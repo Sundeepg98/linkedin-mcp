@@ -110,6 +110,7 @@ PINNED_TOOL_SURFACE: dict[str, tuple[str, ...]] = {
     "linkedin_notify_cost_precondition": (),
     "linkedin_open_messaging": ("include_names", "message_filter"),
     "linkedin_page_plugin_snippet": ("page_id",),
+    "linkedin_premium_job_collection": ("collection",),
     "linkedin_premium_status": (),
     "linkedin_profile_editor_fields": (),
     "linkedin_profile_editor_values": (),
@@ -182,8 +183,8 @@ PINNED_TOOL_SURFACE: dict[str, tuple[str, ...]] = {
 #: write grant, or a second consenting human -- measured against the
 #: shipped predicate rather than assumed; see
 #: `_audit/2026-09-20-admin-rights-ready.md`.
-PINNED_TOOL_COUNT = 45
-PINNED_PARAMETER_COUNT = 63
+PINNED_TOOL_COUNT = 46
+PINNED_PARAMETER_COUNT = 64
 
 
 def live_surface() -> dict[str, tuple[str, ...]]:

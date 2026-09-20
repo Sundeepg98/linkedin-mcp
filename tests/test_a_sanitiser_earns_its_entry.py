@@ -225,6 +225,7 @@ ENROLLED: dict[tuple[str, str], str] = {
     # probe was written, committed, and the red arrived from a file the wave
     # had never opened. Register 9.5, demonstrated on its own author.
     ("_probe_newsletter_subscriptions_live.py", "_relation"): TWO_ARG,
+    ("_probe_premium_collections_live.py", "_relation"): TWO_ARG,
     # THE TWELFTH, AND THE LAST ONE OWED. The `upload-sanction` wave, claiming
     # the file the two comments above named as the remaining unenrolled
     # claimant. With this row the CLAIMANT half of this file's enumeration is

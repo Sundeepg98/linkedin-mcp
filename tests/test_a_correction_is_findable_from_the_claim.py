@@ -183,6 +183,24 @@ CORRECTION_VOCABULARY = (
 #: outcome this file exists to require and so cannot also be a violation of it.
 NOT_A_CORRECTION: dict[tuple[str, str], str] = {
 
+    # 2026-09-20, the FIRST FIRING wave. Triaged by reading the line, which is
+    # a census row I had written myself minutes earlier.
+    ("jobs.md", "2026-09-20-the-first-firing.md"): (
+        "THE CITATION IS EVIDENCE FOR A BANKING, NOT A CORRECTION OF ANYTHING. "
+        "The line is row `J 125`, moved GAP -> COVERED-PROVEN because "
+        "/jobs/collections/top-applicant was opened for the first time and "
+        "linkedin_premium_job_collection shipped in the same commit; it cites "
+        "the audit as the place its numbers were taken. Nothing above it is "
+        "withdrawn and no earlier claim about J 125 is contradicted -- the row "
+        "had no prior reading at all, which is why it sat GAP. "
+        "**THE SCAN IS RIGHT TO OFFER IT AND RIGHT TO BE OVERRULED HERE:** the "
+        "correction vocabulary inside its window belongs to row `J 127` two "
+        "lines below, which IS a real correction and is declared with a "
+        "CORRECTS:/CORRECTED BY: marker pair against this same document. Two "
+        "adjacent rows, one correcting and one banking, citing one audit -- "
+        "the lexical window cannot separate them and a reader can."
+    ),
+
     # 2026-09-20, the premium-four INTEGRATION. Triaged by reading the line,
     # which the integrator had written himself ninety seconds earlier.
     ("2026-09-20-the-premium-integration.md", "2026-09-20-newsletter-built.md"): (

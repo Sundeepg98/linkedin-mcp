@@ -133,26 +133,6 @@ COVERED_ELSEWHERE = {"dom.py"}
 #: admitted address, and no page behind it has ever been opened. It remains
 #: invisible here for the same reason and is NOT a candidate for a line.
 KNOWN_UNWIRED: dict[str, str] = {
-    "job_collections.read_job_collection": (
-        "Held because NOTHING HAS EVER OPENED THE PAGE IT READS. "
-        "linkedin_server/job_collections.py landed 2026-09-20 with the two "
-        "allowlist entries it is the shaper for -- /jobs/collections/top-applicant "
-        "and /jobs/collections/top-choice -- and with 29 tests over a real "
-        "headless page, but there is no capture of either address and there "
-        "never has been. Its selectors, its two-tier slot/card model and its "
-        "id gate are all measured off the two captured SIBLING job lists "
-        "(/jobs/collections/recommended/ and /jobs/search/, which draw one "
-        "shape between them at 24 and 25 slots with 7 hydrated each). That "
-        "makes the reader a HYPOTHESIS about the target, and wiring a tool to "
-        "it would publish a number a caller could not tell from a measured "
-        "one -- the exact failure the module's own list_container_seen field "
-        "exists to prevent, applied one level up. The row stays GAP until the "
-        "reader is FIRED against the live surface; "
-        "_audit/2026-09-20-the-premium-four.md section 9 names the single "
-        "call that would bank it and states what each outcome means. NOT "
-        "PERMANENT: delete this line in the same commit that fires the reader "
-        "live and wires the tool."
-    ),
     "search_results.read_results": (
         "Held with the module, not stranded by accident. linkedin_server/search_results.py landed 2026-09-19 with its tests and WITHOUT the /search/results/ navigation admission, deliberately: a search results page IS a list of other people -- every row carries a name and a /in/<slug> href, and a slug is a name -- so the admission is held on the rule that it and a name-free shaper land TOGETHER OR NEITHER LANDS. The groups admission was granted the same day precisely because a numeric group id names nobody and needs no shaper. NOT PERMANENT: delete these two lines in the same commit that wires the reader and admits the address. See DELIBERATELY_UNWIRED['search_results'] in tests/test_every_orphan_module_is_ruled.py, which rules the same module at module level for the same reason."
     ),

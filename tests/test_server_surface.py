@@ -196,6 +196,7 @@ EXPECTED_TOOLS = {
     # is an ENUMERATION class a targeted run is structurally blind to. The
     # sibling inventory's list is EMPTY as of this commit, which is the end
     # state its own docstring said could not be committed that day.
+    "linkedin_premium_job_collection",
     "linkedin_premium_status",
     "linkedin_newsletter_subscriptions",
     "linkedin_notify_cost_precondition",
@@ -455,7 +456,7 @@ async def tools():
     return {t.name: t for t in await mcp.list_tools()}
 
 
-async def test_the_surface_is_exactly_the_fortyfive_tools(tools):
+async def test_the_surface_is_exactly_the_fortysix_tools(tools):
     """RENAMED THREE TIMES ON 2026-08-25, from ``..._seventeen_tools`` through
     ``..._eighteen_tools`` and ``..._nineteen_tools``, and the rename is the
     honest half of the edit rather than noise in a diff.
@@ -654,7 +655,7 @@ async def test_the_surface_is_exactly_the_fortyfive_tools(tools):
     # out of date. A count belongs in the file that owns the claim.
     # FORTY-FIVE FROM 2026-09-20. The forty-fifth is
     # linkedin_page_plugin_snippet, a READ that opens no page.
-    assert len(tools) == 45
+    assert len(tools) == 46
     # And the split is asserted, not just the total. A future tool arriving as
     # a write would otherwise only have to bump a number.
     #
@@ -778,7 +779,7 @@ async def test_the_surface_is_exactly_the_fortyfive_tools(tools):
     # READ and the write side is BYTE-IDENTICAL across it. It reaches
     # no network at all, so it cannot widen what is READ either --
     # the only tool here of which that is true.
-    assert len(set(tools) - SANCTIONED_WRITE_TOOLS) == 33
+    assert len(set(tools) - SANCTIONED_WRITE_TOOLS) == 34
 
 
 def test_the_read_that_was_nearly_named_a_write():

@@ -1,4 +1,4 @@
-"""The tool surface: forty-five tools, twelve of which write to LinkedIn.
+"""The tool surface: forty-six tools, twelve of which write to LinkedIn.
 
 THIS PARAGRAPH HAS NOW BEEN WRONG FIVE TIMES, in both directions, and the
 count is the part that keeps rotting. Until 2026-08-23 it read *"There is no
@@ -142,9 +142,9 @@ assigned to anybody -- it waits for whoever next runs the suite, and in the
 meantime the pin goes on asserting the old number with full confidence.
 
 THE NUMBERS ABOVE ARE DERIVED NOW, and that is a statement about a test rather
-than about an intention. Forty-five is ``len(await mcp.list_tools())``,
+than about an intention. Forty-six is ``len(await mcp.list_tools())``,
 pinned in ``test_server_surface.py`` by
-``test_the_surface_is_exactly_the_fortyfive_tools``; the split is pinned by
+``test_the_surface_is_exactly_the_fortysix_tools``; the split is pinned by
 ``tests/test_prose_that_makes_a_claim.py::test_the_server_docstring_numbers_are_derived``,
 which reads THESE WORDS and fails if any of the three disagrees with the
 registry.
@@ -157,9 +157,9 @@ POINTER to it was dangling, so a reader who followed it found nothing and
 would reasonably conclude these numbers are unchecked. A citation is a claim
 like any other.
 The surface splits three ways and the split is the part a reader actually
-needs: THIRTY-THREE read, TWELVE write, and ZERO are write-shaped,
-registered, gated and unable to act. Thirty-three plus twelve plus zero is
-forty-five.
+needs: THIRTY-FOUR read, TWELVE write, and ZERO are write-shaped,
+registered, gated and unable to act. Thirty-four plus twelve plus zero is
+forty-six.
 
 THE THIRTEENTH IS ONE READ, 2026-09-20, AND IT IS THE FIRST TOOL HERE THAT
 OPENS NO PAGE AT ALL. ``linkedin_page_plugin_snippet`` builds one string
@@ -336,6 +336,7 @@ from linkedin_server import (
     dom,
     events,
     groups_page,
+    job_collections,
     jobfilter,
     newsletters,
     notify_cost,
@@ -2107,6 +2108,95 @@ async def linkedin_job_collections() -> dict[str, Any]:
                     "numeric_entity_segments": anchor_read["numeric_entity"],
                     "non_numeric_entity_segments": anchor_read["non_numeric_entity"],
                 },
+            }
+    except Exception as exc:
+        return _error(exc)
+
+
+@mcp.tool()
+async def linkedin_premium_job_collection(collection: int = 0) -> dict[str, Any]:
+    """How many postings a Premium job collection holds, plus their numeric ids.
+
+    ONE PAGE LOAD, NO SCROLLING, NO PRESSES. ``collection`` is an INDEX into a
+    closed tuple in ``linkedin_server/job_collections.py``, never a free
+    string, so the set of addresses this tool can ever reach is enumerable by
+    reading that constant: 0 is ``top-applicant``, 1 is ``top-choice``. Both
+    are on the read allowlist, root only. Out of range REFUSES rather than
+    clamping, because a reading filed under the wrong collection is worse than
+    no reading.
+
+    **``slots`` IS THE POSTING COUNT AND ``hydrated`` IS NOT. Do not quote the
+    second as the first.** LinkedIn draws one list slot per posting it has
+    placed in the window and fills only the few near the viewport. Measured on
+    this account 2026-09-20: 25 slots against 9 hydrated on both collections,
+    and 25 against 7 on the ``/jobs/search/`` control. A caller publishing
+    ``hydrated`` under-reports this surface by roughly three times, which is
+    what this reader's first version did before it was corrected.
+
+    **A ZERO IS ONLY READABLE BESIDE ``list_container_seen``**, and they never
+    share a field:
+
+        slots 0, list_container_seen True   -> the collection IS EMPTY. A fact
+                                               about the account.
+        slots 0, list_container_seen False  -> THIS READER COULD NOT SEE. A
+                                               fact about the reader, carrying
+                                               ``refusal``. Do NOT report it as
+                                               an empty collection.
+
+    WHAT IT RETURNS AND WHAT IT WILL NOT. Integers, booleans, one literal of
+    that module, and **NUMERIC POSTING IDS**. No job title, no company name, no
+    recruiter name, no location, no salary -- none of those is read, shaped or
+    present, because nothing textual is taken. A posting id addresses a public
+    job advertisement rather than a person, ``linkedin_search_jobs`` already
+    returns them, and ``/jobs/view/<digits>/`` is already admitted -- so an id
+    from here is consumable by ``linkedin_job_detail`` without widening
+    anything, and that consumability is the whole capability. Every candidate
+    id is matched against a digits-only shape in Python first; anything failing
+    is dropped and counted in ``ids_refused``.
+
+    **``redirected`` IS TRUE HERE ON A PAGE THAT DID NOT REDIRECT, and reading
+    it as "LinkedIn sent me elsewhere" is a wrong answer.** It compares the
+    WHOLE url, and LinkedIn appends a tracking query to both collections --
+    measured 2026-09-20: the PATH survived intact on both, and the landed path
+    still contained its own collection's route word. The field is kept in the
+    family's spelling rather than made clever here; what separates a query
+    from a redirect is a path comparison, and
+    ``scripts/_probe_premium_collections_live.py`` prints one.
+
+    FIRED AND PROVEN LIVE, 2026-09-20, and the tool exists because of it. The
+    reader shipped 2026-09-20 as a HYPOTHESIS measured off two sibling job
+    lists, with no capture of either target, and was deliberately left unwired
+    until somebody opened the pages. Both were then opened through
+    ``scripts/_probe_premium_collections_live.py``: each landed with its own
+    path intact and only a query appended, each drew a list, and the two id
+    sets were shown **disjoint from the control and overlapping each other 11
+    of 25** -- which is what separates two collections from one page served
+    twice, and a count alone could not have. See
+    ``_audit/2026-09-20-the-first-firing.md``.
+    """
+    try:
+        url = job_collections.collection_url(collection)
+    except (IndexError, TypeError) as exc:
+        return {
+            "error": "index_out_of_range",
+            "message": str(exc),
+            "collections": list(job_collections.COLLECTIONS),
+        }
+    try:
+        async with BROWSER.session() as page:
+            landed = await BROWSER.goto(page, url)
+            assert_not_authwall(landed, surface="premium job collection")
+            reading = await job_collections.read_job_collection(
+                page, expect=collection
+            )
+            return {
+                "ok": True,
+                # A RELATION, NEVER THE ADDRESS. The requested url is built
+                # from a module constant a caller can already read, and a
+                # navigation-derived string buys nothing a boolean does not.
+                "redirected": landed.rstrip("/") != url.rstrip("/"),
+                "pages_loaded": 1,
+                **reading,
             }
     except Exception as exc:
         return _error(exc)

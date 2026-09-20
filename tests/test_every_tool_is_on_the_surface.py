@@ -296,4 +296,4 @@ def test_both_rules_reject_the_registry_that_was_actually_measured():
     # moved in the SAME edit as the tool, which is what the paragraph
     # above asks for and what a4565cb did not do. FIVE sites, measured
     # off the registry rather than relayed from a commit message.
-    assert len(_tool_names()) == 45
+    assert len(_tool_names()) == 46
