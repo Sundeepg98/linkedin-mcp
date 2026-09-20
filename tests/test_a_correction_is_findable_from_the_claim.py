@@ -98,6 +98,8 @@ markdown and nothing else.
 
 from __future__ import annotations
 
+import ast
+import collections
 import pathlib
 import re
 import subprocess
@@ -787,22 +789,20 @@ NOT_A_CORRECTION: dict[tuple[str, str], str] = {
         "pointer would claim the fire report found a fault in the census, when "
         "what it did was supply the measurement the cell had been waiting for"
     ),
-    ("jobs.md", "2026-08-30-linkedin-undo.md"): (
-        "the save_job cell cites that document for the OBSERVATION that made "
-        "its claim true -- the ON label 'Unsave the job' existed only because "
-        "a real save produced it. The cell says YES, AND IT LANDED and points "
-        "at what landed it. Nothing in the cited document contradicts the "
-        "census; it is the source the census is resting on, and a CORRECTED "
-        "BY: pointer would invert which of the two is the evidence"
-    ),
-    ("profile.md", "2026-08-31-linkedin-finish.md"): (
-        "the linkedin_surface_census cell cites line numbers in that document "
-        "for the control COUNTS it reports -- profile 4, profile_edit_intro 4, "
-        "settings 3, settings_dark_mode 2 -- and cites a second document for "
-        "the fifth. Citing where a number was measured is the opposite of "
-        "being corrected by it, and a row that named no source would be the "
-        "defect this file exists to catch"
-    ),
+    # TWO ENTRIES WERE REMOVED FROM HERE ON 2026-09-20, AND PYTHON HAD ALREADY
+    # REMOVED THEM. ("jobs.md", "2026-08-30-linkedin-undo.md") and
+    # ("profile.md", "2026-08-31-linkedin-finish.md") were each declared TWICE
+    # in this dict -- once here and once further down. A duplicate key in a dict
+    # literal is not an error: the later value silently wins, so the reasons
+    # written here were dead text that no test could reach and no reader could
+    # tell was dead. Both survivors are strict supersets -- each also answers
+    # for the NEIGHBOURING row that the +-2 window reaches, which is the half
+    # the entries here did not address -- so nothing was argued away.
+    #
+    # Found while resolving a merge, by a check that ITSELF could not fail on
+    # its first attempt: it walked for `ast.Assign` and this is an `ast.AnnAssign`,
+    # so it reported nothing and looked like a clean result.
+    # `test_no_declaration_is_silently_shadowed` below now holds the property.
     ("profile.md", "2026-09-19-tier1-fires.md"): (
         "same shape as the jobs.md entry above and for the same reason: the "
         "cell records update_setting's WRITE moving to FIRED AND VERIFIED -- "
@@ -2343,3 +2343,95 @@ def test_the_entry_and_marker_rules_can_still_fail():
     fabricated = ("2026-08-22-parity-linkedin.md", "INSTRUMENTS.md")
     assert fabricated not in _candidates()
     assert fabricated not in NOT_A_CORRECTION
+
+
+def _module_level_dicts(source: str):
+    """Every module-level ``NAME = {...}`` and ``NAME: T = {...}`` in a source.
+
+    BOTH FORMS, DELIBERATELY. The first version of this walked for `ast.Assign`
+    alone and found NOTHING, because every declaration table in this file is
+    ANNOTATED -- `NOT_A_CORRECTION: dict[tuple[str, str], str] = {`, which the
+    parser reports as `ast.AnnAssign`. It printed an empty result and read
+    exactly like a clean bill of health. That is this repository's most common
+    defect wearing its most convincing costume, and it happened in the check
+    written to catch the defect.
+    """
+    out = []
+    for node in ast.parse(source).body:
+        if isinstance(node, ast.AnnAssign):
+            name = getattr(node.target, "id", None)
+        elif isinstance(node, ast.Assign):
+            name = next((getattr(t, "id", None) for t in node.targets), None)
+        else:
+            continue
+        if name and isinstance(node.value, ast.Dict):
+            out.append((name, node.value))
+    return out
+
+
+def _shadowed(dict_node) -> list:
+    """Keys declared more than once. A dict literal keeps only the LAST."""
+    keys = []
+    for key in dict_node.keys:
+        try:
+            keys.append(ast.literal_eval(key))
+        except ValueError:  # pragma: no cover - a computed key
+            continue
+    return sorted(k for k, n in collections.Counter(keys).items() if n > 1)
+
+
+def test_no_declaration_is_silently_shadowed():
+    """A key declared twice in a declaration table is DEAD TEXT, not a duplicate.
+
+    Python does not raise on a repeated key in a dict literal -- the later value
+    wins and the earlier one becomes unreachable. In this file that means a
+    triage entry whose ARGUMENT no longer applies to anything, which is worse
+    than a missing entry: a reader finds it, believes it is load-bearing, and
+    may delete the wrong half.
+
+    MEASURED, NOT HYPOTHETICAL. On 2026-09-20 this table carried TWO shadowed
+    pairs -- ("jobs.md", "2026-08-30-linkedin-undo.md") and
+    ("profile.md", "2026-08-31-linkedin-finish.md") -- 140 entries at 138
+    distinct keys. They had survived every green run of this suite, because
+    nothing had ever asked.
+    """
+    source = pathlib.Path(__file__).read_text(encoding="utf-8")
+    tables = _module_level_dicts(source)
+    assert tables, (
+        "parsed no module-level dict from this file, so this check is vacuous. "
+        "The likely cause is the AnnAssign/Assign split described in "
+        "_module_level_dicts -- verify before widening anything."
+    )
+    offenders = {name: dup for name, node in tables if (dup := _shadowed(node))}
+    assert not offenders, (
+        "declaration keys silently shadowed (the LATER value wins and the "
+        "earlier reason is unreachable): %s" % offenders
+    )
+
+
+def test_control_the_shadow_check_convicts_a_planted_duplicate():
+    """SHOWN FAILING on a planted duplicate, in both assignment forms.
+
+    Without the AnnAssign half this control would pass while the real table
+    went unexamined -- which is exactly how the first draft behaved.
+    """
+    plain = "X = {\n    ('a', 'b'): 'first',\n    ('a', 'b'): 'second',\n}\n"
+    annotated = "Y: dict = {\n    ('c', 'd'): 'first',\n    ('c', 'd'): 'second',\n}\n"
+
+    for source, expected_name, expected_key in (
+        (plain, "X", ("a", "b")),
+        (annotated, "Y", ("c", "d")),
+    ):
+        tables = _module_level_dicts(source)
+        assert [n for n, _ in tables] == [expected_name], (
+            "the parser did not see a %s-form declaration at all" % expected_name
+        )
+        assert _shadowed(tables[0][1]) == [expected_key], (
+            "the shadow detector did not convict a planted duplicate in %s"
+            % expected_name
+        )
+
+    clean = "Z: dict = {\n    ('a', 'b'): 'only',\n}\n"
+    assert _shadowed(_module_level_dicts(clean)[0][1]) == [], (
+        "the detector convicts a table with no duplicate, so it proves nothing"
+    )
