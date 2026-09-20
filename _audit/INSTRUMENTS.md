@@ -5908,3 +5908,159 @@ two receipts that matter are re-runnable from the repo:
 `scripts/_check_repaired_probe_controls_can_fail.py` and the detector itself.
 The two gitignored captures copied into this worktree to re-run section 1 are
 ignored here as everywhere and are not part of any commit.
+
+---
+
+## 37. THE SHA-CITATION WAVE: KIND BEFORE RESOLUTION, THIRD COSTUME (sha-repair-sixty, 2026-09-20)
+
+### 37.1 `scripts/check_cited_shas_resolve.py` -- every cited SHA must resolve in a CLONE
+
+**ADMITTED, AND SHOWN FAILING.** The red proof is
+`tests/test_a_cited_sha_resolves.py::test_the_detector_finds_a_planted_citation`:
+a planted one-line document whose only citation is a seven-character hex token
+that names no object is extracted as exactly one candidate and convicted. Its
+mirror, `test_a_resolvable_citation_is_not_convicted`, plants the same sentence
+with `HEAD`'s own abbreviation and asserts zero findings -- because an
+instrument that resolves NOTHING reports everything missing and looks exactly
+like a finding.
+
+**THE GUARD CONVICTED THIS ENTRY ON ITS FIRST RUN, and that is the second time
+today a check has fired on prose DESCRIBING its own mechanism.** The paragraph
+above originally quoted the planted sentence verbatim, which put a deliberately
+nonexistent token into a real commit slot in a tracked document. The test file
+is not scanned; the register is. Same shape as this repository's
+correction-marker guard reading a sentence about markers AS a marker: **prose
+about a mechanism is indistinguishable from the mechanism to a matcher that
+only looks at shape.** Quoted in paraphrase here for that reason.
+
+**WHAT IT ASSERTS.** A short SHA in an audit document is a promise a reader can
+check. The predicate is `git merge-base --is-ancestor <sha> master`, read by
+exit code, **never `git cat-file`**. That distinction is the instrument, not a
+detail: this repository keeps a `pre-purge-restore` tag and 80+
+`worktree-agent-*` branches, so `cat-file` answers "commit" for objects no
+clone can reach. `test_ancestry_not_existence_is_the_predicate` pins it by
+taking a real off-`master` branch tip and asserting `cat-file -e` exit 0,
+`--is-ancestor` exit 1, and `guard.resolves(...) is False`. That control
+asserts its own fixture exists FIRST and fails loudly rather than skipping --
+if the branch is ever deleted, a skipping control would silently let the guard
+become the broken thing it replaced.
+
+**FOUND, on first run: 22 distinct SHAs across 29 citations in 19 documents.**
+Pinned, not repaired -- other waves' territory, three of them live. Two-way
+ratchet: red on a new one, red when a pinned one disappears.
+
+### 37.2 THE LAW, IN ITS THIRD COSTUME IN ONE DAY
+
+> **A ZERO FROM A RESOLVER MEANS "NOT OF THIS KIND, OR ABSENT", AND IT CANNOT
+> DISTINGUISH THEM. DECIDE WHAT A TOKEN IS BEFORE ASKING A RESOLVER ABOUT IT.**
+
+Three waves hit it on 2026-09-20 wearing three different costumes, and **the
+third one proves no shape filter can be the answer**, because the corpus
+supplies counter-examples in both directions:
+
+| direction | receipt |
+|---|---|
+| a filter removing NOISE | 280 of 340 "dangling SHAs" were `a`+digits help-article ids |
+| the SAME filter removing SIGNAL | `a540461` and `a604394` are that exact shape **and are real commits**; `a604394` does not resolve, and the filter that fixes the 280 deletes the finding |
+| the companion "not all digits" filter | `5480246`, `5581950` and `9580360` are all-digit real SHAs -- and `9580360` is a **live twin inside a repair's own mapping table** |
+
+A filter that drops a repair's own output is not removing noise. **The SLOT
+decides; the shape cannot.** One slot phrase was measured and DROPPED for the
+register: a bare ``in `X` `` selects 44 occurrences and 8 are help-article ids,
+including a document naming the kind in the same clause.
+
+### 37.3 A REPAIRED CITATION AND AN UNREPAIRED ONE HAVE THE SAME TOKEN SHAPE
+
+This is why the guard has suppressors at all, and it is the finding that makes
+a shape-only census unusable on this corpus. The August repair KEPT all 24 dead
+hashes -- it had to; the dead hash is the key a reader arrives with -- and
+added a mapping table plus a top-of-file declaration. **A guard that fires on
+that punishes the repair and gets switched off.** Every suppressor is quoted
+from the corpus rather than invented. The disclosure suppressor exists because
+the guard's first run convicted the sentence *"and no clone can reach
+`5a69147`"* -- a document being correct out loud in the guard's own recommended
+words.
+
+### 37.4 A UNION ASSERTION OVER A REDUNDANT CORPUS CANNOT DETECT A LOST SOURCE
+
+**Registered against myself.** My first mutation control stripped one mark and
+asserted the citation came back. It failed on both cases -- not because the
+suppressors are broken but because they OVERLAP: both repaired documents carry
+a declaration AND a mapping table, so removing either leaves the other covering
+the token. Had the mapping-table parser broken later, a "is it still
+suppressed?" test would have stayed green on the declaration alone and the
+parser would have been dead code nobody noticed. **Controls now assert PER
+SOURCE:** break one mark, and *that verdict* must stop being handed down, with
+a separate full-strip case for the union.
+
+### 37.5 A SUPPRESSOR WITH NO EXCLUSIVE CORPUS EXAMPLE IS A HOLE, AND I SHIPPED ONE
+
+Chasing 37.4 showed `MARKED-DEAD-DOC` claims only **2** real sites, both on
+hashes that resolve anyway: everything it would cover is already covered by
+`MARKED-MAPPED`. It is KEPT rather than deleted -- declaring a document's SHAs
+dead *without* a mapping table is exactly what you do when no honest twin
+exists, and a guard that convicts that repair is a guard that gets switched off
+-- but it is now controlled on a **planted** document, with its thinness stated
+in the test's own docstring rather than left to look load-bearing.
+
+### 37.6 THE ONE SHAPE RULE THAT SURVIVED, AND WHY IT IS ADMISSIBLE
+
+`DIGEST_LENGTHS = {16}`. Not a guess: a printed table of what was seen at every
+length over the guard's own candidate set -- 7 (186/29/22), 8 (1/0/0),
+12 (10/2/0), 16 (0/0/3). Commit citations here are 7, 8 or 12 characters
+(12 because `linkedin_server_info` reports `build.code.commit` at that width);
+no resolving citation is 16, and all three 16-character tokens in a commit slot
+are 64-bit content digests. Corpus-wide: 47 distinct 16-hex tokens, zero
+resolve. `test_the_digest_bound_hides_no_resolving_citation` re-derives that
+from the live corpus and reds if any 16-char token ever resolves. **The bound
+excludes 16 ALONE** -- not 32, 40 or 64, because a full SHA is a legitimate
+citation and a symmetrical-looking rule is not evidence.
+
+### 37.7 DISPOSABLE, declared
+
+The census, reconciliation and slot-measurement scripts written for this wave
+(token extraction, kind bucketing, the boundary-difference finder, the
+length-bound measurement) are **DISPOSABLE**. Everything durable in them is
+either inside `check_cited_shas_resolve.py` or written out with its numbers in
+`_audit/2026-09-20-the-sixty-dangling.md`. They are not registered.
+
+### 37.8 THREE MORE, FOUND BY RUNNING THE FINISHED GUARD AT THE TREE IT WAS ADDED TO
+
+Writing the controls found 37.4 and 37.5. Pointing the committed instrument at
+the corpus it had just joined found three the controls could not, because a
+guard's own documentation is part of the corpus it scans.
+
+**A DOCUMENT QUOTING THE DECLARATION WAS TREATED AS MAKING ONE.** The audit
+report for this wave quotes *"EVERY SHORT SHA IN THIS FILE IS DEAD"* twice, as
+discussion. The unbounded pattern read it as a declaration and cleared every
+citation in the reporting document: `MARKED-DEAD-DOC` 2 -> 9, and **the guard
+got quieter**. Fixed positionally, bounded to the first 40 lines, against a
+measured 3 and 3 for the two real declarations -- because a declaration is
+something a reader meets BEFORE the citations it covers, so one at line 242
+protects nothing at line 20.
+
+**THIRD INSTANCE OF ONE SHAPE IN THIS REGISTER.** The correction-marker guard
+read a sentence about markers AS a marker and fixed it by anchoring at line
+start. 37.1 above quoted a planted citation into a live commit slot and was
+convicted. Now this.
+
+> **PROSE ABOUT A MECHANISM IS INDISTINGUISHABLE FROM THE MECHANISM TO A
+> MATCHER THAT ONLY LOOKS AT SHAPE.** Every guard whose documentation lives
+> inside its own corpus pays this, and the payment is always the same: the
+> guard goes QUIET, never loud.
+
+**MARKDOWN EMPHASIS INSIDE A PHRASE DEFEATED A MATCH.** This corpus writes
+*"does **not** resolve"* as readily as the plain form, and every emphasised
+disclosure was invisible to `do(?:es)\s+not\s+resolve`. Emphasis is stripped
+before the search now; backticks are not, since a disclosure names its SHA in
+them.
+
+**THE GUARD CONVICTED ITS OWN TEST SUITE.** Two positive controls resolved
+`HEAD` and asserted reachability. They passed all afternoon and went red the
+instant the wave made its own commit -- because the suite runs from a
+`worktree-agent-*` branch whose HEAD is not an ancestor of `master`, which is
+precisely the defect the guard finds. **A test suite that assumes its own
+branch is published is the same error as a wave reporting its work by a SHA on
+that branch**, and it was committed in the file whose subject is that error.
+Controls now resolve `master`, and `_on_master()` fails loudly rather than
+skipping if it cannot.
