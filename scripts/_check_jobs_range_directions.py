@@ -161,6 +161,11 @@ def main(argv: list[str] | None = None) -> int:
         held.setdefault(blocker, {"R": 0, "W": 0, "RW": 0, "?": 0})
         held[blocker][k] = held[blocker].get(k, 0) + 1
 
+    #: Arrivals are read against the WIDENED direction map, not the narrow one,
+    #: so a re-filed `J` row counts under its real direction here even though
+    #: the sibling report can only score it `?`.
+    incoming = sp._incoming(dirs)
+
     victim = None
     if args.control_overrun:
         # DELIBERATELY a blocker this report calls "within split" on the real
@@ -173,6 +178,7 @@ def main(argv: list[str] | None = None) -> int:
     print("\nblockers the shipped split check SKIPS, now readable")
     shown = still = 0
     over: list[str] = []
+    causes: dict[str, str] = {}
     for b in sorted(published):
         h = held.get(b)
         if not h or not any(r.startswith("J ") for r, v in assign.items() if v[0] == b):
@@ -191,6 +197,23 @@ def main(argv: list[str] | None = None) -> int:
               f"published R{published[b]['R']} W{published[b]['W']} RW{published[b]['RW']}"
               f"   held R{h['R']} W{h['W']} RW{h['RW']}"
               + (f"   short on {','.join(short)}" if short else ""))
+        # THE CAUSE, IMPORTED FROM `_check_published_split` RATHER THAN
+        # RE-DERIVED. ADDED 2026-09-20. This file exists to widen that report
+        # to the blockers it skips, and it was widening the COVERAGE while
+        # dropping the READING: `COMPANY-PAGE-SURFACE` is the third known
+        # over-run and the only report that can see it printed the same
+        # undifferentiated `OVER on R` the sibling had just stopped printing.
+        # A discriminator that lives one import away from the report that
+        # needs it is the defect register 24.1 is about, and leaving it here
+        # while fixing it there would have been that defect twice.
+        if bad:
+            inc = incoming.get(b, {"R": 0, "W": 0, "RW": 0, "?": 0})
+            own = {k: h[k] - inc.get(k, 0) for k in ("R", "W", "RW")}
+            cause, why = sp.classify_overrun(published[b], h, own)
+            causes[b] = cause
+            print(f"      incoming R{inc['R']} W{inc['W']} RW{inc['RW']}   "
+                  f"own R{own['R']} W{own['W']} RW{own['RW']}")
+            print(f"      CAUSE {cause} -- {why}")
     print(f"\nblockers holding a J row      {shown}")
     print(f"  still blind after this read {still}")
 
@@ -201,7 +224,18 @@ def main(argv: list[str] | None = None) -> int:
         ok = victim in over
         print(f"\ncontrol-overrun: inflated {victim}'s held W -- "
               f"{'NAMED in the table above, the report can fail' if ok else 'NOT NAMED -- BROKEN'}")
-        return 0 if ok else 1
+        # AND WHETHER IT IS CLASSIFIED, ADDED 2026-09-20 WITH THE CAUSE LINE.
+        # A cause printed beside every over-run and asserted by nothing is
+        # decoration, and decoration in a report is read as a measurement. The
+        # injection adds 99 held writes without touching the published count,
+        # so the blocker now holds far more rows than it published and
+        # OVER-COUNT is the only honest verdict. Stub the classifier, or lose
+        # the incoming subtraction, and this line is what says so.
+        got = causes.get(victim, "NOT CLASSIFIED")
+        cok = got == "OVER-COUNT"
+        print(f"control-overrun: cause for {victim} -- expected OVER-COUNT, "
+              f"got {got} -- {'OK' if cok else 'WRONG'}")
+        return 0 if (ok and cok) else 1
     return 0
 
 

@@ -4058,3 +4058,135 @@ A subset-counting script (the 1.87e14 figure), a fixture-corpus path-family
 tally, and the standalone red-proof harness. The first two produced numbers now
 quoted in the wave document; the third is superseded by the committed test
 file, which plants the same five defects and is re-runnable in CI.
+
+## 25. THE THIRD CAUSE, AND A CONTROL THAT PASSED WHILE ITS REPORT LIED, 2026-09-20
+
+### 24.1 `scripts/_check_published_split.py` -- it printed two words for two unrelated situations
+
+The report classified nothing. It printed `OVER on R` for a blocker whose
+surplus was four rows that ARRIVED on committed re-files, and `OVER on R` for a
+blocker where nothing had arrived, nothing was missing, and the count closed
+exactly. Its docstring named two causes -- a row LOST, a row RE-FILED OUT --
+and both describe movement AFTER publication. **The third is an error AT
+publication, and a report that cannot show it will have its one instance read
+as one of the other two.**
+
+**THE LAW: A CAUSE THE INSTRUMENT CANNOT NAME GETS ATTRIBUTED TO THE NEAREST
+CAUSE IT CAN.** That is not a gap in coverage, it is a manufactured wrong
+answer, and it is the same shape as a line-number citation rotting into a
+plausible one rather than a dangling one.
+
+**THE DISCRIMINATOR WAS ALREADY WRITTEN, ONE FILE AWAY, AND NOBODY CALLED IT.**
+`_check_refile_destination_credit.publishers()` (register 21.2) knows which
+rows arrived from elsewhere. Subtracting their directions from `held` separates
+the causes in three lines:
+
+    RE-FILED-IN   the over-run vanishes once arrivals are subtracted
+    LOST          own rows fall short of the published total
+    AT-BIRTH      count COMPLETE, nothing incoming, and STILL over
+
+No new instrument was written. The import was the whole fix, which is the
+second time in this register that the answer was to call a shipped tool rather
+than build a cousin of it.
+
+**WHAT IT CONVICTED, and the arithmetic is the conviction rather than the
+verdict:** `NEWSLETTER-SURFACE` published `1R/11W` over twelve rows while the
+whole newsletter family in the frozen 409 holds **ten** writes. Eleven writes
+do not exist, so no subset, no re-file and no lost row could ever have produced
+that cell. The read-side version of the same argument -- every 12-subset of the
+thirteen holds at least two reads -- is weaker, because it depends on which
+twelve were chosen. **A supply argument beats a subset argument: one of them
+has to know which rows were picked and the other does not.**
+
+### 24.2 THE CONTROL WAS SHOWN FAILING, AND ONE OF THE MUTATIONS CONVICTED THE CONTROL
+
+Three mutations, each applied in-process and reverted, each required to turn a
+control red:
+
+| mutation | `--control` (pre-existing) | `--control-causes` (new) |
+|---|---|---|
+| classifier returns one word always | exit 0, BLIND | exit 1, 2 of 3 WRONG |
+| `_incoming()` stubbed to `{}` | n/a | exit 1, `DEAD, the subtraction reaches nothing` |
+| clean-victim pool starved | n/a | exit 2, REFUSES to inject |
+
+**THE SECOND ROW IS THIS ENTRY'S REASON FOR EXISTING, BECAUSE ON ITS FIRST
+VERSION IT READ EXIT 0.** With the incoming derivation stubbed dead, all three
+injected cases still classified correctly -- while the report four lines above
+called `SEARCH-RESULTS-SURFACE` AT-BIRTH, the one verdict reserved for a
+published figure that was wrong when written, handed to a blocker whose surplus
+is four documented arrivals.
+
+**THE LAW: A CONTROL THAT SUPPLIES THE INPUT WHOSE DERIVATION IT PROTECTS
+CERTIFIES AN INSTRUMENT THAT IS ALREADY LYING.** The RE-FILED-IN injection
+planted its own arrival into the table, so it exercised the classifier's LOGIC
+and never its INPUT. Repaired with a derivation-liveness assertion -- arrivals
+derived from `publishers()` must equal the `RE_FILED` row count and must not be
+zero:
+
+    HEALTHY            arrivals 5 against 5 RE_FILED rows -- LIVE       exit 0
+    _incoming STUBBED  arrivals 0 against 5 RE_FILED rows -- DEAD       exit 1
+
+The victim-selection guard is register 21.1's lesson applied with the sign
+flipped: injecting a CLASS into a blocker the report already names would
+compare the injected class against the real one and read as a
+misclassification, so the victims are chosen from an asserted-clean pool and
+the control REFUSES rather than injecting anywhere when fewer than three exist.
+
+### 24.3 `scripts/_check_jobs_range_directions.py` -- it widened the COVERAGE and dropped the READING
+
+This file exists to show the twenty blockers the split check SKIPS. It already
+imported that check. It still printed a bare `OVER on R` for
+`COMPANY-PAGE-SURFACE` -- the third known over-run and the ONLY one the narrow
+report cannot see at all -- while the sibling one import away had just learned
+to say which of three causes it was.
+
+**THE LAW: WIDENING WHAT AN INSTRUMENT CAN SEE IS NOT THE SAME AS WIDENING
+WHAT IT CAN SAY, AND THE SECOND IS THE ONE A READER USES.** A report that
+reaches further and reports more coarsely has moved a blind spot rather than
+closed one -- and the blocker only this report can see was the one getting the
+coarsest verdict available.
+
+One import later the whole known set is named, and the third answer is new:
+
+    SEARCH-RESULTS-SURFACE   RE-FILED-IN   four rows arrived on committed re-files
+    NEWSLETTER-SURFACE       AT-BIRTH      corrected in the ledger, 24.1
+    COMPANY-PAGE-SURFACE     LOST          own 16 against a published 18
+
+**AND TWO INSTRUMENTS THAT DO NOT KNOW ABOUT EACH OTHER AGREE ON IT.**
+`_check_open_slots.py` independently lists `COMPANY-PAGE-SURFACE` with 2
+FILLABLE slots -- slots whose row is neither re-filed nor a ruled phantom, i.e.
+rows genuinely missing. `LOST` is the same fact reached from the direction
+column instead of the slot table. A verdict two unrelated parses produce is
+worth more than a verdict one produces twice.
+
+**THE NEW ASSERTION, SHOWN FAILING.** `--control-overrun` already required the
+table to NAME an injected over-run; it now also requires the CAUSE to read
+`OVER-COUNT`, which is the only honest verdict for a blocker holding 99 more
+rows than it published. Stub the classifier to one word and it reads
+`expected OVER-COUNT, got RE-FILED-IN -- WRONG`, exit 1. Healthy: plain,
+`--control-blind` and `--control-overrun` all exit 0.
+
+**AND THE GAP IN IT IS STATED HERE RATHER THAN DISCOVERED LATER.** Dropping
+the incoming subtraction does NOT move this control: its victim has no
+incoming rows and neither does `COMPANY-PAGE-SURFACE`. That mutation is caught
+by the sibling's derivation-liveness assertion (24.2), where the derivation
+lives. **A control that cannot fail for a given defect should say which file
+catches that defect, not imply it catches everything beside it.** Building a
+second copy here would have been the cheaper-feeling move and would have
+produced two controls testing one thing.
+
+### 24.4 DISPOSABLE, declared
+
+Five scratch scripts in the session scratchpad: the 13/3R-10W re-measurement at
+three refs, the whole-line needle widener, the partition-closure arithmetic,
+the incoming-subtraction prototype, and the ledger red-reproduction that
+repoints `build_blocker_map.LEDGER` at an edited copy. The first two are
+superseded by the shipped `scripts/_sweep_frozen_rows.py newsletter`, which was
+used as the cross-instrument control and agrees exactly. The third is
+superseded by the shipped `scripts/_check_open_slots.py`, whose open-slot table
+answers the same question directly. The fourth shipped, as the import in 24.1.
+**The fifth is the only one worth re-deriving and the technique is two lines**
+-- `bbm.LEDGER = <a copy>` prices a ledger edit against every shipped assertion
+without touching a tracked file, and it is how the option of ruling the two
+handed-over defects together was costed before it was declined. Their results
+are in `_audit/2026-09-20-the-split-ruling.md`.

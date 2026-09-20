@@ -290,6 +290,19 @@ import build_blocker_map as bbm  # noqa: E402
 #: reader-side is a ROLE (newsletters he reads vs writes), not an operation
 #: class, and unsubscribing from one he reads is still a write.
 #:
+#: 2026-09-20, AND THE PARAGRAPH ABOVE KEEPS ITS TEXT BECAUSE IT IS RIGHT
+#: ABOUT THE QUESTION IT ASKS. It settles whether the five/five/two ROLE
+#: enumeration implies a direction split. It does not, and anybody reading
+#: "reader-side 5" as "5 reads" is making the mistake it names. It was never
+#: a defence of the cell against the census's OWN R/W column, which is the
+#: argument that convicted it: ten writes exist in the whole newsletter
+#: family and the cell published eleven. The ledger now reads 3R/9W over
+#: these same twelve rows. **A sentence that says a claim is NOT
+#: CONTRADICTED by one argument reads, a month later, as a sentence saying
+#: the claim is right** -- so the scope is written down here rather than
+#: left to the reader. See `_audit/2026-09-20-the-split-ruling.md` section
+#: 3a. THE TWELVE ROWS THIS BLOCK ENUMERATES ARE UNCHANGED.
+#:
 #: THIS OVERTURNS MY OWN RESTRAINT AT 990bbd3 -- "N 55, N 56 and M C80 are
 #: on the sweep's three-way self-conflict list. Adjudicating a three-way
 #: claim is a RULING, not a recovery." That was right then. All three rivals
