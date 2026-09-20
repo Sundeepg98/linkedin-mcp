@@ -7929,3 +7929,113 @@ browser.
 
 `events.py` and `groups_page.py` are not on that list: they were ACQUITTED BY
 MEASUREMENT, not omitted from it.
+
+## 47. THE DIRECTION DATA WAS THERE AND KEYED BY RANGE (jobs-direction, 2026-09-21)
+
+`_audit/2026-09-20-the-reachable-ceiling.md` split the census GAP by direction
+and recorded `jobs.md`'s rows as UNMEASURED, because its per-row tables run
+`| # | capability | source | state | reason |` and carry no `R/W` column. That
+reading was right about the per-row tables and wrong about the file.
+
+> **SECTION 2 OF THAT FILE IS A DIRECTION TABLE. IT IS KEYED BY ROW-RANGE
+> RATHER THAN BY ROW ID, WHICH IS WHY EVERY READER LOOKING FOR A COLUMN MISSED
+> IT.**
+
+`scripts/_check_jobs_range_directions.py` had been reading that same table
+since 2026-09-20 for a different purpose, and nobody joined the two facts.
+
+### 47.1 A BLOCK DIRECTION IS A CLAIM ABOUT A BLOCK, AND THREE WERE WRONG ABOUT A ROW INSIDE
+
+Expanding the ranges resolves 42 of today's 57 GAP rows, leaves 14 under a
+COMPOUND cell (`R + W`) and 1 named by no range. Expanding them is also
+**wrong on three rows**, each one a verb the block direction contradicts:
+
+    J 37   "List AND MANAGE all alerts"                range R   ->  R/W
+    J 56   "FILTER the tracker by date posted"          range W   ->  R
+    J 82   "OBSERVE the Easy Apply daily limit"         range W   ->  R
+
+Mechanical expansion would have published `R 27 / W 27 / R/W 1 / AMBIGUOUS 1`.
+The per-row read publishes **`R 29 / W 25 / R/W 2 / AMBIGUOUS 1` = 57**.
+
+> A RANGE SAYS WHAT A BLOCK CONTAINS. IT NEVER SAYS WHICH ROW IS WHICH, AND
+> WHERE IT LOOKS LIKE IT DOES, IT CAN BE WRONG.
+
+### 47.2 `scripts/_check_jobs_gap_directions.py` -- SHOWN FAILING THREE WAYS
+
+Admitted on the register's second law. The classification is DATA in the file;
+the reachability is read off `readonly.is_read_url` at HEAD.
+
+- `--control-stub-admits` swaps in a stub that admits every address. The
+  REFUSED set goes **10 -> 0**. This is the only proof that the reachability
+  column follows the shipped boundary rather than the table beside it.
+- `--control-drift` drops `J 110`; the reconciliation **names it**.
+- A planted `DIRECTIONS[999]` -- a row the census does not hold -- makes the
+  DEFAULT run exit **1**. The reconciliation is a gate, not decoration.
+
+It is a REPORT for reachability and a GATE for drift, deliberately: an address
+the boundary refuses is a fact to read, but a classification that no longer
+matches the census is always a defect. The census moved eight times in one day;
+a split that cannot notice that is a quotation waiting to happen.
+
+**IT IMPORTS `cells()` RATHER THAN SPLITTING ON PIPES.** Five lines of
+`jobs.md` carry the markdown escape for a literal pipe. Section 41 is why.
+
+**IT READS TWO FILES AND DOES NOT SWEEP THE CORPUS**, so section 45.9's
+`_audit/INDEX.md` exclusion does not apply to it -- asserted rather than
+assumed, because three sweeping instruments have now needed that exclusion and
+the fourth will too.
+
+### 47.3 A CENSUS CELL IS NOT A BOUNDARY, AND TWO OF THEM HAD EXPIRED
+
+Checked against `is_read_url` at HEAD rather than against the cell:
+
+    "/jobs/alerts is not on the read allowlist"        admitted 2026-09-05, 61e3237
+    "Needs /company/<slug>/ ... on the read allowlist"  root admitted 2026-09-20, 952af32
+
+Both cells were written 2026-09-03 and were true then. **The first was false
+sixteen days later and nothing pointed a reader at it** -- the same shape
+`_audit/2026-09-20-the-sanctioned-seventh.md` names as "Section 4 was never
+re-read". Both corrected in place, struck through with the admitting commit
+beside them, no row moved.
+
+> **A COSTING IS A MEASUREMENT WITH A TIMESTAMP. A BOUNDARY THAT WIDENS
+> UNDERNEATH ONE TURNS IT INTO A REASON NOT TO BUILD SOMETHING THAT IS ALREADY
+> REACHABLE.**
+
+The company-root correction is the sharper half: the root is admitted and the
+pattern takes **no sub-path**, so exactly one row of nine (`J 110`, the Home
+tab, which IS the root) moved from address-blocked to parser-only. Filing the
+whole block as unblocked would have been the mirror error.
+
+### 47.4 THE JOBS SLICE ANSWERS DIFFERENTLY FROM MESSAGING
+
+The messaging wave found *"not one is blocked on a reader somebody could sit
+down and write."* Jobs is **not zero**: `J 40` is buildable today on committed
+evidence alone -- the proximity field sits PRESENT AND UNPARSED in two
+committed fixtures, on pages two shipped tools already load, at addresses
+admitted since the first commit, with no extractor anywhere in
+`linkedin_server/`. Boundary 0, no ruling, nothing needed from the operator.
+
+Six more rows have an admitted address and a parser as their only remaining
+cost, **but no capture of the target panel exists**, so that a reader would
+FIND anything is a hypothesis and is filed as one. The distinction is the whole
+value of the section: *the address is admitted* and *the row would close* are
+two claims, and only the first is instrument-verified.
+
+**THE SIX WERE EIGHT UNTIL A CHILD REFUTED TWO OF THEM, AND THE REFUTATION IS
+THE BETTER FINDING.** `J 37` and `J 38` were filed parser-only because
+`/jobs/alerts/` is admitted. It is -- and `readonly.py` records, two lines above
+the pattern, that LinkedIn **redirects away from it**: *"requested
+`/jobs/alerts/` landed `/jobs/jam` query: none"*. It does not 404, so a load
+scored pass/fail looks like success, and a reader written against the
+alerts-manager shape would be parsing a different page than the one it asked
+for.
+
+> **OUR LIST ADMITTING AN ADDRESS IS A STATEMENT ABOUT OUR LIST. WHETHER
+> LINKEDIN SERVES IT IS A STATEMENT ABOUT LINKEDIN, AND NO AMOUNT OF READING
+> OUR FILE CAN ANSWER IT.**
+
+That is `readonly.py`'s own `ALLOWED-AND-STILL-WRONG` category, and this wave
+walked straight into it while writing the section that cites the boundary as
+its authority. The reachability column is honest about what it measures -- it
+reports what the GATE says -- and the gate's verdict is not a destination.

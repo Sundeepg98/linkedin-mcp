@@ -185,6 +185,54 @@ CORRECTION_VOCABULARY = (
 #: outcome this file exists to require and so cannot also be a violation of it.
 NOT_A_CORRECTION: dict[tuple[str, str], str] = {
 
+    # 2026-09-21, the JOBS-DIRECTION wave. All three triaged by reading the line.
+    ("2026-09-21-the-jobs-direction.md", "jobs.md"): (
+        "THE CORRECTION WAS MADE IN PLACE, WHICH IS THE ONE CASE THE BACK-"
+        "POINTER MECHANISM DOES NOT SERVE. The line reads *'Two statements in "
+        "`jobs.md` section 2 were false at HEAD and are corrected in place'*, "
+        "and that is literally what happened: both cells are STRUCK THROUGH "
+        "in that file with the replacement reading and the admitting commit "
+        "beside them. "
+        "**THE MARKER PAIR EXISTS FOR CORRECTIONS THAT LIVE IN ANOTHER "
+        "DOCUMENT**, where a reader arriving at the claim would otherwise "
+        "never learn it was withdrawn -- this file's own subject. A reader "
+        "arriving at either of these two claims CANNOT MISS the correction, "
+        "because it is in the same sentence. A CORRECTED BY marker at the top "
+        "of that slice would additionally be wrong in a specific way: it would "
+        "announce that the SLICE was corrected, when what moved was two "
+        "costing cells in section 2 and **no row, no state and no count**. "
+        "**WHAT WOULD MAKE THIS ENTRY WRONG:** if that wave had corrected a "
+        "jobs claim from OUTSIDE the file -- asserting in its own audit "
+        "document that a row or a state there is mistaken while leaving the "
+        "row untouched. It did not; every jobs edit it made is in the slice."
+    ),
+    ("INSTRUMENTS.md", "jobs.md"): (
+        "THE REGISTER DESCRIBES A MEASUREMENT OF THAT SLICE, IT DOES NOT "
+        "WITHDRAW ANYTHING IN IT. Section 47's line reads *'recorded "
+        "`jobs.md`'s rows as UNMEASURED, because its per-row tables run "
+        "...'* -- the correction vocabulary belongs to what the CEILING "
+        "DOCUMENT said about that slice, and the correction of the ceiling "
+        "document is declared with its own marker pair in "
+        "`2026-09-21-the-jobs-direction.md`. **No row of `jobs.md` is "
+        "contradicted and no state moves**: the wave classified direction, "
+        "which that file never stated per row, and the two edits it made to "
+        "section 2 repair two EXPIRED BOUNDARY PREMISES in place, each "
+        "struck through with the admitting commit beside it. "
+        "**WHAT WOULD MAKE THIS ENTRY WRONG:** if the register ever asserted "
+        "that a STATE or a COUNT in that slice is mistaken, rather than that "
+        "a costing cell went stale underneath it."
+    ),
+    ("INSTRUMENTS.md", "2026-09-20-the-sanctioned-seventh.md"): (
+        "THE CITATION IS AN ANALOGY, NOT A CORRECTION. Section 47.3 reads "
+        "*'the same shape `_audit/2026-09-20-the-sanctioned-seventh.md` names "
+        "as \"Section 4 was never re-read\"'* -- the cited document is being "
+        "AGREED WITH and used as the precedent for why a census cell that was "
+        "true when written can be false sixteen days later with nothing "
+        "pointing a reader at it. **Nothing in it is withdrawn.** A CORRECTED "
+        "BY marker there would tell every future reader that this wave "
+        "retracted something in that document, and this wave relies on it."
+    ),
+
     # 2026-09-20, the EVIDENCE-THAT-RESOLVES wave. Both triaged by reading the
     # line that produced them.
     ("2026-09-20-the-evidence-that-resolves.md",

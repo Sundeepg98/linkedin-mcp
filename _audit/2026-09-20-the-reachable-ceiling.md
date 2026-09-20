@@ -4,6 +4,8 @@
 (`scripts/count_census_states.py`), over the four census slices at master
 `fd81f4e`.**
 
+**CORRECTED BY:** `_audit/2026-09-21-the-jobs-direction.md` -- the `no direction column` cell for the jobs slice is right about its per-row tables and wrong about the file, because section 2 of that slice IS a direction table keyed by ROW-RANGE rather than by row id; its 57 GAP rows are now classified per row as **R 29 / W 25 / R/W 2 / AMBIGUOUS 1**, the `300 GAP rows` denominator above measures 285 at HEAD so the 242-row answerable population must be RE-TAKEN before anything adds the jobs split to it, and jobs measures read-heavy at 29 of 57 (50.9%) against the non-jobs 70 of 242 (28.9%).
+
 ## The reading
 
 Of **300 GAP rows**, direction splits as follows — stated over the population
