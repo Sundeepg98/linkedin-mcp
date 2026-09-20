@@ -60,9 +60,33 @@ HAND_FOUND = {
     "EVENTS-SURFACE": ["_audit/2026-09-19-events-surface.md"],
     "GROUPS-SURFACE": ["_audit/2026-09-19-groups-surface.md",
                        "_audit/2026-09-19-groups-admission.md"],
+    # THE THIRD ENTRY WAS ADDED 2026-09-21 AND THE FLOOR WAS NOT TOUCHED,
+    # WHICH IS THE WHOLE POINT OF RECORDING IT HERE.
+    #
+    # `_audit/2026-09-21-the-read-triage.md` triages 19 of this blocker's 20
+    # read rows and is a hand-found reason document for it by the same standard
+    # as its two neighbours. Adding it took the set from 8 documents to 9.
+    #
+    # WHAT IT EXPOSED ON THE WAY IN, because "the locator regressed" was the
+    # obvious reading and it is the wrong one. Scores, measured:
+    #
+    #     1.  7.000  2026-09-19-search-admission-preconditions.md
+    #     2.  7.000  2026-09-03-linkedin-gap-blockers.md
+    #     3.  5.000  2026-09-21-the-read-triage.md
+    #     4.  5.000  2026-09-19-search-shaper.md
+    #
+    # **THE SHAPER DOCUMENT FELL OUT OF THE TOP 3 ON A TIE, NOT ON MERIT.** Two
+    # candidates scored 5.000 and the order between them is whatever the sort
+    # was already doing. So a `top3` floor is sensitive to an ARBITRARY
+    # TIE-BREAK whenever a new document lands on an existing score -- which is
+    # a property of this measurement nobody had written down, and it is the
+    # reason the corpus growing can look exactly like the locator getting
+    # worse. The floor stays at 7 and is not lowered: lowering it would have
+    # hidden the tie instead of naming it.
     "SEARCH-RESULTS-SURFACE": [
         "_audit/2026-09-19-search-admission-preconditions.md",
-        "_audit/2026-09-19-search-shaper.md"],
+        "_audit/2026-09-19-search-shaper.md",
+        "_audit/2026-09-21-the-read-triage.md"],
     "SERVICES-PAGE-SURFACE": [KNOWN_MISS_DOC],
 }
 
