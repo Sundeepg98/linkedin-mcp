@@ -32,7 +32,7 @@ measurement below is offline, over committed files and git objects.
                                         lied (9a), and a child brief missing
                                         the line that would have saved it a
                                         turn (10a)
-    defects handed on               2   sections 6 and 7
+    defects handed on               2   section 7, and neither is newsletter's
 
 **THE SECOND DEFECT IS DECLINED AND THAT IS THE LOAD-BEARING RESULT.** The
 handover wave asked that both be ruled together. Ruling them together would
@@ -164,9 +164,15 @@ this wave's preference: `linkedin_server/readonly.py`'s boundary comment
 enumerates the blocker in three named halves -- reader-side five (`N 55`,
 `N 56`, `N 57`, `N 58`, `M C80`), author-side five (`M C50`, `M C51`, `M C81`,
 `M C84`, `P L3`), analytics two (`M C83`, `P L4`). Five plus five plus two is
-twelve, `M C82` is not among them, and their directions read 3R/9W off the
-census column. The shipped split checker independently reports this blocker as
-`held R3 W9`.
+twelve, and their directions read 3R/9W off the census column. The shipped
+split checker independently reports this blocker as `held R3 W9`.
+
+**AND `M C82` IS NAMED NOWHERE IN THE PACKAGE -- measured, whole directory,
+zero hits.** That is the negative half of the same evidence and it is worth
+the grep: the enumeration does not merely omit the row, the codebase that
+enumerates this blocker has never heard of it. A reader who assumes the
+omission was an oversight has something to check rather than a silence to
+interpret.
 
 **AND THE ROLE-vs-DIRECTION TRAP IS LEFT STANDING, because it is correct.**
 `tests/test_blocker_map_is_derived.py`'s evidence block warns that the
