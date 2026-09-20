@@ -528,9 +528,19 @@ live -- arrivals derived from `publishers()` must equal the number of
    import direction, which is a refactor rather than a ruling. What is closed
    is the READING: the widened report now classifies causes instead of
    printing the same undifferentiated verdict the narrow one had just stopped
-   printing. What remains: SIX blockers are still blind even to the widened
-   read, on compound `R + W` range cells that describe a block rather than a
-   row, and `J 131` is named by no section-2 range at all.
+   printing.
+
+   **AND THE SIX THAT ARE STILL BLIND ARE NOT ON THIS LIST, because they are
+   not a defect.** They are blind on compound `R + W` range cells, and such a
+   cell describes a BLOCK rather than a row -- `70-73` is "resume upload,
+   list, delete, download" and its `R + W` means the block contains both, not
+   that each of the four does both. A direction read off it would be invented,
+   and inventing one feeds straight into a split comparison: the first draft
+   of the range reader did exactly that and manufactured two over-runs on a
+   direction no row in those blockers carries. **The honest ceiling of this
+   reading is the ledger's own notation**, and `J 131`, named by no section-2
+   range at all, is the same shape. Handing those on as work would be asking
+   somebody to close them, which is asking for the defect back.
 3. **NOT A DEFECT, RECORDED SO IT IS NOT RE-FOUND:** `M C82`'s UNASSIGNED
    reason cell is correct and scoped (section 4d), and the role-vs-direction
    comment in `tests/test_blocker_map_is_derived.py` is correct as written
