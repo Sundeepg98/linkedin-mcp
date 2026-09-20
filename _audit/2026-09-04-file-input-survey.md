@@ -126,6 +126,9 @@ cheapest aim available on any of the five surfaces.
 
 ## 3. WHAT EACH SURFACE ACTUALLY NEEDS NEXT
 
+**CORRECTED BY:** `_audit/2026-09-20-the-decides.md` -- this section costs the message composer as a `_live_control` arm plus a NAME NEEDLE. There is no needle: read live on 2026-09-05, both inputs return an EMPTY shaped name with `name_source=none`, so the needle half of that cost buys nothing and the arm is priced against a control that cannot discriminate.
+
+
 | surface | what is missing | cost |
 |---|---|---|
 | Easy Apply resume | nothing measurable. The count of 1 is measured; aim by count-of-one, never by the invented `Resume` label | a `_live_control` arm |

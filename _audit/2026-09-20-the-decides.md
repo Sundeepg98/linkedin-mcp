@@ -24,6 +24,11 @@ has he ever taken a LinkedIn practice AI interview? (section 2, section 6D.)
 
 ## 0. THE HEADLINE IS AN ARITHMETIC ONE, AND IT IS MEASURED
 
+**CORRECTS:** `_audit/2026-09-03-linkedin-gap-blockers.md` -- its ranking tables publish 2026-09-03 row counts as current. Measured: 23 of the 45 they rank are still GAP.
+
+**CORRECTS:** `_audit/2026-09-04-file-input-survey.md` -- its section 3 costs a name needle that does not exist; both composer inputs return an empty shaped name.
+
+
 The brief says 45 rows sit behind these five blockers. **Measured today with the
 shipped enumerator against the census files themselves, 23 do.**
 

@@ -183,6 +183,29 @@ CORRECTION_VOCABULARY = (
 #: outcome this file exists to require and so cannot also be a violation of it.
 NOT_A_CORRECTION: dict[tuple[str, str], str] = {
 
+    # TWO MORE, 2026-09-20. Both citations. The two REAL corrections that same
+    # wave made -- of the ledger's stale ranking tables and of a costing that
+    # priced a needle which does not exist -- are declared with CORRECTS: /
+    # CORRECTED BY: pairs instead, which is what this table leaves room for.
+    ("2026-09-20-the-decides.md", "2026-09-05-decide-retire-rulings.md"): (
+        "IT QUOTES THE RULING NOTICING THE SAME THING FIRST. The block "
+        "quoted is that ruling's own closing section: 'WHAT THIS RULING "
+        "DOES NOT REACH: rows 146-149 are a different product and are "
+        "already filed under FILE-UPLOAD-UNSANCTIONED.' The wave agrees and "
+        "says the earlier ruling correctly declined to act on somebody "
+        "else's blocker. A document citing another one for having seen a "
+        "problem first is the opposite of correcting it. "
+    ),
+    ("jobs.md", "2026-09-20-job-search-params-built.md"): (
+        "A CENSUS CELL CITING THE WRITE-UP THAT EVIDENCES ITS NEW STATE. "
+        "Row 151 moved to COVERED-UNFIRED on 2026-09-20 and the cell names "
+        "the document that records what shipped and why it is UNFIRED "
+        "rather than PROVEN. The build write-up is the EVIDENCE for the "
+        "state change, exactly as four earlier census cells cite the "
+        "documents that evidenced theirs. The cell is a row showing its "
+        "work. "
+    ),
+
     # TWO MORE, 2026-09-19, from the remaining-partials wave. Both cite the
     # record that SETTLES a question. The third candidate that wave produced IS
     # a real correction -- of a RULING, not of a slice -- and is declared with a

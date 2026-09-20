@@ -168,6 +168,8 @@ filed against the missing surface, not the missing write.
 
 | # | blocker | rows | R/W | boundary | ruling | cost | rows/cost | queue |
 |---|---|---:|---|---|---|---:|---:|---|
+**CORRECTED BY:** `_audit/2026-09-20-the-decides.md` -- the ROW COUNTS in the ranking tables below are freeze figures from 2026-09-03 and have not been maintained. Measured 2026-09-20 against the live census: of 45 rows this file ranks behind five blockers, 23 are still GAP; 22 left on 2026-09-05. The prose in this document has been amended repeatedly and the tables never were, because a table reads as data rather than as a claim. Rank from `scripts/rank_live.py`, which derives the count each run; the COST and boundary columns here are properties of the work and do not go stale.
+
 | 1 | `FILE-UPLOAD-UNSANCTIONED` | 16 | 1R/15W | none | YES | 1 | 16.00 | DECIDE |
 | 2 | `AI-INTERVIEW-PRODUCT` | 14 | 4R/10W | none | YES | 1 | 14.00 | DECIDE-RETIRE |
 | 3 | `JOB-SEARCH-PARAMS` | 6 | 6R | none | no | 1 | 6.00 | BUILD |
