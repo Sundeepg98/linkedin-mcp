@@ -424,7 +424,22 @@ jobs:
         # that is load-bearing: the check below fails if the number that ran is
         # not the number this shard contains. -rs so any skip prints its
         # reason.
-        run: python -m pytest -q -rs --junitxml=junit.xml $(cat shard-files.txt)
+        # -n auto --dist loadfile ADDED 2026-09-20. Every shard was running its ~600
+        # tests SERIALLY on a multi-core runner: measured on run 35482010069, the
+        # "Run this shard" step alone was 117s of a 174s ubuntu job and the windows
+        # jobs were 409-460s, which IS the wall clock since it is the max over shards.
+        #
+        # --dist loadfile KEEPS EACH FILE ON ONE WORKER, and that is the half that
+        # makes this safe in a gate: these files carry module-level state and frozen
+        # captures, so splitting one across workers would be an ISOLATION change, and
+        # an isolation change that alters a verdict is reporting on the isolation
+        # rather than on the code.
+        #
+        # MEASURED BOTH WAYS BEFORE LANDING, because xdist pays a fixed per-worker
+        # startup and LOSES on small sets: one 29-test file is 26.10s serial against
+        # 31.74s parallel, while the whole suite is 913s against 601s. A shard is ~600
+        # tests, well past the crossover.
+        run: python -m pytest -q -rs -n auto --dist loadfile --junitxml=junit.xml $(cat shard-files.txt)
 
       - name: Every test in this shard actually ran
         # if: always() -- this must report the counts on a RED run too. A run

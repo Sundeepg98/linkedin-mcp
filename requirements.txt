@@ -69,3 +69,9 @@ pytest>=8.0
 # pytest.ini sets asyncio_mode=auto; without this line a clean venv would
 # collect those tests and not actually run them.
 pytest-asyncio>=0.23
+
+# Shards run their files in parallel on the runner's cores. Without this the
+# whole matrix runs serially inside each job and the wall clock is the max over
+# shards, so one slow shard pays for everyone. --dist loadfile keeps a file on
+# one worker, which is what makes it safe for files carrying module-level state.
+pytest-xdist>=3.5
