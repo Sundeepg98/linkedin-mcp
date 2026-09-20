@@ -158,6 +158,57 @@ def test_every_selected_blocker_has_a_candidate_address():
             f"addresses: {urls}")
 
 
+#: ADDRESSES TWO BLOCKERS LEGITIMATELY SHARE, each with the reason. A shared
+#: address is not automatically a bug -- `/messaging/` really does draw the
+#: group-chat list, the message-request list and the compose toolbar -- but an
+#: UNDECLARED one is how `CREATOR-HUB-SURFACE` got counted into a headline on
+#: the strength of its sibling's address.
+DELIBERATE_SHARES = {
+    "/messaging/": {"GROUP-CHAT-SURFACE", "MESSAGE-REQUESTS-SURFACE",
+                    "PICKER-SURFACES"},
+    "/preload/sharebox/": {"POLL-SURFACE", "POST-DRAFT-SURFACE"},
+}
+
+
+def test_no_two_blockers_share_a_base_address_undeclared():
+    """THE CONTROL FOR THE BUG AN EVIDENCE SWEEP FOUND IN THIS TABLE.
+
+    `SURFACE_ADDRESSES` is hand-written, so a copy-paste puts one blocker's
+    address on another and the live-boundary section then reports a verdict
+    for a page that blocker has nothing to do with. That happened: the first
+    cut gave `CREATOR-HUB-SURFACE` the identical address as
+    `CONTENT-ANALYTICS-SURFACE`, and it counted a whole blocker into the
+    "already allowed" tally on a duplicate.
+
+    A duplicate is not banned -- three messaging blockers genuinely share one
+    page. It must be DECLARED, which turns a silent copy-paste into a
+    deliberate statement somebody wrote down.
+
+    SHOWN FAILING: re-inserting `CREATOR-HUB-SURFACE: /analytics/creator/
+    content/` into the table turns this red with both blocker names printed.
+    """
+    by_url = {}
+    for blocker, url in csb.SURFACE_ADDRESSES.items():
+        by_url.setdefault(url, set()).add(blocker)
+
+    undeclared = {
+        url: sorted(blockers)
+        for url, blockers in by_url.items()
+        if len(blockers) > 1 and blockers != DELIBERATE_SHARES.get(url)
+    }
+    assert not undeclared, (
+        f"these base addresses are shared by more than one blocker without "
+        f"being declared in DELIBERATE_SHARES, so at least one of them is "
+        f"reporting a verdict for a page it does not own: {undeclared}")
+
+    stale = {url: sorted(names) for url, names in DELIBERATE_SHARES.items()
+             if by_url.get(url) != names}
+    assert not stale, (
+        f"DELIBERATE_SHARES no longer matches the table -- a declaration that "
+        f"has drifted is worse than none, it launders a real duplicate: "
+        f"{stale}")
+
+
 def test_the_live_boundary_section_actually_measured_something(capsys):
     """A blank section must not read as a clean one.
 
