@@ -189,8 +189,9 @@ NOT_A_CORRECTION: dict[tuple[str, str], str] = {
         "THE LINE IS A FILING POINTER, NOT A VERDICT ON THE REGISTER. It reads "
         "'The defect is against the SCRIPT and is filed at INSTRUMENTS.md "
         "32.2', and 32.2 is a section THIS SAME WAVE wrote in the same commit "
-        "series -- as 29.2, renumbered to 31 on merge because two other waves "
-        "published 29 and 30 first. "
+        "series -- written as 29.2 and renumbered TWICE on the way in, because "
+        "live-capture took 29, names-that-do-not-exist took 30, and reason-kinds "
+        "landed 31 while this integration was running. "
         "A wave citing the register entry that carries its own finding "
         "is an attribution -- the direction a reader needs in order to find the "
         "detail -- and a CORRECTED BY marker would assert that INSTRUMENTS.md "
@@ -222,6 +223,30 @@ NOT_A_CORRECTION: dict[tuple[str, str], str] = {
         "The defect itself is recorded at INSTRUMENTS.md section 32.2, filed "
         "against the SCRIPT, and deliberately not edited by this wave because "
         "it belongs to another wave's file."
+    ),
+
+    # TWO FROM THE REGISTER, 2026-09-20, surfaced only after a merge put section
+    # 31 and its cited documents in one tree. Both are the register citing a
+    # document as its SOURCE while correction vocabulary in the same sentence
+    # describes something else entirely -- which is the scan working: the words
+    # are there, and the relation is not.
+    ("INSTRUMENTS.md", "2026-09-20-the-contingent-writeoffs.md"): (
+        "IT CITES THE DOCUMENT AS THE MEASUREMENT BEHIND A DESIGN RULE. The "
+        "passage argues that register keys must be ROW IDS and never line "
+        "numbers, and cites that document's s4.1 as the evidence: all six of "
+        "the census's line-number locators measured DRIFTING 48 to 51 lines, "
+        "one landing on a different row that read COVERED-PROVEN. The drift is "
+        "what the cited document FOUND, not an error in it. A rule citing the "
+        "measurement that justifies it is an attribution. "
+    ),
+    ("INSTRUMENTS.md", "2026-09-20-the-reason-kinds.md"): (
+        "IT POINTS AT WHERE THE NUMBERS LIVE. The sentence reads 'Their "
+        "numbers are the tables in <that document>'. The word SUPERSEDED in "
+        "the lines above it governs four scratch mutation drivers -- three "
+        "superseded by the committed classifier's own reporting, the fourth by "
+        "the pytest guard that runs the same mutations with postcondition "
+        "assertions. Nothing in the passage supersedes the cited document; it "
+        "is named as the place the surviving numbers were published. "
     ),
 
     # SURFACED BY A MERGE, not by either wave alone. The register entry and the
