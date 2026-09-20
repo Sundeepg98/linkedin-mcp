@@ -190,7 +190,7 @@ Both were real, both were red before they were green, and both are pinned:
    integer, rather than thrown or guessed at.
 
 4. **`_HOST` WAS DEFINED AND NEVER READ**, which is worse than not having it:
-   `https://evil.example/company/1234/` classified as `home_tab` and was
+   `https://evil.example/company/5417062/` classified as `home_tab` and was
    counted as a LinkedIn organisation. A count is a claim about what a page
    links to, and one that cannot tell LinkedIn's own routes from a foreign
    host's is making a different claim than its name makes. Now checked, with
