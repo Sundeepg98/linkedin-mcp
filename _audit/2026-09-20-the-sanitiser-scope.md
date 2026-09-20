@@ -391,6 +391,41 @@ zero.
 
 **Live instance count after the fix: 0.** Nothing red; nothing exempted.
 
+### 5.4 THE ONE CLASS THE FIX NEWLY FLAGS THAT IS ACTUALLY SAFE
+
+"0 newly flagged" is true of the live tree and it is NOT the whole answer. The
+question the ruling asked was what the fix flags that it did not flag before, and at
+the level of SHAPES rather than sites there is exactly one class, found by probing my
+own change adversarially rather than by it turning up:
+
+```
+href read off the page, then url-redacted     -> [(2, 'print')]      <- NEW
+href read off the page, printed raw           -> [(2, 'print')]      <- was flagged
+href read off the page, counted               -> []
+href compared                                 -> []
+```
+
+`get_attribute` is a `TEXT_CALLS` entry -- it has to be, because an aria-label is a
+display name -- but an `href` read through it is a **URL**, and a url is the one kind
+of value the `_SANITISERS` entries ARE proven for. Both `_redact` bodies hold on it
+(measured: 0 of 16 claimants leak the url needle). So the author is doing the right
+thing and the guard now objects.
+
+**ZERO LIVE INSTANCES**, which is why the sweep in 5.2 reports no movement -- nobody
+writes this today. It is a future cost, and it is named here rather than discovered.
+
+**Why it is still the right trade.** The alternative is the state this wave removed,
+where the same stop also cleared a display name in prose. A guard that is wrong about
+a url in a direction that costs an author one line is not comparable to a guard that
+is wrong about a name in the direction that puts a person in a transcript.
+
+**What the repair looks like when somebody hits it**, so the next author is not left
+guessing: the honest classification is a THIRD kind -- *a url that arrived through a
+text reader* -- and `PROVEN_FOR` is the schema that can carry it. What must NOT happen
+is an entry added to `TEXT_SANITISERS` to clear the red, because that would credit the
+function for prose on the strength of a url proof, which is the defect this whole file
+is about, returning by the other door.
+
 ---
 
 ## 6. Name-based matching: can the stop resolve the actual function?
@@ -519,7 +554,7 @@ The three guards plus the **six files `scripts/pre_commit_boundary_gate.py` comp
 coupled** to the staged set -- not a list I chose:
 
 ```
-594 passed, 4 skipped in 31.98s
+595 passed, 4 skipped in 38.95s
 ```
 
 and the guards that READ AUDIT PROSE, because this wave writes an audit file, edits
@@ -554,7 +589,11 @@ The 4 skips are pre-existing empty-parameter-set skips in
   certifier's own `_call`.
 * 0 files newly flagged, 0 files unflagged, 179-file corpus, pre-fix walker loaded from
   `git show HEAD:` and shown disagreeing with the post-fix walker on 5 of 7 planted
-  cases.
+  cases. **That is a count of SITES, and it is not the whole answer**: at the level of
+  SHAPES the fix newly flags exactly one safe class -- a url read through
+  `get_attribute('href')` and then shaped by a url-proven sanitiser -- with zero live
+  instances. Found by probing my own change adversarially, not by it turning up. 5.4
+  carries the probe output and the repair path.
 * `post == KNOWN_TEXT_SINKS` exactly, an assertion that fails in both directions.
 * 28 call sites of the three names in the corpus, so the zero is not vacuous.
 * 5 of 5 new checks shown failing, each mutated separately; both mechanisms mutated
