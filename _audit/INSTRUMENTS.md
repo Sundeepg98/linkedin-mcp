@@ -3732,3 +3732,111 @@ not sufficient.
 
 Nothing from this wave is disposable. All four scripts are committed under
 `scripts/` and all four carry controls.
+
+## 22 THE IMPACT GATE, AND THE THREE MUTATIONS THAT KILL IT
+
+`scripts/impact_gate.py` -- selects the tests a change can break, runs exactly
+those plus a corpus-wide floor, and prints what it did NOT run.
+Control: `tests/test_impact_gate_selects_data_dependencies.py`, 13 tests.
+
+**WHY IT IS ADMITTED.** A selector is the hardest thing in this repository to
+red-proof, because the two ways it can be broken look identical from outside:
+one that returns EVERYTHING never refuses, one that returns NOTHING never
+fires, and both print calmly. So every rule in it is disarmable by keyword and
+the control asserts BOTH arms of each.
+
+### 22.1 THE MUTATION THAT KILLS IT, run 2026-09-20
+
+    scripts/impact_gate.py   data_coupling: bool = True  ->  False
+
+    3 failed, 10 passed in 4.37s
+      test_the_census_ledger_selects_the_test_that_caught_it
+      test_the_census_evidence_table_selects_it_too
+      test_the_selection_travels_the_two_hop_chain_and_not_a_coincidence
+
+Restored, `diff -q` clean, 13 passed in 10.9s. The negative arm
+(`test_reverting_the_data_rule_loses_the_test_again`) runs the disarmed
+selector on every CI cycle and asserts it reaches NOTHING -- so a selector
+rewritten to return the whole suite reddens the negative arm, and one rewritten
+to return nothing reddens the positive arms. There is no broken selector that
+passes both.
+
+### 22.2 THE DEFECT IT EXISTS FOR, reproduced before it was built
+
+Staging the reverse of `5d0efb5` -- the `**CORRECTED BY:**` marker that split a
+table `scripts/build_blocker_map.py` parses -- and putting it to the existing
+`scripts/pre_commit_boundary_gate.py`:
+
+    boundary gate:  exit 0, ZERO bytes of output, ZERO tests run
+    truth:          tests/test_blocker_map_is_derived.py, 2 failed in 1.16s
+
+`staged_paths()` keeps only `*.py`, so a `.md` never reaches the coupling rule;
+and a data file defines no module-level constants, so reaching it would not
+help. **A document that is also a DATA SOURCE is read by a PATH, and a path is
+not a name.** The finished gate refuses the same tree in 25.7s, naming three
+failures. `test_the_shipped_constant_rule_is_still_blind_to_this` pins the old
+rule's blindness so a later simplification back onto it cannot be quiet.
+
+### 22.3 PROSE IS NOT DEPENDENCY -- the calibration, with its numbers
+
+Scanning RAW source for the ledger's name selected **158 of 170** test files;
+making the text edge non-transitive took it to 93; three precision fixes took
+it to 4, each found by checking a sample rather than by reasoning:
+
+    strip comments + docstrings (tokenize + AST)      93 -> 9
+      cause: readonly.py:2045 cites it in a # comment,
+             server.py:185 quotes it in a docstring. Neither opens it.
+    directory token requires a SWEEP VERB              9 -> 5
+      cause: repo_paths.py holds Path("_audit") / "_sanitisation_key.json",
+             naming the folder to reach ONE file in it.
+    drop bare \bwalk\b, spell it os.walk               5 -> 4
+      cause: it matched ast.walk, which traverses a syntax tree
+             and no directory at all.
+
+A selector returning 93% of the tree is not selecting; it is laundering a full
+run through a narrowing story, which is worse than an honest full run because
+it claims to have reasoned.
+
+### 22.4 THE CORPUS-WIDE FLOOR, and the check it nearly disarmed
+
+`always_run_files()` derives the tests whose file enumeration takes no input
+from the diff -- `git ls-files`, a repo-root walk, or a sweep spanning two or
+more top-level folders. 13 files, 1797 tests, 25.6s. They are coupled to
+EVERYTHING and therefore selectable by nothing, so they run unconditionally.
+Derived rather than listed, and
+`test_the_floor_is_derived_and_still_finds_the_two_proven_guards` fails by name
+if the detector ever narrows past `test_no_committed_identity.py` or
+`test_page_text_is_never_printed.py`.
+
+**THE TRAP, RECORDED BECAUSE IT IS THIS REGISTER'S OWN DISEASE.** The floor is
+never empty. Had the plan been one merged list, the gate's "empty impact set"
+alarm could never have fired again -- permanently satisfied by a guarantee that
+says nothing about whether the analyser worked. A check that cannot fail,
+introduced by the change meant to make the gate safer, and invisible because
+everything stays green. `Impact.selected` and `Impact.always_run` are separate
+fields, the alarm tests `selected`, and
+`test_the_floor_does_not_mask_an_empty_selection` asserts it.
+
+### 22.5 THE GUARD THAT CONVICTED THE GATE'S OWN AUTHOR
+
+First dogfood run -- the gate applied to its own staged change -- came back RED:
+
+    tests/test_an_outage_is_never_filed_as_an_absence.py
+      ::test_no_probe_returns_a_falsy_datum_from_an_exception_handler
+      impact_gate.py:225
+
+`code_text()` returned `""` from an `except OSError`. Empty string means "this
+file mentions nothing"; unreadable means "unknown" -- the same value to every
+caller, so an I/O error would have silently REMOVED a candidate from the plan.
+That is the exact failure the gate exists to prevent, reproduced inside the
+gate, found by the suite rather than by its author. Repaired by taking the
+remedy the guard itself named -- `None`, and widen at the call site -- rather
+than the one that clears the red.
+
+### 22.6 DISPOSABLE, declared
+
+Nothing. `scripts/impact_gate.py` is committed with its control, and
+`scripts/impact_gate_suite_size.json` is a cached denominator stamped with the
+commit it was taken at, so its staleness is visible rather than assumed. The
+probe used to size the floor was a scratch file and IS disposable; its result
+is the derivation in `always_run_files()`, which is checked by 22.4.
