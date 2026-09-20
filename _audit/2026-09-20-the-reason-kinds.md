@@ -491,7 +491,7 @@ be: a classifier that can always decide is not measuring anything.
 
 ## 8. THE GUARD, SHOWN FAILING
 
-`tests/test_writeoff_kinds_are_derivable.py` -- **69 tests, 8.6s**, driven over **mutated
+`tests/test_writeoff_kinds_are_derivable.py` -- **71 tests, 8.4s**, driven over **mutated
 sandbox copies** of the census. No committed file is written at any point.
 
 The first version was mine and had 11 tests. It was replaced by a colder, independent one
@@ -609,7 +609,17 @@ on every run.
    -- a per-row table of 309 triggers is the hand-maintained artifact this whole design
    rejects -- but it means the trigger is the right SHAPE for a row rather than tailored to
    it. `--contingent` prints them tiered; section 6 is that output with the clusters named.
-8. **One delegated slice failed and then did not.** The mutation child produced nothing on
+8. **A file collision dropped two committed tests, and one had to be restored by hand.**
+   `e1b44b0` committed an 11-test version of the guard; a later wholesale write at the same
+   path replaced it with an independently written 69-test one, and two unique tests went
+   with it. One fell inside the new mutation set and was restored there;
+   `test_every_ruling_section_is_adjudicated` was lifted VERBATIM from `e1b44b0` --
+   unchanged, because guessing at the intent of a test is how a test gets weakened while
+   looking restored. It passes on the current tree. **The hazard is two writers and one
+   path**, and this is its second instance today; the other landed through the git index
+   instead of the filesystem. A wave creating a file where a sibling might also write
+   should check the path before writing, not after.
+9. **One delegated slice failed and then did not.** The mutation child produced nothing on
    disk for 35 minutes, against a live process check and repeated `ls`. I wrote the harness
    myself rather than stay blocked on a hard requirement. It then delivered -- a better
    file than mine, which replaced it, and which found two defects in my instrument that my
