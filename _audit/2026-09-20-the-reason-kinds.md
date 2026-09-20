@@ -350,7 +350,7 @@ judgement wearing five row ids, not five independent ones** -- which is worth kn
 before anybody costs it as five.
 
 **THERE IS NO TIER 1 AND THAT IS NOT A GAP IN THE LIST.** Tier 1 is PROCESS-FACT -- a
-refusal read off a running server -- and no census reason rests on one. See 6.2: the zero
+refusal read off a running server -- and no census reason rests on one. See 6.3: the zero
 is real and the needle was proved alive.
 
 ### 6.1 THE SHARPEST SINGLE ITEM: one capability, three rows, two states, and the correction reached one of them
@@ -384,7 +384,33 @@ disagreement between three rows describing one capability.
 three as duplicates under the rule master landed at `9f50087` -- *a duplicate row is
 MARKED, never DELETED*.
 
-### 6.2 PROCESS-FACT: measured zero, and the needle was proved alive
+### 6.2 WHERE I DISAGREE WITH THE SIBLING WAVE, named rather than left to be noticed
+
+`9a140a3` s13.2 classified three of the same rows. We do not fully agree, and the
+difference is one dimension, in one direction:
+
+| row | `9a140a3` s13.2 | this pass | the difference |
+|---|---|---|---|
+| `N 156` | US-RULING | ACCOUNT-FACT+US-RULING+WORLD-FACT | + account, + world |
+| `N 157` | WORLD-FACT | ACCOUNT-FACT+US-RULING+WORLD-FACT | + account, + ruling |
+| `N 158` | US-RULING | ACCOUNT-FACT+US-RULING+WORLD-FACT | + account, + world |
+
+**The added dimension is ACCOUNT-FACT and it comes from R9's own arithmetic**, which those
+rows inherit and their cells do not restate: *"He has 5 InMail credits a month... That is
+roughly one send per week. Automating five actions a month is not engineering, it is
+ceremony"*, plus *"he now also has a paid subscription that a restriction would strand."*
+Both are facts about his account, and the first is load-bearing -- **the ground that
+automating this is not worth building is an arithmetic over an allowance**, and it weakens
+the moment the allowance changes.
+
+**This is an addition, not a contradiction.** Their US-RULING and WORLD-FACT halves are
+both right and are kept. The reason we differ is a difference in unit: they classified the
+ROW CELL, which is where the send-prohibition lives; this pass classifies the row cell
+PLUS the ruling it points at, which is where the credit arithmetic lives. **Neither view
+is visible from the other's artifact**, which is itself the finding -- and it is the same
+shape as section 3.2, a reason sitting somewhere the reader of the row cannot see.
+
+### 6.3 PROCESS-FACT: measured zero, and the needle was proved alive
 
 Zero write-off reasons rest on a refusal read off a running server. **This is a real zero,
 not a dead needle** -- section 8, P1, feeds the pattern a synthetic positive and confirms it
@@ -468,7 +494,7 @@ raises nothing. That is not a defect in the classifier -- it is what `same` mean
 
 A needle that never fires and a fact that is never true look identical in a count, so every
 zero-firing pattern is fed a synthetic positive. **All ten match; there are no dead
-needles.** That is what makes section 6.2's PROCESS-FACT zero a measurement:
+needles.** That is what makes section 6.3's PROCESS-FACT zero a measurement:
 
     live-process   PROCESS-FACT   matches "measured off the live server, which is 58 commits stale"
 
