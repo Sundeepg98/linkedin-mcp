@@ -86,6 +86,7 @@ import functools
 import importlib.util
 import pathlib
 import re
+import subprocess
 import sys
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
@@ -200,9 +201,34 @@ def corpus() -> tuple[tuple[str, str], ...]:
     absent, because a file that vanished from the scan and a file that argues
     nothing produce the same score and must not produce the same report.
     """
+    # TRACKED FILES ONLY, and this is a correctness rule rather than a filter.
+    #
+    # `_audit/_scratch/` is gitignored (.gitignore:156) and holds 113 markdown
+    # files in the MAIN checkout and ZERO in any worktree or clone. Enumerating
+    # the filesystem therefore gave this tool a different corpus depending on
+    # where it ran: measured 2026-09-20, two blockers had a `_scratch/` progress
+    # file ranked THIRD on master while the same tool in a worktree never saw it.
+    # The recall floor was built in a worktree and went red the moment it ran on
+    # master -- not because the ranking got worse, but because the corpus grew by
+    # 113 files nobody else can read.
+    #
+    # The deeper reason is this repo's own standard: a measurement nobody else
+    # can take is a measurement on its way to becoming a quotation. A reason_doc
+    # naming `_audit/_scratch/_progress-groups-surface.md` sends every reader to
+    # a file that does not exist in their checkout -- strictly worse than naming
+    # nothing, because it looks like an answer. A sibling audit established the
+    # same point about `_progress-unlocatable-recovery.md`: standing verdicts
+    # were resting on a file no reader could open.
+    tracked = subprocess.run(
+        ["git", "-C", str(ROOT), "ls-files", "_audit"],
+        capture_output=True, check=True,
+    ).stdout.decode("utf-8", "replace").splitlines()
+    wanted = sorted(
+        r for r in tracked if r and (r.endswith(".md") or r.endswith(".tsv"))
+    )
     out: list[tuple[str, str]] = []
-    for path in sorted(AUDIT.rglob("*.md")) + sorted(AUDIT.rglob("*.tsv")):
-        rel = str(path.relative_to(ROOT)).replace("\\", "/")
+    for rel in wanted:
+        path = ROOT / rel
         try:
             out.append((rel, path.read_text(encoding="utf-8", errors="replace")))
         except OSError as error:

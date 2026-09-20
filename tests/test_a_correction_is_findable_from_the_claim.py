@@ -183,6 +183,22 @@ CORRECTION_VOCABULARY = (
 #: outcome this file exists to require and so cannot also be a violation of it.
 NOT_A_CORRECTION: dict[tuple[str, str], str] = {
 
+    # SURFACED BY A MERGE, not by either wave alone. The register entry and the
+    # document it cites arrived on two different branches; neither tree held
+    # both, so neither wave's green run could see this pair. It was triaged once
+    # during integration and LOST when a sibling branch's version of this dict
+    # won the same hunk -- which is its own lesson about where merges eat things.
+    ("INSTRUMENTS.md", "2026-09-20-control-census.md"): (
+        "THE REGISTER CITES THE DOCUMENT THAT PRODUCED ITS FINDING. The entry is "
+        "the control-census instrument's registration, and the line names "
+        "control-census.md as the source of the per-file breakdown behind its "
+        "numbers. What trips the scan is the sentence just after: 'This is not a "
+        "claim that the 5 banked rows are WRONG -- a decorative control does not "
+        "mean the probe's finding was false.' That sentence exists to PREVENT a "
+        "misreading of the cited document, which is the opposite of correcting "
+        "it. An instrument naming its own evidence is an attribution. "
+    ),
+
     # 2026-09-20, from the impact-gate wave. A citation of a defect ALREADY
     # REPAIRED at 5d0efb5, reused as the gate's own proving input -- which is
     # the best kind of test case, because it is a failure that really happened.
