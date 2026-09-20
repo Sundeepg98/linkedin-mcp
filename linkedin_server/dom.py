@@ -1065,7 +1065,22 @@ async def read_company_about_card(page: Any) -> dict[str, Any]:
     # interpreted. The partial list is kept on a mid-loop failure, because
     # three links read and a fourth that raised is more than nothing and the
     # field beside it says the count is a floor.
+    # ``hrefs_error`` IS THE EXCEPTION'S TYPE NAME AND NOT ITS MESSAGE, which
+    # is a deliberate difference from ``error`` six lines up. A Playwright
+    # message can quote a selector and, through it, page content; a Python
+    # class name cannot. The field exists only to tell an empty list that was
+    # READ from one that FAILED, and a type name does that exactly as well.
+    #
+    # IT IS ALSO WHAT KEEPS THIS SITE OFF ``KNOWN_TEXT_SINKS``. The first
+    # version logged ``out["hrefs_error"]`` and
+    # ``tests/test_page_text_is_never_printed.py`` went red in CI -- dom.py
+    # 9 -> 10 -- because a subscript of a dict holding ``inner_text`` output
+    # is tainted whatever the key. That guard's own failure message says what
+    # to do and it is followed here rather than argued with: *do NOT add it to
+    # the inventory to clear the red; emit a count, a relation or a marker.*
+    # This is the marker, and the site is gone rather than pinned.
     hrefs: list[str] = []
+    marker: Optional[str] = None
     try:
         links = container.locator("a[href]")
         count = min(int(await links.count()), ABOUT_COMPANY_MAX_LINKS)
@@ -1074,10 +1089,9 @@ async def read_company_about_card(page: Any) -> dict[str, Any]:
             if href:
                 hrefs.append(str(href))
     except Exception as exc:
-        out["hrefs_error"] = f"{type(exc).__name__}: {exc}"
-        logger.debug(
-            "about-the-company links unreadable: %s", out["hrefs_error"]
-        )
+        marker = type(exc).__name__
+        logger.debug("about-the-company links unreadable: %s", marker)
+    out["hrefs_error"] = marker
     out["hrefs"] = hrefs
     return out
 
