@@ -627,15 +627,31 @@ introduced (the 13 characters in `INSTRUMENTS.md` are pre-existing).
 
 **Two things a future reader should know, neither of which blocks it.**
 
-**1. It is a ONE-WAY ratchet, and this repository's established pattern for the
-same shape is an EXACT MAPPING.** `KNOWN_TEXT_SINKS` states the rule in its own
-comment: *"asserted as an EXACT MAPPING, so it cannot rot in either direction: a
-file that gains a site fails, and a file that is FIXED also fails until its
-entry is corrected. The documentation of a defect may not outlive the defect."*
-This baseline fails on a NEW finding and stays silent when a pinned one is
-fixed, so nothing ever forces a pruned entry. That is defensible for a disclosed
-backlog someone is working through, which is what its docstring claims, but it
-is the weaker form and it is not what the neighbouring guards do.
+**1. It was a ONE-WAY ratchet. RAISED, AND FIXED IN `61b254b` -- this entry is
+kept because the correction is the useful part.** The original failed on a NEW
+finding and stayed silent when a pinned one was fixed, so nothing ever forced a
+stale entry out. This repository's established pattern for the same shape is an
+EXACT MAPPING, and `KNOWN_TEXT_SINKS` states why in its own comment:
+*"asserted as an EXACT MAPPING, so it cannot rot in either direction: a file
+that gains a site fails, and a file that is FIXED also fails until its entry is
+corrected. The documentation of a defect may not outlive the defect."*
+
+`61b254b` converts it: `test_probe_corpus_baseline_is_an_exact_mapping` now
+asserts `not gained and not lost`, and -- the part that makes it worth
+anything -- the shown-failing control grew a matching arm, so **both directions
+are demonstrated red rather than one**:
+
+```
+  D. the ratchet's GAINED direction must be able to go RED
+     PASS   removing one real baseline entry makes it report GAINED
+     PASS   control: with the FULL baseline, that entry is NOT reported
+  E. the ratchet's LOST direction must be able to go RED
+     PASS   adding one FABRICATED baseline entry makes it report LOST
+     PASS   control: no REAL baseline entry is reported lost at this moment
+```
+
+A new assertion whose failing state was never shown would have been the same
+defect this whole wave is about, one level up.
 
 **2. The baseline necessarily pins this detector's false positives, including
 in the file this wave just repaired.** All three flagged names in
@@ -654,8 +670,14 @@ flags them, so removing them turns the ratchet red on a file with no defect.
 The fix is to tighten the marker vocabulary so a self-check is distinguishable
 from a UI control -- the same prerequisite the census section above names before
 any count here is quotable. Until then the baseline is 129 entries of which an
-unknown minority are not defects, and the one-way ratchet means nothing will
-make anyone revisit them.
+unknown minority are not defects.
+
+**This one is still open, and the two-way ratchet raises its stakes rather than
+lowering them.** Under an exact mapping, whoever tightens the detector will get
+a LOST red for every false positive that stops being flagged -- which is the
+correct behaviour and is exactly the forcing function the one-way version
+lacked, but it means the triage and the baseline edit are now one job and
+cannot be done separately.
 
 ---
 
