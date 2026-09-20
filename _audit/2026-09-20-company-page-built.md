@@ -502,6 +502,14 @@ Local runs: a 14-file GREEN BASELINE was taken at the tree before anything was
 touched -- 1516 passed, 0 failed. After the change, sweeps over the touched set
 and its neighbours: 1005, 855, 752, 328, 190 and 118 passed, 0 failed.
 
+THE IDENTITY GATE WAS VERIFIED ARMED, NOT ASSUMED. A linked worktree carries
+no gitignored files, and this repository's exact-value sweep reads a gitignored
+wordlist -- a guard that has been measured reporting ALLOWING from inside a
+worktree before. `scripts/sweep_tracked_for_identity.py` run at this tip:
+**218 spellings across 16 classes loaded**, 0 hits across 528 tracked files.
+The loaded-spelling count is the half that proves it was armed; the zero alone
+would not.
+
 **THE FULL SUITE IS CI'S.** The first commit is CERTIFIED GREEN: run
 35481841288 completed success across all 18 jobs -- ubuntu 3.10 x 6 shards,
 ubuntu 3.13 x 6, windows 3.13 x 6. Later commits are queued behind it on the
