@@ -14,6 +14,22 @@ Built 2026-09-19 by the `search-shaper` wave, on
 | `0f711c1` | the cross-engine layer -- `CONTROL_EXPECTATION` computed for the first time |
 | `76caeb6` | the filter half: sixteen census rows the route table never touched |
 
+**NONE OF THE FOUR SHAs ABOVE RESOLVES ON `master`, NOTED 2026-09-20.** Each
+returns exit 1 on `git merge-base --is-ancestor <sha> master`; each resolves
+only via `integrate-1821` and `worktree-agent-a4a7c41bdf3ec4b68`. The content
+is not missing: `master` carries it, folded into one commit, `fa13985`
+("integrate: eight waves' work, replayed as content onto the purged
+history"). The route-half docstring (`fa5a314`), the `CONTROL_EXPECTATION`
+table and its two limits (`0f711c1`), and the filter half's
+`FILTER_CONTROL_EXPECTATION` / `tally_filters` / sixteen-row section
+(`76caeb6`) are verbatim or near-verbatim in `master`'s
+`linkedin_server/search_results.py` today, confirmed with `git blame`. This
+document's own text was itself rewritten before that replay (`f85e959`'s 189
+lines became a further branch commit's 266 before landing here), so the table
+above names what each commit DID, not a byte-for-byte ancestor of this page.
+Row-by-row evidence and the branches' disposition:
+`_audit/2026-09-20-the-six-unremapped.md`.
+
 **`readonly.py` IS UNTOUCHED ACROSS ALL FOUR.** No address admitted, no write
 fired, no browser opened, no page loaded on any path. Every number here comes
 from fixtures and from the shipped scripts' own source, executed under node
@@ -239,8 +255,9 @@ admitting commit is the other half and **it is not mine to fire.**
 1. **Both halves in ONE diff.** The shaper is committed separately because it
    admits nothing and therefore cannot violate condition 1 alone. The admitting
    commit must add the allowlist entry AND wire this module in the same diff.
-   **A shaper nobody calls is not a shaper** -- `76caeb6` existing on the branch
-   does not discharge condition 1 by itself.
+   **A shaper nobody calls is not a shaper** -- `76caeb6` existing on the
+   branch (not on `master`; its content is in `master` via `fa13985`, see the
+   note above) does not discharge condition 1 by itself.
 2. **The pattern must use CLOSED SEGMENTS, not anchors.** `RESULT_TABLE` is the
    vocabulary it should mirror. Four addresses are needed, not one: people,
    groups, events, and content/hashtag -- and **`N 194`'s address is still
