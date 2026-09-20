@@ -250,6 +250,8 @@ this**; it is this wave's finding and the admitting wave inherits it.
 
 ## C. THE REVERT TEST -- COMMITTED GREEN, SHOWN RED (condition 4)
 
+**CORRECTED BY:** `_audit/2026-09-20-the-search-admission.md` -- the instruction below to DELETE the revert test, and item 3 of section D, were superseded by the lead at 2026-09-19 13:05, about twenty minutes after this document was written: the ruling is INVERT, not delete, so the transition stays recorded and the file goes on asserting something true. The measurements in this section are unaffected; only the instruction is, and the admitting wave followed the inversion on 2026-09-20.
+
     tests/test_the_search_results_address_is_refused_before_admission.py
 
 **Five tests, green at HEAD (12:36, 0.25s).** They assert that all eight

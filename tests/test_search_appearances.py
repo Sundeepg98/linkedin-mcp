@@ -322,16 +322,38 @@ def test_the_address_this_reader_names_is_the_one_the_boundary_admits():
         "https://www.linkedin.com/analytics/search-appearances/?keywords=x",
         "https://www.linkedin.com/in/someone-else/search-appearances/",
         "https://www.linkedin.com/me/search-appearances/",
-        "https://www.linkedin.com/search/results/people/?keywords=x",
+        # ``/search/results/people/?keywords=x`` STOOD HERE UNTIL 2026-09-20.
+        # It is now admitted -- see this test's docstring, which records why
+        # that is NOT this guard failing. These two replace it: both are still
+        # refused, both are in the search family, and the sub-path is the
+        # sharper canary because it is the spelling that would address one
+        # PERSON rather than the page listing them.
+        "https://www.linkedin.com/search/results/people/example-person-a1b2c3/",
+        "https://www.linkedin.com/search/results/companies/?keywords=x",
     ],
 )
 def test_the_neighbours_of_that_address_are_still_refused(url):
     """One address was admitted, not a tree and not the surface next door.
 
-    The last case is the point of the whole exercise: this reading exists to
-    inform a ruling on people search, and admitting the page under
-    consideration would be using one load of it as the evidence that
-    authorises it.
+    **THE PEOPLE SEARCH WAS THE POINT OF THE WHOLE EXERCISE AND IT HAS SINCE
+    BEEN ADMITTED -- BY ITS OWN RULING, WHICH IS THE DISTINCTION THIS
+    DOCSTRING EXISTS TO PRESERVE.** This case was here because the
+    search-appearances reading exists to INFORM a ruling on people search, so
+    admitting the page under consideration would have been using one load of
+    it as the evidence that authorises it. **That is still forbidden and it is
+    not what happened.**
+
+    `/search/results/people/` was admitted 2026-09-20 under `09f9961` section
+    6, on five binding conditions, with its own blast radius measured over a
+    90-address corpus and a name-free shaper landing in the same commit. None
+    of that evidence is this reading. The bootstrap this case guarded against
+    did not occur; the address simply stopped being refused for an unrelated
+    and separately-ruled reason.
+
+    So the case is REPLACED rather than deleted, by search-family addresses
+    that are still refused -- because the property worth guarding was never
+    "that one url is red", it was "the search-appearances admission does not
+    reach the search family".
     """
     from linkedin_server import readonly
 

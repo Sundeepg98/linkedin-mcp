@@ -1811,6 +1811,63 @@ _ALLOWED_URL_PATTERNS: tuple[re.Pattern[str], ...] = (
     # organisation or school position in it, which is what refused the
     # newsletter slug next door.
     re.compile(r"^https://www\.linkedin\.com/learning/role-play/scenarios/?$"),
+    # THE PEOPLE SEARCH, admitted 2026-09-20 WITH its shaper and its tool, and
+    # this is the first admission on a THIRD-PARTY-DENSE surface.
+    #
+    # `_audit/2026-09-19-two-census-conventions-ruled.md` section 6 grants
+    # `SEARCH-RESULTS-SURFACE` in principle on five binding conditions. This
+    # line is the admission half of condition 1, whose other half --
+    # `linkedin_server/search_results.py` and the tool that calls it -- lands
+    # in the same commit. **THE RULING SAYS ADMITTING WITHOUT THE SHAPER DOES
+    # NOT PARTIALLY SATISFY IT, IT VIOLATES IT.** If a future edit ever
+    # removes the tool, remove this line with it.
+    #
+    # WHY THIS SPELLING AND NOT A FAMILY. Condition 2 originally read
+    # ANCHORED; it was AMENDED to CLOSED PATH SEGMENTS because anchoring was
+    # measured to do none of the work assigned to it --
+    # `^https://www.linkedin.com/search/.*$`, anchored at BOTH ends, admits
+    # exactly what the bare prefix admits. Re-measured 2026-09-20 by
+    # `scripts/_probe_search_admission_blast_radius.py` over a 90-address
+    # corpus, against the 41 patterns then on disk:
+    #
+    #     S1  people only, this line               newly admits   5
+    #     S2b people|groups|events                 newly admits   7
+    #     W1  /search/.*$ anchored  (NOT proposed) newly admits  18
+    #     W2  /search/ prefix       (NOT proposed) newly admits  18
+    #
+    # **The number that carries information is 18 against 5.** No forbidden
+    # substring names ANY `/search/` address, so everything in that column is
+    # defended by nothing but the absence of a rule -- including the address
+    # this entry is for, which is why the shaper is the condition and not the
+    # allowlist.
+    #
+    # AND THE WILDCARD'S EXTRA FIFTEEN INCLUDE AN ACCOUNT-ENDING ADDRESS.
+    # `/search/results/people/../../mypreferences/d/close-account` is admitted
+    # by W1 and W2 and named by no forbidden substring: the denylist refuses
+    # its siblings `/psettings/` and `/invite` and misses this one. A closed
+    # segment cannot be followed by `..`, so this entry refuses it -- **the
+    # anchor is not what refuses it, the closed spelling is.**
+    #
+    # WHY PEOPLE ONLY, WHEN THREE MORE ROWS SIT ONE ALTERNATION AWAY. 16 of
+    # the blocker's 20 reads are the people vertical; S2b would serve 19. S1
+    # is taken because this is the precedent-setting admission on the
+    # platform's densest third-party surface, because it introduces no new
+    # shape to review -- `(\?[^#]*)?$` is what `/jobs/search/` and
+    # `/notifications/` already carry -- and because widening has a named
+    # route: the ruling's own reopening clause treats "the narrow pattern is
+    # too narrow to serve the rows" as a REQUEST TO WIDEN that gets its own
+    # blast radius. Groups and events should take that route rather than ride
+    # in on this one.
+    #
+    # IT NAMES NOBODY. Every segment is a literal. The query is admitted as a
+    # shape and never read by this server: the tool that consumes this address
+    # sends no query at all, and the shaper drops any query before it reads a
+    # segment and reports only that one was PRESENT.
+    #
+    # THE ROLLBACK IS THIS LINE. `tests/test_search_admission_blast_radius.py`
+    # pins both directions and its `MUST_STAY_REFUSED` set -- which includes
+    # every sibling vertical -- must stay green with this entry present.
+    re.compile(r"^https://www\.linkedin\.com/search/results/people/?(\?[^#]*)?$"),
 )
 
 #: Substrings that must never appear in a navigation target, checked before

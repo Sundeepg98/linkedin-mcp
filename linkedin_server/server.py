@@ -1,4 +1,4 @@
-"""The tool surface: forty-six tools, twelve of which write to LinkedIn.
+"""The tool surface: forty-seven tools, twelve of which write to LinkedIn.
 
 THIS PARAGRAPH HAS NOW BEEN WRONG FIVE TIMES, in both directions, and the
 count is the part that keeps rotting. Until 2026-08-23 it read *"There is no
@@ -142,9 +142,9 @@ assigned to anybody -- it waits for whoever next runs the suite, and in the
 meantime the pin goes on asserting the old number with full confidence.
 
 THE NUMBERS ABOVE ARE DERIVED NOW, and that is a statement about a test rather
-than about an intention. Forty-six is ``len(await mcp.list_tools())``,
+than about an intention. Forty-seven is ``len(await mcp.list_tools())``,
 pinned in ``test_server_surface.py`` by
-``test_the_surface_is_exactly_the_fortysix_tools``; the split is pinned by
+``test_the_surface_is_exactly_the_fortyseven_tools``; the split is pinned by
 ``tests/test_prose_that_makes_a_claim.py::test_the_server_docstring_numbers_are_derived``,
 which reads THESE WORDS and fails if any of the three disagrees with the
 registry.
@@ -157,9 +157,21 @@ POINTER to it was dangling, so a reader who followed it found nothing and
 would reasonably conclude these numbers are unchecked. A citation is a claim
 like any other.
 The surface splits three ways and the split is the part a reader actually
-needs: THIRTY-FOUR read, TWELVE write, and ZERO are write-shaped,
-registered, gated and unable to act. Thirty-four plus twelve plus zero is
-forty-six.
+needs: THIRTY-FIVE read, TWELVE write, and ZERO are write-shaped,
+registered, gated and unable to act. Thirty-five plus twelve plus zero is
+forty-seven.
+
+THE FORTY-SEVENTH IS ONE READ, 2026-09-20, AND IT IS THE FIRST TOOL HERE ON A
+SURFACE WHOSE EVERY ROW IS A THIRD PARTY. ``linkedin_people_search_shape``
+opens the people search and reports COUNTS -- how many result links of each
+closed kind, which of fourteen known filters the page offers, and how many of
+those filters take a PERSON as their value. No name, slug, headline or member
+id can leave it; the matching happens inside the page and only integers come
+back. It takes NO PARAMETERS, because a search query is where a name is typed.
+Its address was refused by the boundary until this commit and was admitted
+only together with the shaper in front of it -- condition 1 of the ruling at
+``09f9961`` section 6, which says admitting it without one would VIOLATE that
+ruling rather than partially satisfy it.
 
 THE THIRTEENTH IS ONE READ, 2026-09-20, AND IT IS THE FIRST TOOL HERE THAT
 OPENS NO PAGE AT ALL. ``linkedin_page_plugin_snippet`` builds one string
@@ -343,6 +355,7 @@ from linkedin_server import (
     page_plugin,
     preflight,
     premium,
+    search_results,
     shape,
     writes,
 )
@@ -2379,6 +2392,108 @@ async def linkedin_notify_cost_precondition() -> dict[str, Any]:
                 "pages_loaded": 1,
                 "notifications_page_opened": False,
                 **verdict,
+            }
+    except Exception as exc:
+        return _error(exc)
+
+
+@mcp.tool()
+async def linkedin_people_search_shape() -> dict[str, Any]:
+    """What your people search OFFERS. Counts and filter names, never a person.
+
+    **THIS IS THE FIRST TOOL ON A THIRD-PARTY-DENSE SURFACE**, and every
+    decision in it is shaped by that. A people-search page's entire payload is
+    other people -- ranked, named and addressed by slug. So this tool reports
+    the page's SHAPE and nothing about anybody on it.
+
+    WHAT COMES BACK
+        ``results.by_kind``     how many links of each closed route kind the
+                                page draws. ``person_result`` is a COUNT of
+                                rows; no row is described, named or addressed.
+        ``filters.by_term``     which of fourteen known filters the page
+                                offers, matched INSIDE the page against a
+                                vocabulary shipped in, so no label crosses.
+        ``filters.by_value_class``
+                                what KIND of value each offered filter takes,
+                                decided in Python from the term's index.
+                                ``person_valued`` is the count of filters
+                                whose value would BE a person -- the page
+                                offers a way to search by one, and this server
+                                cannot learn or report which.
+        ``denominators``        what was seen but not classified, so "no
+                                filters" is distinguishable from "the selector
+                                changed".
+
+    **IT TAKES NO PARAMETERS, AND THAT IS THE PRIVACY DESIGN.** A keyword is
+    where a name is typed. This tool opens one literal address,
+    ``search_results.PEOPLE_SEARCH_URL``, with no query at all -- so no needle
+    can be handed to it, by a caller or by a mistake.
+
+    NOTHING IS FIRED FROM THIS SURFACE. Condition 5 of the admitting ruling,
+    and it is structural here: this coroutine reaches ``read_results`` and
+    ``read_filters``, both of which only evaluate a classifier, and neither
+    takes a confirm token. It presses nothing, connects to nobody, sends
+    nothing, and follows no row's control.
+
+    **WHAT IT DOES NOT CLAIM, and the payload says so too rather than leaving
+    it to this docstring.**
+
+    * **Not that it has seen a live people-search page.** No capture of this
+      surface exists in this repository and this tool has never been run
+      against one -- a browser slot was not available to the wave that landed
+      it. Its classifier is proven on fixtures and under V8; its FIT to
+      LinkedIn's real dialect is unmeasured. ``denominators`` is how a caller
+      sees that for themselves: a page that drew controls none of which
+      matched reports a large ``unmatched_controls``, which is a changed
+      selector and not an empty page.
+    * **Not that the address serves a populated page when opened with no
+      query.** Unmeasured, for the same reason.
+    * **Not that it saw every result.** Search pages lazy-load and re-rank, so
+      a count is a reading with a timestamp.
+    """
+    try:
+        async with BROWSER.session() as page:
+            landed = await BROWSER.goto(page, search_results.PEOPLE_SEARCH_URL)
+            assert_not_authwall(landed, surface="people-search")
+            results = await search_results.read_results(page)
+            filters = await search_results.read_filters(page)
+            return {
+                "ok": True,
+                # NOT "redirected": the landed url is compared to the one
+                # asked for and the ANSWER is a boolean. The landed url
+                # itself is not published -- it is a value the browser chose,
+                # and on this surface it can carry a query.
+                "landed_where_it_was_sent": (
+                    landed.rstrip("/")
+                    == search_results.PEOPLE_SEARCH_URL.rstrip("/")
+                ),
+                "pages_loaded": 1,
+                "results": search_results.tally(
+                    results["counts"],
+                    queries_present=results["queries_present"],
+                ),
+                "filters": search_results.tally_filters(filters["counts"]),
+                "denominators": {
+                    "anchors_seen": results["anchors_seen"],
+                    "controls_seen": filters["controls_seen"],
+                    "unmatched_controls": filters["unmatched_controls"],
+                    "empty_labels": filters["empty_labels"],
+                    "entity_segments_numeric": results["numeric_entity"],
+                    "entity_segments_non_numeric": results["non_numeric_entity"],
+                    # A NONZERO HERE IS A FINDING, not a shape: the page
+                    # answered a count slot with something that was not a
+                    # number, and on this surface that is a label.
+                    "values_refused": (
+                        results["values_refused"] + filters["values_refused"]
+                    ),
+                },
+                "not_claimed": [
+                    "that this classifier has ever met a live search page; "
+                    "no capture of this surface exists and its fit to "
+                    "LinkedIn's rendered dialect is unmeasured",
+                    "that the address serves a populated page with no query",
+                    "that every result was seen; search pages lazy-load",
+                ],
             }
     except Exception as exc:
         return _error(exc)

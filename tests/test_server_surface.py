@@ -212,6 +212,22 @@ EXPECTED_TOOLS = {
     # nothing a caller passes can reach the output except the ten
     # ASCII digits.
     "linkedin_page_plugin_snippet",
+    # THE FORTY-SEVENTH, 2026-09-20, a READ -- and the FIRST TOOL ON THIS
+    # SURFACE WHOSE EVERY ROW IS A THIRD PARTY. ``linkedin_people_search_shape``
+    # opens the people search and returns COUNTS: result links by closed kind,
+    # which of fourteen known filters the page offers, and how many of those
+    # take a PERSON as their value.
+    #
+    # IT WIDENS THE READ SIDE AND NOTHING ELSE, which on THIS surface is a
+    # claim that needs its evidence rather than a reassurance. No entry in
+    # readonly.SANCTIONED_MUTATIONS, no write verb in its name, no confirm
+    # token, and NO PARAMETERS AT ALL -- a search query is where a person's
+    # name is typed, so the tool cannot be handed one. It does open an address
+    # that was refused until this commit, and that admission is the narrowest
+    # spelling measured (people only, 5 newly admitted against a family
+    # wildcard's 18) and landed in the same commit as the shaper in front of
+    # it, which is condition 1 of the ruling at 09f9961 section 6.
+    "linkedin_people_search_shape",
     # THE FORTY-SECOND, 2026-09-05 evening, a READ.
     # ``linkedin_group_memberships`` wires ``groups_page.read_group_
     # memberships``, which wires ``groups.py`` -- a shaper that shipped
@@ -456,7 +472,7 @@ async def tools():
     return {t.name: t for t in await mcp.list_tools()}
 
 
-async def test_the_surface_is_exactly_the_fortysix_tools(tools):
+async def test_the_surface_is_exactly_the_fortyseven_tools(tools):
     """RENAMED THREE TIMES ON 2026-08-25, from ``..._seventeen_tools`` through
     ``..._eighteen_tools`` and ``..._nineteen_tools``, and the rename is the
     honest half of the edit rather than noise in a diff.
@@ -655,7 +671,13 @@ async def test_the_surface_is_exactly_the_fortysix_tools(tools):
     # out of date. A count belongs in the file that owns the claim.
     # FORTY-FIVE FROM 2026-09-20. The forty-fifth is
     # linkedin_page_plugin_snippet, a READ that opens no page.
-    assert len(tools) == 46
+    # FORTY-SEVEN FROM LATER ON 2026-09-20. The forty-seventh is
+    # linkedin_people_search_shape, a READ of the people-search page -- the
+    # first tool here on a surface whose every row is a THIRD PARTY. Its
+    # address was refused by the boundary until that commit and was admitted
+    # only together with the shaper in front of it, which is condition 1 of
+    # the ruling at 09f9961 section 6. This test's NAME moved with it.
+    assert len(tools) == 47
     # And the split is asserted, not just the total. A future tool arriving as
     # a write would otherwise only have to bump a number.
     #
@@ -779,7 +801,16 @@ async def test_the_surface_is_exactly_the_fortysix_tools(tools):
     # READ and the write side is BYTE-IDENTICAL across it. It reaches
     # no network at all, so it cannot widen what is READ either --
     # the only tool here of which that is true.
-    assert len(set(tools) - SANCTIONED_WRITE_TOOLS) == 34
+    # THIRTY-FIVE FROM LATER ON 2026-09-20: linkedin_people_search_shape is a
+    # READ and the write side is BYTE-IDENTICAL across it. **It is the first
+    # arrival in this paragraph that DOES widen what can be read**, because
+    # its address was refused by the boundary until that commit -- and that
+    # is recorded here rather than smoothed over, since every entry above it
+    # claims the opposite about itself. The widening is one closed path
+    # segment, measured at 5 newly admitted addresses against a family
+    # wildcard's 18, and it landed with the shaper that makes the page
+    # readable as counts instead of as people.
+    assert len(set(tools) - SANCTIONED_WRITE_TOOLS) == 35
 
 
 def test_the_read_that_was_nearly_named_a_write():

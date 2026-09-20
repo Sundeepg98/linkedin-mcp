@@ -110,6 +110,7 @@ PINNED_TOOL_SURFACE: dict[str, tuple[str, ...]] = {
     "linkedin_notify_cost_precondition": (),
     "linkedin_open_messaging": ("include_names", "message_filter"),
     "linkedin_page_plugin_snippet": ("page_id",),
+    "linkedin_people_search_shape": (),
     "linkedin_premium_job_collection": ("collection",),
     "linkedin_premium_status": (),
     "linkedin_profile_editor_fields": (),
@@ -183,7 +184,17 @@ PINNED_TOOL_SURFACE: dict[str, tuple[str, ...]] = {
 #: write grant, or a second consenting human -- measured against the
 #: shipped predicate rather than assumed; see
 #: `_audit/2026-09-20-admin-rights-ready.md`.
-PINNED_TOOL_COUNT = 46
+#:
+#: **RE-PINNED 2026-09-20 AT 47 TOOLS AND 64 PARAMETERS (UNCHANGED).**
+#: `linkedin_people_search_shape` ships, takes NO parameters -- confirmed
+#: against the live registry rather than assumed, which is why the
+#: parameter count does not move even though the tool count does. It is
+#: the S1 admission's other half: `readonly._ALLOWED_URL_PATTERNS` gained
+#: `/search/results/people/?` in the same commit, and the ruling in
+#: `_audit/2026-09-19-two-census-conventions-ruled.md` section 6 says
+#: admitting the address without this shaper does not partially satisfy
+#: that ruling, it violates it -- so the two pins move together.
+PINNED_TOOL_COUNT = 47
 PINNED_PARAMETER_COUNT = 64
 
 

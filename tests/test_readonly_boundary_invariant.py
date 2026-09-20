@@ -1273,7 +1273,15 @@ READONLY_AST_AT_LAST_REFREEZE = {
     # on a shared key, so for the allowlist it was a mirror wearing a
     # historical name. Removing the key loses no coverage, because the
     # assertion it made is the line directly below this comment.
-    "_ALLOWED_URL_PATTERNS": "286c233a7db458c7",
+    #
+    # 286c233a7db458c7 until 2026-09-20. GREW by ONE anchored entry --
+    # `/search/results/people/`, the S1 candidate, LANDING WITH ITS SHAPER
+    # and the new tool `linkedin_people_search_shape`. 41 -> 42 patterns;
+    # the forbidden-substring roster is untouched at 33. SEVEN of eight
+    # digests unchanged: the three denylists, both exemption tables,
+    # SANCTIONED_MUTATIONS and `<functions>` are byte-identical across the
+    # change -- only this one tuple entry moved.
+    "_ALLOWED_URL_PATTERNS": "1f9a6cef81e844af",
     "_FORBIDDEN_SUBSTRING_EXEMPTIONS": "43e2bf7f3db0dbed",
     "_FORBIDDEN_SUBSTRING_PATTERN_EXEMPTIONS": "419e64a3cd92ec7e",
     "_FORBIDDEN_URL_SUBSTRINGS": "b0291a66ec9bd51e",

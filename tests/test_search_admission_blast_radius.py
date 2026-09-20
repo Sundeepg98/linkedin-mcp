@@ -1,4 +1,14 @@
-"""THE BLAST RADIUS OF THE SEARCH ADMISSION, PINNED BEFORE THE PATTERN LANDS.
+"""THE BLAST RADIUS OF THE SEARCH ADMISSION, PINNED BEFORE THE PATTERN LANDED.
+
+**THE PATTERN LANDED 2026-09-20 AND THIS FILE WAS INVERTED, NOT DELETED**, per
+its own instruction below. What landed is the PEOPLE vertical only, with its
+shaper and its tool in the same commit. `MUST_STAY_REFUSED` was not touched and
+did not go red, which is the measurement that says the admission was narrow --
+its six sibling verticals are all still refused. `ADMISSION_TARGETS` split in
+two, because one of its two predicted addresses was bought and the other was
+not; see the comment on that tuple, which keeps the failed prediction visible
+rather than editing it down to the outcome.
+
 
 `SEARCH-RESULTS-SURFACE` is 20 still-GAP rows, every one a READ, with no
 admitted address. The lead ruled admission APPROVED IN PRINCIPLE (`09f9961`,
@@ -46,12 +56,30 @@ from linkedin_server import readonly  # noqa: E402
 
 BASE = "https://www.linkedin.com"
 
-#: What the ruling is FOR. Refused today; these are the only entries whose
-#: expected value changes when the admission lands WITH its shaper.
-ADMISSION_TARGETS = (
-    f"{BASE}/search/results/people/?keywords=x",
-    f"{BASE}/search/results/all/?keywords=x",
-)
+#: What the ruling is FOR. **INVERTED 2026-09-20 WHEN THE ADMISSION LANDED**,
+#: per this file's own instruction -- rewritten, not deleted, so the file keeps
+#: recording both halves of the transition.
+#:
+#: **AND THE TWO ENTRIES DID NOT MOVE TOGETHER, WHICH IS THE FINDING.** This
+#: tuple was written on 2026-09-19 as a two-address prediction of what the
+#: admission would buy. The admission that landed is the S1 candidate -- the
+#: PEOPLE vertical only -- so the first flipped and the second did not. The
+#: prediction is kept visible in the split rather than quietly edited down to
+#: whatever happened, because a guard rewritten to match the outcome records
+#: nothing.
+ADMITTED_BY_THE_LANDED_PATTERN = (f"{BASE}/search/results/people/?keywords=x",)
+
+#: **PREDICTED AS A TARGET ON 2026-09-19 AND NOT ADMITTED.** The blended `all`
+#: tab serves no row assigned to this blocker -- `N 161` and `M C70` are
+#: groups, `N 179` is events, `N 194` is content or the hashtag family, and
+#: none of them is `all`. It rides in on no candidate that was measured, so it
+#: stayed shut. It sits here rather than in `MUST_STAY_REFUSED` because that
+#: set is addresses the admission must NEVER reach, and this is one a later
+#: widening could legitimately ask for with its own blast radius.
+PREDICTED_BUT_NOT_ADMITTED = (f"{BASE}/search/results/all/?keywords=x",)
+
+#: Both halves, for the assertions that are about the prediction as a whole.
+ADMISSION_TARGETS = ADMITTED_BY_THE_LANDED_PATTERN + PREDICTED_BUT_NOT_ADMITTED
 
 #: THE DURABLE HALF. Every one of these must be refused before the admission
 #: AND after it. Condition 2 forbids a `/search/` family wildcard, and this is
@@ -106,24 +134,51 @@ def test_the_guard_can_fail_and_is_not_vacuous():
     assert readonly.is_read_url(f"{BASE}/in/me/") is True
 
 
-@pytest.mark.parametrize("url", ADMISSION_TARGETS)
-def test_the_targets_are_still_refused_today(url):
-    """THE REVERT PATH, condition 4, proven while it is still trivially true.
+@pytest.mark.parametrize("url", ADMITTED_BY_THE_LANDED_PATTERN)
+def test_the_target_the_pattern_bought_is_admitted(url):
+    """THE ASSERTION THAT FLIPPED, condition 4 discharged in the live direction.
 
-    This is the assertion that flips when the admission lands. It is pinned
-    NOW so the rollback is a known state rather than a reconstruction: revert
-    the pattern and this passes again.
+    It asserted refusal from 2026-09-19 until the admission landed on
+    2026-09-20, and was inverted in that same commit rather than deleted. The
+    rollback is therefore a KNOWN state and not a reconstruction: remove the
+    one pattern and this assertion returns to its original form.
+    """
+    assert readonly.is_read_url(url) is True
 
-    **WHEN THE ADMISSION LANDS WITH ITS SHAPER, THIS TEST IS REWRITTEN AND NOT
-    DELETED** -- inverted to assert the targets ARE admitted, so the file
-    keeps recording both halves of the transition.
+
+@pytest.mark.parametrize("url", PREDICTED_BUT_NOT_ADMITTED)
+def test_the_target_that_was_predicted_and_not_bought_is_still_refused(url):
+    """A PREDICTION THAT DID NOT COME TRUE, kept as an assertion.
+
+    This address was named a target the day before the admission and the
+    admission did not buy it. Asserting its refusal is worth more than
+    deleting the line: it is now a live guard that the narrow pattern did not
+    quietly grow into the blended tab.
     """
     assert readonly.is_read_url(url) is False
 
 
-def test_no_search_results_address_is_admitted_yet():
-    """The state this whole wave starts from, recorded as a measurement."""
-    every = list(ADMISSION_TARGETS) + [
-        MUST_STAY_REFUSED[k] for k in MUST_STAY_REFUSED if k.startswith("search-")
-    ]
-    assert not [u for u in every if readonly.is_read_url(u)]
+def test_exactly_one_search_vertical_is_admitted_and_it_is_people():
+    """THE SIZE OF THE ADMISSION, as a measurement rather than a claim.
+
+    The state this wave started from was "no search-results address is
+    admitted". That sentence is now false, and replacing it with silence would
+    lose the only number that says how far the boundary moved. So it is
+    replaced with the COUNT, which goes red in both directions -- if a
+    vertical is added without a ruling, and if the people vertical is lost.
+    """
+    verticals = {
+        name: url for name, url in MUST_STAY_REFUSED.items()
+        if name.startswith("search-")
+    }
+    admitted = sorted(n for n, u in verticals.items() if readonly.is_read_url(u))
+    assert admitted == [], (
+        f"a sibling search vertical is readable: {admitted}. The 2026-09-20 "
+        "admission was people-only."
+    )
+    people = [u for u in ADMITTED_BY_THE_LANDED_PATTERN if readonly.is_read_url(u)]
+    assert len(people) == len(ADMITTED_BY_THE_LANDED_PATTERN), (
+        "the people vertical is no longer admitted, so the admission was "
+        "reverted -- in which case the shaper's tool goes with it, because "
+        "condition 1 binds them together in both directions."
+    )
