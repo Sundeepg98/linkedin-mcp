@@ -183,6 +183,30 @@ CORRECTION_VOCABULARY = (
 #: outcome this file exists to require and so cannot also be a violation of it.
 NOT_A_CORRECTION: dict[tuple[str, str], str] = {
 
+    # TWO FROM THE REGISTER, 2026-09-20, surfaced only after a merge put section
+    # 31 and its cited documents in one tree. Both are the register citing a
+    # document as its SOURCE while correction vocabulary in the same sentence
+    # describes something else entirely -- which is the scan working: the words
+    # are there, and the relation is not.
+    ("INSTRUMENTS.md", "2026-09-20-the-contingent-writeoffs.md"): (
+        "IT CITES THE DOCUMENT AS THE MEASUREMENT BEHIND A DESIGN RULE. The "
+        "passage argues that register keys must be ROW IDS and never line "
+        "numbers, and cites that document's s4.1 as the evidence: all six of "
+        "the census's line-number locators measured DRIFTING 48 to 51 lines, "
+        "one landing on a different row that read COVERED-PROVEN. The drift is "
+        "what the cited document FOUND, not an error in it. A rule citing the "
+        "measurement that justifies it is an attribution. "
+    ),
+    ("INSTRUMENTS.md", "2026-09-20-the-reason-kinds.md"): (
+        "IT POINTS AT WHERE THE NUMBERS LIVE. The sentence reads 'Their "
+        "numbers are the tables in <that document>'. The word SUPERSEDED in "
+        "the lines above it governs four scratch mutation drivers -- three "
+        "superseded by the committed classifier's own reporting, the fourth by "
+        "the pytest guard that runs the same mutations with postcondition "
+        "assertions. Nothing in the passage supersedes the cited document; it "
+        "is named as the place the surviving numbers were published. "
+    ),
+
     # SURFACED BY A MERGE, not by either wave alone. The register entry and the
     # document it cites arrived on two different branches; neither tree held
     # both, so neither wave's green run could see this pair. It was triaged once
