@@ -48,6 +48,47 @@ WITHOUT its self-check. I re-ran the four census slices against the row ids by
 hand and by grep against the census markdown and got the same 23; that is a
 second reading, not the shipped control.
 
+### 0b. THE THREE RETIRED BLOCKERS WERE RE-READ INDEPENDENTLY, ROW BY ROW, AGAINST THE PRIMARY SOURCE
+
+A verification slice walked all 24 rows of `MESSAGING-SETTINGS`, `CONTACT-IMPORT`
+and `AI-INTERVIEW-PRODUCT` in the census markdown itself -- not in the derived
+map -- and carries per-row `file:line` locators. Findings, which I spot-checked
+on two rows before accepting them (`jobs.md:375` = `136 ... GAP`,
+`network.md:378` = `109 ... EXCLUDED-RULED`, both exact):
+
+* **All 24 rows found. Zero disagreements** between the census file and
+  `blocker-map.tsv` column 7. 21 `EXCLUDED-RULED` + 3 `GAP`, on both sides, row
+  for row. So the derived map is not drifting from the source here, and none of
+  the counts in section 0 rests on the map.
+* **`990bbd3`'s central claim is MEASURED, not taken on its word.** Its message
+  asserts "+37 / -37 across four files, and all 37 changed lines carry
+  EXCLUDED-RULED". Counted off the diff body: 15 + 10 + 7 + 5 = 37 changed lines
+  (`jobs.md` / `messaging-and-content.md` / `network.md` / `profile.md`), and
+  **37 of 37 `+` lines contain the literal `EXCLUDED-RULED`, 0 of 37 do not.**
+  That matters because every retirement in sections 2-4 rests on that commit
+  having done what it said.
+* **A correction to my brief's framing, and it is worth carrying.** `990bbd3`
+  says "two new blockers were opened for them", and "them" is the FIVE
+  handed-back rows across two files -- `J 136 137 138` plus `N 76` and `M C72`.
+  **Exactly ONE of those two reaches `J 136 137 138`:**
+  `AI-INTERVIEW-RESULTS-NO-ADDRESS`. The second,
+  `LINK-FOR-OFF-PLATFORM-USE` (2 rows, 2R, BUILD, cost 2), covers `N 76` and
+  `M C72` and is outside this wave's scope entirely.
+* **`J 136 137 138` name their successor NOWHERE in the census.** The row text
+  mentions `AI-INTERVIEW-PRODUCT` only to say what happened to the other eleven;
+  `AI-INTERVIEW-RESULTS-NO-ADDRESS` exists only in
+  `_audit/2026-09-05-decide-retire-rulings.md` lines 300-303. **A reader who
+  opens the census to check one of those three rows cannot learn which blocker
+  holds it** -- which is the precise failure `990bbd3` set out to fix for the 37
+  it did edit ("EACH ROW CARRIES ITS OWN REASON, NOT A POINTER"), left standing
+  on the three it deliberately did not touch. Section 6E.
+
+**A third, independent reading agrees on the top row.** A sibling wave yesterday
+published `FILE-UPLOAD-UNSANCTIONED` at **15** GAP
+(`_audit/2026-09-19-what-a-reader-could-actually-close.md:28`), reached by a
+different question ("what could a reader close?"), and concluded its 15 rows
+"contain no reader work at all". Three instruments, three days, same number.
+
 ---
 
 ## 1. `FILE-UPLOAD-UNSANCTIONED` -- **DECIDED, 2026-09-04, BY THE OPERATOR. THE BLOCKER RETIRES; THE 15 ROWS DO NOT.**
@@ -508,6 +549,15 @@ rows:** `MESSAGING-SETTINGS` (0), `CONTACT-IMPORT` (0), and
 unreachable for a reason that is nothing to do with this server. Yes -> they are
 the cheapest read on this page and `AI-INTERVIEW-RESULTS-NO-ADDRESS` becomes a
 real MEASURE item.
+
+**E. Three rows do not name the blocker that holds them.** `J 136 137 138` in
+`_audit/_census/jobs.md:375-377` carry no successor name; it lives only in
+`_audit/2026-09-05-decide-retire-rulings.md:300-303`. `990bbd3` wrote the rule
+this breaks -- *"EACH ROW CARRIES ITS OWN REASON, NOT A POINTER [...] A reader
+who opens the census to check one capability must not have to open a 1563-line
+ruling document"* -- and applied it to the 37 rows it edited, correctly not
+touching these three. The gap is real and it is a one-cell edit per row, for
+whoever owns the map.
 
 ---
 
