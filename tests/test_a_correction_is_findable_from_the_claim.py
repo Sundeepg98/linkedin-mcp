@@ -183,6 +183,23 @@ CORRECTION_VOCABULARY = (
 #: outcome this file exists to require and so cannot also be a violation of it.
 NOT_A_CORRECTION: dict[tuple[str, str], str] = {
 
+    # 2026-09-20, premium-four wave. A DOCUMENT POINTING AT THE REGISTER ENTRY
+    # THAT HOLDS ITS OWN FINDING.
+    ("2026-09-20-the-premium-four.md", "INSTRUMENTS.md"): (
+        "THE LINE IS A FILING POINTER, NOT A VERDICT ON THE REGISTER. It reads "
+        "'The defect is against the SCRIPT and is filed at INSTRUMENTS.md "
+        "29.2', and 29.2 is a section THIS SAME WAVE wrote in the same commit "
+        "series. A wave citing the register entry that carries its own finding "
+        "is an attribution -- the direction a reader needs in order to find the "
+        "detail -- and a CORRECTED BY marker would assert that INSTRUMENTS.md "
+        "had said something wrong, which nothing here claims. The correction "
+        "vocabulary the scan matched ('defect') belongs to the SUBJECT of the "
+        "sentence, a probe script in another wave's file, not to its object. "
+        "THIS PAIR WAS CAUGHT AFTER THE GATE HAD ALREADY READ THE INDEX and "
+        "therefore after the commit that introduced it, which is its own "
+        "lesson: an amendment made after staging is an unchecked change."
+    ),
+
     # 2026-09-20, premium-four wave. Triaged by READING THE LINE, which is what
     # this table asks for -- and the line is a DISCLAIMER of the very thing the
     # scan suspects.

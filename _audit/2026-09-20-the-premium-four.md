@@ -592,6 +592,62 @@ costs one line and disturbs no argument but its own.
 
 ---
 
+## 7d. THE PATTERN I SHIPPED REFUSES THE EXACT URL LINKEDIN DRAWS
+
+Found by the anchors slice AFTER the boundary had already frozen, which is
+why it is a section of its own rather than a line in 7a.
+
+Both `/analytics/recruiter-views` anchors on `cap-profile-views.html` carry a
+query parameter -- **named `timeRange`; the VALUE was never read.** The shipped
+pattern is anchored with no query allowance. Put to the live predicate:
+
+    .../recruiter-views                      True
+    .../recruiter-views/                     True
+    .../recruiter-views?timeRange=<value>    FALSE
+    .../recruiter-views/?timeRange=<value>   FALSE
+
+**SO A CALLER THAT COPIED THE HREF OFF THE PAGE WOULD BE REFUSED BY OUR OWN
+READ GATE.** The other three admitted addresses draw no query at all, and
+`/premium/profile-key-skills` is drawn with no trailing slash -- both spellings
+of all four are asserted in the boundary test.
+
+**THE PATTERN IS KEPT AS IT IS, AND THE FINDING IS WRITTEN INTO THE ENTRY.**
+The reasons, in order:
+
+1. Nothing in this package builds that url yet, so there is no query to strip
+   and no caller to break today.
+2. A `(\?[^#]*)?` group is what the search-appearances entry exists to refuse:
+   *"a pattern that accepts a query accepts whatever a caller appends."*
+3. The legal values of `timeRange` are unknown, because reading the value was
+   correctly out of scope for the measurement that found the parameter. An
+   enumeration written from a guess would be the same error one layer down.
+
+**IF THE BARE ADDRESS DOES NOT SERVE, THE REPAIR IS A DELIBERATE EDIT THAT
+ENUMERATES THE PARAMETER** -- the `?stage=(saved|applied|draft)` shape the
+jobs-tracker entry already uses -- and one page load settles the values.
+
+This is the `/jobs/alerts/` discipline applied to a query instead of a path:
+*"the address is a hypothesis and this comment will not pretend otherwise...
+if the first load 404s, the correct response is to CHANGE THIS PATTERN."* The
+difference is that here the mismatch is MEASURED IN ADVANCE rather than waiting
+to be met as a puzzling refusal.
+
+### 7e. AND THE BARE-SUBSTRING COLUMN IS THE BEST CONFIRMATION OF THIS WAVE'S RULE
+
+From the same slice, and it needs no commentary:
+
+    route                              captures drawing an ANCHOR   bare substring
+    /jobs/collections/top-applicant              1                  8-10 on FOUR
+    /jobs/collections/top-choice                 1                  10 on FOUR
+
+`top-applicant` and `top-choice` occur eight to ten times as bare substrings on
+captures that draw **ZERO anchors** for either route. It is ordinary job-card
+badge text. **A RAW SUBSTRING CENSUS WOULD HAVE REPORTED BOTH ROUTES DRAWN ON
+FOUR SURFACES INSTEAD OF ONE**, and would have argued the allowlist entries on
+evidence that does not exist.
+
+---
+
 ## 8. WHAT I GOT WRONG, IN THIS WAVE, FOUND BY MY OWN INSTRUMENTS
 
 Four, and the first is the one that would have shipped.
@@ -745,6 +801,7 @@ apart, and it unblocks the recruiter-views reader as a side effect.
     tests added                                79    50 boundary + 29 reader
     standing guards that went RED on me         3    8bis -- all three right
     guard tables amended with a ruling          3    2 unwired, 1 triage
+    defects found AFTER the freeze              1    7d, kept and documented
     instruments shipped                         1    + 6 controls, all shown failing
     defects found in my own work                4    section 8
     of those, that would have shipped           1    the tier undercount
