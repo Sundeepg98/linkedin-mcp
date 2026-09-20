@@ -183,6 +183,51 @@ CORRECTION_VOCABULARY = (
 #: outcome this file exists to require and so cannot also be a violation of it.
 NOT_A_CORRECTION: dict[tuple[str, str], str] = {
 
+    # 2026-09-20, the premium-four INTEGRATION. Triaged by reading the line,
+    # which the integrator had written himself ninety seconds earlier.
+    ("2026-09-20-the-premium-integration.md", "2026-09-20-newsletter-built.md"): (
+        "THE CITED DOCUMENT IS THE VICTIM, NOT THE SUBJECT. The passage records "
+        "a defect in the INTEGRATION'S OWN WORK: it renamed "
+        "test_the_admitted_analytics_pages_are_exactly_three so the name would "
+        "match the number, and that rename would have rotted a citation -- "
+        "because 2026-09-20-newsletter-built.md quotes the function BY NAME at "
+        "line 493. The correction vocabulary ('wrong', 'broken') governs the "
+        "RENAME, which was reverted, and never the cited document, which is "
+        "correct and unchanged and is named only to say whose citation was at "
+        "risk. A CORRECTED BY marker would tell every future reader that the "
+        "newsletter audit had said something false, which nothing here claims. "
+        "THE GUARD FIRED ON THE INTEGRATOR AND IT WAS RIGHT TO: a document that "
+        "names another while discussing what was wrong is exactly the shape "
+        "this table exists to make somebody read."
+    ),
+
+    # 2026-09-20, premium-four wave. THE THIRD OF THREE PAIRS THIS ONE WAVE
+    # TRIPPED, AND THE PATTERN IN THEM IS WORTH MORE THAN ANY OF THEM.
+    #
+    # All three are prose that DISCUSSES correction -- a disclaimer, a filing
+    # pointer, and this one, a note about deliberately NOT renaming something
+    # so a citation cannot rot. A scanner that keys on correction vocabulary
+    # near a citation cannot tell writing ABOUT corrections from writing THAT
+    # corrects, and a wave whose audit reasons carefully about what it is and
+    # is not correcting will trip it repeatedly. That is the scan being
+    # sensitive in the right direction: each one took a minute to read and
+    # dismiss, and the failure it prevents -- a false CORRECTED BY marker on
+    # somebody else's correct work -- is not cheap to undo.
+    ("2026-09-20-the-premium-four.md", "2026-09-20-newsletter-built.md"): (
+        "THE LINE EXPLAINS WHY A TEST FUNCTION'S NAME WAS *NOT* CHANGED. It "
+        "reads: 'Its NAME still says \"three\" and is KEPT: "
+        "_audit/2026-09-20-newsletter-built.md cites this function by name, "
+        "and this repository's own finding is that a citation rots into a "
+        "PLAUSIBLE WRONG ANSWER rather than a dangling one.' The cited "
+        "document is named as a CONSUMER of that name -- the reason to leave "
+        "it alone -- not as a document saying anything wrong. Nothing in "
+        "newsletter-built.md is being corrected; its own sentence about that "
+        "test ('unmoved at 4 patterns') describes the tree as it stood when "
+        "it was written and was true then. The count moved later, by this "
+        "wave's own admission, which is a fact about the boundary and not an "
+        "error in that audit."
+    ),
+
     # 2026-09-20, premium-four wave. A DOCUMENT POINTING AT THE REGISTER ENTRY
     # THAT HOLDS ITS OWN FINDING.
     ("2026-09-20-the-premium-four.md", "INSTRUMENTS.md"): (

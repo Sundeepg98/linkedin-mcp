@@ -746,6 +746,96 @@ retraction of somebody else's correct work.
 
 ---
 
+## 8ter. CI WENT RED, TWICE, AND THE ROOT CAUSE IS THAT I NEVER GATED THE FILE THAT MATTERED
+
+The wave froze green locally and went red in CI on all three platform cells.
+Both reds are mine. The second one has a root cause worth more than the fix.
+
+### 8ter-a. THE FILE CARRYING THE BOUNDARY CHANGE WAS NEVER PUT THROUGH THE IMPACT GATE
+
+`scripts/impact_gate.py` reads the INDEX and selects tests by what the staged
+diff can reach. The order I worked in:
+
+    1. edited linkedin_server/readonly.py  (the four new patterns)
+    2. ran FOUR HAND-PICKED test files, all green
+    3. committed fce0843
+    4. THEN staged the audit + instruments and ran the impact gate
+    5. the gate analysed the AUDIT FILES, because readonly.py was already
+       committed and no longer in the staged set
+
+**SO THE ONE FILE IN THIS WAVE WITH A BLAST RADIUS NEVER REACHED THE
+INSTRUMENT BUILT TO MEASURE BLAST RADIUS.** The gate was green twice and both
+greens were about different bytes.
+
+Step 2 is where the damage was done: I substituted my own guess for the
+impact analysis, picked the four files whose names I associated with "the
+boundary", and missed `tests/test_analytics_creator_boundary.py` -- which
+has both *analytics* and *boundary* in its name and pins the analytics family
+by COUNT. It failed three ways:
+
+    a parametrized neighbour case asserting recruiter-views is REFUSED
+    test_the_refusals_are_not_carried_by_this_pattern
+    test_the_admitted_analytics_pages_are_exactly_three   (4 -> 5 patterns)
+
+**THAT LAST ONE IS A TRIPWIRE THAT DID EXACTLY WHAT ITS DOCSTRING PROMISED**
+-- *"A COUNT, so a fourth analytics page cannot arrive unnoticed"* -- and the
+fourth analytics page was mine. It is updated deliberately, with the reason
+and with the pages named individually so the count cannot be satisfied by a
+duplicate. Its NAME still says "three" and is KEPT: `_audit/2026-09-20-newsletter-built.md`
+cites this function by name, and this repository's own finding is that a
+citation rots into a PLAUSIBLE WRONG ANSWER rather than a dangling one.
+
+### 8ter-b. THE SAME ROOT SHAPE, TWICE, AND I DOCUMENTED THE FIRST BEFORE COMMITTING THE SECOND
+
+Section 8bis was written about amending a document AFTER the gate had read
+the index. This is the same defect one level up: gating a set that is not the
+set being committed. **I wrote the first one down and then did it again in
+the next commit**, which is the honest measure of how much a written lesson is
+worth without a mechanism.
+
+    THE RULE THAT WOULD HAVE CAUGHT BOTH: the gate must run on the EXACT
+    staged set that becomes the commit, and any edit after it runs voids it.
+    "The gate passed" is a claim with a timestamp and a byte range.
+
+### 8ter-c. THE SECOND RED: A BASELINE RATCHET, AND WHAT IT ASKS FOR
+
+`tests/test_probe_controls_are_never_decorative.py` gained four findings, all
+in the analytics slice's probe. Its message forbids the lazy repair by name:
+*"do NOT add it here to clear the red; branch on its result, or if it is a
+genuinely decorative reading that was reviewed and accepted, add it to the
+baseline with a one-line reason."*
+
+Reviewed, one at a time:
+
+* `part4() -> digit_controls` is a COUNT of digit-bearing control texts that
+  the report PRINTS. It is a measured datum about the page, not a control over
+  the instrument; the detector matched the substring `control` in its NAME.
+  Branching on it would mean asserting a page's content, which is the opposite
+  of this probe's job. Its correctness is checked by the cross-instrument
+  agreement printed beside it -- premium-hub reproduces a prior wave's live
+  7 and 13 exactly.
+* `control() -> expected`, `break_demo() -> expected`, `break_demo() -> html`
+  are INPUTS to a check whose result IS branched on. `_run_control_pass`
+  returns `ok`; `control()` does `if not ok: return 1` and `break_demo()` does
+  `overall_ok = overall_ok and not ok` then `if overall_ok: return 1`. The
+  detector flags the binding because the name is never itself a condition,
+  while the value it carries decides the exit code. **Verified by running both
+  modes rather than by reading: `--control` exits 0, `--break-demo` exits 1.**
+
+Baselined with that reasoning in the file's own `_comment`, because
+`test_baseline_file_is_well_formed` pins the entry schema to exactly four
+keys -- so the reason goes where the file already keeps prose rather than
+widening a schema a guard holds.
+
+### 8ter-d. WHAT CI IS FOR, DEMONSTRATED
+
+Three platform cells, one shard, the same three failures on each. A local gate
+that read the wrong bytes said PASS twice. **CI is the certifier and a green
+local gate is not a reason to trust it.** The workflow's own header says so;
+this wave is the case.
+
+---
+
 ## 9. THE EXACT CALL THAT WOULD BANK EACH ROW
 
 **NOTHING FIRES IN THIS WAVE.** Every row below stays GAP. Each line is the one
@@ -803,6 +893,8 @@ apart, and it unblocks the recruiter-views reader as a side effect.
     standing guards that went RED on me         3    8bis -- all three right
     guard tables amended with a ruling          3    2 unwired, 1 triage
     defects found AFTER the freeze              1    7d, kept and documented
+    CI reds caused by me                        2    8ter, both fixed
+    coupled tests my hand-picking missed        1    and its name said so
     instruments shipped                         1    + 6 controls, all shown failing
     defects found in my own work                4    section 8
     of those, that would have shipped           1    the tier undercount

@@ -192,10 +192,21 @@ But three things had to change, and none of them is a number bump:
 3. **The count tripwire was RAISED, and the raise is argued.**
    `test_the_admitted_analytics_pages_are_exactly_three` existed, in its own
    words, so that *"a fourth analytics page cannot arrive unnoticed."* A fourth
-   arrived. **It noticed.** It is now `..._exactly_four`, 4 pages / 5 patterns,
-   with an added assertion naming `recruiter-views` specifically so the number
-   cannot absorb the next arrival silently. A count like this is RAISED, never
-   loosened into a bound.
+   arrived. **It noticed.** Raised to 4 pages / 5 patterns, with each page now
+   asserted by name so the count cannot be satisfied by a duplicate. A count
+   like this is RAISED, never loosened into a bound.
+
+   **AND I GOT ITS NAME WRONG, WHICH THE WAVE CAUGHT AND I DID NOT.** I renamed
+   it `..._exactly_four` so the name would match the number.
+   `_audit/2026-09-20-newsletter-built.md:493` cites that function BY NAME, and
+   this repository's own standing finding is that a citation rots into a
+   PLAUSIBLE WRONG ANSWER rather than a dangling one -- so the rename traded a
+   correct name for a broken address. The wave reached the opposite conclusion
+   independently and kept the name with the off-by-one declared in the
+   docstring. **Its version is the one that ships**, and the rename is recorded
+   here rather than quietly dropped, because `tests/test_an_asserted_name_resolves.py`
+   went GREEN across my rename: it does not check audit-document citations of
+   test FUNCTION names, so nothing in the suite would have told me.
 
 ### 3.1 WHY NOBODY SAW IT: the scoped gate did not run the file
 
