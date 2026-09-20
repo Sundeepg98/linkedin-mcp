@@ -482,6 +482,8 @@ it.
 
 ---
 
+**CORRECTED BY:** `_audit/2026-09-20-the-evidence-that-resolves.md` -- section 6 above records the 22 as NOT REPAIRED and pinned at 26 (token, document) rows; all 22 are now repaired and `PINNED` is empty. That wave also measured what this one did not: every one of the 22 has an exact twin on `master` -- identical subject, identical author date, identical `git patch-id` -- so the branches never merged but the work was re-applied. The deferral reasoning here (nineteen documents, three waves live) was correct at the time; those waves have since merged.
+
 **CORRECTS:** `_audit/2026-09-20-the-six-unremapped.md` -- section 3 cited the eight-branch merge as `50e00eb7`, which names no object; the merge is `50e00eb0e064`, and the corrected form resolves only via `integrate-1821`. Repaired in place in that document, which now carries the note.
 
 **CORRECTS:** `_audit/2026-08-31-jobcore-paths.md` -- its "is the pinned commit `b2f5d16` on origin/master? NO -- unpushed" block, and the sentence that `git show b2f5d16:...` cannot resolve in a clone. Re-measured 2026-09-20 against a freshly fetched jobcore remote: `b2f5d16`, `6acc7e6` and `5480246` are all ancestors of `origin/master` there. That document now carries the dated note in place.

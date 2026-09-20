@@ -445,6 +445,113 @@ for mine. They need the `NEVER-LANDED` annotation, which
 
 ---
 
+## THE THIRD JOB: THE SWEEP'S VACUOUS PASS, AND A RULING I HAD TO MAKE AGAINST MYSELF
+
+`scripts/sweep_blobs_for_identity.py --help` took `--help` as a git range,
+swept 0 blobs and printed **"PASS: 0 hits across 0 blobs"**. Root cause: `_git`
+returned `out.stdout` and discarded `returncode` and `stderr`, so a failed
+`rev-list` produced an empty commit list and the tool fell into its `PASS:`
+branch. The module already had a "MUTE CHECK" for an empty NEEDLE set and none
+for an empty CORPUS; that asymmetry was the bug.
+
+**WHAT SHIPPED, STATED FIRST BECAUSE THE RULING WENT ROUND TWICE:**
+
+| case | exit | line |
+|---|---:|---|
+| range git cannot resolve | **2** | `REFUSING TO SWEEP:` naming the range and git's stderr |
+| range resolves, 0 commits | **2** | `REFUSING TO SWEEP:` saying the range RESOLVED and was empty |
+| commits > 0, 0 blobs after exemptions | **2** | same, naming the commit count |
+| commits > 0, blobs > 0 | 0 / 1 | unchanged |
+
+No refusal line begins with `PASS` or `FAIL`.
+
+**AND IT WENT ROUND TWICE BECAUSE I ACCEPTED A NORMATIVE CLAIM ON THE STRENGTH
+OF A MEASURED FACT ATTACHED TO IT.** The brief specified exit 2 for a resolvable
+but empty range. A lead note said the opposite -- a legitimately empty range
+must keep passing -- and offered `origin/master..HEAD`, which is
+`purge_denied_term.py`'s real invocation and really did resolve to 0 commits at
+that moment. **I checked the fact, found it true, and let it carry the claim.
+They are separable and I did not separate them.** I withdrew the clause and
+ruled exit 0; the slice built and tested it in full; the note was then corrected
+by its own author, and the slice paused a second time rather than guess.
+
+**THE ARGUMENT THAT SETTLES IT, and neither of us had it at the time:**
+
+> **AN EMPTY RESULT IS AMBIGUOUS BETWEEN "THERE IS GENUINELY NOTHING TO CHECK"
+> AND "I WAS POINTED AT THE WRONG HISTORY", AND THE TOOL CANNOT TELL THEM
+> APART.** A misconfigured upstream, a detached HEAD, a typo'd ref that happens
+> to resolve, a fresh clone with no `origin/master` -- each yields zero commits
+> while unpushed work exists outside the measured range. A safety tool may not
+> resolve that ambiguity in the reassuring direction.
+
+So the emptiness does not prove the repository is synced; it proves the RANGE is
+empty, and those are different claims. My "don't hard-fail the healthy case"
+was answered by the asymmetry: exit 2 on a genuinely synced repo costs one line
+the caller already explains, because it prints `commits in range: 0` beside the
+verdict. PASS on a wrongly-aimed range authorises a push on a check that
+inspected nothing -- the original `--help` bug with a different cause and the
+same lie.
+
+**THE INVARIANT:** *the verdict line may never imply a sweep that did not
+happen, and a denominator of zero must appear in the line that reports it.*
+
+**AND THE NON-`PASS`/`FAIL` PREFIX IS LOAD-BEARING TWICE OVER.**
+`purge_denied_term.py` renders a non-matching line as `(no verdict)`, which
+blocks the push under its own *"both sweeps must read PASS before pushing"*
+rule. It must NOT be spelled `FAIL`, because that script's closing line is
+*"If either FAILs, run: `git reset --hard <tag>`"* -- **FAIL there names a
+DESTRUCTIVE remedy.** A refusal meaning "I could not establish anything" may
+not be spelled as the word that tells an operator to hard-reset.
+
+### THE REJECTED THIRD OPTION, RECORDED WITH ITS ARGUMENT
+
+The intermediate build was not either of the two positions being argued. It
+exited 0 but emitted **tagged** verdicts -- `PASS (NOTHING IN RANGE)` and
+`PASS (NOTHING SWEPT)` -- and never the bare `PASS: 0 hits across 0 blobs`.
+That is a considered answer to the real problem and it is rejected on a fact
+rather than on preference. `purge_denied_term.py` selects the verdict with
+
+    l.startswith(("PASS", "FAIL"))
+
+**so `PASS (NOTHING IN RANGE)` starts with `PASS` and the tag is invisible to
+the machine that consumes it.** The script's own rule -- *"Both sweeps must
+read PASS before pushing"* -- is machine-shaped language a human applies by
+scanning for a word, and a tag that informs the reader while doing none of the
+check's work is this corpus's recurring defect wearing a helpful face. **It is
+the fifth appearance of that shape today and the first one I wrote myself**,
+after reading the selector line in the slice's own report.
+
+The asymmetry finishes it. Build 1 wrong costs a moment's confusion in a rare
+no-op, and the caller prints `commits in range: 0` beside the verdict so the
+reader sees why. Build 2 wrong authorises a push that puts a real person's
+identifier in a public repository -- which this project has already established
+is not undoable: a force-push leaves retained objects resolvable by SHA, and
+only delete-and-recreate removed them, at the cost of this account's PR history.
+**FAIL-CLOSED BEATS FAIL-INFORMATIVE WHEN THE MISS IS IRREVERSIBLE.**
+
+The tagged form is kept on the record because it IS the right treatment for a
+NON-empty sweep that wants to state what it covered. It is wrong only where a
+machine reads the first word.
+
+Two things from that slice survive both reversals and are worth keeping. Its
+static control for "no code path prints the bare sentence" first text-searched
+the whole file and hit the docstring's own explanation of the invariant, then
+searched past the docstring and hit two comments that also have to name the
+sentence to explain it -- **the same prose-about-a-mechanism shape, for the
+fifth time today.** It landed on walking the AST for string-literal CONSTANT
+nodes and excluding docstrings by node identity; comments are not AST nodes, so
+they fall out for free. **That is the only version of that check that does not
+convict its own explanation.** And its live-caller test reads
+`origin/master..HEAD`'s real state and asserts whichever branch that implies --
+which earned itself immediately, because the range went from 0 commits to 1
+while the ruling was being argued.
+
+**THE PROCESS NOTE, because it is the transferable part.** The slice was told
+one thing by its brief, the opposite by a note on disk, and then the opposite
+again. **It paused both times and built neither on its own judgement.** Had it
+silently picked either way, nobody would have found that the first note was
+wrong -- and it was the pause, not the code, that produced the argument above.
+
 ## HONEST LEDGER
 
 **WHAT I DID NOT SETTLE.**
@@ -472,6 +579,15 @@ for mine. They need the `NEVER-LANDED` annotation, which
    document's line citation still meets a bare `744a1f4` in a transcript. The
    mapping table covers it for the guard; it does not put the twin in front of
    that particular reader, and I chose the transcript's integrity over that.
+7. **Three reds arrived from a guard I had not run before committing.**
+   `test_a_correction_is_findable_from_the_claim.py` refused the full impact
+   gate on this document: one `CORRECTS:` marker whose reason ran onto the next
+   line and so read as absent, a missing `CORRECTED BY:` back-pointer in each
+   corrected document, and two untriaged candidate pairs. All four are fixed in
+   the follow-up commit. **The corrected documents now lead a reader here**,
+   which is the property that rule exists for: a corrector can name what it
+   corrects, and the corrected document cannot name its corrector unless
+   somebody writes it in.
 
 **WHAT CHANGED IN THE TREE.**
 
@@ -492,9 +608,9 @@ rows. All 22 are repaired as of this document and `PINNED` is now empty; the
 section's reasoning for deferring (nineteen documents, three waves live) was
 correct at the time and those waves have since merged.
 
-**CORRECTS:** `_audit/2026-09-20-the-five-under-banked.md` section 8 -- *"for
-rows 9, 11, 12, 13 and 14 the entire evidence chain ends outside the
-repository"*. Measured at artifact granularity those five rows each also cite
+**CORRECTS:** `_audit/2026-09-20-the-five-under-banked.md` section 8 -- its "the ENTIRE evidence chain ends outside the repository" is narrower than it reads.
+Its words are *"for rows 9, 11, 12, 13 and 14 the entire evidence chain ends
+outside the repository"*. Measured at artifact granularity those five rows each also cite
 four TRACKED artifacts, and the corpus-wide count of banked rows with NO
 reachable artifact is 0. The narrower claim -- that the chain behind the
 NUMBERS terminates in `_audit/_scratch/` -- is not contradicted and is not

@@ -183,6 +183,33 @@ CORRECTION_VOCABULARY = (
 #: outcome this file exists to require and so cannot also be a violation of it.
 NOT_A_CORRECTION: dict[tuple[str, str], str] = {
 
+    # 2026-09-20, the EVIDENCE-THAT-RESOLVES wave. Both triaged by reading the
+    # line that produced them.
+    ("2026-09-20-the-evidence-that-resolves.md",
+     "2026-09-20-the-chain-verification.md"): (
+        "THE CITATION IS AN ANALOGY, NOT A CORRECTION. The line reads *'it is "
+        "the same shape as the census at `_audit/2026-09-20-the-chain-"
+        "verification.md`: a correct measurement of the wrong population'* -- "
+        "the cited document is being AGREED WITH and used as the precedent for "
+        "why the citing wave checked a relayed claim instead of acting on it. "
+        "The correction vocabulary in the window belongs to what that document "
+        "ITSELF corrected, which it already declares with its own marker pair. "
+        "A CORRECTED BY marker here would tell every future reader that this "
+        "wave withdrew something in it, and nothing in it is withdrawn."
+    ),
+    ("2026-09-20-the-evidence-that-resolves.md", "network.md"): (
+        "THE CITATION IS A FALSE-POSITIVE REPORT ABOUT AN INSTRUMENT, NOT A "
+        "CLAIM ABOUT THE CENSUS. The line names `network.md` lines 171-172 to "
+        "record that the shipped `dialect_of` heuristic flags `ABSENT` there, "
+        "in a two-column table about page ADDRESSES where the word means the "
+        "page is not drawn. NO ROW OF THAT SLICE IS CONTRADICTED and no state "
+        "moves: the finding is about the scope of a matcher the citing wave "
+        "imported, and the repair was made in the importing file. The citing "
+        "wave DOES correct a census claim elsewhere and declares it with a "
+        "CORRECTS:/CORRECTED BY: pair, so its threshold for declaring one is "
+        "on the record and this pair sits below it deliberately."
+    ),
+
     # 2026-09-20, the FIRST FIRING wave. Triaged by reading the line, which is
     # a census row I had written myself minutes earlier.
     ("jobs.md", "2026-09-20-the-first-firing.md"): (
