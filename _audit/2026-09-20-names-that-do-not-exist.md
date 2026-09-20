@@ -626,6 +626,58 @@ real answer, and this wave hit exactly that while reading its own CI run
 (section 7.5). A text census is what is defensible without the API, and it is
 reported as a text census.
 
+### 6.6 A SHA kind IS gateable -- the design, measured, and handed over unbuilt
+
+The brief said to consider commit SHAs if the machinery reached them cheaply.
+It does, and this section is the answer with numbers rather than a shrug.
+
+**The question is not "does this hex string resolve".** That question was asked
+in 6.4 and it produced the wave's worst answer. The question is whether this
+corpus reserves a POSITION for a commit reference, so a token in it is known to
+be drawn from git before anything is resolved -- the same kind-before-resolution
+step the blocker slot performs.
+
+It does. Measured over backticked 7-8 character hex tokens at `8b58dcb`:
+
+| | occurrences |
+|---|---:|
+| backticked hex tokens | 1,010 |
+| **in a commit slot** (`at \`X\``, `commit \`X\``, `applied \`X\``, `` `X` landed ``, ...) | **166** |
+| of those, resolve as a commit | 149 |
+| of those, dangle | **17** |
+| of the 17, help-article-shaped (slot leak) | 2 |
+
+**Kind precision 164/166 = 98.8%**, and the two leaks are `a6862361` caught by
+the trailing-`adds` form -- "`a6862361` adds finding volunteer opportunities",
+an article, not a commit. A one-line pre-filter excluding `a` + digits takes it
+to 166/166.
+
+One phrase was measured and DROPPED, exactly as in section 2: a bare `in`
+selected 43 more occurrences and leaked five help ids, including
+*"found in `a1341821`, **an article** neither..."* -- the document naming the
+kind in the same clause.
+
+**The 15 genuine findings, all of one shape:** a wave stating which commit its
+measurements were taken at, where that commit no longer exists.
+
+| document | citations |
+|---|---|
+| `2026-08-24-perform-save-unsave.md` | `5a69147` x3, `3d55dd6` x3, `94600de`, `76c34dc` |
+| `2026-08-24-out-of-scope-wave.md` | `063c9b7`, `56e03b0`, `5bc0181` |
+| `2026-08-31-jobcore-paths.md` | `6acc7e6`, `fff1438`, `fe21292` |
+| `2026-08-31-linkedin-lift.md` | `6acc7e6` |
+
+*"All at `5a69147` unless stated."* -- and no clone can reach `5a69147`, so
+**no reader can check the measurement.** That is the asserted-but-absent class
+in its purest form: not a wrong number, an uncheckable one.
+
+**NOT SHIPPED, deliberately.** A sibling wave owns SHA-citation repair, and
+this wave's own rule is that the fixer should not be the detector -- nor should
+the detector plant a gate on live territory mid-flight. What is handed over is
+the slot, the two measured phrase decisions, the pre-filter, and the 15 sites.
+Adding the kind afterwards costs a red-proof and a re-pin, which is cheap; what
+was expensive was knowing which question to ask, and that is now done.
+
 ### 6.9 Things I could not separate, stated plainly
 
 1. **Occurrence-level recall on blockers is 0.50 on the one name where it can be
