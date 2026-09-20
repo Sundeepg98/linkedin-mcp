@@ -22,8 +22,8 @@ the detector.
 
 | artifact | what it is |
 |---|---|
-| `scripts/check_asserted_names_resolve.py` | the guard. 0.5s over the whole corpus |
-| `tests/test_an_asserted_name_resolves.py` | five controls and the pin, 7 tests |
+| `scripts/check_asserted_names_resolve.py` | the guard. 1.3s end to end over the whole corpus |
+| `tests/test_an_asserted_name_resolves.py` | seven controls and the pin, 8 tests |
 
 **Headline:** **4 asserted-and-absent citations, all in one document.** And one
 finding about the instrument itself that is worth more than the four: **the
@@ -98,7 +98,7 @@ to say the true thing plainly:
   reader the disclosure it demands of everyone else.**
 
 The guard is silent on this file now, and it is silent for the reason it is
-silent on the other 162 clean documents: **the marks were discharged.** No
+silent on the other 166 clean documents: **the marks were discharged.** No
 suppression was added, no path was excluded, and
 `scripts/check_asserted_names_resolve.py` contains no mention of this
 document's name. If a future edit removes those sentences, this file goes red
@@ -112,25 +112,39 @@ vocabularies**, and asking "does this token exist?" without first asking "which
 registry is it drawn from?" is what builds the guard nobody reads.
 
 Measured: **234 occurrences of a backticked UPPER-KEBAB token that is not one of
-the ledger's 97**, 78 distinct. Sorted by what they actually are:
+the ledger's 97**, 78 distinct. Partitioned by which vocabulary the token is
+actually drawn from -- and the parts sum, which is the only reason the table is
+worth reading:
 
-| vocabulary | occurrences | examples |
-|---|---:|---|
-| census state cells | 67 | `EXCLUDED-RULED` 24, `COVERED-CANNOT-DELIVER` 15, `COVERED-PROVEN` 7 |
-| evidence classes | 48 | `LEDGER-EXPLICIT` 11, `RECON-DOC` 15, `MEASURED-ABSENT` 7 |
-| refusal / probe returns | 25 | `REFUSED-BY-SUBSTRING` 7, `ALLOWLIST-SILENCE` 4, `AUTH-WALL` |
-| `INSTRUMENTS.md` entry names | 17 | `A-SKIP-IS-NOT-A-RED`, `GUARDS-ITS-OWN-COPY` |
-| section / block labels | 15 | `P-R` 12, `COMPANY-PAGE`, `PREMIUM-JOBS` |
-| map and close classes | 9 | `EMPTY-CERTAIN` 5, `DOUBLE-ASSIGNED`, `NOT-GAP-AT-FREEZE` |
-| build/verify states | 3 | `PROVEN-LIVE`, `TESTED-ONLY`, `KNOWN-BROKEN` |
-| queue verdicts | 3 | `DECIDE-RETIRE` 2, `RULING-FORK` |
-| **genuinely blocker-position** | **13** | the population this guard is about |
+| vocabulary | occurrences | the slot selects | examples |
+|---|---:|---:|---|
+| census state cells | 66 | 0 | `EXCLUDED-RULED` 24, `COVERED-CANNOT-DELIVER` 15 |
+| evidence classes | 48 | 0 | `LEDGER-EXPLICIT` 11, `RECON-DOC` 15, `MEASURED-ABSENT` 7 |
+| **blocker names** | **35** | **13** | the population this guard is about |
+| `INSTRUMENTS.md` entry names | 28 | 0 | `A-SKIP-IS-NOT-A-RED`, `GUARDS-ITS-OWN-COPY` |
+| refusal / probe returns | 25 | 0 | `REFUSED-BY-SUBSTRING` 7, `ALLOWLIST-SILENCE` 4 |
+| section / block labels | 15 | 0 | `P-R` 12, `COMPANY-PAGE`, `PREMIUM-JOBS` |
+| map and close classes | 9 | 0 | `EMPTY-CERTAIN` 5, `DOUBLE-ASSIGNED` |
+| queue verdicts | 3 | 0 | `DECIDE-RETIRE` 2, `RULING-FORK` |
+| build/verify states | 3 | 0 | `PROVEN-LIVE`, `TESTED-ONLY`, `KNOWN-BROKEN` |
+| other | 2 | 0 | `RE-FROZEN`, `FOLLOW-LISTS` |
+| **total** | **234** | **13** | |
 
-**A guard that fired on the shape would run at 13/234 = 5.6% precision.** It
-would be suppressed inside a day, and a suppressed guard certifies nothing.
+**A guard that fired on the shape alone would run at 35/234 = 15% precision, and
+at 3/234 = 1.3% against the defects.** It would be suppressed inside a day, and
+a suppressed guard certifies nothing.
 
 So a blocker candidate must sit in a **SLOT** -- a position this corpus's own
-grammar reserves for a blocker reference.
+grammar reserves for a blocker reference. The right-hand column is that
+argument as a measurement rather than a claim: **the slot takes 13 selections,
+all 13 from the blocker-name row, and none at all from the other 199
+occurrences.** It does not merely reduce the noise; it does not touch it.
+
+(The register's entry names are derived from `INSTRUMENTS.md`'s own
+`### N.N \`NAME\`` headings. A first attempt classified them by length, which
+put a 31-character blocker name in the register and three register entries
+among the blockers -- a reminder that guessing a vocabulary by shape is the
+error this whole section is about.)
 
 ---
 
@@ -251,9 +265,11 @@ pasting a traceback.
 
 ### 3.2 BLOCKER names -- complete population, n = 234 occurrences
 
-Every one of the 234 was hand-labelled from a full-context worksheet. 221 are
-some other vocabulary and are not in a blocker slot; 13 are blocker-position.
-Those 13, in full:
+Every one of the 234 was hand-labelled from a full-context worksheet. **199 are
+drawn from some other vocabulary entirely** -- state cells, evidence classes,
+refusal returns, register entries, section labels -- and none of them is in a
+blocker slot. Of the **35 that ARE blocker names**, 22 sit in ordinary prose
+and 13 sit in a slot. Those 13, in full:
 
 | site | name | hand label | guard verdict | agree |
 |---|---|---|---|:-:|
@@ -273,9 +289,10 @@ Those 13, in full:
 
 **precision 3/3 = 1.00. recall 3/3 = 1.00. false positives 0/231.**
 
-The 221 non-slot occurrences are silent because of the SLOT, and the 10 slotted
-ones are silent because of a MARK -- two independent mechanisms, and the second
-is only reachable because the first did its job.
+The 221 non-slot occurrences are silent because of the SLOT -- 199 of them from
+another vocabulary, 22 blocker names in prose -- and the 10 slotted ones are
+silent because of a MARK. Two independent mechanisms, and the second is only
+reachable because the first did its job.
 
 **RECALL AT THE OCCURRENCE LEVEL IS NOT 1.00 AND THE TABLE ABOVE WOULD HIDE
 THAT.** `PROXIMITY-NOT-PARSED` occurs four times in its document; the guard
@@ -601,7 +618,7 @@ reported as a text census.
    corpus writes blocker names in backticks with high consistency, but "high"
    is not "always" and I did not measure the exception rate, because doing so
    requires deciding which bare UPPER-KEBAB tokens are blocker references --
-   the 5.6%-precision problem the slot exists to avoid. This is an honest hole,
+   the 15%-precision problem the slot exists to avoid. This is an honest hole,
    not a covered case.
 
 3. **A test fixture and a shipped contract are not mechanically separable, and
