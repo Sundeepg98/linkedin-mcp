@@ -1671,6 +1671,66 @@ NOT_A_CORRECTION: dict[tuple[str, str], str] = {
         "named only as the place the resulting instruments went. A document "
         "saying where it filed its tools is an attribution. "
     ),
+
+    # 2026-09-20, the REOPENER-TRIGGERS wave. Four pairs, all triaged by
+    # reading the lines -- three are census rows this wave wrote, and the
+    # fourth is a neighbour caught by the +-2 window.
+    ("messaging-and-content.md", "2026-09-20-the-first-firing.md"): (
+        "THE CITED DOCUMENT ASKED FOR THIS EDIT AND IS NOT CORRECTED BY IT. "
+        "The line is row `M M4`, moved EXCLUDED-RULED -> MEASURED-ABSENT. It "
+        "quotes `the-first-firing.md` s4d, which NAMED the two-state-words "
+        "defect, declined to fix it because two rows had been committed four "
+        "hours earlier, and wrote *the owner of the state vocabulary can rule "
+        "it in one line*. Carrying out an act a document explicitly deferred "
+        "to somebody else is FULFILLING it, not contradicting it: nothing in "
+        "s4d is withdrawn, and its evidence -- three instruments looking, a "
+        "raw-versus-rendered sweep over 25 captures -- is relied on rather "
+        "than overturned. **THE ROW ITSELF IS CORRECTED, and that correction "
+        "IS declared**: this file carries a CORRECTED BY: marker naming "
+        "`2026-09-20-the-reopener-triggers.md`, which carries the matching "
+        "CORRECTS:. So the pair the scan offers here is the wrong pair -- the "
+        "corrector is this wave's document, not the one being quoted. "
+    ),
+    ("network.md", "2026-09-20-the-first-firing.md"): (
+        "THE TWIN OF THE PAIR ABOVE, and the same reading. The line is row "
+        "`N 157`, moved EXCLUDED-RULED -> MEASURED-ABSENT in the same pass "
+        "and for the same reason, quoting the same s4d sentence. `N 157`, "
+        "`M M4` and `J 127` assert one fact about one object -- the InMail "
+        "balance is not rendered -- and `J 127` already read MEASURED-ABSENT, "
+        "so this removes a three-way disagreement rather than creating one. "
+        "The real correction is declared by marker pair with "
+        "`2026-09-20-the-reopener-triggers.md`, as above. "
+    ),
+    ("network.md", "2026-09-20-the-reopener-triggers.md"): (
+        "THE CITATION POINTS AT WHERE A DEFECT IS DESCRIBED, AND THE ROW IS "
+        "AN INSTANCE OF IT RATHER THAN A CORRECTION OF IT. The line is row "
+        "`N 118`, whose STATE DID NOT MOVE -- it was MEASURED-ABSENT before "
+        "this wave and is MEASURED-ABSENT after. What was added is a REOPENER "
+        "clause naming a trigger that WAS ALREADY BUILT: "
+        "`dom.read_profile_detail_entries` has re-taken that reading on every "
+        "call since 2026-09-04. The row cites the wave document as the place "
+        "the class of defect is written up. Nothing about the cited document "
+        "is withdrawn -- it is the document that prompted the clause. "
+        "**A row naming the audit that added a sentence to it is an "
+        "attribution**, which is the same reading as the "
+        "sanitiser-scope/INSTRUMENTS pair above. "
+    ),
+    ("messaging-and-content.md", "2026-09-19-profile-modals-measured.md"): (
+        "COLLATERAL OF THE +-2 WINDOW, AND THE LINE IT FLAGS WAS NOT TOUCHED "
+        "BY ANY WAVE TODAY. The line is row `M M5`, which cites "
+        "`profile-modals-measured.md` amendment C as the place its R9/R4 "
+        "adjudication was made -- a provenance pointer, and the row has read "
+        "that way since 2026-09-19. What made it a candidate is the "
+        "NEIGHBOURING row: `M M4` sits one line above and now opens "
+        "**STATE CORRECTED**, so the vocabulary that trips the scan belongs "
+        "to a different row entirely. **THE WINDOW IS DOING EXACTLY WHAT ITS "
+        "OWN COMMENT SAYS IT WILL** -- reaching two lines and paying for the "
+        "reach in triage entries rather than in silence -- and in a MARKDOWN "
+        "TABLE every row is one line, so +-2 means the two adjacent "
+        "capabilities. That is a real cost of the heuristic on this corpus, "
+        "recorded here rather than argued away: it is the price of not "
+        "missing a correction, and it is cheap. "
+    ),
 }
 
 

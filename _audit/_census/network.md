@@ -33,6 +33,25 @@ the capability. **The row is retired, not deleted**, and its reading is quoted
 inside it: a deleted row is indistinguishable from a row nobody thought of, and
 this census has already sent a wave to build something that is not there.
 
+**CORRECTED BY:** `_audit/2026-09-20-the-reopener-triggers.md` -- row `N 157` moved EXCLUDED-RULED to MEASURED-ABSENT, because its cell reports a measurement and not a decision.
+
+**SECOND DELTA, 2026-09-20, and it is a VOCABULARY correction rather than a
+finding.** The two blocks above stay UNCHANGED. What moved:
+
+    EXCLUDED-RULED              92  ->   91    N 157 left it
+    MEASURED-ABSENT              2  ->    3    N 157 joined it
+
+**`N 157` was never a ruling.** Its cell reported that a page was read and a
+number was not on it, which is this section's own definition of
+MEASURED-ABSENT, and it was filed under `R9` -- a ruling about outreach
+AUTOMATION -- while being a READ. The twin rows `J 127` and `M M4` assert the
+identical fact about the identical object and `J 127` already reads
+MEASURED-ABSENT, so this removes a three-way disagreement inside the census
+rather than creating one. `_audit/2026-09-20-the-first-firing.md` s4d named the
+defect, recorded the evidence and deferred the state word to whoever owns the
+vocabulary; `_audit/2026-09-20-the-reopener-triggers.md` is that ruling.
+**GAP is untouched and no capability was added or removed.**
+
 Counted separately so neither inflates the member denominator:
 
     ADMIN-ONLY capabilities (Page admin, group owner/manager,
@@ -214,7 +233,7 @@ LinkedIn chose to suggest that day.
 | # | capability | R/W | state | note |
 |---|---|---|---|---|
 | 9 | View the invitations you have sent (Sent tab) | R | EXCLUDED-RULED | R2. Named verbatim in `send_invitation`'s own `unverifiable` block as the surface that would confirm a send and cannot be opened |
-| 10 | Withdraw a pending invitation you sent | W | EXCLUDED-RULED | R5 + R2. **LinkedIn DOES offer this -- verified against the Help Center, see 8.5.** The server's spec calls it UNMEASURED; that is true of the server and false of the product |
+| 10 | Withdraw a pending invitation you sent | W | EXCLUDED-RULED | R5 + R2. **LinkedIn DOES offer this -- verified against the Help Center, see 8.5.** The server's spec calls it UNMEASURED; that is true of the server and false of the product. **REOPENER, NAMED 2026-09-20: the operator moving `delete_or_withdraw_anything`, which is the whole of what holds this row.** Same shape as `CONTACT-IMPORT`'s row 109, where the reopener is also an operator act and not a measurement. WHO: the operator. **AND THE WORLD-FACT IN THIS CELL REOPENS NOTHING, which is why it is worth saying out loud:** *LinkedIn offers it* is already TRUE and the row is excluded anyway, so a reader who takes the Help Center line as the live half of this write-off has it backwards -- the contingent-looking clause is settled and the settled-looking clause (`R5`, ours) is the one that can move |
 | 11 | View the Page-follow invitations you have sent | R | EXCLUDED-RULED | R2 |
 | 12 | Withdraw a Page-follow invitation you sent | W | EXCLUDED-RULED | R5 + R2 |
 
@@ -389,7 +408,7 @@ considered.
 | 115 | Opt out of receiving endorsements entirely | W | EXCLUDED-RULED | R11 |
 | 116 | Manage endorsement settings | W | EXCLUDED-RULED | R11 |
 | 117 | Manage skill-endorsement notifications | W | EXCLUDED-RULED | R11 |
-| 118 | Read the endorsement counts on your own skills | R | MEASURED-ABSENT | **LinkedIn DRAWS NO ENDORSEMENT LINE ON THIS PAGE. Measured live 2026-09-04**, `scripts/_probe_endorse_and_follow_lines.py`: `/in/me/details/skills/` returned 20 skill cards and 2,359 characters of `main`, with **ZERO** occurrences of `endors` anywhere on it -- cards or body. The page DREW, so a stale capture is ruled out; the committed fixture agrees with live LinkedIn. This was NEVER a missing parser. Two worlds fit the evidence and nothing on his own account separates them -- LinkedIn draws the line only for a skill someone endorsed, or it stopped drawing it -- so `dom.read_profile_detail_entries` now RE-TAKES this reading on every call and returns it with the denominator it was taken over, rather than hard-coding an answer that would go on denying a count on the day one appears. Costed at zero extra page loads by `_audit/2026-08-22-parity-linkedin.md:18` and refuted the next day by `_audit/2026-08-23-build-linkedin.md:229`, whose correction this row failed to carry for twelve days |
+| 118 | Read the endorsement counts on your own skills | R | MEASURED-ABSENT | **LinkedIn DRAWS NO ENDORSEMENT LINE ON THIS PAGE. Measured live 2026-09-04**, `scripts/_probe_endorse_and_follow_lines.py`: `/in/me/details/skills/` returned 20 skill cards and 2,359 characters of `main`, with **ZERO** occurrences of `endors` anywhere on it -- cards or body. The page DREW, so a stale capture is ruled out; the committed fixture agrees with live LinkedIn. This was NEVER a missing parser. Two worlds fit the evidence and nothing on his own account separates them -- LinkedIn draws the line only for a skill someone endorsed, or it stopped drawing it -- so `dom.read_profile_detail_entries` now RE-TAKES this reading on every call and returns it with the denominator it was taken over, rather than hard-coding an answer that would go on denying a count on the day one appears. Costed at zero extra page loads by `_audit/2026-08-22-parity-linkedin.md:18` and refuted the next day by `_audit/2026-08-23-build-linkedin.md:229`, whose correction this row failed to carry for twelve days. **REOPENER, NAMED 2026-09-20 -- AND IT WAS ALREADY BUILT, WHICH IS THE POINT.** The trigger is `dom.read_profile_detail_entries` returning a non-zero `endorsements` count with a non-zero denominator, on any call. That re-take is described two sentences up and has been shipping since 2026-09-04; what it lacked was the word REOPENER, so no instrument sweeping this census for re-check triggers could see it and this row read as a permanent closure. **A trigger that exists in code and is not named in the cell is invisible to every reader who starts from the census**, which is the whole defect `_audit/2026-09-20-the-reopener-triggers.md` was sent to fix -- and this row is its cheapest instance: zero new code, one clause. WHO: that reader, on every call. **The two worlds in this cell stay unseparated and that is honest** -- a count appearing does not say which of them was true, only that the absence has ended |
 
 ### K. Recommendations (10) -- all EXCLUDED-RULED under R3
 
@@ -475,7 +494,7 @@ people search.
 |---|---|---|---|---|
 | 155 | Message a 1st-degree connection | W | **COVERED-CANNOT-DELIVER** | `linkedin_send_message`. NOT-REV. Fired live and REFUSED, twice. The only row in the slice in this state; see 2 and 8.3 |
 | 156 | Send an InMail to a member outside your network | W | EXCLUDED-RULED | R9 -- four written rulings. NOT-REV |
-| 157 | View your available InMail credits | R | EXCLUDED-RULED | R9. The `premium` census key was added 2026-09-01 to ask exactly this and settled that the balance is not on the composer |
+| 157 | View your available InMail credits | R | MEASURED-ABSENT | **STATE CORRECTED 2026-09-20, EXCLUDED-RULED -> MEASURED-ABSENT, AND THE PRIOR TEXT IS KEPT BELOW UNCHANGED.** `_audit/2026-09-20-the-first-firing.md` s4d named this exact defect and declined to fix it -- *"they still differ in STATE WORD, and that is a real defect I am naming rather than quietly fixing ... the owner of the state vocabulary can rule it in one line"* -- because two rows had been committed four hours earlier and the question was bigger than that wave. This is that one line. **THE GROUND IS A CONTRADICTION INSIDE THE CENSUS, NOT A PREFERENCE:** `J 127`, `M M4` and this row assert ONE fact about ONE object -- the InMail credit balance is not rendered -- and `J 127` is MEASURED-ABSENT while these two read EXCLUDED-RULED. `9a140a3`, whose entire purpose was the kind distinction, files the twin `M 4` as **WORLD-FACT** and not US-RULING. **A measurement is not a ruling.** EXCLUDED-RULED means somebody decided not to build this; the cell below decides nothing -- it reports that a page was read and a number was not on it, which is exactly section 2's definition of MEASURED-ABSENT: *no tool, and a LIVE READING of the surface says LinkedIn does not draw the thing.* **AND R9 NEVER COVERED IT:** R9 is outreach AUTOMATION and this row is a READ. **REOPENER, NAMED, and deliberately the SAME one `J 127` carries so the three rows agree on trigger as well as on substance: a capture of a Premium surface not among the 25 -- the subscription and manage pages are the untested candidates -- drawing a digit beside an InMail or credit word.** WHO: a capture. **PRIOR TEXT, KEPT:** R9. The `premium` census key was added 2026-09-01 to ask exactly this and settled that the balance is not on the composer |
 | 158 | Send an Open Profile message without spending an InMail | W | EXCLUDED-RULED | R9. NOT-REV |
 | 159 | Enable or disable Open Profile on your own profile | W | EXCLUDED-RULED | R11. REV |
 | 160 | Send, receive and manage message requests | W | GAP | TWINS CONFIRMED: `M M6` send, `M M7` accept, `M M8` decline, all GAP, all filed under `MESSAGE-REQUESTS-SURFACE`. The queued RE-FILE's premise holds for this row. Note the twins carry a DIFFERENT blocker from this row, so a re-file is an accounting act across two blockers, not a move within one. |
@@ -707,6 +726,30 @@ anyone.
 Rows: 111, 112, 113, 119-128. See the precision flag under section K -- the key
 names recommendations, the measurement counted endorse controls.
 
+**REOPENER, NAMED 2026-09-20 -- and it is named HERE rather than on the rows
+because ten of the thirteen (119-128) HAVE NO REASON CELL TO PUT IT IN.** This
+ruling is a MEASUREMENT, as its own heading says, so it can go stale the way
+every measurement can, and until now nothing said what would tell anybody.
+TWO independent conditions, either of which reopens:
+
+1. **A non-zero endorse control count** from a re-take of the same reading on a
+   surface this package may load -- the account's own skills surface, or the
+   tracked fixture corpus. The zeros are 13 fixtures, the account's own skills
+   page, and 222 controls read live on 2026-08-30; a re-take is
+   `scripts/_probe_endorse_and_follow_lines.py`. WHO: that instrument.
+2. **Any count at all of RECOMMENDATION controls**, which reopens 119-128
+   independently of the endorse number. This is the precision flag above,
+   turned into a trigger: the key names recommendations, the measurement
+   counted ENDORSE controls, and **no census of recommendation controls has
+   ever been taken** -- so for those ten rows the measurement under them is not
+   merely dated, it is of a different object. WHO: a needle that does not exist
+   yet, which is itself the finding.
+
+**WHAT DOES NOT REOPEN THESE ROWS, stated so the reopener cannot be read wider
+than it is:** a control found on a THIRD PARTY'S PROFILE. R4 forbids loading
+one, that prohibition is ours and is not a measurement, and it survives any
+number this reopener produces.
+
 ### R4 -- loading a third party's profile is permanently forbidden. Produces 14 rows.
 
 `writes.py:1788`:
@@ -762,6 +805,19 @@ Rows: 10, 12, 29, 110, 113, 125.
 
 `writes.py:1784`: "six of ten profile viewers chose anonymity; the row LinkedIn
 renders him is the whole of what he is entitled to".
+
+**REOPENER, NAMED 2026-09-20, and it is narrower than it first looks.** The
+PROHIBITION is ours and is not contingent on anything: nothing reopens
+de-anonymising a viewer who chose anonymity. What IS contingent is the second
+clause -- *the row LinkedIn renders is the whole of the entitlement* -- which
+is a fact about what LinkedIn draws for this account on a given day, and
+"six of ten" is a dated reading rather than a constant. So: **LinkedIn itself
+rendering an identity the account is entitled to see reopens this row, because
+READING WHAT IS DRAWN IS NOT DE-ANONYMISATION** -- the key forbids inferring an
+identity LinkedIn withheld, not reading one it published. WHO: a capture of
+`/analytics/profile-views/`; the shape tally already run on that page is the
+instrument. **An identity recovered by any inference, join or lookup reopens
+nothing**, which is the distinction the key exists to hold.
 
 ### R8 -- `auto_accept_or_auto_reply`. Produces 1 row (15).
 
@@ -836,6 +892,32 @@ now would mean guessed selectors and a guessed request body, which the same
 instruction forbids. So they must be MEASURED first -- that is not a stall, it
 is the only order that satisfies both halves.
 ```
+
+**REOPENER, NAMED 2026-09-20. Three of this ruling's four grounds are facts
+about the ACCOUNT, not about the capability, and none of them said so.** Read
+them back: a monthly allowance of five, a cap that Premium does not lift, and a
+paid subscription that a restriction would strand. Every one of those is a
+thing that changes when the account changes, and the ruling was written as
+though they were constants. Either of these reopens it:
+
+1. **A monthly InMail allowance materially above five**, read off a Premium
+   surface. Ground 1 is arithmetic -- *"five actions a month is not
+   engineering, it is ceremony"* -- so it is an argument WITH A THRESHOLD IN
+   IT, and a threshold that nobody re-reads is a constant by accident. WHO: a
+   capture of a Premium surface.
+2. **The account ceasing to hold a paid subscription a restriction would
+   strand**, which removes the fourth ground outright. WHO: the operator.
+
+**WHAT THESE DO NOT REOPEN.** The behavioural-cap ground and the
+identity-at-risk cut are POLICY and are ours; they survive any allowance. So a
+reopened R9 is a smaller ruling, not an absent one -- which is the distinction
+between a write-off resting on a fact and one resting on a decision.
+
+**AND 157 IS NOT A SENDING ROW.** This ruling is about outreach AUTOMATION;
+`157` is *view your available InMail credits*, a READ, and the only thing
+actually holding it was the measured absence of a balance. It is filed
+MEASURED-ABSENT 2026-09-20 and carries its own reopener; see its row. Rows
+here are now **156 and 158**.
 
 ### R11 -- the settings family is admitted by name or not at all. Produces 21 rows.
 
