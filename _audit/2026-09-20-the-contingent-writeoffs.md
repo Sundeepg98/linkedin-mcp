@@ -33,9 +33,13 @@ its twelve retirements a concrete REOPENER and names **who can establish it**
 the `NOT-OURS` write-offs carries either field. The discipline exists in this
 repository; it was applied to the DECIDE-RETIRE queue and to no other.
 
-**That is the finding under all the findings below.** The failure is not that
-somebody reasoned badly about the Gmail skill. It is that a queue was created
-whose entries are exempt from the reopener rule the sibling queue obeys.
+**That is the finding under all the findings below**, and s6 turns it into a
+number: **a contingent write-off carrying a reopener is 15% still GAP; one
+carrying none is 91% still GAP**, and every contingent write-off yet found
+wrong sits in the second group. The failure is not that somebody reasoned
+badly about the Gmail skill. It is that a queue was created whose entries are
+exempt from the reopener rule the sibling queue obeys, and the exemption is
+measurable.
 
 ---
 
@@ -577,7 +581,76 @@ did not land looks exactly like a control that did not fire.**
 
 ---
 
-## 6. WHAT THIS PASS DID NOT DO
+## 6. THE PREDICTOR: A REOPENER IS WHAT MAKES A WRITE-OFF GET REVISITED
+
+The lead's pattern has been an anecdote -- three instances, found one at a
+time, by somebody happening to look. This makes it a measurement with a named
+remaining queue.
+
+**THE QUESTION.** Of the 26 blockers whose NAME asserts an operator, account or
+world fact (s3.1), which ones have a REOPENER recorded anywhere in the
+committed audit -- a stated condition under which the write-off comes back?
+
+**THE INSTRUMENT, and its error bars, because it has them.** Search every
+committed `.md` under `_audit/` for each blocker name and look for a
+`REOPEN*` marker. Resolution decides the answer, so it was run at two:
+
+* **STRICT** -- the marker must be on the SAME LINE as the blocker name. This
+  is the resolution of the artifact that actually carries reopeners: the table
+  in `decide-retire-rulings.md` s6 puts blocker and reopener in one table row.
+* **LOOSE** -- within 6 lines. This OVER-reports, and the receipt is
+  `MATCH-DETAILS-COLLAPSED`: it read YES off a `REOPENER: nothing that keeps
+  the shape` sentence five lines above that belongs to `PAID-BOOST`.
+
+|  | blockers | rows | still GAP | share |
+|---|---:|---:|---:|---:|
+| **STRICT** -- with a reopener | 13 | 34 | 5 | **15%** |
+| **STRICT** -- without | 13 | 45 | 41 | **91%** |
+| LOOSE -- with a reopener | 16 | 43 | 14 | 33% |
+| LOOSE -- without | 10 | 36 | 32 | 89% |
+
+**The conclusion survives the instrument's own error in both directions.** The
+loose pass credits reopeners that are not there, which biases AGAINST the
+finding, and the gap is still 89% versus 33%.
+
+**AND THE CONVICTION RATE IS 5 OF 5.** Every contingent write-off yet found
+wrong sits in the STRICT no-reopener set:
+
+| instance | blocker | found by |
+|---|---|---|
+| 1 | `ADMIN-RIGHTS-NOT-HELD` | the lead, 2 days ago |
+| 2 | `PREMIUM-JOBS-SURFACES` | the lead (Premium held since 2026-08-30) |
+| 3 | `PREMIUM-READER-NOT-BUILT` (`J 127`) | re-opened this morning |
+| 4 | `SERVED-BY-GMAIL-SKILL` | s1 of this document |
+| 5 | `OWNED-BY-A-SIBLING-SLICE` | s2 of this document |
+
+Not one was in the set that carries reopeners. **A reopener is not paperwork.
+It is the only thing that has ever caused one of these to be looked at again.**
+
+**THE REMAINING QUEUE, and it is small enough to finish.** Eight blockers in
+the no-reopener set have not been tested by anybody -- **16 rows, 13 still
+GAP**:
+
+| blocker | rows | still GAP | the contingent claim to test |
+|---|---:|---:|---|
+| `MATCH-DETAILS-COLLAPSED` | 5 | 5 | is the panel collapsed, or not drawn for this account? |
+| `ANALYTICS-CONTROLS-UNPRESSED` | 4 | 3 | unpressed by us, or absent for him? |
+| `ACCOUNT-VERIFICATION` | 2 | 2 | already self-flagged: *"the address is ASSUMED and this is NOT machine-verified"* |
+| `AUDIO-EVENTS-EXISTENCE` | 1 | 1 | does the product exist, or was it never looked for? |
+| `LEARNING-CERTIFICATE` | 1 | 1 | contingent on a course he has or has not taken |
+| `VIDEO-MEETING-INTEGRATION` | 1 | 1 | contingent on a third-party account being linked |
+| `OPEN-PROFILE-SETTING` | 1 | 0 | closed; reopener still owed |
+| `THIRD-PARTY-PROFILE-FORBIDDEN` | 1 | 0 | closed by OUR ruling; permanent, but say so |
+
+**RECOMMENDED STANDING RULE, one line, and it is the cheapest thing in this
+document.** *A write-off whose reason asserts a fact about the operator, his
+account or the world may not be filed without a REOPENER and the name of who
+can establish it.* The census already enforces it on one queue. Extending it
+costs nothing and is the only measure above that prevents instance 6.
+
+---
+
+## 7. WHAT THIS PASS DID NOT DO
 
 1. **It did not move a census row.** Siblings are building capability in other
    worktrees; s1.4, s2 and s3 state exact replacements for the lead to
