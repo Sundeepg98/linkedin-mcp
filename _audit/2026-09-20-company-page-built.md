@@ -402,6 +402,43 @@ NO WRITE WAS FIRED. This narrows a guard; it does not exercise one.
 
 ---
 
+## 4c. WHAT THE ADMISSION MADE FALSE ELSEWHERE
+
+A boundary change does not only add a line. It falsifies every sentence in the
+repository that described the old boundary, and **none of those would have
+failed a test.** Four were found and corrected; a fifth class was swept for and
+came back clean.
+
+**`linkedin_job_detail`'s own docstring** said `company_about`'s four fields
+come from "a THIRD PARTY'S page, not on the read allowlist". The second half
+stopped being true at 09:36 today. Corrected in place, with the correction
+labelled rather than the sentence quietly reworded, because a reader who
+remembers the old guarantee has to meet the change where the claim lives. The
+two new fields are documented in the same pass.
+
+**Three probes carried a control that went stale**, and two of them said so
+themselves: `_probe_route_vs_surface.py` and `_probe_newsletter_routes.py` each
+asserted `/company/example-co/` MUST REFUSE, went red on the control, and
+REFUSED TO CERTIFY THEIR OWN TABLES. That is the instrument working rather than
+breaking, and it is the reason a control is worth carrying.
+`_probe_unmeasured_surface_addresses.py` held the same control in another
+spelling.
+
+All three were RE-AIMED rather than deleted, one segment deeper, at
+`/company/<x>/people/`. That row holds the class each control was there for --
+a third party's organisation surface refused by no pattern -- and is strictly
+sharper, because the roster is refused by the new anchor and by nothing else.
+**If that anchor is ever loosened into a family pattern, three probes now go
+red instead of none.** Controls pass again: 0 failures in the first two, 7 of 7
+in the third.
+
+**Swept and clean:** the README makes no claim this change falsifies (its
+allowlist section describes the mechanism and names blocked targets, none of
+which moved), and `writes.py`'s "this server cannot open it" is about the Sent
+Invitations manager, not about a Page.
+
+---
+
 ## 5. WHAT THE CENSUS SAID AND WHAT THE CODE SAYS
 
 `network.md` section 5 prices this family as *"One pattern for
