@@ -33,11 +33,25 @@ target, and the rule for where a marker's reason starts ALL come from
 
 That file paid for each of them. Its `MARKER` is anchored at line start because
 an unanchored version read a SENTENCE DESCRIBING the mechanism as a marker. Its
-`_reason_on` starts after the LAST backtick on the line. Its `_documents` asks
-git rather than walking the disk, because `_audit/_scratch/` is gitignored and
-37 working notes made a check pass locally and fail in a clone at the same SHA.
-Re-deriving any of that is how two separate waves shipped broken parsers in one
-day.
+`_documents` asks git rather than walking the disk, because `_audit/_scratch/`
+is gitignored and 37 working notes made a check pass locally and fail in a
+clone at the same SHA. Re-deriving any of that is how two separate waves
+shipped broken parsers in one day.
+
+**WHAT IS NOT IMPORTED IS THE REASON TEXT, AND THE REASON IS NOT HISTORICAL.**
+`_reason_on` used to read after the LAST backtick, this wave measured that it
+cut 65 of 136 reasons, and it was FIXED upstream on 2026-09-20 to read after
+the first backticked span. `reason_on` here still differs from it in two ways
+that matter, both measured rather than assumed:
+
+* it anchors on the CITATION rather than on any backticked span, so a marker
+  written ``**CORRECTS:** `J 57` in `_audit/x.md` -- reason`` does not come
+  back carrying its own citation. The two AGREE on all 136 markers today,
+  which is why they can coexist and why neither should be deleted on the
+  assumption that it duplicates the other.
+* it reads the marker's whole PARAGRAPH rather than its physical line. See
+  `paragraph_at`: 15 reasons wrap, hiding 5,832 characters, and the suffix
+  property that closed the first defect cannot see any of them.
 
 WHAT IS *NOT* IMPORTED is the iteration -- `for document, for line` -- because
 that loop has no blind spot to inherit, and a pure function over an EXPLICIT
@@ -292,42 +306,134 @@ def _unfenced(lines):
             yield line
 
 
-def reason_on(line: str) -> str:
-    """Whatever a marker line says after the document it names.
+#: A line that OPENS a new markdown block rather than continuing a sentence.
+#: Used to find where a marker's paragraph stops.
+BLOCK_OPENER = ("#", "- ", "* ", "+ ", "|", ">", "```", "~~~")
 
-    **THAT SENTENCE IS THE SHIPPED `_reason_on`'s OWN DOCSTRING, AND THE
-    SHIPPED IMPLEMENTATION IS NOT IT.** It takes everything after the LAST
-    backtick on the line, which equals "after the document it names" only when
-    no backtick follows the cited path. Marker reasons in this corpus quote
-    SHAs, symbols and branch names constantly, so the two part company often:
 
-        65 of 136 marker lines disagree, measured 2026-09-20
-        every one of the 65 is a strict SUFFIX -- text is lost, never invented
-        13 are cut below 60 characters
-        the worst loses 738 characters of a 767-character reason
+def paragraph_at(lines, number: int) -> str:
+    """The marker's whole PARAGRAPH: its line plus every continuation line.
 
-    One reads, in full, `. The dated note sits at that block.` Its real reason
-    is a four-clause re-measurement against a freshly fetched remote. **The
-    guard is still GREEN on it**, because its only check is that the fragment
-    is 20 characters long, and a fragment can be.
+    **THE SHIPPED `_reason_on` READS ONE PHYSICAL LINE, AND THIS CORPUS HARD-
+    WRAPS AT ABOUT 78 COLUMNS.** A long reason is therefore written across
+    several lines and everything past the first is invisible to it. Measured
+    2026-09-20, after the last-backtick defect had been fixed upstream:
 
-    So this takes the text from the END OF THE CITATION MATCH, which is the
-    stated intent implemented. THE SHIPPED FUNCTION IS STILL WHAT ADMITS A
-    MARKER -- see `read_markers` -- so the edge set here is provably the edge
-    set the guard enforces, and the only thing that changes is how much of the
-    reason a reader gets to see. Nothing in `tests/` is edited by this wave.
+        15 of 136 marker reasons continue onto a following line
+        5,832 characters of reason text are below the line scope
+        the worst shows the reader 20 characters of a 723-character reason
+
+    That is a THIRD truncation class, and it is not the one the fix closed.
+    `test_a_reason_is_not_cut_at_its_last_backtick` states a SUFFIX property --
+    `_reason_on(line)` against `line[cited.end():]` -- and both sides of that
+    comparison are scoped to the same line, so a missing CONTINUATION
+    satisfies it perfectly. **A suffix test cannot detect a missing prefix's
+    tail.** It convicts 0 of the 15.
+
+    A paragraph ends at a blank line, which is what markdown requires, and
+    also at anything that OPENS a new block -- another marker, a heading, a
+    list item, a fence, a table row, a blockquote -- because those are not
+    continuations of this sentence however they are indented. The join is
+    whitespace-only: `test_joining_a_paragraph_changes_no_word` asserts that
+    the result is the stripped lines with single spaces between them and
+    nothing else, so nothing here can rewrite what a document said.
     """
-    found = CITATION.search(line)
+    out = [lines[number - 1].strip()]
+    for follow in lines[number:]:
+        stripped = follow.strip()
+        if not stripped:
+            break
+        if guard._is_marker(follow) is not None:
+            break
+        if stripped.startswith(BLOCK_OPENER):
+            break
+        out.append(stripped)
+    return " ".join(out)
+
+
+def reason_on(text: str) -> str:
+    """Whatever a marker says after the document it names.
+
+    **IT ANCHORS ON THE CITATION, WHERE THE SHIPPED FUNCTION ANCHORS ON THE
+    FIRST BACKTICKED SPAN OF ANY KIND.** Those coincide only when the cited
+    document is the first backticked thing written. They are not the same
+    rule, and this corpus writes the shape that parts them constantly --
+    backticked row ids, tool names and SHAs:
+
+        **CORRECTS:** `J 57` in `_audit/x.md` -- the reason
+
+        shipped: "in `_audit/x.md` -- the reason"    <- carries the citation
+        here   : "the reason"
+
+    Measured over all 136 markers on 2026-09-20 they AGREE on every one, so
+    this is not a live disagreement; it is the reason the two are not merged
+    into one. `test_control_the_two_reason_anchors_are_not_the_same_rule`
+    keeps that visible instead of leaving a future reader to assume a
+    duplicate and delete the wrong one.
+
+    THE SHIPPED FUNCTION IS STILL WHAT ADMITS A MARKER -- see `read_markers`
+    -- so the edge set here is provably the edge set the guard enforces, and
+    the only thing that changes is how much of the reason a reader sees.
+    Nothing in `tests/` is edited by this wave.
+    """
+    found = CITATION.search(text)
     if found is None:
         return ""
-    return line[found.end():].strip().lstrip("-*: ").strip()
+    return text[found.end():].strip().lstrip("-*: ").strip()
 
 
-def truncated_by_the_shipped_extractor(line: str) -> bool:
-    """True when `guard._reason_on` drops text that `reason_on` keeps."""
-    mine = reason_on(line)
-    theirs = guard._reason_on(line)
-    return bool(mine) and mine != theirs and mine.endswith(theirs)
+def line_scope_loses(lines, number: int) -> bool:
+    """True when the reason continues past the marker's own physical line."""
+    whole = reason_on(paragraph_at(lines, number))
+    one_line = reason_on(lines[number - 1])
+    return bool(whole) and whole != one_line
+
+
+#: The shipped admission floor: a marker is malformed unless its reason is at
+#: least this long. Mirrored rather than imported because it is a literal in
+#: the guard's `_declarations`, not a named constant; `test_the_admission_floor
+#: _is_still_twenty` fails if that literal ever moves, which is the whole
+#: value of writing it down here.
+ADMISSION_FLOOR = 20
+
+
+def admission_margins(documents, root: pathlib.Path) -> list:
+    """How close each admitted marker sits to being rejected, tightest first.
+
+    **THE FLOOR IS APPLIED TO A LINE-SCOPED READ, AND THAT IS THE HAZARD.** A
+    marker is admitted on `len(_reason_on(line)) >= 20`, and `_reason_on`
+    stops at the end of the physical line -- so a marker whose reason WRAPS is
+    judged on its first line alone. Reflow that paragraph by one word and a
+    long, carefully written reason is rejected with the message *carries no
+    reason after the citation*, which is false.
+
+    Measured 2026-09-20, and this is not a hypothetical margin:
+
+        one marker clears the floor by EXACTLY 0 characters -- 20 characters
+        standing in for a 723-character reason
+        five clear it by 3 or fewer, and ALL FIVE of those wrap
+
+    Nothing is rejected today. The index reports the tightest margin on every
+    regeneration rather than a count of rejections, because a count of
+    rejections is zero until the day it is not, and a row that can only read
+    zero is reassurance rather than information.
+    """
+    index = resolver(documents, root)
+    out = []
+    for doc in documents:
+        lines = doc.read_text(encoding="utf-8").splitlines()
+        for number, line in enumerate(lines, 1):
+            if guard._is_marker(line) is None:
+                continue
+            if len(guard._citations(line, index)) != 1:
+                continue
+            one_line = guard._reason_on(line)
+            if len(one_line) < ADMISSION_FLOOR:
+                continue
+            whole = reason_on(paragraph_at(lines, number))
+            out.append((len(one_line) - ADMISSION_FLOOR, doc.name, number,
+                        len(one_line), len(whole)))
+    return sorted(out)
 
 
 def fenced_marker_lines(doc: pathlib.Path, lines) -> list:
@@ -380,8 +486,9 @@ def read_markers(documents, root: pathlib.Path):
       corrected_by    `(target_name, corrector_name) -> [(line_no, reason)]`
       malformed       marker lines naming other than exactly one resolving
                       document, or carrying under 20 characters of reason
-      truncated       admitted lines whose reason the SHIPPED extractor cuts
-                      short -- see `reason_on`
+      truncated       admitted markers whose reason continues past their own
+                      physical line, which the shipped line-scoped extractor
+                      cannot reach -- see `paragraph_at`
 
     THE REJECTION RULES ARE THE CORRECTION GUARD'S, TO THE CHARACTER, because
     the two must agree about what a marker is or the index would advertise
@@ -423,13 +530,13 @@ def read_markers(documents, root: pathlib.Path):
                 malformed.append((doc.name, number, line.strip(),
                                   "carries no reason after the citation"))
                 continue
-            if truncated_by_the_shipped_extractor(line):
-                truncated.append((doc.name, number,
-                                  len(reason_on(line)),
-                                  len(guard._reason_on(line))))
+            whole = reason_on(paragraph_at(lines, number))
+            if line_scope_loses(lines, number):
+                truncated.append((doc.name, number, len(whole),
+                                  len(reason_on(line))))
             where = corrects if kind == "CORRECTS" else corrected_by
             where.setdefault((doc.name, named[0].name), []).append(
-                (number, reason_on(line)))
+                (number, whole))
     return corrects, corrected_by, malformed, sorted(truncated)
 
 
@@ -675,6 +782,7 @@ def render(documents, root: pathlib.Path) -> str:
 
     joined, malformed, half_joined, lopsided, truncated = edges(documents, root)
     intra, hidden = read_quoted_markers(documents, root)
+    margins = admission_margins(documents, root)
 
     #: Titles and quoted reasons are the only strings in this file that this
     #: wave did not write. If one of them carries a backticked `*.md` that
@@ -772,8 +880,11 @@ def render(documents, root: pathlib.Path) -> str:
       % len(lopsided))
     w("| marker lines rejected as malformed | %d |" % len(malformed))
     w("| marker-shaped lines inside a fenced code block | %d |" % len(fenced))
-    w("| reasons the shipped `_reason_on` cuts short (printed in full below) | %d |"
+    w("| reasons that continue past their own line (printed whole below) | %d |"
       % len(truncated))
+    if margins:
+        w("| tightest margin over the %d-character admission floor, in characters"
+          " | %d |" % (ADMISSION_FLOOR, margins[0][0]))
     w("| titles carrying a non-ASCII character | %d |" % len(non_ascii))
     w("| quoted strings whose backticked citation had to be defused | %d |"
       % len(quoting))
@@ -890,7 +1001,7 @@ def render(documents, root: pathlib.Path) -> str:
     w("")
 
     if (malformed or half_joined or lopsided or fenced or truncated
-            or non_ascii or hidden or quoting):
+            or non_ascii or hidden or quoting or margins):
         w("## 6. What the scan rejected, could not join, or had to repair")
         w("")
         w("**An empty section here would be a claim, so it is printed only when")
@@ -899,19 +1010,33 @@ def render(documents, root: pathlib.Path) -> str:
         w("")
         if truncated:
             w("`tests/test_a_correction_is_findable_from_the_claim.py::_reason_on`")
-            w("returns everything after the LAST backtick on a marker line. Its")
-            w("docstring says *whatever a marker line says after the document it")
-            w("names*, which is the same thing only when no backtick follows the")
-            w("cited path. The lines below are the ones where it is not. Every")
-            w("case is a strict SUFFIX -- text is lost, never invented -- and the")
-            w("guard stays green on all of them, because it only asks whether the")
-            w("fragment is 20 characters long. **Sections 2 and 3 above print the")
-            w("full reason**, taken from the end of the citation match.")
+            w("reads ONE PHYSICAL LINE, and this corpus hard-wraps prose at about")
+            w("78 columns. The markers below write their reason across several")
+            w("lines, so everything past the first is outside its reach. **Sections")
+            w("2, 3 and 4 above print the whole paragraph.**")
+            w("")
+            w("This is not the last-backtick defect, which was fixed upstream on")
+            w("2026-09-20. It is a different class, and the suffix property that")
+            w("closed the first one cannot see it: that test compares one line")
+            w("against the same line, so a missing continuation satisfies it.")
             w("")
             for name, number, full, short in truncated:
-                w("- TRUNCATED REASON %s line %d -- the shipped extractor returns"
+                w("- REASON PAST ITS LINE %s line %d -- a line-scoped reader sees"
                   " %d of %d characters."
                   % (_name_link(name, by_name, root), number, short, full))
+            w("")
+        if margins:
+            margin, name, number, short, full = margins[0]
+            w("- TIGHTEST ADMISSION MARGIN %s line %d clears the %d-character"
+              " floor by %d. The floor is applied to the marker's OWN LINE, so"
+              " a reason of %d characters is admitted on the strength of %d."
+              " Reflow that paragraph by one word and a guard rejects it"
+              " saying it *carries no reason after the citation*, which would"
+              " not be true. Reported every regeneration rather than counted,"
+              " because a count of rejections reads zero until the day it does"
+              " not."
+              % (_name_link(name, by_name, root), number, ADMISSION_FLOOR,
+                 margin, full, short))
             w("")
         for name, number, line, why in sorted(malformed):
             w("- MALFORMED MARKER %s line %d -- %s"
@@ -1044,7 +1169,7 @@ def main(argv=None) -> int:
     print("malformed markers     %d" % len(malformed))
     print("half-joined edges     %d" % len(half_joined))
     print("lopsided edges        %d" % len(lopsided))
-    print("truncated reasons     %d" % len(truncated))
+    print("reasons past a line   %d" % len(truncated))
     return 0
 
 

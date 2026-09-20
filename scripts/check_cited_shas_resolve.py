@@ -336,9 +336,23 @@ def _git(repo: pathlib.Path, *args: str) -> subprocess.CompletedProcess[str]:
     )
 
 
+#: `_audit/INDEX.md` is GENERATED -- a derived view of this corpus, not a
+#: member of it. It quotes correction reasons VERBATIM, and A QUOTE DOES NOT
+#: CARRY THE QUOTED DOCUMENT'S MARKS. `1349fe6` is cited by four documents,
+#: each of which opens with a SHA NOTE declaring it branch-only; the quote
+#: carries the hash and leaves the note behind, so the index convicted for a
+#: promise it never made. **The index makes no claims; it reports that others
+#: did.** Third instrument to need this exclusion on 2026-09-20 -- see
+#: INSTRUMENTS.md section 45.9, and the same line in
+#: `scripts/check_asserted_names_resolve.py` and
+#: `scripts/find_blocker_reason.py`.
+GENERATED_VIEWS = frozenset({"_audit/INDEX.md"})
+
+
 def tracked_docs(repo: pathlib.Path) -> list[str]:
     out = _git(repo, "ls-files", CORPUS_DIR).stdout
-    return sorted(p for p in out.splitlines() if p.endswith(".md"))
+    return sorted(p for p in out.splitlines()
+                  if p.endswith(".md") and p not in GENERATED_VIEWS)
 
 
 def load_corpus(repo: pathlib.Path) -> dict[str, str]:

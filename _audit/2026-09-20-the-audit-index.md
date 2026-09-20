@@ -294,6 +294,53 @@ it can resolve), the locator, and the name checker. A fourth that sweeps this
 corpus will pick it up silently, which is why the law is in the register and
 not only here.
 
+## 7b. Addendum, same day: 4.1 was closed upstream, and closing it exposed a third class
+
+**SECTION 4.1 ABOVE STAYS AS WRITTEN.** Its "65 of 136" was true when written
+and is the evidence for why the fix happened. A number in a record is evidence
+of what was known when; correcting it in place destroys that.
+
+The shipped extractor was fixed to read after the first backticked span, with a
+test stating the property that no reason may be a strict suffix of the text
+after its citation. Reconciling this wave to it found two things that refused
+the obvious cleanup.
+
+**The two extractors are not the same rule.** The shipped one anchors on the
+first backticked span of ANY kind; this index's anchors on the first span that
+resolves AS A CITATION. A marker written with a backticked row id before its
+target parts them, and the shipped result then carries the citation inside the
+reason. They agree on all 136 markers today -- which is exactly the condition
+under which somebody deletes one as redundant. Both are kept, one control
+plants the divergence and one watches the live half.
+
+**A third truncation class survived, and the new property test cannot see it.**
+The shipped extractor reads ONE PHYSICAL LINE and this corpus hard-wraps at
+about 78 columns. 15 of 136 reasons continue onto a following line, hiding
+**5,832 characters**; the worst shows a reader 20 characters of a 723-character
+reason. The new suffix property convicts **0** of the 15, by construction: it
+compares one line against the same line, so a missing continuation satisfies it
+exactly. A suffix test cannot detect a tail that was never on the line. The
+23-character fragment quoted in the upstream fix is one of these -- read as the
+floor admitting a short reason, it is a 465-character reason showing 35.
+
+The index now reads the marker's whole paragraph, and the join is asserted
+whitespace-only so nothing can silently reflow quoted prose.
+
+**And the floor is applied to that line-scoped read.** Admission is 20
+characters of the marker's OWN line, so a wrapped marker is judged on its first
+line alone. One marker clears it by **exactly zero** -- 20 characters admitting
+a 723-character reason -- and all five of the tightest five wrap. Nothing is
+rejected today; reflow any of those paragraphs by one word and a guard rejects a
+long reason saying it carries none. Found by a test fixture tripping it, not by
+looking. The index prints the tightest margin every regeneration rather than a
+rejection count, because a count of rejections reads zero until the day it does
+not: **when a hazard is a distance, publish the distance, not the crossing.**
+
+Teaching the shipped extractor to read a paragraph, and applying the floor to
+what it returns, would close both. That is a change to a guard other waves are
+editing, so it is reported with the measurement attached rather than done
+quietly.
+
 ## 8. The exact counts, all derived
 
 **EVERY FIGURE BELOW IS A READING AT FREEZE, 2026-09-20**, and the corpus moved
