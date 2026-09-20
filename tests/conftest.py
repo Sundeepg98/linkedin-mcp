@@ -266,3 +266,40 @@ def patched_navigation(monkeypatch):
 
     monkeypatch.setattr(browser_module.BROWSER, "goto", fake_goto)
     return navigations
+
+
+@pytest.fixture(autouse=True)
+def _caplog_can_hear_the_linkedin_logger(caplog):
+    """Let ``caplog`` receive records from the ``linkedin`` logger.
+
+    WITHOUT THIS, EVERY caplog ASSERTION IN THIS SUITE READS AN EMPTY CHANNEL.
+    ``linkedin_server/config.py`` sets ``logger.propagate = False``, and that is
+    deliberate and load-bearing: this server speaks the MCP stdio protocol, and
+    a log record reaching stdout corrupts the transport. So the production
+    property must not be weakened to make tests work.
+
+    pytest's ``caplog`` installs its handler on the ROOT logger, which records
+    reach only by propagation -- so with propagation off it captured nothing
+    from this package, ever.
+
+    **WHAT THAT COST, and it is why this is autouse.**
+    ``tests/leakwalk.py::assert_no_leak`` appends ``caplog.text`` and every
+    record into the haystack it then asserts is CLEAN. An empty channel
+    satisfies an absence check perfectly, so the log half of that guard could
+    not fire at 14 call sites. Its own docstring says ``caplog`` "is not
+    optional in spirit: a credential that reaches a log file has left the
+    process, and a leak test that reads only the return value was measured
+    green against exactly that build" -- the hazard was understood and the
+    wire was cut.
+
+    Attaching the handler to the named logger, rather than flipping
+    ``propagate``, keeps the stdio guarantee exactly as it is in production.
+    """
+    import logging
+
+    package_logger = logging.getLogger("linkedin")
+    package_logger.addHandler(caplog.handler)
+    try:
+        yield caplog
+    finally:
+        package_logger.removeHandler(caplog.handler)
