@@ -1293,6 +1293,35 @@ NOT_A_CORRECTION: dict[tuple[str, str], str] = {
         "being listed, which is the EVIDENCE-citation shape this dict already "
         "records twice."
     ),
+
+    # 2026-09-20, from the split-ruling wave. Both entries below are the
+    # INVERSE of a correction and they are the first of that shape in this
+    # dict, which is why each says so: the cited document is named because it
+    # was RIGHT, and right FIRST. The vocabulary that catches them is the word
+    # "correction" describing what THIS wave did to a third document.
+    ("2026-09-20-the-split-ruling.md", "2026-09-19-the-remaining-partials.md"): (
+        "AN ATTRIBUTION, NOT A CORRECTION -- IT CREDITS THE CITED DOCUMENT "
+        "WITH THE FIND. The line reads 'the finding is <this document>'s, the "
+        "confirmation is the handover's, and this wave's contribution is the "
+        "ruling and the correction, not the find.' The word CORRECTION in it "
+        "names what the split-ruling wave did to the 2026-09-03 ledger, which "
+        "is declared separately with a real CORRECTS:/CORRECTED BY: pair. "
+        "Section 5.4 of the cited document convicted the same published cell "
+        "a day earlier and on a stronger argument, and this wave adopts that "
+        "argument wholesale. A CORRECTED BY: pointer here would tell a reader "
+        "the document that got it right had been overturned."
+    ),
+    ("2026-09-20-the-split-ruling.md", "2026-09-19-partial-blockers-closed.md"): (
+        "A CITATION-COVERAGE MEASUREMENT ABOUT A THIRD DOCUMENT. The line "
+        "reports that the newsletter-build wave's report cites neither this "
+        "document nor its sibling anywhere in its text -- a grep result with "
+        "a count, offered as evidence that the wave re-discovered a ruling "
+        "rather than inheriting it. The claim being evaluated is the HANDOVER "
+        "REPORT's coverage; nothing in the cited document is asserted wrong, "
+        "and the correction vocabulary two lines up belongs to the sentence "
+        "triaged immediately above. Naming a document as ABSENT from a third "
+        "party's citations is not correcting it."
+    ),
 }
 
 
