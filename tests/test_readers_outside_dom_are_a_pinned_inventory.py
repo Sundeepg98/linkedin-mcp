@@ -178,6 +178,26 @@ def _unwired(modules: dict[str, str]) -> set[str]:
     worth reading.
     """
     parsed = {name: ast.parse(source) for name, source in modules.items()}
+
+    # WHO CALLS WHAT, BUILT ONCE. This loop used to live inside the per-module
+    # loop below, so ``_called_names`` -- a full ``ast.walk`` -- ran once per
+    # ORDERED PAIR of modules: 40 modules meant about 1,560 traversals for an
+    # answer that needs 40. The file was 8.72s and five of its six tests each
+    # paid the whole thing again (measured 2026-09-20), which made it the
+    # third most expensive guard in ``scripts/impact_gate.py``'s unconditional
+    # floor.
+    #
+    # **EXACTLY EQUIVALENT, NOT MERELY SIMILAR.** The old test was
+    # ``reader not in (union of called names over every module except this
+    # one)``. A reader is in that union exactly when some module OTHER than
+    # this one calls it, which is ``callers[reader] - {name}`` being
+    # non-empty. Same verdict on every input, including the planted ones the
+    # three detector controls above feed in.
+    callers: dict[str, set[str]] = {}
+    for module_name, module_tree in parsed.items():
+        for called in _called_names(module_tree):
+            callers.setdefault(called, set()).add(module_name)
+
     unwired: set[str] = set()
     for name, tree in parsed.items():
         if name in COVERED_ELSEWHERE:
@@ -190,14 +210,9 @@ def _unwired(modules: dict[str, str]) -> set[str]:
         ]
         if not readers:
             continue
-        elsewhere: set[str] = set()
-        for other, other_tree in parsed.items():
-            if other == name:
-                continue
-            elsewhere |= _called_names(other_tree)
         stem = name[:-3] if name.endswith(".py") else name
         for reader in readers:
-            if reader not in elsewhere:
+            if not (callers.get(reader, frozenset()) - {name}):
                 unwired.add(f"{stem}.{reader}")
     return unwired
 

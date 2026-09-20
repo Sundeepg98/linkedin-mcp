@@ -80,6 +80,7 @@ judged on what they pass, never on the call.
 from __future__ import annotations
 
 import ast
+import functools
 import pathlib
 
 import pytest
@@ -327,11 +328,35 @@ def emission_points(source: str, filename: str) -> list[tuple[str, str, bool]]:
     return found
 
 
-def _all_points() -> list[tuple[str, str, bool]]:
+@functools.lru_cache(maxsize=1)
+def _all_points() -> tuple[tuple[str, str, bool], ...]:
+    """Every emission point in the scanned package. COMPUTED ONCE PER PROCESS.
+
+    THE CACHE IS A LATENCY FIX AND CHANGES NOTHING ABOUT WHAT IS CHECKED, which
+    is the only reason it is allowed to exist in a guard.
+
+    ``test_the_code_matches_what_was_declared`` is parametrised over the 13
+    declared sites, and every case called this. Each call re-read and
+    re-``ast.parse``-d all of ``linkedin_server/``, and ``emission_points``
+    walks the tree again per emission point for ``_enclosing``, so one call is
+    ~1.1s and the file paid it fourteen times. Measured 2026-09-20: 20 tests in
+    17.19s, of which the thirteen parametrised cases were 1.06-1.24s each.
+
+    **THAT COST WAS NEVER THE PRICE OF BEING CORPUS-WIDE.** This file reads 40
+    files; the expense was reading them fourteen times. It sat inside
+    ``scripts/impact_gate.py``'s unconditional floor as the second most
+    expensive guard in the repository, which made it look like an argument
+    about scope when it was an argument about a missing memo.
+
+    SAFE BECAUSE THE CORPUS DOES NOT MOVE DURING A RUN: nothing in this suite
+    writes to ``linkedin_server/``, the cache is per-process, and
+    ``--dist loadfile`` keeps a whole file on one worker. A tuple rather than a
+    list so a caller cannot mutate the shared value.
+    """
     out: list[tuple[str, str, bool]] = []
     for path in sorted(SCANNED.glob("*.py")):
         out.extend(emission_points(path.read_text(encoding="utf-8"), path.name))
-    return out
+    return tuple(out)
 
 
 def test_every_emission_point_is_declared():
