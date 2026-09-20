@@ -57,9 +57,26 @@ PINNED: set[tuple[str, str, str, int]] = {
      "_audit/2026-09-20-the-contingent-writeoffs.md", 1),
     ("BLOCKER", "PROXIMITY-NOT-PARSED",
      "_audit/2026-09-20-the-contingent-writeoffs.md", 2),
-    ("TOOL", "linkedin_applied_jobs",
-     "_audit/2026-09-20-the-contingent-writeoffs.md", 1),
 }
+
+#: REPAIRED 2026-09-20, and removed from PINNED by the ratchet's own instruction.
+#:
+#: ("TOOL", "linkedin_applied_jobs",
+#:  "_audit/2026-09-20-the-contingent-writeoffs.md", 1)
+#:
+#: That document asserted three tool names supporting a claim that the tracker
+#: is read today. Measured against the package: the middle one had never
+#: existed, and `linkedin_saved_jobs` was mis-assigned -- it serves `J 45`,
+#: while `J 47` and `J 48` are BOTH `linkedin_my_applications`. The paragraph's
+#: claim still holds; the names under it did not. It now carries a correction
+#: block that discloses the absence, which is why `_DISCLOSES` clears it.
+#:
+#: WORTH KEEPING because of HOW it was repaired. Three attempts were made to
+#: silence this without reading the guard: inserting a space mid-name (the
+#: prefix still matched, correctly), then guessing at disclosure wording. The
+#: fourth attempt read `_DISCLOSES` and used the form the corpus already uses.
+#: A guard whose suppressors are documented is cheaper to satisfy honestly than
+#: to work around, and this one made the honest route the easy one.
 
 #: Every verdict the classifier can hand down other than the finding itself.
 #: Kept as an explicit list so that ADDING a suppressor without a corpus

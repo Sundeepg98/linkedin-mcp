@@ -263,9 +263,24 @@ tracker*, source `a8684146`, among rows about LinkedIn's own My Jobs stages.
 So for a job in the LinkedIn tracker, `referral_join.py` has no input at all.
 
 **And the two halves both exist in this repo already.** The server reads the
-tracker today -- census rows 47-49 are COVERED-PROVEN, `linkedin_saved_jobs`,
-`linkedin_applied_jobs`, `linkedin_draft_applications` -- and the proximity
-field sits on the job surfaces, per `J 40` above. What is missing is the join,
+tracker today -- census rows 47-49 are COVERED-PROVEN -- and the proximity
+field sits on the job surfaces, per `J 40` above.
+
+> **CORRECTED 2026-09-20, after this paragraph was written.** It originally
+> named three tools here: `linkedin_saved_jobs`, `linkedin_applied_jobs` --
+> **which does not exist and has never existed in this package; it resolves
+> nowhere in the tree** -- and `linkedin_draft_applications`. Measured against
+> the package: that middle name is a phantom, and the first is
+> mis-assigned -- `linkedin_saved_jobs` serves `J 45`, while `J 47` and `J 48`
+> are BOTH `linkedin_my_applications`. Only `linkedin_draft_applications` was
+> right. The paragraph's claim that the tracker is read today still holds; the
+> tool names supporting it did not.
+>
+> Found twice over, which is why it is worth recording rather than silently
+> editing: a sibling wave caught it while re-verifying this document's own
+> prescribed replacement cells before applying them -- the re-verification was
+> not a formality -- and the asserted-names guard then caught it again on the
+> merged tree, where documents from six waves sit together for the first time. What is missing is the join,
 and nobody owns it because the row was filed as served.
 
 **REPLACEMENT.** `J 57` -- **GAP**, blocker `PROXIMITY-NOT-PARSED` (BLOCKED
