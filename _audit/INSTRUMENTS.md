@@ -7404,7 +7404,7 @@ Section 42 found this at one site and repaired one module. This wave asked how
 big the class was. **Measured: 115 page readers, 16 of them carried a planted
 name out through an exception.** All 16 repaired -- **51 of 103 hazard sites
 closed** -- and the guard that holds the property is
-`tests/test_readers_emit_no_page_string.py`, shown failing on **11 readers**
+`tests/test_readers_emit_no_page_string.py`, shown failing on **12 readers**
 under the coercion that shipped.
 
 ### 44.1 `scripts/_census_page_coercions.py` -- THE ENUMERATION, AND WHY IT PARSES
@@ -7534,12 +7534,16 @@ first written would have called `returns_text` and passed.
 
 > **A NAME THAT LEAVES THROUGH A CAUGHT EXCEPTION HAS STILL LEFT.**
 
-Measured: **22 coercion sites sit inside such a try, and all 22 are
-`int(await ...count())`** -- Playwright integers. The hazard is real and **empty
-BY CONSTRUCTION, not by luck**, which is 44.2's law holding up under a second
-test it was not designed for. `carries_a_laundered_exception` closes it anyway,
-matching phrases only a failed coercion produces, checked BEFORE `returns_text`
-because a check wired in the wrong order is a check that does not run.
+Measured: **22 coercion sites sit LEXICALLY inside such a try, and all 22 are
+`int(await ...count())`** -- Playwright integers, which is 44.2's law holding up
+under a second test it was not designed for. **But lexical containment is not
+the whole hazard**, and an AST scan cannot see the rest: a try can wrap a CALL
+to a reader that coerces elsewhere, and `writes._read_item_comment_box` is that
+shape -- under the plant it RETURNS the caught message instead of raising.
+`carries_a_laundered_exception` catches it at runtime, matching phrases only a
+failed coercion produces, checked BEFORE `returns_text` because a check wired
+in the wrong order is a check that does not run. It is the twelfth conviction
+in 44.5's control; without it the control reported eleven.
 
 **AND IT MAY NOT CLAIM MORE THAN IT RAN.** `not_driven` is a third verdict,
 never a pass. `tests/reader_leak_baseline.json` records the verdict for all 115

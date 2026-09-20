@@ -333,11 +333,19 @@ passed it.
 
 > **A NAME THAT LEAVES THROUGH A CAUGHT EXCEPTION HAS STILL LEFT.**
 
-Measured: **22 coercion sites sit inside such a `try`**, and **all 22 are
-`int(await ...count())`** -- Playwright integers, which the page cannot turn
-into a string. So the hazard is real and **empty BY CONSTRUCTION rather than by
-luck**, which is the PAGE-CONTROLLED / PLAYWRIGHT-TYPED distinction of section
-2 holding up under a second, independent test it was not designed for.
+Measured: **22 coercion sites sit LEXICALLY inside such a `try`**, and **all 22
+are `int(await ...count())`** -- Playwright integers, which the page cannot turn
+into a string. That is the PAGE-CONTROLLED / PLAYWRIGHT-TYPED distinction of
+section 2 holding up under a second, independent test it was not designed for.
+
+**BUT "LEXICALLY INSIDE" IS NOT THE WHOLE HAZARD, AND SAYING IT WAS WOULD BE
+THE SAME MISTAKE ONE LEVEL DOWN.** A `try` can also wrap a CALL to a reader
+that coerces somewhere else entirely, and then the callee's ValueError is
+caught and returned by the caller. `writes._read_item_comment_box` is exactly
+that shape: under the plant it does not raise past its caller, it returns the
+message. An AST scan for `int(` inside a try body cannot see it -- only driving
+the code can, which is why the detector is a runtime one and why this section
+does not claim the hazard is empty.
 
 `plantedpage.carries_a_laundered_exception` closes it anyway, matching on
 phrases only a failed coercion produces (*"invalid literal for int()"*) -- no
@@ -355,11 +363,18 @@ bindings replaced. **A control whose defect is the real previous state is the
 strongest kind available**, because nobody has to argue the mutation is
 representative.
 
-Result: **11 readers go RED under the plant and GREEN again on its removal**,
-including both readers this wave was originally sent to repair. 44 clean
-readers are NOT convicted, which is the expected half -- a reader whose values
-are already integers cannot leak through a coercion, and the plant demonstrates
-that by failing to make it.
+Result on the committed tree: **12 readers go RED under the plant and GREEN
+again on its removal**, including both readers this wave was originally sent to
+repair. 43 clean readers are NOT convicted, which is the expected half -- a
+reader whose values are already integers cannot leak through a coercion, and
+the plant demonstrates that by failing to make it.
+
+It was **11 before the laundered-exception detector was added**, and the
+twelfth is `writes._read_item_comment_box`: under the plant it does not raise
+past its caller, it RETURNS the caught `ValueError`'s message. Without that
+detector it scored `returns_text` and the control would have reported one fewer
+conviction than the defect actually causes. **The number moved because the
+instrument got better, which is the only honest reason a number may move.**
 
 It rebinds at every import site and **prints how many bindings it replaced**,
 because `from linkedin_server.coerce import as_count` copies the function
