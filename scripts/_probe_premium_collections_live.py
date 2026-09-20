@@ -492,7 +492,33 @@ async def main() -> int:
               f" / {reading.get('hydrated')}   seen="
               f"{reading.get('list_container_seen')}")
         print(f"                   {result.get('banks')}")
-    print(f"    analytics captions drawn      : {analytics.get('count')}")
+
+    # **THE ANALYTICS READING IS BRANCHED ON, NOT PRINTED.** The first version
+    # of this block printed `analytics.get('count')` and nothing else, so a
+    # refusal, an auth wall or a reader exception would all have rendered as
+    # `None` beside the word "drawn" -- a control taken and never acted on,
+    # which is the decorative-control defect this repository has a guard for.
+    # It caught this on CI, on a test the local impact gate did not select.
+    # A count that was never taken and a count of zero are different findings
+    # and they do not share a line.
+    if analytics.get("refused"):
+        print("    analytics captions drawn      : NOT READ -- the read "
+              "boundary refused the address. Nothing loaded.")
+    elif analytics.get("authwall"):
+        print("    analytics captions drawn      : NOT READ -- auth wall. "
+              "An OUTAGE, not an absence.")
+    elif analytics.get("error"):
+        print(f"    analytics captions drawn      : NOT READ -- the reader "
+              f"raised {analytics['error']}. An OUTAGE, not an absence.")
+    else:
+        drawn = int(analytics.get("count") or 0)
+        named = sum(1 for v in analytics.get("verdicts") or [] if v.get("named"))
+        print(f"    analytics captions drawn      : {drawn}  "
+              f"({named} matched an authored candidate, "
+              f"{drawn - named} unidentified)")
+        if not drawn:
+            print("    THE CAPTION READER RETURNED NOTHING. That is a reading "
+                  "about the reader until a control says otherwise.")
     return 0
 
 

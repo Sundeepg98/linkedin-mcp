@@ -300,6 +300,26 @@ function: its own comment records the first -- *"No fixture caught it: every
 committed capture of this page has zero `<main>` elements, so the tests took
 one branch and production took the other."*
 
+**AND THE TWO ARE SEPARABLE BY STRUCTURE, NOT ONLY BY READING THEM.** That
+matters because a reader is not allowed to decide what a caption means by its
+text. Walking the ancestor chain of all five labels on the capture, carrying no
+label text and no attribute value:
+
+    label  control         ancestor chain
+    ------------------------------------------------------------------
+    0      input:checkbox  label < div x7                    a filter
+    1      input:checkbox  label < div x7                    a filter
+    2      input:checkbox  label < div x7                    a filter
+    3      input:radio     label < div < div < fieldset < ... < form
+    4      input:radio     label < div < div < fieldset < ... < form
+
+**The three real filters are CHECKBOXES under plain divs. The two intruders are
+RADIOS inside a `<fieldset>` inside a `<form>`** -- a submitted feedback form,
+which is what an ad's "why am I seeing this" control is. A fallback that
+skipped labels enclosed by a `form` or `fieldset` would have returned exactly
+three here, with no vocabulary and no text inspection. That is a fix available
+to whoever owns this reader, offered rather than applied.
+
 ### 5b. What that costs, stated as a defect and not as a curiosity
 
 * `filters` is **contaminated** on the live page: 3 real captions plus whatever
@@ -340,6 +360,27 @@ that was supposed to corroborate it did not. A before/after control must be
 read on the same surface; the next wave to use it should read the badge on the
 control page at both ends.
 
+### 6a. AND A SECOND DECORATIVE CONTROL IN THE SAME FILE, CAUGHT BY CI AND NOT BY ME
+
+The verdict block ended with `print(analytics.get('count'))` and nothing else.
+So a boundary refusal, an auth wall and a reader exception would ALL have
+rendered as `None` beside the word *"drawn"*, and the probe would still have
+exited 0. **A reading taken and never branched on is not a control**, and this
+repository has a guard for exactly that shape:
+`test_probe_controls_are_never_decorative`, which named the file, the line, the
+function and the variable.
+
+**THE LOCAL IMPACT GATE DID NOT SELECT THAT TEST.** It reported PASS over 78
+files and said plainly that 105 of 183 test files -- about 45% of the suite --
+went unrun; this was in the 45%. CI, on three platforms and six shards, failed
+it on two ubuntu shards within minutes of the push. **That is the gate's
+induction step working exactly as its own docstring claims** -- a fast local
+check whose base case is the whole-tree run in CI -- and it is the argument for
+pushing rather than sitting on a green local gate.
+
+The fix is a real branch on all four outcomes, not a baseline entry. The
+guard's own message says so: *"do NOT add it here to clear the red."*
+
 ---
 
 ## 7. THE HONEST LEDGER
@@ -362,6 +403,18 @@ control page at both ends.
   the jobs slice can decide whether a row should exist. **I am not writing one
   -- inventing a census row to have something to bank is the inflation this
   ledger exists to prevent**, and it would also move the denominator.
+
+  **AND THE ABSENCE IS ENUMERATED RATHER THAN ASSERTED**, because a refusal
+  that reports only what it did not match is half a measurement. The corpus
+  holds four nearby rows and not one of them is this capability: `J 79` *Mark
+  a job "Top Choice" (Premium, 3/month)* and `J 80` *Attach an optional message
+  to the poster with a Top Choice mark* are the WRITE act of marking a job,
+  which spends a non-renewable quota and is nothing this tool does; `J 41` and
+  `J 42` are the job-collections weekly digest and the five groupings on
+  `/jobs/collections/recommended/`, a different surface with its own tool.
+  **Reading the top-choice collection is a capability the census never
+  enumerated**, which is `refusal-census-vs-capability-census` exactly: you can
+  grep for what a repository refuses, never for what nobody considered.
 
 **NOT BANKED, AND WHY:**
 
