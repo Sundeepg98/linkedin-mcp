@@ -74,6 +74,10 @@ COVERED_ROWS: dict[tuple[str, str], tuple[str, str]] = {
         "COVERED-UNFIRED",
         "the job-posting verification badge, as a boolean inside insights",
     ),
+    ("jobs.md", "151"): (
+        "COVERED-UNFIRED",
+        "multi-location search: a plan, a merge, and one url per place",
+    ),
 }
 
 
@@ -140,6 +144,60 @@ def test_the_company_filter_chain_is_still_whole() -> None:
     assert 'COMPANY_FILTER_KEY = "f_C"' in filter_src, (
         "jobfilter.COMPANY_FILTER_KEY is no longer f_C; J 10 claims a company "
         "filter and the query key it is built from has changed"
+    )
+
+
+def test_the_multi_location_chain_is_still_whole() -> None:
+    """``J 151``'s coverage, and the link that is NOT a name anyone would grep.
+
+    The chain is plan -> merge -> tool -> url. Three of the four links are
+    ordinary names. The fourth is the one worth asserting: the capability is
+    only safe because EVERY location reaches a url through ONE function that
+    takes ONE place, so the two spellings measured wrong on 2026-09-05 -- a
+    comma-joined pair, and ``location`` appended twice -- are unreachable by
+    construction rather than by care. A fan-out that grew a second url builder
+    would break nothing a name check can see, and would break exactly that.
+
+    ``tests/test_job_search_multiple_locations.py`` asserts the BEHAVIOUR
+    against a driven page. This asserts the row's claim against the tree, which
+    is the direction that survives somebody deleting the behaviour test.
+    """
+    server_src, filter_src = _source("server.py"), _source("jobfilter.py")
+
+    assert "def locations_plan" in filter_src, (
+        "jobfilter.locations_plan is gone; census row J 151 claims COVERED "
+        "and the verdict that decides which places a call visits no longer "
+        "exists"
+    )
+    assert "def merge_location_reads" in filter_src, (
+        "jobfilter.merge_location_reads is gone; J 151's chain is broken at "
+        "the merge step and a fan-out would return only its last place"
+    )
+    assert "locations_plan(" in server_src, (
+        "server.py no longer consults the plan; J 151's chain is broken "
+        "between the tool and the verdict"
+    )
+    assert "locations: str" in server_src, (
+        "the tool parameter J 151 rests on is gone"
+    )
+
+    # THE URL FUNNEL. One builder, and the location it appends is the argument
+    # it was given -- not a list, not a join.
+    tree = ast.parse(server_src)
+    builders = [
+        node
+        for node in ast.walk(tree)
+        if isinstance(node, ast.FunctionDef) and node.name == "_search_url"
+    ]
+    assert len(builders) == 1, (
+        "expected exactly one _search_url; found %d. Every location must "
+        "reach a url through ONE function taking ONE place, or the spellings "
+        "measured wrong on 2026-09-05 become reachable again" % len(builders)
+    )
+    body = ast.unparse(builders[0])
+    assert body.count("'location'") + body.count('"location"') == 1, (
+        "the url builder names the location key more than once, which is the "
+        "shape LinkedIn was measured to strip down to the last city: %s" % body
     )
 
 

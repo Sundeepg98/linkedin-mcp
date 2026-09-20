@@ -120,7 +120,7 @@ PINNED_TOOL_SURFACE: dict[str, tuple[str, ...]] = {
     "linkedin_search_jobs": (
         "company_id", "date_posted", "easy_apply", "experience_level",
         "fair_chance_employer", "in_your_network", "job_type", "keywords",
-        "limit", "location", "remote", "sort_by", "start",
+        "limit", "location", "locations", "remote", "sort_by", "start",
         "under_ten_applicants",
     ),
     "linkedin_send_invitation": ("confirm_token", "member"),
@@ -156,8 +156,17 @@ PINNED_TOOL_SURFACE: dict[str, tuple[str, ...]] = {
 #: this wave DID ship: `linkedin_creator_analytics`, banking `M C40` in
 #: the same commit -- which is the sequence this guard exists to force,
 #: demonstrated by its author rather than only demanded of others.
+#:
+#: **RE-PINNED 2026-09-20 AT 44 TOOLS AND 62 PARAMETERS**, and this one is the
+#: case the file's own header calls the hole it was dug for: a PARAMETER on an
+#: existing tool, with the tool count not moving at all. `locations` shipped on
+#: `linkedin_search_jobs` and banks census row `J 151` -- filter a job search by
+#: MULTIPLE simultaneous locations -- in the same commit. The row is banked as
+#: COVERED-UNFIRED rather than COVERED-PROVEN, because the fan-out is tested
+#: offline and has not been run against live LinkedIn; that is a statement about
+#: the evidence class, not a hedge about whether the capability exists.
 PINNED_TOOL_COUNT = 44
-PINNED_PARAMETER_COUNT = 61
+PINNED_PARAMETER_COUNT = 62
 
 
 def live_surface() -> dict[str, tuple[str, ...]]:

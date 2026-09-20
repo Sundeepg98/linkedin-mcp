@@ -153,6 +153,32 @@ PASSTHROUGH = "PASSTHROUGH"
 DECLARED: dict[tuple[str, str], tuple[str, int]] = {
     # --- PASSTHROUGH: the neutral relay, pinned -----------------------------
     ("shape.py", "envelope"): (PASSTHROUGH, 1),
+    # THE SECOND RELAY, ADDED 2026-09-20 WITH THE MULTI-LOCATION FAN-OUT
+    # (census row J 151), AND THIS GUARD IS THE ONLY THING THAT ASKED.
+    # ``merge_location_reads`` folds N per-place envelopes into one, and copies
+    # ``source_url`` at TWO sites, which is why the count is 2 and not 1:
+    #
+    #   1. inside the per-place loop, into each ``searches`` entry -- verbatim
+    #      off the envelope ``shape.envelope`` already built;
+    #   2. in the merged return, as ``searches[0]["source_url"]``.
+    #
+    # PASSTHROUGH RATHER THAN UNMEASURED, ON THIS TABLE'S OWN LOGIC. The
+    # category describes what THIS SITE DOES, not where its value came from --
+    # ``shape.envelope`` is PASSTHROUGH although several of its callers are
+    # declared UNMEASURED one row apart. This function never opens a page and
+    # never learns a landed url; it copies strings it was handed. Shaping here
+    # would be the reflexive wrap the assertion message warns against, and it
+    # would double-shape whatever the declared emission point upstream already
+    # decided.
+    #
+    # WHAT THE CATEGORY DOES NOT COVER, said plainly because site 2 is not a
+    # pure relay: it SELECTS one url out of N. A caller reading ``source_url``
+    # on a fan-out gets the FIRST place's search, not the call's. That is a
+    # correctness claim rather than an identity one -- a jobs-search url
+    # carries the caller's own keywords and place and no member id -- and it is
+    # answered in the payload rather than hidden: every place's url is in
+    # ``searches``, and ``pages_loaded`` says how many there were.
+    ("jobfilter.py", "merge_location_reads"): (PASSTHROUGH, 2),
     # --- SHAPED: incidental, and shaped on a stated ground -------------------
     # Four refusal/success paths on a surface that carries THIRD PARTIES -- his
     # connections -- and the four are ONE ruling applied four times rather than

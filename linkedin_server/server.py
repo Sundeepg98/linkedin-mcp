@@ -3431,6 +3431,7 @@ _BOOLEAN_FILTERS: tuple[tuple[str, str], ...] = (
 async def linkedin_search_jobs(
     keywords: str,
     location: str = "",
+    locations: str = "",
     remote: str = "any",
     date_posted: str = "any",
     experience_level: str = "",
@@ -3478,13 +3479,40 @@ async def linkedin_search_jobs(
     exactly as it would if you typed the query on the site. That is the only
     trace a search leaves, and it is on your account, not anyone else's.
 
-    ONE LOCATION, NOT SEVERAL, AND THAT IS NOW A MEASURED REFUSAL RATHER THAN
-    AN UNMEASURED OMISSION. LinkedIn's own search accepts more than one
-    location and this tool takes a single string. This docstring used to say
-    "nobody here has measured HOW LinkedIn spells a second location in a url"
-    and predicted that a guessed encoding "does not fail loudly -- it silently
-    searches somewhere else". Both plausible spellings were measured live on
-    2026-09-05 and the prediction was exactly right:
+    SEVERAL LOCATIONS ARE REACHED WITH SEVERAL LOADS, NOT WITH A SECOND
+    SPELLING OF THE URL. Pass `locations` -- places separated by SEMICOLONS,
+    never by commas -- and this tool runs one search per place and merges them.
+    `location` (singular) is the one-place case and is unchanged; supplying
+    both is refused, because one asks for a single search and the other for
+    several.
+
+    WHAT THE FAN-OUT IS AND WHAT IT IS NOT. It is one call, one merged
+    shortlist, and one round-robin pass so a trim falls evenly across the
+    places rather than amputating the last of them; every row carries
+    `found_in`, the place whose search returned it first, and `searches`
+    reports what each place gave. It is NOT LinkedIn's own cross-location
+    ranking: no request is made that names two places, so what comes back is
+    several per-city windows merged, and postings a single cross-city search
+    would have ranked between them were never in any of the pages this read.
+    It also costs one page load per place, and each load is a row in your own
+    recent-search history, which is why `jobfilter.MAX_LOCATIONS` caps it at
+    five per call -- a cost budget on this server, not a LinkedIn limit anyone
+    here has measured.
+
+    AND THE SEMICOLON IS NOT A STYLE CHOICE. A comma is part of a place's own
+    spelling -- "City, Region, Country" -- so a comma-separated list cannot be
+    parsed back into the places that went into it, and both readings fail
+    SILENTLY. That is why `locations` naming only ONE place is refused rather
+    than run: a lone entry is either a caller who wanted `location`, or a
+    caller who comma-separated two cities and is one load away from the
+    failure measured below.
+
+    THE URL SPELLINGS WERE MEASURED AND BOTH ARE WRONG, which is why this is
+    several loads rather than one. This docstring used to say "nobody here has
+    measured HOW LinkedIn spells a second location in a url" and predicted that
+    a guessed encoding "does not fail loudly -- it silently searches somewhere
+    else". Both plausible spellings were measured live on 2026-09-05 and the
+    prediction was exactly right:
 
     * ``location=A%2C%20B`` (comma-joined) -- LinkedIn KEEPS the pair and
       returns seven postings of which ZERO are among A's distinctive results
@@ -3497,16 +3525,27 @@ async def linkedin_search_jobs(
       not the one they wrote first.
 
     Both spellings are therefore WRONG rather than unmeasured, and neither
-    ships. Reaching two cities honestly needs LinkedIn's numeric place ids,
-    which a posting does not carry and which only a second page load could
-    resolve -- so it is a second-load capability, not a parameter, and it is
-    left out on that ground. Two searches, one per city, is the correct route
-    today. Evidence: scripts/_probe_job_search_result_sets.py, pass two.
+    ships -- no url this tool builds ever carries a comma-joined pair of
+    places or a repeated `location` key. That reading named the route taken
+    here in its own words: "Two searches, one per city, is the correct route
+    today", and `locations` is that route moved inside the tool. The remaining
+    unreached thing is LinkedIn's numeric place ids, which a posting does not
+    carry and which only a further page load could resolve; they are what a
+    genuine ONE-request multi-location search would need, and nothing here has
+    them. Evidence: scripts/_probe_job_search_result_sets.py, pass two.
 
     Args:
         keywords: what to search for, e.g. "senior node.js engineer".
         location: city, region or country. Empty means LinkedIn's default.
-            ONE location; see the note above.
+            ONE location. For several, use `locations` instead of putting
+            commas in here; see the note above for why a comma cannot mean
+            "and".
+        locations: several places, SEMICOLON-separated, e.g.
+            "City A, Region, Country; City B, Region, Country". One page load
+            each, merged and de-duplicated by job id, at most
+            `jobfilter.MAX_LOCATIONS` per call. Naming only one place here is
+            refused -- pass it as `location`. Supplying this and `location`
+            together is refused. Empty means no fan-out.
         remote: any | on_site | remote | hybrid.
         date_posted: any | past_24h | past_week | past_month.
         experience_level: comma-separated from internship, entry, associate,
@@ -3547,9 +3586,21 @@ async def linkedin_search_jobs(
                 "message": "keywords is required -- an empty search is a page of noise.",
             }
 
-        params: list[tuple[str, str]] = [("keywords", keywords.strip())]
-        if location.strip():
-            params.append(("location", location.strip()))
+        # WHICH PLACES THIS CALL VISITS, decided before any parameter is built
+        # because a refusal here costs no page load at all. The verdict lives
+        # in ``jobfilter`` and not inline for the reason stated on the company
+        # filter above: its refusals have to be aimed at their known-bad inputs
+        # directly, and logic inside this function has no handle.
+        plan = jobfilter.locations_plan(location, locations)
+        if plan["state"] == "refused":
+            return {"error": "bad_argument", "message": plan["why"]}
+        places: list[str] = plan["places"]
+
+        # EVERY PARAMETER EXCEPT THE LOCATION. The location is spliced in per
+        # search below, at the index it has always occupied -- second, right
+        # after the keywords -- so a one-place call builds the same url it
+        # built before this argument existed.
+        params: list[tuple[str, str]] = []
 
         workplace = _WORKPLACE.get(remote.strip().lower(), "sentinel")
         if workplace == "sentinel":
@@ -3659,18 +3710,49 @@ async def linkedin_search_jobs(
         if start:
             params.append(("start", str(start)))
 
-        url = f"{BASE_URL}/jobs/search/?{urlencode(params)}"
-        result = await _read_cards(
-            url,
-            href_pattern=dom.JOB_HREF,
-            parser=shape.parse_job_card,
-            limit=limit,
-            surface="job search",
-            allow_empty=True,
-        )
+        def _search_url(place: str) -> str:
+            """The url for ONE place. The ONLY place a location reaches a url.
+
+            One function, both paths, and that is the point rather than tidiness:
+            the two spellings measured wrong on 2026-09-05 -- a comma-joined pair
+            and a repeated ``location`` key -- are unreachable from here because
+            this takes ONE string and appends ONE pair. A fan-out that built its
+            own url would be free to reinvent either of them.
+            """
+
+            head: list[tuple[str, str]] = [("keywords", keywords.strip())]
+            if place.strip():
+                head.append(("location", place.strip()))
+            return f"{BASE_URL}/jobs/search/?{urlencode(head + params)}"
+
+        reads: list[tuple[str, dict[str, Any]]] = []
+        for place in places:
+            reads.append(
+                (
+                    place.strip(),
+                    await _read_cards(
+                        _search_url(place),
+                        href_pattern=dom.JOB_HREF,
+                        parser=shape.parse_job_card,
+                        limit=limit,
+                        surface="job search",
+                        allow_empty=True,
+                    ),
+                )
+            )
+
+        if plan["state"] == "fanout":
+            result = jobfilter.merge_location_reads(reads, limit=limit)
+        else:
+            result = reads[0][1]
         result["query"] = {
             "keywords": keywords.strip(),
             "location": location.strip() or None,
+            # THE PLACES ACTUALLY VISITED, and null on a one-place call so the
+            # echo cannot be read as a fan-out that did not happen. On a fan-out
+            # this is the list AFTER duplicates collapsed, which is the list the
+            # loads were made from rather than the list the caller typed.
+            "locations": places if plan["state"] == "fanout" else None,
             "remote": remote,
             "date_posted": date_posted,
             "experience_level": levels or None,
@@ -3691,6 +3773,28 @@ async def linkedin_search_jobs(
                 "the search page rendered but held no job cards -- either the "
                 "filters matched nothing, or the offset is past the end of the "
                 "results."
+            )
+        elif plan["state"] == "fanout":
+            # THE FAN-OUT GETS ITS OWN NOTE BECAUSE THE SHORTFALL NOTE BELOW
+            # WOULD BE FALSE HERE, in both of its halves. Its arithmetic adds
+            # one window's page_had to `start`, and there is no ONE window to
+            # page: each place has its own offset and they advance together
+            # under a single `start`. And its premise -- "a short page is the
+            # NORMAL case" -- is the right thing to say about one load and the
+            # wrong thing to say about a merged list, where a short result can
+            # equally mean a place returned nothing at all. `searches` is what
+            # answers that, per place, so this note points at it rather than
+            # guessing which case fired.
+            result["note"] = (
+                "%d searches, one per place, merged round-robin and "
+                "de-duplicated by job id. This is NOT LinkedIn's own "
+                "cross-location ranking: no request named more than one place. "
+                "Read `searches` for what each place gave -- a place with "
+                "page_had 0 returned nothing, which a short merged list cannot "
+                "tell you on its own. The window was measured at 7 postings "
+                "per load on 2026-09-05, so `start` advances every place at "
+                "once and offsets by postings, not by pages."
+                % len(reads)
             )
         elif result.get("page_had", 0) < limit:
             # THE SHORTFALL SAYS SO, RATHER THAN LOOKING LIKE AN ANSWER.
