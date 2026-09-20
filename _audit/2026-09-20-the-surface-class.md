@@ -20,7 +20,7 @@ Worktree cut from `8b58dcb`. All counts stamped 2026-09-20.
 
 ---
 
-## 0. THE HEADLINE, IN FOUR LINES
+## 0. THE HEADLINE, IN FIVE LINES
 
 1. **The class as published cannot be enumerated.** Its classifier was never
    committed and its inputs are gitignored and gone. 186,629,988,917,605
@@ -40,7 +40,7 @@ Worktree cut from `8b58dcb`. All counts stamped 2026-09-20.
    For 15 of 25 that deadlock silently broke -- the allowlist grew while the
    ledger's cost column did not (s3.4).
 5. **Rows banked out of GAP: 0.** Nothing here moves a row, and the reason is
-   in section 6. Rows inflated: 0. 13 blockers are named CANNOT-TELL and
+   in section 6. Rows inflated: 0. 12 blockers are named CANNOT-TELL and
    costed; **six of them are answered by three page loads** (s7.1).
 
 ---
@@ -335,6 +335,30 @@ real bug in my table (s3.4, s5.0), and the `INMAIL-COMPOSE-SURFACE` tension --
 ordinary composer the row already rules out is reachable. That one is recorded
 unresolved.
 
+**The six were then re-derived without my table, and this is the part worth
+reading.** Asked what each verdict rests on with my output removed, that sweep
+ran its OWN `readonly.is_read_url` calls **with a must-allow/must-refuse
+control pair** -- so the re-derivation is not itself a dead check -- and
+reported honestly rather than defensively:
+
+* four (`BADGES`, `CONTENT-ANALYTICS`, `JOB-ALERTS`, `JOB-COLLECTIONS`) stand
+  on its own calls plus documents from 2026-09-05 to 2026-09-19, none of them
+  mine;
+* `MESSAGE-REQUESTS` survives on its base address only, and the sweep
+  **re-flagged that the row's actual capability -- the requests sub-view --
+  was NOT-YET-EVIDENCE in its original section and still is**, refusing to let
+  the base-address survival read as if it covered the row;
+* **`GROUP-CHAT-SURFACE` was the one genuine dependency.** The string
+  `/messaging/` as that blocker's address came from my table and nowhere else.
+  What rescued it was already in the sweep's own section, sourced but never
+  framed as an addressability finding: a 2026-09-05 live probe **successfully
+  loaded an actual conversation thread**, which a refused address could not
+  have done. It stands on that, not on me.
+
+The control that mattered there is small and general: `/messaging/compose/`
+allows while `/messaging/?compose=true` refuses, so the permissive reading is
+not a blanket allow.
+
 ### 4.1 Group A -- the six with recent sibling activity
 
 | blocker | rows / GAP | EXISTENCE, as measured | ruling |
@@ -459,10 +483,26 @@ that sounds careful**, which is the hardest kind to notice.
 | disposition | blockers | what it means |
 |---|---:|---|
 | **US-FACT** -- reader, WriteSpec, boundary or ruling missing | 11 | stays GAP; the ledger already names the artifact |
-| **CANNOT-TELL** -- nobody captured the page | 13 | stays GAP; costed in s7 |
+| **CANNOT-TELL** -- nobody captured the page | 12 | stays GAP; costed in s7 |
 | **CONTINGENT (operator)** -- `SERVICES-PAGE-SURFACE` | 1 | stays GAP; condition + reopener now named |
 | **ADDRESS DISPUTED** -- `CREATOR-HUB-SURFACE` | 1 | stays GAP; two sources, opposite verdicts |
+| **NOT SWEPT** -- `PREMIUM-JOBS-SURFACES` | 1 | four sibling agents hold it; not mine to rule |
 | **MEASURED-ABSENT** -- LinkedIn does not draw it | **0** | -- |
+| | **26** | |
+
+**The 26 sums only because the last row is honest.** The three sweeps covered
+6 + 9 + 10 = **25**. `PREMIUM-JOBS-SURFACES` was deliberately left out of every
+brief -- the source document filed it under ACCOUNT rather than here, and four
+sibling agents are working it. It is in the class by the name rule and it is
+**adjudicated by nobody in this document**, which is a different thing from
+being ruled. Counting it as adjudicated would have made this table sum to 26
+the easy way.
+
+**Two of the 11 US-FACTs carry an open existence SUB-question** and appear in
+the capture list in s7.1 even though their primary ruling stands:
+`COMPANY-PAGE-SURFACE` (the tabs are ours; the root render was never seen) and
+`JOB-ALERTS-SURFACE` (the writes are ours; the redirect target was never
+named).
 
 ---
 
@@ -551,9 +591,9 @@ tooling were in the checker, not the checked.
 | rows inflated | **0** |
 | rows re-attributed | **0** (see below) |
 | census state cells edited | **0** |
-| blockers adjudicated | **26 of 26** |
+| blockers adjudicated | **25 of 26** (1 is sibling-owned, s4.4) |
 | blockers ruled US-FACT | 11 |
-| blockers ruled CANNOT-TELL, named and costed | 13 |
+| blockers ruled CANNOT-TELL, named and costed | 12 |
 | blockers ruled CONTINGENT with a reopener | 1 |
 | blockers whose ADDRESS is disputed | 1 |
 | blockers ruled MEASURED-ABSENT | **0** |
@@ -576,7 +616,7 @@ before.
 
 ## 7. WHAT THIS WAVE COULD NOT RULE, AND THE EXACT COST OF RULING IT
 
-**13 of the 26 are CANNOT-TELL-WITHOUT-A-CAPTURE.** That is a real outcome,
+**12 of the 26 are CANNOT-TELL-WITHOUT-A-CAPTURE**, plus an existence sub-question inside two more (s4.4). That is a real outcome,
 not a failure: the question is whether LinkedIn draws a page, and no committed
 artifact answers it because nobody has opened the page. Each is named with the
 exact address that would settle it.
