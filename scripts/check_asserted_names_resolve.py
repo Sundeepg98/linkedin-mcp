@@ -493,8 +493,19 @@ _MINT_OF = (
 )
 #: DOCUMENT-scoped and NAME-SPECIFIC: the document disclosing this name's
 #: absence, which is the document being RIGHT.
+#: THE WINDOW CROSSES NEWLINES ON PURPOSE. It did not at first, and the guard
+#: convicted a sentence whose disclosure had simply wrapped:
+#:
+#:     * `linkedin_zzz_planted_tool` does not exist. `linkedin_zzz_quoted_output`
+#:       does not exist. `linkedin_zzz_indented_quote` does not exist.
+#:
+#: The middle name sat at a line end and its "does not exist" began the next
+#: line. Markdown renders that as ONE paragraph and a reader sees one sentence,
+#: so a line-bounded window measures the author's text wrapping rather than
+#: what they said. 120 characters of any whitespace is the same span a reader
+#: takes in either way.
 _ABSENT_OF = (
-    r"{name}`?[^\n]{{0,120}}?(?:exists?\s+only\s+in|does\s+not\s+exist"
+    r"{name}`?[\s\S]{{0,120}}?(?:exists?\s+only\s+in|does\s+not\s+exist"
     r"|not\s+one\s+of\s+the\s+97|never\s+ruled|appears?\s+nowhere)"
 )
 

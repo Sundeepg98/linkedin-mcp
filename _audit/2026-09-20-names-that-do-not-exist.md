@@ -91,6 +91,11 @@ to say the true thing plainly:
 * **`linkedin_zzz_not_a_real_tool` does not exist**, deliberately. It is a
   fabricated control needle, named here only because section 7.1 is about the
   hour it stopped being one.
+* `linkedin_zzz_planted_tool` does not exist. `linkedin_zzz_quoted_output`
+  does not exist. `linkedin_zzz_indented_quote` does not exist. Every `ZZZ-`
+  name in this document does not exist. All are needles planted to prove
+  something could fail, and **a report that names its own needles owes the
+  reader the disclosure it demands of everyone else.**
 
 The guard is silent on this file now, and it is silent for the reason it is
 silent on the other 162 clean documents: **the marks were discharged.** No
@@ -152,10 +157,20 @@ Two further slot forms were added after measurement:
 
 **A markdown table cell under a column whose header names blockers, where the
 name IS the cell.** This is the strongest slot evidence in the corpus:
-**358 cells selected, 353 naming a ledger blocker, and the DISTINCT names it
-selects are exactly the ledger's 97.** The slot reproduces the registry by
-position alone. That property is asserted in
-`test_the_table_slot_still_reproduces_the_registry`, not merely recorded here.
+**360 cells selected, and the DISTINCT names it selects contain all 97 of the
+ledger's blockers** plus the five unapplied mints of section 5.1. The slot
+reproduces the registry by position alone.
+
+The predicate is a SUBSTRING test on the header, and the distribution says why:
+347 of the 360 selections sit under the bare word `blocker`, and 13 sit under
+four other spellings -- `successor blocker (proposed)` 5, `the blocker` 4,
+`new blocker` 2, `blocker name` 2. A fifth, `first blocker, corrected`, matches
+the predicate and carries no names today. Those parts sum to the total, which
+is not decoration: **the first version of this table did not sum.** It
+attributed each selection to every blocker column in its table, so
+two-blocker-column tables double-counted and the parts came to 20 against a
+total of 13. A child reading the report caught the arithmetic and declined to
+reconcile it silently, which is the only reason it was caught at all.
 
 *"The name IS the cell" is load-bearing, not tidiness.* `_census/profile.md`
 heads its fifth column `evidence / blocker` and fills it with prose, so a
@@ -607,6 +622,16 @@ reported as a text census.
    absent.** Correct for CI, which sees only the tracked tree, and worth saying
    because a reader in the main checkout may find the file sitting on disk.
 
+6. **The disclosure window is 120 characters and nothing makes that the right
+   number.** It was line-bounded at first, which measured the author's text
+   WRAPPING rather than what they wrote -- a disclosure split across a line
+   break did not register, and the guard convicted a sentence for being
+   reflowed. It now spans whitespace, which is how markdown renders a
+   paragraph. The 120 itself is still a threshold nobody derived: a disclosure
+   further than that from its name is invisible, and a disclosure closer than
+   that but about a DIFFERENT name will excuse the wrong one. Neither failure
+   was observed in this corpus; both are reachable.
+
 ---
 
 ## 7. The instrument, shown failing -- starting with the time it failed for real
@@ -664,4 +689,85 @@ the bug and left production blind -- the `linkedin_leave_group` suppressor would
 have stayed dead, and the next real invented name that anyone documented would
 have disappeared the same way.
 
-_(section 7.2 carries the planted red-proof battery.)_
+### 7.2 The planted battery -- nine mutations, and the two that did NOT go red
+
+Run under this repository's standing protocol: never in the live tree; copy
+`linkedin_server`, `tests`, `scripts`, `_audit` and `pytest.ini` to scratch;
+ASSERT (not confirm) that the module resolves under the copy AND that the repo
+path is absent from it; one mutation at a time; only the selector that should
+die; restore by re-copying that one file, `diff`-verified empty; finish on a
+clean control run.
+
+| # | mutation | expected | result |
+|---|---|---|---|
+| R1 | append an unmarked `blocker \`ZZZ-PLANTED-BLOCKER\`` line to a corpus doc | pin RED | **RED**, naming document and blocker |
+| R2 | append an unmarked `\`linkedin_zzz_planted_tool\`` line | pin RED | **RED**, naming the TOOL |
+| R3 | rewrite the two pinned `PROXIMITY-NOT-PARSED` sites to a REAL blocker | pin RED in the `repaired` branch | **RED**, in the right branch |
+| R4 | `classify()` returns `[]` | detector control RED | **RED** |
+| R5 | add `"MARKED-NOTHING-EVER"` to `MARKERS` | dead-suppressor test RED | **RED**, naming it |
+| R6 | narrow the header predicate to an exact match | slot control RED | **GREEN. See 7.3.** |
+| R7 | restore the old `CODE_DIRS` (put the self-disarm bug back) | registry control RED | **RED**, and it reproduced the original event one for one |
+| R8 | delete `fenced()`'s indented-block handling | pin RED on the parity census | **GREEN. See 7.4.** |
+| R9 | `classify()` returns `[]`, run BOTH controls | positive RED, negative GREEN | **exactly that** |
+
+**R9 is the pairing proof and its finding is a sentence worth keeping:** under a
+dead `classify()`, `test_the_detector_finds_a_planted_assertion` goes RED while
+`test_a_marked_name_is_not_convicted` stays GREEN. **Neither is valid alone.**
+The negative control is satisfied both by working suppressors and by a detector
+that does no work; the positive control is satisfied both by working suppressors
+and by a detector that convicts everything. Each rules out exactly the failure
+the other cannot see.
+
+### 7.3 R6: the slot control was a union claim, and could not fail
+
+Narrowing the header predicate from a substring test to an exact match removes
+twelve genuinely blocker-labelled columns from the corpus -- and
+`test_the_table_slot_still_reproduces_the_registry` **passed cleanly**. Its
+docstring called itself "the whole precision argument for the slot, asserted
+rather than believed". It was not.
+
+The reason is the corpus, not the code: the test asks whether all 97 ledger
+blockers appear SOMEWHERE in the slot's output, and this corpus is redundant
+enough that every one of them is also cited under a bare `blocker` header or in
+a backtick phrase slot elsewhere. **A union claim over a redundant corpus cannot
+see a narrowing.** Confirmed twice, on two independent clean baselines, and
+diagnosed read-only with the mutation still live rather than by tuning it.
+
+Repaired by exercising the predicate DIRECTLY -- a synthetic one-row table per
+header spelling, through the real code path. Re-run against the repair
+(**R6-PRIME**): the new test goes RED naming all five non-bare spellings; the
+union test stays green, now for a reason its own docstring states. Both are
+kept: **collapse and narrowing are different failures.**
+
+**R6-PRIME-B, and it is a lesson about red-proofs rather than about this
+guard.** The same mutation was predicted to kill one marker class. It killed
+**two**: `MARKED-PROPOSAL-TABLE` as expected, and `MARKED-PROPOSAL-DOC`
+unpredicted -- because that suppressor's only three corpus examples sit under
+the headers `new blocker` and `blocker name`, two of the same five spellings.
+One column-exclusion, two independently-named downstream consumers. **A
+single-selector red-proof under-reports the blast radius of its own mutation**,
+and a reviewer who ran only the named selector would have shipped believing one
+gap was closed.
+
+### 7.4 R8: a mechanism that is correct and load-bearing nowhere
+
+Deleting the indented-block handling changed nothing: 38 candidate sites before,
+38 after, the same 4 findings, across 167 files. The document that motivated it
+is **doubly defended** -- `CONTRACT_MODULES` puts those sixteen names in the
+registry by a path `fenced()` never touches -- and no other indented block in
+the corpus carries a candidate-shaped name.
+
+Not deleted. "Nothing in today's corpus needs it" is an argument about today,
+and the next document to quote an indented `FORBIDDEN_*` list is one commit
+away. Instead the synthetic document in `test_a_marked_name_is_not_convicted`
+now carries an indented block of its own, so the path is exercised by the only
+thing that will notice if it breaks.
+
+### 7.5 What the battery cost, and what it bought
+
+Nine mutations. **Seven behaved. Two did not, and the two that did not are the
+whole value of running it.** One exposed a control that could not fail, in the
+module whose own docstring explains why that is the expensive kind; the other
+exposed a mechanism nothing exercises. Neither was reachable by reading the
+code, and neither would have been found by a battery that tuned its mutations
+until they went red.

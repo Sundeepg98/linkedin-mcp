@@ -227,16 +227,24 @@ def test_every_marker_class_fires_on_the_real_corpus(measured):
     )
 
 
-#: Every header spelling that carries blocker cells in this corpus, measured,
-#: with the cell-selections each one brings. Five of the six are NOT the bare
-#: word, and they are the whole reason the predicate is a substring test.
+#: Every header spelling the predicate recognises in this corpus, with the
+#: table-cell selections each one actually brings. They sum to the measured
+#: total of 360, which is the check that caught the first version of this list:
+#: an earlier count attributed each selection to EVERY blocker column in its
+#: table, so a two-blocker-column table double-counted and the parts summed to
+#: 20 against a total of 13. The numbers now reconcile.
+#:
+#: `first blocker, corrected` carries ZERO cells and is kept deliberately. It is
+#: a real header the predicate matches; its column simply holds no UPPER-KEBAB
+#: name today. Dropping it would narrow the list to what the corpus happens to
+#: exercise, which is how a predicate quietly stops covering its own domain.
 BLOCKER_HEADER_SPELLINGS = (
     "blocker",                        # 347 selections
-    "first blocker, corrected",       #   7
     "successor blocker (proposed)",   #   5
     "the blocker",                    #   4
     "new blocker",                    #   2
     "blocker name",                   #   2
+    "first blocker, corrected",       #   0 -- matched, and carries no names
 )
 
 
