@@ -391,3 +391,44 @@ Two things the gate still cannot see, and neither is claimed:
 3. **The floor's 25.6s**, which is now paid on every invocation. It is the price
    of not shipping a real name into served history, and that trade should be
    made knowingly rather than inherited.
+
+---
+
+## 9. The actual answer to "what would zero latency cost"
+
+Zero is not reachable -- there is a hard floor of roughly 1.7s of interpreter
+and imports before pytest asserts anything, plus 1.3-3.2s of analysis. But the
+interesting number is not the floor, it is **what is still O(suite) after this
+change**, because that is the part that keeps growing:
+
+| component | shape | cost today |
+|---|---|---|
+| selector analysis | O(corpus), but text-only and prefiltered | 1.3 - 3.2s |
+| selected tests | **O(change)** -- the property that was bought | 1s - 190s |
+| **corpus-wide floor** | **still O(suite)** | **25.6s and rising** |
+
+**The floor is the remaining defect, and it is not irreducible.** Checked on
+disk after the gate was built:
+
+    tests/test_no_committed_identity.py      sweeps EVERY tracked file     part of 25.6s
+    scripts/pre_commit_identity_gate.py      scans STAGED CONTENT ONLY     0.220s
+
+They enforce the same property. One is O(suite) and one is O(change), the
+O(change) one already exists, is already installed in `.git/hooks/pre-commit`,
+and is **116x cheaper**. The corpus-wide version earns its keep as a CI
+certifier over the whole tree; carrying it in a local per-commit gate is paying
+suite price for a change-sized question.
+
+So the route to a genuinely flat gate is not a smarter selector -- the selector
+is already O(change). It is **pairing each corpus-wide guard with an
+incremental sibling** that asks the same question of the diff, exactly as the
+identity property already does, and letting the corpus-wide form run on CI
+where a whole-tree sweep belongs. Of the 13 floor members, one is known to have
+such a sibling. The others have not been checked, and that measurement is the
+next piece of work rather than a claim made here.
+
+Until then the 25.6s stands, deliberately. A sibling wave shipped red twice in
+one day for want of exactly these guards, and the identity one guards the least
+reversible thing this repository can do -- a real name in served history. **The
+right order is: keep the floor, then earn the way out of it with measurements,
+never trade it away for a faster number.**
