@@ -26,6 +26,8 @@ without the argument in section 7.**
     CANNOT-TELL blockers measured    10    section 12, 7 loads, 0 rows moved
     redirect targets named            2    section 12, one of them 15 days old
     write-offs classified by fact     13    section 13, 0 moved, 2 re-verified
+    ALLOWED-AND-STILL-WRONG found      3    /jobs/alerts/, /messaging/, /jobs/collections/recommended/
+    caveats found against my own rows  1    section 14, and it resolves in their favour
 
 **THE SCARCE RESOURCE WAS THE SESSION AND IT WAS SPENT ON READS.** Thirteen
 tool calls, one six-page capture, and -- after the first freeze -- four more
@@ -1035,3 +1037,87 @@ cell that closes a row should say which of the four kinds its reason is, and
 every ACCOUNT-FACT and WORLD-FACT should carry the event that reopens it.
 Seven of the thirteen above need nothing -- a ruling is its own trigger. Four
 need one and have none. Two now have one.
+
+---
+
+## 14. THE SERVER THAT ANSWERED SECTION 3 WAS 58 COMMITS STALE -- AND WHY THE ROWS STILL STAND
+
+Found at the end, by a tool that volunteers its own staleness, not by
+suspicion. It is a caveat on this wave's two banked rows and it resolves in
+their favour, which is exactly why it has to be stated rather than omitted.
+
+### 14.1 What the server reported about itself
+
+    loaded_commit       8b58dcb        disk_commit   6086911
+    commits behind      58
+    process started     2026-09-20T04:22:38Z
+    commit_moved        True           stale         True
+
+**A RUNNING MCP SERVER HOLDS THE CODE IT STARTED WITH.** Every call in section
+3 -- the entitlement read, `linkedin_who_viewed_me`, seven
+`linkedin_job_detail` calls -- ran against `8b58dcb`, which is exactly where
+master stood when this wave began.
+
+### 14.2 Why `J 123` and `N 135` are unaffected, checked rather than assumed
+
+    git diff --stat 8b58dcb..HEAD -- dom.py server.py shape.py   ->  EMPTY
+
+**Not one of the three modules behind those rows has changed in 58 commits.**
+`read_job_insight_panels`, `read_profile_views_insights`, the `server.py` call
+sites and `shape.envelope` are byte-identical between what the process is
+running and what is on disk now. The readings stand.
+
+**AND THE ONE `linkedin_server/` FILE THAT DID MOVE IS MY OWN.** `readonly.py`
+-- the two patterns this wave added. So the staleness is, in this instance,
+entirely self-inflicted and entirely harmless to the measurements.
+
+### 14.3 The consequence that is NOT harmless, and it matters for the next wave
+
+**THE TWO ADDRESSES THIS WAVE ADMITTED ARE NOT IN THE RUNNING SERVER.** A
+`mcp__linkedin__*` call against port 8322 today would still refuse
+`/learning/role-play/scenarios/` and `/jobs/jam`, because that process loaded
+its allowlist before they existed.
+
+The probes reached them anyway and the distinction is worth writing down:
+**a probe run as `./venv/Scripts/python.exe scripts/...` imports `readonly`
+FRESH FROM DISK; the long-lived server holds the copy it booted with.** Both
+were correct about their own world. Anyone who concludes from a live MCP
+refusal that an address is unadmitted has measured the process, not the file.
+
+**The server needs a restart before either address is reachable over the
+wire.** Not done here: it is shared, three other waves are live, and a
+restart is not this wave's to take.
+
+### 14.4 Two things confirmed for free while establishing the above
+
+**`JOB-COLLECTIONS` -- the "five groupings" residual is already closed, and a
+fresh load agrees.** The census row was flagged to me as possibly not matching
+what is drawn. It matches: the row already states the groupings are NOT drawn,
+measured against a positive control that matches 5 of 5 on a synthetic
+fixture. Re-fired today over the MCP wire:
+
+    groupings matched      0 of 5        nodes scanned   58
+    unmatched headings    44
+    anchors seen          25             job postings     9
+    leaf values           34, of which 6 strings
+    payload contains "linkedin.com"      False
+    payload contains "/in/"              False
+
+**Nothing to correct.** The row is right, its control fires, and its
+name-freedom holds on the wire on a second independent occasion.
+
+**AND A THIRD REDIRECT, unlooked for:** that call reports `redirected: true`.
+`/jobs/collections/recommended/` is admitted, serves, and does not serve at
+the spelling requested. **That is the third ALLOWED-AND-STILL-WRONG specimen
+in one session**, after `/jobs/alerts/` and `/messaging/`. Three in one wave
+stops being a curiosity and becomes a property of the surface: **LinkedIn
+redirects freely, and an allowlist records intentions rather than
+destinations.**
+
+### 14.5 The resources were left working, and that was verified
+
+The first `linkedin_job_collections` call returned `browser_unavailable`. That
+was transient contention between the server's page pool and this wave's own
+CDP probes, not damage: an immediate retry returned `ok: true` with the full
+payload above. Re-checked at close -- Chrome listening on 9224, the server
+serving 45 tools on 8322. **Both left running, as instructed.**
