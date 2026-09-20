@@ -55,9 +55,9 @@ today: `J 37`, `J 38`, `J 39`, `J 40`, `J 57`, `J 131`.
 
 ### 1.1 The instruments, run rather than described
 
-The skill lives outside this repo at
-`D:\Sundeep\projects\job-hunting\.claude\skills\linkedin-jobs\`. All three of
-its executables were run offline, against their own committed fixtures:
+The skill lives outside this repo, at `<job-hunting>/.claude/skills/linkedin-jobs/`
+(path written repo-relative on purpose -- the absolute one carries a real name).
+All three of its executables were run offline, against their own committed fixtures:
 
     parse_digest.py    --selftest   SELFTEST PASS -- 7 msgs, 38 cards, 37 unique, 5 proximity, 1 dupe
     career_insights.py --selftest   SELFTEST PASS -- 4 msgs, 36 entries, 29 unique people, 30 slug / 6 post
@@ -847,6 +847,19 @@ Everything here is re-runnable offline. Nothing needs a session or a mailbox.
 The scratch TSVs are gitignored by design and are inputs, not conclusions --
 every number quoted above was re-derived from them in this document and each
 one is reproducible from the committed census.
+
+**One hygiene note, corrected before it was reported as a finding.** This
+document first quoted the skill's location as an ABSOLUTE path, which carries a
+real name, and the commit passed. My first inference was the known worktree
+scar -- a gate disarmed because its key is gitignored. **Measured instead of
+reported:** `sweep_tracked_for_identity.py` resolves `KEY_PATH` against the
+MAIN repo, not the worktree, so the key is present and the gate runs ARMED here
+(`PASS: 0 hits across 544 swept files`, 218 spellings, 16 classes). The token
+is on the key's own `_ignore_values` list, deliberately, because it is
+unavoidable in the absolute Windows path that `ci.yml`, `pyproject.toml` and
+two tests already carry. **So the gate behaved correctly and the scar does not
+reproduce here.** The path is now written repo-relative anyway, because the
+instruction is about tracked files rather than about what a gate catches.
 
 **What was run, and what was deliberately not.** Read: `blocker-map.tsv`,
 `blocker-assignments.tsv`, the four census slices, the ledger documents, the
