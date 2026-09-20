@@ -82,7 +82,14 @@ MUST_ALLOW: tuple[tuple[str, str], ...] = (
 MUST_REFUSE: tuple[tuple[str, str], ...] = (
     ("My Network itself -- the badge-consuming parent",
      f"{BASE}/mynetwork/"),
-    ("a company Page", f"{BASE}/company/example-co/"),
+    # A COMPANY PAGE ROOT WAS THIS ROW UNTIL 2026-09-20 AND IT IS NOW
+    # ALLOWED -- the root was admitted for COMPANY-PAGE-SURFACE, and this
+    # control went red and refused to certify its table, which is the
+    # instrument working rather than breaking. The Page's PEOPLE TAB replaces
+    # it: the same surface's member roster, refused by the new entry's anchor
+    # and by nothing else, so the row still holds the class it was here for.
+    ("an organisation's member roster",
+     f"{BASE}/company/example-co/people/"),
     ("a third party's interests tab",
      f"{BASE}/in/someone-else/details/interests/"),
     # REFUSED BY SUBSTRING RATHER THAN BY PATTERN. Without this the table

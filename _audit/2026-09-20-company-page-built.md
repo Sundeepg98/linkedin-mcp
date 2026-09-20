@@ -441,8 +441,8 @@ Shipped:
 
 Tests:
 
-- `tests/test_company_page.py` -- NEW, 63 assertions. The shaper.
-- `tests/test_company_page_boundary.py` -- NEW, 45 assertions. The limits, with
+- `tests/test_company_page.py` -- NEW, 64 tests. The shaper.
+- `tests/test_company_page_boundary.py` -- NEW, 45 tests. The limits, with
   four planted mutations shown firing.
 - `tests/test_readonly.py` -- `/company/example-co/` left `MUST_STAY_UNREADABLE`
   and NINETEEN neighbours joined it. Recorded, not silently dropped: the risk
@@ -462,6 +462,10 @@ pre-existing `/school/` line instead lands on `bd5f83178ce63d94`, and a needle n
 line carries drops zero lines and moves nothing.
 
 Local runs: a 14-file GREEN BASELINE was taken at the tree before anything was
-touched -- 1516 passed, 0 failed. After the change, four sweeps over the
-touched set and its neighbours: 1005, 190, 752 and 328 passed, 0 failed.
-THE FULL SUITE IS CI'S and has not been run on this box.
+touched -- 1516 passed, 0 failed. After the change, sweeps over the touched set
+and its neighbours: 1005, 855, 752, 328, 190 and 118 passed, 0 failed.
+
+**THE FULL SUITE IS CI'S.** The first commit is CERTIFIED GREEN: run
+35481841288 completed success across all 18 jobs -- ubuntu 3.10 x 6 shards,
+ubuntu 3.13 x 6, windows 3.13 x 6. Later commits are queued behind it on the
+same branch.

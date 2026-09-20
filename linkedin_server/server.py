@@ -3841,12 +3841,39 @@ async def linkedin_job_detail(job_id: str) -> dict[str, Any]:
     employers and not others; that is the normal case and not a failure.
 
     company_about IS THE EMPLOYER ITSELF, AND IT COMES FROM A SURFACE THIS
-    SERVER CANNOT OPEN. followers, industry, size_band and on_linkedin are
-    capabilities the surface census files against the company Page -- a
-    THIRD PARTY'S page, not on the read allowlist, and one whose view cost
-    nobody here has measured. LinkedIn draws all four on this posting's own
-    About-the-company card, so they arrive at no extra page load, no
-    boundary change, and no visit to that Page.
+    TOOL DOES NOT OPEN. followers, industry, size_band and on_linkedin are
+    capabilities the surface census files against the company Page, whose
+    view cost nobody here has measured. LinkedIn draws all four on this
+    posting's own About-the-company card, so they arrive at no extra page
+    load and no visit to that Page.
+
+    THIS PARAGRAPH SAID THE COMPANY PAGE WAS "NOT ON THE READ ALLOWLIST"
+    UNTIL 2026-09-20 AND THAT IS NO LONGER TRUE. The Page ROOT --
+    /company/<slug or numeric id>/, that one segment and nothing under it --
+    was admitted for COMPANY-PAGE-SURFACE. It is corrected rather than
+    quietly dropped, because a reader who remembers the old guarantee needs
+    to meet the change here rather than infer it. What has NOT changed is
+    every word about this tool: no tool in this package navigates to that
+    address, and these four fields still come off the posting.
+
+    company_page IS THAT PAGE COUNTED, NEVER NAMED. It classifies the
+    About-the-company card's own links into the Page's tabs and returns
+    COUNTS -- no slug, no address and no name is in it, which is why the
+    card's links can be read at all. counts is positionally aligned to
+    company_page.TAB_KINDS; use company_page.term_for(index) to name one.
+
+    ITS ZERO IS AS INFORMATIVE AS ITS COUNTS, AND ONE ZERO IS PERMANENT:
+    page_roots is 0 on every posting held here, because the card links the
+    Life tab and never the Page root. Read it as "this card does not carry
+    the root", never as "this employer has no Page".
+
+    company_page_url IS THE ADDRESS company_id NOW REACHES. Census row N 104
+    -- find an organisation's Page -- was blocked on the two halves never
+    being joined: the id resolver above, and the allowlist entry. It is the
+    NUMERIC form and only ever the numeric form, because a slug is a name and
+    a digit run cannot be one. It is null whenever company_id.state is not
+    'resolved', which is the normal case on four of the five captures held
+    here. Nothing in this package opens it; it is for you.
 
     size_band AND on_linkedin ARE TWO DIFFERENT FACTS AND WILL DISAGREE.
     size_band is the range the organisation DECLARED ('51-200'); on_linkedin

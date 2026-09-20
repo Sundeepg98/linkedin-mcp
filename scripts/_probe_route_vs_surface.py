@@ -55,7 +55,19 @@ MUST_ALLOW: tuple[tuple[str, str], ...] = (
 MUST_REFUSE: tuple[tuple[str, str], ...] = (
     ("people search -- the general case, deliberately absent",
      f"{BASE}/search/results/people/?keywords=x"),
-    ("a company Page", f"{BASE}/company/example-co/"),
+    # A COMPANY PAGE ROOT WAS THIS ROW UNTIL 2026-09-20 AND IT IS NOW
+    # ALLOWED -- the root was admitted for COMPANY-PAGE-SURFACE, and this
+    # control duly went red and refused to certify the table below it, which
+    # is the instrument working rather than breaking.
+    #
+    # WHAT REPLACES IT IS SHARPER THAN WHAT IT LOST. The row existed to hold
+    # "a third party's organisation surface, refused by no pattern". The
+    # Page's PEOPLE TAB is that surface's member roster: refused by this
+    # boundary's anchor and by NOTHING else, and out of scope by the same
+    # ruling that put a group's roster out of scope by name. If the anchor is
+    # ever loosened into a family pattern, this row is what goes red.
+    ("an organisation's member roster",
+     f"{BASE}/company/example-co/people/"),
     ("the password page -- substring, not pattern",
      f"{BASE}/mypreferences/d/change-password"),
     ("a third party's details page", f"{BASE}/in/someone-else/details/skills/"),
