@@ -4058,3 +4058,50 @@ A subset-counting script (the 1.87e14 figure), a fixture-corpus path-family
 tally, and the standalone red-proof harness. The first two produced numbers now
 quoted in the wave document; the third is superseded by the committed test
 file, which plants the same five defects and is re-runnable in CI.
+
+### 24.7 `A-WATCHER-THAT-EXITS-ZERO-WHEN-IT-NEVER-SAW-A-VERDICT`
+
+**Found 2026-09-20 in the CI-reporting path every wave uses.** Not a test: the
+command waves run to decide whether to report a run green.
+
+`gh run watch <id> --exit-status` is documented to exit non-zero when the run
+fails. **It also exits ZERO when it never learns the run's conclusion at all.**
+Four watches in this wave returned exit code 0 and their transcripts end:
+
+    * every shard reported (ID 106027531906)
+    failed to get run: HTTP 403: API rate limit exceeded for user ID ...
+    [exited with code 0]
+
+The watcher polled, lost the API to a fleet-wide 403 (5,000/hr is shared across
+every tool and agent, and several waves were pushing at once), gave up, and
+**reported success by exiting 0**. Four background tasks then notified
+"completed (exit code 0)", which reads exactly like four green runs.
+
+**THE SHAPE IS THIS REPOSITORY'S OWN STANDING RULE, arriving from outside the
+codebase:** verify by ARTIFACT, never by exit code, because a loop that
+exhausts its attempts exits 0. It has been written here about retry loops. It
+is equally true of a WATCHER, and a watcher is more dangerous because its exit
+code is the only thing a notification carries.
+
+**THE CHECK, and it costs one command.** Never report a conclusion from the
+watcher's exit code. Read the conclusion back:
+
+    gh run view <id> --json status,conclusion,headSha
+
+and if THAT call fails, the run's state is UNKNOWN -- which is a different
+answer from green and must be reported as such. A rate-limited query is an
+outage, not a measurement: this is the same law as
+`A-BLIND-CHANNEL-MUST-NOT-REPORT-A-CLEAN-ABSENCE` (s2.2), and the same one a
+memory in this project already records -- a probe with no `except` turns an
+infrastructure outage into a finding about the platform.
+
+**WHAT IT COST HERE: nothing, because the exit codes were disbelieved** and the
+run list had already been read as an artifact for the two commits that matter.
+Recorded so the next wave does not spend the discovery again, and so that
+"exit code 0" never again appears in a wave report as evidence of a green CI.
+
+**A SECOND-ORDER NOTE WORTH HAVING.** `gh api rate_limit` reported
+`core: 5000/5000, used 0` while `gh run list` and `gh run view` both returned
+403 in the same minute. **The bucket that is exhausted is not the bucket that
+endpoint reports**, so "rate_limit says we are fine" does not license a retry.
+Treat the 403 itself as the measurement.
