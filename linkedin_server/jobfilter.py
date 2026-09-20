@@ -1,4 +1,19 @@
-"""The company filter for a job search, and the one thing it must never echo.
+"""Job-search arguments that need a test handle of their own.
+
+Two of them live here, and the reason is the same in both cases: each turns a
+caller's string into a search, each can be WRONG in a way that returns a
+plausible page rather than an error, and neither can be aimed at its known-bad
+input while it lives inside ``linkedin_search_jobs``.
+
+* **The company filter** -- census row ``J 10``. Its refusal must describe the
+  SHAPE of a rejected value and never quote it, because the likeliest wrong
+  value is a company slug and a slug is an organisation's name. That is the
+  first half of this file.
+* **Multiple simultaneous locations** -- census row ``J 151``. Both url
+  spellings LinkedIn might have accepted were MEASURED WRONG, so the capability
+  is several loads rather than one parameter, and the merge that follows is
+  pure logic with no browser in it. That is the second half, from
+  :data:`LOCATIONS_SEPARATOR` down.
 
 ``J 10`` -- filter a job search by company -- was filed against
 ``COMPANY-ID-RESOLVER`` on the reasoning that ``f_C`` needs a numeric Page id
@@ -149,4 +164,310 @@ def company_filter_param(company_id: str) -> dict[str, Any]:
         "state": "resolved",
         "param": (COMPANY_FILTER_KEY, text),
         "why": f"a {len(text)}-digit Page id, appended as {COMPANY_FILTER_KEY}",
+    }
+
+
+# ---------------------------------------------------------------------------
+# MULTIPLE SIMULTANEOUS LOCATIONS -- census row ``J 151``.
+#
+# THE ROW IS NOT PARAMETER WORK, AND THAT IS A MEASUREMENT RATHER THAN AN
+# OPINION. ``linkedin_search_jobs``'s own docstring carries the full reading
+# taken on 2026-09-05: with city A alone returning seven postings and city B
+# alone seven, sharing two --
+#
+#     location=A%2C%20B      KEPT by LinkedIn, returns seven postings of
+#                            which ZERO are A-only and ZERO are B-only. It
+#                            geocodes somewhere neither search reaches.
+#     location=A&location=B  STRIPPED. LinkedIn serves the LAST city alone,
+#                            and a caller who wrote A first never learns it.
+#
+# Both spellings are WRONG rather than unmeasured, so neither ships, and the
+# same docstring names the honest route: "Two searches, one per city".
+#
+# THIS IS THAT ROUTE, MOVED INSIDE THE TOOL. One load per place, merged and
+# de-duplicated here. What it buys is a single call and a single shortlist
+# spanning several cities. What it does NOT buy is LinkedIn's own ranking
+# ACROSS those cities, because no request is ever made that names two places.
+# That distinction is stated in the tool's docstring rather than papered over:
+# a merged pair of per-city windows is a different object from one cross-city
+# window, and a caller comparing this against LinkedIn's web ui has to know
+# which of the two they are holding.
+#
+# THE SEPARATOR IS A SEMICOLON, AND THAT IS THE WHOLE OF THE SAFETY ARGUMENT.
+# A comma is part of a location's OWN spelling -- LinkedIn's typeahead writes
+# places as "City, Region, Country" -- so a comma-separated list of locations
+# cannot be parsed back into the places that went into it. Both readings fail
+# silently and in the direction already measured: split a qualified place on
+# its commas and you search three places that are not it; DO NOT split it and
+# a caller who comma-separated two cities hands LinkedIn the comma-joined
+# string that was measured to geocode somewhere else. No parse is right for
+# both, so the ambiguous input is REFUSED rather than guessed at.
+# ---------------------------------------------------------------------------
+
+#: What separates one location from the next in the ``locations`` argument.
+#: Named once so the parser, the refusal text and the test that pins it cannot
+#: drift apart. A semicolon does not occur in LinkedIn's own spelling of a
+#: place, which is the property a comma lacks.
+LOCATIONS_SEPARATOR = ";"
+
+#: The ceiling on how many places one call may search.
+#:
+#: **THIS IS A BUDGET AND NOT A MEASUREMENT.** Nothing here has measured a
+#: LinkedIn limit on locations; what is bounded is THIS SERVER's cost, because
+#: every place is one more page load, one more wait, and one more row in the
+#: operator's own recent-search history. Five is the point at which a caller
+#: should be asked to mean it. A future reading of an actual LinkedIn limit
+#: would replace this number and this note together.
+MAX_LOCATIONS = 5
+
+
+def split_locations(text: str) -> list[str]:
+    """Split the ``locations`` argument into places, keeping commas inside them.
+
+    Factored out with a handle of its own for the same reason
+    :func:`describe_shape` has one: the interesting input here is a QUALIFIED
+    place name -- "City, Region, Country" -- and a splitter that can only be
+    reached through the refusal that consumes it can never be aimed at that
+    input directly.
+
+    Empty entries are dropped, so a trailing separator or a doubled one is
+    benign rather than an error. What is never dropped is a comma: every comma
+    survives inside the entry that carried it.
+    """
+
+    return [
+        part.strip()
+        for part in str(text or "").split(LOCATIONS_SEPARATOR)
+        if part.strip()
+    ]
+
+
+def comma_count(text: str) -> int:
+    """How many commas an entry holds. A count, and never the text around them."""
+
+    return str(text or "").count(",")
+
+
+def locations_plan(location: str, locations: str) -> dict[str, Any]:
+    """Decide which places one search call will visit, or refuse to guess.
+
+    A VERDICT rather than a bare list, matching :func:`company_filter_param`
+    beside it. Three states:
+
+    ``single``
+        the ordinary case. ``places`` holds exactly one entry, which is the
+        ``location`` argument as given and may be the empty string, meaning
+        LinkedIn's default. ONE page load, and the url is the one this tool
+        has always built.
+    ``fanout``
+        two or more places. ``places`` holds them in the caller's order with
+        duplicates collapsed; the tool loads one search per entry.
+    ``refused``
+        the arguments cannot be turned into a set of places without guessing.
+        ``places`` is empty and ``why`` says what was seen.
+
+    **EVERY REFUSAL BELOW REPORTS COUNTS AND NEVER THE VALUE.** A place name a
+    caller typed is not a third party's identity the way a company slug is --
+    see this module's first section -- but nothing here NEEDS the text in order
+    to explain itself, and a refusal that quotes its input is one edit away
+    from quoting an input that should never have been echoed. Counts say
+    everything a caller needs in order to act: how many entries were found, and
+    how many commas sat inside the one that was ambiguous.
+    """
+
+    single = str(location or "").strip()
+    raw = str(locations or "")
+
+    if not raw.strip():
+        return {
+            "state": "single",
+            "places": [single],
+            "why": (
+                "no locations list was supplied, so this is one search at the "
+                "location given"
+            ),
+        }
+
+    if single:
+        return {
+            "state": "refused",
+            "places": [],
+            "why": (
+                "location and locations were BOTH supplied and they cannot "
+                "both be honoured -- one asks for a single search and the "
+                "other for several. Pass locations alone for a multi-place "
+                "search, or location alone for one place."
+            ),
+        }
+
+    places = split_locations(raw)
+
+    if not places:
+        return {
+            "state": "refused",
+            "places": [],
+            "why": (
+                "locations held no place names -- separators and whitespace "
+                f"only. Separate places with {LOCATIONS_SEPARATOR!r}, as in "
+                f"'City A, Region, Country{LOCATIONS_SEPARATOR} City B, "
+                "Region, Country'."
+            ),
+        }
+
+    if len(places) == 1:
+        # THE COMMA TRAP, REFUSED RATHER THAN GUESSED AT. One entry means
+        # either a caller who wanted one place and should say so with
+        # ``location``, or a caller who separated two cities with a COMMA --
+        # and that second reading is the failure measured on 2026-09-05, where
+        # LinkedIn keeps the comma-joined string and serves a place that is
+        # neither city. Both readings are cleared by the same one-line change
+        # on the caller's side, so refusing costs nothing, and guessing costs
+        # a shortlist built on a city nobody asked for.
+        return {
+            "state": "refused",
+            "places": [],
+            "why": (
+                "locations named ONE place, and locations means several. The "
+                f"single entry is {describe_shape(places[0])} and holds "
+                f"{comma_count(places[0])} comma(s). If you meant one place, "
+                "pass it as location instead. If you meant several, separate "
+                f"them with {LOCATIONS_SEPARATOR!r} and never with a comma: a "
+                "comma is part of a place's own spelling, and LinkedIn was "
+                "measured on 2026-09-05 to KEEP a comma-joined pair of cities "
+                "and return postings from neither of them."
+            ),
+        }
+
+    # Duplicates collapse instead of costing a load. Compared case-folded and
+    # whitespace-collapsed, because "city a" and "City  A" are one place and
+    # would otherwise buy the same seven postings twice.
+    kept: list[str] = []
+    seen: set[str] = set()
+    for place in places:
+        key = " ".join(place.casefold().split())
+        if key in seen:
+            continue
+        seen.add(key)
+        kept.append(place)
+
+    if len(kept) > MAX_LOCATIONS:
+        return {
+            "state": "refused",
+            "places": [],
+            "why": (
+                f"locations named {len(kept)} distinct places and this tool "
+                f"loads at most {MAX_LOCATIONS} per call, one page load each. "
+                "That ceiling is a cost budget on this server, not a LinkedIn "
+                "limit anyone here has measured. Run the extras as a second "
+                "call."
+            ),
+        }
+
+    return {
+        "state": "fanout",
+        "places": kept,
+        "why": (
+            f"{len(kept)} places, {len(places) - len(kept)} duplicate(s) "
+            f"collapsed; one page load each, {len(kept)} loads in total"
+        ),
+    }
+
+
+def merge_location_reads(
+    reads: list[tuple[str, dict[str, Any]]], *, limit: int
+) -> dict[str, Any]:
+    """Merge one envelope per place into one envelope, and say what each gave.
+
+    ``reads`` is ``(place, envelope)`` in the order the places were loaded, and
+    each envelope is whatever ``shape.envelope`` produced for that load.
+
+    **THE MERGE IS ROUND-ROBIN, AND THAT IS THE ONE DECISION IN THIS FUNCTION
+    WORTH ARGUING ABOUT.** Concatenating the places is the obvious merge and it
+    is silently wrong at this tool's measured numbers: the search window was
+    measured at SEVEN postings per load on 2026-09-05, so three places is up to
+    21 rows against a default ``limit`` of 25 and five places is up to 35. A
+    concatenated list trimmed to 25 would drop the LAST places entirely, and a
+    caller who named five cities would receive four -- with ``capped`` true and
+    nothing at all saying which city vanished. Taking one row from each place
+    in turn makes the trim fall evenly, and every place that returned anything
+    is represented in whatever survives. Order WITHIN a place is untouched, so
+    LinkedIn's own ranking for that city is preserved exactly.
+
+    **DE-DUPLICATION IS BY ``job_id`` AND ONLY BY ``job_id``.** A posting can
+    legitimately answer two cities -- a remote role is the common case -- and
+    returning it twice would inflate the count. A row that carries NO job_id
+    cannot be compared against anything and is kept as it stands; ``unkeyed``
+    on that place's entry counts them, so a caller can see that the de-dupe had
+    rows it could not speak about rather than assuming it had none.
+
+    Every row gains ``found_in``: the place whose search returned it FIRST. It
+    is the provenance the row's own ``location`` field cannot supply, because
+    that field is LinkedIn's spelling of where the JOB is -- frequently
+    "Remote" -- and not a statement about which query found it.
+    """
+
+    per_place: list[list[dict[str, Any]]] = []
+    searches: list[dict[str, Any]] = []
+    seen: set[str] = set()
+    dropped = 0
+
+    for place, envelope in reads:
+        rows = list(envelope.get("results") or [])
+        mine: list[dict[str, Any]] = []
+        repeats = 0
+        unkeyed = 0
+        for row in rows:
+            job_id = row.get("job_id")
+            if job_id:
+                if job_id in seen:
+                    repeats += 1
+                    continue
+                seen.add(job_id)
+            else:
+                unkeyed += 1
+            mine.append({**row, "found_in": place})
+        per_place.append(mine)
+        dropped += int(envelope.get("unparsed_rows") or 0)
+        searches.append(
+            {
+                "location": place,
+                "page_had": int(envelope.get("page_had") or 0),
+                "kept": len(mine),
+                "already_seen": repeats,
+                "unkeyed": unkeyed,
+                "source_url": envelope.get("source_url"),
+            }
+        )
+
+    merged: list[dict[str, Any]] = []
+    for index in range(max((len(rows) for rows in per_place), default=0)):
+        for rows in per_place:
+            if index < len(rows):
+                merged.append(rows[index])
+
+    trimmed = merged[:limit]
+    kept_by_place: dict[str, int] = {}
+    for row in trimmed:
+        kept_by_place[row["found_in"]] = kept_by_place.get(row["found_in"], 0) + 1
+    for entry in searches:
+        entry["in_results"] = kept_by_place.get(entry["location"], 0)
+
+    return {
+        "count": len(trimmed),
+        "page_had": sum(entry["page_had"] for entry in searches),
+        "capped": len(merged) > limit,
+        "limit": limit,
+        "pages_loaded": len(reads),
+        # ONE url where the other tools carry one, and it is the FIRST search's
+        # rather than a joined string, because a caller pasting source_url into
+        # a browser must land on a page this server actually loaded. Every url
+        # is in ``searches``; none of them is hidden.
+        "source_url": searches[0]["source_url"] if searches else None,
+        "searches": searches,
+        # PRESENT ONLY WHEN NON-ZERO, exactly as ``shape.envelope`` emits it.
+        # A key that is always there with a 0 in it reads as "nothing was
+        # dropped anywhere"; a key that appears only when something was dropped
+        # is the signal the rest of this package's results are read with.
+        **({"unparsed_rows": dropped} if dropped else {}),
+        "results": trimmed,
     }

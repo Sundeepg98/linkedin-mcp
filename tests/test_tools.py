@@ -1272,6 +1272,11 @@ async def test_the_search_echoes_back_the_query_it_actually_ran(drive):
     assert result["query"] == {
         "keywords": "node.js engineer",
         "location": "Riverton",
+        # NULL ON A ONE-PLACE CALL, and present rather than omitted for the
+        # same reason the four booleans are echoed when off: a missing key is
+        # a question about whether this build has the fan-out at all, where a
+        # null is an answer about what this call did.
+        "locations": None,
         "remote": "any",
         "date_posted": "any",
         "experience_level": None,
@@ -1292,8 +1297,13 @@ async def test_the_search_echoes_back_the_query_it_actually_ran(drive):
 # of the twelve blockers worth doing and first among the ones needing no
 # ruling: six census rows, one tool, no new surface, no capture, no
 # permission. Five of the six are here. The sixth -- searching several
-# locations at once -- is NOT, and `test_the_tool_says_it_takes_one_location`
-# below is the reason written as a check rather than as a promise.
+# locations at once -- shipped on 2026-09-20 as `locations`, and it was NOT
+# parameter work: both url spellings LinkedIn might have accepted were
+# measured WRONG on 2026-09-05, so it is one page load per place. Its guards
+# live in `tests/test_job_search_multiple_locations.py`;
+# `test_the_tool_says_how_it_reaches_several_locations` below is the docstring
+# half, and it replaced `test_the_tool_says_it_takes_one_location`, which fired
+# on the day the capability landed exactly as its own docstring promised.
 #
 # THE PARAMETER SPELLINGS WERE MEASURED, and the negative control is the
 # half that matters: `f_ZZQQX=true` was STRIPPED from the landed url and
@@ -1436,33 +1446,57 @@ async def test_an_unknown_job_type_names_the_values_it_actually_got(drive):
     assert navigations == [], "a rejected argument must not cost a page load"
 
 
-async def test_the_tool_says_it_takes_one_location(drive):
-    """Census row J 151 is NOT built, and the docstring has to admit it.
+async def test_the_tool_says_how_it_reaches_several_locations(drive):
+    """Census row J 151 IS built now, and the docstring has to say how.
 
-    LinkedIn's own search accepts several locations at once. This tool takes
-    one string, and the blockers ledger costed the gap as pure parameter work
-    -- which is true of the ARGUMENT and false of the URL: how LinkedIn spells
-    a second location has never been measured here, and the ways it might are
-    not interchangeable. A guessed encoding fails SILENTLY, returning results
-    for somewhere else, so the capability is left out and said out loud.
+    THIS TEST REPLACES ``test_the_tool_says_it_takes_one_location``, WHICH
+    FIRED ON 2026-09-20 EXACTLY AS DESIGNED. Its own docstring said it was
+    "the part that cannot rot -- a test that reads the docstring fails the
+    moment the argument becomes a list and nobody updated the prose", and that
+    is what happened: ``locations`` shipped, the prose moved, and the old
+    assertion (``"one location; see the note above" in text``) went red in the
+    same run. The guard is not being deleted for being inconvenient; its claim
+    was retired by the capability landing, and this is the successor claim.
 
-    THIS TEST IS THE PART THAT CANNOT ROT. A note in a docstring saying "not
-    built yet" survives the thing being built; a test that reads the docstring
-    fails the moment the argument becomes a list and nobody updated the prose.
+    WHAT THE SUCCESSOR HAS TO HOLD, and it is MORE than the old one:
+
+    1. The two url spellings measured wrong on 2026-09-05 are still named as
+       measured. That reading is the reason this is several loads rather than
+       one parameter, and a docstring that dropped it would leave the next
+       person free to "simplify" the fan-out back into a comma-joined url.
+    2. The docstring says the fan-out is SEVERAL LOADS. A reader who thinks
+       one call is one request will misread both the cost and the ranking.
+    3. The ``Args:`` block carries it too, on BOTH lines -- the old guard's
+       own red-proof found that a paragraph high up in a docstring does not
+       reach a caller who reads ``Args:`` and stops.
     """
     text = (linkedin_search_jobs.__doc__ or "").lower()
-    assert "one location" in text
+    flat = " ".join(text.split())
+
     assert "measured" in text, (
-        "the reason has to be the reason -- not measured -- rather than a "
-        "bare 'not supported'"
+        "the reason has to be the reason -- measured -- rather than a bare "
+        "'not supported'"
     )
-    # AND THE ARGUMENT ITSELF HAS TO CARRY IT, not only the paragraph above.
-    # ADDED AFTER A RED-PROOF SHOWED THE GUARD WAS WEAKER THAN IT LOOKED:
-    # "one location" occurs TWICE in this docstring, so deleting the `location:`
-    # arg line alone left both occurrences standing and this test passed. A
-    # caller reading `Args:` and stopping there is exactly who the admission is
-    # for, so that line is now asserted on its own.
-    assert "one location; see the note above" in text
+    for spelling in ("location=a%2c%20b", "location=a&location=b"):
+        assert spelling in flat, (
+            "the docstring stopped naming the url spelling %r that was "
+            "measured WRONG on 2026-09-05; without it nothing explains why "
+            "this tool loads one page per place" % spelling
+        )
+    assert "several loads" in flat, (
+        "the docstring has to say the fan-out costs several page loads -- a "
+        "reader who thinks one call is one request misreads both the cost "
+        "and the ranking"
+    )
+
+    # THE ARGS BLOCK, both lines, for the reason the old guard discovered.
+    assert "one location. for several, use `locations`" in flat, (
+        "the `location:` arg line no longer points a caller at `locations`"
+    )
+    assert "locations: several places, semicolon-separated" in flat, (
+        "the `locations:` arg line no longer names the separator, which is "
+        "the one thing a caller gets wrong silently"
+    )
 
 
 # ---------------------------------------------------------------------------
