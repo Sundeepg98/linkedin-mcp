@@ -57,11 +57,11 @@ says so.**
 
 Kinds overlap because a reason may assert more than one; the exact single-count verdicts:
 
-    US-RULING                                       115
-    US-BOUNDARY+US-RULING                            67
-    US-BOUNDARY                                      40
-    UNCLEAR                                          33
-    ACCOUNT-FACT+US-RULING                           20
+    US-RULING                                       112
+    US-BOUNDARY+US-RULING                            69
+    US-BOUNDARY                                      46
+    ACCOUNT-FACT+US-RULING                           30
+    UNCLEAR                                          18
     US-RULING+WORLD-FACT                              8
     ACCOUNT-FACT+WORLD-FACT                           7
     ACCOUNT-FACT                                      6
@@ -310,7 +310,7 @@ say it had changed.** Ordered by what it would cost to settle, cheapest first. T
 machine-generated list is `classify_writeoff_reasons.py --contingent`; this is its
 structure, which is what makes it actionable.
 
-### TIER 1 -- settles by reading one file in this repo. Cost: zero page loads.
+### TIER 0 -- settles by reading one file in this repo. Cost: zero page loads.
 
 | rows | capability | why it is contingent |
 |---|---|---|
@@ -320,7 +320,7 @@ structure, which is what makes it actionable.
 worth doing:** a boundary entry can be wrong for fifteen days while looking settled. Confirm
 the substring still does what the cell says, then decide which half binds.
 
-### TIER 2 -- one instrument this repo already ships. Cost: one page load.
+### TIER 2 -- one instrument this repo already ships. Cost: one page load. **27 rows.**
 
 | rows | capability | the mechanical trigger |
 |---|---|---|
@@ -332,7 +332,8 @@ wearing a code-fact name. This pass reaches the same conclusion from the opposit
 direction -- row cells rather than blocker names -- which is independent agreement, and it
 adds the row count and the instrument.
 
-### TIER 3 -- the InMail family, where the measurement has already been taken twice.
+### TIER 3 -- one page load or one help fetch. **10 rows**, including the InMail family,
+where the measurement has already been taken twice.
 
 | rows | capability |
 |---|---|
@@ -341,12 +342,16 @@ adds the row count and the instrument.
 See section 6.1: for two of these the re-check is not a measurement at all, it is a
 cross-reference.
 
-### TIER 4 -- needs his answer or a live read.
+**The rest of tier 2 and tier 3**, which are individual rather than clustered: `M M39`
+(away message), `M C20` / `M C21` (repost), `N 57` (newsletters subscribed), `N 131`
+(anonymous viewer identity), and the `P D13`-`D17` block (licenses, courses, projects,
+publications, patents). **That last block is a single backreference chain, so it is ONE
+judgement wearing five row ids, not five independent ones** -- which is worth knowing
+before anybody costs it as five.
 
-`M M39` (away message), `M C20` / `M C21` (repost), `N 57` (newsletters subscribed),
-`N 131` (anonymous viewer identity), and the `P D13`-`D17` block (licenses, courses,
-projects, publications, patents) -- which is a single backreference chain, so it is **one**
-judgement wearing five row ids, not five independent ones.
+**THERE IS NO TIER 1 AND THAT IS NOT A GAP IN THE LIST.** Tier 1 is PROCESS-FACT -- a
+refusal read off a running server -- and no census reason rests on one. See 6.2: the zero
+is real and the needle was proved alive.
 
 ### 6.1 THE SHARPEST SINGLE ITEM: one capability, three rows, two states, and the correction reached one of them
 
@@ -389,7 +394,7 @@ reached a census reason cell.
 
 ---
 
-## 7. WHY THE 50 UNCLEAR ROWS ARE UNCLEAR, AND WHICH ARE MY FAULT
+## 7. WHY THE 18 REMAINING UNCLEAR ROWS ARE UNCLEAR, AND WHICH ARE MY FAULT
 
 UNCLEAR is the honest answer only when nobody could tell from what is written. It is **not**
 honest when my rule simply does not know a spelling, so the 50 are split:
@@ -475,7 +480,8 @@ in this corpus contains a space**, so the capture stopped at `P`, the lookup mis
 **inheritance never ran at all.** No error, no warning: every `same` row simply came out
 UNCLEAR, which looks exactly like a census that never wrote a reason. Fixed by recording
 the donor on the row instead of encoding it in a string. **UNCLEAR fell 50 -> 33 and
-contingency rose 49 -> 54**, so the bug was materially distorting the headline.
+contingency rose 49 -> 54** on that fix alone; two further corrections took them to 18 and
+64. The bug was materially distorting the headline, and nothing in the output said so.
 
 **In the harness itself, and it is the same disease one level down.** M1's first version
 rewrote state cells with one regex and left 12 of network.md's 101 write-offs standing --
