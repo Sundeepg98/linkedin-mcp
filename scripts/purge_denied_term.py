@@ -161,7 +161,28 @@ def main() -> int:
     env["FILTER_BRANCH_SQUELCH_WARNING"] = "1"
     subprocess.run(["rm", "-rf", ".git/refs/original"], cwd=str(REPO))
 
-    python = REPO / "venv" / "Scripts" / "python.exe"
+    # THE INTERPRETER IS THE ONE ALREADY RUNNING, NOT ONE RESOLVED FROM REPO.
+    #
+    # This read `REPO / "venv" / "Scripts" / "python.exe"`, and `venv/` is
+    # GITIGNORED -- so it exists in the main checkout and in NO LINKED WORKTREE,
+    # which is where this fleet does its work. The path then went into a
+    # `git filter-branch --tree-filter` shell string, so a miss would not raise
+    # here: the filter would fail on EVERY COMMIT while this function printed a
+    # single captured line. A history-rewriting tool failing quietly is the
+    # worst shape available, and this one rewrites the operator's identity out
+    # of unpushed history.
+    #
+    # `sys.executable` is the interpreter executing this script. It exists by
+    # construction, it is absolute so the tree-filter can use it from any
+    # working directory, and it needs no root-resolution to be right.
+    #
+    # FOURTH REPAIR OF THIS SPELLING IN TWO DAYS -- a test control, a test
+    # module, `enumerate_gap_rows.py`, and now this. Each earlier one was fixed
+    # for the environment that had just bitten. `leak_matrix.py` carries the
+    # same construction and is NOT a defect: it falls back to `sys.executable`
+    # when the file is absent. `pre_commit_boundary_gate.py` is the other
+    # correct form, taking the TOOLING root deliberately and saying why.
+    python = Path(sys.executable)
     print("\nrewriting...")
     proc = subprocess.run(
         ["git", "filter-branch", "--force", "--tree-filter",
