@@ -409,6 +409,14 @@ def classify_route(href: Optional[str]) -> str:
     at all -- rather than admitted as one. A case-insensitive comparison is
     the dangerous repair, because it widens what matches a table whose whole
     job is to be narrow.
+
+    ONE ORDERING CONSEQUENCE, RECORDED SO IT IS NOT DISCOVERED LATER. The
+    ``setup`` check sits BEFORE the two-segment check, so an organisation
+    whose slug is literally ``setup`` classifies as ``page_creation`` rather
+    than as a home tab. That is the conservative direction -- a route named
+    as the creation flow is COUNTED and never mistaken for a Page -- and the
+    alternative ordering has the dangerous miss: LinkedIn's Page-creation
+    flow read as somebody's organisation Page.
     """
     if href is None or not str(href).strip():
         return "no_href"
@@ -549,7 +557,15 @@ def tally(hrefs: Iterable[Optional[str]]) -> dict[str, Any]:
         counts[index[kind]] += 1
         if href and urlsplit(str(href).strip()).query:
             queries += 1
-        if kind in {"off_company", "no_href", TRAVERSAL_REFUSED}:
+        # ``page_creation`` IS IN THIS SKIP SET AND THE OTHERS ARE OBVIOUS.
+        # ``/company/setup/new/`` puts the literal ``setup`` in segment 1,
+        # which ``identifier_kind`` would read as a slug and ``distinct``
+        # would then count as an organisation. It names none: it is the flow
+        # that creates one. Counting it would inflate ``distinct`` by a
+        # product route on any page that links the creation flow.
+        if kind in {
+            "off_company", "no_href", "page_creation", TRAVERSAL_REFUSED
+        }:
             continue
         spelling = identifier_kind(href)
         if spelling == "numeric":

@@ -250,6 +250,27 @@ def test_the_tally_is_integers_and_a_count_list():
         assert isinstance(out[key], int)
 
 
+def test_the_page_creation_flow_is_not_counted_as_an_organisation():
+    """``/company/setup/new/`` puts the literal ``setup`` in segment 1, which a
+    naive count would read as a slug and file as an organisation. It names
+    none -- it is the flow that CREATES one -- so it is counted in its own
+    class and excluded from `distinct`, `slug` and `page_roots`.
+
+    The control beside it is a real Page in the same tally: without one, an
+    implementation that excluded EVERYTHING would pass this.
+    """
+    out = company_page.tally([
+        f"{BASE}/company/setup/new/",
+        f"{BASE}/company/{IDENTIFIER}/",
+    ])
+    creation = out["counts"][company_page.TAB_KINDS.index("page_creation")]
+    assert creation == 1
+    assert out["distinct"] == 1
+    assert out["slug"] == 0
+    assert out["numeric"] == 1
+    assert out["page_roots"] == 1
+
+
 def test_distinct_counts_organisations_without_naming_one():
     """The set is built inside the function and its LENGTH is what leaves."""
     out = company_page.tally([
