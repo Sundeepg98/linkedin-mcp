@@ -3941,3 +3941,120 @@ and vocabulary census, and a landmark-stack locator for one word. All three are
 superseded by the committed probe, which does what they did with controls.
 Their results are the numbers in `_audit/2026-09-20-newsletter-built.md` and in
 the probe's own output.
+
+## 24. THE SURFACE-CLASS ADJUDICATION, 2026-09-20
+
+Appended, not inserted -- see this file's preamble; find these by NAME.
+
+One instrument, `scripts/classify_surface_blockers.py`, with
+`tests/test_surface_class_is_derived.py` (13 tests). Full write-up in
+`_audit/2026-09-20-the-surface-class.md`.
+
+### 24.1 `classify_surface_blockers` -- a membership rule that RUNS
+
+**WHY IT EXISTS.** `_audit/2026-09-20-the-contingent-writeoffs.md` s3.1
+published a class named `SURFACE?` at 22 blockers / 139 rows / 108 GAP. The
+classifier was never committed and its three inputs are gitignored and gone,
+so the membership survives only as three integers -- and **186,629,988,917,605
+distinct 22-blocker subsets of the residual pool fit them exactly.** The same
+defect `build_blocker_map.py` exists to end, one level up.
+
+**SHOWN FAILING in five directions**, each planted against a COPY of the ledger
+in the scratchpad with the module's `LEDGER`/`MAP` constants repointed, so
+nothing tracked was touched:
+
+    ranked table header broken        every boundary cell reads as absent
+    cost-0 table header broken        its blockers read as missing entirely
+    one ranked row deleted            97/409 stops closing
+    SURFACE blocker in neither table  a map/ledger membership disagreement
+    boundary cell IS a surface fact   headline count must move 0 -> 1
+
+### 24.2 `A-ZERO-FROM-A-BRANCH-THAT-CANNOT-FIRE` -- the mutation that matters
+
+The wave's headline is a ZERO: none of the 26 blockers is blocked by a surface
+fact. **A zero is the most dangerous shape a finding can take**, because a
+branch that never fires and a branch that fires and finds nothing print the
+same character. `test_the_surface_fact_branch_can_fire` plants a boundary cell
+reading "LinkedIn draws no such page" and REQUIRES the count to become 1 and
+the blocker to be named.
+
+It earned its place twice over: the red-proof harness itself reported
+`*** DEAD BRANCH` on its first run because it built the planted ledger and
+never passed it, then failed again asserting `"surface fact: 1"` against a
+program that prints `"SURFACE fact: 1"`. **Both defects were in the checker,
+not the checked.** A mutation of the classifier (`return "SURFACE-FACT"` ->
+`"NONE-STATED"`) turns exactly this one test red and leaves the other twelve
+green, which is what a discriminating guard looks like.
+
+### 24.3 `A-HAND-WRITTEN-LOOKUP-NEEDS-A-DUPLICATE-CONTROL`
+
+`SURFACE_ADDRESSES` maps each blocker to a candidate base address, checked
+against the live boundary. It is hand-written, so a copy-paste puts one
+blocker's address on another and the report then prints a verdict for a page
+that blocker has nothing to do with. **That is not hypothetical: it shipped.**
+`CREATOR-HUB-SURFACE` was given the identical address as its sibling
+`CONTENT-ANALYTICS-SURFACE` and was counted into a headline on the strength of
+it -- caught by an evidence sweep reading a 2026-09-19 document, not by the
+author.
+
+`test_no_two_blockers_share_a_base_address_undeclared`. A shared address is not
+banned -- `/messaging/` genuinely draws three of these surfaces -- it must be
+DECLARED, which turns a silent copy-paste into a statement somebody wrote down.
+The guard ALSO fails when the declaration drifts from the table, because a
+stale declaration launders a real duplicate. **SHOWN FAILING** by re-inserting
+the original bug:
+
+    AssertionError: these base addresses are shared by more than one blocker
+    without being declared in DELIBERATE_SHARES, so at least one of them is
+    reporting a verdict for a page it does not own:
+    {'/analytics/creator/content/': ['CONTENT-ANALYTICS-SURFACE',
+                                     'CREATOR-HUB-SURFACE']}
+
+**The general form, worth copying:** any lookup table a human types, whose
+entries are compared against a live system, needs a control that the entries
+are DISTINCT unless distinctness was deliberately waived. Without it a
+duplicate is indistinguishable from a measurement.
+
+### 24.4 `REFUSED-IS-NOT-ABSENT`, and its sharper twin `ALLOWED-AND-STILL-WRONG`
+
+The converse of s9.1's standing ALLOWED IS NOT SERVED, and the reason this
+wave banked zero rows. A probe that runs candidate URLs through
+`readonly.assert_read_url` and reports them refused has measured OUR GATE, not
+LinkedIn. Filing such a refusal as a surface absence writes a fact about this
+repository into the census as a fact about the world.
+
+**And the twin, measured in-class on `JOB-ALERTS-SURFACE`:** `/jobs/alerts/` is
+ALLOWED by the boundary and LinkedIn **redirects away from it, twice
+reproducibly with a control serving correctly at both ends of the session**. So
+a pattern can be ALLOWED-AND-STILL-WRONG -- matching nothing LinkedIn resolves
+to -- and a naive `is_read_url` check reports the row addressable when the one
+live test on record says the address does not serve.
+
+**THE CROSS-INSTRUMENT CONTROL THIS IMPLIES**, and it is cheap:
+`test_the_two_boundary_entry_points_agree_on_every_candidate` asserts
+`is_read_url` and `assert_read_url` return the same verdict for all 26
+addresses (measured: 0 disagreements). The classifier asks the predicate; a
+capture calls the asserting form. If they ever diverge, "reachable for a
+capture" stops being well defined and every number built on it is ambiguous.
+
+### 24.5 A TOOL THIS WAVE MEASURED AND DID NOT WRITE -- `find_blocker_reason`
+
+Not an entry for this register's usual purpose; a WARNING about one already in
+it. Measured across the 26 SURFACE blockers: **286 mentions, 93 ranked, 193
+blind (67.5%)**. A fixed-seed sample of 51 blind mentions read in context came
+back **42 substantive / 9 incidental**.
+
+**THE MECHANISM: a document that argues by CENSUS ROW ID -- this campaign's own
+convention -- instead of repeating the blocker's compound name is nearly
+invisible to a same-line co-occurrence test.** All three flagship
+`SEARCH-RESULTS-SURFACE` admission documents and both 2026-09-20 build-wave
+reports are blind for their own blocker. Precision is fine (18 of 19 top-ranked
+non-census documents substantive); **recall is the defect**. Its silence is
+UNKNOWN, never absence, and no `reason_doc` column may be derived from it.
+
+### 24.6 DISPOSABLE, declared
+
+A subset-counting script (the 1.87e14 figure), a fixture-corpus path-family
+tally, and the standalone red-proof harness. The first two produced numbers now
+quoted in the wave document; the third is superseded by the committed test
+file, which plants the same five defects and is re-runnable in CI.
