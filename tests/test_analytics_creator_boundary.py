@@ -79,9 +79,22 @@ def test_the_creator_content_page_is_admitted():
             "https://www.linkedin.com/analytics/creator/top-posts/",
             "THE OTHER SIBLING, same reading, same reason",
         ),
+        # ``/analytics/recruiter-views/`` STOOD HERE UNTIL 2026-09-20, as
+        # "DRAWN BY THE PROFILE-VIEWS PAGE, twice, and not admitted". It is
+        # now ADMITTED, by the `premium-four` wave, on its own anchored
+        # pattern and with the argument on the entry in readonly.py -- so the
+        # case moved rather than being deleted: this file's job is to pin what
+        # the CREATOR-CONTENT pattern does and does not carry, and the
+        # address's refusal is no longer one of those facts.
+        #
+        # WHAT REPLACES IT IS STRONGER, and it is the line below plus
+        # test_the_refusals_are_not_carried_by_this_pattern: recruiter-views
+        # is asserted there to be admitted by ITS OWN entry and by nothing
+        # here. The sibling that is still refused, and still drawn, keeps the
+        # case honest.
         (
-            "https://www.linkedin.com/analytics/recruiter-views/",
-            "DRAWN BY THE PROFILE-VIEWS PAGE, twice, and not admitted",
+            "https://www.linkedin.com/analytics/recruiter-views/all/",
+            "A SUB-PATH of the newly admitted page -- the entry takes none",
         ),
         (
             "http://www.linkedin.com/analytics/creator/content/",
@@ -134,9 +147,30 @@ def test_the_refusals_are_not_carried_by_this_pattern():
         "https://www.linkedin.com/analytics/creator/",
         "https://www.linkedin.com/analytics/",
         "https://www.linkedin.com/analytics/creator/audience/",
-        "https://www.linkedin.com/analytics/recruiter-views/",
+        # ``/analytics/recruiter-views/`` was in this list until 2026-09-20
+        # and has been ADMITTED since, on its own entry. Its SUB-PATH stands
+        # in for it: still refused, still under the same tree, and it keeps
+        # this control measuring the same thing it always did.
+        "https://www.linkedin.com/analytics/recruiter-views/all/",
     ):
         assert not allowed_without(url), url
+
+    # AND THE ADMITTED SIBLING IS ASSERTED TO BE CARRIED BY ITS OWN ENTRY,
+    # NOT BY THIS ONE. Without this, removing the creator-content pattern
+    # could silently be what admits it and nothing here would notice.
+    recruiter = "https://www.linkedin.com/analytics/recruiter-views/"
+    assert readonly.is_read_url(recruiter) is True, recruiter
+    assert allowed_without(recruiter), (
+        "recruiter-views stopped being admitted once the creator-content "
+        "pattern was removed, which would mean THAT pattern is what carries "
+        "it -- i.e. it is far broader than its comment claims"
+    )
+    matching = [
+        pattern for pattern in readonly._ALLOWED_URL_PATTERNS
+        if pattern.match(recruiter)
+    ]
+    assert len(matching) == 1, matching
+    assert "recruiter-views" in matching[0].pattern, matching[0].pattern
 
 
 def test_the_pattern_carries_no_member_segment():
@@ -179,16 +213,34 @@ def test_the_address_this_reading_informs_is_still_refused():
 
 
 def test_the_admitted_analytics_pages_are_exactly_three():
-    """A COUNT, so a fourth analytics page cannot arrive unnoticed.
+    """A COUNT, so an analytics page cannot arrive unnoticed.
 
-    Profile views (both spellings), search appearances, creator content. The
-    ``/me/profile-views/`` spelling makes it four PATTERNS over three pages,
-    and the split is stated rather than smoothed over because a reader
-    checking this number will otherwise find it off by one and assume drift.
+    **THE NAME IS NOW OFF BY ONE AND IS KEPT ANYWAY.** It reads "three" and
+    the answer is four pages over five patterns. Renaming it would rot a
+    citation: ``_audit/2026-09-20-newsletter-built.md`` quotes this function
+    by name, and this repository has a standing finding that a citation rots
+    into a PLAUSIBLE WRONG ANSWER rather than a dangling one. The number lives
+    in the assertion, where it is checked; the name is an address.
+
+    Profile views (both spellings), search appearances, creator content, and
+    -- since 2026-09-20 -- recruiter views. The ``/me/profile-views/``
+    spelling is what makes it five PATTERNS over four PAGES, and the split is
+    stated rather than smoothed over because a reader checking this number
+    will otherwise find it off by one and assume drift.
+
+    **IT DID ITS JOB.** Its docstring said a fourth analytics page could not
+    arrive unnoticed, and when one did -- admitted by the `premium-four` wave
+    two commits earlier -- this is the assertion that stopped it, in CI, on
+    all three platform cells, after a local gate had missed it.
     """
     analytics = [
         pattern.pattern
         for pattern in readonly._ALLOWED_URL_PATTERNS
         if re.search(r"analytics|profile-views", pattern.pattern)
     ]
-    assert len(analytics) == 4, analytics
+    assert len(analytics) == 5, analytics
+    # AND THE PAGES, NAMED, so the count cannot be satisfied by a duplicate.
+    assert sum("recruiter-views" in p for p in analytics) == 1, analytics
+    assert sum("creator/content" in p for p in analytics) == 1, analytics
+    assert sum("search-appearances" in p for p in analytics) == 1, analytics
+    assert sum("profile-views" in p for p in analytics) == 2, analytics
