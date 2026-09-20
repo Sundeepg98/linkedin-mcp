@@ -26,7 +26,8 @@ without the argument in section 7.**
     CANNOT-TELL blockers measured    10    section 12, 7 loads, 0 rows moved
     redirect targets named            2    section 12, one of them 15 days old
     write-offs classified by fact     13    section 13, 0 moved, 2 re-verified
-    ALLOWED-AND-STILL-WRONG found      3    /jobs/alerts/, /messaging/, /jobs/collections/recommended/
+    ALLOWED-AND-STILL-WRONG found      3    of 4 admitted addresses loaded; the 4th is the control
+    CANNOT-TELL blockers settled      5    + COMPANY-PAGE, section 15
     caveats found against my own rows  1    section 14, and it resolves in their favour
 
 **THE SCARCE RESOURCE WAS THE SESSION AND IT WAS SPENT ON READS.** Thirteen
@@ -1121,3 +1122,79 @@ was transient contention between the server's page pool and this wave's own
 CDP probes, not damage: an immediate retry returned `ok: true` with the full
 payload above. Re-checked at close -- Chrome listening on 9224, the server
 serving 45 tools on 8322. **Both left running, as instructed.**
+
+---
+
+## 15. `COMPANY-PAGE-SURFACE` RENDERS -- the last class-1 CANNOT-TELL within reach, and the one address today that did NOT redirect
+
+### 15.1 The result
+
+`/company/<slug>/`. The family was already admitted; the slug was READ OUT OF
+a capture this wave had already taken, never pasted into a file and never
+printed. Read-only, nothing pressed.
+
+    landed_is_requested   True          redirected   False
+    bytes                 3985716       rendered     5292 chars
+    anchors                   111       buttons          56
+    <main>                      1       headings         15
+
+    PRESENT   follow 22, about 4, people 4, home 4, jobs 3, posts 3,
+              message 2, overview 1, employees 1, visit 1
+    ABSENT    life, following, website, industry, headquarters,
+              founded, specialties, "see all"
+
+**Six sub-tabs are drawn**, taken as path segments and never as labels:
+
+    about   home   insights   jobs   people   posts
+
+**The root renders and it is substantial** -- 111 anchors and 15 headings, not
+a shell. The blocker's question was whether the page draws at all; it does.
+
+**`insights` is the one worth flagging to whoever builds the reader.** It is a
+company-side analytics tab nobody in this corpus has opened, and it sits under
+an address family that is already admitted.
+
+### 15.2 AND IT IS THE CONTROL FOR SECTION 14.4's REDIRECT CLAIM
+
+Four admitted addresses were loaded today and **three redirected**:
+
+    /jobs/alerts/                     ->  /jobs/jam              REDIRECTED
+    /messaging/                       ->  /messaging/thread/<id> REDIRECTED
+    /jobs/collections/recommended/    ->  reported redirected    REDIRECTED
+    /company/<slug>/                  ->  itself                 NOT redirected
+
+**That fourth row is what makes the other three a finding rather than a
+method artifact.** An instrument that reported every address as redirected
+would be measuring itself. This one reports a page arriving where it was
+asked for, in the same session, through the same code path -- so
+ALLOWED-AND-STILL-WRONG is a property of particular addresses and not of the
+way they were read.
+
+### 15.3 A FIFTEEN-SECOND DEFAULT THAT READS AS A DEAD BROWSER
+
+This load failed the first time, and the failure is worth more than the load.
+
+`cdp_bridge.ATTACH_TIMEOUT_MS` defaults to **15000**. With the MCP server
+holding its own CDP connection to the same Chrome, a second
+`connect_over_cdp` did not complete inside it. The error that surfaced was
+`BrowserUnavailableError: could not attach to a browser at
+http://127.0.0.1:9224`, followed by a long remedy block about Chrome not
+having been started with `--remote-debugging-port`.
+
+**THAT REMEDY IS FOR A DIFFERENT FAULT, AND FOLLOWING IT WOULD HAVE BEEN
+DESTRUCTIVE.** It advises quitting Chrome COMPLETELY and restarting it. Chrome
+was fine: `/json/version` answered immediately with a version string, and
+`linkedin_cdp_status` over the MCP wire returned `reachable: true` in the same
+minute. **The browser was healthy and busy, and the message said absent.**
+
+The fix was one environment variable the module already reads:
+
+    LINKEDIN_CDP_ATTACH_TIMEOUT_MS=60000
+
+**AN ERROR THAT NAMES A DESTRUCTIVE REMEDY IS NOT AN INSTRUCTION** -- this
+repository already holds that lesson for `index.lock`, and here it is again
+wearing a browser. The diagnostic to run first is the cheap one that
+distinguishes the two states: probe `/json/version` and ask the server whether
+it can still see the browser. Both are read-only and both take seconds.
+
+**Nothing was killed, and no browser process was touched.**
