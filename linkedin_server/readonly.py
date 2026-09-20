@@ -1123,6 +1123,144 @@ _ALLOWED_URL_PATTERNS: tuple[re.Pattern[str], ...] = (
     # contains ``connect`` or ``invite`` refuses, and that is correct
     # fail-closed behaviour rather than a defect to route around.
     re.compile(r"^https://www\.linkedin\.com/school/[A-Za-z0-9%\-_]{1,100}/?$"),
+    # AN ORGANISATION PAGE, THE ROOT ONLY, BOTH SPELLINGS. Added 2026-09-20 for
+    # ``COMPANY-PAGE-SURFACE`` -- 18 published rows, 16 filed, the largest
+    # BUILD in the census and every row of it filed behind this one line.
+    #
+    # THE CHARACTER CLASS AND THE ANCHORING ARE THE SCHOOL ENTRY'S, BYTE FOR
+    # BYTE, and that is deliberate rather than convenient. A school Page and a
+    # company Page are one entity type in LinkedIn's model wearing two path
+    # words. The ruling one line above turns on a CAUSE -- this boundary's
+    # sharpest refusal is about member profiles, because loading one leaves
+    # THEM a durable record that ``who_viewed_me`` reads the receiving end of,
+    # and an ORGANISATION emits no view receipt to anybody. That cause reaches
+    # here unchanged. Admitting ``/school/`` and refusing ``/company/`` would
+    # be an inconsistency about a spelling.
+    #
+    # A COMPANY SLUG CAN BE A NAME, AND THAT IS MEASURED HERE RATHER THAN
+    # WORRIED ABOUT. ``groups.py`` refuses a non-numeric segment in its own
+    # words BECAUSE A SLUG IS A NAME. ``scripts/_probe_company_path_segments.py``
+    # walks every HTML document this repository has committed -- 22 documents,
+    # 86 hits, 28 DISTINCT segments, 21 NUMERIC and 7 SLUGS -- and one of the
+    # seven is a surname with a word after it. Sole traders, eponymous firms
+    # and personal brands are a category of Page, not an edge case.
+    #
+    # SO THE ADMISSION IS NOT BARE. ``linkedin_server/company_page.py`` is the
+    # name-free shaper and it lands in THIS commit, which is the condition the
+    # search-results admission was held on and is the standard this entry is
+    # measured against rather than the groups one. **The numeric spelling is
+    # the groups case (the address names nobody) and the slug spelling is the
+    # search-results case (it can name somebody); the grant is made on the
+    # stricter of the two.**
+    #
+    # WHY THE SLUG FORM IS IN THE PATTERN AT ALL, which is the non-obvious
+    # half. The tempting narrow entry is ``/company/[0-9]{1,20}/?$`` alone --
+    # the groups pattern with a different word, MEASURED to admit TWO addresses
+    # against this entry's FOUR. It is not safer. LinkedIn canonicalises an
+    # organisation address, so the numeric form's LANDING PAGE is the slug
+    # form: a numeric-only entry admits the request and refuses the arrival,
+    # and ``assert_read_url``'s refusal INTERPOLATES THE URL IT REFUSED. That
+    # is not hypothetical here -- it is the defect
+    # ``tests/test_navigation_is_never_derived.py`` exists for, where
+    # ``/in/me/`` resolved to a decorated member path and the operator's own
+    # slug went into a traceback. A narrower pattern paid for in third-party
+    # slugs in exceptions, on the ordinary path, is the worse trade.
+    #
+    # THE REDIRECT IS THE ONE HYPOTHESIS AND IS NOT DRESSED AS ANYTHING ELSE.
+    # Nobody in this repository has opened a company Page. What IS measured is
+    # that BOTH spellings are addresses LinkedIn itself draws:
+    # ``tests/fixtures/notifications.html`` links a Page by ``/company/5417062``
+    # and every tracked posting links one by ``/company/<slug>/``.
+    #
+    # THE BUILDER IS NUMERIC-ONLY, WHICH IS WHERE THE ASYMMETRY LIVES.
+    # ``company_page.company_page_url`` refuses anything that is not a bounded
+    # run of the TEN ASCII DIGITS, reporting the SHAPE via
+    # ``jobfilter.describe_shape`` and never the value. **This list admits what
+    # the product serves; this package assembles only what names nobody.**
+    #
+    # THE BLAST RADIUS, MEASURED BEFORE THIS LANDED, with
+    # ``scripts/_probe_company_family_blast.py`` over 107 concrete addresses
+    # (``blast_radius.corpus()``'s 67 plus 40 company-family spellings) and
+    # never a substring grep over this list. **This pattern newly admits
+    # exactly FOUR addresses: its target in the slug and numeric spellings,
+    # each with and without the trailing slash, and nothing else.** Zero tabs,
+    # zero traversals, zero queries, zero admin paths, zero dotted segments,
+    # zero urn forms, zero non-ASCII digit forms, and ``newly_refused`` empty.
+    #
+    # FOUR CONTROLS, so the measurement is an instrument reading rather than a
+    # hope. Each was run against a COPY of this roster:
+    #
+    #   ``/company/\d+/?$``            SIX admitted against TWO -- the Arabic-
+    #                                  Indic, Extended Arabic-Indic, Devanagari
+    #                                  and fullwidth spellings of an id. The
+    #                                  same defect ``groups.py`` found in
+    #                                  ``str.isdigit()``, on this surface.
+    #   dot inside the class           SEVEN, adding ``/company/./`` and
+    #                                  ``/company/a..company/`` -- which is why
+    #                                  the dot is outside it here, exactly as
+    #                                  the school entry states for itself.
+    #   ``/company/.*$``               THIRTY-FIVE, every one defended by
+    #                                  NOTHING. See below.
+    #   a needle no line carries       zero movement.
+    #
+    # WHAT THE FAMILY PATTERN WOULD HAVE OPENED, named because this is the
+    # standing boundary trap arriving on a new root. Of its 35, three are not
+    # tabs at all and none of the three carries a forbidden substring:
+    #
+    #     /company/setup/new/            THE FLOW THAT CREATES A PAGE. The
+    #                                    denylist has ``/create`` and LinkedIn
+    #                                    does not spell this one with it.
+    #     /company/<x>/admin/            Page ADMINISTRATION
+    #     /company/<x>/admin/dashboard/  the same, one level down
+    #
+    # and two are traversals whose leading segments lie about where they go --
+    # one normalising onto an account-ending address and one onto a member
+    # profile. The anchor is what refuses all five.
+    #
+    # WHAT THIS DELIBERATELY DOES NOT ADMIT, each named because a widening is
+    # only narrow if its refusals are stated:
+    #
+    #     /company/<x>/people/     A MEMBER ROSTER. Census rows ``J 108`` and
+    #                              ``N 102``, and it is out of scope by the
+    #                              same ruling that put a group's roster out of
+    #                              scope by name. It is refused by this anchor
+    #                              and by nothing else.
+    #     /company/<x>/about/      census row ``J 106``
+    #     /company/<x>/jobs/       ``J 107`` -- and that row does not need it:
+    #                              ``/jobs/search/?f_C=<id>`` has been admitted
+    #                              since the first commit and ``jobfilter.py``
+    #                              already wires it.
+    #     /company/<x>/life/       ``J 109``
+    #     /company/<x>/posts/      ``J 110``
+    #     /company/<x>/products/   ``J 111``
+    #     /company/<x>/services/   ``J 111``
+    #     /company/<x>/insights/   ``J 113``/``J 114``, Premium analytics. The
+    #                              posting draws this href with an
+    #                              ``?insightType=HEADCOUNT`` query, so it
+    #                              would need the query form as well.
+    #     a query on the root      where a filter naming a person arrives
+    #     /company/ and /company   the product root, which is not a Page
+    #
+    # NO WRITE IS BOUGHT AND NOTHING HERE FIRES ANYTHING. The two writes in
+    # this blocker -- ``J 86`` ("I'm interested") and ``N 47`` (follow from the
+    # Page) -- each still need their own url, their own sanction entry and
+    # their own ruling. Measured the way the groups entry measured it: NO tool
+    # registered in ``server.py`` takes a url, an href or a link as a
+    # parameter, so no caller can steer a navigation here.
+    #
+    # SO THIS BUYS A PRECONDITION AND A VOCABULARY, NOT A PAGE READ, and the
+    # honest reading of a widening is what it bought rather than what it
+    # unblocked. No tool in this package navigates to this address today.
+    # ``company_page.py`` opens nothing and has no page function.
+    #
+    # AND THE WARNING THAT OUTLIVES THIS ENTRY: the Page root draws an
+    # organisation's own feed and, on some Pages, a module naming employees the
+    # operator knows. **This list decides what may be OPENED; the shaper
+    # decides what may be SAID.** Whoever writes the first reader for this
+    # address owes it the strictness ``company_page.py`` already defines -- and
+    # that shaper exists BEFORE the reader here, which is the one ordering the
+    # search-results condition was written to force.
+    re.compile(r"^https://www\.linkedin\.com/company/[A-Za-z0-9%\-_]{1,100}/?$"),
     # THE RECOMMENDED JOB COLLECTION, ONE NAMED ADDRESS. Admitted
     # 2026-09-05, census row 75 ``JOB-COLLECTIONS-SURFACE``, on the same
     # ruling.

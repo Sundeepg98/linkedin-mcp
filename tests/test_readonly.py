@@ -2104,7 +2104,65 @@ MUST_STAY_UNREADABLE = (
     # here so that admitting it later is a deliberate edit to this table
     # rather than a side effect of some other widening.
     'https://www.linkedin.com/search/results/people/?network=%5B%22F%22%5D',
-    "https://www.linkedin.com/company/example-co/",
+    # ``https://www.linkedin.com/company/example-co/`` WAS HERE UNTIL
+    # 2026-09-20 and is now READABLE, by the ruling recorded on the allowlist
+    # entry itself: an ORGANISATION Page emits no view receipt, which is the
+    # cause this boundary's sharpest refusal turns on, and ``/school/<slug>/``
+    # -- the same entity type wearing another path word -- was admitted on
+    # exactly that reasoning on 2026-09-05.
+    #
+    # IT IS RECORDED RATHER THAN SILENTLY DROPPED, and what replaces it is the
+    # set of neighbours the admission must NOT have carried, which is a
+    # STRONGER check than the single entry was. The risk was never that one
+    # root opened; it was that a family did -- measured, that family is
+    # THIRTY-FIVE addresses and every one of them is defended by nothing but
+    # the absence of a rule (``scripts/_probe_company_family_blast.py``).
+    #
+    # THE MEMBER ROSTER FIRST, because it is the one surface under this root
+    # where the member-profile cause starts to apply again. Census rows
+    # ``J 108`` and ``N 102`` want it and it is out of scope by the same
+    # ruling that put a group's roster out of scope by name.
+    "https://www.linkedin.com/company/example-co/people/",
+    # THE SAME ROSTER IN THE NUMERIC SPELLING, because the admitted pattern
+    # takes both and a refusal that holds for only one of them is half a
+    # refusal. The id is the one ``tests/fixtures/notifications.html``
+    # actually carries -- an already-declared synthetic value rather than a
+    # freshly minted one, so the identity guard keeps its precision and a
+    # reviewer can see where the number came from.
+    "https://www.linkedin.com/company/5417062/people/",
+    "https://www.linkedin.com/company/example-co/people/?keywords=x",
+    # THE WRITE HALF OF THE SAME ROOT, and NONE OF THESE THREE CARRIES A
+    # FORBIDDEN SUBSTRING -- ``/create`` is on the denylist and LinkedIn does
+    # not spell Page creation with it. They are refused by the allowlist
+    # anchor and by nothing else, which is the standing boundary trap arriving
+    # on a new root.
+    "https://www.linkedin.com/company/setup/new/",
+    "https://www.linkedin.com/company/example-co/admin/",
+    "https://www.linkedin.com/company/example-co/admin/dashboard/",
+    # THE REST OF THE TABS, each a census row this admission deliberately did
+    # not buy: About (J 106), Jobs (J 107), Life (J 109), Posts (J 110),
+    # Products and Services (J 111), Insights (J 113 / J 114).
+    "https://www.linkedin.com/company/example-co/about/",
+    "https://www.linkedin.com/company/example-co/jobs/",
+    "https://www.linkedin.com/company/example-co/life/",
+    "https://www.linkedin.com/company/example-co/posts/",
+    "https://www.linkedin.com/company/example-co/products/",
+    "https://www.linkedin.com/company/example-co/services/",
+    "https://www.linkedin.com/company/example-co/insights/",
+    "https://www.linkedin.com/company/example-co/insights/?insightType=HEADCOUNT",
+    # A QUERY ON THE ADMITTED ROOT, which is where a filter naming a person
+    # would arrive, and the product root, which is not a Page.
+    "https://www.linkedin.com/company/example-co/?foo=1",
+    "https://www.linkedin.com/company/",
+    # TRAVERSALS, whose leading segments LIE about where they go. The first
+    # normalises onto an ACCOUNT-ENDING address and the second onto a member
+    # profile, and no forbidden substring names either -- the anchor is the
+    # whole of what refuses them.
+    "https://www.linkedin.com/company/example-co/../../mypreferences/d/close-account",
+    "https://www.linkedin.com/company/example-co/../../in/someone-else/",
+    # A DOTTED SLUG. Outside the character class deliberately, because
+    # admitting it also admits a ``..`` segment the browser normalises away.
+    "https://www.linkedin.com/company/example.co/",
     "https://www.linkedin.com/feed/following/",
     "https://www.linkedin.com/in/me/edit/",
     # ADDED 2026-08-31, in the commit that admitted ONE url out of each of two

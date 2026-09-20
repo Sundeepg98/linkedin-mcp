@@ -967,6 +967,12 @@ ABOUT_COMPANY_SDUI = '[data-sdui-component$="aboutTheCompanyForJobDetails"]'
 #: and finite.
 ABOUT_COMPANY_MAX_LINES = 40
 
+#: Cap on the HREFS returned beside those lines, same reasoning and a smaller
+#: number: the comment above this container records that the About section
+#: holds exactly TWO distinct ``/company/`` targets -- the name link and the
+#: Premium-insights link -- so twenty is generous and finite.
+ABOUT_COMPANY_MAX_LINKS = 20
+
 
 async def read_company_about_card(page: Any) -> dict[str, Any]:
     """Return the About-the-company card's OBSERVATIONS, deciding nothing.
@@ -976,10 +982,26 @@ async def read_company_about_card(page: Any) -> dict[str, Any]:
     pressed, and no page is loaded -- this reads the render
     ``linkedin_job_detail`` has already performed.
 
-    Returns ``container``, ``sdui``, ``lines`` and ``error``. WHICH LINE IS
-    THE FOLLOWER COUNT AND WHICH IS THE INDUSTRY IS NOT DECIDED HERE; that is
-    ``shape.company_about_card``'s job, where it can be tested without a
-    browser. The three-way distinction this function exists to preserve:
+    Returns ``container``, ``sdui``, ``lines``, ``hrefs``, ``hrefs_error``
+    and ``error``. WHICH LINE IS THE FOLLOWER COUNT AND WHICH IS THE INDUSTRY
+    IS NOT DECIDED HERE; that is ``shape.company_about_card``'s job, where it
+    can be tested without a browser.
+
+    ``hrefs`` WAS ADDED 2026-09-20 AND IS A SEPARATE LIST ON PURPOSE. The
+    comment on the container above already records that this card holds TWO
+    distinct ``/company/`` targets, and those addresses answer a question the
+    LINES cannot: which of an employer's Page tabs the posting links to, and
+    whether the Page root is addressable at all. ``company_page.py`` classifies
+    them into counts and **NEITHER THIS FUNCTION NOR THAT ONE PUBLISHES ONE**
+    -- a company slug is a name, so the address is read here and reduced to an
+    integer before anything leaves the process.
+
+    IT IS STILL A PLAIN PLAYWRIGHT READ. No script is injected, nothing is
+    evaluated, no control is pressed and no page is loaded; this is
+    ``get_attribute`` over a container LinkedIn labels itself, on the render
+    ``linkedin_job_detail`` has already performed.
+
+    The three-way distinction this function exists to preserve:
 
         container False              -- LinkedIn drew no such card
         container True,  lines []    -- the card is a skeleton, not yet filled
@@ -995,6 +1017,8 @@ async def read_company_about_card(page: Any) -> dict[str, Any]:
         "container": False,
         "sdui": False,
         "lines": [],
+        "hrefs": [],
+        "hrefs_error": None,
         "error": None,
     }
 
@@ -1026,6 +1050,49 @@ async def read_company_about_card(page: Any) -> dict[str, Any]:
 
     lines = [line.strip() for line in text.splitlines()]
     out["lines"] = [line for line in lines if line][:ABOUT_COMPANY_MAX_LINES]
+
+    # THE HREFS, IN THEIR OWN TRY, so a card whose links are unreadable still
+    # returns its lines. An unreadable link costs a route classification; a
+    # raise here would cost the follower count, the industry and the size
+    # band as well, which is the wrong thing to lose to the smaller failure.
+    #
+    # AND ``hrefs_error`` EXISTS FOR THE REASON ``container``/``lines`` ARE
+    # TWO FIELDS RATHER THAN ONE. An empty list from a failed read and an
+    # empty list from a card with no links are the same value and DIFFERENT
+    # ANSWERS, and this module's whole shape is built on not collapsing that
+    # pair -- the paragraph above about the skeleton container says so in the
+    # other direction. Nothing reads this field; it exists so a zero can be
+    # interpreted. The partial list is kept on a mid-loop failure, because
+    # three links read and a fourth that raised is more than nothing and the
+    # field beside it says the count is a floor.
+    # ``hrefs_error`` IS THE EXCEPTION'S TYPE NAME AND NOT ITS MESSAGE, which
+    # is a deliberate difference from ``error`` six lines up. A Playwright
+    # message can quote a selector and, through it, page content; a Python
+    # class name cannot. The field exists only to tell an empty list that was
+    # READ from one that FAILED, and a type name does that exactly as well.
+    #
+    # IT IS ALSO WHAT KEEPS THIS SITE OFF ``KNOWN_TEXT_SINKS``. The first
+    # version logged ``out["hrefs_error"]`` and
+    # ``tests/test_page_text_is_never_printed.py`` went red in CI -- dom.py
+    # 9 -> 10 -- because a subscript of a dict holding ``inner_text`` output
+    # is tainted whatever the key. That guard's own failure message says what
+    # to do and it is followed here rather than argued with: *do NOT add it to
+    # the inventory to clear the red; emit a count, a relation or a marker.*
+    # This is the marker, and the site is gone rather than pinned.
+    hrefs: list[str] = []
+    marker: Optional[str] = None
+    try:
+        links = container.locator("a[href]")
+        count = min(int(await links.count()), ABOUT_COMPANY_MAX_LINKS)
+        for index in range(count):
+            href = await links.nth(index).get_attribute("href")
+            if href:
+                hrefs.append(str(href))
+    except Exception as exc:
+        marker = type(exc).__name__
+        logger.debug("about-the-company links unreadable: %s", marker)
+    out["hrefs_error"] = marker
+    out["hrefs"] = hrefs
     return out
 
 
@@ -2047,12 +2114,39 @@ async def harvest_followed_pages(page: Any) -> list[dict[str, Any]]:
     return rows
 
 
+#: The ten ASCII digits, and the bound, for the selector guard below.
+#:
+#: **THIS REPLACED ``str.isdigit()`` ON 2026-09-20 AND THE DEFECT WAS REAL.**
+#: The docstring below promised "``company_id`` must be digits, so nothing a
+#: caller supplies can escape the quoting or widen the predicate", and
+#: ``isdigit()`` admits a charset materially wider than the ten characters that
+#: promise names: MEASURED at HEAD, ``unfollow_control_selector`` accepted the
+#: Arabic-Indic spelling of a four-digit id and BUILT AN XPATH FROM IT. It
+#: would have matched nothing -- LinkedIn's hrefs are ASCII -- so nothing was
+#: ever at risk. What was wrong is that a guard on a string A CLICK IS BUILT
+#: FROM was certifying a property it did not have.
+#:
+#: It is the same finding ``groups.py`` made on its own identifier gate, in
+#: its words: *a charset wide enough to hold a slug is wide enough to hold a
+#: name.* A membership test against a literal set cannot widen behind
+#: anybody's back.
+#:
+#: The upper bound is ``jobfilter._MAX_ID_LEN``'s number rather than a new
+#: one -- this repository has already chosen twenty for exactly this value --
+#: and it is here because an unbounded repetition on caller-shaped input is a
+#: cost nobody chose.
+_ASCII_DIGITS = frozenset("0123456789")
+_MAX_COMPANY_ID_DIGITS = 20
+
+
 def unfollow_control_selector(company_id: str) -> str:
     """A selector for the unfollow button of ONE company, keyed by its id.
 
     GUARDED, like :func:`save_control_selector`, and for the same reason: this
-    is a string a click is built from. ``company_id`` must be digits, so
-    nothing a caller supplies can escape the quoting or widen the predicate.
+    is a string a click is built from. ``company_id`` must be a bounded run of
+    the TEN ASCII DIGITS -- see :data:`_ASCII_DIGITS` for why that is spelled
+    out rather than left to ``str.isdigit()`` -- so nothing a caller supplies
+    can escape the quoting or widen the predicate.
 
     WHY THE ID AND NOT THE NAME, even though the name is right there in the
     accessible name this anchors on. The label states the inverse action --
@@ -2074,7 +2168,12 @@ def unfollow_control_selector(company_id: str) -> str:
     rows with no exceptions in either direction.
     """
     identifier = str(company_id or "").strip()
-    if not identifier.isdigit() or len(identifier) < 4:
+    if (
+        not identifier
+        or not set(identifier) <= _ASCII_DIGITS
+        or len(identifier) < 4
+        or len(identifier) > _MAX_COMPANY_ID_DIGITS
+    ):
         raise ExtractionFailedError(
             f"refusing to build an unfollow selector for {company_id!r}: a "
             "followed Page is addressed by its numeric LinkedIn company id. A "

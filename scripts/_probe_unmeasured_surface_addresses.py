@@ -189,9 +189,15 @@ CANDIDATES: tuple[tuple[str, str, Optional[str]], ...] = (
         "https://www.linkedin.com/psettings/messages/",
         MUST_REFUSE_FORBIDDEN,
     ),
+    # A COMPANY PAGE ROOT WAS THIS CONTROL UNTIL 2026-09-20 AND IS NOW
+    # ALLOWED: the root was admitted for COMPANY-PAGE-SURFACE. The control is
+    # RE-AIMED rather than deleted, at the member roster one segment deeper --
+    # refused by that entry's anchor and by nothing else, so the row still
+    # proves this probe can report REFUSED-NO-PATTERN, and it now also goes
+    # red if the anchor is ever loosened into a family pattern.
     (
         "control",
-        "https://www.linkedin.com/company/example/",
+        "https://www.linkedin.com/company/example/people/",
         MUST_REFUSE_NO_PATTERN,
     ),
 )

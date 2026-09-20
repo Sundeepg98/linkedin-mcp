@@ -315,6 +315,7 @@ from linkedin_server import (
     buildinfo,
     cdp_bridge,
     collections_page,
+    company_page,
     creator_analytics,
     dom,
     events,
@@ -3944,12 +3945,39 @@ async def linkedin_job_detail(job_id: str) -> dict[str, Any]:
     employers and not others; that is the normal case and not a failure.
 
     company_about IS THE EMPLOYER ITSELF, AND IT COMES FROM A SURFACE THIS
-    SERVER CANNOT OPEN. followers, industry, size_band and on_linkedin are
-    capabilities the surface census files against the company Page -- a
-    THIRD PARTY'S page, not on the read allowlist, and one whose view cost
-    nobody here has measured. LinkedIn draws all four on this posting's own
-    About-the-company card, so they arrive at no extra page load, no
-    boundary change, and no visit to that Page.
+    TOOL DOES NOT OPEN. followers, industry, size_band and on_linkedin are
+    capabilities the surface census files against the company Page, whose
+    view cost nobody here has measured. LinkedIn draws all four on this
+    posting's own About-the-company card, so they arrive at no extra page
+    load and no visit to that Page.
+
+    THIS PARAGRAPH SAID THE COMPANY PAGE WAS "NOT ON THE READ ALLOWLIST"
+    UNTIL 2026-09-20 AND THAT IS NO LONGER TRUE. The Page ROOT --
+    /company/<slug or numeric id>/, that one segment and nothing under it --
+    was admitted for COMPANY-PAGE-SURFACE. It is corrected rather than
+    quietly dropped, because a reader who remembers the old guarantee needs
+    to meet the change here rather than infer it. What has NOT changed is
+    every word about this tool: no tool in this package navigates to that
+    address, and these four fields still come off the posting.
+
+    company_page IS THAT PAGE COUNTED, NEVER NAMED. It classifies the
+    About-the-company card's own links into the Page's tabs and returns
+    COUNTS -- no slug, no address and no name is in it, which is why the
+    card's links can be read at all. counts is positionally aligned to
+    company_page.TAB_KINDS; use company_page.term_for(index) to name one.
+
+    ITS ZERO IS AS INFORMATIVE AS ITS COUNTS, AND ONE ZERO IS PERMANENT:
+    page_roots is 0 on every posting held here, because the card links the
+    Life tab and never the Page root. Read it as "this card does not carry
+    the root", never as "this employer has no Page".
+
+    company_page_url IS THE ADDRESS company_id NOW REACHES. Census row N 104
+    -- find an organisation's Page -- was blocked on the two halves never
+    being joined: the id resolver above, and the allowlist entry. It is the
+    NUMERIC form and only ever the numeric form, because a slug is a name and
+    a digit run cannot be one. It is null whenever company_id.state is not
+    'resolved', which is the normal case on four of the five captures held
+    here. Nothing in this package opens it; it is for you.
 
     size_band AND on_linkedin ARE TWO DIFFERENT FACTS AND WILL DISAGREE.
     size_band is the range the organisation DECLARED ('51-200'); on_linkedin
@@ -4172,6 +4200,34 @@ async def linkedin_job_detail(job_id: str) -> dict[str, Any]:
             out["company_id"] = shape.company_id_from_insight_cards(
                 id_cards, company=identity.get("company")
             )
+            # AND THE ADDRESS THAT ID NOW REACHES. Census row N 104 -- find an
+            # organisation's Page -- was filed against SEARCH-RESULTS-SURFACE,
+            # which is still held. This is the other route, and it is the
+            # shape jobfilter.py describes about J 10 in its own first
+            # paragraph: "both halves of that blocker are now built and the
+            # row is still GAP, because nothing joined them."
+            #
+            # BOTH HALVES ARE ON THIS PAGE. The resolver above yields a
+            # NUMERIC organisation id, and /company/<numeric id>/ went on
+            # readonly._ALLOWED_URL_PATTERNS on 2026-09-20. This is the join,
+            # and it costs no page load, no second read and no further ruling.
+            #
+            # THE NUMERIC FORM IS THE ONLY FORM BUILT, which is the whole of
+            # why publishing an address here is safe: a slug is a name and a
+            # digit run cannot be one. company_page.company_page_url refuses
+            # anything else and reports the SHAPE rather than the value, so a
+            # slug arriving here by some future accident cannot be echoed.
+            # jobfilter.py already ruled exactly this narrow exception on
+            # exactly this value.
+            #
+            # NOTHING NAVIGATES TO IT. The address is returned for the
+            # operator; no tool in this package opens it.
+            built = company_page.company_page_url(
+                (out["company_id"] or {}).get("company_id")
+            )
+            out["company_page_url"] = (
+                built["url"] if built.get("built") else None
+            )
 
             # THE EMPLOYER'S FOLLOWER COUNT, INDUSTRY, SIZE BAND AND LINKEDIN
             # HEADCOUNT -- FOUR CAPABILITIES THE CENSUS FILED UNDER A SURFACE
@@ -4207,6 +4263,28 @@ async def linkedin_job_detail(job_id: str) -> dict[str, Any]:
             out["company_about"] = shape.company_about_card(
                 about, company=identity.get("company")
             )
+            # THE PAGE THIS CARD POINTS AT, AS COUNTS, at ZERO extra page
+            # loads. company_page.tally returns integers only -- no slug, no
+            # address and no name is in its output -- which is why the card's
+            # hrefs can be read here and nothing of them published.
+            #
+            # WHAT IT ACTUALLY DELIVERS, MEASURED over the four tracked
+            # job_detail fixtures rather than assumed: FIVE links on a
+            # hydrated card, of which TWO are /company/<slug>/life/ and three
+            # are LinkedIn help pages. So it answers census row J 109 -- this
+            # employer's Page draws a Life tab -- and it answers
+            # `page_roots == 0`.
+            #
+            # THAT ZERO IS THE FINDING AND IT IS NOT A BUG. **The About card
+            # never links the Page ROOT**, only the Life tab, so "is this
+            # employer's Page addressable" is NOT answerable from this card.
+            # The Premium-insights route (J 113 / J 114) is drawn on the
+            # posting too but sits OUTSIDE this container, and it carries a
+            # ?insightType= query the admitted pattern does not take. Reaching
+            # either needs a second anchored container reader -- never a
+            # widening of this one, whose container scoping is the property
+            # that keeps a card from being read off the wrong employer.
+            out["company_page"] = company_page.tally(about.get("hrefs") or [])
 
             out["pages_loaded"] = 1
             out["source_url"] = final_url
