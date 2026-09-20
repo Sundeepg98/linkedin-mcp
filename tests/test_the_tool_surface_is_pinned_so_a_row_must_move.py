@@ -109,6 +109,7 @@ PINNED_TOOL_SURFACE: dict[str, tuple[str, ...]] = {
     "linkedin_notifications": ("limit",),
     "linkedin_notify_cost_precondition": (),
     "linkedin_open_messaging": ("include_names", "message_filter"),
+    "linkedin_page_plugin_snippet": ("page_id",),
     "linkedin_premium_status": (),
     "linkedin_profile_editor_fields": (),
     "linkedin_profile_editor_values": (),
@@ -165,8 +166,24 @@ PINNED_TOOL_SURFACE: dict[str, tuple[str, ...]] = {
 #: COVERED-UNFIRED rather than COVERED-PROVEN, because the fan-out is tested
 #: offline and has not been run against live LinkedIn; that is a statement about
 #: the evidence class, not a hedge about whether the capability exists.
-PINNED_TOOL_COUNT = 44
-PINNED_PARAMETER_COUNT = 62
+#:
+#: **RE-PINNED 2026-09-20 AT 45 TOOLS AND 63 PARAMETERS.**
+#: `linkedin_page_plugin_snippet` ships and banks census row `N A6` --
+#: build a Page follow widget for your own website -- in the same commit,
+#: as COVERED-UNFIRED. The evidence class is the point: the generator is
+#: complete and tested offline against the contract LinkedIn documents,
+#: and it has produced no real snippet because the operator administers
+#: no Page, so no Company ID exists to build one from. That is a
+#: statement about what has been fired, not a hedge about whether the
+#: capability exists.
+#:
+#: **AND IT IS THE ONLY ROW OF THAT BLOCKER'S FIFTEEN THIS COMMIT MOVES.**
+#: The other fourteen need an address the navigation boundary refuses, a
+#: write grant, or a second consenting human -- measured against the
+#: shipped predicate rather than assumed; see
+#: `_audit/2026-09-20-admin-rights-ready.md`.
+PINNED_TOOL_COUNT = 45
+PINNED_PARAMETER_COUNT = 63
 
 
 def live_surface() -> dict[str, tuple[str, ...]]:
