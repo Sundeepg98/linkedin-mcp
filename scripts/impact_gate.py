@@ -607,6 +607,184 @@ def always_run_files(corpus: "Corpus") -> list[tuple[str, str]]:
     return out
 
 
+@dataclass(frozen=True)
+class Pairing:
+    """One corpus-wide SWEEP and the script that answers it on the change.
+
+    The unit is a SWEEP, not a file, and that distinction is the whole design.
+    ``tests/test_no_committed_identity.py`` is 18.0s and MIXED: 546
+    parametrised per-file shape cases, a control that shells the exact-value
+    sweep over the whole tree, a genuinely SET-SHAPED cross-file pairing test,
+    and forty small controls. Substituting the FILE would move the set-shaped
+    half and every control to CI as collateral. Substituting the two SWEEPS
+    leaves the file in the plan with ``--deselect`` and moves nothing else.
+    """
+
+    #: The pytest node id whose whole-tree enumeration the script replaces.
+    #: Deselecting the bare name of a parametrised test removes the whole
+    #: group, which is what makes this cheap to express.
+    node: str
+    #: The incremental script. Contract: 0 clean, 1 refused, anything else
+    #: CANNOT ANSWER -- and see ``fails_open_token``.
+    script: str
+    #: A literal this script prints when it has DECLINED to check rather than
+    #: checked and found nothing. ``pre_commit_identity_gate.py`` exits 0 and
+    #: says ALLOWING when its gitignored wordlist is absent, which is a
+    #: documented deliberate fail-open, and a fail-open is not an answer. A
+    #: sibling that says this word gets its sweep restored to the plan.
+    fails_open_token: str | None = None
+
+
+#: **THE PAIRING REGISTER: corpus-wide sweep -> the script that checks THE SAME
+#: PROPERTY on the change set instead of on the tree.**
+#:
+#: A corpus-wide guard is expensive because its denominator is the corpus. Some
+#: of them do not need that denominator to be useful LOCALLY, because the
+#: property is PER-FILE: "no committable file carries X" is preserved by
+#: checking only the files this commit writes, PROVIDED it already held on the
+#: tree they are landing on.
+#:
+#: **THAT PROVISO IS A BASE CASE AND IT IS NOT OPTIONAL.** A paired sweep is an
+#: INDUCTION STEP. Its base case is the WHOLE-TREE form, which is not deleted
+#: and does not move: it stays in ``tests/`` and runs on every push, on three
+#: platforms, in ``.github/workflows/ci.yml``. Local gets the fast signal; CI
+#: remains the certifier. Nothing local guarantees the previous tree was clean
+#: -- a ``--no-verify`` commit, a guard disarmed in a worktree, a merge from a
+#: branch that never ran it -- so a reader who deletes a swept guard because
+#: its paired script is green has removed the base case from an induction and
+#: will not find out until it matters.
+#:
+#:     base case        the whole-tree sweep, in CI, on every push
+#:     induction step   the script below, locally, on every commit
+#:
+#: A pair is admitted only when BOTH halves exist and the fast half has been
+#: SHOWN FAILING on content the slow half catches -- see
+#: ``tests/test_staged_identity_shapes.py``, which plants three shapes at
+#: runtime in a throwaway repository and asserts both halves see each one. A
+#: fast check that has never been seen red certifies nothing, and a register
+#: of such checks manufactures confidence at scale.
+#:
+#: WHAT IS NOT IN HERE IS ALSO A RESULT. A sweep whose property is about the
+#: SET -- a uniqueness, a total, a pairing between two files, an inventory that
+#: must match exactly -- cannot be answered from staged content, because
+#: staging file A can break an invariant about (A, B) where B was never
+#: staged. Those stay whole-tree and stay in the floor. They are named in
+#: ``_audit/2026-09-20-the-flat-gate.md`` with the reason, rather than worked
+#: around.
+_INCREMENTAL_SIBLINGS: dict[str, tuple[Pairing, ...]] = {
+    # BOTH parametrised families come off ONE script: each is a per-file rule
+    # over the same 170-file glob, and the script answers both in one pass. Two
+    # entries rather than one because the unit of substitution is a SWEEP -- the
+    # file's other 31 cases, including its own shown-failing controls, keep
+    # running here.
+    "tests/test_navigation_is_never_derived.py": (
+        Pairing(
+            node="tests/test_navigation_is_never_derived.py"
+                 "::test_no_navigation_is_aimed_at_a_url_the_browser_chose",
+            script="scripts/staged_navigation_guard.py",
+        ),
+        Pairing(
+            node="tests/test_navigation_is_never_derived.py"
+                 "::test_no_navigation_derived_value_reaches_an_output_sink",
+            script="scripts/staged_navigation_guard.py",
+        ),
+    ),
+    "tests/test_no_committed_identity.py": (
+        # The SHAPE sweep: one assertion parametrised over 545 committable
+        # files. 17,996 ms for the file whole; 446 ms for the change set.
+        Pairing(
+            node="tests/test_no_committed_identity.py"
+                 "::test_no_tracked_file_carries_a_real_identifier",
+            script="scripts/staged_identity_shapes.py",
+        ),
+        # The EXACT-VALUE sweep, hiding inside a control that shells
+        # scripts/sweep_tracked_for_identity.py over the whole tree: 7,820 ms
+        # of the file's time in one test. **ITS INCREMENTAL HALF ALREADY
+        # EXISTED** -- scripts/pre_commit_identity_gate.py, 208 ms, shipped as
+        # a git hook and never joined up to the gate. This line is the join.
+        Pairing(
+            node="tests/test_no_committed_identity.py"
+                 "::test_the_exact_value_sweep_actually_runs",
+            script="scripts/pre_commit_identity_gate.py",
+            fails_open_token="ALLOWING",
+        ),
+    ),
+}
+
+_SIBLING_CLEAN, _SIBLING_REFUSED = 0, 1
+
+
+def pairings_for(floor: list[str]) -> list[Pairing]:
+    """Every registered pairing whose sweep is in this run's floor.
+
+    A pairing whose SCRIPT is missing from disk is skipped, so the sweep stays
+    in the plan. A register entry that silently dropped a guard because
+    somebody renamed a file would be this repository's own "check that cannot
+    fail", with the check missing altogether.
+    """
+    out: list[Pairing] = []
+    for rel in floor:
+        for pair in _INCREMENTAL_SIBLINGS.get(rel, ()):
+            if (REPO / pair.script).exists():
+                out.append(pair)
+            else:
+                print(f"impact-gate: {pair.script} is registered as the fast "
+                      f"half of {pair.node} and is NOT ON DISK. Keeping the "
+                      "whole-tree sweep.", file=sys.stderr)
+    return out
+
+
+def run_siblings(
+    pairings: list[Pairing],
+) -> tuple[list[tuple[Pairing, str]], list[Pairing], list[Pairing], float]:
+    """``(refusals, answered, fell_back, seconds)``.
+
+    ``fell_back`` are the pairings whose script could not answer -- a bad exit
+    code, or a documented fail-open. Their sweeps go back in the pytest plan,
+    which is the entire reason a third outcome exists. Every other gate in this
+    repository fails OPEN because there is nowhere better to fail to; a paired
+    sweep HAS somewhere better, so it fails to the SLOW PATH.
+    """
+    refusals: list[tuple[Pairing, str]] = []
+    answered: list[Pairing] = []
+    fell_back: list[Pairing] = []
+    started = time.monotonic()
+    # ONE RUN PER SCRIPT, NOT PER SWEEP. A script can answer several sweeps --
+    # the navigation one answers two -- and running it twice would pay its
+    # interpreter twice to compute the same verdict, which is the cost this
+    # whole mechanism exists to remove.
+    verdicts: dict[str, tuple[int, str]] = {}
+    for pair in pairings:
+        if pair.script not in verdicts:
+            proc = subprocess.run(
+                [str(PYTHON), str(REPO / pair.script)],
+                cwd=REPO, capture_output=True, text=True,
+                encoding="utf-8", errors="replace",
+            )
+            verdicts[pair.script] = (
+                proc.returncode, (proc.stderr or "") + (proc.stdout or ""))
+        code, output = verdicts[pair.script]
+        if code == _SIBLING_REFUSED:
+            refusals.append((pair, output))
+        elif code != _SIBLING_CLEAN:
+            fell_back.append(pair)
+            print(f"impact-gate: {pair.script} could not answer (exit "
+                  f"{code}); RESTORING its whole-tree sweep.",
+                  file=sys.stderr)
+            for line in output.strip().splitlines()[:4]:
+                print("      " + line, file=sys.stderr)
+        elif pair.fails_open_token and pair.fails_open_token in output:
+            # EXIT 0 IS NOT ALWAYS AN ANSWER. This one declined.
+            fell_back.append(pair)
+            print(f"impact-gate: {pair.script} exited 0 but FAILED OPEN "
+                  f"(said {pair.fails_open_token!r}), which is a decline, not "
+                  "a clean answer; RESTORING its whole-tree sweep.",
+                  file=sys.stderr)
+        else:
+            answered.append(pair)
+    return refusals, answered, fell_back, time.monotonic() - started
+
+
 @dataclass
 class Impact:
     """What a change can reach, and the trail that says how it got there.
@@ -908,9 +1086,22 @@ def recount_suite() -> dict:
 # Running, and reporting honestly.
 # --------------------------------------------------------------------------
 
-def run_plan(plan: list[str], full: bool) -> tuple[int, str, float]:
-    """Run the plan. Returns ``(returncode, stdout, seconds)``."""
+def run_plan(
+    plan: list[str], full: bool, deselect: list[str] | None = None,
+) -> tuple[int, str, float]:
+    """Run the plan. Returns ``(returncode, stdout, seconds)``.
+
+    ``deselect`` holds node ids whose whole-tree sweep a paired script has
+    already answered on the change set -- see :data:`_INCREMENTAL_SIBLINGS`.
+    Deselecting a NODE rather than dropping the FILE is deliberate: these files
+    are mixed, and every control and every set-shaped assertion beside the
+    sweep keeps running locally. It is also empty whenever ``full`` is set, so
+    a widened run stays exhaustive.
+    """
     targets = ["tests/"] if full else [str(REPO / name) for name in plan]
+    skips: list[str] = []
+    for node in (deselect or ()):
+        skips += ["--deselect", node]
     parallel: list[str] = []
     if full or len(plan) >= _PARALLEL_FILE_THRESHOLD:
         # ``--dist loadfile`` KEEPS EACH FILE ON ONE WORKER. These files carry
@@ -921,7 +1112,7 @@ def run_plan(plan: list[str], full: bool) -> tuple[int, str, float]:
     started = time.monotonic()
     proc = subprocess.run(
         [str(PYTHON), "-m", "pytest", *targets, "-q", "-p", "no:randomly",
-         "--tb=line", *parallel],
+         "--tb=line", *skips, *parallel],
         cwd=REPO, capture_output=True, text=True, encoding="utf-8",
     )
     if parallel and proc.returncode not in (0, 1):
@@ -932,7 +1123,7 @@ def run_plan(plan: list[str], full: bool) -> tuple[int, str, float]:
         started = time.monotonic()
         proc = subprocess.run(
             [str(PYTHON), "-m", "pytest", *targets, "-q", "-p", "no:randomly",
-             "--tb=line"],
+             "--tb=line", *skips],
             cwd=REPO, capture_output=True, text=True, encoding="utf-8",
         )
     return proc.returncode, proc.stdout, time.monotonic() - started
@@ -1079,9 +1270,29 @@ def main(argv: list[str] | None = None) -> int:
             "costs about the same and answers more."
         )
 
+    # --- PAIRED GUARDS. The floor's own O(suite) term, answered on the change.
+    #
+    # DELIBERATELY NOT DONE WHEN WIDENING: a full-suite run already contains
+    # every whole-tree form, so substituting there would buy nothing and would
+    # remove the certifier from the one run that was asked to be exhaustive.
+    candidates = [] if full else pairings_for(impact.always_run)
+    answered: list[Pairing] = []
+    sibling_seconds = 0.0
+    sibling_refusals: list[tuple[Pairing, str]] = []
+    if candidates and not args.plan_only:
+        sibling_refusals, answered, _fell_back, sibling_seconds = run_siblings(
+            candidates)
+    elif candidates:
+        # --plan-only does not RUN anything, so it reports what WOULD be
+        # substituted rather than what was. Saying "answered" about a script
+        # that never ran is the kind of claim this gate exists to refuse.
+        answered = []
+    deselect = [pair.node for pair in answered]
+
     print(f"impact-gate: {len(changed)} changed path(s) -> "
           f"{len(impact.selected)} SELECTED + {len(impact.always_run)} "
-          f"corpus-wide = {len(plan)} test file(s).", file=sys.stderr)
+          f"corpus-wide = {len(plan)} test file(s).",
+          file=sys.stderr)
     for name in impact.selected[:40]:
         print(f"    {name}", file=sys.stderr)
         for step in impact.explain(name)[:3]:
@@ -1095,6 +1306,29 @@ def main(argv: list[str] | None = None) -> int:
               "input from the diff,", file=sys.stderr)
         print("    so no impact analysis can ever select them. Omitting "
               "them is how a fast gate ships a real name.", file=sys.stderr)
+    if candidates and args.plan_only:
+        print(f"  {len(candidates)} corpus-wide SWEEP(s) inside them have a "
+              "registered incremental half and WOULD be deselected:",
+              file=sys.stderr)
+        for pair in candidates:
+            print(f"      {pair.node}", file=sys.stderr)
+            print(f"        -> {pair.script}", file=sys.stderr)
+    if answered:
+        print(f"  {len(answered)} corpus-wide SWEEP(s) inside them answered "
+              f"on the CHANGE rather than the tree, in "
+              f"{sibling_seconds * 1000:.0f} ms:", file=sys.stderr)
+        for pair in answered:
+            print(f"      {pair.node}", file=sys.stderr)
+            print(f"        -> {pair.script} (same property, staged content)",
+                  file=sys.stderr)
+        print("    Their FILES stay in the plan; only the sweeps are "
+              "deselected, so every control and every set-shaped assertion "
+              "beside them still runs here.", file=sys.stderr)
+        print("    THIS IS AN INDUCTION STEP. Its base case is the whole-tree "
+              "form, which still runs on every push in CI, on three "
+              "platforms.", file=sys.stderr)
+        print("    Delete the sweep and this stops being a fast check and "
+              "becomes a fast guess.", file=sys.stderr)
     if full:
         print("", file=sys.stderr)
         print(f"  WIDENING TO THE FULL SUITE, because {why_full}",
@@ -1103,7 +1337,27 @@ def main(argv: list[str] | None = None) -> int:
     if args.plan_only:
         return 0
 
-    code, stdout, seconds = run_plan(plan, full)
+    if sibling_refusals:
+        # A PAIRED GUARD IS RED. Reported BEFORE pytest runs, because the
+        # committer does not need to wait out a test plan to be told the thing
+        # that already decided the answer.
+        print("", file=sys.stderr)
+        print("REFUSED: a corpus-wide guard is RED on this change, answered "
+              "by its incremental half.", file=sys.stderr)
+        for pair, output in sibling_refusals:
+            print(f"    {pair.script}  (the fast half of {pair.node})",
+                  file=sys.stderr)
+            for line in output.strip().splitlines():
+                print("      " + line, file=sys.stderr)
+        print("", file=sys.stderr)
+        print("  The whole-tree form is " + ", ".join(
+            pair.node for pair, _o in sibling_refusals) +
+            " -- run it if you want the full picture.", file=sys.stderr)
+        print("  Bypass, if you truly mean to: git commit --no-verify",
+              file=sys.stderr)
+        return 1
+
+    code, stdout, seconds = run_plan(plan, full, deselect)
     ran = tests_run(stdout)
 
     if code not in (0, 1):
