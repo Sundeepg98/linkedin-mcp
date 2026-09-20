@@ -156,3 +156,58 @@ def test_control_the_guard_convicts_a_planted_duplicate():
         "the duplicate detector did not convict a planted duplicate of section 23"
     )
     assert not [n for n, c in collections.Counter(_numbers(real)).items() if c > 1]
+
+
+#: SUBSECTIONS -- added because the guard above FAILED TO CATCH A DEFECT I CAUSED.
+#:
+#: Renumbering a section heading during a merge leaves its `### N.x` children
+#: pointing at the old parent. I did exactly that: moved a heading 33 -> 32 and
+#: left five `### 33.x` beneath it, which then collided with a LATER wave's
+#: genuine `### 33.x`. Every test above passed throughout, because they only read
+#: `^## `. A guard that cannot see half the structure it is named for is the
+#: shape this repo spent 2026-09-20 counting -- and this one was mine.
+#:
+#: A RATCHET, NOT A PIN, deliberately. The file already carries 22 subsections
+#: whose number disagrees with their containing parent, from long before this
+#: guard existed. Demanding zero would mean renumbering published sections that
+#: other documents cite by number -- trading a cosmetic defect for dangling
+#: citations, which is the worse one. The count may fall; it may not rise.
+ORPHAN_SUBSECTION_CEILING = 22
+
+SUBHEADING = re.compile(r"^###\s+(\d+)\.(\d+)", re.M)
+
+
+def _orphans(text: str) -> list[str]:
+    """`### N.x` whose N is not the `## N` section that contains it."""
+    out: list[str] = []
+    parent: str | None = None
+    for line in text.splitlines():
+        head = HEADING.match(line)
+        if head:
+            parent = head.group(1)
+            continue
+        sub = SUBHEADING.match(line)
+        if sub and parent is not None and sub.group(1) != parent:
+            out.append(f"{sub.group(1)}.{sub.group(2)} under {parent}")
+    return out
+
+
+def test_no_new_subsection_is_orphaned_from_its_parent():
+    """A renumbered heading must take its children with it."""
+    found = _orphans(REGISTER.read_text(encoding="utf-8"))
+    assert len(found) <= ORPHAN_SUBSECTION_CEILING, (
+        "%d orphaned subsections against a ceiling of %d. Renumbering a section "
+        "leaves its `### N.x` children pointing at the old parent -- move them "
+        "with it. Full list: %s"
+        % (len(found), ORPHAN_SUBSECTION_CEILING, found)
+    )
+
+
+def test_control_the_orphan_check_convicts_a_planted_renumber():
+    """SHOWN FAILING on the exact defect: a heading moved, its child left behind."""
+    real = REGISTER.read_text(encoding="utf-8")
+    planted = real + "\n## 99. A PLANTED SECTION\n\n### 98.1 ITS CHILD, LEFT BEHIND\n"
+    assert "98.1 under 99" in _orphans(planted), (
+        "the orphan detector did not convict a planted renumber"
+    )
+    assert len(_orphans(planted)) == len(_orphans(real)) + 1

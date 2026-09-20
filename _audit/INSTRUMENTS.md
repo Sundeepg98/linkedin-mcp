@@ -4994,7 +4994,7 @@ postcondition assertions. Their numbers are the tables in
 
 ## 32. The sanitiser-scope wave, 2026-09-20
 
-### 33.1 A PROOF'S CORPUS IS PART OF THE ENTRY, AND A GUARD MAY CONSULT ONLY ENTRIES PROVEN FOR ITS OWN KIND
+### 32.1 A PROOF'S CORPUS IS PART OF THE ENTRY, AND A GUARD MAY CONSULT ONLY ENTRIES PROVEN FOR ITS OWN KIND
 
 `tests/test_page_text_is_never_printed.py` imported the url rule's
 `_is_sanitiser_call` and ORed it into a taint walk whose sources are sixteen TEXT
@@ -5039,7 +5039,7 @@ Restoring the OR in memory: the walker's five red cases fire (mechanism a) AND
 the certifier's structural check fires (mechanism b). Removing either leaves the
 other convicting.
 
-### 33.2 BUILD BOTH VARIANTS FROM SOURCE TEXT -- NEVER IMPORT A MODULE YOU ARE EDITING
+### 32.2 BUILD BOTH VARIANTS FROM SOURCE TEXT -- NEVER IMPORT A MODULE YOU ARE EDITING
 
 **This one convicted itself the same hour.** To measure what the fix newly
 flags, a child was briefed to sweep the tree with two walkers, taking the
@@ -5073,7 +5073,7 @@ rather than two different programs. Corrected result: 179 files, 111 sites befor
 and after, **0 newly flagged, 0 unflagged**, and `post == KNOWN_TEXT_SINKS`
 exactly.
 
-### 33.3 A VACUOUS LOOP DECLARED BEATS A PARAMETRIZE THAT SKIPS
+### 32.3 A VACUOUS LOOP DECLARED BEATS A PARAMETRIZE THAT SKIPS
 
 `test_no_claimant_declares_page_text_without_surviving_the_text_table` checks
 ZERO claimants today, because nothing declares `SCOPE_TEXT`. Its docstring says so
@@ -5092,7 +5092,7 @@ same name, a different function, allowlist-based -- is shown PASSING all six.
 **Two functions, one spelling, opposite results**, which is also the plainest
 statement of why a name-matched stop cannot be trusted.
 
-### 33.4 THE NAME-BASED STOP CANNOT BE REPLACED HERE, AND THE COLLISION IS NOW DOCUMENTED RATHER THAN LATENT
+### 32.4 THE NAME-BASED STOP CANNOT BE REPLACED HERE, AND THE COLLISION IS NOW DOCUMENTED RATHER THAN LATENT
 
 Asked directly and answered honestly: **no.** These guards are pure AST analysis,
 per module, and deliberately so -- resolving a call to a definition needs either
@@ -5112,7 +5112,7 @@ the way `_relation`'s are -- and they are genuinely two different functions doin
 two different jobs, so the honest repair is a RENAME, not reconciliation. A
 rename vouches for nothing, which is why it is available to anyone, and it was
 not taken unilaterally. Left for its owners, in the open.
-### 33.5 A TABLE-DRIVEN GUARD NEEDS THE ENUMERATION HALF, AND I SHIPPED ONE WITHOUT IT
+### 32.5 A TABLE-DRIVEN GUARD NEEDS THE ENUMERATION HALF, AND I SHIPPED ONE WITHOUT IT
 
 `test_a_guard_consults_only_sanitisers_proven_for_its_own_kind` iterates its own
 declaration table, so a new consumer of the url-proven predicate would be invisible
