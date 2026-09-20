@@ -714,7 +714,18 @@ was expensive was knowing which question to ask, and that is now done.
    absent.** Correct for CI, which sees only the tracked tree, and worth saying
    because a reader in the main checkout may find the file sitting on disk.
 
-6. **KIND-BEFORE-RESOLUTION is not a rule I applied evenly, and section 6.4
+6. **A report about other documents' defects trips the correction-findability
+   guard repeatedly, and each trip costs a human ruling.** Five pairs needed
+   triaging into `NOT_A_CORRECTION` over the course of writing this, one per
+   round of editing, because a document that cites another while discussing
+   what is wrong with it looks exactly like a document correcting it. Every one
+   was a genuine judgment call -- corroboration, acquittal, a pointer, a
+   self-retraction -- and none could have been mechanised without weakening the
+   guard. **That is a real cost of this genre of document and the next one
+   should budget for it**, including a red CI run on an intermediate commit
+   (`7b5e283`) that failed on nothing but a pair triaged two commits later.
+
+7. **KIND-BEFORE-RESOLUTION is not a rule I applied evenly, and section 6.4
    records where it failed.** The guard enforces it for UPPER-KEBAB tokens,
    where a slot decides which registry a name is drawn from before anything is
    resolved. The hand-run SHA census had no such step, so 280 LinkedIn Help
