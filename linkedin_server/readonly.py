@@ -1417,6 +1417,56 @@ _ALLOWED_URL_PATTERNS: tuple[re.Pattern[str], ...] = (
     # first load 404s, the correct response is to CHANGE THIS PATTERN, not to
     # conclude he has no alerts -- the skill's own inventory says he has five.
     re.compile(r"^https://www\.linkedin\.com/jobs/alerts/?$"),
+    # The role-play scenario LISTING. Census J 136 / J 137 / J 138, which ask
+    # whether a past practice-interview session's readiness score, summary and
+    # transcript have a stable address.
+    #
+    # THE ADDRESS WAS NOT GUESSED, AND THIS IS THE DIFFERENCE FROM THE ENTRY
+    # ABOVE. On 2026-09-20 a live capture of /premium/my-premium/ found the
+    # sibling drawn on his own hub -- exactly one role-play anchor, in product
+    # content five sections deep, not in chrome. LinkedIn serves this family to
+    # this account. What was a hypothesis was only the SPELLING WITHOUT
+    # ``/new/``, and it was OPENED the same hour rather than left standing:
+    #
+    #   IT SERVES. Landed as requested, no redirect, no login wall, no 404 or
+    #   error copy; a known-served control was read first in the same session
+    #   and reported SERVED, so the instrument could distinguish the two.
+    #
+    #   AND IT DRAWS NOTHING. 673538 bytes, 1135 characters of rendered text,
+    #   24 anchors, 26 buttons, 6 headings -- and ``<main>`` holds SEVENTEEN
+    #   CHARACTERS, two words, one percent of the page's own rendered text.
+    #   Sampled three times over 25 seconds, byte-identical each time, so it
+    #   is not a hydration race. No scenario list, no history, and no
+    #   empty-state or error message either -- fourteen empty/error needles
+    #   all silent.
+    #
+    # SO THE ENTRY IS KEPT, AND IT DELIVERS NO ROW TODAY. That is recorded
+    # rather than softened: this is the ``/in/me/details/interests/`` lesson
+    # arriving in a new shape -- there, an admitted address REDIRECTED; here
+    # one serves and is empty, which looks like coverage and is not. It stays
+    # because the emptiness IS the measurement and re-taking it is one rerun,
+    # and because the member-side experiment flag reads ``control`` on this
+    # account, which is the leading explanation for an empty main with no
+    # empty-state copy -- an INFERENCE, named as one, not a measurement.
+    #
+    # WHY THE LISTING AND NOT THE ROUTE THAT IS ACTUALLY DRAWN. The drawn one
+    # is ``/learning/role-play/scenarios/new/`` and pressing it starts a
+    # session. That is the SAME CLASS as ``/article/newsletter/new/``, which
+    # `_audit/2026-09-20-newsletter-built.md` refused because opening a
+    # composer may autosave something this server has no surface to detect --
+    # and the case is stronger here, because a role-play session is a live
+    # product interaction that asks for a microphone. **This pattern takes NO
+    # SUB-PATH, so it does not admit ``/new/``.** That is load-bearing rather
+    # than incidental: the family this entry buys is one page, and the one
+    # address in the family that could start something stays refused.
+    #
+    # NO QUERY, NO SUB-PATH, NO ID, under the rule the search-appearances
+    # entry states about itself. Nothing here needs one.
+    #
+    # IT NAMES NOBODY. Every segment is a literal; there is no member,
+    # organisation or school position in it, which is what refused the
+    # newsletter slug next door.
+    re.compile(r"^https://www\.linkedin\.com/learning/role-play/scenarios/?$"),
 )
 
 #: Substrings that must never appear in a navigation target, checked before

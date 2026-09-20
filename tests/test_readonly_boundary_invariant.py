@@ -1008,12 +1008,33 @@ PINNED = (
 #: ------------------------------------------------------------------------
 #: RE-FROZEN 2026-09-20, AND ONE DIGEST MOVED BY ONE TUPLE ENTRY:
 #:
-#:     _ALLOWED_URL_PATTERNS   5b5d34b6e3cc8059 -> 6577a7bc8a32d7b8   34 -> 35
+#:     _ALLOWED_URL_PATTERNS   5b5d34b6e3cc8059 -> 85e821d1af9060f3   34 -> 35
 #:     _FORBIDDEN_URL_SUBSTRINGS               unchanged              33 -> 33
 #:
 #: ONE ANCHORED PATTERN, FOR ONE SURFACE:
 #:
 #:     ^https://www\.linkedin\.com/company/[A-Za-z0-9%\-_]{1,100}/?$
+#:
+#: ------------------------------------------------------------------------
+#: RE-FROZEN AGAIN 2026-09-20, LATER THE SAME DAY, ONE MORE TUPLE ENTRY:
+#:
+#:     _ALLOWED_URL_PATTERNS   6577a7bc8a32d7b8 -> 85e821d1af9060f3   35 -> 36
+#:     _FORBIDDEN_URL_SUBSTRINGS               unchanged              33 -> 33
+#:
+#: ONE ANCHORED PATTERN, FOR ONE PAGE:
+#:
+#:     ^https://www\.linkedin\.com/learning/role-play/scenarios/?$
+#:
+#: A READ admission for census J 136-138, by the live-capture wave. The
+#: sibling route is drawn on /premium/my-premium/, so the family is served to
+#: this account and the address was not guessed. THE PATTERN TAKES NO
+#: SUB-PATH, which is load-bearing: the route LinkedIn actually draws is
+#: ``/learning/role-play/scenarios/new/`` and pressing it STARTS a session,
+#: so that one stays refused -- same class as /article/newsletter/new/.
+#: Measured over ten spellings: 10 of 10 admitted-or-refused as intended.
+#: The page was then opened. It SERVES and its <main> holds 17 characters,
+#: stable over three samples in 25 seconds. The entry buys no write, no
+#: sub-path and, today, no row.
 #:
 #: ``COMPANY-PAGE-SURFACE`` -- 18 published rows, 16 filed, the largest BUILD
 #: in the census, and every filed row behind this one line.
@@ -1138,7 +1159,7 @@ READONLY_AST_AT_LAST_REFREEZE = {
     # a deliberate READ admission with the three denylists, both exemption
     # tables, SANCTIONED_MUTATIONS and `<functions>` byte-identical. SEVEN of
     # eight digests unchanged. See the re-freeze note above.
-    "_ALLOWED_URL_PATTERNS": "6577a7bc8a32d7b8",
+    "_ALLOWED_URL_PATTERNS": "85e821d1af9060f3",
     "_FORBIDDEN_SUBSTRING_EXEMPTIONS": "43e2bf7f3db0dbed",
     "_FORBIDDEN_SUBSTRING_PATTERN_EXEMPTIONS": "419e64a3cd92ec7e",
     "_FORBIDDEN_URL_SUBSTRINGS": "b0291a66ec9bd51e",
@@ -1610,7 +1631,7 @@ DENYLISTS_AT_A76FE32 = {
     # own ruling. It also buys no PAGE READ: `company_page.py` opens nothing
     # and has no page function, so what landed is a precondition and a
     # vocabulary. The honest reading of a widening is what it bought.
-    "_ALLOWED_URL_PATTERNS": "6577a7bc8a32d7b8",
+    "_ALLOWED_URL_PATTERNS": "85e821d1af9060f3",
     "_FORBIDDEN_SUBSTRING_EXEMPTIONS": "43e2bf7f3db0dbed",
     # TWO OF THESE FOUR MOVED ON 2026-08-26 and the values are updated here.
     #

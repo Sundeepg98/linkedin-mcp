@@ -3942,7 +3942,97 @@ superseded by the committed probe, which does what they did with controls.
 Their results are the numbers in `_audit/2026-09-20-newsletter-built.md` and in
 the probe's own output.
 
-## 24. THE SURFACE-CLASS ADJUDICATION, 2026-09-20
+## 24 · THE LIVE-CAPTURE WAVE, 2026-09-20
+
+`scripts/_probe_premium_surfaces_shape.py`. Six Premium-bearing surfaces,
+captured live to `_state/` once and re-readable offline for ever. Five
+controls, **each driven into its failing state in-process and each returning
+non-zero**, then passing again afterwards.
+
+### 24.1 A NEEDLE IN THE SOURCE IS NOT A NEEDLE ON THE PAGE
+
+**The finding that would have inverted this wave's headline answer.** Three of
+the six captures are about 1.4 MB and over 99 percent of that is the Ember
+bundle, the i18n dictionaries and the lix blob -- rendered text is 0.2 to 2.5
+percent of the document. Counting `inmail` over the RAW document returns 16 to
+21 on three surfaces and **0 on all six** once `<script>`, `<style>` and
+LinkedIn's `<code>` model payloads are stripped.
+
+The first census here counted raw, and would have reported an InMail balance
+present on three surfaces -- the exact opposite of the truth, on the one census
+row the operator had asked about directly, with a number attached to make it
+look measured. **Both counts now ship side by side, because the gap between
+them is the finding.** The control: a needle repeated 400 times inside a
+`<script>`, plus a drawn word that must survive; disarming `STRIPPED_TAGS`
+voids the run.
+
+### 24.2 A BUDGET-SHAPED REDUCER RULE LETS A PROFILE SLUG THROUGH
+
+**Found by reading my own stdout, not my own code.** The reducer's first
+version replaced a path segment only when it was LONG or DIGIT-BEARING. A
+profile slug is neither, so `/in/<a real person>` printed verbatim -- a third
+party's, and the operator's own -- into a terminal, off captures of his own
+pages.
+
+**A length-and-digit rule is a budget, and a budget is not a rule about WHERE
+a match may land.** The rule that works is positional and unconditional: the
+segment AFTER a member-bearing prefix (`in`, `company`, `school`,
+`newsletters`, `pub`, `profile`, `organization`, `groups`, `showcase`) is
+replaced whatever it looks like. Control 3 is built from that failure and
+reproduces it on demand: reverting to the old rule reports **3 of 4 inputs
+leaked** and voids the run. Nothing reached a tracked file; the captures that
+carry names are gitignored and stayed there.
+
+### 24.3 A ZERO NEEDS A NON-ZERO BESIDE IT, AND A VERDICT NEEDS A SECOND VERDICT
+
+Two controls of the same shape. The census control names 19 needles on a
+synthetic document carrying all of them, so a zero on a real page is a
+reading; blinding `visible_text` voids it. The lix control puts a two-flag
+blob carrying `enabled` and `control` to the treatment parser and requires it
+to distinguish them -- because the wave's headline flag reads `control`, and a
+parser that can only ever emit one value would say exactly that on any input.
+Across the real capture it parses **376 flags spanning 26 distinct
+treatments**, which is what makes the one `control` a measurement.
+
+### 24.4 AN ABSENCE IS NOT A ZERO, AND IT EXITS 2
+
+`_state/` carries no files in a linked worktree. A run that cannot find the
+captures prints what is missing and **exits 2 without tallying anything** --
+driven by pointing it at a nonexistent directory. These documents embed a
+member urn inside the lix `trackingInfo` blob, measured, which is the concrete
+reason they may never be committed rather than a general caution.
+
+### 24.5 A GUARD THAT READS A DIRECTORY AS A FILE
+
+Not this wave's instrument, and found by running the gate rather than reading
+it. `committable_files()` in `tests/test_no_committed_credential.py` sweeps
+tracked PLUS untracked-not-ignored, which is right. But git reports an
+embedded repository as a single DIRECTORY entry, and 23 Claude Code agent
+worktrees under `.claude/worktrees/` therefore arrived as 22 directories that
+were handed to `read_text()`. **22 reds on a tree whose own diff was clean,
+blocking every wave on the box.** Repaired at the INPUT -- `.claude/worktrees/`
+ignored and declared `LOCAL_STATE` -- rather than by teaching the guard to
+tolerate a directory, because the directory never belonged in the swept set.
+
+### 24.6 STILL CANNOT FAIL, AND IT IS NOT MINE
+
+`scripts/_probe_events_surface_shape.py`'s must-stay-silent control is printed
+and never branched on -- the identical gap the newsletter wave found and fixed
+in its own probe, still unfixed at `8b58dcb`. Named rather than edited: it
+belongs to another wave, and a one-line fix with the evidence attached is
+cheaper for its owner than a surprise in their diff. **This is the second
+register entry to name it.**
+
+### 24.7 DISPOSABLE, declared
+
+Four scratchpad scripts: a banking MCP client that writes a tool's payload to
+`_state/` and prints only a shape, a six-page capture driver, and two
+role-play probes (the second re-reading the first's address at three settle
+depths). Their results are the numbers in
+`_audit/2026-09-20-the-live-capture.md`. The capture driver's job is done --
+the captures it wrote are on disk and the committed probe reads them.
+
+## 25. THE SURFACE-CLASS ADJUDICATION, 2026-09-20
 
 Appended, not inserted -- see this file's preamble; find these by NAME.
 
@@ -4059,7 +4149,7 @@ tally, and the standalone red-proof harness. The first two produced numbers now
 quoted in the wave document; the third is superseded by the committed test
 file, which plants the same five defects and is re-runnable in CI.
 
-## 25. THE THIRD CAUSE, AND A CONTROL THAT PASSED WHILE ITS REPORT LIED, 2026-09-20
+## 26. THE THIRD CAUSE, AND A CONTROL THAT PASSED WHILE ITS REPORT LIED, 2026-09-20
 
 ### 24.1 `scripts/_check_published_split.py` -- it printed two words for two unrelated situations
 
@@ -4191,7 +4281,7 @@ without touching a tracked file, and it is how the option of ruling the two
 handed-over defects together was costed before it was declined. Their results
 are in `_audit/2026-09-20-the-split-ruling.md`.
 
-## 26. `scripts/detect_unbranched_probe_controls.py` -- 129 controls that print FAIL and certify anyway, 2026-09-20
+## 27. `scripts/detect_unbranched_probe_controls.py` -- 129 controls that print FAIL and certify anyway, 2026-09-20
 
 ### 24.1 THE CENSUS, AND WHY IT IS A DIFFERENT CLASS FROM A SINGLE FIX
 
