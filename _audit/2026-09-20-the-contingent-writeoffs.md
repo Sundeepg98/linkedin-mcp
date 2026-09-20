@@ -491,24 +491,81 @@ same session, on the right ground -- row `P H11` is *the "Providing services"
 section AS RENDERED ON THE PROFILE*, which is `/in/me/`, ALLOWED, so no pattern
 is owed. **The address reasoning is right.**
 
-What nobody measured is whether the section is drawn at all. Both committed
-captures of that address read **0** for `providing services`:
+What nobody joined is whether the section is drawn at all -- and the census
+already holds the answer, in a different row of the same slice.
 
-    profile_topcard.html            providing services 0
-    profile_topcard_hydrated.html   providing services 0
+    profile.md H1   Create a Service Page / add services   GAP
+                    "one of the three items the `Open to` menu resolves to
+                     on his account; NEVER ACTIONED"
 
-**And that zero does not settle it either**, which is the whole point of
-reporting it this way. The same captures read `Experience` 0, `Licenses` 0,
-`Recommendations` 0, `Activity` 0, `Add profile section` 0 -- they are
-TOPCARD-SCOPED, so they never reach the part of the page where the section
-would sit. **A needle that never reached the region is not a zero**, exactly as
-`jobs.md` row 16 says about the suggested-filters strip.
+    profile.md s7.8  "A census of all five profile captures measured the
+                      `Open to` button's menu resolving to exactly three
+                      items -- Hiring, Providing services, Finding volunteer"
 
-**VERDICT for `P H11`: UNKNOWN, and the census does not have a word for it.**
-The row is costed as though the section renders; no committed evidence says it
-does or does not; the capture that would answer it has never been taken. Queue
-MEASURE -- one full-profile capture at an address already admitted -- not
-BUILD.
+    profile.md H11  "Providing services" section as rendered on the profile
+                    GAP   "no tool, no reason"
+
+So, measured across five captures: **the entry point to create a Service Page
+is rendered on his profile, and he has never used it.** `H11` is the section
+that appears once a Service Page EXISTS. It does not exist.
+
+**VERDICT for `P H11` and the nine write rows above it: TRUE BUT CHANGEABLE,
+at the cost of one operator action** -- exactly the `ADMIN-RIGHTS-NOT-HELD`
+shape, and spelled nowhere. Note also that `H11`'s own cell claims nothing at
+all (*"no tool, no reason"*); the claim that the section renders was introduced
+downstream, in the cost correction, and never had a source.
+
+**And a costing consequence, flagged for whoever owns that blocker rather than
+ruled here.** `H6` edit, `H7` unpublish, `H8` link to a Company Page, `H9`
+request reviews and `H10` manage reviews all presuppose `H1`. They are costed
+as independent writes against a page that does not exist. That is a cost
+question, not a write-off question, and it is out of this pass's scope.
+
+*(My own first attempt at this row was weaker and is recorded so the method is
+visible: I read `providing services` as 0 in both committed captures of
+`/in/me/` and nearly reported the section absent. Those captures also read
+`Experience` 0, `Licenses` 0, `Recommendations` 0 and `Activity` 0 -- they are
+TOPCARD-SCOPED and never reach the region. A needle that never reached the
+region is not a zero, per `jobs.md` row 16. The answer came from the census's
+own `H1` cell, not from my needle.)*
+
+### 3.4 The row cells are markedly more honest than the blocker table
+
+A row-level sweep of the four capability slices -- `jobs.md`, `network.md`,
+`profile.md`, `messaging-and-content.md` -- pulled every reason cell carrying
+an operator, account or world signal: **179 rows** (42 / 42 / 49 / 46).
+(`mcp-inventory.md` was excluded on measurement: it is a tool and
+evidence-class inventory with none of the census vocabulary, so it has no
+capability rows to sweep.)
+
+Of those, **144 sit in a write-off state** (EXCLUDED-RULED, XR, GAP,
+MEASURED-ABSENT). Applying s6's predictor at row level:
+
+| | rows | carry a REOPENER in the cell |
+|---|---:|---:|
+| EXCLUDED-RULED / XR -- rows actually CLOSED with a reason | 86 | **36 (42%)** |
+| GAP -- not closed, so none is owed | 55 | 1 |
+
+**42% at row level against 15%-with / 91%-without at blocker level.** The
+cells are the better artifact, and the ones that are good are very good --
+`jobs.md` 25/29/30 carry the `PANEL-NOT-OBSERVED` control and its reopener
+verbatim; `network.md` 136 is MEASURED-ABSENT with two independent sources
+named; `network.md` 174 refuses to close on a zero in its own words
+(*"A ZERO CANNOT SETTLE THIS ROW"*); `profile.md` L2b says **"NOBODY HAS
+LOOKED"** rather than picking a state.
+
+**The contingent problem is concentrated one level up, in the blocker table,
+where a single reason cell speaks for 6 or 15 or 30 rows and no row can
+contradict it.** `J 40` is the clean case: the census ROW says the field is
+the skill's exclusive one, and the BLOCKER reason turned that into "not on any
+surface this server reads", which is the sentence this repo's own fixtures
+refute.
+
+*(Instrument note, because the sweep's own count moved: the first pass matched
+`"has no"` inside `"has none"` and `"not a"` inside `"not at all"`, and the
+settings-family boilerplate `"a setting is admitted by name or not at all"`
+alone contributed ~33 rows of pure artifact. Word-boundary regexes removed 33
+and added 0. The 179 above is the corrected figure.)*
 
 ---
 
