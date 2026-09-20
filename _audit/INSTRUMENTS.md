@@ -5129,6 +5129,86 @@ containment is one-way, users are a SUBSET of the declarations, and the
 declared-but-not-a-user row IS the fix. **A wrong mutation is cheap; a wrong mutation
 that returns the colour you expected is not.** Re-run against a real user made
 undeclared, and against an invented new one: both red.
+
+---
+
+## 33 · WATCH THE WHOLE LOAD, NOT THE SETTLED DOM (premium4-analyticsshape, 2026-09-20)
+
+Not a new script -- a method, plus the expression that runs it. Section 7 of
+`_audit/2026-09-20-the-profile-views-recapture.md` records why it is registered
+as a method rather than committed to `scripts/`: the probe holds an address
+literal, and `tests/test_navigation_is_never_derived.py` sweeps `scripts/*.py`.
+
+### 33.1 A SETTLED READ CANNOT REFUTE "ATTACHED AFTER HYDRATION"
+
+`dom.py` records that `data-view-name` on the profile-views surface is
+"attached by the client AFTER hydration or not at all". **Every reading of that
+page for seventeen days -- including two of mine -- was taken at settle, and a
+settled read cannot tell `never attached` from `attached, then replaced`.** The
+two possibilities have identical evidence at t=infinity, so no number of
+repeated settled samples distinguishes them. Repetition proves stability; it
+cannot cross a gap in WHEN you looked.
+
+The fix is to sample the whole lifecycle. One open tab, `Runtime.evaluate` over
+raw CDP at ~3 Hz through a navigation someone else triggers, printing only when
+the tuple CHANGES:
+
+    (() => { const m = document.querySelector('main'); return {
+       r: document.readyState,
+       dvn: document.querySelectorAll('[data-view-name]').length,
+       ml: m && m.innerText ? m.innerText.length : -1,
+       an: document.querySelectorAll('a[href*="/in/"]').length,
+       dl: document.documentElement.outerHTML.length }; })()
+
+155 polls over 55s, against a fresh server-driven load:
+
+    t+s    ready      dvn  main_chars  /in/    doc_len
+     0.2   complete     0        1835     7     143554
+     3.6   loading      0          -1     0      23413
+     4.0   complete     0         151     0     539626
+     5.2   complete     0        1404     7     112699
+     5.8   complete     0        1555     7     125995
+     7.1   complete     0        1835     7     143556
+    PEAK data-view-name = 0
+
+### 33.2 THE CONTROL IS THE OTHER COLUMNS, AND IT IS FREE
+
+**SHOWN ABLE TO SPEAK, in the same table that carries the zero.** The probe
+tracked `main` from absent through 151, 1404, 1555 to 1835 characters, the
+document from 23 KB through a 539 KB peak down to 143 KB, and `/in/` anchors
+from 0 to 7 -- while printing 0 for the target at all 155 samples.
+
+A zero standing beside four columns that moved is a reading. A zero standing
+alone is an unproven instrument. **Poll several quantities you EXPECT to move
+alongside the one you expect not to, and the control costs one extra key in
+the returned object.** This is cheaper than the paired-page control of 29.2 and
+works where no sibling page exists.
+
+### 33.3 THE FAILURE IT CAUGHT, WHICH WAS A DIAGNOSIS AND NOT A BUG
+
+The method refuted a same-day audit ruling that an empty `view_names` was "a
+proven scope artifact". It is not: the attribute is absent document-wide at
+every instant. The defect was real, the fix was correct, and **the fix had
+already landed before the reading that diagnosed it** -- `353c04f` is an
+ancestor of the serving process's `loaded_commit`. The reader returns the same
+numbers either way, because on that page all 61 `<p>` and all 5 `<label>` are
+inside `main` already.
+
+**AN INSTRUMENT THAT RETURNS `[]` CANNOT TELL YOU WHICH `[]` IT IS.** "Absent
+from the page" and "outside my scope" are one value at the call site. The
+general repair is the one 2b used: measure BOTH scopes in the same pass and
+return both counts, so the difference is data instead of inference.
+
+### 33.4 TWO PARSE MISSES THIS REGISTERS AGAINST MYSELF
+
+Both were zeros from patterns that had never been shown returning non-zero.
+
+    grep 'href="/in/'  on the fixtures     -> 0    the file uses the ABSOLUTE form; truth 4
+    row.get('url'/'profile_url'/'link')    -> 0    the key is 'profile';           truth 6 of 10
+
+Neither reached a verdict, both because a later measurement happened to
+contradict them. **Shape a probe's needle against ONE known-present specimen
+before trusting its zero** -- the same law as 33.2, applied to a grep.
 ---
 
 ## 34. THE PREMIUM-FOUR WAVE: A DENOMINATOR, AND A READER THAT COUNTED THE WRONG TIER, 2026-09-20

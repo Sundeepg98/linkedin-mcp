@@ -249,6 +249,35 @@ linked from here".
 
 ## 5. `N 136` STAYS OPEN, AND THE SCOPE DEFECT IS NO LONGER A HYPOTHESIS
 
+**CORRECTED BY:** `_audit/2026-09-20-the-profile-views-recapture.md` -- the empty `view_names` is NOT a scope artifact: the scope fix `353c04f` had already landed when this reading was taken, `data-view-name` is absent document-wide, and on this page widening the scope cannot change any field the reader returns. The conclusion that `N 136` is absent survives on other grounds.
+
+> **THIS SECTION'S DIAGNOSIS IS WRONG IN BOTH HALVES, and its conclusion
+> survives on other grounds.**
+>
+> This section rules the empty `view_names` "a proven scope artifact" and the
+> reader "looking in the wrong box". Measured since:
+>
+> 1. **The box was already the whole document when this reading was taken.**
+>    The scope fix `353c04f` (`main || document.body` -> `document.body`) is an
+>    ancestor of `8b58dcb`, and the serving process reports `loaded_commit:
+>    8b58dcb`. This reading came from the document-scoped reader.
+> 2. **On this page the two scopes are the same scope.** All 61 `<p>`, all 5
+>    `<label>` and all 7 `/in/` anchors are inside `main`; the only elements
+>    outside it are 8 `<li>` of furniture the reader never reads. Widening
+>    cannot change any field returned, and did not.
+> 3. **`data-view-name` is absent DOCUMENT-WIDE**, 0 across 3 settled samples
+>    and 0 at every instant of a full 155-poll load. `view_names: []` is a true
+>    reading of the page, not a scope artifact.
+>
+> The 12-versus-0 contradiction is not a contradiction: **12 is `page_had`**,
+> the link-anchored harvest (7 `/in/` + 4 anonymous + 1 recruiter row), never a
+> `data-view-name` count. The two numbers were always counting different
+> things.
+>
+> `N 136` does stay MEASURED-ABSENT as the census already has it -- but the
+> reopener argued for here is refuted, and the row was re-measured by an
+> instrument that could see a panel. See that document's section 6.
+
 `_audit/2026-09-20-the-premium-block.md` section 5 reported, from the tree
 alone, that `PROFILE_VIEWS_INSIGHTS_JS` obeys `main` while its comment says it
 reports it, and that no committed fixture of that page has a `<main>` -- so
