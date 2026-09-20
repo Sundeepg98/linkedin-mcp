@@ -154,9 +154,151 @@ Two observations worth someone's attention, neither fixed here:
 
 ### 4b. The divergence child's findings
 
-(Pending at the time of the freeze -- see section 10.)
+Delegated as a closed-form slice (`walker-divergence`), verified against SHA
+`5c24b05` on a clean `tests/`, full file at
+`...\scratchpad\walker-divergence.md`. **I re-ran its three load-bearing claims
+myself before accepting them**; all three reproduced.
+
+**It corrected my brief.** I was told a third guard "imports only a constant and a
+file-lister" from the navigation engine. Measured:
+`tests/test_probe_navigation_budget.py` imports **nothing** from it -- its only
+imports are `__future__`, `ast` and `pathlib`. I verified that directly. It is not
+even about the same rule: it classifies whether a `.goto` was allowlist-GUARDED, not
+whether its argument is browser-derived. I relayed that claim without checking it; the
+child declined to conform its write-up to the brief, which is the correct behaviour
+and is why the error surfaced.
+
+**The finding worth acting on: the page-text guard inherits a url-scoped safety claim
+and applies it to page text.** The page-text walker imports `_is_sanitiser_call` from
+the navigation guard, and that predicate answers over `_SANITISERS` -- whose entries
+are proven **for urls only**. `_redact`'s own docstring in the navigation guard says
+so in as many words, and adds that "a display name sitting beside a lowercase word
+passes straight through it". Reproduced:
+
+```
+name = await item.inner_text()
+print(_redact(name))
+
+B._tainted_names      -> ['name']          (the value IS tracked as tainted)
+B.text_violations     -> []                (and the print is NOT flagged)
+control, no _redact   -> [(2, 'print')]    (so the flagger still flags)
+```
+
+So `print(_redact(<page text>))` is waved through by the rule built to stop exactly
+that. **Live instances in the tree: ZERO** -- I swept all 175 files for an output sink
+whose argument applies any of the three url sanitisers to a value the page-text walker
+considers page text, and found none. Latent, not live, and named rather than left
+implied.
+
+Two further structural items, both reproduced by me:
+
+- **A bare-name call is invisible to both taint-source checks.** Both engines match a
+  taint source only in attribute-call form. `l = goto(X); print(l)` -> `[]`;
+  `l = BROWSER.goto(X); print(l)` -> `[(2, 'print(l)')]`. Nothing in this codebase
+  calls the browser API bare, so it is a shared latent gap -- shared **by
+  construction**, not by any cross-check, and neither docstring mentions it.
+- **The three call-classifying predicates are not shape-symmetric with each other.**
+  `_is_sanitiser_call` matches both `f(x)` and `o.f(x)`; the counting carve-out matches
+  a Name only, so `print(payload.len(landed))` is flagged. Inert today (nothing defines
+  a `.len()` method) and worth knowing before someone adds one.
+
+Items where the child checked and found the code FINE -- listed so coverage can be told
+from silence: `_member_path`/`_path_of` absent from `_SANITISERS`; the page-text
+inventory header's "111 sites, 25 files" (exact); `KNOWN_DERIVED_NAVIGATIONS == {}`;
+the 4-pass convergence claim I wrote (independently re-derived as 4, same file);
+`read_surface_census` absent from `TEXT_CALLS`; the budget guard's empty
+`KNOWN_UNGUARDED`. Its own "what I did not check" list names the historical
+measurements it declined to reproduce and the negative half of the binding
+comparison, which it deferred to my pin rather than re-deriving.
 
 ---
+
+## 4c. ESCALATION -- a demonstrated bypass of the page-text guard
+
+**Not fixed. Not mine to rule. Reported here and to the coordinator.**
+
+The question asked was narrow and empirical: does page text actually ESCAPE through
+the url-sanitiser stop, or is the laundering merely inelegant? **It escapes.**
+
+### The chain, measured end to end
+
+```
+STEP 1  B.text_violations("name = await item.inner_text()\nprint(_redact(name))\n")
+        -> []                       the guard reports the site CLEAN
+
+STEP 2  B.text_violations("name = await item.inner_text()\nprint(name)\n")
+        -> [(2, 'print')]           the flagger still flags, so step 1 is not
+                                    an empty result standing in for a pass
+
+STEP 3  scripts/_probe_messaging.py::_redact("<two invented words> commented on this")
+        -> "<two invented words> commented on this"        BYTE-IDENTICAL
+```
+
+Every string used is invented -- two ordinary words nobody is called, in the shapes
+this package actually reads off LinkedIn.
+
+### What survives, per input shape
+
+`scripts/_probe_messaging.py::_redact` -- the implementation the navigation guard's
+own `_SANITISERS` note describes:
+
+| page-text shape | outcome |
+|---|---|
+| a card byline (`<Name> commented on this`) | **LEAKS**, byte-identical |
+| plain prose (`Congratulate <Name> on the new role`) | **LEAKS**, byte-identical |
+| a name beside a lowercase word (`by <name>, 2h ago`) | **LEAKS**, byte-identical |
+| an aria-label (`<Name>'s profile photo`) | held -> `<NAME>'s profile photo` |
+| a headline (`<Name> - Staff Engineer at <Company>`) | held |
+| a message preview (`<Name>: thanks, ...`) | held |
+
+**3 of 6.** And the control the trap-list demands: on the input it was actually
+proven for -- a url carrying a vanity slug -- it **holds**, returning
+`https://www.linkedin.com/in/<SLUG>/`. So the function is not broken. **It is
+correctly scoped to urls, and the page-text guard is applying it outside that scope.**
+
+### Why this is worse than an inelegance
+
+- **Two safety mechanisms agree on a wrong answer.** An author who does the
+  right-looking thing -- reach for a redactor before printing -- is waved through by
+  the guard AND handed a redactor that does not redact prose. Nothing in either path
+  says "out of scope".
+- **The stop is matched BY NAME, globally, across every scanned module.** There are
+  **16 definitions** of the three sanitiser names in this tree, including **two
+  different `_redact`s with different properties**: the messaging one is a pattern
+  list and leaks on prose; `scripts/_probe_search_render_timeline.py::_redact` is
+  allowlist-based ("membership, not absence") and **held on all 6** page-text shapes.
+  The guard treats them identically because it only sees the name.
+- The navigation guard's own note already says `_redact` "is NOT a general-purpose
+  name redactor... a display name sitting beside a lowercase word passes straight
+  through it." That warning is true, it is written down, and the page-text guard
+  inherits the recognition **without** inheriting the warning -- because it imports
+  `_is_sanitiser_call`, not the paragraph above it.
+
+### How live is it
+
+**Zero live instances.** I swept all 175 scanned files for an output sink whose
+argument applies any of the three sanitiser names to a value the page-text walker
+considers page text: none. So this is a demonstrated bypass that nothing exercises
+today -- which is the moment to rule on it, not evidence that it is safe. "Nothing has
+leaked" is the argument that produced the third slug leak, and this file says so at
+the top.
+
+### What I did NOT do, deliberately
+
+I did not add a `TEXT_SANITISERS`-side fix, did not scope `_is_sanitiser_call`, and
+did not touch either `_redact`. Every available repair is a change to what a guard
+will silence, and that is a boundary question. The options, for whoever rules it:
+
+1. Stop ORing A's predicate into B -- B's own set is empty by design, so B would then
+   have no sanitiser stop at all, which is arguably the honest state given its own
+   finding that this package has no instrument that can decide whether a string is a
+   person's name.
+2. Keep the OR but scope it: a sanitiser entry declares WHAT it is proven for, and a
+   guard consults only entries proven for its own kind of value.
+3. Rule that the two `_redact`s must not share a name, since the stop is name-based.
+
+Option 2 is the one that generalises, and it is the one that costs a schema change to
+`_SANITISERS`. None of them is a line I should take alone.
 
 ## 5. The sweep: the measured count
 
@@ -309,11 +451,24 @@ mutation can break is exactly the trap measured in this repo today.
 | `For` binds every name in the loop body | 2: drift, and the live **navigation** sweep |
 | `_bindings` also binds `AugAssign` | 3: drift by name -- the intended review moment |
 
+**The drift detector, mutated from the SIBLING side** -- which is the direction it
+actually exists for, since the historical failure was the page-text guard fixing this
+and nobody noticing it had not come back:
+
+| sibling-side mutation | detector | what it names |
+|---|---|---|
+| shipped state | agrees | -- |
+| sibling gains `AugAssign` | **fires** | `only in sibling: [('AugAssign', 'r')]` |
+| sibling loses the `For` binding | **fires** | `only in mine: [('AsyncFor','d'), ('For','c')]` |
+
+It fires in both directions and says which side moved, so the failure is a routing
+slip rather than a bare inequality.
+
 Three readings I want on the record:
 
-- **The drift detector earns its entry.** It independently catches five mutants that
-  would otherwise be caught only by a single red case each. Shown failing, per the
-  register's second law.
+- **The drift detector earns its entry.** It independently catches five mutants from
+  my side and both from the sibling's, where a single red case each would otherwise
+  be the only guard. Shown failing, per the register's second law.
 - **The "capped at 1 pass" mutant is caught by exactly one check** -- the live output
   sweep on one file. If that file is ever fixed, nothing else in this file notices a
   truncating cap. That is thin and I am saying so rather than leaving it.
@@ -413,11 +568,18 @@ conclusion.
 
 **What I found and did not fix**
 
+- **A DEMONSTRATED BYPASS of the page-text guard (section 4c).** `print(_redact(<page
+  text>))` is reported clean by the guard, and the redactor returns a plain name
+  byte-identical in 3 of 6 realistic page-text shapes, while holding on the urls it
+  was proven for. Zero live instances in 175 files. **Escalated, not patched** -- every
+  available repair changes what a guard will silence.
 - `AugAssign` binding, open on both walkers by choice.
 - The navigation guard's bare-basename inventory key (latent; zero collisions today).
-- **A sanitiser admission that three places record and the code never made.** Measured
-  while the walker was open, and reported rather than fixed, because changing
-  `_SANITISERS` is a silencing change and is not this wave's to rule:
+- **A sanitiser admission that three places record, that was attempted, REFUSED FOR A
+  GOOD REASON, and reverted -- while the prose still narrates it as landed.** I first
+  wrote this up as "an admission that never happened", which was wrong in the way that
+  matters: it reads as an oversight, and it was a ruling. The divergence child found
+  the half I was missing, one file away, and I verified it. Reported, not fixed:
 
   | claim | where | truth |
   |---|---|---|
@@ -425,15 +587,36 @@ conclusion.
   | "THE FOURTH ENTRY EXISTS SO A PROBE CAN SAY WHY A LANDING WAS REFUSED..." | docstring at line 895 | there are three |
   | `_SANITISERS == frozenset({_shape_of, _redact, _relation})` | the pin, line 159 and its assertion | three, and the pin passes |
 
-  The proof test `test_why_refused_returns_only_its_own_literals` **exists and runs** --
-  so the contract was proved and the entry was never added. And the whole thing is
-  currently inert for a third reason: parsed rather than grepped,
+  The proof test `test_why_refused_returns_only_its_own_literals` **exists and runs**.
+  The function is real. And parsed rather than grepped,
   `scripts/_probe_landed_address_sweep.py` contains **zero references** to
-  `_why_refused` -- it is defined at line 185 and never called. A name-based sanitiser
-  stop silences nothing when nothing calls it.
+  `_why_refused` -- defined at line 185, never called.
 
-  Three layers of dormancy stacked so that no check could fire: an entry that was not
-  added, about a function that is not called, guarded by a pin that passes because it
-  agrees with the code rather than with the prose. This is the file's own
-  `read_settings_surface` pattern -- its standing example of what a stale "known hole"
-  note becomes -- reproduced inside the file that cites it.
+  **Why the entry is absent is the point, and it is recorded in the wrong file.** The
+  comment at `scripts/_probe_landed_address_sweep.py:244`, which a reader starting from
+  the guard will never reach:
+
+  > "The sanctioned route is an entry in `_SANITISERS`, and I took it and then GAVE IT
+  > BACK: the enrolment table refused the entry. `_why_refused` fails
+  > `MUST_DISCRIMINATE` on both pairs... That table certifies SHAPERS -- functions
+  > mapping a url to a relation or a redaction -- and this is a VERDICT function, a kind
+  > it has never been asked to certify. Reshaping the function to satisfy the table, or
+  > widening the table to admit the function, would both have been getting a green
+  > rather than earning one."
+
+  **So the CODE is right and the PROSE is stale.** The entry was refused on a principled
+  ruling; `_SANITISERS` holding three is correct; the pin asserting three is correct;
+  the live behaviour is correct (`print(_why_refused(landed))` is flagged today, exactly
+  as an unregistered function should be). What is wrong is two places in the guard
+  narrating an admission that was given back, and a comment dated to the day it happened
+  saying it landed.
+
+  This is the repository's own `read_settings_surface` pattern, and one turn worse: a
+  ruling whose reason lives only in the file that was refused, so every reader starting
+  from the claim reaches the wrong document. Two outside registries
+  (`test_a_sanitiser_earns_its_entry.py`, `test_a_verdict_earns_its_entry.py`) agree
+  with the code; only this file's prose disagrees with its own set three lines below it.
+
+  The correction is three lines of prose and it is still not mine: it touches the
+  narration around a silencing set, and the wave that ruled it should be the wave that
+  writes down what it ruled.
