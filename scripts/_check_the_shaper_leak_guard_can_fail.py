@@ -111,83 +111,77 @@ def main() -> int:
 
 
 # ---------------------------------------------------------------------------
-# THE SAME DEFECT IN THE SIBLING READERS -- FILED, NOT FIXED
+# THE SAME DEFECT IN THE SIBLING READERS -- NOW MEASURED ACROSS THE FAMILY
 # ---------------------------------------------------------------------------
 #
-# `search_results.py` was repaired 2026-09-20. `anchors.py` and
-# `collections_page.py` carry the same `int((raw or {}).get(...))` shape. This
-# drives THEIR real reader functions with the same plant, so the filing in
-# `_audit/2026-09-20-the-search-admission.md` section 7 is REPRODUCIBLE FROM A
-# CLONE rather than a number somebody wrote down.
+# THIS SURVEY USED TO LIE, AND THE WAY IT LIED IS WORTH KEEPING WRITTEN DOWN.
 #
-# IT IS A SURVEY AND NOT A GATE. It prints and does not fail the script,
-# because those modules are another surface's and repairing them inside an
-# admission commit would widen that commit's blast radius past the surface it
-# was sent to close. A future wave repairs them and this turns green on its
-# own -- which is the point of leaving it runnable.
-
-#: The plant. Long, and carrying ``example`` so the identity guard passes it on
-#: sight -- the same reasoning as the guard file's own plants.
-_SIBLING_PLANT = "Exampleperson Markersurname"
-
-#: A superset payload: every key any of these readers reads, one a string.
-_SIBLING_PAYLOAD = {
-    "anchors": 1,
-    "counts": [_SIBLING_PLANT],
-    "headings": 1,
-    "numeric_entity": 0,
-    "non_numeric_entity": 0,
-    "groupings": [_SIBLING_PLANT],
-    "collections": [_SIBLING_PLANT],
-}
-
-
-class _PlantedPage:
-    async def evaluate(self, script, arg=None):
-        return _SIBLING_PAYLOAD
+# Until 2026-09-20 it drove the siblings with a hand-written superset payload:
+#
+#     {"anchors": 1, "counts": [plant], "headings": 1, "groupings": [plant],
+#      "collections": [plant]}
+#
+# and reported `collections_page.read_collections` **clean**. It was not clean.
+# That reader reads `raw.get("matches")` -- and `matches` was not a key in that
+# payload, so the list came back empty, the comprehension iterated nothing, and
+# the coercion never ran. THE READER WAS NEVER DRIVEN, AND "NOT DRIVEN" PRINTED
+# AS "CLEAN". The audit `_audit/2026-09-20-the-search-admission.md` section 7
+# inherited that as a measured fact, and it was not one.
+#
+# A HAND-WRITTEN PAYLOAD CAN ONLY EXERCISE THE KEYS ITS AUTHOR THOUGHT OF --
+# the same defect as a leak detector that is a list of known-bad strings, which
+# `tests/leakwalk.py` already records having learned twice.
+#
+# So the payload is gone. This now calls the family harness in
+# `tests/plantedpage.py`, whose page answers EVERY key and whose key vocabulary
+# is harvested from the package source rather than typed out, and it surveys
+# EVERY page reader in the package rather than three named ones.
+#
+# IT IS A SURVEY AND NOT A GATE, unchanged: it prints and does not fail the
+# script. The gate is `tests/test_readers_emit_no_page_string.py`, and the
+# proof that THAT can fail is `scripts/_check_the_coercion_family_guard_can_fail.py`.
 
 
 def _sibling_survey() -> int:
-    import asyncio
-
-    from tests.leakwalk import walk
-
-    from linkedin_server import anchors, collections_page
-
-    def carries(obj) -> bool:
-        return any(_SIBLING_PLANT in text for _, text in walk(obj))
-
-    print("SIBLING SURVEY -- the same coercion, in readers this wave did NOT fix")
-    print()
-    rows = (
-        ("search_results.read_results (REPAIRED)", search_results.read_results),
-        ("anchors.read_anchors", anchors.read_anchors),
-        ("collections_page.read_collections", collections_page.read_collections),
+    from tests.test_readers_emit_no_page_string import (
+        CLEAN,
+        LEAKS,
+        RETURNS_TEXT,
+        discover_readers,
+        drive,
     )
-    leaking = []
-    for label, reader in rows:
-        try:
-            out = asyncio.run(reader(_PlantedPage()))
-            verdict = "LEAKS in result" if carries(out) else "clean"
-        except BaseException as exc:  # noqa: BLE001 -- the exception is the subject
-            verdict = (
-                f"LEAKS via {type(exc).__name__}" if carries(exc)
-                else f"raises clean ({type(exc).__name__})"
-            )
-        if "LEAKS" in verdict:
-            leaking.append(label)
-        print(f"  {label:42s} {verdict}")
+
+    print("FAMILY SURVEY -- every page reader in the package, driven by a")
+    print("page that answers in strings. See tests/plantedpage.py.")
     print()
+
+    verdicts = {name: drive(fn)[0] for name, fn in discover_readers()}
+    buckets: dict[str, int] = {}
+    for verdict in verdicts.values():
+        key = verdict.split(":")[0]
+        buckets[key] = buckets.get(key, 0) + 1
+
+    print(f"  {len(verdicts)} readers discovered")
+    for label, count in sorted(buckets.items(), key=lambda kv: -kv[1]):
+        print(f"    {label:14s} {count:4d}")
+    print()
+
+    leaking = sorted(n for n, v in verdicts.items() if v == LEAKS)
     if leaking:
-        print(f"FILED, NOT FIXED: {len(leaking)} sibling reader(s) still carry it:")
-        for label in leaking:
-            print(f"  {label}")
-        print("  The repair is _as_int / _counts_only / _scalars_only in")
-        print("  linkedin_server/search_results.py, copied. See")
-        print("  _audit/2026-09-20-the-search-admission.md section 7.")
+        print(f"LEAKING VIA AN EXCEPTION -- {len(leaking)} reader(s):")
+        for name in leaking:
+            print(f"  {name}")
+        print("  The repair is linkedin_server/coerce.py: as_count, as_int,")
+        print("  counts_only, scalars_only. See")
+        print("  _audit/2026-09-20-the-coercion-leak.md.")
     else:
-        print("No sibling leaks. If this was non-empty before, somebody fixed them;")
-        print("delete section 7's filing rather than leaving a closed row open.")
+        print("No reader carries a page string out through an exception.")
+    print()
+    returns_text = sum(1 for v in verdicts.values() if v == RETURNS_TEXT)
+    clean = sum(1 for v in verdicts.values() if v == CLEAN)
+    print(f"  {clean} clean, {returns_text} return page text BY CONTRACT")
+    print("  (a text reader returning text is the shapers' subject, not this")
+    print("  one -- see the note on RETURNS_TEXT in the guard).")
     # The survey never fails the script: see the note above.
     return 0
 

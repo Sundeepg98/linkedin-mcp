@@ -638,6 +638,16 @@ shape at five sites. Driven the same way as section 2.1:
 
 **`anchors.read_anchors` leaks. `collections_page.read_collections` does not.**
 
+**CORRECTED BY:** `_audit/2026-09-20-the-coercion-leak.md` -- the second half of the sentence above is FALSE: `collections_page.read_collections` leaks on the same path as `anchors.py`, and the survey could not have seen it because that reader reads `raw.get("matches")` and `matches` is not a key in the payload the survey plants, so the list came back empty, the comprehension iterated nothing, and the coercion never ran.
+
+**The reader was never driven, and "not driven" printed as
+"clean".** Both siblings are repaired as of that document; the survey in
+`scripts/_check_the_shaper_leak_guard_can_fail.py` has been rewritten to drive
+every page reader in the package through a page that answers EVERY key, because
+a hand-written payload can only exercise the keys its author thought of. The
+`anchors` half of the sentence, and every figure in this section about it,
+stands.
+
 **THE SURVEY IS PART OF THE TRACKED SCRIPT**, at the end of
 `scripts/_check_the_shaper_leak_guard_can_fail.py`, so this filing is
 re-runnable from a clone rather than a number somebody wrote down. It PRINTS

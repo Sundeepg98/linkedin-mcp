@@ -89,7 +89,7 @@ from __future__ import annotations
 
 from typing import Any, Iterable
 
-from linkedin_server import dom
+from linkedin_server import coerce, dom
 
 #: THE CLOSED OUTPUT ALPHABET. Order is the contract: the page returns a
 #: POSITION in this tuple, so reordering silently renames every reading ever
@@ -167,12 +167,25 @@ async def read_anchors(page: Any, html: str = "") -> dict[str, Any]:
         host=_HOST,
         html=html or "",
     )
-    counts = list((raw or {}).get("counts") or [])
+    source = raw if isinstance(raw, dict) else {}
+    counts, counts_refused = coerce.counts_only(source.get("counts"))
+    scalars, scalars_refused = coerce.scalars_only(
+        source,
+        (
+            ("anchors_seen", "anchors"),
+            ("numeric_entity", "numeric_entity"),
+            ("non_numeric_entity", "non_numeric_entity"),
+        ),
+    )
     return {
-        "anchors_seen": int((raw or {}).get("anchors") or 0),
-        "counts": [int(value) for value in counts],
-        "numeric_entity": int((raw or {}).get("numeric_entity") or 0),
-        "non_numeric_entity": int((raw or {}).get("non_numeric_entity") or 0),
+        "anchors_seen": scalars["anchors_seen"],
+        "counts": counts,
+        "numeric_entity": scalars["numeric_entity"],
+        "non_numeric_entity": scalars["non_numeric_entity"],
+        # NOT A SHAPE, A FINDING. Normally 0. A nonzero means the page put
+        # something other than a number in a count slot, and it is reported as
+        # a COUNT precisely because the value that caused it may be a name.
+        "values_refused": counts_refused + scalars_refused,
     }
 
 
@@ -195,7 +208,11 @@ def tally(counts: Iterable[int]) -> dict[str, Any]:
     class and a zero-count class are different answers and collapsing them is
     how a reader says "none of those" when it means "I was not told".
     """
-    values = [int(value) for value in counts]
+    # ``int(value)`` HERE WOULD CONTRADICT THE LINE ABOVE. The docstring says
+    # an address cannot reach this function, and that was true of the RETURN
+    # path only: handed a string, ``int`` would have quoted it into a
+    # ValueError and carried it straight back out. Same repair, same reason.
+    values, _refused = coerce.counts_only(counts)
     by_class = {
         ROUTE_CLASSES[position]: value
         for position, value in enumerate(values)

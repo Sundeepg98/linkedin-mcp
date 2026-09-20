@@ -7620,3 +7620,217 @@ diagnostic, the reason-truncation census and the blockquote verification -- ARE
 disposable: each was a one-shot measurement whose finding is now a permanent
 assertion in `tests/test_the_audit_index_is_derived.py` or a derived row in the
 index itself. They were written to the scratchpad and are not committed.
+
+---
+
+
+## 44. AN EXCEPTION IS NOT A RETURN VALUE (the-coercion-leak, 2026-09-20)
+
+`int()` writes the value it refused VERBATIM into its own `ValueError`. That
+exception escapes the reader, `server._error` renders it through
+`config.scrub` -- which substitutes THIS SERVER'S OWN PATHS and nothing else,
+because a name has no shape to scrub -- and a string the page put in a count
+slot reaches the caller intact.
+
+> **AN INTEGER-ONLY RETURN VALUE DOES NOT MAKE A FUNCTION INTEGER-ONLY,
+> BECAUSE AN EXCEPTION IS NOT A RETURN VALUE.**
+
+Section 42 found this at one site and repaired one module. This wave asked how
+big the class was. **Measured: 115 page readers, 16 of them carried a planted
+name out through an exception.** All 16 repaired -- **51 of 103 hazard sites
+closed** -- and the guard that holds the property is
+`tests/test_readers_emit_no_page_string.py`, shown failing on **12 readers**
+under the coercion that shipped.
+
+### 44.1 `scripts/_census_page_coercions.py` -- THE ENUMERATION, AND WHY IT PARSES
+
+**273 coercion sites in 31 modules** at base. `git grep -c` for `int(`/`float(`
+reports **296 lines**, and `dom.py` alone holds **118 textual hits** of which
+the great majority are `parseInt` inside JAVASCRIPT STRING LITERALS -- in-page
+script text that cannot raise a Python `ValueError`. The instrument prints both
+numbers side by side rather than asserting the method was right.
+
+**THE CONSTRUCTOR LIST IS MEASURED, NOT ASSUMED.** It calls each candidate with
+a marker and reports whether the marker survives into `str`, `repr` or `args`.
+Seven of ten quote: `int`, `float`, `int(x, 10)`, `datetime.strptime`,
+`datetime.fromisoformat`, `list.index`, and `dict[key]` (which quotes the KEY).
+`complex`, `uuid.UUID` and `json.loads` describe the failure without naming the
+input -- which is the behaviour the repair reproduces.
+
+### 44.2 THE LAW THIS WAVE ADDS: PAGE-CONTROLLED IS NOT THE SAME AS AWAITED
+
+The first version of the census returned **142** hazard sites in 7 modules and
+convicted two modules that are structurally incapable of the defect.
+
+> `await locator.count()` is awaited and CANNOT be a string -- Playwright
+> computes that integer, and its type is PLAYWRIGHT'S contract, not the
+> document's. `await page.evaluate(...)` can be anything the page's JavaScript
+> returned, including a name.
+>
+> **A VALUE IS PAGE-CONTROLLED WHEN THE DOCUMENT CHOOSES IT, NOT WHEN A
+> COROUTINE PRODUCED IT.**
+
+`groups_page.read_group_memberships` coerces `int(await anchors.count())`
+twice; `events.read_events_home` coerces nothing but `.count()` results and
+`len()` of text. Modelling the SOURCE TYPE -- plus `len`/`bool`/`sum` as
+type-FIXING -- moved the count to **103 sites in 6 modules** and dropped
+`groups_page.py` out of the hazard set entirely.
+
+**A census that cries wolf on sites which cannot hold the defect is one nobody
+acts on**, and over-reporting is not the safe direction when the output is a
+work list.
+
+### 44.3 `tests/plantedpage.py` -- THE DOUBLE, AND THE FIDELITY RULE
+
+> **A DOUBLE THAT ANSWERS EVERYTHING IN STRINGS MANUFACTURES LEAKS THAT CANNOT
+> HAPPEN.**
+
+So it splits its answers exactly where Playwright's own contract splits them:
+`evaluate`, `inner_text`, `get_attribute`, `content`, `title` answer with the
+plant; `count`, `is_visible`, `is_enabled`, `bounding_box` answer with the type
+Playwright promises.
+
+### 44.4 THE FALSE NEGATIVE THAT SET THE WHOLE DESIGN -- TWICE, AND THE SECOND ONE WAS MINE
+
+**FIRST.** Section 42's sibling survey drove the readers with a hand-written
+superset payload and reported `collections_page.read_collections` **clean**. It
+is not clean. That reader reads `raw.get("matches")`, and `matches` was not a
+key in the payload -- so the list came back empty, the comprehension iterated
+nothing, the coercion never ran, and **"not driven" printed as "clean"**.
+
+> A HAND-WRITTEN PAYLOAD CAN ONLY EXERCISE THE KEYS ITS AUTHOR THOUGHT OF.
+
+That is `leakwalk.py`'s own recorded lesson -- a guard that is a list of
+known-bad strings cannot see the class it guards -- one level up, in the KEYS.
+
+**SECOND, in this wave, in the tool built to fix the first.** The corrected
+harness reported **4** leaks. The true number was **14**. `dom.py` does
+`data = dict(data or {})` at fourteen sites, and `dict()` of a dict SUBCLASS
+copies the concrete storage WITHOUT EVER CALLING the overridden `get`. The
+key-agnostic double was flattened back into whatever keys it literally held:
+`read_surface_census`, handed a page answering every key with a name, reported
+`controls_read: 0`.
+
+> **PATCHING THE BEHAVIOUR IS NOT PATCHING THE CALL SITE WHEN THE CALL SITE
+> COPIES THE VALUE.**
+
+The same shape bit twice in one wave -- `dict()` copying a mapping's storage,
+and `from ... import` copying a function object. The second is why
+`scripts/_check_the_coercion_family_guard_can_fail.py` rebinds the helper at
+EVERY import site and **prints how many bindings it replaced**: a plant that
+reached nothing proves nothing, and a count of zero is a loud failure of the
+control rather than a pass of the guard.
+
+The repair: `PageAnswer` seeds its concrete storage from a KEY VOCABULARY
+HARVESTED FROM THE PACKAGE SOURCE -- **470 literals**, every `x.get("k")` and
+`x["k"]` in `linkedin_server/` -- so a key introduced by a reader written
+tomorrow is in the vocabulary the moment it is written. **Ten of the sixteen
+leaks were invisible until that was fixed.**
+
+**THIRD, and it completed the set.** The harness skipped parameters that have
+DEFAULTS, on the reasoning that defaults are the shipped path.
+`dom.read_invitation_surface(page, needle=None, ...)` opens with
+`if not wanted: ... return out`, so driven with defaults it takes an early
+return and **never reaches the three coercions below it**. It reported `clean`.
+
+> **A DEFAULT IS A BRANCH, AND AN UNTAKEN BRANCH IS NOT A CLEAN ONE.**
+
+Two more leaks, found by driving each reader a second time with every
+supportable optional supplied. Three instances of one sentence in one wave --
+**a harness only exercises what its author remembered to exercise** -- which is
+the entire case for a guard that DISCOVERS its subjects instead of listing
+them, and the reason the count in this section is 16 rather than the 14 the
+first honest run reported.
+
+### 44.5 `tests/test_readers_emit_no_page_string.py` -- THE GUARD DISCOVERS ITS SUBJECTS
+
+A guard that NAMES the readers it knows about catches the third instance of a
+class and not the fourth. The subject set is therefore introspected: every
+module-level `async def` in `linkedin_server` taking a `page`. **A reader
+written tomorrow is in the subject set the moment it is written**, with no edit
+to the guard.
+
+**THE ASYMMETRY THAT MAKES IT SHIPPABLE.** 39 of the 115 readers return page
+text -- `read_main_text` returning main text is its entire job. Folding those in
+would paint 39 readers red for working correctly, and the response to a wall of
+red is to weaken the guard.
+
+> **RETURNING PAGE TEXT CAN BE A CONTRACT. RAISING A `ValueError` THAT QUOTES
+> PAGE TEXT IS NOBODY'S CONTRACT.**
+
+So `leaks` is unconditional and has NO EXEMPTION LIST to be argued into -- and
+an exemption list is how the previous instances of this class stayed open.
+
+**AND THERE IS A THIRD PATH OUT, BETWEEN THE TWO VERDICTS.** This package
+writes `out["error"] = f"{type(exc).__name__}: {exc}"` at **18 sites in 6
+modules**. A coercion inside such a `try` never raises past the reader -- its
+MESSAGE is returned instead, quoting the name in a field, which the guard as
+first written would have called `returns_text` and passed.
+
+> **A NAME THAT LEAVES THROUGH A CAUGHT EXCEPTION HAS STILL LEFT.**
+
+Measured: **22 coercion sites sit LEXICALLY inside such a try, and all 22 are
+`int(await ...count())`** -- Playwright integers, which is 44.2's law holding up
+under a second test it was not designed for. **But lexical containment is not
+the whole hazard**, and an AST scan cannot see the rest: a try can wrap a CALL
+to a reader that coerces elsewhere, and `writes._read_item_comment_box` is that
+shape -- under the plant it RETURNS the caught message instead of raising.
+`carries_a_laundered_exception` catches it at runtime, matching phrases only a
+failed coercion produces, checked BEFORE `returns_text` because a check wired
+in the wrong order is a check that does not run. It is the twelfth conviction
+in 44.5's control; without it the control reported eleven.
+
+**AND IT MAY NOT CLAIM MORE THAN IT RAN.** `not_driven` is a third verdict,
+never a pass. `tests/reader_leak_baseline.json` records the verdict for all 115
+and fails on three events: a driven reader stops being drivable, a new reader
+appears unclassified, a known one vanishes. **That file is the half no
+diff-scoped gate would select.** It also REFUSES to record a leaking reader --
+a file holding `"x": "leaks"` becomes a list of permitted leaks within one
+commit of somebody being in a hurry.
+
+### 44.6 `linkedin_server/coerce.py` -- ONE HOME, SO THE CLASS CAN CLOSE
+
+`as_int` never raises and never quotes; it can return only an `int` it was
+handed or `None`. `as_count` is the drop-in for `int(X or 0)` and **LOGS THE
+TYPE, NEVER THE VALUE** -- a log record is another way out of the process, and
+`test_as_count_logs_the_type_and_never_the_value` drives the real logger and
+reads `caplog` to prove it. `counts_only` SUBSTITUTES AND NEVER DROPS, because
+the lists it feeds are positional against closed alphabets whose index 0 is the
+hazard class; in `collections_page` the substitute is **-1 (`UNMATCHED`), not
+0**, since 0 would name the heading `domains` -- asserting a grouping the page
+never said.
+
+`search_results._as_int` KEEPS ITS NAME and delegates, because it is the plant
+point of section 42's control; importing `coerce.as_int` into the callers'
+bodies would have silently disarmed the one instrument that shows that guard
+failing. **A repair that disarms a control is a regression wearing a tidy-up
+costume.**
+
+### 44.7 WHAT IS NOT CLOSED, WITH THE COUNT
+
+**52 static hazard sites remain** (from 103). Of those, **28 sit in readers
+this harness DROVE and measured not to leak**; **24 sit in the 21 readers it
+could not drive** -- 9 needing a browser, 5 needing a `WriteGrant`, 4 refusing
+before they read, 3 other. 42 of the 52 are `writes.py` write-path gates.
+
+**THE GRANT REFUSAL IS A POLICY, NOT A CAPABILITY GAP.** A `WriteGrant` is
+permission to perform ONE action, ONCE; putting a grant constructor in the test
+tree to reach a few more coercions is not a trade a leak harness should make,
+and `writes.perform` is in the discovered set.
+
+**AND THE 42 WERE NOT SWEPT MECHANICALLY, WHICH WAS A RULING.** `as_count` is
+behaviour-identical to `int(X or 0)` for every input the shipped code handled,
+so the sweep was available and cheap.
+
+> A GATE THAT RAISES ON A MALFORMED PAGE IS FAILING CLOSED, AND "NO LONGER
+> RAISES" IS NOT OBVIOUSLY SAFE THERE.
+
+`_send_gate`, `_recipient_gate` and `_typeahead_gate` stand between a preview
+and an irreversible act. An uncertified edit to a send gate is worse than the
+leak it would close. The class is honestly described as **closed for every
+reader this harness can reach, open for the write-path gates it cannot** --
+and closing those needs the measurement first, which needs a ruling or a
+browser.
+
+`events.py` and `groups_page.py` are not on that list: they were ACQUITTED BY
+MEASUREMENT, not omitted from it.
