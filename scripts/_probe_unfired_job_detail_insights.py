@@ -123,6 +123,82 @@ def _verdict(true_n: int, false_n: int, absent_n: int) -> str:
     return "NO-SAMPLE"
 
 
+def judge_panels(read_ok: int, token_hits: dict, premium_seen: int) -> list:
+    """The J 121 / J 122 reading, as lines. PURE, so its branches are testable.
+
+    EXTRACTED FROM `main()` ON PURPOSE. These three arguments decide two census
+    rows, and while the logic sat inline the only way to exercise it was to
+    drive a browser -- so the branches that matter most could not be shown
+    firing at all. A verdict function nobody can test is the shape this
+    repository keeps finding at the bottom of its own false claims.
+
+    TWO OF THE THREE BRANCHES EXIST BECAUSE A RATCHET CAUGHT THEM MISSING.
+    `tests/test_probe_controls_are_never_decorative.py` flagged `read_ok` and
+    `postings_with_premium_control` as computed-but-never-branched. Both
+    findings were correct and neither was decorative:
+
+    **`read_ok` IS A PRECONDITION, NOT A STATISTIC.** Every verdict here is
+    driven by a token tally, and a tally over ZERO panels is zero for every
+    token -- so a run that read nothing would fall into each `else` and print
+    NOT DELIVERED, a strong negative claim about LinkedIn derived from nothing
+    observed. That is the "zero matched" refusal this repository has been
+    burned by twice, wearing a verdict's clothes.
+
+    **A MECHANISM MUST BE OBSERVED BEFORE IT IS NAMED.** The ordinary J 121
+    reading blames Premium gating for the missing percentile. That attribution
+    is worth something only if the gated control was actually SEEN. With zero
+    sightings the percentile is absent AND unexplained -- a different and more
+    alarming reading, pointing at a different repair.
+    """
+    out: list = []
+    if not read_ok:
+        out.append("    NO POSTING RETURNED AN INSIGHTS DICT. This run")
+        out.append("    OBSERVED NOTHING, so it settles nothing. The tallies")
+        out.append("    would all read zero, and a zero drawn from an empty")
+        out.append("    sample is a fact about this run, never a finding")
+        out.append("    about LinkedIn.")
+        out.append("    J 121 AND J 122 ARE NOT JUDGED. Re-run before reading.")
+        return out
+
+    out.append("    postings whose panel contains each token:")
+    for tok in PANEL_TOKENS:
+        out.append("        " + tok + ": " + str(token_hits.get(tok, 0))
+                   + " of " + str(read_ok))
+    out.append("    postings drawing '" + PREMIUM_CONTROL + "': "
+               + str(premium_seen) + " of " + str(read_ok))
+    out.append("")
+    out.append("    J 121 -- your ranking percentile vs other applicants:")
+    if token_hits.get("percentile") or token_hits.get("rank"):
+        out.append("        a percentile/rank token IS present -- inspect "
+                   "before banking")
+    elif not premium_seen:
+        out.append("        NOT DELIVERED, AND THE USUAL EXPLANATION DOES NOT")
+        out.append("        HOLD. No percentile and no rank token appears --")
+        out.append("        and NO posting drew the gated control either, so")
+        out.append("        the absence CANNOT be attributed to Premium gating")
+        out.append("        on this sample. Something else is missing and this")
+        out.append("        run does not say what. NOT BANKABLE, and worth a")
+        out.append("        look.")
+    else:
+        out.append("        NOT DELIVERED. No percentile and no rank token")
+        out.append("        appears in any panel. The metrics sub-part carries")
+        out.append("        applicant COUNTS. The percentile sits behind the")
+        out.append("        gated control, drawn on " + str(premium_seen)
+                   + " of " + str(read_ok) + " postings here,")
+        out.append("        which this reader does not open. NOT BANKABLE.")
+    out.append("    J 122 -- top skills among applicants, experience/education "
+               "levels:")
+    if token_hits.get("skill"):
+        out.append("        a skills token IS present -- inspect before banking")
+    else:
+        out.append("        PARTIAL. seniority and education arrive with")
+        out.append("        percentage splits, which is the experience/")
+        out.append("        education half. NO skills token appears in any")
+        out.append("        panel, so the 'top skills among applicants' half is")
+        out.append("        NOT DELIVERED. NOT BANKABLE AS WRITTEN.")
+    return out
+
+
 def _bankable(verdict: str) -> str:
     """Does this verdict support moving a row to COVERED-PROVEN?"""
     if verdict in ("OBSERVED-BOTH", "OBSERVED-TRUE"):
@@ -399,29 +475,14 @@ async def main() -> int:
         print("        " + part + ": " + str(sub_counts[part]) + " entries")
 
     print("\n### WHAT THE PANEL ACTUALLY CARRIES (decides J 121 and J 122)")
-    print("    postings whose panel contains each token:")
-    for tok in PANEL_TOKENS:
-        print("        " + tok + ": " + str(token_hits[tok]) + " of "
-              + str(read_ok))
-    print("    postings drawing '" + PREMIUM_CONTROL + "': "
-          + str(postings_with_premium_control) + " of " + str(read_ok))
-    print("")
-    print("    J 121 -- your ranking percentile vs other applicants:")
-    if token_hits["percentile"] or token_hits["rank"]:
-        print("        a percentile/rank token IS present -- inspect before banking")
-    else:
-        print("        NOT DELIVERED. No percentile and no rank token appears in")
-        print("        any panel. The metrics sub-part carries applicant COUNTS.")
-        print("        The percentile sits behind the gated control counted")
-        print("        above, which this reader does not open. NOT BANKABLE.")
-    print("    J 122 -- top skills among applicants, experience/education levels:")
-    if token_hits["skill"]:
-        print("        a skills token IS present -- inspect before banking")
-    else:
-        print("        PARTIAL. seniority and education arrive with percentage")
-        print("        splits, which is the experience/education half. NO skills")
-        print("        token appears in any panel, so the 'top skills among")
-        print("        applicants' half is NOT DELIVERED. NOT BANKABLE AS WRITTEN.")
+    # JOINED RATHER THAN LOOPED, deliberately. A `for line in ...: print(line)`
+    # binds a name that is only ever printed, which the decorative-control
+    # detector reports as a never-branched reading. It is an iteration
+    # variable and not a control, but the cheapest honest answer to a detector
+    # is to stop creating the binding rather than to argue about it in a
+    # baseline file.
+    print("\n".join(judge_panels(read_ok, token_hits,
+                                 postings_with_premium_control)))
 
     state = _ROOT / "_state"
     state.mkdir(exist_ok=True)
@@ -429,6 +490,29 @@ async def main() -> int:
     dest.write_text(json.dumps(raw, indent=2, default=str), encoding="utf-8")
     print("\n### RAW capture written under _state/ (gitignored, never committed)")
     print("    entries: " + str(len(raw)))
+
+    # THE EXIT CODE HAS TO MEAN SOMETHING, AND UNTIL NOW IT DID NOT.
+    #
+    # This probe returned 0 whatever it saw -- including a run that read no
+    # panels at all, whose verdicts are drawn from an empty sample. Any caller
+    # that checked the exit status was being told "clean" by a run that
+    # settled nothing. These two branches are placed AFTER the raw capture on
+    # purpose, so a void run still leaves its evidence on disk to diagnose.
+    #
+    # Both conditions were surfaced by
+    # `tests/test_probe_controls_are_never_decorative.py`, which flagged the
+    # two counters as computed-but-never-branched. The detector was right
+    # twice over: not only did nothing branch on them, nothing SHOULD have
+    # been passing silently either.
+    if not read_ok:
+        print("\n### EXIT 1: no posting returned an insights dict. This run")
+        print("    observed nothing and its verdicts are not readings.")
+        return 1
+    if not postings_with_premium_control:
+        print("\n### EXIT 1: the gated control was never drawn in this sample,")
+        print("    so a missing percentile CANNOT be attributed to Premium")
+        print("    gating. The J 121 reading needs a human before it is used.")
+        return 1
     return 0
 
 

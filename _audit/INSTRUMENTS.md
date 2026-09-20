@@ -6553,6 +6553,75 @@ repo already recorded for line numbers. The six insight fields were therefore
 verified by **AST parse of the reader's return dict** -- seven keys, named --
 rather than by grep, because a field-name grep returns ZERO for a dict that
 passes through by reference and reads exactly like a dead field.
+
+### 38.10 THE RATCHET CAUGHT THIS WAVE'S OWN PROBE, AND IT WAS RIGHT TWICE
+
+CI went red on all three platforms after this wave merged, on the two-way
+ratchet in `tests/test_probe_controls_are_never_decorative.py`:
+
+    gained: _probe_unfired_job_detail_insights.py main() -> 'postings_with_premium_control'
+    gained: _probe_unfired_job_detail_insights.py main() -> 'read_ok'
+
+Both counters were computed, printed, and never branched on. The finding class
+is real and DOCUMENTED AS NOT AUTOMATICALLY A DEFECT -- a verdict printed for a
+human to evaluate is a legitimate thing for a probe to emit, and the baseline
+file carries an optional `reason` field for exactly that. **Neither of these
+qualified, and the baseline was never edited.**
+
+**`read_ok` WAS A MISSING PRECONDITION.** Every J 121 / J 122 verdict is driven
+by a token tally, and a tally over ZERO panels is zero for every token -- so a
+run in which no posting returned an insights dict would fall into each `else`
+and print **NOT DELIVERED**, a strong negative claim about LinkedIn derived
+from nothing observed. The "zero matched" refusal this repository has been
+burned by twice, wearing a verdict's clothes.
+
+**`postings_with_premium_control` WAS A MECHANISM NAMED WITHOUT BEING
+OBSERVED.** The ordinary J 121 reading blames Premium gating for the missing
+percentile. That attribution is worth something only if the gated control was
+actually SEEN; with zero sightings the percentile is absent AND unexplained --
+a different and more alarming reading, pointing at a different repair. The
+probe printed the gating sentence unconditionally.
+
+**AND A THIRD DEFECT FELL OUT THAT NOBODY HAD FLAGGED: THE EXIT CODE MEANT
+NOTHING.** `main()` returned 0 whatever it saw, including a run that read no
+panels at all. Any caller checking the exit status was being told "clean" by a
+run that settled nothing. Both conditions are now `return 1`, placed AFTER the
+raw capture is written so a void run still leaves its evidence on disk.
+
+#### THE REPAIR HAD TO SURVIVE THE DETECTOR'S SCOPE, AND THE FIRST TWO DID NOT
+
+Worth recording because the failure mode is not obvious. The verdict logic was
+extracted into a pure `judge_panels(read_ok, token_hits, premium_seen)` so its
+branches could be tested without a browser -- and the detector **re-flagged
+both counters**, because it works per function: inside `main()` the names were
+now only arguments to a call nested in a `print(...)`, and a load that reaches
+a sink call before a statement boundary is print-only. Extraction moved the
+branching out of the detector's view without changing what the probe did.
+An intermediate attempt (`for line in judge_panels(...): print(line)`) then
+produced a THIRD finding on the loop variable `line`.
+
+**The answer was not to argue with the detector but to give `main()` a real
+statement-level use** -- the exit-code branches above, which were a genuine gap
+rather than a token gesture -- and to stop creating the `line` binding by
+joining instead of looping. The pure function keeps its own branches, all three
+of which are now shown firing by
+`tests/test_unfired_probe_verdicts.py` (23 tests, up from 13); two of those
+were planted with `if False:` and both went red before being reverted.
+
+#### THE GATING HOLE THIS EXPOSED, WHICH IS THE TRANSFERABLE PART
+
+**A SCOPED GATE CANNOT SEE A BASELINE IT DOES NOT OWN.** `scripts/impact_gate.py`
+ran green on the original commit and CI went red, because this check compares a
+DETECTOR'S LIVE OUTPUT over the whole corpus against a COMMITTED BASELINE FILE
+that the diff did not touch. The impact set is computed from what the change
+can reach; a change that adds a new probe changes the detector's output without
+touching any file the gate would select. That is the same shape as the
+name-based coupling trap already recorded at 1.3: **scope a gate on the diff
+alone and it waves through every check whose input is the corpus rather than
+the file.** The corpus-wide guards must be run explicitly before a freeze, and
+this was the second gain-direction baseline red to reach CI in one day.
+
+
 ---
 
 ## 41. THE REOPENER TRIGGERS: A WRITE-OFF THAT RESTS ON A FACT NOBODY RE-CHECKS, 2026-09-20
