@@ -567,8 +567,18 @@ def tally(hrefs: Iterable[Optional[str]]) -> dict[str, Any]:
     **THE SIGNATURE IS HALF THE SAFETY PROPERTY** -- this function is never
     handed a name, only addresses it then refuses to publish -- and the
     RETURN is the other half: counts positionally aligned to
-    :data:`TAB_KINDS`, plus four integers. No string from any document is in
-    the output, by construction.
+    :data:`TAB_KINDS`, plus the integers listed below. No string from any
+    document is in the output, by construction.
+
+    **THE NUMBER OF THOSE INTEGERS IS DELIBERATELY NOT WRITTEN HERE.** This
+    sentence said "four" in the first version of this module and the return
+    already had six, because the phrasing was carried across from
+    ``search_results.read_results`` and never re-counted. That is the exact
+    failure ``readonly.py``'s own docstring spends four paragraphs on -- a
+    count in prose beside a list it cannot read goes stale in silence -- and
+    the fix it adopted is the fix here: read the list.
+    ``tests/test_company_page.py`` asserts the key set, so the list cannot
+    rot even though this paragraph could.
 
     ``page_roots`` is the count a caller actually acts on: how many of these
     hrefs are an organisation ROOT whose segment the shipped boundary would
