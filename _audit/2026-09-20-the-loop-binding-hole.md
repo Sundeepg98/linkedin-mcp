@@ -452,7 +452,18 @@ section 7b.
 
 ### 7b. The exhaustive census
 
-(Pending at the time of the freeze -- see section 10.)
+**Still running at the time of this write-up, and section 7 does not depend on it.**
+A closed-form slice (`binding-census`) was given the forms section 7 names as
+NOT-MEASURED-BY-ME -- `import ... as`, `match` capture / `as` / star patterns,
+`except*` groups, lambda parameters, decorator-bound names, PEP 695 type parameters --
+plus a positive and a negative control per construct, so that a BLIND row is
+distinguishable from a malformed fixture. Its deliverable lands at
+`...\scratchpadinding-census.md`.
+
+The table in section 7 is measured and stands on its own; this slice widens it and
+settles the row set I explicitly declined to claim. If it is absent when you read
+this, the honest reading is: **the forms in section 7 are measured, the ones named
+under "did not check" are still unmeasured, and nobody has claimed otherwise.**
 
 ---
 
