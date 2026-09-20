@@ -736,7 +736,7 @@ CONCLUSION"** -- the sentence refusing to do the thing the scan suspects.
 Triaged onto `NOT_A_CORRECTION` with that reading, because inserting a
 `CORRECTED BY:` marker into the live-capture audit would tell every future
 reader its conclusion was wrong when this document says it was right. The
-defect is against the SCRIPT and is filed at `INSTRUMENTS.md` 31.2 -- the
+defect is against the SCRIPT and is filed at `INSTRUMENTS.md` 32.2 -- the
 section this wave wrote as 29.2 and the integration renumbered on collision.
 
 **THE TABLE ASKS FOR TRIAGE AFTER READING THE LINE, AND THE LINE IS THE

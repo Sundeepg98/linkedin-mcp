@@ -1,0 +1,48 @@
+# reason-kind-adjudications.tsv -- the HAND layer under scripts/classify_writeoff_reasons.py
+#
+# WHAT THIS IS. The classifier derives a kind from the words in a reason cell. Where the
+# unit of reasoning is NOT the cell -- because the cell is a pointer at a ruling that 61
+# rows share -- deriving a kind from keywords over a 950-to-2735-character argument is not
+# a measurement, it is a word count. Those rulings are adjudicated ONCE, here, by hand.
+#
+# FOUR FIELDS, TAB SEPARATED:
+#   1  key     `RULING R<n>` for a network.md ruling section, or a slice-qualified row id
+#              (`J 134`, `P B10`). NEVER a line number: `the-contingent-writeoffs.md` s4.1
+#              measured all six of the census's line-number locators drifting 48 to 51
+#              lines, one of them landing on a DIFFERENT row that read COVERED-PROVEN.
+#   2  kind    one or more of US-RULING, US-BOUNDARY, WORLD-FACT, ACCOUNT-FACT,
+#              PROCESS-FACT, joined by `+`. UNCLEAR is legal and means the honest answer
+#              is that nobody can tell from what is written.
+#   3  quote   A VERBATIM SUBSTRING of the thing being ruled on, which must still be
+#              present or `--check` FAILS. This is the entire anti-staleness mechanism:
+#              when somebody rewrites a reason out from under a hand judgement, the
+#              judgement goes RED instead of silently mislabelling the row. Single-line
+#              only -- the census wraps its quoted source at ~76 columns, so a phrase that
+#              spans a line break will never match.
+#   4  why     one line, for a reader who wants to disagree with me.
+#
+# A `#` line is a comment. Blank lines are ignored.
+#
+key	kind	quote	why
+#
+# ---------------------------------------------------------------------------------------
+# THE ELEVEN network.md RULING SECTIONS. 72 write-off rows point at these.
+# ---------------------------------------------------------------------------------------
+#
+RULING R1	US-RULING	the ruling is that nobody should	/mynetwork/ is refused because loading it resets a pending-invitation badge and the cost lands on the people whose invitations get marked seen. A decision, defended, and it states its own circularity: the measurement that would overturn it requires spending the thing it protects. Durable.
+RULING R2	US-BOUNDARY	catching a read that has nothing to do with inviting	FOUR SUBSTRINGS SOMEBODY TYPED, checked before the allowlist. The ruling's own text admits the collateral: the connections list is unreachable only because its address contains /invite and /connect. That is a line, not a decision about connections, and nothing in the 20 rows beneath it says so.
+RULING R3	ACCOUNT-FACT+US-RULING	read live on his own profile on 2026-08-30	Two facts braided. The refusal rests on a MEASUREMENT taken on HIS profile -- zero endorse controls among 222 live controls -- which is an account fact that one received endorsement would falsify. The third-party half is ours (R4). The cell's own history records the reason being REPLACED from policy to measurement, which is what makes the account dependency invisible.
+RULING R4	US-RULING	cost lands entirely on somebody who is not him	Loading a stranger's profile spends THEIR privacy on OUR measurement. Ours, permanent, and argued from the receiving end rather than asserted. Note the ruling flags its own scope gap: the text says "may not do it for a MEASUREMENT" and 10 of its 14 rows are ACTS, not measurements.
+RULING R5	US-RULING	destruction is not a write this design covers	A design decision at any confirm level, and five other specs cite it in reversible_by. Ours and durable.
+RULING R6	US-RULING+WORLD-FACT	is the whole of what he is entitled to	We refuse to defeat viewer anonymity. The refusal is ours; the constraint it respects is LinkedIn's anonymity feature and what it renders him, which is a world fact.
+RULING R7	US-RULING	not load-bearing here	Folded; produces no row in this slice. Recorded so a reader who meets the code is not left hunting.
+RULING R8	US-RULING	stranger wearing his face	An auto-reply in his name he did not read. Ours, and an identity argument rather than a capability one.
+RULING R9	ACCOUNT-FACT+US-RULING+WORLD-FACT	That is roughly one send per week	THE MOST CONTINGENT RULING IN THE SLICE and its name says none of it. Four independent grounds: LinkedIn's invitation cap is behavioural and automation-suspicion-driven (WORLD); he has 5 InMail credits a month so automating five acts a month is ceremony (ACCOUNT -- arithmetic over an allowance); he holds a paid subscription a restriction would strand (ACCOUNT); the skill recommends only and must never send (US-RULING). The arithmetic ground weakens the moment the allowance changes.
+RULING R10	US-BOUNDARY	not load-bearing here	/psettings/ folded into R11; it is a forbidden substring, i.e. a line in a list.
+RULING R11	US-BOUNDARY	/mypreferences/d/categories/	The settings family is admitted BY NAME or not at all: the index is allowed and every toggle address is a forbidden substring. 21 rows rest on two lines in one file. Agrees with the independent classification of P B10 and N 159 in _audit/2026-09-20-the-live-capture.md s13.2.
+#
+# ---------------------------------------------------------------------------------------
+# ROW-LEVEL ADJUDICATIONS. Only where the derived rule cannot see the binding fact.
+# ---------------------------------------------------------------------------------------
+#
+J 134	WORLD-FACT	read and type out your responses	THE ROW IS ITS OWN REOPENER AND NOBODY NOTICED. Capability: "Practice by reading and typing responses instead". Reason: the practice interview is a real-time SPOKEN session needing camera and microphone, REOPENER "a text-only interview mode". The cell opens by quoting LinkedIn's own help text "read and type out your responses" -- so the evidence it cites documents the very mode whose absence is the write-off. Classified WORLD-FACT because what is actually in question is whether LinkedIn draws a text mode, which nothing here measured.

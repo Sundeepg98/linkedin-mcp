@@ -216,7 +216,7 @@ edge, because the name only appears once the entry is written.
 The general shape, and it generalises past this repo: **a scoped gate can see
 which tests name the code you changed. It cannot see which tests assert the
 ABSENCE of what you just added.** A refusal test is exactly that assertion.
-Filed as an instrument-register finding, section 31.6.
+Filed as an instrument-register finding, section 32.6.
 
 ---
 
@@ -486,16 +486,133 @@ refusal: you cannot capture a page you refuse to open.
 
 ### 8.2 The register number
 
-The incoming wave wrote its instrument-register section as **29** from a maximum
-of 28 at `dc5aaa6`, and said in its own text that it should be renumbered if it
-collided. It collided twice over: `live-capture` published 29 and
-`names-that-do-not-exist` published 30 while this wave sat in its worktree. It
-is published here as **31**, and the three citations that pointed at 29.2 moved
-to 31.2 in the same edit.
+The incoming wave wrote its instrument-register section as **29**, from a
+maximum of 28 at `dc5aaa6`, and said in its own text that it should be
+renumbered if it collided.
 
-**A THIRD WAVE IS CURRENTLY STAGING ITS OWN SECTION 31** in an uncommitted
-scratch file. Taking 31 here is the guard's rule working as designed -- the wave
-that publishes first keeps its number -- and
-`tests/test_the_register_numbers_are_unique.py` will catch that wave at ITS
-merge, which is the whole reason the guard exists. Flagged so its integrator
-meets it as a known cost rather than a puzzle.
+**IT COLLIDED THREE TIMES, AND THE THIRD HAPPENED DURING THIS INTEGRATION.**
+
+    written as      29   (max was 28 at the wave's base)
+    collision 1     29   live-capture published it first
+    collision 2     30   names-that-do-not-exist published it first
+    taken           31   at 13:05, correct against master at d6b7e4b
+    collision 3     31   reason-kinds landed it on master at 13:12
+    PUBLISHED AS    32
+
+I took 31 at 13:05 having seen `reason-kinds` staging its own 31 in an
+uncommitted scratch file, and recorded the prediction that the guard would
+catch them at their merge. **It caught me instead** -- they committed first, at
+13:12, while this integration was still writing its deliverable. That is the
+rule working exactly as written (the wave that publishes first keeps its
+number), applied to the wave that had just invoked it against somebody else.
+
+**FOUR WAVES HAVE NOW COMPUTED "THE NEXT INTEGER" FROM THE SAME STALE MAXIMUM
+FOR THIS ONE SECTION.** The guard's own docstring says the collision exists only
+in the merge and no wave's green run can see it; this is the strongest specimen
+of that yet, because the two renumbers happened twenty minutes apart on one
+desk. It is not an argument for a different numbering scheme in this document,
+but it is the evidence anybody proposing one should start from.
+
+All citations moved with it: three to 32.2 in `readonly.py`'s sibling documents
+and the correction-findability table, plus this document's own references to
+32.6 and 32.7.
+
+### 8.3 AND MASTER MOVED UNDER THIS INTEGRATION, WHICH IS WHY IT WAS RE-MEASURED
+
+Master was `d6b7e4b` when this merge began and `1ab1ca8` when it was ready to
+land -- nine commits from the `reason-kinds` wave, arriving between 12:53 and
+13:12. **The re-freeze in section 6 rests entirely on master's content, so it
+was re-verified rather than assumed:**
+
+    linkedin_server/readonly.py                    IDENTICAL d6b7e4b -> 1ab1ca8
+    tests/test_readonly_boundary_invariant.py      IDENTICAL
+    tests/test_analytics_creator_boundary.py       IDENTICAL
+
+So `286c233a7db458c7` still describes the union against the new master, and the
+`37 -> 41` arithmetic is unchanged. The only file the two integrations both
+touched is `_audit/INSTRUMENTS.md`, and that conflict is section 8.2.
+
+**Had any of those three files moved, the pin in this commit would have been
+stale the moment it was written** -- a digest is a claim about a tree, and the
+tree it was computed against stopped being master forty minutes into the work.
+
+---
+
+## 9. THE RATCHET I GREW, AND WHY I WROTE THIS SECTION BEFORE I TOUCHED IT
+
+`tests/test_probe_controls_are_never_decorative.py` went red on the merge. It
+is the guard behind register section 27 -- *129 controls that print FAIL and
+certify anyway* -- and it fails when the detector finds a never-branched probe
+control that is not already in
+`scripts/probe_controls_known_decorative_baseline.json`. The merge brings four
+new findings, all in the incoming wave's `scripts/_probe_analytics_list_shape.py`.
+
+**THE RED WAS REAL AND IT WAS MINE**, in the sense that nothing on master had
+these and my merge introduces them.
+
+**WHAT I WAS ABOUT TO DO, WRITTEN DOWN BEFORE I DID ANYTHING.** I was about to
+add four rows to that JSON to turn the red green -- to a file whose own
+`_comment` says, in those words, that it is *"a RATCHET, not an allowlist to
+grow"*. That is the shape of edit this whole day has been about, so it stopped
+here and each of the four was read first.
+
+### 9.1 What the four actually are
+
+    _probe_analytics_list_shape.py:733  part4()      -> digit_controls   REAL
+    _probe_analytics_list_shape.py:886  control()    -> expected         FALSE POSITIVE
+    _probe_analytics_list_shape.py:925  break_demo() -> expected         FALSE POSITIVE
+    _probe_analytics_list_shape.py:925  break_demo() -> html             FALSE POSITIVE
+
+**THREE OF THE FOUR ARE THE DETECTOR FLAGGING A CONTROL'S INPUTS, NOT ITS
+RESULT.** At both line 886 and line 925 the statement is
+`html, expected = _build_control_doc()` -- a tuple unpack of the control
+FIXTURE. The results are branched, and thoroughly:
+
+* `control()` runs three controls and each one is `if <bad>: print VOID; return 1`.
+  Three branches, three non-zero exits.
+* `break_demo()` accumulates `overall_ok = overall_ok and not ok` across two
+  induced breaks and then branches `if overall_ok:`, returning 1 either way it
+  can fail.
+
+The detector is scoped by the ENCLOSING FUNCTION's name and marker words, so
+every local inside a function called `control()` is a candidate. **The ratchet
+already carries this exact class** -- `_probe_add_section_menu.py / main / html`
+is the same shape, and it has been in the baseline since the census. So this is
+not a new discovery about the probe; it is a known imprecision in the detector,
+visible in its own baseline.
+
+**THE FOURTH IS GENUINE and is not dressed up.** `part4()` computes
+`digit_controls`, prints it, and compares it to a prior wave's live numbers,
+printing `MATCHES` or `DIFFERS (%d)` -- and then carries on identically either
+way. That is precisely the decorative pattern section 27 exists to name. It is
+NOT branched here, deliberately: `part4()` is a SHAPE REPORT over whatever
+capture it is handed, and a DIFFERS against another capture's numbers is an
+expected outcome, not a fault. Making it exit non-zero would manufacture
+failures on correct runs, which is the opposite of the law.
+
+### 9.2 Why the baseline, and what it costs
+
+The guard's own failure message names the two permitted responses: *branch on
+its result*, or *if it is a genuinely decorative reading that was reviewed and
+accepted, add it to the baseline with a one-line reason*. Branching is wrong for
+all four -- three are not results at all, and the fourth would fail on correct
+input. So: baseline, 129 -> 133, reviewed.
+
+**AND THE FILE HAS NO FIELD FOR A REASON.** All 129 existing entries are bare
+`(file, function, variable, line)` tuples. The message asks for a one-line
+reason that the format cannot hold, so the reasons live here and a pointer to
+them was written into the file's `_comment` and `generated_from`. **A triage
+table whose entries cannot carry their triage is a census wearing a ratchet's
+name**, and that is worth more than the four rows.
+
+### 9.3 What I did NOT do
+
+* I did not delete the probe to make the finding go away. It is cited by the
+  wave's audit, and `tests/test_an_asserted_name_resolves.py` would have gone
+  red on the dangling reference -- trading a disclosed finding for a broken
+  citation.
+* I did not "fix" the detector. Three false positives in one probe is a real
+  signal about `scripts/detect_unbranched_probe_controls.py`, but changing a
+  detector that produced a 129-row published census is a wave, not a merge
+  step. Filed at INSTRUMENTS.md 32.8.
+* I did not claim the ratchet is undamaged. It grew, on my commit, by four.

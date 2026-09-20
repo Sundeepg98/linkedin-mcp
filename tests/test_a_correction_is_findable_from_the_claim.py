@@ -188,7 +188,7 @@ NOT_A_CORRECTION: dict[tuple[str, str], str] = {
     ("2026-09-20-the-premium-four.md", "INSTRUMENTS.md"): (
         "THE LINE IS A FILING POINTER, NOT A VERDICT ON THE REGISTER. It reads "
         "'The defect is against the SCRIPT and is filed at INSTRUMENTS.md "
-        "31.2', and 31.2 is a section THIS SAME WAVE wrote in the same commit "
+        "32.2', and 32.2 is a section THIS SAME WAVE wrote in the same commit "
         "series -- as 29.2, renumbered to 31 on merge because two other waves "
         "published 29 and 30 first. "
         "A wave citing the register entry that carries its own finding "
@@ -219,7 +219,7 @@ NOT_A_CORRECTION: dict[tuple[str, str], str] = {
         "attribution, not a correction, and inserting a CORRECTED BY marker "
         "into the live-capture audit would tell every future reader that its "
         "conclusion was wrong when this wave's own text says it was right. "
-        "The defect itself is recorded at INSTRUMENTS.md section 31.2, filed "
+        "The defect itself is recorded at INSTRUMENTS.md section 32.2, filed "
         "against the SCRIPT, and deliberately not edited by this wave because "
         "it belongs to another wave's file."
     ),

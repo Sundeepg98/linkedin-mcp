@@ -1,37 +1,13 @@
 {
-  "_comment": "Known, already-disclosed never-branched probe controls as of the 2026-09-20 census (_audit/2026-09-20-control-census.md). This is a RATCHET, not an allowlist to grow: tests/test_probe_controls_are_never_decorative.py fails on any CURRENT finding not in this list (a NEW decorative control), and does NOT require this file to shrink when an old one is fixed (removing a fixed entry is encouraged but optional -- the test does not enforce it). Match key is (file, function, variable); line numbers are informational only, since an unrelated edit earlier in a file can shift them without changing the defect.",
-  "generated_from": "scripts/detect_unbranched_probe_controls.py, live tree, commit 2fba253 + this session",
-  "count": 129,
+  "_comment": "Known, already-disclosed never-branched probe controls as of the 2026-09-20 census (_audit/2026-09-20-control-census.md). This is a RATCHET, not an allowlist to grow: tests/test_probe_controls_are_never_decorative.py fails on any CURRENT finding not in this list (a NEW decorative control), and does NOT require this file to shrink when an old one is fixed (removing a fixed entry is encouraged but optional -- the test does not enforce it). Match key is (file, function, variable); line numbers are informational only, since an unrelated edit earlier in a file can shift them without changing the defect.  GROWN ONCE, DELIBERATELY: 129 -> 133 on 2026-09-20. The four are named and individually argued in _audit/2026-09-20-the-premium-integration.md section 9; three of them are the detector flagging a control function's INPUT variables rather than its result, which is a defect in the detector and not a decorative control, and this file has no field in which to say so.",
+  "generated_from": "scripts/detect_unbranched_probe_controls.py, live tree, commit 2fba253 + this session; +4 on 2026-09-20 by the premium-four integration, one real and three detector false positives -- read them in _audit/2026-09-20-the-premium-integration.md section 9 before treating this file as a census",
+  "count": 133,
   "entries": [
-    {
-      "file": "_probe_add_section_menu.py",
-      "function": "run_detector_control",
-      "variable": "case_label",
-      "line": 260
-    },
-    {
-      "file": "_probe_add_section_menu.py",
-      "function": "main",
-      "variable": "html",
-      "line": 330
-    },
     {
       "file": "_probe_add_section_menu.py",
       "function": "main",
       "variable": "controls",
       "line": 376
-    },
-    {
-      "file": "_probe_add_section_menu.py",
-      "function": "main",
-      "variable": "shown",
-      "line": 412
-    },
-    {
-      "file": "_probe_add_section_menu.py",
-      "function": "main",
-      "variable": "pop_shown",
-      "line": 436
     },
     {
       "file": "_probe_add_section_menu.py",
@@ -42,8 +18,32 @@
     {
       "file": "_probe_add_section_menu.py",
       "function": "main",
+      "variable": "html",
+      "line": 330
+    },
+    {
+      "file": "_probe_add_section_menu.py",
+      "function": "main",
+      "variable": "pop_shown",
+      "line": 436
+    },
+    {
+      "file": "_probe_add_section_menu.py",
+      "function": "main",
       "variable": "role_shown",
       "line": 442
+    },
+    {
+      "file": "_probe_add_section_menu.py",
+      "function": "main",
+      "variable": "shown",
+      "line": 412
+    },
+    {
+      "file": "_probe_add_section_menu.py",
+      "function": "run_detector_control",
+      "variable": "case_label",
+      "line": 260
     },
     {
       "file": "_probe_alerts_family_pattern.py",
@@ -62,6 +62,30 @@
       "function": "press_pass",
       "variable": "vanished",
       "line": 606
+    },
+    {
+      "file": "_probe_analytics_list_shape.py",
+      "function": "break_demo",
+      "variable": "expected",
+      "line": 925
+    },
+    {
+      "file": "_probe_analytics_list_shape.py",
+      "function": "break_demo",
+      "variable": "html",
+      "line": 925
+    },
+    {
+      "file": "_probe_analytics_list_shape.py",
+      "function": "control",
+      "variable": "expected",
+      "line": 886
+    },
+    {
+      "file": "_probe_analytics_list_shape.py",
+      "function": "part4",
+      "variable": "digit_controls",
+      "line": 733
     },
     {
       "file": "_probe_anchor_surfaces_live.py",
@@ -102,14 +126,14 @@
     {
       "file": "_probe_comment_overflow_menu.py",
       "function": "main",
-      "variable": "position",
-      "line": 267
+      "variable": "key",
+      "line": 301
     },
     {
       "file": "_probe_comment_overflow_menu.py",
       "function": "main",
-      "variable": "key",
-      "line": 301
+      "variable": "position",
+      "line": 267
     },
     {
       "file": "_probe_connections_badge_cost.py",
@@ -132,26 +156,26 @@
     {
       "file": "_probe_contact_info_panel.py",
       "function": "main",
-      "variable": "badge_before",
-      "line": 345
-    },
-    {
-      "file": "_probe_contact_info_panel.py",
-      "function": "main",
       "variable": "badge_after",
       "line": 346
     },
     {
-      "file": "_probe_creator_content_analytics.py",
+      "file": "_probe_contact_info_panel.py",
       "function": "main",
-      "variable": "vocab",
-      "line": 275
+      "variable": "badge_before",
+      "line": 345
     },
     {
       "file": "_probe_creator_content_analytics.py",
       "function": "main",
       "variable": "feed_hits",
       "line": 315
+    },
+    {
+      "file": "_probe_creator_content_analytics.py",
+      "function": "main",
+      "variable": "vocab",
+      "line": 275
     },
     {
       "file": "_probe_details_url_breadth.py",
@@ -180,12 +204,6 @@
     {
       "file": "_probe_events_surface_shape.py",
       "function": "main",
-      "variable": "rows_with_any",
-      "line": 274
-    },
-    {
-      "file": "_probe_events_surface_shape.py",
-      "function": "main",
       "variable": "hits",
       "line": 306
     },
@@ -196,16 +214,22 @@
       "line": 307
     },
     {
-      "file": "_probe_feed_counter_search.py",
-      "function": "_run",
-      "variable": "reaction",
-      "line": 106
+      "file": "_probe_events_surface_shape.py",
+      "function": "main",
+      "variable": "rows_with_any",
+      "line": 274
     },
     {
       "file": "_probe_feed_counter_search.py",
       "function": "_run",
       "variable": "key",
       "line": 107
+    },
+    {
+      "file": "_probe_feed_counter_search.py",
+      "function": "_run",
+      "variable": "reaction",
+      "line": 106
     },
     {
       "file": "_probe_feed_counter_search.py",
@@ -240,12 +264,6 @@
     {
       "file": "_probe_group_settings_route.py",
       "function": "main",
-      "variable": "control_before",
-      "line": 160
-    },
-    {
-      "file": "_probe_group_settings_route.py",
-      "function": "main",
       "variable": "before",
       "line": 164
     },
@@ -254,6 +272,12 @@
       "function": "main",
       "variable": "control_after",
       "line": 189
+    },
+    {
+      "file": "_probe_group_settings_route.py",
+      "function": "main",
+      "variable": "control_before",
+      "line": 160
     },
     {
       "file": "_probe_group_settings_route.py",
@@ -306,6 +330,12 @@
     {
       "file": "_probe_interests_entity_shaping.py",
       "function": "main",
+      "variable": "href_reds",
+      "line": 286
+    },
+    {
+      "file": "_probe_interests_entity_shaping.py",
+      "function": "main",
       "variable": "kind",
       "line": 266
     },
@@ -314,12 +344,6 @@
       "function": "main",
       "variable": "verdict",
       "line": 270
-    },
-    {
-      "file": "_probe_interests_entity_shaping.py",
-      "function": "main",
-      "variable": "href_reds",
-      "line": 286
     },
     {
       "file": "_probe_job_alerts_live.py",
@@ -348,6 +372,18 @@
     {
       "file": "_probe_job_search_filter_params.py",
       "function": "main",
+      "variable": "cards",
+      "line": 1342
+    },
+    {
+      "file": "_probe_job_search_filter_params.py",
+      "function": "main",
+      "variable": "diagnosis",
+      "line": 1310
+    },
+    {
+      "file": "_probe_job_search_filter_params.py",
+      "function": "main",
       "variable": "lines",
       "line": 1292
     },
@@ -364,18 +400,6 @@
       "line": 1308
     },
     {
-      "file": "_probe_job_search_filter_params.py",
-      "function": "main",
-      "variable": "diagnosis",
-      "line": 1310
-    },
-    {
-      "file": "_probe_job_search_filter_params.py",
-      "function": "main",
-      "variable": "cards",
-      "line": 1342
-    },
-    {
       "file": "_probe_job_search_paging_stride.py",
       "function": "main",
       "variable": "dropped",
@@ -390,26 +414,26 @@
     {
       "file": "_probe_job_search_result_ceiling.py",
       "function": "main",
-      "variable": "dropped",
-      "line": 157
-    },
-    {
-      "file": "_probe_job_search_result_ceiling.py",
-      "function": "main",
-      "variable": "refused",
-      "line": 160
-    },
-    {
-      "file": "_probe_job_search_result_ceiling.py",
-      "function": "main",
       "variable": "all_anchors",
       "line": 162
     },
     {
       "file": "_probe_job_search_result_ceiling.py",
       "function": "main",
+      "variable": "dropped",
+      "line": 157
+    },
+    {
+      "file": "_probe_job_search_result_ceiling.py",
+      "function": "main",
       "variable": "list_items",
       "line": 163
+    },
+    {
+      "file": "_probe_job_search_result_ceiling.py",
+      "function": "main",
+      "variable": "refused",
+      "line": 160
     },
     {
       "file": "_probe_job_search_result_ceiling.py",
@@ -432,14 +456,14 @@
     {
       "file": "_probe_landed_address_sweep.py",
       "function": "main",
-      "variable": "measured",
-      "line": 275
+      "variable": "label",
+      "line": 289
     },
     {
       "file": "_probe_landed_address_sweep.py",
       "function": "main",
-      "variable": "label",
-      "line": 289
+      "variable": "measured",
+      "line": 275
     },
     {
       "file": "_probe_landed_address_sweep.py",
@@ -450,26 +474,26 @@
     {
       "file": "_probe_match_details_control.py",
       "function": "main",
-      "variable": "html_len",
-      "line": 201
-    },
-    {
-      "file": "_probe_match_details_control.py",
-      "function": "main",
-      "variable": "text_len",
-      "line": 202
-    },
-    {
-      "file": "_probe_match_details_control.py",
-      "function": "main",
       "variable": "anchors",
       "line": 309
     },
     {
       "file": "_probe_match_details_control.py",
       "function": "main",
+      "variable": "html_len",
+      "line": 201
+    },
+    {
+      "file": "_probe_match_details_control.py",
+      "function": "main",
       "variable": "overlay",
       "line": 310
+    },
+    {
+      "file": "_probe_match_details_control.py",
+      "function": "main",
+      "variable": "text_len",
+      "line": 202
     },
     {
       "file": "_probe_membership_sections.py",
@@ -486,14 +510,14 @@
     {
       "file": "_probe_membership_tally_live.py",
       "function": "main",
-      "variable": "overlap",
-      "line": 222
+      "variable": "name",
+      "line": 240
     },
     {
       "file": "_probe_membership_tally_live.py",
       "function": "main",
-      "variable": "name",
-      "line": 240
+      "variable": "overlap",
+      "line": 222
     },
     {
       "file": "_probe_membership_tally_live.py",
@@ -516,14 +540,14 @@
     {
       "file": "_probe_messaging_hidden_controls.py",
       "function": "_run",
-      "variable": "undisplayed",
-      "line": 215
+      "variable": "flag",
+      "line": 216
     },
     {
       "file": "_probe_messaging_hidden_controls.py",
       "function": "_run",
-      "variable": "flag",
-      "line": 216
+      "variable": "undisplayed",
+      "line": 215
     },
     {
       "file": "_probe_messaging_menu_enumeration.py",
@@ -546,14 +570,14 @@
     {
       "file": "_probe_network_tail_boundary.py",
       "function": "run_controls",
-      "variable": "why",
-      "line": 115
+      "variable": "seen",
+      "line": 116
     },
     {
       "file": "_probe_network_tail_boundary.py",
       "function": "run_controls",
-      "variable": "seen",
-      "line": 116
+      "variable": "why",
+      "line": 115
     },
     {
       "file": "_probe_newsletter_routes.py",
@@ -575,27 +599,9 @@
     },
     {
       "file": "_probe_newsletter_surface_shape.py",
-      "function": "run_word_census",
-      "variable": "note",
-      "line": 331
-    },
-    {
-      "file": "_probe_newsletter_surface_shape.py",
-      "function": "main",
-      "variable": "queried",
-      "line": 433
-    },
-    {
-      "file": "_probe_newsletter_surface_shape.py",
       "function": "main",
       "variable": "count",
       "line": 441
-    },
-    {
-      "file": "_probe_newsletter_surface_shape.py",
-      "function": "main",
-      "variable": "mark",
-      "line": 444
     },
     {
       "file": "_probe_newsletter_surface_shape.py",
@@ -606,8 +612,26 @@
     {
       "file": "_probe_newsletter_surface_shape.py",
       "function": "main",
+      "variable": "mark",
+      "line": 444
+    },
+    {
+      "file": "_probe_newsletter_surface_shape.py",
+      "function": "main",
       "variable": "note",
       "line": 459
+    },
+    {
+      "file": "_probe_newsletter_surface_shape.py",
+      "function": "main",
+      "variable": "queried",
+      "line": 433
+    },
+    {
+      "file": "_probe_newsletter_surface_shape.py",
+      "function": "run_word_census",
+      "variable": "note",
+      "line": 331
     },
     {
       "file": "_probe_off_platform_controls.py",
@@ -623,15 +647,15 @@
     },
     {
       "file": "_probe_profile_modal_presence.py",
-      "function": "run_controls",
-      "variable": "label",
-      "line": 300
-    },
-    {
-      "file": "_probe_profile_modal_presence.py",
       "function": "press_add_section",
       "variable": "census_like",
       "line": 390
+    },
+    {
+      "file": "_probe_profile_modal_presence.py",
+      "function": "run_controls",
+      "variable": "label",
+      "line": 300
     },
     {
       "file": "_probe_profile_sections_live.py",
@@ -683,12 +707,6 @@
     },
     {
       "file": "_probe_small_measures_followup.py",
-      "function": "run_detector_control",
-      "variable": "verdict",
-      "line": 200
-    },
-    {
-      "file": "_probe_small_measures_followup.py",
       "function": "part_b_suggested_filters",
       "variable": "html",
       "line": 392
@@ -712,22 +730,16 @@
       "line": 443
     },
     {
-      "file": "_probe_small_measures_live.py",
+      "file": "_probe_small_measures_followup.py",
       "function": "run_detector_control",
       "variable": "verdict",
-      "line": 227
+      "line": 200
     },
     {
       "file": "_probe_small_measures_live.py",
       "function": "_needles",
       "variable": "main_text",
       "line": 270
-    },
-    {
-      "file": "_probe_small_measures_live.py",
-      "function": "read_jobs_search",
-      "variable": "census",
-      "line": 302
     },
     {
       "file": "_probe_small_measures_live.py",
@@ -742,16 +754,28 @@
       "line": 439
     },
     {
-      "file": "_probe_typeahead_commit.py",
-      "function": "main",
-      "variable": "why",
-      "line": 385
+      "file": "_probe_small_measures_live.py",
+      "function": "read_jobs_search",
+      "variable": "census",
+      "line": 302
+    },
+    {
+      "file": "_probe_small_measures_live.py",
+      "function": "run_detector_control",
+      "variable": "verdict",
+      "line": 227
     },
     {
       "file": "_probe_typeahead_commit.py",
       "function": "main",
       "variable": "send",
       "line": 661
+    },
+    {
+      "file": "_probe_typeahead_commit.py",
+      "function": "main",
+      "variable": "why",
+      "line": 385
     },
     {
       "file": "_probe_unmeasured_surface_addresses.py",

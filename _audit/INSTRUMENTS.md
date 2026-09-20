@@ -4834,21 +4834,181 @@ extraction, per-phrase slot scoring, registry-variant comparison, and the
 frozen-snapshot census. All are superseded by the committed guard, which does
 what they did with controls. Their numbers are the tables in
 `_audit/2026-09-20-names-that-do-not-exist.md`.
+
 ---
 
-## 31. THE PREMIUM-FOUR WAVE: A DENOMINATOR, AND A READER THAT COUNTED THE WRONG TIER, 2026-09-20
+## 31. THE WRITE-OFF REASON KINDS, AND A CORPUS THAT TURNED OUT TO BE A POINTER GRAPH, 2026-09-20
+
+`scripts/classify_writeoff_reasons.py` + `_audit/_census/reason-kind-adjudications.tsv`,
+guarded by `tests/test_writeoff_kinds_are_derivable.py` (71 tests, 8.7s).
+Full argument: `_audit/2026-09-20-the-reason-kinds.md`.
+
+**WHAT IT MEASURES.** Every census row in a write-off state -- EXCLUDED-RULED, XR,
+MEASURED-ABSENT, COVERED-CANNOT-DELIVER -- rests on a reason, and the corpus spells several
+different kinds of thing identically. The classifier sorts all **309** by the kind of fact
+the reason asserts: **US-RULING** (somebody decided it), **US-BOUNDARY** (a line somebody
+typed in an allow/deny list), **WORLD-FACT**, **ACCOUNT-FACT**, **PROCESS-FACT**. The split
+that does the work is two-way: the first two are OURS and re-checkable by reading this
+tree; the other three are CONTINGENT and go stale silently. Result at `cd08e05`:
+**64 contingent, 40 of them carrying no reopener** -- which is the re-examination list.
+That 64 was PREDICTED at 54 and then hit exactly, by implementing the section-heading
+resolution the earlier draft had named as the missing piece.
+
+### 31.1 THE LAW IT SERVES, AND WHY THE UNIT OF ADJUDICATION IS NOT THE ROW
+
+127 of the 309 reason cells -- 41% -- are NOT reasons, they are POINTERS; `network.md`'s
+median write-off reason cell is FOURTEEN CHARACTERS. Six dialects, three of which were
+found by reading the UNCLEAR bucket rather than by design. The most invisible is the
+SECTION HEADING: `### K. Recommendations (10) -- all EXCLUDED-RULED under R3`, where not
+one of the ten rows beneath carries that attribution in any cell. It is scoped on a
+measurement -- exactly ONE heading in the census cites an R-code without being a ruling
+heading -- and `--check` fails if that stops being true. The first draft keyword-matched
+each pointer row against the whole 926-to-2735-character body it pointed at, and a row whose
+entire cell is `R2` came out `ACCOUNT-FACT+US-BOUNDARY+US-RULING` -- a three-kind verdict
+carrying no information. **Eleven rulings carry 72 rows, so the ruling is adjudicated once
+by hand and the rows inherit**, which is what the census means when it writes `R2`.
+
+### 31.2 SHOWN FAILING -- 6 of 7 mutations RED, 1 GREEN BY DESIGN
+
+Driven over mutated SANDBOX copies; no committed file written.
+
+    M1  empty network.md of all 101 write-offs, leave J/P/M at 48/112/48   RED  (exit 1)
+    M2  reword R2's pinned quote by two words                              RED
+    M3  move J 134 out of a write-off state                                RED
+    M4  delete the whole ### R5 ruling section                             RED
+    M5  empty all four slices                                              RED  (exit 1)
+    M7  plant one row between P D14 and P D15                              RED
+    M8  one space in a CAPABILITY cell, reason untouched                   GREEN (calibration)
+
+**M1 IS THE PER-FILE PROOF.** With `network.md` at zero the other three slices still hold
+208 write-off rows, so a UNION assertion over 309 would pass. A union assertion over a
+redundant corpus cannot detect a lost source. **M8 is not decorative:** a harness where
+every mutation goes red is not discriminating, it is broken.
+
+**TEN SIGNALS FIRE ZERO TIMES AND ALL TEN NEEDLES WERE PROVED ALIVE** against synthetic
+positives, including the whole PROCESS-FACT class. A needle that never fires and a fact that
+is never true look identical in a count; that is what makes the PROCESS-FACT zero a
+measurement rather than a broken regex.
+
+### 31.3 FOUR DEFECTS THE HARNESSES FOUND -- THREE IN THE INSTRUMENT, ONE IN A HARNESS
+
+**In the instrument, silently wrong across 46 rows.** Backreference inheritance recovered its
+donor by re-parsing the label `backref<-P D14` with a non-whitespace capture. **Every row key
+in this corpus contains a space**, so the capture stopped at `P`, the lookup missed, and
+INHERITANCE NEVER RAN. No error, no warning -- every `same` row came out UNCLEAR, which looks
+exactly like a census that never wrote a reason. Fixed by storing the donor on the row
+instead of encoding it in a display string.
+**UNCLEAR fell 50 -> 33 and contingency rose 49 -> 54.**
+
+**In the harness, the same disease one level down.** M1's first version rewrote state cells
+with one regex and left 12 of network.md's 101 write-offs standing, because the corpus also
+writes `EXCLUDED-RULED (R11)` and a bolded `COVERED-CANNOT-DELIVER`. The per-file control
+then passed CORRECTLY and was one step from being recorded as *a control that cannot fail*.
+**ASSERTING THAT A MUTATION CHANGED BYTES IS NOT ASSERTING THAT IT ACHIEVED ITS INTENT** --
+every mutation now asserts its postcondition first. Compounding it: that same M1 was
+asserting against `build()`'s problems list while the per-file control lives in
+`main(--check)`, so it was testing the wrong surface entirely.
+
+**A CONTROL THAT COULD NOT FAIL, in the instrument, found by the second reader.** The
+per-file control's second half read `unkinded = [r for r in sub if not r.kind]`, and
+`finalise` sets `r.kind = "UNCLEAR"` on an empty kind set -- so `r.kind` is NEVER falsy and
+that branch was unreachable. It printed "all N write-off rows carry a kind" over 309 rows
+and could never have said anything else. **Second instance of this shape in one wave, so it
+is counted rather than reported again.** REPLACED with the invariant that actually broke:
+a row resolved through a pointer must carry at least what it points at. With inheritance
+disabled the replacement convicts 102 rows across all four slices and names each one; the
+tautology stayed green through all of them.
+
+**A DOCSTRING CLAIM THE CODE DID NOT HONOUR.** `forbidden_keys()` promised every fallback
+path "SAYS SO in the run header"; `FKEYS_SOURCE` was assigned once and read nowhere, so a
+reader of a FALLBACK run could not tell it was one. An artifact claiming more than it ran --
+the exact defect this wave audits the census for -- inside the auditing instrument. Fixed.
+
+### 31.4 THE LAW THIS ENTRY ADDS: A HAND JUDGEMENT MUST INVALIDATE ITSELF
+
+A derived classification tracks the text for free, but the 12 hand adjudications cannot.
+So each one **pins a verbatim single-line quote from the thing it rules on**, and `--check`
+fails when that quote stops being present (M2, M3). When somebody rewrites a reason out from
+under a hand judgement, the judgement goes RED rather than silently mislabelling the row.
+
+This is why the tag was NOT written into the census cells, which was the obvious design: an
+in-cell tag is still hand-maintained, written once against the reason that was there that
+day, and **a wrong tag that travels with the row is worse than no tag because it looks
+maintained**. Keys are ROW IDS, never line numbers -- s4.1 of
+`_audit/2026-09-20-the-contingent-writeoffs.md` measured all six of the census's
+line-number locators drifting 48 to 51 lines, one landing on a different row that read
+COVERED-PROVEN.
+
+### 31.5 A CENSUS DEFECT WORTH ITS OWN LINE
+
+`network.md` section K is headed *"### K. Recommendations (10) -- all EXCLUDED-RULED under
+R3"*, and **not one of `N 119`-`N 128` carries that attribution in any cell** -- those rows
+have no note column at all. Confirmed from two directions: R3's own body declares 13 rows,
+and a parse looking for an `R<n>` token in every cell of every row finds 4. The difference
+is exactly those ten. Five of the nine codes that declare a row set match element for
+element, so this is not a slack parse.
+
+
+### 31.6 WHEN THE TOOL MOVES, PIN THE TOOL AND HASH IT AT BOTH ENDS
+
+The standing freeze discipline is `git stash create`, which pins the CORPUS. That is the
+wrong constraint when **the instrument is the thing under test**. This instrument moved
+four times during its own mutation run and HEAD advanced through four commits while the
+harness was working.
+
+What the harness did instead, and it is better than the freeze that would have been
+prescribed: **it hashed the instrument at harness start and at harness end, asserted the
+two matched, and pinned every published number to the classifier committed at a named
+ref** -- then tabulated the disagreeing earlier baseline ALONGSIDE rather than dropping it.
+
+**A number produced by an instrument that changed underneath you is not attributable to
+anything.** Corpus-freezing does not detect that; a start/end hash of the tool does, and
+costs two lines.
+
+### 31.7 TWO WRITERS, ONE PATH -- THE SECOND INSTANCE TODAY, SO IT IS COUNTED
+
+`e1b44b0` committed an 11-test version of `tests/test_writeoff_kinds_are_derivable.py`.
+`dd73d37` replaced it WHOLESALE with a colder, better 69-test version written independently
+at the same path, and **two unique tests went with it**. One was restored because it fell
+inside the new mutation set; the other, `test_every_ruling_section_is_adjudicated`, had to
+be lifted VERBATIM from `e1b44b0` afterwards.
+
+**A test that was committed and then silently disappeared under a file collision is a
+coverage regression regardless of whose file was better.** It is also the same root cause
+as the index-side sweep recorded elsewhere today, which took 208 lines of a live wave's
+staged work: **the hazard is two writers and one path; the git index and the filesystem are
+merely two ways it lands.**
+
+RULE: a wave creating a file at a path a sibling might also target CHECKS FOR IT BEFORE
+WRITING, not after. And when restoring a dropped test, lift it unchanged -- guessing at the
+intent of a test is how a test gets weakened while looking restored.
+
+### 31.8 DISPOSABLE, declared
+
+Five scratch probes in `_audit/_scratch/`: the replacement-control proof (`_prove_inherit_control.py`, which reproduces the dead-inheritance defect and asserts the new control convicts it), the reason-length profile, the signal-frequency
+miner (own-cell vs inherited firing), the Premium-section state tally, and the mutation
+driver `_mutate_kinds.py`. The first three are superseded by the committed classifier's own
+reporting; the fourth is superseded by the pytest guard, which runs the same mutations with
+postcondition assertions. Their numbers are the tables in
+`_audit/2026-09-20-the-reason-kinds.md`.
+---
+
+## 32. THE PREMIUM-FOUR WAVE: A DENOMINATOR, AND A READER THAT COUNTED THE WRONG TIER, 2026-09-20
 
 **THIS SECTION WAS WRITTEN AS 29 AND IS PUBLISHED AS 31.** The wave computed
 29 from a maximum of 28 at `dc5aaa6` and said in this paragraph that it should
 be renumbered if it collided. It collided: `live-capture` published 29 and
 `names-that-do-not-exist` published 30 while this wave was in its own worktree,
-so the integration took 31. `tests/test_the_register_numbers_are_unique.py` is
+so the integration took 31 -- and then collided A SECOND TIME, in the
+twenty minutes the integration itself took: the `reason-kinds` wave landed
+31 on master first, so this is published as 32. THREE waves computed a next
+integer from the same stale maximum for one section. `tests/test_the_register_numbers_are_unique.py` is
 the guard that makes the collision visible at merge time rather than to a
 reader months later, and its rule -- renumber the INCOMING section, never the
 published one -- is what was applied here. Citations elsewhere in this commit
-that pointed at 29.2 were moved to 31.2 in the same edit.
+that pointed at 29.2 were moved to 32.2 in the same edit.
 
-### 31.1 `scripts/drawn_route_corpus.py` -- the denominator, taken from what LinkedIn drew
+### 32.1 `scripts/drawn_route_corpus.py` -- the denominator, taken from what LinkedIn drew
 
 ADMITTED. Six controls, **each driven into its failing state in-process, and
 the run exits non-zero when any of them cannot be made to fail.**
@@ -4886,9 +5046,9 @@ in `/jobs/view/<id>`. It voided a clean run. **A needle derived by position
 from the input is a rule about the inputs that happened to be listed.** Fixed
 by naming the needle per case.
 
-### 31.2 TWO DEFECTS IN `scripts/_probe_premium_surfaces_shape.py`, NEITHER EDITED HERE
+### 32.2 TWO DEFECTS IN `scripts/_probe_premium_surfaces_shape.py`, NEITHER EDITED HERE
 
-Found by building 31.1. Both belong to another wave's file and are recorded
+Found by building 32.1. Both belong to another wave's file and are recorded
 with their evidence rather than fixed in a surprise diff.
 
 1. **It asks `is_read_url` about shapes that still carry the literal
@@ -4905,7 +5065,7 @@ with their evidence rather than fixed in a surprise diff.
    it. **The owning wave's PROSE has this right; its instrument's TABLE does
    not**, and a later reader consults the table.
 
-### 31.3 AND A HYPOTHESIS OF MINE ABOUT THAT PROBE, REFUTED
+### 32.3 AND A HYPOTHESIS OF MINE ABOUT THAT PROBE, REFUTED
 
 I expected its raw `href="..."` extraction to inflate its inventory with
 strings no anchor draws. Measured over the same six captures through the same
@@ -4914,7 +5074,7 @@ right by luck of this corpus rather than by construction -- a `<link href=>` on
 some future capture would enter it and nothing would say so -- which is a
 different sentence and the one kept.
 
-### 31.4 `linkedin_server/job_collections.py` -- and the reader that counted the wrong tier
+### 32.4 `linkedin_server/job_collections.py` -- and the reader that counted the wrong tier
 
 ADMITTED, with `tests/test_job_collections.py` (29 assertions over a real
 headless page) and `tests/test_premium_four_boundary.py` (50, pure).
@@ -4946,17 +5106,17 @@ every candidate selector agrees exactly across the two scopes -- 24==24, 25==25,
 7==7, 7==7 -- so a scoping claim proved against the captures alone would prove
 nothing at all.
 
-### 31.5 THE LAW THIS WAVE ADDS
+### 32.5 THE LAW THIS WAVE ADDS
 
 **A DENOMINATOR THAT CANNOT SEE YOUR CHANGE REPORTS ZERO, AND ZERO READS AS
 SAFE.** A blast-radius tool, a coverage number and a needle census all fail the
 same way: they answer honestly about a set nobody checked contains the thing
-being asked about. The repair is not a better tool -- 31.1 imports the shipped
+being asked about. The repair is not a better tool -- 32.1 imports the shipped
 one unchanged -- it is to **count the denominator before believing the
 numerator**, and to keep an assertion that the corpus still DISCRIMINATES, so
 the day it stops the suite says so instead of reporting reassuring zeros.
 
-### 31.6 THE INTEGRATION'S LAW: A SCOPED GATE CANNOT SEE A TEST THAT ASSERTS AN ABSENCE
+### 32.6 THE INTEGRATION'S LAW: A SCOPED GATE CANNOT SEE A TEST THAT ASSERTS AN ABSENCE
 
 Added 2026-09-20 by the integration that merged this wave, from a defect the
 merge found in the wave itself. Full argument:
@@ -4999,7 +5159,7 @@ unnoticed"*. A fourth arrived on 2026-09-20 and it noticed -- at merge time,
 three tests red, having never been run by the wave that tripped it. The tripwire
 worked; the gate that should have shown it to its author did not.
 
-### 31.7 AND A BASELINE THAT IS RE-SYNCED IS A MIRROR WEARING A HISTORICAL NAME
+### 32.7 AND A BASELINE THAT IS RE-SYNCED IS A MIRROR WEARING A HISTORICAL NAME
 
 Same integration, second finding, full argument in section 4 of that document.
 
@@ -5038,3 +5198,61 @@ re-synced, so a read admission can no longer touch that dict at all. It did NOT
 claim the repair restored the check's power: the four remaining values still
 equal the live pin's, the test still cannot fail alone, and the docstring now
 says so. Whether to delete it outright is left as a ruling.
+
+### 32.8 THE DECORATIVE-CONTROL DETECTOR FLAGS A CONTROL'S INPUTS, AND ITS RATCHET HAS NOWHERE TO SAY SO
+
+Found by the integration that merged this wave, while triaging a red the merge
+caused. Full reading of all four specimens:
+`_audit/2026-09-20-the-premium-integration.md` section 9.
+
+`scripts/detect_unbranched_probe_controls.py` and its ratchet
+`scripts/probe_controls_known_decorative_baseline.json` (section 27, 129 rows)
+went red on four new findings in this wave's
+`scripts/_probe_analytics_list_shape.py`. **THREE OF THE FOUR ARE THE DETECTOR
+FLAGGING A CONTROL FUNCTION'S INPUT VARIABLES, NOT ITS RESULT:**
+
+    _probe_analytics_list_shape.py:886  control()    -> expected
+    _probe_analytics_list_shape.py:925  break_demo() -> expected
+    _probe_analytics_list_shape.py:925  break_demo() -> html
+
+At both sites the statement is `html, expected = _build_control_doc()` -- a
+tuple unpack of the control FIXTURE. The results are branched, and well:
+`control()` runs three controls, each `if <bad>: print VOID; return 1`;
+`break_demo()` accumulates `overall_ok = overall_ok and not ok` over two induced
+breaks and branches on it. These are among the better-branched control functions
+in the tree, and the detector reports them as decorative.
+
+**THE DETECTOR IS SCOPED BY THE ENCLOSING FUNCTION'S NAME AND MARKER WORDS**, so
+every local inside a function called `control()` is a candidate. The class is
+already IN the published census -- `_probe_add_section_menu.py / main / html`
+is the same shape and has been a baseline row since it was generated. So an
+unknown fraction of the headline number 129 is not decorative controls at all.
+**That number is cited as a finding; it is at least partly a measurement of the
+detector.** Nobody has counted which rows are which, and this entry does not
+either -- it establishes only that the class exists inside the census, with four
+fresh specimens read line by line.
+
+**AND THE RATCHET CANNOT RECORD A TRIAGE.** Its failure message instructs a
+committer to *"add it to the baseline with a one-line reason"*. The file's rows
+are bare `(file, function, variable, line)` tuples with **no reason field**, and
+all 129 carry none. So the mechanism the guard names does not exist in the
+format the guard reads:
+
+> **A TRIAGE TABLE WHOSE ENTRIES CANNOT CARRY THEIR TRIAGE IS A CENSUS WEARING A
+> RATCHET'S NAME.** It still ratchets -- a new finding does go red -- but the
+> judgement that cleared each row is unrecoverable, so the next reader cannot
+> tell a reviewed-and-accepted reading from a rubber stamp, and cannot tell a
+> real decorative control from a detector artifact.
+
+Compare `NOT_A_CORRECTION` in
+`tests/test_a_correction_is_findable_from_the_claim.py`, which solves exactly
+this problem in the same repository: its key is the pair and its VALUE is the
+written reason, so every triage is readable beside the thing it triaged. That is
+the shape this baseline wants.
+
+**NOT REPAIRED HERE, deliberately.** Changing a detector that produced a
+published 129-row census, or migrating the ratchet to a reasoned format, is a
+wave and not a merge step. What the integration did do is grow the ratchet by
+four with every specimen argued in the audit, and write a pointer into the
+file's own `_comment` and `generated_from` so a reader of the JSON is sent to
+the reasons rather than left with four more bare tuples.
