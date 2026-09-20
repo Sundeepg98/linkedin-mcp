@@ -6,6 +6,44 @@
 
 **CORRECTED BY:** `_audit/2026-09-21-the-jobs-direction.md` -- the `no direction column` cell for the jobs slice is right about its per-row tables and wrong about the file, because section 2 of that slice IS a direction table keyed by ROW-RANGE rather than by row id; its 57 GAP rows are now classified per row as **R 29 / W 25 / R/W 2 / AMBIGUOUS 1**, the `300 GAP rows` denominator above measures 285 at HEAD so the 242-row answerable population must be RE-TAKEN before anything adds the jobs split to it, and jobs measures read-heavy at 29 of 57 (50.9%) against the non-jobs 70 of 242 (28.9%).
 
+## THE RE-TAKE THE CORRECTION ABOVE ASKS FOR, done 2026-09-21 at master `5e9802d`
+
+That marker says the 242-row answerable population must be re-taken before
+anything adds the jobs split to it. **It has been.** The table further down is
+left exactly as written, because a number in a record is evidence of what was
+true when it was written; this section is the current reading beside it, not a
+replacement for it.
+
+Re-derived through the same shipped parser over the three slices that carry a
+per-row direction cell, then combined with the per-row jobs classification from
+`_audit/2026-09-21-the-jobs-direction.md`:
+
+| direction | profile + messaging + network | jobs | total |
+|---|---:|---:|---:|
+| **W** | 157 | 25 | **182** |
+| **R** | 69 | 29 | **98** |
+| R/W | 1 | 2 | 3 |
+| unclassified | 1 | 1 | 2 |
+| | | | **285** |
+
+**The sum is 285, which is the census total at HEAD, and that agreement is the
+only reason this combination is trusted at all.** It joins two measurements
+taken hours apart; the day before, a coincidence of cardinality between two
+sets of 22 was read as set identity and cost an hour, so a combined figure that
+did not reconcile exactly would have been discarded rather than explained.
+
+**So roughly 64% of the remaining GAP is write-direction**, and the ceiling
+argument survives the correction intact — what changed is that jobs is
+read-heavy (29 of 57) against the non-jobs slices (69 of 228), which localises
+where the readable remainder lives rather than enlarging it.
+
+**TWO HONESTY NOTES ON THIS TABLE.** The single unclassified messaging row is an
+artifact of the integrator's own crude extractor, which matches an exact cell
+value; the wave that owns that slice classified all of its rows and found no
+unreadable cell. And the jobs `AMBIGUOUS` row is `J 148`, left undecided on
+purpose: its section argues nothing is sent, and nobody has measured whether a
+refinement persists to the copy LinkedIn stores.
+
 ## The reading
 
 Of **300 GAP rows**, direction splits as follows — stated over the population
