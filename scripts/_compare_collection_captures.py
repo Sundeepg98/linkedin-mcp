@@ -36,6 +36,7 @@ silently drops out of a comparison turns a two-way agreement into a one-way
 one and nothing in the output says so.
 
     ./venv/Scripts/python.exe scripts/_compare_collection_captures.py
+    ./venv/Scripts/python.exe scripts/_compare_collection_captures.py --control
 """
 
 from __future__ import annotations
@@ -67,6 +68,54 @@ CAPTURES: dict[str, str] = {
 def _ids(path: pathlib.Path) -> set[str]:
     """Every slot id in a capture, as a SET. The file's text goes no further."""
     return set(SLOT_ID.findall(path.read_text(encoding="utf-8", errors="replace")))
+
+
+def control() -> int:
+    """SHOW THE DETECTOR FAILING. The register's condition of entry.
+
+    A checker that cannot fail certifies nothing, and this repository has
+    already shipped one of those. So the identical-set branch -- the whole
+    reason this file exists -- is demonstrated against an input that MUST trip
+    it, rather than asserted in a docstring.
+
+    THREE ARMS, and the third is the one people forget: a detector that fires
+    on everything passes the first two.
+
+        1  ONE capture under TWO labels   -> must report IDENTICAL and exit 1
+        2  a named capture not on disk    -> must report ABSENT, never drop it
+        3  the real corpus                -> must pass, or arm 1 proves nothing
+    """
+    global CAPTURES
+    real = dict(CAPTURES)
+    twin = next((n for n in real.values() if (STATE / n).exists()), None)
+    if twin is None:
+        print("CONTROL CANNOT RUN: no capture on disk to duplicate.")
+        return 1
+    failures = []
+
+    print("### ARM 1: the same capture under two labels. MUST detect one page.")
+    CAPTURES = {"surface A": twin, "surface B (same file)": twin}
+    if main() != 1:
+        failures.append("arm 1: the detector cannot see one page served twice")
+
+    print("\n### ARM 2: a named capture that is not on disk. MUST say ABSENT.")
+    CAPTURES = {"real": twin, "missing": "cap-this-file-does-not-exist.html"}
+    if main() != 1:
+        failures.append("arm 2: a missing capture was silently dropped")
+
+    print("\n### ARM 3: the real corpus. MUST pass, or arm 1 proves nothing.")
+    CAPTURES = real
+    if main() != 0:
+        failures.append("arm 3: the detector fires on genuinely distinct pages")
+
+    print("\n=== CONTROL VERDICT")
+    if failures:
+        for line in failures:
+            print(f"    FAILED -- {line}")
+        return 1
+    print("    ALL THREE ARMS BEHAVED. The detector fails when it should,")
+    print("    and passes when it should.")
+    return 0
 
 
 def main() -> int:
@@ -120,4 +169,6 @@ def main() -> int:
 
 
 if __name__ == "__main__":
-    raise SystemExit(main())
+    raise SystemExit(
+        control() if "--control" in sys.argv[1:] else main()
+    )

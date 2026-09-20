@@ -158,6 +158,17 @@ lengths differ (30 / 50 / 48). Three documents.
 intersections and never an id, and it reports a named-but-absent capture rather
 than silently dropping it from the comparison.
 
+**AND IT IS SHOWN FAILING, WHICH IS THE REGISTER'S CONDITION OF ENTRY.** I had
+written it, run it, and filed it green -- which certifies nothing, because the
+branch that matters had never fired. `--control` runs three arms:
+
+    1  ONE capture under TWO labels   -> reports IDENTICAL, exits 1
+    2  a named capture not on disk    -> reports ABSENT, exits 1
+    3  the real corpus                -> passes, exits 0
+
+Arm 3 is the one that is easy to leave out, and without it the first two would
+pass for a detector that fires on everything. All three behave.
+
 ---
 
 ## 4. THE RULING ON `J 127` / `M M4` / `N 157` -- AND IT IS NOT THE ONE THE BRIEF EXPECTED
