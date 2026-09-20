@@ -678,7 +678,7 @@ the slot, the two measured phrase decisions, the pre-filter, and the 15 sites.
 Adding the kind afterwards costs a red-proof and a re-pin, which is cheap; what
 was expensive was knowing which question to ask, and that is now done.
 
-### 6.9 Things I could not separate, stated plainly
+### 6.7 Things I could not separate, stated plainly
 
 1. **Occurrence-level recall on blockers is 0.50 on the one name where it can be
    measured** (`PROXIMITY-NOT-PARSED`, 2 of 4 sites). The two missed sites sit
