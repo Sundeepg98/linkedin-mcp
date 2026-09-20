@@ -388,6 +388,94 @@ MUST_DISCRIMINATE = [
 ]
 
 
+# ---------------------------------------------------------------------------
+# WHAT AN ENTRY IS PROVEN FOR. Added 2026-09-20.
+# ---------------------------------------------------------------------------
+#
+# **THE PROOF WAS ABOUT ONE THING AND THE USE WAS ABOUT ANOTHER.** Every needle
+# in :data:`NEEDLED` is a url -- eight url-bearing lines, no prose, no display
+# name, and the words "page text" and "display name" appear nowhere above. So
+# the certification this file grants means *shapes a URL safely*, and it was
+# never asked to mean more.
+#
+# ``tests/test_page_text_is_never_printed.py`` then consumed it as if it were
+# general: until 2026-09-20 that file imported ``_is_sanitiser_call`` and ORed
+# it into a taint walk whose sources are SIXTEEN TEXT READERS. Measured on the
+# tree at `9f50087`, with every needle invented:
+#
+#     text_violations("name = await item.inner_text()\nprint(_redact(name))")
+#         -> []                    the site is reported CLEAN
+#     text_violations("name = await item.inner_text()\nprint(name)")
+#         -> [(2, 'print')]        so the [] above is a silencing, not a
+#                                  walker that flags nothing
+#     _probe_messaging.py::_redact(<an invented display name> + " commented on
+#     this")  ->  the same string, BYTE-IDENTICAL
+#
+# Three of six realistic page-text shapes came back byte-identical from that
+# claimant, while it correctly HELD on the url it was proven for. The function
+# is not broken. It is correctly scoped, and the scope was not written down
+# anywhere a check could read it.
+#
+# **NOBODY RULED THAT. IT FELL OUT OF AN IMPORT.** This mapping is where the
+# scope stops being a paragraph. An entry now says what corpus earned it, and
+# :func:`test_a_guard_consults_only_sanitisers_proven_for_its_own_kind` asserts
+# that a guard tainting page text does not reach for the url-proven predicate.
+#
+# WHY THIS IS A SEPARATE MAPPING RATHER THAN A RESHAPED ``_SANITISERS``:
+# ``_SANITISERS`` is a frozenset of names pinned by literal copy in two files
+# and referenced by name in twenty more, and the url rule's use of it is
+# CORRECT -- it taints urls. Turning it into a mapping would edit a shared
+# symbol across a parallel-wave day to record a fact that belongs to the
+# certifier anyway. The name set stays; what a name PROVES is declared here,
+# next to the table that proves it.
+SCOPE_URL = "url"
+SCOPE_TEXT = "page text"
+
+#: Name -> the kind of value its certification covers. Asserted complete
+#: against ``_SANITISERS`` below, so a new guarded name must declare a kind.
+#: ALL THREE ARE ``URL`` AND THAT IS THE MEASUREMENT, not an oversight: the
+#: table above is the only demonstration any of them has, and it is urls.
+PROVEN_FOR: dict[str, str] = {
+    "_shape_of": SCOPE_URL,
+    "_redact": SCOPE_URL,
+    "_relation": SCOPE_URL,
+}
+
+#: Which guard taints which kind of value.
+GUARD_SCOPE: dict[str, str] = {
+    "test_navigation_is_never_derived.py": SCOPE_URL,
+    "test_page_text_is_never_printed.py": SCOPE_TEXT,
+}
+
+#: The predicate that carries the URL-proven set. A guard whose scope is not
+#: :data:`SCOPE_URL` may not name it.
+URL_PROVEN_PREDICATE = "_is_sanitiser_call"
+
+#: **PAGE-TEXT NEEDLES.** The corpus a claimant would have to survive to
+#: declare :data:`SCOPE_TEXT`.
+#:
+#: ``Jane Doe`` and ``Jane Q Public`` are this repository's committed invented
+#: names -- ``tests/test_probe_redaction.py``, ``tests/test_surface_census.py``
+#: and ``tests/test_editor_fields.py`` all carry them -- and ``Northwind`` is
+#: the invented employer ``tests/test_apply_fixture.py`` uses. NO REAL IDENTITY
+#: IS HERE, and none of these shapes is a url, which is the entire point.
+#:
+#: THE SHAPES WERE CHOSEN BY WHERE THE LEAK IS, not by symmetry: the first three
+#: are the three a measured claimant returns byte-identical, and the last three
+#: are ones it holds. A table made only of the cases that fail would not be able
+#: to show a redactor DISCRIMINATING, and a table made only of the cases that
+#: pass could not fail at all.
+TEXT_NEEDLED = [
+    ("Jane Doe commented on this", "Jane Doe", "a card byline"),
+    ("Congratulate Jane Doe on the new role", "Jane Doe", "plain prose"),
+    ("by Jane Q Public, 2h ago", "Jane Q Public",
+     "a display name beside a lowercase word"),
+    ("Jane Doe's profile photo", "Jane Doe", "an aria-label"),
+    ("Jane Doe - Staff Engineer at Northwind", "Jane Doe", "a headline"),
+    ("Jane Doe: thanks, will take a look", "Jane Doe", "a message preview"),
+]
+
+
 _MODULES: dict[str, object] = {}
 
 
@@ -596,6 +684,210 @@ def test_each_enrolled_sanitiser_still_discriminates(claimant):
         "flattens every input passes a leak-only test while destroying the "
         "reading it exists for." % (filename, function_name)
     )
+
+
+# ---------------------------------------------------------------------------
+# THE SCOPE HALF. A proof about urls may not be spent on page text.
+# ---------------------------------------------------------------------------
+
+
+def _names_used(source: str) -> set[str]:
+    """Every identifier a module IMPORTS or CALLS, parsed rather than grepped.
+
+    Both halves are needed and neither alone is enough. An import without a
+    call is a symbol sitting in a namespace and could be added back into a stop
+    condition by one word; a call without an import is how a name arrives from
+    a star-import or a rebinding. A grep would match the identifier inside this
+    very docstring, which is the standing reason this package parses.
+    """
+    used: set[str] = set()
+    for node in ast.walk(ast.parse(source)):
+        if isinstance(node, ast.ImportFrom):
+            for alias in node.names:
+                used.add(alias.asname or alias.name)
+        elif isinstance(node, ast.Call):
+            func = node.func
+            if isinstance(func, ast.Name):
+                used.add(func.id)
+            elif isinstance(func, ast.Attribute):
+                used.add(func.attr)
+    return used
+
+
+def test_every_guarded_name_declares_what_it_is_proven_for():
+    """A NAME WITH NO DECLARED KIND IS THE DEFECT, WEARING A NEW SPELLING.
+
+    ``_SANITISERS`` gaining an entry without a row here would put the package
+    back where it was on 2026-09-20: a certification whose corpus nobody had
+    written down, consumed by a guard asking a different question.
+    """
+    assert set(PROVEN_FOR) == set(_SANITISERS), (
+        "these guarded names declare no proven kind: %s ; these declare a kind "
+        "and are not guarded: %s"
+        % (sorted(set(_SANITISERS) - set(PROVEN_FOR)),
+           sorted(set(PROVEN_FOR) - set(_SANITISERS)))
+    )
+    assert set(PROVEN_FOR.values()) <= {SCOPE_URL, SCOPE_TEXT}, sorted(set(PROVEN_FOR.values()))
+
+
+def test_a_guard_consults_only_sanitisers_proven_for_its_own_kind():
+    """**THE RULING, AS A CHECK.** The proof obligation must match the use.
+
+    Until 2026-09-20 ``tests/test_page_text_is_never_printed.py`` imported
+    ``_is_sanitiser_call`` and ORed it into a taint walk over SIXTEEN TEXT
+    READERS. Every name that predicate matches is certified by
+    :data:`NEEDLED` -- eight url-bearing lines and nothing else -- so a site
+    was reported clean on the strength of a proof about addresses.
+
+    **BOTH DIRECTIONS IN ONE ASSERTION, deliberately.** It is not "the text
+    guard must not name the predicate"; it is "naming it is exactly as allowed
+    as the guard's scope being url". Written one-sided, the check would still
+    pass if the URL rule lost its own stop -- which would silently forbid that
+    rule's own fix, the thing ``_SANITISERS`` exists to prevent.
+    """
+    for filename, kind in sorted(GUARD_SCOPE.items()):
+        path = REPO / "tests" / filename
+        assert path.exists(), "GUARD_SCOPE names a file that is not here: %s" % filename
+        consults = URL_PROVEN_PREDICATE in _names_used(
+            path.read_text(encoding="utf-8")
+        )
+        assert consults == (kind == SCOPE_URL), (
+            "%s taints %r and %s %s. A guard may stop at a sanitiser only "
+            "where that sanitiser's certification was measured: NEEDLED in "
+            "this file is urls. If page text now needs a stop, give it one "
+            "proven against TEXT_NEEDLED and declare it in PROVEN_FOR -- do "
+            "not re-import this one."
+            % (filename, kind,
+               "names" if consults else "does not name",
+               URL_PROVEN_PREDICATE)
+        )
+
+
+def test_the_scope_check_would_notice_a_guard_reaching_outside_its_kind():
+    """THE CONTROL, and without it the test above is a green over two files.
+
+    ``_names_used`` is shown ACCEPTING and REJECTING on sources authored here,
+    because a predicate only ever run on data that passes has never been shown
+    to reject anything. The first source is the DEFECT, reconstructed in four
+    lines.
+    """
+    offending = (
+        "from test_navigation_is_never_derived import _is_sanitiser_call\n"
+        "def walk(child):\n"
+        "    if _is_sanitiser_call(child):\n"
+        "        return False\n"
+    )
+    assert URL_PROVEN_PREDICATE in _names_used(offending), (
+        "the defect itself, in four lines, and the predicate did not see it"
+    )
+
+    # IMPORTED BUT NEVER CALLED still counts -- it is one word from being a
+    # stop condition again, and that is the state this file is preventing.
+    imported_only = (
+        "from test_navigation_is_never_derived import _is_sanitiser_call\n"
+    )
+    assert URL_PROVEN_PREDICATE in _names_used(imported_only), (
+        "an import with no call is one word from a stop condition"
+    )
+
+    # CALLED THROUGH AN ATTRIBUTE, which is how it would arrive from a module
+    # import rather than a from-import.
+    attribute_form = "import urls\ndef walk(c):\n    return urls._is_sanitiser_call(c)\n"
+    assert URL_PROVEN_PREDICATE in _names_used(attribute_form), (
+        "the attribute spelling is how it arrives from a module import"
+    )
+
+    # AND THE NEGATIVE, so it is not a predicate that says yes to everything.
+    clean = (
+        "from test_navigation_is_never_derived import _COUNTING_CALLS\n"
+        "def walk(child):\n"
+        "    return _is_text_sanitiser_call(child)\n"
+    )
+    assert URL_PROVEN_PREDICATE not in _names_used(clean), (
+        "a rejecter that rejects everything is not a check"
+    )
+
+    # THE NAME INSIDE A STRING IS NOT A USE. A grep would call this a hit, and
+    # this file's own prose says ``_is_sanitiser_call`` a dozen times.
+    prose = '"""a docstring that mentions _is_sanitiser_call by name."""\n'
+    assert URL_PROVEN_PREDICATE not in _names_used(prose), (
+        "matched the name inside a docstring -- this is why it is parsed"
+    )
+
+
+def test_no_claimant_declares_page_text_without_surviving_the_text_table():
+    """EVERY CLAIMANT PROVEN FOR TEXT, AGAINST EVERY PAGE-TEXT NEEDLE.
+
+    **THIS LOOP IS VACUOUS TODAY AND SAYS SO.** No entry in :data:`PROVEN_FOR`
+    declares :data:`SCOPE_TEXT`, so it checks zero claimants and cannot fail. That is
+    not a defect to be papered over with a fuller-looking assertion -- it is
+    the honest state, and the two controls below are what make the table real
+    rather than decorative. They run :data:`TEXT_NEEDLED` against two functions
+    that exist, and one of them fails it.
+
+    The count is asserted rather than left implicit, so the day a claimant does
+    declare :data:`SCOPE_TEXT` this stops being vacuous and a reader can see that it did.
+    """
+    checked = []
+    for claimant in sorted(ENROLLED):
+        filename, function_name = claimant
+        if PROVEN_FOR[function_name] != SCOPE_TEXT:
+            continue
+        function = getattr(_module(filename), function_name)
+        for text, needle, why in TEXT_NEEDLED:
+            out = str(_call(function, ENROLLED[claimant], text))
+            assert needle not in out, (
+                "%s::%s declares it is proven for page text and returned the "
+                "display name in %s. An entry is a promise made on a "
+                "function's behalf." % (filename, function_name, why)
+            )
+        checked.append("%s::%s" % claimant)
+    expected = sorted(
+        "%s::%s" % c for c in ENROLLED if PROVEN_FOR[c[1]] == SCOPE_TEXT
+    )
+    assert sorted(checked) == expected, (checked, expected)
+
+
+def test_the_text_table_catches_the_claimant_that_is_measured_leaking_prose():
+    """**SHOWN FAILING, AGAINST A REAL FUNCTION, NOT A STUB.**
+
+    ``scripts/_probe_messaging.py::_redact`` is a pattern list plus a
+    capitalised-run collapse, and its own source says the gap out loud: a
+    display name beside a lowercase word passes straight through, because the
+    run then contains a lowercase word and the collapse declines it.
+
+    **THAT IS NOT A BUG IN IT.** It holds on the url it is certified for, and
+    it is the reason its row in :data:`PROVEN_FOR` says :data:`SCOPE_URL`. What this
+    asserts is that the page-text table can CONVICT -- a table that everything
+    passes would let the next TEXT claimant in on nothing.
+    """
+    redact = getattr(_module("_probe_messaging.py"), "_redact")
+    leaked = [why for text, needle, why in TEXT_NEEDLED if needle in redact(text)]
+    assert leaked, (
+        "TEXT_NEEDLED no longer catches the claimant it was built from, so "
+        "every green above is vacuous. Either the function changed -- in which "
+        "case re-measure and consider whether it now earns SCOPE_TEXT -- or the "
+        "table stopped carrying the shapes that fail."
+    )
+    # AND THE URL IT IS CERTIFIED FOR STILL HOLDS, in the same breath. Without
+    # this the reader cannot tell a correctly-scoped function from a broken one.
+    assert "some-real-slug-99" not in redact(
+        "https://www.linkedin.com/in/some-real-slug-99/details/skills/"
+    )
+
+
+def test_the_text_table_is_not_a_rejecter_that_rejects_everything():
+    """THE OTHER HALF. A table nothing survives certifies nothing either.
+
+    ``scripts/_probe_search_render_timeline.py::_redact`` is the same name and
+    a different function -- allowlist-based, membership rather than absence --
+    and it holds on every shape in the table. Two functions, one spelling,
+    opposite results: which is also the plainest statement of why the guard
+    cannot be allowed to match on the name alone.
+    """
+    redact = getattr(_module("_probe_search_render_timeline.py"), "_redact")
+    survived = [why for text, needle, why in TEXT_NEEDLED if needle in redact(text)]
+    assert not survived, survived
 
 
 def test_the_table_would_catch_a_do_nothing_sanitiser():
