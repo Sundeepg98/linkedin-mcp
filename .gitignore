@@ -200,3 +200,12 @@ shard-files.txt
 shard-plan.json
 junit.xml
 reports/
+
+# Claude Code's agent worktrees. MACHINE-LOCAL, NEVER REPO CONTENT.
+# Each one carries its own .git file, so git reports the DIRECTORY as a single
+# untracked entry -- and committable_files() in
+# tests/test_no_committed_credential.py then hands that directory to
+# read_text(), which raises. Measured 2026-09-20: 23 worktrees on disk, 22
+# swept, 22 reds, on a tree whose own diff was clean. Ignoring them fixes the
+# guard's INPUT rather than teaching the guard to tolerate a directory.
+.claude/worktrees/
