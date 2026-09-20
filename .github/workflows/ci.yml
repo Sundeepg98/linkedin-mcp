@@ -198,9 +198,24 @@ on:
 # marker inserted between a table header and its first data row broke
 # build_blocker_map.py so every blocker read as unknown, and CI is what caught
 # it. Here a markdown edit IS a code change.
+# CORRECTED 2026-09-20, same day, after it ate four master receipts.
+#
+# The first version wrote `cancel-in-progress: ${{ github.ref != '...' }}` and
+# it DID NOT EXEMPT MASTER. An expression in that field evaluates to the STRING
+# "false", and a non-empty string is truthy, so the exemption was always on.
+# Measured: runs on dc5aaa6, 8ca4f36, 9a140a3 and 6086911 were all cancelled by
+# the next master push, while the four runs that started BEFORE this block
+# landed were still running untouched. A wave caught it and asked whether the
+# exemption worked; it did not.
+#
+# So the exemption moves into the GROUP KEY, where there is no boolean to
+# coerce. On master the group carries the SHA, so every master push is its own
+# group and nothing can supersede it -- that is what keeps "20 of 20 at <sha>"
+# citable as a receipt. On a branch the group is shared, so a newer push
+# supersedes an older run that nobody is waiting on any more.
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: ${{ github.ref != 'refs/heads/master' }}
+  group: ${{ github.workflow }}-${{ github.ref }}-${{ github.ref == 'refs/heads/master' && github.sha || 'shared' }}
+  cancel-in-progress: true
 
 jobs:
   plan:
