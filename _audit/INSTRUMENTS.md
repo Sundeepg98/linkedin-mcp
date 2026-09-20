@@ -6080,7 +6080,7 @@ retirements a concrete reopener AND names who can establish it. The other queue
 was exempt, and the exemption was measurable: **15% still GAP with a reopener,
 91% without.**
 
-### 41.1 `scripts/check_contingent_writeoffs_carry_a_reopener.py` -- ADMITTED, SHOWN FAILING TWICE
+### 41.1 `scripts/check_contingent_writeoffs_carry_a_reopener.py` -- ADMITTED, SHOWN FAILING THREE WAYS
 
 Fails the run if a write-off row is CONTINGENT (`WORLD-FACT` / `ACCOUNT-FACT` /
 `PROCESS-FACT`, per the shipped classifier) and names no `REOPENER` in its
@@ -6091,7 +6091,7 @@ POINTERS and 21 rows carry no reason cell at all (`N 67`-`78`, `N 119`-`128`
 ship four-column tables). A guard reading the raw cell would demand the
 impossible of a fifth of the corpus.
 
-**THE RED IS TWO REDS, AND THE SECOND IS THE ONE THAT MATTERS.** A verdict that
+**THE RED IS THREE REDS, AND EACH COVERS A BLIND SPOT OF THE OTHERS.** A verdict that
 fires on an injected row proves nothing about whether the WALK would ever hand
 it one -- that gap is exactly the shape of the decorative controls this repo
 has been finding all day. So `--demonstrate-red` runs: (1) a synthetic row,
@@ -6099,7 +6099,9 @@ convicted, **plus the same row carrying a reopener, cleared** -- a rule that
 convicts both is not discriminating, it is just failing; (2) an END-TO-END red
 that copies the four census files to a temp dir, plants one row inside a live
 table, repoints the walker and runs the shipped `build()` pipeline. It asserts
-the walk FINDS the row, the guard FAILS, and the failure NAMES it.
+the walk FINDS the row, the guard FAILS, and the failure NAMES it; **(3) a cell
+whose only reopener-shaped text is the sentence "reopens nothing", convicted --
+see 41.4, the defect that made the first two insufficient.**
 
 Four decorative holes closed and named in the docstring: per-slice liveness
 (never a union assertion -- a union over a redundant corpus cannot detect a
@@ -6175,7 +6177,56 @@ said ~40. Over all write-off states it is exactly 40; over `EXCLUDED-RULED` +
 `XR` it is **37**. The other three sit in `COVERED-CANNOT-DELIVER` and
 `MEASURED-ABSENT`. Re-deriving cost one run of a shipped instrument.
 
-### 41.4 PROSE WRITTEN INTO A CLASSIFIED CORPUS IS DATA, NOT COMMENTARY
+### 41.4 THE GUARD WAS GREEN ON A CELL THAT SAID THE OPPOSITE, AND ONLY A MUTATION FOUND IT
+
+**The first version of 41.1 could not fail in the exact case it exists for.**
+It reused `classify_writeoff_reasons.REOPENER`, which is
+`REOPEN(?:ER|S)\b` CASE-INSENSITIVE. That is right for its own job -- reporting,
+where over-reach is free -- and wrong for a gate, because it matches the
+ordinary verb.
+
+Found by MUTATION, never by re-reading: stripping the real `REOPENER:` clause
+out of `P D13` and `P D14` left the guard **green**, because both cells also
+contain the sentence *"the Help-article half REOPENS NOTHING"*. **A cell could
+state in prose that nothing reopens it and thereby satisfy a check whose entire
+subject is whether something does.** The sentences were written by this wave, in
+the same pass, for a good reason (see 41.3) -- which is the uncomfortable part:
+the guard and the text that defeated it came from one author on one afternoon.
+
+**THE DISCRIMINATOR IS CASE, AND IT WAS MEASURED BEFORE IT WAS ADOPTED.** The
+house marker is always SHOUTED (`REOPENER:`, `REOPENER, NAMED:`, `REOPENER a
+parser over either capture`); the ordinary verb is not. Over the whole corpus
+exactly **five** contingent rows pass the loose regex with no shouted marker,
+and all five are the `D13`/`D14` family that prompted this -- so tightening to
+`REOPENER\b` convicts the mutation and **moves nothing else**.
+
+**NOT NARROWED FURTHER, DELIBERATELY.** `REOPENER: none plausible` and
+`REOPENER: nothing that keeps the shape` must keep passing -- an argued "this is
+genuinely permanent" is a real answer to the question, and three of
+`decide-retire-rulings.md` s6's twelve are written that way. **The defect is an
+UNMARKED sentence, never a negative verdict somebody defended.**
+
+It is now RED 3 of the guard's `--demonstrate-red`, asserting both halves: that
+the loose regex DOES match the negative sentence (or the control has stopped
+exercising the defect) and that the shouted marker does NOT.
+
+**THE LAW: A GATE MAY NOT BORROW A REPORTER'S PREDICATE.** The same regex is
+correct in a report and decorative in a guard, because over-matching costs a
+reporter nothing and costs a gate everything. Reuse the instrument, re-derive
+the threshold.
+
+### 41.5 A GUARD NOBODY RUNS HAS ALREADY STOPPED WORKING
+
+`tests/test_contingent_writeoffs_carry_a_reopener.py` wraps 41.1 so CI runs it,
+following `test_pointer_graph_guard.py`. Two tests, and **the second is the one
+that matters**: a green property test is ambiguous between "the census is
+clean" and "the guard was broken into something that cannot speak" -- an import
+returning nothing, a walk finding no rows, a predicate inverted. So the second
+test re-runs `--demonstrate-red` and asserts each red's marker string
+individually, because a demonstration that silently skipped its expensive half
+would still exit 0.
+
+### 41.6 PROSE WRITTEN INTO A CLASSIFIED CORPUS IS DATA, NOT COMMENTARY
 
 **The pointer-graph guard convicted this wave, on four words.** A reopener
 added to `P D14` contained *"each on his own ruling"*; `his own` matches the

@@ -81,6 +81,7 @@ from __future__ import annotations
 
 import argparse
 import pathlib
+import re
 import shutil
 import sys
 import tempfile
@@ -109,10 +110,37 @@ PINNED_EXEMPTIONS: dict[str, str] = {
 }
 
 
+#: THE MARKER, AND WHY IT IS STRICTER THAN THE SHIPPED REGEX.
+#: `classify_writeoff_reasons.REOPENER` is `REOPEN(?:ER|S)\b` CASE-INSENSITIVE.
+#: That is right for its job -- reporting, where over-reach costs nothing -- and
+#: WRONG for a gate, because it matches the ordinary verb. Found by mutation,
+#: not by reading: stripping the real `REOPENER:` clause out of `P D13`/`P D14`
+#: left this guard GREEN, because both cells also contain the sentence
+#: *"the Help-article half REOPENS NOTHING"*. **A cell can then say, in
+#: prose, that nothing reopens it, and satisfy a check whose whole subject is
+#: whether something does.** That is a check that cannot fail in the exact case
+#: it exists for, and this repo has found about ten shapes of that defect.
+#:
+#: The house marker is always SHOUTED -- `REOPENER:`, `REOPENER, NAMED:`,
+#: `REOPENER, per the ruling:`, `REOPENER a parser over either capture`. The
+#: ordinary verb is not. So the discriminator is CASE, and it is measured
+#: rather than assumed: over the whole corpus exactly FIVE contingent rows pass
+#: the loose regex without a shouted marker, and all five are the `P D13`/`D14`
+#: family that prompted this -- so tightening convicts the mutation and moves
+#: NOTHING else.
+#:
+#: NOT NARROWED FURTHER, deliberately. `REOPENER: none plausible` and
+#: `REOPENER: nothing that keeps the shape` MUST keep passing: an argued "this
+#: is genuinely permanent" is a real answer to "what would reopen this", and it
+#: is how `decide-retire-rulings.md` s6 writes three of its twelve. The defect
+#: is an UNMARKED sentence, never a negative verdict somebody defended.
+REOPENER_MARKER = re.compile(r"REOPENER\b")
+
+
 def offenders(rows) -> list:
     """Every write-off row that is contingent and names no reopener."""
     return [r for r in rows
-            if r.contingent and not cwr.REOPENER.search(r.resolved)]
+            if r.contingent and not REOPENER_MARKER.search(r.resolved)]
 
 
 def run(rows, verbose: bool = False) -> tuple[bool, list[str]]:
@@ -230,9 +258,10 @@ PLANTED_ROW = ("| 9901 | PLANTED CONTROL ROW -- not a capability | a000000 | "
 
 
 def demonstrate_red() -> int:
-    print("DEMONSTRATE-RED -- this guard must be able to CONVICT. Two independent")
-    print("reds, because a verdict that fires on an injected row proves nothing")
-    print("about whether the walk would ever hand it one.\n")
+    print("DEMONSTRATE-RED -- this guard must be able to CONVICT. THREE independent")
+    print("reds: a verdict that fires on an injected row proves nothing about")
+    print("whether the walk would ever hand it one, and neither proves that a")
+    print("cell cannot satisfy the check with a sentence saying the opposite.\n")
     ok = True
 
     # ---- RED 1: the verdict logic ------------------------------------------
@@ -325,7 +354,37 @@ def demonstrate_red() -> int:
         cwr.ccs.CENSUS = real
         shutil.rmtree(tmp, ignore_errors=True)
 
-    print("\n" + ("BOTH REDS FIRED -- the guard can convict"
+    # ---- RED 3: the sentence that says the OPPOSITE must not satisfy it ----
+    # This is the mutation that caught the guard's own first version green.
+    print("\nRED 3 -- A CELL SAYING 'REOPENS NOTHING' MUST NOT COUNT AS A REOPENER")
+    negative = ("`/edit/` family ruling; LinkedIn draws no such article for "
+                "this account. **The Help-article half of this cell reopens "
+                "nothing**, because the ruling excludes it either way.")
+    row = cwr.Row(
+        letter="P", rid="9903", state="EXCLUDED-RULED", lineno=0,
+        capability="PLANTED CONTROL ROW WITH A NEGATIVE SENTENCE",
+        reason=negative, section="", table_key="P:0", resolved=negative,
+        resolution="own-cell", signals=["WF:help-centre"],
+        kinds={"WORLD-FACT"}, kind="WORLD-FACT", source="rule",
+        has_reason_cell=True, backref_donor=None, inherited_kinds=set(),
+    )
+    loose = cwr.REOPENER.search(negative)
+    strict = REOPENER_MARKER.search(negative)
+    caught3 = offenders([row])
+    print(f"  the shipped case-insensitive regex matches it : "
+          f"{'YES -- which is why this guard does not use it' if loose else 'no'}")
+    print(f"  this guard's shouted marker matches it        : "
+          f"{'YES -- CONTROL BROKEN' if strict else 'no'}")
+    if len(caught3) == 1 and not strict and loose:
+        print("  ok    the row is CONVICTED: a cell may not satisfy a reopener")
+        print("        check with a sentence stating that nothing reopens it.")
+    else:
+        print("  CONTROL BROKEN: either the negative sentence was accepted as a")
+        print("  reopener, or the loose regex stopped matching it and this")
+        print("  control no longer exercises the defect it was written for.")
+        ok = False
+
+    print("\n" + ("ALL THREE REDS FIRED -- the guard can convict"
                   if ok else "CONTROL BROKEN -- see above"))
     return 0 if ok else 1
 
@@ -352,7 +411,7 @@ def main(argv: list[str] | None = None) -> int:
     if args.list:
         for r in sorted((r for r in rows if r.state in cwr.WRITEOFF and r.contingent),
                         key=lambda r: (r.letter, r.lineno)):
-            mark = "R" if cwr.REOPENER.search(r.resolved) else "-"
+            mark = "R" if REOPENER_MARKER.search(r.resolved) else "-"
             print(f"  [{mark}] {r.key:<9} {r.state:<22} {r.kind:<34} {r.capability[:44]}")
         print()
 

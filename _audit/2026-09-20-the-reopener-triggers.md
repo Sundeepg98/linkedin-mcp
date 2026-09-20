@@ -313,7 +313,7 @@ is contingent and names no reopener in its RESOLVED text.
 write-off reason cells are pointers, and 21 rows carry no reason cell at all.
 Reading the raw cell would demand the impossible of a fifth of the corpus.
 
-### 5.1 Shown failing, twice, because one red was not enough
+### 5.1 Shown failing, three ways, because one red was not enough
 
 A verdict that fires on an injected row proves nothing about whether the walk
 would ever hand it one. So `--demonstrate-red` runs both halves:
@@ -341,7 +341,60 @@ the red proves the REAL rule fires rather than a rule written to be fired. And
 Red 1's second half is the discrimination control: **a rule that convicts a row
 carrying a reopener is not working, it is just failing.**
 
-### 5.2 Four ways it could have been decorative, each closed and named
+### 5.2 THE GUARD WAS GREEN ON A CELL THAT SAID THE OPPOSITE, AND A MUTATION FOUND IT
+
+**Shipped, and then convicted by its own mutation test an hour later.** The
+first version reused `classify_writeoff_reasons.REOPENER`, which is
+`REOPEN(?:ER|S)\b` **case-insensitive**. Correct for its own job -- reporting,
+where over-reach is free -- and wrong for a gate, because it matches the
+ordinary verb.
+
+The mutation: strip the real `REOPENER:` clause out of `P D13` and `P D14` and
+re-run. **The guard stayed GREEN.** Both cells also contain the sentence *"the
+Help-article half REOPENS NOTHING"*, written by this wave two hours earlier and
+for a good reason (section 2.3). **So a cell could state in prose that nothing
+reopens it, and thereby satisfy a check whose entire subject is whether
+something does.**
+
+The uncomfortable part is not the regex. It is that **the guard and the text
+that defeated it came from one author in one afternoon**, so no amount of
+re-reading either would have found it -- only running one against the other.
+
+**THE FIX IS CASE, AND IT WAS MEASURED BEFORE IT WAS ADOPTED.** The house
+marker is always SHOUTED; the ordinary verb is not. Over the whole corpus,
+exactly **five** contingent rows pass the loose regex with no shouted marker,
+and all five are the `D13`/`D14` family that prompted this. Tightening to
+`REOPENER\b` convicts the mutation and **moves nothing else**.
+
+Re-run after tightening: the mutation is caught, and it catches **all five**
+rows -- `D13`, `D14` and the three that inherit by backreference -- which also
+proves the inheritance path is live rather than assumed.
+
+**NOT NARROWED FURTHER, DELIBERATELY.** `REOPENER: none plausible` and
+`REOPENER: nothing that keeps the shape` must keep passing: an argued "this is
+genuinely permanent" is a real answer to the question, and three of
+`decide-retire-rulings.md` s6's twelve are written that way. **The defect is an
+UNMARKED sentence, never a negative verdict somebody defended.**
+
+It is now RED 3, asserting both halves -- that the loose regex DOES match the
+negative sentence (or the control has stopped exercising the defect) and that
+the shouted marker does NOT.
+
+**THE LAW: A GATE MAY NOT BORROW A REPORTER'S PREDICATE.** The same regex is
+right in a report and decorative in a guard, because over-matching costs a
+reporter nothing and costs a gate everything. Reuse the instrument, re-derive
+the threshold.
+
+### 5.3 A guard nobody runs has already stopped working
+
+`tests/test_contingent_writeoffs_carry_a_reopener.py` wraps the script so CI
+runs it, following `test_pointer_graph_guard.py`. **A green property test is
+ambiguous on its own** -- it passes when the census is clean AND when the guard
+has been broken into something that cannot speak. So the second test re-runs
+`--demonstrate-red` and asserts each red's marker string individually, because
+a demonstration that silently skipped its expensive half would still exit 0.
+
+### 5.4 Four ways it could have been decorative, each closed and named
 
 1. **An empty result would pass.** Asserted **per slice** -- a file yielding
    zero contingent write-offs is a LOUD failure naming the file. Per slice and
@@ -357,7 +410,7 @@ carrying a reopener is not working, it is just failing.**
 4. **The logic could be right while the walk finds nothing.** Red 2 exists
    solely for this.
 
-### 5.3 Green
+### 5.5 Green
 
     write-off rows            : 310
       of which CONTINGENT     : 65
