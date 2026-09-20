@@ -8,7 +8,7 @@ trusted. A detector that always says "found a defect" is as useless as one
 that never does; the only convincing proof is the SAME shape flipping
 verdicts when, and only when, the underlying content changes.
 
-FOUR DEMONSTRATIONS:
+FIVE DEMONSTRATIONS:
 
   A  the BROKEN fixture (computed, printed with PASS/FAIL text, never
      branched) must be FLAGGED. If it is not, the detector is decoration.
@@ -19,12 +19,20 @@ FOUR DEMONSTRATIONS:
      DIFFERENT variable (`needle`, not `hits`). `hits` must still be
      flagged -- a detector that credits any nearby `if` as a branch would
      wrongly clear it.
-  D  the RATCHET TEST must itself go RED when a real, currently-known-good
-     baseline entry is removed from its view. This is done by calling the
-     ratchet's own comparison with a baseline missing one real entry
-     (in memory -- the tracked baseline file on disk is never touched), and
-     showing that entry is reported as a "new" finding. A ratchet that
-     cannot be tripped by ANYTHING is not a ratchet.
+  D  the RATCHET's GAINED direction must go RED when a real,
+     currently-known-good baseline entry is removed from its view. This is
+     done by calling the ratchet's own comparison with a baseline missing
+     one real entry (in memory -- the tracked baseline file on disk is
+     never touched), and showing that entry is reported as a "gained"
+     finding. A ratchet that cannot be tripped by ANYTHING is not a
+     ratchet.
+  E  the RATCHET's LOST direction must go RED when the baseline carries an
+     entry the detector no longer finds live. This is the direction a
+     same-day review on this branch named as missing from the first
+     version of this test (this repo's own KNOWN_TEXT_SINKS ratchet checks
+     both directions; the first cut of this one only checked GAINED).
+     Demonstrated by adding one FABRICATED baseline entry that matches no
+     real finding (in memory only) and showing it is reported as "lost."
 
 Run from the repo root with the venv interpreter. Prints a PASS/FAIL line
 per demonstration and exits non-zero if any of them does not behave as
@@ -82,40 +90,56 @@ def main() -> int:
     print()
 
     # ------------------------------------------------------------------- D
-    print("D. the ratchet itself must be able to go RED")
+    print("D. the ratchet's GAINED direction must be able to go RED")
     baseline_doc = json.loads(guard_test.BASELINE_PATH.read_text(encoding="utf-8"))
     real_known = {(e["file"], e["function"], e["variable"]) for e in baseline_doc["entries"]}
+    results = detector.scan_corpus()
+    live_now: dict[tuple, dict] = {}
+    for r in results:
+        for f in r.get("findings", []):
+            live_now[(r["file"], f["function"], f["variable"])] = f
+
     if not real_known:
         _report("D: baseline has at least one real entry to remove", False)
     else:
         removed = sorted(real_known)[0]
         crippled_known = real_known - {removed}
-        results = detector.scan_corpus()
-        new_findings = []
-        for r in results:
-            for f in r.get("findings", []):
-                key = (r["file"], f["function"], f["variable"])
-                if key not in crippled_known:
-                    new_findings.append(key)
+        gained = [key for key in live_now if key not in crippled_known]
         _report(
             "D: removing one real baseline entry (%s) from view makes the "
-            "ratchet report it as new" % (removed,),
-            removed in new_findings,
+            "ratchet report it as GAINED" % (removed,),
+            removed in gained,
         )
         # And the control on the control: with the FULL baseline restored,
         # that same entry must NOT be reported (else the corpus moved under
         # us mid-check, which would invalidate this demonstration).
-        results_again = detector.scan_corpus()
-        new_findings_full = []
-        for r in results_again:
-            for f in r.get("findings", []):
-                key = (r["file"], f["function"], f["variable"])
-                if key not in real_known:
-                    new_findings_full.append(key)
+        gained_full = [key for key in live_now if key not in real_known]
         _report(
             "D control: with the FULL baseline, that entry is NOT reported",
-            removed not in new_findings_full,
+            removed not in gained_full,
         )
+    print()
+
+    # ------------------------------------------------------------------- E
+    print("E. the ratchet's LOST direction must be able to go RED")
+    fabricated = ("<no-such-file>.py", "<no-such-function>", "<no-such-variable>")
+    inflated_baseline = real_known | {fabricated}
+    lost = [key for key in inflated_baseline if key not in live_now]
+    _report(
+        "E: adding one FABRICATED baseline entry makes the ratchet report "
+        "it as LOST",
+        fabricated in lost,
+    )
+    # Control on the control: every REAL baseline entry must still be live
+    # right now, or this demonstration would be exercising real drift
+    # rather than the fabricated one.
+    real_lost = [key for key in real_known if key not in live_now]
+    _report(
+        "E control: no REAL baseline entry is reported lost at this moment "
+        "(if this fails, the corpus moved under this check -- see "
+        "%r)" % (real_lost,),
+        not real_lost,
+    )
     print()
 
     if FAILURES:

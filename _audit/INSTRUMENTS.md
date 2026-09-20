@@ -4104,3 +4104,63 @@ control does not mean the probe's finding was false, only that the probe
 never checked whether it could have been. The fixer's cheapest next step is
 those 5, because they are the only ones where something already rests on
 the answer.
+
+### 24.7 A SAME-DAY PEER REVIEW CAUGHT A REAL GAP: THE RATCHET WAS ONE-WAY
+
+Commit `94e4601` landed on a branch another wave (`_audit/2026-09-20-the-
+floor-again.md`) was also writing to, and that wave reviewed it because it
+was now theirs to have reviewed. Two findings, addressed here rather than
+left standing:
+
+**1. The baseline was a ONE-WAY ratchet; this repository's established
+pattern for the identical shape is TWO-WAY.** `tests/test_page_text_is_
+never_printed.py`'s `KNOWN_TEXT_SINKS` states its own rule: "asserted as an
+EXACT MAPPING, so it cannot rot in either direction: a file that gains a
+site fails, and a file that is FIXED also fails until its entry is
+corrected. The documentation of a defect may not outlive the defect." The
+first cut of `test_probe_corpus_has_no_new_decorative_control` only failed
+on GAINED (a new finding outside the baseline); it stayed green forever on
+LOST (a baseline entry the detector no longer finds), so a fixed control
+could sit in the tracked baseline indefinitely with nothing prompting its
+removal. FIXED: the test is renamed `test_probe_corpus_baseline_is_an_
+exact_mapping` and now fails on either direction, with GAINED and LOST
+reported separately (same message shape as `KNOWN_TEXT_SINKS`'s own test,
+deliberately). The corpus-churn concern that motivated the one-way version
+in the first place still holds and did not require abandoning the
+two-way check: matching is on `(file, function, variable)`, not a global
+count, so an unrelated wave's brand-new probe file cannot trip either
+direction -- only a change to one of the 129 pinned sites can. Demonstration
+E in `scripts/_check_unbranched_control_detector_can_fail.py` now proves the
+LOST direction can go red (a fabricated baseline entry is correctly
+reported lost), alongside D's original proof that GAINED can. Receipt,
+re-run after the fix:
+
+```
+D. the ratchet's GAINED direction must be able to go RED
+PASS   D: removing one real baseline entry (('_probe_add_section_menu.py', 'main', 'controls')) from view makes the ratchet report it as GAINED
+PASS   D control: with the FULL baseline, that entry is NOT reported
+
+E. the ratchet's LOST direction must be able to go RED
+PASS   E: adding one FABRICATED baseline entry makes the ratchet report it as LOST
+PASS   E control: no REAL baseline entry is reported lost at this moment (if this fails, the corpus moved under this check -- see [])
+```
+
+**2. Three of the 129 pinned entries are a live dispute, not a settled
+false positive, and this entry does not resolve it.** The review named
+`_probe_events_surface_shape.py`'s `rows_with_any` and `note` as "display
+values, not controls," and `hits` as "correctly not branched, because the
+must-fire control was hoisted above it and IS branched" -- a semantically
+equivalent sibling variable already gates the same condition the census's
+marker-only rule cannot see. Checked directly rather than taken on trust:
+the file's code is UNCHANGED since commit `2fba253` (`git status` clean),
+and re-running the detector against it live still returns exactly these
+three, mechanically correct under the rule as written (section 24 above and
+the census's own section 6 already named "control" as domain-overloaded
+vocabulary in this exact corpus -- LinkedIn UI controls and self-check
+controls share the one word). Left alone rather than resolved unilaterally:
+narrowing the marker vocabulary to tell the two apart is a real, separable
+piece of work with its own false-positive/false-negative tradeoff, it was
+not this task's brief, and the two-way ratchet built for point 1 means it
+is no longer possible for this dispute to be forgotten by default -- it
+sits in the baseline, live, until someone with the standing to adjudicate
+the marker question does.

@@ -4,7 +4,7 @@ public repo history cited as evidence, e.g. the snapshot sha
 ea9954be9a4e06b757a21c51e01a021866ce5094 and commit 94e4601 -- not secrets.)
 
 Census: probe controls that never branch
-scripts/_probe_*.py in D:\Sundeep\projects\job-hunting\mcp-servers\linkedin\.claude\worktrees\agent-a5757894d474bdacb
+scripts/_probe_*.py, run from a wave-lead worktree of this repo.
 Run 2026-09-20. CENSUS ONLY -- no repo file was modified or committed by this task.
 
 =======================================================================
@@ -705,25 +705,24 @@ Files with >=1 finding, instance count each (56 files, 129 instances):
 =======================================================================
 11. FILES
 =======================================================================
-Snapshot sha (git stash create, never pushed to the shared stash stack):
-                   ea9954be9a4e06b757a21c51e01a021866ce5094
-Detector script:   C:\Users\Dell\AppData\Local\Temp\claude\D--Sundeep-projects-job-hunting-mcp-servers\e4657d94-a9ad-4af0-a042-c6c498fa9c58\scratchpad\probes\detect_unbranched_controls.py
-Snapshot materializer (git show <sha>:<path>, per file, cwd fixed to the
-worktree; read-only):
-                   C:\Users\Dell\AppData\Local\Temp\claude\D--Sundeep-projects-job-hunting-mcp-servers\e4657d94-a9ad-4af0-a042-c6c498fa9c58\scratchpad\probes\materialize_snapshot.py
-Materialized corpus (88 files, the actual input to this census):
-                   C:\Users\Dell\AppData\Local\Temp\claude\D--Sundeep-projects-job-hunting-mcp-servers\e4657d94-a9ad-4af0-a042-c6c498fa9c58\scratchpad\probes\snapshot_corpus\scripts\
-Synthetic-positive reference (git show HEAD:..., immutable, NOT part of
-the corpus -- see section 2, control A):
-                   C:\Users\Dell\AppData\Local\Temp\claude\D--Sundeep-projects-job-hunting-mcp-servers\e4657d94-a9ad-4af0-a042-c6c498fa9c58\scratchpad\probes\calib_head\_probe_events_surface_shape.py
-Raw machine-readable findings (all fields, incl. window_text used for
-marker provenance, the synthetic_positive_control and
-discrimination_control results, and the branched_controls /
-unused_controls buckets):
-                   C:\Users\Dell\AppData\Local\Temp\claude\D--Sundeep-projects-job-hunting-mcp-servers\e4657d94-a9ad-4af0-a042-c6c498fa9c58\scratchpad\probes\control-census.json
-This report is also committed at `_audit/2026-09-20-control-census.md` in
-this repo (commit `94e4601` and after) -- the scratchpad copy above is the
-working copy this session wrote to first; the two are the same text.
+Snapshot sha: see section 0/2 (git stash create, never pushed to the
+shared stash stack).
+
+The detector script, the snapshot materializer, the materialized 88-file
+snapshot corpus, the frozen HEAD reference copy, and the raw machine-
+readable findings (control-census.json, all fields including window_text,
+the synthetic_positive_control and discrimination_control results, and the
+branched_controls / unused_controls buckets) all lived in this session's
+scratchpad -- outside this repo, on the machine that ran this census, never
+committed or intended to be, and not reproducible from an absolute path
+that only made sense on that one machine. Re-deriving them is cheap:
+`scripts/detect_unbranched_probe_controls.py` (committed, see section 12)
+IS that detector, ported and importable; running it against any commit or
+snapshot reproduces the same JSON shape. Nothing in this write-up depends
+on the scratchpad copies still existing.
+
+THIS report is committed at `_audit/2026-09-20-control-census.md` in this
+repo (commit `94e4601` and after).
 
 The snapshot commit object created by `git stash create` is reachable only
 by its sha (it was never attached to any ref or the stash stack), so it is
@@ -812,5 +811,7 @@ once its control actually branches is a measurement, and this task's brief
 was census and harvest, not repair.
 
 Raw ranking data (all 56 rows, all four tiers, with the exact census-row
-citations and journal mentions found per file):
-C:\Users\Dell\AppData\Local\Temp\claude\D--Sundeep-projects-job-hunting-mcp-servers\e4657d94-a9ad-4af0-a042-c6c498fa9c58\scratchpad\probes\triage-by-cost.json
+citations and journal mentions found per file) lived in this session's
+scratchpad as `triage-by-cost.json`, alongside the other scratchpad
+materials named in section 11 -- not committed, not needed to reproduce
+this section: the ranking itself, in full, is written out in 12a above.

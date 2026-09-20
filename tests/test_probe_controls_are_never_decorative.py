@@ -19,17 +19,40 @@ trusted: same shape, one broken and one fixed, one variable name apart
 (adding exactly the ``if silent: ...`` branch), opposite verdicts. Together
 they prove the detector discriminates rather than merely asserting.
 
-``test_probe_corpus_has_no_new_decorative_control`` is the ratchet against
-the real corpus: it loads ``scripts/probe_controls_known_decorative_
-baseline.json`` (129 entries, generated from the 2026-09-20 census) and
-fails only on a finding NOT already in that baseline -- a newly introduced
-decorative control. It does NOT require the baseline to shrink as old
-findings get fixed (that file's own header explains why: matching is on
-(file, function, variable), and removing a fixed entry is encouraged but
-optional). This is deliberately looser than an exact-count pin: multiple
-unrelated waves add new probe files to this corpus daily, and an exact
-global count would fail on someone else's unrelated addition as often as it
-would fail on a real regression.
+``test_probe_corpus_baseline_is_an_exact_mapping`` is the ratchet against
+the real corpus, and it is a TWO-WAY ratchet: it loads ``scripts/
+probe_controls_known_decorative_baseline.json`` (129 entries, generated from
+the 2026-09-20 census) and fails on EITHER a finding not already in that
+baseline (a newly introduced decorative control) OR a baseline entry the
+detector no longer finds live (fixed, or reclassified -- either way the
+entry is now stale and must be corrected, never left in place). This
+mirrors ``tests/test_page_text_is_never_printed.py``'s ``KNOWN_TEXT_SINKS``,
+this repository's established pattern for the same shape: "asserted as an
+EXACT MAPPING, so it cannot rot in either direction... the documentation of
+a defect may not outlive the defect." An earlier version of this test only
+checked the GAINED direction, which a same-day review on this branch named
+correctly: a one-way ratchet lets a fixed finding sit in the baseline
+forever with nothing prompting anyone to remove it. The corpus-count
+concern that motivated the one-way version still holds and is handled
+differently here: matching is on (file, function, variable), not a global
+total, so an unrelated wave adding a brand new probe file changes nothing
+about this baseline's 129 entries and cannot trip either direction of this
+check -- only a change to one of THESE 129 specific sites can.
+
+Two entries are a KNOWN OPEN QUESTION rather than a settled false positive,
+recorded here instead of resolved unilaterally: the same review disputed
+`_probe_events_surface_shape.py`'s `rows_with_any` and `note` as "display
+values, not controls," and `hits` as "correctly not branched, because the
+must-fire control was hoisted above it and IS branched" -- i.e. a
+semantically-equivalent sibling variable already gates the same condition.
+That is a claim about the DETECTOR'S marker vocabulary conflating a
+self-check with LinkedIn UI-control terminology (this census's own
+section 6 raised the identical ambiguity), not about the code having
+changed, and re-running the detector against the live file confirms the
+code is unchanged and these three still mechanically qualify as findings
+under this file's stated rules. Deciding whether to narrow those rules is
+left to whoever owns that call next; this test only asserts what the
+detector currently says, correctly, in both directions.
 """
 from __future__ import annotations
 
@@ -137,34 +160,44 @@ def test_detector_sees_past_an_if_that_branches_on_a_different_variable():
     )
 
 
-def test_probe_corpus_has_no_new_decorative_control():
-    """The ratchet. Fails only on a finding not already in the pinned
-    baseline (129 entries, 2026-09-20) -- i.e. only on a NEW instance of
-    this defect, never on the pre-existing, disclosed backlog a separate
-    fixer is working through."""
+def test_probe_corpus_baseline_is_an_exact_mapping():
+    """The two-way ratchet -- GAINED and LOST, named separately because the
+    two directions need opposite responses (same message shape as
+    KNOWN_TEXT_SINKS's own test, deliberately)."""
     baseline_doc = json.loads(BASELINE_PATH.read_text(encoding="utf-8"))
     known = {
         (e["file"], e["function"], e["variable"]) for e in baseline_doc["entries"]
     }
 
     results = detector.scan_corpus()
-    new_findings = []
+    live: dict[tuple[str, str, str], dict] = {}
     for r in results:
         for f in r.get("findings", []):
-            key = (r["file"], f["function"], f["variable"])
-            if key not in known:
-                new_findings.append(
-                    f"{r['file']}:{f['line']} {f['function']}() -> {f['variable']!r} "
-                    f"(markers: {', '.join(f['markers'])})"
-                )
+            live[(r["file"], f["function"], f["variable"])] = f
 
-    assert not new_findings, (
-        "NEW never-branched probe control(s) not in "
-        "scripts/probe_controls_known_decorative_baseline.json:\n  "
-        + "\n  ".join(new_findings)
-        + "\n\nEither branch on the control's result, or -- if this is a "
-        "genuinely decorative reading that was reviewed and accepted -- add "
-        "it to the baseline file with a one-line reason."
+    gained = sorted(
+        f"{file}:{f['line']} {func}() -> {var!r} (markers: {', '.join(f['markers'])})"
+        for (file, func, var), f in live.items()
+        if (file, func, var) not in known
+    )
+    lost = sorted(
+        f"{e['file']}:{e['line']} {e['function']}() -> {e['variable']!r}"
+        for e in baseline_doc["entries"]
+        if (e["file"], e["function"], e["variable"]) not in live
+    )
+
+    assert not gained and not lost, (
+        "scripts/probe_controls_known_decorative_baseline.json has drifted "
+        "from what the detector currently finds.\n"
+        "  GAINED (a NEW never-branched control -- do NOT add it here to "
+        "clear the red; branch on its result, or if it is a genuinely "
+        "decorative reading that was reviewed and accepted, add it to the "
+        "baseline with a one-line reason):\n    "
+        + ("\n    ".join(gained) or "(none)")
+        + "\n  LOST (the detector no longer finds this one -- fixed, or "
+        "reclassified; correct the baseline entry, because the "
+        "documentation of a defect may not outlive the defect):\n    "
+        + ("\n    ".join(lost) or "(none)")
     )
 
 
