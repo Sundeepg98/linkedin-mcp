@@ -509,6 +509,37 @@ involved belong to sibling waves.
 **A third locator convention exists and is NOT handled:** pytest node ids,
 `path/test_x.py::test_name`, 93 lines. Named rather than guessed at.
 
+**An OUT-OF-RANGE check is the cheapest gate in this whole document and it is
+designed, measured and handed over unbuilt.** It needs no slot and no
+assertion-versus-proposal rule at all: **a citation to line 400 of a 263-line
+file is wrong whatever it meant.** Re-measured independently of the child, over
+`_audit/*.md` targets only -- an in-repo path whose length is a fact this corpus
+controls, where a locator into `linkedin_server/` would go red for reasons
+nobody owns:
+
+```
+md->md line citations resolved to exactly one tracked file: 315
+OUT OF RANGE (cited line beyond the target's length)        : 2
+  _audit/2026-09-19-the-remaining-partials.md:166
+      cites _audit/2026-09-19-the-three-ruling-requests-ruled.md:400   target has 263 lines
+  _audit/_census/mcp-inventory.md:206
+      cites _audit/2026-08-31-linkedin-lift.md:1456   target has 1299 lines
+control: a fabricated over-range citation is caught and an in-range one is not.
+```
+
+**2 findings in 315 citations, zero false positives, with an asserted control**
+-- the same two the child found, reached by different code. Roughly thirty
+lines to ship.
+
+It is NOT shipped for the same reason as 6.6, and the reason is a rule rather
+than fatigue: **this wave's precision tables, red-proof battery and register
+entry were all written for a two-kind guard.** Bolting a third kind on at the
+end would leave it the only kind in the guard never driven red in the real
+harness -- shipped on a synthetic control alone, in a module whose entire
+argument is that a check which has not been shown failing certifies nothing.
+The next wave gets the design, the population, the control and the two sites;
+what is left is the red-proof, which is the part that must not be skipped.
+
 ### 6.3 CENSUS ROW IDS -- an honest zero, backed by a live control
 
 **12,134 row-id citations.** RESOLVES 9,779, UNRESOLVED 232, AMBIGUOUS 2,123.
