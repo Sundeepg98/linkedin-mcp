@@ -285,6 +285,26 @@ reads like a pass. A plain loop with an asserted count does announce it.
 
 ## 5. What the fix flags that it did not flag before: measured, and it is zero
 
+### 5.0 The children shared this worktree, and that is where 5.1 came from
+
+**Both children ran IN this worktree**, not in isolated ones -- `or-sweep`, which did
+the corpus sweep, and `global-binding`, which did section 7's measurement. Each was
+briefed to write its deliverable to a FILE in the scratchpad and to touch nothing
+tracked, and that held: `git status` through the whole wave showed only my own two
+edits, and their outputs live at
+`scratchpad/scope/or-sweep.md` and `scratchpad/scope/global-binding.md`.
+
+**What I did NOT do, and should have:** hand the measuring child a FROZEN SNAPSHOT --
+`git stash create`, read back through `git show <sha>:<path>` -- instead of telling it
+to record `HEAD` and check `git status` was clean. Those are not the same guarantee.
+The second says *the corpus was clean when you looked*; only the first says *the bytes
+you are measuring cannot move*. I was editing `tests/` while it measured, and although
+its swept corpus (`scripts/` + `linkedin_server/`) genuinely did not move, **the
+INSTRUMENT it imported did** -- and the instrument is part of the measurement.
+
+That is the whole of 5.1, and it is the one mistake in this wave that a documented
+practice would have prevented outright.
+
 ### 5.1 The first attempt at this number was INVALID and its own control said so
 
 I briefed a child to sweep the tree with two walker variants, taking "or-on" by

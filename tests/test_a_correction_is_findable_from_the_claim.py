@@ -1458,6 +1458,43 @@ NOT_A_CORRECTION: dict[tuple[str, str], str] = {
         "triaged immediately above. Naming a document as ABSENT from a third "
         "party's citations is not correcting it."
     ),
+    # 2026-09-20, from the sanitiser-scope wave. It is the SUCCESSOR document to
+    # the one it cites: that audit's section 4c escalated the page-text bypass
+    # and explicitly declined to rule on it, and this wave was chartered to rule.
+    ("2026-09-20-the-sanitiser-scope.md", "2026-09-20-the-loop-binding-hole.md"): (
+        "IT EXTENDS AN ESCALATION AND REPORTS SOMEBODY ELSE'S LANDED "
+        "CORRECTION. Two passages trip the scan and neither asserts that "
+        "document is wrong. (1) The cited section 4c demonstrated the "
+        "sanitiser-scope bypass with ONE claimant, `_redact`, in the nested "
+        "call spelling; this wave measured all three guarded names in both "
+        "spellings and both binding forms. That is a WIDENING of a finding, "
+        "not a repair of a false one -- 4c never claimed the other two names "
+        "were unaffected, and in fact says the stop 'matches BY NAME across "
+        "every module', which is the property this wave then measured. (2) "
+        "This wave independently re-measured that document's `global` / "
+        "`nonlocal` STILL BLIND row, found it false, and then found the "
+        "repair ALREADY SHIPPED on master at 42f55b2 by the document's own "
+        "author -- whose version carries a 38-row census where this wave had "
+        "four cases. The edits written here were REVERTED in favour of it "
+        "and the target file is untouched by this wave. Reporting a "
+        "correction another wave has already made, and crediting it as the "
+        "better one, is not making a correction. "
+    ),
+    # 2026-09-20, same wave, second pair. The scan is right to look: the line
+    # sits two lines under a paragraph counting a mistake this wave made twice.
+    ("2026-09-20-the-sanitiser-scope.md", "INSTRUMENTS.md"): (
+        "IT IS A HARVEST POINTER, AND THE CORRECTION VOCABULARY NEXT TO IT "
+        "IS ABOUT THE WAVE'S OWN MISTAKE. The line records where this wave's "
+        "instruments were registered -- section 31 of the register, four "
+        "subsections named -- which is the standing requirement that a tool "
+        "built in a round is filed rather than left in its round's document. "
+        "What trips the scan is the paragraph immediately above it, in which "
+        "the wave counts a blind-regex rename that over-reached into prose "
+        "TWICE in one hour and says both instances were repaired. That is "
+        "this wave correcting ITSELF in its own ledger, and the register is "
+        "named only as the place the resulting instruments went. A document "
+        "saying where it filed its tools is an attribution. "
+    ),
 }
 
 
