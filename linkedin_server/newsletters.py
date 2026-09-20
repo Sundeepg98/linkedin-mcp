@@ -102,6 +102,46 @@ HEADING_SELECTOR = "h1, h2, h3"
 #: this reader SAY SO instead of publishing a description as a title.
 PARAGRAPH_SELECTOR = "p"
 
+#: THE AUTHOR-SIDE AFFORDANCE, AND IT IS THE ONLY ONE THIS PAGE DRAWS.
+#:
+#: ``readonly.py``'s newsletter entry says, about the five rows that are about
+#: newsletters he WRITES, that whether this page lists them is *"a question
+#: for the first live read, not an assumption for this entry"*. The capture
+#: has now been read and the answer is narrow and useful:
+#: ``scripts/_probe_newsletter_surface_shape.py`` over the 2026-09-05 capture
+#: finds ONE author-side href on the whole 74234-character document, and it is
+#: the create route.
+#:
+#: **WHY THIS IS AN ELIGIBILITY SIGNAL AND NOT PAGE FURNITURE, which is the
+#: only reason it is worth a field.** Presence alone would say nothing -- a
+#: create route in the global nav is drawn for everybody. This one is at
+#: offset 27957, inside ``main > section > section``: the SAME container as
+#: the product heading, 302 characters after it and 1932 before the first
+#: subscription row. That is the section's own header action. LinkedIn gates
+#: newsletter creation, so whether it offers the control to THIS account is an
+#: account-specific fact, and it is the precondition under census ``M C50``.
+#:
+#: **IT IS THE READ HALF OF A WRITE AND NOTHING MORE.** Creating a newsletter
+#: MAILS SUBSCRIBERS -- the census marks the row NOT reversible for that
+#: reason -- and nothing in this package creates one. Reporting that the
+#: control exists is not offering to press it, and this address is on
+#: ``press._COMPOSER_MARKERS`` so it cannot be pressed by the sanctioned
+#: mechanism even once somebody wants it to be.
+CREATE_ROUTE = "/article/newsletter/new"
+
+#: SCOPED TO ``main``, and the document-wide count is published BESIDE it
+#: rather than instead of it.
+#:
+#: A bare document-wide count would report the same number today and would be
+#: a different measurement the day LinkedIn puts a create route in the nav --
+#: silently, with nothing saying why. The company-page wave's own finding
+#: applies here: container scoping is the property that keeps a card from
+#: being read off the wrong place. So both numbers ship and a caller can see
+#: them diverge, which is the same reason ``anchors`` ships beside
+#: ``distinct``.
+CREATE_SELECTOR = 'main a[href*="%s"]' % CREATE_ROUTE
+CREATE_SELECTOR_ANYWHERE = 'a[href*="%s"]' % CREATE_ROUTE
+
 # ===========================================================================
 # THIS MODULE INJECTS NO SCRIPT, AND THAT WAS A CORRECTION RATHER THAN A
 # CHOICE.
@@ -205,8 +245,17 @@ async def read_newsletter_subscriptions(page: Any) -> dict[str, Any]:
           "published": int,
           "titles_matching_slug": int,
           "titles_unmatched": int,
+          "create_control": int,    # author-side, INSIDE main
+          "create_control_outside_main": int,
           "error": str | None,
         }
+
+    **``create_control`` IS THE READ HALF OF A WRITE AND IS NOT AN OFFER TO
+    PERFORM IT.** It counts the create-a-newsletter anchors LinkedIn draws in
+    ``main``; see :data:`CREATE_ROUTE` for why that container is the whole of
+    the signal. Nothing in this package creates a newsletter, the address is a
+    composer and ``press.py`` refuses composers for pressing, and the census
+    marks creation NOT reversible because it mails subscribers.
 
     **``distinct`` IS THE ANSWER, NOT ``anchors``.** Measured 2026-09-05: ten
     anchors, five newsletters. The illustration anchors are COUNTED and dropped
@@ -236,6 +285,8 @@ async def read_newsletter_subscriptions(page: Any) -> dict[str, Any]:
         "published": 0,
         "titles_matching_slug": 0,
         "titles_unmatched": 0,
+        "create_control": 0,
+        "create_control_outside_main": 0,
         "error": None,
     }
     try:
@@ -246,6 +297,16 @@ async def read_newsletter_subscriptions(page: Any) -> dict[str, Any]:
             text = str(await headings.nth(index).inner_text() or "").strip()
             if text.lower() == HEADING_WORD:
                 out["heading_seen"] += 1
+
+        # THE AUTHOR-SIDE AFFORDANCE, COUNTED TWICE ON PURPOSE. The
+        # difference between the two numbers is the whole signal: see
+        # :data:`CREATE_SELECTOR`. Plain Playwright counts, no injection, and
+        # NEITHER HREF IS READ -- only how many there are, so nothing a page
+        # chose can reach the caller through this pair.
+        in_main = int(await page.locator(CREATE_SELECTOR).count())
+        anywhere = int(await page.locator(CREATE_SELECTOR_ANYWHERE).count())
+        out["create_control"] = in_main
+        out["create_control_outside_main"] = max(anywhere - in_main, 0)
 
         anchors = page.locator(ANCHOR_SELECTOR)
         out["anchors"] = int(await anchors.count())
@@ -276,6 +337,13 @@ async def read_newsletter_subscriptions(page: Any) -> dict[str, Any]:
         out["rows"] = []
         out["heading_seen"] = 0
         out["anchors"] = 0
+        # RESET TOO, and for the same reason the three above are: the create
+        # counts are read INSIDE this try, so a frame detaching after one of
+        # them would otherwise leave a number that looks measured beside an
+        # error that says nothing was. A partial reading is worse than none,
+        # because nothing downstream can tell.
+        out["create_control"] = 0
+        out["create_control_outside_main"] = 0
         return out
 
     seen: set[str] = set()

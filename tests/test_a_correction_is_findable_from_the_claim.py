@@ -1230,6 +1230,42 @@ NOT_A_CORRECTION: dict[tuple[str, str], str] = {
         "correction vocabulary sits beside the EVIDENCE citation, not beside "
         "any corrected claim."
     ),
+    # 2026-09-20, added by the newsletter build wave, for its own three pairs
+    # and no neighbour's. Each line was READ before it was listed, which is
+    # what this dict's entries claim.
+    ("2026-09-20-newsletter-built.md", "2026-09-05-the-newsletter-create-route.md"): (
+        "THE CITED DOCUMENT IS THE MECHANISM'S PRECEDENT, NOT ITS SUBJECT. "
+        "The line names the-newsletter-create-route.md as the place this "
+        "corpus last chose a BACK-POINTER over a rewrite -- it corrected "
+        "register 9.1 by leaving 9.1's text standing and attaching the "
+        "correction beneath it -- and says that readonly.py's author-side "
+        "paragraph is being amended the same way. Nothing that document "
+        "claims is asserted wrong; it is cited as the house convention being "
+        "followed. A CORRECTED BY: pointer would tell a reader its own "
+        "correction had been overturned, which is the opposite of what the "
+        "sentence says."
+    ),
+    ("INSTRUMENTS.md", "2026-09-20-newsletter-built.md"): (
+        "A POINTER TO WHERE THE NUMBERS LIVE, IN A DISPOSABLE-TOOLS "
+        "DECLARATION. Register 23.6 declares three scratch scripts disposable "
+        "and says their RESULTS survive in the wave report and in the "
+        "committed probe's output. The correction vocabulary near it belongs "
+        "to the word SUPERSEDED, which is about the scratch scripts being "
+        "replaced by the committed probe -- the wave's own discarded drafts, "
+        "the same shape as the four-defects / mcp-inventory entry above. "
+        "The report is the destination of a result, not a document being "
+        "corrected."
+    ),
+    ("_slice-newsletter-inventory.md", "profile.md"): (
+        "THE SLICE IS AN INVENTORY AND profile.md IS ONE OF THE FILES IT "
+        "INVENTORIES. The line reports that a test's own prose describes "
+        "newsletter analytics as a profile.md census-slice row, quoted while "
+        "enumerating what each newsletter-touching test asserts. A read-only "
+        "inventory makes no claim about whether that row is right, and it "
+        "evaluates nothing in profile.md -- the citation names the corpus "
+        "being listed, which is the EVIDENCE-citation shape this dict already "
+        "records twice."
+    ),
 }
 
 

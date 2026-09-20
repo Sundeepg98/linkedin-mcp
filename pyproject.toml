@@ -28,12 +28,28 @@ dependencies = ["fastmcp>=2.0,<4", "playwright>=1.40"]
 # so an install without playwright is an install that cannot answer a single
 # call. Making it optional would only move that failure from install time to
 # first use, which is the worse place to find it.
-# pytest-xdist sits in the TEST extra, not the main dependencies, because it
-# changes only how the suite is RUN and nothing about what the server does.
-# It is not a local convenience: .github/workflows/ci.yml invokes each shard
-# with `-n auto --dist loadfile`, and pytest rejects `-n` as an unrecognised
-# argument when the plugin is absent -- so a venv without it does not fall
-# back to a serial run, it fails the job at startup before a single test.
+#
+# pytest-xdist ADDED HERE 2026-09-20 to repair an inherited red, not to
+# introduce a dependency. `970a276` added it to requirements.txt so CI shards
+# could run their files in parallel, and did not add it here --
+# `test_the_two_files_declare_the_same_dependencies` went red at 07:53 and
+# every push since has failed on it, on master and on every branch cut from
+# master. The guard is right: `pip install -r requirements.txt` and
+# `pip install -e .[test]` are two install paths, a package on only one of them
+# is present on one and absent on the other, and nothing in the resulting
+# ModuleNotFoundError says which path you took.
+#
+# THE DIRECTION OF THE FIX IS THE ONE requirements.txt ITSELF ARGUES FOR: its
+# own comment says "(`pip install -e .[test]` installs the same thing from
+# pyproject.toml)", and pytest and pytest-asyncio are already carried in both
+# places for exactly that reason. Removing the line from requirements.txt
+# instead would agree with the guard and disagree with that sentence, and would
+# take the parallel shards with it.
+#
+# AND THE ABSENCE IS NOT A SLOWDOWN, IT IS A DEAD JOB: ci.yml invokes each
+# shard with `-n auto --dist loadfile`, and pytest rejects `-n` as an
+# unrecognised argument when the plugin is missing. A venv without it does
+# not fall back to a serial run -- it dies at startup, before one test.
 test = ["pytest>=8.0", "pytest-asyncio>=0.23", "pytest-xdist>=3.5"]
 
 [project.scripts]

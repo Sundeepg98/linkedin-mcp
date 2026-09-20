@@ -384,3 +384,136 @@ async def test_a_page_that_cannot_be_evaluated_reports_the_class_and_the_message
     assert out["rows"] == []
     assert out["distinct"] == 0
     assert out["heading_seen"] == 0
+
+
+# ---------------------------------------------------------------------------
+# THE AUTHOR-SIDE AFFORDANCE, added 2026-09-20.
+#
+# The capture was re-read by `scripts/_probe_newsletter_surface_shape.py`,
+# which reports every needle with its ENCLOSING LANDMARK STACK rather than
+# only its count. It found ONE author-side href on the whole 74234-character
+# document -- the create route -- and found it inside main > section > section,
+# the product heading's own container, 302 characters after the heading and
+# 1932 before the first row.
+#
+# THAT PLACEMENT IS THE ENTIRE SIGNAL. A create route in the nav is drawn for
+# everybody and says nothing about this account; one in the section's own
+# header is an eligibility fact, because LinkedIn gates newsletter authorship.
+# So the reader counts inside `main`, and the fixture carries a DECOY outside
+# it -- see the fixture header. A document-wide counter passes every other
+# assertion in this file and fails the pair below.
+# ---------------------------------------------------------------------------
+
+#: What the fixture draws, measured off the file by an independent parse
+#: rather than transcribed -- the discipline the counts above already keep.
+_CREATE_HREF = re.compile(r'href="([^"]*' + re.escape(newsletters.CREATE_ROUTE) + r'[^"]*)"')
+
+
+def _create_hrefs_in_the_file() -> list[str]:
+    return _CREATE_HREF.findall(FIXTURE.read_text(encoding="utf-8"))
+
+
+def test_the_fixture_draws_the_create_route_twice_and_only_one_is_in_main():
+    """THE DECOY IS LOAD-BEARING, so the file is asserted to still carry it.
+
+    Two create hrefs, and the main wrapper opens BETWEEN them. If somebody
+    tidies the decoy away, the scoping assertion below keeps passing while
+    testing nothing, which is this repository's own definition of a check that
+    certifies nothing.
+    """
+    source = FIXTURE.read_text(encoding="utf-8")
+    hrefs = _create_hrefs_in_the_file()
+    assert len(hrefs) == 2, hrefs
+    # COMMENTS STRIPPED FIRST, and it is a red this test caught on its own
+    # first run rather than a precaution: the fixture's header PROSE names the
+    # `<main>` wrapper it added, so a bare `find` located the word in the
+    # explanation and reported the decoy on the wrong side of the tag. A
+    # locator that can match documentation is not locating markup.
+    markup = re.sub(r"<!--.*?-->", "", source, flags=re.DOTALL)
+    first = markup.find(newsletters.CREATE_ROUTE)
+    second = markup.find(newsletters.CREATE_ROUTE, first + 1)
+    opens_main = markup.find("<main>")
+    assert -1 < first < opens_main < second, (first, opens_main, second)
+
+
+@pytest.mark.asyncio
+async def test_the_create_control_is_scoped_to_main_and_the_decoy_proves_it():
+    """ONE INSIDE, ONE OUTSIDE. A document-wide counter reports 2 and 0.
+
+    This is the mutation shown firing rather than described: the fixture holds
+    exactly the input that separates the scoped reading from the naive one,
+    and the two numbers below are different from each other.
+    """
+    out = await _read()
+    assert out["error"] is None
+    assert out["create_control"] == 1
+    assert out["create_control_outside_main"] == 1
+    assert len(_create_hrefs_in_the_file()) == 2
+
+
+@pytest.mark.asyncio
+async def test_a_page_drawing_no_create_route_reports_zero_beside_a_live_control():
+    """ZERO MEANS *NOT OFFERED* ONLY WHEN THE READ ITSELF IS KNOWN GOOD.
+
+    The same pairing the subscription count already uses: a zero create count
+    beside ``heading_seen == 1`` is a fact about the ACCOUNT, and beside
+    ``heading_seen == 0`` it is a fact about the INSTRUMENT. Without the
+    second number a zero here is uninterpretable, which is exactly how this
+    surface produced a confident wrong answer once already.
+    """
+    out = await _read(_HEADING_NO_ROWS)
+    assert out["heading_seen"] == 1
+    assert out["create_control"] == 0
+    assert out["create_control_outside_main"] == 0
+
+
+@pytest.mark.asyncio
+async def test_a_detached_frame_resets_the_create_counts_rather_than_keeping_them():
+    """A PARTIAL READING IS WORSE THAN NONE, because nothing downstream can tell.
+
+    The create counts are taken inside the same try as everything else, so an
+    exception after one of them would otherwise leave a number that looks
+    measured beside an error saying nothing was.
+    """
+
+    class Exploding:
+        def locator(self, _selector):
+            raise RuntimeError("frame was detached")
+
+    out = await newsletters.read_newsletter_subscriptions(Exploding())
+    assert out["error"] == "RuntimeError: frame was detached"
+    assert out["create_control"] == 0
+    assert out["create_control_outside_main"] == 0
+
+
+@pytest.mark.asyncio
+async def test_no_create_href_survives_into_the_reading():
+    """THE COUNT IS THE PAYLOAD AND THE ADDRESS IS NOT.
+
+    The reader counts the anchors and never reads their hrefs, so nothing the
+    page chose can reach a caller through this pair. Asserted over the whole
+    returned structure rather than over the two fields, because a leak would
+    arrive somewhere nobody was watching.
+    """
+    out = await _read()
+    assert newsletters.CREATE_ROUTE not in repr(out)
+    assert "article" not in repr(out)
+
+
+@pytest.mark.asyncio
+async def test_the_naive_document_wide_selector_is_shown_getting_it_wrong(monkeypatch):
+    """THE MUTATION, PLANTED AND SHOWN FIRING, not described in a comment.
+
+    A check that has only ever been seen passing certifies nothing. So the
+    obvious wrong implementation -- count the whole document, which is what
+    every other reader in this module does -- is installed here and measured:
+    it reports TWO in main and ZERO outside, against the shipped one's one and
+    one. The decoy in the fixture is what separates them, and this is the
+    assertion that keeps the decoy honest.
+    """
+    monkeypatch.setattr(
+        newsletters, "CREATE_SELECTOR", newsletters.CREATE_SELECTOR_ANYWHERE
+    )
+    naive = await _read()
+    assert naive["create_control"] == 2
+    assert naive["create_control_outside_main"] == 0

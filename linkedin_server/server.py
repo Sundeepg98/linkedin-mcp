@@ -2143,6 +2143,25 @@ async def linkedin_newsletter_subscriptions() -> dict[str, Any]:
     redacts the title unconditionally and publishes a constant href shape, so
     what comes back says a subscription EXISTS and never which one.
 
+    AND ONE AUTHOR-SIDE FACT, WHICH IS THE READ HALF OF A WRITE AND NOTHING
+    MORE. ``create_control`` counts the create-a-newsletter anchors LinkedIn
+    draws inside ``main`` on this page. Measured on the 2026-09-05 capture:
+    ONE, sitting in the product heading's own container rather than in the
+    nav, which is what makes it a fact about THIS ACCOUNT -- LinkedIn gates
+    newsletter authorship. ``create_control_outside_main`` ships beside it so
+    that a route appearing in global chrome later cannot move the first number
+    silently.
+
+    THIS TOOL STILL CHANGES NOTHING. The address behind that control is a
+    composer; ``press.py`` refuses composers, and no tool here navigates to
+    it. Reporting that a control is on the page is not an offer to press it.
+
+    AND THE THREE AFFORDANCES THIS PAGE DOES NOT DRAW, measured rather than
+    assumed, because the next reader will look for them here: no analytics
+    route, no subscribe control, no unsubscribe control. Each of the three
+    words appears ZERO times in the 74234-character capture
+    (``scripts/_probe_newsletter_surface_shape.py``).
+
     TWO PAGE LOADS, AND THE FIRST ONE IS THE COST GATE. This address sits
     under /mynetwork/, which carries the pending-invitation badge, so the
     obligation the reader states is discharged here: the badge is read BEFORE

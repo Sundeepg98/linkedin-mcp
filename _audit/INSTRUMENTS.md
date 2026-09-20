@@ -3840,3 +3840,104 @@ Nothing. `scripts/impact_gate.py` is committed with its control, and
 commit it was taken at, so its staleness is visible rather than assumed. The
 probe used to size the floor was a scratch file and IS disposable; its result
 is the derivation in `always_run_files()`, which is checked by 22.4.
+
+## 23. THE NEWSLETTER BUILD WAVE, 2026-09-20
+
+### 23.1 `scripts/_probe_newsletter_surface_shape.py` -- READ THE CAPTURE AGAIN
+
+**THE PATTERN, AND IT IS THE ENTRY'S REAL SUBJECT: A LIVE RUN'S CAPTURE
+ANSWERS MORE QUESTIONS THAN THE RUN ASKED, AND RE-READING IT COSTS NOTHING.**
+
+`scripts/_probe_newsletter_subscriptions_live.py` opened the newsletters
+manager on 2026-09-05, wrote FOUR questions into its own header, answered two,
+and left two open. Those two sat open for fifteen days -- behind a page load
+that had already been paid for, on an account where the load is the expensive
+part. This probe answers both offline, in seconds, with no browser, no network
+and no counter of anybody's spent.
+
+Generalised: **before costing a live read, ask whether a capture on disk
+already holds the answer.** This repository gitignores its captures precisely
+because they are made of other people's publications, which makes them easy to
+forget and cheap to re-interrogate.
+
+### 23.2 THE PATH REDUCER THAT INVERTS THE ALLOWLIST
+
+The sibling `_probe_events_surface_shape.py` reduces a path by replacing the
+segment AFTER a known keyword. That leaves a segment somewhere the author did
+not anticipate surviving verbatim.
+
+This one inverts it: `shape.census_substitute` runs first (so the placeholders
+this repository authors survive as themselves), then **EVERY segment outside a
+closed product vocabulary becomes `<seg>`.** A surviving identifier stops being
+unlikely and becomes impossible. Cost: an unfamiliar product word reads as
+`<seg>` until somebody adds it, which is the safe direction.
+
+### 23.3 THE CONTROLS, AND ONE OF THEM IS THE WHOLE FINDING
+
+The findings here are ZEROS -- no analytics route, no subscribe control, no
+unsubscribe control -- and **a zero out of a broken matcher is
+indistinguishable from a zero out of a page.** So:
+
+* `--control` runs the identical word census over a synthetic document that
+  DOES carry every finding word and requires each to be NAMED. Without it a
+  zero here is not a measurement, and the script says so in its own output:
+  *"A zero above is a measurement ONLY if --control passes."*
+* The reducer is shown CHANGING a person-shaped slug. The needle is READ OUT
+  OF THE TRACKED FIXTURE at run time rather than pasted, so no new invented
+  person enters the tree and the control follows the corpus. A missing needle
+  is a VOID, not a skip.
+* CROSS-INSTRUMENT AGREEMENT: the newsletter-anchor total must equal the 10
+  that `newsletters.read_newsletter_subscriptions` measured through Playwright
+  on the same page. A regex and a DOM walk are different instruments, so
+  agreement is evidence and disagreement VOIDS every tally below it.
+* An impossible attribute must stay at zero -- **AND VOIDS THE RUN WHEN IT
+  DOES NOT, which the first draft did not do.** That draft printed `FAIL` and
+  then printed every tally below it with exit 0: a check that announces its
+  own failure and certifies anyway, which is WORSE than not having it, because
+  the word FAIL ends up four screens above a table that reads as data. Found
+  by planting a matcher that cannot stay silent and running it, not by reading
+  the code. **`scripts/_probe_events_surface_shape.py` has the identical shape
+  and the identical gap** -- measured, its `silent` result is printed and never
+  branched on -- and it is NAMED here rather than edited, because it is another
+  wave's instrument and a one-line fix with the evidence attached is cheaper
+  for its owner than a surprise in their diff.
+* **AN ABSENT CAPTURE RETURNS 2 AND PRINTS NOTHING READABLE AS A TALLY.** A
+  linked worktree carries no gitignored files, so this script run from one
+  finds nothing, and an absence reported as a zero would have said *the page
+  draws no analytics* about a file that was not there.
+
+### 23.4 PRESENCE IS NOT A SIGNAL; THE ENCLOSING CONTAINER IS
+
+Every needle is reported with its LANDMARK STACK -- tag names only, which name
+nobody. That is what separated a create route that is the section's own header
+action from one that would have been global chrome, and it is the difference
+between an account-specific eligibility fact and a string every member sees.
+The shipped reader inherits it: `newsletters.CREATE_SELECTOR` is scoped to
+`main` and the document-wide count ships BESIDE it so the two can be seen
+diverging.
+
+**AND THE FIXTURE CARRIES THE DECOY THAT MAKES THAT ASSERTION REAL.** A second
+create route outside `main`, which the live page does not draw -- the same
+deliberate divergence as its eleventh anchor. `test_the_naive_document_wide_
+selector_is_shown_getting_it_wrong` installs the obvious wrong implementation
+by monkeypatch and measures it reporting 2/0 against the shipped 1/1. The
+mutation is planted and fired, not described in a comment.
+
+### 23.5 A LOCATOR THAT CAN MATCH DOCUMENTATION IS NOT LOCATING MARKUP
+
+Caught on its own first run. `test_the_fixture_draws_the_create_route_twice_
+and_only_one_is_in_main` located `<main>` with a bare `find` over the fixture
+source -- and the fixture's own HEADER COMMENT, amended in the same commit,
+names the `<main>` wrapper in prose. The locator hit the explanation, put the
+decoy on the wrong side of the tag, and the test went red with a coordinate
+triple that made no sense until the comment was read. Fixed by stripping HTML
+comments before locating. **Any assertion that searches a fixture's SOURCE
+rather than its DOM is searching its documentation too.**
+
+### 23.6 DISPOSABLE, declared
+
+Three scratch scripts in the session scratchpad -- an href tally, an element
+and vocabulary census, and a landmark-stack locator for one word. All three are
+superseded by the committed probe, which does what they did with controls.
+Their results are the numbers in `_audit/2026-09-20-newsletter-built.md` and in
+the probe's own output.
