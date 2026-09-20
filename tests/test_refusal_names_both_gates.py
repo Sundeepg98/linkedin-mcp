@@ -135,8 +135,20 @@ def test_the_allowlist_refusal_still_carries_its_own_sentence():
     with the allowlist's own words -- otherwise the clause added above could
     have been achieved by making every refusal say the same thing, which would
     destroy the distinction rather than sharpen it.
+
+    THE NEEDLE MOVED ONE SEGMENT DEEPER ON 2026-09-20 and the reason is worth
+    a line. It was ``/company/example/``, and that address BECAME READABLE:
+    the organisation-Page root was admitted for ``COMPANY-PAGE-SURFACE``. The
+    needle is now the About TAB under the same root, which the admission
+    deliberately did not buy -- so this test asserts what it always asserted,
+    on an address that is still refused for the reason it was chosen for.
+
+    **THE PRECONDITION BELOW IS WHY THE MOVE IS SAFE TO MAKE.** It asserts the
+    needle carries no forbidden substring, so a future wave that picks a
+    replacement carrying one cannot silently turn this into a test of the
+    OTHER gate -- which is the exact distinction this file exists to pin.
     """
-    url = f"{BASE}/company/example/"
+    url = f"{BASE}/company/example/about/"
     assert not any(bad in url.lower() for bad in readonly._FORBIDDEN_URL_SUBSTRINGS)
     with pytest.raises(WriteAttemptError) as caught:
         readonly.assert_read_url(url)

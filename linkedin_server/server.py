@@ -315,6 +315,7 @@ from linkedin_server import (
     buildinfo,
     cdp_bridge,
     collections_page,
+    company_page,
     creator_analytics,
     dom,
     events,
@@ -4103,6 +4104,28 @@ async def linkedin_job_detail(job_id: str) -> dict[str, Any]:
             out["company_about"] = shape.company_about_card(
                 about, company=identity.get("company")
             )
+            # THE PAGE THIS CARD POINTS AT, AS COUNTS, at ZERO extra page
+            # loads. company_page.tally returns integers only -- no slug, no
+            # address and no name is in its output -- which is why the card's
+            # hrefs can be read here and nothing of them published.
+            #
+            # WHAT IT ACTUALLY DELIVERS, MEASURED over the four tracked
+            # job_detail fixtures rather than assumed: FIVE links on a
+            # hydrated card, of which TWO are /company/<slug>/life/ and three
+            # are LinkedIn help pages. So it answers census row J 109 -- this
+            # employer's Page draws a Life tab -- and it answers
+            # `page_roots == 0`.
+            #
+            # THAT ZERO IS THE FINDING AND IT IS NOT A BUG. **The About card
+            # never links the Page ROOT**, only the Life tab, so "is this
+            # employer's Page addressable" is NOT answerable from this card.
+            # The Premium-insights route (J 113 / J 114) is drawn on the
+            # posting too but sits OUTSIDE this container, and it carries a
+            # ?insightType= query the admitted pattern does not take. Reaching
+            # either needs a second anchored container reader -- never a
+            # widening of this one, whose container scoping is the property
+            # that keeps a card from being read off the wrong employer.
+            out["company_page"] = company_page.tally(about.get("hrefs") or [])
 
             out["pages_loaded"] = 1
             out["source_url"] = final_url

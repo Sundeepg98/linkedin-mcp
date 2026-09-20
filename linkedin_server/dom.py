@@ -967,6 +967,12 @@ ABOUT_COMPANY_SDUI = '[data-sdui-component$="aboutTheCompanyForJobDetails"]'
 #: and finite.
 ABOUT_COMPANY_MAX_LINES = 40
 
+#: Cap on the HREFS returned beside those lines, same reasoning and a smaller
+#: number: the comment above this container records that the About section
+#: holds exactly TWO distinct ``/company/`` targets -- the name link and the
+#: Premium-insights link -- so twenty is generous and finite.
+ABOUT_COMPANY_MAX_LINKS = 20
+
 
 async def read_company_about_card(page: Any) -> dict[str, Any]:
     """Return the About-the-company card's OBSERVATIONS, deciding nothing.
@@ -976,10 +982,26 @@ async def read_company_about_card(page: Any) -> dict[str, Any]:
     pressed, and no page is loaded -- this reads the render
     ``linkedin_job_detail`` has already performed.
 
-    Returns ``container``, ``sdui``, ``lines`` and ``error``. WHICH LINE IS
-    THE FOLLOWER COUNT AND WHICH IS THE INDUSTRY IS NOT DECIDED HERE; that is
-    ``shape.company_about_card``'s job, where it can be tested without a
-    browser. The three-way distinction this function exists to preserve:
+    Returns ``container``, ``sdui``, ``lines``, ``hrefs`` and ``error``.
+    WHICH LINE IS THE FOLLOWER COUNT AND WHICH IS THE INDUSTRY IS NOT DECIDED
+    HERE; that is ``shape.company_about_card``'s job, where it can be tested
+    without a browser.
+
+    ``hrefs`` WAS ADDED 2026-09-20 AND IS A SEPARATE LIST ON PURPOSE. The
+    comment on the container above already records that this card holds TWO
+    distinct ``/company/`` targets, and those addresses answer a question the
+    LINES cannot: which of an employer's Page tabs the posting links to, and
+    whether the Page root is addressable at all. ``company_page.py`` classifies
+    them into counts and **NEITHER THIS FUNCTION NOR THAT ONE PUBLISHES ONE**
+    -- a company slug is a name, so the address is read here and reduced to an
+    integer before anything leaves the process.
+
+    IT IS STILL A PLAIN PLAYWRIGHT READ. No script is injected, nothing is
+    evaluated, no control is pressed and no page is loaded; this is
+    ``get_attribute`` over a container LinkedIn labels itself, on the render
+    ``linkedin_job_detail`` has already performed.
+
+    The three-way distinction this function exists to preserve:
 
         container False              -- LinkedIn drew no such card
         container True,  lines []    -- the card is a skeleton, not yet filled
@@ -995,6 +1017,7 @@ async def read_company_about_card(page: Any) -> dict[str, Any]:
         "container": False,
         "sdui": False,
         "lines": [],
+        "hrefs": [],
         "error": None,
     }
 
@@ -1026,6 +1049,26 @@ async def read_company_about_card(page: Any) -> dict[str, Any]:
 
     lines = [line.strip() for line in text.splitlines()]
     out["lines"] = [line for line in lines if line][:ABOUT_COMPANY_MAX_LINES]
+
+    # THE HREFS, IN THEIR OWN TRY, so a card whose links are unreadable still
+    # returns its lines. An unreadable link costs a route classification; a
+    # raise here would cost the follower count, the industry and the size
+    # band as well, which is the wrong thing to lose to the smaller failure.
+    try:
+        links = container.locator("a[href]")
+        count = min(int(await links.count()), ABOUT_COMPANY_MAX_LINKS)
+        hrefs: list[str] = []
+        for index in range(count):
+            href = await links.nth(index).get_attribute("href")
+            if href:
+                hrefs.append(str(href))
+        out["hrefs"] = hrefs
+    except Exception as exc:
+        logger.debug(
+            "about-the-company links unreadable: %s: %s",
+            type(exc).__name__,
+            exc,
+        )
     return out
 
 

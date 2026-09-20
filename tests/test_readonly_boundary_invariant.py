@@ -1004,6 +1004,109 @@ PINNED = (
 #: reviews. It also pins that each detector still FIRES on a fixture call, that
 #: reads are not flagged, and that ``clear`` and ``goto`` stay out -- the two
 #: candidates rejected on measurement rather than on taste.
+#:
+#: ------------------------------------------------------------------------
+#: RE-FROZEN 2026-09-20, AND ONE DIGEST MOVED BY ONE TUPLE ENTRY:
+#:
+#:     _ALLOWED_URL_PATTERNS   5b5d34b6e3cc8059 -> 6577a7bc8a32d7b8   34 -> 35
+#:     _FORBIDDEN_URL_SUBSTRINGS               unchanged              33 -> 33
+#:
+#: ONE ANCHORED PATTERN, FOR ONE SURFACE:
+#:
+#:     ^https://www\.linkedin\.com/company/[A-Za-z0-9%\-_]{1,100}/?$
+#:
+#: ``COMPANY-PAGE-SURFACE`` -- 18 published rows, 16 filed, the largest BUILD
+#: in the census, and every filed row behind this one line.
+#:
+#: THE CHARACTER CLASS AND THE ANCHORING ARE THE ``/school/`` ENTRY'S, BYTE
+#: FOR BYTE. A school Page and a company Page are one entity type in
+#: LinkedIn's model wearing two path words, and that entry's ruling turns on a
+#: CAUSE rather than on a feeling: this boundary's sharpest refusal is about
+#: member profiles because loading one leaves THEM a durable record, and an
+#: ORGANISATION emits no view receipt to anybody. Admitting one spelling and
+#: refusing the other would be an inconsistency about a word.
+#:
+#: **BUT A COMPANY SLUG CAN BE A NAME, WHICH A SCHOOL SLUG PRACTICALLY IS
+#: NOT**, and that is measured rather than worried about.
+#: ``scripts/_probe_company_path_segments.py`` walks every HTML document this
+#: repository has committed -- 22 documents, 615218 characters, 86
+#: ``/company/`` hits, **28 DISTINCT segments: 21 NUMERIC and 7 SLUGS** -- and
+#: one of the seven is a surname with a word after it. So the sentence
+#: ``groups.py`` refuses a non-numeric segment with arrives here with a live
+#: example: a slug is a name, and sole traders, eponymous firms and personal
+#: brands are a category of Page rather than an edge case.
+#:
+#: **THEREFORE THIS IS NOT THE GROUPS GRANT. IT IS THE SEARCH-RESULTS ONE.**
+#: The numeric spelling names nobody (the groups case) and the slug spelling
+#: can name somebody (the search-results case), so the admission is made on
+#: the stricter standard: **the name-free shaper lands in the SAME COMMIT**.
+#: ``linkedin_server/company_page.py`` is that shaper -- vocabulary in, integer
+#: index out, no slug/name/address a return value of anything in it -- and
+#: ``tests/test_company_page.py`` holds it to that.
+#:
+#: WHY THE SLUG FORM IS IN THE PATTERN AT ALL, which is the non-obvious half.
+#: ``/company/[0-9]{1,20}/?$`` alone -- the groups pattern with a different
+#: word -- is MEASURED to admit TWO addresses against this entry's FOUR, so it
+#: looks strictly safer. It is not. LinkedIn canonicalises an organisation
+#: address, so the numeric form's LANDING PAGE is the slug form: a
+#: numeric-only entry admits the request and refuses the arrival, and
+#: ``assert_read_url``'s refusal INTERPOLATES THE URL IT REFUSED. That is the
+#: defect ``tests/test_navigation_is_never_derived.py`` exists for, where
+#: ``/in/me/`` resolved to a decorated member path and the operator's own slug
+#: went into a traceback. The redirect is the one HYPOTHESIS here and is not
+#: dressed as anything else; what is measured is that LinkedIn draws BOTH
+#: spellings -- ``notifications.html`` links a Page by ``/company/5417062``
+#: and every tracked posting links one by ``/company/<slug>/``.
+#:
+#: AND THE ASYMMETRY THAT PAYS FOR THE WIDER PATTERN: this package will not
+#: ASSEMBLE a slug address. ``company_page.company_page_url`` refuses anything
+#: that is not a bounded run of the TEN ASCII DIGITS, reporting the SHAPE via
+#: ``jobfilter.describe_shape`` and never the value. **The list admits what the
+#: product serves; the package builds only what names nobody.**
+#:
+#: THE BLAST RADIUS, MEASURED BEFORE THIS LANDED and reproducible after it,
+#: with ``scripts/_probe_company_family_blast.py`` over 107 concrete addresses
+#: (``blast_radius.corpus()``'s 67 plus 41 company-family spellings) and never
+#: a substring grep over the roster. **FOUR newly admitted: the target in the
+#: slug and numeric spellings, each with and without the trailing slash.** Zero
+#: tabs, zero traversals, zero queries, zero admin paths, zero dotted segments,
+#: zero urn forms, zero non-ASCII digit forms, ``newly_refused`` empty.
+#:
+#: FOUR CONTROLS, so the narrowness is an instrument reading and not a claim:
+#: the bare digit escape admits SIX against TWO (the Arabic-Indic, Extended
+#: Arabic-Indic, Devanagari and fullwidth spellings of an id); a dot inside the
+#: class admits SEVEN, adding ``/company/./`` and ``/company/a..company/``; and
+#: **THE FAMILY PATTERN ADMITS THIRTY-FIVE, EVERY ONE DEFENDED BY NOTHING.**
+#: Three of those 35 are not tabs and none carries a forbidden substring:
+#: ``/company/setup/new/`` (the flow that CREATES a Page -- the denylist has
+#: ``/create`` and LinkedIn does not spell this one with it),
+#: ``/company/<x>/admin/`` and ``/company/<x>/admin/dashboard/``. Two more are
+#: traversals whose leading segments lie about where they go, one normalising
+#: onto an account-ending address and one onto a member profile. That is the
+#: standing boundary trap arriving on a new root, and the anchor is what
+#: refuses all five.
+#:
+#: WHAT MOVED AND WHAT DID NOT. ``_ALLOWED_URL_PATTERNS`` moved, once, by one
+#: tuple entry. **EVERY OTHER PINNED DIGEST IS BYTE-IDENTICAL** -- seven of
+#: eight, so ``<functions>`` did not move and ``assert_read_url`` and every
+#: other gate function is unchanged; no denylist was shortened or lengthened
+#: (33 before, 33 after); neither exemption table was touched; no sanctioned
+#: mutation was added, because this wave fires nothing.
+#:
+#: ATTRIBUTION, IN THE FORM THIS DICT ADOPTED: the tree MINUS exactly this
+#: wave's one line hashes to ``5b5d34b6e3cc8059``, the value this line
+#: replaces, so nothing else rode in on the re-pin in a tree with a dozen
+#: writers. Both controls behave: dropping the PRE-EXISTING ``/school/`` line
+#: instead lands on ``bd5f83178ce63d94``, somewhere else entirely, and a needle
+#: no line carries drops zero lines and moves nothing. The entry is ONE LINE
+#: for exactly this reason -- the previous wave's attribution probe reported
+#: MISMATCH on a three-line entry, because deleting the line carrying the
+#: needle left ``re.compile()`` behind, still valid and a different digest.
+#:
+#: ONE INTERPRETER. This box has one venv at 3.13.14 and no ``py`` launcher, so
+#: the value above is verified under 3.13 only. The 3.10 cell is CI's and is
+#: available on push. Claiming two would be the cheapest false sentence here.
+#: ------------------------------------------------------------------------
 READONLY_AST_AT_LAST_REFREEZE = {
     "<functions>": "d7e1d0922e3af446",
     "JS_MUTATION_TOKENS": "d47e30b67c583c1b",
@@ -1023,7 +1126,19 @@ READONLY_AST_AT_LAST_REFREEZE = {
     # so nothing else is riding inside the re-pin. Both controls behave:
     # dropping a DIFFERENT allowlist line lands on a third value entirely,
     # and a needle no line carries drops zero lines and moves nothing.
-    "_ALLOWED_URL_PATTERNS": "5b5d34b6e3cc8059",
+    #
+    # 5b5d34b6e3cc8059 until 2026-09-20. GREW by ONE anchored entry -- an
+    # ORGANISATION PAGE, the root only, in both the slug and numeric
+    # spellings, on the `/school/` entry's character class byte for byte.
+    # COMPANY-PAGE-SURFACE, 16 filed rows, all of them behind this line. It is
+    # granted on the SEARCH-RESULTS standard rather than the groups one,
+    # because a company slug can be a name and this repository's own corpus
+    # carries one -- so `linkedin_server/company_page.py`, the name-free
+    # shaper, lands in the same commit. Same shape as every other move here:
+    # a deliberate READ admission with the three denylists, both exemption
+    # tables, SANCTIONED_MUTATIONS and `<functions>` byte-identical. SEVEN of
+    # eight digests unchanged. See the re-freeze note above.
+    "_ALLOWED_URL_PATTERNS": "6577a7bc8a32d7b8",
     "_FORBIDDEN_SUBSTRING_EXEMPTIONS": "43e2bf7f3db0dbed",
     "_FORBIDDEN_SUBSTRING_PATTERN_EXEMPTIONS": "419e64a3cd92ec7e",
     "_FORBIDDEN_URL_SUBSTRINGS": "b0291a66ec9bd51e",
@@ -1480,7 +1595,22 @@ DENYLISTS_AT_A76FE32 = {
     # inviting each still need their own url, their own sanction entry and
     # their own ruling. Nothing in this change fires anything, and no
     # registered tool in the package can even navigate to either address.
-    "_ALLOWED_URL_PATTERNS": "5b5d34b6e3cc8059",
+    #
+    # UPDATED AGAIN 2026-09-20, same reason an eighth time, and SAID HERE
+    # RATHER THAN CHANGED IN SILENCE because a value updated quietly is a
+    # check quietly retired. The READ boundary admitted ONE anchored entry --
+    # an ORGANISATION PAGE, the root only, both spellings, on the `/school/`
+    # entry's character class byte for byte -- and THE WRITE STILL DID NOT
+    # TOUCH THIS. The three denylists and both exemption tables below are
+    # byte-identical, which is the whole of what this dict is for.
+    #
+    # AND THIS ADMISSION BUYS NO WRITE EITHER, on a root that holds two:
+    # "I'm interested" (census row J 86) and following a Page from the Page
+    # (N 47) each still need their own url, their own sanction entry and their
+    # own ruling. It also buys no PAGE READ: `company_page.py` opens nothing
+    # and has no page function, so what landed is a precondition and a
+    # vocabulary. The honest reading of a widening is what it bought.
+    "_ALLOWED_URL_PATTERNS": "6577a7bc8a32d7b8",
     "_FORBIDDEN_SUBSTRING_EXEMPTIONS": "43e2bf7f3db0dbed",
     # TWO OF THESE FOUR MOVED ON 2026-08-26 and the values are updated here.
     #
