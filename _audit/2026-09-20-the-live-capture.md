@@ -341,7 +341,7 @@ had ever opened `/premium/my-premium/` reads accessible names of `a` and
 This wave used a different instrument -- a whole-document rendered-text census
 -- and it reports what it DID see, not only what it did not:
 
-    on /premium/my-premium/, rendered text, 3346 chars
+    on /premium/my-premium/, rendered text, 3346 chars unstripped (3344 stripped)
       RENDERED-PRESENT   premium 9, insight 3, applicant 1, top applicant 1,
                          interview 1, recruiter 1, manage 2, edit 1
       RENDERED-ABSENT    inmail, credit, salary, unlock, upgrade,
@@ -595,7 +595,10 @@ error copy.
 **AND IT DRAWS NOTHING:**
 
     bytes                                  673538
-    rendered text                            1135 chars
+    rendered text                            1135 chars, stripped
+                                           (1137 unstripped -- the shipped
+                                            probe does not .strip(), so a
+                                            re-run prints the larger one)
     anchors / buttons / headings           24 / 26 / 6
     <main> rendered text                       17 chars -- TWO WORDS, 1% of the page
     empty-state and error needles tried          15, all silent
