@@ -287,7 +287,7 @@ constraint.
 product section, which is an account-specific eligibility fact because
 authorship is gated. Delivered by `newsletters.CREATE_ROUTE` /
 `CREATE_SELECTOR`, surfaced by `linkedin_newsletter_subscriptions`, tested by
-five tests in `tests/test_newsletter_reader.py`.
+SIX tests in `tests/test_newsletter_reader.py`, which goes 15 -> 21.
 STILL MISSING, and it is three things rather than one: the address
 `/article/newsletter/new/` is refused (ONE boundary change -- it carries no
 `/create` substring, unlike `/newsletters/create/` which is refused twice), a
@@ -498,7 +498,10 @@ Shipped:
 
 Tests:
 
-- `tests/test_newsletter_reader.py` -- 16 -> 21. The fixture self-description
+- `tests/test_newsletter_reader.py` -- 15 -> 21, SIX tests, counted off the
+  file rather than off the run (`92b6882`'s message said 16 -> 21; the delta
+  was right and the baseline was one out, and the file is the arbiter). The
+  fixture self-description
   with the decoy pinned, the scoped pair, the naive selector shown getting it
   wrong, the zero-beside-a-live-control pairing, the detached-frame reset, and
   no href surviving into the reading.
