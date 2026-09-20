@@ -115,6 +115,24 @@ DECLARED: dict[str, dict[str, str]] = {
             "is argued in the file."
         ),
     },
+    "classify_writeoff_reasons.py": {
+        "fill": (
+            "A FALSE POSITIVE, declared as one rather than suppressed, and it "
+            "is the SECOND specimen of this scanner's precision limit. The "
+            "line is `print(f\"...\" + textwrap.fill(...))` -- STDLIB TEXT "
+            "WRAPPING in a reporting function. `textwrap.fill` returns a "
+            "string; `page.fill` types into a page. The scanner matches the "
+            "VERB and cannot see the RECEIVER, so the two are indistinguishable "
+            "to it. No page exists in this module: it is an offline classifier "
+            "over a census TSV and it opens no browser at all. "
+            "HELD MASTER RED FROM 1ab1ca8 (2026-09-20 12:55) UNTIL THIS ENTRY, "
+            "across every wave's CI, because a red master makes a new red "
+            "unreadable -- which is the condition this repository has spent the "
+            "day naming. Declared by the premium-four integration, which did "
+            "not write the line and inherited the red; the file's own wave is "
+            "free to replace this with a rename if it prefers."
+        ),
+    },
     "_probe_badge_and_language_affordances.py": {
         "http_post": (
             "A FALSE POSITIVE, declared as one rather than suppressed. The "

@@ -4992,7 +4992,7 @@ reporting; the fourth is superseded by the pytest guard, which runs the same mut
 postcondition assertions. Their numbers are the tables in
 `_audit/2026-09-20-the-reason-kinds.md`.
 
-## 33 The sanitiser-scope wave, 2026-09-20
+## 32. The sanitiser-scope wave, 2026-09-20
 
 ### 33.1 A PROOF'S CORPUS IS PART OF THE ENTRY, AND A GUARD MAY CONSULT ONLY ENTRIES PROVEN FOR ITS OWN KIND
 
@@ -5146,7 +5146,7 @@ collisions inside one integration, because `sanitiser-scope` was pushed off
 **AND THE LAST OF THOSE WAS INVISIBLE TO THE GUARD.** `sanitiser-scope`
 spells its heading `## 33 The sanitiser-scope wave` with NO separator after
 the number, and `tests/test_the_register_numbers_are_unique.py` matched
-`^##\s+(\d+)\s*[.·]` -- so it could not see that section at all, reported
+`^##\s+(\d+)\s*[. or a middle dot]` -- so it could not see that section at all, reported
 the register as unique while it carried TWO section 33s, and I only found
 the collision by reading the headings myself. That guard is widened in this
 same commit and the specimen is 34.9. `tests/test_the_register_numbers_are_unique.py` is
@@ -5412,13 +5412,28 @@ and it is widened in the same commit as this entry.
 
 **THE DEFECT.** Its heading pattern required a separator after the number:
 
-    HEADING = re.compile(r"^##\s+(\d+)\s*[.·]", re.M)
+    HEADING = re.compile(r"^##\s+(\d+)\s*[.MIDDOT]", re.M)
 
-Two committed sections run straight from the number into the title and matched
-NEITHER spelling:
+Two committed sections carried something other than `.` or a middle dot after
+the number, and matched neither spelling. **THEY ARE NOT THE SAME DEFECT, and
+this entry originally said they were:**
 
-    ## 22 THE IMPACT GATE, AND THE THREE MUTATIONS THAT KILL IT
-    ## 33 The sanitiser-scope wave, 2026-09-20
+    ## 22 THE IMPACT GATE, ...        an ordinary SPACE -- a real spelling
+    ## 33<SOH> The sanitiser-scope    a literal 0x01 CONTROL BYTE
+
+The second was corruption, not style. A resolver built `f"## {hi+1}\1"` inside
+a shell heredoc; the heredoc passed `\1` through and Python read it as `\x01`
+rather than as a regex backreference. Its own wave found and repaired it at
+`771b323` -- independently of this entry, within the same hour -- and renumbered
+that section to 32, where its deliverable's citation already pointed.
+
+**THE CORRECTION MATTERS TO THE FIX.** Widening the pattern legitimises the
+FIRST spelling; it must NOT be allowed to paper over the second, because a
+widened regex would have SILENTLY ACCEPTED the corrupt heading instead of
+reporting it. So the control asserts both halves: section 22 is seen, AND no
+register heading carries a control byte at all. Today section 22 is the only
+surviving specimen of the real spelling, and the control says so, so it will
+speak if that ever stops being true.
 
 **SHOWN FAILING, on the state the register was actually in.** This integration
 renumbered its own section onto 33 because the guard reported the register
@@ -5432,7 +5447,8 @@ unique, and 33 was not free. The real test body, run against that register:
       OLD pattern   30 headings seen   duplicates: NONE
       NEW pattern   32 headings seen   duplicates: NONE
 
-    sections the OLD pattern cannot see at all: ['22', '33']
+    sections the OLD pattern could not see at all: ['22', '33']
+      -- '33' repaired at 771b323 the same hour; '22' survives and is pinned
 
 The collision was found by READING THE HEADINGS BY HAND, not by the guard whose
 entire purpose is to find it. A duplicate would have shipped.
@@ -5461,3 +5477,63 @@ integer" from the same stale maximum for one section today, and three of the
 renumbers happened inside this single integration. The guard makes the collision
 visible at merge time, which is worth having; it does not make appending to a
 register concurrent-safe, and nothing here claims it does.
+
+### 34.10 FOUR INSTRUMENTS IN ONE DAY MATCHED A NAME AND COULD NOT SEE THE STRUCTURE
+
+Not a new instrument. A class, counted only because this integration tripped
+all four inside one merge and the fourth had been holding master red.
+
+    instrument                              matched            could not see
+    -------------------------------------   ----------------   ---------------------
+    detect_unbranched_probe_controls.py     the enclosing      that `html`/`expected`
+      (34.8)                                function's NAME    are control INPUTS
+    test_the_register_numbers_are_unique    `## N` + a         a space, and a 0x01
+      (34.9)                                separator          control byte
+    test_probe_interaction_budget           the VERB `fill`    the RECEIVER --
+      (this entry)                                             textwrap vs a page
+    scripts/pre_commit_boundary_gate.py     module-level       a test that asserts
+      (34.6, the scoped gate)               NAMES              an ABSENCE
+
+**THE FOURTH, MEASURED.** `tests/test_probe_interaction_budget.py` refuses a
+probe script that makes a gated interaction nobody declared. From `1ab1ca8`
+(12:55) it convicted this line in `scripts/classify_writeoff_reasons.py`:
+
+    print(f"\n=== TIER {rank}: " + textwrap.fill(
+
+`textwrap.fill` wraps a string. `page.fill` types into LinkedIn. The scanner
+matches the verb and cannot see the receiver, and the module opens no browser
+at all -- it is an offline classifier over a census TSV.
+
+**IT HELD MASTER RED FOR FORTY-FOUR MINUTES ACROSS EVERY WAVE'S CI.** Measured
+by run, not inferred: `d6b7e4b` SUCCESS; `1ab1ca8`, `bbc8dde` and `771b323` all
+FAILURE, one failed test per cell on all three platform cells, the same test
+each time. **That is the condition this repository has spent the day naming: a
+red master makes a NEW red unreadable, so the next wave's genuine failure
+arrives looking exactly like the standing one.** The premium-four integration's
+own CI run was red for this reason and for no other.
+
+Declared as a false positive on the table's own terms -- the guard names the
+three responses and forbids the third by name: *"If the call is right, add it
+to DECLARED with the reason and the bound. If it is a false positive, declare
+it as one. Do NOT widen OPEN_CLASSES to clear this: that silences the verb
+everywhere at once."* Exact precedent already sat in the table:
+`_probe_badge_and_language_affordances.py` / `http_post`, a JavaScript
+`Set.delete` read as an HTTP DELETE.
+
+**THE COMMON SHAPE, and it is worth more than any of the four.** Each of these
+instruments is a text matcher standing in for a structural question:
+
+> **Is this identifier the thing I care about, or does it merely SPELL like
+> it?** A name is evidence about a name. The question every one of these
+> guards is actually asking is about a RECEIVER, a SCOPE, a BYTE or a
+> DIRECTION -- none of which a name carries.
+
+The repository already knows this: `read-the-structure-not-the-text` is a
+standing memory, and three of these four parse Python with `ast` somewhere
+else in the same file. The gap is not knowledge, it is that a name-matcher is
+cheap to write and its false positives are quiet until somebody counts them.
+
+**WHAT IS NOT CLAIMED.** No count of how many of the register's published
+totals are inflated by this class. 34.8 establishes that at least some of the
+129-row decorative-control census is detector artifact; nobody has measured how
+much, and this entry does not either.

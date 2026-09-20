@@ -467,9 +467,18 @@ It was the **only** absolute roster-length assertion in either tree.
       - a false "never recorded" claim, reversing a 2026-09-05 refusal
       - a trap described at length but pinned on a url LinkedIn never draws
       - a stated blocker ("values unknown") that the tree already answered
-    defects found in the STANDING guard suite      2
+    defects found in the STANDING guard suite      3
       - the denylist baseline dict is a mirror, 0 of 8 mutations red it alone
       - the scoped gate cannot see a test that asserts an ABSENCE
+      - the register uniqueness guard passed on a DUPLICATE, blind to two
+        heading spellings; one of those was a control byte, not a style
+
+    of the 3 incoming defects, found INDEPENDENTLY by the wave too    2
+      - it pushed a058ce4 at 13:35 with the same root cause for the analytics
+        boundary red and the same four-way triage of the ratchet, reached by
+        RUNNING both probe modes where this integration read the branches
+    defects the wave found in MY work                                 1
+      - a rename that rotted a live citation; its version ships
     tests repaired rather than silenced            4
     guards deleted                                 0
     rulings deferred to a human                    1   (section 4.3, option a or b)
@@ -511,8 +520,8 @@ renumbered if it collided.
     taken           32
     collision 4     32   sanitiser-scope landed it on master first
     taken           33
-    collision 5     33   sanitiser-scope had ALREADY moved to 33
-    PUBLISHED AS    34
+    collision 5     33   sanitiser-scope was ALREADY sitting on 33
+    PUBLISHED AS    34   and 33 is now vacant -- see below
 
 I took 31 at 13:05 having seen `reason-kinds` staging its own 31 in an
 uncommitted scratch file, and recorded the prediction that the guard would
@@ -529,7 +538,24 @@ desk. It is not an argument for a different numbering scheme in this document,
 but it is the evidence anybody proposing one should start from.
 
 **THE FIFTH COLLISION WAS INVISIBLE TO THE GUARD, AND THAT IS THE REAL
-FINDING HERE.** `sanitiser-scope` spells its heading `## 33 The sanitiser-scope
+FINDING HERE.**
+
+**AND THE FIFTH COLLISION TURNED OUT NOT TO BE A SPELLING AT ALL.** Measured
+byte by byte after `sanitiser-scope` repaired its own heading at `771b323`:
+that heading carried a literal **0x01 SOH control byte** where the separator
+belonged -- `f"## {hi+1}\1"` built inside a shell heredoc, the heredoc passing
+`\1` through for Python to read as `\x01` instead of a regex backreference.
+Section 22, by contrast, is an ordinary space and a real spelling.
+
+**THAT DISTINCTION CHANGED THE REPAIR.** Widening the regex legitimises the
+space; it would have SILENTLY SWALLOWED the control byte. So the control
+asserts both halves -- section 22 is seen, AND no register heading carries a
+control byte at all -- and INSTRUMENTS.md 34.9 was rewritten to separate the
+two causes rather than leave a finding that misstates its own mechanism.
+
+They renumbered to 32, so **33 is now vacant and mine stays at 34.** The guard
+does not enforce contiguity, and moving again would rot citations that have
+already been repointed four times. `sanitiser-scope` spells its heading `## 33 The sanitiser-scope
 wave` -- no separator after the number -- and
 `tests/test_the_register_numbers_are_unique.py` matched only `## N.` or
 a middle-dot separator. So it could not see that section at all: it reported the

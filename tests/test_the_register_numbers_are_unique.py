@@ -15,7 +15,7 @@ it has been shown failing; this is the register failing to hold its own entries
 apart.
 
 WHAT THIS DOES NOT DO. It does not renumber anything and it does not enforce
-contiguity -- the file has real gaps (5 and 32 today) and closing them would
+contiguity -- the file has real gaps (5 and 33 today) and closing them would
 rewrite published section numbers that other documents cite. Uniqueness is the
 property that matters to a reader following a citation; density is not.
 
@@ -39,12 +39,20 @@ REGISTER = pathlib.Path(__file__).resolve().parents[1] / "_audit" / "INSTRUMENTS
 #: normalised here.
 #:
 #: WIDENED 2026-09-20, AND THE GUARD WAS BLIND UNTIL IT WAS. The pattern
-#: required a `.` or `·` AFTER the digits, so a heading that runs straight into
-#: its title was invisible. Two sections are spelled that way, and the guard
-#: could not see either:
+#: required a `.` or `·` AFTER the digits, so anything else there made the
+#: whole section invisible. TWO sections were, for two DIFFERENT reasons, and
+#: the difference matters:
 #:
-#:     ## 22 THE IMPACT GATE, AND THE THREE MUTATIONS THAT KILL IT
-#:     ## 33 The sanitiser-scope wave, 2026-09-20
+#:     ## 22 THE IMPACT GATE, ...        an ordinary SPACE -- a real spelling
+#:     ## 33<SOH> The sanitiser-scope    a literal 0x01 CONTROL BYTE
+#:
+#: The second was a defect, repaired at 771b323 and renumbered to 32: a
+#: resolver built `f"## {hi+1}\1"` inside a shell heredoc, the heredoc passed
+#: `\1` through, and Python read it as \x01 instead of a backreference. So the
+#: widening below legitimises the FIRST spelling and must NOT be allowed to
+#: paper over the second -- a control byte in a heading is corruption, not a
+#: style. That is why the control asserts BOTH that section 22 is seen and that
+#: no heading carries a control byte at all.
 #:
 #: **IT PASSED ON A REGISTER CARRYING TWO SECTION 33s.** The premium-four
 #: integration renumbered its own section onto 33 believing 33 was free --
@@ -116,11 +124,26 @@ def test_control_the_guard_sees_a_heading_with_no_separator():
         "is the defect being fixed, and it is the state master was in"
     )
 
-    # And the two real headings in the committed file that the old pattern
-    # could not see at all.
+    # And the heading in the committed file that the old pattern still cannot
+    # see. There were TWO when this control was written; the sanitiser-scope
+    # wave's `## 33<SOH>` was repaired at 771b323 and renumbered to 32, leaving
+    # section 22 -- a plain `## 22 <title>`, separated by an ordinary space --
+    # as the surviving specimen. If this list ever empties, the widening is no
+    # longer load-bearing on the real file and this control says so.
     real = REGISTER.read_text(encoding="utf-8")
     invisible = sorted(set(_numbers(real)) - set(old_pattern.findall(real)), key=int)
-    assert invisible == ["22", "33"], invisible
+    assert invisible == ["22"], invisible
+
+    # No heading carries a control byte. 771b323 put a literal SOH where a
+    # separator belonged, via `f"## {hi+1}\\1"` inside a shell heredoc -- the
+    # heredoc passed `\\1` to Python, which read it as \\x01 rather than as a
+    # regex backreference. That byte defeated the OLD pattern too, for a
+    # different reason than section 22 does, and a widened regex would have
+    # HIDDEN it rather than reporting it.
+    for number, line in re.findall(r"(?m)^(##\s+\d+)(.*)$", real):
+        assert not any(ord(c) < 32 and c != "\t" for c in number + line), (
+            "a register heading carries a control byte: %r" % (number + line)[:60]
+        )
 
 
 def test_control_the_guard_convicts_a_planted_duplicate():
