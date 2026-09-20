@@ -617,7 +617,22 @@ locally first (1 failed, 7 passed), green after (139 passed with
 `test_ci_shard.py`). The red IS the control: the guard was seen failing and
 then passing on the one line between them.
 
-Re-pushed as CI run `35488009146`.
+### AND THE FIX WORKED, MEASURED ON THE RUNNERS RATHER THAN CLAIMED
+
+`35488009146`, the run carrying the dependency fix, came back RED -- and **not
+on the dependency guard.** Its only failure was
+`tests/test_no_committed_identity.py`, three shards, on the email literal the
+delegated inventory slice had copied out of a test (section 8). That was fixed
+in the next commit.
+
+`35488123324` is the receipt: **20 of 20 jobs SUCCESS**, ubuntu 3.10 x 6
+shards, ubuntu 3.13 x 6, windows 3.13 x 6. Every line of this wave's code is
+in that tree -- the probe, the two reader fields, the fixture with its decoy,
+the six new tests, the `readonly.py` comments and the dependency repair. The
+`pytest-xdist` red that had failed five consecutive master runs is gone.
+
+The commits after it are the wave report, the probe's own control repair and
+two doc corrections; each was pushed and carries its own run.
 
 ### The commits, none carrying an AI attribution trailer
 
