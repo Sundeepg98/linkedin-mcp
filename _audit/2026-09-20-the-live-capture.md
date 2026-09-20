@@ -1224,6 +1224,19 @@ it can still see the browser. Both are read-only and both take seconds.
 
 ## 16. THE CLASSIFIER RE-CHECK -- AND FIRST, A CORRECTION I OWE ITS AUTHOR
 
+> **PROVENANCE, because `git log` on this file will mislead a reader.** This
+> section landed in commit `12ce9cd`, whose subject is *"fix(audit): a
+> phantom tool name, caught by the guard built to catch it"* and which
+> belongs to a different wave. It was staged in the shared main tree when
+> that wave committed, and a commit taking the whole index swept it in --
+> 208 insertions, all of them this section. **Nothing was lost and nothing
+> was altered:** both correction markers survived and the nine correction
+> guards pass. Recorded rather than repaired, because rewriting published
+> history to fix an attribution is a worse trade than one paragraph.
+> **It is also the live demonstration of why a commit in this tree should
+> be pathspec-limited**, which is the discipline every other commit in this
+> wave used and this one was on the receiving end of.
+
 **CORRECTS:** `_audit/2026-09-20-the-live-capture.md` -- its own section 12.9, which accused a committed classifier of a defect it does not have.
 
 ### 16.1 I ACCUSED A COMMITTED ARTIFACT OF A DEFECT IT DOES NOT HAVE
