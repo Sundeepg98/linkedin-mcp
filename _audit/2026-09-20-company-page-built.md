@@ -265,9 +265,9 @@ same ruling.
 **J 111 -- Products / Services tabs.** GAP. Two sub-paths, neither admitted,
 neither drawn anywhere the package already reads.
 
-**J 113 / J 114 -- Insights tab (Premium) and its content.** GAP, AND THE ROUTE
-IS KNOWN, which is worth recording because the next wave should not re-derive
-it. `https://www.linkedin.com/company/<slug>/insights/?insightType=HEADCOUNT` is
+**J 113 -- Insights tab (Premium).** GAP, AND THE ROUTE IS KNOWN, which is
+worth recording because the next wave should not re-derive it.
+`https://www.linkedin.com/company/<slug>/insights/?insightType=HEADCOUNT` is
 drawn on the job posting itself -- measured in `job_detail.html`,
 `job_detail_hydrated.html` and `job_detail_following_hydrated.html`. It needs
 TWO boundary changes, not one: a sub-path AND a query, and this admission takes
@@ -278,14 +278,79 @@ SECOND anchored container reader -- never a widening of this one, whose
 container scoping is the property that keeps a card from being read off the
 wrong employer.
 
-**N 104 -- find an organization's Page by searching for it.** GAP. "By
-searching" is `SEARCH-RESULTS-SURFACE`, a different blocker, still held.
-What this wave adds is the other route: a posting names an organisation, the
-package can now resolve a numeric id from it (`company_id_from_insight_cards`)
-and BUILD the Page address from that id (`company_page.company_page_url`).
-**The two halves exist and nothing joins them into a tool**, which is the exact
-shape `jobfilter.py`'s own first paragraph describes about J 10. Named here so
-it is a backlog item rather than a discovery.
+**J 114 -- Premium Page Insights CONTENT.** PARTIAL, PRE-EXISTING AND ALREADY
+REACHABLE, and this is the largest thing in this report that nobody had
+written down. The tab is shut; a large part of its CONTENT is not.
+
+`dom.read_job_insight_panels` reads the *"Exclusive Job Seeker Insights about
+<company>"* panel LinkedIn draws on the JOB POSTING, and
+`linkedin_job_detail` returns it whole at
+`result["insights"]["company_insights"]["lines"]` -- verified on disk at
+`server.py`'s `out["insights"] = await dom.read_job_insight_panels(page)`.
+Against the committed fixture those lines carry a current headcount total, a
+company-wide two-year growth figure, ONE FUNCTION'S two-year growth figure
+(which is *growth by function*, for whichever function LinkedIn draws), median
+employee tenure, and a bare notice that a 25-point headcount-over-time chart
+exists. The chart's own axis description is dropped as noise, so no time-series
+VALUES survive.
+
+NOT delivered by it: notable alumni (absent from the package entirely) and job
+openings by seniority. Do not confuse the latter with
+`result["insights"]["applicant_insights"]["seniority"]`, which is the seniority
+mix of CURRENT APPLICANTS to one posting -- a different fact with a similar name.
+
+`dom.company_panel_lines` substitutes the employer out of the rows before they
+are published, for the reason its own docstring gives: shaping the heading and
+shipping the name three lines below it would be a rule that only looked like
+one. Tested by `tests/test_free_read_panels.py ::
+test_the_company_panel_is_reported_by_shape_and_is_present` and
+`:: test_the_company_panel_carries_its_rows_and_not_its_plumbing`, both green
+here.
+
+**So J 114 should not be carrying the same GAP state as J 113.** That is a
+census observation from a build wave and is handed over rather than filed.
+
+**N 104 -- find an organization's Page by searching for it.** PARTIAL,
+SHIPPED THIS WAVE, by the route that is not search.
+
+"By searching" is `SEARCH-RESULTS-SURFACE`, a different blocker, still held.
+What shipped is the other route, and the gap it closed was a SEAM rather than a
+feature -- the exact shape `jobfilter.py`'s own first paragraph describes about
+J 10: *both halves of that blocker are now built and the row is still GAP,
+because nothing joined them.*
+
+The halves: `shape.company_id_from_insight_cards` reads a NUMERIC organisation
+id off the posting's Premium insights panel, and `/company/<numeric id>/` went
+on the allowlist in this wave. `linkedin_job_detail` now returns
+`company_page_url` -- the built address, or `None` when the id did not resolve.
+
+**THE ADDRESS IS PUBLISHABLE BECAUSE IT IS NUMERIC.** A slug is a name and a
+digit run cannot be one; `company_page.company_page_url` refuses anything else
+and reports the shape rather than the value. Tested by
+`tests/test_job_detail_wiring.py :: test_the_tool_joins_the_resolved_id_to_a_page_address`,
+which also asserts the shipped door admits what the tool hands over, and by its
+control `:: test_a_posting_with_no_resolved_id_gets_no_address_rather_than_a_guess`
+-- the id is absent on four of the five tracked captures, so the `None` branch
+is the normal case rather than an edge.
+
+STILL MISSING: finding a Page by NAME. That needs the search surface.
+
+### ONE CREDIT I WAS OFFERED AND REFUSED
+
+A recon slice run for this wave proposed PARTIAL for J 110 (Home / Posts) and
+J 111 (Products / Services) on the reasoning that `company_page.tally` returns
+a count at every position in `TAB_KINDS`, so every tab gets "a link-existence
+count".
+
+**I am not taking those two.** The count at `posts_tab` and at `products_tab`
+is ZERO on every tracked posting, because the About-the-company card links
+neither. A zero in a positional list is not evidence that a tab exists; it is
+the absence of evidence either way, and crediting it would be the same move as
+reading an empty harvest as "this employer has no follower count" -- the
+confusion `dom.read_company_about_card` keeps a three-way state to prevent.
+
+J 109 is credited because its count is TWO and was measured; J 110 and J 111
+stay GAP.
 
 ### The measured zero worth carrying forward
 
@@ -293,6 +358,32 @@ it is a backlog item rather than a discovery.
 About-the-company card never links the Page ROOT, only the Life tab.** So "is
 this employer's Page addressable" is not answerable from the card, and a future
 wave that assumes otherwise will get a zero and misread it as "no Page".
+
+---
+
+## 4b. A DEFECT FOUND ON THE WAY, AND FIXED
+
+`dom.unfollow_control_selector` builds an XPath that a CLICK is assembled from,
+and its docstring promised *"company_id must be digits, so nothing a caller
+supplies can escape the quoting or widen the predicate."* It was written with
+`str.isdigit()`.
+
+**MEASURED AT HEAD: it accepted the Arabic-Indic spelling of a four-digit id
+and built the selector.** Nothing was ever at risk -- LinkedIn's hrefs are
+ASCII, so that selector matches nothing -- and that is not the point. A guard
+on a write-path string was certifying a property it did not have, which is the
+same finding `groups.py` made on its own identifier gate: *a charset wide
+enough to hold a slug is wide enough to hold a name.*
+
+Narrowed to a membership test against the ten ASCII digits, and bounded at
+twenty -- `jobfilter._MAX_ID_LEN`'s number rather than a new one. Pinned by
+`tests/test_unfollow_fixture.py :: test_the_selector_refuses_another_script_s_digits`
+(all four scripts, each asserted `str.isdigit()` True first, so the case stops
+meaning anything the day it stops being accepted) and
+`:: test_the_selector_refuses_an_unbounded_digit_run`, which asserts both sides
+of the cap.
+
+NO WRITE WAS FIRED. This narrows a guard; it does not exercise one.
 
 ---
 
@@ -319,12 +410,15 @@ Shipped:
 
 - `linkedin_server/company_page.py` -- NEW. The name-free shaper.
 - `linkedin_server/readonly.py` -- ONE allowlist entry and its comment.
-- `linkedin_server/dom.py` -- `read_company_about_card` returns `hrefs`;
+- `linkedin_server/dom.py` -- `unfollow_control_selector`'s digit guard
+  narrowed from `str.isdigit()` to the ten ASCII digits, bounded at twenty;
+  `read_company_about_card` returns `hrefs`;
   `ABOUT_COMPANY_MAX_LINKS`. A plain Playwright read: **no script is injected**,
   so `INJECTED_SCRIPTS`, the `EXECUTED_SCRIPTS` count and the `dom.py` waiver cap
   are all unmoved.
-- `linkedin_server/server.py` -- three lines: the import, and `company_page` on
-  `linkedin_job_detail`'s result.
+- `linkedin_server/server.py` -- the import, and TWO fields on
+  `linkedin_job_detail`'s result: `company_page` (the tally) and
+  `company_page_url` (the N 104 join).
 - `scripts/_probe_company_path_segments.py` -- NEW instrument: is a company slug
   a name? Asks the corpus.
 - `scripts/_probe_company_family_blast.py` -- NEW instrument: the entry's blast
@@ -342,6 +436,10 @@ Tests:
   ledger entry and the attribution.
 - `tests/test_refusal_names_both_gates.py` -- its needle moved one segment
   deeper, because the old one became readable.
+- `tests/test_job_detail_wiring.py` -- FOUR new tests on the seam: the tally
+  is plumbed, no slug survives onto the wire, the N 104 join, and its
+  unresolved-id control.
+- `tests/test_unfollow_fixture.py` -- the digit-class guard, shown failing.
 
 Attribution: the tree MINUS this wave's one allowlist line hashes to
 `5b5d34b6e3cc8059`, the value it replaces. Controls behave -- dropping the

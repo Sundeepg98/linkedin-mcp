@@ -4069,6 +4069,34 @@ async def linkedin_job_detail(job_id: str) -> dict[str, Any]:
             out["company_id"] = shape.company_id_from_insight_cards(
                 id_cards, company=identity.get("company")
             )
+            # AND THE ADDRESS THAT ID NOW REACHES. Census row N 104 -- find an
+            # organisation's Page -- was filed against SEARCH-RESULTS-SURFACE,
+            # which is still held. This is the other route, and it is the
+            # shape jobfilter.py describes about J 10 in its own first
+            # paragraph: "both halves of that blocker are now built and the
+            # row is still GAP, because nothing joined them."
+            #
+            # BOTH HALVES ARE ON THIS PAGE. The resolver above yields a
+            # NUMERIC organisation id, and /company/<numeric id>/ went on
+            # readonly._ALLOWED_URL_PATTERNS on 2026-09-20. This is the join,
+            # and it costs no page load, no second read and no further ruling.
+            #
+            # THE NUMERIC FORM IS THE ONLY FORM BUILT, which is the whole of
+            # why publishing an address here is safe: a slug is a name and a
+            # digit run cannot be one. company_page.company_page_url refuses
+            # anything else and reports the SHAPE rather than the value, so a
+            # slug arriving here by some future accident cannot be echoed.
+            # jobfilter.py already ruled exactly this narrow exception on
+            # exactly this value.
+            #
+            # NOTHING NAVIGATES TO IT. The address is returned for the
+            # operator; no tool in this package opens it.
+            built = company_page.company_page_url(
+                (out["company_id"] or {}).get("company_id")
+            )
+            out["company_page_url"] = (
+                built["url"] if built.get("built") else None
+            )
 
             # THE EMPLOYER'S FOLLOWER COUNT, INDUSTRY, SIZE BAND AND LINKEDIN
             # HEADCOUNT -- FOUR CAPABILITIES THE CENSUS FILED UNDER A SURFACE

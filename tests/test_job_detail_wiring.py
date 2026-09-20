@@ -44,6 +44,7 @@ from pathlib import Path
 
 import pytest
 
+from linkedin_server import company_page, readonly
 from linkedin_server import server as server_module
 
 FIXTURES = Path(__file__).parent / "fixtures"
@@ -153,6 +154,110 @@ async def test_the_tool_returns_company_follow_state_too(
     assert "company_follow_state" in out
     assert out["company_follow_state"]["state"] == "following"
     assert len(out["company_follow_state"]["why"]) > 20
+
+
+async def test_the_tool_returns_the_company_page_tally(
+    monkeypatch, chromium_page
+):
+    """THE SAME SEAM, ONE WAVE LATER, for ``COMPANY-PAGE-SURFACE``.
+
+    ``company_page.tally`` is exhaustively unit-tested in
+    ``tests/test_company_page.py`` and every one of those tests passes whether
+    or not ``server.py`` calls it. This is the line that notices.
+
+    THE NUMBERS ARE MEASURED OFF THIS CAPTURE, not chosen: the hydrated
+    About-the-company card holds FIVE links, of which TWO are
+    ``/company/<slug>/life/`` and three are LinkedIn help pages.
+
+    **AND ``page_roots`` IS ZERO, WHICH IS THE FINDING RATHER THAN A BUG.**
+    The card never links the Page ROOT, only the Life tab -- so "is this
+    employer's Page addressable" is NOT answerable from this card, and a
+    future wave that assumes otherwise will read this zero as "no Page". It is
+    pinned here so the assumption fails loudly instead.
+    """
+    fixture, job_id = OFFSITE_ROUTE
+    out = await _job_detail(monkeypatch, chromium_page, fixture, job_id)
+
+    assert "company_page" in out
+    tally = out["company_page"]
+    assert tally["hrefs"] == 5
+    assert tally["slug"] == 2
+    assert tally["numeric"] == 0
+    assert tally["distinct"] == 1
+    assert tally["page_roots"] == 0
+
+    counts = tally["counts"]
+    assert len(counts) == len(company_page.TAB_KINDS)
+    named = {
+        company_page.term_for(index): value
+        for index, value in enumerate(counts)
+        if value
+    }
+    assert named == {"life_tab": 2, "off_company": 3}
+
+
+async def test_the_tool_publishes_no_slug_anywhere_in_the_company_page_block(
+    monkeypatch, chromium_page
+):
+    """THE PROPERTY THE SHAPER EXISTS FOR, asserted ON THE WIRE rather than
+    only in a unit test.
+
+    A shaper that keeps names out of its own return value is worth nothing if
+    the seam publishes the raw hrefs beside it. This capture's employer slug
+    is a real string in the document; it must not be anywhere in the block.
+    """
+    fixture, job_id = OFFSITE_ROUTE
+    out = await _job_detail(monkeypatch, chromium_page, fixture, job_id)
+
+    published = repr(out["company_page"])
+    assert "/company/" not in published
+    assert "linkedin.com" not in published
+    assert "life" not in published
+
+
+async def test_the_tool_joins_the_resolved_id_to_a_page_address(
+    monkeypatch, chromium_page
+):
+    """CENSUS ROW ``N 104``, and the gap it closes is a SEAM rather than a
+    feature.
+
+    ``jobfilter.py``'s own first paragraph describes this exact shape about
+    ``J 10``: *both halves of that blocker are now built and the row is still
+    GAP, because nothing joined them.* Here the halves are
+    ``shape.company_id_from_insight_cards`` (a NUMERIC organisation id, read
+    off this posting) and the ``/company/`` allowlist entry added 2026-09-20.
+
+    THE ADDRESS IS THE NUMERIC FORM AND THAT IS WHY IT CAN BE PUBLISHED AT
+    ALL: a slug is a name and a digit run cannot be one.
+    """
+    fixture, job_id = OFFSITE_ROUTE
+    out = await _job_detail(monkeypatch, chromium_page, fixture, job_id)
+
+    assert out["company_id"]["state"] == "resolved", out["company_id"]
+    identifier = out["company_id"]["company_id"]
+
+    url = out["company_page_url"]
+    assert url == f"https://www.linkedin.com/company/{identifier}/"
+    # AND THE DOOR AGREES. An address this tool hands the operator that the
+    # boundary would refuse is an address nobody can act on.
+    assert readonly.is_read_url(url) is True
+
+
+async def test_a_posting_with_no_resolved_id_gets_no_address_rather_than_a_guess(
+    monkeypatch, chromium_page
+):
+    """THE CONTROL for the join above, and it is not hypothetical: the id is
+    absent on four of the five tracked captures, because LinkedIn's Premium
+    insights panel is not drawn for every employer.
+
+    An unresolved id must produce ``None``, never an address assembled from
+    whatever number happened to be nearby.
+    """
+    fixture, job_id = LINKEDIN_ROUTE
+    out = await _job_detail(monkeypatch, chromium_page, fixture, job_id)
+
+    assert out["company_id"]["state"] != "resolved", out["company_id"]
+    assert out["company_page_url"] is None
 
 
 async def test_both_derived_fields_come_from_the_same_single_page_load(

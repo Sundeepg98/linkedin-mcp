@@ -2090,12 +2090,39 @@ async def harvest_followed_pages(page: Any) -> list[dict[str, Any]]:
     return rows
 
 
+#: The ten ASCII digits, and the bound, for the selector guard below.
+#:
+#: **THIS REPLACED ``str.isdigit()`` ON 2026-09-20 AND THE DEFECT WAS REAL.**
+#: The docstring below promised "``company_id`` must be digits, so nothing a
+#: caller supplies can escape the quoting or widen the predicate", and
+#: ``isdigit()`` admits a charset materially wider than the ten characters that
+#: promise names: MEASURED at HEAD, ``unfollow_control_selector`` accepted the
+#: Arabic-Indic spelling of a four-digit id and BUILT AN XPATH FROM IT. It
+#: would have matched nothing -- LinkedIn's hrefs are ASCII -- so nothing was
+#: ever at risk. What was wrong is that a guard on a string A CLICK IS BUILT
+#: FROM was certifying a property it did not have.
+#:
+#: It is the same finding ``groups.py`` made on its own identifier gate, in
+#: its words: *a charset wide enough to hold a slug is wide enough to hold a
+#: name.* A membership test against a literal set cannot widen behind
+#: anybody's back.
+#:
+#: The upper bound is ``jobfilter._MAX_ID_LEN``'s number rather than a new
+#: one -- this repository has already chosen twenty for exactly this value --
+#: and it is here because an unbounded repetition on caller-shaped input is a
+#: cost nobody chose.
+_ASCII_DIGITS = frozenset("0123456789")
+_MAX_COMPANY_ID_DIGITS = 20
+
+
 def unfollow_control_selector(company_id: str) -> str:
     """A selector for the unfollow button of ONE company, keyed by its id.
 
     GUARDED, like :func:`save_control_selector`, and for the same reason: this
-    is a string a click is built from. ``company_id`` must be digits, so
-    nothing a caller supplies can escape the quoting or widen the predicate.
+    is a string a click is built from. ``company_id`` must be a bounded run of
+    the TEN ASCII DIGITS -- see :data:`_ASCII_DIGITS` for why that is spelled
+    out rather than left to ``str.isdigit()`` -- so nothing a caller supplies
+    can escape the quoting or widen the predicate.
 
     WHY THE ID AND NOT THE NAME, even though the name is right there in the
     accessible name this anchors on. The label states the inverse action --
@@ -2117,7 +2144,12 @@ def unfollow_control_selector(company_id: str) -> str:
     rows with no exceptions in either direction.
     """
     identifier = str(company_id or "").strip()
-    if not identifier.isdigit() or len(identifier) < 4:
+    if (
+        not identifier
+        or not set(identifier) <= _ASCII_DIGITS
+        or len(identifier) < 4
+        or len(identifier) > _MAX_COMPANY_ID_DIGITS
+    ):
         raise ExtractionFailedError(
             f"refusing to build an unfollow selector for {company_id!r}: a "
             "followed Page is addressed by its numeric LinkedIn company id. A "

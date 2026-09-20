@@ -236,6 +236,54 @@ def test_the_selector_refuses_anything_that_is_not_a_numeric_page_id(bad):
     assert "company id" in lowered, message
 
 
+#: THE FOUR OTHER SCRIPTS' DIGITS, as code points so this file stays ASCII.
+#: Every one of these is ``str.isdigit()`` True, and until 2026-09-20 the
+#: guard above was written with ``str.isdigit()``.
+_OTHER_SCRIPTS_DIGITS = tuple(
+    "".join(chr(base + n) for n in range(4))
+    for base in (0x0661, 0x06F1, 0x0967, 0xFF11)
+)
+
+
+@pytest.mark.parametrize("bad", _OTHER_SCRIPTS_DIGITS)
+def test_the_selector_refuses_another_script_s_digits(bad):
+    """SHOWN FAILING AT HEAD, 2026-09-20, before the guard was narrowed.
+
+    ``unfollow_control_selector``'s docstring promised *"company_id must be
+    digits, so nothing a caller supplies can escape the quoting or widen the
+    predicate"* -- and ``str.isdigit()`` admits a charset materially wider
+    than the ten characters that promise names. MEASURED: the Arabic-Indic
+    spelling of a four-digit id was accepted and AN XPATH WAS BUILT FROM IT.
+
+    **NOTHING WAS EVER AT RISK AND THAT IS NOT THE POINT.** LinkedIn's hrefs
+    are ASCII, so the selector would have matched nothing. What was wrong is
+    that a guard on a string a CLICK is built from was certifying a property
+    it did not have -- which is the shape this repository has been bitten by
+    twice, where a check is correct for the inputs it was imagined against.
+
+    Same finding ``groups.py`` made on its own identifier gate, in its words:
+    *a charset wide enough to hold a slug is wide enough to hold a name.*
+    """
+    assert bad.isdigit() is True, (
+        "this case only means something while str.isdigit() accepts it"
+    )
+    with pytest.raises(ExtractionFailedError):
+        dom.unfollow_control_selector(bad)
+
+
+def test_the_selector_refuses_an_unbounded_digit_run():
+    """An unbounded repetition on caller-shaped input is a cost nobody chose,
+    and the bound is ``jobfilter._MAX_ID_LEN``'s number rather than a new one.
+
+    The boundary either side is asserted, so a future edit that moves the cap
+    cannot pass by moving it in the loose direction unnoticed.
+    """
+    assert dom._MAX_COMPANY_ID_DIGITS == 20
+    assert dom.unfollow_control_selector("1" * 20).startswith("xpath=")
+    with pytest.raises(ExtractionFailedError):
+        dom.unfollow_control_selector("1" * 21)
+
+
 def test_the_guard_admits_a_real_id_so_it_is_not_merely_refusing_everything():
     """The positive control for the guard above.
 
