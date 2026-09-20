@@ -454,9 +454,9 @@ silently downgraded.
 | 146 | Report inaccurate information on another member's profile | W | EXCLUDED-RULED | R4. NOT-REV |
 | 147 | Report a profile video | W | EXCLUDED-RULED | R4. NOT-REV |
 | 148 | Report a post or a comment in your feed | W | GAP | NOT-REV. Blocker: the feed-item permalink is readable; its overflow menu has never been opened |
-| 149 | Report a message | W | GAP | NOT-REV. Surface owned by the messaging census slice |
-| 150 | Report a whole conversation thread | W | GAP | NOT-REV. Messaging slice |
-| 151 | Mark a system-flagged message as safe instead of reporting it | W | GAP | Messaging slice |
+| 149 | Report a message | W | GAP | NOT-REV. TWIN CONFIRMED: `M M38` "Report a message as spam", GAP, filed under `REPORTING-FLOWS`. The queued RE-FILE's premise -- that the messaging slice counts this too -- holds for this row. |
+| 150 | Report a whole conversation thread | W | GAP | NOT-REV. NO TWIN, ANYWHERE. Measured under 34 needle spellings over `messaging-and-content.md`, `jobs.md`, `profile.md` and `mcp-inventory.md`: zero. The strings "whole conversation thread" and "system-flagged" occur nowhere in this repository outside the audit tree. THE QUEUED RE-FILE MUST NOT BE EXECUTED ON THIS ROW -- its premise that the messaging slice counts it too is measured untrue, so subtracting it here removes a capability no slice holds. This row is the network slice's until some slice claims it. |
+| 151 | Mark a system-flagged message as safe instead of reporting it | W | GAP | NO TWIN, ANYWHERE -- same 34-spelling sweep over all four slices and the tool inventory as row 150. THE QUEUED RE-FILE MUST NOT BE EXECUTED ON THIS ROW. Note the direction: this is the capability to CLEAR a flag, the only row in section M whose act is to undo a report rather than to make one, which is why no reporting-flow twin covers it. |
 | 152 | Report harassment or a safety concern | W | EXCLUDED-RULED | NOT-REV. A Help Center form, off the product surface **RETIRED 2026-09-05, `HELP-CENTER-FORM` (3.3).** A harassment or safety report is an accusation with a consequence for the person named, carried by a free-text narrative only he can write, filed to a human review queue off the product surface. REOPENER: an in-product STRUCTURED report -- and even then the narrative stays his. See `_audit/2026-09-05-decide-retire-rulings.md` |
 | 153 | Hide a network update from your feed | W | GAP | REV |
 | 154 | Hide a single post from your feed without unfollowing its author | W | GAP | REV |
@@ -478,7 +478,7 @@ people search.
 | 157 | View your available InMail credits | R | EXCLUDED-RULED | R9. The `premium` census key was added 2026-09-01 to ask exactly this and settled that the balance is not on the composer |
 | 158 | Send an Open Profile message without spending an InMail | W | EXCLUDED-RULED | R9. NOT-REV |
 | 159 | Enable or disable Open Profile on your own profile | W | EXCLUDED-RULED | R11. REV |
-| 160 | Send, receive and manage message requests | W | GAP | Messaging slice |
+| 160 | Send, receive and manage message requests | W | GAP | TWINS CONFIRMED: `M M6` send, `M M7` accept, `M M8` decline, all GAP, all filed under `MESSAGE-REQUESTS-SURFACE`. The queued RE-FILE's premise holds for this row. Note the twins carry a DIFFERENT blocker from this row, so a re-file is an accounting act across two blockers, not a move within one. |
 
 ### P. LinkedIn Groups as a people surface (18) -- ALL GAP, recovered second pass
 

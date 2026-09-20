@@ -4443,3 +4443,95 @@ control does not mean the probe's finding was false, only that the probe
 never checked whether it could have been. The fixer's cheapest next step is
 those 5, because they are the only ones where something already rests on
 the answer.
+
+## 28. THE BLOCKER-REASON LOCATOR, MEASURED BEFORE IT WAS BUILT ON, 2026-09-20
+
+### 24.1 `tests/test_the_blocker_reason_locator_states_its_recall.py` -- a recall number, pinned
+
+ADMITTED. Shown failing 10 of 10 against `scripts/find_blocker_reason.py` as of
+`8b58dcb`, loaded out of git into a temp file and re-run through the same
+assertions. It pins four properties: the one miss a human found by hand, two
+recall floors, the exclusion of generated artifacts from candidacy, and -- the
+unusual one -- a CEILING on at-rank-1 accuracy that fails if the locator ever
+gets good enough that the column's shape should be re-decided.
+
+**THE VALIDATION SET IS THE INSTRUMENT'S WHOLE VALUE, AND IT IS NOT THE TOOL'S
+OWN OUTPUT.** It is six blockers a sibling wave's child researched by hand, with
+the documents it named in its deliverable before this work began. A tool
+evaluated on the cases it found is measuring itself, and every recall number
+this repository has published for a locator before now was of that shape.
+
+### 24.2 THE FALSE RED I ALMOST BANKED, and the assertion that now prevents it
+
+The first run of the red harness reported `candidates()` returning **0**
+documents for every blocker, which looked like a spectacular confirmation. It
+was a harness defect: the old module computes `ROOT` from `__file__`, the
+harness had written it to a temp directory, and it was scanning an empty tree.
+A zero from a real corpus and a zero from no corpus are the same integer.
+
+The harness now asserts its corpus size before it trusts any result --
+`assert len(list(old.AUDIT.rglob("*.md"))) > 100`. **A red is a measurement and
+has to be defended exactly as hard as a green**, and a red that agrees with your
+hypothesis is the one you will not check.
+
+### 24.3 FOUR DEFECTS IN ONE WORD LIST, AND ONLY ONE WAS "ADD MORE WORDS"
+
+Diagnosed and measured SEPARATELY, because each has a different fix and three of
+them are invisible to the obvious remedy:
+
+* **A STEM WRAPPED IN `\b(...)\b` MATCHES NOTHING.** The list was written with
+  stems -- `refus`, `measur`, `admit` -- and every one was dead. `measur` matched
+  zero occurrences in a corpus carrying "measured" 1910 times. The comment above
+  the regex read "deliberately broad"; the regex was the opposite. **A vocabulary
+  can be silently empty and still look carefully chosen.**
+* **A PHYSICAL LINE IS NOT A UNIT OF ARGUMENT.** Scoring required the needle and
+  an argue-word on one line, over a corpus hard-wrapped at 76 columns (mean
+  non-blank line 70.6 chars, median 75). It was measuring typography -- and
+  DIRECTIONALLY, because a `.tsv` record is one line (mean 544.5) and carried
+  every word of a record on the needle's own line.
+* **THE GENERATED INDEX WON 59 OF 97 RACES.** The top-ranked "document that
+  argues this blocker's reason" was `blocker-map.tsv`, which restates
+  assignments and argues nothing -- and is the file the proposed column would be
+  written into, making the derivation a fixpoint on its own content. The
+  hand-written evidence TSV beside it is deliberately NOT excluded, and the test
+  asserts that distinction rather than banning a file extension.
+* **THE JOIN KEY WAS WRONG.** The needle was the blocker NAME; this corpus
+  argues by census ROW ID. A build report argues at length about `J 40` and
+  names its blocker twice in the whole file.
+
+Recall against the hand-built set, 1 of 8 -> 8 of 8 found, 0 of 8 -> 4 of 8 at
+rank 1. **The fixes were measured one at a time, and the known-miss case passes
+as a CONSEQUENCE of the vocabulary repair rather than as its target** -- which
+is the difference between a repair and a tool tuned to its own test.
+
+### 24.4 THE SHAPE A MEASURED RECALL FORCED ON A DERIVED COLUMN
+
+`reason_doc` ships, but it may not carry a bare path: at 4-of-8 at rank 1 a path
+in a table cell is a coin flip wearing a fact's clothes, and a table reads as
+data rather than as a claim. Every populated cell begins
+`CANDIDATE-<rank>-OF-<n> SCORE-<n>`, and a test asserts that no cell is ever a
+bare path. **The measurement did not just qualify the column, it specified its
+format.**
+
+The fixpoint was verified rather than argued: `--write` twice, byte-identical.
+
+### 24.5 A ROW THAT LOSES ITS ASSIGNMENT IS NOT A ROW THAT WAS DELETED
+
+A control was commissioned on the premise that a union merge had resurrected a
+deleted census row. The pickaxe refuted it: exactly one commit ever touched
+those row texts and it is the one that created them, and the repository has no
+`.gitattributes`, so no union driver was ever configured. What had actually been
+removed was the rows' BLOCKER ASSIGNMENT, in a different file, on a different
+object. **Two different deletions wearing one sentence.** The refutation was
+worth more than the confirmation would have been: it established that no census
+row has ever been deleted in this tree, which turned a bookkeeping chore into a
+ruling.
+
+### 24.6 DISPOSABLE, declared
+
+Five scratch scripts in the session scratchpad -- a reproduction of the reported
+miss, a corpus-geometry and top-candidate census, a three-way mechanism
+isolator, a five-variant recall harness, and a row-join A/B. All five are
+retired in favour of the committed test, which pins the properties they
+discovered. Their numbers are recorded in this wave's own audit document,
+`_audit/2026-09-20-the-three-held-defects.md` section 2.

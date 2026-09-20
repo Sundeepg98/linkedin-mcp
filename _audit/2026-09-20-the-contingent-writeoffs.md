@@ -14,6 +14,8 @@ committed evidence or against the skill's own source, run offline.
 Repo at `bf275cf` when the measurements were taken; this document's own guard
 lands at `5e2727e`.
 
+**CORRECTED BY:** `_audit/2026-09-20-the-three-held-defects.md` -- the substance of the `J 40` and `J 57` overturns in section 1.2 re-verified and HELD, but three things in the prescribed replacements did not: the cell for `J 57` names `linkedin_applied_jobs` as row 47's server tool and no such tool exists anywhere here (`J 47` and `J 48` are both served by `linkedin_my_applications`, and `linkedin_saved_jobs` serves `J 45`); the fixture count of 20 is a depth-1 figure where a recursive enumeration finds 22, with the 2-carrier result and the un-hydrated-twin discriminator both unchanged; and the blocker both replacements re-file onto occurs nowhere but this document, so creating it is a ledger act that breaks three pinned assertions -- the rows now carry the measurement on their own cells instead, and the re-file is deferred with its decision point named.
+
 ---
 
 ## 0. THE THREE VERDICTS, AND WHY THE CENSUS SPELLS THEM THE SAME
