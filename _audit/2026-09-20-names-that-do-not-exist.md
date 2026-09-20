@@ -600,7 +600,7 @@ unrelated failure sentence on the next.
 
 **No GitHub API call was made.** A rate-limited 403 is indistinguishable from a
 real answer, and this wave hit exactly that while reading its own CI run
-(section 8). A text census is what is defensible without the API, and it is
+(section 7.5). A text census is what is defensible without the API, and it is
 reported as a text census.
 
 ### 6.9 Things I could not separate, stated plainly
@@ -780,8 +780,7 @@ away. Instead the synthetic document in `test_a_marked_name_is_not_convicted`
 now carries an indented block of its own, so the path is exercised by the only
 thing that will notice if it breaks.
 
-### 7.5 CI reproduced the self-disarm on three platforms, and the read of CI
-### is itself an instance of this class
+### 7.5 CI reproduced the self-disarm on three platforms -- and reading CI is itself an instance of this class
 
 The first commit, `4b66c03`, carried the self-disarm bug. CI run
 **35492250931** came back **failure** on six shards, and the failing assertions
