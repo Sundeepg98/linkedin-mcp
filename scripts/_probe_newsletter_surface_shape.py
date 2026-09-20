@@ -387,6 +387,18 @@ def main(argv: list[str] | None = None) -> int:
     silent = len(IMPOSSIBLE.findall(html))
     print("\n--- CONTROL, must stay silent: %d  %s"
           % (silent, "PASS" if silent == 0 else "FAIL"))
+    # AND IT VOIDS, WHICH IT DID NOT IN THE FIRST DRAFT. That draft printed
+    # FAIL and then printed every tally below it with exit 0 -- a check that
+    # announces its own failure and certifies anyway, which is worse than not
+    # having it, because the word FAIL sits four screens above a table that
+    # reads as data. Found by planting a matcher that CANNOT stay silent and
+    # running it; the sibling events probe has the same shape and the same
+    # gap. If this matcher is finding things, it is matching something other
+    # than what it was written for, and nothing it neighbours is a reading.
+    if silent:
+        print("    VOID. A matcher that finds an attribute no document carries")
+        print("    is measuring itself, so no tally below it is a reading.")
+        return 1
 
     anchors = [(m.start(), m.group(1)) for m in NEWSLETTER_HREF.finditer(html)]
     agree = len(anchors) == READER_MEASURED_ANCHORS

@@ -232,6 +232,21 @@ partial win; it is a blast radius paid for nothing.**
 | must stay silent | an attribute no document carries | 0 |
 | an absent capture | worktree run | exit 2, no tally printed |
 
+**ALL FIVE WERE EXERCISED, NOT ASSERTED.** Each was driven into its failing
+state in-process -- the needle fixture pointed at a missing path, the
+cross-instrument count set to 999, the impossible attribute replaced by a
+matcher that finds every href -- and each returned non-zero. The healthy run
+and `--control` still return 0 afterwards.
+
+**AND THE FOURTH ONE WAS BROKEN UNTIL THAT EXERCISE.** The must-stay-silent
+control printed `FAIL` and then printed every tally below it with **exit 0**.
+A check that announces its own failure and certifies anyway is worse than no
+check: the word FAIL ends up four screens above a table that reads as data.
+Fixed to VOID. **`scripts/_probe_events_surface_shape.py` has the identical
+gap** -- measured: its `silent` result is printed and never branched on. Named
+rather than edited, because it belongs to another wave and a one-line fix with
+the evidence attached is cheaper for its owner than a surprise in their diff.
+
 The last one is not hypothetical: **a linked worktree carries no gitignored
 files**, so the default invocation from this wave's own tree finds nothing.
 Reported as an absence, exit 2, with the line *"an absence is not a zero"*.

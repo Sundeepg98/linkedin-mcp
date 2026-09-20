@@ -3890,7 +3890,17 @@ indistinguishable from a zero out of a page.** So:
   that `newsletters.read_newsletter_subscriptions` measured through Playwright
   on the same page. A regex and a DOM walk are different instruments, so
   agreement is evidence and disagreement VOIDS every tally below it.
-* An impossible attribute must stay at zero.
+* An impossible attribute must stay at zero -- **AND VOIDS THE RUN WHEN IT
+  DOES NOT, which the first draft did not do.** That draft printed `FAIL` and
+  then printed every tally below it with exit 0: a check that announces its
+  own failure and certifies anyway, which is WORSE than not having it, because
+  the word FAIL ends up four screens above a table that reads as data. Found
+  by planting a matcher that cannot stay silent and running it, not by reading
+  the code. **`scripts/_probe_events_surface_shape.py` has the identical shape
+  and the identical gap** -- measured, its `silent` result is printed and never
+  branched on -- and it is NAMED here rather than edited, because it is another
+  wave's instrument and a one-line fix with the evidence attached is cheaper
+  for its owner than a surprise in their diff.
 * **AN ABSENT CAPTURE RETURNS 2 AND PRINTS NOTHING READABLE AS A TALLY.** A
   linked worktree carries no gitignored files, so this script run from one
   finds nothing, and an absence reported as a zero would have said *the page
