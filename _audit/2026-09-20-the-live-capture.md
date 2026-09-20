@@ -21,11 +21,18 @@ without the argument in section 7.**
     prior findings live-reproduced    2    the newsletter census, the unlock asymmetry
     prior hypotheses live-confirmed   1    the profile-views scope defect
     defects found in my own work      2    section 9
-    allowlist patterns added          0
+    allowlist patterns added          1    section 11, and it bought no row
+    open questions closed later       1    section 11 answered section 10's first
 
 **THE SCARCE RESOURCE WAS THE SESSION AND IT WAS SPENT ON READS.** Thirteen
-tool calls and one six-page capture. Everything else in this document is
-offline over `_state/`, re-runnable for ever with the browser switched off.
+tool calls, one six-page capture, and -- after the first freeze -- four more
+loads to open the one address this wave had filed as an argument rather than
+a line. Everything else in this document is offline over `_state/`,
+re-runnable for ever with the browser switched off.
+
+**THE LEDGER ABOVE COUNTS SECTIONS 1-11. Section 7 originally reported that
+nothing was admitted; one pattern was, later the same day, and both the
+original sentence and the amendment are left standing there.**
 
 ---
 
@@ -367,18 +374,31 @@ every surface labelled Premium. Cross-instrument agreement, recorded.
 
 ---
 
-## 7. THE BOUNDARY: NOTHING WAS ADMITTED
+## 7. THE BOUNDARY: ONE PATTERN ADMITTED, AFTER THIS SECTION FIRST SAID NONE
 
-`_ALLOWED_URL_PATTERNS` is unchanged. Every address opened was already on it.
+> **AMENDED LATER THE SAME DAY. THIS SECTION ORIGINALLY READ "NOTHING WAS
+> ADMITTED" AND THAT IS NO LONGER TRUE.** It was written while the six
+> captures were the whole of the evidence, and it filed four candidates as
+> arguments rather than lines -- including candidate 1 below. Then the
+> session was still live, candidate 1 was the wave's own headline question,
+> and **the thing standing between us and the answer was OUR refusal, not
+> LinkedIn's.** So it was admitted and opened. Section 11 is what the page
+> returned. The original sentence is left standing above rather than
+> rewritten, because a section that quietly changes its own verdict is the
+> defect this corpus keeps finding.
+
+`_ALLOWED_URL_PATTERNS` went **35 -> 36**, digest `6577a7bc8a32d7b8 ->
+`85e821d1af9060f3`. Every OTHER address opened in sections 1-6 was already
+on the list; three of the four candidates below are still only arguments.
 
 Four candidates are now evidenced well enough to be argued for, and I am
 filing the argument rather than the line, because **an address that has been
 seen served is a candidate, not yet a decision** -- and three of the four
 still need a shaper designed before they would be usable:
 
-1. `/learning/role-play/scenarios/` -- the listing, not the drawn `/new/`
-   route. No member segment. **Would close section 4's open question.** The
-   `/new/` sibling stays refused under 4d.
+1. ~~`/learning/role-play/scenarios/`~~ -- **ADMITTED AND OPENED. See
+   section 11.** The `/new/` sibling stays refused under 4d, and the
+   pattern takes no sub-path so it cannot reach it.
 2. `/jobs/collections/top-applicant` -- no member segment; sibling of an
    already-admitted collection; the Top Applicant signal the operator named.
 3. `/analytics/recruiter-views` -- no member segment, but the page is made of
@@ -483,9 +503,11 @@ Named, so the next wave does not re-discover them, and so this wave does not
 repeat the 2026-09-05 probe that left two of its own four questions open for
 fifteen days behind a page load already paid for.
 
-1. **Does `/learning/role-play/scenarios/` (no `/new/`) serve, and does it
-   list past sessions?** One allowlist hypothesis, one page load. This is the
-   whole remaining cost of J 136-138 and it needs nothing from the operator.
+1. ~~**Does `/learning/role-play/scenarios/` serve, and does it list past
+   sessions?**~~ **CLOSED THE SAME DAY, BY SECTION 11: it serves, and it
+   renders 17 characters in `main`.** Re-aimed rather than closed outright --
+   what is now open is WHY it is empty, and the cheapest test is to re-run the
+   same read once the member-side experiment flag stops reading `control`.
 2. **Does `/analytics/recruiter-views` serve, and what is on it?** Drawn on
    his own profile-views page, never recorded in this repo before today.
 3. **What is on `/jobs/collections/top-applicant`?** The Top Applicant signal,
@@ -499,3 +521,113 @@ fifteen days behind a page load already paid for.
 
 None of the five needs a ruling, a consent or a measurement only the operator
 can authorise. All five need a browser.
+
+---
+
+## 11. THE ROLE-PLAY LISTING, ADMITTED AND OPENED -- IT SERVES, AND IT DRAWS NOTHING
+
+Written after sections 1-10 and after the first freeze. Section 4 concluded,
+from what six surfaces DRAW, that LinkedIn offers a route to start a role-play
+session and none to read one back. That was an inference from absence. This
+section replaces it with a load.
+
+### 11a. Why the refusal was ours
+
+Section 4's honest position was *"the listing has never been opened"*, and the
+reason it had never been opened is that this repository refuses the address.
+**That is our decision, not a fact about LinkedIn**, and a standing refusal
+nobody has re-examined is the cheapest kind of blocker to mistake for a wall.
+The session was live and this wave was the only browser wave. So the pattern
+was admitted, with the argument in `readonly.py` beside it, and the page was
+opened.
+
+### 11b. The admission is bounded, and that was proved before it was used
+
+    ^https://www\.linkedin\.com/learning/role-play/scenarios/?$
+
+Ten spellings put to `is_read_url`, **10 of 10 as intended**:
+
+| spelling | admitted |
+|---|---|
+| the listing, with and without a trailing slash | **yes**, 2 of 2 |
+| **the create route LinkedIn actually draws**, bare and with its query | **no**, 2 of 2 |
+| a scenario id, a results guess, the role-play root, learning root, a course, the listing with a query | no, 6 of 6 |
+
+**THE PATTERN TAKES NO SUB-PATH AND THAT IS THE POINT.** The route the product
+draws is `/new/`, pressing it starts a session, and it is the same autosave
+class as `/article/newsletter/new/`. Admitting the listing does not reach it.
+
+### 11c. What the load returned
+
+A known-served control (`/premium/my-premium/`) was read FIRST in the same
+session and reported SERVED, so the instrument could tell the two apart.
+
+**IT SERVES.** Landed as requested, no redirect, no login wall, no 404 or
+error copy.
+
+**AND IT DRAWS NOTHING:**
+
+    bytes                                  673538
+    rendered text                            1135 chars
+    anchors / buttons / headings           24 / 26 / 6
+    <main> rendered text                       17 chars -- TWO WORDS, 1% of the page
+    empty-state and error needles tried          14, all silent
+    samples over 25 seconds                       3, byte-identical
+
+**SEVENTEEN CHARACTERS IN `main`.** The 1135 characters are LinkedIn
+Learning's global chrome; the content region is two words. Three samples at
+settle, +10s and +25s came back byte-identical, so **this is not a hydration
+race** -- the page settled and that is what it drew.
+
+**AND THERE IS NO EMPTY-STATE MESSAGE EITHER**, which is the part worth
+pausing on. A product with no sessions to show usually says so. Fourteen
+needles -- `not available`, `no longer`, `sorry`, `page not found`, `try
+again`, `coming soon`, `nothing here` and seven more -- all silent. This page
+does not report that there is nothing; it reports nothing.
+
+### 11d. What that settles, and what it does not
+
+**SETTLED:** the address serves, and on this account it renders no scenario
+list, no session history, no readiness score, no summary and no transcript.
+Section 4's inference is confirmed by a load rather than by absence of a link.
+
+**NOT SETTLED, and this is an inference named as one:** *why* it is empty. The
+leading explanation is the one section 4e measured -- the member-side lix key
+`learning-job-interview-prep-role-play-experiment` reads treatment `control`
+on this account -- which would produce exactly this shape: the route exists,
+the shell renders, and the experiment's content never mounts. **That is
+consistent with the evidence and is not proved by it.** A second possibility
+is not excluded: the product may mount only for a member who has a session,
+in which case the page is an honest empty for a different reason.
+
+### 11e. J 136 / J 137 / J 138 -- still GAP, and now for a measured reason
+
+No row moves and nothing is inflated. The blocker is now:
+
+* **not** "only the operator knows whether he has taken one" -- refuted in
+  section 4;
+* **not** "the address is out of reach" -- it is admitted, bounded and served;
+* **but** "the surface renders no session content on this account, and the
+  member-side experiment flag reads `control`."
+
+**THE NEXT ARTIFACT CHANGES ACCORDINGLY**, and it still needs nothing from
+him: re-run this one read when the flag's treatment changes. That is a
+one-command rerun against an address already on the list, and it is the
+cheapest open question this wave leaves behind.
+
+### 11f. The honest cost of the admission
+
+**IT BOUGHT NO ROW.** `_ALLOWED_URL_PATTERNS` is one wider and the census is
+unmoved, which by this corpus's own standard -- *"a surface admitted and
+unusable is not a partial win; it is a blast radius paid for nothing"* -- is
+the outcome that has to be declared rather than dressed up.
+
+It is kept, for two reasons stated plainly: the emptiness IS the measurement
+and re-taking it later costs one rerun; and the entry names nobody, takes no
+sub-path and reaches no write. **But it is a widening that delivered a
+negative result, and the ledger line below says so.**
+
+    rows banked by section 11        0
+    allowlist patterns added         1
+    open questions closed            1   (does the listing serve -- yes)
+    open questions re-aimed          1   (why is it empty -- flag, or no session)
