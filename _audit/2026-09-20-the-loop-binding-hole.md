@@ -156,7 +156,7 @@ Two observations worth someone's attention, neither fixed here:
 
 Delegated as a closed-form slice (`walker-divergence`), verified against SHA
 `5c24b05` on a clean `tests/`, full file at
-`...\scratchpad\walker-divergence.md`. **I re-ran its three load-bearing claims
+`scratchpad/walker-divergence.md`. **I re-ran its three load-bearing claims
 myself before accepting them**; all three reproduced.
 
 **It corrected my brief.** I was told a third guard "imports only a constant and a
@@ -458,7 +458,7 @@ NOT-MEASURED-BY-ME -- `import ... as`, `match` capture / `as` / star patterns,
 `except*` groups, lambda parameters, decorator-bound names, PEP 695 type parameters --
 plus a positive and a negative control per construct, so that a BLIND row is
 distinguishable from a malformed fixture. Its deliverable lands at
-`...\scratchpadinding-census.md`.
+`scratchpad/binding-census.md`.
 
 The table in section 7 is measured and stands on its own; this slice widens it and
 settles the row set I explicitly declined to claim. If it is absent when you read
