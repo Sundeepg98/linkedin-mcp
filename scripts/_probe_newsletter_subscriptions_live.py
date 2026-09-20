@@ -16,6 +16,29 @@ door rather than a room:
   4. is an unsubscribe control drawn HERE, which would take census ``N 56``
      from two blockers to one.
 
+**ALL FOUR ARE NOW ANSWERED, AND THIS HEADER KEEPS ITS TEXT.** It was right
+about what it knew and the sequence is worth more than a tidy paragraph -- the
+same reason ``_audit/2026-09-05-the-newsletter-create-route.md`` corrected
+register 9.1 with a back-pointer rather than a rewrite. 1 and 2 were answered
+by this probe's own run on 2026-09-05: the page SERVES, and it draws ten
+anchors over five newsletters. 3 and 4 were answered on 2026-09-20 by
+``scripts/_probe_newsletter_surface_shape.py``, OFFLINE over the capture this
+run wrote, so they cost nothing and needed no second load:
+
+  3. NO. The only author-side href on the page is the CREATE route, in the
+     product heading's own container. No manage, edit or delete route exists
+     anywhere in the document, so the page does not list newsletters he
+     writes.
+  4. NO. The words "subscribe" and "unsubscribe" appear ZERO times in 74234
+     characters, in an href, in an ``aria-label``, and in the text. ``N 56``
+     stays where it was; this surface does not shorten it.
+
+**THE LESSON FOR THE NEXT PROBE ON ANY SURFACE, because it is the cheap half
+this one nearly left on the floor:** a live run's capture answers more
+questions than the run itself asks, and re-reading it costs nothing on his
+account. Two of these four sat open for fifteen days behind a page load that
+had already been paid for.
+
 ## THE OBLIGATION, AND IT IS NOT OPTIONAL
 
 ``/mynetwork/`` is refused because opening it is BELIEVED to consume the

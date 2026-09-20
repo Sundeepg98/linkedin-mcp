@@ -851,6 +851,24 @@ _ALLOWED_URL_PATTERNS: tuple[re.Pattern[str], ...] = (
     # measurement here says this page lists those. Whether it does is a
     # question for the first live read, not an assumption for this entry.
     #
+    #     ANSWERED 2026-09-20, and the paragraph above keeps its text because
+    #     it was right about what it knew. The read happened on 2026-09-05 and
+    #     the capture has now been analysed --
+    #     ``scripts/_probe_newsletter_surface_shape.py``, offline, with every
+    #     needle reported beside its enclosing landmark stack.
+    #
+    #     ONE author-side href in 74234 characters: ``/article/newsletter/new``,
+    #     inside ``main > section > section``, 302 characters after the product
+    #     heading and 1932 before the first row -- the section's own header
+    #     action rather than chrome. NO manage route, NO edit route, NO delete
+    #     route, and the word "manage" appears once, inside a row's own prose.
+    #
+    #     So this page carries the CREATE affordance and nothing else
+    #     author-side. ``M C50``'s read half is delivered off it -- see
+    #     ``newsletters.CREATE_ROUTE`` -- and ``M C51``, ``M C81``, ``M C84``
+    #     and ``P L3`` have no route here at all. Their controls are on a
+    #     newsletter's OWN page, which is refused below.
+    #
     # NO QUERY STRING AND NO SUB-PATH, and the anchoring is the whole of the
     # permission -- the same shape as the two roots opened on 2026-09-05.
     # What that deliberately does NOT admit, each named because a widening is
@@ -862,8 +880,66 @@ _ALLOWED_URL_PATTERNS: tuple[re.Pattern[str], ...] = (
     #                                -- so the address itself carries a person
     #                                and admitting it would put one in every
     #                                log line that records a page load.
+    #
+    #                                **AND A SECOND REASON, RULED 2026-09-20,
+    #                                because the first one alone invites the
+    #                                answer "then ship a shaper with it".**
+    #                                That is what the company-page admission
+    #                                did, and the two cases are not the same.
+    #                                THIS PACKAGE COULD NEVER ASSEMBLE THIS
+    #                                ADDRESS. ``company_page.company_page_url``
+    #                                builds the NUMERIC organisation form and
+    #                                the slug form is admitted only because
+    #                                LinkedIn canonicalises one onto the other,
+    #                                so refusing the slug would refuse the
+    #                                ARRIVAL. **No numeric newsletter address
+    #                                is known to exist** -- all ten anchors on
+    #                                the captured manager page are slug forms --
+    #                                so there is no name-free spelling to
+    #                                assemble, and reaching this page would
+    #                                mean navigating to an href THE PAGE CHOSE,
+    #                                which ``tests/test_navigation_is_never_
+    #                                derived.py`` exists to refuse. The rule
+    #                                the company-page wave wrote still governs:
+    #                                *the list admits what the product serves,
+    #                                and the package assembles only what names
+    #                                nobody.* Here those two sets do not
+    #                                overlap, so the door would open onto a
+    #                                room nothing may walk into -- and the room
+    #                                is made of other people's publications
+    #                                with the author named in the address.
+    #                                Census ``M C51``, ``M C80``, ``M C84``,
+    #                                ``N 55``, ``N 56`` and ``P L3`` all wait
+    #                                here, and they wait on that, not on a
+    #                                line.
     #     /newsletters/              the product root, which is a family
     #     /newsletters/<slug>/analytics/   census ``M C83``, ``P L4``
+    #
+    #                                **AND THAT SPELLING IS UNMEASURED, which
+    #                                this line looked like it was asserting.**
+    #                                Nobody in this repository has seen
+    #                                LinkedIn serve it. The page that lists his
+    #                                newsletters links NO analytics address and
+    #                                contains the word "analytics" ZERO times
+    #                                in 74234 characters -- measured 2026-09-20
+    #                                by ``scripts/_probe_newsletter_surface_
+    #                                shape.py``, whose ``--control`` shows the
+    #                                same census naming every one of those
+    #                                words on a document that carries them, so
+    #                                the zero is a reading rather than a dead
+    #                                matcher. A second candidate exists,
+    #                                ``/analytics/creator/newsletters/``, named
+    #                                only in ``tests/test_analytics_creator_
+    #                                boundary.py`` as a MUST-REFUSE and never
+    #                                observed either.
+    #
+    #                                So ``M C83`` and ``P L4`` are not one
+    #                                allowlist line away from anything: they
+    #                                are waiting on a LIVE READ that establishes
+    #                                which address serves, and an entry written
+    #                                for either today would be the one thing
+    #                                the paragraph at the top of this block
+    #                                refuses -- a guessed address.
     #     .../newsletters/?<anything>      a query is where a filter naming a
     #                                person would arrive
     #
