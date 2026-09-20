@@ -763,7 +763,38 @@ away. Instead the synthetic document in `test_a_marked_name_is_not_convicted`
 now carries an indented block of its own, so the path is exercised by the only
 thing that will notice if it breaks.
 
-### 7.5 What the battery cost, and what it bought
+### 7.5 CI reproduced the self-disarm on three platforms, and the read of CI
+### is itself an instance of this class
+
+The first commit, `4b66c03`, carried the self-disarm bug. CI run
+**35492250931** came back **failure** on six shards, and the failing assertions
+are exactly the three from section 7.1 plus one correction-triage -- the same
+defect, reproduced independently on ubuntu py3.10, ubuntu py3.13 and
+windows py3.13. A local finding confirmed by a machine that shares none of this
+one's state.
+
+**And reading that result is the same problem this wave is about.** The run id
+`35492250931` is a name asserted to exist with a property attached, and two
+things can go wrong that a reader cannot see: nobody ever read the conclusion,
+or the conclusion belongs to a commit that is not the branch HEAD. Both were
+live here.
+
+* A watcher's exit code is not a conclusion. `gh run watch --exit-status` exits
+  **0 when it never learned the answer** -- it polls, loses the API to a 403,
+  prints the error and signals success. For a background watch the exit code is
+  the whole signal, so a false green is indistinguishable from a real one.
+* **This wave hit the 403 itself**, mid-read, and a second-order trap with it:
+  `gh api rate_limit` reports a bucket that is not the exhausted one, so the
+  quota looks full while `gh run list` refuses. **The 403 is the measurement.**
+* So every conclusion in this document was read as an artifact --
+  `gh run view <id> --json status,conclusion,headSha` -- with `headSha`
+  compared against the branch HEAD, and a 403 reported as UNKNOWN rather than
+  waited out into a guess.
+
+Section 6.5 counts the run-id citations this corpus already carries. This is
+what it looks like to consume one correctly.
+
+### 7.6 What the battery cost, and what it bought
 
 Nine mutations. **Seven behaved. Two did not, and the two that did not are the
 whole value of running it.** One exposed a control that could not fail, in the
