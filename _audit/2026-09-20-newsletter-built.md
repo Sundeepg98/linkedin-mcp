@@ -18,9 +18,11 @@ and against committed fixtures.
     capability shipped            1   M C50's READ HALF, tested, not a stub
     allowlist patterns added      0   and the refusal is argued, not deferred
     open questions closed         2   by measurement, permanently
-    prose claims corrected        3
-    census defects handed over    2
+    prose claims corrected        3   in readonly.py x2 and one probe header
+    declared corrections          1   the ledger's R/W cell, with back-pointer
+    census defects handed over    2   and neither was fixed by editing a map
     inherited CI reds repaired    1   not this wave's, and it blocked everyone
+    defects in my own output      2   one in a test, one in a reviewed slice
 
 **THIS BLOCKER IS NOT WHAT ITS VERDICT SAYS IT IS, and the number above is the
 evidence rather than an excuse.** Nine of the eleven GAP rows are WRITES whose
@@ -160,6 +162,17 @@ says the word zero times.
 A second candidate exists and is no better off: `/analytics/creator/
 newsletters/` appears only in `tests/test_analytics_creator_boundary.py` as a
 MUST-REFUSE needle. Never observed either.
+
+**AND THE ONE ANALYTICS SURFACE THIS SERVER DOES OPEN DOES NOT CARRY THEM**,
+checked rather than assumed, because it is the obvious place a next wave will
+look. `/analytics/creator/content/` is admitted and IS read, by
+`creator_analytics.read_content_analytics` through
+`linkedin_creator_analytics`. It parses `aria-label` chart annotations into
+`{date, value, metric}` against `chart_labels.KNOWN_METRICS`, a CLOSED set of
+which `impressions` is the only member ever measured live. **There is no
+newsletter dimension and no per-newsletter series** -- the chart is post
+impressions over time. So no part of `M C83` or `P L4` is delivered by it, and
+nothing here was left uncredited.
 
 **THIS SURFACE'S OWN FOUNDING LESSON IS THAT AN ADMITTED ADDRESS IS NOT A
 SERVED ONE.** `/in/me/details/interests/` was admitted for this blocker's
