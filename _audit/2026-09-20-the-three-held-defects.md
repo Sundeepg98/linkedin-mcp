@@ -146,6 +146,15 @@ work began. A tool evaluated on the cases it found is measuring itself.
 | + F1 + F2 + F3 | 6 of 8 | 5 of 8 | 0 of 8 | 0 of 97 |
 | **+ F4 row-id join (shipped)** | **8 of 8** | **7 of 8** | **4 of 8** | **0 of 97** |
 
+**THE MIDDLE THREE ROWS AND THE LAST TWO WERE TAKEN WITH REGEXES THAT DIFFER BY
+ONE ALTERNATION, and saying so is cheaper than a reader finding it.** The F1
+experiment stemmed `blocked` to `block(?:ed|s|ing)?`. That was narrowed back to
+`blocked` alone before shipping, because bare "block" is a LinkedIn capability
+-- block a member -- and would have fired across the whole messaging census. The
+last two rows are the shipped vocabulary; the middle three are the experiment,
+and the difference moves one hand-found document by one rank. It changes no
+conclusion, which is why it is a footnote and not a re-run.
+
 **A column derived from the shipped tool would have named the generated map as
 the document arguing the reason for 59 of 97 blockers** -- and the map is the
 file the column lives in.
