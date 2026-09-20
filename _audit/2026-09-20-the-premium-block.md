@@ -35,6 +35,12 @@ The subscription is not the blocker anywhere on that list. Two rows need only a
 session. Four need a press. Two need an address. Three need a gate that was
 deliberately built to refuse.
 
+**And section 5 is a live defect found while verifying the session script, not a
+census row: the profile-views reader's scope comment and its scope disagree, in
+the one branch no committed fixture exercises.** It would have made the session
+below misread its own nulls, which is the same mistake sections 1.1 and 1.2
+diagnose in the census.
+
 ---
 
 # 1. THE VERDICT ASKED FOR FIRST: J 127 AND N 136
@@ -305,9 +311,12 @@ linkedin_who_viewed_me(limit: int = DEFAULT_LIMIT)               server.py:1551
 ```
 
 `out.update(extra)` puts `insights` at the TOP LEVEL of the result, not nested
-under `extra`. The trend field survives even where LinkedIn drops
-`data-view-name`: the reader has a text fallback that finds the chart's own
-sentence ("Line chart with N data points.") directly.
+under `extra`. The trend field has TWO routes to `chart_present`: the
+`data-view-name="line-chart"` holder, and -- if that misses -- a scan of the
+scope's text for a line containing `data point`, which sets `chart_present`
+itself. So a missing view-name attribute alone does not null the trend.
+**But see section 5: the SCOPE both routes run in is narrower than this file's
+own comment claims, and that is the thing most likely to null it live.**
 
 ## BOTH CHAINS FAIL LOUDLY, WHICH IS WHY THE FIRING RULE HAS A PRECONDITION
 
@@ -478,23 +487,39 @@ rounded up.
 
 `limit` defaults to `DEFAULT_LIMIT`; no required parameters.
 
-1. **Check `result.insights_error` first.** If present, STOP for this call:
+0. **Check `result.insights.observed.main_present` BEFORE anything else.**
+   This is the discriminator for the scope defect in section 5. If it is
+   `true`, the reader scoped to `<main>`, and **every absence in this result is
+   an absence WITHIN `main`, not on the page** -- record the result and treat
+   no null in it as evidence about LinkedIn. If it is `false`, the reader
+   widened to `document.body` and the absences are real page absences.
+1. **Check `result.insights_error`.** If present, STOP for this call:
    nothing promotes, and the exception type is the finding.
 2. `result.insights.trend.present` and `result.insights.trend.description`
    -- a non-null description **promotes N 135 to COVERED-PROVEN.**
+   Three gates can leave it null, and only the third is about LinkedIn:
+   (i) the insights block sits inside `if rows:` (`server.py:1618`), so a load
+   that parses zero viewer cards skips the read entirely -- but if BOTH urls
+   yield zero the whole call raises, so there is **no silent
+   success-with-absent-insights** here; (ii) the `except` above; (iii)
+   `chart_present` false on both routes. A null `trend` with `main_present
+   true` is gate (iii) reading a scope that may not contain the chart.
 3. `result.insights.observed.view_names` -- **the N 136 instrument.** The reader
-   collects every `data-view-name` on the page, unfiltered, up to 60.
+   collects every `data-view-name` in scope, unfiltered, up to 60.
    * **NON-EMPTY** -> a real measurement of the rendered DOM. Absence of any
      locations / industries / companies view name then settles N 136 as absent
      on the unpressed render, on an instrument that COULD have shown it.
      Expect `analytics-section-show-more` to be among them.
-   * **EMPTY** -> **N 136 stays open and the call proved nothing about it.**
-     This is a documented failure mode, not a surprise: the live page on
-     2026-09-03 carried no `data-view-name` attribute anywhere, which is exactly
-     why the reader ships a `<label>`-text fallback for its filters.
-4. `result.insights.observed.main_chars` -- how much of the page rendered. A
-   small number means the page deferred itself and no absence claim is available
-   from this reading at all.
+   * **EMPTY with `main_present false`** -> a real absence across `body`.
+   * **EMPTY with `main_present true`** -> **N 136 stays open and the call
+     proved nothing about it.** The committed capture has **no `<main>` at all**
+     and carries all 45 of its `data-view-name` elements outside one, which is
+     the documented shape of this page: LinkedIn draws its furniture above and
+     beside the content region. A `main`-scoped read on a page built that way
+     is looking in the wrong box.
+4. `result.insights.observed.main_chars` -- how much of `main` rendered. A small
+   number alongside `main_present true` is the strongest sign the scope, not
+   the page, produced the nulls.
 5. The viewer rows themselves are the 365-day Premium window in use.
 
 ### Call 3 -- `linkedin_job_detail(job_id="<a live posting id>")`
@@ -506,6 +531,14 @@ One required parameter, a string.
    **promotes J 123 to COVERED-PROVEN.** The heading comes back as the shape
    `Exclusive Job Seeker Insights about <company>`; the employer is replaced
    before it leaves the reader, so the result is safe to paste.
+   **DO NOT RUN THIS ON ONE POSTING AND CONCLUDE ANYTHING FROM A NULL.**
+   Inside the reader, `company` starts `None` and is reassigned only if some
+   section heading starts with `JOB_COMPANY_PANEL_PREFIX`. The tool's own
+   docstring records the panel as **absent on four of the five committed
+   captures**, and calls that *"the normal case and not a failure"* --
+   LinkedIn draws it for some employers and not others. So J 123 promotes on
+   the FIRST posting that draws it; budget several job ids, and a null is a
+   fact about that employer, never about the capability.
 3. `result.insights.more_behind_a_control` -- expect `Show match details` and
    `Show Premium Insights`. **That list is the citable evidence that J 124 and
    J 126 are behind a named, rendered, unpressed control rather than behind the
@@ -536,3 +569,91 @@ One required parameter, a string.
 * **No write row moves** -- J 78/79/80, J 129, M M47, N 192, P B9 all need writes
   enabled, and the InMail family additionally needs a recipient the gate can
   confirm.
+
+---
+
+# 5. FOUND WHILE VERIFYING THE SESSION SCRIPT: THE SCOPE COMMENT AND THE SCOPE DISAGREE
+
+**Not a census row. A live defect in `PROFILE_VIEWS_INSIGHTS_JS` that would have
+made the session script above misread its own results, and it is the same
+disease as sections 1.1 and 1.2 wearing a third costume.**
+
+`dom.py`'s comment block above `PROFILE_VIEWS_INSIGHTS_JS` says, in capitals:
+
+> *"THE SCOPE IS THE DOCUMENT, AND `main` IS REPORTED RATHER THAN OBEYED."*
+> *"WIDENING IS SAFE HERE BY CONSTRUCTION, WHICH IS THE ONLY REASON IT IS DONE."*
+
+The code, eleven lines below that sentence, is:
+
+```js
+const scope = main || document.body;
+```
+
+**That OBEYS `main` whenever `main` exists**, and widens to `document.body` only
+when it does not. The comment describes the fix; the code makes a different one.
+
+### Why the test corpus cannot catch it
+
+Measured: `grep -c "<main" tests/fixtures/profile_views_analytics_hydrated.html`
+-> **0**. **No committed fixture of this page has a `<main>` element**, so every
+test takes the `document.body` branch. The live page has a `main` -- the whole
+2026-09-03 measurement is premised on it -- so **the live call takes the branch
+nothing tests, and the tests take the branch nothing live does.**
+
+### Why that matters more than it looks
+
+The comment block itself records what a `main`-scoped read returned on that page:
+
+> *"This scoped to main and returned nulls for three fields on the live page --
+> measured 2026-09-03: trend null, filters [], viewer_rows 0, while the controls
+> were on screen and nine viewer rows had just been harvested."*
+
+That is the exact failure the widening was written to cure, and on a page with a
+`main` the code still selects the narrow scope. **A null `trend` or an empty
+`view_names` from a live call is therefore ambiguous between "LinkedIn did not
+draw it" and "we looked inside the wrong box"** -- which is precisely the
+confusion that closed J 127 and N 136 wrongly.
+
+### A related stale diagnosis, in the same file
+
+The filters comment a few lines down still says *"the live page on 2026-09-03
+carried NO `data-view-name` attribute ANYWHERE."* The scope comment says the
+committed capture has *"45 `data-view-name` elements outside"* a `main`. Both
+describe the same measurement and they are not compatible. The first is the
+PRE-widening diagnosis, left in place after the reason for it was superseded --
+a correction recorded in one comment and not held in its neighbour.
+
+### WHAT I DID ABOUT IT
+
+**Nothing to the code.** `dom.py` is the contended file this package's own
+`premium.py` header cites as the reason modules ship standalone, and this wave
+is offline analysis. The defect is reported, not patched.
+
+**What makes it survivable in the meantime** is that the reader already returns
+the discriminator: `observed.main_present` says which branch ran. That is why
+step 0 of call 2 is to read it first. A result with `main_present true` and
+empty aggregates is not a measurement of LinkedIn and must not be banked as one.
+
+### THE FIX, WHEN SOMEONE OWNS THAT FILE
+
+One line -- make the scope match the comment (`document.body`, with `main`
+reported and not obeyed) -- plus the thing that would have caught it:
+**a fixture of this page WITH a `<main>` element**, so the branch the live call
+actually takes is the branch a test takes too. Ship the fixture first and watch
+it fail.
+
+### AND ONE CHECK THAT CANNOT FAIL, FOUND THE SAME WAY
+
+For J 123: no committed test asserts `company_insights` off the **tool's**
+return value. `tests/test_free_read_panels.py` asserts it richly but calls
+`dom.read_job_insight_panels` directly; the one test that drives the real tool
+(`test_the_tool_actually_returns_the_panels_it_computes`) pins
+`applicant_insights` instead. A future change that filtered `out["insights"]`
+down to a named subset -- keeping `applicant_insights`, dropping
+`company_insights` -- **would pass every committed test in this repository.**
+The repo has the general structural law for this
+(`tests/test_a_covered_row_names_the_artifact_that_covers_it.py`) but its
+`COVERED_ROWS` table binds only `J 10`, `K10` and `J 151`; **`J 123` is not in
+it.** Registering J 123 there is the right follow-up, and it is correctly gated
+on the session script firing first -- the table is for COVERED rows, and J 123
+is COVERED-UNFIRED until someone runs call 3.
