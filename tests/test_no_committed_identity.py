@@ -311,6 +311,23 @@ DECLARED_PLANTS = {
     # The fixture guard's can-it-fail control, whose synthetic member token is
     # deliberately absent from the allowlist -- that IS the property it tests.
     ("tests/test_sdui_surfaces_fixture.py", "member token"): 1,
+    # 2026-09-20, added by the integrator at the evidence-resolves merge, where
+    # this guard went RED on master before the push. The banked-evidence guard
+    # asks whether a cited artifact is reachable from a CLONE, so its control
+    # needs an artifact that demonstrably is not -- and a drive-rooted absolute
+    # path is precisely that shape. The plant is `Z:` followed by invented
+    # segments: no such drive is mounted on this machine, no segment names a
+    # person or a place, and the string identifies nobody.
+    #
+    # DECLARED RATHER THAN DEFUSED, deliberately. The cheap fix was to rename
+    # the first segment to one already inside GENERIC_DRIVE_ROOTS, which would
+    # have gone green without anybody writing down why -- and would have spent
+    # corpus-wide vocabulary to silence one fixture. The shape is load-bearing
+    # in that control: soften it and the control stops standing for the thing
+    # it certifies. Pinned at 1 so a SECOND drive-rooted path appearing in that
+    # file is a fresh red, which is the whole point of counting rather than
+    # skipping.
+    ("tests/test_banked_evidence_is_reachable.py", "drive root"): 1,
     # The messaging probe's redaction test needs a urn-SHAPED literal to feed
     # its redactor. THIS ENTRY WAS EARNED THE HARD WAY: that file first shipped
     # with the REAL member urn the probe had printed, and this guard caught it
