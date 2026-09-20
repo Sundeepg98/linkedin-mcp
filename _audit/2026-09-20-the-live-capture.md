@@ -20,7 +20,7 @@ without the argument in section 7.**
     offline instruments shipped       1    + 5 controls, all driven into failure
     prior findings live-reproduced    2    the newsletter census, the unlock asymmetry
     prior hypotheses live-confirmed   1    the profile-views scope defect
-    defects found in my own work      2    section 9
+    defects found in my own work      3    section 9, and 9c was found last
     allowlist patterns added          1    section 11, and it bought no row
     open questions closed later       1    section 11 answered section 10's first
 
@@ -455,7 +455,7 @@ longer "nobody has opened this page."
 
 ---
 
-## 9. EVERY CONTROL, AND THE TWO DEFECTS IN MY OWN WORK
+## 9. EVERY CONTROL, AND THE THREE DEFECTS IN MY OWN WORK
 
 ### The instrument
 
@@ -492,6 +492,27 @@ three surfaces. Those are bundle strings. Had I stopped there I would have
 reported the opposite of the truth on the row the operator asked about most,
 with a number attached to make it look measured. Section 2 is that mistake
 turned into the instrument's primary output.
+
+### 9c. I REPORTED RUNNING FEWER CONTROLS THAN I RAN
+
+Found after the freeze, by re-deriving section 11's numbers from the capture
+instead of from my own prose. **The role-play listing was put to FIFTEEN
+empty-state and error needles, not fourteen**, and all fifteen stayed silent.
+The audit, three census rows and the `readonly.py` entry each said fourteen.
+
+An understated count is still a wrong count, and this one sat under the claim
+that carries the most weight in section 11 -- *the page does not even report
+that there is nothing*. **The number of needles that stayed silent IS that
+claim's evidence**, so getting it wrong in the safe direction is not a
+mitigation. Corrected in all four places, in its own commit, rather than
+folded quietly into another change.
+
+**AND THE WAY IT WAS FOUND IS THE REUSABLE PART.** Nothing flagged it -- no
+test binds prose to a measurement. It surfaced because the numbers were
+re-taken from `_state/` at the end and compared against what the document
+said, which is the same check that caught section 6b's admitted count going
+stale. **A wave that writes numbers into prose should re-derive them from the
+artifact before it stops, because the tree will not.**
 
 ### A third instrument still cannot fail, and it is not mine
 
