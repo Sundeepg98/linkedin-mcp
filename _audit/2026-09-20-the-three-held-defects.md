@@ -467,10 +467,20 @@ which is not one of them.
 3. **De-duplication policy is unruled.** Delete the duplicate row, or mark it?
    Section 3.3. `N 149`/`N 160` are blocked on this and so is every future
    cross-slice re-file.
-4. **The map's locator for these four rows has rotted.** It records
-   `L296,L537,L647`; the real occurrences are at L325 and L558 and there is no
-   third. A line-number citation does not dangle, it rots into a plausible wrong
-   answer. Cite symbols or row ids.
+4. **The map's locator for these four rows has rotted**, and it is worth seeing
+   what rot looks like. It records `L296,L537,L647`. The real occurrences are
+   L325 (the cost-0 table row) and L558 (the double-count paragraph), and there
+   is no third. What the three cited lines actually hold today:
+
+       L296  (five places searched, reported UNFOUND rather than guessed).
+       L537  18 my blocker is a surface name and nothing more.
+       L647      390   at 23f04f1
+
+   **Not one of them dangles.** Each reads like something a careful reader might
+   accept -- a methodology note, a sentence about blocker naming, a figure in a
+   table -- which is exactly the failure mode: a line-number citation rots into a
+   plausible wrong answer that stops the reader instead of sending them looking.
+   Cite symbols or row ids.
 5. **`N 95`/`N 96` carry a live contradiction** between two same-day documents,
    one saying the pair is settled onto the jobs rows and the other saying they
    were carved back. Nobody has closed it.
