@@ -366,6 +366,26 @@ subject) twin that IS an ancestor"**, which is exactly the three in 4.1 and
 excludes all four here. The four need no action: they become ancestors when the
 integrator merges.
 
+### 4.3 ADDENDUM 2026-09-20 -- NO MERGE CAME, AND ONE MEASURABLY WILL NOT
+
+4.2 predicted the four SHAs above become ancestors when the integrator
+merges. Measured the next day: no merge happened. `master` instead carries
+all eight 2026-09-19 waves' combined effect as one commit, `fa13985`
+("integrate: eight waves' work, replayed as content onto the purged
+history"), and the four SHAs remain non-ancestors of `master` today -- the
+ancestry check in 4.1 gives the same off verdict now that it gave then.
+
+A follow-up sweep found `integrate-1821` is not the only branch on this line:
+eight `worktree-agent-*` branches share its 2026-09-05 merge-base with
+`master`, add zero files `master` lacks, and score no better than `master` on
+the census GAP / COVERED-UNFIRED count, checked with `master`'s own
+`scripts/enumerate_gap_rows.py --ref <branch>`: `master` 302/29; the eight
+branches read 311/27 or 303/27; `integrate-1821` itself reads 303/27. A merge
+bringing any of them in would add nothing a reader of `master` does not
+already have, which is the operational reason none is pending.
+
+**CORRECTED BY:** `_audit/2026-09-20-the-six-unremapped.md` -- the "become ancestors when the integrator merges" line two paragraphs up; no merge happened and none is expected, per the branch-family measurement in that document.
+
 ---
 
 ## 5. WHAT THIS WAVE DID NOT DO
