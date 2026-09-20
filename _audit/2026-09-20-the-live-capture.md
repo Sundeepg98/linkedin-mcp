@@ -577,7 +577,7 @@ error copy.
     rendered text                            1135 chars
     anchors / buttons / headings           24 / 26 / 6
     <main> rendered text                       17 chars -- TWO WORDS, 1% of the page
-    empty-state and error needles tried          14, all silent
+    empty-state and error needles tried          15, all silent
     samples over 25 seconds                       3, byte-identical
 
 **SEVENTEEN CHARACTERS IN `main`.** The 1135 characters are LinkedIn
@@ -586,7 +586,7 @@ settle, +10s and +25s came back byte-identical, so **this is not a hydration
 race** -- the page settled and that is what it drew.
 
 **AND THERE IS NO EMPTY-STATE MESSAGE EITHER**, which is the part worth
-pausing on. A product with no sessions to show usually says so. Fourteen
+pausing on. A product with no sessions to show usually says so. Fifteen
 needles -- `not available`, `no longer`, `sorry`, `page not found`, `try
 again`, `coming soon`, `nothing here` and seven more -- all silent. This page
 does not report that there is nothing; it reports nothing.

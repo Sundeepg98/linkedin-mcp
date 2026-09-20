@@ -1437,7 +1437,7 @@ _ALLOWED_URL_PATTERNS: tuple[re.Pattern[str], ...] = (
     #   CHARACTERS, two words, one percent of the page's own rendered text.
     #   Sampled three times over 25 seconds, byte-identical each time, so it
     #   is not a hydration race. No scenario list, no history, and no
-    #   empty-state or error message either -- fourteen empty/error needles
+    #   empty-state or error message either -- fifteen empty/error needles
     #   all silent.
     #
     # SO THE ENTRY IS KEPT, AND IT DELIVERS NO ROW TODAY. That is recorded
