@@ -278,3 +278,25 @@ the decision is untaken; `POST-COMMENT-CONTROLS` is MEASURE at cost 6.
 **I did not reach a fixed point.** I reached a point where every remaining row
 has a NAMED reason it cannot be routed, and four of those reasons are questions
 for somebody with standing to answer them.
+
+---
+
+# ADDENDUM 2026-09-20 -- THE TWO COMMIT CITATIONS IN THE READINGS TABLE
+
+Appended at the end rather than inline by the table, so no line number any
+other tracked document cites into this file moves.
+
+`86b8ed5` and `5581950` (READINGS table, above) do not resolve on `master`.
+Both are ancestors of `integrate-1821` and of
+`worktree-agent-aa255d5b6ed0788c7` only. The rows each filed are on `master`
+regardless: all six of `86b8ed5`'s (`COMPANY-PAGE-SURFACE` N 33 / N 47 / N 53
+/ N 54, `PER-MESSAGE-OVERFLOW-MENU` M M11, `HASHTAG-EXISTENCE` N 61) and all
+nine of `5581950`'s were present in `_audit/_census/blocker-assignments.tsv`
+at the point `master` carried them in, by commit `fa13985`. Two of the
+fifteen did not stay: N 61 was later taken out on its own evidence by
+unrelated project work, and M M11's text (not its conclusion) was overtaken
+by an independent commit that reached the same filing on a separate branch. A
+few more of the nine (`M C23`, `M C29`, `M C90`, `M M10`) carry evidence text
+a later same-branch commit rewrote before the replay; the row's own
+assignment is unchanged in every one of those. Row-by-row evidence:
+`_audit/2026-09-20-the-six-unremapped.md`.

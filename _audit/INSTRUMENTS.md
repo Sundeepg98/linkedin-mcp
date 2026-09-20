@@ -4726,3 +4726,111 @@ Three scratchpad probes: a five-target capture driver, a landing-url namer,
 and an offline analyser over the captures. Their results are section 12 of
 `_audit/2026-09-20-the-live-capture.md`; the captures they wrote are in
 `_state/` and re-readable without them.
+
+---
+
+## 30. The names-that-do-not-exist wave, 2026-09-20
+
+### 30.1 `scripts/check_asserted_names_resolve.py` -- A NAME AN AUDIT DOCUMENT ASSERTS MUST RESOLVE
+
+A citation to something that does not exist does not rot into an obviously
+dangling reference. **It rots into a PLAUSIBLE WRONG ANSWER**, which stops the
+reader instead of sending them looking. Four separate waves hit that class on
+one day and none of them was looking for it.
+
+The hard part is that a document may legitimately name something absent. The
+rule was read off the corpus rather than invented: **this corpus already MARKS
+its proposals** -- "New blocker:", a "(proposed)" column header, "Re-file as",
+"a SPECIFICATION, not a build", a modal, or the document disclosing the absence
+itself. The burden of marking is the author's, and an unmarked name in a
+referential position is an assertion because a reader has nothing else to go on.
+
+Measured over 166 files / 78,656 lines: precision 1.00 and recall 1.00 on both
+kinds, over a COMPLETE census of their decision space rather than a sample --
+tools n=4 occurrences, blockers n=234. 4 asserted-and-absent citations, all in
+one document. Full workings: `_audit/2026-09-20-names-that-do-not-exist.md`.
+
+### 30.2 A GUARD CAN DISARM ITSELF BY DOCUMENTING ITSELF
+
+**Shown failing in the live tree within an hour, with nothing planted, and CI
+reproduced it on three platforms.**
+
+`tool_registry()` shipped scanning raw text of `linkedin_server/`, `scripts/`
+and `tests/`. Then the guard was committed -- with a docstring naming its worked
+examples and a test planting a control needle. Those strings landed in the
+scanned directories, the registry swallowed them, and the next run reported ZERO
+absent tool names, with the pin going red in the direction that reads "these
+defects were REPAIRED". Nothing had been repaired.
+
+**This is the corpus's own defect one level up: writing ABOUT a name is not the
+name existing.** A test's string literal and an audit sentence are the same kind
+of thing, and a registry that reads one but not the other draws the line in the
+wrong place.
+
+Two candidate fixes were MEASURED AND REJECTED before the third was taken.
+Scoping to `linkedin_server/` alone convicts a document for quoting a shipped
+`FORBIDDEN_TOOLS` contract; restricting to AST identifiers loses 26 of 72 corpus
+tokens, because real tool names live in string literals here. **The defect was
+never the extraction technique. It was the scope.**
+
+THE GENERAL FORM, for any guard that resolves names against a tree: **a guard
+must not read its own commentary as evidence.** The fix is NOT to rename the
+fixtures -- that tunes the test to dodge the bug and leaves production blind.
+`test_the_registry_cannot_absorb_a_name_from_its_own_instruments` names the four
+exact strings that did it.
+
+### 30.3 A UNION CLAIM OVER A REDUNDANT CORPUS CANNOT SEE A NARROWING
+
+`test_the_table_slot_still_reproduces_the_registry` asserted that all 97 ledger
+blockers still appear SOMEWHERE in the slot's output, and its docstring called
+that "the whole precision argument for the slot, asserted rather than believed".
+A red-proof narrowed the header predicate from a substring test to an exact
+match -- removing twelve genuinely blocker-labelled columns -- and **the test
+passed cleanly**, twice, on two independent clean baselines. This corpus is
+redundant enough that every one of the 97 is also cited elsewhere.
+
+Repaired by exercising the predicate DIRECTLY, a synthetic one-row table per
+header spelling through the real code path. The union test is KEPT beside it:
+collapse and narrowing are different failures and only one was covered.
+
+**AND THE SAME MUTATION KILLED A SECOND, UNPREDICTED MARKER CLASS.** Its three
+corpus examples sat under two of the same header spellings. **A single-selector
+red-proof under-reports the blast radius of its own mutation**, and a reviewer
+who ran only the named selector would ship believing one gap was closed.
+
+### 30.4 A MECHANISM THAT IS CORRECT AND LOAD-BEARING NOWHERE
+
+Deleting the guard's 4-space-indented-block handling changed nothing: 38
+candidate sites before, 38 after, across 167 files. The document that motivated
+it is doubly defended by an independent registry path, and no other indented
+block in the corpus carries a candidate-shaped name.
+
+It was NOT deleted -- "nothing in today's corpus needs it" is an argument about
+today. A synthetic indented block was added to a control instead, so the path is
+exercised by the only thing that will notice. **Register the state explicitly:
+a component nothing exercises is one edit from silently ceasing to work, and it
+looks identical to one that is load-bearing.**
+
+### 30.5 TWO NUMBERS THIS WAVE GOT WRONG, BOTH CAUGHT BY A READER
+
+* **Per-spelling counts that did not sum.** 347 + 7 + 5 + 4 + 2 + 2 against a
+  stated total of 13 non-bare. The measurement attributed each selection to
+  EVERY blocker column in its table, so two-column tables double-counted.
+  Re-measured per originating column: 347 + 5 + 4 + 2 + 2 = 360, and one
+  spelling carries zero. **A number that does not sum is a number nobody
+  checked.** A child pasted both figures, flagged the discrepancy, and declined
+  to reconcile it silently; that is the only reason it was found.
+
+* **A window that measured text WRAPPING.** The name-scoped absence rule was
+  line-bounded, so a disclosure split across a line break did not register and
+  the guard convicted a reflowed sentence. Markdown renders that as one
+  paragraph. Fixed to span whitespace. The 120-character width remains a
+  threshold nobody derived and the ledger says so.
+
+### 30.6 DISPOSABLE, declared
+
+Twelve scratch probes in the session scratchpad -- candidate-population
+extraction, per-phrase slot scoring, registry-variant comparison, and the
+frozen-snapshot census. All are superseded by the committed guard, which does
+what they did with controls. Their numbers are the tables in
+`_audit/2026-09-20-names-that-do-not-exist.md`.

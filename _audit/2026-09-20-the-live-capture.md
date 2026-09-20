@@ -28,6 +28,8 @@ without the argument in section 7.**
     write-offs classified by fact     13    section 13, 0 moved, 2 re-verified
     ALLOWED-AND-STILL-WRONG found      3    of 4 admitted addresses loaded; the 4th is the control
     CANNOT-TELL blockers settled      5    + COMPANY-PAGE, section 15
+    classifier addresses re-checked   26    section 16; 14 landed, 5 redirect
+    corrections to my OWN audit        2    sections 12.9 and 6b, both by me
     caveats found against my own rows  1    section 14, and it resolves in their favour
 
 **THE SCARCE RESOURCE WAS THE SESSION AND IT WAS SPENT ON READS.** Thirteen
@@ -764,6 +766,12 @@ nothing was reached improperly.
 
 ### 12.3 `GROUP-CHAT-SURFACE` -- NOT ANSWERED, AND THE REASON IS NOW EXACT
 
+> **DO NOT SEND ANOTHER BROWSER WAVE AT THIS BLOCKER OR AT `MESSAGE-REQUESTS`.**
+> Both were filed as capture-blocked and neither is. A browser cannot help:
+> the only admitted messaging address lands INSIDE one thread, so no page
+> load can enumerate the inbox. **What they need is an ADDRESS that lists
+> conversations, and finding one is desk work, not session work.**
+
     conversation-marked elements drawn     3
     facepile-classed elements             14
     rendered "group"                       1
@@ -864,6 +872,19 @@ Both are name-free, same-origin, and served-adjacent -- the same standard that
 justified section 11's admission. Filed as candidates, not admitted here.
 
 ### 12.9 `CREATOR-HUB-SURFACE` -- THE CLASSIFIER IS WRONG, AND THE COPY-PASTE HYPOTHESIS HOLDS
+
+**CORRECTED BY:** `_audit/2026-09-20-the-live-capture.md` -- section 16.1 read the committed classifier and found it does NOT assign the address this section accuses it of assigning.
+
+> **THE HEADING ABOVE IS WRONG AND IS LEFT STANDING SO THIS PARAGRAPH IS
+> FINDABLE FROM IT.** The
+> committed classifier does NOT assign that address -- it lists
+> `CREATOR-HUB-SURFACE` in a separate `DISPUTED_ADDRESSES` table carrying
+> BOTH candidates, prints both verdicts on every run, excludes it from its
+> headline tally, and says in its own comment that the duplicate was in the
+> FIRST CUT and that it declines to adjudicate. I restated a relayed summary
+> as a finding about code I had not opened. **The page measurements below
+> are sound and stand; the accusation against the classifier does not.**
+> The dispute is adjudicated on evidence in section 16.2.
 
 The conflict: commit `9d15c11`'s classifier assigns CREATOR-HUB-SURFACE the
 address `/analytics/creator/content/`, ALLOWED -- **identical to the one it
@@ -1198,3 +1219,212 @@ distinguishes the two states: probe `/json/version` and ask the server whether
 it can still see the browser. Both are read-only and both take seconds.
 
 **Nothing was killed, and no browser process was touched.**
+
+---
+
+## 16. THE CLASSIFIER RE-CHECK -- AND FIRST, A CORRECTION I OWE ITS AUTHOR
+
+> **PROVENANCE, because `git log` on this file will mislead a reader.** This
+> section landed in commit `12ce9cd`, whose subject is *"fix(audit): a
+> phantom tool name, caught by the guard built to catch it"* and which
+> belongs to a different wave. It was staged in the shared main tree when
+> that wave committed, and a commit taking the whole index swept it in --
+> 208 insertions, all of them this section.
+>
+> **THE COMMIT WAS THE CAMPAIGN LEAD'S, and the mechanism is worth naming
+> exactly.** The lead ran `git add` with two explicit paths -- correctly
+> pathspec-limited -- and then a plain `git commit`, which builds from the
+> WHOLE INDEX and therefore took this file too. A pathspec on the `add`
+> constrains nothing about what is already staged; `git commit --only <paths>`
+> is the form that does. The lead had warned two other waves about precisely
+> this hazard in the hours before doing it, which is the part worth keeping:
+> knowing the rule is not the same as reaching for the right flag. **Nothing was lost and nothing
+> was altered:** both correction markers survived and the nine correction
+> guards pass. Recorded rather than repaired, because rewriting published
+> history to fix an attribution is a worse trade than one paragraph.
+> **It is also the live demonstration of why a commit in this tree should
+> be pathspec-limited**, which is the discipline every other commit in this
+> wave used and this one was on the receiving end of.
+
+**CORRECTS:** `_audit/2026-09-20-the-live-capture.md` -- its own section 12.9, which accused a committed classifier of a defect it does not have.
+
+### 16.1 I ACCUSED A COMMITTED ARTIFACT OF A DEFECT IT DOES NOT HAVE
+
+Section 12.9 states that commit `9d15c11`'s classifier **"assigns
+CREATOR-HUB-SURFACE the address `/analytics/creator/content/` -- identical to
+the one it assigns CONTENT-ANALYTICS-SURFACE"**, calls that **"a defect in the
+new classifier"**, and concludes the copy-paste hypothesis holds.
+
+**I read the relay and not the file. The committed classifier does none of
+that.** Read at `scripts/classify_surface_blockers.py`:
+
+* `CREATOR-HUB-SURFACE` **is not in `SURFACE_ADDRESSES` at all.**
+* It is in a separate `DISPUTED_ADDRESSES` table carrying **both** candidates,
+  and the run prints `DISPUTED  /analytics/creator/content/ -> ALLOWED |
+  /creator-hub/ -> refused` -- both verdicts, side by side.
+* Its comment block says the duplicate existed **"in the first cut of this
+  table"**, that an evidence sweep found it, that it is **"a guess wearing a
+  measurement's clothes"**, and that the sweep **"declined to adjudicate it
+  and so does this file."**
+* The disputed blocker is **excluded from the headline tally**, which says so
+  in its own output: *"denominator excludes 1 blocker(s) whose address is
+  DISPUTED"*.
+
+**So the defect was caught BEFORE the commit, by its own author, and the
+committed artifact is honest about exactly the thing I accused it of hiding.**
+The table even states its epistemic status unprompted -- *"THIS TABLE IS A
+CLAIM, NOT A DERIVATION, and it is written out rather than computed precisely
+so it can be argued with"* -- and prints each url next to its verdict on every
+run, which is the property that let me check it in ten minutes.
+
+**WHAT I GOT WRONG AND WHY IT MATTERS MORE THAN THE ROW.** My measurement of
+the PAGE was sound and stands: `/analytics/creator/content/` carries the
+string `creator-hub` zero times in its entire source, and `/creator-hub/` is
+refused by the live gate. My claim about the CLASSIFIER was not a measurement
+at all -- it was a relayed summary I restated as a finding about committed
+code I had not opened. **This repository's standing lesson is that a number
+one agent hands another is a reading with a timestamp the receiver cannot
+see. I applied that to numbers and not to accusations.**
+
+The sentence in 12.9 that survives is the recommendation: every assigned
+address wants checking against the live gate AND against LinkedIn. Section
+16.3 is that check, and it was worth running.
+
+### 16.2 THE DISPUTE THE CLASSIFIER DECLINED TO ADJUDICATE, ADJUDICATED
+
+It held `CREATOR-HUB-SURFACE` open because no capture existed either way. One
+now does, so the question it left is answerable:
+
+    /analytics/creator/content/   SERVES, not redirected, 2288 rendered chars
+                                  of real content (analytics 5, impression 5,
+                                  engagement 4, post 7, follower 1)
+    the string "creator-hub" in that page's ENTIRE SOURCE            0
+    rendered "creator" / "hub" / "mode" / "tools"            0 / 0 / 0 / 0
+    sibling routes it DOES draw   /analytics/creator/audience/
+                                  /analytics/creator/top-posts/
+    /creator-hub/ against the live gate                       refused
+
+**The two are not one surface.** The analytics page has no creator-hub
+relationship of any kind -- not a link, not a mention, not a bundle string --
+and it draws its own siblings instead. `/analytics/creator/content/` belongs
+to `CONTENT-ANALYTICS-SURFACE` alone; `CREATOR-HUB-SURFACE` keeps
+`/creator-hub/`, refused, and stays class 2: a ruling, then an entry, then a
+load, in that order.
+
+**Its three rows are `P L1`, `P L7` and `P L8`** and none of them moves. What
+moves is that the dispute is closed on evidence rather than preference, which
+is what its author asked for by declining to guess.
+
+### 16.3 THE RE-CHECK: 26 ADDRESSES AGAINST OUR GATE, AND 14 AGAINST LINKEDIN
+
+**The gate half needs no browser** and the classifier already runs it: 17
+ALLOWED, 8 refused, 1 disputed. **15 of 25 base addresses are ALREADY allowed
+while the ledger still bills an allowlist entry** -- the classifier's own
+headline, reproduced unchanged.
+
+**The half only a live session can do is whether LinkedIn SERVES them.**
+Fourteen admitted addresses were loaded across this wave, landing URL recorded
+every time:
+
+| address | landed | redirected |
+|---|---|---|
+| `/jobs/alerts/` | `/jobs/jam` | **YES** |
+| `/messaging/` | `/messaging/thread/<id>` | **YES** |
+| `/jobs/collections/recommended/` | reported redirected by the tool | **YES** |
+| `/in/me/` | `/in/<entity>` -- a decorated member path | **YES** |
+| `/school/example/` | **`/company/<entity>/about`** | **YES** |
+| `/company/<slug>/` | itself | no |
+| `/messaging/compose/` | itself | no |
+| `/preload/sharebox/` | itself | no |
+| `/analytics/creator/content/` | itself | no |
+| `/analytics/search-appearances/` | itself | no |
+| `/premium/my-premium/` | itself | no |
+| `/mynetwork/network-manager/newsletters/` | itself | no |
+| `/events/` | itself | no |
+| `/groups/` | itself | no |
+
+**FIVE OF FOURTEEN ADMITTED ADDRESSES DO NOT SERVE AT THE SPELLING THE TABLE
+HOLDS.** Nine do, which is the control: an instrument reporting every address
+as redirected would be measuring itself.
+
+### 16.4 THE TWO NEW ONES, AND THE SCHOOL RESULT IS STRUCTURAL
+
+**`BADGES-SURFACE` -- `/in/me/` redirects to a decorated member path.** This
+repository already knew it in the abstract: `test_navigation_is_never_derived`
+exists partly because *"`/in/me/` resolved to a decorated member path and a
+slug went into a traceback."* Now it is measured on this account, and the page
+behind it is substantial -- 398401 bytes, 10122 rendered chars, 142 anchors,
+16 headings. The surface renders; the address moves.
+
+**`SCHOOL-PAGE-SURFACE` -- `/school/example/` lands on
+`/company/<entity>/about`.** LinkedIn canonicalises the school family onto the
+COMPANY family, and it does so even for a placeholder slug this repository
+invented. 118486 bytes, 3001 rendered chars, 50 anchors, 9 headings -- a real
+page, not an error.
+
+**THAT IS A STRUCTURAL FACT AND NOT A CURIOSITY.** A reader built against
+`/school/<slug>/` would be parsing a company page. Anyone costing
+`SCHOOL-PAGE-SURFACE` as a separate reader is costing a surface that
+canonicalises into one already admitted and already partly read -- section 15
+measured the company root's six sub-tabs, of which `about` is the one this
+redirect lands on.
+
+**`EVENTS-SURFACE` draws four `<main>` elements**, recorded because every
+scope-based reader in this package assumes one; section 5's whole defect was a
+reader scoped to a `main` that was the wrong box.
+
+### 16.5 THE ONE ADMITTED ADDRESS I DID NOT LOAD, AND WHY THAT IS THE ANSWER
+
+**`ARTICLE-SURFACE` -- `/article/new/`. ALLOWED, and deliberately not opened.**
+
+It is a COMPOSER. `_audit/2026-09-20-newsletter-built.md` records that opening
+one **may autosave a draft this server has no surface to detect**, and that
+wave refused to admit a second composer for exactly that reason. Loading it to
+find out whether it serves would risk the side effect the refusal exists to
+prevent, and a draft silently created under his name is not recoverable by
+anything in this package.
+
+**So its landing is UNKNOWN and will stay unknown until somebody rules on the
+autosave class.** That is a real answer and it is different in kind from the
+other thirteen: not *nobody looked*, but *looking costs more than the
+finding*. The cell should say so.
+
+### 16.6 A MISMATCH BETWEEN TWO COMMITTED SOURCES, HANDED OVER
+
+`RESUME-TOOLS-SURFACE` is assigned **`/resume-builder/`** by the classifier
+(refused by the live gate), while the `surface-class` wave's CANNOT-TELL list
+gives it **`/premium/my-premium/`** (allowed, and the address I measured it
+against in section 12.10). **Two committed sources, one blocker, two
+addresses** -- the same shape as the CREATOR-HUB dispute and it has not been
+adjudicated.
+
+What section 12.10 measured stands either way: no resume-builder entry is
+drawn on the Premium hub, `resume`/`cv`/`builder`/`cover letter` all zero,
+zero resume-shaped hrefs. **That is evidence the hub is NOT the surface**,
+which argues the classifier's `/resume-builder/` is the better candidate --
+and it is refused, so the blocker is class 2 rather than class 1. Filed, not
+ruled: I have measured one of the two candidates and not the other.
+
+### 16.7 THE TWO CANDIDATES FILED, AND NOT ADMITTED
+
+Per the lead's instruction, recorded with their evidence and left alone:
+
+    /analytics/creator/audience/     drawn on /analytics/creator/content/
+    /analytics/creator/top-posts/    drawn on /analytics/creator/content/
+
+Both name-free, same-origin, drawn by LinkedIn on a page it serves to this
+account -- the same standard that justified sections 11 and 12.1. **Neither is
+admitted in this wave.** The boundary moved twice today and a third widening
+on a page nobody has costed a reader for would be motion rather than progress.
+
+### 16.8 LEDGER
+
+    classifier addresses re-checked against our gate      26
+    admitted addresses landed against LinkedIn            14
+    of those, REDIRECTED                                   5
+    admitted addresses deliberately NOT loaded             1   /article/new/
+    disputes adjudicated                                   1   CREATOR-HUB
+    disputes found and handed over                         1   RESUME-TOOLS
+    corrections to my own committed audit                  1   section 12.9
+    rows banked                                            0
+    allowlist patterns added                               0

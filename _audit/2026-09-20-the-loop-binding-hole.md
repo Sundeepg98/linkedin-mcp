@@ -23,7 +23,7 @@ $ venv/Scripts/python.exe -m pytest tests/test_navigation_is_never_derived.py -q
 
 Note for anyone reproducing: `venv/` is gitignored, so it does **not** exist inside a
 worktree. The interpreter used throughout is the main checkout's
-`D:\Sundeep\projects\job-hunting\mcp-servers\linkedin\venv\Scripts\python.exe`, run
+`./venv/Scripts/python.exe`, run
 with the worktree as cwd. That is the standing worktree trap, hit again here.
 
 ---
@@ -429,10 +429,10 @@ was delegated (`binding-census`) and is section 7b.
 | walrus (`:=`) | **BLIND** | HANDLED | |
 | `except ... as` | BLIND | **STILL BLIND** | see below |
 | augmented assignment (`x += t`) | BLIND | **STILL BLIND** | one line; deliberately not taken alone |
-| `global` / `nonlocal` rebinding | BLIND | **STILL BLIND** | needs cross-function flow |
+| `global` / `nonlocal` rebinding | ~~BLIND~~ | **SEEN -- I HAD THIS WRONG** | see 7b |
 | function parameters | BLIND | **STILL BLIND** | needs inter-procedural flow |
 
-All four "STILL BLIND" rows are pinned **by name** in
+All the "STILL BLIND" rows are pinned **by name** in
 `test_the_two_walkers_bind_the_same_forms`, with a control asserting the fixture
 actually contains each form first -- otherwise those four are four assertions that
 cannot fail.
@@ -450,22 +450,57 @@ parameters, comprehension `if`-clause walrus, and PEP 695 type parameters. Named
 rather than implied by omission; the delegated census covers them and its answer is
 section 7b.
 
-### 7b. The exhaustive census
+### 7b. The exhaustive census -- and a correction to section 7
 
-**Still running at the time of this write-up, and section 7 does not depend on it.**
-A closed-form slice (`binding-census`) was given the forms section 7 names as
-NOT-MEASURED-BY-ME -- `import ... as`, `match` capture / `as` / star patterns,
-`except*` groups, lambda parameters, decorator-bound names, PEP 695 type parameters --
-plus a positive and a negative control per construct, so that a BLIND row is
-distinguishable from a malformed fixture. Its deliverable lands at
-`scratchpad/binding-census.md`.
+Delegated as a closed-form slice (`binding-census`), landed at
+`scratchpad/binding-census.md`. **38 measured rows, every one with a positive AND a
+negative control, and every control passed.** 4 rows UNMEASURED with reasons, 1
+construct added beyond the brief. It handled HEAD moving under it correctly: diffed
+the incoming commit, confirmed the delta was entirely inside a docstring with zero
+executable lines, and said so rather than aborting or silently absorbing it.
 
-The table in section 7 is measured and stands on its own; this slice widens it and
-settles the row set I explicitly declined to claim. If it is absent when you read
-this, the honest reading is: **the forms in section 7 are measured, the ones named
-under "did not check" are still unmeasured, and nobody has claimed otherwise.**
+**IT CONTRADICTED ME, AND IT WAS RIGHT.** Section 7's table said `global`/`nonlocal`
+rebinding was STILL BLIND. It is SEEN. I verified the correction myself before
+accepting it:
 
----
+```
+my original global case      -> blind
+global rebind of a tainted v -> [(3, 'CACHE')]
+same source, global DELETED  -> [(3, 'CACHE')]
+```
+
+`global LEAK; LEAK = landed` is two statements: an inert `ast.Global` plus an
+**ordinary `ast.Assign`** the walker already handles. Taint is by name and per module,
+so the rebinding propagates regardless of scope. Deleting the keyword changes nothing
+-- that is the proof it contributes nothing either way.
+
+**Why my probe said blind: I built the discriminating test badly.** My case passed the
+value in through a function PARAMETER, and parameters are blind. So I measured the
+parameter hole and filed it under the global row. This is the same failure as the
+"already red for the wrong reason" case in section 2.1, running in the opposite
+direction -- **blind for the wrong reason** -- and I caught the first one and shipped
+the second. A control that comes back the colour you expected is the one you do not
+re-examine.
+
+The child's reconciliation is precise and I am adopting its scoping: the narrow claim
+in `test_the_two_walkers_bind_the_same_forms` -- that `_bindings` never dispatches on
+a bare `ast.Global` node -- **remains true and is not contradicted**. What was false
+was generalising that to "the form is invisible to the rule". And the loophole is
+specific: `except ... as`, `AugAssign` and parameters each bind ONLY through their own
+node type, with no plain `Assign` hiding underneath, so their BLIND verdicts stand.
+
+**The census's full result set**, beyond what section 7 covered:
+
+| verdict | constructs |
+|---|---|
+| **SEEN** (23) | assignment, annotated, chained (`a = b = t`), tuple/list unpacking, starred unpacking, subscript target (and the KEY name too), attribute target, `for`, `async for`, nested-tuple `for`, list/set/dict/generator comprehension targets, nested comprehension, `with ... as`, `async with ... as`, second withitem in one `with`, `with ... as (tuple)`, walrus in `if` / in a comprehension `if` / in `while`, `global`, `nonlocal` |
+| **BLIND** (15) | `AugAssign`, `except ... as`, `except*` groups, all five parameter forms (positional, keyword-only, default, `*args`, `**kwargs`), lambda parameters, `match` capture / `as` / star patterns, decorator-bound names, PEP 695 `type X = EXPR` |
+| **N/A -- no value slot** (4) | `import x as y`, `from m import x as y`, bare `def`/`class` name binding, PEP 695 generic brackets `[T]` |
+
+That last row is worth its own line: those four are **not gaps**. There is no
+expression in the syntax for a tainted value to arrive through, and `alias.asname` is
+a plain `str` rather than an `ast.Name`, so no walker could find it. "Unmeasured" was
+the wrong word for them and the census supplied the right one.
 
 ## 8. Mutation ledger -- which of my own tests notice
 
@@ -606,6 +641,14 @@ conclusion.
   **UNKNOWN**, and that is the honest word rather than a pass.
 - The `with ... as` case is parity with the sibling and has no measured site behind it.
   Said in its own docstring too.
+
+**What a child caught that I had shipped**
+
+- I claimed `global`/`nonlocal` rebinding was blind, in a docstring AND in section 7.
+  It is SEEN. My probe conflated it with the parameter hole -- I measured one thing and
+  labelled it another. Corrected in both places, with the reason, rather than quietly
+  edited. It is the second time in this wave that a case came back the expected colour
+  for the wrong reason, and the first time I did not catch it myself.
 
 **What I changed that I was not asked to**
 
