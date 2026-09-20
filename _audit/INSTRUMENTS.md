@@ -5732,3 +5732,44 @@ The census, reconciliation and slot-measurement scripts written for this wave
 length-bound measurement) are **DISPOSABLE**. Everything durable in them is
 either inside `check_cited_shas_resolve.py` or written out with its numbers in
 `_audit/2026-09-20-the-sixty-dangling.md`. They are not registered.
+
+### 35.8 THREE MORE, FOUND BY RUNNING THE FINISHED GUARD AT THE TREE IT WAS ADDED TO
+
+Writing the controls found 35.4 and 35.5. Pointing the committed instrument at
+the corpus it had just joined found three the controls could not, because a
+guard's own documentation is part of the corpus it scans.
+
+**A DOCUMENT QUOTING THE DECLARATION WAS TREATED AS MAKING ONE.** The audit
+report for this wave quotes *"EVERY SHORT SHA IN THIS FILE IS DEAD"* twice, as
+discussion. The unbounded pattern read it as a declaration and cleared every
+citation in the reporting document: `MARKED-DEAD-DOC` 2 -> 9, and **the guard
+got quieter**. Fixed positionally, bounded to the first 40 lines, against a
+measured 3 and 3 for the two real declarations -- because a declaration is
+something a reader meets BEFORE the citations it covers, so one at line 242
+protects nothing at line 20.
+
+**THIRD INSTANCE OF ONE SHAPE IN THIS REGISTER.** The correction-marker guard
+read a sentence about markers AS a marker and fixed it by anchoring at line
+start. 35.1 above quoted a planted citation into a live commit slot and was
+convicted. Now this.
+
+> **PROSE ABOUT A MECHANISM IS INDISTINGUISHABLE FROM THE MECHANISM TO A
+> MATCHER THAT ONLY LOOKS AT SHAPE.** Every guard whose documentation lives
+> inside its own corpus pays this, and the payment is always the same: the
+> guard goes QUIET, never loud.
+
+**MARKDOWN EMPHASIS INSIDE A PHRASE DEFEATED A MATCH.** This corpus writes
+*"does **not** resolve"* as readily as the plain form, and every emphasised
+disclosure was invisible to `do(?:es)\s+not\s+resolve`. Emphasis is stripped
+before the search now; backticks are not, since a disclosure names its SHA in
+them.
+
+**THE GUARD CONVICTED ITS OWN TEST SUITE.** Two positive controls resolved
+`HEAD` and asserted reachability. They passed all afternoon and went red the
+instant the wave made its own commit -- because the suite runs from a
+`worktree-agent-*` branch whose HEAD is not an ancestor of `master`, which is
+precisely the defect the guard finds. **A test suite that assumes its own
+branch is published is the same error as a wave reporting its work by a SHA on
+that branch**, and it was committed in the file whose subject is that error.
+Controls now resolve `master`, and `_on_master()` fails loudly rather than
+skipping if it cannot.

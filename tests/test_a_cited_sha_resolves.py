@@ -131,11 +131,28 @@ def test_ancestry_not_existence_is_the_predicate():
     )
 
 
+def _on_master() -> str:
+    """A short SHA that a clone CAN resolve.
+
+    Deliberately `master` and not `HEAD`. This suite is normally run from a
+    `worktree-agent-*` branch, and such a branch's own HEAD is exactly the
+    thing this guard convicts -- it is not an ancestor of `master` until the
+    branch merges. Written as `HEAD` first, and every positive control went red
+    the moment the wave made its own commit: **the guard caught its own test
+    suite committing the defect the guard exists to find.**
+    """
+    short = _git("rev-parse", "--short=7", "master").stdout.strip()
+    assert re.fullmatch(r"[0-9a-f]{7,}", short), (
+        f"cannot resolve `master` to a short sha (got {short!r}); the positive "
+        "controls below cannot run and must not be skipped"
+    )
+    return short
+
+
 def test_a_known_good_abbreviation_resolves():
     """The mirror control: an instrument that resolves NOTHING reports
     everything missing and looks exactly like a finding."""
-    head = _git("rev-parse", "--short=7", "HEAD").stdout.strip()
-    assert guard.resolves(REPO, head) is True
+    assert guard.resolves(REPO, _on_master()) is True
 
 
 def test_a_nonsense_token_does_not_resolve():
@@ -152,10 +169,10 @@ def test_the_detector_finds_a_planted_citation(tmp_path):
 
 
 def test_a_resolvable_citation_is_not_convicted():
-    head = _git("rev-parse", "--short=7", "HEAD").stdout.strip()
-    blob = f"Measured at `{head}` on a settled tree.\n"
+    sha = _on_master()
+    blob = f"Measured at `{sha}` on a settled tree.\n"
     sites = guard.candidates({"_audit/_planted.md": blob})
-    assert [s.token for s in sites] == [head]
+    assert [s.token for s in sites] == [sha]
     assert guard.findings(REPO, sites) == []
 
 
@@ -265,6 +282,48 @@ def test_the_dead_doc_declaration_suppresses_and_can_be_defeated():
         {"_audit/_planted.md": declared.replace("IS DEAD", "is fine")}
     )
     assert [s.verdict for s in defeated] == ["CANDIDATE"], defeated
+
+
+def test_quoting_the_declaration_does_not_declare():
+    """A document DISCUSSING the declaration must not be cleared by it.
+
+    FOUND IN THIS GUARD, BY THIS GUARD, AFTER IT WAS COMMITTED. The audit
+    document reporting this wave quotes "EVERY SHORT SHA IN THIS FILE IS DEAD"
+    twice -- once in prose, once in a table of suppressors -- and the first
+    version of the pattern read both AS declarations, silently clearing every
+    citation in the reporting document. `MARKED-DEAD-DOC` went 2 -> 9 and the
+    guard got QUIETER, which is the worst direction for a defect to move.
+
+    Third instance of one shape in this repository: a correction-marker guard
+    reading a sentence about markers as a marker; the register quoting a
+    planted citation into a live commit slot; and this. The fix is positional
+    for the same reason the correction guard's was anchoring -- a declaration
+    is something a reader meets BEFORE the citations it covers.
+    """
+    filler = "\n".join(f"Filler line {i}." for i in range(_FAR_BELOW_PREAMBLE))
+    quoting = (
+        "# A report about dead-SHA declarations\n\n"
+        + filler
+        + "\n\nThe two repaired documents each say "
+        '*"EVERY SHORT SHA IN THIS FILE IS DEAD"* at the top.\n'
+        # Far enough below the quote that the DISCLOSURE window cannot reach
+        # it either -- this control is about the DECLARATION suppressor alone,
+        # and a fixture that trips a second one proves nothing about the first.
+        + "\n".join(f"More prose {i}." for i in range(10))
+        + "\nMeasured at `deadbee` on a settled tree.\n"
+    )
+    sites = guard.candidates({"_audit/_planted.md": quoting})
+    assert [s.token for s in sites] == ["deadbee"], sites
+    assert sites[0].verdict == "CANDIDATE", (
+        "a document QUOTING the declaration was treated as making one; the "
+        f"suppressor is matching a phrase rather than a position (got "
+        f"{sites[0].verdict})"
+    )
+
+
+#: Comfortably past `_DECLARATION_WINDOW`, so the quote in the control above
+#: lands in the body rather than the preamble where a real declaration sits.
+_FAR_BELOW_PREAMBLE = 60
 
 
 @pytest.mark.parametrize("doc, token, verdict, mutate", _MARK_SOURCES)

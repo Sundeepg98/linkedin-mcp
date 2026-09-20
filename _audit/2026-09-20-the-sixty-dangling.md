@@ -374,6 +374,55 @@ planted document with its thinness stated rather than hidden.
 **An assertion satisfied by an empty result cannot fail.** An empty candidate
 set is a broken slot regex reporting a spotless corpus, so it exits 2.
 
+### And three more, caught by running the guard again AFTER committing it
+
+The four above came from writing the controls. These came from pointing the
+finished instrument at the tree it had just been added to, which is not the
+same act and found three things reading could not.
+
+**1. A DOCUMENT THAT QUOTES THE DECLARATION WAS TREATED AS MAKING ONE.** This
+report quotes *"EVERY SHORT SHA IN THIS FILE IS DEAD"* twice -- once in prose,
+once in the suppressor table. Both are discussion. The unbounded pattern read
+them as a declaration and silently cleared every citation in the reporting
+document: `MARKED-DEAD-DOC` went 2 -> 9 and **the guard got quieter**, which is
+the worst direction for a defect to move.
+
+**That is the third instance of one shape in this repository.** The
+correction-marker guard once read a sentence *about* markers as a marker. The
+instrument register, two hours ago, quoted this guard's own planted citation
+into a live commit slot and was convicted for it. And now this.
+
+> **PROSE ABOUT A MECHANISM IS INDISTINGUISHABLE FROM THE MECHANISM TO A
+> MATCHER THAT ONLY LOOKS AT SHAPE.**
+
+The correction guard's fix was to anchor at line start -- *a declaration is a
+line, not a phrase*. The fix here is positional for the same reason, one step
+further: a declaration is something a reader meets BEFORE the citations it
+covers, so one at line 242 protects nothing at line 20 and is not a declaration
+at all. Bounded to the first 40 lines, against a measured 3 and 3 for the two
+real ones.
+
+**2. MARKDOWN EMPHASIS INSIDE A PHRASE DEFEATED THE DISCLOSURE MATCH.** This
+corpus writes *"does **not** resolve"* as readily as the plain form, and
+`do(?:es)\s+not\s+resolve` matches only the second. Every emphasised disclosure
+was invisible. Found because this document used the emphasised spelling about
+`a604394` and was convicted for disclosing it correctly. Emphasis is now
+stripped before the search; backticks are not, because a disclosure names its
+SHA in backticks.
+
+**3. THE GUARD CONVICTED ITS OWN TEST SUITE.** Two positive controls resolved
+`HEAD` and asserted it was reachable. They passed all afternoon and went red
+the instant this wave made its own commit -- because **this suite runs from a
+`worktree-agent-*` branch, whose HEAD is not an ancestor of `master`**, which
+is the exact defect the guard exists to find. The controls now resolve
+`master`. A test suite that assumes its own branch is published is the same
+mistake as a wave that reports its work by a SHA on that branch, and I made it
+in the file whose subject is that mistake.
+
+**This document's own commit sits on such a branch**, and its SHA will not
+resolve in a clone until the branch merges. Stated here rather than discovered
+by a fourth census.
+
 ---
 
 ## 8. Honest ledger

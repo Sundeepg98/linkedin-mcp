@@ -201,6 +201,31 @@ _DECLARED_DEAD_DOC = re.compile(
     r"EVERY\s+SHORT\s+SHA\s+IN\s+THIS\s+FILE\s+IS\s+DEAD", re.IGNORECASE
 )
 
+#: HOW FAR INTO A DOCUMENT THE DECLARATION MAY SIT, and this bound is not
+#: cosmetic -- without it the suppressor is defeated by any document that
+#: QUOTES the declaration.
+#:
+#: **MEASURED ON THIS GUARD'S OWN FIRST POST-COMMIT RUN.** The audit document
+#: written to report this wave quotes the phrase twice, once in prose and once
+#: in a table of suppressors. Both are discussion, neither is a declaration --
+#: and the unbounded pattern read them AS one, silently clearing every citation
+#: in the reporting document. `MARKED-DEAD-DOC` jumped 2 -> 9 and the guard got
+#: quieter, which is the worst direction for a defect to move.
+#:
+#: This repository has now hit the identical shape three times: a
+#: correction-marker guard read a sentence ABOUT markers as a marker; the
+#: instrument register quoted a planted citation into a live commit slot; and
+#: this. **PROSE ABOUT A MECHANISM IS INDISTINGUISHABLE FROM THE MECHANISM TO A
+#: MATCHER THAT ONLY LOOKS AT SHAPE.** The correction guard's fix was to anchor
+#: at line start, on the reasoning that a declaration is a LINE and not a
+#: phrase. The same reasoning applies here with position as well as anchoring:
+#: a declaration is something a reader meets BEFORE the citations it covers, so
+#: one at line 242 protects nothing at line 20 and is not a declaration at all.
+#:
+#: 40 lines, against a measured 3 and 3 for the two real declarations. Wide
+#: enough for a longer preamble, far short of any document's body.
+_DECLARATION_WINDOW = 40
+
 #: DOCUMENT-SCOPED SUPPRESSOR 2 -- a mapping table exists. Its heading is the
 #: corpus's own: "## Dead hashes, recovered". Rows are
 #: ``| dead | subject | live | confidence |``. The dead hash in column 0 is the
@@ -245,6 +270,12 @@ _DISCLOSURE = re.compile(
     r"|nowhere\s+on\b",
     re.IGNORECASE,
 )
+
+#: Markdown emphasis markers, stripped before the disclosure search so that
+#: "does **not** resolve" reads the same as "does not resolve". Backticks are
+#: NOT stripped, because a disclosure names its SHA in backticks and removing
+#: them would run the token into the surrounding words.
+_EMPHASIS = re.compile(r"\*+|(?<=\w)_(?=\w)")
 
 #: How far a disclosure may sit from the token it discloses. 2 lines, matching
 #: the corpus's own re-wrapping: `routing-the-unassigned.md` names both tokens
@@ -366,7 +397,13 @@ def disclosed_tokens(blob: str) -> set[str]:
     form is a note at the foot referring back to a table above.
     """
     lines = blob.splitlines()
-    disclosing = [i for i, line in enumerate(lines) if _DISCLOSURE.search(line)]
+    # Markdown emphasis INSIDE the phrase defeats a plain word-boundary match:
+    # this corpus writes "does **not** resolve on `master`" as often as it
+    # writes the unadorned form, and the first version of this suppressor
+    # missed every emphasised one. Found on the guard's own audit document,
+    # which used the emphasised spelling and was convicted for it.
+    plain = [_EMPHASIS.sub("", line) for line in lines]
+    disclosing = [i for i, line in enumerate(plain) if _DISCLOSURE.search(line)]
     if not disclosing:
         return set()
     found: set[str] = set()
@@ -384,7 +421,8 @@ def candidates(blobs: dict[str, str]) -> list[Site]:
     sites: list[Site] = []
     for doc in sorted(blobs):
         blob = blobs[doc]
-        declared_dead = bool(_DECLARED_DEAD_DOC.search(blob))
+        preamble = "\n".join(blob.splitlines()[:_DECLARATION_WINDOW])
+        declared_dead = bool(_DECLARED_DEAD_DOC.search(preamble))
         mapped = mapped_tokens(blob)
         disclosed = disclosed_tokens(blob)
         for lineno, line in enumerate(blob.splitlines(), 1):
