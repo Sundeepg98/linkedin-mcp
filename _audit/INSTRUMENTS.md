@@ -5617,3 +5617,188 @@ cheap to write and its false positives are quiet until somebody counts them.
 totals are inflated by this class. 34.8 establishes that at least some of the
 129-row decorative-control census is detector artifact; nobody has measured how
 much, and this entry does not either.
+
+## 35. THE FIVE PROBES UNDER A BANKED ROW, 2026-09-20
+
+The 129-row decorative-control census (section 27) ranked five probe files as
+TIER 1: the ones a census row had already been banked on. This wave took those
+five. Full reading: `_audit/2026-09-20-the-five-under-banked.md`.
+
+**ALL NINE BANKED ROWS HOLD. TWO OF TWELVE FLAGGED INSTANCES WERE REAL
+DECORATIVE CONTROLS.** Both are repaired; neither repair moved a row.
+
+### 35.1 `scripts/_check_repaired_probe_controls_can_fail.py` -- SHOWN FAILING
+
+The receipt this register requires before a repair is believed. Ten
+demonstrations, two kinds. BEHAVIOURAL: the real `_analyse` from
+`scripts/_probe_membership_sections.py` over two synthetic captures built in
+the script, one `<h9>` apart, which must return opposite verdicts -- plus the
+same function over the REAL gitignored capture, which reports LOUDLY when the
+file is absent rather than skipping, because a worktree carries no gitignored
+file and a silent skip there reads as a pass. MECHANICAL: the detector run over
+the HEAD blob and over the working file, where the variable must be a FINDING
+at HEAD and CORRECTLY BRANCHED now -- same file, two shas, opposite verdicts,
+the shape section 27's own calibration used.
+
+```
+PASS   A1: the clean capture returns True (3 anchors, no <h9>)
+PASS   A2: the SAME capture plus one <h9> returns False
+PASS   A3: the two verdicts differ
+PASS   A4 control-for-the-control: a clean capture with the WRONG expected
+       count also returns False, by the OTHER control
+PASS   A-LIVE1: the real groups capture still returns True with the control
+       now gating -- the banked reading survives
+PASS   A-LIVE2: and it does so because the control read 0
+PASS   B: _probe_membership_sections.py _analyse() -> 'silent' is a FINDING at HEAD
+PASS   B: ... is CORRECTLY BRANCHED in the working tree
+PASS   B: _probe_creator_content_analytics.py main() -> 'feed_hits' is a FINDING at HEAD
+PASS   B: ... is CORRECTLY BRANCHED in the working tree
+
+all 10 demonstrations behaved as stated
+```
+
+**AND THE RECEIPT WAS SHOWN NON-VACUOUS**, which is the half a receipt
+generator usually skips. Demonstration A2 was re-run against the PRE-REPAIR
+blob at HEAD `0882d35`, loaded as a module so the real committed code ran:
+
+```
+COUNTER-CHECK against the PRE-REPAIR source (HEAD 0882d35):
+  A1 clean  -> True
+  A2 broken -> True
+  HEAD's own line: ['CONTROL must stay silent: 1 FAIL']
+VERDICT: A2 would have FAILED at HEAD, so the receipt is not vacuous.
+```
+
+**The committed code printed FAIL and returned True in the same run.** That is
+the census's defect, caught in the act, in a file under a banked row.
+
+### 35.2 THE HONEST LIMIT OF THE REPAIRED CONTROL
+
+`IMPOSSIBLE_HEADING` is `<h9>`, a level HTML does not have, so this control
+reads 0 by construction on any real capture. **The repair proves the WIRING
+refuses; it does not make the needle strong.** An assertion satisfied by an
+empty result still cannot fail, and the injected-`<h9>` demonstration exists
+because the live green could not have told me the difference. Registered as a
+limit rather than smoothed, because a control that comes back the colour you
+expected is the one nobody re-examines.
+
+### 35.3 TWO DEFECT CLASSES A VARIABLE-BASED DETECTOR CANNOT SEE
+
+Found by reading the five files, not by the detector, and neither appears in
+the 129 in any form.
+
+**A DISCARDED RETURN BINDS NO VARIABLE.**
+`scripts/_probe_small_measures_live.py` states a contract in its docstring --
+*"If a page control fails, this file prints SUSPECT against that surface and
+does not offer its target counts as a reading"* -- and honoured it on ONE
+surface of three. `read_events` and `read_feed_hashtag_context` called
+`await _page_control(...)` as a bare statement and dropped the boolean. The
+detector hunts a variable nobody branches on; here there is no variable. Both
+sites now bind and branch.
+
+> **A CONTROL WHOSE RESULT IS NEVER BOUND IS INVISIBLE TO A DETECTOR THAT
+> LOOKS FOR AN UNUSED BINDING, AND IT IS THE SAME DEFECT ONE STEP EARLIER.**
+
+**A VERDICT PRINTED FOR A HUMAN TO EVALUATE.**
+`scripts/_probe_creator_content_analytics.py` prints *"structural fields EQUAL
+to the feed: N of M"* then *"IF THAT IS MOST OF THEM, THIS ADDRESS IS SERVING
+THE FEED"*, and returns 0 either way. For a declared CAPTURE that is a design
+choice and it is NOT repaired here; it is written down so the next reader
+knows the sentence is an instruction to a person, not a branch.
+
+### 35.4 TWO MORE FALSE-POSITIVE MECHANISMS IN THE DETECTOR, MEASURED
+
+Disclosed in `scripts/detect_unbranched_probe_controls.py`'s own docstring
+beside the `passes` mechanism it already carried. The detector is NOT changed:
+narrowing the marker rule moves a published census and is a wave of its own.
+
+**THE BARE PYTHON `pass` STATEMENT.** The marker "pass" matches the keyword,
+which is the idiomatic body of a swallowed `except` and therefore lands inside
+the window of any value read in a `try`. Sweep: strip every line that is a bare
+`pass` statement from each finding's window, re-test for a marker, count the
+findings that lose their last one. **4 of 133 (3.0%)** -- larger than the 1.6%
+`passes` mechanism already disclosed.
+
+**A WINDOW THAT REACHES A BANNER.** The window runs to the first later sibling
+whose subtree sinks the name, which for a report accumulator flushed by a
+printing `_write()` spans whatever the probe announced in between.
+`_probe_job_search_result_sets.py main() -> lines` is flagged solely because an
+`emit("positive control keyword: ...")` string sits ten lines into a 28-line
+window. It is the single TIER-1 finding with five banked rows behind it, and it
+is not a control at all.
+
+**A PROXY FOR THE OPEN MARKER DISPUTE, offered without ruling on it.**
+`tests/test_probe_controls_are_never_decorative.py` records an unresolved
+question about three `_probe_events_surface_shape.py` entries where the marker
+vocabulary collides with LinkedIn UI "control". Counted 2026-09-20: **56 of the
+131 live findings (42.7%) have `control` as their ONLY marker, with no PASS /
+FAIL / VOID / must-fire / must-stay-silent / sanity / agree vocabulary anywhere
+in the name or window.** An upper bound on the class, not a verdict -- a real
+control can be named without verdict words. The three disputed entries sit
+inside that 56.
+
+### 35.5 THE RATCHET NOW CARRIES ITS TRIAGE, WHICH 34.8 ASKED FOR
+
+133 -> 131, GAINED 0, LOST 2, both removed rather than left to rot.
+
+Section 34.8 diagnosed the hole and declined to fix it -- *"a triage table
+whose entries cannot carry their triage is a census wearing a ratchet's
+name"*, and migrating the format *"is a wave and not a merge step"*. This was
+a wave. `scripts/probe_controls_known_decorative_baseline.json` gained an
+**optional** `reason` string; ten entries carry one, 121 do not, and the
+difference is the point: an entry without a reason is visibly untriaged rather
+than silently assumed reviewed.
+
+`test_baseline_file_is_well_formed` asserts the field's shape and that it has
+not been WIPED -- a regeneration straight from the detector emits no reasons
+and would erase every triage ever recorded. **Deliberately no count floor**: a
+floor is an incentive to write reasons in bulk, which is the rubber stamp 34.8
+warned about. Shown failing on three doctored inputs against one control, with
+the shipped test function imported rather than re-implemented:
+
+```
+PASS   1. reasons stripped must go RED                RED as required
+PASS   2. a blank reason must go RED                  RED as required
+PASS   3. an unknown field must go RED                RED as required
+PASS   4. CONTROL: the real file must stay green      green
+```
+
+**AND THE BASELINE'S OWN COMMENT WAS STALE.** It told a reader the test *"does
+NOT require this file to shrink when an old one is fixed"*. The test has been a
+two-way ratchet since the peer review that caught it being one-way. A reader
+obeying the comment would have left both repaired entries in place and gone
+red. Rewritten.
+
+### 35.6 THE LAW THIS WAVE ADDS, AND THE CENSUS FINDING DID NOT FIND IT
+
+Five banked rows cite one instrument, one session, one evidence document. The
+document is a composite of TWO runs and names only one; the raw output path it
+points at had been overwritten twice, forty minutes before the document was
+written; and the two runs disagree about the drift floor -- 0 in the run the
+five rows quote, 4 in the run made twenty minutes later. On the stricter floor
+four rows get stronger (MOVED 14, 14, 12, 14 above a 4-id floor) and one flips:
+`f_JT=F moved 2 -- WITHIN DRIFT (4), not evidence`.
+
+> **A THRESHOLD MEASURED PER SESSION MUST BE QUOTED WITH ITS SESSION, OR THE
+> FRIENDLIEST SESSION BECOMES A PROPERTY OF THE SURFACE.**
+
+The probe understood this -- it takes the stability control LAST, on purpose,
+so it spans the whole session -- and five census cells then copied one
+session's number across as though it described LinkedIn. The cells are
+corrected in place with a declared CORRECTS/CORRECTED BY pair; no row's state
+moved, and the case for moving row 11 anyway is written out for whoever owns
+the census.
+
+**THE POINT FOR THIS REGISTER: none of that came from the census finding.** The
+flagged control in that file was an accumulator. A decorative control is a
+defect you can grep for. This one was reachable only by opening the evidence
+and reading it against the outputs still on disk.
+
+### 35.7 DISPOSABLE, declared
+
+The three edit scripts, the counter-check harness, the baseline updater and the
+doctored-baseline demonstration were scratchpad-only and are not shipped. The
+two receipts that matter are re-runnable from the repo:
+`scripts/_check_repaired_probe_controls_can_fail.py` and the detector itself.
+The two gitignored captures copied into this worktree to re-run section 1 are
+ignored here as everywhere and are not part of any commit.

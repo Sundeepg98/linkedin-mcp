@@ -413,10 +413,24 @@ async def read_events(page) -> None:
         await page.wait_for_load_state("networkidle", timeout=15_000)
     except Exception as error:  # noqa: BLE001
         print(f"    settle wait did not complete: {type(error).__name__}")
-    await _page_control(page, "events root", EVENTS_PAGE_CONTROLS)
+    control_ok = await _page_control(page, "events root", EVENTS_PAGE_CONTROLS)
     await _needles(page, EVENTS_TARGET_NEEDLES + (ABSENT_NEEDLE,), "audio")
     census = await dom.read_surface_census(page)
     print(f"    census controls_read={census.get('controls_read')}")
+    # THE RETURN VALUE WAS DISCARDED HERE UNTIL 2026-09-20, AND ON THE FEED.
+    # This file's own docstring says "If a page control fails, this file
+    # prints SUSPECT against that surface and does not offer its target
+    # counts as a reading". `read_jobs_search` does exactly that; these two
+    # surfaces called the same control as a bare statement and threw the
+    # boolean away, so the stated contract held on one surface of three.
+    #
+    # A DISCARDED RETURN IS INVISIBLE TO A DETECTOR THAT LOOKS FOR A VARIABLE
+    # NOBODY BRANCHES ON, because there is no variable. That class does not
+    # appear in the 2026-09-20 census at all -- not as a low-priority row,
+    # not as a false positive, simply not as anything.
+    if not control_ok:
+        print("\n    SUSPECT: the page control failed, so nothing above is "
+              "offered as a reading about this surface.")
 
 
 async def read_feed_hashtag_context(page) -> None:
@@ -434,7 +448,7 @@ async def read_feed_hashtag_context(page) -> None:
         await page.wait_for_load_state("networkidle", timeout=15_000)
     except Exception as error:  # noqa: BLE001
         print(f"    settle wait did not complete: {type(error).__name__}")
-    await _page_control(page, "feed", FEED_PAGE_CONTROLS)
+    control_ok = await _page_control(page, "feed", FEED_PAGE_CONTROLS)
     html = await page.content()
     main_text = ""
     try:
@@ -476,6 +490,10 @@ async def read_feed_hashtag_context(page) -> None:
     feed_hashtag = await page.locator('a[href*="/feed/hashtag/"]').count()
     print(f"      a[href*='hashtag']          {anchors}")
     print(f"      a[href*='/feed/hashtag/']   {feed_hashtag}")
+    # SEE read_events FOR WHY THIS BRANCH IS HERE AND WAS NOT.
+    if not control_ok:
+        print("\n    SUSPECT: the page control failed, so nothing above is "
+              "offered as a reading about this surface.")
 
 
 async def main() -> int:

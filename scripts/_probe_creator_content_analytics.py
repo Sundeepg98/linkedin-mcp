@@ -287,6 +287,7 @@ async def main() -> int:
             # address is serving the feed and there is no analytics page here.
             print("\n  CONTROL -- the SAME readings on /feed/, same session")
             feed_sig = {}
+            feed_hits = None
             try:
                 await BROWSER.goto(page, f"{BASE_URL}/feed/")
                 try:
@@ -319,6 +320,7 @@ async def main() -> int:
                 print(f"      CONTROL FAILED: {type(exc).__name__} -- no "
                       "comparison is claimed")
                 feed_sig = {}
+                feed_hits = None
 
             print("\n  VERDICT")
             rendered = (
@@ -340,6 +342,29 @@ async def main() -> int:
                       f"{len(same)} of {len(REGIONS)}")
                 print("      IF THAT IS MOST OF THEM, THIS ADDRESS IS "
                       "SERVING THE FEED.")
+                # THE CONTROL'S OTHER HALF, AND UNTIL 2026-09-20 IT WAS
+                # PRINTED FIFTEEN LINES FROM THE NUMBER IT EXISTS TO BE
+                # COMPARED AGAINST, WITH NOTHING COMPARING THEM. A reader
+                # had to hold both and do the subtraction. That is the
+                # reader gating, not the probe.
+                #
+                # NO THRESHOLD IS INVENTED HERE. The one statement this
+                # comparison supports without picking a number is the
+                # positive-control law: A DISCRIMINATOR THAT SCORES ITS OWN
+                # NEGATIVE CONTROL AS HIGH AS ITS TARGET CANNOT
+                # DISCRIMINATE. If /feed/ carries as much analytics
+                # vocabulary as this address does, a vocabulary hit here is
+                # not evidence of an analytics page, and the verdict says so
+                # instead of leaving it to be noticed.
+                if feed_hits is not None:
+                    vocab_discriminates = sum(hits.values()) > feed_hits
+                    print(f"      analytics vocabulary here / on the feed: "
+                          f"{sum(hits.values())} / {feed_hits}")
+                    if not vocab_discriminates:
+                        print("      THE VOCABULARY SIGNAL DOES NOT "
+                              "DISCRIMINATE: the feed scores at least as "
+                              "high, so a vocabulary hit at this address is "
+                              "not evidence that an analytics page rendered.")
             print("      (a zero above is only a reading because the "
                   "denominator is printed beside it)")
     finally:

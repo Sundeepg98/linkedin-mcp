@@ -39,6 +39,17 @@ total, so an unrelated wave adding a brand new probe file changes nothing
 about this baseline's 129 entries and cannot trip either direction of this
 check -- only a change to one of THESE 129 specific sites can.
 
+THE BASELINE CARRIES REASONS NOW, and only where one was actually derived.
+`scripts/probe_controls_known_decorative_baseline.json` gained an OPTIONAL
+`reason` string on 2026-09-20 (the five-under-banked wave), which is the shape
+`_audit/INSTRUMENTS.md` 34.8 asked for after the premium-four integration had
+to argue four specimens in a file with nowhere to say so: *"a triage table
+whose entries cannot carry their triage is a census wearing a ratchet's name"*.
+Ten entries carry one; the rest do not, and that difference is the point --
+an unreasoned entry is visibly untriaged rather than silently assumed
+reviewed. `test_baseline_file_is_well_formed` therefore asserts the field's
+SHAPE and that it has not been wiped, never a count.
+
 Two entries are a KNOWN OPEN QUESTION rather than a settled false positive,
 recorded here instead of resolved unilaterally: the same review disputed
 `_probe_events_surface_shape.py`'s `rows_with_any` and `note` as "display
@@ -207,5 +218,23 @@ def test_baseline_file_is_well_formed():
     baseline_doc = json.loads(BASELINE_PATH.read_text(encoding="utf-8"))
     assert baseline_doc["count"] == len(baseline_doc["entries"])
     assert baseline_doc["count"] > 0
+    reasoned = 0
     for entry in baseline_doc["entries"]:
-        assert set(entry) == {"file", "function", "variable", "line"}
+        assert {"file", "function", "variable", "line"} <= set(entry)
+        assert set(entry) <= {"file", "function", "variable", "line", "reason"}
+        if "reason" in entry:
+            assert isinstance(entry["reason"], str) and entry["reason"].strip()
+            reasoned += 1
+    # A REASON IS OPTIONAL AND ITS ABSENCE IS INFORMATION. This asserts only
+    # that the field, where present, says something -- and that the file has
+    # not been REGENERATED from the detector, which emits no reasons and would
+    # silently erase every triage ever recorded here. There is deliberately NO
+    # floor on how many entries carry one: a floor is an incentive to write
+    # reasons in bulk, which is the rubber stamp `_audit/INSTRUMENTS.md` 34.8
+    # warned about when it asked for this field.
+    assert reasoned >= 1, (
+        "no entry carries a `reason`. Either the field was dropped, or this "
+        "file was regenerated straight from the detector -- which erases the "
+        "triage that distinguishes a reviewed reading from a rubber stamp. "
+        "Re-apply the reasons rather than shipping a bare census."
+    )

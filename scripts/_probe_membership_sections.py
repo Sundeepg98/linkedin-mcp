@@ -41,7 +41,9 @@ rather than left for a reader to notice.
     events   census measured 54
 
 A SECOND CONTROL runs the other way: a heading pattern that cannot match must
-find nothing, or the matcher is over-broad rather than the page rich.
+find nothing, or the matcher is over-broad rather than the page rich. It is
+stated as a refusal on the same footing as the first: both controls produce one
+verdict, in one place, and either one voids the tallies on its own.
 
 Usage::
 
@@ -217,14 +219,28 @@ def _analyse(name: str, path: Path, anchor_pattern: str, expected: int) -> bool:
         )[:6]:
             print(f"            {count:>3}  {label!r}")
 
-    ok = len(anchors) == expected
+    census_agrees = len(anchors) == expected
     print(f"    CONTROL against the census: parsed {len(anchors)}, census "
-          f"measured {expected} -- {'AGREE' if ok else 'DISAGREE'}")
-    if not ok:
+          f"measured {expected} -- {'AGREE' if census_agrees else 'DISAGREE'}")
+    if not census_agrees:
         print("    THE TALLIES ABOVE ARE VOID. Two instruments over one page "
               "disagree, so this parse is wrong and nothing under it is a "
               "reading about his account.")
-    return ok
+    # THE MUST-STAY-SILENT CONTROL DECIDES TOO, AND UNTIL 2026-09-20 IT DID
+    # NOT. `silent` was computed above and printed with the literal words
+    # PASS and FAIL, and then nothing read it: this function could print FAIL
+    # and return True in the same run. A control whose result no branch
+    # consumes is a sentence, not a gate.
+    #
+    # THE TWO CONTROLS NOW PRODUCE ONE VERDICT IN ONE PLACE. Two answers on
+    # one page is how a reader ends up reconciling an instrument against
+    # itself, which is the reader doing the gating.
+    if silent:
+        print("    THE TALLIES ABOVE ARE VOID. A heading pattern that cannot "
+              "match matched anyway, so the heading matcher is over-broad "
+              "and every section above is a fact about the matcher rather "
+              "than about the page.")
+    return census_agrees and silent == 0
 
 
 def main() -> int:
