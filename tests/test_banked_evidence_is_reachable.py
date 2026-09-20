@@ -195,6 +195,36 @@ def test_a_linkedin_route_is_not_a_filesystem_path():
     assert [a.path for a in rows[0].artifacts] == [TRACKED_ARTIFACT], rows[0].artifacts
 
 
+def test_an_abbreviated_path_is_not_counted_as_unreachable():
+    """AN ABBREVIATED CITATION IS NOT AN UNREACHABLE ONE.
+
+    FORCED BY A REAL ROW, not anticipated. `messaging-and-content.md` row `M4`
+    cites `perform.md:3462-3487`. No tracked file is named `perform.md`, so the
+    strict rule called it NOT-IN-REPO and put an EIGHTH row in the headline
+    count -- the one integer this instrument exists to state exactly. But
+    exactly one tracked basename ENDS with it,
+    `_audit/2026-08-31-linkedin-perform.md`, and the line number settles it:
+    that file has 4,966 lines while the only other candidate containing
+    "perform" has 298, so line 3462 exists in precisely one of them.
+
+    The evidence is reachable; the path as written is not. Those are different
+    complaints and folding the second into the first inflates the answer.
+    """
+    tracked = chk.tracked_files()
+    assert chk.classify("perform.md", tracked, set()) == "ABBREVIATED"
+    art = chk.Artifact("perform.md", "perform.md", "ABBREVIATED")
+    assert not art.counts_as_finding
+    assert not art.reachable, (
+        "ABBREVIATED must not read as TRACKED either -- it is reported, not "
+        "silently accepted"
+    )
+    # THE MIRROR, in both directions, or the class is a hole rather than a
+    # distinction: a name matching nothing at all is still NOT-IN-REPO, and a
+    # name matching exactly is still TRACKED.
+    assert chk.classify("no-such-file-zzz.md", tracked, set()) == "NOT-IN-REPO"
+    assert chk.classify(TRACKED_ARTIFACT.rsplit("/", 1)[-1], tracked, set()) == "TRACKED"
+
+
 def test_a_line_number_suffix_does_not_break_the_path():
     rows, _, _ = chk.measure(
         _plant("See `" + TRACKED_ARTIFACT + ":49` and `" + IGNORED_ARTIFACT + ":12-18`."))

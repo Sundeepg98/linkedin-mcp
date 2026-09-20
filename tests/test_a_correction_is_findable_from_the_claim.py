@@ -197,6 +197,21 @@ NOT_A_CORRECTION: dict[tuple[str, str], str] = {
         "A CORRECTED BY marker here would tell every future reader that this "
         "wave withdrew something in it, and nothing in it is withdrawn."
     ),
+    ("2026-09-20-the-evidence-that-resolves.md", "messaging-and-content.md"): (
+        "THE CITING DOCUMENT REPORTS A CORRECTION SOMEBODY ELSE MADE, AND "
+        "DECLINES TO MAKE ONE. The line says row `M4` was corrected -- by "
+        "`master`, from EXCLUDED-RULED to MEASURED-ABSENT, in that row's own "
+        "words -- and that the correction moved M4 into the banked population "
+        "for the first time, which is why a re-measurement found it. NOTHING "
+        "IN THAT SLICE IS WITHDRAWN BY THE CITING WAVE: no row is edited, no "
+        "state is proposed, and the instrument that found M4 is documented as "
+        "measuring and never demoting. "
+        "**WHAT WOULD MAKE THIS ENTRY WRONG:** if that document ever asserted "
+        "M4's state or its cited numbers were mistaken, rather than reporting "
+        "that its own first reading of M4 counted an abbreviated path as "
+        "unreachable -- which is a correction of the INSTRUMENT, and is "
+        "recorded against the instrument."
+    ),
     ("2026-09-20-the-evidence-that-resolves.md", "network.md"): (
         "THE CITATION IS A FALSE-POSITIVE REPORT ABOUT AN INSTRUMENT, NOT A "
         "CLAIM ABOUT THE CENSUS. The line names `network.md` lines 171-172 to "
@@ -208,6 +223,27 @@ NOT_A_CORRECTION: dict[tuple[str, str], str] = {
         "wave DOES correct a census claim elsewhere and declares it with a "
         "CORRECTS:/CORRECTED BY: pair, so its threshold for declaring one is "
         "on the record and this pair sits below it deliberately."
+    ),
+
+    # 2026-09-20, the sanctioned-seventh reading. Triaged by the integrator who
+    # wrote the citing line, deliberately, to say what he was NOT doing.
+    ("2026-09-20-the-sanctioned-seventh.md", "profile.md"): (
+        "THE CITATION IS A HANDOVER, AND IT SAYS SO IN THE SAME SENTENCE. The "
+        "line reads that `_audit/_census/profile.md` 'is under a live wave's "
+        "hand as this is written', and the section it closes states outright "
+        "that the rows named above are NOT repaired here because they belong "
+        "to the census slices. Naming rows for the wave that owns them is the "
+        "opposite of correcting them. "
+        "**THE SCAN IS RIGHT TO OFFER IT**, because the correction vocabulary "
+        "in the window is real and dense -- the surrounding paragraphs are "
+        "about a reason that went false, and rows `B2`, `M1`, `B3`, `B5` and "
+        "`G3` in that very file carry it. A later wave may well correct them, "
+        "and when it does the pair becomes a genuine CORRECTS:/CORRECTED BY: "
+        "declaration against profile.md rather than this entry. "
+        "**WHAT WOULD MAKE THIS ENTRY WRONG:** if this document ever edits a "
+        "profile.md row, or asserts that a profile.md claim is withdrawn "
+        "rather than merely stale. It does neither today; it measures the "
+        "code and hands the rows on, and the census file is untouched by it."
     ),
 
     # 2026-09-20, the FIRST FIRING wave. Triaged by reading the line, which is
@@ -1697,6 +1733,90 @@ NOT_A_CORRECTION: dict[tuple[str, str], str] = {
         "this wave correcting ITSELF in its own ledger, and the register is "
         "named only as the place the resulting instruments went. A document "
         "saying where it filed its tools is an attribution. "
+    ),
+
+    # 2026-09-20, the REOPENER-TRIGGERS wave. Four pairs, all triaged by
+    # reading the lines -- three are census rows this wave wrote, and the
+    # fourth is a neighbour caught by the +-2 window.
+    ("messaging-and-content.md", "2026-09-20-the-first-firing.md"): (
+        "THE CITED DOCUMENT ASKED FOR THIS EDIT AND IS NOT CORRECTED BY IT. "
+        "The line is row `M M4`, moved EXCLUDED-RULED -> MEASURED-ABSENT. It "
+        "quotes `the-first-firing.md` s4d, which NAMED the two-state-words "
+        "defect, declined to fix it because two rows had been committed four "
+        "hours earlier, and wrote *the owner of the state vocabulary can rule "
+        "it in one line*. Carrying out an act a document explicitly deferred "
+        "to somebody else is FULFILLING it, not contradicting it: nothing in "
+        "s4d is withdrawn, and its evidence -- three instruments looking, a "
+        "raw-versus-rendered sweep over 25 captures -- is relied on rather "
+        "than overturned. **THE ROW ITSELF IS CORRECTED, and that correction "
+        "IS declared**: this file carries a CORRECTED BY: marker naming "
+        "`2026-09-20-the-reopener-triggers.md`, which carries the matching "
+        "CORRECTS:. So the pair the scan offers here is the wrong pair -- the "
+        "corrector is this wave's document, not the one being quoted. "
+    ),
+    ("network.md", "2026-09-20-the-first-firing.md"): (
+        "THE TWIN OF THE PAIR ABOVE, and the same reading. The line is row "
+        "`N 157`, moved EXCLUDED-RULED -> MEASURED-ABSENT in the same pass "
+        "and for the same reason, quoting the same s4d sentence. `N 157`, "
+        "`M M4` and `J 127` assert one fact about one object -- the InMail "
+        "balance is not rendered -- and `J 127` already read MEASURED-ABSENT, "
+        "so this removes a three-way disagreement rather than creating one. "
+        "The real correction is declared by marker pair with "
+        "`2026-09-20-the-reopener-triggers.md`, as above. "
+    ),
+    ("network.md", "2026-09-20-the-reopener-triggers.md"): (
+        "THE CITATION POINTS AT WHERE A DEFECT IS DESCRIBED, AND THE ROW IS "
+        "AN INSTANCE OF IT RATHER THAN A CORRECTION OF IT. The line is row "
+        "`N 118`, whose STATE DID NOT MOVE -- it was MEASURED-ABSENT before "
+        "this wave and is MEASURED-ABSENT after. What was added is a REOPENER "
+        "clause naming a trigger that WAS ALREADY BUILT: "
+        "`dom.read_profile_detail_entries` has re-taken that reading on every "
+        "call since 2026-09-04. The row cites the wave document as the place "
+        "the class of defect is written up. Nothing about the cited document "
+        "is withdrawn -- it is the document that prompted the clause. "
+        "**A row naming the audit that added a sentence to it is an "
+        "attribution**, which is the same reading as the "
+        "sanitiser-scope/INSTRUMENTS pair above. "
+    ),
+    ("messaging-and-content.md", "2026-09-19-profile-modals-measured.md"): (
+        "COLLATERAL OF THE +-2 WINDOW, AND THE LINE IT FLAGS WAS NOT TOUCHED "
+        "BY ANY WAVE TODAY. The line is row `M M5`, which cites "
+        "`profile-modals-measured.md` amendment C as the place its R9/R4 "
+        "adjudication was made -- a provenance pointer, and the row has read "
+        "that way since 2026-09-19. What made it a candidate is the "
+        "NEIGHBOURING row: `M M4` sits one line above and now opens "
+        "**STATE CORRECTED**, so the vocabulary that trips the scan belongs "
+        "to a different row entirely. **THE WINDOW IS DOING EXACTLY WHAT ITS "
+        "OWN COMMENT SAYS IT WILL** -- reaching two lines and paying for the "
+        "reach in triage entries rather than in silence -- and in a MARKDOWN "
+        "TABLE every row is one line, so +-2 means the two adjacent "
+        "capabilities. That is a real cost of the heuristic on this corpus, "
+        "recorded here rather than argued away: it is the price of not "
+        "missing a correction, and it is cheap. "
+    ),
+    ("profile.md", "2026-09-20-the-sanctioned-seventh.md"): (
+        "THE CITATION IS A POINTER AT THE FULL READING, AND THE ARROW POINTS "
+        "THE OTHER WAY. The line is row `B2`, whose REASON was repaired "
+        "2026-09-20 -- it had called the `set_input_files` ban "
+        "*package-wide*, which stopped being true on 2026-09-04 when a single "
+        "call site was sanctioned. `B2` cites `the-sanctioned-seventh.md` as "
+        "the place that sanction is measured and argued in full. **The cited "
+        "document is not corrected by this citation; it is the CORRECTOR's "
+        "evidence.** The correction vocabulary beside it is this row "
+        "describing its OWN repair. "
+        "**THE REAL CORRECTION IS DECLARED, and it is a different pair:** "
+        "`profile.md` carries a CORRECTED BY: marker naming "
+        "`2026-09-20-the-reopener-triggers.md`, which carries the matching "
+        "CORRECTS:. The sanctioned-seventh document deliberately edited no "
+        "census row -- its own NOT_A_CORRECTION entry above says so and names "
+        "that as its failure condition -- so the wave that DID edit the row "
+        "owns the declaration. "
+        "**AND THE STATE DID NOT MOVE:** `B2` was EXCLUDED-RULED and remains "
+        "so. Upload is absent from `writes.PERFORMABLE` and "
+        "`writes.writes_enabled()` is False, so nothing became reachable. "
+        "Right answer, wrong reason -- which is worth a correction precisely "
+        "because a later reader cannot tell it from wrong answer, wrong "
+        "reason. "
     ),
 }
 

@@ -176,7 +176,7 @@ class Artifact(NamedTuple):
 
     @property
     def counts_as_finding(self) -> bool:
-        return self.verdict not in ("TRACKED", "AMBIGUOUS")
+        return self.verdict not in ("TRACKED", "AMBIGUOUS", "ABBREVIATED")
 
     def display(self) -> str:
         # An absolute path is an identifier. Report its SHAPE, never its value.
@@ -280,12 +280,29 @@ def classify(tok: str, tracked: set[str], ignored: set[str]) -> str:
         if tok in ignored or any(tok.startswith(i) for i in ignored):
             return "GITIGNORED"
         return "ABSENT" if not (ROOT / tok).exists() else "UNTRACKED-LOCAL"
-    # A bare filename: does exactly one tracked file end with it?
+    # A bare filename: does exactly one tracked file carry that basename?
     hits = [f for f in tracked if f.rsplit("/", 1)[-1] == tok]
     if len(hits) == 1:
         return "TRACKED"
     if len(hits) > 1:
         return "AMBIGUOUS"
+    # AN ABBREVIATED CITATION IS NOT AN UNREACHABLE ONE, and this class was
+    # forced by a real row rather than anticipated. `messaging-and-content.md`
+    # row `M4` cites `perform.md:3462-3487`. No tracked file is named
+    # `perform.md`, so the strict rule called it NOT-IN-REPO and put an eighth
+    # row in the headline count. But exactly one tracked basename ENDS with it
+    # -- `_audit/2026-08-31-linkedin-perform.md` -- and the line number settles
+    # it beyond doubt: that file has 4,966 lines and the only other candidate
+    # containing "perform" has 298, so line 3462 exists in one of them.
+    #
+    # **THE EVIDENCE IS REACHABLE; THE PATH AS WRITTEN IS NOT.** Those are
+    # different complaints and folding the second into the first would have
+    # inflated the headline integer by one, which is the number this whole
+    # instrument exists to state exactly. Reported under its own name, listed
+    # in full, and NOT counted as a finding.
+    suffixed = [f for f in tracked if f.rsplit("/", 1)[-1].endswith(tok)]
+    if len(suffixed) == 1:
+        return "ABBREVIATED"
     return "NOT-IN-REPO"
 
 
@@ -662,6 +679,8 @@ def main(argv: list[str] | None = None) -> int:
     norun = [r for r in rows if names_a_run_with_no_script(r, tracked)]
 
     ambiguous = [(r, a) for r in rows for a in r.artifacts if a.verdict == "AMBIGUOUS"]
+    abbreviated = [(r, a) for r in rows for a in r.artifacts
+                   if a.verdict == "ABBREVIATED"]
 
     print("")
     print("BANKED ROWS WITH AT LEAST ONE UNREACHABLE ARTIFACT : " + str(len(bad)))
@@ -669,6 +688,8 @@ def main(argv: list[str] | None = None) -> int:
     print("BANKED ROWS DESCRIBING A RUN WITH NO TRACKED SCRIPT : " + str(len(norun)))
     print("artifacts the extractor could not disambiguate      : "
           + str(len(ambiguous)) + "   (NOT counted as findings)")
+    print("ABBREVIATED paths -- reachable, but not as written  : "
+          + str(len(abbreviated)) + "   (NOT counted as findings)")
 
     by_verdict: dict[str, int] = {}
     for r in rows:
@@ -705,6 +726,14 @@ def main(argv: list[str] | None = None) -> int:
         for r in sorted(norun, key=lambda x: (x.slice_name, x.line)):
             print("  {} row {} [{}] line {}".format(
                 r.slice_name.split("/")[-1], r.row_id, r.state, r.line))
+
+    if abbreviated:
+        print("")
+        print("ABBREVIATED -- exactly one tracked basename ENDS with the cited")
+        print("name, so the evidence IS reachable and the path as written is not:")
+        for r, a in abbreviated:
+            print("  {} row {} [{}]  cites {!r}".format(
+                r.slice_name.split("/")[-1], r.row_id, r.state, a.raw))
 
     if ambiguous:
         print("")

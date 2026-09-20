@@ -231,6 +231,10 @@ named.
 
 ### The denominators, printed because a finding without them is not a measurement
 
+**Re-measured at the merge point `master` was fast-forwarded to, because three
+of the four slices moved under this wave while it was running.** The
+denominators grew; the answer did not.
+
     census slices read                     4
     table lines seen                     929
       rows naming a state                704
@@ -238,10 +242,11 @@ named.
       rows naming several                  0   NOT guessed at
       state-legend rows                   28   the state IS the row id
       MISSPELLED state cells               0   shipped `dialect_of`
-    rows in a BANKED state                79
-    evidence artifacts cited              87
-      TRACKED                             74
+    rows in a BANKED state                81   (79 before the merge)
+    evidence artifacts cited              93   (87 before)
+      TRACKED                             79
       GITIGNORED                          13
+      ABBREVIATED                          1   reachable, but not as written
       ambiguous / unclassifiable           0
 
 **THE STATE VOCABULARY IS IMPORTED, NOT REBUILT.**
@@ -268,7 +273,41 @@ this instrument most needs to be believed.
 
     BANKED ROWS RESTING ON AT LEAST ONE ARTIFACT NO CLONE CAN REACH   7
       of those, rows with NO reachable artifact at all                0
-    BANKED ROWS DESCRIBING A LIVE RUN WITH NO TRACKED SCRIPT         24
+    BANKED ROWS DESCRIBING A LIVE RUN WITH NO TRACKED SCRIPT         26
+
+### THE MERGE MOVED THE DENOMINATORS AND NOT THE ANSWER, AND IT NEARLY MOVED THE ANSWER
+
+Three of the four slices changed on `master` while this wave ran. Re-measuring
+after the merge -- rather than relaying the figure taken before it -- is the
+whole of why the number above is 7 and not 8.
+
+The re-run reported **8**. The new row was `messaging-and-content.md` `M4`,
+which `master` had just corrected from `EXCLUDED-RULED` into `MEASURED-ABSENT`
+-- so it entered the banked population for the first time, bringing its
+citations with it. One of them is `perform.md:3462-3487`, and **no tracked file
+is named `perform.md`**, so the strict rule classed it NOT-IN-REPO and it
+counted.
+
+**It should not count, and the reason is checkable.** Exactly one tracked
+basename ENDS with that name -- `_audit/2026-08-31-linkedin-perform.md` -- and
+the line number settles it beyond argument: that file has **4,966 lines** while
+the only other candidate containing "perform" has **298**, so line 3462 exists
+in precisely one of them.
+
+> **THE EVIDENCE IS REACHABLE; THE PATH AS WRITTEN IS NOT. Those are different
+> complaints, and folding the second into the first inflates the one integer
+> this instrument exists to state exactly.**
+
+So `ABBREVIATED` is its own class: printed in full with the row that carries
+it, and NOT counted as a finding. It is a real thing to fix -- the citation
+should name the file -- and it is not a reader who cannot reach the evidence.
+The mirror is asserted in both directions, or the class would be a hole rather
+than a distinction: a name matching nothing is still NOT-IN-REPO, and a name
+matching exactly is still TRACKED.
+
+**The 7 are the same 7 rows as before the merge**, and the pin -- keyed on
+(slice, row id, state) rather than on a line number -- held across it while
+`network.md` row 136 moved from line 439 to 458.
 
 ### The 7, with the artifact named
 
