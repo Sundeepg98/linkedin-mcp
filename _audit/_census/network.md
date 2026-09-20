@@ -544,29 +544,55 @@ by searching the product name. `/events/` returns **0 grep hits** in the package
 |---|---|---|---|---|
 | 194 | Find hiring managers through the #Hiring hashtag in search | R | GAP | **ASSIGNMENT SETTLED, STATE UNCHANGED.** `skew-gate` applied the A13 re-file in `5073827`; this row is `SEARCH-RESULTS-SURFACE` and that is not reopened here. It stays GAP on its own row text, and a 2026-09-19 feed read adds a second, independent reason it cannot be reached the other way: zero rendered hashtag anchors and zero `/feed/hashtag/` hrefs across four loads (`_audit/2026-09-19-hashtag-surface-live-evidence.md`). **So the people-search blocker is load-bearing whichever way the hashtag question falls** -- a blocker that still blocks when the contested half is removed is the row's real blocker. Blocker: no people search. The other seven recovered hashtag rows are post-composition or Page-admin and belong to the content slice |
 
-### S. Admin-only capabilities -- counted separately (15, all GAP)
+### S. Admin-only capabilities -- counted separately (15: 14 GAP, 1 COVERED-UNFIRED)
 
-He administers no Page, owns no group and organizes no event, so none of these
-is a capability he currently holds. All fifteen are GAP: no tool, and no written
-reason. A10-A15 were recovered in the second pass.
+He administers no Page, owns no group and organizes no event, so fourteen of
+these are not capabilities he currently holds. A10-A15 were recovered in the
+second pass.
 
-| # | capability | R/W |
-|---|---|---|
-| A1 | Notify employees of a Page post | W |
-| A2 | Follow another organization's Page on behalf of your Page | W |
-| A3 | View the Pages your Page follows | R |
-| A4 | Invite connections to follow a Page you manage | W |
-| A5 | View your Page's invitation credit balance | R |
-| A6 | Build a Page Follow button for your organization's website | W |
-| A7 | Turn on automatic invitations to content engagers (Premium) | W |
-| A8 | Turn off automatic invitations (Premium) | W |
-| A9 | Invite followers of similar Pages to follow your Page (Premium) | W |
-| A10 | Invite your connections to a group you own or manage | W |
-| A11 | Message an individual group member as owner or manager | W |
-| A12 | Send a message request as a group admin to a member you are not connected to | W |
-| A13 | Privately message any event attendee as the organizer, without being connected | W |
-| A14 | Remove an attendee from an event you organize | W |
-| A15 | Withdraw an event invitation before the invitee responds | W |
+**THIS TABLE GAINED A `state` COLUMN ON 2026-09-20, AND THE COLUMN IS THE
+POINT.** It had three columns and no state cell, so its verdict lived only in
+the prose above it and was turned into a countable `GAP` by a HARDCODED
+OVERRIDE in two scripts -- `count_census_states.main` and
+`enumerate_gap_rows.rows`, both spelled `if not st and letter == "N" and
+<id matches A-digits>: st = "GAP"`. **That override made every row here
+permanently GAP no matter what shipped**, because the state was in the code
+rather than in the file. `A6` is the row that proved it: a tool shipped, and
+nothing in the census could move. The override's own `if not st` is the
+designed escape hatch and this column takes it -- the rows now say what they
+are, and the override stays as a backstop for any A-row added without one.
+
+**AND THE SECTION'S REASON IS WEAKER THAN IT READS, which is recorded here
+rather than left for somebody to inherit.** "He administers no Page" rests, for
+the Page family, on a Manage-Pages capture that is a FRAGMENT -- `<head>` plus
+`<main>`, no `<html>`, `<body>` or `<nav>` -- in which all 20 href-bearing
+elements are `/company/<digits>/` and zero are anything else. An instrument
+that captured no page chrome could not have found an admin marker if one
+existed, so "zero admin markers" is a fact about the capture, not about the
+account. The EVENT half is genuinely measured (the self-scoped "Your events"
+card is a rendered zero against a full sibling card as its control); the GROUP
+half rests on five membership rows whose controls are `Leave this group`,
+`Copy link to group` and `Update your settings`, with no owner-only control in
+the vocabulary that arrived -- an absence never shown against a positive
+control. See `_audit/2026-09-20-admin-rights-ready.md`.
+
+| # | capability | R/W | state | note |
+|---|---|---|---|---|
+| A1 | Notify employees of a Page post | W | GAP | no Page; address refused |
+| A2 | Follow another organization's Page on behalf of your Page | W | GAP | refused by `/follow` before the allowlist |
+| A3 | View the Pages your Page follows | R | GAP | refused by `/follow` before the allowlist |
+| A4 | Invite connections to follow a Page you manage | W | GAP | needs a second consenting human |
+| A5 | View your Page's invitation credit balance | R | GAP | refused by `/invite` before the allowlist |
+| A6 | Build a Page Follow button for your organization's website | W | COVERED-UNFIRED | `linkedin_page_plugin_snippet`; no Page id exists to build one from |
+| A7 | Turn on automatic invitations to content engagers (Premium) | W | GAP | refused by `/settings/` before the allowlist |
+| A8 | Turn off automatic invitations (Premium) | W | GAP | refused by `/settings/` before the allowlist |
+| A9 | Invite followers of similar Pages to follow your Page (Premium) | W | GAP | needs a second consenting human |
+| A10 | Invite your connections to a group you own or manage | W | GAP | needs a second consenting human |
+| A11 | Message an individual group member as owner or manager | W | GAP | needs a second consenting human |
+| A12 | Send a message request as a group admin to a member you are not connected to | W | GAP | needs a second consenting human |
+| A13 | Privately message any event attendee as the organizer, without being connected | W | GAP | needs a second consenting human |
+| A14 | Remove an attendee from an event you organize | W | GAP | `/events/<id>/` is not admitted; only the events root is |
+| A15 | Withdraw an event invitation before the invitee responds | W | GAP | refused by `/invite`; also needs an invitation already sent |
 
 ---
 

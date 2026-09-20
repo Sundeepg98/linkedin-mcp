@@ -288,4 +288,12 @@ def test_both_rules_reject_the_registry_that_was_actually_measured():
     # ``REGISTRY_WHILE_BROKEN`` first. The demonstration compares a two-entry
     # reading BY CONTENT and reads no count, so the number moving cannot reach
     # it.
-    assert len(_tool_names()) == 44
+    #
+    # 45 FROM 2026-09-20: linkedin_page_plugin_snippet, a READ that opens
+    # no page at all. This pin and the three sites in
+    # test_server_surface.py -- EXPECTED_TOOLS, the count, the read split
+    # -- plus that test's own name and the forcing-function pin were all
+    # moved in the SAME edit as the tool, which is what the paragraph
+    # above asks for and what a4565cb did not do. FIVE sites, measured
+    # off the registry rather than relayed from a commit message.
+    assert len(_tool_names()) == 45

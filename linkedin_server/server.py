@@ -1,4 +1,4 @@
-"""The tool surface: forty-four tools, twelve of which write to LinkedIn.
+"""The tool surface: forty-five tools, twelve of which write to LinkedIn.
 
 THIS PARAGRAPH HAS NOW BEEN WRONG FIVE TIMES, in both directions, and the
 count is the part that keeps rotting. Until 2026-08-23 it read *"There is no
@@ -142,9 +142,9 @@ assigned to anybody -- it waits for whoever next runs the suite, and in the
 meantime the pin goes on asserting the old number with full confidence.
 
 THE NUMBERS ABOVE ARE DERIVED NOW, and that is a statement about a test rather
-than about an intention. Forty-four is ``len(await mcp.list_tools())``,
+than about an intention. Forty-five is ``len(await mcp.list_tools())``,
 pinned in ``test_server_surface.py`` by
-``test_the_surface_is_exactly_the_fortyfour_tools``; the split is pinned by
+``test_the_surface_is_exactly_the_fortyfive_tools``; the split is pinned by
 ``tests/test_prose_that_makes_a_claim.py::test_the_server_docstring_numbers_are_derived``,
 which reads THESE WORDS and fails if any of the three disagrees with the
 registry.
@@ -157,8 +157,24 @@ POINTER to it was dangling, so a reader who followed it found nothing and
 would reasonably conclude these numbers are unchecked. A citation is a claim
 like any other.
 The surface splits three ways and the split is the part a reader actually
-needs: THIRTY-TWO read, TWELVE write, and ZERO are write-shaped, registered,
-gated and unable to act. Thirty-two plus twelve plus zero is forty-four.
+needs: THIRTY-THREE read, TWELVE write, and ZERO are write-shaped,
+registered, gated and unable to act. Thirty-three plus twelve plus zero is
+forty-five.
+
+THE THIRTEENTH IS ONE READ, 2026-09-20, AND IT IS THE FIRST TOOL HERE THAT
+OPENS NO PAGE AT ALL. ``linkedin_page_plugin_snippet`` builds one string
+offline from a numeric id a caller supplies, so it widens neither the write
+side nor the set of addresses this package can reach -- the two things every
+previous arrival had to be weighed against. It banks census row ``N A6`` as
+COVERED-UNFIRED in the same commit.
+
+**AND THIS TIME EVERY SITE MOVED TOGETHER, WHICH IS WHAT THE THREE
+PARAGRAPHS ABOVE ARE ABOUT.** The headline at the top of this docstring,
+these two sentences, ``README.md``'s headline and its tree diagram, the pin
+in ``test_server_surface.py`` AND that test's own name, the read split, the
+count in ``test_every_tool_is_on_the_surface.py``, and the forcing-function
+pin -- nine sites in one edit, because the debt this file records twice is
+what a partial sweep leaves behind.
 
 THE TWENTY-FIFTH READ ARRIVED 2026-09-05: ``linkedin_search_appearances``,
 the reciprocal of ``linkedin_who_viewed_me`` -- that one reads the receiving
@@ -322,6 +338,7 @@ from linkedin_server import (
     jobfilter,
     newsletters,
     notify_cost,
+    page_plugin,
     preflight,
     premium,
     shape,
@@ -8824,6 +8841,56 @@ async def linkedin_creator_analytics() -> dict[str, Any]:
             )
             assert_not_authwall(landed, surface="creator-analytics")
             return await creator_analytics.read_content_analytics(page)
+    except Exception as exc:
+        return _error(exc)
+
+
+@mcp.tool()
+async def linkedin_page_plugin_snippet(page_id: str) -> dict[str, Any]:
+    """IT REACHES NO NETWORK AND CHANGES NOTHING: one HTML snippet, built offline.
+
+    No browser session is opened, no request leaves this process, and nothing
+    on LinkedIn is read or altered in either direction. The return value is a
+    string: the embed code LinkedIn documents for the widget a Page
+    administrator pastes into their own website.
+
+    WHAT IT IS FOR. Census row ``N A6`` is not an act on LinkedIn at all --
+    "Build a Page Follow button for your organization's website" -- and it is
+    the only one of the fifteen in ``ADMIN-RIGHTS-NOT-HELD`` this server can
+    deliver by itself. The other fourteen need an address this package may not
+    open, a write grant, or a second consenting human. This one needs a
+    template and a number.
+
+    **THE NUMBER IS NOT ONE THIS SERVER CAN READ, AND THAT IS THE HONEST
+    SHAPE OF THE ROW RATHER THAN A DEFECT.** The cited document names exactly
+    one place a Page administrator finds their Company ID: the admin section
+    of their own Page. That address is refused by this package's navigation
+    boundary -- measured 2026-09-20, by allowlist silence rather than by a
+    forbidden substring -- so the id arrives from the caller by hand or the
+    tool has nothing to build with. ``tests/test_page_plugin.py`` pins that
+    refusal, so the day the address is admitted somebody re-decides this.
+
+    **ONLY TEN CHARACTERS OF WHAT YOU PASS CAN REACH THE OUTPUT.** A Company
+    ID is a run of ASCII digits; anything else is refused. That is not
+    fussiness. A Page's vanity name is routinely a person's name -- a
+    personal-brand Page, a one-person consultancy -- and the plugin's own
+    contract wants the numeric id anyway, so refusing the slug costs nothing
+    and closes the hole by construction. A refusal reports SHAPE FACTS about
+    what it saw and never the value, for the same reason.
+
+    WHAT COMES BACK. ``html`` holds the snippet, or ``None`` with ``refused``
+    naming which rule declined it. Every answer also carries the provenance of
+    the contract it reproduces, including ``source_doc_updated`` and
+    ``verified_live`` -- which is ``false``, and stays false until somebody
+    watches the widget render. The snippet loads a third-party script and
+    carries no integrity digest because the cited document specifies none;
+    ``advisory`` says so where a caller meets it.
+
+    Args:
+        page_id: your Page's numeric Company ID, as ASCII digits.
+    """
+    try:
+        return {"ok": True, **page_plugin.follow_plugin_snippet(page_id)}
     except Exception as exc:
         return _error(exc)
 

@@ -199,6 +199,18 @@ EXPECTED_TOOLS = {
     "linkedin_premium_status",
     "linkedin_newsletter_subscriptions",
     "linkedin_notify_cost_precondition",
+    # THE FORTY-FIFTH, 2026-09-20, a READ -- and the only tool on
+    # this surface that opens NO PAGE AT ALL. It builds one string
+    # offline from a numeric id the caller supplies, banking census
+    # row N A6 as COVERED-UNFIRED. UNFIRED is the honest state and
+    # not a hedge: the operator administers no Page today, so there
+    # is no Company ID in existence to build a real snippet from.
+    #
+    # IT WIDENS NOTHING THIS FILE GUARDS. No address, no entry in
+    # readonly.SANCTIONED_MUTATIONS, no write verb in its name, and
+    # nothing a caller passes can reach the output except the ten
+    # ASCII digits.
+    "linkedin_page_plugin_snippet",
     # THE FORTY-SECOND, 2026-09-05 evening, a READ.
     # ``linkedin_group_memberships`` wires ``groups_page.read_group_
     # memberships``, which wires ``groups.py`` -- a shaper that shipped
@@ -443,7 +455,7 @@ async def tools():
     return {t.name: t for t in await mcp.list_tools()}
 
 
-async def test_the_surface_is_exactly_the_fortyfour_tools(tools):
+async def test_the_surface_is_exactly_the_fortyfive_tools(tools):
     """RENAMED THREE TIMES ON 2026-08-25, from ``..._seventeen_tools`` through
     ``..._eighteen_tools`` and ``..._nineteen_tools``, and the rename is the
     honest half of the edit rather than noise in a diff.
@@ -547,8 +559,16 @@ async def test_the_surface_is_exactly_the_fortyfour_tools(tools):
     what turned this red into something a commit had to answer for rather
     than something a suite would mention eventually.
 
-    FORTY-FOUR NAMES OVER FORTY-THREE CAPABILITIES; the login pair is still
+    FORTY-FIVE NAMES OVER FORTY-FOUR CAPABILITIES; the login pair is still
     the only pair.
+
+    **THAT SENTENCE READ "FORTY-FOUR NAMES OVER FORTY-THREE" UNTIL
+    2026-09-20**, and this time the prose moved in the same edit as the
+    body rather than a session later. Corrected rather than deleted for
+    the reason the paragraphs below give: the arithmetic is the
+    load-bearing part, and names minus capabilities being exactly the
+    login pair is a claim that stays checkable when the count moves
+    again.
 
     **THAT SENTENCE READ "FORTY-TWO NAMES OVER FORTY-ONE" UNTIL 2026-09-19**,
     for the same reason it once read "thirty-six over thirty-five": two tools
@@ -632,7 +652,9 @@ async def test_the_surface_is_exactly_the_fortyfour_tools(tools):
     # is bumped by whoever is unlucky enough to run the suite next, which is
     # exactly how the one in test_messaging_overview reached three admissions
     # out of date. A count belongs in the file that owns the claim.
-    assert len(tools) == 44
+    # FORTY-FIVE FROM 2026-09-20. The forty-fifth is
+    # linkedin_page_plugin_snippet, a READ that opens no page.
+    assert len(tools) == 45
     # And the split is asserted, not just the total. A future tool arriving as
     # a write would otherwise only have to bump a number.
     #
@@ -752,7 +774,11 @@ async def test_the_surface_is_exactly_the_fortyfour_tools(tools):
     # Neither opens an address that was not already admitted and neither adds
     # an entry to readonly.SANCTIONED_MUTATIONS, so the widening is in what
     # can be READ and in nothing else.
-    assert len(set(tools) - SANCTIONED_WRITE_TOOLS) == 32
+    # THIRTY-THREE FROM 2026-09-20: linkedin_page_plugin_snippet is a
+    # READ and the write side is BYTE-IDENTICAL across it. It reaches
+    # no network at all, so it cannot widen what is READ either --
+    # the only tool here of which that is true.
+    assert len(set(tools) - SANCTIONED_WRITE_TOOLS) == 33
 
 
 def test_the_read_that_was_nearly_named_a_write():
