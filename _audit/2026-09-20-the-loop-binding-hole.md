@@ -23,7 +23,7 @@ $ venv/Scripts/python.exe -m pytest tests/test_navigation_is_never_derived.py -q
 
 Note for anyone reproducing: `venv/` is gitignored, so it does **not** exist inside a
 worktree. The interpreter used throughout is the main checkout's
-`D:\Sundeep\projects\job-hunting\mcp-servers\linkedin\venv\Scripts\python.exe`, run
+`./venv/Scripts/python.exe`, run
 with the worktree as cwd. That is the standing worktree trap, hit again here.
 
 ---
