@@ -162,7 +162,7 @@ from __future__ import annotations
 import re
 from typing import Any, Iterable
 
-from linkedin_server import dom
+from linkedin_server import coerce, dom
 
 #: THE CLOSED OUTPUT ALPHABET. Order is the contract: the page returns a
 #: POSITION in this tuple, so reordering silently renames every reading ever
@@ -285,12 +285,20 @@ def _as_int(value: Any) -> int | None:
 
     ``bool`` is refused deliberately: ``True`` is an ``int`` in Python, and a
     count of ``True`` results is a reading nobody took.
+
+    THE BODY MOVED TO ``linkedin_server.coerce`` ON 2026-09-20 and this name
+    stayed, for two reasons that pull the same way. The repair turned out to be
+    needed at 45 sites in 14 readers rather than at this one, and a helper
+    copied fourteen times is fourteen things that can drift -- that is the
+    whole argument for a shared module. But this name is also the PLANT POINT
+    of ``scripts/_check_the_shaper_leak_guard_can_fail.py``, which proves the
+    guard can fail by rebinding ``search_results._as_int`` to ``int``; the
+    functions below resolve it as a module global at call time, so the plant
+    still reaches them. Delegating THROUGH this function preserves that,
+    where importing ``coerce.as_int`` into their bodies would have silently
+    disarmed the one control that shows this guard failing.
     """
-    if isinstance(value, bool):
-        return None
-    if isinstance(value, int):
-        return value
-    return None
+    return coerce.as_int(value)
 
 
 def _counts_only(values: Any) -> tuple[list[int], int]:

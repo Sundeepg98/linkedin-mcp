@@ -209,7 +209,7 @@ from dataclasses import dataclass, field
 from typing import Any, Optional, Union
 from urllib.parse import urlsplit
 
-from linkedin_server import dom, shape, uploads
+from linkedin_server import coerce, dom, shape, uploads
 from linkedin_server.errors import WriteAttemptError
 
 # ---------------------------------------------------------------------------
@@ -3784,8 +3784,8 @@ async def _read_dark_mode(
         "checked_sources": sorted(
             {str(row.get("checked_source") or "none") for row in rows}
         ),
-        "controls_read": int(census.get("controls_read") or 0),
-        "forms": int((census.get("counts") or {}).get("forms") or 0),
+        "controls_read": coerce.as_count(census.get("controls_read")),
+        "forms": coerce.as_count((census.get("counts") or {}).get("forms")),
     }
 
     if not rows:

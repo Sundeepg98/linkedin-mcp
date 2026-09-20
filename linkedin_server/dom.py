@@ -44,6 +44,7 @@ import time
 from typing import Any, Optional
 
 from linkedin_server import shape
+from linkedin_server.coerce import as_count
 from linkedin_server.config import logger
 from linkedin_server.errors import ExtractionFailedError
 
@@ -3372,7 +3373,7 @@ async def read_surface_census(
         )
 
     counts = {
-        key: int((data.get("counts") or {}).get(key) or 0)
+        key: as_count((data.get("counts") or {}).get(key))
         for key in (
             "forms",
             "buttons",
@@ -3505,7 +3506,7 @@ async def read_file_inputs(
     # ``truncated`` when they do. A page with more controls than the cap would
     # make the filtered list an UNDERCOUNT, and a reader that returned only
     # that would quietly say "one file input" about a page with three.
-    counted = int((census.get("counts") or {}).get("file_inputs") or 0)
+    counted = as_count((census.get("counts") or {}).get("file_inputs"))
     described = len(inputs)
     return {
         "count": counted,
@@ -3909,7 +3910,7 @@ async def read_self_owned_editor_fields(
         ) from exc
 
     data = dict(data or {})
-    anchors = int(data.get("anchor_controls") or 0)
+    anchors = as_count(data.get("anchor_controls"))
     if anchors == 0:
         return {
             "refused": "no_anchor",
@@ -4000,7 +4001,7 @@ async def read_self_owned_editor_fields(
         "container": {
             "kind": str(kind),
             "anchor": anchor_name,
-            "controls_inside": int(data.get("controls_inside") or 0),
+            "controls_inside": as_count(data.get("controls_inside")),
         },
         "fields": fields,
     }
@@ -4358,7 +4359,7 @@ async def read_self_owned_editor_values(
         ) from exc
 
     data = dict(data or {})
-    anchors = int(data.get("anchor_controls") or 0)
+    anchors = as_count(data.get("anchor_controls"))
     if anchors == 0:
         return {
             "refused": "no_anchor",
@@ -4406,7 +4407,7 @@ async def read_self_owned_editor_values(
                 "tag": str(control.get("tag") or ""),
                 "type": control.get("type"),
                 "role": control.get("role"),
-                "index": int(control.get("index") or 0),
+                "index": as_count(control.get("index")),
                 # THE VALUE HALF, AND census_substitute IS NOT CALLED ON IT.
                 # Deliberate, argued above the script, and pinned by
                 # test_a_value_that_looks_like_a_urn_is_not_substituted: a
@@ -4427,7 +4428,7 @@ async def read_self_owned_editor_values(
         "container": {
             "kind": str(kind),
             "anchor": anchor_name,
-            "controls_inside": int(data.get("controls_inside") or 0),
+            "controls_inside": as_count(data.get("controls_inside")),
         },
         "fields": fields,
     }
@@ -5114,9 +5115,9 @@ async def read_own_activity_items(
         ) from exc
 
     data = dict(data or {})
-    overflow = int(data.get("overflow_controls") or 0)
-    authors = int(data.get("authors_found") or 0)
-    headings = int(data.get("owner_headings") or 0)
+    overflow = as_count(data.get("overflow_controls"))
+    authors = as_count(data.get("authors_found"))
+    headings = as_count(data.get("owner_headings"))
     owner_match = data.get("owner_match")
     owner_source = data.get("owner_source")
 
@@ -5156,24 +5157,24 @@ async def read_own_activity_items(
         # textContent count. They differ exactly when LinkedIn draws a heading
         # CSS has taken out of layout, which is what it does on the live
         # profile and what made this reader refuse for a day.
-        "owner_headings_rendered": int(data.get("owner_headings_rendered") or 0),
-        "owner_headings_contained": int(
-            data.get("owner_headings_contained") or 0
+        "owner_headings_rendered": as_count(data.get("owner_headings_rendered")),
+        "owner_headings_contained": as_count(
+            data.get("owner_headings_contained")
         ),
         # WHETHER THE PAGE HAS A TITLE AT ALL, as a count rather than the
         # string. It is the third owner route's raw material and an empty one
         # is a different refusal from a title that simply does not carry the
         # author -- the same absent-is-not-zero distinction the two heading
         # counts keep.
-        "owner_title_present": int(data.get("owner_title_present") or 0),
-        "permalink_anchors": int(data.get("permalink_anchors") or 0),
-        "distinct_urns": int(data.get("distinct_urns") or 0),
-        "unrecognised": int(data.get("unrecognised") or 0),
-        "unpaired": int(data.get("unpaired") or 0),
+        "owner_title_present": as_count(data.get("owner_title_present")),
+        "permalink_anchors": as_count(data.get("permalink_anchors")),
+        "distinct_urns": as_count(data.get("distinct_urns")),
+        "unrecognised": as_count(data.get("unrecognised")),
+        "unpaired": as_count(data.get("unpaired")),
     }
     routes = dict(data.get("item_root_source") or {})
     item_root_source = {
-        key: int(routes.get(key) or 0) for key in ("data-urn", "data-id", "climb")
+        key: as_count(routes.get(key)) for key in ("data-urn", "data-id", "climb")
     }
 
     def refusal(code: str, reason: str) -> dict[str, Any]:
@@ -5245,7 +5246,7 @@ async def read_own_activity_items(
         "authorship_facts": facts,
         "items": items,
         "anchors_per_item": {
-            key: int(per_item_raw.get(key) or 0) for key in items
+            key: as_count(per_item_raw.get(key)) for key in items
         },
         "counts": counts,
         "item_root_source": item_root_source,
@@ -5588,10 +5589,10 @@ async def read_sdui_actions(
         logger.debug("sdui actions unreadable: %s", out["error"])
         return out
     for key in ("script_blocks", "payload_chars", "needle_hits"):
-        out[key] = int(reading.get(key) or 0)
+        out[key] = as_count(reading.get(key))
     for bucket in ("global", "scoped"):
         got = reading.get(bucket) or {}
-        out[bucket] = {key: int(got.get(key) or 0) for key in SDUI_ACTION_TOKENS}
+        out[bucket] = {key: as_count(got.get(key)) for key in SDUI_ACTION_TOKENS}
     # READABLE means the payload was there AND carried recognisable actions.
     # A page with script blocks but no action tokens is a page this reader
     # cannot speak for, and it says so rather than reporting a comfortable
@@ -6801,13 +6802,13 @@ async def read_recipient_ids(page: Any) -> dict[str, Any]:
     except Exception as exc:  # noqa: BLE001 - reported, never raised
         out["error"] = f"{type(exc).__name__}: {exc}"
         return out
-    out["buttons"] = int((data or {}).get("buttons") or 0)
+    out["buttons"] = as_count((data or {}).get("buttons"))
     for row in (data or {}).get("rows") or []:
         out["rows"].append(
             {
                 "slug": str(row.get("slug") or ""),
                 "recipient": str(row.get("recipient") or ""),
-                "hops": int(row.get("hops") or 0),
+                "hops": as_count(row.get("hops")),
                 # WHY the slug is empty, which is a different question from
                 # whether it is. An empty slug because the climb ran out of
                 # hops means the row is deeper than the budget; an empty slug
@@ -6979,10 +6980,13 @@ async def read_comment_surface(page: Any) -> dict[str, Any]:
         counts[name] = counts.get(name, 0) + 1
     out["names"] = counts
     out["unnamed"] = unnamed
-    out["controls_read"] = int(census.get("controls_read") or 0)
+    # CLEAN ONLY BECAUSE ITS UPSTREAM IS. ``read_surface_census`` was repaired
+    # today, so what reaches here is already integers -- which is a property of
+    # the CALLER, not of this line, and it is one edit away from not holding.
+    out["controls_read"] = as_count(census.get("controls_read"))
     census_counts = census.get("counts") or {}
-    out["menus"] = int(census_counts.get("menus") or 0)
-    out["menu_items"] = int(census_counts.get("menu_items") or 0)
+    out["menus"] = as_count(census_counts.get("menus"))
+    out["menu_items"] = as_count(census_counts.get("menu_items"))
     return out
 
 #: The reaction control, and the most informative string measured that day.
@@ -7508,10 +7512,13 @@ async def read_invitation_surface(
         # type alone says which failure happened and carries nothing.
         logger.debug("invite needle unreadable: %s", type(exc).__name__)
         return out
-    out["controls"] = int(reading.get("total") or 0)
-    out["matches"] = int(reading.get("matches") or 0)
+    out["controls"] = as_count(reading.get("total"))
+    out["matches"] = as_count(reading.get("matches"))
     position = reading.get("index")
-    out["index"] = None if position is None else int(position)
+    # ABSENT STAYS None. ``as_count`` answers 0 for a missing value, and 0 is a
+    # real index on this surface -- collapsing "no match" into "the first one"
+    # is the conflation the explicit None here exists to refuse.
+    out["index"] = None if position is None else as_count(position)
     # THE THIRD GATE, IN PYTHON, over the two already applied in the page.
     # Three conditions rather than one on the line that can carry a name, and
     # they are written in two different languages so that a single edit
@@ -8471,7 +8478,7 @@ async def read_job_insight_panels(page: Any) -> dict[str, Any]:
             "heading_count": len(sections),
             "view_names": list(markers.get("view_names") or []),
             "main_present": bool(markers.get("main_present")),
-            "main_chars": int(markers.get("main_chars") or 0),
+            "main_chars": as_count(markers.get("main_chars")),
         },
     }
 
@@ -8734,9 +8741,9 @@ async def read_profile_views_insights(page: Any) -> dict[str, Any]:
             "metrics_seen": len(metrics),
             "view_names": list(data.get("view_names") or []),
             "view_name_counts": dict(data.get("view_name_counts") or {}),
-            "viewer_rows": int(data.get("viewer_rows") or 0),
+            "viewer_rows": as_count(data.get("viewer_rows")),
             "main_present": bool(data.get("main_present")),
-            "main_chars": int(data.get("main_chars") or 0),
+            "main_chars": as_count(data.get("main_chars")),
         },
     }
 
@@ -9379,21 +9386,21 @@ async def read_search_appearances(page: Any) -> dict[str, Any]:
         "filters": list(data.get("filters") or []),
         # THE ANSWER TO THE QUESTION THIS PAGE WAS OPENED FOR.
         "anchors": {
-            "person": int(data.get("person_anchors") or 0),
-            "company": int(data.get("company_anchors") or 0),
-            "total": int(data.get("total_anchors") or 0),
+            "person": as_count(data.get("person_anchors")),
+            "company": as_count(data.get("company_anchors")),
+            "total": as_count(data.get("total_anchors")),
         },
         "observed": {
-            "pairs_seen": int(data.get("pairs_seen") or 0),
-            "pairs_withheld": int(data.get("pairs_withheld") or 0),
-            "paragraphs_seen": int(data.get("paragraphs_seen") or 0),
-            "list_items": int(data.get("list_items") or 0),
-            "headings": int(data.get("headings") or 0),
-            "images": int(data.get("images") or 0),
+            "pairs_seen": as_count(data.get("pairs_seen")),
+            "pairs_withheld": as_count(data.get("pairs_withheld")),
+            "paragraphs_seen": as_count(data.get("paragraphs_seen")),
+            "list_items": as_count(data.get("list_items")),
+            "headings": as_count(data.get("headings")),
+            "images": as_count(data.get("images")),
             "view_names": list(data.get("view_names") or []),
             "view_name_counts": dict(data.get("view_name_counts") or {}),
             "main_present": bool(data.get("main_present")),
-            "main_chars": int(data.get("main_chars") or 0),
+            "main_chars": as_count(data.get("main_chars")),
         },
     }
 
