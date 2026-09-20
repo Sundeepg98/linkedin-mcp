@@ -370,6 +370,8 @@ produced output byte-identical to the run before them.
 
 ## 5. INSTRUMENTS
 
+### 5.1 The locator recall guard
+
 `tests/test_the_blocker_reason_locator_states_its_recall.py` -- 27 checks over
 the locator: the known miss, the recall floors, the generated-artifact
 exclusion, the rank-1 ceiling that guards the column's shape, the column's own
@@ -397,6 +399,31 @@ The rank-1 assertion is a CEILING and will fail if somebody genuinely improves
 the ranking. That is deliberate: at that point the column's shape should be
 re-decided rather than inherited.
 
+### 5.2 The unpublished-blocker check in `build_blocker_map.py`
+
+Section 1.4 could only be written because a TEST catches a blocker the ledger
+does not publish. The SCRIPT said nothing: its per-blocker table iterates the
+published set, so rows filed onto an unpublished name are simply absent from
+it, and its two headline counts were written against a hardcoded 97. A reader
+running `--check` on the re-file this wave declined would have seen a clean
+table with two rows quietly missing.
+
+It now prints what it DID see, and fails. Control and mutation, the mutation
+injected by wrapping `build()` rather than by editing the shared evidence file,
+which is another wave's ground:
+
+    CONTROL    unmodified build                                 exit 0, silent
+    MUTATION   J 40 and J 57 filed onto PROXIMITY-NOT-PARSED    exit 1
+
+      FAIL: the map holds 1 blocker(s) the ledger does not publish, so they
+      appear NOWHERE in the per-blocker table below and are not counted in
+      any total on this page:
+        PROXIMITY-NOT-PARSED   holds 2 row(s), published nowhere
+
+The two headline counts are now derived from the parsed ledger rather than
+from the literal 97, so they cannot report a total that includes a blocker
+which is not one of them.
+
 ---
 
 ## 6. DEFECTS HANDED ON
@@ -416,9 +443,11 @@ re-decided rather than inherited.
 5. **`N 95`/`N 96` carry a live contradiction** between two same-day documents,
    one saying the pair is settled onto the jobs rows and the other saying they
    were carved back. Nobody has closed it.
-6. **A new blocker name is structurally invisible** in
-   `build_blocker_map.py`'s per-blocker verdict table, and its header counts are
-   hardcoded at 97. Any future blocker creation hits this first.
+6. **A new blocker name was structurally invisible** in
+   `build_blocker_map.py`'s per-blocker verdict table, and its header counts
+   were hardcoded at 97. **FIXED HERE** -- see section 5.2. The script now
+   names any blocker the ledger does not publish, says that such a blocker
+   appears nowhere in the table below it, and fails.
 7. **Section heading counts are hand-maintained** and will go stale on the first
    row that moves. Nothing derives them.
 8. **The InMail ledger file the skill models a balance from does not exist**, so

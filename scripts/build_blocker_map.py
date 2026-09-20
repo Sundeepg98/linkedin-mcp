@@ -434,8 +434,38 @@ def main(argv: list[str] | None = None) -> int:
     recount: dict[str, int] = {}
     for blocker, *_ in assign.values():
         recount[blocker] = recount.get(blocker, 0) + 1
-    print(f"\nblockers with at least one recovered row  {len(recount)} of 97")
-    print(f"blockers with NO recovered row            {97 - len(recount)}")
+
+    #: A BLOCKER THE LEDGER DOES NOT PUBLISH IS INVISIBLE IN EVERYTHING BELOW,
+    #: and that was silent until 2026-09-20. The per-blocker table iterates
+    #: `published`, so a name outside it holds rows and is never printed; the
+    #: two headline counts are written against a hardcoded 97, so they would
+    #: report a total that counts a blocker which is not one of the 97. The
+    #: TEST has caught this since it was written; the SCRIPT did not say a word.
+    #:
+    #: MEASURED the same day, on a live attempt: a wave held a replacement cell
+    #: re-filing two rows onto a new blocker, `PROXIMITY-NOT-PARSED`. Running
+    #: this script would have printed a clean-looking table with those rows
+    #: simply absent from it, and the only signal would have come from a test
+    #: the author might not have run. A refusal that reports only what it did
+    #: NOT match is half a measurement -- so this prints what it DID see.
+    unknown = sorted(b for b in recount if b not in published)
+    if unknown:
+        print(f"\n  FAIL: the map holds {len(unknown)} blocker(s) the ledger "
+              f"does not publish, so they appear NOWHERE in the per-blocker "
+              f"table below and are not counted in any total on this page:")
+        for b in unknown:
+            print(f"    {b:32s} holds {recount[b]} row(s), published nowhere")
+        print("    Creating a blocker is a LEDGER act: it needs an entry in "
+              "one of the two published tables AND a re-total, which "
+              "test_the_ledger_tables_still_total_97_blockers_and_409_rows "
+              "pins. Filing rows onto an unpublished name is not that act.")
+        fail = 1
+
+    known = len(recount) - len(unknown)
+    print(f"\nblockers with at least one recovered row  {known} of "
+          f"{len(published)}")
+    print(f"blockers with NO recovered row            "
+          f"{len(published) - known}")
 
     print("\nper-blocker recount vs the ledger's published count")
     print(f"  {'blocker':32s} {'pub':>4s} {'map':>4s} {'delta':>6s}  verdict")
