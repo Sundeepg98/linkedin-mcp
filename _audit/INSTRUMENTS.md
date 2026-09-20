@@ -6281,6 +6281,65 @@ is a shouted word built only out of the state vocabulary's own atoms, so the
 heuristic cannot help but see it. Scoped to rows of four cells or more -- a
 capability row's shape in these slices -- because **an instrument that cries
 wolf in a census is disbelieved exactly where it is most needed.**
+
+### 40.8 `scripts/sweep_blobs_for_identity.py` -- THE GREEN THAT MEASURED NOTHING
+
+`sweep_blobs_for_identity.py --help` took `--help` as a git range, swept 0
+blobs and printed **`PASS: 0 hits across 0 blobs`** -- exit 0 from the tool
+that checks blobs for a real person's identifiers before they are published.
+`_git()` returned `out.stdout` and discarded `returncode` and `stderr`, so a
+failed `rev-list` produced an empty commit list and `main()` fell through to
+its `PASS` branch. The module already had a MUTE CHECK for an empty NEEDLE set
+and none for an empty CORPUS.
+
+> **A MUTE-CHECK ON THE NEEDLES AND NONE ON THE CORPUS IS HALF A GUARD.** Both
+> ends of a search can be empty and both emptinesses produce the same clean
+> result. Whichever one you thought of first, the other is the one that bites.
+
+Every zero now refuses: unresolvable range, resolvable-but-empty range, and
+commits-with-no-blobs, each with a DISTINCT message, none beginning `PASS` or
+`FAIL`.
+
+**REFUSING ON A VALID-BUT-EMPTY RANGE IS NOT OBVIOUS AND THE RULING WENT ROUND
+TWICE.** The case for passing is real: an empty `origin/master..HEAD` is the
+normal state of a synced repo and it is the one live caller's real invocation.
+
+> **AN EMPTY RESULT IS AMBIGUOUS BETWEEN "THERE IS NOTHING TO CHECK" AND "I WAS
+> POINTED AT THE WRONG HISTORY", AND THE TOOL CANNOT TELL THEM APART.** A
+> misconfigured upstream, a detached HEAD, a typo'd ref that resolves, a fresh
+> clone with no `origin/master` -- each yields zero while unpushed work sits
+> outside the measured range. **FAIL-CLOSED BEATS FAIL-INFORMATIVE WHEN THE
+> MISS IS IRREVERSIBLE**, and publishing an identifier here is irreversible:
+> a force-push leaves retained objects resolvable by SHA.
+
+**THE REJECTED MIDDLE OPTION, recorded with its argument.** An intermediate
+build exited 0 with TAGGED verdicts -- `PASS (NOTHING IN RANGE)`,
+`PASS (NOTHING SWEPT)` -- never the bare sentence. It loses on a fact:
+`purge_denied_term.py` selects the verdict with
+`l.startswith(("PASS", "FAIL"))`.
+
+> **A QUALIFIER AFTER THE FIRST WORD IS INVISIBLE TO A PREFIX MATCH.** When one
+> string is read by a human AND by a gate, and they do not parse it the same
+> way, the tag informs the reader and does none of the gate's work. Put the
+> distinction where the machine reads, or accept that only the human has it.
+
+And the prefix carries a second load: that script's closing line is *"If either
+FAILs, run: `git reset --hard <tag>`"*, so **`FAIL` there names a DESTRUCTIVE
+remedy**. A refusal meaning "I could not establish anything" may not be spelled
+as the word that tells an operator to hard-reset. `(no verdict)` is the correct
+rendering and is now deliberate rather than incidental.
+
+**THE CONTROL THAT TOOK THREE DRAFTS, and it is 37.8's shape a fifth time.** A
+static check banning the original sentence from the source first text-searched
+the whole file and hit the docstring's own explanation of the invariant; then
+searched past the docstring and hit two code COMMENTS that name it for the same
+reason.
+
+> **WALK THE AST FOR STRING CONSTANTS AND EXCLUDE DOCSTRINGS BY NODE IDENTITY.**
+> A text scan cannot tell "explains the sentence" from "prints the sentence".
+> An AST walk can: a comment is never a node, and a docstring is an
+> identifiable one. What remains is exactly the set of literals that can reach
+> stdout.
 ---
 
 ## 41. THE REOPENER TRIGGERS: A WRITE-OFF THAT RESTS ON A FACT NOBODY RE-CHECKS, 2026-09-20
