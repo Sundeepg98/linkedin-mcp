@@ -14,11 +14,11 @@ J 90	J 89	1	US-RULING	XR	jobs.md	same spec; `server.py:3652` -- "none of those a
 J 91	J 89	2	US-RULING	XR	jobs.md	same spec
 M M2	M M1	1	UNCLEAR	COVERED-CANNOT-DELIVER	messaging-and-content.md	same tool, same gate; additionally spends a mete
 M M8	M M7	1	-	GAP	messaging-and-content.md	same
-M M15	M M14	1	-	GAP	messaging-and-content.md	same mutation class
-M M18	M M17	1	-	GAP	messaging-and-content.md	same mutation class as M14
-M M28	M M27	1	-	GAP	messaging-and-content.md	same
-M C4	M C3	1	-	GAP	messaging-and-content.md	same
-M C5	M C3	2	-	GAP	messaging-and-content.md	same
+M M15	M M14	1	US-RULING	GAP	messaging-and-content.md	same mutation class  **THE STATED REASON WENT ST
+M M18	M M17	1	-	GAP	messaging-and-content.md	same mutation class as M14  **THE STATED REASON 
+M M28	M M27	1	-	GAP	messaging-and-content.md	same  **THE LIVE ZERO REPRODUCES OFFLINE, WITH I
+M C4	M C3	1	US-BOUNDARY|US-RULING	GAP	messaging-and-content.md	same  **THE STATED REASON WENT STALE AND THE STA
+M C5	M C3	2	US-BOUNDARY|US-RULING	GAP	messaging-and-content.md	same  **THE STATED REASON WENT STALE AND THE STA
 M C14	M C13	1	US-RULING	EXCLUDED-RULED	messaging-and-content.md	same measurement
 M C15	M C13	2	US-RULING	EXCLUDED-RULED	messaging-and-content.md	same
 M C16	M C13	3	US-RULING	EXCLUDED-RULED	messaging-and-content.md	same

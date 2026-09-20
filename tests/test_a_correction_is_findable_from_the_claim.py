@@ -1671,6 +1671,72 @@ NOT_A_CORRECTION: dict[tuple[str, str], str] = {
         "named only as the place the resulting instruments went. A document "
         "saying where it filed its tools is an attribution. "
     ),
+    # -- 2026-09-20, the MESSAGING-GAP wave. Six pairs, every reason written
+    # -- after reading the line that produced it. Five of the six are one
+    # -- census ROW citing the sources its own argument rests on: a markdown
+    # -- table has no blank lines, the row is a single 2,000-character line,
+    # -- and every citation in it therefore sits within the window of every
+    # -- correction word in it. The sixth is a back-pointer.
+    ("INSTRUMENTS.md", "messaging-and-content.md"): (
+        "IT IS A REGISTER ENTRY DESCRIBING A CORRECTION THAT WAS MADE IN "
+        "PLACE, WHICH IS THE OUTCOME THIS FILE REQUIRES RATHER THAN A "
+        "VIOLATION OF IT. Section 39.6 records that the census section 4 was "
+        "stale in all four of its factual claims and that a guard now "
+        "re-derives them -- and the census itself carries the correction "
+        "block, dated, with a CORRECTED BY: marker naming its corrector. The "
+        "register is naming the defect its instrument was built for, which is "
+        "what every other entry in it does. The document that CORRECTS the "
+        "census is the wave report, and that pair IS declared. "
+    ),
+    ("messaging-and-content.md", "2026-09-05-lead-rulings-round-two.md"): (
+        "THE ROW QUOTES THIS DOCUMENT AS ITS AUTHORITY AND CONTRADICTS "
+        "NOTHING IN IT. The line is row C43, moved GAP -> EXCLUDED-RULED on "
+        "the FEED-CONTENT-READ-RULING, and it quotes that document's section "
+        "5 verbatim in support -- 'counts and relations only, never text or "
+        "names'. The correction vocabulary in the row is about the CENSUS: "
+        "this row was left GAP while its own twin was banked, so what is "
+        "being corrected is the row, by itself, in place. The cited ruling is "
+        "fifteen days old, unchanged, and is the reason the row moved. "
+    ),
+    ("messaging-and-content.md", "2026-09-05-settings-rest.md"): (
+        "SAME LINE, SAME ROLE: THE CITATION IS THE BUILD RECEIPT FOR THE "
+        "RULING THE ROW RESTS ON. Row C43 cites this document's section 1 to "
+        "show the ruling was not merely made but BUILT -- as feed.py, with "
+        "the guarantee in the signature in both directions. Nothing in that "
+        "document is withdrawn, narrowed or contradicted by the row; it is "
+        "the evidence that the rule the row is retired under is live code "
+        "rather than an audit sentence. "
+    ),
+    ("messaging-and-content.md", "2026-09-19-cross-slice-rulings.md"): (
+        "THE ROW CITES THIS DOCUMENT FOR THE NAME OF THE PATTERN IT IS AN "
+        "INSTANCE OF. Row C43 calls itself a propagation failure and points "
+        "at that document's section 2, which defines the signature -- a GAP "
+        "row that states the ruling's own premise and files GAP anyway. "
+        "Citing a taxonomy in order to be classified by it is the opposite of "
+        "correcting it, and that document's own count is not touched. "
+    ),
+    ("messaging-and-content.md", "2026-09-20-the-decides.md"): (
+        "THE CENSUS QUOTES THIS DOCUMENT IN ORDER TO OBEY IT, AND THE "
+        "CORRECTION VOCABULARY BELONGS TO A DIFFERENT CLAIM. The line sits in "
+        "the section 4 correction block, where the census records that its "
+        "own claim about set_input_files was false. The quotation from the "
+        "decides document is the RULING THAT KEEPS TEN ROWS AT GAP -- 'the "
+        "blocker RETIRES as a blocker ... Its 15 rows stay GAP, correctly' -- "
+        "cited so that the corrected census cannot be read as licence to move "
+        "them. What is corrected is the census; what is quoted is the rule "
+        "that bounds the correction. "
+    ),
+    ("messaging-and-content.md", "2026-09-20-the-messaging-gap.md"): (
+        "THIS IS THE BACK-POINTER ITSELF, SEEN FROM THE WRONG END. The "
+        "correction runs from the wave report TO the census, and that pair is "
+        "declared: the report carries CORRECTS: and the census carries "
+        "CORRECTED BY:. What the scan produces here is the census's ROW C43 "
+        "naming the wave report as the place its reading is written up -- the "
+        "'See ...' pointer every banked row in this corpus carries. Reading "
+        "it as the census correcting the report inverts the direction of the "
+        "declared pair. "
+    ),
+
 }
 
 
