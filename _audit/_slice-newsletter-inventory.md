@@ -616,13 +616,19 @@ file).
 
 - **`test_no_committed_identity.py`** (18 tests) --
   `test_every_shape_can_actually_fail` (parametrised over many synthetic
-  planted-PII strings): one parameter is the email address
-  `"somebody+newsletter@a-real-company.co.uk"`, used purely as a
-  plus-tagged-address regression control for the generic email-shape
-  detector (guarding against an over-broad exemption for addresses with no
-  alphanumeric local part). The word "newsletter" here is incidental filler
-  text inside a synthetic email local-part and has no connection to the
-  newsletter feature.
+  planted-PII strings): one parameter is a PLUS-TAGGED EMAIL ADDRESS whose
+  local part carries the word "newsletter" as filler, used purely as a
+  regression control for the generic email-shape detector (guarding against
+  an over-broad exemption for addresses with no alphanumeric local part).
+  **The literal is deliberately NOT reproduced here**, and that is a
+  correction rather than a style choice: this slice first quoted it verbatim
+  and `test_no_committed_identity.py` went red on THIS FILE --
+  *"1 unallowed email hit(s), 0 declared"*. The literal is declared where it
+  is planted, in the test that plants it, and a declaration is scoped to the
+  file that earns it. Copying a planted control into a prose document moves
+  an email-shaped string somewhere nothing declared it, and the remedy is to
+  stop copying rather than to widen the allowlist. The word "newsletter"
+  there is incidental and has no connection to the newsletter feature.
 
 - **`test_page_text_is_never_printed.py`** (6 tests) -- both hits are
   module-level: one is descriptive prose ("the exact shape the newsletter

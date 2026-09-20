@@ -857,6 +857,14 @@ _ALLOWED_URL_PATTERNS: tuple[re.Pattern[str], ...] = (
     #     ``scripts/_probe_newsletter_surface_shape.py``, offline, with every
     #     needle reported beside its enclosing landmark stack.
     #
+    #     AND THE OBLIGATION THAT COMES WITH THE SAME MEASUREMENT, because it
+    #     is easier to meet as a known one: THREE ``/in/<member>/`` anchors sit
+    #     in that same ``main > section > section`` container, alongside the
+    #     rows. **This page names members.** The shipped reader cannot reach
+    #     them -- ``newsletters.ANCHOR_SELECTOR`` matches ``/newsletters/``,
+    #     plural, and no member path does -- but whoever widens that selector
+    #     or adds an authorship join takes three third-party names in one step.
+    #
     #     ONE author-side href in 74234 characters: ``/article/newsletter/new``,
     #     inside ``main > section > section``, 302 characters after the product
     #     heading and 1932 before the first row -- the section's own header

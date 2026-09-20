@@ -20,6 +20,7 @@ and against committed fixtures.
     open questions closed         2   by measurement, permanently
     prose claims corrected        3
     census defects handed over    2
+    inherited CI reds repaired    1   not this wave's, and it blocked everyone
 
 **THIS BLOCKER IS NOT WHAT ITS VERDICT SAYS IT IS, and the number above is the
 evidence rather than an excuse.** Nine of the eleven GAP rows are WRITES whose
@@ -58,6 +59,14 @@ subject and it is the most portable thing in this document.
 | `<seg>//<seg>/messaging/` | 1 | ADMITTED |
 | `<seg>//<seg>/notifications/` | 1 | ADMITTED |
 | eleven more, all chrome | 12 | refused |
+
+**THE THREE MEMBER PATHS ARE IN THE PRODUCT SECTION, NOT THE NAV**, measured
+by the same landmark stack: `main>section>section`, alongside the rows. The
+page NAMES MEMBERS. The shipped reader cannot reach them -- its anchor
+selector is `a[href*="/newsletters/"]`, plural, and no member path matches it
+-- but **whoever widens that selector, or adds an author join, inherits three
+third-party names in one step.** Recorded here and in `readonly.py` so it is
+met as a known obligation rather than as a surprise.
 
 ### WHAT THE PAGE DOES NOT DRAW, AND THESE THREE ZEROS ARE THE FINDING
 
@@ -499,6 +508,23 @@ REVIEWED before any of it entered this report. It is what establishes section
 mentions are a sibling tool's docstring and a line inside
 `linkedin_server_info`'s self-audit payload.
 
+**AND ONE DEFECT IN IT THAT THE REVIEW MISSED AND A GUARD CAUGHT**, recorded
+because it is the argument for reviewing a slice at all. The inventory quoted,
+verbatim, a synthetic plus-tagged EMAIL ADDRESS that
+`tests/test_no_committed_identity.py` plants as a control in its own file. The
+literal is declared where it is planted; **a declaration is scoped to the file
+that earns it.** The moment the slice was committed and became tracked, the
+shape half of the identity guard parametrised over it and went red -- *"1
+unallowed email hit(s), 0 declared"*. It did not fire earlier because that
+guard walks TRACKED files and the slice was untracked when I first ran it, and
+the commit hook runs the EXACT-VALUE sweep, which is a different instrument.
+
+The remedy was to stop copying, not to widen the allowlist: the literal is
+described by shape and the inventory's point is unchanged. **Copying a planted
+control into a prose document moves an identifier-shaped string somewhere
+nothing declared it** -- and the reviewer who read the slice's sections and not
+its characters was me.
+
 **ONE STALENESS CAVEAT, stated rather than smoothed over:** it enumerates
 `read_newsletter_subscriptions`'s returned keys WITHOUT `create_control` and
 `create_control_outside_main`, because it read the module before this wave's
@@ -531,9 +557,36 @@ at any point.
 `scripts/impact_gate.py --against bf275cf --plan-only` selected 116 of 172
 test files -- 67%, above its own 45% line -- and printed *"WIDENING TO THE FULL
 SUITE"*. Another wave already held a full-suite `-n auto` run on this box, and
-a second one would have serialised both. Pushed instead: CI run
-`35487644895` on `worktree-agent-afc22ccbce52f93eb`, 18 shards across ubuntu
-3.10, ubuntu 3.13 and windows 3.13.
+a second one would have serialised both. Pushed instead, 18 shards across
+ubuntu 3.10, ubuntu 3.13 and windows 3.13.
+
+### AND CI CAME BACK RED, AND THE RED WAS NOT THIS WAVE'S
+
+Run `35487644895`, 3 of 18 shards failed, all three on
+`tests/test_requirements_pins.py::test_the_two_files_declare_the_same_dependencies`.
+
+**MASTER HAS BEEN RED ON EVERY PUSH SINCE 07:53:49 TODAY.** `970a276` added
+`pytest-xdist>=3.5` to `requirements.txt` so CI shards could run their files in
+parallel, and did not add it to `pyproject.toml`'s `test` extra. Five master
+runs failed on it before this wave pushed: `35485075941`, `35485294903`,
+`35485333383`, `35486076330`, `35486105863`. It reached my branch because my
+branch is cut from master, and it landed in shard 3 rather than master's shard
+0 only because adding a test file reshuffles the distribution.
+
+**THE BRIEF I WAS GIVEN SAID "CI green on every push". That premise stopped
+being true at 07:53**, and it is worth surfacing beyond this wave: a shared
+gate that is red for everyone is the condition under which a wave's OWN red
+gets attributed to the known failure and waved through.
+
+Fixed here rather than reported, because it is one line, reversible, and it
+blocks the fleet: `pytest-xdist>=3.5` added to the `test` extra, in the
+direction `requirements.txt` argues for in its own comment -- *"(`pip install
+-e .[test]` installs the same thing from pyproject.toml)"*. Reproduced red
+locally first (1 failed, 7 passed), green after (139 passed with
+`test_ci_shard.py`). The red IS the control: the guard was seen failing and
+then passing on the one line between them.
+
+Re-pushed as CI run `35488009146`.
 
 Three commits, none carrying an AI attribution trailer:
 
