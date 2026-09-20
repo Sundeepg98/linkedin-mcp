@@ -546,6 +546,56 @@ Three things came out of it that are worth more than the edit would have been:
    I had pasted the same absolute interpreter path into section 1. Removed. The gate
    that caught somebody else's instance caught mine in the same run.
 
+### 7.4 A TRIAL MERGE, THE COLLISION THE BRIEF PREDICTED, AND A RED THAT IS NOT MINE
+
+Master moved again while this wave finished. Three things came out of checking rather
+than assuming, and the third is the reason this branch is NOT merged.
+
+**(a) THE REGISTER COLLIDED, EXACTLY AS PREDICTED.** This wave computed max-plus-one
+against the register at `d6b7e4b` and got **31**. By the time it finished,
+`origin/master` had published its own `## 31. THE WRITE-OFF REASON KINDS...` from a
+sibling. Two waves computed max-plus-one against two different trees and both got 31 --
+which is what max-plus-one does under concurrency, and why
+`tests/test_the_register_numbers_are_unique.py` exists. **The published number is not
+mine to move**, so mine did: 31 -> 32, its five subsections, and every cross-reference.
+Found by comparing against the remote BEFORE merging, not by a conflict during it.
+
+**(b) THE MERGE ITSELF IS ONE CONFLICT AND IT IS CLEAN.** A trial
+`git merge origin/master` produced exactly one: the register's append hunk, master's 31
+against my 32. Resolved by keeping BOTH in numerical order. Everything else auto-merged,
+INCLUDING `tests/test_a_correction_is_findable_from_the_claim.py`, whose triage table
+both waves appended to -- master's 110 rows and my 2 all survived, verified by count
+rather than by the merge reporting success. That check was worth running: master carries
+a commit this same day titled *"restore the test a file collision dropped"*, about that
+very file.
+
+**(c) THE MERGED TREE IS RED, AND THE RED IS MASTER'S.**
+`test_every_candidate_pair_is_declared_or_triaged` fails on two pairs, both inside
+master's own section 31 content:
+
+```
+INSTRUMENTS.md:4938 cites 2026-09-20-the-contingent-writeoffs.md ... untriaged
+INSTRUMENTS.md:4993 cites 2026-09-20-the-reason-kinds.md        ... untriaged
+```
+
+**Measured rather than inferred**, because "it looks like theirs" is not a finding: I
+checked out `origin/master`'s OWN `_audit/INSTRUMENTS.md` and its OWN
+`tests/test_a_correction_is_findable_from_the_claim.py` into this tree and ran the
+guard. The first pair still fails, at the same line number, with master's own table
+under it. So `origin/master` at `1ab1ca8` is red on its own guard, independently of
+this wave.
+
+**THE MERGE WAS ABORTED AND THIS BRANCH IS LEFT GREEN.** Merging would make MY branch
+and MY CI red with somebody else's defect, which buys nothing and destroys the one
+signal this wave exists to produce. The renumber in (a) is KEPT, because it is correct
+either way and removes the only real conflict from whoever integrates.
+
+Triaging master's two pairs myself is available and I declined it, on that table's own
+rule: an entry there is a CLAIM about a document, and both documents are a sibling's.
+Vouching for a contract I did not write is the `_redact` mistake the certifier exists to
+stop, one file over. **Reported, not fixed, and named so the integrator is not surprised
+by it.**
+
 ---
 
 ## 8. The suite
