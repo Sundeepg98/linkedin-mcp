@@ -306,6 +306,57 @@ def test_an_adjudication_on_a_row_that_left_the_writeoffs_goes_red(census):
 
 
 # ---------------------------------------------------------------------------
+# M4 -- a ruling section that has gone missing
+# ---------------------------------------------------------------------------
+def test_a_deleted_ruling_section_is_reported(census):
+    """Delete `### R5` and expect BOTH failure modes, not either one.
+
+    Rows point at a ruling by code and inherit its adjudicated kind, so a
+    ruling that disappears breaks the chain at two places at once: the rows
+    citing it can no longer resolve, and the hand adjudication pinned on it
+    now names a section nothing has. Asserting only one of those would let
+    the other rot -- a corpus with no rows citing R5 would still need the
+    orphaned adjudication reported, and vice versa.
+
+    The count is asserted too. R5's own heading says "Produces 6 rows", and
+    exactly six rows complain, so the ruling's published count is checked
+    against the corpus for free.
+    """
+    path = census / "network.md"
+    before = _read(path)
+    lines = before.splitlines(keepends=True)
+    in_fence, start, end = False, None, None
+    for i, line in enumerate(lines):
+        if _FENCE.match(line):
+            in_fence = not in_fence
+            continue
+        if in_fence:
+            continue
+        if start is None and re.match(r"^###\s+R5\b", line):
+            start = i
+            continue
+        if start is not None and re.match(r"^#{1,3}\s", line):
+            end = i
+            break
+    assert start is not None, "no `### R5` heading in network.md"
+    end = len(lines) if end is None else end
+    _write(path, "".join(lines[:start] + lines[end:]))
+    _landed(before, _read(path), "network.md")
+    assert not re.search(r"^###\s+R5\b", _read(path), re.M)
+
+    code, out = _check()
+    assert code != 0, f"a deleted ruling section did not turn --check red:\n{out}"
+
+    citing = [l for l in out.splitlines()
+              if "cites R5, which has no ruling section" in l]
+    assert len(citing) == 6, (
+        f"R5's heading says it produces 6 rows; {len(citing)} rows reported an "
+        f"unresolvable citation:\n" + "\n".join(citing))
+    assert ("ADJUDICATION 'RULING R5' names a ruling section that network.md "
+            "no longer has") in out, out
+
+
+# ---------------------------------------------------------------------------
 # M5 -- an empty corpus
 # ---------------------------------------------------------------------------
 def test_an_empty_corpus_is_a_loud_event(census):
@@ -645,3 +696,56 @@ def test_a_row_inserted_above_a_backreference_repoints_it(census):
     assert code == 0 and "FAIL" not in out, (
         "the re-pointing was reported, which would be better than the "
         "measured behaviour -- update this test and say so")
+
+
+# ---------------------------------------------------------------------------
+# RESTORED VERBATIM FROM `e1b44b0`, WHICH A LATER WHOLE-FILE WRITE DROPPED
+# ---------------------------------------------------------------------------
+# TWO AGENTS WROTE THE SAME PATH IN ONE TREE AND THE LATER WRITE TOOK THE WHOLE
+# FILE. `e1b44b0` committed an 11-test version of this file; `dd73d37` replaced
+# it wholesale with a colder, better 69-test one, and two unique tests went with
+# it. That is a COVERAGE REGRESSION regardless of whose file was better, and it
+# is the second instance of this root cause today -- the other landed through
+# the git index rather than the filesystem, sweeping 208 lines of a live wave's
+# staged work. THE HAZARD IS TWO WRITERS AND ONE PATH; the index and the
+# filesystem are only two ways it lands. A wave creating a file at a path a
+# sibling might also target should check for it BEFORE writing, not after.
+#
+# The test below is lifted UNCHANGED from `e1b44b0` -- not paraphrased, not
+# "improved" in transit, because guessing at the intent of a test is how a test
+# gets weakened while looking restored. Only the two helpers it needs are new,
+# and they are mechanical.
+#
+# (`test_a_deleted_ruling_section_is_reported`, the other dropped test, was
+# restored separately and independently because it fell inside the mutation set.)
+
+
+@pytest.fixture
+def real_census():
+    """The committed corpus, restored afterwards whatever a test does to it.
+
+    New here. `e1b44b0` carried a fixture of this name; the surviving file
+    drives everything through a mutated sandbox instead, so the unmutated
+    corpus needed a name again.
+    """
+    original = C.CENSUS
+    yield original
+    C.CENSUS = original
+
+
+def build_at(census_dir):
+    """`cw.build` against a given corpus directory. New here, mechanical."""
+    C.CENSUS = census_dir
+    return cw.build(None)
+
+
+def test_every_ruling_section_is_adjudicated(real_census):
+    """72 rows inherit from 11 rulings, so an unadjudicated ruling silently unclassifies
+    a whole block. A keyword sweep over a 2,735-character ruling body was measured to
+    produce a three-kind verdict carrying no information, which is why these are hand
+    judgements pinned to quotes."""
+    _, _, _, _, rulings, problems, adj = build_at(real_census)
+    adjudicated = {a.key for a in adj if a.key.startswith("RULING ")}
+    for code in rulings:
+        assert f"RULING {code}" in adjudicated, f"{code} has no adjudication"
+    assert not [p for p in problems if "ADJUDICATION" in p]

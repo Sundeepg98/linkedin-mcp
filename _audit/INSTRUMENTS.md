@@ -4840,7 +4840,7 @@ what they did with controls. Their numbers are the tables in
 ## 31. THE WRITE-OFF REASON KINDS, AND A CORPUS THAT TURNED OUT TO BE A POINTER GRAPH, 2026-09-20
 
 `scripts/classify_writeoff_reasons.py` + `_audit/_census/reason-kind-adjudications.tsv`,
-guarded by `tests/test_writeoff_kinds_are_derivable.py` (69 tests, 8.6s).
+guarded by `tests/test_writeoff_kinds_are_derivable.py` (71 tests, 8.7s).
 Full argument: `_audit/2026-09-20-the-reason-kinds.md`.
 
 **WHAT IT MEASURES.** Every census row in a write-off state -- EXCLUDED-RULED, XR,
@@ -4948,9 +4948,44 @@ and a parse looking for an `R<n>` token in every cell of every row finds 4. The 
 is exactly those ten. Five of the nine codes that declare a row set match element for
 element, so this is not a slack parse.
 
-### 31.6 DISPOSABLE, declared
 
-Four scratch probes in `_audit/_scratch/`: the reason-length profile, the signal-frequency
+### 31.6 WHEN THE TOOL MOVES, PIN THE TOOL AND HASH IT AT BOTH ENDS
+
+The standing freeze discipline is `git stash create`, which pins the CORPUS. That is the
+wrong constraint when **the instrument is the thing under test**. This instrument moved
+four times during its own mutation run and HEAD advanced through four commits while the
+harness was working.
+
+What the harness did instead, and it is better than the freeze that would have been
+prescribed: **it hashed the instrument at harness start and at harness end, asserted the
+two matched, and pinned every published number to the classifier committed at a named
+ref** -- then tabulated the disagreeing earlier baseline ALONGSIDE rather than dropping it.
+
+**A number produced by an instrument that changed underneath you is not attributable to
+anything.** Corpus-freezing does not detect that; a start/end hash of the tool does, and
+costs two lines.
+
+### 31.7 TWO WRITERS, ONE PATH -- THE SECOND INSTANCE TODAY, SO IT IS COUNTED
+
+`e1b44b0` committed an 11-test version of `tests/test_writeoff_kinds_are_derivable.py`.
+`dd73d37` replaced it WHOLESALE with a colder, better 69-test version written independently
+at the same path, and **two unique tests went with it**. One was restored because it fell
+inside the new mutation set; the other, `test_every_ruling_section_is_adjudicated`, had to
+be lifted VERBATIM from `e1b44b0` afterwards.
+
+**A test that was committed and then silently disappeared under a file collision is a
+coverage regression regardless of whose file was better.** It is also the same root cause
+as the index-side sweep recorded elsewhere today, which took 208 lines of a live wave's
+staged work: **the hazard is two writers and one path; the git index and the filesystem are
+merely two ways it lands.**
+
+RULE: a wave creating a file at a path a sibling might also target CHECKS FOR IT BEFORE
+WRITING, not after. And when restoring a dropped test, lift it unchanged -- guessing at the
+intent of a test is how a test gets weakened while looking restored.
+
+### 31.8 DISPOSABLE, declared
+
+Five scratch probes in `_audit/_scratch/`: the replacement-control proof (`_prove_inherit_control.py`, which reproduces the dead-inheritance defect and asserts the new control convicts it), the reason-length profile, the signal-frequency
 miner (own-cell vs inherited firing), the Premium-section state tally, and the mutation
 driver `_mutate_kinds.py`. The first three are superseded by the committed classifier's own
 reporting; the fourth is superseded by the pytest guard, which runs the same mutations with

@@ -19,6 +19,44 @@ rows, and measured the predictor (a contingent write-off carrying a reopener is 
 GAP; one carrying none is 91%). `_audit/2026-09-20-the-live-capture.md` s13 classified the
 13 Premium exclusions and contributed the taxonomy refinement this document adopts.
 
+
+---
+
+## 0. LEAD WITH THIS: THE RE-EXAMINATION LIST WAS 20% SHORT AND NOTHING SAID SO
+
+The deliverable of this wave is the list in section 6 -- the write-offs resting on a fact
+about the operator or the world, which go stale silently. **For most of this wave that
+list was wrong, and the instrument reported it with the same confidence it reports the
+corrected one.**
+
+The cause was one regex:
+
+    re.search(r"backref<-(\S+)", r.resolution)      # against "backref<-P D14"
+
+**Every row id in this corpus contains a space.** The capture stopped at `P`, the lookup
+`by_key.get("P")` missed, and **backreference inheritance never ran at all** -- for
+**69 stated rows**, 46 of them in a write-off state. No error. No warning. Those rows
+simply came out UNCLEAR, which is indistinguishable from a census that never wrote a
+reason. It moved every published figure:
+
+    UNCLEAR              50  ->  33
+    CONTINGENT           49  ->  54
+    re-examination list  25  ->  30      <- the deliverable, 20% short
+
+**It was found by mutation, not by reading.** I read that code path several times while
+writing it and while documenting it. What caught it was planting a row above a `same`
+chain and asking what the dependents inherited -- a question the code's author does not
+think to ask, because he already believes the answer.
+
+Two further corrections (section 3.2, then three spellings the rule did not know) took the
+list to its final **40**. So the first published version of this wave's most actionable
+output was missing **fifteen of forty rows**.
+
+**The general form, for the next instrument:** a lookup that silently returns nothing is
+worse than one that raises, because its failure is shaped exactly like a legitimate empty
+result. `UNCLEAR` was a real verdict in this vocabulary, so the bug wore a costume the
+vocabulary itself supplied.
+
 ---
 
 ## 1. THE TAXONOMY, AND THE ONE SPLIT THAT DOES THE WORK
@@ -109,7 +147,8 @@ instrument built in one session had a bug on its first attempt.
 
 ### 3.1 The backreference is the most fragile construct in the census
 
-46 cells resolve **by position** to the row physically above them. Nothing marks a cell as
+46 write-off cells -- and **69 stated rows in all** -- resolve **by position** to the row
+physically above them. Nothing marks a cell as
 load-bearing for the rows beneath it, so **a row inserted into the middle of a table
 silently re-points every `same` below it**, with no error and no warning. The chains are
 real and they are long: `P D15`, `D16`, `D17` all reach their argument only at `D14`, and
@@ -505,9 +544,10 @@ read its donor by re-parsing the label `backref<-P D14` with `(\S+)` -- and **ev
 in this corpus contains a space**, so the capture stopped at `P`, the lookup missed, and
 **inheritance never ran at all.** No error, no warning: every `same` row simply came out
 UNCLEAR, which looks exactly like a census that never wrote a reason. Fixed by recording
-the donor on the row instead of encoding it in a string. **UNCLEAR fell 50 -> 33 and
-contingency rose 49 -> 54** on that fix alone; two further corrections took them to 18 and
-64. The bug was materially distorting the headline, and nothing in the output said so.
+the donor on the row instead of encoding it in a string. **69 stated rows were affected,
+46 of them write-offs.** UNCLEAR fell 50 -> 33 and contingency rose 49 -> 54 on that fix
+alone; two further corrections took them to 18 and 64. See section 0 -- this is the
+headline, not a footnote.
 
 **In the harness itself, and it is the same disease one level down.** M1's first version
 rewrote state cells with one regex and left 12 of network.md's 101 write-offs standing --
