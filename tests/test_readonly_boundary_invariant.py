@@ -2095,6 +2095,80 @@ def test_the_write_did_not_touch_any_of_the_four_denylists():
         )
 
 
+#: A REFUSAL MAY BE ADDED. IT MAY NOT BE REMOVED.
+#:
+#: Ruled 2026-09-20 by the campaign lead, after this file's second guard was
+#: measured as having no discriminating power of its own: every key in
+#: ``DENYLISTS_AT_A76FE32`` is also in ``READONLY_AST_AT_LAST_REFREEZE``, so
+#: across eight single-structure mutations, five reddened both tests, three
+#: reddened the pin alone, and **zero reddened the denylist guard alone**.
+#: Removing ``_ALLOWED_URL_PATTERNS`` from it that day fixed its SEMANTICS -- a
+#: read admission can no longer force it to re-sync -- but not its redundancy.
+#:
+#: WHY A FLOOR IS NOT A SUBSET OF A DIGEST, which is the whole argument for
+#: keeping this guard rather than deleting it. **The pin is re-frozen on
+#: purpose, routinely** -- every deliberate read admission moves
+#: ``_ALLOWED_URL_PATTERNS`` and the pin is updated to match, which resets its
+#: protection over every other structure in the same edit. A floor does not
+#: reset. So a refusal quietly dropped *inside* an otherwise legitimate
+#: re-freeze passes the newly-frozen pin and fails here. That is the one shape
+#: an exact digest structurally cannot catch, and it is the shape that matters:
+#: nobody weakens a boundary in a commit announcing that it weakens a boundary.
+#:
+#: Raising a floor is ordinary and needs no ceremony. LOWERING one is a claim
+#: that a refusal should go, and belongs in a commit that says so and nothing
+#: else.
+REFUSAL_FLOORS = {
+    "_FORBIDDEN_URL_SUBSTRINGS": 33,
+    "_FORBIDDEN_SUBSTRING_EXEMPTIONS": 2,
+    "_FORBIDDEN_SUBSTRING_PATTERN_EXEMPTIONS": 2,
+    "_MUTATION_CALL_PATTERNS": 29,
+}
+
+
+def _live_sizes() -> dict[str, int]:
+    import linkedin_server.readonly as _ro
+
+    return {name: len(getattr(_ro, name)) for name in REFUSAL_FLOORS}
+
+
+def test_no_refusal_is_ever_removed():
+    """The direction this file's digests cannot express on their own."""
+    sizes = _live_sizes()
+    shrunk = {n: (sizes[n], floor) for n, floor in REFUSAL_FLOORS.items() if sizes[n] < floor}
+    assert not shrunk, (
+        "a refusal structure SHRANK: %s (live, floor). A digest cannot catch "
+        "this on its own, because the pin beside it is re-frozen on every "
+        "deliberate admission and that resets it. Removing a refusal is a "
+        "decision -- make it in a commit that says so and lower the floor there."
+        % shrunk
+    )
+
+
+def test_control_the_floor_convicts_a_removed_refusal():
+    """SHOWN FAILING on the exact edit it exists for: one refusal deleted."""
+    sizes = _live_sizes()
+    tampered = dict(sizes)
+    tampered["_FORBIDDEN_URL_SUBSTRINGS"] -= 1
+    caught = [n for n, f in REFUSAL_FLOORS.items() if tampered[n] < f]
+    assert caught == ["_FORBIDDEN_URL_SUBSTRINGS"], (
+        "the floor did not convict a deleted refusal"
+    )
+    assert not [n for n, f in REFUSAL_FLOORS.items() if sizes[n] < f]
+
+
+def test_control_the_floor_is_not_tripped_by_a_legitimate_admission():
+    """The other half: growth is ordinary and must NOT fire.
+
+    Without this, a floor that simply refused every change would pass the
+    control above while being useless -- the vacuous-satisfaction shape this
+    corpus counted 129 instances of on 2026-09-20.
+    """
+    sizes = _live_sizes()
+    grown = {n: v + 3 for n, v in sizes.items()}
+    assert not [n for n, f in REFUSAL_FLOORS.items() if grown[n] < f]
+
+
 
 def test_adding_a_second_sanctioned_mutation_moves_the_digest():
     """SHOWN FAILING on the edit this new pin exists to catch.
