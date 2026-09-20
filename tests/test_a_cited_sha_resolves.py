@@ -109,15 +109,35 @@ def _git(*args: str) -> subprocess.CompletedProcess[str]:
 def test_ancestry_not_existence_is_the_predicate():
     """A commit that exists locally but is off `master` must NOT resolve.
 
-    This is the entire reason this guard exists rather than a `cat-file` one.
-    `integrate-1821` is a local branch whose tip is a real commit object and is
-    not an ancestor of `master`; `cat-file -e` says yes and a clone says no.
+    This is the entire reason this guard exists rather than a `cat-file` one:
+    `cat-file -e` says yes to any object in the store, and a clone says no to
+    everything off `master`.
+
+    THE FIXTURE IS MANUFACTURED, AND IT USED TO BE FOUND. This control pinned
+    `integrate-1821` -- a branch that exists on the box this was written on,
+    resolves in no clone, and is under a standing ruling never to be pushed
+    (`_audit/2026-09-20-the-six-unremapped.md`: "KEEP, do not delete, do not
+    push, do not modify"). So the control was green locally and went red on
+    all three CI platforms the instant it was published. That is this guard's
+    own subject arriving inside its own control: a test that assumes its repo
+    holds a ref nobody else has is the same error as a wave citing a SHA on a
+    branch that never merged.
+
+    `commit-tree` builds the fixture from `master`'s own tree instead. It
+    writes one dangling commit object, depends on no ref, and satisfies both
+    preconditions in any clone -- the object exists, and it is an ancestor of
+    nothing.
     """
-    tip = _git("rev-parse", "integrate-1821").stdout.strip()
+    tip = _git(
+        "-c", "user.name=control",
+        "-c", "user.email=control@example.invalid",
+        "commit-tree", "master^{tree}",
+        "-m", "off-master fixture for the ancestry control",
+    ).stdout.strip()
     assert re.fullmatch(r"[0-9a-f]{40}", tip), (
-        "the control's own fixture is gone: `integrate-1821` does not resolve, "
-        "so this control cannot distinguish a working guard from a broken one. "
-        "Do not skip -- pick another off-master commit and re-pin the control."
+        "could not manufacture the control's fixture with commit-tree, so this "
+        "control cannot distinguish a working guard from a broken one. Do not "
+        "skip -- without it the guard can pass on existence instead of ancestry."
     )
     assert _git("cat-file", "-e", tip + "^{commit}").returncode == 0, (
         "control precondition: the object must EXIST locally, or this proves nothing"

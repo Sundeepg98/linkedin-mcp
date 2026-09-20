@@ -196,6 +196,8 @@ path nobody has driven.
   away from that, and the operator has never been asked about it."* Nothing
   needs measuring first. It needs an answer.
 
+**CORRECTED BY:** `_audit/2026-09-20-the-sanctioned-seventh.md` -- the bullet above is false as of 2026-09-04. `set_input_files` no longer "sits in no sanction": it is entry 7 of `SANCTIONED_MUTATIONS`, permitted at `writes.py::perform`. The bullet below is also overtaken -- `set_input_files` now appears in at least eight `_audit` documents, not one. Neither change opens a capability: upload is not in `PERFORMABLE` and `writes_enabled()` is False. But this bullet's own framing -- "ONE OPERATOR ANSWER FROM OPENING ... it needs an answer" -- is still accurate, and **no operator answer is recorded anywhere in the corpus**; the sanction is recorded, the ruling behind it is not.
+
 * **AND THAT DISCREPANCY IS ITSELF A FINDING ABOUT THIS CENSUS.** Several of
   this repository's sharpest rulings live in TEST DOCSTRINGS rather than in
   `_audit/` -- `set_input_files` has ONE mention across 51 audit files, and

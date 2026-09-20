@@ -183,6 +183,27 @@ CORRECTION_VOCABULARY = (
 #: outcome this file exists to require and so cannot also be a violation of it.
 NOT_A_CORRECTION: dict[tuple[str, str], str] = {
 
+    # 2026-09-20, the sanctioned-seventh reading. Triaged by the integrator who
+    # wrote the citing line, deliberately, to say what he was NOT doing.
+    ("2026-09-20-the-sanctioned-seventh.md", "profile.md"): (
+        "THE CITATION IS A HANDOVER, AND IT SAYS SO IN THE SAME SENTENCE. The "
+        "line reads that `_audit/_census/profile.md` 'is under a live wave's "
+        "hand as this is written', and the section it closes states outright "
+        "that the rows named above are NOT repaired here because they belong "
+        "to the census slices. Naming rows for the wave that owns them is the "
+        "opposite of correcting them. "
+        "**THE SCAN IS RIGHT TO OFFER IT**, because the correction vocabulary "
+        "in the window is real and dense -- the surrounding paragraphs are "
+        "about a reason that went false, and rows `B2`, `M1`, `B3`, `B5` and "
+        "`G3` in that very file carry it. A later wave may well correct them, "
+        "and when it does the pair becomes a genuine CORRECTS:/CORRECTED BY: "
+        "declaration against profile.md rather than this entry. "
+        "**WHAT WOULD MAKE THIS ENTRY WRONG:** if this document ever edits a "
+        "profile.md row, or asserts that a profile.md claim is withdrawn "
+        "rather than merely stale. It does neither today; it measures the "
+        "code and hands the rows on, and the census file is untouched by it."
+    ),
+
     # 2026-09-20, the FIRST FIRING wave. Triaged by reading the line, which is
     # a census row I had written myself minutes earlier.
     ("jobs.md", "2026-09-20-the-first-firing.md"): (
