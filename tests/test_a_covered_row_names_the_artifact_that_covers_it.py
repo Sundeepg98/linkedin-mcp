@@ -164,12 +164,25 @@ def test_the_multi_location_chain_is_still_whole() -> None:
     """
     server_src, filter_src = _source("server.py"), _source("jobfilter.py")
 
-    assert "def locations_plan" in filter_src, (
+    # NAMES MATCHED AS AST DEFINITIONS, NOT AS SUBSTRINGS, and that is a
+    # correction this guard earned on its first mutation run rather than a
+    # style preference. Written as ``"def merge_location_reads" in filter_src``
+    # it survived the function being RENAMED to
+    # ``merge_location_reads_renamed`` -- the old name is a PREFIX of the new
+    # one, so the substring was still there while ``server.py``'s call site
+    # pointed at nothing. A rename is the likeliest way this link breaks and it
+    # was the one shape the check could not see.
+    defined = {
+        node.name
+        for node in ast.walk(ast.parse(filter_src))
+        if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef))
+    }
+    assert "locations_plan" in defined, (
         "jobfilter.locations_plan is gone; census row J 151 claims COVERED "
         "and the verdict that decides which places a call visits no longer "
         "exists"
     )
-    assert "def merge_location_reads" in filter_src, (
+    assert "merge_location_reads" in defined, (
         "jobfilter.merge_location_reads is gone; J 151's chain is broken at "
         "the merge step and a fan-out would return only its last place"
     )

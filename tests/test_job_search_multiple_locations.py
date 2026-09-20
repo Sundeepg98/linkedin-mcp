@@ -372,17 +372,30 @@ def test_duplicate_places_collapse_instead_of_costing_a_load():
 def test_the_ceiling_refuses_one_more_than_it_accepts():
     """The cap shown accepting its maximum and refusing the next one.
 
-    A ceiling test that only ever asserts the refusal cannot distinguish a cap
-    of five from a cap of zero.
+    THE FIRST DRAFT OF THIS TEST COULD NOT FAIL, and a mutation run is what
+    said so. It built both inputs out of ``jobfilter.MAX_LOCATIONS``, so
+    raising the constant to 500 raised the test's own inputs with it and the
+    assertion stayed green against a cap that refused nothing. A check whose
+    input is derived from the value under test measures the derivation, never
+    the value.
+
+    So the number is pinned as a LITERAL here. That makes re-costing the budget
+    fail in this file, which is the intent and not a nuisance: ``MAX_LOCATIONS``
+    is a declared cost budget on this server rather than a measured LinkedIn
+    limit, and moving it should cost somebody a deliberate edit and a reason.
     """
-    at_the_cap = SEP.join(f"City {n}, Region, Country" for n in range(jobfilter.MAX_LOCATIONS))
-    over = SEP.join(
-        f"City {n}, Region, Country" for n in range(jobfilter.MAX_LOCATIONS + 1)
+    assert jobfilter.MAX_LOCATIONS == 5, (
+        "the location budget moved. It is a POLICY number -- one page load per "
+        "place, each a row in the operator's own recent-search history -- not "
+        "a measured LinkedIn limit. Change it here and in jobfilter.py "
+        "together, and say in the commit why the cost changed."
     )
+    at_the_cap = SEP.join(f"City {n}, Region, Country" for n in range(5))
+    over = SEP.join(f"City {n}, Region, Country" for n in range(6))
     assert jobfilter.locations_plan("", at_the_cap)["state"] == "fanout"
     refused = jobfilter.locations_plan("", over)
     assert refused["state"] == "refused", refused
-    assert str(jobfilter.MAX_LOCATIONS) in refused["why"], refused["why"]
+    assert "5" in refused["why"], refused["why"]
     assert "budget" in refused["why"], refused["why"]
 
 
