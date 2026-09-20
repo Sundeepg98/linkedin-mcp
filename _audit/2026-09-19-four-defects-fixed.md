@@ -373,7 +373,7 @@ merges. Measured the next day: no merge happened. `master` instead carries
 all eight 2026-09-19 waves' combined effect as one commit, `fa13985`
 ("integrate: eight waves' work, replayed as content onto the purged
 history"), and the four SHAs remain non-ancestors of `master` today -- the
-ancestry check in 4.1 gives the same off verdict now that it gave then.
+same off verdict 4.2 measured then, re-run now.
 
 A follow-up sweep found `integrate-1821` is not the only branch on this line:
 eight `worktree-agent-*` branches share its 2026-09-05 merge-base with
