@@ -926,28 +926,44 @@ what section 1.3's `_trivial_render_seconds` now provides, and it answers the
 narrower question (was the BROWSER starved) rather than the broader one (was the
 RUNNER).
 
-### 7.2 The packer's weight table is wrong where it matters most, and nothing checks it
+### 7.2 NOTHING EVER CHECKS THE PACKER'S WEIGHT TABLE -- which is the finding, and it is not the one I went looking for
+
+Stated in the shape the evidence actually supports, not the shape I first wrote.
+Section 4.3 refuted my hypothesis that the table specifically underprices
+browser files; what survives is narrower and more durable.
 
 `scripts/ci_shard_timings.json` prices `tests/test_editor_fields.py` at
-**16.083s**. Measured directly on this box, alone, nothing else of mine running:
+**16.083s**. Measured directly on this box, alone:
 
     python -m pytest -q tests/test_editor_fields.py
     53 passed in 179.05s (0:02:59)
 
 The file is byte-identical between the table's measurement commit (`f65ec88`)
-and `f729a2a`, so this is not a table describing an older file. Section 4.3
-carries the ratio control that separates "this table entry is wrong" from "this
-box is slow".
+and `f729a2a`, so it is not a table describing an older file. But per 4.3 a
+two-test static guard measures 29x its entry on this box, higher than any
+browser file, so **this box cannot tell a wrong table from a loaded machine**
+and no claim about the entry's correctness is made here.
 
-This matters because of what the packer is: LPT balancing by SECONDS. An
-under-priced heavy file does not merely land in a slightly-wrong shard -- it
-invites the packer to stack more work on top of it. `scripts/ci_shard.py`'s own
-docstring names this exact failure mode -- *"a new file is as likely to be a
-browser module as a static guard, and under-pricing one of those is the mistake
-that lands two 180s files in the same shard"* -- and then the table went wrong
-for precisely such a file. Consistent with that, shard 3 at `f729a2a` holds
-**2111 tests against a 884-1486 range** for its five siblings: 42% above the
-next-heaviest, in a scheme whose entire purpose is balance.
+The claim that does stand needs no calm box: **nothing in this repository ever
+compares the committed table against a measured run**, so nobody would know
+either way. And the table's own provenance line concedes the same weakness on
+the other side -- it was taken on *"one Windows laptop ... NOT a quiet box --
+short foreground test batches overlapped parts of it."* A packer that balances
+by SECONDS is steered by a number that was measured under load and has never
+been re-checked under any conditions at all.
+
+That matters because of what the packer is. LPT sorts heaviest-first and fills
+the lightest shard; an under-priced heavy file does not merely land in a
+slightly-wrong shard, it invites the packer to stack more work on top of it.
+`scripts/ci_shard.py`'s own docstring names this failure mode -- *"a new file is
+as likely to be a browser module as a static guard, and under-pricing one of
+those is the mistake that lands two 180s files in the same shard"*.
+
+And one number here IS solid, because it comes from the plans rather than from
+any clock: shard 3 at `f729a2a` holds **2111 tests against a 884-1486 range**
+for its five siblings -- 42% above the next-heaviest -- in a scheme whose whole
+purpose is balance. Whether that is correct depends entirely on a weight table
+nothing validates.
 
 Two things are missing and both are nameable:
 
