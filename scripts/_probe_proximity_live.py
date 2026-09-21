@@ -331,6 +331,34 @@ async def main() -> int:
         drew_ids = sorted(j for j, r in by_id.items() if r)
         print("    cards seen: " + str(cards_seen)
               + "   readings kept: " + str(len(card_readings)))
+        # ZERO CARDS IS NOT A NEGATIVE READING, IT IS NO READING, AND EVERY
+        # TALLY BELOW WOULD BE A COUNT OVER AN EMPTY SAMPLE. `cards_seen` is
+        # the raw material this whole run is made of. If the search surface
+        # returned nothing then `find_proximity` was never reached, and
+        # nothing downstream is evidence about it in either direction.
+        # FALLING THROUGH WAS THE DEFECT, and it is quiet rather than loud:
+        # `verdict()` answers NO-SAMPLE over n=0, `strong` is then False, and
+        # the banking question prints "EVERY READING WAS THE SAME VERDICT"
+        # about zero readings. That sentence is false, and it is the one
+        # shape this probe's own preamble forbids -- the ABSENCE of data
+        # reported as data, in the exact words a real negative would use. It
+        # exits 1 either way, so the whole difference lives in the log, which
+        # is what makes it worth a branch instead of a footnote.
+        if not cards_seen:
+            print("    NO CARD WAS READ AT ALL. This run is VOID, not a")
+            print("    negative: the SEARCH surface returned nothing, so the")
+            print("    proximity reader was never reached and no tally below")
+            print("    would be a measurement of it.")
+            if errors:
+                print("    searches that raised, by TYPE (messages"
+                      " deliberately not printed): "
+                      + ", ".join(name + "=" + str(errors[name])
+                                  for name in sorted(errors)))
+            else:
+                print("    No search raised: each returned zero rows, which")
+                print("    is the search surface's own answer and not this")
+                print("    reader's.")
+            return 1
         print("    DISTINCT job ids seen: " + str(len(by_id))
               + "   distinct ids that DREW: " + str(len(drew_ids)))
         if len(by_id) and len(drew_ids):
