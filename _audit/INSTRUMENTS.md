@@ -8346,7 +8346,51 @@ filter pill should read 1 rather than 2.
 > distinguished from page chrome without reading a label -- which on this
 > surface is the one thing forbidden.
 
-### 48.6 WHAT THE WAVE MEASURED THAT IS NOT AN INSTRUMENT
+### 48.6 THE CAPTURE INSTRUMENT, AND THE LAW A SHRINKING PAGE TAUGHT IT
+
+**`scripts/_probe_how_you_match_capture.py`** -- takes the capture `J 110` and
+`J 116`-`J 120` have never had. Those rows are filed as parser-only at boundary
+0, which asserts a reader would find something in a panel **nobody has ever
+looked at**. It parses nothing, tests no token and moves no row: a probe that
+both captures the evidence and rules on it is one wave marking its own work.
+
+Ids come from the SHIPPED search tool so no search address is invented; each
+posting is opened at the `/jobs/view/<id>/` shape `readonly` admits, with
+`assert_read_url` called before navigating; attach-only; closes its own tab.
+
+**IT CAPTURES TWICE PER POSTING, AND THAT CAME STRAIGHT FROM 48.4.** If a single
+reading on the navigation settle can be a reading of a shell, a single capture
+can be a capture of one -- and a later wave would parse it, find nothing, and
+conclude the panel is absent.
+
+> **A SHRINKING PAGE IS NOT A DRAWING PAGE, AND THE DIFFERENCE DECIDES WHICH
+> BYTES SURVIVE.** The probe originally said a difference between the two
+> captures meant the page was still drawing, so the later one was the one to
+> parse. Measured on the first run: **all three postings SHRANK, and hugely** --
+> 860,705 to 208,904 bytes, 858,838 to 497,740, 831,707 to 178,177. A served
+> document was being replaced by a lighter client-rendered one. Under the
+> original rule a capture tool would have discarded a 860 KB document **on a
+> guess**, and the wave that parsed the 178 KB survivor and found no panel would
+> have filed a MEASURED-ABSENT that was an artifact of the capture.
+
+So it keeps both and names neither, and its summary says in as many words that
+it cannot tell which holds the panel. **The generalisable half: a capture tool
+may not choose. The moment it prefers one artifact it has become a reader, and
+a reader that runs before anybody has looked at the surface encodes the
+expectation of whoever wrote it.** The refuted assumption stays in the
+docstring rather than being deleted, because the assumption is the reusable
+part.
+
+**A DELIBERATE EXCEPTION TO THE REACHABILITY RULE, AND IT IS THE ONLY ONE IN
+THIS WAVE.** The captures live under gitignored `_state/`, id-to-file mapping
+beside them and never on the console. They are NOT reachable from a clone, and
+that is not a defect to repair by committing them: the HTML holds employer
+names, recruiter names and locations, and a job id names an employer's posting.
+A raw capture of a third-party surface may never be committed. What IS committed
+is the script that retakes it cheaply -- **the re-runnable instrument is the
+clone-reachable evidence when the artifact itself can never be.**
+
+### 48.7 WHAT THE WAVE MEASURED THAT IS NOT AN INSTRUMENT
 
 * **A TOOL'S "DOES NOT CLAIM" LIST IS A WORK ITEM, NOT A DISCLAIMER.**
   `linkedin_people_search_shape` shipped saying it did not claim the address

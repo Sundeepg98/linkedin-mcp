@@ -297,8 +297,9 @@ leaves no way to see that anything moved.
   wait-for-the-panel inside a shipped tool on an admitted surface; a firing
   wave measures it and hands it over, it does not quietly change the thing it
   was sent to measure.
-* **Did not capture the `How you match` panel** for the secondary `J 110`,
-  `J 116`-`J 120` hypothesis. Those rows are untouched and remain a hypothesis.
+* **Did not PARSE the `How you match` panel.** The capture was taken (section
+  10) and nothing was read out of it. `J 110` and `J 116`-`J 120` are untouched
+  and remain a hypothesis; what changed is that the evidence now exists.
 
 ## 9. THE GENERALISABLE HALF, AND IT IS ABOUT ACCESSIBILITY
 
@@ -315,3 +316,49 @@ the reader built to consume it. Here it is contained -- only integers cross --
 but containment at the boundary is the LAST line, not the first, and a reader
 that matched on `textContent` fed a count that a census row would have quoted.
 **Registered as instrument-register entry 48.**
+
+## 10. THE SECONDARY: THE `How you match` PANEL IS NOW CAPTURED, AND NOT PARSED
+
+`J 110` and `J 116`-`J 120` are filed as a HYPOTHESIS -- parser-only at boundary
+0 -- and **no capture of the target panel existed**, so "a reader would find
+something there" had never been checked against anything.
+`scripts/_probe_how_you_match_capture.py` took the capture. It parses nothing,
+tests no token and moves no row; ruling on the panel is the next wave's job and
+it needs the bytes first.
+
+Three postings, ids harvested through the SHIPPED search tool so no search
+address is invented, each opened at the `/jobs/view/<id>/` shape `readonly`
+admits, each captured TWICE six seconds apart:
+
+    posting   capture 1    capture 2      drift
+       01      860,705      208,904     -651,801
+       02      858,838      497,740     -361,098
+       03      831,707      178,177     -653,530
+
+    POSTINGS LOADED     : 3 of 3
+    CAPTURES THAT DIFFER: 3 of 3   (shrank 3, grew 0)
+
+**THE DOUBLE CAPTURE CAME STRAIGHT OUT OF SECTION 4b, AND IT EARNED ITSELF ON
+THE FIRST RUN.** The people-search race showed that a single reading taken on
+the navigation settle can be a reading of a shell. So this captures twice --
+and the probe's original wording said a difference meant the page was still
+drawing, so the later capture was the one to parse.
+
+**Every posting SHRANK, and hugely.** That is not a page filling in; it is a
+served document being replaced by a lighter client-rendered one. **The panel may
+live in either capture**, so both are kept and neither is named. A capture tool
+that had quietly kept "the later one" would have discarded a 860 KB document on
+a guess, and the wave that parsed the 178 KB survivor and found no panel would
+have concluded the panel does not exist. *The wrong instruction was in the file
+for about four minutes; it is recorded in the probe's docstring rather than
+deleted, because the assumption is the reusable part.*
+
+**THE CAPTURES ARE MACHINE-LOCAL BY DESIGN AND ARE NOT REACHABLE FROM A CLONE.**
+They sit under gitignored `_state/`, with the id-to-file mapping beside them and
+never on the console, because the HTML holds employer names, recruiter names and
+locations, and a job id names an employer's posting. **This is the one place in
+this wave where evidence is deliberately not re-derivable from the repository**
+-- a raw capture of a third-party surface may never be committed, so a later
+wave settles those rows on this box or retakes the capture itself, which the
+script exists to make cheap. That is why no `J` row moved and why none could
+have.
