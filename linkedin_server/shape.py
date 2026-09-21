@@ -679,6 +679,337 @@ def split_welded_card_line(line: str) -> Optional[dict[str, Any]]:
     }
 
 
+# ---------------------------------------------------------------------------
+# Network proximity -- census row J 40
+# ---------------------------------------------------------------------------
+#
+# WHY THE OBVIOUS READ IS THE LEAK. LinkedIn draws the per-job proximity
+# insight TWICE on a search card, and the two copies are not the same string:
+#
+#     <span aria-hidden="true">       1 company alum works here
+#     <span class="visually-hidden">  1 <ORG> company alum works here
+#
+# THE ACCESSIBLE COPY IS THE ONE CARRYING THE EMPLOYER'S NAME. The instinct to
+# prefer it -- it is the semantic copy, it is what assistive technology reads,
+# it looks like the real content -- takes the name every time.
+#
+# Nothing here chooses between them, and that is the point: by the time these
+# functions see a card the choice has already been made, by code that does not
+# know the phrase. ``strip_screen_reader_copies`` subtracts every element the
+# page ITSELF marked screen-reader-only, BY COUNT, and ``.visually-hidden`` is
+# in ``dom.CARD_HIDDEN_SELECTOR``. MEASURED 2026-09-21 by harvesting the
+# committed ``jobs_search_hydrated.html`` in a local headless Chromium: the
+# name-carrying copy arrives in ``record["hidden"]``, the subtraction removes
+# it, and the only proximity line left in the parser's ``lines`` is name-free.
+#
+# SO THE CONTRACT FOR EVERY CALLER, and it is the whole safety argument:
+# hand :func:`find_proximity` lines that have ALREADY been through that
+# subtraction. Never ``record["text"]`` raw, never ``record["hidden"]``, and
+# never anything derived from ``textContent`` -- which ignores ``aria-hidden``,
+# clip-styling and ``display:none`` alike and therefore MERGES the two copies
+# back together. ``parse_job_card`` hands over its post-subtraction ``lines``.
+#
+# AND THE SECOND LINE OF DEFENCE, for the day that one fails: this module
+# returns INTEGERS AND NOTHING ELSE. A relation is a POSITION in a tuple this
+# package authored; a count is accumulated digit by digit. There is no code
+# path here that can return a substring of a page, so a subtraction that
+# silently stopped working would cost a wrong COUNT, never a name.
+#
+# THE JOB DETAIL PAGE HAS NO SUCH PROTECTION, and is measured to need none
+# because it offers nothing to protect. ``job_detail_following_hydrated.html``
+# carries ONE ``<p>`` reading "Company alumni from <ORG>": no name-free twin,
+# no count, and not one ``.visually-hidden`` element on the whole page. A count
+# cannot be read there at all, so detail reports the RELATION and stops --
+# state ``relation_only``. The employer's name is on that line and never
+# leaves, because nothing here returns a string.
+
+#: THE CLOSED RELATION ALPHABET. A reading reports a POSITION in this tuple,
+#: never a string lifted off a page. Order is the contract -- :func:`relation_for`
+#: maps a position back to a literal -- so a new relation goes on the END or
+#: every reading ever taken is silently renamed.
+PROXIMITY_RELATIONS: tuple[str, ...] = (
+    "company_alum",
+    "school_alum",
+    "connection",
+)
+
+#: THE CLOSED VERDICT ALPHABET. ``not_drawn`` IS FIRST for the same reason
+#: ``company_root.READING_STATES`` puts ``reader_blind`` first: it is the
+#: verdict that asserts nothing about the account's graph.
+#:
+#: ``not_drawn`` IS NOT A COUNT OF ZERO and is never reported as one. A card
+#: that draws no insight, a card whose wording moved, and an account with no
+#: connection to that employer are three different worlds, and this reader can
+#: separate the first two from a drawn card but not the third from either.
+PROXIMITY_STATES: tuple[str, ...] = (
+    "not_drawn",
+    "relation_only",
+    "numeral_refused",
+    "disagreement",
+    "count_read",
+)
+
+#: Positions in :data:`PROXIMITY_STATES`, named. Spelled as literals rather
+#: than looked up so a reordering of the tuple breaks a test instead of quietly
+#: renaming every reading; ``tests/test_proximity_reader.py`` asserts each one
+#: still names the state it claims.
+_PROX_NOT_DRAWN = 0
+_PROX_RELATION_ONLY = 1
+_PROX_NUMERAL_REFUSED = 2
+_PROX_DISAGREEMENT = 3
+_PROX_COUNT_READ = 4
+
+#: ``(relation, phrase, a count precedes it)``. THE PHRASES ARE NORMALISED
+#: ALREADY -- lowercase, single-spaced -- because that is the form
+#: :func:`find_proximity` compares against, and a second normaliser applied to
+#: the constants is a second thing that can drift.
+#:
+#: **NO PHRASE MAY CONTAIN ANOTHER**, asserted by ``tests/test_proximity_reader.py``.
+#: Two phrases where one contains the other match the same line and produce two
+#: readings of ONE fact, which would read as corroboration. That is this row's
+#: named hazard -- counting RENDERINGS rather than facts -- closed by
+#: construction rather than by a de-duplication pass that has to be right.
+#:
+#: SINGULAR AND PLURAL ARE BOTH HERE because LinkedIn draws "1 company alum
+#: works here" and "4 company alums work here" with different verbs, and a
+#: reader that knew only the plural would go silent for exactly the account
+#: with ONE alum at an employer -- the case a job hunt cares about most.
+#:
+#: MEASURED vs UNMEASURED is marked per row. Two phrases are measured against
+#: committed captures; the rest are the singular/plural and school/connection
+#: siblings of those two. A wrong phrase costs a MISSING reading -- never a
+#: wrong number, and never a name.
+PROXIMITY_PHRASES: tuple[tuple[str, str, bool], ...] = (
+    # MEASURED -- jobs_search_hydrated.html, the search card.
+    ("company_alum", "company alum works here", True),
+    # UNMEASURED siblings of the line above.
+    ("company_alum", "company alums work here", True),
+    ("company_alum", "company alumni work here", True),
+    ("school_alum", "school alum works here", True),
+    ("school_alum", "school alums work here", True),
+    ("school_alum", "school alumni work here", True),
+    ("connection", "connection works here", True),
+    ("connection", "connections work here", True),
+    # MEASURED -- job_detail_following_hydrated.html. NO COUNT PRECEDES THESE:
+    # the detail page draws the relation as a heading over a face pile and
+    # never states a number, so ``counted`` is False and a reading off this
+    # phrase is ``relation_only`` by construction.
+    ("company_alum", "company alumni from", False),
+    ("school_alum", "school alumni from", False),
+)
+
+_PROXIMITY_DIGITS = "0123456789"
+
+#: Characters which, sitting immediately before a digit run, mean that run is
+#: PART OF A LARGER NUMERAL OR TOKEN rather than a count of its own -- a
+#: decimal, a date, a fraction, a clock time, a percentage. A run preceded by
+#: any of these is REFUSED, never read. See :func:`_digits_before` for why the
+#: set is written out rather than left as the one separator that came to mind.
+_PROXIMITY_DECORATIONS = ".-/:%"
+
+#: The longest digit run this reader will commit to. A seven-digit alum count
+#: is not a fact about a job card, it is the signature of a digit run that
+#: belongs to something else on the line.
+_PROXIMITY_MAX_DIGITS = 6
+
+
+def relation_for(position: int) -> str:
+    """One relation position -> the literal it names. Out of range REFUSES.
+
+    A clamp would silently rename one relation to another -- position 0 is
+    ``company_alum`` -- so an out-of-range position is reported rather than
+    folded onto the first entry.
+    """
+    if 0 <= position < len(PROXIMITY_RELATIONS):
+        return PROXIMITY_RELATIONS[position]
+    return "position_out_of_range"
+
+
+def state_for(position: int) -> str:
+    """One state position -> one literal. Out of range REFUSES, never clamps."""
+    if 0 <= position < len(PROXIMITY_STATES):
+        return PROXIMITY_STATES[position]
+    return "position_out_of_range"
+
+
+def proximity_alphabet() -> frozenset[str]:
+    """Every token a proximity reading can ever be resolved to."""
+    return (
+        frozenset(PROXIMITY_RELATIONS)
+        | frozenset(PROXIMITY_STATES)
+        | {"position_out_of_range"}
+    )
+
+
+def _digits_before(text: str, at: int) -> tuple[Optional[int], bool]:
+    """The digit run immediately before ``at``. Returns ``(value, refused)``.
+
+    **NEVER CALLS ``int()`` AND NEVER RAISES.** The value is accumulated from
+    character positions in :data:`_PROXIMITY_DIGITS`, so there is no
+    constructor here to quote a refused string into its own exception message
+    and out through a function whose return type promised no strings --
+    the failure ``linkedin_server.coerce``'s module docstring exists to name.
+
+    ``coerce.as_int`` IS THE WRONG INSTRUMENT AT THIS SITE, and the brief that
+    commissioned this reader prescribed it. Measured 2026-09-21:
+    ``as_int("1") is None``. It is a TYPE GATE for a value that already
+    crossed a JS boundary as a JSON number -- it accepts ``int`` and answers
+    ``None`` for every string -- and the source here is a Python line of page
+    text. There is no string-to-integer reader anywhere in ``coerce``, so this
+    is one, written to that module's contract: never raises, never quotes.
+
+    ``refused`` is True when a numeral IS there but not in a shape this reader
+    will commit to -- a decimal, an abbreviation, a percentage, a malformed
+    group, or a run too long. **A refusal is never reported as a count and
+    never as a zero.**
+    """
+    index = at
+    gap = 0
+    while index > 0 and text[index - 1] == " ":
+        index -= 1
+        gap += 1
+    if gap == 0:
+        # The phrase is welded to whatever precedes it. Nothing here is a
+        # numeral of ours, and guessing a boundary is how a wrong number gets
+        # into a real field.
+        return None, False
+
+    end = index
+    while index > 0 and (
+        text[index - 1] in _PROXIMITY_DIGITS or text[index - 1] == ","
+    ):
+        index -= 1
+    run = text[index:end]
+
+    if not run:
+        # No bare digit run -- but there may be a DECORATED numeral sitting
+        # there ("1k", "10%", "1.5"). Distinguishing "no number was offered"
+        # from "a number was offered in a shape I will not read" is the whole
+        # difference between ``relation_only`` and ``numeral_refused``.
+        probe = index
+        while probe > 0 and text[probe - 1] != " ":
+            probe -= 1
+        token = text[probe:index]
+        return None, any(character in _PROXIMITY_DIGITS for character in token)
+
+    before = text[index - 1] if index > 0 else ""
+    # ``before`` IS EMPTY WHEN THE RUN STARTS THE LINE, and the emptiness has
+    # to be tested FIRST: ``"" in ".-/:%"`` is True in Python, because every
+    # string contains the empty string. Written with the guard rather than a
+    # comment alone because this exact expression, without it, refused the one
+    # line the whole wave is about -- "1 company alum works here" -- and turned
+    # 13 checks red in one run.
+    if before and (before in _PROXIMITY_DECORATIONS or before.isalpha()):
+        # THE DIGIT RUN IS PART OF SOMETHING LARGER, so it is not this line's
+        # count and reading it is a plausible wrong number rather than a
+        # missing one. "1.5 company alums" would otherwise read as 5,
+        # "2026-09-21 ..." as 21, "1/2 ..." as 2, "12:30 ..." as 30, "k1" as 1.
+        #
+        # THE SET IS EXPLICIT BECAUSE THE ASYMMETRY IS THE DEFECT. This
+        # repository has already paid for the narrower version of this guard
+        # once: ``company_root.NUMERAL_SHAPES`` gained ``percent_refused`` when
+        # a cold review found ``%`` falling through a suffix check that caught
+        # ``k``/``m``/``b`` -- the same shape, one separator remembered and the
+        # rest not. Written as data so the next one is an edit to a string.
+        return None, True
+
+    groups = run.split(",")
+    if any(not group for group in groups):
+        return None, True
+    if len(groups) > 1:
+        # Grouped digits, so the grouping has to be well formed. "1,23" is not
+        # a number this reader understands, and reading it as 123 is the kind
+        # of quiet repair that turns a refusal into a wrong answer.
+        if len(groups[0]) > 3 or any(len(group) != 3 for group in groups[1:]):
+            return None, True
+
+    digits = run.replace(",", "")
+    if len(digits) > _PROXIMITY_MAX_DIGITS:
+        return None, True
+
+    value = 0
+    for character in digits:
+        value = value * 10 + (ord(character) - 48)
+    return value, False
+
+
+def find_proximity(lines: Iterable[str]) -> dict[str, Any]:
+    """Read network proximity off lines a caller has already de-duplicated.
+
+    **THE INPUT CONTRACT IS THE SAFETY ARGUMENT.** Pass lines that have been
+    through :func:`strip_screen_reader_copies`; see the block comment above
+    this section for what happens to a caller that passes raw card text.
+
+    **THE OUTPUT IS THREE INTEGERS OR NONE.** ``{"state": <position in
+    PROXIMITY_STATES>, "relation": <position in PROXIMITY_RELATIONS> or None,
+    "count": <int> or None}``. Nothing read off a page is returned, in any
+    field, on any path.
+
+    DE-DUPLICATION IS ON THE FACT, NOT ON THE MATCH. A card can render one
+    insight several times -- the measured case is two copies 95 characters
+    apart -- and counting matches would report one fact as several, or as a
+    disagreement with itself. So matches are folded into a SET of
+    ``(relation, count)`` pairs and the verdict is taken from that set: same
+    fact twice is one fact; genuinely different facts are ``disagreement``,
+    which is a refusal and not a pick.
+
+    A REFUSED NUMERAL ANYWHERE ON THE CARD SUPPRESSES THE COUNT, even when
+    another copy offered a clean one. The two disagree about what the page
+    says, and this module's job is not to adjudicate that.
+    """
+    facts: set[tuple[int, Optional[int]]] = set()
+    refused = False
+    drawn = False
+
+    for raw in lines or ():
+        text = _WS.sub(" ", str(raw or "")).strip().lower()
+        if not text:
+            continue
+        for relation, phrase, counted in PROXIMITY_PHRASES:
+            position = PROXIMITY_RELATIONS.index(relation)
+            start = text.find(phrase)
+            while start >= 0:
+                drawn = True
+                value: Optional[int] = None
+                if counted:
+                    value, no_number = _digits_before(text, start)
+                    if no_number:
+                        refused = True
+                facts.add((position, value))
+                start = text.find(phrase, start + len(phrase))
+
+    out: dict[str, Any] = {
+        "state": _PROX_NOT_DRAWN,
+        "relation": None,
+        "count": None,
+    }
+    if not drawn:
+        return out
+
+    relations = {position for position, _count in facts}
+    if len(relations) > 1:
+        # Two different relations on one card. Both may be true, and this
+        # reader has one slot; picking one would invent a fact about which.
+        out["state"] = _PROX_DISAGREEMENT
+        return out
+
+    out["relation"] = relations.pop()
+    counts = {count for _position, count in facts if count is not None}
+    if len(counts) > 1:
+        out["state"] = _PROX_DISAGREEMENT
+        out["relation"] = None
+        return out
+    if refused:
+        out["state"] = _PROX_NUMERAL_REFUSED
+        return out
+    if counts:
+        out["state"] = _PROX_COUNT_READ
+        out["count"] = counts.pop()
+        return out
+    out["state"] = _PROX_RELATION_ONLY
+    return out
+
+
 def parse_job_card(record: dict[str, Any]) -> Optional[dict[str, Any]]:
     """Shape one job row (saved, applied, or a search result).
 
@@ -737,6 +1068,17 @@ def parse_job_card(record: dict[str, Any]) -> Optional[dict[str, Any]]:
     ]
     if not lines:
         return None
+
+    #: READ FROM ``lines``, WHICH IS THE POINT. This is the list AFTER
+    #: ``strip_screen_reader_copies`` has removed every copy the page marked
+    #: screen-reader-only, so the name-carrying duplicate of the proximity
+    #: insight is already gone and the name-free one is what is left. Reading
+    #: ``record["text"]`` here instead would put the employer's name back in
+    #: front of the reader. Taken before the loop below so a proximity line
+    #: that ever looked status-shaped or timestamp-shaped is still seen -- that
+    #: loop DISCARDS lines, and a reader downstream of a discard silently
+    #: inherits its judgement.
+    proximity = find_proximity(lines)
 
     status = None
     when = find_time_ago(lines)
@@ -831,6 +1173,7 @@ def parse_job_card(record: dict[str, Any]) -> Optional[dict[str, Any]]:
             location=welded["location"],
             status=status,
             when=when,
+            proximity=proximity,
         )
 
     rest = lines_after(remaining, title)
@@ -880,6 +1223,7 @@ def parse_job_card(record: dict[str, Any]) -> Optional[dict[str, Any]]:
         location=location,
         status=status,
         when=when,
+        proximity=proximity,
     )
 
 
@@ -891,6 +1235,7 @@ def _job_card_out(
     location: Optional[str],
     status: Optional[str],
     when: Optional[str],
+    proximity: Optional[dict[str, Any]] = None,
 ) -> dict[str, Any]:
     """The row, shaped and trimmed. ONE construction, two callers.
 
@@ -910,6 +1255,14 @@ def _job_card_out(
     if job_id:
         out["job_id"] = job_id
         out["url"] = f"https://www.linkedin.com/jobs/view/{job_id}"
+    if proximity and proximity.get("state") != _PROX_NOT_DRAWN:
+        # OMITTED WHEN THE CARD DREW NOTHING, like every optional field above
+        # it. A row that carries ``proximity`` with ``not_drawn`` in it would
+        # be asserting something about the account's graph; an absent key
+        # asserts nothing, which is the honest report for a card that simply
+        # had no insight line. The state remains in the alphabet because
+        # :func:`find_proximity` is a pure function that callers test directly.
+        out["proximity"] = proximity
     return out
 
 
@@ -2008,6 +2361,24 @@ def parse_job_detail(
     out["workplace_type"] = _match_vocabulary(header, WORKPLACE_TYPES)
     out["employment_type"] = _match_vocabulary(header, EMPLOYMENT_TYPES)
     out["status"] = _find_status(header)
+    #: SCOPED TO ``header`` ON PURPOSE, and the boundary was measured before it
+    #: was chosen. On ``job_detail_following_hydrated`` the alumni line is line
+    #: 11 of a 13-line header, above ``body_at``; the full page is 222 lines,
+    #: 209 of them the DESCRIPTION. A job description is prose that can say
+    #: "company alumni from our graduate programme" in a sentence, and read
+    #: over the whole page this field would report a fact about the account's
+    #: network from an employer's marketing copy. Every header fact above is
+    #: scoped this way for the same reason.
+    #:
+    #: DETAIL CANNOT CARRY A COUNT. The page draws the relation as a heading
+    #: over a face pile and states no number, so the phrases that match here
+    #: are the ``counted=False`` rows of :data:`PROXIMITY_PHRASES` and the
+    #: state is ``relation_only``. Reported as None when nothing was drawn, in
+    #: the same shape as ``salary`` and ``status`` beside it.
+    proximity = find_proximity(header)
+    out["proximity"] = (
+        proximity if proximity["state"] != _PROX_NOT_DRAWN else None
+    )
     out["description"] = _job_body(lines, body_at) if body_at is not None else None
     return out
 

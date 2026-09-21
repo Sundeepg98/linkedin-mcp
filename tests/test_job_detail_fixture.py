@@ -372,6 +372,20 @@ async def test_no_third_party_person_is_read_off_the_posting(which):
     LinkedIn renders a hiring-team block and "people also viewed" rows on this
     page. Both are other members. Nothing here extracts either, and this test
     is what stops a later field quietly adding one.
+
+    ``proximity`` WAS ADMITTED DELIBERATELY ON 2026-09-21, which is this
+    assertion working rather than being worked around. The wave that added it
+    (`_audit/2026-09-21-the-proximity-field.md`) turned this test red on both
+    renders, because the closed key set is exactly what makes a new field on
+    this reader impossible to add in silence.
+
+    IT IS THE ONE FIELD ON THIS READER THAT CANNOT CARRY A PERSON, and that is
+    why admitting it is safe rather than merely convenient: it is
+    ``{state, relation, count}``, three integers or None, where the first two
+    are POSITIONS in closed alphabets the package ships. The ``/in/`` scan
+    below therefore holds over it trivially -- an integer has no substring --
+    and the type is asserted directly, over lines that DO carry an employer, by
+    ``tests/test_proximity_reader.py``.
     """
     got = await _detail(which)
     assert set(got) == {
@@ -385,6 +399,7 @@ async def test_no_third_party_person_is_read_off_the_posting(which):
         "employment_type",
         "status",
         "description",
+        "proximity",
     }
     for value in got.values():
         assert "/in/" not in str(value)

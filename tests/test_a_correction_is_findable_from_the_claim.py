@@ -185,6 +185,30 @@ CORRECTION_VOCABULARY = (
 #: outcome this file exists to require and so cannot also be a violation of it.
 NOT_A_CORRECTION: dict[tuple[str, str], str] = {
 
+    # 2026-09-21, the PROXIMITY-FIELD wave. Triaged by reading the line, and
+    # it is the TABLE-ROW proximity shape this dict's own docstring names
+    # FIRST -- the matched word is in a different capability's row.
+    ("jobs.md", "2026-09-21-the-proximity-field.md"): (
+        "THE MATCHED WORD IS IN A DIFFERENT ROW, ABOUT A DIFFERENT ADDRESS. "
+        "The citing line is census row 40, which names this wave's own "
+        "deliverable as its evidence: *'Evidence "
+        "`_audit/2026-09-21-the-proximity-field.md`'*. The correction "
+        "vocabulary is `stale`, two lines below, inside ROW 42 -- job "
+        "collections -- where it appears as *'all four are the staleness "
+        "diagnostic'*, describing the STRING CONTENT OF A JSON PAYLOAD and "
+        "not a claim that any document got anything wrong. A markdown table "
+        "has no blank lines, so row 42's prose sits inside row 40's window. "
+        "**THE CITED DOCUMENT IS ROW 40'S OUTPUT, NOT ITS CORRECTOR.** Row 40 "
+        "moved GAP -> COVERED-UNFIRED because that wave built the reader; the "
+        "document reports the build and withdraws nothing in `jobs.md`. The "
+        "one thing that wave did correct -- a line pointer in two blocker "
+        "TSVs -- it deliberately did NOT act on, and says so. "
+        "**WHAT WOULD MAKE THIS ENTRY WRONG:** row 40 citing that document "
+        "while WITHDRAWING a claim of its own, or row 42 being rewritten so "
+        "that its `stale` becomes a verdict about a document rather than "
+        "about a payload. Either turns this into a real pair needing markers."
+    ),
+
     # 2026-09-21, the THREE-READERS wave. Both triaged by reading the line,
     # and both are the TABLE-ROW / ADJACENT-HEADING proximity shape this
     # dict's own docstring names.
