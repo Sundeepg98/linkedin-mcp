@@ -27,16 +27,16 @@ are listed as `(undated)`; no date is taken from git history, because
 
 | what | count |
 | --- | --- |
-| audit documents git tracks under `_audit` | 206 |
-| of those, carrying a `YYYY-MM-DD-` date prefix | 173 |
+| audit documents git tracks under `_audit` | 207 |
+| of those, carrying a `YYYY-MM-DD-` date prefix | 174 |
 | distinct dates | 14 |
 | documents with no level-1 heading | 1 |
-| `CORRECTS:` marker lines | 77 |
-| `CORRECTED BY:` marker lines | 77 |
-| distinct declared correction edges | 74 |
+| `CORRECTS:` marker lines | 79 |
+| `CORRECTED BY:` marker lines | 79 |
+| distinct declared correction edges | 76 |
 | documents something later corrects | 42 |
-| documents that correct something | 56 |
-| documents at either end of a cross-document edge | 81 |
+| documents that correct something | 57 |
+| documents at either end of a cross-document edge | 82 |
 | intra-document correction markers | 4 |
 | documents that correct themselves later on | 2 |
 | documents no correction marker touches at all | 123 |
@@ -495,6 +495,10 @@ document is dead; it says one thing in it was overtaken and names what.
 
   > row `M M4` moved EXCLUDED-RULED to MEASURED-ABSENT, because its cell reports a measurement and not a decision.
 
+- CORRECTED BY [2026-09-21-the-write-ceiling.md](2026-09-21-the-write-ceiling.md)
+
+  > this slice's 71 write-direction GAP rows were adjudicated row by row on 2026-09-21; five moved to EXCLUDED-RULED and 66 stayed GAP.
+
 ### [_census/network.md](_census/network.md)
 
 (undated) &middot; CENSUS SLICE: NETWORK AND PEOPLE
@@ -522,6 +526,10 @@ document is dead; it says one thing in it was overtaken and names what.
 - CORRECTED BY [2026-09-21-the-read-triage.md](2026-09-21-the-read-triage.md)
 
   > nine rows carried a stated reason that is FALSE at HEAD and each is now corrected in place: `33`, `53`, `54`, `102` and `104` on the company root (admitted 2026-09-20), `79` on the people-search pattern (admitted 2026-09-20 with its shaper and its tool), `99` and `100` on the `/school/` pattern (admitted 2026-09-05, and the cell's "0 grep hits" was a reading of a tree that no longer exists), and `132` on the claim that no tool returns an appearance count. **NO STATE MOVED ON ANY OF THEM** -- the slice's GAP count is 91 before and after, and the census total is 285 either way, re-measured by `scripts/count_census_states.py --expect J=57,P=55,M=82,N=91`. The one row that could move is `53`, which a build wave already found SHIPPED and pre-existing; what stops it here is that no committed record shows the key POPULATED in a live fire, and this wave was forbidden the browser.
+
+- CORRECTED BY [2026-09-21-the-write-ceiling.md](2026-09-21-the-write-ceiling.md)
+
+  > rows `63` and `163` asserted that `/groups/<id>/` and `/groups/discover/` are NAMED REFUSALS in `readonly.py`'s own comment; measured 2026-09-21 through the shipped gate, **both are ALLOWED**, on two allowlist patterns added 2026-09-19 that rewrote the very comment those cells cite. **NO STATE MOVED** -- this slice's GAP count is 87 before and after -- and the correction pushes both rows TOWARDS GAP, because the address third of their price is now paid while the write sanction and the ruling are not. That document also adjudicated this slice's 49 write-direction GAP rows and moved none, the 2026-09-20 write-partition having already ruled on all of them.
 
 ### [_census/profile.md](_census/profile.md)
 
@@ -1105,6 +1113,18 @@ reach is visible. The quoted reason here is the CORRECTOR's own
 
   > row `K8`, whose reason cell reads "no tool, no reason" when the reading exists and was taken at allowlist +0.
 
+### [2026-09-21-the-write-ceiling.md](2026-09-21-the-write-ceiling.md)
+
+2026-09-21 &middot; THE WRITE CEILING: 157 WRITE-DIRECTION GAP ROWS, AND THE 152 THAT STAY
+
+- CORRECTS [_census/messaging-and-content.md](_census/messaging-and-content.md)
+
+  > five write rows re-filed GAP to EXCLUDED-RULED under the settings-family ruling, and the group-address clause on `C61` corrected as false at this tree.
+
+- CORRECTS [_census/network.md](_census/network.md)
+
+  > the same group-address clause on rows `63` and `163`, measured false; no state moved.
+
 ## 5. Every document, by date
 
 `CORRECTED` means at least one later document declares a correction of
@@ -1146,8 +1166,8 @@ ways, which is a fact about markers and not a verdict on the document.
 | (undated) | [_slice-unfollow-census.md](_slice-unfollow-census.md) | Unfollow-anchor census -- linkedin MCP server |  |
 | (undated) | [_census/jobs.md](_census/jobs.md) | Census slice: JOBS, END TO END | **CORRECTED x5** |
 | (undated) | [_census/mcp-inventory.md](_census/mcp-inventory.md) | MCP inventory -- what this server ACTUALLY DELIVERS |  |
-| (undated) | [_census/messaging-and-content.md](_census/messaging-and-content.md) | Capability census -- MESSAGING AND CONTENT | **CORRECTED x3** |
-| (undated) | [_census/network.md](_census/network.md) | CENSUS SLICE: NETWORK AND PEOPLE | **CORRECTED x6** |
+| (undated) | [_census/messaging-and-content.md](_census/messaging-and-content.md) | Capability census -- MESSAGING AND CONTENT | **CORRECTED x4** |
+| (undated) | [_census/network.md](_census/network.md) | CENSUS SLICE: NETWORK AND PEOPLE | **CORRECTED x7** |
 | (undated) | [_census/profile.md](_census/profile.md) | CENSUS SLICE: PROFILE, IDENTITY, SETTINGS AND PRIVACY | **CORRECTED x2** |
 | 2026-08-22 | [2026-08-22-linkedin-preflight.md](2026-08-22-linkedin-preflight.md) | 2026-08-22 - browser preflight, and a session_info that outlives the browser |  |
 | 2026-08-22 | [2026-08-22-parity-linkedin.md](2026-08-22-parity-linkedin.md) | LinkedIn parity, 2026-08-22 -- what he can do that this server cannot | **CORRECTED x1** |
@@ -1322,6 +1342,7 @@ ways, which is a fact about markers and not a verdict on the document.
 | 2026-09-21 | [2026-09-21-the-proximity-field.md](2026-09-21-the-proximity-field.md) | The proximity field -- census row `J 40`, read per-job network proximity |  |
 | 2026-09-21 | [2026-09-21-the-read-triage.md](2026-09-21-the-read-triage.md) | The read rows are GATED, not backlogged -- but nineteen of the fifty-nine are not | **CORRECTED x1** corrects x2 |
 | 2026-09-21 | [2026-09-21-the-three-readers.md](2026-09-21-the-three-readers.md) | Two readers for three rows, on two addresses nothing could navigate to -- | **CORRECTED x2** |
+| 2026-09-21 | [2026-09-21-the-write-ceiling.md](2026-09-21-the-write-ceiling.md) | THE WRITE CEILING: 157 WRITE-DIRECTION GAP ROWS, AND THE 152 THAT STAY | corrects x2 |
 
 ## 6. What the scan rejected, could not join, or had to repair
 

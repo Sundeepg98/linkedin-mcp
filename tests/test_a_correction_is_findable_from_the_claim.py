@@ -185,6 +185,38 @@ CORRECTION_VOCABULARY = (
 #: outcome this file exists to require and so cannot also be a violation of it.
 NOT_A_CORRECTION: dict[tuple[str, str], str] = {
 
+    # 2026-09-21, the WRITE-CEILING wave. The correction is REAL, and its
+    # TARGET IS THE CENSUS CELL ITSELF rather than either cited document --
+    # which is the case this dict exists to distinguish and the one a
+    # proximity scan cannot.
+    ("network.md", "2026-09-05-groups-surface-measured.md"): (
+        "THE CORRECTION TARGETS THE CITING CELL, NOT THE CITED DOCUMENT. "
+        "Census row 63 asserted that `/groups/<id>/` and `/groups/discover/` "
+        "are *'NAMED REFUSALS in `readonly.py`'s own comment'*. Measured "
+        "2026-09-21 through the shipped gate, both are ALLOWED: two allowlist "
+        "patterns were added 2026-09-19 and the cited comment was rewritten "
+        "BY that admission. So the false clause is the ROW'S OWN, written "
+        "before the boundary moved under it. "
+        "`2026-09-05-groups-surface-measured.md` is cited by that row as "
+        "EVIDENCE for a different and still-true finding -- that no join "
+        "control is drawn on any suggestion row on `/groups/` -- and nothing "
+        "in this correction touches it. Declaring a CORRECTS: pair would "
+        "send a reader to a document that got nothing wrong."
+    ),
+
+    # 2026-09-21, the WRITE-CEILING wave. The TABLE-ROW proximity shape this
+    # dict's docstring names FIRST, and a second instance of it.
+    ("network.md", "2026-09-05-groups-wire.md"): (
+        "THE MATCHED WORD IS IN A DIFFERENT ROW, ABOUT A DIFFERENT SURFACE. "
+        "The citing line is census row 162 -- browse recommended groups -- "
+        "which cites `2026-09-05-groups-wire.md` for a live payload, and "
+        "that row was NOT edited by this wave. The correction vocabulary is "
+        "one line below, inside ROW 163, where a 2026-09-21 measurement "
+        "records that row's own address clause as false. A markdown table "
+        "has no blank lines, so row 163's prose sits inside row 162's "
+        "two-line window. Row 162's claims are untouched and unchallenged."
+    ),
+
     # 2026-09-21, the PROXIMITY-FIELD wave. Triaged by reading the line, and
     # it is the TABLE-ROW proximity shape this dict's own docstring names
     # FIRST -- the matched word is in a different capability's row.

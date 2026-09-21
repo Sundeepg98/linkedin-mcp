@@ -118,7 +118,19 @@ DENOMINATOR_AT_WAVE_START = (83, {"R": 11, "W": 71, "R+W": 1})
 #: AFTER the wave moved ``C43`` -- a READ -- out of GAP onto the
 #: FEED-CONTENT-READ-RULING. One row, one direction, and the arithmetic is
 #: stated so the two numbers cannot be confused for a disagreement.
-EXPECTED_NOW = (82, {"R": 10, "W": 71, "R+W": 1})
+AFTER_THE_MESSAGING_GAP_WAVE = (82, {"R": 10, "W": 71, "R+W": 1})
+
+#: AFTER ``_audit/2026-09-21-the-write-ceiling.md``, which adjudicated this
+#: slice's 71 WRITE-direction GAP rows and moved FIVE of them --
+#: ``M35``, ``M36``, ``C73``, ``C88``, ``C89`` -- to EXCLUDED-RULED under the
+#: settings-family ruling (``_audit/2026-09-05-decide-retire-rulings.md``
+#: section 3.10, which states that ruling is capability-level rather than
+#: path-level). **THE ARITHMETIC IS STATED RATHER THAN THE NUMBER REPLACED:**
+#: 82 - 5 = 77, and the writes 71 - 5 = 66. The read and read-and-write counts
+#: are UNTOUCHED, which is the check that this wave stayed inside its scope --
+#: it was a write-direction pass, so any movement in ``R`` would have been a
+#: row it had no business moving.
+EXPECTED_NOW = (77, {"R": 10, "W": 66, "R+W": 1})
 
 
 def test_the_headline_split_is_the_one_the_report_quotes():
