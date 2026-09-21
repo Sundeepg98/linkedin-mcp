@@ -26,13 +26,25 @@ inferred, and the specific claim that made it severe is still DERIVED.**
     not an address at all            1 -- a regex that spells `href`
 
 **AND THE QUESTION THE LEAD ASKED PLAINLY. Can a name still reach a caller
-through an error message anywhere in this package? YES, in three places, none
-of which is this class, and the largest is section 6.1:
-`ExtractionFailedError.url` is published by `server._error` with NO SCRUBBER AT
-ALL, from 20 sites, 13 of which hand it `page.url` read at the moment of the
-raise.** It is a declared contract with a standing per-site ruling on its
-success-path twin and none on its failure-path self. It needs a ruling and a
-measurement, not an edit, and this wave had no browser.
+through an error message anywhere in this package? YES.** Not through this
+class -- through the FIELD beside it, and it is section 6.1:
+
+> `ExtractionFailedError.url` is published by `server._error` with **NO
+> SCRUBBER AT ALL**. 20 sites feed it; 12 hand it `page.url` read at the
+> moment of the raise, with no authwall gate in between.
+
+**MEASURED, not read**: driven offline against the shipped code,
+`dom.require_rows` handed a name-bearing authwall landing raises, and
+`server._error(exc)["url"]` carries the slug verbatim to the caller. What is
+NOT measured is whether such a value reaches those sites in production, and
+that distinction is the whole of the severity. It is a declared contract whose
+success-path twin has a standing per-site ruling and whose failure-path self
+has none. It needs a ruling and a measurement, not an edit, and this wave had
+no browser.
+
+Two smaller ones, both NAMED rather than repaired because each is the tool's
+own contract on its success path: a `hint` carrying the page's section
+headings (6.4), and slugs in `out["profile"]` / `out["company_url"]` (5.2).
 
 ---
 
@@ -598,6 +610,24 @@ be published. Measured by AST over `linkedin_server/`:
 
 Its own docstring declares the contract: *"Carries the url so the operator can
 open the same page by hand and see what this server saw."*
+
+**THE MECHANISM IS MEASURED, NOT READ.** Driven offline against the SHIPPED
+code with a synthetic name-bearing authwall landing:
+
+    dom.require_rows([], url=<a /company/<slug>/ authwall landing>, ...)
+      -> ExtractionFailedError
+      -> server._error(exc)["url"] CARRIES THE SLUG VERBATIM
+
+So the field does publish whatever it is handed, and nothing on the way out
+touches it. **WHAT IS NOT MEASURED IS REACHABILITY**, and the distinction is
+the whole of the severity: the two `server.py` `require_rows` calls run AFTER
+`assert_not_authwall` has passed, so a landing arriving there cannot be an
+authwall. The twelve `dom.py` sites are the ones with nothing in between --
+they take `page.url` at the moment of the raise, which can differ from the
+`final_url` the gate saw. Eight of those readers were driven with a page
+double that answers empty and none of them reached its raise, so they are
+recorded as UNMEASURED and not as clean, the way the coercion wave recorded
+its 21 undrivable readers.
 
 **THE FINDING IS AN ASYMMETRY, AND IT IS NEW.** The SUCCESS-path twin of this
 value has a standing, per-site, fourteen-row ruling in

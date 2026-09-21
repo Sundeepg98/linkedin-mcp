@@ -8851,7 +8851,12 @@ which is the only honest reason a number may move.**
 `server._error` scrubs `message` and `hint` and passes `url` through raw. 20
 sites feed it: 12 in `dom.py` hand it `_url_of(page)` -- the live page url read
 at the moment of the raise -- plus one `require_rows` parameter and 7 in
-`server.py`. **The asymmetry is the finding**: the SUCCESS-path twin of this
+`server.py`. **DRIVEN OFFLINE against the shipped code: `require_rows` handed a
+name-bearing authwall landing raises, and `server._error(exc)["url"]` carries
+the slug verbatim.** The MECHANISM is measured; REACHABILITY is not, and that
+distinction is the whole of the severity -- the `server.py` sites sit behind
+the authwall gate and the twelve `dom.py` ones do not.
+**The asymmetry is the finding**: the SUCCESS-path twin of this
 value has a standing fourteen-row per-site ruling, and the FAILURE-path field
 has none, on the same value in the same function, reached exactly when the page
 was NOT what was expected. It needs a ruling and a measurement, not an edit.
