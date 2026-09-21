@@ -525,11 +525,24 @@ other structurally cannot.
 | `session_info_offline:941` `jar_error = scrub(f"...{exc}")` | **YES** -- same | **same** |
 | `login_via_browser:1401` `stored = {... f"harvest raised {type(exc).__name__}"}` | YES -- via `"session_stored": stored` | real, but `TYPE_ONLY`, so no risk |
 
-*Cause:* the slice's RETURN sink requires the taint to sit inside a dict the
-function returns. Here it is assigned to a plain local and the publishing dict
-is built **twenty lines later**, so its dataflow stops at the assignment. Mine
-marks every assignment `ASSIGN->RETURN?` -- a deliberately cruder sink that
-over-reports and forces a human read.
+*Cause -- and I got this wrong before its author told me.* My first guess was
+that the slice's dataflow stops at the assignment because the publishing dict
+is built twenty lines later. **It is not that.** The slice's own LIMITS
+section says why, and it is a better answer: `scrub(...)` is an OPAQUE CALL,
+and this walker treats any call it does not recognise as taint-CLEARING. So
+`jar_error` comes out clean at the assignment and its two later uses are never
+candidates at all. Mine marks every assignment `ASSIGN->RETURN?` -- a
+deliberately cruder sink that over-reports and forces a human read -- so it
+surfaced them for the wrong reason and the read is what settled them.
+
+The distinction matters, because "opaque call clears taint" is a JUDGMENT
+applied uniformly, not an oversight. `scrub` really is this repository's
+sanitiser at some sites. **It is not one here** -- `scrub` is
+`paths.relativise_known`, measured removing 0 characters from a library
+message -- so the two `session_info_offline` rows are `VALUE` x `RETURN` sites
+wearing a sanitiser that cannot clean them. The slice flags the judgment as
+its single largest one and offers the allowlist that would close it. That is
+the right way to lose an argument.
 
 **The 1 only THE SLICE finds, and it is a class mine cannot see at all:**
 
@@ -542,6 +555,29 @@ That row is branch B5, which I had classified by READING as "an int off
 slice is right to flag it: the trust is real but it is an assumption about
 Playwright, not a property of this code. The guard drives that branch
 (`http_999_unservable`) with the planted jar and it passes clean.
+
+**AND THE SLICE FOUND A TENTH SITE THAT NEITHER OF MY INSTRUMENTS FLAGGED.**
+`logout:1149`:
+
+```python
+failures.append(f"{name}: {scrub(f'{type(exc).__name__}: {exc}')}")
+```
+
+`failures` is later `"; ".join(...)`-ed into a returned `reason`. Mine misses
+it because `list.append(...)` is not among my sinks -- it is neither an
+assignment, a return, a raise, nor a log -- so it was invisible by
+construction. **My sink vocabulary has a hole shaped exactly like a method
+call**, and it took a differently-built instrument to show me.
+
+**THE ONE BLIND SPOT BOTH CENSUSES SHARE, named by the slice:** neither does
+INTERPROCEDURAL taint, so **neither can see `require_auth` at all** -- the
+chokepoint every gated tool calls, which does
+`raise NotAuthenticatedError(status.get("reason"))` over a dict `check_auth`
+built. A silent "no hit" there is not a clearance. This wave has that covered
+EMPIRICALLY rather than statically: `test_require_auth_does_not_raise_the_credential`
+drives it on all 6 branches and was RED on 3 before the repair. **Where the
+census is blind, the guard is not** -- which is the argument for having both,
+and for never reading a census as a clearance.
 
 **THE LESSON IS NOT THAT ONE INSTRUMENT WON.** It is that "a census of
 exception interpolations" and "a census of tainted values reaching a string"
@@ -590,6 +626,12 @@ measurement is the thing this repository keeps calling out.
   match. The predecessor measured `scrub` removing **0 characters** from a
   library message. **A sanitiser that knows paths cannot clean a credential**,
   so the wrap is not a defence here. Not driven.
+* **`logout:1149` (RETURN), found by the slice, missed by both of mine.**
+  `failures.append(f"{name}: {scrub(f'{type(exc).__name__}: {exc}')}")`, later
+  joined into a returned `reason`. Same `scrub`-is-not-a-defence argument as
+  above. The exception comes from `_erase(target)`, a local filesystem unlink,
+  so the credential risk is low and the PATH risk is what `scrub` is actually
+  for -- but it is the same shape and it is un-driven. See 6.5.
 
 ### 7.2 The class, and the two cuts that matter more than the total
 
