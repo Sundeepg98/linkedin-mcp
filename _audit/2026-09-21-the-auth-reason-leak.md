@@ -491,51 +491,66 @@ same probe, same browser:
 "clean".** One failure mode of `context.cookies()` was driven; its other
 failure modes were not enumerated. Recorded in RESIDUAL rather than closed.
 
-### 6.5 THE INDEPENDENT SECOND METHOD -- and the stricter one under-reported
+### 6.5 THE INDEPENDENT SECOND METHOD -- and NEITHER census subsumes the other
 
-The delegated slice landed its instrument (though not its report) while this
+The delegated slice landed its instrument (though never its report) while this
 document was being written: `scripts/_census_auth_exception_interpolation.py`,
-an AST census of the same question written to a different design, with its own
-manufactured fixture and a 9/9 selftest. It was reviewed and run here before
-being admitted. **It is better than mine in one respect** -- it models name
-REBINDING, so `exc = "a literal"` correctly clears the taint, where mine
-over-reports and says so.
+an AST census of the same question built to a different design, with its own
+manufactured fixture and a `--selftest` of its own. It was reviewed and run
+here before being admitted.
 
-Run over the same file, it finds **6 hits**; mine finds **9 rows**. That is a
-real disagreement and it was adjudicated by READING the three rows, not by
-preferring an instrument.
+**THIS SECTION WAS WRITTEN ONCE AND IS WRONG IN THE FIRST COMMIT OF THIS
+DOCUMENT.** It recorded the slice at 6 hits against my 9 and concluded the
+stricter instrument simply under-reported. Between that paragraph and the
+freeze the child kept working: its selftest went 9/9 to 10/10 and its census
+went 6 hits to 7. **A number one agent hands another is a reading with a
+timestamp the receiver cannot see**, and I published one without re-taking it.
+The corrected reconciliation is below, re-run at 20:35 against the version
+actually committed.
 
-| the 6 both find | agreement |
-|---|---|
-| 115 `_cookie_records` RAISE VALUE, 148 `_warm_session_cookies` LOG VALUE, 263 `_arm_session_store` LOG VALUE, 342 `check_auth` LOG TYPE_ONLY, ~347/361 `check_auth` RETURN TYPE_ONLY, 480 `_maybe_corroborate` LOG VALUE | **identical, line for line** |
+Run over the same file: the slice finds **7**, mine finds **9**, and the union
+is **10 distinct sites**. The overlap is 6. Each instrument finds rows the
+other structurally cannot.
 
-The three only mine finds, each checked by reading the source:
+**The 6 both find, line for line:** 115 `_cookie_records` RAISE VALUE,
+148 `_warm_session_cookies` LOG VALUE, 263 `_arm_session_store` LOG VALUE,
+342 `check_auth` LOG TYPE_ONLY, 361 `check_auth` RETURN TYPE_ONLY,
+480 `_maybe_corroborate` LOG VALUE.
+
+**The 3 only MINE finds** -- all confirmed real by reading the source:
 
 | row | returned? | verdict |
 |---|---|---|
-| `session_info_offline:939` `jar_error = scrub(str(exc))` | **YES** -- `jar_error` lands in `out["credential_source"]` via an f-string, and in `_credential(..., unreadable=jar_error)` | **a REAL `VALUE` x `RETURN` site the stricter census missed** |
+| `session_info_offline:939` `jar_error = scrub(str(exc))` | **YES** -- `jar_error` lands in `out["credential_source"]` via an f-string, and in `_credential(..., unreadable=jar_error)` | **a real `VALUE` x `RETURN` site** |
 | `session_info_offline:941` `jar_error = scrub(f"...{exc}")` | **YES** -- same | **same** |
 | `login_via_browser:1401` `stored = {... f"harvest raised {type(exc).__name__}"}` | YES -- via `"session_stored": stored` | real, but `TYPE_ONLY`, so no risk |
 
-**THE CAUSE, AND IT IS THE INTERESTING PART.** The stricter instrument's
-RETURN sink requires the tainted value to be inside a dict that the function
-returns. Here the taint is assigned to a plain local, and the dict that
-publishes it is built **twenty lines later**. Its dataflow stops at the
-assignment. Mine flags every assignment as `ASSIGN->RETURN?` -- a deliberately
-cruder sink that over-reports and forces a human read.
+*Cause:* the slice's RETURN sink requires the taint to sit inside a dict the
+function returns. Here it is assigned to a plain local and the publishing dict
+is built **twenty lines later**, so its dataflow stops at the assignment. Mine
+marks every assignment `ASSIGN->RETURN?` -- a deliberately cruder sink that
+over-reports and forces a human read.
 
-**So the better-engineered analysis under-reported the two highest-stakes rows
-in the file**, the only `VALUE` x `RETURN` pair, and the cruder one surfaced
-them. That is the whole argument for a census marking a maybe as a maybe
-rather than resolving it silently: *a census that folds its own blind spot
-into the clean column is worse than no census*, and "the value is not in the
-returned dict" is exactly the kind of true-looking statement that hides a
-deferred publication.
+**The 1 only THE SLICE finds, and it is a class mine cannot see at all:**
 
-Both instruments are kept. Neither is retired: the rebinding model is worth
-having, and so is the loose sink. The slice's file is adopt-committed
-separately and credited -- see section 8 -- because its author was still
-writing it when this froze.
+| row | why mine missed it |
+|---|---|
+| `check_auth:441` `f"the identity call returned HTTP {status}"` | `status` is `response.status` -- an attribute off a RESPONSE object, not an exception. My census tracks only `except ... as N` names, so this taint class is outside its vocabulary by construction. The slice models it as `T3` |
+
+That row is branch B5, which I had classified by READING as "an int off
+`response.status`" and parked in RESIDUAL 7.3 as *"trusted to be an int"*. The
+slice is right to flag it: the trust is real but it is an assumption about
+Playwright, not a property of this code. The guard drives that branch
+(`http_999_unservable`) with the planted jar and it passes clean.
+
+**THE LESSON IS NOT THAT ONE INSTRUMENT WON.** It is that "a census of
+exception interpolations" and "a census of tainted values reaching a string"
+are different questions that look like one question, and each instrument
+answered the one it was built for. *A census that folds its own blind spot
+into the clean column is worse than no census* -- so both are committed, both
+keep their selftests, and neither is retired. The slice models name rebinding,
+which mine does not; mine follows a local into a deferred dict, which the
+slice does not.
 
 ### 6.6 Disagreement with the coordinator's scan, reconciled
 
