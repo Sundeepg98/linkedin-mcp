@@ -44,6 +44,7 @@ from __future__ import annotations
 
 import asyncio
 import sys
+import time
 import traceback
 from contextlib import asynccontextmanager
 from pathlib import Path
@@ -113,10 +114,31 @@ async def drive() -> dict[str, Any]:
             context = await browser.new_context(viewport={"width": 1280, "height": 720})
             page = await context.new_page()
 
+            # THE SHIPPED HELPERS, NOT A COPY OF THEM. This render is the
+            # fixture's render with one number changed (the timeout, so the
+            # control finishes in seconds); the diagnosis and the control
+            # reading are imported from the module under test, so what is
+            # printed below is what CI would print and not a re-implementation
+            # that happens to agree.
+            from tests.test_editor_fields import (
+                _render_diagnosis,
+                _trivial_render_seconds,
+            )
+
             async def render(markup: str) -> None:
-                await page.set_content(
-                    markup, wait_until="domcontentloaded", timeout=TIMEOUT_MS
-                )
+                started = time.monotonic()
+                try:
+                    await page.set_content(
+                        markup, wait_until="domcontentloaded", timeout=TIMEOUT_MS
+                    )
+                except Exception as exc:
+                    waited = time.monotonic() - started
+                    control = await _trivial_render_seconds(browser)
+                    raise AssertionError(
+                        _render_diagnosis(
+                            type(exc).__name__, waited, len(markup), control
+                        )
+                    ) from exc
 
             @asynccontextmanager
             async def fake_session():
@@ -163,12 +185,36 @@ def main() -> int:
     new = render_failure("AFTER (fields_of)", lambda: names_of_NEW(result))
 
     old_ok = old.startswith("KeyError")
-    new_ok = "TimeoutError" in new and "set_content" in new
+    new_ok = "set_content did not finish" in new
+    named_kind = "TimeoutError" in new
+    # The reading that separates a starved box from a hanging document. Its
+    # PRESENCE is what is checked, never its value -- asserting a number here
+    # would make this control fail on a slow machine, which is the one machine
+    # it most needs to keep working on.
+    took_control_reading = "immediately afterwards took:" in new
+    worker_named = "xdist worker:" in new
+
+    # AND THE DISCRIMINATOR MUST ACTUALLY DISCRIMINATE. This script's fixture is
+    # a HANGING DOCUMENT, not a starved machine: the box is fine, one page's
+    # parser is wedged. So the correct reading is the prompt one. If this
+    # reports "ALSO FAILED" the diagnosis is indicting the machine for what the
+    # markup did -- which is exactly what the first version of
+    # _trivial_render_seconds did by reusing the wedged page, and exactly how
+    # that defect was found.
+    discriminated = "in a fresh context" in new and "ALSO FAILED" not in new
 
     print("VERDICT")
-    print("  old headline names only the absent key : %s" % ("yes" if old_ok else "NO"))
-    print("  new headline quotes the real envelope  : %s" % ("yes" if new_ok else "NO"))
-    ok = old_ok and new_ok
+    print("  old headline names only the absent key   : %s" % ("yes" if old_ok else "NO"))
+    print("  new headline quotes the real envelope    : %s" % ("yes" if new_ok else "NO"))
+    print("  new message names the exception kind     : %s" % ("yes" if named_kind else "NO"))
+    print("  new message carries the CONTROL reading  : %s" % ("yes" if took_control_reading else "NO"))
+    print("  new message names the xdist worker       : %s" % ("yes" if worker_named else "NO"))
+    print("  CONTROL READING BLAMES THE MARKUP, NOT")
+    print("  THE MACHINE (this fixture hangs a page,")
+    print("  it does not starve the box)              : %s"
+          % ("yes" if discriminated else "NO"))
+    ok = (old_ok and new_ok and named_kind and took_control_reading
+          and worker_named and discriminated)
     print()
     print("CONTROL: %s" % (
         "PASS -- the failure now names what the tool returned" if ok

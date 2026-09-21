@@ -83,6 +83,18 @@ Run with ``--self-test`` to execute all controls across all three passes
 (pass 1: 3 controls; pass A: 2; pass B: 1) and print their verbatim output;
 no census file is written in that mode.
 
+EVERY POSITIVE CONTROL'S FIXTURE IS BUILT (``SYNTHETIC_KNOWN_SHAPE``), NEVER
+READ OFF A LIVE FILE. This was learned expensively, not assumed: the first
+version of Pass 1 CONTROL 1 (and, by inheritance, Pass 1 CONTROL 3 and Pass
+A CONTROL 1) pinned to the real ``tests/test_editor_fields.py``'s real
+``names_of()`` -- and it rotted within the same working session, TWICE, each
+time a real bug this census exists to find got fixed out from under the
+pin. A control whose positive fixture is FOUND in the repo it watches will
+always eventually go quiet on the repo's own success, indistinguishably
+from the instrument breaking. A control whose fixture is BUILT into the
+script cannot rot that way, because nothing in the repo can repair a string
+literal that lives here.
+
 ## PASS A and PASS B (follow-up census, same instrument, same scope walk)
 
 ``--pass-a`` enumerates the SHAPE the CI failure actually had: a non-test_,
@@ -131,9 +143,37 @@ RESULT_PARAM_NAMES = frozenset(
     {"result", "results", "answer", "envelope", "payload", "reply", "response"}
 )
 
-#: The known instance CONTROL 1 must find -- test_editor_fields.py's names_of().
+#: A SYNTHESISED module holding the ORIGINAL shape of the bug this whole
+#: census exists to find: a plain helper, parameter named "result" (rule d),
+#: subscripting it with a string constant, no guard anywhere. Shared "known
+#: positive" fixture for Pass 1 CONTROL 1, Pass 1 CONTROL 3, and Pass A
+#: CONTROL 1.
+#:
+#: BUILT, NOT FOUND IN A LIVE FILE -- ON PURPOSE, AND LEARNED THE EXPENSIVE
+#: WAY. The first version of this fixture was pinned to the REAL
+#: tests/test_editor_fields.py's real names_of(): "the census must find
+#: THIS instance, at THIS file". It rotted the same afternoon it was
+#: written, when the bug it pinned to got fixed out from under it -- and a
+#: SECOND real-file pin (the by_label positive-control candidate this same
+#: census turned up) rotted the same way, within the hour, when THAT got
+#: fixed too. Both rots were the CORRECT outcome for the codebase and the
+#: WRONG outcome for a control: a control that can only detect an unfixed
+#: bug is a control that goes quiet on its own success, and a positive
+#: control going quiet is indistinguishable from the instrument breaking
+#: unless someone happens to notice the diff. A control whose fixture is
+#: BUILT does not rot when the repo it watches is repaired, because nothing
+#: in the repo can repair a string literal living in this script.
+SYNTHETIC_KNOWN_SHAPE = textwrap.dedent(
+    """\
+    def names_of(result: dict[str, Any]) -> list[str]:
+        # The published label of every control in the answer, in document order.
+        return [field["name"] for field in result["fields"]]
+    """
+)
+
+#: The known instance CONTROLs must find, inside SYNTHETIC_KNOWN_SHAPE above.
 KNOWN_POSITIVE = {
-    "file": "tests/test_editor_fields.py",
+    "file": "<synthetic-known-shape>",
     "name": "result",
     "key": "fields",
 }
@@ -971,22 +1011,18 @@ def _print_record_line(rec: dict[str, Any]) -> None:
     print(f"      source: {rec['source_line']}")
 
 
-def _run_control_3(real_source: str) -> dict[str, Any]:
-    """Patch the REAL names_of() source in memory and show the record for
-    result["fields"] disappear when the subscript becomes a .get() call."""
-    tree = ast.parse(real_source, filename="tests/test_editor_fields.py")
-    target = None
-    for node in ast.walk(tree):
-        if isinstance(node, ast.FunctionDef) and node.name == "names_of":
-            target = node
-            break
-    if target is None:
-        raise RuntimeError(
-            "CONTROL 3 SURPRISE: names_of() was not found in the real source"
-        )
-    before_src = ast.get_source_segment(real_source, target)
-    if not before_src:
-        raise RuntimeError("CONTROL 3 SURPRISE: ast.get_source_segment returned nothing")
+def _run_control_3() -> dict[str, Any]:
+    """Patch the BUILT known-shape fixture (SYNTHETIC_KNOWN_SHAPE) in memory
+    and show the record for result["fields"] disappear when the subscript
+    becomes a .get() call.
+
+    Used to read the REAL names_of() off disk and patch THAT. Rotted the
+    first time the real function was fixed: the .replace() found nothing to
+    replace, and this function's own guard against that (below) is what
+    caught it, as a RuntimeError rather than a false PASS -- see
+    SYNTHETIC_KNOWN_SHAPE's docstring for the full account.
+    """
+    before_src = SYNTHETIC_KNOWN_SHAPE
 
     before_tree = ast.parse(before_src, filename="<control3-before>")
     before_records: list[dict[str, Any]] = []
@@ -1010,20 +1046,21 @@ def _run_control_3(real_source: str) -> dict[str, Any]:
 
 def self_test_pass1() -> int:
     print("=" * 78)
-    print("CONTROL 1 -- POSITIVE: the known instance must be found")
+    print("CONTROL 1 -- POSITIVE: a BUILT fixture holding the known shape must be found")
     print("=" * 78)
-    records, summary = run_census()
-    if summary["errors"]:
-        print(f"SURPRISE: {len(summary['errors'])} file(s) failed to parse/read:")
-        for e in summary["errors"]:
-            print(f"  {e['file']}: {e['error']}")
-        return 1
+    print("  (built into this script, not read off a live file -- a fixture pinned")
+    print("   to a real file's CURRENT content rots the moment that file is fixed,")
+    print("   which happened, twice, to this exact control. See")
+    print("   SYNTHETIC_KNOWN_SHAPE's docstring.)")
+    syn_tree = ast.parse(SYNTHETIC_KNOWN_SHAPE, filename=KNOWN_POSITIVE["file"])
+    syn_records: list[dict[str, Any]] = []
+    _process_scope(
+        syn_tree, "<module>", KNOWN_POSITIVE["file"], SYNTHETIC_KNOWN_SHAPE.splitlines(), syn_records
+    )
     hits = [
         r
-        for r in records
-        if r["file"] == KNOWN_POSITIVE["file"]
-        and r["name"] == KNOWN_POSITIVE["name"]
-        and r["key"] == KNOWN_POSITIVE["key"]
+        for r in syn_records
+        if r["name"] == KNOWN_POSITIVE["name"] and r["key"] == KNOWN_POSITIVE["key"]
     ]
     print(f"  matches for {KNOWN_POSITIVE}: {len(hits)}")
     for rec in hits:
@@ -1035,6 +1072,20 @@ def self_test_pass1() -> int:
         )
         return 1
     print("  CONTROL 1 PASSED")
+    print()
+
+    print("  (sanity check, separate concern: does the REAL tree still parse")
+    print("   cleanly right now -- not whether any specific bug is present)")
+    _real_records, real_summary = run_census()
+    print(
+        f"    {real_summary['files_scanned']} files, {len(real_summary['errors'])} parse "
+        f"errors, {real_summary['total']} total subscript records under tests/ right now"
+    )
+    if real_summary["errors"]:
+        print(f"  SURPRISE: {len(real_summary['errors'])} file(s) fail to parse:")
+        for e in real_summary["errors"]:
+            print(f"    {e['file']}: {e['error']}")
+        return 1
     print()
 
     print("=" * 78)
@@ -1075,11 +1126,10 @@ def self_test_pass1() -> int:
     print()
 
     print("=" * 78)
-    print("CONTROL 3 -- SHOW IT GOING QUIET: patch names_of(), watch the record vanish")
+    print("CONTROL 3 -- SHOW IT GOING QUIET: patch the fixture, watch the record vanish")
     print("=" * 78)
-    real_source = (TESTS_DIR / "test_editor_fields.py").read_text(encoding="utf-8")
-    c3 = _run_control_3(real_source)
-    print("  BEFORE (real names_of source, read from disk):")
+    c3 = _run_control_3()
+    print("  BEFORE (SYNTHETIC_KNOWN_SHAPE, built into this script):")
     for line in c3["before_source"].splitlines():
         print(f"    {line}")
     print(f"  BEFORE records: {len(c3['before_records'])}")
@@ -1106,25 +1156,19 @@ def self_test_pass1() -> int:
 
 def self_test_pass_a() -> int:
     print("=" * 78)
-    print("PASS A CONTROL 1 -- POSITIVE: names_of must be in the defect set")
+    print("PASS A CONTROL 1 -- POSITIVE: the BUILT fixture must be in the defect set")
     print("=" * 78)
-    result = run_pass_a()
-    if result["summary"]["errors"]:
-        print(f"SURPRISE: {len(result['summary']['errors'])} file(s) failed to parse:")
-        for e in result["summary"]["errors"]:
-            print(f"  {e['file']}: {e['error']}")
-        return 1
-    hits = [
-        c
-        for c in result["candidates"]
-        if c["file"] == "tests/test_editor_fields.py" and c["function"] == "names_of"
-    ]
+    print("  (SYNTHETIC_KNOWN_SHAPE again -- this control used to pin to a real")
+    print("   file+function name and rotted the same way CONTROL 1 above did.)")
+    syn_tree = ast.parse(SYNTHETIC_KNOWN_SHAPE, filename=KNOWN_POSITIVE["file"])
+    hits: list[dict[str, Any]] = []
+    for node in ast.walk(syn_tree):
+        row = analyze_pass_a_function(node, SYNTHETIC_KNOWN_SHAPE)
+        if row is not None:
+            hits.append(row)
     print(f"  matches: {len(hits)}")
     for c in hits:
-        print(
-            f"    {c['file']}:{c['def_line']} {c['function']}({', '.join(c['params'])})"
-            f"  in_defect_set={c['in_defect_set']}"
-        )
+        print(f"    {c['function']}({', '.join(c['params'])})  in_defect_set={c['in_defect_set']}")
         for s in c["sites"]:
             print(
                 f"      site line={s['line']} {s['param']}[{s['key']!r}]"
@@ -1133,11 +1177,24 @@ def self_test_pass_a() -> int:
     ok1 = len(hits) == 1 and hits[0]["in_defect_set"] is True
     if not ok1:
         print(
-            "  PASS A CONTROL 1 FAILED -- names_of must be found, exactly once, "
+            "  PASS A CONTROL 1 FAILED -- the fixture must be found, exactly once, "
             "and unguarded. The instrument is broken; fix it, not this control."
         )
         return 1
     print("  PASS A CONTROL 1 PASSED")
+    print()
+
+    print("  (sanity check, separate concern: current real-tree defect set size)")
+    real_result = run_pass_a()
+    if real_result["summary"]["errors"]:
+        print(f"  SURPRISE: {len(real_result['summary']['errors'])} file(s) failed to parse:")
+        for e in real_result["summary"]["errors"]:
+            print(f"    {e['file']}: {e['error']}")
+        return 1
+    print(
+        f"    {real_result['summary']['candidate_count']} candidate(s), "
+        f"{real_result['summary']['defect_count']} in the defect set, right now"
+    )
     print()
 
     print("=" * 78)

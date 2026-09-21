@@ -8,6 +8,60 @@ py3.13 and the other five Windows shards all passed. Two things went wrong and
 they are different in kind: the suite MISREPORTED the failure, and something
 made a local `Page.set_content` take longer than sixty seconds.
 
+## THE ANSWER, UP FRONT
+
+**DEFECT 1 -- FIXED AND SHOWN.** `tests/test_editor_fields.py` states a
+convention (`.get` with the whole result as the message) in a comment, and the
+function immediately below that comment broke it. A Playwright timeout was
+reported as `KeyError: 'fields'`. Every read of `"fields"` now goes through
+`fields_of`, which quotes the envelope in the HEADLINE. The sweep found a
+SECOND instance of the same shape nobody had reported -- `by_label` in
+`tests/test_editor_values.py`, whose docstring promises "a loud failure" while
+raising `KeyError` before either of its loud assertions runs. Both fixed;
+defect set re-measured at 0.
+
+**DEFECT 2 -- BOTH HYPOTHESES REFUTED. H1 no, H2 no.**
+
+* **H2 is refuted.** All 47 changed lines in `linkedin_server/server.py` are
+  docstring and comment prose. The module's AST with docstrings stripped is
+  IDENTICAL across all three commits, and `tests/test_editor_fields.py` is
+  unchanged since the last green run. Proven with an instrument shown flipping
+  its verdict on a one-token mutation.
+* **H1 is refuted as stated, in the direction nobody expected.** The failing
+  file was in shard 3 at BOTH commits -- it did not move -- and its browser
+  company SHRANK from six files to five. The new test file the merge added
+  constructs no browser at all. H1's MECHANISM is real, though: 25 of shard 3's
+  35 files turned over and it became the heaviest shard by 42%.
+* **The cause is resource exhaustion, and it is proven non-code by a
+  comparison nobody designed.** Attempt 1 and attempt 2 of the SAME run are the
+  same commit, plan, files and command. Attempt 1's parallel phase took
+  **343.34s and failed**; attempt 2's took **110.74s and passed**. A 3.1x
+  degradation with the code held byte-identical.
+* **And it was not simply a slow machine.** Attempt 1 was ~1.7x FASTER at
+  single-threaded work (12.74s vs 21.35s collection) and 3.1x slower in
+  parallel. The degradation is specific to running many things at once.
+
+**WHAT IS NOT ESTABLISHED, stated plainly:** WHY the parallel phase degraded --
+worker count, memory pressure or a noisy co-tenant. The logs cannot separate
+them because **no shard job records how many workers `-n auto` resolved to, the
+runner's CPU count, or free memory.** That one-line measurement is named in 7.1
+and deliberately NOT made, because `ci.yml` is the most-shared file in the repo
+and five other waves were live.
+
+**THE FIX FOR DEFECT 2 IS NOT A LARGER NUMBER.** The timeout is still 60000ms,
+nothing is retried, nothing is marked flaky. What changed is that when it fires
+it takes the DISCRIMINATING reading -- how long an empty document takes on the
+same browser in a fresh context -- which separates "the box was starved" from
+"this document hung". Shown working on a real forced timeout (5.3). That
+control also caught the first version of the discriminator blaming the machine
+for what the markup did.
+
+**A HYPOTHESIS OF MY OWN, REFUTED (4.3):** the packer prices the failing file
+at 16s and it measures 179s, which looks like a smoking gun. It is not
+supported -- on this box a two-test static guard is 29x over its table entry,
+higher than any browser file. This box cannot separate a wrong table from a
+loaded machine. Recorded rather than dropped.
+
 ---
 
 ## 0. THE FULL FAILURE, AS THE LOG HAS IT
@@ -412,9 +466,14 @@ ESTABLISHED, with the evidence in this document:
   passed on the retry, and passed locally;
 * the failing run was degraded specifically in its PARALLEL phase, by 3.1x,
   while being faster single-threaded (3A.2);
-* 19 of the 20 browser tests in the same file passed in the same failing run.
-  One `set_content` hung; the other nineteen did not. This is a tail event
-  inside a degraded run, not a property of the markup.
+* EVERY OTHER TEST IN THE SAME FILE PASSED IN THE SAME FAILING RUN. The shard
+  reported exactly one failure out of 2111, so all 52 of the module's other
+  collected tests passed -- including every other test driven by the same
+  browser fixture (20 of the module's 35 test functions take `run_tool`, and
+  each one launches its own Playwright driver and its own Chromium, because the
+  fixture is function-scoped). One `set_content` hung and dozens of others on
+  the same fixture did not. That is a tail event inside a degraded run, not a
+  property of the markup, and not a property of the fixture either.
 
 **NOT ESTABLISHED, and I am not going to pretend otherwise:** WHY the parallel
 phase was degraded. The candidates are a different `-n auto` resolution (fewer
@@ -493,6 +552,134 @@ on a comparable box. Two further facts about the table:
 
 ---
 
+### 4.3 THE RATIO CONTROL -- which refuted MY hypothesis, not the table
+
+Section 4.2 looks like a smoking gun: the packer prices the failing file at
+16.083s and it measures 179.05s. The obvious story is "the table underprices
+browser files, so LPT stacked work on top of one". I went looking for that and
+the measurement did not support it.
+
+The control: run five files from shard 3 with known table entries, serially,
+with a junit report, and compare RATIOS rather than absolute seconds -- because
+this box is neither the box the table was measured on nor a quiet one, so
+absolute seconds measure the laptop. Per-file seconds parsed with
+`ci_shard.py`'s own `seconds_per_file()`, imported rather than re-implemented.
+
+    file                                       table(s)   measured    ratio
+    tests/test_result_verification_block.py       1.706       49.7    29.2x
+    tests/test_editor_values.py                  16.795      418.5    24.9x
+    tests/test_editor_fields.py                  16.083      371.4    23.1x
+    tests/test_no_committed_identity.py          10.575      147.2    13.9x
+    tests/test_browser.py                         0.713        3.0     4.2x
+
+**Every file is far over its table entry, including a two-test static guard at
+29.2x -- the highest ratio in the set, and it launches nothing.** The browser
+files are not the outliers. The spread runs 4.2x to 29.2x with no relationship
+to whether a browser is involved.
+
+So this box cannot separate a wrong table from a loaded machine, and the
+hypothesis is NOT ESTABLISHED. Two confounds, both real: five sibling waves were
+running throughout (the same file measured 179.05s alone earlier and 371.4s
+here, so contention alone moves it 2x), and fixed per-file overhead inflates
+small files' ratios, which is exactly what the 2-test file at the top of that
+table is showing.
+
+I am recording this as a refuted hypothesis of my own rather than quietly
+dropping it, because the 16-vs-179 number in 4.2 is genuinely striking and the
+next person will notice it too. What it needs is in 7.2.
+
+### 4.4 THE SUBSCRIPT SWEEP -- count, method, and why the big number is not the answer
+
+**Method.** `scripts/_census_result_subscripts.py` parses every `tests/**/*.py`
+with `ast` -- 212 files, 0 parse errors -- and finds every `ast.Subscript` whose
+slice is a string CONSTANT and whose base is a `Name` that is RESULT-BOUND in
+its enclosing scope. Result-bound means bound by one of: `x = await ...`; a
+tuple-unpack of an `await` (element positions tracked, so only the names
+actually assigned); a call to `run_tool`/`call_tool`/`invoke`/`tool`/`_run`; a
+parameter named `result`/`results`/`answer`/`envelope`/`payload`/`reply`/
+`response`; or `json.loads(...)` in a scope that already holds such a binding
+(recorded separately as `indirect`).
+
+Nothing here is decided by grep. That was a requirement and it earns itself:
+`result["fields"]` occurs as PROSE inside a comment and a docstring in the very
+file being fixed, and a textual sweep would have "fixed" both. The parse also
+distinguishes `assert result["x"], result` (the subscript is the subject) from
+`assert cond, result["x"]` (it is the message), which no line-oriented tool does.
+
+**The wide count: 1943 records across 63 of 212 files.** That number is REAL and
+it is NOT the defect. It is what the suite's ordinary idiom looks like, and
+"fix 1943 sites" would be a rewrite of the test suite justified by one CI
+failure. Two narrower cuts were taken instead.
+
+**Cut one -- does the module practise the convention?** Classifying each file by
+whether it has sites of the form `assert x.get("k") ..., x` (convention-honoured)
+versus string subscripts on a result-bound name (convention-broken):
+
+    PRACTISES       1
+    MIXED           6
+    PURE-SUBSCRIPT 57
+    NEITHER       148
+
+`tests/test_editor_fields.py` classifies correctly, and the finding that settles
+section 1.2 is this: it has **zero** raw subscripts on a refusal key. Every one
+of its refusal checks does use `.get`. The convention is honoured exactly where
+it is written down. The 27 result-subscripts in that file are all on the SUCCESS
+path -- outside the comment's stated scope, and the success path is what broke.
+
+**Cut two -- THE DEFECT CLASS, which is what was actually fixed.** The shape that
+destroyed the diagnosis is narrower than "a subscript": it is a subscript inside
+a FUNCTION THAT WAS HANDED THE RESULT, because then the traceback's headline
+names a missing key while the envelope sits one frame up, behind a helper's
+name. Enumerated suite-wide: functions that are not tests and not fixtures,
+which take a result-shaped parameter and subscript it with a string constant.
+
+    candidates suite-wide  2
+    guarded                1
+    DEFECT SET             2   (names_of, and one nobody had reported)
+
+The second was `by_label` in `tests/test_editor_values.py:286`, whose docstring
+promises *"or a loud failure"* while raising `KeyError: 'fields'` before either
+of its two loud assertions is reached. Both are now fixed; the count is 2, and
+the sweep is what found the one that was not in the brief.
+
+**Controls on the census itself.** Positive: the known instance at
+`test_editor_fields.py:323` must appear -- it did, printed. Negative/mutation: a
+synthetic module carrying (i) a result-bound subscript, (ii) a `.get` on the
+same name, (iii) a subscript on a name that is NOT result-bound -- exactly (i)
+was reported and neither (ii) nor (iii). Going-quiet: `names_of` rewritten in
+memory to `.get`, and the record for that line disappeared.
+
+A fourth control arrived unplanned and is worth recording. Midway through, the
+census's positive control went to ZERO matches -- because I had landed the
+`fields_of` fix underneath it. The instrument was right, its PIN had rotted, and
+it was reported as a surprise rather than adapted to. The lesson is general
+enough to keep: **a control pinned to a defect's continued existence rots the
+moment the defect is fixed** -- and a SECOND control in the same script was
+independently stale the same way. Both were re-pinned to a synthesised module
+held inside the script, carrying the original pre-fix shape, parsed in memory
+and never read off disk. That was then confirmed the hard way: the tree moved
+under the census twice more (another edit, then the commit) and the re-pinned
+controls did not notice, because they no longer look at that file.
+
+**After both fixes the defect set is 0, re-measured rather than assumed** -- 6
+of 6 controls passing across all three passes.
+
+One correction to my own expectation, reported as measured rather than shaded
+to fit: I predicted `by_label` would now classify as GUARDED. It does not. It is
+ABSENT from the candidate list entirely, exactly like `names_of`, because the
+`.get` extraction routes through a local `fields` variable and leaves no
+`result[...]` subscript in the function for a guard to attach to. The
+guarded-candidate path is real and its own control fires on a constructed case
+that keeps a subscript -- but no instance in this repository currently
+exercises it. Whether GUARDED and ABSENT should be tracked separately going
+forward is left open rather than decided here.
+
+Pass B after the fixes: `tests/test_editor_values.py` did not change class
+(still MIXED); its convention-breaking count dropped 19 -> 17, which is exactly
+the two sites `by_label` no longer has.
+
+---
+
 ## 5. CONTROLS
 
 ### 5.1 The AST comparator, shown failing
@@ -568,14 +755,252 @@ the timeout integer. The script also REFUSES rather than comparing if the tool
 happens to publish `fields`, because then no timeout occurred and the
 comparison would be of two things that never happened.
 
+### 5.3 THE DIAGNOSIS ITSELF, and the defect the control found in it
+
+Section 1.3 fixes the reporting. The remaining half of Defect 2 is that a bare
+`Timeout 60000ms exceeded` cannot be attributed by anyone who reads it: it does
+not say whether the BROWSER was starved or whether THAT DOCUMENT hung, and those
+call for opposite responses. `render` now takes the discriminating reading at
+the moment of failure -- how long it waited, the exception's type, the markup's
+LENGTH (never its content -- that is
+`ERROR-MESSAGE-RULED-AT-THE-RAISE`, the ruling this very merge landed), the
+xdist worker, and how long an EMPTY document takes on the same browser
+immediately afterwards.
+
+The timeout is still 60000ms. It was not raised, nothing is retried, and nothing
+is marked flaky.
+
+**AND THE CONTROL CAUGHT THE FIRST VERSION BEING WRONG.** `_trivial_render_seconds`
+originally reused the page that had just failed. Run against a hanging document,
+it reported
+
+    An empty document on this same browser immediately afterwards took:
+    ALSO FAILED (>5s) -- the browser is not drawing at all
+
+which indicts the MACHINE for what the MARKUP did -- the precise confusion the
+reading exists to prevent, shipped inside the fix for it. A wedged parser is
+still wedged a moment later, so the control render on that same page cannot
+succeed. Taking the reading in a FRESH CONTEXT, which gets its own renderer,
+fixes it. Same script, same fixture, after the change:
+
+    ... It waited 3.1s for 'domcontentloaded' on 161 bytes of LOCAL markup
+    -- no network is involved in this call, so a wait like that is about what
+    else was running, not about the page. An empty document on this same
+    browser immediately afterwards took: 0.64s in a fresh context.
+    xdist worker: none (serial run).
+
+    VERDICT
+      old headline names only the absent key   : yes
+      new headline quotes the real envelope    : yes
+      new message names the exception kind     : yes
+      new message carries the CONTROL reading  : yes
+      new message names the xdist worker       : yes
+      CONTROL READING BLAMES THE MARKUP, NOT
+      THE MACHINE (this fixture hangs a page,
+      it does not starve the box)              : yes
+
+    CONTROL: PASS -- the failure now names what the tool returned
+
+0.64s against a 3.1s timeout on the same browser: the discriminator
+discriminating, on a fixture where the right answer is known because the script
+built it. That last verdict line is now part of the control, so the wrong-page
+version cannot come back silently. The check asserts the reading's PRESENCE and
+shape and never its value -- asserting a number would make this control fail on
+a slow machine, which is the one machine it most needs to keep working on.
+
+### 5.4 The edited modules, run
+
+    python -m pytest -q -rs tests/test_editor_fields.py tests/test_editor_values.py
+        tests/test_browser.py tests/test_result_verification_block.py
+        tests/test_no_committed_identity.py
+    869 passed in 1005.39s (0:16:45)
+
+Both edited modules pass, alongside the three files section 4.3 prices. The
+exception path added to `render` is not exercised by that run -- no timeout
+occurred -- which is exactly why 5.3 drives it directly instead of trusting a
+green suite to have covered it.
+
+### 5.5 TWO OF THIS REPOSITORY'S OWN GATES CAUGHT THIS WAVE, and both were right
+
+Recorded because a wave that reports only the gates it passed is reporting on
+its luck.
+
+**`tests/test_the_audit_index_is_derived.py` refused this very document.**
+
+    assert len(table) == len(docs), (len(table), len(docs))
+    E   AssertionError: (217, 218)
+    2 failed, 44 passed
+
+`_audit/INDEX.md` is DERIVED from the corpus and the gate asserts the identity
+"every tracked document has a row, and every row names a tracked document".
+Adding this audit file broke it -- as it should. Regenerated with the command
+the failure itself names, `python scripts/build_audit_index.py --write`, which
+wrote one row and moved three derived counts (217 -> 218 documents, 181 -> 182
+dated, 130 -> 131 untouched by a correction marker). Re-run: 46 passed.
+
+**`tests/test_scripts_are_import_safe.py` refused one of my new instruments.**
+
+    AssertionError: scripts/_probe_diff_is_docstring_only.py:
+      [(158, 'replace at import time'), (160, 'replace at import time')]
+    1 failed, 1110 passed
+
+The probe built its two control variants with `.replace` at MODULE level, and
+the rule is that no script may act because something imported it. Moved inside
+`self_test()`, which is the only thing that uses them. Re-run: 206 passed, and
+the probe's own four controls still pass.
+
+Both are worth more than the fixes they forced. The audit index gate is the one
+that makes `_audit/` navigable rather than a directory of orphans, and it fired
+on the first document added to it by someone who had not read it. The
+import-safety gate caught a side effect in a file whose entire purpose is to be
+imported and asked a question.
+
 ---
 
-## 6. THE RE-RUN
+## 6. THE RE-RUN, VERIFIED RATHER THAN ASSUMED
 
-(pending -- see RESIDUAL if absent)
+The brief asked me to establish whether the requested re-run actually started
+and what it concluded, instead of assuming either. Both readings are stamped.
+
+    12:0x UTC : {"conclusion":null,"run_attempt":2,"status":"in_progress"}
+    12:15 UTC : {"conclusion":"success","run_attempt":2,"status":"completed",
+                 "updated_at":"2026-09-21T11:34:35Z"}
+
+    windows-latest py3.13 shard 3, attempt 2, job 106315070960:
+      started 11:27:42Z, completed 11:34:25Z, conclusion SUCCESS
+      2109 passed, 1 skipped, 1 xfailed in 110.74s
+
+So: it started, and it concluded GREEN. Two things follow, and only two.
+
+It does NOT mean the defect is absent. A green retry of an intermittent failure
+is the expected outcome of an intermittent failure; it measures frequency, not
+cause, and nothing in section 1 or section 3A rests on it.
+
+What it DOES buy is the controlled comparison in 3A, which is worth considerably
+more than a verdict: the same commit, plan and command, passing and failing, with
+the code held byte-identical. That is what let H2 be refuted by elimination
+rather than merely by inspection.
+
+One practical consequence for whoever reads the log next: `gh run view
+35592629243 --log-failed` returns "run ... is still in progress" while a re-run
+is live, and once it completes, the failing ATTEMPT-1 logs are not what that
+command returns. Attempt 1's logs have to be fetched by attempt and job id:
+
+    gh api repos/<owner>/linkedin-mcp/actions/runs/<run>/attempts/1/jobs
+    gh api repos/<owner>/linkedin-mcp/actions/jobs/<job id>/logs
+
+Requesting a re-run therefore makes the evidence for the failure HARDER to
+reach, which is worth knowing before requesting one.
 
 ---
 
 ## 7. RESIDUAL
 
-(pending)
+### 7.1 THE MEASUREMENT THAT WOULD SETTLE THE CAUSE, and it is one line
+
+The mechanism behind 3A.2 -- a run that was faster single-threaded and 3.1x
+slower in parallel -- cannot be separated from these logs into "fewer xdist
+workers", "memory pressure under N Chromiums" or "noisy co-tenant", because
+**no shard job records how many workers `-n auto` resolved to, how many CPUs the
+runner had, or how much memory was free.** Under `-q`, xdist prints no banner,
+so the number that decides between the candidates was never written down on
+either attempt.
+
+The fix is a diagnostic step in `.github/workflows/ci.yml`, before "Run this
+shard":
+
+    - name: What this runner is, and how wide the shard will run
+      run: |
+        python -c "import os; print('cpu_count', os.cpu_count())"
+        python -c "import psutil; print(psutil.virtual_memory())"  # or wmic/free
+        python -m pytest -n auto --collect-only -q 2>&1 | head -3
+
+**I have NOT made this change, on purpose.** `.github/workflows/ci.yml` is the
+most-shared file in this repository and five other waves were running in their
+own worktrees while this one ran; the brief's rule is to name a change in
+another wave's file rather than make it. It is named here, with its exact
+content, so it costs whoever owns that file one paste.
+
+Until it exists, a recurrence is diagnosable only from the test side -- which is
+what section 1.3's `_trivial_render_seconds` now provides, and it answers the
+narrower question (was the BROWSER starved) rather than the broader one (was the
+RUNNER).
+
+### 7.2 The packer's weight table is wrong where it matters most, and nothing checks it
+
+`scripts/ci_shard_timings.json` prices `tests/test_editor_fields.py` at
+**16.083s**. Measured directly on this box, alone, nothing else of mine running:
+
+    python -m pytest -q tests/test_editor_fields.py
+    53 passed in 179.05s (0:02:59)
+
+The file is byte-identical between the table's measurement commit (`f65ec88`)
+and `f729a2a`, so this is not a table describing an older file. Section 4.3
+carries the ratio control that separates "this table entry is wrong" from "this
+box is slow".
+
+This matters because of what the packer is: LPT balancing by SECONDS. An
+under-priced heavy file does not merely land in a slightly-wrong shard -- it
+invites the packer to stack more work on top of it. `scripts/ci_shard.py`'s own
+docstring names this exact failure mode -- *"a new file is as likely to be a
+browser module as a static guard, and under-pricing one of those is the mistake
+that lands two 180s files in the same shard"* -- and then the table went wrong
+for precisely such a file. Consistent with that, shard 3 at `f729a2a` holds
+**2111 tests against a 884-1486 range** for its five siblings: 42% above the
+next-heaviest, in a scheme whose entire purpose is balance.
+
+Two things are missing and both are nameable:
+
+* **nothing compares the committed table against reality.** The repo ships
+  `--write-timings` to regenerate it and `--plan --seconds junit.xml` to price a
+  plan against a real run, but no gate ever runs either, so the table can drift
+  arbitrarily far while every partition test stays green -- the tests assert
+  that the split is a PARTITION, which stays true at any weights.
+* **the table covers 157 files; the suite at `f729a2a` collects 208.** Fifty-one
+  files are priced at the mean seconds-per-test, including the file this merge
+  added.
+
+RECOMMENDED, NOT DONE: a gate that fails when a file's measured seconds diverge
+from its table entry by more than some factor, naming the file. I did not
+regenerate the table and I did not touch `scripts/ci_shard.py` or the timings
+file: regenerating needs a quiet box and a full serial run, it would reshuffle
+every shard for every wave mid-flight, and those files may be another wave's.
+
+### 7.3 The sweep's wider set, deliberately not fixed
+
+`scripts/_census_result_subscripts.py` finds **1943** string-literal subscripts
+on result-bound names across 63 of 212 files under `tests/`. That is the
+suite's ordinary idiom, not a defect list, and it is NOT the number this wave
+fixed. The reasoning is in section 4.4. The full 1943-record census is
+regenerable from the committed script and was deliberately left untracked: at
+roughly 1 MB it is noise in a repository where **every new tracked file adds a
+parametrised case to two guards and perturbs the shard plan** -- the mechanism
+section 3.5 measures.
+
+### 7.4 One known instance left unfixed, named so it is findable
+
+`for field in result["fields"]:` inside
+`tests/test_editor_values.py::test_the_ten_fields_are_present_on_every_returned_control`
+is a raw subscript in a TEST BODY rather than in a helper, so it falls outside
+the defect class this wave defined and fixed (functions that are HANDED a result
+and subscript it, where the envelope disappears behind the helper's name). Its
+headline on a missing key would still be `KeyError: 'fields'`, but the failing
+test's own name and frame are right there, which is the difference the class
+turns on. Recorded rather than fixed.
+
+CITED BY SYMBOL, AND THE REASON IS THIS DOCUMENT'S OWN MISTAKE. I first wrote it
+down as line 689. It is line 708. Nothing moved it but me: expanding
+`by_label`'s docstring three sections earlier added nineteen lines above it in
+the same edit. A line number in an audit does not rot into a dangling
+reference, it rots into a PLAUSIBLE WRONG ANSWER -- line 689 still exists and
+still holds code -- so the symbol is the citation and the number is a
+convenience.
+
+### 7.5 What a green master does not mean here
+
+Master is green again because attempt 2 passed, not because anything was
+repaired -- the repair in this branch had not landed when that retry ran. The
+conditions that produced the failure are not understood (7.1) and are not under
+this repository's control. The honest expectation is that this recurs. What has
+changed is that when it does, the failure will name the timeout and say whether
+the browser was being starved, instead of reporting a missing key.

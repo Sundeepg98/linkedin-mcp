@@ -252,55 +252,88 @@ TRIVIAL_RENDER_TIMEOUT_MS = 5_000
 TRIVIAL_HTML = "<!doctype html><html><body></body></html>"
 
 
-async def _trivial_render_seconds(page: Any) -> str:
-    """How long this browser takes to draw an EMPTY document, right now.
+async def _trivial_render_seconds(browser: Any) -> str:
+    """How long this BROWSER takes to draw an empty document in a FRESH context.
 
-    THE ONE NUMBER THAT SEPARATES THE TWO EXPLANATIONS. When
-    ``set_content`` times out on a local string there are only two stories, and
-    they call for opposite responses:
+    THE ONE NUMBER THAT SEPARATES THE TWO EXPLANATIONS. When ``set_content``
+    times out on a local string there are only two stories, and they call for
+    opposite responses:
 
     * THE BOX IS STARVED -- the browser is not being scheduled. Then an empty
-      document is slow too, and the fix is about how much work runs beside this.
+      document is slow too, and the answer is about how much runs beside this.
     * THIS DOCUMENT HANGS -- the markup blocks ``domcontentloaded``. Then an
-      empty document is instant, and the fix is in the fixture.
+      empty document is prompt, and the answer is in the fixture.
 
     A bare ``Timeout 60000ms exceeded`` distinguishes neither, which is why the
-    2026-09-21 failure could not be attributed from its own message. Taking this
-    reading at the moment of failure costs one empty page and settles it.
+    2026-09-21 CI failure could not be attributed from its own message.
+
+    A FRESH CONTEXT, NOT THE PAGE THAT JUST FAILED, and that is the whole
+    correctness of this reading. The first version of this reused the failing
+    page and was WRONG in exactly the case it exists to detect: a document that
+    blocks the parser is still blocking it a moment later, so the control
+    render on that same page fails too and reports "the browser is not drawing
+    at all" -- indicting the box for what the markup did. Measured, in
+    ``scripts/_check_the_editor_fields_failure_names_the_envelope.py``, which is
+    how it was found. A new context gets its own renderer, so it answers about
+    the BROWSER rather than about the wedged page.
 
     Never raises: it runs INSIDE an exception path, and a diagnostic that can
     replace the failure it was called to explain is worse than no diagnostic.
     """
+    context = None
     started = time.monotonic()
     try:
+        context = await browser.new_context()
+        page = await context.new_page()
         await page.set_content(
             TRIVIAL_HTML,
             wait_until="domcontentloaded",
             timeout=TRIVIAL_RENDER_TIMEOUT_MS,
         )
+        # Read the clock HERE, before the teardown below. Tearing a context
+        # down is real work on a starved box and it is not what was asked.
+        elapsed = time.monotonic() - started
     except Exception:
-        return "ALSO FAILED (>%.0fs) -- the browser is not drawing at all" % (
-            TRIVIAL_RENDER_TIMEOUT_MS / 1000,
+        return (
+            "ALSO FAILED (>%.0fs) in a FRESH context -- this browser is not "
+            "drawing at all, which points at the machine rather than the markup"
+            % (TRIVIAL_RENDER_TIMEOUT_MS / 1000,)
         )
-    return "%.2fs" % (time.monotonic() - started)
+    finally:
+        if context is not None:
+            try:
+                await context.close()
+            except Exception:
+                pass
+    return "%.2fs in a fresh context" % (elapsed,)
 
 
-def _render_diagnosis(waited: float, markup_length: int, control: str) -> str:
+def _render_diagnosis(
+    kind: str, waited: float, markup_length: int, control: str
+) -> str:
     """What a reader needs, and NOTHING THE PAGE CHOSE.
 
     The markup's LENGTH is here and its CONTENT is not, and that is the fresh
     ruling ``ERROR-MESSAGE-RULED-AT-THE-RAISE`` rather than a style choice:
     this string becomes ``$.message`` on the tool's error envelope, a page value
     in an exception's arguments is forbidden, and it is forbidden AT THE RAISE
-    because ``_error`` cannot tell where the text came from. A length is ours.
+    because ``_error`` cannot tell where the text came from. A length is ours,
+    and so is an exception's TYPE NAME -- that ruling holds a library's own text
+    publishable, and the type is all that is taken here.
+
+    ``kind`` is carried rather than assumed because the caller catches every
+    exception, not only a timeout. A message that narrates a timeout over a
+    closed page would be this same defect in a new place: confident text about
+    something nobody measured.
     """
     return (
-        "set_content did not finish. It waited %.1fs for 'domcontentloaded' on "
-        "%d bytes of LOCAL markup -- no network is involved in this call, so a "
-        "wait like that is about what else was running, not about the page. "
-        "An empty document on this same browser immediately afterwards took: "
-        "%s. xdist worker: %s."
+        "set_content did not finish -- %s. It waited %.1fs for "
+        "'domcontentloaded' on %d bytes of LOCAL markup -- no network is "
+        "involved in this call, so a wait like that is about what else was "
+        "running, not about the page. An empty document on this same browser "
+        "immediately afterwards took: %s. xdist worker: %s."
         % (
+            kind,
             waited,
             markup_length,
             control,
@@ -352,9 +385,11 @@ async def run_tool(monkeypatch):
                         )
                     except Exception as exc:
                         waited = time.monotonic() - started
-                        control = await _trivial_render_seconds(page)
+                        control = await _trivial_render_seconds(browser)
                         raise AssertionError(
-                            _render_diagnosis(waited, len(markup), control)
+                            _render_diagnosis(
+                                type(exc).__name__, waited, len(markup), control
+                            )
                         ) from exc
                     width = await page.evaluate("window.innerWidth")
                     assert width == EDITOR_VIEWPORT["width"], (

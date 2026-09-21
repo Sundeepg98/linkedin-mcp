@@ -155,15 +155,24 @@ class Holder:
         return 3
 '''
 
-_PROSE_ONLY = _BASE.replace("Old prose", "Completely rewritten and much longer prose")
-
-_ONE_TOKEN = _BASE.replace("isinstance(value, KeyError)", "isinstance(value, ValueError)")
-
 
 def self_test() -> int:
+    # THE TWO VARIANTS ARE BUILT HERE, NOT AT MODULE LEVEL, and that is
+    # tests/test_scripts_are_import_safe.py's rule rather than a preference:
+    # no script in this repository may act because something imported it, and
+    # its detector counts a module-level ``.replace`` as acting. It caught this
+    # file on its first run. Building them inside the only function that uses
+    # them costs nothing and keeps importing this module genuinely inert.
+    prose_only = _BASE.replace(
+        "Old prose", "Completely rewritten and much longer prose"
+    )
+    one_token = _BASE.replace(
+        "isinstance(value, KeyError)", "isinstance(value, ValueError)"
+    )
+
     ok = True
 
-    same, detail = compare(_BASE, _PROSE_ONLY)
+    same, detail = compare(_BASE, prose_only)
     print("CONTROL 1 -- every docstring rewritten, no code touched")
     report(same, detail, "base", "prose_only", None)
     if not same:
@@ -171,7 +180,7 @@ def self_test() -> int:
         ok = False
     print()
 
-    same, detail = compare(_BASE, _ONE_TOKEN)
+    same, detail = compare(_BASE, one_token)
     print("CONTROL 2 -- one exception type changed, docstrings untouched")
     report(same, detail, "base", "one_token", "keep")
     if same or detail["changed"] != ["keep"]:
@@ -191,7 +200,7 @@ def self_test() -> int:
     # first printed "unchanged-or-absent" for any name not in the changed list,
     # so a misspelled --focus produced the same reassuring word as a genuine
     # comparison. A focus line has to be able to say it compared nothing.
-    same, detail = compare(_BASE, _ONE_TOKEN)
+    same, detail = compare(_BASE, one_token)
     print("CONTROL 4 -- --focus on a name that exists in neither revision")
     report(same, detail, "base", "one_token", "no_such_function")
     print("CONTROL 4b -- --focus on a name that exists and did not change")
