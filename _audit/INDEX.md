@@ -27,8 +27,8 @@ are listed as `(undated)`; no date is taken from git history, because
 
 | what | count |
 | --- | --- |
-| audit documents git tracks under `_audit` | 222 |
-| of those, carrying a `YYYY-MM-DD-` date prefix | 184 |
+| audit documents git tracks under `_audit` | 223 |
+| of those, carrying a `YYYY-MM-DD-` date prefix | 185 |
 | distinct dates | 14 |
 | documents with no level-1 heading | 2 |
 | `CORRECTS:` marker lines | 87 |
@@ -39,7 +39,7 @@ are listed as `(undated)`; no date is taken from git history, because
 | documents at either end of a cross-document edge | 86 |
 | intra-document correction markers | 4 |
 | documents that correct themselves later on | 2 |
-| documents no correction marker touches at all | 134 |
+| documents no correction marker touches at all | 135 |
 | blockquoted markers naming ANOTHER document | 0 |
 | edges missing one of their two markers | 0 |
 | edges declared a different number of times in each direction | 2 |
@@ -1430,6 +1430,7 @@ ways, which is a fact about markers and not a verdict on the document.
 | 2026-09-21 | [2026-09-21-refuse-before-the-click.md](2026-09-21-refuse-before-the-click.md) | REFUSE BEFORE THE CLICK -- the press gate now consults the basis table before it touches a page | corrects x1 |
 | 2026-09-21 | [2026-09-21-taint-does-not-survive-a-container.md](2026-09-21-taint-does-not-survive-a-container.md) | The output-sink guard misses a landed URL that reaches stdout |  |
 | 2026-09-21 | [2026-09-21-the-all-filters-press.md](2026-09-21-the-all-filters-press.md) | THE `All filters` PRESS: REFUSED AT CONDITION 2, AND THE GATE WOULD HAVE PRESSED FIRST | corrects x2 |
+| 2026-09-21 | [2026-09-21-the-auth-reason-leak.md](2026-09-21-the-auth-reason-leak.md) | THE AUTH REASON LEAK: a session credential in a published field, and in the log |  |
 | 2026-09-21 | [2026-09-21-the-compound-rows.md](2026-09-21-the-compound-rows.md) | The compound rows -- when one census row names two capabilities | corrects x1 |
 | 2026-09-21 | [2026-09-21-the-field-beside-the-message.md](2026-09-21-the-field-beside-the-message.md) | THE FIELD BESIDE THE MESSAGE: 20 SITES, ADJUDICATED ONE AT A TIME |  |
 | 2026-09-21 | [2026-09-21-the-fires-and-the-controls.md](2026-09-21-the-fires-and-the-controls.md) | THE FIRES AND THE CONTROLS | corrects x2 |

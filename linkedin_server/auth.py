@@ -311,14 +311,61 @@ async def check_auth(
         except Exception:
             body_text = ""
     except Exception as exc:
-        logger.info("auth check request failed: %s: %s", type(exc).__name__, exc)
+        # THE TYPE, NEVER THE MESSAGE -- and this one is not a style choice.
+        #
+        # A failing ``page.request.get`` does not raise a short sentence. It
+        # renders THE WHOLE REQUEST into its own exception text: the method,
+        # the address, and every request header on its own line. One of those
+        # lines is ``cookie:``, and this request is the one that carries the
+        # session. Measured 2026-09-21 against a real chromium on loopback --
+        # ``scripts/_probe_auth_reason_leak.py`` -- on both the connect-error
+        # and the timeout branch: the credential landed in ``$.reason``, in
+        # the log record, and in ``AuthUnknownError``'s message, six of six.
+        #
+        # WHY THIS IS FIXED HERE AND NOT AT THE ENVELOPE. `ERROR-MESSAGE-
+        # RULED-AT-THE-RAISE`: what an error string may carry is decided where
+        # the value ENTERS the exception, never where it leaves, because
+        # ``server._error`` holds a ``playwright...Error`` whose text is a
+        # timeout and one whose text is a credential and cannot tell them
+        # apart. Here it IS knowable -- this call site is the one that hands
+        # Playwright the cookie -- so here is where it is refused.
+        #
+        # ``_cookie_records`` says of the jar: "Never logged, never persisted,
+        # never returned." Two of those three clauses were false on this path,
+        # because an invariant scoped to a module's own statements cannot see
+        # a channel that runs through a dependency.
+        #
+        # THE LOG IS THE OTHER HALF, and it has no envelope at all. ``coerce``
+        # states the same rule for the same reason: "THE LOG LINE NAMES THE
+        # TYPE AND NEVER THE VALUE ... a log record is another way out of the
+        # process."
+        logger.info(
+            "auth check request failed: %s (the library's message is withheld "
+            "-- it renders the whole request, cookie header included)",
+            type(exc).__name__,
+        )
         result = {
             "authenticated": None,
             "checked_against": AUTH_ENDPOINT_NOTE,
             "session_cookie_present": cookie_present,
+            # WHAT IS LEFT IS STILL A DIAGNOSIS, deliberately. Deleting the
+            # field would trade one defect for another -- a refusal that says
+            # nothing -- so what remains is everything provably credential-free
+            # AND useful: the exception TYPE, which separates "LinkedIn did not
+            # answer in time" from "the request could not be made at all"; the
+            # ceiling, which is this server's own constant; and a sentence
+            # saying what was withheld and why, so a reader does not file the
+            # terseness as a bug in the field. Where it was asked is already
+            # next to this, in ``checked_against``.
             "reason": (
-                f"the auth request could not be completed ({type(exc).__name__}: "
-                f"{exc}). This is not a verdict either way."
+                f"the auth request could not be completed ({type(exc).__name__}"
+                f", within a ceiling of {API_TIMEOUT_MS}ms). THE LIBRARY'S OWN "
+                "MESSAGE IS WITHHELD rather than quoted: it renders the entire "
+                "request, including the cookie header, so it carries the "
+                "session credential. The type above is the diagnosis -- a "
+                "TimeoutError means LinkedIn did not answer inside the "
+                "ceiling, anything else means the request could not be made at "
+                "all. This is not a verdict either way."
             ),
         }
         return await _maybe_corroborate(page, result, corroborate, warm_final_url)

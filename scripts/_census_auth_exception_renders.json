@@ -1,0 +1,188 @@
+{
+  "rows": [
+    {
+      "path": "linkedin_server/auth.py",
+      "line": 115,
+      "function": "_cookie_records",
+      "handler_line": 114,
+      "caught_as": [
+        "exc"
+      ],
+      "sink": "RAISE",
+      "renders": "VALUE",
+      "both": [
+        "TYPE",
+        "VALUE"
+      ],
+      "source": "raise BrowserUnavailableError("
+    },
+    {
+      "path": "linkedin_server/auth.py",
+      "line": 148,
+      "function": "_warm_session_cookies",
+      "handler_line": 147,
+      "caught_as": [
+        "exc"
+      ],
+      "sink": "LOG",
+      "renders": "VALUE",
+      "both": [
+        "TYPE",
+        "VALUE"
+      ],
+      "source": "logger.info("
+    },
+    {
+      "path": "linkedin_server/auth.py",
+      "line": 263,
+      "function": "_arm_session_store",
+      "handler_line": 262,
+      "caught_as": [
+        "exc"
+      ],
+      "sink": "LOG",
+      "renders": "VALUE",
+      "both": [
+        "TYPE",
+        "VALUE"
+      ],
+      "source": "logger.debug(\"session store not armed (%s): %s\", type(exc).__name__, exc)"
+    },
+    {
+      "path": "linkedin_server/auth.py",
+      "line": 347,
+      "function": "check_auth",
+      "handler_line": 313,
+      "caught_as": [
+        "exc"
+      ],
+      "sink": "ASSIGN->RETURN?",
+      "renders": "TYPE_ONLY",
+      "both": [
+        "TYPE"
+      ],
+      "source": "result = {"
+    },
+    {
+      "path": "linkedin_server/auth.py",
+      "line": 342,
+      "function": "check_auth",
+      "handler_line": 313,
+      "caught_as": [
+        "exc"
+      ],
+      "sink": "LOG",
+      "renders": "TYPE_ONLY",
+      "both": [
+        "TYPE"
+      ],
+      "source": "logger.info("
+    },
+    {
+      "path": "linkedin_server/auth.py",
+      "line": 480,
+      "function": "_maybe_corroborate",
+      "handler_line": 479,
+      "caught_as": [
+        "exc"
+      ],
+      "sink": "LOG",
+      "renders": "VALUE",
+      "both": [
+        "TYPE",
+        "VALUE"
+      ],
+      "source": "logger.info("
+    },
+    {
+      "path": "linkedin_server/auth.py",
+      "line": 939,
+      "function": "session_info_offline",
+      "handler_line": 936,
+      "caught_as": [
+        "exc"
+      ],
+      "sink": "ASSIGN->RETURN?",
+      "renders": "VALUE",
+      "both": [
+        "VALUE"
+      ],
+      "source": "jar_error = scrub(str(exc))"
+    },
+    {
+      "path": "linkedin_server/auth.py",
+      "line": 941,
+      "function": "session_info_offline",
+      "handler_line": 940,
+      "caught_as": [
+        "exc"
+      ],
+      "sink": "ASSIGN->RETURN?",
+      "renders": "VALUE",
+      "both": [
+        "TYPE",
+        "VALUE"
+      ],
+      "source": "jar_error = scrub(f\"{type(exc).__name__}: {exc}\")"
+    },
+    {
+      "path": "linkedin_server/auth.py",
+      "line": 1401,
+      "function": "login_via_browser",
+      "handler_line": 1400,
+      "caught_as": [
+        "exc"
+      ],
+      "sink": "ASSIGN->RETURN?",
+      "renders": "TYPE_ONLY",
+      "both": [
+        "TYPE"
+      ],
+      "source": "stored = {"
+    }
+  ],
+  "unresolved": [
+    {
+      "path": "linkedin_server/auth.py",
+      "line": 155,
+      "function": "_warm_session_cookies",
+      "why": "bare `except:` -- no name bound, nothing to render"
+    },
+    {
+      "path": "linkedin_server/auth.py",
+      "line": 311,
+      "function": "check_auth",
+      "why": "bare `except:` -- no name bound, nothing to render"
+    },
+    {
+      "path": "linkedin_server/auth.py",
+      "line": 382,
+      "function": "check_auth",
+      "why": "bare `except:` -- no name bound, nothing to render"
+    },
+    {
+      "path": "linkedin_server/auth.py",
+      "line": 542,
+      "function": "_cookie_expiry",
+      "why": "bare `except:` -- no name bound, nothing to render"
+    },
+    {
+      "path": "linkedin_server/auth.py",
+      "line": 1058,
+      "function": "_erase",
+      "why": "bare `except:` -- no name bound, nothing to render"
+    },
+    {
+      "path": "linkedin_server/auth.py",
+      "line": 1363,
+      "function": "login_via_browser",
+      "why": "bare `except:` -- no name bound, nothing to render"
+    },
+    {
+      "path": "linkedin_server/auth.py",
+      "line": 1467,
+      "function": "_page_is_dead",
+      "why": "bare `except:` -- no name bound, nothing to render"
+    }
+  ]
+}
