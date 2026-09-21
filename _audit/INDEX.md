@@ -27,8 +27,8 @@ are listed as `(undated)`; no date is taken from git history, because
 
 | what | count |
 | --- | --- |
-| audit documents git tracks under `_audit` | 202 |
-| of those, carrying a `YYYY-MM-DD-` date prefix | 169 |
+| audit documents git tracks under `_audit` | 203 |
+| of those, carrying a `YYYY-MM-DD-` date prefix | 170 |
 | distinct dates | 14 |
 | documents with no level-1 heading | 1 |
 | `CORRECTS:` marker lines | 74 |
@@ -39,7 +39,7 @@ are listed as `(undated)`; no date is taken from git history, because
 | documents at either end of a cross-document edge | 78 |
 | intra-document correction markers | 4 |
 | documents that correct themselves later on | 2 |
-| documents no correction marker touches at all | 122 |
+| documents no correction marker touches at all | 123 |
 | blockquoted markers naming ANOTHER document | 0 |
 | edges missing one of their two markers | 0 |
 | edges declared a different number of times in each direction | 2 |
@@ -1277,6 +1277,7 @@ ways, which is a fact about markers and not a verdict on the document.
 | 2026-09-20 | [2026-09-20-the-three-held-defects.md](2026-09-20-the-three-held-defects.md) | The three held defects | corrects x1 |
 | 2026-09-20 | [2026-09-20-the-unfired-twentyseven.md](2026-09-20-the-unfired-twentyseven.md) | The unfired twenty-seven |  |
 | 2026-09-20 | [2026-09-20-the-write-partition.md](2026-09-20-the-write-partition.md) | THE WRITE PARTITION: 101 WRITE-DIRECTION GAP ROWS, AND THE 87 THAT STAY | corrects x1 |
+| 2026-09-21 | [2026-09-21-taint-does-not-survive-a-container.md](2026-09-21-taint-does-not-survive-a-container.md) | The output-sink guard misses a landed URL that reaches stdout |  |
 | 2026-09-21 | [2026-09-21-the-fourteen-fired.md](2026-09-21-the-fourteen-fired.md) | THE FOURTEEN FIRED: one banked, one refused, twelve behind a press | corrects x2 |
 | 2026-09-21 | [2026-09-21-the-jobs-direction.md](2026-09-21-the-jobs-direction.md) | THE JOBS DIRECTION: the fifth of the GAP that was never asked the question | corrects x1 |
 | 2026-09-21 | [2026-09-21-the-open-queue.md](2026-09-21-the-open-queue.md) | The open queue, 2026-09-21 at master `9dbaad2` |  |
