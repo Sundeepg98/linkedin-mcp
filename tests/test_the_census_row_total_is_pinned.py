@@ -1,8 +1,10 @@
 """The census DENOMINATOR is pinned, so it cannot move without somebody saying so.
 
 `stated rows 704` is the number every completion figure in this repository
-divides by. It is quoted in 21 tracked documents and in two module docstrings.
-**Nothing asserted it until this file.** The invariant held because each wave
+divides by. It is printed by 15 documents under `_audit/` -- measured the day
+this guard was written, and the guard COMPUTES that figure rather than carrying
+it, because it became 16 the moment this wave's own audit document landed.
+**Nothing asserted the number itself until this file.** The invariant held because each wave
 was asked to check it by hand, which is the condition an invariant is in just
 before it quietly stops being true -- and this repository has already paid for
 that exact shape twice, with `XR` (23 rows invisible for a fortnight) and
@@ -115,6 +117,38 @@ PINNED_STATE_VOCABULARY = frozenset({
 })
 
 
+#: Documents are searched for the pinned total as a STANDALONE TOKEN, so
+#: `14,704` in a fixture blurb does not count and `704` in a sentence does.
+_TOKEN = None
+
+
+def _documents_quoting_the_total() -> int:
+    """How many tracked `_audit` documents print the pinned total.
+
+    COMPUTED, NEVER HARDCODED, AND IT CAUGHT ITS OWN AUTHOR. The first draft of
+    this file wrote `21 tracked documents` into the failure text. That number
+    came from `git grep -l "704"` -- a SUBSTRING match, which also counts six
+    documents where those digits sit inside a longer number. **The error was
+    found by building this function and watching it disagree**, and the same
+    wrong 21 had already gone into an audit document and a commit message. **A
+    guard against stale numbers must not carry one**, and a count in a message
+    nobody re-derives is the same defect one level down.
+
+    It is INDICATIVE, not a citation index: a token match cannot tell a
+    denominator from a coincidence, and it does not try. It exists to say how
+    far the blast radius reaches, which is the thing a reader needs in order to
+    care.
+    """
+    global _TOKEN
+    if _TOKEN is None:
+        _TOKEN = __import__("re").compile(rf"(?<!\d){PINNED_ROW_TOTAL}(?!\d)")
+    audit = _ROOT / "_audit"
+    return sum(
+        1 for path in audit.rglob("*.md")
+        if _TOKEN.search(path.read_text(encoding="utf-8", errors="replace"))
+    )
+
+
 def _live() -> "object":
     """The live population, or a skip-free failure if a dialect is open.
 
@@ -175,8 +209,9 @@ def test_no_census_row_appeared_or_vanished_without_a_decision():
         f"THE CENSUS POPULATION MOVED: {len(added)} added, {len(removed)} "
         f"removed (total {sum(pinned.values())} -> {sum(live.values())}).\n"
         f"This is the DENOMINATOR under every completion figure in this "
-        f"repository -- 21 tracked documents quote it. Each of them now "
-        f"divides by a number that is no longer true.\n"
+        f"repository -- {_documents_quoting_the_total()} documents under "
+        f"`_audit/` print {PINNED_ROW_TOTAL}. Each of them now divides by a "
+        f"number that is no longer true.\n"
         f"{P.describe(added, removed)}\n"
         f"TO CLEAR: `python scripts/pin_census_rows.py --write`, update "
         f"PINNED_ROW_TOTAL and PINNED_SLICE_ROWS in this file, and IN THE SAME "

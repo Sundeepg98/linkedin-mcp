@@ -35,11 +35,18 @@ this repository, and no estimate appears in this document.** What is derivable
 is what remains and what would unblock it:
 
     NOT DELIVERED                317 rows   (GAP 275 + UNFIRED 23 + CANNOT-DELIVER 19)
-      needs a live browser session  25   DERIVED 23 + ENUMERATED 2
+      needs a live browser session  25   DERIVED 23 UNFIRED + ENUMERATED 2
       needs an operator ruling     151   CEILING, the standing write ruling
                                    + 5   ENUMERATED, one undecided question
       blocked on nothing at all     61   UPPER BOUND, and see the residual
       unplaceable by any instrument 56   jobs.md has no direction column
+      a tool fired and cannot do it 19   COVERED-CANNOT-DELIVER
+
+    IT SUMS, AND HERE IS THE CHECK, because the buckets are drawn from two
+    different populations and a reader is entitled to be suspicious:
+      23 UNFIRED + 19 CANNOT-DELIVER + 275 GAP                      = 317
+      and inside the 275:  151 write + 68 read + 56 unplaceable     = 275
+      and inside the 68:     2 press +  5 ruling + 61 blocked-on-nothing = 68
 
 ---
 
@@ -165,11 +172,20 @@ two are the same measurement.
 
 ## 3. THE GUARD: `stated rows` IS LOAD-BEARING AND NOTHING WAS HOLDING IT
 
-**Verified rather than inherited from the brief.** `704` appears in 21 tracked
-`_audit` documents and in two module docstrings. In Python it appears four
-times: twice in `count_census_states.py`'s docstring, once in
-`blocker_table_refresh.py`'s docstring, and once in a `#:` comment in
+**Verified rather than inherited from the brief.** As a standalone number, `704`
+appears in **15** tracked `_audit` documents before this one (16 including it)
+and in two module docstrings. In Python it appears four times: twice in
+`count_census_states.py`'s docstring, once in `blocker_table_refresh.py`'s
+docstring, and once in a `#:` comment in
 `tests/test_writeoff_kinds_are_derivable.py`. **No assertion anywhere.**
+
+*An earlier draft of this document, and the commit message that landed it, said
+**21**. That came from `git grep -l "704"`, a SUBSTRING match, which also counts
+six documents where the digits sit inside a longer number. The figure was caught
+by building the guard's own computed version and watching it disagree --
+`(?<!\d)704(?!\d)` returns 16. A number taken from a loose grep and published
+without a second reading is the exact failure this wave exists to guard against,
+arriving in the wave's own prose, and it is recorded rather than quietly fixed.*
 
 ### 3.1 WHY THE EXISTING GUARDS COULD NOT DO IT
 
@@ -228,8 +244,8 @@ merely "mine can fail" but "mine fires while the neighbour stays green".
     exit code 1 (want non-zero)
     E  AssertionError: THE CENSUS POPULATION MOVED: 1 added, 0 removed (total 704 -> 705).
     E    This is the DENOMINATOR under every completion figure in this repository --
-    E    21 tracked documents quote it. Each of them now divides by a number that is
-    E    no longer true.
+    E    16 documents under `_audit/` print 704. Each of them now divides by a
+    E    number that is no longer true.
     E      ADDED    N A16 -- a capability row entered the census. Every published
     E                        percentage divides by a different number than it did.
     neighbour test_census_rows_carry_a_state.py: exit 0 -- STAYED GREEN, expected to stay green

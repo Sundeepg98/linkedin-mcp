@@ -9192,7 +9192,10 @@ only reason nobody has met it.
 ## 52. THE DENOMINATOR NOTHING WAS HOLDING, AND A COMPLETION FIGURE THAT REFUSES (what-100-percent-means, 2026-09-21)
 
 `stated rows 704` is the number under every completion figure this repository
-publishes. It is quoted in 21 tracked documents and two module docstrings.
+publishes. As a standalone number it appears in 15 tracked documents
+under `_audit/` and in two module docstrings -- a figure the guard COMPUTES
+rather than carries, because the first draft wrote 21 from a substring grep
+and was wrong by six.
 **No shipped test asserted it.** Every wave was asked to check it by hand,
 which is the condition an invariant is in immediately before it stops being
 true -- and this census has twice lost rows exactly that way, `XR` (23 rows,

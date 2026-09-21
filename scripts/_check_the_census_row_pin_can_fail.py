@@ -89,8 +89,14 @@ def _copy_tree() -> pathlib.Path:
     for rel in ("scripts", "tests"):
         shutil.copytree(REPO / rel, scratch / rel,
                         ignore=shutil.ignore_patterns("__pycache__", "*.pyc"))
-    (scratch / "_audit").mkdir()
-    shutil.copytree(REPO / "_audit" / "_census", scratch / "_audit" / "_census")
+    # THE WHOLE `_audit` TREE, not just `_census`. The guard's failure message
+    # COMPUTES how many documents print the pinned total, and a copy holding
+    # only the census would make every demonstration report `0 documents` --
+    # a figure that is false about the repository and that would be pasted
+    # into an audit document as evidence. A demonstration whose output cannot
+    # be quoted is half a demonstration.
+    shutil.copytree(REPO / "_audit", scratch / "_audit",
+                    ignore=shutil.ignore_patterns("_scratch"))
     shutil.copy2(REPO / "pytest.ini", scratch / "pytest.ini")
     # The guard imports nothing from the package, but pytest.ini's rootdir
     # collection and conftest do; an absent package turns every demonstration
