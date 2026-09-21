@@ -488,8 +488,38 @@ is not: **a printed total that the visible rows do not reach invites a reader
 to trust a row that is not there.** The suppression is now stated and counted
 in the table's own output.
 
-> RUNNING THE CHEAP DISAGREEING CHECK IS HOW BOTH OF THIS INSTRUMENT'S DEFECTS
-> WERE FOUND -- a grep against its shortlist, and a grep against its own grep.
+> RUNNING THE CHEAP DISAGREEING CHECK IS HOW TWO OF THIS INSTRUMENT'S THREE
+> DEFECTS WERE FOUND -- a grep against its shortlist, and a grep against its
+> own grep. The third was found by a shipped guard, and it is the worst of
+> them.
+
+### 5.1a AND THE CONTRAST COULD HAVE BEEN MANUFACTURED FROM NOTHING
+
+`test_an_outage_is_never_filed_as_an_absence` refused this wave's own new
+script:
+
+    _census_message_interpolations.py:1225
+    A zero from a failed read and a zero from an empty surface are the same
+    number and different findings.
+
+Two handlers answered an unreachable version-control tool with `""` and `{}`.
+**That turns an OUTAGE into an ABSENCE, and here it does so in the direction
+that flatters this census's own thesis:** with the tool gone, the contrast
+table prints a naive-search count of ZERO beside 292 AST sites, which is the
+strongest possible evidence for *"a text search cannot see this class"*,
+measured from nothing at all. The number this whole section rests on was one
+missing binary away from being fabricated by its own error handling.
+
+Both handlers now raise `CensusOutage`. Shown failing, by running the census
+with the tool off `PATH`:
+
+    CensusOutage: the version-control tool could not be run
+    (FileNotFoundError); this census cannot report a HEAD comparison or a
+    contrast it did not measure
+
+The search-tool handler separates the two cases by RETURN CODE rather than
+flattening them -- exit 1 means "matched nothing", which is a real reading;
+anything else is an outage.
 
 ### 5.2 THE ADJUDICATION -- 21 ADDRESS-BEARING SITES
 

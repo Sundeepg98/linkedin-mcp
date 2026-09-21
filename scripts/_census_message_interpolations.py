@@ -1215,15 +1215,46 @@ def source_digest(sources: dict[str, str]) -> dict[str, Any]:
     return {"modules": per_module, "combined": combined, "count": len(per_module)}
 
 
+class CensusOutage(RuntimeError):
+    """An instrument this census depends on could not be reached.
+
+    **IT IS AN EXCEPTION AND NOT AN EMPTY RESULT, AND THAT IS THE WHOLE
+    POINT.** The first version of :func:`_git` and :func:`grep_contrast`
+    answered an unreachable version-control tool with ``""`` and ``{}``. That
+    turns an OUTAGE into an ABSENCE -- and here it does so in the direction
+    that FLATTERS THIS CENSUS'S OWN THESIS: with the tool gone, the contrast
+    table prints a naive-search count of ZERO beside 292 AST sites, which is
+    the strongest evidence this document could possibly show for "a text
+    search cannot see this class", measured from nothing at all.
+
+    Caught by ``tests/test_an_outage_is_never_filed_as_an_absence`` on this
+    wave's own new script. *A zero from a failed read and a zero from an empty
+    surface are the same number and different findings.*
+    """
+
+
 def _git(args: list[str]) -> str:
-    """A READ-ONLY git call. Nothing here writes an object, a ref or the index."""
+    """A READ-ONLY call to the version-control tool. Writes nothing.
+
+    RAISES rather than returning an empty string -- see :class:`CensusOutage`.
+    """
     try:
         proc = subprocess.run(
             ["git"] + args, cwd=str(REPO), capture_output=True, text=True, timeout=60
         )
-        return proc.stdout if proc.returncode == 0 else ""
-    except (OSError, subprocess.SubprocessError):
-        return ""
+    except (OSError, subprocess.SubprocessError) as exc:
+        raise CensusOutage(
+            "the version-control tool could not be run (%s); this census "
+            "cannot report a HEAD comparison or a contrast it did not measure"
+            % type(exc).__name__
+        ) from exc
+    if proc.returncode != 0:
+        raise CensusOutage(
+            "the version-control tool exited %d on %r; this census cannot "
+            "report a number it did not measure"
+            % (proc.returncode, args[0] if args else "?")
+        )
+    return proc.stdout
 
 
 def head_sources() -> dict[str, str]:
@@ -1266,17 +1297,32 @@ def grep_contrast(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
     for pattern in NAIVE_PATTERNS:
         argv += ["-e", pattern]
     argv += ["--", "linkedin_server/"]
+    # NO HANDLER THAT SWALLOWS, DELIBERATELY. The search tool exits 1 when it
+    # matches NOTHING, which is a real reading, and something else when it
+    # could not run, which is an outage -- so the two are separated by the
+    # return code rather than flattened into an empty dict. See
+    # :class:`CensusOutage` for what the flattened version was worth.
     try:
         proc = subprocess.run(
             argv, cwd=str(REPO), capture_output=True, text=True, timeout=60
         )
-        for line in proc.stdout.splitlines():
-            if ":" not in line:
-                continue
-            where, _, count = line.rpartition(":")
-            textual[Path(where).name] = int(count) if count.strip().isdigit() else 0
-    except (OSError, subprocess.SubprocessError):
-        textual = {}
+    except (OSError, subprocess.SubprocessError) as exc:
+        raise CensusOutage(
+            "the naive search could not be run (%s); the contrast table would "
+            "print a count of zero that nothing measured, which is the "
+            "strongest evidence this census could show for its own thesis"
+            % type(exc).__name__
+        ) from exc
+    if proc.returncode not in (0, 1):
+        raise CensusOutage(
+            "the naive search exited %d; the contrast table would print a "
+            "count of zero that nothing measured" % proc.returncode
+        )
+    for line in proc.stdout.splitlines():
+        if ":" not in line:
+            continue
+        where, _, count = line.rpartition(":")
+        textual[Path(where).name] = int(count) if count.strip().isdigit() else 0
 
     ast_counts: dict[str, int] = {}
     for row in rows:
