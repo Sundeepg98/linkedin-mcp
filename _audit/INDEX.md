@@ -27,8 +27,8 @@ are listed as `(undated)`; no date is taken from git history, because
 
 | what | count |
 | --- | --- |
-| audit documents git tracks under `_audit` | 229 |
-| of those, carrying a `YYYY-MM-DD-` date prefix | 189 |
+| audit documents git tracks under `_audit` | 230 |
+| of those, carrying a `YYYY-MM-DD-` date prefix | 190 |
 | distinct dates | 14 |
 | documents with no level-1 heading | 2 |
 | `CORRECTS:` marker lines | 88 |
@@ -39,7 +39,7 @@ are listed as `(undated)`; no date is taken from git history, because
 | documents at either end of a cross-document edge | 88 |
 | intra-document correction markers | 4 |
 | documents that correct themselves later on | 2 |
-| documents no correction marker touches at all | 139 |
+| documents no correction marker touches at all | 140 |
 | blockquoted markers naming ANOTHER document | 0 |
 | edges missing one of their two markers | 0 |
 | edges declared a different number of times in each direction | 2 |
@@ -1454,6 +1454,7 @@ ways, which is a fact about markers and not a verdict on the document.
 | 2026-09-21 | [2026-09-21-the-fires-and-the-controls.md](2026-09-21-the-fires-and-the-controls.md) | THE FIRES AND THE CONTROLS | corrects x2 |
 | 2026-09-21 | [2026-09-21-the-four-loose-rows.md](2026-09-21-the-four-loose-rows.md) | THE FOUR LOOSE ROWS -- `shape.invitation_badge`, `hrefs_error`, `pill_label`, `J 57` |  |
 | 2026-09-21 | [2026-09-21-the-fourteen-fired.md](2026-09-21-the-fourteen-fired.md) | THE FOURTEEN FIRED: one banked, one refused, twelve behind a press | **CORRECTED x1** corrects x2 |
+| 2026-09-21 | [2026-09-21-the-gate-that-waves-data-through.md](2026-09-21-the-gate-that-waves-data-through.md) | The gate that waves data through |  |
 | 2026-09-21 | [2026-09-21-the-jobs-direction.md](2026-09-21-the-jobs-direction.md) | THE JOBS DIRECTION: the fifth of the GAP that was never asked the question | corrects x1 |
 | 2026-09-21 | [2026-09-21-the-landed-url.md](2026-09-21-the-landed-url.md) | A LANDING IS A STRING THE SITE CHOSE, AND THIS PROCESS HAD NO ALLOWLIST FOR IT | corrects x1 |
 | 2026-09-21 | [2026-09-21-the-locators-that-point-elsewhere.md](2026-09-21-the-locators-that-point-elsewhere.md) | The locators that point elsewhere |  |

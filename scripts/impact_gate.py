@@ -73,6 +73,38 @@ boundary gate's own docstring already says its constant rule is deliberately
 NOT an import graph, for the symmetric reason. Three couplings, three
 readers.
 
+AND THREE MORE, ADDED 2026-09-21, BECAUSE THE BASENAME RULE HAS A BLIND SPOT
+THIS REPOSITORY WALKS INTO ELEVEN TIMES.
+
+A recording of an entire suite run, with every file-opening call instrumented,
+put a number on what the rules above miss: **2271 observed (data file -> test
+file) edges, of which 37 were not in the analyser's plan.** They fell into
+three shapes, and each got the instrument its shape requires.
+
+  * **A COMPOSED NAME IS FOUND BY PARSING THE F-STRING.** The basename
+    survives ``ROOT / "_audit" / "<name>"``; it does NOT survive
+    ``FIXTURES / f"{fixture}.html"``, where the last segment is itself
+    assembled. Thirty-eight sites in 24 files build the last segment that way and one
+    composes the stem twice. ``f"{x}.html"`` is read as the pattern it is, and
+    then told apart from its neighbours by the literals the file holds -- see
+    :func:`composed_verdict`, where the narrowing arm is the whole difference
+    between a rule and a floor.
+  * **A SCRIPT LOADED BY PATH IS FOUND BY ITS FULL PATH.** Thirty-five files
+    here reach a script through
+    ``importlib.util.spec_from_file_location``, which no import parser can
+    see. The full repo-relative path is an ADDRESS, unlike a bare stem, so
+    matching it is safe where the text edge in general is not.
+  * **WHAT IS READ THROUGH A WALK, OR A CHILD PROCESS, IS NOT FOUND AT ALL --
+    IT IS OBSERVED.** ``scripts/build_read_map.py`` records which test file was
+    on the stack when each data file was opened, and
+    ``impact_gate_read_map.json`` is that recording. It is ADDITIVE and that
+    is a law: a test written since the recording is absent from it, so absence
+    proves nothing and may never trim a plan. Its stamp is printed beside
+    every verdict, and its ABSENCE is printed too.
+
+Cost of all three, measured over 266 tracked data files: the mean plan went
+from 25.0 test files to 25.1 of 208, and the maximum did not move.
+
 AND A THIRD CATEGORY THAT IS NOT A COUPLING AT ALL: THE CORPUS-WIDE FLOOR.
 
 A sibling wave shipped red to CI twice on 2026-09-20, both times for one
@@ -215,6 +247,12 @@ _PARALLEL_FILE_THRESHOLD = 5
 #: Where the suite-size denominator is cached, with the commit it was taken at
 #: so a reader can tell whether it still means anything.
 _SUITE_SIZE_CACHE = Path(__file__).resolve().parent / "impact_gate_suite_size.json"
+
+#: The OBSERVED read map: which test file was on the stack when which data
+#: file was opened, recorded by ``scripts/build_read_map.py`` over a whole
+#: suite run. It answers the one question no parser can: what a test reads
+#: through a directory walk, a composed name, or a child process.
+_READ_MAP_CACHE = Path(__file__).resolve().parent / "impact_gate_read_map.json"
 
 
 # --------------------------------------------------------------------------
@@ -377,6 +415,291 @@ def data_tokens(rel_path: str) -> tuple[list[re.Pattern[str]], list[re.Pattern[s
     return files, dirs
 
 
+#: The shortest literal run that may anchor a composed-name pattern. Below
+#: this, the pattern stops being about a filename: ``f"{a}-{b}"`` has a
+#: one-character anchor and would fullmatch any hyphenated basename in the
+#: tree. Three is the length of the shortest extension this repository stores
+#: data under (``.md``, ``.py``), which is what the anchor is nearly always
+#: made of.
+_MIN_LITERAL_ANCHOR = 3
+
+#: A hole in a composed name may not cross a path separator. ``f"{x}.html"``
+#: names ONE segment, and a hole that could swallow ``/`` would let that
+#: pattern fullmatch a whole repo-relative path and couple the file to every
+#: html anywhere in the tree.
+_HOLE = r"[^/\\]*"
+
+
+def _string_shape(node: ast.AST) -> list[str | None] | None:
+    """Flatten a name-building expression into literal parts and holes.
+
+    ``None`` entries are the holes. Returns ``None`` when the node is not a
+    string-building expression at all, which is most nodes.
+
+    TWO SHAPES, because those are the two this repository uses to build the
+    last segment of a path: an f-string, and a ``+`` chain with a literal on
+    one side. Both were found by walking the syntax of every file in ``tests/``,
+    ``scripts/`` and ``linkedin_server/`` -- 38 such sites in 24 files. A grep
+    for the same thing found 11, which is the undercount this rule exists to
+    stop trusting -- see ``_audit/2026-09-21-the-gate-that-waves-data-through.md``.
+    """
+    if isinstance(node, ast.JoinedStr):
+        parts: list[str | None] = []
+        for value in node.values:
+            if isinstance(value, ast.Constant) and isinstance(value.value, str):
+                parts.append(value.value)
+            else:
+                parts.append(None)
+        return parts
+    if isinstance(node, ast.BinOp) and isinstance(node.op, ast.Add):
+        left = _string_shape(node.left)
+        right = _string_shape(node.right)
+        if left is None:
+            left = ([node.left.value]
+                    if (isinstance(node.left, ast.Constant)
+                        and isinstance(node.left.value, str))
+                    else [None])
+        if right is None:
+            right = ([node.right.value]
+                     if (isinstance(node.right, ast.Constant)
+                         and isinstance(node.right.value, str))
+                     else [None])
+        joined = left + right
+        if all(part is None for part in joined):
+            return None
+        return joined
+    return None
+
+
+@dataclass(frozen=True)
+class Composed:
+    """What a file's syntax says about the names it builds at runtime.
+
+    ``patterns`` are the shapes; ``literals`` are every non-docstring string
+    constant in the file, which is how the shapes are told apart from one
+    another. Both are needed, and separately -- see :func:`composed_verdict`.
+    """
+
+    patterns: tuple[re.Pattern[str], ...]
+    literals: frozenset[str]
+
+
+def composed_name_patterns(source: str) -> Composed | None:
+    """Patterns for the names this source builds at RUNTIME. None if unknown.
+
+    **THE TOKEN THE BASENAME RULE RELIES ON IS THE ONE SHAPE THIS REPOSITORY
+    ROUTINELY DESTROYS.** ``data_tokens`` matches the last path segment because
+    it is what survives ``ROOT / "_audit" / "<name>"``. It does not survive
+    ``FIXTURES / f"{fixture}.html"``, where the segment ITSELF is assembled --
+    and the assembled form is how 38 sites in 24 files build the last segment
+    of a path, 11 of them in fixture readers.
+    ``tests/test_free_read_panels.py`` holds
+    ``HYDRATED = "job_detail_hydrated"`` and reads that fixture at eleven call
+    sites through that one constant; before this function existed, the
+    analyser's selection for ``tests/fixtures/job_detail_hydrated.html`` was
+    twenty-two test files and that one was not among them.
+
+    **AN F-STRING IS A PATTERN, SO READ IT AS ONE.** ``f"{fixture}.html"``
+    becomes ``([^/\\\\]*)\\.html`` and ``f"jobs_tracker_{which}"`` becomes
+    ``jobs_tracker_([^/\\\\]*)``, matched with ``fullmatch`` so the anchors
+    do not need writing. The second is the only handle that exists on
+    ``tests/test_tracker_readiness.py:170``, where the stem is composed a
+    SECOND time before the extension is added.
+
+    **AND THE ANCHOR FLOOR IS WHAT KEEPS IT A COUPLING.** A pattern whose
+    longest literal is shorter than :data:`_MIN_LITERAL_ANCHOR` is discarded,
+    because ``f"{a}-{b}"`` fullmatches a great many basenames and means
+    nothing about any of them. The caller adds a second, independent
+    requirement -- that the file also names an ANCESTOR DIRECTORY of the
+    changed path as a quoted segment -- for the same reason the directory
+    rule already requires a sweep verb: a token class this generous needs
+    structural evidence beside it or it becomes a rubber stamp.
+
+    Returns None when the source cannot be parsed, and the caller widens on
+    None as it does everywhere else in this module.
+    """
+    try:
+        tree = ast.parse(source)
+    except (SyntaxError, ValueError):
+        return None
+    # DOCSTRINGS ARE EXCLUDED FROM THE LITERAL SET, and the reason is that the
+    # set is used to NARROW. A prose mention is not an enumeration, and
+    # letting one block a coupling would make an essay load-bearing -- the
+    # exact distinction ``code_text`` was written for, applied to a different
+    # token.
+    prose: set[int] = set()
+    for node in ast.walk(tree):
+        if (isinstance(node, ast.Expr)
+                and isinstance(node.value, ast.Constant)
+                and isinstance(node.value.value, str)):
+            prose.add(id(node.value))
+    out: list[re.Pattern[str]] = []
+    seen: set[str] = set()
+    literals: set[str] = set()
+    for node in ast.walk(tree):
+        if (isinstance(node, ast.Constant) and isinstance(node.value, str)
+                and id(node) not in prose):
+            literals.add(node.value)
+        shape = _string_shape(node)
+        if not shape:
+            continue
+        if not any(part is not None and len(part) >= _MIN_LITERAL_ANCHOR
+                   for part in shape):
+            continue
+        # THE HOLES ARE CAPTURED, because the caller needs to read what fell
+        # into them -- a pattern that merely matches says a great deal less
+        # than a pattern that matches with a hole this file demonstrably
+        # fills.
+        body = "".join("(" + _HOLE + ")" if part is None else re.escape(part)
+                       for part in shape)
+        if body in seen:
+            continue
+        seen.add(body)
+        try:
+            out.append(re.compile(body))
+        except re.error:
+            continue
+    return Composed(patterns=tuple(out), literals=frozenset(literals))
+
+
+#: The three verdicts :func:`composed_verdict` can return. They are kept
+#: distinct rather than collapsed to a boolean because the REPORT says which
+#: one fired, and a plan the reader cannot audit is a plan nobody should
+#: trust.
+_COMPOSED_EXACT = "exact"
+_COMPOSED_SHAPE = "shape"
+_COMPOSED_NO = None
+
+
+def composed_verdict(comp: Composed, targets: list[str]) -> tuple[str, str] | None:
+    """``(verdict, pattern)`` for a file against one changed path, or None.
+
+    **TWO TIERS, AND THE SECOND ONE IS THE HONEST ONE.**
+
+    ``f"{fixture}.html"`` fullmatches every html basename in the tree. Coupling
+    on that alone is safe but not a selection: measured on this repository it
+    added the same seven test files to EVERY fixture change, which is a floor
+    wearing a selector's clothes. So the shape is tested against what the file
+    actually holds:
+
+    ``EXACT`` -- the pattern matches AND every hole is filled by a string
+    literal this file contains. ``tests/test_free_read_panels.py`` holds
+    ``HYDRATED = "job_detail_hydrated"`` and composes ``f"{HYDRATED}.html"``;
+    the hole is filled by a literal three lines up, so that is not a shape
+    coincidence, it is the name.
+
+    ``SHAPE`` -- the pattern matches, no literal fills the hole, AND the file
+    contains NO literal that fills this pattern's holes for anything. That is
+    the "I cannot tell" case: the names come from somewhere this analyser
+    cannot see, so it couples. Widening on unknown, as everywhere else here.
+
+    ``None`` -- the pattern matches, and the file DOES enumerate names of this
+    shape as literals, and this is not one of them. That is the only narrowing
+    in this function and it is bounded: a file that sweeps its directory was
+    already coupled by the branch above this one, so by the time control
+    reaches here the file does not glob -- its names are the ones it names.
+    """
+    fallback: str | None = None
+    for pat in comp.patterns:
+        for target in targets:
+            match = pat.fullmatch(target)
+            if match is None:
+                continue
+            holes = list(match.groups())
+            if holes and all(h and h in comp.literals for h in holes):
+                return _COMPOSED_EXACT, pat.pattern
+            enumerated = any(
+                lit != target
+                and (m := pat.fullmatch(lit)) is not None
+                and all(m.groups())
+                for lit in comp.literals
+            )
+            if not enumerated and fallback is None:
+                fallback = pat.pattern
+    if fallback is not None:
+        return _COMPOSED_SHAPE, fallback
+    return _COMPOSED_NO
+
+
+def composed_targets(rel_path: str) -> list[str]:
+    """The strings a composed-name pattern is tested against, for one path.
+
+    THREE, and each earns its place: the BASENAME for ``f"{x}.html"``, the
+    STEM for a name that is composed before its extension is appended, and the
+    whole repo-relative PATH for a literal that carries a directory --
+    ``f"_audit/{name}.md"``. Testing only the first would have missed
+    ``tests/test_tracker_readiness.py``, which is the case that made the stem
+    necessary.
+    """
+    rel_path = _rel(rel_path)
+    base = rel_path.rsplit("/", 1)[-1]
+    stem = base.rsplit(".", 1)[0] if "." in base else base
+    return [base, stem, rel_path]
+
+
+def _head_sha() -> str | None:
+    """This checkout's short HEAD, or None. NEVER ``""``.
+
+    None because the caller PRINTS this: an empty string would render as a
+    blank where a commit should be, which reads as "current" to a skimming
+    eye. The absence has to be sayable.
+    """
+    try:
+        proc = subprocess.run(["git", "rev-parse", "--short", "HEAD"],
+                              cwd=REPO, capture_output=True, text=True,
+                              encoding="utf-8")
+    except OSError:
+        return None
+    if proc.returncode != 0:
+        return None
+    return proc.stdout.strip() or None
+
+
+def read_map() -> dict | None:
+    """The observed read map, or None when there is not one. NEVER ``{}``.
+
+    None and an empty map are different findings and this repository has been
+    bitten by collapsing that distinction three times in two days. A caller
+    that gets None must SAY the map is missing; a caller that gets an empty
+    one has been told the recording found nothing, which is a claim.
+    """
+    try:
+        payload = json.loads(_READ_MAP_CACHE.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return None
+    if not isinstance(payload, dict) or "edges" not in payload:
+        return None
+    return payload
+
+
+def observed_readers(paths: list[str]) -> tuple[dict[str, list[str]], dict | None]:
+    """``(test file -> the changed paths it was SEEN reading, stamp)``.
+
+    **THIS IS THE ONLY RULE HERE THAT IS NOT A GUESS, AND IT IS ALSO THE ONLY
+    ONE THAT CAN GO STALE.** Both halves matter, so both are reported: the
+    caller prints when the recording was taken and at which commit, beside a
+    plan that also contains the static rules' answers.
+
+    It is ADDITIVE and that is a law, not a default. A test written since the
+    recording is simply absent from it, and reading absence as "nothing reads
+    this file" would be the very defect the gate exists to refuse, rebuilt
+    inside the gate out of a cache. So the map may only ever ADD test files to
+    a plan the static rules already produced.
+    """
+    payload = read_map()
+    if payload is None:
+        return {}, None
+    wanted = {_rel(p) for p in paths}
+    out: dict[str, list[str]] = {}
+    for test_file, read_paths in payload.get("edges", {}).items():
+        if not is_test_target(test_file) or not (REPO / test_file).exists():
+            continue
+        hit = sorted(wanted.intersection(read_paths))
+        if hit:
+            out[test_file] = hit
+    return out, payload
+
+
 def import_names(rel_path: str) -> set[str]:
     """The dotted names under which a staged ``.py`` file can be imported.
 
@@ -476,6 +799,7 @@ class Corpus:
         self._raw: dict[str, str | None] = {}
         self._code: dict[str, str | None] = {}
         self._imports: dict[str, set[str] | None] = {}
+        self._composed: dict[str, "Composed | None"] = {}
         #: The corpus-wide floor, memoised -- it takes no input from the diff,
         #: so deriving it twice in one run is pure cost.
         self.floor: list[tuple[str, str]] | None = None
@@ -499,6 +823,21 @@ class Corpus:
         if rel not in self._imports:
             self._imports[rel] = _imports_of(REPO / rel)
         return self._imports[rel]
+
+    def composed(self, rel: str) -> "Composed | None":
+        """Runtime-composed name patterns. None = could not be read or parsed.
+
+        Memoised for the reason every reading here is: this is an AST parse,
+        and the analyser paying more than the tests it scopes is the failure
+        mode this module was built to escape. It is also LAZY at the call
+        site -- only files that already passed the directory prefilter are
+        ever parsed for it.
+        """
+        if rel not in self._composed:
+            raw = self.raw(rel)
+            self._composed[rel] = (None if raw is None
+                                   else composed_name_patterns(raw))
+        return self._composed[rel]
 
 
 def is_test_target(rel: str) -> bool:
@@ -806,6 +1145,11 @@ class Impact:
     edges: list[tuple[str, str, str]] = field(default_factory=list)
     #: Staged paths that force the full suite, each with its reason.
     triggers: list[tuple[str, str]] = field(default_factory=list)
+    #: The observed read map's stamp, or None when there is no map on disk.
+    #: None is REPORTED, never treated as an empty recording.
+    read_map_stamp: dict | None = None
+    #: How many test files the observed map added that no static rule found.
+    observed_only: int = 0
 
     @property
     def test_files(self) -> list[str]:
@@ -820,6 +1164,8 @@ def impact_set(
     paths: list[str],
     *,
     data_coupling: bool = True,
+    composed_coupling: bool = True,
+    observed_coupling: bool = True,
     import_coupling: bool = True,
     constant_coupling: bool = True,
     always_run: bool = True,
@@ -827,12 +1173,12 @@ def impact_set(
 ) -> Impact:
     """Test files a change to ``paths`` can break.
 
-    The three keyword switches exist so a CONTROL can turn one rule OFF and
-    watch the selector stop finding what it must find. A check that cannot be
-    shown failing certifies nothing, and a selector whose rules cannot be
-    disarmed individually cannot be shown failing at all. See
+    The keyword switches exist so a CONTROL can turn one rule OFF and watch
+    the selector stop finding what it must find. A check that cannot be shown
+    failing certifies nothing, and a selector whose rules cannot be disarmed
+    individually cannot be shown failing at all. See
     ``tests/test_impact_gate_selects_data_dependencies.py``, which asserts
-    both arms.
+    both arms for each of them.
     """
     impact = Impact()
     paths = [_rel(p) for p in paths]
@@ -890,6 +1236,7 @@ def impact_set(
     for source in paths:
         if data_coupling:
             file_pats, dir_pats = data_tokens(source)
+            targets = composed_targets(source)
             for rel in candidates:
                 if rel == source or rel in found:
                     continue
@@ -920,6 +1267,32 @@ def impact_set(
                 elif (_SWEEP_VERBS.search(code)
                         and any(pat.search(code) for pat in dir_pats)):
                     reached(source, rel, "sweeps the directory", frontier)
+                elif composed_coupling and any(pat.search(code)
+                                               for pat in dir_pats):
+                    # THE FILE ADDRESSES THE DIRECTORY BUT NAMES NO FILE IN
+                    # IT, and does not sweep. That is the shape of a reader
+                    # that BUILDS the last segment, so ask its syntax whether
+                    # it builds one that this path could be.
+                    #
+                    # The directory match is the second requirement and it is
+                    # not decoration: ``f"{x}.html"`` on its own fullmatches
+                    # every html in the tree, and pairing a generous pattern
+                    # with a piece of structural evidence is the same
+                    # discipline the sweep branch above already applies.
+                    shapes = corpus.composed(rel)
+                    if shapes is None:
+                        reached(source, rel, "UNPARSEABLE, coupled "
+                                "defensively", frontier)
+                    else:
+                        verdict = composed_verdict(shapes, targets)
+                        if verdict is not None:
+                            kind, pattern = verdict
+                            why = ("composes this exact name"
+                                   if kind == _COMPOSED_EXACT
+                                   else "composes names of this shape and "
+                                        "enumerates none of them")
+                            reached(source, rel, f"{why} (/{pattern}/)",
+                                    frontier)
         if import_coupling and source.endswith(".py"):
             importers_of(source, frontier)
 
@@ -942,6 +1315,47 @@ def impact_set(
     # on this module" is answerable exactly, by reading its importers. Once
     # the walk is in python-land the precise instrument exists, so using the
     # blunt one there buys nothing and costs the whole property.
+    # ONE EXCEPTION, AND IT IS THE NARROWEST FORM OF THE TEXT EDGE, NOT THE
+    # BLUNT ONE. ``importlib.util.spec_from_file_location(name, ROOT / rel)``
+    # is how TWENTY-FIVE test files in this suite load a script, and an AST
+    # import parser sees nothing at all: there is no ``import`` statement to
+    # read. What those files DO hold is the script's FULL repo-relative path
+    # as a literal -- ``"scripts/drawn_route_corpus.py"``.
+    #
+    # Matching that full path is a different instrument from matching a
+    # basename, which is what the paragraph above ruled out. A bare stem
+    # (``shape``) matches prose across the tree; a path with its directory and
+    # its extension is an ADDRESS, and a file that writes one out is reaching
+    # for that file. Measured: making the full-path edge transitive adds the
+    # edges the dynamic loaders need without the 158-of-170 blow-up, because
+    # the token is not one a docstring uses in passing.
+    def dynamic_loaders_of(source: str, nxt: list[str]) -> None:
+        # **SCOPED TO ``scripts/``, AND THE SCOPE WAS MEASURED, NOT ASSUMED.**
+        # Every one of the ``spec_from_file_location`` sites in this
+        # repository -- 35 files -- loads a SCRIPT, for the structural reason that
+        # ``scripts/`` is not a package: a test cannot ``import`` it without
+        # first editing ``sys.path``, so it reaches for the file instead.
+        # ``linkedin_server/`` IS a package and is imported normally, so the
+        # rule buys nothing there -- and it costs plenty: run over package
+        # modules as well, ``linkedin_server/shape.py`` went from 123 selected
+        # to 159 of 208, and the analyser from 7s to 18s, for zero recovered
+        # edges.
+        if not source.startswith("scripts/") or not source.endswith(".py"):
+            return
+        pats = [re.compile(re.escape(source)),
+                re.compile(re.escape(source.replace("/", "\\")))]
+        for rel in candidates:
+            if rel == source or rel in found:
+                continue
+            raw = corpus.raw(rel)
+            if raw is None or not any(p.search(raw) for p in pats):
+                continue
+            code = corpus.code(rel)
+            if code is None:
+                reached(source, rel, "UNREADABLE, coupled defensively", nxt)
+            elif any(p.search(code) for p in pats):
+                reached(source, rel, "loads it by path", nxt)
+
     if import_coupling:
         for _ in range(max_hops):
             if not frontier:
@@ -949,7 +1363,9 @@ def impact_set(
             nxt: list[str] = []
             for source in frontier:
                 importers_of(source, nxt)
+                dynamic_loaders_of(source, nxt)
             frontier = nxt
+
 
     # --- THE STAGED TESTS THEMSELVES, and the shipped constant rule --------
     staged_tests = [p for p in paths if p.startswith("tests/") and p.endswith(".py")]
@@ -982,6 +1398,33 @@ def impact_set(
                 ("linkedin_server/", "tests/test_readonly.py",
                  "package-level invariant, auto-globs new modules")
             )
+
+    # --- WHAT WAS SEEN, added to what was inferred. ------------------------
+    #
+    # **THE STATIC RULES ANSWER "WHO COULD READ THIS"; THIS ANSWERS "WHO WAS
+    # SEEN READING IT".** They are different questions and the second one has
+    # no parser. Three shapes in this suite produce a real read with nothing
+    # to match on: a fixture borrowed across test modules by pytest INJECTION
+    # (``from tests.test_writes import ...  # fixtures are used by
+    # injection``, 37 such imports), a walk over a directory that
+    # names no document in it, and a read that happens inside a child process.
+    #
+    # Measured: unioning the recording moved the mean plan over 266 tracked
+    # data files from 25.0 test files to 25.1, changed the maximum not at all,
+    # and added nothing to 261 of them. The five it touched are fixtures, at
+    # most +3 each. That is the cheapest edge in this module.
+    #
+    # ADDITIVE ONLY. A test written since the recording is absent from it, so
+    # absence proves nothing and may never narrow a plan.
+    if observed_coupling:
+        seen_reading, stamp = observed_readers(paths)
+        impact.read_map_stamp = stamp
+        for rel, hit in seen_reading.items():
+            if rel not in found:
+                impact.observed_only += 1
+            found.add(rel)
+            impact.edges.append(
+                (hit[0], rel, "OBSERVED reading it in the recorded suite run"))
 
     impact.selected = sorted(f for f in found if (REPO / f).exists())
 
@@ -1309,6 +1752,38 @@ def main(argv: list[str] | None = None) -> int:
     if len(impact.selected) > 40:
         print(f"    ... and {len(impact.selected) - 40} more selected",
               file=sys.stderr)
+    # THE RECORDING'S AGE IS PART OF THE VERDICT. A plan that leaned on a
+    # measurement taken at another commit has to say so, and a plan that had
+    # no measurement at all has to say THAT -- the absence is a fact about
+    # this run, not a quiet default.
+    if impact.read_map_stamp is None:
+        print("  NO OBSERVED READ MAP on disk, so every edge above is "
+              "INFERRED from source. Build one with "
+              "scripts/build_read_map.py.", file=sys.stderr)
+    else:
+        stamp = impact.read_map_stamp
+        print(f"  observed read map: {stamp.get('test_files', '?')} test "
+              f"files recorded {stamp.get('taken_at', '?')} at "
+              f"{stamp.get('head', '?')}; it added {impact.observed_only} "
+              "file(s) here that no static rule found.", file=sys.stderr)
+        print("    A test written since that recording is ABSENT from it, so "
+              "it can only ever ADD to this plan, never trim it.",
+              file=sys.stderr)
+        # THE READER SHOULD NOT HAVE TO COMPARE TWO SHORT SHAS BY EYE. A
+        # recording taken at another commit is the normal case, not an alarm
+        # -- but "it is out of date" is a fact about THIS run and belongs in
+        # the report, not in the reader's head.
+        head = _head_sha()
+        recorded = stamp.get("head")
+        if head is None:
+            print("    (this checkout's HEAD could not be read, so the "
+                  "recording's age is UNKNOWN rather than current.)",
+                  file=sys.stderr)
+        elif recorded and recorded != head:
+            print(f"    IT WAS NOT TAKEN AT THIS COMMIT: recorded at "
+                  f"{recorded}, HEAD is {head}. Rebuild with "
+                  "scripts/build_read_map.py if a data reader has been added "
+                  "since.", file=sys.stderr)
     if impact.always_run:
         print(f"  + {len(impact.always_run)} CORPUS-WIDE guard(s), run "
               "unconditionally -- they sweep the tracked set and take no "

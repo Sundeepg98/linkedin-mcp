@@ -146,7 +146,14 @@ def test_reverting_the_data_rule_loses_the_test_again():
     the work, and it runs on every CI cycle rather than living in a comment.
     """
     _skip_if_moved(LEDGER, THE_TEST)
-    reverted = G.impact_set([LEDGER], data_coupling=False)
+    # ALL THREE DATA-REACHING RULES, NOT ONE. When the composed-name rule and
+    # the observed read map were added on 2026-09-21 this control went RED
+    # with ``data_coupling=False`` alone, and it was RIGHT to: the assertion
+    # it makes is "nothing else silently reaches this", and something else
+    # now did. A control that names one switch while the code has three has
+    # quietly stopped controlling the thing it claims to.
+    reverted = G.impact_set([LEDGER], data_coupling=False,
+                            composed_coupling=False, observed_coupling=False)
     assert THE_TEST not in reverted.selected, (
         "with data coupling reverted, the census ledger must NOT reach "
         f"{THE_TEST} -- that is the 2026-09-20 hole. It was found anyway, so "
@@ -383,3 +390,231 @@ def test_turning_the_floor_off_removes_exactly_the_floor():
                 f"{proven} survived with the floor off, so something else is "
                 "pulling it in and the floor is not what is protecting us."
             )
+
+
+# --------------------------------------------------------------------------
+# THE COMPOSED-NAME RULE, added 2026-09-21. A positive arm, a negative arm,
+# and a NARROWING arm -- because a rule with no narrowing arm cannot be shown
+# to discriminate, and a selector that does not discriminate is a floor.
+# --------------------------------------------------------------------------
+
+#: A fixture read through a stem the reading file NEVER spells out as a
+#: filename: ``tests/test_free_read_panels.py`` holds
+#: ``HYDRATED = "job_detail_hydrated"`` and opens ``FIXTURES /
+#: f"{HYDRATED}.html"``. Before the composed rule existed, the analyser
+#: selected 22 test files for this fixture and that reader was not among them.
+COMPOSED_FIXTURE = "tests/fixtures/job_detail_hydrated.html"
+COMPOSED_READER = "tests/test_free_read_panels.py"
+
+#: A fixture whose stem is composed TWICE --
+#: ``markup(f"jobs_tracker_{which}")`` in ``tests/test_tracker_readiness.py``,
+#: which then appends ``.html``. The string ``jobs_tracker_row.html`` appears
+#: nowhere in the file that reads it.
+TWICE_COMPOSED_FIXTURE = "tests/fixtures/jobs_tracker_row.html"
+TWICE_COMPOSED_READER = "tests/test_tracker_readiness.py"
+
+#: A script this suite loads by PATH rather than by import --
+#: ``importlib.util.spec_from_file_location``, which no import parser can see.
+#: Twenty-five test files here do it, because ``scripts/`` is not a package.
+LOADED_BY_PATH = "tests/fixtures/synthetic/drawn_routes.txt"
+LOADED_BY_PATH_SCRIPT = "scripts/drawn_route_corpus.py"
+LOADED_BY_PATH_READER = "tests/test_premium_four_boundary.py"
+
+
+def test_a_composed_stem_reaches_the_file_that_composes_it():
+    """The positive arm of the rule that made this wave necessary."""
+    _skip_if_moved(COMPOSED_FIXTURE, COMPOSED_READER)
+    impact = G.impact_set([COMPOSED_FIXTURE])
+    assert COMPOSED_READER in impact.selected, (
+        f"{COMPOSED_READER} opens {COMPOSED_FIXTURE} through a stem held in a "
+        "module constant, so the basename never appears where the file is "
+        f"read. Selected: {impact.selected}"
+    )
+
+
+def test_a_twice_composed_stem_reaches_it_too():
+    """The harder shape: a literal prefix plus a hole, extension added later."""
+    _skip_if_moved(TWICE_COMPOSED_FIXTURE, TWICE_COMPOSED_READER)
+    impact = G.impact_set([TWICE_COMPOSED_FIXTURE])
+    assert TWICE_COMPOSED_READER in impact.selected, (
+        f"{TWICE_COMPOSED_READER} builds this name in two steps and the "
+        f"analyser must follow both. Selected: {impact.selected}"
+    )
+
+
+def test_reverting_the_composed_rule_loses_those_readers_again():
+    """THE CONTROL. Both specimens must go dark when the rule is disarmed.
+
+    ``observed_coupling`` is disarmed with it, because the recorded read map
+    supplies the same edge from another direction and would let this arm pass
+    while proving nothing about the rule it names.
+    """
+    _skip_if_moved(COMPOSED_FIXTURE, COMPOSED_READER,
+                   TWICE_COMPOSED_FIXTURE, TWICE_COMPOSED_READER)
+    for data_file, reader in ((COMPOSED_FIXTURE, COMPOSED_READER),
+                              (TWICE_COMPOSED_FIXTURE, TWICE_COMPOSED_READER)):
+        reverted = G.impact_set([data_file], composed_coupling=False,
+                                observed_coupling=False)
+        assert reader not in reverted.selected, (
+            f"with the composed rule reverted, {data_file} must NOT reach "
+            f"{reader} -- that is the 2026-09-21 hole. It was found anyway, "
+            "so either another rule is over-selecting or this control no "
+            f"longer controls anything. Found: {reverted.selected}"
+        )
+
+
+def test_the_composed_rule_refuses_a_shape_the_reader_enumerates():
+    """The NARROWING arm, which is what stops the rule being a floor.
+
+    ``f"{x}.html"`` fullmatches every html basename in the tree. A rule that
+    coupled on the shape alone would add the same handful of files to EVERY
+    fixture change: selection-shaped output with no selection in it. So a file
+    that demonstrably ENUMERATES names of that shape as literals, and does not
+    enumerate this one, is left out.
+
+    ``tests/test_free_read_panels.py`` names exactly one html literal and it is
+    not a tracker capture, so a tracker capture must not drag it in.
+    """
+    _skip_if_moved(TWICE_COMPOSED_FIXTURE, COMPOSED_READER)
+    narrowed = G.impact_set([TWICE_COMPOSED_FIXTURE], observed_coupling=False)
+    assert COMPOSED_READER not in narrowed.selected, (
+        f"{COMPOSED_READER} does not read {TWICE_COMPOSED_FIXTURE}; it was "
+        "selected anyway, so the composed rule has stopped discriminating and "
+        f"is coupling on the extension alone. Selected: {narrowed.selected}"
+    )
+
+
+def test_a_script_loaded_by_path_carries_its_data_to_the_loader():
+    """``spec_from_file_location`` is an import no import parser can read."""
+    _skip_if_moved(LOADED_BY_PATH, LOADED_BY_PATH_SCRIPT, LOADED_BY_PATH_READER)
+    impact = G.impact_set([LOADED_BY_PATH], observed_coupling=False)
+    assert LOADED_BY_PATH_READER in impact.selected, (
+        f"{LOADED_BY_PATH_READER} loads {LOADED_BY_PATH_SCRIPT} by path and "
+        f"that script opens {LOADED_BY_PATH}. Selected: {impact.selected}"
+    )
+
+
+def test_reverting_the_import_walk_loses_the_path_loader():
+    """THE CONTROL for the hop above."""
+    _skip_if_moved(LOADED_BY_PATH, LOADED_BY_PATH_READER)
+    reverted = G.impact_set([LOADED_BY_PATH], import_coupling=False,
+                            observed_coupling=False)
+    assert LOADED_BY_PATH_READER not in reverted.selected, (
+        "with the import walk off, a two-hop path-load must not be found. "
+        f"Found: {reverted.selected}"
+    )
+
+
+# --------------------------------------------------------------------------
+# THE OBSERVED READ MAP. It is a recording, so both of its failure modes are
+# pinned: it must only ADD, and its ABSENCE must be spoken rather than read as
+# an empty recording.
+# --------------------------------------------------------------------------
+
+def test_the_observed_map_only_ever_adds_to_a_plan():
+    """A recording may widen a plan. It may never trim one.
+
+    A test written since the recording is absent from it, and absence read as
+    "nothing reads this" is the defect this whole gate exists to refuse,
+    rebuilt inside the gate out of a cache.
+    """
+    probed = 0
+    for probe in (LEDGER, COMPOSED_FIXTURE, EVIDENCE_TSV):
+        if not (_ROOT / probe).exists():
+            continue
+        probed += 1
+        without = set(G.impact_set([probe], observed_coupling=False).test_files)
+        with_map = set(G.impact_set([probe]).test_files)
+        assert without <= with_map, (
+            f"the read map REMOVED {sorted(without - with_map)} from the plan "
+            f"for {probe}. It is additive by law; something is reading it as "
+            "an authority instead of as an addition."
+        )
+    assert probed, (
+        "no probe path existed, so this test asserted nothing at all -- which "
+        "is the shape of a check that cannot fail. Re-aim it."
+    )
+
+
+def test_an_absent_read_map_is_reported_and_never_read_as_empty(monkeypatch):
+    """No map on disk is an UNKNOWN, and the gate has to say so.
+
+    ``{}`` and None are the same value to a careless caller and completely
+    different findings: one says the recording found nothing, the other says
+    there was no recording.
+    """
+    monkeypatch.setattr(G, "_READ_MAP_CACHE", _ROOT / "no-such-read-map.json")
+    assert G.read_map() is None, (
+        "a missing read map must read as None, never as an empty recording."
+    )
+    edges, stamp = G.observed_readers([LEDGER])
+    assert edges == {} and stamp is None
+    impact = G.impact_set([LEDGER])
+    assert impact.read_map_stamp is None, (
+        "the Impact must carry the ABSENCE so the report can print it; a "
+        "silent default here is how a missing recording becomes invisible."
+    )
+
+
+# --------------------------------------------------------------------------
+# THE FLAT GLOB. ``candidate_files()`` enumerates ``tests/*.py``,
+# ``scripts/*.py`` and ``linkedin_server/*.py`` -- ONE level, no recursion.
+# That is correct for this tree today and silently wrong the day somebody adds
+# ``tests/unit/``: every file under it becomes invisible to every coupling
+# rule, and NOTHING would say so. This is the "say so" turned into an
+# assertion.
+# --------------------------------------------------------------------------
+
+_ANALYSED_ROOTS = ("tests", "scripts", "linkedin_server")
+
+
+def _below_the_flat_glob(root: pathlib.Path) -> list[str]:
+    """``.py`` files the flat glob cannot see, under one analysed root.
+
+    A PURE FUNCTION OF A DIRECTORY, so the assertion below has a control that
+    does not require writing a file into a tree other agents are working in.
+    ``__pycache__`` is excluded because it holds no source.
+    """
+    if not root.is_dir():
+        return []
+    deep = {p for p in root.rglob("*.py") if "__pycache__" not in p.parts}
+    flat = set(root.glob("*.py"))
+    return sorted(p.as_posix() for p in deep - flat)
+
+
+def test_no_python_hides_below_the_analysers_flat_glob():
+    """Every analysable ``.py`` is where ``candidate_files()`` looks."""
+    hidden: list[str] = []
+    for name in _ANALYSED_ROOTS:
+        hidden += _below_the_flat_glob(_ROOT / name)
+    assert not hidden, (
+        "these python files live in a SUBDIRECTORY of an analysed root, and "
+        "impact_gate.candidate_files() globs one level only -- so no coupling "
+        "rule can see them, no change can select them, and the gate would say "
+        f"nothing about it: {hidden}. Either move them up or teach "
+        "candidate_files() to recurse; do not delete this test."
+    )
+
+
+def test_the_flat_glob_check_can_actually_find_something(tmp_path):
+    """THE CONTROL, over a manufactured directory rather than the real tree.
+
+    A check that has only ever been shown a flat directory proves nothing
+    about a nested one -- and the honest way to show it working is to BUILD
+    the nested case, not to write one into a repository three other agents are
+    committing to.
+    """
+    (tmp_path / "flat.py").write_text("x = 1\n", encoding="ascii")
+    nested = tmp_path / "unit"
+    nested.mkdir()
+    (nested / "test_buried.py").write_text("y = 2\n", encoding="ascii")
+    (tmp_path / "__pycache__").mkdir()
+    (tmp_path / "__pycache__" / "ignored.py").write_text("z = 3\n",
+                                                         encoding="ascii")
+    found = _below_the_flat_glob(tmp_path)
+    assert found == ["unit/test_buried.py"] or found == [
+        (tmp_path / "unit" / "test_buried.py").as_posix()
+    ], found
+    assert not any("__pycache__" in f for f in found), (
+        "the cache is not source and must not be reported as a hidden file."
+    )
