@@ -16,9 +16,10 @@ master at `e672ed7` while this wave was forking, states it:
 
 Deliverables: `scripts/build_rulings_index.py` (generator, `--write` /
 `--check` / `--find`), `_audit/RULINGS.md` (34 rulings),
-`tests/test_the_rulings_register_is_derived.py` (18 tests, 12 of them planted
-red proofs), `scripts/_check_the_rulings_register_can_fail.py` (mutation run
-over the live register: **34 of 34 anchors shown load-bearing**).
+`tests/test_the_rulings_register_is_derived.py` (**21 tests: 9 planted red
+proofs, 5 planted green controls, 7 live assertions**),
+`scripts/_check_the_rulings_register_can_fail.py` (mutation run over the live
+register: **34 of 34 anchors shown load-bearing**).
 
 ---
 
@@ -286,21 +287,38 @@ Recorded because each was found by the instrument rather than by reading it.
 
 ### 2.5 THE RED PROOFS, AND THAT EVERY ANCHOR IS INDIVIDUALLY LOAD-BEARING
 
-`tests/test_the_rulings_register_is_derived.py` -- 18 tests, **12 planted red
-proofs**, each asserting a specific defect goes red, plus a control asserting
-the clean corpus is green (without which every red is satisfied by a checker
-that always fails). All in `tmp_path`; **nothing is planted in a live tree.**
+`tests/test_the_rulings_register_is_derived.py` -- **21 tests: 9 planted RED
+proofs, 5 planted GREEN controls, 7 live assertions.** All defects are planted
+in `tmp_path`; **nothing is planted in a live tree.**
 
-    a registered ruling DELETED from the corpus        -> red
-    a registered ruling REWORDED                       -> red
-    the whole document vanishing                       -> red
-    an anchor matching TWICE                           -> red
-    a NEW `RULED:` declaration nobody filed            -> red
-    a `NOT_A_RULING` entry gone stale                  -> red
-    an ALIAS resolving to two rulings                  -> red
-    a hand-authored date disagreeing with the filename -> red
-    the committed file drifting from the derivation    -> red
-    a FENCED `RULED:` example                          -> stays green
+    PLANTED, MUST GO RED
+      a registered ruling DELETED from the corpus
+      a registered ruling REWORDED
+      the whole document vanishing
+      an anchor matching TWICE
+      a NEW `RULED:` declaration nobody filed
+      a `NOT_A_RULING` entry gone stale
+      an ALIAS resolving to two rulings
+      a hand-authored date disagreeing with the filename
+      a real declaration that merely MENTIONS the state name
+
+    PLANTED, MUST STAY GREEN
+      a clean synthetic corpus          <- without this every red above is
+                                           satisfied by a checker that always
+                                           fails; it is the cheapest test in
+                                           the file and the one whose absence
+                                           would void all of them
+      a FENCED `RULED:` example
+      prose ABOUT the marker, quoting it in backticks
+      the state name `EXCLUDED-RULED:` in a census cell
+      a triage entry silencing exactly its own hit
+
+**The last two pairs are deliberately opposed**, because a narrowing that
+quietly widened would be worse than the false positive it removed: one plants
+`EXCLUDED-RULED:` in a cell and demands silence, the other plants a real
+`**RULED:**` declaration whose text merely mentions the state and demands a
+red. Together they prove the lookbehind is scoped to the hyphenated token and
+not to the word.
 
 `scripts/_check_the_rulings_register_can_fail.py` goes further, because "the
 mechanism can go red" and "these 34 anchors each do work" are different
