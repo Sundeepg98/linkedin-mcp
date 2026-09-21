@@ -210,7 +210,7 @@ def test_the_alphabet_helper_covers_everything_a_reading_resolves_to():
     ],
 )
 def test_one_line_reads_as_the_fact_it_states(line, expected):
-    assert resolved(shape.read_proximity([line])) == expected
+    assert resolved(shape.find_proximity([line])) == expected
 
 
 @pytest.mark.parametrize(
@@ -240,7 +240,7 @@ def test_a_numeral_this_reader_will_not_commit_to_is_refused_not_guessed(line):
     ``10k`` as 10 -- a plausible wrong number in a real field, which nothing
     downstream can tell from a right one.
     """
-    reading = shape.read_proximity([line])
+    reading = shape.find_proximity([line])
     assert reading["count"] is None, (
         "%r produced a count of %r; a numeral the reader does not understand "
         "must be refused, not repaired" % (line, reading["count"])
@@ -272,7 +272,7 @@ def test_a_relation_with_no_numeral_is_not_reported_as_a_refusal(line):
     stated a number this reader would not read. Collapsing them loses the only
     signal that the phrase table has gone stale against LinkedIn's numerals.
     """
-    assert shape.state_for(shape.read_proximity([line])["state"]) == "relation_only"
+    assert shape.state_for(shape.find_proximity([line])["state"]) == "relation_only"
 
 
 def test_the_same_fact_rendered_twice_is_one_fact():
@@ -282,9 +282,9 @@ def test_the_same_fact_rendered_twice_is_one_fact():
     Counting matches would report that as two readings of one card and, worse,
     a reader that compared match COUNTS would call it corroboration.
     """
-    once = shape.read_proximity([SAFE_LINE])
-    twice = shape.read_proximity([SAFE_LINE, SAFE_LINE])
-    welded = shape.read_proximity(["%s %s" % (SAFE_LINE, SAFE_LINE)])
+    once = shape.find_proximity([SAFE_LINE])
+    twice = shape.find_proximity([SAFE_LINE, SAFE_LINE])
+    welded = shape.find_proximity(["%s %s" % (SAFE_LINE, SAFE_LINE)])
     assert resolved(once) == ("count_read", "company_alum", 1)
     assert resolved(twice) == resolved(once)
     assert resolved(welded) == resolved(once)
@@ -301,7 +301,7 @@ def test_two_different_relations_on_one_card_are_refused_rather_than_picked():
     test green. With one shared count only the relation branch can produce a
     refusal, so a pass now means what the name says.
     """
-    reading = shape.read_proximity(
+    reading = shape.find_proximity(
         ["1 company alum works here", "1 connection works here"]
     )
     assert resolved(reading) == ("disagreement", None, None)
@@ -309,7 +309,7 @@ def test_two_different_relations_on_one_card_are_refused_rather_than_picked():
 
 def test_two_different_counts_for_one_relation_are_refused_rather_than_picked():
     """The other disagreement, kept separate so each branch has its own check."""
-    reading = shape.read_proximity(
+    reading = shape.find_proximity(
         ["1 company alum works here", "4 company alums work here"]
     )
     assert shape.state_for(reading["state"]) == "disagreement"
@@ -320,7 +320,7 @@ def test_two_different_counts_for_one_relation_are_refused_rather_than_picked():
 def test_a_refused_numeral_suppresses_a_clean_one_elsewhere_on_the_card():
     """The two copies disagree about what the page says, and adjudicating that
     is not this module's job."""
-    reading = shape.read_proximity([SAFE_LINE, "1.5 company alums work here"])
+    reading = shape.find_proximity([SAFE_LINE, "1.5 company alums work here"])
     assert reading["count"] is None
     assert shape.state_for(reading["state"]) == "numeral_refused"
 
@@ -343,14 +343,14 @@ def test_the_reader_never_raises_on_hostile_input(hostile):
     """It must answer, never raise. A raised exception from a page-derived
     value is how ``int()`` puts that value into a traceback -- see
     ``coerce``'s module docstring."""
-    reading = shape.read_proximity([hostile])
+    reading = shape.find_proximity([hostile])
     assert set(reading) == {"state", "relation", "count"}
 
 
 def test_the_reader_tolerates_a_non_list_and_an_empty_one():
-    assert resolved(shape.read_proximity([])) == ("not_drawn", None, None)
-    assert resolved(shape.read_proximity(None)) == ("not_drawn", None, None)
-    assert resolved(shape.read_proximity(())) == ("not_drawn", None, None)
+    assert resolved(shape.find_proximity([])) == ("not_drawn", None, None)
+    assert resolved(shape.find_proximity(None)) == ("not_drawn", None, None)
+    assert resolved(shape.find_proximity(())) == ("not_drawn", None, None)
 
 
 # ---------------------------------------------------------------------------
@@ -386,7 +386,7 @@ def test_a_reading_carries_no_text_from_the_line_it_was_read_from(line):
     not think of. So this asserts the TYPE: every value in a reading is an
     ``int`` or ``None``, which no string on any page can satisfy.
     """
-    reading = shape.read_proximity([line])
+    reading = shape.find_proximity([line])
     for field, value in reading.items():
         assert value is None or isinstance(value, int), (
             "field %r came back as %s. A reading is integers and None; any "
@@ -403,7 +403,7 @@ def test_the_leaked_copy_and_the_safe_copy_read_as_one_fact_not_two():
     different words. The reader must report ONE fact, must still refuse to
     return the employer, and must not mistake the pair for a disagreement.
     """
-    reading = shape.read_proximity([SAFE_LINE, LEAKED_LINE])
+    reading = shape.find_proximity([SAFE_LINE, LEAKED_LINE])
     assert resolved(reading) == ("count_read", "company_alum", 1), (
         "the two copies of one insight were not folded into one fact"
     )
@@ -416,7 +416,7 @@ def test_the_word_before_the_phrase_is_never_read_as_a_count():
     If the count reader walked back over anything other than digits it would
     read the employer's last word. It must answer "no numeral here" instead.
     """
-    reading = shape.read_proximity([LEAKED_LINE])
+    reading = shape.find_proximity([LEAKED_LINE])
     assert reading["count"] is None, (
         "a count was read out of %r, where the characters before the phrase "
         "are an employer's name and not a numeral" % LEAKED_LINE
@@ -439,7 +439,7 @@ def test_no_line_of_this_reader_calls_int_or_float_on_page_text():
     import inspect
     import textwrap
 
-    for function in (shape._digits_before, shape.read_proximity):
+    for function in (shape._digits_before, shape.find_proximity):
         tree = ast.parse(textwrap.dedent(inspect.getsource(function)))
         called = {
             node.func.id

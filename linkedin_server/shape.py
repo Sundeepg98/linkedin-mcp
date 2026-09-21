@@ -703,7 +703,7 @@ def split_welded_card_line(line: str) -> Optional[dict[str, Any]]:
 # it, and the only proximity line left in the parser's ``lines`` is name-free.
 #
 # SO THE CONTRACT FOR EVERY CALLER, and it is the whole safety argument:
-# hand :func:`read_proximity` lines that have ALREADY been through that
+# hand :func:`find_proximity` lines that have ALREADY been through that
 # subtraction. Never ``record["text"]`` raw, never ``record["hidden"]``, and
 # never anything derived from ``textContent`` -- which ignores ``aria-hidden``,
 # clip-styling and ``display:none`` alike and therefore MERGES the two copies
@@ -761,7 +761,7 @@ _PROX_COUNT_READ = 4
 
 #: ``(relation, phrase, a count precedes it)``. THE PHRASES ARE NORMALISED
 #: ALREADY -- lowercase, single-spaced -- because that is the form
-#: :func:`read_proximity` compares against, and a second normaliser applied to
+#: :func:`find_proximity` compares against, and a second normaliser applied to
 #: the constants is a second thing that can drift.
 #:
 #: **NO PHRASE MAY CONTAIN ANOTHER**, asserted by ``tests/test_proximity_reader.py``.
@@ -933,7 +933,7 @@ def _digits_before(text: str, at: int) -> tuple[Optional[int], bool]:
     return value, False
 
 
-def read_proximity(lines: Iterable[str]) -> dict[str, Any]:
+def find_proximity(lines: Iterable[str]) -> dict[str, Any]:
     """Read network proximity off lines a caller has already de-duplicated.
 
     **THE INPUT CONTRACT IS THE SAFETY ARGUMENT.** Pass lines that have been
@@ -1078,7 +1078,7 @@ def parse_job_card(record: dict[str, Any]) -> Optional[dict[str, Any]]:
     #: that ever looked status-shaped or timestamp-shaped is still seen -- that
     #: loop DISCARDS lines, and a reader downstream of a discard silently
     #: inherits its judgement.
-    proximity = read_proximity(lines)
+    proximity = find_proximity(lines)
 
     status = None
     when = find_time_ago(lines)
@@ -1261,7 +1261,7 @@ def _job_card_out(
         # be asserting something about the account's graph; an absent key
         # asserts nothing, which is the honest report for a card that simply
         # had no insight line. The state remains in the alphabet because
-        # :func:`read_proximity` is a pure function that callers test directly.
+        # :func:`find_proximity` is a pure function that callers test directly.
         out["proximity"] = proximity
     return out
 
@@ -2375,7 +2375,7 @@ def parse_job_detail(
     #: are the ``counted=False`` rows of :data:`PROXIMITY_PHRASES` and the
     #: state is ``relation_only``. Reported as None when nothing was drawn, in
     #: the same shape as ``salary`` and ``status`` beside it.
-    proximity = read_proximity(header)
+    proximity = find_proximity(header)
     out["proximity"] = (
         proximity if proximity["state"] != _PROX_NOT_DRAWN else None
     )

@@ -1,6 +1,6 @@
 # The proximity field -- census row `J 40`, read per-job network proximity
 
-**WAVE:** `proximity-field`. **STATUS: IN PROGRESS** -- written incrementally.
+**WAVE:** `proximity-field`. **STATUS: FROZEN.** Written incrementally; section 7 was written last, after the full suite came back red and five of its eight failures turned out to be mine.
 **BRANCH:** `worktree-agent-af3d04d2d06ceafc5`, forked at `2571b1f`.
 
 ---
@@ -195,7 +195,7 @@ New public names in `shape.py`:
 | `PROXIMITY_PHRASES` | `(relation, phrase, a count precedes it)`, 10 rows, 2 MEASURED |
 | `relation_for` / `state_for` | position -> literal; out of range REFUSES, never clamps |
 | `proximity_alphabet()` | every token a reading can resolve to |
-| `read_proximity(lines)` | the reader. Pure, no page, no browser |
+| `find_proximity(lines)` | the reader. Pure, no page, no browser |
 | `_digits_before(text, at)` | the count reader described in 1.5 |
 
 `not_drawn` is first in the verdict alphabet for the reason
@@ -208,13 +208,13 @@ card but not the third from either.
 
 ### 2.2 Where it rides along
 
-* **`parse_job_card`** -- computes `read_proximity(lines)` immediately after
+* **`parse_job_card`** -- computes `find_proximity(lines)` immediately after
   `lines` is built, and passes it to both `_job_card_out` call sites (the
   ordinary path and the welded one-line-card path). `_job_card_out` emits
   `proximity` **only when the card drew something**, exactly like `status`,
   `when` and `job_id` above it. A row carrying `not_drawn` would be asserting
   something about the graph; an absent key asserts nothing.
-* **`parse_job_detail`** -- `read_proximity(header)`, reported as the reading or
+* **`parse_job_detail`** -- `find_proximity(header)`, reported as the reading or
   `None`, in the same shape as `salary` and `status` beside it.
 
 **Taken BEFORE the status/time-ago loop, not after.** That loop DISCARDS lines,
@@ -262,7 +262,7 @@ consequences, stated as the rules they became:
    in this wave calls it.
 2. **The reader is handed `lines`, never `record["text"]`, never
    `record["hidden"]`.** `lines` is post-subtraction. This is written into the
-   code as a comment at the call site and into `read_proximity`'s docstring as
+   code as a comment at the call site and into `find_proximity`'s docstring as
    an input contract, because it is the kind of thing a later edit breaks by
    reaching for the "more complete" source.
 3. **The search page's name-carrying copy is `class="visually-hidden"`**, which
@@ -503,7 +503,7 @@ count which silently rewrites itself cannot be cited.
 
 | claim | how it is known |
 |---|---|
-| the reader exists and runs | `shape.read_proximity`, called from `parse_job_card` and `parse_job_detail` |
+| the reader exists and runs | `shape.find_proximity`, called from `parse_job_card` and `parse_job_detail` |
 | it reads the search card | `jobs_search_hydrated.html`, 1 of 7 rows, `count_read`/`company_alum`/1, in BOTH layouts |
 | it reads the detail page | `job_detail_following_hydrated.html`, `relation_only`/`company_alum`/None |
 | it is not matching prose | the un-hydrated twins: 0 of 7 rows, and `None`. Same reader, same pages |
@@ -660,13 +660,106 @@ the full one.
 recording on its own: this module is the repository's widest blast radius, and
 any wave touching it should expect the scoped gate to decline to scope.
 
-**RESULT: the run was still in progress when this wave froze.** The full suite
-was measured at roughly 20 minutes on a quiet box; this run was started with
-**65 python processes alive** on the box, three waves plus the lead. The log is
-at `scratchpad/gate_frozen.log` in this session's scratchpad. **Recorded as
-IN PROGRESS rather than as a pass** -- a gate whose result I did not see is not
-a gate I may quote, which is the same rule as section 7.1 in the other
-direction.
+**RESULT: RED, and five of the eight failures were mine.**
+
+    8 failed, 7581 passed, 8 skipped, 1 xfailed in 1754.71s (0:29:14)
+    EXIT=1
+
+**THE GATE EARNED ITS 29 MINUTES.** Everything before this section was green --
+79 proximity cases, every guard I thought to run, two commits through an armed
+identity gate -- and the full suite still found five real defects in this wave.
+Four of them are in the class the brief warned about in general terms and none
+of my own checks could see, because each is a CLOSED-WORLD assertion held in
+somebody else's file about a set I had just added a member to.
+
+### 7.2a THE EIGHT, CLASSIFIED
+
+The lead's standing ruling for the day: a timeout is contention until
+re-measured serially; a failure on VALUES is not. So all four failing files
+were re-run serially, alone, on the same tree.
+
+| failure | verdict |
+|---|---|
+| `test_job_detail_fixture::test_no_third_party_person_is_read_off_the_posting` x2 | **MINE** |
+| `test_the_audit_index_is_derived` x2 | **MINE** |
+| `test_readers_outside_dom_are_a_pinned_inventory::test_the_unwired_readers_are_exactly_the_pinned_inventory` | **MINE** |
+| `test_stale_process_is_announced` x2 | **ARTIFACT** -- passes serially |
+| `test_click_is_not_its_own_evidence::test_the_refusal_says_when_a_matcher_would_have_separated_them` | **ARTIFACT** -- passes serially |
+
+**THE TWO `stale_process` FAILURES WERE CAUSED BY ME, AND NOT BY THE CHANGE.**
+That file's subject is whether the modules a process has loaded match what is
+committed. **I committed twice while the full suite was running**, on the
+reasoning that the house rule is commit-first-then-gate and that uncommitted
+work is the only unrecoverable state. Both of those remain true, and the cost
+was two spurious reds in a 29-minute run that then had to be classified. The
+right order for next time is not "gate first" -- it is **commit, then start the
+gate, then do not commit again until it lands.**
+
+### 7.2b THE THREE REAL ONES, AND WHY MY OWN CHECKS COULD NOT SEE THEM
+
+**(1) `parse_job_detail` HAS A PINNED KEY SET, IN A PRIVACY TEST.**
+`test_no_third_party_person_is_read_off_the_posting` asserts
+`set(got) == {10 names}` and says in its own docstring that it "is what stops a
+later field quietly adding one". My always-present `proximity` key made it 11.
+**The guard fired exactly as designed and caught a real change to a privacy
+reader's shape.**
+
+I had looked for this. I grepped for `set(detail)`, `detail.keys()`,
+`sorted(row)` and similar, found only unrelated census assertions, and
+concluded there was no strict key-set consumer. **The variable in that file is
+named `got`.** A name-based search for a structural property, missing the case
+that mattered -- which is this repository's own `read-the-structure-not-the-text`
+lesson, and I repeated it while explicitly trying not to.
+
+Fixed by ADMITTING the field to the set with the reason written in, which is
+the workflow that test prescribes. Not by making the key conditional: that
+would have kept the set at 10 on the fixtures the guard runs and hidden my
+field from the one privacy check that scans this reader's values -- the
+"passes through a path other than the one it claims" failure this report spends
+section 4.4 on.
+
+**(2) THE AUDIT INDEX IS DERIVED AND I ADDED A DOCUMENT TO THE CORPUS.**
+`_audit/INDEX.md` is generated by `scripts/build_audit_index.py` over every
+tracked `_audit/` document, and `test_the_audit_index_is_derived` re-derives it
+and compares. My report is the 203rd document. Fixed by running
+`python scripts/build_audit_index.py --write` -- the prescribed workflow, and
+the index is a generated artifact rather than something to hand-edit.
+
+**(3) I NAMED MY FUNCTION `read_proximity`, AND `read_*` MEANS SOMETHING HERE.**
+`test_readers_outside_dom_are_a_pinned_inventory` reported
+`Extra items in the left set: 'shape.read_proximity'`. Its `KNOWN_UNWIRED` pin
+is **empty**, and its module docstring says why that matters: the inventory's
+subject is *"a reader nobody can call"*, the entries that came off it were MCP
+tools being registered, and *"the count of readers this package ships that
+nobody can call is now zero, measured rather than asserted."*
+
+**Pinning mine would have put a false statement in that inventory.** My
+function is called -- by `parse_job_card` and `parse_job_detail`, in its own
+module -- and it is not a candidate for tool registration, which this wave was
+explicitly forbidden to do. The detector's rule is "a top-level `def read_*`
+that no OTHER module calls", and `read_*` is this package's prefix for a
+function that takes a `page`: `dom.read_main_text(page)`,
+`company_root.read_company_root(page, html)`. **Measured: `shape.py` contained
+ZERO `read_*` functions before mine.** Mine takes `lines`.
+
+So the name was the defect, not the wiring. **Renamed `read_proximity` ->
+`find_proximity`**, matching `find_time_ago(lines)` -- its direct sibling, a
+field extractor over the same list in the same function.
+
+**AND I CHECKED THAT THE RENAME HIDES FROM NOTHING before making it**, because
+"rename until the detector stops complaining" is the exact move this report
+criticises elsewhere. `tests/test_readers_emit_no_page_string.py` is the leak
+guard for readers, and it discovers its subjects as *"every module-level `async
+def` with a `page` parameter"* -- not by name. `find_proximity` is a plain
+`def` with no `page`, so it was never in that guard's subject set and the
+rename removes it from nothing. What the rename removes is a non-reader from a
+reader inventory.
+
+**RECORDED RATHER THAN QUIETLY FIXED:** the previous paragraph of this section
+said the gate was "IN PROGRESS" and listed what had passed, with the reasoning
+that a gate whose result I had not seen was not a gate I could quote. That was
+the right call and it was about to become a comfortable one -- the run it was
+waiting on came back red.
 
 **WHAT DID COMPLETE, and it is not nothing:**
 

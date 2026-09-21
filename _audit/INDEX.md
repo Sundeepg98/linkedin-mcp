@@ -27,8 +27,8 @@ are listed as `(undated)`; no date is taken from git history, because
 
 | what | count |
 | --- | --- |
-| audit documents git tracks under `_audit` | 202 |
-| of those, carrying a `YYYY-MM-DD-` date prefix | 169 |
+| audit documents git tracks under `_audit` | 203 |
+| of those, carrying a `YYYY-MM-DD-` date prefix | 170 |
 | distinct dates | 14 |
 | documents with no level-1 heading | 1 |
 | `CORRECTS:` marker lines | 74 |
@@ -39,7 +39,7 @@ are listed as `(undated)`; no date is taken from git history, because
 | documents at either end of a cross-document edge | 78 |
 | intra-document correction markers | 4 |
 | documents that correct themselves later on | 2 |
-| documents no correction marker touches at all | 122 |
+| documents no correction marker touches at all | 123 |
 | blockquoted markers naming ANOTHER document | 0 |
 | edges missing one of their two markers | 0 |
 | edges declared a different number of times in each direction | 2 |
@@ -1280,6 +1280,7 @@ ways, which is a fact about markers and not a verdict on the document.
 | 2026-09-21 | [2026-09-21-the-fourteen-fired.md](2026-09-21-the-fourteen-fired.md) | THE FOURTEEN FIRED: one banked, one refused, twelve behind a press | corrects x2 |
 | 2026-09-21 | [2026-09-21-the-jobs-direction.md](2026-09-21-the-jobs-direction.md) | THE JOBS DIRECTION: the fifth of the GAP that was never asked the question | corrects x1 |
 | 2026-09-21 | [2026-09-21-the-open-queue.md](2026-09-21-the-open-queue.md) | The open queue, 2026-09-21 at master `9dbaad2` |  |
+| 2026-09-21 | [2026-09-21-the-proximity-field.md](2026-09-21-the-proximity-field.md) | The proximity field -- census row `J 40`, read per-job network proximity |  |
 | 2026-09-21 | [2026-09-21-the-read-triage.md](2026-09-21-the-read-triage.md) | The read rows are GATED, not backlogged -- but nineteen of the fifty-nine are not | **CORRECTED x1** corrects x2 |
 | 2026-09-21 | [2026-09-21-the-three-readers.md](2026-09-21-the-three-readers.md) | Two readers for three rows, on two addresses nothing could navigate to -- |  |
 
@@ -1314,7 +1315,7 @@ against the same line, so a missing continuation satisfies it.
 - REASON PAST ITS LINE [2026-09-20-the-first-firing.md](2026-09-20-the-first-firing.md) line 233 -- a line-scoped reader sees 35 of 465 characters.
 - REASON PAST ITS LINE [2026-09-20-the-five-under-banked.md](2026-09-20-the-five-under-banked.md) line 3 -- a line-scoped reader sees 35 of 349 characters.
 - REASON PAST ITS LINE [2026-09-20-the-five-under-banked.md](2026-09-20-the-five-under-banked.md) line 457 -- a line-scoped reader sees 94 of 717 characters.
-- REASON PAST ITS LINE [_census/jobs.md](_census/jobs.md) line 352 -- a line-scoped reader sees 21 of 385 characters.
+- REASON PAST ITS LINE [_census/jobs.md](_census/jobs.md) line 381 -- a line-scoped reader sees 21 of 385 characters.
 
 - TIGHTEST ADMISSION MARGIN [2026-09-03-linkedin-gap-blockers.md](2026-09-03-linkedin-gap-blockers.md) line 272 clears the 20-character floor by 0. The floor is applied to the marker's OWN LINE, so a reason of 723 characters is admitted on the strength of 20. Reflow that paragraph by one word and a guard rejects it saying it *carries no reason after the citation*, which would not be true. Reported every regeneration rather than counted, because a count of rejections reads zero until the day it does not.
 
