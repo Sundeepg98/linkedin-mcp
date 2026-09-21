@@ -8788,7 +8788,25 @@ must still say `signed-out wall`, name the matched marker, and carry the
 that says nothing**, which is precisely the trap laid by flipping an assertion
 to an absence.
 
-### 51.4 A SHIPPED GUARD FIRED ON THIS WAVE'S OWN OUTPUT, AND THREE OF THE FOUR ANSWERS WERE DODGES
+### 51.4 THREE SHIPPED GUARDS FIRED ON THIS WAVE'S OWN OUTPUT, AND NONE WAS DEFUSED
+
+Two of them in one line each, and the third below at length:
+
+* **`test_no_committed_identity`** refused three files for a MADE-UP four-digit
+  company id used to illustrate an argument. The rule is on the SHAPE because a
+  reviewer cannot tell an invented id from a real one; it is now the suite's
+  own `SYNTHETIC_IDS` entry.
+* **`test_an_outage_is_never_filed_as_an_absence`** refused this wave's new
+  census script, and it is the entry in section 51 worth re-reading. See 51.7.
+
+**AND ONE HONEST GAP:** the EXACT-VALUE identity gate was verified ARMED (it
+reported examining staged files against 218 spellings) but was not shown
+FAILING, because constructing a positive control means putting a value from the
+operator's real gitignored wordlist into a staged file -- the thing the gate
+exists to stop. The SHAPE half was shown failing, on this wave's own files,
+without anybody arranging it.
+
+### 51.4a THE TAINT GUARD, AND THREE OF THE FOUR ANSWERS WERE DODGES
 
 The first repair logged the descriptor as well as raising it, and
 `test_no_navigation_derived_value_reaches_an_output_sink[auth.py]` went red:
