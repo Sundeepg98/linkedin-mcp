@@ -7820,10 +7820,30 @@ async def read_invitation_badge(page: Any) -> dict[str, Any]:
 
     THE LABEL IS SHAPED ON THE WAY OUT, the same route
     ``read_messaging_badge`` takes, and the count is parsed from the SHAPED
-    string by :func:`shape.invitation_badge`. That ordering is deliberate: it
-    means the only string this process ever holds has already been through the
-    census shaper, so a nav label that one day carries a name carries it no
-    further than the page.
+    string by :func:`shape.invitation_badge`. That ordering is deliberate and
+    it is worth having; what it does NOT buy is redaction.
+
+    **THE SENTENCE THAT USED TO END THIS DOCSTRING WAS FALSE.** It read *"so a
+    nav label that one day carries a name carries it no further than the
+    page"*, and ``census_shape`` does not do that. It is a CHARACTER AND
+    LENGTH gate -- this module says so twice in its own comments, around
+    ``read_surface_census`` -- so a short plain name passes both gates
+    UNCHANGED and is then published at ``saw.shaped_label``. Driven, not
+    argued: ``tests/test_the_unread_readings_were_never_driven.py``
+    asserts ``census_shape(PLANT) == PLANT`` in both directions, and the
+    control that shows it failing is
+    ``scripts/_check_the_unread_readings_guard_can_fail.py``.
+
+    **SO THE PUBLICATION IS DELIBERATE RATHER THAN SAFE**, and those are
+    different claims. The label is published because
+    :func:`shape.invitation_badge`'s refusal contract rests on saying WHAT IT
+    SAW -- a nav that did not hydrate and a label whose shape changed want
+    different repairs, and a bare "zero matched" is what stops anyone telling
+    them apart. Withholding it would cost that. The open fork, which belongs
+    to whoever owns the payload rather than to this docstring: keep publishing
+    the label as now, or publish its SHAPE instead (``landing.withheld`` is
+    the worked precedent and its alphabet is closed). Until that is ruled,
+    read this field as a name-bearing string, because it is one.
     """
     out: dict[str, Any] = {
         # DEFAULTS THAT REFUSE. Every early return below leaves the label

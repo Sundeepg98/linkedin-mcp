@@ -2975,10 +2975,21 @@ def invitation_badge(reading: Optional[dict[str, Any]]) -> dict[str, Any]:
     (``links: 3, badge_links: 0``) want completely different repairs, and a
     bare "zero matched" is what stops anyone telling them apart.
 
-    THE LABEL IT PARSES HAS ALREADY BEEN THROUGH ``census_shape``. That is why
-    the ``why`` strings below may quote it: whatever the nav one day carries,
-    what reaches here is a shape, and an opaque one simply fails the pattern
-    and is reported as the opaque marker it is.
+    THE LABEL IT PARSES HAS ALREADY BEEN THROUGH ``census_shape``, AND THAT
+    IS NOT THE GUARANTEE THIS DOCSTRING USED TO CLAIM. It said *"whatever the
+    nav one day carries, what reaches here is a shape"*. Measured: a long or
+    odd-charactered label does come through as ``<opaque>``, but ``census_shape``
+    is a CHARACTER AND LENGTH gate rather than a redactor, so **a short plain
+    name passes it unchanged** and is republished below at
+    ``saw.shaped_label``, on the success branch and on every refusal branch.
+
+    That is a DELIBERATE publication, not a safe one: the refusal contract
+    above -- *the refusal says what it did see* -- is what it buys, and
+    dropping the field would collapse "the nav did not hydrate" back into
+    "zero matched". Pinned by ``tests/test_the_unread_readings_were_never_driven.py``
+    so the claim cannot drift back to the stronger one, and the fork between
+    publishing the label and publishing its shape is recorded in
+    :func:`dom.read_invitation_badge`'s docstring rather than decided here.
     """
     seen = dict(reading or {})
     links = seen.get("links")
