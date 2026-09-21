@@ -102,6 +102,26 @@ DISMISS_KEYS = ("Escape",)
 #: gains a gated call and is not here turns this file red, and the fix is to
 #: write the reason down.
 DECLARED: dict[str, dict[str, str]] = {
+    "_probe_what_playwright_quotes.py": {
+        "fill": (
+            "DECLARED BY THE WAVE THAT WROTE IT (_audit/2026-09-21-what-"
+            "playwright-quotes.md). The call is "
+            "`cards.fill(\"x\", timeout=T)` where `cards` is a locator over "
+            "THREE divs in a document this probe planted with `set_content` "
+            "one line earlier. It types nothing, because it cannot reach the "
+            "typing: `Locator.fill` is one of the 37 strict methods, the "
+            "locator matches 3, and Playwright raises a strict mode violation "
+            "BEFORE any input is dispatched -- which is the entire reason the "
+            "line exists. The probe is cataloguing which Playwright verbs "
+            "quote page content into their own error text, and `fill` is one "
+            "of them; omitting it would leave a hole in the census at exactly "
+            "the verb a reader would ask about. No LinkedIn page, no remote "
+            "host, no persistent profile: an ephemeral chromium this process "
+            "launches and closes. Even if the fill succeeded it would write "
+            "one character into a synthetic div on a page that exists only in "
+            "memory."
+        ),
+    },
     "_probe_typeahead_commit.py": {
         "fill": (
             "Types a NEEDLE into a message composer to measure whether "
