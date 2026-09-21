@@ -233,6 +233,62 @@ NOT_A_CORRECTION: dict[tuple[str, str], str] = {
         "corrected."
     ),
 
+    # 2026-09-21, wave `what-is-reachable-now`. FIVE PAIRS OF ONE SHAPE: A
+    # CENSUS CELL (or a slice) CITING ITS OWN EVIDENCE. The detector is right
+    # to raise them and they are all the same false positive, so they are
+    # grouped here with one argument and five entries rather than five
+    # arguments.
+    #
+    # THE DIRECTION IS WHAT DECIDES IT. A correction runs corrector ->
+    # corrected. These five run the other way: the cell is the thing that was
+    # CORRECTED, and the document it names is the evidence that corrected it.
+    # The correction vocabulary sitting beside the citation is the cell
+    # REPORTING what the evidence found ("NO LONGER TRUE", "the recorded
+    # blocker is false"), never a claim that the cited document is wrong.
+    #
+    # AND THE REAL CORRECTIONS ARE DECLARED, which is the test that this is a
+    # false positive rather than a dodge: `2026-09-21-what-is-reachable-now.md`
+    # carries `CORRECTS:` markers for `network.md` and `profile.md`, and both
+    # of those files carry the matching `CORRECTED BY:` back-pointer. A reader
+    # starting from either claim reaches the correction. Declaring these five
+    # as well would assert that a census row corrects its own audit trail,
+    # which inverts the relationship the marker pair exists to record.
+    ("network.md", "_slice-n53-follower-chain.md"): (
+        "Row `N 53`'s cell CITES this slice as the source of its "
+        "occurrence-vs-presence audit -- the finding that `_ABOUT_FOLLOWERS` "
+        "is fully anchored and card-scoped, and therefore not vulnerable to "
+        "the defect that re-priced `N 54`. The slice corrected the ROW's "
+        "recorded blocker; the row does not correct the slice."
+    ),
+    ("network.md", "_slice-analytics-press-preflight.md"): (
+        "Row `N 134`'s cell CITES this preflight for the three press "
+        "conditions that settle offline and for the waiver-budget price of "
+        "the shaper it still needs. The preflight is the row's evidence, not "
+        "its subject."
+    ),
+    ("profile.md", "_slice-analytics-press-preflight.md"): (
+        "Row `P O3` shares `N 134`'s surface and blocker and cites the same "
+        "preflight for the same reason. Same direction, same argument."
+    ),
+    ("profile.md", "2026-09-21-what-is-reachable-now.md"): (
+        "Row `P O3`'s cell cites the wave report for the press evidence -- "
+        "the witness returning `disclosed: true`. **That correction IS "
+        "declared, in the other direction**: the report carries `CORRECTS: "
+        "_audit/_census/profile.md` and this file carries the matching "
+        "`CORRECTED BY:` back-pointer, so a reader starting at the claim "
+        "reaches it. This pair is the back-pointer being read from the wrong "
+        "end."
+    ),
+    ("_slice-n53-follower-chain.md", "2026-09-20-company-page-built.md"): (
+        "The slice QUOTES that document's 'SHIPPED, pre-existing' verdict for "
+        "`N 53` while noting it was reached offline, and says so in order to "
+        "explain why a live firing was still owed. Quoting a verdict and "
+        "naming its evidence class is not correcting it -- that document's "
+        "reading was true of what it could measure, which is the same "
+        "distinction `2026-09-21-the-fires-and-the-controls.md` draws when it "
+        "declines to rewrite `2026-09-21-the-three-readers.md`."
+    ),
+
     # 2026-09-21. TWO DERIVED VIEWS MEETING, which is a shape worth naming
     # because neither file was written by the hand that caused the pair.
     ("RULINGS.md", "2026-09-19-two-census-conventions-ruled.md"): (
