@@ -308,6 +308,32 @@ NOT_A_CORRECTION: dict[tuple[str, str], str] = {
         "row WOULD be correcting it from outside, and would need its own "
         "marker pair. Today no row disputes a single figure in it."
     ),
+    # 2026-09-21, the ALL-FILTERS-PRESS wave. The same pair shape as the entry
+    # directly above, on the same census row, one document later.
+    ("network.md", "2026-09-21-the-all-filters-press.md"): (
+        "THE ARROW POINTS THE WRONG WAY, EXACTLY AS IT DOES FOR THAT ROW'S "
+        "OTHER RECEIPT. The line is census row 80, and the correction "
+        "vocabulary in it -- *'THE PRESS ROUTE IS CLOSED AS OF 2026-09-21'* -- "
+        "is the row reporting what the cited document MEASURED about the "
+        "surface, not a claim that the document got anything wrong. The row's "
+        "new sentences exist BECAUSE of that document; they are its output. "
+        "**THE REAL CORRECTION IN THIS PAIR RUNS THE OTHER WAY AND IS "
+        "DECLARED.** `2026-09-21-the-all-filters-press.md` carries `CORRECTS: "
+        "_audit/_census/network.md` -- rows 80, 81 and 84-93 named their "
+        "blocker as a press nobody had ruled on, when the press was ruled on "
+        "2026-09-19 and the control fails that ruling's condition 2 "
+        "terminally -- and the slice carries the matching `CORRECTED BY:` "
+        "back-pointer in its header. A second marker pair for the reverse "
+        "direction would assert that the SLICE withdrew something in the "
+        "DOCUMENT, which nothing here does: no row disputes any reading in "
+        "it, and the document moved no row's state. "
+        "**WHAT WOULD MAKE THIS ENTRY WRONG:** if a `network.md` row ever "
+        "asserted that the attribute reading itself is mistaken -- a later "
+        "wave measuring `aria-expanded` or `aria-haspopup` PRESENT on the "
+        "`all filters` control -- while leaving the document unmarked. That "
+        "row would be correcting it from outside and would need its own "
+        "marker pair."
+    ),
     ("INSTRUMENTS.md", "jobs.md"): (
         "THE REGISTER DESCRIBES A MEASUREMENT OF THAT SLICE, IT DOES NOT "
         "WITHDRAW ANYTHING IN IT. Section 47's line reads *'recorded "
