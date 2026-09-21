@@ -159,6 +159,7 @@ form to the vocabulary as its own phrase -- never to loosen the matcher.*
 
 from __future__ import annotations
 
+import asyncio
 import re
 from typing import Any, Iterable
 
@@ -619,6 +620,155 @@ async def read_filters(page: Any, html: str = "") -> dict[str, Any]:
         "unmatched_controls": scalars["unmatched_controls"],
         "empty_labels": scalars["empty_labels"],
         "values_refused": counts_refused + scalars_refused,
+    }
+
+
+#: HOW MANY CONSECUTIVE UNCHANGED READS END THE WAIT, and how far apart they
+#: are taken. Three rather than two: the panel was measured pausing between
+#: bursts, and two equal reads 350 ms apart is a pause, where three spanning
+#: 1.05 s is a plateau. Twenty polls is the ceiling, so the wait can add at
+#: most about seven seconds to a call that would otherwise have been wrong.
+PANEL_STABLE_READS = 3
+PANEL_POLL_MS = 350
+PANEL_MAX_POLLS = 20
+
+#: HOW LONG A PAGE THAT HAS DRAWN **NOTHING** IS WAITED ON, and it is much
+#: shorter than the full budget. A panel still at ZERO controls after this many
+#: polls is not a panel drawing slowly; it is a page with no filter panel on it,
+#: and continuing to poll a page that never started is waiting for a different
+#: page to arrive.
+#:
+#: **IT EXISTS BECAUSE THE FULL BUDGET MADE THIS READER UNDRIVABLE**, which is
+#: worse than slow. ``tests/reader_leak_baseline.json`` records a verdict per
+#: page reader and says of its own third value: *"not_driven means this offline
+#: harness could not reach it, which is NEVER A PASS."* The harness drives each
+#: reader against a planted page on a 5 s budget; a planted page draws no
+#: controls, so the zero-guard held on for 20 polls at 350 ms -- 7 s -- and the
+#: reader timed out and was recorded unreached. A reader nothing can drive
+#: cannot be shown to leak or not to leak.
+#:
+#: SO THE WORST CASE IS NOW SPLIT IN TWO, on the distinction that matters: a
+#: panel that is GROWING gets the whole budget, because that is the case worth
+#: waiting for; a panel that has drawn NOTHING gets about two seconds.
+PANEL_ZERO_POLLS = 6
+
+
+async def read_filters_when_settled(page: Any) -> dict[str, Any]:
+    """:func:`read_filters`, but not until the panel has STOPPED GROWING.
+
+    ## THE DEFECT THIS EXISTS FOR, MEASURED RATHER THAN SUSPECTED
+
+    ``linkedin_people_search_shape`` returned its filters on two of three
+    end-to-end firings. The third read a page that had drawn 45 of its 83
+    controls and reported EVERY filter as zero. Re-measured under load on
+    2026-09-21 over eight firings, six of which completed:
+
+        controls_seen 45  ->  filters_offered 0   (three firings)
+        controls_seen 62  ->  filters_offered 3   (two firings)
+        controls_seen 73  ->  filters_offered 3   (one firing)
+
+    The correlation is exact in both directions, and ``controls_seen`` was
+    already in the payload disclosing it.
+
+    ## WHY ``BROWSER.goto``'s SETTLE DOES NOT COVER THIS, AND WHY LOAD MAKES
+    ## IT WORSE RATHER THAN BETTER
+
+    ``goto`` navigates on ``domcontentloaded`` and then waits for
+    ``networkidle`` with a flat fallback, and its own docstring says that is
+    **not a readiness check**. On a loaded box the renderer is starved, fewer
+    requests are in flight, and a 500 ms network lull arrives EARLIER -- so
+    the settle SHORTENS against a panel that has drawn less. That is why both
+    quiet runs looked deterministic and only a pinned CPU exposed it: the
+    defect hides on exactly the machine a fix would naturally be verified on.
+
+    ## WHAT IT WAITS ON, AND WHY IT IS NOT A SELECTOR
+
+    **NO NEW SELECTOR AND NO NEW VOCABULARY.** A ``wait_for_selector`` here
+    would be a guess at LinkedIn's class names on a surface this package has
+    barely met, and a wrong guess fails in the quiet direction -- it would
+    time out and read the half-drawn page anyway, which is today's behaviour
+    with extra steps. This waits on the SHIPPED READER'S OWN NUMBER instead:
+    it re-reads until ``controls_seen`` has been unchanged for
+    :data:`PANEL_STABLE_READS` consecutive polls. The instrument measuring
+    readiness is the instrument that will take the reading.
+
+    It costs no new ``page.evaluate`` CALL SITE -- every poll re-enters
+    ``dom.read_search_filters``, which already carries the one waiver -- so
+    the pinned waiver budget does not move.
+
+    ## WHAT ``settled`` DOES AND DOES NOT MEAN
+
+    **``settled`` IS NOT "COMPLETE" AND IS NEVER REPORTED AS IT.** A panel
+    that is stuck at 45 forever is stable at 45, and this function cannot
+    tell a finished panel from a wedged one -- nothing here knows how many
+    controls the page intends to draw, and a hardcoded expectation would be a
+    constant nobody measured pretending to be a denominator. So the trajectory
+    travels with the reading: ``controls_first``, ``controls_last``, ``polls``
+    and ``settled``, and a caller who sees ``controls_last`` well below what
+    other calls achieve still knows to distrust it.
+
+    ``settled`` is ``False`` when the poll budget ran out with the count still
+    moving, which is a FINDING -- the panel was still drawing when the reading
+    was taken -- and it is published rather than retried forever.
+    """
+    reading = await read_filters(page)
+    first = coerce.as_count(reading.get("controls_seen"))
+    last = first
+    stable = 1
+    polls = 1
+    settled = False
+
+    while polls < PANEL_MAX_POLLS:
+        # A ZERO IS NEVER A PLATEAU. A page that has drawn no control at all
+        # is a page that has not started, and three zeros in a row would
+        # otherwise "settle" instantly on precisely the blind reading this
+        # function exists to prevent.
+        if last > 0 and stable >= PANEL_STABLE_READS:
+            settled = True
+            break
+        # BUT A PAGE THAT NEVER STARTS IS NOT WAITED ON FOR THE WHOLE BUDGET.
+        # See :data:`PANEL_ZERO_POLLS`: holding the full 20 polls open on a
+        # page with no panel is how this reader became undrivable by the
+        # offline leak harness, and ``not_driven`` is never a pass.
+        if last <= 0 and polls >= PANEL_ZERO_POLLS:
+            break
+        # ``asyncio.sleep`` AND NOT ``page.wait_for_timeout``, AND A TEST
+        # CONVICTED THE OTHER CHOICE. The interval is THIS LOOP'S pacing, not
+        # something the page is being asked to do, so it must not require a
+        # page capability. Every shipped reader in this package touches a page
+        # only through ``evaluate``; the first version of this function called
+        # ``page.wait_for_timeout`` and therefore raised ``AttributeError`` on
+        # ``tests/test_the_search_shaper_emits_no_name.py``'s hostile page,
+        # which implements ``evaluate`` and nothing else. The tool swallowed it
+        # into ``_error`` and published a payload with no ``denominators`` --
+        # so a reader that quietly widened its demands on the page turned three
+        # name-safety proofs into KeyErrors. The narrower dependency is both
+        # the safer one and the one the rest of this package already keeps.
+        await asyncio.sleep(PANEL_POLL_MS / 1000)
+        reading = await read_filters(page)
+        polls += 1
+        current = coerce.as_count(reading.get("controls_seen"))
+        stable = stable + 1 if current == last else 1
+        last = current
+
+    if last > 0 and stable >= PANEL_STABLE_READS:
+        settled = True
+
+    return {
+        **reading,
+        "panel_wait": {
+            "polls": polls,
+            "settled": settled,
+            "controls_first": first,
+            "controls_last": last,
+            "stable_reads_required": PANEL_STABLE_READS,
+            "poll_ms": PANEL_POLL_MS,
+            "max_polls": PANEL_MAX_POLLS,
+            # WHICH BUDGET THIS READING SPENT. A caller seeing ``polls`` equal
+            # to this and ``controls_last`` zero is looking at a page that
+            # drew no panel at all, not at one this gave up on early.
+            "zero_polls": PANEL_ZERO_POLLS,
+        },
     }
 
 

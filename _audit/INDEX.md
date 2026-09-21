@@ -27,16 +27,16 @@ are listed as `(undated)`; no date is taken from git history, because
 
 | what | count |
 | --- | --- |
-| audit documents git tracks under `_audit` | 205 |
-| of those, carrying a `YYYY-MM-DD-` date prefix | 172 |
+| audit documents git tracks under `_audit` | 206 |
+| of those, carrying a `YYYY-MM-DD-` date prefix | 173 |
 | distinct dates | 14 |
 | documents with no level-1 heading | 1 |
-| `CORRECTS:` marker lines | 75 |
-| `CORRECTED BY:` marker lines | 75 |
-| distinct declared correction edges | 72 |
+| `CORRECTS:` marker lines | 77 |
+| `CORRECTED BY:` marker lines | 77 |
+| distinct declared correction edges | 74 |
 | documents something later corrects | 42 |
-| documents that correct something | 55 |
-| documents at either end of a cross-document edge | 80 |
+| documents that correct something | 56 |
+| documents at either end of a cross-document edge | 81 |
 | intra-document correction markers | 4 |
 | documents that correct themselves later on | 2 |
 | documents no correction marker touches at all | 123 |
@@ -439,6 +439,10 @@ document is dead; it says one thing in it was overtaken and names what.
 
 2026-09-21 &middot; Two readers for three rows, on two addresses nothing could navigate to --
 
+- CORRECTED BY [2026-09-21-the-fires-and-the-controls.md](2026-09-21-the-fires-and-the-controls.md)
+
+  > the first live firing of both readers built here. It refutes one claim this document carried forward: that `company_root.COUNT_PHRASES` being unmeasured could cost only a missing reading and never a wrong number. The shipped phrases match as SUFFIXES of LinkedIn's real lines, so they publish a number that is wrong -- one short for `N 33`, and for `N 54` not attributable to the opened Page at all, because that phrase occurs 2 to 8 times per Page. **Nothing measured in this document is withdrawn**: every number here was taken offline against fixtures and V8 and is still correct about what it measured. What is corrected is the forward-looking claim, and it is corrected in `company_root.py` and the tool docstring where a reader meets it.
+
 - CORRECTED BY [2026-09-21-the-landed-url.md](2026-09-21-the-landed-url.md)
 
   > the paragraph above is superseded the same day: the general case IS repaired, in `auth.assert_not_authwall` itself, so no tool in this package publishes its landing any more.
@@ -506,6 +510,10 @@ document is dead; it says one thing in it was overtaken and names what.
 - CORRECTED BY [2026-09-20-the-write-partition.md](2026-09-20-the-write-partition.md)
 
   > the claim that this ruling removes the connections list was put through the shipped read gate on 2026-09-20 and the address is ADMITTED, so the side effect described above no longer happens.
+
+- CORRECTED BY [2026-09-21-the-fires-and-the-controls.md](2026-09-21-the-fires-and-the-controls.md)
+
+  > rows `33`, `54` and `175`, the three this slice carried as COVERED-UNFIRED after the readers wave, were fired live for the first time and **all three moved COVERED-UNFIRED to COVERED-CANNOT-DELIVER. NONE BANKED.** Each fired cleanly and each cannot do the thing its row names: the shipped phrase is a SUFFIX of LinkedIn's real line (`<entity> & n other connections follow this page`), so the digit run beside it counts the connections OTHER than the one named -- and on `54` that phrase occurs **2 to 8 times per Page**, once per recommended organisation, so its number is not attributable to the Page it was read from at all; `175` returns `ambiguous` on 3 of 3 because no anchor on a group page wears the `/feed/update/` route its positive branch is gated on. **`54` is the one to read: it returned `count_read` on 6 of 6 Pages with six distinct values, and `company_root`'s own `disagreement` guard is structurally blind to what is wrong with it -- that guard compares different PHRASE POSITIONS, and this collapse happens between occurrences of the SAME phrase inside the page.** COVERED-UNFIRED 8 -> 5 and COVERED-CANNOT-DELIVER 8 -> 11; **GAP is UNCHANGED at 87** and the census total is 281 either way, re-measured by `scripts/count_census_states.py --expect J=57,P=55,M=82,N=87`.
 
 - CORRECTED BY [2026-09-21-the-fourteen-fired.md](2026-09-21-the-fourteen-fired.md)
 
@@ -1045,6 +1053,18 @@ reach is visible. The quoted reason here is the CORRECTOR's own
 
   > R2's headline claim that the ruling removes the connections list, measured false at HEAD through the shipped read gate; the back-pointer is written into R2 itself.
 
+### [2026-09-21-the-fires-and-the-controls.md](2026-09-21-the-fires-and-the-controls.md)
+
+2026-09-21 &middot; THE FIRES AND THE CONTROLS
+
+- CORRECTS [2026-09-21-the-three-readers.md](2026-09-21-the-three-readers.md)
+
+  > that wave's deliverable states, correctly for its own tree, that `company_root.COUNT_PHRASES` is an unmeasured guess whose first live fire would settle it, and that a wrong phrase could cost only a missing reading. The first live fire happened here and refutes the second half: the shipped phrases match as SUFFIXES of LinkedIn's real lines and publish a number that is wrong. That document is NOT rewritten, because everything it claimed was true of what it could measure; what is corrected is the claim it carried forward, and it is corrected in `company_root.py` and in the tool docstring where a reader will meet it.
+
+- CORRECTS [_census/network.md](_census/network.md)
+
+  > rows `33`, `54` and `175`, all three of which read COVERED-UNFIRED and are re-priced here to COVERED-CANNOT-DELIVER from their first live firing; each cell is corrected in place and none banks. The slice's COVERED-UNFIRED moves 8 to 5 and COVERED-CANNOT-DELIVER 8 to 11, with GAP unchanged at 87.
+
 ### [2026-09-21-the-fourteen-fired.md](2026-09-21-the-fourteen-fired.md)
 
 2026-09-21 &middot; THE FOURTEEN FIRED: one banked, one refused, twelve behind a press
@@ -1127,7 +1147,7 @@ ways, which is a fact about markers and not a verdict on the document.
 | (undated) | [_census/jobs.md](_census/jobs.md) | Census slice: JOBS, END TO END | **CORRECTED x5** |
 | (undated) | [_census/mcp-inventory.md](_census/mcp-inventory.md) | MCP inventory -- what this server ACTUALLY DELIVERS |  |
 | (undated) | [_census/messaging-and-content.md](_census/messaging-and-content.md) | Capability census -- MESSAGING AND CONTENT | **CORRECTED x3** |
-| (undated) | [_census/network.md](_census/network.md) | CENSUS SLICE: NETWORK AND PEOPLE | **CORRECTED x5** |
+| (undated) | [_census/network.md](_census/network.md) | CENSUS SLICE: NETWORK AND PEOPLE | **CORRECTED x6** |
 | (undated) | [_census/profile.md](_census/profile.md) | CENSUS SLICE: PROFILE, IDENTITY, SETTINGS AND PRIVACY | **CORRECTED x2** |
 | 2026-08-22 | [2026-08-22-linkedin-preflight.md](2026-08-22-linkedin-preflight.md) | 2026-08-22 - browser preflight, and a session_info that outlives the browser |  |
 | 2026-08-22 | [2026-08-22-parity-linkedin.md](2026-08-22-parity-linkedin.md) | LinkedIn parity, 2026-08-22 -- what he can do that this server cannot | **CORRECTED x1** |
@@ -1294,13 +1314,14 @@ ways, which is a fact about markers and not a verdict on the document.
 | 2026-09-20 | [2026-09-20-the-unfired-twentyseven.md](2026-09-20-the-unfired-twentyseven.md) | The unfired twenty-seven |  |
 | 2026-09-20 | [2026-09-20-the-write-partition.md](2026-09-20-the-write-partition.md) | THE WRITE PARTITION: 101 WRITE-DIRECTION GAP ROWS, AND THE 87 THAT STAY | corrects x1 |
 | 2026-09-21 | [2026-09-21-taint-does-not-survive-a-container.md](2026-09-21-taint-does-not-survive-a-container.md) | The output-sink guard misses a landed URL that reaches stdout |  |
+| 2026-09-21 | [2026-09-21-the-fires-and-the-controls.md](2026-09-21-the-fires-and-the-controls.md) | THE FIRES AND THE CONTROLS | corrects x2 |
 | 2026-09-21 | [2026-09-21-the-fourteen-fired.md](2026-09-21-the-fourteen-fired.md) | THE FOURTEEN FIRED: one banked, one refused, twelve behind a press | corrects x2 |
 | 2026-09-21 | [2026-09-21-the-jobs-direction.md](2026-09-21-the-jobs-direction.md) | THE JOBS DIRECTION: the fifth of the GAP that was never asked the question | corrects x1 |
 | 2026-09-21 | [2026-09-21-the-landed-url.md](2026-09-21-the-landed-url.md) | A LANDING IS A STRING THE SITE CHOSE, AND THIS PROCESS HAD NO ALLOWLIST FOR IT | corrects x1 |
 | 2026-09-21 | [2026-09-21-the-open-queue.md](2026-09-21-the-open-queue.md) | The open queue, 2026-09-21 at master `9dbaad2` |  |
 | 2026-09-21 | [2026-09-21-the-proximity-field.md](2026-09-21-the-proximity-field.md) | The proximity field -- census row `J 40`, read per-job network proximity |  |
 | 2026-09-21 | [2026-09-21-the-read-triage.md](2026-09-21-the-read-triage.md) | The read rows are GATED, not backlogged -- but nineteen of the fifty-nine are not | **CORRECTED x1** corrects x2 |
-| 2026-09-21 | [2026-09-21-the-three-readers.md](2026-09-21-the-three-readers.md) | Two readers for three rows, on two addresses nothing could navigate to -- | **CORRECTED x1** |
+| 2026-09-21 | [2026-09-21-the-three-readers.md](2026-09-21-the-three-readers.md) | Two readers for three rows, on two addresses nothing could navigate to -- | **CORRECTED x2** |
 
 ## 6. What the scan rejected, could not join, or had to repair
 

@@ -27,6 +27,7 @@ ever produced, which is the definition of a control that cannot fail.
 
 from __future__ import annotations
 
+import asyncio
 import inspect
 import json
 import os
@@ -969,4 +970,191 @@ def test_the_module_admits_nothing() -> None:
         assert forbidden not in source, (
             f"{forbidden!r} appears in the shaper. Admission and shaper land "
             "in the same commit or neither lands -- and this is the shaper."
+        )
+
+
+# ---------------------------------------------------------------------------
+# THE PANEL RACE
+# ---------------------------------------------------------------------------
+#
+# ``linkedin_people_search_shape`` returned its filters on two of three
+# end-to-end firings; the third read a page that had drawn 45 of its 83
+# controls and reported every filter as zero. Measured again under load on
+# 2026-09-21 over eight firings: three read 45 controls and offered zero
+# filters, two read 62 and offered three, one read 73 and offered three.
+# After the fix, eight of eight read 83 under the same load.
+#
+# THE TESTS BELOW OPEN NO BROWSER. They drive the shipped coroutine against a
+# page whose control count rises on a schedule this file sets, which is the
+# one thing a live firing cannot give you: a REPRODUCIBLE trajectory.
+
+
+class _RisingPanel:
+    """A page whose filter panel draws a little more on every read.
+
+    ``totals`` is the control count per read. The reading's shape is exactly
+    what ``dom.read_search_filters`` returns, because ``read_filters`` is the
+    function under test and a fake answering a different shape would be
+    testing itself.
+
+    **IT IMPLEMENTS ``evaluate`` AND NOTHING ELSE, DELIBERATELY.** Every
+    shipped reader in this package touches a page only through ``evaluate``,
+    and the first version of ``read_filters_when_settled`` quietly broke that
+    by calling ``page.wait_for_timeout``. It raised ``AttributeError`` on
+    ``tests/test_the_search_shaper_emits_no_name.py``'s hostile page, the tool
+    swallowed it, and three name-safety proofs became KeyErrors. This fake is
+    narrow on purpose so the same widening cannot pass here again.
+    """
+
+    def __init__(self, totals: list[int], matched_at: int = 60) -> None:
+        self._totals = list(totals)
+        self._matched_at = matched_at
+        self.reads = 0
+
+    async def evaluate(self, script, arg=None):  # noqa: ANN001 - fake page
+        index = min(self.reads, len(self._totals) - 1)
+        total = self._totals[index]
+        self.reads += 1
+        term_count = (arg or {}).get("termCount", 0)
+        # A PANEL BELOW ITS THRESHOLD MATCHES NOTHING, which is the live
+        # correlation this fake reproduces: 45 controls -> 0 filters.
+        offered = 1 if total >= self._matched_at else 0
+        return {
+            "counts": [offered] + [0] * max(term_count - 1, 0),
+            "controls": total,
+            "matched_controls": offered,
+            "unmatched_controls": max(total - offered, 0),
+            "empty_labels": 0,
+        }
+
+    # NO ``wait_for_timeout``. See the class docstring: the wait paces itself
+    # with ``asyncio.sleep`` precisely so a page needs no method but
+    # ``evaluate``, and this fake is the guard on that.
+
+
+def test_the_panel_wait_returns_the_SETTLED_reading_not_the_first_one(monkeypatch) -> None:
+    """The fix, stated as the behaviour that was missing.
+
+    The panel climbs 45 -> 62 -> 73 -> 83 and stops. The shipped wait must
+    return the reading taken at 83, and must say so in its trajectory.
+    """
+    monkeypatch.setattr(search_results, "PANEL_POLL_MS", 0)
+    page = _RisingPanel([45, 62, 73, 83, 83, 83, 83, 83, 83])
+    reading = asyncio.run(search_results.read_filters_when_settled(page))
+
+    assert reading["controls_seen"] == 83
+    wait = reading["panel_wait"]
+    assert wait["settled"] is True
+    assert wait["controls_first"] == 45
+    assert wait["controls_last"] == 83
+    assert wait["polls"] > 1
+    assert search_results.tally_filters(reading["counts"])["filters_offered"] == 1
+
+
+def test_THIS_CONTROL_CAN_FAIL_the_unwaited_reader_returns_the_blind_page() -> None:
+    """The partner red. Without the wait, the SAME page reads zero filters.
+
+    An instrument enters only if it has been shown failing, and the failure
+    this one shows is the defect itself: ``read_filters`` on the identical
+    trajectory takes the 45-control reading and reports no filter at all. If
+    a future edit reverts the tool to the unwaited call, the test above goes
+    red while this one stays green -- which is the pair working rather than
+    two tests agreeing.
+    """
+    page = _RisingPanel([45, 62, 73, 83, 83, 83, 83, 83, 83])
+    reading = asyncio.run(search_results.read_filters(page))
+
+    assert reading["controls_seen"] == 45
+    assert search_results.tally_filters(reading["counts"])["filters_offered"] == 0
+    assert "panel_wait" not in reading
+
+
+def test_a_page_stuck_at_zero_never_reports_itself_SETTLED(monkeypatch) -> None:
+    """Three zeros in a row is not a plateau, it is a page that never started.
+
+    This branch is what makes the wait honest rather than merely patient: a
+    stability rule without it settles INSTANTLY on exactly the blind reading
+    the function exists to prevent.
+    """
+    monkeypatch.setattr(search_results, "PANEL_POLL_MS", 0)
+    page = _RisingPanel([0] * 40)
+    reading = asyncio.run(search_results.read_filters_when_settled(page))
+
+    wait = reading["panel_wait"]
+    assert wait["settled"] is False
+    assert wait["controls_last"] == 0
+    # THE SHORT BUDGET, NOT THE FULL ONE. A page that never draws a control
+    # gets ``PANEL_ZERO_POLLS`` and not ``PANEL_MAX_POLLS`` -- holding the
+    # full budget open here is what made this reader undrivable by the
+    # offline leak harness, and its baseline calls `not_driven` never a pass.
+    assert wait["polls"] == search_results.PANEL_ZERO_POLLS
+    assert search_results.PANEL_ZERO_POLLS < search_results.PANEL_MAX_POLLS
+
+
+def test_a_panel_wedged_LOW_settles_but_publishes_that_it_never_grew(monkeypatch) -> None:
+    """``settled`` is not ``complete``, and the payload must let a caller see it.
+
+    A panel stuck at 45 is stable at 45, and nothing in this process knows the
+    page meant to draw 83. So the claim made is the narrow one -- the count
+    stopped moving -- and ``controls_first == controls_last`` is how a reader
+    tells a wedged panel from one that grew into place.
+    """
+    monkeypatch.setattr(search_results, "PANEL_POLL_MS", 0)
+    page = _RisingPanel([45] * 40)
+    reading = asyncio.run(search_results.read_filters_when_settled(page))
+
+    wait = reading["panel_wait"]
+    assert wait["settled"] is True
+    assert wait["controls_first"] == wait["controls_last"] == 45
+    assert search_results.tally_filters(reading["counts"])["filters_offered"] == 0
+    # AND THE WAIT ACTUALLY RAN. Without this line the test passed under BOTH
+    # planted defects -- a wedged panel and a removed wait produce the same
+    # first/last pair, so the assertions above alone could not tell them
+    # apart. Measured by planting, not by reading it back.
+    assert wait["polls"] == search_results.PANEL_STABLE_READS
+
+
+def test_the_wait_is_BOUNDED_and_cannot_poll_forever(monkeypatch) -> None:
+    """A panel that grows on every read must still terminate.
+
+    An unbounded wait on a surface that lazy-loads is a hang, and a hang in a
+    tool body holds the single-flight browser lock for the whole session.
+    """
+    monkeypatch.setattr(search_results, "PANEL_POLL_MS", 0)
+    page = _RisingPanel(list(range(1, 400)))
+    reading = asyncio.run(search_results.read_filters_when_settled(page))
+
+    wait = reading["panel_wait"]
+    assert wait["polls"] == search_results.PANEL_MAX_POLLS
+    assert wait["settled"] is False
+    assert page.reads == search_results.PANEL_MAX_POLLS, (
+        "every poll must be a real read; a wait that stops reading is a "
+        "sleep with a verdict attached"
+    )
+
+
+def test_the_SHIPPED_poll_interval_is_positive_and_the_budget_is_finite() -> None:
+    """The constants, unpatched -- the tests above set the interval to zero.
+
+    **THIS TEST EXISTS BECAUSE ITS ASSERTION WAS IN THE WRONG PLACE FIRST.**
+    It sat inside the bounded-wait test, which monkeypatches
+    ``PANEL_POLL_MS`` to 0 for speed, so it asserted ``0 > 0`` and went red
+    immediately. The lesson is the reusable half: a test that patches a
+    constant cannot also be the test that the constant is sane, and a poll
+    loop with a zero interval is not a wait -- it is twenty reads as fast as
+    the page will answer.
+    """
+    assert search_results.PANEL_POLL_MS > 0
+    assert search_results.PANEL_MAX_POLLS > search_results.PANEL_STABLE_READS
+    assert search_results.PANEL_STABLE_READS >= 2, (
+        "one unchanged read is a pause, not a plateau"
+    )
+
+
+def test_the_panel_wait_takes_no_label_needle_or_address() -> None:
+    """The same signature rule the rest of this surface lives under."""
+    signature = inspect.signature(search_results.read_filters_when_settled)
+    for name in signature.parameters:
+        assert name.lower() not in _ADDRESS_SHAPED, (
+            f"{name!r} would let a needle reach the panel wait"
         )

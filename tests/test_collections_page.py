@@ -145,6 +145,72 @@ def test_the_control_fixture_would_match_every_grouping_and_one_decoy() -> None:
     )
 
 
+def test_the_control_has_an_expectation_and_it_predicts_the_decoy() -> None:
+    """The fixture is held to a WRITTEN prediction, not only to its own input.
+
+    **THIS MODULE SHIPPED WITHOUT ONE UNTIL 2026-09-21.** Its three siblings --
+    ``anchors``, ``search_results`` (twice) and ``company_root`` -- each wrote
+    down what their fixture must produce. This one did not, and the test above
+    is why the gap was invisible: it asserts the fixture still CONTAINS the
+    right strings, which is a claim about the input. Nothing said what the
+    output had to be, so once the fixture was finally driven through a real
+    engine there was nothing for the result to disagree with.
+
+    ``UNMATCHED`` IS THE ENTRY THAT MATTERS. Five matches is also the shape a
+    matcher that salutes every heading makes; the decoy is what separates them,
+    so it is PREDICTED here rather than merely present in the fixture.
+    """
+    expectation = collections_page.CONTROL_EXPECTATION
+
+    for term in collections_page.GROUPINGS:
+        assert expectation.get(term) == 1, (
+            f"{term!r} is missing from the expectation, so the control makes "
+            "no prediction about it."
+        )
+    assert expectation.get(collections_page.UNMATCHED) == 1, (
+        "the expectation does not predict the DECOY. Without that entry a "
+        "matcher that matched everything it was shown would satisfy it."
+    )
+    assert set(expectation) == set(collections_page.GROUPINGS) | {
+        collections_page.UNMATCHED
+    }, (
+        "the expectation names something the fixture cannot produce, or has "
+        "stopped naming something it can."
+    )
+
+
+def test_THIS_CONTROL_CAN_FAIL_a_saluting_matcher_satisfies_a_decoyless_table() -> None:
+    """The partner red, and it convicts the expectation rather than the code.
+
+    A matcher that returns the FIRST grouping for every heading it is shown is
+    broken in the way this surface's zero-reading scar was about. Scored
+    against the shipped expectation it fails. Scored against the same table
+    with the decoy entry removed -- the version this module shipped with, in
+    effect, by shipping no table at all -- it is indistinguishable from a
+    working one on the count that would have been checked.
+    """
+    # Six headings, and a saluting matcher calls all six the first grouping.
+    first = collections_page.GROUPINGS[0]
+    saluted = collections_page.tally([0] * 6)["by_term"]
+
+    assert saluted.get(collections_page.UNMATCHED, 0) == 0, (
+        "a saluting matcher leaves nothing unmatched -- that is the tell"
+    )
+    assert saluted.get(first) == 6
+
+    decoyless = {
+        term: count
+        for term, count in collections_page.CONTROL_EXPECTATION.items()
+        if term != collections_page.UNMATCHED
+    }
+    assert saluted != collections_page.CONTROL_EXPECTATION
+    assert (
+        saluted.get(collections_page.UNMATCHED, 0)
+        != collections_page.CONTROL_EXPECTATION[collections_page.UNMATCHED]
+    ), "the decoy entry is what the saluting matcher fails on"
+    assert collections_page.UNMATCHED not in decoyless
+
+
 @pytest.mark.parametrize(
     "mutation,expected",
     [

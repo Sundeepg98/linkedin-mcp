@@ -78,10 +78,15 @@ PACKAGE = REPO / "linkedin_server"
 #: Owned by ``tests/test_reader_reachability.py``. Not re-checked here.
 COVERED_ELSEWHERE = {"dom.py"}
 
-#: THE INVENTORY, AND IT IS EMPTY. Every reader outside ``dom.py`` that no
-#: other module calls, with the reason it is in that state. **Not a list of
-#: readers cleared to be unwired** -- a list of readers KNOWN to be, so the
-#: next one arrives in a diff.
+#: THE INVENTORY. Every reader outside ``dom.py`` that no other module calls,
+#: with the reason it is in that state. **Not a list of readers cleared to be
+#: unwired** -- a list of readers KNOWN to be, so the next one arrives in a
+#: diff.
+#:
+#: IT WAS EMPTY FROM 2026-09-05 TO 2026-09-21 and now holds exactly one line,
+#: which is NOT a reader nobody reaches -- see that entry's own reason. The
+#: distinction is the whole point of requiring reasons: a count of one here
+#: says "something is worth reading", never "something is broken".
 #:
 #: EMPTIED 2026-09-05 by wiring all three, not by deleting the check. What was
 #: here, and where each one went:
@@ -149,7 +154,27 @@ COVERED_ELSEWHERE = {"dom.py"}
 #: below (`test_the_detector_fires_on_a_planted_unwired_reader` and its
 #: silent-on-a-called-reader twin) are what keep that readable as a
 #: measurement rather than as an absence.
-KNOWN_UNWIRED: dict[str, str] = {}
+#: REFILLED 2026-09-21 WITH ONE ENTRY, AND IT IS NOT AN UNWIRED READER -- it
+#: is the detector's own definition meeting a one-hop wiring for the first
+#: time. Read the reason before treating the count as a defect count.
+KNOWN_UNWIRED: dict[str, str] = {
+    "search_results.read_filters": (
+        "NOT UNWIRED -- WIRED ONE HOP AWAY, which this detector cannot see by "
+        "construction. `linkedin_people_search_shape` stopped calling it "
+        "directly on 2026-09-21 and now calls "
+        "`search_results.read_filters_when_settled`, which polls it until the "
+        "filter panel stops growing (the tool read a page that had drawn 45 "
+        "of its 83 controls and reported every filter as zero). The wait lives "
+        "in the shaper rather than in `server.py` so that the instrument "
+        "measuring readiness is the instrument that takes the reading, and "
+        "because a `wait_for_selector` here would be a guess at LinkedIn's "
+        "class names that fails SILENTLY when wrong. `_unwired` asks whether "
+        "any module OTHER than this one calls the reader, so a caller in the "
+        "same file reads as no caller at all. The entry is therefore a record "
+        "of a detector boundary, not of a reader nobody reaches: delete it if "
+        "and only if some other module calls `read_filters` directly again."
+    )
+}
 
 
 def _called_names(tree: ast.AST) -> set[str]:
