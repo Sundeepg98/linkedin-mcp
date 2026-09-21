@@ -623,60 +623,74 @@ is why the repair in section 5.1 had to land before the baseline could move.
 
 ### The gate
 
-`python scripts/impact_gate.py` selected **133 test files by impact plus 15
-corpus-wide guards = 134 of 208**, then said so and widened:
+Run four times. **The one that counts is the last, and it is the only one taken
+with the tree standing still:**
 
 ```
-WIDENING TO THE FULL SUITE, because the impact set is 134 of 208 test files
-(64%), at or above the 45% line where running everything costs about the same
-and answers more.
+impact-gate: 10 changed path(s) -> 145 SELECTED + 15 corpus-wide = 146 test file(s).
+  WIDENING TO THE FULL SUITE, because the impact set is 146 of 209 test files
+  (70%), at or above the 45% line where running everything costs about the same
+  and answers more.
+
+  PASS over the FULL SUITE (7990 tests) in 1065.1s.
+  Still windows-only. CI runs three platforms and remains the certifier.
 ```
 
-**So there is no un-run remainder to name: it ran all 208 files.** The scoped
-set is still worth reading, because it shows how the change reaches the corpus:
-`linkedin_server/writes.py` by import, `tests/plantedpage.py` by import,
-`tests/reader_leak_baseline.json` by directory sweep, and the new audit document
-and script by the corpus-wide sweeps that enumerate the tracked set.
+**WHAT IT SAYS IT DID NOT RUN, in its own last line: the other two platforms.**
+It ran every one of the 209 test files -- there is no un-run file to name,
+because the selector refused to be scoped at 70% -- and it is a ONE-PLATFORM
+answer. The scoped set is still worth reading for how this change reaches the
+corpus: `linkedin_server/writes.py` and `tests/plantedpage.py` by import,
+`tests/reader_leak_baseline.json` by directory sweep, and the new documents and
+scripts through the corpus-wide sweeps that enumerate the tracked set. One
+selection edge is new and was not predicted here: `tests/refusinggrant.py`
+reaches `tests/test_compose_fields.py` because it *"pins a shared module-level
+constant"*.
 
-**ONE RED IS LEFT AND IT IS NOT THIS CHANGE'S**, which is a claim with evidence
-rather than a dismissal. `tests/test_click_is_not_its_own_evidence.py` failed
-in both full-suite runs, with a DIFFERENT member each time:
+**THE THREE EARLIER RUNS WERE RED, AND EVERY RED IS ACCOUNTED FOR.** They are
+recorded rather than dropped, because a green taken after three reds is only
+worth what the reds were.
 
-| run | failing member |
-| --- | --- |
-| first | `test_the_refusal_says_when_a_matcher_would_have_separated_them`, `test_a_prefixed_listbox_reproduces_the_live_census_signature` |
-| second | `test_the_counts_can_differ_so_the_instrument_has_been_shown_to_speak` |
+**Class 1 -- real, and fixed.** An undeclared urn placeholder (section 6.1); a
+marker naming a source file where only a document in this corpus may be named;
+two derived registers needing regeneration; and one bullet that sat two lines
+from a word on `test_a_correction_is_findable_from_the_claim`'s deliberately
+loose vocabulary, which makes an untriaged pair. **That last one fired twice --
+the second time on the paragraph written here to explain the first, which
+quoted the trigger word beside the same filename.** Both were prose and neither
+was a claim of the kind that guard governs; it was right to stop a human both
+times, and the whole cost of its looseness was two rewordings.
 
-Three facts settle it:
+**Class 2 -- load, not defect.** `tests/test_click_is_not_its_own_evidence.py`
+failed in the two loaded runs with a DIFFERENT member each time -- first
+`test_the_refusal_says_when_a_matcher_would_have_separated_them` and
+`test_a_prefixed_listbox_reproduces_the_live_census_signature`, then
+`test_the_counts_can_differ_so_the_instrument_has_been_shown_to_speak` -- and
+passed in the quiet run. All three route through that file's `_census` helper,
+which calls **`writes._typeahead_gate`**, the twin this wave did NOT touch; the
+test that does reach `_recipient_gate` passed in every run. They drive a real
+local headless browser under a `_fast_wait` monkeypatch that shortens its
+timeouts, and the loaded runs were taken with **9 concurrent pytest processes
+on the box** from sibling worktrees (`Get-CimInstance Win32_Process`). A
+varying failing member is what separates load from a defect.
 
-* all three route through that file's `_census` helper, which calls
-  **`writes._typeahead_gate`** -- the twin this wave did NOT touch. The
-  function this wave changed, `_recipient_gate`, is reached by a different
-  test in the same file, and that test passed in both runs;
-* the file passes whole in isolation (31 passed, then the three named above
-  re-run green);
-* the tests drive a real local headless browser under a `_fast_wait`
-  monkeypatch that shortens its timeouts, and both full-suite runs happened
-  with **9 concurrent pytest processes on the box** from other worktrees
-  (measured with `Get-CimInstance Win32_Process`). A shortened wait on a
-  saturated box is the classic shape, and a varying failing member is what
-  distinguishes it from a defect.
+**Class 3 -- SELF-INFLICTED, and it is the one worth writing down.** The third
+run reported two reds in `tests/test_stale_process_is_announced.py`:
+`test_a_matching_commit_is_not_stale_and_adds_nothing` and
+`test_arm_a2_an_uncommitted_edit_to_a_loaded_module_is_stale`. They pass 20/20
+on a quiet tree. The cause was mine: **I committed while that run's pytest was
+still executing.** Read from the source rather than guessed -- the first
+asserts `block["loaded_commit"] == block["disk_commit"]` and the second asserts
+`block["commit_moved"] is False`, so a commit landing mid-run is precisely what
+they detect.
 
-The other failures the first run reported were real and are fixed: an
-undeclared urn placeholder (section 6.1), a marker naming a source file rather
-than a document in this corpus, and two derived registers that needed
-regenerating.
+> **A GATE WHOSE SUBJECT IS THE TREE CANNOT BE RUN WHILE YOU ARE MOVING THE
+> TREE**, and the instrument that caught it was this repository's own
+> stale-process detector, doing to the author exactly what it exists to do to a
+> server running code that no longer exists on disk.
 
-One more is worth reporting because it happened TWICE, the second time to the
-sentence describing the first. `test_a_correction_is_findable_from_the_claim`
-pairs any citation of a document in this corpus with a deliberately loose
-vocabulary within two lines, and demands that the pair be either declared or
-triaged. A bullet listing the regenerated registers sat two lines from a word
-on that list, so the pair went untriaged -- and the paragraph written here to
-explain that then quoted the word beside the same filename and tripped it
-again. Both were prose, neither was a correction claim, and the guard was
-right to stop a human both times: that is what a loose vocabulary buys, and
-the cost of it is exactly two rewordings.
+The final run was therefore taken with `--against f729a2a` over the committed
+range, with `git status` empty before and after.
 
 ### Files
 
