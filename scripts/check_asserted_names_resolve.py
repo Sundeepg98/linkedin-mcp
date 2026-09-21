@@ -107,9 +107,21 @@ decision space, at 5 occurrence sites, and every one is labelled below.
 WHAT THIS GUARD DOES NOT DO. It does not reach names carried in prose with no
 slot and no backticks -- `find_asserted_names` would have to guess which
 vocabulary such a token is drawn from, and guessing is how the 4%-precision
-version of this check gets built. It does not judge whether a RESOLVING citation
-points at the right thing. It does not follow `path:line` locators into their
-targets (a line number is not an anchor in a live tree; see INSTRUMENTS 3.5).
+version of this check gets built. It does not judge whether a RESOLVING TOOL or
+BLOCKER name is the right one for its sentence. It does not follow `path:line`
+locators carried in PROSE into their targets (a line number is not an anchor in
+a live tree; see INSTRUMENTS 3.5).
+
+ONE ITEM CAME OFF THAT LIST ON 2026-09-21, and the reason it is recorded here is
+that this guard's own honesty line is what found it. The line used to end
+"...and locator line numbers", and all the damage was inside that clause: of the
+137 `L<number>` locators in `_audit/_census/blocker-assignments.tsv` pointing at
+a census slice, ZERO resolved to the row they were evidence for. They are now
+row-label citations, and `scripts/check_census_locators_resolve.py` gates them.
+That guard is SEPARATE rather than bolted on here deliberately -- its subject is
+a six-column TSV resolved against a row-label index, not names in markdown
+resolved against two registries, and a guard whose red means two unrelated
+things is a guard whose red gets read as noise.
 
     ./venv/Scripts/python.exe scripts/check_asserted_names_resolve.py
     ./venv/Scripts/python.exe scripts/check_asserted_names_resolve.py --all
@@ -667,8 +679,13 @@ def main(argv: list[str] | None = None) -> int:
     print(f"cleared by an author mark  : {considered - len(bad)}")
     print(f"ASSERTED and ABSENT        : {len(bad)}")
     print("NOT checked: unbackticked UPPER-KEBAB outside a slot, prose names of "
-          "no fixed vocabulary, whether a RESOLVING citation points at the "
-          "right thing, and locator line numbers.")
+          "no fixed vocabulary, and whether a resolving TOOL or BLOCKER name is "
+          "the right one for the sentence it sits in.")
+    print("NO LONGER on that list, 2026-09-21: locators into a census slice. "
+          "`scripts/check_census_locators_resolve.py` resolves every locator in "
+          "`_audit/_census/blocker-assignments.tsv` whose source is one of the "
+          "four slices, and fails on one that names the wrong row. Line numbers "
+          "in PROSE citations (`file.md:123`) are still unchecked by anything.")
     if not bad:
         print("\nno asserted name is absent.")
         return 0

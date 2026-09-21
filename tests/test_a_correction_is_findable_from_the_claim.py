@@ -2621,6 +2621,55 @@ NOT_A_CORRECTION: dict[tuple[str, str], str] = {
         "the write-partition's queue or its precedent citation was mistaken."
     ),
 
+    # 2026-09-21, the LOCATOR-DRIFT wave. THE CORRECTED THING IS THIS WAVE'S
+    # OWN FIRST DRAFT, AND THE CITED FILE IS THE EVIDENCE THAT CONVICTED IT.
+    ("2026-09-21-the-locators-that-point-elsewhere.md", "profile.md"): (
+        "THE SUBJECT OF THE CORRECTION IS AN UNCOMMITTED DRAFT OF THIS "
+        "WAVE'S OWN RESOLVER, NOT THE CITED CENSUS FILE. The flagged line "
+        "reads *'The first resolver decided \"is this a line number\" from "
+        "the SPELLING `L<digits>`'*, and what follows says that resolver was "
+        "wrong and was changed before anything shipped. `profile.md` appears "
+        "beside it as the MEASUREMENT that convicted the draft: that slice "
+        "numbers eight of its own rows `L1` .. `L8`, so a shape-only rule "
+        "would have refused the four correct citations of those rows and "
+        "reported them as rot. "
+        "**THE ARROW POINTS AT THE INSTRUMENT, AND THE CITED FILE IS THE "
+        "REASON, NOT THE TARGET.** Declaring a CORRECTS: pair would put a "
+        "`CORRECTED BY:` marker on `profile.md` announcing a repair to a file "
+        "this wave did not edit -- and it edited no census row at all, by "
+        "constraint, because four waves were moving rows that day. A reader "
+        "arriving at that marker would go looking for a changed row and find "
+        "none, which is the plausible-wrong-answer failure this whole "
+        "document is about, committed by the back-pointer meant to prevent "
+        "it. "
+        "**WHAT WOULD MAKE THIS ENTRY WRONG:** a later edit to that section "
+        "that asserts something `profile.md` states is mistaken -- a wrong "
+        "row label, a miscounted section L, a state cell misread. Nothing in "
+        "it does today; every claim it makes about that slice is a reading "
+        "of the slice as it stands."
+    ),
+
+    # 2026-09-21, the same wave. LIST PROXIMITY, AND THE MATCHED WORD IS THIS
+    # GUARD'S OWN FILENAME -- a shape the +-2 window will keep producing.
+    ("2026-09-21-the-locators-that-point-elsewhere.md", "RULINGS.md"): (
+        "THE MATCHED WORD IS A FILENAME IN THE NEIGHBOURING BULLET. The line "
+        "is one entry of a file manifest -- *'`_audit/RULINGS.md` -- DERIVED, "
+        "regenerated with `scripts/build_rulings_index.py --write`'* -- and "
+        "two lines below it the same manifest lists "
+        "`tests/test_a_correction_is_findable_from_the_claim.py`, whose NAME "
+        "carries the vocabulary. A bulleted list has no blank lines between "
+        "items, so +-2 reaches the neighbours exactly as it does in a markdown "
+        "table, which is the cost this file's own preamble records paying. "
+        "**REGENERATING A DERIVED FILE IS NOT CORRECTING IT.** `RULINGS.md` is "
+        "output: it was rebuilt because the wave added a document and the "
+        "register prints a corpus count, and the entire diff is that count "
+        "going 216 to 217. Nothing the register asserted was withdrawn, so "
+        "there is no claim for a `CORRECTED BY:` marker to point a reader at. "
+        "**WHAT WOULD MAKE THIS ENTRY WRONG:** that document coming to argue "
+        "that a registered ruling, an anchor or a declaration in `RULINGS.md` "
+        "is mistaken, rather than that its generator was run."
+    ),
+
 }
 
 
