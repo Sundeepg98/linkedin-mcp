@@ -1,0 +1,2210 @@
+{
+  "summary": {
+    "files_scanned": 212,
+    "class_counts": {
+      "PRACTISES": 1,
+      "MIXED": 6,
+      "PURE_SUBSCRIPT": 57,
+      "NEITHER": 148
+    },
+    "convention_comment_files": [
+      "tests/test_activity_items.py",
+      "tests/test_editor_fields.py"
+    ],
+    "honour_errors": [],
+    "breaking_errors": [],
+    "comment_errors": []
+  },
+  "files": [
+    {
+      "file": "tests/conftest.py",
+      "honouring_strict": 0,
+      "honouring_weak": 0,
+      "breaking": 0,
+      "class": "NEITHER",
+      "has_convention_comment": false
+    },
+    {
+      "file": "tests/leakwalk.py",
+      "honouring_strict": 0,
+      "honouring_weak": 0,
+      "breaking": 0,
+      "class": "NEITHER",
+      "has_convention_comment": false
+    },
+    {
+      "file": "tests/plantedpage.py",
+      "honouring_strict": 0,
+      "honouring_weak": 0,
+      "breaking": 0,
+      "class": "NEITHER",
+      "has_convention_comment": false
+    },
+    {
+      "file": "tests/repo_paths.py",
+      "honouring_strict": 0,
+      "honouring_weak": 0,
+      "breaking": 0,
+      "class": "NEITHER",
+      "has_convention_comment": false
+    },
+    {
+      "file": "tests/test_a_cited_sha_resolves.py",
+      "honouring_strict": 0,
+      "honouring_weak": 0,
+      "breaking": 0,
+      "class": "NEITHER",
+      "has_convention_comment": false
+    },
+    {
+      "file": "tests/test_a_correction_is_findable_from_the_claim.py",
+      "honouring_strict": 0,
+      "honouring_weak": 0,
+      "breaking": 0,
+      "class": "NEITHER",
+      "has_convention_comment": false
+    },
+    {
+      "file": "tests/test_a_covered_row_names_the_artifact_that_covers_it.py",
+      "honouring_strict": 0,
+      "honouring_weak": 0,
+      "breaking": 0,
+      "class": "NEITHER",
+      "has_convention_comment": false
+    },
+    {
+      "file": "tests/test_a_named_cost_names_a_tool_that_can_incur_it.py",
+      "honouring_strict": 0,
+      "honouring_weak": 0,
+      "breaking": 0,
+      "class": "NEITHER",
+      "has_convention_comment": false
+    },
+    {
+      "file": "tests/test_a_performable_action_can_reach_its_control.py",
+      "honouring_strict": 0,
+      "honouring_weak": 0,
+      "breaking": 0,
+      "class": "NEITHER",
+      "has_convention_comment": false
+    },
+    {
+      "file": "tests/test_a_person_name_is_never_a_literal.py",
+      "honouring_strict": 0,
+      "honouring_weak": 0,
+      "breaking": 0,
+      "class": "NEITHER",
+      "has_convention_comment": false
+    },
+    {
+      "file": "tests/test_a_probe_closes_its_own_tab.py",
+      "honouring_strict": 0,
+      "honouring_weak": 0,
+      "breaking": 0,
+      "class": "NEITHER",
+      "has_convention_comment": false
+    },
+    {
+      "file": "tests/test_a_retired_row_rests_on_a_live_assertion.py",
+      "honouring_strict": 0,
+      "honouring_weak": 0,
+      "breaking": 0,
+      "class": "NEITHER",
+      "has_convention_comment": false
+    },
+    {
+      "file": "tests/test_a_sanitiser_earns_its_entry.py",
+      "honouring_strict": 0,
+      "honouring_weak": 0,
+      "breaking": 0,
+      "class": "NEITHER",
+      "has_convention_comment": false
+    },
+    {
+      "file": "tests/test_a_settled_count_is_named_once.py",
+      "honouring_strict": 0,
+      "honouring_weak": 0,
+      "breaking": 0,
+      "class": "NEITHER",
+      "has_convention_comment": false
+    },
+    {
+      "file": "tests/test_a_spec_may_not_assert_what_the_code_denies.py",
+      "honouring_strict": 0,
+      "honouring_weak": 0,
+      "breaking": 0,
+      "class": "NEITHER",
+      "has_convention_comment": false
+    },
+    {
+      "file": "tests/test_a_thread_id_never_leaves_the_module.py",
+      "honouring_strict": 0,
+      "honouring_weak": 0,
+      "breaking": 6,
+      "class": "PURE_SUBSCRIPT",
+      "has_convention_comment": false
+    },
+    {
+      "file": "tests/test_a_verdict_earns_its_entry.py",
+      "honouring_strict": 0,
+      "honouring_weak": 0,
+      "breaking": 0,
+      "class": "NEITHER",
+      "has_convention_comment": false
+    },
+    {
+      "file": "tests/test_activity_items.py",
+      "honouring_strict": 16,
+      "honouring_weak": 16,
+      "breaking": 125,
+      "class": "MIXED",
+      "has_convention_comment": true
+    },
+    {
+      "file": "tests/test_addressing_is_not_permission.py",
+      "honouring_strict": 0,
+      "honouring_weak": 0,
+      "breaking": 0,
+      "class": "NEITHER",
+      "has_convention_comment": false
+    },
+    {
+      "file": "tests/test_an_asserted_name_resolves.py",
+      "honouring_strict": 0,
+      "honouring_weak": 0,
+      "breaking": 0,
+      "class": "NEITHER",
+      "has_convention_comment": false
+    },
+    {
+      "file": "tests/test_an_outage_is_never_filed_as_an_absence.py",
+      "honouring_strict": 0,
+      "honouring_weak": 0,
+      "breaking": 0,
+      "class": "NEITHER",
+      "has_convention_comment": false
+    },
+    {
+      "file": "tests/test_analytics_creator_boundary.py",
+      "honouring_strict": 0,
+      "honouring_weak": 0,
+      "breaking": 0,
+      "class": "NEITHER",
+      "has_convention_comment": false
+    },
+    {
+      "file": "tests/test_anchors.py",
+      "honouring_strict": 0,
+      "honouring_weak": 0,
+      "breaking": 0,
+      "class": "NEITHER",
+      "has_convention_comment": false
+    },
+    {
+      "file": "tests/test_api_call_sites.py",
+      "honouring_strict": 0,
+      "honouring_weak": 0,
+      "breaking": 0,
+      "class": "NEITHER",
+      "has_convention_comment": false
+    },
+    {
+      "file": "tests/test_apply_fixture.py",
+      "honouring_strict": 0,
+      "honouring_weak": 0,
+      "breaking": 26,
+      "class": "PURE_SUBSCRIPT",
+      "has_convention_comment": false
+    },
+    {
+      "file": "tests/test_apply_modal_fixture.py",
+      "honouring_strict": 0,
+      "honouring_weak": 0,
+      "breaking": 88,
+      "class": "PURE_SUBSCRIPT",
+      "has_convention_comment": false
+    },
+    {
+      "file": "tests/test_auth.py",
+      "honouring_strict": 0,
+      "honouring_weak": 0,
+      "breaking": 67,
+      "class": "PURE_SUBSCRIPT",
+      "has_convention_comment": false
+    },
+    {
+      "file": "tests/test_auth_lifecycle.py",
+      "honouring_strict": 0,
+      "honouring_weak": 0,
+      "breaking": 24,
+      "class": "PURE_SUBSCRIPT",
+      "has_convention_comment": false
+    },
+    {
+      "file": "tests/test_badge_and_language_affordances.py",
+      "honouring_strict": 0,
+      "honouring_weak": 0,
+      "breaking": 0,
+      "class": "NEITHER",
+      "has_convention_comment": false
+    },
+    {
+      "file": "tests/test_banked_evidence_is_reachable.py",
+      "honouring_strict": 0,
+      "honouring_weak": 0,
+      "breaking": 0,
+      "class": "NEITHER",
+      "has_convention_comment": false
+    },
+    {
+      "file": "tests/test_blast_radius.py",
+      "honouring_strict": 0,
+      "honouring_weak": 0,
+      "breaking": 0,
+      "class": "NEITHER",
+      "has_convention_comment": false
+    },
+    {
+      "file": "tests/test_blocker_map_is_derived.py",
+      "honouring_strict": 0,
+      "honouring_weak": 0,
+      "breaking": 0,
+      "class": "NEITHER",
+      "has_convention_comment": false
+    },
+    {
+      "file": "tests/test_browser.py",
+      "honouring_strict": 0,
+      "honouring_weak": 0,
+      "breaking": 0,
+      "class": "NEITHER",
+      "has_convention_comment": false
+    },
+    {
+      "file": "tests/test_build_echo.py",
+      "honouring_strict": 0,
+      "honouring_weak": 0,
+      "breaking": 3,
+      "class": "PURE_SUBSCRIPT",
+      "has_convention_comment": false
+    },
+    {
+      "file": "tests/test_c43_rests_on_the_feed_content_ruling.py",
+      "honouring_strict": 0,
+      "honouring_weak": 0,
+      "breaking": 0,
+      "class": "NEITHER",
+      "has_convention_comment": false
+    },
+    {
+      "file": "tests/test_cdp_attach.py",
+      "honouring_strict": 0,
+      "honouring_weak": 0,
+      "breaking": 7,
+      "class": "PURE_SUBSCRIPT",
+      "has_convention_comment": false
+    },
+    {
+      "file": "tests/test_census_rows_carry_a_state.py",
+      "honouring_strict": 0,
+      "honouring_weak": 0,
+      "breaking": 0,
+      "class": "NEITHER",
+      "has_convention_comment": false
+    },
+    {
+      "file": "tests/test_chart_labels.py",
+      "honouring_strict": 0,
+      "honouring_weak": 0,
+      "breaking": 0,
+      "class": "NEITHER",
+      "has_convention_comment": false
+    },
+    {
+      "file": "tests/test_ci_shard.py",
+      "honouring_strict": 0,
+      "honouring_weak": 0,
+      "breaking": 3,
+      "class": "PURE_SUBSCRIPT",
+      "has_convention_comment": false
+    },
+    {
+      "file": "tests/test_click_is_not_its_own_evidence.py",
+      "honouring_strict": 0,
+      "honouring_weak": 0,
+      "breaking": 114,
+      "class": "PURE_SUBSCRIPT",
+      "has_convention_comment": false
+    },
+    {
+      "file": "tests/test_collections_page.py",
+      "honouring_strict": 0,
+      "honouring_weak": 0,
+      "breaking": 0,
+      "class": "NEITHER",
+      "has_convention_comment": false
+    },
+    {
+      "file": "tests/test_comment_delta_gate.py",
+      "honouring_strict": 0,
+      "honouring_weak": 0,
+      "breaking": 39,
+      "class": "PURE_SUBSCRIPT",
+      "has_convention_comment": false
+    },
+    {
+      "file": "tests/test_comment_gate_reads_the_item_it_acts_on.py",
+      "honouring_strict": 0,
+      "honouring_weak": 0,
+      "breaking": 12,
+      "class": "PURE_SUBSCRIPT",
+      "has_convention_comment": false
+    },
+    {
+      "file": "tests/test_company_about_card.py",
+      "honouring_strict": 0,
+      "honouring_weak": 0,
+      "breaking": 6,
+      "class": "PURE_SUBSCRIPT",
+      "has_convention_comment": false
+    },
+    {
+      "file": "tests/test_company_id_resolver.py",
+      "honouring_strict": 0,
+      "honouring_weak": 0,
+      "breaking": 0,
+      "class": "NEITHER",
+      "has_convention_comment": false
+    },
+    {
+      "file": "tests/test_company_job_filter.py",
+      "honouring_strict": 0,
+      "honouring_weak": 0,
+      "breaking": 0,
+      "class": "NEITHER",
+      "has_convention_comment": false
+    },
+    {
+      "file": "tests/test_company_page.py",
+      "honouring_strict": 0,
+      "honouring_weak": 0,
+      "breaking": 0,
+      "class": "NEITHER",
+      "has_convention_comment": false
+    },
+    {
+      "file": "tests/test_company_page_boundary.py",
+      "honouring_strict": 0,
+      "honouring_weak": 0,
+      "breaking": 0,
+      "class": "NEITHER",
+      "has_convention_comment": false
+    },
+    {
+      "file": "tests/test_company_root.py",
+      "honouring_strict": 0,
+      "honouring_weak": 0,
+      "breaking": 4,
+      "class": "PURE_SUBSCRIPT",
+      "has_convention_comment": false
+    },
+    {
+      "file": "tests/test_compose_fields.py",
+      "honouring_strict": 0,
+      "honouring_weak": 0,
+      "breaking": 11,
+      "class": "PURE_SUBSCRIPT",
+      "has_convention_comment": false
+    },
+    {
+      "file": "tests/test_connections_reader.py",
+      "honouring_strict": 0,
+      "honouring_weak": 0,
+      "breaking": 46,
+      "class": "PURE_SUBSCRIPT",
+      "has_convention_comment": false
+    },
+    {
+      "file": "tests/test_contingent_writeoffs_carry_a_reopener.py",
+      "honouring_strict": 0,
+      "honouring_weak": 0,
+      "breaking": 0,
+      "class": "NEITHER",
+      "has_convention_comment": false
+    },
+    {
+      "file": "tests/test_cookie_jar.py",
+      "honouring_strict": 0,
+      "honouring_weak": 0,
+      "breaking": 0,
+      "class": "NEITHER",
+      "has_convention_comment": false
+    },
+    {
+      "file": "tests/test_editor_fields.py",
+      "honouring_strict": 6,
+      "honouring_weak": 6,
+      "breaking": 18,
+      "class": "MIXED",
+      "has_convention_comment": true
+    },
+    {
+      "file": "tests/test_editor_values.py",
+      "honouring_strict": 3,
+      "honouring_weak": 5,
+      "breaking": 17,
+      "class": "MIXED",
+      "has_convention_comment": false
+    },
+    {
+      "file": "tests/test_events_home_reader.py",
+      "honouring_strict": 0,
+      "honouring_weak": 0,
+      "breaking": 56,
+      "class": "PURE_SUBSCRIPT",
+      "has_convention_comment": false
+    },
+    {
+      "file": "tests/test_every_census_surface_prices_itself.py",
+      "honouring_strict": 0,
+      "honouring_weak": 0,
+      "breaking": 0,
+      "class": "NEITHER",
+      "has_convention_comment": false
+    },
+    {
+      "file": "tests/test_every_ignore_entry_is_declared.py",
+      "honouring_strict": 0,
+      "honouring_weak": 0,
+      "breaking": 0,
+      "class": "NEITHER",
+      "has_convention_comment": false
+    },
+    {
+      "file": "tests/test_every_orphan_module_is_ruled.py",
+      "honouring_strict": 0,
+      "honouring_weak": 0,
+      "breaking": 0,
+      "class": "NEITHER",
+      "has_convention_comment": false
+    },
+    {
+      "file": "tests/test_every_tool_is_on_the_surface.py",
+      "honouring_strict": 0,
+      "honouring_weak": 0,
+      "breaking": 0,
+      "class": "NEITHER",
+      "has_convention_comment": false
+    },
+    {
+      "file": "tests/test_feed_tally.py",
+      "honouring_strict": 0,
+      "honouring_weak": 0,
+      "breaking": 0,
+      "class": "NEITHER",
+      "has_convention_comment": false
+    },
+    {
+      "file": "tests/test_follow_state_fixture.py",
+      "honouring_strict": 0,
+      "honouring_weak": 0,
+      "breaking": 44,
+      "class": "PURE_SUBSCRIPT",
+      "has_convention_comment": false
+    },
+    {
+      "file": "tests/test_free_read_panels.py",
+      "honouring_strict": 0,
+      "honouring_weak": 0,
+      "breaking": 66,
+      "class": "PURE_SUBSCRIPT",
+      "has_convention_comment": false
+    },
+    {
+      "file": "tests/test_gap_rows_on_refused_addresses.py",
+      "honouring_strict": 0,
+      "honouring_weak": 0,
+      "breaking": 0,
+      "class": "NEITHER",
+      "has_convention_comment": false
+    },
+    {
+      "file": "tests/test_group_page.py",
+      "honouring_strict": 0,
+      "honouring_weak": 0,
+      "breaking": 7,
+      "class": "PURE_SUBSCRIPT",
+      "has_convention_comment": false
+    },
+    {
+      "file": "tests/test_identity_gate.py",
+      "honouring_strict": 0,
+      "honouring_weak": 0,
+      "breaking": 0,
+      "class": "NEITHER",
+      "has_convention_comment": false
+    },
+    {
+      "file": "tests/test_impact_gate_selects_data_dependencies.py",
+      "honouring_strict": 0,
+      "honouring_weak": 0,
+      "breaking": 0,
+      "class": "NEITHER",
+      "has_convention_comment": false
+    },
+    {
+      "file": "tests/test_intro_fields.py",
+      "honouring_strict": 0,
+      "honouring_weak": 0,
+      "breaking": 0,
+      "class": "NEITHER",
+      "has_convention_comment": false
+    },
+    {
+      "file": "tests/test_item_addresses.py",
+      "honouring_strict": 0,
+      "honouring_weak": 0,
+      "breaking": 8,
+      "class": "PURE_SUBSCRIPT",
+      "has_convention_comment": false
+    },
+    {
+      "file": "tests/test_job_alerts_read_boundary.py",
+      "honouring_strict": 0,
+      "honouring_weak": 0,
+      "breaking": 0,
+      "class": "NEITHER",
+      "has_convention_comment": false
+    },
+    {
+      "file": "tests/test_job_collections.py",
+      "honouring_strict": 0,
+      "honouring_weak": 0,
+      "breaking": 79,
+      "class": "PURE_SUBSCRIPT",
+      "has_convention_comment": false
+    },
+    {
+      "file": "tests/test_job_description_readiness.py",
+      "honouring_strict": 0,
+      "honouring_weak": 0,
+      "breaking": 14,
+      "class": "PURE_SUBSCRIPT",
+      "has_convention_comment": false
+    },
+    {
+      "file": "tests/test_job_detail_fixture.py",
+      "honouring_strict": 0,
+      "honouring_weak": 0,
+      "breaking": 13,
+      "class": "PURE_SUBSCRIPT",
+      "has_convention_comment": false
+    },
+    {
+      "file": "tests/test_job_detail_save_state.py",
+      "honouring_strict": 0,
+      "honouring_weak": 0,
+      "breaking": 15,
+      "class": "PURE_SUBSCRIPT",
+      "has_convention_comment": false
+    },
+    {
+      "file": "tests/test_job_detail_wiring.py",
+      "honouring_strict": 2,
+      "honouring_weak": 2,
+      "breaking": 18,
+      "class": "MIXED",
+      "has_convention_comment": false
+    },
+    {
+      "file": "tests/test_job_search_fixture.py",
+      "honouring_strict": 0,
+      "honouring_weak": 0,
+      "breaking": 0,
+      "class": "NEITHER",
+      "has_convention_comment": false
+    },
+    {
+      "file": "tests/test_job_search_multiple_locations.py",
+      "honouring_strict": 0,
+      "honouring_weak": 0,
+      "breaking": 12,
+      "class": "PURE_SUBSCRIPT",
+      "has_convention_comment": false
+    },
+    {
+      "file": "tests/test_job_search_result_window.py",
+      "honouring_strict": 0,
+      "honouring_weak": 0,
+      "breaking": 10,
+      "class": "PURE_SUBSCRIPT",
+      "has_convention_comment": false
+    },
+    {
+      "file": "tests/test_labels_in_capture.py",
+      "honouring_strict": 0,
+      "honouring_weak": 0,
+      "breaking": 0,
+      "class": "NEITHER",
+      "has_convention_comment": false
+    },
+    {
+      "file": "tests/test_landing.py",
+      "honouring_strict": 0,
+      "honouring_weak": 0,
+      "breaking": 0,
+      "class": "NEITHER",
+      "has_convention_comment": false
+    },
+    {
+      "file": "tests/test_launch_boundary.py",
+      "honouring_strict": 0,
+      "honouring_weak": 0,
+      "breaking": 0,
+      "class": "NEITHER",
+      "has_convention_comment": false
+    },
+    {
+      "file": "tests/test_leakwalk.py",
+      "honouring_strict": 0,
+      "honouring_weak": 0,
+      "breaking": 0,
+      "class": "NEITHER",
+      "has_convention_comment": false
+    },
+    {
+      "file": "tests/test_membership_row.py",
+      "honouring_strict": 0,
+      "honouring_weak": 0,
+      "breaking": 0,
+      "class": "NEITHER",
+      "has_convention_comment": false
+    },
+    {
+      "file": "tests/test_membership_tally.py",
+      "honouring_strict": 0,
+      "honouring_weak": 0,
+      "breaking": 0,
+      "class": "NEITHER",
+      "has_convention_comment": false
+    },
+    {
+      "file": "tests/test_menus.py",
+      "honouring_strict": 0,
+      "honouring_weak": 0,
+      "breaking": 0,
+      "class": "NEITHER",
+      "has_convention_comment": false
+    },
+    {
+      "file": "tests/test_messaging_badge.py",
+      "honouring_strict": 0,
+      "honouring_weak": 0,
+      "breaking": 0,
+      "class": "NEITHER",
+      "has_convention_comment": false
+    },
+    {
+      "file": "tests/test_messaging_overview.py",
+      "honouring_strict": 0,
+      "honouring_weak": 0,
+      "breaking": 0,
+      "class": "NEITHER",
+      "has_convention_comment": false
+    },
+    {
+      "file": "tests/test_messaging_recipient_addressing.py",
+      "honouring_strict": 0,
+      "honouring_weak": 0,
+      "breaking": 0,
+      "class": "NEITHER",
+      "has_convention_comment": false
+    },
+    {
+      "file": "tests/test_navigation_is_never_derived.py",
+      "honouring_strict": 0,
+      "honouring_weak": 0,
+      "breaking": 0,
+      "class": "NEITHER",
+      "has_convention_comment": false
+    },
+    {
+      "file": "tests/test_needle_never_escapes.py",
+      "honouring_strict": 0,
+      "honouring_weak": 0,
+      "breaking": 0,
+      "class": "NEITHER",
+      "has_convention_comment": false
+    },
+    {
+      "file": "tests/test_newsletter_reader.py",
+      "honouring_strict": 0,
+      "honouring_weak": 0,
+      "breaking": 40,
+      "class": "PURE_SUBSCRIPT",
+      "has_convention_comment": false
+    },
+    {
+      "file": "tests/test_newsletter_route.py",
+      "honouring_strict": 0,
+      "honouring_weak": 0,
+      "breaking": 0,
+      "class": "NEITHER",
+      "has_convention_comment": false
+    },
+    {
+      "file": "tests/test_no_committed_credential.py",
+      "honouring_strict": 0,
+      "honouring_weak": 0,
+      "breaking": 0,
+      "class": "NEITHER",
+      "has_convention_comment": false
+    },
+    {
+      "file": "tests/test_no_committed_document_defers_to_an_ignored_path.py",
+      "honouring_strict": 0,
+      "honouring_weak": 0,
+      "breaking": 0,
+      "class": "NEITHER",
+      "has_convention_comment": false
+    },
+    {
+      "file": "tests/test_no_committed_identity.py",
+      "honouring_strict": 0,
+      "honouring_weak": 0,
+      "breaking": 0,
+      "class": "NEITHER",
+      "has_convention_comment": false
+    },
+    {
+      "file": "tests/test_no_message_publishes_a_landing.py",
+      "honouring_strict": 0,
+      "honouring_weak": 0,
+      "breaking": 0,
+      "class": "NEITHER",
+      "has_convention_comment": false
+    },
+    {
+      "file": "tests/test_no_write_tool_names_a_third_party.py",
+      "honouring_strict": 0,
+      "honouring_weak": 0,
+      "breaking": 0,
+      "class": "NEITHER",
+      "has_convention_comment": false
+    },
+    {
+      "file": "tests/test_notification_handles.py",
+      "honouring_strict": 0,
+      "honouring_weak": 0,
+      "breaking": 0,
+      "class": "NEITHER",
+      "has_convention_comment": false
+    },
+    {
+      "file": "tests/test_notify_cost.py",
+      "honouring_strict": 0,
+      "honouring_weak": 0,
+      "breaking": 0,
+      "class": "NEITHER",
+      "has_convention_comment": false
+    },
+    {
+      "file": "tests/test_opaque_targets.py",
+      "honouring_strict": 0,
+      "honouring_weak": 0,
+      "breaking": 0,
+      "class": "NEITHER",
+      "has_convention_comment": false
+    },
+    {
+      "file": "tests/test_otw_payload_probe.py",
+      "honouring_strict": 0,
+      "honouring_weak": 0,
+      "breaking": 0,
+      "class": "NEITHER",
+      "has_convention_comment": false
+    },
+    {
+      "file": "tests/test_page_plugin.py",
+      "honouring_strict": 0,
+      "honouring_weak": 0,
+      "breaking": 0,
+      "class": "NEITHER",
+      "has_convention_comment": false
+    },
+    {
+      "file": "tests/test_page_text_is_never_printed.py",
+      "honouring_strict": 0,
+      "honouring_weak": 0,
+      "breaking": 0,
+      "class": "NEITHER",
+      "has_convention_comment": false
+    },
+    {
+      "file": "tests/test_path_hygiene.py",
+      "honouring_strict": 0,
+      "honouring_weak": 0,
+      "breaking": 0,
+      "class": "NEITHER",
+      "has_convention_comment": false
+    },
+    {
+      "file": "tests/test_pointer_graph_guard.py",
+      "honouring_strict": 0,
+      "honouring_weak": 0,
+      "breaking": 0,
+      "class": "NEITHER",
+      "has_convention_comment": false
+    },
+    {
+      "file": "tests/test_pre_push_ref_gate.py",
+      "honouring_strict": 0,
+      "honouring_weak": 0,
+      "breaking": 0,
+      "class": "NEITHER",
+      "has_convention_comment": false
+    },
+    {
+      "file": "tests/test_preflight.py",
+      "honouring_strict": 0,
+      "honouring_weak": 0,
+      "breaking": 7,
+      "class": "PURE_SUBSCRIPT",
+      "has_convention_comment": false
+    },
+    {
+      "file": "tests/test_premium_four_boundary.py",
+      "honouring_strict": 0,
+      "honouring_weak": 0,
+      "breaking": 0,
+      "class": "NEITHER",
+      "has_convention_comment": false
+    },
+    {
+      "file": "tests/test_premium_reader.py",
+      "honouring_strict": 0,
+      "honouring_weak": 0,
+      "breaking": 15,
+      "class": "PURE_SUBSCRIPT",
+      "has_convention_comment": false
+    },
+    {
+      "file": "tests/test_press.py",
+      "honouring_strict": 1,
+      "honouring_weak": 1,
+      "breaking": 20,
+      "class": "MIXED",
+      "has_convention_comment": false
+    },
+    {
+      "file": "tests/test_preview_state_and_click_state.py",
+      "honouring_strict": 0,
+      "honouring_weak": 0,
+      "breaking": 0,
+      "class": "NEITHER",
+      "has_convention_comment": false
+    },
+    {
+      "file": "tests/test_probe_controls_are_never_decorative.py",
+      "honouring_strict": 0,
+      "honouring_weak": 0,
+      "breaking": 0,
+      "class": "NEITHER",
+      "has_convention_comment": false
+    },
+    {
+      "file": "tests/test_probe_filter_channels.py",
+      "honouring_strict": 0,
+      "honouring_weak": 0,
+      "breaking": 0,
+      "class": "NEITHER",
+      "has_convention_comment": false
+    },
+    {
+      "file": "tests/test_probe_interaction_budget.py",
+      "honouring_strict": 0,
+      "honouring_weak": 0,
+      "breaking": 0,
+      "class": "NEITHER",
+      "has_convention_comment": false
+    },
+    {
+      "file": "tests/test_probe_navigation_budget.py",
+      "honouring_strict": 0,
+      "honouring_weak": 0,
+      "breaking": 0,
+      "class": "NEITHER",
+      "has_convention_comment": false
+    },
+    {
+      "file": "tests/test_probe_redaction.py",
+      "honouring_strict": 0,
+      "honouring_weak": 0,
+      "breaking": 0,
+      "class": "NEITHER",
+      "has_convention_comment": false
+    },
+    {
+      "file": "tests/test_profile_pdf_download_is_blocked_on_transport.py",
+      "honouring_strict": 0,
+      "honouring_weak": 0,
+      "breaking": 0,
+      "class": "NEITHER",
+      "has_convention_comment": false
+    },
+    {
+      "file": "tests/test_profile_version_gate.py",
+      "honouring_strict": 0,
+      "honouring_weak": 0,
+      "breaking": 0,
+      "class": "NEITHER",
+      "has_convention_comment": false
+    },
+    {
+      "file": "tests/test_profile_views_fixture.py",
+      "honouring_strict": 0,
+      "honouring_weak": 0,
+      "breaking": 0,
+      "class": "NEITHER",
+      "has_convention_comment": false
+    },
+    {
+      "file": "tests/test_prose_that_makes_a_claim.py",
+      "honouring_strict": 0,
+      "honouring_weak": 0,
+      "breaking": 0,
+      "class": "NEITHER",
+      "has_convention_comment": false
+    },
+    {
+      "file": "tests/test_proximity_is_on_a_read_surface.py",
+      "honouring_strict": 0,
+      "honouring_weak": 0,
+      "breaking": 0,
+      "class": "NEITHER",
+      "has_convention_comment": false
+    },
+    {
+      "file": "tests/test_proximity_reader.py",
+      "honouring_strict": 0,
+      "honouring_weak": 1,
+      "breaking": 0,
+      "class": "PRACTISES",
+      "has_convention_comment": false
+    },
+    {
+      "file": "tests/test_publish_post_names_its_audience.py",
+      "honouring_strict": 0,
+      "honouring_weak": 0,
+      "breaking": 4,
+      "class": "PURE_SUBSCRIPT",
+      "has_convention_comment": false
+    },
+    {
+      "file": "tests/test_radio_label_binding.py",
+      "honouring_strict": 0,
+      "honouring_weak": 0,
+      "breaking": 30,
+      "class": "PURE_SUBSCRIPT",
+      "has_convention_comment": false
+    },
+    {
+      "file": "tests/test_react_direction_is_read_where_it_acts.py",
+      "honouring_strict": 0,
+      "honouring_weak": 0,
+      "breaking": 13,
+      "class": "PURE_SUBSCRIPT",
+      "has_convention_comment": false
+    },
+    {
+      "file": "tests/test_reader_reachability.py",
+      "honouring_strict": 0,
+      "honouring_weak": 0,
+      "breaking": 0,
+      "class": "NEITHER",
+      "has_convention_comment": false
+    },
+    {
+      "file": "tests/test_readers_emit_no_page_string.py",
+      "honouring_strict": 0,
+      "honouring_weak": 0,
+      "breaking": 0,
+      "class": "NEITHER",
+      "has_convention_comment": false
+    },
+    {
+      "file": "tests/test_readers_outside_dom_are_a_pinned_inventory.py",
+      "honouring_strict": 0,
+      "honouring_weak": 0,
+      "breaking": 0,
+      "class": "NEITHER",
+      "has_convention_comment": false
+    },
+    {
+      "file": "tests/test_readonly.py",
+      "honouring_strict": 0,
+      "honouring_weak": 0,
+      "breaking": 0,
+      "class": "NEITHER",
+      "has_convention_comment": false
+    },
+    {
+      "file": "tests/test_readonly_boundary_invariant.py",
+      "honouring_strict": 0,
+      "honouring_weak": 0,
+      "breaking": 0,
+      "class": "NEITHER",
+      "has_convention_comment": false
+    },
+    {
+      "file": "tests/test_receipt_names_its_own_action.py",
+      "honouring_strict": 0,
+      "honouring_weak": 0,
+      "breaking": 0,
+      "class": "NEITHER",
+      "has_convention_comment": false
+    },
+    {
+      "file": "tests/test_recipient_ids_from_the_viewer_list.py",
+      "honouring_strict": 0,
+      "honouring_weak": 0,
+      "breaking": 13,
+      "class": "PURE_SUBSCRIPT",
+      "has_convention_comment": false
+    },
+    {
+      "file": "tests/test_recommendation_tally.py",
+      "honouring_strict": 0,
+      "honouring_weak": 0,
+      "breaking": 0,
+      "class": "NEITHER",
+      "has_convention_comment": false
+    },
+    {
+      "file": "tests/test_refusal_names_both_gates.py",
+      "honouring_strict": 0,
+      "honouring_weak": 0,
+      "breaking": 0,
+      "class": "NEITHER",
+      "has_convention_comment": false
+    },
+    {
+      "file": "tests/test_requirements_pins.py",
+      "honouring_strict": 0,
+      "honouring_weak": 0,
+      "breaking": 0,
+      "class": "NEITHER",
+      "has_convention_comment": false
+    },
+    {
+      "file": "tests/test_result_verification_block.py",
+      "honouring_strict": 0,
+      "honouring_weak": 0,
+      "breaking": 8,
+      "class": "PURE_SUBSCRIPT",
+      "has_convention_comment": false
+    },
+    {
+      "file": "tests/test_save_candidates_fixture.py",
+      "honouring_strict": 0,
+      "honouring_weak": 0,
+      "breaking": 51,
+      "class": "PURE_SUBSCRIPT",
+      "has_convention_comment": false
+    },
+    {
+      "file": "tests/test_school_and_collections_boundary.py",
+      "honouring_strict": 0,
+      "honouring_weak": 0,
+      "breaking": 0,
+      "class": "NEITHER",
+      "has_convention_comment": false
+    },
+    {
+      "file": "tests/test_scripts_are_import_safe.py",
+      "honouring_strict": 0,
+      "honouring_weak": 0,
+      "breaking": 0,
+      "class": "NEITHER",
+      "has_convention_comment": false
+    },
+    {
+      "file": "tests/test_sdui_action_reader.py",
+      "honouring_strict": 0,
+      "honouring_weak": 0,
+      "breaking": 14,
+      "class": "PURE_SUBSCRIPT",
+      "has_convention_comment": false
+    },
+    {
+      "file": "tests/test_sdui_action_resolver.py",
+      "honouring_strict": 0,
+      "honouring_weak": 0,
+      "breaking": 0,
+      "class": "NEITHER",
+      "has_convention_comment": false
+    },
+    {
+      "file": "tests/test_sdui_surfaces_fixture.py",
+      "honouring_strict": 0,
+      "honouring_weak": 0,
+      "breaking": 14,
+      "class": "PURE_SUBSCRIPT",
+      "has_convention_comment": false
+    },
+    {
+      "file": "tests/test_search_admission_blast_radius.py",
+      "honouring_strict": 0,
+      "honouring_weak": 0,
+      "breaking": 0,
+      "class": "NEITHER",
+      "has_convention_comment": false
+    },
+    {
+      "file": "tests/test_search_appearances.py",
+      "honouring_strict": 0,
+      "honouring_weak": 0,
+      "breaking": 19,
+      "class": "PURE_SUBSCRIPT",
+      "has_convention_comment": false
+    },
+    {
+      "file": "tests/test_search_results.py",
+      "honouring_strict": 0,
+      "honouring_weak": 0,
+      "breaking": 0,
+      "class": "NEITHER",
+      "has_convention_comment": false
+    },
+    {
+      "file": "tests/test_selectors_resolve.py",
+      "honouring_strict": 0,
+      "honouring_weak": 0,
+      "breaking": 0,
+      "class": "NEITHER",
+      "has_convention_comment": false
+    },
+    {
+      "file": "tests/test_send_message_gate.py",
+      "honouring_strict": 0,
+      "honouring_weak": 0,
+      "breaking": 29,
+      "class": "PURE_SUBSCRIPT",
+      "has_convention_comment": false
+    },
+    {
+      "file": "tests/test_server_surface.py",
+      "honouring_strict": 0,
+      "honouring_weak": 0,
+      "breaking": 30,
+      "class": "PURE_SUBSCRIPT",
+      "has_convention_comment": false
+    },
+    {
+      "file": "tests/test_session_info_offline.py",
+      "honouring_strict": 0,
+      "honouring_weak": 0,
+      "breaking": 19,
+      "class": "PURE_SUBSCRIPT",
+      "has_convention_comment": false
+    },
+    {
+      "file": "tests/test_session_store.py",
+      "honouring_strict": 0,
+      "honouring_weak": 0,
+      "breaking": 22,
+      "class": "PURE_SUBSCRIPT",
+      "has_convention_comment": false
+    },
+    {
+      "file": "tests/test_shape.py",
+      "honouring_strict": 0,
+      "honouring_weak": 0,
+      "breaking": 0,
+      "class": "NEITHER",
+      "has_convention_comment": false
+    },
+    {
+      "file": "tests/test_staged_identity_shapes.py",
+      "honouring_strict": 0,
+      "honouring_weak": 0,
+      "breaking": 0,
+      "class": "NEITHER",
+      "has_convention_comment": false
+    },
+    {
+      "file": "tests/test_staged_navigation_guard.py",
+      "honouring_strict": 0,
+      "honouring_weak": 0,
+      "breaking": 0,
+      "class": "NEITHER",
+      "has_convention_comment": false
+    },
+    {
+      "file": "tests/test_stale_process_is_announced.py",
+      "honouring_strict": 0,
+      "honouring_weak": 0,
+      "breaking": 0,
+      "class": "NEITHER",
+      "has_convention_comment": false
+    },
+    {
+      "file": "tests/test_state_cell_dialects_refuse_loudly.py",
+      "honouring_strict": 0,
+      "honouring_weak": 0,
+      "breaking": 0,
+      "class": "NEITHER",
+      "has_convention_comment": false
+    },
+    {
+      "file": "tests/test_subscription_row.py",
+      "honouring_strict": 0,
+      "honouring_weak": 0,
+      "breaking": 0,
+      "class": "NEITHER",
+      "has_convention_comment": false
+    },
+    {
+      "file": "tests/test_surface_census.py",
+      "honouring_strict": 0,
+      "honouring_weak": 0,
+      "breaking": 75,
+      "class": "PURE_SUBSCRIPT",
+      "has_convention_comment": false
+    },
+    {
+      "file": "tests/test_surface_class_is_derived.py",
+      "honouring_strict": 0,
+      "honouring_weak": 0,
+      "breaking": 0,
+      "class": "NEITHER",
+      "has_convention_comment": false
+    },
+    {
+      "file": "tests/test_sweep_blobs_refuses_a_vacuous_pass.py",
+      "honouring_strict": 0,
+      "honouring_weak": 0,
+      "breaking": 0,
+      "class": "NEITHER",
+      "has_convention_comment": false
+    },
+    {
+      "file": "tests/test_the_analytics_scope_is_the_document.py",
+      "honouring_strict": 0,
+      "honouring_weak": 0,
+      "breaking": 0,
+      "class": "NEITHER",
+      "has_convention_comment": false
+    },
+    {
+      "file": "tests/test_the_audience_reader_arrives_with_its_contract.py",
+      "honouring_strict": 0,
+      "honouring_weak": 0,
+      "breaking": 0,
+      "class": "NEITHER",
+      "has_convention_comment": false
+    },
+    {
+      "file": "tests/test_the_audit_index_is_derived.py",
+      "honouring_strict": 0,
+      "honouring_weak": 0,
+      "breaking": 0,
+      "class": "NEITHER",
+      "has_convention_comment": false
+    },
+    {
+      "file": "tests/test_the_blocker_reason_locator_states_its_recall.py",
+      "honouring_strict": 0,
+      "honouring_weak": 0,
+      "breaking": 0,
+      "class": "NEITHER",
+      "has_convention_comment": false
+    },
+    {
+      "file": "tests/test_the_census_prose_matches_the_boundary.py",
+      "honouring_strict": 0,
+      "honouring_weak": 0,
+      "breaking": 0,
+      "class": "NEITHER",
+      "has_convention_comment": false
+    },
+    {
+      "file": "tests/test_the_error_url_is_ruled_per_site.py",
+      "honouring_strict": 0,
+      "honouring_weak": 0,
+      "breaking": 0,
+      "class": "NEITHER",
+      "has_convention_comment": false
+    },
+    {
+      "file": "tests/test_the_events_boundary_is_root_only.py",
+      "honouring_strict": 0,
+      "honouring_weak": 0,
+      "breaking": 0,
+      "class": "NEITHER",
+      "has_convention_comment": false
+    },
+    {
+      "file": "tests/test_the_filter_click_cannot_leave_the_address.py",
+      "honouring_strict": 0,
+      "honouring_weak": 0,
+      "breaking": 5,
+      "class": "PURE_SUBSCRIPT",
+      "has_convention_comment": false
+    },
+    {
+      "file": "tests/test_the_groups_id_segment_is_closed.py",
+      "honouring_strict": 0,
+      "honouring_weak": 0,
+      "breaking": 0,
+      "class": "NEITHER",
+      "has_convention_comment": false
+    },
+    {
+      "file": "tests/test_the_groups_tool_keeps_its_properties.py",
+      "honouring_strict": 0,
+      "honouring_weak": 0,
+      "breaking": 0,
+      "class": "NEITHER",
+      "has_convention_comment": false
+    },
+    {
+      "file": "tests/test_the_messaging_census_refusals_can_fire.py",
+      "honouring_strict": 0,
+      "honouring_weak": 0,
+      "breaking": 0,
+      "class": "NEITHER",
+      "has_convention_comment": false
+    },
+    {
+      "file": "tests/test_the_needle_is_matched_as_a_bare_substring.py",
+      "honouring_strict": 0,
+      "honouring_weak": 0,
+      "breaking": 15,
+      "class": "PURE_SUBSCRIPT",
+      "has_convention_comment": false
+    },
+    {
+      "file": "tests/test_the_other_two_count_claims_are_pinned_too.py",
+      "honouring_strict": 0,
+      "honouring_weak": 0,
+      "breaking": 0,
+      "class": "NEITHER",
+      "has_convention_comment": false
+    },
+    {
+      "file": "tests/test_the_package_compiles_on_its_oldest_python.py",
+      "honouring_strict": 0,
+      "honouring_weak": 0,
+      "breaking": 0,
+      "class": "NEITHER",
+      "has_convention_comment": false
+    },
+    {
+      "file": "tests/test_the_payload_read_is_a_race.py",
+      "honouring_strict": 0,
+      "honouring_weak": 0,
+      "breaking": 8,
+      "class": "PURE_SUBSCRIPT",
+      "has_convention_comment": false
+    },
+    {
+      "file": "tests/test_the_press_gate_cannot_witness_disclosure.py",
+      "honouring_strict": 0,
+      "honouring_weak": 0,
+      "breaking": 0,
+      "class": "NEITHER",
+      "has_convention_comment": false
+    },
+    {
+      "file": "tests/test_the_presser_control_is_a_pair.py",
+      "honouring_strict": 0,
+      "honouring_weak": 0,
+      "breaking": 3,
+      "class": "PURE_SUBSCRIPT",
+      "has_convention_comment": false
+    },
+    {
+      "file": "tests/test_the_refusal_table_needs_a_spec.py",
+      "honouring_strict": 0,
+      "honouring_weak": 0,
+      "breaking": 0,
+      "class": "NEITHER",
+      "has_convention_comment": false
+    },
+    {
+      "file": "tests/test_the_register_numbers_are_unique.py",
+      "honouring_strict": 0,
+      "honouring_weak": 0,
+      "breaking": 0,
+      "class": "NEITHER",
+      "has_convention_comment": false
+    },
+    {
+      "file": "tests/test_the_rulings_register_is_derived.py",
+      "honouring_strict": 0,
+      "honouring_weak": 0,
+      "breaking": 0,
+      "class": "NEITHER",
+      "has_convention_comment": false
+    },
+    {
+      "file": "tests/test_the_sanitisation_key_is_unignorable_under_any_name.py",
+      "honouring_strict": 0,
+      "honouring_weak": 0,
+      "breaking": 0,
+      "class": "NEITHER",
+      "has_convention_comment": false
+    },
+    {
+      "file": "tests/test_the_scanner_has_only_ever_gained_detectors.py",
+      "honouring_strict": 0,
+      "honouring_weak": 0,
+      "breaking": 0,
+      "class": "NEITHER",
+      "has_convention_comment": false
+    },
+    {
+      "file": "tests/test_the_search_results_address_is_refused_before_admission.py",
+      "honouring_strict": 0,
+      "honouring_weak": 0,
+      "breaking": 0,
+      "class": "NEITHER",
+      "has_convention_comment": false
+    },
+    {
+      "file": "tests/test_the_search_shaper_emits_no_name.py",
+      "honouring_strict": 0,
+      "honouring_weak": 0,
+      "breaking": 3,
+      "class": "PURE_SUBSCRIPT",
+      "has_convention_comment": false
+    },
+    {
+      "file": "tests/test_the_second_gate_covers_the_class.py",
+      "honouring_strict": 0,
+      "honouring_weak": 0,
+      "breaking": 0,
+      "class": "NEITHER",
+      "has_convention_comment": false
+    },
+    {
+      "file": "tests/test_the_settings_boundary_refuses_account_deletion.py",
+      "honouring_strict": 0,
+      "honouring_weak": 0,
+      "breaking": 0,
+      "class": "NEITHER",
+      "has_convention_comment": false
+    },
+    {
+      "file": "tests/test_the_settings_index_addresses_are_pinned.py",
+      "honouring_strict": 0,
+      "honouring_weak": 0,
+      "breaking": 0,
+      "class": "NEITHER",
+      "has_convention_comment": false
+    },
+    {
+      "file": "tests/test_the_source_url_split_was_never_ruled.py",
+      "honouring_strict": 0,
+      "honouring_weak": 0,
+      "breaking": 0,
+      "class": "NEITHER",
+      "has_convention_comment": false
+    },
+    {
+      "file": "tests/test_the_stated_guarantee_matches_the_sanctioned_list.py",
+      "honouring_strict": 0,
+      "honouring_weak": 0,
+      "breaking": 0,
+      "class": "NEITHER",
+      "has_convention_comment": false
+    },
+    {
+      "file": "tests/test_the_tool_surface_is_pinned_so_a_row_must_move.py",
+      "honouring_strict": 0,
+      "honouring_weak": 0,
+      "breaking": 0,
+      "class": "NEITHER",
+      "has_convention_comment": false
+    },
+    {
+      "file": "tests/test_the_unassigned_reason_is_not_a_default.py",
+      "honouring_strict": 0,
+      "honouring_weak": 0,
+      "breaking": 0,
+      "class": "NEITHER",
+      "has_convention_comment": false
+    },
+    {
+      "file": "tests/test_the_wired_readers_keep_their_properties.py",
+      "honouring_strict": 0,
+      "honouring_weak": 0,
+      "breaking": 0,
+      "class": "NEITHER",
+      "has_convention_comment": false
+    },
+    {
+      "file": "tests/test_the_wordlist_is_found_from_a_worktree.py",
+      "honouring_strict": 0,
+      "honouring_weak": 0,
+      "breaking": 0,
+      "class": "NEITHER",
+      "has_convention_comment": false
+    },
+    {
+      "file": "tests/test_thread_reply_surface.py",
+      "honouring_strict": 0,
+      "honouring_weak": 0,
+      "breaking": 23,
+      "class": "PURE_SUBSCRIPT",
+      "has_convention_comment": false
+    },
+    {
+      "file": "tests/test_tool_envelopes_emit_no_page_string.py",
+      "honouring_strict": 0,
+      "honouring_weak": 0,
+      "breaking": 0,
+      "class": "NEITHER",
+      "has_convention_comment": false
+    },
+    {
+      "file": "tests/test_tools.py",
+      "honouring_strict": 0,
+      "honouring_weak": 0,
+      "breaking": 132,
+      "class": "PURE_SUBSCRIPT",
+      "has_convention_comment": false
+    },
+    {
+      "file": "tests/test_tracker_harvest_census.py",
+      "honouring_strict": 0,
+      "honouring_weak": 0,
+      "breaking": 11,
+      "class": "PURE_SUBSCRIPT",
+      "has_convention_comment": false
+    },
+    {
+      "file": "tests/test_tracker_readiness.py",
+      "honouring_strict": 1,
+      "honouring_weak": 1,
+      "breaking": 27,
+      "class": "MIXED",
+      "has_convention_comment": false
+    },
+    {
+      "file": "tests/test_transport.py",
+      "honouring_strict": 0,
+      "honouring_weak": 0,
+      "breaking": 0,
+      "class": "NEITHER",
+      "has_convention_comment": false
+    },
+    {
+      "file": "tests/test_triage_instrument.py",
+      "honouring_strict": 0,
+      "honouring_weak": 0,
+      "breaking": 0,
+      "class": "NEITHER",
+      "has_convention_comment": false
+    },
+    {
+      "file": "tests/test_typeahead_gate.py",
+      "honouring_strict": 0,
+      "honouring_weak": 0,
+      "breaking": 30,
+      "class": "PURE_SUBSCRIPT",
+      "has_convention_comment": false
+    },
+    {
+      "file": "tests/test_typeahead_probe.py",
+      "honouring_strict": 0,
+      "honouring_weak": 0,
+      "breaking": 0,
+      "class": "NEITHER",
+      "has_convention_comment": false
+    },
+    {
+      "file": "tests/test_typed_bytes.py",
+      "honouring_strict": 0,
+      "honouring_weak": 0,
+      "breaking": 0,
+      "class": "NEITHER",
+      "has_convention_comment": false
+    },
+    {
+      "file": "tests/test_unfired_probe_verdicts.py",
+      "honouring_strict": 0,
+      "honouring_weak": 0,
+      "breaking": 0,
+      "class": "NEITHER",
+      "has_convention_comment": false
+    },
+    {
+      "file": "tests/test_unfollow_fixture.py",
+      "honouring_strict": 0,
+      "honouring_weak": 0,
+      "breaking": 27,
+      "class": "PURE_SUBSCRIPT",
+      "has_convention_comment": false
+    },
+    {
+      "file": "tests/test_unverifiable_outcomes.py",
+      "honouring_strict": 0,
+      "honouring_weak": 0,
+      "breaking": 0,
+      "class": "NEITHER",
+      "has_convention_comment": false
+    },
+    {
+      "file": "tests/test_uploads.py",
+      "honouring_strict": 0,
+      "honouring_weak": 0,
+      "breaking": 53,
+      "class": "PURE_SUBSCRIPT",
+      "has_convention_comment": false
+    },
+    {
+      "file": "tests/test_urn_substitution_covers_the_class.py",
+      "honouring_strict": 0,
+      "honouring_weak": 0,
+      "breaking": 0,
+      "class": "NEITHER",
+      "has_convention_comment": false
+    },
+    {
+      "file": "tests/test_vendored_buildinfo.py",
+      "honouring_strict": 0,
+      "honouring_weak": 0,
+      "breaking": 0,
+      "class": "NEITHER",
+      "has_convention_comment": false
+    },
+    {
+      "file": "tests/test_verification_that_could_not_read.py",
+      "honouring_strict": 0,
+      "honouring_weak": 0,
+      "breaking": 13,
+      "class": "PURE_SUBSCRIPT",
+      "has_convention_comment": false
+    },
+    {
+      "file": "tests/test_writeoff_kinds_are_derivable.py",
+      "honouring_strict": 0,
+      "honouring_weak": 0,
+      "breaking": 0,
+      "class": "NEITHER",
+      "has_convention_comment": false
+    },
+    {
+      "file": "tests/test_writes.py",
+      "honouring_strict": 0,
+      "honouring_weak": 0,
+      "breaking": 152,
+      "class": "PURE_SUBSCRIPT",
+      "has_convention_comment": false
+    },
+    {
+      "file": "tests/test_writes_nine.py",
+      "honouring_strict": 0,
+      "honouring_weak": 0,
+      "breaking": 49,
+      "class": "PURE_SUBSCRIPT",
+      "has_convention_comment": false
+    }
+  ],
+  "honour_records": [
+    {
+      "file": "tests/test_activity_items.py",
+      "line": 482,
+      "enclosing": "test_a_rail_with_two_authors_publishes_no_item_key_at_all",
+      "name": "result",
+      "key": "refused",
+      "assert_line": 482,
+      "strict": true,
+      "weak": true,
+      "msg_text": "result",
+      "source_line": "assert result.get(\"refused\") == \"mixed_authors\", result"
+    },
+    {
+      "file": "tests/test_activity_items.py",
+      "line": 541,
+      "enclosing": "test_an_all_his_rail_yields_exactly_his_item_keys_deduped",
+      "name": "result",
+      "key": "refused",
+      "assert_line": 541,
+      "strict": true,
+      "weak": true,
+      "msg_text": "result",
+      "source_line": "assert result.get(\"refused\") is None, result"
+    },
+    {
+      "file": "tests/test_activity_items.py",
+      "line": 640,
+      "enclosing": "test_a_heading_out_of_layout_used_to_refuse_and_now_names_the_owner",
+      "name": "result",
+      "key": "refused",
+      "assert_line": 640,
+      "strict": true,
+      "weak": true,
+      "msg_text": "result",
+      "source_line": "assert result.get(\"refused\") is None, result"
+    },
+    {
+      "file": "tests/test_activity_items.py",
+      "line": 744,
+      "enclosing": "test_without_the_self_assertion_nothing_at_all_is_read",
+      "name": "result",
+      "key": "refused",
+      "assert_line": 744,
+      "strict": true,
+      "weak": true,
+      "msg_text": "result",
+      "source_line": "assert result.get(\"refused\") == \"self_assertion_unreadable\", result"
+    },
+    {
+      "file": "tests/test_activity_items.py",
+      "line": 776,
+      "enclosing": "test_an_explicit_false_assertion_refuses_at_once_no_retry",
+      "name": "result",
+      "key": "refused",
+      "assert_line": 776,
+      "strict": true,
+      "weak": true,
+      "msg_text": "result",
+      "source_line": "assert result.get(\"refused\") == \"not_self_profile\", result"
+    },
+    {
+      "file": "tests/test_activity_items.py",
+      "line": 821,
+      "enclosing": "test_an_absent_reading_that_turns_true_on_retry_succeeds",
+      "name": "result",
+      "key": "refused",
+      "assert_line": 821,
+      "strict": true,
+      "weak": true,
+      "msg_text": "result",
+      "source_line": "assert result.get(\"refused\") is None, result"
+    },
+    {
+      "file": "tests/test_activity_items.py",
+      "line": 849,
+      "enclosing": "test_an_h1_naming_somebody_else_refuses",
+      "name": "result",
+      "key": "refused",
+      "assert_line": 849,
+      "strict": true,
+      "weak": true,
+      "msg_text": "result",
+      "source_line": "assert result.get(\"refused\") == \"author_is_not_the_page_owner\", result"
+    },
+    {
+      "file": "tests/test_activity_items.py",
+      "line": 866,
+      "enclosing": "test_no_h1_at_all_refuses",
+      "name": "result",
+      "key": "refused",
+      "assert_line": 866,
+      "strict": true,
+      "weak": true,
+      "msg_text": "result",
+      "source_line": "assert result.get(\"refused\") == \"no_page_owner_heading\", result"
+    },
+    {
+      "file": "tests/test_activity_items.py",
+      "line": 885,
+      "enclosing": "test_two_h1_elements_refuse_rather_than_take_the_first",
+      "name": "result",
+      "key": "refused",
+      "assert_line": 885,
+      "strict": true,
+      "weak": true,
+      "msg_text": "result",
+      "source_line": "assert result.get(\"refused\") == \"ambiguous_page_owner_heading\", result"
+    },
+    {
+      "file": "tests/test_activity_items.py",
+      "line": 921,
+      "enclosing": "test_zero_overflow_controls_refuses",
+      "name": "result",
+      "key": "refused",
+      "assert_line": 921,
+      "strict": true,
+      "weak": true,
+      "msg_text": "result",
+      "source_line": "assert result.get(\"refused\") == \"no_overflow_controls\", result"
+    },
+    {
+      "file": "tests/test_activity_items.py",
+      "line": 975,
+      "enclosing": "test_the_prefix_rule_in_both_directions",
+      "name": "result",
+      "key": "refused",
+      "assert_line": 975,
+      "strict": true,
+      "weak": true,
+      "msg_text": "result",
+      "source_line": "assert result.get(\"refused\") is None, result"
+    },
+    {
+      "file": "tests/test_activity_items.py",
+      "line": 979,
+      "enclosing": "test_the_prefix_rule_in_both_directions",
+      "name": "result",
+      "key": "refused",
+      "assert_line": 979,
+      "strict": true,
+      "weak": true,
+      "msg_text": "result",
+      "source_line": "assert result.get(\"refused\") == \"author_is_not_the_page_owner\", result"
+    },
+    {
+      "file": "tests/test_activity_items.py",
+      "line": 1015,
+      "enclosing": "test_a_permalink_that_is_not_urn_shaped_is_counted_never_emitted",
+      "name": "result",
+      "key": "refused",
+      "assert_line": 1015,
+      "strict": true,
+      "weak": true,
+      "msg_text": "result",
+      "source_line": "assert result.get(\"refused\") is None, result"
+    },
+    {
+      "file": "tests/test_activity_items.py",
+      "line": 1048,
+      "enclosing": "test_a_urn_in_no_item_root_is_counted_never_emitted",
+      "name": "result",
+      "key": "refused",
+      "assert_line": 1048,
+      "strict": true,
+      "weak": true,
+      "msg_text": "result",
+      "source_line": "assert result.get(\"refused\") is None, result"
+    },
+    {
+      "file": "tests/test_activity_items.py",
+      "line": 1159,
+      "enclosing": "test_the_route_that_found_each_item_root_is_reported",
+      "name": "result",
+      "key": "refused",
+      "assert_line": 1159,
+      "strict": true,
+      "weak": true,
+      "msg_text": "result",
+      "source_line": "assert result.get(\"refused\") is None, result"
+    },
+    {
+      "file": "tests/test_activity_items.py",
+      "line": 1534,
+      "enclosing": "test_the_page_title_names_the_owner_when_no_heading_does",
+      "name": "result",
+      "key": "refused",
+      "assert_line": 1534,
+      "strict": true,
+      "weak": true,
+      "msg_text": "result",
+      "source_line": "assert result.get(\"refused\") is None, result"
+    },
+    {
+      "file": "tests/test_activity_items.py",
+      "line": 1722,
+      "enclosing": "test_every_authorship_fact_the_reader_produces_reaches_the_caller",
+      "name": "refused",
+      "key": "refused",
+      "assert_line": 1722,
+      "strict": false,
+      "weak": false,
+      "msg_text": null,
+      "source_line": "assert refused.get(\"refused\")"
+    },
+    {
+      "file": "tests/test_connections_reader.py",
+      "line": 965,
+      "enclosing": "test_an_unchanged_badge_returns_the_rows",
+      "name": "out",
+      "key": "readable",
+      "assert_line": 965,
+      "strict": false,
+      "weak": false,
+      "msg_text": "'the success shape is an envelope'",
+      "source_line": "assert out.get(\"readable\") is None, \"the success shape is an envelope\""
+    },
+    {
+      "file": "tests/test_editor_fields.py",
+      "line": 590,
+      "enclosing": "test_two_anchors_refuse_as_ambiguous_and_carry_no_fields",
+      "name": "result",
+      "key": "refused",
+      "assert_line": 590,
+      "strict": true,
+      "weak": true,
+      "msg_text": "result",
+      "source_line": "assert result.get(\"refused\") == \"ambiguous_anchor\", result"
+    },
+    {
+      "file": "tests/test_editor_fields.py",
+      "line": 604,
+      "enclosing": "test_no_anchor_refuses_and_carries_no_fields",
+      "name": "result",
+      "key": "refused",
+      "assert_line": 604,
+      "strict": true,
+      "weak": true,
+      "msg_text": "result",
+      "source_line": "assert result.get(\"refused\") == \"no_anchor\", result"
+    },
+    {
+      "file": "tests/test_editor_fields.py",
+      "line": 619,
+      "enclosing": "test_an_anchor_outside_every_dialog_refuses",
+      "name": "result",
+      "key": "refused",
+      "assert_line": 619,
+      "strict": true,
+      "weak": true,
+      "msg_text": "result",
+      "source_line": "assert result.get(\"refused\") == \"anchor_outside_a_container\", result"
+    },
+    {
+      "file": "tests/test_editor_fields.py",
+      "line": 641,
+      "enclosing": "test_a_missing_self_assertion_refuses_before_the_second_load",
+      "name": "result",
+      "key": "refused",
+      "assert_line": 641,
+      "strict": true,
+      "weak": true,
+      "msg_text": "result",
+      "source_line": "assert result.get(\"refused\") == \"self_assertion_unreadable\", result"
+    },
+    {
+      "file": "tests/test_editor_fields.py",
+      "line": 657,
+      "enclosing": "test_two_landed_urls_naming_different_members_refuse",
+      "name": "result",
+      "key": "refused",
+      "assert_line": 657,
+      "strict": true,
+      "weak": true,
+      "msg_text": "result",
+      "source_line": "assert result.get(\"refused\") == \"different_member\", result"
+    },
+    {
+      "file": "tests/test_editor_fields.py",
+      "line": 1303,
+      "enclosing": "test_an_explicit_false_assertion_refuses_at_once",
+      "name": "result",
+      "key": "refused",
+      "assert_line": 1303,
+      "strict": true,
+      "weak": true,
+      "msg_text": "result",
+      "source_line": "assert result.get(\"refused\") == \"not_self_profile\", result"
+    },
+    {
+      "file": "tests/test_editor_values.py",
+      "line": 442,
+      "enclosing": "test_the_two_tools_refuse_the_same_way_on_the_same_page",
+      "name": "values",
+      "key": "refused",
+      "assert_line": 442,
+      "strict": false,
+      "weak": true,
+      "msg_text": "(values, labels)",
+      "source_line": "assert values.get(\"refused\") == labels.get(\"refused\"), (values, labels)"
+    },
+    {
+      "file": "tests/test_editor_values.py",
+      "line": 442,
+      "enclosing": "test_the_two_tools_refuse_the_same_way_on_the_same_page",
+      "name": "labels",
+      "key": "refused",
+      "assert_line": 442,
+      "strict": false,
+      "weak": true,
+      "msg_text": "(values, labels)",
+      "source_line": "assert values.get(\"refused\") == labels.get(\"refused\"), (values, labels)"
+    },
+    {
+      "file": "tests/test_editor_values.py",
+      "line": 443,
+      "enclosing": "test_the_two_tools_refuse_the_same_way_on_the_same_page",
+      "name": "values",
+      "key": "refused",
+      "assert_line": 443,
+      "strict": true,
+      "weak": true,
+      "msg_text": "values",
+      "source_line": "assert values.get(\"refused\") is not None, values"
+    },
+    {
+      "file": "tests/test_editor_values.py",
+      "line": 470,
+      "enclosing": "test_the_anchor_refusals_carry_no_fields",
+      "name": "result",
+      "key": "refused",
+      "assert_line": 470,
+      "strict": true,
+      "weak": true,
+      "msg_text": "result",
+      "source_line": "assert result.get(\"refused\") == expected, result"
+    },
+    {
+      "file": "tests/test_editor_values.py",
+      "line": 483,
+      "enclosing": "test_the_ownership_refusal_carries_no_fields",
+      "name": "result",
+      "key": "refused",
+      "assert_line": 483,
+      "strict": true,
+      "weak": true,
+      "msg_text": "result",
+      "source_line": "assert result.get(\"refused\") == \"self_assertion_unreadable\", result"
+    },
+    {
+      "file": "tests/test_job_detail_wiring.py",
+      "line": 223,
+      "enclosing": "test_an_empty_href_list_can_be_told_from_an_unreadable_one",
+      "name": "shell",
+      "key": "error",
+      "assert_line": 223,
+      "strict": true,
+      "weak": true,
+      "msg_text": "shell",
+      "source_line": "assert shell.get(\"error\") == \"extraction_failed\", shell"
+    },
+    {
+      "file": "tests/test_job_detail_wiring.py",
+      "line": 325,
+      "enclosing": "test_a_shell_that_never_rendered_the_posting_still_fails_loudly",
+      "name": "out",
+      "key": "error",
+      "assert_line": 325,
+      "strict": true,
+      "weak": true,
+      "msg_text": "out",
+      "source_line": "assert out.get(\"error\") == \"extraction_failed\", out"
+    },
+    {
+      "file": "tests/test_press.py",
+      "line": 1103,
+      "enclosing": "test_every_refusal_is_classified_by_when_it_is_knowable",
+      "name": "verdict",
+      "key": "refused",
+      "assert_line": 1103,
+      "strict": true,
+      "weak": true,
+      "msg_text": "verdict",
+      "source_line": "assert verdict.get(\"refused\") == reason, verdict"
+    },
+    {
+      "file": "tests/test_press.py",
+      "line": 1158,
+      "enclosing": "test_a_counter_reader_returning_none_cannot_pass_for_a_pre_press_permit",
+      "name": "verdict",
+      "key": "permitted_to_attempt",
+      "assert_line": 1158,
+      "strict": false,
+      "weak": false,
+      "msg_text": "'a pre-press permit was returned for a press that already happened.'",
+      "source_line": "assert verdict.get(\"permitted_to_attempt\") is not True, ("
+    },
+    {
+      "file": "tests/test_proximity_reader.py",
+      "line": 635,
+      "enclosing": "test_the_hydrated_detail_page_reads_a_relation_and_no_count",
+      "name": "detail",
+      "key": "proximity",
+      "assert_line": 635,
+      "strict": false,
+      "weak": false,
+      "msg_text": null,
+      "source_line": "assert resolved(detail.get(\"proximity\")) == (\"relation_only\", \"company_alum\", None)"
+    },
+    {
+      "file": "tests/test_proximity_reader.py",
+      "line": 636,
+      "enclosing": "test_the_hydrated_detail_page_reads_a_relation_and_no_count",
+      "name": "detail",
+      "key": "proximity",
+      "assert_line": 636,
+      "strict": false,
+      "weak": false,
+      "msg_text": null,
+      "source_line": "assert DETAIL_ORG not in json.dumps(detail.get(\"proximity\"))"
+    },
+    {
+      "file": "tests/test_proximity_reader.py",
+      "line": 642,
+      "enclosing": "test_the_un_hydrated_detail_twin_reads_nothing",
+      "name": "detail",
+      "key": "proximity",
+      "assert_line": 642,
+      "strict": false,
+      "weak": true,
+      "msg_text": "'the un-hydrated detail capture produced %r' % (detail.get('proximity'),)",
+      "source_line": "assert detail.get(\"proximity\") is None, ("
+    },
+    {
+      "file": "tests/test_publish_post_names_its_audience.py",
+      "line": 108,
+      "enclosing": "test_refusing_reaches_no_page_and_no_write_machinery",
+      "name": "out",
+      "key": "reached",
+      "assert_line": 108,
+      "strict": false,
+      "weak": false,
+      "msg_text": "'the refusal reached _write_tool, which would load the composer -- CENSUS_SURFACE_COST records that opening it may autosave a draft this server has no surface to detect or remove'",
+      "source_line": "assert out.get(\"reached\") is None, ("
+    },
+    {
+      "file": "tests/test_tracker_readiness.py",
+      "line": 617,
+      "enclosing": "test_the_refusal_the_operator_saw_now_says_when_it_looked",
+      "name": "result",
+      "key": "error",
+      "assert_line": 617,
+      "strict": true,
+      "weak": true,
+      "msg_text": "result",
+      "source_line": "assert result.get(\"error\") == \"extraction_failed\", result"
+    },
+    {
+      "file": "tests/test_writes_nine.py",
+      "line": 2860,
+      "enclosing": "test_the_label_does_not_reach_the_grant",
+      "name": "block",
+      "key": "to_confirm",
+      "assert_line": 2860,
+      "strict": false,
+      "weak": false,
+      "msg_text": "'the spec was not made grantable'",
+      "source_line": "assert block.get(\"to_confirm\"), \"the spec was not made grantable\""
+    },
+    {
+      "file": "tests/test_writes_nine.py",
+      "line": 2861,
+      "enclosing": "test_the_label_does_not_reach_the_grant",
+      "name": "block",
+      "key": "who_this_would_reach",
+      "assert_line": 2861,
+      "strict": false,
+      "weak": false,
+      "msg_text": null,
+      "source_line": "assert MEMBER in str(block.get(\"who_this_would_reach\") or \"\")"
+    },
+    {
+      "file": "tests/test_writes_nine.py",
+      "line": 2883,
+      "enclosing": "test_the_label_does_not_reach_the_grant",
+      "name": "block",
+      "key": "who_this_would_reach",
+      "assert_line": 2883,
+      "strict": false,
+      "weak": false,
+      "msg_text": null,
+      "source_line": "assert label in str(block.get(\"who_this_would_reach\") or \"\")"
+    }
+  ]
+}

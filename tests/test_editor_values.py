@@ -284,9 +284,28 @@ async def run_values(monkeypatch):
 
 
 def by_label(result: dict[str, Any], label: str) -> dict[str, Any]:
-    """The one record whose published name is ``label``, or a loud failure."""
-    found = [field for field in result["fields"] if field["name"] == label]
-    assert len(found) == 1, (label, [f["name"] for f in result["fields"]])
+    """The one record whose published name is ``label``, or a loud failure.
+
+    THE DOCSTRING PROMISED LOUD AND THE CODE DELIVERED QUIET, in the one case
+    that mattered. ``result["fields"]`` on a result that did not succeed raises
+    ``KeyError: 'fields'`` before either assertion below is reached, so the
+    failure named an absent key and said nothing about what the tool returned
+    instead -- and the two assertions, which ARE loud, never ran.
+
+    That is not hypothetical here. On 2026-09-21 the same shape in
+    ``tests/test_editor_fields.py`` reported a 60-second
+    ``Page.set_content`` timeout to CI as ``KeyError: 'fields'``. This helper
+    was found by the census that failure prompted
+    (``scripts/_census_result_subscripts.py``, pass A: functions that are handed
+    a result and subscript it unguarded) and was the only other instance in the
+    suite.
+    """
+    fields = result.get("fields")
+    assert isinstance(fields, list), (
+        "the tool published no 'fields' list. It returned: %r" % (result,)
+    )
+    found = [field for field in fields if field["name"] == label]
+    assert len(found) == 1, (label, [f["name"] for f in fields])
     return found[0]
 
 
