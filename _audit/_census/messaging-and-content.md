@@ -15,7 +15,7 @@ it advertises against the code in `linkedin_server/`.
 
 **CORRECTED BY:** `_audit/2026-09-21-the-write-ceiling.md` -- this slice's 71 write-direction GAP rows were adjudicated row by row on 2026-09-21; five moved to EXCLUDED-RULED and 66 stayed GAP.
 
-The five are `M35`, `M36`, `C73`, `C88`, `C89`, all under the SETTINGS-FAMILY ruling, which is stated **capability-level, not path-level** and *"'a setting', not 'a profile setting'"* -- the profile slice applied it to 93 rows, this slice to five, and these are five more the enumeration never reached. **NOTHING ELSE MOVED, AND THAT IS THE LARGER HALF OF THE PASS:** 66 of the 71 stay GAP, 23 of them on a DATED PRIOR ADJUDICATION that already examined the row and chose GAP. Delta on this slice, re-derived with `scripts/count_census_states.py`:
+The five are `M35`, `M36`, `C73`, `C88`, `C89`, all under the SETTINGS-FAMILY ruling, which is stated **capability-level, not path-level** and *"'a setting', not 'a profile setting'"* -- the profile slice applied it to 93 rows, this slice to five, and these are five more the enumeration never reached. **NOTHING ELSE MOVED, AND THAT IS THE LARGER HALF OF THE PASS:** 66 of the 71 stay GAP, **21** of them on a DATED PRIOR ADJUDICATION that already examined the row and chose GAP. (23 of the 71 carried such a marker; two of those 23 are among the five that moved, so 21 remain. The arithmetic is written out because the two figures are one subtraction apart and a reader who meets only one of them cannot tell which.) Delta on this slice, re-derived with `scripts/count_census_states.py`:
 
     GAP              82 -> 77
     EXCLUDED-RULED   45 -> 50

@@ -204,10 +204,21 @@ NAME`** -- the mechanism by which dark mode became the one writable setting.
       network.md   49   adjudicated 2026-09-20, not re-litigated
       messaging    66   adjudicated HERE
 
-Of the messaging 66, measured by phrase over the cells:
+Measured by phrase over the cells, across all **71** messaging write rows as they
+stood BEFORE this wave:
 
     CARRY A DATED PRIOR ADJUDICATION that already chose GAP      23
-    NO SUCH MARKER -- nobody has weighed them                    43
+    NO SUCH MARKER -- nobody has weighed them                    48
+                                                                ---
+                                                                 71
+
+and of the **66 that remain** after five closed -- two of the five (`C88`, `C89`)
+carried a marker and three (`M35`, `M36`, `C73`) did not, so the split is:
+
+    CARRY A DATED PRIOR ADJUDICATION                             21
+    NO SUCH MARKER                                               45
+                                                                ---
+                                                                 66
 
 **23 of 71 messaging write rows had already been examined and deliberately left GAP**,
 most of them on 2026-09-19 and 2026-09-20. The largest single group is the ten rows
