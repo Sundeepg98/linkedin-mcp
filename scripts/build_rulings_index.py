@@ -313,6 +313,38 @@ REGISTER: tuple = (
         aliases=("the deduplication ruling",
                  "OWNED-BY-A-SIBLING-SLICE"),
     ),
+    Ruling(
+        id="COMPOUND-ROW-SPLITS-ONLY-ON-STATE",
+        claim="When ONE census row describes TWO capabilities it is SPLIT "
+              "only if the halves require different STATES. A DIRECTION "
+              "divergence is repaired in the cell as `R+W`, never by a "
+              "split. Two verbs, two surfaces, two addresses and mere "
+              "verbosity are not grounds. A row whose halves share a state "
+              "today but would not once a pending ruling is applied carries "
+              "a written TRIGGER instead of being split now.",
+        binds="census state -- every row whose capability names two acts",
+        document="_audit/2026-09-21-the-compound-rows.md",
+        anchor="SPLIT a compound row if and only if its halves require "
+               "DIFFERENT STATES.",
+        aliases=("the compound rows", "split or leave whole",
+                 "P L2 -> L2 + L2b", "two capabilities one row",
+                 "the write-partition's section 4.4.2 question"),
+        note="THE EXACT COMPLEMENT OF `DUPLICATE-ROW-IS-MARKED-NEVER-DELETED` "
+             "above -- that one governs two rows describing one capability, "
+             "this one governs one row describing two. They were filed "
+             "together for that reason. The asymmetry it rests on is "
+             "MEASURED rather than argued: `reader_closable_blockers."
+             "DIRECTIONS` normalises four spellings of a both-DIRECTION onto "
+             "`R+W`, while `count_census_states.classify` answers a "
+             "two-STATE cell by silently taking the first by textual order "
+             "or by dropping the row out of the census, raising no dialect "
+             "either way. Direction can be told the truth in the cell; state "
+             "cannot. The corpus had already decided this eight times "
+             "without naming it -- seven non-splits (`P M6` `P M9` `P M11` "
+             "`M M28` `M C47` `N 125`, plus `J 71` declining in writing) and "
+             "the one split, `P L2` -> `L2` + `L2b`, whose halves are BOTH "
+             "reads and which therefore refutes a direction-based rule.",
+    ),
 
     # ----------------------------------------------------------- write scope
     Ruling(

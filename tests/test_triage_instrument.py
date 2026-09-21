@@ -130,7 +130,29 @@ AFTER_THE_MESSAGING_GAP_WAVE = (82, {"R": 10, "W": 71, "R+W": 1})
 #: are UNTOUCHED, which is the check that this wave stayed inside its scope --
 #: it was a write-direction pass, so any movement in ``R`` would have been a
 #: row it had no business moving.
-EXPECTED_NOW = (77, {"R": 10, "W": 66, "R+W": 1})
+AFTER_THE_WRITE_CEILING_WAVE = (77, {"R": 10, "W": 66, "R+W": 1})
+
+#: AFTER ``_audit/2026-09-21-the-compound-rows.md``, which ruled
+#: ``COMPOUND-ROW-SPLITS-ONLY-ON-STATE`` and corrected ONE direction cell:
+#: ``C85`` ("Vote in a poll / view poll results") carried ``W`` for a pair
+#: whose second half is a READ, and now carries ``R+W``.
+#:
+#: **THE TOTAL DOES NOT MOVE AND THAT IS THE WHOLE POINT OF THIS ENTRY.**
+#: 77 before, 77 after: no row left GAP, no row was created, no denominator
+#: moved. The arithmetic is entirely inside the split -- writes 66 - 1 = 65,
+#: read-and-writes 1 + 1 = 2, reads UNTOUCHED at 10 because the read HALF of a
+#: compound row is counted in ``R+W`` and never in ``R``.
+#:
+#: WHY A CELL EDIT RATHER THAN A SPLIT, since a split was the queued option:
+#: the row's halves differ in DIRECTION and agree on STATE (both GAP), and the
+#: direction vocabulary has a both-value that ``rcb.DIRECTIONS`` already
+#: normalises from four spellings, while the STATE vocabulary has none --
+#: ``classify`` answers a two-state cell by silently taking the first by
+#: textual order, or by silently dropping the row out of the census. So a
+#: direction divergence can be told the truth in the cell and a state
+#: divergence cannot, which is the whole of the ruling. ``M28`` in the same
+#: file is the identical shape and has carried ``R+W`` since it was written.
+EXPECTED_NOW = (77, {"R": 10, "W": 65, "R+W": 2})
 
 
 def test_the_headline_split_is_the_one_the_report_quotes():

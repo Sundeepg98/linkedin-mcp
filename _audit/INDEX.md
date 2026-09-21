@@ -27,8 +27,8 @@ are listed as `(undated)`; no date is taken from git history, because
 
 | what | count |
 | --- | --- |
-| audit documents git tracks under `_audit` | 211 |
-| of those, carrying a `YYYY-MM-DD-` date prefix | 177 |
+| audit documents git tracks under `_audit` | 212 |
+| of those, carrying a `YYYY-MM-DD-` date prefix | 178 |
 | distinct dates | 14 |
 | documents with no level-1 heading | 1 |
 | `CORRECTS:` marker lines | 82 |
@@ -39,7 +39,7 @@ are listed as `(undated)`; no date is taken from git history, because
 | documents at either end of a cross-document edge | 84 |
 | intra-document correction markers | 4 |
 | documents that correct themselves later on | 2 |
-| documents no correction marker touches at all | 125 |
+| documents no correction marker touches at all | 126 |
 | blockquoted markers naming ANOTHER document | 0 |
 | edges missing one of their two markers | 0 |
 | edges declared a different number of times in each direction | 2 |
@@ -1373,6 +1373,7 @@ ways, which is a fact about markers and not a verdict on the document.
 | 2026-09-21 | [2026-09-21-refuse-before-the-click.md](2026-09-21-refuse-before-the-click.md) | REFUSE BEFORE THE CLICK -- the press gate now consults the basis table before it touches a page | corrects x1 |
 | 2026-09-21 | [2026-09-21-taint-does-not-survive-a-container.md](2026-09-21-taint-does-not-survive-a-container.md) | The output-sink guard misses a landed URL that reaches stdout |  |
 | 2026-09-21 | [2026-09-21-the-all-filters-press.md](2026-09-21-the-all-filters-press.md) | THE `All filters` PRESS: REFUSED AT CONDITION 2, AND THE GATE WOULD HAVE PRESSED FIRST | corrects x2 |
+| 2026-09-21 | [2026-09-21-the-compound-rows.md](2026-09-21-the-compound-rows.md) | The compound rows -- when one census row names two capabilities |  |
 | 2026-09-21 | [2026-09-21-the-fires-and-the-controls.md](2026-09-21-the-fires-and-the-controls.md) | THE FIRES AND THE CONTROLS | corrects x2 |
 | 2026-09-21 | [2026-09-21-the-fourteen-fired.md](2026-09-21-the-fourteen-fired.md) | THE FOURTEEN FIRED: one banked, one refused, twelve behind a press | **CORRECTED x1** corrects x2 |
 | 2026-09-21 | [2026-09-21-the-jobs-direction.md](2026-09-21-the-jobs-direction.md) | THE JOBS DIRECTION: the fifth of the GAP that was never asked the question | corrects x1 |

@@ -8,9 +8,9 @@
 
 **THIS REGISTER IS NOT THE CORPUS AND DOES NOT CLAIM TO BE COMPLETE.** Read section 4 before concluding a question is unruled: the scan that keeps it honest reads ONE marker, and the ruling that caused this file to be written does not carry it.
 
-    rulings registered       34
-    documents scanned        210
-    RULED: declarations      21 claimed, 7 triaged, 0 unclaimed
+    rulings registered       35
+    documents scanned        211
+    RULED: declarations      22 claimed, 7 triaged, 0 unclaimed
 
 ---
 
@@ -58,6 +58,7 @@ Scan the CLAIM column against your question. Every claim is a paraphrase written
 | `N61-REMOVED-FROM-HASHTAG-EXISTENCE` | `N 61` is removed from `HASHTAG-EXISTENCE`. | one row's blocker assignment | 2026-09-19 | [2026-09-19-the-five-requests-ruled.md](2026-09-19-the-five-requests-ruled.md)<br>*B. `N 61` IN `HASHTAG-EXISTENCE` -- RULED: removed* |
 | `DUPLICATE-ROW-IS-MARKED-NEVER-DELETED` | When two census rows describe one capability the duplicate STAYS in the file, marked as a duplicate and naming the row it duplicates. It is not removed and its id is never reused. | every cross-slice re-file and de-duplication | 2026-09-20 | [2026-09-20-the-deduplication-ruling.md](2026-09-20-the-deduplication-ruling.md)<br>*The ruling* |
 | `POSITIONAL-DIALECT-SHIP-THE-DETECTOR` | Ship the detector; do not rewrite the 69 cells. | the positional-dialect cells | 2026-09-20 | [2026-09-20-the-pointer-graph.md](2026-09-20-the-pointer-graph.md)<br>*4. THE DECISION ON THE POSITIONAL DIALECT* |
+| `COMPOUND-ROW-SPLITS-ONLY-ON-STATE` | When ONE census row describes TWO capabilities it is SPLIT only if the halves require different STATES. A DIRECTION divergence is repaired in the cell as `R+W`, never by a split. Two verbs, two surfaces, two addresses and mere verbosity are not grounds. A row whose halves share a state today but would not once a pending ruling is applied carries a written TRIGGER instead of being split now. | every row whose capability names two acts | 2026-09-21 | [2026-09-21-the-compound-rows.md](2026-09-21-the-compound-rows.md)<br>*THE RULING -- RULED: a compound row is split ONLY when its halves need different STATES* |
 | `EXCLUDED-RULED-ADMISSION` | A row is EXCLUDED-RULED only on one of FOUR written grounds: a forbidden-substring entry, a writes.PERMANENTLY_FORBIDDEN key, a WriteSpec refusing in its own words, or an audit passage measuring the capability unreachable. Anything a general mechanism merely happens to block is GAP with a NAMED BLOCKER. | the bar for EXCLUDED-RULED on every slice | ~2026-09-03 | [_census/network.md](_census/network.md)<br>*2. HOW A CAPABILITY WAS ASSIGNED A STATE* |
 
 ### verb
@@ -117,6 +118,7 @@ Scan the CLAIM column against your question. Every claim is a paraphrase written
 | one canonical id | `CANONICAL-RULING-ID` |
 | OWNED-BY-A-SIBLING-SLICE | `DUPLICATE-ROW-IS-MARKED-NEVER-DELETED` |
 | P I12 -> J99 | `CONTAINER-EXCLUSION-PROPAGATES-ONLY-IF-UNREACHABLE` |
+| P L2 -> L2 + L2b | `COMPOUND-ROW-SPLITS-ONLY-ON-STATE` |
 | press.disclose | `DISCLOSING-PRESS-PERMITTED` |
 | R11 | `MESSAGING-SETTINGS-CAPABILITY-LEVEL` |
 | R9 | `DO-NOT-OPEN-MESSAGING` |
@@ -132,9 +134,11 @@ Scan the CLAIM column against your question. Every claim is a paraphrase written
 | section 7 of lead-rulings-round-two | `SCROLL-NOT-SANCTIONED` |
 | server.py::linkedin_update_setting | `MESSAGING-SETTINGS-CAPABILITY-LEVEL` |
 | settings family | `MESSAGING-SETTINGS-CAPABILITY-LEVEL` |
+| split or leave whole | `COMPOUND-ROW-SPLITS-ONLY-ON-STATE` |
 | THE BOUNDARY IS NOT A REASON | `BOUNDARY-IS-NOT-A-REASON` |
 | the census's own rule | `EXCLUDED-RULED-ADMISSION` |
 | the class-filter convention | `INCIDENTAL-CAPTURE-IS-NOT-A-RULING` |
+| the compound rows | `COMPOUND-ROW-SPLITS-ONLY-ON-STATE` |
 | the deduplication ruling | `DUPLICATE-ROW-IS-MARKED-NEVER-DELETED` |
 | the disclosing press | `DISCLOSING-PRESS-PERMITTED` |
 | the groups eight | `GROUPS-ADDRESS-BUYS-NO-WRITE` |
@@ -147,6 +151,8 @@ Scan the CLAIM column against your question. Every claim is a paraphrase written
 | the search admission | `SEARCH-ADMISSION-APPROVED-FIVE-CONDITIONS` |
 | the standing order | `NO-IRREVERSIBLE-WRITE-IS-FIRED` |
 | the standing shape | `STANDING-SHAPE-OF-A-WRITE-RULING` |
+| the write-partition's section 4.4.2 question | `COMPOUND-ROW-SPLITS-ONLY-ON-STATE` |
+| two capabilities one row | `COMPOUND-ROW-SPLITS-ONLY-ON-STATE` |
 | two-census-conventions section 1 | `CANONICAL-RULING-ID` |
 | two-census-conventions section 2 | `CONTAINER-EXCLUSION-PROPAGATES-ONLY-IF-UNREACHABLE` |
 | two-census-conventions section 3 | `INCIDENTAL-CAPTURE-IS-NOT-A-RULING` |
@@ -158,6 +164,8 @@ Scan the CLAIM column against your question. Every claim is a paraphrase written
 **`BOUNDARY-IS-NOT-A-REASON`** -- The application of EXCLUDED-RULED-ADMISSION that section 5.4a found. It quotes the census rule rather than restating it.
 
 **`CANONICAL-RULING-ID`** -- THIS FILE IS THAT RULING'S ARTIFACT. It is why the register prints a section heading and never a line number, and why the aliases column exists at all.
+
+**`COMPOUND-ROW-SPLITS-ONLY-ON-STATE`** -- THE EXACT COMPLEMENT OF `DUPLICATE-ROW-IS-MARKED-NEVER-DELETED` above -- that one governs two rows describing one capability, this one governs one row describing two. They were filed together for that reason. The asymmetry it rests on is MEASURED rather than argued: `reader_closable_blockers.DIRECTIONS` normalises four spellings of a both-DIRECTION onto `R+W`, while `count_census_states.classify` answers a two-STATE cell by silently taking the first by textual order or by dropping the row out of the census, raising no dialect either way. Direction can be told the truth in the cell; state cannot. The corpus had already decided this eight times without naming it -- seven non-splits (`P M6` `P M9` `P M11` `M M28` `M C47` `N 125`, plus `J 71` declining in writing) and the one split, `P L2` -> `L2` + `L2b`, whose halves are BOTH reads and which therefore refutes a direction-based rule.
 
 **`CONTAINER-EXCLUSION-PROPAGATES-ONLY-IF-UNREACHABLE`** -- Built ON `P I12` as a SOUND exclusion: *zero of 237 urls reach one* is ground four of EXCLUDED-RULED-ADMISSION. Two later documents call `P I12` a miscategorisation; see the register's DISPUTED note in the report for this wave.
 
@@ -185,10 +193,10 @@ Scan the CLAIM column against your question. Every claim is a paraphrase written
 
 | signal NOT scanned | files | lines |
 |---|---|---|
-| a heading naming a ruling | 98 | 225 |
-| a bold line opening on RULING/RULED | 45 | 101 |
-| the phrase THE RULING | 31 | 46 |
-| a named -RULING id | 19 | 45 |
+| a heading naming a ruling | 99 | 226 |
+| a bold line opening on RULING/RULED | 46 | 102 |
+| the phrase THE RULING | 32 | 47 |
+| a named -RULING id | 20 | 46 |
 | the phrase standing ruling | 9 | 15 |
 | a lead or operator ruling in prose | 31 | 62 |
 
@@ -223,6 +231,7 @@ Every `RULED:` line in the corpus, and what became of it. An UNCLAIMED row fails
 | [2026-09-19-two-census-conventions-ruled.md](2026-09-19-two-census-conventions-ruled.md) | ### RULED: APPROVED IN PRINCIPLE. FIVE CONDITIONS, ALL BINDING. | `SEARCH-ADMISSION-APPROVED-FIVE-CONDITIONS` |
 | [2026-09-19-two-census-conventions-ruled.md](2026-09-19-two-census-conventions-ruled.md) | ### RULED: THE GRAIN FOLLOWS WHAT THE PLATFORM DRAWS | `GRAIN-FOLLOWS-WHAT-THE-PLATFORM-DRAWS` |
 | [2026-09-20-the-pointer-graph.md](2026-09-20-the-pointer-graph.md) | **RULED: ship the detector. Do not rewrite the 69 cells.** The brief authorised this | `POSITIONAL-DIALECT-SHIP-THE-DETECTOR` |
+| [2026-09-21-the-compound-rows.md](2026-09-21-the-compound-rows.md) | ## THE RULING -- RULED: a compound row is split ONLY when its halves need different STATES | `COMPOUND-ROW-SPLITS-ONLY-ON-STATE` |
 
 ### 5.1 Triaged -- a declaration hit that is not a ruling made here
 
