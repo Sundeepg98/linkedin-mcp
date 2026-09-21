@@ -144,7 +144,10 @@ Outermost, not innermost, is the whole point: when `tests/repo_paths.py` or a
 still on the stack above.
 
 **One full recording, 2865s (47m42s), `-n auto`: 8661 raw edges over 143 test
-files, 192 unattributed reads.** Pruned for shipping to non-python targets
+files, 192 unattributed reads.** All 192 are pytest reading a test file's own
+source during collection, when no test frame is on the stack yet; the field is
+kept in the artifact rather than dropped, because it is the honest edge of what
+stack attribution can see. Pruned for shipping to non-python targets
 that are FILES (a walk opens its directory, so the first pruning kept rows
 for `.` and `_audit`): 2294 edges over 86 test files, 117 KB.
 
@@ -206,9 +209,13 @@ rule could reach:
 
 ## 4. THE COUPLING BUILT, AND WHAT DEFEATS IT
 
-Three additions, each with its own switch so a control can disarm it, because
-a selector whose rules cannot be disarmed individually cannot be shown failing
-at all.
+Three additions. Two carry their own switch so a control can disarm them,
+because a selector whose rules cannot be disarmed individually cannot be shown
+failing at all. The third -- the path-load hop -- deliberately does NOT: it is
+part of the import walk and is disarmed with it by `import_coupling=False`,
+which is what its control uses. That choice has a cost and 3.1 pays it out
+loud: a run that disarms only the two named switches is not the pristine
+analyser.
 
 ### 4.1 `composed_coupling` -- read the f-string as the pattern it is
 
@@ -454,6 +461,13 @@ REFUSED: a test this change can reach is RED.
 `EXIT=1`. The cost of catching it was **eight more test files and 84 more
 seconds**.
 
+(That output says the map holds 87 test files; the committed file says 86. The
+pastes are verbatim from the runs, and the map was pruned once more afterwards
+to drop rows for DIRECTORIES -- a walk opens its directory, so `.` and `_audit`
+had been recorded as read targets and neither can ever be a changed path. The
+run above is not re-staged to make the two numbers agree, because a doctored
+receipt is worth less than an explained one.)
+
 ### 6.5 The fourth failure in that run is the best thing in this document
 
 `tests/test_impact_gate_selects_data_dependencies.py::test_reverting_the_data_rule_loses_the_test_again`
@@ -516,11 +530,13 @@ gate, which calls it once, and it is why every census in this document took
 half an hour. A module-level corpus cache keyed on mtime would fix it. Not
 built; it changes no verdict.
 
-**R4. `candidate_files()` globs three directories FLAT.** There is no `.py`
-under `tests/`, `scripts/` or `linkedin_server/` in a subdirectory today, so
-the flat glob is correct today. The day somebody adds `tests/unit/`, every file
-in it becomes invisible to the analyser and nothing will say so. A guard that
-asserts the flat glob still covers what pytest collects would close it.
+**R4. `candidate_files()` globs three directories FLAT -- CLOSED, with a
+guard.** There is no `.py` in a subdirectory of `tests/`, `scripts/` or
+`linkedin_server/` today, so the flat glob is correct today; the day somebody
+adds `tests/unit/`, every file in it would become invisible to every coupling
+rule and nothing would say so. `test_no_python_hides_below_the_analysers_flat_glob`
+now says so, and its control manufactures a nested directory in `tmp_path`
+rather than writing one into a tree three other waves are committing to.
 
 **R5. `.github/workflows/ci.yml` selects exactly ONE test file.** The
 recording agrees -- only `tests/test_the_package_compiles_on_its_oldest_python.py`
@@ -528,13 +544,19 @@ reads it. That is a true reading and also a thin one: CI is the certifier, and a
 change to the matrix is the change least checkable from here. Out of scope for
 an impact analyser; named so nobody reads the 1 as coverage.
 
-**R6. Five tests were already red on this tree during the recording**
-(`test_click_is_not_its_own_evidence`, `test_a_cited_sha_resolves`'s cheapness
-guard, `test_typeahead_gate`, `test_sweep_blobs_refuses_a_vacuous_pass`, and my
-own `build_read_map.py` outage defect, since fixed). Seven other waves were
-writing at the time. The recording captures READS, not verdicts, so a red test
-still contributes its edges -- but a test that died before opening its fixtures
-would be under-recorded, and I have not separated those cases.
+**R6. Five tests were red DURING THE RECORDING and none of them is red now.**
+The recording run reported `test_click_is_not_its_own_evidence`,
+`test_a_cited_sha_resolves`'s cheapness guard, `test_typeahead_gate`,
+`test_sweep_blobs_refuses_a_vacuous_pass` and my own `build_read_map.py`
+outage defect. The last was real and is fixed. The other four are almost
+certainly the instrument's own weight: **the recording wraps every
+`builtins.open` and `io.open` in the process**, and two of those four are
+explicitly budget or timing guards. The clean run below has all five green.
+
+That is a limit worth stating rather than waving off: a test that dies before
+opening its fixtures is UNDER-RECORDED, and the edges it would have
+contributed are simply absent from the map. I have not separated those cases,
+and the union with the static rules is what stops it mattering.
 
 **R7. The recall numbers in 3.1 are measured against the recording, so the
 line "with the observed map unioned, 0 missed" would be CIRCULAR and is not
@@ -549,6 +571,35 @@ loudly (never skip) if one is renamed, and every derived number the gate prints
 is computed at run time, not baked in. The one baked artifact is the read map,
 and it is additive by construction.
 
+**ONE THING FOR WHOEVER MERGES THIS: rebuild the read map afterwards.**
+`python scripts/build_read_map.py`, 2865s, and commit the result. Seven waves
+are adding tests; every one of them added after `f729a2a` is absent from the
+recording and will be carried only by the static rules until it is rebuilt.
+Nothing breaks if you skip it -- the gate says on every run that the recording
+was not taken at this commit -- but the precision it buys decays from that
+moment on.
+
+---
+
+## VERIFICATION
+
+The whole suite, on the committed tree, uninstrumented:
+
+    python -m pytest tests/ -q -p no:randomly -n auto --dist loadfile
+    7970 passed, 8 skipped, 1 xfailed in 636.53s (0:10:36)     EXIT 0
+
+**A scoped gate is the wrong certifier for a change to the scoped gate**, so
+this wave was verified by the thing it is scoping, not by itself. The impact
+gate was also run on the staged change (36 files, 2041 tests, PASS) and it
+caught something real on the first attempt -- `_audit/INDEX.md` and
+`_audit/RULINGS.md` are DERIVED, and adding a document without regenerating
+them is red. They were regenerated with their own build scripts, never
+hand-edited.
+
+The eight skips are the windows symlink-privilege cases, four empty parameter
+sets, and one reader that does not exist yet. The xfail is a strict marker on
+a known 2026-09-03 defect.
+
 ---
 
 ## INSTRUMENTS
@@ -558,4 +609,4 @@ and it is additive by construction.
 | `scripts/build_read_map.py` | NEW. Records which test file reads which data file, by instrumenting `builtins.open`, `io.open` and `subprocess`. Re-runnable: `python scripts/build_read_map.py`. |
 | `scripts/impact_gate_read_map.json` | NEW. The recording, stamped with its date and commit; the gate prints that stamp, and says so when it was not taken at this commit. |
 | `scripts/impact_gate.py` | `composed_name_patterns`, `composed_verdict`, `composed_targets`, `read_map`, `observed_readers`, and the `loads it by path` hop. |
-| `tests/test_impact_gate_selects_data_dependencies.py` | Four new controls plus the repaired one. Two shown failing by mutation. |
+| `tests/test_impact_gate_selects_data_dependencies.py` | Six new tests plus the repaired control. Two shown failing by mutation; the flat-glob guard carries its own manufactured control. |

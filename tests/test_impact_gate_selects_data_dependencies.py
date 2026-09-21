@@ -554,3 +554,67 @@ def test_an_absent_read_map_is_reported_and_never_read_as_empty(monkeypatch):
         "the Impact must carry the ABSENCE so the report can print it; a "
         "silent default here is how a missing recording becomes invisible."
     )
+
+
+# --------------------------------------------------------------------------
+# THE FLAT GLOB. ``candidate_files()`` enumerates ``tests/*.py``,
+# ``scripts/*.py`` and ``linkedin_server/*.py`` -- ONE level, no recursion.
+# That is correct for this tree today and silently wrong the day somebody adds
+# ``tests/unit/``: every file under it becomes invisible to every coupling
+# rule, and NOTHING would say so. This is the "say so" turned into an
+# assertion.
+# --------------------------------------------------------------------------
+
+_ANALYSED_ROOTS = ("tests", "scripts", "linkedin_server")
+
+
+def _below_the_flat_glob(root: pathlib.Path) -> list[str]:
+    """``.py`` files the flat glob cannot see, under one analysed root.
+
+    A PURE FUNCTION OF A DIRECTORY, so the assertion below has a control that
+    does not require writing a file into a tree other agents are working in.
+    ``__pycache__`` is excluded because it holds no source.
+    """
+    if not root.is_dir():
+        return []
+    deep = {p for p in root.rglob("*.py") if "__pycache__" not in p.parts}
+    flat = set(root.glob("*.py"))
+    return sorted(p.as_posix() for p in deep - flat)
+
+
+def test_no_python_hides_below_the_analysers_flat_glob():
+    """Every analysable ``.py`` is where ``candidate_files()`` looks."""
+    hidden: list[str] = []
+    for name in _ANALYSED_ROOTS:
+        hidden += _below_the_flat_glob(_ROOT / name)
+    assert not hidden, (
+        "these python files live in a SUBDIRECTORY of an analysed root, and "
+        "impact_gate.candidate_files() globs one level only -- so no coupling "
+        "rule can see them, no change can select them, and the gate would say "
+        f"nothing about it: {hidden}. Either move them up or teach "
+        "candidate_files() to recurse; do not delete this test."
+    )
+
+
+def test_the_flat_glob_check_can_actually_find_something(tmp_path):
+    """THE CONTROL, over a manufactured directory rather than the real tree.
+
+    A check that has only ever been shown a flat directory proves nothing
+    about a nested one -- and the honest way to show it working is to BUILD
+    the nested case, not to write one into a repository three other agents are
+    committing to.
+    """
+    (tmp_path / "flat.py").write_text("x = 1\n", encoding="ascii")
+    nested = tmp_path / "unit"
+    nested.mkdir()
+    (nested / "test_buried.py").write_text("y = 2\n", encoding="ascii")
+    (tmp_path / "__pycache__").mkdir()
+    (tmp_path / "__pycache__" / "ignored.py").write_text("z = 3\n",
+                                                         encoding="ascii")
+    found = _below_the_flat_glob(tmp_path)
+    assert found == ["unit/test_buried.py"] or found == [
+        (tmp_path / "unit" / "test_buried.py").as_posix()
+    ], found
+    assert not any("__pycache__" in f for f in found), (
+        "the cache is not source and must not be reported as a hidden file."
+    )
