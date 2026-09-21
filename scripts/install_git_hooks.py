@@ -129,7 +129,7 @@ def classify(text: str) -> str:
     return "unrecognised"
 
 
-def main() -> int:
+def install_pre_commit() -> int:
     check_only = "--check" in sys.argv
 
     if not HOOK.parent.exists():
@@ -181,6 +181,96 @@ def main() -> int:
     print("  NOTE: .git/hooks is per-checkout and untracked. This protects this")
     print("  working copy only. Bypass when you mean it: git commit --no-verify")
     return 0
+
+
+# ---------------------------------------------------------------------------
+# THE SECOND HOOK. A DIFFERENT FILE, A DIFFERENT EVENT, AND ONE GATE IN IT.
+# ---------------------------------------------------------------------------
+#: ``exec`` IS CORRECT HERE AND WRONG IN THE PRE-COMMIT HOOK, which is worth
+#: saying out loud because this file's own docstring warns against it. That
+#: warning is about APPENDING a second command after an exec line -- the shell
+#: is replaced, so the second gate never runs and the file still reads as if it
+#: does. This hook runs exactly one gate and must hand it git's stdin unchanged
+#: (the ref lines ARE the input), so exec is the honest spelling. If a second
+#: pre-push gate is ever added, exec has to go first.
+PUSH_HOOK = REPO / ".git" / "hooks" / "pre-push"
+PUSH_GATE = "scripts/pre_push_ref_gate.py"
+
+PUSH_WANTED = (
+    "#!/bin/sh\n"
+    "# Resolve the interpreter against the MAIN checkout, not the cwd -- linked\n"
+    "# worktrees share this hooks directory and have no venv of their own. Same\n"
+    "# reasoning, and the same 2026-09-19 scar, as the pre-commit hook above.\n"
+    "COMMON=$(git rev-parse --git-common-dir 2>/dev/null) || exit 0\n"
+    'ROOT=$(cd "$(dirname "$COMMON")" && pwd)\n'
+    'PY="$ROOT/venv/Scripts/python.exe"\n'
+    "\n"
+    "# NOT FOUND IS A LOUD ALLOW. Refusing every push because of infrastructure\n"
+    "# is how a gate earns a --no-verify habit; passing in silence is how it\n"
+    "# stops being a gate. Say which happened.\n"
+    'if [ ! -x "$PY" ]; then\n'
+    '  echo "pre-push: interpreter not found at $PY -- REF GATE DID NOT RUN. Allowing." >&2\n'
+    "  exit 0\n"
+    "fi\n"
+    "\n"
+    f'exec "$PY" "$ROOT/{PUSH_GATE}" "$@"\n'
+)
+
+
+def classify_push(text: str) -> str:
+    return "current" if text == PUSH_WANTED else "unrecognised"
+
+
+def install_pre_push() -> int:
+    check_only = "--check" in sys.argv
+    state = "absent" if not PUSH_HOOK.exists() else classify_push(
+        PUSH_HOOK.read_text(encoding="utf-8"))
+
+    print()
+    print(f"pre-push hook: {state}")
+    print(f"  path   : {PUSH_HOOK}")
+    print(f"  gate   : {PUSH_GATE}")
+
+    if state == "current":
+        print("  nothing to do.")
+        return 0
+
+    if state == "unrecognised":
+        print()
+        print("REFUSED: a pre-push hook is already installed and this script")
+        print("did not write it. Somebody wrote that file deliberately and a")
+        print("single-file hook means installing over it would DISCARD it.")
+        return 3
+
+    if check_only:
+        print()
+        print("  --check: would install the ref gate.")
+        return 1
+
+    PUSH_HOOK.write_text(PUSH_WANTED, encoding="utf-8")
+    try:
+        PUSH_HOOK.chmod(0o755)
+    except OSError:
+        pass
+    written = classify_push(PUSH_HOOK.read_text(encoding="utf-8"))
+    print()
+    print(f"  installed. re-read says: {written}")
+    if written != "current":
+        print("  REFUSED-AFTER-THE-FACT: the file on disk is not what was written.")
+        return 4
+    print("  It refuses any REMOTE ref but refs/heads/master, deletes included.")
+    print("  Override for one command: LINKEDIN_MCP_ALLOW_ANY_REF=1 git push ...")
+    return 0
+
+
+def main() -> int:
+    # BOTH RUN, AND THE WORSE CODE WINS. Returning early on the first hook's
+    # result would mean a healthy pre-commit hook silently skips installing the
+    # pre-push one -- the same shadowing this file exists to prevent, one level
+    # up.
+    commit_rc = install_pre_commit()
+    push_rc = install_pre_push()
+    return max(commit_rc, push_rc)
 
 
 if __name__ == "__main__":
