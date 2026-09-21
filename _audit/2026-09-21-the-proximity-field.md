@@ -1,6 +1,6 @@
 # The proximity field -- census row `J 40`, read per-job network proximity
 
-**WAVE:** `proximity-field`. **STATUS: FROZEN.** Written incrementally; section 7 was written last, after the full suite came back red and five of its eight failures turned out to be mine.
+**WAVE:** `proximity-field`. **STATUS: FROZEN, full suite GREEN** -- 7591 passed, 0 failed, 21m07s sharded, on the corrected tree. Written incrementally; section 7 was written last, after a first full run came back RED and five of its eight failures turned out to be mine.
 **BRANCH:** `worktree-agent-af3d04d2d06ceafc5`, forked at `2571b1f`.
 
 ---
@@ -760,6 +760,58 @@ said the gate was "IN PROGRESS" and listed what had passed, with the reasoning
 that a gate whose result I had not seen was not a gate I could quote. That was
 the right call and it was about to become a comfortable one -- the run it was
 waiting on came back red.
+
+### 7.2c THE RE-RUN, GREEN
+
+Full suite on the corrected tree, same flags the gate uses:
+
+    7591 passed, 8 skipped, 1 xfailed in 1267.84s (0:21:07)
+    EXIT=0
+
+Zero `FAILED` lines. The three artifacts of 7.2a did not recur, which is the
+second measurement confirming they were contention and a mid-run commit rather
+than defects. The one `xfailed` is `test_click_is_not_its_own_evidence`'s
+declared KNOWN DEFECT from 2026-09-03, strict-marked so a fix turns it red;
+nothing to do with this wave.
+
+7581 passed in the red run and 7591 here: **+8 repaired, +2 net new cases**
+from the checks 4.4 and 4.5 added.
+
+**RUN AS `pytest tests/ -q -p no:randomly -n auto --dist loadfile`, NOT AS
+`scripts/impact_gate.py`, AND THE REASON IS 7.1.** By this point everything was
+COMMITTED, so the index was empty and the gate would have printed *"nothing
+staged; nothing to check"* and exited 0 -- the empty-index pass this section
+opens with. So the gate's own full-suite command was run directly. Same
+binary, same flags, same targets: `impact_gate.py:1114` builds
+`[PYTHON, "-m", "pytest", "tests/", "-q", "-p", "no:randomly", "--tb=line",
+*parallel]` with `parallel = ["-n", "auto", "--dist", "loadfile"]` whenever
+`full` is true.
+
+### 7.2d I RAN THE CONFIRMATION SERIALLY FIRST, WHICH IS THE ONE THE HOUSE RULE NAMES
+
+The first attempt at this confirmation was a bare `pytest tests/ -q -p
+no:randomly`. **No `-n`.** It reached **18% in 33 minutes** -- a projected three
+hours -- against **21 minutes** for the identical suite sharded. Killed and
+re-run.
+
+The standing rule is explicit: if a gate must run locally, SHARD it
+(`-n <cores> --dist loadfile`), never serially. `pytest-xdist` is installed
+here and `scripts/impact_gate.py` already does exactly this, with the threshold
+MEASURED (`_PARALLEL_FILE_THRESHOLD = 5`, from "31.74s at `-n 8` against 26.10s
+serial on one 29-test file") and with `--dist loadfile` chosen for a stated
+reason: these files carry module-level state and frozen captures, so splitting
+one file across workers would be reporting on the isolation rather than on the
+code.
+
+**I had read none of that before reaching for the bare invocation**, and the
+diagnosis only arrived because a 30-minute watch expired with the run at 18%
+and I went to find out why rather than re-arming it. The comparison is also the
+answer to why the earlier gate run took 29 minutes and not three hours: it was
+sharded, because `full` is true and the gate does this correctly.
+
+**COST:** 33 minutes of a contended box, on a day whose lead ruling opens *"the
+box is contended today"*. The cheapest possible read of the right file would
+have prevented it.
 
 **WHAT DID COMPLETE, and it is not nothing:**
 
