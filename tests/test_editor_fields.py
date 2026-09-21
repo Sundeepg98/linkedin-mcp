@@ -46,6 +46,8 @@ from __future__ import annotations
 
 import ast
 import json
+import os
+import time
 from contextlib import asynccontextmanager
 from pathlib import Path
 from typing import Any
@@ -241,6 +243,71 @@ EDITABLE_HTML = (
 # The harness
 # ---------------------------------------------------------------------------
 
+#: How long the CONTROL render below is given. Deliberately short: it is not
+#: trying to succeed against a hostile page, it is asking whether this browser
+#: can still draw an empty document promptly. Seconds, not tens of seconds.
+TRIVIAL_RENDER_TIMEOUT_MS = 5_000
+
+#: An empty document. Nothing to parse, no script, no layout worth the name.
+TRIVIAL_HTML = "<!doctype html><html><body></body></html>"
+
+
+async def _trivial_render_seconds(page: Any) -> str:
+    """How long this browser takes to draw an EMPTY document, right now.
+
+    THE ONE NUMBER THAT SEPARATES THE TWO EXPLANATIONS. When
+    ``set_content`` times out on a local string there are only two stories, and
+    they call for opposite responses:
+
+    * THE BOX IS STARVED -- the browser is not being scheduled. Then an empty
+      document is slow too, and the fix is about how much work runs beside this.
+    * THIS DOCUMENT HANGS -- the markup blocks ``domcontentloaded``. Then an
+      empty document is instant, and the fix is in the fixture.
+
+    A bare ``Timeout 60000ms exceeded`` distinguishes neither, which is why the
+    2026-09-21 failure could not be attributed from its own message. Taking this
+    reading at the moment of failure costs one empty page and settles it.
+
+    Never raises: it runs INSIDE an exception path, and a diagnostic that can
+    replace the failure it was called to explain is worse than no diagnostic.
+    """
+    started = time.monotonic()
+    try:
+        await page.set_content(
+            TRIVIAL_HTML,
+            wait_until="domcontentloaded",
+            timeout=TRIVIAL_RENDER_TIMEOUT_MS,
+        )
+    except Exception:
+        return "ALSO FAILED (>%.0fs) -- the browser is not drawing at all" % (
+            TRIVIAL_RENDER_TIMEOUT_MS / 1000,
+        )
+    return "%.2fs" % (time.monotonic() - started)
+
+
+def _render_diagnosis(waited: float, markup_length: int, control: str) -> str:
+    """What a reader needs, and NOTHING THE PAGE CHOSE.
+
+    The markup's LENGTH is here and its CONTENT is not, and that is the fresh
+    ruling ``ERROR-MESSAGE-RULED-AT-THE-RAISE`` rather than a style choice:
+    this string becomes ``$.message`` on the tool's error envelope, a page value
+    in an exception's arguments is forbidden, and it is forbidden AT THE RAISE
+    because ``_error`` cannot tell where the text came from. A length is ours.
+    """
+    return (
+        "set_content did not finish. It waited %.1fs for 'domcontentloaded' on "
+        "%d bytes of LOCAL markup -- no network is involved in this call, so a "
+        "wait like that is about what else was running, not about the page. "
+        "An empty document on this same browser immediately afterwards took: "
+        "%s. xdist worker: %s."
+        % (
+            waited,
+            markup_length,
+            control,
+            os.environ.get("PYTEST_XDIST_WORKER", "none (serial run)"),
+        )
+    )
+
 
 @pytest.fixture
 async def run_tool(monkeypatch):
@@ -273,9 +340,22 @@ async def run_tool(monkeypatch):
                 page = await context.new_page()
 
                 async def render(markup: str) -> None:
-                    await page.set_content(
-                        markup, wait_until="domcontentloaded", timeout=60_000
-                    )
+                    # THE TIMEOUT STAYS AT SIXTY SECONDS. It was not raised on
+                    # 2026-09-21 and it should not be: sixty seconds to parse a
+                    # local string is already absurd, and a larger number would
+                    # have converted a measurable event into a slower one. What
+                    # changes is that when it fires, it says what it saw.
+                    started = time.monotonic()
+                    try:
+                        await page.set_content(
+                            markup, wait_until="domcontentloaded", timeout=60_000
+                        )
+                    except Exception as exc:
+                        waited = time.monotonic() - started
+                        control = await _trivial_render_seconds(page)
+                        raise AssertionError(
+                            _render_diagnosis(waited, len(markup), control)
+                        ) from exc
                     width = await page.evaluate("window.innerWidth")
                     assert width == EDITOR_VIEWPORT["width"], (
                         f"the page laid out at {width}px, not "
@@ -318,9 +398,44 @@ async def run_tool(monkeypatch):
 #: received. The check is exactly as strict either way -- ``None`` never equals
 #: a refusal code -- and every one of these is paired with an assertion that
 #: ``"fields"`` is absent, which is the half that would actually be dangerous.
+#:
+#: WIDENED 2026-09-21, AND THE REASON IS THAT THE COMMENT ABOVE PREDICTED ITS
+#: OWN COUNTEREXAMPLE AND THEN DID NOT COVER IT. The rule was written for the
+#: REFUSAL checks -- "every refusal check below" -- and every refusal check in
+#: this module does honour it. The hazard it describes is not specific to
+#: refusals: a subscript on a result that stopped SUCCEEDING raises
+#: ``KeyError: 'fields'``, which says nothing about what the tool returned
+#: instead, in exactly the words used above. On 2026-09-21 that is what
+#: happened, on one Windows CI shard and nowhere else. The tool had answered
+#:
+#:     {'error': 'unexpected', 'message': 'TimeoutError: Page.set_content:
+#:      Timeout 60000ms exceeded. ... waiting until "domcontentloaded"'}
+#:
+#: and the build reported ``KeyError: 'fields'``. Recovering the real failure
+#: meant reading the local-variable dump above the traceback; the HEADLINE --
+#: the line in the job summary, the line anybody greps for -- named a key that
+#: was merely absent. So the success path now goes through :func:`fields_of`,
+#: which states what came back. The check remains exactly as strict: a result
+#: with no ``"fields"`` still fails, it just says why.
+def fields_of(result: dict[str, Any]) -> list[dict[str, Any]]:
+    """The answer's controls, or a failure that quotes what arrived instead.
+
+    Every read of ``"fields"`` in this module goes through here. It is an
+    ``assert`` rather than a raise so that pytest renders it as an assertion
+    failure with the envelope in the headline, which is the whole point --
+    ``result["fields"]`` already "fails" on a missing key, and the complaint
+    against it was never that it passed.
+    """
+    fields = result.get("fields")
+    assert isinstance(fields, list), (
+        "the tool published no 'fields' list. It returned: %r" % (result,)
+    )
+    return fields
+
+
 def names_of(result: dict[str, Any]) -> list[str]:
     """The published label of every control in the answer, in document order."""
-    return [field["name"] for field in result["fields"]]
+    return [field["name"] for field in fields_of(result)]
 
 
 # ---------------------------------------------------------------------------
@@ -606,7 +721,7 @@ async def test_the_planted_values_are_really_in_the_document(run_tool):
     result, _ = await run_tool(RELAXED_HTML)
     # The answer describes three inputs; the values behind them are what the
     # sweep above proved absent.
-    inputs = [field for field in result["fields"] if field["tag"] == "input"]
+    inputs = [field for field in fields_of(result) if field["tag"] == "input"]
     assert len(inputs) == 3, inputs
 
 
@@ -618,7 +733,7 @@ async def test_no_href_is_returned_either(run_tool):
     rendered = json.dumps(result)
 
     assert "/help/" not in rendered, rendered
-    anchors = [field for field in result["fields"] if field["tag"] == "a"]
+    anchors = [field for field in fields_of(result) if field["tag"] == "a"]
     assert len(anchors) == 1, anchors
     assert anchors[0]["has_href"] is True
     assert "href" not in anchors[0], sorted(anchors[0])
@@ -840,7 +955,7 @@ async def test_the_ten_fields_are_present_on_every_returned_control(run_tool):
         "has_href",
     }
     assert len(expected) == 10
-    for field in result["fields"]:
+    for field in fields_of(result):
         assert set(field) == expected, sorted(field)
 
 
@@ -850,7 +965,7 @@ async def test_the_tristates_are_not_collapsed_to_booleans(run_tool):
     keeps paying for, so both values are shown arriving from one document.
     """
     result, _ = await run_tool(TWO_DIALOG_HTML)
-    by_name = {field["name"]: field for field in result["fields"]}
+    by_name = {field["name"]: field for field in fields_of(result)}
 
     # A text input is not checkable at all.
     assert by_name["Additional name"]["checked"] is None
@@ -991,8 +1106,8 @@ async def test_an_editables_own_content_is_not_published_as_its_name(run_tool):
     result, _navigations = await run_tool(EDITABLE_HTML)
     assert result["self_ownership"]["established"] is True, result
 
-    by_name = {field["name"]: field for field in result["fields"]}
-    assert "<content>" in by_name, result["fields"]
+    by_name = {field["name"]: field for field in fields_of(result)}
+    assert "<content>" in by_name, fields_of(result)
     marked = by_name["<content>"]
     assert marked["name_source"] == "content"
     assert marked["tag"] == "div"
@@ -1023,7 +1138,7 @@ async def test_a_button_named_by_its_own_text_is_still_named(run_tool):
     container is found by the control named ``Save``.
     """
     result, _navigations = await run_tool(EDITABLE_HTML)
-    names = {field["name"] for field in result["fields"]}
+    names = {field["name"] for field in fields_of(result)}
     assert "Save" in names, names
     assert result["container"]["anchor"] == "Save"
 
@@ -1043,7 +1158,7 @@ async def test_the_marker_is_not_the_same_answer_as_no_name(run_tool):
     )
     assert EDITABLE_VALUE not in unnamed
     result, _navigations = await run_tool(unnamed)
-    sources = {field["name"]: field["name_source"] for field in result["fields"]}
+    sources = {field["name"]: field["name_source"] for field in fields_of(result)}
     assert "<content>" not in sources
     assert "" in sources and sources[""] == "none"
 

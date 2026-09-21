@@ -1,0 +1,83 @@
+{
+  "summary": {
+    "candidate_count": 1,
+    "defect_count": 0,
+    "guarded_count": 1,
+    "by_file": {
+      "tests/test_result_verification_block.py": 1
+    },
+    "files_scanned": 212,
+    "errors": []
+  },
+  "candidates": [
+    {
+      "function": "_assert_the_chain_actually_ran",
+      "def_line": 186,
+      "params": [
+        "result"
+      ],
+      "sites": [
+        {
+          "line": 201,
+          "col": 11,
+          "param": "result",
+          "key": "publish_gate",
+          "guarded": true,
+          "guard_reasons": [
+            "assert@201"
+          ]
+        },
+        {
+          "line": 206,
+          "col": 11,
+          "param": "result",
+          "key": "publish_gate",
+          "guarded": true,
+          "guard_reasons": [
+            "assert@201",
+            "assert@206"
+          ]
+        },
+        {
+          "line": 206,
+          "col": 56,
+          "param": "result",
+          "key": "publish_gate",
+          "guarded": true,
+          "guard_reasons": [
+            "assert@201",
+            "assert@206"
+          ]
+        },
+        {
+          "line": 207,
+          "col": 11,
+          "param": "result",
+          "key": "clicked",
+          "guarded": true,
+          "guard_reasons": [
+            "assert@201",
+            "assert@206",
+            "assert@207"
+          ]
+        },
+        {
+          "line": 207,
+          "col": 50,
+          "param": "result",
+          "key": "clicked",
+          "guarded": true,
+          "guard_reasons": [
+            "assert@201",
+            "assert@206",
+            "assert@207"
+          ]
+        }
+      ],
+      "function_guarded": true,
+      "in_defect_set": false,
+      "source": "def _assert_the_chain_actually_ran(result: dict) -> None:\n    \"\"\"The harness's own self-check, asserted BEFORE the claim under test.\n\n    WHY IT IS HERE. Both tests below fail today, and they must fail for the\n    RIGHT reason. Every refusal in this chain -- a composer that did not\n    render, a fill that landed nothing, a submit that stayed disabled --\n    produces a result whose ``verification`` is equally wrong, so a fixture\n    that had quietly stopped working would keep these tests red after the\n    defect was fixed. That is the worst outcome available: a red that survives\n    its own repair teaches whoever repairs it that the repair did not work.\n\n    So the three facts that prove the chain reached the end are asserted\n    first, and all three PASS against the tree as committed. If one of them\n    ever fails, the failure is in this file's fixture and says so.\n    \"\"\"\n    assert result[\"publish_gate\"] is not None, (\n        \"no publish gate ran, which means the fill never happened -- \"\n        \"``perform`` only reaches ``_publish_submit_gate`` from inside the \"\n        \"fill loop. The composer fixture is not the shape the gate requires.\"\n    )\n    assert result[\"publish_gate\"][\"proceeded\"] is True, result[\"publish_gate\"]\n    assert result[\"clicked\"][\"clicks_made\"] == 1, result[\"clicked\"]",
+      "file": "tests/test_result_verification_block.py"
+    }
+  ]
+}
