@@ -34,21 +34,40 @@ SCRIPT = ROOT / "scripts" / "check_gap_rows_on_refused_addresses.py"
 #: docstring for why a silent fix is as loud as a new offender. The unit is a
 #: ROW, never a (row, address) pair.
 #:
-#: 5 -> 4 on 2026-09-21. `C88` left GAP for EXCLUDED-RULED, and the direction
-#: matters more than the number: this pin exists to catch a row filed GAP
-#: AGAINST the census's bar, so a row LEAVING that set is the benign move the
-#: script's own message names ("FEWER means one was resolved and this pin was
-#: not updated").
+#: **5 -> 4 on 2026-09-21, AND THE ROW IS NAMED BECAUSE A RE-PIN WITHOUT ONE IS
+#: JUST FITTING THE NUMBER TO TODAY.** The row that left is ``M C88`` -- "Choose
+#: whether members can mention, tag or collaborate with you", on
+#: ``/mypreferences/d/categories/``. It was closed by `c500cf9` (the
+#: write-ceiling wave, 2026-09-21 11:15, "5 of 157 write-direction GAP rows
+#: close"), which moved it GAP -> EXCLUDED-RULED and did not re-pin here.
 #:
-#: IT WAS NOT LAUNDERED OUT ON THE SUBSTRING, which is the thing this pin
-#: guards. `C88` does sit on `/mypreferences/d/categories/`, a forbidden
-#: substring -- verified. It was closed on a DIFFERENT and older authority:
-#: the settings-family ruling, which `_audit/2026-09-05-decide-retire-rulings.md`
-#: states is "capability-level, not path-level", and which profile.md had
-#: already applied to 93 rows while messaging had reached five. That
-#: distinction is the whole of the 2026-09-05 ruling that a boundary is not a
-#: reason: a row may leave GAP because somebody ruled the CAPABILITY, never
-#: because a general mechanism happens to block its address.
+#: **RESOLVED, NOT BLIND, and the difference is the whole reason to check.**
+#: The two failure modes look identical from the count alone: a row whose STATE
+#: left GAP (this one -- correct, re-pin) versus a row still GAP whose
+#: backticked ADDRESS was edited away so the walk stopped seeing it (a silent
+#: loss of coverage, where re-pinning would hide a real offender). Measured on
+#: both census snapshots with the shipped ``ADDR`` regex and the shipped gate:
+#: at `16941f0` C88 reads ``STATE='GAP'`` and at HEAD ``STATE='EXCLUDED-RULED'``,
+#: **with the same two addresses visible to the check at both ends** --
+#: ``/mypreferences/d/categories/`` and ``/mypreferences/d/categories/visibility``.
+#: The row is past the bar; it did not hide.
+#:
+#: The other four are unchanged and still named by the script's own output:
+#: ``M M11``, ``N A3``, ``N A5``, ``P D25``. See
+#: `_audit/2026-09-21-refuse-before-the-click.md` section 5B.
+#:
+#: **AND IT WAS NOT LAUNDERED OUT ON THE SUBSTRING**, which is the one thing
+#: this pin exists to catch and the half the measurement above does not settle.
+#: `C88` DOES sit on a forbidden substring -- verified through the shipped gate
+#: -- so "the row left GAP" and "the row left GAP *for the reason this pin
+#: forbids*" are different claims. It was closed on a DIFFERENT and older
+#: authority: the settings-family ruling, which
+#: `_audit/2026-09-05-decide-retire-rulings.md` states is "capability-level, not
+#: path-level", and which `profile.md` had already applied to 93 rows while
+#: messaging had reached five. A row may leave GAP because somebody ruled the
+#: CAPABILITY; never because a general mechanism happens to block its address.
+#: That is `EXCLUDED-RULED-ADMISSION` and `INCIDENTAL-CAPTURE-IS-NOT-A-RULING`,
+#: both registered in `_audit/RULINGS.md`.
 EXPECTED_GAP_ROWS = 4
 
 

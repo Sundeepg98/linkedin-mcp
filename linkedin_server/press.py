@@ -77,6 +77,41 @@ So ``condition_3_route`` names which of two ways it was satisfied:
 carrying its BOUND and its REFUTERS). ``sensitivity_established`` separates
 them, and **a merely readable counter is neither and prices nothing.**
 
+## EVERY REFUSAL A URL CAN PREDICT IS TAKEN BEFORE THE PAGE IS TOUCHED
+
+**RULED AND REPAIRED 2026-09-21.** `_audit/2026-09-21-the-all-filters-press.md`
+section 3 measured this gate taking a real click and a real `Escape` on a
+surface it then refused for `no_sensitivity_basis` -- a refusal that is a PURE
+FUNCTION OF THE URL and was therefore knowable before any contact. The surface
+where it was found lists OTHER PEOPLE. *A gate that clicks and then says no has
+already done the thing it refused.*
+
+The pre-press branch of :func:`evaluate` now runs :func:`check_basis`, which is
+condition 3's url-derivable half: `no_sensitivity_basis` and
+`structural_argument_incomplete` are both decided from :data:`SENSITIVITY_BASES`
+alone, and both are now returned with the page untouched.
+
+**WHAT THIS DOES NOT DO, so nobody reads it as more than it is.** It only ever
+makes the gate refuse EARLIER. No press that was permitted is now refused, and
+no press that was refused is now permitted -- the same conditions decide, at an
+earlier moment. Nothing here weakens a condition.
+
+**AND THE BASIS-LESS PRE-PRESS VERDICT IS A REFUSAL, NOT A PERMIT.** `/in/me/`
+declares no basis, so his own profile is ADMITTED (condition 1, on its own
+merits) and NOT PERMITTED TO PRESS. The refusal is NOT-YET -- declaring a basis
+for the surface is an available ruling and the verdict names it -- and the
+alternative was making the verdict true by declaration, which is what a permit
+on a surface the gate would refuse anyway amounts to.
+
+**THE SECOND INSTANCE, same root cause, found by enumerating the branches.**
+:func:`evaluate` inferred "I am being called before a press" from the ABSENCE of
+counter readings. A ``read_counters`` that returns ``None`` produces exactly
+that shape AFTER a real click, so the gate clicked, dismissed, skipped
+conditions 3 and 4 entirely and returned ``permitted_to_attempt: True`` with no
+refusal at all -- worse than refusing late, because a caller testing
+``refused`` sees nothing wrong. A moment is not inferable from its inputs:
+``already_pressed`` says it instead.
+
 ## WHY THE CALLER CANNOT HAND IN A SELECTOR
 
 :func:`disclose` takes a SHAPE KEY from a closed tuple, not a selector string.
@@ -281,6 +316,7 @@ def sensitivity_basis(url: Optional[str]) -> Optional[dict[str, Any]]:
     return None
 
 
+
 #: THE WITNESS. What is counted at the open moment, as a CLOSED SET.
 #:
 #: **ADDED 2026-09-19 because the gate could not see disclosure at all.** The
@@ -402,6 +438,96 @@ def check_shape(shape: Optional[str]) -> dict[str, Any]:
     return {"pressed": False, "shape_ok": True}
 
 
+def _basis_refusal(
+    basis: Optional[dict[str, Any]],
+    *,
+    read_at_both_ends: Optional[list] = None,
+) -> Optional[dict[str, Any]]:
+    """CONDITION 3'S URL-DERIVABLE HALF. Returns a refusal, or None. PURE.
+
+    Held in one function because it is consulted from TWO MOMENTS -- before any
+    page contact by :func:`check_basis`, and again with the readings in hand by
+    :func:`check_counters` -- and a refusal whose reasoning is written twice is
+    a refusal whose two copies drift apart. ``read_at_both_ends`` is the only
+    difference between them, and it is a difference of EVIDENCE, not of rule:
+    after a press the refusal can also say what WAS read and why that is not
+    enough.
+    """
+    if basis is None:
+        if read_at_both_ends is None:
+            preamble = (
+                "no basis is declared for this surface, so condition 3 has no "
+                "way to be satisfied here whatever the counters turn out to "
+                "say. This is known from the ADDRESS alone and is refused "
+                "before anything is touched. "
+            )
+        else:
+            preamble = (
+                f"counters {sorted(read_at_both_ends)} were read at both ends "
+                "and did not move, which shows they are READABLE and nothing "
+                "more. "
+            )
+        return _refuse(
+            "no_sensitivity_basis",
+            preamble
+            + "Condition 3 is satisfied only by a counter shown SENSITIVE to "
+            "this press class, or by an explicit structural argument that no "
+            "outward effect is possible from this surface. A merely readable "
+            "counter is neither and prices nothing. Declare a basis for this "
+            "surface in press.SENSITIVITY_BASES.",
+            terminal=False,
+        )
+
+    if str(basis.get("kind")) != "structural":
+        return None
+
+    # A BARE ASSERTION IS NOT AN ARGUMENT. An entry without its BOUND and its
+    # REFUTERS cannot be attacked, and an argument nobody can attack is the
+    # shape this package refuses everywhere else.
+    missing = [f for f in _STRUCTURAL_REQUIRED if not basis.get(f)]
+    if missing:
+        return _refuse(
+            "structural_argument_incomplete",
+            f"this surface declares a structural basis missing {missing}. "
+            "Route (b) must state its claims, THE BOUND it does not exceed, "
+            "and what would REFUTE it -- otherwise it is an assertion wearing "
+            "an argument's clothes.",
+            terminal=False,
+        )
+    return None
+
+
+def check_basis(url: Optional[str]) -> dict[str, Any]:
+    """CONDITION 3, THE HALF ANSWERABLE BEFORE ANY PAGE CONTACT. PURE.
+
+    :data:`SENSITIVITY_BASES` is keyed by SURFACE and :func:`sensitivity_basis`
+    is a pure function of the url, so whether condition 3 has ANY way to be
+    satisfied here is decided by the address. That makes it a PRE-PRESS
+    question, and until 2026-09-21 it was asked after the click. See the module
+    docstring and `_audit/2026-09-21-refuse-before-the-click.md`.
+
+    On success the verdict carries the basis KIND and, for route (a), the
+    counters the surface declares sensitive -- so a caller knows what its
+    ``read_counters`` must return before it builds one, rather than discovering
+    ``sensitive_counter_not_read`` after a press.
+    """
+    basis = sensitivity_basis(url)
+    refusal = _basis_refusal(basis)
+    if refusal is not None:
+        return refusal
+    # ``_basis_refusal`` refuses every None basis, so one exists here. Written
+    # as ``basis or {}`` rather than as an ``assert``: an assert is removed
+    # under ``-O``, and a safety module must not narrow a type with a statement
+    # the interpreter is allowed to delete.
+    declared = basis or {}
+    return {
+        "pressed": False,
+        "basis_declared": True,
+        "basis": str(declared.get("kind")),
+        "requires_counters": sorted(declared.get("counters") or ()),
+    }
+
+
 def check_counters(
     before: Optional[dict],
     after: Optional[dict],
@@ -457,34 +583,24 @@ def check_counters(
         )
 
     # CONDITION 3 IS NOT SATISFIED BY READABILITY. See SENSITIVITY_BASES.
-    if basis is None:
-        return _refuse(
-            "no_sensitivity_basis",
-            f"counters {sorted(shared)} were read at both ends and did not "
-            "move, which shows they are READABLE and nothing more. Condition "
-            "3 is satisfied only by a counter shown SENSITIVE to this press "
-            "class, or by an explicit structural argument that no outward "
-            "effect is possible from this surface. A merely readable counter "
-            "is neither and prices nothing. Declare a basis for this surface "
-            "in press.SENSITIVITY_BASES.",
-            terminal=False,
-        )
+    #
+    # BOTH OF THESE REFUSALS ARE ALSO TAKEN BEFORE THE PRESS, by
+    # :func:`check_basis` -- they are pure functions of the surface. They are
+    # still reached here because this function is PUBLIC and a caller can
+    # arrive with readings in hand having skipped :func:`evaluate` entirely;
+    # what is not duplicated is their reasoning, which lives in one place.
+    #
+    # THE ORDER IS DELIBERATE AND IS NOT THE SAME AS THE PRE-PRESS ORDER.
+    # ``counter_moved`` above is TERMINAL and is a measurement of a real
+    # write, so once readings exist it outranks a missing basis: the
+    # strongest true thing to say about a press that moved an outward counter
+    # is that it was a write, not that the surface lacked paperwork.
+    refusal = _basis_refusal(basis, read_at_both_ends=sorted(shared))
+    if refusal is not None:
+        return refusal
 
     kind = str(basis.get("kind"))
     if kind == "structural":
-        # A BARE ASSERTION IS NOT AN ARGUMENT. An entry without its BOUND and
-        # its REFUTERS cannot be attacked, and an argument nobody can attack
-        # is the shape this package refuses everywhere else.
-        missing = [f for f in _STRUCTURAL_REQUIRED if not basis.get(f)]
-        if missing:
-            return _refuse(
-                "structural_argument_incomplete",
-                f"this surface declares a structural basis missing {missing}. "
-                "Route (b) must state its claims, THE BOUND it does not "
-                "exceed, and what would REFUTE it -- otherwise it is an "
-                "assertion wearing an argument's clothes.",
-                terminal=False,
-            )
         return {
             "pressed": False,
             "counters_ok": True,
@@ -578,14 +694,23 @@ def witness_verdict(
             "moved": ["control_aria_expanded"],
             "witnessed_by": shared,
         }
+    # THE WITNESS MAY NOT SPEAK FOR THE VERDICT. This text used to read "the
+    # press was permitted and safe" -- a claim about PERMISSION, which the
+    # witness never sees and which is FALSE every time the witness rides on a
+    # refusal. Measured 2026-09-21: a press refused for ``no_counter_reading``
+    # came back carrying "the press was permitted and safe". The module
+    # docstring is emphatic that the witness never DECIDES permission; a
+    # surface may not print a claim it cannot derive, so it must not REPORT it
+    # either.
     return {
         "disclosed": False,
         "moved": [],
         "witnessed_by": shared,
         "why": (
             "nothing this witness counts changed between the press and the "
-            "dismissal. That is a MISS rather than a failure: the press was "
-            "permitted and safe, and it disclosed nothing this set can see."
+            "dismissal. That is a MISS rather than a failure: whatever the "
+            "verdict decided, this press disclosed nothing the witness set "
+            "can see."
         ),
     }
 
@@ -623,14 +748,22 @@ def evaluate(
     after: Optional[dict] = None,
     expanded_before: Any = None,
     expanded_after: Any = None,
+    already_pressed: bool = False,
 ) -> dict[str, Any]:
     """THE WHOLE GATE, PURE AND BROWSER-FREE. Conjunctive, in order.
 
-    **THE ORDER IS PART OF THE CONTRACT.** Address first, shape second, and only
-    then anything that requires the press to have happened. A caller that runs
-    this with no counters gets a refusal BEFORE pressing, which is the point:
-    the pre-press half can be evaluated on its own and must pass before any
-    control is touched.
+    **THE ORDER IS PART OF THE CONTRACT.** Address first, shape second, the
+    BASIS third, and only then anything that requires the press to have
+    happened. A caller that runs this with no counters gets a refusal BEFORE
+    pressing, which is the point: the pre-press half can be evaluated on its
+    own and must pass before any control is touched.
+
+    ``already_pressed`` SAYS WHICH MOMENT THIS IS instead of inferring it. The
+    pre-press branch used to be selected by ``before is None and after is
+    None``, which a ``read_counters`` returning ``None`` reproduces exactly
+    AFTER a real click -- so a press that had happened came back as a pre-press
+    permit with conditions 3 and 4 never evaluated. :func:`disclose` passes
+    True. See the module docstring.
 
     Returns the first refusal, or a permit. It never raises: one unusable
     control is not an error.
@@ -642,12 +775,27 @@ def evaluate(
     if verdict.get("refused"):
         return verdict
 
-    if before is None and after is None:
-        # The PRE-PRESS verdict: everything checkable without acting.
+    if not already_pressed and before is None and after is None:
+        # THE PRE-PRESS VERDICT: everything checkable without acting -- AND
+        # CONDITION 3'S BASIS IS CHECKABLE WITHOUT ACTING, which is the whole
+        # of the 2026-09-21 repair. A surface with no declared basis can only
+        # ever end in ``no_sensitivity_basis``, so a permit here was a promise
+        # the gate had already decided not to keep.
+        verdict = check_basis(url)
+        if verdict.get("refused"):
+            return verdict
+        still_to_show = ["counters_unmoved", "closure_verified"]
+        if verdict.get("basis") == "sensitive":
+            # Route (a) can still fail on the READING -- a basis naming a
+            # counter nobody read prices nothing -- so the permit says so
+            # rather than leaving the caller to discover it after a press.
+            still_to_show.insert(0, "sensitive_counter_read")
         return {
             "pressed": False,
             "permitted_to_attempt": True,
-            "still_to_show": ["counters_unmoved", "closure_verified"],
+            "basis": verdict.get("basis"),
+            "requires_counters": verdict.get("requires_counters"),
+            "still_to_show": still_to_show,
         }
 
     # THE BASIS IS RESOLVED FROM THE SURFACE, never handed in. See
@@ -694,12 +842,21 @@ async def disclose(
     ``shape`` is a KEY FROM :data:`SANCTIONED_SHAPES`, never a selector. An
     arbitrary string cannot become a press target.
 
-    ``read_counters`` is an async callable returning a mapping of counter name
+    ``read_counters`` is an async callable returning a MAPPING of counter name
     to int-or-None. It is REQUIRED: with no way to price the press, condition 3
-    refuses before anything is touched.
+    refuses before anything is touched. **IT MUST RETURN A MAPPING, NEVER
+    ``None``** -- a reader that returns ``None`` used to make the post-press
+    verdict indistinguishable from a pre-press one, which disarmed conditions 3
+    and 4 after a real click. ``already_pressed`` closes that; a ``None``
+    reading is now ``no_counter_reading``, which is what it always meant.
 
     **THE PRE-PRESS GATE RUNS FIRST AND RETURNS BEFORE ANY CONTROL IS
-    TOUCHED.** That ordering is the difference between a guard and a report.
+    TOUCHED.** That ordering is the difference between a guard and a report,
+    and as of 2026-09-21 the sentence is TRUE OF CONDITION 3 AS WELL: the
+    pre-press verdict consults :func:`check_basis`, so a surface with no
+    declared sensitivity basis is refused with the page never asked for a
+    locator. It was not true before, and the surface where that was measured
+    lists other people.
     """
     pre = evaluate(url=getattr(page, "url", None), shape=shape)
     if pre.get("refused"):
@@ -761,6 +918,11 @@ async def disclose(
         after=after,
         expanded_before=expanded_before,
         expanded_after=expanded_after,
+        # THE PRESS HAS HAPPENED. Said rather than inferred: a reader that
+        # returns None makes ``before``/``after`` indistinguishable from a
+        # pre-press call, and the gate then skipped conditions 3 and 4 and
+        # reported a permit for a click it had already taken.
+        already_pressed=True,
     )
     # THE WITNESS RIDES ALONGSIDE THE VERDICT AND NEVER DECIDES IT. It is
     # attached to a refusal too, because "the press was refused on its

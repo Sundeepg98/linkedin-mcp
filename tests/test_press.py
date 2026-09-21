@@ -11,7 +11,10 @@ is asserted directly: :class:`FakePage` counts clicks.
 """
 from __future__ import annotations
 
+import ast
 import inspect
+import pathlib
+from unittest import mock
 
 import pytest
 
@@ -176,16 +179,40 @@ def test_a_composer_is_refused_even_though_it_is_admitted_for_reading():
     assert verdict["reachable_by_this_route"] is False
 
 
-def test_his_own_profile_is_permitted_and_a_third_party_is_not():
+def test_his_own_profile_is_admitted_and_a_third_party_is_not():
     """The self/third-party split, with both sides asserted.
 
     The third-party case is refused twice over -- the allowlist does not admit
     it either -- and that is defence in depth rather than redundancy: the
     address check would stop enforcing this the day somebody admits a
     third-party read.
+
+    **RE-AIMED 2026-09-21, AND THE RENAME IS THE POINT.** This test used to
+    assert ``evaluate(...).get("permitted_to_attempt") is True`` for
+    ``/in/me/``, which was never a fact about the self/third-party split: the
+    split lives entirely in :func:`press.check_address`, and the pre-press
+    permit was reading True only because the gate did not yet consult the
+    basis table. ``/in/me/`` declares no sensitivity basis, so it is ADMITTED
+    (condition 1 passes on its own merits) and NOT PERMITTED TO PRESS (condition
+    3 has no way to be satisfied there yet). Both halves are asserted below, so
+    this is a narrower claim than the old one rather than a weaker one -- and
+    the refusal is NOT-YET, with the remedy named in the verdict.
+    See `_audit/2026-09-21-refuse-before-the-click.md` section 2.
     """
+    assert press.check_address(f"{BASE}/in/me/").get("admitted") is True, (
+        "his own profile must still pass condition 1 -- the third-party "
+        "branch must not be catching /in/me/."
+    )
     mine = press.evaluate(url=f"{BASE}/in/me/", shape="[aria-haspopup]")
-    assert mine.get("permitted_to_attempt") is True
+    assert mine["refused"] == "no_sensitivity_basis", mine
+    assert mine["reachable_by_this_route"] is True, (
+        "declaring a basis for his own profile is an available ruling, so "
+        "this must not read as NEVER."
+    )
+    assert "SENSITIVITY_BASES" in mine["why"], (
+        "a NOT-YET refusal must name what would unblock it, or it consumes a "
+        "future wave working out what to do with it."
+    )
     # ``another-person`` rather than an invented slug: it is a member of
     # ``test_no_committed_identity.SYNTHETIC_SLUG_TOKENS``, so ``_slug_ok``
     # passes it ON SIGHT. The first version read ``a-third-party`` -- equally
@@ -202,16 +229,37 @@ def test_his_own_profile_is_permitted_and_a_third_party_is_not():
 
 
 def test_the_third_party_refusal_fires_on_its_own_merits():
-    """Aimed straight at ``check_address`` with the allowlist stipulated.
+    """Aimed straight at ``check_address`` with the allowlist STIPULATED.
 
     Without this, the previous test passes on the allowlist alone and the
     third-party branch is never the thing standing -- the mutation-survives
     lesson this repository has recorded three times.
+
+    **AND IT WAS STILL PASSING ON THE ALLOWLIST ALONE UNTIL 2026-09-21.** This
+    test asserted ``refused in {address_not_admitted, third_party_surface}``,
+    a SET satisfied by the first of the two, and then asserted a CONSTANT
+    (``"me" in _SELF_SEGMENTS``) rather than the branch. Measured: every
+    third-party profile spelling tried is refused by ``is_read_url`` first, so
+    **the third-party branch could not be reached by any real url and had never
+    been shown failing.** The allowlist is stipulated below -- which is what
+    "on its own merits" was always supposed to mean -- so the branch is now the
+    only thing standing.
     """
     verdict = press.check_address(f"{BASE}/in/someone/detail/")
     assert verdict["refused"] in {"address_not_admitted", "third_party_surface"}
-    # And the branch itself, exercised directly on a path it alone refuses.
-    assert "me" in press._SELF_SEGMENTS
+
+    with mock.patch.object(press.readonly, "is_read_url", lambda _url: True):
+        # The allowlist now admits everything, so nothing but the third-party
+        # branch can refuse this.
+        theirs = press.check_address(f"{BASE}/in/another-person/detail/")
+        mine = press.check_address(f"{BASE}/in/me/")
+    assert theirs["refused"] == "third_party_surface", theirs
+    assert theirs["reachable_by_this_route"] is False
+    assert mine.get("admitted") is True, (
+        "with the allowlist stipulated, HIS OWN profile must still pass -- "
+        "otherwise the branch refuses on the /in/ segment rather than on who "
+        "the member is, and the positive half proves nothing."
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -407,28 +455,109 @@ def test_an_unverifiable_closure_is_treated_as_an_open_one():
 # THE ORDERING -- a refused press must touch NOTHING
 # ---------------------------------------------------------------------------
 
+#: THE ROWS OF THE ORDERING TEST, one per CONDITION rather than one per
+#: address, with the condition written down so a gap is visible on the page.
+#:
+#: **THE ROW SET USED TO BE FOUR ADDRESSES AND IT COVERED TWO CONDITIONS.**
+#: Two of them refused at condition 1 and two at condition 2 -- both evaluated
+#: before anything is touched -- so the test passed for a gate that acted first
+#: on every OTHER branch, and `_audit/2026-09-21-the-all-filters-press.md`
+#: section 3 measured exactly that happening on a surface listing other people.
+#: A guard whose cases all take the same branch is a guard for that branch.
+#:
+#: Condition 4 is absent from this list ON PURPOSE and it is not an oversight:
+#: **it has no pre-press-derivable refusal by construction.** `closure_verified`
+#: is a statement about the state AFTER the press, so there is nothing about it
+#: a gate could know in advance. The refusals that are genuinely measurements
+#: are covered by :data:`WHEN_KNOWABLE` below, which requires each of them to
+#: return a PERMIT from the pre-press verdict -- the mechanical form of "this
+#: one really could not have been hoisted".
+_REFUSED_BEFORE_ANY_CONTACT = (
+    # condition 1 -- the address
+    ("condition 1", f"{BASE}/pulse/drafts/", "[aria-expanded]",
+     {"address_not_admitted"}),
+    ("condition 1", f"{BASE}/article/new/", "[aria-expanded]",
+     {"composer_or_editor"}),
+    ("condition 1", f"{BASE}/in/another-person/", "[aria-expanded]",
+     {"address_not_admitted", "third_party_surface"}),
+    ("condition 1", None, "[aria-expanded]", {"no_address"}),
+    # condition 2 -- the shape
+    ("condition 2", f"{BASE}/feed/", 'button:has-text("All filters")',
+     {"shape_not_sanctioned"}),
+    ("condition 2", f"{BASE}/feed/", "button", {"shape_not_sanctioned"}),
+    # condition 3 -- THE HALF THAT IS A PURE FUNCTION OF THE URL. These two
+    # rows are the defect this file's ordering test used to miss entirely.
+    ("condition 3", f"{BASE}/search/results/people/", "[aria-expanded]",
+     {"no_sensitivity_basis"}),
+    ("condition 3", f"{BASE}/in/me/", "[aria-haspopup]",
+     {"no_sensitivity_basis"}),
+)
+
+
 @pytest.mark.asyncio
-async def test_a_refused_press_never_touches_the_page():
+@pytest.mark.parametrize(
+    "condition,url,shape,expected",
+    _REFUSED_BEFORE_ANY_CONTACT,
+    ids=[
+        f"{row[0]}-{sorted(row[3])[0]}" for row in _REFUSED_BEFORE_ANY_CONTACT
+    ],
+)
+async def test_a_refused_press_never_touches_the_page(condition, url, shape, expected):
     """THE DIFFERENCE BETWEEN A GUARD AND A REPORT.
 
     Every refusal below is checked against a page that would have recorded a
     click. A gate that refuses AFTER acting is not a gate.
+
+    **WIDENED 2026-09-21 TO COVER CONDITION 3.** The two condition-3 rows are a
+    surface that lists other people and his own profile, and both were CLICKED
+    and then refused by the shipped gate. See
+    `_audit/2026-09-21-refuse-before-the-click.md`.
     """
-    for url, shape in (
-        (f"{BASE}/article/new/", "[aria-expanded]"),
-        (f"{BASE}/pulse/drafts/", "[aria-expanded]"),
-        (f"{BASE}/feed/", 'button:has-text("All filters")'),
-        (f"{BASE}/feed/", "button"),
-    ):
-        page = FakePage(url)
-        verdict = await press.disclose(page, shape=shape, read_counters=_counters)
-        assert verdict["pressed"] is False
-        assert page.clicks == [], (url, shape, page.clicks)
-        assert page.keys == []
-        assert page.selectors == [], (
-            "a refused press asked the page for a locator. The gate must "
-            "return before touching anything."
+    page = FakePage(url)
+    verdict = await press.disclose(page, shape=shape, read_counters=_counters)
+    assert verdict["pressed"] is False
+    assert verdict["refused"] in expected, (condition, url, shape, verdict)
+    assert page.clicks == [], (condition, url, shape, page.clicks)
+    assert page.keys == [], (condition, url, shape, page.keys)
+    assert page.selectors == [], (
+        f"a refused press ({condition}, {verdict.get('refused')}) asked the "
+        "page for a locator. The gate must return before touching anything."
+    )
+
+
+@pytest.mark.asyncio
+async def test_a_malformed_structural_basis_is_also_caught_before_the_press():
+    """The SECOND url-derivable condition-3 refusal, and it needs a plant.
+
+    ``structural_argument_incomplete`` fires when the table declares a route
+    (b) entry without its BOUND or its REFUTERS. Like ``no_sensitivity_basis``
+    it is a pure function of the url -- the table is closed and keyed by
+    surface -- so it must be taken before the press for the same reason, and
+    it was not.
+
+    The malformed entry is PLANTED rather than found: the committed table has
+    no such row and ``test_every_declared_structural_basis_carries_the_full_shape``
+    exists to keep it that way, so the only honest way to reach this branch is
+    to manufacture the fixture.
+    """
+    # ``/notifications/`` because it is ADMITTED by the read allowlist and
+    # declares no basis today -- so the plant is the only thing that changed,
+    # and the refusal cannot be an artefact of condition 1.
+    surface = f"{BASE}/notifications/"
+    assert press.check_address(surface).get("admitted") is True
+    assert press.sensitivity_basis(surface) is None
+    planted = (("/notifications/", {"kind": "structural", "why": "asserted"}),)
+    with mock.patch.object(press, "SENSITIVITY_BASES", planted):
+        assert press.sensitivity_basis(surface) is not None
+        page = FakePage(surface)
+        verdict = await press.disclose(
+            page, shape="[aria-expanded]", read_counters=_counters
         )
+    assert verdict["refused"] == "structural_argument_incomplete", verdict
+    assert verdict["reachable_by_this_route"] is True
+    assert page.clicks == [] and page.keys == [] and page.selectors == [], (
+        "a basis the table itself declares incomplete was pressed anyway."
+    )
 
 
 @pytest.mark.asyncio
@@ -642,78 +771,486 @@ def test_the_caller_cannot_hand_in_a_selector():
 
 
 # ---------------------------------------------------------------------------
-# THE HOLE IN THE ORDERING TEST ABOVE, PINNED. See
-# `_audit/2026-09-21-the-all-filters-press.md` section 3.
+# THE HOLE IN THE ORDERING TEST ABOVE, NOW CLOSED. See
+# `_audit/2026-09-21-the-all-filters-press.md` section 3 for the measurement
+# and `_audit/2026-09-21-refuse-before-the-click.md` for the repair.
 # ---------------------------------------------------------------------------
 
-async def test_a_surface_with_no_declared_basis_is_pressed_before_it_is_refused():
-    """A CHARACTERISATION TEST FOR A MEASURED DEFECT. Do not read it as a spec.
+async def test_a_surface_with_no_declared_basis_is_refused_before_it_is_pressed():
+    """THE ZERO-CLICKS CONTROL. Inverted 2026-09-21 from a characterisation
+    test that pinned the opposite -- ``...is_pressed_before_it_is_refused`` --
+    exactly as that test's own docstring instructed.
 
     ``test_a_refused_press_never_touches_the_page`` asserts the difference
-    between a guard and a report -- and **every case it checks refuses at
-    condition 1 or condition 2**, both of which are evaluated before anything
-    is touched. No case exercises a surface that PASSES 1 and 2 and fails
+    between a guard and a report, and until 2026-09-21 **every case it checked
+    refused at condition 1 or condition 2**, both evaluated before anything is
+    touched. No case exercised a surface that PASSES 1 and 2 and fails
     condition 3 because :data:`press.SENSITIVITY_BASES` declares no basis for
-    it. On that path the click has already happened when the refusal is
-    computed, so for those surfaces the gate is a report.
+    it. On that path the click had already happened when the refusal was
+    computed, so for those surfaces the gate was a report.
 
-    The pre-press branch of :func:`press.evaluate` returns
-    ``permitted_to_attempt`` without consulting :func:`press.sensitivity_basis`,
-    although a surface with no basis can only ever end in
-    ``no_sensitivity_basis``. The refusal is therefore KNOWN BEFORE THE PRESS
-    and taken AFTER it.
-
-    **THIS IS NOT ACADEMIC.** A wave was briefed on 2026-09-21 to press the
+    **THIS WAS NOT ACADEMIC.** A wave was briefed on 2026-09-21 to press the
     ``All filters`` control on ``/search/results/people/`` and to let the gate
-    decide. Had it called :func:`press.disclose`, the live page would have
-    received a real click and a real Escape before the gate said no.
+    decide. Had it called :func:`press.disclose`, a live page listing other
+    people would have received a real click and a real ``Escape`` before the
+    gate said no.
 
-    **WHY THIS PINS THE BEHAVIOUR RATHER THAN FIXING IT.** The fix is four
-    lines, and it changes a contract another committed test relies on:
-    ``test_his_own_profile_is_permitted_and_a_third_party_is_not`` asserts
-    ``permitted_to_attempt is True`` for ``/in/me/``, which declares no basis
-    either. So the correction is a decision about what a pre-press verdict
-    MEANS for every no-basis surface, and it belongs to whoever owns this
-    module, not to a wave that arrived to measure one control.
-
-    **WHEN THE ORDERING IS FIXED, INVERT THIS TEST -- DO NOT DELETE IT.** The
-    assertion that must then hold is ``page.clicks == []`` with the same
-    ``no_sensitivity_basis`` refusal, returned by the PRE-PRESS branch.
+    **WHAT CHANGED:** the pre-press branch of :func:`press.evaluate` now
+    consults :func:`press.sensitivity_basis`, which is a PURE FUNCTION OF THE
+    URL, so a surface that can only ever end in ``no_sensitivity_basis`` is
+    refused with the page untouched. The refusal is NOT-YET rather than NEVER,
+    and its ``why`` names the remedy: declare a basis for the surface.
     """
-    people = f"{BASE}/search/results/people/"
-    # Condition 1 passes on its own merits, which is what makes the rest mean
-    # something: this is not an artefact of an unadmitted address.
-    assert readonly.is_read_url(people) is True
-    assert press.check_address(people).get("admitted") is True
-    # Condition 2 passes for a caller naming a sanctioned shape.
-    assert press.check_shape("[aria-expanded]").get("shape_ok") is True
-    # And no basis is declared for this surface, so condition 3 cannot pass.
-    assert press.sensitivity_basis(people) is None
+    for surface, shape in (
+        (f"{BASE}/search/results/people/", "[aria-expanded]"),
+        (f"{BASE}/in/me/", "[aria-haspopup]"),
+    ):
+        # Condition 1 passes on its own merits, which is what makes the rest
+        # mean something: this is not an artefact of an unadmitted address.
+        assert readonly.is_read_url(surface) is True
+        assert press.check_address(surface).get("admitted") is True
+        # Condition 2 passes for a caller naming a sanctioned shape.
+        assert press.check_shape(shape).get("shape_ok") is True
+        # And no basis is declared for this surface, so condition 3 cannot pass.
+        assert press.sensitivity_basis(surface) is None
 
-    pre = press.evaluate(url=people, shape="[aria-expanded]")
-    assert pre.get("permitted_to_attempt") is True, (
-        "the pre-press verdict has learned to consult the basis table. That "
-        "is the fix this test was waiting for -- invert it now: assert the "
-        "refusal comes back here and that the page is never touched."
+        # control_count=8 is the count measured on the live people-search page
+        # (`_audit/2026-09-21-the-all-filters-press.md` section 5). The control
+        # IS present: the refusal is not shape_absent_on_this_page wearing
+        # another name.
+        page = FakePage(surface, control_count=8)
+
+        async def _one_counter():
+            return {"invitations": 0}
+
+        verdict = await press.disclose(
+            page, shape=shape, read_counters=_one_counter
+        )
+        # THE CONTROL, AND IT IS ASSERTED FIRST ON PURPOSE. Everything else
+        # here is a statement about a verdict; this is the statement about the
+        # PAGE, and it is the one that was false.
+        assert page.clicks == [], (
+            f"the gate clicked {surface.rsplit('/', 2)[-2]!r} and refused "
+            f"afterwards: clicks={page.clicks}. The refusal is a pure "
+            "function of the url and was available before any contact."
+        )
+        assert page.keys == [], (surface, page.keys)
+        assert page.selectors == [], (surface, page.selectors)
+
+        assert verdict["pressed"] is False
+        assert verdict["refused"] == "no_sensitivity_basis", verdict
+        assert verdict["reachable_by_this_route"] is True
+
+        pre = press.evaluate(url=surface, shape=shape)
+        assert pre.get("permitted_to_attempt") is not True, (
+            "the pre-press verdict still permits a surface whose only possible "
+            "outcome is no_sensitivity_basis."
+        )
+        assert pre["refused"] == "no_sensitivity_basis", pre
+        assert pre["reachable_by_this_route"] is True, (
+            "declaring a basis for this surface is an available next step, so "
+            "the refusal must not read as terminal."
+        )
+
+
+#: WHEN EACH REFUSAL BECOMES KNOWABLE. Three values, and the middle one is not
+#: padding: a gate may READ a page without pressing it, and reading is not what
+#: the ordering rule forbids. What it forbids is ACTING -- a click or a key --
+#: on a refusal that was already derivable.
+#:
+#: * ``before_any_contact`` -- derivable from the url, the shape and the
+#:   caller's own arguments. The page is never even asked for a locator.
+#: * ``after_a_read``       -- needs a fact about the page, obtained by reading
+#:   it. Nothing is clicked and nothing is typed.
+#: * ``after_the_press``    -- a MEASUREMENT of what the press did. It cannot
+#:   be hoisted, and :func:`test_every_refusal_is_classified_by_when_it_is_knowable`
+#:   proves that per row by requiring the PRE-PRESS verdict on the same input
+#:   to be a permit.
+#:
+#: **THIS TABLE IS THE FIX TO THE BLIND SPOT, not the two rows added to the
+#: ordering test.** The ordering test could only ever cover the inputs somebody
+#: thought to write down; ``no_sensitivity_basis`` shipped because nobody did.
+#: This dict is checked for EXACT completeness against the ``_refuse()`` calls
+#: in :mod:`linkedin_server.press`, so a new refusal cannot be added without
+#: somebody stating when it becomes knowable.
+WHEN_KNOWABLE: dict[str, str] = {
+    # condition 1 -- the address, and the caller's own arguments
+    "no_address": "before_any_contact",
+    "address_not_admitted": "before_any_contact",
+    "composer_or_editor": "before_any_contact",
+    "third_party_surface": "before_any_contact",
+    # condition 2 -- the shape key
+    "shape_not_sanctioned": "before_any_contact",
+    # condition 3, the url-derivable half. BOTH OF THESE USED TO BE
+    # after_the_press, and that was the defect.
+    "no_sensitivity_basis": "before_any_contact",
+    "structural_argument_incomplete": "before_any_contact",
+    "no_counter_reader_supplied": "before_any_contact",
+    # the page is read but never pressed
+    "shape_absent_on_this_page": "after_a_read",
+    # condition 3, the measured half -- these are facts about what the press
+    # did and there is nothing about them a gate could know in advance
+    "no_counter_reading": "after_the_press",
+    "counter_unreadable": "after_the_press",
+    "no_counter_prices_this_press": "after_the_press",
+    "counter_moved": "after_the_press",
+    "sensitive_counter_not_read": "after_the_press",
+    # condition 4 -- a statement about the state AFTER the press, so it has no
+    # pre-press-derivable form at all
+    "closure_unverifiable": "after_the_press",
+    "not_restored": "after_the_press",
+    # the press itself raising
+    "press_failed": "after_the_press",
+}
+
+
+def _refusal_reasons_in_source() -> set[str]:
+    """Every reason string ``press.py`` hands to ``_refuse``, read by AST.
+
+    Not by grep: a reason is the FIRST POSITIONAL ARGUMENT of a call, and a
+    line-oriented scan cannot tell that from the same word in prose -- this
+    repository has recorded exactly that failure in
+    ``test_a_correction_is_findable_from_the_claim``.
+    """
+    tree = ast.parse(pathlib.Path(press.__file__).read_text(encoding="utf-8"))
+    reasons: set[str] = set()
+    for node in ast.walk(tree):
+        if not isinstance(node, ast.Call):
+            continue
+        name = getattr(node.func, "id", None) or getattr(node.func, "attr", None)
+        if name != "_refuse" or not node.args:
+            continue
+        first = node.args[0]
+        assert isinstance(first, ast.Constant) and isinstance(first.value, str), (
+            "a _refuse() reason is not a literal string. A COMPUTED REASON CAN "
+            "CARRY PAGE TEXT, and it also makes this inventory unreadable."
+        )
+        reasons.add(first.value)
+    return reasons
+
+
+def test_the_refusal_inventory_is_exactly_what_the_module_can_emit():
+    """A REFUSAL NOBODY CLASSIFIED IS THE DEFECT THAT SHIPPED.
+
+    Both directions. A reason in the source and not in :data:`WHEN_KNOWABLE`
+    is an unclassified branch; an entry for a reason the source no longer
+    emits is a stale allowlist, which this repository treats as loudly as a
+    missing one -- an allowlist nobody re-checks is a silencer.
+    """
+    in_source = _refusal_reasons_in_source()
+    declared = set(WHEN_KNOWABLE)
+    assert in_source - declared == set(), (
+        f"unclassified refusals: {sorted(in_source - declared)}. Say when each "
+        "becomes knowable -- if the answer is before_any_contact, the gate has "
+        "to take it before the press."
+    )
+    assert declared - in_source == set(), (
+        f"stale entries for refusals the module no longer emits: "
+        f"{sorted(declared - in_source)}"
+    )
+    assert set(WHEN_KNOWABLE.values()) <= {
+        "before_any_contact", "after_a_read", "after_the_press"
+    }
+
+
+#: The one refusal NOT in :data:`_REACHES`, because reaching it needs a PLANT
+#: rather than an input -- the committed basis table has no malformed entry and
+#: another test exists to keep it that way. It is exercised by
+#: ``test_a_malformed_structural_basis_is_also_caught_before_the_press``.
+_REACHED_BY_A_PLANT = {"structural_argument_incomplete"}
+
+
+def test_every_classified_refusal_is_actually_exercised_somewhere():
+    """A CLASSIFICATION NOBODY DRIVES IS A CLAIM, NOT A CHECK.
+
+    :data:`WHEN_KNOWABLE` would otherwise let a refusal be declared
+    ``before_any_contact`` with nothing ever proving it. Every reason must be
+    reached by a real input in :data:`_REACHES` or by the one named plant, and
+    the two sets must not overlap or drift.
+    """
+    exercised = set(_REACHES) | _REACHED_BY_A_PLANT
+    assert exercised == set(WHEN_KNOWABLE), (
+        f"classified but never driven: {sorted(set(WHEN_KNOWABLE) - exercised)}; "
+        f"driven but not classified: {sorted(exercised - set(WHEN_KNOWABLE))}"
+    )
+    assert not (set(_REACHES) & _REACHED_BY_A_PLANT), (
+        "a reason listed as needing a plant also has a plain input; one of the "
+        "two is stale."
     )
 
-    page = FakePage(people, control_count=8)
 
-    async def _one_counter():
-        return {"invitations": 0}
+#: ONE INPUT PER REFUSAL, so the classification above is exercised rather than
+#: asserted. ``kwargs`` are handed to :func:`press.disclose`.
+_REACHES: dict[str, dict] = {
+    "no_address": {"url": None, "shape": "[aria-expanded]"},
+    "address_not_admitted": {
+        "url": f"{BASE}/pulse/drafts/", "shape": "[aria-expanded]"},
+    "composer_or_editor": {
+        "url": f"{BASE}/article/new/", "shape": "[aria-expanded]"},
+    # THE ONLY ROW THAT NEEDS A PLANT, and the plant IS the finding. Measured
+    # 2026-09-21: `readonly.is_read_url` refuses EVERY third-party profile
+    # spelling tried -- `/in/another-person/`, `/in/another-person/detail/`,
+    # `/in/another-person/recent-activity/all/` -- so `check_address` returns
+    # `address_not_admitted` and the third-party branch is never the thing
+    # standing. It is real defence in depth and it is ALSO a branch that had
+    # never been shown failing; `test_the_third_party_refusal_fires_on_its_own_merits`
+    # asserts a SET containing both reasons, so it is satisfied by the
+    # allowlist alone. Admitting the address is the only honest way to make
+    # the branch the only thing left.
+    "third_party_surface": {
+        "url": f"{BASE}/in/another-person/detail/", "shape": "[aria-expanded]",
+        "admit_all": True},
+    "shape_not_sanctioned": {"url": f"{BASE}/feed/", "shape": "button"},
+    "no_sensitivity_basis": {
+        "url": f"{BASE}/search/results/people/", "shape": "[aria-expanded]"},
+    "no_counter_reader_supplied": {
+        "url": f"{BASE}/feed/", "shape": "[aria-expanded]", "reader": None},
+    "shape_absent_on_this_page": {
+        "url": f"{BASE}/feed/", "shape": "[aria-expanded]", "control_count": 0},
+    "counter_moved": {
+        "url": f"{BASE}/feed/", "shape": "[aria-expanded]", "reader": "moving"},
+    "counter_unreadable": {
+        "url": f"{BASE}/feed/", "shape": "[aria-expanded]", "reader": "unreadable"},
+    "no_counter_prices_this_press": {
+        "url": f"{BASE}/feed/", "shape": "[aria-expanded]", "reader": "disjoint"},
+    "sensitive_counter_not_read": {
+        "url": f"{BASE}/feed/", "shape": "[aria-expanded]", "reader": "no_off_state"},
+    "no_counter_reading": {
+        "url": f"{BASE}/feed/", "shape": "[aria-expanded]", "reader": "none"},
+    "not_restored": {
+        "url": f"{BASE}/feed/", "shape": "[aria-expanded]",
+        "expanded": ("false", "true", "true")},
+    "closure_unverifiable": {
+        "url": f"{BASE}/feed/", "shape": "[aria-expanded]",
+        "expanded": ("false", "true", None)},
+    "press_failed": {
+        "url": f"{BASE}/feed/", "shape": "[aria-expanded]", "raises": True},
+}
+
+
+def _reader_named(name):
+    if name is None:
+        return None
+    if name == "none":
+        async def read():
+            return None
+        return read
+    if name == "unreadable":
+        async def read():
+            return {"off_state": None}
+        return read
+    if name == "moving":
+        values = iter([{"off_state": 3}, {"off_state": 4}])
+
+        async def read():
+            return next(values)
+        return read
+    if name == "disjoint":
+        values = iter([{"off_state": 3}, {"invitations": 0}])
+
+        async def read():
+            return next(values)
+        return read
+    if name == "no_off_state":
+        async def read():
+            return {"invitations": 0}
+        return read
+    raise AssertionError(name)
+
+
+class RaisingPage(FakePage):
+    """A page whose click raises, for the one refusal that needs it."""
+
+    def locator(self, selector):
+        locator = super().locator(selector)
+        page = self
+
+        async def click(**_kwargs):
+            page.clicks.append(selector)
+            raise TimeoutError("synthetic")
+
+        locator.click = click
+        return locator
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("reason", sorted(_REACHES))
+async def test_every_refusal_is_classified_by_when_it_is_knowable(reason):
+    """THE CLASSIFICATION, EXERCISED. Each refusal is reached, and what the
+    page received is compared against what :data:`WHEN_KNOWABLE` claims.
+
+    **THE LOAD-BEARING ASSERTION IS THE LAST ONE.** For every refusal claimed
+    to be ``after_the_press``, the PRE-PRESS verdict on the same input must be
+    a permit -- the mechanical form of "this one genuinely could not have been
+    taken earlier". Reclassify ``no_sensitivity_basis`` back to
+    ``after_the_press`` and that assertion is what fails, because the pre-press
+    verdict now refuses it.
+    """
+    spec = dict(_REACHES[reason])
+    url = spec.pop("url")
+    shape = spec.pop("shape")
+    reader_name = spec.pop("reader", "steady")
+    factory = RaisingPage if spec.pop("raises", False) else FakePage
+    admit_all = spec.pop("admit_all", False)
+    page = factory(url, **spec)
+    reader = _counters if reader_name == "steady" else _reader_named(reader_name)
+
+    if admit_all:
+        with mock.patch.object(press.readonly, "is_read_url", lambda _url: True):
+            verdict = await press.disclose(page, shape=shape, read_counters=reader)
+    else:
+        verdict = await press.disclose(page, shape=shape, read_counters=reader)
+    assert verdict.get("refused") == reason, verdict
+
+    when = WHEN_KNOWABLE[reason]
+    if when == "before_any_contact":
+        assert page.selectors == [] and page.clicks == [] and page.keys == [], (
+            f"{reason} is classified before_any_contact and the page was "
+            f"touched: selectors={page.selectors} clicks={page.clicks}"
+        )
+    elif when == "after_a_read":
+        assert page.selectors != [], f"{reason} claims a read that never happened"
+        assert page.clicks == [] and page.keys == [], (
+            f"{reason} is classified after_a_read and the page was PRESSED"
+        )
+    else:
+        assert page.clicks != [], (
+            f"{reason} is classified after_the_press and no press happened -- "
+            "it is derivable earlier and must be taken earlier."
+        )
+        pre = press.evaluate(url=url, shape=shape)
+        assert pre.get("permitted_to_attempt") is True, (
+            f"{reason} is classified after_the_press, yet the pre-press "
+            f"verdict on the same input already refuses it: {pre.get('refused')}"
+        )
+
+
+@pytest.mark.asyncio
+async def test_a_counter_reader_returning_none_cannot_pass_for_a_pre_press_permit():
+    """A SECOND INSTANCE OF THE SAME DEFECT, found by enumerating the branches.
+
+    :func:`press.evaluate` decided it was being called BEFORE a press from the
+    absence of counter readings -- ``before is None and after is None``. A
+    ``read_counters`` that returns ``None`` produces exactly that shape AFTER a
+    real click, so the gate clicked, pressed ``Escape``, skipped conditions 3
+    and 4 entirely, and returned ``permitted_to_attempt: True`` with no
+    ``refused`` key at all.
+
+    **THAT IS WORSE THAN REFUSING LATE**, which is why it is pinned separately:
+    a caller testing ``verdict.get("refused")`` sees ``None`` and banks a press
+    that was never priced, on a verdict whose own witness says the press
+    happened.
+
+    The measured shape at ``4c8d0f1``::
+
+        verdict : {"permitted_to_attempt": true, "pressed": false, ...}
+        clicks  : ['[aria-expanded]']
+        keys    : ['Escape']
+    """
+    page = FakePage(f"{BASE}/feed/")
+
+    async def _none_reader():
+        return None
 
     verdict = await press.disclose(
-        page, shape="[aria-expanded]", read_counters=_one_counter
+        page, shape="[aria-expanded]", read_counters=_none_reader
     )
-    assert verdict["pressed"] is False
-    assert verdict["refused"] == "no_sensitivity_basis"
-    # NOT YET, rather than NEVER: declaring a basis for this surface is a
-    # ruling somebody could make, so the refusal must not read as terminal.
-    assert verdict["reachable_by_this_route"] is True
-    # THE DEFECT ITSELF, asserted so it cannot regress silently in either
-    # direction. A press that was going to be refused was taken.
+    assert verdict.get("permitted_to_attempt") is not True, (
+        "a pre-press permit was returned for a press that already happened."
+    )
+    assert verdict["refused"] == "no_counter_reading", verdict
     assert page.clicks == ["[aria-expanded]"], (
-        "the ordering changed. If the press no longer happens, this test has "
-        "served its purpose -- invert it per the docstring."
+        "the press DID happen here -- this refusal is a measurement, and the "
+        "defect was never that the click occurred but that the verdict denied "
+        "it had."
     )
-    assert page.keys == ["Escape"]
+    # AND THE WITNESS THAT RIDES ON THAT REFUSAL MAY NOT SPEAK FOR IT. See
+    # test_the_witness_never_asserts_permission below.
+    assert "permitted" not in verdict["witness"].get("why", ""), verdict["witness"]
+
+
+def test_the_two_moments_give_the_same_reason_for_the_same_surface():
+    """THE ANTI-DRIFT CONTROL for a refusal computed at two moments.
+
+    ``check_basis`` runs before the press and ``check_counters`` runs after it,
+    and both decide the same two url-derivable refusals. Two copies of one
+    refusal drift; the reasoning lives in ``press._basis_refusal`` and this
+    asserts the two callers still agree -- same REASON and same terminality,
+    on every surface the table knows about and on one it does not.
+
+    The ``why`` texts differ DELIBERATELY and that is asserted too: after a
+    press the refusal can also say what WAS read, which is evidence the
+    pre-press form does not have. A difference of evidence, not of rule.
+    """
+    surfaces = (
+        f"{BASE}/search/results/people/",   # no basis
+        f"{BASE}/in/me/",                   # no basis
+        f"{BASE}/notifications/",           # no basis, not in the table at all
+    )
+    for surface in surfaces:
+        pre = press.check_basis(surface)
+        post = press.check_counters(
+            {"invitations": 0},
+            {"invitations": 0},
+            basis=press.sensitivity_basis(surface),
+        )
+        assert pre["refused"] == post["refused"] == "no_sensitivity_basis", (
+            surface, pre, post
+        )
+        assert pre["reachable_by_this_route"] is post["reachable_by_this_route"]
+        assert pre["why"] != post["why"], (
+            "the post-press refusal must ALSO report what was read at both "
+            "ends; if the two texts are identical that evidence was dropped."
+        )
+        assert "READABLE" in post["why"] and "READABLE" not in pre["why"]
+
+    # And the surfaces that DO declare a basis are not refused at either moment.
+    for surface, kind in (
+        (f"{BASE}/feed/", "sensitive"),
+        (f"{BASE}/analytics/profile-views/", "structural"),
+    ):
+        verdict = press.check_basis(surface)
+        assert verdict.get("refused") is None, verdict
+        assert verdict["basis"] == kind
+    assert press.check_basis(f"{BASE}/feed/")["requires_counters"] == ["off_state"]
+    assert press.check_basis(
+        f"{BASE}/analytics/profile-views/"
+    )["requires_counters"] == [], (
+        "a structural basis prices by ARGUMENT and names no counter; saying it "
+        "requires one would send a caller hunting for something that does not "
+        "exist."
+    )
+
+
+@pytest.mark.asyncio
+async def test_the_witness_never_asserts_permission():
+    """A SURFACE MAY NOT PRINT A CLAIM IT CANNOT DERIVE.
+
+    :func:`press.witness_verdict` is handed two counts and, at most, the
+    control's own ``aria-expanded``. It never sees the verdict. Its MISS text
+    nevertheless read *"the press was permitted and safe"* -- and the module
+    docstring is explicit that the witness is attached to REFUSALS TOO, so that
+    sentence shipped on refusals, saying the opposite of the verdict it rode
+    beside. Measured 2026-09-21 on a press refused for ``no_counter_reading``.
+
+    The property asserted is about the FUNCTION, not about one call site: no
+    reading this function can return may contain a permission word.
+    """
+    readings = (
+        (None, None),
+        ({}, {}),
+        ({"menus": 1}, {"menus": 2}),
+        ({"menus": 1}, {"menus": 1}),
+        ({"menus": 1}, {"menus": 1}),
+    )
+    for index, (before, after) in enumerate(readings):
+        control_open = "true" if index == 4 else None
+        witness = press.witness_verdict(before, after, control_open=control_open)
+        why = str(witness.get("why", "")).lower()
+        for word in ("permitted", "permission", "safe", "refused", "unsafe"):
+            assert word not in why, (
+                f"the witness claimed {word!r} in {witness!r}. It is handed "
+                "counts and nothing else -- it cannot know whether the press "
+                "was permitted, and it is attached to refusals too."
+            )
+
