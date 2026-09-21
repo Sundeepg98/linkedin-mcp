@@ -284,6 +284,24 @@ The pre-commit identity gate ran armed rather than disarmed in this worktree and
 said so: *"identity gate examined 2 staged file(s) against 218 spellings; 0
 hits."*
 
+**THE SECOND RUN, over this document and the slice beside it**, did print the
+line, and it is quoted here because a gate that widened has not answered the
+question the line answers:
+
+      PASS over the 23 file(s) above (1360 tests) -- AND OVER NOTHING ELSE.
+
+      NOT CHECKED: 184 of 207 test files (88.9% of the suite by file).
+      The corpus-wide guards DID run, so the identity, credential and page-text
+      sweeps cover the whole tree. Everything else above is unexamined.
+      That is roughly 4734 of 6094 tests unrun (77.7%), against a suite count taken 2026-09-20 at 970a276.
+      Wall clock: 131.6s.
+      THIS IS A LOCAL, WINDOWS-ONLY SIGNAL. CI runs three platforms and is the
+      certifier; a green gate here is not a reason to shrink that matrix.
+
+Two markdown files selected 23 test files, because `_audit/INDEX.md` and
+`_audit/RULINGS.md` are DATA read by path, which is the coupling edge that gate
+was built to see.
+
 ---
 
 ## 6. WHERE DISK DISAGREED WITH THE BRIEF
