@@ -744,3 +744,138 @@ a third party composing the string, 89 sub-expressions package-wide, and the
 remedy `press.disclose` already uses -- report the exception TYPE and nothing
 else -- deletes diagnosis the messages exist for. It needs a ruling and a
 denominator, which is the next wave, not an edit at the end of this one.
+
+## 11. THE ONE THING I DECIDED NOT TO DO, WITH THE ARGUMENT FOR IT
+
+**Should the seven `ASKED_FOR` sites ALSO describe where they landed?** They
+could: `hint=... + landing.withheld(final_url)` costs nothing in leak terms,
+because the descriptor's alphabet is closed, and it would restore the one
+thing the repair takes away -- the payload no longer records that a redirect
+happened.
+
+**NOT DONE, AND THE REASON IS NOT CAUTION.**
+
+1. **The landing class worth naming is already named, upstream.**
+   `assert_not_authwall(final_url, ...)` runs before every one of the seven
+   raises and, since the measuring wave, refuses with a full descriptor. What
+   remains is a non-authwall redirect on a page that then failed to render
+   rows, where the redirect is not the diagnosis.
+2. **It is additive scope on a repair that is already certified**, and four of
+   the seven hints are one fixed English sentence that tests may read.
+   *Adding is cheap, feels like rigour, and is indistinguishable from progress
+   from the inside*, which is exactly when it should be a separate decision.
+
+**THE ONE SITE WHERE I THINK THE ANSWER IS PROBABLY YES**, named so the next
+wave does not have to rediscover it: `linkedin_who_viewed_me`. Its own
+docstring says `/me/profile-views/` redirects to the analytics page. After
+this repair, a both-attempts-failed payload reports
+`url: https://www.linkedin.com/me/profile-views/`, and an operator who opens
+it lands somewhere else and may conclude the server read the wrong surface.
+One `landing.withheld(last_url)` in that hint would say *you were redirected,
+to a route of this class* in literals. **That is a one-line change with a
+real argument and it belongs to whoever takes the `$.message` wave**, beside
+the other decision about what this package's failures are allowed to say.
+
+## 12. MASTER IS RED, AND IT IS NOT THIS WAVE. MEASURED, THEN THE MERGE WAS ABORTED
+
+The brief said to re-check `git log master..HEAD` before freezing. That check
+earned its place twice over.
+
+**MASTER HAD MOVED FOUR COMMITS** while this wave ran, landing the
+`the-compound-rows` wave: `826798a`, `5ab40c7`, `2d41db8`, `e5ba6c5`. This
+wave's own certification was taken BEFORE that:
+
+    full suite at 479761e + this wave    PASS, 7912 tests, 0 failed, 687.6s
+
+### 12.1 THE MERGE, AND WHAT IT COST TO RESOLVE
+
+Merged locally to see what would happen. Two files conflicted and they are the
+two that cannot be hand-resolved:
+
+    _audit/INDEX.md                 CONFLICT
+    _audit/RULINGS.md               CONFLICT
+    scripts/build_rulings_index.py  auto-merged, both Ruling rows intact
+
+Both conflicting files carry **GENERATED. Do not hand-edit.**, so there is
+exactly one correct resolution and it is not a resolution: **take either side
+to clear the markers, then REGENERATE, then `--check`.** Hand-merging two
+derivations yields a file matching neither corpus, which that file's own drift
+guard then convicts. Done that way it came out clean -- 213 tracked documents,
+36 rulings, all anchors resolving.
+
+**RECORDED FOR WHOEVER MERGES THIS**, because it will recur on every wave that
+writes an audit document while another one does.
+
+### 12.2 AND THEN THE GATE REFUSED, ON A TEST THIS WAVE DOES NOT TOUCH
+
+    REFUSED: a test this change can reach is RED.
+        FAILED tests/test_the_blocker_reason_locator_states_its_recall.py
+               ::test_recall_against_a_hand_built_set_does_not_regress
+        1 failed, 2354 passed, 3 skipped in 202.34s
+
+    E  6 of 9 hand-found documents are in the top 3, below the floor of 7
+
+**FOUR EXPERIMENTS, AND THE FOURTH IS THE ONE THAT SETTLES IT.** Each is the
+same single test, run with one thing removed from the working tree and then
+restored:
+
+| what was removed | result |
+|---|---|
+| this wave's audit document | **still RED** |
+| the compound-rows wave's audit document | **still RED** |
+| both new audit documents together | **still RED** |
+| **master's 19-line addition to `_audit/2026-09-21-the-write-ceiling.md`**, with this wave's every file left in place | **GREEN** |
+
+**SO THE RED IS `e5ba6c5`'s, AND THIS WAVE CONTRIBUTES NOTHING TO IT.** The
+same conclusion arrives from the other side: the full suite was green at
+`479761e` + this wave, 7912 tests, and that run included this test.
+
+### 12.3 THE MECHANISM, AND THE TEST PREDICTED IT IN WRITING
+
+`scripts/find_blocker_reason.py` ranks documents per blocker. Measured:
+
+    GROUPS-SURFACE
+      1. (11) _audit/2026-09-05-groups-surface-measured.md
+      2.  (9) _audit/2026-09-03-linkedin-gap-blockers.md
+      3.  (7) _audit/2026-09-21-the-write-ceiling.md     <-- grown by e5ba6c5
+      4.  (7) _audit/2026-09-19-groups-admission.md      <-- hand-found, TIED
+
+**THE HAND-FOUND DOCUMENT DID NOT LOSE ON SCORE. IT LOST A TIE AT 7-ALL**, and
+the tie-break is reverse-lexicographic on the path, so the LATER DATE IN THE
+FILENAME WINS. `2026-09-21-...` beats `2026-09-19-...` for no reason connected
+to relevance.
+
+That guard's own docstring names this exact failure mode, one wave earlier:
+
+> **THE SHAPER DOCUMENT FELL OUT OF THE TOP 3 ON A TIE, NOT ON MERIT.** [...]
+> So a `top3` floor is sensitive to an ARBITRARY TIE-BREAK whenever a new
+> document lands on an existing score -- which is a property of this
+> measurement nobody had written down, and it is the reason the corpus growing
+> can look exactly like the locator getting worse. The floor stays at 7 and is
+> not lowered: lowering it would have hidden the tie instead of naming it.
+
+**THE GUARD IS WORKING AS DESIGNED.** Its author chose to let it go red rather
+than lower the floor, precisely so a human would look. This is the human
+looking, and the reading is: the locator has not got worse, the corpus grew
+into a second tie, and the tie-break is arbitrary.
+
+### 12.4 WHAT I DID NOT DO, AND WHY
+
+**THE MERGE WAS ABORTED AND THIS BRANCH IS HANDED BACK AT `479761e` + one
+commit, gate-green.** Three things were available and two are wrong:
+
+| option | verdict |
+|---|---|
+| lower `RECALL_TOP3_FLOOR` to 6 | **REFUSED** -- the file says in writing that lowering hides the tie instead of naming it, and the locator did not get worse |
+| change the tie-break to path-ascending | **REFUSED** -- that fixes this instance and is exactly as arbitrary; which document should win a tie is a ruling nobody has made, on an instrument this wave does not own |
+| commit the merge with `--no-verify` | **REFUSED** -- a bypassed gate on somebody else's red buries the signal inside my merge commit, and a red branch cannot be serially verify-merged anyway |
+| **abort, stay green, report the cause with the reproduction** | **TAKEN** |
+
+**THE DECISION THE LEAD OWNS**, stated so it is not rediscovered: master is red
+at `e5ba6c5` on `test_recall_against_a_hand_built_set_does_not_regress`, the
+cause is a 7-7 tie broken by filename date, and the fork is (a) rule the
+tie-break, (b) move the floor with a reason, or (c) change the metric so
+growth cannot look like regression. **Nothing merges cleanly until one of
+those is chosen**, and that is true of every wave in flight, not only this one.
+
+---

@@ -641,6 +641,21 @@ REGISTER: tuple = (
                "nothing at all",
         aliases=("the field beside the message", "the twenty sites",
                  "ERROR-URL-PER-SITE"),
+        note="THE FAILURE-PATH COUNTERPART OF THE `source_url` SPLIT RULING "
+             "in `tests/test_the_source_url_split_was_never_ruled.py`, which "
+             "is NOT registered here because it lives as a test rather than "
+             "as an audit passage. Same kind of value -- the address a read "
+             "landed on -- in several of the SAME functions, and the two were "
+             "ruled by different files that did not know about each other: "
+             "`linkedin_my_profile` was declared SHAPED on its success path "
+             "and published its landing raw on its failure path, in one "
+             "function, for weeks. That ruling supplied the METHOD used here "
+             "(a per-site declaration with a written reason, a count per "
+             "site, a relay pinned as a relay, and drift failing in BOTH "
+             "directions) and its prohibition is what stopped this wave "
+             "wrapping all twenty: *wrapping a deliberate publication is as "
+             "much a defect as leaking an accidental one.* The count each "
+             "way is 12 withheld, 7 published, 1 relay.",
     ),
 )
 
