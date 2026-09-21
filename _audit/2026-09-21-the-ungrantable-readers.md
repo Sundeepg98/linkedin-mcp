@@ -105,9 +105,21 @@ grant DOOR (`consume`, `mint`, `assert_write_url`, `discard_all`,
 | `observe` | `goto`, in every branch | `writes_enabled` 4126 | takes no grant | **(d)** -- see 2.2 |
 | `preview` | via `observe` | `mint` 4772 | mints one | **(d)** -- see 2.2 |
 
-`perform` is the ONLY function in the module that touches the page or a door.
-Everything the grant block was protecting lives in one function, and the other
-four were refused for standing next to it.
+**Of the five readers the grant block fenced off, `perform` is the only one
+that touches the page or a door** -- and the walk that says so covers EVERY
+function in `writes.py`, not a chosen list, because a claim of the form "only
+X does this" is only worth the denominator it was taken over:
+
+```
+PAGE ACTIONS   perform  click 8756, fill 8784, set_input_files 8714, select_option 8727
+               _load    navigator.goto 3079
+GRANT DOORS    consume, mint, observe, perform   writes_enabled
+               perform                           assert_write_url
+               preview                           mint
+```
+
+`_live_control`, `_verify_after`, `_typeahead_gate` and `_recipient_gate` hold
+neither. They were refused for standing next to the one function that does.
 
 ### 2.1 The exact grant reads, so "data carrier" is not a characterisation
 
@@ -651,12 +663,20 @@ Three facts settle it:
   distinguishes it from a defect.
 
 The other failures the first run reported were real and are fixed: an
-undeclared urn placeholder (section 6.1), a `CORRECTS:` marker naming a source
-file rather than a document in this corpus, two derived registers that needed
-regenerating, and one word -- *"stale"* -- sitting within two lines of a
-citation of `INDEX.md`, which is correction vocabulary and made the pair
-untriaged. That last one is the guard doing exactly its job on prose that was
-not a correction claim at all.
+undeclared urn placeholder (section 6.1), a marker naming a source file rather
+than a document in this corpus, and two derived registers that needed
+regenerating.
+
+One more is worth reporting because it happened TWICE, the second time to the
+sentence describing the first. `test_a_correction_is_findable_from_the_claim`
+pairs any citation of a document in this corpus with a deliberately loose
+vocabulary within two lines, and demands that the pair be either declared or
+triaged. A bullet listing the regenerated registers sat two lines from a word
+on that list, so the pair went untriaged -- and the paragraph written here to
+explain that then quoted the word beside the same filename and tripped it
+again. Both were prose, neither was a correction claim, and the guard was
+right to stop a human both times: that is what a loose vocabulary buys, and
+the cost of it is exactly two rewordings.
 
 ### Files
 
