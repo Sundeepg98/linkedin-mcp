@@ -1,0 +1,24 @@
+{
+  "_comment": "Verdict per message site that interpolates an address, from scripts/_census_message_interpolations.py. Regenerate with: python -m tests.test_no_message_publishes_a_landing --write-baseline. WITHHELD and SERVER_CONSTRUCTED are MEASURED from the code; ASKED_FOR, PUBLISHED_BY_CONTRACT and NAMES_NO_ADDRESS are RULED, per function, with reasons in that file. There is no verdict meaning 'this publishes a landing' -- a baseline that could record one would become a list of permitted leaks.",
+  "sites": {
+    "auth.py:_maybe_corroborate:landing.withheld(final_url)": "WITHHELD",
+    "auth.py:login_via_browser:LOGIN_URL": "SERVER_CONSTRUCTED",
+    "browser.py:goto:url": "ASKED_FOR",
+    "dom.py:read_job_identity:slug.group(1)": "PUBLISHED_BY_CONTRACT",
+    "readonly.py:assert_read_url:url": "ASKED_FOR",
+    "readonly.py:assert_read_url:url#2": "ASKED_FOR",
+    "readonly.py:assert_read_url:url#3": "ASKED_FOR",
+    "server.py:_read_tracker:shape.tracker_read_note( await dom.read_tracker_evidence(pag": "NAMES_NO_ADDRESS",
+    "server.py:linkedin_job_detail:BASE_URL": "SERVER_CONSTRUCTED",
+    "shape.py:parse_person_card:slug": "PUBLISHED_BY_CONTRACT",
+    "transport.py:_serve:http_url(chosen)": "SERVER_CONSTRUCTED",
+    "writes.py:_assert_landed_on_target:landing.withheld(landed)": "WITHHELD",
+    "writes.py:_assert_landed_on_target:landing.withheld(landed)#2": "WITHHELD",
+    "writes.py:_assert_landed_on_target:landing.withheld(landed)#3": "WITHHELD",
+    "writes.py:_assert_landed_on_target:landing.withheld(landed)#4": "WITHHELD",
+    "writes.py:_render:spec.url_template.format(target=url_target_of(spec, observat": "SERVER_CONSTRUCTED",
+    "writes.py:assert_write_url:url": "ASKED_FOR",
+    "writes.py:assert_write_url:url#2": "ASKED_FOR",
+    "writes.py:assert_write_url:url#3": "ASKED_FOR"
+  }
+}

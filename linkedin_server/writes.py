@@ -209,7 +209,7 @@ from dataclasses import dataclass, field
 from typing import Any, Optional, Union
 from urllib.parse import urlsplit
 
-from linkedin_server import coerce, dom, shape, uploads
+from linkedin_server import coerce, dom, landing, shape, uploads
 from linkedin_server.errors import WriteAttemptError
 
 # ---------------------------------------------------------------------------
@@ -5906,13 +5906,39 @@ def _assert_landed_on_target(
     LIST has one address and no id at all; the target selects a row, so the url
     is compared whole and the row is enforced by the selector the click is
     built from -- which is the only place it can be.
+
+    **EVERY REFUSAL BELOW DESCRIBES THE LANDING AND NONE OF THEM QUOTES IT**,
+    repaired 2026-09-21. Until then each said ``landed on {landed!r}`` -- and
+    the message reaches ``server._error``, which renders it through
+    ``config.scrub``, which substitutes this server's own filesystem paths and
+    nothing else. It is the ``assert_not_authwall`` defect on the write path,
+    and it is REACHED EXACTLY WHEN THE LANDING IS NOT WHAT WAS ASKED FOR: the
+    branch that quoted the landing is the branch where LinkedIn sent the
+    browser somewhere this server did not choose, which is the one case where
+    the string is certainly not ours. A signed-out bounce lands here as an
+    authwall url carrying the address it bounced, and the canonical form of an
+    organisation address is a slug, which is a name.
+
+    ``expected``, ``want`` and ``got`` are still quoted and that is deliberate.
+    ``expected`` is assembled by this package from a template and a grant
+    target. ``want`` and ``got`` are the path AFTER the member segment, so
+    neither can be the member: they are route tails, and they are the actual
+    diagnosis of the one failure this branch exists to describe.
+
+    **THE MESSAGE IS ALL THAT CHANGED.** No branch, no comparison and no
+    refusal moved, which is why this repair was safe to make in a wave that
+    could not drive a write gate -- the distinction the coercion wave drew when
+    it refused to convert a gate's ``raise`` into a substituted zero.
     """
     if spec.target_kind == "job_id":
         landed_id = re.search(dom.JOB_HREF, str(landed))
         if not landed_id or landed_id.group(1) != grant.target:
             raise WriteAttemptError(
                 f"refusing to click: the grant is for job {grant.target} and "
-                f"the browser landed on {landed!r}, which is not that posting."
+                "the browser landed somewhere that is not that posting. THE "
+                "LANDING IS WITHHELD rather than named -- see "
+                f"linkedin_server/landing.py. What is safe to say about it -- "
+                f"{landing.withheld(landed)}."
             )
         return
     # THE SUBJECT HALF, through the same derivation every other site uses --
@@ -5978,20 +6004,23 @@ def _assert_landed_on_target(
         if landed_member is None:
             raise WriteAttemptError(
                 f"refusing to click: this action is performed on his own "
-                f"profile at {expected!r} and the browser landed on {landed!r}, "
-                "which is not a /in/<member>/ url at all. A redirect that "
+                f"profile at {expected!r} and the browser landed somewhere "
+                "that is not a /in/<member>/ url at all. A redirect that "
                 "leaves the profile family is not the redirect this action "
-                "expects."
+                "expects. THE LANDING IS WITHHELD rather than named. What is "
+                f"safe to say about it -- {landing.withheld(landed)}."
             )
         want = (expected_member.group(2) or "").rstrip("/")
         got = (landed_member.group(2) or "").rstrip("/")
         if want != got:
             raise WriteAttemptError(
                 f"refusing to click: this action is performed on {expected!r} "
-                f"and the browser landed on {landed!r}. The member segment is "
-                "allowed to differ -- /in/me/ redirects to whoever is signed "
-                f"in -- but the path after it is not: this expects {want!r} "
-                f"and the page is showing {got!r}."
+                "and the browser landed on a different profile path. The "
+                "member segment is allowed to differ -- /in/me/ redirects to "
+                "whoever is signed in -- but the path after it is not: this "
+                f"expects {want!r} and the page is showing {got!r}. THE "
+                "LANDING ITSELF IS WITHHELD; what is safe to say about it -- "
+                f"{landing.withheld(landed)}."
             )
         return
 
@@ -6006,7 +6035,8 @@ def _assert_landed_on_target(
         # teaches him the wrong model of what is safe.
         raise WriteAttemptError(
             f"refusing to click: this action is performed on {expected!r} and "
-            f"the browser landed on {landed!r}. "
+            "the browser landed elsewhere. THE LANDING IS WITHHELD rather than "
+            f"named; what is safe to say about it -- {landing.withheld(landed)}. "
             + (
                 "A list write is anchored to a row on one page, so landing "
                 "anywhere else means the row this grant names is not on the "

@@ -545,7 +545,8 @@ def test_the_fixture_carries_a_person_shaped_plant_rather_than_a_placeholder():
 
 
 # ---------------------------------------------------------------------------
-# 6. THE AUTHWALL REFUSAL, AND THE SHIPPED ONE SHOWN PUBLISHING A SLUG
+# 6. THE AUTHWALL REFUSAL, AND THE SHIPPED ONE SHOWN NO LONGER PUBLISHING A
+#    SLUG -- INVERTED 2026-09-21 WHEN THE GENERAL CASE WAS REPAIRED
 # ---------------------------------------------------------------------------
 
 #: A signed-out bounce from an organisation Page. LinkedIn's authwall carries
@@ -558,32 +559,99 @@ AUTHWALL_CARRYING_A_SLUG = (
 )
 
 
-def test_the_shipped_authwall_refusal_publishes_the_slug_it_bounced():
-    """SHOWN FAILING, against the SHIPPED function, not a mutant.
+#: The message ``auth.assert_not_authwall`` SHIPPED until 2026-09-21, spelled
+#: exactly as it was. It is kept as a plant rather than deleted with the
+#: defect, because a control whose defect is the real previous state is the
+#: strongest kind available -- nobody has to argue the mutation is
+#: representative. ``scripts/_check_the_landing_guard_can_fail.py`` rebinds the
+#: shipped function to this; the control below asserts on it directly.
+def _the_refusal_that_shipped(final_url: str, *, surface: str) -> str:
+    return (
+        f"loading the {surface} page landed on {final_url}, which is "
+        "LinkedIn's signed-out wall -- there is no live session. Call "
+        "linkedin_login and sign in yourself in the window it "
+        "opens."
+    )
 
-    This is the control that makes the test below a measurement rather than a
-    green. ``auth.assert_not_authwall`` interpolates the FINAL url into its
-    message; that message reaches ``server._error``; ``config.scrub``
-    substitutes this server's own FILESYSTEM PATHS and nothing else. So the
-    slug arrives at the caller intact -- in an exception, which is not a
-    return value.
 
-    **IT IS NOT A DEFECT IN THAT FUNCTION AND IS NOT FIXED HERE.** Every other
-    tool in the package bounces the same way and most of their addresses carry
-    a numeric id. The divergence is scoped to the two surfaces where the
-    landing can be a name.
+def _assert_the_landing_did_not_reach_the_caller(exception) -> None:
+    """The whole assertion, factored out so the control can be aimed at it.
+
+    **IT MUST NOT BE SATISFIABLE BY AN EMPTY RESULT.** A test that only checks
+    a name is absent passes on a refusal that says nothing at all, and this
+    repository has a scar for a test satisfied by an empty result. So the
+    absence is checked AND the refusal is required to still do its job: name
+    its surface, say an authwall happened, and carry the descriptor that
+    replaced the landing.
     """
     from linkedin_server import server
+
+    rendered = json.dumps(server._error(exception))
+    assert "exampleone-markersurname" not in rendered, rendered
+    assert "%2Fcompany%2F" not in rendered, rendered
+    assert "https%3A%2F%2F" not in rendered, rendered
+    # THE PARAMETER'S NAME MAY BE SAID; ITS VALUE MAY NOT, and the first
+    # version of this line forbade both. ``sessionRedirect`` appears in the
+    # descriptor on purpose -- it is in ``landing.ADDRESS_PARAMS``, a closed
+    # set this package declares, and a parameter name is LinkedIn's
+    # vocabulary rather than a third party's text. What must never appear is
+    # the ASSIGNMENT, because a value follows it.
+    assert "sessionRedirect=" not in rendered, rendered
+    # ...and it still refuses usefully.
+    assert "signed-out wall" in rendered, rendered
+    assert "organisation Page" in rendered, rendered
+    assert "/authwall" in rendered, rendered
+    assert "bounced from company_page" in rendered, rendered
+
+
+def test_the_shipped_authwall_refusal_no_longer_publishes_the_slug_it_bounced():
+    """THE PROOF THE LEAK IS CLOSED -- against the SHIPPED function.
+
+    **THIS TEST USED TO ASSERT THE OPPOSITE, AND IT WAS RIGHT TO.** Until
+    2026-09-21 it read ``test_the_shipped_authwall_refusal_publishes_the_slug
+    _it_bounced`` and drove ``auth.assert_not_authwall`` to demonstrate that
+    the slug DID arrive at the caller -- the control that made the divergence
+    below a measurement rather than a green. Its own failure message said what
+    to do when it stopped being true.
+
+    It stopped being true because the general case was repaired rather than
+    because the divergence was removed, so **it is inverted and not deleted**:
+    deleting it would remove the only test that ever demonstrated the defect,
+    and the assertion it makes now is the one worth keeping for good.
+
+    The defect it demonstrated: ``assert_not_authwall`` interpolated the FINAL
+    url into its message; that message reaches ``server._error``;
+    ``config.scrub`` substitutes this server's own FILESYSTEM PATHS and nothing
+    else, because a name has no shape to scrub. See
+    ``_audit/2026-09-21-the-landed-url.md`` and ``linkedin_server/landing.py``.
+    """
     from linkedin_server.auth import assert_not_authwall
     from linkedin_server.errors import NotAuthenticatedError
 
     with pytest.raises(NotAuthenticatedError) as caught:
         assert_not_authwall(AUTHWALL_CARRYING_A_SLUG, surface="organisation Page")
-    rendered = json.dumps(server._error(caught.value))
-    assert "exampleone-markersurname" in rendered, (
-        "the shipped refusal no longer publishes its landing, so the "
-        "divergence below is buying nothing and should be removed"
+    _assert_the_landing_did_not_reach_the_caller(caught.value)
+
+
+def test_that_assertion_convicts_the_refusal_that_actually_shipped():
+    """SHOWN FAILING, and the defect is the real previous state.
+
+    The test above is a measurement only if it could have failed. Handed the
+    message ``assert_not_authwall`` shipped with -- reproduced verbatim in
+    :func:`_the_refusal_that_shipped` -- the same assertion must convict, and
+    it must convict on the LEAK rather than on a missing phrase, which is why
+    the plant is the whole original sentence and not a fragment.
+    """
+    from linkedin_server.errors import NotAuthenticatedError
+
+    planted = NotAuthenticatedError(
+        _the_refusal_that_shipped(
+            AUTHWALL_CARRYING_A_SLUG, surface="organisation Page"
+        )
     )
+    with pytest.raises(AssertionError) as caught:
+        _assert_the_landing_did_not_reach_the_caller(planted)
+    assert "exampleone-markersurname" in str(caught.value)
 
 
 def test_the_new_surfaces_refuse_without_naming_what_they_bounced_off():

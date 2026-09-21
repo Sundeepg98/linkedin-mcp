@@ -8684,3 +8684,214 @@ constant so no contended file is edited:
 same hour as the code they check, by the author of that code, and all three
 read as rigour while standing for nothing. The cold review found two defects
 in the same files and NONE of these three assertions was what caught them.
+
+## 51. A LANDING IS A STRING THE SITE CHOSE, AND `scrub()` KNOWS ONLY PATHS (landed-url, 2026-09-21)
+
+Full document: `_audit/2026-09-21-the-landed-url.md`. Base `762ec23`.
+
+`auth.assert_not_authwall` interpolated the landed url verbatim into its
+refusal, from **27 tool-facing call sites** (28 calls in `linkedin_server/`,
+one of them inside `server.py`'s own local helper; 7 more in `scripts/`). That
+message reaches `server._error`, which renders it through `config.scrub` --
+which substitutes THIS SERVER'S OWN FILESYSTEM PATHS and nothing else.
+
+> IT KNOWS PATHS. IT DOES NOT KNOW URLS AND IT DOES NOT KNOW NAMES.
+
+Third instance of one law in three days. `int()` quoting its input (section
+44), this, and **`scrub()` knowing only paths is the common cause of both**.
+
+### 51.1 THE CLAIM WAS TRUE AND HAD NEVER BEEN MEASURED -- AND HALF OF IT STILL HAS NOT
+
+Two identically worded, uncited assertions carried the premise that LinkedIn's
+authwall carries the address it bounced. Both rested on a measurement of OUR
+OWN refusal over a SYNTHETIC url. The evidence was on disk the whole time, in
+**Chrome's own history databases** under the gitignored `_state/` -- not in any
+of the project's capture files, none of which contains the string `authwall`.
+
+    31 landing events matching AUTHWALL_MARKERS, deduplicated across five
+       profile generations.  /authwall 1, /uas/login 13, bare /login 17,
+       /checkpoint/ 0 -- that marker has still never fired.
+    14 of them carry a predecessor resolved through `visits.from_visit`, and
+       the predecessor agrees with the address inside the query 14 times of 14.
+    sessionRedirect  on /authwall (camelCase)
+    session_redirect on /uas/login (snake case)
+
+**AND THE HALF THAT CUTS THE OTHER WAY. Not one measured landing carries an
+`/in/<member>/` path or an organisation slug** -- every observed inner address
+is `/feed`, `/messaging` or `/jobs/view/<numeric id>`. So *the authwall carries
+the address it bounced* is VERIFIED and *therefore it can be a name* is
+DERIVED, from LinkedIn's url grammar and from nothing on this disk. The
+repository had been spelling the two as one sentence.
+
+A raw byte scan finds 508 marker-bearing occurrences; they collapse to 31
+events. **AN OCCURRENCE COUNT OVERSTATED THIS EVIDENCE BY 16x**, because Chrome
+keeps the same database under `Default/` and `Snapshots/<version>/Default/` and
+the profile has been copied four times.
+
+### 51.2 THE REPAIR IS AT THE RAISE SITE, AND THE ENGINE OF `scrub()` SAYS SO
+
+`paths.relativise_known` -- vendored, DO-NOT-EDIT, byte-compared by a test --
+states in shipped text that a heuristic hunt *"would eventually eat a Naukri
+API route, A URL, or a Windows drive letter"*. **A url is named there as the
+collateral.** Three more reasons, in the document: there is nothing to put on
+the allowlist, because the value is chosen by the remote site at the moment of
+the bounce; PROVENANCE decides publishability and a sink sees only text, so
+`/company/<id>/` assembled by this package and `authwall?sessionRedirect=...`
+chosen by LinkedIn are the same shape with opposite verdicts; and `scrub` is
+the one boundary every failure funnels through, which makes it the
+highest-blast-radius edit available to a wave that cannot open a browser.
+
+    WHAT TRANSFERS FROM THE COERCION FINDING IS THE OBSERVATION -- A VALUE
+    REACHES A CALLER THROUGH ERROR TEXT -- AND NEVER THE REMEDY.
+
+`linkedin_server/landing.py` is the one home, so the class closes for functions
+nobody has written yet rather than by a 28th local fix. Everything it emits is
+a literal it declares, an integer or a boolean. Its most useful field is
+`bounced_from`: the route CLASS of the address the landing says it bounced
+from -- *you were bounced off a company page* is the diagnosis, and WHICH
+company page is the leak.
+
+### 51.3 THE CONTROL WAS INVERTED, NOT DELETED -- SHOWN FAILING
+
+`tests/test_company_root.py` shipped a test driving the SHIPPED function and
+asserting the slug DID reach the caller. **It went red on the first run of the
+repair, which is the leak-closed proof arriving as a failure.** It is inverted
+rather than deleted: deleting it would remove the only test that ever
+demonstrated the defect.
+
+The inverted assertion may not be satisfiable by an empty result, so it checks
+the absence AND requires the refusal to still name its surface, say an authwall
+happened, and carry `bounced from company_page`. Beside it, a control hands
+that same assertion the pre-repair message verbatim and requires it to convict.
+
+`scripts/_check_the_landing_guard_can_fail.py` restores the refusal that
+ACTUALLY SHIPPED at `762ec23`, at every binding, and prints how many it
+replaced -- 2 leak of 2 driven. **The part worth keeping is the third line of
+its output**: `writes.py` imports the function INSIDE a function body, which
+re-resolves from `auth` at call time, so it has no module attribute to set. A
+control counting only attributes would have reported it as a binding it failed
+to reach, which reads exactly like a hole. The style is parsed, not guessed.
+
+**ONE ASSERTION IN THE FIRST DRAFT WAS WRONG AND THE TEST CAUGHT IT.** It
+forbade the string `sessionRedirect` outright, while the descriptor names that
+parameter on purpose -- from a closed declared set, because a parameter name is
+LinkedIn's vocabulary and not a third party's text. It is now
+`sessionRedirect=`: the ASSIGNMENT, because a value follows it.
+
+**AND THERE WAS A SECOND CONTROL, IN A FILE NOBODY HAD MENTIONED.**
+`tests/test_tools.py` asserted `AUTHWALL_URL in result["message"]` **across six
+tools** -- the same claim as the one above, made about six different surfaces,
+found only by running a wider slice of the suite than the wave's own files.
+Inverted the same way and with the same anti-vacuity requirement: the refusal
+must still say `signed-out wall`, name the matched marker, and carry the
+`describe_shape` reading. **An absence assertion on its own passes on a refusal
+that says nothing**, which is precisely the trap laid by flipping an assertion
+to an absence.
+
+### 51.4 A SHIPPED GUARD FIRED ON THIS WAVE'S OWN OUTPUT, AND THREE OF THE FOUR ANSWERS WERE DODGES
+
+The first repair logged the descriptor as well as raising it, and
+`test_no_navigation_derived_value_reaches_an_output_sink[auth.py]` went red:
+the value IS derived from the landing, and a logger call is one of that rule's
+sinks. The guard is right about the taint and the value is still safe.
+
+| response | verdict |
+|---|---|
+| declare it in `KNOWN_TAINTED_OUTPUT` | REFUSED -- a false claim in a safety ledger |
+| move the log into `landing.py` | REFUSED -- same value, invisible to a per-module engine |
+| rename the variable | REFUSED -- it IS derived |
+| log the surface and nothing derived | TAKEN |
+
+The sanctioned route is an entry in `_SANITISERS`, and it is left as a named
+next step rather than taken -- see 51.6.
+
+### 51.5 THE SWEEP, AND THE LAW THAT DECIDES EVERY "NAMED" ROW
+
+`scripts/_census_message_interpolations.py` (AST): **292 message sites in 24
+modules, 539 interpolated sub-expressions**; the naive grep finds **18 lines**.
+**All 88 LOG sites have no f-string anywhere** -- the format string is a
+constant and `logging` interpolates, so `logger.info("landed on %s", url)`
+reaches a log record with the url in it and no grep for `f"` can see it.
+
+**THE INSTRUMENT PRINTS A SUBJECT DIGEST BECAUSE OF THIS WAVE.** Its first run
+and every run after it disagreed, from a byte-identical instrument: the repair
+was landing in the same worktree while the census ran. *A count over a tree
+somebody else is editing is a reading with a timestamp, not a fact about the
+codebase.* It now counts HEAD and the working tree separately and prints both.
+
+21 sites examined: **7 repaired, 13 named, 1 not an address at all** -- a
+regex, `dom.JOB_HREF`, that spells `href`. The census's own shortlist
+is 19, and **the two it cannot see are both this wave's repairs** -- one
+interpolates a name carrying no address token, which a source-text rule cannot
+reach; the other BUILDS its message in a helper and returns it, so the field
+assignment that publishes it holds a Call rather than a built string. Both
+limits are stated in the guard rather than left to be discovered. The law:
+
+> RETURNING PAGE TEXT CAN BE A CONTRACT. RAISING A `ValueError` THAT QUOTES
+> PAGE TEXT IS NOBODY'S CONTRACT.
+
+restated one class over: **a message is never a contract; a field can be.** No
+tool declares "my refusal names the landing", which is why that string had no
+defenders. `out["profile"]`, `out["company_url"]` and `source_url` are declared
+publications, and `tests/test_the_source_url_split_was_never_ruled.py` already
+governs the last per site while explicitly refusing a reflexive wrap.
+
+**AND THE AST CENSUS MISSED ONE.** It reported 3 sites in
+`writes._assert_landed_on_target`; there are four, and the fourth `raise`'s
+argument is a BinOp of a JoinedStr and an IfExp. Found by running
+`grep -n "{landed"` against the instrument's own output. An AST census is a
+better instrument than grep in both directions and is still an instrument;
+running the cheap disagreeing check is what caught it. Repaired, and it now
+reports all four -- **the number moved because the instrument got better,
+which is the only honest reason a number may move.**
+
+### 51.6 THREE THINGS LEFT OPEN, EACH MEASURED
+
+**1. `ExtractionFailedError.url` IS PUBLISHED WITH NO SCRUBBER AT ALL.**
+`server._error` scrubs `message` and `hint` and passes `url` through raw. 20
+sites feed it: 12 in `dom.py` hand it `_url_of(page)` -- the live page url read
+at the moment of the raise -- plus one `require_rows` parameter and 7 in
+`server.py`. **The asymmetry is the finding**: the SUCCESS-path twin of this
+value has a standing fourteen-row per-site ruling, and the FAILURE-path field
+has none, on the same value in the same function, reached exactly when the page
+was NOT what was expected. It needs a ruling and a measurement, not an edit.
+
+**2. THE TAINT ENGINE HAS TWO LAUNDERING CONSTRUCTS AND ONE IS NEW.** Measured
+against the shipped `output_violations` with synthetic modules:
+
+    print(landed)                                          CAUGHT
+    lines.append("..." + landed); print(join(lines))       NOT CAUGHT
+    lines = lines + ["..." + landed]; print(join(lines))   CAUGHT
+    returned in a dict, printed by subscript elsewhere     NOT CAUGHT
+    returned in a dict, printed by bare name elsewhere     CAUGHT
+
+The dict-subscript row is already recorded in
+`scripts/_probe_compose_file_inputs.py`'s own comment. **The `.append` row is
+recorded nowhere, and the rebinding form being CAUGHT is what localises it:
+MUTATION IS NOT ASSIGNMENT** -- the same shape as the hole `_bindings` records
+learning once already about iteration. `scripts/_probe_file_inputs_live.py`
+sits in it, printing a landed url with an empty `KNOWN_TAINTED_OUTPUT` entry.
+**AND THE LEDGER CANNOT RECORD WHAT THE ENGINE CANNOT SEE**: that guard asserts
+`found == declared` by equality, so the undeclared site cannot be declared, only
+fixed.
+
+**3. THE SANITISER CERTIFIER CANNOT LOAD A `linkedin_server/` CLAIMANT.**
+`tests/test_a_sanitiser_earns_its_entry._module` resolves every claimant as
+`REPO / "scripts" / filename`, while its `_claimants()` scans `_python_files()`
+-- **46 files of which are in `linkedin_server/`**. Measured:
+`_module("landing.py") -> FileNotFoundError`. A claimant there is DISCOVERABLE
+by the enumeration guard and UNLOADABLE by the demonstration guard, so a
+`linkedin_server/` function named `_redact`, `_shape_of` or `_relation` would
+fail the first and crash the second. No such claimant exists yet, which is the
+only reason nobody has met it.
+
+### 51.7 THE ENTRIES
+
+| path | shown failing by |
+|---|---|
+| `linkedin_server/landing.py` | shipped code |
+| `tests/test_landing.py` | three inline controls: a describer that quotes its input, one that answers in prose, and a descriptor that keeps the landing -- each convicted by the same alphabet predicate the real tests use |
+| `tests/test_company_root.py` (inverted control) | the pre-repair message, verbatim, convicted by the same assertion |
+| `tests/test_tools.py` (inverted control, x6 tools) | it was RED on the repair before it was inverted, which is the same demonstration arriving as a failure |
+| `scripts/_check_the_landing_guard_can_fail.py` | the refusal that shipped at `762ec23`, rebound at every binding, 2 of 2 leak |
+| `scripts/_census_message_interpolations.py` | prints its own grep contrast; its one miss is recorded in 51.5 rather than quietly fixed |

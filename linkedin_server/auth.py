@@ -33,8 +33,15 @@ import time
 from pathlib import Path
 from typing import Any, Optional
 
+# WHY A MODULE-LEVEL IMPORT IS SAFE HERE. This file keeps its module-level
+# package imports to ``config`` and ``errors`` on purpose -- the authentication
+# path does not drag the page-reading machinery in behind it -- and ``landing``
+# holds that line: it imports ``config`` and ``jobfilter``, both of which are
+# standard library plus this package's own constants. That is also why its
+# route table is a checked COPY of ``anchors.ROUTE_TABLE`` rather than an
+# import of it; ``anchors`` imports ``dom``.
+from linkedin_server import landing
 from linkedin_server.config import (
-    AUTHWALL_MARKERS,
     API_TIMEOUT_MS,
     FEED_URL,
     LOGIN_POLL_S,
@@ -429,15 +436,42 @@ async def _maybe_corroborate(
             return result
 
     result = dict(result)
-    result["corroborated_with"] = f"GET {FEED_URL} -> {final_url}"
-    if any(marker in final_url for marker in AUTHWALL_MARKERS):
+    result["corroborated_with"] = _corroboration_note(final_url)
+    if landing.authwall_marker(final_url) is not None:
         result["authenticated"] = False
         result["reason"] = (
-            "the identity call was inconclusive, but loading the feed landed on "
-            f"{final_url}, which is LinkedIn's signed-out wall. Call "
+            "the identity call was inconclusive, but loading the feed landed "
+            "on LinkedIn's signed-out wall. THE LANDING IS WITHHELD rather "
+            "than named -- see linkedin_server/landing.py. What is safe to "
+            f"say about it -- {landing.withheld(final_url)}. Call "
             "linkedin_login and sign in yourself."
         )
     return result
+
+
+def _corroboration_note(final_url: str) -> str:
+    """What the corroborating navigation did, without republishing a landing.
+
+    **BOTH HALVES OF THIS FIELD WERE LEAKING AND ONLY ONE WAS OBVIOUS.**
+    ``reason`` above becomes an exception message -- ``require_auth`` raises
+    ``NotAuthenticatedError(status["reason"])`` -- so the authwall landing it
+    quoted was the ``assert_not_authwall`` defect reached by a second path.
+    ``corroborated_with`` is a plain published FIELD and quoted the same
+    landing, on the same branch, with no exception involved at all.
+
+    So the rule here is provenance rather than branch: **an address is repeated
+    only when it is the one this server ASKED FOR.** A landing that is anywhere
+    else -- an authwall, a checkpoint, an interstitial none of the markers
+    name -- is a string LinkedIn chose, and is described instead. A query
+    string counts as elsewhere: ``/feed/?highlightedUpdateUrn=urn:li:activity:
+    <digits>`` is the same path and carries an identifier this repository's own
+    identity gate would refuse in a commit.
+    """
+    asked = FEED_URL
+    landed = final_url or ""
+    if landed.rstrip("/") == asked.rstrip("/"):
+        return f"GET {asked} -> {asked}"
+    return f"GET {asked} -> elsewhere; {landing.withheld(landed)}"
 
 
 # ---------------------------------------------------------------------------
@@ -1133,14 +1167,70 @@ def assert_not_authwall(final_url: str, *, surface: str) -> None:
     request being refused. Spending a separate identity call before every read
     would double this server's request rate to establish something the
     navigation already established.
+
+    **THE LANDING IS WITHHELD, AND THAT IS THE POINT OF THIS FUNCTION'S
+    MESSAGE.** Until 2026-09-21 it read ``f"... landed on {final_url} ..."``.
+    That string reaches ``server._error``, which renders it through
+    ``config.scrub`` -- and scrub substitutes THIS SERVER'S OWN FILESYSTEM
+    PATHS and nothing else, because a name has no shape to scrub. A landing is
+    a string LINKEDIN chose; the canonical form of an organisation address is a
+    SLUG; a slug is a name. Thirty call sites raise through here, so this was
+    one function publishing a third party's name on the ordinary signed-out
+    path from twenty-odd tools.
+
+    ``landing.describe_landing`` replaces it with integers, booleans and
+    literals from closed tuples that module declares -- including the CLASS of
+    the address the landing says it bounced from, which is the fact a debugger
+    actually needs. See ``linkedin_server/landing.py`` for why that repair is
+    here and not in ``scrub()``, and ``_audit/2026-09-21-the-landed-url.md``
+    for what an authwall landing was measured to carry.
+
+    **THE SIGNATURE AND THE EXCEPTION TYPE ARE UNCHANGED, DELIBERATELY.**
+    Thirty call sites is the reason the repair is inside the function rather
+    than at any of them, and a caller that catches ``NotAuthenticatedError``
+    today still catches it. Nothing is attached to the exception either:
+    ``server._error`` publishes ``getattr(exc, "url", "")`` into the payload
+    UNSCRUBBED, so a ``url`` attribute here would put the landing back on the
+    wire past every argument above.
     """
-    if any(marker in (final_url or "") for marker in AUTHWALL_MARKERS):
-        raise NotAuthenticatedError(
-            f"loading the {surface} page landed on {final_url}, which is "
-            "LinkedIn's signed-out wall -- there is no live session. Call "
-            "linkedin_login and sign in yourself in the window it "
-            "opens."
-        )
+    marker = landing.authwall_marker(final_url)
+    if marker is None:
+        return
+    # THE LOG LINE CARRIES THE SURFACE AND NOTHING DERIVED FROM THE LANDING,
+    # AND A SHIPPED GUARD IS THE REASON. The first version of this repair
+    # logged the descriptor too -- it is name-free, so that was not a leak --
+    # and ``test_no_navigation_derived_value_reaches_an_output_sink[auth.py]``
+    # went red on it: ``described`` is assigned from ``final_url``, the taint
+    # walk follows the binding, and a logger call is one of that rule's output
+    # sinks. **THE GUARD IS RIGHT ABOUT THE TAINT AND THE VALUE IS STILL
+    # SAFE**, and the sanctioned way to say so is an entry in that file's
+    # ``_SANITISERS`` -- a list with a real bar and a documented history of
+    # being abused. Earning it is left as a measured, named next step rather
+    # than taken here; see _audit/2026-09-21-the-landed-url.md, which also
+    # records the defect this wave found in the certifier that would have to
+    # grant it. WHAT IS NOT DONE INSTEAD: the site is not declared in
+    # ``KNOWN_TAINTED_OUTPUT`` -- that would file a false claim in a safety
+    # ledger -- and the log is not moved into ``landing.py``, where the same
+    # value would be invisible to a per-module engine. Both are dodges.
+    #
+    # NOTHING A DEBUGGER NEEDS IS LOST. The descriptor is in the refusal
+    # below, which is what reaches the caller; this line records THAT an
+    # authwall fired and on WHICH surface, which is the server-side event.
+    logger.warning(
+        "a navigation for the %s surface landed on LinkedIn's signed-out "
+        "wall. The landing is not logged, by design; what is safe to say "
+        "about it is in the refusal.",
+        surface,
+    )
+    described = landing.withheld(final_url)
+    raise NotAuthenticatedError(
+        f"loading the {surface} page landed on LinkedIn's signed-out wall, so "
+        "there is no live session. THE LANDING IS WITHHELD rather than named: "
+        "LinkedIn's authwall carries the address it bounced inside its own "
+        "query, and the canonical form of an organisation address is a slug, "
+        f"which is a name. What is safe to say about it -- {described}. Call "
+        "linkedin_login and sign in yourself in the window it opens."
+    )
 
 
 async def require_auth(page: Any) -> dict[str, Any]:

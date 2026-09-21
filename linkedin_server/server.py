@@ -2672,8 +2672,28 @@ async def linkedin_group_memberships() -> dict[str, Any]:
 def _authwall_refusal_without_the_landing(landed: str, *, surface: str) -> None:
     """``assert_not_authwall``, with the LANDING kept out of the message.
 
-    **THIS IS A DELIBERATE DIVERGENCE FROM WHAT EVERY OTHER TOOL HERE DOES,
-    AND IT IS SCOPED TO THE TWO SURFACES THAT NEED IT.**
+    **IT IS NO LONGER A DIVERGENCE, AND IT IS KEPT ANYWAY. AMENDED
+    2026-09-21.** The paragraphs below are the state on 2026-09-21 when this
+    helper was written, left in place rather than rewritten -- a number
+    corrected in place is a check quietly retired. What changed: the general
+    case WAS repaired, in ``auth.assert_not_authwall`` itself, so every tool in
+    this module now withholds its landing and the sentence below beginning
+    "every other tool in this module still publishes" is superseded. See
+    ``linkedin_server/landing.py`` and
+    ``_audit/2026-09-21-the-landed-url.md``.
+
+    **WHY IT SURVIVES RATHER THAN BEING UNWOUND.** Not inertia, and not
+    because removing it is expensive. It is a SECOND, INDEPENDENT refusal
+    whose message is built from constants alone: it takes no url into its
+    text at all, where ``assert_not_authwall`` takes one and describes it. On
+    the two surfaces where a landing is canonically a NAME -- an organisation
+    Page and a group page -- that independence is worth keeping, because a
+    future edit that re-introduced the landing upstream would still meet a
+    refusal here that cannot carry one. ``tests/test_company_root.py`` drives
+    both and asserts both are clean.
+
+    ------------------------------------------------------------------
+    AS WRITTEN 2026-09-21, BEFORE THE GENERAL REPAIR:
 
     ``auth.assert_not_authwall`` interpolates the FINAL url into its refusal.
     That message reaches :func:`_error`, and ``config.scrub`` substitutes THIS
