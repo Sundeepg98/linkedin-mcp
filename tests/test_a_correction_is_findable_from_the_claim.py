@@ -2214,6 +2214,55 @@ NOT_A_CORRECTION: dict[tuple[str, str], str] = {
         "asserted mistaken; it is named because its rank moved. "
     ),
 
+    # 2026-09-21, the WHAT-WAS-RULED wave. THREE pairs, and the first and
+    # third are one recurring shape rather than three mistakes: **a report
+    # that BUILDS OR REGENERATES a derived file will always cite that file
+    # beside staleness vocabulary**, because saying why a derived file had to
+    # be rebuilt is what such a report is for. "Stale", "regenerated" and
+    # "drifted" are the correction vocabulary AND the vocabulary of
+    # derivation, and the scan cannot tell them apart from proximity. Expect
+    # this shape from every future wave that touches INDEX.md or RULINGS.md.
+    ("2026-09-21-what-was-ruled.md", "RULINGS.md"): (
+        "THE CITING DOCUMENT CREATED THE CITED ONE; IT WITHDRAWS NOTHING. "
+        "`_audit/RULINGS.md` is this wave's own generated output and the "
+        "report is its build note. The correction vocabulary in the window "
+        "is *'goes false with nobody touching it'*, which is the report "
+        "stating why ITS OWN section-1 counts are pinned as a dated reading "
+        "-- the corpus grew by two documents when this wave landed, one of "
+        "them the cited file. Nothing in `RULINGS.md` is asserted mistaken; "
+        "it did not exist to be mistaken about. "
+        "**WHAT WOULD MAKE THIS ENTRY WRONG:** the report later asserting "
+        "that a registered claim in `RULINGS.md` is false while leaving the "
+        "register unregenerated."
+    ),
+    ("2026-09-21-what-was-ruled.md", "INDEX.md"): (
+        "A DERIVED FILE WAS REGENERATED, NOT CORRECTED. The line reads "
+        "*'the committed `INDEX.md` was stale by construction. Regenerated "
+        "with --write'* -- 'stale' here is a statement about DERIVATION, not "
+        "about a claim. This wave added two documents to `_audit/`, which "
+        "makes every derived index stale automatically and is the index's "
+        "own drift check working exactly as designed. **Nothing `INDEX.md` "
+        "says is asserted wrong**; it is regenerated, every line of it, from "
+        "the corpus. It would be incoherent for a report to CORRECT a file "
+        "whose entire content is computed. "
+        "**WHAT WOULD MAKE THIS ENTRY WRONG:** the report asserting that the "
+        "index GENERATOR produces a wrong line, which would be a correction "
+        "of `scripts/build_audit_index.py` and would belong there."
+    ),
+    ("2026-09-21-what-was-ruled.md", "profile.md"): (
+        "THE CLAIM IS ABOUT A SCAN'S BEHAVIOUR ON A ROW, NOT ABOUT THE ROW. "
+        "The line reads *'The single false positive is "
+        "`_audit/_census/profile.md` row `P A25`'* -- where 'false positive' "
+        "is the verdict on THIS WAVE'S OWN `RULED:` scan, which matched "
+        "inside the state name `EXCLUDED-RULED` in that row's reason cell. "
+        "**The row is correct and is not being corrected**; the parser was "
+        "the thing at fault and it was fixed. No state, reason or citation "
+        "in `profile.md` is touched by this wave, and the wave edited no "
+        "census file at all. "
+        "**WHAT WOULD MAKE THIS ENTRY WRONG:** the report asserting that "
+        "`P A25`'s own state or reason is mistaken."
+    ),
+
 }
 
 
