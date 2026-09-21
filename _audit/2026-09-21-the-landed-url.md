@@ -5,11 +5,11 @@ Wave `landed-url`, 2026-09-21, from master `762ec23`. Register section 51.
 **CORRECTS:** `_audit/2026-09-21-the-three-readers.md` -- its section 6b says "THE GENERAL CASE IS NAMED AND NOT FIXED. Every other tool in `server.py` still publishes its landing in this refusal", which was true when written and is false now.
 
 The general case is repaired in `auth.assert_not_authwall` itself and every
-tool in the package withholds its landing. The same section's premise about
-LinkedIn's authwall
-query was asserted from url shape; it is MEASURED here, and the half of it that
-makes the leak severe -- that the bounced address can be a NAME -- is still
-DERIVED and is labelled so in section 1.3.
+tool in the package withholds its landing. That section's premise about
+LinkedIn's authwall query was asserted from url shape; it is MEASURED here, and
+the half of it that makes the leak severe -- that the bounced address can be a
+NAME -- is still DERIVED and is labelled so in section 1.3.
+
 No browser was opened. No LinkedIn page was loaded. No write was fired. Every
 number below is offline, from shipped code, the committed tree, and Chrome's
 own history databases in the gitignored `_state/`.
@@ -922,5 +922,20 @@ One function, 27 tool-facing call sites, one message. The convention everybody
 had been asserting about LinkedIn's authwall turned out to be true and to have
 been sitting unmeasured in a browser profile for four weeks; the part that made
 it severe is still derived and is now labelled as such. Seven sites repaired,
-thirteen named, and the biggest remaining door is a FIELD with a contract --
-which is why it gets a ruling rather than an edit.
+thirteen named.
+
+**THE BIGGEST REMAINING DOOR IS WIDER THAN THIS ONE WAS, AND IT IS A FIELD WITH
+A CONTRACT.** `ExtractionFailedError.url` is published with no scrubber at all,
+12 of 12 of its `dom.py` sites were driven to their own raise, and every one of
+them handed the planted slug straight to the caller. It is not repaired here
+because reflexively wrapping a declared publication is the defect that field's
+own standing ruling exists to refuse -- so it gets a ruling and a browser, not
+an edit from a wave that had neither.
+
+**AND THREE SHIPPED GUARDS FIRED ON THIS WAVE'S OWN OUTPUT.** The taint rule on
+a log line, the identity shape rule on a made-up company id, and the
+outage-as-absence rule on a new script whose error handling could have
+manufactured this document's own headline number from a missing binary. None
+was defused. That last one is the entry in this wave worth re-reading: **the
+strongest evidence in section 5.1 was one `except` away from being fabricated
+by the instrument that reported it.**
