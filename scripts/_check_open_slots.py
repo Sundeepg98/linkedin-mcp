@@ -12,6 +12,23 @@ computable number of rows can never be filed by anybody.
 WHAT IT IS NOT. Not a gate. It asserts nothing about the map's content and
 changes no file. The one thing it does assert is its own arithmetic, below.
 
+AND ITS UNASSIGNED COUNT IS NOT TODAY'S SET OF UNROUTED ROWS. Everything here
+is scoped to the FROZEN 409, which is what the control exists to keep true --
+mixing the frozen set with the live census is the "two different populations"
+error this file was written to prevent. So a row that entered GAP AFTER the
+freeze has no line in the map, and therefore cannot appear in the UNASSIGNED
+bucket, nor even among the rows ruled unfileable: being unfileable still
+requires being IN the map. Measured 2026-09-21 -- today that is exactly one
+row, `P L2b`, split out of the compound `L2` on 2026-09-04, the day after the
+2026-09-03 freeze, and the map's own prose says of it that "no map edit can
+fix that".
+
+THAT DRIFT IS ALREADY REPORTED, NEXT DOOR, and this note exists only so the
+reader looks there instead of concluding it is unmeasured. `build_blocker_map.py`
+prints rows LEFT, rows ENTERED and today's derived GAP total on every run, from
+the `frozen`/`current` pair it already builds. Read that before treating the
+number below as a count of what is unrouted now.
+
 THE CONTROL, and it must fire. The ledger's published counts, the map's data
 lines and the frozen GAP total are three independently produced numbers that
 must all read 409 -- the ledger because it claims a PARTITION of the frozen
