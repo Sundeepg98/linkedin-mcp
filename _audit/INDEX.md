@@ -27,19 +27,19 @@ are listed as `(undated)`; no date is taken from git history, because
 
 | what | count |
 | --- | --- |
-| audit documents git tracks under `_audit` | 215 |
-| of those, carrying a `YYYY-MM-DD-` date prefix | 180 |
+| audit documents git tracks under `_audit` | 218 |
+| of those, carrying a `YYYY-MM-DD-` date prefix | 181 |
 | distinct dates | 14 |
-| documents with no level-1 heading | 1 |
-| `CORRECTS:` marker lines | 83 |
-| `CORRECTED BY:` marker lines | 83 |
-| distinct declared correction edges | 80 |
+| documents with no level-1 heading | 2 |
+| `CORRECTS:` marker lines | 87 |
+| `CORRECTED BY:` marker lines | 87 |
+| distinct declared correction edges | 84 |
 | documents something later corrects | 44 |
-| documents that correct something | 60 |
-| documents at either end of a cross-document edge | 85 |
+| documents that correct something | 61 |
+| documents at either end of a cross-document edge | 86 |
 | intra-document correction markers | 4 |
 | documents that correct themselves later on | 2 |
-| documents no correction marker touches at all | 128 |
+| documents no correction marker touches at all | 130 |
 | blockquoted markers naming ANOTHER document | 0 |
 | edges missing one of their two markers | 0 |
 | edges declared a different number of times in each direction | 2 |
@@ -443,6 +443,10 @@ document is dead; it says one thing in it was overtaken and names what.
 
   > the sentence above is still true of THIS wave and its `--expect` command is now stale.** That wave fired the people-search surface live and moved `N 83` GAP to COVERED-PROVEN, so the counter's current expectation is `--expect J=57,P=55,M=82,N=90` and the census total is 284. Nothing here is retracted: this wave moved no state, which is what it claimed. It also identified rows `80`-`94` as sharing row `79`'s expired blocker and could not re-price them because it was forbidden the browser; that is the gap the successor closed.
 
+- CORRECTED BY [2026-09-21-what-is-reachable-now.md](2026-09-21-what-is-reachable-now.md)
+
+  > its denominator and its buildable count are both superseded, and NOT because anything in it was wrong. **The 59 is 68**: this wave scoped itself to profile and network, and the jobs slice holds 29-to-31 read rows that no direction-based sweep can see, because its per-row tables carry no direction column and `direction_of` returns `unknown` for all of them. **Of the 19 buildable, three were built and fired the same day and all three returned COVERED-CANNOT-DELIVER** (`N 33`, `N 54`, `N 175`); twelve are behind an `All filters` press since measured REFUSED terminally at condition 2; one banked (`N 83`). That document's own section 7 anticipated this -- *"ALLOWED IS NOT SERVED"* -- and its address verdicts were re-driven here and hold: 30 of 30 AGREE, 0 MOVED.
+
 ### [2026-09-21-the-three-readers.md](2026-09-21-the-three-readers.md)
 
 2026-09-21 &middot; Two readers for three rows, on two addresses nothing could navigate to --
@@ -477,7 +481,7 @@ document is dead; it says one thing in it was overtaken and names what.
 
 - CORRECTED BY [2026-09-05-jobs-tail.md](2026-09-05-jobs-tail.md)
 
-  > row 127 above cites a 2026-08-31 audit for "the boundary entry and reader are NOT built". Measured 2026-09-05: the boundary entry IS built and is one of the admitted patterns at that tree; the reader is still not built. Half that sentence is current and half is stale, which is the shape that survives a careless check -- a reader who verifies either half concludes the whole is sound.
+  > row 127 above cites a
 
 - CORRECTED BY [2026-09-19-unfired-but-built.md](2026-09-19-unfired-but-built.md)
 
@@ -494,6 +498,10 @@ document is dead; it says one thing in it was overtaken and names what.
 - CORRECTED BY [2026-09-20-the-premium-block.md](2026-09-20-the-premium-block.md)
 
   > row 127 above was banked MEASURED-ABSENT on a reading whose instrument carries no needle for a balance, a credit or a number, so it could not have reported one. Re-opened GAP.
+
+- CORRECTED BY [2026-09-21-what-is-reachable-now.md](2026-09-21-what-is-reachable-now.md)
+
+  > row `40` moves COVERED-UNFIRED to COVERED-PROVEN on its first live firing, against the bar the THIRD DELTA above pre-registered for it (*"moves to COVERED-PROVEN on one live search"*). Four runs through the shipped `linkedin_search_jobs` and `linkedin_job_detail`, every reading reproducing. The GAP count is UNCHANGED at 56 -- this row left GAP this morning when it was built -- and what moves is `CP 20 -> 21`, `CU 4 -> 3`. **What banked is that the reader REACHES the live field and SELECTS** (1 of 14 distinct postings drew, 13 omitted the key; the same posting read `count_read` on the search card and `relation_only` on the detail page, the asymmetry the reader's design predicted). **What did NOT bank is the COUNT**: every value read was 2, n=1 distinct posting, so the number itself is unproven and the cell says so. 2026-08-31 audit for "the boundary entry and reader are NOT built". Measured 2026-09-05: the boundary entry IS built and is one of the admitted patterns at that tree; the reader is still not built. Half that sentence is current and half is stale, which is the shape that survives a careless check -- a reader who verifies either half concludes the whole is sound.
 
 ### [_census/messaging-and-content.md](_census/messaging-and-content.md)
 
@@ -555,6 +563,10 @@ document is dead; it says one thing in it was overtaken and names what.
 
   > rows `63` and `163` asserted that `/groups/<id>/` and `/groups/discover/` are NAMED REFUSALS in `readonly.py`'s own comment; measured 2026-09-21 through the shipped gate, **both are ALLOWED**, on two allowlist patterns added 2026-09-19 that rewrote the very comment those cells cite. **NO STATE MOVED** -- this slice's GAP count is 87 before and after -- and the correction pushes both rows TOWARDS GAP, because the address third of their price is now paid while the write sanction and the ruling are not. That document also adjudicated this slice's 49 write-direction GAP rows and moved none, the 2026-09-20 write-partition having already ruled on all of them.
 
+- CORRECTED BY [2026-09-21-what-is-reachable-now.md](2026-09-21-what-is-reachable-now.md)
+
+  > row `53` moves **GAP to COVERED-PROVEN** on a live firing of `linkedin_job_detail`: `company_about.state` = `read` on 10 of 10 postings carrying the card, `followers` an integer with **10 distinct values across three magnitudes**, and `read` is only reachable when the card's own opening name agrees with `dom.read_job_identity`, so the attribution check passed live. It is structurally immune to the defect that killed `N 54` -- `_ABOUT_FOLLOWERS` is fully anchored (`^...$`) and the read is scoped to ONE card element. **The slice's GAP moves 87 -> 86 and COVERED-PROVEN 6 -> 7.** Row `134`'s evidence cell also gains the second sanctioned press, whose WITNESS returned `disclosed: true` -- settling the 2026-09-19 question of whether the panel opens at all -- **with no state change**: that row's blocker is now exactly one unbuilt artifact, a name-free content shaper.
+
 ### [_census/profile.md](_census/profile.md)
 
 (undated) &middot; CENSUS SLICE: PROFILE, IDENTITY, SETTINGS AND PRIVACY
@@ -566,6 +578,10 @@ document is dead; it says one thing in it was overtaken and names what.
 - CORRECTED BY [2026-09-21-the-read-triage.md](2026-09-21-the-read-triage.md)
 
   > row `K8`'s reason cell read "no tool, no reason", and the second half is FALSE: the capability was measured live on 2026-09-05 at allowlist +0, on an instrument shown able to disagree with itself on the same page. The "no tool" half is true and is kept. **NO STATE MOVED** -- this slice's GAP count is 55 before and after. The same document triages all 17 of this slice's read-direction GAP rows by remaining cost and finds 16 of the 17 gated on an address, a decision or a press.
+
+- CORRECTED BY [2026-09-21-what-is-reachable-now.md](2026-09-21-what-is-reachable-now.md)
+
+  > row `O3`'s reason cell read *"no tool, no reason"*. There is now a reason and it is not a ruling: the disclosing press on `/analytics/profile-views/` is permitted, three of its four conditions settle offline against the shipped gate, and the press was TAKEN with a witness returning `disclosed: true`. **NO STATE MOVED** -- this slice's GAP is 55 before and after -- and the row is now blocked on ONE unbuilt artifact, a name-free shaper for a panel made of other people, priced against a `# readonly-ok` waiver budget that is AT its cap of 22 with zero remaining.
 
 ## 3. What a document corrected in itself
 
@@ -1177,6 +1193,26 @@ reach is visible. The quoted reason here is the CORRECTOR's own
 
   > the same group-address clause on rows `63` and `163`, measured false; no state moved.
 
+### [2026-09-21-what-is-reachable-now.md](2026-09-21-what-is-reachable-now.md)
+
+2026-09-21 &middot; WHAT IS REACHABLE NOW: 68 read rows, two banked, and the read-direction sweep is blind to a whole slice
+
+- CORRECTS [2026-09-21-the-read-triage.md](2026-09-21-the-read-triage.md)
+
+  > its headline "19 buildable of 59 read rows" is superseded on both numbers. The denominator is **68**, not 59, because that wave scoped itself to profile and network, and the jobs slice holds 29-to-31 read rows that no direction-based sweep in this repository can see. Of its 19 buildable, **three were built and fired the same day and all three came back CANNOT-DELIVER**, twelve are behind a press since REFUSED terminally, and one banked. Nothing in that document was wrong when written; every one of its verdicts that I re-took reproduced.
+
+- CORRECTS [_census/jobs.md](_census/jobs.md)
+
+  > row `40` moves COVERED-UNFIRED to COVERED-PROVEN on a live firing, against the bar that row's own author pre-registered.
+
+- CORRECTS [_census/network.md](_census/network.md)
+
+  > row `53` moves GAP to COVERED-PROVEN on a live firing; row `134`'s evidence cell gains the witness result, state unchanged.
+
+- CORRECTS [_census/profile.md](_census/profile.md)
+
+  > row `O3`'s evidence cell gains the same, state unchanged. Its reason was `no tool, no reason`; there is now a reason.
+
 ## 5. Every document, by date
 
 `CORRECTED` means at least one later document declares a correction of
@@ -1191,6 +1227,7 @@ ways, which is a fact about markers and not a verdict on the document.
 | (undated) | [INSTRUMENTS.md](INSTRUMENTS.md) | The instrument register | **CORRECTED x1** |
 | (undated) | [RULINGS.md](RULINGS.md) | THE RULINGS REGISTER -- one entry per RULING, not per document |  |
 | (undated) | [_slice-activity-items.md](_slice-activity-items.md) | Slice: `linkedin_my_activity_items` -- item keys, for items measured to be his |  |
+| (undated) | [_census/_slice-analytics-press-preflight.md](_census/_slice-analytics-press-preflight.md) | Analytics press preflight -- OFFLINE slice for `what-is-reachable-now` |  |
 | (undated) | [_slice-apply-census.md](_slice-apply-census.md) | Apply-control census - LinkedIn MCP job-posting captures |  |
 | (undated) | [_slice-apply-modal-fixture.md](_slice-apply-modal-fixture.md) | Slice: the apply-modal reader gets a DERIVED fixture and real execution |  |
 | (undated) | [_slice-apply-test-repoint.md](_slice-apply-test-repoint.md) | Slice: repoint the tests that pinned "apply registers no tool" |  |
@@ -1205,6 +1242,7 @@ ways, which is a fact about markers and not a verdict on the document.
 | (undated) | [_slice-draft-stage.md](_slice-draft-stage.md) | Slice: the draft stage (`?stage=draft`) -- read boundary widened by one alternative |  |
 | (undated) | [_slice-editor-fields.md](_slice-editor-fields.md) | Slice: `linkedin_profile_editor_fields` -- names, from inside one measured container |  |
 | (undated) | [_slice-invitation-needle.md](_slice-invitation-needle.md) | Slice: aiming one invitation control by a call-time needle |  |
+| (undated) | [_census/_slice-n53-follower-chain.md](_census/_slice-n53-follower-chain.md) | (no level-1 heading) |  |
 | (undated) | [_slice-newsletter-inventory.md](_slice-newsletter-inventory.md) | Newsletter code-path inventory |  |
 | (undated) | [_slice-notifications-census.md](_slice-notifications-census.md) | Slice census: is there a mark-read control on the LinkedIn notifications surface? |  |
 | (undated) | [_slice-otw-backstop.md](_slice-otw-backstop.md) | Slice: set_open_to_work had no backstop behind _direction's unknown gate |  |
@@ -1218,11 +1256,11 @@ ways, which is a fact about markers and not a verdict on the document.
 | (undated) | [_slice-surface-census-tool.md](_slice-surface-census-tool.md) | Slice: linkedin_surface_census -- BUILT AND GREEN |  |
 | (undated) | [_slice-trace-corpus.md](_slice-trace-corpus.md) | Slice -- the parse-trace corpus, measured and widened |  |
 | (undated) | [_slice-unfollow-census.md](_slice-unfollow-census.md) | Unfollow-anchor census -- linkedin MCP server |  |
-| (undated) | [_census/jobs.md](_census/jobs.md) | Census slice: JOBS, END TO END | **CORRECTED x5** |
+| (undated) | [_census/jobs.md](_census/jobs.md) | Census slice: JOBS, END TO END | **CORRECTED x6** |
 | (undated) | [_census/mcp-inventory.md](_census/mcp-inventory.md) | MCP inventory -- what this server ACTUALLY DELIVERS |  |
 | (undated) | [_census/messaging-and-content.md](_census/messaging-and-content.md) | Capability census -- MESSAGING AND CONTENT | **CORRECTED x4** |
-| (undated) | [_census/network.md](_census/network.md) | CENSUS SLICE: NETWORK AND PEOPLE | **CORRECTED x9** |
-| (undated) | [_census/profile.md](_census/profile.md) | CENSUS SLICE: PROFILE, IDENTITY, SETTINGS AND PRIVACY | **CORRECTED x2** |
+| (undated) | [_census/network.md](_census/network.md) | CENSUS SLICE: NETWORK AND PEOPLE | **CORRECTED x10** |
+| (undated) | [_census/profile.md](_census/profile.md) | CENSUS SLICE: PROFILE, IDENTITY, SETTINGS AND PRIVACY | **CORRECTED x3** |
 | 2026-08-22 | [2026-08-22-linkedin-preflight.md](2026-08-22-linkedin-preflight.md) | 2026-08-22 - browser preflight, and a session_info that outlives the browser |  |
 | 2026-08-22 | [2026-08-22-parity-linkedin.md](2026-08-22-parity-linkedin.md) | LinkedIn parity, 2026-08-22 -- what he can do that this server cannot | **CORRECTED x1** |
 | 2026-08-23 | [2026-08-23-build-linkedin.md](2026-08-23-build-linkedin.md) | linkedin, 2026-08-23 -- leak walker, and a write design that is scoped rather than unlocked | corrects x1 |
@@ -1399,9 +1437,10 @@ ways, which is a fact about markers and not a verdict on the document.
 | 2026-09-21 | [2026-09-21-the-landed-url.md](2026-09-21-the-landed-url.md) | A LANDING IS A STRING THE SITE CHOSE, AND THIS PROCESS HAD NO ALLOWLIST FOR IT | corrects x1 |
 | 2026-09-21 | [2026-09-21-the-open-queue.md](2026-09-21-the-open-queue.md) | The open queue, 2026-09-21 at master `9dbaad2` |  |
 | 2026-09-21 | [2026-09-21-the-proximity-field.md](2026-09-21-the-proximity-field.md) | The proximity field -- census row `J 40`, read per-job network proximity |  |
-| 2026-09-21 | [2026-09-21-the-read-triage.md](2026-09-21-the-read-triage.md) | The read rows are GATED, not backlogged -- but nineteen of the fifty-nine are not | **CORRECTED x1** corrects x2 |
+| 2026-09-21 | [2026-09-21-the-read-triage.md](2026-09-21-the-read-triage.md) | The read rows are GATED, not backlogged -- but nineteen of the fifty-nine are not | **CORRECTED x2** corrects x2 |
 | 2026-09-21 | [2026-09-21-the-three-readers.md](2026-09-21-the-three-readers.md) | Two readers for three rows, on two addresses nothing could navigate to -- | **CORRECTED x2** |
 | 2026-09-21 | [2026-09-21-the-write-ceiling.md](2026-09-21-the-write-ceiling.md) | THE WRITE CEILING: 157 WRITE-DIRECTION GAP ROWS, AND THE 152 THAT STAY | **CORRECTED x1** corrects x2 |
+| 2026-09-21 | [2026-09-21-what-is-reachable-now.md](2026-09-21-what-is-reachable-now.md) | WHAT IS REACHABLE NOW: 68 read rows, two banked, and the read-direction sweep is blind to a whole slice | corrects x4 |
 | 2026-09-21 | [2026-09-21-what-was-ruled.md](2026-09-21-what-was-ruled.md) | A register keyed on RULINGS, not on documents -- and the fourth payment |  |
 
 ## 6. What the scan rejected, could not join, or had to repair
@@ -1435,7 +1474,7 @@ against the same line, so a missing continuation satisfies it.
 - REASON PAST ITS LINE [2026-09-20-the-first-firing.md](2026-09-20-the-first-firing.md) line 233 -- a line-scoped reader sees 35 of 465 characters.
 - REASON PAST ITS LINE [2026-09-20-the-five-under-banked.md](2026-09-20-the-five-under-banked.md) line 3 -- a line-scoped reader sees 35 of 349 characters.
 - REASON PAST ITS LINE [2026-09-20-the-five-under-banked.md](2026-09-20-the-five-under-banked.md) line 457 -- a line-scoped reader sees 94 of 717 characters.
-- REASON PAST ITS LINE [_census/jobs.md](_census/jobs.md) line 381 -- a line-scoped reader sees 21 of 385 characters.
+- REASON PAST ITS LINE [_census/jobs.md](_census/jobs.md) line 382 -- a line-scoped reader sees 825 of 1189 characters.
 
 - TIGHTEST ADMISSION MARGIN [2026-09-03-linkedin-gap-blockers.md](2026-09-03-linkedin-gap-blockers.md) line 272 clears the 20-character floor by 0. The floor is applied to the marker's OWN LINE, so a reason of 723 characters is admitted on the strength of 20. Reflow that paragraph by one word and a guard rejects it saying it *carries no reason after the citation*, which would not be true. Reported every regeneration rather than counted, because a count of rejections reads zero until the day it does not.
 

@@ -1,0 +1,87 @@
+# `/company/NUMERIC-ID/` IS A PLACEHOLDER AND THE VALUE DRIVEN WAS NOT.
+# Every row spelled NUMERIC-ID here was driven through `readonly.is_read_url`
+# as a synthetic run of TEN ZERO DIGITS. It is written back as a placeholder
+# because the staged identity guard REFUSED the literal -- a ten-digit run
+# after `/company/` matches the company-id SHAPE, and a shape match means
+# UNDECLARED, never real. The guard's own advice is to change the content
+# rather than declare a plant, since a declaration permanently widens what it
+# tolerates for this file. The verdicts are unaffected: the allowlist pattern
+# accepts a digit run, not a particular one.
+address_shape	is_read_url	forbidden_tokens_present	triage_doc_verdict	AGREES_OR_MOVED
+https://www.linkedin.com/search/results/people/	True	-	BUILDABLE [N80-N93]; RULING-D1 [N79,N94,N194]	AGREES
+https://www.linkedin.com/search/results/companies/	False	-	RULING-D2 [N104]	AGREES
+https://www.linkedin.com/search/results/groups/	False	-	RULING-D2 [N161]	AGREES
+https://www.linkedin.com/search/results/events/	False	-	RULING-D2 [N179]	AGREES
+https://www.linkedin.com/company/NUMERIC-ID/	True	-	BUILDABLE/COVERED-UNFIRED [N33 numeric-id spelling]	AGREES
+https://www.linkedin.com/company/placeholder-org/	True	-	BUILDABLE/COVERED-UNFIRED [N54 slug spelling]	AGREES
+https://www.linkedin.com/company/NUMERIC-ID/people/	False	-	RULING-D3 [N102]	AGREES
+https://www.linkedin.com/groups/12345/	True	-	BUILDABLE/COVERED-UNFIRED [N175]	AGREES
+https://www.linkedin.com/analytics/profile-views/	True	-	RULING-D6/SERVED [N134,P-O3; also N133's press host]	AGREES
+https://www.linkedin.com/analytics/search-appearances/	True	-	RULING-D6 [N132]	AGREES
+https://www.linkedin.com/in/me/	True	-	RULING-D4/SERVED [P-C8, P-K8; also N76's press host]	AGREES
+https://www.linkedin.com/school/placeholder-school/	True	-	RULING-D3 root [N99,N100]	AGREES
+https://www.linkedin.com/school/placeholder-school/people/	False	-	RULING-D3 tab [N99,N100]	AGREES
+https://www.linkedin.com/in/placeholder-member/	False	-	RULING-D3 [N172,N177,N178]	AGREES
+https://www.linkedin.com/events/	True	-	context in N184's own cell (root; cell states True)	AGREES
+https://www.linkedin.com/events/12345/	False	-	ADDRESS/ABSENT [N184]	AGREES
+https://www.linkedin.com/jobs/view/1234567/	True	-	SERVED [N53 job-posting route]	AGREES
+https://www.linkedin.com/in/me/details/recommendations/	False	-	ADDRESS/ABSENT [P-F1 self-form]	AGREES
+https://www.linkedin.com/in/placeholder-member/details/recommendations/	False	-	ADDRESS/ABSENT [P-F1 third-party-form]	AGREES
+https://www.linkedin.com/analytics/creator/audience/	False	-	ADDRESS/ABSENT [P-L1]	AGREES
+https://www.linkedin.com/in/me/followers/	False	/follow	ADDRESS/REFUSED [P-L2b] SYNTHETIC-REPRESENTATIVE	AGREES
+https://www.linkedin.com/newsletters/placeholder-newsletter/analytics/	False	-	ADDRESS/ABSENT [P-L4,M-C83] candidate 1	AGREES
+https://www.linkedin.com/analytics/creator/newsletters/	False	-	ADDRESS/ABSENT [P-L4,M-C83] candidate 2	AGREES
+https://www.linkedin.com/analytics/creator/	False	-	ADDRESS/ABSENT [P-L7 candidate; parent tree]	AGREES
+https://www.linkedin.com/analytics/	False	-	ADDRESS/ABSENT [P-L8; analytics tree root]	AGREES
+https://www.linkedin.com/in/me/details/services/	False	-	ADDRESS/ABSENT [P-H11] INFERRED-BY-PATTERN	AGREES
+https://www.linkedin.com/jobs/application-settings/	False	/jobs/application;settings	ADDRESS/REFUSED [P-M12] SYNTHETIC-REPRESENTATIVE	AGREES
+https://www.linkedin.com/company/NUMERIC-ID/admin/follow/	False	/follow	ADDRESS/REFUSED [N-A3] SYNTHETIC-REPRESENTATIVE	AGREES
+https://www.linkedin.com/company/NUMERIC-ID/admin/invite/	False	/invite	ADDRESS/REFUSED [N-A5] SYNTHETIC-REPRESENTATIVE	AGREES
+https://www.linkedin.com/feed/hashtag/placeholdertag/followed/	False	/follow	no-verdict-row [N61] SYNTHETIC-REPRESENTATIVE (property-demonstration only)	AGREES
+
+# COMMIT 24aabf2 CHANGED NO URL PATTERN IN readonly.py.
+# git show 24aabf2 -- linkedin_server/readonly.py is comment-only:
+# every added/removed line is a '#' documentation line noting that
+# two readers (linkedin_group_page, linkedin_company_page_counts) now
+# exist for /groups/<id>/ and /company/<slug|id>/, both of which were
+# ALREADY on _ALLOWED_URL_PATTERNS since 2026-09-19 / 2026-09-20. No
+# regex in _ALLOWED_URL_PATTERNS and no entry in _FORBIDDEN_URL_SUBSTRINGS
+# was added, removed or edited by this commit. The commit's own message
+# says so directly: "Boundary: no address admitted, no write added, no
+# ruling resolved."
+#
+# SO THE PREMISE THAT MOTIVATED THIS SLICE DOES NOT HOLD FOR THE
+# is_read_url PREDICATE SPECIFICALLY: every verdict below was already
+# current before 24aabf2 and remains current after it. What DID change
+# is reachability by TOOL (two new callers can now navigate to addresses
+# that were already on the allowlist) -- a different axis than the one
+# this predicate measures.
+#
+# MOVED rows: none.
+#
+# counts: AGREES=30 MOVED=0 NEW=0 (total driven rows=30)
+#
+# ADDRESSES NAMED IN THE TRIAGE DOC WITH NO RECOVERABLE LITERAL,
+# CONSIDERED BUT NOT DRIVEN (no shape to construct a URL from, and
+# inventing one would misrepresent the corpus rather than probe it):
+#   P-A25  contact-info panel overlay address (self AND third-party
+#          spelling both called unadmitted; neither spelling given)
+#   P-D25  "Add profile section" menu target -- the doc quotes its OWN
+#          predicate result directly (is_read_url=False, tokens=[]) but
+#          never states the url string itself, so it cannot be re-driven
+#          independently here; the quoted result is taken on the doc's
+#          word, not re-verified
+#   P-D28  "view profile in multiple languages" -- PRESS, no address text
+#   P-G6   per-post analytics -- "no module builds one from a urn"
+#   P-J4   hiring-state menu -- PRESS behind /in/me/, no distinct address
+#   N-61   followed-hashtags -- property only ("contains /follow"); the
+#          feed/hashtag/.../followed/ shape above is a demonstration of
+#          that property, not the corpus's own literal
+#   N-76   personal Follow link -- PRESS behind /in/me/, no distinct address
+#   N-95   search history -- "no search-history address is admitted and
+#          none is refused", no literal given
+#   N-133  press on the profile-views page -- same address as N134/P-O3
+#   N-171  passive cost of joining a group -- not an address at all (D5)
+#   N-174  pending group join requests -- unmeasurable by any read (RULING)
+#   N-183  event-invitation preference -- classed a SETTING, not this
+#          boundary's row; no settings sub-path literal given
