@@ -1,0 +1,1685 @@
+{
+  "definitions": {
+    "strict_methods": [
+      "aria_snapshot",
+      "blur",
+      "bounding_box",
+      "check",
+      "clear",
+      "click",
+      "content_frame",
+      "dblclick",
+      "dispatch_event",
+      "drag_to",
+      "element_handle",
+      "evaluate",
+      "evaluate_handle",
+      "fill",
+      "focus",
+      "get_attribute",
+      "hover",
+      "inner_html",
+      "inner_text",
+      "input_value",
+      "is_checked",
+      "is_disabled",
+      "is_editable",
+      "is_enabled",
+      "is_hidden",
+      "is_visible",
+      "press",
+      "press_sequentially",
+      "screenshot",
+      "scroll_into_view_if_needed",
+      "select_option",
+      "set_input_files",
+      "tap",
+      "text_content",
+      "type",
+      "uncheck",
+      "wait_for"
+    ],
+    "non_strict_methods": [
+      "all",
+      "all_inner_texts",
+      "all_text_contents",
+      "and_",
+      "count",
+      "describe",
+      "element_handles",
+      "evaluate_all",
+      "filter",
+      "first",
+      "frame_locator",
+      "highlight",
+      "last",
+      "locator",
+      "nth",
+      "or_"
+    ],
+    "page_only_selector_method": "wait_for_selector",
+    "interp_target_attrs": [
+      "filter",
+      "get_by_text",
+      "locator",
+      "wait_for_selector"
+    ]
+  },
+  "totals": {
+    "VULNERABLE": 6,
+    "IMMUNE": 74,
+    "UNRESOLVED": 5,
+    "immune_by_reason": {
+      "first": 27,
+      "last": 0,
+      "nth": 19,
+      "page-level-non-strict": 28,
+      "all-element": 0,
+      "other": 0
+    }
+  },
+  "per_module": [
+    {
+      "module": "buildinfo.py",
+      "vulnerable": 0,
+      "immune": 0,
+      "unresolved": 1,
+      "total": 1
+    },
+    {
+      "module": "cdp_bridge.py",
+      "vulnerable": 0,
+      "immune": 0,
+      "unresolved": 1,
+      "total": 1
+    },
+    {
+      "module": "creator_analytics.py",
+      "vulnerable": 0,
+      "immune": 1,
+      "unresolved": 0,
+      "total": 1
+    },
+    {
+      "module": "dom.py",
+      "vulnerable": 6,
+      "immune": 51,
+      "unresolved": 0,
+      "total": 57
+    },
+    {
+      "module": "events.py",
+      "vulnerable": 0,
+      "immune": 4,
+      "unresolved": 0,
+      "total": 4
+    },
+    {
+      "module": "groups_page.py",
+      "vulnerable": 0,
+      "immune": 2,
+      "unresolved": 0,
+      "total": 2
+    },
+    {
+      "module": "item_addresses.py",
+      "vulnerable": 0,
+      "immune": 1,
+      "unresolved": 0,
+      "total": 1
+    },
+    {
+      "module": "job_collections.py",
+      "vulnerable": 0,
+      "immune": 2,
+      "unresolved": 0,
+      "total": 2
+    },
+    {
+      "module": "newsletters.py",
+      "vulnerable": 0,
+      "immune": 3,
+      "unresolved": 0,
+      "total": 3
+    },
+    {
+      "module": "notify_cost.py",
+      "vulnerable": 0,
+      "immune": 1,
+      "unresolved": 0,
+      "total": 1
+    },
+    {
+      "module": "premium.py",
+      "vulnerable": 0,
+      "immune": 1,
+      "unresolved": 0,
+      "total": 1
+    },
+    {
+      "module": "press.py",
+      "vulnerable": 0,
+      "immune": 4,
+      "unresolved": 1,
+      "total": 5
+    },
+    {
+      "module": "writes.py",
+      "vulnerable": 0,
+      "immune": 4,
+      "unresolved": 2,
+      "total": 6
+    }
+  ],
+  "sites": [
+    {
+      "module": "buildinfo.py",
+      "function": "invalidate_cache",
+      "line": 351,
+      "attr": "clear",
+      "verdict": "UNRESOLVED",
+      "reason": "no-binding",
+      "immune_bucket": "",
+      "source": "_CACHE.clear()"
+    },
+    {
+      "module": "cdp_bridge.py",
+      "function": "probe",
+      "line": 148,
+      "attr": "wait_for",
+      "verdict": "UNRESOLVED",
+      "reason": "no-binding",
+      "immune_bucket": "",
+      "source": "raw = await asyncio.wait_for("
+    },
+    {
+      "module": "creator_analytics.py",
+      "function": "collect_labels",
+      "line": 68,
+      "attr": "get_attribute",
+      "verdict": "IMMUNE",
+      "reason": "nth",
+      "immune_bucket": "nth",
+      "source": "value = await locator.nth(index).get_attribute(\"aria-label\")"
+    },
+    {
+      "module": "dom.py",
+      "function": "harvest_linked_cards",
+      "line": 573,
+      "attr": "evaluate",
+      "verdict": "IMMUNE",
+      "reason": "page-level-non-strict",
+      "immune_bucket": "page-level-non-strict",
+      "source": "records = await page.evaluate(HARVEST_LINKED_CARDS_JS, cfg)  # readonly-ok"
+    },
+    {
+      "module": "dom.py",
+      "function": "harvest_census",
+      "line": 634,
+      "attr": "evaluate",
+      "verdict": "IMMUNE",
+      "reason": "page-level-non-strict",
+      "immune_bucket": "page-level-non-strict",
+      "source": "result = await page.evaluate(HARVEST_LINKED_CARDS_JS, cfg)  # readonly-ok"
+    },
+    {
+      "module": "dom.py",
+      "function": "read_tracker_row_shape",
+      "line": 742,
+      "attr": "evaluate",
+      "verdict": "IMMUNE",
+      "reason": "page-level-non-strict",
+      "immune_bucket": "page-level-non-strict",
+      "source": "result = await page.evaluate(TRACKER_ROW_SHAPE_JS, cfg)  # readonly-ok"
+    },
+    {
+      "module": "dom.py",
+      "function": "harvest_block_cards",
+      "line": 779,
+      "attr": "evaluate",
+      "verdict": "IMMUNE",
+      "reason": "page-level-non-strict",
+      "immune_bucket": "page-level-non-strict",
+      "source": "records = await page.evaluate(HARVEST_BLOCK_CARDS_JS, cfg)  # readonly-ok"
+    },
+    {
+      "module": "dom.py",
+      "function": "read_profile_fields",
+      "line": 802,
+      "attr": "evaluate",
+      "verdict": "IMMUNE",
+      "reason": "page-level-non-strict",
+      "immune_bucket": "page-level-non-strict",
+      "source": "data = await page.evaluate(READ_PROFILE_JS, cfg)  # readonly-ok"
+    },
+    {
+      "module": "dom.py",
+      "function": "read_job_identity",
+      "line": 888,
+      "attr": "get_attribute",
+      "verdict": "IMMUNE",
+      "reason": "first",
+      "immune_bucket": "first",
+      "source": "label = await block.get_attribute("
+    },
+    {
+      "module": "dom.py",
+      "function": "read_job_identity",
+      "line": 900,
+      "attr": "get_attribute",
+      "verdict": "IMMUNE",
+      "reason": "first",
+      "immune_bucket": "first",
+      "source": "href = await block.locator('a[href*=\"/company/\"]').first.get_attribute("
+    },
+    {
+      "module": "dom.py",
+      "function": "read_company_about_card",
+      "line": 1046,
+      "attr": "inner_text",
+      "verdict": "IMMUNE",
+      "reason": "first",
+      "immune_bucket": "first",
+      "source": "await container.inner_text(timeout=ELEMENT_READ_TIMEOUT_MS) or \"\""
+    },
+    {
+      "module": "dom.py",
+      "function": "read_company_about_card",
+      "line": 1090,
+      "attr": "get_attribute",
+      "verdict": "IMMUNE",
+      "reason": "nth",
+      "immune_bucket": "nth",
+      "source": "href = await links.nth(index).get_attribute(\"href\")"
+    },
+    {
+      "module": "dom.py",
+      "function": "read_radio_label_binding",
+      "line": 1381,
+      "attr": "get_attribute",
+      "verdict": "VULNERABLE",
+      "reason": "bare:.locator",
+      "immune_bucket": "",
+      "source": "input_id = await control.get_attribute(\"id\")"
+    },
+    {
+      "module": "dom.py",
+      "function": "read_radio_label_binding",
+      "line": 1433,
+      "attr": "get_attribute",
+      "verdict": "VULNERABLE",
+      "reason": "bare:.locator",
+      "immune_bucket": "",
+      "source": "bound_to = await labels.get_attribute(\"for\")"
+    },
+    {
+      "module": "dom.py",
+      "function": "read_save_control",
+      "line": 1495,
+      "attr": "get_attribute",
+      "verdict": "IMMUNE",
+      "reason": "first",
+      "immune_bucket": "first",
+      "source": "label = await controls.first.get_attribute(\"aria-label\")"
+    },
+    {
+      "module": "dom.py",
+      "function": "_sweep_save_shaped",
+      "line": 1637,
+      "attr": "get_attribute",
+      "verdict": "IMMUNE",
+      "reason": "nth",
+      "immune_bucket": "nth",
+      "source": "label = await controls.nth(index).get_attribute(\"aria-label\")"
+    },
+    {
+      "module": "dom.py",
+      "function": "wait_for_save_control",
+      "line": 1784,
+      "attr": "wait_for",
+      "verdict": "IMMUNE",
+      "reason": "first",
+      "immune_bucket": "first",
+      "source": "await page.locator(SAVE_CONTROL).first.wait_for("
+    },
+    {
+      "module": "dom.py",
+      "function": "read_apply_control",
+      "line": 1891,
+      "attr": "get_attribute",
+      "verdict": "IMMUNE",
+      "reason": "first",
+      "immune_bucket": "first",
+      "source": "value = await control.get_attribute(attribute)"
+    },
+    {
+      "module": "dom.py",
+      "function": "read_follow_control",
+      "line": 1987,
+      "attr": "get_attribute",
+      "verdict": "IMMUNE",
+      "reason": "first",
+      "immune_bucket": "first",
+      "source": "label = await controls.first.get_attribute(\"aria-label\")"
+    },
+    {
+      "module": "dom.py",
+      "function": "harvest_followed_pages",
+      "line": 2100,
+      "attr": "get_attribute",
+      "verdict": "IMMUNE",
+      "reason": "nth",
+      "immune_bucket": "nth",
+      "source": "label = await button.get_attribute(\"aria-label\")"
+    },
+    {
+      "module": "dom.py",
+      "function": "harvest_followed_pages",
+      "line": 2110,
+      "attr": "get_attribute",
+      "verdict": "IMMUNE",
+      "reason": "first",
+      "immune_bucket": "first",
+      "source": "href = await link.first.get_attribute(\"href\")"
+    },
+    {
+      "module": "dom.py",
+      "function": "read_unfollow_control",
+      "line": 2213,
+      "attr": "get_attribute",
+      "verdict": "IMMUNE",
+      "reason": "first",
+      "immune_bucket": "first",
+      "source": "label = await controls.first.get_attribute(\"aria-label\")"
+    },
+    {
+      "module": "dom.py",
+      "function": "read_main_text",
+      "line": 2232,
+      "attr": "inner_text",
+      "verdict": "IMMUNE",
+      "reason": "page-level-non-strict",
+      "immune_bucket": "page-level-non-strict",
+      "source": "await page.inner_text(\"main\", timeout=ELEMENT_READ_TIMEOUT_MS) or \"\""
+    },
+    {
+      "module": "dom.py",
+      "function": "wait_for_job_description",
+      "line": 2336,
+      "attr": "wait_for",
+      "verdict": "IMMUNE",
+      "reason": "first",
+      "immune_bucket": "first",
+      "source": "await page.locator(JOB_DESCRIPTION_SLOT).first.wait_for("
+    },
+    {
+      "module": "dom.py",
+      "function": "read_apply_modal",
+      "line": 2668,
+      "attr": "get_attribute",
+      "verdict": "VULNERABLE",
+      "reason": "bare:.locator",
+      "immune_bucket": "",
+      "source": "(\"submit_name\", submit.get_attribute(\"aria-label\")),"
+    },
+    {
+      "module": "dom.py",
+      "function": "read_apply_modal",
+      "line": 2669,
+      "attr": "get_attribute",
+      "verdict": "VULNERABLE",
+      "reason": "bare:.locator",
+      "immune_bucket": "",
+      "source": "(\"_disabled\", submit.get_attribute(\"disabled\")),"
+    },
+    {
+      "module": "dom.py",
+      "function": "read_apply_modal",
+      "line": 2670,
+      "attr": "get_attribute",
+      "verdict": "VULNERABLE",
+      "reason": "bare:.locator",
+      "immune_bucket": "",
+      "source": "(\"_aria_disabled\", submit.get_attribute(\"aria-disabled\")),"
+    },
+    {
+      "module": "dom.py",
+      "function": "read_apply_modal",
+      "line": 2677,
+      "attr": "is_visible",
+      "verdict": "VULNERABLE",
+      "reason": "bare:.locator",
+      "immune_bucket": "",
+      "source": "visible = bool(await submit.is_visible())"
+    },
+    {
+      "module": "dom.py",
+      "function": "read_apply_modal",
+      "line": 2720,
+      "attr": "is_visible",
+      "verdict": "IMMUNE",
+      "reason": "nth",
+      "immune_bucket": "nth",
+      "source": "if not await node.is_visible():"
+    },
+    {
+      "module": "dom.py",
+      "function": "read_apply_modal",
+      "line": 2722,
+      "attr": "get_attribute",
+      "verdict": "IMMUNE",
+      "reason": "nth",
+      "immune_bucket": "nth",
+      "source": "label = (await node.get_attribute(\"aria-label\")) or \"\""
+    },
+    {
+      "module": "dom.py",
+      "function": "read_apply_modal",
+      "line": 2723,
+      "attr": "inner_text",
+      "verdict": "IMMUNE",
+      "reason": "nth",
+      "immune_bucket": "nth",
+      "source": "text = (await node.inner_text()) or \"\""
+    },
+    {
+      "module": "dom.py",
+      "function": "activate_messaging_filter",
+      "line": 2954,
+      "attr": "get_attribute",
+      "verdict": "IMMUNE",
+      "reason": "first",
+      "immune_bucket": "first",
+      "source": "label = str(await pills.first.get_attribute(\"aria-label\") or \"\").strip()"
+    },
+    {
+      "module": "dom.py",
+      "function": "activate_messaging_filter",
+      "line": 2956,
+      "attr": "inner_text",
+      "verdict": "IMMUNE",
+      "reason": "first",
+      "immune_bucket": "first",
+      "source": "label = str(await pills.first.inner_text() or \"\").strip()"
+    },
+    {
+      "module": "dom.py",
+      "function": "activate_messaging_filter",
+      "line": 2960,
+      "attr": "click",
+      "verdict": "IMMUNE",
+      "reason": "first",
+      "immune_bucket": "first",
+      "source": "await pills.first.click(timeout=FILTER_CLICK_TIMEOUT_MS)"
+    },
+    {
+      "module": "dom.py",
+      "function": "read_surface_census",
+      "line": 3470,
+      "attr": "evaluate",
+      "verdict": "IMMUNE",
+      "reason": "page-level-non-strict",
+      "immune_bucket": "page-level-non-strict",
+      "source": "data = await page.evaluate(CENSUS_JS, cfg)  # readonly-ok"
+    },
+    {
+      "module": "dom.py",
+      "function": "read_self_owned_editor_fields",
+      "line": 4066,
+      "attr": "evaluate",
+      "verdict": "IMMUNE",
+      "reason": "page-level-non-strict",
+      "immune_bucket": "page-level-non-strict",
+      "source": "data = await page.evaluate(EDITOR_FIELDS_JS, cfg)  # readonly-ok"
+    },
+    {
+      "module": "dom.py",
+      "function": "read_self_owned_editor_values",
+      "line": 4515,
+      "attr": "evaluate",
+      "verdict": "IMMUNE",
+      "reason": "page-level-non-strict",
+      "immune_bucket": "page-level-non-strict",
+      "source": "data = await page.evaluate(EDITOR_VALUES_JS, cfg)  # readonly-ok"
+    },
+    {
+      "module": "dom.py",
+      "function": "read_own_activity_items",
+      "line": 5271,
+      "attr": "evaluate",
+      "verdict": "IMMUNE",
+      "reason": "page-level-non-strict",
+      "immune_bucket": "page-level-non-strict",
+      "source": "data = await page.evaluate(ACTIVITY_ITEMS_JS, cfg)  # readonly-ok"
+    },
+    {
+      "module": "dom.py",
+      "function": "read_post_composer",
+      "line": 5549,
+      "attr": "is_enabled",
+      "verdict": "IMMUNE",
+      "reason": "first",
+      "immune_bucket": "first",
+      "source": "out[\"submit_enabled\"] = bool(await submits.first.is_enabled())"
+    },
+    {
+      "module": "dom.py",
+      "function": "read_sdui_actions",
+      "line": 5747,
+      "attr": "evaluate",
+      "verdict": "IMMUNE",
+      "reason": "page-level-non-strict",
+      "immune_bucket": "page-level-non-strict",
+      "source": "reading = await page.evaluate(SDUI_ACTIONS_JS, cfg)  # readonly-ok"
+    },
+    {
+      "module": "dom.py",
+      "function": "read_compose_modes",
+      "line": 6058,
+      "attr": "evaluate",
+      "verdict": "IMMUNE",
+      "reason": "page-level-non-strict",
+      "immune_bucket": "page-level-non-strict",
+      "source": "data = await page.evaluate(COMPOSE_MODES_JS, cfg)  # readonly-ok"
+    },
+    {
+      "module": "dom.py",
+      "function": "read_selected_recipients",
+      "line": 6404,
+      "attr": "evaluate",
+      "verdict": "IMMUNE",
+      "reason": "page-level-non-strict",
+      "immune_bucket": "page-level-non-strict",
+      "source": "data = await page.evaluate(  # readonly-ok"
+    },
+    {
+      "module": "dom.py",
+      "function": "read_typeahead_options",
+      "line": 6798,
+      "attr": "wait_for_selector",
+      "verdict": "IMMUNE",
+      "reason": "page-level-non-strict",
+      "immune_bucket": "page-level-non-strict",
+      "source": "await page.wait_for_selector("
+    },
+    {
+      "module": "dom.py",
+      "function": "read_recipient_ids",
+      "line": 6955,
+      "attr": "evaluate",
+      "verdict": "IMMUNE",
+      "reason": "page-level-non-strict",
+      "immune_bucket": "page-level-non-strict",
+      "source": "data = await page.evaluate(  # readonly-ok"
+    },
+    {
+      "module": "dom.py",
+      "function": "read_compose_send_state",
+      "line": 7006,
+      "attr": "is_enabled",
+      "verdict": "IMMUNE",
+      "reason": "first",
+      "immune_bucket": "first",
+      "source": "out[\"enabled\"] = bool(await control.first.is_enabled())"
+    },
+    {
+      "module": "dom.py",
+      "function": "read_thread_reply_surface",
+      "line": 7514,
+      "attr": "is_disabled",
+      "verdict": "IMMUNE",
+      "reason": "first",
+      "immune_bucket": "first",
+      "source": "out[\"send_disabled\"] = bool(await send.first.is_disabled())"
+    },
+    {
+      "module": "dom.py",
+      "function": "read_reaction_surface",
+      "line": 7560,
+      "attr": "get_attribute",
+      "verdict": "IMMUNE",
+      "reason": "nth",
+      "immune_bucket": "nth",
+      "source": "label = await controls.nth(index).get_attribute(\"aria-label\")"
+    },
+    {
+      "module": "dom.py",
+      "function": "read_invitation_surface",
+      "line": 7667,
+      "attr": "evaluate",
+      "verdict": "IMMUNE",
+      "reason": "page-level-non-strict",
+      "immune_bucket": "page-level-non-strict",
+      "source": "reading = await page.evaluate(INVITE_NEEDLE_JS, cfg)  # readonly-ok"
+    },
+    {
+      "module": "dom.py",
+      "function": "read_messaging_badge",
+      "line": 7719,
+      "attr": "get_attribute",
+      "verdict": "IMMUNE",
+      "reason": "first",
+      "immune_bucket": "first",
+      "source": "label = await links.first.get_attribute(\"aria-label\")"
+    },
+    {
+      "module": "dom.py",
+      "function": "read_invitation_badge",
+      "line": 7851,
+      "attr": "get_attribute",
+      "verdict": "IMMUNE",
+      "reason": "first",
+      "immune_bucket": "first",
+      "source": "label = await badges.first.get_attribute(\"aria-label\")"
+    },
+    {
+      "module": "dom.py",
+      "function": "wait_for_tracker_list",
+      "line": 7967,
+      "attr": "wait_for",
+      "verdict": "IMMUNE",
+      "reason": "first",
+      "immune_bucket": "first",
+      "source": "await page.locator(tracker_list_selector()).first.wait_for("
+    },
+    {
+      "module": "dom.py",
+      "function": "read_tracker_evidence",
+      "line": 8066,
+      "attr": "text_content",
+      "verdict": "IMMUNE",
+      "reason": "first",
+      "immune_bucket": "first",
+      "source": "content = await page.locator(\"main\").first.text_content("
+    },
+    {
+      "module": "dom.py",
+      "function": "read_job_insight_panels",
+      "line": 8529,
+      "attr": "evaluate",
+      "verdict": "IMMUNE",
+      "reason": "page-level-non-strict",
+      "immune_bucket": "page-level-non-strict",
+      "source": "markers = await page.evaluate(  # readonly-ok"
+    },
+    {
+      "module": "dom.py",
+      "function": "read_profile_views_insights",
+      "line": 8867,
+      "attr": "evaluate",
+      "verdict": "IMMUNE",
+      "reason": "page-level-non-strict",
+      "immune_bucket": "page-level-non-strict",
+      "source": "data = await page.evaluate(  # readonly-ok"
+    },
+    {
+      "module": "dom.py",
+      "function": "read_search_appearances",
+      "line": 9502,
+      "attr": "evaluate",
+      "verdict": "IMMUNE",
+      "reason": "page-level-non-strict",
+      "immune_bucket": "page-level-non-strict",
+      "source": "data = await page.evaluate(  # readonly-ok"
+    },
+    {
+      "module": "dom.py",
+      "function": "read_anchor_classes",
+      "line": 9771,
+      "attr": "evaluate",
+      "verdict": "IMMUNE",
+      "reason": "page-level-non-strict",
+      "immune_bucket": "page-level-non-strict",
+      "source": "return await page.evaluate(  # readonly-ok"
+    },
+    {
+      "module": "dom.py",
+      "function": "read_collection_groupings",
+      "line": 9790,
+      "attr": "evaluate",
+      "verdict": "IMMUNE",
+      "reason": "page-level-non-strict",
+      "immune_bucket": "page-level-non-strict",
+      "source": "return await page.evaluate(  # readonly-ok"
+    },
+    {
+      "module": "dom.py",
+      "function": "read_count_lines",
+      "line": 10170,
+      "attr": "evaluate",
+      "verdict": "IMMUNE",
+      "reason": "page-level-non-strict",
+      "immune_bucket": "page-level-non-strict",
+      "source": "return await page.evaluate(  # readonly-ok"
+    },
+    {
+      "module": "dom.py",
+      "function": "read_search_result_classes",
+      "line": 10322,
+      "attr": "evaluate",
+      "verdict": "IMMUNE",
+      "reason": "page-level-non-strict",
+      "immune_bucket": "page-level-non-strict",
+      "source": "return await page.evaluate(  # readonly-ok"
+    },
+    {
+      "module": "dom.py",
+      "function": "read_search_filters",
+      "line": 10458,
+      "attr": "evaluate",
+      "verdict": "IMMUNE",
+      "reason": "page-level-non-strict",
+      "immune_bucket": "page-level-non-strict",
+      "source": "return await page.evaluate(  # readonly-ok"
+    },
+    {
+      "module": "events.py",
+      "function": "_announced_total",
+      "line": 259,
+      "attr": "get_attribute",
+      "verdict": "IMMUNE",
+      "reason": "nth",
+      "immune_bucket": "nth",
+      "source": "label = await controls.nth(index).get_attribute(\"aria-label\")"
+    },
+    {
+      "module": "events.py",
+      "function": "read_events_home",
+      "line": 373,
+      "attr": "inner_text",
+      "verdict": "IMMUNE",
+      "reason": "first",
+      "immune_bucket": "first",
+      "source": "await headings.first.inner_text("
+    },
+    {
+      "module": "events.py",
+      "function": "read_events_home",
+      "line": 402,
+      "attr": "inner_text",
+      "verdict": "IMMUNE",
+      "reason": "first",
+      "immune_bucket": "first",
+      "source": "await body.inner_text(timeout=ELEMENT_READ_TIMEOUT_MS)"
+    },
+    {
+      "module": "events.py",
+      "function": "read_events_home",
+      "line": 424,
+      "attr": "inner_text",
+      "verdict": "IMMUNE",
+      "reason": "first",
+      "immune_bucket": "first",
+      "source": "await footer.inner_text("
+    },
+    {
+      "module": "groups_page.py",
+      "function": "read_group_memberships",
+      "line": 227,
+      "attr": "get_attribute",
+      "verdict": "IMMUNE",
+      "reason": "nth",
+      "immune_bucket": "nth",
+      "source": "str(await anchors.nth(index).get_attribute(\"href\") or \"\")"
+    },
+    {
+      "module": "groups_page.py",
+      "function": "read_group_memberships",
+      "line": 250,
+      "attr": "get_attribute",
+      "verdict": "IMMUNE",
+      "reason": "first",
+      "immune_bucket": "first",
+      "source": "str(await row.locator(ANCHOR).first.get_attribute(\"href\") or \"\")"
+    },
+    {
+      "module": "item_addresses.py",
+      "function": "read_item_addresses",
+      "line": 307,
+      "attr": "get_attribute",
+      "verdict": "IMMUNE",
+      "reason": "nth",
+      "immune_bucket": "nth",
+      "source": "hrefs.append(await locator.nth(index).get_attribute(\"href\"))"
+    },
+    {
+      "module": "job_collections.py",
+      "function": "read_job_collection",
+      "line": 353,
+      "attr": "get_attribute",
+      "verdict": "IMMUNE",
+      "reason": "nth",
+      "immune_bucket": "nth",
+      "source": "value = await slots.nth(index).get_attribute(SLOT_ID_ATTRIBUTE)"
+    },
+    {
+      "module": "job_collections.py",
+      "function": "read_job_collection",
+      "line": 364,
+      "attr": "inner_text",
+      "verdict": "IMMUNE",
+      "reason": "first",
+      "immune_bucket": "first",
+      "source": "text = str(await main.first.inner_text() or \"\").lower()"
+    },
+    {
+      "module": "newsletters.py",
+      "function": "read_newsletter_subscriptions",
+      "line": 297,
+      "attr": "inner_text",
+      "verdict": "IMMUNE",
+      "reason": "nth",
+      "immune_bucket": "nth",
+      "source": "text = str(await headings.nth(index).inner_text() or \"\").strip()"
+    },
+    {
+      "module": "newsletters.py",
+      "function": "read_newsletter_subscriptions",
+      "line": 316,
+      "attr": "get_attribute",
+      "verdict": "IMMUNE",
+      "reason": "nth",
+      "immune_bucket": "nth",
+      "source": "href = str(await item.get_attribute(\"href\") or \"\")"
+    },
+    {
+      "module": "newsletters.py",
+      "function": "read_newsletter_subscriptions",
+      "line": 320,
+      "attr": "inner_text",
+      "verdict": "IMMUNE",
+      "reason": "first",
+      "immune_bucket": "first",
+      "source": "str(await paragraphs.first.inner_text() or \"\").strip()"
+    },
+    {
+      "module": "notify_cost.py",
+      "function": "read_notifications_badge",
+      "line": 142,
+      "attr": "get_attribute",
+      "verdict": "IMMUNE",
+      "reason": "first",
+      "immune_bucket": "first",
+      "source": "label = await badges.first.get_attribute(\"aria-label\")"
+    },
+    {
+      "module": "premium.py",
+      "function": "read_premium_surface",
+      "line": 179,
+      "attr": "inner_text",
+      "verdict": "IMMUNE",
+      "reason": "nth",
+      "immune_bucket": "nth",
+      "source": "await controls.nth(index).inner_text("
+    },
+    {
+      "module": "press.py",
+      "function": "disclose",
+      "line": 883,
+      "attr": "get_attribute",
+      "verdict": "IMMUNE",
+      "reason": "nth",
+      "immune_bucket": "nth",
+      "source": "expanded_before = await locator.get_attribute(\"aria-expanded\")"
+    },
+    {
+      "module": "press.py",
+      "function": "disclose",
+      "line": 888,
+      "attr": "click",
+      "verdict": "IMMUNE",
+      "reason": "nth",
+      "immune_bucket": "nth",
+      "source": "await locator.click(timeout=CLICK_TIMEOUT_MS)"
+    },
+    {
+      "module": "press.py",
+      "function": "disclose",
+      "line": 897,
+      "attr": "get_attribute",
+      "verdict": "IMMUNE",
+      "reason": "nth",
+      "immune_bucket": "nth",
+      "source": "control_open = await locator.get_attribute(\"aria-expanded\")"
+    },
+    {
+      "module": "press.py",
+      "function": "disclose",
+      "line": 900,
+      "attr": "press",
+      "verdict": "UNRESOLVED",
+      "reason": "unrecognised-shape:Attribute",
+      "immune_bucket": "",
+      "source": "await page.keyboard.press(\"Escape\")"
+    },
+    {
+      "module": "press.py",
+      "function": "disclose",
+      "line": 901,
+      "attr": "get_attribute",
+      "verdict": "IMMUNE",
+      "reason": "nth",
+      "immune_bucket": "nth",
+      "source": "expanded_after = await locator.get_attribute(\"aria-expanded\")"
+    },
+    {
+      "module": "writes.py",
+      "function": "discard_all",
+      "line": 2330,
+      "attr": "clear",
+      "verdict": "UNRESOLVED",
+      "reason": "no-binding",
+      "immune_bucket": "",
+      "source": "_GRANTS.clear()"
+    },
+    {
+      "module": "writes.py",
+      "function": "discard_all",
+      "line": 2331,
+      "attr": "clear",
+      "verdict": "UNRESOLVED",
+      "reason": "no-binding",
+      "immune_bucket": "",
+      "source": "_OBSERVED.clear()"
+    },
+    {
+      "module": "writes.py",
+      "function": "perform",
+      "line": 8678,
+      "attr": "set_input_files",
+      "verdict": "IMMUNE",
+      "reason": "page-level-non-strict",
+      "immune_bucket": "page-level-non-strict",
+      "source": "await page.set_input_files("
+    },
+    {
+      "module": "writes.py",
+      "function": "perform",
+      "line": 8691,
+      "attr": "select_option",
+      "verdict": "IMMUNE",
+      "reason": "page-level-non-strict",
+      "immune_bucket": "page-level-non-strict",
+      "source": "await page.select_option("
+    },
+    {
+      "module": "writes.py",
+      "function": "perform",
+      "line": 8720,
+      "attr": "click",
+      "verdict": "IMMUNE",
+      "reason": "page-level-non-strict",
+      "immune_bucket": "page-level-non-strict",
+      "source": "await page.click(click_plan.pop(0), timeout=CLICK_TIMEOUT_MS)"
+    },
+    {
+      "module": "writes.py",
+      "function": "perform",
+      "line": 8748,
+      "attr": "fill",
+      "verdict": "IMMUNE",
+      "reason": "page-level-non-strict",
+      "immune_bucket": "page-level-non-strict",
+      "source": "await page.fill(fill_selector, fill_text, timeout=CLICK_TIMEOUT_MS)"
+    }
+  ],
+  "interpolated_selectors": [
+    {
+      "module": "creator_analytics.py",
+      "function": "collect_labels",
+      "line": 61,
+      "attr": "locator",
+      "arg_kind": "positional",
+      "shape": "name",
+      "source": "locator = page.locator(LABEL_SELECTOR)"
+    },
+    {
+      "module": "dom.py",
+      "function": "read_job_identity",
+      "line": 887,
+      "attr": "locator",
+      "arg_kind": "positional",
+      "shape": "name",
+      "source": "block = page.locator(COMPANY_BLOCK).first"
+    },
+    {
+      "module": "dom.py",
+      "function": "read_company_about_card",
+      "line": 1028,
+      "attr": "locator",
+      "arg_kind": "positional",
+      "shape": "name",
+      "source": "container = page.locator(ABOUT_COMPANY_CONTAINER).first"
+    },
+    {
+      "module": "dom.py",
+      "function": "read_company_about_card",
+      "line": 1040,
+      "attr": "locator",
+      "arg_kind": "positional",
+      "shape": "name",
+      "source": "out[\"sdui\"] = bool(await page.locator(ABOUT_COMPANY_SDUI).count())"
+    },
+    {
+      "module": "dom.py",
+      "function": "read_radio_label_binding",
+      "line": 1365,
+      "attr": "locator",
+      "arg_kind": "positional",
+      "shape": "other-non-literal:Call",
+      "source": "control = page.locator(named_role_selector(role, name))"
+    },
+    {
+      "module": "dom.py",
+      "function": "read_radio_label_binding",
+      "line": 1391,
+      "attr": "locator",
+      "arg_kind": "positional",
+      "shape": "other-non-literal:Call",
+      "source": "labels = page.locator(settings_radio_label_selector(name))"
+    },
+    {
+      "module": "dom.py",
+      "function": "read_save_control",
+      "line": 1487,
+      "attr": "locator",
+      "arg_kind": "positional",
+      "shape": "name",
+      "source": "controls = page.locator(SAVE_CONTROL)"
+    },
+    {
+      "module": "dom.py",
+      "function": "_sweep_save_shaped",
+      "line": 1607,
+      "attr": "locator",
+      "arg_kind": "positional",
+      "shape": "name",
+      "source": "controls = page.locator(SAVE_SWEEP_SELECTOR)"
+    },
+    {
+      "module": "dom.py",
+      "function": "_sweep_save_shaped",
+      "line": 1618,
+      "attr": "locator",
+      "arg_kind": "positional",
+      "shape": "name",
+      "source": "out[\"labelled_buttons\"] = int(await page.locator(SAVE_LABELLED_BUTTONS).count())"
+    },
+    {
+      "module": "dom.py",
+      "function": "_sweep_save_shaped",
+      "line": 1622,
+      "attr": "locator",
+      "arg_kind": "positional",
+      "shape": "name",
+      "source": "out[\"main_buttons_total\"] = int(await page.locator(MAIN_BUTTONS).count())"
+    },
+    {
+      "module": "dom.py",
+      "function": "wait_for_save_control",
+      "line": 1784,
+      "attr": "locator",
+      "arg_kind": "positional",
+      "shape": "name",
+      "source": "await page.locator(SAVE_CONTROL).first.wait_for("
+    },
+    {
+      "module": "dom.py",
+      "function": "read_apply_control",
+      "line": 1877,
+      "attr": "locator",
+      "arg_kind": "positional",
+      "shape": "name",
+      "source": "controls = page.locator(APPLY_CONTROL)"
+    },
+    {
+      "module": "dom.py",
+      "function": "read_follow_control",
+      "line": 1979,
+      "attr": "locator",
+      "arg_kind": "positional",
+      "shape": "name",
+      "source": "controls = page.locator(FOLLOW_CONTROL)"
+    },
+    {
+      "module": "dom.py",
+      "function": "harvest_followed_pages",
+      "line": 2090,
+      "attr": "locator",
+      "arg_kind": "positional",
+      "shape": "name",
+      "source": "buttons = page.locator(FOLLOWED_PAGE_BUTTON)"
+    },
+    {
+      "module": "dom.py",
+      "function": "harvest_followed_pages",
+      "line": 2106,
+      "attr": "locator",
+      "arg_kind": "positional",
+      "shape": "name",
+      "source": "link = button.locator(_FOLLOWED_PAGE_ID_SCOPE).locator("
+    },
+    {
+      "module": "dom.py",
+      "function": "harvest_followed_pages",
+      "line": 2106,
+      "attr": "locator",
+      "arg_kind": "positional",
+      "shape": "name",
+      "source": "link = button.locator(_FOLLOWED_PAGE_ID_SCOPE).locator("
+    },
+    {
+      "module": "dom.py",
+      "function": "read_unfollow_control",
+      "line": 2205,
+      "attr": "locator",
+      "arg_kind": "positional",
+      "shape": "name",
+      "source": "controls = page.locator(selector)"
+    },
+    {
+      "module": "dom.py",
+      "function": "wait_for_job_description",
+      "line": 2336,
+      "attr": "locator",
+      "arg_kind": "positional",
+      "shape": "name",
+      "source": "await page.locator(JOB_DESCRIPTION_SLOT).first.wait_for("
+    },
+    {
+      "module": "dom.py",
+      "function": "read_apply_modal",
+      "line": 2647,
+      "attr": "locator",
+      "arg_kind": "positional",
+      "shape": "name",
+      "source": "out[\"modal_present\"] = int(await page.locator(APPLY_MODAL_SELECTOR).count()) > 0"
+    },
+    {
+      "module": "dom.py",
+      "function": "read_apply_modal",
+      "line": 2652,
+      "attr": "locator",
+      "arg_kind": "positional",
+      "shape": "name",
+      "source": "submit = page.locator(APPLY_SUBMIT_SELECTOR)"
+    },
+    {
+      "module": "dom.py",
+      "function": "read_apply_modal",
+      "line": 2708,
+      "attr": "locator",
+      "arg_kind": "positional",
+      "shape": "f-string",
+      "source": "buttons = page.locator(f\"{APPLY_MODAL_SELECTOR} button\")"
+    },
+    {
+      "module": "dom.py",
+      "function": "read_post_composer",
+      "line": 5545,
+      "attr": "locator",
+      "arg_kind": "positional",
+      "shape": "other-non-literal:Call",
+      "source": "out[\"editors\"] = int(await page.locator(post_editor_selector()).count())"
+    },
+    {
+      "module": "dom.py",
+      "function": "read_post_composer",
+      "line": 5546,
+      "attr": "locator",
+      "arg_kind": "positional",
+      "shape": "other-non-literal:Call",
+      "source": "submits = page.locator(post_submit_selector())"
+    },
+    {
+      "module": "dom.py",
+      "function": "read_typeahead_pattern_census",
+      "line": 6672,
+      "attr": "locator",
+      "arg_kind": "positional",
+      "shape": "name",
+      "source": "out[label] = int(await page.locator(selector).count())"
+    },
+    {
+      "module": "dom.py",
+      "function": "read_typeahead_options",
+      "line": 6798,
+      "attr": "wait_for_selector",
+      "arg_kind": "positional",
+      "shape": "name",
+      "source": "await page.wait_for_selector("
+    },
+    {
+      "module": "dom.py",
+      "function": "read_typeahead_options",
+      "line": 6812,
+      "attr": "locator",
+      "arg_kind": "positional",
+      "shape": "name",
+      "source": "out[\"per_selector\"][selector] = await page.locator(selector).count()"
+    },
+    {
+      "module": "dom.py",
+      "function": "read_typeahead_options",
+      "line": 6818,
+      "attr": "locator",
+      "arg_kind": "positional",
+      "shape": "other-non-literal:Subscript",
+      "source": "out[\"matches\"] = await page.locator(out[\"selector\"]).count()"
+    },
+    {
+      "module": "dom.py",
+      "function": "read_compose_send_state",
+      "line": 7000,
+      "attr": "locator",
+      "arg_kind": "positional",
+      "shape": "other-non-literal:Call",
+      "source": "control = page.locator(compose_send_selector())"
+    },
+    {
+      "module": "dom.py",
+      "function": "read_compose_send_state",
+      "line": 7003,
+      "attr": "locator",
+      "arg_kind": "positional",
+      "shape": "other-non-literal:Call",
+      "source": "await page.locator(compose_body_selector()).count()"
+    },
+    {
+      "module": "dom.py",
+      "function": "read_comment_surface",
+      "line": 7127,
+      "attr": "locator",
+      "arg_kind": "positional",
+      "shape": "other-non-literal:Call",
+      "source": "await page.locator(comment_editor_selector()).count()"
+    },
+    {
+      "module": "dom.py",
+      "function": "_count_links_with",
+      "line": 7347,
+      "attr": "locator",
+      "arg_kind": "positional",
+      "shape": "concat",
+      "source": "return int(await page.locator('a[href*=\"' + fragment + '\"]').count())"
+    },
+    {
+      "module": "dom.py",
+      "function": "read_thread_reply_surface",
+      "line": 7503,
+      "attr": "locator",
+      "arg_kind": "positional",
+      "shape": "concat",
+      "source": "await page.locator("
+    },
+    {
+      "module": "dom.py",
+      "function": "read_thread_reply_surface",
+      "line": 7507,
+      "attr": "locator",
+      "arg_kind": "positional",
+      "shape": "other-non-literal:Call",
+      "source": "send = page.locator(compose_send_selector())"
+    },
+    {
+      "module": "dom.py",
+      "function": "read_reaction_surface",
+      "line": 7539,
+      "attr": "locator",
+      "arg_kind": "positional",
+      "shape": "name",
+      "source": "controls = page.locator(REACTION_CONTROL)"
+    },
+    {
+      "module": "dom.py",
+      "function": "read_reaction_surface",
+      "line": 7546,
+      "attr": "locator",
+      "arg_kind": "positional",
+      "shape": "concat",
+      "source": "await page.locator("
+    },
+    {
+      "module": "dom.py",
+      "function": "read_reaction_surface",
+      "line": 7551,
+      "attr": "locator",
+      "arg_kind": "positional",
+      "shape": "concat",
+      "source": "await page.locator("
+    },
+    {
+      "module": "dom.py",
+      "function": "read_invitation_surface",
+      "line": 7656,
+      "attr": "locator",
+      "arg_kind": "positional",
+      "shape": "name",
+      "source": "out[\"controls\"] = int(await page.locator(INVITE_CONTROL).count())"
+    },
+    {
+      "module": "dom.py",
+      "function": "read_invitation_badge",
+      "line": 7839,
+      "attr": "locator",
+      "arg_kind": "positional",
+      "shape": "concat",
+      "source": "await page.locator("
+    },
+    {
+      "module": "dom.py",
+      "function": "read_invitation_badge",
+      "line": 7843,
+      "attr": "locator",
+      "arg_kind": "positional",
+      "shape": "other-non-literal:Call",
+      "source": "badges = page.locator(invitation_badge_selector())"
+    },
+    {
+      "module": "dom.py",
+      "function": "wait_for_tracker_list",
+      "line": 7967,
+      "attr": "locator",
+      "arg_kind": "positional",
+      "shape": "other-non-literal:Call",
+      "source": "await page.locator(tracker_list_selector()).first.wait_for("
+    },
+    {
+      "module": "dom.py",
+      "function": "read_tracker_evidence",
+      "line": 8077,
+      "attr": "locator",
+      "arg_kind": "positional",
+      "shape": "name",
+      "source": "out[\"rows_matching\"] = int(await page.locator(TRACKER_ROW_LINK).count())"
+    },
+    {
+      "module": "dom.py",
+      "function": "read_tracker_evidence",
+      "line": 8091,
+      "attr": "locator",
+      "arg_kind": "positional",
+      "shape": "f-string",
+      "source": "await page.locator(f\"{TRACKER_ROW_LINK}:visible\").count()"
+    },
+    {
+      "module": "events.py",
+      "function": "_announced_total",
+      "line": 252,
+      "attr": "locator",
+      "arg_kind": "positional",
+      "shape": "name",
+      "source": "controls = footer.locator(EVENTS_HOME_FOOTER_CONTROL_SELECTOR)"
+    },
+    {
+      "module": "events.py",
+      "function": "read_events_home",
+      "line": 357,
+      "attr": "locator",
+      "arg_kind": "positional",
+      "shape": "name",
+      "source": "cards = page.locator(EVENTS_HOME_CARD_SELECTOR)"
+    },
+    {
+      "module": "events.py",
+      "function": "read_events_home",
+      "line": 370,
+      "attr": "locator",
+      "arg_kind": "positional",
+      "shape": "name",
+      "source": "headings = card.locator(EVENTS_HOME_HEADING_SELECTOR)"
+    },
+    {
+      "module": "events.py",
+      "function": "read_events_home",
+      "line": 381,
+      "attr": "locator",
+      "arg_kind": "positional",
+      "shape": "name",
+      "source": "rows = await card.locator(EVENTS_HOME_ROW_SELECTOR).count()"
+    },
+    {
+      "module": "events.py",
+      "function": "read_events_home",
+      "line": 385,
+      "attr": "locator",
+      "arg_kind": "positional",
+      "shape": "name",
+      "source": "links = await card.locator(EVENTS_HOME_LINK_SELECTOR).count()"
+    },
+    {
+      "module": "events.py",
+      "function": "read_events_home",
+      "line": 396,
+      "attr": "locator",
+      "arg_kind": "positional",
+      "shape": "name",
+      "source": "bodies = card.locator(EVENTS_HOME_CARD_BODY_SELECTOR)"
+    },
+    {
+      "module": "events.py",
+      "function": "read_events_home",
+      "line": 407,
+      "attr": "locator",
+      "arg_kind": "positional",
+      "shape": "name",
+      "source": "await body.locator("
+    },
+    {
+      "module": "events.py",
+      "function": "read_events_home",
+      "line": 418,
+      "attr": "locator",
+      "arg_kind": "positional",
+      "shape": "name",
+      "source": "footers = card.locator(EVENTS_HOME_CARD_FOOTER_SELECTOR)"
+    },
+    {
+      "module": "events.py",
+      "function": "read_events_home",
+      "line": 431,
+      "attr": "locator",
+      "arg_kind": "positional",
+      "shape": "name",
+      "source": "await footer.locator("
+    },
+    {
+      "module": "groups_page.py",
+      "function": "_stopping_ancestor",
+      "line": 162,
+      "attr": "locator",
+      "arg_kind": "positional",
+      "shape": "name",
+      "source": "found = int(await node.locator(ANCHOR).count())"
+    },
+    {
+      "module": "groups_page.py",
+      "function": "read_group_memberships",
+      "line": 222,
+      "attr": "locator",
+      "arg_kind": "positional",
+      "shape": "name",
+      "source": "anchors = page.locator(ANCHOR)"
+    },
+    {
+      "module": "groups_page.py",
+      "function": "read_group_memberships",
+      "line": 230,
+      "attr": "locator",
+      "arg_kind": "positional",
+      "shape": "name",
+      "source": "controls = page.locator(CONTROL)"
+    },
+    {
+      "module": "groups_page.py",
+      "function": "read_group_memberships",
+      "line": 250,
+      "attr": "locator",
+      "arg_kind": "positional",
+      "shape": "name",
+      "source": "str(await row.locator(ANCHOR).first.get_attribute(\"href\") or \"\")"
+    },
+    {
+      "module": "job_collections.py",
+      "function": "read_job_collection",
+      "line": 321,
+      "attr": "locator",
+      "arg_kind": "positional",
+      "shape": "name",
+      "source": "slots_in_main = int(await page.locator(SLOT_SELECTOR).count())"
+    },
+    {
+      "module": "job_collections.py",
+      "function": "read_job_collection",
+      "line": 322,
+      "attr": "locator",
+      "arg_kind": "positional",
+      "shape": "name",
+      "source": "slots_anywhere = int(await page.locator(SLOT_SELECTOR_ANYWHERE).count())"
+    },
+    {
+      "module": "job_collections.py",
+      "function": "read_job_collection",
+      "line": 323,
+      "attr": "locator",
+      "arg_kind": "positional",
+      "shape": "name",
+      "source": "cards_in_main = int(await page.locator(CARD_SELECTOR).count())"
+    },
+    {
+      "module": "job_collections.py",
+      "function": "read_job_collection",
+      "line": 324,
+      "attr": "locator",
+      "arg_kind": "positional",
+      "shape": "name",
+      "source": "cards_anywhere = int(await page.locator(CARD_SELECTOR_ANYWHERE).count())"
+    },
+    {
+      "module": "job_collections.py",
+      "function": "read_job_collection",
+      "line": 325,
+      "attr": "locator",
+      "arg_kind": "positional",
+      "shape": "name",
+      "source": "boxes_in_main = int(await page.locator(CONTAINER_SELECTOR).count())"
+    },
+    {
+      "module": "job_collections.py",
+      "function": "read_job_collection",
+      "line": 326,
+      "attr": "locator",
+      "arg_kind": "positional",
+      "shape": "name",
+      "source": "boxes_anywhere = int(await page.locator(CONTAINER_SELECTOR_ANYWHERE).count())"
+    },
+    {
+      "module": "job_collections.py",
+      "function": "read_job_collection",
+      "line": 351,
+      "attr": "locator",
+      "arg_kind": "positional",
+      "shape": "name",
+      "source": "slots = page.locator(SLOT_SELECTOR)"
+    },
+    {
+      "module": "newsletters.py",
+      "function": "read_newsletter_subscriptions",
+      "line": 295,
+      "attr": "locator",
+      "arg_kind": "positional",
+      "shape": "name",
+      "source": "headings = page.locator(HEADING_SELECTOR)"
+    },
+    {
+      "module": "newsletters.py",
+      "function": "read_newsletter_subscriptions",
+      "line": 306,
+      "attr": "locator",
+      "arg_kind": "positional",
+      "shape": "name",
+      "source": "in_main = int(await page.locator(CREATE_SELECTOR).count())"
+    },
+    {
+      "module": "newsletters.py",
+      "function": "read_newsletter_subscriptions",
+      "line": 307,
+      "attr": "locator",
+      "arg_kind": "positional",
+      "shape": "name",
+      "source": "anywhere = int(await page.locator(CREATE_SELECTOR_ANYWHERE).count())"
+    },
+    {
+      "module": "newsletters.py",
+      "function": "read_newsletter_subscriptions",
+      "line": 311,
+      "attr": "locator",
+      "arg_kind": "positional",
+      "shape": "name",
+      "source": "anchors = page.locator(ANCHOR_SELECTOR)"
+    },
+    {
+      "module": "newsletters.py",
+      "function": "read_newsletter_subscriptions",
+      "line": 317,
+      "attr": "locator",
+      "arg_kind": "positional",
+      "shape": "name",
+      "source": "paragraphs = item.locator(PARAGRAPH_SELECTOR)"
+    },
+    {
+      "module": "notify_cost.py",
+      "function": "read_notifications_badge",
+      "line": 130,
+      "attr": "locator",
+      "arg_kind": "positional",
+      "shape": "concat",
+      "source": "await page.locator("
+    },
+    {
+      "module": "notify_cost.py",
+      "function": "read_notifications_badge",
+      "line": 134,
+      "attr": "locator",
+      "arg_kind": "positional",
+      "shape": "other-non-literal:Call",
+      "source": "badges = page.locator(notifications_badge_selector())"
+    },
+    {
+      "module": "premium.py",
+      "function": "read_premium_surface",
+      "line": 168,
+      "attr": "locator",
+      "arg_kind": "positional",
+      "shape": "name",
+      "source": "controls = page.locator(_CONTROL_SELECTOR)"
+    },
+    {
+      "module": "press.py",
+      "function": "disclose",
+      "line": 874,
+      "attr": "locator",
+      "arg_kind": "positional",
+      "shape": "name",
+      "source": "locator = page.locator(shape).nth(index)"
+    },
+    {
+      "module": "press.py",
+      "function": "disclose",
+      "line": 876,
+      "attr": "locator",
+      "arg_kind": "positional",
+      "shape": "name",
+      "source": "if not int(await page.locator(shape).count()):"
+    },
+    {
+      "module": "press.py",
+      "function": "_read_witness",
+      "line": 947,
+      "attr": "locator",
+      "arg_kind": "positional",
+      "shape": "name",
+      "source": "out[name] = int(await page.locator(selector).count())"
+    }
+  ]
+}

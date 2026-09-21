@@ -135,7 +135,26 @@ GUARD_CALLS = frozenset({"assert_read_url", "is_read_url"})
 #: reports which values were never tried, and why, is worth more than one that
 #: tried them without permission**, and the discovery question stays open for
 #: an admit-and-measure wave with a revert path.
-KNOWN_UNGUARDED: dict[str, str] = {}
+KNOWN_UNGUARDED: dict[str, str] = {
+    "_probe_what_playwright_quotes.py": (
+        "DECLARED BY THE WAVE THAT WROTE IT (_audit/2026-09-21-what-playwright-"
+        "quotes.md). Five raw `page.goto` calls, and NONE of them can reach "
+        "LinkedIn or any remote host. Four target a loopback address the probe "
+        "itself owns -- an `http.server` it starts on 127.0.0.1:0 and shuts "
+        "down in a `finally`, plus one port it binds and closes precisely so "
+        "nothing is listening -- and the fifth is the literal string "
+        "`not-a-url-ZQREQZQ`, which exists to make Chromium refuse to parse "
+        "it. The probe measures what PLAYWRIGHT writes into its own navigation "
+        "errors, so the navigation must be raw: `BROWSER.goto` takes the "
+        "profile lock and would put this probe on the operator's signed-in "
+        "Chrome, which is the one thing its brief forbids. `assert_read_url` "
+        "would REFUSE every one of these addresses, correctly, since none is "
+        "a LinkedIn read surface -- calling it here would mean asking the "
+        "allowlist to bless a loopback socket. The bound is in the file: no "
+        "hostname but 127.0.0.1, an ephemeral chromium context, and nothing "
+        "persistent touched."
+    ),
+}
 
 
 def _enclosing(tree: ast.AST, lineno: int):
@@ -291,6 +310,20 @@ def test_the_measurement_exemplar_proves_the_distinction_discriminates():
     )
 
 
+#: The ONE named exception to the emptiness claim below, and the only one.
+#: Its argument is in the ``KNOWN_UNGUARDED`` entry and in
+#: ``_audit/2026-09-21-what-playwright-quotes.md``; the short form is that no
+#: ADMITTED address can answer the question the probe asks, because the
+#: question is what Playwright writes when a navigation is REDIRECTED TO AN
+#: ADDRESS THE SITE CHOSE and then fails -- and making a redirect happen means
+#: owning the server, which means loopback. Routing through ``BROWSER.goto``
+#: would put the probe on the operator's signed-in profile, which its brief
+#: forbids outright; hand-guarding with ``assert_read_url`` would ask the
+#: LinkedIn read allowlist to bless ``127.0.0.1``, which is not what that
+#: allowlist is for and would be a worse precedent than this entry.
+NAMED_EXCEPTIONS = {"_probe_what_playwright_quotes.py"}
+
+
 def test_the_record_is_empty_and_that_is_a_claim_rather_than_an_absence():
     """EVERY ENTRY LEFT BY BEING FIXED, and this asserts the end state.
 
@@ -307,14 +340,23 @@ def test_the_record_is_empty_and_that_is_a_claim_rather_than_an_absence():
     can answer -- it gets recorded and this assertion gets a named exception
     with its ruling, not a quiet bump.
     """
-    assert KNOWN_UNGUARDED == {}, (
-        f"unguarded navigations are recorded again: {sorted(KNOWN_UNGUARDED)}. "
+    unnamed = sorted(set(KNOWN_UNGUARDED) - NAMED_EXCEPTIONS)
+    assert not unnamed, (
+        f"unguarded navigations are recorded again: {unnamed}. "
         "That may be right -- but a record is the LAST resort, after routing "
         "through BROWSER.goto and after hand-guarding with assert_read_url, "
         "and after checking the probe is not simply navigating to an address "
         "that should be admitted instead. The disclosing-press round ruled "
         "that a discovery probe may not navigate to a refused address even to "
-        "find out whether it should be admitted."
+        "find out whether it should be admitted. If this one is genuinely the "
+        "next NAMED_EXCEPTIONS entry, add it there WITH its ruling, the way "
+        "the single existing one is argued -- do not widen this assertion."
+    )
+    stale = sorted(NAMED_EXCEPTIONS - set(KNOWN_UNGUARDED))
+    assert not stale, (
+        f"these named exceptions no longer correspond to a record: {stale}. "
+        "An exception that outlives the thing it excepts is how a table stops "
+        "meaning anything -- delete it in the commit that fixed the probe."
     )
 
 

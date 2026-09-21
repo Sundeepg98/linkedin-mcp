@@ -1,0 +1,1104 @@
+[
+ {
+  "id": "strict.text_content",
+  "family": "strict",
+  "api": "Locator.text_content",
+  "note": "",
+  "raised": true,
+  "exc_type": "playwright._impl._errors.Error",
+  "message": "Locator.text_content: Error: strict mode violation: locator(\".card\") resolved to 3 elements:\n    1) <div id=\"ZQIDZQ-1\" class=\"card ZQCLASSZQ\" data-probe=\"ZQATTRZQ-1\">ZQTEXTZQ-alpha</div> aka get_by_text(\"ZQTEXTZQ-alpha\")\n    2) <div id=\"ZQIDZQ-2\" class=\"card ZQCLASSZQ\" data-probe=\"ZQATTRZQ-2\">ZQTEXTZQ-beta</div> aka get_by_text(\"ZQTEXTZQ-beta\")\n    3) <div id=\"ZQIDZQ-3\" class=\"card ZQCLASSZQ\" data-probe=\"ZQATTRZQ-3\">ZQTEXTZQ-gamma</div> aka get_by_text(\"ZQTEXTZQ-gamma\")\n\nCall log:\n  - waiting for locator(\".card\")\n",
+  "hits": {
+   "page_chosen": [
+    "attr",
+    "cls",
+    "eid",
+    "text"
+   ],
+   "ours": []
+  },
+  "observed": "ECHO",
+  "server_saw": []
+ },
+ {
+  "id": "strict.inner_text",
+  "family": "strict",
+  "api": "Locator.inner_text",
+  "note": "",
+  "raised": true,
+  "exc_type": "playwright._impl._errors.Error",
+  "message": "Locator.inner_text: Error: strict mode violation: locator(\".card\") resolved to 3 elements:\n    1) <div id=\"ZQIDZQ-1\" class=\"card ZQCLASSZQ\" data-probe=\"ZQATTRZQ-1\">ZQTEXTZQ-alpha</div> aka get_by_text(\"ZQTEXTZQ-alpha\")\n    2) <div id=\"ZQIDZQ-2\" class=\"card ZQCLASSZQ\" data-probe=\"ZQATTRZQ-2\">ZQTEXTZQ-beta</div> aka get_by_text(\"ZQTEXTZQ-beta\")\n    3) <div id=\"ZQIDZQ-3\" class=\"card ZQCLASSZQ\" data-probe=\"ZQATTRZQ-3\">ZQTEXTZQ-gamma</div> aka get_by_text(\"ZQTEXTZQ-gamma\")\n\nCall log:\n  - waiting for locator(\".card\")\n",
+  "hits": {
+   "page_chosen": [
+    "attr",
+    "cls",
+    "eid",
+    "text"
+   ],
+   "ours": []
+  },
+  "observed": "ECHO",
+  "server_saw": []
+ },
+ {
+  "id": "strict.inner_html",
+  "family": "strict",
+  "api": "Locator.inner_html",
+  "note": "",
+  "raised": true,
+  "exc_type": "playwright._impl._errors.Error",
+  "message": "Locator.inner_html: Error: strict mode violation: locator(\".card\") resolved to 3 elements:\n    1) <div id=\"ZQIDZQ-1\" class=\"card ZQCLASSZQ\" data-probe=\"ZQATTRZQ-1\">ZQTEXTZQ-alpha</div> aka get_by_text(\"ZQTEXTZQ-alpha\")\n    2) <div id=\"ZQIDZQ-2\" class=\"card ZQCLASSZQ\" data-probe=\"ZQATTRZQ-2\">ZQTEXTZQ-beta</div> aka get_by_text(\"ZQTEXTZQ-beta\")\n    3) <div id=\"ZQIDZQ-3\" class=\"card ZQCLASSZQ\" data-probe=\"ZQATTRZQ-3\">ZQTEXTZQ-gamma</div> aka get_by_text(\"ZQTEXTZQ-gamma\")\n\nCall log:\n  - waiting for locator(\".card\")\n",
+  "hits": {
+   "page_chosen": [
+    "attr",
+    "cls",
+    "eid",
+    "text"
+   ],
+   "ours": []
+  },
+  "observed": "ECHO",
+  "server_saw": []
+ },
+ {
+  "id": "strict.get_attribute",
+  "family": "strict",
+  "api": "Locator.get_attribute",
+  "note": "",
+  "raised": true,
+  "exc_type": "playwright._impl._errors.Error",
+  "message": "Locator.get_attribute: Error: strict mode violation: locator(\".card\") resolved to 3 elements:\n    1) <div id=\"ZQIDZQ-1\" class=\"card ZQCLASSZQ\" data-probe=\"ZQATTRZQ-1\">ZQTEXTZQ-alpha</div> aka get_by_text(\"ZQTEXTZQ-alpha\")\n    2) <div id=\"ZQIDZQ-2\" class=\"card ZQCLASSZQ\" data-probe=\"ZQATTRZQ-2\">ZQTEXTZQ-beta</div> aka get_by_text(\"ZQTEXTZQ-beta\")\n    3) <div id=\"ZQIDZQ-3\" class=\"card ZQCLASSZQ\" data-probe=\"ZQATTRZQ-3\">ZQTEXTZQ-gamma</div> aka get_by_text(\"ZQTEXTZQ-gamma\")\n\nCall log:\n  - waiting for locator(\".card\")\n",
+  "hits": {
+   "page_chosen": [
+    "attr",
+    "cls",
+    "eid",
+    "text"
+   ],
+   "ours": []
+  },
+  "observed": "ECHO",
+  "server_saw": []
+ },
+ {
+  "id": "strict.is_visible",
+  "family": "strict",
+  "api": "Locator.is_visible",
+  "note": "",
+  "raised": true,
+  "exc_type": "playwright._impl._errors.Error",
+  "message": "Locator.is_visible: Error: strict mode violation: locator(\".card\") resolved to 3 elements:\n    1) <div id=\"ZQIDZQ-1\" class=\"card ZQCLASSZQ\" data-probe=\"ZQATTRZQ-1\">ZQTEXTZQ-alpha</div> aka get_by_text(\"ZQTEXTZQ-alpha\")\n    2) <div id=\"ZQIDZQ-2\" class=\"card ZQCLASSZQ\" data-probe=\"ZQATTRZQ-2\">ZQTEXTZQ-beta</div> aka get_by_text(\"ZQTEXTZQ-beta\")\n    3) <div id=\"ZQIDZQ-3\" class=\"card ZQCLASSZQ\" data-probe=\"ZQATTRZQ-3\">ZQTEXTZQ-gamma</div> aka get_by_text(\"ZQTEXTZQ-gamma\")\n\nCall log:\n    - checking visibility of locator(\".card\")\n",
+  "hits": {
+   "page_chosen": [
+    "attr",
+    "cls",
+    "eid",
+    "text"
+   ],
+   "ours": []
+  },
+  "observed": "ECHO",
+  "server_saw": []
+ },
+ {
+  "id": "strict.wait_for",
+  "family": "strict",
+  "api": "Locator.wait_for",
+  "note": "",
+  "raised": true,
+  "exc_type": "playwright._impl._errors.Error",
+  "message": "Locator.wait_for: Error: strict mode violation: locator(\".card\") resolved to 3 elements:\n    1) <div id=\"ZQIDZQ-1\" class=\"card ZQCLASSZQ\" data-probe=\"ZQATTRZQ-1\">ZQTEXTZQ-alpha</div> aka get_by_text(\"ZQTEXTZQ-alpha\")\n    2) <div id=\"ZQIDZQ-2\" class=\"card ZQCLASSZQ\" data-probe=\"ZQATTRZQ-2\">ZQTEXTZQ-beta</div> aka get_by_text(\"ZQTEXTZQ-beta\")\n    3) <div id=\"ZQIDZQ-3\" class=\"card ZQCLASSZQ\" data-probe=\"ZQATTRZQ-3\">ZQTEXTZQ-gamma</div> aka get_by_text(\"ZQTEXTZQ-gamma\")\n\nCall log:\n  - waiting for locator(\".card\") to be visible\n",
+  "hits": {
+   "page_chosen": [
+    "attr",
+    "cls",
+    "eid",
+    "text"
+   ],
+   "ours": []
+  },
+  "observed": "ECHO",
+  "server_saw": []
+ },
+ {
+  "id": "strict.element_handle",
+  "family": "strict",
+  "api": "Locator.element_handle",
+  "note": "",
+  "raised": true,
+  "exc_type": "playwright._impl._errors.Error",
+  "message": "Locator.element_handle: Error: strict mode violation: locator(\".card\") resolved to 3 elements:\n    1) <div id=\"ZQIDZQ-1\" class=\"card ZQCLASSZQ\" data-probe=\"ZQATTRZQ-1\">ZQTEXTZQ-alpha</div> aka get_by_text(\"ZQTEXTZQ-alpha\")\n    2) <div id=\"ZQIDZQ-2\" class=\"card ZQCLASSZQ\" data-probe=\"ZQATTRZQ-2\">ZQTEXTZQ-beta</div> aka get_by_text(\"ZQTEXTZQ-beta\")\n    3) <div id=\"ZQIDZQ-3\" class=\"card ZQCLASSZQ\" data-probe=\"ZQATTRZQ-3\">ZQTEXTZQ-gamma</div> aka get_by_text(\"ZQTEXTZQ-gamma\")\n\nCall log:\n  - waiting for locator(\".card\")\n",
+  "hits": {
+   "page_chosen": [
+    "attr",
+    "cls",
+    "eid",
+    "text"
+   ],
+   "ours": []
+  },
+  "observed": "ECHO",
+  "server_saw": []
+ },
+ {
+  "id": "strict.evaluate",
+  "family": "strict",
+  "api": "Locator.evaluate",
+  "note": "",
+  "raised": true,
+  "exc_type": "playwright._impl._errors.Error",
+  "message": "Locator.evaluate: Error: strict mode violation: locator(\".card\") resolved to 3 elements:\n    1) <div id=\"ZQIDZQ-1\" class=\"card ZQCLASSZQ\" data-probe=\"ZQATTRZQ-1\">ZQTEXTZQ-alpha</div> aka get_by_text(\"ZQTEXTZQ-alpha\")\n    2) <div id=\"ZQIDZQ-2\" class=\"card ZQCLASSZQ\" data-probe=\"ZQATTRZQ-2\">ZQTEXTZQ-beta</div> aka get_by_text(\"ZQTEXTZQ-beta\")\n    3) <div id=\"ZQIDZQ-3\" class=\"card ZQCLASSZQ\" data-probe=\"ZQATTRZQ-3\">ZQTEXTZQ-gamma</div> aka get_by_text(\"ZQTEXTZQ-gamma\")\n\nCall log:\n  - waiting for locator(\".card\")\n",
+  "hits": {
+   "page_chosen": [
+    "attr",
+    "cls",
+    "eid",
+    "text"
+   ],
+   "ours": []
+  },
+  "observed": "ECHO",
+  "server_saw": []
+ },
+ {
+  "id": "strict.bounding_box",
+  "family": "strict",
+  "api": "Locator.bounding_box",
+  "note": "",
+  "raised": true,
+  "exc_type": "playwright._impl._errors.Error",
+  "message": "Locator.bounding_box: Error: strict mode violation: locator(\".card\") resolved to 3 elements:\n    1) <div id=\"ZQIDZQ-1\" class=\"card ZQCLASSZQ\" data-probe=\"ZQATTRZQ-1\">ZQTEXTZQ-alpha</div> aka get_by_text(\"ZQTEXTZQ-alpha\")\n    2) <div id=\"ZQIDZQ-2\" class=\"card ZQCLASSZQ\" data-probe=\"ZQATTRZQ-2\">ZQTEXTZQ-beta</div> aka get_by_text(\"ZQTEXTZQ-beta\")\n    3) <div id=\"ZQIDZQ-3\" class=\"card ZQCLASSZQ\" data-probe=\"ZQATTRZQ-3\">ZQTEXTZQ-gamma</div> aka get_by_text(\"ZQTEXTZQ-gamma\")\n\nCall log:\n  - waiting for locator(\".card\")\n",
+  "hits": {
+   "page_chosen": [
+    "attr",
+    "cls",
+    "eid",
+    "text"
+   ],
+   "ours": []
+  },
+  "observed": "ECHO",
+  "server_saw": []
+ },
+ {
+  "id": "strict.click",
+  "family": "strict",
+  "api": "Locator.click",
+  "note": "",
+  "raised": true,
+  "exc_type": "playwright._impl._errors.Error",
+  "message": "Locator.click: Error: strict mode violation: locator(\".card\") resolved to 3 elements:\n    1) <div id=\"ZQIDZQ-1\" class=\"card ZQCLASSZQ\" data-probe=\"ZQATTRZQ-1\">ZQTEXTZQ-alpha</div> aka get_by_text(\"ZQTEXTZQ-alpha\")\n    2) <div id=\"ZQIDZQ-2\" class=\"card ZQCLASSZQ\" data-probe=\"ZQATTRZQ-2\">ZQTEXTZQ-beta</div> aka get_by_text(\"ZQTEXTZQ-beta\")\n    3) <div id=\"ZQIDZQ-3\" class=\"card ZQCLASSZQ\" data-probe=\"ZQATTRZQ-3\">ZQTEXTZQ-gamma</div> aka get_by_text(\"ZQTEXTZQ-gamma\")\n\nCall log:\n  - waiting for locator(\".card\")\n",
+  "hits": {
+   "page_chosen": [
+    "attr",
+    "cls",
+    "eid",
+    "text"
+   ],
+   "ours": []
+  },
+  "observed": "ECHO",
+  "server_saw": []
+ },
+ {
+  "id": "strict.fill",
+  "family": "strict",
+  "api": "Locator.fill",
+  "note": "",
+  "raised": true,
+  "exc_type": "playwright._impl._errors.Error",
+  "message": "Locator.fill: Error: strict mode violation: locator(\".card\") resolved to 3 elements:\n    1) <div id=\"ZQIDZQ-1\" class=\"card ZQCLASSZQ\" data-probe=\"ZQATTRZQ-1\">ZQTEXTZQ-alpha</div> aka get_by_text(\"ZQTEXTZQ-alpha\")\n    2) <div id=\"ZQIDZQ-2\" class=\"card ZQCLASSZQ\" data-probe=\"ZQATTRZQ-2\">ZQTEXTZQ-beta</div> aka get_by_text(\"ZQTEXTZQ-beta\")\n    3) <div id=\"ZQIDZQ-3\" class=\"card ZQCLASSZQ\" data-probe=\"ZQATTRZQ-3\">ZQTEXTZQ-gamma</div> aka get_by_text(\"ZQTEXTZQ-gamma\")\n\nCall log:\n  - waiting for locator(\".card\")\n",
+  "hits": {
+   "page_chosen": [
+    "attr",
+    "cls",
+    "eid",
+    "text"
+   ],
+   "ours": []
+  },
+  "observed": "ECHO",
+  "server_saw": []
+ },
+ {
+  "id": "strict.get_by_text",
+  "family": "strict",
+  "api": "get_by_text(..).text_content",
+  "note": "the `aka get_by_text(\"<text>\")` suggestion quotes element text",
+  "raised": true,
+  "exc_type": "playwright._impl._errors.Error",
+  "message": "Locator.text_content: Error: strict mode violation: get_by_text(\"ZQTEXTZQ\") resolved to 3 elements:\n    1) <div id=\"ZQIDZQ-1\" class=\"card ZQCLASSZQ\" data-probe=\"ZQATTRZQ-1\">ZQTEXTZQ-alpha</div> aka get_by_text(\"ZQTEXTZQ-alpha\")\n    2) <div id=\"ZQIDZQ-2\" class=\"card ZQCLASSZQ\" data-probe=\"ZQATTRZQ-2\">ZQTEXTZQ-beta</div> aka get_by_text(\"ZQTEXTZQ-beta\")\n    3) <div id=\"ZQIDZQ-3\" class=\"card ZQCLASSZQ\" data-probe=\"ZQATTRZQ-3\">ZQTEXTZQ-gamma</div> aka get_by_text(\"ZQTEXTZQ-gamma\")\n\nCall log:\n  - waiting for get_by_text(\"ZQTEXTZQ\")\n",
+  "hits": {
+   "page_chosen": [
+    "attr",
+    "cls",
+    "eid",
+    "text"
+   ],
+   "ours": []
+  },
+  "observed": "ECHO",
+  "server_saw": []
+ },
+ {
+  "id": "strict.filter_has_text",
+  "family": "strict",
+  "api": "Locator.filter(has_text).text_content",
+  "note": "",
+  "raised": true,
+  "exc_type": "playwright._impl._errors.Error",
+  "message": "Locator.text_content: Error: strict mode violation: locator(\".card\").filter(has_text=\"ZQTEXTZQ\") resolved to 3 elements:\n    1) <div id=\"ZQIDZQ-1\" class=\"card ZQCLASSZQ\" data-probe=\"ZQATTRZQ-1\">ZQTEXTZQ-alpha</div> aka get_by_text(\"ZQTEXTZQ-alpha\")\n    2) <div id=\"ZQIDZQ-2\" class=\"card ZQCLASSZQ\" data-probe=\"ZQATTRZQ-2\">ZQTEXTZQ-beta</div> aka get_by_text(\"ZQTEXTZQ-beta\")\n    3) <div id=\"ZQIDZQ-3\" class=\"card ZQCLASSZQ\" data-probe=\"ZQATTRZQ-3\">ZQTEXTZQ-gamma</div> aka get_by_text(\"ZQTEXTZQ-gamma\")\n\nCall log:\n  - waiting for locator(\".card\").filter(has_text=\"ZQTEXTZQ\")\n",
+  "hits": {
+   "page_chosen": [
+    "attr",
+    "cls",
+    "eid",
+    "text"
+   ],
+   "ours": []
+  },
+  "observed": "ECHO",
+  "server_saw": []
+ },
+ {
+  "id": "strict.page_text_content_strict",
+  "family": "strict",
+  "api": "Page.text_content(sel, strict=True)",
+  "note": "",
+  "raised": true,
+  "exc_type": "playwright._impl._errors.Error",
+  "message": "Page.text_content: Error: strict mode violation: locator(\".card\") resolved to 3 elements:\n    1) <div id=\"ZQIDZQ-1\" class=\"card ZQCLASSZQ\" data-probe=\"ZQATTRZQ-1\">ZQTEXTZQ-alpha</div> aka get_by_text(\"ZQTEXTZQ-alpha\")\n    2) <div id=\"ZQIDZQ-2\" class=\"card ZQCLASSZQ\" data-probe=\"ZQATTRZQ-2\">ZQTEXTZQ-beta</div> aka get_by_text(\"ZQTEXTZQ-beta\")\n    3) <div id=\"ZQIDZQ-3\" class=\"card ZQCLASSZQ\" data-probe=\"ZQATTRZQ-3\">ZQTEXTZQ-gamma</div> aka get_by_text(\"ZQTEXTZQ-gamma\")\n\nCall log:\n  - waiting for locator(\".card\")\n",
+  "hits": {
+   "page_chosen": [
+    "attr",
+    "cls",
+    "eid",
+    "text"
+   ],
+   "ours": []
+  },
+  "observed": "ECHO",
+  "server_saw": []
+ },
+ {
+  "id": "strict.wait_for_selector_strict",
+  "family": "strict",
+  "api": "Page.wait_for_selector(sel, strict=True)",
+  "note": "",
+  "raised": true,
+  "exc_type": "playwright._impl._errors.Error",
+  "message": "Page.wait_for_selector: Error: strict mode violation: locator(\".card\") resolved to 3 elements:\n    1) <div id=\"ZQIDZQ-1\" class=\"card ZQCLASSZQ\" data-probe=\"ZQATTRZQ-1\">ZQTEXTZQ-alpha</div> aka get_by_text(\"ZQTEXTZQ-alpha\")\n    2) <div id=\"ZQIDZQ-2\" class=\"card ZQCLASSZQ\" data-probe=\"ZQATTRZQ-2\">ZQTEXTZQ-beta</div> aka get_by_text(\"ZQTEXTZQ-beta\")\n    3) <div id=\"ZQIDZQ-3\" class=\"card ZQCLASSZQ\" data-probe=\"ZQATTRZQ-3\">ZQTEXTZQ-gamma</div> aka get_by_text(\"ZQTEXTZQ-gamma\")\n\nCall log:\n  - waiting for locator(\".card\") to be visible\n",
+  "hits": {
+   "page_chosen": [
+    "attr",
+    "cls",
+    "eid",
+    "text"
+   ],
+   "ours": []
+  },
+  "observed": "ECHO",
+  "server_saw": []
+ },
+ {
+  "id": "nonstrict.page_text_content",
+  "family": "nonstrict",
+  "api": "Page.text_content(sel)",
+  "note": "takes the FIRST of 3 and does not raise",
+  "raised": false,
+  "exc_type": null,
+  "message": null,
+  "hits": {
+   "page_chosen": [],
+   "ours": []
+  },
+  "observed": "SILENT",
+  "server_saw": []
+ },
+ {
+  "id": "nonstrict.page_inner_text",
+  "family": "nonstrict",
+  "api": "Page.inner_text(sel)",
+  "note": "",
+  "raised": false,
+  "exc_type": null,
+  "message": null,
+  "hits": {
+   "page_chosen": [],
+   "ours": []
+  },
+  "observed": "SILENT",
+  "server_saw": []
+ },
+ {
+  "id": "nonstrict.page_get_attribute",
+  "family": "nonstrict",
+  "api": "Page.get_attribute(sel, name)",
+  "note": "",
+  "raised": false,
+  "exc_type": null,
+  "message": null,
+  "hits": {
+   "page_chosen": [],
+   "ours": []
+  },
+  "observed": "SILENT",
+  "server_saw": []
+ },
+ {
+  "id": "nonstrict.wait_for_selector",
+  "family": "nonstrict",
+  "api": "Page.wait_for_selector(sel)",
+  "note": "",
+  "raised": false,
+  "exc_type": null,
+  "message": null,
+  "hits": {
+   "page_chosen": [],
+   "ours": []
+  },
+  "observed": "SILENT",
+  "server_saw": []
+ },
+ {
+  "id": "qualified.first",
+  "family": "qualified",
+  "api": "Locator.first.text_content",
+  "note": "",
+  "raised": false,
+  "exc_type": null,
+  "message": null,
+  "hits": {
+   "page_chosen": [],
+   "ours": []
+  },
+  "observed": "SILENT",
+  "server_saw": []
+ },
+ {
+  "id": "qualified.last",
+  "family": "qualified",
+  "api": "Locator.last.text_content",
+  "note": "",
+  "raised": false,
+  "exc_type": null,
+  "message": null,
+  "hits": {
+   "page_chosen": [],
+   "ours": []
+  },
+  "observed": "SILENT",
+  "server_saw": []
+ },
+ {
+  "id": "qualified.nth0",
+  "family": "qualified",
+  "api": "Locator.nth(0).text_content",
+  "note": "",
+  "raised": false,
+  "exc_type": null,
+  "message": null,
+  "hits": {
+   "page_chosen": [],
+   "ours": []
+  },
+  "observed": "SILENT",
+  "server_saw": []
+ },
+ {
+  "id": "setwide.count",
+  "family": "setwide",
+  "api": "Locator.count",
+  "note": "",
+  "raised": false,
+  "exc_type": null,
+  "message": null,
+  "hits": {
+   "page_chosen": [],
+   "ours": []
+  },
+  "observed": "SILENT",
+  "server_saw": []
+ },
+ {
+  "id": "setwide.all_text_contents",
+  "family": "setwide",
+  "api": "Locator.all_text_contents",
+  "note": "",
+  "raised": false,
+  "exc_type": null,
+  "message": null,
+  "hits": {
+   "page_chosen": [],
+   "ours": []
+  },
+  "observed": "SILENT",
+  "server_saw": []
+ },
+ {
+  "id": "setwide.all_inner_texts",
+  "family": "setwide",
+  "api": "Locator.all_inner_texts",
+  "note": "",
+  "raised": false,
+  "exc_type": null,
+  "message": null,
+  "hits": {
+   "page_chosen": [],
+   "ours": []
+  },
+  "observed": "SILENT",
+  "server_saw": []
+ },
+ {
+  "id": "setwide.evaluate_all",
+  "family": "setwide",
+  "api": "Locator.evaluate_all",
+  "note": "",
+  "raised": false,
+  "exc_type": null,
+  "message": null,
+  "hits": {
+   "page_chosen": [],
+   "ours": []
+  },
+  "observed": "SILENT",
+  "server_saw": []
+ },
+ {
+  "id": "timeout.absent_literal",
+  "family": "timeout",
+  "api": "Locator.text_content, literal selector, no match",
+  "note": "the call log quotes the selector; this one holds no sentinel",
+  "raised": true,
+  "exc_type": "playwright._impl._errors.TimeoutError",
+  "message": "Locator.text_content: Timeout 900ms exceeded.\nCall log:\n  - waiting for locator(\"#no-such-node\")\n",
+  "hits": {
+   "page_chosen": [],
+   "ours": []
+  },
+  "observed": "SILENT",
+  "server_saw": []
+ },
+ {
+  "id": "timeout.selector_echo_id",
+  "family": "timeout",
+  "api": "Locator.text_content, selector carrying a token",
+  "note": "THE SELECTOR IS ECHOED VERBATIM",
+  "raised": true,
+  "exc_type": "playwright._impl._errors.TimeoutError",
+  "message": "Locator.text_content: Timeout 900ms exceeded.\nCall log:\n  - waiting for locator(\"#ZQSELZQ-missing\")\n",
+  "hits": {
+   "page_chosen": [],
+   "ours": [
+    "sel"
+   ]
+  },
+  "observed": "OURS_ONLY",
+  "server_saw": []
+ },
+ {
+  "id": "timeout.selector_echo_hastext",
+  "family": "timeout",
+  "api": "Locator :has-text(..) no match",
+  "note": "a :has-text() needle is echoed verbatim",
+  "raised": true,
+  "exc_type": "playwright._impl._errors.TimeoutError",
+  "message": "Locator.text_content: Timeout 900ms exceeded.\nCall log:\n  - waiting for locator(\".card:has-text('ZQSELZQ')\")\n",
+  "hits": {
+   "page_chosen": [],
+   "ours": [
+    "sel"
+   ]
+  },
+  "observed": "OURS_ONLY",
+  "server_saw": []
+ },
+ {
+  "id": "timeout.hidden_wait_visible",
+  "family": "timeout",
+  "api": "Locator.wait_for(state=visible) on display:none",
+  "note": "`locator resolved to hidden <outerHTML>` -- no strict violation needed",
+  "raised": true,
+  "exc_type": "playwright._impl._errors.TimeoutError",
+  "message": "Locator.wait_for: Timeout 900ms exceeded.\nCall log:\n  - waiting for locator(\"#hiddenone\") to be visible\n    9 \\xd7 locator resolved to hidden <div class=\"gone\" id=\"hiddenone\" data-probe=\"ZQHIDDENZQ\">ZQHIDDENZQ-text</div>\n",
+  "hits": {
+   "page_chosen": [
+    "hidden"
+   ],
+   "ours": []
+  },
+  "observed": "ECHO",
+  "server_saw": []
+ },
+ {
+  "id": "timeout.page_wait_for_selector_visible",
+  "family": "timeout",
+  "api": "Page.wait_for_selector(state=visible), NOT strict",
+  "note": "the non-strict page-level wait echoes the element too",
+  "raised": true,
+  "exc_type": "playwright._impl._errors.TimeoutError",
+  "message": "Page.wait_for_selector: Timeout 900ms exceeded.\nCall log:\n  - waiting for locator(\"#hiddenone\") to be visible\n    8 \\xd7 locator resolved to hidden <div class=\"gone\" id=\"hiddenone\" data-probe=\"ZQHIDDENZQ\">ZQHIDDENZQ-text</div>\n",
+  "hits": {
+   "page_chosen": [
+    "hidden"
+   ],
+   "ours": []
+  },
+  "observed": "ECHO",
+  "server_saw": []
+ },
+ {
+  "id": "timeout.click_intercepted",
+  "family": "timeout",
+  "api": "Locator.click intercepted by an overlay",
+  "note": "the INTERCEPTING element's outerHTML is quoted",
+  "raised": true,
+  "exc_type": "playwright._impl._errors.TimeoutError",
+  "message": "Locator.click: Timeout 900ms exceeded.\nCall log:\n  - waiting for locator(\"#link\")\n    - locator resolved to <a id=\"link\" href=\"/ZQHREFZQ/path\">a link</a>\n  - attempting click action\n    2 \\xd7 waiting for element to be visible, enabled and stable\n      - element is visible, enabled and stable\n      - scrolling into view if needed\n      - done scrolling\n      - <div id=\"cover\" data-probe=\"ZQOVERLAYZQ\">ZQOVERLAYZQ-text</div> intercepts pointer events\n    - retrying click action\n    - waiting 20ms\n    2 \\xd7 waiting for element to be visible, enabled and stable\n      - element is visible, enabled and stable\n      - scrolling into view if needed\n      - done scrolling\n      - <div id=\"cover\" data-probe=\"ZQOVERLAYZQ\">ZQOVERLAYZQ-text</div> intercepts pointer events\n    - retrying click action\n      - waiting 100ms\n    - waiting for element to be visible, enabled and stable\n    - element is visible, enabled and stable\n    - scrolling into view if needed\n    - done scrolling\n    - <div id=\"cover\" data-probe=\"ZQOVERLAYZQ\">ZQOVERLAYZQ-text</div> intercepts pointer events\n  - retrying click action\n    - waiting 500ms\n",
+  "hits": {
+   "page_chosen": [
+    "hrefattr",
+    "overlay"
+   ],
+   "ours": []
+  },
+  "observed": "ECHO",
+  "server_saw": []
+ },
+ {
+  "id": "timeout.page_click_multi",
+  "family": "timeout",
+  "api": "Page.click on a 3-element selector",
+  "note": "`resolved to 3 elements. Proceeding with the first one: <outerHTML>`",
+  "raised": true,
+  "exc_type": "playwright._impl._errors.TimeoutError",
+  "message": "Page.click: Timeout 900ms exceeded.\nCall log:\n  - waiting for locator(\".card\")\n    - locator resolved to 3 elements. Proceeding with the first one: <div id=\"ZQIDZQ-1\" class=\"card ZQCLASSZQ\" data-probe=\"ZQATTRZQ-1\">ZQTEXTZQ-alpha</div>\n  - attempting click action\n    2 \\xd7 waiting for element to be visible, enabled and stable\n      - element is visible, enabled and stable\n      - scrolling into view if needed\n      - done scrolling\n      - <div id=\"cover\" data-probe=\"ZQOVERLAYZQ\">ZQOVERLAYZQ-text</div> intercepts pointer events\n    - retrying click action\n    - waiting 20ms\n    2 \\xd7 waiting for element to be visible, enabled and stable\n      - element is visible, enabled and stable\n      - scrolling into view if needed\n      - done scrolling\n      - <div id=\"cover\" data-probe=\"ZQOVERLAYZQ\">ZQOVERLAYZQ-text</div> intercepts pointer events\n    - retrying click action\n      - waiting 100ms\n    - waiting for element to be visible, enabled and stable\n    - element is visible, enabled and stable\n    - scrolling into view if needed\n    - done scrolling\n    - <div id=\"cover\" data-probe=\"ZQOVERLAYZQ\">ZQOVERLAYZQ-text</div> intercepts pointer events\n  - retrying click action\n    - waiting 500ms\n",
+  "hits": {
+   "page_chosen": [
+    "attr",
+    "cls",
+    "eid",
+    "overlay",
+    "text"
+   ],
+   "ours": []
+  },
+  "observed": "ECHO",
+  "server_saw": []
+ },
+ {
+  "id": "timeout.nth_out_of_range",
+  "family": "timeout",
+  "api": "Locator.nth(9).text_content",
+  "note": "",
+  "raised": true,
+  "exc_type": "playwright._impl._errors.TimeoutError",
+  "message": "Locator.text_content: Timeout 900ms exceeded.\nCall log:\n  - waiting for locator(\".card\").nth(9)\n",
+  "hits": {
+   "page_chosen": [],
+   "ours": []
+  },
+  "observed": "SILENT",
+  "server_saw": []
+ },
+ {
+  "id": "timeout.wait_for_function",
+  "family": "timeout",
+  "api": "Page.wait_for_function",
+  "note": "",
+  "raised": true,
+  "exc_type": "playwright._impl._errors.TimeoutError",
+  "message": "Page.wait_for_function: Timeout 900ms exceeded.",
+  "hits": {
+   "page_chosen": [],
+   "ours": []
+  },
+  "observed": "SILENT",
+  "server_saw": []
+ },
+ {
+  "id": "timeout.wait_for_url",
+  "family": "timeout",
+  "api": "Page.wait_for_url",
+  "note": "",
+  "raised": true,
+  "exc_type": "playwright._impl._errors.TimeoutError",
+  "message": "Timeout 900ms exceeded.\n=========================== logs ===========================\nwaiting for navigation to \"**/never-here\" until 'load'\n============================================================",
+  "hits": {
+   "page_chosen": [],
+   "ours": []
+  },
+  "observed": "SILENT",
+  "server_saw": []
+ },
+ {
+  "id": "timeout.wait_for_load_state",
+  "family": "timeout",
+  "api": "Page.wait_for_load_state",
+  "note": "",
+  "raised": false,
+  "exc_type": null,
+  "message": null,
+  "hits": {
+   "page_chosen": [],
+   "ours": []
+  },
+  "observed": "SILENT",
+  "server_saw": []
+ },
+ {
+  "id": "timeout.set_content",
+  "family": "timeout",
+  "api": "Page.set_content (the already-observed case)",
+  "note": "the one data point section 7 already had, re-driven",
+  "raised": true,
+  "exc_type": "playwright._impl._errors.TimeoutError",
+  "message": "Page.set_content: Timeout 1ms exceeded.\nCall log:\n  - setting frame content, waiting until \"load\"\n",
+  "hits": {
+   "page_chosen": [],
+   "ours": []
+  },
+  "observed": "SILENT",
+  "server_saw": []
+ },
+ {
+  "id": "evaluate.js_throws_page_text",
+  "family": "evaluate",
+  "api": "Page.evaluate, our JS throws with page text",
+  "note": "a script that names what it saw carries it out",
+  "raised": true,
+  "exc_type": "playwright._impl._errors.Error",
+  "message": "Page.evaluate: Error: ZQTITLEZQ-doc ZQTEXTZQ-alpha\n    at eval (eval at evaluate (:311:30), <anonymous>:1:15)\n    at UtilityScript.evaluate (<anonymous>:318:18)\n    at UtilityScript.<anonymous> (<anonymous>:1:44)",
+  "hits": {
+   "page_chosen": [
+    "text",
+    "title"
+   ],
+   "ours": []
+  },
+  "observed": "ECHO",
+  "server_saw": []
+ },
+ {
+  "id": "evaluate.js_typeerror",
+  "family": "evaluate",
+  "api": "Page.evaluate, TypeError on a missing node",
+  "note": "",
+  "raised": true,
+  "exc_type": "playwright._impl._errors.Error",
+  "message": "Page.evaluate: TypeError: Cannot read properties of null (reading 'textContent')\n    at eval (eval at evaluate (:311:30), <anonymous>:1:38)\n    at UtilityScript.evaluate (<anonymous>:318:18)\n    at UtilityScript.<anonymous> (<anonymous>:1:44)",
+  "hits": {
+   "page_chosen": [],
+   "ours": []
+  },
+  "observed": "SILENT",
+  "server_saw": []
+ },
+ {
+  "id": "evaluate.js_syntax",
+  "family": "evaluate",
+  "api": "Page.evaluate, syntax error",
+  "note": "",
+  "raised": true,
+  "exc_type": "playwright._impl._errors.Error",
+  "message": "Page.evaluate: SyntaxError: Unexpected identifier 'is'\n    at eval (<anonymous>)\n    at UtilityScript.evaluate (<anonymous>:311:30)\n    at UtilityScript.<anonymous> (<anonymous>:1:44)",
+  "hits": {
+   "page_chosen": [],
+   "ours": []
+  },
+  "observed": "SILENT",
+  "server_saw": []
+ },
+ {
+  "id": "evaluate.json_parse_structural",
+  "family": "evaluate",
+  "api": "Page.evaluate, JSON.parse over malformed page JSON",
+  "note": "the STRUCTURAL branch reports a POSITION and quotes nothing",
+  "raised": true,
+  "exc_type": "playwright._impl._errors.Error",
+  "message": "Page.evaluate: SyntaxError: Expected ':' after property name in JSON at position 10 (line 1 column 11)\n    at JSON.parse (<anonymous>)\n    at eval (eval at evaluate (:311:30), <anonymous>:1:12)\n    at UtilityScript.evaluate (<anonymous>:318:18)\n    at UtilityScript.<anonymous> (<anonymous>:1:44)",
+  "hits": {
+   "page_chosen": [],
+   "ours": []
+  },
+  "observed": "SILENT",
+  "server_saw": []
+ },
+ {
+  "id": "evaluate.json_parse_bare_token",
+  "family": "evaluate",
+  "api": "Page.evaluate, JSON.parse over page text that is not JSON at all",
+  "note": "THE NEAR MISS INSIDE ONE FUNCTION: this branch quotes the input",
+  "raised": true,
+  "exc_type": "playwright._impl._errors.Error",
+  "message": "Page.evaluate: SyntaxError: Unexpected token 'Z', \"ZQTEXTZQ-alpha\" is not valid JSON\n    at JSON.parse (<anonymous>)\n    at eval (eval at evaluate (:311:30), <anonymous>:1:12)\n    at UtilityScript.evaluate (<anonymous>:318:18)\n    at UtilityScript.<anonymous> (<anonymous>:1:44)",
+  "hits": {
+   "page_chosen": [
+    "text"
+   ],
+   "ours": []
+  },
+  "observed": "ECHO",
+  "server_saw": []
+ },
+ {
+  "id": "evaluate.arg_roundtrip",
+  "family": "evaluate",
+  "api": "Page.evaluate, page value passed back as an arg",
+  "note": "",
+  "raised": true,
+  "exc_type": "playwright._impl._errors.Error",
+  "message": "Page.evaluate: Error: rejected ZQTEXTZQ-alpha\n    at eval (eval at evaluate (:311:30), <anonymous>:1:16)\n    at UtilityScript.evaluate (<anonymous>:318:18)\n    at UtilityScript.<anonymous> (<anonymous>:1:44)",
+  "hits": {
+   "page_chosen": [
+    "text"
+   ],
+   "ours": []
+  },
+  "observed": "ECHO",
+  "server_saw": []
+ },
+ {
+  "id": "nav.connection_refused",
+  "family": "nav",
+  "api": "Page.goto, nothing listening",
+  "note": "does the message quote the address we ASKED FOR",
+  "raised": true,
+  "exc_type": "playwright._impl._errors.Error",
+  "message": "Page.goto: net::ERR_CONNECTION_REFUSED at http://127.0.0.1:51858/ZQREQZQ/gone\nCall log:\n  - navigating to \"http://127.0.0.1:51858/ZQREQZQ/gone\", waiting until \"load\"\n",
+  "hits": {
+   "page_chosen": [],
+   "ours": [
+    "req"
+   ]
+  },
+  "observed": "OURS_ONLY",
+  "server_saw": []
+ },
+ {
+  "id": "nav.redirect_then_reset",
+  "family": "nav",
+  "api": "Page.goto, 302 to a SITE-CHOSEN address that then dies",
+  "note": "THE ONE THAT MATTERS: requested address, or the LANDING? I declared ECHO and the measurement convicted me",
+  "raised": true,
+  "exc_type": "playwright._impl._errors.Error",
+  "message": "Page.goto: net::ERR_EMPTY_RESPONSE at http://127.0.0.1:51857/ZQREQZQ/redirect-me\nCall log:\n  - navigating to \"http://127.0.0.1:51857/ZQREQZQ/redirect-me\", waiting until \"load\"\n",
+  "hits": {
+   "page_chosen": [],
+   "ours": [
+    "req"
+   ]
+  },
+  "observed": "OURS_ONLY",
+  "server_saw": [
+   "/ZQREQZQ/redirect-me",
+   "/ZQLANDZQ-landing/page"
+  ]
+ },
+ {
+  "id": "nav.redirect_then_timeout",
+  "family": "nav",
+  "api": "Page.goto, 302 to a SITE-CHOSEN address that hangs",
+  "note": "same question, timeout branch rather than net-error branch",
+  "raised": true,
+  "exc_type": "playwright._impl._errors.TimeoutError",
+  "message": "Page.goto: Timeout 900ms exceeded.\nCall log:\n  - navigating to \"http://127.0.0.1:51857/ZQREQZQ/redirect-slow\", waiting until \"load\"\n",
+  "hits": {
+   "page_chosen": [],
+   "ours": [
+    "req"
+   ]
+  },
+  "observed": "OURS_ONLY",
+  "server_saw": [
+   "/ZQREQZQ/redirect-slow",
+   "/ZQLANDZQ-landing/slow"
+  ]
+ },
+ {
+  "id": "nav.bad_url",
+  "family": "nav",
+  "api": "Page.goto, malformed url",
+  "note": "",
+  "raised": true,
+  "exc_type": "playwright._impl._errors.Error",
+  "message": "Page.goto: Protocol error (Page.navigate): Cannot navigate to invalid URL\nCall log:\n  - navigating to \"not-a-url-ZQREQZQ\", waiting until \"load\"\n",
+  "hits": {
+   "page_chosen": [],
+   "ours": [
+    "req"
+   ]
+  },
+  "observed": "OURS_ONLY",
+  "server_saw": []
+ },
+ {
+  "id": "request.unreachable",
+  "family": "request",
+  "api": "page.request.get, nothing listening",
+  "note": "",
+  "raised": true,
+  "exc_type": "playwright._impl._errors.Error",
+  "message": "APIRequestContext.get: connect ECONNREFUSED 127.0.0.1:51858\nCall log:\n  - \\u2192 GET http://127.0.0.1:51858/ZQREQZQ/api\n    - user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/153.0.8010.12 Safari/537.36\n    - accept: */*\n    - accept-encoding: gzip,deflate,br\n",
+  "hits": {
+   "page_chosen": [],
+   "ours": [
+    "req"
+   ]
+  },
+  "observed": "OURS_ONLY",
+  "server_saw": []
+ },
+ {
+  "id": "request.json_over_page_body",
+  "family": "request",
+  "api": "APIResponse.json over a body the SITE chose",
+  "note": "the body is page-chosen; does the decoder quote it",
+  "raised": true,
+  "exc_type": "json.decoder.JSONDecodeError",
+  "message": "Expecting value: line 1 column 1 (char 0)",
+  "hits": {
+   "page_chosen": [],
+   "ours": []
+  },
+  "observed": "SILENT",
+  "server_saw": [
+   "/notjson"
+  ]
+ },
+ {
+  "id": "request.headers_in_call_log",
+  "family": "request",
+  "api": "page.request.get failing while the context holds a cookie",
+  "note": "THE CALL LOG ENUMERATES EVERY REQUEST HEADER",
+  "raised": true,
+  "exc_type": "playwright._impl._errors.Error",
+  "message": "APIRequestContext.get: connect ECONNREFUSED 127.0.0.1:51858\nCall log:\n  - \\u2192 GET http://127.0.0.1:51858/ZQREQZQ/api\n    - user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/153.0.8010.12 Safari/537.36\n    - accept: */*\n    - accept-encoding: gzip,deflate,br\n    - x-zq-probe: ZQHDRZQ-header\n    - cookie: zq_session=ZQCOOKIEZQ-value\n",
+  "hits": {
+   "page_chosen": [
+    "cookie"
+   ],
+   "ours": [
+    "hdr",
+    "req"
+   ]
+  },
+  "observed": "ECHO",
+  "server_saw": []
+ },
+ {
+  "id": "request.timeout_headers",
+  "family": "request",
+  "api": "page.request.get timing out while the context holds a cookie",
+  "note": "the timeout branch, which is the reachable one in practice",
+  "raised": true,
+  "exc_type": "playwright._impl._errors.TimeoutError",
+  "message": "APIRequestContext.get: Timeout 900ms exceeded.\nCall log:\n  - \\u2192 GET http://127.0.0.1:51857/ZQLANDZQ-landing/slow\n    - user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/153.0.8010.12 Safari/537.36\n    - accept: */*\n    - accept-encoding: gzip,deflate,br\n    - x-zq-probe: ZQHDRZQ-header\n    - cookie: zq_session=ZQCOOKIEZQ-value\n",
+  "hits": {
+   "page_chosen": [
+    "cookie",
+    "landing"
+   ],
+   "ours": [
+    "hdr"
+   ]
+  },
+  "observed": "ECHO",
+  "server_saw": [
+   "/ZQLANDZQ-landing/slow"
+  ]
+ },
+ {
+  "id": "expect.to_have_text",
+  "family": "expect",
+  "api": "expect(..).to_have_text",
+  "note": "`Actual value: <page text>`",
+  "raised": true,
+  "exc_type": "builtins.AssertionError",
+  "message": "Locator expected to have text 'nothing like it'\nActual value: ZQTEXTZQ-alpha \nCall log:\n  - Expect \"to_have_text\" locator(\"#ZQIDZQ-1\") with timeout 900ms\n  - waiting for locator(\"#ZQIDZQ-1\")\n    8 \\xd7 locator resolved to <div id=\"ZQIDZQ-1\" class=\"card ZQCLASSZQ\" data-probe=\"ZQATTRZQ-1\">ZQTEXTZQ-alpha</div>\n      - unexpected value \"ZQTEXTZQ-alpha\"\n\nAria snapshot:\n- text: ZQTEXTZQ-alpha",
+  "hits": {
+   "page_chosen": [
+    "attr",
+    "cls",
+    "eid",
+    "text"
+   ],
+   "ours": []
+  },
+  "observed": "ECHO",
+  "server_saw": []
+ },
+ {
+  "id": "expect.to_have_attribute",
+  "family": "expect",
+  "api": "expect(..).to_have_attribute",
+  "note": "",
+  "raised": true,
+  "exc_type": "builtins.AssertionError",
+  "message": "Locator expected to have attribute 'nothing like it'\nActual value: ZQATTRZQ-1 \nCall log:\n  - Expect \"to_have_attribute\" locator(\"#ZQIDZQ-1\") with timeout 900ms\n  - waiting for locator(\"#ZQIDZQ-1\")\n    9 \\xd7 locator resolved to <div id=\"ZQIDZQ-1\" class=\"card ZQCLASSZQ\" data-probe=\"ZQATTRZQ-1\">ZQTEXTZQ-alpha</div>\n      - unexpected value \"ZQATTRZQ-1\"\n\nAria snapshot:\n- text: ZQTEXTZQ-alpha",
+  "hits": {
+   "page_chosen": [
+    "attr",
+    "cls",
+    "eid",
+    "text"
+   ],
+   "ours": []
+  },
+  "observed": "ECHO",
+  "server_saw": []
+ },
+ {
+  "id": "expect.to_have_count",
+  "family": "expect",
+  "api": "expect(..).to_have_count",
+  "note": "",
+  "raised": true,
+  "exc_type": "builtins.AssertionError",
+  "message": "Locator expected to have count '99'\nActual value: 3 \nCall log:\n  - Expect \"to_have_count\" locator(\".card\") with timeout 900ms\n  - waiting for locator(\".card\")\n    9 \\xd7 locator resolved to 3 elements\n      - unexpected value \"3\"\n",
+  "hits": {
+   "page_chosen": [],
+   "ours": []
+  },
+  "observed": "SILENT",
+  "server_saw": []
+ },
+ {
+  "id": "stdlib.int",
+  "family": "stdlib",
+  "api": "int(<page text>)",
+  "note": "",
+  "raised": true,
+  "exc_type": "builtins.ValueError",
+  "message": "invalid literal for int() with base 10: 'ZQTEXTZQ-alpha'",
+  "hits": {
+   "page_chosen": [
+    "text"
+   ],
+   "ours": []
+  },
+  "observed": "ECHO"
+ },
+ {
+  "id": "stdlib.float",
+  "family": "stdlib",
+  "api": "float(<page text>)",
+  "note": "",
+  "raised": true,
+  "exc_type": "builtins.ValueError",
+  "message": "could not convert string to float: 'ZQTEXTZQ-alpha'",
+  "hits": {
+   "page_chosen": [
+    "text"
+   ],
+   "ours": []
+  },
+  "observed": "ECHO"
+ },
+ {
+  "id": "stdlib.list_index",
+  "family": "stdlib",
+  "api": "[].index(<page text>)",
+  "note": "",
+  "raised": true,
+  "exc_type": "builtins.ValueError",
+  "message": "'ZQTEXTZQ-alpha' is not in list",
+  "hits": {
+   "page_chosen": [
+    "text"
+   ],
+   "ours": []
+  },
+  "observed": "ECHO"
+ },
+ {
+  "id": "stdlib.list_remove",
+  "family": "stdlib",
+  "api": "[].remove(<page text>)",
+  "note": "",
+  "raised": true,
+  "exc_type": "builtins.ValueError",
+  "message": "list.remove(x): x not in list",
+  "hits": {
+   "page_chosen": [],
+   "ours": []
+  },
+  "observed": "SILENT"
+ },
+ {
+  "id": "stdlib.set_remove",
+  "family": "stdlib",
+  "api": "set().remove(<page text>)",
+  "note": "",
+  "raised": true,
+  "exc_type": "builtins.KeyError",
+  "message": "'ZQTEXTZQ-alpha'",
+  "hits": {
+   "page_chosen": [
+    "text"
+   ],
+   "ours": []
+  },
+  "observed": "ECHO"
+ },
+ {
+  "id": "stdlib.set_discard",
+  "family": "stdlib",
+  "api": "set().discard(<page text>)",
+  "note": "",
+  "raised": false,
+  "exc_type": null,
+  "message": null,
+  "hits": {
+   "page_chosen": [],
+   "ours": []
+  },
+  "observed": "SILENT"
+ },
+ {
+  "id": "stdlib.dict_getitem",
+  "family": "stdlib",
+  "api": "{}[<page text>]",
+  "note": "",
+  "raised": true,
+  "exc_type": "builtins.KeyError",
+  "message": "'ZQTEXTZQ-alpha'",
+  "hits": {
+   "page_chosen": [
+    "text"
+   ],
+   "ours": []
+  },
+  "observed": "ECHO"
+ },
+ {
+  "id": "stdlib.json_loads",
+  "family": "stdlib",
+  "api": "json.loads(<page text>)",
+  "note": "",
+  "raised": true,
+  "exc_type": "json.decoder.JSONDecodeError",
+  "message": "Expecting value: line 1 column 1 (char 0)",
+  "hits": {
+   "page_chosen": [],
+   "ours": []
+  },
+  "observed": "SILENT"
+ },
+ {
+  "id": "stdlib.datetime",
+  "family": "stdlib",
+  "api": "datetime.strptime(<page text>)",
+  "note": "",
+  "raised": true,
+  "exc_type": "builtins.ValueError",
+  "message": "time data 'ZQTEXTZQ-alpha' does not match format '%Y-%m-%d'",
+  "hits": {
+   "page_chosen": [
+    "text"
+   ],
+   "ours": []
+  },
+  "observed": "ECHO"
+ }
+]
