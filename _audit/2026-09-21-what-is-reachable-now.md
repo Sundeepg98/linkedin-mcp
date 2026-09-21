@@ -564,6 +564,49 @@ turn the guard red for the other wave's pairs.** This is a textual conflict with
 a semantic non-conflict underneath it, which is the kind that gets resolved wrong
 in a hurry.
 
+### 6.3 A SIBLING WAVE'S COMMIT MESSAGE LANDED ON MY COMMIT, AND THE CAUSE IS A SHARED DIRECTORY NOBODY TREATS AS SHARED
+
+Recorded because it is a fleet hazard, it cost a wrong commit, and nothing in
+this repository warns about it.
+
+I wrote this wave's commit message to `<scratchpad>/commitmsg.txt` and ran
+`git commit -F` on it. **The commit landed carrying a different wave's message
+entirely** -- a `fix(tests)` subject about a Windows shard KeyError, belonging to
+a wave working on `test_editor_fields.py`. My fourteen files were correct and
+the identity gate passed over them; only the message was another wave's.
+
+**THE SCRATCHPAD IS PER-SESSION, NOT PER-AGENT.** Every agent in this session
+resolves the same `.../<session-uuid>/scratchpad` directory. A sibling wave
+wrote its own `commitmsg.txt` there between my `Write` and my `git commit -F`,
+and `-F` read whatever was at that path at the moment it ran. **A generic
+filename in a shared directory is a race with no lock and no error** -- the
+write succeeds, the read succeeds, and the only symptom is a commit whose
+message describes somebody else's work.
+
+**IT IS THE SAME SHAPE AS THE TREE HAZARD THIS FLEET ALREADY KNOWS**, one level
+down: the standing rule is that concurrent waves must not share a git index, and
+the reason is that a shared mutable location silently mixes two agents' work.
+The scratchpad is a shared mutable location that looks private because its path
+contains a uuid -- and the uuid identifies the SESSION.
+
+**THE REPAIR, and it is cheap:** any file an agent writes to the shared
+scratchpad and later reads back carries its own WAVE NAME and worktree id in the
+filename -- `commitmsg-<wave>-<worktree>.txt` rather than `commitmsg.txt`. The
+commit was amended to its correct message; the tree was never wrong, and the
+amend changed the message only.
+
+**AND THE GUARD CAUGHT ME SPELLING THAT FILENAME OUT HERE**, which is the fourth
+guard to fire on this wave and the fourth to be right. A worktree id is a hex
+string, and this one happens to contain a ten-digit run, which is the [phone]
+shape. The value is not a phone number and the guard cannot know that -- **a
+shape match means UNDECLARED, not real** -- and an absolute workspace path is an
+identifier in this repository by its own rule, so the repair is to describe the
+convention rather than print the instance.
+
+**AND THE REASON THIS IS IN THE FILE RATHER THAN IN A REPORT TO THE LEAD:** a
+NAMED agent's final text stays in its own transcript. If it is not written down
+here, nobody learns it.
+
 ---
 
 ## 7. EVIDENCE: EVERY NUMBER HERE IS RE-DERIVABLE FROM A CLONE
