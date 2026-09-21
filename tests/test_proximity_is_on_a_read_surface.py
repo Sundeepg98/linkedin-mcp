@@ -12,6 +12,14 @@ surfaces and is simply not extracted. "Present and discarded" and "not on any
 surface" are different verdicts with different prices: the first is a parser on
 an address already admitted, the second is somebody else's job.
 
+**THE PARSER LANDED 2026-09-21** (wave ``proximity-field``, receipts in
+``_audit/2026-09-21-the-proximity-field.md``). This file kept its evidence and
+its controls, which still pin what the captures draw; its last check was
+INVERTED rather than deleted -- see
+:func:`test_the_field_is_read_in_exactly_one_module`. The reader itself, and
+the proof that it carries no employer name out, are in
+``tests/test_proximity_reader.py``.
+
 So this file pins the evidence, not the conclusion. It asserts only what the
 bytes on disk say, and it is built to be able to say NO:
 
@@ -139,18 +147,39 @@ def _prose_lines(path):
     return prose
 
 
-def test_the_field_is_read_by_nothing_in_the_package():
-    """The other half of the finding, and the reason the row is a BUILD.
+#: The ONE module allowed to name the alumni field in CODE. See
+#: :func:`test_the_field_is_read_in_exactly_one_module`.
+READER_MODULE = "shape.py"
 
-    The field is drawn and thrown away. ``linkedin_server`` names an alumni
-    line only in PROSE -- one ``#:`` comment in ``dom.py`` and one docstring
-    sentence in ``shape.py``, both about field-shift hazards rather than about
-    reading it -- and no line of CODE names it, whether as an identifier or as
-    a string needle.
 
-    This asserts that prose-only state. The day somebody wires a reader this
-    test goes red and is deleted along with the census row: that is the
-    intended end of this file, not a regression.
+def test_the_field_is_read_in_exactly_one_module():
+    """THIS CHECK WAS INVERTED ON 2026-09-21, WHEN THE READER LANDED.
+
+    It used to assert that ``linkedin_server`` named an alumni line only in
+    PROSE -- one ``#:`` comment in ``dom.py``, one docstring sentence in
+    ``shape.py``, both about field-shift hazards -- and that no line of CODE
+    named it anywhere. That was the evidence for ``J 40`` being a BUILD: the
+    field was drawn and thrown away.
+
+    Wave ``proximity-field`` built the reader, so the old assertion went red,
+    naming ten lines in ``shape.py``. Its own docstring called that "the
+    intended end of this file, not a regression" and prescribed deleting it.
+
+    IT IS INVERTED RATHER THAN DELETED, because deleting it is a strictly
+    worse trade than it looks. The old check had a real job -- knowing WHERE in
+    this package the field is named -- and that job did not end when the
+    reader landed; it changed sign. A reader concentrated in one module can be
+    audited for the thing that matters here, which is that the employer's name
+    never leaves it. The same matching scattered across four modules cannot,
+    and would arrive silently.
+
+    So it now asserts the CONCENTRATION: code names the field, and only inside
+    ``shape.py``. It can still fail three ways -- the reader disappearing, the
+    matching spreading to a second module, or the two prose mentions this file
+    is calibrated against going away.
+
+    Shown failing 2026-09-21 in all three directions; receipts in
+    ``_audit/2026-09-21-the-proximity-field.md`` section 4.
     """
     import glob
 
@@ -169,11 +198,18 @@ def test_the_field_is_read_by_nothing_in_the_package():
                 (in_prose if n in prose else in_code).append(where)
 
     assert in_prose, (
-        "the two prose mentions this check is calibrated against are gone, so "
-        "it is no longer looking at the package it was written for"
+        "the prose mentions this check is calibrated against are gone, so it "
+        "is no longer looking at the package it was written for"
     )
-    assert in_code == [], (
-        "CODE now names the alumni field at %r. If that is a reader, census "
-        "row J 40 is no longer a GAP and this file has done its job -- move "
-        "the row and delete this test." % in_code
+    assert in_code, (
+        "NO code in the package names the alumni field any more. The reader "
+        "census row J 40 rests on has been removed or renamed -- which puts "
+        "the row back to a GAP and is a finding, not a pass."
+    )
+    stray = sorted({where.split(":")[0] for where in in_code} - {READER_MODULE})
+    assert stray == [], (
+        "the alumni field is now named in CODE outside %s, in %r. The reader "
+        "is meant to be concentrated in one module so the guarantee that no "
+        "employer name leaves it can be audited in one place."
+        % (READER_MODULE, stray)
     )
