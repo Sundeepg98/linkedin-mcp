@@ -910,6 +910,7 @@ worktree and has been repaired four times in two days.
 | `linkedin_server/landing.py` | shipped code |
 | `tests/test_landing.py` | **REGISTER** -- the alphabet proof and its two red controls |
 | `scripts/_check_the_landing_guard_can_fail.py` | **REGISTER** -- shows the guard failing on the state that shipped |
+| `scripts/_probe_dom_error_url_field.py` | **REGISTER** -- drives every `dom.py` raise site that carries a url, by making `evaluate` fail for ONE script chosen by identity; asserts `reached` from the TRACEBACK, and carries a per-reader negative control (a double that raises for no script) plus both directions of the needle hunt |
 | `scripts/_census_message_interpolations.py` | **REGISTER** -- the enumeration, with the grep contrast printed |
 | `tests/test_no_message_publishes_a_landing.py` | **REGISTER** -- the discovering guard |
 | `tests/landing_interpolation_baseline.json` | **REGISTER** -- the coverage record; refuses to hold a hazard |
