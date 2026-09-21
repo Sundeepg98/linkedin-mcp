@@ -1,6 +1,15 @@
 # A LANDING IS A STRING THE SITE CHOSE, AND THIS PROCESS HAD NO ALLOWLIST FOR IT
 
 Wave `landed-url`, 2026-09-21, from master `762ec23`. Register section 51.
+
+**CORRECTS:** `_audit/2026-09-21-the-three-readers.md` -- its section 6b says "THE GENERAL CASE IS NAMED AND NOT FIXED. Every other tool in `server.py` still publishes its landing in this refusal", which was true when written and is false now.
+
+The general case is repaired in `auth.assert_not_authwall` itself and every
+tool in the package withholds its landing. The same section's premise about
+LinkedIn's authwall
+query was asserted from url shape; it is MEASURED here, and the half of it that
+makes the leak severe -- that the bounced address can be a NAME -- is still
+DERIVED and is labelled so in section 1.3.
 No browser was opened. No LinkedIn page was loaded. No write was fired. Every
 number below is offline, from shipped code, the committed tree, and Chrome's
 own history databases in the gitignored `_state/`.
