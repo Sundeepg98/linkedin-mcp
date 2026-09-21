@@ -653,6 +653,42 @@ REGISTER: tuple = (
         anchor="RULED: LEDGER OVER-COUNTS",
         aliases=("request E",),
     ),
+    # REGISTERED BY THE WAVE THAT MADE IT, and that is why the entry exists
+    # rather than the code comments citing a document title. Twenty sites fed
+    # `ExtractionFailedError.url`, `server._error` publishes it with no
+    # scrubber, and the question a later reader will ask is "what has been
+    # ruled about that field" -- which is the one question `_audit/INDEX.md`
+    # cannot answer and this register was written for.
+    Ruling(
+        id="ERROR-URL-ASKED-FOR-OR-NOTHING",
+        claim="The error envelope's url field carries the address this server "
+              "ASKED FOR, or nothing at all. A landing is never published "
+              "there; where a requested address exists in scope publishing it "
+              "is REQUIRED rather than merely permitted, and where none "
+              "exists the key is omitted and the landing is DESCRIBED in the "
+              "hint. A descriptor never goes into the url field.",
+        binds="verb -- what ExtractionFailedError.url may carry, per site",
+        document="_audit/2026-09-21-the-field-beside-the-message.md",
+        anchor="carries the address this server ASKED FOR, or it carries "
+               "nothing at all",
+        aliases=("the field beside the message", "the twenty sites",
+                 "ERROR-URL-PER-SITE"),
+        note="THE FAILURE-PATH COUNTERPART OF THE `source_url` SPLIT RULING "
+             "in `tests/test_the_source_url_split_was_never_ruled.py`, which "
+             "is NOT registered here because it lives as a test rather than "
+             "as an audit passage. Same kind of value -- the address a read "
+             "landed on -- in several of the SAME functions, and the two were "
+             "ruled by different files that did not know about each other: "
+             "`linkedin_my_profile` was declared SHAPED on its success path "
+             "and published its landing raw on its failure path, in one "
+             "function, for weeks. That ruling supplied the METHOD used here "
+             "(a per-site declaration with a written reason, a count per "
+             "site, a relay pinned as a relay, and drift failing in BOTH "
+             "directions) and its prohibition is what stopped this wave "
+             "wrapping all twenty: *wrapping a deliberate publication is as "
+             "much a defect as leaking an accidental one.* The count each "
+             "way is 12 withheld, 7 published, 1 relay.",
+    ),
 )
 
 
