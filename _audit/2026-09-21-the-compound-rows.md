@@ -434,3 +434,139 @@ invisible to this wave.**
 the denominator anywhere in the corpus or in the shipped tests goes stale, which
 is the strongest practical argument for the rule: the cheapest correct answer to
 seven of the eight cases costs the denominator nothing.
+
+### 7.1 ONE PINNED NUMBER DID MOVE, AND IT IS NOT THE DENOMINATOR
+
+`tests/test_triage_instrument.py::test_the_headline_split_is_the_one_the_report_quotes`
+pins the messaging slice's direction split. Correcting `C85`'s cell turned it
+**red first**, which is the demonstration this repo requires of any check that
+is going to be changed:
+
+    AssertionError: this slice held 83 GAP rows {'R': 11, 'W': 71, 'R+W': 1} at the
+    start of the 2026-09-20 messaging-gap wave, and 77 {'R': 10, 'W': 66, 'R+W': 1}
+    after it moved C43. It now holds 77 {'R': 10, 'W': 65, 'R+W': 2}.
+
+**Read what did NOT move in that message: the total, 77, and the reads, 10.** No
+row left GAP, no row was created. The arithmetic is entirely inside the split --
+writes `66 - 1 = 65`, read-and-writes `1 + 1 = 2` -- and the reads stay at 10
+because a compound row's read HALF counts in `R+W` and never in `R`. The
+constant was updated with that arithmetic written out, per the file's own
+convention, and **the value the write-ceiling wave set was preserved under
+`AFTER_THE_WRITE_CEILING_WAVE` rather than overwritten**, so the number that
+wave's report quotes still exists under a name that says whose it is. That is
+`DUPLICATE-ROW-IS-MARKED-NEVER-DELETED`'s principle applied to a constant.
+
+### 7.2 THE DENOMINATOR IS LESS LOAD-BEARING THAN THE BRIEF ASSUMED, AND THIS IS MEASURED
+
+A dedicated sweep of every assertion of the census row total, over the tracked
+set, found:
+
+| | |
+|---|---|
+| literal occurrences of `704` in tracked files | **60**, on 48 lines in 27 files |
+| of those lines, ROW-TOTAL ASSERTIONS | **34**, every one of them PROSE (markdown, or a Python docstring) |
+| of those lines, unrelated | **14** -- SHA fragments, help-article ids, a fixture hash, an employee-count string |
+| **assertions a shipped test ENFORCES against the literal `704`** | **ZERO** |
+
+**No test, gate or check anywhere in this repository pins the number 704.**
+Six constants were found by the broader search (`stated rows`, `--expect`,
+`count_census_states`, `row_count`, `total_rows`) and **none of the six goes red
+if `stated rows` becomes 705** -- each pins something narrower (per-slice GAP,
+a frozen historical census of 692/690/409, a four-row refused-address subset).
+
+The one genuinely derived figure that moves is **`760`**, the re-derived
+capability denominator, which is `stated_rows + 58 - 2` and would become 761.
+The PUBLISHED `761` is frozen by explicit ruling
+(`_audit/2026-09-19-cross-slice-rulings.md` section J3: *"correcting a headline
+by one on a reconstruction would cost more trust than it buys"*), so a +1 split
+would make the re-derivation converge ON the frozen headline rather than diverge
+from it.
+
+**THIS WEAKENS THE THIRD ARGUMENT IN THE BRIEF, AND I AM RECORDING THAT AGAINST
+MY OWN CONCLUSION.** The brief stated *"`stated rows = 704` is asserted across
+the corpus and by shipped tests"* and that *"every pinned count stated against
+704 becomes stale in the same commit."* The first half is true of the corpus
+(34 prose sites) and **false of the tests (zero)**; the second half overstates
+the blast radius. **A future split is cheaper than the brief priced it.** It is
+still 34 prose edits, and it still creates a row outside every frozen set, which
+remains the real cost -- but nobody should decline a genuinely required split in
+the belief that it would turn the suite red. It would not.
+
+---
+
+## 8. THE GATE
+
+Staged first, then `scripts/impact_gate.py`. Its verdict, and its own statement
+of what it did not do, quoted rather than summarised:
+
+    PASS over the 49 file(s) above (2354 tests) -- AND OVER NOTHING ELSE.
+
+    NOT CHECKED: 156 of 205 test files (76.1% of the suite by file).
+    The corpus-wide guards DID run, so the identity, credential and page-text
+    sweeps cover the whole tree. Everything else above is unexamined.
+    That is roughly 3740 of 6094 tests unrun (61.4%), against a suite count taken 2026-09-20 at 970a276.
+
+The impact set is 49 of 205 files (23.9%), well under the ~45% widening
+threshold, so no widening notice fired.
+
+**THE FIRST GATE RUN REFUSED, AND TWO OF ITS FOUR REDS WERE THE CORPUS TEACHING
+ME SOMETHING.** `test_the_audit_index_is_derived` and
+`test_the_rulings_register_is_derived` were ordinary derived-file drift,
+regenerated with `--write`. The fourth was not:
+`test_a_correction_is_findable_from_the_claim::test_every_candidate_pair_is_declared_or_triaged`
+caught all three edited cells and demanded the correction relationships be
+declared or triaged with a written reason. All three went onto
+`NOT_A_CORRECTION`, and the reasons are in the test file, because:
+
+* `M C67` and `P D27`/`P L3` cite the ruling that GOVERNS them --
+  the shape `CANONICAL-RULING-ID` makes mandatory. A `CORRECTS:` pair would
+  point a reader from the ruling to the row that obeys it, which is backwards.
+* `M C85` cites the write-partition only to say where its sibling rows are
+  queued, and **the write-partition got nothing wrong**: *"RULING NEEDED: split,
+  or leave whole"* was a correct statement that no ruling existed.
+  **An answer to a correctly-posed open question is not a correction of the
+  asking**, and that discrimination is now written down where the next wave
+  will meet it.
+
+---
+
+## 9. WHAT IS OWED, AND WHAT CONTRADICTS THE BRIEF
+
+**ONE BACK-POINTER IS OWED ON A DOCUMENT THIS WAVE DOES NOT OWN.**
+`_audit/2026-09-21-the-write-ceiling.md` diagnosed `C85`'s read half as
+invisible **because the row is compound**. The measurement says the cause is the
+misstated direction cell: `M M28` is identically compound and has never been
+invisible. That is a real correction, it is declared inside this document, and
+it needs a `CORRECTED BY:` back-pointer in the write-ceiling report, written by
+whoever owns that file. It is recorded on `NOT_A_CORRECTION` as owed rather than
+quietly skipped. The same document quotes `EXPECTED_NOW` at its old value; that
+value now lives under `AFTER_THE_WRITE_CEILING_WAVE`, so nothing dangles, but a
+one-line note there would close it.
+
+**THREE THINGS CONTRADICT THE BRIEF. Disk won all three.**
+
+1. **The precedent does not support the rule it was offered as a model for.**
+   The brief presents `P L2` -> `L2` + `L2b` as *"your model for what a split
+   looks like on disk AND your warning about what it costs."* It is both of
+   those, and it is also the **counter-example**: both halves are `R`, so a
+   direction-divergence rule would have forbidden the only split this census has
+   ever made.
+2. **`N 169` and `N 187` are not the same shape as `C85`.** They were named as
+   such by `write-ceiling`. They name ONE act over four facets and appear in no
+   compound net. What they carry is a direction cell contradicted by their own
+   reason cell, which is a different defect and not a split question.
+3. **`stated rows = 704` is not enforced by any shipped test.** Section 7.2.
+   Thirty-four prose sites, zero tests.
+
+**AND ONE THING I GOT WRONG MID-WAVE, recorded because the correction came from
+the corpus rather than from me.** I had `N 160` (*"Send, receive and manage
+message requests"*) down for an `R+W` correction on the strength of `receive`.
+Its own reason cell names its three twins -- `M M6` send, `M M7` accept,
+`M M8` decline -- and all three are `W`. `receive` there is the passive arrival
+of a request, not an act this census tracks. **No change made.** The sharp net
+over-reported exactly as designed and the row adjudicated itself.
+
+**THE STOP CONDITION IS MET.** The rule is settled and registered; every
+candidate carries a verdict; the denominator did not move; and the question that
+opened this wave now resolves against the register in one query, returning
+`COMPOUND-ROW-SPLITS-ONLY-ON-STATE` first.
