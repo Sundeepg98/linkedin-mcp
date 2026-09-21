@@ -10,7 +10,7 @@
 
     rulings registered       34
     documents scanned        209
-    RULED: declarations      21 claimed, 6 triaged, 0 unclaimed
+    RULED: declarations      21 claimed, 7 triaged, 0 unclaimed
 
 ---
 
@@ -188,7 +188,7 @@ Scan the CLAIM column against your question. Every claim is a paraphrase written
 | a heading naming a ruling | 98 | 225 |
 | a bold line opening on RULING/RULED | 44 | 98 |
 | the phrase THE RULING | 31 | 46 |
-| a named -RULING id | 18 | 44 |
+| a named -RULING id | 19 | 45 |
 | the phrase standing ruling | 9 | 15 |
 | a lead or operator ruling in prose | 31 | 62 |
 
@@ -233,6 +233,10 @@ Every `RULED:` line in the corpus, and what became of it. An UNCLAIMED row fails
 **[2026-09-19-the-four-absent-blockers.md](2026-09-19-the-four-absent-blockers.md)** -- `> RULED: THE CENSUS IS RIGHT. THE LEDGER'S `1R` IS THE ERROR. [...] **That `1R``
 
 > A QUOTATION OF A RULING MADE ELSEWHERE, marked as one by its blockquote. The ruling is CENSUS-OUTRANKS-LEDGER, declared in `_audit/2026-09-19-the-three-ruling-requests-ruled.md` and registered under that id. Registering the quotation too would give one ruling two entries, which is precisely what CANONICAL-RULING-ID forbids.
+
+**[2026-09-21-the-open-queue.md](2026-09-21-the-open-queue.md)** -- ``_audit/2026-09-19-two-census-conventions-ruled.md`): *"RULED: NO. THEY STAY`
+
+> A THIRD QUOTATION OF `INCIDENTAL-CAPTURE-IS-NOT-A-RULING`, in section 5.4b -- the correction that exists BECAUSE that ruling was missed. The lead's 5.4a claimed the question had been re-derived three times and named only the 2026-09-03 origin; 5.4b cites the 2026-09-19 ruling it had overlooked, which is the one that says `RULED:` in a file named `...-ruled.md`. Registering the citation would put that ruling in the register a second time, which `CANONICAL-RULING-ID` forbids. **The entry is worth reading for what it records rather than what it silences**: this register was merged and, within minutes, refused the very document written to explain why the corpus could not be searched -- the instrument convicting its own commissioner on its first working day.
 
 **[2026-09-21-the-open-queue.md](2026-09-21-the-open-queue.md)** -- `### 5.4 RULED: incidental capture is not a ruling -- and the discriminator is real, 08:40`
 

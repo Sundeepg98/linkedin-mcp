@@ -288,6 +288,36 @@ the wave firing that same surface, and a second browser builder on one
 signed-in profile is the thing this repo does not do. Take it when the slot
 frees.
 
+### 5.4b CORRECTION TO 5.4a, WHICH WAS ITSELF INCOMPLETE, 13:10
+
+**5.4a says the question was re-derived three times. It is four, and 5.4a is
+the fourth.** It found ONE of the two prior rulings and missed the other — the
+one that says `RULED:` in a file named `...-ruled.md`:
+
+- **`EXCLUDED-RULED-ADMISSION`** (~2026-09-03), the origin, which 5.4a quotes.
+- **`INCIDENTAL-CAPTURE-IS-NOT-A-RULING`** (2026-09-19,
+  `_audit/2026-09-19-two-census-conventions-ruled.md`): *"RULED: NO. THEY STAY
+  GAP, WITH THE BLOCKER NAMED PRECISELY."* With a three-way discriminator table
+  already written out.
+
+**A correction about findability, itself incomplete for want of findability.**
+The defect convicting itself, which is the most honest evidence available that
+it is real and not a story about one careless afternoon.
+
+**AND 5.4 SIMPLIFIED THE RULE IT RESTATED.** It treats the question as binary —
+aimed or incidental. The origin ruling is a **FOUR-GROUND TEST**: a row is
+`EXCLUDED-RULED` only on a forbidden-substring entry, a
+`writes.PERMANENTLY_FORBIDDEN` key, a `WriteSpec` refusing in its own words, or
+an audit passage measuring the capability unreachable. Everything a general
+mechanism merely happens to block is GAP with a named blocker. So 5.4's
+conclusion is right and its rule is coarser than the one already on disk.
+
+**WHY NOBODY COULD FIND IT, measured rather than guessed:** the origin lives in
+`_audit/_census/network.md` section 2 — **inside the data file it governs**,
+not in any document named for rulings. No search of rulings documents could
+ever have reached it. `_audit/RULINGS.md` now indexes it, and asking the
+question in its own words returns it ranked first of 34.
+
 ### 5.4a CORRECTION TO 5.4: IT WAS ALREADY RULED, ON 2026-09-05, 11:25
 
 **5.4 below presents itself as a new ruling. It is not one.** The same question

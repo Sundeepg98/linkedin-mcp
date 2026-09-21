@@ -683,6 +683,21 @@ NOT_A_RULING: dict = {
         "it."
     ),
 
+    ("2026-09-21-the-open-queue.md", "RULED: NO. THEY STAY"): (
+        "A THIRD QUOTATION OF `INCIDENTAL-CAPTURE-IS-NOT-A-RULING`, in section "
+        "5.4b -- the correction that exists BECAUSE that ruling was missed. "
+        "The lead's 5.4a claimed the question had been re-derived three times "
+        "and named only the 2026-09-03 origin; 5.4b cites the 2026-09-19 "
+        "ruling it had overlooked, which is the one that says `RULED:` in a "
+        "file named `...-ruled.md`. Registering the citation would put that "
+        "ruling in the register a second time, which `CANONICAL-RULING-ID` "
+        "forbids. **The entry is worth reading for what it records rather "
+        "than what it silences**: this register was merged and, within "
+        "minutes, refused the very document written to explain why the "
+        "corpus could not be searched -- the instrument convicting its own "
+        "commissioner on its first working day."
+    ),
+
     ("2026-09-21-the-open-queue.md", "RULED: incidental capture is not a ruling"): (
         "A RE-DERIVATION, NOT A NEW RULING, and its own document says so. "
         "Section 5.4a: *'5.4 below presents itself as a new ruling. It is not "
