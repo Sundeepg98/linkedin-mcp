@@ -9255,3 +9255,105 @@ specs reach `page.goto` and are refused by the double. Lifting the flag would
 not drive them. Five hazard coercion sites sit inside driven readers and never
 execute on the planted page; they are listed in the audit document rather than
 counted as covered.
+
+---
+
+## 53. THE DENOMINATOR NOTHING WAS HOLDING, AND A COMPLETION FIGURE THAT REFUSES (what-100-percent-means, 2026-09-21)
+
+`stated rows 704` is the number under every completion figure this repository
+publishes. As a standalone number it appears in 15 tracked documents
+under `_audit/` and in two module docstrings -- a figure the guard COMPUTES
+rather than carries, because the first draft wrote 21 from a substring grep
+and was wrong by six.
+**No shipped test asserted it.** Every wave was asked to check it by hand,
+which is the condition an invariant is in immediately before it stops being
+true -- and this census has twice lost rows exactly that way, `XR` (23 rows,
+a fortnight) and `CANNOT-DELIVER` (2 rows, through the freeze the number 409
+rests on).
+
+### 53.1 WHY THE EXISTING GUARDS COULD NOT DO IT, MEASURED RATHER THAN ASSUMED
+
+`tests/test_census_rows_carry_a_state.py` inspects **706** rows against the
+counter's **704** -- the two extra are its own `DECLARED_STATELESS` pair. So it
+is not a coverage gap: **every counted row was already being inspected.**
+Neither it nor `test_state_cell_dialects_refuse_loudly.py` COUNTS, and looking
+at a row one at a time is a different question from asking how many there are.
+A row added with a perfectly well-formed state cell passes both and moves the
+denominator in silence. Demonstrated, with both neighbours run and shown
+staying green.
+
+### 53.2 THE PIN IS AN ID SET, NOT A SCALAR, AND THE REASON IS THE FAILURE TEXT
+
+A scalar can say `704 -> 705` and nothing more, after which somebody diffs
+592 KB of markdown to find out which row. The pin carries the ID SET with
+multiplicity (`DUPLICATE-ROW-IS-MARKED-NEVER-DELETED` makes a set wrong the
+first time that ruling is exercised), so the guard names the delta itself --
+and DISCRIMINATES a row DELETED from its slice from one still sitting there
+whose state cell has stopped being readable. Those two need opposite fixes and
+this repository has twice paid for reporting them alike.
+
+**IT PINS THE POPULATION, NEVER THE ADJUDICATION.** A row moving GAP ->
+COVERED-PROVEN does not fire it. Several waves move rows daily; a guard firing
+on each would be switched off within the week.
+
+### 53.3 THE THIRD LEG NOTHING ELSE HAS: THE VOCABULARY
+
+Widening `count_census_states.STATES` makes previously-invisible rows countable,
+so **the denominator moves while every census file stays byte for byte the
+same.** That has happened twice, both times correctly, and both times the
+counter's docstring demanded a receipt nothing enforced.
+
+### 53.4 THE COMPLETION INSTRUMENT, AND THE DEFECT ITS OWN CONTROL FOUND IN IT
+
+`scripts/census_completion.py` prints the decomposition -- surface,
+denominator, adjudicated-vs-delivered, and what remains split by what would
+unblock it. **Its first version was wrong and demonstration C convicted it.**
+With a row's state rewritten to a word outside the vocabulary, it printed a
+complete and entirely plausible set of percentages over 703 rows: the row left
+numerator and denominator together, so nothing looked odd. Its control compared
+the walk against `enumerate_gap_rows`, and **the two share the parse by
+design**, so the check could not see it. The repair is the coupling: the
+instrument now consults `tests/census_row_pin.json` -- the only record of the
+population NOT produced by that parse -- and REFUSES rather than publishing a
+figure over a denominator nobody agreed to. A warning above the numbers would
+have been the worst option available: the numbers get quoted, the warning does
+not.
+
+### 53.5 WHAT IT REFUSES TO DO
+
+It does not classify blockers by their names. `scripts/classify_surface_blockers.py`
+records what that costs -- 186,629,988,917,605 subsets fit the three integers a
+name-based split once published. Every division is either computed by a shipped
+instrument or is an ENUMERATED list of row ids from a named document, and each
+line says which. It invents no schedule and prints no duration.
+
+### 53.6 A CONTROL WHOSE FIXTURE IS FOUND AT RUNTIME, AND WHY
+
+`_check_census_completion_can_fail.py` first hardcoded `N 33` and died on its
+first run: a sibling wave had banked that row hours earlier. A control naming a
+census row by id rots continuously, and rots into a FALSE ALARM somebody has to
+diagnose. It now SEARCHES for a row matching the shape it needs, ASSERTS one was
+found, and PRINTS which it chose -- so a census with no such row left fails
+loudly instead of passing vacuously.
+
+### 53.7 THE ENTRIES
+
+| path | shown failing by |
+|---|---|
+| `tests/test_the_census_row_total_is_pinned.py` | `scripts/_check_the_census_row_pin_can_fail.py`, three ways on real census rows in a scratch copy: a row ADDED (`ADDED N A16`, total 704 -> 705), a row DELETED (`DELETED J 1`, 704 -> 703), and a state rewritten outside the vocabulary (`UNREADABLE J 1` -- the discriminator, naming the row as still present). Each demonstration also RUNS the cell-shaped neighbour and asserts what it does: green for the first two, red for the third. That is what turns "shown failing" into "shown catching something nothing else catches" |
+| `scripts/pin_census_rows.py` | refuses to write a pin while any dialect is open, since a pin taken then freezes a denominator already short by that row |
+| `scripts/census_completion.py` | `scripts/_check_census_completion_can_fail.py`: a state change (5 pinned figures move at once, all named), a DIRECTION change (the bucket split moves and the headline figures do not -- the leg proving the decomposition is measured, not decorative), and an unreadable state (it REFUSES). **The third demonstration failed against the instrument's first version and is the reason the pin is consulted at all** |
+| `tests/census_row_pin.json` | not an instrument -- it is the datum the two above read. Its integrity is asserted by the literals `PINNED_ROW_TOTAL` and `PINNED_SLICE_ROWS`, which a human must edit, so `--write` on a broken tree cannot quietly green the suite |
+
+### 53.8 NOT AN INSTRUMENT, RECORDED SO NOBODY BUILDS IT AGAIN
+
+**A three-way blocker classifier keyed on blocker NAMES.** The wave wanted one
+and did not ship it. `_audit/2026-09-20-the-contingent-writeoffs.md` s3.1 is the
+precedent: a five-way split published as counts from an uncommitted classifier,
+whose own limits section admits the class *"is a guess about names, not a
+measurement of reasons"*. The bucket sizes in `census_completion.py` are
+therefore either shipped-instrument output (the R/W direction split) or
+enumerated row-id lists from named documents, and bucket 3 is printed as an
+UPPER BOUND with the missing measurement named: a per-row ADDRESS run through
+`readonly.is_read_url`. The census records addresses in prose, not in a column,
+so no instrument can take that measurement today.

@@ -2670,6 +2670,73 @@ NOT_A_CORRECTION: dict[tuple[str, str], str] = {
         "is mistaken, rather than that its generator was run."
     ),
 
+    # 2026-09-21, the WHAT-100-PERCENT-MEANS wave. Five candidates. ONE IS A
+    # REAL CORRECTION AND IS DECLARED -- `2026-09-21-the-open-queue.md` carries
+    # the matching `CORRECTED BY:` back-pointer, because its section 2 lists a
+    # row that has since been banked and a reader would rebuild it. The other
+    # four are below, each triaged by reading the line.
+    ("2026-09-21-what-100-percent-means.md",
+     "2026-09-20-the-write-partition.md"): (
+        "THE LINE IS A REFUSAL TO ADOPT THE DOCUMENT, WHICH IS THE OPPOSITE "
+        "OF CORRECTING IT. It sits in the RESIDUAL section and reads *'Not "
+        "measured here'*, then reports what that document claims and says the "
+        "claim *'was NOT re-derived by this wave and is cited, not adopted'*. "
+        "The correction vocabulary belongs to the document's OWN headline -- "
+        "that R2's claim is false at HEAD -- quoted so a reader knows what is "
+        "being declined. "
+        "**A CORRECTS: PAIR HERE WOULD ASSERT THE ONE THING THIS ENTRY "
+        "EXPLICITLY DISCLAIMS**: that this wave measured the write-partition "
+        "population and found it wrong. It did not measure it at all. "
+        "**WHAT WOULD MAKE THIS ENTRY WRONG:** a later section of this "
+        "document re-deriving that population and contradicting it."
+    ),
+    ("2026-09-21-what-100-percent-means.md", "mcp-inventory.md"): (
+        "THE CORRECTION TARGETS A DOCSTRING AND THE CITED FILE IS THE "
+        "EVIDENCE, NOT THE DEFENDANT. The line records that a child correctly "
+        "reported `scripts/count_census_states.py`'s docstring paraphrasing "
+        "this census's vocabulary as three states where the file's own table "
+        "gives six. `mcp-inventory.md` is what settles it and got nothing "
+        "wrong; the inaccurate paraphrase is in a Python docstring, which "
+        "this register's marker mechanism does not reach and which this wave "
+        "did not edit -- the counter is a shared instrument several waves "
+        "write. "
+        "**WHAT WOULD MAKE THIS ENTRY WRONG:** this document asserting that a "
+        "state, a row or a count IN `mcp-inventory.md` is mistaken. It makes "
+        "no claim about that file's contents beyond quoting its preamble "
+        "approvingly."
+    ),
+    ("2026-09-21-what-100-percent-means.md", "network.md"): (
+        "IT IS A SELF-CORRECTION, AND THE CITED SLICE IS THE WITNESS THAT "
+        "CONVICTED IT. The line is set in italics as an aside and reads *'An "
+        "earlier draft of this wave's control claimed `network.md`'s "
+        "admin-only table had no `state` column ... That was measured and it "
+        "is false'* -- the thing corrected is this wave's own draft, and the "
+        "slice is the evidence. The slice's header is quoted verbatim BECAUSE "
+        "it is right. "
+        "The aside also records that `count_census_states.main()` still "
+        "carries the same stale belief in a comment. **THAT IS A NOTE ABOUT A "
+        "PYTHON COMMENT, NOT A CENSUS CLAIM**, and no row, state or count in "
+        "the slice is disputed. "
+        "**WHAT WOULD MAKE THIS ENTRY WRONG:** this document asserting a "
+        "`network.md` row or state is mistaken while leaving it untouched. "
+        "This wave edits no census file at all, by its own constraint."
+    ),
+    ("2026-09-21-what-100-percent-means.md", "profile.md"): (
+        "THE CITED FILE IS NAMED AS THE HONEST COUNTEREXAMPLE. The line reads "
+        "*'unlike `profile.md`'s COUNTS block -- which declares its own "
+        "frozenness in prose and is therefore honest'*, and the correction "
+        "vocabulary belongs to what is being contrasted AGAINST it: "
+        "`blocker-map.tsv`'s `state_today` column, which is named for the "
+        "present, carries no date and is stale on 34 of 409 rows. "
+        "`profile.md` appears only to show what doing it correctly looks "
+        "like. A CORRECTS: marker would send a reader to a file this document "
+        "holds up as the good example. "
+        "**WHAT WOULD MAKE THIS ENTRY WRONG:** this document asserting that "
+        "the frozen COUNTS block is wrong rather than merely dated. It says "
+        "the opposite: both its `79` and the live `55` are true statements "
+        "about different instants, and the block says so itself."
+    ),
+
 }
 
 
