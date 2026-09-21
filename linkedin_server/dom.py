@@ -43,7 +43,7 @@ import re
 import time
 from typing import Any, Optional
 
-from linkedin_server import shape
+from linkedin_server import landing, shape
 from linkedin_server.coerce import as_count
 from linkedin_server.config import logger
 from linkedin_server.errors import ExtractionFailedError
@@ -573,7 +573,7 @@ async def harvest_linked_cards(
     except Exception as exc:
         raise ExtractionFailedError(
             f"could not read the page: {type(exc).__name__}: {exc}",
-            url=_url_of(page),
+            hint=_landing_note(page),
         ) from exc
     return list(records or [])
 
@@ -779,7 +779,7 @@ async def harvest_block_cards(
     except Exception as exc:
         raise ExtractionFailedError(
             f"could not read the page: {type(exc).__name__}: {exc}",
-            url=_url_of(page),
+            hint=_landing_note(page),
         ) from exc
     return list(records or [])
 
@@ -802,7 +802,7 @@ async def read_profile_fields(
     except Exception as exc:
         raise ExtractionFailedError(
             f"could not read the profile page: {type(exc).__name__}: {exc}",
-            url=_url_of(page),
+            hint=_landing_note(page),
         ) from exc
     return dict(data or {})
 
@@ -2424,6 +2424,44 @@ def _url_of(page: Any) -> str:
         return ""
 
 
+def _landing_note(page: Any) -> str:
+    """Say what page a reader failed on, without republishing its address.
+
+    **THE TWELVE READERS BELOW USED TO PASS ``url=_url_of(page)`` INTO
+    ``ExtractionFailedError``, AND ``server._error`` PUBLISHES THAT FIELD WITH
+    NO SCRUBBER AT ALL.** That was measured, not argued:
+    ``scripts/_probe_dom_error_url_field.py`` drove all twelve to their own
+    raise and found a planted ``/in/<slug>/`` verbatim at ``$.url`` twelve
+    times out of twelve. See ``_audit/2026-09-21-the-field-beside-the-message.md``
+    for the per-site ruling and ``_audit/2026-09-21-the-landed-url.md`` section
+    6.1 for the measurement.
+
+    **THIS SITE IS THE WORST PROVENANCE IN THE PACKAGE AND NOT MERELY A
+    LANDING.** Every one of the twelve reads ``page.url`` inside an ``except``
+    entered because ``page.evaluate`` raised, and the production raising class
+    is Playwright's *execution context destroyed by a navigation mid-evaluate*.
+    On exactly that path ``page.url`` is the address of the page that REPLACED
+    the one being read -- so the old field was publishing a string LinkedIn
+    chose AND describing the wrong page with it. Both halves say withhold.
+
+    **WHY THE NOTE GOES IN ``hint`` AND NOT IN ``url``.**
+    ``ExtractionFailedError.url`` is documented as an address the operator can
+    OPEN; a descriptor sentence there would be a type lie, and a caller that
+    tried to open it would be following this server into nonsense. ``hint`` is
+    prose by contract. ``server._error`` omits ``url`` entirely when it is
+    empty, so the payload simply carries no address -- which is the truth:
+    **this reader never knew one.** The address the TOOL requested is published
+    by the tool's own raise in ``server.py``, where it is a string this package
+    composed; that is the ASKED_FOR half of the same ruling.
+
+    Everything returned here is a literal from :mod:`linkedin_server.landing`,
+    an integer or a boolean -- that module's whole property, proved in
+    ``tests/test_landing.py`` and driven against this helper in
+    ``tests/test_the_error_url_is_ruled_per_site.py``.
+    """
+    return "the page this reader failed on: " + landing.withheld(_url_of(page))
+
+
 # ---------------------------------------------------------------------------
 # Href patterns used by the tools
 # ---------------------------------------------------------------------------
@@ -3310,7 +3348,7 @@ async def read_surface_census(
     except Exception as exc:
         raise ExtractionFailedError(
             f"could not read the page: {type(exc).__name__}: {exc}",
-            url=_url_of(page),
+            hint=_landing_note(page),
         ) from exc
 
     data = dict(data or {})
@@ -3906,7 +3944,7 @@ async def read_self_owned_editor_fields(
     except Exception as exc:
         raise ExtractionFailedError(
             f"could not read the editor container: {type(exc).__name__}: {exc}",
-            url=_url_of(page),
+            hint=_landing_note(page),
         ) from exc
 
     data = dict(data or {})
@@ -4355,7 +4393,7 @@ async def read_self_owned_editor_values(
     except Exception as exc:
         raise ExtractionFailedError(
             f"could not read the editor container: {type(exc).__name__}: {exc}",
-            url=_url_of(page),
+            hint=_landing_note(page),
         ) from exc
 
     data = dict(data or {})
@@ -5111,7 +5149,7 @@ async def read_own_activity_items(
     except Exception as exc:
         raise ExtractionFailedError(
             f"could not read the activity rail: {type(exc).__name__}: {exc}",
-            url=_url_of(page),
+            hint=_landing_note(page),
         ) from exc
 
     data = dict(data or {})
@@ -5899,7 +5937,7 @@ async def read_compose_modes(page: Any) -> dict[str, Any]:
         raise ExtractionFailedError(
             f"could not read the composer's dispatch modes: "
             f"{type(exc).__name__}: {exc}",
-            url=_url_of(page),
+            hint=_landing_note(page),
         ) from exc
     return dict(data or {})
 
@@ -6248,7 +6286,7 @@ async def read_selected_recipients(page: Any, needle: str) -> dict[str, Any]:
         raise ExtractionFailedError(
             f"could not read the composer's selected recipients: "
             f"{type(exc).__name__}: {exc}",
-            url=_url_of(page),
+            hint=_landing_note(page),
         ) from exc
     return dict(data or {})
 
@@ -8376,7 +8414,7 @@ async def read_job_insight_panels(page: Any) -> dict[str, Any]:
     except Exception as exc:
         raise ExtractionFailedError(
             f"could not read the job posting: {type(exc).__name__}: {exc}",
-            url=_url_of(page),
+            hint=_landing_note(page),
         ) from exc
     markers = dict(markers or {})
 
@@ -8719,7 +8757,7 @@ async def read_profile_views_insights(page: Any) -> dict[str, Any]:
     except Exception as exc:
         raise ExtractionFailedError(
             f"could not read the profile-views page: {type(exc).__name__}: {exc}",
-            url=_url_of(page),
+            hint=_landing_note(page),
         ) from exc
     data = dict(data or {})
 
@@ -9356,7 +9394,7 @@ async def read_search_appearances(page: Any) -> dict[str, Any]:
         raise ExtractionFailedError(
             f"could not read the search-appearances page: "
             f"{type(exc).__name__}: {exc}",
-            url=_url_of(page),
+            hint=_landing_note(page),
         ) from exc
     data = dict(data or {})
 

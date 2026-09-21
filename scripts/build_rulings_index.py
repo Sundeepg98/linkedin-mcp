@@ -621,6 +621,27 @@ REGISTER: tuple = (
         anchor="RULED: LEDGER OVER-COUNTS",
         aliases=("request E",),
     ),
+    # REGISTERED BY THE WAVE THAT MADE IT, and that is why the entry exists
+    # rather than the code comments citing a document title. Twenty sites fed
+    # `ExtractionFailedError.url`, `server._error` publishes it with no
+    # scrubber, and the question a later reader will ask is "what has been
+    # ruled about that field" -- which is the one question `_audit/INDEX.md`
+    # cannot answer and this register was written for.
+    Ruling(
+        id="ERROR-URL-ASKED-FOR-OR-NOTHING",
+        claim="The error envelope's url field carries the address this server "
+              "ASKED FOR, or nothing at all. A landing is never published "
+              "there; where a requested address exists in scope publishing it "
+              "is REQUIRED rather than merely permitted, and where none "
+              "exists the key is omitted and the landing is DESCRIBED in the "
+              "hint. A descriptor never goes into the url field.",
+        binds="verb -- what ExtractionFailedError.url may carry, per site",
+        document="_audit/2026-09-21-the-field-beside-the-message.md",
+        anchor="carries the address this server ASKED FOR, or it carries "
+               "nothing at all",
+        aliases=("the field beside the message", "the twenty sites",
+                 "ERROR-URL-PER-SITE"),
+    ),
 )
 
 

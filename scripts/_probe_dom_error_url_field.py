@@ -136,26 +136,61 @@ INNER_NEEDLE = "example-inner-marker-string"
 # The twelve sites
 # ---------------------------------------------------------------------------
 
-#: ``(reader, script constant, line of the ``raise``)`` at commit a29c281.
-TARGETS: tuple[tuple[str, str, int], ...] = (
-    ("harvest_linked_cards", "HARVEST_LINKED_CARDS_JS", 574),
-    ("harvest_block_cards", "HARVEST_BLOCK_CARDS_JS", 780),
-    ("read_profile_fields", "READ_PROFILE_JS", 803),
-    ("read_surface_census", "CENSUS_JS", 3311),
-    ("read_self_owned_editor_fields", "EDITOR_FIELDS_JS", 3907),
-    ("read_self_owned_editor_values", "EDITOR_VALUES_JS", 4356),
-    ("read_own_activity_items", "ACTIVITY_ITEMS_JS", 5112),
-    ("read_compose_modes", "COMPOSE_MODES_JS", 5899),
-    ("read_selected_recipients", "SELECTED_RECIPIENT_JS", 6248),
-    ("read_job_insight_panels", "JOB_INSIGHT_MARKERS_JS", 8377),
-    ("read_profile_views_insights", "PROFILE_VIEWS_INSIGHTS_JS", 8720),
-    ("read_search_appearances", "SEARCH_APPEARANCES_JS", 9356),
+#: ``(reader, script constant)``. **THE LINE IS NOT HERE ANY MORE, AND THE
+#: REASON IS A FALSE FINDING THIS FILE PRODUCED ON 2026-09-21.**
+#:
+#: This tuple used to carry the line of each ``raise``, frozen at commit
+#: a29c281, and ``main`` compared the traceback against it inside
+#: :data:`LINE_WINDOW`. The ``the-field-beside-the-message`` wave then repaired
+#: the twelve sites and added a 38-line helper above them, and **nine of the
+#: twelve rows came back ``wrong_site``** -- a verdict that reads as *the probe
+#: reached the wrong raise* and was in fact *dom.py grew*. Nothing had moved
+#: except line numbers.
+#:
+#: That is the recorded failure mode of a line citation exactly: it does not
+#: rot into a dangling reference, it rots into a PLAUSIBLE WRONG ANSWER, which
+#: stops a reader instead of sending them looking. The expected line is now
+#: RESOLVED FROM THE SOURCE at run time by :func:`_expected_raise_lines`, and a
+#: reader whose line cannot be resolved UNIQUELY voids the report rather than
+#: being compared against a guess.
+TARGETS: tuple[tuple[str, str], ...] = (
+    ("harvest_linked_cards", "HARVEST_LINKED_CARDS_JS"),
+    ("harvest_block_cards", "HARVEST_BLOCK_CARDS_JS"),
+    ("read_profile_fields", "READ_PROFILE_JS"),
+    ("read_surface_census", "CENSUS_JS"),
+    ("read_self_owned_editor_fields", "EDITOR_FIELDS_JS"),
+    ("read_self_owned_editor_values", "EDITOR_VALUES_JS"),
+    ("read_own_activity_items", "ACTIVITY_ITEMS_JS"),
+    ("read_compose_modes", "COMPOSE_MODES_JS"),
+    ("read_selected_recipients", "SELECTED_RECIPIENT_JS"),
+    ("read_job_insight_panels", "JOB_INSIGHT_MARKERS_JS"),
+    ("read_profile_views_insights", "PROFILE_VIEWS_INSIGHTS_JS"),
+    ("read_search_appearances", "SEARCH_APPEARANCES_JS"),
 )
 
 #: A multi-line ``raise`` reports its statement's first line, but which line
 #: of a statement a traceback names has moved between interpreter releases.
 #: A window rather than equality, with the measured value always reported.
 LINE_WINDOW = 8
+
+
+def _expected_raise_lines() -> dict[str, int]:
+    """Where each reader's ``ExtractionFailedError`` is, READ FROM THE SOURCE.
+
+    Replaces the frozen third column of :data:`TARGETS`; see the note there
+    for the false finding that forced it.
+
+    **A READER WITH MORE THAN ONE SUCH RAISE IS LEFT OUT RATHER THAN GUESSED
+    AT.** Its absence makes ``main`` void the run for that row, which is the
+    honest answer: this probe's ``reached`` verdict rests on the traceback
+    landing at ONE known statement, and a function with two of them has no
+    such statement. Filling in "the first one" would be a guess wearing a
+    measurement's clothes.
+    """
+    lines: dict[str, list[int]] = {}
+    for row in _argument_census("dom", "ExtractionFailedError"):
+        lines.setdefault(row["enclosing"], []).append(int(row["line"]))
+    return {name: found[0] for name, found in lines.items() if len(found) == 1}
 
 
 # ---------------------------------------------------------------------------
@@ -385,7 +420,7 @@ def _hint_reaches_the_envelope() -> dict[str, Any]:
 def _controls_that_did_not_hold(payload: dict) -> list:
     """Every control in ``payload`` that failed, as one line each.
 
-    THREE CONTROLS, AND EACH ONE VOIDS A DIFFERENT CLAIM:
+    FOUR CONTROLS, AND EACH ONE VOIDS A DIFFERENT CLAIM:
 
     * the POSITIVE hunt controls -- the walker must find a needle that IS
       planted. Without them "no needle found" could mean the walker is blind.
@@ -395,6 +430,12 @@ def _controls_that_did_not_hold(payload: dict) -> list:
       double that raises for NO script must produce no raise. Without it a
       ``reached`` verdict could be ambient behaviour of the double rather than
       the effect of this probe's per-script shaping.
+    * the RESOLVED EXPECTED LINE -- a ``reached`` verdict means the traceback
+      landed at a KNOWN statement, so a reader whose raise cannot be located
+      uniquely in the source has nothing for the traceback to be compared
+      against. Added 2026-09-21 with :func:`_expected_raise_lines`, when the
+      frozen line table reported nine false ``wrong_site`` rows after a repair
+      grew ``dom.py`` by 38 lines.
 
     Returned as a LIST rather than a bool so the failure names itself. An
     empty list is the only result that lets the report stand.
@@ -422,19 +463,29 @@ def _controls_that_did_not_hold(payload: dict) -> list:
                 "shaping"
                 % (row.get("reader"), row.get("control_why") or "no reason")
             )
+        if row.get("verdict") == "line_unresolved":
+            failures.append(
+                "the raise in %r could not be located uniquely in dom.py, so "
+                "its traceback has no known statement to be compared against "
+                "and 'reached' cannot be claimed for it" % row.get("reader")
+            )
     return failures
 
 
 def main() -> int:
     evaluated = _scripts_evaluated()
+    expected_lines = _expected_raise_lines()
     rows: list[dict[str, Any]] = []
 
-    for reader, script_name, line in TARGETS:
+    for reader, script_name in TARGETS:
         fn = getattr(dom, reader, None)
         script = getattr(dom, script_name, None)
+        line = expected_lines.get(reader)
         row: dict[str, Any] = {
             "reader": reader,
             "script": script_name,
+            # RESOLVED, not frozen. None means dom.py has no single
+            # ExtractionFailedError in this reader, which voids the run.
             "expected_line": line,
             "ast_scripts": evaluated.get(reader, []),
             "ast_agrees": script_name in evaluated.get(reader, []),
@@ -454,7 +505,9 @@ def main() -> int:
         row["control_frame"] = control.get("frame", "")
         row["control_line"] = control.get("line", 0)
 
-        if row["outcome"] == "raised":
+        if line is None:
+            row["verdict"] = "line_unresolved"
+        elif row["outcome"] == "raised":
             same = row.get("frame") == reader
             near = abs(int(row.get("line") or 0) - line) <= LINE_WINDOW
             row["verdict"] = "reached" if (same and near) else "wrong_site"

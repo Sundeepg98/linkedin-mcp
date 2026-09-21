@@ -8,9 +8,9 @@
 
 **THIS REGISTER IS NOT THE CORPUS AND DOES NOT CLAIM TO BE COMPLETE.** Read section 4 before concluding a question is unruled: the scan that keeps it honest reads ONE marker, and the ruling that caused this file to be written does not carry it.
 
-    rulings registered       34
-    documents scanned        210
-    RULED: declarations      21 claimed, 7 triaged, 0 unclaimed
+    rulings registered       35
+    documents scanned        211
+    RULED: declarations      22 claimed, 7 triaged, 0 unclaimed
 
 ---
 
@@ -71,6 +71,7 @@ Scan the CLAIM column against your question. Every claim is a paraphrase written
 | `DISCLOSING-PRESS-PERMITTED` | Pressing a control that DISCLOSES content on a page already admitted is PERMITTED, under four conditions that must all hold: the page is admitted, the control matches an enumerated disclosure shape by attribute, the press is shown not to move an outward counter, and it is closed with the closure verified. | pressing a control, disclosure only | 2026-09-19 | [2026-09-19-the-disclosing-press-ruling.md](2026-09-19-the-disclosing-press-ruling.md)<br>*RULED: PERMITTED, under four conditions that must ALL hold* |
 | `PROBE-MUST-NOT-TRY-REFUSED-VALUES` | The check stands and the probe must not try refused values. | what a probe may submit while measuring a boundary | 2026-09-19 | [2026-09-19-two-census-conventions-ruled.md](2026-09-19-two-census-conventions-ruled.md)<br>*RULED: THE CHECK STANDS. THE PROBE MUST NOT TRY REFUSED VALUES.* |
 | `PUBLISHED-SPLIT-REPORT-NOW-GATE-LATER` | The published-split check REPORTS now and GATES once the deliberate over-runs are declared. | when a reporting check becomes a blocking gate | 2026-09-19 | [2026-09-19-the-five-requests-ruled.md](2026-09-19-the-five-requests-ruled.md)<br>*D. THE PUBLISHED-SPLIT CHECK -- RULED: report now, gate once the deliberate over-runs are declared* |
+| `ERROR-URL-ASKED-FOR-OR-NOTHING` | The error envelope's url field carries the address this server ASKED FOR, or nothing at all. A landing is never published there; where a requested address exists in scope publishing it is REQUIRED rather than merely permitted, and where none exists the key is omitted and the landing is DESCRIBED in the hint. A descriptor never goes into the url field. | what ExtractionFailedError.url may carry, per site | 2026-09-21 | [2026-09-21-the-field-beside-the-message.md](2026-09-21-the-field-beside-the-message.md)<br>*5. THE RULING, STATED ONCE SO IT CAN BE CITED* |
 
 ---
 
@@ -101,6 +102,7 @@ Scan the CLAIM column against your question. Every claim is a paraphrase written
 | DECIDE not MEASURE | `GROUPS-ADDRESS-BUYS-NO-WRITE` |
 | decide-retire-rulings section 2 | `BOUNDARY-IS-NOT-A-REASON` |
 | DEFECT ONE | `GATE-IS-SAFE-AND-BLIND` |
+| ERROR-URL-PER-SITE | `ERROR-URL-ASKED-FOR-OR-NOTHING` |
 | FORBIDDEN-CLASS-FIX-LANDED | `INCIDENTAL-CAPTURE-IS-NOT-A-RULING` |
 | incidental capture | `INCIDENTAL-CAPTURE-IS-NOT-A-RULING` |
 | L118-123 | `EXCLUDED-RULED-ADMISSION` |
@@ -137,6 +139,7 @@ Scan the CLAIM column against your question. Every claim is a paraphrase written
 | the class-filter convention | `INCIDENTAL-CAPTURE-IS-NOT-A-RULING` |
 | the deduplication ruling | `DUPLICATE-ROW-IS-MARKED-NEVER-DELETED` |
 | the disclosing press | `DISCLOSING-PRESS-PERMITTED` |
+| the field beside the message | `ERROR-URL-ASKED-FOR-OR-NOTHING` |
 | the groups eight | `GROUPS-ADDRESS-BUYS-NO-WRITE` |
 | the guard contradiction | `MUST-STAY-REFUSED-ENTRIES-COME-OUT` |
 | the ledger's own rule | `EXCLUDED-RULED-ADMISSION` |
@@ -147,6 +150,7 @@ Scan the CLAIM column against your question. Every claim is a paraphrase written
 | the search admission | `SEARCH-ADMISSION-APPROVED-FIVE-CONDITIONS` |
 | the standing order | `NO-IRREVERSIBLE-WRITE-IS-FIRED` |
 | the standing shape | `STANDING-SHAPE-OF-A-WRITE-RULING` |
+| the twenty sites | `ERROR-URL-ASKED-FOR-OR-NOTHING` |
 | two-census-conventions section 1 | `CANONICAL-RULING-ID` |
 | two-census-conventions section 2 | `CONTAINER-EXCLUSION-PROPAGATES-ONLY-IF-UNREACHABLE` |
 | two-census-conventions section 3 | `INCIDENTAL-CAPTURE-IS-NOT-A-RULING` |
@@ -185,11 +189,11 @@ Scan the CLAIM column against your question. Every claim is a paraphrase written
 
 | signal NOT scanned | files | lines |
 |---|---|---|
-| a heading naming a ruling | 98 | 225 |
-| a bold line opening on RULING/RULED | 45 | 101 |
-| the phrase THE RULING | 31 | 46 |
+| a heading naming a ruling | 99 | 227 |
+| a bold line opening on RULING/RULED | 46 | 106 |
+| the phrase THE RULING | 32 | 48 |
 | a named -RULING id | 19 | 45 |
-| the phrase standing ruling | 9 | 15 |
+| the phrase standing ruling | 10 | 17 |
 | a lead or operator ruling in prose | 31 | 62 |
 
 **The ruling that caused this register to be written is in the first row and not in the scan.** `BOUNDARY-IS-NOT-A-REASON` is phrased as a quoted ledger rule under a heading that carries no marker at all. It is registered because a person read it, and nothing here would have found it.
@@ -223,6 +227,7 @@ Every `RULED:` line in the corpus, and what became of it. An UNCLAIMED row fails
 | [2026-09-19-two-census-conventions-ruled.md](2026-09-19-two-census-conventions-ruled.md) | ### RULED: APPROVED IN PRINCIPLE. FIVE CONDITIONS, ALL BINDING. | `SEARCH-ADMISSION-APPROVED-FIVE-CONDITIONS` |
 | [2026-09-19-two-census-conventions-ruled.md](2026-09-19-two-census-conventions-ruled.md) | ### RULED: THE GRAIN FOLLOWS WHAT THE PLATFORM DRAWS | `GRAIN-FOLLOWS-WHAT-THE-PLATFORM-DRAWS` |
 | [2026-09-20-the-pointer-graph.md](2026-09-20-the-pointer-graph.md) | **RULED: ship the detector. Do not rewrite the 69 cells.** The brief authorised this | `POSITIONAL-DIALECT-SHIP-THE-DETECTOR` |
+| [2026-09-21-the-field-beside-the-message.md](2026-09-21-the-field-beside-the-message.md) | **RULED: the error envelope's url field carries the address this server ASKED | `ERROR-URL-ASKED-FOR-OR-NOTHING` |
 
 ### 5.1 Triaged -- a declaration hit that is not a ruling made here
 

@@ -1071,7 +1071,17 @@ async def _read_cards(
             page, href_pattern=href_pattern, max_items=limit * 3
         )
         if not allow_empty:
-            dom.require_rows(records, url=final_url, surface=surface)
+            # THE REQUESTED ADDRESS, NOT THE LANDED ONE. `url` is this
+            # function's own parameter and `test_navigation_is_never_derived`
+            # is the standing proof that no navigation target in this package
+            # is page-derived, so it is a string this package or its caller
+            # composed. `final_url` is `BROWSER.goto`'s return, which is
+            # `page.url` -- a string LinkedIn chose, published by
+            # `server._error` with no scrubber. Ruled ASKED_FOR in
+            # _audit/2026-09-21-the-field-beside-the-message.md; the contract
+            # "open the same page by hand" is honoured better by the address
+            # that travels the same redirect than by its endpoint.
+            dom.require_rows(records, url=url, surface=surface)
         rows, dropped = dom.parse_all(records, parser)
         return shape.envelope(
             rows, limit=limit, source_url=final_url, dropped=dropped
@@ -1166,7 +1176,14 @@ async def _read_tracker(
                         shape.parse_job_card_trace(rec) for rec in records[:3]
                     ],
                 ),
-                url=final_url,
+                # ASKED_FOR, not landed. `url` above is
+                # f"{BASE_URL}/jobs-tracker/?stage={stage}" -- this package's
+                # own template over a stage token; `final_url` is `page.url`
+                # after the navigation, which `server._error` publishes
+                # unscrubbed. Ruled per site in
+                # _audit/2026-09-21-the-field-beside-the-message.md and pinned
+                # by tests/test_the_error_url_is_ruled_per_site.py.
+                url=url,
                 hint="open the url yourself and compare with what this reports",
             )
 
@@ -1662,7 +1679,20 @@ async def linkedin_who_viewed_me(limit: int = DEFAULT_LIMIT) -> dict[str, Any]:
     try:
         async with BROWSER.session() as page:
             last_url = ""
+            # THE REQUESTED ADDRESS OF THE LAST ATTEMPT, TRACKED SEPARATELY
+            # FROM THE LANDED ONE. Both are needed and they are different
+            # things: `last_url` is `page.url` and feeds `source_url` on the
+            # success path, which the fourteen-row `source_url` ruling governs
+            # and this wave does not touch; `last_requested_url` is the
+            # constant this tool asked for and is what the failure below
+            # publishes. **THIS TOOL'S OWN DOCSTRING SAYS THE TWO DIVERGE** --
+            # "/me/profile-views/ now redirects to that same page" -- so here
+            # the difference is documented rather than hypothetical.
+            # BOUND BEFORE THE NAVIGATION ON PURPOSE: if `goto` raises, the
+            # requested address is still the one that was tried.
+            last_requested_url = ""
             for attempt, url in enumerate(urls[:MAX_NAVIGATIONS_PER_CALL], start=1):
+                last_requested_url = url
                 last_url = await BROWSER.goto(page, url)
                 assert_not_authwall(last_url, surface="profile views")
                 records = await dom.harvest_linked_cards(
@@ -1739,7 +1769,12 @@ async def linkedin_who_viewed_me(limit: int = DEFAULT_LIMIT) -> dict[str, Any]:
                 "the classic profile-views page. If you genuinely have no "
                 "viewers this is what an empty list looks like; if you know "
                 "there are some, LinkedIn has changed this surface.",
-                url=last_url,
+                # ASKED_FOR: the last address this tool REQUESTED, both of
+                # them module constants. `last_url` is where the browser
+                # finished, and this is the one surface whose own docstring
+                # records a redirect. Ruled in
+                # _audit/2026-09-21-the-field-beside-the-message.md.
+                url=last_requested_url,
                 hint="open the url yourself and compare with what this reports",
             )
     except Exception as exc:
@@ -4645,7 +4680,14 @@ async def linkedin_job_detail(job_id: str) -> dict[str, Any]:
                         description_wait=reading["description_wait"],
                         settle=BROWSER.last_settle,
                     ),
-                    url=final_url,
+                    # ASKED_FOR, not landed. `url` above is
+                    # f"{BASE_URL}/jobs/view/{digits}", built from digits this
+                    # tool already proved numeric -- the same provenance the
+                    # landing baseline rules SERVER_CONSTRUCTED for this
+                    # function's message. `final_url` is `page.url`, which
+                    # `server._error` publishes unscrubbed. Ruled in
+                    # _audit/2026-09-21-the-field-beside-the-message.md.
+                    url=url,
                     hint="open the url yourself and compare with what this reports",
                 )
 
@@ -4935,7 +4977,12 @@ async def linkedin_followed_companies(
                     + " An empty list here would be indistinguishable from you "
                     "following nothing, so it is reported as a failure "
                     "instead.",
-                    url=final_url,
+                    # ASKED_FOR, not landed. `url` above is a pure constant --
+                    # f"{BASE_URL}/mynetwork/network-manager/company/" -- and
+                    # `final_url` is `page.url`, which `server._error`
+                    # publishes unscrubbed. Ruled in
+                    # _audit/2026-09-21-the-field-beside-the-message.md.
+                    url=url,
                     hint="open the url yourself and compare with what this reports",
                 )
 
@@ -5019,7 +5066,20 @@ async def linkedin_my_profile(
         }
     try:
         async with BROWSER.session() as page:
-            final_url = await BROWSER.goto(page, f"{BASE_URL}/in/me/")
+            # NAMED, AND THIS IS THE SURFACE WHERE IT MATTERS MOST. `/in/me/`
+            # is a constant; what it LANDS on is `/in/<vanity>/`, and a vanity
+            # slug is a name. The shipped test
+            # `test_a_profile_page_with_no_readable_name_is_a_failure` drove
+            # exactly that redirect and asserted the resolved slug reached the
+            # caller at `$.url` -- it PASSED, which is what the leak looked
+            # like from inside the suite. It is inverted now. Note also that
+            # `source_url` on this tool's SUCCESS path is declared SHAPED in
+            # tests/test_the_source_url_split_was_never_ruled.py: the same
+            # value, in the same function, was shaped on one path and raw on
+            # the other, and nobody had noticed because the two paths are
+            # ruled by different files.
+            requested_url = f"{BASE_URL}/in/me/"
+            final_url = await BROWSER.goto(page, requested_url)
             assert_not_authwall(final_url, surface="profile")
             fields = await dom.read_profile_fields(page)
 
@@ -5037,7 +5097,17 @@ async def linkedin_my_profile(
                     "h1 at all now, so the name is taken from the first "
                     "heading inside main, cross-checked against the document "
                     "title.",
-                    url=final_url,
+                    # ASKED_FOR: `/in/me/`, not the `/in/<vanity>/` it landed
+                    # on. See the comment at `requested_url` above.
+                    url=requested_url,
+                    # UNTOUCHED, AND DELIBERATELY SO. This hint is page text
+                    # and it is a SEPARATE decision from the url -- section 4
+                    # of _audit/2026-09-21-the-field-beside-the-message.md
+                    # says why, and the short version is that the same list is
+                    # published on this tool's SUCCESS path as
+                    # `headings_seen`, so withholding it here would break a
+                    # contract while leaving the contract standing one branch
+                    # away.
                     hint=f"headings seen: {[s.get('heading') for s in sections]}",
                 )
 
@@ -5371,7 +5441,14 @@ async def linkedin_notifications(
     limit = _clamp(limit, NOTIFICATIONS_DEFAULT_LIMIT, NOTIFICATIONS_MAX_LIMIT)
     try:
         async with BROWSER.session() as page:
-            final_url = await BROWSER.goto(page, f"{BASE_URL}/notifications/")
+            # NAMED SO THE REFUSAL CAN PUBLISH IT. The address this tool
+            # REQUESTS is a constant; the address it LANDS on is a string
+            # LinkedIn chose, and `server._error` publishes the error's `url`
+            # field with no scrubber. The requested one is what the failure
+            # below carries -- see
+            # _audit/2026-09-21-the-field-beside-the-message.md.
+            requested_url = f"{BASE_URL}/notifications/"
+            final_url = await BROWSER.goto(page, requested_url)
             assert_not_authwall(final_url, surface="notifications")
             records = await dom.harvest_block_cards(
                 page,
@@ -5383,7 +5460,7 @@ async def linkedin_notifications(
             )
             dom.require_rows(
                 records,
-                url=final_url,
+                url=requested_url,
                 surface="notifications",
                 hint=(
                     "notifications is the surface with the least dependable "

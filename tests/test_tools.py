@@ -1616,7 +1616,23 @@ async def test_the_completeness_block_is_labelled_derived_and_invents_no_score(d
 
 
 async def test_a_profile_page_with_no_readable_name_is_a_failure(drive):
-    """Not a dict of Nones. A shape full of nulls reads like data."""
+    """Not a dict of Nones. A shape full of nulls reads like data.
+
+    INVERTED 2026-09-21, AND THE INVERSION IS THE POINT OF THE TEST NOW.
+    Until then this asserted ``result["url"] == PROFILE_RESOLVED_URL`` -- that
+    the ``/in/<vanity>/`` address ``/in/me/`` REDIRECTED TO reached the caller.
+    It passed for as long as it existed, which is what the leak looked like
+    from inside the suite: ``server._error`` publishes an
+    ``ExtractionFailedError``'s ``url`` with NO scrubber, and a vanity slug is
+    a name.
+
+    IT IS NOT DELETED, BECAUSE IT IS THE ONLY TEST THAT EVER DEMONSTRATED THAT
+    DEFECT. It is turned round: the refusal must publish the address this
+    server ASKED FOR, which is a constant, and must not carry the one it
+    landed on. The per-site ruling is
+    ``_audit/2026-09-21-the-field-beside-the-message.md`` and its executable
+    half is ``tests/test_the_error_url_is_ruled_per_site.py``.
+    """
     page = ScriptedPage(
         evaluate_queue=[{"url": PROFILE_RESOLVED_URL, "sections": []}],
         redirect_map={PROFILE_ME_URL: PROFILE_RESOLVED_URL},
@@ -1626,9 +1642,36 @@ async def test_a_profile_page_with_no_readable_name_is_a_failure(drive):
     result = await linkedin_my_profile(include_skills=True)
 
     assert result["error"] == "extraction_failed", result
-    assert result["url"] == PROFILE_RESOLVED_URL
+    # THE REQUESTED ADDRESS, POSITIVELY. Not an absence assertion: the field
+    # is this tool's reproduction instruction and a refusal that published
+    # nothing would satisfy "the slug is gone" while helping nobody. Opening
+    # /in/me/ by hand travels the same redirect the server travelled.
+    assert result["url"] == PROFILE_ME_URL, result
+    # AND THE LANDING IS NOWHERE IN THE PAYLOAD, not merely out of $.url.
+    assert PROFILE_RESOLVED_URL not in repr(result), result
+    assert "alex-r" not in repr(result), result
     assert "name" not in result
     assert "completeness" not in result
+
+
+def test_that_assertion_convicts_the_payload_that_actually_shipped():
+    """THE ANTI-VACUITY HALF, and it is not optional.
+
+    Flipping an assertion to an absence is exactly where a vacuous test gets
+    written: ``the slug is not in the payload`` passes on an empty dict. So the
+    same two assertions are handed the payload the code produced BEFORE the
+    repair -- the landed url in ``$.url`` -- and are required to convict it.
+    """
+    before_the_repair = {
+        "error": "extraction_failed",
+        "message": "the profile page rendered but no name could be read",
+        "url": PROFILE_RESOLVED_URL,
+        "hint": "headings seen: []",
+    }
+
+    assert before_the_repair["url"] != PROFILE_ME_URL
+    assert PROFILE_RESOLVED_URL in repr(before_the_repair)
+    assert "alex-r" in repr(before_the_repair)
 
 
 async def test_a_profile_whose_slug_cannot_be_resolved_says_so(drive):
