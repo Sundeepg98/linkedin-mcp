@@ -2347,6 +2347,62 @@ NOT_A_CORRECTION: dict[tuple[str, str], str] = {
         "`P A25`'s own state or reason is mistaken."
     ),
 
+    # 2026-09-21, the COMPOUND-ROWS wave. A ROW CITING THE RULING THAT
+    # GOVERNS IT -- the shape `CANONICAL-RULING-ID` makes MANDATORY, and
+    # therefore the shape this dict will meet most often from here on.
+    ("messaging-and-content.md", "2026-09-21-the-compound-rows.md"): (
+        "THE CITED DOCUMENT IS THE RULING, AND THE CITING CELL IS THE ROW IT "
+        "RULES ON. `M C67` carries *'RULED NOT-SPLIT 2026-09-21 under "
+        "`COMPOUND-ROW-SPLITS-ONLY-ON-STATE`'* plus the citation, because "
+        "`CANONICAL-RULING-ID` requires exactly that -- *'a bare prose reason "
+        "is not a citation and may not carry a verdict alone'*. So the "
+        "correction vocabulary in this cell is the row RECORDING a verdict "
+        "reached elsewhere, not the row correcting the document it names. "
+        "**A `CORRECTS:` pair here would point a reader from the ruling to "
+        "the row that obeys it, which is backwards**: the ruling document is "
+        "upstream of this cell, not its target. "
+        "**WHAT WOULD MAKE THIS ENTRY WRONG:** a census cell asserting that "
+        "`2026-09-21-the-compound-rows.md` got something wrong."
+    ),
+    ("profile.md", "2026-09-21-the-compound-rows.md"): (
+        "THE SAME SHAPE AS THE `messaging-and-content.md` ENTRY ABOVE, on "
+        "`P D27` and `P L3`. Both cells record a NOT-SPLIT verdict and the "
+        "trigger condition under which the row must be split later, and both "
+        "cite the ruling document as `CANONICAL-RULING-ID` requires. The "
+        "cells obey the ruling; they do not correct it. "
+        "**WHAT WOULD MAKE THIS ENTRY WRONG:** a census cell asserting that "
+        "`2026-09-21-the-compound-rows.md` got something wrong."
+    ),
+
+    # 2026-09-21, the COMPOUND-ROWS wave. AN ANSWER TO A CORRECTLY-POSED
+    # OPEN QUESTION IS NOT A CORRECTION OF THE ASKING, which is a
+    # discrimination worth writing down because the vocabulary is identical.
+    ("messaging-and-content.md", "2026-09-20-the-write-partition.md"): (
+        "THE CITED DOCUMENT ASKED, AND GOT NOTHING WRONG. `M C85`'s cell "
+        "names `2026-09-20-the-write-partition.md` for one purpose: to say "
+        "that section 4.4.2 *'already has two rows queued on the identical "
+        "question'*. That is a POINTER TO SIBLING ROWS, and it was accurate "
+        "when written and is accurate now -- `P D27` and `P L3` were indeed "
+        "queued there, and this wave ruled on all three together. The "
+        "write-partition's own words are *'RULING NEEDED: split, or leave "
+        "whole'*, which is a correct statement that no ruling existed. "
+        "**A QUESTION ANSWERED IS NOT A CLAIM REFUTED.** "
+        "The correction vocabulary the scan matched belongs to the verdict "
+        "this wave added to the cell, and that verdict's target is the "
+        "CELL'S OWN direction value -- `W` on a row whose second half is a "
+        "read -- which no cited document ever asserted. "
+        "**ONE THING THIS WAVE DID CORRECT IS DELIBERATELY NOT DECLARED "
+        "HERE, AND IS OWED:** `_audit/2026-09-21-the-write-ceiling.md` "
+        "diagnosed `C85`'s read half as invisible BECAUSE THE ROW IS "
+        "COMPOUND, and the measurement says the cause is the misstated "
+        "direction cell -- `M M28` is identically compound and is visible. "
+        "That correction lives in `2026-09-21-the-compound-rows.md`, targets "
+        "a document this wave does not own, and needs a `CORRECTED BY:` "
+        "back-pointer written by whoever owns it. It is not in this cell. "
+        "**WHAT WOULD MAKE THIS ENTRY WRONG:** a census cell asserting that "
+        "the write-partition's queue or its precedent citation was mistaken."
+    ),
+
 }
 
 
