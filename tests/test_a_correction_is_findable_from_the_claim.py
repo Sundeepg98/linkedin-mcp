@@ -201,6 +201,27 @@ NOT_A_CORRECTION: dict[tuple[str, str], str] = {
         "asserting that something in that deliverable is false while "
         "leaving the deliverable untouched."
     ),
+    ("network.md", "2026-09-21-the-fires-and-the-controls.md"): (
+        "THE ARROW IS DECLARED IN THE OTHER DIRECTION AND THIS IS ITS "
+        "SHADOW. The fires-and-the-controls deliverable declares "
+        "*'CORRECTS: `_audit/_census/network.md` -- rows 33, 54 and 175'*, "
+        "and network.md carries the matching CORRECTED BY. What this "
+        "candidate pair claims instead is that NETWORK.MD corrects the "
+        "DELIVERABLE, which is backwards: the slice withdraws nothing from "
+        "that document and asserts nothing about it. The vocabulary match is "
+        "inside row 33's own re-priced cell -- *'both claims are corrected "
+        "in place rather than left standing'* -- which is the cell "
+        "describing the edit the deliverable made to the SOURCE MODULES, "
+        "two lines from the citation that names the deliverable. A census "
+        "cell that explains why it moved will always sit near the document "
+        "that moved it, so this shape recurs by construction rather than by "
+        "anybody's mistake; the sibling entry below is the same shape one "
+        "wave earlier. "
+        "**WHAT WOULD MAKE THIS ENTRY WRONG:** network.md asserting that "
+        "something in the fires-and-the-controls deliverable is false while "
+        "leaving that deliverable untouched. It does not -- every row the "
+        "deliverable discusses is edited in this slice, in the same commit."
+    ),
     ("network.md", "2026-09-21-the-three-readers.md"): (
         "THE VOCABULARY BELONGS TO THE DELTA BELOW, WHICH IS OLDER THAN THE "
         "CITATION AND IS NOT CORRECTED BY IT. The cited line is *'name-"

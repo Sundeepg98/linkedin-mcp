@@ -230,4 +230,31 @@ def control_fixture() -> str:
     )
     # A heading the vocabulary must NOT match, so the control also proves the
     # matcher discriminates rather than matching everything it is shown.
+    #
+    # WHAT IT MUST PRODUCE IS NOW WRITTEN DOWN -- see :data:`CONTROL_EXPECTATION`.
     return rows + "<section><h2>Saved searches</h2><ul><li></li></ul></section>"
+
+
+#: What :func:`control_fixture` must produce. Written out so the control has an
+#: EXPECTATION rather than only an output -- a control whose result nobody
+#: predicted cannot fail.
+#:
+#: **THIS MODULE WAS THE ONE OF THE FOUR THAT SHIPPED WITHOUT ONE**, found
+#: 2026-09-21 when the fixtures were driven through a real engine for the first
+#: time. ``anchors``, ``search_results`` and ``company_root`` each wrote their
+#: expectation down beside the fixture; this one did not, so it was the single
+#: control in the package that could not have failed even once something
+#: finally executed it.
+#:
+#: ``UNMATCHED`` IS 1 AND THAT ENTRY IS THE DISCRIMINATING HALF. Five matches
+#: alone is the shape a matcher that salutes everything also makes; the
+#: ``Saved searches`` decoy is what separates them, so it is PREDICTED here
+#: rather than merely present in the fixture.
+#:
+#: MEASURED, not asserted: driven through ``dom.COLLECTION_GROUPINGS_JS`` in a
+#: real browser, the fixture produces exactly this -- 6 headings seen, 5
+#: matched, 1 unmatched. ``scripts/_probe_control_paths_live.py``.
+CONTROL_EXPECTATION: dict[str, int] = {
+    **{term: 1 for term in GROUPINGS},
+    UNMATCHED: 1,
+}

@@ -63,6 +63,26 @@ them -- there is no known-gated group id here to calibrate against, exactly as
 instrument can fail is not a reading, so this one declines to pick the
 flattering branch.
 
+**AND MEASURED 2026-09-21, THE THIRD OF THOSE THREE IS THE ONE THAT IS TRUE,
+SO ``feed_drawn`` CANNOT FIRE AT ALL TODAY.** The tool was run against three
+groups this account belongs to and returned ``ambiguous`` on all three, over
+pages drawing 86, 35 and 47 anchors with 16, 3 and 9 member-profile anchors
+among them -- so the pages rendered and the direct link reached them. A route
+census of those three captures, resolving absolute hrefs to their paths, found
+``/feed/`` six times (the nav home link, twice per page) and **``/feed/update/``
+zero times.** A group feed's post permalinks do not wear the route this
+module's positive branch is gated on.
+
+That is not an ambiguity, and the distinction is this repository's own: a
+verdict whose positive case cannot occur is the same defect as a check that
+cannot fail, seen from the other side. The row is filed
+COVERED-CANNOT-DELIVER on that measurement rather than left reading as though
+three private groups had been probed and found gated. Closing it needs
+``anchors.ROUTE_TABLE`` to learn the shape a group post permalink actually
+wears, which is an edit to a script three other readers run and is still not
+this row's to make. Receipts: ``_audit/2026-09-21-the-fires-and-the-controls.md``,
+``scripts/_probe_group_feed_permalinks.py``.
+
 ## NO NAME, POST, SLUG OR ADDRESS IS A RETURN VALUE OF ANYTHING HERE
 
 * :func:`read_group_page` returns the integers ``anchors.read_anchors`` returns

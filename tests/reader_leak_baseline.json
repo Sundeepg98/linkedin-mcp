@@ -83,6 +83,7 @@
     "press:_read_witness": "clean",
     "press:disclose": "clean",
     "search_results:read_filters": "clean",
+    "search_results:read_filters_when_settled": "clean",
     "search_results:read_results": "clean",
     "server:_attach_recipient_ids": "clean",
     "server:_establish_self_owned_editor": "not_driven:raises BrowserUnavailableError",

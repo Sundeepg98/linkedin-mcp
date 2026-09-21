@@ -8684,3 +8684,233 @@ constant so no contended file is edited:
 same hour as the code they check, by the author of that code, and all three
 read as rigour while standing for nothing. The cold review found two defects
 in the same files and NONE of these three assertions was what caught them.
+
+---
+
+## 50. A CONTROL THAT HAD NEVER EXECUTED, A 6-OF-6 READING ATTRIBUTABLE TO NOTHING, AND THREE FILTERS THAT WERE DEFENDED BY AN ARGUMENT (the-fires-and-the-controls, 2026-09-21)
+
+The wave that held the browser after section 49 built its readers. Its job was
+to FIRE the three rows 49 left COVERED-UNFIRED, to drive the `control_fixture()`
+paths nothing had ever executed, and to close a race in a shipped tool.
+
+Deliverable: `_audit/2026-09-21-the-fires-and-the-controls.md`. **Nothing
+banked**, and sections 50.2 and 50.5 are why that is the right outcome.
+
+### 50.1 A CONTROL THAT HAS NEVER EXECUTED IS NOT A CHECK THAT CANNOT FAIL. IT IS WORSE.
+
+`scripts/_probe_control_paths_live.py`. **IT NEEDS A LIVE ATTACHED CHROME
+(`LINKEDIN_CDP_ATTACH=1`) AND THEREFORE CANNOT RUN ON A CI RUNNER**, which is
+stated here rather than discovered later: the thing it certifies is a
+`DOMParser` branch, so an engine is the whole point and there is no offline
+mode to fall back to. It REFUSES to start without the attach rather than
+no-opping -- a probe that silently passes on a runner certifies nothing, which
+is a shape this repository keeps finding. The consequence to hold in mind is
+that this certification is re-derivable only on a box with the signed-in
+browser, so the register entry, not a green pipeline, is where it lives.
+
+Four shipped modules declare a `control_fixture()`; `search_results` declares
+two, so there are FIVE paths.
+Every test naming one asserted on the markup **string**. The line that makes a
+fixture a control -- `new DOMParser().parseFromString(html, "text/html")`
+inside the shipped script -- has no implementation in node, so it had never run
+anywhere.
+
+**A check that cannot fail has at least executed.** These had not, and the
+distinction matters for how you hunt them: an unfalsifiable check is found by
+reading the assertion, and an unexecuted branch is found only by asking what
+engine the line needs. Grep will show you the first class and not the second.
+
+**AND THE GAP HID BEHIND A SEAM THAT WAS HONESTLY DECLARED**, which is the part
+worth carrying forward. `search_results` and `company_root` already drive
+shipped JS under V8, and those tests say in capitals that node has no DOM, so
+`querySelectorAll` and `getAttribute` are "NOT covered below" -- the hrefs are
+extracted with a *Python* regex and fed to a brace-matched pure function, and
+`company_root` drives `control_tree()` rather than `control_fixture()`. Every
+word of that is true and was written down. **A declared seam still leaves a
+hole, and a hole somebody declared is harder to see than one nobody did**,
+because the reader's eye stops at the honesty. The uncovered half was exactly
+the half a fixture exists for: a fixture is a string, and the only thing that
+makes it a control rather than a constant is a parser reading it.
+
+Driven in one attached tab, navigating nowhere, all five PASS. Each carries a
+planted defect and all five go RED under it, which is what makes "all four
+work" a measurement rather than a shrug.
+
+**THE PLANT WORTH THE BROWSER SLOT** is `company_root`'s: rename
+`visually-hidden` on the screen-reader copy and change nothing else. The
+reading moves **11 -> 41** and `hidden_subtrees_skipped` falls **2 -> 1**. That
+is section 49's whole property -- the exclusion that keeps a third party's name
+out of a count -- shown load-bearing in a real DOM for the first time rather
+than in a synthetic node list.
+
+**AND AN ABSENCE, CLOSED IN THE SAME COMMIT:** `collections_page` was the only
+one of the four shipping no written expectation. Its test asserted the fixture
+still CONTAINS the right strings -- a claim about the INPUT -- which is exactly
+why the gap was invisible: nothing said what the OUTPUT had to be, so driving
+it produced a result with nothing to disagree with.
+`collections_page.CONTROL_EXPECTATION` now ships with `unmatched: 1`, and that
+entry is the discriminating half -- five matches is also the shape a matcher
+that salutes every heading makes. The partner red drives a saluting matcher and
+shows it satisfying a decoyless table while failing the shipped one.
+
+**A DERIVED EXPECTATION IS A PREDICTION THE PROBE MAKES ABOUT ITSELF; A SHIPPED
+ONE IS A PREDICTION THE MODULE MAKES.** The probe read its own derivation for
+one run and now reads the constant, because only the second can be contradicted
+by a later edit to the module. A probe that carries the expectation is a closed
+loop.
+
+### 50.2 A PHRASE THAT IS A SUFFIX PUBLISHES A WRONG NUMBER; A PHRASE THAT MATCHES SEVEN TIMES PUBLISHES SOMEBODY ELSE'S
+
+`company_root.COUNT_PHRASES` shipped saying *"a wrong phrase costs a missing
+reading, never a wrong number and never a name."* **The second half is refuted
+by measurement.**
+
+LinkedIn draws `<entity> & n other connections follow this page`. The shipped
+phrase `connections follow this page` is its **suffix**, so it matches, the
+line is short, the numeral is clean `plain_digits` -- and `n` counts the
+connections OTHER than the one named. Every reading is short by exactly one.
+
+**THE DANGEROUS PART IS THE DISCRIMINATION.** `count_read` on 6 of 6 Pages with
+six distinct values from 2 to 11. That is precisely the evidence this register
+demands before banking -- a reader plainly selecting and not saluting -- and it
+is satisfied by a reading that is wrong every time. **A row can pass the
+discrimination test and still be wrong**, because discrimination proves the
+reader responds to the page, not that it read the right number off it.
+
+**AND PRESENCE WAS THE WRONG QUESTION. COUNTING CHANGED THE FINDING.** The
+phrase occurs **7, 6, 5, 8, 2 and 5** times per Page -- never once -- because a
+Page root draws that line for every RECOMMENDED organisation as well as for the
+subject. `dom.COUNT_LINES_JS` keeps ONE best match per phrase, shortest
+container winning the tie-break, and publishes it with no record that anything
+competed. **The number is not attributable to the organisation whose Page was
+opened**, which is a different and worse defect than being short by one. A
+presence test answers "is the wording right"; only a COUNT answers "is there
+exactly one thing this could be".
+
+**AND THE CLAIM IS DELIBERATELY THE NARROW ONE.** A cross-check comparing the
+published value against the candidate numbers was run and is NOT relied on: it
+flattens the page into one string and so cannot reproduce the adjacency rule
+`numeralNear` uses when a number and its phrase sit in sibling elements. Two of
+its six rows "missed", and that is explained by the instrument rather than by
+misattribution. The occurrence count alone carries the finding -- 2 to 8
+candidates, one winner, no disclosure -- so the conclusion rests on a direct
+measurement and not on a comparison that could be an artifact. **A weaker
+instrument agreeing with you is not corroboration; it is a second thing to
+check.**
+
+**THE GUARD BUILT FOR THIS HAZARD IS STRUCTURALLY BLIND TO IT**, and that is
+the entry. `company_root._verdict_for` ships a `disagreement` state for two
+readings of one kind that disagree. It compares two different PHRASE POSITIONS.
+This collapse is between occurrences of the SAME phrase and it happens INSIDE
+THE PAGE, below the guard -- so the disagreement is resolved before Python ever
+sees it. **A guard placed above the point where alternatives collapse cannot
+report that alternatives existed.** Its sibling `connections work here` occurs
+exactly once per Page, so the same module fails in two different ways at once,
+and a repair assuming either shape would leave the other standing.
+
+The phrase list was NOT widened: the measured line CONTAINS the shipped phrase,
+so adding it breaks the module's own *no phrase may contain another* invariant,
+whose stated reason is that two phrases on one line "would read as
+corroboration and is one observation." Widening to bank a row is the move this
+entry exists to refuse.
+
+### 50.3 A VERDICT WHOSE POSITIVE BRANCH CANNOT FIRE
+
+`scripts/_probe_group_feed_permalinks.py`. `linkedin_group_page` returned
+`ambiguous` on 3 of 3 groups the account belongs to, over pages drawing 86, 35
+and 47 anchors. `feed_drawn` is gated on `/feed/update/`; a route census finds
+that route **zero** times and `/feed/` six (the nav home link).
+
+**A verdict that cannot fire and a check that cannot fail are the same defect
+seen from two sides**, and the honest branch's honest wording is what hides it:
+`ambiguous` reads as a finding about three groups when it is a fact about the
+route table. The tell is the DENOMINATOR -- 3 of 3, on groups whose membership
+is not in doubt -- and not the verdict.
+
+### 50.4 THE PANEL RACE: LOAD SHORTENS THE WAIT, IT DOES NOT LENGTHEN IT
+
+`search_results.read_filters_when_settled`, and
+`scripts/_probe_people_search_panel_race.py`.
+
+`BROWSER.goto` settles on `networkidle` with a flat fallback, and its own
+docstring says that is not a readiness check. **On a pinned box the settle gets
+SHORTER**: the renderer is starved, fewer requests are in flight, and the 500 ms
+lull arrives earlier -- against a panel that has drawn less. Reproduced under
+the suite at `-n auto`: 3 of 6 firings read 45 controls and offered zero
+filters. After the fix, **8 of 8 at the full 83** under the same load.
+
+Three properties are the entry:
+
+* **The wait uses the shipped reader's own number**, not a new selector. A
+  selector on a barely-met surface is a guess that fails QUIETLY -- it times
+  out and reads the half-drawn page anyway, which is the old behaviour with
+  extra steps.
+* **A zero is never a plateau.** Without that guard the stability rule settles
+  instantly on the blind reading it exists to prevent.
+* **`settled` is not `complete`**, and the payload says so: nothing knows how
+  many controls the page intends to draw, so a wedged panel settles like a
+  finished one. `controls_first` and `controls_last` travel with it.
+
+SHOWN FAILING against two plants. One test passed under BOTH on its first draft
+-- a wedged panel and a removed wait produce the same first/last pair -- and was
+strengthened with an assertion on `polls`. **Found by planting, not by reading
+it back.**
+
+**AND THE WAIT'S OWN FIRST DRAFT WIDENED WHAT A PAGE MUST PROVIDE, WHICH IS THE
+ENTRY WORTH KEEPING.** It paced itself with `page.wait_for_timeout`. Every
+shipped reader in this package touches a page through `evaluate` alone, and
+`tests/test_the_search_shaper_emits_no_name.py` drives the tool against a
+hostile page that implements exactly that and nothing else. The call raised
+`AttributeError`, the tool swallowed it into `_error`, and **three name-safety
+proofs turned into `KeyError: 'denominators'`** -- a reader quietly asking more
+of the page disarmed the tests that prove it publishes no name. The interval is
+this loop's own pacing, not something the page is being asked to do, so
+`asyncio.sleep` is both narrower and more accurate. **A new dependency on a
+collaborator's shape does not fail where you added it; it fails in whatever
+already stood on the narrow contract.**
+
+**PROVENANCE, BECAUSE THE LIVE RUN PREDATES THE SHIPPED BYTES.** The 8-of-8
+measurement used the `wait_for_timeout` form; the shipped form differs only in
+that primitive -- same loop, constants, stop condition and payload. The re-run
+on shipped bytes was attempted and blocked: six firings returned
+`browser_unavailable` under load, and the serial re-measure could not follow
+because port 9224 stopped answering. See the deliverable for the full statement
+and for why no Chrome was started to recover it.
+
+### 50.5 A FILTER DEFENDED BY AN ARGUMENT IS THE DEFECT. THREE IN ONE WAVE.
+
+The transferable entry, and it convicts this wave's own instruments.
+
+1. **A frequency filter cannot separate a name from boilerplate here.** "Publish
+   only runs appearing on 3+ Pages; LinkedIn's copy repeats and a name does
+   not." It published a real connection's given name on **all six**, because
+   the line names one of the account's own connections and that person follows
+   many Pages. **No threshold fixes it.**
+2. **A route census printed the segment it promised never to print.** Two path
+   segments, and `/in/<slug>/` is two segments. The docstring said the entity
+   segment "is never rendered" while the code rendered it. Fixed at segment
+   two; **the same class reappeared at segment one** and had to be closed
+   again.
+3. **The same census could not have refuted its own headline.** It bucketed
+   every absolute href as `(external-or-absolute)` -- 108, 58, 70 of them --
+   then concluded from the remainder that no `/feed` route exists. An absolute
+   `.../feed/update/...` sat inside the bucket it never opened.
+
+**THE COMMON SHAPE: a filter that decides what to REMOVE must anticipate what
+it is removing; a filter that decides what to KEEP need not.** All three
+repairs converge on the same move -- ship a vocabulary in and let nothing else
+out -- which is what every reader in this package already does and what none of
+these three probes did until they were caught.
+
+**THE SELF-CHECK IS THE ENTRY, NOT THE ALLOWLIST.** `route_of` now has a
+`leaks()` partner run over every rendered route **before the result is
+returned**, which stops the probe rather than tidying the output. An allowlist
+is an argument; a self-check is an instrument.
+
+**AND THE SUITE CAUGHT A FOURTH.**
+`tests/test_page_text_is_never_printed.py` failed the wording probe with its
+own red saying *"do NOT add it here to clear the red; emit a count, a relation
+or a marker."* A vocabulary-clean run is still something LinkedIn wrote. The
+runs went to the gitignored `_state/` and stdout got counts. **The pinned
+inventory was not widened** -- which is the only reason that guard is still
+worth anything.

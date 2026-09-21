@@ -105,22 +105,39 @@ COVERED_ROWS: dict[tuple[str, str], tuple[str, str]] = {
     # catches an unannounced PROMOTION -- which is the direction that inflates
     # a count, and the one these three are most likely to drift in the moment
     # somebody fires them without writing it down.
+    # AND ALL THREE MOVED ON 2026-09-21 -- DOWNWARD, which is the direction
+    # the note above did NOT expect. They were fired for the first time and
+    # every one of them came back unable to do the thing its row names, so
+    # each is re-pinned at COVERED-CANNOT-DELIVER with what the firing
+    # measured. **THE PIN IS UPDATED RATHER THAN REMOVED, DELIBERATELY.** The
+    # failing message offers removal, and removal would disarm the guard on
+    # exactly the three rows now most likely to drift: a later wave that
+    # repairs the phrase set or the route table will be tempted to promote
+    # them straight back to PROVEN, and an empty table notices nothing. A pin
+    # that tracks a row down and then up is worth more than one that lets go
+    # the moment the news is bad.
     ("network.md", "33"): (
-        "COVERED-UNFIRED",
-        "connections at an organization: linkedin_company_page_counts opens "
-        "the Page root by numeric id and returns a COUNT from integers read "
-        "inside the document",
+        "COVERED-CANNOT-DELIVER",
+        "connections at an organization: FIRED 2026-09-21 against six Pages, "
+        "count_read on 2 -- and both published 3 where the page says four, "
+        "because the shipped phrase matches only the TAIL of LinkedIn's line "
+        "and the digit run beside it counts the connections OTHER than the "
+        "one named",
     ),
     ("network.md", "54"): (
-        "COVERED-UNFIRED",
-        "connections subscribed to a Page: the same reader and the same page "
-        "load as row 33, a second phrase in one closed table",
+        "COVERED-CANNOT-DELIVER",
+        "connections subscribed to a Page: FIRED 2026-09-21, count_read on 6 "
+        "of 6 with six distinct values -- and the phrase occurs 2 to 8 times "
+        "per Page, once per recommended organisation, so the reader keeps one "
+        "winner by container length and the number is not attributable to the "
+        "Page that was opened",
     ),
     ("network.md", "175"): (
-        "COVERED-UNFIRED",
-        "the direct link to a group: linkedin_group_page builds "
-        "/groups/<digits>/ and answers feed_drawn, reader_blind or ambiguous "
-        "from anchor counts alone",
+        "COVERED-CANNOT-DELIVER",
+        "the direct link to a group: FIRED 2026-09-21 against three groups "
+        "this account belongs to, ambiguous on all three -- feed_drawn is "
+        "gated on the /feed/update/ route and a census of the captures finds "
+        "that route zero times, so the positive branch cannot fire at all",
     ),
 }
 

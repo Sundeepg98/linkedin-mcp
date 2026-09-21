@@ -1,6 +1,8 @@
 # Two readers for three rows, on two addresses nothing could navigate to --
 # and the accessible copy is what the control convicts.
 
+**CORRECTED BY:** `_audit/2026-09-21-the-fires-and-the-controls.md` -- the first live firing of both readers built here. It refutes one claim this document carried forward: that `company_root.COUNT_PHRASES` being unmeasured could cost only a missing reading and never a wrong number. The shipped phrases match as SUFFIXES of LinkedIn's real lines, so they publish a number that is wrong -- one short for `N 33`, and for `N 54` not attributable to the opened Page at all, because that phrase occurs 2 to 8 times per Page. **Nothing measured in this document is withdrawn**: every number here was taken offline against fixtures and V8 and is still correct about what it measured. What is corrected is the forward-looking claim, and it is corrected in `company_root.py` and the tool docstring where a reader meets it.
+
 Wave `three-readers`, 2026-09-21, from master `9dbaad2`.
 Scope: census rows `N 33`, `N 54` and `N 175`, the three of the read triage's
 nineteen that need a READER over an admitted address rather than a browser slot.

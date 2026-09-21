@@ -144,10 +144,62 @@ COUNT_KINDS: tuple[str, ...] = (
 #: account with one connection at an employer -- the case a job hunt cares
 #: about most.
 #:
-#: **UNMEASURED. See the module docstring.** These are the shapes LinkedIn's
-#: own help pages use for these two modules; no capture in this repository
-#: holds a company Page, so the first live fire is what settles them. A wrong
-#: phrase costs a missing reading, never a wrong number and never a name.
+#: **MEASURED 2026-09-21, AND THE SENTENCE THAT USED TO CLOSE THIS COMMENT IS
+#: REFUTED.** It read: *"A wrong phrase costs a missing reading, never a wrong
+#: number and never a name."* The first half is true. **THE SECOND HALF IS
+#: FALSE, and it is false in the direction that matters.**
+#:
+#: Six organisation Pages were opened. Rendered as SHAPES, with every token
+#: this package did not write down replaced, the two lines LinkedIn actually
+#: draws are:
+#:
+#:     <entity> & n other connections follow this page      6 of 6 Pages
+#:     <entity> & n other connections work here             2 of 6 Pages
+#:
+#: Every phrase below that matched, matched as a **SUFFIX** of one of those.
+#: The digit run nearest the phrase is therefore `n`, which is LinkedIn's
+#: count of the connections OTHER THAN the one it names, and the answer the
+#: row wants is `n + 1`. So a phrase can be "found in a short line", publish a
+#: `plain_digits` value, and still be wrong -- silently, consistently, and by
+#: exactly one. `connections follow this page` read on 6 of 6 Pages with six
+#: distinct values; every one of them is one short.
+#:
+#: **AND THE OFF-BY-ONE IS THE SMALLER HALF OF IT.** Counted rather than
+#: presence-tested, `connections follow this page` occurs **7, 6, 5, 8, 2 and
+#: 5** times on those six Pages -- never once. A Page root draws that line for
+#: every RECOMMENDED organisation as well as for the subject, and each
+#: occurrence names a DIFFERENT organisation. ``dom.COUNT_LINES_JS`` keeps ONE
+#: best match per phrase -- a match carrying a number beats one that does not,
+#: shortest container is the tie-break -- and publishes the winner with no
+#: record that anything competed. **So `connections_following_page` is not
+#: attributable to the organisation whose Page was opened.**
+#:
+#: **:func:`_verdict_for`'s `disagreement` STATE IS STRUCTURALLY BLIND TO
+#: THIS**, which is the part worth carrying forward. It exists for exactly
+#: this hazard and it compares two different PHRASE POSITIONS; the collapse
+#: here is between occurrences of the SAME phrase, and it happens inside the
+#: page, below the guard. A disagreement resolved before Python is reached is
+#: not one anything can report.
+#:
+#: `connections work here` occurs EXACTLY ONCE on each Page that draws it, so
+#: that reading is attributable and its only defect is the off-by-one. The two
+#: rows this module serves therefore fail in two different ways, and a single
+#: repair that assumed one shape would leave the other standing.
+#:
+#: **THE LIST IS DELIBERATELY NOT WIDENED TO REPAIR THIS, and that is a
+#: ruling rather than an omission.** The measured line CONTAINS the shipped
+#: phrase, so adding it would break this comment's own *NO PHRASE MAY CONTAIN
+#: ANOTHER* invariant and produce two readings of one number -- which would
+#: read as corroboration. The repair is a replacement plus a rule about the
+#: qualifier, it changes what `COUNT_KINDS` means, and it is owed its own wave
+#: rather than a widening that makes a row bank.
+#:
+#: STILL UNMEASURED, SEPARATELY: four of the six below were absent from all six
+#: Pages. `connection works here` is not LinkedIn's singular -- the singular
+#: drawn on two Pages is `<entity> works here`, with no count and no
+#: `connection` token at all.
+#: Receipts: `_audit/2026-09-21-the-fires-and-the-controls.md`,
+#: `scripts/_probe_company_root_wording.py`.
 COUNT_PHRASES: tuple[tuple[str, str], ...] = (
     ("connections_at_organisation", "connections work here"),
     ("connections_at_organisation", "connection works here"),

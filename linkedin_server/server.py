@@ -2466,16 +2466,28 @@ async def linkedin_people_search_shape() -> dict[str, Any]:
     **WHAT IT DOES NOT CLAIM, and the payload says so too rather than leaving
     it to this docstring.**
 
-    * **Not that it has seen a live people-search page.** No capture of this
-      surface exists in this repository and this tool has never been run
-      against one -- a browser slot was not available to the wave that landed
-      it. Its classifier is proven on fixtures and under V8; its FIT to
-      LinkedIn's real dialect is unmeasured. ``denominators`` is how a caller
-      sees that for themselves: a page that drew controls none of which
-      matched reports a large ``unmatched_controls``, which is a changed
-      selector and not an empty page.
+    * **THE SENTENCE THAT USED TO SIT HERE IS NOW FALSE AND IS CORRECTED
+      RATHER THAN QUIETLY DROPPED.** It said this tool "has never been run
+      against" a live people-search page. It was run fourteen times on
+      2026-09-21, and what those firings measured is worse than the unknown
+      they replaced: the panel is still drawing when ``goto`` returns, and
+      three of the first six firings read EVERY filter as zero off a page
+      that had drawn 45 of its controls. That is why ``read_filters_when_
+      settled`` now stands between this tool and the page, and why
+      ``panel_wait`` travels in the payload.
+    * **Not that the panel was COMPLETE when it was read.** ``panel_wait.
+      settled`` says the count stopped moving, which is not the same claim:
+      nothing here knows how many controls the page intends to draw, so a
+      panel wedged at a low count settles the same way a finished one does.
+      Read ``controls_seen`` beside it -- measured live, one firing's panel
+      reached 73 while another's stopped at 45.
+    * **Not that the fourteen shipped terms are LinkedIn's fourteen.** The
+      best live firing offered THREE of them. Whether the other eleven live
+      behind the "All filters" button, are worded differently, or are not
+      offered to this account is unmeasured, and nothing is pressed here to
+      find out.
     * **Not that the address serves a populated page when opened with no
-      query.** Unmeasured, for the same reason.
+      query.** Still unmeasured as a general claim.
     * **Not that it saw every result.** Search pages lazy-load and re-rank, so
       a count is a reading with a timestamp.
     """
@@ -2484,7 +2496,12 @@ async def linkedin_people_search_shape() -> dict[str, Any]:
             landed = await BROWSER.goto(page, search_results.PEOPLE_SEARCH_URL)
             assert_not_authwall(landed, surface="people-search")
             results = await search_results.read_results(page)
-            filters = await search_results.read_filters(page)
+            # NOT ``read_filters``. THE PANEL IS STILL DRAWING WHEN goto
+            # RETURNS, and reading it then produced every filter as zero on
+            # three of six firings under load -- see
+            # ``search_results.read_filters_when_settled`` for the measurement
+            # and for why ``settled`` is not a claim of completeness.
+            filters = await search_results.read_filters_when_settled(page)
             return {
                 "ok": True,
                 # NOT "redirected": the landed url is compared to the one
@@ -2501,6 +2518,13 @@ async def linkedin_people_search_shape() -> dict[str, Any]:
                     queries_present=results["queries_present"],
                 ),
                 "filters": search_results.tally_filters(filters["counts"]),
+                # THE TRAJECTORY, NOT ONLY THE DESTINATION. ``controls_first``
+                # below ``controls_last`` means the panel was still drawing
+                # when this call arrived; ``settled`` false means it still was
+                # when the reading was taken. Neither is a claim that the
+                # panel is COMPLETE -- nothing here knows how many controls
+                # the page intends to draw.
+                "panel_wait": filters["panel_wait"],
                 "denominators": {
                     "anchors_seen": results["anchors_seen"],
                     "controls_seen": filters["controls_seen"],
@@ -2516,9 +2540,13 @@ async def linkedin_people_search_shape() -> dict[str, Any]:
                     ),
                 },
                 "not_claimed": [
-                    "that this classifier has ever met a live search page; "
-                    "no capture of this surface exists and its fit to "
-                    "LinkedIn's rendered dialect is unmeasured",
+                    "that the filter panel was COMPLETE when it was read; "
+                    "panel_wait.settled means the control count stopped "
+                    "moving, and a panel wedged low settles like a finished "
+                    "one",
+                    "that the fourteen shipped terms are LinkedIn's fourteen; "
+                    "the best live firing offered three, and nothing is "
+                    "pressed here to open the All filters panel",
                     "that the address serves a populated page with no query",
                     "that every result was seen; search pages lazy-load",
                 ],
@@ -2835,13 +2863,42 @@ async def linkedin_company_page_counts(organisation_id: str) -> dict[str, Any]:
     payload is how many the walk stepped over, so the exclusion is a number
     you can read rather than an assurance.
 
-    **A PHRASE THAT DID NOT RENDER READS ``phrase_not_drawn``, WHICH IS NOT A
-    COUNT OF ZERO.** Nobody in this repository has opened a company Page, so
-    the exact words beside these two numbers are unmeasured: the first live
-    run of this tool measures the wording as well as the count. A wrong phrase
-    costs a missing reading and can never produce a wrong number, because a
-    number is published only when a phrase this package shipped was found in a
-    short line.
+    **READ THIS BEFORE TRUSTING A NUMBER FROM THIS TOOL. IT IS ONE SHORT.**
+
+    This paragraph used to say that nobody had opened a company Page and that
+    *"a wrong phrase costs a missing reading and can never produce a wrong
+    number."* Six Pages were opened on 2026-09-21 and the second claim is
+    REFUTED. The measured line shapes are written out in
+    ``company_root.COUNT_PHRASES`` and are not repeated here.
+
+    WHAT THEY MEAN FOR THE TWO NUMBERS BELOW. LinkedIn names ONE connection
+    and then counts the OTHERS, and every shipped phrase matches only the TAIL
+    of that construction -- so the digit run this reader picks up is the count
+    of the others, and the answer each row wants is that number PLUS ONE.
+    ``connections_following_page`` returned ``count_read`` on 6 of 6 Pages
+    with six distinct values, every one short by exactly one: consistent,
+    plausible and wrong, which is worse than a reading that did not happen.
+
+    **AND FOR ``connections_following_page`` THAT IS THE SMALLER HALF.** Its
+    phrase occurs SEVEN, SIX, FIVE, EIGHT, TWO and FIVE times on those six
+    Pages -- never once -- because a Page root draws that line for every
+    RECOMMENDED organisation as well as for the subject. This reader keeps one
+    best match per phrase and reports it with no record that anything
+    competed, so **that number is not attributable to the organisation whose
+    Page you opened.** ``connections_at_organisation``'s phrase occurs exactly
+    once per Page, so it is attributable and merely one short. The two numbers
+    in this payload are therefore wrong in two different ways.
+
+    The phrase list is NOT widened here -- the measured line CONTAINS the
+    shipped phrase, so adding it would break ``company_root``'s own *no phrase
+    may contain another* invariant and turn one observation into two. Census
+    rows ``N 33`` and ``N 54`` are filed COVERED-CANNOT-DELIVER on this
+    measurement and nothing is banked off it.
+
+    **A PHRASE THAT DID NOT RENDER STILL READS ``phrase_not_drawn``, AND THAT
+    IS STILL NOT A COUNT OF ZERO.** Three of the six Pages carry no
+    at-organisation line at all, which this correctly reports; a fourth
+    carries one no shipped phrase reaches.
 
     AN ABBREVIATION IS REFUSED, NEVER ROUNDED, and so is a decimal. ``2K`` is
     not two thousand as far as this tool is concerned; it is
