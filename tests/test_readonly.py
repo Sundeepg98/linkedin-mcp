@@ -771,6 +771,30 @@ def test_only_dom_module_waives_evaluate():
     # screen-reader copy that carries a person's name. Pulling it out to
     # compare it in Python is the leak; comparing it in the page and returning
     # a POSITION plus an INTEGER is not.
+    #
+    # THE OTHER 22 IN THIS FILE IS THE SAME 22, AND THAT IS NOT A COINCIDENCE.
+    # Measured 2026-09-21, because it was first reported as one.
+    # ``test_the_scripts_executed_are_exactly_the_ones_declared`` pins
+    # ``len(EXECUTED_SCRIPTS) == 22``, and today those are these: every
+    # ``# readonly-ok`` in this module sits on a ``page.evaluate(``, and every
+    # script this package executes is one of those calls -- there are none
+    # outside dom.py. One set of sites, counted twice.
+    #
+    # THEY ARE STILL NOT THE SAME ASSERTION, which is why neither is derived
+    # from the other. This one is a CEILING over a module's waivers, and it
+    # would also catch a waiver spent on something that is not an evaluate at
+    # all: ``# readonly-ok`` is a trailing string and nothing binds it to a
+    # call. That one is an EXACT pin keyed by call site AND script name, and it
+    # catches an undeclared script. They diverge the first time a waiver is
+    # spent off an evaluate. Until then they move together -- and must still be
+    # edited together by hand, each with its own argument.
+    #
+    # DO NOT CROSS-CHECK THEM BY LINE NUMBER. Ten of the 22 differ by exactly
+    # one, because the waiver is counted where the COMMENT is, on
+    # ``page.evaluate(``, and the call site where the ARGUMENT is, on the line
+    # below it whenever the call wraps. The intersection reads 12 of 22 and
+    # looks like proof that these are unrelated sets. It is proof of nothing
+    # but line wrapping.
     assert waived_in.get("dom.py", 0) <= 22, waived_in
 
 
@@ -1189,6 +1213,15 @@ def test_the_scripts_executed_are_exactly_the_ones_declared():
     # dom.read_count_lines. The group reader landing in the same commit adds
     # NO entry here: it runs ANCHOR_CLASSIFY_JS through anchors.read_anchors,
     # which is one script at one call site before and after.
+    #
+    # THIS 22 AND THE 22 IN ``test_only_dom_module_waives_evaluate`` ARE THE
+    # SAME 22 CALL SITES, measured 2026-09-21: every executed script is a
+    # ``page.evaluate(`` in dom.py and every one of those carries a
+    # ``# readonly-ok``. They are not the same assertion, neither is derived
+    # from the other, and the reason a line-number cross-check reads 12 of 22
+    # rather than 22 is written out beside that budget. Read it before
+    # reconciling the two numbers -- they are equal by fact, not by
+    # construction, and one of them is a ceiling.
     assert len(EXECUTED_SCRIPTS) == 22, sorted(EXECUTED_SCRIPTS)
 
 
