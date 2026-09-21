@@ -180,6 +180,29 @@ def _argument_for(param: inspect.Parameter) -> tuple[bool, Any]:
 
     if param.name == "page":
         return True, PlantedPage()
+    # BEFORE the ``str`` branch below, and the order is the whole point. An
+    # anchor is a CONTROL LABEL that ``perform`` derives with
+    # ``anchor_label_for(spec, grant.target)``; there is no other source for
+    # one. Measured: handing ``_live_control`` the generic synthetic string
+    # instead leaves ``save_job`` and ``unsave_job`` raising
+    # ``ExtractionFailedError`` before their readings -- two of thirteen
+    # branches unmeasured, reported as driven because eleven others ran.
+    if param.name == "anchor":
+        return True, _Paired("anchor")
+    # AND BEFORE ``str`` FOR THE SAME REASON. A ``url`` in this package is an
+    # ALLOWLISTED READ ADDRESS: ``writes._load`` hands it to
+    # ``readonly.assert_read_url`` as its first statement, which refuses the
+    # generic synthetic string and raises ``WriteAttemptError``. The baseline
+    # then recorded ``not_driven:raises WriteAttemptError`` against a reader
+    # that had never run a line of its own -- a reason describing the HARNESS
+    # while reading as though the write module had refused. With the server's
+    # own feed constant the true reason appears: it navigates, which is an
+    # offline harness's honest ceiling. Blast radius is one reader; ``_load``
+    # is the only discovered reader with a ``url`` parameter.
+    if param.name == "url":
+        from linkedin_server import writes
+
+        return True, writes.FEED_URL
     if param.annotation is inspect.Parameter.empty:
         # Unannotated. Every such parameter in this package is a selector or a
         # needle, and a string is the only thing that could be passed anyway.
@@ -200,8 +223,8 @@ def _argument_for(param: inspect.Parameter) -> tuple[bool, Any]:
         return True, PlantedPage()
     if base in DOMAIN_OBJECTS:
         return True, _VARY  # expanded by _build_call into one call per value
-    if base == "WriteGrant":
-        return False, GRANT_REFUSAL
+    if base in PAIRED_OBJECTS:
+        return True, _Paired(base)  # built from this variant's own WriteSpec
     return False, f"needs {param.name}: {text}"
 
 
@@ -209,18 +232,70 @@ def _argument_for(param: inspect.Parameter) -> tuple[bool, Any]:
 #: all". See :func:`_domain_values`.
 _VARY = object()
 
-#: WHY THIS HARNESS WILL NOT MINT A WRITE GRANT. A ``WriteGrant`` is
-#: "permission to perform ONE action, on ONE target, ONCE, soon" -- the object
-#: that stands between a preview and an irreversible act. Making one easy to
-#: fabricate so that a test can reach a few more coercions would put a grant
-#: constructor in the test tree, and ``writes.perform`` is in the discovered
-#: set. The three gates and ``perform`` stay NOT-DRIVEN, and this is a POLICY
-#: boundary rather than a capability gap -- which is a different finding and is
-#: recorded as one.
-GRANT_REFUSAL = (
-    "needs grant: WriteGrant -- this harness does not mint write grants "
-    "(policy, not capability; see GRANT_REFUSAL)"
-)
+
+class _Paired:
+    """A placeholder for a value DERIVED FROM THE VARIANT'S OWN ``WriteSpec``.
+
+    Not a member of :data:`DOMAIN_OBJECTS`, because those are varied
+    INDEPENDENTLY and these may not be. A ``WriteGrant`` is permission for ONE
+    action: pairing ``save_job``'s grant with ``follow_company``'s spec is a
+    state the server cannot be in, so a verdict taken there would be about a
+    branch nobody wrote. It is also the difference between 13 variants and
+    13 x 13 x 13 -- ``_verify_after`` takes a spec, a grant AND an
+    observation.
+
+    See :func:`_pair_with_spec` for the resolution, and ``tests/refusinggrant.py``
+    for what each kind resolves to and why none of it authorises a write.
+    """
+
+    __slots__ = ("kind",)
+
+    def __init__(self, kind: str) -> None:
+        self.kind = kind
+
+
+class _PairedObservation:
+    """A paired ``Observation`` whose facts need the PAGE, so it waits.
+
+    ``observe`` builds an Observation's facts by running a reader over a page.
+    Reproducing that faithfully is an ``await``, and :func:`_build_call` is
+    synchronous -- so this marker carries the spec out to :func:`_drive_once`,
+    which resolves it inside the event loop it already owns.
+    """
+
+    __slots__ = ("spec",)
+
+    def __init__(self, spec: Any) -> None:
+        self.spec = spec
+
+
+#: THE TYPES THIS HARNESS SUPPLIES FROM THE VARIANT'S SPEC, and it supplies
+#: them because REFUSING THEM WAS MEASURING THE HARNESS'S OWN PLUMBING.
+#:
+#: This slot held ``GRANT_REFUSAL`` until 2026-09-21: five readers recorded
+#: ``not_driven`` on the grounds that minting a grant is "policy, not
+#: capability". Three measurements retired it, all in
+#: ``_audit/2026-09-21-the-ungrantable-readers.md``:
+#:
+#: * ``_live_control``, ``_verify_after``, ``_typeahead_gate`` and
+#:   ``_recipient_gate`` contain NO page action and NO grant door -- an AST
+#:   walk finds zero ``click``/``fill``/``goto`` and zero
+#:   ``consume``/``mint``/``assert_write_url``/``writes_enabled``. They read a
+#:   page and return a verdict. The grant reaches them as two strings.
+#: * ``tests/test_writes.py::_bare_grant`` has built one all along, with a
+#:   docstring explaining why that is not a way round ``mint``.
+#: * ``writes.Observation``'s own docstring says an Observation built by hand
+#:   is INERT, because ``_record`` is the only writer of ``_OBSERVED``.
+#:
+#: WHAT THE REFUSAL WAS COSTING, counted with the repository's own census:
+#: 22 of the 52 unguarded page-derived coercion sites
+#: (``scripts/_census_page_coercions.py``) live inside those five readers, and
+#: that census closes by naming THIS file as the thing that settles which of
+#: them leak. It could not. One of them did.
+#:
+#: ``perform`` is still NOT-DRIVEN and its reason is now the true one: the
+#: process-wide ``writes_enabled()`` door, which nothing here touches.
+PAIRED_OBJECTS: frozenset[str] = frozenset({"WriteGrant", "Observation"})
 
 
 def _domain_values(text: str) -> list[Any]:
@@ -284,7 +359,85 @@ def _build_call(
                 else:
                     grown.append(([*args, choice], dict(kwargs)))
         variants = grown
-    return variants + _with_optionals(variants, optional), ""
+    return _pair_with_spec(variants + _with_optionals(variants, optional)), ""
+
+
+def _pair_with_spec(
+    variants: list[tuple[list[Any], dict[str, Any]]]
+) -> list[tuple[list[Any], dict[str, Any]]]:
+    """Resolve every :class:`_Paired` against the WriteSpec beside it.
+
+    A variant that already holds a spec uses THAT ONE -- so a grant, an anchor
+    and an observation in the same call all describe the same action, which is
+    the only combination ``perform`` can ever assemble.
+
+    A variant with no spec (``_typeahead_gate(page, grant)``,
+    ``_recipient_gate(page, grant)``, ``perform(navigator, page, grant)``) is
+    EXPANDED, one per sanctioned action, for the reason :func:`_domain_values`
+    gives: a single chosen action would drive the branch that action takes and
+    report the reader measured. Four of the thirteen reach
+    ``_recipient_gate``'s coercions and nine return early -- and the four are
+    the whole finding.
+    """
+    from linkedin_server import writes
+
+    from tests import refusinggrant
+
+    shipped = [writes.SANCTIONED_WRITES[k] for k in sorted(writes.SANCTIONED_WRITES)]
+    out: list[tuple[list[Any], dict[str, Any]]] = []
+    for args, kwargs in variants:
+        supplied = [*args, *kwargs.values()]
+        if not any(isinstance(value, _Paired) for value in supplied):
+            out.append((args, kwargs))
+            continue
+        own = [v for v in supplied if isinstance(v, writes.WriteSpec)]
+        for spec in own[:1] or shipped:
+            resolved = {
+                "WriteGrant": lambda s=spec: refusinggrant.grant_for(s),
+                "anchor": lambda s=spec: refusinggrant.anchor_for(s),
+                "Observation": lambda s=spec: _PairedObservation(s),
+            }
+            out.append(
+                (
+                    [
+                        resolved[v.kind]() if isinstance(v, _Paired) else v
+                        for v in args
+                    ],
+                    {
+                        name: resolved[v.kind]() if isinstance(v, _Paired) else v
+                        for name, v in kwargs.items()
+                    },
+                )
+            )
+    return out
+
+
+async def resolve_paired_observations(
+    args: list[Any], kwargs: dict[str, Any]
+) -> tuple[list[Any], dict[str, Any]]:
+    """Turn every :class:`_PairedObservation` into a real, INERT Observation.
+
+    Separate and public because it is the one resolution that needs a running
+    loop and the page, and because ``scripts/_probe_dom_error_url_field.py``
+    consumes :func:`_build_call`'s variants directly -- a caller that drives a
+    reader taking an ``Observation`` has to run this first or it hands the
+    reader a marker.
+    """
+    from tests import refusinggrant
+
+    supplied = [*args, *kwargs.values()]
+    pages = [v for v in supplied if isinstance(v, PlantedPage)]
+    page = pages[0] if pages else PlantedPage()
+
+    async def _one(value: Any) -> Any:
+        if isinstance(value, _PairedObservation):
+            return await refusinggrant.observation_for(page, value.spec)
+        return value
+
+    return (
+        [await _one(v) for v in args],
+        {name: await _one(v) for name, v in kwargs.items()},
+    )
 
 
 def _with_optionals(
@@ -357,7 +510,10 @@ def _drive_once(
     fn: Callable[..., Any], args: list[Any], kwargs: dict[str, Any]
 ) -> tuple[str, str]:
     async def _run() -> Any:
-        return await asyncio.wait_for(fn(*args, **kwargs), timeout=DRIVE_TIMEOUT_S)
+        call_args, call_kwargs = await resolve_paired_observations(args, kwargs)
+        return await asyncio.wait_for(
+            fn(*call_args, **call_kwargs), timeout=DRIVE_TIMEOUT_S
+        )
 
     try:
         result = asyncio.run(_run())
