@@ -1,5 +1,7 @@
 # The open queue, 2026-09-21 at master `9dbaad2`
 
+**CORRECTED BY:** `_audit/2026-09-21-what-100-percent-means.md` -- section 2's `J 40` item is stale: that row is `COVERED-UNFIRED` at `f729a2a`, banked by the `proximity-field` wave, so a reader following this queue would commission a build that has already landed. The other two section-2 items named by row, `N 134` and `P O3`, were re-measured and are still GAP.
+
 **A DATED SNAPSHOT, NOT A CLAIM ABOUT THE PRESENT.** Everything below was true
 when written and some of it is designed to stop being true. Re-derive any count
 through `scripts/count_census_states.py` and any address through

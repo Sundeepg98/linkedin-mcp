@@ -27,19 +27,19 @@ are listed as `(undated)`; no date is taken from git history, because
 
 | what | count |
 | --- | --- |
-| audit documents git tracks under `_audit` | 217 |
-| of those, carrying a `YYYY-MM-DD-` date prefix | 181 |
+| audit documents git tracks under `_audit` | 218 |
+| of those, carrying a `YYYY-MM-DD-` date prefix | 182 |
 | distinct dates | 14 |
 | documents with no level-1 heading | 1 |
-| `CORRECTS:` marker lines | 83 |
-| `CORRECTED BY:` marker lines | 83 |
-| distinct declared correction edges | 80 |
-| documents something later corrects | 44 |
-| documents that correct something | 60 |
-| documents at either end of a cross-document edge | 85 |
+| `CORRECTS:` marker lines | 84 |
+| `CORRECTED BY:` marker lines | 84 |
+| distinct declared correction edges | 81 |
+| documents something later corrects | 45 |
+| documents that correct something | 61 |
+| documents at either end of a cross-document edge | 87 |
 | intra-document correction markers | 4 |
 | documents that correct themselves later on | 2 |
-| documents no correction marker touches at all | 130 |
+| documents no correction marker touches at all | 129 |
 | blockquoted markers naming ANOTHER document | 0 |
 | edges missing one of their two markers | 0 |
 | edges declared a different number of times in each direction | 2 |
@@ -434,6 +434,14 @@ document is dead; it says one thing in it was overtaken and names what.
 - CORRECTED BY [2026-09-21-the-all-filters-press.md](2026-09-21-the-all-filters-press.md)
 
   > section 5 and section 8 of this document say the `All filters` press is forbidden by condition 5 of the admitting ruling and would be the one action that settles twelve rows. **Both halves are wrong and the second is the expensive one.** The disclosing press was ruled on 2026-09-19, and the control fails that ruling's condition 2 terminally: measured live, twice, it declares NEITHER `aria-expanded` NOR `aria-haspopup`, so it is not a member of either sanctioned node set and no caller naming a sanctioned shape can reach it. Condition 3 refuses it a second time -- no sensitivity basis is declared for this surface. **NOTHING MEASURED IN THIS DOCUMENT IS DISTURBED:** `locations` = 1, `actively hiring` = 2, `all filters` = 1, `next` = 1 and `school anise` = 0 all reproduced on two fresh loads, and every one of the fourteen verdicts stands.
+
+### [2026-09-21-the-open-queue.md](2026-09-21-the-open-queue.md)
+
+2026-09-21 &middot; The open queue, 2026-09-21 at master `9dbaad2`
+
+- CORRECTED BY [2026-09-21-what-100-percent-means.md](2026-09-21-what-100-percent-means.md)
+
+  > section 2's `J 40` item is stale: that row is `COVERED-UNFIRED` at `f729a2a`, banked by the `proximity-field` wave, so a reader following this queue would commission a build that has already landed. The other two section-2 items named by row, `N 134` and `P O3`, were re-measured and are still GAP.
 
 ### [2026-09-21-the-read-triage.md](2026-09-21-the-read-triage.md)
 
@@ -1177,6 +1185,14 @@ reach is visible. The quoted reason here is the CORRECTOR's own
 
   > the same group-address clause on rows `63` and `163`, measured false; no state moved.
 
+### [2026-09-21-what-100-percent-means.md](2026-09-21-what-100-percent-means.md)
+
+2026-09-21 &middot; What 100 percent means here, and the two numbers that both deserve the word "done"
+
+- CORRECTS [2026-09-21-the-open-queue.md](2026-09-21-the-open-queue.md)
+
+  > its section 2 lists `J 40`, its highest-value uncommissioned build, as *"named, measured and NOT yet commissioned"*; measured at `f729a2a` that row is `COVERED-UNFIRED`, banked by the `proximity-field` wave, so a reader arriving there would commission a build that has already landed. Its own header declares it a dated snapshot and says to re-derive, which is correct behaviour, but that warning names no row. `N 134` and `P O3` from the same section were re-measured and are unaffected.
+
 ## 5. Every document, by date
 
 `CORRECTED` means at least one later document declares a correction of
@@ -1398,11 +1414,12 @@ ways, which is a fact about markers and not a verdict on the document.
 | 2026-09-21 | [2026-09-21-the-fourteen-fired.md](2026-09-21-the-fourteen-fired.md) | THE FOURTEEN FIRED: one banked, one refused, twelve behind a press | **CORRECTED x1** corrects x2 |
 | 2026-09-21 | [2026-09-21-the-jobs-direction.md](2026-09-21-the-jobs-direction.md) | THE JOBS DIRECTION: the fifth of the GAP that was never asked the question | corrects x1 |
 | 2026-09-21 | [2026-09-21-the-landed-url.md](2026-09-21-the-landed-url.md) | A LANDING IS A STRING THE SITE CHOSE, AND THIS PROCESS HAD NO ALLOWLIST FOR IT | corrects x1 |
-| 2026-09-21 | [2026-09-21-the-open-queue.md](2026-09-21-the-open-queue.md) | The open queue, 2026-09-21 at master `9dbaad2` |  |
+| 2026-09-21 | [2026-09-21-the-open-queue.md](2026-09-21-the-open-queue.md) | The open queue, 2026-09-21 at master `9dbaad2` | **CORRECTED x1** |
 | 2026-09-21 | [2026-09-21-the-proximity-field.md](2026-09-21-the-proximity-field.md) | The proximity field -- census row `J 40`, read per-job network proximity |  |
 | 2026-09-21 | [2026-09-21-the-read-triage.md](2026-09-21-the-read-triage.md) | The read rows are GATED, not backlogged -- but nineteen of the fifty-nine are not | **CORRECTED x1** corrects x2 |
 | 2026-09-21 | [2026-09-21-the-three-readers.md](2026-09-21-the-three-readers.md) | Two readers for three rows, on two addresses nothing could navigate to -- | **CORRECTED x2** |
 | 2026-09-21 | [2026-09-21-the-write-ceiling.md](2026-09-21-the-write-ceiling.md) | THE WRITE CEILING: 157 WRITE-DIRECTION GAP ROWS, AND THE 152 THAT STAY | **CORRECTED x1** corrects x2 |
+| 2026-09-21 | [2026-09-21-what-100-percent-means.md](2026-09-21-what-100-percent-means.md) | What 100 percent means here, and the two numbers that both deserve the word "done" | corrects x1 |
 | 2026-09-21 | [2026-09-21-what-the-browser-said.md](2026-09-21-what-the-browser-said.md) | WHAT THE BROWSER SAID: `$.message`, adjudicated by PROVENANCE CLASS |  |
 | 2026-09-21 | [2026-09-21-what-was-ruled.md](2026-09-21-what-was-ruled.md) | A register keyed on RULINGS, not on documents -- and the fourth payment |  |
 

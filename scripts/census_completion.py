@@ -1,0 +1,591 @@
+"""What "percentage complete" means here -- computed, so it need not be remembered.
+
+THE QUESTION THIS ANSWERS. *How much is left?* It has been answered with a
+percentage nobody derived. This prints the derivation instead: the surface, the
+denominator, the two different numerators that both have a claim to the word
+"done", and a decomposition of what remains.
+
+=============================================================================
+THE ONE DISTINCTION EVERYTHING TURNS ON, AND IT IS NOT MINE
+=============================================================================
+
+`_audit/2026-09-19-the-read-rows.md` section 4 measured a population that read
+as **61%** converting to capability at **11%**, and named the cause in one
+sentence:
+
+    The 61% headline survives only because COVERED-CANNOT-DELIVER is a
+    COVERED-* state and is not a capability.
+
+So this file reports TWO figures and never lets the larger one stand alone:
+
+    ADJUDICATED   every state except GAP. A human reached the row and
+                  recorded a verdict. It says NOTHING about whether anybody
+                  can use the capability.
+    DELIVERED     the row is a capability a user can exercise.
+
+**AND DELIVERED IS PRINTED TWICE, BECAUSE TWO DEFENSIBLE LINES EXIST.** The
+read-rows document draws it at PROVEN + UNFIRED -- its column is headed *"an
+actual capability (PROVEN or UNFIRED)"*. A stricter reading counts only
+COVERED-PROVEN, on the ground that UNFIRED means the code exists and has never
+returned a payload from live LinkedIn. Both are printed with their state-sets
+named. Choosing silently between them is how a headline becomes a quotation.
+
+=============================================================================
+TWO DENOMINATORS, AND SAYING WHICH ONE IS THE WHOLE POINT
+=============================================================================
+
+    PUBLISHED SURFACE   every stated row, including the ones ruled out of
+                        scope. Answers "how much of everything LinkedIn
+                        offers".
+    ACHIEVABLE SURFACE  the published surface minus EXCLUDED-RULED and
+                        MEASURED-ABSENT -- rows this repository has decided
+                        it will not do, and rows the platform does not have.
+                        Answers "how much of what we are willing to build".
+
+A percentage quoted without saying which of these it divides by is not an
+answer. The second is far the larger number and it is the honest one for
+planning; the first is the honest one for scope.
+
+=============================================================================
+WHAT IT REFUSES TO DO
+=============================================================================
+
+**IT DOES NOT CLASSIFY BLOCKERS BY THEIR NAMES.** `scripts/
+classify_surface_blockers.py` records what that costs: a five-way split of 97
+blockers was published from an uncommitted classifier, and its own document
+admits *"the SURFACE? class of 22 is a guess about names, not a measurement of
+reasons"* -- 186,629,988,917,605 distinct subsets fit the three published
+integers. Every split below is either computed by a shipped instrument or is an
+ENUMERATED list of row ids taken from a named document, and each is labelled
+with which.
+
+**IT DOES NOT INVENT A SCHEDULE.** No duration appears anywhere in this file.
+What remains is decomposed by WHAT WOULD UNBLOCK IT, which is a fact about the
+work; how long that takes is not derivable from anything in this repository.
+
+    python scripts/census_completion.py
+    python scripts/census_completion.py --check     # fail on drift from the pins
+
+**`--check` IS WHY THIS IS AN INSTRUMENT AND NOT A REPORT.** It pins every
+headline figure and exits non-zero when one moves. Shown failing:
+`scripts/_check_census_completion_can_fail.py`.
+"""
+from __future__ import annotations
+
+import argparse
+import collections
+import pathlib
+import sys
+
+_HERE = pathlib.Path(__file__).resolve().parent
+sys.path.insert(0, str(_HERE))
+
+import count_census_states as ccs  # noqa: E402
+import enumerate_gap_rows as egr  # noqa: E402
+import pin_census_rows as pcr  # noqa: E402
+import reader_closable_blockers as rcb  # noqa: E402
+
+#: Short spellings folded to their long form. Taken from the shipped counter's
+#: own documented equivalences -- `XR` is `jobs.md`'s EXCLUDED-RULED, `CP`/`CU`
+#: are its COVERED-PROVEN / COVERED-UNFIRED, `CANNOT-DELIVER` was messaging's
+#: first spelling. The counter deliberately reports them UNFOLDED, so that a
+#: reader can see a slice using two spellings; a completion figure must fold
+#: them or it double-counts the vocabulary instead of the census.
+FOLD = {
+    "CP": "COVERED-PROVEN",
+    "CU": "COVERED-UNFIRED",
+    "CCD": "COVERED-CANNOT-DELIVER",
+    "ER": "EXCLUDED-RULED",
+    "XR": "EXCLUDED-RULED",
+    "CANNOT-DELIVER": "COVERED-CANNOT-DELIVER",
+}
+
+#: A row in one of these states is OUT OF THE ACHIEVABLE SURFACE: this
+#: repository ruled it will not do it, or measured that LinkedIn does not offer
+#: it. Neither is work remaining and neither is a capability delivered.
+OUT_OF_SCOPE = ("EXCLUDED-RULED", "MEASURED-ABSENT")
+
+#: The read-rows document's line: an actual capability.
+DELIVERED_BROAD = ("COVERED-PROVEN", "COVERED-UNFIRED")
+#: The strict line: it has returned a payload from live LinkedIn.
+DELIVERED_STRICT = ("COVERED-PROVEN",)
+
+#: THE TWO ROWS THAT ARE NOT ONE CAPABILITY EACH, with the number of
+#: capabilities each stands for and the state every one of them carries.
+#: Verified against the file at HEAD rather than inherited from the counter's
+#: docstring: `O6-O20` names fifteen visibility toggles (the id range
+#: O6..O20 is 15, and the capability cell lists 15 items -- two independent
+#: counts agreeing), and the `P-R` subsection's header declares 45 with its own
+#: closing note that 44 of them are the settings family and `P1` is the 45th.
+#:
+#: **THE REASON THIS CAN BE FOLDED INTO A PERCENTAGE AT ALL is that every one
+#: of the 58 extra capabilities is EXCLUDED-RULED.** They are out of the
+#: achievable surface either way, so the row-vs-capability argument moves the
+#: achievable-surface figures by almost nothing -- which is worth printing,
+#: because it is the objection anybody would raise first. `collapse()` ASSERTS
+#: the state on both rows rather than trusting this comment.
+COLLAPSED = {
+    ("P", "O6-O20"): (15, "EXCLUDED-RULED"),
+    ("P", "P1"): (45, "EXCLUDED-RULED"),
+}
+
+#: ENUMERATED, not inferred. Rows the corpus names as waiting on a decision no
+#: engineering can substitute for. `_audit/2026-09-21-the-open-queue.md` s1
+#: calls D3 *"the single highest-yield decision left in this row set"*, quoting
+#: `_audit/2026-09-19-the-read-rows.md` s5.2, which lists these five by id.
+RULING_BLOCKED_NAMED = {
+    ("N", "99"): "D3 -- is a reasoned allowlist refusal `written`?",
+    ("N", "172"): "D3 -- is a reasoned allowlist refusal `written`?",
+    ("N", "177"): "D3 -- is a reasoned allowlist refusal `written`?",
+    ("N", "178"): "D3 -- is a reasoned allowlist refusal `written`?",
+    ("M", "C83"): "D3 -- is a reasoned allowlist refusal `written`?",
+}
+
+#: ENUMERATED. Rows the corpus names as needing a control PRESSED on a live
+#: page -- `DISCLOSING-PRESS-PERMITTED` ruled it allowed and `press.disclose`
+#: is built, so the remaining cost is a session and nothing else.
+#: `_audit/2026-09-21-the-open-queue.md` s2: *"`N 134` and `P O3` need a press
+#: ... `press.disclose` has zero callers among the 47 shipped tools."*
+PRESS_BLOCKED_NAMED = {
+    ("N", "134"): "needs a disclosing press; the mechanism is built and unused",
+    ("P", "O3"): "needs a disclosing press; the mechanism is built and unused",
+}
+
+
+def walk():
+    """(letter, row_id, folded_state, direction) for every stated row.
+
+    THE LOOP IS REPLICATED AND EVERY DECISION INSIDE IT IS IMPORTED. `cells`,
+    `ROW`, `HEADERS`, `state_of` come from the shipped counter, `ADMIN_ONLY`
+    from the shipped enumerator and `direction_of` from the shipped direction
+    finder. Only the iteration is local, and `control()` below re-runs the
+    shipped enumerator and counter and refuses to report on any disagreement.
+
+    The replication exists because `reader_closable_blockers.main()` does this
+    same walk inline with no seam to import, and carving a seam out of a file
+    three other waves may be editing is not worth the contention.
+    """
+    for letter, name in ccs.SLICES.items():
+        path = ccs.CENSUS / name
+        for line in path.read_text(encoding="utf-8",
+                                   errors="replace").splitlines():
+            if not line.startswith("|"):
+                continue
+            c = ccs.cells(line)
+            if len(c) < 3:
+                continue
+            if c[0] and set(c[0]) <= set("-: "):
+                continue
+            if not ccs.ROW.match(line) or c[0].lower() in ccs.HEADERS:
+                continue
+            st = ccs.state_of(c)
+            if not st and letter == "N" and egr.ADMIN_ONLY.fullmatch(c[0]):
+                st = "GAP"
+            if not st:
+                continue
+            yield letter, c[0], FOLD.get(st, st), rcb.direction_of(c)
+
+
+def control(rows) -> list[str]:
+    """Refuse to report unless the population is BOTH self-consistent and pinned.
+
+    TWO CHECKS THAT LOOK ALIKE AND ARE NOT, AND THE SECOND ONE WAS ADDED
+    BECAUSE THE FIRST WAS SHOWN TO BE INCAPABLE OF CATCHING THE CASE THAT
+    MATTERS.
+
+    1. AGREEMENT WITH THE SHIPPED ENUMERATOR. It checks the REPLICATION -- that
+       the loop in `walk()` did not drift from `enumerate_gap_rows.rows()`. It
+       is worth having and it is NOT a second opinion: the two share the parse
+       by design, so a defect they share is invisible to it. That is not a
+       suspicion, it is written into `enumerate_gap_rows`' own docstring.
+
+    2. AGREEMENT WITH THE PIN. `tests/census_row_pin.json` is the only record
+       of the population that is NOT produced by this parse, so it is the only
+       witness that can convict the parse.
+
+    **MEASURED, NOT ARGUED.** `scripts/_check_census_completion_can_fail.py`
+    demonstration C rewrites one row's state to a word outside the vocabulary.
+    The row silently leaves numerator and denominator together. With only check
+    1, THIS FILE PRINTED A COMPLETE AND ENTIRELY PLAUSIBLE SET OF PERCENTAGES
+    OVER 703 ROWS and reported the census as one row smaller -- the exact
+    disease it was written to expose, in its own output. Check 2 turns that
+    into a refusal.
+
+    A REFUSAL, NEVER A FOOTNOTE. Every percentage over a drifted denominator
+    still looks reasonable, so printing them with a warning above would be the
+    worst available behaviour: the numbers would be quoted and the warning
+    would not.
+    """
+    problems: list[str] = []
+    dialects: list[str] = []
+    shipped = collections.Counter(
+        (letter, rid) for letter, rid, *_ in egr.rows(dialects=dialects))
+    if dialects:
+        problems.append(
+            f"{len(dialects)} state cell(s) are spelled in a dialect the "
+            f"shipped vocabulary does not hold; every figure below would be "
+            f"short by that many rows:\n    " + "\n    ".join(dialects))
+    mine = collections.Counter((letter, rid) for letter, rid, *_ in rows)
+    if mine != shipped:
+        missing = sorted(set(shipped) - set(mine))
+        extra = sorted(set(mine) - set(shipped))
+        problems.append(
+            f"this walk disagrees with `enumerate_gap_rows.rows()` -- "
+            f"{len(missing)} row(s) it sees and this does not {missing[:8]}, "
+            f"{len(extra)} the other way {extra[:8]}")
+
+    pinned = pcr.load()
+    if not pinned:
+        problems.append(
+            f"the census row population is UNPINNED ({pcr.PIN} is missing or "
+            f"empty), so nothing independent of this parse can confirm the "
+            f"denominator. Run `python scripts/pin_census_rows.py --write`.")
+    else:
+        added, removed = pcr.delta(pinned, mine)
+        if added or removed:
+            problems.append(
+                f"THE POPULATION HAS DRIFTED OFF ITS PIN: "
+                f"{len(added)} added, {len(removed)} removed "
+                f"(pinned {sum(pinned.values())}, live {sum(mine.values())}). "
+                f"Every percentage this file would print divides by a "
+                f"denominator nobody has agreed to.\n"
+                + pcr.describe(added, removed))
+    return problems
+
+
+def tally(rows):
+    folded = collections.Counter(st for _l, _r, st, _d in rows)
+    return folded
+
+
+def collapse(rows) -> tuple[int, list[str]]:
+    """(extra capabilities beyond the row count, problems).
+
+    ASSERTS the state of every collapsed row instead of trusting `COLLAPSED`.
+    If one of them is ever re-adjudicated -- and `O23` in the same section is
+    already GAP, so the settings family is not uniformly closed -- the claim
+    that the collapse is entirely out of scope stops being true, and this must
+    say so rather than keep printing a figure built on it.
+    """
+    state = {(l, r): st for l, r, st, _d in rows}
+    extra, problems = 0, []
+    for key, (n, want) in COLLAPSED.items():
+        got = state.get(key)
+        if got is None:
+            problems.append(
+                f"collapsed row {key[0]} {key[1]} is no longer in the census, "
+                f"so the capability denominator cannot be derived")
+            continue
+        if got != want:
+            problems.append(
+                f"collapsed row {key[0]} {key[1]} is {got}, not {want}. It "
+                f"stands for {n} capabilities, so {n - 1} capabilities just "
+                f"moved into or out of the achievable surface in one edit and "
+                f"no row count can show it. RE-READ THE SECTION before "
+                f"quoting any figure here.")
+        extra += n - 1
+    return extra, problems
+
+
+def pct(n: int, d: int) -> str:
+    return "  n/a" if not d else f"{100.0 * n / d:5.1f}%"
+
+
+def report(rows, out) -> dict:
+    """Print the decomposition and return the headline figures as a dict."""
+    folded = tally(rows)
+    total = sum(folded.values())
+    gap = folded["GAP"]
+    proven = folded["COVERED-PROVEN"]
+    unfired = folded["COVERED-UNFIRED"]
+    cannot = folded["COVERED-CANNOT-DELIVER"]
+    out_of_scope = sum(folded[s] for s in OUT_OF_SCOPE)
+    achievable = total - out_of_scope
+    adjudicated = total - gap
+    broad = sum(folded[s] for s in DELIVERED_BROAD)
+    strict = sum(folded[s] for s in DELIVERED_STRICT)
+
+    p = out.append
+    p("=" * 78)
+    p("1. THE SURFACE, AND WHAT IT IS A SURFACE OF")
+    p("=" * 78)
+    p("The four capability slices under `_audit/_census/`. Row counts are the")
+    p("shipped counter's; nothing here is quoted from a document.")
+    p("")
+    per_slice = collections.Counter(letter for letter, *_ in rows)
+    for letter in sorted(ccs.SLICES):
+        p(f"    {letter}  {ccs.SLICES[letter]:30s} {per_slice[letter]:4d} rows")
+    p(f"       {'':30s} {'':4s} ----")
+    p(f"       {'stated rows, all four slices':30s} {total:4d}")
+    p("")
+    p("  `_audit/_census/mcp-inventory.md` is a FIFTH file in that directory and")
+    p("  is NOT counted above. It runs a different state vocabulary")
+    p("  (PROVEN-LIVE / TESTED-ONLY / KNOWN-BROKEN) over a different")
+    p("  population -- tools, not capabilities -- and the shipped counter")
+    p("  excludes it by name. Adding it would sum two different things.")
+    p("")
+    p("=" * 78)
+    p("2. THE DENOMINATOR")
+    p("=" * 78)
+    p(f"    PUBLISHED SURFACE   {total:4d}   every stated row")
+    p(f"    out of scope        {out_of_scope:4d}   EXCLUDED-RULED {folded['EXCLUDED-RULED']}"
+      f" + MEASURED-ABSENT {folded['MEASURED-ABSENT']}")
+    p(f"    ACHIEVABLE SURFACE  {achievable:4d}   what is left to be built or ruled")
+    p("")
+    p("  ROWS ARE NOT CAPABILITIES. `profile.md` collapses two blocks into")
+    p("  single rows, so the CAPABILITY total is larger than the row total:")
+    p("")
+    extra, collapse_problems = collapse(rows)
+    for key, (n, _want) in sorted(COLLAPSED.items()):
+        p(f"    {key[0]} {key[1]:8s} stands for {n:3d} capabilities in 1 row"
+          f"   (+{n - 1})")
+    cap_total = total + extra
+    cap_out = out_of_scope + extra
+    cap_achievable = cap_total - cap_out
+    p(f"    {'':12s} {'':12s} collapse bonus        +{extra}")
+    p(f"    CAPABILITIES, published surface   {cap_total:4d}   computed at HEAD")
+    p("")
+    p("  THREE CAPABILITY TOTALS CIRCULATE AND THIS FILE CORRECTS NONE OF THEM.")
+    p(f"    {cap_total}   stated rows + declared collapses, computed above")
+    p("    761   published, and quoted as the denominator under every coverage")
+    p("          ratio in this campaign. It has never reconciled with its own")
+    p("          stated terms: `_audit/2026-09-19-cross-slice-rulings.md`")
+    p("          measured that `705 + 59 - 2` evaluates to 762, not 761.")
+    p("    760   the shipped counter's docstring, which keeps a `- 2 stateless`")
+    p("          term. THE TWO STATELESS ROWS ARE `J 58` AND `M C53`, AND")
+    p("          NEITHER IS INSIDE THE 704 -- they carry no state, so the")
+    p("          counter never counted them. Subtracting them removes them a")
+    p("          second time.")
+    p("")
+    p("  ONE OF THE THREE FUTURES THAT 2026-09-19 COULD NOT SEPARATE IS NOW")
+    p("  CLOSED. That wave reported `THE P-R BLOCK DOES NOT EXIST` because no")
+    p("  row is named `P-R`, and could not tell whether the +45 double-counted")
+    p("  rows that had since been expanded or was simply stale. Measured at")
+    p("  HEAD: the block is a SECTION, not a row -- `### P-R ... (45)` -- its")
+    p("  44 settings-family items are PROSE BULLETS CARRYING NO ROW IDS, and")
+    p("  its own closing note reads `P1 is counted in the 45`. So the +44 is")
+    p("  not double-counted: those capabilities have no rows to double-count.")
+    p("  THE UNEXPLAINED TERM IS THE `- 2`, AND IT IS THE WHOLE DIFFERENCE.")
+    p("  Reported, not corrected: this denominator's owner is the counter's,")
+    p("  and moving it silently is how the 761 became unreproducible.")
+    if collapse_problems:
+        for problem in collapse_problems:
+            p(f"    !! {problem}")
+    p("")
+    p("  EVERY ONE OF THE 58 COLLAPSED CAPABILITIES IS EXCLUDED-RULED --")
+    p("  asserted above, not assumed -- so they leave the achievable surface")
+    p("  the moment they enter it. That is why the row-vs-capability argument,")
+    p("  which sounds decisive, moves the number that matters by almost")
+    p("  nothing:")
+    p("")
+    p(f"    delivered / published surface    rows {pct(broad, total)}"
+      f"   capabilities {pct(broad, cap_total)}")
+    p(f"    delivered / achievable surface   rows {pct(broad, achievable)}"
+      f"   capabilities {pct(broad, cap_achievable)}")
+    p("")
+    p("  So the figures below divide by ROWS, and the capability reading is")
+    p("  printed beside them wherever it would differ.")
+    p("")
+    p("=" * 78)
+    p("3. ADJUDICATED IS NOT DELIVERED")
+    p("=" * 78)
+    p("  Each figure names the state-set that defines it. The larger one never")
+    p("  stands alone -- that is the whole finding of")
+    p("  `_audit/2026-09-19-the-read-rows.md` section 4.")
+    p("")
+    p(f"    ADJUDICATED        {adjudicated:4d} / {total:4d}  {pct(adjudicated, total)}"
+      f"   everything except GAP")
+    p(f"    DELIVERED, broad   {broad:4d} / {total:4d}  {pct(broad, total)}"
+      f"   COVERED-PROVEN + COVERED-UNFIRED")
+    p(f"    DELIVERED, strict  {strict:4d} / {total:4d}  {pct(strict, total)}"
+      f"   COVERED-PROVEN only")
+    p("")
+    p("  Against the ACHIEVABLE surface instead, which is the number to plan on:")
+    p("")
+    p(f"    DELIVERED, broad   {broad:4d} / {achievable:4d}  {pct(broad, achievable)}")
+    p(f"    DELIVERED, strict  {strict:4d} / {achievable:4d}  {pct(strict, achievable)}")
+    p("")
+    p("  THE GAP BETWEEN THE FIRST LINE AND THE OTHER TWO IS THE ENTIRE POINT.")
+    p(f"  {adjudicated} rows carry a verdict. {broad} of them are a capability anybody can")
+    p(f"  use. The difference is {adjudicated - broad} rows that were REASONED ABOUT and")
+    p("  then ruled out, measured absent, or found undeliverable -- real work,")
+    p("  and not one unit of it is a thing the server can do.")
+    p("")
+    p("=" * 78)
+    p("4. WHAT REMAINS, DECOMPOSED BY WHAT WOULD UNBLOCK IT")
+    p("=" * 78)
+    not_delivered = total - broad - out_of_scope
+    p(f"  NOT DELIVERED (achievable surface minus delivered-broad): {not_delivered}")
+    p(f"    GAP                       {gap:4d}   no verdict yet")
+    p(f"    COVERED-CANNOT-DELIVER    {cannot:4d}   a tool fired and cannot do it")
+    p("")
+    gap_rows = [(l, r, d) for l, r, st, d in rows if st == "GAP"]
+    by_dir = collections.Counter(d for _l, _r, d in gap_rows)
+    reader = by_dir["R"] + by_dir["R+W"]
+    p("  -- BUCKET 1: BLOCKED ON A LIVE BROWSER SESSION -------------------")
+    p(f"     COVERED-UNFIRED                         {unfired:4d}   DERIVED from the state")
+    p("       The code exists and has never returned a payload from live")
+    p("       LinkedIn. A session is the entire remaining cost, by definition")
+    p("       of the state -- no ruling, no design, no build.")
+    named_press = [k for k in PRESS_BLOCKED_NAMED
+                   if any((l, r) == k and st == "GAP" for l, r, st, _d in rows)]
+    p(f"     still-GAP rows needing a press          {len(named_press):4d}   ENUMERATED"
+      f" {sorted(named_press)}")
+    p(f"     bucket 1, named                         {unfired + len(named_press):4d}")
+    p("")
+    p("  -- BUCKET 2: BLOCKED ON AN OPERATOR RULING -----------------------")
+    named_ruling = [k for k in RULING_BLOCKED_NAMED
+                    if any((l, r) == k and st == "GAP" for l, r, st, _d in rows)]
+    p(f"     one undecided question, five rows       {len(named_ruling):4d}   ENUMERATED"
+      f" {sorted(named_ruling)}")
+    p(f"     write-direction still-GAP rows          {by_dir['W']:4d}   DERIVED from the"
+      f" census R/W cell")
+    p("       Governed by the STANDING ruling `NO-IRREVERSIBLE-WRITE-IS-FIRED`:")
+    p("       a write may be designed, gated and left ready, and may NOT be")
+    p("       fired at a real target without him. So the last step of every one")
+    p("       of these is a decision, whatever is built first. This is a")
+    p("       CEILING on the bucket, not a claim that each row is otherwise")
+    p("       ready -- most are not.")
+    p("")
+    p("  -- BUCKET 3: BLOCKED ON NOTHING AT ALL ---------------------------")
+    p("     THE ONLY BUCKET WHOSE SIZE IS A STATEMENT ABOUT WORK.")
+    p(f"     read-direction still-GAP rows           {reader:4d}   DERIVED"
+      f"  (R {by_dir['R']} + R+W {by_dir['R+W']})")
+    p("       An UPPER BOUND and nothing stronger. It is the set a reader could")
+    p("       close IN PRINCIPLE. It has not been shown that each one's address")
+    p("       is admitted by the shipped read boundary, and that is the exact")
+    p("       measurement missing -- see section 5.")
+    p(f"     of those, known to need a session       {len(named_press):4d}")
+    p(f"     of those, known to need a ruling        "
+      f"{len([k for k in named_ruling if any((l, r) == k and d in ('R', 'R+W') for l, r, _s, d in rows)]):4d}")
+    p("")
+    p("  -- UNCLASSIFIED: A MEASUREMENT GAP, NOT A BLOCKER ----------------")
+    p(f"     direction unknown                       {by_dir['unknown']:4d}")
+    p(f"     direction ambiguous                     {by_dir['ambiguous']:4d}")
+    p("       `jobs.md` has no per-row R/W column at all, so its rows cannot be")
+    p("       placed in bucket 2 or 3 by this method. That is a fact about the")
+    p("       census's shape, and `_audit/2026-09-21-the-jobs-direction.md`")
+    p("       argues the column should NOT be added. Until that is ruled, these")
+    p("       rows are honestly unplaceable and are not silently folded into a")
+    p("       neighbouring bucket to make the arithmetic tidy.")
+    p("")
+    p(f"     CHECK: {by_dir['R']} + {by_dir['R+W']} + {by_dir['W']} + "
+      f"{by_dir['unknown']} + {by_dir['ambiguous']} = "
+      f"{sum(by_dir.values())}, and still-GAP is {gap}")
+    p("")
+    p("=" * 78)
+    p("5. WHAT THIS INSTRUMENT CANNOT SAY")
+    p("=" * 78)
+    p("  * HOW LONG. Nothing here measures duration and nothing should be read")
+    p("    as a schedule.")
+    p("  * WHETHER BUCKET 3 IS REALLY BLOCKED ON NOTHING. The missing")
+    p("    measurement is a per-row ADDRESS run through `readonly.is_read_url`.")
+    p("    The census records an address in prose, not in a column, so no")
+    p("    instrument can take it today. `_audit/2026-09-19-the-read-rows.md`")
+    p("    did it BY HAND for 39 rows; at that rate the remaining read rows are")
+    p("    a bounded, unglamorous job and it is the one that would turn this")
+    p("    upper bound into a number.")
+    p("  * WHETHER A ROW IS THE RIGHT ROW. Every count here is over the census")
+    p("    as written. If a capability is missing from the census entirely, it")
+    p("    is missing from every figure above, and no instrument in this")
+    p("    repository can find what nobody enumerated.")
+
+    return {
+        "stated_rows": total,
+        "capabilities": cap_total,
+        "capabilities_achievable": cap_achievable,
+        "out_of_scope": out_of_scope,
+        "achievable": achievable,
+        "adjudicated": adjudicated,
+        "delivered_broad": broad,
+        "delivered_strict": strict,
+        "gap": gap,
+        "cannot_deliver": cannot,
+        "unfired": unfired,
+        "gap_read": reader,
+        "gap_write": by_dir["W"],
+        "gap_unknown": by_dir["unknown"],
+        "gap_ambiguous": by_dir["ambiguous"],
+    }
+
+
+#: EVERY headline figure this file prints, pinned. `--check` fails on any
+#: movement and NAMES it. This is what makes the file an instrument rather than
+#: a report: a report that cannot disagree with the tree certifies nothing.
+#: Re-pin only alongside a statement of what moved the census.
+PINNED = {
+    "stated_rows": 704,
+    #: 762 = 704 stated rows + 58 declared collapses, computed at HEAD. NOT the
+    #: published 761 and NOT the counter docstring's 760: those two differ only
+    #: by a `- 2 stateless` term whose two rows are already outside the 704.
+    #: Pinned at what the tree computes, with the other two named in the output.
+    "capabilities": 762,
+    "capabilities_achievable": 389,
+    "out_of_scope": 315,
+    "achievable": 389,
+    "adjudicated": 429,
+    "delivered_broad": 95,
+    "delivered_strict": 72,
+    "gap": 275,
+    "cannot_deliver": 19,
+    "unfired": 23,
+    "gap_read": 68,
+    #: 151, not the 152 published by `_audit/2026-09-21-the-write-ceiling.md`.
+    #: That document scoped itself to `profile.md`, `network.md` and
+    #: `messaging-and-content.md`; measured at HEAD those three carry W 151 and
+    #: R+W 3, and `jobs.md` contributes no direction at all. The compound-rows
+    #: wave repaired `M C85` from `W` to `R+W` IN PLACE, which is a -1 on W and
+    #: is CONSISTENT WITH the difference rather than proof of it -- stated that
+    #: way because I did not re-derive that document's population.
+    "gap_write": 151,
+    #: All 56 are `jobs.md`, which has no per-row R/W column. Not a coincidence
+    #: and not a defect in the finder: it is the whole of that slice's still-GAP
+    #: population.
+    "gap_unknown": 56,
+    "gap_ambiguous": 0,
+}
+
+
+def main(argv: list[str] | None = None) -> int:
+    ap = argparse.ArgumentParser(description="The completion decomposition.")
+    ap.add_argument("--check", action="store_true",
+                    help="exit 1 if any headline figure has moved off its pin")
+    args = ap.parse_args(argv)
+
+    rows = list(walk())
+    problems = control(rows)
+    if problems:
+        print("REFUSING TO REPORT -- a control failed, so no figure below "
+              "would mean anything:")
+        for problem in problems:
+            print(f"  {problem}")
+        return 1
+
+    out: list[str] = []
+    figures = report(rows, out)
+    print("\n".join(out))
+
+    moved = {k: (PINNED[k], v) for k, v in figures.items()
+             if k in PINNED and PINNED[k] != v}
+    print()
+    print("=" * 78)
+    if moved:
+        print(f"{len(moved)} PINNED FIGURE(S) MOVED:")
+        for key, (was, now) in sorted(moved.items()):
+            print(f"    {key:22s} pinned {was:5d}   now {now:5d}   "
+                  f"({now - was:+d})")
+        print("  Every document quoting one of these is now quoting a number "
+              "that is\n  no longer true. Re-pin in the same commit that says "
+              "what moved.")
+    else:
+        print("every headline figure matches its pin")
+    missing = sorted(set(PINNED) - set(figures))
+    if missing:
+        print(f"  PINS WITH NO FIGURE TO CHECK: {missing} -- a pin that "
+              f"checks nothing is worse than none.")
+        moved = moved or {"_": (0, 1)}
+    return 1 if (args.check and (moved or missing)) else 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())
