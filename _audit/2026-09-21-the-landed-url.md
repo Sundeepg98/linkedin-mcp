@@ -896,6 +896,30 @@ still be a third party's name.** Untouched here; it is decision `D1` in
       -> 292 sites / 24 modules / 539 sub-expressions; grep contrast 18;
          shortlist 19 = 14 raw + 5 routed through landing.withheld()
 
+    venv/Scripts/python scripts/_probe_dom_error_url_field.py
+      -> 12 readers, 12 reached, 12 with the plant at $.url and at $.message,
+         12 negative controls not_driven, voided_by []
+
+    venv/Scripts/python -m pytest -n auto --dist loadfile -q
+      -> 7628 passed, 8 skipped, 1 xfailed, 0 failed (24m44s)
+
+**AND THE TWO RUNS BEFORE THAT ONE ARE WORTH MORE THAN IT IS**, so they are
+recorded rather than replaced by the green:
+
+    run 1   7610 passed, 13 failed   2 mine (correction markers), 1 mine
+                                     (outage-as-absence), 7 test_stale_process
+                                     seeing a tree I was committing into, 3
+                                     contention -- all ten re-measured GREEN
+                                     serially, the three real ones repaired
+    run 2   7620 passed,  3 failed   1 mine (decorative controls in the new
+                                     probe), 2 test_stale_process, same cause
+    run 3   7628 passed,  0 failed   frozen tree, no commits during it
+
+**THREE OF THIS WAVE'S FOUR SELF-INFLICTED FINDINGS CAME OUT OF A RED FULL
+SUITE, NOT OUT OF A TARGETED RUN.** Two of them were in files the wave had
+written minutes earlier and had already run green in a scoped selection. A
+green scoped run is a fact about the selection.
+
 The interpreter is the one in the MAIN checkout; a worktree carries no
 gitignored files and therefore no `venv/`. **No script here resolves an
 interpreter as `REPO / "venv" / ...`** -- that construction is absent in every
