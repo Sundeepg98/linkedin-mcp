@@ -97,6 +97,31 @@ COVERED_ROWS: dict[tuple[str, str], tuple[str, str]] = {
         "multi-location search, FIRED 2026-09-20: 2 searches, 12 rows, 12 "
         "distinct ids, all carrying found_in, attributed to 2 places",
     ),
+    # THE FIRST NETWORK ROWS ON THIS TABLE, 2026-09-21, and the first three
+    # pinned at UNFIRED rather than PROVEN. That is the state they belong in
+    # and pinning it is the point: the wave that built them was forbidden the
+    # browser, so nothing has seen either tool return a payload live. This
+    # guard was written to catch a banked row reverting to GAP and it also
+    # catches an unannounced PROMOTION -- which is the direction that inflates
+    # a count, and the one these three are most likely to drift in the moment
+    # somebody fires them without writing it down.
+    ("network.md", "33"): (
+        "COVERED-UNFIRED",
+        "connections at an organization: linkedin_company_page_counts opens "
+        "the Page root by numeric id and returns a COUNT from integers read "
+        "inside the document",
+    ),
+    ("network.md", "54"): (
+        "COVERED-UNFIRED",
+        "connections subscribed to a Page: the same reader and the same page "
+        "load as row 33, a second phrase in one closed table",
+    ),
+    ("network.md", "175"): (
+        "COVERED-UNFIRED",
+        "the direct link to a group: linkedin_group_page builds "
+        "/groups/<digits>/ and answers feed_drawn, reader_blind or ambiguous "
+        "from anchor counts alone",
+    ),
 }
 
 
@@ -116,11 +141,105 @@ def _source(name: str) -> str:
 
 
 def test_both_census_slices_are_readable_at_all() -> None:
-    """The control. A guard that reads an empty corpus refuses nothing."""
+    """The control. A guard that reads an empty corpus refuses nothing.
+
+    EXTENDED 2026-09-21 TO network.md, because the table above now pins rows
+    in it. A pin over a slice this control does not read would pass on a walk
+    that had been broken into finding nothing, which is the exact ambiguity
+    this function exists to remove.
+    """
     jobs, profile = _states("jobs.md"), _states("profile.md")
+    network = _states("network.md")
     assert len(jobs) >= 100, f"only {len(jobs)} rows parsed out of jobs.md"
     assert len(profile) >= 100, f"only {len(profile)} rows parsed out of profile.md"
+    assert len(network) >= 100, f"only {len(network)} rows parsed out of network.md"
     assert "10" in jobs and "K10" in profile, "the two banked rows are not being read"
+    assert {"33", "54", "175"} <= set(network), (
+        "the three network rows banked 2026-09-21 are not being parsed out of "
+        "network.md, so their pins above are asserting nothing"
+    )
+
+
+def _defined_names(source: str) -> set[str]:
+    """Function names DEFINED in a source, as AST definitions.
+
+    Matched as definitions rather than as substrings for the reason the
+    multi-location chain below earned on its first mutation run: an old name
+    that is a PREFIX of its replacement survives a substring check while every
+    call site points at nothing.
+    """
+    return {
+        node.name
+        for node in ast.walk(ast.parse(source))
+        if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef))
+    }
+
+
+#: ``module -> the names census rows 33, 54 and 175 rest on``. Kept as data so
+#: the chain test and the control below drive the SAME predicate over the same
+#: list -- a control that checks a hand-copied subset proves the copy.
+_THREE_READER_CHAIN: dict[str, tuple[str, ...]] = {
+    "company_root.py": (
+        "read_company_root",
+        "connection_counts",
+        "phrases_shipped",
+        "control_fixture",
+    ),
+    "group_page.py": (
+        "read_group_page",
+        "reachability",
+        "group_page_url",
+        "landed_on_the_same_group",
+    ),
+    "dom.py": ("read_count_lines",),
+    "server.py": ("linkedin_company_page_counts", "linkedin_group_page"),
+}
+
+
+def test_the_two_readers_behind_the_three_network_rows_are_still_whole() -> None:
+    """``N 33``, ``N 54`` and ``N 175``: shaper -> reader -> tool.
+
+    THE ROWS ARE COVERED ONLY IF EVERY LINK HOLDS. Each of the two chains ends
+    at a registered tool, and the failure this asserts against is the one the
+    file's docstring names in the other direction: a row left claiming
+    coverage after somebody deletes the reader. Both of these modules are new,
+    which makes them the likeliest in the package to be moved or folded into a
+    neighbour by a later tidy-up.
+    """
+    for module, names in _THREE_READER_CHAIN.items():
+        defined = _defined_names(_source(module))
+        for name in names:
+            assert name in defined, (
+                f"{module} no longer defines {name}. Census rows 33, 54 and "
+                "175 in network.md claim COVERED-UNFIRED against these two "
+                "readers, and a chain with a link missing is a row claiming a "
+                "capability nobody provides."
+            )
+    # THE SCRIPT IS PART OF THE CHAIN AND IT IS NOT A DEF, so it is asserted
+    # separately rather than being left out because it did not fit the loop.
+    assert "COUNT_LINES_JS" in _source("dom.py"), (
+        "dom.COUNT_LINES_JS is gone; rows 33 and 54 rest on a reader whose "
+        "in-page half no longer exists"
+    )
+
+
+def test_control_the_chain_check_convicts_a_renamed_reader() -> None:
+    """SHOWN FAILING, against a MUTATED COPY so no tracked file is edited.
+
+    A rename is the likeliest way one of these links breaks, and it is the
+    shape a substring check cannot see when the old name is a prefix of the
+    new one. This drives the SAME predicate the test above drives, over a copy
+    of each module with one name extended.
+    """
+    for module, names in _THREE_READER_CHAIN.items():
+        source = _source(module)
+        target = names[0]
+        mutated = source.replace(f"def {target}(", f"def {target}_renamed(")
+        assert mutated != source, (module, target)
+        assert target not in _defined_names(mutated), (
+            f"the chain check cannot see {target} disappearing from {module}, "
+            "so its green above certifies nothing"
+        )
 
 
 @pytest.mark.parametrize("key", sorted(COVERED_ROWS))

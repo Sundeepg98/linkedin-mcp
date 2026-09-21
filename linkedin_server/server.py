@@ -1,4 +1,4 @@
-"""The tool surface: forty-seven tools, twelve of which write to LinkedIn.
+"""The tool surface: forty-nine tools, twelve of which write to LinkedIn.
 
 THIS PARAGRAPH HAS NOW BEEN WRONG FIVE TIMES, in both directions, and the
 count is the part that keeps rotting. Until 2026-08-23 it read *"There is no
@@ -142,9 +142,9 @@ assigned to anybody -- it waits for whoever next runs the suite, and in the
 meantime the pin goes on asserting the old number with full confidence.
 
 THE NUMBERS ABOVE ARE DERIVED NOW, and that is a statement about a test rather
-than about an intention. Forty-seven is ``len(await mcp.list_tools())``,
+than about an intention. Forty-nine is ``len(await mcp.list_tools())``,
 pinned in ``test_server_surface.py`` by
-``test_the_surface_is_exactly_the_fortyseven_tools``; the split is pinned by
+``test_the_surface_is_exactly_the_fortynine_tools``; the split is pinned by
 ``tests/test_prose_that_makes_a_claim.py::test_the_server_docstring_numbers_are_derived``,
 which reads THESE WORDS and fails if any of the three disagrees with the
 registry.
@@ -157,9 +157,27 @@ POINTER to it was dangling, so a reader who followed it found nothing and
 would reasonably conclude these numbers are unchecked. A citation is a claim
 like any other.
 The surface splits three ways and the split is the part a reader actually
-needs: THIRTY-FIVE read, TWELVE write, and ZERO are write-shaped,
-registered, gated and unable to act. Thirty-five plus twelve plus zero is
-forty-seven.
+needs: THIRTY-SEVEN read, TWELVE write, and ZERO are write-shaped,
+registered, gated and unable to act. Thirty-seven plus twelve plus zero is
+forty-nine.
+
+THE FORTY-EIGHTH AND FORTY-NINTH ARE TWO READS, 2026-09-21, AND THEY ARE ONE
+FINDING RATHER THAN TWO TOOLS. ``linkedin_group_page`` and
+``linkedin_company_page_counts`` each open an address that had been on the read
+allowlist for days -- ``/groups/<id>/`` since 2026-09-19, ``/company/<id>/``
+since 2026-09-20 -- with **nothing in this package able to navigate to it**,
+because every tool on those two surfaces took no parameter at all. Both
+allowlist entries say so about themselves; these two tools are the answer.
+
+Each takes ONE numeric identifier and nothing else. A group id and an
+organisation id are digit runs, so the ADDRESS names nobody; a slug is refused
+because a slug is a name, and the refusal reports the SHAPE of what it saw
+rather than the value. Neither reads a heading, a label, an author or a post:
+one classifies the page's anchors through the shaper ``anchors.py`` already
+ships, the other compares phrases INSIDE the document and returns a position
+and an integer. Census rows ``N 175``, ``N 33`` and ``N 54`` -- all three
+COVERED-UNFIRED, because nothing has yet seen either tool return a payload
+live.
 
 THE FORTY-SEVENTH IS ONE READ, 2026-09-20, AND IT IS THE FIRST TOOL HERE ON A
 SURFACE WHOSE EVERY ROW IS A THIRD PARTY. ``linkedin_people_search_shape``
@@ -226,8 +244,12 @@ column say different things.
 
 ONE SANCTIONED ACTION STILL REFUSES AND IT IS NOT IN THAT COUNT.
 ``set_open_to_work`` has no tool registered for it at all, so it is not part
-of the thirty-five: it is a spec behind the gate with nothing on the surface
-to call it. ``writes.mint`` refuses it a grant at issue, so no confirm token
+of the READ COUNT above: it is a spec behind the gate with nothing on the
+surface to call it. **THAT SENTENCE SPELLED THE NUMBER OUT UNTIL 2026-09-21**
+and went stale the moment the read count moved, three paragraphs below the
+line that says these numbers are derived now. A number pinned by a test does
+not need restating in prose beside it; restating it only adds a second place
+for it to be wrong. ``writes.mint`` refuses it a grant at issue, so no confirm token
 for it can exist for anyone.
 
 AND THE REASON MINT REFUSES IT CHANGED ON 2026-09-02, which matters because
@@ -344,9 +366,11 @@ from linkedin_server import (
     cdp_bridge,
     collections_page,
     company_page,
+    company_root,
     creator_analytics,
     dom,
     events,
+    group_page,
     groups_page,
     job_collections,
     jobfilter,
@@ -392,7 +416,11 @@ from linkedin_server.config import (
     display,
     scrub,
 )
-from linkedin_server.errors import ExtractionFailedError, LinkedInReaderError
+from linkedin_server.errors import (
+    ExtractionFailedError,
+    LinkedInReaderError,
+    NotAuthenticatedError,
+)
 from linkedin_server.profile_lock import held_by
 
 # ---------------------------------------------------------------------------
@@ -2636,6 +2664,234 @@ async def linkedin_group_memberships() -> dict[str, Any]:
                 "cost": groups_page.cost_certification(before, after),
                 "counter_states_on_the_groups_page": on_page,
                 **reading,
+            }
+    except Exception as exc:
+        return _error(exc)
+
+
+def _authwall_refusal_without_the_landing(landed: str, *, surface: str) -> None:
+    """``assert_not_authwall``, with the LANDING kept out of the message.
+
+    **THIS IS A DELIBERATE DIVERGENCE FROM WHAT EVERY OTHER TOOL HERE DOES,
+    AND IT IS SCOPED TO THE TWO SURFACES THAT NEED IT.**
+
+    ``auth.assert_not_authwall`` interpolates the FINAL url into its refusal.
+    That message reaches :func:`_error`, and ``config.scrub`` substitutes THIS
+    SERVER'S OWN FILESYSTEM PATHS and nothing else -- a name has no shape to
+    scrub. It is the coercion-leak class one layer over: the value does not
+    leave in a return field, it leaves in an exception.
+
+    WHY IT MATTERS HERE AND NOT ELSEWHERE. **LinkedIn's authwall carries the
+    address it bounced inside its own query**, and the canonical form of an
+    ORGANISATION address is a SLUG. A slug is a name -- a sole trader, an
+    eponymous firm or a personal brand gets a person's name in it, and this
+    repository's own corpus carries one. So a signed-out load of a Page root
+    can put a third party's name into a refusal, on the ordinary path, every
+    time. ``linkedin_job_detail`` bounces the same way and its address carries
+    a NUMERIC job id, which is why this has not been worth a divergence before.
+
+    WHAT IS NOT CLAIMED. The general case belongs to ``auth.py`` and is NOT
+    fixed here: every other tool in this module still publishes its landing in
+    this refusal. Repairing that is a decision about a function twenty-odd
+    tools share, and this wave is three census rows. It is named in
+    `_audit/2026-09-21-the-three-readers.md` rather than quietly widened.
+
+    ``from None`` IS PART OF THE FIX, not punctuation: it suppresses the
+    original exception whose message holds the url, so a traceback rendered
+    anywhere cannot walk back to it.
+    """
+    try:
+        assert_not_authwall(landed, surface=surface)
+    except NotAuthenticatedError:
+        raise NotAuthenticatedError(
+            f"loading the {surface} landed on LinkedIn's signed-out "
+            "wall, so there is no live session. THE LANDING IS WITHHELD "
+            "rather than named, which is the one way this refusal differs "
+            "from the rest of this module: LinkedIn's authwall carries the "
+            "address it bounced inside its own query, and the canonical form "
+            "of an organisation address is a SLUG, which is a name. Call "
+            "linkedin_login and sign in yourself in the window it opens."
+        ) from None
+
+
+@mcp.tool()
+async def linkedin_group_page(group_id: str) -> dict[str, Any]:
+    """Did a group's DIRECT LINK reach it? A verdict and counts, never a post.
+
+    Census row ``N 175`` -- reach a private unlisted group through a direct
+    link or an invitation. ``/groups/<id>/`` has been on the read allowlist
+    since 2026-09-19 and that entry says in its own words that **no tool in
+    this package could navigate to it**, because every tool on the surface
+    takes no parameter. This is the tool that can.
+
+    THE ANSWER IS A VERDICT OVER INTEGERS, and the three it can give are the
+    whole contract:
+
+        feed_drawn     feed permalinks rendered, so the link REACHED a group
+                       this account can see
+        ambiguous      the page rendered and drew no feed permalink. A
+                       membership gate, an empty group and a restyle each
+                       produce exactly this reading and NOTHING here can
+                       separate them
+        reader_blind   the page drew no anchor at all, which is a fact about
+                       the reader
+
+    **NOT ONE WORD OF THE GROUP CROSSES THE BOUNDARY.** No name, no heading,
+    no label, no author and no post text: the page's anchors are classified
+    INSIDE the document against a route table this package defines, and what
+    comes back is a count per class. That obligation is the allowlist entry's
+    own -- *whoever writes the first reader for this address owes it a shaper
+    as strict as the search-results one* -- and it is met by running the
+    shipped classifier rather than by writing a second one.
+
+    ``group_id`` IS TEN ASCII DIGITS AND NOTHING ELSE. A group segment that is
+    not a bounded digit run is refused as a SLUG, because a group named after
+    a person gets that person's name in its slug, and the refusal reports the
+    SHAPE of what it saw rather than the value.
+
+    THIS TOOL WRITES NOTHING. There is no join, no leave, no invitation and no
+    press here; ``/groups/<id>/invite/`` is refused twice over by the read
+    boundary and census rows ``N 163`` and ``N 164`` each still need their own
+    url, their own sanction entry and their own ruling.
+
+    THE COST IS UNMEASURED AND THAT IS STATED RATHER THAN GUESSED. One
+    navigation, no second page, and no counter on this account is known to
+    belong to this surface -- ``linkedin_group_memberships`` had to bracket on
+    the feed for exactly that reason. A bracket here would be two extra loads
+    to watch a number that is not attributable to what was opened.
+
+    Args:
+        group_id: the numeric LinkedIn group id, ten ASCII digits, at most 20
+            of them.
+
+    Returns:
+        The verdict, the anchor counts it was derived from, and whether the
+        navigation stayed on the group it was sent to -- or a refusal naming
+        the shape it saw.
+    """
+    try:
+        # ``address`` RATHER THAN ``built``, AND THE NAME IS THE FIX.
+        # ``test_navigation_is_never_derived`` collects taint PER MODULE BY
+        # NAME, deliberately -- a closure reading a landed url out of an
+        # enclosing scope is the shape it was written for. ``linkedin_job_
+        # detail`` binds ``built`` to a url assembled from a company id it
+        # read OFF THE PAGE, which is genuinely tainted and navigates to
+        # nothing; reusing that name here would have inherited its taint and
+        # put the first entry ever into KNOWN_DERIVED_NAVIGATIONS for a
+        # navigation that is not derived at all. This url is a template this
+        # repository authored, filled from a value the CALLER supplied and
+        # this package has already proven is ten-ASCII-digit only.
+        address = group_page.group_page_url(group_id)
+        if not address.get("built"):
+            return {"ok": False, **address}
+        async with BROWSER.session() as page:
+            landed = await BROWSER.goto(page, address["url"])
+            _authwall_refusal_without_the_landing(
+                landed, surface="group page"
+            )
+            same = group_page.landed_on_the_same_group(
+                landed, address["identifier"]
+            )
+            reading = await group_page.read_group_page(page)
+            return {
+                "ok": True,
+                "pages_loaded": 1,
+                # THE IDENTIFIER IS THE CALLER'S OWN AND IS A DIGIT RUN THIS
+                # TOOL ALREADY PROVED IS ONE. The LANDING is not published:
+                # it is reduced to a bounded digit run and compared as one,
+                # so a redirect to somebody's profile cannot ride out here.
+                "group_id": address["identifier"],
+                "landed_on_the_same_group": same,
+                "reach": group_page.reachability(reading, same),
+                **reading,
+            }
+    except Exception as exc:
+        return _error(exc)
+
+
+@mcp.tool()
+async def linkedin_company_page_counts(organisation_id: str) -> dict[str, Any]:
+    """How many of your connections an organisation Page counts. COUNTS ONLY.
+
+    Census rows ``N 33`` -- how many of your connections work at an
+    organisation -- and ``N 54`` -- how many of your connections are
+    subscribed to a Page's updates. Both numbers render on the Page root,
+    which has been on the read allowlist since 2026-09-20, and
+    ``company_page.py`` says in its own docstring that it *opens nothing*.
+    This is the tool that opens it.
+
+    **A COUNT AND NEVER A LIST.** That is the discrimination that banked
+    ``N 101`` as CANNOT-DELIVER rather than PROVEN -- *a tool that reports HOW
+    MANY does not cover a row asking WHICH* -- and it is structural here: the
+    page is reduced to integers inside the document and no string of any kind
+    crosses back. The roster tab that WOULD name people,
+    ``/company/<x>/people/``, is refused by the read boundary and is not
+    reachable from anything in this tool.
+
+    **THE SCREEN-READER COPY OF EVERY LINE IS STEPPED OVER AND COUNTED.**
+    LinkedIn draws these lines twice -- an ``aria-hidden`` visible span that
+    is name-free beside a ``visually-hidden`` span that carries a person's
+    name -- and ``textContent`` takes both. ``hidden_subtrees_skipped`` in the
+    payload is how many the walk stepped over, so the exclusion is a number
+    you can read rather than an assurance.
+
+    **A PHRASE THAT DID NOT RENDER READS ``phrase_not_drawn``, WHICH IS NOT A
+    COUNT OF ZERO.** Nobody in this repository has opened a company Page, so
+    the exact words beside these two numbers are unmeasured: the first live
+    run of this tool measures the wording as well as the count. A wrong phrase
+    costs a missing reading and can never produce a wrong number, because a
+    number is published only when a phrase this package shipped was found in a
+    short line.
+
+    AN ABBREVIATION IS REFUSED, NEVER ROUNDED, and so is a decimal. ``2K`` is
+    not two thousand as far as this tool is concerned; it is
+    ``abbreviated_refused``, with no value. A wrong number that looks right is
+    worse than no number.
+
+    ``organisation_id`` IS TEN ASCII DIGITS AND NOTHING ELSE. This package
+    will not assemble a slug, because a slug is a name -- a sole trader, an
+    eponymous firm or a personal brand gets a person's name in it. The numeric
+    id is what ``linkedin_job_detail`` already publishes as
+    ``company_page_url``, so a caller reaches a Page without ever typing one.
+
+    THIS TOOL WRITES NOTHING. No control is pressed: "I'm interested"
+    (``J 86``) is not touched, and neither is the Page's subscribe control
+    (``N 47``). Each still needs its own url, its own sanction entry and its
+    own ruling.
+
+    Args:
+        organisation_id: the numeric LinkedIn organisation id, ten ASCII
+            digits, at most 20 of them.
+
+    Returns:
+        A verdict per count kind with the integer where there is one, the
+        walk's own counters, and whether the navigation stayed on the Page --
+        or a refusal naming the shape it saw.
+    """
+    try:
+        # ``address`` RATHER THAN ``built``, for the reason written out at
+        # linkedin_group_page: the taint engine is per-module by name and
+        # ``built`` is already bound, in linkedin_job_detail, to a url built
+        # from a company id read off a page.
+        address = company_page.company_page_url(organisation_id)
+        if not address.get("built"):
+            return {"ok": False, **address}
+        async with BROWSER.session() as page:
+            landed = await BROWSER.goto(page, address["url"])
+            _authwall_refusal_without_the_landing(
+                landed, surface="organisation Page"
+            )
+            reading = await company_root.read_company_root(page)
+            return {
+                "ok": True,
+                "pages_loaded": 1,
+                "organisation_id": address["identifier"],
+                # A BOOLEAN, NOT THE LANDING. LinkedIn canonicalises this
+                # address and the slug form is where it canonicalises TO, so
+                # publishing the landed url here would publish exactly the
+                # spelling this package refuses to assemble.
+                "redirected": landed.rstrip("/") != address["url"].rstrip("/"),
+                "counts": company_root.connection_counts(reading),
             }
     except Exception as exc:
         return _error(exc)

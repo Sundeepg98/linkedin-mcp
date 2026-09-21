@@ -83,6 +83,8 @@ EXPECTED_TOOLS = (
     "linkedin_surface_census",
     "linkedin_server_info",
     "linkedin_session_info",
+    "linkedin_group_page",
+    "linkedin_company_page_counts",
 )
 
 
@@ -298,4 +300,7 @@ def test_both_rules_reject_the_registry_that_was_actually_measured():
     # off the registry rather than relayed from a commit message.
     # FORTY-SEVEN FROM 2026-09-20: linkedin_people_search_shape, a READ on the
     # people-search surface, admitted together with its shaper.
-    assert len(_tool_names()) == 47
+    # FORTY-EIGHT AND FORTY-NINE FROM 2026-09-21: linkedin_group_page and
+    # linkedin_company_page_counts, both READS, each opening an admitted
+    # address that no registered tool could navigate to.
+    assert len(_tool_names()) == 49

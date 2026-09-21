@@ -754,7 +754,24 @@ def test_only_dom_module_waives_evaluate():
     # one evaluate call site in dom.py. The cap is a ratchet on WHERE evaluate
     # may appear, not on how many scripts exist, so it moves with declared
     # additions and never with undeclared ones.
-    assert waived_in.get("dom.py", 0) <= 21, waived_in
+    #
+    # 21 -> 22 on 2026-09-21: COUNT_LINES_JS, run once from
+    # dom.read_count_lines, for census rows N 33 and N 54 on the organisation
+    # Page root. ONE waiver is spent on this wave and not two: the group
+    # reader for N 175 adds NO call site at all -- group_page.read_group_page
+    # runs anchors.read_anchors, which is the classifier already declared
+    # below, so a second surface is read through a script that is already
+    # scanned. Reusing a declared script is the cheapest possible way through
+    # this cap and it is the one the shipped instrument was there for.
+    #
+    # WHY THE ONE IT DOES SPEND COULD NOT BE A LOCATOR CHAIN, which is the
+    # question this budget exists to force. The comparison has to happen WHERE
+    # THE STRINGS ARE: a locator read hands the line to Python, and on this
+    # page the same line is drawn twice -- an aria-hidden visible copy beside a
+    # screen-reader copy that carries a person's name. Pulling it out to
+    # compare it in Python is the leak; comparing it in the page and returning
+    # a POSITION plus an INTEGER is not.
+    assert waived_in.get("dom.py", 0) <= 22, waived_in
 
 
 # ---------------------------------------------------------------------------
@@ -813,6 +830,27 @@ INJECTED_SCRIPTS = {
     # turn the same line into a real mutation.
     "ANCHOR_CLASSIFY_JS": dom.ANCHOR_CLASSIFY_JS,
     "COLLECTION_GROUPINGS_JS": dom.COLLECTION_GROUPINGS_JS,
+    # 2026-09-21. The count-line reader, for census rows N 33 and N 54 on the
+    # organisation Page root. Declared for the ordinary reason -- an executed
+    # script that is not declared is one nobody reviewed -- and declaring it
+    # ENROLS it in test_every_script_this_package_executes_cannot_mutate.
+    #
+    # IT IS THE ONLY SCRIPT ON THIS LIST THAT ASSEMBLES TEXT BY A WALK, and
+    # that is what it exists for rather than a side effect of it. LinkedIn
+    # draws these lines twice -- an aria-hidden visible span beside a
+    # screen-reader span carrying a person's name -- and textContent takes
+    # both. This walk STEPS OVER any subtree matching CARD_HIDDEN_SELECTOR and
+    # returns HOW MANY it stepped over, so the exclusion is an integer a
+    # caller can read. Nothing else crosses: a POSITION in a phrase table
+    # defined in company_root.py, a POSITION in a numeral-shape table, and a
+    # number. No text, no attribute value, no href.
+    #
+    # IT IS ALSO THE ONLY SCRIPT HERE DRIVEN UNDER V8 IN THE SUITE.
+    # tests/test_company_root.py runs THIS constant under node over a
+    # synthetic tree and re-runs it with the one skipping line replaced by a
+    # line that skips nothing: the shipped script reads ELEVEN and the
+    # defective one reads FORTY-ONE, out of the accessible copy.
+    "COUNT_LINES_JS": dom.COUNT_LINES_JS,
     # 2026-08-30. The row-shape reader, which climbs from a job-row anchor and
     # reports each level as a tag name and two character counts. It exists
     # purely to describe a page this package could not read, and it is held to
@@ -1146,7 +1184,12 @@ def test_the_scripts_executed_are_exactly_the_ones_declared():
     # is keyed by NAME, so the two move together only when a script is added
     # with exactly one call site -- which is why it is asserted rather than
     # derived from the other.
-    assert len(EXECUTED_SCRIPTS) == 21, sorted(EXECUTED_SCRIPTS)
+    # 21 -> 22 on 2026-09-21 for COUNT_LINES_JS, declared in INJECTED_SCRIPTS
+    # in the same change and run from exactly one call site,
+    # dom.read_count_lines. The group reader landing in the same commit adds
+    # NO entry here: it runs ANCHOR_CLASSIFY_JS through anchors.read_anchors,
+    # which is one script at one call site before and after.
+    assert len(EXECUTED_SCRIPTS) == 22, sorted(EXECUTED_SCRIPTS)
 
 
 def test_the_call_site_resolver_sees_a_script_hiding_behind_a_name():

@@ -338,6 +338,23 @@ DECLARED_PLANTS = {
     # guard live on every OTHER shape in the file rather than assembling the
     # urn at runtime to hide it, which would blind the guard to a real value
     # pasted in later.
+    # 2026-09-21. THE THIRD URN-SHAPED LITERAL, and it is here by the same
+    # remedy as the two below it rather than by a new argument.
+    #
+    # tests/test_group_page.py drives ``group_page.group_page_url`` over every
+    # spelling a caller might hand it that is NOT a bounded run of the ten
+    # ASCII digits, and ``urn:li:group:<digits>`` is one of them -- it is the
+    # spelling the /groups/<id>/ allowlist entry names in its own list of what
+    # stays refused. Proving the builder refuses it needs a urn-SHAPED literal.
+    #
+    # THE VALUE IS THE SUITE'S OWN SYNTHETIC GROUP ID, the eight digits that
+    # already appear in twenty-one other places under tests/, and it names a
+    # GROUP rather than a member: a group id is numeric, which is the whole
+    # reason that address was admitted at all. Declared here rather than
+    # assembled at runtime, for the reason spelled out directly below --
+    # hiding a shape from the scanner blinds it to a real value pasted in
+    # later. Pinned at 1 so a SECOND urn appearing in that file still fails.
+    ("tests/test_group_page.py", "urn id"): 1,
     ("tests/test_probe_redaction.py", "urn id"): 1,
     # THE SECOND URN-SHAPED LITERAL, 2026-08-30, and it is here for the same
     # reason as the one above and by the same remedy: the file fired, the value

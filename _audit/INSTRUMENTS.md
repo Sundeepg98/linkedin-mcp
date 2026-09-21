@@ -8156,3 +8156,273 @@ mechanical sweep would get one of them wrong.
   **zero callers among the 47 shipped tools.** The gap between "permitted and
   built" and "reachable" is invisible to every instrument that reads the
   boundary, because the boundary is not where it lives.
+
+---
+
+## 49. A WALK THAT STEPS OVER THE SCREEN-READER COPY, AND THE DEFECT THAT READS FORTY-ONE (three-readers, 2026-09-21)
+
+Two readers landed on two addresses that had been on the read allowlist for
+days with nothing able to navigate to them -- census rows `N 33`, `N 54` and
+`N 175`. Both surfaces are third-party dense: a company Page root draws *"a
+module naming employees the operator knows"* and `/groups/<id>/` draws *"other
+members' posts in full"*, both quoted from the allowlist entries' own warnings.
+
+Deliverable: `_audit/2026-09-21-the-three-readers.md`.
+
+### 49.1 `dom.COUNT_LINES_JS` -- SHOWN FAILING BY READING THE WRONG NUMBER
+
+The guard is `tests/test_company_root.py`, and it runs **the shipped constant
+itself under V8** over a synthetic node tree from `company_root.control_tree()`
+-- node has no DOM, so the tree is supplied and the SCRIPT is untouched. A
+Python re-implementation of its rules would be the second disagreeing copy this
+repository already has a scar for.
+
+THE MUTATION, applied to a COPY of the script source and never to the module:
+
+    if (isHidden(child)) { skipped += 1; continue; }     ->
+    if (false) { skipped += 1; continue; }
+
+    shipped script     connections_at_organisation = 11 , hidden_skipped = 2
+    mutated script     connections_at_organisation = 41 , hidden_skipped = 0
+
+Forty-one is the number in the SCREEN-READER copy of the line. The fixture's
+first group is shaped for this on purpose: the accessible copy is SHORTER than
+the visible line and carries a different number, so the tightest-container rule
+that normally protects the reading is what hands the wrong answer over once the
+skip is gone. **A fixture where the hidden copy is longer would leave the skip
+looking decorative**, which is how a control ends up proving nothing.
+
+> `dom.CARD_HIDDEN_SELECTOR` HAD EXISTED SINCE THE CARD MEASUREMENT AND HAD
+> NEVER BEEN WIRED TO A READER THAT ASSEMBLES TEXT. This is the first one.
+
+**AND THE HONEST HALF, ASSERTED AS ITS OWN TEST.** The planted name reaches the
+output in NEITHER build, because the return value is integers by construction.
+The skip buys a CORRECT NUMBER; name-freedom is bought one layer down and does
+not depend on it. Without that test somebody removes the skip believing they
+have only loosened an accuracy check.
+
+`test_the_planted_defect_anchor_is_still_in_the_shipped_script` asserts the
+mutated line still occurs exactly once in the module, so the control cannot
+silently become a control of nothing when the script is reformatted.
+
+### 49.2 THE WALK SKIPS, IT DOES NOT DELETE, AND THAT IS NOT A STYLE CHOICE
+
+The obvious implementation clones the node and takes the screen-reader spans
+out of the copy. `COUNT_LINES_JS` never builds a copy: it walks and steps over
+any subtree matching the selector.
+
+Two reasons, and the second is the durable one:
+
+* `.remove(`, `appendChild`, `insertBefore` and `replaceChild` are all on
+  `readonly.JS_MUTATION_TOKENS`, and `removeChild` is on none of them --
+  a removal in this script would have passed the scan **by a blind spot**.
+  Section 2's rule about the array-filling method applies: the shape is
+  REMOVED rather than argued for an exemption.
+* A walk that skips has no shape for a future edit to turn into a real page
+  mutation. A clone-and-delete does, and the scanner cannot tell a detached
+  node from an attached one -- which is the documented reason
+  `ANCHOR_CLASSIFY_JS` parses its control input with `DOMParser`.
+
+### 49.3 INDEX 0 IS WHERE A SUBSTITUTED VALUE LANDS, SO INDEX 0 MUST PUBLISH NOTHING
+
+`coerce` substitutes a refused value with `0` and counts the substitution. For
+a POSITION in a closed alphabet that means garbage lands on entry zero.
+`company_root.NUMERAL_SHAPES` therefore opens with `no_digit_run`, the one
+class that carries no number.
+
+    NUMERAL_SHAPES[0] == "no_digit_run"   -> a refused shape reads
+                                             numeral_refused, value None
+
+An alphabet with `plain_digits` first would have turned a value the page
+refused into *trust this number* -- the flattering direction, and the one
+nobody would have gone looking at. Pinned by
+`test_the_substitution_default_lands_on_a_class_that_publishes_no_number`,
+which drives a shape of `0` through the shipped verdict function.
+
+**AND THE COERCION LAW IS DEPARTED FROM ONCE, DELIBERATELY.**
+`coerce.counts_only` SUBSTITUTES rather than drops, because several callers
+align lists positionally and dropping one entry renames every entry behind it.
+A match in this reader carries its own phrase position, so dropping one renames
+nothing -- and `read_company_root` drops it and publishes `matches_refused`.
+The law is followed where its reason applies and departed from where its reason
+does not, which is the only honest way to hold a rule.
+
+### 49.4 A PHRASE THAT DID NOT RENDER IS NOT A COUNT OF ZERO
+
+`company_root.COUNT_PHRASES` is **UNMEASURED** -- nobody in this repository has
+opened a company Page, which `company_page.py` says in its own last line. The
+reader is honest about that by construction rather than by footnote:
+
+    reader_blind       the walk visited no element  -> about the READER
+    phrase_not_drawn   the walk ran and nothing matched
+    count_read         the integer
+
+`phrase_not_drawn` carries `value: None` and says *THIS IS NOT A COUNT OF ZERO*
+in its own `why`, with `elements` and `chunks` beside it. This is
+`groups_page.interpret_zero`'s discrimination on a third surface, and it is why
+`N 33` and `N 54` are honestly COVERED-UNFIRED: **the first live fire measures
+the vocabulary as well as the count.**
+
+A wrong phrase costs a missing reading. It cannot produce a wrong number,
+because a number is published only when a phrase this package shipped matched
+word-bounded in a short line; and it cannot produce a name, because no string
+crosses the boundary at all.
+
+### 49.5 AN ABBREVIATION IS REFUSED AND A DECIMAL IS NOT A GROUP SEPARATOR
+
+Both driven under V8 over the same fixture, both coming back refused:
+
+    "2K connections follow this company"      -> abbreviated_refused, no value
+    "1.5 connections work at this company"    -> decimal_refused,     no value
+
+The decimal branch is the one worth the register entry. Treating `.` as a group
+separator -- which is the natural way to write the parser, since `,` is one --
+turns `1.5` into `15`. **A wrong number that looks right is worse than no
+number**, and it is the only failure mode of this reader that would have been
+invisible in the payload.
+
+Every digit test in the script is an ASCII range comparison, so the
+Arabic-Indic, Devanagari and fullwidth spellings of a run are not read as
+numbers at all. Same closed class `groups.py` and `company_page.py` name
+character by character, arriving in the page.
+
+### 49.6 THE OBLIGATION ON `/groups/<id>/` WAS PAID BY REUSE, AND THAT IS THE ENTRY
+
+The allowlist entry demanded *"a shaper as strict as the search-results one"*
+from whoever wrote the first reader. What makes the search shaper strict is the
+vocabulary-in / index-out engine, and `anchors.py` already ships it over a
+route table carrying `member_profile` at index 0 and `feed_update` -- the exact
+two classes a group feed is made of.
+
+    group_page.read_group_page  ->  anchors.read_anchors  ->  ANCHOR_CLASSIFY_JS
+
+    new scripts injected                 0
+    new vocabulary shipped into a page   0
+    evaluate waiver budget movement      0 for this row
+
+> THE STRICTEST AVAILABLE READER WAS THE ONE ALREADY WRITTEN, AND THE ONLY
+> THING THAT HAD BEEN MISSING WAS A TOOL THAT COULD HAND IT A PAGE.
+
+`tests/test_group_page.py` makes the coupling loud rather than leaving it
+implicit: `route_classes_this_reader_depends_on()` is exported and asserted
+against `anchors.ROUTE_CLASSES`, because a rename there turns every lifted
+count into a silent zero, which is the quiet direction.
+
+### 49.7 THE BUILDER AND THE BOUNDARY, ASSERTED IN BOTH DIRECTIONS
+
+`test_the_bound_is_the_boundarys_own_and_the_two_are_shown_disagreeing` drives
+the bound rather than restating it:
+
+    "1" * 20 -> built, and is_read_url(that url) is True
+    "1" * 21 -> refused, and is_read_url(the url it WOULD have built) is False
+
+The second half is what makes it a coupling test rather than a tautology: it
+fails the day the allowlist widens without this module, which is the exact
+divergence the groups coupling test caught on its own first run.
+
+### 49.8 WHAT THE WAVE MEASURED THAT IS NOT AN INSTRUMENT
+
+* **THE "CHEAPEST BUILD LEFT" FOR `N 33` IS REFUSED ON THE NAME-FREEDOM BAR,
+  and that is a finding rather than a preference.** Aggregating
+  `linkedin_connections` by employer needs the caller to supply an employer
+  NAME and match it against third-party HEADLINE text; the rows publish names
+  and profile urls on purpose (`rows_are_not_redacted`), an employer is not a
+  field on them, and a company name is routinely a person's name. The Page root
+  answers the same row with a COUNT and no needle.
+* **`ANCHOR_CLASSIFY_JS` HAS NO DOT-SEGMENT RULE**, so the group reader inherits
+  the gap `search_results.py` closed for itself. Cost measured and bounded: a
+  miscounted bucket, never a string, because no href it reads is returned,
+  navigated to or built into a url. Named in the module docstring rather than
+  left for the next reader to find, and not fixed here -- it is an edit to a
+  script three other readers run.
+* **A REFUSAL LIST CAN HAVE A BLIND SPOT AND THE RIGHT RESPONSE IS NOT TO USE
+  IT.** `removeChild` passes `scan_js_for_mutations` while its four siblings do
+  not. Reported here; the script avoids the shape entirely, so nothing rests on
+  the gap being closed.
+
+### 49.9 THE COLD REVIEW, AND WHAT IT COST THE MODULE'S OWN PROSE
+
+An independent reviewer drove the SHIPPED `dom.COUNT_LINES_JS` under node over
+adversarial trees and convicted the reader of a WRONG NUMBER in the one path
+its docstring said could not produce one:
+
+    ("", [("card", ["50 people viewed, 11 connections work here"])])
+      shipped at the time  ->  value 50
+      repaired             ->  value 11
+
+`numeralOf` read the FIRST digit run in the line. `numeralNear` reads the run
+nearest the MATCHED PHRASE, backwards first then forwards, both bounded by
+`COUNT_LINES_MAX_NUMERAL_GAP` -- because an unbounded search is the same defect
+with a longer reach, stepping out of the clause the phrase belongs to.
+
+**THE SECOND FINDING IS THE ONE MOST LIKELY TO HAVE FIRED LIVE.** Tightest-
+container-wins preferred a span holding the phrase ALONE over the parent
+holding the phrase AND the count, so `<span>11</span><span>connections work
+here</span>` -- an utterly ordinary stat line -- read `numeral_refused`. A
+match carrying a number now beats one that does not; length is the tie-break
+and no longer the rule.
+
+BOTH ARE SHOWN FAILING BY RE-PLANTING THE OLD RULE on a copy of the source,
+and `company_root.adversarial_trees()` keeps all seven shapes -- including the
+two BOUNDARIES either side of the distance rule, because a rule that convicts
+everything is not discriminating, it is failing.
+
+**AND THE CLAIM IT KILLED IS WORTH MORE THAN THE FIXES.** The docstring's
+"it cannot produce a wrong number" was an ABSOLUTE with a reason attached, and
+the reason did not support the absolute. What replaced it names the condition
+the code actually holds and says, in the same paragraph, that it is still a
+rule about markup nobody here has seen.
+
+### 49.10 A CONTROL PATH FOUR MODULES DECLARE AND NOTHING HAS EVER RUN
+
+`read_company_root`'s `html=` parameter claimed `control_fixture()` could
+"PROVE the matcher works". Measured by the same review: `DOMParser` is
+undefined under plain node, the offline driver therefore always passes
+`html=""`, production never passes `html` at all, and the tests touching
+`control_fixture()` check the MARKUP STRING rather than a reading of it.
+
+**IT IS NOT ONE MODULE.** `anchors.control_fixture`,
+`search_results.control_fixture` and `collections_page.control_fixture` are in
+the identical position -- declared, read as strings, never driven through any
+JS engine by anything in the suite.
+
+> A CONTROL NOBODY RUNS IS A COMMENT, AND A DOCSTRING THAT CALLS IT A PROOF IS
+> THE CONFIDENCE-AT-SCALE THIS REGISTER EXISTS TO PREVENT.
+
+The docstring is corrected to say what is true. The gap is REPORTED and not
+closed: exercising it needs a real engine, and this wave had no browser.
+
+### 49.11 EVERY FIELD WAS COERCED AND THE ARGUMENT WAS NOT
+
+`reachability` and `connection_counts` both opened `dict(reading or {})` --
+which RAISES on a bare int, bool or string -- while their docstrings said a
+needle could not reach them. The property held for every FIELD inside the
+reading and not for the reading itself: the coercion-leak class one layer
+shallower than `coerce.py` was written for. No caller in the package could
+reach it, which is a fact about today's callers rather than about the
+function. Repaired in both modules in one edit, with a parametrised test over
+ten non-mapping shapes.
+
+### 49.12 THREE ENTRIES ABOVE CLAIMED A PROPERTY THAT HAD ONLY RUN GREEN
+
+This register's second law is that an instrument enters only if it has been
+SHOWN FAILING, and three of the assertions written for this wave stated a
+property without ever being driven against the defect they exist to catch.
+Each is now owed its red, planted with ``monkeypatch`` against a COPY of the
+constant so no contended file is edited:
+
+* **`NUMERAL_SHAPES[0]` must publish no value.** Swap positions 0 and 1 and a
+  REFUSED shape -- the value ``coerce`` substitutes when a page answers a slot
+  with a string -- reads ``count_read`` with a figure of 99. A number nobody
+  read, wearing the shape of one somebody did.
+* **The three `anchors.ROUTE_CLASSES` names `group_page` lifts.** Rename
+  ``feed_update`` and the tally answers ZERO for it with no error, so a group
+  whose feed drew reads ``ambiguous``. The quiet direction, driven.
+* **The non-mapping argument.** ``dict(reading or {})`` -- the expression that
+  shipped -- is run over a bare int, a bool and a planted name and raises on
+  each, beside the repaired ``isinstance`` form swallowing all three.
+
+**THE GAP IS WORTH MORE THAN THE THREE TESTS.** All three were written in the
+same hour as the code they check, by the author of that code, and all three
+read as rigour while standing for nothing. The cold review found two defects
+in the same files and NONE of these three assertions was what caught them.

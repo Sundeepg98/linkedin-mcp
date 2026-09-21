@@ -853,6 +853,31 @@ _ALLOWED_URL_PATTERNS: tuple[re.Pattern[str], ...] = (
     # that obligation belongs to the reader rather than to this line, which is
     # why this line could land without one.
     #
+    # **THE OBLIGATION WAS PAID ON 2026-09-21 AND CONDITION 4 ABOVE IS NOW
+    # HISTORY RATHER THAN A STANDING CLAIM.** Both paragraphs are left as
+    # written -- they were true when written, and correcting a dated
+    # measurement in place destroys the record -- but a reader exists now and
+    # a line here that still read "no tool can navigate to either" would be a
+    # stale claim of exactly the kind this file keeps catching elsewhere:
+    #
+    #     linkedin_server/group_page.py   the shaper, and the reader
+    #     server.py linkedin_group_page   the tool, one numeric parameter
+    #
+    # WHAT IT PAID THE OBLIGATION WITH is worth one line, because it is not
+    # what the warning expected. "As strict as the search-results one" was met
+    # by NOT WRITING A SECOND INSTRUMENT: the reader runs
+    # ``anchors.read_anchors`` -- the classifier this file's own
+    # ``INJECTED_SCRIPTS`` declaration already covers -- over the route table
+    # that carries ``member_profile`` at index 0. No new script is injected,
+    # the evaluate waiver budget does not move, and what crosses back is a
+    # count per class. The group's name, its headings and its members' posts
+    # are not read at all.
+    #
+    # AND THE WRITES ARE UNTOUCHED, which is the half a widening always owes:
+    # joining, leaving, posting, commenting, reacting and inviting each still
+    # need their own url, their own sanction entry and their own ruling. The
+    # tool takes a numeric id and opens one page.
+    #
     # AND BOUNDED AT TWENTY, WHICH IS ``groups.py``'s NUMBER AND NOT A NEW ONE.
     # The first spelling of this entry was ``[0-9]+``, and the coupling test
     # caught it on its first run: ``group_identifier`` caps an identifier at
@@ -1568,6 +1593,27 @@ _ALLOWED_URL_PATTERNS: tuple[re.Pattern[str], ...] = (
     # address owes it the strictness ``company_page.py`` already defines -- and
     # that shaper exists BEFORE the reader here, which is the one ordering the
     # search-results condition was written to force.
+    #
+    # **THE READER LANDED 2026-09-21, so "no tool in this package navigates to
+    # this address today" above is now a dated measurement and not a standing
+    # claim.** It is left as written; this is the amendment rather than an
+    # edit, because a number corrected in place is a check quietly retired.
+    #
+    #     linkedin_server/company_root.py           the reader
+    #     server.py linkedin_company_page_counts    the tool, one numeric id
+    #
+    # ``company_page.py`` STILL OPENS NOTHING and still has no page function --
+    # its own test refuses any coroutine in it, and the reader was put in a
+    # separate module precisely so that claim stays true. The vocabulary and
+    # the predicate are where they were; what is new is a page function beside
+    # them.
+    #
+    # THE MODULE NAMING EMPLOYEES IS THE ONE THE READER IS AIMED AT, and that
+    # is why the strictness is spent there. The reading is a COUNT and never a
+    # list -- census rows N 33 and N 54 -- and the screen-reader copy of every
+    # line is STEPPED OVER inside the page, counted, and never assembled into
+    # a string this process holds. ``/company/<x>/people/``, the roster that
+    # would name them, is refused by this list exactly as it was.
     re.compile(r"^https://www\.linkedin\.com/company/[A-Za-z0-9%\-_]{1,100}/?$"),
     # THE RECOMMENDED JOB COLLECTION, ONE NAMED ADDRESS. Admitted
     # 2026-09-05, census row 75 ``JOB-COLLECTIONS-SURFACE``, on the same
