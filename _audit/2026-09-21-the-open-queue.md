@@ -288,3 +288,56 @@ the wave firing that same surface, and a second browser builder on one
 signed-in profile is the thing this repo does not do. Take it when the slot
 frees.
 
+### 5.4 RULED: incidental capture is not a ruling — and the discriminator is real, 08:40
+
+**This one is decided rather than returned.** Section 1 files it as an open
+decision, the analysis there already recommends an answer, and the recommended
+answer moves reported coverage DOWN. A convention that can only understate is
+one a lead can take; it is also reversible, and leaving it open is not neutral,
+because the census is currently running **two incompatible practices at once**
+(`R2` files 15 rows on forbidden substrings it admits catch them incidentally;
+`P E6` and `N 114` say in prose that it does not count).
+
+**THE RULING: a refusal counts as EXCLUDED-RULED only when the refusal was
+AIMED AT THAT ADDRESS. A forbidden substring that catches an address as
+collateral of a rule written for something else is not a ruling, and a row
+resting on one goes back to GAP.**
+
+**The discriminator was verified, not assumed** — and there are THREE outcomes,
+not two. Measured against the shipped tables (42 allow patterns, 33 forbidden
+substrings; synthetic slugs only):
+
+    /in/<slug>/edit/            substring `/edit/` matched   -> a NAMED rule fired
+    /company/<slug>/people/     0 allow, 0 substrings        -> see below
+    /search/results/people/     1 allow pattern              -> ADMITTED
+
+**A CORRECTION TO THIS DOCUMENT'S OWN WORDING, and I nearly published the
+opposite.** Section 1 says the company and school rosters are *"refused by an
+anchored pattern written for them"*. Mechanically there is **no deny-pattern
+table at all** — `_ALLOWED_URL_PATTERNS` is an ADMIT list, so a non-match is a
+default deny, and a probe reports `0 matches` for a roster exactly as it would
+for an address nobody ever thought about. **That measurement cannot see design
+intent, and reading "0 matches" as "nobody ruled it" would have been the error
+this repository keeps finding: the resolver answered truthfully and the wrong
+meaning was nearly taken from it.**
+
+Reading the source settles it the other way. The allow anchor for a company
+root is deliberately terminated (`/?$`) so that it stops BEFORE `/people/`, and
+the comment above it states the exclusion by name: *"WHAT THIS DELIBERATELY
+DOES NOT ADMIT, each named because a widening is only narrow if its refusals
+are stated … A MEMBER ROSTER. Census rows `J 108` and `N 102`, and it is out of
+scope by the same ruling that put a group's roster out of scope by name. It is
+refused by this anchor and by nothing else."*
+
+So the honest phrasing is **not** "an anchored pattern written for them" but
+**"excluded by the deliberate END of an anchor written for the adjacent
+address, with the exclusion stated by name and attributed to a ruling."** Same
+conclusion, and the substring test still separates it cleanly from incidental
+capture — because incidental capture means a substring DID match.
+
+**What is NOT done here, and why.** The ruling is recorded; it is **not applied
+to any census row**. Re-filing `R2`'s 15 rows means editing census files two
+live waves may touch, and it wants the evidence in front of whoever does it.
+Expect reported coverage to fall and GAP to rise when it lands — that is the
+point of the ruling, not a regression.
+
