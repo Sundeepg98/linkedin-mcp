@@ -910,7 +910,7 @@ worktree and has been repaired four times in two days.
 | `linkedin_server/landing.py` | shipped code |
 | `tests/test_landing.py` | **REGISTER** -- the alphabet proof and its two red controls |
 | `scripts/_check_the_landing_guard_can_fail.py` | **REGISTER** -- shows the guard failing on the state that shipped |
-| `scripts/_probe_dom_error_url_field.py` | **REGISTER** -- drives every `dom.py` raise site that carries a url, by making `evaluate` fail for ONE script chosen by identity; asserts `reached` from the TRACEBACK, and carries a per-reader negative control (a double that raises for no script) plus both directions of the needle hunt |
+| `scripts/_probe_dom_error_url_field.py` | **REGISTER** -- drives every `dom.py` raise site that carries a url, by making `evaluate` fail for ONE script chosen by identity; asserts `reached` from the TRACEBACK, carries a per-reader negative control plus both directions of the needle hunt, and **REFUSES TO REPORT AT ALL when those controls do not hold** (exit 1, each failure named) -- which is the repair after `test_probe_controls_are_never_decorative` caught it printing them and returning 0 regardless |
 | `scripts/_census_message_interpolations.py` | **REGISTER** -- the enumeration, with the grep contrast printed |
 | `tests/test_no_message_publishes_a_landing.py` | **REGISTER** -- the discovering guard |
 | `tests/landing_interpolation_baseline.json` | **REGISTER** -- the coverage record; refuses to hold a hazard |
@@ -933,7 +933,11 @@ because reflexively wrapping a declared publication is the defect that field's
 own standing ruling exists to refuse -- so it gets a ruling and a browser, not
 an edit from a wave that had neither.
 
-**AND THREE SHIPPED GUARDS FIRED ON THIS WAVE'S OWN OUTPUT.** The taint rule on
+**AND FOUR SHIPPED GUARDS FIRED ON THIS WAVE'S OWN OUTPUT.** The
+decorative-control rule on the reachability probe, which computed fourteen
+controls, printed them, and returned 0 whatever they said -- repaired by
+branching on them, which is what its own failure message told me to do instead
+of adding the site to a baseline. The taint rule on
 a log line, the identity shape rule on a made-up company id, and the
 outage-as-absence rule on a new script whose error handling could have
 manufactured this document's own headline number from a missing binary. None
