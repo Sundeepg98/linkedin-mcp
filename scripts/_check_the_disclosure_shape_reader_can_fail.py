@@ -17,7 +17,7 @@ no persistent context, loads the fixture through `set_content` -- it navigates
 NOWHERE, not even to a `data:` url -- and closes it. There is no CDP, no attach,
 no session, no signed-in account anywhere in this file.
 
-## THE FOUR CLAIMS UNDER TEST
+## THE CLAIMS UNDER TEST
 
 1. **The lifted matcher is the shipped matcher.** The shipped filter fixture and
    its shipped expectation are driven through THIS probe's script, and every
@@ -34,6 +34,18 @@ no session, no signed-in account anywhere in this file.
    a column that always equals its neighbour proves nothing.
 4. **The output gate refuses a planted string.** Three plants, each at a
    different depth, and each must raise.
+5. **The payload counter reads zero AND nonzero** on bytes built to give it
+   each answer.
+6. **The probe's own certification can fail, one way per control.** `certify`
+   is driven over built records that break exactly ONE field each, plus a
+   clean record that must certify and a combined case that must report all
+   three -- a gate reporting only the first failure teaches a caller to fix
+   one thing and re-run.
+7. **The three readings baselined as decorative really are, and are not
+   silent.** Each printer is handed a broken record and must RAISE, so
+   "nobody branches on it" is safe rather than merely tolerated. This is the
+   executable half of a claim that would otherwise live only in a JSON
+   comment.
 
 Run::
 
@@ -44,6 +56,7 @@ Exit 0 only if every control behaves. Prints integers and verdicts.
 from __future__ import annotations
 
 import asyncio
+import copy
 import pathlib
 import sys
 
@@ -121,6 +134,164 @@ async def _read(page, html: str) -> dict:
     return await probe.read_shape(page)
 
 
+#: A surface record with EVERY control passing. Each case below breaks exactly
+#: ONE field of it, so a case that goes green is a case whose control is dead
+#: rather than a case that happened to be fine.
+CLEAN_SURFACE = {
+    "surface_index": 0,
+    "landed_where_it_was_sent": True,
+    "panel": {
+        "controls_seen": 83,
+        "values_refused": 0,
+        "panel_wait": {"settled": True, "polls": 3,
+                       "controls_first": 83, "controls_last": 83},
+    },
+}
+
+
+def _certification_controls() -> int:
+    """Drive `probe.certify` over BUILT records. One break per case.
+
+    **THE DEFECT THESE EXIST FOR WAS SHIPPED AND CAUGHT BY A SIBLING GUARD.**
+    The first version of the probe read `panel_wait`, printed `settled=...`,
+    and branched on nothing -- so a reading taken on a half-drawn page would
+    have printed its zeros, written its record and exited 0. The zeros are the
+    probe's central claim, and a half-drawn page produces them for free.
+    """
+    failures = 0
+
+    def case(label, surface, wait, surfaces_read, expected):
+        nonlocal failures
+        got = probe.certify(surface, wait, surfaces_read)
+        names = sorted(probe.failure_name(position) for _, position in got)
+        if names != sorted(expected):
+            failures += 1
+            _fail(f"{label}: got {names}, expected {sorted(expected)}")
+        else:
+            _ok(f"{label}: {names or 'no failure -- clean record certifies'}")
+
+    clean = copy.deepcopy(CLEAN_SURFACE)
+    wait = clean["panel"]["panel_wait"]
+
+    # THE POSITIVE CONTROL FIRST. Without it every red below could be a
+    # function that refuses everything, which certifies nothing.
+    case("a clean record", clean, wait, 2, [])
+
+    unsettled = copy.deepcopy(CLEAN_SURFACE)
+    unsettled["panel"]["panel_wait"]["settled"] = False
+    case("panel still drawing", unsettled,
+         unsettled["panel"]["panel_wait"], 2, ["panel_not_settled"])
+
+    # `settled` ABSENT is not `settled` False and must not be read as True.
+    missing = copy.deepcopy(CLEAN_SURFACE)
+    del missing["panel"]["panel_wait"]["settled"]
+    case("settled absent", missing,
+         missing["panel"]["panel_wait"], 2, ["panel_not_settled"])
+
+    case("panel_wait empty", copy.deepcopy(CLEAN_SURFACE), {}, 2,
+         ["panel_wait_unreadable"])
+    case("panel_wait not a mapping", copy.deepcopy(CLEAN_SURFACE), None, 2,
+         ["panel_wait_unreadable"])
+
+    redirected = copy.deepcopy(CLEAN_SURFACE)
+    redirected["landed_where_it_was_sent"] = False
+    case("landed elsewhere", redirected,
+         redirected["panel"]["panel_wait"], 2, ["landed_elsewhere"])
+
+    leaked = copy.deepcopy(CLEAN_SURFACE)
+    leaked["panel"]["values_refused"] = 1
+    case("a value the reader refused", leaked,
+         leaked["panel"]["panel_wait"], 2, ["values_refused_nonzero"])
+
+    unread = copy.deepcopy(CLEAN_SURFACE)
+    unread["panel"]["values_refused"] = None
+    case("values_refused unreadable", unread,
+         unread["panel"]["panel_wait"], 2, ["values_refused_unreadable"])
+
+    case("no cross-page control", copy.deepcopy(CLEAN_SURFACE), wait, 1,
+         ["no_cross_page_control"])
+    case("no surface read at all", copy.deepcopy(CLEAN_SURFACE), wait, 0,
+         ["no_surface_read"])
+
+    # SEVERAL AT ONCE. A gate that reports only the first failure teaches a
+    # caller to fix one thing and re-run, which is how three reds become three
+    # runs.
+    broken = copy.deepcopy(CLEAN_SURFACE)
+    broken["landed_where_it_was_sent"] = False
+    broken["panel"]["values_refused"] = 2
+    broken["panel"]["panel_wait"]["settled"] = False
+    case("three at once", broken, broken["panel"]["panel_wait"], 2,
+         ["landed_elsewhere", "panel_not_settled", "values_refused_nonzero"])
+
+    # THE VOCABULARY REFUSES RATHER THAN CLAMPS. A clamp renames one failure
+    # to another, and these are reported to a human who will act on the word.
+    for bad in (-1, len(probe.CONTROL_FAILURES), "0", None):
+        try:
+            probe.failure_name(bad)
+        except IndexError:
+            pass
+        else:
+            failures += 1
+            _fail(f"failure_name({bad!r}) returned instead of refusing")
+    _ok("failure_name refuses every out-of-range position")
+    return failures
+
+
+def _decorative_claim_controls() -> int:
+    """THE CLAIM THAT THE THREE BASELINED READINGS ARE DECORATIVE, MEASURED.
+
+    `scripts/probe_controls_known_decorative_baseline.json` carries three
+    entries for the probe -- `_print_shape() -> 'shape'`, and the two table
+    loop counters. Each says the reading is a DISPLAY BINDING whose failure is
+    not swallowed. **That second half is a claim about behaviour, and a claim
+    about behaviour written in a JSON comment is exactly the rubber stamp the
+    baseline's own preamble warns about.** So it is executed here: hand the
+    printers a record with the reading broken and require them to RAISE.
+
+    A raise is loud -- `main` catches it, prints the exception TYPE and exits
+    1 -- which is what makes "nobody branches on it" safe rather than merely
+    tolerated. If any of these ever starts returning quietly, this control
+    goes red and the baseline entry is wrong.
+    """
+    failures = 0
+
+    def must_raise(label, call):
+        nonlocal failures
+        try:
+            call()
+        except Exception as exc:  # noqa: BLE001 - the TYPE is the assertion
+            _ok(f"{label}: raised {type(exc).__name__}, which main reports")
+        else:
+            failures += 1
+            _fail(
+                f"{label}: returned QUIETLY. The baseline entry claiming this "
+                "reading's failure is not swallowed is now false."
+            )
+
+    # `shape` absent entirely -- what read_shape returns when the page answers
+    # with something that is not a mapping.
+    must_raise("empty shape dict", lambda: probe._print_shape({"shape": {}}))
+    # The arrays present but SHORTER than the shipped-in vocabulary, which is
+    # what a changed `termCount` would produce. This is the one the loop
+    # counters ride on.
+    short = {
+        "shape": {
+            "controls_scanned": 1, "expanded_nodes": 0, "haspopup_nodes": 0,
+            "dialogs": 0, "menus": 0, "menuitems": 0, "listboxes": 0,
+            "matched_shipped_label": [0], "matched_hidden_excluded": [0],
+            "matched_with_aria_label": [0], "with_aria_expanded": [0],
+            "with_aria_haspopup": [0], "first_expanded_value": [0],
+            "first_haspopup_value": [0], "first_expanded_index": [0],
+            "first_haspopup_index": [0],
+        }
+    }
+    must_raise("shape arrays shorter than the vocabulary",
+               lambda: probe._print_shape(short))
+    must_raise("empty payload dict",
+               lambda: probe._print_payload({"payload": {}}))
+    return failures
+
+
 def _fail(message: str) -> None:
     print(f"  FAIL  {message}")
 
@@ -154,6 +325,14 @@ async def main() -> int:
         _fail(f"the gate refused a CLEAN payload: {exc}")
     else:
         _ok("a clean payload passes -- the gate is not refusing everything")
+    print()
+
+    print()
+    print("CONTROL 6 -- THE PROBE'S OWN CERTIFICATION CAN FAIL, ONE WAY EACH")
+    failures += _certification_controls()
+    print()
+    print("CONTROL 7 -- THE BASELINED READINGS ARE DECORATIVE, AND NOT SILENT")
+    failures += _decorative_claim_controls()
     print()
 
     async with async_playwright() as playwright_instance:
