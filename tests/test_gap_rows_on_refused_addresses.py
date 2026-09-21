@@ -33,7 +33,23 @@ SCRIPT = ROOT / "scripts" / "check_gap_rows_on_refused_addresses.py"
 #: The pin. A move in EITHER direction is meant to fail: see the script's own
 #: docstring for why a silent fix is as loud as a new offender. The unit is a
 #: ROW, never a (row, address) pair.
-EXPECTED_GAP_ROWS = 5
+#:
+#: 5 -> 4 on 2026-09-21. `C88` left GAP for EXCLUDED-RULED, and the direction
+#: matters more than the number: this pin exists to catch a row filed GAP
+#: AGAINST the census's bar, so a row LEAVING that set is the benign move the
+#: script's own message names ("FEWER means one was resolved and this pin was
+#: not updated").
+#:
+#: IT WAS NOT LAUNDERED OUT ON THE SUBSTRING, which is the thing this pin
+#: guards. `C88` does sit on `/mypreferences/d/categories/`, a forbidden
+#: substring -- verified. It was closed on a DIFFERENT and older authority:
+#: the settings-family ruling, which `_audit/2026-09-05-decide-retire-rulings.md`
+#: states is "capability-level, not path-level", and which profile.md had
+#: already applied to 93 rows while messaging had reached five. That
+#: distinction is the whole of the 2026-09-05 ruling that a boundary is not a
+#: reason: a row may leave GAP because somebody ruled the CAPABILITY, never
+#: because a general mechanism happens to block its address.
+EXPECTED_GAP_ROWS = 4
 
 
 def _run(*args: str) -> subprocess.CompletedProcess:

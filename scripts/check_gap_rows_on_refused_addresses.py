@@ -40,7 +40,7 @@ THE BAR IT ENFORCES IS THE CENSUS'S OWN, quoted from the `N 38` cell:
     EXCLUDED-RULED.
 
     python scripts/check_gap_rows_on_refused_addresses.py
-    python scripts/check_gap_rows_on_refused_addresses.py --expect-gap 5
+    python scripts/check_gap_rows_on_refused_addresses.py --expect-gap 4
     python scripts/check_gap_rows_on_refused_addresses.py --demonstrate-red
 
 =============================================================================
@@ -291,7 +291,18 @@ def demonstrate_red() -> int:
             ok = False
 
         print("\nRED 2 -- THE CHECK MUST FAIL ON THE PLANTED CORPUS")
-        failed, report = run(expect_gap=5)
+        # THIS NUMBER IS THE SAME PIN AS `EXPECTED_GAP_ROWS` IN
+        # `tests/test_gap_rows_on_refused_addresses.py`, AND THE TWO MUST MOVE
+        # TOGETHER. The control plants one offender and requires the check to
+        # convict, which only happens while the planted corpus EXCEEDS what is
+        # expected. Leave this behind and the control inverts silently: the
+        # planted count lands exactly on the stale expectation, the check
+        # PASSES, and a control that cannot convict reports itself broken --
+        # which is what it did on 2026-09-21 when the pin moved 5 -> 4 here and
+        # not there.
+        #
+        # 5 -> 4 on 2026-09-21, tracking `C88` leaving GAP for EXCLUDED-RULED.
+        failed, report = run(expect_gap=4)
         if failed and any("J 9801" in line for line in report):
             print("  ok    it FAILED and it NAMED the planted row")
         elif failed:
