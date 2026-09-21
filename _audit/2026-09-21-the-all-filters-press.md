@@ -593,3 +593,105 @@ Stated so the next wave does not re-derive it, in increasing order of cost.
 
 **What would NOT move them: asking for a ruling on the press.** That ruling
 exists, the control fails it, and the failure is terminal.
+
+---
+
+## 12. ADDENDUM -- THE PROBE SHIPPED FOUR NEVER-BRANCHED CONTROLS, AND ONE OF THEM WAS REAL
+
+`tests/test_probe_controls_are_never_decorative.py::test_probe_corpus_baseline_is_an_exact_mapping`
+went red on master over this wave's probe. The guard's instruction is explicit:
+do not add a finding to the baseline to clear the red; branch on it, or argue
+it. **Both answers apply here, and the split is the point.**
+
+**FIRST CORRECTION: THERE WERE FOUR, NOT THREE.** The local run reports two
+separate `'index'` entries in two different functions -- `_print_shape` and
+`_print_payload` -- where the relay carried one unlocated. So the finding list
+is `_print_shape -> 'shape'`, `_print_shape -> 'index'`,
+`_print_payload -> 'index'`, `main -> 'wait'`.
+
+### `main() -> 'wait'` IS A REAL CONTROL, AND ITS FAILURE WAS BEING SWALLOWED
+
+`wait = one["panel"]["panel_wait"] or {}` is the settle reading from
+`search_results.read_filters_when_settled`, which publishes `settled` False when
+the poll budget ran out with the control count **still moving** -- its own
+docstring calls that *"a FINDING: the panel was still drawing when the reading
+was taken."*
+
+**THIS PROBE'S CENTRAL CLAIM IS A ZERO, AND A HALF-DRAWN PAGE PRODUCES THAT ZERO
+FOR FREE.** `_audit/2026-09-21-the-fourteen-fired.md` section 4b measured
+exactly that failure on exactly this surface: 45 of 83 controls drawn, every
+filter term zero. The first version of this probe printed `settled=...` and
+branched on nothing -- so a reading taken mid-render would have printed its
+table, written its record, and **exited 0**. The guard's sentence for that shape
+is the right one: *the probe prints FAIL and certifies its findings anyway.*
+
+**It is now branched.** `certify()` is a pure function over one surface record;
+`main` calls it, prints any failure by name from a closed vocabulary, stamps the
+written record `certified` true or false, and **returns 1 when any control
+failed** with the line *"These numbers may NOT be quoted into a census row."*
+
+**AND REPAIRING IT SURFACED TWO MORE THE DETECTOR CANNOT SEE.** Both are now
+enforced by the same function:
+
+* **`landed_where_it_was_sent`** -- a redirected load is a reading of a
+  different page. Printed and ignored, exactly like `wait`, and invisible to the
+  detector because it is read straight out of a dict into an f-string with **no
+  local name to flag**. The detector's candidate set is simple-Name assignment
+  targets, so **its finding was a proper subset of the defect.** Worth knowing
+  about the guard: passing it is not the same as having no unbranched controls.
+* **`values_refused`** -- the shipped reader's own counter, where nonzero means
+  the page answered a count slot with something that was not an integer, and on
+  this surface a string in a count slot is a name until shown otherwise. It was
+  neither printed NOR branched: the milder "assigned and never even read" class
+  the detector tracks separately.
+
+A fourth control was added while the function was being written: `--skip-feed-
+control` already warned in its help text that the output *"cannot bank a row"*.
+That was advice; it is now a verdict.
+
+**SHOWN FAILING, ONE WAY PER CONTROL.** CONTROL 6 of
+`scripts/_check_the_disclosure_shape_reader_can_fail.py` drives `certify` over
+built records that break exactly one field each -- so a case that goes green is
+a case whose control is dead, not a case that happened to be fine -- plus a
+clean record that must certify, a combined case that must report all three at
+once (a gate reporting only the first failure teaches a caller to fix one thing
+and re-run), and `failure_name` refusing every out-of-range position rather than
+clamping, because a clamp renames one failure to another.
+
+**AND THE LIVE RUN RE-FIRED CLEAN.** A third firing on the certified instrument
+reproduced surface 0 exactly: `all filters` matched 1 under both label sources,
+`aria-label` 0, `aria-expanded` and `aria-haspopup` absent, position -1 in both
+node lists, `settled` True at 83 -> 83, `values_refused` 0, `CERTIFIED`, exit 0.
+**The condition-2 refusal now rests on a reading that could have refused
+itself.**
+
+### THE OTHER THREE ARE DECORATIVE, AND THE CLAIM IS EXECUTED RATHER THAN ASSERTED
+
+`_print_shape -> 'shape'` is a local alias for a sub-mapping so the format
+arguments fit on a line. The two `'index'` entries are loop counters over a
+fixed-length shipped vocabulary. The marker that made all three control-like is
+the literal `controls=%d` column header and the placeholder `-control-` this
+probe prints in the ROW column for a phrase that serves no census row -- report
+vocabulary, not a self-check, which is the same conflation the guard's own
+docstring already discloses as an open question for another file.
+
+**THE HALF OF THAT ARGUMENT WORTH DOUBTING IS "AND NOTHING IS SWALLOWED", SO IT
+IS NOT LEFT IN PROSE.** CONTROL 7 of the check script hands each printer a
+broken record and requires it to RAISE: an empty `shape` mapping raises
+`KeyError`, arrays shorter than the shipped vocabulary raise `IndexError`, an
+empty `payload` mapping raises `KeyError`. Each is caught by `main`, which
+prints the exception TYPE and exits 1. **If any of them ever starts returning
+quietly, that control goes red and the baseline entry is wrong** -- which is the
+property a JSON comment cannot have.
+
+The three entries are added to `scripts/probe_controls_known_decorative_baseline.json`
+(131 -> 134), each carrying its reason, with the file's `_comment` history
+extended in the shape the two prior waves used.
+
+**ONE THING THE REPAIR ALSO REMOVED.** The first attempt at the diagnostic line
+used `for surface_index_failed, position in failed:` inside `main`, and the
+detector immediately flagged BOTH loop targets as new never-branched
+control-like readings. It was right. The rendering moved into `failure_lines()`,
+a function with no sink in it at all, so the shape cannot recur. **The remedy
+for a guard finding is not to argue with it; it is to stop writing the shape it
+finds.**

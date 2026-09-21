@@ -160,6 +160,7 @@ _OWN_KEYS: frozenset[str] = frozenset({
     "data_bytes", "unreadable",
     "counter", "invitations", "gate_raised", "error_type",
     "phrase_count", "row_ledger_agrees",
+    "certified", "control_failures",
 })
 
 SURFACES: tuple[str, ...] = ("people_search", "feed")
@@ -446,6 +447,106 @@ class WireCounter:
         }
 
 
+#: THE CLOSED VOCABULARY OF CONTROL FAILURES. A failure crosses as a POSITION
+#: in this tuple, never as a sentence, for the same reason every other reading
+#: here does.
+CONTROL_FAILURES: tuple[str, ...] = (
+    "no_surface_read",            # 0
+    "no_cross_page_control",      # 1
+    "landed_elsewhere",           # 2
+    "panel_wait_unreadable",      # 3
+    "panel_not_settled",          # 4
+    "values_refused_unreadable",  # 5
+    "values_refused_nonzero",     # 6
+)
+
+
+def failure_name(index: int) -> str:
+    """One index -> one literal. Out of range REFUSES rather than clamping."""
+    if not isinstance(index, int) or not 0 <= index < len(CONTROL_FAILURES):
+        raise IndexError(
+            f"{index!r} is not a control-failure position; refusing to clamp, "
+            "which would rename one failure to another."
+        )
+    return CONTROL_FAILURES[index]
+
+
+def failure_lines(failures: list) -> list[str]:
+    """``surface N  <word>`` per failure. RENDERING, kept out of :func:`main`.
+
+    It lives here rather than as a loop in ``main`` for a mechanical reason:
+    a ``for surface, position in failures:`` loop inside ``main`` creates two
+    local names whose only loads are inside a ``say`` call, and
+    ``scripts/detect_unbranched_probe_controls.py`` correctly reports those as
+    never-branched control-like readings. **The remedy for a guard finding is
+    not to argue with it; it is to stop writing the shape it finds.**
+    """
+    return [
+        "surface %d  %s" % (int(pair[0]), failure_name(int(pair[1])))
+        for pair in failures
+    ]
+
+
+def certify(surface: dict, panel_wait: dict, surfaces_read: int) -> list[list]:
+    """THE CONTROLS THIS PROBE RUNS ON ITSELF. PURE, and :func:`main` BRANCHES.
+
+    **THIS EXISTS BECAUSE THE FIRST VERSION PRINTED THESE AND IGNORED THEM**,
+    and `tests/test_probe_controls_are_never_decorative.py` caught it. The
+    guard's sentence for that shape is exact: *the probe prints FAIL and
+    certifies its findings anyway.*
+
+    **AND THE ONE IT CAUGHT IS A REAL CONTROL, NOT A DISPLAY FIELD.**
+    `read_filters_when_settled` publishes `settled` False when the poll budget
+    ran out with the control count still MOVING -- *"a FINDING: the panel was
+    still drawing when the reading was taken."* This probe's whole claim is
+    that a named control carries neither sanctioned attribute, and **a reading
+    of a half-drawn page shows exactly that for a control that has not been
+    drawn yet.** `_audit/2026-09-21-the-fourteen-fired.md` section 4b measured
+    that precise failure on this precise surface: 45 of 83 controls drawn, and
+    every filter read zero.
+
+    Three more controls ride with it, each one able to make the numbers
+    unquotable on its own:
+
+    * **`landed_where_it_was_sent`** -- a redirected load is a reading of a
+      different page. It was printed and ignored too, and the detector could
+      not see it because it is read straight out of a dict into an f-string
+      with no local name to flag. **The guard's finding was a SUBSET of the
+      defect**, which is worth knowing about the guard.
+    * **`values_refused`** -- the shipped reader's own counter. Nonzero means
+      the page answered a count slot with something that was not an integer,
+      and on this surface a string in a count slot is a name until shown
+      otherwise. It was neither printed NOR branched, which is the milder
+      "assigned and never even read" class the detector tracks separately.
+    * **the cross-page control itself** -- `--skip-feed-control` already said
+      in its help text that the output *"cannot bank a row"*. That was advice.
+      It is now a verdict.
+
+    Returns ``[[surface_index, failure_position], ...]``, empty when every
+    control passed. Integers only.
+    """
+    failures: list[list] = []
+    index = surface.get("surface_index")
+    if not isinstance(index, int):
+        index = -1
+    if surfaces_read < 1:
+        return [[-1, 0]]
+    if surfaces_read < 2:
+        failures.append([index, 1])
+    if surface.get("landed_where_it_was_sent") is not True:
+        failures.append([index, 2])
+    if not isinstance(panel_wait, dict) or not panel_wait:
+        failures.append([index, 3])
+    elif panel_wait.get("settled") is not True:
+        failures.append([index, 4])
+    refused = (surface.get("panel") or {}).get("values_refused")
+    if refused is None or isinstance(refused, bool):
+        failures.append([index, 5])
+    elif refused:
+        failures.append([index, 6])
+    return failures
+
+
 def _as_int(value):
     """An int, or None. NEVER a zero standing in for an unread counter.
 
@@ -697,6 +798,10 @@ async def main() -> int:
         say(f"COULD NOT ATTACH: {type(exc).__name__}")
         return 2
 
+    # EVERY CONTROL FAILURE SEEN, ACROSS EVERY SURFACE. Read after the loop and
+    # it decides the exit code -- see the end of this function.
+    uncertified: list[list] = []
+
     # OUR tab, held so the finally can close it. THE PAGE, NEVER THE CONTEXT --
     # in attach mode the context is a real signed-in Chrome and closing it takes
     # that browser down.
@@ -721,6 +826,15 @@ async def main() -> int:
                         wait.get("controls_first"), wait.get("controls_last"),
                     )
                 )
+                # THE BRANCH. `wait` is not a display field -- `settled` False
+                # means this reading may be of a half-drawn page, which is the
+                # one way this probe's central zero could be an artefact.
+                failed = certify(one, wait, len(targets))
+                uncertified.extend(failed)
+                if failed:
+                    say("    CONTROL FAILED: " + ", ".join(
+                        failure_lines(failed)
+                    ))
                 say(
                     "    invitation counter reads: %s"
                     % (one["counter"]["invitations"],)
@@ -746,8 +860,24 @@ async def main() -> int:
             await tab.close()
         await BROWSER.stop()
 
+    # THE CONTROLS DECIDE THE EXIT CODE. A reading that failed one of them is
+    # WRITTEN -- the evidence is integers and is worth keeping -- but it is
+    # written STAMPED, and the process exits nonzero, so a caller cannot take
+    # an uncertified reading for a certified one and neither can a later
+    # reader of the file.
+    record["certified"] = not uncertified
+    record["control_failures"] = uncertified
     _write(args.out, record)
     say(f"WROTE {pathlib.Path(args.out).name} under _state/ (gitignored)")
+    if uncertified:
+        say()
+        say("NOT CERTIFIED -- %d control failure(s):" % len(uncertified))
+        say("    " + "\n    ".join(failure_lines(uncertified)))
+        say("These numbers may NOT be quoted into a census row. A control that")
+        say("failed is not a nuisance to re-run past; it is the reading saying")
+        say("it cannot tell you what you asked.")
+        return 1
+    say("CERTIFIED -- every control passed.")
     return 0
 
 
