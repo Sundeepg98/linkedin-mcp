@@ -341,3 +341,53 @@ live waves may touch, and it wants the evidence in front of whoever does it.
 Expect reported coverage to fall and GAP to rise when it lands — that is the
 point of the ruling, not a regression.
 
+### 5.5 A NEW decision for section 1: `server._error` publishes a url nothing scrubs, 09:20
+
+Landed with the `scrub-the-landing` merge, which repaired the landing at the
+raise site and **deliberately did not repair this**. It is the strongest
+unrepaired disclosure finding in the corpus and it needs a ruling, so it belongs
+with section 1's decisions rather than section 2's build work.
+
+**What is measured.** `ExtractionFailedError.url` is published by `server._error`
+with **no scrubber at all** — `out["url"] = url`, sitting beside a `message` and
+a `hint` that both go through `scrub()`. **20 sites feed that field. All 12 of
+the `dom.py` sites were DRIVEN to their own raise, and all 12 published a
+planted slug verbatim at `$.url`** — each `reached` asserted from the traceback
+rather than inferred, with a per-reader negative control that returned without
+raising in all 12.
+
+**Three things that make the obvious remedies wrong, each measured:**
+
+- **Reachability is structural, not incidental.** Every site is
+  `try: await page.evaluate(...) except Exception: raise ...(url=_url_of(page))`.
+  **The guard is on the CALL, not on the answer** — a page double that answers
+  empty reaches none of them, because an empty answer has already returned and
+  walks past the `except`. Reachability reduces to "can `evaluate` raise", which
+  it always can. A first attempt measured nothing for exactly that reason.
+- **A remedy scoped to `_url_of(page)` misses seven more sites**, which feed the
+  same field with a LANDED url: `dom.require_rows` (both callers pass
+  `final_url`) and five in `server.py` — `_read_tracker`,
+  `linkedin_who_viewed_me`, `linkedin_job_detail`,
+  `linkedin_followed_companies`, `linkedin_my_profile`.
+- **`out["message"]` is a second unscrubbed channel**, and `$.hint` a third. A
+  needle planted only inside the exception `evaluate` raised landed at
+  `$.message` in all 12 drives; `scrub()` runs there and removes only paths, and
+  a name has no shape to scrub. The hint channel is
+  `hint=f"headings seen: {...}"` in `linkedin_my_profile`, carrying page heading
+  text, driven through `_error` to confirm it survives.
+
+**Why the wave refused to fix it, and the refusal is right.** It is a DECLARED
+CONTRACT whose success-path twin carries a standing fourteen-row per-site ruling
+that explicitly forbids reflexive wrapping. Putting every url through
+`landing.withheld()` would overturn that ruling by side effect, on a weaker
+basis than the one that made it. **It needs a ruling, and it needs a browser** —
+whether a LIVE authwall actually makes `evaluate` raise on these surfaces is the
+one thing not established.
+
+**What holds it shut meanwhile, so the severity is not overstated:** the same
+wave measured that not one real landing on this account carries an
+`/in/<member>/` path or an organisation slug — 31 events, 14 of 14
+predecessor-to-parameter agreements, `/checkpoint/` never fired. The field is
+unscrubbed and its worst case is unwitnessed. "A landing can be a name" remains
+DERIVED.
+
