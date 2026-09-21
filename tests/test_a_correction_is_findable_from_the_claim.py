@@ -257,6 +257,70 @@ NOT_A_CORRECTION: dict[tuple[str, str], str] = {
         "asserting that something in that deliverable is false while "
         "leaving the deliverable untouched."
     ),
+    # 2026-09-21, the REFUSE-FIRST wave. A SHAPE THIS DICT HAS NOT CARRIED
+    # BEFORE, and it is worth naming rather than folding into TABLE-ROW
+    # PROXIMITY: the cited document is DERIVED.
+    ("2026-09-21-refuse-before-the-click.md", "INDEX.md"): (
+        "A DERIVED ARTIFACT CANNOT BE CORRECTED, ONLY REGENERATED. The citing "
+        "line is a row of that document's gate-disposition table: *'`_audit/"
+        "INDEX.md` is DERIVED and my new report made it stale. Regenerated "
+        "with `scripts/build_audit_index.py --write` (209 tracked documents), "
+        "never hand-merged.'* The matched vocabulary is `stale`, and what it "
+        "describes is a BUILD STEP that had not been re-run -- not a claim "
+        "INDEX.md makes that turned out to be false. `INDEX.md` asserts "
+        "nothing of its own: it is the script's output over the corpus, which "
+        "is why the standing instruction is to regenerate it and never to "
+        "hand-merge it. A CORRECTS: marker would point a reader at a file "
+        "that will be overwritten wholesale by its generator on the next run, "
+        "and the back-pointer would be deleted by that same run. "
+        "**WHAT WOULD MAKE THIS ENTRY WRONG:** `INDEX.md` ceasing to be "
+        "generated -- at which point it starts making claims of its own and "
+        "can be corrected like any other document."
+    ),
+
+    # 2026-09-21, the REFUSE-FIRST wave. A SENTENCE SAYING "THIS IS NOT A
+    # CORRECTION" IS INDISTINGUISHABLE FROM ONE TO A PROXIMITY SCAN, which is
+    # this file's own recorded defect (see MARKER's docstring) arriving from
+    # the other side.
+    ("2026-09-21-refuse-before-the-click.md", "2026-09-21-the-all-filters-press.md"): (
+        "THE CITED LINE IS AN EXPLICIT STATEMENT THAT THE DOCUMENT IS NOT "
+        "CORRECTED. It reads *'`_audit/2026-09-21-the-all-filters-press.md` "
+        "was not rewritten. It is a dated record and it was accurate; this "
+        "file implements its handover rather than correcting it. No CORRECTS: "
+        "marker names it, for the same reason.'* -- the vocabulary that "
+        "matches (`correcting`, `corrects`) is the word this sentence uses to "
+        "DENY the relationship, and it sits on the citation's own line because "
+        "the sentence is about that document. The refuse-first wave implements "
+        "the handover in section 3 of the all-filters document; it withdraws "
+        "nothing in it and contradicts none of its measurements, which is why "
+        "no marker pair exists. "
+        "**WHAT WOULD MAKE THIS ENTRY WRONG:** refuse-before-the-click "
+        "asserting that a measurement or claim IN the all-filters document is "
+        "false -- at which point it owes that document a CORRECTS: marker and "
+        "the back-pointer, and this entry must go."
+    ),
+
+    # 2026-09-21, the REFUSE-FIRST wave. The arrow IS declared -- see the
+    # CORRECTS/CORRECTED BY pair between that deliverable and this census --
+    # and this is the same SHADOW shape as the fires-and-the-controls entry
+    # directly below.
+    ("network.md", "2026-09-21-refuse-before-the-click.md"): (
+        "THE ARROW IS DECLARED IN THE OTHER DIRECTION AND THIS IS ITS "
+        "SHADOW. `2026-09-21-refuse-before-the-click.md` declares "
+        "*'CORRECTS: `_audit/_census/network.md` -- row `76`'* and this file "
+        "carries the matching CORRECTED BY in its header. What the candidate "
+        "pair claims instead is that NETWORK.MD corrects THE DELIVERABLE, "
+        "which is backwards: row 76 cites that document as the SOURCE of its "
+        "own in-place correction and withdraws nothing from it. The matched "
+        "vocabulary -- `wrong`, `false`, `stale` -- is inside row 76's own "
+        "re-priced cell, describing what the ROW said before 2026-09-21, and "
+        "a markdown table has no blank lines so that prose sits inside the "
+        "citation's two-line window. "
+        "**WHAT WOULD MAKE THIS ENTRY WRONG:** row 76 asserting that "
+        "something IN that deliverable is false while leaving the deliverable "
+        "untouched, which would be a real correction needing its own markers."
+    ),
+
     ("network.md", "2026-09-21-the-fires-and-the-controls.md"): (
         "THE ARROW IS DECLARED IN THE OTHER DIRECTION AND THIS IS ITS "
         "SHADOW. The fires-and-the-controls deliverable declares "

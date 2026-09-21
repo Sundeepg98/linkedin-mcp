@@ -291,7 +291,24 @@ def demonstrate_red() -> int:
             ok = False
 
         print("\nRED 2 -- THE CHECK MUST FAIL ON THE PLANTED CORPUS")
-        failed, report = run(expect_gap=5)
+        # THE UNPLANTED COUNT, DERIVED RATHER THAN HARDCODED.
+        #
+        # **THIS READ ``run(expect_gap=5)`` UNTIL 2026-09-21, AND THAT WAS A
+        # SECOND COPY OF THE PIN** that lives in
+        # ``tests/test_gap_rows_on_refused_addresses.py``. One number, two
+        # homes, and on 2026-09-21 only one of them moved: `c500cf9` closed
+        # row `M C88`, the real count went 5 -> 4, and the literal 5 here then
+        # matched the PLANTED corpus exactly -- so this control passed a
+        # corpus containing its own planted offender and reported ITSELF
+        # broken. A control whose expectation is a copy of the thing it is
+        # controlling fails in the direction that looks like its own fault.
+        #
+        # ``len(keys) - 1`` is exactly the count without the plant, and it is
+        # not an assumption: RED 1 immediately above asserts that `J 9801`
+        # IS in ``keys``, and RED 3 immediately below asserts that `J 9802`
+        # is NOT -- so precisely one planted row joins the set. The two
+        # assertions that bracket this line are what make it derivable.
+        failed, report = run(expect_gap=len(keys) - 1)
         if failed and any("J 9801" in line for line in report):
             print("  ok    it FAILED and it NAMED the planted row")
         elif failed:

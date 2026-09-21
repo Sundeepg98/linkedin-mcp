@@ -27,16 +27,16 @@ are listed as `(undated)`; no date is taken from git history, because
 
 | what | count |
 | --- | --- |
-| audit documents git tracks under `_audit` | 208 |
-| of those, carrying a `YYYY-MM-DD-` date prefix | 175 |
+| audit documents git tracks under `_audit` | 209 |
+| of those, carrying a `YYYY-MM-DD-` date prefix | 176 |
 | distinct dates | 14 |
 | documents with no level-1 heading | 1 |
-| `CORRECTS:` marker lines | 81 |
-| `CORRECTED BY:` marker lines | 81 |
-| distinct declared correction edges | 78 |
+| `CORRECTS:` marker lines | 82 |
+| `CORRECTED BY:` marker lines | 82 |
+| distinct declared correction edges | 79 |
 | documents something later corrects | 43 |
-| documents that correct something | 58 |
-| documents at either end of a cross-document edge | 83 |
+| documents that correct something | 59 |
+| documents at either end of a cross-document edge | 84 |
 | intra-document correction markers | 4 |
 | documents that correct themselves later on | 2 |
 | documents no correction marker touches at all | 123 |
@@ -522,6 +522,10 @@ document is dead; it says one thing in it was overtaken and names what.
 - CORRECTED BY [2026-09-20-the-write-partition.md](2026-09-20-the-write-partition.md)
 
   > the claim that this ruling removes the connections list was put through the shipped read gate on 2026-09-20 and the address is ADMITTED, so the side effect described above no longer happens.
+
+- CORRECTED BY [2026-09-21-refuse-before-the-click.md](2026-09-21-refuse-before-the-click.md)
+
+  > row `76` stated that `/in/me/` + `[aria-haspopup]` is **PERMITTED**, quoting the gate's own `permitted_to_attempt: true` and `permitted: true, priced_by: [...]`. Re-measured 2026-09-21: it is `no_sensitivity_basis` at BOTH ends. The row was true when written at `1f5985d` 10:53 on 2026-09-19 and was falsified sixty-three minutes later by `61e3e01` 11:56, which ruled that READABILITY no longer prices a press -- a reading with a timestamp, quoted after its subject moved. That wave ALSO repaired the ordering defect the cell relied on: until 2026-09-21 the gate returned `permitted_to_attempt: true` on any basis-less surface and then CLICKED before refusing, so the quoted permit was one the gate had already decided not to honour. The cell is corrected in place and re-filed from BLOCKED ON EXECUTION to **BLOCKED ON A RULING**, because no counter reader can ever move it. **NO STATE MOVED** -- row 76 is GAP before and after, and this slice's counts stand exactly as the preceding wave left them.
 
 - CORRECTED BY [2026-09-21-the-all-filters-press.md](2026-09-21-the-all-filters-press.md)
 
@@ -1073,6 +1077,14 @@ reach is visible. The quoted reason here is the CORRECTOR's own
 
   > R2's headline claim that the ruling removes the connections list, measured false at HEAD through the shipped read gate; the back-pointer is written into R2 itself.
 
+### [2026-09-21-refuse-before-the-click.md](2026-09-21-refuse-before-the-click.md)
+
+2026-09-21 &middot; REFUSE BEFORE THE CLICK -- the press gate now consults the basis table before it touches a page
+
+- CORRECTS [_census/network.md](_census/network.md)
+
+  > row `76`, which states that `/in/me/` + `[aria-haspopup]` **is PERMITTED**, quoting `permitted_to_attempt: true` and `permitted: true, priced_by: [...]`. Re-measured 2026-09-21 through the shipped gate: it is `no_sensitivity_basis` at BOTH ends, and has been since `61e3e01` at 11:56 on 2026-09-19 -- sixty-three minutes after the claim landed at `1f5985d` 10:53. The cell is corrected in place and the row is re-filed from BLOCKED ON EXECUTION to BLOCKED ON A RULING. **NO STATE MOVED:** the row is GAP before and after.
+
 ### [2026-09-21-the-all-filters-press.md](2026-09-21-the-all-filters-press.md)
 
 2026-09-21 &middot; THE `All filters` PRESS: REFUSED AT CONDITION 2, AND THE GATE WOULD HAVE PRESSED FIRST
@@ -1191,7 +1203,7 @@ ways, which is a fact about markers and not a verdict on the document.
 | (undated) | [_census/jobs.md](_census/jobs.md) | Census slice: JOBS, END TO END | **CORRECTED x5** |
 | (undated) | [_census/mcp-inventory.md](_census/mcp-inventory.md) | MCP inventory -- what this server ACTUALLY DELIVERS |  |
 | (undated) | [_census/messaging-and-content.md](_census/messaging-and-content.md) | Capability census -- MESSAGING AND CONTENT | **CORRECTED x4** |
-| (undated) | [_census/network.md](_census/network.md) | CENSUS SLICE: NETWORK AND PEOPLE | **CORRECTED x8** |
+| (undated) | [_census/network.md](_census/network.md) | CENSUS SLICE: NETWORK AND PEOPLE | **CORRECTED x9** |
 | (undated) | [_census/profile.md](_census/profile.md) | CENSUS SLICE: PROFILE, IDENTITY, SETTINGS AND PRIVACY | **CORRECTED x2** |
 | 2026-08-22 | [2026-08-22-linkedin-preflight.md](2026-08-22-linkedin-preflight.md) | 2026-08-22 - browser preflight, and a session_info that outlives the browser |  |
 | 2026-08-22 | [2026-08-22-parity-linkedin.md](2026-08-22-parity-linkedin.md) | LinkedIn parity, 2026-08-22 -- what he can do that this server cannot | **CORRECTED x1** |
@@ -1357,6 +1369,7 @@ ways, which is a fact about markers and not a verdict on the document.
 | 2026-09-20 | [2026-09-20-the-three-held-defects.md](2026-09-20-the-three-held-defects.md) | The three held defects | corrects x1 |
 | 2026-09-20 | [2026-09-20-the-unfired-twentyseven.md](2026-09-20-the-unfired-twentyseven.md) | The unfired twenty-seven |  |
 | 2026-09-20 | [2026-09-20-the-write-partition.md](2026-09-20-the-write-partition.md) | THE WRITE PARTITION: 101 WRITE-DIRECTION GAP ROWS, AND THE 87 THAT STAY | corrects x1 |
+| 2026-09-21 | [2026-09-21-refuse-before-the-click.md](2026-09-21-refuse-before-the-click.md) | REFUSE BEFORE THE CLICK -- the press gate now consults the basis table before it touches a page | corrects x1 |
 | 2026-09-21 | [2026-09-21-taint-does-not-survive-a-container.md](2026-09-21-taint-does-not-survive-a-container.md) | The output-sink guard misses a landed URL that reaches stdout |  |
 | 2026-09-21 | [2026-09-21-the-all-filters-press.md](2026-09-21-the-all-filters-press.md) | THE `All filters` PRESS: REFUSED AT CONDITION 2, AND THE GATE WOULD HAVE PRESSED FIRST | corrects x2 |
 | 2026-09-21 | [2026-09-21-the-fires-and-the-controls.md](2026-09-21-the-fires-and-the-controls.md) | THE FIRES AND THE CONTROLS | corrects x2 |

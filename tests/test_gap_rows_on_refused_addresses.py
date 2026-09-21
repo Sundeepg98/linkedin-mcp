@@ -33,7 +33,29 @@ SCRIPT = ROOT / "scripts" / "check_gap_rows_on_refused_addresses.py"
 #: The pin. A move in EITHER direction is meant to fail: see the script's own
 #: docstring for why a silent fix is as loud as a new offender. The unit is a
 #: ROW, never a (row, address) pair.
-EXPECTED_GAP_ROWS = 5
+#:
+#: **5 -> 4 on 2026-09-21, AND THE ROW IS NAMED BECAUSE A RE-PIN WITHOUT ONE IS
+#: JUST FITTING THE NUMBER TO TODAY.** The row that left is ``M C88`` -- "Choose
+#: whether members can mention, tag or collaborate with you", on
+#: ``/mypreferences/d/categories/``. It was closed by `c500cf9` (the
+#: write-ceiling wave, 2026-09-21 11:15, "5 of 157 write-direction GAP rows
+#: close"), which moved it GAP -> EXCLUDED-RULED and did not re-pin here.
+#:
+#: **RESOLVED, NOT BLIND, and the difference is the whole reason to check.**
+#: The two failure modes look identical from the count alone: a row whose STATE
+#: left GAP (this one -- correct, re-pin) versus a row still GAP whose
+#: backticked ADDRESS was edited away so the walk stopped seeing it (a silent
+#: loss of coverage, where re-pinning would hide a real offender). Measured on
+#: both census snapshots with the shipped ``ADDR`` regex and the shipped gate:
+#: at `16941f0` C88 reads ``STATE='GAP'`` and at HEAD ``STATE='EXCLUDED-RULED'``,
+#: **with the same two addresses visible to the check at both ends** --
+#: ``/mypreferences/d/categories/`` and ``/mypreferences/d/categories/visibility``.
+#: The row is past the bar; it did not hide.
+#:
+#: The other four are unchanged and still named by the script's own output:
+#: ``M M11``, ``N A3``, ``N A5``, ``P D25``. See
+#: `_audit/2026-09-21-refuse-before-the-click.md` section 5B.
+EXPECTED_GAP_ROWS = 4
 
 
 def _run(*args: str) -> subprocess.CompletedProcess:
