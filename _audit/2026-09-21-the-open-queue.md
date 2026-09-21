@@ -288,6 +288,33 @@ the wave firing that same surface, and a second browser builder on one
 signed-in profile is the thing this repo does not do. Take it when the slot
 frees.
 
+### 5.4a CORRECTION TO 5.4: IT WAS ALREADY RULED, ON 2026-09-05, 11:25
+
+**5.4 below presents itself as a new ruling. It is not one.** The same question
+was answered sixteen days earlier and the answer is quoted inside
+`_audit/2026-09-05-decide-retire-rulings.md` section 2, *"THE BOUNDARY IS NOT A
+REASON"*, citing the ledger's own rule:
+
+> *"Everything a general mechanism merely happens to block is a GAP with a
+> NAMED BLOCKER — recorded so nobody reads GAP as cheap, **but not laundered
+> into a decision**."*
+
+That is 5.4's conclusion, word for word in substance. **The ruling stands; the
+attribution in 5.4 is wrong**, and everything measured under it — the
+three-way discriminator, the anchor-termination finding, the refusal to read
+`0 matches` as `nobody ruled it` — remains good and is new.
+
+**THE ACTUAL DEFECT IS FINDABILITY, NOT AN OPEN QUESTION.** Two separate waves
+have now escalated this same question to the lead as undecided, and the lead
+then re-derived it a third time. Three independent readers reached "nobody has
+ruled this" about a ruling that exists, is written down, and is cited in a file
+named for rulings. A corpus of 207 documents with an index keyed on DOCUMENTS
+has no way to ask *"what has been ruled about X"*, and this is what that costs:
+not a wrong answer, but the same answer paid for three times.
+
+Recorded here rather than by editing 5.4, because a count — and a claim of
+authorship — is evidence of what was believed when it was written.
+
 ### 5.4 RULED: incidental capture is not a ruling — and the discriminator is real, 08:40
 
 **This one is decided rather than returned.** Section 1 files it as an open

@@ -1225,7 +1225,16 @@ def main(argv: list[str] | None = None) -> int:
     changed = present + deleted
 
     if not changed:
-        print("impact-gate: nothing staged; nothing to check.", file=sys.stderr)
+        # THIS IS NOT A PASS, AND THE EXIT CODE CANNOT SAY SO. A caller that
+        # reads the code sees 0 and a human skimming sees "nothing to check",
+        # and both are one short step from "the gate was green". The subject of
+        # this gate is the INDEX, so after a commit there is nothing left in it
+        # to read -- the same shape that let the identity gate be recorded as
+        # passing four times in one session while examining zero bytes
+        # (2026-09-21). Found here by a wave that hit it, not by a control.
+        print("impact-gate: NOTHING WAS STAGED, SO NOTHING WAS CHECKED. "
+              "This is not a pass. Stage the change first, or pass --against "
+              "<ref> to measure a range instead of the index.", file=sys.stderr)
         return 0
 
     if not PYTHON.exists() and not args.plan_only:
