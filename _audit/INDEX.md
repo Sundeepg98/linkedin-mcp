@@ -27,8 +27,8 @@ are listed as `(undated)`; no date is taken from git history, because
 
 | what | count |
 | --- | --- |
-| audit documents git tracks under `_audit` | 207 |
-| of those, carrying a `YYYY-MM-DD-` date prefix | 174 |
+| audit documents git tracks under `_audit` | 209 |
+| of those, carrying a `YYYY-MM-DD-` date prefix | 175 |
 | distinct dates | 14 |
 | documents with no level-1 heading | 1 |
 | `CORRECTS:` marker lines | 79 |
@@ -39,7 +39,7 @@ are listed as `(undated)`; no date is taken from git history, because
 | documents at either end of a cross-document edge | 82 |
 | intra-document correction markers | 4 |
 | documents that correct themselves later on | 2 |
-| documents no correction marker touches at all | 123 |
+| documents no correction marker touches at all | 125 |
 | blockquoted markers naming ANOTHER document | 0 |
 | edges missing one of their two markers | 0 |
 | edges declared a different number of times in each direction | 2 |
@@ -1137,6 +1137,7 @@ ways, which is a fact about markers and not a verdict on the document.
 | date | document | title | markers |
 | --- | --- | --- | --- |
 | (undated) | [INSTRUMENTS.md](INSTRUMENTS.md) | The instrument register | **CORRECTED x1** |
+| (undated) | [RULINGS.md](RULINGS.md) | THE RULINGS REGISTER -- one entry per RULING, not per document |  |
 | (undated) | [_slice-activity-items.md](_slice-activity-items.md) | Slice: `linkedin_my_activity_items` -- item keys, for items measured to be his |  |
 | (undated) | [_slice-apply-census.md](_slice-apply-census.md) | Apply-control census - LinkedIn MCP job-posting captures |  |
 | (undated) | [_slice-apply-modal-fixture.md](_slice-apply-modal-fixture.md) | Slice: the apply-modal reader gets a DERIVED fixture and real execution |  |
@@ -1343,6 +1344,7 @@ ways, which is a fact about markers and not a verdict on the document.
 | 2026-09-21 | [2026-09-21-the-read-triage.md](2026-09-21-the-read-triage.md) | The read rows are GATED, not backlogged -- but nineteen of the fifty-nine are not | **CORRECTED x1** corrects x2 |
 | 2026-09-21 | [2026-09-21-the-three-readers.md](2026-09-21-the-three-readers.md) | Two readers for three rows, on two addresses nothing could navigate to -- | **CORRECTED x2** |
 | 2026-09-21 | [2026-09-21-the-write-ceiling.md](2026-09-21-the-write-ceiling.md) | THE WRITE CEILING: 157 WRITE-DIRECTION GAP ROWS, AND THE 152 THAT STAY | corrects x2 |
+| 2026-09-21 | [2026-09-21-what-was-ruled.md](2026-09-21-what-was-ruled.md) | A register keyed on RULINGS, not on documents -- and the fourth payment |  |
 
 ## 6. What the scan rejected, could not join, or had to repair
 
