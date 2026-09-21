@@ -1584,13 +1584,32 @@ def report(
     add("| module | grep lines | AST sites |")
     add("|---|---:|---:|")
     total_grep = total_ast = 0
+    agreeing = agreeing_grep = agreeing_ast = 0
     contrast = grep_contrast(main)
     for row in contrast:
         total_grep += row["grep_lines"]
         total_ast += row["ast_sites"]
         if row["grep_lines"] != row["ast_sites"]:
             add(f"| `{row['module']}` | {row['grep_lines']} | {row['ast_sites']} |")
+        else:
+            agreeing += 1
+            agreeing_grep += row["grep_lines"]
+            agreeing_ast += row["ast_sites"]
     add(f"| **TOTAL** | **{total_grep}** | **{total_ast}** |")
+    add("")
+    # THE ROWS MUST SUM TO THE TOTAL, OR THE TABLE MUST SAY WHY THEY DO NOT.
+    # This table shows DISAGREEMENTS only, which is the useful view and also a
+    # filter -- and a printed TOTAL that its visible rows do not reach invites
+    # a reader to trust a row that is not there. Caught by an independent
+    # ripgrep cross-check that found four grep lines in three modules the
+    # table never mentioned. So the suppression is now stated and counted
+    # rather than silent.
+    add(
+        f"Rows are DISAGREEMENTS only. **{agreeing} module(s) where the two "
+        f"counts agree are suppressed**, carrying {agreeing_grep} grep line(s) "
+        f"and {agreeing_ast} AST site(s) -- they are inside the TOTAL, so the "
+        "visible rows do not sum to it."
+    )
     add("")
     pct_args = [r for r in main if r["kind"] == "LOG" and 'f"' not in r["message"] and "f'" not in r["message"]]
     add(

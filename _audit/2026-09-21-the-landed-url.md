@@ -470,6 +470,18 @@ final_url)` reaches a log record with the url in it and a grep for `f"` cannot
 see one of them. Multi-line `raise` calls -- the dominant spelling here -- are
 invisible to the same search for the same reason.
 
+**AND THE TABLE PRINTING THAT CONTRAST DID NOT RECONCILE, WHICH I FOUND BY
+RUNNING THE GREP MYSELF.** An independent ripgrep returned 18, agreeing with
+the TOTAL -- and four of those lines were in three modules the table never
+mentioned. The rows summed to 288 against a printed 292. The cause is benign
+(the table shows DISAGREEMENTS only, which is the useful view) and the defect
+is not: **a printed total that the visible rows do not reach invites a reader
+to trust a row that is not there.** The suppression is now stated and counted
+in the table's own output.
+
+> RUNNING THE CHEAP DISAGREEING CHECK IS HOW BOTH OF THIS INSTRUMENT'S DEFECTS
+> WERE FOUND -- a grep against its shortlist, and a grep against its own grep.
+
 ### 5.2 THE ADJUDICATION -- 21 ADDRESS-BEARING SITES
 
 | site | verdict |
