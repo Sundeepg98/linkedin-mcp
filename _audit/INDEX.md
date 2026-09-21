@@ -27,16 +27,16 @@ are listed as `(undated)`; no date is taken from git history, because
 
 | what | count |
 | --- | --- |
-| audit documents git tracks under `_audit` | 199 |
-| of those, carrying a `YYYY-MM-DD-` date prefix | 166 |
+| audit documents git tracks under `_audit` | 200 |
+| of those, carrying a `YYYY-MM-DD-` date prefix | 167 |
 | distinct dates | 14 |
 | documents with no level-1 heading | 1 |
-| `CORRECTS:` marker lines | 72 |
-| `CORRECTED BY:` marker lines | 72 |
-| distinct declared correction edges | 69 |
-| documents something later corrects | 40 |
-| documents that correct something | 53 |
-| documents at either end of a cross-document edge | 77 |
+| `CORRECTS:` marker lines | 74 |
+| `CORRECTED BY:` marker lines | 74 |
+| distinct declared correction edges | 71 |
+| documents something later corrects | 41 |
+| documents that correct something | 54 |
+| documents at either end of a cross-document edge | 78 |
 | intra-document correction markers | 4 |
 | documents that correct themselves later on | 2 |
 | documents no correction marker touches at all | 120 |
@@ -427,6 +427,14 @@ document is dead; it says one thing in it was overtaken and names what.
 
   > section 6 above records the 22 as NOT REPAIRED and pinned at 26 (token, document) rows; all 22 are now repaired and `PINNED` is empty. That wave also measured what this one did not: every one of the 22 has an exact twin on `master` -- identical subject, identical author date, identical `git patch-id` -- so the branches never merged but the work was re-applied. The deferral reasoning here (nineteen documents, three waves live) was correct at the time; those waves have since merged.
 
+### [2026-09-21-the-read-triage.md](2026-09-21-the-read-triage.md)
+
+2026-09-21 &middot; The read rows are GATED, not backlogged -- but nineteen of the fifty-nine are not
+
+- CORRECTED BY [2026-09-21-the-fourteen-fired.md](2026-09-21-the-fourteen-fired.md)
+
+  > the sentence above is still true of THIS wave and its `--expect` command is now stale.** That wave fired the people-search surface live and moved `N 83` GAP to COVERED-PROVEN, so the counter's current expectation is `--expect J=57,P=55,M=82,N=90` and the census total is 284. Nothing here is retracted: this wave moved no state, which is what it claimed. It also identified rows `80`-`94` as sharing row `79`'s expired blocker and could not re-price them because it was forbidden the browser; that is the gap the successor closed.
+
 ### [INSTRUMENTS.md](INSTRUMENTS.md)
 
 (undated) &middot; The instrument register
@@ -490,6 +498,10 @@ document is dead; it says one thing in it was overtaken and names what.
 - CORRECTED BY [2026-09-20-the-write-partition.md](2026-09-20-the-write-partition.md)
 
   > the claim that this ruling removes the connections list was put through the shipped read gate on 2026-09-20 and the address is ADMITTED, so the side effect described above no longer happens.
+
+- CORRECTED BY [2026-09-21-the-fourteen-fired.md](2026-09-21-the-fourteen-fired.md)
+
+  > rows 80 through 93, the fourteen the shaper's own `FILTER_TERM_ROWS` names, were re-priced from the FIRST LIVE FIRING of this surface; all fourteen had an EMPTY evidence cell and a blocker that expired 2026-09-20, and **row 83 moved GAP to COVERED-PROVEN** while the other thirteen stayed GAP with a measured reason each -- row 82 matched live and was deliberately NOT banked. See the THIRD DELTA below.
 
 - CORRECTED BY [2026-09-21-the-read-triage.md](2026-09-21-the-read-triage.md)
 
@@ -1025,6 +1037,18 @@ reach is visible. The quoted reason here is the CORRECTOR's own
 
   > R2's headline claim that the ruling removes the connections list, measured false at HEAD through the shipped read gate; the back-pointer is written into R2 itself.
 
+### [2026-09-21-the-fourteen-fired.md](2026-09-21-the-fourteen-fired.md)
+
+2026-09-21 &middot; THE FOURTEEN FIRED: one banked, one refused, twelve behind a press
+
+- CORRECTS [2026-09-21-the-read-triage.md](2026-09-21-the-read-triage.md)
+
+  > its re-measure command `--expect J=57,P=55,M=82,N=91` no longer passes now that row 83 has left GAP, so the live expectation is `N=90` and a census total of 284; that document's own claim is NOT wrong and is NOT rewritten, because it moved no state and said so truthfully.
+
+- CORRECTS [_census/network.md](_census/network.md)
+
+  > rows 80 through 93 each carried an EMPTY evidence cell and a blocker that expired 2026-09-20; all fourteen are re-priced here from a live firing, row 83 moves GAP to COVERED-PROVEN, and the slice's GAP count moves 91 to 90.
+
 ### [2026-09-21-the-jobs-direction.md](2026-09-21-the-jobs-direction.md)
 
 2026-09-21 &middot; THE JOBS DIRECTION: the fifth of the GAP that was never asked the question
@@ -1087,7 +1111,7 @@ ways, which is a fact about markers and not a verdict on the document.
 | (undated) | [_census/jobs.md](_census/jobs.md) | Census slice: JOBS, END TO END | **CORRECTED x5** |
 | (undated) | [_census/mcp-inventory.md](_census/mcp-inventory.md) | MCP inventory -- what this server ACTUALLY DELIVERS |  |
 | (undated) | [_census/messaging-and-content.md](_census/messaging-and-content.md) | Capability census -- MESSAGING AND CONTENT | **CORRECTED x3** |
-| (undated) | [_census/network.md](_census/network.md) | CENSUS SLICE: NETWORK AND PEOPLE | **CORRECTED x4** |
+| (undated) | [_census/network.md](_census/network.md) | CENSUS SLICE: NETWORK AND PEOPLE | **CORRECTED x5** |
 | (undated) | [_census/profile.md](_census/profile.md) | CENSUS SLICE: PROFILE, IDENTITY, SETTINGS AND PRIVACY | **CORRECTED x2** |
 | 2026-08-22 | [2026-08-22-linkedin-preflight.md](2026-08-22-linkedin-preflight.md) | 2026-08-22 - browser preflight, and a session_info that outlives the browser |  |
 | 2026-08-22 | [2026-08-22-parity-linkedin.md](2026-08-22-parity-linkedin.md) | LinkedIn parity, 2026-08-22 -- what he can do that this server cannot | **CORRECTED x1** |
@@ -1253,8 +1277,9 @@ ways, which is a fact about markers and not a verdict on the document.
 | 2026-09-20 | [2026-09-20-the-three-held-defects.md](2026-09-20-the-three-held-defects.md) | The three held defects | corrects x1 |
 | 2026-09-20 | [2026-09-20-the-unfired-twentyseven.md](2026-09-20-the-unfired-twentyseven.md) | The unfired twenty-seven |  |
 | 2026-09-20 | [2026-09-20-the-write-partition.md](2026-09-20-the-write-partition.md) | THE WRITE PARTITION: 101 WRITE-DIRECTION GAP ROWS, AND THE 87 THAT STAY | corrects x1 |
+| 2026-09-21 | [2026-09-21-the-fourteen-fired.md](2026-09-21-the-fourteen-fired.md) | THE FOURTEEN FIRED: one banked, one refused, twelve behind a press | corrects x2 |
 | 2026-09-21 | [2026-09-21-the-jobs-direction.md](2026-09-21-the-jobs-direction.md) | THE JOBS DIRECTION: the fifth of the GAP that was never asked the question | corrects x1 |
-| 2026-09-21 | [2026-09-21-the-read-triage.md](2026-09-21-the-read-triage.md) | The read rows are GATED, not backlogged -- but nineteen of the fifty-nine are not | corrects x2 |
+| 2026-09-21 | [2026-09-21-the-read-triage.md](2026-09-21-the-read-triage.md) | The read rows are GATED, not backlogged -- but nineteen of the fifty-nine are not | **CORRECTED x1** corrects x2 |
 
 ## 6. What the scan rejected, could not join, or had to repair
 
