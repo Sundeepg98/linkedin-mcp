@@ -639,3 +639,81 @@ def test_the_caller_cannot_hand_in_a_selector():
             f"{invented!r} was admitted; membership must be EXACT, so a "
             "near-miss string cannot be smuggled past the list."
         )
+
+
+# ---------------------------------------------------------------------------
+# THE HOLE IN THE ORDERING TEST ABOVE, PINNED. See
+# `_audit/2026-09-21-the-all-filters-press.md` section 3.
+# ---------------------------------------------------------------------------
+
+async def test_a_surface_with_no_declared_basis_is_pressed_before_it_is_refused():
+    """A CHARACTERISATION TEST FOR A MEASURED DEFECT. Do not read it as a spec.
+
+    ``test_a_refused_press_never_touches_the_page`` asserts the difference
+    between a guard and a report -- and **every case it checks refuses at
+    condition 1 or condition 2**, both of which are evaluated before anything
+    is touched. No case exercises a surface that PASSES 1 and 2 and fails
+    condition 3 because :data:`press.SENSITIVITY_BASES` declares no basis for
+    it. On that path the click has already happened when the refusal is
+    computed, so for those surfaces the gate is a report.
+
+    The pre-press branch of :func:`press.evaluate` returns
+    ``permitted_to_attempt`` without consulting :func:`press.sensitivity_basis`,
+    although a surface with no basis can only ever end in
+    ``no_sensitivity_basis``. The refusal is therefore KNOWN BEFORE THE PRESS
+    and taken AFTER it.
+
+    **THIS IS NOT ACADEMIC.** A wave was briefed on 2026-09-21 to press the
+    ``All filters`` control on ``/search/results/people/`` and to let the gate
+    decide. Had it called :func:`press.disclose`, the live page would have
+    received a real click and a real Escape before the gate said no.
+
+    **WHY THIS PINS THE BEHAVIOUR RATHER THAN FIXING IT.** The fix is four
+    lines, and it changes a contract another committed test relies on:
+    ``test_his_own_profile_is_permitted_and_a_third_party_is_not`` asserts
+    ``permitted_to_attempt is True`` for ``/in/me/``, which declares no basis
+    either. So the correction is a decision about what a pre-press verdict
+    MEANS for every no-basis surface, and it belongs to whoever owns this
+    module, not to a wave that arrived to measure one control.
+
+    **WHEN THE ORDERING IS FIXED, INVERT THIS TEST -- DO NOT DELETE IT.** The
+    assertion that must then hold is ``page.clicks == []`` with the same
+    ``no_sensitivity_basis`` refusal, returned by the PRE-PRESS branch.
+    """
+    people = f"{BASE}/search/results/people/"
+    # Condition 1 passes on its own merits, which is what makes the rest mean
+    # something: this is not an artefact of an unadmitted address.
+    assert readonly.is_read_url(people) is True
+    assert press.check_address(people).get("admitted") is True
+    # Condition 2 passes for a caller naming a sanctioned shape.
+    assert press.check_shape("[aria-expanded]").get("shape_ok") is True
+    # And no basis is declared for this surface, so condition 3 cannot pass.
+    assert press.sensitivity_basis(people) is None
+
+    pre = press.evaluate(url=people, shape="[aria-expanded]")
+    assert pre.get("permitted_to_attempt") is True, (
+        "the pre-press verdict has learned to consult the basis table. That "
+        "is the fix this test was waiting for -- invert it now: assert the "
+        "refusal comes back here and that the page is never touched."
+    )
+
+    page = FakePage(people, control_count=8)
+
+    async def _one_counter():
+        return {"invitations": 0}
+
+    verdict = await press.disclose(
+        page, shape="[aria-expanded]", read_counters=_one_counter
+    )
+    assert verdict["pressed"] is False
+    assert verdict["refused"] == "no_sensitivity_basis"
+    # NOT YET, rather than NEVER: declaring a basis for this surface is a
+    # ruling somebody could make, so the refusal must not read as terminal.
+    assert verdict["reachable_by_this_route"] is True
+    # THE DEFECT ITSELF, asserted so it cannot regress silently in either
+    # direction. A press that was going to be refused was taken.
+    assert page.clicks == ["[aria-expanded]"], (
+        "the ordering changed. If the press no longer happens, this test has "
+        "served its purpose -- invert it per the docstring."
+    )
+    assert page.keys == ["Escape"]
