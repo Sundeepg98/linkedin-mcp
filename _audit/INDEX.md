@@ -27,8 +27,8 @@ are listed as `(undated)`; no date is taken from git history, because
 
 | what | count |
 | --- | --- |
-| audit documents git tracks under `_audit` | 217 |
-| of those, carrying a `YYYY-MM-DD-` date prefix | 181 |
+| audit documents git tracks under `_audit` | 218 |
+| of those, carrying a `YYYY-MM-DD-` date prefix | 182 |
 | distinct dates | 14 |
 | documents with no level-1 heading | 1 |
 | `CORRECTS:` marker lines | 83 |
@@ -39,7 +39,7 @@ are listed as `(undated)`; no date is taken from git history, because
 | documents at either end of a cross-document edge | 85 |
 | intra-document correction markers | 4 |
 | documents that correct themselves later on | 2 |
-| documents no correction marker touches at all | 130 |
+| documents no correction marker touches at all | 131 |
 | blockquoted markers naming ANOTHER document | 0 |
 | edges missing one of their two markers | 0 |
 | edges declared a different number of times in each direction | 2 |
@@ -1398,6 +1398,7 @@ ways, which is a fact about markers and not a verdict on the document.
 | 2026-09-21 | [2026-09-21-the-fourteen-fired.md](2026-09-21-the-fourteen-fired.md) | THE FOURTEEN FIRED: one banked, one refused, twelve behind a press | **CORRECTED x1** corrects x2 |
 | 2026-09-21 | [2026-09-21-the-jobs-direction.md](2026-09-21-the-jobs-direction.md) | THE JOBS DIRECTION: the fifth of the GAP that was never asked the question | corrects x1 |
 | 2026-09-21 | [2026-09-21-the-landed-url.md](2026-09-21-the-landed-url.md) | A LANDING IS A STRING THE SITE CHOSE, AND THIS PROCESS HAD NO ALLOWLIST FOR IT | corrects x1 |
+| 2026-09-21 | [2026-09-21-the-locators-that-point-elsewhere.md](2026-09-21-the-locators-that-point-elsewhere.md) | The locators that point elsewhere |  |
 | 2026-09-21 | [2026-09-21-the-open-queue.md](2026-09-21-the-open-queue.md) | The open queue, 2026-09-21 at master `9dbaad2` |  |
 | 2026-09-21 | [2026-09-21-the-proximity-field.md](2026-09-21-the-proximity-field.md) | The proximity field -- census row `J 40`, read per-job network proximity |  |
 | 2026-09-21 | [2026-09-21-the-read-triage.md](2026-09-21-the-read-triage.md) | The read rows are GATED, not backlogged -- but nineteen of the fifty-nine are not | **CORRECTED x1** corrects x2 |
