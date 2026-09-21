@@ -505,6 +505,44 @@ the only one whose remedy would have meant signing another wave's acceptance.
 
 ---
 
+## 5A. FOUR FILES WERE TOUCHED OUTSIDE THE BRIEF'S LIST, AND WHY
+
+The brief's list was `linkedin_server/press.py`, `tests/test_press.py`, this
+report, and `_audit/_census/*.md` only on a genuine state change. **Four more
+files were edited, and none of them is a tidy-up:**
+
+| file | why it was unavoidable |
+|---|---|
+| `tests/test_a_correction_is_findable_from_the_claim.py` | the census edit turns it RED until the correction is DECLARED or TRIAGED. Below. |
+| `_audit/INDEX.md` | DERIVED. A new audit document makes it stale, and the brief says to regenerate it with `scripts/build_audit_index.py --write` and never hand-merge. Done. |
+| `tests/test_gap_rows_on_refused_addresses.py` | a red at HEAD that blocks every wave's gate. 5B.1. |
+| `scripts/check_gap_rows_on_refused_addresses.py` | the same red's second half, one derived line. 5B.2. |
+
+The last two are outside this wave's subject entirely and are flagged here
+rather than folded in quietly. The correction-test edit:
+
+    FAILED test_every_candidate_pair_is_declared_or_triaged
+    2 candidate correction(s) nobody has triaged.
+
+Both pairs are resolved the way that file's own precedents resolve them:
+
+* **`refuse-before-the-click.md` -> `network.md` is DECLARED**, with a
+  `**CORRECTS:**` marker at the top of this report and the matching
+  `**CORRECTED BY:**` line in `network.md`'s header block, beside the five
+  already there. **That is the substantive half**: a reader who arrives at
+  row 76's old claim can now find the document that refutes it, which is the
+  defect that file exists to prevent.
+* **`network.md` -> `refuse-before-the-click.md` is TRIAGED** onto
+  `NOT_A_CORRECTION` as the SHADOW of the declared arrow -- row 76 cites this
+  report as the SOURCE of its own in-place correction and withdraws nothing from
+  it. The entry states what would make it wrong, as its neighbours do. The
+  reverse pair cannot be declared: a census row is one line of a markdown table
+  and a marker must OPEN its line.
+
+Green after: `tests/test_a_correction_is_findable_from_the_claim.py 13 passed`.
+
+---
+
 ## 5B. TWO REDS THAT WERE NOT MINE, AND THE ONE I DECLINED TO FIX
 
 Both were red at HEAD. Neither is caused by anything this wave changed, and both
@@ -621,44 +659,6 @@ REVIEWED acceptance by somebody who owns the probe. I did not write that probe,
 and I am forbidden the browser it runs against, so I can say the four readings
 are decorative from the source but I cannot certify the acceptance. **Suppressing
 a finding on another wave's behalf is the one edit a passing gate is not worth.**
-
----
-
-## 5A. ONE FILE WAS TOUCHED OUTSIDE THE BRIEF'S LIST, AND WHY
-
-The brief's list was `linkedin_server/press.py`, `tests/test_press.py`, this
-report, and `_audit/_census/*.md` only on a genuine state change. **Four more
-files were edited, and none of them is a tidy-up:**
-
-| file | why it was unavoidable |
-|---|---|
-| `tests/test_a_correction_is_findable_from_the_claim.py` | the census edit turns it RED until the correction is DECLARED or TRIAGED. Below. |
-| `_audit/INDEX.md` | DERIVED. A new audit document makes it stale, and the brief says to regenerate it with `scripts/build_audit_index.py --write` and never hand-merge. Done. |
-| `tests/test_gap_rows_on_refused_addresses.py` | a red at HEAD that blocks every wave's gate. 5B.1. |
-| `scripts/check_gap_rows_on_refused_addresses.py` | the same red's second half, one derived line. 5B.2. |
-
-The last two are outside this wave's subject entirely and are flagged here
-rather than folded in quietly. The correction-test edit:
-
-    FAILED test_every_candidate_pair_is_declared_or_triaged
-    2 candidate correction(s) nobody has triaged.
-
-Both pairs are resolved the way that file's own precedents resolve them:
-
-* **`refuse-before-the-click.md` -> `network.md` is DECLARED**, with a
-  `**CORRECTS:**` marker at the top of this report and the matching
-  `**CORRECTED BY:**` line in `network.md`'s header block, beside the five
-  already there. **That is the substantive half**: a reader who arrives at
-  row 76's old claim can now find the document that refutes it, which is the
-  defect that file exists to prevent.
-* **`network.md` -> `refuse-before-the-click.md` is TRIAGED** onto
-  `NOT_A_CORRECTION` as the SHADOW of the declared arrow -- row 76 cites this
-  report as the SOURCE of its own in-place correction and withdraws nothing from
-  it. The entry states what would make it wrong, as its neighbours do. The
-  reverse pair cannot be declared: a census row is one line of a markdown table
-  and a marker must OPEN its line.
-
-Green after: `tests/test_a_correction_is_findable_from_the_claim.py 13 passed`.
 
 ---
 
