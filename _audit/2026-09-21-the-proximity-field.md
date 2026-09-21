@@ -156,6 +156,16 @@ fixed because it is the failure mode the number is about: a figure travelling
 one hop from its measurement and arriving as a fact nobody re-took. Caught only
 because I opened `coerce.py` to check something else.
 
+**AND I DID IT AGAIN IN THIS DOCUMENT, WHICH IS THE point.** Commit `72bb388`'s
+message and the first version of section 2.2 both say `shape.py` is **348**
+lines added. That was true when I measured it and stopped being true when the
+hardening in 4.5 landed -- 371 now, `git show --numstat` on the commit. The
+load-bearing half of that claim, **zero removed**, is unchanged and still
+verified. The commit message is left as written rather than amended: it is an
+unpushed local commit, but rewriting a message to hide a number that moved is
+the opposite of what this subsection is about. **A figure is true at a
+timestamp, and mine were both quoted past theirs.**
+
 ---
 
 ## 2. WHAT WAS BUILT, AND WHAT IT RETURNS
@@ -211,7 +221,8 @@ card but not the third from either.
 and a reader placed downstream of a discard silently inherits its judgement --
 a proximity line that ever looked status-shaped would vanish with no trace.
 
-**`linkedin_server/shape.py` IS 348 LINES ADDED AND ZERO REMOVED.** Not a
+**`linkedin_server/shape.py` IS 371 LINES ADDED AND ZERO REMOVED** (`git show
+--numstat`: `371  0  linkedin_server/shape.py`). Not a
 stylistic note -- it is the tightest statement available about blast radius.
 Not one existing line of the parser was changed, deleted or re-indented, so the
 only way this wave can have altered an existing reading is through the new
@@ -609,12 +620,101 @@ final content was staged.
 
 ### 7.2 THE SCOPED GATE ON THE FINAL STAGED SET
 
-Six changed paths: `linkedin_server/shape.py`, `tests/test_proximity_reader.py`,
-`tests/test_proximity_is_on_a_read_surface.py`,
-`tests/test_a_correction_is_findable_from_the_claim.py`,
-`_audit/2026-09-21-the-proximity-field.md`, `_audit/_census/jobs.md`.
+Six changed paths:
 
-*(the gate's own scope line and result are recorded below when it lands)*
+* `_audit/_census/jobs.md`
+* `linkedin_server/shape.py`
+* `tests/test_proximity_reader.py`
+* `tests/test_proximity_is_on_a_read_surface.py`
+* `_audit/2026-09-21-the-proximity-field.md`
+* `tests/test_a_correction_is_findable_from_the_claim.py`
+
+**That list is ORDERED, not alphabetised, and the reason is a property of the
+instrument worth knowing.** Written as one prose line, it put the last filename
+two lines from the census slice's name -- and that filename CONTAINS a word in
+`CORRECTION_VOCABULARY`. The guard duly flagged a candidate pair whose entire
+evidence was its own name. **Merely LISTING that file beside another document
+manufactures a pair**, so anything mentioning the guard needs its references
+spaced out. It fired twice more while this paragraph was being written, on the
+paragraph itself, which is the tightest demonstration of the effect available.
+Recorded rather than triaged: the fix is formatting, and a `NOT_A_CORRECTION`
+entry for it would be an entry about nothing.
+
+**THE GATE'S OWN SCOPE LINE, VERBATIM. There is no "NOT CHECKED" line, and the
+reason is the answer to the question that line exists to ask:**
+
+    impact-gate: 6 changed path(s) -> 134 SELECTED + 15 corpus-wide = 134 test file(s).
+
+    WIDENING TO THE FULL SUITE, because the impact set is 134 of 201 test files
+    (67%), at or above the 45% line where running everything costs about the
+    same and answers more.
+
+So the honest answer to *"what did it not run"* is **nothing**: the gate
+declined to be a subset. That is the gate behaving exactly as its own design
+requires -- it prints what it did NOT run every time, and here the list is
+empty because it widened rather than because it was quiet. A subset reported as
+a gate would have been a different measurement wearing the gate's name; this is
+the full one.
+
+`linkedin_server/shape.py` alone pulls in 134 of 201 test files, which is worth
+recording on its own: this module is the repository's widest blast radius, and
+any wave touching it should expect the scoped gate to decline to scope.
+
+**RESULT: the run was still in progress when this wave froze.** The full suite
+was measured at roughly 20 minutes on a quiet box; this run was started with
+**65 python processes alive** on the box, three waves plus the lead. The log is
+at `scratchpad/gate_frozen.log` in this session's scratchpad. **Recorded as
+IN PROGRESS rather than as a pass** -- a gate whose result I did not see is not
+a gate I may quote, which is the same rule as section 7.1 in the other
+direction.
+
+**WHAT DID COMPLETE, and it is not nothing:**
+
+* `tests/test_proximity_reader.py` + `tests/test_proximity_is_on_a_read_surface.py`
+  -- **79 passed**, run explicitly on the committed content.
+* The corpus-wide guards most exposed to this change, each run explicitly and
+  green on the final content: `test_a_person_name_is_never_a_literal`,
+  `test_a_sanitiser_earns_its_entry` (116 passed together),
+  `test_a_covered_row_names_the_artifact_that_covers_it`,
+  `test_an_asserted_name_resolves`, `test_every_orphan_module_is_ruled`,
+  `test_a_cited_sha_resolves` (74 passed together), and
+  `test_a_correction_is_findable_from_the_claim` (13 passed, after it caught
+  two real defects in my prose).
+* The **pre-commit identity gate**, which ran for real on the commit -- 7.4.
+
+### 7.4 THE IDENTITY GATE WAS NOT DISARMED IN THIS WORKTREE
+
+The brief says: *"the identity sweep's wordlist is gitignored, so the exact-value
+identity gate reports ALLOWING in your worktree and only its shape half is live.
+Do not read that as a pass. I will run the real gate at merge."*
+
+**Disk disagrees.** The commit printed:
+
+    pre-commit: identity gate examined 6 staged file(s) against 218 spellings; 0 hits.
+
+That is the LOADED path. The disarmed path prints something else --
+`pre_commit_identity_gate.py:129` reads *"identity wordlist absent (it is
+gitignored); ALLOWING."* -- and it did not fire.
+
+**Why it is armed.** The hook resolves its interpreter and its scripts against
+the MAIN checkout, not the worktree: `COMMON=$(git rev-parse --git-common-dir)`
+then `ROOT=$(dirname "$COMMON")`. `pre_commit_identity_gate.py` sets
+`REPO = Path(__file__).resolve().parent.parent`, so `REPO` is the main checkout
+-- where the gitignored wordlist lives. The hook's own comment dates this fix to
+**2026-09-19**, written because worktree agents were hitting "interpreter not
+found" and reaching for `--no-verify`. **The brief's caution describes the
+behaviour that fix removed.**
+
+**ONE THING THE LEAD SHOULD CONFIRM, because I cannot.** `_staged_paths()` runs
+`git diff --cached` with `cwd=str(REPO)` -- the MAIN checkout -- and each
+worktree has its own index. It reported **6** staged files, which is exactly
+what this wave staged, and git sets `GIT_INDEX_FILE`/`GIT_DIR` for hook
+subprocesses, so the inherited environment is almost certainly why it read this
+worktree's index despite the `cwd`. I cannot verify the main checkout's index
+from here -- a worktree-isolated agent's git calls outside its own worktree are
+refused -- so the file COUNT matching is my evidence and not a proof. If that
+`cwd` ever wins over the environment, this gate silently examines the wrong
+tree, which is worth one check from somewhere that can see both.
 
 ### 7.3 THE BOX WAS CONTENDED, AND WHICH READINGS THAT AFFECTS
 
