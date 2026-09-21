@@ -42,11 +42,12 @@ from __future__ import annotations
 import re
 import time
 from typing import Any, Optional
+from urllib.parse import urlsplit
 
 from linkedin_server import landing, shape
 from linkedin_server.coerce import as_count
 from linkedin_server.config import logger
-from linkedin_server.errors import ExtractionFailedError
+from linkedin_server.errors import ExtractionFailedError, WriteAttemptError
 
 # ---------------------------------------------------------------------------
 # Injected scripts (read-only: query, read text, return)
@@ -2818,6 +2819,71 @@ def assert_permitted_filter(name: str) -> str:
     return wanted
 
 
+#: WHAT A PILL DID TO THE URL, as a closed vocabulary of three.
+#:
+#: THIS EXISTS BECAUSE A BOOLEAN COULD NOT CARRY THE ANSWER.
+#: :func:`activate_messaging_filter` has always returned ``navigated``, a plain
+#: ``page.url != before``, under a docstring saying that a pill which moves the
+#: page invalidates the permission to click it. **Nothing ever read the field**
+#: -- a gate described and never built, found by the act-then-decide sweep in
+#: ``_audit/2026-09-21-refuse-before-the-click.md`` section 8.
+#:
+#: AND THE OBVIOUS REPAIR IS WRONG. On the ONLY live reading this repository
+#: has of this path (2026-09-03, recorded in
+#: ``_audit/2026-08-31-linkedin-perform.md`` section 106), ``url_after`` was
+#: ``url_before`` *"plus ?filter=inmail"* -- so ``navigated`` was TRUE, and a
+#: gate raising on it would have refused the one run that ever worked. Its only
+#: known firing would be a false positive.
+#:
+#: WHAT THE PERMISSION RESTS ON, read off ``readonly.SANCTIONED_MUTATIONS``
+#: rather than assumed: *"A pill SENDS NOTHING and CHANGES NOTHING on
+#: LinkedIn's servers; it alters which rows are displayed."* A query appended
+#: to the SAME address is LinkedIn recording which rows are displayed. That is
+#: the permitted effect, spelled in the url bar, and it is ``filter_state``.
+#:
+#: ``left_the_address`` is the class the docstring was describing: a different
+#: host or path, which means the control did more than filter the view in front
+#: of it -- most plausibly by opening a DIFFERENT conversation, a second cost
+#: this tool prices once and only once.
+FILTER_MOVEMENT_CLASSES: tuple[str, ...] = (
+    "none",
+    "filter_state",
+    "left_the_address",
+)
+
+
+def classify_filter_movement(before: str, after: str) -> str:
+    """Classify a url change into :data:`FILTER_MOVEMENT_CLASSES`.
+
+    A pure function of two strings, so it is testable without a page and
+    carries nothing out of one: it returns a member of a closed tuple and
+    never a fragment of either argument.
+
+    Scheme, host and path decide it. A trailing slash is not a departure --
+    the same page spelled two ways is the same page -- and a query or
+    fragment change is ``filter_state``, because that is exactly the shape
+    LinkedIn produced on the one live activation on record.
+
+    UNMEASURABLE RESOLVES AGAINST THE CLICK, and with no branch written for
+    it: an empty or missing url shares no path with a real address, so it
+    falls out as ``left_the_address`` by the same comparison as everything
+    else. A malformed pair raises out of here rather than being classified,
+    which lands in the caller's error path -- the reading is refused either
+    way, so no defensive branch is written that production could never reach.
+    """
+    if before == after:
+        return "none"
+    left = urlsplit(str(before or ""))
+    right = urlsplit(str(after or ""))
+    if (
+        left.scheme.lower() == right.scheme.lower()
+        and left.netloc.lower() == right.netloc.lower()
+        and left.path.rstrip("/") == right.path.rstrip("/")
+    ):
+        return "filter_state"
+    return "left_the_address"
+
+
 async def activate_messaging_filter(page: Any, name: str) -> dict[str, Any]:
     """Activate one filter pill. THE ONLY CLICK ON ANY READ PATH.
 
@@ -2830,6 +2896,35 @@ async def activate_messaging_filter(page: Any, name: str) -> dict[str, Any]:
     pill turns out to move the page, that is a finding rather than a detail:
     it would mean the control does more than filter, and the read
     classification that permits this click would no longer hold.
+
+    THAT PARAGRAPH DESCRIBED A GATE THAT WAS NEVER BUILT, for three weeks.
+    The condition was measured, as ``navigated``, returned, and read by
+    nothing: see :data:`FILTER_MOVEMENT_CLASSES` for the finding and for why
+    "raise on ``navigated``" is the WRONG repair -- that field is True on the
+    only live reading this path has ever produced.
+
+    SO THE ENFORCED CLASS IS MOVEMENT, NOT INEQUALITY. ``url_movement``
+    classifies the change; ``left_the_address`` raises
+    :class:`~linkedin_server.errors.WriteAttemptError` and the pair
+    ``none``/``filter_state`` returns normally. ``navigated`` is kept, exactly
+    as it was, as the raw comparison behind the classification.
+
+    WHAT THE RAISE GATES, STATED PRECISELY, because a refusal after the act
+    can pretend to more than it does. **It does not un-click the pill.** Where
+    a pill lands is not derivable before pressing it -- the pills carry no
+    href, which is the measured fact that made a click necessary at all -- so
+    this refusal is ``after_the_act`` and cannot be hoisted. What it does stop
+    is the READING: the only caller activates the filter and only afterwards
+    takes ``page.content()``, so a page this classification no longer covers
+    is never read, never shaped and never returned. ``tests/
+    test_the_filter_click_cannot_leave_the_address.py`` asserts that order by
+    AST over the caller, and asserts that exactly one click was spent.
+
+    Raises:
+        ValueError: ``name`` is outside :data:`MESSAGING_FILTERS`. Before any
+            locator exists, so nothing is touched.
+        WriteAttemptError: the click moved the browser to a different address.
+            After the click, by construction; the page is not read.
     """
     wanted = assert_permitted_filter(name)
     before = page.url
@@ -2889,8 +2984,34 @@ async def activate_messaging_filter(page: Any, name: str) -> dict[str, Any]:
     # the fix.
     #
     # ``navigated`` stays a plain comparison, which yields a boolean and
-    # carries nothing -- it is the signal a caller actually needs from these
-    # two, and it survives redaction untouched.
+    # carries nothing, and it survives redaction untouched.
+    #
+    # IT IS NOT THE SIGNAL A CALLER NEEDS, and this comment said it was until
+    # 2026-09-21. It is TRUE on the measured live activation -- LinkedIn
+    # appends ``?filter=inmail`` to the same thread -- so on its own it cannot
+    # separate the permitted case from the one the docstring calls
+    # permission-invalidating. ``url_movement`` is what does that, and it is
+    # computed BEFORE the return so the refusal can land before anything is
+    # handed back.
+    movement = classify_filter_movement(before, page.url)
+    if movement == "left_the_address":
+        # NO ADDRESS IS NAMED HERE, not even the redacted form: this string
+        # reaches a model's context through the caller's error envelope, and
+        # which surface he was on is itself a fact about him. The filter name
+        # comes from a closed tuple; the class name comes from another.
+        raise WriteAttemptError(
+            f"the {wanted!r} filter pill moved the browser to a different "
+            "address (url_movement: left_the_address). The permission for "
+            "this click is that a view filter is a read IN EFFECT -- it "
+            "alters which rows are displayed and sends nothing. A control "
+            "that moves the page did more than that, so the classification "
+            "that permitted it does not describe what happened, and the page "
+            "it landed on is NOT read. The click is already spent and this "
+            "refusal does not undo it: where a pill lands cannot be derived "
+            "before pressing it, because the pills carry no href. If this "
+            "fires, it is a finding about the surface and wants a ruling, "
+            "not a retry."
+        )
     return {
         "activated": True,
         "filter": wanted,
@@ -2898,6 +3019,8 @@ async def activate_messaging_filter(page: Any, name: str) -> dict[str, Any]:
         "url_before": shape.redact_thread_id(before),
         "url_after": shape.redact_thread_id(page.url),
         "navigated": page.url != before,
+        # THE CLASSIFIED FORM, and the one a caller should branch on.
+        "url_movement": movement,
     }
 
 
