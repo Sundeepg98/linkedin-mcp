@@ -30,7 +30,7 @@ rests on provenance: a value LinkedIn chose, published into text a scrubber
 cannot clean, is out of this process whatever it happens to hold today.
 
 This is the third instance of one law in three days. ``int()`` quotes the value
-it refused into its own ``ValueError`` -- 16 of 115 readers leaked, closed by
+it refused into its own ``ValueError`` -- 14 of 115 readers leaked, closed by
 ``coerce.py``. ``assert_not_authwall`` interpolates the landing -- this module.
 **``scrub()`` knowing only paths is the common cause of both.**
 
