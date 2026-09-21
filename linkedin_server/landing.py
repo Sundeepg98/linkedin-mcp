@@ -10,8 +10,11 @@ refusal::
 That exception escapes the tool, ``server._error`` renders it through
 ``config.scrub``, and scrub substitutes THIS SERVER'S OWN FILESYSTEM PATHS and
 nothing else -- a name has no shape to scrub. **It knows paths. It does not
-know urls and it does not know names.** Thirty call sites raise through that
-one function.
+know urls and it does not know names.** TWENTY-SEVEN tool-facing call sites
+raise through that one function (28 calls in ``linkedin_server/``, one of them
+inside ``server.py``'s own local helper), and 7 more live in ``scripts/``.
+Counted by AST; a grep for the name returns 30 because it also matches the two
+``import`` lines.
 
     A LANDING IS A STRING THE REMOTE SITE CHOSE, AND THIS PROCESS HAS NO
     ALLOWLIST FOR IT.
@@ -89,8 +92,8 @@ functions nobody has written yet**, plus a standing guard that DISCOVERS its
 subjects instead of listing them --
 ``tests/test_no_message_publishes_a_landing.py`` walks the package's AST and
 fails on a message-bearing interpolation of a url-shaped expression that is not
-already ruled. A thirtieth local fix would have closed one site; this closes
-thirty and fails loudly on the thirty-first.
+already ruled. A twenty-eighth local fix would have closed one site; this
+closes all twenty-seven and fails loudly on the twenty-eighth.
 
 ## WHAT MAY BE SAID ABOUT A LANDING
 
@@ -112,10 +115,18 @@ character LinkedIn chose becomes part of a descriptor:
   character classes. That is this repository's shipped "describe without
   quoting" instrument and it is imported rather than re-written.
 
-**THE DESCRIPTOR IS SAFE TO LOG AS WELL AS TO RAISE.** A log record is another
-way out of the process, so the rule ``coerce.as_count`` follows -- name the
-type, never the value -- applies here unchanged, and there is no asymmetry to
-defend because the same descriptor goes to both.
+**THE DESCRIPTOR IS SAFE TO LOG AS WELL AS TO RAISE**, because a log record is
+another way out of the process and the rule ``coerce.as_count`` follows --
+name the type, never the value -- applies here unchanged.
+
+**AND IT IS NOT LOGGED ANYWAY, WHICH IS A SEPARATE FACT AND NOT A RETRACTION
+OF THAT ONE.** ``auth.assert_not_authwall`` logs the SURFACE and nothing
+derived from the landing, because ``test_no_navigation_derived_value_reaches
+_an_output_sink`` follows the binding from ``final_url`` and a logger call is
+one of its sinks. That guard is right about the taint and wrong about the
+hazard, and the sanctioned way to tell it so is a ``_SANITISERS`` entry that
+this wave did not earn. See the comment at that call site and
+``_audit/2026-09-21-the-landed-url.md``.
 
 ## WHAT IS DELIBERATELY NOT DONE
 
@@ -123,8 +134,9 @@ defend because the same descriptor goes to both.
 publishes ``getattr(exc, "url", "")`` INTO THE PAYLOAD UNSCRUBBED -- that is how
 ``ExtractionFailedError`` carries its url on purpose. Giving a
 ``NotAuthenticatedError`` a ``url`` would put the landing straight back on the
-wire past every argument above. The descriptor travels in the message text and
-in the log, both of which are scrubbed or name-free by construction.
+wire past every argument above. The descriptor travels in the MESSAGE TEXT,
+which is name-free by construction -- and that is the channel the caller
+reads.
 
 ## WHY THE ROUTE TABLE IS COPIED AND NOT IMPORTED
 

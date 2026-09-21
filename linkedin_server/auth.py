@@ -1174,9 +1174,10 @@ def assert_not_authwall(final_url: str, *, surface: str) -> None:
     ``config.scrub`` -- and scrub substitutes THIS SERVER'S OWN FILESYSTEM
     PATHS and nothing else, because a name has no shape to scrub. A landing is
     a string LINKEDIN chose; the canonical form of an organisation address is a
-    SLUG; a slug is a name. Thirty call sites raise through here, so this was
-    one function publishing a third party's name on the ordinary signed-out
-    path from twenty-odd tools.
+    SLUG; a slug is a name. TWENTY-SEVEN tool-facing call sites raise through
+    here -- counted by AST, not grepped -- so this was one function publishing
+    a third party's name on the ordinary signed-out path from twenty-odd
+    tools.
 
     ``landing.describe_landing`` replaces it with integers, booleans and
     literals from closed tuples that module declares -- including the CLASS of
@@ -1186,8 +1187,8 @@ def assert_not_authwall(final_url: str, *, surface: str) -> None:
     for what an authwall landing was measured to carry.
 
     **THE SIGNATURE AND THE EXCEPTION TYPE ARE UNCHANGED, DELIBERATELY.**
-    Thirty call sites is the reason the repair is inside the function rather
-    than at any of them, and a caller that catches ``NotAuthenticatedError``
+    Twenty-seven call sites is the reason the repair is inside the function
+    rather than at any of them, and a caller that catches ``NotAuthenticatedError``
     today still catches it. Nothing is attached to the exception either:
     ``server._error`` publishes ``getattr(exc, "url", "")`` into the payload
     UNSCRUBBED, so a ``url`` attribute here would put the landing back on the
