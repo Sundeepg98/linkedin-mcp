@@ -42,18 +42,21 @@ class -- through the FIELD beside it, and it is section 6.1:
 > SCRUBBER AT ALL**. 20 sites feed it; 12 hand it `page.url` read at the
 > moment of the raise, with no authwall gate in between.
 
-**MEASURED, not read**: driven offline against the shipped code,
-`dom.require_rows` handed a name-bearing authwall landing raises, and
-`server._error(exc)["url"]` carries the slug verbatim to the caller. What is
-NOT measured is whether such a value reaches those sites in production, and
-that distinction is the whole of the severity. It is a declared contract whose
-success-path twin has a standing per-site ruling and whose failure-path self
-has none. It needs a ruling and a measurement, not an edit, and this wave had
-no browser.
+**MEASURED: 12 of the 12 `dom.py` sites were DRIVEN TO THEIR OWN RAISE, and all
+12 published the planted slug verbatim at `$.url`.** Reachability is not a
+question there -- it is structural, and section 6.1 explains why. A declared
+contract whose success-path twin has a standing per-site ruling and whose
+failure-path self has none. It needs a ruling and a measurement against a real
+browser, not an edit, and this wave had none.
 
-Two smaller ones, both NAMED rather than repaired because each is the tool's
-own contract on its success path: a `hint` carrying the page's section
-headings (6.4), and slugs in `out["profile"]` / `out["company_url"]` (5.2).
+**AND `out["url"]` IS NOT THE ONLY UNSCRUBBED CHANNEL ON THOSE TWELVE.** Every
+one of their messages is `f"...: {type(exc).__name__}: {exc}"`, so whatever the
+BROWSER put in its own exception is interpolated into `out["message"]` and
+scrubbed for paths only. A second needle, planted only inside the exception
+`page.evaluate` raised, landed at `$.message` in all 12 drives.
+
+Two smaller ones: a `hint` MEASURED publishing the page's own section headings
+at `$.hint` (6.4), and slugs in `out["profile"]` / `out["company_url"]` (5.2).
 
 ---
 
@@ -669,16 +672,61 @@ code with a synthetic name-bearing authwall landing:
       -> ExtractionFailedError
       -> server._error(exc)["url"] CARRIES THE SLUG VERBATIM
 
-So the field does publish whatever it is handed, and nothing on the way out
-touches it. **WHAT IS NOT MEASURED IS REACHABILITY**, and the distinction is
-the whole of the severity: the two `server.py` `require_rows` calls run AFTER
-`assert_not_authwall` has passed, so a landing arriving there cannot be an
-authwall. The twelve `dom.py` sites are the ones with nothing in between --
-they take `page.url` at the moment of the raise, which can differ from the
-`final_url` the gate saw. Eight of those readers were driven with a page
-double that answers empty and none of them reached its raise, so they are
-recorded as UNMEASURED and not as clean, the way the coercion wave recorded
-its 21 undrivable readers.
+**AND SO IS REACHABILITY, FOR ALL TWELVE `dom.py` SITES: 12 DRIVEN, 0 NOT
+DRIVEN, 12 PUBLISHING THE PLANT AT `$.url`.** `reached` is asserted from the
+TRACEBACK -- the deepest `dom.py` frame must be the target function at the
+expected line -- because three of these readers can raise the same class from a
+neighbour's site, so "the right exception came out" is not the measurement.
+The envelope is byte-for-byte: no shaping, no substitution, no truncation.
+
+### AND MY OWN FIRST ATTEMPT MEASURED NOTHING, WHICH IS THE LESSON
+
+I drove eight of them with a page double that answers empty; not one reached
+its raise, and I was one step from recording them UNMEASURED. **That was a fact
+about the double.** Every one of the twelve has the same shape:
+
+    try:
+        data = await page.evaluate(<one module-level script constant>, cfg)
+    except Exception as exc:
+        raise ExtractionFailedError(..., url=_url_of(page)) from exc
+
+> **THE GUARD IS ON THE CALL, NOT ON THE ANSWER.** A page that answers empty
+> has RETURNED; it walks past the `except` and down the normal path. **No empty
+> answer of any shape can reach any of these twelve raises.**
+
+So reachability reduces to one question -- can `page.evaluate` raise for that
+script -- and `except Exception` catches every class, which makes each site
+reachable BY CONSTRUCTION. The probe drives it by making `evaluate` raise for
+exactly one script object, chosen by identity against the `dom` constant. That
+per-script selectivity is load-bearing rather than tidy: `read_job_insight_panels`
+opens by awaiting `read_profile_fields`, so a double that raised for every
+script would send the job reader out through line 803 and record the wrong site.
+
+**THE HONEST LIMIT.** This is CODE-LEVEL reachability. It does not prove that a
+live authwall bounce makes `page.evaluate` raise on these surfaces -- in
+production the raising classes are Playwright's `Error` (execution context
+destroyed by a navigation mid-evaluate) and `TimeoutError`, and whether the
+bounce produces one on each surface is a browser measurement this wave could
+not take.
+
+### A REMEDY SCOPED TO `_url_of(page)` WOULD MISS SEVEN MORE SITES
+
+All twelve are `_url_of(page)` -- confirmed by unparsing the argument from the
+AST, so a keyword split across lines cannot fake it. But the same unscrubbed
+field is fed a landed url from seven sites that are NOT that expression:
+`dom.require_rows` (from `server.py:1074` and `server.py:5327`, both
+`url=final_url`) and five `server.py` raises -- `_read_tracker`,
+`linkedin_who_viewed_me`, `linkedin_job_detail`, `linkedin_followed_companies`
+and `linkedin_my_profile`.
+
+### AND A SECOND CHANNEL ON THE SAME TWELVE
+
+Every one of their messages is built `f"...: {type(exc).__name__}: {exc}"`, so
+whatever the BROWSER put in its own exception reaches `out["message"]`,
+scrubbed for paths only. A second needle planted ONLY inside the exception
+`page.evaluate` raised landed at `$.message` in all 12 drives. That is the
+`EXCEPTION_TEXT:arbitrary` bucket of 6.5, measured to carry a value through
+rather than argued about.
 
 **THE FINDING IS AN ASYMMETRY, AND IT IS NEW.** The SUCCESS-path twin of this
 value has a standing, per-site, fourteen-row ruling in
@@ -753,13 +801,23 @@ Left for its owner. Enrolling would also mean widening `_SANITISERS` and the
 name pin, on two shared guard files, from a wave whose subject is a different
 thing.
 
-### 6.4 THE `hint` THAT CARRIES PAGE HEADINGS
+### 6.4 THE `hint` THAT CARRIES PAGE HEADINGS -- MEASURED
 
-`server.py`'s profile reader raises with
-`hint=f"headings seen: {[s.get('heading') for s in sections]}"` -- the page's
-own heading text, scrubbed for paths only. **NAMED, not a defect of this
-class**: the same list is published on the SUCCESS path as `headings_seen`, so
-it is the tool's own contract, which is exactly the distinction 5.3 draws.
+`linkedin_my_profile` raises with
+`hint=f"headings seen: {[s.get('heading') for s in sections]}"`, where
+`sections` comes from `dom.read_profile_fields(page)`. Driven, not read: that
+exception through `server._error` yields `out["hint"] = "headings seen:
+['<needle>']"` with the needle intact at `$.hint`. `scrub` substitutes this
+server's filesystem paths and nothing else, so page text passes through it
+untouched -- the same property that lets the url through.
+
+It is the ONLY page-derived `hint` in the package. The other `hint=` values are
+two fixed English sentences.
+
+**NAMED, not a defect of this class**: the same list is published on the
+SUCCESS path as `headings_seen`, so it is the tool's own contract, which is
+exactly the distinction 5.3 draws. Its being the tool's contract is why it is
+not repaired here; its being MEASURED is why it is not merely asserted.
 
 ### 6.5 THE 89 `{exc}` SUB-EXPRESSIONS, AND THE ONE I COULD MEASURE OFFLINE
 
@@ -801,6 +859,13 @@ A BUNDLE.** It does not clear the other 87 sub-expressions, and it cannot: a
 Playwright selector error quotes a selector, a redirect-chain diagnostic could
 in principle name a hop. Closing that properly means driving a real failure
 against a real browser, which this wave was forbidden.
+
+**AND THE CHANNEL ITSELF IS MEASURED TO CARRY A VALUE THROUGH**, which is the
+half that does not need a browser: a needle planted only inside the exception
+`page.evaluate` raised reached `out["message"]` in all 12 drives of 6.1. So the
+question is never *can this channel carry a name* -- it can, demonstrably --
+only *does anything put one in it*. That is the right shape for the open item,
+and it is narrower and sharper than "89 unclassified sites".
 
 ### 6.6 CALLER-SUPPLIED NEEDLES
 

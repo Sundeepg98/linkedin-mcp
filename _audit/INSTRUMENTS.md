@@ -8851,11 +8851,25 @@ which is the only honest reason a number may move.**
 `server._error` scrubs `message` and `hint` and passes `url` through raw. 20
 sites feed it: 12 in `dom.py` hand it `_url_of(page)` -- the live page url read
 at the moment of the raise -- plus one `require_rows` parameter and 7 in
-`server.py`. **DRIVEN OFFLINE against the shipped code: `require_rows` handed a
-name-bearing authwall landing raises, and `server._error(exc)["url"]` carries
-the slug verbatim.** The MECHANISM is measured; REACHABILITY is not, and that
-distinction is the whole of the severity -- the `server.py` sites sit behind
-the authwall gate and the twelve `dom.py` ones do not.
+`server.py`. **DRIVEN OFFLINE against the shipped code: 12 of the 12 `dom.py` sites reached
+their own raise -- asserted from the TRACEBACK, since three of those readers
+can raise the same class from a neighbour's site -- and all 12 published the
+planted slug verbatim at `$.url`.**
+
+**REACHABILITY THERE IS STRUCTURAL, AND MY OWN FIRST ATTEMPT MEASURED NOTHING.**
+A double that answers empty reached none of them, and that is a fact about the
+double: every site is `try: await page.evaluate(<script>) except Exception:
+raise ...(url=_url_of(page))`. *The guard is on the CALL, not on the ANSWER* --
+a page that answers empty has RETURNED and walks past the `except`. So no empty
+answer of any shape can reach these raises, and any evaluate failure can, which
+makes each one reachable by construction. The honest limit: that is CODE-LEVEL
+reachability, not proof that a live bounce makes `evaluate` raise.
+
+**A REMEDY SCOPED TO `_url_of(page)` WOULD MISS SEVEN MORE SITES** feeding the
+same unscrubbed field -- `require_rows` from two `server.py` call sites, and
+five `server.py` raises. **AND `url` IS NOT THE ONLY CHANNEL:** a second needle
+planted only inside the exception `evaluate` raised landed at `$.message` in
+all 12 drives, because every one of those messages interpolates `{exc}`.
 **The asymmetry is the finding**: the SUCCESS-path twin of this
 value has a standing fourteen-row per-site ruling, and the FAILURE-path field
 has none, on the same value in the same function, reached exactly when the page
