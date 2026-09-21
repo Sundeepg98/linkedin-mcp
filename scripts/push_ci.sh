@@ -49,7 +49,26 @@ published by pushing it. Built by scripts/push_ci.sh.")
 n=$(git rev-list --count "$C")
 [ "$n" = "1" ] || { echo "push_ci: orphan reaches $n commits, expected 1. REFUSING." >&2; exit 1; }
 
+# SWEEP WHAT IS ACTUALLY PUBLISHED, NOT WHAT IS ON DISK. The sweep above reads
+# TRACKED FILES AS THEY ARE IN THE WORKING TREE; this commit carries the tree of
+# $SRC. Those are the same thing only when the tree is clean, and this script
+# has no such precondition -- so on a dirty tree the thing examined and the
+# thing pushed were different objects, and only the first was ever checked.
+# Now that $C exists, the exact blob set that would leave this machine can be
+# named. Added 2026-09-21 after `origin/ci-offload` was found already published
+# and had to be swept after the fact (it read PASS, 0 of 498 blobs).
+./venv/Scripts/python.exe scripts/sweep_blobs_for_identity.py "master..$C" || {
+  echo "push_ci: blob sweep of the orphan REFUSED or FAILED. Nothing pushed." >&2
+  exit 1; }
+
 git branch -f "$BRANCH" "$C"
-git push -f origin "$BRANCH"
+# DECLARING THE INTENT, NOT DEFEATING THE GATE. scripts/pre_push_ref_gate.py
+# refuses any remote ref but master, because `git push --all` in this checkout
+# offers 45 refs and the non-master ones carry blobs purged from the history
+# master publishes. This push is deliberate and its content has just been swept
+# twice, so it says so for exactly one command. Accidents do not set
+# environment variables; that is the whole security model and it only works if
+# the deliberate callers are explicit rather than exempt.
+LINKEDIN_MCP_ALLOW_ANY_REF=1 git push -f origin "$BRANCH"
 echo "push_ci: $BRANCH -> $C  (1 commit, $(git rev-list --objects "$C" | wc -l) objects)"
 gh run list --branch "$BRANCH" --limit 1 2>/dev/null || true

@@ -178,3 +178,48 @@ not given a new way to block work without a ruling, so it became loud instead.
 **Nothing in section 1 has moved. Every decision there is still open**, and the
 sentence that section opens with still holds: those are the constraint, not the
 engineering.
+
+### 5.1 Correction to section 1, and to the paragraph above it, 07:45
+
+**The pre-push decision is no longer open: it is built.** And section 1's
+factual premise for it was wrong, which is why it gets its own heading rather
+than a quiet edit.
+
+Section 1 states *"every remote branch is an ancestor of master and master
+sweeps clean."* The first half is **false**, measured against the remote refs
+rather than the local branches that share their names:
+
+- `origin` serves **13 refs besides master**.
+- **`origin/ci-offload` is NOT an ancestor of master.** It is an ORPHAN commit
+  — `58a7c13`, no parent, *"integrated tree for CI verification, no ancestry"*,
+  2026-09-19 — carrying **498 blobs master does not have**, on a PUBLIC repo.
+- It was swept: **PASS, 0 hits across 498 blobs against all 218 spellings.** So
+  the conclusion section 1 drew survives; the reason it gave for it does not.
+
+**The threat the section named is real, and now measured exactly rather than
+asserted.** `git push --all` in this checkout offers **45 refs**. All ten
+non-ancestor local branches were swept, not sampled:
+
+    9 of 10  FAIL: 3 hit(s) in 1 distinct path(s)   <- incl. integrate-1821
+    1 of 10  PASS: 0 hits across 498 blobs          <- ci-offload
+
+Those 9 carry the blobs `scripts/purge_denied_term.py` removed from the history
+master publishes. **The single branch that sweeps clean is also the only one
+that is published** — which is luck rather than design, and was the whole
+argument for building the gate rather than trusting the pattern to hold.
+
+`scripts/pre_push_ref_gate.py` now refuses any REMOTE ref but
+`refs/heads/master`, deletes included, installed by `install_git_hooks.py` and
+overridable for one command with `LINKEDIN_MCP_ALLOW_ANY_REF=1`. It refuses on
+the remote ref deliberately, so `git push origin master:anything` is caught
+where a local-ref check would wave it through — a mutation run proved that
+distinction was NOT yet tested, because the first version of the test used
+`HEAD` as the local ref and `HEAD` is not allowlisted either, so the test
+passed for the wrong reason.
+
+**Two things this does NOT do**, stated so nobody reads more into it. It does
+not sweep a ref's CONTENT — a ref it allows has been named, not cleared. And it
+is per-checkout: `.git/hooks` is untracked, so a fresh clone has no protection
+until `install_git_hooks.py` is run. The repo-wide half is
+`tests/test_pre_push_ref_gate.py`, which runs on three CI platforms because the
+gate's decision is a pure function of git's stdin and needs no wordlist.
