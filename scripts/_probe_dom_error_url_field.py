@@ -382,6 +382,49 @@ def _hint_reaches_the_envelope() -> dict[str, Any]:
     }
 
 
+def _controls_that_did_not_hold(payload: dict) -> list:
+    """Every control in ``payload`` that failed, as one line each.
+
+    THREE CONTROLS, AND EACH ONE VOIDS A DIFFERENT CLAIM:
+
+    * the POSITIVE hunt controls -- the walker must find a needle that IS
+      planted. Without them "no needle found" could mean the walker is blind.
+    * the NEGATIVE hunt control -- the walker must find nothing in a
+      needle-free payload. Without it every hit could be a false positive.
+    * the PER-READER negative control -- driving the same reader against a
+      double that raises for NO script must produce no raise. Without it a
+      ``reached`` verdict could be ambient behaviour of the double rather than
+      the effect of this probe's per-script shaping.
+
+    Returned as a LIST rather than a bool so the failure names itself. An
+    empty list is the only result that lets the report stand.
+    """
+    failures = []
+    hunt = payload.get("hunt_controls") or {}
+    for name in ("positive_url", "positive_inner"):
+        if hunt.get(name) is not True:
+            failures.append(
+                "positive hunt control %r did not fire: the walker could not "
+                "find a needle that IS planted, so every 'no needle' reading "
+                "below is unattributable" % name
+            )
+    if hunt.get("negative"):
+        failures.append(
+            "the negative hunt control found %d needle(s) in a needle-free "
+            "payload, so every hit below may be a false positive"
+            % len(hunt.get("negative") or [])
+        )
+    for row in payload.get("rows") or []:
+        if row.get("control_outcome") != "not_driven":
+            failures.append(
+                "per-reader negative control for %r RAISED (%s): its verdict "
+                "is ambient behaviour of the double rather than this probe's "
+                "shaping"
+                % (row.get("reader"), row.get("control_why") or "no reason")
+            )
+    return failures
+
+
 def main() -> int:
     evaluated = _scripts_evaluated()
     rows: list[dict[str, Any]] = []
@@ -444,7 +487,31 @@ def main() -> int:
         "hint_through_error": _hint_reaches_the_envelope(),
         "job_panels_via_read_profile_fields": transitive,
     }
+    # **THE CONTROLS DECIDE WHETHER THIS REPORT IS ALLOWED TO EXIST.**
+    #
+    # Until 2026-09-21 this function computed every control above, printed
+    # them inside the payload, and returned 0 whatever they said.
+    # ``tests/test_probe_controls_are_never_decorative`` caught it -- a
+    # control whose result nothing acts on is decoration, and a reader who
+    # sees "hunt_controls" in the output reasonably assumes something checked
+    # them. Its own message is the rule: *branch on its result*, never add the
+    # site to a baseline to clear the red.
+    payload["voided_by"] = _controls_that_did_not_hold(payload)
     print(json.dumps(payload, indent=2, sort_keys=False))
+    if payload["voided_by"]:
+        # JOINED RATHER THAN LOOPED, and that is not a style choice. A `for
+        # reason in ...: print(reason)` binds a control-marked name that
+        # nothing branches on, and the same detector flags it -- correctly, by
+        # its own rule, since a reader cannot tell a printed reason from an
+        # acted-on one. The branch above is where the acting happens; this is
+        # only how it says so.
+        print(
+            "VOID -- this report's own controls did not hold, so none of its "
+            "verdicts is attributable to the probe's shaping:\n  "
+            + "\n  ".join(payload["voided_by"]),
+            file=sys.stderr,
+        )
+        return 1
     return 0
 
 

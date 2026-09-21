@@ -8788,9 +8788,10 @@ must still say `signed-out wall`, name the matched marker, and carry the
 that says nothing**, which is precisely the trap laid by flipping an assertion
 to an absence.
 
-### 51.4 THREE SHIPPED GUARDS FIRED ON THIS WAVE'S OWN OUTPUT, AND NONE WAS DEFUSED
+### 51.4 FOUR SHIPPED GUARDS FIRED ON THIS WAVE'S OWN OUTPUT, AND NONE WAS DEFUSED
 
-Two of them in one line each, and the third below at length:
+FOUR, once the reachability probe was written. Three in one line each,
+and the taint rule below at length:
 
 * **`test_no_committed_identity`** refused three files for a MADE-UP four-digit
   company id used to illustrate an argument. The rule is on the SHAPE because a
@@ -8798,6 +8799,11 @@ Two of them in one line each, and the third below at length:
   own `SYNTHETIC_IDS` entry.
 * **`test_an_outage_is_never_filed_as_an_absence`** refused this wave's new
   census script, and it is the entry in section 51 worth re-reading. See 51.7.
+* **`test_probe_controls_are_never_decorative`** refused the reachability
+  probe, which computed twelve negative controls and two hunt controls,
+  printed them, and returned 0 whatever they said. Its own message is the rule
+  -- *branch on its result, do NOT add the site to the baseline to clear the
+  red* -- and that is what was done.
 
 **AND ONE HONEST GAP:** the EXACT-VALUE identity gate was verified ARMED (it
 reported examining staged files against 218 spellings) but was not shown
@@ -8946,5 +8952,5 @@ only reason nobody has met it.
 | `tests/test_company_root.py` (inverted control) | the pre-repair message, verbatim, convicted by the same assertion |
 | `tests/test_tools.py` (inverted control, x6 tools) | it was RED on the repair before it was inverted, which is the same demonstration arriving as a failure |
 | `scripts/_check_the_landing_guard_can_fail.py` | the refusal that shipped at `762ec23`, rebound at every binding, 2 of 2 leak |
-| `scripts/_probe_dom_error_url_field.py` | 12 readers driven, 12 reached, 12 publishing the plant -- and 12 NEGATIVE controls, a double that raises for no script, every one of which returned without raising. `reached` is asserted from the TRACEBACK because three of these readers can raise the same class from a neighbour's site, so "the right exception came out" is not the measurement |
+| `scripts/_probe_dom_error_url_field.py` | 12 readers driven, 12 reached, 12 publishing the plant -- and 12 NEGATIVE controls, a double that raises for no script, every one of which returned without raising. **AND A FOURTH SHIPPED GUARD FIRED ON IT: `test_probe_controls_are_never_decorative` caught this probe computing every one of those controls, printing them, and returning 0 whatever they said.** It now REFUSES to let its report stand -- `_controls_that_did_not_hold` returns a list of named failures and the exit code branches on it; shown both directions, exit 1 under a planted blind walker and exit 0 restored. Its message is the rule that was followed rather than dodged: *branch on its result, do NOT add the site to the baseline to clear the red*. `reached` is asserted from the TRACEBACK because three of these readers can raise the same class from a neighbour's site, so "the right exception came out" is not the measurement |
 | `scripts/_census_message_interpolations.py` | prints its own grep contrast. **THREE defects. The worst was found by a SHIPPED GUARD, `test_an_outage_is_never_filed_as_an_absence`: two handlers answered an unreachable version-control tool with `""` and `{}`, which turns an OUTAGE into an ABSENCE in the direction that FLATTERS THIS CENSUS'S OWN THESIS -- with the tool gone the table prints a naive-search count of ZERO beside 292 AST sites, the strongest possible evidence for "a text search cannot see this class", measured from nothing. Both now raise `CensusOutage`, shown failing by running it with the tool off PATH; the search handler separates "matched nothing" (exit 1, a real reading) from an outage by return code. The other two were found by running the cheap disagreeing check rather than by reading it**: a shortlist that missed a fourth `{landed!r}` site (found by grepping its output), and a contrast table whose visible rows summed to 288 against a printed TOTAL of 292 (found by running the grep independently -- four lines in three modules the table suppressed as "agreeing" and never named). A printed total the visible rows do not reach invites a reader to trust a row that is not there; the suppression is now stated and counted in the output |
