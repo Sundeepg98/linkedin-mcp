@@ -480,10 +480,28 @@ entry states what would make it wrong. After that entry:
 
 **THIS SECTION'S OWN TEXT WAS WRITTEN AFTER THOSE RUNS**, which is unavoidable
 for any report that quotes its own gate -- the recursion has to stop somewhere
-and this is where. The tree that was committed differs from the one gate 4
-measured by exactly two things: the triage entry above and this paragraph. Both
-were re-verified by the four guards named above rather than assumed, and the
-gate was run once more after the commit for the record.
+and this is where. So the gate was run ONCE MORE, after the commit, against the
+COMMITTED RANGE rather than the index, and that run is the authoritative one.
+
+**AND THE EMPTY-INDEX CONTROL FIRED FIRST, which is why the range form was
+needed at all.** A staged-content gate run after the commit has an empty subject:
+
+    impact-gate: NOTHING WAS STAGED, SO NOTHING WAS CHECKED. This is not a
+    pass. Stage the change first, or pass --against <ref> to measure a range
+    instead of the index.
+
+    $ scripts/impact_gate.py --against HEAD~1
+
+      WIDENING TO THE FULL SUITE, because the impact set is 138 of 204 test files (68%), ...
+
+    REFUSED: a test this change can reach is RED.
+        FAILED tests/test_probe_controls_are_never_decorative.py::test_probe_corpus_baseline_is_an_exact_mapping
+        1 failed, 7805 passed, 8 skipped, 1 xfailed in 626.60s (0:10:26)
+
+**7805 PASSING ON THE COMMITTED TREE, AND ONE RED: 5B.3, THE ONE DECLINED ON
+PURPOSE.** Its two inputs are in neither this commit nor my working tree. The
+full-suite arc across the wave was **6 -> 2 -> 1**, and the one that remains is
+the only one whose remedy would have meant signing another wave's acceptance.
 
 ---
 
