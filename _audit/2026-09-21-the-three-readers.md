@@ -341,6 +341,18 @@ numeric id, which is why this has not been worth a divergence before; repairing
 it properly is a decision about a function twenty-odd tools share, and this
 wave is three census rows. It is written down here rather than quietly widened.
 
+**CORRECTED BY:** `_audit/2026-09-21-the-landed-url.md` -- the paragraph above is superseded the same day: the general case IS repaired, in `auth.assert_not_authwall` itself, so no tool in this package publishes its landing any more.
+
+The divergence above is therefore no longer a divergence. It is kept anyway, as
+a second independent refusal built from constants alone. That
+document also MEASURES the premise this section asserted from url shape: the
+authwall does carry the bounced address, in `sessionRedirect`, agreeing with
+Chrome's recorded predecessor 14 times of 14 -- and **no measured landing has
+ever carried an `/in/<member>/` path or an organisation slug**, so the half of
+the claim that makes the leak severe remains DERIVED rather than verified. The
+paragraph is left standing rather than rewritten, which is this document's own
+rule two sections up.
+
 ---
 
 ## 6c. TWO SHIPPED GUARDS FIRED ON THIS WAVE'S OWN OUTPUT, AND BOTH WERE RIGHT

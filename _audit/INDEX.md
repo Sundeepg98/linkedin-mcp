@@ -27,19 +27,19 @@ are listed as `(undated)`; no date is taken from git history, because
 
 | what | count |
 | --- | --- |
-| audit documents git tracks under `_audit` | 203 |
-| of those, carrying a `YYYY-MM-DD-` date prefix | 170 |
+| audit documents git tracks under `_audit` | 204 |
+| of those, carrying a `YYYY-MM-DD-` date prefix | 171 |
 | distinct dates | 14 |
 | documents with no level-1 heading | 1 |
-| `CORRECTS:` marker lines | 74 |
-| `CORRECTED BY:` marker lines | 74 |
-| distinct declared correction edges | 71 |
-| documents something later corrects | 41 |
-| documents that correct something | 54 |
-| documents at either end of a cross-document edge | 78 |
+| `CORRECTS:` marker lines | 75 |
+| `CORRECTED BY:` marker lines | 75 |
+| distinct declared correction edges | 72 |
+| documents something later corrects | 42 |
+| documents that correct something | 55 |
+| documents at either end of a cross-document edge | 80 |
 | intra-document correction markers | 4 |
 | documents that correct themselves later on | 2 |
-| documents no correction marker touches at all | 123 |
+| documents no correction marker touches at all | 122 |
 | blockquoted markers naming ANOTHER document | 0 |
 | edges missing one of their two markers | 0 |
 | edges declared a different number of times in each direction | 2 |
@@ -434,6 +434,14 @@ document is dead; it says one thing in it was overtaken and names what.
 - CORRECTED BY [2026-09-21-the-fourteen-fired.md](2026-09-21-the-fourteen-fired.md)
 
   > the sentence above is still true of THIS wave and its `--expect` command is now stale.** That wave fired the people-search surface live and moved `N 83` GAP to COVERED-PROVEN, so the counter's current expectation is `--expect J=57,P=55,M=82,N=90` and the census total is 284. Nothing here is retracted: this wave moved no state, which is what it claimed. It also identified rows `80`-`94` as sharing row `79`'s expired blocker and could not re-price them because it was forbidden the browser; that is the gap the successor closed.
+
+### [2026-09-21-the-three-readers.md](2026-09-21-the-three-readers.md)
+
+2026-09-21 &middot; Two readers for three rows, on two addresses nothing could navigate to --
+
+- CORRECTED BY [2026-09-21-the-landed-url.md](2026-09-21-the-landed-url.md)
+
+  > the paragraph above is superseded the same day: the general case IS repaired, in `auth.assert_not_authwall` itself, so no tool in this package publishes its landing any more.
 
 ### [INSTRUMENTS.md](INSTRUMENTS.md)
 
@@ -1057,6 +1065,14 @@ reach is visible. The quoted reason here is the CORRECTOR's own
 
   > it records the jobs slice's GAP rows as carrying **no direction column at all** and therefore leaves them unmeasured; the first half is true of the per-row tables and the second is now discharged, and its own non-jobs numbers need re-taking before anything combines them with these (section 7).
 
+### [2026-09-21-the-landed-url.md](2026-09-21-the-landed-url.md)
+
+2026-09-21 &middot; A LANDING IS A STRING THE SITE CHOSE, AND THIS PROCESS HAD NO ALLOWLIST FOR IT
+
+- CORRECTS [2026-09-21-the-three-readers.md](2026-09-21-the-three-readers.md)
+
+  > its section 6b says "THE GENERAL CASE IS NAMED AND NOT FIXED. Every other tool in `server.py` still publishes its landing in this refusal", which was true when written and is false now.
+
 ### [2026-09-21-the-read-triage.md](2026-09-21-the-read-triage.md)
 
 2026-09-21 &middot; The read rows are GATED, not backlogged -- but nineteen of the fifty-nine are not
@@ -1280,9 +1296,10 @@ ways, which is a fact about markers and not a verdict on the document.
 | 2026-09-21 | [2026-09-21-taint-does-not-survive-a-container.md](2026-09-21-taint-does-not-survive-a-container.md) | The output-sink guard misses a landed URL that reaches stdout |  |
 | 2026-09-21 | [2026-09-21-the-fourteen-fired.md](2026-09-21-the-fourteen-fired.md) | THE FOURTEEN FIRED: one banked, one refused, twelve behind a press | corrects x2 |
 | 2026-09-21 | [2026-09-21-the-jobs-direction.md](2026-09-21-the-jobs-direction.md) | THE JOBS DIRECTION: the fifth of the GAP that was never asked the question | corrects x1 |
+| 2026-09-21 | [2026-09-21-the-landed-url.md](2026-09-21-the-landed-url.md) | A LANDING IS A STRING THE SITE CHOSE, AND THIS PROCESS HAD NO ALLOWLIST FOR IT | corrects x1 |
 | 2026-09-21 | [2026-09-21-the-open-queue.md](2026-09-21-the-open-queue.md) | The open queue, 2026-09-21 at master `9dbaad2` |  |
 | 2026-09-21 | [2026-09-21-the-read-triage.md](2026-09-21-the-read-triage.md) | The read rows are GATED, not backlogged -- but nineteen of the fifty-nine are not | **CORRECTED x1** corrects x2 |
-| 2026-09-21 | [2026-09-21-the-three-readers.md](2026-09-21-the-three-readers.md) | Two readers for three rows, on two addresses nothing could navigate to -- |  |
+| 2026-09-21 | [2026-09-21-the-three-readers.md](2026-09-21-the-three-readers.md) | Two readers for three rows, on two addresses nothing could navigate to -- | **CORRECTED x1** |
 
 ## 6. What the scan rejected, could not join, or had to repair
 

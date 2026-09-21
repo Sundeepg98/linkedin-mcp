@@ -964,7 +964,33 @@ async def test_an_auth_wall_bounce_is_not_authenticated_not_an_empty_list(drive,
     # pre-rename message and would certify nothing.
     assert "linkedin_login" in result["message"]
     assert "linkedin_login_browser" not in result["message"]
-    assert AUTHWALL_URL in result["message"]
+    # **INVERTED 2026-09-21, AND IT USED TO READ ``AUTHWALL_URL in ...``.**
+    #
+    # That assertion was correct and load-bearing for three weeks: it held the
+    # refusal to naming the address it bounced off, so a caller could open it.
+    # It is now the opposite assertion for one reason -- **the landing is a
+    # string LINKEDIN chose, and ``config.scrub`` substitutes this server's own
+    # FILESYSTEM PATHS and nothing else.** LinkedIn's authwall carries the
+    # address it bounced inside its own query (MEASURED 2026-09-21 against
+    # Chrome's history, 14 predecessor agreements of 14), and the canonical
+    # form of an organisation address is a slug, which is a name. See
+    # ``linkedin_server/landing.py`` and
+    # ``_audit/2026-09-21-the-landed-url.md``.
+    #
+    # NOT DELETED, INVERTED. Deleting it would remove the only assertion in
+    # this file that ever demonstrated the refusal carrying its landing.
+    #
+    # AND IT IS NOT SATISFIABLE BY AN EMPTY MESSAGE, which is the whole risk of
+    # flipping an assertion to an absence: the refusal must still say an
+    # authwall happened and describe what it may.
+    assert AUTHWALL_URL not in result["message"]
+    assert "session_redirect=" not in result["message"]
+    assert "signed-out wall" in result["message"]
+    assert "/login" in result["message"], "the matched marker is still named"
+    assert "characters, containing" in result["message"], (
+        "the refusal must still carry the describe_shape reading; an absence "
+        "check on its own passes on a refusal that says nothing"
+    )
     assert "results" not in result, "a refusal must not look like a result set"
     assert len(navigations) == 1, "the bounce must stop the call, not retry it"
 
