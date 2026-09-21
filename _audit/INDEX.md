@@ -31,15 +31,15 @@ are listed as `(undated)`; no date is taken from git history, because
 | of those, carrying a `YYYY-MM-DD-` date prefix | 178 |
 | distinct dates | 14 |
 | documents with no level-1 heading | 1 |
-| `CORRECTS:` marker lines | 82 |
-| `CORRECTED BY:` marker lines | 82 |
-| distinct declared correction edges | 79 |
-| documents something later corrects | 43 |
-| documents that correct something | 59 |
-| documents at either end of a cross-document edge | 84 |
+| `CORRECTS:` marker lines | 83 |
+| `CORRECTED BY:` marker lines | 83 |
+| distinct declared correction edges | 80 |
+| documents something later corrects | 44 |
+| documents that correct something | 60 |
+| documents at either end of a cross-document edge | 85 |
 | intra-document correction markers | 4 |
 | documents that correct themselves later on | 2 |
-| documents no correction marker touches at all | 126 |
+| documents no correction marker touches at all | 125 |
 | blockquoted markers naming ANOTHER document | 0 |
 | edges missing one of their two markers | 0 |
 | edges declared a different number of times in each direction | 2 |
@@ -454,6 +454,14 @@ document is dead; it says one thing in it was overtaken and names what.
 - CORRECTED BY [2026-09-21-the-landed-url.md](2026-09-21-the-landed-url.md)
 
   > the paragraph above is superseded the same day: the general case IS repaired, in `auth.assert_not_authwall` itself, so no tool in this package publishes its landing any more.
+
+### [2026-09-21-the-write-ceiling.md](2026-09-21-the-write-ceiling.md)
+
+2026-09-21 &middot; THE WRITE CEILING: 157 WRITE-DIRECTION GAP ROWS, AND THE 152 THAT STAY
+
+- CORRECTED BY [2026-09-21-the-compound-rows.md](2026-09-21-the-compound-rows.md)
+
+  > section 8 blames `M C85`'s invisible read half on the row being COMPOUND, but the defect was the DIRECTION CELL: the repair is `W` -> `R+W` in place, never a split, and `N 169`/`N 187` are refuted outright.
 
 ### [INSTRUMENTS.md](INSTRUMENTS.md)
 
@@ -1097,6 +1105,14 @@ reach is visible. The quoted reason here is the CORRECTOR's own
 
   > rows `80`, `81`, `84`-`93` each name the blocker as a press nobody has ruled on. The press IS ruled and the control fails it, which is the opposite kind of blocker: a deferral that resolves, replaced by one that does not. **NO ROW CHANGES STATE** -- twelve evidence cells are corrected in place, the state column is untouched on every one, and the slice's counts stand exactly as the preceding wave left them.
 
+### [2026-09-21-the-compound-rows.md](2026-09-21-the-compound-rows.md)
+
+2026-09-21 &middot; The compound rows -- when one census row names two capabilities
+
+- CORRECTS [2026-09-21-the-write-ceiling.md](2026-09-21-the-write-ceiling.md)
+
+  > its section 8 blames `M C85`'s invisible read half on the row being COMPOUND, but the defect was the DIRECTION CELL, repaired in place as `R+W`; and its `N 169`/`N 187` claim is refuted, they are one act over four facets.
+
 ### [2026-09-21-the-fires-and-the-controls.md](2026-09-21-the-fires-and-the-controls.md)
 
 2026-09-21 &middot; THE FIRES AND THE CONTROLS
@@ -1373,7 +1389,7 @@ ways, which is a fact about markers and not a verdict on the document.
 | 2026-09-21 | [2026-09-21-refuse-before-the-click.md](2026-09-21-refuse-before-the-click.md) | REFUSE BEFORE THE CLICK -- the press gate now consults the basis table before it touches a page | corrects x1 |
 | 2026-09-21 | [2026-09-21-taint-does-not-survive-a-container.md](2026-09-21-taint-does-not-survive-a-container.md) | The output-sink guard misses a landed URL that reaches stdout |  |
 | 2026-09-21 | [2026-09-21-the-all-filters-press.md](2026-09-21-the-all-filters-press.md) | THE `All filters` PRESS: REFUSED AT CONDITION 2, AND THE GATE WOULD HAVE PRESSED FIRST | corrects x2 |
-| 2026-09-21 | [2026-09-21-the-compound-rows.md](2026-09-21-the-compound-rows.md) | The compound rows -- when one census row names two capabilities |  |
+| 2026-09-21 | [2026-09-21-the-compound-rows.md](2026-09-21-the-compound-rows.md) | The compound rows -- when one census row names two capabilities | corrects x1 |
 | 2026-09-21 | [2026-09-21-the-fires-and-the-controls.md](2026-09-21-the-fires-and-the-controls.md) | THE FIRES AND THE CONTROLS | corrects x2 |
 | 2026-09-21 | [2026-09-21-the-fourteen-fired.md](2026-09-21-the-fourteen-fired.md) | THE FOURTEEN FIRED: one banked, one refused, twelve behind a press | **CORRECTED x1** corrects x2 |
 | 2026-09-21 | [2026-09-21-the-jobs-direction.md](2026-09-21-the-jobs-direction.md) | THE JOBS DIRECTION: the fifth of the GAP that was never asked the question | corrects x1 |
@@ -1382,7 +1398,7 @@ ways, which is a fact about markers and not a verdict on the document.
 | 2026-09-21 | [2026-09-21-the-proximity-field.md](2026-09-21-the-proximity-field.md) | The proximity field -- census row `J 40`, read per-job network proximity |  |
 | 2026-09-21 | [2026-09-21-the-read-triage.md](2026-09-21-the-read-triage.md) | The read rows are GATED, not backlogged -- but nineteen of the fifty-nine are not | **CORRECTED x1** corrects x2 |
 | 2026-09-21 | [2026-09-21-the-three-readers.md](2026-09-21-the-three-readers.md) | Two readers for three rows, on two addresses nothing could navigate to -- | **CORRECTED x2** |
-| 2026-09-21 | [2026-09-21-the-write-ceiling.md](2026-09-21-the-write-ceiling.md) | THE WRITE CEILING: 157 WRITE-DIRECTION GAP ROWS, AND THE 152 THAT STAY | corrects x2 |
+| 2026-09-21 | [2026-09-21-the-write-ceiling.md](2026-09-21-the-write-ceiling.md) | THE WRITE CEILING: 157 WRITE-DIRECTION GAP ROWS, AND THE 152 THAT STAY | **CORRECTED x1** corrects x2 |
 | 2026-09-21 | [2026-09-21-what-was-ruled.md](2026-09-21-what-was-ruled.md) | A register keyed on RULINGS, not on documents -- and the fourth payment |  |
 
 ## 6. What the scan rejected, could not join, or had to repair

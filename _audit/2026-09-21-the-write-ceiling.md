@@ -1,5 +1,24 @@
 # THE WRITE CEILING: 157 WRITE-DIRECTION GAP ROWS, AND THE 152 THAT STAY
 
+**CORRECTED BY:** `_audit/2026-09-21-the-compound-rows.md` -- section 8 blames `M C85`'s invisible read half on the row being COMPOUND, but the defect was the DIRECTION CELL: the repair is `W` -> `R+W` in place, never a split, and `N 169`/`N 187` are refuted outright.
+
+Section 8 below diagnoses `M C85`'s read half as invisible *because the row is
+compound*. The compounding is not the defect: `M M28` is identically compound
+in the same file and was never invisible.
+`COMPOUND-ROW-SPLITS-ONLY-ON-STATE`, registered in `_audit/RULINGS.md`, settles
+it: a direction divergence is repaired in place, because
+`reader_closable_blockers.DIRECTIONS` normalises four spellings of a
+both-direction cell, while a two-STATE cell cannot be told truthfully at all --
+`count_census_states.classify` silently takes the first state by textual order
+or drops the row from numerator and denominator, raising no dialect either way.
+That same wave also **refutes this document's `N 169`/`N 187` claim**: they are
+one act over four facets and appear in no compound net.
+
+*Written by the lead, because the correcting wave could not edit a file it did
+not own and recorded the back-pointer as owed. A corrector names what it
+corrects; the corrected document cannot name its corrector unless somebody puts
+it here, and a reader starting from the claim is exactly who needs it.*
+
 **Scope as briefed:** every `W`-direction `GAP` row in `_audit/_census/profile.md`,
 `_audit/_census/network.md` and `_audit/_census/messaging-and-content.md`.
 `_audit/_census/jobs.md` was **not touched and not read for adjudication** -- it has

@@ -1,5 +1,7 @@
 # The compound rows -- when one census row names two capabilities
 
+**CORRECTS:** `_audit/2026-09-21-the-write-ceiling.md` -- its section 8 blames `M C85`'s invisible read half on the row being COMPOUND, but the defect was the DIRECTION CELL, repaired in place as `R+W`; and its `N 169`/`N 187` claim is refuted, they are one act over four facets.
+
 **Wave:** `the-compound-rows`, 2026-09-21.
 **Question:** when one census row describes TWO capabilities, should it be split?
 **Answer:** **almost never, and the lead's proposed rule is refuted twice over by
