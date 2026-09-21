@@ -710,7 +710,48 @@ own heading text, scrubbed for paths only. **NAMED, not a defect of this
 class**: the same list is published on the SUCCESS path as `headings_seen`, so
 it is the tool's own contract, which is exactly the distinction 5.3 draws.
 
-### 6.5 CALLER-SUPPLIED NEEDLES
+### 6.5 THE 89 `{exc}` SUB-EXPRESSIONS, AND THE ONE I COULD MEASURE OFFLINE
+
+The census's largest non-safe bucket is `EXCEPTION_TEXT:arbitrary` -- **89
+sub-expressions**, and it resolved the enclosing handler rather than guessing:
+
+    'except Exception'              86
+    'except OSError'                 3
+    'except ExtractionFailedError'   1
+
+So essentially every `{exc}` in this package is rendered under a handler that
+catches ANYTHING, and whatever Playwright or the standard library put in that
+message is what gets interpolated. `config.scrub` removes only the paths. **A
+THIRD PARTY COMPOSES THAT TEXT, WHICH IS THE ONE CASE WHERE THIS PACKAGE HAS NO
+SAY IN WHAT IT SAYS.**
+
+`browser.goto` is the site where it matters most:
+
+    raise BrowserUnavailableError(
+        f"navigation to {url} failed: {type(exc).__name__}: {exc}"
+    ) from exc
+
+The `{url}` half is `ASKED_FOR` and is in the baseline. The `{exc}` half is
+Playwright's. **Measured offline, from the shipped driver source** -- the only
+route available to a wave with no browser -- both navigation-failure templates
+interpolate the REQUESTED url and not the landing:
+
+    playwright/driver/package/lib/coreBundle.js
+
+      progress2.log(`navigating to "${url3}", waiting until "${waitUntil}"`)
+      throw new NavigationAbortedError(loaderId, `${errorText} at ${url3}`)
+
+`url3` is `goto`'s own argument. So for the navigation case the provenance of
+the embedded address is the same as `{url}`'s, and the bucket is narrower than
+it looks.
+
+**THAT IS A SOURCE READING, NOT A DRIVEN ONE, AND IT COVERS TWO TEMPLATES OUT OF
+A BUNDLE.** It does not clear the other 87 sub-expressions, and it cannot: a
+Playwright selector error quotes a selector, a redirect-chain diagnostic could
+in principle name a hop. Closing that properly means driving a real failure
+against a real browser, which this wave was forbidden.
+
+### 6.6 CALLER-SUPPLIED NEEDLES
 
 9 sub-expressions across the package interpolate a tool argument back into a
 refusal. That is the caller's own string returning to the caller, which is a

@@ -8845,7 +8845,7 @@ running the cheap disagreeing check is what caught it. Repaired, and it now
 reports all four -- **the number moved because the instrument got better,
 which is the only honest reason a number may move.**
 
-### 51.6 THREE THINGS LEFT OPEN, EACH MEASURED
+### 51.6 FOUR THINGS LEFT OPEN, EACH MEASURED
 
 **1. `ExtractionFailedError.url` IS PUBLISHED WITH NO SCRUBBER AT ALL.**
 `server._error` scrubs `message` and `hint` and passes `url` through raw. 20
@@ -8880,7 +8880,22 @@ sits in it, printing a landed url with an empty `KNOWN_TAINTED_OUTPUT` entry.
 `found == declared` by equality, so the undeclared site cannot be declared, only
 fixed.
 
-**3. THE SANITISER CERTIFIER CANNOT LOAD A `linkedin_server/` CLAIMANT.**
+**3. THE 89 `{exc}` SUB-EXPRESSIONS ARE ALL UNDER A HANDLER THAT CATCHES
+ANYTHING** -- resolved to the lexically innermost `except` that binds the name:
+86 `except Exception`, 3 `except OSError`, 1 `except ExtractionFailedError`. A
+THIRD PARTY composes that text, which is the one case where this package has no
+say in what it says. For the navigation site that matters most, measured
+OFFLINE from the shipped Playwright driver source -- the only route open to a
+wave with no browser -- both failure templates interpolate `goto`'s own
+argument and not the landing:
+
+    progress2.log(`navigating to "${url3}", waiting until "${waitUntil}"`)
+    throw new NavigationAbortedError(loaderId, `${errorText} at ${url3}`)
+
+Two templates out of a bundle, read rather than driven. It does not clear the
+other 87.
+
+**4. THE SANITISER CERTIFIER CANNOT LOAD A `linkedin_server/` CLAIMANT.**
 `tests/test_a_sanitiser_earns_its_entry._module` resolves every claimant as
 `REPO / "scripts" / filename`, while its `_claimants()` scans `_python_files()`
 -- **46 files of which are in `linkedin_server/`**. Measured:
