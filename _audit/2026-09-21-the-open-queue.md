@@ -247,3 +247,44 @@ in a real browser, matching the V8 synthetic-tree prediction exactly. That is
 the accessible-copy hazard demonstrated live rather than argued — the
 screen-reader copy inflating a count by nearly 4x — on the same surface `J 40`
 reads.
+### 5.3 The `All filters` block may not need the ruling at all, 08:30
+
+**A twice-reported block is a backlog item, not an answer.** Section 1 files the
+`All filters` press as an operator decision worth 12 rows, and that is correct
+as far as it goes: opening the panel is a press, and condition 5 of the search
+admitting ruling is that nothing is fired from that surface. **That is a
+refusal somebody actually ruled, so it is not mine to void.**
+
+**But the ruling bars FIRING, not READING, and the two have been conflated.**
+`_audit/2026-09-21-the-fourteen-fired.md` establishes it: the same wave read
+**83 drawn controls** off that surface under that ruling, and banked `N 83`
+(Locations) from it. Reading is plainly permitted. What it found was that the
+blocked filters *"are not among the 83 drawn"* — and **that is a statement about
+the DOM**, because the measurement was a containment test over rendered
+controls.
+
+**THE QUESTION NOBODY HAS ASKED: does the filter vocabulary ship in an embedded
+PAYLOAD even though the DOM does not render it?** LinkedIn hydrates these pages
+from JSON, and a vocabulary present in the payload would be readable with no
+press, under the existing ruling, changing nothing about condition 5. If the
+answer is yes, the operator decision in section 1 **dissolves** rather than
+waiting — 12 rows reachable by a read. If no, section 1's decision is confirmed
+as the only route, which is worth knowing at the same cost.
+
+**Why this cannot be settled offline, measured:** there is **no committed
+capture of the people-search surface at all**. `tests/fixtures/` holds
+`jobs_search.html`, `jobs_search_hydrated.html` and `jobs_search_salary.html`
+and nothing for people. So this needs one live READ of an already-admitted
+address, with the panel left shut — a browser slot, not a ruling.
+
+**Evidence class, stated honestly:** no document in the corpus names a
+payload-level filter enumeration for this surface. That is a search over what
+people WROTE; this repository has already established that you cannot grep for
+what nobody considered, so "unasked" is the best available reading and not a
+proof.
+
+**Status: NAMED AND MEASURED, NOT COMMISSIONED.** The browser slot is held by
+the wave firing that same surface, and a second browser builder on one
+signed-in profile is the thing this repo does not do. Take it when the slot
+frees.
+
