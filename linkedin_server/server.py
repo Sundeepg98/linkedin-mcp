@@ -1024,7 +1024,35 @@ mcp.tool = _tool_announcing_staleness
 
 
 def _error(exc: Exception) -> dict[str, Any]:
-    """Report a failure as a failure, with everything needed to act on it."""
+    """Report a failure as a failure, with everything needed to act on it.
+
+    **WHAT `message` MAY CARRY IS NOT DECIDED HERE, AND CANNOT BE.** This
+    function holds an ``Exception`` and can read exactly two things from it --
+    ``type(exc)`` and ``str(exc)``. Whether the text quotes a value THE PAGE
+    chose is not among them: ``int("<a label from the page>")`` raises a
+    stdlib ``ValueError``, indistinguishable here from ``int(None)``. So a
+    policy written at this line is uniform across every provenance class,
+    which is the reflexive wrap of a deliberate publication that
+    ``tests/test_the_source_url_split_was_never_ruled.py`` forbids.
+
+        THE DISCRIMINATOR IS NOT THE EXCEPTION'S AUTHOR. IT IS WHETHER A
+        VALUE THE PAGE CHOSE ENTERED THE EXCEPTION'S ARGUMENTS, AND THAT IS
+        KNOWABLE AT THE RAISE AND UNKNOWABLE AT THE ENVELOPE.
+
+    Ruled ``ERROR-MESSAGE-RULED-AT-THE-RAISE`` in
+    ``_audit/2026-09-21-what-the-browser-said.md``. The enforcement points are
+    where the value enters: ``coerce.py`` (never build the exception),
+    ``press.disclose`` (render the type, drop the text) and ``landing.py``
+    (interpolate a closed vocabulary). ``tests/test_readers_emit_no_page_string.py``
+    holds it for every reader, and
+    ``tests/test_tool_envelopes_emit_no_page_string.py`` holds it at the other
+    end of this pipe, for the 48 tool bodies that funnel into this line and
+    that the reader guard structurally cannot discover.
+
+    ``$.url`` is ruled separately and per site by
+    ``ERROR-URL-ASKED-FOR-OR-NOTHING``; it is the one field here that is
+    deliberately NOT scrubbed.
+    """
     if isinstance(exc, LinkedInReaderError):
         out: dict[str, Any] = {"error": exc.kind, "message": scrub(str(exc))}
         url = getattr(exc, "url", "")
@@ -2253,6 +2281,23 @@ async def linkedin_premium_job_collection(collection: int = 0) -> dict[str, Any]
     try:
         url = job_collections.collection_url(collection)
     except (IndexError, TypeError) as exc:
+        # DECLARED SERVER_CONSTRUCTED, AND DECLARED HERE BECAUSE THIS LINE
+        # BYPASSES `_error` AND SO INHERITS NOTHING FROM THE ENVELOPE'S
+        # RULING. It is the package's only `str(exc)` publication with no
+        # `scrub` at all, which costs nothing at THIS site and only at this
+        # site: `job_collections.collection_url` raises a TypeError naming
+        # `type(index)` and never the value, or an IndexError built from an
+        # int already proven int one line earlier, a length, and this module's
+        # own COLLECTIONS constants. No caller string, no page string and no
+        # filesystem path can reach that message, so there is nothing for a
+        # scrubber to remove -- and adding one would be the reflexive wrap of a
+        # deliberate publication that the fourteen-row ruling forbids.
+        # Ruled by ERROR-MESSAGE-RULED-AT-THE-RAISE in
+        # _audit/2026-09-21-what-the-browser-said.md: what a message may carry
+        # is decided where the value ENTERS the exception, never where it
+        # leaves. If `collection_url` ever renders its argument, this
+        # declaration is what makes that a change somebody has to make on
+        # purpose.
         return {
             "error": "index_out_of_range",
             "message": str(exc),

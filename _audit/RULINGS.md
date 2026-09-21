@@ -8,9 +8,9 @@
 
 **THIS REGISTER IS NOT THE CORPUS AND DOES NOT CLAIM TO BE COMPLETE.** Read section 4 before concluding a question is unruled: the scan that keeps it honest reads ONE marker, and the ruling that caused this file to be written does not carry it.
 
-    rulings registered       36
-    documents scanned        214
-    RULED: declarations      23 claimed, 7 triaged, 0 unclaimed
+    rulings registered       37
+    documents scanned        216
+    RULED: declarations      24 claimed, 7 triaged, 0 unclaimed
 
 ---
 
@@ -72,6 +72,7 @@ Scan the CLAIM column against your question. Every claim is a paraphrase written
 | `DISCLOSING-PRESS-PERMITTED` | Pressing a control that DISCLOSES content on a page already admitted is PERMITTED, under four conditions that must all hold: the page is admitted, the control matches an enumerated disclosure shape by attribute, the press is shown not to move an outward counter, and it is closed with the closure verified. | pressing a control, disclosure only | 2026-09-19 | [2026-09-19-the-disclosing-press-ruling.md](2026-09-19-the-disclosing-press-ruling.md)<br>*RULED: PERMITTED, under four conditions that must ALL hold* |
 | `PROBE-MUST-NOT-TRY-REFUSED-VALUES` | The check stands and the probe must not try refused values. | what a probe may submit while measuring a boundary | 2026-09-19 | [2026-09-19-two-census-conventions-ruled.md](2026-09-19-two-census-conventions-ruled.md)<br>*RULED: THE CHECK STANDS. THE PROBE MUST NOT TRY REFUSED VALUES.* |
 | `PUBLISHED-SPLIT-REPORT-NOW-GATE-LATER` | The published-split check REPORTS now and GATES once the deliberate over-runs are declared. | when a reporting check becomes a blocking gate | 2026-09-19 | [2026-09-19-the-five-requests-ruled.md](2026-09-19-the-five-requests-ruled.md)<br>*D. THE PUBLISHED-SPLIT CHECK -- RULED: report now, gate once the deliberate over-runs are declared* |
+| `ERROR-MESSAGE-RULED-AT-THE-RAISE` | What the error envelope's message may carry is decided WHERE THE VALUE ENTERS THE EXCEPTION, never where it leaves. The provenance classes are not classes of exception -- a page value inside a stdlib ValueError is indistinguishable at server._error from one that is not -- so no per-class policy may live at the envelope. The package's own exception text and a library's own exception text are PUBLISHABLE; a value the PAGE chose is FORBIDDEN inside any exception, whoever authored the class. | what server._error may publish in $.message, and where that is decided | 2026-09-21 | [2026-09-21-what-the-browser-said.md](2026-09-21-what-the-browser-said.md)<br>*3.4 THE RULING, STATED ONCE SO IT CAN BE CITED* |
 | `ERROR-URL-ASKED-FOR-OR-NOTHING` | The error envelope's url field carries the address this server ASKED FOR, or nothing at all. A landing is never published there; where a requested address exists in scope publishing it is REQUIRED rather than merely permitted, and where none exists the key is omitted and the landing is DESCRIBED in the hint. A descriptor never goes into the url field. | what ExtractionFailedError.url may carry, per site | 2026-09-21 | [2026-09-21-the-field-beside-the-message.md](2026-09-21-the-field-beside-the-message.md)<br>*5. THE RULING, STATED ONCE SO IT CAN BE CITED* |
 
 ---
@@ -89,6 +90,7 @@ Scan the CLAIM column against your question. Every claim is a paraphrase written
 | #6 change a setting | `ONE-NAMED-SETTINGS-PAGE-AT-A-TIME` |
 | #7 send a connection invitation | `INVITATION-TARGETING-IS-CALL-TIME` |
 | #9 send a message / InMail | `DO-NOT-OPEN-MESSAGING` |
+| $.message | `ERROR-MESSAGE-RULED-AT-THE-RAISE` |
 | 3.10 | `MESSAGING-SETTINGS-CAPABILITY-LEVEL` |
 | a GAP with a NAMED BLOCKER | `EXCLUDED-RULED-ADMISSION` |
 | A9 | `REDACTION-FORK-CLOSED-VOCABULARY` |
@@ -103,6 +105,7 @@ Scan the CLAIM column against your question. Every claim is a paraphrase written
 | DECIDE not MEASURE | `GROUPS-ADDRESS-BUYS-NO-WRITE` |
 | decide-retire-rulings section 2 | `BOUNDARY-IS-NOT-A-REASON` |
 | DEFECT ONE | `GATE-IS-SAFE-AND-BLIND` |
+| ERROR-MESSAGE-PROVENANCE | `ERROR-MESSAGE-RULED-AT-THE-RAISE` |
 | ERROR-URL-PER-SITE | `ERROR-URL-ASKED-FOR-OR-NOTHING` |
 | FORBIDDEN-CLASS-FIX-LANDED | `INCIDENTAL-CAPTURE-IS-NOT-A-RULING` |
 | incidental capture | `INCIDENTAL-CAPTURE-IS-NOT-A-RULING` |
@@ -137,6 +140,7 @@ Scan the CLAIM column against your question. Every claim is a paraphrase written
 | server.py::linkedin_update_setting | `MESSAGING-SETTINGS-CAPABILITY-LEVEL` |
 | settings family | `MESSAGING-SETTINGS-CAPABILITY-LEVEL` |
 | split or leave whole | `COMPOUND-ROW-SPLITS-ONLY-ON-STATE` |
+| the 89 sub-expressions | `ERROR-MESSAGE-RULED-AT-THE-RAISE` |
 | THE BOUNDARY IS NOT A REASON | `BOUNDARY-IS-NOT-A-REASON` |
 | the census's own rule | `EXCLUDED-RULED-ADMISSION` |
 | the class-filter convention | `INCIDENTAL-CAPTURE-IS-NOT-A-RULING` |
@@ -156,10 +160,12 @@ Scan the CLAIM column against your question. Every claim is a paraphrase written
 | the standing shape | `STANDING-SHAPE-OF-A-WRITE-RULING` |
 | the twenty sites | `ERROR-URL-ASKED-FOR-OR-NOTHING` |
 | the write-partition's section 4.4.2 question | `COMPOUND-ROW-SPLITS-ONLY-ON-STATE` |
+| third-party exception text | `ERROR-MESSAGE-RULED-AT-THE-RAISE` |
 | two capabilities one row | `COMPOUND-ROW-SPLITS-ONLY-ON-STATE` |
 | two-census-conventions section 1 | `CANONICAL-RULING-ID` |
 | two-census-conventions section 2 | `CONTAINER-EXCLUSION-PROPAGATES-ONLY-IF-UNREACHABLE` |
 | two-census-conventions section 3 | `INCIDENTAL-CAPTURE-IS-NOT-A-RULING` |
+| what the browser said | `ERROR-MESSAGE-RULED-AT-THE-RAISE` |
 
 ---
 
@@ -172,6 +178,8 @@ Scan the CLAIM column against your question. Every claim is a paraphrase written
 **`COMPOUND-ROW-SPLITS-ONLY-ON-STATE`** -- THE EXACT COMPLEMENT OF `DUPLICATE-ROW-IS-MARKED-NEVER-DELETED` above -- that one governs two rows describing one capability, this one governs one row describing two. They were filed together for that reason. The asymmetry it rests on is MEASURED rather than argued: `reader_closable_blockers.DIRECTIONS` normalises four spellings of a both-DIRECTION onto `R+W`, while `count_census_states.classify` answers a two-STATE cell by silently taking the first by textual order or by dropping the row out of the census, raising no dialect either way. Direction can be told the truth in the cell; state cannot. The corpus had already decided this eight times without naming it -- seven non-splits (`P M6` `P M9` `P M11` `M M28` `M C47` `N 125`, plus `J 71` declining in writing) and the one split, `P L2` -> `L2` + `L2b`, whose halves are BOTH reads and which therefore refutes a direction-based rule.
 
 **`CONTAINER-EXCLUSION-PROPAGATES-ONLY-IF-UNREACHABLE`** -- Built ON `P I12` as a SOUND exclusion: *zero of 237 urls reach one* is ground four of EXCLUDED-RULED-ADMISSION. Two later documents call `P I12` a miscategorisation; see the register's DISPUTED note in the report for this wave.
+
+**`ERROR-MESSAGE-RULED-AT-THE-RAISE`** -- THE SIBLING OF `ERROR-URL-ASKED-FOR-OR-NOTHING`, and it goes the OTHER WAY for a stated reason rather than by temperament. The url field could be ruled PER SITE because every value feeding it is an address this package composed or read; `$.message` cannot, because `_error` holds only `type(exc)` and `str(exc)` and the provenance of what that text QUOTES is not among them. So the ruling moves the decision to the raise, which is where the corpus had already put it three times without naming it: `coerce.py`, `press.disclose` and `landing.py`. It also DECLINES the sibling's own recommendation to make the twelve `dom.py` messages type-only -- all twelve are inside `tests/test_readers_emit_no_page_string.py`'s driven subject set and green (4 clean, 8 returns_text, 0 not_driven), so the payload class is already closed for them and type-only would delete twelve diagnoses to close a channel no needle travels. What it SHIPPED is the other end of the pipe: `tests/test_tool_envelopes_emit_no_page_string.py`, because the reader guard discovers only `async def` functions taking a `page` and the 48 tool bodies that funnel into `_error` are therefore outside it, permanently.
 
 **`ERROR-URL-ASKED-FOR-OR-NOTHING`** -- THE FAILURE-PATH COUNTERPART OF THE `source_url` SPLIT RULING in `tests/test_the_source_url_split_was_never_ruled.py`, which is NOT registered here because it lives as a test rather than as an audit passage. Same kind of value -- the address a read landed on -- in several of the SAME functions, and the two were ruled by different files that did not know about each other: `linkedin_my_profile` was declared SHAPED on its success path and published its landing raw on its failure path, in one function, for weeks. That ruling supplied the METHOD used here (a per-site declaration with a written reason, a count per site, a relay pinned as a relay, and drift failing in BOTH directions) and its prohibition is what stopped this wave wrapping all twenty: *wrapping a deliberate publication is as much a defect as leaking an accidental one.* The count each way is 12 withheld, 7 published, 1 relay.
 
@@ -199,11 +207,11 @@ Scan the CLAIM column against your question. Every claim is a paraphrase written
 
 | signal NOT scanned | files | lines |
 |---|---|---|
-| a heading naming a ruling | 100 | 228 |
-| a bold line opening on RULING/RULED | 47 | 107 |
-| the phrase THE RULING | 33 | 49 |
+| a heading naming a ruling | 102 | 230 |
+| a bold line opening on RULING/RULED | 48 | 109 |
+| the phrase THE RULING | 34 | 52 |
 | a named -RULING id | 20 | 46 |
-| the phrase standing ruling | 10 | 17 |
+| the phrase standing ruling | 11 | 18 |
 | a lead or operator ruling in prose | 31 | 62 |
 
 **The ruling that caused this register to be written is in the first row and not in the scan.** `BOUNDARY-IS-NOT-A-REASON` is phrased as a quoted ledger rule under a heading that carries no marker at all. It is registered because a person read it, and nothing here would have found it.
@@ -239,6 +247,7 @@ Every `RULED:` line in the corpus, and what became of it. An UNCLAIMED row fails
 | [2026-09-20-the-pointer-graph.md](2026-09-20-the-pointer-graph.md) | **RULED: ship the detector. Do not rewrite the 69 cells.** The brief authorised this | `POSITIONAL-DIALECT-SHIP-THE-DETECTOR` |
 | [2026-09-21-the-compound-rows.md](2026-09-21-the-compound-rows.md) | ## THE RULING -- RULED: a compound row is split ONLY when its halves need different STATES | `COMPOUND-ROW-SPLITS-ONLY-ON-STATE` |
 | [2026-09-21-the-field-beside-the-message.md](2026-09-21-the-field-beside-the-message.md) | **RULED: the error envelope's url field carries the address this server ASKED | `ERROR-URL-ASKED-FOR-OR-NOTHING` |
+| [2026-09-21-what-the-browser-said.md](2026-09-21-what-the-browser-said.md) | **RULED: what the error envelope's message may carry is decided WHERE THE | `ERROR-MESSAGE-RULED-AT-THE-RAISE` |
 
 ### 5.1 Triaged -- a declaration hit that is not a ruling made here
 

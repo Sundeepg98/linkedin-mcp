@@ -185,6 +185,54 @@ CORRECTION_VOCABULARY = (
 #: outcome this file exists to require and so cannot also be a violation of it.
 NOT_A_CORRECTION: dict[tuple[str, str], str] = {
 
+    # 2026-09-21, the WHAT-THE-BROWSER-SAID wave. A TABLE ROW'S NEIGHBOUR,
+    # which is the purest form of what a proximity scan cannot see.
+    ("2026-09-21-what-the-browser-said.md", "2026-09-21-the-read-triage.md"): (
+        "THE CORRECTION VOCABULARY BELONGS TO A DIFFERENT ROW OF THE SAME "
+        "TABLE. Section 6.3 triages nine call sites one per row; two rows "
+        "above the citation, `search_results.py::_lift_function` is declared "
+        "a **FALSE POSITIVE** of the wave's own census, because the receiver "
+        "is a `str` and `str.index` was measured not to quote its input. "
+        "That correction targets `scripts/_census_quoting_callees.py`, an "
+        "instrument written the same day by the same wave, and it is declared "
+        "in the row that makes it. "
+        "The citation of `2026-09-21-the-read-triage.md` is the opposite of a "
+        "correction: it AGREES with that document and defers to it, recording "
+        "that two caller-supplied `int()` sites belong to its decision `D1` "
+        "and that `D1` is still unruled. Declaring a CORRECTS: pair would "
+        "send a reader to a document this wave did not contradict, and would "
+        "put a `CORRECTED BY:` marker on an open decision that nothing has "
+        "closed -- which is worse than silence, because it reads as closure."
+    ),
+
+    # 2026-09-21, the same wave, and the SAME TWO ENTRIES TWICE OVER because
+    # the scan keys on a basename and this document names both derived views
+    # in one breath. The reason is one reason; splitting it would be a lie
+    # about how many facts there are.
+    ("2026-09-21-what-the-browser-said.md", "INDEX.md"): (
+        "THE MATCHED WORD IS A THIRD GUARD'S NAME, NOT A VERDICT ON EITHER "
+        "CITED FILE. Section 5.5 reports that the wave's FIRST impact-gate run "
+        "was red on five derived-file tests and lists what it had changed the "
+        "inputs to without regenerating: `_audit/INDEX.md`, `_audit/RULINGS.md` "
+        "*'and the correction register'* -- and `correction` is the "
+        "vocabulary hit. The sentence makes no claim that either file is "
+        "wrong; it records that the wave had not yet run `--write`, which it "
+        "then did, and says both `--check` green in the same paragraph. "
+        "A CORRECTS: pair here would point a reader at two GENERATED files "
+        "that got nothing wrong, and the marker would not survive their next "
+        "`--write` in any case."
+    ),
+    ("2026-09-21-what-the-browser-said.md", "RULINGS.md"): (
+        "THE SAME LINE AS THE `INDEX.md` ENTRY ABOVE, and the same reason: the "
+        "vocabulary hit is the word `correction` inside the NAME of a third "
+        "guard, `tests/test_a_correction_is_findable_from_the_claim.py`, which "
+        "the sentence lists beside these two files as something the wave had "
+        "to regenerate or triage. No claim is made about `_audit/RULINGS.md` "
+        "except that it was regenerated with `--write` and re-checked green -- "
+        "which is this register's own rule for a derived file, followed, not "
+        "corrected."
+    ),
+
     # 2026-09-21. TWO DERIVED VIEWS MEETING, which is a shape worth naming
     # because neither file was written by the hand that caused the pair.
     ("RULINGS.md", "2026-09-19-two-census-conventions-ruled.md"): (

@@ -689,6 +689,48 @@ REGISTER: tuple = (
              "much a defect as leaking an accidental one.* The count each "
              "way is 12 withheld, 7 published, 1 relay.",
     ),
+    # THE FIELD ITSELF, RULED THE DAY AFTER THE FIELD BESIDE IT. Registered
+    # next to its sibling on purpose: a reader who arrives asking about the
+    # error envelope wants both, and they answer different halves.
+    Ruling(
+        id="ERROR-MESSAGE-RULED-AT-THE-RAISE",
+        claim="What the error envelope's message may carry is decided WHERE "
+              "THE VALUE ENTERS THE EXCEPTION, never where it leaves. The "
+              "provenance classes are not classes of exception -- a page "
+              "value inside a stdlib ValueError is indistinguishable at "
+              "server._error from one that is not -- so no per-class policy "
+              "may live at the envelope. The package's own exception text and "
+              "a library's own exception text are PUBLISHABLE; a value the "
+              "PAGE chose is FORBIDDEN inside any exception, whoever authored "
+              "the class.",
+        binds="verb -- what server._error may publish in $.message, and where "
+              "that is decided",
+        document="_audit/2026-09-21-what-the-browser-said.md",
+        anchor="decided WHERE THE\nVALUE ENTERS THE EXCEPTION, never where it "
+               "leaves",
+        aliases=("what the browser said", "$.message", "the 89 sub-expressions",
+                 "third-party exception text", "ERROR-MESSAGE-PROVENANCE"),
+        note="THE SIBLING OF `ERROR-URL-ASKED-FOR-OR-NOTHING`, and it goes the "
+             "OTHER WAY for a stated reason rather than by temperament. The "
+             "url field could be ruled PER SITE because every value feeding it "
+             "is an address this package composed or read; `$.message` cannot, "
+             "because `_error` holds only `type(exc)` and `str(exc)` and the "
+             "provenance of what that text QUOTES is not among them. So the "
+             "ruling moves the decision to the raise, which is where the "
+             "corpus had already put it three times without naming it: "
+             "`coerce.py`, `press.disclose` and `landing.py`. It also DECLINES "
+             "the sibling's own recommendation to make the twelve `dom.py` "
+             "messages type-only -- all twelve are inside "
+             "`tests/test_readers_emit_no_page_string.py`'s driven subject set "
+             "and green (4 clean, 8 returns_text, 0 not_driven), so the "
+             "payload class is already closed for them and type-only would "
+             "delete twelve diagnoses to close a channel no needle travels. "
+             "What it SHIPPED is the other end of the pipe: "
+             "`tests/test_tool_envelopes_emit_no_page_string.py`, because the "
+             "reader guard discovers only `async def` functions taking a "
+             "`page` and the 48 tool bodies that funnel into `_error` are "
+             "therefore outside it, permanently.",
+    ),
 )
 
 
