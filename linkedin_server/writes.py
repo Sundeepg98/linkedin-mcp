@@ -7910,8 +7910,44 @@ async def _recipient_gate(page: Any, grant: WriteGrant) -> dict[str, Any]:
         "matches": reading.get("matches"),
         "selectors_tried": list(dom.RECIPIENT_CHIP_SELECTORS),
     }
-    total = int(reading.get("total") or 0)
-    matches = int(reading.get("matches") or 0)
+    # COERCED THROUGH THE HELPER, AND THE TWIN GATE ABOVE IS NOT. They look
+    # identical and they are not the same hazard:
+    #
+    # * ``_typeahead_gate`` reads ``dom.read_typeahead_options``, whose
+    #   ``total`` and ``matches`` are ``await page.locator(...).count()`` --
+    #   PLAYWRIGHT-TYPED. A document cannot make a ``count()`` answer with a
+    #   string, so ``int()`` there cannot be handed one.
+    # * THIS gate reads ``dom.read_selected_recipients``, which is
+    #   ``dict(await page.evaluate(...))`` -- PAGE-CONTROLLED, and returned
+    #   unshaped. Whatever that document's JavaScript returns arrives here.
+    #
+    # So ``int(reading.get("total") or 0)`` put a value the PAGE chose into
+    # ``ValueError: invalid literal for int() with base 10: '<it>'``, which
+    # escapes this function (the ``try`` above wraps only the read), leaves
+    # ``perform``, and is rendered by ``server._error`` through
+    # ``config.scrub`` -- which substitutes this server's own paths and
+    # nothing else, because a name has no shape to scrub.
+    #
+    # THE VALUE IN QUESTION IS A RECIPIENT CHIP'S ACCESSIBLE NAME, on the one
+    # action this package calls the most irreversible in audience. Forty lines
+    # below, this same function refuses to print that label because "it is
+    # somebody's name and this server does not read one to explain itself" --
+    # and then carried it out through a coercion. Measured 2026-09-21 by
+    # ``tests/test_readers_emit_no_page_string.py`` the hour it could first
+    # drive this function at all; see
+    # ``_audit/2026-09-21-the-ungrantable-readers.md``.
+    #
+    # ``as_count`` IS A TYPE GATE AND NOT A PARSER, so state the difference
+    # rather than claim there is none: ``as_count("5")`` is 0 where the
+    # shipped ``int("5")`` was 5. That costs nothing HERE and would cost
+    # something at a site reading text, because ``SELECTED_RECIPIENT_JS``
+    # returns ``total: seen.length`` and a counter -- JavaScript NUMBERS. On
+    # every value that script can produce, and on an absent key, this answers
+    # exactly what the shipped line answered; on anything else it substitutes
+    # a LOGGED zero instead of raising a string. A zero total refuses, which
+    # is the direction this gate already fails in.
+    total = coerce.as_count(reading.get("total"))
+    matches = coerce.as_count(reading.get("matches"))
 
     if total == 0:
         out["refused_condition"] = "1_no_recipient_committed"

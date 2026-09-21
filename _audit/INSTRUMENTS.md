@@ -9186,3 +9186,72 @@ only reason nobody has met it.
 | `scripts/_probe_dom_error_url_field.py` | 12 readers driven, 12 reached, 12 publishing the plant -- and 12 NEGATIVE controls, a double that raises for no script, every one of which returned without raising. **AND A FOURTH SHIPPED GUARD FIRED ON IT: `test_probe_controls_are_never_decorative` caught this probe computing every one of those controls, printing them, and returning 0 whatever they said.** It now REFUSES to let its report stand -- `_controls_that_did_not_hold` returns a list of named failures and the exit code branches on it; shown both directions, exit 1 under a planted blind walker and exit 0 restored. Its message is the rule that was followed rather than dodged: *branch on its result, do NOT add the site to the baseline to clear the red*. `reached` is asserted from the TRACEBACK because three of these readers can raise the same class from a neighbour's site, so "the right exception came out" is not the measurement |
 | `scripts/_census_message_interpolations.py` | prints its own grep contrast. **THREE defects. The worst was found by a SHIPPED GUARD, `test_an_outage_is_never_filed_as_an_absence`: two handlers answered an unreachable version-control tool with `""` and `{}`, which turns an OUTAGE into an ABSENCE in the direction that FLATTERS THIS CENSUS'S OWN THESIS -- with the tool gone the table prints a naive-search count of ZERO beside 292 AST sites, the strongest possible evidence for "a text search cannot see this class", measured from nothing. Both now raise `CensusOutage`, shown failing by running it with the tool off PATH; the search handler separates "matched nothing" (exit 1, a real reading) from an outage by return code. The other two were found by running the cheap disagreeing check rather than by reading it**: a shortlist that missed a fourth `{landed!r}` site (found by grepping its output), and a contrast table whose visible rows summed to 288 against a printed TOTAL of 292 (found by running the grep independently -- four lines in three modules the table suppressed as "agreeing" and never named). A printed total the visible rows do not reach invites a reader to trust a row that is not there; the suppression is now stated and counted in the output |
 
+---
+
+## 52. A REFUSAL NOBODY RULED HID A LEAK FOR AS LONG AS IT STOOD (the-ungrantable-readers, 2026-09-21)
+
+Full working: `_audit/2026-09-21-the-ungrantable-readers.md`.
+
+### 52.1 THE SHAPE, BECAUSE IT IS NOT ABOUT GRANTS
+
+`tests/test_readers_emit_no_page_string.py` refused to build a `WriteGrant` and
+wrote the refusal into the baseline as *"policy, not capability; see
+GRANT_REFUSAL"*. The citation pointed at the constant making the claim, and
+nothing outside it had ever ruled on the question.
+
+Five readers were NOT-DRIVEN behind it. **22 of the 52 sites in this
+repository's own hazard bucket** (`scripts/_census_page_coercions.py`) live
+inside those five -- and that census closes by naming this exact guard as the
+thing that settles which of them leak. It could not. One of them did:
+`writes._recipient_gate` raised `ValueError: invalid literal for int() with
+base 10: '<a page-chosen value>'`, forty lines below its own docstring's
+promise not to print that value because it is somebody's name.
+
+**A REFUSAL THAT CITES ITSELF IS NOT A RULING, AND THE COST IS MEASURED IN THE
+CHECKS IT KEEPS FROM RUNNING** -- not in the thing it declines to do.
+
+Three measurements retired it, none of them an argument: an AST walk showing
+the four gates hold no page action and no grant door; `tests/test_writes.py`'s
+own `_bare_grant`, which has built these objects all along and says why that is
+not a way round `mint`; and `writes.Observation`'s docstring, which declares a
+hand-built observation inert because `_record` is the only writer of
+`_OBSERVED`.
+
+### 52.2 THE TWIN THAT DOES NOT LEAK IS WHAT MAKES THE MEASUREMENT CREDIBLE
+
+`_typeahead_gate` holds two lines of the same shape and is CLEAN.
+`read_typeahead_options` builds its `total` and `matches` from
+`await page.locator(...).count()` -- Playwright-typed, and a document cannot
+make a `count()` answer with a string. `read_selected_recipients` returns
+`dict(await page.evaluate(...))` unshaped. **Same two lines, different hazard**,
+which is `tests/plantedpage.py`'s fidelity rule holding under a third
+independent test and the reason the harness convicted one twin rather than
+painting both red.
+
+### 52.3 THE RED-PROOFS WERE RUN WITHOUT MUTATING THE LIVE TREE
+
+Required by this register's own rule, and the routes were: rebinding
+`coerce.as_count` in memory to restore `int(value or 0)` -- the line that
+shipped -- and loading a pytest plugin from a SCRATCH directory with `-p` to
+stub the harness's own helpers. No tracked file was edited to prove anything,
+so no concurrent wave's uncommitted work was ever inside a restore window.
+
+### 52.4 THE ENTRIES
+
+| path | shown failing by |
+|---|---|
+| `tests/refusinggrant.py` | `refusal_failures` convicts four objects each lacking exactly ONE of the four refusals -- a live token, membership of `writes._GRANTS`, an unexpired TTL, `consumed=True`. Stubbed to `return []`, the in-suite control goes red |
+| `tests/test_the_harness_grant_cannot_authorise_a_write.py` | two mutations by scratch plugin: `refusal_failures -> []` reds its own control; `grant_for` replaced with a plain live `WriteGrant` reds all 13 parametrised actions |
+| `scripts/_check_the_refusing_grant_can_fail.py` | five sections, each red then green. Section 2 is the one worth reading: it neutralises `writes.writes_enabled` IN MEMORY (never the environment) so the doors refuse the grant for ITS OWN reasons, and its CONTROL is `consume()` ADMITTING a registered fresh grant -- without which a refusal below proves only that the flag is off. It counts a reached browser call as a FAILURE |
+| `linkedin_server/writes.py` `_recipient_gate` | the shipped `int(reading.get("total") or 0)`, restored by rebinding `coerce.as_count`: `returns_text -> leaks -> returns_text` |
+| `tests/test_readers_emit_no_page_string.py` (anchor rule) | a generic synthetic string for `anchor` leaves `save_job` and `unsave_job` raising `ExtractionFailedError` before their readings -- 2 of 13 branches unmeasured while the reader reports driven |
+| `tests/test_readers_emit_no_page_string.py` (url rule) | the generic string is refused by `readonly.assert_read_url` BEFORE `_load` runs a line, and the baseline recorded that as `raises WriteAttemptError` -- a reason describing the harness while reading as the write module refusing |
+
+### 52.5 WHAT IT DOES NOT COVER
+
+`observe` and `preview` stay NOT-DRIVEN and their refusal is REAL, measured
+rather than assumed: with the flag neutralised in memory, all 13 sanctioned
+specs reach `page.goto` and are refused by the double. Lifting the flag would
+not drive them. Five hazard coercion sites sit inside driven readers and never
+execute on the planted page; they are listed in the audit document rather than
+counted as covered.
