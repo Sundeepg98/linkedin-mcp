@@ -73,6 +73,57 @@ total is 284.** It is recorded here rather than by editing that document,
 because a wave that rewrites the record it supersedes leaves no way to see that
 anything moved.
 
+**THIRD DELTA, 2026-09-21, AND IT IS THE FIRST ONE THAT IS A BUILD.** The
+blocks above stay UNCHANGED. What moved:
+
+    GAP                         91  ->   88    33, 54 and 175 left it
+    COVERED-UNFIRED              5  ->    8    the same three joined it
+
+**THREE ROWS, TWO READERS, AND NOT ONE OF THEM IS PROVEN.** Two addresses that
+had been admitted for days with nothing able to navigate to them now have a
+tool each: `/company/<numeric id>/` (rows `33` and `54`, one reader, one page
+load) and `/groups/<id>/` (row `175`). Every one is COVERED-UNFIRED and
+deliberately NOT COVERED-PROVEN -- the wave that built them was forbidden the
+browser, a sibling wave held the only signed-in profile, and this census's own
+definition is that PROVEN needs an audit recording a live firing. Banking these
+as PROVEN would be the exact inversion `COVERED-CANNOT-DELIVER` exists to stop,
+one state along. Re-measure with
+`scripts/count_census_states.py --expect J=57,P=55,M=82,N=88`. Detail, and the
+name-freedom argument for each: `_audit/2026-09-21-the-three-readers.md`.
+
+**RECONCILED AT THE MERGE, 2026-09-21, BY THE INTEGRATOR. BOTH BLOCKS ABOVE ARE
+LEFT EXACTLY AS THEIR WAVES WROTE THEM.** Each was correct when written and each
+is now wrong as a sequence, because **both computed their arithmetic from the
+same base of 91** — they ran in parallel worktrees and neither could see the
+other. Rewriting either would destroy the evidence of what its wave actually
+measured, which is the one thing a delta block is for.
+
+    GAP              91 -> 90    the firing wave, N 83 banked
+                     90 -> 87    the readers wave, N 33 / N 54 / N 175 built
+    COVERED-PROVEN    5 ->  6    N 83
+    COVERED-UNFIRED   5 ->  8    the three built rows
+
+**The live value is `N=87`, and the whole-census expectation is
+`--expect J=57,P=55,M=82,N=87`, total GAP 281.** So BOTH printed `--expect`
+lines above are stale from here on: `N=90` was true between the two merges, and
+`N=88` was never true at all — it is what the readers wave would have measured
+had it landed first. Re-derive rather than quote either.
+
+**AND THE FIRST DRAFT OF THIS VERY PARAGRAPH SAID 282**, because the integrator
+took the readers wave's whole-census total from its report instead of deriving
+it — that wave counted 285 → 282 from a base the firing wave had already moved
+to 284. Caught by running the counter one line later. **The error being
+corrected here and the error made while correcting it are the same error**, one
+minute apart: quoting a number a wave computed against a base that has since
+moved. That is the argument for the rule rather than an embarrassment beside
+it.
+
+**This is the same defect the corpus keeps finding, arriving in the corpus's own
+bookkeeping**: a number that was true when written, in a document nothing
+re-derives. The difference is that this one was caught by the merge conflict
+that forced both blocks into one file — which is an argument for the census
+being one file per slice rather than several.
+
 **SECOND DELTA, 2026-09-20, and it is a VOCABULARY correction rather than a
 finding.** The two blocks above stay UNCHANGED. What moved:
 
@@ -304,7 +355,7 @@ LinkedIn chose to suggest that day.
 | 30 | View a connection's own connections | R | EXCLUDED-RULED | R4 + R2 |
 | 31 | View shared connections with a member | R | EXCLUDED-RULED | R4 |
 | 32 | View your Contacts page | R | EXCLUDED-RULED | R1 |
-| 33 | See how many of your connections work at an organization | R | GAP | ~~Blocker: no `/company/` pattern on the allowlist~~ **EXPIRED 2026-09-20. STATE UNCHANGED, AND THIS IS NOW A BUILD ROW RATHER THAN A BOUNDARY ROW.** `/company/<slug>/` and `/company/<numeric id>/` are both admitted (`is_read_url` True, re-measured 2026-09-21), and `linkedin_job_detail` now publishes `company_page_url` -- the built NUMERIC address, so a Page can be reached without ever assembling a slug. **The number renders on that root and NO READER OPENS IT**; `company_page.py` is a vocabulary and a predicate and *"opens nothing"* by its own docstring. A SECOND, INDEPENDENT ROUTE also exists and was named before the boundary moved: `_audit/2026-09-19-the-read-rows.md` calls this *"the cheapest genuine BUILD left in this set: the data is already returned, only the aggregation is missing"*, since `linkedin_connections` returns one row per connection over an admitted address. **AND ONE ROUTE IS MEASURED DEAD, which is worth as much:** `_audit/2026-09-20-company-page-built.md` dumped `dom.read_job_insight_panels` whole over both hydrated captures and **no line in either panel names a connection**, so this cannot be lifted off the posting the way `N 53` was. Whoever builds it owes a COUNT and never a list. See `_audit/2026-09-21-the-read-triage.md` |
+| 33 | See how many of your connections work at an organization | R | **COVERED-UNFIRED** | **A READER LANDED 2026-09-21. UNFIRED, NOT PROVEN, and the wave that built it was forbidden the browser.** `linkedin_company_page_counts(organisation_id)` opens `/company/<numeric id>/` -- the address `linkedin_job_detail` already publishes as `company_page_url` -- and returns the `connections_at_organisation` verdict from `company_root.connection_counts`. **A COUNT AND NEVER A LIST**, which is the `N 101` discrimination held structurally: the page is reduced to integers INSIDE the document and no string crosses back. `/company/<x>/people/` stays refused. ARTIFACTS: `linkedin_server/company_root.py`, `dom.COUNT_LINES_JS` + `dom.read_count_lines`, `tests/test_company_root.py` (52 tests, the shipped script driven under V8 over seven adversarial shapes, two of which were defects a cold review convicted). **WHAT IS STILL UNMEASURED, STATED SO NOBODY BANKS IT AS PROVEN:** nobody in this repository has opened a company Page, so `company_root.COUNT_PHRASES` is LinkedIn's wording as this wave believes it to be, and the first live fire measures the wording as well as the count. A phrase that does not render reads `phrase_not_drawn`, which is **NOT** a count of zero. PRIOR CELL, kept because it is the measurement that made this buildable: ~~Blocker: no `/company/` pattern on the allowlist~~ **EXPIRED 2026-09-20. STATE UNCHANGED, AND THIS IS NOW A BUILD ROW RATHER THAN A BOUNDARY ROW.** `/company/<slug>/` and `/company/<numeric id>/` are both admitted (`is_read_url` True, re-measured 2026-09-21), and `linkedin_job_detail` now publishes `company_page_url` -- the built NUMERIC address, so a Page can be reached without ever assembling a slug. **The number renders on that root and NO READER OPENS IT**; `company_page.py` is a vocabulary and a predicate and *"opens nothing"* by its own docstring. A SECOND, INDEPENDENT ROUTE also exists and was named before the boundary moved: `_audit/2026-09-19-the-read-rows.md` calls this *"the cheapest genuine BUILD left in this set: the data is already returned, only the aggregation is missing"*, since `linkedin_connections` returns one row per connection over an admitted address. **AND ONE ROUTE IS MEASURED DEAD, which is worth as much:** `_audit/2026-09-20-company-page-built.md` dumped `dom.read_job_insight_panels` whole over both hydrated captures and **no line in either panel names a connection**, so this cannot be lifted off the posting the way `N 53` was. Whoever builds it owes a COUNT and never a list. See `_audit/2026-09-21-the-read-triage.md` |
 
 **This is the single most consequential block in the census for the operator's
 actual job hunt.** The warm-referral workflow he already runs -- see the
@@ -341,7 +392,7 @@ read it out of Gmail instead. Rows 23-33 are why that skill exists.
 | 51 | Mute a company | W | GAP | REV. `mute` 0 hits |
 | 52 | View the list of Pages you follow | R | **COVERED-PROVEN** | `linkedin_followed_companies`, 2 live readings, PASS |
 | 53 | View a Page's follower count | R | GAP | ~~No `/company/`~~ **THE RECORDED BLOCKER IS FALSE TWICE OVER, AND THE ROW IS SERVED TODAY. STATE DELIBERATELY UNCHANGED.** (1) `/company/<slug>/` HAS been on the read allowlist since 2026-09-20 -- `readonly.is_read_url` returns True for it, re-measured 2026-09-21. (2) **The row never needed that address.** `linkedin_job_detail` already returns the count: `dom.read_company_about_card` -> `shape.company_about_card` -> `followers`, parsed by `shape._ABOUT_FOLLOWERS`, published under `company_about`. No company Page is opened; the card renders on `/jobs/view/<id>`, admitted since the first commit. `tests/test_company_about_card.py` asserts an integer follower count and asserts it is `None` in BOTH un-hydrated states, so an unhydrated card cannot read as "no followers". `_audit/2026-09-20-company-page-built.md` found the same thing and filed it "SHIPPED, pre-existing" -- **and the row was left carrying the refuted blocker, which is why the correction is written here rather than in a document.** WHAT STILL STANDS BETWEEN THIS AND A BANK, stated so nobody banks it on this cell: no committed record shows `followers` POPULATED in a live fire. The 2026-09-19 fire that populated `company_about` is cited on `N 101` for `on_linkedin`, not for this key. That is one re-read of an existing artifact, not a build. See `_audit/2026-09-21-the-read-triage.md` |
-| 54 | View how many of your connections follow a Page | R | GAP | ~~No `/company/`~~ **EXPIRED 2026-09-20, exactly as `N 33`. STATE UNCHANGED.** The Page root is admitted and reachable by a built numeric address; the number renders there; no reader opens it; and the posting route is measured dead by the same insight-panel dump. This is a BUILD row, not a boundary row, and it owes the same strictness: a COUNT, never a list. Note what this row is NOT -- `search_results.FILTER_TERMS` holds `followers of`, which is a people-search FILTER NAME whose value is a PERSON, reported as presence and never as a count. See `_audit/2026-09-21-the-read-triage.md` |
+| 54 | View how many of your connections follow a Page | R | **COVERED-UNFIRED** | **SERVED BY THE SAME READER AS `N 33`, LANDED 2026-09-21. UNFIRED, NOT PROVEN.** `linkedin_company_page_counts(organisation_id)` returns the `connections_following_page` verdict beside the other one, from one page load: the two rows are two phrases in one closed table, not two tools. It owes a COUNT and never a list and it delivers one -- the reading is an integer positioned against `company_root.NUMERAL_SHAPES`, and an ABBREVIATION IS REFUSED RATHER THAN ROUNDED, so a Page drawing `2K` reads `abbreviated_refused` with no value rather than two thousand. Same artifacts and same unmeasured-vocabulary caveat as `N 33`; see `_audit/2026-09-21-the-three-readers.md`. PRIOR CELL: ~~No `/company/`~~ **EXPIRED 2026-09-20, exactly as `N 33`. STATE UNCHANGED.** The Page root is admitted and reachable by a built numeric address; the number renders there; no reader opens it; and the posting route is measured dead by the same insight-panel dump. This is a BUILD row, not a boundary row, and it owes the same strictness: a COUNT, never a list. Note what this row is NOT -- `search_results.FILTER_TERMS` holds `followers of`, which is a people-search FILTER NAME whose value is a PERSON, reported as presence and never as a count. See `_audit/2026-09-21-the-read-triage.md` |
 | 55 | Subscribe to a newsletter | W | GAP | REV. `newsletter` 0 hits |
 | 56 | Unsubscribe from a newsletter | W | GAP | REV |
 | 57 | View the newsletters you subscribe to | R | COVERED-CANNOT-DELIVER | `linkedin_newsletter_subscriptions` reaches the newsletters surface and returns `distinct` -- A COUNT (`anchors` is the decoy: ten anchors, five newsletters, measured 2026-09-05). Every row leaves through `shape.subscription_row`, which redacts the title UNCONDITIONALLY and publishes a constant href shape, so the answer says a subscription EXISTS and never WHICH. The row asks which. A tool that reports HOW MANY does not cover a row asking WHICH -- banked CANNOT-DELIVER rather than PROVEN for that reason |
@@ -560,7 +611,7 @@ as people search.
 | 172 | View a fellow group member's connections only after connecting with them | R | GAP | |
 | 173 | Access the list of groups you belong to | R | COVERED-PROVEN | **SHIPPED AND FIRED LIVE 2026-09-05; the row was never moved.** Same capability as `M C60` and served by the same tool, `linkedin_group_memberships` (`server.py:1894`). Re-verified independently 2026-09-19 by reading the tree: 30 tests pass in `tests/test_the_groups_tool_keeps_its_properties.py`, tool registered per `tests/test_every_tool_is_on_the_surface.py`. Returns **counts and numeric ids, never a name** -- structurally, since `groups.membership_tally` accepts no name anywhere and refuses a non-numeric path segment because a slug is a name. **The reading that matters is `memberships.distinct`, NOT `anchors`:** the Groups page draws memberships and LinkedIn's suggestions with the same kind of anchor, so a flat sweep answers TEN to a question whose answer is FIVE -- in the flattering direction, while looking correct. The tool splits the page structurally (nearest anchor-bearing ancestor holding exactly one group anchor) and carries `agrees_with_corroborated` in its payload so a caller can see whether a reading joins the four corroborating instruments or is that known defect arriving again |
 | 174 | View the groups you have requested to join | R | GAP | **MEASURED AND DELIBERATELY NOT CLOSED -- A ZERO CANNOT SETTLE THIS ROW.** The `/groups/` root was read live and draws exactly two sections, neither of them a pending-requests list. **That reading is consistent with two different worlds and cannot separate them:** he may have zero pending requests, and a section that is absent when empty reads identically to one that does not exist. **A reading no instrument can fail is not a reading**, so the row stays GAP rather than being retired on a comfortable zero. NEXT ARTIFACT: a pending request would have to exist for the surface to be observable at all -- and creating one is a WRITE at a real group, so this is unmeasurable by any read on this account's current state. Evidence `_audit/_scratch/_progress-groups-surface.md` item 4 |
-| 175 | Reach a private unlisted group through a direct link or an invitation | R | GAP | |
+| 175 | Reach a private unlisted group through a direct link or an invitation | R | **COVERED-UNFIRED** | **THE READER THE ALLOWLIST ENTRY SAID NOBODY HAD WRITTEN, LANDED 2026-09-21. UNFIRED, NOT PROVEN.** `linkedin_group_page(group_id)` builds `/groups/<digits>/` -- admitted 2026-09-19, `is_read_url` True, re-measured 2026-09-21 -- and answers the DIRECT-LINK half: `feed_drawn` when feed permalinks rendered, `reader_blind` when the page drew no anchor, `ambiguous` otherwise. **THE AMBIGUOUS BRANCH IS THE HONEST ONE**: a membership gate, an empty group and a restyle each produce a rendered page with no permalink and NOTHING here can separate them, which is `groups_page.interpret_zero`'s own refusal on the same grounds. The invitation half is served by the same address -- `?invitedBy=<token>` is dropped before anything reads it. **THE OBLIGATION THE ENTRY ATTACHED TO THIS ROW IS PAID BY REUSE**: the reader runs the already-declared `anchors.read_anchors`, so no script is injected and the evaluate waiver budget did not move for it. ARTIFACTS: `linkedin_server/group_page.py`, `server.py linkedin_group_page`, `tests/test_group_page.py` (32 tests). NOT COVERED BY THIS: the member roster, `N 165`, refused by a ruling this reader does not touch |
 | 176 | Prevent your network being updated when you join a group | W | GAP | REV |
 | 177 | Find people you know through shared group membership | R | GAP | |
 | 178 | See which groups a member belongs to before connecting | R | GAP | Overlaps row 65's surface but is its own read |

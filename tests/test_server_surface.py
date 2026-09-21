@@ -1,4 +1,4 @@
-"""The tool surface: forty-seven tools, thirty-five of which do not write.
+"""The tool surface: forty-nine tools, thirty-seven of which do not write.
 
 **AND THIS LINE IS NOW DERIVED, NOT MAINTAINED, 2026-09-20.** It had gone stale
 a THIRD time -- "forty-four tools, thirty-two of which do not write" against a
@@ -412,6 +412,14 @@ EXPECTED_TOOLS = {
     # segments. It is a noun phrase describing a list, in the same family as
     # linkedin_draft_applications and linkedin_saved_jobs.
     "linkedin_my_activity_items",
+    # THE FORTY-EIGHTH AND FORTY-NINTH, 2026-09-21, and they arrive together
+    # because they are one finding rather than two tools: each opens an address
+    # that had been on the read allowlist for days -- /groups/<id>/ since
+    # 2026-09-19 and /company/<id>/ since 2026-09-20 -- and that no tool in
+    # this package could navigate to, because every tool on those surfaces took
+    # no parameter. Both are READS. No write was added by either.
+    "linkedin_group_page",
+    "linkedin_company_page_counts",
 }
 
 #: Names a reader must never grow. Listed explicitly so that adding one is a
@@ -481,7 +489,7 @@ async def tools():
     return {t.name: t for t in await mcp.list_tools()}
 
 
-async def test_the_surface_is_exactly_the_fortyseven_tools(tools):
+async def test_the_surface_is_exactly_the_fortynine_tools(tools):
     """RENAMED THREE TIMES ON 2026-08-25, from ``..._seventeen_tools`` through
     ``..._eighteen_tools`` and ``..._nineteen_tools``, and the rename is the
     honest half of the edit rather than noise in a diff.
@@ -585,6 +593,10 @@ async def test_the_surface_is_exactly_the_fortyseven_tools(tools):
     what turned this red into something a commit had to answer for rather
     than something a suite would mention eventually.
 
+    THE THIRTEENTH RENAME, 2026-09-21, moved because two reads --
+    ``linkedin_group_page`` and ``linkedin_company_page_counts`` -- were built,
+    not because a tool already here was renamed.
+
     FORTY-FIVE NAMES OVER FORTY-FOUR CAPABILITIES; the login pair is still
     the only pair.
 
@@ -686,7 +698,7 @@ async def test_the_surface_is_exactly_the_fortyseven_tools(tools):
     # address was refused by the boundary until that commit and was admitted
     # only together with the shaper in front of it, which is condition 1 of
     # the ruling at 09f9961 section 6. This test's NAME moved with it.
-    assert len(tools) == 47
+    assert len(tools) == 49
     # And the split is asserted, not just the total. A future tool arriving as
     # a write would otherwise only have to bump a number.
     #
@@ -819,7 +831,13 @@ async def test_the_surface_is_exactly_the_fortyseven_tools(tools):
     # segment, measured at 5 newly admitted addresses against a family
     # wildcard's 18, and it landed with the shaper that makes the page
     # readable as counts instead of as people.
-    assert len(set(tools) - SANCTIONED_WRITE_TOOLS) == 35
+    # THIRTY-SEVEN FROM 2026-09-21: linkedin_group_page and
+    # linkedin_company_page_counts are BOTH READS and the write side is
+    # BYTE-IDENTICAL across them -- which is the half of this split that
+    # matters. Neither adds an entry to readonly.SANCTIONED_MUTATIONS; each
+    # opens an address that was already on the read allowlist and that no
+    # registered, parameterless tool could reach.
+    assert len(set(tools) - SANCTIONED_WRITE_TOOLS) == 37
 
 
 def test_the_read_that_was_nearly_named_a_write():
@@ -2357,18 +2375,18 @@ def test_the_headline_is_derived_from_the_constants():
 def test_control_the_speller_and_the_headline_check_can_both_fail():
     """SHOWN FAILING. A spelling table and a comparison are both places a
     check like this dies silently, so both are exercised."""
-    assert _spell(47) == "forty-seven", _spell(47)
-    assert _spell(35) == "thirty-five", _spell(35)
+    assert _spell(49) == "forty-nine", _spell(49)
+    assert _spell(37) == "thirty-seven", _spell(37)
     assert _spell(40) == "forty", _spell(40)
     assert _spell(12) == "twelve", _spell(12)
 
     # The comparison must reject a headline that is wrong by ONE tool -- the
     # drift size that actually occurs, and the one a loose check would miss.
-    derived = f"The tool surface: {_spell(47)} tools, {_spell(35)} of which do not write."
-    off_by_one = f"The tool surface: {_spell(46)} tools, {_spell(35)} of which do not write."
-    assert derived != off_by_one, "the comparison cannot tell 47 from 46"
+    derived = f"The tool surface: {_spell(49)} tools, {_spell(37)} of which do not write."
+    off_by_one = f"The tool surface: {_spell(48)} tools, {_spell(37)} of which do not write."
+    assert derived != off_by_one, "the comparison cannot tell 49 from 48"
 
     # And it must reject a drift in the SECOND number while the first is right,
     # which is the shape the 2026-09-20 instance had (44/32 against 47/35).
-    second_wrong = f"The tool surface: {_spell(47)} tools, {_spell(32)} of which do not write."
+    second_wrong = f"The tool surface: {_spell(49)} tools, {_spell(32)} of which do not write."
     assert derived != second_wrong, "the comparison only checks the first number"

@@ -9632,6 +9632,395 @@ async def read_collection_groupings(
     )
 
 
+#: Find a SHIPPED COUNT PHRASE on a page and read the number beside it. The
+#: vocabulary goes IN, a position in it and an INTEGER come out, and no text of
+#: any kind crosses the boundary. See ``linkedin_server/company_root.py``.
+#:
+#: IT IS THE ONLY SCRIPT ON THIS LIST THAT ASSEMBLES TEXT BY A WALK RATHER
+#: THAN BY READING A NODE, AND THAT IS THE WHOLE POINT OF IT. LinkedIn draws
+#: the same line twice on a card: an ``aria-hidden`` visible span that is
+#: name-free, and a screen-reader span that carries a person's name.
+#: ``textContent`` is unconditional and picks up both;
+#: :data:`CARD_HIDDEN_SELECTOR` is what this package already knows those
+#: screen-reader spans by, and it had never been wired to a reader that
+#: assembles text. This walk STEPS OVER any subtree matching that selector and
+#: COUNTS how many it stepped over, so the exclusion is a visible integer
+#: rather than an assurance.
+#:
+#: NOTHING ON THE PAGE IS CHANGED AND NOTHING IS DETACHED. The obvious
+#: implementation clones a node and takes the screen-reader spans out of the
+#: copy; this one never builds a copy, because a walk that skips is the same
+#: answer with no shape for a future edit to turn into a real page mutation.
+#:
+#: THE TEN ASCII DIGITS, IN THE PAGE. Every digit test below is an ASCII range
+#: comparison, so the Arabic-Indic, Devanagari and fullwidth spellings of a run
+#: are NOT read as a number -- they fall out as ``no_digit_run``. That is the
+#: same closed class ``groups.py`` and ``company_page.py`` name character by
+#: character, arriving here for the same reason.
+#:
+#: AN ABBREVIATION IS REFUSED, NEVER ROUNDED, and so is a decimal: "2K
+#: connections" is not two and "1.5" is not fifteen. Each gets its own position
+#: in the shape table and neither carries a value.
+COUNT_LINES_JS = """
+(args) => {
+  const phrases = args.phrases || [];
+  const hidden = args.hidden || "";
+  const html = args.html || "";
+  const maxDepth = args.maxDepth || 0;
+  const maxChunks = args.maxChunks || 0;
+  const maxChunkChars = args.maxChunkChars || 0;
+  const maxDigits = args.maxDigits || 0;
+  const maxGap = args.maxGap || 0;
+
+  // THE CONTROL PATH. When html is supplied the SAME walk runs against a
+  // DETACHED document, so the demonstration that this CAN match -- and that
+  // it steps over the screen-reader copy -- costs no navigation. A matcher
+  // that returns zero everywhere is indistinguishable from a broken one.
+  // DOMParser, NOT a markup assignment on a detached node: the read-only
+  // scanner refuses that assignment and is right to, because it cannot tell a
+  // detached node from an attached one.
+  //
+  // NOTHING HAS EVER RUN THIS BRANCH, online or offline, and the module
+  // docstring says so rather than implying a proof that does not exist.
+  let root = document;
+  if (html) {
+    root = new DOMParser().parseFromString(html, "text/html");
+  }
+
+  const isHidden = (el) => {
+    if (!hidden || !el || el.nodeType !== 1) return false;
+    // A selector a browser cannot parse costs nothing and must not take the
+    // whole reading down with it.
+    try { return el.matches(hidden); } catch (e) { return false; }
+  };
+
+  // NODES A BROWSER WOULD NOT RENDER AS TEXT. Walking into one reads markup
+  // or code as if it were a line on the page.
+  //
+  // ARIA-HIDDEN IS DELIBERATELY NOT ON THIS LIST, AND THE REASON IS A
+  // MEASUREMENT. On the search card the VISIBLE span is the one wearing
+  // aria-hidden="true" and the screen-reader duplicate is the one carrying
+  // a name. Skipping aria-hidden here would step over exactly the copy this
+  // reader wants and keep exactly the copy it is defending against.
+  //
+  // display:none IS NOT HANDLED EITHER, and that is named rather than
+  // implied: it needs a computed style, which is a per-node layout read on
+  // a page with thousands of them.
+  const NON_CONTENT = [
+    "SCRIPT", "STYLE", "TEMPLATE", "NOSCRIPT", "SVG", "IFRAME", "OBJECT"
+  ];
+  const isNonContent = (el) => {
+    if (!el || el.nodeType !== 1) return false;
+    const tag = el.tagName ? String(el.tagName).toUpperCase() : "";
+    if (tag && NON_CONTENT.indexOf(tag) !== -1) return true;
+    try { return !!(el.hasAttribute && el.hasAttribute("hidden")); }
+    catch (e) { return false; }
+  };
+
+  // Whitespace collapsed by hand rather than by a pattern, so this script
+  // carries no escape sequence at all.
+  const collapse = (s) => {
+    let out = "";
+    let gap = false;
+    for (let i = 0; i < s.length; i += 1) {
+      const ch = s[i];
+      const code = ch.charCodeAt(0);
+      if (code <= 32 || code === 160) { gap = true; continue; }
+      if (gap && out.length > 0) out += " ";
+      gap = false;
+      out += ch;
+    }
+    return out;
+  };
+
+  // Lowercase, alphanumerics only, single-spaced -- AND A MAP BACK TO THE RAW
+  // TEXT. The map is the whole reason this is not the one-line normaliser it
+  // started as: the phrase is matched on the normalised form and the NUMBER
+  // has to be read from beside it, which needs the raw index the match
+  // landed on.
+  const normWithMap = (s) => {
+    let out = "";
+    const map = [];
+    let gap = false;
+    for (let i = 0; i < s.length; i += 1) {
+      const ch = s[i].toLowerCase();
+      const ok = (ch >= "a" && ch <= "z") || (ch >= "0" && ch <= "9");
+      if (!ok) { gap = true; continue; }
+      if (gap && out.length > 0) { out += " "; map.push(i); }
+      gap = false;
+      out += ch;
+      map.push(i);
+    }
+    return { text: out, map: map };
+  };
+
+  // WHERE the phrase sits, not merely THAT it does. -1 for no match. The
+  // padded index equals the index in the unpadded string, because the match
+  // begins on the pad character.
+  const boundedIndexOf = (hay, needle) => {
+    if (!hay || !needle) return -1;
+    return (" " + hay + " ").indexOf(" " + needle + " ");
+  };
+
+  // SHAPE POSITIONS. The table they index lives in company_root.py and
+  // position 0 is a REFUSAL on purpose: a substituted value lands on 0, and
+  // the class at 0 must be one that publishes no number.
+  const SHAPE_NONE = 0;
+  const SHAPE_PLAIN = 1;
+  const SHAPE_GROUPED = 2;
+  const SHAPE_ABBREV = 3;
+  const SHAPE_DECIMAL = 4;
+  const SHAPE_LONG = 5;
+  const SHAPE_PERCENT = 6;
+
+  const isDigit = (ch) => ch >= "0" && ch <= "9";
+
+  const numeralOf = (text) => {
+    let i = 0;
+    while (i < text.length && !isDigit(text[i])) i += 1;
+    if (i >= text.length) return { shape: SHAPE_NONE, value: 0 };
+    let digits = "";
+    let grouped = false;
+    let j = i;
+    while (j < text.length) {
+      const ch = text[j];
+      if (isDigit(ch)) { digits += ch; j += 1; continue; }
+      const next = j + 1 < text.length ? text[j + 1] : "";
+      if (ch === "," && isDigit(next)) { grouped = true; j += 1; continue; }
+      // A DECIMAL POINT IS NOT A GROUP SEPARATOR. Reading one as a separator
+      // turns 1.5 into 15, which is a wrong number that looks right.
+      if (ch === "." && isDigit(next)) return { shape: SHAPE_DECIMAL, value: 0 };
+      break;
+    }
+    let k = j;
+    while (k < text.length && text[k] === " ") k += 1;
+    if (k < text.length) {
+      // A PERCENTAGE IS NOT A COUNT. Refused for the same reason an
+      // abbreviation is: a decorated number read as a bare one is the wrong
+      // number wearing the right shape.
+      if (text[k] === "%") return { shape: SHAPE_PERCENT, value: 0 };
+      const suffix = text[k].toLowerCase();
+      const after = k + 1 < text.length ? text[k + 1].toLowerCase() : " ";
+      const moreLetters = after >= "a" && after <= "z";
+      if ((suffix === "k" || suffix === "m" || suffix === "b") && !moreLetters) {
+        return { shape: SHAPE_ABBREV, value: 0 };
+      }
+    }
+    if (digits.length > maxDigits) return { shape: SHAPE_LONG, value: 0 };
+    const value = parseInt(digits, 10);
+    if (!isFinite(value)) return { shape: SHAPE_NONE, value: 0 };
+    return { shape: grouped ? SHAPE_GROUPED : SHAPE_PLAIN, value: value };
+  };
+
+  // THE NUMBER BESIDE THE PHRASE, NOT THE FIRST ONE IN THE LINE.
+  //
+  // THIS IS A DEFECT A COLD REVIEW CONVICTED, not a refinement. The first
+  // version took the leading digit run of the whole candidate, so
+  // "50 people viewed, 11 connections work here" published FIFTY -- a
+  // fully-formed, plausible, WRONG answer, out of the one path the module
+  // claimed could not produce one.
+  //
+  // BACKWARDS FIRST because that is where a count renders, then forwards,
+  // and BOTH ARE BOUNDED: an unbounded search would walk out of the clause
+  // the phrase belongs to and adopt a number from a different sentence,
+  // which is the same defect with a longer reach.
+  const numeralNear = (text, start, end) => {
+    let i = start - 1;
+    const floor = start - maxGap > 0 ? start - maxGap : 0;
+    while (i >= floor && !isDigit(text[i])) i -= 1;
+    if (i >= floor && isDigit(text[i])) {
+      let j = i;
+      while (j > 0) {
+        const prev = text[j - 1];
+        if (isDigit(prev)) { j -= 1; continue; }
+        if ((prev === "," || prev === ".") && j - 2 >= 0 && isDigit(text[j - 2])) {
+          j -= 2; continue;
+        }
+        break;
+      }
+      return numeralOf(text.slice(j));
+    }
+    let k = end + 1;
+    const reach = end + 1 + maxGap;
+    const ceiling = reach < text.length ? reach : text.length;
+    while (k < ceiling && !isDigit(text[k])) k += 1;
+    if (k < ceiling && isDigit(text[k])) return numeralOf(text.slice(k));
+    return { shape: SHAPE_NONE, value: 0 };
+  };
+
+  let elements = 0;
+  let chunks = 0;
+  let capped = 0;
+  let skipped = 0;
+  let nonContent = 0;
+  const best = {};
+
+  // ONE ELEMENT'S OWN VISIBLE TEXT IS ONE CANDIDATE, and only a SHORT one is
+  // considered. That cap is what makes the tightest container win without a
+  // second pass: the ancestors that also hold the phrase are long and fall
+  // out, and among the rest the shortest match is kept.
+  const consider = (text) => {
+    if (!text) return;
+    if (text.length > maxChunkChars) return;
+    if (chunks >= maxChunks) { capped = 1; return; }
+    chunks += 1;
+    const flat = normWithMap(text);
+    if (!flat.text) return;
+    for (let p = 0; p < phrases.length; p += 1) {
+      const needle = phrases[p];
+      const at = boundedIndexOf(flat.text, needle);
+      if (at === -1) continue;
+      const rawStart = flat.map[at];
+      const rawEnd = flat.map[at + needle.length - 1];
+      const num = numeralNear(text, rawStart, rawEnd);
+      const prior = best[p];
+      // A MATCH CARRYING A NUMBER BEATS ONE THAT DOES NOT, WHATEVER THEIR
+      // LENGTHS -- the second defect the same review convicted. Tightest-
+      // container-wins on its own prefers a span holding the phrase ALONE
+      // over the parent holding the phrase AND the count, so a page a human
+      // reads at a glance came back numeral_refused. Length is the
+      // tie-break, not the rule.
+      if (prior) {
+        const priorHas = prior.shape !== SHAPE_NONE;
+        const mineHas = num.shape !== SHAPE_NONE;
+        if (priorHas && !mineHas) continue;
+        if (priorHas === mineHas && prior.len <= text.length) continue;
+      }
+      best[p] = { len: text.length, shape: num.shape, value: num.value };
+    }
+  };
+
+  const walk = (el, depth) => {
+    if (depth > maxDepth) return "";
+    elements += 1;
+    let out = "";
+    const kids = el.childNodes;
+    for (let i = 0; i < kids.length; i += 1) {
+      const child = kids[i];
+      if (child.nodeType === 3) { out += " " + (child.nodeValue || ""); continue; }
+      if (child.nodeType !== 1) continue;
+      // THE ACCESSIBLE COPY IS STEPPED OVER AND COUNTED.
+      if (isHidden(child)) { skipped += 1; continue; }
+      // SO IS ANYTHING A BROWSER WOULD NOT DRAW AS TEXT, counted separately
+      // because the two numbers answer different questions.
+      if (isNonContent(child)) { nonContent += 1; continue; }
+      out += " " + walk(child, depth + 1);
+    }
+    const text = collapse(out);
+    consider(text);
+    return text;
+  };
+
+  const start = root.body || root.documentElement;
+  if (start) walk(start, 0);
+
+  const matches = [];
+  for (const key in best) {
+    const entry = best[key];
+    matches.push({
+      phrase: parseInt(key, 10),
+      shape: entry.shape,
+      value: entry.value,
+      chars: entry.len,
+    });
+  }
+
+  // INTEGERS ONLY. Every field below is a number or a list of objects whose
+  // every field is a number, by construction.
+  return {
+    elements: elements,
+    chunks: chunks,
+    chunks_capped: capped,
+    hidden_skipped: skipped,
+    non_content_skipped: nonContent,
+    matches: matches,
+  };
+}
+"""
+
+#: How deep the visible-text walk descends. A real page terminates because it
+#: is finite; a bound is what stops a pathological one from not terminating.
+#:
+#: **EIGHTY RATHER THAN FORTY, AND THE REASON IS THE VERDICT IT PROTECTS.**
+#: This bound exists to bound WORK, not to bound the READING. A LinkedIn page
+#: nests deeply -- a card inside a section inside a module inside a rail is
+#: routinely past forty elements from ``body`` -- and a walk that stops short
+#: returns an ancestor's text with the deep subtree MISSING. That reads as
+#: ``phrase_not_drawn``, which this reader publishes to mean *the line was not
+#: drawn*. A cap that can produce that verdict by stopping early makes the
+#: verdict a lie in the one direction nobody would check.
+#:
+#: Eighty levels of a recursion whose frame is three locals is nothing; the
+#: cost of the walk is the text it concatenates, and that is bounded by the
+#: document rather than by this number.
+COUNT_LINES_MAX_DEPTH = 80
+
+#: How many candidate elements may be considered. Exceeding it sets
+#: ``chunks_capped``, which travels in the payload -- a capped scan that
+#: reported nothing would otherwise be indistinguishable from a page that drew
+#: nothing, and those are different answers.
+#:
+#: TWENTY THOUSAND, for the reason above it: the cap is a ceiling on work and
+#: not a sampling rule. A signed-in LinkedIn surface draws thousands of
+#: elements and a phrase can sit in any of them, so a number chosen to be tidy
+#: would decide which lines this reader is allowed to find. The per-chunk cost
+#: is one pass over at most :data:`COUNT_LINES_MAX_CHUNK_CHARS` characters.
+COUNT_LINES_MAX_CHUNKS = 20000
+
+#: The longest element text that counts as a candidate LINE. A count phrase
+#: renders in a short container; this cap is what drops the ancestors holding
+#: the same phrase inside a page of prose.
+COUNT_LINES_MAX_CHUNK_CHARS = 240
+
+#: The longest digit run that may become a value. An unbounded repetition on
+#: page-shaped input is a cost nobody chose, and a longer run is reported as
+#: its own shape rather than parsed.
+COUNT_LINES_MAX_DIGITS = 12
+
+#: HOW FAR FROM THE MATCHED PHRASE A NUMBER MAY SIT AND STILL BE ITS NUMBER.
+#:
+#: This bound is the fix for a defect a cold review convicted: the first
+#: version read the leading digit run of the whole candidate line, so
+#: "50 people viewed, 11 connections work here" published FIFTY. The search
+#: now starts AT the phrase and walks outward, and an UNBOUNDED walk would be
+#: the same defect with a longer reach -- it would step out of the clause the
+#: phrase belongs to and adopt a number from another sentence.
+#:
+#: Thirty-two characters is wide enough for "11 of your " and for a grouped
+#: run like "1,234,567 ", and narrow enough that a separate clause does not
+#: fit inside it.
+COUNT_LINES_MAX_NUMERAL_GAP = 32
+
+
+async def read_count_lines(
+    page: Any,
+    *,
+    phrases: list,
+    hidden: str,
+    html: str = "",
+) -> dict[str, Any]:
+    """Run :data:`COUNT_LINES_JS`. Returns positions and integers only.
+
+    ``phrases`` is a list of NORMALISED phrase strings defined by the caller;
+    the page answers with a POSITION in that list. ``hidden`` is the selector
+    whose subtrees the walk steps over -- :data:`CARD_HIDDEN_SELECTOR` at every
+    call site. ``html`` is the CONTROL path, as in :func:`read_anchor_classes`.
+    """
+    return await page.evaluate(  # readonly-ok
+        COUNT_LINES_JS,
+        {
+            "phrases": phrases,
+            "hidden": hidden,
+            "html": html or "",
+            "maxDepth": COUNT_LINES_MAX_DEPTH,
+            "maxChunks": COUNT_LINES_MAX_CHUNKS,
+            "maxChunkChars": COUNT_LINES_MAX_CHUNK_CHARS,
+            "maxDigits": COUNT_LINES_MAX_DIGITS,
+            "maxGap": COUNT_LINES_MAX_NUMERAL_GAP,
+        },
+    )
+
+
 #: Classify a SEARCH RESULTS page's anchors by CLOSED PATH SEGMENT SEQUENCE.
 #: :data:`ANCHOR_CLASSIFY_JS` one level sharper: THREE fixed segments instead
 #: of one or two, the query counted rather than dropped silently, and a

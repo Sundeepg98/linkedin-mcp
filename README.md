@@ -3,8 +3,20 @@
 An MCP server that shows you your own LinkedIn account data as structured tool
 results instead of pages you have to click through.
 
-**Forty-seven tools ship. Thirty-five read. Twelve write. None is
+**Forty-nine tools ship. Thirty-seven read. Twelve write. None is
 write-shaped and unable to act.**
+
+**THAT LINE READ "Forty-seven ... Thirty-five" UNTIL 2026-09-21.** The
+forty-eighth and forty-ninth arrive together because they are one finding
+rather than two tools: `linkedin_group_page` and `linkedin_company_page_counts`
+each open an address that had been on the read allowlist for days --
+`/groups/<id>/` since 2026-09-19, `/company/<id>/` since 2026-09-20 -- with
+NOTHING IN THIS PACKAGE ABLE TO NAVIGATE TO IT, because every tool on those two
+surfaces took no parameter at all. Both allowlist entries say exactly that
+about themselves. Each new tool takes ONE numeric identifier, refuses a slug
+because a slug is a name, and answers in counts: census rows `N 175`, `N 33`
+and `N 54`, all three COVERED-UNFIRED because nothing has yet seen either tool
+return a payload live.
 
 **THAT LINE READ "Forty-six ... Thirty-four" UNTIL LATER STILL ON 2026-09-20**,
 and it moved a third time that day. The forty-seventh is
@@ -842,7 +854,7 @@ linkedin_server/
   cdp_bridge.py              the recovery path: attach to a running Chrome
   dom.py                     the read-only harvesters and the control readers
   shape.py                   pure parsers and the result envelope
-  server.py                  the forty-seven tools
+  server.py                  the forty-nine tools
   errors.py
 tests/                       1393 tests, no network, no account
   fixtures/                  frozen LinkedIn markup, scrubbed

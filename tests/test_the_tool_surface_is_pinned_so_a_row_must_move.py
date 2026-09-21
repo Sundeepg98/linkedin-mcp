@@ -88,6 +88,7 @@ PINNED_TOOL_SURFACE: dict[str, tuple[str, ...]] = {
     "linkedin_auth_status": (),
     "linkedin_cdp_status": (),
     "linkedin_comment_on_item": ("confirm_token", "item", "text"),
+    "linkedin_company_page_counts": ("organisation_id",),
     "linkedin_compose_fields": (),
     "linkedin_connections": ("limit",),
     "linkedin_creator_analytics": (),
@@ -96,6 +97,7 @@ PINNED_TOOL_SURFACE: dict[str, tuple[str, ...]] = {
     "linkedin_follow_company": ("confirm_token", "job_id"),
     "linkedin_followed_companies": ("company", "limit"),
     "linkedin_group_memberships": (),
+    "linkedin_group_page": ("group_id",),
     "linkedin_job_collections": (),
     "linkedin_job_detail": ("job_id",),
     "linkedin_login": ("wait_seconds",),
@@ -194,8 +196,29 @@ PINNED_TOOL_SURFACE: dict[str, tuple[str, ...]] = {
 #: `_audit/2026-09-19-two-census-conventions-ruled.md` section 6 says
 #: admitting the address without this shaper does not partially satisfy
 #: that ruling, it violates it -- so the two pins move together.
-PINNED_TOOL_COUNT = 47
-PINNED_PARAMETER_COUNT = 64
+#: **RE-PINNED 2026-09-21 AT 49 TOOLS AND 66 PARAMETERS**, and this is the
+#: case the guard's own docstring asks for: the surface moved and census rows
+#: move with it, in this commit. `linkedin_group_page("group_id")` and
+#: `linkedin_company_page_counts("organisation_id")` each open an address that
+#: has been on the read allowlist since 2026-09-19 and 2026-09-20 and that NO
+#: tool in this package could navigate to, because every tool on those two
+#: surfaces took no parameter at all -- which both allowlist entries state
+#: about themselves.
+#:
+#: THE PARAMETER COUNT MOVES BY TWO AND BOTH ARE NUMERIC IDENTIFIERS. Neither
+#: is a name, a url or a needle: each is refused unless it is a bounded run of
+#: the ten ASCII digits, because a slug is a name. That is the same deliberate
+#: exception `linkedin_job_detail("job_id")` and
+#: `linkedin_page_plugin_snippet("page_id")` already carry -- a BUILDER has to
+#: be handed the thing it builds from.
+#:
+#: THE ROWS: `N 175` for the group reader, `N 33` and `N 54` for the
+#: organisation Page reader. All three move GAP -> COVERED-UNFIRED and NOT to
+#: COVERED-PROVEN, because the wave that built them was forbidden the browser
+#: and nothing has seen either tool return a payload live. See
+#: `_audit/2026-09-21-the-three-readers.md`.
+PINNED_TOOL_COUNT = 49
+PINNED_PARAMETER_COUNT = 66
 
 
 def live_surface() -> dict[str, tuple[str, ...]]:

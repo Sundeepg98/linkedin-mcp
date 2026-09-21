@@ -185,6 +185,39 @@ CORRECTION_VOCABULARY = (
 #: outcome this file exists to require and so cannot also be a violation of it.
 NOT_A_CORRECTION: dict[tuple[str, str], str] = {
 
+    # 2026-09-21, the THREE-READERS wave. Both triaged by reading the line,
+    # and both are the TABLE-ROW / ADJACENT-HEADING proximity shape this
+    # dict's own docstring names.
+    ("INSTRUMENTS.md", "2026-09-21-the-three-readers.md"): (
+        "THE VOCABULARY IS THE NEXT HEADING AND IT IS ABOUT A PLANTED "
+        "DEFECT, NOT ABOUT THAT DOCUMENT. The cited line is *'Deliverable: "
+        "`_audit/2026-09-21-the-three-readers.md`.'* -- a pointer and "
+        "nothing else. The match is `wrong`, two lines below, inside "
+        "*'### 49.1 `dom.COUNT_LINES_JS` -- SHOWN FAILING BY READING THE "
+        "WRONG NUMBER'*, which is the register naming what the MUTATED "
+        "script reads. The register entry and the deliverable are the same "
+        "wave's output and neither withdraws anything in the other. "
+        "**WHAT WOULD MAKE THIS ENTRY WRONG:** a later register section "
+        "asserting that something in that deliverable is false while "
+        "leaving the deliverable untouched."
+    ),
+    ("network.md", "2026-09-21-the-three-readers.md"): (
+        "THE VOCABULARY BELONGS TO THE DELTA BELOW, WHICH IS OLDER THAN THE "
+        "CITATION AND IS NOT CORRECTED BY IT. The cited line is *'name-"
+        "freedom argument for each: `_audit/2026-09-21-the-three-readers."
+        "md`.'*, closing the THIRD DELTA -- a BUILD that moved rows 33, 54 "
+        "and 175 out of GAP. The match is `correction`, two lines below, in "
+        "the header of the SECOND DELTA: *'2026-09-20, and it is a "
+        "VOCABULARY correction rather than a finding'*, which is that "
+        "earlier delta describing ITSELF. The slice stacks its deltas "
+        "newest-first with no blank line between a delta's last line and "
+        "the next delta's header, so every new delta lands within the "
+        "window of the previous one's self-description. "
+        "**WHAT WOULD MAKE THIS ENTRY WRONG:** the three-readers document "
+        "asserting that a row or a state in this slice is mistaken while "
+        "leaving the row untouched. It does not; all three rows it discusses "
+        "are edited in the slice itself."
+    ),
     # 2026-09-21, the JOBS-DIRECTION wave. All three triaged by reading the line.
     ("2026-09-21-the-jobs-direction.md", "jobs.md"): (
         "THE CORRECTION WAS MADE IN PLACE, WHICH IS THE ONE CASE THE BACK-"
