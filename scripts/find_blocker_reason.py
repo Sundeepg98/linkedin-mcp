@@ -281,7 +281,39 @@ def _ranking() -> dict[str, list[tuple[int, str]]]:
             for hit in hits:
                 if hit in tally:
                     tally[hit][rel] = tally[hit].get(rel, 0) + 1
-    return {b: sorted(((s, d) for d, s in docs.items()), reverse=True)
+    # ON A TIE THE EARLIER DOCUMENT WINS, AND THAT IS A RULE RATHER THAN A SORT
+    # ORDER. This read `sorted(..., reverse=True)` until 2026-09-21, which sorts
+    # the FILENAME descending when scores are equal -- so a later date won, and
+    # every new document that landed on an existing score displaced the
+    # incumbent. `tests/test_the_blocker_reason_locator_states_its_recall.py`
+    # predicted this in its own words a wave earlier, having watched it happen
+    # once and declined to lower the floor because "lowering it would have
+    # hidden the tie instead of naming it":
+    #
+    #     THE SHAPER DOCUMENT FELL OUT OF THE TOP 3 ON A TIE, NOT ON MERIT ...
+    #     it is the reason the corpus growing can look exactly like the locator
+    #     getting worse.
+    #
+    # It then happened a second time and turned master red: a back-pointer
+    # added to `_audit/2026-09-21-the-write-ceiling.md` took that document from
+    # below the cut to exactly 7 for `GROUPS-SURFACE` -- a blocker its new text
+    # does not discuss -- tying `2026-09-19-groups-admission.md` and taking
+    # third place on the strength of its filename alone.
+    #
+    # MEASURED OVER THE WHOLE HAND-BUILT SET, both ways, before this changed:
+    # later-wins gives top3 6/9 against a floor of 7; earlier-wins gives 7/9,
+    # with `anywhere` 9/9 either way and no expected document losing its place.
+    # The one that moves inside the cut is `2026-09-21-the-read-triage.md`,
+    # 1 -> 3, which is the rule working rather than a cost.
+    #
+    # WHY EARLIER AND NOT A COIN: it makes the measurement MONOTONE UNDER
+    # CORPUS GROWTH. A document that ties an incumbent can no longer take its
+    # place, so a falling recall number means the locator got worse and never
+    # merely that somebody wrote another file. The scorer's precision is a
+    # separate question and is NOT fixed here -- a document scoring 7 for a
+    # blocker it never mentions is still a false positive, just no longer one
+    # that can evict the truth.
+    return {b: sorted(((s, d) for d, s in docs.items()), key=lambda sd: (-sd[0], sd[1]))
             for b, docs in tally.items()}
 
 
