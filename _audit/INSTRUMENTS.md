@@ -8156,3 +8156,261 @@ mechanical sweep would get one of them wrong.
   **zero callers among the 47 shipped tools.** The gap between "permitted and
   built" and "reachable" is invisible to every instrument that reads the
   boundary, because the boundary is not where it lives.
+
+---
+
+## 48. THE ZERO THAT HAS THREE MEANINGS, AND A MATCH THAT WAS REFUSED (the-fourteen-fired, 2026-09-21)
+
+Deliverable: `_audit/2026-09-21-the-fourteen-fired.md`. The first live reading
+of `/search/results/people/` this repository has ever taken. Fourteen census
+rows re-priced, **one banked**, one matched-and-refused, twelve left GAP with a
+measured blocker replacing an expired one.
+
+### 48.1 THE INSTRUMENTS
+
+**`scripts/_probe_people_search_shape_live.py`** -- fires the two SHIPPED
+readers (`search_results.read_results`, `read_filters`) at the live page and
+tallies them exactly as `linkedin_people_search_shape` does. Prints its own
+provenance -- git head plus sha256 of `search_results.py` and `dom.py` -- before
+it reads anything, because a firing that cannot name its own bytes has proven
+nothing, and the MCP route on this box was a day-old process from another tree.
+Refuses to run outside CDP attach mode, so it can never launch a second Chrome
+at the persistent profile. Emits no address, no label and no exception message,
+only its type.
+
+`--fire-tool [--fire-tool-times N]` additionally runs the TOOL end to end
+rather than only its readers, which is what a census row means when it says a
+tool fired. The envelope's one free-text field (`not_claimed`) is not
+whitelisted but CHECKED: each sentence must be found in `server.py`'s own
+source, because a sentence that came off the document cannot be in a file
+written before the page loaded. *The naive form of that check -- a plain
+substring test -- returned False for all three real sentences and looked
+exactly like a finding; the literals are implicit concatenations the file
+splits across lines.* **A provenance check that cannot see the shape its own
+codebase writes strings in manufactures a leak report.**
+
+*SHOWN FAILING* two ways. Its leak gate is convicted on planted defects by the
+control below. Its READING is shown able to come back empty by the cross-page
+control: the same code on the feed returns fourteen zeros while still seeing
+72-203 controls, so the instrument demonstrably CAN say nothing.
+
+**`scripts/_probe_people_search_chrome_diagnosis.py`** -- answers *why* a term
+read zero, without ever extracting a label. It drives the SHIPPED in-page
+classifier through its SHIPPED `phrases` parameter, shipping a DIFFERENT
+vocabulary in and reading the same integers back. **No new JavaScript is
+injected**, which keeps `dom.py` the only place an executed script is declared
+and scanned.
+
+*SHOWN FAILING AND SHOWN SPEAKING IN THE SAME RUN*, which is the pairing that
+matters: the synthetic negative `school anise` reads 0 while the positive
+control `next` reads 1 on the same page, and the entire twelve-phrase vocabulary
+collapses to zero on the feed.
+
+**`scripts/_check_the_probe_vocabulary_gate_can_fail.py`** -- the shown-failing
+control for the first probe's `_gate`. Eleven cases. Plants a foreign string
+nested inside a list inside a dict, a foreign key, and an unexpected type, and
+asserts each is refused; asserts the refusal names the FIELD PATH and **does not
+echo the planted value**; and asserts the gate is not vacuous by showing a
+healthy payload PASSES and that an emptied alphabet makes that same payload
+raise.
+
+*AND THE CONTROL WAS ITSELF CONVICTED, WHICH IS THE STEP THAT IS USUALLY
+SKIPPED.* A control that has only ever printed PASS is indistinguishable from
+one that cannot fail. Its `_gate` was replaced with a no-op returning `None` --
+the exact defect it exists to catch -- and the battery re-run:
+
+    default              11 of 11 PASS, exit 0
+    gate disarmed         8 of 11 FAIL,  exit 1
+
+and the three that still passed are the three that SHOULD: a no-op gate does
+not raise on a healthy payload (case A), and E1/E2 assert facts about the
+alphabet rather than about the gate. **The red proof is carried in the file
+behind `--demonstrate-red`, not in this paragraph**, on the convention
+`_check_cells_honours_escaped_pipe.py` set: *a control that describes the bug in
+prose cannot fail when the bug comes back.* The flag asserts the STRUCTURAL
+claim -- every gate-dependent case went red -- rather than a hardcoded count,
+which would go brittle the moment a twelfth case is added.
+
+**AND THE RED PROOF WAS ITSELF CHECKED FOR VACUITY, WHICH IS THE THIRD LEVEL
+AND THE ONE ALMOST NOBODY WALKS TO.** `--demonstrate-red` passes when the
+gate-dependent cases fail. If the PLANT ever stopped working, the failing set
+would be EMPTY -- and a verdict that accepted an empty set would certify a red
+proof that is no longer red, while printing green. Neutralising the plant (the
+disarmed stand-in replaced by a pass-through, so the gate is fully armed while
+the flag still claims to be testing a disarmed one) makes the flag **REFUSE,
+exit 1**. Three levels, each convicted:
+
+    the gate refuses planted defects                 11/11, exit 0
+    disarming the gate turns the control red          8 red, exit 1
+    neutralising the plant makes the RED PROOF refuse         exit 1
+
+### 48.2 THE LAW: A ZERO HAS THREE MEANINGS, AND A MATCHER'S ASYMMETRY CAN SEPARATE THEM WITHOUT READING ANYTHING
+
+> **ABSENT, UNDRAWN, MISSED.** A count of zero from a label matcher is not one
+> finding, it is three -- the control is not drawn; no chrome is drawn at all,
+> so the question was never asked; or the control is drawn and the matcher did
+> not recognise its label. **Banking a row on the wrong one is the over-claim**,
+> and the difference is invisible in the number.
+
+`FILTER_PANEL_JS` matches a one-word phrase by WHOLE-LABEL EQUALITY and a
+multi-word phrase by CONTAINMENT. That asymmetry, built for a different reason
+(keeping `connections` from matching `Connections of <a person>`), turns out to
+be a DIAGNOSTIC:
+
+    multi-word zero  -> STRONG. A decorated label would still have matched by
+                        containment. The control is not among those drawn.
+    single-word zero -> WEAK. Decoration alone defeats it; absent and decorated
+                        are indistinguishable.
+
+So seven of the twelve zeros are robust absences and five are unresolved, and
+the wave could say which without printing one label off a page whose every row
+is a third party. **The generalisable move is to read the matcher's own rules as
+an instrument** rather than treating the matcher as a black box that emits
+counts.
+
+### 48.3 THE LAW: THE ACCESSIBLE COPY IS THE DANGEROUS ONE, AND THE READER BUILT FOR IT IS DANGEROUS TOO
+
+Already known on this surface: the search card renders its proximity insight
+twice and the copies differ -- the `aria-hidden="true"` visible span is
+name-free and the `visually-hidden` screen-reader span carries the employer
+name. **The second half is new.** `FILTER_PANEL_JS` takes
+`label = getAttribute("aria-label") || textContent`, and `textContent` is
+unconditional: it ignores `aria-hidden`, `display:none` and clip-styling. This
+file's OWN 2026-08-30 comment already records `innerText` leaking that
+clip-styled pattern, and `textContent` is strictly leakier than the thing
+already shown to leak.
+
+> Here nothing escapes -- both scripts return integers and integer arrays only,
+> so it is a CORRECTNESS hazard and not a disclosure one. **But containment at
+> the boundary is the last line, not the first**, and this reader fed a count a
+> census row would have quoted.
+
+**AND THE HAZARD HAS A DIRECTION, WHICH IS WHAT MADE ONE ROW BANKABLE.** Hidden
+text can only ADD words to a label. Adding a word BREAKS a whole-label equality
+match and FEEDS a containment match. So the hazard inflates multi-word terms and
+**cannot manufacture a single-word one**. The row banked (`N 83`, `locations`)
+rides the equality path; the row refused (`N 82`, `actively hiring`) rides
+containment. *A hazard with a known direction is not a reason to bank nothing --
+it is a reason to know which side of it your evidence sits on.*
+
+### 48.4 THE LAW: A RACE THAT ONLY LOSES UNDER LOAD IS INVISIBLE TO A CAREFUL WAVE
+
+`linkedin_people_search_shape` was fired END TO END three times, not only
+through its readers. It returned the filter on **2 of 3** firings. The third
+read a page that had drawn **45 of its 83 controls** and reported every filter
+as zero.
+
+> **THE FIRST TWO RUNS OF THIS WAVE COULD NOT HAVE FOUND THIS.** They were taken
+> on a quiet box, where every reading was byte-identical at 83 controls and the
+> tool looked deterministic. The race appeared only when a sibling agent's
+> 7,386-test suite pinned the CPU at 100% and the render slipped past the
+> navigation settle. **A wave that tidies its environment before measuring
+> removes the conditions under which its instrument fails** -- and the tidy run
+> is the one that banks the row with a clean story and no knowledge of the
+> defect.
+
+Two things make it a finding rather than a fright, and both are worth copying:
+
+* **THE DENOMINATOR CAUGHT IT.** `denominators.controls_seen` read 45 against
+  83. The tool's own docstring says that field exists so a changed selector is
+  distinguishable from an empty page; **a half-drawn page lands in the same
+  slot, and the same field separates it.** A reader with no denominator would
+  have seen an authoritative "this search offers no filters".
+* **THE CORRELATION IS EXACT IN BOTH DIRECTIONS.** Across every reading taken --
+  two probes, two vocabularies, a quiet box and a loaded one -- the term read
+  **1 on every drawn page** (controls 73-83) and **0 on every partial one**
+  (controls 45), with no exception either way. That is what licenses attributing
+  the zero to the clock instead of to the page; one anecdote would not have.
+
+**A RACE IS A RATIO, SO THE INSTRUMENT TAKES A COUNT.** `--fire-tool-times N`
+exists because a single firing cannot tell a race from a verdict, and the probe
+prints *"TOOL FIRINGS THAT SAW ANY FILTER: 2 of 3"* rather than a pass.
+
+*Reported, not repaired.* The fix is a wait-for-the-panel inside a shipped tool
+on an admitted surface, which belongs to whoever owns it.
+
+### 48.5 THE REFUSAL: A MATCH IS NOT A MEANING
+
+`actively hiring` read **2**, stably, on every reading, reproduced under a
+second vocabulary. It was not banked, and that is this wave's most useful
+decision. Three facts convict it together and none is sufficient alone: the term
+is multi-word, so it matches by containment; the reader's selector is
+**unscoped** (`button, [role=...], [aria-label]` over the WHOLE document, not a
+filter panel); and it is a jobs-side badge phrase on a people page, where a
+filter pill should read 1 rather than 2.
+
+> **PRESENT IS NOT MEANINGFUL.** The sibling scars are a field that read
+> `4 true / 0 false` at n=4 and `9/2` at n=11, and a probe where every filter
+> value returned exactly 7 rows. This is the same law arriving as a POSITIVE:
+> the number came back, it was reproducible, and it still could not be
+> distinguished from page chrome without reading a label -- which on this
+> surface is the one thing forbidden.
+
+### 48.6 THE CAPTURE INSTRUMENT, AND THE LAW A SHRINKING PAGE TAUGHT IT
+
+**`scripts/_probe_how_you_match_capture.py`** -- takes the capture `J 110` and
+`J 116`-`J 120` have never had. Those rows are filed as parser-only at boundary
+0, which asserts a reader would find something in a panel **nobody has ever
+looked at**. It parses nothing, tests no token and moves no row: a probe that
+both captures the evidence and rules on it is one wave marking its own work.
+
+Ids come from the SHIPPED search tool so no search address is invented; each
+posting is opened at the `/jobs/view/<id>/` shape `readonly` admits, with
+`assert_read_url` called before navigating; attach-only; closes its own tab.
+
+**IT CAPTURES TWICE PER POSTING, AND THAT CAME STRAIGHT FROM 48.4.** If a single
+reading on the navigation settle can be a reading of a shell, a single capture
+can be a capture of one -- and a later wave would parse it, find nothing, and
+conclude the panel is absent.
+
+> **A SHRINKING PAGE IS NOT A DRAWING PAGE, AND THE DIFFERENCE DECIDES WHICH
+> BYTES SURVIVE.** The probe originally said a difference between the two
+> captures meant the page was still drawing, so the later one was the one to
+> parse. Measured on the first run: **all three postings SHRANK, and hugely** --
+> 860,705 to 208,904 bytes, 858,838 to 497,740, 831,707 to 178,177. A served
+> document was being replaced by a lighter client-rendered one. Under the
+> original rule a capture tool would have discarded a 860 KB document **on a
+> guess**, and the wave that parsed the 178 KB survivor and found no panel would
+> have filed a MEASURED-ABSENT that was an artifact of the capture.
+
+So it keeps both and names neither, and its summary says in as many words that
+it cannot tell which holds the panel. **The generalisable half: a capture tool
+may not choose. The moment it prefers one artifact it has become a reader, and
+a reader that runs before anybody has looked at the surface encodes the
+expectation of whoever wrote it.** The refuted assumption stays in the
+docstring rather than being deleted, because the assumption is the reusable
+part.
+
+**A DELIBERATE EXCEPTION TO THE REACHABILITY RULE, AND IT IS THE ONLY ONE IN
+THIS WAVE.** The captures live under gitignored `_state/`, id-to-file mapping
+beside them and never on the console. They are NOT reachable from a clone, and
+that is not a defect to repair by committing them: the HTML holds employer
+names, recruiter names and locations, and a job id names an employer's posting.
+A raw capture of a third-party surface may never be committed. What IS committed
+is the script that retakes it cheaply -- **the re-runnable instrument is the
+clone-reachable evidence when the artifact itself can never be.**
+
+### 48.7 WHAT THE WAVE MEASURED THAT IS NOT AN INSTRUMENT
+
+* **A TOOL'S "DOES NOT CLAIM" LIST IS A WORK ITEM, NOT A DISCLAIMER.**
+  `linkedin_people_search_shape` shipped saying it did not claim the address
+  serves a populated page with no query. One page load settled it: 77 anchors,
+  18 routing to the people vertical, `All filters` drawn. **The honest caveat
+  was correct and it sat unmeasured for a day because nobody read it as a
+  queue.**
+* **AN EXPIRED BLOCKER'S SUCCESSOR IS A DECISION, NOT A DEFECT.** Twelve rows
+  are not blocked by a missing tool, a missing address or the allowlist. They
+  are behind an `All filters` press that condition 5 of the admitting ruling
+  forbids. **A row whose blocker is a ruling nobody has made reads identically
+  to a row nobody has worked on**, and only a firing tells them apart.
+* **THE INDEX IS BUILT OVER TRACKED DOCUMENTS, SO STAGING PRECEDES
+  REGENERATION.** `build_audit_index.py --write` run before `git add` wrote 199
+  documents and silently omitted the new one; after staging it wrote 200. The
+  guard would have caught the drift at commit time, but the ORDER is the thing
+  worth writing down.
+* **A COUNTER-COMMAND IN A SUPERSEDED DOCUMENT GOES STALE AND MUST NOT BE
+  EDITED.** `--expect ... N=91` appears twice in the prior day's triage
+  deliverable. Its claim about its own edits stays true. The successor value
+  (`N=90`, total 284) is recorded in the census header's THIRD DELTA instead,
+  because **a wave that rewrites the record it supersedes leaves no way to see
+  that anything moved.**

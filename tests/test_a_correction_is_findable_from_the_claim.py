@@ -206,6 +206,30 @@ NOT_A_CORRECTION: dict[tuple[str, str], str] = {
         "document that a row or a state there is mistaken while leaving the "
         "row untouched. It did not; every jobs edit it made is in the slice."
     ),
+    # 2026-09-21, the FOURTEEN-FIRED wave. One pair, and it is the arrow
+    # pointing the wrong way.
+    ("network.md", "2026-09-21-the-fourteen-fired.md"): (
+        "THE CITATION IS A ROW NAMING ITS OWN RECEIPT, AND A RECEIPT IS NOT A "
+        "THING THE ROW WITHDRAWS. The line is census row 80, whose cell "
+        "reports a live firing and then says *'It does not prove the page "
+        "offers a control to NARROW to it'* -- the correction vocabulary is "
+        "the row stating ITS OWN verdict about the SURFACE, not a claim that "
+        "the cited document got anything wrong. Row 80 exists in that shape "
+        "BECAUSE of that document; it is its output. "
+        "**THE REAL CORRECTION IN THIS PAIR RUNS THE OTHER WAY AND IS "
+        "DECLARED.** `2026-09-21-the-fourteen-fired.md` carries `CORRECTS: "
+        "_audit/_census/network.md` and that slice carries the matching "
+        "`CORRECTED BY:` back-pointer, because the document is what re-priced "
+        "rows 80-93 and moved row 83 out of GAP. A second marker pair for the "
+        "reverse direction would assert that the SLICE withdrew something in "
+        "the DOCUMENT, which nothing here does. "
+        "**WHAT WOULD MAKE THIS ENTRY WRONG:** if a `network.md` row ever "
+        "asserted that this document's own readings are mistaken -- a later "
+        "wave re-reading the surface and contradicting the banked `locations` "
+        "measurement, say -- while leaving the document itself unmarked. That "
+        "row WOULD be correcting it from outside, and would need its own "
+        "marker pair. Today no row disputes a single figure in it."
+    ),
     ("INSTRUMENTS.md", "jobs.md"): (
         "THE REGISTER DESCRIBES A MEASUREMENT OF THAT SLICE, IT DOES NOT "
         "WITHDRAW ANYTHING IN IT. Section 47's line reads *'recorded "

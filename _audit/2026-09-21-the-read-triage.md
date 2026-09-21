@@ -6,6 +6,8 @@
 
 **No state moved on any of the ten**; the GAP total is 285 before and after, re-measured by the shipped counter with `--expect J=57,P=55,M=82,N=91`.
 
+**CORRECTED BY:** `_audit/2026-09-21-the-fourteen-fired.md` -- **the sentence above is still true of THIS wave and its `--expect` command is now stale.** That wave fired the people-search surface live and moved `N 83` GAP to COVERED-PROVEN, so the counter's current expectation is `--expect J=57,P=55,M=82,N=90` and the census total is 284. Nothing here is retracted: this wave moved no state, which is what it claimed. It also identified rows `80`-`94` as sharing row `79`'s expired blocker and could not re-price them because it was forbidden the browser; that is the gap the successor closed.
+
 Wave `read-triage`, 2026-09-21, from master `f80ee02`.
 Scope: the **59 READ-direction GAP rows** of `_audit/_census/profile.md` (17)
 and `_audit/_census/network.md` (42).
