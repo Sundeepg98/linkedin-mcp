@@ -27,8 +27,8 @@ are listed as `(undated)`; no date is taken from git history, because
 
 | what | count |
 | --- | --- |
-| audit documents git tracks under `_audit` | 213 |
-| of those, carrying a `YYYY-MM-DD-` date prefix | 179 |
+| audit documents git tracks under `_audit` | 215 |
+| of those, carrying a `YYYY-MM-DD-` date prefix | 180 |
 | distinct dates | 14 |
 | documents with no level-1 heading | 1 |
 | `CORRECTS:` marker lines | 83 |
@@ -39,7 +39,7 @@ are listed as `(undated)`; no date is taken from git history, because
 | documents at either end of a cross-document edge | 85 |
 | intra-document correction markers | 4 |
 | documents that correct themselves later on | 2 |
-| documents no correction marker touches at all | 126 |
+| documents no correction marker touches at all | 128 |
 | blockquoted markers naming ANOTHER document | 0 |
 | edges missing one of their two markers | 0 |
 | edges declared a different number of times in each direction | 2 |
@@ -1213,6 +1213,7 @@ ways, which is a fact about markers and not a verdict on the document.
 | (undated) | [_slice-premium-four-anchors.md](_slice-premium-four-anchors.md) | premium-four anchor-level slice -- four target routes, six captures, measured offline |  |
 | (undated) | [_slice-premium-four-jobshape.md](_slice-premium-four-jobshape.md) | job-list DOM shape -- two captures, measured offline |  |
 | (undated) | [_slice-prose-writecount.md](_slice-prose-writecount.md) | Slice: correct write-count prose rot |  |
+| (undated) | [_slice-reader-guard-subjects.md](_slice-reader-guard-subjects.md) | Reader-leak guard: exact subject set, and what sits outside it |  |
 | (undated) | [_slice-readme-read-table.md](_slice-readme-read-table.md) | Slice: complete the README read-tool table |  |
 | (undated) | [_slice-surface-census-tool.md](_slice-surface-census-tool.md) | Slice: linkedin_surface_census -- BUILT AND GREEN |  |
 | (undated) | [_slice-trace-corpus.md](_slice-trace-corpus.md) | Slice -- the parse-trace corpus, measured and widened |  |
@@ -1400,6 +1401,7 @@ ways, which is a fact about markers and not a verdict on the document.
 | 2026-09-21 | [2026-09-21-the-read-triage.md](2026-09-21-the-read-triage.md) | The read rows are GATED, not backlogged -- but nineteen of the fifty-nine are not | **CORRECTED x1** corrects x2 |
 | 2026-09-21 | [2026-09-21-the-three-readers.md](2026-09-21-the-three-readers.md) | Two readers for three rows, on two addresses nothing could navigate to -- | **CORRECTED x2** |
 | 2026-09-21 | [2026-09-21-the-write-ceiling.md](2026-09-21-the-write-ceiling.md) | THE WRITE CEILING: 157 WRITE-DIRECTION GAP ROWS, AND THE 152 THAT STAY | **CORRECTED x1** corrects x2 |
+| 2026-09-21 | [2026-09-21-what-the-browser-said.md](2026-09-21-what-the-browser-said.md) | WHAT THE BROWSER SAID: `$.message`, adjudicated by PROVENANCE CLASS |  |
 | 2026-09-21 | [2026-09-21-what-was-ruled.md](2026-09-21-what-was-ruled.md) | A register keyed on RULINGS, not on documents -- and the fourth payment |  |
 
 ## 6. What the scan rejected, could not join, or had to repair
