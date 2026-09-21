@@ -185,6 +185,26 @@ CORRECTION_VOCABULARY = (
 #: outcome this file exists to require and so cannot also be a violation of it.
 NOT_A_CORRECTION: dict[tuple[str, str], str] = {
 
+    # 2026-09-21. TWO DERIVED VIEWS MEETING, which is a shape worth naming
+    # because neither file was written by the hand that caused the pair.
+    ("RULINGS.md", "2026-09-19-two-census-conventions-ruled.md"): (
+        "`_audit/RULINGS.md` IS GENERATED, and this line is the register "
+        "RENDERING a `NOT_A_RULING` triage note out of "
+        "`scripts/build_rulings_index.py`. That note has to describe a "
+        "correction relationship in order to do its job -- it explains that a "
+        "`RULED:` string in `2026-09-21-the-open-queue.md` section 5.4b is a "
+        "CITATION of `INCIDENTAL-CAPTURE-IS-NOT-A-RULING` rather than a new "
+        "declaration, and 5.4b exists because 5.4a missed that ruling. So the "
+        "correction vocabulary is quoted, not asserted: **the register makes "
+        "no correction claim of its own**, and the real correction is "
+        "declared where it belongs, in the open-queue document, by its own "
+        "`5.4b CORRECTION TO 5.4a` heading. "
+        "Declaring it here instead would put a `CORRECTS:` marker in a file "
+        "that `--write` regenerates, so the marker would not survive its next "
+        "regeneration -- a declaration that silently deletes itself is worse "
+        "than none."
+    ),
+
     # 2026-09-21, the WRITE-CEILING wave. The correction is REAL, and its
     # TARGET IS THE CENSUS CELL ITSELF rather than either cited document --
     # which is the case this dict exists to distinguish and the one a
