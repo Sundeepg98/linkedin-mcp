@@ -122,3 +122,59 @@ hypothesis to reach it: I expected the campaign to be gated everywhere, and
 network was not — because sixteen rows sat blocked on a `/search/results/`
 pattern that had already been admitted, with its shaper and its tool, by a wave
 that never went back to re-price what it unblocked.
+
+---
+
+## 5. Addendum, 2026-09-21 07:20 — what has moved since the sections above
+
+**This corrects the sections above; it does not rewrite them.** The snapshot
+stays as written, because a count is evidence of what was true when it was
+taken. It lives in this file rather than a new one so that a reader arriving at
+a stale claim above can find its corrector — a corrector names what it corrects,
+and the corrected document cannot name its corrector unless somebody puts it
+here.
+
+**`J 40` IS COMMISSIONED.** Section 2 files it under build work *"named,
+measured and NOT yet commissioned"*; that stopped being true at 07:20. Wave
+`proximity-field` owns it in an isolated worktree, working offline against the
+two committed fixtures, and will report to
+`_audit/2026-09-21-the-proximity-field.md`. It was briefed to check `J 57` as
+well, which `_audit/2026-09-21-the-jobs-direction.md` records as blocked behind
+it.
+
+Four things were verified before commissioning rather than inherited from the
+row, because a row's reason is a reading with a timestamp:
+
+- both hydrated fixtures carry the needle and **both un-hydrated twins read 0**,
+  so the negative control is already committed and no browser slot is needed;
+- the search card's two copies differ exactly as recorded — the
+  `aria-hidden="true"` span is name-free, the `visually-hidden` span carries the
+  employer name;
+- `coerce.as_int` exists, so the wave has a coercion that cannot quote its input
+  back out through an exception;
+- the parsers live in `shape.py`, which no live wave owns, so the field can ride
+  along in readers that already exist and **no new MCP tool and no edit to
+  `server.py` is required.**
+
+**The two `22`s in `tests/test_readonly.py` are NOT a coincidence.** A survey
+filed them as *"different metric, coincidentally same number"* and I restated
+that before checking it. Measured: they are the same 22 `page.evaluate(` call
+sites in `dom.py`, counted twice — every `# readonly-ok` sits on one of those
+calls and there are no evaluate call sites outside the module. Both sites now
+say so, and say why a line-number cross-check reads 12 of 22 rather than 22:
+the waiver is counted where the comment is, the call site where the argument
+is, one line below whenever the call wraps. No check was added — asserting the
+two counts equal would convert a deliberate independence into a coupling.
+
+**The exact-value identity gate was silent on its clean path.** It returned 0
+with no output, so *examined every staged file* and *examined nothing* printed
+identically — and that second case is reachable: this gate was run and recorded
+as passing four times in one session **after** the commits had already been
+made, reading zero bytes each time. Four clean receipts for four unexamined
+commits. It now names its denominator on a pass and prints `THIS IS NOT A PASS`
+on an empty index. Refusal semantics deliberately unchanged: a shipped guard is
+not given a new way to block work without a ruling, so it became loud instead.
+
+**Nothing in section 1 has moved. Every decision there is still open**, and the
+sentence that section opens with still holds: those are the constraint, not the
+engineering.
