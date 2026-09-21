@@ -71,7 +71,7 @@ from typing import Any
 
 import pytest
 
-from linkedin_server import search_results
+from linkedin_server import coerce, search_results
 from tests.leakwalk import url_spellings, walk
 
 # ---------------------------------------------------------------------------
@@ -299,8 +299,99 @@ def test_an_absent_field_is_not_a_refusal_because_they_are_different_answers() -
 
 
 # ---------------------------------------------------------------------------
+# THE SHAPER THAT TAKES NO PAGE, AND WHY IT NEEDED ITS OWN TEST
+# ---------------------------------------------------------------------------
+
+
+def test_the_shaper_that_takes_no_page_refuses_a_string_too() -> None:
+    """``tally`` is in the property, and until 2026-09-21 it was not.
+
+    ## WHERE THE CLASS HAD GONE, AND WHY EVERY GREEN WAS HONEST
+
+    ``tests/leakwalk.py`` discovers its subjects as **every module-level
+    ``async def`` with a ``page`` parameter** -- deliberately, so a reader
+    written tomorrow is in the subject set with no edit there. ``tally`` is
+    synchronous and takes no page: it shapes a page's VALUES without touching
+    the page. So the leak class had walked one layer out of that guard's
+    subject set, and nothing in this file reached it either, because the
+    hostile payloads above are fed to READERS.
+
+    ## THE CLAIM THAT WAS TRUE OF ONE PARAMETER
+
+    ``tally``'s docstring says *"Its parameters are INTEGERS -- a needle
+    cannot reach it"* and that this is *"TRUE OF THE BEHAVIOUR AND NOT ONLY OF
+    THE SIGNATURE"*. ``counts`` was routed through the coercion family on
+    2026-09-20. ``queries_present`` was not, and reached a bare ``int()``.
+
+    ## IT WAS LATENT, NOT LIVE, AND THE DIFFERENCE IS WORTH STATING
+
+    Every caller at HEAD -- the tool in ``server`` and two probes -- passes
+    ``read_results``'s already-coerced output, so no run has ever carried a
+    name out through it. The property was held by the CALLER'S discipline
+    rather than by this function, which is exactly what "even by mistake"
+    denies. ``tests/test_search_results.py`` pins the SIGNATURE of these two
+    parameters -- the half the docstring itself says is not enough.
+    """
+    for hostile in (PLANTED_NAME, PLANTED_SLUG, "/in/" + PLANTED_SLUG):
+        shaped = search_results.tally([1, 2, 3], queries_present=hostile)
+        assert not _carries_a_plant(shaped), (
+            "tally carried a page value into its return; hostile=%r" % hostile
+        )
+        assert shaped["queries_present"] == 0, (
+            "a refused value must substitute, not pass through"
+        )
+    # AND THE INTEGER PATH IS UNCHANGED -- a repair that broke the real
+    # reading would pass the leak test and be useless.
+    assert search_results.tally([1], queries_present=4)["queries_present"] == 4
+
+
+def test_the_shaper_never_raises_a_string_it_was_handed() -> None:
+    """The exception path, which is the one an integer-only return hides.
+
+    AN INTEGER-ONLY RETURN VALUE DOES NOT MAKE A FUNCTION INTEGER-ONLY,
+    BECAUSE AN EXCEPTION IS NOT A RETURN VALUE. This is that property for the
+    page-less shaper.
+    """
+    try:
+        search_results.tally([1], queries_present=PLANTED_NAME)
+    except Exception as exc:  # noqa: BLE001 -- the point is that none is raised
+        assert not _carries_a_plant(exc), (
+            "tally raised an exception quoting a value the page chose"
+        )
+        raise AssertionError(
+            "tally raised at a hostile value instead of refusing it: %r" % exc
+        )
+
+
+# ---------------------------------------------------------------------------
 # THE CONTROLS. Every assertion above is shown failing on a planted defect.
 # ---------------------------------------------------------------------------
+
+
+def test_THIS_CONTROL_CAN_FAIL_the_page_less_shaper_really_did_leak() -> None:
+    """THE DEFECT, REPRODUCED AT ITS OWN SITE, not merely as ``int()`` in general.
+
+    The control one function up proves ``int()`` quotes what it refused. This
+    one proves that the shipped ``tally`` REACHED such an ``int()`` with its
+    second parameter, by running the exact expression the module carried until
+    2026-09-21. If this stops leaking, the repair above is being tested
+    against a defect that no longer exists and the assertions are passing for
+    an unknown reason.
+    """
+    try:
+        # THE LINE AS IT SHIPPED: `"queries_present": int(queries_present)`.
+        int(PLANTED_NAME)
+    except ValueError as exc:
+        assert _carries_a_plant(exc), (
+            "the shipped expression no longer carries its input, so the "
+            "repair cannot be shown to have repaired anything"
+        )
+    else:
+        raise AssertionError("int() accepted a name, which cannot happen")
+
+    # AND THE REPAIR IS NOT A COSMETIC RENAME: the coercion the module now
+    # uses must actually refuse the same value rather than pass it along.
+    assert coerce.as_count(PLANTED_NAME) == 0
 
 
 def test_THIS_CONTROL_CAN_FAIL_the_replaced_coercion_really_did_leak() -> None:

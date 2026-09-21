@@ -27,16 +27,16 @@ are listed as `(undated)`; no date is taken from git history, because
 
 | what | count |
 | --- | --- |
-| audit documents git tracks under `_audit` | 217 |
-| of those, carrying a `YYYY-MM-DD-` date prefix | 181 |
+| audit documents git tracks under `_audit` | 218 |
+| of those, carrying a `YYYY-MM-DD-` date prefix | 182 |
 | distinct dates | 14 |
 | documents with no level-1 heading | 1 |
-| `CORRECTS:` marker lines | 83 |
-| `CORRECTED BY:` marker lines | 83 |
-| distinct declared correction edges | 80 |
+| `CORRECTS:` marker lines | 85 |
+| `CORRECTED BY:` marker lines | 85 |
+| distinct declared correction edges | 82 |
 | documents something later corrects | 44 |
-| documents that correct something | 60 |
-| documents at either end of a cross-document edge | 85 |
+| documents that correct something | 61 |
+| documents at either end of a cross-document edge | 86 |
 | intra-document correction markers | 4 |
 | documents that correct themselves later on | 2 |
 | documents no correction marker touches at all | 130 |
@@ -511,6 +511,10 @@ document is dead; it says one thing in it was overtaken and names what.
 
   > row `M M4` moved EXCLUDED-RULED to MEASURED-ABSENT, because its cell reports a measurement and not a decision.
 
+- CORRECTED BY [2026-09-21-the-search-results-surface.md](2026-09-21-the-search-results-surface.md)
+
+  > row `C70` carried `N 161`'s text verbatim, including a citation to `readonly.py:547-549` which at HEAD resolves to prose about `/in/me/` surviving a redirect rather than to the groups comment it names. **A rotted line citation does not dangle here; it lands on another allowlist comment, so a reader who follows it finds something plausible and stops.** Repaired to a SYMBOL citation, as `CANONICAL-RULING-ID` requires, and the phrase *"NAMED REFUSAL"* is dropped because it pointed a reader at `EXCLUDED-RULED` when a comment declining to inherit an address is not one of that state's four admitted grounds. Both address spellings this row needs were re-measured through the shipped gate and both are refused. **NO STATE MOVED** -- this slice is 142 rows and 77 GAP before and after.
+
 - CORRECTED BY [2026-09-21-the-write-ceiling.md](2026-09-21-the-write-ceiling.md)
 
   > this slice's 71 write-direction GAP rows were adjudicated row by row on 2026-09-21; five moved to EXCLUDED-RULED and 66 stayed GAP.
@@ -550,6 +554,10 @@ document is dead; it says one thing in it was overtaken and names what.
 - CORRECTED BY [2026-09-21-the-read-triage.md](2026-09-21-the-read-triage.md)
 
   > nine rows carried a stated reason that is FALSE at HEAD and each is now corrected in place: `33`, `53`, `54`, `102` and `104` on the company root (admitted 2026-09-20), `79` on the people-search pattern (admitted 2026-09-20 with its shaper and its tool), `99` and `100` on the `/school/` pattern (admitted 2026-09-05, and the cell's "0 grep hits" was a reading of a tree that no longer exists), and `132` on the claim that no tool returns an appearance count. **NO STATE MOVED ON ANY OF THEM** -- the slice's GAP count is 91 before and after, and the census total is 285 either way, re-measured by `scripts/count_census_states.py --expect J=57,P=55,M=82,N=91`. The one row that could move is `53`, which a build wave already found SHIPPED and pre-existing; what stops it here is that no committed record shows the key POPULATED in a live fire, and this wave was forbidden the browser.
+
+- CORRECTED BY [2026-09-21-the-search-results-surface.md](2026-09-21-the-search-results-surface.md)
+
+  > nine cells on this slice carried a reason that is FALSE at HEAD, absent altogether, or pointed at the wrong file, and each is corrected in place: `4` and `194` said *"no people search"* (admitted 2026-09-20); `94` and `179` were **EMPTY and had never been measured** -- `94` was swept along by the range wording `80-94` while only `80`-`93` were re-priced, and `179` carries this blocker but sits outside the people block, so every wave passed it; `161` cited `readonly.py:547-549`, which at HEAD is prose about `/in/me/` and not the groups comment; `83` described a panel race the tool no longer runs, `read_filters_when_settled` having closed it. Rows `80`, `81`, `88`, `89` and `93` additionally gained the label-SHAPE route they each named as unbuilt, now shipped and UNFIRED, with the exact live reading that would close them written into the cell. **NO STATE MOVED ON ANY ROW** -- this slice is 209 rows and 87 GAP before and after, the census total is 704 either way, and `scripts/reader_closable_blockers.py` still reports `SEARCH-RESULTS-SURFACE` at 20 GAP / 19 reader-reachable with all four of its controls passing.
 
 - CORRECTED BY [2026-09-21-the-write-ceiling.md](2026-09-21-the-write-ceiling.md)
 
@@ -1165,6 +1173,18 @@ reach is visible. The quoted reason here is the CORRECTOR's own
 
   > row `K8`, whose reason cell reads "no tool, no reason" when the reading exists and was taken at allowlist +0.
 
+### [2026-09-21-the-search-results-surface.md](2026-09-21-the-search-results-surface.md)
+
+2026-09-21 &middot; THE SEARCH-RESULTS SURFACE -- the largest reader-closable concentration, and what a reader can actually do with it
+
+- CORRECTS [_census/messaging-and-content.md](_census/messaging-and-content.md)
+
+  > row `C70` carries `N 161`'s text verbatim, including the same rotted line citation. Both are repaired to a SYMBOL citation as `CANONICAL-RULING-ID` requires, and both drop the phrase *"NAMED REFUSAL"*, which pointed a reader at `EXCLUDED-RULED` when a comment declining to inherit an address is not one of that state's four admitted grounds. **NO STATE MOVES.**
+
+- CORRECTS [_census/network.md](_census/network.md)
+
+  > rows `4` and `194` name their blocker as *"no people search"*, which has been false since 2026-09-20, when `/search/results/people/` was admitted with its shaper and its tool; rows `94` and `179` carried EMPTY evidence cells and had never been measured by anybody; row `161`'s citation `readonly.py:547-549` resolves at HEAD to prose about `/in/me/` surviving a redirect, not to the groups comment it names; row `83` states in the present tense that *"the tool reads immediately after the navigation settle"*, which stopped being true when `read_filters_when_settled` landed and `server`'s tool was wired to it. **NO ROW CHANGES STATE** -- nine evidence cells are corrected in place plus five given a built route, the state column is untouched on every one, and `stated rows` is 704 before and after with all four slices identical.
+
 ### [2026-09-21-the-write-ceiling.md](2026-09-21-the-write-ceiling.md)
 
 2026-09-21 &middot; THE WRITE CEILING: 157 WRITE-DIRECTION GAP ROWS, AND THE 152 THAT STAY
@@ -1221,8 +1241,8 @@ ways, which is a fact about markers and not a verdict on the document.
 | (undated) | [_slice-unfollow-census.md](_slice-unfollow-census.md) | Unfollow-anchor census -- linkedin MCP server |  |
 | (undated) | [_census/jobs.md](_census/jobs.md) | Census slice: JOBS, END TO END | **CORRECTED x5** |
 | (undated) | [_census/mcp-inventory.md](_census/mcp-inventory.md) | MCP inventory -- what this server ACTUALLY DELIVERS |  |
-| (undated) | [_census/messaging-and-content.md](_census/messaging-and-content.md) | Capability census -- MESSAGING AND CONTENT | **CORRECTED x4** |
-| (undated) | [_census/network.md](_census/network.md) | CENSUS SLICE: NETWORK AND PEOPLE | **CORRECTED x9** |
+| (undated) | [_census/messaging-and-content.md](_census/messaging-and-content.md) | Capability census -- MESSAGING AND CONTENT | **CORRECTED x5** |
+| (undated) | [_census/network.md](_census/network.md) | CENSUS SLICE: NETWORK AND PEOPLE | **CORRECTED x10** |
 | (undated) | [_census/profile.md](_census/profile.md) | CENSUS SLICE: PROFILE, IDENTITY, SETTINGS AND PRIVACY | **CORRECTED x2** |
 | 2026-08-22 | [2026-08-22-linkedin-preflight.md](2026-08-22-linkedin-preflight.md) | 2026-08-22 - browser preflight, and a session_info that outlives the browser |  |
 | 2026-08-22 | [2026-08-22-parity-linkedin.md](2026-08-22-parity-linkedin.md) | LinkedIn parity, 2026-08-22 -- what he can do that this server cannot | **CORRECTED x1** |
@@ -1401,6 +1421,7 @@ ways, which is a fact about markers and not a verdict on the document.
 | 2026-09-21 | [2026-09-21-the-open-queue.md](2026-09-21-the-open-queue.md) | The open queue, 2026-09-21 at master `9dbaad2` |  |
 | 2026-09-21 | [2026-09-21-the-proximity-field.md](2026-09-21-the-proximity-field.md) | The proximity field -- census row `J 40`, read per-job network proximity |  |
 | 2026-09-21 | [2026-09-21-the-read-triage.md](2026-09-21-the-read-triage.md) | The read rows are GATED, not backlogged -- but nineteen of the fifty-nine are not | **CORRECTED x1** corrects x2 |
+| 2026-09-21 | [2026-09-21-the-search-results-surface.md](2026-09-21-the-search-results-surface.md) | THE SEARCH-RESULTS SURFACE -- the largest reader-closable concentration, and what a reader can actually do with it | corrects x2 |
 | 2026-09-21 | [2026-09-21-the-three-readers.md](2026-09-21-the-three-readers.md) | Two readers for three rows, on two addresses nothing could navigate to -- | **CORRECTED x2** |
 | 2026-09-21 | [2026-09-21-the-write-ceiling.md](2026-09-21-the-write-ceiling.md) | THE WRITE CEILING: 157 WRITE-DIRECTION GAP ROWS, AND THE 152 THAT STAY | **CORRECTED x1** corrects x2 |
 | 2026-09-21 | [2026-09-21-what-the-browser-said.md](2026-09-21-what-the-browser-said.md) | WHAT THE BROWSER SAID: `$.message`, adjudicated by PROVENANCE CLASS |  |

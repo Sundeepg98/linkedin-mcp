@@ -10393,6 +10393,32 @@ FILTER_PANEL_JS = """
     }
     return false;
   };
+  // THE SHAPE TEST. SAME TOKEN WINDOW, WITHOUT THE SINGLE-WORD ASYMMETRY.
+  //
+  // WHAT IT IS FOR: a single-word term reading 0 through matchPhrase cannot
+  // distinguish "the page does not draw this control" from "the page draws
+  // it with a decorated label", because the asymmetry above requires a
+  // one-word phrase to BE the whole label. That ambiguity is the stated
+  // blocker on the degree-filter row and it is the only thing this adds.
+  //
+  // IT IS DELIBERATELY NOT A LOOSENING OF matchPhrase. The asymmetry is load
+  // bearing -- it is what keeps the degree filter apart from the
+  // person-valued one, whose label IS A PERSON -- so this is a SECOND,
+  // SEPARATELY COUNTED reading and matchPhrase is untouched. Loosening the
+  // matcher is precisely the repair the module refuses.
+  const windowMatch = (haystack, phrase) => {
+    const words = haystack.split(" ").filter((w) => w.length > 0);
+    const needle = phrase.split(" ").filter((w) => w.length > 0);
+    if (needle.length === 0 || needle.length > words.length) return false;
+    for (let start = 0; start + needle.length <= words.length; start += 1) {
+      let matched = true;
+      for (let i = 0; i < needle.length; i += 1) {
+        if (words[start + i] !== needle[i]) { matched = false; break; }
+      }
+      if (matched) return true;
+    }
+    return false;
+  };
   // THE CONTROL PATH, as in the other readers here. DOMParser, never a
   // markup assignment; see anchors.py for the full reason.
   let root = document;
@@ -10410,6 +10436,9 @@ FILTER_PANEL_JS = """
     )
   );
   const counts = Array.from({ length: termCount }, () => 0);
+  // COUNTED ONLY OVER CONTROLS matchPhrase REFUSED, so the two arrays are
+  // DISJOINT per control and `counts` keeps exactly the meaning it had.
+  const decorated = Array.from({ length: termCount }, () => 0);
   let matchedControls = 0;
   let unmatchedControls = 0;
   let emptyLabels = 0;
@@ -10426,14 +10455,27 @@ FILTER_PANEL_JS = """
     for (const pair of phrases) {
       if (matchPhrase(label, pair[0])) { index = pair[1]; break; }
     }
-    if (index === -1) { unmatchedControls += 1; continue; }
+    if (index === -1) {
+      unmatchedControls += 1;
+      // THE SHAPE PASS, over the controls the shipped matcher REFUSED and
+      // only those. Same longest-first order, same break, so a label is
+      // attributed to at most one term here exactly as above.
+      for (const pair of phrases) {
+        if (windowMatch(label, pair[0])) { decorated[pair[1]] += 1; break; }
+      }
+      continue;
+    }
     counts[index] += 1;
     matchedControls += 1;
   }
-  // INTEGERS ONLY. No label is in this return value, by construction.
+  // INTEGERS ONLY. No label is in this return value, by construction --
+  // `decorated` is a count of CONTROLS, never a property of a label, and
+  // deliberately carries no word count: a word count of a label reading
+  // `Connections of <a person>` is a fact about that person's name.
   return {
     controls: controls.length,
     counts: counts,
+    decorated: decorated,
     matched_controls: matchedControls,
     unmatched_controls: unmatchedControls,
     empty_labels: emptyLabels,
