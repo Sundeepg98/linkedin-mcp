@@ -1,0 +1,21 @@
+[
+  {
+    "branch": "connect_refused",
+    "exc_type": "Error",
+    "exc_module": "playwright._impl._errors",
+    "text": "APIRequestContext.get: connect ECONNREFUSED 127.0.0.1:57540\nCall log:\n  - \u2192 GET http://127.0.0.1:57540/identity\n    - user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/153.0.8010.12 Safari/537.36\n    - accept: */*\n    - accept-encoding: gzip,deflate,br\n    - cookie: li_at=<PLANTED-CREDENTIAL-HERE>\n"
+  },
+  {
+    "branch": "timeout",
+    "exc_type": "TimeoutError",
+    "exc_module": "playwright._impl._errors",
+    "text": "APIRequestContext.get: Timeout 900ms exceeded.\nCall log:\n  - \u2192 GET http://127.0.0.1:57539/identity\n    - user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/153.0.8010.12 Safari/537.36\n    - accept: */*\n    - accept-encoding: gzip,deflate,br\n    - cookie: li_at=<PLANTED-CREDENTIAL-HERE>\n"
+  },
+  {
+    "branch": "cookie_jar_read_on_closed_context",
+    "exc_type": "TargetClosedError",
+    "exc_module": "playwright._impl._errors",
+    "text": "BrowserContext.cookies: Target page, context or browser has been closed",
+    "sink": "_cookie_records re-raise"
+  }
+]

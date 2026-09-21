@@ -27,8 +27,8 @@ are listed as `(undated)`; no date is taken from git history, because
 
 | what | count |
 | --- | --- |
-| audit documents git tracks under `_audit` | 227 |
-| of those, carrying a `YYYY-MM-DD-` date prefix | 188 |
+| audit documents git tracks under `_audit` | 229 |
+| of those, carrying a `YYYY-MM-DD-` date prefix | 189 |
 | distinct dates | 14 |
 | documents with no level-1 heading | 2 |
 | `CORRECTS:` marker lines | 88 |
@@ -39,7 +39,7 @@ are listed as `(undated)`; no date is taken from git history, because
 | documents at either end of a cross-document edge | 88 |
 | intra-document correction markers | 4 |
 | documents that correct themselves later on | 2 |
-| documents no correction marker touches at all | 137 |
+| documents no correction marker touches at all | 139 |
 | blockquoted markers naming ANOTHER document | 0 |
 | edges missing one of their two markers | 0 |
 | edges declared a different number of times in each direction | 2 |
@@ -1247,6 +1247,7 @@ ways, which is a fact about markers and not a verdict on the document.
 | (undated) | [_slice-apply-census.md](_slice-apply-census.md) | Apply-control census - LinkedIn MCP job-posting captures |  |
 | (undated) | [_slice-apply-modal-fixture.md](_slice-apply-modal-fixture.md) | Slice: the apply-modal reader gets a DERIVED fixture and real execution |  |
 | (undated) | [_slice-apply-test-repoint.md](_slice-apply-test-repoint.md) | Slice: repoint the tests that pinned "apply registers no tool" |  |
+| (undated) | [_slice-auth-interp-census.md](_slice-auth-interp-census.md) | AST census: exception/dependency interpolation in linkedin_server/auth.py |  |
 | (undated) | [_slice-auth-rename-repoint.md](_slice-auth-rename-repoint.md) | Slice: repoint tests after the linkedin_login rename |  |
 | (undated) | [_slice-block-cards-subtraction.md](_slice-block-cards-subtraction.md) | Slice: port the isRendered guard to HARVEST_BLOCK_CARDS_JS |  |
 | (undated) | [_slice-boundary-ruled-surfaces.md](_slice-boundary-ruled-surfaces.md) | Slice: the two ruled surfaces -- `/in/me/edit/intro/` and `/mypreferences/d/dark-mode` |  |
@@ -1447,6 +1448,7 @@ ways, which is a fact about markers and not a verdict on the document.
 | 2026-09-21 | [2026-09-21-refuse-before-the-click.md](2026-09-21-refuse-before-the-click.md) | REFUSE BEFORE THE CLICK -- the press gate now consults the basis table before it touches a page | corrects x1 |
 | 2026-09-21 | [2026-09-21-taint-does-not-survive-a-container.md](2026-09-21-taint-does-not-survive-a-container.md) | The output-sink guard misses a landed URL that reaches stdout |  |
 | 2026-09-21 | [2026-09-21-the-all-filters-press.md](2026-09-21-the-all-filters-press.md) | THE `All filters` PRESS: REFUSED AT CONDITION 2, AND THE GATE WOULD HAVE PRESSED FIRST | corrects x2 |
+| 2026-09-21 | [2026-09-21-the-auth-reason-leak.md](2026-09-21-the-auth-reason-leak.md) | THE AUTH REASON LEAK: a session credential in a published field, and in the log |  |
 | 2026-09-21 | [2026-09-21-the-compound-rows.md](2026-09-21-the-compound-rows.md) | The compound rows -- when one census row names two capabilities | corrects x1 |
 | 2026-09-21 | [2026-09-21-the-field-beside-the-message.md](2026-09-21-the-field-beside-the-message.md) | THE FIELD BESIDE THE MESSAGE: 20 SITES, ADJUDICATED ONE AT A TIME |  |
 | 2026-09-21 | [2026-09-21-the-fires-and-the-controls.md](2026-09-21-the-fires-and-the-controls.md) | THE FIRES AND THE CONTROLS | corrects x2 |
