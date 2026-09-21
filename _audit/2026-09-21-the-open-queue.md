@@ -223,3 +223,27 @@ is per-checkout: `.git/hooks` is untracked, so a fresh clone has no protection
 until `install_git_hooks.py` is run. The repo-wide half is
 `tests/test_pre_push_ref_gate.py`, which runs on three CI platforms because the
 gate's decision is a pure function of git's stdin and needs no wordlist.
+
+### 5.2 Two items added to section 2, from survey children, 08:25
+
+**`collections_page.py` has no written `CONTROL_EXPECTATION`** — the one gap of
+four modules; `anchors`, `search_results` and `company_root` each have one.
+Found by the `control-expect` survey. Small, uncontested, and deliberately NOT
+bolted onto a wave that is already firing: it wants its own slot.
+
+**The `DOMParser` branch of all five `dom.*_JS` scripts is uncertified by
+`tests/`.** All 8 test call sites of a `control_fixture()` are string-only
+substring asserts, or a "seam" where Python regex lifts hrefs and labels out of
+the fixture and feeds them to a pure JS function under node — and **node has no
+DOM**, so `DOMParser`/`querySelectorAll` is never reached. All five scripts
+HAVE that branch. The only thing that drives it is
+`scripts/_probe_control_paths_live.py`, which was **untracked**; it has been run
+clean (5 PASS) and planted (5 correctly FAIL), and the lead has ruled it gets
+committed. Until that lands, "the html branch is certified" has no artifact.
+
+Its sharpest measurement is worth carrying forward on its own: renaming ONLY
+the `visually-hidden` class flips `connections_at_organisation` from **11 to 41**
+in a real browser, matching the V8 synthetic-tree prediction exactly. That is
+the accessible-copy hazard demonstrated live rather than argued — the
+screen-reader copy inflating a count by nearly 4x — on the same surface `J 40`
+reads.
