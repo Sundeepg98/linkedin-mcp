@@ -131,10 +131,12 @@ def main() -> int:
         return 0
 
     hits: list[tuple[str, int, str, str]] = []
+    examined = 0
     for path in _staged_paths():
         content = _staged_content(path)
         if content is None:
             continue
+        examined += 1
         folded_lines = content.splitlines()
         for number, line in enumerate(folded_lines, start=1):
             low = line.casefold()
@@ -148,6 +150,22 @@ def main() -> int:
                 break
 
     if not hits:
+        # SAY WHAT WAS EXAMINED. A silent ``return 0`` reads identically
+        # whether this gate checked every staged file or checked nothing, and
+        # the difference is the whole value of it. Measured 2026-09-21: it was
+        # run and recorded as passing four times in one session AFTER the
+        # commits had already been made, so the index was empty every time and
+        # it examined zero bytes. Four clean receipts for four unexamined
+        # commits. An empty index is not a clean one.
+        spellings = sum(len(values) for values in wordlist.values())
+        if examined == 0:
+            print("pre-commit: identity gate examined NO staged content. "
+                  "THIS IS NOT A PASS -- nothing was checked. Stage the "
+                  "change first; run after a commit and there is nothing "
+                  "left in the index to read.", file=sys.stderr)
+            return 0
+        print(f"pre-commit: identity gate examined {examined} staged file(s) "
+              f"against {spellings} spellings; 0 hits.", file=sys.stderr)
         return 0
 
     print("", file=sys.stderr)
