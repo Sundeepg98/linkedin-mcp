@@ -27,16 +27,16 @@ are listed as `(undated)`; no date is taken from git history, because
 
 | what | count |
 | --- | --- |
-| audit documents git tracks under `_audit` | 207 |
-| of those, carrying a `YYYY-MM-DD-` date prefix | 174 |
+| audit documents git tracks under `_audit` | 208 |
+| of those, carrying a `YYYY-MM-DD-` date prefix | 175 |
 | distinct dates | 14 |
 | documents with no level-1 heading | 1 |
-| `CORRECTS:` marker lines | 79 |
-| `CORRECTED BY:` marker lines | 79 |
-| distinct declared correction edges | 76 |
-| documents something later corrects | 42 |
-| documents that correct something | 57 |
-| documents at either end of a cross-document edge | 82 |
+| `CORRECTS:` marker lines | 81 |
+| `CORRECTED BY:` marker lines | 81 |
+| distinct declared correction edges | 78 |
+| documents something later corrects | 43 |
+| documents that correct something | 58 |
+| documents at either end of a cross-document edge | 83 |
 | intra-document correction markers | 4 |
 | documents that correct themselves later on | 2 |
 | documents no correction marker touches at all | 123 |
@@ -427,6 +427,14 @@ document is dead; it says one thing in it was overtaken and names what.
 
   > section 6 above records the 22 as NOT REPAIRED and pinned at 26 (token, document) rows; all 22 are now repaired and `PINNED` is empty. That wave also measured what this one did not: every one of the 22 has an exact twin on `master` -- identical subject, identical author date, identical `git patch-id` -- so the branches never merged but the work was re-applied. The deferral reasoning here (nineteen documents, three waves live) was correct at the time; those waves have since merged.
 
+### [2026-09-21-the-fourteen-fired.md](2026-09-21-the-fourteen-fired.md)
+
+2026-09-21 &middot; THE FOURTEEN FIRED: one banked, one refused, twelve behind a press
+
+- CORRECTED BY [2026-09-21-the-all-filters-press.md](2026-09-21-the-all-filters-press.md)
+
+  > section 5 and section 8 of this document say the `All filters` press is forbidden by condition 5 of the admitting ruling and would be the one action that settles twelve rows. **Both halves are wrong and the second is the expensive one.** The disclosing press was ruled on 2026-09-19, and the control fails that ruling's condition 2 terminally: measured live, twice, it declares NEITHER `aria-expanded` NOR `aria-haspopup`, so it is not a member of either sanctioned node set and no caller naming a sanctioned shape can reach it. Condition 3 refuses it a second time -- no sensitivity basis is declared for this surface. **NOTHING MEASURED IN THIS DOCUMENT IS DISTURBED:** `locations` = 1, `actively hiring` = 2, `all filters` = 1, `next` = 1 and `school anise` = 0 all reproduced on two fresh loads, and every one of the fourteen verdicts stands.
+
 ### [2026-09-21-the-read-triage.md](2026-09-21-the-read-triage.md)
 
 2026-09-21 &middot; The read rows are GATED, not backlogged -- but nineteen of the fifty-nine are not
@@ -514,6 +522,10 @@ document is dead; it says one thing in it was overtaken and names what.
 - CORRECTED BY [2026-09-20-the-write-partition.md](2026-09-20-the-write-partition.md)
 
   > the claim that this ruling removes the connections list was put through the shipped read gate on 2026-09-20 and the address is ADMITTED, so the side effect described above no longer happens.
+
+- CORRECTED BY [2026-09-21-the-all-filters-press.md](2026-09-21-the-all-filters-press.md)
+
+  > rows `80`, `81`, `84`-`93` named their blocker as *"A PRESS NOBODY HAS RULED ON"*. **The press IS ruled** -- the disclosing-press ruling of 2026-09-19, cited in full in the correcting document -- **and the `All filters` control fails its condition 2 TERMINALLY**: measured live on the settled page, twice, it declares neither `aria-expanded` nor `aria-haspopup` and reads position -1 in both node lists, on a reader shown reporting PRESENT for two other controls on the same reading. Condition 3 refuses it independently -- no sensitivity basis is declared for this surface. **NO STATE MOVED ON ANY ROW**: twelve evidence cells were corrected in place, the state column is untouched on every one, and the slice's counts stand exactly as the preceding wave left them. The correction matters because the two blockers are opposite kinds -- an unmade ruling resolves, a terminal mechanism refusal does not, and a wave reading the old cell would go and ask for a ruling that already exists.
 
 - CORRECTED BY [2026-09-21-the-fires-and-the-controls.md](2026-09-21-the-fires-and-the-controls.md)
 
@@ -1061,6 +1073,18 @@ reach is visible. The quoted reason here is the CORRECTOR's own
 
   > R2's headline claim that the ruling removes the connections list, measured false at HEAD through the shipped read gate; the back-pointer is written into R2 itself.
 
+### [2026-09-21-the-all-filters-press.md](2026-09-21-the-all-filters-press.md)
+
+2026-09-21 &middot; THE `All filters` PRESS: REFUSED AT CONDITION 2, AND THE GATE WOULD HAVE PRESSED FIRST
+
+- CORRECTS [2026-09-21-the-fourteen-fired.md](2026-09-21-the-fourteen-fired.md)
+
+  > its section 5 and its row table say opening the panel *"is a press, and condition 5 of the admitting ruling is that nothing is fired from this surface"*, and its section 8 records the press as the *"one action that would settle twelve rows"*. **The press is not blocked by condition 5 and it would not settle them.** The disclosing press was RULED on 2026-09-19, and the `All filters` control fails that ruling's condition 2 TERMINALLY: measured live twice, it declares neither `aria-expanded` nor `aria-haspopup`, so no caller naming a sanctioned shape can reach it. That document's readings are not disturbed -- every count in it that this wave re-took reproduced -- and its verdicts on all fourteen rows stand.
+
+- CORRECTS [_census/network.md](_census/network.md)
+
+  > rows `80`, `81`, `84`-`93` each name the blocker as a press nobody has ruled on. The press IS ruled and the control fails it, which is the opposite kind of blocker: a deferral that resolves, replaced by one that does not. **NO ROW CHANGES STATE** -- twelve evidence cells are corrected in place, the state column is untouched on every one, and the slice's counts stand exactly as the preceding wave left them.
+
 ### [2026-09-21-the-fires-and-the-controls.md](2026-09-21-the-fires-and-the-controls.md)
 
 2026-09-21 &middot; THE FIRES AND THE CONTROLS
@@ -1167,7 +1191,7 @@ ways, which is a fact about markers and not a verdict on the document.
 | (undated) | [_census/jobs.md](_census/jobs.md) | Census slice: JOBS, END TO END | **CORRECTED x5** |
 | (undated) | [_census/mcp-inventory.md](_census/mcp-inventory.md) | MCP inventory -- what this server ACTUALLY DELIVERS |  |
 | (undated) | [_census/messaging-and-content.md](_census/messaging-and-content.md) | Capability census -- MESSAGING AND CONTENT | **CORRECTED x4** |
-| (undated) | [_census/network.md](_census/network.md) | CENSUS SLICE: NETWORK AND PEOPLE | **CORRECTED x7** |
+| (undated) | [_census/network.md](_census/network.md) | CENSUS SLICE: NETWORK AND PEOPLE | **CORRECTED x8** |
 | (undated) | [_census/profile.md](_census/profile.md) | CENSUS SLICE: PROFILE, IDENTITY, SETTINGS AND PRIVACY | **CORRECTED x2** |
 | 2026-08-22 | [2026-08-22-linkedin-preflight.md](2026-08-22-linkedin-preflight.md) | 2026-08-22 - browser preflight, and a session_info that outlives the browser |  |
 | 2026-08-22 | [2026-08-22-parity-linkedin.md](2026-08-22-parity-linkedin.md) | LinkedIn parity, 2026-08-22 -- what he can do that this server cannot | **CORRECTED x1** |
@@ -1334,8 +1358,9 @@ ways, which is a fact about markers and not a verdict on the document.
 | 2026-09-20 | [2026-09-20-the-unfired-twentyseven.md](2026-09-20-the-unfired-twentyseven.md) | The unfired twenty-seven |  |
 | 2026-09-20 | [2026-09-20-the-write-partition.md](2026-09-20-the-write-partition.md) | THE WRITE PARTITION: 101 WRITE-DIRECTION GAP ROWS, AND THE 87 THAT STAY | corrects x1 |
 | 2026-09-21 | [2026-09-21-taint-does-not-survive-a-container.md](2026-09-21-taint-does-not-survive-a-container.md) | The output-sink guard misses a landed URL that reaches stdout |  |
+| 2026-09-21 | [2026-09-21-the-all-filters-press.md](2026-09-21-the-all-filters-press.md) | THE `All filters` PRESS: REFUSED AT CONDITION 2, AND THE GATE WOULD HAVE PRESSED FIRST | corrects x2 |
 | 2026-09-21 | [2026-09-21-the-fires-and-the-controls.md](2026-09-21-the-fires-and-the-controls.md) | THE FIRES AND THE CONTROLS | corrects x2 |
-| 2026-09-21 | [2026-09-21-the-fourteen-fired.md](2026-09-21-the-fourteen-fired.md) | THE FOURTEEN FIRED: one banked, one refused, twelve behind a press | corrects x2 |
+| 2026-09-21 | [2026-09-21-the-fourteen-fired.md](2026-09-21-the-fourteen-fired.md) | THE FOURTEEN FIRED: one banked, one refused, twelve behind a press | **CORRECTED x1** corrects x2 |
 | 2026-09-21 | [2026-09-21-the-jobs-direction.md](2026-09-21-the-jobs-direction.md) | THE JOBS DIRECTION: the fifth of the GAP that was never asked the question | corrects x1 |
 | 2026-09-21 | [2026-09-21-the-landed-url.md](2026-09-21-the-landed-url.md) | A LANDING IS A STRING THE SITE CHOSE, AND THIS PROCESS HAD NO ALLOWLIST FOR IT | corrects x1 |
 | 2026-09-21 | [2026-09-21-the-open-queue.md](2026-09-21-the-open-queue.md) | The open queue, 2026-09-21 at master `9dbaad2` |  |

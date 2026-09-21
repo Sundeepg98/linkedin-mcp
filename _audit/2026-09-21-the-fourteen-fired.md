@@ -9,6 +9,8 @@
 
 **CORRECTS:** `_audit/_census/network.md` -- rows 80 through 93 each carried an EMPTY evidence cell and a blocker that expired 2026-09-20; all fourteen are re-priced here from a live firing, row 83 moves GAP to COVERED-PROVEN, and the slice's GAP count moves 91 to 90.
 
+**CORRECTED BY:** `_audit/2026-09-21-the-all-filters-press.md` -- section 5 and section 8 of this document say the `All filters` press is forbidden by condition 5 of the admitting ruling and would be the one action that settles twelve rows. **Both halves are wrong and the second is the expensive one.** The disclosing press was ruled on 2026-09-19, and the control fails that ruling's condition 2 terminally: measured live, twice, it declares NEITHER `aria-expanded` NOR `aria-haspopup`, so it is not a member of either sanctioned node set and no caller naming a sanctioned shape can reach it. Condition 3 refuses it a second time -- no sensitivity basis is declared for this surface. **NOTHING MEASURED IN THIS DOCUMENT IS DISTURBED:** `locations` = 1, `actively hiring` = 2, `all filters` = 1, `next` = 1 and `school anise` = 0 all reproduced on two fresh loads, and every one of the fourteen verdicts stands.
+
 **CORRECTS:** `_audit/2026-09-21-the-read-triage.md` -- its re-measure command `--expect J=57,P=55,M=82,N=91` no longer passes now that row 83 has left GAP, so the live expectation is `N=90` and a census total of 284; that document's own claim is NOT wrong and is NOT rewritten, because it moved no state and said so truthfully.
 
 **2026-09-21. Read-only. `writes_enabled` False, verified in-process before the
