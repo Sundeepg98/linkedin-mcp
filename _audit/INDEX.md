@@ -27,19 +27,19 @@ are listed as `(undated)`; no date is taken from git history, because
 
 | what | count |
 | --- | --- |
-| audit documents git tracks under `_audit` | 230 |
-| of those, carrying a `YYYY-MM-DD-` date prefix | 190 |
+| audit documents git tracks under `_audit` | 231 |
+| of those, carrying a `YYYY-MM-DD-` date prefix | 191 |
 | distinct dates | 14 |
 | documents with no level-1 heading | 2 |
-| `CORRECTS:` marker lines | 88 |
-| `CORRECTED BY:` marker lines | 88 |
-| distinct declared correction edges | 85 |
-| documents something later corrects | 45 |
-| documents that correct something | 62 |
-| documents at either end of a cross-document edge | 88 |
+| `CORRECTS:` marker lines | 89 |
+| `CORRECTED BY:` marker lines | 89 |
+| distinct declared correction edges | 86 |
+| documents something later corrects | 46 |
+| documents that correct something | 63 |
+| documents at either end of a cross-document edge | 90 |
 | intra-document correction markers | 4 |
 | documents that correct themselves later on | 2 |
-| documents no correction marker touches at all | 140 |
+| documents no correction marker touches at all | 139 |
 | blockquoted markers naming ANOTHER document | 0 |
 | edges missing one of their two markers | 0 |
 | edges declared a different number of times in each direction | 2 |
@@ -474,6 +474,14 @@ document is dead; it says one thing in it was overtaken and names what.
 - CORRECTED BY [2026-09-21-the-compound-rows.md](2026-09-21-the-compound-rows.md)
 
   > section 8 blames `M C85`'s invisible read half on the row being COMPOUND, but the defect was the DIRECTION CELL: the repair is `W` -> `R+W` in place, never a split, and `N 169`/`N 187` are refuted outright.
+
+### [2026-09-21-what-the-browser-said.md](2026-09-21-what-the-browser-said.md)
+
+2026-09-21 &middot; WHAT THE BROWSER SAID: `$.message`, adjudicated by PROVENANCE CLASS
+
+- CORRECTED BY [2026-09-21-the-dict-literal-exclusion.md](2026-09-21-the-dict-literal-exclusion.md)
+
+  > the exclusion was LIFTED on 2026-09-21 and this pricing was wrong in three ways. The `+124 sites` costs the baseline nothing: that guard admits only SHORTLISTED sub-expressions, so the site count is the wrong denominator. Exactly ONE committed baseline imports this walk, not two. And the delta figures reproduce exactly while one of the four names does not -- at the variant producing `+124 / +181 / +4` the fourth new EXCEPTION_TEXT sub-expression is `server.py::_badge_refusal`, not `server.py::_error`; `_error` is added there as a PASSTHROUGH bucketed PAGE_OR_SITE_DERIVED and reaches EXCEPTION_TEXT only under the wider all-dicts scope. Full lift measured: 311/558/19 -> 480/792/37, baseline 19 -> 37 rows, 0 changed, 0 vanished, 5 rows needing adjudication across 3 functions -- a line, not a wave. Section 2.3's premise that widening would bring `_error` inside `test_no_message_publishes_a_landing` is separately false: that guard's subject rule is the address shortlist, and `_error`'s three expressions name no address. What governs `_error` is the DRIVEN guard at the envelope, `tests/test_tool_envelopes_emit_no_page_string.py`, which this document itself shipped.
 
 ### [INSTRUMENTS.md](INSTRUMENTS.md)
 
@@ -1137,6 +1145,14 @@ reach is visible. The quoted reason here is the CORRECTOR's own
 
   > its section 8 blames `M C85`'s invisible read half on the row being COMPOUND, but the defect was the DIRECTION CELL, repaired in place as `R+W`; and its `N 169`/`N 187` claim is refuted, they are one act over four facets.
 
+### [2026-09-21-the-dict-literal-exclusion.md](2026-09-21-the-dict-literal-exclusion.md)
+
+2026-09-21 &middot; THE DICT-LITERAL EXCLUSION: LIFTED, AND A TWIN IS WHY
+
+- CORRECTS [2026-09-21-what-the-browser-said.md](2026-09-21-what-the-browser-said.md)
+
+  > section 2.3 prices the lift against the wrong denominator and misnames one of its four new EXCEPTION_TEXT sub-expressions. `+124 sites` costs the consuming baseline nothing, because that guard admits only SHORTLISTED sub-expressions; exactly ONE committed baseline imports the walk, not two; the real cost is 18 baseline rows of which 13 are verdicted from the code and 5 need adjudication across 3 functions. `server.py::_error` is NOT one of the four new EXCEPTION_TEXT sub-expressions at the variant that produces that `+124` -- the fourth is `server.py::_badge_refusal`, which the same section separately and correctly calls a classifier artefact. And its premise that widening would bring `_error` inside the landing guard is false: that guard is scoped to the address shortlist and `_error`'s three expressions name no address. Its absolute figures (310 / 557 / 19) are NOT corrected -- they reproduce exactly on the tree that measured them, see section 2.1.
+
 ### [2026-09-21-the-fires-and-the-controls.md](2026-09-21-the-fires-and-the-controls.md)
 
 2026-09-21 &middot; THE FIRES AND THE CONTROLS
@@ -1450,6 +1466,7 @@ ways, which is a fact about markers and not a verdict on the document.
 | 2026-09-21 | [2026-09-21-the-all-filters-press.md](2026-09-21-the-all-filters-press.md) | THE `All filters` PRESS: REFUSED AT CONDITION 2, AND THE GATE WOULD HAVE PRESSED FIRST | corrects x2 |
 | 2026-09-21 | [2026-09-21-the-auth-reason-leak.md](2026-09-21-the-auth-reason-leak.md) | THE AUTH REASON LEAK: a session credential in a published field, and in the log |  |
 | 2026-09-21 | [2026-09-21-the-compound-rows.md](2026-09-21-the-compound-rows.md) | The compound rows -- when one census row names two capabilities | corrects x1 |
+| 2026-09-21 | [2026-09-21-the-dict-literal-exclusion.md](2026-09-21-the-dict-literal-exclusion.md) | THE DICT-LITERAL EXCLUSION: LIFTED, AND A TWIN IS WHY | corrects x1 |
 | 2026-09-21 | [2026-09-21-the-field-beside-the-message.md](2026-09-21-the-field-beside-the-message.md) | THE FIELD BESIDE THE MESSAGE: 20 SITES, ADJUDICATED ONE AT A TIME |  |
 | 2026-09-21 | [2026-09-21-the-fires-and-the-controls.md](2026-09-21-the-fires-and-the-controls.md) | THE FIRES AND THE CONTROLS | corrects x2 |
 | 2026-09-21 | [2026-09-21-the-four-loose-rows.md](2026-09-21-the-four-loose-rows.md) | THE FOUR LOOSE ROWS -- `shape.invitation_badge`, `hrefs_error`, `pill_label`, `J 57` |  |
@@ -1468,7 +1485,7 @@ ways, which is a fact about markers and not a verdict on the document.
 | 2026-09-21 | [2026-09-21-what-100-percent-means.md](2026-09-21-what-100-percent-means.md) | What 100 percent means here, and the two numbers that both deserve the word "done" | corrects x1 |
 | 2026-09-21 | [2026-09-21-what-is-reachable-now.md](2026-09-21-what-is-reachable-now.md) | WHAT IS REACHABLE NOW: 68 read rows, two banked, and the read-direction sweep is blind to a whole slice | corrects x4 |
 | 2026-09-21 | [2026-09-21-what-playwright-quotes.md](2026-09-21-what-playwright-quotes.md) | WHAT PLAYWRIGHT QUOTES: the parked question, measured offline |  |
-| 2026-09-21 | [2026-09-21-what-the-browser-said.md](2026-09-21-what-the-browser-said.md) | WHAT THE BROWSER SAID: `$.message`, adjudicated by PROVENANCE CLASS |  |
+| 2026-09-21 | [2026-09-21-what-the-browser-said.md](2026-09-21-what-the-browser-said.md) | WHAT THE BROWSER SAID: `$.message`, adjudicated by PROVENANCE CLASS | **CORRECTED x1** |
 | 2026-09-21 | [2026-09-21-what-was-ruled.md](2026-09-21-what-was-ruled.md) | A register keyed on RULINGS, not on documents -- and the fourth payment |  |
 
 ## 6. What the scan rejected, could not join, or had to repair

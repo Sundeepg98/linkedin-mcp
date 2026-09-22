@@ -71,9 +71,16 @@ set when the source text of an interpolated sub-expression contains ``url``,
 * It does not run the code. Which of these sites is REACHABLE is a different
   question, settled by driving, not by reading -- the way
   ``tests/test_readers_emit_no_page_string.py`` settles its own.
-* The census it imports does not count strings built into a ``dict`` literal,
-  returned directly, or assembled across a function boundary by a helper.
-  Those shapes are outside the subject set entirely.
+* The census it imports does not count a string built and ``return``ed on its
+  own outside a dict, nor one assembled across a function boundary by a
+  helper. Those shapes are outside the subject set entirely.
+  **THE ``dict`` LITERAL WAS ON THAT LIST UNTIL 2026-09-21 AND IS NOT ANY
+  MORE**, which took this baseline from 19 sites to 37 and admitted three new
+  rulings below (``_audit/2026-09-21-the-dict-literal-exclusion.md``). What
+  convicted the exclusion was a twin: ``shape.parse_person_card`` and
+  ``shape.parse_connection_card`` publish the same address expression under
+  the same key, and only the one written as a subscript assignment was ever
+  in this guard's subject set.
 
 Regenerate the baseline with::
 
@@ -160,6 +167,47 @@ PUBLISHED_BY_CONTRACT_SITES: dict[str, str] = {
     "dom.py:read_job_identity": (
         "``out['company_url']`` is likewise a success-path field. Same "
         "reasoning, same owning guard."
+    ),
+    # ---- ADMITTED 2026-09-21, when the census stopped excluding dict
+    # ---- literals. _audit/2026-09-21-the-dict-literal-exclusion.md.
+    "shape.py:parse_connection_card": (
+        "THE TWIN OF ``shape.py:parse_person_card`` ABOVE, and the row that "
+        "convicted the exclusion. Both functions build the SAME expression, "
+        "``f'https://www.linkedin.com/in/{slug}'``, under the SAME key, "
+        "``profile``. ``parse_person_card`` writes it as a subscript "
+        "assignment and has carried a verdict here since this file was "
+        "written; ``parse_connection_card`` RETURNS it inside a dict literal "
+        "and was invisible to every guard until the census was widened. One "
+        "publication, two spellings, and the spelling decided which one was "
+        "governed. The verdict is the sibling's, unchanged: a success-path "
+        "field, and whether that field may be published at all is the "
+        "SHAPERS' question with its own guards. Its own eight-line source "
+        "comment says the same thing -- 'A BROWSER LINK, NOT A NAVIGABLE "
+        "ADDRESS' -- so this is a deliberate publication that nobody had "
+        "written down here."
+    ),
+    "shape.py:apply_route": (
+        "``raw_href`` is the apply control's own href, quoted in the "
+        "returned ``why``. The function's ENTIRE CONTRACT is to name where "
+        "an application would be sent -- it publishes ``destination`` and "
+        "``destination_host`` as declared fields, and on the branch where it "
+        "identifies the route ``destination`` IS ``raw_href``. On the two "
+        "branches where it refuses, it names the href it could not classify, "
+        "which is this repository's standing refusal doctrine: a refusal "
+        "that says 'some href did not match' cannot be acted on. Convicting "
+        "it would be convicting a contract for obeying a rule -- the exact "
+        "error ``_audit/2026-09-21-what-the-browser-said.md`` section 5.2a "
+        "records against a guard built from envelope shape rather than "
+        "provenance. THE ASYMMETRY IS REAL AND THIS TABLE CANNOT EXPRESS IT: "
+        "it is keyed by ``module:function`` and the three sites disagree "
+        "about whether a sibling field republishes the value. Recorded in "
+        "the audit's RESIDUAL rather than hidden here."
+    ),
+    "writes.py:_direction": (
+        "``observation.state_url`` appears inside ``what_that_means``, and "
+        "the SAME dict literal publishes it verbatim one key earlier as "
+        "``read_from_url``. Withholding it in the sentence while returning "
+        "it in the field beside it would withhold nothing at all."
     ),
 }
 

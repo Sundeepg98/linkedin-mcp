@@ -67,13 +67,24 @@ far more likely. Every site in it is a site a human still has to read.
 
 ## WHAT THIS DOES NOT COUNT, SAID OUT LOUD
 
-A gate may not claim more than it ran. This walk does NOT count: strings built
-into a ``dict`` LITERAL (``return {"error": f"..."}``); strings passed to
-``print``; strings built and returned directly; messages assembled across a
-function boundary by a helper. ``PASSTHROUGH`` -- a non-literal string handed
-to an exception WHOLE, with no interpolation at all -- is a real shape in this
-class that the four requested kinds do not name, so it is counted and reported
-SEPARATELY rather than folded into the total or dropped.
+A gate may not claim more than it ran. This walk does NOT count: strings passed
+to ``print``; a built string ``return``ed on its own, outside a dict; messages
+assembled across a function boundary by a helper. ``PASSTHROUGH`` -- a
+non-literal string handed to an exception WHOLE, with no interpolation at all
+-- is a real shape in this class that the four requested kinds do not name, so
+it is counted and reported SEPARATELY rather than folded into the total or
+dropped.
+
+**THE ``dict`` LITERAL USED TO BE ON THAT LIST AND IS NOT ANY MORE** (lifted
+2026-09-21, ``_audit/2026-09-21-the-dict-literal-exclusion.md``). Measured
+before and after on one snapshot: 311 sites / 558 sub-expressions / 19
+shortlisted with the construct excluded, 480 / 792 / 37 with it counted. The
+exclusion was not one condition but three, each sufficient alone -- see the
+comment above :meth:`_Walker.visit_Return`. What convicted it was not the size
+of the delta but a TWIN: ``shape.parse_person_card`` and
+``shape.parse_connection_card`` build the same address expression under the
+same key, one as a subscript assignment and one inside a returned dict, and
+only the first was visible to any guard.
 
     python scripts/_census_message_interpolations.py [--json] [--out PATH]
 """
@@ -337,6 +348,27 @@ def _is_message_field(target: ast.AST) -> bool:
     return False
 
 
+def _dict_literal_target(key: str) -> ast.Subscript:
+    """The ``ast.Subscript`` the shipped recorders already know how to read.
+
+    A dict literal's key is an ``ast.Constant``, and both :func:`_is_message_field`
+    and :meth:`_Walker._record_field` ask about a TARGET. Synthesising the
+    subscript keeps ONE implementation of the key test rather than a second
+    copy that can drift from it.
+
+    DELIBERATELY LOCATIONLESS. :func:`_source` tries ``ast.get_source_segment``
+    first, which answers ``None`` for a node carrying no position, and then
+    falls back to ``ast.unparse``. So the rendered target reads
+    ``returned['message']`` -- a label that says the key came out of a dict
+    literal, and that can never be mistaken for a line of source that exists.
+    """
+    return ast.Subscript(
+        value=ast.Name(id="returned", ctx=ast.Load()),
+        slice=ast.Constant(value=key),
+        ctx=ast.Store(),
+    )
+
+
 def _sanitiser_call(expr: ast.AST) -> str:
     """The repair function this expression is routed through, or ``""``.
 
@@ -396,11 +428,74 @@ def _is_log_call(node: ast.Call) -> str:
     return ""
 
 
+#: ``{id(text): text.splitlines(keepends=True)}`` for the modules walked.
+#:
+#: ``ast.get_source_segment`` re-splits its whole ``source`` argument on every
+#: call. ``server.py`` is half a megabyte and this walk asks for hundreds of
+#: segments in it, so that one line was **12 of the 16 seconds** a single-module
+#: profile spent -- measured with cProfile, not guessed, and measured only
+#: because widening this walk to dict literals tripled its runtime and the
+#: first explanation offered for that was the wrong one.
+#:
+#: Keyed on ``id(text)`` with the string itself retained, so an interned or
+#: recycled id cannot hand back another module's lines.
+_LINE_CACHE: dict[int, tuple[str, list[str]]] = {}
+
+
+def _lines_of(text: str) -> list[str]:
+    hit = _LINE_CACHE.get(id(text))
+    if hit is not None and hit[0] is text:
+        return hit[1]
+    lines = text.splitlines(keepends=True)
+    _LINE_CACHE[id(text)] = (text, lines)
+    return lines
+
+
+def _segment(text: str, node: ast.AST) -> Optional[str]:
+    """``ast.get_source_segment(text, node)``, over cached lines.
+
+    A REIMPLEMENTATION OF A STDLIB FUNCTION IS A LIABILITY UNLESS IT IS
+    PROVEN EQUAL, so it was proven twice, and the two differ in what they
+    cover -- stated exactly rather than rounded up:
+
+    * ONCE, over the WHOLE package: **65672 located nodes compared against
+      ``ast.get_source_segment``, 0 disagreements.** Recorded in
+      ``_audit/2026-09-21-the-dict-literal-exclusion.md`` section 6. It takes
+      about five minutes, because the stdlib side is the very cost this
+      function removes, so it is not what runs routinely.
+    * ROUTINELY, in ``scripts/_check_the_dict_literal_walk_can_fail.py``
+      arm 3: **8 of the 46 modules IN FULL, and it prints the 38 it did
+      not read**, plus a synthetic subject carrying MULTI-BYTE characters --
+      the case that breaks a byte-offset slice and that a strict-ASCII
+      package cannot supply.
+
+    The stdlib's own line splitting is ``str.splitlines``, which is what this
+    uses, so form feeds are handled identically rather than approximately.
+    """
+    try:
+        if node.end_lineno is None or node.end_col_offset is None:  # type: ignore[attr-defined]
+            return None
+        lineno = node.lineno - 1  # type: ignore[attr-defined]
+        end_lineno = node.end_lineno - 1  # type: ignore[attr-defined]
+        col_offset = node.col_offset  # type: ignore[attr-defined]
+        end_col_offset = node.end_col_offset  # type: ignore[attr-defined]
+    except AttributeError:
+        return None
+
+    lines = _lines_of(text)
+    if end_lineno == lineno:
+        return lines[lineno].encode()[col_offset:end_col_offset].decode()
+
+    first = lines[lineno].encode()[col_offset:].decode()
+    last = lines[end_lineno].encode()[:end_col_offset].decode()
+    return "".join([first] + lines[lineno + 1 : end_lineno] + [last])
+
+
 def _source(expr: ast.AST, text: str) -> str:
     """The exact source of ``expr``, or an unparse when the segment is lost."""
     try:
-        segment = ast.get_source_segment(text, expr)
-    except (ValueError, TypeError):
+        segment = _segment(text, expr)
+    except (ValueError, TypeError, IndexError):
         segment = None
     if segment:
         return " ".join(segment.split())
@@ -879,6 +974,10 @@ class _Walker(ast.NodeVisitor):
         self._fn_stack: list[ast.AST] = []
         self._ctx_stack: list[_Context] = []
         self._handler_stack: list[ast.ExceptHandler] = []
+        #: Dict literals already opened, by id. ``visit_Return`` and
+        #: ``visit_Dict`` both reach ``return {...}``; without this the
+        #: commonest shape in the package would be counted twice.
+        self._dicts_opened: set[int] = set()
 
     def visit_ExceptHandler(self, node: ast.ExceptHandler) -> None:
         self._handler_stack.append(node)
@@ -1028,6 +1127,84 @@ class _Walker(ast.NodeVisitor):
         if node.value is not None:
             self._record_field(node, [node.target], node.value)
         self.generic_visit(node)
+
+    # -- DICT LITERALS -----------------------------------------------------
+    #
+    # ADDED 2026-09-21. Until then this walk declared, in its own docstring
+    # and again in section 9 of its report, that it did not count *"strings
+    # built into a ``dict`` LITERAL (``return {"error": f"..."}``)"*. That
+    # exclusion was never one condition. It was THREE, each sufficient on its
+    # own, which is why lifting any one of them alone changed nothing and
+    # looked like a measurement saying the construct was absent:
+    #
+    #   1. there was no ``visit_Return`` and no ``visit_Dict``, so a dict
+    #      literal was walked by ``generic_visit`` and never offered to a
+    #      recorder at all;
+    #   2. ``_record_field`` opens by requiring a ``Subscript`` or
+    #      ``Attribute`` TARGET, so a dict bound to a plain name --
+    #      ``out: dict[str, Any] = {...}``, which is how ``server._error``
+    #      writes the first of its two renderings -- was dropped on that line;
+    #   3. ``interpolations`` answers ``None`` for an ``ast.Dict``, because
+    #      ``_decompose`` handles ``JoinedStr``/``Call``/``BinOp``/``IfExp``
+    #      and falls through for everything else.
+    #
+    # WHAT IT COST, MEASURED RATHER THAN ARGUED: ``shape.parse_person_card``
+    # writes ``out["profile"] = f"https://www.linkedin.com/in/{slug}"`` and
+    # ``shape.parse_connection_card`` RETURNS THE SAME EXPRESSION UNDER THE
+    # SAME KEY inside a dict literal. The first is in
+    # ``tests/landing_interpolation_baseline.json`` with a written verdict.
+    # The second was invisible. One publication, two spellings, and only the
+    # spelling decided which one a guard could see.
+    #
+    # THE ENTRY POINT IS THE DICT, NOT THE STATEMENT. What publishes here is
+    # the KEY, so which statement the literal sits in is irrelevant and
+    # scoping this to ``return`` would leave ``_error``'s first rendering out
+    # for a reason about syntax. Mechanisms 2 and 3 are UNTOUCHED: they still
+    # do their real work for every non-dict value, and this path never asks
+    # them about a dict.
+    #
+    # EVERY STRING KEY IS OFFERED, not only the ``MESSAGE_KEYS`` ones,
+    # because that is exactly what this walk already does for the subscript
+    # spelling -- ``_record_field``'s FIELD branch fires for any Subscript
+    # target and only its PASSTHROUGH branch consults ``_is_message_field``.
+    # Narrowing dict keys to message keys here would have left the
+    # ``parse_person_card`` / ``parse_connection_card`` twin uncovered, which
+    # is the one case that proves the exclusion had a cost.
+    def visit_Return(self, node: ast.Return) -> None:
+        if isinstance(node.value, ast.Dict):
+            self._offer_dict(node.value)
+        self.generic_visit(node)
+
+    def visit_Dict(self, node: ast.Dict) -> None:
+        self._offer_dict(node)
+        self.generic_visit(node)
+
+    def _offer_dict(self, node: ast.Dict) -> None:
+        """Hand each string key of ``node`` to the shipped field recorder."""
+        if id(node) in self._dicts_opened:
+            return
+        self._dicts_opened.add(id(node))
+        for key, value in zip(node.keys, node.values):
+            # ``{**base, "message": x}`` gives a None key for the unpacking.
+            if key is None:
+                continue
+            if not (isinstance(key, ast.Constant) and isinstance(key.value, str)):
+                continue
+            # BEHAVIOUR-PRESERVING. ``_record_field`` cannot record a row for
+            # an ``ast.Constant`` value by either branch: ``interpolations``
+            # answers None for one, and the PASSTHROUGH branch returns on
+            # ``_is_str_constant(value) or isinstance(value, ast.Constant)``.
+            # Asserted, not assumed, in
+            # ``scripts/_check_the_dict_literal_walk_can_fail.py``.
+            #
+            # IT IS NOT WHY THIS WALK IS FAST, and the first version of this
+            # comment claimed it was. Measured with cProfile after the claim
+            # was written: the cost was ``ast.get_source_segment`` re-splitting
+            # half a megabyte of ``server.py`` on every call -- 302 calls, 12
+            # of 16 seconds. This skip saved nothing. See :func:`_source`.
+            if isinstance(value, ast.Constant):
+                continue
+            self._record_field(key, [_dict_literal_target(key.value)], value)
 
     def _record_field(
         self, node: ast.AST, targets: list[ast.AST], value: ast.AST
@@ -1186,7 +1363,9 @@ def census(package: Path = PACKAGE) -> list[dict[str, Any]]:
 #
 # MEASURED, not anticipated: the first run of this instrument reported 76
 # hazard sub-expressions and a 19-row shortlist; every run after it reported
-# 75 and 17, from a BYTE-IDENTICAL instrument. Nothing was nondeterministic --
+# 75 and 17, from a BYTE-IDENTICAL instrument. (THOSE FOUR NUMBERS ARE
+# HISTORY, NOT A BASELINE -- this walk gained dict literals on 2026-09-21 and
+# its shortlist is 37 today. They are kept because the STORY is the point.) Nothing was nondeterministic --
 # three consecutive ``--json`` runs are md5-identical. The SOURCE had changed
 # underneath, because another agent was repairing ``auth.py`` in this same
 # worktree while the census ran.
@@ -1449,7 +1628,10 @@ def report(
             "three consecutive `--json` runs md5-identical to each other. "
             "Nothing was nondeterministic: another agent was repairing "
             "`auth.py` IN THIS SAME WORKTREE while the census ran, and the "
-            "denominator moved."
+            "denominator moved. **Those four numbers are HISTORY rather than "
+            "a baseline** -- this walk gained dict literals on 2026-09-21 and "
+            "is not comparable to a run taken before it. The story is what is "
+            "being kept, not the figures."
         )
         add("")
         add(
@@ -1832,13 +2014,22 @@ def report(
     add("")
     add(
         "A gate may not claim more than it ran. This walk does not count: a "
-        "built string inside a `dict` LITERAL (`return {\"error\": f\"...\"}`); a "
-        "built string `return`ed directly; a string passed to `print`; a message "
-        "assembled by a helper across a function boundary; or an f-string reached "
-        "only through `str.join`. It also cannot see which of these sites is "
-        "REACHABLE -- a static bucket is a hypothesis, and the coercion-leak "
-        "audit settled its equivalent question by DRIVING the readers, not by "
-        "reading them."
+        "built string `return`ed on its own, outside a dict; a string passed to "
+        "`print`; a message assembled by a helper across a function boundary; or "
+        "an f-string reached only through `str.join`. It also cannot see which of "
+        "these sites is REACHABLE -- a static bucket is a hypothesis, and the "
+        "coercion-leak audit settled its equivalent question by DRIVING the "
+        "readers, not by reading them."
+    )
+    add("")
+    add(
+        "**The `dict` LITERAL was on that list until 2026-09-21 and is not any "
+        "more.** It is counted now, every string key of every dict literal, "
+        "which is what this walk already did for the subscript spelling. The "
+        "before/after and the reasoning are in "
+        "`_audit/2026-09-21-the-dict-literal-exclusion.md`; the control that "
+        "shows the widened entry points failing when they are removed is "
+        "`scripts/_check_the_dict_literal_walk_can_fail.py`."
     )
     add("")
     add("### A zero from a detector nobody has seen fire certifies nothing")

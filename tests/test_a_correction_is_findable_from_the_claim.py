@@ -2737,6 +2737,30 @@ NOT_A_CORRECTION: dict[tuple[str, str], str] = {
         "about different instants, and the block says so itself."
     ),
 
+    # 2026-09-21, the DICT-LITERAL-EXCLUSION wave. A DISAMBIGUATION OF THE
+    # BRIEF, not of the register -- and that distinction is the whole entry.
+    ("2026-09-21-the-dict-literal-exclusion.md", "INSTRUMENTS.md"): (
+        "THE CORRECTED PARTY IS THE BRIEF, AND A BRIEF IS NOT A DOCUMENT IN "
+        "THIS CORPUS. Section 1.1 answers the question 'which instrument "
+        "carries the exclusion', because the brief that commissioned the wave "
+        "named three starting points and all three were the wrong file. One of "
+        "the three is the `_audit/INSTRUMENTS.md` entry documenting a walk that "
+        "reads a field in three spellings -- 'keyword argument, dict literal, "
+        "subscript assignment'. **THAT ENTRY IS ACCURATE AND IS NOT CORRECTED "
+        "HERE.** It describes the CONTROL for "
+        "`tests/test_the_source_url_split_was_never_ruled.py`, which reads "
+        "`source_url` in all three spellings and never had the gap this wave "
+        "repaired. What section 1.1 says is that a reader who arrives there "
+        "looking for the message census has arrived at a different instrument. "
+        "Declaring a CORRECTS: pair would put a `CORRECTED BY:` marker on a "
+        "register entry that is TRUE, which is worse than silence: it would "
+        "tell every future reader that the source_url control had been found "
+        "wrong. "
+        "**WHAT WOULD MAKE THIS ENTRY WRONG:** that register entry itself "
+        "claiming its walk covers the message census, or the message census's "
+        "dict-literal coverage being attributed to it."
+    ),
+
 }
 
 

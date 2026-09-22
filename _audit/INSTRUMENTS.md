@@ -9357,3 +9357,98 @@ enumerated row-id lists from named documents, and bucket 3 is printed as an
 UPPER BOUND with the missing measurement named: a per-row ADDRESS run through
 `readonly.is_read_url`. The census records addresses in prose, not in a column,
 so no instrument can take that measurement today.
+
+---
+
+## 54. A WALK THAT CANNOT SEE A CONSTRUCT CANNOT REPORT IT MISSING (dict-literal-exclusion, 2026-09-21)
+
+**Registered 2026-09-21.** Full record:
+`_audit/2026-09-21-the-dict-literal-exclusion.md`.
+
+`scripts/_census_message_interpolations.py` declared, in its own docstring and
+in section 9 of its generated report, that it did not count *"strings built
+into a `dict` LITERAL"*. An honest declaration, and the zero it produced for
+that construct was still a fact about the walk rather than about the package.
+
+### 54.1 AN EXCLUSION IS RARELY ONE CONDITION, AND THAT IS WHY IT SURVIVES
+
+Three mechanisms, each sufficient on its own: no `visit_Return`/`visit_Dict`
+entry point; `_record_field`'s `isinstance(t, (ast.Subscript, ast.Attribute))`
+target gate, which drops a dict bound to a plain name; and `_decompose`
+answering `None` for an `ast.Dict`. **Lifting any one alone changes nothing,
+and the resulting measurement looks exactly like the construct being absent.**
+A partial lift was demonstrated failing before the real one shipped -- see
+52.3.
+
+    WHEN A REPAIR TO AN EXCLUSION MEASURES NO CHANGE, COUNT THE MECHANISMS
+    BEFORE BELIEVING THE ZERO.
+
+### 54.2 A DELTA IS NOT A FINDING. A TWIN IS.
+
+The lift moved the census from 311 sites / 558 sub-expressions / 19 shortlisted
+to 480 / 792 / 37, and the size of that delta argued for nothing. What decided
+it was one pair: `shape.parse_person_card` writes
+`out["profile"] = f"https://www.linkedin.com/in/{slug}"` and
+`shape.parse_connection_card` RETURNS the same expression under the same key
+inside a dict literal. The first had carried a written verdict in
+`tests/landing_interpolation_baseline.json` since that file existed; the second
+was invisible to every guard. **Look for a construct the codebase spells two
+ways. If one spelling is governed and the other is not, the exclusion is an
+accident regardless of how large or small its delta is.**
+
+**AND PRICE IT IN THE RIGHT DENOMINATOR.** The residual that deferred this
+priced it at *"+124 sites ... a wave and not a line"*. The consuming guard
+admits only SHORTLISTED sub-expressions, so site count costs it nothing; and
+its `verdict_for` decides `WITHHELD` and `SERVER_CONSTRUCTED` from the code
+before any ruled table is read. Actual cost: 18 baseline rows, 13 verdicted
+automatically, **5 needing adjudication across 3 functions**.
+
+### 54.3 SHOWN FAILING
+
+`scripts/_check_the_dict_literal_walk_can_fail.py` -- three arms, each driven
+red and green in one process, 1.6s.
+
+| arm | mutation | the red it produced |
+|---|---|---|
+| the walk sees both `server._error` renderings | delete `visit_Return` and `visit_Dict`, i.e. restore the pre-2026-09-21 walk | `the walk cannot see rendering_one, rendering_two` |
+| the same, narrowed to `return`-valued dicts only -- mechanisms 1 and 3 lifted, 2 left. **Run against the pre-lift measurement harness, not this script**, and recorded in the audit's section 5.3 because that harness was not kept | run the widening at scope `return-only` | `THE WIDENING DOES NOT WORK: the widened walk still cannot see rendering_one` |
+| the `ast.Constant` pre-skip in `_offer_dict` is behaviour-preserving | widen the skip to swallow a `JoinedStr` | `the pre-skip is NOT behaviour-preserving: 1 row(s) with it, 2 without` |
+| `_segment` equals `ast.get_source_segment` | drop the first character of every segment | `errors.py: disagreement at line 1 on Expr` |
+
+The arm subject carries THREE NEGATIVES the walk saw before the change. A walk
+that had simply stopped returning anything would otherwise be
+indistinguishable from one that had gained the construct, and each arm reports
+`THIS SCRIPT IS BROKEN` rather than a pass when its own subject goes empty.
+
+`--narrow` on the same script prints the counterfactual over the real package
+-- the current walk beside the same walk with the entry points removed -- so
+the before/after stays re-derivable at any later revision, and a delta
+collapsing toward zero means somebody re-narrowed the walk.
+
+### 54.4 THE PERFORMANCE DEFECT THE WIDENING EXPOSED, AND A CLAIM ITS AUTHOR GOT WRONG
+
+Widening took the walk from 22.1s to 59s. The first explanation was written
+into a source comment before it was profiled and was wrong. cProfile over one
+module: `ast.get_source_segment` re-splits its whole `source` argument on every
+call, and on half a megabyte of `server.py` that was **12 of 16 seconds**. The
+cost predated the widening entirely; the narrow walk paid it at half the call
+count and nobody had looked.
+
+Repaired with a per-text line cache and a local slice, **proven equal to the
+stdlib over 65672 located nodes of the whole package with 0 disagreements**,
+plus a synthetic multi-byte subject in the control, because this repository is
+strict-ASCII and **no real module can exercise the byte-offset path a
+reimplementation breaks on**. Result: 4.6s, faster than the narrow walk it
+replaced.
+
+    A REIMPLEMENTATION OF A STDLIB FUNCTION IS A LIABILITY UNTIL IT IS PROVEN
+    EQUAL -- AND THE CASE THAT BREAKS IT MAY BE ONE YOUR CODEBASE CANNOT
+    SUPPLY, SO BUILD IT.
+
+### 54.5 THE ENTRIES
+
+| path | shown failing by |
+|---|---|
+| `scripts/_check_the_dict_literal_walk_can_fail.py` | three arms, three mutations of its own, verbatim reds in 52.3. Each arm also fails loudly when its own subject is empty rather than reporting a pass |
+| `scripts/_census_message_interpolations.py` (the dict-literal entry points) | mutation 1 removes them and the walk goes blind to both `server._error` renderings while still seeing the three negatives |
+| `tests/test_no_message_publishes_a_landing.py` (the three new rulings) | the three table entries were removed in process and the guard's own test functions called directly: **5 rows, 5 reds**, each naming its site, plus `test_the_subject_set_has_not_silently_changed` firing from the other direction on `PUBLISHED_BY_CONTRACT -> UNRULED`. 44 passed with them restored |

@@ -556,6 +556,8 @@ Priced in 2.3: +124 sites, +181 sub-expressions, +4 rows needing verdicts in
 EXCEPTION_TEXT sub-expressions including `_error` itself. A wave, and the
 number is now on disk so it does not have to be re-derived.
 
+**CORRECTED BY:** `_audit/2026-09-21-the-dict-literal-exclusion.md` -- the exclusion was LIFTED on 2026-09-21 and this pricing was wrong in three ways. The `+124 sites` costs the baseline nothing: that guard admits only SHORTLISTED sub-expressions, so the site count is the wrong denominator. Exactly ONE committed baseline imports this walk, not two. And the delta figures reproduce exactly while one of the four names does not -- at the variant producing `+124 / +181 / +4` the fourth new EXCEPTION_TEXT sub-expression is `server.py::_badge_refusal`, not `server.py::_error`; `_error` is added there as a PASSTHROUGH bucketed PAGE_OR_SITE_DERIVED and reaches EXCEPTION_TEXT only under the wider all-dicts scope. Full lift measured: 311/558/19 -> 480/792/37, baseline 19 -> 37 rows, 0 changed, 0 vanished, 5 rows needing adjudication across 3 functions -- a line, not a wave. Section 2.3's premise that widening would bring `_error` inside `test_no_message_publishes_a_landing` is separately false: that guard's subject rule is the address shortlist, and `_error`'s three expressions name no address. What governs `_error` is the DRIVEN guard at the envelope, `tests/test_tool_envelopes_emit_no_page_string.py`, which this document itself shipped.
+
 ### 6.3 THE QUOTING CALLEES: 14 OF 26 PROVEN, 9 SITES OUTSIDE THE READER GUARD, TRIAGED
 
 The `quoting-callees` slice (`_audit/_slice-quoting-callees.md`,
