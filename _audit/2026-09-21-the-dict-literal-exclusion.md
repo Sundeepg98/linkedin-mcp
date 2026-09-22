@@ -10,7 +10,7 @@ re-measures everything rather than inheriting it.
 `f729a2a`. Subject digest `1035304ce819` over 46 modules, stable across the
 run. Every number below is from this box on this snapshot.
 
-**CORRECTS:** `_audit/2026-09-21-what-the-browser-said.md` -- section 2.3 prices the lift against the wrong denominator and misnames one of its four new EXCEPTION_TEXT sub-expressions. `+124 sites` costs the consuming baseline nothing, because that guard admits only SHORTLISTED sub-expressions; exactly ONE committed baseline imports the walk, not two; the real cost is 18 baseline rows of which 13 are verdicted from the code and 5 need adjudication across 3 functions. `server.py::_error` is NOT one of the four new EXCEPTION_TEXT sub-expressions at the variant that produces that `+124` -- the fourth is `server.py::_badge_refusal`, which the same section separately and correctly calls a classifier artefact. And its premise that widening would bring `_error` inside the landing guard is false: that guard is scoped to the address shortlist and `_error`'s three expressions name no address. Its absolute figures (310 / 557 / 19) are NOT corrected -- they reproduce exactly on the tree that measured them, see section 2.1.
+**CORRECTS:** `_audit/2026-09-21-what-the-browser-said.md` -- section 2.3 prices the lift against the wrong denominator and misnames one of its four new EXCEPTION_TEXT sub-expressions. `+124 sites` costs the consuming baseline nothing, because that guard admits only SHORTLISTED sub-expressions; exactly ONE committed baseline imports the walk, not two; the real cost is 18 baseline rows of which 13 are verdicted from the code and 5 need adjudication across 3 functions. `server.py::_error` is NOT one of the four new EXCEPTION_TEXT sub-expressions at the variant that produces that `+124` -- the fourth is `server.py::_badge_refusal`, which the same section separately and correctly calls a classifier artefact. And its premise that widening would bring `_error` inside the landing guard is false: that guard is scoped to the address shortlist and `_error`'s four expressions name no address. Its absolute figures (310 / 557 / 19) are NOT corrected -- they reproduce exactly on the tree that measured them, see section 2.1.
 
 ---
 
@@ -269,8 +269,12 @@ does not repair it.**
 
 That guard's subject rule is `SHORTLIST_TOKENS` -- `url`, `landed`, `final_url`,
 `href`, `slug`, `redirect` -- matched against an expression's source text.
-`_error`'s three expressions are `exc.kind`, `scrub(str(exc))` and
-`scrub(f"{type(exc).__name__}: {exc}")`. **None contains an address token, so
+`_error`'s FOUR census-recorded expressions are `exc.kind` and
+`scrub(str(exc))` (both server.py:1057), `scrub(hint)` (server.py:1063) and
+`scrub(f"{type(exc).__name__}: {exc}")` (server.py:1071). **CORRECTED
+2026-09-22: this said THREE and omitted `scrub(hint)`**, confirmed against the
+census's own output rather than by reading. `out["url"] = url` at server.py:1060
+is NOT census-recorded, which is why the list is four and not five. **None contains an address token, so
 `_error` does not enter that guard's subject set at any widening.** Measured:
 with the exclusion fully lifted the baseline gains 18 keys and **not one of
 them is in `_error`**.
@@ -760,10 +764,10 @@ not run is the paragraph describing it.
 | the record said | disk says |
 |---|---|
 | census at HEAD: 310 sites / 557 sub-expressions | **311 / 558 at `f729a2a`.** 310 / 557 is exact at `6c24426`, the tree that measured it; the merge brought one `RAISE` in `dom.activate_messaging_filter` from `b73783a`. Both right, neither current without its revision |
-| *"a shared walk that two committed baselines import"* | **one.** `tests/test_no_message_publishes_a_landing.py` and nothing else under `tests/` or `scripts/`. The envelope and reader baselines belong to driven guards that discover their own subjects |
+| *"a shared walk that two committed baselines import"* | **one BASELINE.** `tests/test_no_message_publishes_a_landing.py`, which PATH-LOADS the walk rather than importing it (`scripts/` has no `__init__.py`), so an import walk does not see it. **CORRECTED 2026-09-22:** the words "and nothing else under `tests/` or `scripts/`" were false -- `scripts/_check_the_dict_literal_walk_can_fail.py:63` does `import _census_message_interpolations`, and it is a file THIS DOCUMENT introduces in section 5. It is a control, not a baseline, so the count of one baseline stands; the parenthetical did not. The envelope and reader baselines belong to driven guards that discover their own subjects |
 | *"+4 rows needing rulings"*, priced against +124 sites, *"a wave and not a line"* | **+124 sites costs that baseline nothing** -- it admits only shortlisted sub-expressions. The full lift costs **18 baseline rows, of which 13 are verdicted from the code and 5 need adjudication across 3 functions** |
 | the four new `EXCEPTION_TEXT` sub-expressions include `server.py::_error` | **it does not,** at the variant producing that `+4`. The fourth is `server.py::_badge_refusal` -- the row the same section separately calls a classifier artefact. `_error` enters that variant as one `PASSTHROUGH` bucketed `PAGE_OR_SITE_DERIVED`, and reaches `EXCEPTION_TEXT` only under `all-dicts` |
-| `_error` is outside the census *"and therefore outside `test_no_message_publishes_a_landing`'s subject set too"* | **true, and lifting the exclusion does not change it.** That guard is scoped to `SHORTLIST_TOKENS`; `_error`'s three expressions name no address. With the exclusion fully lifted the baseline gains 18 keys and none is in `_error`. The lift is right for a different reason |
+| `_error` is outside the census *"and therefore outside `test_no_message_publishes_a_landing`'s subject set too"* | **true, and lifting the exclusion does not change it.** That guard is scoped to `SHORTLIST_TOKENS`; `_error`'s four expressions name no address. With the exclusion fully lifted the baseline gains 18 keys and none is in `_error`. The lift is right for a different reason |
 | the brief: start from `_census_page_coercions.py` / `_census_reader_guard_subjects.py` / the INSTRUMENTS entry on *"argument, dict literal, subscript assignment"* | **none of the three.** The exclusion is in `_census_message_interpolations.py`. `_census_page_coercions.py` has an explicit `ast.Dict` branch and never had this gap; the INSTRUMENTS line describes a control on `tests/test_the_source_url_split_was_never_ruled.py` |
 | the brief: *"`stated rows` must total 704 after your change"* | **704, unchanged** -- and the instruction conflates two censuses. `_audit/_census/*.md` is the CAPABILITY census; the rows this residual owes verdicts to live in `tests/landing_interpolation_baseline.json`. Checked both ways anyway |
 
@@ -794,8 +798,11 @@ cannot name the href it rejected cannot be acted on. Written here rather than
 folded into the table so the disagreement survives.
 
 **R2. The ordinal hazard did not bite and is still live.** Baseline keys are
-`module:function:expr[:60]` with a `#n` ordinal, and **10 of 37 keys carry
-one**, in 3 groups. If a widening ever inserts a site that sorts BEFORE an
+`module:function:expr[:60]` with a `#n` ordinal, and **21 of 37 keys carry
+one**, in 5 groups. **CORRECTED 2026-09-22: this said 10 in 3 groups**, counted
+directly off `tests/landing_interpolation_baseline.json`; the largest group is
+`server.py:<module>:BASE_URL` at 12. The safety claim below is UNCHANGED and was
+re-verified: 5 groups, 0 non-uniform. If a widening ever inserts a site that sorts BEFORE an
 existing same-base site, every later ordinal shifts and the verdicts
 re-attribute silently -- `compare()` would report one `appeared` and nothing
 else. Measured today: `vanished 0`, `changed 0` for all four variants, and
@@ -838,3 +845,29 @@ and deliberately NOT repaired here: it is another section's text, the file is
 append-contended by several waves, and an in-place edit far from my own append
 is exactly the kind of change that loses somebody's work. Named so it is a
 known quantity rather than a surprise for whoever next runs an encoding check.
+
+## 12. ADJUDICATION OF THIS DOCUMENT'S OWN VERIFICATION (added 2026-09-22)
+
+This wave spawned a child to verify its write-up. That child reported FOUR false
+claims twenty minutes AFTER the wave committed, and the wave never applied them:
+it was later measured dead -- no process, nothing written in its worktree for
+11.5 hours, a message unacted for 9h40m.
+
+**The integrator re-measured all four rather than applying them on the child's
+word.** Three held and are corrected in place above, each marked
+`CORRECTED 2026-09-22`. **One did not hold.**
+
+| finding | verdict | basis |
+|---|---|---|
+| the "nothing else under tests/ or scripts/" parenthetical | **UPHELD** | an import walk finds one plain importer, a control this document itself introduces. The count of one BASELINE stands; the parenthetical did not |
+| `_error` has three census-recorded expressions | **UPHELD** | the census's own output lists FOUR for that function; the omission is `scrub(hint)` at server.py:1063 |
+| the walk's 4.6s wall clock does not reproduce | **REFUTED** | 4121ms and 4162ms on two consecutive runs on a QUIESCENT box. The child measured 19-24s while ten waves and 48 xdist workers were resident; its reading was load-contaminated, not the figure wrong |
+| R2's "10 of 37 keys in 3 groups" | **UPHELD** | 21 of 37 across 5 groups, counted off the baseline file. R2's SAFETY claim was separately re-verified and is TRUE: 5 groups, 0 non-uniform |
+
+**The refuted one is the point of the exercise.** Applying all four on a
+relayed reading would have replaced a reproducible figure with a wrong one, and
+the wrong one came from an honest measurement taken under a load nobody recorded
+alongside it. A timing claim without its machine conditions is not a claim about
+the code -- which is the same defect this document's own section on the
+performance regression is about, arriving one level up.
+
