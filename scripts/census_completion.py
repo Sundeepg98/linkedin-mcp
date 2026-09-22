@@ -523,13 +523,13 @@ PINNED = {
     "capabilities_achievable": 389,
     "out_of_scope": 315,
     "achievable": 389,
-    "adjudicated": 429,
-    "delivered_broad": 95,
-    "delivered_strict": 72,
-    "gap": 275,
+    "adjudicated": 430,
+    "delivered_broad": 96,
+    "delivered_strict": 74,
+    "gap": 274,
     "cannot_deliver": 19,
-    "unfired": 23,
-    "gap_read": 68,
+    "unfired": 22,
+    "gap_read": 67,
     #: 151, not the 152 published by `_audit/2026-09-21-the-write-ceiling.md`.
     #: That document scoped itself to `profile.md`, `network.md` and
     #: `messaging-and-content.md`; measured at HEAD those three carry W 151 and
