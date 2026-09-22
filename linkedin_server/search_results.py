@@ -424,6 +424,15 @@ def tally(counts: Iterable[int], queries_present: int = 0) -> dict[str, Any]:
     2026-09-20, so handing it a string raised an exception QUOTING that string
     -- the sentence was a claim about the parameter's type while the mechanism
     said something weaker. It now refuses the same way the readers do.
+
+    **AND IT TOOK TWO REPAIRS, NOT ONE, WHICH IS THE PART WORTH KEEPING.**
+    2026-09-20 routed ``counts`` through the coercion family and left
+    ``queries_present`` on a bare ``int()``. For a day the paragraph above was
+    true of ONE of the two parameters and false of the other, and it read as
+    though it covered both -- so the sentence that was supposed to retire the
+    defect is what made it hard to see. ``queries_present`` was repaired
+    2026-09-21. **Both parameters are covered; neither claim rests on a
+    caller pre-coercing.**
     """
     values, _refused = _counts_only(list(counts))
     by_kind = {
@@ -446,7 +455,37 @@ def tally(counts: Iterable[int], queries_present: int = 0) -> dict[str, Any]:
         # segments do not say where it goes.
         "traversals_refused": by_kind.get(TRAVERSAL_REFUSED, 0),
         # THE FILTER WAS SEEN, NEVER READ.
-        "queries_present": int(queries_present),
+        #
+        # THE COERCION FAMILY AND NOT ``int()``, AND THE DIFFERENCE IS THE
+        # WHOLE POINT OF THIS MODULE'S 2026-09-20 REPAIR. ``counts`` was
+        # routed through that family the same day and THIS PARAMETER WAS NOT,
+        # so the docstring above -- which says the claim is true of the
+        # BEHAVIOUR and not only of the signature -- was true of one
+        # parameter and false of the other. Handing a string here raised
+        # ``ValueError: invalid literal for int() with base 10: '<label>'``,
+        # quoting a value this page chose, on the one surface in this server
+        # whose labels read ``Connections of <a person>``.
+        #
+        # IT WAS LATENT AND NOT LIVE, WHICH IS WHY NOTHING CAUGHT IT. Every
+        # caller today -- ``server``'s tool and two probes -- passes
+        # ``read_results``'s already-coerced output, so the property held by
+        # the CALLER'S discipline rather than by this function. "Cannot be
+        # handed a needle even by mistake" is a claim about the mistake, and
+        # a caller that does not pre-coerce IS the mistake.
+        #
+        # ``tests/leakwalk.py`` cannot see this: it discovers its subjects as
+        # every module-level ``async def`` with a ``page`` parameter, and
+        # ``tally`` is synchronous and takes no page. The leak class had
+        # walked one layer out of that guard's subject set, into the function
+        # that shapes a page's values without touching the page.
+        # ``as_count`` AND NOT THE BARE TYPE GATE, BECAUSE THE
+        # SUBSTITUTION MUST NOT BE SILENT. This module's own rule is that a
+        # refused value is always announced; ``tally``'s output schema is
+        # fixed and cannot grow a refusal field without changing a tool's
+        # contract, so it takes the LOGGING half of the family. The log names
+        # ``type(value).__name__`` and never the value, because a log record
+        # is another way out of the process.
+        "queries_present": coerce.as_count(queries_present),
     }
 
 
@@ -601,6 +640,10 @@ async def read_filters(page: Any, html: str = "") -> dict[str, Any]:
     )
     source = raw if isinstance(raw, dict) else {}
     counts, counts_refused = _counts_only(source.get("counts"))
+    # THE SHAPE READING, coerced on the SAME path as every other page value.
+    # A page that answers this key with a string gets the same refusal the
+    # counts get, and the refusal is added to the same published total.
+    decorated, decorated_refused = _counts_only(source.get("decorated"))
     scalars, scalars_refused = _scalars_only(
         source,
         (
@@ -616,11 +659,61 @@ async def read_filters(page: Any, html: str = "") -> dict[str, Any]:
     return {
         "controls_seen": scalars["controls_seen"],
         "counts": counts,
+        # POSITIONALLY ALIGNED TO :data:`FILTER_TERMS`, like ``counts``, and
+        # DISJOINT FROM IT: a control counted here is one the shipped matcher
+        # refused. See :func:`decorated_reading_is_decisive_only_as_absence`
+        # for what a nonzero does and does not prove.
+        "decorated": decorated,
         "matched_controls": scalars["matched_controls"],
         "unmatched_controls": scalars["unmatched_controls"],
         "empty_labels": scalars["empty_labels"],
-        "values_refused": counts_refused + scalars_refused,
+        "values_refused": counts_refused + decorated_refused + scalars_refused,
     }
+
+
+#: THE CLOSED VOCABULARY :func:`shape_verdict` may return. Three verdicts,
+#: because the reading has three outcomes and collapsing the third into
+#: either of the others is the whole defect this pair of numbers exists to
+#: repair.
+SHAPE_VERDICTS: tuple[str, ...] = ("present", "absent", "undecided")
+
+
+def shape_verdict(whole: int, decorated: int) -> str:
+    """What ``(counts[i], decorated[i])`` PROVES for one term. Never a guess.
+
+    ## WHY THIS IS A FUNCTION AND NOT A SENTENCE IN AN AUDIT DOCUMENT
+
+    The rule below decides a census row's state, and a rule that lives in
+    prose is re-derived -- differently -- by every wave that needs it. This
+    repository has already paid four times for one answer re-derived in four
+    places. So the interpretation resolves to a SYMBOL.
+
+    ## THE READING IS DECISIVE IN ONE DIRECTION ONLY
+
+    ``ABSENT`` is the strong verdict and it is the one this instrument was
+    built for. ``whole == 0`` alone could never distinguish *the page does
+    not draw this control* from *the page draws it with a decorated label*,
+    because the page matcher requires a single-word phrase to BE the whole
+    label. ``decorated == 0`` eliminates the second explanation: no control
+    the matcher refused carries this term as a whole word either.
+
+    ``UNDECIDED`` is what a nonzero ``decorated`` earns, and calling it
+    *present* would be the over-claim. **This vocabulary's own collision is
+    the reason.** ``connections`` is a prefix of ``connections of``; a label
+    reading ``Connections of <a person>`` is matched by the two-word term
+    and never reaches this pass, but a THIRD label carrying the word among
+    others would raise ``decorated["connections"]`` without any degree
+    filter existing. The count says a word occurs; it does not say on what.
+
+    ``PRESENT`` restates what the shipped matcher already said and adds
+    nothing -- it is here so that a caller switching on this function handles
+    all three cases rather than falling through one.
+    """
+    if whole >= 1:
+        return "present"
+    if decorated >= 1:
+        return "undecided"
+    return "absent"
 
 
 #: HOW MANY CONSECUTIVE UNCHANGED READS END THE WAIT, and how far apart they
@@ -1098,6 +1191,17 @@ def filter_matcher_source() -> str:
 def filter_normaliser_source() -> str:
     """The SHIPPED ``normaliseLabel``, lifted the same way."""
     return _lift_function(_MATCH_IN_PAGE, "const normaliseLabel =")
+
+
+def filter_window_matcher_source() -> str:
+    """The SHIPPED ``windowMatch``, lifted the same way.
+
+    Exists so the shape pass can be driven under a real engine by the same
+    corpus harness that drives :func:`filter_matcher_source`, rather than by
+    a Python transcription of it. Two implementations that agree today can
+    disagree tomorrow, and this module already says so about the matcher.
+    """
+    return _lift_function(_MATCH_IN_PAGE, "const windowMatch =")
 
 
 def _lift_function(source: str, declaration: str) -> str:

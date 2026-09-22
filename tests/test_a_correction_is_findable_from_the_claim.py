@@ -538,6 +538,67 @@ NOT_A_CORRECTION: dict[tuple[str, str], str] = {
         "the back-pointer, and this entry must go."
     ),
 
+    # 2026-09-21, the SEARCH-RESULTS-SURFACE wave. TWO SHADOWS, one per slice,
+    # and the same shape as the two entries below it.
+    ("network.md", "2026-09-21-the-search-results-surface.md"): (
+        "THE ARROW IS DECLARED IN THE OTHER DIRECTION AND THIS IS ITS "
+        "SHADOW. `2026-09-21-the-search-results-surface.md` declares "
+        "*'CORRECTS: `_audit/_census/network.md` -- rows `4` and `194` [...] "
+        "`94` and `179` [...] `161` [...] `83`'*, and this file carries the "
+        "matching CORRECTED BY in its header. What the candidate pair claims "
+        "instead is that NETWORK.MD corrects THE DELIVERABLE, which is "
+        "backwards: the slice withdraws nothing from that document and "
+        "asserts nothing about it. The matched vocabulary -- `false`, "
+        "`corrected`, `stale` -- sits inside rows `4` and `194`'s own "
+        "re-priced cells, describing what those ROWS said before 2026-09-21 "
+        "(*'no people search exists here at all'*, false since the people "
+        "search was admitted on 2026-09-20), and a markdown table has no "
+        "blank lines, so that prose falls inside the citation's two-line "
+        "window. "
+        "**WHAT WOULD MAKE THIS ENTRY WRONG:** a row in this slice asserting "
+        "that a measurement or claim IN that deliverable is false while "
+        "leaving the deliverable untouched, which would be a real correction "
+        "owing its own markers."
+    ),
+
+    ("messaging-and-content.md", "2026-09-21-the-search-results-surface.md"): (
+        "THE ARROW IS DECLARED IN THE OTHER DIRECTION AND THIS IS ITS "
+        "SHADOW, identically to the network.md entry above. That deliverable "
+        "declares *'CORRECTS: `_audit/_census/messaging-and-content.md` -- "
+        "row `C70`'* and this file carries the matching CORRECTED BY. The "
+        "candidate pair claims the reverse. The vocabulary match is inside "
+        "row `C70`'s own cell, which records that its citation to "
+        "`readonly.py` line numbers had ROTTED -- at HEAD those lines are "
+        "prose about a different address -- and that the phrase *'NAMED "
+        "REFUSAL'* was too strong for a state whose grounds are enumerated. "
+        "Both are corrections OF THIS ROW, made BY that document. "
+        "**WHAT WOULD MAKE THIS ENTRY WRONG:** row `C70` withdrawing "
+        "something from that deliverable rather than recording what the row "
+        "itself used to say."
+    ),
+
+    # 2026-09-21. NOT a shadow: a THIRD document caught in a row's window.
+    ("network.md", "2026-09-19-hashtag-surface-live-evidence.md"): (
+        "THE CORRECTION AND THE CITATION ARE ABOUT DIFFERENT THINGS, AND THE "
+        "ROW AGREES WITH THE DOCUMENT IT CITES. Row `194` cites "
+        "`2026-09-19-hashtag-surface-live-evidence.md` as a SECOND, "
+        "INDEPENDENT reason it cannot be reached -- *'zero rendered hashtag "
+        "anchors and zero `/feed/hashtag/` hrefs across four loads'* -- and "
+        "takes that reading as true, re-confirming the address is still "
+        "refused. The correction vocabulary in the same cell belongs to the "
+        "row's OWN blocker line, which read *'Blocker: no people search.'* "
+        "and was false at HEAD once the people search was admitted on "
+        "2026-09-20. Nothing in the hashtag document is withdrawn, doubted "
+        "or re-measured; the cell explicitly says the hashtag half is NOT "
+        "load-bearing either way. The pair exists only because a table row "
+        "has no blank lines, so an in-place correction of the row lands "
+        "within two lines of an unrelated citation. "
+        "**WHAT WOULD MAKE THIS ENTRY WRONG:** row `194` disputing the "
+        "hashtag document's four-load reading, or re-measuring it and "
+        "getting a different answer, either of which would owe that document "
+        "a CORRECTS: marker and a back-pointer."
+    ),
+
     # 2026-09-21, the REFUSE-FIRST wave. The arrow IS declared -- see the
     # CORRECTS/CORRECTED BY pair between that deliverable and this census --
     # and this is the same SHADOW shape as the fires-and-the-controls entry
