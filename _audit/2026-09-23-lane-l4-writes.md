@@ -333,8 +333,10 @@ the InMail response controls), then one supervised send. Neither can be undone.
 attribution in any message):
 
 * `b35ed54` -- the classification: the table, its checker, 20 tests, register 61.1-61.4.
-* the build commit that follows this section -- `N 47` built, the second-use guard, the coercion
-  and label repairs, the R2 build-ready columns, register 61 completed, this record.
+* `3e91d6b` -- `N 47` built, the second-use guard, the coercion and label repairs, the R2
+  build-ready columns and their three plants, register 61 completed, the ASCII repairs.
+* `d15225e` -- the three gate-2 repairs below, the gate results and section 7.
+* a last documentation-only commit carrying the cold verification's outcome (section 8).
 
 **Expected pin moves -- NOT re-pinned here, as the brief orders.** `scripts/census_completion.py`,
 run on this branch after the build, prints exactly five moved figures and nothing else:
@@ -376,6 +378,15 @@ files: 49 -> 50 tools, `PERFORMABLE` 12 -> 13, `SANCTIONED_WRITES` 13 -> 14, pin
      the guard resolved the ruling against the blocker ledger. The id is real (it is registered in
      `_audit/RULINGS.md`); the sentence now names it as a ruling.
 
+  The three guard files were then run whole: 67 passed.
+* Gate 3, over `d15225e`: `scripts/impact_gate.py --against 3e91d6b` -- the repair delta, gated
+  O(change) because gate 2 had just run the whole suite at `3e91d6b`. PASS over 38 test files (2027
+  tests, the 17 corpus-wide guards among them); NOT CHECKED 179 of 217 files, about 4067 of 6094
+  tests; wall 568.9 s.
+* **NOT RUN:** the full suite at the final HEAD (it last ran whole at `3e91d6b`, with exactly the
+  three reds above); `--against b0d3ab8` at the final HEAD, which would widen to that same full
+  suite; CI on any platform (nothing was pushed); any live run of anything.
+
 ## 7. RAISED FOR OTHER OWNERS -- NOT RULED HERE
 
 1. **`N 46`, and its jobs twin `J 103`, read COVERED-UNFIRED while a recorded measurement says the
@@ -399,3 +410,34 @@ files: 49 -> 50 tools, `PERFORMABLE` 12 -> 13, `SANCTIONED_WRITES` 13 -> 14, pin
    candidate site there, while the unwrapped instance in section 4 was convicted. Harmless here --
    that id resolves in `_audit/RULINGS.md` -- but an unresolvable BLOCKER name wrapped the same way
    would pass.
+
+## 8. THE ONE COLD VERIFICATION PASS
+
+One implementer child, cold to this work, ran a 16-item closed checklist over `d15225e` (21:00 to
+21:23), read-only, reporting facts for the lead to judge. Its report stays in the session
+scratchpad; what it found is recorded here. **15 PASS, 1 FAIL**, and the FAIL is the checklist's
+own pattern rather than the work:
+
+* **Item 5, "absolute paths in added lines": FAIL, ADJUDICATED A FALSE MATCH.** The only hit is the
+  substring `/d/` inside `/mypreferences/d/unfollowed`, the LinkedIn route quoted in section 3's
+  `N 40` row. It is not a drive path, a mount path or a username, and the same route was already
+  quoted in five audit documents at `b0d3ab8`. The other six patterns -- the two drive prefixes,
+  both spellings of the user directory, the temp directory and the operator's first name -- hit
+  nothing in any added line.
+* **Item 10, noted rather than failed:** `test_control_2` asserts the refusal and its reason but no
+  navigation count, because the refusal it drives fires inside `consume`, which never navigates;
+  the navigations it records all belong to the preview that minted the token. Controls 1 and 3
+  assert zero navigations; the shown-failing test asserts that the replay DID navigate.
+* **Passed, among the rest:** no attribution line in any commit; no forbidden file and none of the
+  four protected rows touched; no non-ASCII byte in any added line; `writes_enabled()` False with
+  the variable unset; every removed line in `writes.py` and `dom.py` matched to its replacement,
+  with no guard lost; the three new raise and log sites listed with what each interpolates
+  (`landing.withheld(landed)`, nothing, and an exception's type name); the class checker green,
+  and `test_write_classes.py` plus `test_follow_company_page.py` 59 passed; the three generated
+  files at a fixpoint; the census MATCH at 273 with row `47` COVERED-UNFIRED; this record's first
+  line; the table's 151 lines, 11 / 23 / 117, with the R2-detail rule holding both ways; and no
+  raw capture among the committed files.
+
+As briefed, that was the one pass; nothing was re-verified after it. The only changes since are
+this section and section 6's commit and gate lists -- documentation, with the three generated
+files re-run to a fixpoint and unchanged -- gated in the last commit.
