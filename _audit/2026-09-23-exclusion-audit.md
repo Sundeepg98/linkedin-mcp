@@ -16,6 +16,8 @@ pending count hides. A further 95 rest on agent rulings he never made and never
 contradicted, and 107 on family rulings of his own (section 2.1). Of the 7
 MEASURED-ABSENT rows, 6 are measured and recorded, 1 is not.
 
+**CORRECTED BY:** `_audit/2026-09-23-exclusion-returns.md` -- N 136 has a tracked measurement this audit did not cite (the 2026-09-20 profile-views recapture, section 6), so all 7 MEASURED-ABSENT rows are recorded; and P M3 cites the delete key in its own cell, so 20 lifted rows are held by nothing, not 21.
+
 ---
 
 ## 0. THE QUESTION, AND WHY IT WAS PARSED RATHER THAN GREPPED
