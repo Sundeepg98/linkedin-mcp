@@ -849,6 +849,35 @@ REGISTER: tuple = (
         note="Orchestrator's call under OUTWARD-ACTS-NEED-THE-OPERATOR; "
              "overridable.",
     ),
+    Ruling(
+        id="SELF-PROFILE-EDITS-NOT-OUTWARD",
+        claim="Edits to the operator's own profile fields are not outward "
+              "acts: no other person is targeted and each edit reverses. "
+              "Live proofs are permitted with notify-network off, the field "
+              "restored in-session and proven by a before/after reading, and "
+              "never a field that broadcasts by nature.",
+        binds="live proofs -- edits to the operator's own profile fields",
+        document="_audit/2026-09-23-rulings-write-class-and-delegated-calls.md",
+        anchor="RULED: (orchestrator, 2026-09-23, delegated) EDITS TO THE "
+               "OPERATOR'S OWN",
+        note="Orchestrator's call under OUTWARD-ACTS-NEED-THE-OPERATOR; "
+             "overridable. Narrows OPERATOR-NAMES-THE-TARGET to writes that "
+             "target other people.",
+    ),
+    Ruling(
+        id="OTHER-MEMBER-IDS-AS-READS",
+        claim="Another member's id in a search facet (e.g. connectionOf) is "
+              "permitted as a read when it comes from the tool's arguments, "
+              "never from page content, and is never stored in a tracked "
+              "file.",
+        binds="read boundary -- search facets carrying another member's id",
+        document="_audit/2026-09-23-rulings-write-class-and-delegated-calls.md",
+        anchor="RULED: (orchestrator, 2026-09-23, delegated) OTHER MEMBERS' "
+               "IDS IN SEARCH",
+        note="Orchestrator's call under OUTWARD-ACTS-NEED-THE-OPERATOR; "
+             "overridable. Answers the other-members question N 172 was "
+             "held on.",
+    ),
 )
 
 

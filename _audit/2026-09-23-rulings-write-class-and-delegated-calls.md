@@ -76,6 +76,27 @@ needs no go-ahead per fire. Opening a thread can show its sender "seen", so
 the live lane prefers threads whose last message is already read. That
 makes a proof send no new read receipt.
 
+### Edits to his own profile fields
+
+RULED: (orchestrator, 2026-09-23, delegated) EDITS TO THE OPERATOR'S OWN
+profile fields are not outward acts in the sense of
+OPERATOR-NAMES-THE-TARGET. No other person is targeted, the operator allowed
+the profile editors on 2026-08-31, and each edit is reversible. A live proof
+is permitted on four conditions:
+- "notify network" is confirmed off in the edit dialog;
+- the field is restored in the same session;
+- a before/after reading proves the restoration;
+- no field that broadcasts by its nature (for example, adding a new position)
+  is touched.
+
+### Other members' ids as search facets
+
+RULED: (orchestrator, 2026-09-23, delegated) OTHER MEMBERS' IDS IN SEARCH
+facets (for example `connectionOf`) are permitted as reads when the id comes
+from the tool's arguments, never from page content, and is never stored in
+a tracked file. This answers the open other-members question that N 172 was
+held on.
+
 ### Presses on /in/me/
 
 RULED: (orchestrator, 2026-09-23, delegated) /in/me/ presses get NO blanket

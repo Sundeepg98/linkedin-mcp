@@ -8,9 +8,9 @@
 
 **THIS REGISTER IS NOT THE CORPUS AND DOES NOT CLAIM TO BE COMPLETE.** Read section 4 before concluding a question is unruled: the scan that keeps it honest reads ONE marker, and the ruling that caused this file to be written does not carry it.
 
-    rulings registered       46
+    rulings registered       48
     documents scanned        237
-    RULED: declarations      33 claimed, 7 triaged, 0 unclaimed
+    RULED: declarations      35 claimed, 7 triaged, 0 unclaimed
 
 ---
 
@@ -81,6 +81,7 @@ Scan the CLAIM column against your question. Every claim is a paraphrase written
 |---|---|---|---|---|
 | `OPERATOR-NAMES-THE-TARGET` | A live proof of an outward act fires ONLY at a target the operator names -- whom to connect with or message, which job to apply to, what to post. Never a real person or job chosen by the package or an agent. | every outward write | 2026-09-23 | [2026-09-23-rulings-write-class-and-delegated-calls.md](2026-09-23-rulings-write-class-and-delegated-calls.md)<br>*The operator names each live target* |
 | `OWN-INBOX-READS-COVERED-BY-B` | Reading the operator's own inbox, including opening threads, is covered by ruling (b) with no per-fire go-ahead; proofs prefer threads already read so no new read receipt is sent. | /messaging/ reads | 2026-09-23 | [2026-09-23-rulings-write-class-and-delegated-calls.md](2026-09-23-rulings-write-class-and-delegated-calls.md)<br>*Reading his own inbox* |
+| `SELF-PROFILE-EDITS-NOT-OUTWARD` | Edits to the operator's own profile fields are not outward acts: no other person is targeted and each edit reverses. Live proofs are permitted with notify-network off, the field restored in-session and proven by a before/after reading, and never a field that broadcasts by nature. | edits to the operator's own profile fields | 2026-09-23 | [2026-09-23-rulings-write-class-and-delegated-calls.md](2026-09-23-rulings-write-class-and-delegated-calls.md)<br>*Edits to his own profile fields* |
 
 ### press gate
 
@@ -94,6 +95,7 @@ Scan the CLAIM column against your question. Every claim is a paraphrase written
 | id | what was ruled | binds | when | where (document / section) |
 |---|---|---|---|---|
 | `D1-SEARCH-AS-READS` | Search keywords and LinkedIn-written facets are permitted as reads: values from tool arguments only, never an identifying value of the operator, at most 5 test searches per session. | search keywords and facets | 2026-09-23 | [2026-09-23-rulings-write-class-and-delegated-calls.md](2026-09-23-rulings-write-class-and-delegated-calls.md)<br>*D1: search keywords and facets* |
+| `OTHER-MEMBER-IDS-AS-READS` | Another member's id in a search facet (e.g. connectionOf) is permitted as a read when it comes from the tool's arguments, never from page content, and is never stored in a tracked file. | search facets carrying another member's id | 2026-09-23 | [2026-09-23-rulings-write-class-and-delegated-calls.md](2026-09-23-rulings-write-class-and-delegated-calls.md)<br>*Other members' ids as search facets* |
 
 ### verb
 
@@ -240,9 +242,13 @@ Scan the CLAIM column against your question. Every claim is a paraphrase written
 
 **`NOTIFICATIONS-UNREAD-SPEND`** -- Orchestrator's call under OUTWARD-ACTS-NEED-THE-OPERATOR; overridable. Registered under the id the census holds used for the open question, so the holds resolve to the answer.
 
+**`OTHER-MEMBER-IDS-AS-READS`** -- Orchestrator's call under OUTWARD-ACTS-NEED-THE-OPERATOR; overridable. Answers the other-members question N 172 was held on.
+
 **`PERMALINK-READ-IS-ALLOWED`** -- `M C42` records that this ruling DID NOT REACH naming the target -- which is why that row cannot rest on it. See the DISPUTED section of `_audit/2026-09-21-what-was-ruled.md`.
 
 **`SEARCH-ADMISSION-APPROVED-FIVE-CONDITIONS`** -- Condition 2 was AMENDED the same day -- see SEARCH-CONDITION-2-CLOSED. The ruling bars FIRING, not READING; conflating the two cost a later wave a decision it did not need.
+
+**`SELF-PROFILE-EDITS-NOT-OUTWARD`** -- Orchestrator's call under OUTWARD-ACTS-NEED-THE-OPERATOR; overridable. Narrows OPERATOR-NAMES-THE-TARGET to writes that target other people.
 
 **`VIEW-SWITCH-PRESS-RESTORED`** -- Orchestrator's call under OUTWARD-ACTS-NEED-THE-OPERATOR; overridable.
 
@@ -305,6 +311,8 @@ Every `RULED:` line in the corpus, and what became of it. An UNCLAIMED row fails
 | [2026-09-23-rulings-write-class-and-delegated-calls.md](2026-09-23-rulings-write-class-and-delegated-calls.md) | RULED: (orchestrator, 2026-09-23, delegated) D1, SEARCH KEYWORDS AND | `D1-SEARCH-AS-READS` |
 | [2026-09-23-rulings-write-class-and-delegated-calls.md](2026-09-23-rulings-write-class-and-delegated-calls.md) | RULED: (orchestrator, 2026-09-23, delegated) Loading /notifications/ is | `NOTIFICATIONS-UNREAD-SPEND` |
 | [2026-09-23-rulings-write-class-and-delegated-calls.md](2026-09-23-rulings-write-class-and-delegated-calls.md) | RULED: (orchestrator, 2026-09-23, applying (b)) Reading the operator's own | `OWN-INBOX-READS-COVERED-BY-B` |
+| [2026-09-23-rulings-write-class-and-delegated-calls.md](2026-09-23-rulings-write-class-and-delegated-calls.md) | RULED: (orchestrator, 2026-09-23, delegated) EDITS TO THE OPERATOR'S OWN | `SELF-PROFILE-EDITS-NOT-OUTWARD` |
+| [2026-09-23-rulings-write-class-and-delegated-calls.md](2026-09-23-rulings-write-class-and-delegated-calls.md) | RULED: (orchestrator, 2026-09-23, delegated) OTHER MEMBERS' IDS IN SEARCH | `OTHER-MEMBER-IDS-AS-READS` |
 | [2026-09-23-rulings-write-class-and-delegated-calls.md](2026-09-23-rulings-write-class-and-delegated-calls.md) | RULED: (orchestrator, 2026-09-23, delegated) /in/me/ presses get NO blanket | `IN-ME-NO-BLANKET-BAR` |
 
 ### 5.1 Triaged -- a declaration hit that is not a ruling made here
