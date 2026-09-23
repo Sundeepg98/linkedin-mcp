@@ -9952,6 +9952,55 @@ list, the export of the census frozen at `1c08e5f` for the retrospective check
 -- are declared disposable. Every number they produced is either re-derived by
 the instrument on each run or recorded with its result in the audit.
 
+## 64. A FAMILY THAT HOLDS NO ROW MUST SAY WHY, AND A CONTROL THAT BUILDS ITS OWN FIXTURE (exclusion-returns, 2026-09-23)
+
+**Registered 2026-09-23.** Full record: `_audit/2026-09-23-exclusion-returns.md`.
+Numbered 64 because the orchestrator assigned it to this lane.
+
+Lane R returned 251 exclusions to GAP and re-filed nine kept rows onto the
+ground that holds them, which left 29 of the exclusion-basis registry's families
+holding no row at all. The registry's own test said a family must be used "or
+say why", and nothing could say why. Two cheap exits were both wrong: deleting
+the 29 would have taken the record of who made each ruling with them, and
+leaving them would have kept 29 vocabulary entries that can no longer fail.
+
+### 64.1 THE ENTRIES
+
+| path | shown failing by |
+|---|---|
+| `scripts/check_exclusion_basis.py` `EMPTIED`, and the row check beside it | Three mutations run against `tests/test_exclusion_basis.py` through a pytest plugin: one declared family dropped from `EMPTIED` (1 red, the used-or-says-why test), a family that still holds rows declared empty (3 red, including the real-table soundness test), and `row_problems` made to ignore the table (1 red, the new planted-row test). The unmutated control: 37 passed |
+| `tests/test_writeoff_kinds_are_derivable.py`, the moot-adjudication control | It moved `J 134`, the one real row-level adjudication, which this lane retired with its row -- so it would have gone on passing only by accident, or failing for the wrong reason. It now plants an adjudication, asserts the plant alone is green, then moves the row out and asserts the named red |
+
+    A REGISTRY ENTRY THAT HOLDS NOTHING IS KEPT FOR ITS ATTRIBUTION AND
+    DECLARED WITH ITS REASON -- AND THE DECLARATION IS ITSELF A CLAIM A ROW
+    CAN CONVICT.
+
+### 64.2 DECLARED DISPOSABLE
+
+The scratchpad scripts that carried out the returns -- the population splitter,
+the per-row decision table, the in-place cell editor that verified every state
+move against the shipped parse, the table rewriter, the delta-block inserter,
+the four test patches and the mutation plugin. The census cells, the table and
+the audit are the artifacts; the checker re-derives every link on every run.
+
+### 64.3 ADDED AT THE MERGE, 2026-09-24: A RETURNED ROW IS ITS OWN CLASS
+
+Lane R returned 245 rows to GAP, and 169 of them were never among the 409
+rows the blocker map's spine holds. The map is not grown (the coordinator's
+integration order, 2026-09-24). So a returned row is tallied as
+its OWN CLASS, read off its own cell -- the marker `RETURNED TO GAP ... BY LANE
+R ... BLOCKER, NAMED:` -- and each instrument still refuses a row that carries
+neither a map line nor the marker.
+
+| path | shown failing by |
+|---|---|
+| `scripts/triage_messaging_gap_rows.py` `RETURNED_CLASS`, `returned_outside_ledger` | `tests/test_triage_instrument.py::test_an_unmarked_row_off_the_map_is_still_refused`: a joined row with no marker, removed from the map, comes back UNJOINED rather than classed; the two older hole tests now pick their victims from joined, unmarked rows |
+| `scripts/triage_read_gap_rows.py` verdict `RETURNED` and CONTROL 9 | `--plant unmarked-returned` gives RETURNED to a row whose cell has no marker, and CONTROL 9 refuses naming it; `tests/test_triage_read_gap_rows.py` drives the plant |
+| `scripts/check_exclusion_basis.py` family `D5-PASSIVE-COST-IS-NOT-A-ROW` | the registry's standing controls: a row filed under it must carry the ruling id in its own cell, and its two anchors must resolve in the ruling document |
+
+    A CLASS THAT IS READ OFF THE ROW'S OWN CELL CANNOT BE TYPED ONTO A ROW
+    NOBODY RETURNED, AND A ROW NOBODY CLASSED STILL COMES BACK MISSING.
+
 ## 65. THE JOBS SLICE GETS ITS DIRECTION COLUMN BESIDE THE CENSUS, AND A CHECK THAT RE-READS THE DECIDING WORDS (lane-l3-jobs, 2026-09-23)
 
 **Registered 2026-09-23.** Full record: `_audit/2026-09-23-lane-l3-jobs.md`.
@@ -10066,6 +10115,114 @@ per-capture shape probes, the offline run of the collections reader over the
 raw capture, the line-ending census -- are declared disposable. What they
 measured is re-derived by the checker on every run, carried into a committed
 fixture by a builder, or recorded with its number in the audit.
+
+---
+
+## 66. A SEARCH COMPOSED FROM ARGUMENTS ONLY, AND A LANDING READ AS A LITERAL (lane-s-people-search, 2026-09-24)
+
+**Registered 2026-09-24.** Full record:
+`_audit/2026-09-24-lane-s-people-search.md`. Numbered 66 on the brief's
+instruction, so parallel lanes forked from one master do not collide.
+
+`linkedin_people_search_shape` takes a keyword and four facets under
+`D1-SEARCH-AS-READS` and `OTHER-MEMBER-IDS-AS-READS`, composed by
+`linkedin_server/people_search.py`. Two properties had to be proven offline --
+every composed address is admitted, and nothing page-derived can enter one --
+and one reading had to be built for the live lane.
+
+### 66.1 THE ENTRIES
+
+| path | shown failing by |
+|---|---|
+| `tests/test_people_search_readers.py::test_every_composed_address_is_admitted_by_the_shipped_boundary` -- 26 composed addresses (every argument alone, every pair, all five, each facet at its value ceiling) through `readonly.is_read_url`, `people_search.boundary_verdict` and `check_read_addresses.refusal_of` | `test_THIS_CONTROL_CAN_FAIL_the_admission_check_can_say_refused` in the same file: the same three checks say REFUSED for `keywords=settings` |
+| `tests/test_people_search_readers.py::test_the_tool_navigates_only_to_the_composed_address_when_driven` -- a recording browser whose page answers in plants and whose landing appends a planted name, a planted slug and a stranger's member token under the tool's own keys; the tool must navigate exactly once, to the composed address | `test_THIS_CONTROL_CAN_FAIL_the_recorder_convicts_a_second_navigation`: the recorder's assertion raises on a second navigation to the landing, and on a lone navigation to it. AND ON THE REAL TOOL: a disposable mutation run planted one `BROWSER.goto(page, landed)` into a copy of the tool body -- the mutant navigated twice and the committed assertion raised, while the taint guard's `violations()` read 1 violation at the planted line and 0 on the unmutated `server.py` |
+| `linkedin_server/people_search.py::landing_verdict` -- what LinkedIn kept of each composed argument in the address it settled on, as a literal from a closed alphabet (`verbatim`, `same_values`, `different_values`, `absent`, `unreadable`), never publishing the landing | `test_a_dropped_or_changed_value_is_never_read_as_kept` and `test_the_driven_tool_reports_what_linkedin_kept_as_literals`: a foreign value under the tool's own key reads `different_values` and a dropped key `absent` -- the reading is shown saying NO before its `verbatim` is believed |
+
+### 66.2 WHY THE THIRD ONE IS AN INSTRUMENT AND NOT A FIELD
+
+Four of the seven rows rest on a URL spelling nobody has seen LinkedIn write --
+a JSON list for `pastCompany` and `geoUrn`, a two-member list for any facet,
+and the `connectionOf` key itself. `linkedin_search_jobs` measured twice that a
+guessed spelling does not fail loudly: it silently searches somewhere else.
+`landing_verdict` turns that silent failure into a literal on the FIRST fire,
+and the live queue banks on it.
+
+### 66.3 NOT REGISTERED, AND WHY
+
+* `people_search.compose` and `boundary_verdict` are the reader, not
+  instruments. Their properties are pinned by the entries above and by the
+  refusal tests in the same file. `boundary_verdict` decides with
+  `readonly.is_read_url` and explains from the boundary's own forbidden
+  tuple; the tests hold its first-named substring against
+  `check_read_addresses.refusal_of`, the census instrument's reading of the
+  gate's sentence, so the two readings cannot drift apart. It does NOT call
+  `readonly.assert_read_url`: `tests/test_api_call_sites.py` pins that
+  function's callers to the two navigation paths, and caught the lane's first
+  version calling it.
+
+### 66.4 DECLARED DISPOSABLE
+
+The scratchpad scripts this lane ran -- the capture parser that printed
+people-search parameter names and value shapes, the census-cell editor, the
+ASCII escaper, the derived-navigation mutation run and the blocker-map diff
+summariser -- are declared disposable. What they measured is recorded in the
+audit or re-derived by a shipped test.
+
+---
+
+## 67. FOUR GUARDS THAT COULD NOT SEE THEIR OWN SUBJECT: A READER'S OUTPUT, A LIBRARY'S MESSAGE, A CAPITAL LETTER, A MERGE STAGE (lane-g-guards, 2026-09-24)
+
+**Registered 2026-09-24.** Full record: `_audit/2026-09-24-lane-g-guards.md`.
+Each gap was measured by another lane first; each repair was shown failing on
+the unrepaired code before it passed.
+
+### 67.1 THE NAVIGATION RULE NOW TAKES A READER'S RETURN VALUE AS A SOURCE
+
+Section 65.4 recorded `J 57` passing `tests/test_navigation_is_never_derived.py`
+while breaking its rule, and left the widening to that file's owner. Done:
+`reader_derived_navigations` feeds the navigation sink from Playwright's page
+reads, reader-named calls (`read_`, `harvest_`, `linkedin_`) and the file's own
+page-returning functions, with taint scoped lexically, a subscript key never a
+receiver, and `.append`/`+=` carrying a value -- each choice measured on the
+tree before it was made. Sources stay derivable from one file's text, so
+`scripts/staged_navigation_guard.py` is still an induction step. The output
+sink's decline to taint response bodies is unchanged.
+
+    A GUARD'S DECLARED GAP IS ALSO WHERE THE NEXT VIOLATION WILL LIVE. ON ITS
+    FIRST RUN THE WIDENED ENGINE FOUND THREE OLDER ROUTES OF THE WITHDRAWN
+    ROUTE'S SHAPE, ONE OF THEM SHIPPED.
+
+### 67.2 A PAGE WHOSE EVERY READ FAILS, SO AN EXCEPTION'S TEXT HAS ONE WAY OUT
+
+`tests/plantedpage.py::RaisingPage` fails every read with a marker in the
+message; its failing methods are derived from `PlantedPage`/`PlantedLocator`,
+not listed. Driven against every discovered reader, a RETURNED value holding
+the marker can only hold an exception's text -- whatever the spelling -- while
+a RAISED one is the `$.message` channel, ruled at the raise and recorded, never
+failed. It replaces recognising a coercion's wording with an experiment on the
+channel itself.
+
+### 67.3 THE ENTRIES
+
+| path | shown failing by |
+|---|---|
+| `tests/test_navigation_is_never_derived.py` (`reader_derived_navigations`) | the withdrawn `J 57` route (from `16e1e19`, trimmed) and nine sibling shapes: 10 red plants plus a same-module pair failed on the unmodified engine (11 failed); after, 16 pass, including 5 green caller-supplied shapes that must stay green |
+| `tests/plantedpage.py` (`RaisingPage`) + `tests/test_readers_emit_no_page_string.py` (the failing-page family) | 24 readers laundered on the unrepaired tree; 5 after, declared exactly; a synthetic launderer convicted in five spellings (`str`, `repr`, `args`, `%`, the dom shape); `read_radio_label_binding`'s control red on its original line |
+| `scripts/check_cited_shas_resolve.py` (`SLOTS`, keyword fold) | a sentence-initial "Committed" plant red on the unmodified guard; per-slot capitalised plants red on 9 of 10 slots with one folded; a completeness test for any future keyword slot |
+| `scripts/find_blocker_reason.py` (`tracked_audit_paths`) | a conflict manufactured in a throwaway repository (git lists the path three times) and a planted tripled listing (score 6 against 2), both red before the set |
+
+REPAIRED, NOT NEW: `scripts/_check_the_unread_readings_guard_can_fail.py` blinded
+its positive control by making `dom.py`'s `error` field type-only -- which is now
+the shipped code, so that mutation planted nothing. Its control now drives the
+retired handler verbatim; 11 of 11 convictions.
+
+### 67.4 DECLARED DISPOSABLE
+
+The scratchpad prototypes -- three versions of the reader engine and their
+measurement harnesses, the per-channel census of exception-text renders, the
+consumer map of `error` fields, the per-slot fold measurement, the timing
+script -- are declared disposable. Every number they produced is recorded in
+the lane record, and what they found is held by the entries above.
 
 ## 70. THE BEST-VERIFIED WRITE NEVER PRESSED SAVE, AND A WRITE AIMED BY ITS CARD (lane-l7-profile-writes, 2026-09-24)
 

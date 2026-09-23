@@ -941,6 +941,68 @@ REGISTER: tuple = (
                "RECOVERY AND SESSION",
         note="The cannot-be-undone arm of OUTWARD-ACTS-NEED-THE-OPERATOR.",
     ),
+    Ruling(
+        id="D2-SEARCH-VERTICALS-WIDENED",
+        claim="The search admission widens from people to four CLOSED "
+              "segments, /search/results/(people|companies|groups|events)/, "
+              "under D1-SEARCH-AS-READS's three conditions; serves N 104, "
+              "N 161, M C70 and N 179.",
+        binds="read boundary -- search result verticals",
+        document="_audit/2026-09-24-rulings-search-verticals-rosters-passive-"
+                 "costs.md",
+        anchor="RULED: (orchestrator, 2026-09-24, delegated) D2 IS ANSWERED YES",
+        aliases=("D2",),
+        note="Orchestrator's call under OUTWARD-ACTS-NEED-THE-OPERATOR; "
+             "overridable. Question: _audit/2026-09-21-the-read-triage.md D2.",
+    ),
+    Ruling(
+        id="D3-UNREGISTERED-REFUSAL-IS-NOT-A-RULING",
+        claim="A refusal written only into an allowlist comment is not a "
+              "ruling: it makes no row EXCLUDED-RULED or CANNOT-DELIVER, and "
+              "a row resting on one is GAP, blocked on the decision the "
+              "refusal asks for, until that decision is registered.",
+        binds="census convention -- refusals recorded only beside an "
+              "allowlist entry",
+        document="_audit/2026-09-24-rulings-search-verticals-rosters-passive-"
+                 "costs.md",
+        anchor="RULED: (orchestrator, 2026-09-24, delegated) D3 IS ANSWERED NO",
+        aliases=("D3",),
+        note="Orchestrator's call under OUTWARD-ACTS-NEED-THE-OPERATOR; "
+             "overridable. Question: _audit/2026-09-21-the-read-triage.md D3. "
+             "Governs N 99, N 177 and N 178.",
+    ),
+    Ruling(
+        id="MEMBER-ROSTERS-AS-BOUNDED-READS",
+        claim="A roster the operator can open himself (a group's members, an "
+              "event's attendees, a company's or school's People tab) is "
+              "admitted as a bounded read: one page per call, the id from "
+              "tool arguments only, no automatic pagination, no member name "
+              "or id in a tracked file, inside the live budget.",
+        binds="read boundary -- member rosters",
+        document="_audit/2026-09-24-rulings-search-verticals-rosters-passive-"
+                 "costs.md",
+        anchor="RULED: (orchestrator, 2026-09-24, delegated) MEMBER ROSTERS "
+               "ARE ADMITTED AS",
+        note="Orchestrator's call under OUTWARD-ACTS-NEED-THE-OPERATOR; "
+             "overridable. Decides the roster question the 2026-09-05 "
+             "refusal recorded in readonly.py and census cells but never "
+             "registered (D3). Rows it held: N 165, N 188, N 189, J 108, "
+             "N 102, N 99, N 177.",
+    ),
+    Ruling(
+        id="D5-PASSIVE-COST-IS-NOT-A-ROW",
+        claim="A consequence of an act with no control of its own is recorded "
+              "on the act's row, and its own row is EXCLUDED-RULED as "
+              "NOT-AN-ACT (N 171). A preference he sets is an act, a setting, "
+              "and stays a GAP write row (N 183).",
+        binds="census convention -- passive costs",
+        document="_audit/2026-09-24-rulings-search-verticals-rosters-passive-"
+                 "costs.md",
+        anchor="RULED: (orchestrator, 2026-09-24, delegated) D5 IS ANSWERED",
+        aliases=("D5",),
+        note="Orchestrator's call under OUTWARD-ACTS-NEED-THE-OPERATOR; "
+             "overridable. Question: _audit/2026-09-21-the-read-triage.md D5.",
+    ),
 )
 
 

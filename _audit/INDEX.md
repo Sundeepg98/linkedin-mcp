@@ -27,19 +27,19 @@ are listed as `(undated)`; no date is taken from git history, because
 
 | what | count |
 | --- | --- |
-| audit documents git tracks under `_audit` | 244 |
-| of those, carrying a `YYYY-MM-DD-` date prefix | 204 |
+| audit documents git tracks under `_audit` | 248 |
+| of those, carrying a `YYYY-MM-DD-` date prefix | 208 |
 | distinct dates | 16 |
 | documents with no level-1 heading | 2 |
-| `CORRECTS:` marker lines | 101 |
-| `CORRECTED BY:` marker lines | 101 |
-| distinct declared correction edges | 98 |
-| documents something later corrects | 50 |
-| documents that correct something | 70 |
-| documents at either end of a cross-document edge | 97 |
+| `CORRECTS:` marker lines | 106 |
+| `CORRECTED BY:` marker lines | 106 |
+| distinct declared correction edges | 103 |
+| documents something later corrects | 51 |
+| documents that correct something | 71 |
+| documents at either end of a cross-document edge | 99 |
 | intra-document correction markers | 4 |
 | documents that correct themselves later on | 2 |
-| documents no correction marker touches at all | 145 |
+| documents no correction marker touches at all | 147 |
 | blockquoted markers naming ANOTHER document | 0 |
 | edges missing one of their two markers | 0 |
 | edges declared a different number of times in each direction | 2 |
@@ -523,6 +523,14 @@ document is dead; it says one thing in it was overtaken and names what.
 
   > of the five "blocked on nothing", `M C85` is gated RULING (no sanctioned source for a poll post's address) and `P O3`, `N 134` and `M C72` are gated PRESS, measured live the same day; only `M M49` remains, so the figure is 1 of 67, not 5.
 
+### [2026-09-23-exclusion-audit.md](2026-09-23-exclusion-audit.md)
+
+2026-09-23 &middot; Who ruled each exclusion -- the 315 rows outside the denominator, traced
+
+- CORRECTED BY [2026-09-23-exclusion-returns.md](2026-09-23-exclusion-returns.md)
+
+  > N 136 has a tracked measurement this audit did not cite (the 2026-09-20 profile-views recapture, section 6), so all 7 MEASURED-ABSENT rows are recorded; and P M3 cites the delete key in its own cell, so 20 lifted rows are held by nothing, not 21.
+
 ### [INSTRUMENTS.md](INSTRUMENTS.md)
 
 (undated) &middot; The instrument register
@@ -559,6 +567,10 @@ document is dead; it says one thing in it was overtaken and names what.
 
   > row `40` moves COVERED-UNFIRED to COVERED-PROVEN on its first live firing, against the bar the THIRD DELTA above pre-registered for it (*"moves to COVERED-PROVEN on one live search"*). Four runs through the shipped `linkedin_search_jobs` and `linkedin_job_detail`, every reading reproducing. The GAP count is UNCHANGED at 56 -- this row left GAP this morning when it was built -- and what moves is `CP 20 -> 21`, `CU 4 -> 3`. **What banked is that the reader REACHES the live field and SELECTS** (1 of 14 distinct postings drew, 13 omitted the key; the same posting read `count_read` on the search card and `relation_only` on the detail page, the asymmetry the reader's design predicted). **What did NOT bank is the COUNT**: every value read was 2, n=1 distinct posting, so the number itself is unproven and the cell says so. 2026-08-31 audit for "the boundary entry and reader are NOT built". Measured 2026-09-05: the boundary entry IS built and is one of the admitted patterns at that tree; the reader is still not built. Half that sentence is current and half is stale, which is the shape that survives a careless check -- a reader who verifies either half concludes the whole is sound.
 
+- CORRECTED BY [2026-09-23-exclusion-returns.md](2026-09-23-exclusion-returns.md)
+
+  > lane R returned 38 of this slice's 48 exclusions to GAP with each blocker named, re-filed J 25, J 29 and J 30 to MEASURED-ABSENT, and kept 7 on the census's written grounds; GAP 56 -> 94.
+
 ### [_census/messaging-and-content.md](_census/messaging-and-content.md)
 
 (undated) &middot; Capability census -- MESSAGING AND CONTENT
@@ -590,6 +602,10 @@ document is dead; it says one thing in it was overtaken and names what.
 - CORRECTED BY [2026-09-23-census-cleanup.md](2026-09-23-census-cleanup.md)
 
   > row `C42` said no tool in this server returns a post identifier; since `C41` was proven on 2026-09-23 one does, for his own posts, and the row's cell now says which half its premise still holds for. Its state was not re-decided.
+
+- CORRECTED BY [2026-09-23-exclusion-returns.md](2026-09-23-exclusion-returns.md)
+
+  > lane R returned 40 of this slice's 50 exclusions to GAP with each blocker named and kept 10 on the census's written grounds; GAP 77 -> 117.
 
 ### [_census/network.md](_census/network.md)
 
@@ -639,6 +655,10 @@ document is dead; it says one thing in it was overtaken and names what.
 
   > row `53` moves **GAP to COVERED-PROVEN** on a live firing of `linkedin_job_detail`: `company_about.state` = `read` on 10 of 10 postings carrying the card, `followers` an integer with **10 distinct values across three magnitudes**, and `read` is only reachable when the card's own opening name agrees with `dom.read_job_identity`, so the attribution check passed live. It is structurally immune to the defect that killed `N 54` -- `_ABOUT_FOLLOWERS` is fully anchored (`^...$`) and the read is scoped to ONE card element. **The slice's GAP moves 87 -> 86 and COVERED-PROVEN 6 -> 7.** Row `134`'s evidence cell also gains the second sanctioned press, whose WITNESS returned `disclosed: true` -- settling the 2026-09-19 question of whether the panel opens at all -- **with no state change**: that row's blocker is now exactly one unbuilt artifact, a name-free content shaper.
 
+- CORRECTED BY [2026-09-23-exclusion-returns.md](2026-09-23-exclusion-returns.md)
+
+  > lane R returned 69 of this slice's 97 exclusions to GAP with each blocker named, moved N 23 to COVERED-UNFIRED because linkedin_connections reads that list, and kept 27 on the census's written grounds; GAP 86 -> 155.
+
 - CORRECTED BY [2026-09-23-readers-four-rows.md](2026-09-23-readers-four-rows.md)
 
   > row `134` said the 2026-09-21 witness showed the panel opens and left one name-free shaper as the whole blocker. That press was measured to land on the header nav; the pill this row names opens into a filter form whose payload needs APPLYING, a submission. State unchanged.
@@ -658,6 +678,10 @@ document is dead; it says one thing in it was overtaken and names what.
 - CORRECTED BY [2026-09-21-what-is-reachable-now.md](2026-09-21-what-is-reachable-now.md)
 
   > row `O3`'s reason cell read *"no tool, no reason"*. There is now a reason and it is not a ruling: the disclosing press on `/analytics/profile-views/` is permitted, three of its four conditions settle offline against the shipped gate, and the press was TAKEN with a witness returning `disclosed: true`. **NO STATE MOVED** -- this slice's GAP is 55 before and after -- and the row is now blocked on ONE unbuilt artifact, a name-free shaper for a panel made of other people, priced against a `# readonly-ok` waiver budget that is AT its cap of 22 with zero remaining.
+
+- CORRECTED BY [2026-09-23-exclusion-returns.md](2026-09-23-exclusion-returns.md)
+
+  > lane R returned 98 of this slice's 113 exclusions to GAP with each blocker named -- the 22 profile editors, 19 Open To Work rows, the unnamed settings pages and the rest -- and kept 15 on the census's written grounds; GAP 55 -> 153.
 
 - CORRECTED BY [2026-09-23-readers-four-rows.md](2026-09-23-readers-four-rows.md)
 
@@ -1349,6 +1373,30 @@ reach is visible. The quoted reason here is the CORRECTOR's own
 
   > row `C42` read *"no tool in this server returns one"* (a post identifier); since `C41` was proven today, `linkedin_my_activity_items` returns one for every post of his own. The premise still holds for other people's posts, and the state is not re-decided.
 
+### [2026-09-23-exclusion-returns.md](2026-09-23-exclusion-returns.md)
+
+2026-09-23 &middot; Exclusion returns -- the hidden work put back into the pending count
+
+- CORRECTS [2026-09-23-exclusion-audit.md](2026-09-23-exclusion-audit.md)
+
+  > N 136 has a tracked measurement that audit did not cite, so all 7 MEASURED-ABSENT rows are recorded, not 6; and P M3 cites the delete key in its own cell, so 20 lifted rows are held by nothing, not 21.
+
+- CORRECTS [_census/jobs.md](_census/jobs.md)
+
+  > 38 of the slice's 48 exclusions returned to GAP with each blocker named, J 25, J 29 and J 30 re-filed MEASURED-ABSENT, 7 kept on written grounds; GAP 56 to 94.
+
+- CORRECTS [_census/messaging-and-content.md](_census/messaging-and-content.md)
+
+  > 40 of the slice's 50 exclusions returned to GAP with each blocker named, the mention and tag rows among them; 10 kept on written grounds; GAP 77 to 117.
+
+- CORRECTS [_census/network.md](_census/network.md)
+
+  > 69 of the slice's 97 exclusions returned to GAP with each blocker named, N 23 moved to COVERED-UNFIRED because a shipped tool reads it, 27 kept; GAP 86 to 155.
+
+- CORRECTS [_census/profile.md](_census/profile.md)
+
+  > 98 of the slice's 113 exclusions returned to GAP with each blocker named, the profile editors, Open To Work and the unnamed settings pages among them; 15 kept on written grounds; GAP 55 to 153.
+
 ### [2026-09-23-lane-l2-refused-presses.md](2026-09-23-lane-l2-refused-presses.md)
 
 2026-09-23 &middot; Lane L2: nine refused presses, and none of them is a narrow extension away
@@ -1431,11 +1479,11 @@ ways, which is a fact about markers and not a verdict on the document.
 | (undated) | [_slice-surface-census-tool.md](_slice-surface-census-tool.md) | Slice: linkedin_surface_census -- BUILT AND GREEN |  |
 | (undated) | [_slice-trace-corpus.md](_slice-trace-corpus.md) | Slice -- the parse-trace corpus, measured and widened |  |
 | (undated) | [_slice-unfollow-census.md](_slice-unfollow-census.md) | Unfollow-anchor census -- linkedin MCP server |  |
-| (undated) | [_census/jobs.md](_census/jobs.md) | Census slice: JOBS, END TO END | **CORRECTED x6** |
+| (undated) | [_census/jobs.md](_census/jobs.md) | Census slice: JOBS, END TO END | **CORRECTED x7** |
 | (undated) | [_census/mcp-inventory.md](_census/mcp-inventory.md) | MCP inventory -- what this server ACTUALLY DELIVERS |  |
-| (undated) | [_census/messaging-and-content.md](_census/messaging-and-content.md) | Capability census -- MESSAGING AND CONTENT | **CORRECTED x7** |
-| (undated) | [_census/network.md](_census/network.md) | CENSUS SLICE: NETWORK AND PEOPLE | **CORRECTED x12** |
-| (undated) | [_census/profile.md](_census/profile.md) | CENSUS SLICE: PROFILE, IDENTITY, SETTINGS AND PRIVACY | **CORRECTED x4** |
+| (undated) | [_census/messaging-and-content.md](_census/messaging-and-content.md) | Capability census -- MESSAGING AND CONTENT | **CORRECTED x8** |
+| (undated) | [_census/network.md](_census/network.md) | CENSUS SLICE: NETWORK AND PEOPLE | **CORRECTED x13** |
+| (undated) | [_census/profile.md](_census/profile.md) | CENSUS SLICE: PROFILE, IDENTITY, SETTINGS AND PRIVACY | **CORRECTED x5** |
 | 2026-08-22 | [2026-08-22-linkedin-preflight.md](2026-08-22-linkedin-preflight.md) | 2026-08-22 - browser preflight, and a session_info that outlives the browser |  |
 | 2026-08-22 | [2026-08-22-parity-linkedin.md](2026-08-22-parity-linkedin.md) | LinkedIn parity, 2026-08-22 -- what he can do that this server cannot | **CORRECTED x1** |
 | 2026-08-23 | [2026-08-23-build-linkedin.md](2026-08-23-build-linkedin.md) | linkedin, 2026-08-23 -- leak walker, and a write design that is scoped rather than unlocked | corrects x1 |
@@ -1632,14 +1680,18 @@ ways, which is a fact about markers and not a verdict on the document.
 | 2026-09-23 | [2026-09-23-bucket3-addresses.md](2026-09-23-bucket3-addresses.md) | Bucket 3, measured: 67 rows, 33 on an admitted page, and 5 a reader could close today | **CORRECTED x2** corrects x1 |
 | 2026-09-23 | [2026-09-23-census-cleanup.md](2026-09-23-census-cleanup.md) | Census cleanup: six statements the census makes about itself, measured against today | corrects x2 |
 | 2026-09-23 | [2026-09-23-completeness-probe.md](2026-09-23-completeness-probe.md) | The completeness probe -- does the census know every address LinkedIn rendered? |  |
-| 2026-09-23 | [2026-09-23-exclusion-audit.md](2026-09-23-exclusion-audit.md) | Who ruled each exclusion -- the 315 rows outside the denominator, traced |  |
+| 2026-09-23 | [2026-09-23-exclusion-audit.md](2026-09-23-exclusion-audit.md) | Who ruled each exclusion -- the 315 rows outside the denominator, traced | **CORRECTED x1** |
+| 2026-09-23 | [2026-09-23-exclusion-returns.md](2026-09-23-exclusion-returns.md) | Exclusion returns -- the hidden work put back into the pending count | corrects x5 |
 | 2026-09-23 | [2026-09-23-lane-l1-refused-reads.md](2026-09-23-lane-l1-refused-reads.md) | Lane L1, refused reads: 24 rows at the read boundary, taken one at a time |  |
 | 2026-09-23 | [2026-09-23-lane-l2-refused-presses.md](2026-09-23-lane-l2-refused-presses.md) | Lane L2: nine refused presses, and none of them is a narrow extension away | corrects x1 |
 | 2026-09-23 | [2026-09-23-lane-l3-jobs.md](2026-09-23-lane-l3-jobs.md) | Lane L3, jobs rows: 56 directions, 31 read addresses, 2 readers built and 1 withdrawn | corrects x1 |
 | 2026-09-23 | [2026-09-23-lane-l4-writes.md](2026-09-23-lane-l4-writes.md) | Lane L4 -- WRITES: classify the write-direction GAP rows, build the reversible first round to ready-to-fire |  |
 | 2026-09-23 | [2026-09-23-readers-four-rows.md](2026-09-23-readers-four-rows.md) | READERS FOR THE FOUR ROWS BLOCKED ON NOTHING: P O3, N 134, M C72, M C85 | corrects x4 |
 | 2026-09-23 | [2026-09-23-rulings-write-class-and-delegated-calls.md](2026-09-23-rulings-write-class-and-delegated-calls.md) | Rulings, 2026-09-23: the write class, the live budget, and the calls delegated to the orchestrator |  |
+| 2026-09-24 | [2026-09-24-lane-g-guards.md](2026-09-24-lane-g-guards.md) | Lane G -- security guard hardening: four measured gaps in the checks that keep page text out and page choice out of navigation |  |
 | 2026-09-24 | [2026-09-24-lane-l7-profile-writes.md](2026-09-24-lane-l7-profile-writes.md) | Lane L7 -- WRITES TO HIS OWN PROFILE: the 36 R3 profile-family rows, classed and given one outcome each |  |
+| 2026-09-24 | [2026-09-24-lane-s-people-search.md](2026-09-24-lane-s-people-search.md) | Lane S -- people-search readers (2026-09-24) |  |
+| 2026-09-24 | [2026-09-24-rulings-search-verticals-rosters-passive-costs.md](2026-09-24-rulings-search-verticals-rosters-passive-costs.md) | Rulings, 2026-09-24: the search verticals, member rosters, refusals nobody registered, and passive costs |  |
 
 ## 6. What the scan rejected, could not join, or had to repair
 
@@ -1672,7 +1724,7 @@ against the same line, so a missing continuation satisfies it.
 - REASON PAST ITS LINE [2026-09-20-the-first-firing.md](2026-09-20-the-first-firing.md) line 233 -- a line-scoped reader sees 35 of 465 characters.
 - REASON PAST ITS LINE [2026-09-20-the-five-under-banked.md](2026-09-20-the-five-under-banked.md) line 3 -- a line-scoped reader sees 35 of 349 characters.
 - REASON PAST ITS LINE [2026-09-20-the-five-under-banked.md](2026-09-20-the-five-under-banked.md) line 457 -- a line-scoped reader sees 94 of 717 characters.
-- REASON PAST ITS LINE [_census/jobs.md](_census/jobs.md) line 402 -- a line-scoped reader sees 825 of 1189 characters.
+- REASON PAST ITS LINE [_census/jobs.md](_census/jobs.md) line 421 -- a line-scoped reader sees 825 of 1189 characters.
 
 - TIGHTEST ADMISSION MARGIN [2026-09-03-linkedin-gap-blockers.md](2026-09-03-linkedin-gap-blockers.md) line 272 clears the 20-character floor by 0. The floor is applied to the marker's OWN LINE, so a reason of 723 characters is admitted on the strength of 20. Reflow that paragraph by one word and a guard rejects it saying it *carries no reason after the citation*, which would not be true. Reported every regeneration rather than counted, because a count of rejections reads zero until the day it does not.
 
