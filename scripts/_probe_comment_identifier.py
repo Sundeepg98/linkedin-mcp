@@ -8,7 +8,7 @@ needs a target, and a target needs a name.
 That claim has never been measured. It was inferred from the absence of a
 comment reader, which is a fact about this package and not about LinkedIn's
 DOM. This probe settles it on the cheapest surface available -- ONE OF HIS OWN
-ITEMS, at an address this server already opens for ``feed_item_commented``.
+ITEMS, at an address this server already opens for ``feed_item``.
 
 ## TWO CANDIDATE ROUTES, and they cost very differently
 
@@ -67,18 +67,32 @@ remedy. **The remedy was NOT a pinned-inventory entry** -- the guard's own
 failure text forbids that, and every declaration permanently widens what it
 tolerates.
 
+## Which items it opens -- YOU name them, his rail may only say no
+
+    python scripts/_probe_comment_identifier.py urn:li:activity:<digits> [...]
+
+The items come from the COMMAND LINE, typically keys ``linkedin_my_activity_items``
+returned, and are visited in the order given. His own activity rail is read
+first and only VETOES: an item it does not carry is dropped, counted and never
+opened. **THE PAGE MAY VETO A NAVIGATION, NEVER SUPPLY ONE** -- the ruling of
+2026-09-24 that retired this probe's first design, which walked the rail
+richest first and so let the page choose every address it opened. To get that
+order back, sort the arguments by ``anchors_per_item`` yourself.
+
 ## Bounds
 
-TWO navigations, both to his own pages. Route A presses NOTHING. Route B
-presses ONE overflow control and closes the menu with Escape. The page this
-probe opens is closed in a ``finally`` -- the PAGE, never the context, which is
-his own signed-in browser session.
+His own profile, then one permalink per item you named that his rail
+verified. Route A presses NOTHING. Route B presses ONE overflow control and
+closes the menu with Escape. The page this probe opens is closed in a
+``finally`` -- the PAGE, never the context, which is his own signed-in browser
+session.
 """
 
 from __future__ import annotations
 
 import asyncio
 import os
+import re
 import sys
 from pathlib import Path
 
@@ -93,6 +107,28 @@ from linkedin_server.writes import PROFILE_URL  # noqa: E402
 #: waves tonight and a probe that cannot run because a neighbour is mid-save
 #: has failed for a reason unrelated to its question.
 ITEM_PERMALINK_URL = config.BASE_URL + dom.ACTIVITY_PERMALINK_MARKER + "{urn}/"
+
+#: The activity reader's own item shape (``urnShape`` in dom.ACTIVITY_ITEMS_JS).
+#: An argument of any other shape is dropped and counted, never echoed.
+ITEM_SHAPE = re.compile(r"urn:li:[A-Za-z]+:[0-9]+")
+
+USAGE = (
+    "usage: python scripts/_probe_comment_identifier.py "
+    "urn:li:activity:<digits> [...]\n"
+    "  Name the items to open -- keys linkedin_my_activity_items returned. "
+    "His own rail\n  is read first and may only VETO one; nothing is loaded "
+    "for an item you did not name."
+)
+
+
+def _named_items(argv: list[str]) -> list[str]:
+    """The items the OPERATOR named, in his order, repeats dropped."""
+    out: list[str] = []
+    for arg in argv:
+        text = str(arg).strip()
+        if ITEM_SHAPE.fullmatch(text) and text not in out:
+            out.append(text)
+    return out
 
 #: The schema marker a comment identifier carries. This is LinkedIn's own
 #: vocabulary, not anybody's identifier, so it is safe to hold and to print.
@@ -327,6 +363,12 @@ def _report(where: str, reading: dict) -> None:
 
 
 async def main() -> None:
+    wanted = _named_items(sys.argv[1:])
+    if not wanted:
+        print(USAGE)
+        print(f"  arguments given: {len(sys.argv) - 1}; in the item shape: 0. "
+              "Nothing was loaded.")
+        return
     print("PROBE: is a COMMENT addressable off a page this server already opens?")
     print(f"  marker asked for: {COMMENT_URN_MARKER!r} (LinkedIn schema, not an id)")
     print("  route A reads attributes and presses NOTHING.")
@@ -354,7 +396,9 @@ async def main() -> None:
             print("      about the load and not about the reader. STOPPING.")
             return
 
-        # === THE RAIL. Same resolver the census's feed_item surfaces use.
+        # === THE RAIL. The same reader the census's feed_item surface runs,
+        # and for the same purpose: a VETO. It answers whether each item he
+        # named is on his own rail, and supplies neither an item nor an order.
         rail = await dom.read_own_activity_items(page)
         if rail.get("refused") or not rail.get("items"):
             print(f"\n  REFUSED at the rail: {rail.get('refused')}")
@@ -362,17 +406,22 @@ async def main() -> None:
             return
         items = list(rail["items"])
         anchors = dict(rail.get("anchors_per_item") or {})
-        order = sorted(items, key=lambda u: (-anchors.get(u, 0), items.index(u)))
-        print(f"\n  his items on the rail: {len(items)} (no urn is printed)")
+        verified = [urn for urn in wanted if urn in items]
+        print(f"\n  items named: {len(wanted)}; on his rail: {len(verified)}; "
+              f"vetoed: {len(wanted) - len(verified)} (no urn is printed)")
+        if not verified:
+            print("  NOTHING TO OPEN: his rail carried none of the items named,")
+            print("  on its first render. Nothing further was loaded.")
+            return
 
-        # === ROUTE A, walking richest-first until something carries comments.
+        # === ROUTE A, walking the named items in his order.
         print("\n=== 1. ROUTE A -- an identifier already in the document")
         found = None
-        for position, urn in enumerate(order, start=1):
+        for position, urn in enumerate(verified, start=1):
             await page.wait_for_timeout(2_000)
             await BROWSER.goto(page, ITEM_PERMALINK_URL.format(urn=urn))
             reading = await page.evaluate(IDENT_JS, _cfg())
-            _report(f"item {position} of {len(order)} "
+            _report(f"item {position} of {len(verified)} "
                     f"(anchors {anchors.get(urn, 0)})", reading)
             if len(reading["nodes_carrying_identifier"]) > 0:
                 if found is None:

@@ -380,6 +380,7 @@ from linkedin_server import (
     anchors,
     buildinfo,
     cdp_bridge,
+    coerce,
     collections_page,
     company_page,
     company_root,
@@ -6207,8 +6208,8 @@ def census_settle_report(surface: str, controls_read: int) -> dict[str, Any]:
     }
 
 
-#: Surfaces whose url this server does not know until it has READ something,
-#: so they cannot live in the table above.
+#: Surfaces whose url this server does not know until the CALLER names an
+#: item, so they cannot live in the table above.
 #:
 #: A SEPARATE SET RATHER THAN A PLACEHOLDER ENTRY, and the first attempt was
 #: the placeholder -- ``"feed_item": BASE_URL + "/feed/update/"`` -- which
@@ -6221,31 +6222,24 @@ def census_settle_report(surface: str, controls_read: int) -> dict[str, Any]:
 #: The resolved url still goes through the same door -- ``BROWSER.goto`` calls
 #: ``assert_read_url`` like every other read -- and the shape it can take is
 #: pinned by its own test against a synthetic urn.
-CENSUS_RESOLVED_SURFACES: frozenset[str] = frozenset(
-    {"feed_item", "feed_item_commented"}
-)
+#:
+#: ``feed_item_commented`` AND ``CENSUS_ITEM_RULES`` WERE RETIRED 2026-09-24.
+#: The two resolved keys differed only in how the PAGE chose the item -- the
+#: first in document order, or the one carrying the most permalink anchors --
+#: and the orchestrator's ruling that settled the derived-navigation question
+#: forbids exactly that choice: THE PAGE MAY VETO A NAVIGATION, NEVER SUPPLY
+#: ONE. The caller now names the item, and the richest-item choice that key
+#: automated is the caller's to make from ``linkedin_my_activity_items``'
+#: ``anchors_per_item``. Two keys for one measurement would leave a caller
+#: choosing between two names for the same thing.
+CENSUS_RESOLVED_SURFACES: frozenset[str] = frozenset({"feed_item"})
 
-#: How ``feed_item`` and ``feed_item_commented`` choose which of his items to
-#: open. Both are MEASUREMENTS OF A SURFACE rather than aims for a write, and
-#: the answer says which rule it used.
-#:
-#: ``feed_item`` takes the first in document order. That is choosing by
-#: position, which this package refuses for a WRITE and which is fine here:
-#: the question is what a permalink page draws, and any of his items answers
-#: it equally.
-#:
-#: ``feed_item_commented`` takes the one with the MOST permalink anchors, and
-#: it exists because the first item turned out to have no comments on it. An
-#: item's anchor count is the measured signal for extra links -- his rail
-#: carries six items at 2 anchors and two at 4 -- so the richest item is the
-#: one most likely to render a comment count. IT IS A HEURISTIC AND SAYS SO:
-#: it selects the item most likely to answer the question, and if that item
-#: still draws no comment affordance the answer is that the surface does not
-#: carry one, which is exactly the finding being sought.
-CENSUS_ITEM_RULES: dict[str, str] = {
-    "feed_item": "first",
-    "feed_item_commented": "most_anchors",
-}
+#: THE SHAPE A CALLER'S ITEM MUST HAVE BEFORE ANYTHING IS LOADED -- the
+#: activity reader's own ``urnShape`` in ``dom.ACTIVITY_ITEMS_JS``, which
+#: refuses to publish a key of any other shape. Restated here because the
+#: refusal has to happen before a page exists to run the reader on, and held
+#: equal to the reader's by ``test_the_item_shape_is_the_readers_own``.
+CENSUS_ITEM_SHAPE = re.compile(r"urn:li:[A-Za-z]+:[0-9]+")
 
 
 #: SURFACES WHOSE SDUI FLIGHT PAYLOAD IS WORTH COUNTING, and the STABLE,
@@ -6368,139 +6362,142 @@ CENSUS_SURFACE_COST: dict[str, str] = {
 ITEM_PERMALINK_URL = BASE_URL + dom.ACTIVITY_PERMALINK_MARKER + "{urn}/"
 
 
-async def _resolve_own_item_permalink(
-    page: Any, rule: str = "first"
-) -> tuple[dict[str, Any], Optional[str]]:
-    """One of HIS item permalinks, or a refusal explaining why not.
+async def _own_item_veto(page: Any, item: str) -> dict[str, Any]:
+    """Whether HIS OWN activity rail vetoes the item the caller named.
 
-    Returns ``(block, url)``. When ``url`` is ``None`` the block IS the
-    answer -- a refusal to be returned whole -- and when it is a string the
-    block is the ``aimed_at`` report that rides along with the census.
+    THE PAGE MAY VETO A NAVIGATION, NEVER SUPPLY ONE -- the orchestrator's
+    ruling of 2026-09-24, delegated for exactly this route. This used to be
+    ``_resolve_own_item_permalink``, which read his rail, CHOSE an item off it
+    (the first, or the one carrying the most anchors) and returned its address:
+    a navigation the page aimed, which ``tests/test_navigation_is_never_derived.py``
+    forbids and could see once a reader's return value became one of its
+    sources. Now the CALLER names the item, and this answers one question about
+    it -- is it on his own rail, as the activity reader establishes authorship
+    -- and returns NO ADDRESS AT ALL. The caller builds the address from its own
+    argument, so nothing this function reads can become one.
+
+    Returns ONE dict. When ``verified`` is True every refusal below was passed
+    and the item is among the rail's items, and the dict is the ``aimed_at``
+    report that rides along with the census. Otherwise the dict IS the answer --
+    a refusal to be returned whole -- and the item's page has not been loaded.
 
     THE REFUSALS ARE NOT REWRITTEN HERE. This runs the same C1 check and the
-    same reader ``linkedin_my_activity_items`` runs, and forwards whatever
-    they say. A second, laxer copy of an authorship rule is how the strict one
-    stops being the rule -- and this caller wants a urn, which is precisely
+    same reader ``linkedin_my_activity_items`` runs, and forwards whatever they
+    say. A second, laxer copy of an authorship rule is how the strict one stops
+    being the rule -- and this caller wants to open an item, which is precisely
     the caller most tempted to take one on weaker evidence.
 
-    THE FIRST ITEM IN DOCUMENT ORDER, and the answer says so. For a WRITE that
-    would be choosing by position and is refused everywhere in this package;
-    for a MEASUREMENT OF THE SURFACE it is fine, because the question is what
-    a permalink page draws and any of his items answers it. The distinction is
-    the reason this helper lives here and not in ``writes``.
+    FIRST RENDER ONLY, like the reader it trusts: an older item sitting below
+    the fold is refused as unverified. That says the item was not SEEN on his
+    rail, never that it is not his.
     """
     landed, state, pages_loaded = await _goto_self_profile_asserted(page)
     if state == SELF_ASSERTION_FALSE:
-        return (
-            {
-                "surface": "feed_item",
-                "refused": "not_self_profile",
-                "reason": (
-                    f"the landed profile url carries {_SELF_ASSERTION_PARAM} "
-                    "with a value that is not 'true'. That is LinkedIn "
-                    "stating the profile is NOT the viewer's own, which is a "
-                    "settled answer rather than a reading that failed -- so "
-                    "it is not retried, and nothing further is loaded."
-                ),
-                "authorship": _authorship_block(
-                    established=False, self_assertion=False
-                ),
-                "pages_loaded": pages_loaded,
-            },
-            None,
-        )
+        return {
+            "surface": "feed_item",
+            "refused": "not_self_profile",
+            "reason": (
+                f"the landed profile url carries {_SELF_ASSERTION_PARAM} "
+                "with a value that is not 'true'. That is LinkedIn "
+                "stating the profile is NOT the viewer's own, which is a "
+                "settled answer rather than a reading that failed -- so "
+                "it is not retried, and nothing further is loaded."
+            ),
+            "authorship": _authorship_block(
+                established=False, self_assertion=False
+            ),
+            "pages_loaded": pages_loaded,
+        }
     if state == SELF_ASSERTION_ABSENT:
-        return (
-            {
-                "surface": "feed_item",
-                "refused": "self_assertion_unreadable",
-                "reason": (
-                    "the landed profile url carried no "
-                    f"{_SELF_ASSERTION_PARAM} parameter at all, on "
-                    f"{pages_loaded} attempt(s). THIS IS NOT A STATEMENT "
-                    "THAT THE PROFILE IS NOT YOURS -- LinkedIn did not "
-                    "answer the question, and this server will not turn an "
-                    "unread assertion into a claim about your account. "
-                    "Nothing further was read off the page, and an item "
-                    "permalink is not visited on an unread assertion."
-                ),
-                "authorship": _authorship_block(
-                    established=False, self_assertion=False
-                ),
-                "pages_loaded": pages_loaded,
-            },
-            None,
-        )
+        return {
+            "surface": "feed_item",
+            "refused": "self_assertion_unreadable",
+            "reason": (
+                "the landed profile url carried no "
+                f"{_SELF_ASSERTION_PARAM} parameter at all, on "
+                f"{pages_loaded} attempt(s). THIS IS NOT A STATEMENT "
+                "THAT THE PROFILE IS NOT YOURS -- LinkedIn did not "
+                "answer the question, and this server will not turn an "
+                "unread assertion into a claim about your account. "
+                "Nothing further was read off the page, and an item "
+                "permalink is not visited on an unread assertion."
+            ),
+            "authorship": _authorship_block(
+                established=False, self_assertion=False
+            ),
+            "pages_loaded": pages_loaded,
+        }
     reading = await dom.read_own_activity_items(page)
     facts = reading["authorship_facts"]
     if "items" not in reading or not reading["items"]:
-        return (
-            {
-                "surface": "feed_item",
-                "refused": reading.get("refused") or "no_items",
-                "reason": (
-                    reading.get("reason")
-                    or "authorship held and the rail carried no item key to "
-                    "aim at. An empty rail is not an error and it is not a "
-                    "surface either."
-                ),
-                "authorship": _authorship_block(
-                    established=False, self_assertion=True, facts=facts
-                ),
-                "counts": reading["counts"],
-                "item_root_source": reading["item_root_source"],
-                "pages_loaded": pages_loaded,
-            },
-            None,
-        )
-    items = list(reading["items"])
-    per_item = dict(reading.get("anchors_per_item") or {})
-    if rule == "most_anchors":
-        # THE RICHEST ITEM, and ties break on document order so the choice is
-        # deterministic across runs -- a census whose subject moved between
-        # readings could not be compared with itself.
-        #
-        # THE ORIGINAL ORDER IS CAPTURED BEFORE THE SORT, and the first
-        # version did not do that. It read ``items.index(urn)`` INSIDE the key
-        # function, which ``list.sort`` evaluates while it is mutating the
-        # very list being indexed -- so a urn already moved by the partial
-        # sort was no longer where ``index`` looked, and the call raised
-        # ``ValueError: '<urn>' is not in list``. It failed on its first live
-        # use, which is the good version of that bug: loudly, before the
-        # census had navigated anywhere.
-        order = {urn: position for position, urn in enumerate(items)}
-        items.sort(key=lambda urn: (-int(per_item.get(urn) or 0), order[urn]))
-    return (
-        {
-            # THE URN ITSELF IS NOT REPORTED HERE. It is a real identifier and
-            # it is already in the landed ``source_url`` this census returns,
-            # which is one place rather than two. What this block reports is
-            # HOW the aim was taken, which is the part a reader has to judge.
-            "chosen_by": (
-                "first item in document order on his own activity rail"
-                if rule == "first"
-                else "the item on his own activity rail carrying the MOST "
-                "permalink anchors, ties broken by document order -- a "
-                "heuristic for the item most likely to render a comment "
-                "count, not a claim that it has one"
+        return {
+            "surface": "feed_item",
+            "refused": reading.get("refused") or "no_items",
+            "reason": (
+                reading.get("reason")
+                or "authorship held and the rail carried no item key to "
+                "check yours against. An empty rail is not an error and it "
+                "is not a surface either."
             ),
-            "items_available": len(items),
-            "anchors_on_the_chosen_item": int(per_item.get(items[0]) or 0),
+            "authorship": _authorship_block(
+                established=False, self_assertion=True, facts=facts
+            ),
+            "counts": reading["counts"],
+            "item_root_source": reading["item_root_source"],
+            "pages_loaded": pages_loaded,
+        }
+    items = list(reading["items"])
+    if item not in items:
+        # THE VETO. A MEMBERSHIP TEST, and that is the whole of what the page
+        # contributes: a boolean about the caller's item, never an item of its
+        # own. The rail's other keys are not reported -- a refusal is not a
+        # route to a list of identifiers the caller did not ask for.
+        return {
+            "surface": "feed_item",
+            "refused": "item_not_on_his_rail",
+            "reason": (
+                "the item you named is not among the items his own activity "
+                "rail carried on its first render, so its page was not "
+                "loaded. A caller's item is opened only after his rail has "
+                "had the chance to veto it: the page may veto a navigation, "
+                "never supply one. THIS SAYS THE ITEM WAS NOT VERIFIED, not "
+                "that it is not his -- the rail is read without scrolling, so "
+                "an older item may simply sit below the fold. Pass a key "
+                "linkedin_my_activity_items returned."
+            ),
             "authorship": _authorship_block(
                 established=True, self_assertion=True, facts=facts
             ),
-            # HOW MANY TIMES /in/me/ WAS LOADED TO CLEAR THE SELF-ASSERTION
-            # GATE ABOVE -- 1 or 2, never hardcoded, so the caller composing
-            # the census's own pages_loaded can add its own item-page load to
-            # a real number rather than an assumed one.
+            "items_available": len(items),
             "pages_loaded": pages_loaded,
-        },
-        ITEM_PERMALINK_URL.format(urn=items[0]),
-    )
+        }
+    per_item = dict(reading.get("anchors_per_item") or {})
+    return {
+        "verified": True,
+        # THE ITEM ITSELF IS NOT REPORTED HERE. It is a real identifier, the
+        # caller already holds it, and it is in the landed ``source_url`` this
+        # census returns -- one place rather than two. What this block reports
+        # is HOW the aim was taken, which is the part a reader has to judge.
+        "chosen_by": (
+            "the caller, and verified present on his own activity rail before "
+            "its page was loaded"
+        ),
+        "items_available": len(items),
+        # A COUNT OFF THE PAGE, COERCED BY THE HELPER THAT NEVER RAISES AND
+        # NEVER QUOTES ITS INPUT. The retired resolver used a bare int() here.
+        "anchors_on_the_item": coerce.as_count(per_item.get(item)),
+        "authorship": _authorship_block(
+            established=True, self_assertion=True, facts=facts
+        ),
+        # HOW MANY TIMES /in/me/ WAS LOADED TO CLEAR THE SELF-ASSERTION GATE
+        # ABOVE -- 1 or 2, never hardcoded, so the census adds its own
+        # item-page load to a real number rather than an assumed one.
+        "pages_loaded": pages_loaded,
+    }
 
 
 @mcp.tool()
-async def linkedin_surface_census(surface: str) -> dict[str, Any]:
+async def linkedin_surface_census(surface: str, item: str = "") -> dict[str, Any]:
     """Measure what controls a LinkedIn page carries. An instrument, not a feature.
 
     ================= WHAT THIS IS FOR -- READ FIRST =================
@@ -6518,11 +6515,17 @@ async def linkedin_surface_census(surface: str) -> dict[str, Any]:
     IT LOADS EXACTLY ONE PAGE, ON EVERY SURFACE BUT ONE, AND CLICKS NOTHING.
     There is no typing, no form submission, no scrolling and no request other
     than the page load. It reads the rendered DOM and returns counts. THE ONE
-    EXCEPTION IS "feed_item", WHICH LOADS EXACTLY TWO: a permalink is
-    addressed by a urn, and the only route to one is the same own-activity
-    read linkedin_my_activity_items performs, so that surface inherits every
-    authorship refusal that reader has. The count is on every answer, in
-    pages_loaded, rather than only here.
+    EXCEPTION IS "feed_item", WHICH MEASURES AN ITEM YOU NAME: pass, as item,
+    one of the keys linkedin_my_activity_items returned. Before that item's
+    page is loaded, his own activity rail is read -- /in/me/, once or twice --
+    and the item must be on it, or the call is refused and the item's page is
+    never loaded. THE PAGE MAY VETO A NAVIGATION, NEVER SUPPLY ONE: the
+    address is built from your argument, and the rail can only say no. So
+    "feed_item" LOADS EXACTLY TWO PAGES when it proceeds -- his profile, then
+    the item -- and a third only when LinkedIn's self-assertion needs its one
+    retry on the profile. It inherits every authorship refusal the activity
+    reader has. The count is on every answer, in pages_loaded, rather than
+    only here.
 
     AND THE LOAD ITSELF IS NO LONGER FREE ON EVERY SURFACE. This paragraph
     used to say a census "is not worth a side effect" and used that to explain
@@ -6581,10 +6584,10 @@ async def linkedin_surface_census(surface: str) -> dict[str, Any]:
 
     Args:
         surface: which page to measure. A KEY, never a url, and one of these
-            fourteen: "feed", "profile", "profile_edit_intro", "settings",
-            "settings_dark_mode", "feed_item", "feed_item_commented",
-            "post_composer", "article_composer", "messaging_compose",
-            "premium", "search_appearances", "groups" or "events". THIS LIST
+            thirteen: "feed", "profile", "profile_edit_intro", "settings",
+            "settings_dark_mode", "feed_item", "post_composer",
+            "article_composer", "messaging_compose", "premium",
+            "search_appearances", "groups" or "events". THIS LIST
             HAS BEEN INCOMPLETE TWICE and is now pinned
             by ``test_the_census_docstring_lists_every_surface_it_answers_to``
             -- it said "five" while eight keys existed, and was then corrected
@@ -6602,14 +6605,13 @@ async def linkedin_surface_census(surface: str) -> dict[str, Any]:
             profile, in the /in/me/ spelling that resolves to whoever is
             signed in; no other member's is reachable, because opening one
             would leave that person a durable record. "feed_item" is ONE of
-            his own items, found by the own-activity reader and chosen as the
-            first on the rail; no argument selects it, and a rail whose
-            authorship cannot be established yields a refusal rather than a
-            census. "feed_item_commented" is the same resolver under a
-            different rule -- the item carrying the MOST permalink
-            anchors, which is a heuristic for the richest item on his rail
-            rather than a claim about what that item renders, and
-            CENSUS_ITEM_RULES names the rule an answer used. "premium"
+            his own items, the one YOU name in item and his own rail verifies;
+            a rail whose authorship cannot be established yields a refusal
+            rather than a census. The key "feed_item_commented", which let
+            the PAGE choose the item carrying the most permalink anchors, was
+            retired on 2026-09-24: to measure the richest item, pick it
+            yourself from linkedin_my_activity_items' anchors_per_item and
+            pass it to "feed_item". "premium"
             is his own subscription page, added to settle whether an InMail
             balance is a countable thing this server can read; it is not.
             The three composer keys each carry a "cost" field saying
@@ -6617,6 +6619,12 @@ async def linkedin_surface_census(surface: str) -> dict[str, Any]:
             are still deliberately not offered: loading them consumes a badge
             he has not seen, which is a cost with nothing to show for it. See
             CENSUS_SURFACES and CENSUS_SURFACE_COST for the ruling on each.
+        item: for "feed_item" only, and required there -- one of the keys
+            linkedin_my_activity_items returned, in its urn:li:<type>:<digits>
+            shape. Nothing, or anything of another shape, is refused before
+            any page loads; an item his own activity rail does not carry is
+            refused before its page loads. Every other surface is a fixed
+            address and refuses an item.
     """
     key = str(surface or "").strip().lower()
     if key not in CENSUS_SURFACES and key not in CENSUS_RESOLVED_SURFACES:
@@ -6633,36 +6641,68 @@ async def linkedin_surface_census(surface: str) -> dict[str, Any]:
             "valid_surfaces": census_surface_keys(),
         }
 
+    # THE ITEM IS CHECKED BEFORE ANY PAGE EXISTS. A refusal here RETURNS, like
+    # the unknown key above, and loads nothing. The caller's value is never
+    # echoed: it is a real identifier, and the caller already holds it.
+    wanted = str(item or "").strip()
+    if key in CENSUS_RESOLVED_SURFACES and not CENSUS_ITEM_SHAPE.fullmatch(wanted):
+        return {
+            "surface": key,
+            "refused": "item_required" if not wanted else "item_unrecognised",
+            "reason": (
+                f"{key!r} measures an item YOU name, and needs one of the "
+                "keys linkedin_my_activity_items returned, in its "
+                "urn:li:<type>:<digits> shape. "
+                + (
+                    "None was given."
+                    if not wanted
+                    else "What was given is not that shape."
+                )
+                + " Nothing was loaded."
+            ),
+            "pages_loaded": 0,
+        }
+    if key not in CENSUS_RESOLVED_SURFACES and wanted:
+        return {
+            "surface": key,
+            "refused": "item_not_accepted",
+            "reason": (
+                f"{key!r} is a fixed address and takes no item; only "
+                "'feed_item' measures an item you name. Nothing was loaded."
+            ),
+            "pages_loaded": 0,
+        }
+
     try:
         async with BROWSER.session() as page:
             pages_loaded = 1
             aimed_at: Optional[dict[str, Any]] = None
             if key in CENSUS_RESOLVED_SURFACES:
-                # THE ONE SURFACE WHOSE URL THIS SERVER DOES NOT KNOW UNTIL IT
-                # HAS READ SOMETHING. A permalink is addressed by a urn, and
-                # the ONLY route to one here is the same reader
-                # linkedin_my_activity_items uses -- which publishes a key
-                # only for items it has established are his own. So this key
-                # inherits that reader's whole refusal set rather than
-                # weakening it: no authorship, no census.
+                # THE ONE SURFACE WHOSE URL IS THE CALLER'S TO NAME. A
+                # permalink is addressed by a urn, and the urn comes from the
+                # item argument -- never off a page. HIS OWN RAIL IS READ
+                # FIRST AND MAY ONLY SAY NO: _own_item_veto runs the same
+                # reader linkedin_my_activity_items uses, inherits its whole
+                # refusal set (no authorship, no census), and answers one
+                # question about the caller's item. It returns no address.
                 #
-                # NO ARGUMENT SELECTS THE ITEM, and there is no parameter
-                # through which one could. That is deliberate: a caller
-                # handing in a urn would be handing in an identifier this
-                # server never read, and the read boundary would then be the
-                # only thing standing between a census and an arbitrary
-                # member's item.
-                aimed_at, item_url = await _resolve_own_item_permalink(
-                    page, CENSUS_ITEM_RULES[key]
-                )
-                if item_url is None:
+                # THIS USED TO SAY "NO ARGUMENT SELECTS THE ITEM", and it was
+                # right about the hazard: a caller-supplied urn nobody checked
+                # would leave the read boundary alone between a census and an
+                # arbitrary member's item. The veto is what answers that, and
+                # the ruling of 2026-09-24 is why the page no longer chooses:
+                # THE PAGE MAY VETO A NAVIGATION, NEVER SUPPLY ONE.
+                aimed_at = await _own_item_veto(page, wanted)
+                if aimed_at.get("verified") is not True:
                     return aimed_at
                 # THE REAL COUNT, PLUS ONE FOR THIS ITEM PAGE -- not a
                 # hardcoded 2. The self-assertion gate inside
-                # _resolve_own_item_permalink now retries once on an unread
-                # assertion, so the profile alone may already be 1 or 2.
+                # _own_item_veto retries once on an unread assertion, so the
+                # profile alone may already be 1 or 2.
                 pages_loaded = aimed_at["pages_loaded"] + 1
-                final_url = await BROWSER.goto(page, item_url)
+                final_url = await BROWSER.goto(
+                    page, ITEM_PERMALINK_URL.format(urn=wanted)
+                )
             else:
                 final_url = await BROWSER.goto(page, CENSUS_SURFACES[key])
             assert_not_authwall(final_url, surface=key)
@@ -6749,12 +6789,11 @@ async def linkedin_surface_census(surface: str) -> dict[str, Any]:
                 # not look is a cost the caller was not told about.
                 out["cost"] = CENSUS_SURFACE_COST[key]
             if aimed_at is not None:
-                # HOW THE ITEM WAS CHOSEN, and it says "by position" out loud.
-                # The rail carries several of his items and this takes the
-                # FIRST in document order, which is choosing by position --
-                # acceptable for a MEASUREMENT OF A SURFACE, where any of his
-                # items answers the question equally, and stated rather than
-                # hidden because it would not be acceptable for a write.
+                # HOW THE ITEM WAS CHOSEN: by the caller, and verified on his
+                # own rail before its page loaded. Said on the answer because
+                # the choosing used to be the page's -- the first item in
+                # document order -- and a reader of an older census should be
+                # able to tell which kind of aim a given answer carries.
                 out["aimed_at"] = aimed_at
             if census["truncated"]:
                 out["truncated"] = True

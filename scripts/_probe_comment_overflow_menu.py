@@ -60,15 +60,30 @@ Every string printed has been through ``shape.census_shape``.
 * It never opens a menu on a comment it could not prove was his.
 * It loads no third party's profile and follows no link.
 
+## Which items it opens -- YOU name them, his rail may only say no
+
+    python scripts/_probe_comment_overflow_menu.py urn:li:activity:<digits> [...]
+
+The items come from the COMMAND LINE, typically keys ``linkedin_my_activity_items``
+returned, and are visited in the order given. His own activity rail is read
+first and only VETOES: an item it does not carry is dropped, counted and never
+opened. **THE PAGE MAY VETO A NAVIGATION, NEVER SUPPLY ONE** -- the ruling of
+2026-09-24 that retired this probe's first design, which walked every item on
+the rail, richest first, and so let the page choose every address it opened.
+To get the old richest-first walk, order the arguments by
+``linkedin_my_activity_items``' ``anchors_per_item`` yourself.
+
 ## Bounds
 
-TWO navigations: his own profile, then one of his own item permalinks. One
-click, on one overflow control, whose identity was established in the page.
+His own profile, then one permalink per item you named that his rail verified,
+stopping at the first that carries a comment of his. One click, on one
+overflow control, whose identity was established in the page.
 """
 
 from __future__ import annotations
 
 import asyncio
+import re
 import sys
 from pathlib import Path
 
@@ -85,6 +100,28 @@ from linkedin_server.writes import PROFILE_URL  # noqa: E402
 #: cannot run because somebody else's file is mid-save is a probe that fails
 #: for a reason having nothing to do with its question.
 ITEM_PERMALINK_URL = config.BASE_URL + dom.ACTIVITY_PERMALINK_MARKER + "{urn}/"
+
+#: The activity reader's own item shape (``urnShape`` in dom.ACTIVITY_ITEMS_JS).
+#: An argument of any other shape is dropped and counted, never echoed.
+ITEM_SHAPE = re.compile(r"urn:li:[A-Za-z]+:[0-9]+")
+
+USAGE = (
+    "usage: python scripts/_probe_comment_overflow_menu.py "
+    "urn:li:activity:<digits> [...]\n"
+    "  Name the items to open -- keys linkedin_my_activity_items returned. "
+    "His own rail\n  is read first and may only VETO one; nothing is loaded "
+    "for an item you did not name."
+)
+
+
+def _named_items(argv: list[str]) -> list[str]:
+    """The items the OPERATOR named, in his order, repeats dropped."""
+    out: list[str] = []
+    for arg in argv:
+        text = str(arg).strip()
+        if ITEM_SHAPE.fullmatch(text) and text not in out:
+            out.append(text)
+    return out
 
 #: The measured comment overflow control. Quoted in dom.read_comment_surface
 #: as ``View more options for <member>'s comment.`` -- the prefix is the whole
@@ -225,6 +262,12 @@ def _names(census: dict) -> dict[str, int]:
 
 
 async def main() -> None:
+    wanted = _named_items(sys.argv[1:])
+    if not wanted:
+        print(USAGE)
+        print(f"  arguments given: {len(sys.argv) - 1}; in the item shape: 0. "
+              "Nothing was loaded.")
+        return
     print("PROBE: does a comment overflow menu offer a DELETE?")
     print(f"  comment prefix anchored on: {COMMENT_OVERFLOW_PREFIX!r}")
     print(f"  owner read from:            {dom.ACTIVITY_OVERFLOW_PREFIX!r}")
@@ -244,27 +287,27 @@ async def main() -> None:
 
         items = list(rail["items"])
         anchors = dict(rail.get("anchors_per_item") or {})
-        # RICHEST FIRST, by permalink anchors -- a heuristic for the item most
-        # likely to carry comments, and the same rule the census's
-        # ``feed_item_commented`` surface uses. Ties keep document order.
-        #
-        # AND THEN THE REST, because the first run of this probe found the
-        # richest item carrying FOUR comment menus and NONE of them his. That
-        # is a real answer about that item and says nothing about the others,
-        # so walking the rail is the difference between "he has not commented
-        # here" and "he has not commented at all". Every item is his own, so
-        # each load costs a page and nobody else anything.
-        order = sorted(
-            items, key=lambda urn: (-anchors.get(urn, 0), items.index(urn))
-        )
-        print(f"  his items: {len(items)}; walking all of them, richest first")
+        # THE PAGE MAY VETO A NAVIGATION, NEVER SUPPLY ONE. The rail answers a
+        # MEMBERSHIP question about each item he named and contributes nothing
+        # else: no item of its own, and no order -- a richest-first sort would
+        # let the page decide which named items this loop reaches before it
+        # stops. The walk-every-item design this replaces answered "has he
+        # commented at all"; naming every item on the command line still does.
+        verified = [urn for urn in wanted if urn in items]
+        print(f"  items named: {len(wanted)}; on his rail: {len(verified)}; "
+              f"vetoed: {len(wanted) - len(verified)}")
         print("  (no urn is printed -- they are real identifiers)")
+        if not verified:
+            print("\n  NOTHING TO OPEN: his rail carried none of the items named,")
+            print("  on its first render. Nothing further was loaded.")
+            await BROWSER.stop()
+            return
 
         aim = None
         print("\n=== 1. AIMING, decided inside the page, one item at a time")
         print(f"    {'item':>6}  {'anchors':>7}  {'owner':>5}  "
               f"{'comment menus':>13}  {'HIS':>3}")
-        for position, urn in enumerate(order, start=1):
+        for position, urn in enumerate(verified, start=1):
             await page.wait_for_timeout(3_000)
             await BROWSER.goto(page, ITEM_PERMALINK_URL.format(urn=urn))
             reading = await page.evaluate(
@@ -330,10 +373,12 @@ async def main() -> None:
 
         # THE FIRST OF HIS OWN, IN DOCUMENT ORDER, AND THE ANSWER SAYS SO.
         #
-        # A WRITE MAY NOT DO THIS and this file is not a write. The rule is
-        # already drawn in this repository, at ``_resolve_own_item_permalink``,
-        # in these words: "THE FIRST ITEM IN DOCUMENT ORDER, and the answer
-        # says so. For a WRITE that would be choosing by position and is
+        # A WRITE MAY NOT DO THIS and this file is not a write. The rule was
+        # drawn at ``_resolve_own_item_permalink`` (retired 2026-09-24, when the
+        # census's item became the caller's to name, because that rule chose a
+        # NAVIGATION by position), in these words: "THE FIRST ITEM IN
+        # DOCUMENT ORDER, and the answer says so. For a WRITE that would be
+        # choosing by position and is
         # refused everywhere in this package; for a MEASUREMENT OF THE SURFACE
         # it is fine, because the question is what a permalink page draws and
         # any of his items answers it."

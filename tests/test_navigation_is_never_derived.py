@@ -803,36 +803,26 @@ def _python_files() -> list[pathlib.Path]:
 #: Leave it empty. A new derived navigation fails naming itself, and an entry
 #: added here has to carry the same argument this one did.
 #:
-#: **THREE ENTRIES SINCE 2026-09-24, AND NONE OF THEM IS NEW CODE.** The reader
-#: source (see ``reader_derived_navigations``) found them on its first run over
-#: the tree. All three read HIS OWN ACTIVITY RAIL through
-#: ``dom.read_own_activity_items`` and open an item permalink built from a urn
-#: the rail returned -- one navigation in the census tool, one per item in each
-#: probe. The url-only engine could not see them: the urn arrives as a reader's
-#: return value, never as a ``goto`` return or a ``.url``.
+#: **EMPTY AGAIN SINCE 2026-09-24, AND THE SECOND ROUND WENT LIKE THE FIRST:
+#: FORCED IN BY A FINDING, FORCED OUT BY A FIX.** The reader source (see
+#: ``reader_derived_navigations``) found three routes on its first run, none of
+#: them new code, all three reading HIS OWN ACTIVITY RAIL through
+#: ``dom.read_own_activity_items`` and opening an item permalink built from a
+#: urn the rail returned: ``linkedin_surface_census`` on its ``feed_item`` keys
+#: (shipped since 2026-08-31, three days before this rule existed), and two
+#: hand-run probes walking every item on the rail. They were declared while two
+#: standing rules disagreed -- this file's, and the census's own refusal of a
+#: caller-supplied urn as "an identifier this server never read".
 #:
-#: * ``server.py`` -- ``linkedin_surface_census`` on its ``feed_item`` keys,
-#:   through ``_resolve_own_item_permalink`` (present since ``3b78dd6``,
-#:   2026-08-31, three days before this rule existed). SHIPPED CODE.
-#: * ``_probe_comment_overflow_menu.py`` (2026-09-04) and
-#:   ``_probe_comment_identifier.py`` (2026-09-05) -- hand-run probes walking
-#:   every item on the rail, richest first.
-#:
-#: **DECLARED, NOT FIXED, AND NOT WAIVED -- BECAUSE TWO STANDING RULES MEET
-#: HERE.** This file says the process must name its next address without
-#: asking the page, and lane L3 withdrew ``J 57`` for navigating to ids read off
-#: HIS OWN tracker. ``_resolve_own_item_permalink``'s own docstring argues the
-#: opposite direction on purpose: a caller-supplied urn would be "an identifier
-#: this server never read", so the census takes one only from a rail whose
-#: authorship it has established. Each rule is right about the hazard it names.
-#: Which one governs a walk of his own rail is a ruling for the census owner,
-#: not an edit for the lane that found it -- the same holding position the
-#: first entry here took before a live measurement settled it.
-KNOWN_DERIVED_NAVIGATIONS: dict[str, list[str]] = {
-    "_probe_comment_identifier.py": ["ITEM_PERMALINK_URL.format(urn=urn)"],
-    "_probe_comment_overflow_menu.py": ["ITEM_PERMALINK_URL.format(urn=urn)"],
-    "server.py": ["item_url"],
-}
+#: **THE RULING THAT SETTLED IT, delegated by the orchestrator 2026-09-24:
+#: THE PAGE MAY VETO A NAVIGATION, NEVER SUPPLY ONE.** The item now comes from
+#: the CALLER -- a tool argument, or a probe's command line -- and a read of his
+#: own rail only VERIFIES it: an item that is not on the rail is refused and its
+#: page never loaded. The address is built from the caller's value, and the
+#: rail's answer reaches the navigation only as a boolean, which this engine
+#: already treats as carrying nothing. So the rule is satisfied rather than
+#: waived, and the three entries left with the code that needed them.
+KNOWN_DERIVED_NAVIGATIONS: dict[str, list[str]] = {}
 
 
 @pytest.mark.parametrize(

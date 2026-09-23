@@ -134,7 +134,7 @@ PINNED_TOOL_SURFACE: dict[str, tuple[str, ...]] = {
     "linkedin_send_message": ("confirm_token", "member", "text"),
     "linkedin_server_info": ("verbose",),
     "linkedin_session_info": ("verify_live",),
-    "linkedin_surface_census": ("surface",),
+    "linkedin_surface_census": ("item", "surface"),
     "linkedin_unfollow_company": ("company_id", "confirm_token"),
     "linkedin_unsave_job": ("confirm_token", "job_id"),
     "linkedin_update_profile_field": ("confirm_token", "field", "value"),
@@ -256,8 +256,17 @@ PINNED_TOOL_SURFACE: dict[str, tuple[str, ...]] = {
 #: parameters are the two every gated write takes -- a numeric identifier,
 #: refused unless it is 4 to 20 ASCII digits, and the token. See
 #: `_audit/2026-09-23-lane-l4-writes.md`.
+#: **RE-PINNED 2026-09-24 AT 51 TOOLS AND 70 PARAMETERS (lane G follow-up).**
+#: `linkedin_surface_census` gained `item`, and NO CENSUS ROW MOVES, which is
+#: this guard's question answered out loud: it is not a new capability but the
+#: same measurement re-aimed. The census's `feed_item` surface used to open an
+#: item the PAGE chose -- the first on his rail, or, under the retired
+#: `feed_item_commented` key, the one with the most anchors -- and the
+#: orchestrator's ruling of 2026-09-24 forbids that: THE PAGE MAY VETO A
+#: NAVIGATION, NEVER SUPPLY ONE. So the caller names the item and his own rail
+#: may only refuse it. See `_audit/2026-09-24-lane-g-guards.md`, Follow-up.
 PINNED_TOOL_COUNT = 51
-PINNED_PARAMETER_COUNT = 69
+PINNED_PARAMETER_COUNT = 70
 
 
 def live_surface() -> dict[str, tuple[str, ...]]:
