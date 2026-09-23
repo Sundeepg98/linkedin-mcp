@@ -879,8 +879,10 @@ def selftest(box: pathlib.Path) -> int:
     assert p.read_bytes().decode("utf-8") != raw, \
         "G5 postcondition: the calibration must really change the file"
     out, rc = _check_in(tree)
+    # 68 since 2026-09-24: lane L7's integration named `P G3`'s ruling in place
+    # of its positional 'same ruling', and re-pinned (it was 69).
     record("G5 CALIBRATION -- whitespace in P D15's capability cell", False, out, rc,
-           "PASS -- all 69 pinned pointers")
+           "PASS -- all 68 pinned pointers")
 
     print("THE POINTER-GRAPH GUARD, SHOWN FAILING")
     print("=" * 92)
