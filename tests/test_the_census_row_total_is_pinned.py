@@ -87,16 +87,20 @@ import pin_census_rows as P  # noqa: E402
 
 #: The denominator, as a literal, so a reader of this file learns the number
 #: without opening the JSON and so an emptied pin cannot pass quietly.
-PINNED_ROW_TOTAL = 704
+#: 704 -> 747 on 2026-09-24: lane Y2's completeness admission added 43 GAP rows
+#: (J 152-167, P S1-S10, M M52-M53 and C93-C101, N 195-200), each a capability
+#: LinkedIn drew on a captured page that no row carried -- see
+#: `_audit/2026-09-24-lane-y2-admission.md`. No row left.
+PINNED_ROW_TOTAL = 747
 
 #: Per slice, because a delta of zero across four slices is reachable by two
 #: errors cancelling -- one row added to `jobs.md` and one dropped from
-#: `network.md` sum to 704 and are not the same census.
+#: `network.md` sum to the same total and are not the same census.
 PINNED_SLICE_ROWS = {
-    "J": 150,   # jobs.md
-    "P": 203,   # profile.md
-    "M": 142,   # messaging-and-content.md
-    "N": 209,   # network.md
+    "J": 166,   # jobs.md                    (150 + 16)
+    "P": 213,   # profile.md                 (203 + 10)
+    "M": 153,   # messaging-and-content.md   (142 + 11)
+    "N": 215,   # network.md                 (209 + 6)
 }
 
 #: Every spelling `count_census_states` will honour. Two of these were taught
