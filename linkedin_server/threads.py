@@ -158,7 +158,18 @@ def is_the_compose_address(url: Any) -> bool:
 # the main checkout's _state/). Shapes and counts only were taken; the lane
 # record section 1 carries the numbers.
 
-ROW_SELECTOR = "li.msg-conversation-listitem"
+#: EVERY PAGE-LEVEL SELECTOR BELOW IS SCOPED TO <main>, and that is
+#: measured, not tidy: on both captures one <main>
+#: (``main#main.scaffold-layout__list-detail.msg__list-detail``) holds the
+#: list, the open conversation, the composer's form and the header, while
+#: the messaging overlay and LinkedIn's global search sit OUTSIDE it. The
+#: overlay can hold conversation bubbles with forms of their own, and the
+#: search is a combobox; neither may be counted as this page's. The row- and
+#: message-relative selectors are read inside a row or a message, so they
+#: inherit the scope. Counted old spelling against scoped on both captures:
+#: nothing moved but the recipient box (lane record, section 3.3). The ONE
+#: page-wide exception is receipt evidence -- see EVIDENCE_EVENT_SELECTOR.
+ROW_SELECTOR = "main li.msg-conversation-listitem"
 #: 10 of the 20 rows on both captures -- virtualised placeholders, no content.
 OCCLUDED_CLASS = "msg-conversation-card--occluded"
 #: The row's clickable element: a div with tabindex=0 and NO href.
@@ -166,14 +177,25 @@ ROW_LINK_SELECTOR = ".msg-conversation-listitem__link"
 PARTICIPANT_NAMES_SELECTOR = ".msg-conversation-card__participant-names"
 GROUP_FACEPILE_SELECTOR = ".msg-facepile-grid__img--multiple-participants"
 #: The row whose conversation is open. 0 on the composer, 1 on the inbox.
-ACTIVE_ROW_SELECTOR = ".msg-conversations-container__convo-item-link--active"
+ACTIVE_ROW_SELECTOR = "main .msg-conversations-container__convo-item-link--active"
 #: The filter pills: buttons, no href, a data-test hook naming each.
-PILL_SELECTOR = "button[data-test-messaging-inbox-filters__filter-pill]"
+PILL_SELECTOR = "main button[data-test-messaging-inbox-filters__filter-pill]"
 PILL_HOOK = "data-test-messaging-inbox-filters__filter-pill"
 
 #: One message of an open conversation. 0 on the composer, 1 on the inbox.
-EVENT_SELECTOR = "li.msg-s-message-list__event"
+EVENT_SELECTOR = "main li.msg-s-message-list__event"
 ITEM_SELECTOR = ".msg-s-event-listitem"
+#: RECEIPT EVIDENCE IS READ PAGE-WIDE, ON PURPOSE -- the one exception to
+#: the <main> scoping above. "Did loading this page display anybody's
+#: conversation?" is not a question about <main>: the overlay sits outside
+#: it and can hold an open conversation bubble, and a list page that draws
+#: one HAS displayed a conversation, whoever opened it. So the list's
+#: evidence counts messages and active markers ANYWHERE on the page, while
+#: every reader that AIMS -- what this conversation holds, what a reply
+#: would type into -- counts inside <main> only. On both captures the two
+#: spellings count the same (lane record, section 3.3).
+EVIDENCE_EVENT_SELECTOR = "li.msg-s-message-list__event"
+EVIDENCE_ACTIVE_ROW_SELECTOR = ".msg-conversations-container__convo-item-link--active"
 #: MEASURED on the other party's message. His own carries no such modifier --
 #: DERIVED: no capture holds a message he sent.
 OTHER_ITEM_SELECTOR = ".msg-s-event-listitem--other"
@@ -182,33 +204,43 @@ LAST_MSG_CLASS = "msg-s-message-list__last-msg"
 #: The container after the last event. The WITHOUT form is measured; the WITH
 #: form is DERIVED as the BEM counterpart and has never been captured.
 SEEN_WITHOUT_SELECTOR = (
-    ".msg-s-message-list__typing-indicator-container--without-seen-receipt"
+    "main .msg-s-message-list__typing-indicator-container--without-seen-receipt"
 )
 SEEN_WITH_SELECTOR = (
-    ".msg-s-message-list__typing-indicator-container--with-seen-receipt"
+    "main .msg-s-message-list__typing-indicator-container--with-seen-receipt"
 )
-SEEN_ANY_SELECTOR = "[class*='seen-receipt']"
+SEEN_ANY_SELECTOR = "main [class*='seen-receipt']"
 
 #: The reply form. Measured on the COMPOSER, whose form wears
 #: ``msg-form--thread-footer-feature`` -- the thread footer's own component.
 #: That a thread draws the same form is DERIVED; the first live preview of a
 #: reply measures it (every count below is in the preview's facts).
-REPLY_FORM_SELECTOR = "form.msg-form"
-REPLY_EDITOR_SELECTOR = 'form.msg-form div.msg-form__contenteditable[role="textbox"]'
-REPLY_SEND_SELECTOR = 'form.msg-form button.msg-form__send-button[type="submit"]'
+REPLY_FORM_SELECTOR = "main form.msg-form"
+REPLY_EDITOR_SELECTOR = 'main form.msg-form div.msg-form__contenteditable[role="textbox"]'
+REPLY_SEND_SELECTOR = 'main form.msg-form button.msg-form__send-button[type="submit"]'
 #: The editor's accessible name, measured: 'Write a message' + U+2026.
 REPLY_EDITOR_LABEL = "Write a message\u2026"
-FILE_INPUT_SELECTOR = 'form.msg-form input[type="file"]'
-#: A thread has nobody to choose. A combobox here means it is not a thread.
-RECIPIENT_BOX_SELECTOR = '[role="combobox"]'
-TEXTBOX_SELECTOR = '[role="textbox"]'
+FILE_INPUT_SELECTOR = 'main form.msg-form input[type="file"]'
+#: A thread has nobody to choose, so a MESSAGING recipient box here means it
+#: is not a thread. NOT ``[role=combobox]`` alone, and that was this module's
+#: first version: LinkedIn's global search input is a combobox on EVERY page
+#: (measured on both captures), so a bare role count read every real
+#: conversation as "not a conversation" and no reply could ever have been
+#: typed. The recipient box is the composer's own typeahead, measured as
+#: ``input.msg-connections-typeahead__search-field`` inside
+#: ``div.msg-connections-typeahead``.
+RECIPIENT_BOX_SELECTOR = (
+    'main .msg-connections-typeahead [role="combobox"], '
+    "main input.msg-connections-typeahead__search-field"
+)
+TEXTBOX_SELECTOR = 'main [role="textbox"]'
 
 #: The correspondent's name in the conversation header -- exactly one.
-TITLE_SELECTOR = ".msg-entity-lockup__entity-title"
+TITLE_SELECTOR = "main .msg-entity-lockup__entity-title"
 #: The conversation the inbox capture opened was SPONSORED: no reply form,
 #: response buttons instead.
-SPONSORED_SELECTOR = ".msg-sponsored-conversation-thread"
-RESPONSE_BUTTON_SELECTOR = ".msg-s-sponsored-message-actions button"
+SPONSORED_SELECTOR = "main .msg-sponsored-conversation-thread"
+RESPONSE_BUTTON_SELECTOR = "main .msg-s-sponsored-message-actions button"
 
 #: Below this many elements a LinkedIn page has not rendered. The same floor
 #: ``dom.read_thread_reply_surface`` uses, for the same reason: on a page that
@@ -221,7 +253,7 @@ RENDERED_FLOOR = 50
 #: on the first live read without any label crossing. A video-meeting control
 #: was NOT among the four; ``video_meeting`` is listed so its presence would
 #: be counted if a conversation draws one (census ``M M20``).
-FOOTER_ACTION_SELECTOR = "form.msg-form button.msg-form__footer-action"
+FOOTER_ACTION_SELECTOR = "main form.msg-form button.msg-form__footer-action"
 _FOOTER_VOCABULARY: dict[str, str] = {
     "attach an image for your draft conversation": "attach_image",
     "attach a file for your draft conversation": "attach_file",
@@ -341,8 +373,9 @@ async def read_conversation_list(page: Any, *, include_names: bool = False) -> d
                     else None
                 )
             out["rows"].append(record)
-        out["message_events"] = await _count(page.locator(EVENT_SELECTOR))
-        out["active_rows"] = await _count(page.locator(ACTIVE_ROW_SELECTOR))
+        # PAGE-WIDE: receipt evidence, not aim (EVIDENCE_EVENT_SELECTOR).
+        out["message_events"] = await _count(page.locator(EVIDENCE_EVENT_SELECTOR))
+        out["active_rows"] = await _count(page.locator(EVIDENCE_ACTIVE_ROW_SELECTOR))
         out["editors"] = await _count(page.locator(REPLY_EDITOR_SELECTOR))
         out["pills"] = await _read_pills(page)
     except Exception as exc:  # noqa: BLE001 - reported as a type, never raised
@@ -722,9 +755,24 @@ async def read_thread(page: Any, *, text: Optional[str] = None) -> dict[str, Any
 
 
 def _accept_shape(value: Any) -> str:
-    """An ``accept`` declaration kept to its own alphabet: MIME types and
-    extensions are LinkedIn's configuration, and nothing else survives."""
-    return re.sub(r"[^a-z0-9/*.,+\-]", "", str(value or "").lower())[:160]
+    """An ``accept`` declaration as a CLOSED token; its text never crosses.
+
+    Measured on the composer's form: one input declares ``image/*``, the
+    other a list of extensions beginning ``image/*,`` that includes
+    ``.pdf``. The first version returned the declaration itself, lowercased
+    and cut to an alphabet -- still a page string, and one the page-string
+    guard's needle cannot see once it is lowercased. So it is compared here
+    and only the token leaves.
+    """
+    declared = re.sub(r"\s+", "", str(value or "")).lower()
+    if not declared:
+        return "any_file"
+    if declared == "image/*":
+        return "images"
+    parts = declared.split(",")
+    if parts[0] == "image/*" and ".pdf" in parts:
+        return "images_and_documents"
+    return "unrecognised"
 
 
 def reply_state(reading: dict[str, Any]) -> tuple[str, str]:
@@ -871,13 +919,22 @@ def thread_facts(reading: dict[str, Any]) -> dict[str, Any]:
 # ---------------------------------------------------------------------------
 
 
-async def reply_send_gate(page: Any) -> dict[str, Any]:
+async def reply_send_gate(page: Any, *, text: str) -> dict[str, Any]:
     """May Send be pressed? Read AFTER his words are in the box.
 
     The transition ``publish_post`` and ``send_message`` gate on: Send is
     measured DISABLED on an empty form, so a fill that landed is something
     this server can SEE -- Send enabled, the box no longer empty. Every
     condition is re-read here, on the page, after the fill.
+
+    AND THE WORDS MUST BE HIS, EXACTLY. ``text`` is the grant's own words
+    and it is REQUIRED: a caller that forgets it gets a TypeError, never a
+    gate that quietly skipped the check. A box can turn Send on while
+    holding something else -- an autocorrect, an emoji substitution, a
+    mention picked up as he typed -- and a message cannot be taken back,
+    so words he did not confirm are not sent. The comparison is the one
+    :func:`composer_holds` makes, whitespace-normalised; only a boolean
+    and two lengths are kept.
     """
     out: dict[str, Any] = {
         "proceed": False,
@@ -895,11 +952,19 @@ async def reply_send_gate(page: Any) -> dict[str, Any]:
             "recipient_boxes": await _count(page.locator(RECIPIENT_BOX_SELECTOR)),
             "send_enabled": None,
             "editor_empty": None,
+            "words_exact": None,
+            "held_characters": None,
+            "grant_characters": len(_normalise(text)),
         }
         if observed["send_controls"] == 1:
             observed["send_enabled"] = bool(await sends.first.is_enabled())
         if observed["editors"] == 1:
-            observed["editor_empty"] = _normalise(await editors.first.inner_text()) == ""
+            # HIS OWN WORDS, compared here and dropped: a boolean and a
+            # length leave, the text does not.
+            held = _normalise(await editors.first.inner_text())
+            observed["editor_empty"] = held == ""
+            observed["words_exact"] = held == _normalise(text)
+            observed["held_characters"] = len(held)
     except Exception as exc:  # noqa: BLE001 - reported as a type
         out["refused_condition"] = "0_read_failed"
         out["why"] = (
@@ -938,11 +1003,22 @@ async def reply_send_gate(page: Any) -> dict[str, Any]:
             "not land -- and a disabled control is not pressed to find out."
         )
         return out
+    if observed["words_exact"] is not True:
+        out["refused_condition"] = "5_words_not_exact"
+        out["why"] = (
+            "Send turned on, but the reply box does not hold exactly the "
+            f"words the grant carries ({observed['held_characters']} "
+            f"characters in the box, {observed['grant_characters']} "
+            "confirmed): they were changed as they were typed, or something "
+            "else is in the box. A message cannot be taken back, so words "
+            "you did not confirm are not sent. Send was not pressed."
+        )
+        return out
     out["proceed"] = True
     out["why"] = (
-        "the reply box holds text and Send went from the disabled state an "
-        "empty form draws to enabled -- the observable transition a fill "
-        "produces. No recipient box is drawn."
+        "the reply box holds exactly the words you confirmed and Send went "
+        "from the disabled state an empty form draws to enabled -- the "
+        "observable transition a fill produces. No recipient box is drawn."
     )
     return out
 

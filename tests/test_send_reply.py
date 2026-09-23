@@ -369,6 +369,42 @@ async def test_send_is_not_pressed_when_the_words_did_not_turn_it_on(writes_on, 
     assert receipt["performed"] is not True
 
 
+#: DERIVED -- a box that changes the words as they are typed (an
+#: autocorrect, an emoji substitution). Send DOES turn on, so the transition
+#: the gate reads happens; what is in the box is not what he confirmed.
+CHANGES_THE_WORDS = _derive(
+    THREAD,
+    "send.disabled = (editor.textContent.trim().length === 0);",
+    "if (editor.textContent.slice(-1) !== '!') "
+    "{ editor.textContent = editor.textContent + '!'; } "
+    "send.disabled = (editor.textContent.trim().length === 0);",
+)
+
+
+async def test_send_is_not_pressed_when_the_box_holds_other_words_than_his(
+    writes_on, browser_page
+):
+    """A MESSAGE IS IRREVERSIBLE, so the words sent must be the words he
+    confirmed. Send turned on and the box is not empty -- every condition
+    the transition gate reads is met -- and the gate refuses on the words
+    alone, keeping two lengths and no text."""
+    block, _nav_used = await _preview(browser_page)
+    grant = consume(block["to_confirm"], action=_ACTION, target=TARGET)
+    receipt = await writes.perform(
+        _nav(CHANGES_THE_WORDS, CHANGES_THE_WORDS), browser_page, grant
+    )
+    gate = receipt["send_gate"]
+    assert gate["proceeded"] is False
+    assert gate["refused_condition"] == "5_words_not_exact"
+    assert gate["observed"]["send_enabled"] is True
+    assert gate["observed"]["editor_empty"] is False
+    assert gate["observed"]["words_exact"] is False
+    assert gate["observed"]["held_characters"] == gate["observed"]["grant_characters"] + 1
+    assert receipt["clicked"]["clicks_made"] == 0
+    assert receipt["performed"] is not True
+    _no_third_party(receipt)
+
+
 async def test_the_click_refuses_before_typing_when_the_landing_is_another_conversation(
     writes_on, browser_page
 ):

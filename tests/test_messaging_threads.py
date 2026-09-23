@@ -238,6 +238,32 @@ async def test_a_list_page_that_opened_a_conversation_refuses_even_with_the_opt_
         assert guard["list_page"]["opened"] is True
 
 
+#: DERIVED -- the composer's list with an overlay conversation bubble open
+#: OUTSIDE <main>. No capture holds one (the overlay is minimised on every
+#: capture); LinkedIn can restore an open bubble from one page to the next.
+COMPOSE_WITH_A_BUBBLE = _derive(
+    COMPOSE_LIST,
+    '<aside class="msg-overlay-container">',
+    '<aside class="msg-overlay-container"><div class="msg-overlay-conversation-bubble">'
+    '<ul><li class="msg-s-message-list__event"><div class="msg-s-event-listitem '
+    'msg-s-event-listitem--other"><p class="msg-s-event-listitem__body">Words in a '
+    "bubble.</p></div></li></ul></div>",
+)
+
+
+async def test_a_conversation_the_overlay_draws_counts_against_nothing_was_opened(over):
+    """RECEIPT EVIDENCE IS PAGE-WIDE; AIM IS <main>. The bubble is not this
+    page's conversation -- the thread reader ignores it (the next section) --
+    but a list page that draws one HAS displayed a conversation, so the guard
+    refuses, and the opt-in does not reach it."""
+    reading = await over(COMPOSE_WITH_A_BUBBLE, threads.read_conversation_list)
+    assert reading["message_events"] == 1 and reading["rows_rendered"] == 3
+    for allow in (False, True):
+        guard = threads.receipt_guard(reading, allow_unread=allow, landed=threads.COMPOSE_URL)
+        assert guard["proceed"] is False
+        assert guard["list_page"]["opened"] is True
+
+
 def test_no_rendered_row_and_an_unreadable_list_both_refuse_by_default():
     empty = {"rows": [], "rows_placeholder": 3, "message_events": 0, "active_rows": 0, "error": None}
     assert threads.receipt_guard(empty, allow_unread=False)["proceed"] is False
@@ -276,7 +302,7 @@ async def test_the_thread_fixture_reads_as_measured(over):
     assert reading["send_controls"] == 1 and reading["send_disabled"] is True
     assert reading["recipient_boxes"] == 0
     assert reading["file_inputs"] == 2
-    assert reading["file_input_accepts"][0] == "image/*"
+    assert reading["file_input_accepts"] == ["images", "images_and_documents"]
     assert reading["footer_actions"] == [
         "attach_image", "attach_file", "gif_keyboard", "emoji_keyboard"
     ]
@@ -354,8 +380,28 @@ DRAFT = _derive(
     _derive(THREAD, 'id="reply-editor"></div>', 'id="reply-editor">an old draft</div>'),
     'id="reply-send" disabled>', 'id="reply-send">',
 )
+#: DERIVED -- the composer's own recipient box, in its measured shape, drawn
+#: inside a conversation. The global search combobox the fixture already
+#: carries is NOT this, and the next test shows the difference.
 WITH_A_RECIPIENT_BOX = _derive(
-    THREAD, '<form class="msg-form', '<input role="combobox" aria-label="Enter message recipients"><form class="msg-form'
+    THREAD,
+    '<form class="msg-form',
+    '<div class="msg-connections-typeahead"><input class="msg-connections-typeahead__search-field" '
+    'role="combobox" type="text"></div><form class="msg-form',
+)
+#: DERIVED -- an overlay conversation bubble open OUTSIDE <main>, with a form
+#: and a message of its own. No capture holds one; the overlay's place outside
+#: <main> is measured on both captures.
+OVERLAY_BUBBLE = _derive(
+    THREAD,
+    "<script>",
+    '<aside class="msg-overlay-container"><div class="msg-overlay-conversation-bubble">'
+    '<ul><li class="msg-s-message-list__event"><div class="msg-s-event-listitem msg-s-event-listitem--other">'
+    '<p class="msg-s-event-listitem__body">Words in another bubble.</p></div></li></ul>'
+    '<form class="msg-form"><div class="msg-form__contenteditable" contenteditable="true" role="textbox" '
+    'aria-label="Write a message&#8230;">a draft in the bubble</div>'
+    '<button type="submit" class="msg-form__send-button">Send</button></form></div></aside>'
+    "<script>",
 )
 
 
@@ -374,6 +420,40 @@ async def test_every_other_reply_box_state_is_unknown_and_says_why(over, world, 
     state, why = threads.reply_state(reading)
     assert state == "unknown" and fragment in why
     _clean(why)
+
+
+async def test_the_global_search_box_is_a_combobox_and_not_a_recipient_box(over):
+    """THE DEFECT THE FIRST VERSION SHIPPED WITH, as a control. LinkedIn's
+    global search input is a ``role=combobox`` on every page -- measured on
+    both captures -- and the first recipient-box selector was that role alone,
+    so every real conversation would have read as "not a conversation"."""
+
+    async def counts(page):
+        return (
+            await page.locator('[role="combobox"]').count(),
+            await page.locator(threads.RECIPIENT_BOX_SELECTOR).count(),
+        )
+
+    assert await over(THREAD, counts) == (1, 0)
+    assert await over(WITH_A_RECIPIENT_BOX, counts) == (2, 1)
+
+
+async def test_the_composer_is_not_a_conversation_and_its_recipient_box_says_so(over):
+    """The count that CAN fail, failing where it should: the composer draws
+    its own typeahead, and nothing may be typed there as a reply."""
+    reading = await over(COMPOSE_LIST, threads.read_thread)
+    assert reading["recipient_boxes"] == 1
+    state, why = threads.reply_state(reading)
+    assert state == "unknown" and "recipient box" in why
+
+
+async def test_an_open_overlay_bubble_is_not_this_conversation(over):
+    """Everything is scoped to <main>; the bubble's form, draft and message
+    are outside it and none of them is counted."""
+    reading = await over(OVERLAY_BUBBLE, threads.read_thread)
+    assert reading["editors"] == 1 and reading["editor_empty"] is True
+    assert reading["events"] == 3 and reading["send_controls"] == 1
+    assert threads.reply_state(reading)[0] == "reply_box_empty"
 
 
 async def test_response_buttons_are_a_closed_vocabulary(over):

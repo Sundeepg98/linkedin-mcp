@@ -105,6 +105,8 @@ from tests.test_follow_company_page import (
     COMPANY_PAGE_FOLLOW_ID,
     COMPANY_PAGE_FOLLOW_MARKUP,
 )
+from tests.test_messaging_threads import THREAD as MESSAGING_THREAD
+from tests.test_messaging_threads import THREAD_ID as MESSAGING_THREAD_ID
 from tests.test_result_verification_block import SHAREBOX_MARKUP
 from tests.test_send_message_gate import COMPOSER_MARKUP
 from tests.test_selectors_resolve import PAGE as SELECTOR_RESOLUTION_PAGE
@@ -248,6 +250,22 @@ REACHED: dict[str, tuple[str, str, str]] = {
         "tests/test_follow_company_page.py",
         COMPANY_PAGE_FOLLOW_MARKUP,
         COMPANY_PAGE_FOLLOW_ID,
+    ),
+    # THE FOURTEENTH, 2026-09-24 (census row ``M M10``). A SYNTHETIC
+    # conversation whose STRUCTURE is measured -- the composer's own
+    # ``msg-form``, its editor empty and Send drawn DISABLED -- and whose
+    # content is invented; its source module says which parts are which.
+    # The preview and the click read the box through ONE function,
+    # ``threads.reply_state``, which is the property this file pins.
+    "send_reply": (
+        "tests/fixtures/synthetic/messaging_thread.html",
+        MESSAGING_THREAD,
+        str(
+            writes._target_for(
+                spec_for_action("send_reply"),
+                {"thread": MESSAGING_THREAD_ID, "text": "Thursday works."},
+            )
+        ),
     ),
 }
 

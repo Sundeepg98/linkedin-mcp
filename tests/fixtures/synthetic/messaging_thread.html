@@ -21,6 +21,10 @@
     * the list pane marks the open conversation's row with
       msg-conversations-container__convo-item-link--active.
 
+  MEASURED on both captures: LinkedIn's global search input is a
+  role=combobox OUTSIDE <main> on every page, and <main> holds the list, the
+  conversation, the form and the header; the overlay sits outside it.
+
   MEASURED on the composer capture: the reply form -- form.msg-form wearing
   msg-form--thread-footer-feature, one contenteditable role=textbox named
   'Write a message' + U+2026, two file inputs, the footer actions, and a
@@ -45,6 +49,10 @@
 <html lang="en">
 <head><title>Messaging | LinkedIn</title></head>
 <body>
+
+<header class="global-nav">
+  <div class="global-nav__search"><input class="search-global-typeahead__input" role="combobox" aria-expanded="false" aria-label="Search" type="text"></div>
+</header>
 
 <main class="scaffold-layout__main">
 <div class="scaffold-layout__list-detail-container">

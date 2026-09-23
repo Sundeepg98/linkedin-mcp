@@ -1836,6 +1836,9 @@ async def test_the_server_instructions_name_every_write_that_ships():
         # THIRTEEN FROM 2026-09-23, extended the same way and for the same
         # reason: follow_company_page is the thirteenth performable write.
         13: "thirteen",
+        # FOURTEEN FROM 2026-09-24: send_reply. Extended the same way; the
+        # instructions still have to SAY it, which this map does not do.
+        14: "fourteen",
     }
     assert f"{words[len(writes.PERFORMABLE)]} write" in text
     for action in writes.PERFORMABLE:

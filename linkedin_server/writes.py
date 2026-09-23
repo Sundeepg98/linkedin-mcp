@@ -9696,11 +9696,15 @@ async def perform(
                     click_plan.append(comment_gate["selector"])
             elif spec.action in REPLY_ACTIONS:
                 # A CONVERSATION'S OWN SEND, gated on the transition its form
-                # draws (disabled while empty, enabled once the words land) and
-                # on no recipient box having appeared. Reported in the
-                # receipt's ``send_gate`` block, which is the field a reader
-                # of any send already looks at.
-                send_gate = await threads.reply_send_gate(page)
+                # draws (disabled while empty, enabled once the words land),
+                # on no recipient box having appeared, and on the box holding
+                # EXACTLY the grant's words -- a message is irreversible, so
+                # words changed as they were typed are not sent. Reported in
+                # the receipt's ``send_gate`` block, which is the field a
+                # reader of any send already looks at.
+                send_gate = await threads.reply_send_gate(
+                    page, text=_text_component_of(spec, grant.target)
+                )
                 if send_gate["proceed"]:
                     click_plan.append(send_gate["selector"])
             else:

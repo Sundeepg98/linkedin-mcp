@@ -4204,15 +4204,15 @@ async def linkedin_open_messaging(
             # THE CONVERSATION THIS OPENED, as counts: who wrote the last
             # message and the read indicator on his last one (census M M49).
             # No text is passed, so nothing is compared and no words cross.
-            landed_reading = await threads.read_thread(page)
+            conversation_reading = await threads.read_thread(page)
         verdict = shape.messaging_overview(
             html, landed, include_names=bool(include_names)
         )
         verdict["receipt_guard"] = guard
         verdict["landed_conversation"] = {
-            "messages_drawn": landed_reading.get("events"),
-            "read_indicator": threads.seen_state(landed_reading),
-            "error": landed_reading.get("error"),
+            "messages_drawn": conversation_reading.get("events"),
+            "read_indicator": threads.seen_state(conversation_reading),
+            "error": conversation_reading.get("error"),
         }
         # EXPECTED TO SHOW ZERO RECIPIENT BOXES, and that zero is the finding
         # rather than a formality: a thread has nobody to choose, so a

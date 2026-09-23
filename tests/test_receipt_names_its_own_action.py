@@ -227,7 +227,14 @@ _WHERE_TO_LOOK_OWNERS: dict[str, frozenset[str]] = {
     # row. ``"message"`` alone is a word any future messaging-adjacent row
     # would legitimately contain -- an InMail, a reply, a request -- and it
     # would be reported as a trespass on a surface those rows never claimed.
-    "LinkedIn messages": frozenset({"send_message"}),
+    #
+    # A SECOND OWNER FROM 2026-09-24, entitled rather than borrowing:
+    # ``send_reply`` VERIFIES in the conversation itself -- its
+    # ``_verify_after`` branch reloads the conversation he named and reads
+    # the delta there -- so the place a human opens is the place this server
+    # read. Its ``_VERIFIED_FROM`` row was checked against every owned phrase
+    # above and contains none of them.
+    "LinkedIn messages": frozenset({"send_message", "send_reply"}),
 }
 
 #: THE ONLY SETS OF ACTIONS ALLOWED TO SHARE A ``_WHERE_TO_LOOK`` VALUE

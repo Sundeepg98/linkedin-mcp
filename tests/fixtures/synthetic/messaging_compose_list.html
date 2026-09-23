@@ -22,6 +22,9 @@
       values (JOB, UNREAD, CONNECTIONS, INMAIL, STARRED) and aria-pressed; the
       folder (Focused) is a separate dropdown trigger;
     * the messaging overlay is present and MINIMISED, with no rows;
+    * LinkedIn's global search input is a role=combobox OUTSIDE <main>, on
+      every page; the composer's own recipient box is
+      input.msg-connections-typeahead__search-field, inside <main>;
     * NO li.msg-s-message-list__event and NO row marked active: the composer
       opens no conversation. That absence is the property under test and is
       drawn here exactly as measured.
@@ -36,6 +39,7 @@
 <body>
 
 <header class="global-nav">
+  <div class="global-nav__search"><input class="search-global-typeahead__input" role="combobox" aria-expanded="false" aria-label="Search" type="text"></div>
   <nav>
     <a href="https://www.linkedin.com/feed/">Home</a>
     <a href="https://www.linkedin.com/messaging/">Messaging</a>
@@ -199,7 +203,7 @@
 <div class="scaffold-layout__detail msg__detail">
   <div class="msg-connections-typeahead">
     <label for="recipient-box">To</label>
-    <input id="recipient-box" role="combobox" aria-expanded="false" aria-label="Enter message recipients" type="text">
+    <input id="recipient-box" class="msg-connections-typeahead__search-field" role="combobox" aria-expanded="false" type="text">
   </div>
   <form class="msg-form msg-form--thread-footer-feature">
     <div class="msg-form__contenteditable t-14 t-black--light t-normal" contenteditable="true" role="textbox" aria-multiline="true" aria-label="Write a message&#8230;"></div>

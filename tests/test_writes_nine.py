@@ -540,6 +540,10 @@ CLEAN_COMPONENT = {
     "value": "a real value",
     "setting": "dark-mode",
     "member": MEMBER,
+    # ``send_reply``'s subject, 2026-09-24: a conversation id in the read
+    # allowlist's own shape (a digit first). SYNTHETIC, as every thread id in
+    # this suite is.
+    "thread": "2-SYNTHETICCLEANTHREAD==",
 }
 
 
