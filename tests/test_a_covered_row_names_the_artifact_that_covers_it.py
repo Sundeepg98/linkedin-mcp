@@ -155,6 +155,21 @@ COVERED_ROWS: dict[tuple[str, str], tuple[str, str]] = {
         "linkedin_premium_job_collection, the recommended collection the "
         "reader's shape was measured on; never fired at that index",
     ),
+    # PINNED AT UNFIRED, 2026-09-23, by lane L1 -- the state it belongs in,
+    # for the reason the network rows above were first pinned there: the
+    # wave that built it was offline, so nothing has seen the field return
+    # live. It is a PASSTHROUGH, the K10 shape: `per_post` rides inside the
+    # dict `linkedin_creator_analytics` returns whole, so a search of
+    # server.py for the field name finds nothing. The chain is asserted
+    # below. A fire that promotes or demotes it must move this pin in the
+    # same commit.
+    ("profile.md", "G6"): (
+        "COVERED-UNFIRED",
+        "per-post impressions and engagements, read off the post-summary "
+        "links /analytics/creator/content/ draws beside his featured items, "
+        "by linkedin_creator_analytics's per_post field; built offline "
+        "against a structure measured on two captures, never fired",
+    ),
 }
 
 
@@ -474,3 +489,80 @@ def test_control_the_jobs_chain_convicts_a_renamed_link() -> None:
         mutated = source.replace(f"def {target}(", f"def {target}_renamed(")
         assert mutated != source, (module, target)
         assert target not in _defined_names(mutated), (module, target)
+
+
+def _per_post_join(creator_src: str) -> bool:
+    """Does ``read_content_analytics`` assign the per-post reader to ``per_post``?"""
+    tree = ast.parse(creator_src)
+    for node in ast.walk(tree):
+        if not isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+            continue
+        if node.name != "read_content_analytics":
+            continue
+        for inner in ast.walk(node):
+            if not isinstance(inner, ast.Assign) or not inner.targets:
+                continue
+            target = ast.unparse(inner.targets[0])
+            if target.endswith("['per_post']") or target.endswith('["per_post"]'):
+                if "read_post_summary_counts" in ast.unparse(inner.value):
+                    return True
+    return False
+
+
+def _returns_the_whole_reading(server_src: str) -> bool:
+    """Does ``linkedin_creator_analytics`` return ``read_content_analytics`` WHOLE?"""
+    tree = ast.parse(server_src)
+    for node in ast.walk(tree):
+        if not isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+            continue
+        if node.name != "linkedin_creator_analytics":
+            continue
+        for inner in ast.walk(node):
+            if isinstance(inner, ast.Return) and inner.value is not None:
+                if "read_content_analytics" in ast.unparse(inner.value):
+                    return True
+    return False
+
+
+def test_the_per_post_passthrough_is_still_whole() -> None:
+    """``P G6``'s coverage: reader -> ``per_post`` key -> the tool's whole dict.
+
+    The K10 shape again. ``per_post`` is assigned inside
+    ``creator_analytics.read_content_analytics`` and reaches a caller only
+    because ``linkedin_creator_analytics`` returns that dict WHOLE, so the
+    field name appears nowhere in server.py. All three links are asserted.
+    """
+    counts_src = _source("post_summary_counts.py")
+    assert "async def read_post_summary_counts" in counts_src, (
+        "post_summary_counts.read_post_summary_counts is gone; census row P G6 "
+        "claims COVERED on a reader that no longer exists"
+    )
+    assert _per_post_join(_source("creator_analytics.py")), (
+        "creator_analytics.read_content_analytics no longer assigns the "
+        "per-post reader to a 'per_post' key; P G6's chain is broken"
+    )
+    assert _returns_the_whole_reading(_source("server.py")), (
+        "linkedin_creator_analytics no longer returns read_content_analytics "
+        "whole. THAT RETURN IS THE ONLY THING CARRYING per_post to a caller; "
+        "census row P G6 claims COVERED on exactly this join"
+    )
+
+
+def test_control_the_per_post_join_checks_can_fail() -> None:
+    """SHOWN FAILING: each join check must see its link removed."""
+    creator = _source("creator_analytics.py")
+    renamed = creator.replace('reading["per_post"]', 'reading["per_item"]')
+    assert renamed != creator
+    assert _per_post_join(creator) is True
+    assert _per_post_join(renamed) is False, (
+        "the per-post join check cannot see the key renamed, so its green "
+        "above certifies nothing"
+    )
+    server = _source("server.py")
+    unjoined = server.replace(
+        "return await creator_analytics.read_content_analytics(page)",
+        "return {}",
+    )
+    assert unjoined != server
+    assert _returns_the_whole_reading(server) is True
+    assert _returns_the_whole_reading(unjoined) is False

@@ -8,9 +8,9 @@
 
 **THIS REGISTER IS NOT THE CORPUS AND DOES NOT CLAIM TO BE COMPLETE.** Read section 4 before concluding a question is unruled: the scan that keeps it honest reads ONE marker, and the ruling that caused this file to be written does not carry it.
 
-    rulings registered       37
-    documents scanned        234
-    RULED: declarations      24 claimed, 7 triaged, 0 unclaimed
+    rulings registered       48
+    documents scanned        241
+    RULED: declarations      35 claimed, 7 triaged, 0 unclaimed
 
 ---
 
@@ -22,13 +22,14 @@ Scan the CLAIM column against your question. Every claim is a paraphrase written
 
 | id | what was ruled | binds | when | where (document / section) |
 |---|---|---|---|---|
-| `DO-NOT-OPEN-MESSAGING` | Do not open messaging. Opening it opens a surface whose cost lands on other people, and the row is DEFERRED BY RULING. | /messaging/ | 2026-08-31 | [2026-08-31-linkedin-finish.md](2026-08-31-linkedin-finish.md)<br>*#9 send a message / InMail -- `linkedin_send_message`. REFUSING, and now DEFERRED BY RULING.* |
+| `DO-NOT-OPEN-MESSAGING` | SUPERSEDED 2026-09-23 by WRITE-CLASS-B: the operator ruled that messaging MAY be opened. Original: Do not open messaging. Opening it opens a surface whose cost lands on other people, and the row is DEFERRED BY RULING. | /messaging/ | 2026-08-31 | [2026-08-31-linkedin-finish.md](2026-08-31-linkedin-finish.md)<br>*#9 send a message / InMail -- `linkedin_send_message`. REFUSING, and now DEFERRED BY RULING.* |
 | `ONE-NAMED-SETTINGS-PAGE-AT-A-TIME` | ONE NAMED settings page below `/mypreferences/d/` is admitted, one at a time. | /mypreferences/d/ | 2026-08-31 | [2026-08-31-linkedin-finish.md](2026-08-31-linkedin-finish.md)<br>*#6 change a setting -- `linkedin_update_setting`. BUILT, NOT CAPTURED.* |
 | `PERMALINK-READ-IS-ALLOWED` | `/feed/update/<urn>/` is allowed and an ordinary read of a post at its permalink is permitted; reacting rests on the same permalink ruling. | /feed/update/<urn>/ | 2026-08-31 | [2026-08-31-linkedin-finish.md](2026-08-31-linkedin-finish.md)<br>*#2 comment on an item -- `linkedin_comment_on_item`. STILL REFUSING.* |
 | `PROFILE-EDITOR-ADDRESSES-ALLOWED` | `/in/<member>/edit/` and the profile editors are allowed. | the profile editor surfaces | 2026-08-31 | [2026-08-31-linkedin-finish.md](2026-08-31-linkedin-finish.md)<br>*#4 edit a profile field -- `linkedin_update_profile_field`. BUILT, NOT CAPTURED.* |
 | `MUST-STAY-REFUSED-ENTRIES-COME-OUT` | `MUST_STAY_REFUSED` listing `groups` and `events` is wrong and must come out, or move to a class the admission does not reach. | the guard's must-stay-refused table | 2026-09-19 | [2026-09-19-search-admission-condition-2-amended.md](2026-09-19-search-admission-condition-2-amended.md)<br>*`MUST_STAY_REFUSED` LISTING `groups` AND `events` IS WRONG AND MUST COME OUT* |
 | `SEARCH-ADMISSION-APPROVED-FIVE-CONDITIONS` | The search-results admission is APPROVED IN PRINCIPLE under five binding conditions, one of which is that nothing is FIRED from that surface. | /search/results/ | 2026-09-19 | [2026-09-19-two-census-conventions-ruled.md](2026-09-19-two-census-conventions-ruled.md)<br>*RULED: APPROVED IN PRINCIPLE. FIVE CONDITIONS, ALL BINDING.* |
 | `SEARCH-CONDITION-2-CLOSED` | Condition 2 of the search admission demands CLOSED PATH SEGMENTS, not a NARROW ANCHORED pattern. Anchoring was measured to do none of the work assigned to it. | the shape of any allowlist pattern | 2026-09-19 | [2026-09-19-search-admission-condition-2-amended.md](2026-09-19-search-admission-condition-2-amended.md)<br>*CONDITION 2 IS AMENDED: **CLOSED**, NOT **ANCHORED*** |
+| `NOTIFICATIONS-UNREAD-SPEND` | Loading /notifications/ is PERMITTED: it only clears the operator's own unread badge. Answers the question N 20 and N 45 were held on. | /notifications/ | 2026-09-23 | [2026-09-23-rulings-write-class-and-delegated-calls.md](2026-09-23-rulings-write-class-and-delegated-calls.md)<br>*Notifications: the unread-spend question* |
 
 ### capability class
 
@@ -39,10 +40,11 @@ Scan the CLAIM column against your question. Every claim is a paraphrase written
 | `FEED-CONTENT-READ-RULING` | Feed content may be read as COUNTS AND RELATIONS ONLY, never text or names. | reads of feed and post content | 2026-09-05 | [2026-09-05-lead-rulings-round-two.md](2026-09-05-lead-rulings-round-two.md)<br>*5. `FEED-CONTENT-READ-RULING` -- COUNTS AND RELATIONS ONLY* |
 | `MENTION-COMPOSITION-RULING` | Build the mention MECHANISM, forbid the SOURCE: composing a mention is permitted as a mechanism, and harvesting the candidate list it would mention from is not. | mentions in posts and comments | 2026-09-05 | [2026-09-05-lead-rulings-round-two.md](2026-09-05-lead-rulings-round-two.md)<br>*1. `MENTION-COMPOSITION-RULING` -- BUILD THE MECHANISM, FORBID THE SOURCE* |
 | `MESSAGING-SETTINGS-CAPABILITY-LEVEL` | The settings-family ruling is CAPABILITY-level, not path-level: a setting is admitted BY NAME or not at all, which excludes every page below the settings index whatever its URL spelling. It says 'a setting', not 'a profile setting'. | every persisted account preference | 2026-09-05 | [2026-09-05-decide-retire-rulings.md](2026-09-05-decide-retire-rulings.md)<br>*3.10 `MESSAGING-SETTINGS` -- 5 rows, RE-FILED, NOT RETIRED* |
-| `NO-IRREVERSIBLE-WRITE-IS-FIRED` | No irreversible write is fired at a real target -- not an application, a post, an invitation, a message or a comment. Permission to BUILD a capability is not consent to perform a specific act against a specific person. Writes may be designed, gated, tested against fixtures and left ready. | every write in the server, standing | 2026-09-05 | [2026-09-05-lead-rulings-round-two.md](2026-09-05-lead-rulings-round-two.md)<br>*The line I did NOT cross, and will not without him* |
+| `NO-IRREVERSIBLE-WRITE-IS-FIRED` | AMENDED 2026-09-23 by WRITE-CLASS-B: irreversible writes MAY now be fired, but ONLY at a target the operator names -- the consent-per-act half below still binds. Original: No irreversible write is fired at a real target -- not an application, a post, an invitation, a message or a comment. Permission to BUILD a capability is not consent to perform a specific act against a specific person. Writes may be designed, gated, tested against fixtures and left ready. | every write in the server, standing | 2026-09-05 | [2026-09-05-lead-rulings-round-two.md](2026-09-05-lead-rulings-round-two.md)<br>*The line I did NOT cross, and will not without him* |
 | `STANDING-SHAPE-OF-A-WRITE-RULING` | Every new write gets the SAME bar the twelve shipped writes meet: design, WriteSpec, gate, consent text, tests against fixtures and synthetic targets, two calls behind a single-use action-bound target-bound token with a 120s TTL. Do not invent a stricter bar for a new capability, and do not weaken it. | the admission shape for any new write | 2026-09-05 | [2026-09-05-lead-rulings-round-two.md](2026-09-05-lead-rulings-round-two.md)<br>*8. The standing shape of every write ruling here* |
 | `GATE-IS-SAFE-AND-BLIND` | The gate is SAFE and BLIND, and those are different properties: condition 4 cannot witness disclosure. | the disclosure witness on a press gate | 2026-09-19 | [2026-09-19-two-census-conventions-ruled.md](2026-09-19-two-census-conventions-ruled.md)<br>*DEFECT ONE: CONDITION 4 CANNOT WITNESS DISCLOSURE* |
 | `GROUPS-ADDRESS-BUYS-NO-WRITE` | Admitting a group address buys nothing for joining, leaving, posting, commenting or inviting. Each needs its own url, its own write sanction and its own ruling, so those rows stay GAP and no boundary change moves them. The price is three things and an admission pays one. | groups writes, and any address widening | 2026-09-19 | [2026-09-19-groups-admission.md](2026-09-19-groups-admission.md)<br>*The eight writes: the census already ruled this, TODAY, against itself* |
+| `WRITE-CLASS-B` | The package may CONNECT, MESSAGE, APPLY, POST and OPEN MESSAGING on the operator's account, behind the single-use grant model and off by default. Lifts the read-only rule, the apply/connect/InMail cut and DO-NOT-OPEN-MESSAGING. | outward writes and opening messaging | 2026-09-23 | [2026-09-23-rulings-write-class-and-delegated-calls.md](2026-09-23-rulings-write-class-and-delegated-calls.md)<br>*The write class (b)* |
 
 ### census state
 
@@ -60,6 +62,40 @@ Scan the CLAIM column against your question. Every claim is a paraphrase written
 | `POSITIONAL-DIALECT-SHIP-THE-DETECTOR` | Ship the detector; do not rewrite the 69 cells. | the positional-dialect cells | 2026-09-20 | [2026-09-20-the-pointer-graph.md](2026-09-20-the-pointer-graph.md)<br>*4. THE DECISION ON THE POSITIONAL DIALECT* |
 | `COMPOUND-ROW-SPLITS-ONLY-ON-STATE` | When ONE census row describes TWO capabilities it is SPLIT only if the halves require different STATES. A DIRECTION divergence is repaired in the cell as `R+W`, never by a split. Two verbs, two surfaces, two addresses and mere verbosity are not grounds. A row whose halves share a state today but would not once a pending ruling is applied carries a written TRIGGER instead of being split now. | every row whose capability names two acts | 2026-09-21 | [2026-09-21-the-compound-rows.md](2026-09-21-the-compound-rows.md)<br>*THE RULING -- RULED: a compound row is split ONLY when its halves need different STATES* |
 | `EXCLUDED-RULED-ADMISSION` | A row is EXCLUDED-RULED only on one of FOUR written grounds: a forbidden-substring entry, a writes.PERMANENTLY_FORBIDDEN key, a WriteSpec refusing in its own words, or an audit passage measuring the capability unreachable. Anything a general mechanism merely happens to block is GAP with a NAMED BLOCKER. | the bar for EXCLUDED-RULED on every slice | ~2026-09-03 | [_census/network.md](_census/network.md)<br>*2. HOW A CAPABILITY WAS ASSIGNED A STATE* |
+
+### decision routing
+
+| id | what was ruled | binds | when | where (document / section) |
+|---|---|---|---|---|
+| `OUTWARD-ACTS-NEED-THE-OPERATOR` | Only acts toward other people, or irreversible ones, need the operator. Every other call -- search keywords, self-only presses, his own notification state, allowlist and press-gate defaults -- is the orchestrator's, on evidence, recorded here and overridable. | what is escalated to the operator | 2026-09-23 | [2026-09-23-rulings-write-class-and-delegated-calls.md](2026-09-23-rulings-write-class-and-delegated-calls.md)<br>*What needs the operator* |
+
+### live lanes
+
+| id | what was ruled | binds | when | where (document / section) |
+|---|---|---|---|---|
+| `LIVE-BUDGET-40-LOADS` | A live session may use up to 40 LinkedIn page loads, serial, at least 20 seconds apart -- a ceiling, not a target; one browser driver at a time. | page loads per session | 2026-09-23 | [2026-09-23-rulings-write-class-and-delegated-calls.md](2026-09-23-rulings-write-class-and-delegated-calls.md)<br>*The live-session budget* |
+
+### live proofs
+
+| id | what was ruled | binds | when | where (document / section) |
+|---|---|---|---|---|
+| `OPERATOR-NAMES-THE-TARGET` | A live proof of an outward act fires ONLY at a target the operator names -- whom to connect with or message, which job to apply to, what to post. Never a real person or job chosen by the package or an agent. | every outward write | 2026-09-23 | [2026-09-23-rulings-write-class-and-delegated-calls.md](2026-09-23-rulings-write-class-and-delegated-calls.md)<br>*The operator names each live target* |
+| `OWN-INBOX-READS-COVERED-BY-B` | Reading the operator's own inbox, including opening threads, is covered by ruling (b) with no per-fire go-ahead; proofs prefer threads already read so no new read receipt is sent. | /messaging/ reads | 2026-09-23 | [2026-09-23-rulings-write-class-and-delegated-calls.md](2026-09-23-rulings-write-class-and-delegated-calls.md)<br>*Reading his own inbox* |
+| `SELF-PROFILE-EDITS-NOT-OUTWARD` | Edits to the operator's own profile fields are not outward acts: no other person is targeted and each edit reverses. Live proofs are permitted with notify-network off, the field restored in-session and proven by a before/after reading, and never a field that broadcasts by nature. | edits to the operator's own profile fields | 2026-09-23 | [2026-09-23-rulings-write-class-and-delegated-calls.md](2026-09-23-rulings-write-class-and-delegated-calls.md)<br>*Edits to his own profile fields* |
+
+### press gate
+
+| id | what was ruled | binds | when | where (document / section) |
+|---|---|---|---|---|
+| `IN-ME-NO-BLANKET-BAR` | /in/me/ presses get no blanket sensitivity-basis bar; each control is judged on evidence like any other press. | /in/me/ controls | 2026-09-23 | [2026-09-23-rulings-write-class-and-delegated-calls.md](2026-09-23-rulings-write-class-and-delegated-calls.md)<br>*Presses on /in/me/* |
+| `VIEW-SWITCH-PRESS-RESTORED` | A press that changes which rows a view shows is permitted if the view is RESTORED afterwards and a before/after reading proves it. | sort and filter controls | 2026-09-23 | [2026-09-23-rulings-write-class-and-delegated-calls.md](2026-09-23-rulings-write-class-and-delegated-calls.md)<br>*View-switch presses* |
+
+### read boundary
+
+| id | what was ruled | binds | when | where (document / section) |
+|---|---|---|---|---|
+| `D1-SEARCH-AS-READS` | Search keywords and LinkedIn-written facets are permitted as reads: values from tool arguments only, never an identifying value of the operator, at most 5 test searches per session. | search keywords and facets | 2026-09-23 | [2026-09-23-rulings-write-class-and-delegated-calls.md](2026-09-23-rulings-write-class-and-delegated-calls.md)<br>*D1: search keywords and facets* |
+| `OTHER-MEMBER-IDS-AS-READS` | Another member's id in a search facet (e.g. connectionOf) is permitted as a read when it comes from the tool's arguments, never from page content, and is never stored in a tracked file. | search facets carrying another member's id | 2026-09-23 | [2026-09-23-rulings-write-class-and-delegated-calls.md](2026-09-23-rulings-write-class-and-delegated-calls.md)<br>*Other members' ids as search facets* |
 
 ### verb
 
@@ -101,6 +137,7 @@ Scan the CLAIM column against your question. Every claim is a paraphrase written
 | condition 5 | `SEARCH-ADMISSION-APPROVED-FIVE-CONDITIONS` |
 | container and content | `CONTAINER-EXCLUSION-PROPAGATES-ONLY-IF-UNREACHABLE` |
 | counts and relations only | `FEED-CONTENT-READ-RULING` |
+| D1 | `D1-SEARCH-AS-READS` |
 | dark mode | `ONE-NAMED-SETTINGS-PAGE-AT-A-TIME` |
 | DECIDE not MEASURE | `GROUPS-ADDRESS-BUYS-NO-WRITE` |
 | decide-retire-rulings section 2 | `BOUNDARY-IS-NOT-A-REASON` |
@@ -134,6 +171,7 @@ Scan the CLAIM column against your question. Every claim is a paraphrase written
 | request C | `CONVERSATION-OVERFLOW-BOTH-WAVES-RIGHT` |
 | request D | `PUBLISHED-SPLIT-REPORT-NOW-GATE-LATER` |
 | request E | `CREATOR-HUB-AND-POST-COMMENT-LEDGER-OVERCOUNTS` |
+| ruling (b) | `WRITE-CLASS-B` |
 | safety is a property of the code | `STANDING-SHAPE-OF-A-WRITE-RULING` |
 | SCROLL | `SCROLL-NOT-SANCTIONED` |
 | section 7 of lead-rulings-round-two | `SCROLL-NOT-SANCTIONED` |
@@ -159,6 +197,7 @@ Scan the CLAIM column against your question. Every claim is a paraphrase written
 | the standing order | `NO-IRREVERSIBLE-WRITE-IS-FIRED` |
 | the standing shape | `STANDING-SHAPE-OF-A-WRITE-RULING` |
 | the twenty sites | `ERROR-URL-ASKED-FOR-OR-NOTHING` |
+| the write class (b) | `WRITE-CLASS-B` |
 | the write-partition's section 4.4.2 question | `COMPOUND-ROW-SPLITS-ONLY-ON-STATE` |
 | third-party exception text | `ERROR-MESSAGE-RULED-AT-THE-RAISE` |
 | two capabilities one row | `COMPOUND-ROW-SPLITS-ONLY-ON-STATE` |
@@ -179,6 +218,8 @@ Scan the CLAIM column against your question. Every claim is a paraphrase written
 
 **`CONTAINER-EXCLUSION-PROPAGATES-ONLY-IF-UNREACHABLE`** -- Built ON `P I12` as a SOUND exclusion: *zero of 237 urls reach one* is ground four of EXCLUDED-RULED-ADMISSION. Two later documents call `P I12` a miscategorisation; see the register's DISPUTED note in the report for this wave.
 
+**`D1-SEARCH-AS-READS`** -- Orchestrator's call under OUTWARD-ACTS-NEED-THE-OPERATOR; overridable.
+
 **`ERROR-MESSAGE-RULED-AT-THE-RAISE`** -- THE SIBLING OF `ERROR-URL-ASKED-FOR-OR-NOTHING`, and it goes the OTHER WAY for a stated reason rather than by temperament. The url field could be ruled PER SITE because every value feeding it is an address this package composed or read; `$.message` cannot, because `_error` holds only `type(exc)` and `str(exc)` and the provenance of what that text QUOTES is not among them. So the ruling moves the decision to the raise, which is where the corpus had already put it three times without naming it: `coerce.py`, `press.disclose` and `landing.py`. It also DECLINES the sibling's own recommendation to make the twelve `dom.py` messages type-only -- all twelve are inside `tests/test_readers_emit_no_page_string.py`'s driven subject set and green (4 clean, 8 returns_text, 0 not_driven), so the payload class is already closed for them and type-only would delete twelve diagnoses to close a channel no needle travels. What it SHIPPED is the other end of the pipe: `tests/test_tool_envelopes_emit_no_page_string.py`, because the reader guard discovers only `async def` functions taking a `page` and the 48 tool bodies that funnel into `_error` are therefore outside it, permanently.
 
 **`ERROR-URL-ASKED-FOR-OR-NOTHING`** -- THE FAILURE-PATH COUNTERPART OF THE `source_url` SPLIT RULING in `tests/test_the_source_url_split_was_never_ruled.py`, which is NOT registered here because it lives as a test rather than as an audit passage. Same kind of value -- the address a read landed on -- in several of the SAME functions, and the two were ruled by different files that did not know about each other: `linkedin_my_profile` was declared SHAPED on its success path and published its landing raw on its failure path, in one function, for weeks. That ruling supplied the METHOD used here (a per-site declaration with a written reason, a count per site, a relay pinned as a relay, and drift failing in BOTH directions) and its prohibition is what stopped this wave wrapping all twenty: *wrapping a deliberate publication is as much a defect as leaking an accidental one.* The count each way is 12 withheld, 7 published, 1 relay.
@@ -189,15 +230,29 @@ Scan the CLAIM column against your question. Every claim is a paraphrase written
 
 **`GROUPS-ADDRESS-BUYS-NO-WRITE`** -- Stated in `readonly.py`'s own comment and quoted here. The companion rule that a widening is reported by what it BANKS rather than by what it UNBLOCKS sits in the same section.
 
+**`IN-ME-NO-BLANKET-BAR`** -- Orchestrator's call under OUTWARD-ACTS-NEED-THE-OPERATOR; overridable.
+
 **`INCIDENTAL-CAPTURE-IS-NOT-A-RULING`** -- THIS IS THE ANSWER TWO WAVES ESCALATED AS UNDECIDED AND A THIRD RE-DERIVED. It carries the three-way GENERAL FORM table that the 2026-09-21 re-derivation reconstructed from measurement. Its own citation is the 2026-09-03 ledger passage, so the chain is: census rule -> ledger asks -> 09-05 applies -> 09-19 RULES -> 09-21 re-derives.
+
+**`LIVE-BUDGET-40-LOADS`** -- Operator's words: "go, 40 loads is fine". Raised from 15 per wave, to feed one live lane from several offline build lanes.
 
 **`MESSAGING-SETTINGS-CAPABILITY-LEVEL`** -- The ruling CANONICAL-RULING-ID was written about: one sentence wearing three names across three slices. Its census twin is `_audit/_census/profile.md`.
 
 **`NO-IRREVERSIBLE-WRITE-IS-FIRED`** -- The single widest write ruling in the corpus. It separates BUILD from FIRE, which is the distinction most re-escalations about writes collapse.
 
+**`NOTIFICATIONS-UNREAD-SPEND`** -- Orchestrator's call under OUTWARD-ACTS-NEED-THE-OPERATOR; overridable. Registered under the id the census holds used for the open question, so the holds resolve to the answer.
+
+**`OTHER-MEMBER-IDS-AS-READS`** -- Orchestrator's call under OUTWARD-ACTS-NEED-THE-OPERATOR; overridable. Answers the other-members question N 172 was held on.
+
 **`PERMALINK-READ-IS-ALLOWED`** -- `M C42` records that this ruling DID NOT REACH naming the target -- which is why that row cannot rest on it. See the DISPUTED section of `_audit/2026-09-21-what-was-ruled.md`.
 
 **`SEARCH-ADMISSION-APPROVED-FIVE-CONDITIONS`** -- Condition 2 was AMENDED the same day -- see SEARCH-CONDITION-2-CLOSED. The ruling bars FIRING, not READING; conflating the two cost a later wave a decision it did not need.
+
+**`SELF-PROFILE-EDITS-NOT-OUTWARD`** -- Orchestrator's call under OUTWARD-ACTS-NEED-THE-OPERATOR; overridable. Narrows OPERATOR-NAMES-THE-TARGET to writes that target other people.
+
+**`VIEW-SWITCH-PRESS-RESTORED`** -- Orchestrator's call under OUTWARD-ACTS-NEED-THE-OPERATOR; overridable.
+
+**`WRITE-CLASS-B`** -- Operator's word: "b". Supersedes DO-NOT-OPEN-MESSAGING and amends NO-IRREVERSIBLE-WRITE-IS-FIRED; its target condition is OPERATOR-NAMES-THE-TARGET.
 
 ---
 
@@ -207,12 +262,12 @@ Scan the CLAIM column against your question. Every claim is a paraphrase written
 
 | signal NOT scanned | files | lines |
 |---|---|---|
-| a heading naming a ruling | 108 | 239 |
-| a bold line opening on RULING/RULED | 53 | 117 |
-| the phrase THE RULING | 35 | 54 |
-| a named -RULING id | 22 | 49 |
-| the phrase standing ruling | 13 | 24 |
-| a lead or operator ruling in prose | 31 | 62 |
+| a heading naming a ruling | 114 | 252 |
+| a bold line opening on RULING/RULED | 59 | 132 |
+| the phrase THE RULING | 35 | 56 |
+| a named -RULING id | 26 | 56 |
+| the phrase standing ruling | 17 | 35 |
+| a lead or operator ruling in prose | 34 | 74 |
 
 **The ruling that caused this register to be written is in the first row and not in the scan.** `BOUNDARY-IS-NOT-A-REASON` is phrased as a quoted ledger rule under a heading that carries no marker at all. It is registered because a person read it, and nothing here would have found it.
 
@@ -248,6 +303,17 @@ Every `RULED:` line in the corpus, and what became of it. An UNCLAIMED row fails
 | [2026-09-21-the-compound-rows.md](2026-09-21-the-compound-rows.md) | ## THE RULING -- RULED: a compound row is split ONLY when its halves need different STATES | `COMPOUND-ROW-SPLITS-ONLY-ON-STATE` |
 | [2026-09-21-the-field-beside-the-message.md](2026-09-21-the-field-beside-the-message.md) | **RULED: the error envelope's url field carries the address this server ASKED | `ERROR-URL-ASKED-FOR-OR-NOTHING` |
 | [2026-09-21-what-the-browser-said.md](2026-09-21-what-the-browser-said.md) | **RULED: what the error envelope's message may carry is decided WHERE THE | `ERROR-MESSAGE-RULED-AT-THE-RAISE` |
+| [2026-09-23-rulings-write-class-and-delegated-calls.md](2026-09-23-rulings-write-class-and-delegated-calls.md) | RULED: (operator, 2026-09-23 17:43, verbatim "go, 40 loads is fine") A live | `LIVE-BUDGET-40-LOADS` |
+| [2026-09-23-rulings-write-class-and-delegated-calls.md](2026-09-23-rulings-write-class-and-delegated-calls.md) | RULED: (operator, 2026-09-23 18:13) Only actions that act as the operator | `OUTWARD-ACTS-NEED-THE-OPERATOR` |
+| [2026-09-23-rulings-write-class-and-delegated-calls.md](2026-09-23-rulings-write-class-and-delegated-calls.md) | RULED: (operator, 2026-09-23 18:15, verbatim "b") The package may CONNECT, | `WRITE-CLASS-B` |
+| [2026-09-23-rulings-write-class-and-delegated-calls.md](2026-09-23-rulings-write-class-and-delegated-calls.md) | RULED: (operator, 2026-09-23 18:15, same ruling) A live proof of an outward | `OPERATOR-NAMES-THE-TARGET` |
+| [2026-09-23-rulings-write-class-and-delegated-calls.md](2026-09-23-rulings-write-class-and-delegated-calls.md) | RULED: (orchestrator, 2026-09-23, delegated) VIEW-SWITCH PRESSES are | `VIEW-SWITCH-PRESS-RESTORED` |
+| [2026-09-23-rulings-write-class-and-delegated-calls.md](2026-09-23-rulings-write-class-and-delegated-calls.md) | RULED: (orchestrator, 2026-09-23, delegated) D1, SEARCH KEYWORDS AND | `D1-SEARCH-AS-READS` |
+| [2026-09-23-rulings-write-class-and-delegated-calls.md](2026-09-23-rulings-write-class-and-delegated-calls.md) | RULED: (orchestrator, 2026-09-23, delegated) Loading /notifications/ is | `NOTIFICATIONS-UNREAD-SPEND` |
+| [2026-09-23-rulings-write-class-and-delegated-calls.md](2026-09-23-rulings-write-class-and-delegated-calls.md) | RULED: (orchestrator, 2026-09-23, applying (b)) Reading the operator's own | `OWN-INBOX-READS-COVERED-BY-B` |
+| [2026-09-23-rulings-write-class-and-delegated-calls.md](2026-09-23-rulings-write-class-and-delegated-calls.md) | RULED: (orchestrator, 2026-09-23, delegated) EDITS TO THE OPERATOR'S OWN | `SELF-PROFILE-EDITS-NOT-OUTWARD` |
+| [2026-09-23-rulings-write-class-and-delegated-calls.md](2026-09-23-rulings-write-class-and-delegated-calls.md) | RULED: (orchestrator, 2026-09-23, delegated) OTHER MEMBERS' IDS IN SEARCH | `OTHER-MEMBER-IDS-AS-READS` |
+| [2026-09-23-rulings-write-class-and-delegated-calls.md](2026-09-23-rulings-write-class-and-delegated-calls.md) | RULED: (orchestrator, 2026-09-23, delegated) /in/me/ presses get NO blanket | `IN-ME-NO-BLANKET-BAR` |
 
 ### 5.1 Triaged -- a declaration hit that is not a ruling made here
 

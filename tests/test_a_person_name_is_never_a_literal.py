@@ -118,6 +118,13 @@ INVENTED_NAMES = frozenset(
         "alex-r-12ab34",
         "priya-sharma-12ab34",
         "Always off",
+        # tests/test_l1_self_scoped_admissions.py's OTHER (lane L1,
+        # 2026-09-23): the member-segment placeholder for "any profile that is
+        # not his", used only to prove a pattern REFUSES it. Not a person and
+        # not a slug shape -- two dictionary words and no digit run -- and it
+        # is the spelling scripts/blast_radius.py and the search-admission
+        # guard already use, carrying the identity guard's sanctioned token.
+        "someone-else",
         # tests/test_feed_tally.py's NEEDLE, declared by the wave that wrote
         # it. NOT A PERSON AND NOT A SLUG SHAPE: it carries no digit run, no
         # capitalised run and no name, and it is deliberately unlike anything

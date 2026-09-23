@@ -23,6 +23,9 @@ It exits 1 when:
     disagrees with the LIVE boundary;
   * a source no longer resolves (the file, a ``::token`` in it, or a census
     row it cites);
+  * a read row is classed blocked on nothing on a page a RULING holds, or
+    breaks any other rule of ``check_read_addresses.ruling_problems`` -- the
+    edge the bucket-3 table gained on 2026-09-23, applied here unchanged;
   * any break in the vocabulary.
 
 THE BOUNDARY IS IMPORTED, NEVER RE-IMPLEMENTED -- and neither is the bucket-3
@@ -408,6 +411,11 @@ def census_figures(walk_rows, path: pathlib.Path = TABLE
     table, problems = load(path)
     problems += coverage_problems(table, pop)
     problems += shape_problems(table)
+    # And no jobs row blocked on nothing where a RULING holds its page -- the
+    # edge the bucket-3 split gained on 2026-09-23 (`check_read_addresses.
+    # ruling_problems`), applied to this table's read rows unchanged. Pure: it
+    # reads the holds table in `scripts/ruling_holds.py`, never the register.
+    problems += cra.ruling_problems(_reads(table))
     if problems:
         return None, problems
     s = split(table)
@@ -473,6 +481,7 @@ def main(argv: list[str] | None = None) -> int:
     problems += phrase_problems(rows)
     problems += range_problems(rows)
     problems += source_problems(rows)
+    problems += cra.ruling_problems(_reads(rows))
     problems += cra.control_problems()
     problems += boundary_problems(rows)
 

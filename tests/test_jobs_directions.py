@@ -462,3 +462,72 @@ def test_report_lines_renders_both_forms(tmp_path) -> None:
     withheld_lines = cjd.report_lines(none_figures, problems)
     assert withheld_lines and all(isinstance(x, str) for x in withheld_lines)
     assert "WITHHELD" in "\n".join(withheld_lines)
+
+
+# ------------------------------------------- the ruling-holds edge, 2026-09-23
+#
+# The bucket-3 table gained `check_read_addresses.ruling_problems` on master:
+# no row blocked on nothing on a page a RULING holds. This table applies the
+# same function to its read rows. Since the register of 2026-09-23 no hold
+# binds a page, so on the real table the edge has nothing to fire on; these
+# tests install a hold themselves, the way `tests/test_read_addresses.py`
+# does, and show it firing on a jobs row.
+
+
+def _jobs_page(row: dict[str, str]) -> str:
+    import urllib.parse
+
+    return urllib.parse.urlsplit(row["address"]).path
+
+
+def _admitted_unheld_jobs_row(row: dict[str, str]) -> bool:
+    import ruling_holds as rh
+
+    return (row["class"] == "ADMITTED" and _jobs_page(row).endswith("/")
+            and rh.surface_hold(_jobs_page(row)) is None)
+
+
+def test_the_real_table_passes_the_ruling_edge() -> None:
+    import check_read_addresses as cra
+
+    rows, _ = cjd.load()
+    assert cra.ruling_problems([r for r in rows if r["dir"] != "W"]) == []
+
+
+def test_blocked_on_nothing_on_a_held_jobs_page_turns_it_red(
+        tmp_path, capsys, monkeypatch) -> None:
+    """A jobs row made READER on a page a planted ruling holds: red, and named."""
+    import ruling_holds as rh
+
+    lines = _lines()
+    i = _find(lines, _admitted_unheld_jobs_row)
+    row = _row(lines[i])
+    row["gate"] = "READER"
+    lines[i] = _line(row)
+    monkeypatch.setitem(rh.ROW_HOLDS, "PLANTED-RULING", rh.Hold(
+        status="STANDING", binds="surface", surface=_jobs_page(row)))
+    code, out = _check(capsys, _plant(tmp_path, lines))
+    assert code == 1, out
+    assert (f"{row['slice']} {row['row']}: classed blocked on nothing (gate "
+            f"READER), but its page {_jobs_page(row)} sits on "
+            f"{_jobs_page(row)}, which PLANTED-RULING holds (STANDING)") in out
+
+
+def test_census_figures_withholds_when_the_ruling_edge_fails(
+        tmp_path, monkeypatch) -> None:
+    """The pure hook census_completion calls applies the edge too: WITHHELD."""
+    import census_completion as cc
+    import ruling_holds as rh
+
+    lines = _lines()
+    i = _find(lines, _admitted_unheld_jobs_row)
+    row = _row(lines[i])
+    row["gate"] = "READER"
+    lines[i] = _line(row)
+    monkeypatch.setitem(rh.ROW_HOLDS, "PLANTED-RULING", rh.Hold(
+        status="STANDING", binds="surface", surface=_jobs_page(row)))
+    figures, problems = cjd.census_figures(list(cc.walk()),
+                                           path=_plant(tmp_path, lines))
+    assert figures is None
+    assert any(p.startswith(f"{row['slice']} {row['row']}: classed blocked on "
+                            f"nothing") for p in problems), problems

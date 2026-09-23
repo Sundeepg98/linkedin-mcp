@@ -4,6 +4,9 @@ claude-opus-5-5[1m]
 
 **CORRECTS:** `_audit/2026-09-21-the-read-triage.md` -- four address verdicts: P F1 and P H11 are pages on the admitted profile, not ADDRESS/ABSENT, and P L4 and N 61 wait on a live read, not on a refused address anybody has seen served.
 
+**CORRECTED BY:** `_audit/2026-09-23-census-cleanup.md` -- the split asked the boundary and never the rulings: `M M49` sat on a messaging page while `DO-NOT-OPEN-MESSAGING` stood, which made the five four until the operator lifted that ruling at 18:15 the same day. The five stands under the rulings as they now are, and the checker now asks them.
+**CORRECTED BY:** `_audit/2026-09-23-readers-four-rows.md` -- of the five "blocked on nothing", `M C85` is gated RULING (no sanctioned source for a poll post's address) and `P O3`, `N 134` and `M C72` are gated PRESS, measured live the same day; only `M M49` remains, so the figure is 1 of 67, not 5.
+
 Wave `bucket3-addresses`, 2026-09-23, from master `79c5f8e`. **READ-ONLY AND
 OFFLINE THROUGHOUT.** No browser was started or attached to, no page was
 loaded, no session was touched, and `writes_enabled` was never read or moved.
@@ -49,7 +52,9 @@ banked, so every prior per-row reading of this population was reusable.
 **THE REAL SIZE OF "BLOCKED ON NOTHING AT ALL" IS 5 OF 67.** Five rows sit on a
 page the boundary admits AND have nothing between that page and a reader but
 the reader itself: M M49 and M C85 (READER), P O3, N 134 and M C72
-(PRESS-PERMITTED). Seven more need only a session first -- a live look (P F1,
+(PRESS-PERMITTED). **[Later on 2026-09-23: four while `DO-NOT-OPEN-MESSAGING`
+stood, since `M M49` sits on a messaging page; five again after the operator
+lifted that ruling at 18:15. See the note under the title.]** Seven more need only a session first -- a live look (P F1,
 P H11, P K8) or a fire of code that already ships (N 80, N 81, N 88, N 89).
 The other 55 are gated: 21 behind a refused press or an unmade decision, 24 at
 the boundary itself, and 10 with no address to put through it.
@@ -193,6 +198,11 @@ before anything entered the table; section 6 says what it changed.
 Generated from `_audit/_census/read-addresses.tsv` rather than typed, so the
 two cannot disagree. Sources are written as plain paths; the table carries the
 same text.
+
+**[Later on 2026-09-23: they now differ in one cell. `M M49`'s note in the
+address table opens with the ruling that held its page until the operator
+lifted it at 18:15; its gate is READER in both. The address table is the
+current record; see the note under the title.]**
 
 ### ADMITTED -- 33
 
@@ -453,7 +463,9 @@ happen to it.
         BUILT-UNFIRED     N 80, N 81, N 88, N 89
 
 **5 is the number a reader-building wave should be sized on.** 12 if that wave
-also holds a browser slot. Two of the five (P O3, N 134) are one artifact, and
+also holds a browser slot. **[Later on 2026-09-23: 4 and 11 while
+`DO-NOT-OPEN-MESSAGING` held `M M49`'s page; 5 and 12 again after the operator
+lifted it at 18:15. See the note under the title.]** Two of the five (P O3, N 134) are one artifact, and
 `dom.py`'s readonly-ok waiver budget is at its cap of 22, so that shaper must
 reuse an already-declared in-page script or argue for the cap.
 
@@ -560,7 +572,9 @@ demonstrations pass, unchanged.
 3. **M C83's D3 filing.** `census_completion.RULING_BLOCKED_NAMED` names it
    under D3, but the boundary's own comment says its address has never been
    seen served; a D3 ruling would not make it buildable. Either the list or the
-   row's reason should say so -- this wave changed neither.
+   row's reason should say so -- this wave changed neither. **[Later on
+   2026-09-23: settled, and no ruling was needed. The row left the D3 list and
+   the address table's line for it says why.]**
 4. **Merge notes, not rulings.**
    * `tests/test_read_addresses.py` goes red, by design, the moment any
      bucket-3 row changes state or direction. If a sibling wave in the same

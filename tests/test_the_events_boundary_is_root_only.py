@@ -28,6 +28,16 @@ a `readonly.py` whose allowlist was emptied. So
 control that proves the predicate is still discriminating, and without it the
 refusals certify nothing.
 
+**AMENDED 2026-09-23 BY A LANE-L1 `REVIEW:` COMMIT, AND THE TITLE ABOVE IS NOW
+A DATED CLAIM.** One event BY ITS NUMERIC ID -- census ``N 184``, *reach an
+event through its URL* -- is admitted on its own anchored line, under the four
+conditions the lead set for ``/groups/<id>/``. Its case moved OUT of the
+must-stay-refused table below rather than being deleted, and
+:data:`EVENT_BY_ID_ADMITTED` pins it; the SLUG form beside it (a title run into
+the id) stays refused, and so do the attendee roster, comments, about, manage
+and every sub-path. The title is kept because this file is cited by it; what
+it protects -- the roster and the family -- is unchanged.
+
 **EVERY EVENT ID BELOW IS A REPDIGIT AND EVERY SLUG CARRIES A SANCTIONED
 SYNTHETIC TOKEN.** No real event was addressed and none was needed --
 ``is_read_url`` is a pure string predicate, so the ids here are shaped to be
@@ -62,9 +72,15 @@ EVENTS_DEEP_MUST_STAY_REFUSED = (
     ("the same roster filtered to 1st-degree connections -- census N 189. The "
      "filter is applied by LinkedIn, so the page is still the roster",
      f"{BASE}/events/{SYNTHETIC_EVENT_ID}/attendees/?facetConnectionOf=1"),
-    ("an event page -- organiser and content. Census N 184, and the row the "
-     "admission comment predicted would prove the ledger's allowlist+1 short",
-     f"{BASE}/events/{SYNTHETIC_EVENT_ID}/"),
+    # THE NUMERIC EVENT PAGE STOOD HERE UNTIL 2026-09-23 -- "an event page --
+    # organiser and content. Census N 184". It is ADMITTED by its own line
+    # (lane L1, a REVIEW: commit) and pinned in EVENT_BY_ID_ADMITTED below.
+    # Its QUERY spelling takes its place: still refused, and still one of the
+    # nine a family pattern would turn red, so the count in the test's
+    # docstring below is unchanged.
+    ("the numeric event page carrying a query -- the admitted line takes "
+     "none, and a query is where a filter naming a person would arrive",
+     f"{BASE}/events/{SYNTHETIC_EVENT_ID}/?x=1"),
     ("the same page in the form LinkedIn writes when the event has a slug",
      f"{BASE}/events/some-event-placeholder-{SYNTHETIC_EVENT_ID}/"),
     ("third-party comments on an event -- census C 92",
@@ -95,6 +111,23 @@ EVENTS_DEEP_MUST_STAY_REFUSED = (
      "and not this blocker's to admit",
      f"{BASE}/search/results/events/?keywords=x"),
 )
+
+
+#: ONE EVENT BY ITS NUMERIC ID, admitted 2026-09-23 (lane L1, REVIEW). Both
+#: slash forms. The slug form stays in the refused table above.
+EVENT_BY_ID_ADMITTED = (
+    f"{BASE}/events/{SYNTHETIC_EVENT_ID}/",
+    f"{BASE}/events/{SYNTHETIC_EVENT_ID}",
+)
+
+
+@pytest.mark.parametrize("url", EVENT_BY_ID_ADMITTED)
+def test_one_event_by_numeric_id_is_admitted_by_its_own_line(url):
+    """The admission is the numeric id and exactly one line carries it."""
+    readonly.assert_read_url(url)
+    carriers = [p for p in readonly._ALLOWED_URL_PATTERNS if p.match(url)]
+    assert len(carriers) == 1, [p.pattern for p in carriers]
+    assert "[0-9]{1,20}" in carriers[0].pattern, carriers[0].pattern
 
 
 @pytest.mark.parametrize("url", EVENTS_ROOT_MUST_STAY_ADMITTED)
