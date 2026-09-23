@@ -548,8 +548,26 @@ on this worktree after the moves:
   for EXCLUDED-RULED; INCIDENTAL-CAPTURE-IS-NOT-A-RULING reads a class filter
   catching an address as a blocker. The rows are GAP under the second, which is
   the registered one; the pin moves.
-* `tests/test_triage_instrument.py`, `EXPECTED_NOW` for the messaging slice, 77
-  GAP to 117.
+* `tests/test_triage_instrument.py`, `EXPECTED_NOW` for the messaging slice: 77
+  GAP `{R 10, W 65, R+W 2}` to 117 `{R 13, W 101, R+W 3}`. **Its join test is
+  not a count and will not re-pin away**: it requires every messaging GAP row to
+  join `_audit/_census/blocker-map.tsv`, whose spine is the 409 rows that were
+  GAP at the 2026-09-03 freeze. 14 returned messaging rows were already
+  excluded at that freeze, so they have no line (`C13`-`C16`, `C18`, `C20`,
+  `C21`, `C33`, `C35`, `C42`, `C44`, `C47`, `M3`, `M39`), and the headline test
+  raises on `M M3` for the same reason. Across all four slices **175 of the 251
+  returned rows were never in the 409-row ledger at all; 76 were**, and those 76
+  still carry their ledger blocker in the map. Whether the map's spine grows or
+  the triage treats a row outside it as its own class is a decision for whoever
+  holds those two files.
+* `_audit/_census/pointer-graph.tsv` (`scripts/measure_pointer_graph.py`): 30
+  pinned positional pointers read a different donor verdict, because this lane
+  appended a note to the donor row. The donors are `J 50`, `J 66`, `J 74`,
+  `J 89`, `M C20`, `P B4`, `P C4`, `P D9`, `P D14`, `P I2`, `P I4` and `P M1`;
+  26 of the 30 pointing rows are returned rows themselves, and the other four
+  are `J 67`, `P I11` and `P M3`, kept on grounds their own cells now state, and
+  `P D10`, a COVERED-CANNOT-DELIVER row whose "same shape as D4" the resolver
+  reads by position as `P D9`.
 * `tests/census_row_pin.json`: no move.
 
 ## 7. WHAT ELSE THIS LANE CHANGED, AND WHY EACH HAD TO
@@ -598,4 +616,32 @@ IN PROGRESS.
 
 ## 9. GATES RUN AND NOT RUN
 
-IN PROGRESS.
+**RUN, on `ab26c14` and `af677b9`:**
+
+* `scripts/check_exclusion_basis.py`: **exit 0** -- population 63, table 63,
+  structural problems 0, **untraced 0, lifted 0**. It shipped red at 26 and 27.
+* `tests/test_exclusion_basis.py`: 37 passed; then the same file against three
+  mutations of the `EMPTIED` machinery, each red (INSTRUMENTS section 64).
+* `scripts/count_census_states.py`: GAP J 94, P 153, M 117, N 161 -- 525 of 704
+  stated rows; EXCLUDED-RULED 49 plus `XR` 4; MEASURED-ABSENT 10.
+* `scripts/pin_census_rows.py --check`: no drift, 704 rows. Not re-pinned, and
+  nothing asked it to be.
+* `scripts/classify_writeoff_reasons.py --check` and
+  `scripts/check_contingent_writeoffs_carry_a_reopener.py`: PASS; the three
+  generated files regenerated until a second sweep changed nothing, then each
+  `--check`ed clean; the pre-commit identity gate, 0 hits on both commits.
+* **`scripts/impact_gate.py --against f89bd29`, run 1 on `ab26c14`: REFUSED --
+  9 failed, 2156 passed in 243s**, 44 test files plus the 17 corpus-wide guards.
+  All nine are the expected moves of section 6 and nothing else:
+  `tests/test_read_addresses.py` 3 (the 34 uncovered bucket-3 rows),
+  `tests/test_triage_instrument.py` 4 (`EXPECTED_NOW` and the frozen-map join),
+  `tests/test_pointer_graph_guard.py` 2 (the 30 moved pointers). No wall-clock
+  budget test refused, so none needed a lone re-run.
+* **Beyond the gate's selection**, 20 census-adjacent test files the lane chose
+  by hand: 338 passed, 1 failed -- `tests/test_gap_rows_on_refused_addresses.py`,
+  `EXPECTED_GAP_ROWS` 4 to 55, section 6.
+
+**NOT RUN:** by the gate, 172 of 216 test files, about 3929 of 6094 tests; it is
+a local, Windows-only signal and CI's three platforms are the certifier, and
+nothing was pushed. **Deliberately not run:** anything touching LinkedIn, a
+browser, port 9224 or `_state/` -- nothing here needs them.

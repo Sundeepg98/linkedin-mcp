@@ -201,10 +201,12 @@ call was the orchestrator's, delegated under OUTWARD-ACTS-NEED-THE-OPERATOR.
     MEASURED-ABSENT    3  ->    3   N 136 now cites a tracked measurement
 
 **Kept, each on a written ground:** 10, 12, 29, 96, 109, 110, 113, 125, 131, 141, A14, A15 (ground two); 105, 107 (ground four); 2, 30, 31, 65, 103, 111, 112 (the operator's 2026-09-04 ruling).
-**SECTION 6's PER-RULING ROW LISTS ARE LEFT AS WRITTEN.** After this delta R1, R2, R8,
-R9 and R11 hold no EXCLUDED-RULED row -- each of their rows is GAP and names the ruling
-as its blocker -- and R3 holds N 111 and N 112 only beside R4. R4 keeps its seven,
-R5 its nine plus N 141 by act-class, and R6 holds N 131.
+**SECTION 6's PER-RULING ROW LISTS ARE LEFT AS WRITTEN.** After this delta R1, R8, R9
+and R11 hold no EXCLUDED-RULED row -- each of their rows is GAP and names the ruling as
+its blocker -- and R2 holds none on its own: N 10, N 12, N 29, N 30 and N A15 still cite
+it beside R5 or R4, which hold them. R3 holds none on its own either: N 111 and N 112
+sit beside R4, N 113 and N 125 beside R5. R4 keeps its seven, R5 its nine plus N 141 by
+act-class, and R6 holds N 131.
 
 ---
 
