@@ -1163,3 +1163,142 @@ in the entries: **read a capture offline in a local headless Chromium with
 every request aborted and LinkedIn's script and policy tags removed**, and
 check it against a live reading first (Entry 2's control: 20 live, 20
 offline) before trusting what it says about anything else.
+
+---
+
+## Integration 2026-09-24
+
+**The order** (orchestrator, 01:58): merge master into this branch, re-derive
+every pin on the merged state, fix the eight red test pins, gate, commit --
+PART 1, before any follow-up. **Disk at 01:55, before anything was done:**
+this branch clean at its last commit, `3b4a69f` (this lane's close, which
+does not resolve on `master` until the lane merges); master at `001f70b`, 24
+commits past this branch's base; no `_TEAM_LEAD_*.md`. It matched the order,
+so the order was followed as written.
+
+**THE COMMITS:** `28eeccc` (the merge, with every conflict resolved and the
+derived files regenerated), `5f11f1e` (the pins), and the commit that adds
+this section.
+
+### The merged surface, re-derived rather than summed
+
+    tools          52   the base's 49 + this lane's linkedin_own_item_link
+                        + master's linkedin_recent_job_searches (L3) and
+                        linkedin_follow_company_page (L4)
+    reads          39   writes 13 (L4's follow is the thirteenth)
+    parameters     73   67 at the base + this lane's 4 + L4's 2
+    sanctioned     12   mutating calls: 7 + this lane's 5; L4's follow
+                        reuses perform's existing click
+
+Each is measured off the merged registry by the surface tests, not trusted
+from the sum. The surface test is renamed `..._fifty_two_tools`, with its
+record.
+
+### Conflicts: 13 files, and how each was resolved
+
+- **The count sites** -- `server.py` (two hunks), `README.md` (two),
+  `linkedin_server/__init__.py`, `tests/test_server_surface.py` (three),
+  `tests/test_every_tool_is_on_the_surface.py`, the tool-surface pin: every
+  paragraph from both sides kept, the numbers above written in.
+- **The census, per row, against the merge base** (a comparison of the three
+  git stages of each file, row by row):
+
+      file                  one side only        both sides
+      profile.md            5 (ours)             6: P A8 A11 A13 A17 A19 A21
+      network.md            15 (ours 3, theirs 12)   0
+      read-addresses.tsv    17 (ours 4, theirs 13)   0
+      messaging-and-content.md   merged by git: no overlapping hunk
+
+  A row changed on one side takes that side. **The six own-profile-edit rows
+  changed on both:** this lane's side only INSERTED its dated "NOT SAVED"
+  paragraph, and master's cleanup lane rewrote the rest of each cell (the
+  RELEASED BY citation), so both are kept: the lane's paragraph, then
+  master's cell. That is the case the order allows; nothing was guessed.
+  `network.md` also carries a paragraph outside the table that only master
+  changed (lane L4's delta for `N 47`); it is master's.
+- **The derived files** (`_audit/INDEX.md`, `_audit/RULINGS.md`,
+  `blocker-map.tsv`): master's taken, every resolved path staged, then
+  regenerated with `--write` twice -- the second sweep changed nothing --
+  and `--check` exits 0 on all three. Against master's copy, the blocker map
+  differs in exactly four state cells (`P G6`, `N 134`, `P O3`, `M C72`) and
+  in 126 reason-rank recounts (its ninth column alone).
+  `completeness-candidates.tsv` changed on neither side and was NOT
+  regenerated: it harvests local captures under `_state/`, not tracked files,
+  so regenerating it would be a new harvest rather than a merge step.
+
+**A CORRECTION TO THE MERGE COMMIT'S OWN MESSAGE.** It says "26 rows changed
+on one side only take that side". The count is **37**: 20 census rows in the
+two table files plus 17 address-table lines. The message was written from an
+estimate and not from the comparison's output; this line is the record.
+
+### The pins, re-derived on the merged tree
+
+`scripts/census_completion.py --check`, measured after the merge (the lane's
+forecast deltas were against its base and were NOT applied):
+
+    adjudicated         434 -> 437      delivered_broad    100 -> 103
+    delivered_strict     75 -> 79       gap                270 -> 267
+    unfired              25 -> 24       gap_read            66 -> 63
+    b3_admitted          40 -> 37       b1_no_ruling        15 -> 14
+    PINNED_B1_ROWS       P G6 leaves its hold
+
+Every move is this lane's four live promotions; master's own figures had
+moved from the lane's base, which is why the numbers on the left are not
+the ones this document forecast in its closing section.
+
+**The census-derived test pins**, each for the same rows:
+
+- `test_banked_evidence_is_reachable`: `M C72` and `N 134` pinned (their
+  gitignored citations sit in PRIOR readings that earlier waves wrote), and
+  the unreachable count 15 -> 18;
+- `scripts/triage_read_gap_rows.py`: `N 134` and `P O3` dropped from its
+  verdict table (51 read-GAP rows, 51 verdicts);
+- `tests/test_triage_instrument.py`: `EXPECTED_NOW` re-derived to 76 GAP
+  rows, R 9 (`M C72` left); a new dated constant keeps the old value;
+- the pointer graph: `N 135`'s vestigial positional "Same" is written out as
+  the reference it stood for (`N 133`'s page), so it no longer re-points
+  when a row above it changes; `pointer-graph.tsv` re-pinned 69 -> 67 (the
+  two moves, both intended: `N 134` has evidence of its own, `N 135` is no
+  longer positional), and the selftest's calibration literal moved with it.
+
+### Gates, run and NOT run
+
+**RUN**, all on the merged tree:
+
+- **The navigation-derivation and page-string guards on the merged
+  `server.py`**, where lane L4's tools and this lane's meet:
+  `test_navigation_is_never_derived`, `test_readers_emit_no_page_string`,
+  `test_tool_envelopes_emit_no_page_string` -- 765 passed.
+- **The census instruments**, by exit code: `census_completion.py --check`
+  0, `check_read_addresses.py` 0, `check_write_classes.py` 0,
+  `ruling_holds.py` 0, `pin_census_rows.py --check` 0,
+  `measure_pointer_graph.py --check` 0, `check_jobs_directions.py` 0.
+- **The corpus guards**: `check_cited_shas_resolve.py` 0,
+  `check_contingent_writeoffs_carry_a_reopener.py` 0, the three derived-file
+  `--check`s 0; `check_asserted_names_resolve.py` exits 1 on eight findings,
+  every one in another wave's document and every one pinned by
+  `tests/test_an_asserted_name_resolves.py`, which passes -- none is in this
+  lane's document.
+- **`scripts/impact_gate.py --against 001f70b`, planned and NOT run**: the
+  plan widens to the full suite (224 of 239 test files reachable), and the
+  order says not to run a full suite locally while six lanes share the box --
+  measured at the time: six pytest processes, CPU 100% in three samples.
+- **In its place, a selection of 62 files** at two workers: the gate's 17
+  corpus-wide guards, the order's named corpus guards (correction, cited
+  sha, reopener, identity, audit index, rulings register), the tests of the
+  code files changed on both sides (the three surface tests, the prose-count
+  and package-docstring pins, `test_tools`, the two page-string guards), the
+  read-only boundary tests, this lane's module tests, lane L4's and L3's new
+  tests, and the census tests. **4581 passed, 1 failed, in 30 min 41 s.** The failure was
+  real and was the merge's: `test_ci_shard.py::test_the_timings_table_still_
+  prices_most_of_the_suite` -- the timings table prices 157 files, master
+  has 234 test files (0.671, over the two-thirds line) and the merge 239
+  (0.657, under it), because this lane's five new test files carry no
+  timings. **Repaired by measurement, not by moving the line:** the five
+  files were run alone into a junit report and added through the shipped
+  `ci_shard.seconds_per_file`, with their provenance appended to the
+  table's own (a loaded box, so their seconds are high). 162 of 239; the
+  shard tests pass (131).
+
+**NOT RUN:** the full suite (CI runs it after the orchestrator's merge);
+CI itself (nothing pushed); the 3.10 cell; any live fire.
