@@ -143,10 +143,9 @@ TRIAGE: dict[str, tuple[str, str, str]] = {
     "P M12": ("ADDRESS", "REFUSED", "the application-settings address carries "
                                     "the FIRST entry on the forbidden tuple; "
                                     "reopening it is the operator's"),
-    "P O3": ("BUILDABLE", "", "address admitted and already loaded by a shipped "
-                              "tool; the press is RULED permitted, the guard "
-                              "and its witness are BUILT; one shaper is missing"),
-    "P O23": ("RULING", "", "measurable only by firing a profile write and "
+    # "P O3" LEFT 2026-09-24: proven live by the live lane (the view switch and
+    # the decided reveal with its reader), so it is no longer a read GAP row.
+    "P O23":("RULING", "", "measurable only by firing a profile write and "
                             "observing another account; writes_enabled is "
                             "False"),
     # ---- network.md ----
@@ -208,10 +207,9 @@ TRIAGE: dict[str, tuple[str, str, str]] = {
                             "nobody has ruled"),
     "N 133": ("PRESS", "", "applying a filter SUBMITS, and the disclosing-press "
                            "ruling refuses submits by name"),
-    "N 134": ("BUILDABLE", "", "address admitted, press RULED permitted, guard "
-                               "and witness BUILT, sanctioned shapes measured "
-                               "present on the page; one shaper is missing"),
-    "N 161": ("RULING", "", "the groups vertical was deliberately left out of "
+    # "N 134" LEFT 2026-09-24: proven live by the live lane's view switch, so
+    # it is no longer a read GAP row.
+    "N 161":("RULING", "", "the groups vertical was deliberately left out of "
                             "the search admission, which names the "
                             "request-to-widen route instead"),
     "N 171": ("RULING", "", "a passive COST of an act, not an act; whether a "

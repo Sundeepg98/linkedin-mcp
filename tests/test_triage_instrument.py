@@ -152,7 +152,17 @@ AFTER_THE_WRITE_CEILING_WAVE = (77, {"R": 10, "W": 66, "R+W": 1})
 #: direction divergence can be told the truth in the cell and a state
 #: divergence cannot, which is the whole of the ruling. ``M28`` in the same
 #: file is the identical shape and has carried ``R+W`` since it was written.
-EXPECTED_NOW = (77, {"R": 10, "W": 65, "R+W": 2})
+AFTER_THE_COMPOUND_ROWS_WAVE = (77, {"R": 10, "W": 65, "R+W": 2})
+
+#: AFTER THE LIVE LANE'S MERGE, 2026-09-24, re-derived on the merged tree:
+#: ``C72`` ("Share a post off LinkedIn") -- a READ -- was proven live on his own
+#: post and moved GAP -> COVERED-PROVEN
+#: (``_audit/2026-09-23-live-lane-session-1.md`` Entries 10-12). 77 - 1 = 76,
+#: reads 10 - 1 = 9; writes and read-and-writes UNTOUCHED, because the lane
+#: moved no write. ``_audit/2026-09-20-the-messaging-gap.md`` quotes the
+#: wave-start 83, which stays true of that moment and is not edited.
+AFTER_THE_LIVE_LANE = (76, {"R": 9, "W": 65, "R+W": 2})
+EXPECTED_NOW = AFTER_THE_LIVE_LANE
 
 
 def test_the_headline_split_is_the_one_the_report_quotes():

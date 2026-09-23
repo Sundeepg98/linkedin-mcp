@@ -1,6 +1,8 @@
 """`scripts/measure_pointer_graph.py --check` must be able to go RED.
 
-WHAT IT GUARDS. 69 census reason cells say `same` and resolve BY POSITION to the
+WHAT IT GUARDS. 67 census reason cells (69 until the live lane's merge,
+2026-09-24, which banked `N 134` and wrote out `N 135`'s vestigial pointer) say
+`same` and resolve BY POSITION to the
 nearest substantive row above them in the same table. Nothing marks a row as
 load-bearing for the rows beneath it, so a row inserted mid-table re-points every
 dependent below it and changes its classification -- with no edit to those rows, no
