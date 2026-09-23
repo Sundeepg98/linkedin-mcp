@@ -10153,7 +10153,9 @@ the overlay draws outside `<main>` has still been displayed. Aim is
 ### 69.6 FOURTEEN MUTATIONS, FOURTEEN KILLS
 
 Each load-bearing condition was broken ALONE in a scratch copy of the tree
-and its named test run. Ten at `899b24b`: the unread word signal, the
+and its named test run. Ten at `899b24b` (a commit on the lane's branch;
+`899b24b` does not resolve on `master` until the branch merges): the
+unread word signal, the
 guard's refusal on an unread row, the list page's opened check, the reply's
 delta (`== was + 1` weakened to `>= was`), the send gate's transition check,
 the title's copy into a NEW dict, the landing check before typing, the

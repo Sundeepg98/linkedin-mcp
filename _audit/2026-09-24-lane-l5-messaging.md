@@ -257,7 +257,10 @@ answered UNKNOWN ("not a conversation's reply surface"), and `linkedin_send_repl
 have typed a word. It failed CLOSED, so nothing unsafe could follow, and no test saw it: both
 synthetic fixtures had been cut to the messaging region and drew no global navigation, so the one
 element that breaks the selector was absent from every world the tests built. RED REPRODUCTION,
-in a scratch copy of the tree at `899b24b`: drawing the global search into the thread fixture and
+in a scratch copy of the tree at `899b24b` -- a commit on this lane's branch that does not resolve
+on `master` until the branch merges; its subject is "send_reply: the same words from the other
+side are not his send -- the authorship condition gets its own test" -- drawing the global
+search into the thread fixture and
 changing nothing else fails 17 of the 63 tests in `tests/test_send_reply.py` and
 `tests/test_messaging_threads.py`.
 
@@ -525,7 +528,8 @@ because this lane added two (section 8.3).
    lifted, 1 release); `pin_census_rows --check` no drift, 704 rows. The three generated files at
    a fixed point: `build_audit_index --check`, `build_rulings_index --check`,
    `build_blocker_map --check`, each exit 0.
-5. **Ten mutations at `899b24b`, ten kills** (instrument register 69.6), each applied alone to a
+5. **Ten mutations at `899b24b`, ten kills** (instrument register 69.6; `899b24b` does not resolve
+   on `master` until this lane's branch merges -- its subject is in 3.3), each applied alone to a
    scratch copy of the tree and each failing its named test at the assertion named for it; the
    unmutated copy passed all ten.
 6. **The defect of section 3.3, reproduced red and then fixed in a scratch copy first.** Red: the
