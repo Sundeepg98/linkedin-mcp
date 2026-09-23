@@ -649,3 +649,21 @@ triaged: a triage entry would have muted the pair for good.
     b3_admitted             40 -> 38    (-2)
     b3_blocked_on_nothing    1 -> 1     (P O3 in and out; M M49 remains)
     PINNED_B1_ROWS           P G6 leaves its hold
+
+### Entry 9 -- 23:26:17-23:26:30, the messaging badge read again: 1 load, messaging still held
+
+`--only badge,m43,m33`, ledger 23 -> 24, walled False, 0 challenge terms.
+`linkedin_new_messages` read `new_since_last_visit` **1**, as at 22:14, so
+the harness opened no `/messaging/` page (m43, m33: HELD-BY-BADGE). The
+notifications badge on the same page read 2 -- two notifications have
+arrived since the 22:15 spend.
+
+**So `M M43`, `M M33` and `M M49` keep their states this session, on a
+reading taken twice, 72 minutes apart.** For `M M49` that also means build
+(c) was NOT written: the one page it reads -- the conversation `/messaging/`
+lands in -- has never been captured, and a reader for a thread DOM nobody
+has seen would be a guess. **What moves all three is one event outside this
+lane's reach: the badge reading 0**, which happens when he opens Messaging
+himself. The next live session's first key should be `badge,m43,m33`: on a
+0 it fires `M M43`, captures the landing (the capture build (c) needs), and
+fires `M M33` with the `starred` pill -- three loads.

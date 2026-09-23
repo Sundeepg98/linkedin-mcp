@@ -745,8 +745,10 @@ NOT_A_CORRECTION: dict[tuple[str, str], str] = {
         "is false while leaving it untouched."
     ),
     ("messaging-and-content.md", "2026-09-23-live-lane-session-1.md"): (
-        "TABLE-ROW PROXIMITY, from FIVE citing lines, read window by window. "
-        "`M33` and `M43` (NOT OPENED on a measured badge reading) sit two rows "
+        "TABLE-ROW PROXIMITY. SIX lines cite the session document -- `M33`, "
+        "`M43`, `M49`, `C38`, `C48`, `C85` -- and the windows of `M49` and "
+        "`C48` hold no correction vocabulary at all. The other four, read window "
+        "by window: `M33` and `M43` (NOT OPENED on a measured badge reading) sit two rows "
         "above `M35` ('the same undercount 3.10 corrected') and `M45` (a "
         "'superseded' in its own history); `C38` (CAPTURED) sits below `C36` "
         "and `C37`, each carrying an earlier wave's 'corrected'; and `C85` is "
