@@ -36,6 +36,13 @@ file; the tally is a by-product.
                    stale. **NO STATE IS MOVED BY THIS FILE OR BY THE DOCUMENT
                    THAT QUOTES IT** -- a state move needs a fire or a ruling,
                    and this script has neither.
+    RETURNED       returned from EXCLUDED-RULED by lane R on 2026-09-23, and
+                   its OWN CLASS rather than a cost read here: the row's cell
+                   names its blocker after the marker
+                   ``RETURNED TO GAP ... BY LANE R ... BLOCKER, NAMED:`` and
+                   its address is measured in ``read-addresses.tsv``. CONTROL
+                   9 refuses the verdict on a row whose cell lacks the marker,
+                   so it cannot be typed onto an arbitrary row.
 
 **THE VERDICT IS THE BINDING GATE, NOT EVERY GATE.** Several rows carry two:
 `P C8` needs a press AND a transport this package does not have. The verdict
@@ -79,6 +86,7 @@ from __future__ import annotations
 
 import argparse
 import pathlib
+import re
 import sys
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
@@ -96,7 +104,12 @@ ROOT = pathlib.Path(__file__).resolve().parents[1]
 SCOPE = ("P", "N")
 
 #: The closed verdict alphabet. Control 4 refuses anything off it.
-VERDICTS = ("BUILDABLE", "ADDRESS", "RULING", "PRESS", "SERVED")
+VERDICTS = ("BUILDABLE", "ADDRESS", "RULING", "PRESS", "SERVED", "RETURNED")
+
+#: The census's convention for a row lane R returned (see RETURNED above);
+#: the same marker ``triage_messaging_gap_rows.RETURNED_MARKER`` reads.
+RETURNED_MARKER = re.compile(
+    r"\*\*RETURNED TO GAP\b[^*]*\bBY LANE R\b.*?BLOCKER, NAMED:", re.S)
 
 #: row key -> (verdict, sub-label or '', the binding gate in one line).
 #: Taken row by row in `_audit/2026-09-21-the-read-triage.md`, which carries the
@@ -166,13 +179,9 @@ TRIAGE: dict[str, tuple[str, str, str]] = {
                               "filter vocabulary"),
     "N 82": ("BUILDABLE", "", "served by the shipped people-search tool's "
                               "filter vocabulary"),
-    "N 84": ("BUILDABLE", "", "served by the shipped people-search tool's "
-                              "filter vocabulary"),
-    "N 85": ("BUILDABLE", "", "served by the shipped people-search tool's "
-                              "filter vocabulary"),
+    # N 84, N 85 and N 87 LEFT 2026-09-24: lane S built their facet readers
+    # (COVERED-UNFIRED), and the WHO rule keeps them there -- each is a FILTER.
     "N 86": ("BUILDABLE", "", "served by the shipped people-search tool's "
-                              "filter vocabulary"),
-    "N 87": ("BUILDABLE", "", "served by the shipped people-search tool's "
                               "filter vocabulary"),
     "N 88": ("BUILDABLE", "", "served by the shipped people-search tool's "
                               "filter vocabulary"),
@@ -186,10 +195,9 @@ TRIAGE: dict[str, tuple[str, str, str]] = {
                               "filter vocabulary"),
     "N 93": ("BUILDABLE", "", "served by the shipped people-search tool's "
                               "filter vocabulary"),
-    "N 94": ("RULING", "", "NO term serves it -- the shaper's own rule says a "
-                           "row with no term is a row it cannot serve; a "
-                           "multi-value query is the keyword decision again"),
-    "N 95": ("ADDRESS", "ABSENT", "no search-history address is admitted and "
+    # N 94 LEFT 2026-09-24: lane S composes several locations into one
+    # search from the tool's arguments (COVERED-UNFIRED, a FILTER row).
+    "N 95":("ADDRESS", "ABSENT", "no search-history address is admitted and "
                                   "none is refused either; the row is also "
                                   "unrouted in the blocker map"),
     "N 99": ("RULING", "", "the school root is admitted and the alumni tab is "
@@ -214,9 +222,6 @@ TRIAGE: dict[str, tuple[str, str, str]] = {
     "N 161": ("RULING", "", "the groups vertical was deliberately left out of "
                             "the search admission, which names the "
                             "request-to-widen route instead"),
-    "N 171": ("RULING", "", "a passive COST of an act, not an act; whether a "
-                            "cost is a capability row is a census convention "
-                            "nobody has ruled"),
     "N 172": ("RULING", "", "needs another member's connection list, refused "
                             "by the boundary's sharpest cause in its own words"),
     "N 174": ("RULING", "", "the surface is unobservable until a pending "
@@ -228,9 +233,6 @@ TRIAGE: dict[str, tuple[str, str, str]] = {
                             "sharpest refusal"),
     "N 179": ("RULING", "", "the events vertical was deliberately left out of "
                             "the search admission"),
-    "N 183": ("RULING", "", "a SETTING, which the boundary's own comment says "
-                            "lives under preferences; whether the standing "
-                            "settings ruling reaches it is unruled"),
     "N 184": ("ADDRESS", "ABSENT", "the events family admits the root only -- "
                                    "one segment narrower than the groups "
                                    "family, which admits the id"),
@@ -242,6 +244,35 @@ TRIAGE: dict[str, tuple[str, str, str]] = {
                                    "exemption; and admin rights are unmeasured"),
     "N A5": ("ADDRESS", "REFUSED", "carries /invite, same double cost, same "
                                    "unmeasured precondition"),
+    # ---- RETURNED by lane R, 2026-09-23 (its own class; see VERDICTS) ----
+    "N 9": ("RETURNED", "", "returned by lane R 2026-09-23 from EXCLUDED-RULED; its blocker is named in its own cell and its address is measured in read-addresses.tsv"),
+    "N 11": ("RETURNED", "", "returned by lane R 2026-09-23 from EXCLUDED-RULED; its blocker is named in its own cell and its address is measured in read-addresses.tsv"),
+    "N 13": ("RETURNED", "", "returned by lane R 2026-09-23 from EXCLUDED-RULED; its blocker is named in its own cell and its address is measured in read-addresses.tsv"),
+    "N 14": ("RETURNED", "", "returned by lane R 2026-09-23 from EXCLUDED-RULED; its blocker is named in its own cell and its address is measured in read-addresses.tsv"),
+    "N 19": ("RETURNED", "", "returned by lane R 2026-09-23 from EXCLUDED-RULED; its blocker is named in its own cell and its address is measured in read-addresses.tsv"),
+    "N 22": ("RETURNED", "", "returned by lane R 2026-09-23 from EXCLUDED-RULED; its blocker is named in its own cell and its address is measured in read-addresses.tsv"),
+    "N 24": ("RETURNED", "", "returned by lane R 2026-09-23 from EXCLUDED-RULED; its blocker is named in its own cell and its address is measured in read-addresses.tsv"),
+    "N 25": ("RETURNED", "", "returned by lane R 2026-09-23 from EXCLUDED-RULED; its blocker is named in its own cell and its address is measured in read-addresses.tsv"),
+    "N 26": ("RETURNED", "", "returned by lane R 2026-09-23 from EXCLUDED-RULED; its blocker is named in its own cell and its address is measured in read-addresses.tsv"),
+    "N 27": ("RETURNED", "", "returned by lane R 2026-09-23 from EXCLUDED-RULED; its blocker is named in its own cell and its address is measured in read-addresses.tsv"),
+    "N 28": ("RETURNED", "", "returned by lane R 2026-09-23 from EXCLUDED-RULED; its blocker is named in its own cell and its address is measured in read-addresses.tsv"),
+    "N 32": ("RETURNED", "", "returned by lane R 2026-09-23 from EXCLUDED-RULED; its blocker is named in its own cell and its address is measured in read-addresses.tsv"),
+    "N 38": ("RETURNED", "", "returned by lane R 2026-09-23 from EXCLUDED-RULED; its blocker is named in its own cell and its address is measured in read-addresses.tsv"),
+    "N 39": ("RETURNED", "", "returned by lane R 2026-09-23 from EXCLUDED-RULED; its blocker is named in its own cell and its address is measured in read-addresses.tsv"),
+    "N 97": ("RETURNED", "", "returned by lane R 2026-09-23 from EXCLUDED-RULED; its blocker is named in its own cell and its address is measured in read-addresses.tsv"),
+    "N 143": ("RETURNED", "", "returned by lane R 2026-09-23 from EXCLUDED-RULED; its blocker is named in its own cell and its address is measured in read-addresses.tsv"),
+    "N 165": ("RETURNED", "", "returned by lane R 2026-09-23; a member roster, admitted as a bounded read by MEMBER-ROSTERS-AS-BOUNDED-READS -- needs an admission and a reader; blocker named in its cell"),
+    "N 188": ("RETURNED", "", "returned by lane R 2026-09-23; a member roster, admitted as a bounded read by MEMBER-ROSTERS-AS-BOUNDED-READS -- needs an admission and a reader; blocker named in its cell"),
+    "N 189": ("RETURNED", "", "returned by lane R 2026-09-23; a member roster, admitted as a bounded read by MEMBER-ROSTERS-AS-BOUNDED-READS -- needs an admission and a reader; blocker named in its cell"),
+    "P K1": ("RETURNED", "", "returned by lane R 2026-09-23 from EXCLUDED-RULED; its blocker is named in its own cell and its address is measured in read-addresses.tsv"),
+    "P M2": ("RETURNED", "", "returned by lane R 2026-09-23 from EXCLUDED-RULED; its blocker is named in its own cell and its address is measured in read-addresses.tsv"),
+    "P M4": ("RETURNED", "", "returned by lane R 2026-09-23 from EXCLUDED-RULED; its blocker is named in its own cell and its address is measured in read-addresses.tsv"),
+    "P M5": ("RETURNED", "", "returned by lane R 2026-09-23 from EXCLUDED-RULED; its blocker is named in its own cell and its address is measured in read-addresses.tsv"),
+    "P N9": ("RETURNED", "", "returned by lane R 2026-09-23 from EXCLUDED-RULED; its blocker is named in its own cell and its address is measured in read-addresses.tsv"),
+    "P N13": ("RETURNED", "", "returned by lane R 2026-09-23 from EXCLUDED-RULED; its blocker is named in its own cell and its address is measured in read-addresses.tsv"),
+    "P N22": ("RETURNED", "", "returned by lane R 2026-09-23 from EXCLUDED-RULED; its blocker is named in its own cell and its address is measured in read-addresses.tsv"),
+    "P O22": ("RETURNED", "", "returned by lane R 2026-09-23 from EXCLUDED-RULED; its blocker is named in its own cell and its address is measured in read-addresses.tsv"),
+    "P D26": ("RETURNED", "", "returned by lane R 2026-09-23 from EXCLUDED-RULED; its blocker is named in its own cell and its address is measured in read-addresses.tsv"),
 }
 
 #: LEFT GAP SINCE THE 2026-09-21 TRIAGE, measured 2026-09-23 with
@@ -256,6 +287,12 @@ TRIAGE: dict[str, tuple[str, str, str]] = {
 #: They were removed rather than kept because CONTROL 4 refuses a verdict for
 #: a row that is not a read-GAP row, and that refusal is the tripwire this
 #: file exists to carry.
+#:
+#: LEFT THE READ-GAP SET 2026-09-24, on rulings batch 3 (lane R at its merge):
+#:
+#:     N 171  EXCLUDED-RULED as NOT-AN-ACT  (was RULING) -- D5-PASSIVE-COST-IS-NOT-A-ROW
+#:     N 183  still GAP, direction W        (was RULING) -- the same ruling
+#:            names it a setting, so it is a write row admitted by name
 
 #: These four 2026-09-21 verdicts were measured past by the bucket-3 address
 #: table (`_audit/_census/read-addresses.tsv`, audit
@@ -285,15 +322,51 @@ MEASURED_PAST_BY_BUCKET3: dict[str, str] = {
 #: CONTROL 8 refuses an entry whose row does not carry RULING: a decision can
 #: only have been made for a row that was waiting on one.
 DECIDED_SINCE_TRIAGE: dict[str, str] = {
+    # N 79, N 172 AND N 194: THE TRIAGE-DAY DECISION WAS MADE, THE READER WAS
+    # BUILT (lane S, 2026-09-24), AND A DIFFERENT DECISION NOW HOLDS THE ROW.
+    # The WHO rule (the orchestrator's census call, 2026-09-24 03:20) returned
+    # each to GAP: its payload is WHO and the reader publishes counts. So the
+    # row carries RULING again, on the name-free shaper doctrine, pending the
+    # operator's question on returning names at runtime -- and the bucket-3
+    # table gates it RULING. N 94 LEFT the same day: a FILTER, COVERED-UNFIRED.
     "N 79": "D1-SEARCH-AS-READS: a keyword may be passed, from tool "
-            "arguments only; bucket-3 gate READER",
-    "N 94": "D1-SEARCH-AS-READS: a location facet may be passed, more than "
-            "one value included; bucket-3 gate READER",
+            "arguments only; built by lane S 2026-09-24, and now held by a "
+            "DIFFERENT question -- the name-free shaper doctrine under the "
+            "WHO rule, pending the operator; bucket-3 gate RULING",
     "N 172": "OTHER-MEMBER-IDS-AS-READS with D1-SEARCH-AS-READS: another "
-             "member's id in a search facet, from tool arguments only; "
-             "bucket-3 gate READER",
-    "N 194": "D1-SEARCH-AS-READS: the hashtag is a keyword; bucket-3 gate "
-             "READER",
+             "member's id in a search facet, from tool arguments only; built "
+             "by lane S 2026-09-24, and now held by a DIFFERENT question -- "
+             "the name-free shaper doctrine under the WHO rule, pending the "
+             "operator; bucket-3 gate RULING",
+    "N 194": "D1-SEARCH-AS-READS: the hashtag is a keyword; built by lane S "
+             "2026-09-24, and now held by a DIFFERENT question -- the "
+             "name-free shaper doctrine under the WHO rule, pending the "
+             "operator; bucket-3 gate RULING",
+    # ---- decided by the calls registered at master 9c219c8 and 001f70b,
+    # annotated by lane R at its merge (2026-09-24), ruling by ruling ----
+    "N 99": "D3-UNREGISTERED-REFUSAL-IS-NOT-A-RULING and "
+            "MEMBER-ROSTERS-AS-BOUNDED-READS: the alumni tab is a roster he "
+            "can open; GAP, blocked on an admission and a reader",
+    "N 100": "MEMBER-ROSTERS-AS-BOUNDED-READS: the same school People tab; "
+             "an admission and a reader",
+    "N 102": "MEMBER-ROSTERS-AS-BOUNDED-READS: a Page's People tab is a "
+             "roster he can open; an admission and a reader",
+    "N 104": "D2-SEARCH-VERTICALS-WIDENED: the companies vertical is "
+             "admitted in principle; it needs a reader",
+    "N 132": "D6-CAPABILITY-OVER-AFFORDANCE: a row named for an affordance "
+             "is discharged by the package's own sanctioned routes",
+    "N 161": "D2-SEARCH-VERTICALS-WIDENED: the groups vertical is admitted "
+             "in principle; it needs a reader",
+    "N 177": "D3-UNREGISTERED-REFUSAL-IS-NOT-A-RULING and "
+             "MEMBER-ROSTERS-AS-BOUNDED-READS: a group's member directory; "
+             "an admission and a reader",
+    "N 178": "D3-UNREGISTERED-REFUSAL-IS-NOT-A-RULING: GAP on an admission "
+             "and a reader; its live proof loads another member's profile, "
+             "so the operator names that member",
+    "N 179": "D2-SEARCH-VERTICALS-WIDENED: the events vertical is admitted "
+             "in principle; it needs a reader",
+    "P C8": "D4-NO-OWN-BROWSER-CONTEXT: the download transport is the "
+            "DevTools download behaviour on the attached browser",
 }
 
 
@@ -343,7 +416,8 @@ def main(argv: list[str] | None = None) -> int:
                                                     "bad-verdict",
                                                     "stale-census",
                                                     "stale-annotation",
-                                                    "undecided-annotation"],
+                                                    "undecided-annotation",
+                                                    "unmarked-returned"],
                     help="SHOW THIS INSTRUMENT FAILING on a planted defect")
     args = ap.parse_args(argv)
 
@@ -373,6 +447,15 @@ def main(argv: list[str] | None = None) -> int:
         decided[victim] = "planted: a decision for a row that awaited none"
         print(f"PLANTED: {victim} annotated as decided, and its verdict is "
               f"not RULING. Control 8 must refuse.\n")
+
+    returned_cells = _returned_cells(triage)
+    if args.plant == "unmarked-returned":
+        victim = next(k for k in sorted(triage) if triage[k][0] == "ADDRESS")
+        triage[victim] = ("RETURNED", "", "planted: a returned verdict on a "
+                                          "row whose cell has no marker")
+        returned_cells[victim] = ""
+        print(f"PLANTED: {victim} given RETURNED, and its cell carries no "
+              f"returned-row marker. Control 9 must refuse.\n")
 
     failures = 0
 
@@ -464,6 +547,21 @@ def main(argv: list[str] | None = None) -> int:
         print(f"      {len(decided)} decided since the triage, each a RULING "
               f"verdict -- OK")
 
+    print("\n  CONTROL 9 -- every RETURNED verdict's row names its blocker in "
+          "its own cell")
+    unmarked = sorted(k for k, v in triage.items() if v[0] == "RETURNED"
+                      and not RETURNED_MARKER.search(returned_cells.get(k, "")))
+    if unmarked:
+        failures += 1
+        for key in unmarked:
+            print(f"      {key} carries RETURNED and its cell has no "
+                  f"returned-row marker -- the class is read off the cell, "
+                  f"never typed onto a row")
+    else:
+        n_ret = sum(1 for v in triage.values() if v[0] == "RETURNED")
+        print(f"      {n_ret} RETURNED verdicts, every row's cell carries the "
+              f"marker -- OK")
+
     if failures:
         print(f"\n  REFUSING TO REPORT: {failures} control failure(s). A triage "
               f"that cannot be shown to cover every row should not print a "
@@ -514,6 +612,26 @@ def main(argv: list[str] | None = None) -> int:
           "reachable and the\n  row's recorded reason is stale; banking it "
           "needs a fire or a ruling, and this\n  script has neither.")
     return 0
+
+
+def _returned_cells(triage: dict) -> dict[str, str]:
+    """RETURNED key -> its census cell text, read with the shipped parser."""
+    want = {k for k, v in triage.items() if v[0] == "RETURNED"}
+    out: dict[str, str] = {}
+    for letter, name in ccs.SLICES.items():
+        if letter not in SCOPE:
+            continue
+        for line in (ccs.CENSUS / name).read_text(encoding="utf-8",
+                                                  errors="replace").splitlines():
+            if not line.startswith("|"):
+                continue
+            c = ccs.cells(line)
+            if len(c) < 3 or not ccs.ROW.match(line):
+                continue
+            key = f"{letter} {c[0]}"
+            if key in want:
+                out[key] = " | ".join(c)
+    return out
 
 
 def _sort_key(key: str) -> tuple[str, int, str]:

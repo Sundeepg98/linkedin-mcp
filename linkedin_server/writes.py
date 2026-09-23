@@ -8747,7 +8747,9 @@ async def _recipient_gate(page: Any, grant: WriteGrant) -> dict[str, Any]:
         out["refused_condition"] = "0_read_failed"
         out["why"] = (
             "the composer could not be read after the recipient was typed, so "
-            f"nothing is known about who is in it: {type(exc).__name__}: {exc}"
+            f"nothing is known about who is in it: {type(exc).__name__} (its "
+            "message is not repeated: a failed read can render the selector "
+            "that carries his needle)"
         )
         return out
 
