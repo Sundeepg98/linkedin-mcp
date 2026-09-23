@@ -352,11 +352,15 @@ DECIDED_SINCE_TRIAGE: dict[str, str] = {
     "N 102": "MEMBER-ROSTERS-AS-BOUNDED-READS: a Page's People tab is a "
              "roster he can open; an admission and a reader",
     "N 104": "D2-SEARCH-VERTICALS-WIDENED: the companies vertical is "
-             "admitted in principle; it needs a reader",
+             "admitted in principle, and on the boundary since lane S's "
+             "follow-up (2026-09-24, bucket-3 gate MEASURE); it needs a "
+             "capture and a reader",
     "N 132": "D6-CAPABILITY-OVER-AFFORDANCE: a row named for an affordance "
              "is discharged by the package's own sanctioned routes",
     "N 161": "D2-SEARCH-VERTICALS-WIDENED: the groups vertical is admitted "
-             "in principle; it needs a reader",
+             "in principle, and on the boundary since lane S's follow-up "
+             "(2026-09-24, bucket-3 gate MEASURE); it needs a capture and a "
+             "reader",
     "N 177": "D3-UNREGISTERED-REFUSAL-IS-NOT-A-RULING and "
              "MEMBER-ROSTERS-AS-BOUNDED-READS: a group's member directory; "
              "an admission and a reader",
@@ -364,7 +368,9 @@ DECIDED_SINCE_TRIAGE: dict[str, str] = {
              "and a reader; its live proof loads another member's profile, "
              "so the operator names that member",
     "N 179": "D2-SEARCH-VERTICALS-WIDENED: the events vertical is admitted "
-             "in principle; it needs a reader",
+             "in principle, and on the boundary since lane S's follow-up "
+             "(2026-09-24, bucket-3 gate MEASURE); it needs a capture and a "
+             "reader",
     "P C8": "D4-NO-OWN-BROWSER-CONTEXT: the download transport is the "
             "DevTools download behaviour on the attached browser",
 }

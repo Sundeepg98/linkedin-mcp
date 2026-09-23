@@ -107,10 +107,28 @@ EVENTS_DEEP_MUST_STAY_REFUSED = (
      f"{BASE}/events/discovery/"),
     ("the saved-events shelf, a different surface with its own blocker",
      f"{BASE}/my-items/saved-events/"),
-    ("the events SEARCH vertical, which is SEARCH-RESULTS-SURFACE's row N 179 "
-     "and not this blocker's to admit",
-     f"{BASE}/search/results/events/?keywords=x"),
+    # THE EVENTS SEARCH VERTICAL STOOD HERE UNTIL 2026-09-24 -- "which is
+    # SEARCH-RESULTS-SURFACE's row N 179 and not this blocker's to admit" --
+    # and it was admitted by exactly that route: D2-SEARCH-VERTICALS-WIDENED,
+    # on the SEARCH line. It moved to ADMITTED_BY_ANOTHER_LINE_SINCE below,
+    # which still pins what this table was for: no EVENTS line reaches it.
 )
+
+#: MOVED OUT OF THE REFUSED TABLE ABOVE ON 2026-09-24, NOT DELETED. Admitted
+#: by a line that is not in the events family; this file's business with it
+#: is that no events line carries it.
+ADMITTED_BY_ANOTHER_LINE_SINCE = (
+    f"{BASE}/search/results/events/?keywords=x",
+)
+
+
+@pytest.mark.parametrize("url", ADMITTED_BY_ANOTHER_LINE_SINCE)
+def test_what_another_line_admitted_since_is_not_an_events_line(url):
+    assert readonly.is_read_url(url) is True
+    carriers = [p for p in readonly._ALLOWED_URL_PATTERNS if p.match(url)]
+    assert len(carriers) == 1, [p.pattern for p in carriers]
+    assert carriers[0].pattern.startswith(
+        r"^https://www\.linkedin\.com/search/results/"), carriers[0].pattern
 
 
 #: ONE EVENT BY ITS NUMERIC ID, admitted 2026-09-23 (lane L1, REVIEW). Both

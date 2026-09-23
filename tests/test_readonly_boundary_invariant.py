@@ -1221,6 +1221,27 @@ PINNED = (
 #: The pattern-exemption digest is 76d7b10899530d69 with the follower list
 #: and 419e64a3cd92ec7e without it. Computed with this file's `ast_digest`.
 #: ------------------------------------------------------------------------
+#: RE-FROZEN AGAIN 2026-09-24 (lane S follow-up), ONE DIGEST MOVED BY ONE
+#: EDITED TUPLE ENTRY -- THE SEARCH ADMISSION WIDENED TO FOUR CLOSED WORDS on
+#: `D2-SEARCH-VERTICALS-WIDENED`:
+#:
+#:     _ALLOWED_URL_PATTERNS   c37e98f84ee443f2 -> d7b3315318c877d0   49 -> 49
+#:     every other table       unchanged
+#:
+#:     ^https://www\.linkedin\.com/search/results/people/?(\?[^#]*)?$
+#:  -> ^https://www\.linkedin\.com/search/results/(people|companies|groups|events)/?(\?[^#]*)?$
+#:
+#: The count does not move because a line CHANGED rather than arrived. Its
+#: blast radius was measured before the change by
+#: `scripts/_probe_search_admission_blast_radius.py` (S2: exactly three newly
+#: admitted, the companies, groups and events keyword spellings) and is pinned
+#: in `tests/test_search_admission_blast_radius.py` and
+#: `tests/test_d2_search_verticals.py`. ATTRIBUTION: the tree with exactly
+#: this one line put back to its people-only spelling hashes to
+#: c37e98f84ee443f2 on the allowlist key and to the prior pin on all eight,
+#: so nothing else rode in. Seven of eight digests byte-identical;
+#: `<functions>` unmoved, so `assert_read_url` did not change.
+#: ------------------------------------------------------------------------
 READONLY_AST_AT_LAST_REFREEZE = {
     "<functions>": "d7e1d0922e3af446",
     "JS_MUTATION_TOKENS": "d47e30b67c583c1b",
@@ -1367,7 +1388,11 @@ READONLY_AST_AT_LAST_REFREEZE = {
     # c8c476ea47f0dfdd until the second REVIEW: commit of 2026-09-23 (lane
     # L1): one event by its numeric id. See that ledger entry, which also
     # lists the value for every combination of the two REVIEW commits.
-    "_ALLOWED_URL_PATTERNS": "c37e98f84ee443f2",
+    #
+    # c37e98f84ee443f2 until 2026-09-24 (lane S follow-up): the people-only
+    # search line widened to four closed words on D2-SEARCH-VERTICALS-WIDENED.
+    # One entry edited, none added. See that ledger entry.
+    "_ALLOWED_URL_PATTERNS": "d7b3315318c877d0",
     "_FORBIDDEN_SUBSTRING_EXEMPTIONS": "43e2bf7f3db0dbed",
     # 419e64a3cd92ec7e until the same REVIEW: commit: a third entry, excusing
     # exactly {"/follow"} for exactly the anchored follower-list address.

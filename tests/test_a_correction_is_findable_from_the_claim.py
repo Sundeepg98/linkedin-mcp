@@ -241,6 +241,19 @@ NOT_A_CORRECTION: dict[tuple[str, str], str] = {
         "WOULD MAKE THIS ENTRY WRONG:** a network row asserting the doctrine "
         "withdrawn or mistaken while leaving the document unmarked."
     ),
+    # 2026-09-24, lane S follow-up. `M C70` NOW CITES THE LANE'S RECORD for a
+    # capture spec -- read, not inferred from the filenames.
+    ("messaging-and-content.md", "2026-09-24-lane-s-people-search.md"): (
+        "ADJACENCY, NOT A CORRECTION. Row C70 cites the lane's record for the "
+        "capture spec that measures where LinkedIn searches inside a group. "
+        "The matched vocabulary is the row's OWN 2026-09-21 paragraph -- "
+        "*'TWO CORRECTIONS 2026-09-21'*, *'A PLAUSIBLE WRONG ANSWER'* -- about "
+        "a line-number citation into readonly.py that had rotted, earlier in "
+        "the same cell. The row withdraws nothing the record says. **WHAT "
+        "WOULD MAKE THIS ENTRY WRONG:** a messaging-and-content row asserting "
+        "the record wrong about that row while leaving the record unmarked, "
+        "which would need its own CORRECTS: / CORRECTED BY: pair."
+    ),
 
     # 2026-09-21, the FOUR-LOOSE-ROWS wave. THREE OF THESE FOUR ARE ROWS OF
     # ONE CHRONOLOGY TABLE, and the reason is one reason told three times

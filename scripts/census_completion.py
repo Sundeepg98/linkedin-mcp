@@ -988,8 +988,16 @@ PINNED = {
     #: four FILTER rows lane S built (`N 84`, `N 85`, `N 87`, `N 94`) left
     #: bucket 3 for COVERED-UNFIRED, all four ADMITTED; the boundary did not
     #: move.
-    "b3_admitted": 40,
-    "b3_refused": 38,
+    #: 43 / 35 / 1 / 13 / 2 SINCE LANE S'S FOLLOW-UP, ITEM 1 (2026-09-24): THE
+    #: BOUNDARY MOVED. `D2-SEARCH-VERTICALS-WIDENED` widened the search line
+    #: to four closed words, and the three rows whose recorded page is one of
+    #: the new words -- `N 104` (companies), `N 161` (groups), `N 179` (events)
+    #: -- went REFUSED -> ADMITTED, each gated MEASURE (no capture exists).
+    #: No row entered or left bucket 3 and no state moved; `M C70` stays
+    #: REFUSED on its content-vertical address, its groups spelling now an
+    #: admitted also-driven line.
+    "b3_admitted": 43,
+    "b3_refused": 35,
     "b3_no_address": 1,
     "b3_needs_session": 13,
     "b3_undetermined": 2,

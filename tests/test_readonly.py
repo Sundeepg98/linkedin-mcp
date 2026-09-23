@@ -1368,6 +1368,14 @@ ALLOWED = [
     "https://www.linkedin.com/groups/12345678",
     "https://www.linkedin.com/groups/discover/",
     "https://www.linkedin.com/groups/discover",
+    # THE GROUPS AND EVENTS SEARCH VERTICALS, 2026-09-24, on
+    # `D2-SEARCH-VERTICALS-WIDENED`. INVERTED FROM TWO LINES THAT STOOD IN
+    # BLOCKED UNTIL THIS COMMIT, spelled exactly as they were there, so the
+    # diff states what flipped. Admitted by the SEARCH line's closed
+    # alternation, not by either root above -- and nothing in the package
+    # opens them yet (`tests/test_d2_search_verticals.py`).
+    "https://www.linkedin.com/search/results/groups/?keywords=engineering",
+    "https://www.linkedin.com/search/results/events/?keywords=hiring",
 ]
 
 BLOCKED = [
@@ -1532,7 +1540,9 @@ BLOCKED = [
     "https://www.linkedin.com/groups/example-group/",
     "https://www.linkedin.com/groups/12345678-placeholder/",
     "https://www.linkedin.com/mynetwork/groups/",
-    "https://www.linkedin.com/search/results/groups/?keywords=engineering",
+    # ``/search/results/groups/?keywords=engineering`` STOOD HERE UNTIL
+    # 2026-09-24 and is now in ALLOWED, inverted: D2-SEARCH-VERTICALS-WIDENED
+    # admitted the groups search vertical on the search line.
     # A QUERY STRING ON EITHER ROOT. Neither pattern takes one -- nothing
     # builds one, so nothing needs preserving, and a pattern that accepts a
     # query is a pattern that accepts whatever a caller appends.
@@ -1557,7 +1567,8 @@ BLOCKED = [
     "https://www.linkedin.com/events/12345678901234567890/about/",
     "https://www.linkedin.com/events/12345678901234567890/comments/",
     "https://www.linkedin.com/mynetwork/network-manager/events/",
-    "https://www.linkedin.com/search/results/events/?keywords=hiring",
+    # ``/search/results/events/?keywords=hiring`` STOOD HERE UNTIL 2026-09-24
+    # and is now in ALLOWED, inverted, on D2-SEARCH-VERTICALS-WIDENED.
 ]
 
 
@@ -2239,11 +2250,16 @@ MUST_STAY_UNREADABLE = (
     # `M C70`), events (`N 179`), content (`N 194`). The ruling's reopening
     # clause gives them a route -- a request to widen, with its own blast
     # radius -- and riding in on this entry is not it.
+    #
+    # THREE OF THEM TOOK THAT ROUTE ON 2026-09-24 AND LEFT THIS TABLE, recorded
+    # rather than silently dropped: `/search/results/companies/`,
+    # `/search/results/groups/` and `/search/results/events/` (each with
+    # `?keywords=x`) were admitted by D2-SEARCH-VERTICALS-WIDENED, a request to
+    # widen with its own blast radius -- measured before the line changed, S2
+    # newly admitting exactly those three -- which is the route this comment
+    # named. The three below stay: D2 chose four words, not seven.
     "https://www.linkedin.com/search/results/all/?keywords=x",
-    "https://www.linkedin.com/search/results/companies/?keywords=x",
-    "https://www.linkedin.com/search/results/groups/?keywords=x",
     "https://www.linkedin.com/search/results/schools/?keywords=x",
-    "https://www.linkedin.com/search/results/events/?keywords=x",
     "https://www.linkedin.com/search/results/content/?keywords=%23hiring",
     # THE FAMILY ROOTS, which are what a prefix pattern would have opened.
     "https://www.linkedin.com/search/",

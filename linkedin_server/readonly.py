@@ -748,6 +748,11 @@ _ALLOWED_URL_PATTERNS: tuple[re.Pattern[str], ...] = (
     #                              queued DECIDE and is not this entry's to
     #                              inherit
     #
+    # AMENDED 2026-09-24, COMMENT ONLY: ``/search/results/groups/`` IS NOW
+    # ADMITTED -- by the search entry, on `D2-SEARCH-VERTICALS-WIDENED`, and
+    # not by this one. The list above says what THIS root does not inherit,
+    # and that is unchanged.
+    #
     # ``/groups/<id>/invite/`` IS REFUSED TWICE AND THAT IS WORTH KNOWING
     # RATHER THAN DISCOVERING. It contains ``/invite``, which is on
     # :data:`_FORBIDDEN_URL_SUBSTRINGS` and checked BEFORE this list, AND it
@@ -933,6 +938,10 @@ _ALLOWED_URL_PATTERNS: tuple[re.Pattern[str], ...] = (
     #                              member roster, and out of scope by the same
     #                              ruling that put N 165 out of scope.
     #     /search/results/events/  SEARCH-RESULTS-SURFACE again
+    #
+    # AMENDED 2026-09-24, COMMENT ONLY: ``/search/results/events/`` IS NOW
+    # ADMITTED -- by the search entry, on `D2-SEARCH-VERTICALS-WIDENED`, and
+    # not by this one. What THIS root does not inherit is unchanged.
     re.compile(r"^https://www\.linkedin\.com/events/?$"),
     # THE INTRO EDITOR ON HIS OWN PROFILE. Added 2026-08-31 on the operator's
     # ruling: the profile editors are his own profile, no third party, and
@@ -1920,7 +1929,54 @@ _ALLOWED_URL_PATTERNS: tuple[re.Pattern[str], ...] = (
     # THE ROLLBACK IS THIS LINE. `tests/test_search_admission_blast_radius.py`
     # pins both directions and its `MUST_STAY_REFUSED` set -- which includes
     # every sibling vertical -- must stay green with this entry present.
-    re.compile(r"^https://www\.linkedin\.com/search/results/people/?(\?[^#]*)?$"),
+    #
+    # WIDENED 2026-09-24 TO FOUR CLOSED SEGMENTS, on `D2-SEARCH-VERTICALS-
+    # WIDENED` (the orchestrator's delegated call, `_audit/2026-09-24-rulings-
+    # search-verticals-rosters-passive-costs.md`). "WHY PEOPLE ONLY" above
+    # sends groups and events along a named route -- a request to widen, with
+    # its own blast radius -- and this is that route. `companies` rides in
+    # because `N 104` needs it, which answers the one reason the 2026-09-19
+    # preconditions preferred dropping it. The spelling is that measurement's
+    # S2: a closed alternation of four literal words, never a `/search/`
+    # prefix, which is what `SEARCH-CONDITION-2-CLOSED` demands.
+    #
+    # THE BLAST RADIUS, MEASURED BEFORE THIS LINE CHANGED, by
+    # `scripts/_probe_search_admission_blast_radius.py` over its 90-address
+    # corpus against the 49 patterns then on disk: S2 newly admits exactly
+    # THREE addresses -- the companies, groups and events keyword spellings --
+    # and no traversal, no `all` tab and no other vertical. The two wildcards
+    # it carries as counterfactuals newly admit 13 each, the account-ending
+    # traversal among them. The closed alternation still cannot be followed
+    # by `..`, so every traversal spelling above stays refused from all four
+    # words; `tests/test_d2_search_verticals.py` drives each.
+    #
+    # `MUST_STAY_REFUSED` NO LONGER LISTS THE THREE, on
+    # `MUST-STAY-REFUSED-ENTRIES-COME-OUT`: those entries assumed S1 and the
+    # ruling said they come out. The account-ending and third-party families
+    # stay in it, and the content, schools and jobs verticals move to a block
+    # marked with the choice they assume. The rollback is still this line:
+    # its people-only spelling, with that file's inverted assertions put back.
+    #
+    # CONDITION 1 FOR THE THREE NEW WORDS, stated rather than assumed. THE
+    # NAME-FREE SHAPER IS THE SHIPPED ONE: `search_results.read_results` and
+    # `read_filters` build what they return out of integer accumulators
+    # whatever page they meet, so a companies, groups or events results page
+    # can put no string into them -- the 2026-09-20 argument, "a shaper that
+    # is completely wrong about this page still cannot emit a name", proven on
+    # hostile payloads by `tests/test_the_search_shaper_emits_no_name.py`.
+    # WHAT DOES NOT EXIST IS A TOOL FOR THE THREE. The ruling says "each then
+    # needs a reader", and readers here are built against captures only, which
+    # this admission is the precondition for: every capture goes through
+    # `BROWSER.goto`, which calls `assert_read_url`. So no package code opens
+    # them today. `search_verticals.compose` builds their addresses from a
+    # tool's arguments and nothing in the package imports it
+    # (`tests/test_every_orphan_module_is_ruled.py` holds it unwired, with
+    # this condition as the reason), and `tests/test_d2_search_verticals.py`
+    # pins that the one search tool composes the people vertical only. THE
+    # FIRST TOOL THAT OPENS ONE OF THE THREE LANDS WITH ITS NAME-FREE READER
+    # IN THE SAME COMMIT -- condition 1's own words, applied to the first read
+    # rather than to the address.
+    re.compile(r"^https://www\.linkedin\.com/search/results/(people|companies|groups|events)/?(\?[^#]*)?$"),
     # ======================================================================
     # FIVE SELF-SCOPED READ PAGES, admitted 2026-09-23 by lane L1 (refused
     # reads). Full per-row record: `_audit/2026-09-23-lane-l1-refused-reads.md`.

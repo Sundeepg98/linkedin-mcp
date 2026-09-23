@@ -56,12 +56,29 @@ NEIGHBOURS = (
     (f"{B}/events/{ID}/../../in/someone-else/",
      "a TRAVERSAL onto a member profile"),
     (f"{B}/events/past/", "a sub-path under the root, not an id"),
-    (f"{B}/search/results/events/?keywords=x", "the search vertical -- N 179"),
+)
+
+#: MOVED OUT OF ``NEIGHBOURS`` ON 2026-09-24, NOT DELETED. The events search
+#: vertical (``N 179``) was admitted by ``D2-SEARCH-VERTICALS-WIDENED`` -- on
+#: the SEARCH line, with its own blast radius, and not on this one. What this
+#: file still asserts about it is the part that was always its business: THIS
+#: line does not reach it.
+ADMITTED_BY_ANOTHER_LINE_SINCE = (
+    (f"{B}/search/results/events/?keywords=x",
+     "the search vertical -- N 179, admitted by the search line on D2"),
 )
 
 
 def _carriers():
     return [p for p in readonly._ALLOWED_URL_PATTERNS if CARRIER in p.pattern]
+
+
+def test_what_another_line_admitted_since_is_not_this_lines_doing():
+    carriers = _carriers()
+    assert len(carriers) == 1
+    for url, why in ADMITTED_BY_ANOTHER_LINE_SINCE:
+        assert readonly.is_read_url(url), why
+        assert not carriers[0].match(url), why
 
 
 def test_one_event_by_numeric_id_is_admitted_in_both_spellings():

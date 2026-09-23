@@ -674,3 +674,210 @@ would prove the reader and bank nothing: under the WHO rule a count does not
 deliver those rows. They move when the operator answers the question on
 returning names at runtime -- and the reader they would then need is not the
 one this lane built.
+
+## Follow-up 2026-09-24
+
+The orchestrator's follow-up order (04:28) gave this lane four items after
+its merge: D2's search verticals, the member rosters, the WHO rule extended to
+WHICH, and the pins. Offline throughout: no browser, no LinkedIn page, no
+Chrome profile. One commit per item, each carrying its own census moves, and
+this section grows with each commit so the record on disk is never behind the
+tree.
+
+### A. Step 0
+
+`HEAD` was `3cee266`, contained in `master` `ff98a7f`; `git merge --ff-only
+ff98a7f` fast-forwarded cleanly and the tree was clean. Every measurement
+below is taken on that base plus this lane's own commits.
+
+### B. Item 1 -- the search line widened to four closed words
+
+**THE LINE.** `readonly._ALLOWED_URL_PATTERNS`'s people-search entry changed
+from `^https://www\.linkedin\.com/search/results/people/?(\?[^#]*)?$` to
+`^https://www\.linkedin\.com/search/results/(people|companies|groups|events)/?(\?[^#]*)?$`
+-- one entry EDITED, none added, so the pattern count stays 49. It is the S2
+spelling `_audit/2026-09-19-search-admission-preconditions.md` measured, a
+closed alternation of four literal words and never a `/search/` prefix
+(`SEARCH-CONDITION-2-CLOSED`). The groups-root and events-root comments that
+listed their search verticals as "not this entry's to inherit" carry a dated
+comment-only amendment: admitted now, by the search line, not by them.
+
+**THE BLAST RADIUS, TAKEN BEFORE THE LINE CHANGED** with
+`scripts/_probe_search_admission_blast_radius.py` over its 90-address corpus
+against the 49 patterns on disk at `ff98a7f`:
+
+    S2   four verticals (this line)          newly admits  3
+         companies, groups, events -- each ?keywords=x, nothing else
+    S2b  three verticals (not taken)         newly admits  2
+    W1   /search/.*$ anchored (counterfactual)  newly admits 13
+    W2   /search/ prefix (counterfactual)       newly admits 13
+         both including the account-ending traversal
+
+**THE PROBE ITSELF EXITED 1 AT `ff98a7f`, before any edit of mine.** Its
+narrow-candidate control required S1 to newly admit something, and a
+candidate already on disk newly admits nothing by construction -- so from
+the day S1 landed (2026-09-20) the probe convicted the admission it had
+measured. The control now asks the question it exists for, of the candidate
+D2 took: every address its four words are for is admitted with it installed,
+newly or already. Before the line changed that reads 3 newly and 1 already;
+after, 0 and 4. All four controls pass after the change, exit 0.
+
+**THE DIGEST.** `_ALLOWED_URL_PATTERNS` `c37e98f84ee443f2 ->
+d7b3315318c877d0`, seven of eight digests byte-identical, `<functions>`
+unmoved. Attribution: the tree with exactly that one line put back to its
+people-only spelling hashes to the prior pin on all eight keys. Recorded in
+the ledger in `tests/test_readonly_boundary_invariant.py`.
+
+**`MUST_STAY_REFUSED`, ON `MUST-STAY-REFUSED-ENTRIES-COME-OUT`.** In
+`tests/test_search_admission_blast_radius.py` the three vertical entries left
+the durable set for `ADMITTED_BY_THE_D2_WIDENING`, under their old names and
+asserted the other way; `content`, `schools` and `jobs` moved to
+`REFUSED_UNDER_THE_D2_CHOICE`, marked with the choice they assume; the
+account-ending and third-party families stayed, and the durable set gained
+the account-ending traversal from each of the four words. The count test was
+rewritten to pin FOUR over a closed list of twelve vertical words, and a
+planted `/search/` prefix is shown turning it and the traversals red.
+
+**THE ORDER'S THREE TESTS**, in `tests/test_d2_search_verticals.py` (101):
+every admitted spelling of every word (with and without the slash and a
+query) and every address the composer builds over a nine-keyword corpus;
+the account-ending traversal and six siblings refused from all four words; 15
+planted prefix spellings refused (`companiesx`, `groupsearch`, `events2`, a
+changed case, a deep path under a word, a doubled slash), with the control
+that a `/search/results/` prefix admits all fifteen. Plus exactly one pattern
+admitting each word.
+
+**THE COMPOSER.** `linkedin_server/search_verticals.py::compose(vertical, *,
+keywords)` builds the companies, groups or events search from a tool's
+arguments only, the way `people_search.compose` builds a people search: the
+keyword is validated by `people_search.validated_keywords` -- split out of
+`people_search.compose` unchanged, so the rules cannot drift, and lane S's
+109 tests stayed green across the split -- sent under `keywords`,
+`urlencode`d, no `origin`. It takes no facet (none of these verticals'
+facets is on record in any capture) and REQUIRES a keyword (every row it
+serves is a search by keyword; the bare vertical page is uncaptured). Pure,
+no page, no loop, and a rejected value is described, never quoted.
+
+**CONDITION 1, AND A DEVIATION FROM ITS LETTER THAT THE ORCHESTRATOR SHOULD
+SEE.** The search admission's condition 1 reads *"ADMISSION AND A NAME-FREE
+SHAPER LAND IN THE SAME COMMIT, OR NEITHER LANDS"*. D2 says of its rows "each
+then needs a reader", and this order says readers are built against captures
+only -- and a capture needs the admission, because every capture goes through
+`BROWSER.goto`, which calls `assert_read_url`. So the address landed without
+a reader for the three new words, and what condition 1 protects is held
+instead by the absence of any route: nothing in the package imports
+`search_verticals` (`tests/test_every_orphan_module_is_ruled.py` holds it
+unwired with this as its reason), and the one search tool composes the
+people vertical only (pinned in `tests/test_d2_search_verticals.py`). The
+shaper itself exists and is the shipped one -- `search_results.read_results`
+and `read_filters` return integers whatever page they meet. **The first tool
+that opens one of the three words must land with its name-free reader in the
+same commit.** If the orchestrator reads condition 1 as binding the ADDRESS
+rather than the first read, the rollback is the one line, and every test above
+knows how to go back.
+
+**THE OTHER TESTS THE WIDENING MOVED**, each rewritten with the address it
+stopped refusing recorded, none deleted: `test_readonly.py` (two BLOCKED
+entries inverted into ALLOWED; three `MUST_STAY_UNREADABLE` entries recorded
+out), `test_the_search_results_address_is_refused_before_admission.py`
+(inverted a second time; the measured candidate is now READ OFF the probe by
+name and must equal the shipped line), `test_the_events_boundary_is_root_only.py`,
+`test_the_groups_id_segment_is_closed.py` and `test_l1_event_by_id_admission.py`
+(the search vertical moved to an ADMITTED-BY-ANOTHER-LINE group asserting no
+events or groups line carries it), and `test_analytics_creator_boundary.py`,
+`test_premium_four_boundary.py`, `test_search_appearances.py` (a companies
+canary replaced by the content vertical, still refused).
+
+**THE CENSUS.** In `_audit/_census/read-addresses.tsv`, `N 104`, `N 161` and
+`N 179` went REFUSED -> ADMITTED, gate MEASURE, source
+`linkedin_server/search_verticals.py::compose`, each prior note kept; `M C70`
+stays REFUSED on its content-vertical address, its groups spelling now an
+admitted also-driven line. Each of the four cells carries a dated paragraph;
+no STATE moved. `census_completion` pins `b3_admitted 40 -> 43`,
+`b3_refused 38 -> 35`, re-pinned in the same commit with the reason. The
+triage's three D2 annotations now say the address is on the boundary.
+
+### F. Capture specs for live session 2
+
+Every capture below is ONE page load through `BROWSER.goto` (which asserts
+the address admitted), with `page.content()` written to a gitignored
+`_state/` file and never committed. Nothing is typed, pressed, scrolled or
+submitted, and the live session's standing brackets apply (the control page
+before and after, the anomaly rule). Every address is composed by this
+package's composers from values supplied at fire time; no value below
+identifies the operator, and none is written into a tracked file. What is
+read out of each capture afterwards is offline, by SHAPE and COUNT: never a
+name, a slug, a title or a query value.
+
+**THE SEARCH CAP BINDS THE WHOLE SESSION.** `D1-SEARCH-AS-READS`, carried to
+every vertical by D2, allows five test searches per live session. The lane S
+live queue above already holds four people searches, and F.1-F.3 are three
+more, so the session budget is set in section E.
+
+#### F.1 `N 104` -- the companies search
+
+* **Page.** `search_verticals.compose("companies", keywords="robotics")` ->
+  `https://www.linkedin.com/search/results/companies/?keywords=robotics`. A
+  generic industry word, naming no employer of his; for the row's own proof a
+  later fire would search an organisation's NAME, which is what the row does.
+* **State.** Signed in; the control page served; nothing pressed.
+* **Why the load changes nothing.** A results page lists organisations and is
+  READ: reading it follows, messages and invites nobody -- condition 5 of the
+  search admission. No member profile is loaded, so nobody is left a
+  who-viewed record. The one trace is self-only: LinkedIn may add the keyword
+  to his own recent searches, which is the cost the five-search cap prices.
+* **What to read off it.** Landed on the companies vertical by closed-segment
+  equality; the number of result cards; **whether each card carries a
+  NUMERIC organisation id** (a `/company/<digits>/` href or a digit-bearing
+  entity urn) or slugs only, counted by shape; the results-count element;
+  whether a pagination control is drawn (never pressed); and the shipped
+  `search_results.read_results` / `read_filters` run over the capture offline.
+* **What it decides.** Whether a reader can return
+  `company_page.company_page_url(<digits>)` per result (section D gives the
+  row's verdict on that).
+* **Cost.** 1 load, 1 of the session's 5 searches.
+
+#### F.2 `N 161` -- the groups search
+
+* **Page.** `search_verticals.compose("groups", keywords="open source")` ->
+  `https://www.linkedin.com/search/results/groups/?keywords=open+source`.
+* **State.** As F.1.
+* **Why the load changes nothing.** As F.1. A results page may draw a join
+  control per group; joining is a write with its own row, and nothing is
+  pressed.
+* **What to read off it.** Landed vertical; result cards; group ids by shape
+  (`/groups/<digits>/`, the form `groups.py` counts); the results count;
+  whether join controls and pagination are drawn (counted, never pressed).
+* **Cost.** 1 load, 1 search.
+
+#### F.3 `N 179` -- the events search
+
+* **Page.** `search_verticals.compose("events", keywords="developer
+  conference")` -> `https://www.linkedin.com/search/results/events/?keywords=developer+conference`.
+* **State.** As F.1.
+* **Why the load changes nothing.** As F.1. An event card may draw an attend
+  or register control; attending is `N 185`'s write, and nothing is pressed.
+* **What to read off it.** Landed vertical; result cards; event ids by shape,
+  and whether the SLUG form (the event's title run into its id) is what the
+  cards link, which the boundary does not admit; the results count; attend
+  controls and pagination drawn (counted, never pressed).
+* **Cost.** 1 load, 1 search.
+
+#### F.4 `M C70` -- where LinkedIn searches inside a group
+
+* **Page.** `/groups/<id>/` (admitted since 2026-09-19), `<id>` a group he
+  belongs to, supplied at fire time -- the numeric ids
+  `linkedin_group_memberships` returns are the source, passed as an argument
+  and not read off a page by any code.
+* **State.** As F.1. NO search is fired: this load finds the address, it
+  does not use it.
+* **Why the load changes nothing.** A group he belongs to, opened by its
+  numeric id, is the load `linkedin_group_page` made three times on
+  2026-09-21 (`N 175`); an entity page leaves nobody a view record.
+* **What to read off it.** The search control the page draws: its form
+  action or href by SHAPE -- which vertical (`content`?), which parameter
+  names carry the group -- never a value. If it is the content vertical with
+  a group facet, the row needs a ruling to widen the search line to
+  `content`, which D2 did not make; if it is its own address, that address
+  needs its own admission.
+* **Cost.** 1 load, 0 searches.

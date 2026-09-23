@@ -85,6 +85,13 @@ ADMITTED = (
     f"{BASE}/groups/discover/",
 )
 
+#: MOVED OUT OF ``MUST_STAY_REFUSED`` ON 2026-09-24, NOT DELETED. Admitted by
+#: a line outside the groups family; this file's business with it is that
+#: neither groups line carries it.
+ADMITTED_BY_ANOTHER_LINE_SINCE = {
+    "search-groups": f"{BASE}/search/results/groups/?keywords=x",
+}
+
 #: THE DURABLE HALF. Every one of these was refused before the admission and
 #: must be refused after it. Slugs use SANCTIONED SYNTHETIC TOKENS -- these are
 #: invented strings, and no group anybody belongs to is named here.
@@ -117,7 +124,12 @@ MUST_STAY_REFUSED = {
     "invite": f"{BASE}/groups/{ID}/invite/",
     # Group search belongs to SEARCH-RESULTS-SURFACE and is not this
     # admission's to inherit.
-    "search-groups": f"{BASE}/search/results/groups/?keywords=x",
+    #
+    # ``search-groups`` (``/search/results/groups/?keywords=x``) STOOD HERE
+    # UNTIL 2026-09-24 and was admitted by exactly that route -- on the SEARCH
+    # line, by D2-SEARCH-VERTICALS-WIDENED, not by either groups line. It
+    # moved to ADMITTED_BY_ANOTHER_LINE_SINCE below, which pins that neither
+    # groups line reaches it.
     "mynetwork-groups": f"{BASE}/mynetwork/groups/",
     # ----------------------------------------------------------- the query
     # Neither pattern takes one. Nothing builds a query on these addresses, so
@@ -224,6 +236,16 @@ def test_the_addresses_the_ruling_bought(url: str) -> None:
     admitting anything. These four are the same predicate answering True.
     """
     assert readonly.is_read_url(url) is True
+
+
+@pytest.mark.parametrize("name", sorted(ADMITTED_BY_ANOTHER_LINE_SINCE))
+def test_what_another_line_admitted_since_is_not_a_groups_line(name: str) -> None:
+    url = ADMITTED_BY_ANOTHER_LINE_SINCE[name]
+    assert readonly.is_read_url(url) is True
+    carriers = [p for p in readonly._ALLOWED_URL_PATTERNS if p.match(url)]
+    assert len(carriers) == 1, [p.pattern for p in carriers]
+    assert carriers[0].pattern.startswith(
+        r"^https://www\.linkedin\.com/search/results/"), carriers[0].pattern
 
 
 @pytest.mark.parametrize("segment", sorted(SEGMENTS))
