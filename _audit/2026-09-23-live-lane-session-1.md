@@ -520,3 +520,76 @@ tree before it ran.
 comparison (`total == len(...) == N`), with a paragraph warning that it goes
 stale on every widening; it went red on the first new entry and was bumped
 with each, as that paragraph predicts.
+
+### Entry 7 -- 23:08:46-23:09:25, the view switch and the reveal, fired: 2 loads, 8 presses
+
+`--only pv_switch,pv_verify`, ledger 19 -> 21, both pages walled False with
+0 challenge terms. `pv_switch` is the shipped
+`linkedin_who_viewed_me(limit=10, view_switch="interesting_viewers_verified",
+show_more_analytics=True)`; `pv_verify` is the same tool plainly, a fresh
+load, straight after.
+
+    view_switch   permitted True   restored True   left_applied False
+                  applied_view_differs True   closed after apply True, after restore True
+                  path_unchanged True   counters held: headline_viewers, invitations,
+                  notifications_unread (read at both ends; structural basis)
+                  viewers_when_applied 6 rows (the same fields as the unfiltered rows)
+                  headline_when_applied 6
+    reveal        permitted True   url_unchanged True   counters held (the same three)
+                  main elements 822 -> 912; reading: 49 new lines, 82 new elements,
+                  "show more analytics" GONE, nothing else appeared or went
+                  witness: nothing it counts moved (an inline expansion, not a
+                  dialog or menu -- a MISS for that set, by its own wording)
+    pv_verify     rows 10 and the headline: THE SAME as the switch run's own load
+
+**`N 134` -- PROVEN.** The row asks to see notable or interesting viewers.
+The tool applied the "Interesting viewers" pill's "verified" option, returned
+the 6 viewers it left, and took the filter off. **The fields whose meaning
+was checked:** the headline under the filter (6) equals the number of rows it
+left (6); the filter changed the view; the view read after the restore EQUALS
+the view read before (the module's `restored`, which also requires the pill
+closed and the path unmoved); no counter moved; and a fresh load straight
+after agreed with the load before the switch, so the restore held on
+LinkedIn's side as well as in the tab. Presses: open, select, apply, reopen,
+deselect, apply -- 6.
+
+**`P O3` -- HALF PROVEN, STATE UNCHANGED, AND NOW A READER AWAY.** The
+filters half is shown by the same switch. The insights half: the decided
+"Show more analytics" press was PERMITTED -- url and three counters
+unchanged -- and it drew two new sections, "Highlights" (7 lines, no numbers,
+1 chart) and "Details" (7 lines, 5 of them percentages, 2 charts), read
+offline from the capture by headings and line counts only. **Nothing in the
+package turns those two sections into data yet**, so the row is not banked on
+them. Its gate in `read-addresses.tsv` moves PRESS -> READER: a reader is all
+that is left, built offline from `_state/live1/pv_switch.html`, owing a shape
+and a redaction rule for rare values (the sections describe other people in
+aggregate). Presses: the reveal, 1 (plus the switch's 6 shared with `N 134`).
+
+**A FINDING FOR ANOTHER ROW, NOT ACTED ON.** `N 136` ("See top locations,
+industries and companies of your viewers (Premium)") is MEASURED-ABSENT on
+the finding that no such panel is drawn. The "Details" section behind "Show
+more analytics" -- percentages about his viewers -- may be exactly that panel,
+unseen because nothing could press the button until today. `N 136` is not in
+this lane's queue and its cell is left alone; it is flagged for the
+orchestrator.
+
+**THE CENSUS:** `network.md` `134` GAP -> COVERED-PROVEN with the evidence
+above; `profile.md` `O3` a dated paragraph, state GAP; `read-addresses.tsv`
+`N 134`'s line REMOVED (a proven row is no longer bucket 3, and the checker
+flags a line for a non-bucket-3 row), `P O3` gate PRESS -> READER.
+`check_read_addresses.py`: GREEN, 65 of 65; blocked on nothing 2 (`M M49`,
+`P O3`). The correction guard's new `network.md` pair, and `O3` joining the
+`profile.md` pair, are triaged after reading each line in the window.
+
+**PIN MOVES SO FAR, NOT RE-PINNED** (`census_completion.py --check`, now):
+
+    adjudicated            431 -> 432   (+1)
+    delivered_broad         97 -> 98    (+1)
+    delivered_strict        75 -> 77    (+2: P G6, N 134)
+    gap                    273 -> 272   (-1: N 134)
+    gap_read                66 -> 65    (-1)
+    unfired                 22 -> 21    (-1: P G6)
+    b1_no_ruling             7 -> 6     (-1)
+    b3_admitted             40 -> 39    (-1)
+    b3_blocked_on_nothing    1 -> 2     (+1: P O3 is now READER)
+    PINNED_B1_ROWS           P G6 leaves its hold
