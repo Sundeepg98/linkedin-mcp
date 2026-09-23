@@ -10,10 +10,10 @@ claude-opus-5-5[1m]
 
 **CORRECTS:** `_audit/_census/network.md` -- row `134` likewise; the pill it names opens into a filter form whose payload needs APPLYING (section 3.0.1).
 
-**SIX OF THE SHAS IN THIS DOCUMENT ARE BRANCH-ONLY TODAY.** `652cd2f`,
-`aba78f7`, `2bc3720`, `d912b25`, `1df9061` and `7ad55ed` are this wave's
-commits on its worktree branch and do not resolve on `master` until that
-branch merges.
+**SEVEN OF THE SHAS IN THIS DOCUMENT ARE BRANCH-ONLY TODAY.** `652cd2f`,
+`aba78f7`, `2bc3720`, `d912b25`, `1df9061`, `7ad55ed` and `1c55694` are this
+wave's commits on its worktree branch and do not resolve on `master` until
+that branch merges.
 Their subjects, which survive a rewrite: `652cd2f` *"press: read what a press
 disclosed, through two more closed tables"*; `aba78f7` *"who_viewed_me: open
 the filter pills through the gate; filters skip a dialog"*; `2bc3720`
@@ -22,7 +22,8 @@ module"*; `d912b25` *"record the zero-press load; aim the feed fire by
 position with two refusing interlocks"*; `1df9061` *"record the fires: P O3,
 N 134 and M C72 are gated PRESS, each measured live"*; `7ad55ed`
 *"readers-four-rows: name the verdict basis, the probe table and the
-branch-only SHAs"*.
+branch-only SHAs"*; `1c55694` *"readers-four-rows: read the requests against
+the new rulings; forecast the merge"*.
 
 **2026-09-23. Wave `readers-four-rows`, base `b0d3ab8`. WRITTEN AS THE WAVE
 RUNS, not at its end.** The four rows `_audit/2026-09-23-bucket3-addresses.md`
@@ -990,3 +991,40 @@ ways: a gone pid returns at once, a live pid under a 2-second bound reports
 the bound; it waits on a handle, so a pid reused after it opens cannot fool
 it, but one reused BEFORE it opens can -- a pid measured at 20:12:40 named a
 different process by 20:14:59).
+
+### 10.4 THE FULL-SUITE GATE -- red on its first complete run, and that was the gate working
+
+**Queued, not piled on.** At 20:12:40 the box carried three other full-suite
+gates, 24 xdist workers on 8 cores and 100% CPU -- over the local ceiling of
+about two -- so this gate waited on the two oldest (a bounded wait on their
+process handles, 20:16:49 to 20:36:35), then on the next (to 20:41:58), and
+launched when no other gate was running (none at 20:43:14, none but this one
+at 20:44:51; the box was not sampled again during the run).
+
+`scripts/impact_gate.py --against b0d3ab8` at `1c55694`, 20:43:16 to
+21:09:02: widened to the full suite (189 of 219 files impacted). **REFUSED -- 2 failed, 8371 passed, 8 skipped, 1 xfailed,
+in 1514 s.** Both failures are this wave's, both follow from `aba78f7`, and no
+complete run had reached them before, because the only earlier full run was
+killed at 30 minutes by my own bound.
+
+1. `tests/test_every_orphan_module_is_ruled.py`,
+   `test_every_ruling_is_still_about_a_real_orphan[press]`. That file held
+   `press.py` as deliberately unwired, with the instruction "NOT PERMANENT:
+   delete this entry when it is wired"; `aba78f7` wired it. **The entry is
+   deleted on its own instruction**, and a dated note in that file's own form
+   (its `search_results` precedent) names the one call site and the opt-in
+   parameter it sits behind. The tool's docstring already said the wiring
+   was deliberate, so `server.py` is not touched.
+2. `tests/test_readers_emit_no_page_string.py`,
+   `test_the_driven_set_has_not_silently_shrunk`. Three new page readers had
+   no recorded verdict: `press:_take_reading`,
+   `server:_open_profile_views_filter_menus` and
+   `server:_profile_views_press_counters`. The per-reader test in the same run
+   had already DRIVEN all three with hostile page strings and passed them;
+   only the baseline lacked them. **Regenerated with that file's own writer,
+   which refuses to write while any reader leaks:** the diff of
+   `tests/reader_leak_baseline.json` is exactly three added lines, all three
+   `clean`, and none of the other 119 verdicts moved.
+
+The re-run of the same gate on the repaired tree follows this commit, and its
+result is appended below when it has run.
