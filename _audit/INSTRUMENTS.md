@@ -9497,7 +9497,7 @@ re-driving it.
 
 | path | shown failing by |
 |---|---|
-| `scripts/check_read_addresses.py` | `tests/test_read_addresses.py`: twelve plants into a COPY of the real table -- the two consistent ones above, a missing row, a row that left the bucket, a duplicate, a moved direction cell, a wrong refusal kind, a wrong `also_driven` verdict, a class contradicting its verdict, an off-alphabet gate, an addressless row with no reason -- each red AND naming its row; a boundary monkeypatched to admit everything, named by the control; and green on the real table with the population asserted equal to the table's keys |
+| `scripts/check_read_addresses.py` | `tests/test_read_addresses.py`: eleven plants into a COPY of the real table -- the two consistent ones above, a missing row, a row that left the bucket, a duplicate, a moved direction cell, a wrong refusal kind, a wrong `also_driven` verdict, a class contradicting its verdict, an off-alphabet gate, an addressless row with no reason -- each red AND naming its row; a boundary monkeypatched to admit everything, named by the control; and green on the real table with the population asserted equal to the table's keys |
 | `scripts/census_completion.py` (the bucket-3 split and its six `b3_` pins) | `scripts/_check_census_completion_can_fail.py` demonstration B, unchanged: a still-GAP write row moved to R enters the bucket with no line, the split is WITHHELD rather than zeroed, and all six `b3_` pins report nothing to check. `tests/test_read_addresses.py` also plants a table missing a row and asserts `report()` returns no `b3_` figure at all |
 
 ### 57.4 DECLARED DISPOSABLE

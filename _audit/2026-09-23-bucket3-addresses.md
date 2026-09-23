@@ -54,7 +54,7 @@ P H11, P K8) or a fire of code that already ships (N 80, N 81, N 88, N 89).
 The other 55 are gated: 21 behind a refused press or an unmade decision, 24 at
 the boundary itself, and 10 with no address to put through it.
 
-**The upper bound was 13 times the measured number.** Bucket 3 was, in its own
+**The upper bound was more than thirteen times the measured number.** Bucket 3 was, in its own
 words, "the set a reader could close IN PRINCIPLE". Measured at the boundary and
 at the first gate past it, a reader wave sized on 67 would find 5.
 
@@ -301,12 +301,13 @@ address and `<s>` the substring named in its refusal column.
   *"A READ PATTERN DOES ADMIT THIS ADDRESS, so this substring is the ONLY thing
   refusing it"*. No bucket-3 row is refused by a write guard alone.
 
-**Of the 20 allowlist-silence refusals, 9 are refusals somebody reasoned in
-writing** -- the member rosters and third-party profiles (N 99, N 100, N 102,
-N 177, N 178) and the three search verticals the people-only admission
-deliberately left out (N 104, N 161, N 179, with M C70 a fourth on the content
-vertical). The other 11 are silence nobody has argued either way: P A25, P G6,
-P L1, P L7, P L8, P M11, M C38, M C39, M C48, N 184 and N A5.
+**Which of the 20 allowlist-silence refusals rest on a cause somebody wrote
+down is exactly the question D3 asks, and this wave does not answer it.** A
+first draft of this section split them 9 and 11 and was withdrawn before it
+landed: several of the "11" (N A5's admin root, M C39's query group, N 184's
+event page) turn out to carry a written cause in `readonly.py` after all. The
+refusal KIND is measured; the refusal's REASON is a reading of prose, and this
+table does not claim it.
 
 ---
 
@@ -407,9 +408,12 @@ happen to it.
 * **D1 (may a search keyword be passed) holds 5 of the 9 RULING rows**: N 79,
   N 93, N 94, N 172, N 194. It is the highest-yield open decision inside
   bucket 3.
-* **One sensitivity-basis entry for `/in/me/` holds 3 PRESS rows**: P D28,
-  P J4, N 76. N 76's own cell states why the argument for it is circular: it
-  would assert the absence of exactly what only the press could reveal.
+* **One refusal stands first in front of 3 PRESS rows**: no sensitivity basis
+  is declared for `/in/me/` (P D28, P J4, N 76). An entry would clear that
+  condition for all three and prove nothing else about them -- P J4's control
+  was measured inert and P D28's is not proven to exist -- and N 76's own cell
+  states why the argument for such an entry is circular: it would assert the
+  absence of exactly what only the press could reveal.
 * **One control holds 7 PRESS rows**: the All-filters panel on the people
   search (N 84, N 85, N 86, N 87, N 90, N 91, N 92), refused at condition 2
   terminally. The press-free route through response bodies needs a reader the
@@ -523,7 +527,13 @@ Offline and read-only throughout: no browser, no live page, `writes_enabled` unt
 
 (appended as rows land)
 
-#### 16:50 -- denominator confirmed, prior work located, one shipped instrument found RED
+**THE TWO ENTRIES BELOW FIRST CARRIED CLOCK TIMES, AND THE TIMES WERE GUESSED.**
+They read 16:50 and 17:35; the box clock read 16:33 when the impact gate ran,
+after both entries were written. An agent's sense of elapsed time is not an
+instrument, so they are numbered instead. The wave opened at 15:47 by the box
+clock, which was read.
+
+#### Entry 1 -- denominator confirmed, prior work located, one shipped instrument found RED
 
 * **N = 67, as ordered, and no discrepancy.** Derived by importing
   `census_completion.walk()` and filtering folded state `GAP` with direction `R`
@@ -545,7 +555,7 @@ Offline and read-only throughout: no browser, no live page, `writes_enabled` unt
   exact exemptions, two pattern exemptions (listed by importing the module, not
   by grep -- the read-rows scar).
 
-#### 17:35 -- all 67 rows classified; the side table is on disk
+#### Entry 2 -- all 67 rows classified; the side table is on disk
 
 `_audit/_census/read-addresses.tsv` written, 67 data lines, every verdict and
 refusal column measured by calling the shipped `readonly.is_read_url` /
