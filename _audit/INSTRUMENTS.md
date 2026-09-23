@@ -10169,3 +10169,25 @@ measurement harnesses, the per-channel census of exception-text renders, the
 consumer map of `error` fields, the per-slot fold measurement, the timing
 script -- are declared disposable. Every number they produced is recorded in
 the lane record, and what they found is held by the entries above.
+
+### 67.5 RETIRED: `scripts/_check_jobs_gap_directions.py` (section 47.2), 2026-09-24
+
+Deleted on the lane G follow-up's evidence, after section 65.6 recorded it as
+superseded and red. Measured the day it left:
+
+    jobs.md GAP rows today                                     92
+    rows it classified                                         57
+      still GAP                                                54
+        covered by _audit/_census/jobs-directions.tsv          54   0 disagree
+      no longer GAP (J 18, J 39, J 40)                          3
+    today's GAP rows it did not classify                       40
+    its own run                                                crashed: KeyError on row 17
+    anything that ran it (tests, scripts, CI)                  nothing
+    its successor, scripts/check_jobs_directions.py            GREEN, 92 of 92
+
+Its data was a stale subset of a maintained table, and wiring it back in
+would have kept the second copy its own author warned against. Its one
+distinctive control -- a boundary stub that admits everything, which proved
+the reachability column read the shipped boundary -- lives on in the
+successor's tests (section 65.5). Section 47's text stays as the record of
+what it measured; this note is where it ended.
