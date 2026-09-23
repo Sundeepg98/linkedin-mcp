@@ -185,6 +185,33 @@ CORRECTION_VOCABULARY = (
 #: outcome this file exists to require and so cannot also be a violation of it.
 NOT_A_CORRECTION: dict[tuple[str, str], str] = {
 
+    # 2026-09-23, lane L1 (refused reads). TWO CENSUS FILES CITE THE LANE'S
+    # DELIVERABLE AS EVIDENCE, and in both the matched word is `false` on the
+    # NEIGHBOURING row -- read, not inferred from the filenames.
+    ("messaging-and-content.md", "2026-09-23-lane-l1-refused-reads.md"): (
+        "ADJACENCY, NOT A CORRECTION. The citing line is section 4's "
+        "allowlist-count cell, which cites the lane's deliverable for the "
+        "admissions that moved the count; the matched word is `FALSE` in the "
+        "row two lines below -- *'FALSE BOTH WAYS'*, the correction block's "
+        "verdict on its own 2026-09-03 claim about `set_input_files`, which "
+        "has nothing to do with the lane. The census cell corrects nothing IN "
+        "the deliverable; it rests a number on it. **WHAT WOULD MAKE THIS "
+        "ENTRY WRONG:** the census asserting that something the deliverable "
+        "says is false while leaving the deliverable untouched."
+    ),
+    ("profile.md", "2026-09-23-lane-l1-refused-reads.md"): (
+        "ADJACENCY, NOT A CORRECTION. Row `P G6` -- and, once the lane's "
+        "follower-list REVIEW commit is taken, row `P L2b` -- cites the "
+        "lane's deliverable as the evidence for its own cell (G6's move to "
+        "COVERED-UNFIRED, L2b's address admission), and the matched word is "
+        "`false` in the NEXT row down each time: `P G7`'s *'IS NOW HALF "
+        "FALSE'* and `P L3`'s *'no published cell is false of any of them'*, "
+        "both about their own rows. Neither row withdraws anything from the "
+        "deliverable. **WHAT WOULD MAKE THIS ENTRY WRONG:** a profile "
+        "row asserting the deliverable wrong about that row while leaving it "
+        "unmarked, which would need its own CORRECTS: / CORRECTED BY: pair."
+    ),
+
     # 2026-09-21, the FOUR-LOOSE-ROWS wave. THREE OF THESE FOUR ARE ROWS OF
     # ONE CHRONOLOGY TABLE, and the reason is one reason told three times
     # because the scan keys on a basename.
@@ -636,6 +663,50 @@ NOT_A_CORRECTION: dict[tuple[str, str], str] = {
         "**WHAT WOULD MAKE THIS ENTRY WRONG:** row `C41` asserting that "
         "something IN that deliverable is false while leaving the deliverable "
         "untouched, which would be a real correction needing its own markers."
+    ),
+    ("network.md", "2026-09-23-readers-four-rows.md"): (
+        "THE ARROW IS DECLARED IN THE OTHER DIRECTION AND THIS IS ITS "
+        "SHADOW. `2026-09-23-readers-four-rows.md` declares *'CORRECTS: "
+        "`_audit/_census/network.md` -- row `134`'* and this file carries the "
+        "matching CORRECTED BY in its header block. What the candidate pair "
+        "claims instead is that NETWORK.MD corrects the deliverable, which is "
+        "backwards: row `134` cites it as the evidence for its own "
+        "2026-09-23 paragraph and withdraws nothing from it. The matched "
+        "words are TABLE-ROW PROXIMITY -- `correction` and `false` sit in the "
+        "row's own 2026-09-05 paragraph ('a self-correction: that wave's s1 "
+        "had reported the page carries no such controls and s11 measured "
+        "that FALSE') and in its neighbours `133` and `135`. "
+        "**WHAT WOULD MAKE THIS ENTRY WRONG:** row `134` asserting that "
+        "something IN that deliverable is false while leaving it untouched."
+    ),
+    ("profile.md", "2026-09-23-readers-four-rows.md"): (
+        "THE ARROW IS DECLARED IN THE OTHER DIRECTION AND THIS IS ITS "
+        "SHADOW. `2026-09-23-readers-four-rows.md` declares *'CORRECTS: "
+        "`_audit/_census/profile.md` -- row `O3`'* and this file carries the "
+        "matching CORRECTED BY in its header block. Row `O3` cites the "
+        "deliverable as the evidence for its own 2026-09-23 paragraph and "
+        "withdraws nothing from it. The matched words are TABLE-ROW "
+        "PROXIMITY: `false` and `correction` are in row `O5` two lines down "
+        "('ALL THREE CLAUSES ARE FALSE AND THE ROW MOVES ON THE CORRECTION'), "
+        "a row about badge creation this deliverable never touches. "
+        "**WHAT WOULD MAKE THIS ENTRY WRONG:** row `O3` asserting that "
+        "something IN that deliverable is false while leaving it untouched."
+    ),
+    ("messaging-and-content.md", "2026-09-23-readers-four-rows.md"): (
+        "TABLE-ROW PROXIMITY, ON ONE LINE. Row `C85` is a single table line, "
+        "so every paragraph ever appended to it sits at distance zero from "
+        "every citation in it. The matched word is `false`, inside the "
+        "row's own 2026-09-21 RULED paragraph -- 'nothing this census "
+        "publishes had to be false' -- which is about the direction cell and "
+        "predates the cited document by two days. The citation is the "
+        "evidence pointer at the end of the row's 2026-09-23 paragraph, which "
+        "records that the row was STOPPED AT THE ADDRESS and withdraws "
+        "nothing from the deliverable it cites. The correction this wave did "
+        "make is a different pair and is declared: the deliverable CORRECTS "
+        "`2026-09-23-bucket3-addresses.md`, which carries the CORRECTED BY. "
+        "**WHAT WOULD MAKE THIS ENTRY WRONG:** row `C85` asserting that "
+        "something IN that deliverable is false while leaving the deliverable "
+        "untouched."
     ),
 
     ("network.md", "2026-09-21-the-fires-and-the-controls.md"): (

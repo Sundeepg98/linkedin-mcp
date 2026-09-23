@@ -8789,6 +8789,13 @@ PROFILE_VIEWS_INSIGHTS_JS = """
   }
   if (!out.filters.length) {
     for (const node of scope.querySelectorAll('label')) {
+      // A LABEL INSIDE A DIALOG IS NOT ONE OF THE PAGE'S FILTERS. Measured
+      // 2026-09-23 on a capture of this page: five <label> elements, three
+      // inside the filter pills and TWO inside a form in a closed dialog in
+      // the right rail, both short enough to pass the cap -- so this fallback
+      // published five "filters", two of which were a feedback form's
+      // options. Skipped by WHERE the label sits, never by what it says.
+      if (node.closest('dialog, [role="dialog"]')) continue;
       const label = textOf(node);
       if (label && label.length <= cfg.labelMaxChars &&
           out.filters.indexOf(label) === -1 &&

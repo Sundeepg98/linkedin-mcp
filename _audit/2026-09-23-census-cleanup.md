@@ -4,7 +4,7 @@ claude-opus-5-5[1m]
 
 **CORRECTS:** `_audit/_census/messaging-and-content.md` -- row `C42` read *"no tool in this server returns one"* (a post identifier); since `C41` was proven today, `linkedin_my_activity_items` returns one for every post of his own. The premise still holds for other people's posts, and the state is not re-decided.
 
-**CORRECTS:** `_audit/2026-09-23-bucket3-addresses.md` -- it sized "blocked on nothing" at 5 of 67 without asking the rulings, counting `M M49` on a messaging thread while `DO-NOT-OPEN-MESSAGING` stood, which made the size 4. The operator lifted that ruling at 18:15 the same day (5 again), and the calls registered later that evening decided what eight RULING rows waited on, seven of which now need only a reader, so the size is 12 under the rulings as they now are (section 12). The checker asks the holds on every run; the gates are re-judged by hand when a ruling lands.
+**CORRECTS:** `_audit/2026-09-23-bucket3-addresses.md` -- it sized "blocked on nothing" at 5 of 67 without asking the rulings, counting `M M49` on a messaging thread while `DO-NOT-OPEN-MESSAGING` stood, which made the size 4. The operator lifted that ruling at 18:15 the same day (5 again), and the calls registered later that evening decided what eight RULING rows waited on, seven of which now need only a reader (12 on this branch, section 12). Merged with the live readers wave, which gated four of the original five PRESS or RULING, the size is 8 of 66 under the rulings and the live readings as they now are (section 13). The checker asks the holds on every run; the gates are re-judged by hand when a ruling lands.
 
 Wave `census-cleanup`, 2026-09-23, from master `b0d3ab8` (the merge of the
 bucket-1 and bucket-3 waves). **OFFLINE THROUGHOUT.** No browser was started or
@@ -39,13 +39,22 @@ merged it and finished the holds. The state after that merge:
 **AND TWO MORE CALLS WERE REGISTERED LATER THAT EVENING (section 12).** Master
 4a57b75 registered `SELF-PROFILE-EDITS-NOT-OUTWARD` and
 `OTHER-MEMBER-IDS-AS-READS`; this branch fast-forwarded to it, released six
-writes and re-gated thirteen bucket-3 rows. The state NOW:
+writes and re-gated thirteen bucket-3 rows. The state after that:
 
     item 1   bucket 1 is 9 held by a standing ruling / 0 relayed / 0 pending
              / 12 held by no ruling, 6 of them writes RELEASED by
              SELF-PROFILE-EDITS-NOT-OUTWARD
     item 6   blocked on nothing is 12 of 67; the gate column reads READER 9,
              PRESS-PERMITTED 3, MEASURE 8, BUILT-UNFIRED 4, PRESS 5, RULING 4
+
+**AND THIS BRANCH MERGED MASTER cab6995 (section 13)** -- lanes L1, Y and L3
+and the live readers wave. The state NOW, measured on the merged tree:
+
+    item 1   bucket 1 is 9 held by a standing ruling / 0 relayed / 0 pending
+             / 15 held by no ruling (6 of them released writes), of 24
+    item 6   blocked on nothing is 8 of 66; of 40 ADMITTED the gate column
+             reads READER 8, PRESS-PERMITTED 0, MEASURE 14, BUILT-UNFIRED 4,
+             PRESS 9, RULING 5
 
 ---
 
@@ -1086,7 +1095,10 @@ diffs against c8fa6ea, to be measured at the merge: bucket 1 is 9 standing /
 0 / 0 / 13 held by no ruling (6 of them released) of 22, and blocked on
 nothing is 8 of 66 -- `M M49` and the seven people-search readers above.
 Master's `press.py` changed too, and still declares no basis for `/in/me/`
-(read from its source, not run).
+(read from its source, not run). **[Measured at the merge, section 13: master
+had moved once more by then, and bucket 1 is 9 / 0 / 0 / 15 of 24; blocked on
+nothing is 8 of 66; and the merged `press.check_basis` refuses `/in/me/`,
+run in-process.]**
 
 ### 12.5 THE BLOCKER MAP
 
@@ -1102,5 +1114,125 @@ gain one and two points, and one gains a candidate without changing its
 first.
 
 ### 12.6 GATES
+
+Reported in the wave's final message, for the reason section 11 gives.
+
+---
+
+## 13. THE MERGE WITH MASTER cab6995, AND EVERY PIN RE-DERIVED ON THE MERGED TREE
+
+**THE ORDER, CHECKED AGAINST DISK FIRST.** The orchestrator's third order,
+late on 2026-09-23: IF this branch's head is still its re-gate commit and
+master is cab6995 or a descendant, merge master, resolving row by row by owner;
+re-derive and re-pin every figure `--check` names, on the merged tree, by
+measurement; confirm the address-table line for the keyword row; fix the
+events-search row's census cell; gate; commit; do not push. Measured at 22:43
+IST: both held and the tree was clean. Since 4a57b75 master had merged the
+reopener for the post-identifier row, lane L1 (seven reads admitted, one built),
+lane Y (the completeness probe) with a locator fix, the live readers wave (its
+four rows measured live and re-gated) and lane L3 (the jobs slice's direction
+table, two reads built).
+
+### 13.1 SIX FILES CONFLICTED, AND EACH LINE WENT TO ITS OWNER
+
+    read-addresses.tsv   this branch's 13 lines and master's 27 (lane L1's
+                         admissions and refusals, the readers wave's four); the
+                         built profile row's line left with master. A scratch
+                         resolver took master's file whole and put this
+                         branch's line back only where master's line for that
+                         row was byte-identical to the merge base: no row had
+                         changed on both sides, and the conflict was adjacency
+    network.md           the same rule: this branch's 9 rows, master's 2; no
+                         row changed on both sides
+    census_completion.py three hunks: the blocked-on-nothing pin (the history of
+                         both sides kept, the value measured), the bucket-1 and
+                         D3 pins beside lane L3's ten jobs pins (kept whole),
+                         and the row pin (one NO RULING group, the union,
+                         measured)
+    bucket3 audit        both back-pointers kept and this branch's brought to
+                         the merged figure, with its bracketed notes
+    RULINGS.md and       master's side taken, then regenerated with INDEX.md
+    blocker-map.tsv      to a fixpoint
+
+Auto-merged, then checked rather than trusted: `profile.md` and
+`messaging-and-content.md` each equal master's file with only this branch's
+rows put back (the six releases; the comment-sort row), measured by a second
+scratch against the three trees. The read triage (master dropped one verdict
+for a row that left GAP; this branch added CONTROL 8) and INSTRUMENTS.md
+(master added the sections of lanes L1, Y and L3) merged without overlap.
+
+### 13.2 ONE ROW RE-JUDGED AT THE MERGE, ON MASTER'S EVIDENCE
+
+The readers wave opened the three viewer-filter pills live under the gate the
+same evening: each reads as a filter form, nothing that arrived matched a
+viewer-category term, and its section 9.1 reads applying a viewer filter as the
+view-switch press, a build. This branch had gated the filter row MEASURE on
+"what a pill opens is in no capture". That premise is spent; what remains is the
+apply press the shipped gate refuses. So the row is PRESS, as the readers wave
+gated its neighbour on the same surface. Its table line and census note say so;
+neither blocked on nothing nor the triage moves.
+
+### 13.3 WHAT THE ORDER ASKED TO CONFIRM OR FIX
+
+The keyword row's line on the merged tree is this branch's: READER, citing
+`D1-SEARCH-AS-READS` as decided. Master's copy still asked D1 as a question, and
+the merge took this branch's line.
+
+The events-search row's census cell gave its blocker as "no admitted
+events-search address, plus the unmade parameter ruling". A dated note now says
+the parameter half is decided and the address half -- widening the search
+admission past the people vertical, D2 -- stands.
+
+Not edited, reported instead: four address-table notes lane L1 wrote still say
+the row "Needs D2 AND D1". The D1 half of each is decided. The second follow-up
+gave L1's refused rows' lines to L1, so they wait for their owner:
+
+    M C70, N 104, N 161, N 179
+
+### 13.4 THE PINS, MEASURED ON THE MERGED TREE
+
+`census_completion.py --check` is green on these values. Old is master cab6995
+and this branch's head before the merge; new is what the merged tree measures.
+
+    pin                      master    branch    merged
+    unfired                     24        21        24
+    b1_standing                 15         9         9
+    b1_relayed, b1_pending    0, 0      0, 0      0, 0
+    b1_no_ruling                 9        12        15
+    b1_released                 --         6         6
+    b2_d3_rows                   4         3         3
+    b3_blocked_on_nothing        1        12         8
+
+Every other pin -- the headline decomposition, the bucket-3 classes and the ten
+jobs pins -- is master's value, and the merged tree measures it unmoved. The
+row pin now holds nine rows for the target condition, the hold on every
+outward write, and fifteen for NO RULING: the six released writes, the three
+reads lanes L1 and L3 built, and the six held by no ruling before. The gate column of the 40 ADMITTED rows reads
+READER 8, PRESS-PERMITTED 0, MEASURE 14, BUILT-UNFIRED 4, PRESS 9, RULING 5,
+and the eight blocked on nothing are the messaging reader and the seven
+people-search readers of section 12.
+
+### 13.5 FOUND AT THE MERGE, AND NOT FIXED HERE: A CONFLICTED MERGE TRIPLES THE LOCATOR'S CORPUS
+
+The first regeneration ran while six paths were still unmerged, and the
+blocker map came back with the conflicted bucket-3 audit ranked first for
+blockers it does not argue, on scores of 33, 30 and 24 -- exactly three times
+the 11, 10 and 8 the same document scores once the paths are staged (both ends
+measured) -- and with the conflicted `RULINGS.md` ranked as a reason for
+blockers it only quotes. `scripts/find_blocker_reason.py` builds its corpus
+from `git ls-files _audit` without removing repeats, and an unmerged path is
+listed once per stage, three stages here -- which is why git ships
+`ls-files --deduplicate`. That mechanism is DERIVED from the exact factor and
+from which paths carried it; the listing itself was not captured before the
+paths were staged. `INDEX.md` and `RULINGS.md` regenerated byte-identical
+either way, so only the locator reads the listing raw. Staged, the map
+regenerated with no blocker's first candidate moved from master's: two
+blockers this document already led gain one and two points, and one gains a
+candidate. The rule this implies for anyone merging: stage every resolved path
+BEFORE regenerating. The locator is shipped code outside this order, so it is
+reported, not changed; the fix it suggests is that flag, or a set over the
+listing.
+
+### 13.6 GATES
 
 Reported in the wave's final message, for the reason section 11 gives.

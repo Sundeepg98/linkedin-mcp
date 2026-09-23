@@ -107,14 +107,6 @@ DELIBERATELY_UNWIRED: dict[str, str] = {
         "it was ruled unwireable, and the author should replace this reason "
         "with theirs. NOT PERMANENT."
     ),
-    "press": (
-        "IN PROGRESS, owned by another wave as of 2026-09-19. The "
-        "disclosing-press mechanism is being built in its own module with a "
-        "clean entry point and its author will supply the wiring line rather "
-        "than editing server.py under another wave's hands. Its sanctioned "
-        "mutations are already in readonly.SANCTIONED_MUTATIONS. NOT "
-        "PERMANENT: delete this entry when it is wired."
-    ),
 }
 
 # THE search_results ENTRY WAS DELETED 2026-09-20, ON ITS OWN INSTRUCTION.
@@ -139,6 +131,23 @@ DELIBERATELY_UNWIRED: dict[str, str] = {
 # gap, it is stated in the tool's own payload under `not_claimed`, and it is
 # written up in _audit/2026-09-20-the-search-admission.md. It is deliberately
 # NOT held as an orphan ruling here, because the module is no longer an orphan.
+
+# THE press ENTRY WAS DELETED 2026-09-23, ON ITS OWN INSTRUCTION.
+#
+# It read "NOT PERMANENT: delete this entry when it is wired", and it was
+# wired on purpose by the readers-four-rows wave:
+# `server._open_profile_views_filter_menus` imports it (commented "the one
+# package caller of the gate") and calls `press.disclose`, reachable ONLY
+# through `linkedin_who_viewed_me(open_filter_menus=True)` -- default False,
+# which is that tool exactly as it was. The tool's own docstring says so.
+#
+# **WHAT THE WIRING DID NOT CHANGE.** The gate's four conditions and its closed
+# tables stand as ruled; the wiring adds a caller, not a permission. Every
+# press it makes is one `press.evaluate` permits, scoped to `main` through the
+# gate's own PRESS_SCOPES table, and it stops at the first press that is not
+# permitted. The run that proved it live, and the three readers it added to
+# tests/reader_leak_baseline.json (all three "clean"), are in
+# _audit/2026-09-23-readers-four-rows.md, sections 3 and 10.
 
 
 def _entry_points() -> list[pathlib.Path]:
