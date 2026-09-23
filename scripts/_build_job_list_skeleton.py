@@ -1,6 +1,6 @@
 """Turn a captured job-LIST page into a skeleton fixture that carries its SHAPE and nothing else.
 
-Kept as the PROVENANCE of ``tests/fixtures/jobs_recommended_skeleton.html``:
+Kept as the PROVENANCE of ``tests/fixtures/synthetic/jobs_recommended_skeleton.html``:
 it is the exact record of what was measured on the capture and what the
 fixture keeps, which is the thing a privacy review needs and cannot get from
 the output alone.
@@ -44,7 +44,7 @@ import sys
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 DEFAULT_CAPTURE = ROOT / "_state" / "cap-jobs-recommended.html"
-DEFAULT_OUT = ROOT / "tests" / "fixtures" / "jobs_recommended_skeleton.html"
+DEFAULT_OUT = ROOT / "tests" / "fixtures" / "synthetic" / "jobs_recommended_skeleton.html"
 
 #: The first synthetic id. Ten digits, clear of every real range this repo has
 #: seen, and 100 above the control fixture's run so the two never collide.

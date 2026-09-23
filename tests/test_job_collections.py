@@ -600,7 +600,7 @@ def test_the_control_fixture_carries_its_decoy_outside_main():
 
 
 def _skeleton_path() -> Path:
-    return Path(__file__).parent / "fixtures" / "jobs_recommended_skeleton.html"
+    return Path(__file__).parent / "fixtures" / "synthetic" / "jobs_recommended_skeleton.html"
 
 
 def _skeleton_markup() -> str:

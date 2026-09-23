@@ -31,7 +31,7 @@ from linkedin_server import job_home
 
 
 def _fixture_path() -> Path:
-    return Path(__file__).parent / "fixtures" / "jobs_home_recent_searches.html"
+    return Path(__file__).parent / "fixtures" / "synthetic" / "jobs_home_recent_searches.html"
 
 
 def _html() -> str:

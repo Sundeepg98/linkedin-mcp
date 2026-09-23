@@ -1,6 +1,6 @@
 """Turn a captured JOBS HOME into a sanitised fixture of its recent-searches list.
 
-Kept as the PROVENANCE of ``tests/fixtures/jobs_home_recent_searches.html``:
+Kept as the PROVENANCE of ``tests/fixtures/synthetic/jobs_home_recent_searches.html``:
 the exact record of what was carried over from the live capture and what was
 invented, which is what a privacy review needs and cannot get from the output.
 
@@ -44,7 +44,7 @@ from urllib.parse import parse_qs, urlsplit
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 DEFAULT_CAPTURE = ROOT / "_state" / "cap-ct-jobsalerts.html"
-DEFAULT_OUT = ROOT / "tests" / "fixtures" / "jobs_home_recent_searches.html"
+DEFAULT_OUT = ROOT / "tests" / "fixtures" / "synthetic" / "jobs_home_recent_searches.html"
 
 LIST_LABEL = "Recent job searches"
 HISTORY_ORIGIN = "SEMANTIC_SEARCH_HISTORY"

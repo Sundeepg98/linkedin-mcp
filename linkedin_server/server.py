@@ -1,4 +1,4 @@
-"""The tool surface: forty-nine tools, twelve of which write to LinkedIn.
+"""The tool surface: fifty tools, twelve of which write to LinkedIn.
 
 THIS PARAGRAPH HAS NOW BEEN WRONG FIVE TIMES, in both directions, and the
 count is the part that keeps rotting. Until 2026-08-23 it read *"There is no
@@ -157,9 +157,15 @@ POINTER to it was dangling, so a reader who followed it found nothing and
 would reasonably conclude these numbers are unchecked. A citation is a claim
 like any other.
 The surface splits three ways and the split is the part a reader actually
-needs: THIRTY-SEVEN read, TWELVE write, and ZERO are write-shaped,
-registered, gated and unable to act. Thirty-seven plus twelve plus zero is
-forty-nine.
+needs: THIRTY-EIGHT read, TWELVE write, and ZERO are write-shaped,
+registered, gated and unable to act. Thirty-eight plus twelve plus zero is
+fifty.
+
+THE FIFTIETH IS ONE READ, 2026-09-23. ``linkedin_recent_job_searches`` opens
+the jobs home, ``/jobs/jam/`` -- admitted 2026-09-20 with nothing behind it
+-- and returns the recent-searches list: each search's keywords and place,
+the names of the filters it carried, and whether LinkedIn draws its alert
+badge. Census row ``J 18``, COVERED-UNFIRED.
 
 THE FORTY-EIGHTH AND FORTY-NINTH ARE TWO READS, 2026-09-21, AND THEY ARE ONE
 FINDING RATHER THAN TWO TOOLS. ``linkedin_group_page`` and
