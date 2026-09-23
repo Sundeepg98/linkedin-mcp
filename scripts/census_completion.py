@@ -902,6 +902,19 @@ PINNED = {
     #: A GAP count that grows here is not work that appeared; it is work that
     #: was always there and was filed out of scope without one of the census's
     #: four written grounds.
+    #:
+    #: RE-DERIVED AT LANE S'S MERGE, 2026-09-24, from the tree merged with
+    #: master d65759f and not as deltas from the lane's base
+    #: (`_audit/2026-09-24-lane-s-people-search.md`, Integration 2026-09-24).
+    #: Lane S built the people-search readers for seven rows, and the WHO
+    #: rule (the orchestrator's census call, 03:20) kept only the four FILTER
+    #: rows delivered: `N 84`, `N 85`, `N 87`, `N 94` GAP -> COVERED-UNFIRED.
+    #: `N 79`, `N 172` and `N 194` stay GAP -- their payload is WHO and the
+    #: reader publishes counts -- re-gated RULING in the address table. So:
+    #:   adjudicated 190 -> 194, delivered_broad 101 -> 105, unfired 26 -> 30
+    #:   gap 514 -> 510, gap_read 98 -> 94, b3_admitted 44 -> 40
+    #:   b3_blocked_on_nothing 9 -> 2 (four left bucket 3, three re-gated)
+    #:   b1_no_ruling 16 -> 20 (the four enter bucket 1, held by no ruling)
     "stated_rows": 704,
     #: 762 = 704 stated rows + 58 declared collapses, computed at HEAD. NOT the
     #: published 761 and NOT the counter docstring's 760: those two differ only
@@ -911,7 +924,7 @@ PINNED = {
     "capabilities_achievable": 648,
     "out_of_scope": 70,
     "achievable": 634,
-    "adjudicated": 190,
+    "adjudicated": 194,
     #: 434 / 100 / 270 / 25, and gap_write 150, since the lane-L4 merge
     #: (2026-09-23): `N 47` was built -- `linkedin_follow_company_page`, a
     #: WRITE, behind the flag and the single-use grant, never fired (GAP ->
@@ -927,15 +940,15 @@ PINNED = {
     #: (GAP -> COVERED-UNFIRED, `_audit/2026-09-23-lane-l1-refused-reads.md`).
     #: One row changing class moves all five; b3 admitted/refused 40/16 are
     #: L1's allowlist admissions, and b1_no_ruling 7 is P G6 entering bucket 1.
-    "delivered_broad": 101,
+    "delivered_broad": 105,
     #: 75 and 21 since the bucket-1 merge: `M C41` fired live and moved from
     #: COVERED-UNFIRED to COVERED-PROVEN (`_audit/2026-09-23-bucket1-fires.md`).
     #: One row changing class moves both, and leaves delivered_broad at 96.
     "delivered_strict": 75,
-    "gap": 514,
+    "gap": 510,
     "cannot_deliver": 19,
-    "unfired": 26,
-    "gap_read": 98,
+    "unfired": 30,
+    "gap_read": 94,
     #: 151, not the 152 published by `_audit/2026-09-21-the-write-ceiling.md`.
     #: That document scoped itself to `profile.md`, `network.md` and
     #: `messaging-and-content.md`; measured at HEAD those three carry W 151 and
@@ -971,7 +984,11 @@ PINNED = {
     #: boundary (ADMITTED 4, REFUSED 23, NEEDS-SESSION 7), and two left it --
     #: `N 171` (NO-ADDRESS; NOT-AN-ACT now) and `N 183` (REFUSED; a setting, so
     #: a write row). The boundary itself did not move.
-    "b3_admitted": 44,
+    #: 40 / 38 / 1 / 13 / 2 SINCE LANE S'S MERGE (sum 94, `gap_read`): the
+    #: four FILTER rows lane S built (`N 84`, `N 85`, `N 87`, `N 94`) left
+    #: bucket 3 for COVERED-UNFIRED, all four ADMITTED; the boundary did not
+    #: move.
+    "b3_admitted": 40,
     "b3_refused": 38,
     "b3_no_address": 1,
     "b3_needs_session": 13,
@@ -993,11 +1010,16 @@ PINNED = {
     #:   9   at lane R's merge, 2026-09-24: `P K1`, returned from an
     #:       exclusion, reads the Verifications section on the admitted
     #:       /in/me/ page, and only a reader stands in its way
+    #:   2   at lane S's merge, 2026-09-24: lane S built the seven people-
+    #:       search readers. The four FILTER rows left for COVERED-UNFIRED;
+    #:       under the WHO rule `N 79`, `N 172` and `N 194` stay GAP, re-gated
+    #:       RULING on the name-free shaper doctrine, pending the operator's
+    #:       question on returning names at runtime. Left: `M M49`, `P K1`
     #: The gates past the boundary are re-judged BY HAND when a ruling lands;
     #: what `ruling_problems` asks on every run is only that no row blocked on
     #: nothing sits on a page a hold binds.
     #: `_audit/2026-09-23-census-cleanup.md` items 6 and 7, sections 11-13.
-    "b3_blocked_on_nothing": 9,
+    "b3_blocked_on_nothing": 2,
     #: BUCKET 1 BY WHAT HOLDS EACH ROW, DERIVED from the census and the
     #: holds in `scripts/ruling_holds.py`, BY THE STATUS OF THE HOLD: standing,
     #: relayed, pending, or none. They sum to `unfired`, and `PINNED_B1_ROWS`
@@ -1029,6 +1051,11 @@ PINNED = {
     #:   lane R's merge       10 standing / 0 / 0 / 16 none, 6 released, of 26:
     #:                        N 23 was returned from an exclusion to
     #:                        COVERED-UNFIRED, a read no ruling holds (+1 none).
+    #:   lane S's merge       10 standing / 0 / 0 / 20 none, 6 released, of 30:
+    #:                        the four people-search FILTER readers (N 84,
+    #:                        N 85, N 87, N 94), reads no ruling holds -- D1
+    #:                        and OTHER-MEMBER-IDS permit, they hold nothing
+    #:                        (+4 none).
     #: `b1_relayed` is the count this file called `b1_named_target` until the
     #: target condition was registered: a name for what a status COUNTS, not
     #: for which ruling happens to have it today. `b1_released` is a SUBSET of
@@ -1036,7 +1063,7 @@ PINNED = {
     "b1_standing": 10,
     "b1_relayed": 0,
     "b1_pending": 0,
-    "b1_no_ruling": 16,
+    "b1_no_ruling": 20,
     "b1_released": 6,
     #: D3's enumerated list: FOUR once `M C83` left it, and THREE since
     #: `N 172` left it the same evening on OTHER-MEMBER-IDS-AS-READS -- see
@@ -1090,9 +1117,14 @@ PINNED_B1_ROWS: dict[str, tuple[str, ...]] = {
     #: COVERED-UNFIRED, because `linkedin_connections` already reads his
     #: connections list behind a before-and-after badge gate and no live fire
     #: is on record. A read of his own list, which no ruling holds.
+    #: `N 84`, `N 85`, `N 87` and `N 94` entered with lane S's merge,
+    #: 2026-09-24: people-search FILTER readers built offline and never
+    #: fired, from the tool's arguments under D1-SEARCH-AS-READS (and, for
+    #: `N 85`, OTHER-MEMBER-IDS-AS-READS). Both rulings permit; neither holds.
     NO_RULING: (
         "J 18", "J 39", "J 121", "J 122", "M M33", "M M43", "N 20", "N 23",
-        "N 45", "P A8", "P A11", "P A13", "P A17", "P A19", "P A21", "P G6",
+        "N 45", "N 84", "N 85", "N 87", "N 94",
+        "P A8", "P A11", "P A13", "P A17", "P A19", "P A21", "P G6",
     ),
 }
 
