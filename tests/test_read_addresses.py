@@ -37,11 +37,15 @@ sys.path.insert(0, str(ROOT))
 
 import check_read_addresses as cra  # noqa: E402
 
-REAL = cra.TABLE
+# NO MODULE-LEVEL CONSTANT BEYOND THE CONVENTIONAL ``ROOT``, deliberately. The
+# impact gate couples every test file that NAMES an upper-case constant this
+# file defines, as a whole word -- and a first draft's ``REAL`` matched the
+# word REAL in the prose of dozens of docstrings, dragging 98 of 215 files
+# into a one-file change and widening the gate to the full suite.
 
 
 def _lines() -> list[str]:
-    return REAL.read_text(encoding="ascii").splitlines()
+    return cra.TABLE.read_text(encoding="ascii").splitlines()
 
 
 def _data_indexes(lines: list[str]) -> list[int]:
