@@ -617,6 +617,32 @@ tests, re-run: **1428 passed, 0 failed.** The lane's test file holds 109 tests.
 
 **NOT RUN**: the widened full suite (CI, after the merge); any live fire.
 
+### I.4a Master moved during the integration: lane G at `209a831`
+
+While these gates ran, `master` advanced to `209a831` -- lane G's guard
+hardening: error fields carry exception types, the navigation guard sees
+values a reader returned, the hash-citation guard case-folds its slot words,
+the reason locator reads a conflicted path once, register section 67. As the
+order said, it was merged the same way, in a second merge commit on this
+branch.
+
+    path                   resolution
+    _audit/INSTRUMENTS.md  both sides appended at the end; kept in number
+                           order, 66 (this lane) then 67 (lane G)
+    _audit/INDEX.md        generated; master's side taken, every path staged,
+                           then INDEX.md, RULINGS.md and blocker-map.tsv
+                           regenerated in two sweeps, --check at a fixed point
+
+No census file changed on master's side, so no pin moves: the pins of I.3
+stand, and the census instruments re-run on the merged tree read the same --
+`census_completion --check` matches every pin, `check_read_addresses` GREEN
+94 of 94, triage all nine controls OK, `check_write_classes` GREEN,
+`pin_census_rows` no drift, `ruling_holds` GREEN. Lane G's hardened guards
+were run against this lane's code with the selection that touches it -- the
+navigation guard, both page-string guards on the new `tests/plantedpage.py`,
+the hash-citation guard, the reason locator's own test, the lane's 109 tests,
+the tool-surface pin, the corpus and census guards: **2311 passed, 0 failed.**
+
 ### I.5 What the follow-up inherits
 
 * The live queue below is re-cut: the three WHO rows bank on no fire under the
