@@ -10122,4 +10122,31 @@ the default-activity form anchor and the job-seeker preferences anchor, and
 the two generators that wrote the census cells and the class-table lines --
 are declared disposable. What they measured is recorded with its numbers in
 the lane record, and the two behaviours they established are carried by the
-two test files above, which re-derive them on every run.
+two test files above, which re-derive them on every run. So are the gate's:
+the writer of the impact selection (the gate's own `impact_set()`, written
+out in full because `--plan-only` prints 40 names), its runner, the
+in-memory re-pin of 70.5, and the two drivers that put the five new readers
+and the new tool through their families' harnesses without writing either
+baseline.
+
+### 70.5 A LIST OF PIN MOVES IS PROVEN COMPLETE BY APPLYING IT, IN MEMORY
+
+A lane that may not re-pin still owes the merge the list of pins it moves,
+and that list is a claim nothing in the suite checks for completeness. This
+lane checked it by applying the list to the IMPORTED module --
+`census_completion.PINNED` and `PINNED_B1_ROWS` patched in one process,
+nothing written -- and running the owners in that same process:
+`census_completion.main(["--check"])`, then `tests/test_ruling_holds.py`
+through `pytest.main`, which imports the same module object and so reads the
+patched pins.
+
+SHOWN FAILING: with only the `PINNED_B1_ROWS` entry applied, two reds, both
+naming `unfired` at 26 against 25; with the six figures added, `--check`
+exits 0 and the file passes 55 of 55.
+
+    A LIST OF PIN MOVES IS A PREDICTION ABOUT A RE-PIN NOBODY HAS RUN.
+    APPLY IT WHERE IT CANNOT PERSIST AND RUN ITS OWNERS: THEN IT IS A
+    MEASUREMENT.
+
+The script is disposable (70.4); the method is the part the merge can reuse,
+wherever a pin's owners read it from a module attribute.

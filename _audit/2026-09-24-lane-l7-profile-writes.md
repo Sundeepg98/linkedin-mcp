@@ -25,6 +25,10 @@ headless Chromium over static HTML with no network.
 - the family repair built and gated on its own tests: 24 passed; the four tests that carry the defect
   were run against the UNREPAIRED `writes.py` (the file at `9c219c8`, swapped in and swapped back,
   byte-compared after) and all four failed for the reason each names (section 3.3).
+- the gate (section 8): the impact selection, 179 files, ran at the second commit -- 24 reds, each tied
+  in section 7 to the pin or baseline that clears it. It found three moves this record had not listed
+  (the pointer graph, the reader baseline, the shard timings), and one pointer this lane moved is NOT
+  its to re-pin (`P G3`, section 6.1, finding 5).
 
 ## 1. THE DENOMINATOR, DERIVED
 
@@ -307,6 +311,21 @@ from the blocker ledger.
    build (the same tool, the same control).
 4. **The six intro-editor rows outside this slice** (`P A8`, `A11`, `A13`, `A17`, `A19`, `A21`) rest on
    the tool this lane repaired (section 3.4).
+5. **`P G3` reads its argument off whichever row sits above it, and this lane moved that row.** Its
+   cell is `same ruling`, which the census's own resolver (`BACKREF` in
+   `scripts/classify_writeoff_reasons.py`) reads off the nearest SUBSTANTIVE row above it. At the base
+   that was `P G1` -- a sentence about a reliability defect, not a ruling -- because `P G2`'s "no tool,
+   no reason" leaves 14 characters once the furniture is stripped, one short of the 15 the resolver
+   calls substantive. This lane's note makes `P G2` substantive, so `P G3` now inherits a note that
+   argues an ADMISSIBLE editor address, the opposite of an exclusion. Measured with `--explain "P G3"`
+   at the base and on this branch: its kind moves from `US-RULING` to `ACCOUNT-FACT+US-RULING`,
+   contingent, with no reopener, and the classifier's re-examine list goes from 2 to 3.
+   `scripts/measure_pointer_graph.py --check` convicts it by name (section 7). `P G3` is
+   EXCLUDED-RULED and not this lane's to edit. The repair is one cell: name the ruling rather than a
+   position. `P G4` and `P G5`, directly below and written in the same commit (`7931cefb`, whose message
+   counts 23 rows of the `/edit/` family moved at once), name theirs as the `/edit/` family ruling; the
+   owner decides whether that is `P G3`'s too. Until that edit, `P G3`'s edge must not be re-pinned: a
+   re-pin would certify an argument nobody wrote for it.
 
 ## 7. THE PINS THIS LANE MOVES -- NOT RE-PINNED HERE, AS THE BRIEF ORDERS
 
@@ -324,6 +343,17 @@ lines.
     unfired             25 ->  26
     PINNED_B1_ROWS      + P I14, held by OPERATOR-NAMES-THE-TARGET (derived by
                         ruling_holds.hold_of for a W row, as N 47's was)
+
+**The pointer graph** (`scripts/measure_pointer_graph.py --check`, and with it BOTH tests in
+`tests/test_pointer_graph_guard.py` -- the second because its calibration control expects the tree to
+pass the pin, so it fails whenever the first does): 4 of 69 pinned pointers moved; none gone, none new.
+
+    P A27, P A28, P A29   still point at P A26; P A26's verdict moved  - -> ACCOUNT-FACT|US-RULING
+    P G3                  re-pointed: P G1 -> P G2
+
+The first three are this lane's rows and the move is intended: each carries its own note saying "As
+`A26`", and `P A26`'s note is the argument they now inherit. Re-pin them at the merge. The fourth is
+NOT intended and must not be re-pinned as it stands -- section 6.1, finding 5.
 
 `scripts/count_census_states.py --expect J=54,P=53,M=77,N=85` MATCHES at 269 (it was `P=54`, 270).
 `scripts/check_write_classes.py` is GREEN on 151 lines: the write-direction GAP population is 149 and
@@ -349,17 +379,110 @@ Each red test, with the edit that re-pins it (none applied here):
 | `tests/test_server_surface.py::test_the_server_instructions_name_every_write_that_ships` | `words[14] = "fourteen"`; in `server.py`'s instructions, "thirteen write" -> "fourteen write" and name `linkedin_mark_company_interest` beside the other writes |
 | `tests/test_every_tool_is_on_the_surface.py::test_both_rules_reject_the_registry_that_was_actually_measured` | 51 -> 52 |
 | `tests/test_the_tool_surface_is_pinned_so_a_row_must_move.py::test_no_tool_appeared_or_vanished_without_a_census_decision` | add the tool to `PINNED_TOOL_SURFACE` (52 tools, 71 parameters); the census decision it asks for is `P I14`, banked in this lane |
-| `tests/test_the_other_two_count_claims_are_pinned_too.py` (headline, module listing) | `README.md`: "Fifty-two tools ship. Thirty-eight read. Fourteen write." and "the fifty-two tools"; the module listing gains `profile_editor.py` and `company_interest.py` |
+| `tests/test_the_other_two_count_claims_are_pinned_too.py::test_the_readme_headline_agrees_with_the_registry`, `::test_the_readme_module_listing_names_the_right_number` | `README.md`: "Fifty-two tools ship. Thirty-eight read. Fourteen write." and "the fifty-two tools"; the module listing gains `profile_editor.py` and `company_interest.py` |
 | `tests/test_prose_that_makes_a_claim.py::test_the_server_docstring_numbers_are_derived`, `::test_the_server_docstring_accounts_for_the_action_that_has_no_tool` | `server.py`'s module docstring: fifty-two tools, fourteen of which write, fifteen sanctioned (the fifteenth being `set_open_to_work`, the one with no tool) |
-| `tests/test_tool_envelopes_emit_no_page_string.py::test_the_driven_set_has_not_silently_shrunk` | regenerate `tests/tool_envelope_baseline.json` (`python -m tests.test_tool_envelopes_emit_no_page_string --write-baseline`); the new tool is expected `not_driven:never read the page`, as every write's is |
+| `tests/test_tool_envelopes_emit_no_page_string.py::test_the_driven_set_has_not_silently_shrunk` | regenerate `tests/tool_envelope_baseline.json` (`python -m tests.test_tool_envelopes_emit_no_page_string --write-baseline`). The new tool's verdict was MEASURED in-lane through that file's own `drive_tool`, standalone with its `sandbox_session_store` applied and the baseline left unwritten: `not_driven:never read the page`, the verdict `linkedin_update_profile_field` and `linkedin_follow_company` also drive to today |
+| `tests/test_readers_emit_no_page_string.py::test_the_driven_set_has_not_silently_shrunk` | five new page readers with no recorded verdict: `company_interest:read_after_press`, `:read_interest_control`, `:read_state`, `profile_editor:read_save_gate`, `:wait_for_editor_to_close`. Regenerate `tests/reader_leak_baseline.json` (`python -m tests.test_readers_emit_no_page_string --write-baseline`). All five were DRIVEN in-lane through that file's own `drive`, baseline unwritten: all five `clean`. The same pass found three recorded readers whose baseline says `returns_text` and which drive `clean` today (`dom:read_follow_control`, `writes:_read_follow_state`, `writes:_verify_after`) -- not a failure in that direction, and the first is in a file this lane did not touch, so the baseline was already behind before this lane; a regeneration records all three |
+| `tests/test_ruling_holds.py::test_bucket_one_is_derived_and_sits_on_its_pins`, `::test_a_write_row_whose_direction_flips_is_named` | none of their own: both clear with the census re-pin above. The second picks as its victim the FIRST COVERED-UNFIRED write held by `OPERATOR-NAMES-THE-TARGET` in walk order, which is now `P I14`, and it expects that victim to be pinned. PROVEN IN MEMORY, nothing written: the six figures and the `PINNED_B1_ROWS` entry applied to the imported module, then `census_completion --check` exits 0 and the whole of `tests/test_ruling_holds.py` passes, 55 of 55 |
+| `tests/test_pointer_graph_guard.py::test_the_committed_census_still_matches_its_pin`, `::test_every_failure_class_is_convicted_and_the_calibration_is_not` | the pointer-graph block above: re-pin `P A27`, `P A28`, `P A29`; do NOT re-pin `P G3` until its cell names its ruling |
+| `tests/test_ci_shard.py::test_the_timings_table_still_prices_most_of_the_suite` | the paragraph below: one regeneration after the merge, from a full-suite junit report |
 | `tests/test_writes.py::test_what_ships_is_narrower_than_what_is_sanctioned` | add `mark_company_interest` to both set literals |
 | `tests/test_writes.py::test_the_gate_prints_every_measured_verdict_with_its_evidence`, `::test_every_verdict_is_pinned_to_ITS_ACTION_not_to_the_set_of_verdicts` | `_UNMEASURED_REVERSIBILITY` gains it; `REVERSIBILITY_CLASS[...] = "STILL-UNKNOWN"`; `REVERSIBILITY_MEASURED[...] = False` |
 | `tests/test_preview_state_and_click_state.py::test_every_performable_action_is_either_reached_or_declared_unreachable` | `len(PERFORMABLE) == 14`, `len(REACHED) == 14` (the `REACHED` entry itself is in this lane) |
 | `tests/test_receipt_names_its_own_action.py::test_the_action_set_is_the_one_this_file_was_measured_against` | 13 -> 14. Its phrase owners need no new entry: the rest of that file passes with the new rows in place, so neither new row prints a phrase another action owns |
 
+**A COMMITTED MEASUREMENT THIS LANE TIPS, AND CANNOT REGENERATE ON THIS BOX:**
+`tests/test_ci_shard.py::test_the_timings_table_still_prices_most_of_the_suite` goes red. It asks that
+`scripts/ci_shard_timings.json` price at least two thirds of the live `tests/test_*.py` files. At the
+base it priced 157 of 234 against a line of 156 -- ONE file of headroom -- and this lane adds two test
+files (`tests/test_profile_editor_commit.py`, `tests/test_mark_company_interest.py`): 157 of 236
+against a line of 157.33. Measured by `ci_shard.load_timings()` against the glob, on this branch and
+again with the two files left out (157 of 234, green). It is a merge-level item, not a lane-level one:
+every sibling lane that adds a test file moves the same ratio, and the repair is ONE regeneration
+after the merge by the recipe in `scripts/ci_shard.py`'s docstring, which needs a full-suite junit
+report -- the run the brief forbids on this shared box. Writing two entries by hand was refused: the
+table's `_measured` line names the one run that produced every figure in it, and two figures that run
+never measured would sit beside it as if it had.
+
 **NOT A PIN, AND APPLIED HERE:** `tests/test_preview_state_and_click_state.py`'s `REACHED` gained the
 new action (a coverage table, not a count: without it the action would be performable and driven by
 nothing in that file), and `tests/test_write_classes.py` gained two plants.
+
+## 8. COMMITS, GATES, AND WHAT DID NOT RUN
+
+**Commits** -- on the worktree branch only; nothing pushed; no attribution line in any message. A hash
+of this lane's names a commit on that branch and nowhere on `master` until the orchestrator merges it,
+so each is listed here by its SUBJECT, which survives a squash or a rebase where a hash does not:
+
+* *lane L7: update_profile_field now presses Save and verifies on a fresh render; P I14 "I'm
+  interested" built, unfired; 36 profile-family rows classed* -- the family repair, the build, the
+  class-checker rule, the census cells and class lines, INSTRUMENTS section 70, this record, and the
+  three generated files at a fixed point.
+* *lane L7: triage the two census pairs citing the lane record; route spellings made exact; P I14's
+  missing restore path stated* -- two `NOT_A_CORRECTION` entries written after reading every site,
+  the `/in/<member>/` route spellings, and section 4.3's paragraph on the missing restore path.
+* *lane L7: the gate record -- the selection's 24 reds each tied to the pin that clears it; P G3's
+  moved pointer raised; section 8* -- section 6.1's finding 5, section 7's additions, this section,
+  and INSTRUMENTS 70.4-70.5. No code.
+
+**Gates that ran, and what each said.**
+
+1. **The census instruments, at the tip.** `census_completion --check`: red on exactly the six figures
+   and the one bucket-one entry of section 7 and nothing else -- and PROVEN COMPLETE rather than only
+   listed: applied in memory to the imported module, nothing written, the same check exits 0 and
+   `tests/test_ruling_holds.py` passes 55 of 55 (INSTRUMENTS 70.5). `count_census_states --expect
+   J=54,P=53,M=77,N=85`: MATCH at 269. `check_write_classes`: GREEN, 151 lines.
+   `check_read_addresses`: 66 of 66. `ruling_holds`: green. `pin_census_rows --check`: no drift, 704
+   rows. `measure_pointer_graph --check`: RED on 4 of 69 pinned pointers, each named in section 7.
+   `classify_writeoff_reasons --check`: exit 0, and its per-row table against the base differs in
+   exactly one row, `P G3` (section 6.1, finding 5).
+2. **The impact gate.** `scripts/impact_gate.py --against 9c219c8 --plan-only`, run by a child at the
+   first commit: 17 changed paths, 174 of 236 test files (74%) -- WIDENED TO THE FULL SUITE past its
+   45% line. So, as the brief orders, the full suite did NOT run here; the SELECTION did, with the
+   corpus-wide guards. The plan prints 40 of its selected files and none of its 17 corpus-wide guards
+   by name, so the child stopped rather than guess, correctly; the list was then written from the
+   gate's own `impact_set()`: 179 test files, the 17 guards among them. Recomputed at the tip (18
+   changed paths): the same 179, byte for byte.
+3. **That selection, run** at the second commit (`-n 4`, verbose, one process): **24 failed, 7824
+   passed, 4 skipped, 1 xfailed, no errors, 28 min 37 s.** The 24 reds are exactly the 24 ids of
+   section 7's table: none unlisted, and no listed id passed. The skips are the three symlink tests of
+   `tests/test_uploads.py` and one in `tests/test_the_audience_reader_arrives_with_its_contract.py`, and
+   the xfail is in `tests/test_click_is_not_its_own_evidence.py` -- no file of the three is this
+   lane's. The exact-value identity sweep was ARMED in this worktree (its key path resolves to the
+   main checkout's gitignored key) and passed on all 18 paths this lane changed. The third
+   commit changes only this record and the instrument register, so the code-level result stands for the
+   tip; the guards that read those two documents were re-run there (6 below).
+4. **Measured in-lane where a baseline would otherwise be regenerated:** the five new page readers
+   through the reader family's own harness, all `clean`, and the new tool through the envelope family's
+   own harness, `not_driven:never read the page` -- both baselines left unwritten (section 7).
+5. **The lane's own tests, and the targeted runs while building** (not gates; each red repaired before
+   the commit it would have entered, or listed in section 7): the two new files alone (24, then 30-odd
+   passing); the write, surface and guard files around them in three batches -- 7 reds, then 7, then
+   1 -- whose non-pin reds were the naming law twice (`signal`, then `share`: section 4), a new reader
+   of `from_state` in `_live_control` (replaced by the verdict's own constant), the unbounded section
+   count (section 4.4) and a test constant carrying LinkedIn's trailing full stop. The identity and
+   hygiene guards: 1777 passed. The page-string guards and the readers inventory: 78 passed.
+6. **The diff itself, and the documents at the tip** -- run after the last edit to this record. The
+   diff from the base: 2771 added lines, all ASCII, none carrying an absolute workspace path, a
+   user directory or the operator's name (a byte scan, and a pattern scan whose four planted controls
+   each fire). `scripts/check_cited_shas_resolve.py`: OK, every cited SHA an ancestor of `master`. The
+   impact gate's own selection for this record and the instrument register -- 31 test files, the 17
+   corpus-wide guards among them: **3 failed, 3274 passed**, and the three are the shard-timings test
+   and the two `tests/test_ruling_holds.py` tests, all in section 7's table. The three generators'
+   `--check`: a fixed point.
+
+**NOT RUN, and why:**
+
+* **the full suite** -- the plan widened to it and the brief forbids it on this shared box. It runs on
+  CI after the merge.
+* **CI on any platform** -- nothing was pushed.
+* **any live run of anything** -- no browser, no LinkedIn, no grant outside fixture tests.
+* **any re-pin, or any baseline regeneration** -- the brief forbids the first; section 7 lists every
+  one of both with its edit.
+* **the shard-timings regeneration** -- it needs a full-suite junit report (section 7).
+* **`scripts/build_read_map.py`** -- the impact gate notes that its observed read map was recorded at an
+  older commit; the static rules selected this lane's files without it, and rebuilding it is a
+  measurement over the whole suite.
 
 ## Live queue
 
