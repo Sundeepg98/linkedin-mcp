@@ -119,6 +119,7 @@ PINNED_TOOL_SURFACE: dict[str, tuple[str, ...]] = {
     "linkedin_profile_editor_values": (),
     "linkedin_publish_post": ("confirm_token", "text"),
     "linkedin_react_to_item": ("confirm_token", "item"),
+    "linkedin_recent_job_searches": (),
     "linkedin_save_job": ("confirm_token", "job_id"),
     "linkedin_saved_jobs": ("limit",),
     "linkedin_search_appearances": (),
@@ -227,7 +228,23 @@ PINNED_TOOL_SURFACE: dict[str, tuple[str, ...]] = {
 #: are decided by ONE live fire of this parameter, and they move -- or keep
 #: their state with a named reason -- in the commit that records that fire.
 #: See `_audit/2026-09-23-readers-four-rows.md`.
-PINNED_TOOL_COUNT = 49
+#: **RE-PINNED 2026-09-23 AT 50 TOOLS AND 67 PARAMETERS (lane L3), merged over the
+#: readers wave's 49 and 67 just above: one tool added, no parameter, and the
+#: surface change moves a census row in the same commit.**
+#: `linkedin_recent_job_searches()` reads the jobs home and banks `J 18`.
+#: **A SECOND TOOL WAS PINNED HERE AND WITHDRAWN BEFORE MERGE:**
+#: `linkedin_tracked_job_proximity(stage, limit)` joined the tracker to the
+#: posting's proximity read by navigating to job ids READ OFF THE TRACKER
+#: PAGE -- a derived navigation `tests/test_navigation_is_never_derived.py`
+#: forbids, and one its taint engine (a `goto` return and `.url` only) could
+#: not see. `J 57` stays GAP.
+#: **AND ONE MOVE THIS PIN CANNOT SEE, SAID HERE BECAUSE IT IS THE HOLE THIS
+#: FILE WAS DUG FOR ONE LEVEL DOWN:** `linkedin_premium_job_collection` gained
+#: a new VALUE, index 2 (`recommended`), on a parameter it already had, and it
+#: banks `J 39`. No name and no parameter moved, so this guard is silent about
+#: it by construction. Both rows move GAP -> COVERED-UNFIRED, not PROVEN: the
+#: lane that built them was offline. See `_audit/2026-09-23-lane-l3-jobs.md`.
+PINNED_TOOL_COUNT = 50
 PINNED_PARAMETER_COUNT = 67
 
 

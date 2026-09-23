@@ -81,6 +81,7 @@ import textwrap
 _HERE = pathlib.Path(__file__).resolve().parent
 sys.path.insert(0, str(_HERE))
 
+import check_jobs_directions as cjd  # noqa: E402
 import check_read_addresses as cra  # noqa: E402
 import count_census_states as ccs  # noqa: E402
 import enumerate_gap_rows as egr  # noqa: E402
@@ -714,15 +715,19 @@ def report(rows, out) -> dict:
       f"    "
       f"{len([k for k in named_ruling if any((l, r) == k and d in ('R', 'R+W') for l, r, _s, d in rows)]):4d}")
     p("")
-    p("  -- UNCLASSIFIED: A MEASUREMENT GAP, NOT A BLOCKER ----------------")
-    p(f"     direction unknown                       {by_dir['unknown']:4d}")
+    p("  -- JOBS: DIRECTION BY SIDE TABLE, NOT BY CENSUS CELL ----------")
+    p(f"     direction unknown in the census cell    {by_dir['unknown']:4d}")
     p(f"     direction ambiguous                     {by_dir['ambiguous']:4d}")
-    p("       `jobs.md` has no per-row R/W column at all, so its rows cannot be")
-    p("       placed in bucket 2 or 3 by this method. That is a fact about the")
-    p("       census's shape, and `_audit/2026-09-21-the-jobs-direction.md`")
-    p("       argues the column should NOT be added. Until that is ruled, these")
-    p("       rows are honestly unplaceable and are not silently folded into a")
-    p("       neighbouring bucket to make the arithmetic tidy.")
+    p("       `jobs.md` has no per-row R/W column, by the argument of")
+    p("       `_audit/2026-09-21-the-jobs-direction.md` section 8; the")
+    p("       per-row reading lives in `_audit/_census/jobs-directions.tsv`,")
+    p("       checked by `scripts/check_jobs_directions.py`:")
+    # WITHHELD RATHER THAN ZEROED, as bucket 3: a jobs table that has
+    # drifted from the census returns None and each `jobs_` pin reports
+    # nothing to check. Pure -- no boundary import, so the can-fail copy runs.
+    jobs, jobs_problems = cjd.census_figures(rows)
+    for line in cjd.report_lines(jobs, jobs_problems):
+        p(line)
     p("")
     p(f"     CHECK: {by_dir['R']} + {by_dir['R+W']} + {by_dir['W']} + "
       f"{by_dir['unknown']} + {by_dir['ambiguous']} = "
@@ -801,6 +806,10 @@ def report(rows, out) -> dict:
             "b3_undetermined": split3["class:UNDETERMINED"],
             "b3_blocked_on_nothing": split3["blocked_on_nothing"],
         })
+    # THE JOBS SLICE, BY SIDE TABLE -- withheld, never zeroed, when
+    # `_audit/_census/jobs-directions.tsv` has drifted from the census.
+    if jobs is not None:
+        figures.update(jobs)
     return figures
 
 
@@ -818,19 +827,24 @@ PINNED = {
     "capabilities_achievable": 389,
     "out_of_scope": 315,
     "achievable": 389,
-    "adjudicated": 431,
+    "adjudicated": 433,
+    #: 433 / 99 / 271 / 24 since the lane-L3 merge (2026-09-23): `J 18` and
+    #: `J 39` were built (GAP -> COVERED-UNFIRED, `_audit/2026-09-23-lane-l3-
+    #: jobs.md`); both enter bucket 1 held by no ruling (b1_no_ruling 7 -> 9),
+    #: and gap_unknown 56 -> 54 because both were jobs rows. gap_read stays 66:
+    #: jobs rows are counted by the side table, below, not in bucket 3.
     #: 431 / 97 / 273 / 22 / 66 since the lane-L1 merge: `P G6` was built
     #: (GAP -> COVERED-UNFIRED, `_audit/2026-09-23-lane-l1-refused-reads.md`).
     #: One row changing class moves all five; b3 admitted/refused 40/16 are
     #: L1's allowlist admissions, and b1_no_ruling 7 is P G6 entering bucket 1.
-    "delivered_broad": 97,
+    "delivered_broad": 99,
     #: 75 and 21 since the bucket-1 merge: `M C41` fired live and moved from
     #: COVERED-UNFIRED to COVERED-PROVEN (`_audit/2026-09-23-bucket1-fires.md`).
     #: One row changing class moves both, and leaves delivered_broad at 96.
     "delivered_strict": 75,
-    "gap": 273,
+    "gap": 271,
     "cannot_deliver": 19,
-    "unfired": 22,
+    "unfired": 24,
     "gap_read": 66,
     #: 151, not the 152 published by `_audit/2026-09-21-the-write-ceiling.md`.
     #: That document scoped itself to `profile.md`, `network.md` and
@@ -840,10 +854,11 @@ PINNED = {
     #: is CONSISTENT WITH the difference rather than proof of it -- stated that
     #: way because I did not re-derive that document's population.
     "gap_write": 151,
-    #: All 56 are `jobs.md`, which has no per-row R/W column. Not a coincidence
+    #: All 54 are `jobs.md`, which has no per-row R/W column (56 until the
+    #: lane-L3 merge built J 18 and J 39). Not a coincidence
     #: and not a defect in the finder: it is the whole of that slice's still-GAP
     #: population.
-    "gap_unknown": 56,
+    "gap_unknown": 54,
     "gap_ambiguous": 0,
     #: BUCKET 3, MEASURED 2026-09-23 (`_audit/2026-09-23-bucket3-addresses.md`),
     #: counted off `_audit/_census/read-addresses.tsv`, whose every verdict
@@ -895,11 +910,28 @@ PINNED = {
     "b1_standing": 15,
     "b1_relayed": 0,
     "b1_pending": 0,
-    "b1_no_ruling": 7,
+    "b1_no_ruling": 9,
     #: D3's enumerated list: FOUR since 2026-09-23, when `M C83` left it --
     #: see `RULING_BLOCKED_NAMED`. It was printed as "five rows" and pinned
     #: nowhere, which is how a list edit could have moved it silently.
     "b2_d3_rows": 4,
+    #: THE JOBS SLICE BY SIDE TABLE, 2026-09-23 (lane L3), counted off
+    #: `_audit/_census/jobs-directions.tsv`, whose every verdict and deciding
+    #: phrase `scripts/check_jobs_directions.py` re-checks. `jobs_gap` equals
+    #: `gap_unknown` and the three directions partition it; the five classes
+    #: partition its R + R+W rows (26 + 3 = 29). Kept OUT of `gap_read` and
+    #: `gap_write` deliberately: `gap_read` feeds bucket 3, whose address
+    #: table does not carry jobs rows.
+    "jobs_gap": 54,
+    "jobs_dir_r": 26,
+    "jobs_dir_w": 25,
+    "jobs_dir_rw": 3,
+    "jobs_admitted": 9,
+    "jobs_refused": 19,
+    "jobs_no_address": 0,
+    "jobs_needs_session": 1,
+    "jobs_undetermined": 0,
+    "jobs_blocked_on_nothing": 0,
 }
 
 #: BUCKET 1, ROW BY ROW -- the control that goes RED WHEN A ROW MOVES, and
@@ -913,7 +945,10 @@ PINNED_B1_ROWS: dict[str, tuple[str, ...]] = {
         "N 1", "N 46", "N 48",
         "P A8", "P A11", "P A13", "P A17", "P A19", "P A21",
     ),
-    NO_RULING: ("J 121", "J 122", "M M33", "M M43", "N 20", "N 45", "P G6"),
+    #: `J 18` and `J 39` entered 2026-09-23 with the lane-L3 merge: two reads,
+    #: built offline, which no ruling holds.
+    NO_RULING: ("J 18", "J 39", "J 121", "J 122", "M M33", "M M43", "N 20",
+                "N 45", "P G6"),
 }
 
 

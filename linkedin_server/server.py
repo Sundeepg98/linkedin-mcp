@@ -1,4 +1,4 @@
-"""The tool surface: forty-nine tools, twelve of which write to LinkedIn.
+"""The tool surface: fifty tools, twelve of which write to LinkedIn.
 
 THIS PARAGRAPH HAS NOW BEEN WRONG FIVE TIMES, in both directions, and the
 count is the part that keeps rotting. Until 2026-08-23 it read *"There is no
@@ -157,9 +157,15 @@ POINTER to it was dangling, so a reader who followed it found nothing and
 would reasonably conclude these numbers are unchecked. A citation is a claim
 like any other.
 The surface splits three ways and the split is the part a reader actually
-needs: THIRTY-SEVEN read, TWELVE write, and ZERO are write-shaped,
-registered, gated and unable to act. Thirty-seven plus twelve plus zero is
-forty-nine.
+needs: THIRTY-EIGHT read, TWELVE write, and ZERO are write-shaped,
+registered, gated and unable to act. Thirty-eight plus twelve plus zero is
+fifty.
+
+THE FIFTIETH IS ONE READ, 2026-09-23. ``linkedin_recent_job_searches`` opens
+the jobs home, ``/jobs/jam/`` -- admitted 2026-09-20 with nothing behind it
+-- and returns the recent-searches list: each search's keywords and place,
+the names of the filters it carried, and whether LinkedIn draws its alert
+badge. Census row ``J 18``, COVERED-UNFIRED.
 
 THE FORTY-EIGHTH AND FORTY-NINTH ARE TWO READS, 2026-09-21, AND THEY ARE ONE
 FINDING RATHER THAN TWO TOOLS. ``linkedin_group_page`` and
@@ -373,6 +379,7 @@ from linkedin_server import (
     group_page,
     groups_page,
     job_collections,
+    job_home,
     jobfilter,
     newsletters,
     notify_cost,
@@ -2441,10 +2448,18 @@ async def linkedin_premium_job_collection(collection: int = 0) -> dict[str, Any]
     ONE PAGE LOAD, NO SCROLLING, NO PRESSES. ``collection`` is an INDEX into a
     closed tuple in ``linkedin_server/job_collections.py``, never a free
     string, so the set of addresses this tool can ever reach is enumerable by
-    reading that constant: 0 is ``top-applicant``, 1 is ``top-choice``. Both
-    are on the read allowlist, root only. Out of range REFUSES rather than
-    clamping, because a reading filed under the wrong collection is worse than
-    no reading.
+    reading that constant: 0 is ``top-applicant``, 1 is ``top-choice``, 2 is
+    ``recommended``. All three are on the read allowlist, root only. Out of
+    range REFUSES rather than clamping, because a reading filed under the
+    wrong collection is worse than no reading.
+
+    **INDEX 2 IS NOT A PREMIUM COLLECTION** -- the tool's name predates it. It
+    is LinkedIn's own recommended-jobs list (census ``J 39``), the same page
+    ``linkedin_job_collections`` COUNTS; here its posting ids come back, so a
+    recommendation becomes a posting ``linkedin_job_detail`` can read. Added
+    2026-09-23 and exercised offline only, over a skeleton of the live capture
+    this reader's shape was measured on: it has NOT been fired against
+    LinkedIn at that index.
 
     **``slots`` IS THE POSTING COUNT AND ``hydrated`` IS NOT. Do not quote the
     second as the first.** LinkedIn draws one list slot per posting it has
@@ -2538,6 +2553,60 @@ async def linkedin_premium_job_collection(collection: int = 0) -> dict[str, Any]
             }
     except Exception as exc:
         return _error(exc)
+
+
+@mcp.tool()
+async def linkedin_recent_job_searches() -> dict[str, Any]:
+    """Your recent job searches, re-runnable, and which of them carry a job alert.
+
+    ONE PAGE LOAD, NO SCROLLING, NO PRESSES. The address is a module constant,
+    ``job_home.HOME_URL`` -- the jobs home, ``/jobs/jam/``, which is where
+    LinkedIn lands ``/jobs/alerts/`` (measured 2026-09-20). Census ``J 18``,
+    *recent searches: view and re-run*.
+
+    WHAT EACH ENTRY CARRIES. ``search_keywords`` -- the query exactly as
+    ``linkedin_search_jobs`` takes it, read off the entry's own href by the
+    same function that already hands you a job alert's keywords from your
+    notifications; ``location`` -- the place the search ran in, when the
+    subtitle isolates exactly one; ``alert_on`` -- whether LinkedIn draws its
+    alert badge on that search; ``in_your_network``, ``workplace``, and
+    ``facets``, the names of the filters the search carried. **TO RE-RUN ONE,
+    pass its ``search_keywords`` and ``location`` to ``linkedin_search_jobs``.**
+
+    WHAT IT WILL NOT TELL YOU. No filter VALUE -- a salary band is your pay
+    expectation, so only the fact that a salary filter was on comes back -- no
+    place id, no href, no job, no person. ``location`` is ``None`` with
+    ``location_state`` ``ambiguous`` when the subtitle carries two candidate
+    places, rather than a joined string the page never drew.
+
+    **A ZERO IS ONLY READABLE BESIDE ``list_label_seen``.** No entries with the
+    list drawn is a fact about your account; no entries with no list is this
+    reader failing to see, and carries ``refusal``.
+
+    **ALERTS: A PARTIAL VIEW, AND SAID SO.** The badge sits on RECENT searches,
+    so an alert whose search has aged out of the list is not shown here.
+    ``alerts_on`` counts the badges drawn, not every alert you have.
+
+    NOT YET FIRED LIVE. Built 2026-09-23 against a sanitised copy of the live
+    capture of that landing; the first live call is also the first check that
+    ``/jobs/jam/`` serves the same list when opened directly.
+    """
+    url = job_home.HOME_URL
+    try:
+        async with BROWSER.session() as page:
+            landed = await BROWSER.goto(page, url)
+            assert_not_authwall(landed, surface="jobs home")
+            reading = await job_home.read_recent_searches(page)
+            return {
+                "ok": True,
+                # A RELATION, NEVER THE ADDRESS -- the family's spelling.
+                "redirected": landed.rstrip("/") != url.rstrip("/"),
+                "pages_loaded": 1,
+                **reading,
+            }
+    except Exception as exc:
+        return _error(exc)
+
 
 
 @mcp.tool()

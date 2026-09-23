@@ -1,0 +1,30 @@
+<!--
+  The jobs home's RECENT SEARCHES list, sanitised. Built by
+  scripts/_build_jobs_home_fixture.py from the gitignored live capture of
+  the /jobs/alerts/ landing; that capture is never committed.
+  CARRIED OVER: 6 entries in order, each entry's list-item
+  and span classes, its href's query KEYS in order, and its subtitle's
+  badge shape (3 carry the alert badge).
+  INVENTED: every query, every place, every query value except the
+  history tag and the network flag.
+  ADDED, NOT CAPTURED: three decoys, each marked below.
+-->
+<html><head><title>Jobs | LinkedIn</title></head><body>
+<!-- DECOY 1, added: a history entry OUTSIDE main. -->
+<nav><a href="https://www.linkedin.com/jobs/search-results/?keywords=Decoy+Outside+Main&amp;origin=SEMANTIC_SEARCH_HISTORY"><span>Decoy Outside Main</span><span>Placeholder City Z</span></a></nav>
+<main>
+<section><h2>Recent job searches</h2><button aria-label="Clear your search history">Clear</button>
+<ul aria-label="Recent job searches" id="jobs-home-vertical-list__entity-list">
+<li class="pv2 discovery-templates-vertical-list__list-item artdeco-list__item"><div class="display-flex"><a class="display-flex flex-column" href="https://www.linkedin.com/jobs/search-results/?keywords=Placeholder+Platform+Engineer&amp;distance=25&amp;f_JIYN=true&amp;geoId=100000000&amp;origin=SEMANTIC_SEARCH_HISTORY"><span class="jobs-home-job-search-history__title--truncated-text t-16 t-black t-bold">Placeholder Platform Engineer</span><span class="discovery-templates-entity-item--truncated-text t-black--light t-14">Placeholder City A &#183; In your network</span></a></div></li>
+<li class="pv2 discovery-templates-vertical-list__list-item artdeco-list__item"><div class="display-flex"><a class="display-flex flex-column" href="https://www.linkedin.com/jobs/search-results/?keywords=Placeholder+Data+Engineer&amp;distance=25&amp;geoId=100000000&amp;origin=SEMANTIC_SEARCH_HISTORY"><span class="jobs-home-job-search-history__title--truncated-text t-16 t-black t-bold">Placeholder Data Engineer</span><span class="discovery-templates-entity-item--truncated-text t-black--light t-14">Alert On &#183; Placeholder City B</span></a></div></li>
+<li class="pv2 discovery-templates-vertical-list__list-item"><div class="display-flex"><a class="display-flex flex-column" href="https://www.linkedin.com/jobs/search-results/?keywords=Placeholder+Frontend+Engineer&amp;distance=25&amp;geoId=100000000&amp;origin=SEMANTIC_SEARCH_HISTORY"><span class="jobs-home-job-search-history__title--truncated-text t-16 t-black t-bold">Placeholder Frontend Engineer</span><span class="discovery-templates-entity-item--truncated-text t-black--light t-14">Alert On &#183; Placeholder City C</span></a></div></li>
+<li class="pv2 discovery-templates-vertical-list__list-item--collapsed artdeco-list__item"><div class="display-flex"><a class="display-flex flex-column" href="https://www.linkedin.com/jobs/search-results/?keywords=Placeholder+Backend+Engineer&amp;distance=25&amp;geoId=100000000&amp;origin=SEMANTIC_SEARCH_HISTORY"><span class="jobs-home-job-search-history__title--truncated-text t-16 t-black t-bold">Placeholder Backend Engineer</span><span class="discovery-templates-entity-item--truncated-text t-black--light t-14">Placeholder City D</span></a></div></li>
+<li class="pv2 discovery-templates-vertical-list__list-item--collapsed artdeco-list__item"><div class="display-flex"><a class="display-flex flex-column" href="https://www.linkedin.com/jobs/search-results/?keywords=Placeholder+Mobile+Developer&amp;distance=25&amp;f_SAL=f_SA_id_000&amp;geoId=100000000&amp;origin=SEMANTIC_SEARCH_HISTORY"><span class="jobs-home-job-search-history__title--truncated-text t-16 t-black t-bold">Placeholder Mobile Developer</span><span class="discovery-templates-entity-item--truncated-text t-black--light t-14">Alert On &#183; Placeholder City E &#183; Remote</span></a></div></li>
+<li class="pv2 discovery-templates-vertical-list__list-item--collapsed artdeco-list__item"><div class="display-flex"><a class="display-flex flex-column" href="https://www.linkedin.com/jobs/search-results/?keywords=Placeholder+Cloud+Developer&amp;distance=25&amp;f_SAL=f_SA_id_000&amp;geoId=100000000&amp;origin=SEMANTIC_SEARCH_HISTORY"><span class="jobs-home-job-search-history__title--truncated-text t-16 t-black t-bold">Placeholder Cloud Developer</span><span class="discovery-templates-entity-item--truncated-text t-black--light t-14">Placeholder City F &#183; Remote</span></a></div></li>
+</ul>
+</section>
+<!-- DECOY 2, added: a search-route anchor in main WITHOUT the history tag. -->
+<a href="https://www.linkedin.com/jobs/search-results/?keywords=Decoy+Untagged&amp;origin=JOBS_HOME_SEARCH_BUTTON"><span>Decoy Untagged</span><span>Placeholder City Y</span></a>
+<!-- DECOY 3, added: a second list under the SAME element id, as the capture draws its top-applicant list. -->
+<section><h2>Placeholder second list</h2><ul aria-label="Placeholder second list" id="jobs-home-vertical-list__entity-list"><li><a href="/jobs/collections/top-applicant/?currentJobId=1000000201"><span>Decoy Posting</span><span>Placeholder City X</span></a></li></ul></section>
+</main></body></html>

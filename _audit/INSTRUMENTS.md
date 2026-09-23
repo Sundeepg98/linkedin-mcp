@@ -9815,3 +9815,118 @@ captures, the label-distribution pass, the hub scoring behind the live-capture
 list, the export of the census frozen at `1c08e5f` for the retrospective check
 -- are declared disposable. Every number they produced is either re-derived by
 the instrument on each run or recorded with its result in the audit.
+
+## 65. THE JOBS SLICE GETS ITS DIRECTION COLUMN BESIDE THE CENSUS, AND A CHECK THAT RE-READS THE DECIDING WORDS (lane-l3-jobs, 2026-09-23)
+
+**Registered 2026-09-23.** Full record: `_audit/2026-09-23-lane-l3-jobs.md`.
+Numbered 65: the lane was assigned 60, and the census cleanup merged a 60 of
+its own first, so this one moved past the merged 58, 59, 60, 62 and 63 rather
+than renumber a section other documents already cite.
+
+`scripts/census_completion.py` printed 56 `jobs.md` rows as `direction
+unknown`, because that census carries no per-row R/W column, and section 8 of
+`_audit/2026-09-21-the-jobs-direction.md` argues it should not grow one. So the
+per-row reading lives beside the census, in `_audit/_census/jobs-directions.tsv`
+-- 56 classified R 28 / W 25 / R+W 3, then two rows built and banked, 54
+remaining at R 26 / W 25 / R+W 3 -- and every read row carries the bucket-3
+address columns, measured through the shipped boundary.
+
+### 65.1 A DIRECTION IS A READING OF WORDS, SO THE WORDS ARE CITED
+
+A direction column that holds only `R` or `W` can go stale without anything
+being able to notice: the capability cell it was read from can be rewritten
+under it. So each line also carries `dir_phrase` -- the words of the row's own
+capability cell that decide it -- and `dir_basis`, which says whether section
+2's ROW-RANGE cell agrees (`VERB`), is overruled by the row's own verb
+(`VERB-OVER-RANGE`, three rows the 2026-09-21 wave already found), or names
+both acts (`COMPOUND`, `RESOLVED`). The check re-finds every phrase in the live
+capability cell, word-bounded, and re-reads section 2 through the shipped
+`_check_jobs_range_directions.jobs_directions()`, so a recorded disagreement
+that has since gone away is named as stale rather than inherited.
+
+    A DIRECTION CANNOT BE CHECKED FOR TRUTH. THE WORDS IT WAS READ FROM CAN
+    BE CHECKED FOR EXISTENCE, AND THAT IS THE HALF AN INSTRUMENT CAN HOLD.
+
+### 65.2 REFUSED IS NOT WHERE IT IS DRAWN -- THE MIRROR OF ALLOWED IS NOT SERVED
+
+Three rows had been priced on an address that is not where their payload is
+drawn: `J 18`'s recent searches are drawn on the admitted jobs home, not the
+refused `/jobs/search-history/`; `J 56`'s date filter is a checkbox on the
+admitted tracker tab, not a refused query; `J 16`'s suggestions belong to the
+semantic search at the refused `/jobs/search-results/`, not the admitted
+classic search. The bucket-3 rule settled each -- the ADDRESS is the page whose
+load draws the payload -- and every other candidate is kept in `also_driven`
+and re-driven on every run.
+
+### 65.3 A FIXTURE THAT WOULD HAVE PASSED WHILE THE LIVE PAGE FAILED
+
+Half the recent-search entries sit in LinkedIn's collapsed state, and the
+capture records the class, not the stylesheet. A reader built on
+`inner_text` reads a `visibility:hidden` entry as empty and passes every test
+over a fixture with no CSS. `job_home.read_recent_searches` uses
+`text_content`, and `tests/test_job_home.py` hides the collapsed entries two
+ways. **ITS FIRST DRAFT HID THEM ONE WAY, `display:none`, AND ITS OWN CONTROL
+FIRED**: an element inside a `display:none` subtree is not rendered, so
+`innerText` falls back to its full text and that plant could not have caught a
+regression. The discriminating mode was added and the non-discriminating one
+kept, labelled, so the file says why the first is needed.
+
+### 65.4 A JOIN THAT WAS A DERIVED NAVIGATION, AND A GUARD THAT COULD NOT SEE IT
+
+`J 57`'s own census cell names *"the buildable route"*: tracker -> job ids ->
+each posting. A tool was built on it, tested end to end over committed
+captures, gated, committed -- and withdrawn before merge, because it navigates
+to ids READ OFF THE TRACKER PAGE. `tests/test_navigation_is_never_derived.py`
+forbids exactly that (*"a page that can choose the next url can choose a
+stranger's"*), and its engine could not have said so: it taints only a `goto`
+return and a `.url`, and its own docstring names page content as a deliberate
+gap. The guard's green was true and the rule was broken. What caught it was a
+review of the diff against the rule's TEXT, not against the guard's verdict.
+
+    A GUARD THAT NAMES ITS OWN BLIND SPOT HAS NOT CLOSED IT. A NEW NAVIGATION
+    IS CHECKED AGAINST THE RULE'S SENTENCE, NOT ONLY AGAINST ITS ENGINE.
+
+Not repaired here: widening the engine's sources to parsed page content is
+that file's owner's decision, and its docstring records why it was declined.
+
+### 65.5 THE ENTRIES
+
+| path | shown failing by |
+|---|---|
+| `scripts/check_jobs_directions.py` | `tests/test_jobs_directions.py`: 29 tests, every plant into a COPY of the real table and each red AND naming its row -- the two consistent lies only the live boundary can convict (an ADMITTED row made a tidy REFUSED and the reverse), a missing row, a line for a row that left GAP, a duplicate, a deciding phrase no longer in its capability cell, a `VERB` row section 2 now disagrees with, a `VERB-OVER-RANGE` disagreement gone stale, a read row classed `WRITE` and a `WRITE` row given an address, an `R+W` row with one phrase, a `RESOLVED` basis on an `R` row, a source whose file, token or census row is gone or that is prose, a wrong refusal kind, a wrong `also_driven` verdict, a missing table as a named problem, a boundary monkeypatched to admit everything named by the control; green on the real table; and the two pure functions `census_completion.py` is meant to call, shown returning figures on the real walk and WITHHOLDING them, never zeroing, on a table missing a row |
+
+`scripts/check_jobs_directions.py` imports `check_read_addresses`' shape,
+boundary, control and refusal functions unchanged rather than copying them, so
+a read row here obeys exactly the rules a bucket-3 row does.
+
+**AND THE RULING-HOLDS EDGE, ADDED AT THE MERGE WITH MASTER `c8fa6ea`.** The
+bucket-3 checker gained `ruling_problems` the same day -- no row blocked on
+nothing on a page a RULING holds (`scripts/ruling_holds.py`) -- and this
+checker now runs it on its read rows, in `main` and in the pure
+`census_figures` that `census_completion.py` calls. No hold binds a page
+today, so on the real table it has nothing to fire on; three of the 29
+tests install a hold themselves and show it firing, in the checker and in
+the census hook, which withholds the jobs split.
+
+**PROVENANCE, NOT INSTRUMENTS**: `scripts/_build_job_list_skeleton.py` and
+`scripts/_build_jobs_home_fixture.py` build two committed fixtures from
+gitignored live captures and are the record of what each fixture carried over
+and what it invented. Each REFUSES a capture whose shape would make its fixture
+misrepresent the page. They are not registered as instruments.
+
+### 65.6 SUPERSEDED, AND RED AT HEAD BEFORE THIS WAVE: SECTION 47's TABLE
+
+`scripts/_check_jobs_gap_directions.py` (section 47) carries its
+classification as a Python dict, a second copy of this data -- the drift its
+own author warned about. It has been RED at HEAD since `J 40` left GAP on
+2026-09-21 (its reconciliation names the row) and no test runs it, which is how
+nobody was told. This wave does not edit it; `_audit/_census/jobs-directions.tsv`
+supersedes its table, and retiring it is recorded as a merge note.
+
+### 65.7 DECLARED DISPOSABLE
+
+The scratchpad scripts this wave ran -- the generator that wrote the table, the
+per-capture shape probes, the offline run of the collections reader over the
+raw capture, the line-ending census -- are declared disposable. What they
+measured is re-derived by the checker on every run, carried into a committed
+fixture by a builder, or recorded with its number in the audit.
