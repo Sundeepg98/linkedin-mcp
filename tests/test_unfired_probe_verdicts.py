@@ -36,7 +36,9 @@ import importlib.util
 import pathlib
 import sys
 
-REPO = pathlib.Path(__file__).resolve().parent.parent
+import pytest
+
+REPO =pathlib.Path(__file__).resolve().parent.parent
 SCRIPTS = REPO / "scripts"
 
 
@@ -53,6 +55,7 @@ def _load(name: str):
 
 insights = _load("_probe_unfired_job_detail_insights")
 filters = _load("_probe_unfired_job_search_filters")
+selfreads = _load("_probe_unfired_self_reads")
 
 
 # --------------------------------------------------------------------------
@@ -266,3 +269,79 @@ def test_the_two_probes_agree_on_what_a_badge_state_is():
         {"error": "TimeoutError"},
     ):
         assert insights._badge_state(reading) == filters._badge_state(reading)
+
+
+# --------------------------------------------------------------------------
+# THE STOP RULE, added 2026-09-23. The planted defect is a probe that keeps
+# loading pages after the session has gone wrong.
+#
+# Until then an error envelope mid-run was COUNTED and the loop moved to the
+# next posting, so a login wall or a throttled page would have been answered
+# with more navigations into the same session.
+# --------------------------------------------------------------------------
+
+#: Every error KIND a shipped tool can put in its envelope (`errors.py`'s
+#: `kind` values, `server._error`'s fallback) plus the one the probes build
+#: themselves when a tool RAISES -- the exception's type name.
+_ANOMALY_KINDS = (
+    "not_authenticated",
+    "auth_unknown",
+    "browser_unavailable",
+    "extraction_failed",
+    "write_attempt_blocked",
+    "unexpected",
+    "TimeoutError",
+)
+
+
+def test_every_error_envelope_stops_the_run():
+    """Including `extraction_failed`: a 999 draws nothing and arrives as that.
+
+    A login or checkpoint landing reaches a tool as `not_authenticated`; a
+    throttled page arrives as `extraction_failed`, and nothing in the envelope
+    separates it from a flake. So both stop, and so does every other kind.
+    """
+    for kind in _ANOMALY_KINDS:
+        assert insights._anomaly({"error": kind}) == kind, kind
+
+
+def test_a_refusal_and_a_clean_payload_are_not_anomalies():
+    """The rows this probe decides ARE refusals -- stopping on one would
+    make every `self_assertion_unreadable` reading impossible to take."""
+    assert insights._anomaly({"refused": "self_assertion_unreadable",
+                              "reason": "the landed url carried none"}) is None
+    assert insights._anomaly({"insights": {}, "title": "x"}) is None
+    assert insights._anomaly({"error": None}) is None
+    assert insights._anomaly({"error": ""}) is None
+
+
+def test_a_result_that_is_not_a_dict_is_an_anomaly():
+    for value in (None, [], "x", 0):
+        assert insights._anomaly(value) == "not_a_dict"
+
+
+def test_the_anomaly_is_named_by_kind_and_never_by_message():
+    """An envelope's `message` may quote the page. Only the kind leaves."""
+    out = {"error": "extraction_failed",
+           "message": "PLANTED-PAGE-TEXT that must not be printed"}
+    assert insights._anomaly(out) == "extraction_failed"
+    assert len(insights._anomaly({"error": "k" * 500})) == 40
+
+
+def test_the_self_read_probe_stops_by_the_same_rule_and_holds_no_copy():
+    """Lifted by import, like the proximity probe's control apparatus. A
+    second copy of a stop rule is a stop rule that can drift."""
+    assert not hasattr(selfreads, "_anomaly")
+    for kind in _ANOMALY_KINDS:
+        assert selfreads.sibling._anomaly({"error": kind}) == kind
+    assert selfreads.sibling._anomaly({"refused": "x"}) is None
+
+
+def test_the_row_selector_defaults_to_both_and_refuses_anything_else():
+    """A typo that fell back to BOTH would load the composer unasked."""
+    assert selfreads._selected([]) == ("M45", "C41")
+    assert selfreads._selected(["--only", "C41"]) == ("C41",)
+    assert selfreads._selected(["--only", "M45"]) == ("M45",)
+    for bad in (["--only", "c41"], ["--only"], ["--only", "M33"]):
+        with pytest.raises(SystemExit):
+            selfreads._selected(bad)
