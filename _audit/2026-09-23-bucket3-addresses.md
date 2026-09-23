@@ -94,8 +94,8 @@ own has its HOST page as its address, and the press becomes the row's gate
 as good as the address it was taken on: **MEASURED** (seen served, or drawn on
 a live page or a capture), **NAMED** (written in code, a test, the census or an
 audit, never observed served) or **INFERRED** (constructed as representative by
-a prior wave or this one). Six of the 57 addresses are INFERRED; section 6
-lists them.
+a prior wave or this one). Of the 57 addresses, 28 are MEASURED, 22 NAMED and
+7 INFERRED; section 6 lists the seven.
 
 ---
 
@@ -179,8 +179,12 @@ prefixes (`/search/results/`, `/school/`), bare substrings (`/follow`,
 `/invite`, `/edit/`), and context addresses a cell names for another purpose
 (the counter candidates in M C72's cell, the jobs search in N 79's).
 
-**Delegation: none.** Every slice of this wave needed the per-row judgement
-this document records, so none was closed-form enough to hand down.
+**Delegation: one closed-form slice, and it was a check, not a judgement.**
+Classifying a row needed the judgement this document records, so none of that
+was handed down. Verifying it was: an implementer child, read-only and with no
+part in writing the table, re-resolved every row's source and quoted the
+supporting line for every claim in its note. Its report was read line by line
+before anything entered the table; section 6 says what it changed.
 
 ---
 
@@ -195,12 +199,12 @@ same text.
 | row | address | basis | gate | source | why |
 |---|---|---|---|---|---|
 | M C85 | `/feed/update/urn:li:activity:12345/` | NAMED | **READER** | _audit/_census/messaging-and-content.md row C85 | The READ half is poll results, COUNTS on the post, under the feed-content ruling C43 and C74 rest on (counts and relations only). The permalink is admitted; no reader exists. UNVERIFIED and not recorded anywhere: whether per-option results render before voting (a vote is an irreversible write). |
-| M M49 | `/messaging/thread/2-ABCdef123/` | MEASURED | **READER** | _audit/_census/messaging-and-content.md row M49 | The indicators live in a thread, and /messaging/ is measured to redirect into /messaging/thread/<id> (live capture 12.2). The row's own cell: blocked on a reader plus the cost of opening a thread, not on an address; linkedin_open_messaging already carries that cost and documents it (a read receipt may be seen). Thread id is the synthetic from scripts/_probe_route_vs_surface.py. |
-| P O3 | `/analytics/profile-views/` | MEASURED | **PRESS-PERMITTED** | linkedin_server/press.py::SENSITIVITY_BASES['/analytics/profile-views/'] | Loaded today by linkedin_who_viewed_me. Press conditions 1-3 settle offline (admitted; [aria-expanded] sanctioned; structural basis declared) and the witness fired 2026-09-21: the panel opens. Blocked on ONE unbuilt artifact, a name-free content shaper, with dom.py's readonly-ok waiver budget at 22 of 22. |
+| M M49 | `/messaging/thread/2-ABCdef123/` | MEASURED | **READER** | _audit/_census/messaging-and-content.md row M49 | The indicators live in a thread, and /messaging/ is measured to redirect into /messaging/thread/<id> (live capture 12.2). The row's own cell: blocked on a reader plus the cost of opening a thread, not on an address; linkedin_open_messaging already carries that cost for the thread LinkedIn lands on, and documents it (a read receipt may be seen). A reader confined to that landed thread adds no cost; one that CHOOSES a thread by id would be a new decision. Thread id is the synthetic from scripts/_probe_route_vs_surface.py. |
+| P O3 | `/analytics/profile-views/` | MEASURED | **PRESS-PERMITTED** | _audit/_census/profile.md row O3 | Loaded today by linkedin_who_viewed_me. Press conditions 1-3 settle offline (admitted; [aria-expanded] sanctioned; the structural basis press.SENSITIVITY_BASES declares for this surface) and the witness fired 2026-09-21: the panel opens. Blocked on ONE unbuilt artifact, a name-free content shaper, with dom.py's readonly-ok waiver budget at 22 of 22. |
 | M C72 | `/feed/` | MEASURED | **PRESS-PERMITTED** | _audit/_census/messaging-and-content.md row C72 | The share triggers render on /feed/ (measured live 2026-09-19); the off-platform items are built on demand behind an [aria-haspopup] trigger. Offline, press conditions 1-3 settle: admitted, shape sanctioned, and press.SENSITIVITY_BASES declares /feed/ 'sensitive' on off_state. What is missing is a caller wiring read_reaction_surface as the counter, then a fire. |
-| N 134 | `/analytics/profile-views/` | MEASURED | **PRESS-PERMITTED** | linkedin_server/press.py::SENSITIVITY_BASES['/analytics/profile-views/'] | Same surface and artifact as P O3: conditions 1-3 settle offline, the witness fired (the panel opens), and the one unbuilt thing is a name-free shaper for a panel made of other people. |
-| P F1 | `/in/me/` | NAMED | **MEASURE** | scripts/_probe_profile_sections_live.py::PROFILE_URL | The detail address (also driven) is refused, so the route the repository pursues is the recommendations SECTION on the admitted profile. Its structure is UNMEASURED: four instruments failed their controls finding it (2026-09-19) and scroll is not sanctioned. recommendations.py (the name-free shaper) ships unwired. Corrects the read triage's ADDRESS/ABSENT, which priced only the detail spelling. **Also driven:** `/in/me/details/recommendations/` refused. |
-| P H11 | `/in/me/` | NAMED | **MEASURE** | _audit/2026-09-05-network-tail.md section 3 | The row is the section AS RENDERED ON THE PROFILE, so its page is /in/me/ (admitted); the two other spellings (also driven) are refused and serve the ten writes, not this read. Render gate unmeasured: nobody knows whether the section renders on a passive load, and shape._TOPCARD_CHROME discards the phrase as furniture. Corrects the read triage's ADDRESS/ABSENT, which priced the details spelling. **Also driven:** `/in/me/details/services/` refused, `/services/page/` refused. |
+| N 134 | `/analytics/profile-views/` | MEASURED | **PRESS-PERMITTED** | _audit/_census/network.md row 134 | Same surface and artifact as P O3: conditions 1-3 settle offline, the witness fired (the panel opens), and the one unbuilt thing is a name-free shaper for a panel made of other people. |
+| P F1 | `/in/me/` | NAMED | **MEASURE** | scripts/_probe_profile_sections_live.py::PROFILE_URL | The detail address (also driven) is refused, so the route the repository pursues is the recommendations SECTION on the admitted profile, whose heading shape.PROFILE_SECTION_HEADINGS already lists among the profile's own sections. Its structure is UNMEASURED: four instruments failed their controls finding it (2026-09-19) and scroll is not sanctioned. recommendations.py (the name-free shaper) ships unwired. Corrects the read triage's ADDRESS/ABSENT, which priced only the detail spelling. **Also driven:** `/in/me/details/recommendations/` refused. |
+| P H11 | `/in/me/` | NAMED | **MEASURE** | _audit/2026-09-05-network-tail.md section 3 | The row is the section AS RENDERED ON THE PROFILE, so its page is /in/me/ (admitted); the two other spellings (also driven) are refused and serve the ten writes, not this read. Render gate unmeasured: nobody knows whether the section renders on a passive load. The read triage says the phrase sits in shape._TOPCARD_CHROME; measured, that set holds the 'add services' PROMPT, not the section, so no parser in the package reads the section either way. Corrects the read triage's ADDRESS/ABSENT, which priced the details spelling. **Also driven:** `/in/me/details/services/` refused, `/services/page/` refused. |
 | P K8 | `/in/me/` | MEASURED | **MEASURE** | _audit/2026-09-05-profile-rest.md | A reading exists at allowlist +0: top voice 0 in text AND 0 in accessible names, on an instrument shown able to disagree with itself. What remains is one live re-read to bank MEASURED-ABSENT (read triage 3.2), not a reader. |
 | N 80 | `/search/results/people/` | MEASURED | **BUILT-UNFIRED** | linkedin_server/search_results.py::PEOPLE_SEARCH_URL | Fired live 2026-09-21 (route half: 18 person_result anchors, landed where sent). The term 'people' read 0; the label-SHAPE reading that would settle it (dom.FILTER_PANEL_JS windowMatch / search_results.read_filters 'decorated') is BUILT and NOT FIRED. |
 | N 81 | `/search/results/people/` | MEASURED | **BUILT-UNFIRED** | linkedin_server/search_results.py::PEOPLE_SEARCH_URL | Single-word term read 0, which cannot separate absent from decorated; the All-filters press is refused terminally. The label-SHAPE reading is BUILT and NOT FIRED. |
@@ -208,7 +212,7 @@ same text.
 | N 89 | `/search/results/people/` | MEASURED | **BUILT-UNFIRED** | linkedin_server/search_results.py::PEOPLE_SEARCH_URL | Single-word term read 0, which cannot separate absent from decorated; the label-SHAPE reading is BUILT and NOT FIRED (row cell, 2026-09-21). |
 | P D28 | `/in/me/` | MEASURED | **PRESS** | _audit/2026-09-03-linkedin-gap-blockers.md Amendment C2 | The phrase 'profile language' was measured rendering on /in/me/ (read half +0). Binding gate per the read triage: PRESS -- the reading found distinct_langs 1, and no pressable language control is proven; press.check_basis refuses /in/me/ with no_sensitivity_basis. |
 | P J4 | `/in/me/` | MEASURED | **PRESS** | scripts/_probe_route_vs_surface.py::CANDIDATES (P J4) | The hiring state sits behind the Open-to menu. Measured twice, fourteen days apart: hiring NAMED BUT INERT, the opener AMBIGUOUS, the menu holding three options and no state (read triage). press.check_basis refuses /in/me/ with no_sensitivity_basis. |
-| M C29 | `/feed/update/urn:li:activity:12345/` | NAMED | **PRESS** | scripts/_probe_route_vs_surface.py::CANDIDATES (one post, by permalink) | Comments render under a post; the permalink is admitted and press.check_basis finds the /feed/ basis for it. But sorting is SELECTING an option, a second press that is not a disclosure, and the control was never named or measured, so no ruled press reaches it. |
+| M C29 | `/feed/update/urn:li:activity:12345/` | INFERRED | **PRESS** | scripts/_probe_route_vs_surface.py::CANDIDATES (one post, by permalink) | INFERRED BY THIS WAVE: the probe tags this permalink for M C43, M C34 and N 148, never for this row; it is used here because comments render under the post they belong to. The class cannot move on it: both pages a post's comments render on, the permalink and the feed (also driven), are admitted, and press.check_basis finds the /feed/ basis for both. But sorting is SELECTING an option, a second press that is not a disclosure, and the control was never named or measured, so no ruled press reaches it. **Also driven:** `/feed/` admitted. |
 | N 76 | `/in/me/` | MEASURED | **PRESS** | _audit/_census/network.md row 76 | One [aria-haspopup] and zero menus on /in/me/, so the follow link is behind a built-on-demand menu. press.check_basis refuses /in/me/ with no_sensitivity_basis before anything is read; the row's cell re-files it as a RULING REQUEST for a SENSITIVITY_BASES entry, and states why the argument would be circular. |
 | N 84 | `/search/results/people/` | MEASURED | **PRESS** | linkedin_server/search_results.py::PEOPLE_SEARCH_URL | Multi-word term 'current company' read 0 on 83 drawn controls, so the control sits in the All-filters panel. That press is refused TERMINALLY (condition 2: neither aria-expanded nor aria-haspopup; condition 3: no sensitivity basis). The press-free route (response bodies) needs a reader this package lacks, with an admission heavier than the press. |
 | N 85 | `/search/results/people/` | MEASURED | **PRESS** | linkedin_server/search_results.py::PEOPLE_SEARCH_URL | Multi-word term 'connections of' read 0 on 83 drawn controls, so the control sits in the All-filters panel. That press is refused TERMINALLY (condition 2: neither aria-expanded nor aria-haspopup; condition 3: no sensitivity basis). The press-free route (response bodies) needs a reader this package lacks, with an admission heavier than the press. |
@@ -241,7 +245,7 @@ same text.
 | P M11 | `/resume-builder/` | INFERRED | `NO-PATTERN` | scripts/classify_surface_blockers.py::SURFACE_ADDRESSES (the resume-tools entry) | The only address the corpus names, and its own module calls the table a CLAIM, not a derivation. No pattern among the 42 names any resume path, and the capture of the admitted /premium/my-premium/ draws resume/cv/builder 0 times (live capture 12.10). Entitlement unverified. |
 | P M12 | `/jobs/application-settings/` | INFERRED | `FORBIDDEN[/jobs/application]+NO-PATTERN` | _audit/2026-09-21-the-read-triage.md section 5 | Inferred from the sibling row M1 (the recheck tsv marks it SYNTHETIC-REPRESENTATIVE). Refused by the FIRST forbidden substring; reopening it is the operator's (row M1). Whether AI resume feedback renders on an admitted job posting is unmeasured. |
 | M C38 | `/analytics/post-summary/urn:li:activity:12345/` | MEASURED | `NO-PATTERN` | _audit/_census/messaging-and-content.md row C38 | The row asks PER-POST analytics and viewer demographics. The account-level page (also driven) is admitted and read by linkedin_creator_analytics but serves a per-day account series for one metric; the per-post address is drawn on it and refused. **Also driven:** `/analytics/creator/content/` admitted. |
-| M C39 | `/analytics/creator/content/?metricType=x` | NAMED | `NO-PATTERN` | tests/test_analytics_creator_boundary.py (MUST-REFUSE) | LinkedIn selects a metric with ?metricType= (chart_labels.py), and the admitted pattern has no query group, so the comments metric is unreachable at any value; the fixture's value is driven. Same tool and surface as C38, fired live. |
+| M C39 | `/analytics/creator/content/?metricType=x` | NAMED | `NO-PATTERN` | tests/test_analytics_creator_boundary.py (MUST-REFUSE) | Tied to this row by the 2026-09-19 read-rows wave (5.1): the comments metric needs ?metricType=. LinkedIn selects a metric that way (chart_labels.py), and the admitted pattern has no query group -- readonly.py states why -- so the comments metric is unreachable at any value; the fixture's value is driven. Same tool and surface as C38, fired live. |
 | M C48 | `/in/me/recent-activity/articles/` | NAMED | `NO-PATTERN` | _audit/_census/messaging-and-content.md row C48 | Both spellings the row's own cell measured refuse; the single allowlist +1 its blocker is billed is owed at least twice. **Also driven:** `/pulse/` refused. |
 | M C70 | `/search/results/content/` | NAMED | `NO-PATTERN` | _audit/_census/messaging-and-content.md row C70 | Both spellings of this capability's address refuse (row cell, re-measured 2026-09-21). D2 (widen the search admission past people) plus a per-group address; doubly gated. **Also driven:** `/search/results/groups/` refused. |
 | N 99 | `/school/placeholder-school/people/` | NAMED | `NO-PATTERN` | scripts/_probe_route_vs_surface.py::CANDIDATES (a school's alumni tab) | The root (also driven) is admitted; the alumni tab is refused by the school entry's anchor, in its own words, carrying zero forbidden substrings. D3: does a reasoned allowlist refusal count as written. **Also driven:** `/school/placeholder-school/` admitted. |
@@ -249,8 +253,8 @@ same text.
 | N 102 | `/company/placeholder-org/people/` | NAMED | `NO-PATTERN` | linkedin_server/readonly.py (company entry: /company/<x>/people/) | A MEMBER ROSTER, refused 'by this anchor and by nothing else' (measured: zero forbidden substrings); the root is admitted. D3's cause. **Also driven:** `/company/placeholder-org/` admitted. |
 | N 104 | `/search/results/companies/` | NAMED | `NO-PATTERN` | _audit/_census/network.md row 104 | D2: widen the search admission past the people vertical. The non-search half (company_page_url off a posting) already ships. |
 | N 161 | `/search/results/groups/` | NAMED | `NO-PATTERN` | _audit/_census/network.md row 161 | The groups entry's comment declines to inherit this address; D2. |
-| N 177 | `/groups/12345/members/` | NAMED | `NO-PATTERN` | linkedin_server/readonly.py (groups entry: /groups/<id>/members/) | The member roster, 'not admitted here or anywhere'. D3. |
-| N 178 | `/in/someone-else/details/interests/` | NAMED | `NO-PATTERN` | scripts/_probe_newsletter_routes.py (a third party's interests) | Another member's groups sit on THEIR profile; loading a third party's profile leaves them a durable record, the boundary's sharpest refusal. D3. **Also driven:** `/in/someone-else/` refused. |
+| N 177 | `/groups/12345/members/` | NAMED | `NO-PATTERN` | _audit/2026-09-19-the-read-rows.md section 5.2 | The read-rows wave tied this row to a group's member directory. linkedin_server/readonly.py refuses that roster by name -- as census row N 165, the row put out of scope for it -- and its groups root entry states the cause: a group's MEMBER DIRECTORY is other people and is 'not admitted here or anywhere'. D3. |
+| N 178 | `/in/someone-else/` | NAMED | `NO-PATTERN` | _audit/2026-09-19-the-read-rows.md section 5.2 | The read-rows wave tied this row to another member's profile. A member's groups would sit on THEIR profile -- the interests tab, also driven, is this wave's inference of where, taken from a third-party interests literal scripts/_probe_newsletter_routes.py uses as a refusal control. Loading a third party's profile leaves them a durable record, the boundary's sharpest refusal. D3. **Also driven:** `/in/someone-else/details/interests/` refused. |
 | N 179 | `/search/results/events/` | NAMED | `NO-PATTERN` | _audit/_census/network.md row 179 | D2, plus the D1 parameter ruling (a keyword nothing on this surface accepts). |
 | N 183 | `/mypreferences/d/categories/placeholder/` | INFERRED | `FORBIDDEN[/mypreferences/d/categories/]+NO-PATTERN` | linkedin_server/readonly.py (events entry: N 183 is a SETTING under preferences) | Which preference page holds it is unrecorded. The settings index draws navigation only and the toggles live one level down under categories/, which is denylisted as a family (_audit/2026-09-19-settings-tail-addresses.md), so every spelling there refuses on the same substring. D5's second costume: if the settings ruling reaches it, it is EXCLUDED-RULED. |
 | N 184 | `/events/12345/` | NAMED | `NO-PATTERN` | linkedin_server/readonly.py (events entry names N 184 at /events/<id>/) | The events family admits the root only (also driven), one segment narrower than groups; pinned by a committed test. **Also driven:** `/events/` admitted. |
@@ -327,14 +331,27 @@ every one of them:
     UNDETERMINED    M M9    no address lists conversations; the one live look found none
                     M M28   the same hole, for the archived view
 
-**Six addresses are INFERRED, and for five of them the class cannot move** --
+**Seven addresses are INFERRED, and for six of them the class cannot move** --
 every spelling in the family gets the same verdict: P L8 (all three hub
 candidates refuse), P M11 (no pattern among the 42 names any resume path),
-N 94 (the people pattern admits any query), N 183 (the whole `categories/`
-family refuses on one substring) and N A5 (the company pattern admits the root
-only, so everything under `/admin/` refuses). **P M12 is the one whose class
-could move**: its address is inferred from the sibling row M1, and whether AI
-resume feedback renders on an admitted job posting has never been looked at.
+M C29 (both pages a post's comments render on, its permalink and the feed, are
+admitted), N 94 (the people pattern admits any query), N 183 (the whole
+`categories/` family refuses on one substring) and N A5 (the company pattern
+admits the root only, so everything under `/admin/` refuses). **P M12 is the
+one whose class could move**: its address is inferred from the sibling row M1,
+and whether AI resume feedback renders on an admitted job posting has never
+been looked at.
+
+**A cold source check ran over all 67 rows and was taken at its word only
+after its evidence was read.** A verifier with no part in writing the table
+re-resolved every row's source against the tree and quoted the supporting line
+for every claim. It returned 67 supported, and its two caveats were real: the
+literals first cited for M C29 and N 178, and the passage first cited for
+N 177, are tagged in their own files for OTHER rows. All three were re-sourced
+to the audit that actually ties them, and M C29's basis dropped to INFERRED.
+Reading its evidence also turned up one inherited imprecision it had passed:
+the read triage says P H11's phrase sits in `shape._TOPCARD_CHROME`, and that
+set holds the "add services" prompt, not the section.
 
 **Two statements in the table are UNVERIFIED and marked so in their rows**:
 that M C85's poll results render before a vote (a vote is an irreversible
@@ -504,16 +521,22 @@ demonstrations pass, unchanged.
                                                    all four MATCH, GAP 274, stated rows 704
     scripts/reader_closable_blockers.py            controls 1-4 OK, reader-reachable 67
     scripts/pin_census_rows.py                     no drift: live population is the pin
-    tests/test_read_addresses.py                   @@TESTS@@
+    tests/test_read_addresses.py                   28 passed; its first run failed 1 of 21 on
+                                                   its OWN assertion (the letters of RED inside
+                                                   BUILT-UNFIRED), fixed before the first commit
     scripts/impact_gate.py --against 79c5f8e       @@GATE@@
     the three generators, twice                    INDEX, RULINGS, blocker map at a fixpoint
     the pre-commit identity gate                   0 hits, on every commit of this wave
 
 **NOT RUN, and why:**
 
-* **The full suite.** The impact gate scoped this change to 36 of 215 test
-  files (17%) and said so; the other 179 files did not run here. CI runs the
-  whole suite on three platforms on push, and this wave does not push.
+* **The full suite.** The impact gate scoped this change and said so; the
+  files it did not select did not run here. CI runs the whole suite on three
+  platforms on push, and this wave does not push. **Its first plan for this
+  wave selected 98 of 215 files and widened itself to the full suite** -- the
+  new test's module-level constant `REAL` matched the word REAL in dozens of
+  docstrings under the gate's constant-coupling rule. The constant was removed
+  in this wave's second commit and the plan fell to 36.
 * **`scripts/triage_read_gap_rows.py` green.** It is red at HEAD on its own
   control for a reason that predates this wave (section 7.4), and it was re-run
   only to confirm that the red is the same five rows.
