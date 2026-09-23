@@ -27,6 +27,13 @@ them later than the clock when it was written.
     01:58  impact gate launched; killed at 02:28:34 by this lane's own 30-minute
            timeout, WITHOUT a verdict, while a sibling lane's full-suite gate ran
            beside it -- see section 6.1
+    02:33  the navigation guard's limits restated from a re-measurement; this
+           log's times replaced by readings
+    02:34  impact gate run 2 launched, after the older sibling gate exited
+    03:16  gate run 2 REFUSED on one test (the 250 ms readiness race, section 5
+           item 6); the cold verification pass had reported 11 of 11 by then
+    03:22  that test's module, run alone while other lanes' suites ran: the same
+           red, `1_no_listbox`
     --     master moved to 001f70b while this lane ran (other lanes merging);
            this lane's gates stay --against 9c219c8, as briefed
 
@@ -288,11 +295,26 @@ regeneration after this record was staged is in section 6.
    also returns repeats; its consumers were not audited. Safe by construction:
    the hash guard (a dict keyed by path), `check_banked_evidence_is_reachable`
    and the sanitiser census (sets).
-6. **A readiness race under load.**
-   `tests/test_click_is_not_its_own_evidence.py::test_the_refusal_names_the_ambiguity_when_no_matcher_can_help`
-   read `1_no_listbox` in a six-worker batch on a busy box and passed alone (the
-   module: 30 passed, 1 xfailed). That branch is decided by whether the listbox
-   attached inside its wait, not by any field this lane changed.
+6. **A readiness race with a known mechanism, in a file this lane does not own.**
+   `tests/test_click_is_not_its_own_evidence.py`'s `_fast_wait` fixture sets
+   `dom.TYPEAHEAD_TIMEOUT_MS` from 5000 to **250 ms**, and its docstring says it is
+   "for the one test that WANTS it to time out" -- the one asserting
+   `1_no_listbox`. **Seventeen tests take it.** At least two of them assert
+   `4_several_options_match`, which needs the listbox to ATTACH inside those 250 ms:
+   `test_the_refusal_names_the_ambiguity_when_no_matcher_can_help` and
+   `test_the_refusal_says_when_a_matcher_would_have_separated_them`. Under a box
+   running other lanes' suites, it does not. Measured three times this session,
+   each reading `1_no_listbox`: a six-worker batch, gate run 2, and the module run
+   alone at 03:23 while other lanes' suites ran; each passed when re-run alone
+   (13.7 s for the test; the module passed whole at 01:42 when the box was
+   quieter). Already on record on 2026-09-21, reproduced by another lane at a
+   clean HEAD (`_audit/2026-09-21-the-four-loose-rows.md` section 5A.1). **Not
+   this lane's change, by construction:** `appeared` is set by
+   `page.wait_for_selector(..., timeout=TYPEAHEAD_TIMEOUT_MS)`, which runs before
+   both lines this lane edited in `read_typeahead_options`, and every consumer of
+   the `error` field tests only its truthiness or prints it -- a type name is as
+   truthy as the message it replaced. The repair is the owner's: give those tests
+   the real bound, or their own.
 
 ## 6. COMMITS, GATES, AND WHAT DID NOT RUN
 
@@ -304,6 +326,8 @@ The commits, on this branch only until it merges (no ancestor of `master` yet):
 | `0926678` | hash citation guard: every slot keyword is case-folded, the hex class is not |
 | `8013a30` | reason locator: a conflicted path is read once, not once per merge stage |
 | `54ebb7f` | error fields carry the exception TYPE: fourteen dom.py sites, one write gate, and the guard that holds it |
+| `447a838` | lane G record and register section 67; generated files regenerated to a fixpoint |
+| `9512fd1` | lane G: the navigation guard's limits restated from a re-measurement; the record's times read from git |
 
 Gates are recorded in section 6.1 as they complete.
 
@@ -328,3 +352,51 @@ Gates are recorded in section 6.1 as they complete.
                                             full-suite gate shared the box. A gate
                                             killed by its caller is not a red and not
                                             a green, and is not counted as either.
+    impact gate --against 9c219c8, run 2   REFUSED on ONE test, on the final code
+                                            tree (the table's last row): 1 failed,
+                                            9123 passed,
+                                            8 skipped, 1 xfailed in 2462.5 s, full
+                                            suite, launched 02:34 after the older
+                                            sibling gate exited, no timeout wrapper.
+                                            The one red is the 250 ms readiness race
+                                            of section 5 item 6, attributed there.
+    cold verification pass                 11 of 11 PASS -- section 7
+
+**NOT RUN, and what that leaves open:** a third full gate to turn run 2's single
+red green (the race is load-dependent, and the owner's repair, not a re-run, is
+what would settle it); CI on any platform (nothing was pushed); anything live.
+No gate ran on the commit that adds sections 6.1 and 7: that commit changes this
+record alone, with the generated files re-run to a fixpoint.
+
+## 7. THE ONE COLD VERIFICATION PASS
+
+One implementer child, cold to this work, ran an 11-item closed checklist over
+the tree at the section 6 table's last row, from disk, read-only, reporting facts
+for the lead to judge. **11 of 11
+PASS**, no CANNOT-TELL. The report stays in the session scratchpad; what it found:
+
+* six lane commits, and no attribution line in any message body;
+* 1827 added lines: no non-ASCII character (checked per character, per byte and by
+  regex); no drive path, user directory or name. Its one raw hit, `C:\`, was
+  fixture text -- the identifier `SRC` then `:` then an escaped newline -- and it
+  said so; the one address is `control@example.invalid`;
+* no census slice, no census file other than the generated map, and no rulings
+  register source among the 16 changed paths;
+* all 15 `dom.py` hunks are an `error`/`why` assignment, its continuation, or a
+  comment;
+* **the twelve ruled raise sites: every one IDENTICAL, and more than asked -- each
+  of the twelve functions' whole body is byte-identical to `9c219c8`**;
+* the three generated files' `--check` modes all exit 0;
+* the red proofs re-derived from the old revisions, not taken from this record:
+  the old hash guard finds no candidate in the capitalised plant and the new one
+  finds `deadbee`; the old navigation module finds nothing in the `J 57` route and
+  the new one finds exactly the marked line; the locator's two tests and the
+  failing-page selection pass; `KNOWN_LAUNDERERS` holds five keys, none in
+  `dom.py`, `writes.py` or `server.py`;
+* this record's first line, its commit table against `git log` (the four rows it
+  then held, subjects equal), and no status-log time later than the commit that
+  wrote it;
+* section 67's entry paths all exist; the worktree clean.
+
+As briefed, that was the one pass; nothing was re-verified after it. The gate run
+2 result and this section are the only changes since.
