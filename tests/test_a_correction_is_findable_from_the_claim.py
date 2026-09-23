@@ -2977,7 +2977,7 @@ NOT_A_CORRECTION: dict[tuple[str, str], str] = {
 }
 
 
-def _documents() -> list[pathlib.Path]:
+def _documents(root: pathlib.Path | None = None) -> list[pathlib.Path]:
     """Every ``.md`` document in ``_audit/`` THAT GIT TRACKS.
 
     **IT USED TO BE ``AUDIT.rglob("*.md")``, AND THAT MADE THE SCAN'S DOMAIN
@@ -3013,17 +3013,33 @@ def _documents() -> list[pathlib.Path]:
     A non-zero git exit FAILS. It is not skipped and not defaulted to a disk
     walk -- a check that goes quiet when its instrument is missing is the shape
     this whole suite is written against.
+
+    ``root`` defaults to this repository's ``ROOT``, looked up at CALL time as
+    it always was; a test passes a throwaway repository to reach a real
+    merge-stage listing.
     """
+    root = ROOT if root is None else root
     proc = subprocess.run(
         ["git", "ls-files", "--", "_audit"],
-        cwd=str(ROOT),
+        cwd=str(root),
         capture_output=True,
         text=True,
     )
     assert proc.returncode == 0, "git ls-files failed: %s" % proc.stderr
+    # DEDUPED, THEN SORTED AS BEFORE. `git ls-files` prints an UNMERGED path
+    # once per merge stage (1 = common ancestor, 2 = ours, 3 = theirs), so
+    # mid-merge a conflicted document is listed up to three times. Measured on
+    # the blocker locator's copy of this listing: one conflicted document
+    # scored 33/30/24 against 11/10/8 once staged
+    # (`_audit/2026-09-23-census-cleanup.md` section 13.5). Here the repeat
+    # turned the basename-uniqueness check red on a duplicate that does not
+    # exist. Collapsed on git's exact strings before they become paths (a
+    # Windows path compares case-blind), following
+    # `scripts/find_blocker_reason.py::tracked_audit_paths` -- a set, then
+    # sorted; not `--deduplicate`, which older git lacks.
     return sorted(
-        ROOT / line
-        for line in proc.stdout.splitlines()
+        root / line
+        for line in set(proc.stdout.splitlines())
         if line.strip().endswith(".md")
     )
 
@@ -3570,3 +3586,136 @@ def test_control_the_truncation_check_convicts_the_rule_it_replaced():
     # A marker with no citation at all must come back empty rather than raise;
     # the old rule raised ValueError on a line with no backtick.
     assert _reason_on("**CORRECTS:** nothing cited here") == ""
+
+
+# ---------------------------------------------------------------------------
+# THE MERGE-STAGE DUPLICATION DEFECT.
+#
+# `_documents()` built its list from `git ls-files -- _audit` without removing
+# repeats, and `git ls-files` prints an UNMERGED path once per merge stage
+# (1 = common ancestor, 2 = ours, 3 = theirs). Measured for the blocker
+# locator's copy of the same listing by the census cleanup lane: one
+# conflicted document scored 33, 30, 24 against 11, 10, 8 once staged
+# (`_audit/2026-09-23-census-cleanup.md` section 13.5). The repaired precedent
+# is `scripts/find_blocker_reason.py::tracked_audit_paths` and the two tests
+# at the end of `tests/test_the_blocker_reason_locator_states_its_recall.py`.
+# ---------------------------------------------------------------------------
+
+
+def test_a_conflicted_listing_is_read_once(tmp_path):
+    """A REAL multi-stage listing, manufactured, never found.
+
+    Builds an actual conflicted merge in `tmp_path` rather than trusting the
+    "once per stage" description, because a premise nobody re-measures can
+    quietly stop holding on a future git version. Never touches the real
+    repository and never reads the global/user git identity -- every commit
+    carries its own throwaway `-c user.name` / `-c user.email`.
+    """
+    audit = tmp_path / "_audit"
+    audit.mkdir()
+    doc = audit / "a.md"
+    identity = ["-c", "user.name=control", "-c", "user.email=control@example.invalid"]
+
+    def git(args, check=True):
+        result = subprocess.run(
+            ["git"] + args, cwd=str(tmp_path), capture_output=True, text=True,
+        )
+        if check:
+            assert result.returncode == 0, (
+                "git %r failed in %s: rc=%d stdout=%r stderr=%r"
+                % (args, tmp_path, result.returncode, result.stdout, result.stderr)
+            )
+        return result
+
+    git(["init", "-q"])
+    git(["checkout", "-q", "-b", "main"])
+
+    doc.write_text("original line\n", encoding="ascii")
+    git(["add", "_audit/a.md"])
+    git(identity + ["commit", "-q", "-m", "base"])
+
+    git(["checkout", "-q", "-b", "side"])
+    doc.write_text("side change\n", encoding="ascii")
+    git(["add", "_audit/a.md"])
+    git(identity + ["commit", "-q", "-m", "side"])
+
+    git(["checkout", "-q", "main"])
+    doc.write_text("main change\n", encoding="ascii")
+    git(["add", "_audit/a.md"])
+    git(identity + ["commit", "-q", "-m", "main"])
+
+    merge = git(identity + ["merge", "-m", "merge", "side"], check=False)
+    assert merge.returncode != 0, (
+        "the manufactured merge did not conflict (rc=%d); this test's premise "
+        "-- a real multi-stage listing -- was never created. stdout=%r "
+        "stderr=%r" % (merge.returncode, merge.stdout, merge.stderr)
+    )
+
+    raw = [line for line in git(["ls-files", "--", "_audit"]).stdout.splitlines() if line]
+    raw_count = raw.count("_audit/a.md")
+    assert raw_count > 1, (
+        "STOP AND REPORT: plain `git ls-files -- _audit` lists _audit/a.md %d "
+        "time(s) during this manufactured conflict, not more than once. The "
+        "premise this test measures -- that git lists an unmerged path once "
+        "per stage -- does not hold here. Raw listing: %r" % (raw_count, raw)
+    )
+
+    listed = [path.relative_to(tmp_path).as_posix() for path in _documents(tmp_path)]
+    assert listed.count("_audit/a.md") == 1, (
+        "_documents(tmp_path) lists _audit/a.md %d time(s) during an "
+        "unresolved merge conflict (%d stages in the raw listing); expected "
+        "exactly 1. Got: %r" % (listed.count("_audit/a.md"), raw_count, listed)
+    )
+
+
+def test_a_tripled_listing_invents_no_duplicate_basename(monkeypatch):
+    """THE SYMPTOM HERE, and it is a verdict, measured before this was written.
+
+    Every other consumer of `_documents()` keys a dict -- `_resolver` by
+    spelling, `_declarations` by (document, target), `_candidates` by
+    (corrector, target) -- so a repeat collapses there, and under a planted
+    tripled listing their outputs were identical to the real ones. The one
+    consumer that counts a LIST is the basename-uniqueness assertion in
+    `test_there_is_a_corpus_and_the_scan_reaches_it`: it reads ONE conflicted
+    document as three documents sharing a name, and the corpus check goes red
+    mid-merge on a duplicate that does not exist.
+
+    Plants the repeat through this module's own `subprocess.run` seam --
+    intercepting ONLY the exact `git ls-files -- _audit` call against ROOT --
+    and calls the REAL consumer rather than a copy of its predicate. Patching
+    `_documents` itself would skip over its own dedup and stay red forever.
+    """
+    doc = "_audit/2026-08-22-parity-linkedin.md"
+    cmd = ["git", "ls-files", "--", "_audit"]
+    real_run = subprocess.run
+    real = real_run(cmd, cwd=str(ROOT), capture_output=True, text=True)
+    assert real.returncode == 0, "git ls-files failed: %s" % real.stderr
+    lines = [line for line in real.stdout.splitlines() if line]
+    assert lines.count(doc) == 1, (
+        "the real listing carries %s %d time(s); this test's premise -- one "
+        "real occurrence, tripled by the plant -- does not hold."
+        % (doc, lines.count(doc))
+    )
+    planted = "\n".join(lines + [doc, doc]) + "\n"
+    hits = []
+
+    def fake_run(args, *rest, **kwargs):
+        if list(args) == cmd and kwargs.get("cwd") == str(ROOT):
+            hits.append(args)
+            return subprocess.CompletedProcess(args, 0, stdout=planted, stderr="")
+        return real_run(args, *rest, **kwargs)
+
+    monkeypatch.setattr(subprocess, "run", fake_run)
+    try:
+        test_there_is_a_corpus_and_the_scan_reaches_it()
+    except AssertionError as caught:
+        raise AssertionError(
+            "under a listing that carries %s three times -- the shape an "
+            "unresolved merge produces -- the corpus check reads ONE document "
+            "as three documents sharing a basename and goes red on a duplicate "
+            "that does not exist. Its assertion said: %s" % (doc, caught)
+        ) from caught
+    assert hits, (
+        "the planted listing was never read -- the exact `git ls-files -- "
+        "_audit` call was not intercepted, so this green proves nothing"
+    )
