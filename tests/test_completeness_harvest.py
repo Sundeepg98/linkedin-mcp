@@ -87,8 +87,15 @@ def test_a_route_written_into_a_census_row_stops_being_a_candidate(tmp_path):
 
 
 def test_its_own_output_is_never_read_back_as_census(tmp_path):
+    # THE PLANT NAMES ITS FILES ITSELF. Its first version planted into
+    # ``ch.OWN_FILES`` -- so a mutation emptying that set also emptied the
+    # plant, and this test passed vacuously while the probe read its own
+    # output back. The names are the files the instrument WRITES, taken from
+    # its output paths and spelled out here, not from its exclusion list.
+    own = ("completeness-candidates.tsv", "completeness-annotations.tsv")
+    assert (ch.OUT_TSV.name, ch.ANNOTATIONS.name) == own
     census = _census_copy(tmp_path)
-    for name in sorted(ch.OWN_FILES):
+    for name in own:
         (census / name).write_text(
             "kind\tpattern\naddress\t%s\n" % planted_route, encoding="ascii")
     klass = _verdicts(ch._planted_result(census))
