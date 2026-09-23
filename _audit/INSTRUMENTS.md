@@ -9507,3 +9507,56 @@ first wrote the table, the three-row drift control, the cross-check of every
 address the rows' own census cells name, and the offline press-condition
 runner -- are declared disposable. Everything they measured is re-derived by
 the checker on every run or recorded with its result in the audit.
+
+---
+
+## 61. THE WRITE ROWS GET A CLASS COLUMN, AND THE CLASS IS DERIVED FROM THE ACT (lane-l4-writes, 2026-09-23)
+
+**Registered 2026-09-23.** Full record: `_audit/2026-09-23-lane-l4-writes.md`.
+Numbered 61 by the orchestrator's allocation for this lane (57 bucket 3, 58-60
+the sibling lanes), so parallel appends do not collide.
+
+The census holds 151 write-direction still-GAP rows, and until this entry no
+column said which DECISION governs each one: the operator's reversible first
+round (R1), the three acts he cut (R2), or neither (R3).
+`_audit/_census/write-classes.tsv` is that column, one line per row.
+
+### 61.1 THE CLASS IS A PROPERTY OF THE ACT, NOT A CELL
+
+Every line names its act from a closed vocabulary held in the checker
+(`WRITE_CLASS_ACTS`), and the class is looked up from the act. A line whose
+class disagrees with its act is red. So widening R1 -- deciding, say, that
+subscribing to a newsletter is a follow -- is an edit to the VOCABULARY, where
+a reviewer sees the class boundary move, and never one quiet cell in a
+151-line table.
+
+### 61.2 THE PLANT THAT MATTERS IS THE CONSISTENT ONE
+
+A line rewritten so that act and class agree with each other -- `subscribe`
+to `follow`, R3 to R1 -- passes every vocabulary check. It is caught because an
+R1 line must cite, verbatim, the passage that DEFINES R1 (the operator's own
+sentence, quoted in `_audit/_census/network.md` section 6), and an R2 line the
+passage that defines the cut (the comment above `writes.SANCTIONED_WRITES`).
+Shown both ways on 2026-09-23: the plant on `M C80` is convicted by exactly
+one problem, *"R1 must cite the passage that defines it"*; with that rule
+removed from the checker in process, the same plant produces NO problem naming
+the row. That rule is the only thing between the table and a silent widening.
+
+    A CLASS THAT CAN BE ASSERTED WITHOUT ITS AUTHORITY IS A CLASS NOBODY
+    DECIDED.
+
+### 61.3 A ROW MAY LEAVE THE POPULATION IN EXACTLY ONE WAY
+
+The population is re-walked on every run with the shipped decisions
+(`count_census_states`, `enumerate_gap_rows.ADMIN_ONLY`,
+`reader_closable_blockers.direction_of`), and the table must equal it. The one
+sanctioned departure is a BUILD: a line whose disposition is `built:<action>`
+must name an action in `writes.PERFORMABLE` AND its census row must no longer
+read GAP. A build that did not move its row, a row that moved for any other
+reason, and a `queued:` row that has left are all red.
+
+### 61.4 THE ENTRIES
+
+| path | shown failing by |
+|---|---|
+| `scripts/check_write_classes.py` | `tests/test_write_classes.py`: thirteen plants into a COPY of the real table -- a missing row, a duplicate, a row that is not write-direction GAP (`N 1`), a class disagreeing with its act, the CONSISTENT widening of 61.2, an off-vocabulary act, a drifted capability text, a dropped self-citation, a phrase that no longer resolves, an unregistered ruling id, a build naming an action outside `PERFORMABLE` (convicted twice: the action, and the row still reading GAP), an R2 line carrying a build disposition, and non-ASCII -- each red AND naming its row; a missing table reported as a named problem; the two class-defining passages resolved on their own; the walk's known answers (`M M6`, `P A14`, `N 4` in; `N 1`, `P A1` out); green on the real table with the table asserted equal to the population plus what was built; and the 11 / 23 / 117 split pinned |
