@@ -398,6 +398,7 @@ from linkedin_server import (
     premium,
     search_results,
     shape,
+    threads,
     writes,
 )
 from linkedin_server.auth import (
@@ -4065,9 +4066,22 @@ async def linkedin_new_messages() -> dict[str, Any]:
 
 @mcp.tool()
 async def linkedin_open_messaging(
-    include_names: bool = False, message_filter: str = ""
+    include_names: bool = False, message_filter: str = "", allow_unread: bool = False
 ) -> dict[str, Any]:
     """Open your LinkedIn messages and report what is there. OPENS A THREAD.
+
+    **REFUSED BY DEFAULT WHILE ANY CONVERSATION READS UNREAD, since
+    2026-09-24.** Before /messaging/ is asked for, the composer's own list is
+    read -- /messaging/compose/, which is measured to draw the same list and to
+    open nothing. If any rendered row there reads unread this returns a
+    refusal and opens nothing, because the conversation LinkedIn would open is
+    its own choice (on the one capture of it, the most recent row) and a list
+    row carries no thread id to tell the two apart. Pass ``allow_unread=True``
+    to open it anyway and take that cost. When nothing reads unread, the conversation this
+    opens is one you have already read, and it shows nobody a new "seen". Two
+    page loads. The guard's full answer, including what it does NOT cover, is
+    in ``receipt_guard``; the read indicator on the last words you wrote in
+    the opened conversation is in ``landed_conversation``.
 
     **THE COST IS IN THE NAME BECAUSE IT IS UNAVOIDABLE.** Asking LinkedIn for
     ``/messaging/`` does not stay on a list -- it redirects into ONE SPECIFIC
@@ -4142,10 +4156,24 @@ async def linkedin_open_messaging(
         message_filter: activate one filter pill before reading -- one of
             focused, other, unread, jobs, connections, inmail, starred. Empty
             for the default view. Anything else is refused, not clicked.
+        allow_unread: open /messaging/ even though a conversation reads
+            unread on the composer's list. Default False.
     """
     try:
         wanted = str(message_filter or "").strip().lower()
         async with BROWSER.session() as page:
+            # THE RECEIPT GUARD, 2026-09-24, and it runs BEFORE /messaging/
+            # is asked for, because that load is the act it guards. The
+            # composer draws the same list and opens nothing (measured); a
+            # row carries no thread id, so an unread row anywhere in the
+            # rendered list refuses. See ``threads.receipt_guard``.
+            list_landed = await BROWSER.goto(page, threads.COMPOSE_URL)
+            listing = await threads.read_conversation_list(page)
+            guard = threads.receipt_guard(
+                listing, allow_unread=bool(allow_unread), landed=list_landed
+            )
+            if not guard["proceed"]:
+                return threads.refused_result(guard)
             landed = await BROWSER.goto(page, MESSAGING_URL)
             applied: dict[str, Any] = {"activated": False, "why": "no filter asked for"}
             if wanted:
@@ -4173,9 +4201,19 @@ async def linkedin_open_messaging(
             # party's words, in full, sent to him privately. The reader has no
             # field that could carry a message, a name or a thread id.
             reply_surface = await dom.read_thread_reply_surface(page)
+            # THE CONVERSATION THIS OPENED, as counts: who wrote the last
+            # message and the read indicator on his last one (census M M49).
+            # No text is passed, so nothing is compared and no words cross.
+            landed_reading = await threads.read_thread(page)
         verdict = shape.messaging_overview(
             html, landed, include_names=bool(include_names)
         )
+        verdict["receipt_guard"] = guard
+        verdict["landed_conversation"] = {
+            "messages_drawn": landed_reading.get("events"),
+            "read_indicator": threads.seen_state(landed_reading),
+            "error": landed_reading.get("error"),
+        }
         # EXPECTED TO SHOW ZERO RECIPIENT BOXES, and that zero is the finding
         # rather than a formality: a thread has nobody to choose, so a
         # combobox here would mean a reply is not addressless after all and
@@ -4192,7 +4230,110 @@ async def linkedin_open_messaging(
             "requested": wanted or None,
             **applied,
         }
-        return {**verdict, "pages_loaded": 1}
+        # TWO: the composer's list for the guard, then /messaging/.
+        return {**verdict, "pages_loaded": 2}
+    except Exception as exc:
+        return _error(exc)
+
+
+@mcp.tool()
+async def linkedin_list_conversations(include_names: bool = False) -> dict[str, Any]:
+    """List your conversations WITHOUT opening any. Unread is paired to the row.
+
+    WHY THIS AND NOT ``linkedin_open_messaging``. Asking LinkedIn for
+    /messaging/ does not stay on a list: it redirects into ONE conversation
+    LinkedIn chooses, and opening an unread conversation can show its sender a
+    "seen". This reads the composer page instead -- /messaging/compose/,
+    already on the read allowlist -- which draws the same conversation list and
+    opens NOTHING: measured on a 2026-09-20 capture, zero conversation messages
+    on the page and zero rows marked active, against one of each on
+    /messaging/ captured the same minute. The result carries that evidence as
+    counts in ``opened_a_conversation``, so "nothing was opened" is a number
+    you can check rather than a promise.
+
+    WHAT IT COSTS, and all of it is yours: the messaging tab's
+    new-since-last-visit badge resets, as it does whenever messaging is
+    opened, and an empty composer is drawn. Nothing is typed. One page load.
+
+    UNREAD HAS THREE VALUES. true or false on a rendered row, null on a
+    placeholder row -- LinkedIn draws about ten rows and leaves the rest as
+    empty placeholders. The READ form is measured; no capture holds an unread
+    row in LinkedIn's current markup, so unread is matched as a union of
+    signals (a class token, the word, a badge) and ``signals`` says which one
+    fired. A row that is unread in some fourth way would read false.
+
+    A ROW CARRIES NO THREAD ID -- measured -- so this cannot hand you one.
+    Names are off by default; pass ``include_names=True`` when you have
+    decided to look, because this output lands in transcripts.
+
+    Args:
+        include_names: return each rendered row's participant names instead
+            of a placeholder. Default False.
+    """
+    try:
+        async with BROWSER.session() as page:
+            landed = await BROWSER.goto(page, threads.COMPOSE_URL)
+            reading = await threads.read_conversation_list(
+                page, include_names=bool(include_names)
+            )
+        return threads.list_result(
+            reading, landed, include_names=bool(include_names)
+        )
+    except Exception as exc:
+        return _error(exc)
+
+
+@mcp.tool()
+async def linkedin_open_thread(thread_id: str, allow_unread: bool = False) -> dict[str, Any]:
+    """Open ONE conversation you name by its thread id. Refused while anything reads unread.
+
+    RECEIPT-SAFE AS FAR AS THE PAGE ALLOWS, and the limit is stated. First the
+    composer's list is read (it opens nothing). If any rendered row there reads
+    unread, this REFUSES and opens nothing, because a list row carries no
+    thread id -- measured -- so this server cannot tell whether the
+    conversation you named is the unread one, and opening it could show its
+    sender a "seen". Pass ``allow_unread=True`` to open it anyway and take that
+    cost. What the guard cannot see -- placeholder rows, older conversations,
+    folders the default view does not draw -- is in ``receipt_guard.residue``.
+
+    Then /messaging/thread/<your id>/ is loaded and the landing is checked
+    against the id you gave: LinkedIn sends an id it does not recognise into a
+    conversation of its own choosing, and that page is NOT read. The
+    conversation is read as counts:
+
+    * how many messages are drawn, and whether the last is yours or theirs;
+    * the read indicator on the last words you wrote (census M M49): ``not_drawn``
+      rests on a measured marker, ``drawn`` on its never-captured counterpart,
+      and ``evidence`` says which;
+    * whether a reply box is drawn and empty, the precondition
+      ``linkedin_send_reply`` checks;
+    * response buttons on a sponsored conversation, from a closed vocabulary.
+
+    No words from the conversation, no name and no thread id come back. Two
+    page loads.
+
+    Args:
+        thread_id: the part of the conversation's address after
+            /messaging/thread/, copied from your own browser. This server
+            never reads one off a page.
+        allow_unread: open even though a rendered row reads unread. Default
+            False.
+    """
+    try:
+        url = threads.thread_url(thread_id)
+        async with BROWSER.session() as page:
+            list_landed = await BROWSER.goto(page, threads.COMPOSE_URL)
+            listing = await threads.read_conversation_list(page)
+            guard = threads.receipt_guard(
+                listing, allow_unread=bool(allow_unread), landed=list_landed
+            )
+            if not guard["proceed"]:
+                return threads.refused_result(guard)
+            landed = await BROWSER.goto(page, url)
+            if not threads.landed_on_thread(landed, thread_id):
+                return threads.off_thread_result(guard, landed)
+            reading = await threads.read_thread(page)
+        return threads.open_thread_result(guard, reading)
     except Exception as exc:
         return _error(exc)
 
@@ -9146,9 +9287,17 @@ async def linkedin_send_message(
     is sendable" and "this is addressed to the person you named" are different
     claims.
 
-    IT CAN REPORT NOT SENT AND CAN NEVER REPORT SENT. The only surface that
-    could confirm a send is the thread, which is forbidden here and costs a
-    read receipt to look at.
+    IT CAN REPORT SENT SINCE 2026-09-24, ON A WEAK FOOTING, AND IT STILL HAS
+    NEVER SENT. This paragraph said it could NEVER report SENT, because the
+    only surface that could confirm a send -- the conversation -- was
+    forbidden. Ruling WRITE-CLASS-B lifted that. After a send, the
+    conversation LinkedIn leaves drawn on the same page is read IN PLACE
+    (its id is page-derived and is never navigated to), and SENT is reported
+    only when your exact words are its last message. With no before-count,
+    an identical earlier last message of yours would read the same. None of
+    this reaches a recipient: the recipient check above still refuses. For a
+    person you already have a conversation with, ``linkedin_send_reply``
+    removes the recipient problem entirely and confirms by a delta.
 
     ON OPENING MESSAGING, which is still true and still the reason the PREVIEW
     stays blind. Loading /messaging/ is MEASURED TWICE to redirect into one
@@ -9198,6 +9347,67 @@ async def linkedin_send_message(
     try:
         return await _write_tool(
             "send_message", {"member": member, "text": text}, confirm_token
+        )
+    except Exception as exc:
+        return _error(exc)
+
+
+@mcp.tool()
+async def linkedin_send_reply(
+    thread_id: str, text: str, confirm_token: str = ""
+) -> dict[str, Any]:
+    """Reply inside ONE existing conversation you name by thread id. SENDS.
+
+    A REPLY TO A REAL PERSON, UNDER YOUR NAME, THAT NOTHING HERE CAN TAKE BACK.
+    Deletion is forbidden in this design at any confirm level, and even where
+    LinkedIn lets a sender delete a message it does not un-send the email or
+    un-read what was read.
+
+    WHY A CONVERSATION AND NOT A NAME. ``linkedin_send_message`` addresses a
+    person by the text of their name in a typeahead, and that route is
+    measured dead: a typed name commits nobody. A conversation already fixes
+    who receives the words, so the only aiming question left is "is this the
+    conversation you named?" -- and a thread id inside an admitted address
+    answers it. The landing is compared against your id before anything is
+    typed and again after, because LinkedIn sends an id it does not recognise
+    into a conversation of its own choosing.
+
+    CALL IT WITHOUT ``confirm_token`` FIRST. Nothing is typed. The conversation
+    is loaded -- which, if it holds a message you have not read, can show its
+    sender a "seen" -- and you get back a block with the conversation's title
+    (read off its own header, for you to check, and kept nowhere), your exact
+    words, and the state of its reply box. Read it, then call again with the
+    token it hands you, within two minutes, once.
+
+    ON CONFIRM: the reply box must be EMPTY, with Send drawn disabled; your
+    words are typed; Send must turn enabled with no recipient box drawn; then
+    Send is pressed. THEN IT CONFIRMS ITSELF: the conversation is loaded fresh
+    and ``performed`` is true only if your exact words are its last message
+    AND the number of messages carrying them rose by exactly one. False means
+    the box still held your words with Send enabled and nothing new appeared.
+    ``"unknown"`` means neither -- open the conversation and look, and do NOT
+    retry, because a retry on a reply that landed sends it twice.
+
+    ONE LINE ONLY: a newline in the text is refused, the same rule every
+    typed target here follows, because a target is printed in a block a human
+    reads.
+
+    Args:
+        thread_id: the part of the conversation's address after
+            /messaging/thread/, copied from your own browser. Never read off a
+            page by this server.
+        text: the exact words. Part of the target, so a token binds to them.
+        confirm_token: leave empty to preview. The token from that preview,
+            used once within two minutes, sends the reply.
+    """
+    try:
+        if writes.writes_enabled():
+            # THE SHAPE FIRST, with a sentence, rather than at the read door
+            # with a pattern -- and only when writes are on, because the flag
+            # answers before anything about which target was asked for.
+            threads.thread_url(thread_id)
+        return await _write_tool(
+            "send_reply", {"thread": thread_id, "text": text}, confirm_token
         )
     except Exception as exc:
         return _error(exc)

@@ -1,0 +1,190 @@
+<!doctype html>
+<!--
+  SYNTHETIC. NOT A CAPTURE.
+
+  One open conversation at /messaging/thread/<id>/. Its STRUCTURE comes from
+  two measurements taken 2026-09-20, both off captures held outside the tree
+  (_audit/2026-09-24-lane-l5-messaging.md section 1), and from ONE DERIVATION
+  that is named here because every test built on this file inherits it:
+
+  MEASURED on the inbox capture (a conversation LinkedIn chose to open):
+    * ul.msg-s-message-list-content holds, in DOM order: top-of-list, loader,
+      the li.msg-s-message-list__event items (the LAST one also wearing
+      msg-s-message-list__last-msg-), then
+      li.msg-s-message-list__typing-indicator-container--without-seen-receipt,
+      then bottom-of-list;
+    * the other side's message is div.msg-s-event-listitem wearing
+      msg-s-event-listitem--other, with a meta block (name, time) and a
+      p.msg-s-event-listitem__body;
+    * the header draws exactly one span.msg-entity-lockup__entity-title, a
+      button.msg-thread__star-icon, and the conversation's options trigger;
+    * the list pane marks the open conversation's row with
+      msg-conversations-container__convo-item-link--active.
+
+  MEASURED on the composer capture: the reply form -- form.msg-form wearing
+  msg-form--thread-footer-feature, one contenteditable role=textbox named
+  'Write a message' + U+2026, two file inputs, the footer actions, and a
+  type=submit Send drawn DISABLED while empty.
+
+  DERIVED, and the tests say so wherever it matters:
+    * that a conversation draws that same form (the captured conversation
+      was a SPONSORED one and drew no form at all);
+    * that a message HE sent is a msg-s-event-listitem WITHOUT the --other
+      modifier (no capture holds a message he sent). The second event below
+      is drawn that way.
+
+  THE SCRIPT at the bottom stands in for LinkedIn's own: Send follows the
+  box's emptiness, and a submit draws the words as a new last message and
+  empties the box -- the optimistic redraw a real conversation performs.
+  It is the fixture's script, not this package's; nothing in
+  linkedin_server injects script into a page.
+
+  Its CONTENT is invented: the names are nobody's and the words were written
+  for this file.
+-->
+<html lang="en">
+<head><title>Messaging | LinkedIn</title></head>
+<body>
+
+<main class="scaffold-layout__main">
+<div class="scaffold-layout__list-detail-container">
+
+<div class="scaffold-layout__list msg__list">
+  <ul class="msg-conversations-container__conversations-list">
+    <li tabindex="-1" class="scaffold-layout__list-item msg-conversation-listitem msg-conversations-container__convo-item msg-conversations-container__pillar">
+      <div class="msg-conversation-card msg-conversations-container__pillar">
+        <div tabindex="0" class="msg-conversation-listitem__link msg-conversations-container__convo-item-link msg-conversations-container__convo-item-link--active">
+          <h3 class="msg-conversation-listitem__participant-names msg-conversation-card__participant-names t-16 t-black t-normal"><div><span>Kai Example</span></div></h3>
+          <p class="msg-conversation-card__message-snippet t-14">Would Thursday work for a short call?</p>
+          <div class="msg-conversation-card__conversation-status msg-conversation-card__star-icon" role="img" aria-label="Star conversation"></div>
+          <span class="visually-hidden">. Active conversation</span>
+        </div>
+      </div>
+    </li>
+    <li tabindex="-1" class="msg-conversation-card--occluded scaffold-layout__list-item msg-conversation-listitem msg-conversations-container__convo-item msg-conversations-container__pillar"></li>
+  </ul>
+</div>
+
+<div class="scaffold-layout__detail msg__detail">
+<div class="msg-thread msg-thread--pillar">
+
+  <div class="msg-title-bar">
+    <div class="msg-title-bar__title-bar-title">
+      <div class="msg-entity-lockup">
+        <dl>
+          <dt class="msg-entity-lockup__entity-title-wrapper">
+            <span class="msg-entity-lockup__entity-title">Kai Example</span>
+          </dt>
+          <dd class="msg-entity-lockup__entity-info t-12 t-black--light t-normal">Invented headline</dd>
+        </dl>
+      </div>
+      <div class="artdeco-dropdown msg-thread-actions__dropdown">
+        <button type="button" class="msg-thread-actions__control artdeco-button artdeco-dropdown__trigger" aria-expanded="false"><span class="visually-hidden">Open the options list in your conversation with Kai Example</span></button>
+        <div class="msg-thread-actions__dropdown-container"><div class="msg-thread-actions__dropdown-options artdeco-dropdown__content" aria-hidden="true"></div></div>
+      </div>
+      <button type="button" class="msg-thread__star-icon" aria-label="Star conversation"></button>
+    </div>
+  </div>
+
+  <div class="msg-s-message-list-container msg-s-message-list-container--column-reversed">
+    <div class="msg-s-message-list msg-s-message-list--scroll-buffer">
+      <ul class="msg-s-message-list-content" id="events">
+        <li class="msg-s-message-list__top-of-list"></li>
+        <li class="msg-s-message-list__loader"></li>
+
+        <li class="msg-s-message-list__event clearfix">
+          <div class="msg-s-event-listitem msg-s-event-listitem--last-in-group msg-s-event-listitem--other">
+            <div class="msg-s-message-group__meta">
+              <span class="msg-s-message-group__profile-link msg-s-message-group__name t-14 t-black t-bold">Kai Example</span>
+              <time class="msg-s-message-group__timestamp t-12 t-black--light t-normal">10:02 AM</time>
+            </div>
+            <div class="msg-s-event-listitem__message-bubble"><div class="msg-s-event__content">
+              <p class="msg-s-event-listitem__body t-14 t-black t-normal">Hello, is the example role still open?</p>
+            </div></div>
+          </div>
+        </li>
+
+        <li class="msg-s-message-list__event clearfix">
+          <div class="msg-s-event-listitem msg-s-event-listitem--last-in-group">
+            <div class="msg-s-message-group__meta">
+              <span class="msg-s-message-group__profile-link msg-s-message-group__name t-14 t-black t-bold">Pat Owner</span>
+              <time class="msg-s-message-group__timestamp t-12 t-black--light t-normal">10:05 AM</time>
+            </div>
+            <div class="msg-s-event-listitem__message-bubble"><div class="msg-s-event__content">
+              <p class="msg-s-event-listitem__body t-14 t-black t-normal">Yes, it is. Happy to talk.</p>
+            </div></div>
+          </div>
+        </li>
+
+        <li class="msg-s-message-list__event clearfix msg-s-message-list__last-msg-">
+          <div class="msg-s-event-listitem msg-s-event-listitem--last-in-group msg-s-event-listitem--other">
+            <div class="msg-s-message-group__meta">
+              <span class="msg-s-message-group__profile-link msg-s-message-group__name t-14 t-black t-bold">Kai Example</span>
+              <time class="msg-s-message-group__timestamp t-12 t-black--light t-normal">10:09 AM</time>
+            </div>
+            <div class="msg-s-event-listitem__message-bubble"><div class="msg-s-event__content">
+              <p class="msg-s-event-listitem__body t-14 t-black t-normal">Would Thursday work for a short call?</p>
+            </div></div>
+          </div>
+        </li>
+
+        <li class="msg-s-message-list__typing-indicator-container--without-seen-receipt" id="typing"></li>
+        <li class="msg-s-message-list__bottom-of-list"></li>
+      </ul>
+    </div>
+  </div>
+
+  <form class="msg-form msg-form--thread-footer-feature" id="reply-form">
+    <div class="msg-form__contenteditable t-14 t-black--light t-normal" contenteditable="true" role="textbox" aria-multiline="true" aria-label="Write a message&#8230;" id="reply-editor"></div>
+    <button type="button" class="msg-form__expand-btn artdeco-button">Maximize compose field</button>
+    <input type="file" class="msg-form__attachment-upload-input" accept="image/*">
+    <button type="button" class="msg-form__footer-action artdeco-button" aria-label="Attach an image for your draft conversation">Attach an image for your draft conversation</button>
+    <input type="file" class="msg-form__attachment-upload-input" accept="image/*,.ai,.psd,.pdf,.doc,.docx,.ppt,.pptx,.pps,.ppsx,.xls,.xlsx,.txt,.eml,.mov,.mp4">
+    <button type="button" class="msg-form__footer-action artdeco-button" aria-label="Attach a file for your draft conversation">Attach a file for your draft conversation</button>
+    <button type="button" class="msg-form__footer-action artdeco-button" aria-label="Open GIF Keyboard">Open GIF Keyboard</button>
+    <button type="button" class="msg-form__footer-action artdeco-button" aria-label="Open Emoji Keyboard">Open Emoji Keyboard</button>
+    <button type="submit" class="msg-form__send-button artdeco-button" id="reply-send" disabled>Send</button>
+    <button type="button" class="msg-form__send-toggle artdeco-button">Open send options</button>
+  </form>
+
+</div>
+</div>
+
+</div>
+</main>
+
+<script>
+(function () {
+  var editor = document.getElementById('reply-editor');
+  var send = document.getElementById('reply-send');
+  var form = document.getElementById('reply-form');
+  if (!editor || !send || !form) { return; }
+  editor.addEventListener('input', function () {
+    send.disabled = (editor.textContent.trim().length === 0);
+  });
+  form.addEventListener('submit', function (event) {
+    event.preventDefault();
+    if (form.getAttribute('data-dispatches') !== 'yes') { return; }
+    var words = editor.textContent.trim();
+    var events = document.getElementById('events');
+    var typing = document.getElementById('typing');
+    var previous = events.querySelector('.msg-s-message-list__last-msg-');
+    if (previous) { previous.className = 'msg-s-message-list__event clearfix'; }
+    var li = document.createElement('li');
+    li.className = 'msg-s-message-list__event clearfix msg-s-message-list__last-msg-';
+    var item = document.createElement('div');
+    item.className = 'msg-s-event-listitem msg-s-event-listitem--last-in-group';
+    var body = document.createElement('p');
+    body.className = 'msg-s-event-listitem__body t-14 t-black t-normal';
+    body.textContent = words;
+    item.appendChild(body);
+    li.appendChild(item);
+    events.insertBefore(li, typing);
+    editor.textContent = '';
+    send.disabled = true;
+  });
+}());
+</script>
+
+</body>
+</html>

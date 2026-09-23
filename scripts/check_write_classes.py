@@ -46,7 +46,12 @@ THIS FILE EXITS 1 WHEN:
     -- including a ruling the register now reads SUPERSEDED, which still
     resolves by id and no longer says anything that is true;
   * a ``built:`` line names an action that is not in ``writes.PERFORMABLE``,
-    or whose row is still GAP -- or a non-R1 line carries a build disposition;
+    or whose row is still GAP; a ``queued:`` line's row has left the
+    population; or an R1 line is left ``classify-only``. (Until lane L5,
+    2026-09-24, every non-R1 line had to be ``classify-only`` -- lane L4's
+    own scope. WRITE-CLASS-B let R2 be built, and a lane that builds an R2
+    or R3 row, or names the blocker of one it cannot build, records it here
+    in the same two dispositions R1 uses.)
   * an R2 line lacks any of its four build-ready columns, its target does not
     open with one of the four kinds, or a non-R2 line carries any of them.
 
@@ -67,8 +72,8 @@ widening (act and class rewritten together) that only the defining-passage
 rule can see, an off-vocabulary act, a drifted capability, a missing
 self-citation, a phrase that no longer resolves, a ruling id that is not
 registered, a ruling the register reads SUPERSEDED, a build naming an action
-that cannot perform, a classify-only
-class carrying a build, an R2 line missing its build-ready detail, detail on
+that cannot perform, an R1 line left
+classify-only, an R2 line missing its build-ready detail, detail on
 an R3 line, an R2 target outside the four kinds, and non-ASCII -- and asserts
 each turns this red and names the row. It asserts green on the real table
 too. A check that has only been seen passing certifies nothing.
@@ -315,9 +320,6 @@ def shape_problems(rows: list[dict[str, str]],
         if not _WC_DISPOSITION_RX.match(r["disposition"]):
             problems.append(f"{tag}: disposition {r['disposition']!r} is not "
                             f"built:<action>, queued:<BLOCKER> or classify-only")
-        elif cls != "R1" and r["disposition"] != "classify-only":
-            problems.append(f"{tag}: {cls} is classify-only in this lane; it "
-                            f"carries {r['disposition']!r}")
         elif cls == "R1" and r["disposition"] == "classify-only":
             problems.append(f"{tag}: R1 must say built: or queued:, not "
                             f"classify-only")

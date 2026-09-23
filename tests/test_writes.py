@@ -4622,15 +4622,17 @@ def test_the_editor_exemption_is_an_exact_url_and_not_a_family():
     assert "/edit/" in readonly._FORBIDDEN_URL_SUBSTRINGS
 
 
-def test_send_message_can_report_not_sent_and_never_sent():
+def test_send_message_can_report_not_sent_from_the_composer():
     """The 2026-09-02 ruling: read what proves it did NOT happen.
 
     ``perform`` decides True by comparing the verified state against
     ``expected_after``, and False by comparing it against ``unchanged_state``,
-    falling to UNKNOWN between them. This action can never reach the True arm
-    -- ``verified_state`` initialises to UNKNOWN and no surface exists that
-    writes ``"message_sent"`` -- so naming the NOT-performed state is what
-    turns the worst answer into the second best.
+    falling to UNKNOWN between them. Until 2026-09-24 this action could never
+    reach the True arm -- no surface it could read wrote ``"message_sent"`` --
+    so naming the NOT-performed state is what turned the worst answer into
+    the second best. It still does, on the composer. (Renamed that day from
+    ``..._and_never_sent``: the True arm is now reachable through the
+    conversation a send leaves drawn, read in place.)
 
     The property that admits it is the one that disqualified the alternative,
     inverted: a "cleared composer means sent" rule could only be validated by
@@ -4666,11 +4668,13 @@ def test_send_message_can_report_not_sent_and_never_sent():
 
     # PERFORMABLE, AND THE THREE FIELDS THAT MAKE THE VERDICT HONEST.
     #
-    # ``to_state`` is a state no reader here can return, so the True arm is
-    # unreachable BY CONSTRUCTION -- that is the design, not an oversight.
-    # ``not_performed_state`` is what makes the False arm reachable. So this
-    # action can be shown NOT to have happened and cannot be shown to have
-    # happened, and the asymmetry is asserted rather than described.
+    # ``to_state`` WAS a state no reader here could return, until 2026-09-24:
+    # ruling WRITE-CLASS-B lifted the prohibition on the conversation, and
+    # ``_verify_after`` now reads the conversation a send leaves drawn, in
+    # place -- see
+    # ``tests/test_send_message_gate.py::test_verify_after_reaches_the_to_state_only_through_the_conversation_read_back``.
+    # ``not_performed_state`` is still what makes the False arm reachable on
+    # the composer itself, which is the half this test's name now claims.
     assert "send_message" in writes.PERFORMABLE
     assert spec.to_state == "message_sent"
     assert spec.unverifiable is None, (
