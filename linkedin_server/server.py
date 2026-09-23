@@ -1903,6 +1903,17 @@ async def _profile_views_more_analytics(page: Any) -> dict[str, Any]:
             reveal_block["insights_after"] = await dom.read_profile_views_insights(page)
         except Exception as exc:  # noqa: BLE001 - never raised
             reveal_block["insights_after_error"] = type(exc).__name__
+        # WHAT THE BUTTON REVEALED, read: the "Highlights" and "Details"
+        # sections (top location, industry and company; each company's share).
+        # See profile_views_more's docstring for why no name is redacted here.
+        from linkedin_server import profile_views_more
+
+        try:
+            reveal_block["revealed_insights"] = (
+                await profile_views_more.read_profile_views_more_insights(page)
+            )
+        except Exception as exc:  # noqa: BLE001 - never raised
+            reveal_block["revealed_insights_error"] = type(exc).__name__
     return reveal_block
 
 
@@ -1983,8 +1994,9 @@ async def linkedin_who_viewed_me(
         show_more_analytics: also press "Show more analytics" -- one plain
             button, admitted by name in reveal.DECIDED_REVEALS -- and report
             whether it only revealed content (url unchanged, no counter
-            moved) plus the page's insights read again after it. Default
-            False.
+            moved), plus what it revealed under
+            more_analytics.revealed_insights: the top location, industry and
+            company of his viewers, and each company's share. Default False.
     """
     limit = _clamp(limit, DEFAULT_LIMIT, MAX_LIMIT)
     urls = [

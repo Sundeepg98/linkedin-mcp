@@ -84,6 +84,7 @@
     "press:_read_witness": "clean",
     "press:_take_reading": "clean",
     "press:disclose": "clean",
+    "profile_views_more:read_profile_views_more_insights": "clean",
     "reveal:reveal": "clean",
     "search_results:read_filters": "clean",
     "search_results:read_filters_when_settled": "clean",
