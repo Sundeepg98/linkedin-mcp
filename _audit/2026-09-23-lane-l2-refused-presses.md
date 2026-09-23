@@ -223,9 +223,9 @@ accessible-name value:
   `button[type=submit]` sits in the closed feedback-style dialog above, not in
   the filter bar. Refused still; for the reason just given, not that one.
 * **The tabs sort; they do not filter.** Most recent / Most relevant are a
-  `role=tab` pair whose panels are empty, so switching them re-renders the
-  viewer list from the server. A second view switch on the same surface, and
-  not this row's capability.
+  `role=tab` pair whose panels are empty, so the viewer list they order sits
+  outside them and a switch must re-render it -- from where, no capture says.
+  A second view switch on the same surface, and not this row's capability.
 
 **Is applying provably read-only?** Counted by effect -- the operator's own
 test for the messaging pills, *"a view filter is a read"* -- it sends nothing
@@ -313,7 +313,12 @@ Those are LinkedIn's own option texts, not a third party's, so this is a
 mislabel and not a leak. It is the finding the recapture audit's section 9.2
 read as two new filters; that pair is declared at the head of this document,
 with its back-pointer at the claim. `dom.py` is not this lane's file and is
-not edited.
+not edited here. **The live readers wave reports repairing it on its own
+branch** -- the fallback now skips any `<label>` inside a dialog, with a test
+that runs the real script and is shown failing when the skip is removed -- and
+has agreed to cite this document's declaration rather than write a second
+back-pointer into the recapture audit. That repair is reported, not verified
+here; it lands at merge.
 
 ### 6.3 D1'S REACH IS WIDER THAN THE FIVE ROWS BUCKET 3 COUNTED
 
@@ -410,6 +415,8 @@ disposable there.
                                              13 passed; its first run was red on exactly the
                                              two pairs predicted, both triaged
     five citation and register guards        79 passed
+    the shipped press tests (two files)      88 passed, press.py unchanged
+    the gate's own pre-press verdicts        taken in-process per surface and shape (Entry 8)
     the three generators, twice per commit   INDEX, RULINGS and the blocker map at a fixpoint --
                                              the second sweep changed nothing. The blocker map's
                                              first sweep moved 7 rows' rank-1 locator document to
@@ -565,6 +572,44 @@ unsound sentence; that is the point of pinning it there.
     scripts/impact_gate.py --against b0d3ab8 PASS over 48 files (2157 tests), and by its own
                                              statement NOT CHECKED 167 of 215 test files;
                                              395.2 s wall clock
+
+### Entry 8 -- the gates on `30ed210`, and the gate's own pre-press verdicts
+
+    scripts/check_read_addresses.py          GREEN, 67 of 67
+    scripts/census_completion.py --check     exit 0, every headline figure matches its pin
+    tests/test_a_correction_is_findable_from_the_claim.py
+                                             13 passed, on the staged state
+    tests/test_press.py and
+    tests/test_the_press_gate_cannot_witness_disclosure.py
+                                             88 passed -- press.py is unchanged, and the
+                                             mechanics this document cites stand beside
+                                             its own green tests
+    scripts/impact_gate.py --against b0d3ab8 PASS over 48 files (2157 tests); NOT CHECKED
+                                             167 of 215 test files; 334.9 s wall clock
+
+**THE SHIPPED GATE'S OWN PRE-PRESS VERDICTS**, taken in-process by calling
+`press.evaluate` with no page, for this lane's surfaces:
+
+    surface                        [aria-expanded], [aria-haspopup]         [role="tab"]
+    /analytics/profile-views/      permitted to attempt; basis structural   shape_not_sanctioned,
+                                                                            never by this route
+    /search/results/people/        refused no_sensitivity_basis, not-yet    the same
+    /feed/ and a feed permalink    permitted to attempt; basis sensitive,   the same
+                                   off_state required
+
+Two sentences of this document rest on that table: section 4's "opening a
+filter is ALREADY permitted" (the first row) and section 7's "a view switch
+is a ruling, not an edit" (the last column: the gate itself files a tab press
+as never reachable by this route). **And one thing the middle row does NOT
+say:** the pre-press verdict for people search reads not-yet, because the
+gate cannot see from an address that the All-filters control belongs to
+neither node set. The terminal refusal of the seven rows comes from the
+2026-09-21 measurement of the control, not from this table.
+
+**One sentence of section 4 was softened in this entry's commit:** it had
+said a tab switch re-renders the viewer list "from the server". Empty
+tabpanels show the list sits outside them; they do not show where a re-render
+takes its data.
 
 ---
 
