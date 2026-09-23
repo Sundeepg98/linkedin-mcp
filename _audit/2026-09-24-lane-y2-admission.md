@@ -400,6 +400,18 @@ moves against master `9c219c8`; other lanes moving states in parallel (lane R re
 exclusions to GAP) will move several of the same pins, so the train re-pins once, on
 the merged tree.**
 
+**THREE TEST PINS MOVED WITH THE ROWS, AND THOSE WERE RE-PINNED**, in the lane's fourth
+commit, each with its arithmetic in the pin's own comment. The impact gate found them
+(section 13); none is read by a census instrument:
+
+    tests/test_a_census_locator_names_its_row.py  stated rows      704 -> 747
+    tests/test_write_classes.py                   R1, R2, R3       (11, 23, 117) -> (11, 24, 130)
+    tests/test_triage_instrument.py               slice M GAP      77 (R 10, W 65, R+W 2)
+                                                                   -> 88 (R 16, W 69, R+W 3)
+
+Like the row pin, each is a literal that another lane's rows can move too, so a merge
+that touches two of them re-derives the figure rather than adding the deltas.
+
 ## 12. Gates
 
 **CENSUS INSTRUMENTS, on the tree after the admission and the row re-pin:**
@@ -429,4 +441,90 @@ the merged tree.**
                                   other lanes' documents; none in this lane's files,
                                   whose twenty new blocker names are all minted
 
-THE IMPACT GATE: recorded in section 13 once it has run.
+THE IMPACT GATE, THE TESTS OUTSIDE ITS PLAN AND WHAT DID NOT RUN: section 13.
+
+## 13. The impact gate, the red it found, and what did not run
+
+**RED ON THE FIRST RUN, AND EIGHT OF THE NINE WERE THIS LANE'S.**
+`scripts/impact_gate.py --against 9c219c8` on the third commit: 20 changed paths, 52
+test files with the 17 corpus-wide guards among them -- not the full suite. **9 failed,
+2402 passed, 1080 s.** Eight were figures or joins the admitted rows moved and that
+none of section 12's census instruments reads:
+
+    tests/test_a_census_locator_names_its_row.py  a second literal of the row
+        population, 704, that the row re-pin did not know about -> 747
+    tests/test_write_classes.py                   the pinned class split,
+        (11, 23, 117) -> (11, 24, 130): M C94 is R2, the other thirteen admitted
+        writes are R3
+    tests/test_triage_read_gap_rows.py, 2 tests   the six admitted P and N reads
+        had no triage verdict. Now P S1, P S3 and N 199 ADDRESS/ABSENT, P S5 and
+        N 195 BUILDABLE, N 197 PRESS -- each the bucket-3 gate of section 7 in that
+        triage's alphabet
+    tests/test_triage_instrument.py, 4 tests      the messaging triage joins every
+        GAP row of its slice to the blocker map, whose spine is the census frozen
+        at 1c08e5f, so the eleven admitted M rows could never join; and its
+        pinned headline split, 77 -> 88
+
+The fixes are the lane's fourth commit: three pins re-pinned (section 11), six triage
+lines written, and one rule the join did not have.
+
+**THE JOIN NEEDED A RULE, NOT A NUMBER.** A row that entered GAP after the map's freeze
+has no map line by construction. The messaging triage now derives those rows from the
+census read AT the map's own `FROZEN_REF` from git -- never from the map, which would
+turn every hole in it into an exemption -- exempts them from the join, and prints them
+by id in a bucket of their own. An empty freeze read refuses, and so, since the fifth
+commit, does a state cell spelled in a dialect at the freeze, which the enumerator
+drops: a row that was GAP then would otherwise read as entered since. A cold reviewer
+found that one (0 defects, 1 risk, on the fourth commit; inert today, because the
+census at the freeze parses clean) and the fifth commit closes it. A rename cannot hide
+behind the exemption either: the row pin holds an ID SET and names both ids. Shown
+failing, four mutations of the committed script, each restored from git: exempting
+every row (3 failed), no refusal on an empty freeze read (1 failed), the join ignoring
+the exemption (3 failed), no refusal on a dialect at the freeze (1 failed); restored,
+11 passed. Any lane that puts an M row into GAP after this -- an exclusion returned, a later
+admission -- lands in that bucket instead of turning the triage red; what still moves,
+by design, is the pinned split. Registered as section 71.6.
+
+**THE NINTH WAS NOT THIS LANE'S: IT IS A RACE BETWEEN LANES.**
+`tests/test_pointer_graph_guard.py::test_every_failure_class_is_convicted_and_the_calibration_is_not`
+failed inside that gate, then passed alone on the same tree and inside the next gate.
+`scripts/measure_pointer_graph.py --selftest` builds its sandbox at ONE fixed path
+under the user's temp directory, `pointer-graph-selftest`, and deletes whatever is
+there first, so two worktrees running the selftest at once delete each other's sandbox
+mid-check -- and five lanes were gating on this box. DERIVED from the code and the
+three runs, not reproduced on purpose (doing so would break other lanes' gates); not
+repaired here, since the file is not this lane's. The repair is a per-run
+`tempfile.mkdtemp`.
+
+**AFTER THE FIXES**, on the fourth commit:
+
+    impact gate --against 9c219c8      25 changed paths, 55 test files, PASS over
+                                       2642 tests, 758 s. NOT CHECKED: 180 of 235
+                                       test files
+    the census-reading test files      34 files, chosen by a text search for the
+      the plan does not select         census modules and paths: 1593 passed,
+                                       3 skipped, 1 xfailed, 730 s
+    the whole-tree forms of the four   the identity file and the navigation file in
+      sweeps the gate answers on the   full over the tracked set, on the third
+      change                           commit: 1470 passed; later commits touched
+                                       only scripts, tests and this document, each
+                                       through the pre-commit identity gate (0 hits)
+    the candidate table                FIXED POINT on the committed tree, verdict
+                                       layer 0 problems
+
+**THE CANDIDATE TABLE'S FIXED POINT IS NOT MERGE-STABLE, AND CI CANNOT SEE THAT.** Its
+`known_elsewhere` column is derived from every audit document, script, test and the
+package, so another lane's document naming a candidate route moves the column. Measured:
+an untracked document planted under `_audit/` naming `/legal/eula` (a docs-scope
+candidate nobody else names) turned `--check` red with "would CHANGE address
+/legal/eula"; removed, the fixed point came back and the tree was clean. The verdict
+layer stayed at 0 problems throughout -- `verdict_problems`, the half CI runs, does not
+read that column -- and `--check` needs captures that exist on this box only. **After
+the train merges, regenerate the table here with `--write --captured-before
+2026-09-23T00:00:00`, then `--check`.**
+
+**NOT RUN:** 149 of the suite's 235 test files -- the gate's plan (55) and the extra
+set (34) overlap on three, so 86 ran; CI's three-platform matrix, since nothing was
+pushed; anything live, since this lane was offline; and `census_completion`'s re-pin,
+deliberately (section 11). The gate of the commit that adds this section is reported in
+the lane's final message: a document cannot hold the gate of the commit that writes it.

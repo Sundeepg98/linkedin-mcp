@@ -10077,7 +10077,9 @@ Section 63's probe raises CANDIDATES; nothing held a decision about them. Lane Y
 gave every app-scope candidate one verdict -- ADMIT (a new GAP row carries it),
 RECORDED (an existing row carried it in words and gained the address or control),
 OUT (not a user capability) -- in three new columns of the annotations file, and
-built the check that keeps those verdicts true against the tree.
+built the check that keeps those verdicts true against the tree. Admitting rows then
+broke a join that had assumed the GAP set only shrinks; 71.6 is the rule that
+replaced the assumption.
 
 ### 71.1 A VERDICT IS A CLAIM ABOUT THE CENSUS, SO THE CENSUS IS ASKED
 
@@ -10095,6 +10097,14 @@ read lands in a tracked file. `--captured-before <UTC stamp>` names the corpus
 (2026-09-23T00:00:00 reproduces lane Y's 71 captures exactly) and prints the rest
 as set aside; `--check` proves the committed table is byte for byte what
 `--write` would write over that corpus.
+
+**THAT FIXED POINT IS NOT MERGE-STABLE.** The table's `known_elsewhere` column is
+derived from every audit document, script and test, so a document another lane
+adds that names a candidate route moves it. Measured: one untracked document
+naming `/legal/eula` turned `--check` red ("would CHANGE address /legal/eula"),
+and removing it restored the fixed point. `verdict_problems` does not read that
+column, which is why CI cannot see this, and `--check` reads captures only the
+box that holds them has; after a merge, regenerate there with the same cutoff.
 
 ### 71.3 THE CENSUS'S VOCABULARY RE-KEYS THE CONTROLS IT IS DIFFED AGAINST
 
@@ -10124,3 +10134,24 @@ boundary drives, the evidence-append and side-table writers, the verifier's
 sampler and its key, the census-only consistency check, the mutation runner --
 are declared disposable. Everything they wrote is in the census, the side
 tables, the annotations or the audit, and the checks above re-derive it.
+
+### 71.6 THE BLOCKER MAP IS FROZEN; A SLICE THAT GROWS CANNOT JOIN IT
+
+`scripts/triage_messaging_gap_rows.py` joins every GAP row of its slice to
+`_audit/_census/blocker-map.tsv` and refuses on any row that does not join. The
+map's spine is the census at `1c08e5f` -- the set the ledger divided -- so a row
+that entered GAP later has no line there by construction, and the slice's first
+admission (eleven rows) turned four tests red. The exemption is DERIVED: rows GAP
+today that were not GAP in the census read from git at the map's own
+`FROZEN_REF`. It is never read off the map, which would turn every hole in the map
+into an exemption. An empty freeze read refuses; so does a state cell spelled in
+a dialect at the freeze, which the enumerator drops (a cold reviewer's finding,
+closed the same day). The exempt rows print by id in a bucket of their own.
+
+    A JOIN AGAINST A FROZEN TABLE NEEDS A RULE FOR ROWS BORN AFTER THE FREEZE,
+    AND THE RULE MUST BE READ FROM THE FREEZE, NEVER FROM THE TABLE.
+
+| path | shown failing by |
+|---|---|
+| `scripts/triage_messaging_gap_rows.py` (`entered_since_freeze`, the `entered` argument of `unjoined_rows`) | `tests/test_triage_instrument.py`: an empty freeze read refuses and names the ref; a planted dialect at the freeze refuses and names the row; with the exemption passed, one hole and three holes punched in rows that WERE GAP at the freeze are still named, and each control first asserts there is such a row to punch; without the exemption, the join names exactly the rows that entered. Red under four mutations of the committed script, each restored from git: exempting every row (3 failed), no refusal on an empty freeze read (1 failed), the join ignoring the exemption (3 failed), no refusal on a dialect (1 failed); restored, 11 passed |
+| `scripts/triage_read_gap_rows.py` (six `TRIAGE` lines: `P S1`, `P S3`, `P S5`, `N 195`, `N 197`, `N 199`) | the shipped CONTROL 4, unchanged, which named all six `NO VERDICT` before they were written |
