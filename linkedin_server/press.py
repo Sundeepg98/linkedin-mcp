@@ -157,6 +157,45 @@ every interactive node on the page -- the family wildcard condition 2 exists to
 forbid, the same shape as the settings-family pattern that would have admitted
 six account-ending spellings. If a third shape is ever needed it is a RULING
 REQUEST with a measured blast radius, not an edit here.
+
+## THE OPEN-MOMENT READING, AND WHY IT IS A TABLE AND NOT A CALLBACK
+
+**ADDED 2026-09-23, because until then no reader could read what a press
+disclosed.** The witness below counts a closed set and the dismissal follows it
+immediately, so the only instant at which disclosed content exists was spent on
+integers that say THAT something opened and never WHAT. Every row this gate was
+ruled for (a panel on his analytics, a feed item's menu) wants the what.
+
+**THE READING OBEYS THE WITNESS'S OWN RULE: A CLOSED SET, NEVER A CALLER'S
+CALLABLE.** A caller names a KEY from :data:`OPEN_READINGS`, exactly as it
+names a shape key, and the table decides everything else: which surfaces the
+reading is sanctioned on, and which PHRASES go into the page. The page answers
+through ``dom.read_count_lines`` -- a script already declared, already
+scanned, at a call site already inside the evaluate budget -- with PHRASE
+POSITIONS AND INTEGERS. No page string crosses the boundary, so the reading
+can only ever publish this module's own literals and numbers.
+
+**IT IS TAKEN TWICE, AND THE PAIR IS THE POINT**, for the witness's reason: a
+phrase can already be on the page before anything is pressed (a feed post's
+own text can say anything). So the same reading is taken immediately before
+the click and again at the open moment, and ``appeared`` names only what the
+press brought into view.
+
+**IT RIDES ALONGSIDE THE VERDICT AND NEVER DECIDES IT**, like the witness. A
+reading does not make a press permitted or refused, and it is attached to a
+refusal too. **A reading taken during a press the verdict REFUSED is not a
+delivered read**, and a caller that banks one is banking a write's side effect.
+
+## AIMING WITHOUT A LABEL: THE SCOPE TABLE
+
+``index`` is a POSITION over the whole page, and page chrome comes first in
+document order -- on the analytics page the nav and a skip-link menu precede
+``main``. So a package caller could only aim by a position whose meaning moves
+with LinkedIn's chrome. :data:`PRESS_SCOPES` narrows the candidates to
+``<scope> <shape>`` BEFORE the index is applied. A scope is a closed-table KEY
+like everything else here, it is structural (a landmark or a component name
+LinkedIn's own code writes), never a label, and it can only REMOVE candidates:
+whatever it selects still matches a sanctioned shape.
 """
 from __future__ import annotations
 
@@ -314,6 +353,140 @@ def sensitivity_basis(url: Optional[str]) -> Optional[dict[str, Any]]:
         if marker in path:
             return basis
     return None
+
+
+#: THE OPEN-MOMENT READINGS, AS A CLOSED TABLE. See the module docstring.
+#:
+#: Each entry names the EXACT paths it is sanctioned on (equality, not
+#: containment: a reading measured on one surface says nothing about another
+#: that happens to share a prefix) and the phrases it ships into the page, as
+#: ``(term, phrase)`` pairs. A phrase is already in the normalised form
+#: ``dom.COUNT_LINES_JS`` compares against -- lowercase ASCII letters and
+#: digits, single-spaced -- and ``tests/test_press_open_reading.py`` asserts
+#: that of every entry, so a phrase that could never match cannot sit here
+#: looking like a measurement.
+#:
+#: **WHAT COMES BACK IS A TERM AND AN INTEGER.** The term is the first element
+#: of a pair in this table; the integer is the number the page drew beside the
+#: phrase, when it drew one of the two shapes that carry a value. Nothing else.
+_READING_REQUIRED = ("surfaces", "phrases", "why")
+
+OPEN_READINGS: tuple[tuple[str, dict[str, Any]], ...] = (
+    (
+        "feed_item_share_menu",
+        {
+            "surfaces": ("/feed/",),
+            "phrases": (
+                ("copy_link", "copy link to post"),
+                ("copy_link", "copy link"),
+                ("embed", "embed this post"),
+                ("share_via", "share via"),
+            ),
+            "why": (
+                "M C72, the READ half of sharing a post off LinkedIn: the "
+                "off-platform items a feed item's menu builds on demand. The "
+                "needles are the three scripts/_probe_off_platform_controls.py "
+                "counted at 0 on the unpressed feed on 2026-09-19, behind a "
+                "detector control that matched each of them -- absent until "
+                "a menu opens, which is exactly what a reading at the open "
+                "moment is for."
+            ),
+        },
+    ),
+)
+
+
+def open_reading(key: Optional[str]) -> Optional[dict[str, Any]]:
+    """The table entry for a reading key, or None. PURE."""
+    for name, entry in OPEN_READINGS:
+        if name == key:
+            return entry
+    return None
+
+
+def check_reading(url: Optional[str], reading: Optional[str]) -> dict[str, Any]:
+    """The reading half of the pre-press gate. PURE, and TERMINAL when it refuses.
+
+    ``None`` is no reading asked for, which is the gate as it always was. A key
+    outside :data:`OPEN_READINGS` is refused the way an off-list shape is: a
+    caller cannot supply a reading, only name one. A key named on a surface its
+    entry does not list is refused too -- the phrases were chosen for a page,
+    and shipping them into another one measures nothing anybody chose.
+    """
+    if reading is None:
+        return {"pressed": False, "reading_ok": True}
+    entry = open_reading(reading)
+    if entry is None:
+        return _refuse(
+            "reading_not_sanctioned",
+            "the reading is not a key of press.OPEN_READINGS. A caller NAMES a "
+            "reading and cannot supply one: the open moment is the most "
+            "privileged instant this module has, and code handed in from "
+            "outside would run inside it.",
+            terminal=True,
+        )
+    path = urlsplit(str(url or "").strip()).path
+    if path not in tuple(entry.get("surfaces") or ()):
+        return _refuse(
+            "reading_not_for_this_surface",
+            "this reading is sanctioned only on the surfaces its entry in "
+            "press.OPEN_READINGS lists, and this address is not one of them. "
+            "Its phrases were chosen for a page; on another page they measure "
+            "nothing anybody chose.",
+            terminal=True,
+        )
+    return {"pressed": False, "reading_ok": True}
+
+
+#: WHERE A PRESS MAY LOOK FOR ITS CONTROL, AS A CLOSED TABLE. See the module
+#: docstring. A scope is a selector for a CONTAINER, and the press looks for
+#: its shape only inside it: ``<scope> <shape>``. It narrows and never widens.
+#:
+#: **A SCOPE IS STRUCTURAL, NEVER A LABEL**, for condition 2's reason, and
+#: ``tests/test_press_open_reading.py`` refuses any entry that reads text or an
+#: accessible name.
+_SCOPE_REQUIRED = ("selector", "why")
+
+PRESS_SCOPES: tuple[tuple[str, dict[str, Any]], ...] = (
+    (
+        "main",
+        {
+            "selector": "main",
+            "why": (
+                "the page's own content landmark. Document order puts the "
+                "global nav and a skip-link jump menu AHEAD of it, and both "
+                "draw disclosure controls: the 2026-09-05 controls census of "
+                "/analytics/profile-views/ surfaced the nav's business menu "
+                "on a press. A page-wide index therefore names chrome before "
+                "it names anything of his."
+            ),
+        },
+    ),
+)
+
+
+def press_scope(key: Optional[str]) -> Optional[dict[str, Any]]:
+    """The table entry for a scope key, or None. PURE."""
+    for name, entry in PRESS_SCOPES:
+        if name == key:
+            return entry
+    return None
+
+
+def check_scope(scope: Optional[str]) -> dict[str, Any]:
+    """The scope half of the pre-press gate. PURE, and TERMINAL when it refuses."""
+    if scope is None:
+        return {"pressed": False, "scope_ok": True}
+    if press_scope(scope) is None:
+        return _refuse(
+            "scope_not_sanctioned",
+            "the scope is not a key of press.PRESS_SCOPES. A caller names a "
+            "scope and cannot supply one, for the reason it cannot supply a "
+            "shape: a selector handed in from outside is a press target "
+            "chosen by whoever wrote it.",
+            terminal=True,
+        )
+    return {"pressed": False, "scope_ok": True}
 
 
 
@@ -749,14 +922,18 @@ def evaluate(
     expanded_before: Any = None,
     expanded_after: Any = None,
     already_pressed: bool = False,
+    reading: Optional[str] = None,
+    scope: Optional[str] = None,
 ) -> dict[str, Any]:
     """THE WHOLE GATE, PURE AND BROWSER-FREE. Conjunctive, in order.
 
-    **THE ORDER IS PART OF THE CONTRACT.** Address first, shape second, the
-    BASIS third, and only then anything that requires the press to have
-    happened. A caller that runs this with no counters gets a refusal BEFORE
-    pressing, which is the point: the pre-press half can be evaluated on its
-    own and must pass before any control is touched.
+    **THE ORDER IS PART OF THE CONTRACT.** Address first, shape second, then
+    the caller's two other KEYS (``reading`` and ``scope``, each checked
+    against its closed table), the BASIS after them, and only then anything
+    that requires the press to have happened. A caller that runs this with no
+    counters gets a refusal BEFORE pressing, which is the point: the pre-press
+    half can be evaluated on its own and must pass before any control is
+    touched.
 
     ``already_pressed`` SAYS WHICH MOMENT THIS IS instead of inferring it. The
     pre-press branch used to be selected by ``before is None and after is
@@ -772,6 +949,15 @@ def evaluate(
     if verdict.get("refused"):
         return verdict
     verdict = check_shape(shape)
+    if verdict.get("refused"):
+        return verdict
+    # THE CALLER'S OTHER TWO KEYS, both closed tables, both pure functions of
+    # the arguments -- so both are refused here, before the basis and before
+    # any contact, on the same footing as an off-list shape.
+    verdict = check_reading(url, reading)
+    if verdict.get("refused"):
+        return verdict
+    verdict = check_scope(scope)
     if verdict.get("refused"):
         return verdict
 
@@ -790,13 +976,21 @@ def evaluate(
             # counter nobody read prices nothing -- so the permit says so
             # rather than leaving the caller to discover it after a press.
             still_to_show.insert(0, "sensitive_counter_read")
-        return {
+        permit: dict[str, Any] = {
             "pressed": False,
             "permitted_to_attempt": True,
             "basis": verdict.get("basis"),
             "requires_counters": verdict.get("requires_counters"),
             "still_to_show": still_to_show,
         }
+        # ECHOED ONLY WHEN ASKED FOR, so the permit every existing caller
+        # receives is byte-for-byte the permit it received before these keys
+        # existed.
+        if reading is not None:
+            permit["reading"] = reading
+        if scope is not None:
+            permit["scope"] = scope
+        return permit
 
     # THE BASIS IS RESOLVED FROM THE SURFACE, never handed in. See
     # SENSITIVITY_BASES: a basis a caller can assert is a basis a caller can
@@ -836,11 +1030,20 @@ async def disclose(
     shape: str,
     index: int = 0,
     read_counters: Optional[Callable] = None,
+    reading: Optional[str] = None,
+    scope: Optional[str] = None,
 ) -> dict[str, Any]:
     """Press ONE enumerated disclosure control, or refuse and touch nothing.
 
     ``shape`` is a KEY FROM :data:`SANCTIONED_SHAPES`, never a selector. An
     arbitrary string cannot become a press target.
+
+    ``reading`` and ``scope`` are KEYS too, from :data:`OPEN_READINGS` and
+    :data:`PRESS_SCOPES`, and both are checked before anything is touched.
+    ``scope`` narrows where the ``index``-th control is looked for; ``reading``
+    is taken immediately before the click and again at the open moment, and
+    rides on the verdict as ``reading`` beside the witness, deciding nothing.
+    Leave both ``None`` and this is the gate exactly as it was.
 
     ``read_counters`` is an async callable returning a MAPPING of counter name
     to int-or-None. It is REQUIRED: with no way to price the press, condition 3
@@ -858,7 +1061,9 @@ async def disclose(
     locator. It was not true before, and the surface where that was measured
     lists other people.
     """
-    pre = evaluate(url=getattr(page, "url", None), shape=shape)
+    pre = evaluate(
+        url=getattr(page, "url", None), shape=shape, reading=reading, scope=scope
+    )
     if pre.get("refused"):
         return pre
 
@@ -871,9 +1076,22 @@ async def disclose(
             terminal=False,
         )
 
-    locator = page.locator(shape).nth(index)
+    # THE CANDIDATES. With no scope this is the page-wide locator, built by the
+    # same two calls it always was; with one, the shape is looked for only
+    # inside the scope's container. check_scope has already refused any key
+    # outside the table, so the entry exists whenever a scope was named.
+    scope_selector = (press_scope(scope) or {}).get("selector") if scope else None
+
+    def _candidates():
+        if scope_selector:
+            return page.locator(scope_selector).locator(shape)
+        return page.locator(shape)
+
+    locator = _candidates().nth(index)
+    reading_before: Optional[dict[str, Any]] = None
+    reading_open: Optional[dict[str, Any]] = None
     try:
-        if not int(await page.locator(shape).count()):
+        if not int(await _candidates().count()):
             return _refuse(
                 "shape_absent_on_this_page",
                 "the page draws no control of this shape. That is a fact "
@@ -884,6 +1102,10 @@ async def disclose(
         # THE BASELINE HALF OF THE WITNESS, taken before anything is pressed.
         # A page-wide count is meaningless without it.
         witness_before = await _read_witness(page)
+        # AND THE BASELINE HALF OF THE READING, for the witness's reason: a
+        # phrase already on the page is not something the press disclosed.
+        if reading is not None:
+            reading_before = await _take_reading(page, reading)
         before = await read_counters()
         await locator.click(timeout=CLICK_TIMEOUT_MS)
         after = await read_counters()
@@ -895,6 +1117,11 @@ async def disclose(
         # never-opened.
         witness_after = await _read_witness(page)
         control_open = await locator.get_attribute("aria-expanded")
+        # THE READING AT THE OPEN MOMENT, BEFORE THE DISMISSAL -- the one place
+        # it can be taken. It cannot raise (see _take_reading), so it cannot
+        # skip the Escape below.
+        if reading is not None:
+            reading_open = await _take_reading(page, reading)
         # CLOSE IT. Escape first, because it is the dismissal this repository's
         # probes already use and it closes a menu that has no toggle.
         await page.keyboard.press("Escape")
@@ -923,6 +1150,8 @@ async def disclose(
         # pre-press call, and the gate then skipped conditions 3 and 4 and
         # reported a permit for a click it had already taken.
         already_pressed=True,
+        reading=reading,
+        scope=scope,
     )
     # THE WITNESS RIDES ALONGSIDE THE VERDICT AND NEVER DECIDES IT. It is
     # attached to a refusal too, because "the press was refused on its
@@ -931,7 +1160,100 @@ async def disclose(
     verdict["witness"] = witness_verdict(
         witness_before, witness_after, control_open=control_open
     )
+    # THE READING RIDES THE SAME WAY, and for the same two reasons: it never
+    # decides the verdict, and it is attached to a refusal as well -- where it
+    # is evidence about the press and NOT a delivered read.
+    if reading is not None:
+        verdict["reading"] = reading_verdict(reading, reading_before, reading_open)
     return verdict
+
+
+async def _take_reading(page: Any, key: str) -> dict[str, Any]:
+    """One reading of a table entry's phrases. NEVER RAISES.
+
+    Returns ``{"read": True, "terms": {term: numeral}, ...}`` or
+    ``{"read": False, "unreadable": <exception TYPE>}``. It must not raise
+    because it runs between the click and the Escape: an exception here would
+    skip the dismissal and leave a disclosure open for the next reader.
+
+    The page answers through ``dom.read_count_lines`` -- a declared script at a
+    waived call site -- with phrase POSITIONS and integers. Imported here
+    rather than at module level so this module stays importable, and testable,
+    with no browser-facing module loaded at all.
+    """
+    entry = open_reading(key) or {}
+    pairs = tuple(entry.get("phrases") or ())
+    try:
+        from linkedin_server import company_root, dom
+
+        raw = await dom.read_count_lines(
+            page,
+            phrases=[phrase for _term, phrase in pairs],
+            hidden=dom.CARD_HIDDEN_SELECTOR,
+        )
+        terms: dict[str, Any] = {}
+        for match in (raw or {}).get("matches") or []:
+            position = int(match.get("phrase", -1))
+            if not 0 <= position < len(pairs):
+                # A POSITION OUTSIDE THE LIST IS REFUSED, never clamped onto
+                # the first phrase -- that would rename one term to another.
+                continue
+            term = pairs[position][0]
+            numeral = company_root.term_for(int(match.get("shape", 0)))
+            value = (
+                int(match.get("value", 0))
+                if numeral in ("plain_digits", "grouped_digits")
+                else None
+            )
+            prior = terms.get(term)
+            # ONE TERM MAY HAVE SEVERAL PHRASES. A match that carries a number
+            # beats one that does not; otherwise the first match stands.
+            if prior is None or (prior["value"] is None and value is not None):
+                terms[term] = {"numeral": numeral, "value": value}
+        return {
+            "read": True,
+            "terms": terms,
+            "hidden_skipped": _as_int((raw or {}).get("hidden_skipped")),
+            "chunks_capped": bool((raw or {}).get("chunks_capped")),
+        }
+    except Exception as exc:  # noqa: BLE001 - a reading never breaks a press
+        return {"read": False, "unreadable": type(exc).__name__}
+
+
+def _as_int(value: Any) -> int:
+    """A count or 0, for the two integer fields a reading reports. PURE."""
+    try:
+        return int(value or 0)
+    except (TypeError, ValueError):
+        return 0
+
+
+def reading_verdict(
+    key: str, before: Optional[dict], open_: Optional[dict]
+) -> dict[str, Any]:
+    """WHAT THE PRESS BROUGHT INTO VIEW, from the two readings. PURE.
+
+    ``appeared`` is the terms read at the open moment and NOT before the click
+    -- the only terms the press can be credited with. ``held`` were there at
+    both moments, so the press cannot be credited with them; ``gone`` were
+    there before and not while open. **``appeared`` is None, never empty,
+    when either moment did not read**: a reading that did not happen is not a
+    reading that found nothing.
+    """
+    out: dict[str, Any] = {"key": key, "before": before, "open": open_}
+    if not before or not open_ or not before.get("read") or not open_.get("read"):
+        out.update({"appeared": None, "held": None, "gone": None})
+        return out
+    was = set((before.get("terms") or {}))
+    now = set((open_.get("terms") or {}))
+    out.update(
+        {
+            "appeared": sorted(now - was),
+            "held": sorted(now & was),
+            "gone": sorted(was - now),
+        }
+    )
+    return out
 
 
 async def _read_witness(page: Any) -> dict[str, Any]:
