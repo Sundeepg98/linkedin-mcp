@@ -4,7 +4,7 @@ claude-opus-5-5[1m]
 
 **CORRECTS:** `_audit/2026-09-21-the-read-triage.md` -- four address verdicts: P F1 and P H11 are pages on the admitted profile, not ADDRESS/ABSENT, and P L4 and N 61 wait on a live read, not on a refused address anybody has seen served.
 
-**CORRECTED BY:** `_audit/2026-09-23-census-cleanup.md` -- the five rows blocked on nothing are FOUR: `M M49`'s page is a messaging thread and `DO-NOT-OPEN-MESSAGING` holds every messaging page, so its gate is STANDING-RULING, not READER. The split asked the boundary and never the rulings; the checker now asks both.
+**CORRECTED BY:** `_audit/2026-09-23-census-cleanup.md` -- the split asked the boundary and never the rulings: `M M49` sat on a messaging page while `DO-NOT-OPEN-MESSAGING` stood, which made the five four until the operator lifted that ruling at 18:15 the same day. The five stands under the rulings as they now are, and the checker now asks them.
 
 Wave `bucket3-addresses`, 2026-09-23, from master `79c5f8e`. **READ-ONLY AND
 OFFLINE THROUGHOUT.** No browser was started or attached to, no page was
@@ -51,9 +51,9 @@ banked, so every prior per-row reading of this population was reusable.
 **THE REAL SIZE OF "BLOCKED ON NOTHING AT ALL" IS 5 OF 67.** Five rows sit on a
 page the boundary admits AND have nothing between that page and a reader but
 the reader itself: M M49 and M C85 (READER), P O3, N 134 and M C72
-(PRESS-PERMITTED). **[Later on 2026-09-23: FOUR, not five. `M M49` sits on a
-messaging page, which the standing ruling `DO-NOT-OPEN-MESSAGING` holds, so its
-gate is STANDING-RULING -- see the note under the title.]** Seven more need only a session first -- a live look (P F1,
+(PRESS-PERMITTED). **[Later on 2026-09-23: four while `DO-NOT-OPEN-MESSAGING`
+stood, since `M M49` sits on a messaging page; five again after the operator
+lifted that ruling at 18:15. See the note under the title.]** Seven more need only a session first -- a live look (P F1,
 P H11, P K8) or a fire of code that already ships (N 80, N 81, N 88, N 89).
 The other 55 are gated: 21 behind a refused press or an unmade decision, 24 at
 the boundary itself, and 10 with no address to put through it.
@@ -198,10 +198,10 @@ Generated from `_audit/_census/read-addresses.tsv` rather than typed, so the
 two cannot disagree. Sources are written as plain paths; the table carries the
 same text.
 
-**[Later on 2026-09-23: they now disagree on exactly one line, kept here as
-this wave wrote it. `M M49` is gated STANDING-RULING in the address table, not
-READER, and its note there cites the ruling that holds its page. The address
-table is the current record; see the note under the title.]**
+**[Later on 2026-09-23: they now differ in one cell. `M M49`'s note in the
+address table opens with the ruling that held its page until the operator
+lifted it at 18:15; its gate is READER in both. The address table is the
+current record; see the note under the title.]**
 
 ### ADMITTED -- 33
 
@@ -462,9 +462,9 @@ happen to it.
         BUILT-UNFIRED     N 80, N 81, N 88, N 89
 
 **5 is the number a reader-building wave should be sized on.** 12 if that wave
-also holds a browser slot. **[Later on 2026-09-23: 4, and 11 with a browser
-slot. `M M49` is held by `DO-NOT-OPEN-MESSAGING`; see the note under the
-title.]** Two of the five (P O3, N 134) are one artifact, and
+also holds a browser slot. **[Later on 2026-09-23: 4 and 11 while
+`DO-NOT-OPEN-MESSAGING` held `M M49`'s page; 5 and 12 again after the operator
+lifted it at 18:15. See the note under the title.]** Two of the five (P O3, N 134) are one artifact, and
 `dom.py`'s readonly-ok waiver budget is at its cap of 22, so that shaper must
 reuse an already-declared in-page script or argue for the cap.
 

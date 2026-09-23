@@ -76,6 +76,7 @@ import argparse
 import collections
 import pathlib
 import sys
+import textwrap
 
 _HERE = pathlib.Path(__file__).resolve().parent
 sys.path.insert(0, str(_HERE))
@@ -573,8 +574,11 @@ def report(rows, out) -> dict:
     p("       (`_audit/2026-09-23-bucket1-fires.md` section 3). So what holds each")
     p("       row is DERIVED here from the census and never typed: a W row by its")
     p("       R/W cell, any other row by the hold its own cell cites as HELD BY.")
-    p("       `scripts/ruling_holds.py` resolves every cited id against the rulings")
-    p("       register; this file only counts them.")
+    p("       `scripts/ruling_holds.py` resolves every cited id; this file only")
+    p("       counts them. THE RULINGS MOVED THE SAME DAY: at 18:15 the operator's")
+    p("       ruling (b), relayed and not yet in the register, lifted the")
+    p("       messaging ruling and the read-only rule, so the writes and the two")
+    p("       messaging reads now wait on a live proof against a target he names.")
     holds, b1_problems = bucket1_holds(rows)
     split1 = None
     if holds is None:
@@ -589,31 +593,33 @@ def report(rows, out) -> dict:
         members: dict[str, list[str]] = collections.defaultdict(list)
         for row, hold in holds.items():
             members[hold or NO_RULING].append(row)
-        split1 = {"write": 0, "standing": 0, "pending": 0, "none": 0}
-        p("     held by a STANDING ruling -- made, and in force:")
-        for hold_id, hold in rh.ROW_HOLDS.items():
-            if hold.status != "STANDING":
-                continue
-            rows_held = sorted(members.get(hold_id, []), key=_row_order)
-            if hold_id == rh.WRITE_RULING_ID:
-                split1["write"] = len(rows_held)
-                by_cell = sum(1 for r in rows_held if direction.get(r) == "W")
-                how = (f"DERIVED  W {by_cell} by the R/W cell, "
-                       f"{len(rows_held) - by_cell} cited")
-            else:
-                split1["standing"] += len(rows_held)
+        split1 = {"standing": 0, "relayed": 0, "pending": 0, "none": 0}
+        headings = (
+            ("STANDING", "standing",
+             "held by a STANDING ruling -- made, registered, in force:"),
+            ("RELAYED", "relayed",
+             "held by a RELAYED ruling -- made, not yet in the register:"),
+            ("PENDING", "pending",
+             "waiting on a PENDING question to the operator -- NOT a ruling:"),
+        )
+        for status, key, heading in headings:
+            p(f"     {heading}")
+            ids = [i for i, h in rh.ROW_HOLDS.items() if h.status == status]
+            if not ids:
+                p("       none")
+            for hold_id in ids:
+                hold = rh.ROW_HOLDS[hold_id]
+                rows_held = sorted(members.get(hold_id, []), key=_row_order)
+                split1[key] += len(rows_held)
                 how = "DERIVED  cited"
-            p(f"       {hold_id:37s} {len(rows_held):4d}   {how}")
-            _wrap(p, rows_held)
-        p("     waiting on a PENDING question to the operator -- NOT a ruling:")
-        for hold_id, hold in rh.ROW_HOLDS.items():
-            if hold.status != "PENDING":
-                continue
-            rows_held = sorted(members.get(hold_id, []), key=_row_order)
-            split1["pending"] += len(rows_held)
-            p(f"       {hold_id:37s} {len(rows_held):4d}   DERIVED  cited")
-            p(f"         {hold.gist}")
-            _wrap(p, rows_held)
+                if hold.binds == "write":
+                    by_cell = sum(1 for r in rows_held
+                                  if direction.get(r) == "W")
+                    how = (f"DERIVED  W {by_cell} by the R/W cell, "
+                           f"{len(rows_held) - by_cell} cited")
+                p(f"       {hold_id:37s} {len(rows_held):4d}   {how}")
+                p(f"         {hold.gist}")
+                _wrap(p, rows_held)
         free = sorted(members.get(NO_RULING, []), key=_row_order)
         split1["none"] = len(free)
         p(f"     {'held by NO ruling -- the cell says what':39s} "
@@ -621,9 +627,15 @@ def report(rows, out) -> dict:
         p("       remains for each: a press, a build, or a session")
         _wrap(p, free)
         total1 = sum(split1.values())
-        p(f"     CHECK: {split1['write']} + {split1['standing']} + "
+        p(f"     CHECK: {split1['standing']} + {split1['relayed']} + "
           f"{split1['pending']} + {split1['none']} = {total1}, and "
           f"COVERED-UNFIRED is {unfired}")
+        p("     LIFTED, and cited by no row as a hold (a stale citation withholds")
+        p("     this split):")
+        for hold_id, why in rh.LIFTED_ROW_HOLDS.items():
+            p(f"       {hold_id}")
+            for piece in textwrap.wrap(why, 66):
+                p(f"         {piece}")
     p("")
     p("  -- BUCKET 2: BLOCKED ON AN OPERATOR RULING -----------------------")
     named_ruling = [k for k in RULING_BLOCKED_NAMED
@@ -632,12 +644,13 @@ def report(rows, out) -> dict:
       f" {sorted(named_ruling)}")
     p(f"     write-direction still-GAP rows          {by_dir['W']:4d}   DERIVED from the"
       f" census R/W cell")
-    p("       Governed by the STANDING ruling `NO-IRREVERSIBLE-WRITE-IS-FIRED`:")
-    p("       a write may be designed, gated and left ready, and may NOT be")
-    p("       fired at a real target without him. So the last step of every one")
-    p("       of these is a decision, whatever is built first. This is a")
-    p("       CEILING on the bucket, not a claim that each row is otherwise")
-    p("       ready -- most are not.")
+    p("       Governed until 18:15 on 2026-09-23 by `NO-IRREVERSIBLE-WRITE-IS-FIRED`,")
+    p("       and since then by the operator's ruling (b), relayed and not yet in")
+    p("       the register: a write may be designed, gated and left ready, and")
+    p("       fired only at a target HE names. So the last step of every one of")
+    p("       these is his decision, whatever is built first. This is a CEILING")
+    p("       on the bucket, not a claim that each row is otherwise ready --")
+    p("       most are not.")
     p("")
     p("  -- BUCKET 3: BLOCKED ON NOTHING AT ALL ---------------------------")
     p("     THE ONLY BUCKET WHOSE SIZE IS A STATEMENT ABOUT WORK.")
@@ -729,9 +742,9 @@ def report(rows, out) -> dict:
     p("    enumerated from committed sources rather than a measurement. One")
     p("    part of that judgement IS checked, since 2026-09-23: no row may be")
     p("    blocked on nothing on a page a ruling holds -- the holds that bind a")
-    p("    SURFACE, in `scripts/ruling_holds.py`. A ruling that binds an ACT,")
-    p("    such as the write ruling, cannot be read off an address, so a row")
-    p("    it holds must say so in its note and no instrument checks that.")
+    p("    SURFACE, in `scripts/ruling_holds.py`. A hold that binds an ACT,")
+    p("    such as the one on every write, cannot be read off an address, so a")
+    p("    row it holds must say so in its note and no instrument checks that.")
     if split3 is not None:
         unaddressed = (split3["class:NO-ADDRESS"]
                        + split3["class:NEEDS-SESSION"]
@@ -768,8 +781,8 @@ def report(rows, out) -> dict:
     # hold that cannot be read would otherwise count as a zero somewhere.
     if split1 is not None:
         figures.update({
-            "b1_write_ruling": split1["write"],
-            "b1_other_standing": split1["standing"],
+            "b1_standing": split1["standing"],
+            "b1_named_target": split1["relayed"],
             "b1_pending": split1["pending"],
             "b1_no_ruling": split1["none"],
         })
@@ -840,22 +853,29 @@ PINNED = {
     "b3_no_address": 2,
     "b3_needs_session": 6,
     "b3_undetermined": 2,
-    #: 4, not the 5 the bucket-3 wave pinned: `M M49` sat on a messaging page
-    #: and `DO-NOT-OPEN-MESSAGING` holds every one, so its gate is
-    #: STANDING-RULING and it is not blocked on nothing. The split was drawn
-    #: against the boundary without asking the rulings; `ruling_problems` now
-    #: refuses the table if that happens again. The class counts do not move --
-    #: the row is still ADMITTED. `_audit/2026-09-23-census-cleanup.md` item 6.
-    "b3_blocked_on_nothing": 4,
-    #: BUCKET 1 BY WHAT HOLDS EACH ROW, DERIVED 2026-09-23 and matching, row
-    #: for row, the classification `_audit/2026-09-23-bucket1-fires.md`
-    #: section 3 typed by hand: 15 writes held by the standing write ruling,
-    #: 2 rows held by `DO-NOT-OPEN-MESSAGING`, 2 waiting on the open
-    #: notifications question, 2 held by no ruling. They sum to `unfired`.
-    #: `PINNED_B1_ROWS` below pins WHICH rows, because a count cannot see two
-    #: rows swap.
-    "b1_write_ruling": 15,
-    "b1_other_standing": 2,
+    #: 5 -- AND IT WAS 4 FOR PART OF 2026-09-23. `M M49` sits on a messaging
+    #: page, and while `DO-NOT-OPEN-MESSAGING` stood that made it held, not
+    #: blocked on nothing: the bucket-3 split had asked the boundary and never
+    #: the rulings, and this pin read 4 in the census-cleanup wave's first
+    #: commit. The operator lifted the
+    #: ruling at 18:15 (his ruling (b), relayed), so the row is READER again
+    #: and the count is back where the bucket-3 wave put it -- now because the
+    #: rulings were asked. `ruling_problems` asks them on every run.
+    #: `_audit/2026-09-23-census-cleanup.md` items 6 and 7.
+    "b3_blocked_on_nothing": 5,
+    #: BUCKET 1 BY WHAT HOLDS EACH ROW, DERIVED from the census and the
+    #: holds in `scripts/ruling_holds.py`. After the operator's 18:15 ruling
+    #: of 2026-09-23: NO standing ruling holds any of the 21; 17 -- the 15
+    #: writes and the two messaging reads -- wait on a live proof against a
+    #: target he names; 2 on the open notifications question; 2 on no ruling
+    #: at all. They sum to `unfired`. (Before 18:15 the 17 were 15 held by the
+    #: write ruling and 2 by the messaging ruling, which is the split
+    #: `_audit/2026-09-23-bucket1-fires.md` section 3 typed by hand, and this
+    #: derivation reproduced it row for row before the ruling moved.)
+    #: `PINNED_B1_ROWS`
+    #: below pins WHICH rows, because a count cannot see two rows swap.
+    "b1_standing": 0,
+    "b1_named_target": 17,
     "b1_pending": 2,
     "b1_no_ruling": 2,
     #: D3's enumerated list: FOUR since 2026-09-23, when `M C83` left it --
@@ -869,13 +889,12 @@ PINNED = {
 #: hold with this table: a row entering or leaving the state, or changing
 #: hold, is reported by id. Re-pin only in the commit that says why it moved.
 PINNED_B1_ROWS: dict[str, tuple[str, ...]] = {
-    "NO-IRREVERSIBLE-WRITE-IS-FIRED": (
+    "OPERATOR-NAMES-THE-TARGET": (
         "J 103", "J 104", "J 128",
-        "M C1", "M C25", "M C32",
+        "M C1", "M C25", "M C32", "M M33", "M M43",
         "N 1", "N 46", "N 48",
         "P A8", "P A11", "P A13", "P A17", "P A19", "P A21",
     ),
-    "DO-NOT-OPEN-MESSAGING": ("M M33", "M M43"),
     "NOTIFICATIONS-UNREAD-SPEND": ("N 20", "N 45"),
     NO_RULING: ("J 121", "J 122"),
 }

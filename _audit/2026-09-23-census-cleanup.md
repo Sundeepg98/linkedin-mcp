@@ -4,7 +4,7 @@ claude-opus-5-5[1m]
 
 **CORRECTS:** `_audit/_census/messaging-and-content.md` -- row `C42` read *"no tool in this server returns one"* (a post identifier); since `C41` was proven today, `linkedin_my_activity_items` returns one for every post of his own. The premise still holds for other people's posts, and the state is not re-decided.
 
-**CORRECTS:** `_audit/2026-09-23-bucket3-addresses.md` -- it sized "blocked on nothing" at 5 of 67, counting `M M49` on a messaging thread; `DO-NOT-OPEN-MESSAGING` holds every messaging page, so the measured size is 4 and `M M49`'s gate is STANDING-RULING.
+**CORRECTS:** `_audit/2026-09-23-bucket3-addresses.md` -- it sized "blocked on nothing" at 5 of 67 without asking the rulings, counting `M M49` on a messaging thread while `DO-NOT-OPEN-MESSAGING` stood, which made the size 4. The operator lifted that ruling at 18:15 the same day, so the size is 5 again under the rulings as they now are, and the checker now asks them.
 
 Wave `census-cleanup`, 2026-09-23, from master `b0d3ab8` (the merge of the
 bucket-1 and bucket-3 waves). **OFFLINE THROUGHOUT.** No browser was started or
@@ -13,6 +13,19 @@ touched. Everything below is the census, the shipped boundary called
 in-process, the rulings register, and the scripts that read them.
 
 **WRITTEN AS THE WAVE RUNS.** Section 0 was written before any file was edited.
+
+**AND THE RULINGS MOVED MID-WAVE.** At 18:15 IST the operator made a ruling that
+reached this wave at about 18:25, after its second commit; section 7 records it
+and what it changed. Sections 1 to 6 keep what was measured and built before
+it, each opening with its state AFTER it:
+
+    item 1        bucket 1 is 0 standing / 17 waiting on a live proof against
+                  a target he names / 2 pending / 2 on no ruling
+                  (before: 15 + 2 held by standing rulings / 2 / 2)
+    item 6        blocked on nothing is 5 of 67 (it was 4 for part of the
+                  day); the edge stays, reading the holds as they now are
+    items 2 to 5  unchanged by the ruling, except that C42's cell now says
+                  C25 and C32 wait on a named target
 
 ---
 
@@ -84,6 +97,24 @@ browser is written down and left.
 ---
 
 ## 1. ITEM 1 -- BUCKET 1, DERIVED FROM THE CENSUS AND THE RULINGS
+
+**AFTER 18:15 (section 7), THE SAME DERIVATION PRINTS:**
+
+    held by a STANDING ruling -- made, registered, in force:     none
+    held by a RELAYED ruling -- made, not yet in the register:
+      OPERATOR-NAMES-THE-TARGET               17   W 12 by the R/W cell, 5 cited
+        J 103, J 104, J 128, M C1, M C25, M C32, M M33, M M43, N 1, N 46,
+        N 48, P A8, P A11, P A13, P A17, P A19, P A21
+    waiting on a PENDING question to the operator -- NOT a ruling:
+      NOTIFICATIONS-UNREAD-SPEND               2   N 20, N 45
+    held by NO ruling                          2   J 121, J 122
+    CHECK: 0 + 17 + 2 + 2 = 21, and COVERED-UNFIRED is 21
+
+The pins read `b1_standing` 0, `b1_named_target` 17, `b1_pending` 2 and
+`b1_no_ruling` 2, and `PINNED_B1_ROWS` holds the three groups row by row.
+Everything below in this section is the state as first built and committed,
+before the ruling reached the wave; the mechanism is unchanged, and only the
+holds table and five cells moved.
 
 **DONE.** `scripts/census_completion.py` no longer calls bucket 1 "blocked on a
 live browser session". It prints what holds each COVERED-UNFIRED row, and every
@@ -209,7 +240,7 @@ read row into bucket 3 (achievable 389 -> 390, `gap` 274 -> 275, `gap_read`
 same day a sibling wave is moving bucket-3 rows on this slice, and the class
 that row takes in bucket 3 is itself a judgement (its payload for other people's
 posts has no known page). That is a decision for whoever merges both waves, and
-section 9 puts it there with the cascade priced.
+section 10 puts it there with the cascade priced.
 
 ---
 
@@ -297,6 +328,20 @@ non-empty and equal to the key set.
 
 ## 6. ITEM 6 -- THE 33 ADMITTED ROWS AGAINST EVERY STANDING RULING
 
+**AFTER 18:15 (section 7): BLOCKED ON NOTHING IS 5 OF 67 AGAIN.** `M M49` is
+READER once more, and its note opens *"Was held by DO-NOT-OPEN-MESSAGING; lifted
+by the operator 2026-09-23 18:15"*. `b3_blocked_on_nothing` is back at 5 and no
+row carries STANDING-RULING. The edge is unchanged and green, because it reads
+the holds as they now are. No admitted row sits on a held page today -- the one
+surface hold left is the notifications question, and no admitted row is on
+`/notifications/` -- so its tests install their own holds on pages they choose.
+Everything below in this section is the re-check as first done. It stays the
+record of why the edge exists: run on the table as it stood, it named `M M49`
+and nothing else.
+
+    BLOCKED ON NOTHING, after 18:15    5   M M49, M C85 (READER);
+                                           P O3, N 134, M C72 (PRESS-PERMITTED)
+
 ### 6.1 The rulings consulted
 
 All 37 entries of `_audit/RULINGS.md`, by what they bind, plus the four rulings in
@@ -334,7 +379,7 @@ register entry whose BINDS is an address family): four entries name a path.
     the other 25 register entries    bind census conventions, output shapes or write
                                      admission; none binds a page any of the 33 is on
 
-### 6.2 The split, re-derived
+### 6.2 The split, re-derived -- as it stood before 18:15
 
     ADMITTED 33 -- unchanged; the class is the boundary's, and the boundary admits M M49's page
       READER             1   M C85
@@ -346,9 +391,10 @@ register entry whose BINDS is an address family): four entries name a path.
       STANDING-RULING    1   M M49 -- HELD BY `DO-NOT-OPEN-MESSAGING`
     BLOCKED ON NOTHING   4   of 67 (was 5): M C85, P O3, N 134, M C72
 
-**The derived number is 4, as the orchestrator expected -- and it rests on one
-unverified render (6.4).** Re-pinned: `b3_blocked_on_nothing` 5 -> 4. No other
-`b3_` pin moves, because the row stays ADMITTED.
+**Before 18:15 the derived number was 4, as the orchestrator then expected, and
+it rested on one unverified render (6.4).** It was re-pinned 5 -> 4 in this
+wave's second commit, and back to 5 in its third, after the ruling. No other
+`b3_` pin moved either time, because the row stays ADMITTED.
 
 **A NEW GATE, NOT THE OLD `RULING`.** `RULING` is a decision nobody has made and
 belongs in the operator's open queue; `DO-NOT-OPEN-MESSAGING` was made on
@@ -404,10 +450,11 @@ changes the class of none of them:
     M C85         /feed/update/<urn>/, READER. The permalink ruling permits the read and
                   the feed-content ruling permits counts. BUT its own line already marks
                   it UNVERIFIED whether poll results render before a vote, and a vote is
-                  an irreversible write: if they render only after one, the write ruling
-                  holds the read and the row leaves blocked on nothing (3 of 67). The
-                  live fire settles it. Separately, a permalink needs a post key, and the
-                  only tool here that returns one returns his own posts' keys (item 2).
+                  an irreversible write: if they render only after one, the read waits on
+                  a write -- since 18:15 a write he must name the target of -- and the
+                  row leaves blocked on nothing (4 of 67 after the ruling). The live fire
+                  settles it. Separately, a permalink needs a post key, and the only tool
+                  here that returns one returns his own posts' keys (item 2).
 
 **AT MERGE:** if the sibling banks any of the four, `read-addresses.tsv` loses
 that row's line, `b3_admitted` and `b3_blocked_on_nothing` move, and
@@ -417,7 +464,67 @@ the key until it is, which is the point of item 5.
 
 ---
 
-## 7. INSTRUMENTS
+## 7. THE 18:15 RULING, RELAYED MID-WAVE, AND WHAT THIS WAVE DID WITH IT
+
+**WHAT ARRIVED.** A note from the orchestrator at the worktree root, file time
+18:17:21 IST, read at about 18:25 by the box clock, after this wave's second
+commit. It relays that at 18:15 the operator ruled "(b)", in its words:
+
+> the linkedin MCP may connect, message, apply, post AND OPEN MESSAGING on his account
+
+-- lifting `DO-NOT-OPEN-MESSAGING`, the read-only rule and the apply, connect
+and InMail cut. It asked for three things inside this wave's six items and
+nothing outside them: class no row as held by the messaging ruling, and record
+`M M49` as "was held by DO-NOT-OPEN-MESSAGING; lifted by the operator
+2026-09-23 18:15"; make the edge read the rulings as they now are; and have
+bucket 1 say that the writes and the two messaging reads are held only by the
+need for a live proof against a target he names. The note was deleted after
+acting, as it asked, and never committed.
+
+**VERIFIED BEFORE OBEYED.** Disk disagrees with the note in one place: the rulings
+register still carries `DO-NOT-OPEN-MESSAGING` and
+`NO-IRREVERSIBLE-WRITE-IS-FIRED` as STANDING. The note names that lag itself --
+the orchestrator records the ruling in the register at merge -- so it is not
+the kind of disagreement that should stop the order, and it is stated here as
+the note asked. Everything else the note assumed matched disk: the edge
+existed, `M M49` was the only admitted row on a messaging page, and the 15
+writes and `M M33` / `M M43` were the rows it named.
+
+**HOW IT WAS APPLIED -- one table, and the cells that cite it:**
+
+    scripts/ruling_holds.py   the two rulings leave ROW_HOLDS for
+                              LIFTED_ROW_HOLDS, so a cell or note still citing
+                              either as a hold goes red instead of counting.
+                              OPERATOR-NAMES-THE-TARGET enters, status RELAYED
+                              (made, not yet in the register), binding every
+                              write. Its record is the quotation above, required
+                              exactly once in this document, and it fails the
+                              moment the register carries its id, so that it
+                              becomes STANDING with its BINDS checked
+    census cells              J 103, J 104, J 128, M M33, M M43 now cite
+                              OPERATOR-NAMES-THE-TARGET; the ruling that held
+                              each until 18:15 is kept as history in lowercase
+                              prose, which the marker does not read. C42's cell
+                              says C25 and C32 wait on a named target. N 20 and
+                              N 45 keep the open question
+    read-addresses.tsv        M M49 back to READER, its note opening with the
+                              record line the note asked for
+    census_completion.py      bucket 1 grouped STANDING / RELAYED / PENDING /
+                              none, the lifted two printed as lifted; bucket 2's
+                              write sentence names what governs a write now;
+                              b3_blocked_on_nothing back to 5 with its history
+
+**WHAT THE NOTE DID NOT COVER, LEFT AS IT WAS.** The notifications question.
+Ruling (b), as relayed, names connect, message, apply, post and opening
+messaging, not the notifications page, whose cost falls on HIS unread badge.
+`N 20` and `N 45` therefore stay on the open question. And for the two
+messaging reads the "target he names" is his own inbox: what he accepts, per
+fire, is that opening it lands in a conversation LinkedIn chooses and can mark
+that person's message read.
+
+---
+
+## 8. INSTRUMENTS
 
 Registered in `_audit/INSTRUMENTS.md` section 60 (numbered past the next free
 integer so siblings forked from the same master do not collide):
@@ -427,18 +534,19 @@ D; the ruling edge in `scripts/check_read_addresses.py`; and
 `tests/test_triage_read_gap_rows.py` over the repaired triage.
 
 **DECLARED DISPOSABLE:** the scratch join of the 33 admitted rows against the
-register (6.1) and the scratch that rewrote `M M49`'s two cells. What each
+register (6.1), and the two scratch scripts that rewrote `M M49`'s cells --
+first to STANDING-RULING, then back to READER after the ruling. What each
 measured is recorded above, and the edge re-derives the part that matters on
 every run.
 
 ---
 
-## 8. GATES
+## 9. GATES
 
 (Filled in after the commits: what ran, what it said, and what did not run.)
 
 ---
 
-## 9. FOR THE ORCHESTRATOR AND THE OPERATOR
+## 10. FOR THE ORCHESTRATOR AND THE OPERATOR
 
 (Filled in at the end.)

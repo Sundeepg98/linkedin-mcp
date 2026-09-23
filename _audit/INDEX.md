@@ -493,7 +493,7 @@ document is dead; it says one thing in it was overtaken and names what.
 
 - CORRECTED BY [2026-09-23-census-cleanup.md](2026-09-23-census-cleanup.md)
 
-  > the five rows blocked on nothing are FOUR: `M M49`'s page is a messaging thread and `DO-NOT-OPEN-MESSAGING` holds every messaging page, so its gate is STANDING-RULING, not READER. The split asked the boundary and never the rulings; the checker now asks both.
+  > the split asked the boundary and never the rulings: `M M49` sat on a messaging page while `DO-NOT-OPEN-MESSAGING` stood, which made the five four until the operator lifted that ruling at 18:15 the same day. The five stands under the rulings as they now are, and the checker now asks them.
 
 ### [INSTRUMENTS.md](INSTRUMENTS.md)
 
@@ -1307,7 +1307,7 @@ reach is visible. The quoted reason here is the CORRECTOR's own
 
 - CORRECTS [2026-09-23-bucket3-addresses.md](2026-09-23-bucket3-addresses.md)
 
-  > it sized "blocked on nothing" at 5 of 67, counting `M M49` on a messaging thread; `DO-NOT-OPEN-MESSAGING` holds every messaging page, so the measured size is 4 and `M M49`'s gate is STANDING-RULING.
+  > it sized "blocked on nothing" at 5 of 67 without asking the rulings, counting `M M49` on a messaging thread while `DO-NOT-OPEN-MESSAGING` stood, which made the size 4. The operator lifted that ruling at 18:15 the same day, so the size is 5 again under the rulings as they now are, and the checker now asks them.
 
 - CORRECTS [_census/messaging-and-content.md](_census/messaging-and-content.md)
 

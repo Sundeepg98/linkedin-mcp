@@ -26,7 +26,8 @@ demonstrations, and the third is a different KIND of failure from the others:
                             behaviour.
   D  AN UNFIRED ROW CHANGES HOLD. Move one COVERED-UNFIRED row W -> R. Bucket
                             1's hold for it is DERIVED from that cell, so the
-                            row leaves the write ruling for NO RULING: the two
+                            row leaves the hold on every write for NO RULING:
+                            the two
                             `b1_` pins move, the row-by-row control NAMES the
                             row, and nothing about GAP moves. Added 2026-09-23
                             with the derivation (`_audit/2026-09-23-census-
@@ -219,10 +220,10 @@ def main() -> int:
               _slice(scratch, "network.md"), scratch,
               _retarget("W", "R", also="COVERED-UNFIRED"),
               # The hold is derived from the direction cell, so the row moves
-              # from the write ruling to NO RULING and bucket 1 moves ALONE:
-              # no GAP figure may move, and the row must be NAMED, not only
-              # counted.
-              want=["PINNED FIGURE(S) MOVED", "b1_write_ruling",
+              # from the hold on every write to NO RULING and bucket 1 moves
+              # ALONE: no GAP figure may move, and the row must be NAMED, not
+              # only counted.
+              want=["PINNED FIGURE(S) MOVED", "b1_named_target",
                     "b1_no_ruling", "BUCKET-1 ROW(S) MOVED",
                     "now held by NO RULING"],
               forbid=["adjudicated", "delivered_broad", "gap_read",

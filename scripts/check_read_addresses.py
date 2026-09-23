@@ -90,7 +90,9 @@ SOURCE_KINDS = ("code-symbol", "test-fixture", "census-prose", "prior-audit")
 #: the operator's open queue. `STANDING-RULING` is one he HAS made and that is
 #: in force (the row's note cites it with HELD BY): nothing past the boundary
 #: is reachable before it, and filing it as `RULING` would put a decided
-#: question back into the open queue.
+#: question back into the open queue. No row carries it since the operator
+#: lifted `DO-NOT-OPEN-MESSAGING` at 18:15 that day; `M M49` carried it until
+#: then. It stays in the alphabet for the next ruling that holds a page.
 GATES = ("READER", "PRESS-PERMITTED", "MEASURE", "BUILT-UNFIRED", "PRESS",
          "RULING", "STANDING-RULING")
 
@@ -309,15 +311,22 @@ def ruling_problems(rows: list[dict[str, str]]) -> list[str]:
 
     THE EDGE THIS TABLE SHIPPED WITHOUT, measured 2026-09-23. ``M M49`` was
     classed READER -- blocked on nothing -- because the shipped boundary admits
-    ``/messaging/thread/<id>/``. ``DO-NOT-OPEN-MESSAGING`` forbids opening
-    messaging at all. The boundary says what the CODE may open; a ruling says
-    what may be DONE; the split asked only the first. Nothing in the table's
-    own vocabulary could see it, because the row was internally consistent.
+    ``/messaging/thread/<id>/``, while ``DO-NOT-OPEN-MESSAGING`` forbade
+    opening messaging at all. The boundary says what the CODE may open; a
+    ruling says what may be DONE; the split asked only the first. Nothing in
+    the table's own vocabulary could see it, because the row was internally
+    consistent. Run on the table as it then stood, this edge named ``M M49``
+    and nothing else.
+
+    AND THE SAME DAY THE ANSWER MOVED: the operator lifted that ruling at 18:15
+    (his ruling (b), relayed), so ``M M49`` is READER again and the edge is
+    green on it -- because it reads the holds as they are NOW, from one table.
+    A split that had typed "held" into the row would now be the stale one.
 
     Every ADMITTED row's page is looked up among the holds in
     ``ruling_holds.ROW_HOLDS`` that bind a SURFACE. A hold that binds an ACT --
-    the write ruling -- cannot be read off an address, so a row held that way
-    must say so in its note, and nothing here can check it. On a held page:
+    the one on every write -- cannot be read off an address, so a row held that
+    way must say so in its note, and nothing here can check it. On a held page:
 
       * a BLOCKED-ON-NOTHING gate is RED -- the edge itself;
       * a STANDING hold with any gate but STANDING-RULING is RED: nothing past
@@ -329,7 +338,8 @@ def ruling_problems(rows: list[dict[str, str]]) -> list[str]:
 
     And the converse, so the new gate cannot be spent carelessly: a
     STANDING-RULING row must cite a STANDING hold, and when that hold binds a
-    surface the row's page must sit on it.
+    surface the row's page must sit on it. And on ANY row, a note still citing
+    a LIFTED ruling with ``HELD BY`` is RED: that citation is history.
 
     PURE: the holds table is imported, the register is not. That it still
     agrees with the register is ``ruling_holds.register_problems``, which
@@ -337,6 +347,11 @@ def ruling_problems(rows: list[dict[str, str]]) -> list[str]:
     """
     problems: list[str] = []
     for r in rows:
+        for lifted in (c for c in rh.cited(r["note"])
+                       if c in rh.LIFTED_ROW_HOLDS):
+            problems.append(f"{r['slice']} {r['row']}: its note cites HELD BY "
+                            f"`{lifted}`, and that ruling is lifted -- "
+                            f"{rh.LIFTED_ROW_HOLDS[lifted]}")
         if r["class"] != "ADMITTED" or not r["address"].startswith(HOST):
             continue
         tag = f"{r['slice']} {r['row']}"

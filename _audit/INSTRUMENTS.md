@@ -9471,8 +9471,8 @@ addresses in prose. `_audit/_census/read-addresses.tsv` is that column, one line
 per bucket-3 row, and the measurement is taken: of 67 rows, 33 sit on a page the
 boundary admits, 24 on one it refuses, 10 carry no address at all -- and 5 have
 nothing between an admitted page and a reader but the reader. **[Later on
-2026-09-23: 4. `M M49`'s page is a messaging thread, which a standing ruling
-holds; section 60.]**
+2026-09-23: 4 while a standing ruling held `M M49`'s messaging page, and 5
+again after the operator lifted it at 18:15; section 60.]**
 
 ### 57.1 THE PLANT THAT MATTERS IS A CONSISTENT ONE
 
@@ -9525,20 +9525,32 @@ as what may be DONE. `scripts/census_completion.py` read the COVERED-UNFIRED
 state and printed "a session is the entire remaining cost" -- for 21 rows of
 which a session was the whole cost for none. The bucket-3 split read the read
 boundary's admission of a messaging thread and printed "blocked on nothing" --
-for a page a standing ruling forbids opening. The census state and the
+for a page a then-standing ruling forbade opening. The census state and the
 boundary answer what the CODE can do. What holds a row is a ruling, made or
 asked, and neither instrument asked one.
 
-### 60.1 ONE TABLE OF HOLDS, ANCHORED TO THE REGISTER, READ BY BOTH BUCKETS
+**AND THE SAME AFTERNOON THE RULINGS THEMSELVES MOVED**, which is the argument
+for keeping them in ONE table. At 18:15 the operator lifted the messaging
+ruling and the read-only rule (his ruling (b), relayed to the wave, registered
+by the orchestrator at merge). Both buckets absorbed it through one edit to the
+holds table and five census cells: the messaging reads and the writes now wait
+on a live proof against a target he names, and `M M49` is READER again.
 
-`scripts/ruling_holds.py` names three holds: the write ruling (binds every
-write), `DO-NOT-OPEN-MESSAGING` (binds `/messaging/`), and the one open
-question (binds `/notifications/`, marked PENDING everywhere it prints). A
-STANDING entry is re-read from `build_rulings_index.REGISTER` on every run and
+### 60.1 ONE TABLE OF HOLDS, ANCHORED TO ITS RECORDS, READ BY BOTH BUCKETS
+
+`scripts/ruling_holds.py` names what holds rows today: a condition on every
+write (status RELAYED -- the operator's ruling, not yet in the register) and
+the one open question (binds `/notifications/`, marked PENDING everywhere it
+prints). It also keeps `LIFTED_ROW_HOLDS`, the two rulings lifted at 18:15, so
+a cell or note still citing either as a hold goes red instead of counting.
+
+A STANDING entry is re-read from `build_rulings_index.REGISTER` on every run and
 goes red when the id leaves the register, stops being STANDING, or its BINDS no
-longer names the surface. The PENDING entry goes red when a registered ruling
-binds its surface, because the question has then been answered and every row
-citing it must be re-read.
+longer names the surface. A RELAYED entry goes red when the register carries
+its id, so it becomes STANDING and its BINDS starts being checked. The PENDING
+entry goes red when a registered ruling binds its surface, because the question
+has then been answered and every row citing it must be re-read. RELAYED and
+PENDING entries each resolve to their record's exact words, once.
 
     A HOLD IS CITED WITH A MARKER AND READ; IT IS NEVER INFERRED FROM A MENTION.
 
@@ -9559,20 +9571,24 @@ leaving COVERED-UNFIRED is named too.
 `check_read_addresses.ruling_problems` was run against the address table exactly
 as HEAD had it, before the row was touched, and returned two problems, both
 `M M49`: blocked on nothing on `/messaging/`, and a note not citing its hold.
-That is a stronger showing than a plant, because nobody chose the input.
+That is a stronger showing than a plant, because nobody chose the input. After
+the 18:15 lift the same row is green under the same edge, because the edge reads
+the holds as they now are. No admitted row sits on a held page today, so every
+test of the edge installs its own hold on a page it chooses.
 
 ### 60.4 THE ENTRIES
 
 | path | shown failing by |
 |---|---|
-| `scripts/ruling_holds.py` | `tests/test_ruling_holds.py`: register copies with the messaging ruling removed, re-scoped to a narrower surface, no longer STANDING, and the write ruling rebound; the pending question answered by a planted registered ruling; the question's words moved in its document. Each is handed in as a parameter, so neither the real register nor the real table is touched |
-| `scripts/census_completion.py` -- bucket 1 by hold, four `b1_` pins, `PINNED_B1_ROWS`, and `b2_d3_rows` | on HEAD's cells before any marker existed: `--check` red, naming the seven rows whose holds were prose only. Demonstration D of `scripts/_check_census_completion_can_fail.py` (a COVERED-UNFIRED row W to R: two `b1_` pins move, the row is named, no GAP figure moves). `tests/test_ruling_holds.py`: a marker removed, the swap in 60.2, a direction flip, a row leaving the state, an unreadable hold withholding the split and every `b1_` figure |
-| `scripts/check_read_addresses.py` -- `ruling_problems` and the STANDING-RULING gate | HEAD's own table, 60.3. `tests/test_read_addresses.py`: the row put back to READER, a held page under a PRESS gate, a held page citing nothing, STANDING-RULING off its ruling's page or citing nothing, a planted PENDING question convicting a row the test makes blocked on nothing, and `census_completion` withholding the split |
+| `scripts/ruling_holds.py` | `tests/test_ruling_holds.py`: a STANDING hold handed in and resolved green, then register copies with that ruling removed, re-scoped to a narrower surface, and no longer STANDING; the relayed ruling found in a register copy; the relayed and pending records' words moved; the pending question answered by a planted registered ruling; a ruling listed both lifted and live. Each is handed in as a parameter, so neither the real register nor the real table is touched |
+| `scripts/census_completion.py` -- bucket 1 by hold, four `b1_` pins, `PINNED_B1_ROWS`, and `b2_d3_rows` | on HEAD's cells before any marker existed: `--check` red, naming the seven rows whose holds were prose only. Demonstration D of `scripts/_check_census_completion_can_fail.py` (a COVERED-UNFIRED row W to R: two `b1_` pins move, the row is named, no GAP figure moves). `tests/test_ruling_holds.py`: a marker removed, the swap in 60.2, a direction flip, a row leaving the state, an unknown or LIFTED citation withholding the split and every `b1_` figure |
+| `scripts/check_read_addresses.py` -- `ruling_problems` and the STANDING-RULING gate | HEAD's own table, 60.3. `tests/test_read_addresses.py`, each on a hold the test installs: a row made blocked on nothing on a held page, a held page under a PRESS gate, a held page citing nothing, STANDING-RULING off its ruling's page or citing nothing, a PENDING question convicting a row the test makes blocked on nothing, a note still citing a LIFTED ruling, and `census_completion` withholding the split |
 | `scripts/triage_read_gap_rows.py` -- CONTROL 7 -- and `tests/test_triage_read_gap_rows.py` (the first test that runs the script) | `N 53` planted back into the real file: two tests red naming it, the file restored and compared by sha256. Each of the four `--plant` options refused by its own control's sentence |
 
 ### 60.5 DECLARED DISPOSABLE
 
 The scratch join of the 33 admitted rows against the register's address-family
-entries, and the scratch that rewrote two cells of one line of the address
-table. What the first measured is recorded in the audit, and `ruling_problems`
-re-derives the part that matters on every run.
+entries, and the two scratches that rewrote one line of the address table (to
+STANDING-RULING, then back to READER after the lift). What the join measured is
+recorded in the audit, and `ruling_problems` re-derives the part that matters
+on every run.
