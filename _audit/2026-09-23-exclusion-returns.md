@@ -20,7 +20,10 @@ written grounds, cited, and 8 held by the operator's own 2026-09-04 ruling and
 left untouched. `N 136` stays MEASURED-ABSENT and now cites a measurement.
 **The pending count moves from 274 to 519 GAP rows, and the achievable surface
 from 389 rows to 635.** The operator asked whether the pending count was exact;
-it was short by 245 rows of work nothing written ruled out.
+it was short by 245 rows of work nothing written ruled out. **Measured again at
+the merge of master `001f70b` (Integration 2026-09-24, below): 514 GAP rows and
+an achievable surface of 634 rows, 648 capabilities.** Master's lanes had built
+four rows meanwhile, and rulings batch 3 filed `N 171` as NOT-AN-ACT.
 
 **AUTHORITY.** The operator ruled at 18:13 (OUTWARD-ACTS-NEED-THE-OPERATOR) that
 only acts toward other people, or irreversible ones, need him, and that every
@@ -543,7 +546,8 @@ own view name says it reveals a further section.
 population is 704 before and after: no row entered or left the census.
 
 **EXPECTED PIN MOVES -- NOT RE-PINNED HERE, BY INSTRUCTION.** Each was measured
-on this worktree after the moves:
+on this worktree after the moves. These are the phase-one figures; the pins as
+set at the merge, and why each differs, are in the Integration section, I.5:
 
 * `scripts/census_completion.py` PINNED: `gap` 274 to 519, `out_of_scope` 315 to
   69, `achievable` 389 to 635, `adjudicated` 430 to 185, `delivered_broad` 96 to
@@ -883,7 +887,7 @@ b1_relayed 0, b1_pending 0, b1_released 6, and the three jobs zeros.
   a deletion that ground two keeps. They have to be itemized into rows before
   they can be decided one at a time. Until then they are counted with `P1`,
   outside the achievable capability surface; no row figure depends on them,
-  and `capabilities_achievable` would rise by at most 44. The block's own
+  and `capabilities_achievable` would rise by at most 43, Delete Data staying out. The block's own
   paragraph and section 6 of `profile.md` now say this in-line, with no line
   added, so no row moved a line.
 * **The seven cold-verifier disagreements of section 8 stand as adjudicated.**
@@ -903,8 +907,51 @@ jobs directions. Every output was reviewed against its checker and by diff
 before it replaced a tracked table. Two applied whole; one with the single
 `N 62` line changed.
 
-### I.9 Gates
+### I.9 Gates run and not run
 
-Recorded in the next commit on this branch: a document cannot record the gate
-run on the commit that contains it, and the house rule is commit first, then
-gate.
+**RUN, on the merge, `7ec1817`** -- a commit of this branch; it does not resolve
+on master until this branch merges. This section rides in the commit after it,
+because a document cannot record the gate run on the commit that contains it.
+
+* **`scripts/impact_gate.py --against 001f70b`: PASS -- 55 test files, 2640
+  tests, 1142.5s wall clock**, 02:13 to 02:33 on a box other lanes were using.
+  29 changed paths; the 55 include the 17 corpus-wide guards, which ran
+  unconditionally, and every census test this lane touched. The plan did not
+  widen to the full suite, so the order's full-suite question did not arise.
+* **Beside the gate's selection**: the two census guard files it did not pick,
+  `tests/test_contingent_writeoffs_carry_a_reopener.py` and
+  `tests/test_the_events_boundary_is_root_only.py`, 21 passed; and
+  `scripts/_check_census_completion_can_fail.py`, all five demonstrations
+  passing against the re-pinned file -- a state move, a direction move, an
+  unreadable state, a hold move and a lost release each turn `--check` red and
+  name what moved, and the restored copy is green again.
+* **Every census instrument on the committed tree.** `census_completion.py
+  --check`: every headline figure matches its pin. `check_read_addresses` 98 of
+  98; `check_exclusion_basis` 70 of 70, 0 untraced, 0 lifted;
+  `check_write_classes` 325 lines, GREEN; `check_jobs_directions` 92 of 92;
+  `ruling_holds` GREEN; `pin_census_rows --check`, no drift at 704;
+  `classify_writeoff_reasons --check`,
+  `check_contingent_writeoffs_carry_a_reopener`,
+  `check_gap_rows_on_refused_addresses` and `measure_pointer_graph --check`
+  PASS; both triage scripts exit 0; `check_census_locators_resolve`, every
+  locator names its row; `check_cited_shas_resolve`, OK.
+  `check_asserted_names_resolve` exits 1 on the 8 sites that
+  `tests/test_an_asserted_name_resolves.py` pins, the set master already pins
+  and this lane did not touch; that test is green in the gate.
+* **The pre-commit identity gate**: 105 staged files against 218 spellings, 0
+  hits. Over master, this lane's added lines carry no non-ASCII character and
+  no absolute workspace path, measured on the diff.
+* **The generated files** -- the index, the rulings register and the blocker
+  map -- regenerated until a second sweep changed nothing.
+
+**NOT RUN:**
+
+* The rest of the suite: 179 of 234 test files, about 3454 of 6094 tests. CI's
+  three platforms are the certifier, and nothing was pushed, by instruction.
+* `scripts/completeness_harvest.py --write`, for the reason in I.1.
+* Anything that loads LinkedIn or touches the operator's browser, port 9224 or
+  `_state/`. One browser did run, inside the gate:
+  `tests/test_sdui_surfaces_fixture.py` and `tests/test_surface_census.py` each
+  launch Playwright's own headless Chromium with no user profile and set local
+  HTML into it -- two `chrome-headless-shell` processes, measured under the
+  gate's own workers at 02:26 and gone by 02:30.
