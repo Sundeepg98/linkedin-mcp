@@ -523,7 +523,7 @@ comparison (`total == len(...) == N`), with a paragraph warning that it goes
 stale on every widening; it went red on the first new entry and was bumped
 with each, as that paragraph predicts.
 
-### Entry 7 -- 23:08:46-23:09:25, the view switch and the reveal, fired: 2 loads, 8 presses
+### Entry 7 -- 23:08:46-23:09:25, the view switch and the reveal, fired: 2 loads, 7 presses
 
 `--only pv_switch,pv_verify`, ledger 19 -> 21, both pages walled False with
 0 challenge terms. `pv_switch` is the shipped
@@ -764,7 +764,10 @@ build found them.** `c523769` moved `readonly.SANCTIONED_MUTATIONS` from 7 to
 docstring's count, so `test_the_read_only_boundary_is_where_it_was_re_frozen`
 and `test_the_package_docstring_agrees_about_writes_and_mutations` failed on
 that commit and on the five after it. Measured, not inferred: the committed
-tree at `f100efa`, exported with `git archive` and run, fails both. The
+tree at `f100efa` -- this lane's commit, which does not resolve on `master`
+until the lane merges; its subject is "live lane session 1: messaging read
+again and still held; M M49 not built, with the reason" -- exported with
+`git archive` and run, fails both. The
 per-commit runs were chosen by hand and did not select them. Both are
 repaired in `1d4ef86` (the re-freeze attributed in the file's own form: the
 tree minus exactly the five new entries hashes to the frozen value). The
@@ -875,10 +878,10 @@ not measured this time (no badge reading before the load in this key).
 
     queue  row      outcome           the reason, or the evidence (entry)
     1      P G6     PROVEN            per_post readable, 2 items; totals = sums of lists (2)
-    2      M M43    NOT FIRED         messaging badge read 1 at 22:14 and 23:26 (2, 9)
-    2      M M33    NOT FIRED         the same reading (2, 9)
-    3      N 20     FIRED, NOT SHOWN  10 notifications, none invitation-kind (2)
-    3      N 45     FIRED, NOT SHOWN  10 notifications, none follow-kind (2)
+    2      M M43    NOT FIRED         messaging badge read 1 at 22:14, 23:26, 00:43 (2, 9, 13)
+    2      M M33    NOT FIRED         the same readings (2, 9, 13)
+    3      N 20     FIRED, NOT SHOWN  10 notifications twice, none invitation-kind (2, 13)
+    3      N 45     FIRED, NOT SHOWN  10 notifications twice, none follow-kind (2, 13)
     4      M M49    NOT BUILT         the thread page it reads was never landed on (9)
     5      N 134    PROVEN            6 viewers under the filter; restored, twice (7)
     5      P O3     PROVEN            filters by the switch; insights revealed and read (8)
@@ -889,6 +892,211 @@ not measured this time (no badge reading before the load in this key).
     8      P A25 P L1 P L8 M C48 M C38
                     CAPTURED          state unchanged; the captures await readers (5)
     9      lane Y   CAPTURED          all 8 page items of its list (2, 4, 5)
+
+## LOADS, PRESSES AND WRITES
+
+    loads      28 of 40, serial, every one through the ledger; the smallest
+               gap between two loads 22.5 s, none under the 20 s floor
+    clicks     22 -- Entry 3: 3 (the pills, through press.disclose);
+               Entry 4: 1 (the post menu, press.disclose); Entry 7: 7 (the
+               switch's 6 and the reveal's 1); Entry 8: 7 (the same, fired
+               again); Entries 11 and 12: 2 each (the menu, the copy entry)
+    keys       4 Escapes recorded (press.disclose sends one after each of its
+               4 clicks) and 0 to 2 NOT recorded: the two C72 fires ran
+               before share_link reported escape_pressed, and the menu may
+               have closed itself on the copy press. The field exists now,
+               because of this line (the last commit below).
+    writes     0. No save, send, reaction, follow or profile field; the nine
+               outward writes stay held by OPERATOR-NAMES-THE-TARGET.
+
+**ENTRY 7'S HEADING SAID 8 PRESSES; IT WAS 7.** Counted from the source, not
+recalled: the switch's success path is six clicks (open, select, apply,
+reopen, deselect, reapply) and the reveal is one. The heading is corrected
+in place and this line says so.
+
+The forced prediction (0.7) said 4 rows would prove and named the messaging
+three as the likeliest misses. **4 proved** (P G6, N 134, P O3, M C72); the
+misses were the messaging three, as predicted, and N 20 / N 45, which the
+prediction's count absorbed without naming.
+
+## EXPECTED PIN MOVES, NOT RE-PINNED
+
+Every one below is a consequence of this lane's four promotions (`P G6`,
+`N 134`, `P O3`, `M C72`), and each names the exact edit a re-pin makes.
+
+`scripts/census_completion.py --check`, at the end of the session:
+
+    adjudicated            431 -> 434   (+3: N 134, P O3, M C72)
+    delivered_broad         97 -> 100   (+3)
+    delivered_strict        75 -> 79    (+4: P G6, N 134, P O3, M C72)
+    gap                    273 -> 270   (-3: N 134, P O3, M C72)
+    gap_read                66 -> 63    (-3)
+    unfired                 22 -> 21    (-1: P G6)
+    b1_no_ruling             7 -> 6     (-1: P G6)
+    b3_admitted             40 -> 37    (-3)
+    b3_blocked_on_nothing    1 -> 1     (P O3 in and out; M M49 remains)
+    PINNED_B1_ROWS           P G6 leaves its hold
+
+And the tests that pin a census-derived set, red on the full gate for
+exactly these reasons:
+
+    tests/test_ruling_holds.py
+        test_bucket_one_is_derived_and_sits_on_its_pins
+            PINNED_B1_ROWS: P G6 leaves its hold
+    tests/test_banked_evidence_is_reachable.py
+        test_the_seven_under_banked_rows_are_exactly_these
+            PINNED gains (messaging-and-content.md, C72) and (network.md, 134)
+        test_every_unreachable_artifact_is_named_and_classified
+            15 -> 18 artifacts
+            BOTH ROWS' UNREACHABLE CITATIONS ARE IN THEIR KEPT PRIOR READINGS,
+            written by earlier waves (gitignored _audit/_scratch/ files:
+            one under C72, two under 134). The evidence for the promotion
+            itself is tracked. Promotion is what made the guard read the
+            whole cell: it examines banked rows only. P O3 cited a gitignored
+            capture in this lane's own words and was reworded instead.
+    tests/test_triage_read_gap_rows.py
+        test_green_on_the_real_tree
+        test_the_control_4_population_is_not_empty_and_equals_the_key_set
+            scripts/triage_read_gap_rows.py's verdict table still carries
+            "N 134" and "P O3", which are no longer read GAP rows: 53
+            verdicts over 51 rows. Drop the two entries.
+    tests/test_triage_instrument.py
+        test_the_headline_split_is_the_one_the_report_quotes
+            EXPECTED_NOW (77, {R: 10, W: 65, R+W: 2}) -> (76, {R: 9, ...}),
+            M C72, and the report that quotes it
+    tests/test_pointer_graph_guard.py
+        test_the_committed_census_still_matches_its_pin
+        test_every_failure_class_is_convicted_and_the_calibration_is_not
+            N 135's cell opens with a bare "Same", a pointer that resolved to
+            N 133 and now resolves to N 134, because N 134's state moved.
+            N 135's own evidence follows the fragment and did not change.
+            pointer-graph.tsv 69 -> 68 (network 4 -> 3). The honest repair is
+            to replace the vestigial "Same" in the commit that re-pins; N 133
+            is in the cleanup lane's ten, so this lane left both alone.
+
+The per-row pin for `P G6` in
+`tests/test_a_covered_row_names_the_artifact_that_covers_it.py` WAS moved,
+in Entry 2's commit: its own instruction said a fire must move it.
+`check_read_addresses.py`: GREEN, 63 of 63.
+
+## GATES RUN, AND NOT RUN
+
+RUN, and what each covered:
+
+- **The full impact gate**, `scripts/impact_gate.py --against c8fa6ea`, on
+  the tree of the last commit below: it widened to the full suite (215 of
+  233 test files reachable). **9 failed, 8958 passed, 8 skipped, 1 xfailed,
+  in 20 min 45 s.** Eight of the nine are the pin moves listed above. The
+  ninth was a defect in this document -- `f100efa` cited in a commit slot
+  without its subject or a disclosure -- and is repaired
+  (`scripts/check_cited_shas_resolve.py` exits 0). After the repairs the
+  eight pin reds were re-run by name and are exactly the eight.
+- **Per commit, scoped by hand** -- the files each change touched plus the
+  identity, person-name and correction guards on the staged index. **This is
+  the gate that missed two guards for six commits** (Entry 10): a selection
+  by name did not include the two files that read `readonly.py` and the
+  package docstring as wholes. The full gate above is what that miss is
+  answered by.
+- **The generated files**: `build_audit_index.py`, `build_rulings_index.py`
+  and `build_blocker_map.py`, `--write` twice (the second sweep changed
+  nothing) and `--check` exit 0 on all three, in the C72 commit and again
+  in the last. **An earlier "fixed point" claimed in the build (d) commit
+  was void**: the three were run without `--write`, so they only reported.
+  Nothing was stale -- the proper sweep changed INDEX and RULINGS not at
+  all, and the blocker map only for `C72` -- but that check verified
+  nothing and is not counted.
+- **Red-proofs, each plant alone in a scratch copy**: share_link 8 (the
+  child's) + 8 (P9-P16) + 2 (P17-P18); the price 7 (Q1-Q6, Q4b); the tool
+  body 5 (T1-T5); the replacement-script guards 3 plus one measurement
+  (RA-RD); reveal R1-R6, view_switch V1-V7, profile_views_more M1-M5 and the
+  harness H1-H7 (earlier entries). Every plant red.
+
+NOT RUN:
+
+- **CI.** Nothing was pushed (the brief). The 3.10 cell is CI's; every
+  number here is 3.13 on this box.
+- **A live fire after `escape_pressed` existed.** Offline proof only.
+- **The observed read map** the impact gate consults was recorded on
+  2026-09-22 (`5c910e4`), not on this branch; the gate says so itself, and
+  it only ever ADDS to a plan.
+
+## COMMITS
+
+On the lane branch, oldest first. **None resolves on `master` until the lane
+merges**; each subject is the key that survives a rewrite.
+
+    1ef494c  live lane session 1: the plan, and a harness that counts every load
+    1d470d2  live lane session 1: P G6 proven; messaging held on the badge; N 20/45 not shown
+    0cf9720  live lane session 1: the filter popovers captured open; G6's banked pin moved
+    e2fa2d5  live lane harness: a post_capture key; two urn-shaped test literals built at runtime
+    d9b4c26  live lane harness: the editor-fields read, lane L1's captures and lane Y's pages as keys
+    2e7cb2f  live lane session 1: the post menu captured; nothing saved; L1 and lane Y captured
+    c523769  view switch and decided reveal: two presses, each on a recorded call
+    4279dc3  live lane harness: pv_switch fires the view switch and the reveal; pv_verify reloads to check the restore held
+    85df223  live lane session 1: N 134 proven by the view switch; P O3 half proven, now a reader away
+    5ed7d14  profile views: read what Show more analytics reveals
+    70d3472  live lane session 1: P O3 proven -- filters by the view switch, insights by the reveal and its reader
+    f100efa  live lane session 1: messaging read again and still held; M M49 not built, with the reason
+    1d4ef86  copy link of his own post: share_link and linkedin_own_item_link; the late re-freeze
+    21d718c  linkedin_own_item_link driven end to end on the fixture: real counter reader, 5 plants red
+    2775d02  own item link: price the presses by the post's own reaction toggle; refuse a price that cannot move
+    2d4bb44  live lane session 1: M C72 proven -- the link of his own post, on a price that could move
+    8cd8e98  share_link reports whether it pressed the Escape; the held rows read once more
+
+and the commit that adds this section.
+
+## FINDINGS AND DECISIONS FOR THE ORCHESTRATOR
+
+1. **The `/feed/` basis prices nothing on a post permalink.** It reaches
+   `/feed/update/` by path prefix, but its counter, `off_state`, counts the
+   feed's toggle label ("Reaction button state: no reaction"), and the
+   permalink draws its toggle as "Unreact Like" -- measured in all three
+   captures of his post's page, with zero in the feed's label, while the
+   feed draws three. So `press.check_counters` compares two zeros and calls
+   it a price. `linkedin_own_item_link` now prices by the toggle itself and
+   refuses before any press when nothing can move; **`press.disclose` on a
+   permalink is still priced by the zero** (the harness's `post_capture`
+   was, Entry 4). Two ways to close it, both in `press.py`, which is not
+   this lane's: a basis of its own for `/feed/update/`, or a refusal when the
+   basis-named counter reads 0 at both ends and nothing else priced the
+   press. The gate's `priced_by` field also names the basis counter rather
+   than whatever counter could move (Entry 12).
+2. **The react write aims by the feed's label** (`dom.REACTION_OFF_LABEL`,
+   `reaction_control_selector`, used on item permalinks). On his own post's
+   permalink the measured toggle is "Unreact Like" (the post liked; the OFF
+   form "React Like" is inferred). n=1, one liked post, but it suggests the
+   write would find no control there. For lane L4.
+3. **`JS_MUTATION_TOKENS` cannot see API replacement -- now VERIFIED BY
+   INSTRUMENT.** With `CLIPBOARD_JS` undeclared (RC) or declared as an
+   ordinary injected script (RD),
+   `test_every_script_this_package_executes_cannot_mutate` PASSES it -- a
+   script that replaces three page functions and adds a listener. It is held
+   by `SCRIPTS_THAT_REPLACE_PAGE_BEHAVIOUR` and its two guards instead.
+4. **A scanner that matches by attribute name** flagged nothing wrong in
+   `press.evaluate` -- a pure function -- and invited a child to import it
+   under an alias to keep the scanner quiet. Rejected as evasion; the four
+   component checks are called by their own names, as `reveal` and
+   `view_switch` already did.
+5. **`N 136` may be the "Details" panel** behind "Show more analytics" (Entry
+   7). Not this lane's row; its cell is untouched.
+6. **The six profile edits** need an account-level reading of the
+   "share profile updates" setting, a ruling that it satisfies condition 1,
+   and `writes.py` asserting it at save time (lane L4). Entry 5.
+7. **`M C85`** needs `/in/me/recent-activity/all/` admitted to look past the
+   rail's 8 items for a poll of his own -- a boundary decision.
+8. **Messaging moves only when his badge reads 0.** Read 1 at 22:14, 23:26
+   and 00:43. The next session's first key: `badge,m43,m33`; on a 0 it fires
+   `M M43`, captures the landing (the page `M M49`'s reader needs) and fires
+   `M M33` -- three loads.
+9. **`check_banked_evidence_is_reachable.py` lists 28 banked rows as
+   describing a live run with no tracked script**, including long-standing
+   `profile.md` rows (`A5`, `A7`, `G7` among them) and this lane's `G6` and
+   `O3`, whose cells do name `scripts/_probe_live_lane_session_1.py`; `C41`,
+   `N 134` and `C72`, written in the same form, are not listed. Report-only,
+   asserted by no test, and not chased here.
+10. **A long-running `find` process** on the box (PID 19532, about 4.7
+    CPU-hours when sampled at 00:4x) is not this lane's and was left alone;
+    whoever owns it should know.
 
 ## INSTRUMENTS -- register candidates, and what is disposable
 
@@ -907,6 +1115,44 @@ orchestrator appends them at merge or declines them.
     linkedin_server/view_switch.py               V1-V7 (Entry 6), including a restore that never
                                                  compares the view
     linkedin_server/profile_views_more.py        M1-M5 (Entry 8)
+    linkedin_server/share_link.py                the child's 8 and P9-P18 (Entry 10, 13): the owner
+      copy_own_post_link, CLIPBOARD_JS           check skipped, a startswith match, the hook not
+                                                 installed, the Escape skipped or unreported, a read
+                                                 that does not wait, a placeholder for the item's
+                                                 text, an empty text promoted, a refusal dropping
+                                                 its closure, a url fallback for an empty box
+      share_link.read_item_price,                Q1-Q6 and Q4b (Entry 11): a zero accepted as a
+      price_can_move                             price, the permalink dialect ignored, the off form
+                                                 misspelled, an unread toggle turned into 0 (the one
+                                                 that survived its first run), a bool read as a
+                                                 count, the tool pressing without the check, the
+                                                 readings not returned
+    linkedin_own_item_link, end to end           T1-T5 (Entry 10): the counter reader ignoring the
+      on the fixture through a stand-in BROWSER  page, the link withheld only when asked, the load
+                                                 unreported, a derived address, a bad id reporting
+                                                 a load
+    tests/test_readonly.py                       RA-RC (a reader declared as a replacement script;
+      SCRIPTS_THAT_REPLACE_PAGE_BEHAVIOUR and    the script run from a second, unsanctioned
+      its two guards                             function; the script left undeclared), and RD, the
+                                                 measurement that the token scan passes it
+
+**A METHOD, for the register's method list rather than its instruments:**
+**a counter that reads 0 at both ends of a press priced nothing unless it
+could have moved.** Before trusting a price, count the counter's own label
+in a capture of the page the press happens on. The `/feed/` basis's
+`off_state` passed every gate check on a page that does not draw its label
+at all (Entry 11); the gate compares readings and cannot know what a
+reading is able to do.
+
+**ALSO DISPOSABLE, from build (d) and the price fix, in the session
+scratchpad:** `mutate_share.py`,
+`mutate_escape.py`, `mutate_price.py`, `mutate_tool.py`,
+`mutate_readonly.py` (the plant runners -- each copies the tree, plants one
+defect, restores byte-for-byte, and handles CRLF anchors after two of them
+reported "anchor found 0 times" instead of planting), `refreeze_attr.py`
+(the re-freeze attribution, in the test file's own form), `c72_census.py`,
+`verify_share_hits.py`, `doc_claims.py` (the tool docstring's write-verb
+scan, run before the surface test).
 
 **DISPOSABLE, in the session scratchpad, never tracked:** the planted-defect
 runners, the child-free tree copier, the offline readers of captures

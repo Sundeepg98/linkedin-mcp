@@ -615,7 +615,9 @@ async def copy_own_post_link(
     10. The menu is closed (Escape, if still open) and its closed state
         read, whatever happened above. A refusal from steps 6-8 carries
         ``closure`` too: the menu was opened, so the refusal says whether it
-        was left as found.
+        was left as found. That refusal and a completed copy both carry
+        ``escape_pressed``, so the presses made can be counted off them; a
+        ``press_failed`` answer does not, and claims nothing about the page.
     11. Counters read again.
     12. The verdict: ``press.check_counters`` and ``press.check_closure``
         against the two readings, reported alongside everything gathered
@@ -766,10 +768,11 @@ async def copy_own_post_link(
         # It stays inline rather than becoming a third drain point: there is
         # already exactly one page.keyboard.press(...) call site, so a drain
         # point would rename it without reducing the count that matters.
-        # EVERY PRESS IS COUNTED IN THE ANSWER: the two clicks always happen
-        # on this path, the Escape only when the menu is still open, so the
-        # answer says which -- a press count read off an envelope that
-        # cannot say it is a guess.
+        # EVERY PRESS IS COUNTED IN THE ANSWER. The clicks follow from it --
+        # one (the trigger) on a refusal from steps 6-8, two on a copy -- and
+        # the Escape happens only when the menu is still open, so the answer
+        # says whether it did: a press count read off an envelope that cannot
+        # say it is a guess.
         escape_pressed = False
         if await trigger.get_attribute("aria-expanded") == "true":
             await page.keyboard.press("Escape")
