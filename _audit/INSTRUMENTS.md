@@ -9452,3 +9452,58 @@ replaced.
 | `scripts/_check_the_dict_literal_walk_can_fail.py` | three arms, three mutations of its own, verbatim reds in 52.3. Each arm also fails loudly when its own subject is empty rather than reporting a pass |
 | `scripts/_census_message_interpolations.py` (the dict-literal entry points) | mutation 1 removes them and the walk goes blind to both `server._error` renderings while still seeing the three negatives |
 | `tests/test_no_message_publishes_a_landing.py` (the three new rulings) | the three table entries were removed in process and the guard's own test functions called directly: **5 rows, 5 reds**, each naming its site, plus `test_the_subject_set_has_not_silently_changed` firing from the other direction on `PUBLISHED_BY_CONTRACT -> UNRULED`. 44 passed with them restored |
+
+---
+
+## 57. BUCKET 3 GETS ITS ADDRESS COLUMN, AND A CHECK THAT ASKS THE GATE AGAIN (bucket3-addresses, 2026-09-23)
+
+**Registered 2026-09-23.** Full record:
+`_audit/2026-09-23-bucket3-addresses.md`. Numbered 57 rather than the next
+integer on purpose: sibling waves forked from the same master read 54 as the
+maximum, and the next integer is the one they will all take.
+
+Section 53.8 left bucket 3 of `scripts/census_completion.py` printed as an
+UPPER BOUND with its missing measurement named: a per-row ADDRESS run through
+`readonly.is_read_url`, which no instrument could take while the census kept
+addresses in prose. `_audit/_census/read-addresses.tsv` is that column, one line
+per bucket-3 row, and the measurement is taken: of 67 rows, 33 sit on a page the
+boundary admits, 24 on one it refuses, 10 carry no address at all -- and 5 have
+nothing between an admitted page and a reader but the reader.
+
+### 57.1 THE PLANT THAT MATTERS IS A CONSISTENT ONE
+
+A row whose class contradicts its own recorded verdict is caught by the table's
+vocabulary checks without asking anything. The plant only the live boundary can
+catch is a row rewritten CONSISTENTLY -- class, verdict, refusal kind and gate
+all agreeing with each other, and all untrue. Both directions are planted
+(an ADMITTED row made a tidy REFUSED, and the reverse), and each is convicted by
+the re-drive and by nothing else.
+
+    A TABLE OF VERDICTS IS CHECKED BY ASKING THE GATE AGAIN, NEVER BY ASKING
+    THE TABLE WHETHER IT AGREES WITH ITSELF.
+
+### 57.2 THE IMPORT THAT HAD TO BE LAZY
+
+`census_completion.py` imports the checker to count the table, and
+`scripts/_check_census_completion_can_fail.py` runs `census_completion.py`
+inside a copy of `scripts/` and `_audit/_census/` that carries no
+`linkedin_server` package. A module-level import of the boundary would have
+crashed the control run of every demonstration. The boundary is imported inside
+the three functions that drive an address; the parse, coverage and split
+functions stay pure, and the completion figure counts the table without
+re-driving it.
+
+### 57.3 THE ENTRIES
+
+| path | shown failing by |
+|---|---|
+| `scripts/check_read_addresses.py` | `tests/test_read_addresses.py`: twelve plants into a COPY of the real table -- the two consistent ones above, a missing row, a row that left the bucket, a duplicate, a moved direction cell, a wrong refusal kind, a wrong `also_driven` verdict, a class contradicting its verdict or its refusal, an off-alphabet gate, an addressless row with no reason -- each red AND naming its row; a table that does not exist, reported as a named problem rather than a traceback; four more that break the SOURCE column (a missing file, a missing `::SYMBOL`, a missing census row, prose where a path belongs), since a citation here rots into a plausible wrong answer rather than a dangling one; a boundary monkeypatched to admit everything, named by the control; and green on the real table with the population asserted equal to the table's keys |
+| `scripts/census_completion.py` (the bucket-3 split and its six `b3_` pins) | `scripts/_check_census_completion_can_fail.py` demonstration B, unchanged: a still-GAP write row moved to R enters the bucket with no line, the split is WITHHELD rather than zeroed, and all six `b3_` pins report nothing to check. `tests/test_read_addresses.py` also plants a table missing a row and asserts `report()` returns no `b3_` figure at all |
+
+### 57.4 DECLARED DISPOSABLE
+
+The one-shot scripts this wave ran from its scratchpad -- the generator that
+first wrote the table, the three-row drift control, the cross-check of every
+address the rows' own census cells name, and the offline press-condition
+runner -- are declared disposable. Everything they measured is re-derived by
+the checker on every run or recorded with its result in the audit.
