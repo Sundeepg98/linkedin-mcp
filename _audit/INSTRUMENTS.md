@@ -10102,9 +10102,14 @@ and the live queue banks on it.
 
 * `people_search.compose` and `boundary_verdict` are the reader, not
   instruments. Their properties are pinned by the entries above and by the
-  refusal tests in the same file, which drive `boundary_verdict`'s reading of
-  the gate's sentence beside `check_read_addresses.kind_of_refusal` so the
-  two readers of that one sentence cannot drift apart.
+  refusal tests in the same file. `boundary_verdict` decides with
+  `readonly.is_read_url` and explains from the boundary's own forbidden
+  tuple; the tests hold its first-named substring against
+  `check_read_addresses.refusal_of`, the census instrument's reading of the
+  gate's sentence, so the two readings cannot drift apart. It does NOT call
+  `readonly.assert_read_url`: `tests/test_api_call_sites.py` pins that
+  function's callers to the two navigation paths, and caught the lane's first
+  version calling it.
 
 ### 66.4 DECLARED DISPOSABLE
 

@@ -79,12 +79,19 @@ forbidden substrings, and 8 of 11 ordinary keywords trip one
 (``_audit/2026-09-19-search-admission-preconditions.md`` B.4: ``password``,
 ``settings``, ``invitation`` ...). That audit hands the tool a requirement: decide
 in advance what happens, WITHOUT narrowing the denylist. So
-:func:`boundary_verdict` puts the composed address to ``readonly.assert_read_url``
--- the door itself, not a second copy of its decision -- before any session
-opens, and a refusal comes back structured: the boundary's own kind, the
-substring (published only when it is a member of the boundary's own tuple), the
-argument that carried it, and a sentence written for a person who was
-searching, not "not a read surface". Nothing is loaded.
+:func:`boundary_verdict` asks the door -- ``readonly.is_read_url``, the
+non-raising form ``press.py`` already uses as a pre-check -- before any
+session opens, and a refusal comes back structured: the kind ``BROWSER.goto``
+would raise, the boundary's OWN forbidden substrings the address carries (read
+off its tuple, so only this package's constants can appear), the argument
+that carried them, and a sentence written for a person who was searching, not
+"not a read surface". Nothing is loaded.
+
+``readonly.assert_read_url`` IS NOT CALLED HERE, and that is a measurement's
+consequence rather than a style: its call sites are pinned to the two
+navigation paths by ``tests/test_api_call_sites.py``, which caught the first
+version of this module calling it (the lane's impact gate, 2026-09-24).
+``BROWSER.goto`` still calls it on every address this admits.
 """
 
 from __future__ import annotations
@@ -188,15 +195,14 @@ KEPT_VERDICTS: tuple[str, ...] = (
     "unreadable",
 )
 
-#: The boundary's own refusal sentence, read the way
-#: ``scripts/check_read_addresses.kind_of_refusal`` reads it -- the gate's own
-#: words, pinned by two committed tests in ``tests/test_readonly.py``.
-#: ``tests/test_people_search_readers.py`` drives both readers over the same
-#: refusals so the two cannot drift apart.
-_FORBIDDEN_SENTENCE = re.compile(r" contains '([^']+)', which is not a read surface")
-_PATTERN_WOULD_ADMIT = "A READ PATTERN DOES ADMIT THIS ADDRESS"
-_NO_PATTERN_EITHER = "AND NO READ PATTERN ADMITS THIS ADDRESS EITHER"
-_NOT_ON_THE_ALLOWLIST = "is not on the read-only allowlist"
+#: The closed alphabet of :func:`boundary_verdict`'s ``boundary_refusal``.
+#:
+#:     FORBIDDEN     the address carries at least one of the boundary's own
+#:                   forbidden substrings, and each is listed
+#:     NOT-ADMITTED  the boundary refuses it and its tuple explains nothing --
+#:                   for an address this module composed, a defect in the
+#:                   composition, never a guess at a reason
+BOUNDARY_REFUSALS: tuple[str, ...] = ("FORBIDDEN", "NOT-ADMITTED")
 
 
 def _refused(argument: str, refused: str, value: str, why: str) -> dict[str, Any]:
@@ -393,87 +399,74 @@ def _pairs_of(url: str) -> list[tuple[str, str]]:
 
 
 def boundary_verdict(url: str) -> dict[str, Any]:
-    """Put a composed address to the READ BOUNDARY. Before any session opens.
+    """Ask the READ BOUNDARY about a composed address. Before any session opens.
 
-    ``{"admitted": True}``, or a refusal carrying the boundary's own reading::
+    ``{"admitted": True}``, or a refusal::
 
         {"admitted": False,
-         "boundary_kind": <WriteAttemptError.kind>,
-         "boundary_refusal": "FORBIDDEN" | "NO-PATTERN" | "UNREADABLE",
-         "forbidden_substring": <one of the boundary's own substrings> | None,
-         "a_read_pattern_admits_the_address": True | False | None,
+         "boundary_kind": <the kind BROWSER.goto would raise on it>,
+         "boundary_refusal": "FORBIDDEN" | "NOT-ADMITTED",
+         "forbidden_substrings": [<the boundary's own substrings it carries>],
          "arguments_carrying_it": [<argument>, ...],
          "why": <sentence>}
 
-    THE DOOR DECIDES, THIS ONLY REPORTS. ``readonly.assert_read_url`` is called
-    -- the same function ``BROWSER.goto`` calls first -- and its exception is
-    READ, never re-derived. The substring is taken off the boundary's own
-    sentence and published ONLY if it is a member of the boundary's own
-    forbidden tuple, so nothing a caller typed can come back through this
-    field. The exception's text, which quotes the whole address, is not
-    returned.
+    THE DOOR DECIDES; THIS ONLY EXPLAINS. The decision is
+    ``readonly.is_read_url`` -- the door's own non-raising form, the pre-check
+    ``press.py`` already makes before a press -- and nothing here can admit an
+    address it refuses. ``readonly.assert_read_url`` is deliberately NOT
+    called: its call sites are pinned to the two navigation paths
+    (``tests/test_api_call_sites.py``), and ``BROWSER.goto`` still calls it on
+    every address this admits.
+
+    THE EXPLANATION is which of the boundary's OWN forbidden substrings the
+    lowered address carries, in the tuple's order -- the method
+    ``scripts/_probe_landed_address_sweep._why_refused`` uses -- so every
+    string it can publish is one of this package's constants and never a
+    caller's value. The first one listed is the one the gate names first; the
+    lane's tests hold the two readings together with the census instrument's
+    ``check_read_addresses.refusal_of``. A refusal the tuple cannot explain
+    lists nothing and says so rather than guessing.
     """
-    try:
-        readonly.assert_read_url(url)
-    except readonly.WriteAttemptError as exc:
-        message = str(exc)
-        substring: Optional[str] = None
-        pattern_admits: Optional[bool] = None
-        hit = _FORBIDDEN_SENTENCE.search(message)
-        if hit and hit.group(1) in readonly._FORBIDDEN_URL_SUBSTRINGS:
-            substring = hit.group(1)
-            kind = "FORBIDDEN"
-            if _PATTERN_WOULD_ADMIT in message:
-                pattern_admits = True
-            elif _NO_PATTERN_EITHER in message:
-                pattern_admits = False
-        elif _NOT_ON_THE_ALLOWLIST in message:
-            kind = "NO-PATTERN"
-            pattern_admits = False
-        else:
-            kind = "UNREADABLE"
+    if readonly.is_read_url(url):
+        return {"admitted": True}
+    lowered = url.lower()
+    found = [bad for bad in readonly._FORBIDDEN_URL_SUBSTRINGS if bad in lowered]
 
-        carrying: list[str] = []
-        if substring is not None:
-            keys = dict((key, argument) for argument, key in ARGUMENT_KEYS)
-            for key, value in _pairs_of(url):
-                encoded = urlencode([(key, value)]).lower()
-                argument = keys.get(key)
-                if argument and substring in encoded and argument not in carrying:
-                    carrying.append(argument)
+    carrying: list[str] = []
+    keys = {key: argument for argument, key in ARGUMENT_KEYS}
+    for key, value in _pairs_of(url):
+        encoded = urlencode([(key, value)]).lower()
+        argument = keys.get(key)
+        if argument and argument not in carrying and any(bad in encoded for bad in found):
+            carrying.append(argument)
 
-        if kind == "FORBIDDEN":
-            why = (
-                f"the read boundary refuses ANY address carrying "
-                f"'{substring}', query included, because that substring guards "
-                "a write surface -- and the ruling that admitted this search "
-                "forbids narrowing that list for it. So this search cannot be "
-                "run by this server with that word in it. Nothing was loaded "
-                "and no search was spent; the value is not quoted back. Search "
-                "again without that word."
-            )
-        elif kind == "NO-PATTERN":
-            why = (
-                "the read boundary does not admit this address. A composed "
-                "people search should always be admitted, so this is a defect "
-                "in the composition, not in the arguments. Nothing was loaded."
-            )
-        else:
-            why = (
-                "the read boundary refused this address and its refusal could "
-                "not be read -- reported rather than guessed. Nothing was "
-                "loaded."
-            )
-        return {
-            "admitted": False,
-            "boundary_kind": readonly.WriteAttemptError.kind,
-            "boundary_refusal": kind,
-            "forbidden_substring": substring,
-            "a_read_pattern_admits_the_address": pattern_admits,
-            "arguments_carrying_it": carrying,
-            "why": why,
-        }
-    return {"admitted": True}
+    if found:
+        named = ", ".join(f"'{bad}'" for bad in found)
+        why = (
+            f"the read boundary refuses ANY address carrying {named}, query "
+            "included, because each guards a write surface -- and the ruling "
+            "that admitted this search forbids narrowing that list for it. So "
+            "this search cannot be run by this server with that in it. Nothing "
+            "was loaded and no search was spent; the value is not quoted back. "
+            "Search again without it."
+        )
+        kind = "FORBIDDEN"
+    else:
+        why = (
+            "the read boundary does not admit this address, and it carries "
+            "none of the boundary's forbidden substrings. A composed people "
+            "search should always be admitted, so this is a defect in the "
+            "composition, not in the arguments. Nothing was loaded."
+        )
+        kind = "NOT-ADMITTED"
+    return {
+        "admitted": False,
+        "boundary_kind": readonly.WriteAttemptError.kind,
+        "boundary_refusal": kind,
+        "forbidden_substrings": found,
+        "arguments_carrying_it": carrying,
+        "why": why,
+    }
 
 
 def refusal_envelope(verdict: dict[str, Any]) -> dict[str, Any]:
@@ -485,10 +478,7 @@ def refusal_envelope(verdict: dict[str, Any]) -> dict[str, Any]:
             "error": "refused_by_the_read_boundary",
             "boundary_kind": verdict["boundary_kind"],
             "boundary_refusal": verdict["boundary_refusal"],
-            "forbidden_substring": verdict["forbidden_substring"],
-            "a_read_pattern_admits_the_address": verdict[
-                "a_read_pattern_admits_the_address"
-            ],
+            "forbidden_substrings": list(verdict["forbidden_substrings"]),
             "arguments_carrying_it": list(verdict["arguments_carrying_it"]),
             "pages_loaded": 0,
             "why": verdict["why"],
@@ -594,4 +584,4 @@ def landing_verdict(landed: Any, asked: str) -> dict[str, Any]:
 def emitted_alphabet() -> frozenset[str]:
     """Every string :func:`landing_verdict` and the refusal kinds can publish
     that is not a sentence or a shape."""
-    return frozenset(KEPT_VERDICTS) | {"FORBIDDEN", "NO-PATTERN", "UNREADABLE"}
+    return frozenset(KEPT_VERDICTS) | frozenset(BOUNDARY_REFUSALS)

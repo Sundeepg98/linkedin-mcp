@@ -212,6 +212,23 @@ NOT_A_CORRECTION: dict[tuple[str, str], str] = {
         "unmarked, which would need its own CORRECTS: / CORRECTED BY: pair."
     ),
 
+    # 2026-09-24, lane S (people-search readers). SEVEN NETWORK ROWS CITE THE
+    # LANE'S RECORD as the home of their live queue; the scan reports the
+    # first, row 79, and the reason is the same for all seven -- read, not
+    # inferred from the filenames.
+    ("network.md", "2026-09-24-lane-s-people-search.md"): (
+        "QUOTATION AND ADJACENCY, NOT A CORRECTION. Rows 79, 84, 85, 87, 94, "
+        "172 and 194 moved to COVERED-UNFIRED on the lane's reader, and each "
+        "cites the lane's record for its live queue. The matched word on row "
+        "79 is `mistake`, inside that row's KEPT prior cell -- the tool "
+        "docstring it quotes, *'by a caller or by a mistake'* -- and `false` "
+        "sits in rows 80 and 81, about their own filter terms. No network row "
+        "withdraws anything the record says. **WHAT WOULD MAKE THIS ENTRY "
+        "WRONG:** a network row asserting the record wrong about that row "
+        "while leaving the record unmarked, which would need its own "
+        "CORRECTS: / CORRECTED BY: pair."
+    ),
+
     # 2026-09-21, the FOUR-LOOSE-ROWS wave. THREE OF THESE FOUR ARE ROWS OF
     # ONE CHRONOLOGY TABLE, and the reason is one reason told three times
     # because the scan keys on a basename.

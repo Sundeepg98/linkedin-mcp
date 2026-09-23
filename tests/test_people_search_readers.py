@@ -237,16 +237,14 @@ def test_a_keyword_that_trips_a_forbidden_substring_gets_the_boundarys_answer(
     assert verdict["admitted"] is False
     assert verdict["boundary_refusal"] == "FORBIDDEN"
     assert verdict["boundary_kind"] == readonly.WriteAttemptError.kind
-    substring = verdict["forbidden_substring"]
-    assert substring in readonly._FORBIDDEN_URL_SUBSTRINGS
-    assert substring in keyword
-    # The people pattern admits any query shape, so the substring ALONE refuses.
-    assert verdict["a_read_pattern_admits_the_address"] is True
+    found = verdict["forbidden_substrings"]
+    assert found, "a forbidden keyword was refused and nothing named why"
+    assert all(bad in readonly._FORBIDDEN_URL_SUBSTRINGS for bad in found)
+    assert all(bad in keyword for bad in found)
     assert verdict["arguments_carrying_it"] == ["keywords"]
     # Written for a person who was searching, not "not a read surface".
     assert "not a read surface" not in verdict["why"]
     assert "Nothing was loaded" in verdict["why"]
-
 
 @pytest.mark.parametrize("keyword", CLEAN_KEYWORDS)
 def test_the_three_clean_ordinary_keywords_are_admitted(keyword: str) -> None:
@@ -270,38 +268,63 @@ def test_a_refused_keyword_is_not_quoted_back_in_the_envelope() -> None:
     assert not any("exampleperson" in text for text in texts), envelope
 
 
-def test_the_refusal_reading_agrees_with_the_census_instruments_reader() -> None:
-    """Two readers of the gate's one sentence, driven over the same refusals.
+def test_the_explanation_agrees_with_the_census_instruments_reader() -> None:
+    """Two readings of one refusal, held together.
 
-    ``scripts/check_read_addresses.kind_of_refusal`` is the census instrument;
-    ``people_search.boundary_verdict`` is the tool's. If the gate's sentence is
-    ever reworded, both must move together or this goes red.
+    ``scripts/check_read_addresses.refusal_of`` reads the GATE'S OWN SENTENCE;
+    ``people_search.boundary_verdict`` reads the gate's own TUPLE. The first
+    substring the explanation lists must be the one the gate names, for every
+    B.4 keyword and for a keyword carrying two substrings at once -- so a gate
+    that changed its order or its words turns this red rather than leaving two
+    readers to drift.
     """
-    for keyword in REFUSED_KEYWORDS:
+    for keyword in REFUSED_KEYWORDS + ("password settings",):
         url = _composed(keywords=keyword)
         verdict = people_search.boundary_verdict(url)
         census = cra.refusal_of(url)
         assert census == (
-            f"FORBIDDEN[{verdict['forbidden_substring']}]+PATTERN-WOULD-ADMIT"
-        )
+            f"FORBIDDEN[{verdict['forbidden_substrings'][0]}]+PATTERN-WOULD-ADMIT"
+        ), (keyword, census, verdict["forbidden_substrings"])
 
 
-def test_the_substring_is_published_only_from_the_boundarys_own_tuple(monkeypatch) -> None:
-    """A sentence naming a substring the tuple does not hold publishes nothing."""
-
-    def _lying_gate(url: str) -> str:
-        raise readonly.WriteAttemptError(
-            f"navigation blocked: {url!r} contains '{MARKER_KEYWORD}', which is "
-            "not a read surface. A READ PATTERN DOES ADMIT THIS ADDRESS"
-        )
-
-    monkeypatch.setattr(readonly, "assert_read_url", _lying_gate)
-    verdict = people_search.boundary_verdict(_composed(keywords="engineer"))
+def test_the_explanation_never_invents_a_substring(monkeypatch) -> None:
+    """A refusal the boundary's tuple cannot explain names nothing."""
+    monkeypatch.setattr(readonly, "is_read_url", lambda url: False)
+    verdict = people_search.boundary_verdict(_composed(keywords=MARKER_KEYWORD))
     assert verdict["admitted"] is False
-    assert verdict["forbidden_substring"] is None
-    assert verdict["boundary_refusal"] == "UNREADABLE"
+    assert verdict["boundary_refusal"] == "NOT-ADMITTED"
+    assert verdict["forbidden_substrings"] == []
+    assert verdict["arguments_carrying_it"] == []
     assert not any(MARKER_KEYWORD in text for _w, text in walk(verdict))
 
+
+def test_the_explanation_is_read_off_the_boundarys_own_tuple(monkeypatch) -> None:
+    """Ban a new word in the DOOR's tuple and the door refuses it, and the
+    explanation names exactly that constant -- read off the tuple, not typed
+    into this module."""
+    planted = "examplewordthegatenowbans"
+    monkeypatch.setattr(
+        readonly,
+        "_FORBIDDEN_URL_SUBSTRINGS",
+        readonly._FORBIDDEN_URL_SUBSTRINGS + (planted,),
+    )
+    verdict = people_search.boundary_verdict(_composed(keywords=planted))
+    assert verdict["admitted"] is False
+    assert verdict["forbidden_substrings"] == [planted]
+    assert verdict["arguments_carrying_it"] == ["keywords"]
+
+
+def test_the_composer_never_calls_the_navigation_door() -> None:
+    """``assert_read_url``'s callers are pinned to the navigation paths
+    (``tests/test_api_call_sites.py``); the composer asks ``is_read_url``."""
+    tree = _tree(MODULE)
+    called = {
+        (node.func.attr if isinstance(node.func, ast.Attribute)
+         else getattr(node.func, "id", ""))
+        for node in ast.walk(tree) if isinstance(node, ast.Call)
+    }
+    assert "assert_read_url" not in called
+    assert "is_read_url" in called
 
 # ---------------------------------------------------------------------------
 # 4. A refused ARGUMENT is described, never quoted
@@ -591,7 +614,7 @@ def test_a_boundary_refusal_opens_no_session_and_loads_nothing(monkeypatch) -> N
     assert browser.sessions == 0 and browser.gotos == []
     assert payload["ok"] is False
     assert payload["error"] == "refused_by_the_read_boundary"
-    assert payload["forbidden_substring"] == "password"
+    assert payload["forbidden_substrings"] == ["password"]
     assert payload["arguments_carrying_it"] == ["keywords"]
     assert payload["pages_loaded"] == 0
     assert not _carried(payload, ("exampleperson",))

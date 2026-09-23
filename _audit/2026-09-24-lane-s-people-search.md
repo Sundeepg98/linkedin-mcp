@@ -13,7 +13,8 @@ copied into a tracked file.
 
 BUILT. All seven rows moved GAP -> COVERED-UNFIRED, none NEEDS-CAPTURE, none
 blocked. Nothing re-pinned; the pin moves are listed in section 8. Gates in
-section 9.
+section 9, including two real failures the lane's own impact gate found and
+the lane fixed.
 
 ## 1. The set, derived from the table
 
@@ -103,16 +104,22 @@ and `test_the_no_argument_call_is_the_call_it_always_was`).
   `[A-Za-z0-9_-]`), so a SLUG -- a name -- is refused by shape. Empty members,
   duplicates and more than the per-argument budget are refused, never
   repaired.
-* **THE BOUNDARY ANSWERS, BEFORE ANY SESSION OPENS.** `boundary_verdict` puts
-  the composed address to `readonly.assert_read_url` -- the door itself, the
-  same call `BROWSER.goto` makes first, not a copy of its decision. A keyword
-  that trips a forbidden substring (8 of 11 ordinary keywords per the
-  2026-09-19 preconditions audit B.4) comes back structured: the boundary's
-  own kind (`write_attempt_blocked`), the substring (published only when it
-  is a member of the boundary's own tuple), whether a read pattern admits the
-  address, which argument carried it, and a sentence written for a person who
-  was searching -- not "not a read surface". Zero pages loaded, no session
-  opened, the denylist not narrowed.
+* **THE BOUNDARY ANSWERS, BEFORE ANY SESSION OPENS.** `boundary_verdict` asks
+  the door -- `readonly.is_read_url`, the non-raising form `press.py` already
+  uses as a pre-check; nothing here can admit what it refuses. A keyword that
+  trips a forbidden substring (8 of 11 ordinary keywords per the 2026-09-19
+  preconditions audit B.4) comes back structured: the kind `BROWSER.goto`
+  would raise (`write_attempt_blocked`), the boundary's OWN forbidden
+  substrings the address carries, read off its tuple in its order (so only
+  the package's constants can appear, and the first is the one the gate
+  names), which argument carried them, and a sentence written for a person
+  who was searching -- not "not a read surface". Zero pages loaded, no
+  session opened, the denylist not narrowed. **CHANGED IN THE LANE, ON ITS
+  OWN GATE'S FINDING:** the first version called `readonly.assert_read_url` and read
+  the gate's refusal sentence; `tests/test_api_call_sites.py` pins that
+  function's callers to the two navigation paths, the lane's impact gate
+  convicted the third caller, and the explanation now reads the tuple the
+  way `scripts/_probe_landed_address_sweep._why_refused` does.
 * **NOTHING IS ECHOED.** No keyword, id or member token comes back. The
   payload says WHAT was applied as counts (`query_applied`) and, per
   argument, what LinkedIn did with it in the address it settled on
@@ -143,13 +150,17 @@ and `test_the_no_argument_call_is_the_call_it_always_was`).
                                            passes one" amended
     linkedin_server/readonly.py            comment only, AST unchanged: the people entry's
                                            "sends no query at all" amended
-    tests/test_people_search_readers.py    NEW. 105 tests, section 6
+    tests/test_people_search_readers.py    NEW. 107 tests, section 6
     tests/test_server_surface.py           comment only: "NO PARAMETERS AT ALL" amended
+    tests/test_a_correction_is_findable_   one NOT_A_CORRECTION entry: network.md cites this
+      from_the_claim.py                    record beside the word `mistake`, which is inside
+                                           row 79's kept prior cell (section 9)
     _audit/_census/network.md              seven cells, section 7
     _audit/_census/read-addresses.tsv      the seven lines removed: the rows left bucket 3
 
-The `server.py` hunk is the tool, one import line and three lines of the
-module docstring. No tool was added, so the tool count stays 51.
+The `server.py` hunk is the tool, one import line, and in the module
+docstring one line edited and four added. No tool was added, so the tool
+count stays 51.
 
 ## 5. Per row
 
@@ -218,12 +229,15 @@ failing on the same run.
   the unmutated `server.py` reads 0 (and 0 output-sink violations). Two
   instruments sharing no mechanism convict the same derived navigation.
 * **THE BOUNDARY'S OWN ANSWER.** All eight B.4 keywords refuse with their
-  substring and `a_read_pattern_admits_the_address` True, the three clean ones
-  are admitted, and the eleven split 8 / 3 exactly as B.4 measured. The
-  refusal reading is driven beside `check_read_addresses.kind_of_refusal` over
-  the same refusals, so a reworded gate sentence turns both red together; a
-  gate sentence naming a substring outside the boundary's tuple publishes no
-  substring. A boundary refusal and an argument refusal each open NO session.
+  substrings, the three clean ones are admitted, and the eleven split 8 / 3
+  exactly as B.4 measured. The explanation is held against the census
+  instrument's reading of the gate's own sentence
+  (`check_read_addresses.refusal_of`): for every B.4 keyword, and for a
+  keyword carrying two substrings, the first substring listed is the one the
+  gate names. A refusal the tuple cannot explain lists nothing; a word planted
+  in the DOOR's tuple is refused by the door and named exactly; the composer
+  never calls `assert_read_url`. A boundary refusal and an argument refusal
+  each open NO session.
 * **NOTHING COMES BACK.** The driven payload carries no plant and none of the
   five argument values; `query_kept` reads the planted foreign values as
   `different_values`, never as kept. Seventeen refused arguments (slugs, the
@@ -233,7 +247,7 @@ failing on the same run.
   a no-break space or a zero-width joiner -- ordinary in several Indian
   scripts -- is NOT refused: control characters are refused by Unicode
   category `Cc`, not by `str.isprintable()`, which is False for both (found in
-  self-review after the first commit and fixed in the last).
+  self-review after the first commit and fixed in a later one).
 * **THE LANDING VERDICT** reads verbatim, same_values (a re-spaced keyword, a
   bare id for a list, a reordered list), different_values, absent and
   unreadable, and False for another vertical, a wall, another host and a
@@ -297,7 +311,67 @@ after the edit: GREEN, 59 of 59 bucket-3 rows.
 
 ## 9. Gates
 
-PENDING -- filled in after the census commit.
+Every lane commit went through the pre-commit identity gate (0 hits each
+time). The lane's commits are branch-only until the merge.
+
+**THE CENSUS INSTRUMENTS**, on the census commit and again on the final tree:
+
+    census_completion --check      exit 1 on EXACTLY the 8 figures and the 7
+                                   bucket-1 rows of section 8 -- expected, not
+                                   re-pinned
+    check_read_addresses           GREEN, 59 of 59 bucket-3 rows
+    ruling_holds                   GREEN
+    pin_census_rows --check        no drift (704)
+    triage_read_gap_rows           exit 1 on CONTROL 4 only, naming exactly the
+                                   seven rows -- expected, section 8
+    build_audit_index / build_rulings_index / build_blocker_map --check
+                                   exit 0 after every regeneration (fixed point)
+
+**THE FIRST IMPACT GATE** (`scripts/impact_gate.py --against 9c219c8`), run in
+the background on the census commit. The impact set was 184 of 235 test files
+(78%), so it widened to the FULL SUITE: 15 failed, 9050 passed, 8 skipped,
+1 xfailed, in 1975 s. Every failure classified:
+
+    expected -- the pins section 8 lists, not re-pinned (4)
+      test_ruling_holds::test_bucket_one_is_derived_and_sits_on_its_pins
+      test_the_tool_surface_is_pinned_so_a_row_must_move::...[linkedin_people_search_shape]
+      test_triage_read_gap_rows::test_green_on_the_real_tree
+      test_triage_read_gap_rows::test_the_control_4_population_is_not_empty_and_equals_the_key_set
+    REAL, and fixed in the lane (2)
+      test_api_call_sites::test_assert_read_url_is_called_only_on_the_navigation_paths
+        -- boundary_verdict was a THIRD caller of assert_read_url; it now
+           decides with is_read_url and explains from the tuple (section 3)
+      test_a_correction_is_findable_from_the_claim::test_every_candidate_pair_is_declared_or_triaged
+        -- network.md cites this record within two lines of `mistake`, a word
+           inside row 79's KEPT prior cell; triaged NOT_A_CORRECTION with the
+           reason, after reading the line
+    environmental -- green on the clean committed tree, 22 of 22 (9)
+      test_stale_process_is_announced (7), test_server_surface::
+      test_both_login_names_are_registered_and_the_old_one_forwards,
+      test_publish_post_names_its_audience::test_it_stops_refusing_the_moment_the_audience_can_be_read
+        -- the self-review commit was edited INTO the working tree while the
+           suite ran (the stale-process tests compare loaded modules with the
+           disk), on a box carrying 33 python processes from several lanes
+
+**THE COLD VERIFICATION** -- one pass by a child, on the tree before the two
+fixes above, 14 claims, all VERIFIED, zero refuted: the commit messages carry
+no attribution; exactly seven network.md lines changed and each keeps its prior
+cell verbatim; exactly seven address lines left and `check_read_addresses` is
+green; the census pins move by exactly section 8; its own fuzzers built 6480
+argument combinations (4320 composed, every one admitted, no foreign key) and
+157 landings (never raises, closed alphabet), and its own fake browser drove
+the real tool (one navigation, to the composed address, no argument echoed; a
+refused keyword and a refused slug opened no session); 1387 of 1388 selected
+tests passed, the one failure the tool-surface pin; and a cold read of this
+record found no claim the files contradict. Its only defect is the one
+section 10 already names (a failed navigation quotes the composed address).
+It also found the `unreadable` landing verdict hard to reach: it is reachable,
+through an unbalanced IPv6 bracket, which `urlsplit` refuses and the lane's
+test drives.
+
+**AFTER THE FIXES**: `tests/test_people_search_readers.py` (107),
+`tests/test_api_call_sites.py` and `tests/test_a_correction_is_findable_from_the_claim.py`:
+131 passed. The final impact gate is below.
 
 ## 10. Found and not fixed
 
@@ -340,6 +414,10 @@ Declared disposable (scratchpad, not tracked):
   result is recorded in section 6; the committed controls stand without it.
 * `bmap_summary.py` -- summarised the regenerated blocker map's diff by
   column, to confirm no blocker's first reason candidate moved.
+* `lane_s_*` drafts -- text of this lane's own edits staged outside the tree
+  while the cold verifier read it; the edits themselves are in the commits.
+* The cold verifier's own scripts (`check_c6.py` .. `check_c13.py`) and its
+  report `cold_verify_lane_s.txt` -- its results are summarised in section 9.
 
 ## Live queue
 

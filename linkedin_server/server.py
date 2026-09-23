@@ -2868,10 +2868,10 @@ async def linkedin_people_search_shape(
     A KEYWORD THE READ BOUNDARY REFUSES IS ANSWERED BEFORE ANY PAGE LOADS. The
     boundary scans the whole address, query included, and words such as
     ``password``, ``settings`` and ``invitation`` trip a write guard. The
-    composed address is put to ``readonly.assert_read_url`` first; a refusal
-    comes back as ``refused_by_the_read_boundary`` naming the substring and
-    the argument that carried it, with ``pages_loaded`` 0. The denylist is not
-    narrowed for a search.
+    composed address is put to the boundary (``readonly.is_read_url``) first;
+    a refusal comes back as ``refused_by_the_read_boundary`` naming the
+    boundary's own substrings it carries and the argument that carried them,
+    with ``pages_loaded`` 0. The denylist is not narrowed for a search.
 
     EACH CALL WITH AN ARGUMENT IS ONE PEOPLE SEARCH, and LinkedIn counts people
     searches against the account's monthly limit -- which is why a live test
