@@ -823,6 +823,38 @@ pressing without the check (2), the readings not returned (2). **One plant
 survived its first run:** an unread toggle turning into 0 moved no test,
 because nothing had driven the reader's exception path. It is driven now.
 
+### Entry 12 -- 00:37:03-00:37:23, M C72 re-fired on the fixed price: 1 load, 2 presses -- PROVEN
+
+`--only own_link` on `2775d02`, ledger 25 -> 26, walled False, challenge
+terms 0, the same post. **Returned:** `permitted` True, `copied` True,
+`captures` 1, `owner_item_present` True, `link_withheld` True, `pages_loaded`
+1; `shape` identical to Entry 11's (https, LinkedIn host, path kind `posts`,
+carries the id as a whole number, has a query, length 213); closure closed.
+**`price_readings`, three:** `off_state` 0, `toggle_on` 1, `toggle_off` 0 at
+each -- the check before any press, and the gate's two. The gate compared
+all three counters at both ends (`read_at_both_ends` lists them) and none
+moved; the toggle that was drawn is one an outward reaction would move.
+**The gate's own `priced_by` still names only `off_state`**, the basis's
+counter, which is 0 here: the field reports the basis, not the counter that
+could move. That is press's reporting and is left alone; the readings beside
+it are the evidence. The capture agrees with the three before it: the toggle
+"Unreact Like" 1, "1 reaction", one reacted-with entry.
+
+**`M C72` -- PROVEN.** **The fields whose meaning was checked:** ownership
+read off the menu before the copy press (an author-only entry drawn); the
+text the page copied was captured, and it is the post's shareable link --
+the `posts` path on a LinkedIn https host carrying this post's id as a whole
+number; the price could move and did not; the menu closed. **NOT CLAIMED:**
+the link itself (withheld; nobody read it); the embed half of the row ("Embed
+this post" is a different item, not pressed); whether his system clipboard
+was untouched (not observable from the page -- the capture held the text, so
+the page copied through a route the capture covers); a reaction changing KIND
+(Like to another keeps a toggle on, so these counts cannot see it); n=1 on a
+price that could move -- the first fire's capability reading agrees, its
+price is disowned. Census: `messaging-and-content.md` `C72` GAP ->
+COVERED-PROVEN, its prior readings kept beneath; its `read-addresses.tsv`
+line removed.
+
 ---
 
 ## THE ROWS, ONE LINE EACH
@@ -836,7 +868,7 @@ because nothing had driven the reader's exception path. It is driven now.
     4      M M49    NOT BUILT         the thread page it reads was never landed on (9)
     5      N 134    PROVEN            6 viewers under the filter; restored, twice (7)
     5      P O3     PROVEN            filters by the switch; insights revealed and read (8)
-    6      M C72    [pending]
+    6      M C72    PROVEN            the link's shape checked; priced by a toggle that could move (12)
     --     M C85    NEEDS-TARGET      no poll among the 8 items his rail draws (2)
     7      P A8 A11 A13 A17 A19 A21
                     NOT SAVED         the dialog draws no notify control (5); zero writes
