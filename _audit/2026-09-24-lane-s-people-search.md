@@ -371,7 +371,32 @@ test drives.
 
 **AFTER THE FIXES**: `tests/test_people_search_readers.py` (107),
 `tests/test_api_call_sites.py` and `tests/test_a_correction_is_findable_from_the_claim.py`:
-131 passed. The final impact gate is below.
+131 passed.
+
+**THE FINAL IMPACT GATE** (`--against 9c219c8`), on the fix commit with a
+clean tree and nothing edited during the run: 189 of 235 files selected (80%),
+widened to the FULL SUITE -- 5 failed, 9064 passed, 8 skipped, 1 xfailed, in
+2390 s, on a box running three other lanes' gates at the same time.
+
+    expected -- section 8's pins, not re-pinned (4)
+      test_ruling_holds::test_bucket_one_is_derived_and_sits_on_its_pins
+      test_the_tool_surface_is_pinned_so_a_row_must_move::...[linkedin_people_search_shape]
+      test_triage_read_gap_rows::test_green_on_the_real_tree
+      test_triage_read_gap_rows::test_the_control_4_population_is_not_empty_and_equals_the_key_set
+    environmental (1)
+      test_click_is_not_its_own_evidence::test_the_refusal_says_when_a_matcher_would_have_separated_them
+        -- a writes-gate file this lane does not touch (selected through
+           readonly.py's comment-only edit); run alone on the same commit it
+           passes, 30 passed and its known strict xfail, in 374 s -- a slow
+           file, red once under a saturated box and green alone
+
+Both real failures of the first run are gone, and nothing new of the lane's
+own is red.
+
+**NOT RUN**: no live fire (the lane is offline by its brief); no CI (nothing is
+pushed); the full suite was not re-run after this record's own last edit,
+which touches only this file and the generated views, each held at a fixed
+point by its own `--check`.
 
 ## 10. Found and not fixed
 
