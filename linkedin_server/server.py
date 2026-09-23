@@ -1698,42 +1698,51 @@ async def _profile_views_press_counters(page: Any):
     ``_audit/2026-09-23-bucket1-fires.md`` section 0.4, which is why the
     headline is not optional here.
     """
-    chosen: dict[str, Any] = {}
+    # EVERY BINDING IN THESE THREE HELPERS CARRIES A NAME NO OTHER FUNCTION IN
+    # THIS MODULE USES. ``tests/test_navigation_is_never_derived.py`` tracks
+    # taint PER MODULE AND BY NAME: the first version of this code bound
+    # ``witness`` / ``reading`` / ``term`` / ``entry`` off a parameter named
+    # ``verdict`` -- a name already tainted elsewhere here -- and the taint
+    # spread by name until an unrelated navigation's loop variable read as
+    # page-chosen. The rule was right to refuse; the names were the defect.
+    chosen_keys: dict[str, Any] = {}
 
-    async def _badges() -> dict[str, Optional[int]]:
-        out: dict[str, Optional[int]] = {}
+    async def _badge_values() -> dict[str, Optional[int]]:
+        badge_out: dict[str, Optional[int]] = {}
         try:
-            out["invitations"] = shape.invitation_badge(
+            badge_out["invitations"] = shape.invitation_badge(
                 await dom.read_invitation_badge(page)
             ).get("pending")
         except Exception:  # noqa: BLE001 - an unread badge is None, never 0
-            out["invitations"] = None
+            badge_out["invitations"] = None
         try:
-            out["notifications_unread"] = notify_cost.notifications_badge(
+            badge_out["notifications_unread"] = notify_cost.notifications_badge(
                 await notify_cost.read_notifications_badge(page)
             ).get("unread")
         except Exception:  # noqa: BLE001
-            out["notifications_unread"] = None
-        return out
+            badge_out["notifications_unread"] = None
+        return badge_out
 
     async def read_counters() -> dict[str, Optional[int]]:
         try:
-            insights = await dom.read_profile_views_insights(page)
-            headline = _as_count((insights.get("headline") or {}).get("value"))
-        except Exception:  # noqa: BLE001 - reported as unread, never raised
-            headline = None
-        badges = await _badges()
-        if "keys" not in chosen:
-            chosen["keys"] = ["headline_viewers"] + sorted(
-                name for name, value in badges.items() if value is not None
+            views_insights = await dom.read_profile_views_insights(page)
+            headline_count = _as_count(
+                (views_insights.get("headline") or {}).get("value")
             )
-        reading = {"headline_viewers": headline, **badges}
-        return {name: reading.get(name) for name in chosen["keys"]}
+        except Exception:  # noqa: BLE001 - reported as unread, never raised
+            headline_count = None
+        badge_values = await _badge_values()
+        if "keys" not in chosen_keys:
+            chosen_keys["keys"] = ["headline_viewers"] + sorted(
+                badge for badge, got in badge_values.items() if got is not None
+            )
+        counter_values = {"headline_viewers": headline_count, **badge_values}
+        return {key: counter_values.get(key) for key in chosen_keys["keys"]}
 
     return read_counters
 
 
-def _filter_menu_summary(ordinal: int, verdict: dict[str, Any]) -> dict[str, Any]:
+def _filter_menu_summary(ordinal: int, gate_verdict: dict[str, Any]) -> dict[str, Any]:
     """One opened pill, reported in this module's and press.py's own words.
 
     EVERY STRING HERE IS A LITERAL OF THIS PACKAGE: refusal reasons, witness
@@ -1741,25 +1750,26 @@ def _filter_menu_summary(ordinal: int, verdict: dict[str, Any]) -> dict[str, Any
     ``before`` / ``open`` detail is not copied through; what the caller needs
     is what APPEARED and how much arrived.
     """
-    witness = verdict.get("witness") or {}
-    reading = verdict.get("reading") or {}
-    opened = (reading.get("open") or {}).get("terms") or {}
+    gate_witness = gate_verdict.get("witness") or {}
+    gate_reading = gate_verdict.get("reading") or {}
+    open_terms = (gate_reading.get("open") or {}).get("terms") or {}
+    appeared_terms = gate_reading.get("appeared") or []
     return {
         "pill": ordinal,
-        "permitted": bool(verdict.get("permitted")),
-        "refused": verdict.get("refused"),
-        "reachable_by_this_route": verdict.get("reachable_by_this_route"),
-        "disclosed": witness.get("disclosed"),
-        "witness_moved": list(witness.get("moved") or []),
-        "appeared": reading.get("appeared"),
-        "held": reading.get("held"),
+        "permitted": bool(gate_verdict.get("permitted")),
+        "refused": gate_verdict.get("refused"),
+        "reachable_by_this_route": gate_verdict.get("reachable_by_this_route"),
+        "disclosed": gate_witness.get("disclosed"),
+        "witness_moved": list(gate_witness.get("moved") or []),
+        "appeared": gate_reading.get("appeared"),
+        "held": gate_reading.get("held"),
         "values": {
-            term: entry.get("value")
-            for term, entry in opened.items()
-            if entry.get("value") is not None and term in (reading.get("appeared") or [])
+            menu_term: menu_entry.get("value")
+            for menu_term, menu_entry in open_terms.items()
+            if menu_entry.get("value") is not None and menu_term in appeared_terms
         },
-        "new_lines": reading.get("new_lines"),
-        "read_at_both_ends": list(verdict.get("read_at_both_ends") or []),
+        "new_lines": gate_reading.get("new_lines"),
+        "read_at_both_ends": list(gate_verdict.get("read_at_both_ends") or []),
     }
 
 
@@ -1783,53 +1793,53 @@ async def _open_profile_views_filter_menus(page: Any) -> dict[str, Any]:
     """
     from linkedin_server import press  # the one package caller of the gate
 
-    candidates = page.locator("main").locator("[aria-expanded]")
+    pill_candidates = page.locator("main").locator("[aria-expanded]")
 
     async def _pill_indices() -> list[int]:
-        found: list[int] = []
-        for index in range(int(await candidates.count())):
-            control = candidates.nth(index)
-            if (await control.get_attribute("role") or "") != "button":
+        pill_found: list[int] = []
+        for pill_index in range(int(await pill_candidates.count())):
+            pill_control = pill_candidates.nth(pill_index)
+            if (await pill_control.get_attribute("role") or "") != "button":
                 continue
-            if not await control.is_visible():
+            if not await pill_control.is_visible():
                 continue
-            if not int(await control.locator("label").count()):
+            if not int(await pill_control.locator("label").count()):
                 continue
-            found.append(index)
-        return found
+            pill_found.append(pill_index)
+        return pill_found
 
-    reader = await _profile_views_press_counters(page)
-    first = await reader()
-    if not first or any(value is None for value in first.values()):
+    counter_reader = await _profile_views_press_counters(page)
+    first_counters = await counter_reader()
+    if not first_counters or any(got is None for got in first_counters.values()):
         # KNOWABLE BEFORE ANY CLICK, so refused before any click: the gate
         # itself would read these, press, and only then refuse.
         return {
             "pills_found": len(await _pill_indices()),
             "menus": [],
             "stopped": "counters_unreadable_before_any_press",
-            "counters": sorted(first or {}),
+            "counters": sorted(first_counters or {}),
         }
 
-    out: dict[str, Any] = {"pills_found": 0, "menus": [], "stopped": None}
+    menus_out: dict[str, Any] = {"pills_found": 0, "menus": [], "stopped": None}
     for ordinal in range(PROFILE_VIEWS_MAX_PILLS):
-        pills = await _pill_indices()
-        out["pills_found"] = len(pills)
-        if ordinal >= len(pills):
+        pill_list = await _pill_indices()
+        menus_out["pills_found"] = len(pill_list)
+        if ordinal >= len(pill_list):
             break
-        verdict = await press.disclose(
+        gate_verdict = await press.disclose(
             page,
             shape="[aria-expanded]",
-            index=pills[ordinal],
-            read_counters=reader,
+            index=pill_list[ordinal],
+            read_counters=counter_reader,
             reading=PROFILE_VIEWS_MENU_READING,
             scope="main",
         )
-        summary = _filter_menu_summary(ordinal, verdict)
-        out["menus"].append(summary)
-        if not summary["permitted"]:
-            out["stopped"] = f"pill {ordinal} was not permitted"
+        menu_summary = _filter_menu_summary(ordinal, gate_verdict)
+        menus_out["menus"].append(menu_summary)
+        if not menu_summary["permitted"]:
+            menus_out["stopped"] = f"pill {ordinal} was not permitted"
             break
-    return out
+    return menus_out
 
 
 @mcp.tool()
