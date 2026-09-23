@@ -345,7 +345,7 @@ LinkedIn chose to suggest that day.
 | 17 | Report an invitation sender with "I don't know this person" | W | EXCLUDED-RULED | R1. NOT-REV, and it costs the sender an account penalty |
 | 18 | Message an invitation sender without accepting | W | EXCLUDED-RULED | R1. Surface owned by the messaging census slice |
 | 19 | Read the personal note on a received invitation | R | EXCLUDED-RULED | R1 + R2 |
-| 20 | Be notified when a member invites you to connect | R | **COVERED-UNFIRED** | `linkedin_notifications` |
+| 20 | Be notified when a member invites you to connect | R | **COVERED-UNFIRED** | `linkedin_notifications`. Held by no ruling since 2026-09-23. It waited on `NOTIFICATIONS-UNREAD-SPEND`, the question put that day -- may a fire spend his unread badge? -- and the question is answered: loading `/notifications/` is PERMITTED, the orchestrator's call under the operator's delegation of 18:13 (his own notification state is the orchestrator's to decide), registered the same day and overridable by him. The cost is as measured: loading `/notifications/` clears his unread badge and it does not come back (1 -> 0 on 2026-08-21, stated in the tool's own docstring); and a fire proves this row only if an invitation-kind item is in his list that day. Priced in `_audit/2026-09-23-bucket1-fires.md` section 2. What remains is a session |
 | 21 | Suggest your connections to a member whose invitation you accepted | W | EXCLUDED-RULED | R1 |
 | 22 | View Connections You May Know after accepting | R | EXCLUDED-RULED | R1 |
 
@@ -386,7 +386,7 @@ read it out of Gmail instead. Rows 23-33 are why that skill exists.
 | 42 | Unfollow the articles of a member you are not connected to | W | GAP | REV |
 | 43 | Mute a person from a feed post | W | GAP | REV. `mute` has **0 hits** anywhere in `linkedin_server/*.py` |
 | 44 | View your own followers | R | COVERED-CANNOT-DELIVER | **BOTH ROUTES ARE CLOSED AND ONE OF THEM WAS MEASURED SHUT.** `linkedin_my_profile` ships a `followers` field and fired live 2026-09-04: "his topcard holds exactly ONE such line and it is connections, so `followers` is null here and that is the page's answer". So a tool exists, it has fired, and the page does not draw the number. The LIST route `/mynetwork/network-manager/people-follow/followers/` is refused by `readonly._FORBIDDEN_URL_SUBSTRINGS` on `/follow`, before the allowlist is consulted -- measured by calling `is_read_url` on it. Filing this GAP would say "no tool and no reason"; there is a tool and there is a measurement. |
-| 45 | Be notified when a non-connection follows you | R | **COVERED-UNFIRED** | `linkedin_notifications` |
+| 45 | Be notified when a non-connection follows you | R | **COVERED-UNFIRED** | `linkedin_notifications`. Held by no ruling since 2026-09-23. It waited on `NOTIFICATIONS-UNREAD-SPEND`, the question put that day -- may a fire spend his unread badge? -- and the question is answered: loading `/notifications/` is PERMITTED, the orchestrator's call under the operator's delegation of 18:13 (his own notification state is the orchestrator's to decide), registered the same day and overridable by him. The cost is as measured: loading `/notifications/` clears his unread badge and it does not come back (1 -> 0 on 2026-08-21, stated in the tool's own docstring); and a fire proves this row only if a follow-kind item is in his list that day. Priced in `_audit/2026-09-23-bucket1-fires.md` section 2. What remains is a session |
 
 ### F. Following organizations, newsletters, hashtags, groups (21)
 

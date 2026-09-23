@@ -27,16 +27,16 @@ are listed as `(undated)`; no date is taken from git history, because
 
 | what | count |
 | --- | --- |
-| audit documents git tracks under `_audit` | 237 |
-| of those, carrying a `YYYY-MM-DD-` date prefix | 197 |
+| audit documents git tracks under `_audit` | 238 |
+| of those, carrying a `YYYY-MM-DD-` date prefix | 198 |
 | distinct dates | 15 |
 | documents with no level-1 heading | 2 |
-| `CORRECTS:` marker lines | 94 |
-| `CORRECTED BY:` marker lines | 94 |
-| distinct declared correction edges | 91 |
-| documents something later corrects | 47 |
-| documents that correct something | 67 |
-| documents at either end of a cross-document edge | 94 |
+| `CORRECTS:` marker lines | 96 |
+| `CORRECTED BY:` marker lines | 96 |
+| distinct declared correction edges | 93 |
+| documents something later corrects | 48 |
+| documents that correct something | 68 |
+| documents at either end of a cross-document edge | 95 |
 | intra-document correction markers | 4 |
 | documents that correct themselves later on | 2 |
 | documents no correction marker touches at all | 141 |
@@ -495,6 +495,14 @@ document is dead; it says one thing in it was overtaken and names what.
 
   > the exclusion was LIFTED on 2026-09-21 and this pricing was wrong in three ways. The `+124 sites` costs the baseline nothing: that guard admits only SHORTLISTED sub-expressions, so the site count is the wrong denominator. Exactly ONE committed baseline imports this walk, not two. And the delta figures reproduce exactly while one of the four names does not -- at the variant producing `+124 / +181 / +4` the fourth new EXCEPTION_TEXT sub-expression is `server.py::_badge_refusal`, not `server.py::_error`; `_error` is added there as a PASSTHROUGH bucketed PAGE_OR_SITE_DERIVED and reaches EXCEPTION_TEXT only under the wider all-dicts scope. Full lift measured: 311/558/19 -> 480/792/37, baseline 19 -> 37 rows, 0 changed, 0 vanished, 5 rows needing adjudication across 3 functions -- a line, not a wave. Section 2.3's premise that widening would bring `_error` inside `test_no_message_publishes_a_landing` is separately false: that guard's subject rule is the address shortlist, and `_error`'s three expressions name no address. What governs `_error` is the DRIVEN guard at the envelope, `tests/test_tool_envelopes_emit_no_page_string.py`, which this document itself shipped.
 
+### [2026-09-23-bucket3-addresses.md](2026-09-23-bucket3-addresses.md)
+
+2026-09-23 &middot; Bucket 3, measured: 67 rows, 33 on an admitted page, and 5 a reader could close today
+
+- CORRECTED BY [2026-09-23-census-cleanup.md](2026-09-23-census-cleanup.md)
+
+  > the split asked the boundary and never the rulings: `M M49` sat on a messaging page while `DO-NOT-OPEN-MESSAGING` stood, which made the five four until the operator lifted that ruling at 18:15 the same day. The five stands under the rulings as they now are, and the checker now asks them.
+
 ### [INSTRUMENTS.md](INSTRUMENTS.md)
 
 (undated) &middot; The instrument register
@@ -558,6 +566,10 @@ document is dead; it says one thing in it was overtaken and names what.
 - CORRECTED BY [2026-09-23-bucket1-fires.md](2026-09-23-bucket1-fires.md)
 
   > row `C41` moved COVERED-UNFIRED to COVERED-PROVEN: `linkedin_my_activity_items` returned items live for the first time on record, with authorship established on all three conditions.
+
+- CORRECTED BY [2026-09-23-census-cleanup.md](2026-09-23-census-cleanup.md)
+
+  > row `C42` said no tool in this server returns a post identifier; since `C41` was proven on 2026-09-23 one does, for his own posts, and the row's cell now says which half its premise still holds for. Its state was not re-decided.
 
 ### [_census/network.md](_census/network.md)
 
@@ -1297,6 +1309,18 @@ reach is visible. The quoted reason here is the CORRECTOR's own
 
   > four address verdicts: P F1 and P H11 are pages on the admitted profile, not ADDRESS/ABSENT, and P L4 and N 61 wait on a live read, not on a refused address anybody has seen served.
 
+### [2026-09-23-census-cleanup.md](2026-09-23-census-cleanup.md)
+
+2026-09-23 &middot; Census cleanup: six statements the census makes about itself, measured against today
+
+- CORRECTS [2026-09-23-bucket3-addresses.md](2026-09-23-bucket3-addresses.md)
+
+  > it sized "blocked on nothing" at 5 of 67 without asking the rulings, counting `M M49` on a messaging thread while `DO-NOT-OPEN-MESSAGING` stood, which made the size 4. The operator lifted that ruling at 18:15 the same day, so the size is 5 again under the rulings as they now are, and the checker now asks them.
+
+- CORRECTS [_census/messaging-and-content.md](_census/messaging-and-content.md)
+
+  > row `C42` read *"no tool in this server returns one"* (a post identifier); since `C41` was proven today, `linkedin_my_activity_items` returns one for every post of his own. The premise still holds for other people's posts, and the state is not re-decided.
+
 ### [2026-09-23-lane-l2-refused-presses.md](2026-09-23-lane-l2-refused-presses.md)
 
 2026-09-23 &middot; Lane L2: nine refused presses, and none of them is a narrow extension away
@@ -1353,7 +1377,7 @@ ways, which is a fact about markers and not a verdict on the document.
 | (undated) | [_slice-unfollow-census.md](_slice-unfollow-census.md) | Unfollow-anchor census -- linkedin MCP server |  |
 | (undated) | [_census/jobs.md](_census/jobs.md) | Census slice: JOBS, END TO END | **CORRECTED x6** |
 | (undated) | [_census/mcp-inventory.md](_census/mcp-inventory.md) | MCP inventory -- what this server ACTUALLY DELIVERS |  |
-| (undated) | [_census/messaging-and-content.md](_census/messaging-and-content.md) | Capability census -- MESSAGING AND CONTENT | **CORRECTED x6** |
+| (undated) | [_census/messaging-and-content.md](_census/messaging-and-content.md) | Capability census -- MESSAGING AND CONTENT | **CORRECTED x7** |
 | (undated) | [_census/network.md](_census/network.md) | CENSUS SLICE: NETWORK AND PEOPLE | **CORRECTED x11** |
 | (undated) | [_census/profile.md](_census/profile.md) | CENSUS SLICE: PROFILE, IDENTITY, SETTINGS AND PRIVACY | **CORRECTED x3** |
 | 2026-08-22 | [2026-08-22-linkedin-preflight.md](2026-08-22-linkedin-preflight.md) | 2026-08-22 - browser preflight, and a session_info that outlives the browser |  |
@@ -1549,7 +1573,8 @@ ways, which is a fact about markers and not a verdict on the document.
 | 2026-09-21 | [2026-09-21-what-the-browser-said.md](2026-09-21-what-the-browser-said.md) | WHAT THE BROWSER SAID: `$.message`, adjudicated by PROVENANCE CLASS | **CORRECTED x1** |
 | 2026-09-21 | [2026-09-21-what-was-ruled.md](2026-09-21-what-was-ruled.md) | A register keyed on RULINGS, not on documents -- and the fourth payment |  |
 | 2026-09-23 | [2026-09-23-bucket1-fires.md](2026-09-23-bucket1-fires.md) | BUCKET 1: the read-direction COVERED-UNFIRED rows, fired once each through attach | corrects x1 |
-| 2026-09-23 | [2026-09-23-bucket3-addresses.md](2026-09-23-bucket3-addresses.md) | Bucket 3, measured: 67 rows, 33 on an admitted page, and 5 a reader could close today | corrects x1 |
+| 2026-09-23 | [2026-09-23-bucket3-addresses.md](2026-09-23-bucket3-addresses.md) | Bucket 3, measured: 67 rows, 33 on an admitted page, and 5 a reader could close today | **CORRECTED x1** corrects x1 |
+| 2026-09-23 | [2026-09-23-census-cleanup.md](2026-09-23-census-cleanup.md) | Census cleanup: six statements the census makes about itself, measured against today | corrects x2 |
 | 2026-09-23 | [2026-09-23-exclusion-audit.md](2026-09-23-exclusion-audit.md) | Who ruled each exclusion -- the 315 rows outside the denominator, traced |  |
 | 2026-09-23 | [2026-09-23-lane-l2-refused-presses.md](2026-09-23-lane-l2-refused-presses.md) | Lane L2: nine refused presses, and none of them is a narrow extension away | corrects x1 |
 | 2026-09-23 | [2026-09-23-rulings-write-class-and-delegated-calls.md](2026-09-23-rulings-write-class-and-delegated-calls.md) | Rulings, 2026-09-23: the write class, the live budget, and the calls delegated to the orchestrator |  |
