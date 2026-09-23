@@ -44,8 +44,9 @@ about a sensitivity basis for `/in/me/`). None of the remaining nine sits under
     N 92    LEFT REFUSED     the same press; no facet on record
     N 133   NEEDS-CAPTURE    opening a pill is ALREADY permitted; what it opens is uncaptured;
                              applying a filter is a view switch no sanctioned press reaches
-    M C29   NEEDS-CAPTURE    never captured anywhere; its only reachable host is the feed;
-                             choosing an order is a view switch no sanctioned press reaches
+    M C29   NEEDS-CAPTURE    its control is in no capture (its state is); its only reachable
+                             host is the feed; choosing an order is a view switch no
+                             sanctioned press reaches
 
     permitted and built    0
     NEEDS-CAPTURE          2
@@ -239,10 +240,17 @@ census cell revised to say all of the above.
 
 ## 5. M C29 -- SORT COMMENTS (MOST RELEVANT / MOST RECENT)
 
-* **Never captured.** No comment-sort control appears in any of the 25 raw
-  captures or in any tracked fixture. The company root's 582 `sortOrder` hits
-  are `sortOrderFromClient` server-driven state keys, not a rendered control;
-  the profile-views `Most recent` / `Most relevant` hits are the viewer tabs.
+* **Its control is in no capture; its STATE is.** No rendered comment-sort
+  control appears in any of the 25 raw captures or in any tracked fixture:
+  `Most recent` / `Most relevant` occur only as the profile-views viewer tabs.
+  But the company-root capture's server-driven payload carries **380
+  `commentSortOrder`-prefixed keys** -- five distinct keys, 76 occurrences
+  each, every one followed by an opaque value -- beside 190
+  `sortOrderFromClient` keys, 4 `sortOrder-value` tokens, and a feed-level
+  `FeedSortOrder` enum whose two values are `RELEVANCE` and `REV_CHRON`. So a
+  comment-sort state slot rides on post surfaces; what renders it, and what
+  pressing it sends, is in no capture. (Entry 6 records how this paragraph
+  first read.)
 * **The permalink is admitted and unaddressable.** C42 is EXCLUDED-RULED
   because no tool in this server returns a post urn, so the address table's
   permalink (INFERRED) is a page nothing can name. The feed, also driven and
@@ -393,7 +401,34 @@ disposable there.
 
 ## 10. GATES RUN, AND GATES NOT RUN
 
-(filled when they ran -- see the log)
+**RUN, all on this worktree, all offline** (per commit in Entries 7 and 8):
+
+    scripts/check_read_addresses.py          GREEN, 67 of 67 -- after the table edit, and on
+                                             each commit
+    scripts/census_completion.py --check     exit 0, every headline figure matches its pin
+    tests/test_a_correction_is_findable_from_the_claim.py
+                                             13 passed; its first run was red on exactly the
+                                             two pairs predicted, both triaged
+    five citation and register guards        79 passed
+    the three generators, twice per commit   INDEX, RULINGS and the blocker map at a fixpoint --
+                                             the second sweep changed nothing. The blocker map's
+                                             first sweep moved 7 rows' rank-1 locator document to
+                                             this audit (M C23, M C29, M C90, N 133, N 134, N 136,
+                                             P O3) and 74 rows' candidate denominators, and no
+                                             other column
+    the pre-commit identity gate             0 hits on every commit
+    scripts/impact_gate.py --against b0d3ab8 PASS over 48 files (2157 tests); NOT CHECKED 167 of
+                                             215 test files, said by the gate itself
+    one cold verification pass               briefed on 9facb53; outcome in Entry 9
+
+**NOT RUN, and why:**
+
+* **The full suite.** The scoped gate chose what this change can break and
+  says what it did not run; CI runs the whole suite on three platforms on
+  push, and this lane does not push.
+* **Any new press test.** `press.py` is unchanged, so the order's "one
+  negative control per extension" has no extension to attach to.
+* **Anything live.** No reading here came from a browser.
 
 ---
 
@@ -494,3 +529,65 @@ the live wave's version is not on master. **This lane has no `press.py`
 change at all**, by the decision in section 1, so there is nothing to keep
 additive and nothing for the orchestrator to reconcile at merge. Acknowledged
 by deleting the file; it was never staged.
+
+### Entry 6 -- a number of mine that did not hold, found by re-auditing it
+
+Committed in `9facb53`, section 5 read: *"The company root's 582 `sortOrder`
+hits are `sortOrderFromClient` server-driven state keys."* **Both halves were
+unsound, and the verdict did not rest on either.**
+
+* **582 was a case-insensitive count** reported as the case-sensitive token.
+  Case-sensitive, `sortOrder` occurs 194 times: 190 `sortOrderFromClient` and
+  4 `sortOrder-value`.
+* **The classification was drawn from the first eight lines of a sorted
+  listing.** Counted whole, the 582 case-insensitive hits are 190
+  `sortOrderFromClient`, 380 `commentSortOrder`-prefixed keys, 4
+  `sortOrder-value` and 8 `feedSortOrder` / `FeedSortOrder_*` tokens -- and
+  the 380 are the interesting ones: comment-sort STATE on a post surface.
+
+**WHAT MOVED:** section 5's paragraph, the M C29 line of section 1, the M C29
+note in the address table, and one clause of the census C29 cell -- each now
+says "no rendered control" and names the state keys. **WHAT DID NOT:** the
+verdict. NEEDS-CAPTURE rests on no capture showing the CONTROL, which remains
+true; the state keys make a comment sort more certainly real, not more
+reachable. The cold verifier was briefed on `9facb53` and will read the
+unsound sentence; that is the point of pinning it there.
+
+### Entry 7 -- the gates on `9facb53`
+
+    scripts/check_read_addresses.py          GREEN, 67 of 67
+    scripts/census_completion.py --check     exit 0, every headline figure matches its pin
+    five citation and register guards        79 passed: test_an_asserted_name_resolves,
+                                             test_the_register_numbers_are_unique,
+                                             test_a_cited_sha_resolves,
+                                             test_a_census_locator_names_its_row,
+                                             test_read_addresses
+    scripts/impact_gate.py --against b0d3ab8 PASS over 48 files (2157 tests), and by its own
+                                             statement NOT CHECKED 167 of 215 test files;
+                                             395.2 s wall clock
+
+---
+
+## Live queue
+
+**No row of this lane is ready to fire.** Nothing below is a reader. Each line
+is a CAPTURE that a NEEDS-CAPTURE row waits on, in the order's own fields --
+row, tool, page address, expected loads, press -- with the condition that
+makes the load worth taking.
+
+    M C29 | the live readers wave's structural probe, ALREADY IN FLIGHT (its
+          |   deliverable 2026-09-23-readers-four-rows, section 2.2)
+          | /feed/
+          | 0 extra loads -- it rides the load that wave is taking anyway
+          | none: a shut-state reading of [aria-expanded] / [aria-haspopup]
+          |   membership with the terms sort and comments, never a label
+
+    N 133 | press.disclose with its shipped witness -- ONLY AFTER section 7 is
+          |   ruled YES; before that, the load buys nothing a ruling needs
+          | /analytics/profile-views/
+          | 1 load
+          | one [aria-expanded] press on the Company pill, which the shipped
+          |   gate ALREADY PERMITS, at the index the zero-press node-order
+          |   reading gives (never index 0); the witness names the popover's
+          |   container kind, and the controls inside it need an open-moment
+          |   reading no shipped instrument takes
