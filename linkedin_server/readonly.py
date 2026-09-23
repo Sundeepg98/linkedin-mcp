@@ -2081,6 +2081,46 @@ _ALLOWED_URL_PATTERNS: tuple[re.Pattern[str], ...] = (
     # RELATIONS ONLY, structurally, the `groups.py` way; `census_substitute`
     # returns a name unchanged, so no shape guard saves a reader here.
     re.compile(r"^https://www\.linkedin\.com/mynetwork/network-manager/people-follow/followers/?$"),
+    # ======================================================================
+    # REVIEW (lane L1, 2026-09-23) -- N 184, ONE EVENT BY ITS NUMERIC ID.
+    # Census row N 184: "reach an event through its URL after it has been
+    # shared with you". Shipped in a commit whose subject starts `REVIEW:`
+    # because it REVERSES A STATED REFUSAL: the `/events/` root entry lists
+    # `/events/<id>/` among what it does not admit ("an event page --
+    # organizer and content") and `tests/test_the_events_boundary_is_root_
+    # only.py` enforced it. That list scoped the ROOT's widening; it was not a
+    # ruling against the address -- the groups root listed `/groups/<id>/`
+    # the same way, and `/groups/<id>/` was admitted fourteen days later on
+    # the lead's ruling under four binding conditions. THIS LINE IS HELD TO
+    # THOSE SAME FOUR, and that is the whole argument:
+    #
+    #   1. A CLOSED SEGMENT: the ten ASCII digits, at most 20 -- the groups
+    #      bound. `\d+` in its place admits Arabic-Indic digits and a 21-digit
+    #      id too: 5 newly admitted against 3 over the same corpus.
+    #   2. THE ADDRESS NAMES NOBODY. An event id is numeric, and LinkedIn draws
+    #      the numeric form itself (the captured events root links events both
+    #      ways). The SLUG form it also draws -- the event's TITLE run into its
+    #      id -- is NOT admitted: a title can carry a person's name, and this
+    #      package would only ever assemble the numeric form.
+    #   3. THE BLAST RADIUS, MEASURED: exactly the numeric-event spellings
+    #      (+2 for the target, +1 more for the shipped corpus's own
+    #      `/events/12345678/`), nothing else. An `/events/.*` family admits
+    #      12, including the ATTENDEE ROSTER -- N 188, out of scope by the
+    #      ruling that put N 165 out of scope -- and a traversal onto a member
+    #      profile.
+    #   4. NOTHING IS FIRED: no attend, no share, no invite; `/events/<id>/
+    #      invite/` stays refused twice (`/invite` first). NO READER SHIPS WITH
+    #      IT: no event page has ever been captured, so the first load belongs
+    #      to the live lane (key `event`), and the reader that follows owes the
+    #      anchor-census strictness `group_page.py` pays -- an event page draws
+    #      an organiser and people attending.
+    #
+    # PURE READ, ARGUED BY CAUSE AND NOT MEASURED: this boundary's sharpest
+    # refusal is the member profile, because loading one leaves THEM a durable
+    # record. An event is an entity page like a group or an organisation, and
+    # nothing in this repository says it records who viewed it. The first load
+    # brackets the invitation badge.
+    re.compile(r"^https://www\.linkedin\.com/events/[0-9]{1,20}/?$"),
 )
 
 #: Substrings that must never appear in a navigation target, checked before

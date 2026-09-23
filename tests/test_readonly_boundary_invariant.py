@@ -1198,6 +1198,29 @@ PINNED = (
 #: digests byte-identical; `<functions>` unmoved. MERGES ONLY ON THE OPERATOR'S
 #: LOOK: a read bought past a write guard is his call, whatever the argument.
 #: ------------------------------------------------------------------------
+#: RE-FROZEN AGAIN 2026-09-23 BY A SECOND `REVIEW:` COMMIT (lane L1), ONE
+#: DIGEST MOVED BY ONE TUPLE ENTRY -- ONE EVENT BY ITS NUMERIC ID (N 184):
+#:
+#:     _ALLOWED_URL_PATTERNS   c8c476ea47f0dfdd -> c37e98f84ee443f2   48 -> 49
+#:     every other table       unchanged
+#:
+#:     ^https://www\.linkedin\.com/events/[0-9]{1,20}/?$
+#:
+#: IT REVERSES A STATED SCOPE: the `/events/` root entry listed `/events/<id>/`
+#: among what it did not admit, and `tests/test_the_events_boundary_is_root_
+#: only.py` enforced that. The line is held to the four conditions the lead
+#: set for `/groups/<id>/` on 2026-09-19 -- closed segment, numeric-only (the
+#: slug form, a title run into the id, stays refused), blast radius measured
+#: (`tests/test_l1_event_by_id_admission.py`), nothing fired -- and it merges
+#: only on the operator's look. ATTRIBUTION: the tree minus exactly this line
+#: hashes to c8c476ea47f0dfdd. Seven of eight digests byte-identical.
+#:
+#: IF THE OPERATOR TAKES ONLY ONE OF THE TWO REVIEW COMMITS, the allowlist
+#: digest is: main commit alone 7d442864f68f61fc; + follower list only
+#: c8c476ea47f0dfdd; + event only f0fcc25ebc21c2a3; + both c37e98f84ee443f2.
+#: The pattern-exemption digest is 76d7b10899530d69 with the follower list
+#: and 419e64a3cd92ec7e without it. Computed with this file's `ast_digest`.
+#: ------------------------------------------------------------------------
 READONLY_AST_AT_LAST_REFREEZE = {
     "<functions>": "d7e1d0922e3af446",
     "JS_MUTATION_TOKENS": "d47e30b67c583c1b",
@@ -1340,7 +1363,11 @@ READONLY_AST_AT_LAST_REFREEZE = {
     # 7d442864f68f61fc until the REVIEW: commit of 2026-09-23 (lane L1) that
     # admits his own follower list -- one line here, one pattern exemption
     # beside it. See that ledger entry.
-    "_ALLOWED_URL_PATTERNS": "c8c476ea47f0dfdd",
+    #
+    # c8c476ea47f0dfdd until the second REVIEW: commit of 2026-09-23 (lane
+    # L1): one event by its numeric id. See that ledger entry, which also
+    # lists the value for every combination of the two REVIEW commits.
+    "_ALLOWED_URL_PATTERNS": "c37e98f84ee443f2",
     "_FORBIDDEN_SUBSTRING_EXEMPTIONS": "43e2bf7f3db0dbed",
     # 419e64a3cd92ec7e until the same REVIEW: commit: a third entry, excusing
     # exactly {"/follow"} for exactly the anchored follower-list address.
