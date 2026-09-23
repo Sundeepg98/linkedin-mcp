@@ -10,10 +10,10 @@ claude-opus-5-5[1m]
 
 **CORRECTS:** `_audit/_census/network.md` -- row `134` likewise; the pill it names opens into a filter form whose payload needs APPLYING (section 3.0.1).
 
-**SEVEN OF THE SHAS IN THIS DOCUMENT ARE BRANCH-ONLY TODAY.** `652cd2f`,
-`aba78f7`, `2bc3720`, `d912b25`, `1df9061`, `7ad55ed` and `1c55694` are this
-wave's commits on its worktree branch and do not resolve on `master` until
-that branch merges.
+**EIGHT OF THE SHAS IN THIS DOCUMENT ARE BRANCH-ONLY TODAY.** `652cd2f`,
+`aba78f7`, `2bc3720`, `d912b25`, `1df9061`, `7ad55ed`, `1c55694`, `9b4dd6b` are
+this wave's commits on its worktree branch and do not resolve on `master`
+until that branch merges.
 Their subjects, which survive a rewrite: `652cd2f` *"press: read what a press
 disclosed, through two more closed tables"*; `aba78f7` *"who_viewed_me: open
 the filter pills through the gate; filters skip a dialog"*; `2bc3720`
@@ -23,7 +23,8 @@ position with two refusing interlocks"*; `1df9061` *"record the fires: P O3,
 N 134 and M C72 are gated PRESS, each measured live"*; `7ad55ed`
 *"readers-four-rows: name the verdict basis, the probe table and the
 branch-only SHAs"*; `1c55694` *"readers-four-rows: read the requests against
-the new rulings; forecast the merge"*.
+the new rulings; forecast the merge"*; `9b4dd6b` *"tests: press is wired, so
+its orphan ruling is spent; three readers get verdicts"*.
 
 **2026-09-23. Wave `readers-four-rows`, base `b0d3ab8`. WRITTEN AS THE WAVE
 RUNS, not at its end.** The four rows `_audit/2026-09-23-bucket3-addresses.md`
@@ -927,6 +928,37 @@ After the merge, `scripts/check_read_addresses.py` and
 both sides moved lines of the table; the pin moves in section 7 are this
 branch's alone.
 
+**RE-RUN BETWEEN 21:30 AND 21:33 AGAINST `867ae38`, THIS BRANCH AT `9b4dd6b`.** `master` had
+moved 17 commits past `53ba1b6` (the census cleanup, lane X, lane L1).
+**Six conflicts now:** the five above, plus
+`_audit/2026-09-23-bucket3-addresses.md`, where both sides added a
+back-pointer at the same header position -- `master`'s from the census
+cleanup, this branch's from this document. Both stay. The table now has
+THREE hunks (`master` moved `P L8`, `M C38` and `M C48` to MEASURE and edited
+other columns of `N 133` and `N 161`; this branch moved its four rows), and
+`network.md` still has one.
+
+**The rule, row-wise, for every hunk in all three files: each row takes the
+side that differs from the base `b0d3ab8`, and no row was changed on both
+sides.** Checked by a second scratch script over the dry-run tree: 0 rows
+changed on both sides, 0 lines lost from either side, 0 invented, 0 markers.
+Shown failing first: a planted resolution that always takes `master`'s side
+reports 4, 1 and 1 of this branch's lines lost. (Its first control swapped
+the base instead, which disarmed the check along with the resolution and
+passed; it proved nothing and was replaced by the plant.)
+
+Auto-merged, and checked where a check is possible offline:
+`tests/reader_leak_baseline.json` merges to a valid union of 123 readers
+(`master`'s 120 plus this branch's three), keys still sorted.
+`linkedin_server/server.py` auto-merges beside `master`'s 9 added lines; the
+navigation-derivation guard (per module, by name) and the page-string family
+guard need a run on the MERGED tree, which only a gate there can give.
+
+`master` still pins `b3_blocked_on_nothing` at 5 at `867ae38`, and all four of
+this wave's rows are still READER or PRESS-PERMITTED in its table, so the merge
+moves the measured figure by -4 from whatever `master` measures (DERIVED, not
+run on a merged tree).
+
 ### 10.2 THE GATES -- what ran, on which tree, and what did not
 
 **The code this wave fired is the code it committed.** `d912b25` was
@@ -958,8 +990,8 @@ correction between the same two documents later. Re-checked with the
 guard's own `_candidates()` and `_declarations()`: zero untriaged pairs touch
 this document.
 
-The full-suite gate on this branch's final code is recorded in 10.4, when it
-has run.
+The full-suite gate on this branch's final code is recorded in 10.4: red on
+its first complete run, then PASS on the repaired tree.
 
 ### 10.3 INSTRUMENTS -- register candidates, and what is disposable
 
@@ -1026,5 +1058,36 @@ killed at 30 minutes by my own bound.
    `tests/reader_leak_baseline.json` is exactly three added lines, all three
    `clean`, and none of the other 119 verdicts moved.
 
-The re-run of the same gate on the repaired tree follows this commit, and its
-result is appended below when it has run.
+**THE RE-RUN, ON THE REPAIRED TREE: PASS.** `scripts/impact_gate.py --against
+b0d3ab8` at `9b4dd6b`, 21:15:44 to 21:30:00, beside one other gate (lane L3's,
+running since 21:03:17 -- two gates, the ceiling, not over it): widened to the
+full suite again, **PASS over the FULL SUITE, 8380 tests, in 813.6 s.** The
+count is the red run's 8382 less exactly two: the `[press]` cases of the two
+tests parametrized over the deleted table entry
+(`test_every_ruling_is_still_about_a_real_orphan`,
+`test_every_ruling_gives_an_actual_reason`).
+
+**And the wave's new and changed test files, run on their own** at `9b4dd6b`
+after the gate: 184 passed, 0 failed, 0 skipped --
+`test_press.py` 77, `test_the_tool_surface_is_pinned_so_a_row_must_move.py`
+51, `test_press_open_reading.py` 18, `test_probe_disclosure_targets.py` 14,
+`test_every_orphan_module_is_ruled.py` 11, `test_who_viewed_me_filter_menus.py`
+10, `test_profile_views_filters_skip_dialogs.py` 3.
+
+**`scripts/census_completion.py --check` at `9b4dd6b`:** exactly one pinned
+figure moved, `b3_blocked_on_nothing` 5 -> 1 (-4), as section 7 says; not
+re-pinned.
+
+**NOT RUN, and why:**
+
+- **CI.** This branch is not pushed; the brief forbids it. CI's three
+  platforms remain the certifier, and everything above is one Windows box.
+- **Any gate on the MERGED tree.** Nothing is merged; 10.1 names what that
+  run must include.
+- **Any live fire after 19:13.** None is needed for what this wave claims: no
+  file under `linkedin_server/` or `scripts/` changed after `d912b25`, the
+  commit the fires ran on.
+- **The final commit of this document,** which only appends this section,
+  gets the doc-scoped gate (`--against 9b4dd6b`) rather than a third full
+  suite; its result is in the wave's report, not here, because a document
+  cannot record the gate over its own last commit.
