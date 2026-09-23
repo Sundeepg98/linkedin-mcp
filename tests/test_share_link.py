@@ -828,3 +828,98 @@ async def test_clipboard_install_and_read_are_the_only_two_modes_used(monkeypatc
         assert result is True
         texts = await share_link._clipboard(page, "read")
         assert texts == []
+
+
+# ---------------------------------------------------------------------------
+# THE TOOL, END TO END: linkedin_own_item_link on the fixture, offline.
+#
+# Everything above drives share_link directly with a stand-in counter
+# reader. This drives the TOOL a caller calls -- its navigation, the landed-
+# url check, the REAL counter reader (dom.read_reaction_surface) and the
+# envelope it hands back -- against the same fixture, so a wiring defect is
+# found here rather than by spending a live load on it. BROWSER is replaced
+# by a stand-in whose goto navigates the local page by the fulfilled route:
+# still no socket, still no linkedin.com.
+# ---------------------------------------------------------------------------
+
+
+class _FixtureBrowser:
+    """BROWSER's two methods, over one local page; records every address."""
+
+    def __init__(self, page: Any) -> None:
+        self.page = page
+        self.gotos: list[str] = []
+
+    def session(self):
+        @asynccontextmanager
+        async def _session():
+            yield self.page
+
+        return _session()
+
+    async def goto(self, page: Any, url: str) -> str:
+        self.gotos.append(url)
+        await page.goto(url, timeout=10_000)
+        return page.url
+
+
+async def _run_tool(monkeypatch, config: dict, **kwargs) -> tuple[dict, list[str]]:
+    from linkedin_server import server
+
+    async with _open_fixture(config) as page:
+        browser = _FixtureBrowser(page)
+        monkeypatch.setattr(server, "BROWSER", browser)
+        payload = await server.linkedin_own_item_link(**kwargs)
+        return payload, browser.gotos
+
+
+async def test_the_tool_copies_on_one_load_and_withholds_the_link_by_default(
+    monkeypatch,
+):
+    payload, gotos = await _run_tool(
+        monkeypatch, {"reactionControl": True}, activity_id=ACTIVITY_DIGITS
+    )
+    assert gotos == [share_link.post_url(ACTIVITY_DIGITS)], gotos
+    assert payload.get("permitted") is True, payload
+    assert payload["copied"] is True, payload
+    assert payload["shape"]["carries_activity_id"] is True, payload
+    assert payload["pages_loaded"] == 1, payload
+    # THE LINK IS NOT IN THE ENVELOPE unless asked for; its presence is.
+    assert "link" not in payload, payload
+    assert payload["link_withheld"] is True, payload
+    # The price was a REAL reading: one reaction toggle, OFF, unmoved.
+    assert payload["counters"].get("refused") is None, payload
+
+
+async def test_the_tool_returns_the_link_only_when_asked(monkeypatch):
+    payload, _ = await _run_tool(
+        monkeypatch, {"reactionControl": True},
+        activity_id=ACTIVITY_DIGITS, include_link=True,
+    )
+    assert payload["copied"] is True, payload
+    assert share_link.link_shape(payload["link"], ACTIVITY_DIGITS)[
+        "carries_activity_id"
+    ] is True
+    assert "link_withheld" not in payload, payload
+
+
+async def test_the_tool_refuses_when_the_press_moves_the_reaction_counter(
+    monkeypatch,
+):
+    """THE PRICE, SHOWN FAILING END TO END: the copy press also flips the
+    item's reaction toggle, as an outward act would. The tool's own reader
+    must see off_state move and the verdict must refuse -- whatever the
+    clipboard captured."""
+    payload, _ = await _run_tool(
+        monkeypatch, {"reactionControl": True, "copyReacts": True},
+        activity_id=ACTIVITY_DIGITS,
+    )
+    assert payload.get("permitted") is False, payload
+    assert payload["counters"].get("refused") == "counter_moved", payload
+
+
+async def test_the_tool_refuses_a_bad_id_with_no_load(monkeypatch):
+    payload, gotos = await _run_tool(monkeypatch, {}, activity_id="12a45")
+    assert payload.get("refused") == "bad_activity_id", payload
+    assert payload["pages_loaded"] == 0, payload
+    assert gotos == [], gotos
