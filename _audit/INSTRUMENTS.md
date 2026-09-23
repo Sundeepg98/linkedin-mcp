@@ -10167,3 +10167,59 @@ people-search parameter names and value shapes, the census-cell editor, the
 ASCII escaper, the derived-navigation mutation run and the blocker-map diff
 summariser -- are declared disposable. What they measured is recorded in the
 audit or re-derived by a shipped test.
+
+---
+
+## 67. FOUR GUARDS THAT COULD NOT SEE THEIR OWN SUBJECT: A READER'S OUTPUT, A LIBRARY'S MESSAGE, A CAPITAL LETTER, A MERGE STAGE (lane-g-guards, 2026-09-24)
+
+**Registered 2026-09-24.** Full record: `_audit/2026-09-24-lane-g-guards.md`.
+Each gap was measured by another lane first; each repair was shown failing on
+the unrepaired code before it passed.
+
+### 67.1 THE NAVIGATION RULE NOW TAKES A READER'S RETURN VALUE AS A SOURCE
+
+Section 65.4 recorded `J 57` passing `tests/test_navigation_is_never_derived.py`
+while breaking its rule, and left the widening to that file's owner. Done:
+`reader_derived_navigations` feeds the navigation sink from Playwright's page
+reads, reader-named calls (`read_`, `harvest_`, `linkedin_`) and the file's own
+page-returning functions, with taint scoped lexically, a subscript key never a
+receiver, and `.append`/`+=` carrying a value -- each choice measured on the
+tree before it was made. Sources stay derivable from one file's text, so
+`scripts/staged_navigation_guard.py` is still an induction step. The output
+sink's decline to taint response bodies is unchanged.
+
+    A GUARD'S DECLARED GAP IS ALSO WHERE THE NEXT VIOLATION WILL LIVE. ON ITS
+    FIRST RUN THE WIDENED ENGINE FOUND THREE OLDER ROUTES OF THE WITHDRAWN
+    ROUTE'S SHAPE, ONE OF THEM SHIPPED.
+
+### 67.2 A PAGE WHOSE EVERY READ FAILS, SO AN EXCEPTION'S TEXT HAS ONE WAY OUT
+
+`tests/plantedpage.py::RaisingPage` fails every read with a marker in the
+message; its failing methods are derived from `PlantedPage`/`PlantedLocator`,
+not listed. Driven against every discovered reader, a RETURNED value holding
+the marker can only hold an exception's text -- whatever the spelling -- while
+a RAISED one is the `$.message` channel, ruled at the raise and recorded, never
+failed. It replaces recognising a coercion's wording with an experiment on the
+channel itself.
+
+### 67.3 THE ENTRIES
+
+| path | shown failing by |
+|---|---|
+| `tests/test_navigation_is_never_derived.py` (`reader_derived_navigations`) | the withdrawn `J 57` route (from `16e1e19`, trimmed) and nine sibling shapes: 10 red plants plus a same-module pair failed on the unmodified engine (11 failed); after, 16 pass, including 5 green caller-supplied shapes that must stay green |
+| `tests/plantedpage.py` (`RaisingPage`) + `tests/test_readers_emit_no_page_string.py` (the failing-page family) | 24 readers laundered on the unrepaired tree; 5 after, declared exactly; a synthetic launderer convicted in five spellings (`str`, `repr`, `args`, `%`, the dom shape); `read_radio_label_binding`'s control red on its original line |
+| `scripts/check_cited_shas_resolve.py` (`SLOTS`, keyword fold) | a sentence-initial "Committed" plant red on the unmodified guard; per-slot capitalised plants red on 9 of 10 slots with one folded; a completeness test for any future keyword slot |
+| `scripts/find_blocker_reason.py` (`tracked_audit_paths`) | a conflict manufactured in a throwaway repository (git lists the path three times) and a planted tripled listing (score 6 against 2), both red before the set |
+
+REPAIRED, NOT NEW: `scripts/_check_the_unread_readings_guard_can_fail.py` blinded
+its positive control by making `dom.py`'s `error` field type-only -- which is now
+the shipped code, so that mutation planted nothing. Its control now drives the
+retired handler verbatim; 11 of 11 convictions.
+
+### 67.4 DECLARED DISPOSABLE
+
+The scratchpad prototypes -- three versions of the reader engine and their
+measurement harnesses, the per-channel census of exception-text renders, the
+consumer map of `error` fields, the per-slot fold measurement, the timing
+script -- are declared disposable. Every number they produced is recorded in
+the lane record, and what they found is held by the entries above.

@@ -27,8 +27,8 @@ are listed as `(undated)`; no date is taken from git history, because
 
 | what | count |
 | --- | --- |
-| audit documents git tracks under `_audit` | 246 |
-| of those, carrying a `YYYY-MM-DD-` date prefix | 206 |
+| audit documents git tracks under `_audit` | 247 |
+| of those, carrying a `YYYY-MM-DD-` date prefix | 207 |
 | distinct dates | 16 |
 | documents with no level-1 heading | 2 |
 | `CORRECTS:` marker lines | 106 |
@@ -39,7 +39,7 @@ are listed as `(undated)`; no date is taken from git history, because
 | documents at either end of a cross-document edge | 99 |
 | intra-document correction markers | 4 |
 | documents that correct themselves later on | 2 |
-| documents no correction marker touches at all | 145 |
+| documents no correction marker touches at all | 146 |
 | blockquoted markers naming ANOTHER document | 0 |
 | edges missing one of their two markers | 0 |
 | edges declared a different number of times in each direction | 2 |
@@ -1688,6 +1688,7 @@ ways, which is a fact about markers and not a verdict on the document.
 | 2026-09-23 | [2026-09-23-lane-l4-writes.md](2026-09-23-lane-l4-writes.md) | Lane L4 -- WRITES: classify the write-direction GAP rows, build the reversible first round to ready-to-fire |  |
 | 2026-09-23 | [2026-09-23-readers-four-rows.md](2026-09-23-readers-four-rows.md) | READERS FOR THE FOUR ROWS BLOCKED ON NOTHING: P O3, N 134, M C72, M C85 | corrects x4 |
 | 2026-09-23 | [2026-09-23-rulings-write-class-and-delegated-calls.md](2026-09-23-rulings-write-class-and-delegated-calls.md) | Rulings, 2026-09-23: the write class, the live budget, and the calls delegated to the orchestrator |  |
+| 2026-09-24 | [2026-09-24-lane-g-guards.md](2026-09-24-lane-g-guards.md) | Lane G -- security guard hardening: four measured gaps in the checks that keep page text out and page choice out of navigation |  |
 | 2026-09-24 | [2026-09-24-lane-s-people-search.md](2026-09-24-lane-s-people-search.md) | Lane S -- people-search readers (2026-09-24) |  |
 | 2026-09-24 | [2026-09-24-rulings-search-verticals-rosters-passive-costs.md](2026-09-24-rulings-search-verticals-rosters-passive-costs.md) | Rulings, 2026-09-24: the search verticals, member rosters, refusals nobody registered, and passive costs |  |
 

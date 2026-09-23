@@ -212,6 +212,85 @@ def test_an_all_digit_sha_is_not_filtered_out():
     assert [s.token for s in sites] == ["5480246"]
 
 
+def test_a_sentence_initial_committed_is_a_slot():
+    """A capitalised, sentence-initial "Committed `...`" must be a candidate.
+
+    The `committed` slot's keyword was case-sensitive, so a citation that
+    opens a sentence -- as lane L3's record wrote `Committed `d111560`` --
+    never matched the pattern at all, and the citation was never checked.
+    """
+    blob = "Committed `deadbee` on a settled tree.\n"
+    sites = guard.candidates({"_audit/_planted.md": blob})
+    assert [s.token for s in sites] == ["deadbee"], sites
+    assert sites[0].verdict == "CANDIDATE", sites
+    assert [s.token for s in guard.findings(REPO, sites)] == ["deadbee"]
+
+
+def test_the_case_fold_reaches_the_keyword_and_never_the_hex():
+    """The fix's case fold must cover only the keyword, never the hex class.
+
+    Uppercase hex is not this corpus's citation shape (`HEX` is
+    `[0-9a-f]{7,40}`, lowercase only), so widening the keyword match must not
+    also widen what counts as a hex digit -- a capitalised token must still
+    be rejected, and the plain lowercase form must keep working.
+    """
+    upper = "Committed `DEADBEE` on a settled tree.\n"
+    assert guard.candidates({"_audit/_planted.md": upper}) == []
+
+    lower = "committed `deadbee` on a settled tree.\n"
+    sites = guard.candidates({"_audit/_planted.md": lower})
+    assert [s.token for s in sites] == ["deadbee"], sites
+
+
+#: ONE CAPITALISED PLANT PER KEYWORD SLOT. The ``committed`` defect was never
+#: that slot's alone: every keyword here was lowercase-only, and folding them
+#: was MEASURED before it was done -- over the tracked corpus it adds 35
+#: (token, site) pairs this guard had never checked, 33 of which resolve and
+#: two of which are already suppressed at the same site (``56e03b0`` in a
+#: document declaring its SHAs dead, ``c4d2be2`` already MARKED-MAPPED through
+#: the lowercase ``at``), so ZERO new findings. Each slot is asserted through
+#: its OWN pattern, because ``candidates`` hands a site to whichever slot
+#: matches first and several of these plants would also match ``at``.
+_CAPITALISED_PLANTS = {
+    "at-backtick": "At `deadbee` the tree was settled.",
+    "at-bare": "At deadbee the tree was settled.",
+    "commit": "Commit `deadbee` carried it.",
+    "committed": "Committed `deadbee` on a settled tree.",
+    "landed-on": "Landed on `deadbee` after review.",
+    "landed-after": "`deadbee` Landed first.",
+    "applied": "Applied as `deadbee` to the tree.",
+    "introduced-at": "Introduced at `deadbee` by the wave.",
+    "baseline": "Baseline `deadbee` held.",
+    "pinned-commit": "Pinned commit `deadbee` held.",
+}
+
+#: Slots with no keyword to fold -- pure punctuation around the hex.
+_KEYWORDLESS_SLOTS = frozenset({"range-lhs", "range-rhs", "show-path"})
+
+
+@pytest.mark.parametrize("slot_name", sorted(_CAPITALISED_PLANTS))
+def test_every_keyword_slot_reads_a_capitalised_keyword(slot_name):
+    """RED PROOF per slot: a sentence-initial keyword is still the slot."""
+    pattern = {slot.name: slot.pattern for slot in guard.SLOTS}[slot_name]
+    line = _CAPITALISED_PLANTS[slot_name]
+    match = pattern.search(line)
+    assert match is not None and match.group(1) == "deadbee", (
+        f"slot {slot_name!r} does not read its own keyword capitalised: {line!r}"
+    )
+    assert pattern.search(line.replace("deadbee", "DEADBEE")) is None, (
+        f"slot {slot_name!r} folded the HEX class as well as the keyword"
+    )
+
+
+def test_every_slot_is_either_folded_or_keywordless():
+    """A keyword slot added tomorrow without a capitalised plant fails here."""
+    names = {slot.name for slot in guard.SLOTS}
+    assert names == set(_CAPITALISED_PLANTS) | _KEYWORDLESS_SLOTS, (
+        f"unaccounted slots: {sorted(names - set(_CAPITALISED_PLANTS) - _KEYWORDLESS_SLOTS)}; "
+        f"stale plants: {sorted((set(_CAPITALISED_PLANTS) | _KEYWORDLESS_SLOTS) - names)}"
+    )
+
+
 def test_the_digest_bound_hides_no_resolving_citation(measured):
     """The ONE shape rule must not be load-bearing in the wrong direction.
 
