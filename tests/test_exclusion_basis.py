@@ -250,7 +250,7 @@ def test_every_family_in_the_registry_is_used_or_says_why(real):
     ("P D5", "basis", "family=EDIT-FAMILY; op=CONTRARY",
      "family=R9-OUTREACH-AUTOMATION; op=YES", "cites R9-OUTREACH-AUTOMATION"),
     ("P D5", "basis", "op=CONTRARY", "op=YES", "records op=CONTRARY"),
-    ("N 111", "source", '"endorse_or_recommend": (', '"endorse_or_admire": (', "no longer contains"),
+    ("N 119", "source", '"endorse_or_recommend": (', '"endorse_or_admire": (', "no longer contains"),
 ])
 def test_a_plant_in_a_copy_of_the_real_table_is_red_and_named(real, tmp_path, row, field, old, new, needle):
     rows = [dict(r) for r in real[0]]

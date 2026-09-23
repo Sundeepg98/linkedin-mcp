@@ -7,12 +7,14 @@ cell was edited and no row changed state.** Whether any row below returns to GAP
 is the operator's decision; this document is the evidence for it.
 
 **THE ANSWER, IN ONE PARAGRAPH.** The pending count is not exact. Of the 308
-EXCLUDED-RULED rows, no row rests on an operator ruling that names it; 26 have
-no traceable basis at all; 27 rest on a basis he withdrew with his ruling (b)
-on 2026-09-23; and 61 more sit under a family his own recorded words point
-against. **114 rows -- 37% of the exclusions -- are left out of the pending
-count with no current written ground to leave them out** (section 2.1). Of the
-7 MEASURED-ABSENT rows, 6 are measured and recorded, 1 is not.
+EXCLUDED-RULED rows, none rests on an operator ruling that names it; agents
+placed every one. **47 are held by nothing today** -- 26 have no traceable
+basis at all, and 21 rested only on a basis he withdrew with his ruling (b) on
+2026-09-23. **59 more are held only by an agent's reading his own recorded
+words contradict.** Those 106 rows, 34% of the exclusions, are what the
+pending count hides. A further 95 rest on agent rulings he never made and never
+contradicted, and 107 on family rulings of his own (section 2.1). Of the 7
+MEASURED-ABSENT rows, 6 are measured and recorded, 1 is not.
 
 ---
 
@@ -133,49 +135,61 @@ the one who could reopen the row -- **30 cells name him in their own REOPENER
 clause** -- or a family ruling of his that an agent applied to the row (the
 settings re-files' "the operator already made it", the typing ruling on
 `M C10` and `M C28`). No cell cites a ruling of his that names its own row. That is the direct answer to "who ruled each
-exclusion": **agents ruled every one, and in 106 cases they were applying a
-family ruling he made.**
+exclusion": **agents ruled every one, and in 109 cases they were applying a
+family ruling he made** -- 3 of which, the R9 rows, he has since withdrawn.
 
 **THE 282 B ROWS, lifted included, by who made the family and whether its
 wording reaches the row:**
 
                          scope=YES  EXTENDED   NO   total
-    op=YES                   78        27       1    106
+    op=YES                   81        27       1    109
     op=NO                    75        13      27    115
-    op=CONTRARY              45         0      16     61
+    op=CONTRARY              42         0      16     58
 
-**Only 78 rows -- 25% of the 308 -- rest on a family ruling the operator made
-AND plainly reach the row, and 73 of those 78 are one family, the settings
+**Only 81 rows -- 26% of the 308 -- rest on a family ruling the operator made
+AND plainly reach the row, and 73 of those 81 are one family, the settings
 ruling, whose words ADMIT settings one at a time rather than rule any out**
-(section 4). The other five are third-party profile reads his 2026-09-04
-narrowing plainly covers.
+(section 4). The other eight are held by his 2026-09-04 narrowing of the
+boundary to his own profile: five reads of a member's profile content, and the
+three ENDORSE rows, whose key survives only because the one page that draws the
+control is a third party's profile.
 
 ### 2.1 IS THE PENDING COUNT EXACT? NO -- AND HERE IS THE DECOMPOSITION
 
-Every figure is a row count off `_audit/_census/exclusion-basis.tsv`, and the
-tiers do not overlap. Each is a statement about the BASIS, not a prediction of
-what the operator will decide.
+Every figure is a row count off `_audit/_census/exclusion-basis.tsv`. Each of
+the 308 rows sits in exactly one tier, by what holds it TODAY. Each tier is a
+statement about the basis, not a prediction of what the operator will decide.
 
-| tier | rows | what holds the row today |
-|---|---:|---|
-| no traceable basis (C) | 26 | nothing written that decides against it |
-| basis withdrawn today, nothing else holds it (B-lifted) | 21 | nothing, since ruling (b) |
-| basis withdrawn today, one other basis remains (B-lifted) | 6 | R1, the 2026-09-04 profile ruling, or `/edit/` |
-| his recorded words point the other way (B, `op=CONTRARY`) | 61 | an agent's reading he has contradicted |
-| an agent's family, its wording does not reach the row (B, `op=NO`, `scope=NO`) | 13 | an agent's ruling, stretched |
-| an agent's family, reached only by widening (B, `op=NO`, `scope=EXTENDED`) | 12 | an agent's ruling, widened |
-| an agent's family, plainly in scope (B, `op=NO`, `scope=YES`) | 66 | an agent's ruling he never made |
-| his family, reached only by widening or not at all (B, `op=YES`, `scope` EXTENDED or NO) | 25 | his ruling, stretched by an agent |
-| his family, plainly in scope (B, `op=YES`, `scope=YES`) | 78 | his own ruling |
-| | **308** | |
+| group | tier | rows | examples |
+|---|---|---:|---|
+| **HIDDEN** | no traceable basis (C) | 26 | section 3 |
+| | lifted by (b), nothing else holds it | 21 | `N 24`-`28`, `P M1`-`M7`, `N 156 158` |
+| | lifted by (b); the basis left is one his words contradict | 1 | `M C18`, still held by `/edit/` |
+| | his recorded words contradict the family (`op=CONTRARY`) | 58 | profile editors 22, Open To Work 20, recommendations 16 |
+| **AGENT-RULED** | lifted by (b); an agent basis he never contradicted remains | 4 | `N 13 14 16 19`, still held by R1 |
+| | an agent's family; its own wording does not reach the row | 13 | `J 60`-`65`, `M C14`-`C16` |
+| | an agent's family, reached only by widening | 12 | R1's ten, `P A9`, `N 106` |
+| | an agent's family, plainly in scope | 66 | the delete key 20, the retirements 31 |
+| **HIS** | lifted by (b); a basis he made remains | 1 | `M M5`, held by his 2026-09-04 profile ruling |
+| | his family, stretched by an agent's reading | 25 | `P K1`-`K6`, the typing ruling on mentions |
+| | his family, plainly in scope | 81 | settings 73, third-party profile 8 |
+| | | **308** | |
 
-**Read it from the top.** The first two tiers -- **47 rows** -- are held by
-nothing at all today. The next two add **67** where the only thing holding the
-row is a basis he has withdrawn in part or contradicted. That is **114 rows,
-37% of the exclusions**, that the pending count leaves out and the corpus gives
-no current ground to leave out. The census's achievable surface of 389 is an
-UNDERCOUNT by up to that much; how much of it is real work is his to rule, and
+**HIDDEN, 106 rows (34%):** 47 held by nothing at all today, and 59 held only
+by a reading his own words contradict. The census's achievable surface of 389
+leaves all 106 out; the corpus gives no ground for that that he has not
+withdrawn or contradicted. How much of it is real work is his to rule, and
 section 4 gives one line per family to rule on.
+
+**AGENT-RULED, 95 rows (31%):** real, written, uncontradicted -- and not his.
+Each needs only his ratification to become a ruling, or his word to go back to
+GAP. The twelve retirement families (32 rows) are the largest single block and
+section 4 argues they are one question.
+
+**HIS, 107 rows (35%):** 81 plainly inside a ruling he made. But 73 of those 81
+are the settings rows, and his settings ruling ADMITS settings one at a time --
+so even this group holds a question only he can answer (section 4).
+
 
 ## 2a. THE OPERATOR'S RULING (b), 2026-09-23 18:15, AND THE ROWS IT LIFTS
 
@@ -304,8 +318,8 @@ most of the weight get a paragraph after the table.
 | `EDIT-FAMILY` | 22 | CODE, `/edit/` from `1a94cf9`; narrowing refused by the 2026-08-31 wave | CONTRARY | 22 YES | Return to GAP, blocker "`/edit/` kept refusing by the implementing wave". He allowed the profile editors 2026-08-31 and dissolved the profile-edit prohibition 2026-08-30; one passage of the 2026-08-31 perform record calls a WRITE admission for `/in/<member>/edit/` still owed, since met for the intro editor |
 | `OTW-SPEC-NEVER-LOADED` | 20 | CODE, 2026-08-23 | CONTRARY | 20 YES | Return to GAP, blocked on capturing the modal. He approved Open To Work 2026-08-23; 2026-08-25 files it UNMEASURED; `2026-09-05-profile-modals.md` s7 lists as still owed "An operator ruling ... may one capture of the open-to-work modal be taken with you watching" |
 | `PF-DELETE-OR-WITHDRAW` | 20 | CODE, 2026-08-23 | NO | 20 YES | Put to him once. It meets neither survival bar the `writes.py` header attributes to him -- impossible with a measurement, or unattended -- and five `reversible_by` claims rest on it |
-| `PF-ENDORSE-OR-RECOMMEND` | 19 | CODE, 2026-08-23; policy ground dissolved by him | CONTRARY | 3 YES, 16 NO | Return the 16 RECOMMENDATION rows to GAP -- the surviving measurement counted endorse controls, a different object. Keep the 3 endorse rows only while the zero-control reading stands; he ruled 2026-08-25 that endorsing gets built |
-| `NO-THIRD-PARTY-PROFILE-LOAD` | 14 | OPERATOR, 2026-09-04 | YES | 5 YES, 9 EXT | Keep the 5 reads of a member's profile content. Re-examine the 9 acts: the census routes them through the member's profile, and network.md s6 R4 says the key's text does not cover acting |
+| `PF-ENDORSE-OR-RECOMMEND` | 16 | CODE, 2026-08-23; policy ground dissolved by him | CONTRARY | 16 NO | Return all 16 -- every one a RECOMMENDATION row -- to GAP: the key's surviving measurement counted endorse controls, a different object, and he dissolved its policy ground |
+| `NO-THIRD-PARTY-PROFILE-LOAD` | 17 | OPERATOR, 2026-09-04 | YES | 8 YES, 9 EXT | Keep the 8: five reads of a member's profile content, and the three ENDORSE rows (`N 111 112`, `P E4`), whose key survives only because the one page drawing the control is a third party's -- so his 2026-09-04 ruling, not the key, is what holds them, even though he ruled 2026-08-25 that endorsing gets built. Re-examine the 9 acts: the census routes them through the member's profile, and network.md s6 R4 says the key's text does not cover acting |
 | `R2-INVITATION-SUBSTRINGS` | 13 | CODE, `1a94cf9` (read-only first commit) | NO | 8 YES, 5 NO | Lifted by (b) -- move at merge. `N 13 14 16 19` stay held by R1 |
 | `RETIRE-AI-INTERVIEW-PRODUCT` | 11 | WAVE, 2026-09-05 | NO | 11 YES | Put to him with the other eleven retirements as ONE ruling: the queue was defined as "needs his answer", and a wave answered it. The grounds -- a live spoken session, a hirer's screening -- are strong |
 | `R1-MYNETWORK-BADGE` | 10 | WAVE, 2026-08-30 | NO | 10 EXT | Return to GAP with the badge cost as the blocker. R1 refused a census KEY on a DERIVED cost; `linkedin_notifications` already pays the same badge knowingly for a tool whose purpose is reading; (b) lets the server connect |
@@ -368,10 +382,9 @@ his. One ratification settles all twelve.
 | `EDIT-FAMILY` | YES | `P D11`, `P D12`, `P D13`, `P D14`, `P D15`, `P D16`, `P D17`, `P D18`, `P D19`, `P D2`, `P D20`, `P D21`, `P D22`, `P D23`, `P D5`, `P D6`, `P D8`, `P D9`, `P E2`, `P E3`, `P G4`, `P G5` |
 | `OTW-SPEC-NEVER-LOADED` | YES | `J 89`, `J 90`, `J 91`, `J 92`, `J 93`, `J 94`, `J 95`, `J 96`, `J 97`, `P B6`, `P I10`, `P I11`, `P I2`, `P I3`, `P I4`, `P I5`, `P I6`, `P I7`, `P I8`, `P I9` |
 | `PF-DELETE-OR-WITHDRAW` | YES | `P E5`, `P F5`, `P K7`, `M C17`, `M C19`, `M C22`, `M C31`, `M C62`, `M C77`, `M M12`, `M M26`, `N 10`, `N 12`, `N 29`, `N 96`, `N 110`, `N 113`, `N 125`, `N A14`, `N A15` |
-| `PF-ENDORSE-OR-RECOMMEND` | YES | `P E4`, `N 111`, `N 112` |
-| `PF-ENDORSE-OR-RECOMMEND` | NO | `P F2`, `P F3`, `P F4`, `P F6`, `P F7`, `P F8`, `P F9`, `N 119`, `N 120`, `N 121`, `N 122`, `N 123`, `N 124`, `N 126`, `N 127`, `N 128` |
-| `NO-THIRD-PARTY-PROFILE-LOAD` | YES | `N 2`, `N 30`, `N 31`, `N 65`, `N 103` |
+| `NO-THIRD-PARTY-PROFILE-LOAD` | YES | `P E4`, `N 2`, `N 30`, `N 31`, `N 65`, `N 103`, `N 111`, `N 112` |
 | `NO-THIRD-PARTY-PROFILE-LOAD` | EXTENDED | `N 34`, `N 35`, `N 36`, `N 66`, `N 141`, `N 144`, `N 145`, `N 146`, `N 147` |
+| `PF-ENDORSE-OR-RECOMMEND` | NO | `P F2`, `P F3`, `P F4`, `P F6`, `P F7`, `P F8`, `P F9`, `N 119`, `N 120`, `N 121`, `N 122`, `N 123`, `N 124`, `N 126`, `N 127`, `N 128` |
 | `R2-INVITATION-SUBSTRINGS` | YES | `M C69*`, `N 9*`, `N 11*`, `N 13*`, `N 14*`, `N 16*`, `N 19*`, `N 168*` |
 | `R2-INVITATION-SUBSTRINGS` | NO | `N 24*`, `N 25*`, `N 26*`, `N 27*`, `N 28*` |
 | `RETIRE-AI-INTERVIEW-PRODUCT` | YES | `J 132`, `J 133`, `J 134`, `J 135`, `J 139`, `J 140`, `J 141`, `J 142`, `J 143`, `J 144`, `J 145` |
@@ -500,6 +513,14 @@ EXTENDED, one YES this table calls NO. **Read `scope=` as a pointer for the
 operator, not as a measurement.** The class and the `op=` flag reproduce; the
 scope flag reproduces six times in ten.
 
+**ONE REFILE WAS MADE AFTER THE PASS, AND NONE OF ITS ROWS WAS SAMPLED.** The
+three ENDORSE rows, `N 111 112` and `P E4`, moved from the endorse key
+(`op=CONTRARY`) to his 2026-09-04 third-party-profile ruling (`op=YES`), with
+the key kept as a second family. Their own cells give the reason: the key
+survives only because "the only surface that would carry the control is a
+THIRD PARTY'S PROFILE". It was found re-reading the headline against the
+table, and it moved the CONTRARY count from 61 to 58.
+
 **One row the verifier named ambiguous, and it is the same row this document
 would name:** `J 92`, between B and C/SILENCE -- a basis that is a capture
 nobody took. Section 4 recommends the whole family back to GAP on exactly that
@@ -522,6 +543,13 @@ document, now finds zero candidate pairs.
 17 corpus-wide guards (identity, credential, page-text) did run. It is a
 local, Windows-only signal; CI's three platforms are the certifier and nothing
 was pushed.
+
+**RUN 2, on `110de1e`: PASS** over the same 37 test files, 2018 tests, 966s
+wall; the same 179 files not run.
+
+**RUN 3** gates the commit carrying the endorse refile and the corrected
+headline; its result is in this lane's final report rather than here, because
+a document cannot record the gate run on the commit that contains it.
 
 **Run beside it:** `tests/test_exclusion_basis.py`, 36 passed, and the same file
 against five broken checkers, every one red; the three generated files
