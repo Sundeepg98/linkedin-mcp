@@ -1842,9 +1842,76 @@ async def _open_profile_views_filter_menus(page: Any) -> dict[str, Any]:
     return menus_out
 
 
+#: The reveal this tool may press, by its key in ``reveal.DECIDED_REVEALS``.
+PROFILE_VIEWS_REVEAL = "profile_views_show_more_analytics"
+
+
+async def _profile_views_switch(page: Any, switch_key: str, row_cap: int) -> dict[str, Any]:
+    """Apply one ruled filter, read the viewers it leaves, and take it off.
+
+    THE VIEW IS READ THE WAY THIS TOOL READS IT: the same harvest and the same
+    row parser as the unfiltered list, plus the headline count. The module
+    compares that whole reading before the switch and after the restore; the
+    filtered reading comes back as ``viewers_when_applied`` and
+    ``headline_when_applied``. Every binding here carries a name no other
+    function in this module uses (the navigation guard tracks taint by name).
+    """
+    from linkedin_server import view_switch as switch_module
+
+    switch_counters = await _profile_views_press_counters(page)
+
+    async def switch_view_now() -> dict[str, Any]:
+        switch_records = await dom.harvest_linked_cards(
+            page, href_pattern=dom.PERSON_HREF, max_items=row_cap * 3, sibling_rows=True
+        )
+        switch_rows, _switch_dropped = dom.parse_all(switch_records, shape.parse_person_card)
+        try:
+            switch_insights = await dom.read_profile_views_insights(page)
+            switch_headline = _as_count((switch_insights.get("headline") or {}).get("value"))
+        except Exception:  # noqa: BLE001 - an unread headline is None, never 0
+            switch_headline = None
+        return {"headline": switch_headline, "rows": switch_rows}
+
+    switch_outcome = await switch_module.apply_and_restore(
+        page, key=switch_key, read_view=switch_view_now, read_counters=switch_counters
+    )
+    switch_applied_view = switch_outcome.pop("view_applied", None) or {}
+    switch_outcome["viewers_when_applied"] = switch_applied_view.get("rows")
+    switch_outcome["headline_when_applied"] = switch_applied_view.get("headline")
+    return switch_outcome
+
+
+async def _profile_views_more_analytics(page: Any) -> dict[str, Any]:
+    """Press the one decided plain button, then read the page's insights again.
+
+    The reveal's own verdict says whether it only revealed content; the
+    insights reader then runs a second time on the revealed page, so a caller
+    can compare it with ``insights`` above.
+    """
+    from linkedin_server import reveal as reveal_module
+
+    reveal_counters = await _profile_views_press_counters(page)
+    reveal_outcome = await reveal_module.reveal(
+        page,
+        key=PROFILE_VIEWS_REVEAL,
+        read_counters=reveal_counters,
+        reading=PROFILE_VIEWS_MENU_READING,
+    )
+    reveal_block: dict[str, Any] = {"reveal": reveal_outcome}
+    if reveal_outcome.get("pressed"):
+        try:
+            reveal_block["insights_after"] = await dom.read_profile_views_insights(page)
+        except Exception as exc:  # noqa: BLE001 - never raised
+            reveal_block["insights_after_error"] = type(exc).__name__
+    return reveal_block
+
+
 @mcp.tool()
 async def linkedin_who_viewed_me(
-    limit: int = DEFAULT_LIMIT, open_filter_menus: bool = False
+    limit: int = DEFAULT_LIMIT,
+    open_filter_menus: bool = False,
+    view_switch: str = "",
+    show_more_analytics: bool = False,
 ) -> dict[str, Any]:
     """List the people who viewed your profile, most recent first.
 
@@ -1905,6 +1972,19 @@ async def linkedin_who_viewed_me(
         limit: maximum rows to return (default 25, max 100).
         open_filter_menus: also open and read the filter pills (default
             False, which is this tool exactly as it was).
+        view_switch: APPLY ONE FILTER, read the viewers it leaves, and TAKE
+            IT OFF again -- one key of view_switch.VIEW_SWITCHES:
+            "interesting_viewers_verified" or
+            "interesting_viewers_company_you_follow". Empty (the default)
+            does nothing. The filtered viewers come back under
+            view_switch.viewers_when_applied; view_switch.restored says
+            whether the page was proven put back (the view read after equals
+            the view read before). Anything else is refused, not pressed.
+        show_more_analytics: also press "Show more analytics" -- one plain
+            button, admitted by name in reveal.DECIDED_REVEALS -- and report
+            whether it only revealed content (url unchanged, no counter
+            moved) plus the page's insights read again after it. Default
+            False.
     """
     limit = _clamp(limit, DEFAULT_LIMIT, MAX_LIMIT)
     urls = [
@@ -2001,6 +2081,23 @@ async def linkedin_who_viewed_me(
                             )
                         except Exception as exc:  # noqa: BLE001 - never raised
                             extra["filter_menus_error"] = type(exc).__name__
+                    # THE VIEW SWITCH, THEN THE REVEAL -- in that order so the
+                    # switch reads and restores the page as the tool found it.
+                    # Same failure rule: neither can cost the viewer list.
+                    if view_switch:
+                        try:
+                            extra["view_switch"] = await _profile_views_switch(
+                                page, view_switch, limit
+                            )
+                        except Exception as exc:  # noqa: BLE001 - never raised
+                            extra["view_switch_error"] = type(exc).__name__
+                    if show_more_analytics:
+                        try:
+                            extra["more_analytics"] = await _profile_views_more_analytics(
+                                page
+                            )
+                        except Exception as exc:  # noqa: BLE001 - never raised
+                            extra["more_analytics_error"] = type(exc).__name__
                     return shape.envelope(
                         rows,
                         limit=limit,

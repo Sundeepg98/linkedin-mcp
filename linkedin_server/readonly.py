@@ -3061,6 +3061,51 @@ SANCTIONED_MUTATIONS: tuple[tuple[str, str, str], ...] = (
     # describe -- and it means wiring the first one is a one-line diff beside
     # a paragraph explaining what it costs.
     ("linkedin_server/writes.py", "perform", "set_input_files"),
+    # THE EIGHTH ENTRY, added 2026-09-23 by the live lane, and it is the first
+    # press admitted BY NAME rather than by attribute. It is ``reveal.reveal``'s
+    # one click: a plain button the disclosing-press ruling's shape list cannot
+    # reach, named per control in ``reveal.DECIDED_REVEALS`` and decided under
+    # the operator's delegation of 18:13 that day ("press-gate defaults ... the
+    # orchestrator decides every other call"). The call it rests on, verbatim:
+    # "DECIDED (orchestrator-delegated, 2026-09-23): 'Show more analytics' (a
+    # plain button) is permitted as a DISCLOSURE, provided a before/after
+    # reading shows it only reveals content and changes no state."
+    #
+    # WHY IT IS NOT A WIDENING OF THE SHAPE LIST. ``SANCTIONED_SHAPES`` is
+    # untouched and still matches by attribute only. This entry is bound to
+    # ONE function, and that function presses only a control whose label
+    # EQUALS a phrase in a closed table entry that also names the one surface
+    # it applies to; the label is compared and never returned. Everything
+    # knowable before the click is refused before it -- an undecided key, the
+    # wrong surface, an unadmitted address, no basis, an unreadable counter,
+    # and not exactly one matching control -- and after it the verdict must
+    # show the url unchanged and no counter moved, or it says it was not.
+    # It lives in its own module so ``press.py`` stays the attribute gate it
+    # says it is, with its refusal inventory unchanged.
+    ("linkedin_server/reveal.py", "reveal", "click"),
+    # THE NINTH ENTRY, 2026-09-23, the live lane: the VIEW SWITCH. One click
+    # line, in ``view_switch._activate``, the drain point every step of
+    # ``view_switch.apply_and_restore`` goes through (open a filter pill,
+    # select one option, press the popover's own "show results", then the
+    # same three again to take it off). ``tests/test_view_switch.py`` pins
+    # that ``apply_and_restore`` is its only caller.
+    #
+    # THE RULING IT RESTS ON, registered as VIEW-SWITCH-PRESS-RESTORED
+    # (orchestrator, 2026-09-23, delegated under the operator's 18:13
+    # delegation): "VIEW-SWITCH PRESSES are permitted: a press that changes
+    # which rows a view shows, such as a sort or filter control. The view
+    # must be RESTORED afterwards, with readings taken before and after the
+    # press to prove it."
+    #
+    # WHY IT IS ARGUABLE RATHER THAN A WIDENING. It is bound to a closed table
+    # (``view_switch.VIEW_SWITCHES``) naming one surface, one pill and one
+    # option per entry; everything knowable from the address, the key and the
+    # counters is refused before any click; it never uses Escape (measured:
+    # a popover holding an input stayed open after one); and its verdict is
+    # ``permitted`` only when the view read after the restore EQUALS the view
+    # read before, the pill is closed, the path never moved and no counter
+    # did. A switch left applied is its loudest refusal, not a quiet one.
+    ("linkedin_server/view_switch.py", "_activate", "click"),
 )
 
 

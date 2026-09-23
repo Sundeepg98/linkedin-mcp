@@ -137,7 +137,7 @@ PINNED_TOOL_SURFACE: dict[str, tuple[str, ...]] = {
     "linkedin_unsave_job": ("confirm_token", "job_id"),
     "linkedin_update_profile_field": ("confirm_token", "field", "value"),
     "linkedin_update_setting": ("confirm_token", "setting", "value"),
-    "linkedin_who_viewed_me": ("limit", "open_filter_menus"),
+    "linkedin_who_viewed_me": ("limit", "open_filter_menus", "show_more_analytics", "view_switch"),
 }
 
 #: 44 tools and 61 parameters at the pin. Asserted rather than assumed, so a
@@ -227,8 +227,17 @@ PINNED_TOOL_SURFACE: dict[str, tuple[str, ...]] = {
 #: are decided by ONE live fire of this parameter, and they move -- or keep
 #: their state with a named reason -- in the commit that records that fire.
 #: See `_audit/2026-09-23-readers-four-rows.md`.
+#:
+#: **RE-PINNED 2026-09-23 AT 49 TOOLS AND 69 PARAMETERS, by the live lane.**
+#: `linkedin_who_viewed_me("view_switch", "show_more_analytics")` -- the view
+#: switch (one ruled filter applied, read, and proven restored, on
+#: VIEW-SWITCH-PRESS-RESTORED) and the one decided reveal ("Show more
+#: analytics", on its orchestrator-delegated call). **NO ROW MOVES IN THIS
+#: COMMIT:** `N 134` and `P O3` are decided by ONE live fire of these two
+#: parameters and move, or keep their state with a named reason, in the commit
+#: that records it. See `_audit/2026-09-23-live-lane-session-1.md`.
 PINNED_TOOL_COUNT = 49
-PINNED_PARAMETER_COUNT = 67
+PINNED_PARAMETER_COUNT = 69
 
 
 def live_surface() -> dict[str, tuple[str, ...]]:

@@ -430,3 +430,93 @@ not taken.
 older than disk): I was editing `press.py` and `readonly.py` while the run
 was in flight. Its detector was right; the reading is unaffected because
 nothing it calls was edited.
+
+### Entry 6 -- 22:40-23:06, builds (a) and (b), offline, zero loads
+
+**THE SHAPE OF THE PERMISSION CHANGED, AND IT IS THE MOST IMPORTANT THING IN
+THIS ENTRY.** `readonly.SANCTIONED_MUTATIONS` is the complete, pinned list of
+where this package presses, and its count test admits ONE call per entry --
+"the list admits ONE call and not a licence". It held 7 entries. It now holds
+**9**:
+
+    8  ("linkedin_server/reveal.py", "reveal", "click")
+       the DECIDED reveal -- "Show more analytics", a plain button, admitted
+       BY NAME per control, on the orchestrator-delegated call of 0.1
+    9  ("linkedin_server/view_switch.py", "_activate", "click")
+       the view switch, on VIEW-SWITCH-PRESS-RESTORED; one drain-point click
+       every step goes through, and a test pins apply_and_restore as its only
+       caller
+
+Each carries its argument beside it in `readonly.py`, citing the call it
+rests on. `press.py` -- the attribute gate -- is UNCHANGED except its
+docstring, which said every package press goes through `disclose` and no
+longer can; the new presses live in their own modules and reuse its pure
+checks (`check_address`, `check_basis`, `check_counters`, the witness and
+the open-moment reading) rather than a second copy. **(b) was first written
+into `press.py` and moved out** when its refusal inventory showed it could
+not be driven through `disclose`.
+
+**(b) `linkedin_server/reveal.py` -- `DECIDED_REVEALS` and `reveal()`.** The
+control is the ONE visible button in `main` carrying no `aria-expanded`,
+`aria-haspopup` or `aria-controls` whose label EQUALS "show more analytics"
+after normalisation (the measured shape: two other plain buttons of the same
+shape sit beside it). Refused BEFORE the click: an undecided key, another
+surface, an unadmitted address, no basis, a reading not sanctioned there, no
+counter reader, an unreadable counter, not exactly one match. After it:
+`url_unchanged`, `counters` (the gate's own check), the witness, `main`'s
+element count before and after, the reading. `permitted` only if the url and
+every counter held. **No closure step**: the call requires none, and a second
+press to collapse would be a second press nobody decided.
+
+**(a) `linkedin_server/view_switch.py` -- `VIEW_SWITCHES` and
+`apply_and_restore()`**, built to the captured popover: open the pill (found by
+caption among main's `[aria-expanded]` role=button pills), select the option
+(`[role=checkbox|radio]` by `aria-label`, checked state by `aria-checked`),
+press the popover's own "show results" (which applies AND closes), read the
+view, then reopen, deselect, apply again, read again. **Escape is never used**
+(Entry 3's measured failure). `restored` requires the view read after the
+restore to EQUAL the view read before, the pill closed, the path unmoved;
+`permitted` adds no counter moved. A switch it cannot take off is its loudest
+refusal (`switch_left_applied`), and it closes a popover left open before
+saying so. Two entries: the "Interesting viewers" pill's "verified" and "works
+at a company you follow".
+
+**Wired into `linkedin_who_viewed_me`**: `view_switch=<key>` and
+`show_more_analytics=True`, both on the page the tool already loaded, switch
+first so it reads and restores the page as found, each failure caught
+separately so neither can cost the viewer list. The view is read with the
+tool's own harvest and row parser plus the headline count. Tool-surface pin
+67 -> 69 parameters, re-pinned in the same commit with the statement that no
+row moves in it; README row updated. `tests/reader_leak_baseline.json`: 8
+readers added, all `clean`, none removed or changed (regenerated with the
+file's own writer, in a copy without the child's unfinished module).
+
+**SHOWN FAILING, in a scratch copy of the tree** (child-free, the copy
+confirmed to be what imported), one plant at a time:
+
+    BASELINE   test_reveal.py 29 passed, test_view_switch.py 35 passed
+    R1 a control carrying disclosure state counted     1 red
+    R2 an invisible match counted                      1 red
+    R3 an unreadable counter pressed anyway            2 red
+    R4 the url never compared                          2 red
+    R5 the counters never compared                     2 red
+    R6 the surface never checked                       2 red
+    V1 the restore never compares the view             2 red
+    V2 the restore never deselects                     5 red
+    V3 an already-applied option pressed anyway        2 red
+    V4 an absent option leaves the pill open           1 red
+    V5 the apply pattern loosened to any "show"        1 red
+    V6 the counters never compared                     2 red
+    V7 a failed restore leaves the popover open        1 red
+    RESTORED   29 passed, 35 passed
+
+**Two defects of mine caught before any fire.** The apply pattern first
+allowed `[0-9,]+` for a count, but the normaliser turns "1,234" into "1 234"
+-- the pattern test went red on its own first run. And a view-switch test
+ended `or True` and could not fail; it was rewritten to assert on the syntax
+tree before it ran.
+
+**`tests/test_readonly.py` also carries a hand-edited constant** in a chained
+comparison (`total == len(...) == N`), with a paragraph warning that it goes
+stale on every widening; it went red on the first new entry and was bumped
+with each, as that paragraph predicts.

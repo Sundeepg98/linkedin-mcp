@@ -157,8 +157,15 @@ def test_the_sanctioned_list_is_exactly_these_calls():
         ("linkedin_server/writes.py", "perform", "fill"),
         ("linkedin_server/writes.py", "perform", "select_option"),
         ("linkedin_server/writes.py", "perform", "set_input_files"),
+        ("linkedin_server/reveal.py", "reveal", "click"),
+        ("linkedin_server/view_switch.py", "_activate", "click"),
     )
-    assert len(readonly.SANCTIONED_MUTATIONS) == 7
+    # EIGHT FROM 2026-09-23: ``reveal.reveal``'s one click, the first press
+    # admitted BY NAME -- per control, in reveal.DECIDED_REVEALS, on a recorded
+    # orchestrator-delegated call. Its argument is beside it in readonly.py.
+    # NINE, the same day: ``view_switch._activate``, the one click of the view
+    # switch, on VIEW-SWITCH-PRESS-RESTORED. Argument beside it too.
+    assert len(readonly.SANCTIONED_MUTATIONS) == 9
     # THE KINDS ARE ASSERTED SEPARATELY, because the count alone would let a
     # click be swapped for a fill without moving the number, and those are
     # different capabilities: a click presses what is already there, a fill
@@ -181,6 +188,8 @@ def test_the_sanctioned_list_is_exactly_these_calls():
     # key.
     kinds = sorted(kind for _p, _f, kind in readonly.SANCTIONED_MUTATIONS)
     assert kinds == [
+        "click",
+        "click",
         "click",
         "click",
         "click",
@@ -267,7 +276,12 @@ def test_the_package_contains_exactly_as_many_mutating_calls_as_are_listed():
     # The widening also moves the SHAPE the module docstring describes: seven
     # entries across THREE files now (writes.py, dom.py, press.py), where the
     # prose still says five. That sentence is press.py's owner to correct.
-    assert total == len(readonly.SANCTIONED_MUTATIONS) == 7, total
+    #
+    # EIGHT, 2026-09-23: reveal.reveal's one click. Bumped in the same change
+    # that added the entry -- and only because the red named this line, which
+    # is the paragraph above being right a third time. NINE, the same day:
+    # view_switch._activate, bumped deliberately this time.
+    assert total == len(readonly.SANCTIONED_MUTATIONS) == 9, total
 
 
 def test_the_partition_conserves_every_hit():
