@@ -28,6 +28,13 @@ installs one of its own. Three ways this can rot, all planted:
     only the row-by-row control can see it. Every census plant goes into a
     copy of the cells handed to `bucket1_holds(texts=...)`; no census file is
     written.
+  * **A RELEASE UN-HOLDS A WRITE IT SHOULD NOT.** Since master 4a57b75 a W
+    row can leave the write hold, by citing a registered release in its own
+    cell (`SELF-PROFILE-EDITS-NOT-OUTWARD`, for his own profile fields). A
+    release the register does not carry or no longer stands by, one cited on
+    a row that is not a write, or one beside the write hold's own marker must
+    be reported; a released row whose marker is removed must go back under
+    the hold, by name.
 
 **GREEN ALONE IS AMBIGUOUS** -- a table checked against nothing, or a
 derivation that cannot see a marker, is green too. So the real tree is asserted
@@ -59,6 +66,7 @@ _ANSWERED = "NOTIFICATIONS-UNREAD-SPEND"
 #: A registered STANDING ruling whose BINDS is a path and which is not lifted.
 #: Its polarity does not matter here: only register resolution is under test.
 _STANDING = "ONE-NAMED-SETTINGS-PAGE-AT-A-TIME"
+_RELEASE = "SELF-PROFILE-EDITS-NOT-OUTWARD"
 
 
 def _standing_hold(hold_id=_STANDING, surface="/mypreferences/d/"):
@@ -223,6 +231,38 @@ def test_a_lifted_ruling_gone_from_the_register_turns_it_red() -> None:
            f"by that id" in problems
 
 
+def test_the_real_release_is_registered_and_standing() -> None:
+    """The control for the three release damages below: green on the real tables."""
+    assert _RELEASE in rh.ROW_RELEASES
+    assert _ruling(_RELEASE).status == "STANDING"
+    assert rh.register_problems(releases=dict(rh.ROW_RELEASES)) == []
+
+
+def test_a_release_nobody_registered_turns_it_red() -> None:
+    problems = rh.register_problems(
+        releases={"PLANTED-RELEASE": rh.Release(gist="planted")})
+    assert any(p.startswith("PLANTED-RELEASE: a release here, and the rulings "
+                            "register has no ruling by that id")
+               for p in problems), problems
+
+
+def test_a_release_the_register_no_longer_stands_by_turns_it_red() -> None:
+    withdrawn = dataclasses.replace(_ruling(_RELEASE), status="SUPERSEDED")
+    problems = rh.register_problems(register=_register_with(**{_RELEASE: withdrawn}))
+    assert any(p.startswith(f"{_RELEASE}: a release here, and the register now "
+                            f"says 'SUPERSEDED', not STANDING")
+               for p in problems), problems
+
+
+def test_a_release_also_listed_as_lifted_turns_it_red() -> None:
+    """A release is not a hold that was lifted: one id may not be both."""
+    lifted = dict(rh.LIFTED_ROW_HOLDS)
+    lifted[_RELEASE] = rh.Lifted(register_status="STANDING", why="planted")
+    problems = rh.register_problems(lifted=lifted)
+    assert f"{_RELEASE}: listed as a release AND as a hold or a lifted hold" \
+        in problems
+
+
 # -------------------------------------------------------------- hold_of's rules
 
 
@@ -249,11 +289,19 @@ def planted_holds(monkeypatch):
     ("R", f"the row mentions `{_TARGET}` without the marker", None),
     ("R", f"this row was held by `{_LIFTED}` until 18:15", None),
     ("unknown", "nothing cited", None),
+    ("W", f"**RELEASED BY `{_RELEASE}`**", None),
+    ("W", f"**RELEASED BY `{_RELEASE}`** **HELD BY `PLANTED-QUESTION`**",
+     "PLANTED-QUESTION"),
+    ("W", f"the row mentions `{_RELEASE}` without the marker", _TARGET),
+    ("W", f"released by `{_RELEASE}`, in lowercase", _TARGET),
 ], ids=["W-needs-no-marker", "a-standing-write-hold-outranks-a-question",
         "R-cites-the-target-hold", "R-cites-a-pending", "jobs-row-cites-the-target-hold",
         "pending-outranks-relayed", "standing-outranks-pending",
         "a-mention-is-not-a-marker", "lowercase-history-is-not-a-marker",
-        "no-citation-is-no-ruling"])
+        "no-citation-is-no-ruling", "a-released-write-is-held-by-nothing",
+        "a-released-write-can-still-cite-a-hold",
+        "a-mentioned-release-releases-nothing",
+        "a-lowercase-release-releases-nothing"])
 def test_hold_of_reads_the_census_and_nothing_else(
         planted_holds, direction, text, want) -> None:
     hold, problems = rh.hold_of(direction, text)
@@ -266,8 +314,17 @@ def test_hold_of_reads_the_census_and_nothing_else(
     ("R", "**HELD BY `NO-SUCH-RULING`**", "not a hold this census knows"),
     ("R+W", f"**HELD BY `{_TARGET}`**", "which half of the row"),
     ("ambiguous", "", "which half of the row"),
+    ("W", "**RELEASED BY `NO-SUCH-RELEASE`**",
+     "which is not a release this census knows"),
+    ("R", f"**RELEASED BY `{_RELEASE}`**", "on a row whose direction is 'R'"),
+    ("unknown", f"**RELEASED BY `{_RELEASE}`**",
+     "on a row whose direction is 'unknown'"),
+    ("W", f"**HELD BY `{_TARGET}`** **RELEASED BY `{_RELEASE}`**",
+     "held and released at once"),
 ], ids=["a-lifted-ruling-cited-as-a-hold", "an-answered-question-cited-as-a-hold",
-        "an-unknown-id", "an-R+W-row", "an-ambiguous-row"])
+        "an-unknown-id", "an-R+W-row", "an-ambiguous-row", "an-unknown-release",
+        "a-release-on-a-read", "a-release-on-a-jobs-row",
+        "a-release-beside-the-write-hold"])
 def test_hold_of_refuses_what_it_cannot_read(direction, text, needle) -> None:
     _hold, problems = rh.hold_of(direction, text)
     assert any(needle in p for p in problems), problems
@@ -289,6 +346,9 @@ def test_bucket_one_is_derived_and_sits_on_its_pins() -> None:
     for key in keys:
         assert figures[key] == cc.PINNED[key], key
     assert sum(figures[k] for k in keys) == unfired
+    # A SUBSET of the rows held by no ruling, never a fifth term of the sum.
+    assert figures["b1_released"] == cc.PINNED["b1_released"]
+    assert figures["b1_released"] <= figures["b1_no_ruling"]
     text = "\n".join(out)
     assert "a session is the entire remaining cost" not in text.lower()
     assert f"CHECK: {figures['b1_standing']} + " in text
@@ -299,6 +359,14 @@ def test_no_census_cell_still_cites_a_lifted_ruling_as_a_hold() -> None:
     for key, text in _texts().items():
         stale = [c for c in rh.cited(text) if c in rh.LIFTED_ROW_HOLDS]
         assert not stale, (key, stale)
+
+
+def test_every_release_releases_at_least_one_row_today() -> None:
+    """A release no cell cites is a vocabulary entry nobody can check."""
+    texts = _texts()
+    for release_id in rh.ROW_RELEASES:
+        assert any(release_id in rh.cited(t, rh.RELEASED_BY_MARKER)
+                   for t in texts.values()), release_id
 
 
 def test_the_pinned_rows_are_exactly_the_unfired_rows() -> None:
@@ -372,15 +440,52 @@ def test_a_swap_that_moves_no_count_is_still_named() -> None:
 
 
 def test_a_write_row_whose_direction_flips_is_named() -> None:
+    """A write the hold binds by its R/W cell alone, flipped to a read.
+
+    The victim is a row HELD BY the target through its direction, never a
+    released one: since the releases, the first W row in walk order is a
+    released profile edit, and flipping THAT is the next test's plant.
+    """
     rows = list(cc.walk())
+    holds, _ = _holds(rows)
     victim = next(f"{l} {r}" for l, r, st, d in rows
-                  if st == "COVERED-UNFIRED" and d == "W")
+                  if st == "COVERED-UNFIRED" and d == "W"
+                  and holds[f"{l} {r}"] == _TARGET)
     flipped = [(l, r, st, "R" if f"{l} {r}" == victim else d)
                for l, r, st, d in rows]
     planted, problems = _holds(flipped)
     assert not problems
     assert (f"{victim}: pinned as held by {_TARGET}, now held by "
             f"{cc.NO_RULING}") in cc.bucket1_moves(planted)
+
+
+def test_a_released_row_whose_direction_flips_withholds_the_split() -> None:
+    """A release on a row that is no longer a write releases nothing: withheld, and why."""
+    rows = list(cc.walk())
+    holds, _ = _holds(rows)
+    victim = _first_free(holds, "W")
+    assert _RELEASE in rh.cited(_texts()[_key(victim)], rh.RELEASED_BY_MARKER)
+    flipped = [(l, r, st, "R" if f"{l} {r}" == victim else d)
+               for l, r, st, d in rows]
+    planted, problems = _holds(flipped)
+    assert planted is None
+    assert any(p.startswith(f"{victim}: cites RELEASED BY `{_RELEASE}`, which "
+                            f"releases the hold on a write, on a row whose "
+                            f"direction is 'R'") for p in problems), problems
+
+
+def test_a_removed_release_puts_the_write_back_under_the_hold_and_names_it() -> None:
+    """THE RELEASE IS STATED IN THE CELL: without its marker the write is held again."""
+    holds, _ = _holds()
+    victim = _first_free(holds, "W")
+    texts = _texts()
+    assert "RELEASED BY" in texts[_key(victim)]
+    texts[_key(victim)] = texts[_key(victim)].replace("RELEASED BY",
+                                                      "released, once, by")
+    planted, problems = _holds(texts=texts)
+    assert not problems
+    assert (f"{victim}: pinned as held by {cc.NO_RULING}, now held by "
+            f"{_TARGET}") in cc.bucket1_moves(planted)
 
 
 def test_a_row_that_leaves_the_state_is_named() -> None:

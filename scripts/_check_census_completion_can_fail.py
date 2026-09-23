@@ -3,7 +3,7 @@
 A completion figure is the easiest thing in this repository to publish and the
 hardest to keep true: it is quoted, it goes stale silently, and the tree that
 would refute it is 592 KB of markdown nobody re-reads. So the instrument that
-prints it only earns its entry if it can disagree with the tree. Four
+prints it only earns its entry if it can disagree with the tree. Five
 demonstrations, and the third is a different KIND of failure from the others:
 
   A  A ROW CHANGES STATE.   Move one row GAP -> COVERED-PROVEN. `--check` must
@@ -34,9 +34,17 @@ demonstrations, and the third is a different KIND of failure from the others:
                             cleanup.md` item 1); a count pin alone could not
                             name the row, and two rows swapping would move no
                             count at all.
+  E  A RELEASED WRITE LOSES ITS RELEASE. Strip one `RELEASED BY` marker from
+                            a profile edit. The release is stated IN THE CELL,
+                            so the row goes back under the hold on every
+                            write: three `b1_` pins move (standing up, no
+                            ruling and released down), the row is NAMED, and
+                            nothing about GAP moves. Added 2026-09-23 with the
+                            releases (`_audit/2026-09-23-census-cleanup.md`
+                            section 12).
 
-**C IS THE ONE WORTH THE FILE.** A, B and D prove the pins are connected to the
-tree. C proves the instrument would rather say nothing than publish a figure
+**C IS THE ONE WORTH THE FILE.** A, B, D and E prove the pins are connected to
+the tree. C proves the instrument would rather say nothing than publish a figure
 it cannot stand behind, and that is the property this repository keeps finding
 it did not have.
 
@@ -145,6 +153,27 @@ def _retarget(frm: str, to: str, also: str | None = None):
     return mutate
 
 
+def _unrelease():
+    """Strip the FIRST `RELEASED BY` marker -- demonstration E.
+
+    Found at runtime, as `_retarget` finds its rows, and ASSERTED found: a
+    census with no release left fails loudly instead of passing vacuously.
+    """
+    def mutate(text: str) -> str:
+        out, chosen = [], None
+        for line in text.splitlines():
+            if chosen is None and line.startswith("|") and "RELEASED BY `" in line:
+                chosen = line.split("|")[1].strip()
+                line = line.replace("RELEASED BY `", "released, once, by `")
+            out.append(line)
+        assert chosen is not None, (
+            "control is broken, or no row cites a release any more")
+        print(f"    target chosen at runtime: row {chosen!r} (its RELEASED BY "
+              f"marker removed)")
+        return "\n".join(out) + "\n"
+    return mutate
+
+
 def _demo(label: str, path: pathlib.Path, scratch: pathlib.Path, mutate,
           want: list[str], forbid: list[str], want_exit_nonzero: bool = True):
     original = path.read_bytes()
@@ -228,6 +257,16 @@ def main() -> int:
                     "now held by NO RULING"],
               forbid=["adjudicated", "delivered_broad", "gap_read",
                       "stated_rows", "REFUSING TO REPORT"]),
+        _demo("E  A RELEASED WRITE LOSES ITS RELEASE (profile.md, one "
+              "RELEASED BY marker removed)",
+              _slice(scratch, "profile.md"), scratch, _unrelease(),
+              # The mirror of D: the row moves from NO RULING back to the
+              # hold on every write, and the released count moves with it.
+              want=["PINNED FIGURE(S) MOVED", "b1_standing", "b1_no_ruling",
+                    "b1_released", "BUCKET-1 ROW(S) MOVED",
+                    "now held by OPERATOR-NAMES-THE-TARGET"],
+              forbid=["adjudicated", "delivered_broad", "gap_read",
+                      "stated_rows", "REFUSING TO REPORT"]),
     ]
 
     final_code, _ = _run(scratch)
@@ -237,7 +276,7 @@ def main() -> int:
 
     shutil.rmtree(scratch, ignore_errors=True)
     ok = all(results) and clean
-    print(f"\n{'ALL FOUR DEMONSTRATIONS PASS' if ok else 'SOMETHING DID NOT BEHAVE AS STATED'}")
+    print(f"\n{'ALL FIVE DEMONSTRATIONS PASS' if ok else 'SOMETHING DID NOT BEHAVE AS STATED'}")
     return 0 if ok else 1
 
 

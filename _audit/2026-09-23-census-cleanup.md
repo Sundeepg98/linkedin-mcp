@@ -4,7 +4,7 @@ claude-opus-5-5[1m]
 
 **CORRECTS:** `_audit/_census/messaging-and-content.md` -- row `C42` read *"no tool in this server returns one"* (a post identifier); since `C41` was proven today, `linkedin_my_activity_items` returns one for every post of his own. The premise still holds for other people's posts, and the state is not re-decided.
 
-**CORRECTS:** `_audit/2026-09-23-bucket3-addresses.md` -- it sized "blocked on nothing" at 5 of 67 without asking the rulings, counting `M M49` on a messaging thread while `DO-NOT-OPEN-MESSAGING` stood, which made the size 4. The operator lifted that ruling at 18:15 the same day, so the size is 5 again under the rulings as they now are, and the checker now asks them.
+**CORRECTS:** `_audit/2026-09-23-bucket3-addresses.md` -- it sized "blocked on nothing" at 5 of 67 without asking the rulings, counting `M M49` on a messaging thread while `DO-NOT-OPEN-MESSAGING` stood, which made the size 4. The operator lifted that ruling at 18:15 the same day (5 again), and the calls registered later that evening decided what eight RULING rows waited on, seven of which now need only a reader, so the size is 12 under the rulings as they now are (section 12). The checker asks the holds on every run; the gates are re-judged by hand when a ruling lands.
 
 Wave `census-cleanup`, 2026-09-23, from master `b0d3ab8` (the merge of the
 bucket-1 and bucket-3 waves). **OFFLINE THROUGHOUT.** No browser was started or
@@ -29,12 +29,23 @@ it, each opening with its state AFTER it:
 
 **AND THE REGISTER CAUGHT UP THE SAME EVENING (section 11).** Master 53ba1b6
 registered ruling (b) and the orchestrator's delegated calls; this branch
-merged it and finished the holds. The state NOW:
+merged it and finished the holds. The state after that merge:
 
     item 1   bucket 1 is 15 held by a standing ruling (every write, at a
              target he names) / 0 relayed / 0 pending / 6 held by no ruling
     item 6   unchanged: blocked on nothing is 5 of 67, and no hold binds a
              page any more
+
+**AND TWO MORE CALLS WERE REGISTERED LATER THAT EVENING (section 12).** Master
+4a57b75 registered `SELF-PROFILE-EDITS-NOT-OUTWARD` and
+`OTHER-MEMBER-IDS-AS-READS`; this branch fast-forwarded to it, released six
+writes and re-gated thirteen bucket-3 rows. The state NOW:
+
+    item 1   bucket 1 is 9 held by a standing ruling / 0 relayed / 0 pending
+             / 12 held by no ruling, 6 of them writes RELEASED by
+             SELF-PROFILE-EDITS-NOT-OUTWARD
+    item 6   blocked on nothing is 12 of 67; the gate column reads READER 9,
+             PRESS-PERMITTED 3, MEASURE 8, BUILT-UNFIRED 4, PRESS 5, RULING 4
 
 ---
 
@@ -835,6 +846,8 @@ visible to anyone who opens his profile, while `OUTWARD-ACTS-NEED-THE-OPERATOR`
 routes to him only acts toward other people or ones that cannot be undone.
 Whether those six are outward is the orchestrator's call; until it is made
 they stay held, the direction that cannot fire anything by mistake.
+**[Made later the same evening and registered as
+`SELF-PROFILE-EDITS-NOT-OUTWARD`; the six are released: section 12.]**
 
 **WHAT THE NEW RULINGS BEAR ON, AND WHAT WAS NOT TOUCHED.** Three registered
 rulings bear on bucket-3 gates, and re-gating those rows was not part of this
@@ -852,6 +865,242 @@ order:
 Their notes still describe those decisions as unmade. No class count and no
 blocked-on-nothing figure moves until someone re-gates them, and what each
 becomes -- READER, PRESS-PERMITTED or MEASURE -- is a judgement per row.
+**[Re-gated later the same evening, with three more rows found on disk and
+the other-people question answered by a registered call: section 12.]**
 
 **GATES FOR THIS SECTION** are reported in the wave's final message: a
 document cannot quote the gate that checks its own last edit.
+
+---
+
+## 12. THE SECOND FOLLOW-UP: SIX WRITES RELEASED, THIRTEEN ROWS RE-GATED
+
+**THE ORDER, CHECKED AGAINST DISK FIRST.** The orchestrator's second order,
+the evening of 2026-09-23: IF master is still 4a57b75 and this branch 6fae42c,
+merge master; release the six self-profile-edit holds under
+`SELF-PROFILE-EDITS-NOT-OUTWARD`; re-gate the bucket-3 rows whose notes still
+describe decisions as unmade; re-derive and re-pin; regenerate; gate; commit;
+do not push. Both SHAs held when measured, before any edit. `git merge master`
+fast-forwarded to 4a57b75, which registers two more of the orchestrator's
+delegated calls, each overridable by the operator and each recorded in
+`_audit/2026-09-23-rulings-write-class-and-delegated-calls.md`:
+`SELF-PROFILE-EDITS-NOT-OUTWARD` (edits to his own profile fields are not
+outward acts: no other person is targeted and each edit reverses; a live proof
+runs with notify-network off, restores the field in-session, proves it by a
+before/after reading, and never touches a field that broadcasts by nature) and
+`OTHER-MEMBER-IDS-AS-READS` (another member's id in a search facet is a
+permitted read when it comes from the tool's arguments, never from page
+content, and is never stored in a tracked file). Every instrument was green at
+4a57b75 before the first edit.
+
+**ONE PLACE WHERE DISK AND THE ORDER DIFFERED, AND DISK WAS FOLLOWED.** The
+order named ten rows. The address table at 4a57b75 carried thirteen whose notes
+describe a question as unmade that a registered call has since decided: the
+ten, and `N 84`, `N 85` and `N 87`, which lane L2 had moved from PRESS to
+RULING that afternoon on the words *"Composing one is D1"* (and, for `N 85`,
+D3's other-people cause). The order's list matches the bucket-3
+audit's nine RULING rows plus the press rows, which predate that move. Same
+rulings, same evidence, so all thirteen were re-gated; each is one line of the
+table and can be put back on its own.
+
+### 12.1 THE RELEASE, AND WHY IT IS A MARKER
+
+The write hold binds every OUTWARD write, and a W row is held by it through
+its R/W cell with no marker (section 1). A class of writes the register calls
+not outward can therefore leave the hold only by saying so IN ITS OWN CELL,
+never by where it sits in the census: a row's section is its topic, not its
+class. The marker is ``**RELEASED BY `<ID>`**``.
+
+    scripts/ruling_holds.py   ROW_RELEASES, one entry today
+                              (SELF-PROFILE-EDITS-NOT-OUTWARD), and
+                              RELEASED_BY_MARKER. hold_of: a W row citing a
+                              known release is held by no ruling. REPORTED,
+                              never counted: a release this census does not
+                              know, a release on a row that is not a write
+                              (a jobs row included -- jobs.md has no R/W
+                              column), and a release beside the write hold's
+                              own HELD BY. register_problems: every release
+                              must be registered, STANDING, and not also a
+                              hold or a lifted hold
+    profile.md                P A8, P A11, P A13, P A17, P A19, P A21 carry
+                              the marker, and the ruling's proof conditions
+                              in words
+    census_completion.py      bucket 1 prints the released writes as a subset
+                              of "held by NO ruling", with a new pin,
+                              b1_released; bucket 2 no longer says the last
+                              step of EVERY write is his, and counts the
+                              still-GAP writes whose own cell cites a release
+                              (0 today: the six are the bucket-1 rows)
+
+**THE NEW BUCKET-1 SPLIT:**
+
+    held by a STANDING ruling
+      OPERATOR-NAMES-THE-TARGET           9   W 6 by the R/W cell, 3 cited
+                                              J 103, J 104, J 128, M C1,
+                                              M C25, M C32, N 1, N 46, N 48
+    held by a RELAYED ruling              0
+    waiting on a PENDING question         0
+    held by NO ruling                    12   J 121, J 122, M M33, M M43,
+                                              N 20, N 45, and the six below
+      of which writes RELEASED            6   P A8, P A11, P A13, P A17,
+                                              P A19, P A21
+    CHECK: 9 + 0 + 0 + 12 = 21
+
+**WHAT A RELEASE DOES NOT DO.** It takes the named-target condition off; it
+fires nothing. The six still need a session, and each proof is bound by the
+ruling's four conditions, which ride in the cell.
+
+### 12.2 THE RE-GATE, ROW BY ROW
+
+Each row's gate and note in `_audit/_census/read-addresses.tsv` now cite the
+ruling by id; each census cell whose words the ruling changed carries a dated
+RE-GATED note (network.md rows 76, 79, 84, 85, 87, 93, 94, 133 and 194;
+messaging-and-content.md row C29). The one row without a note has an empty
+cell, left so.
+
+    row    ruling                            gate                what it needs now
+    N 79   D1-SEARCH-AS-READS                RULING -> READER    a keyword-taking reader; a keyword
+                                                                 that trips a forbidden substring
+                                                                 gets the boundary's own refusal
+    N 194  D1-SEARCH-AS-READS                RULING -> READER    the same reader: the hashtag is
+                                                                 a keyword
+    N 94   D1-SEARCH-AS-READS                RULING -> READER    a reader composing the location
+                                                                 facet; the ruling bounds each
+                                                                 search, not the number of values,
+                                                                 so the cell's second question goes
+                                                                 with the first
+    N 84   D1-SEARCH-AS-READS (disk)         RULING -> READER    currentCompany: 16 LinkedIn-authored
+                                                                 hrefs on record (lane L2)
+    N 87   D1-SEARCH-AS-READS (disk)         RULING -> READER    pastCompany: a LinkedIn-authored
+                                                                 canned search on record
+    N 172  OTHER-MEMBER-IDS-AS-READS + D1    RULING -> READER    connectionOf, the id from tool
+                                                                 arguments only, never stored
+                                                                 (census cell empty; no note)
+    N 85   OTHER-MEMBER-IDS-AS-READS + D1    RULING -> READER    the same spelling as N 172
+           (disk)
+    N 93   D1-SEARCH-AS-READS                RULING -> MEASURE   decided, but no spelling is on
+                                                                 record for its five fielded
+                                                                 keywords: lane L2's census of
+                                                                 LinkedIn-authored people-search
+                                                                 keys holds `keywords` only, and a
+                                                                 repository search for four common
+                                                                 fielded spellings found none
+    P D28  IN-ME-NO-BLANKET-BAR              PRESS  -> MEASURE   no control to judge: distinct_langs
+                                                                 1, and its measuring document says
+                                                                 it does not prove one exists
+    P J4   IN-ME-NO-BLANKET-BAR              PRESS  -> MEASURE   the one press on record opens three
+                                                                 options and no state; where the
+                                                                 state renders is unknown
+    N 76   IN-ME-NO-BLANKET-BAR              PRESS  -> PRESS     judged on evidence the trigger is a
+                                                                 disclosure shape, but the shipped
+                                                                 gate still refuses /in/me/ (12.4):
+                                                                 a build, then a session
+    M C29  VIEW-SWITCH-PRESS-RESTORED        PRESS  -> MEASURE   permitted with the view restored;
+                                                                 the control was never captured, and
+                                                                 his own permalinks are addressable
+                                                                 since C41 fired
+    N 133  VIEW-SWITCH-PRESS-RESTORED        PRESS  -> MEASURE   applying a filter is permitted with
+                                                                 the view restored; what a pill
+                                                                 opens is in no capture
+
+**EACH CONTROL WAS JUDGED ON ITS EVIDENCE, AS THE ORDER SAID -- NO BLANKET
+MOVE.** Two of the thirteen did not become readers although their decision was
+made: the fielded-keyword row, because a reader needs a spelling nobody has
+seen, and the follow-link row, because the code has not taken the ruling. No
+restore-and-prove press exists yet: `press.disclose` closes by Escape and
+checks `aria-expanded`, which cannot put a selection back, so the two
+view-switch rows also need that press built after their capture -- unless the
+viewer-filter capture shows the opened pill carrying per-option counts, which
+lane L2 named as the question and which an already-permitted disclosing press
+would then deliver.
+
+### 12.3 WHAT MOVED
+
+    gate column (33 ADMITTED)   READER 2 -> 9, PRESS-PERMITTED 3 -> 3,
+                                MEASURE 3 -> 8, BUILT-UNFIRED 4 -> 4,
+                                PRESS 9 -> 5, RULING 12 -> 4,
+                                STANDING-RULING 0 -> 0
+    BLOCKED ON NOTHING          5 -> 12 of 67: M C72, M C85, M M49, N 79,
+                                N 84, N 85, N 87, N 94, N 134, N 172,
+                                N 194, P O3
+    pins                        b3_blocked_on_nothing 5 -> 12,
+                                b1_standing 15 -> 9, b1_no_ruling 6 -> 12,
+                                b1_released NEW at 6, b2_d3_rows 4 -> 3
+                                (N 172 left D3's list: the ruling answers the
+                                cause it was filed for), PINNED_B1_ROWS
+                                re-pinned (the six P A rows from
+                                OPERATOR-NAMES-THE-TARGET to NO RULING)
+    unmoved                     every other pin, the class split
+                                (ADMITTED 33 / REFUSED 24 / NO-ADDRESS 2 /
+                                NEEDS-SESSION 6 / UNDETERMINED 2), unfired 21
+
+The seven new blocked-on-nothing rows are all people-search readers, so a live
+proof of any of them spends the session budget D1 sets: at most 5 test
+searches, and never a value that identifies the operator.
+
+The census_completion report now LISTS the blocked-on-nothing rows off the
+table instead of sending the reader to the bucket-3 audit, which names the
+five of its own day and cannot say the table has moved.
+
+### 12.4 FOR THE ORCHESTRATOR
+
+**THE SHIPPED PRESS GATE HAS NOT TAKEN `IN-ME-NO-BLANKET-BAR`.** Measured
+in-process on this branch, 2026-09-23 about 21:30 IST: `press.check_basis` for
+`/in/me/` returns `no_sensitivity_basis` -- *"no basis is declared for this surface, so
+condition 3 has no way to be satisfied here"* -- the blanket bar the ruling
+removes. For every `/in/me/` press the code and the register now say different
+things. `linkedin_server/press.py` is shipped code outside this order, so it
+was not touched: a build item. The follow-link row still gated PRESS waits on
+it, and the two `/in/me/` rows now gated MEASURE would meet it the moment a live
+look found their control.
+
+**`N 174` STILL READS RULING, AND IS NOT A DECISION NOBODY HAS MADE.** It is
+observable only once a pending group-join request exists, and creating one is a
+write at a real group. Ruling (b) lifted the read-only rule, and a join request
+acts toward other people, so `OPERATOR-NAMES-THE-TARGET` makes the group his to
+name: what it waits on is his naming one. Left as it was: the order did not name it, and the gate this
+table has for a ruling made -- STANDING-RULING -- is for a page a hold binds,
+which this is not. A read row waiting on a write's target is a shape the table
+cannot yet say; a small design question for whoever owns the gate column. So
+RULING now means four rows: this one, `P C8` (D4, the package's own browser
+context), `N 82` (a label reading this surface forbids) and `N 132` (D6,
+whether two addresses discharge a row named for a control). No registered call
+reaches D4 or D6.
+
+**THE READ TRIAGE IS KEPT AS ITS DAY'S READING, AND NOW SAYS SO FOR FOUR MORE
+ROWS.** `scripts/triage_read_gap_rows.py` gains `DECIDED_SINCE_TRIAGE`
+(`N 79`, `N 94`, `N 172`, `N 194`: RULING verdicts a registered call has since
+decided) and a CONTROL 8 that refuses an entry whose row does not carry RULING,
+shown refusing by a new plant. Its `P D28` line had the measuring document
+saying it "proves no pressable control exists"; the document says it "does not
+prove a pressable control exists", and the line now says that.
+
+**MASTER MOVED TWICE WHILE THIS RAN.** First to 1cfb962 (lanes L1 and Y), then,
+during the gates, to c8fa6ea (the live readers wave). This branch stays on
+4a57b75, as the order set, and is gated against it. Their changes touch other
+lines of the same files: L1 admitted seven reads, every one gated MEASURE, and
+built one read into bucket 1; the readers wave re-gated its four rows and
+re-pinned blocked on nothing to 1 (`M M49` alone). So the merge has to
+re-derive the pins rather than take either side. By the arithmetic of the
+diffs against c8fa6ea, to be measured at the merge: bucket 1 is 9 standing /
+0 / 0 / 13 held by no ruling (6 of them released) of 22, and blocked on
+nothing is 8 of 66 -- `M M49` and the seven people-search readers above.
+Master's `press.py` changed too, and still declares no basis for `/in/me/`
+(read from its source, not run).
+
+### 12.5 THE BLOCKER MAP
+
+**NO BLOCKER'S FIRST CANDIDATE MOVED.** The locator behind the map's
+`reason_doc` column counts, per blocker, the paragraphs that mention one of its
+rows. The first draft of this section repeated row ids across many
+paragraphs, and on regeneration this document took first place for two
+blockers it does not discuss: one holding 30 group rows, one holding three
+off-platform rows. The ids were gathered into the tables above and the map
+regenerated, and those two point where they pointed before. What remains in
+the regenerated map is scores only: two blockers this document already led
+gain one and two points, and one gains a candidate without changing its
+first.
+
+### 12.6 GATES
+
+Reported in the wave's final message, for the reason section 11 gives.

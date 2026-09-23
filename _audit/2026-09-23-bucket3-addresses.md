@@ -4,7 +4,7 @@ claude-opus-5-5[1m]
 
 **CORRECTS:** `_audit/2026-09-21-the-read-triage.md` -- four address verdicts: P F1 and P H11 are pages on the admitted profile, not ADDRESS/ABSENT, and P L4 and N 61 wait on a live read, not on a refused address anybody has seen served.
 
-**CORRECTED BY:** `_audit/2026-09-23-census-cleanup.md` -- the split asked the boundary and never the rulings: `M M49` sat on a messaging page while `DO-NOT-OPEN-MESSAGING` stood, which made the five four until the operator lifted that ruling at 18:15 the same day. The five stands under the rulings as they now are, and the checker now asks them.
+**CORRECTED BY:** `_audit/2026-09-23-census-cleanup.md` -- the split asked the boundary and never the rulings: `M M49` sat on a messaging page while `DO-NOT-OPEN-MESSAGING` stood, which made the five four until the operator lifted that ruling at 18:15 the same day. The calls registered later that evening (`D1-SEARCH-AS-READS`, `OTHER-MEMBER-IDS-AS-READS`) decided what eight RULING rows waited on, seven of which now need only a reader, so it is twelve under the rulings as they now are (its section 12). The checker asks the holds on every run; the gates are re-judged by hand when a ruling lands.
 
 Wave `bucket3-addresses`, 2026-09-23, from master `79c5f8e`. **READ-ONLY AND
 OFFLINE THROUGHOUT.** No browser was started or attached to, no page was
@@ -48,12 +48,19 @@ banked, so every prior per-row reading of this population was reusable.
     PRESS             12   the payload is behind a press the shipped gate refuses
     RULING             9   a named decision nobody has made comes first
 
+**[The gate column the evening of 2026-09-23, after lane L2 moved three rows
+from PRESS to RULING and the census cleanup re-gated thirteen on the calls
+registered that evening: READER 9, PRESS-PERMITTED 3, MEASURE 8,
+BUILT-UNFIRED 4, PRESS 5, RULING 4. The table is the record.]**
+
 **THE REAL SIZE OF "BLOCKED ON NOTHING AT ALL" IS 5 OF 67.** Five rows sit on a
 page the boundary admits AND have nothing between that page and a reader but
 the reader itself: M M49 and M C85 (READER), P O3, N 134 and M C72
 (PRESS-PERMITTED). **[Later on 2026-09-23: four while `DO-NOT-OPEN-MESSAGING`
 stood, since `M M49` sits on a messaging page; five again after the operator
-lifted that ruling at 18:15. See the note under the title.]** Seven more need only a session first -- a live look (P F1,
+lifted that ruling at 18:15; twelve after the calls registered that evening
+moved seven people-search rows from RULING to READER, listed in the census
+cleanup's section 12. See the note under the title.]** Seven more need only a session first -- a live look (P F1,
 P H11, P K8) or a fire of code that already ships (N 80, N 81, N 88, N 89).
 The other 55 are gated: 21 behind a refused press or an unmade decision, 24 at
 the boundary itself, and 10 with no address to put through it.
@@ -196,7 +203,9 @@ before anything entered the table; section 6 says what it changed.
 
 Generated from `_audit/_census/read-addresses.tsv` rather than typed, so the
 two cannot disagree. Sources are written as plain paths; the table carries the
-same text.
+same text. **[Since the evening of 2026-09-23 they do: lane L2 and the census
+cleanup re-gated rows in the table after this section was generated, and the
+lines below are this wave's. The table is the record.]**
 
 **[Later on 2026-09-23: they now differ in one cell. `M M49`'s note in the
 address table opens with the ruling that held its page until the operator

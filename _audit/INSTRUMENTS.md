@@ -8050,7 +8050,8 @@ reports what the GATE says -- and the gate's verdict is not a destination.
 `profile.md` and `network.md` by REMAINING COST -- BUILDABLE / ADDRESS / RULING
 / PRESS / SERVED -- and refuses to print a tally unless six controls pass.
 **[2026-09-23: 54 rows, after five left GAP, and a seventh control; section
-60 has the test that now runs it.]**
+60 has the test that now runs it. That evening an eighth control, over the
+four RULING verdicts the registered calls decided: section 60.6.]**
 Deliverable `_audit/2026-09-21-the-read-triage.md`.
 
 ### 46.1 THE LAW: A JUDGEMENT SHIPS WITH A TRIPWIRE ON ITS OWN DENOMINATOR
@@ -9472,7 +9473,9 @@ per bucket-3 row, and the measurement is taken: of 67 rows, 33 sit on a page the
 boundary admits, 24 on one it refuses, 10 carry no address at all -- and 5 have
 nothing between an admitted page and a reader but the reader. **[Later on
 2026-09-23: 4 while a standing ruling held `M M49`'s messaging page, and 5
-again after the operator lifted it at 18:15; section 60.]**
+again after the operator lifted it at 18:15; section 60. 12 after the calls
+registered that evening re-gated seven RULING rows to READER; section
+60.6.]**
 
 ### 57.1 THE PLANT THAT MATTERS IS A CONSISTENT ONE
 
@@ -9639,10 +9642,10 @@ test of the edge installs its own hold on a page it chooses.
 
 | path | shown failing by |
 |---|---|
-| `scripts/ruling_holds.py` | The merge with master 53ba1b6, on real data (60.1). `tests/test_ruling_holds.py`: a STANDING hold handed in and resolved green, then register copies with that ruling removed, re-scoped to a narrower surface, and no longer STANDING; the write hold rebound to "one write only"; the merge's two events replayed against the real register (a RELAYED hold it now carries, a PENDING question it now answers); relayed and pending records whose words moved; a ruling listed both lifted and live; a lifted ruling the register puts back into force, and one it drops. Each is handed in as a parameter, so neither the real register nor the real table is touched |
-| `scripts/census_completion.py` -- bucket 1 by hold, four `b1_` pins, `PINNED_B1_ROWS`, and `b2_d3_rows` | on HEAD's cells before any marker existed: `--check` red, naming the seven rows whose holds were prose only. Demonstration D of `scripts/_check_census_completion_can_fail.py` (a COVERED-UNFIRED row W to R: two `b1_` pins move, the row is named, no GAP figure moves). `tests/test_ruling_holds.py`: a marker removed, the swap in 60.2, a direction flip, a row leaving the state, an unknown or LIFTED citation withholding the split and every `b1_` figure |
+| `scripts/ruling_holds.py` | The merge with master 53ba1b6, on real data (60.1). `tests/test_ruling_holds.py`: a STANDING hold handed in and resolved green, then register copies with that ruling removed, re-scoped to a narrower surface, and no longer STANDING; the write hold rebound to "one write only"; the merge's two events replayed against the real register (a RELAYED hold it now carries, a PENDING question it now answers); relayed and pending records whose words moved; a ruling listed both lifted and live; a lifted ruling the register puts back into force, and one it drops. RELEASES (60.6): a release nobody registered, one the register no longer holds STANDING, and one also listed as lifted; in `hold_of`, a release unknown to the table, cited on a read, on a jobs row, and beside the write hold's own marker. Each is handed in as a parameter, so neither the real register nor the real table is touched |
+| `scripts/census_completion.py` -- bucket 1 by hold, five `b1_` pins, `PINNED_B1_ROWS`, and `b2_d3_rows` | on HEAD's cells before any marker existed: `--check` red, naming the seven rows whose holds were prose only. Demonstration D of `scripts/_check_census_completion_can_fail.py` (a COVERED-UNFIRED row W to R: two `b1_` pins move, the row is named, no GAP figure moves), and demonstration E (one RELEASED BY marker stripped: three `b1_` pins move and the row is named). `tests/test_ruling_holds.py`: a marker removed, the swap in 60.2, a direction flip, a row leaving the state, an unknown or LIFTED citation withholding the split and every `b1_` figure, a release removed (the row named, back under the write hold), a released row flipped to a read (the split withheld) |
 | `scripts/check_read_addresses.py` -- `ruling_problems` and the STANDING-RULING gate | HEAD's own table, 60.3. `tests/test_read_addresses.py`, each on a hold the test installs: a row made blocked on nothing on a held page, a held page under a PRESS gate, a held page citing nothing, STANDING-RULING off its ruling's page or citing nothing, a PENDING question convicting a row the test makes blocked on nothing, a note still citing a LIFTED ruling, and `census_completion` withholding the split |
-| `scripts/triage_read_gap_rows.py` -- CONTROL 7 -- and `tests/test_triage_read_gap_rows.py` (the first test that runs the script) | `N 53` planted back into the real file: two tests red naming it, the file restored and compared by sha256. Each of the four `--plant` options refused by its own control's sentence |
+| `scripts/triage_read_gap_rows.py` -- CONTROLS 7 and 8 -- and `tests/test_triage_read_gap_rows.py` (the first test that runs the script) | `N 53` planted back into the real file: two tests red naming it, the file restored and compared by sha256. Each of the five `--plant` options refused by its own control's sentence; `undecided-annotation` (60.6) names `N 133`, a PRESS row annotated as decided |
 
 ### 60.5 DECLARED DISPOSABLE
 
@@ -9650,7 +9653,35 @@ The scratch join of the 33 admitted rows against the register's address-family
 entries, and the two scratches that rewrote one line of the address table (to
 STANDING-RULING, then back to READER after the lift). What the join measured is
 recorded in the audit, and `ruling_problems` re-derives the part that matters
-on every run.
+on every run. Likewise the evening's scratches (60.6): the one that appended
+the six release markers, the one that re-gated thirteen table lines, the one
+that appended the dated census notes -- each matched its lines exactly and
+aborted on anything else -- and an in-process probe of `press.check_basis`
+per page.
+
+### 60.6 A WRITE LEAVES THE HOLD ONLY BY A RELEASE ITS OWN CELL CITES
+
+Master 4a57b75 registered `SELF-PROFILE-EDITS-NOT-OUTWARD`: edits to his own
+profile fields are not outward acts. The write hold binds every OUTWARD write
+and holds a W row through its R/W cell with no marker, so the release could not
+be inferred from where a row sits -- a row's section is its topic, not its
+class. It is a marker, ``**RELEASED BY `<ID>`**``, read the way ``HELD BY`` is,
+from a table of releases (`ROW_RELEASES`) that must resolve to a registered
+STANDING ruling. A release cited on a read, on a jobs row (no R/W column), or
+beside the write hold's own marker is reported and never counted, and a release
+missing from the table un-holds nothing. Six bucket-1 cells cite it, and
+`b1_released` pins how many writes it takes out, as a subset of "held by NO
+ruling".
+
+    A RELEASE IS A STATEMENT IN THE CELL, NEVER A POSITION IN THE CENSUS.
+
+The same evening's re-gate is not an instrument and is recorded in the audit,
+section 12: thirteen bucket-3 rows moved on the registered calls, and "blocked
+on nothing" went from 5 to 12. What the instruments gained from it: the
+census_completion report lists the blocked-on-nothing rows off the table rather
+than pointing at a document that names another day's five, and the read
+triage's CONTROL 8 refuses a DECIDED_SINCE_TRIAGE entry whose row does not
+carry RULING, since only a row waiting on a decision can have had one made.
 
 ## 62. WHO RULED EACH EXCLUSION, AND A CHECK THAT FAILS WHEN NOBODY DID (exclusion-audit, 2026-09-23)
 
