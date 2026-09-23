@@ -10,15 +10,19 @@ claude-opus-5-5[1m]
 
 **CORRECTS:** `_audit/_census/network.md` -- row `134` likewise; the pill it names opens into a filter form whose payload needs APPLYING (section 3.0.1).
 
-**FOUR OF THE SHAS IN THIS DOCUMENT ARE BRANCH-ONLY TODAY.** `652cd2f`,
-`aba78f7`, `2bc3720` and `d912b25` are this wave's commits on its worktree
-branch and do not resolve on `master` until that branch merges. Their
-subjects, which survive a rewrite: `652cd2f` *"press: read what a press
+**SIX OF THE SHAS IN THIS DOCUMENT ARE BRANCH-ONLY TODAY.** `652cd2f`,
+`aba78f7`, `2bc3720`, `d912b25`, `1df9061` and `7ad55ed` are this wave's
+commits on its worktree branch and do not resolve on `master` until that
+branch merges.
+Their subjects, which survive a rewrite: `652cd2f` *"press: read what a press
 disclosed, through two more closed tables"*; `aba78f7` *"who_viewed_me: open
 the filter pills through the gate; filters skip a dialog"*; `2bc3720`
 *"server: the pill opener's names no longer spread taint through the
 module"*; `d912b25` *"record the zero-press load; aim the feed fire by
-position with two refusing interlocks"*.
+position with two refusing interlocks"*; `1df9061` *"record the fires: P O3,
+N 134 and M C72 are gated PRESS, each measured live"*; `7ad55ed`
+*"readers-four-rows: name the verdict basis, the probe table and the
+branch-only SHAs"*.
 
 **2026-09-23. Wave `readers-four-rows`, base `b0d3ab8`. WRITTEN AS THE WAVE
 RUNS, not at its end.** The four rows `_audit/2026-09-23-bucket3-addresses.md`
@@ -368,6 +372,15 @@ it). Nothing was committed from that state. The rule this cost: **a lead does
 not plant defects in a file a child can still read, until the child's turn
 has measurably ended** -- its transcript quiet, not its report written.
 
+**AND THE REGISTER ALREADY SAID IT, MORE STRICTLY.** `_audit/INSTRUMENTS.md`,
+under "How a red-proof is run here": never in the live tree; copy
+`linkedin_server`, `tests`, `scripts` and `pytest.ini` to a scratch
+directory and plant there. All 23 of this wave's plants (sections 1, 2.2 and
+3, the child's three included) were made in this worktree's own files and
+restored by sha256. The collision above is what that rule exists to prevent,
+arriving on schedule. Each cycle ended on the RESTORED run printed with it,
+and section 10.4 records the full-suite gate over the committed files.
+
 
 **AND A DEFECT IN THE SHIPPED INSIGHTS READER, on `P O3`'s own surface.** The
 section 2.1 capture carries five `<label>` elements: three inside the pills,
@@ -376,11 +389,13 @@ reader's 40-character cap. The page has no `data-view-name` at all, so
 `PROFILE_VIEWS_INSIGHTS_JS` takes its `<label>` fallback and publishes all
 five as `insights.filters` -- two of them a feedback form's options. Measured
 by my own structure-only census of the capture; L2 reported the same from the
-10:02 capture, and L2 -- not this wave -- declared the DOCUMENT correction of
-`_audit/2026-09-20-the-profile-views-recapture.md` section 9.2 (its two
-"undocumented filters" are those dialog labels), both markers on its own
-branch; this wave adds no second back-pointer there. This wave fixes the CODE
-(section 3), and the live fire read 3 (section 3.0.1).
+10:02 capture. The two "undocumented filters" in section 9.2 of
+`_audit/2026-09-20-the-profile-views-recapture.md` are those dialog labels,
+and the document-level record of that is L2's, not this wave's: its markers
+sit at both ends, written on its own branch and on `master` since the lane L2
+merge `62a8f0f` (both read there by 20:23); this wave adds no second
+back-pointer. This wave fixes the CODE (section 3), and the live fire read 3
+(section 3.0.1).
 
 ---
 
@@ -745,7 +760,11 @@ excluded from this wave by `DO-NOT-OPEN-MESSAGING`).
 
 Census cells, each gaining a dated paragraph that cites this document:
 `profile.md` `O3`, `network.md` `134`, `messaging-and-content.md` `C72` and
-`C85`. Correction markers, both ends: this document CORRECTS
+`C85`. The messaging census carries no marker: its two cells never stated
+that either row was blocked on nothing, and the `C72` cell had already
+recorded its live measure stopping at the press boundary on 2026-09-19.
+
+Correction markers, both ends: this document CORRECTS
 `2026-09-23-bucket3-addresses.md`, `2026-09-21-what-is-reachable-now.md`,
 `_census/profile.md` and `_census/network.md`, and each carries its CORRECTED
 BY. The correction guard's three table-row-proximity candidates (the census
@@ -800,6 +819,10 @@ prediction was right about `N 134` and `M C85`, and for the reasons given.
 
 ## 9. WHAT NEEDS AN OPERATOR RULING
 
+**Superseded in part: read 9.1 first.** The four requests below were written
+before `master`'s `53ba1b6` registered the 2026-09-23 rulings at 20:06, after
+every fire in this document had run.
+
 1. **A third sanctioned press shape, or not.** "Show more analytics" (the
    gate to `P O3`'s Premium insights) is a plain button carrying neither
    `[aria-expanded]` nor `[aria-haspopup]` -- the position the people search's
@@ -820,3 +843,150 @@ reading has no settle, so a menu built on demand reads empty (section 5.1);
 and `press.disclose` reads its before-counters and THEN clicks even when that
 reading has already doomed the press (section 3). Both are the "refuse before
 the click" class, and both belong in `press.py` with their own tests.
+
+### 9.1 THE SAME REQUESTS, READ AGAINST `53ba1b6` (written 20:26, after its registration)
+
+`master` moved twice while this wave was gating: the lane L2 merge `62a8f0f`,
+then `53ba1b6`, which registers the 2026-09-23 rulings. Measured at 20:26,
+with `master` at `53ba1b6`, by
+`git diff --stat b0d3ab8 master -- linkedin_server/`: **empty**. No press
+mechanism beyond the one this wave fired under exists on `master` either.
+
+- **Request 2 is ANSWERED.** Ruling `VIEW-SWITCH-PRESS-RESTORED` (the
+  orchestrator's, delegated, overridable) permits a press that changes which
+  rows a view shows, provided the view is RESTORED and a before/after reading
+  proves it. Applying a viewer filter is that press. So `N 134` and `P O3`'s
+  filters half now wait on a BUILD, not on anyone (`N 133`, lane L2's row on
+  the same surface, is not assessed here): open the pill (the
+  disclosing press, shipped and fired here), choose the option and press
+  "Show results" (the view switch), read the viewers, then reset and prove the
+  reset by reading the same surface before and after. Nothing ships it today.
+  This wave's brief admitted only presses the shipped gate permits, so it was
+  neither built nor fired here, and the four cells stay as measured.
+- **Request 1 is no longer the operator's.** Ruling
+  `OUTWARD-ACTS-NEED-THE-OPERATOR` routes press-gate defaults and self-only
+  presses to the orchestrator. "Show more analytics" reveals more of the page
+  rather than switching which rows a view shows, so the view-switch ruling
+  does not obviously reach it (DERIVED, from the control's measured shape and
+  its label); the third-shape decision stands, now the orchestrator's.
+- **Request 3 is the orchestrator's too**, by the same routing ruling. The
+  nearest registered precedent is `D1-SEARCH-AS-READS`: values taken from the
+  tool's arguments only, never from page content, with the
+  navigation-derivation guard unchanged. That is the shape a caller-named
+  poll urn has; no registered ruling decides it as of `53ba1b6`.
+- **Request 4 moves with request 1.** `M C72`'s obtaining step (copy a post's
+  link, embed it) is a press on a menu item whose effect, by its label, is his
+  own clipboard or a dialog -- a self-only press, so the orchestrator's call.
+  That is DERIVED from the labels: whether LinkedIn counts a link copy toward
+  the post author's share figures, which would make it an act that reaches
+  another person, is not measured. The aiming problem does not move with any
+  ruling: today's feed draws no per-post container (section 2.2).
+- **`M M49`.** `DO-NOT-OPEN-MESSAGING` is SUPERSEDED by `WRITE-CLASS-B`, and
+  `OWN-INBOX-READS-COVERED-BY-B` covers opening his own threads. This wave's
+  brief excluded `M M49` by name, on the old ruling; it is untouched here, and
+  whether a live lane takes it is the orchestrator's to brief.
+- **The live rules this wave ran under were its brief's** (budget 15, never
+  `/messaging/`, never `/notifications/`) and held for every load; they are
+  narrower than `LIVE-BUDGET-40-LOADS` and `NOTIFICATIONS-UNREAD-SPEND` allow,
+  and nothing in this document relied on the difference.
+
+## 10. THE MERGE AND THE GATES
+
+### 10.1 THE MERGE, FORECAST BY A DRY RUN -- no ref moved, nothing merged
+
+`git merge-tree --write-tree --name-only master HEAD`, run between 20:16 and
+20:23 with `master` at `53ba1b6` and this branch at `7ad55ed`: **five
+conflicts**.
+
+    _audit/INDEX.md                    generated -- regenerate to a fixpoint
+    _audit/RULINGS.md                  generated -- regenerate to a fixpoint
+    _audit/_census/blocker-map.tsv     generated -- regenerate to a fixpoint
+    _audit/_census/network.md          ONE hunk: rows 133 and 134
+    _audit/_census/read-addresses.tsv  ONE hunk: rows N 133 and N 134
+
+Both real conflicts are the same shape: lane L2 rewrote row 133, this wave
+rewrote row 134, and the two sit on adjacent lines. **Resolution: keep the
+dry-run merge and replace its one hunk with `master`'s row 133 followed by
+this branch's row 134.** Checked mechanically by a scratch script against the
+dry-run tree, all seven checks true in both files: `master` left row 134 as
+the base had it; this branch left row 133 as the base had it; exactly one
+hunk; every line this branch added survives (2 in `network.md`, 4 in the
+table); every line `master` added survives (8 and 9); no line is invented; no
+marker is left. **The first version of that check failed, and it was right
+to:** it built "`master` plus this branch's row 134", which drops this
+branch's OTHER edits to the same two files (the back-pointer in the network
+census header, and the `P O3`, `M C72` and `M C85` lines of the table); its
+merge-equality check did not hold on either file, and the recipe was rebuilt
+before this section was written.
+
+The messaging census and the correction guard's own test file merge cleanly.
+
+After the merge, `scripts/check_read_addresses.py` and
+`scripts/census_completion.py --check` need a run on the MERGED tree, since
+both sides moved lines of the table; the pin moves in section 7 are this
+branch's alone.
+
+### 10.2 THE GATES -- what ran, on which tree, and what did not
+
+**The code this wave fired is the code it committed.** `d912b25` was
+committed at 19:10:08; the two fire outputs are stamped 19:11:03 and
+19:13:25. Since `d912b25`, `git diff --stat d912b25 HEAD -- linkedin_server/
+scripts/ tests/` shows one file, 28 added lines of triage entries in the
+correction guard's list. No reader, gate or probe changed after its fire, so
+no fire is re-run.
+
+    run                                          tree                          result
+    scripts/impact_gate.py --against b0d3ab8     1df9061, from 19:28:18        KILLED by my own 30-minute
+      widened to the full suite (189 of 219      beside a sibling's full        bound at 19:58:18; no
+      files impacted, 86%, over its 45% line)    suite on 8 cores               verdict of any kind
+    tests/test_a_cited_sha_resolves.py           working-tree text that         28 passed
+                                                 became 7ad55ed, ~20:00
+    the 12 files the gate selects for a change   working tree, 20:29:40 to      450 passed, 1 failed
+      to this document alone, serially           20:36:41, with 9.1 and 10.1
+
+**The one failure was real and was mine.** The correction guard's
+candidate-pair test found two pairs from this document with correction
+vocabulary within two lines of a citation and neither declared nor triaged:
+this document to the 2026-09-20 profile-views recapture (section 2.2,
+reporting lane L2's record), and this document to the messaging census
+(section 6, which had stood since `1df9061` -- the killed gate would have
+caught it). **Neither is a correction by this document**, so each sentence
+was reworded rather than triaged. A `NOT_A_CORRECTION` entry mutes its pair
+for good; a reworded sentence leaves the guard fully armed for a real
+correction between the same two documents later. Re-checked with the
+guard's own `_candidates()` and `_declarations()`: zero untriaged pairs touch
+this document.
+
+The full-suite gate on this branch's final code is recorded in 10.4, when it
+has run.
+
+### 10.3 INSTRUMENTS -- register candidates, and what is disposable
+
+Not appended to `_audit/INSTRUMENTS.md` on this branch: `master` changed that
+file too, and an append here is a sixth conflict at the merge. The three
+candidates below each name the mutations that killed them, as the register
+requires; the orchestrator appends them at merge or declines them.
+
+    candidate                                   shown failing by           tests that die
+    press.py: OPEN_READINGS, PRESS_SCOPES,      7 plants, A-G, section 1   test_press.py,
+      the open-moment reading                                              test_press_open_reading.py
+    server.py: the filter-pill opener and       9 plants, S1-S8 and D1,    test_who_viewed_me_filter_menus.py,
+      its fixed counter set                     section 3                  test_profile_views_filters_skip_dialogs.py
+    scripts/_probe_disclosure_targets.py        7 plants, P1-P4 and the    test_probe_disclosure_targets.py
+      (which control sits at each index)        child's three, 2.2
+
+**NOT a candidate:** `scripts/_probe_readers_four_fires.py`. Its two
+interlocks (Playwright's count against the in-page count inside `main`, and
+the label veto) fired once, live, and passed; neither was ever shown
+refusing. It is committed as the record of how the fires were aimed.
+
+**DISPOSABLE, in the session scratchpad, never tracked:** the three live-tree
+planters (the method the register forbids -- not to be reused), the
+generator-fixpoint loop, the structure and label censuses of the capture,
+the taint diff, the table-line editor, the SHA census of this document, the
+box-load snapshot, the merge-resolution check of 10.1 (shown failing once, on
+its own first recipe), and a bounded wait on process handles (shown both
+ways: a gone pid returns at once, a live pid under a 2-second bound reports
+the bound; it waits on a handle, so a pid reused after it opens cannot fool
+it, but one reused BEFORE it opens can -- a pid measured at 20:12:40 named a
+different process by 20:14:59).
