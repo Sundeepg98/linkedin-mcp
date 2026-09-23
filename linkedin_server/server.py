@@ -7823,11 +7823,18 @@ async def linkedin_own_item_link(activity_id: str, include_link: bool = False) -
     then nothing is captured, the answer reads copied: false, and whether his
     clipboard was written cannot be read from here.
 
+    THE PRESSES ARE PRICED BY THE ITEM'S OWN REACTION TOGGLE, read in both
+    measured dialects (share_link.read_item_price) before the first press and
+    after the last. A page that draws no toggle at all is refused
+    (price_cannot_move) with nothing pressed: a counter that cannot move
+    prices nothing, whatever it reads.
+
     WHAT COMES BACK: copied (bool); captures (how many texts were kept);
     shape -- whether it is an https LinkedIn link, its path kind, whether it
-    carries this activity id; permitted; and the gate's counter and closure
-    verdicts. THE LINK ITSELF ONLY WITH include_link=True: it can carry his
-    profile's vanity name.
+    carries this activity id; permitted; the gate's counter and closure
+    verdicts; and price_readings, every price reading taken, integers only.
+    THE LINK ITSELF ONLY WITH include_link=True: it can carry his profile's
+    vanity name.
 
     Args:
         activity_id: 1-20 ASCII digits -- the id of one of his own items.
@@ -7845,21 +7852,34 @@ async def linkedin_own_item_link(activity_id: str, include_link: bool = False) -
             "pages_loaded": 0,
         }
     own_item_url = share_module.post_url(own_item_digits)
+    # EVERY PRICE READING IS KEPT AND RETURNED, integers only: the price is
+    # evidence, and a verdict that only names its counter ("priced by
+    # off_state") cannot show whether that counter could have moved. The
+    # first live fire was priced by an off_state of 0 at both ends.
+    own_item_readings: list[dict[str, Optional[int]]] = []
     try:
         async with BROWSER.session() as page:
             own_item_landed = await BROWSER.goto(page, own_item_url)
             assert_not_authwall(own_item_landed, surface="post")
 
             async def own_item_counters() -> dict[str, Optional[int]]:
-                own_item_surface = await dom.read_reaction_surface(page)
-                own_item_off = (
-                    own_item_surface.get("off_state")
-                    if isinstance(own_item_surface, dict) else None
-                )
-                if isinstance(own_item_off, bool) or not isinstance(own_item_off, int):
-                    return {"off_state": None}
-                return {"off_state": own_item_off}
+                own_item_reading = await share_module.read_item_price(page)
+                own_item_readings.append(dict(own_item_reading))
+                return own_item_reading
 
+            # A PRICE THAT CANNOT MOVE IS REFUSED BEFORE THE FIRST PRESS.
+            if not share_module.price_can_move(await own_item_counters()):
+                return {
+                    "refused": "price_cannot_move",
+                    "why": (
+                        "the item's page drew no reaction toggle in either "
+                        "measured dialect, so no counter read here could move "
+                        "for an outward act. A press nothing can price is not "
+                        "made: nothing was pressed."
+                    ),
+                    "price_readings": own_item_readings,
+                    "pages_loaded": 1,
+                }
             own_item_outcome = await share_module.copy_own_post_link(
                 page, activity_digits=own_item_digits, read_counters=own_item_counters
             )
@@ -7867,6 +7887,7 @@ async def linkedin_own_item_link(activity_id: str, include_link: bool = False) -
         return _error(exc)
     if not include_link:
         own_item_outcome["link_withheld"] = own_item_outcome.pop("link", None) is not None
+    own_item_outcome["price_readings"] = own_item_readings
     own_item_outcome["pages_loaded"] = 1
     return own_item_outcome
 

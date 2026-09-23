@@ -3133,7 +3133,12 @@ SANCTIONED_MUTATIONS: tuple[tuple[str, str, str], ...] = (
     # this tab instead. Its one gap -- a reference the page took before the
     # capture -- is named in share_link and reads as copied: false. The
     # address is admitted, the gate's component checks run before any press,
-    # the reaction counter is read at both ends, and the closure is verified.
+    # and the closure is verified. THE PRICE IS THE ITEM'S OWN REACTION
+    # TOGGLE, in both measured dialects (share_link.read_item_price), read
+    # before the first press and after the last; a page drawing no toggle is
+    # refused before any press, because the /feed/ basis's own off_state
+    # reads 0 on a permalink whatever happens -- measured on the first live
+    # fire, which that zero priced.
     ("linkedin_server/share_link.py", "_activate", "click"),
     ("linkedin_server/share_link.py", "_clipboard", "evaluate"),
     ("linkedin_server/share_link.py", "copy_own_post_link", "press"),

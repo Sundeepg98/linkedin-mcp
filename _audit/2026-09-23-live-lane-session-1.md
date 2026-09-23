@@ -367,6 +367,8 @@ or passed on a command line. Walled False, challenge terms 0. 4
 `[aria-expanded]` in `main`; exactly 1 whose name starts "open control menu".
 Opened through `press.disclose`, priced by `off_state`: **permitted**, closure
 verified. Captured closed (lane Y's item 5, a post permalink) and open.
+**(Entry 11 corrects this price: `off_state` reads 0 on this page whatever
+happens, so it priced nothing.)**
 
 **The open menu, read offline:** eight `div[role=button]` items, each inside
 an `li` of one `ul`, no `role=menu` or `menuitem` anywhere -- "feature on top
@@ -676,7 +678,8 @@ fires `M M33` with the `starred` pill -- three loads.
 four digits). Served by a new tool, `linkedin_own_item_link(activity_id,
 include_link=False)`: it loads his post's permalink (the admitted
 `/feed/update/urn:li:activity:<digits>/`), prices the presses by `off_state`
-on that page, runs `share_link.copy_own_post_link`, and returns the link's
+on that page (**vacuous there -- Entry 11, and the fix beside it**), runs
+`share_link.copy_own_post_link`, and returns the link's
 SHAPE -- https, LinkedIn host, path kind, whether it carries this id. The
 link itself only with `include_link=True`, since it can carry his vanity
 name; the session harness never asks for it.
@@ -754,6 +757,71 @@ caller of `_activate` (1), the mode not validated (2). The lead's eight:
     P16 the script's wait drifts from READ_WAIT_MS       3   the pin, and both shortened waits
 
 Baseline 61 passed; restored 61 passed.
+
+**Two guards were red on this branch from `c523769` to `f100efa`, and this
+build found them.** `c523769` moved `readonly.SANCTIONED_MUTATIONS` from 7 to
+9 without the read-only boundary's re-freeze and without the package
+docstring's count, so `test_the_read_only_boundary_is_where_it_was_re_frozen`
+and `test_the_package_docstring_agrees_about_writes_and_mutations` failed on
+that commit and on the five after it. Measured, not inferred: the committed
+tree at `f100efa`, exported with `git archive` and run, fails both. The
+per-commit runs were chosen by hand and did not select them. Both are
+repaired in `1d4ef86` (the re-freeze attributed in the file's own form: the
+tree minus exactly the five new entries hashes to the frozen value). The
+lesson is the repository's own, paid again: a gate chosen by name misses a
+guard that reads the file as a whole. The full impact gate is run at the end
+of this session for that reason.
+
+**The tool body, driven end to end offline (`21d718c`).** A stand-in
+`BROWSER` navigates the local fixture by its fulfilled route, so the
+navigation, the landed-url check, the real counter reader and the envelope
+all run; 5 plants in the tool body red (the counter reader ignoring the page,
+the link withheld only when asked, the load not reported, a derived address,
+a bad id reporting a load).
+
+### Entry 11 -- 00:15:39-00:15:56, M C72 fired: 1 load, 2 presses -- the link obtained, and its price found vacuous
+
+`--only own_link`, ledger 24 -> 25, walled False, challenge terms 0. The id
+is the newest of his own activity ids, read in-process from the activity raw
+(authorship established) and never printed. **Returned:** `permitted` True,
+`copied` True, `captures` 1, `owner_item_present` True, the link withheld
+(`link_withheld` True), `pages_loaded` 1; `shape`: https, LinkedIn host, path
+kind `posts` (the shareable form), carries the id as a whole number, has a
+query, length 213; closure closed; `counters_ok`, priced by `off_state`.
+
+**THE PRICE WAS A ZERO THAT COULD NOT MOVE, found in the capture and not in
+the verdict.** The `/feed/` basis names `off_state`, the count of toggles
+labelled "Reaction button state: no reaction". The session's `/feed/`
+capture draws three. His post's permalink draws NONE: its one toggle reads
+"Unreact Like" (the post is liked) in all three captures of that page, 22:38
+closed, 22:38 open and 00:15. So `off_state` read 0 before and after the
+press whatever happened; the gate compared two zeros and reported them as a
+price. It cannot tell "did not move" from "could not move", and the `/feed/`
+basis reaches `/feed/update/` by path prefix while its counter exists only
+on `/feed/`. **The same zero priced Entry 4's press** on the same page, which
+Entry 4 records as "priced by `off_state`: permitted" without the value.
+That price was vacuous too, and this entry is its correction.
+
+**What the presses did NOT do, read another way.** Across the three captures
+the post's reaction state is identical -- the toggle "Unreact Like" 1, the
+count label "1 reaction", one reacted-with entry -- so neither press (22:38's
+menu; 00:15's menu and copy) added or removed a reaction. The like predates
+both: the 22:38:20 capture was taken on the session's first load of that
+page, before any press on it. That is an after-the-fact reading of captures,
+not the gate's price, and the gate is what failed.
+
+**THE FIX, offline, before the fire is repeated.**
+`share_link.read_item_price` counts the item's toggle in both measured
+dialects -- `off_state` (the basis's own), plus the permalink's "Unreact "
+(on) and "React " (off; inferred from the on form, not yet seen). The tool
+asks `price_can_move` BEFORE the first press and refuses `price_cannot_move`,
+with nothing pressed, when every counter reads 0; every reading comes back
+as integers in `price_readings`. 84 tests. Seven plants, all red: the zero
+accepted (2), the permalink dialect ignored (5), the off form misspelled (2),
+an unread toggle turned into 0 (4), a bool read as a count (1), the tool
+pressing without the check (2), the readings not returned (2). **One plant
+survived its first run:** an unread toggle turning into 0 moved no test,
+because nothing had driven the reader's exception path. It is driven now.
 
 ---
 

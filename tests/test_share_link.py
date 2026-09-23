@@ -863,21 +863,37 @@ class _FixtureBrowser:
         return page.url
 
 
-async def _run_tool(monkeypatch, config: dict, **kwargs) -> tuple[dict, list[str]]:
+async def _run_tool(monkeypatch, config: dict, *, probe=None, **kwargs):
+    """Run the tool on the fixture. ``probe``, if given, reads the page AFTER
+    the tool returned (still open) and its answer comes back third."""
     from linkedin_server import server
 
     async with _open_fixture(config) as page:
         browser = _FixtureBrowser(page)
         monkeypatch.setattr(server, "BROWSER", browser)
         payload = await server.linkedin_own_item_link(**kwargs)
-        return payload, browser.gotos
+        seen = await probe(page) if probe else None
+        return payload, browser.gotos, seen
+
+
+async def _untouched(page) -> dict:
+    return {
+        "expanded": await _trigger_expanded(page),
+        "box": await _clipboard_box(page),
+        "escapes": await _escape_keydowns(page),
+    }
+
+
+#: What a price reading looks like on the page the live fire saw: his own
+#: item, liked, its toggle in the permalink dialect, off_state 0.
+LIVE_SHAPED_PRICE = {"off_state": 0, "toggle_on": 1, "toggle_off": 0}
 
 
 async def test_the_tool_copies_on_one_load_and_withholds_the_link_by_default(
     monkeypatch,
 ):
-    payload, gotos = await _run_tool(
-        monkeypatch, {"reactionControl": True}, activity_id=ACTIVITY_DIGITS
+    payload, gotos, _ = await _run_tool(
+        monkeypatch, {"permalinkToggle": "liked"}, activity_id=ACTIVITY_DIGITS
     )
     assert gotos == [share_link.post_url(ACTIVITY_DIGITS)], gotos
     assert payload.get("permitted") is True, payload
@@ -887,12 +903,32 @@ async def test_the_tool_copies_on_one_load_and_withholds_the_link_by_default(
     # THE LINK IS NOT IN THE ENVELOPE unless asked for; its presence is.
     assert "link" not in payload, payload
     assert payload["link_withheld"] is True, payload
-    # The price was a REAL reading: one reaction toggle, OFF, unmoved.
+    # THE PRICE IS EVIDENCE, NOT A LABEL: three readings (the check before
+    # any press, and the gate's two), each with a toggle that COULD move.
     assert payload["counters"].get("refused") is None, payload
+    assert payload["price_readings"] == [LIVE_SHAPED_PRICE] * 3, payload
+
+
+async def test_the_tool_refuses_a_page_whose_price_cannot_move_before_any_press(
+    monkeypatch,
+):
+    """The page draws no reaction toggle in either dialect: every counter
+    reads 0 and none could move. Refused on the first reading -- the menu
+    never opened, the capture never installed, no key pressed."""
+    payload, _, seen = await _run_tool(
+        monkeypatch, {}, probe=_untouched, activity_id=ACTIVITY_DIGITS
+    )
+    assert payload.get("refused") == "price_cannot_move", payload
+    assert payload["pages_loaded"] == 1, payload
+    assert payload["price_readings"] == [
+        {"off_state": 0, "toggle_on": 0, "toggle_off": 0}
+    ], payload
+    assert seen == {"expanded": "false", "box": None, "escapes": 0}, seen
 
 
 async def test_the_tool_returns_the_link_only_when_asked(monkeypatch):
-    payload, _ = await _run_tool(
+    """Also the FEED dialect's price path: off_state 1, no permalink toggle."""
+    payload, _, _ = await _run_tool(
         monkeypatch, {"reactionControl": True},
         activity_id=ACTIVITY_DIGITS, include_link=True,
     )
@@ -901,25 +937,97 @@ async def test_the_tool_returns_the_link_only_when_asked(monkeypatch):
         "carries_activity_id"
     ] is True
     assert "link_withheld" not in payload, payload
+    assert payload["price_readings"][0] == {
+        "off_state": 1, "toggle_on": 0, "toggle_off": 0
+    }, payload
 
 
-async def test_the_tool_refuses_when_the_press_moves_the_reaction_counter(
-    monkeypatch,
+@pytest.mark.parametrize(
+    "config",
+    [
+        {"reactionControl": True, "copyReacts": True},
+        {"permalinkToggle": "liked", "copyReacts": True},
+        {"permalinkToggle": "unliked", "copyReacts": True},
+    ],
+    ids=["feed_dialect", "permalink_liked_to_unliked", "permalink_unliked_to_liked"],
+)
+async def test_the_tool_refuses_when_the_press_moves_the_reaction_toggle(
+    monkeypatch, config
 ):
-    """THE PRICE, SHOWN FAILING END TO END: the copy press also flips the
-    item's reaction toggle, as an outward act would. The tool's own reader
-    must see off_state move and the verdict must refuse -- whatever the
-    clipboard captured."""
-    payload, _ = await _run_tool(
-        monkeypatch, {"reactionControl": True, "copyReacts": True},
-        activity_id=ACTIVITY_DIGITS,
-    )
+    """THE PRICE, SHOWN FAILING END TO END, in every dialect and direction:
+    the copy press also flips the item's reaction toggle, as an outward act
+    would. The tool's own reader must see it move and the verdict must
+    refuse -- whatever the clipboard captured."""
+    payload, _, _ = await _run_tool(monkeypatch, config, activity_id=ACTIVITY_DIGITS)
     assert payload.get("permitted") is False, payload
     assert payload["counters"].get("refused") == "counter_moved", payload
 
 
 async def test_the_tool_refuses_a_bad_id_with_no_load(monkeypatch):
-    payload, gotos = await _run_tool(monkeypatch, {}, activity_id="12a45")
+    payload, gotos, _ = await _run_tool(monkeypatch, {}, activity_id="12a45")
     assert payload.get("refused") == "bad_activity_id", payload
     assert payload["pages_loaded"] == 0, payload
     assert gotos == [], gotos
+
+
+@pytest.mark.parametrize(
+    ("config", "expected"),
+    [
+        ({"permalinkToggle": "liked"}, {"off_state": 0, "toggle_on": 1, "toggle_off": 0}),
+        ({"permalinkToggle": "unliked"}, {"off_state": 0, "toggle_on": 0, "toggle_off": 1}),
+        ({"reactionControl": True}, {"off_state": 1, "toggle_on": 0, "toggle_off": 0}),
+        ({}, {"off_state": 0, "toggle_on": 0, "toggle_off": 0}),
+    ],
+    ids=["permalink_liked", "permalink_unliked", "feed_dialect", "no_toggle"],
+)
+async def test_read_item_price_reads_each_dialect(config, expected):
+    async with _open_fixture(config) as page:
+        assert await share_link.read_item_price(page) == expected
+
+
+@pytest.mark.parametrize(
+    "surface_off_state", [0, True, "3", None], ids=["int", "bool", "string", "none"]
+)
+async def test_an_unread_counter_is_none_never_a_zero(monkeypatch, surface_off_state):
+    """A toggle count that raises, and an off_state that is not an int, both
+    read as None -- and a None prices nothing. Found by a plant that turned an
+    unread toggle into 0 and moved no test (Q4): the exception path had never
+    been driven."""
+    async def surface(page):
+        return {"off_state": surface_off_state}
+
+    monkeypatch.setattr(share_link.dom, "read_reaction_surface", surface)
+
+    class _Unreadable:
+        async def count(self):
+            raise RuntimeError("the page went away")
+
+    class _Page:
+        def locator(self, selector):
+            return _Unreadable()
+
+    reading = await share_link.read_item_price(_Page())
+    # ONLY a true int survives; a bool is an int to Python and not a count.
+    expected_off = surface_off_state if type(surface_off_state) is int else None
+    assert reading == {
+        "off_state": expected_off, "toggle_on": None, "toggle_off": None
+    }, reading
+    assert share_link.price_can_move(reading) is False
+
+
+@pytest.mark.parametrize(
+    ("reading", "can_move"),
+    [
+        ({"off_state": 0, "toggle_on": 1, "toggle_off": 0}, True),
+        ({"off_state": 0, "toggle_on": 0, "toggle_off": 1}, True),
+        ({"off_state": 3, "toggle_on": 0, "toggle_off": 0}, True),
+        ({"off_state": 0, "toggle_on": 0, "toggle_off": 0}, False),
+        ({"off_state": None, "toggle_on": 1, "toggle_off": 0}, False),
+        ({"off_state": 0, "toggle_on": True, "toggle_off": 0}, False),
+        ({"toggle_on": 1, "toggle_off": 0}, False),
+        (None, False),
+    ],
+    ids=["liked", "unliked", "feed", "all_zero", "one_unread", "a_bool", "a_counter_missing", "none"],
+)
+def test_price_can_move(reading, can_move):
+    assert share_link.price_can_move(reading) is can_move

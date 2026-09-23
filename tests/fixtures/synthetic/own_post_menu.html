@@ -56,12 +56,15 @@ Recognised flags, all optional, all default false:
                        cannot see. Counted as an unpatched write.
   itemClickCloses   -- the copy item's own click closes the menu, as a real
                        menu's item usually does; no Escape is then needed.
-  reactionControl   -- draw the item's reaction toggle in its OFF state, the
-                       counter the /feed/ basis prices a press by (off_state
-                       reads 1 with it, 0 without).
-  copyReacts        -- with reactionControl: the copy press ALSO flips the
-                       toggle out of its OFF state, as an outward act would,
-                       so off_state moves 1 -> 0 and the price must refuse.
+  reactionControl   -- draw the item's reaction toggle in the FEED's dialect,
+                       OFF ("Reaction button state: no reaction"): off_state
+                       reads 1 with it, 0 without.
+  permalinkToggle   -- "liked" or "unliked": draw the toggle in the
+                       PERMALINK's dialect instead, measured live as "Unreact
+                       Like" on a liked item ("React Like" is its inferred
+                       OFF form). off_state reads 0 here, which is the point.
+  copyReacts        -- the copy press ALSO flips whichever toggle is drawn,
+                       as an outward act would; the price must refuse.
 
 window.__osClipboardWrites counts an UNPATCHED clipboard write -- a copy
 that reached the function this script captured at load time, before any
@@ -122,12 +125,19 @@ by Escape".
   var trigger1 = buildTrigger("trigger-1");
   root.appendChild(trigger1);
 
+  // [label drawn, label after the toggle flips], per dialect.
+  var REACTION_LABELS = {
+    feed: ["Reaction button state: no reaction", "Reaction button state: like"],
+    liked: ["Unreact Like", "React Like"],
+    unliked: ["React Like", "Unreact Like"]
+  };
+  var dialect = cfg.reactionControl ? "feed" : (cfg.permalinkToggle || null);
   var reaction = null;
-  if (cfg.reactionControl) {
+  if (dialect && REACTION_LABELS[dialect]) {
     reaction = document.createElement("button");
     reaction.type = "button";
     reaction.id = "reaction-toggle";
-    reaction.setAttribute("aria-label", "Reaction button state: no reaction");
+    reaction.setAttribute("aria-label", REACTION_LABELS[dialect][0]);
     reaction.textContent = "Like";
     root.appendChild(reaction);
   }
@@ -241,7 +251,7 @@ by Escape".
       copier();
     }
     if (cfg.copyReacts && reaction) {
-      reaction.setAttribute("aria-label", "Reaction button state: like");
+      reaction.setAttribute("aria-label", REACTION_LABELS[dialect][1]);
     }
     if (cfg.itemClickCloses) {
       closeMenu1();

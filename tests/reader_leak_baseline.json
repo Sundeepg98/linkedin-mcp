@@ -101,6 +101,7 @@
     "server:_resolve_own_item_permalink": "not_driven:raises BrowserUnavailableError",
     "share_link:_clipboard": "not_driven:raises ValueError",
     "share_link:copy_own_post_link": "clean",
+    "share_link:read_item_price": "clean",
     "view_switch:_apply_positions": "clean",
     "view_switch:_option_positions": "clean",
     "view_switch:_pill_positions": "clean",
