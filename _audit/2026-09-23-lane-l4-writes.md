@@ -648,3 +648,27 @@ rewritten).
 still never fired -- and each cell now says the gate reads the relabelled control, since when, and
 which test shows it. What only a live fire settles: the ON label, and whether every live posting
 draws the card's name link the binding reads.
+
+## 11. THE GATES AFTER THE MERGE, AND WHAT DID NOT RUN
+
+On the head carrying the merge and all three follow-ups (commit subject *follow_company reads the
+relabelled posting control (N 46, J 103), anchored the way the Page root's is*):
+
+* **The census instruments, every one green:** `scripts/census_completion.py --check` (every
+  headline figure on its pin, every bucket-1 row on its pinned hold), `scripts/check_read_addresses.py`
+  (66 of 66), `scripts/check_jobs_directions.py` (54 of 54), `scripts/check_write_classes.py`
+  (151 lines), `scripts/ruling_holds.py`, `scripts/pin_census_rows.py` (no drift), and
+  `scripts/count_census_states.py --expect J=54,P=54,M=77,N=85` (MATCH at 270).
+* **The impact gate against master's head:** 33 changed paths selected 213 of 234 test files, so
+  the gate WIDENED TO THE FULL SUITE -- **PASS over 8961 tests in 761.5 s**, the 17 corpus-wide
+  guards among them. The box was quiet when it ran: no other gate and no automation browser
+  running.
+
+**NOT RUN, and what that leaves open:**
+
+* No commit between the merge and the head was gated by the full suite on its own. The merge
+  commit carried one red -- the pair guard reading a sentence of section 9 as a correction, since
+  reworded -- which the full suite at the head no longer shows. The two commits between were
+  gated by their own targeted runs (section 10).
+* No CI on any platform: nothing was pushed. No second cold verification: the lane's budget was
+  one pass, spent before the merge (section 8). Nothing ran live.
