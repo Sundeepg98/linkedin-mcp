@@ -29,6 +29,9 @@ headless Chromium over static HTML with no network.
   in section 7 to the pin or baseline that clears it. It found three moves this record had not listed
   (the pointer graph, the reader baseline, the shard timings), and one pointer this lane moved is NOT
   its to re-pin (`P G3`, section 6.1, finding 5).
+- the one cold verification (section 8, item 7): 21 of 21 PASS, nothing left behind in the worktree.
+  Then a read-only merge dry-run against `master`: six files conflict, and no census row was changed
+  by both sides (section 7, "at the merge").
 
 ## 1. THE DENOMINATOR, DERIVED
 
@@ -326,6 +329,11 @@ from the blocker ledger.
    counts 23 rows of the `/edit/` family moved at once), name theirs as the `/edit/` family ruling; the
    owner decides whether that is `P G3`'s too. Until that edit, `P G3`'s edge must not be re-pinned: a
    re-pin would certify an argument nobody wrote for it.
+   **ON `master` SINCE THIS BRANCH WAS CUT** (read at `ff98a7f`, 30 commits past the base; nothing
+   merged here): lane R returned `P G3`, `G4` and `G5` to GAP, each with a named blocker. `P G3`'s
+   cell still OPENS with `same ruling`, so it is still a positional pointer and the merged tree
+   re-points it exactly as this branch does. The repair is unchanged -- one cell -- and it now belongs
+   to whoever holds `P G3`'s GAP.
 
 ## 7. THE PINS THIS LANE MOVES -- NOT RE-PINNED HERE, AS THE BRIEF ORDERS
 
@@ -404,6 +412,19 @@ report -- the run the brief forbids on this shared box. Writing two entries by h
 table's `_measured` line names the one run that produced every figure in it, and two figures that run
 never measured would sit beside it as if it had.
 
+**AT THE MERGE -- measured, nothing merged.** A read-only `git merge-tree --write-tree` of this
+branch against `master` at `ff98a7f` (30 commits past the base) conflicts in six files and merges the
+other twelve cleanly -- `linkedin_server/writes.py`, `linkedin_server/server.py`,
+`_audit/_census/write-classes.tsv` and every test file among them. Three of the six are generated
+(`_audit/INDEX.md`, `_audit/RULINGS.md`, `_audit/_census/blocker-map.tsv`): regenerate them after the
+merge. `_audit/INSTRUMENTS.md` collides where two sections were appended at the same end: keep both.
+The two census files collide by ADJACENCY ONLY. Compared row by row across the base, `master` and
+this branch, `master` changed 105 rows of the profile slice and 95 of the network slice, this lane 34
+and 2, and NOT ONE row was changed by both -- so each file resolves row by row: `master`'s text for
+every row outside the 36, this lane's for the 36. Every move in this section was measured against
+the base, and `master` has re-pinned since, with the lanes merged into it: apply each as a delta, or
+re-measure on the merged tree.
+
 **NOT A PIN, AND APPLIED HERE:** `tests/test_preview_state_and_click_state.py`'s `REACHED` gained the
 new action (a coverage table, not a count: without it the action would be performable and driven by
 nothing in that file), and `tests/test_write_classes.py` gained two plants.
@@ -424,6 +445,9 @@ so each is listed here by its SUBJECT, which survives a squash or a rebase where
 * *lane L7: the gate record -- the selection's 24 reds each tied to the pin that clears it; P G3's
   moved pointer raised; section 8* -- section 6.1's finding 5, section 7's additions, this section,
   and INSTRUMENTS 70.4-70.5. No code.
+* *lane L7: record the cold verification (21 of 21) and the merge dry-run against master* -- this
+  record only, written AFTER the one cold pass the brief budgets, so it is gated by the document
+  selection (item 6) and not by a second cold pass.
 
 **Gates that ran, and what each said.**
 
@@ -462,14 +486,28 @@ so each is listed here by its SUBJECT, which survives a squash or a rebase where
    of `from_state` in `_live_control` (replaced by the verdict's own constant), the unbounded section
    count (section 4.4) and a test constant carrying LinkedIn's trailing full stop. The identity and
    hygiene guards: 1777 passed. The page-string guards and the readers inventory: 78 passed.
-6. **The diff itself, and the documents at the tip** -- run after the last edit to this record. The
-   diff from the base: 2771 added lines, all ASCII, none carrying an absolute workspace path, a
-   user directory or the operator's name (a byte scan, and a pattern scan whose four planted controls
-   each fire). `scripts/check_cited_shas_resolve.py`: OK, every cited SHA an ancestor of `master`. The
-   impact gate's own selection for this record and the instrument register -- 31 test files, the 17
-   corpus-wide guards among them: **3 failed, 3274 passed**, and the three are the shard-timings test
-   and the two `tests/test_ruling_holds.py` tests, all in section 7's table. The three generators'
-   `--check`: a fixed point.
+6. **The diff itself, and the documents** -- run at the third commit after its last edit, and again
+   at the fourth. At the third: the diff from the base, 2771 added lines, all ASCII, none carrying an
+   absolute workspace path, a user directory or the operator's name (a byte scan, and a pattern scan
+   whose four planted controls each fire); `scripts/check_cited_shas_resolve.py` OK, every cited SHA
+   an ancestor of `master`; the impact gate's own selection for this record and the instrument
+   register -- 31 test files, the 17 corpus-wide guards among them -- **3 failed, 3274 passed**, the
+   three being the shard-timings test and the two `tests/test_ruling_holds.py` tests, all in section
+   7's table; and the three generators' `--check` at a fixed point. At the fourth, on the staged tree
+   before its commit: its own 46 added lines, all ASCII and none carrying a machine path; the
+   cited-SHA guard OK, the `master` hash cited here resolving as an ancestor of `master`; the same
+   31-file selection, **3 failed, 3274 passed**, the same three; the generators at a fixed point.
+7. **The cold verification** -- ONE pass, as the brief budgets, by an implementer child cold to this
+   work, at the third commit, against a closed 21-item checklist, writing nothing in the worktree (its
+   closing status read was empty): **21 PASS, 0 FAIL, 0 NOT RUN.** Measured independently of this
+   lane's own runs: the 24 claimed reds are exactly the reds of the 13 files that hold them (703
+   collected; 24 failed, 679 passed; none extra, none missing), and each is named in section 7's
+   table; the census and pointer-graph moves match section 7 figure for figure; only `P I14` changed
+   state; 2771 added lines scanned, none non-ASCII and none carrying a machine path; one literal call
+   site each of `click`, `fill`, `select_option` and `set_input_files` (an AST walk); the save gate
+   called twice inside `perform`; the lane's three test files, 82 passed; the identity and hygiene
+   guards, 934 passed; `writes_enabled()` False with the flag unset. None of its surprises was a
+   defect.
 
 **NOT RUN, and why:**
 
