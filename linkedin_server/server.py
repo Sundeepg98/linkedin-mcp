@@ -8370,6 +8370,43 @@ async def linkedin_follow_company_page(
         return _error(exc)
 
 
+@mcp.tool()
+async def linkedin_mark_company_interest(
+    job_id: str, confirm_token: str = ""
+) -> dict[str, Any]:
+    """Tell one posting's employer's recruiters you are interested ("I'm interested").
+
+    Same two-step shape and the same five gates as ``linkedin_save_job``: no
+    ``confirm_token``, no action -- you get a block to read and a token that
+    works ONCE, only for this posting, only for this verb, within two minutes.
+    Census row ``P I14``; ``linkedin_job_detail`` reports the control as
+    ``interest_control``.
+
+    WHO SEES IT: that employer's recruiters -- it is FOR them. It is not a post
+    and your network is not told, but it is not private to you either, and a
+    removal later does not un-show it to anyone who already looked.
+
+    THE PREVIEW READS the posting's About-the-company card, which must open by
+    naming the posting's own employer, and requires exactly one control in it
+    wearing the label LinkedIn draws before an interest is signalled. An
+    employer you have ALREADY signalled is refused, not reported: that label
+    has never been captured.
+
+    AFTER THE PRESS the posting is re-rendered: the OFF label still drawn means
+    the interest did NOT land and ``performed`` is ``false`` -- including when
+    LinkedIn asked for a further step, which this server does not take.
+
+    Args:
+        job_id: the numeric LinkedIn job id whose employer you want to signal.
+        confirm_token: leave empty to preview. Pass the token from that
+            preview to actually press "I'm interested".
+    """
+    try:
+        return await _write_tool("mark_company_interest", job_id, confirm_token)
+    except Exception as exc:
+        return _error(exc)
+
+
 # ---------------------------------------------------------------------------
 # The seven that are built, gated, and refuse
 # ---------------------------------------------------------------------------

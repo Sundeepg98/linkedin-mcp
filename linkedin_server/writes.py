@@ -209,7 +209,15 @@ from dataclasses import dataclass, field
 from typing import Any, Optional, Union
 from urllib.parse import urlsplit
 
-from linkedin_server import coerce, dom, landing, shape, uploads
+from linkedin_server import (
+    coerce,
+    company_interest,
+    dom,
+    landing,
+    profile_editor,
+    shape,
+    uploads,
+)
 from linkedin_server.errors import WriteAttemptError
 
 # ---------------------------------------------------------------------------
@@ -941,6 +949,88 @@ SANCTIONED_WRITES: dict[str, WriteSpec] = {
             "needed for the verdict."
         ),
     ),
+    # "I'M INTERESTED", 2026-09-24 (census row ``P I14``, lane L7): privately
+    # telling ONE employer's recruiters he is interested in working there,
+    # pressed in the About-the-company card of one of their postings. The OFF
+    # control is on record in three tracked posting captures and
+    # ``linkedin_job_detail`` has reported it drawn since it shipped; nothing
+    # pressed it. The verdicts live in ``company_interest``; this entry and
+    # the arms below delegate to it.
+    #
+    # BUILT UNDER THE STANDING SHAPE AND NOTHING WIDER: the posting address is
+    # the one save and follow already use, the click is ``perform``'s one
+    # click, and no boundary moved. OFF BY DEFAULT and behind the same
+    # single-use, action-bound, target-bound grant. Its LIVE proof is the
+    # operator's to aim: the act is FOR other people (that employer's
+    # recruiters), so ``OPERATOR-NAMES-THE-TARGET`` picks the posting.
+    "linkedin_mark_company_interest": WriteSpec(
+        action="mark_company_interest",
+        tool_name="linkedin_mark_company_interest",
+        url_template="https://www.linkedin.com/jobs/view/{target}/",
+        url_pattern=re.compile(r"^https://www\.linkedin\.com/jobs/view/(\d{6,})/$"),
+        exempt_substring=None,
+        summary=(
+            "Privately tell the recruiters at one posting's employer that you "
+            "are interested in working there, from the posting itself."
+        ),
+        from_state="not_signalled",
+        to_state="interest_signalled",
+        target_kind="job_id",
+        state_from="posting_interest",
+        direction_source=(
+            "the posting's own About-the-company card, read off the page this "
+            "action clicks on, at no extra page load. MEASURED on three tracked "
+            "posting captures: the card draws one plain button whose only name "
+            "is its text, 'I<apostrophe>m interested' (U+2019), under the "
+            "heading 'Interested in working with us in the future?' beside "
+            "LinkedIn's Help article a1380509. The gate requires the card to "
+            "open by naming the posting's own employer and exactly one control "
+            "in it to wear that label."
+        ),
+        wrong_state_note=(
+            "This gate acts only from the OFF label it has measured. A card "
+            "whose interest section draws any other control is refused, not "
+            "pressed: that is the shape an interest you ALREADY signalled "
+            "would take, and the label LinkedIn draws then has never been "
+            "captured -- so this server cannot recognise it, and pressing it "
+            "could withdraw the interest instead."
+        ),
+        reversibility="STILL-UNKNOWN whether this server can take it back",
+        reversibility_measured=False,
+        reversibility_class="STILL-UNKNOWN",
+        reversibility_evidence=(
+            "NOT MEASURED. LinkedIn's Help article for the feature (a1380509, "
+            "cited by census row J 86) describes removing an interest, and "
+            "census row P I15 is that removal -- but the control it would "
+            "press is the ON-state control, which no capture holds."
+        ),
+        reversible_by=(
+            "HIM, by hand, in LinkedIn's own interface, for now. Census row "
+            "P I15 is the removal; it waits on the label this action's first "
+            "supervised press will draw."
+        ),
+        residue=(
+            "WHO SAW IT. The signal is for that employer's recruiters, and a "
+            "removal later takes it off their list; it does not un-show it to "
+            "anyone who already looked. SECOND: whether ONE press completes the "
+            "act is unmeasured -- LinkedIn may ask for a further step, and this "
+            "server takes none; the fresh render after the press says whether "
+            "the interest landed. THIRD: an employer he has already signalled "
+            "reads UNKNOWN at preview, not 'signalled'."
+        ),
+        spends=(
+            "one of the interest signals LinkedIn allows at a time -- census "
+            "row J 86 quotes its Help article as 'max 50, expires 1 year'. "
+            "Not measured here."
+        ),
+        reversibility_procedure=(
+            "One supervised press on a posting HE names: the receipt's "
+            "after-press reading and the fresh render record the label the "
+            "section's control wears once signalled, which is the anchor the "
+            "removal (P I15) needs and the only evidence that a removal exists "
+            "on this surface at all."
+        ),
+    ),
     "linkedin_set_open_to_work": WriteSpec(
         action="set_open_to_work",
         tool_name="linkedin_set_open_to_work",
@@ -1602,12 +1692,15 @@ SANCTIONED_WRITES: dict[str, WriteSpec] = {
             "measured and would not control."
         ),
         reversibility_procedure=(
-            "Open one editor and census it: whether it renders the CURRENT "
-            "value in its field (which is what makes an edit revertible by "
-            "hand at all), what its save control is called, and whether a "
-            "cancel exists. That requires loading an address the read "
-            "boundary currently forbids, so it is a ruling before it is a "
-            "measurement."
+            "One supervised round trip: change a field, read it back on a "
+            "fresh render, put the previous value back through this same "
+            "action, and read it again. The two facts this sentence used to "
+            "list as unmeasured are measured -- the editor renders the CURRENT "
+            "value (dom.read_self_owned_editor_values reads it), and its commit "
+            "control is 'Save' (2026-08-31), which this write presses since "
+            "2026-09-24 -- and its address is admitted by an exact exemption. "
+            "What only the round trip can show is whether LinkedIn keeps any "
+            "history of the edit, which no read has looked for."
         ),
     ),
     "linkedin_update_setting": WriteSpec(
@@ -4445,6 +4538,29 @@ async def observe(
             same_page_as_action=True,
         )
 
+    if spec.state_from == "posting_interest":
+        # ONE load, of the posting the click lands on -- the ``posting_page``
+        # shape, with the interest control read instead of the follow control.
+        # The employer the posting names is what the card must open with; see
+        # ``company_interest.read_state``.
+        url = str(spec.url_template or "").format(target=target)
+        landed = await _load(navigator, page, url, surface="job posting")
+        facts = await _read_posting_facts(page, target, navigator=navigator)
+        interest, state, why = await company_interest.read_state(
+            page, company=facts.get("company")
+        )
+        facts["interest"] = interest
+        return _record(
+            spec,
+            target=target,
+            facts=facts,
+            facts_url=landed,
+            state=state,
+            state_why=why,
+            state_url=landed,
+            same_page_as_action=True,
+        )
+
     if spec.state_from == "apply_control":
         # ONE load, and the facts and the route come off the same page. The
         # route is read from the CONTROL rather than from the payload, which
@@ -5292,6 +5408,24 @@ _SAVE_FAMILY: frozenset[str] = frozenset({"save_job", "unsave_job"})
 
 PERFORMABLE: frozenset[str] = frozenset(
     {
+        # "I'M INTERESTED", 2026-09-24, census row ``P I14`` (lane L7). Every
+        # clause the others needed is true of it:
+        #
+        #   a measured surface   /jobs/view/<id>/, the address save and follow
+        #                        already act on
+        #   a measured anchor    the OFF label, a plain button in the
+        #                        About-the-company card, on three tracked
+        #                        posting captures
+        #   an aimable target    exactly one such control in a card that opens
+        #                        by naming the posting's own employer
+        #   a real verification  a fresh render of the posting: the OFF label
+        #                        still drawn means NOT signalled
+        #   no new permission    the click is perform()'s existing one
+        #
+        # WHAT IT CANNOT SAY is the ON label -- never captured -- so an
+        # employer already signalled reads UNKNOWN and is refused. ENABLING IS
+        # NOT FIRING: its live proof is aimed by the operator.
+        "mark_company_interest",
         # THE THIRTEENTH, 2026-09-23, census row ``N 47``, and the first write
         # added under the operator's reversible-first-round class since the
         # round's own three. Every clause the others needed is true of it:
@@ -5769,6 +5903,11 @@ def anchor_label_for(
         # to, and already printed in the preview he confirms.
         field, _, _ = str(target or "").partition(TARGET_JOIN)
         return field.strip() or None
+    if spec.action == "mark_company_interest":
+        # THE OFF LABEL, EXACT, measured on three tracked posting captures. The
+        # control's name carries no company; identity comes from the card it
+        # sits in, checked at preview and again at click time.
+        return company_interest.OFF_LABEL
     if spec.action == "follow_company_page":
         # A PREFIX, like the unfollow's, and for the same reason: LinkedIn
         # writes the Page's own name into the label, which makes it a strong
@@ -6141,6 +6280,9 @@ _WHERE_TO_LOOK: dict[str, str] = {
     "follow_company_page": "your followed companies",
     "update_setting": "your dark-mode setting",
     "update_profile_field": "the profile editor for that field",
+    # The card the press was made in, on the posting he named. No other
+    # surface this server may read lists his interest signals.
+    "mark_company_interest": "the About-the-company card on that posting",
     # THE TWELFTH, and the only row here naming a surface this server
     # deliberately will NOT open. Reading the thread is what would settle
     # a send, and it costs a read receipt on a real person -- his to
@@ -6246,11 +6388,13 @@ _VERIFIED_FROM: dict[str, str] = {
         "beside the verdict as newly_observed_reaction_labels."
     ),
     "update_profile_field": (
-        "THE SAME PAGE, and there is no other -- the editor is the only place "
-        "this value lives. So this is a FRESH READ rather than an independent "
-        "corroboration, and the difference between those two is the "
-        "difference between evidence and the appearance of it. What it buys "
-        "is the value as the page holds it now, after the write."
+        "A FRESH NAVIGATION TO THE EDITOR after the Save press, so the value "
+        "read is the one LinkedIn STORED and not the one typed into the "
+        "dialog. Until 2026-09-24 this read the same, still-open dialog and "
+        "could report a change nobody had saved. It is still the same surface "
+        "-- the editor is the only place this value lives -- so this is a new "
+        "render from LinkedIn rather than an independent corroboration, and "
+        "the difference is stated rather than implied."
     ),
     "follow_company": (
         "THE CONTROL THAT WAS JUST CLICKED, on the page it was clicked on. "
@@ -6271,6 +6415,14 @@ _VERIFIED_FROM["send_message"] = (
     "happened, which is the honest shape rather than a shortfall."
 )
 _VERIFIED_FROM["unsave_job"] = _VERIFIED_FROM["save_job"]
+_VERIFIED_FROM["mark_company_interest"] = (
+    "THE SAME POSTING, RE-RENDERED by a fresh navigation, and read in the "
+    "employer's own card. No other surface this server may read lists his "
+    "interest signals, so this is a new render from LinkedIn rather than an "
+    "independent witness. Its NEGATIVE is strong -- the OFF label still drawn "
+    "means the interest was not signalled -- and its positive says only that "
+    "the control moved, because the label it moves to has never been captured."
+)
 _VERIFIED_FROM["follow_company_page"] = (
     "a DIFFERENT surface from the one clicked: Manage Pages, where a followed "
     "Page is a row keyed by the same numeric id this action was granted on. "
@@ -6705,6 +6857,24 @@ async def _live_control(
     still carries exactly one unfollow button, which is the precondition a
     click needs and a list read does not.
     """
+    if spec.action == "mark_company_interest":
+        # THE SAME READER THE PREVIEW USED, ON THE SAME PAGE: freshness, not a
+        # second source. The posting is re-identified first, because the card
+        # must open by naming the employer the posting itself names, and the
+        # click selector is the module's CONSTANT -- strict mode holds it to
+        # the one OFF control in the card.
+        facts = await _read_posting_facts(page, grant.target)
+        _interest, state, why = await company_interest.read_state(
+            page, company=facts.get("company")
+        )
+        # THE VERDICT'S OWN STATE DECIDES WHETHER A SELECTOR IS BUILT, not
+        # ``spec.from_state``: the origin check against the spec is
+        # ``valid_from``'s, in ``perform``, and a second reader of that field
+        # here would be one more meaning nobody ruled.
+        if state != company_interest.NOT_SIGNALLED:
+            return (state, why, "")
+        return (state, why, company_interest.OFF_CONTROL_IN_CARD)
+
     if spec.action == "update_profile_field":
         # AIM FROM THE LIVE CONTROL LIST, never from a remembered selector.
         # ``perform`` has already navigated to the editor, so this reads the
@@ -7371,8 +7541,16 @@ async def _live_control(
     return (state, why, dom.save_control_selector(anchor))
 
 
-async def _editor_value_of(page: Any, field: str) -> tuple[Optional[str], str]:
+async def _editor_value_of(
+    page: Any, field: str, *, when: str = "after the write"
+) -> tuple[Optional[str], str]:
     """The current value of ONE named control in the open editor.
+
+    ``when`` IS PART OF THE ANSWER, added 2026-09-24. Both readings -- the
+    prior value, taken BEFORE the change, and the verification, taken after it
+    -- came back saying "read live from the editor after the write", so the
+    restore block described the value it was protecting as having been read
+    after it was overwritten.
 
     Returns ``(value, why)``; ``value`` is None when it could not be read, and
     None is never collapsed into an empty string -- "I could not read it" and
@@ -7407,7 +7585,7 @@ async def _editor_value_of(page: Any, field: str) -> tuple[Optional[str], str]:
     value = records[0].get("value")
     if value is None:
         return (None, f"{field!r} was found but its value could not be read.")
-    return (str(value), f"read live from the editor after the write.")
+    return (str(value), f"read live from the editor {when}.")
 
 
 async def _verify_after(
@@ -7488,35 +7666,93 @@ async def _verify_after(
             "the action a measured surface, or declare the outcome "
             "unverifiable on its spec and say why."
         )
+    if spec.action == "mark_company_interest":
+        # FIRST, WHAT THE PRESS LEFT IN PLACE -- counts only, and it decides
+        # nothing. It is the one reading that can say a further step OPENED (a
+        # dialog appeared) rather than only that the interest did not land,
+        # and taking that measurement is what a first supervised press is for.
+        in_place = await company_interest.read_after_press(page)
+        left = (
+            f" Before the fresh render, the press had left the card drawing "
+            f"{coerce.as_count(in_place.get('off_in_card'))} OFF control(s) and "
+            f"{coerce.as_count(in_place.get('section_buttons'))} section "
+            f"control(s), with {in_place.get('dialogs')} dialog(s) open."
+        )
+        # THEN A FRESH RENDER OF THE SAME POSTING. Not a second surface --
+        # nothing else this server may read lists his interest signals -- but
+        # a new render from LinkedIn rather than the control that redrew in
+        # place, and the NEGATIVE it can give (the OFF label still drawn) is a
+        # strong answer.
+        url = str(spec.url_template).format(target=url_target_of(spec, grant.target))
+        landed = await _load(navigator, page, url, surface="job posting")
+        try:
+            _assert_landed_on_target(spec, grant, landed)
+        except WriteAttemptError as exc:
+            return (UNKNOWN, str(exc) + left, url)
+        try:
+            facts = await _read_posting_facts(page, grant.target, navigator=navigator)
+        except WriteAttemptError as exc:
+            return (
+                UNKNOWN,
+                "the posting could not be read back after the press "
+                f"({type(exc).__name__}), so its card says nothing about this "
+                "signal." + left,
+                url,
+            )
+        observation_card = await dom.read_company_about_card(page)
+        card = shape.company_about_card(observation_card, company=facts.get("company"))
+        reading = await company_interest.read_interest_control(page)
+        state, why = company_interest.verification_verdict(reading, card)
+        return (state, why + left, url)
+
     if spec.action == "update_profile_field":
-        # THE BEST-VERIFIED WRITE IN THIS PACKAGE, and that is worth saying
-        # plainly because almost nothing else here can say it. publish_post
-        # ships with its outcome DECLARED unverifiable; apply_job can only
-        # establish that it did NOT happen; send_message is the same. This one
-        # can read the field back and see the value it asked for.
+        # A FRESH RENDER OF THE STORED VALUE, NOT THE DIALOG THAT WAS TYPED
+        # INTO -- and until 2026-09-24 it was the dialog. This branch read the
+        # field back on the SAME page, without navigating, so it saw the value
+        # the fill had just put into an editor nobody had saved, and reported
+        # ``field_changed``. With Save never pressed (see EDITOR_SAVE_ACTIONS)
+        # that was a success reported for an edit LinkedIn never stored:
+        # measured by lane L7 over a frozen world whose value persists only if
+        # Save is pressed -- ``performed: true``, ``clicks_made: 0``, the
+        # stored value unchanged.
         #
-        # IT IS A FRESH READ OF THE SAME SURFACE, NOT A SECOND ONE. The editor
-        # is the only place this value lives. What that buys is freshness --
-        # the value as the page holds it now, after the write -- and saying so
-        # is the difference between evidence and the appearance of it.
+        # SO IT NAVIGATES. The editor's own address, through the read door,
+        # renders what LinkedIn STORED; a dialog left open unsaved is discarded
+        # by the navigation, and then this reads the old value and says
+        # ``value_unchanged``. It is still the same SURFACE -- the editor is
+        # the only place this value lives -- but it is a new render from
+        # LinkedIn rather than the page this write typed into, and those are
+        # different witnesses.
         wanted, _, requested = grant.target.partition(TARGET_JOIN)
         wanted = wanted.strip()
-        current, why = await _editor_value_of(page, wanted)
+        editor_url = str(spec.url_template)
+        landed = await _load(navigator, page, editor_url, surface="profile editor")
+        try:
+            _assert_landed_on_target(spec, grant, landed)
+        except WriteAttemptError as exc:
+            return (UNKNOWN, str(exc), editor_url)
+        current, why = await _editor_value_of(
+            page, wanted, when="after the write, on a fresh render of the editor"
+        )
+        # ``read_from`` IS THE ADDRESS ASKED FOR, the ``/in/me/`` spelling,
+        # never the landing: the landing carries his member slug, and the
+        # question this field answers -- which surface was read -- is answered
+        # by the address this package composed.
         if current is None:
-            return (UNKNOWN, why, "")
+            return (UNKNOWN, why, editor_url)
         if current == requested:
             return (
                 "field_changed",
                 f"{wanted!r} now reads back as the value this write asked "
                 f"for. {why}",
-                "",
+                editor_url,
             )
         if prior_value is not None and current == prior_value:
             return (
                 "value_unchanged",
                 f"{wanted!r} still holds exactly what it held before this "
                 f"write, so nothing was changed. {why}",
-                "",
+                editor_url,
             )
         # NEITHER THE REQUESTED VALUE NOR THE OLD ONE. Reported as unknown
         # rather than guessed at: LinkedIn may normalise what it stores, and a
@@ -7528,7 +7764,7 @@ async def _verify_after(
             f"previous one. LinkedIn may have normalised it, or something "
             f"else may have changed it. {why} The exact strings are in this "
             "block for you to compare.",
-            "",
+            editor_url,
         )
 
     if spec.action == "react_to_item":
@@ -7880,6 +8116,17 @@ ADDRESSED_TYPING_ACTIONS: frozenset[str] = frozenset({"send_message"})
 #: something indistinguishable from success. One measured boolean separates
 #: the two surfaces and it changes which instrument works.
 DELTA_SUBMIT_ACTIONS: frozenset[str] = frozenset({"comment_on_item"})
+
+
+#: ACTIONS THAT CHANGE A FIELD IN AN EDITOR AND THEN COMMIT IT WITH ``Save``.
+#: Added 2026-09-24 (lane L7), because ``update_profile_field`` never pressed
+#: Save: after its fill it fell through to the POST composer's gate, which
+#: found no post editor on the intro editor and pressed nothing, and the
+#: verification then read the unsaved dialog back as a success. The gate that
+#: decides this action's press is ``profile_editor.read_save_gate``, and it is
+#: reached after a fill AND after a select -- a select drains before the click
+#: loop, so it has to be asked for there too.
+EDITOR_SAVE_ACTIONS: frozenset[str] = frozenset({"update_profile_field"})
 
 
 async def _comment_submit_gate(
@@ -9052,6 +9299,10 @@ async def perform(
     recipient_gate: Optional[dict[str, Any]] = None
     typeahead_gate: Optional[dict[str, Any]] = None
     send_gate: Optional[dict[str, Any]] = None
+    # THE EDITOR'S COMMIT GATE, for EDITOR_SAVE_ACTIONS only, and the poll
+    # that follows its press. See ``profile_editor``.
+    editor_save_gate: Optional[dict[str, Any]] = None
+    editor_close: Optional[dict[str, Any]] = None
 
     # THE TYPING PLAN, and it is a QUEUE FOR THE SAME REASON THE CLICK PLAN IS.
     #
@@ -9133,7 +9384,9 @@ async def perform(
     prior_why = ""
     if spec.action == "update_profile_field":
         prior_field, _, _ = grant.target.partition(TARGET_JOIN)
-        prior_value, prior_why = await _editor_value_of(page, prior_field.strip())
+        prior_value, prior_why = await _editor_value_of(
+            page, prior_field.strip(), when="before the write"
+        )
 
     selects_made = 0
     uploads_made = 0
@@ -9267,6 +9520,15 @@ async def perform(
                 select_selector, label=select_text, timeout=CLICK_TIMEOUT_MS
             )
             selects_made += 1
+        # THE COMMIT, FOR A CHANGE MADE BY CHOOSING. A select drains before
+        # the click loop below, so an editor action asks its save gate HERE;
+        # one that changed its field by typing asks inside the loop, after the
+        # fill. Either way the press joins the ONE click queue -- no new click
+        # call site is bought. Until 2026-09-24 neither path asked at all.
+        if spec.action in EDITOR_SAVE_ACTIONS and selects_made:
+            editor_save_gate = await profile_editor.read_save_gate(page)
+            if editor_save_gate["proceed"]:
+                click_plan.append(editor_save_gate["selector"])
         # ONE LOOP OVER TWO QUEUES, AND CLICKS DRAIN FIRST.
         #
         # THIS WAS TWO SEQUENTIAL LOOPS -- every fill, then every click -- and
@@ -9362,12 +9624,34 @@ async def perform(
                 comment_gate = await _comment_submit_gate(page, before_names)
                 if comment_gate["proceed"]:
                     click_plan.append(comment_gate["selector"])
+            elif spec.action in EDITOR_SAVE_ACTIONS:
+                # THE EDITOR'S OWN COMMIT, AND NOT THE COMPOSER'S. This action
+                # reached the ``else`` below until 2026-09-24, where the POST
+                # composer's gate looked for a post editor on the intro editor,
+                # found none, and pressed nothing -- so Save was never pressed.
+                editor_save_gate = await profile_editor.read_save_gate(page)
+                if editor_save_gate["proceed"]:
+                    click_plan.append(editor_save_gate["selector"])
             else:
                 publish_gate = await _publish_submit_gate(page)
                 if publish_gate["proceed"]:
                     click_plan.append(publish_gate["selector"])
     except Exception as exc:  # noqa: BLE001 - reported, never re-raised
         click_error = f"{type(exc).__name__}: {exc}"
+
+    # THE EDITOR CLOSING, polled after the Save press so the verification's
+    # fresh navigation does not race LinkedIn's own save request -- navigating
+    # away mid-request can abort it. A measurement, never a gate: the
+    # verification reads the STORED value on a new render whatever this says.
+    if (
+        editor_save_gate is not None
+        and editor_save_gate.get("proceed")
+        and clicks_made
+    ):
+        try:
+            editor_close = await profile_editor.wait_for_editor_to_close(page)
+        except Exception:  # noqa: BLE001 - a measurement, not a gate
+            editor_close = {"closed": None, "polls": 0}
 
     # The label the control changed INTO. Read for a human, never branched on.
     # This settled the missing half of shape.SAVE_LABELS on 2026-08-30 -- it
@@ -9718,6 +10002,29 @@ async def perform(
                 "refused_condition": publish_gate.get("refused_condition"),
                 "why": publish_gate.get("why"),
                 "observed": publish_gate.get("observed"),
+            }
+        ),
+        # WHAT THE EDITOR'S SAVE GATE SAW, for EDITOR_SAVE_ACTIONS. Null for
+        # every other action, and null on an editor action that never reached
+        # it (the change could not be entered). ``notify_network`` is the
+        # reading condition 1 of SELF-PROFILE-EDITS-NOT-OUTWARD turns on, and
+        # its sentence says whether it CONFIRMED anything.
+        "editor_save_gate": (
+            None
+            if editor_save_gate is None
+            else {
+                "proceeded": bool(editor_save_gate.get("proceed")),
+                "refused_condition": editor_save_gate.get("refused_condition"),
+                "why": editor_save_gate.get("why"),
+                "save_controls": editor_save_gate.get("save_controls"),
+                "notify_network": editor_save_gate.get("notify_network"),
+                "unnamed_switches": editor_save_gate.get("unnamed_switches"),
+                "notify_network_means": profile_editor.notify_network_note(
+                    editor_save_gate
+                ),
+                "editor_closed_after_save": (
+                    None if editor_close is None else editor_close.get("closed")
+                ),
             }
         ),
         # WHAT THE APPLY SUBMIT GATE SAW, for the one action that has one.

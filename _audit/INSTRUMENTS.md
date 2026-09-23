@@ -10066,3 +10066,60 @@ per-capture shape probes, the offline run of the collections reader over the
 raw capture, the line-ending census -- are declared disposable. What they
 measured is re-derived by the checker on every run, carried into a committed
 fixture by a builder, or recorded with its number in the audit.
+
+## 70. THE BEST-VERIFIED WRITE NEVER PRESSED SAVE, AND A WRITE AIMED BY ITS CARD (lane-l7-profile-writes, 2026-09-24)
+
+**Registered 2026-09-24.** Full record: `_audit/2026-09-24-lane-l7-profile-writes.md`.
+Numbered 70 by the orchestrator's allocation for this lane, so parallel appends
+do not collide.
+
+### 70.1 A VERIFICATION THAT READS THE PAGE IT TYPED INTO CANNOT FAIL
+
+`linkedin_update_profile_field` filled or selected a field and never pressed
+the editor's `Save`: after its fill it fell through to the POST composer's gate,
+which found no post editor on the intro editor and pressed nothing, and a
+select never reached a gate at all. Its verification then re-read the SAME,
+still-open dialog -- which held exactly the value just typed -- and reported
+`field_changed`. So the write the package called its best verified returned
+`performed: true` for an edit LinkedIn never stored, and the six
+COVERED-UNFIRED intro-editor rows rested on a check that could not fail.
+
+    A READ-BACK IS EVIDENCE ONLY IF IT COULD HAVE COME BACK DIFFERENT. THE
+    DIALOG THAT WAS TYPED INTO WILL ALWAYS AGREE WITH THE TYPING; THE VALUE
+    THE SITE STORED IS THE ONLY WITNESS.
+
+The instrument that exposed it is a frozen world with STATE: the editor's
+value persists only if its Save handler ran before the next navigation, which
+is how a server-backed form behaves and what no static fixture can model. Every
+earlier fixture served one fixed document per url, so "filled" and "saved" were
+indistinguishable in it -- the defect was invisible to the suite for three
+weeks for exactly that reason.
+
+### 70.2 A CAPABILITY SHIPPED FOR AN ACT IS AIMED BY THE CONTAINER, NOT BY THE LABEL
+
+"I'm interested" carries no company in its name; the employer it signals is
+whoever owns the card it sits in. The gate therefore takes identity from the
+CARD (it must open by naming the posting's own employer -- the rule
+`linkedin_job_detail` already applied to its facts) and only the aim from the
+label (exactly one OFF-labelled control inside that card). An unmeasured ON
+label reads unknown and is refused, and the verification's negative (the OFF
+label still drawn on a fresh render) is its strong answer.
+
+### 70.3 THE ENTRIES
+
+| path | shown failing by |
+|---|---|
+| `linkedin_server/profile_editor.py` -- `save_gate_verdict`, `read_save_gate`, `wait_for_editor_to_close`, `notify_network_note`; and in `writes.py`: `EDITOR_SAVE_ACTIONS`, the save gate asked after a fill and after a select, the fresh-render branch of `_verify_after`, `_editor_value_of(when=)` | `tests/test_profile_editor_commit.py`, over a stateful frozen world. Against the unrepaired `writes.py` (the `9c219c8` file swapped in, then swapped back and byte-compared): 4 failed -- `performed` true with the stored value unchanged; `field_changed` reported for a change nobody saved; a select never saved; the prior value described as read "after the write". After: 24 passed, including notify-network ON refusing the press (`4_notify_network_not_off`), an unnamed switch reported `NOT CONFIRMED` rather than off, a disabled Save, LinkedIn declining the value (`performed: false`), seven verdict refusals by code, the selector matching nothing once the dialog closes, and the restore path run as a round trip whose before and after readings are equal |
+| `linkedin_server/company_interest.py` -- `read_interest_control`, `interest_verdict`, `read_state`, `read_after_press`, `verification_verdict`; the `mark_company_interest` spec and arms in `writes.py`; `server.linkedin_mark_company_interest` | `tests/test_mark_company_interest.py`: three tracked captures read `not_signalled`, a skeleton and a shell read unknown; four DERIVED worlds (unmeasured ON label, two OFF controls, another company's card, no control) refused at the verdict and at the preview with no grant minted and no page string quoted; the three grant controls (no grant, another target or verb on the same posting, a second use) with zero navigations on every refusal; four end-to-end runs (moved control true, OFF label still drawn false, a section that vanished unknown, another company's card unknown). The SECTION BOUND was shown failing first: the unbounded version climbed from the Help link to the nearest ancestor holding any button, so a card with the interest control removed read "the section draws 2 controls" -- the card's Follow and 'more' toggle -- which the verification would have read as a control that MOVED; bounded to the section's own keyed block, it counts 0 |
+| `scripts/check_write_classes.py` -- R3 lines may carry `built:` / `queued:` | `tests/test_write_classes.py`: an R3 queue is green; an R3 build naming a non-performable action on a row still GAP is convicted twice by name; the R2 plant still convicts. Against the old rule, the real table as this lane left it is red on all 36 of its lines |
+
+### 70.4 DECLARED DISPOSABLE
+
+The scratchpad scripts this lane ran -- the red reproduction of the missing
+Save, the offline run of the interest reader over the five posting captures,
+the counts over the local captures that found the Open-to explainer anchors,
+the default-activity form anchor and the job-seeker preferences anchor, and
+the two generators that wrote the census cells and the class-table lines --
+are declared disposable. What they measured is recorded with its numbers in
+the lane record, and the two behaviours they established are carried by the
+two test files above, which re-derive them on every run.

@@ -249,6 +249,15 @@ REACHED: dict[str, tuple[str, str, str]] = {
         COMPANY_PAGE_FOLLOW_MARKUP,
         COMPANY_PAGE_FOLLOW_ID,
     ),
+    # 2026-09-24 (census row ``P I14``, lane L7). A TRACKED capture: the OFF
+    # control is drawn in the About-the-company card of this posting, and the
+    # preview and the click read it through ONE verdict,
+    # ``company_interest.read_state``.
+    "mark_company_interest": (
+        "tests/fixtures/job_detail_hydrated.html",
+        markup("job_detail_hydrated"),
+        JOB,
+    ),
 }
 
 #: WHAT THIS INSTRUMENT CANNOT REACH, WITH THE REASON -- AND THE REASON IS NOT
