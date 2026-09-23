@@ -349,7 +349,11 @@ REGISTER: tuple = (
     # ----------------------------------------------------------- write scope
     Ruling(
         id="NO-IRREVERSIBLE-WRITE-IS-FIRED",
-        claim="No irreversible write is fired at a real target -- not an "
+        status="AMENDED",
+        claim="AMENDED 2026-09-23 by WRITE-CLASS-B: irreversible writes MAY "
+              "now be fired, but ONLY at a target the operator names -- the "
+              "consent-per-act half below still binds. Original: "
+              "No irreversible write is fired at a real target -- not an "
               "application, a post, an invitation, a message or a comment. "
               "Permission to BUILD a capability is not consent to perform a "
               "specific act against a specific person. Writes may be "
@@ -598,7 +602,10 @@ REGISTER: tuple = (
     ),
     Ruling(
         id="DO-NOT-OPEN-MESSAGING",
-        claim="Do not open messaging. Opening it opens a surface whose cost "
+        status="SUPERSEDED",
+        claim="SUPERSEDED 2026-09-23 by WRITE-CLASS-B: the operator ruled that "
+              "messaging MAY be opened. Original: "
+              "Do not open messaging. Opening it opens a surface whose cost "
               "lands on other people, and the row is DEFERRED BY RULING.",
         binds="address family -- /messaging/",
         document="_audit/2026-08-31-linkedin-finish.md",
@@ -730,6 +737,117 @@ REGISTER: tuple = (
              "reader guard discovers only `async def` functions taking a "
              "`page` and the 48 tool bodies that funnel into `_error` are "
              "therefore outside it, permanently.",
+    ),
+
+    # ------------------------------ 2026-09-23: write class (b), live budget,
+    # and the calls the operator delegated to the orchestrator
+    Ruling(
+        id="LIVE-BUDGET-40-LOADS",
+        claim="A live session may use up to 40 LinkedIn page loads, serial, "
+              "at least 20 seconds apart -- a ceiling, not a target; one "
+              "browser driver at a time.",
+        binds="live lanes -- page loads per session",
+        document="_audit/2026-09-23-rulings-write-class-and-delegated-calls.md",
+        anchor='verbatim "go, 40 loads is fine")',
+        note="Operator's words: \"go, 40 loads is fine\". Raised from 15 per "
+             "wave, to feed one live lane from several offline build lanes.",
+    ),
+    Ruling(
+        id="OUTWARD-ACTS-NEED-THE-OPERATOR",
+        claim="Only acts toward other people, or irreversible ones, need the "
+              "operator. Every other call -- search keywords, self-only "
+              "presses, his own notification state, allowlist and press-gate "
+              "defaults -- is the orchestrator's, on evidence, recorded here "
+              "and overridable.",
+        binds="decision routing -- what is escalated to the operator",
+        document="_audit/2026-09-23-rulings-write-class-and-delegated-calls.md",
+        anchor="RULED: (operator, 2026-09-23 18:13) Only actions that act as "
+               "the operator",
+    ),
+    Ruling(
+        id="WRITE-CLASS-B",
+        claim="The package may CONNECT, MESSAGE, APPLY, POST and OPEN "
+              "MESSAGING on the operator's account, behind the single-use "
+              "grant model and off by default. Lifts the read-only rule, the "
+              "apply/connect/InMail cut and DO-NOT-OPEN-MESSAGING.",
+        binds="capability class -- outward writes and opening messaging",
+        document="_audit/2026-09-23-rulings-write-class-and-delegated-calls.md",
+        anchor='RULED: (operator, 2026-09-23 18:15, verbatim "b") The package '
+               'may CONNECT,',
+        aliases=("ruling (b)", "the write class (b)"),
+        note="Operator's word: \"b\". Supersedes DO-NOT-OPEN-MESSAGING and "
+             "amends NO-IRREVERSIBLE-WRITE-IS-FIRED; its target condition is "
+             "OPERATOR-NAMES-THE-TARGET.",
+    ),
+    Ruling(
+        id="OPERATOR-NAMES-THE-TARGET",
+        claim="A live proof of an outward act fires ONLY at a target the "
+              "operator names -- whom to connect with or message, which job to "
+              "apply to, what to post. Never a real person or job chosen by "
+              "the package or an agent.",
+        binds="live proofs -- every outward write",
+        document="_audit/2026-09-23-rulings-write-class-and-delegated-calls.md",
+        anchor="RULED: (operator, 2026-09-23 18:15, same ruling) A live proof "
+               "of an outward",
+    ),
+    Ruling(
+        id="VIEW-SWITCH-PRESS-RESTORED",
+        claim="A press that changes which rows a view shows is permitted if "
+              "the view is RESTORED afterwards and a before/after reading "
+              "proves it.",
+        binds="press gate -- sort and filter controls",
+        document="_audit/2026-09-23-rulings-write-class-and-delegated-calls.md",
+        anchor="RULED: (orchestrator, 2026-09-23, delegated) VIEW-SWITCH "
+               "PRESSES are",
+        note="Orchestrator's call under OUTWARD-ACTS-NEED-THE-OPERATOR; "
+             "overridable.",
+    ),
+    Ruling(
+        id="D1-SEARCH-AS-READS",
+        claim="Search keywords and LinkedIn-written facets are permitted as "
+              "reads: values from tool arguments only, never an identifying "
+              "value of the operator, at most 5 test searches per session.",
+        binds="read boundary -- search keywords and facets",
+        document="_audit/2026-09-23-rulings-write-class-and-delegated-calls.md",
+        anchor="RULED: (orchestrator, 2026-09-23, delegated) D1, SEARCH "
+               "KEYWORDS AND",
+        aliases=("D1",),
+        note="Orchestrator's call under OUTWARD-ACTS-NEED-THE-OPERATOR; "
+             "overridable.",
+    ),
+    Ruling(
+        id="NOTIFICATIONS-UNREAD-SPEND",
+        claim="Loading /notifications/ is PERMITTED: it only clears the "
+              "operator's own unread badge. Answers the question N 20 and "
+              "N 45 were held on.",
+        binds="address family -- /notifications/",
+        document="_audit/2026-09-23-rulings-write-class-and-delegated-calls.md",
+        anchor="RULED: (orchestrator, 2026-09-23, delegated) Loading "
+               "/notifications/ is",
+        note="Orchestrator's call under OUTWARD-ACTS-NEED-THE-OPERATOR; "
+             "overridable. Registered under the id the census holds used "
+             "for the open question, so the holds resolve to the answer.",
+    ),
+    Ruling(
+        id="OWN-INBOX-READS-COVERED-BY-B",
+        claim="Reading the operator's own inbox, including opening threads, "
+              "is covered by ruling (b) with no per-fire go-ahead; proofs "
+              "prefer threads already read so no new read receipt is sent.",
+        binds="live proofs -- /messaging/ reads",
+        document="_audit/2026-09-23-rulings-write-class-and-delegated-calls.md",
+        anchor="RULED: (orchestrator, 2026-09-23, applying (b)) Reading the "
+               "operator",
+    ),
+    Ruling(
+        id="IN-ME-NO-BLANKET-BAR",
+        claim="/in/me/ presses get no blanket sensitivity-basis bar; each "
+              "control is judged on evidence like any other press.",
+        binds="press gate -- /in/me/ controls",
+        document="_audit/2026-09-23-rulings-write-class-and-delegated-calls.md",
+        anchor="RULED: (orchestrator, 2026-09-23, delegated) /in/me/ presses "
+               "get NO blanket",
+        note="Orchestrator's call under OUTWARD-ACTS-NEED-THE-OPERATOR; "
+             "overridable.",
     ),
 )
 
