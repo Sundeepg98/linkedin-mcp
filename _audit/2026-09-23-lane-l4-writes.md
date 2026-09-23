@@ -330,13 +330,20 @@ the InMail response controls), then one supervised send. Neither can be undone.
 ## 6. COMMITS, GATES, AND THE PINS THIS LANE MOVES
 
 **Commits** (worktree branch `worktree-agent-a6aa0720780262d33` only; nothing pushed; no AI
-attribution in any message):
+attribution in any message). **THESE SHAS ARE ON THAT BRANCH AND NOWHERE ON `master`** until the
+orchestrator merges it -- `b35ed54`, `3e91d6b`, `d15225e`, `36a5850` -- so each is listed with
+its commit SUBJECT, which survives a squash or a rebase where the hash does not:
 
-* `b35ed54` -- the classification: the table, its checker, 20 tests, register 61.1-61.4.
-* `3e91d6b` -- `N 47` built, the second-use guard, the coercion and label repairs, the R2
-  build-ready columns and their three plants, register 61 completed, the ASCII repairs.
-* `d15225e` -- the three gate-2 repairs below, the gate results and section 7.
-* a last documentation-only commit carrying the cold verification's outcome (section 8).
+* `b35ed54` -- *census(write): class all 151 write-direction GAP rows R1/R2/R3, derived from the
+  act* -- the table, its checker, 20 tests, register 61.1-61.4.
+* `3e91d6b` -- *writes: follow an organisation Page from the Page itself (N 47), ready to fire,
+  unfired* -- the build, the second-use guard, the coercion and label repairs, the R2 build-ready
+  columns and their three plants, register 61 completed, the ASCII repairs.
+* `d15225e` -- *gate 2 repairs: three guards convicted text the N 47 build wrote* -- the three
+  repairs below, the gate results and section 7.
+* `36a5850` -- *lane L4 record: gate 3, what did not run, and the one cold verification* --
+  section 8; and one last commit after it, *lane L4 record: disclose the branch-only SHAs*, which
+  adds this paragraph after gate 4 (below) convicted its absence.
 
 **Expected pin moves -- NOT re-pinned here, as the brief orders.** `scripts/census_completion.py`,
 run on this branch after the build, prints exactly five moved figures and nothing else:
@@ -383,6 +390,14 @@ files: 49 -> 50 tools, `PERFORMABLE` 12 -> 13, `SANCTIONED_WRITES` 13 -> 14, pin
   O(change) because gate 2 had just run the whole suite at `3e91d6b`. PASS over 38 test files (2027
   tests, the 17 corpus-wide guards among them); NOT CHECKED 179 of 217 files, about 4067 of 6094
   tests; wall 568.9 s.
+* Gate 4, over `36a5850`: `--against d15225e`, the documentation delta -- 25 test files, the 17
+  corpus-wide guards among them: **1 failed, 1684 passed in 171 s. REFUSED** by
+  `test_a_cited_sha_resolves.py::test_no_new_unresolvable_citation_appears`. This section cited
+  `3e91d6b` twice in the guard's "at <sha>" slot, and no lane commit is an ancestor of `master`
+  before the merge. Repaired the way the guard asks: every hash kept, the branch-only status
+  disclosed and each commit's subject recorded, in the paragraph above the commit list.
+* Gate 5, over the disclosure commit: `--against 36a5850` -- recorded in the lane's final report
+  rather than here, because a sentence about a gate cannot be written before the gate runs.
 * **NOT RUN:** the full suite at the final HEAD (it last ran whole at `3e91d6b`, with exactly the
   three reds above); `--against b0d3ab8` at the final HEAD, which would widen to that same full
   suite; CI on any platform (nothing was pushed); any live run of anything.
@@ -440,4 +455,4 @@ own pattern rather than the work:
 
 As briefed, that was the one pass; nothing was re-verified after it. The only changes since are
 this section and section 6's commit and gate lists -- documentation, with the three generated
-files re-run to a fixpoint and unchanged -- gated in the last commit.
+files re-run to a fixpoint -- and the gate-4 repair that section 6 describes.
