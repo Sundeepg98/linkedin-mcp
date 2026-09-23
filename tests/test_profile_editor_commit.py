@@ -25,6 +25,15 @@ persists only on a Save press is how a server-backed form behaves, and a
 notify-network switch is a control NOTHING ON RECORD says the intro editor
 draws -- it is planted so the refusal that guards it can be seen firing.
 
+CONDITION 1, SINCE THE INTEGRATION OF 2026-09-24. The gate presses Save only
+when condition 1 of ``SELF-PROFILE-EDITS-NOT-OUTWARD`` is ESTABLISHED: by a
+notify control in the dialog read off, or -- the amendment, whose reader does
+not exist yet -- by his account-level setting read off before the edit. Nothing
+supplies the second, so a world whose dialog draws no notify control is now
+REFUSED (``5_condition_1_not_established``). The tests that need the press
+therefore plant the switch READ OFF (:data:`_CONFIRMABLE`); that is the only
+basis the unwired gate accepts, and the planting is as invented as it was.
+
 NOTHING HERE REACHES LINKEDIN. A local headless Chromium over ``set_content``.
 """
 from __future__ import annotations
@@ -60,6 +69,10 @@ _PROFILE_HTML = (
 #: INVENTED values, distinctive so a leak would be visible.
 _OLD_CITY = "Oldtownvale"
 _NEW_CITY = "Newtownvale"
+
+#: A world in which condition 1 is ESTABLISHED the only way the unwired gate
+#: accepts: a planted notify control in the dialog, read off.
+_CONFIRMABLE = {"notify": "off"}
 
 
 class _EditorWorld:
@@ -175,7 +188,7 @@ async def _write(page, world: _EditorWorld, field: str, value: str) -> dict:
 async def test_performed_true_means_the_stored_value_changed(writes_on, browser_page):
     """SHOWN FAILING against the unrepaired module: there, this returned
     ``performed: true`` with ``clicks_made: 0`` and the store unchanged."""
-    world = _EditorWorld()
+    world = _EditorWorld(**_CONFIRMABLE)
     receipt = await _write(browser_page, world, "City", _NEW_CITY)
     assert receipt["performed"] is True, receipt["verification"]
     assert world.store["City"] == _NEW_CITY, (
@@ -183,6 +196,7 @@ async def test_performed_true_means_the_stored_value_changed(writes_on, browser_
     )
     assert receipt["clicked"]["clicks_made"] == 1
     assert receipt["editor_save_gate"]["proceeded"] is True
+    assert receipt["editor_save_gate"]["condition_1"] == "dialog_control_off"
     assert receipt["editor_save_gate"]["editor_closed_after_save"] is True
     assert receipt["verification"]["read_from"] == _EDITOR_URL
     assert MEMBER_SLUG not in receipt["verification"]["read_from"]
@@ -211,7 +225,7 @@ async def test_without_the_press_the_verification_now_says_not_performed(
 
 async def test_a_chosen_value_is_saved_too(writes_on, browser_page):
     """A select drains BEFORE the click loop, so the gate is asked there too."""
-    world = _EditorWorld()
+    world = _EditorWorld(**_CONFIRMABLE)
     receipt = await _write(browser_page, world, "Month", "March")
     assert world.store["Month"] == "March"
     assert receipt["performed"] is True
@@ -220,7 +234,7 @@ async def test_a_chosen_value_is_saved_too(writes_on, browser_page):
 
 async def test_linkedin_declining_the_value_reads_as_not_performed(writes_on, browser_page):
     """The press happens, the dialog stays open, nothing is stored."""
-    world = _EditorWorld(save_rejects=True)
+    world = _EditorWorld(save_rejects=True, **_CONFIRMABLE)
     receipt = await _write(browser_page, world, "City", _NEW_CITY)
     assert receipt["clicked"]["clicks_made"] == 1
     assert receipt["editor_save_gate"]["editor_closed_after_save"] is False
@@ -250,20 +264,47 @@ async def test_a_notify_network_control_that_is_off_is_confirmed_off(writes_on, 
     receipt = await _write(browser_page, world, "City", _NEW_CITY)
     gate = receipt["editor_save_gate"]
     assert gate["proceeded"] is True and gate["notify_network"] == "off"
+    assert gate["condition_1"] == "dialog_control_off"
     assert gate["notify_network_means"].startswith("CONFIRMED OFF")
     assert world.store["City"] == _NEW_CITY
 
 
-async def test_an_unnamed_switch_is_not_confirmed_off(writes_on, browser_page):
+async def test_neither_basis_for_condition_1_refuses_the_press(writes_on, browser_page):
+    """THE FAIL-SAFE DEFAULT, through the real preview, consume and perform.
+
+    The dialog draws no notify control, and nothing supplies the account-level
+    reading the amended condition 1 would accept (``perform`` does not pass
+    one: the reader does not exist yet). Neither route establishes the
+    condition, so the gate refuses BEFORE the press -- NEEDS-OPERATOR -- and
+    nothing is stored. Until 2026-09-24 this world was pressed and saved, with
+    'NOT DRAWN' in the receipt's words as the only trace."""
+    world = _EditorWorld()
+    receipt = await _write(browser_page, world, "City", _NEW_CITY)
+    gate = receipt["editor_save_gate"]
+    assert gate["proceeded"] is False
+    assert gate["refused_condition"] == "5_condition_1_not_established"
+    assert gate["notify_network"] == "not_drawn" and gate["condition_1"] is None
+    assert "NEEDS-OPERATOR" in gate["why"]
+    assert gate["notify_network_means"].startswith("NOT ESTABLISHED")
+    assert receipt["clicked"]["clicks_made"] == 0
+    assert world.store["City"] == _OLD_CITY
+    assert receipt["performed"] is False
+
+
+async def test_an_unnamed_switch_beside_no_notify_control_refuses_too(writes_on, browser_page):
     """The measured intro editor draws two switches with NO accessible name.
-    Either could be a notify toggle, so 'not drawn' beside them is not
-    'confirmed off', and the receipt must say so rather than imply it."""
+    Either could be a notify toggle, so 'not drawn' beside them establishes
+    nothing, and the receipt says so rather than implying it."""
     world = _EditorWorld(unnamed_switch=True)
     receipt = await _write(browser_page, world, "City", _NEW_CITY)
     gate = receipt["editor_save_gate"]
+    assert gate["proceeded"] is False
+    assert gate["refused_condition"] == "5_condition_1_not_established"
     assert gate["notify_network"] == "not_drawn"
     assert gate["unnamed_switches"] == 1
-    assert gate["notify_network_means"].startswith("NOT CONFIRMED")
+    assert gate["notify_network_means"].startswith("NOT ESTABLISHED")
+    assert receipt["clicked"]["clicks_made"] == 0
+    assert world.store["City"] == _OLD_CITY
 
 
 async def test_a_disabled_save_is_not_pressed(writes_on, browser_page):
@@ -302,7 +343,7 @@ async def _reading(page, world: _EditorWorld) -> dict:
 
 
 async def test_the_restore_path_round_trips_and_the_readings_prove_it(writes_on, browser_page):
-    world = _EditorWorld()
+    world = _EditorWorld(**_CONFIRMABLE)
     before = await _reading(browser_page, world)
     assert before == {"City": _OLD_CITY, "Month": "January"}
 
@@ -401,22 +442,27 @@ _CITY = _field("City", type="text")
          "4_notify_network_not_off"),
         ({"fields": [_SAVE, _field("Notify network", role="switch", checked=None)]},
          "4_notify_network_not_off"),
+        ({"fields": [_SAVE, _CITY]}, "5_condition_1_not_established"),
     ],
     ids=["no-editor", "no-save", "two-saves", "save-disabled", "two-notify",
-         "notify-on", "notify-unreadable"],
+         "notify-on", "notify-unreadable", "neither-basis"],
 )
 def test_every_refusal_has_its_own_code(reading, code):
     gate = profile_editor.save_gate_verdict(reading)
     assert gate["proceed"] is False and gate["refused_condition"] == code
     assert gate["selector"] == profile_editor.SAVE_SELECTOR
+    assert gate["condition_1"] is None
 
 
 def test_a_button_named_like_a_notify_control_is_not_the_setting():
-    """Only a CHECKABLE control is a setting the save carries."""
+    """Only a CHECKABLE control is a setting the save carries: the button is
+    read as NO notify control (condition 1 unestablished, code 5), never as a
+    notify control of unknown state (which would be code 4)."""
     gate = profile_editor.save_gate_verdict(
         {"fields": [_SAVE, _field("Share with network", tag="button", source="text")]}
     )
-    assert gate["proceed"] is True and gate["notify_network"] == "not_drawn"
+    assert gate["notify_network"] == "not_drawn"
+    assert gate["refused_condition"] == "5_condition_1_not_established"
 
 
 def test_no_why_quotes_a_control_name_the_page_chose():
@@ -450,3 +496,68 @@ def test_the_action_is_the_only_editor_save_action():
     assert writes.EDITOR_SAVE_ACTIONS == frozenset({_ACTION})
     assert _ACTION in writes.PERFORMABLE
     assert re.search(r"fresh navigation", writes._VERIFIED_FROM[_ACTION], re.I)
+
+
+# ---------------------------------------------------------------------------
+# 6. THE SEAM for the amended condition 1: the account-level reading
+# ---------------------------------------------------------------------------
+
+_NAMED_SWITCH_OFF = _field("Notify network", type="checkbox", checked=False)
+_NAMED_SWITCH_ON = _field("Notify network", type="checkbox", checked=True)
+_UNNAMED_SWITCH = _field("", source="none", type="checkbox", role="switch", checked=False)
+
+
+@pytest.mark.parametrize("account", [None, "on", "unknown", "OFF", "yes", ""])
+def test_no_dialog_control_and_no_account_off_is_not_established(account):
+    """Anything but the exact reading 'off' establishes nothing -- including a
+    value the seam does not recognise, which is refused rather than trusted."""
+    gate = profile_editor.save_gate_verdict(
+        {"fields": [_SAVE, _CITY]}, account_share_updates=account
+    )
+    assert gate["proceed"] is False
+    assert gate["refused_condition"] == "5_condition_1_not_established"
+    assert "NEEDS-OPERATOR" in gate["why"]
+
+
+def test_an_account_level_off_establishes_it_where_the_dialog_draws_nothing():
+    gate = profile_editor.save_gate_verdict(
+        {"fields": [_SAVE, _CITY]}, account_share_updates="off"
+    )
+    assert gate["proceed"] is True
+    assert gate["condition_1"] == "account_setting_off"
+    assert profile_editor.notify_network_note(gate).startswith("CONFIRMED OFF AT THE ACCOUNT")
+
+
+def test_an_account_level_off_does_not_cover_an_unnamed_switch():
+    """The amendment speaks of a dialog that draws NO notify control. An
+    unnamed switch may be one, so the account-level route refuses beside it."""
+    gate = profile_editor.save_gate_verdict(
+        {"fields": [_SAVE, _CITY, _UNNAMED_SWITCH]}, account_share_updates="off"
+    )
+    assert gate["proceed"] is False
+    assert gate["refused_condition"] == "6_unnamed_switch_unresolved"
+    assert profile_editor.notify_network_note(gate).startswith("NOT ESTABLISHED")
+
+
+def test_a_dialog_control_governs_whatever_the_account_reads():
+    """Where the dialog draws its own notify control, that control decides:
+    ON refuses even with the account read off, and OFF presses with no
+    account reading at all."""
+    on = profile_editor.save_gate_verdict(
+        {"fields": [_SAVE, _NAMED_SWITCH_ON]}, account_share_updates="off"
+    )
+    assert on["refused_condition"] == "4_notify_network_not_off"
+    off = profile_editor.save_gate_verdict({"fields": [_SAVE, _NAMED_SWITCH_OFF]})
+    assert off["proceed"] is True and off["condition_1"] == "dialog_control_off"
+
+
+def test_the_seam_is_the_only_new_input_and_it_defaults_to_not_read():
+    """Unwired means: the keyword exists, defaults to None, and the reader
+    passes it through untouched. The accepted readings are a closed tuple."""
+    import inspect
+
+    for fn in (profile_editor.save_gate_verdict, profile_editor.read_save_gate):
+        parameter = inspect.signature(fn).parameters["account_share_updates"]
+        assert parameter.default is None
+        assert parameter.kind is inspect.Parameter.KEYWORD_ONLY
+    assert profile_editor.ACCOUNT_READINGS == ("off", "on", "unknown")

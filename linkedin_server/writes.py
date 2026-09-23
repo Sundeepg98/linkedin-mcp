@@ -9527,6 +9527,11 @@ async def perform(
         # one that changed its field by typing asks inside the loop, after the
         # fill. Either way the press joins the ONE click queue -- no new click
         # call site is bought. Until 2026-09-24 neither path asked at all.
+        # NEITHER CALL PASSES ``account_share_updates``: the amended condition
+        # 1's account-level reader does not exist yet, so the gate refuses
+        # wherever the dialog draws no notify control. Wiring that reading --
+        # taken BEFORE the change is entered -- is the seam at
+        # ``profile_editor.ACCOUNT_READINGS``.
         if spec.action in EDITOR_SAVE_ACTIONS and selects_made:
             editor_save_gate = await profile_editor.read_save_gate(page)
             if editor_save_gate["proceed"]:
@@ -10009,8 +10014,10 @@ async def perform(
         # WHAT THE EDITOR'S SAVE GATE SAW, for EDITOR_SAVE_ACTIONS. Null for
         # every other action, and null on an editor action that never reached
         # it (the change could not be entered). ``notify_network`` is the
-        # reading condition 1 of SELF-PROFILE-EDITS-NOT-OUTWARD turns on, and
-        # its sentence says whether it CONFIRMED anything.
+        # reading condition 1 of SELF-PROFILE-EDITS-NOT-OUTWARD turns on,
+        # ``condition_1`` names what ESTABLISHED it when the gate pressed, and
+        # the sentence says the same in words. The gate refuses before the
+        # press when neither route establishes it (see profile_editor).
         "editor_save_gate": (
             None
             if editor_save_gate is None
@@ -10020,6 +10027,7 @@ async def perform(
                 "why": editor_save_gate.get("why"),
                 "save_controls": editor_save_gate.get("save_controls"),
                 "notify_network": editor_save_gate.get("notify_network"),
+                "condition_1": editor_save_gate.get("condition_1"),
                 "unnamed_switches": editor_save_gate.get("unnamed_switches"),
                 "notify_network_means": profile_editor.notify_network_note(
                     editor_save_gate
