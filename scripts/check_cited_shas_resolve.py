@@ -155,20 +155,31 @@ class Slot(NamedTuple):
 #: over the tracked corpus before adoption -- occurrences selected, and how
 #: many of those were of a known OTHER kind. A phrase that selected another
 #: vocabulary at any material rate was dropped rather than tuned.
+#:
+#: EVERY KEYWORD IS CASE-FOLDED, AND ONLY THE KEYWORD. Until 2026-09-24 every
+#: keyword here was lowercase-only, so a citation opening a sentence was never
+#: a candidate at all: lane L3's record wrote "Committed `d111560`" and this
+#: guard never read it. Folding was MEASURED across all ten keyword slots
+#: before it was done -- 35 (token, site) pairs added that nothing had checked,
+#: 33 resolving and 2 already suppressed at the same site, so ZERO new findings.
+#: The fold is a scoped ``(?i:...)`` around the keyword, never ``re.IGNORECASE``
+#: on the pattern, so ``HEX`` stays lowercase-only: uppercase hex is not this
+#: corpus's citation shape. Held per slot by
+#: ``test_every_keyword_slot_reads_a_capitalised_keyword``.
 SLOTS: tuple[Slot, ...] = (
-    Slot("at-backtick", re.compile(r"\bat\s+`(" + HEX + r")`")),
-    Slot("at-bare", re.compile(r"\bat\s+(" + HEX + r")\b")),
-    Slot("commit", re.compile(r"\bcommit\s+`?(" + HEX + r")`?")),
-    Slot("committed", re.compile(r"\bcommitted\s+(?:at\s+)?`(" + HEX + r")`")),
-    Slot("landed-on", re.compile(r"\bland(?:ed|s)\s+on\s+`(" + HEX + r")`")),
-    Slot("landed-after", re.compile(r"`(" + HEX + r")`\s+land(?:ed|s)\b")),
+    Slot("at-backtick", re.compile(r"\b(?i:at)\s+`(" + HEX + r")`")),
+    Slot("at-bare", re.compile(r"\b(?i:at)\s+(" + HEX + r")\b")),
+    Slot("commit", re.compile(r"\b(?i:commit)\s+`?(" + HEX + r")`?")),
+    Slot("committed", re.compile(r"\b(?i:committed\s+(?:at\s+)?)`(" + HEX + r")`")),
+    Slot("landed-on", re.compile(r"\b(?i:land(?:ed|s)\s+on)\s+`(" + HEX + r")`")),
+    Slot("landed-after", re.compile(r"`(" + HEX + r")`\s+(?i:land(?:ed|s))\b")),
     Slot("range-lhs", re.compile(r"`(" + HEX + r")\.\." + HEX + r"`")),
     Slot("range-rhs", re.compile(r"`" + HEX + r"\.\.(" + HEX + r")`")),
-    Slot("applied", re.compile(r"\bapplied\s+.{0,20}?`(" + HEX + r")`")),
+    Slot("applied", re.compile(r"\b(?i:applied)\s+.{0,20}?`(" + HEX + r")`")),
     Slot("show-path", re.compile(r"`(" + HEX + r"):[A-Za-z_./]")),
-    Slot("introduced-at", re.compile(r"\bintroduced\s+at\s+`(" + HEX + r")`")),
-    Slot("baseline", re.compile(r"\bbaseline\s+`(" + HEX + r")`")),
-    Slot("pinned-commit", re.compile(r"\bpinned\s+commit\s+`?(" + HEX + r")`?")),
+    Slot("introduced-at", re.compile(r"\b(?i:introduced\s+at)\s+`(" + HEX + r")`")),
+    Slot("baseline", re.compile(r"\b(?i:baseline)\s+`(" + HEX + r")`")),
+    Slot("pinned-commit", re.compile(r"\b(?i:pinned\s+commit)\s+`?(" + HEX + r")`?")),
 )
 
 #: MEASURED AND REJECTED, kept here because a refusal that names only what it

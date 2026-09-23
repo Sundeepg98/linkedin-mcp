@@ -230,19 +230,40 @@ async def test_a_page_value_in_the_raise_does_not_reach_hrefs_error():
 
 
 @pytest.mark.asyncio
-async def test_the_sibling_error_field_does_carry_the_page_value():
+async def test_the_instrument_sees_a_page_value_in_an_error_field():
     """THE POSITIVE CONTROL, and it is why the test above can fail.
 
-    `error` is built `f"{type(exc).__name__}: {exc}"` six lines above
-    `hrefs_error`'s `type(exc).__name__`, in the same function, and the
-    comment between them calls that *"a deliberate difference"*. If this
-    assertion ever stops holding, the instrument above has gone blind and its
-    green means nothing -- a check that cannot fail certifies nothing.
+    UNTIL 2026-09-24 ITS SUBJECT WAS A REAL FIELD. `read_company_about_card`
+    built `error` as `f"{type(exc).__name__}: {exc}"` six lines above
+    `hrefs_error`'s `type(exc).__name__`, so the sibling field carried the
+    plant and proved this double and `carries_the_plant` could see one. Lane G
+    repaired that field to the TYPE alone (lane L4 measured the class: write
+    gates print such fields in their refusals), so it can no longer be the
+    subject -- a control may not depend on production code keeping a defect.
+    The subject is now that handler, verbatim, over the same double.
     """
+    page = _RaisingAboutPage("text")
+
+    async def the_old_handler() -> Any:
+        try:
+            await page.locator("the about-the-company container").first.inner_text()
+        except Exception as exc:  # noqa: BLE001 - the retired shape, on purpose
+            return f"{type(exc).__name__}: {exc}"
+        return None
+
+    error = await the_old_handler()
+    assert error is not None, "the double stopped raising, so this proves nothing"
+    assert carries_the_plant(error) != [], error
+
+
+@pytest.mark.asyncio
+async def test_the_sibling_error_field_is_the_type_alone():
+    """The repair, recorded: the field says THAT the read failed, not WHAT
+    the page said -- the same contract `hrefs_error` always kept."""
     out = await dom.read_company_about_card(_RaisingAboutPage("text"))
 
-    assert out["error"] is not None, out
-    assert carries_the_plant(out["error"]) != [], out["error"]
+    assert out["error"] == "ValueError", out["error"]
+    assert carries_the_plant(out["error"]) == [], out["error"]
     # The two fields are genuinely different, not two spellings of one thing.
     assert out["hrefs_error"] is None, out
 
