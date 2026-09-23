@@ -123,6 +123,25 @@ a six-column TSV resolved against a row-label index, not names in markdown
 resolved against two registries, and a guard whose red means two unrelated
 things is a guard whose red gets read as noise.
 
+ONE MORE ITEM WAS HARDENED, NOT ADDED, ON 2026-09-23. The slot phrases above
+were always found on ONE line, because `_blocker_candidates` reads one line
+at a time. This corpus is hard-wrapped prose, and the lane-L4 lead's own
+`_audit/2026-09-23-lane-l4-writes.md` wrapped "... under" at a line end with
+a backticked ruling id opening the next line (reworded since) -- a reader
+sees one sentence; the guard, reading one line, saw neither half, and an
+unresolvable name wrapped the same way would have passed silently. The join
+found SIX such sites in the corpus on its first run: that one, reworded, and
+five in other lanes' records, pinned in the test's ratchet. Both slot forms now also match
+ACROSS exactly one line break: `_SLOT_BEFORE` when the phrase ends the
+previous line and the name opens this one, `_SLOT_AFTER` when the name ends
+this line and "blocker" opens the next -- and ONLY between two NON-BLANK
+lines, and NEVER through a fenced-code boundary or into or out of a table row
+(SLOT FORM 3 owns table rows; see `_blocker_candidates` and
+`_joined_neighbour`). It still does NOT reach a MINT or MODAL phrase that
+itself wraps ("New\nblocker:"), a join spanning MORE than one line break, or
+a slot phrase separated from the name by a blank line -- those candidates
+remain exactly as invisible as an unslotted one has always been.
+
     ./venv/Scripts/python.exe scripts/check_asserted_names_resolve.py
     ./venv/Scripts/python.exe scripts/check_asserted_names_resolve.py --all
 """
@@ -388,7 +407,12 @@ def blocker_registry(repo: pathlib.Path) -> dict[str, int]:
 # --------------------------------------------------------------------------
 
 #: SLOT FORM 1 -- a phrase immediately BEFORE the name. Measured per phrase;
-#: the four that selected only other vocabularies were dropped.
+#: the four that selected only other vocabularies were dropped. Applied
+#: same-line in `_blocker_candidates` below, and applied once more across a
+#: single hard-wrap by `_joined_neighbour` -- this regex is reused unchanged
+#: for the wrapped case, against the WHOLE previous line instead of the text
+#: preceding the backtick, because "ends the line" is the same anchor either
+#: way (see the module docstring, 2026-09-23).
 _SLOT_BEFORE = re.compile(
     r"(?:^|[\s(*_>|,;:-])"
     r"(?:the\s+blocker|blocker|blocked\s+behind|behind|filed\s+under|under"
@@ -402,6 +426,8 @@ _SLOT_BEFORE = re.compile(
 #: Thin, and kept anyway: leaving it out would have hidden `NO-ADDRESS` behind
 #: an ACCIDENT of the prefix rule rather than behind the marker that actually
 #: excuses it, and a guard whose silences are accidents cannot be audited.
+#: Applied once more across a single hard-wrap by `_joined_neighbour`, against
+#: the start of the NEXT line, same regex, same reasoning as SLOT FORM 1 above.
 _SLOT_AFTER = re.compile(r"^\s*blockers?\b", re.IGNORECASE)
 
 #: SLOT FORM 3 -- a markdown table cell under a column whose HEADER names
@@ -550,8 +576,38 @@ def _doc_marks(blob: str, name: str) -> str | None:
     return None
 
 
+def _joined_neighbour(
+    lines: list[str], idx0: int, inside_fence: set[int]
+) -> str | None:
+    """The line at 0-based `idx0`, if it may join a slot across a hard-wrap.
+
+    Ineligible, and returned as None: out of range, blank, inside a fence
+    (``` or the indented form -- see `fenced()`), or a table row. The table
+    exclusion is not an accident of the other two -- SLOT FORM 3 is the
+    table's OWN rule for how a cell names a blocker (`_CELL_ASIDE` /
+    `header_cols` below), and letting prose leak into a table row or a table
+    row leak into prose would let two different rules fire off the same
+    text for two different reasons. Called twice per candidate line, once
+    for the line before and once for the line after -- see
+    `_blocker_candidates`.
+    """
+    if idx0 < 0 or idx0 >= len(lines):
+        return None
+    if (idx0 + 1) in inside_fence:
+        return None
+    text = lines[idx0]
+    if not text.strip():
+        return None
+    if text.lstrip().startswith("|"):
+        return None
+    return text
+
+
 def _blocker_candidates(
-    line: str, header_cols: list[int] | None
+    line: str,
+    header_cols: list[int] | None,
+    prev_line: str | None = None,
+    next_line: str | None = None,
 ) -> list[tuple[str, str]]:
     """(name, slot-form) for every blocker-position name on this line.
 
@@ -559,17 +615,46 @@ def _blocker_candidates(
     blockers, computed once per table rather than per row -- re-splitting the
     header for all 78,656 corpus lines was measured at several seconds on its
     own, which is how a guard gets dropped from a gate.
+
+    `prev_line` / `next_line`, when not None, are the adjacent line's raw
+    text, already passed through `_joined_neighbour` so a join is only ever
+    attempted between two lines of ordinary prose (see that function). They
+    default to None so every EXISTING caller and test that does not pass them
+    reproduces the pre-2026-09-23 behaviour exactly -- no wrap is ever
+    attempted without them.
     """
     out: list[tuple[str, str]] = []
+    prev_ends_slot: bool | None = None  # resolved at most once per line: every
+    # backtick on this line that opens it asks the identical question of the
+    # identical prev_line, so the first answer is cached rather than re-run.
     for m in _BACKTICK.finditer(line):
         name = m.group(1).strip()
         if not _KEBAB.match(name) or _RANGE.match(name):
             continue
         before = line[: m.start()].rstrip().rstrip("*_")
+        after = line[m.end():]
         if _SLOT_BEFORE.search(before):
             out.append((name, "phrase-before"))
-        elif _SLOT_AFTER.match(line[m.end():]):
+        elif _SLOT_AFTER.match(after):
             out.append((name, "phrase-after"))
+        elif (prev_line is not None
+              and not line[: m.start()].strip().strip("*_")):
+            # The name OPENS this line -- nothing but whitespace, or the
+            # emphasis the same-line check already strips (``**`NAME`**``),
+            # precedes it here, so a same-line SLOT_BEFORE already failed for
+            # the right reason: the phrase, if it exists, is on the line before.
+            if prev_ends_slot is None:
+                prev_ends_slot = bool(
+                    _SLOT_BEFORE.search(prev_line.rstrip().rstrip("*_"))
+                )
+            if prev_ends_slot:
+                out.append((name, "phrase-before-wrapped"))
+        elif next_line is not None and not after.strip().strip("*_"):
+            # The name CLOSES this line -- nothing but whitespace or emphasis
+            # follows it here, so SLOT FORM 2's "blocker", if present, opens
+            # next_line.
+            if _SLOT_AFTER.match(next_line):
+                out.append((name, "phrase-after-wrapped"))
 
     if header_cols:
         cells = _cells(line)
@@ -618,8 +703,16 @@ def classify(
                 found += [("TOOL", m.group(0)) for m in _TOOL_TOKEN.finditer(line)
                           if m.group(0) not in tools]
             if may_blocker:
+                # The two neighbours are resolved here, not inside
+                # `_blocker_candidates`, because `classify` already holds
+                # `lines` and `inside_fence` for the whole file -- passing
+                # them down would mean re-deriving the same eligibility on
+                # every call instead of once per line.
+                prev_txt = _joined_neighbour(lines, n - 2, inside_fence)
+                next_txt = _joined_neighbour(lines, n, inside_fence)
                 found += [("BLOCKER", nm)
-                          for nm, _form in _blocker_candidates(line, cols[n])
+                          for nm, _form in _blocker_candidates(
+                              line, cols[n], prev_txt, next_txt)
                           if nm not in blockers]
             if not found:
                 continue

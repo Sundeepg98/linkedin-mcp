@@ -45,8 +45,8 @@ replicates -- at `b0d3ab8`:
 
 The write-ceiling document counted 152 on 2026-09-21 (37 / 66 / 49). Measured by re-running the
 same walk over the census at `d92aa30`, the write-ceiling's own commit, and diffing the key sets:
-exactly ONE row has left since, `M C85`, whose direction cell was repaired `W` -> `R+W` under
-`COMPOUND-ROW-SPLITS-ONLY-ON-STATE`. It is one of the three `R+W` above, and it is a row this lane
+exactly ONE row has left since, `M C85`, whose direction cell was repaired `W` -> `R+W` by the
+ruling `COMPOUND-ROW-SPLITS-ONLY-ON-STATE`. It is one of the three `R+W` above, and it is a row this lane
 was told not to touch. (A first draft of this paragraph printed 64 / 50 for the last two slices,
 counted by eye off a list; the script says 65 / 49 and the diff says why. Corrected before
 commit.)
@@ -560,3 +560,41 @@ comment, publish and send gates interpolate `reading['error']`, which several do
 `f"{type(exc).__name__}: {exc}"`. Those are page TEXT by design in some readers ("returns_text" in
 the reader-leak baseline) and a message rendering in others; either is a different repair from
 this one.
+
+### 10.2 (c) THE ASSERTED-NAME GUARD NOW READS A NAME WRAPPED ONTO THE NEXT LINE
+
+Built by one implementer child to a closed brief (its files only; it committed nothing), then
+reviewed and extended here. `scripts/check_asserted_names_resolve.py` finds a slot phrase and a
+backticked UPPER-KEBAB name on ONE line; hard-wrapped prose splits them, and section 7 item 4
+measured this record doing exactly that. Both slot forms now also match ACROSS ONE line break --
+the phrase ending the previous line and the name opening this one, or the name ending this line
+and "blocker" opening the next -- only between two non-blank lines, never through a fence and
+never into or out of a table row. The review added one thing: a name wrapped inside emphasis
+(`**` before it) was still missed, because the same-line check strips `*` and `_` and the join did
+not; it does now.
+
+**SHOWN FAILING.** The child's control, `test_the_detector_finds_a_wrapped_assertion`, plants
+both mirror shapes with names that resolve nowhere; against the unmodified guard it failed with
+`found == set()` -- neither wrap seen. After the fix it passes, and the review's second control,
+`test_a_wrap_is_joined_across_one_ordinary_line_break_and_no_further`, plants the emphasised
+join (convicted) and a blank line, a fence, a table row and two line breaks (none joined). The
+module: 11 passed; the guard stays well under its speed bound.
+
+**WHAT THE JOIN FOUND ON ITS FIRST RUN: six sites, 59 -> 65 candidates, 3 -> 9 convictions.**
+Each is "under" ending a line with a backticked id opening the next -- the shape this guard has
+always convicted on one line, and whose MEASURED table counts other-vocabulary names as findings.
+Five are registered RULING ids and one is a census STATE word; none is a blocker:
+
+    _audit/2026-09-20-the-premium-block.md         EXCLUDED-RULED (a state)       pinned
+    _audit/2026-09-21-the-auth-reason-leak.md      ERROR-URL-ASKED-FOR-OR-NOTHING pinned
+    _audit/2026-09-23-bucket1-fires.md             NO-IRREVERSIBLE-WRITE-IS-FIRED pinned
+    _audit/2026-09-23-census-cleanup.md            SELF-PROFILE-EDITS-NOT-OUTWARD pinned
+    _audit/2026-09-23-lane-l1-refused-reads.md     ONE-NAMED-SETTINGS-PAGE-AT-A-TIME pinned
+    this record, section 1                         COMPOUND-ROW-SPLITS-ONLY-ON-STATE reworded
+
+The five in other lanes' records are PINNED in the test's ratchet with that reason, not edited:
+the repair is a one-word rewording by each record's owner, and the ratchet then demands the pin
+narrow. **A DESIGN QUESTION FOR THE GUARD'S OWNER, not ruled here:** the register now makes a
+ruling id resolvable in the tree, and the guard still resolves only against the blocker ledger.
+Resolving ruling ids too would clear four of the five and every future "under `<RULING>`"; it
+would also stop the guard catching a ruling id asserted where a blocker belongs.
