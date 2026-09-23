@@ -427,11 +427,25 @@ def _plant_hold(monkeypatch, surface: str, status: str = "STANDING",
 
 
 def test_the_real_table_passes_the_edge() -> None:
-    """Green today, and the edge has at least one surface hold to fire on."""
+    """Green on the real table.
+
+    On its own that says little: since the register of 2026-09-23 no hold
+    binds a page, so the edge has nothing to fire on here. What it CAN do is
+    shown below, each test on a hold it installs itself.
+    """
     rows, _ = cra.load()
     assert cra.ruling_problems(rows) == []
-    assert any(h.binds == "surface" for h in rh.ROW_HOLDS.values()), \
-        "no hold binds a page, so the edge could never fire on the real table"
+
+
+def test_the_edge_reads_the_holds_table_it_is_given(monkeypatch) -> None:
+    """Not vacuous: install a hold on a real admitted row's page and the real table goes red."""
+    rows, _ = cra.load()
+    row = next(r for r in rows if _admitted_and_unheld(r)
+               and r["gate"] in cra.BLOCKED_ON_NOTHING)
+    _plant_hold(monkeypatch, _page(row))
+    problems = cra.ruling_problems(rows)
+    assert any(p.startswith(f"{row['slice']} {row['row']}: classed blocked on "
+                            f"nothing") for p in problems), problems
 
 
 def test_blocked_on_nothing_on_a_held_page_turns_it_red(

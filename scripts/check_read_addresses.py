@@ -319,9 +319,13 @@ def ruling_problems(rows: list[dict[str, str]]) -> list[str]:
     and nothing else.
 
     AND THE SAME DAY THE ANSWER MOVED: the operator lifted that ruling at 18:15
-    (his ruling (b), relayed), so ``M M49`` is READER again and the edge is
-    green on it -- because it reads the holds as they are NOW, from one table.
-    A split that had typed "held" into the row would now be the stale one.
+    (his ruling (b), ``WRITE-CLASS-B`` in the register), so ``M M49`` is READER
+    again and the edge is green on it -- because it reads the holds as they
+    are NOW, from one table. A split that had typed "held" into the row would
+    now be the stale one. Since the register caught up that evening, NO hold
+    binds a page at all, so on the real table this edge has nothing to fire
+    on: it is a tripwire for the next ruling that holds a page, and
+    ``tests/test_read_addresses.py`` shows it firing on holds it installs.
 
     Every ADMITTED row's page is looked up among the holds in
     ``ruling_holds.ROW_HOLDS`` that bind a SURFACE. A hold that binds an ACT --
@@ -351,7 +355,7 @@ def ruling_problems(rows: list[dict[str, str]]) -> list[str]:
                        if c in rh.LIFTED_ROW_HOLDS):
             problems.append(f"{r['slice']} {r['row']}: its note cites HELD BY "
                             f"`{lifted}`, and that ruling is lifted -- "
-                            f"{rh.LIFTED_ROW_HOLDS[lifted]}")
+                            f"{rh.LIFTED_ROW_HOLDS[lifted].why}")
         if r["class"] != "ADMITTED" or not r["address"].startswith(HOST):
             continue
         tag = f"{r['slice']} {r['row']}"

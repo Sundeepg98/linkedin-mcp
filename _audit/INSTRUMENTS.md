@@ -9589,19 +9589,27 @@ on a live proof against a target he names, and `M M49` is READER again.
 
 ### 60.1 ONE TABLE OF HOLDS, ANCHORED TO ITS RECORDS, READ BY BOTH BUCKETS
 
-`scripts/ruling_holds.py` names what holds rows today: a condition on every
-write (status RELAYED -- the operator's ruling, not yet in the register) and
-the one open question (binds `/notifications/`, marked PENDING everywhere it
-prints). It also keeps `LIFTED_ROW_HOLDS`, the two rulings lifted at 18:15, so
-a cell or note still citing either as a hold goes red instead of counting.
+`scripts/ruling_holds.py` names what holds rows. Since master registered the
+rulings of 2026-09-23 that is ONE hold, `OPERATOR-NAMES-THE-TARGET`, STANDING
+and binding every write. Before that evening it was carried as RELAYED, next
+to an open notifications question carried as PENDING. `LIFTED_ROW_HOLDS` keeps
+what used to hold rows -- the two rulings lifted at 18:15 and the question,
+answered as a permission -- each with the status the register gives it. A
+cell or note still citing one as a hold goes red instead of counting, and a
+register that puts one back into force goes red too.
 
 A STANDING entry is re-read from `build_rulings_index.REGISTER` on every run and
 goes red when the id leaves the register, stops being STANDING, or its BINDS no
 longer names the surface. A RELAYED entry goes red when the register carries
-its id, so it becomes STANDING and its BINDS starts being checked. The PENDING
+its id, so it becomes STANDING and its BINDS starts being checked. A PENDING
 entry goes red when a registered ruling binds its surface, because the question
 has then been answered and every row citing it must be re-read. RELAYED and
 PENDING entries each resolve to their record's exact words, once.
+
+**BOTH OF THOSE TRIPWIRES FIRED ON REAL DATA.** At the merge with master
+53ba1b6, before anything was flipped, the checker exited 1 with exactly two
+problems -- the relayed entry now registered, the pending question now
+answered -- and nothing had been planted.
 
     A HOLD IS CITED WITH A MARKER AND READ; IT IS NEVER INFERRED FROM A MENTION.
 
@@ -9631,7 +9639,7 @@ test of the edge installs its own hold on a page it chooses.
 
 | path | shown failing by |
 |---|---|
-| `scripts/ruling_holds.py` | `tests/test_ruling_holds.py`: a STANDING hold handed in and resolved green, then register copies with that ruling removed, re-scoped to a narrower surface, and no longer STANDING; the relayed ruling found in a register copy; the relayed and pending records' words moved; the pending question answered by a planted registered ruling; a ruling listed both lifted and live. Each is handed in as a parameter, so neither the real register nor the real table is touched |
+| `scripts/ruling_holds.py` | The merge with master 53ba1b6, on real data (60.1). `tests/test_ruling_holds.py`: a STANDING hold handed in and resolved green, then register copies with that ruling removed, re-scoped to a narrower surface, and no longer STANDING; the write hold rebound to "one write only"; the merge's two events replayed against the real register (a RELAYED hold it now carries, a PENDING question it now answers); relayed and pending records whose words moved; a ruling listed both lifted and live; a lifted ruling the register puts back into force, and one it drops. Each is handed in as a parameter, so neither the real register nor the real table is touched |
 | `scripts/census_completion.py` -- bucket 1 by hold, four `b1_` pins, `PINNED_B1_ROWS`, and `b2_d3_rows` | on HEAD's cells before any marker existed: `--check` red, naming the seven rows whose holds were prose only. Demonstration D of `scripts/_check_census_completion_can_fail.py` (a COVERED-UNFIRED row W to R: two `b1_` pins move, the row is named, no GAP figure moves). `tests/test_ruling_holds.py`: a marker removed, the swap in 60.2, a direction flip, a row leaving the state, an unknown or LIFTED citation withholding the split and every `b1_` figure |
 | `scripts/check_read_addresses.py` -- `ruling_problems` and the STANDING-RULING gate | HEAD's own table, 60.3. `tests/test_read_addresses.py`, each on a hold the test installs: a row made blocked on nothing on a held page, a held page under a PRESS gate, a held page citing nothing, STANDING-RULING off its ruling's page or citing nothing, a PENDING question convicting a row the test makes blocked on nothing, a note still citing a LIFTED ruling, and `census_completion` withholding the split |
 | `scripts/triage_read_gap_rows.py` -- CONTROL 7 -- and `tests/test_triage_read_gap_rows.py` (the first test that runs the script) | `N 53` planted back into the real file: two tests red naming it, the file restored and compared by sha256. Each of the four `--plant` options refused by its own control's sentence |

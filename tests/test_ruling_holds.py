@@ -1,27 +1,32 @@
 """The holds table, and bucket 1's derivation from it, must be CHECKED -- and the checks must FAIL.
 
 `scripts/ruling_holds.py` names what holds census rows: a ruling in force, a
-ruling the operator has made that the register does not carry yet, or a
-question still open. `scripts/census_completion.py` counts its bucket 1 -- the
+ruling relayed but not yet registered, or a question still open -- and keeps
+the rulings and questions that USED to hold rows, each with what the register
+says about it now. `scripts/census_completion.py` counts its bucket 1 -- the
 COVERED-UNFIRED rows -- by the hold each row's own cell cites, or by its R/W
-cell for a write. Until 2026-09-23 that bucket said a live session was the
-entire remaining cost of all of them; `_audit/2026-09-23-bucket1-fires.md`
-section 3 measured that it was the whole cost of none. And the same day the
-rulings themselves moved: at 18:15 the operator lifted the messaging ruling and
-the read-only rule (his ruling (b), relayed), which this table absorbed in one
-edit. Three ways this can rot, all planted here:
+cell for a write.
 
-  * **THE TABLE DRIFTS FROM THE REGISTER.** A ruling retired, re-scoped or
-    re-worded in `build_rulings_index.REGISTER`, the pending question answered,
-    or the relayed ruling registered while the table still calls it relayed.
-    `register_problems` is handed a DAMAGED COPY of the register or of the
-    table -- never the real ones -- and must name the damage.
-  * **A ROW STILL CITES A LIFTED RULING.** The citation is history; counting it
-    would publish a hold that no longer exists. It must withhold the split.
+The table moved three times on 2026-09-23 (first build; the operator's ruling
+(b) relayed at 18:15; the register catching up that evening), and every move
+was an edit to this table and to the cells that cite it. So the tests below
+hold the MECHANISM, not the day: where a plant needs a kind of hold the real
+table no longer has -- a pending question, a hold on a page -- the test
+installs one of its own. Three ways this can rot, all planted:
+
+  * **THE TABLE DRIFTS FROM THE REGISTER.** A hold's ruling retired, re-scoped
+    or no longer standing; a relayed ruling registered, or a pending question
+    answered, while this table still says otherwise; a LIFTED ruling put back
+    into force. `register_problems` is handed a DAMAGED COPY -- of the
+    register, the holds or the lifted list, never the real ones -- and must
+    name the damage. Two of these are the real events of the merge with
+    master 53ba1b6, replayed against the real register.
+  * **A ROW STILL CITES A LIFTED RULING.** The citation is history; counting
+    it would publish a hold that no longer exists. It must withhold the split.
   * **A ROW MOVES AND A COUNT CANNOT SAY WHICH.** The plant that matters most
     is the SWAP: two rows exchange holds, every count stays where it was, and
-    only the row-by-row control can see it. Every census plant goes into a copy
-    of the cells handed to `bucket1_holds(texts=...)`; no census file is
+    only the row-by-row control can see it. Every census plant goes into a
+    copy of the cells handed to `bucket1_holds(texts=...)`; no census file is
     written.
 
 **GREEN ALONE IS AMBIGUOUS** -- a table checked against nothing, or a
@@ -48,9 +53,10 @@ import ruling_holds as rh  # noqa: E402
 # couples every test file that names an upper-case constant this file defines.
 
 _TARGET = rh.WRITE_HOLD_ID
-_PENDING = "NOTIFICATIONS-UNREAD-SPEND"
 _LIFTED = "DO-NOT-OPEN-MESSAGING"
-#: A registered STANDING ruling whose BINDS is a path, and which is NOT lifted.
+_AMENDED = "NO-IRREVERSIBLE-WRITE-IS-FIRED"
+_ANSWERED = "NOTIFICATIONS-UNREAD-SPEND"
+#: A registered STANDING ruling whose BINDS is a path and which is not lifted.
 #: Its polarity does not matter here: only register resolution is under test.
 _STANDING = "ONE-NAMED-SETTINGS-PAGE-AT-A-TIME"
 
@@ -58,12 +64,10 @@ _STANDING = "ONE-NAMED-SETTINGS-PAGE-AT-A-TIME"
 def _standing_hold(hold_id=_STANDING, surface="/mypreferences/d/"):
     """A STANDING surface hold, handed in as a parameter.
 
-    No STANDING hold is in use today, so the STANDING branch of
-    `register_problems` is exercised by handing one in. It is a real registered
-    STANDING ruling, so it resolves green before any damage. (The FIRST draft
-    handed in the messaging ruling and went red on its own control: that
-    ruling is on the lifted list, and "lifted AND live" is a problem this file
-    wants reported -- which is the last test below.)
+    It is a real registered STANDING ruling, so it resolves green before any
+    damage. (A first draft handed in the messaging ruling and went red on its
+    own control: that ruling is on the lifted list, and "lifted AND live" is a
+    problem this file wants reported -- the test for it is below.)
     """
     return {hold_id: rh.Hold(status="STANDING", binds="surface",
                              surface=surface)}
@@ -143,39 +147,56 @@ def test_a_standing_ruling_no_longer_standing_turns_it_red() -> None:
     assert f"{_STANDING}: the register now says 'LIFTED', not STANDING" in problems
 
 
-def test_a_relayed_ruling_the_register_now_carries_turns_it_red() -> None:
-    """The register caught up: the entry must become STANDING, BINDS checked."""
-    caught_up = dataclasses.replace(_ruling(_LIFTED), id=_TARGET,
-                                    binds="capability class -- every write")
-    problems = rh.register_problems(register=_register_with(**{_TARGET: caught_up}))
+def test_the_write_hold_rebound_to_one_write_turns_it_red() -> None:
+    """The register spells it "every outward write"; "one write only" is not every write."""
+    rebound = dataclasses.replace(_ruling(_TARGET), binds="live proofs -- one write only")
+    problems = rh.register_problems(register=_register_with(**{_TARGET: rebound}))
+    assert any(p.startswith(f"{_TARGET}: binds every write here") for p in problems), \
+        problems
+
+
+def test_the_merge_replayed_a_relayed_hold_the_register_carries_turns_it_red() -> None:
+    """THE REAL EVENT: at the merge with master this entry was RELAYED here and registered there."""
+    relayed = {_TARGET: rh.Hold(
+        status="RELAYED", binds="write",
+        document="_audit/2026-09-23-census-cleanup.md",
+        anchor="the linkedin MCP may connect, message, apply, post AND OPEN "
+               "MESSAGING on his account")}
+    problems = rh.register_problems(holds=relayed)
     assert any(p.startswith(f"{_TARGET}: RELAYED here, and the register now "
                             f"carries it") for p in problems), problems
 
 
 def test_a_relayed_ruling_whose_record_moved_turns_it_red() -> None:
-    holds = dict(rh.ROW_HOLDS)
-    holds[_TARGET] = dataclasses.replace(holds[_TARGET],
-                                         anchor="words nobody ever wrote")
-    problems = rh.register_problems(holds=holds)
-    assert any(p.startswith(f"{_TARGET}: its words occur 0 time(s)")
+    relayed = {"PLANTED-RELAYED": rh.Hold(
+        status="RELAYED", binds="write",
+        document="_audit/2026-09-23-census-cleanup.md",
+        anchor="words nobody ever wrote")}
+    problems = rh.register_problems(holds=relayed)
+    assert any(p.startswith("PLANTED-RELAYED: its words occur 0 time(s)")
                for p in problems), problems
 
 
-def test_an_answered_pending_question_turns_it_red() -> None:
-    """A registered ruling binding the question's surface means it was answered."""
-    answer = dataclasses.replace(_ruling(_LIFTED), id="PLANTED-ANSWER",
-                                 binds="address family -- /notifications/")
-    problems = rh.register_problems(register=_register_with(**{"PLANTED-ANSWER": answer}))
-    assert any(p.startswith(f"{_PENDING}: PENDING here, and the register now "
-                            f"holds ['PLANTED-ANSWER']") for p in problems), problems
+def test_the_merge_replayed_a_pending_question_the_register_answered_turns_it_red() -> None:
+    """THE REAL EVENT: the notifications question, pending here, answered in the register."""
+    pending = {_ANSWERED: rh.Hold(
+        status="PENDING", binds="surface", surface="/notifications/",
+        document="_audit/2026-09-23-bucket1-fires.md",
+        anchor="may one `linkedin_notifications` call spend his unread "
+               "notification state?")}
+    problems = rh.register_problems(holds=pending)
+    assert any(p.startswith(f"{_ANSWERED}: PENDING here, and the register now "
+                            f"holds ['{_ANSWERED}'] binding /notifications/")
+               for p in problems), problems
 
 
 def test_a_pending_question_whose_words_moved_turns_it_red() -> None:
-    holds = dict(rh.ROW_HOLDS)
-    holds[_PENDING] = dataclasses.replace(holds[_PENDING],
-                                          anchor="words nobody ever wrote")
-    problems = rh.register_problems(holds=holds)
-    assert any(p.startswith(f"{_PENDING}: its words occur 0 time(s)")
+    pending = {"PLANTED-QUESTION": rh.Hold(
+        status="PENDING", binds="surface", surface="/planted-question/",
+        document="_audit/2026-09-23-bucket1-fires.md",
+        anchor="words nobody ever wrote")}
+    problems = rh.register_problems(holds=pending)
+    assert any(p.startswith("PLANTED-QUESTION: its words occur 0 time(s)")
                for p in problems), problems
 
 
@@ -187,45 +208,66 @@ def test_a_ruling_both_lifted_and_live_turns_it_red() -> None:
     assert f"{_LIFTED}: listed as lifted AND as a live hold" in problems
 
 
+def test_a_lifted_ruling_the_register_puts_back_in_force_turns_it_red() -> None:
+    """The lifted list is read against the register too: SUPERSEDED must still say so."""
+    reinstated = dataclasses.replace(_ruling(_LIFTED), status="STANDING")
+    problems = rh.register_problems(register=_register_with(**{_LIFTED: reinstated}))
+    assert any(p.startswith(f"{_LIFTED}: lifted here on the register's word "
+                            f"'SUPERSEDED', and the register now says 'STANDING'")
+               for p in problems), problems
+
+
+def test_a_lifted_ruling_gone_from_the_register_turns_it_red() -> None:
+    problems = rh.register_problems(register=_register_with(**{_AMENDED: None}))
+    assert f"{_AMENDED}: lifted here, and the rulings register has no ruling " \
+           f"by that id" in problems
+
+
 # -------------------------------------------------------------- hold_of's rules
+
+
+@pytest.fixture
+def planted_holds(monkeypatch):
+    """One hold of each status on a page, so the rules are tested whatever today's table holds."""
+    for hold_id, status in (("PLANTED-STANDING", "STANDING"),
+                            ("PLANTED-QUESTION", "PENDING"),
+                            ("PLANTED-RELAYED", "RELAYED")):
+        monkeypatch.setitem(rh.ROW_HOLDS, hold_id, rh.Hold(
+            status=status, binds="surface", surface=f"/{hold_id.lower()}/"))
 
 
 @pytest.mark.parametrize("direction, text, want", [
     ("W", "no marker at all", _TARGET),
-    ("W", f"**HELD BY `{_PENDING}`**", _PENDING),
+    ("W", "**HELD BY `PLANTED-QUESTION`**", _TARGET),
     ("R", f"**HELD BY `{_TARGET}`**", _TARGET),
-    ("R", f"**HELD BY `{_PENDING}`**", _PENDING),
+    ("R", "**HELD BY `PLANTED-QUESTION`**", "PLANTED-QUESTION"),
     ("unknown", f"**HELD BY `{_TARGET}`**", _TARGET),
-    ("R", f"**HELD BY `{_TARGET}`** **HELD BY `{_PENDING}`**", _PENDING),
+    ("R", "**HELD BY `PLANTED-RELAYED`** **HELD BY `PLANTED-QUESTION`**",
+     "PLANTED-QUESTION"),
+    ("R", "**HELD BY `PLANTED-QUESTION`** **HELD BY `PLANTED-STANDING`**",
+     "PLANTED-STANDING"),
     ("R", f"the row mentions `{_TARGET}` without the marker", None),
     ("R", f"this row was held by `{_LIFTED}` until 18:15", None),
     ("unknown", "nothing cited", None),
-], ids=["W-needs-no-marker", "an-open-question-outranks-the-write-hold",
-        "R-cites-the-relayed-condition", "R-cites-a-pending",
-        "jobs-row-cites-the-write-hold", "pending-outranks-relayed",
+], ids=["W-needs-no-marker", "a-standing-write-hold-outranks-a-question",
+        "R-cites-the-target-hold", "R-cites-a-pending", "jobs-row-cites-the-target-hold",
+        "pending-outranks-relayed", "standing-outranks-pending",
         "a-mention-is-not-a-marker", "lowercase-history-is-not-a-marker",
         "no-citation-is-no-ruling"])
-def test_hold_of_reads_the_census_and_nothing_else(direction, text, want) -> None:
+def test_hold_of_reads_the_census_and_nothing_else(
+        planted_holds, direction, text, want) -> None:
     hold, problems = rh.hold_of(direction, text)
     assert (hold, problems) == (want, [])
 
 
-def test_a_standing_hold_outranks_everything(monkeypatch) -> None:
-    monkeypatch.setitem(rh.ROW_HOLDS, "PLANTED-STANDING",
-                        rh.Hold(status="STANDING", binds="surface",
-                                surface="/planted/"))
-    hold, problems = rh.hold_of(
-        "W", f"**HELD BY `{_PENDING}`** **HELD BY `PLANTED-STANDING`**")
-    assert (hold, problems) == ("PLANTED-STANDING", [])
-
-
 @pytest.mark.parametrize("direction, text, needle", [
     ("R", f"**HELD BY `{_LIFTED}`**", "that ruling is lifted"),
+    ("R", f"**HELD BY `{_ANSWERED}`**", "that ruling is lifted"),
     ("R", "**HELD BY `NO-SUCH-RULING`**", "not a hold this census knows"),
     ("R+W", f"**HELD BY `{_TARGET}`**", "which half of the row"),
     ("ambiguous", "", "which half of the row"),
-], ids=["a-lifted-ruling-cited-as-a-hold", "an-unknown-id", "an-R+W-row",
-        "an-ambiguous-row"])
+], ids=["a-lifted-ruling-cited-as-a-hold", "an-answered-question-cited-as-a-hold",
+        "an-unknown-id", "an-R+W-row", "an-ambiguous-row"])
 def test_hold_of_refuses_what_it_cannot_read(direction, text, needle) -> None:
     _hold, problems = rh.hold_of(direction, text)
     assert any(needle in p for p in problems), problems
@@ -243,7 +285,7 @@ def test_bucket_one_is_derived_and_sits_on_its_pins() -> None:
     assert unfired == len(holds) == cc.PINNED["unfired"]
     out: list[str] = []
     figures = cc.report(rows, out)
-    keys = ("b1_standing", "b1_named_target", "b1_pending", "b1_no_ruling")
+    keys = ("b1_standing", "b1_relayed", "b1_pending", "b1_no_ruling")
     for key in keys:
         assert figures[key] == cc.PINNED[key], key
     assert sum(figures[k] for k in keys) == unfired
@@ -253,7 +295,7 @@ def test_bucket_one_is_derived_and_sits_on_its_pins() -> None:
 
 
 def test_no_census_cell_still_cites_a_lifted_ruling_as_a_hold() -> None:
-    """The lift reached every cell: no COVERED-UNFIRED row cites one."""
+    """The lifts reached every cell: no COVERED-UNFIRED row cites one."""
     for key, text in _texts().items():
         stale = [c for c in rh.cited(text) if c in rh.LIFTED_ROW_HOLDS]
         assert not stale, (key, stale)
@@ -268,14 +310,28 @@ def test_the_pinned_rows_are_exactly_the_unfired_rows() -> None:
 # ------------------------------------------------------- bucket 1, shown failing
 
 
+def _direction():
+    return {f"{l} {r}": d for l, r, _st, d in cc.walk()}
+
+
 def _first_cited(holds, want):
     """The first row held by ``want`` through its CITATION, not its R/W cell."""
-    direction = {f"{l} {r}": d for l, r, _st, d in cc.walk()}
+    direction = _direction()
     for row, hold in sorted(holds.items()):
         if hold == want and direction.get(row) != "W":
             return row
     raise AssertionError(f"no COVERED-UNFIRED row cites {want!r} today; this "
                          f"control has nothing to plant on")
+
+
+def _first_free(holds, want_direction):
+    """The first row held by NO ruling with the given direction."""
+    direction = _direction()
+    for row, hold in sorted(holds.items()):
+        if hold is None and direction.get(row) == want_direction:
+            return row
+    raise AssertionError(f"no COVERED-UNFIRED row with direction "
+                         f"{want_direction!r} is held by no ruling today")
 
 
 def _key(row):
@@ -295,19 +351,24 @@ def test_a_removed_marker_moves_the_row_and_names_it() -> None:
 
 
 def test_a_swap_that_moves_no_count_is_still_named() -> None:
-    """THE PLANT A COUNT PIN CANNOT SEE: two rows exchange holds, totals unchanged."""
+    """THE PLANT A COUNT PIN CANNOT SEE: two rows exchange holds, totals unchanged.
+
+    A row cited under the target hold loses its marker, and a row held by no
+    ruling -- a jobs row, so its direction cannot supply a hold -- gains one.
+    """
     holds, _ = _holds()
-    a, b = _first_cited(holds, _TARGET), _first_cited(holds, _PENDING)
+    a = _first_cited(holds, _TARGET)
+    b = _first_free(holds, "unknown")
     texts = _texts()
-    texts[_key(a)] = texts[_key(a)].replace(_TARGET, _PENDING)
-    texts[_key(b)] = texts[_key(b)].replace(_PENDING, _TARGET)
+    texts[_key(a)] = texts[_key(a)].replace("HELD BY", "held, once, by")
+    texts[_key(b)] += f" **HELD BY `{_TARGET}`**"
     planted, problems = _holds(texts=texts)
     assert not problems
     assert sorted(planted.values(), key=str) == sorted(holds.values(), key=str), \
         "the swap changed a count; it no longer tests what it claims to"
     moves = cc.bucket1_moves(planted)
-    assert f"{a}: pinned as held by {_TARGET}, now held by {_PENDING}" in moves
-    assert f"{b}: pinned as held by {_PENDING}, now held by {_TARGET}" in moves
+    assert f"{a}: pinned as held by {_TARGET}, now held by {cc.NO_RULING}" in moves
+    assert f"{b}: pinned as held by {cc.NO_RULING}, now held by {_TARGET}" in moves
 
 
 def test_a_write_row_whose_direction_flips_is_named() -> None:
@@ -336,12 +397,13 @@ def test_a_row_that_leaves_the_state_is_named() -> None:
 @pytest.mark.parametrize("planted_id, needle", [
     ("NO-SUCH-RULING", "cites `NO-SUCH-RULING`, which is not a hold"),
     (_LIFTED, f"cites `{_LIFTED}` as its hold, and that ruling is lifted"),
-], ids=["an-unknown-id", "a-lifted-ruling"])
+    (_ANSWERED, f"cites `{_ANSWERED}` as its hold, and that ruling is lifted"),
+], ids=["an-unknown-id", "a-lifted-ruling", "an-answered-question"])
 def test_an_unreadable_hold_withholds_the_whole_split(planted_id, needle) -> None:
     """Withheld, never guessed: a stale or unknown citation yields no split."""
     rows = list(cc.walk())
     holds, _ = _holds(rows)
-    victim = _first_cited(holds, _PENDING)
+    victim = _first_free(holds, "R")
     texts = _texts()
     texts[_key(victim)] += f" **HELD BY `{planted_id}`**"
     planted, problems = _holds(rows, texts=texts)

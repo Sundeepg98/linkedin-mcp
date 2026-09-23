@@ -23,12 +23,19 @@ than each re-deciding.
 AND THE RULINGS MOVED THE SAME DAY, WHICH IS THE ARGUMENT FOR ONE TABLE
 -----------------------------------------------------------------------
 At 18:15 on 2026-09-23 the operator ruled "(b)": this server may connect,
-message, apply, post and open messaging on his account. The orchestrator
-relayed it to the wave that built this file, in writing, and registers it at
-merge. It LIFTS ``DO-NOT-OPEN-MESSAGING`` and the read-only rule, and the
-writes no longer wait on a no-write ruling: every one of them, and the two
-messaging reads, wait on a live proof against a target HE names. Both buckets
-changed by editing this table and the cells that cite it -- nothing else.
+message, apply, post and open messaging on his account. It LIFTS
+``DO-NOT-OPEN-MESSAGING`` and the read-only rule. The orchestrator relayed it
+to the wave that built this file, and this table carried it as RELAYED until
+master registered it that evening (``WRITE-CLASS-B`` and
+``OPERATOR-NAMES-THE-TARGET``, recorded in
+``_audit/2026-09-23-rulings-write-class-and-delegated-calls.md``). The same
+registration answered the open notifications question and put his own
+inbox reads under (b) with no per-fire go-ahead -- both the orchestrator's
+calls under the operator's delegation, and overridable by him. So today ONE
+hold is left: every write fires only at a target he names. Both buckets moved
+each time by editing this table and the cells that cite it -- nothing else.
+And the day the register caught up, :func:`register_problems` said so on its
+own: RELAYED here and registered there, PENDING here and answered there.
 
 WHAT A ROW OF ``ROW_HOLDS`` SAYS
 --------------------------------
@@ -58,8 +65,12 @@ ruling binds its surface -- the question has been answered, and every row
 citing it must be re-read against the answer.
 
 **A LIFTED RULING IS KEPT, SO A STALE CITATION GOES RED.** ``LIFTED_ROW_HOLDS``
-names each ruling that held rows and no longer does. A cell or a note still
-citing one as a hold is reported by :func:`hold_of`, never silently counted.
+names each ruling, or answered question, that held rows and no longer does. A
+cell or a note still citing one as a hold is reported by :func:`hold_of`,
+never silently counted. And each entry records WHAT THE REGISTER SAYS about it
+(SUPERSEDED, AMENDED, or -- for the answered question, now a permission --
+STANDING); :func:`register_problems` checks that too, so a register that puts
+a lifted ruling back into force reaches this table as a red.
 
 HOW A ROW CITES ITS HOLD
 ------------------------
@@ -120,48 +131,74 @@ class Hold:
     gist: str = ""
 
 
-#: The id of the hold every write is held by, since the operator's 18:15
-#: ruling of 2026-09-23. Named once because a rule turns on it: a W row is held
-#: by it with no marker.
+#: The id of the hold every write is held by: the operator's own ruling of
+#: 18:15 on 2026-09-23, STANDING in the register since master 53ba1b6. Named
+#: once because a rule turns on it: a W row is held by it with no marker.
 WRITE_HOLD_ID = "OPERATOR-NAMES-THE-TARGET"
 
 #: Every hold a census row may cite TODAY, keyed by the id it is cited by.
+#:
+#: ONE ENTRY, AND THE REASON IS THE REGISTER, NOT A SIMPLIFICATION. After the
+#: rulings of 2026-09-23 nothing holds a PAGE any more: messaging may be
+#: opened (WRITE-CLASS-B), his own inbox reads need no per-fire go-ahead
+#: (OWN-INBOX-READS-COVERED-BY-B), and loading /notifications/ is permitted
+#: (NOTIFICATIONS-UNREAD-SPEND, now a registered permission). What still holds
+#: census rows is the condition on every outward write.
+#:
+#: **ONE CLASSIFICATION IS THIS TABLE'S, NOT THE REGISTER'S.** The register
+#: binds this ruling to "every outward write"; this table holds every census
+#: W row with it, as the bucket-1 audit classed the writes. The six
+#: profile-field edits (P A8, A11, A13, A17, A19, A21) are the rows where
+#: "outward" could be argued: they are his own fields, reversible, and visible
+#: to everyone who opens his profile. `OUTWARD-ACTS-NEED-THE-OPERATOR` routes
+#: to him only acts toward other people or irreversible ones. Whether a
+#: profile field is such an act is the orchestrator's to call, and
+#: `_audit/2026-09-23-census-cleanup.md` puts it there; until then the rows
+#: stay held, which is the direction that cannot fire anything by mistake.
 ROW_HOLDS: dict[str, Hold] = {
     WRITE_HOLD_ID: Hold(
-        status="RELAYED",
+        status="STANDING",
         binds="write",
-        document="_audit/2026-09-23-census-cleanup.md",
-        anchor="the linkedin MCP may connect, message, apply, post AND OPEN "
-               "MESSAGING on his account",
-        gist="a live proof against a target the operator names",
-    ),
-    #: NOT A RULING. The question put to him on 2026-09-23 after the SECOND
-    #: wave reached the two notification rows and declined them on the same
-    #: ground. Loading the page clears his unread badge and it does not come
-    #: back, so a fire spends his state. The 18:15 ruling, as relayed, does
-    #: not name notifications, so the question stands; the id is the
-    #: question's, and it stops being cited the day he answers either way.
-    "NOTIFICATIONS-UNREAD-SPEND": Hold(
-        status="PENDING",
-        binds="surface",
-        surface="/notifications/",
-        document="_audit/2026-09-23-bucket1-fires.md",
-        anchor="may one `linkedin_notifications` call spend his unread "
-               "notification state?",
-        gist="may a fire spend his unread badge? It does not come back.",
+        gist="a live proof only at a target the operator names",
     ),
 }
 
-#: Rulings that held census rows and NO LONGER DO, with when and by what. A
-#: row still citing one of these as a hold is reported, never counted: the
-#: citation is history, and the row has to be re-read.
-LIFTED_ROW_HOLDS: dict[str, str] = {
-    "DO-NOT-OPEN-MESSAGING": "lifted by the operator at 18:15 on 2026-09-23 "
-                             "(his ruling (b), relayed by the orchestrator)",
-    "NO-IRREVERSIBLE-WRITE-IS-FIRED": "holds no write of this server since "
-                                      "the operator's ruling (b) at 18:15 on "
-                                      "2026-09-23, relayed: a write waits on "
-                                      "a target he names",
+
+@dataclasses.dataclass(frozen=True)
+class Lifted:
+    """A ruling, or an answered question, that held census rows and no longer does."""
+
+    #: What the register must say about this id TODAY. Checked by
+    #: :func:`register_problems`, so a register that puts the ruling back into
+    #: force reaches this table as a red rather than as a quiet disagreement.
+    register_status: str
+    #: One line: when, by what, and what a row that cited it should cite now.
+    why: str
+
+
+#: Rulings and questions that held census rows and NO LONGER DO. A row still
+#: citing one of these as a hold is reported, never counted: the citation is
+#: history, and the row has to be re-read.
+LIFTED_ROW_HOLDS: dict[str, Lifted] = {
+    "DO-NOT-OPEN-MESSAGING": Lifted(
+        register_status="SUPERSEDED",
+        why="replaced at 18:15 on 2026-09-23 by WRITE-CLASS-B, the operator's "
+            "ruling (b): messaging may be opened"),
+    "NO-IRREVERSIBLE-WRITE-IS-FIRED": Lifted(
+        register_status="AMENDED",
+        why="amended at 18:15 on 2026-09-23 by WRITE-CLASS-B: a write may "
+            "fire, at a target the operator names -- the hold a write row "
+            "cites is OPERATOR-NAMES-THE-TARGET"),
+    #: The question the bucket-1 wave put on 2026-09-23 (may a fire spend his
+    #: unread badge?). Answered PERMITTED the same day as the orchestrator's
+    #: delegated call -- the operator routed "his own notification state" to
+    #: the orchestrator at 18:13 -- and registered under the question's own
+    #: id, so the register now reads it as a STANDING permission.
+    "NOTIFICATIONS-UNREAD-SPEND": Lifted(
+        register_status="STANDING",
+        why="answered 2026-09-23: loading /notifications/ is permitted (the "
+            "orchestrator's delegated call, overridable by the operator); the "
+            "id is now a registered permission, not a hold"),
 }
 
 #: ``**HELD BY `<ID>`**`` -- the bold is optional, the backticked id is not.
@@ -216,7 +253,8 @@ def hold_of(direction: str, text: str) -> tuple[str | None, list[str]]:
             ids.append(i)
         elif i in LIFTED_ROW_HOLDS:
             problems.append(f"cites `{i}` as its hold, and that ruling is "
-                            f"lifted -- {LIFTED_ROW_HOLDS[i]}; re-read the row")
+                            f"lifted -- {LIFTED_ROW_HOLDS[i].why}; re-read the "
+                            f"row")
         else:
             problems.append(f"cites `{i}`, which is not a hold this census "
                             f"knows (scripts/ruling_holds.py::ROW_HOLDS)")
@@ -265,15 +303,24 @@ def _anchor_problems(hold_id: str, hold: Hold, root: pathlib.Path) -> list[str]:
     return []
 
 
-def register_problems(root: pathlib.Path = ROOT, register=None,
-                      holds: dict[str, Hold] | None = None) -> list[str]:
-    """Every entry of ``holds`` resolved against the corpus. Empty is green.
+#: A write hold's register BINDS must still name EVERY write of its class:
+#: "every write ...", or "every <kind> write" -- the register's own spelling
+#: for this ruling is "every outward write". "one write only" does not match.
+_EVERY_WRITE = re.compile(r"every\b(?:\s+\w+)?\s+writes?\b")
 
-    ``register`` and ``holds`` default to the shipped ones and exist as
-    parameters so a control can hand in a damaged copy without touching either.
+
+def register_problems(root: pathlib.Path = ROOT, register=None,
+                      holds: dict[str, Hold] | None = None,
+                      lifted: dict[str, Lifted] | None = None) -> list[str]:
+    """Every entry of ``holds`` and ``lifted`` resolved against the corpus.
+
+    Empty is green. ``register``, ``holds`` and ``lifted`` default to the
+    shipped ones and exist as parameters so a control can hand in a damaged
+    copy without touching any of them.
     """
     register = _register() if register is None else register
     holds = ROW_HOLDS if holds is None else holds
+    lifted = LIFTED_ROW_HOLDS if lifted is None else lifted
     by_id = {r.id: r for r in register}
     problems: list[str] = []
     for hold_id, hold in holds.items():
@@ -292,7 +339,7 @@ def register_problems(root: pathlib.Path = ROOT, register=None,
                 problems.append(f"{hold_id}: holds the surface {hold.surface} "
                                 f"here, and the register's BINDS reads "
                                 f"{ruling.binds!r}")
-            if hold.binds == "write" and not what.startswith("every write"):
+            if hold.binds == "write" and not _EVERY_WRITE.match(what):
                 problems.append(f"{hold_id}: binds every write here, and the "
                                 f"register's BINDS reads {ruling.binds!r}")
         elif hold.status == "RELAYED":
@@ -320,9 +367,18 @@ def register_problems(root: pathlib.Path = ROOT, register=None,
                                             and hold.surface.endswith("/")):
             problems.append(f"{hold_id}: surface {hold.surface!r} is not a "
                             f"/path/ prefix")
-    for hold_id in LIFTED_ROW_HOLDS:
+    for hold_id, entry in lifted.items():
         if hold_id in holds:
             problems.append(f"{hold_id}: listed as lifted AND as a live hold")
+        ruling = by_id.get(hold_id)
+        if ruling is None:
+            problems.append(f"{hold_id}: lifted here, and the rulings register "
+                            f"has no ruling by that id")
+        elif ruling.status != entry.register_status:
+            problems.append(f"{hold_id}: lifted here on the register's word "
+                            f"{entry.register_status!r}, and the register now "
+                            f"says {ruling.status!r} -- re-read every row it "
+                            f"once held")
     return problems
 
 
@@ -332,15 +388,18 @@ def main(argv: list[str] | None = None) -> int:
     for hold_id, hold in ROW_HOLDS.items():
         where = hold.surface if hold.binds == "surface" else "every write"
         print(f"    {hold_id:32s} {hold.status:9s} {where}")
-    for hold_id, why in LIFTED_ROW_HOLDS.items():
-        print(f"    {hold_id:32s} LIFTED    {why}")
+    for hold_id, entry in LIFTED_ROW_HOLDS.items():
+        print(f"    {hold_id:32s} LIFTED    register says "
+              f"{entry.register_status}: {entry.why}")
     if problems:
         print(f"RED: {len(problems)} problem(s):")
         for p in problems:
             print(f"  {p}")
         return 1
-    print(f"GREEN: {len(ROW_HOLDS)} holds -- every STANDING one resolves in the "
-          f"rulings register, every RELAYED and PENDING one to its own record")
+    print(f"GREEN: {len(ROW_HOLDS)} hold(s) and {len(LIFTED_ROW_HOLDS)} lifted "
+          f"-- every STANDING hold resolves in the rulings register, every "
+          f"RELAYED and PENDING one to its own record, and every lifted one to "
+          f"the status the register gives it")
     return 0
 
 

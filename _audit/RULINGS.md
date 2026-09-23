@@ -257,11 +257,11 @@ Scan the CLAIM column against your question. Every claim is a paraphrase written
 | signal NOT scanned | files | lines |
 |---|---|---|
 | a heading naming a ruling | 110 | 245 |
-| a bold line opening on RULING/RULED | 55 | 124 |
+| a bold line opening on RULING/RULED | 55 | 125 |
 | the phrase THE RULING | 35 | 54 |
 | a named -RULING id | 24 | 52 |
-| the phrase standing ruling | 15 | 30 |
-| a lead or operator ruling in prose | 33 | 68 |
+| the phrase standing ruling | 16 | 34 |
+| a lead or operator ruling in prose | 32 | 70 |
 
 **The ruling that caused this register to be written is in the first row and not in the scan.** `BOUNDARY-IS-NOT-A-REASON` is phrased as a quoted ledger rule under a heading that carries no marker at all. It is registered because a person read it, and nothing here would have found it.
 

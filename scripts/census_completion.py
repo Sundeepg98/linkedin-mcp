@@ -575,10 +575,12 @@ def report(rows, out) -> dict:
     p("       row is DERIVED here from the census and never typed: a W row by its")
     p("       R/W cell, any other row by the hold its own cell cites as HELD BY.")
     p("       `scripts/ruling_holds.py` resolves every cited id; this file only")
-    p("       counts them. THE RULINGS MOVED THE SAME DAY: at 18:15 the operator's")
-    p("       ruling (b), relayed and not yet in the register, lifted the")
-    p("       messaging ruling and the read-only rule, so the writes and the two")
-    p("       messaging reads now wait on a live proof against a target he names.")
+    p("       counts them. THE RULINGS MOVED THE SAME DAY: the operator's ruling")
+    p("       (b) at 18:15 (`WRITE-CLASS-B`) lifted the messaging ruling and the")
+    p("       read-only rule, and every write now fires only at a target he")
+    p("       names (`OPERATOR-NAMES-THE-TARGET`). The orchestrator's delegated")
+    p("       calls of the same day put his own inbox reads under (b) and")
+    p("       answered the notifications question. All registered.")
     holds, b1_problems = bucket1_holds(rows)
     split1 = None
     if holds is None:
@@ -632,9 +634,9 @@ def report(rows, out) -> dict:
           f"COVERED-UNFIRED is {unfired}")
         p("     LIFTED, and cited by no row as a hold (a stale citation withholds")
         p("     this split):")
-        for hold_id, why in rh.LIFTED_ROW_HOLDS.items():
-            p(f"       {hold_id}")
-            for piece in textwrap.wrap(why, 66):
+        for hold_id, entry in rh.LIFTED_ROW_HOLDS.items():
+            p(f"       {hold_id}  (the register says {entry.register_status})")
+            for piece in textwrap.wrap(entry.why, 66):
                 p(f"         {piece}")
     p("")
     p("  -- BUCKET 2: BLOCKED ON AN OPERATOR RULING -----------------------")
@@ -645,12 +647,12 @@ def report(rows, out) -> dict:
     p(f"     write-direction still-GAP rows          {by_dir['W']:4d}   DERIVED from the"
       f" census R/W cell")
     p("       Governed until 18:15 on 2026-09-23 by `NO-IRREVERSIBLE-WRITE-IS-FIRED`,")
-    p("       and since then by the operator's ruling (b), relayed and not yet in")
-    p("       the register: a write may be designed, gated and left ready, and")
-    p("       fired only at a target HE names. So the last step of every one of")
-    p("       these is his decision, whatever is built first. This is a CEILING")
-    p("       on the bucket, not a claim that each row is otherwise ready --")
-    p("       most are not.")
+    p("       and since then by the operator's ruling (b), `WRITE-CLASS-B`, with")
+    p("       `OPERATOR-NAMES-THE-TARGET`: a write may be designed, gated and left")
+    p("       ready, and fired only at a target HE names. So the last step of")
+    p("       every one of these is his decision, whatever is built first. This")
+    p("       is a CEILING on the bucket, not a claim that each row is otherwise")
+    p("       ready -- most are not.")
     p("")
     p("  -- BUCKET 3: BLOCKED ON NOTHING AT ALL ---------------------------")
     p("     THE ONLY BUCKET WHOSE SIZE IS A STATEMENT ABOUT WORK.")
@@ -782,7 +784,7 @@ def report(rows, out) -> dict:
     if split1 is not None:
         figures.update({
             "b1_standing": split1["standing"],
-            "b1_named_target": split1["relayed"],
+            "b1_relayed": split1["relayed"],
             "b1_pending": split1["pending"],
             "b1_no_ruling": split1["none"],
         })
@@ -858,26 +860,35 @@ PINNED = {
     #: blocked on nothing: the bucket-3 split had asked the boundary and never
     #: the rulings, and this pin read 4 in the census-cleanup wave's first
     #: commit. The operator lifted the
-    #: ruling at 18:15 (his ruling (b), relayed), so the row is READER again
-    #: and the count is back where the bucket-3 wave put it -- now because the
-    #: rulings were asked. `ruling_problems` asks them on every run.
-    #: `_audit/2026-09-23-census-cleanup.md` items 6 and 7.
+    #: ruling at 18:15 (his ruling (b), `WRITE-CLASS-B`, registered on master
+    #: 53ba1b6), so the row is READER again and the count is back where the
+    #: bucket-3 wave put it -- now because the rulings were asked.
+    #: `ruling_problems` asks them on every run.
+    #: `_audit/2026-09-23-census-cleanup.md` items 6 and 7, and section 11.
     "b3_blocked_on_nothing": 5,
     #: BUCKET 1 BY WHAT HOLDS EACH ROW, DERIVED from the census and the
-    #: holds in `scripts/ruling_holds.py`. After the operator's 18:15 ruling
-    #: of 2026-09-23: NO standing ruling holds any of the 21; 17 -- the 15
-    #: writes and the two messaging reads -- wait on a live proof against a
-    #: target he names; 2 on the open notifications question; 2 on no ruling
-    #: at all. They sum to `unfired`. (Before 18:15 the 17 were 15 held by the
-    #: write ruling and 2 by the messaging ruling, which is the split
-    #: `_audit/2026-09-23-bucket1-fires.md` section 3 typed by hand, and this
-    #: derivation reproduced it row for row before the ruling moved.)
-    #: `PINNED_B1_ROWS`
+    #: holds in `scripts/ruling_holds.py`, BY THE STATUS OF THE HOLD: standing,
+    #: relayed, pending, or none. They sum to `unfired`, and `PINNED_B1_ROWS`
     #: below pins WHICH rows, because a count cannot see two rows swap.
-    "b1_standing": 0,
-    "b1_named_target": 17,
-    "b1_pending": 2,
-    "b1_no_ruling": 2,
+    #:
+    #: WHAT MOVED, AND WHY, three times on 2026-09-23:
+    #:   first build          15 standing (the write ruling) + 2 standing (the
+    #:                        messaging ruling) / 0 / 2 pending / 2 none --
+    #:                        the bucket-1 audit's section 3, row for row
+    #:   ruling (b), relayed  0 / 17 relayed (the writes and M M33, M M43) /
+    #:                        2 pending / 2 none
+    #:   master 53ba1b6       15 standing / 0 / 0 / 6 none. The register made
+    #:                        `OPERATOR-NAMES-THE-TARGET` STANDING (+15 here);
+    #:                        `OWN-INBOX-READS-COVERED-BY-B` released M M33 and
+    #:                        M M43 and the notifications question was answered
+    #:                        PERMITTED, releasing N 20 and N 45 (+4 to none).
+    #: `b1_relayed` is the count this file called `b1_named_target` until the
+    #: target condition was registered: a name for what a status COUNTS, not
+    #: for which ruling happens to have it today.
+    "b1_standing": 15,
+    "b1_relayed": 0,
+    "b1_pending": 0,
+    "b1_no_ruling": 6,
     #: D3's enumerated list: FOUR since 2026-09-23, when `M C83` left it --
     #: see `RULING_BLOCKED_NAMED`. It was printed as "five rows" and pinned
     #: nowhere, which is how a list edit could have moved it silently.
@@ -891,12 +902,11 @@ PINNED = {
 PINNED_B1_ROWS: dict[str, tuple[str, ...]] = {
     "OPERATOR-NAMES-THE-TARGET": (
         "J 103", "J 104", "J 128",
-        "M C1", "M C25", "M C32", "M M33", "M M43",
+        "M C1", "M C25", "M C32",
         "N 1", "N 46", "N 48",
         "P A8", "P A11", "P A13", "P A17", "P A19", "P A21",
     ),
-    "NOTIFICATIONS-UNREAD-SPEND": ("N 20", "N 45"),
-    NO_RULING: ("J 121", "J 122"),
+    NO_RULING: ("J 121", "J 122", "M M33", "M M43", "N 20", "N 45"),
 }
 
 

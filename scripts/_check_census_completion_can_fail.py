@@ -223,7 +223,7 @@ def main() -> int:
               # from the hold on every write to NO RULING and bucket 1 moves
               # ALONE: no GAP figure may move, and the row must be NAMED, not
               # only counted.
-              want=["PINNED FIGURE(S) MOVED", "b1_named_target",
+              want=["PINNED FIGURE(S) MOVED", "b1_standing",
                     "b1_no_ruling", "BUCKET-1 ROW(S) MOVED",
                     "now held by NO RULING"],
               forbid=["adjudicated", "delivered_broad", "gap_read",

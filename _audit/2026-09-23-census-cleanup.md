@@ -27,6 +27,15 @@ it, each opening with its state AFTER it:
     items 2 to 5  unchanged by the ruling, except that C42's cell now says
                   C25 and C32 wait on a named target
 
+**AND THE REGISTER CAUGHT UP THE SAME EVENING (section 11).** Master 53ba1b6
+registered ruling (b) and the orchestrator's delegated calls; this branch
+merged it and finished the holds. The state NOW:
+
+    item 1   bucket 1 is 15 held by a standing ruling (every write, at a
+             target he names) / 0 relayed / 0 pending / 6 held by no ruling
+    item 6   unchanged: blocked on nothing is 5 of 67, and no hold binds a
+             page any more
+
 ---
 
 ## 0. THE PLAN, WRITTEN BEFORE ANY EDIT
@@ -660,6 +669,10 @@ Both are fixed in this document.
 
 ### 10.1 At merge
 
+**[Settled the same evening, section 11: ruling (b) and the target condition
+are registered, both notes below about the register are acted on, and the
+lifted list is now read against the register.]**
+
 * **Registering ruling (b).** `scripts/ruling_holds.py` carries it as
   `OPERATOR-NAMES-THE-TARGET`, status RELAYED, binding every write. The day the
   register carries that id, `register_problems` goes RED on purpose ("mark it
@@ -683,6 +696,10 @@ Both are fixed in this document.
   (the same value HEAD had, with its history now in the comment).
 
 ### 10.2 What needs the operator
+
+**[Both answered the same evening, as the orchestrator's calls under the
+operator's delegation and overridable by him -- section 11. Neither needs him
+now unless he overrides.]**
 
 1. **`N 20` and `N 45`: may one `linkedin_notifications` call spend his unread
    notification state?** Ruling (b), as relayed, names connecting, messaging,
@@ -721,3 +738,120 @@ ask for, made on the same day a sibling is moving rows on the same slice.
   one of the six items.
 * The gate's abridged listing (9, above) hid a selected file from a reader.
   Not a selection defect; a listing that could say which six it omitted.
+
+---
+
+## 11. THE REGISTER CATCHES UP: THE MERGE WITH MASTER 53ba1b6, AND THE HOLDS FINISHED
+
+**THE ORDER, CHECKED AGAINST DISK FIRST.** At 20:05 the orchestrator ordered
+this branch to merge master and finish the holds, IF this branch stood at its
+fourth commit and master at 53ba1b6. Both held when measured at 20:08 by the
+box clock, with b0d3ab8 as the common base. Master had added lane L2's merge
+and the register entries for the rulings of 2026-09-23, recorded in
+`_audit/2026-09-23-rulings-write-class-and-delegated-calls.md`, and each entry
+this wave depends on was read before anything was changed. The document names
+who decided each one: the operator ruled the write class (b), that he names
+every live target, and that his own notification state and his own view are
+the orchestrator's to decide. The orchestrator's calls under that delegation,
+each overridable by him, include the two that move rows here: loading
+`/notifications/` is permitted, and reading his own inbox needs no per-fire
+go-ahead. **One precision against the order's wording:** the notifications
+entry is registered with status STANDING, as a permission that answers the
+question, not with a status reading ANSWERED. The substance is the order's.
+
+**THE MERGE, IN ITS OWN COMMIT.** Two conflicts were real, and each was taken
+from the two commits' own lines rather than retyped: in the address table,
+`M M49` from this branch and `M C29` from lane L2 (adjacent lines, one change
+each); in the instrument register, both sides had appended a section after 57,
+and lane L2's 59 is kept ahead of this wave's 60. The three generated files
+were regenerated twice, to a fixpoint, and never hand-merged.
+
+**AND AT THE MERGE THE HOLDS TABLE SAID SO ON ITS OWN.** Before anything was
+flipped, `scripts/ruling_holds.py` exited 1 with exactly these two problems,
+on real data with nothing planted:
+
+    OPERATOR-NAMES-THE-TARGET: RELAYED here, and the register now carries it
+      -- mark it STANDING, so its BINDS is checked from now on
+    NOTIFICATIONS-UNREAD-SPEND: PENDING here, and the register now holds
+      ['NOTIFICATIONS-UNREAD-SPEND'] binding /notifications/ -- the question
+      looks answered; re-read every row that cites it
+
+They are the two tripwires section 1 built into the table, firing on the
+event they were built for. The merge commit keeps that red, and the next
+commit clears it.
+
+**THE FLIP:**
+
+    holds table       OPERATOR-NAMES-THE-TARGET is STANDING, and the only hold.
+                      The register's BINDS for it reads "every outward write";
+                      the check on a write hold now accepts that spelling and
+                      still refuses "one write only"
+    lifted list       DO-NOT-OPEN-MESSAGING (the register says SUPERSEDED),
+                      NO-IRREVERSIBLE-WRITE-IS-FIRED (AMENDED), and the
+                      notifications question (STANDING, as a permission).
+                      NEW: each entry names the status the register gives it
+                      and the checker compares, which closes the gap 10.1
+                      named -- nothing had read this list against the register
+    census cells      M M33, M M43, N 20, N 45 lose their HELD BY markers and
+                      say in prose why no ruling holds them; J 103, J 104,
+                      J 128 keep theirs and name the registered ids; C42's
+                      cell and the messaging DELTA note name them too
+    address table     M M49's note names both registered rulings; its gate
+                      stays READER
+
+**THE NEW BUCKET-1 SPLIT, AND THE PINS THAT MOVED:**
+
+    held by a STANDING ruling
+      OPERATOR-NAMES-THE-TARGET          15   W 12 by the R/W cell, 3 cited
+    held by a RELAYED ruling              0
+    waiting on a PENDING question         0
+    held by NO ruling                     6   J 121, J 122, M M33, M M43,
+                                              N 20, N 45
+    CHECK: 15 + 0 + 0 + 6 = 21
+
+    b1_standing       0 -> 15
+    b1_named_target  17 -> renamed b1_relayed, now 0: the pin names what a
+                          status COUNTS, not which ruling holds it today
+    b1_pending        2 -> 0
+    b1_no_ruling      2 -> 6
+    PINNED_B1_ROWS    re-pinned to the two groups above
+
+No other pin moved: `unfired` 21, `b2_d3_rows` 4, `b3_blocked_on_nothing` 5.
+What remains for the six held by no ruling is not a ruling: a session for
+M M33, M M43, N 20 and N 45, and a press and a reader change for J 121 and
+J 122.
+
+**THE PAGE EDGE HAS NOTHING TO FIRE ON TODAY, SAID RATHER THAN HIDDEN.** With
+the question answered, no hold binds a page. `ruling_problems` is green on the
+real table because there is nothing for it to catch; each of its tests
+installs a hold of its own, and one installs a hold on a real admitted row's
+page to show the real table going red.
+
+**ONE CLASSIFICATION IS STILL THIS TABLE'S, NOT THE REGISTER'S.** The register
+binds the target condition to every OUTWARD write; this table holds all 15
+census writes with it. Six of them -- `P A8`, `P A11`, `P A13`, `P A17`,
+`P A19`, `P A21` -- are edits to his own profile fields: reversible, and
+visible to anyone who opens his profile, while `OUTWARD-ACTS-NEED-THE-OPERATOR`
+routes to him only acts toward other people or ones that cannot be undone.
+Whether those six are outward is the orchestrator's call; until it is made
+they stay held, the direction that cannot fire anything by mistake.
+
+**WHAT THE NEW RULINGS BEAR ON, AND WHAT WAS NOT TOUCHED.** Three registered
+rulings bear on bucket-3 gates, and re-gating those rows was not part of this
+order:
+
+    D1-SEARCH-AS-READS           N 79, N 93, N 94, N 194: gate RULING, first
+                                 gate D1, which is now decided. (N 172 also
+                                 needs another member's identifier, D3's
+                                 other-people question, still open)
+    IN-ME-NO-BLANKET-BAR         P D28, P J4, N 76: gate PRESS, first refusal
+                                 the missing /in/me/ sensitivity basis
+    VIEW-SWITCH-PRESS-RESTORED   M C29 (a sort is a selection) and N 133 (a
+                                 filter): gate PRESS -- lane L2's rows
+
+Their notes still describe those decisions as unmade. No class count and no
+blocked-on-nothing figure moves until someone re-gates them, and what each
+becomes -- READER, PRESS-PERMITTED or MEASURE -- is a judgement per row.
+
+**GATES FOR THIS SECTION** are reported in the wave's final message: a
+document cannot quote the gate that checks its own last edit.
