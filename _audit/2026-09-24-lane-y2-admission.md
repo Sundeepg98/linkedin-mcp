@@ -496,6 +496,17 @@ three runs, not reproduced on purpose (doing so would break other lanes' gates);
 repaired here, since the file is not this lane's. The repair is a per-run
 `tempfile.mkdtemp`.
 
+**IT FAILED ONCE MORE, AND THIS TIME THE SANDBOX WAS LOOKED AT.** The gate of the fifth
+to seventh commits (`--against f720bcf`: 4 changed paths, 44 test files) read 1
+failed, 2377 passed, 3 skipped -- the same test, alone. Inspected after: the shared
+sandbox had last been rebuilt inside that gate's window, and its `network.md`,
+`messaging-and-content.md` and `jobs.md` -- files no selftest control edits -- differ
+from this lane's, so another worktree's tree was the last one in it. A selftest of this
+tree in a private sandbox (`--sandbox`, a scratch path) ran all five controls as
+specified, calibration included, and left those three files identical to this lane's;
+the test file alone on the seventh commit: 3 passed. The race is now MEASURED at the
+directory; which run deleted whose sandbox mid-check is still inferred.
+
 **AFTER THE FIXES**, on the fourth commit:
 
     impact gate --against 9c219c8      25 changed paths, 55 test files, PASS over
@@ -507,8 +518,9 @@ repaired here, since the file is not this lane's. The repair is a per-run
     the whole-tree forms of the four   the identity file and the navigation file in
       sweeps the gate answers on the   full over the tracked set, on the third
       change                           commit: 1470 passed; later commits touched
-                                       only scripts, tests and this document, each
-                                       through the pre-commit identity gate (0 hits)
+                                       only two scripts, three tests, this document
+                                       and the instrument register, each through
+                                       the pre-commit identity gate (0 hits)
     the candidate table                FIXED POINT on the committed tree, verdict
                                        layer 0 problems
 
