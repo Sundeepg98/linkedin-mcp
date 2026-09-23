@@ -248,6 +248,32 @@ def test_the_newest_activity_urn_is_chosen_and_nothing_else_counts() -> None:
     assert harness.newest_own_activity_digits(_activity_raw(True, items)) == "4" * 19
 
 
+def test_a_notify_toggle_is_counted_and_its_label_never_returned() -> None:
+    fields = [
+        {"label": "First name", "role": "textbox"},
+        {"label": "Share profile updates with your network", "role": "switch",
+         "type": "checkbox", "checked": False},
+        {"name": "Notify network", "role": "checkbox"},
+        "not a dict",
+    ]
+    found = harness.notify_controls(fields)
+    assert found["fields"] == 4 and found["notify_like_controls"] == 2
+    rendered = harness.shape_of(found)
+    assert "Share profile" not in rendered and "Notify" not in rendered
+    assert found["matches"][0] == {"role": "switch", "type": "checkbox", "carries_checked": True}
+    assert harness.notify_controls([{"label": "City"}])["notify_like_controls"] == 0
+
+
+def test_the_capture_keys_are_constant_addresses_the_boundary_admits() -> None:
+    from linkedin_server import readonly
+
+    for key, url in harness.CAPTURE_URLS.items():
+        assert readonly.is_read_url(url), key
+        assert "{" not in url and "?" not in url, key
+    assert set(harness.CAPTURE_URLS) <= set(harness.KEYS)
+    assert set(harness.L1_KEYS) <= set(harness.KEYS)
+
+
 def test_the_environment_refuses_without_attach_mode(monkeypatch) -> None:
     monkeypatch.setattr(harness.config, "CDP_ATTACH", False)
     assert harness._environment_refusal() is not None

@@ -87,9 +87,37 @@ CEILING = 40
 MIN_GAP_S = 20.0
 
 #: The keys, in the order they may run. Closed.
+#: ZERO-PRESS CAPTURES, by constant address. The ``l1_*`` keys are lane L1's
+#: NEEDS-CAPTURE rows: read with L1's own readers
+#: (``_probe_l1_admitted_reads_live._read_for``) and captured under L1's own
+#: file names (``_state/l1-<key>.html``) so the next offline wave finds them
+#: where L1's document says -- but counted and spaced by THIS ledger, and
+#: without L1's jobs-search control bracket (two loads, and a jobs search
+#: adds to his recent-search history). The ``cap_*`` keys are lane Y's
+#: live-capture list, items the boundary admits today and that need no press.
+#: ``l1_post_summary`` takes its id from the activity raw, as post_capture does.
+L1_KEYS: dict[str, str] = {
+    "l1_contact": "contact", "l1_audience": "audience", "l1_overview": "overview",
+    "l1_articles": "articles", "l1_post_summary": "post_summary",
+}
+CAPTURE_URLS: dict[str, str] = {
+    "cap_prefs": "https://www.linkedin.com/mypreferences/d/",
+    "cap_recruiter_views": "https://www.linkedin.com/analytics/recruiter-views/",
+    "cap_connections": "https://www.linkedin.com/mynetwork/invite-connect/connections/",
+    "cap_company_large": "https://www.linkedin.com/company/microsoft/",
+    "cap_company_services": "https://www.linkedin.com/company/infosys/",
+}
+
 KEYS: tuple[str, ...] = (
     "per_post", "badge", "m43", "m33", "notifications", "activity", "pv_capture",
-    "post_capture",
+    "post_capture", "editor_fields", "people_search",
+) + tuple(L1_KEYS) + tuple(CAPTURE_URLS)
+
+#: Control labels that would be a NOTIFY-NETWORK toggle in the intro editor.
+#: Matched as substrings of a normalised label; counted, never printed.
+NOTIFY_PHRASES: tuple[str, ...] = (
+    "notify network", "notify your network", "share with network",
+    "share with your network", "share profile updates", "share profile changes",
 )
 
 #: ``post_capture``: ONE OF HIS OWN POSTS, by an activity id this harness
@@ -123,7 +151,8 @@ M33_FILTER = "starred"
 #: The most loads one key may spend, for the pre-check before it starts.
 MAX_LOADS: dict[str, int] = {
     "per_post": 1, "badge": 1, "m43": 1, "m33": 1, "notifications": 1, "activity": 2,
-    "pv_capture": 1, "post_capture": 1,
+    "pv_capture": 1, "post_capture": 1, "editor_fields": 2, "people_search": 1,
+    **{k: 1 for k in L1_KEYS}, **{k: 1 for k in CAPTURE_URLS},
 }
 
 #: String fields whose values are this package's own closed words.
@@ -444,7 +473,72 @@ async def _call(key: str) -> dict[str, Any]:
         return await server.linkedin_notifications()
     if key == "activity":
         return await server.linkedin_my_activity_items()
+    if key == "editor_fields":
+        return await server.linkedin_profile_editor_fields()
+    if key == "people_search":
+        return await server.linkedin_people_search_shape()
     raise ValueError("no tool for key " + key)
+
+
+def notify_controls(fields: list[Any]) -> dict[str, Any]:
+    """Which intro-editor controls look like a notify-network toggle. PURE.
+
+    Counts only: the label is compared against :data:`NOTIFY_PHRASES` and
+    never returned. Reports each match's role and type, and whether the field
+    dict carried a checked state at all.
+    """
+    matches: list[dict[str, Any]] = []
+    for field in fields or []:
+        if not isinstance(field, dict):
+            continue
+        label = _normalised(" ".join(str(field.get(k) or "") for k in ("label", "name")))
+        if any(p in label for p in NOTIFY_PHRASES):
+            matches.append({
+                "role": field.get("role") if isinstance(field.get("role"), str) else None,
+                "type": field.get("type") if isinstance(field.get("type"), str) else None,
+                "carries_checked": any(k in field for k in ("checked", "aria_checked", "state")),
+            })
+    return {"fields": len(fields or []), "notify_like_controls": len(matches), "matches": matches}
+
+
+async def fire_capture_key(key: str, capture: bool, carried: dict[str, Any]) -> dict[str, Any]:
+    """One zero-press load of a constant address, read and captured."""
+    import _probe_l1_admitted_reads_live as l1
+
+    if key in L1_KEYS:
+        l1_key = L1_KEYS[key]
+        post_id = None
+        if l1_key == "post_summary":
+            raw_path = STATE / "activity.json"
+            post_id = newest_own_activity_digits(
+                json.loads(raw_path.read_text(encoding="utf-8")) if raw_path.exists() else {})
+            if post_id is None:
+                return {"stopped": "no_own_activity_id"}
+        url = l1._url_for(l1_key, post_id, None)
+    else:
+        url = CAPTURE_URLS[key]
+    if not readonly.is_read_url(url):
+        return {"stopped": "address_not_admitted"}
+    async with BROWSER.session() as page:
+        landed = await BROWSER.goto(page, url)
+        relation = l1._relation(landed, url)
+        say("    relation: " + shape_of(relation, "state"))
+        await _health(key)
+        if key in L1_KEYS:
+            reading = await l1._read_for(L1_KEYS[key], page)
+        else:
+            reading = await l1._anchors_reading(page)
+            reading["dialog_count"] = int(await page.locator('[role="dialog"]').count())
+        say("    reading: " + shape_of(reading))
+        if capture:
+            html = await page.content()
+            STATE.mkdir(parents=True, exist_ok=True)
+            if key in L1_KEYS:
+                l1._capture(L1_KEYS[key], html)
+            else:
+                (STATE / (key + ".html")).write_text(html, encoding="utf-8")
+            say("    capture written under _state/ (gitignored)")
+    return {"relation": relation, "reading": reading}
 
 
 async def _pill_indices(page: Any) -> list[int]:
@@ -614,9 +708,13 @@ async def fire(key: str, capture: bool, carried: dict[str, Any]) -> dict[str, An
     if refusal:
         raise _Anomaly("ledger_refused_before_start", key)
     _CURRENT["key"] = key
-    if key in ("pv_capture", "post_capture"):
-        result = await (fire_pv_capture(capture) if key == "pv_capture"
-                        else fire_post_capture(capture))
+    if key in ("pv_capture", "post_capture") or key in L1_KEYS or key in CAPTURE_URLS:
+        if key == "pv_capture":
+            result = await fire_pv_capture(capture)
+        elif key == "post_capture":
+            result = await fire_post_capture(capture)
+        else:
+            result = await fire_capture_key(key, capture, carried)
         _write_raw(key, result)
         say("    RAW written under _state/ (gitignored)")
         if result.get("stopped"):
@@ -653,6 +751,10 @@ async def fire(key: str, capture: bool, carried: dict[str, Any]) -> dict[str, An
         say("    cost_delta: state " + shape_of(delta.get("state"), "state")
             + ", refused_on " + shape_of(delta.get("refused_on"), "refused_on")
             + ", delta " + shape_of(delta.get("delta")))
+    elif key == "editor_fields":
+        found = notify_controls(out.get("fields") or [])
+        raw["notify_controls"] = found
+        say("    intro editor: " + shape_of(found))
     elif key == "activity":
         items = out.get("items") or []
         types = urn_types(items)
