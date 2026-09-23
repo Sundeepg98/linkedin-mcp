@@ -108,6 +108,7 @@ def test_a_missing_verdict_turns_it_red(monkeypatch, capsys) -> None:
     ("stale-census", "which is NOT a read GAP row today"),
     ("stale-annotation", "N 99999 carries an annotation but NO VERDICT"),
     ("undecided-annotation", "is annotated as decided, and carries "),
+    ("unmarked-returned", "carries RETURNED and its cell has no returned-row marker"),
 ])
 def test_every_built_in_plant_refuses(plant, named, capsys) -> None:
     """Each plant is refused BY THE CONTROL BUILT FOR IT, not merely refused.

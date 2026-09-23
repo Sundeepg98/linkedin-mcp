@@ -47,6 +47,34 @@ blocker to anything; it joins.
 Any control that fails REFUSES THE WHOLE REPORT. A triage that cannot be
 trusted to have read every row should not print a tally at all.
 
+## A ROW RETURNED FROM AN EXCLUSION IS ITS OWN CLASS, NOT A HOLE IN THE MAP
+
+The blocker map's spine is the 409 rows that were GAP at the 2026-09-03 freeze,
+and it is not grown (the orchestrator's call, delegated, 2026-09-24). A row lane
+R returned from EXCLUDED-RULED on 2026-09-23 that was NOT one of those 409 has
+no map line, and never will. Such a row is not unjoined: its blocker is NAMED IN
+ITS OWN CELL, after the marker ``RETURNED TO GAP ... BY LANE R ... BLOCKER,
+NAMED:`` (``_audit/2026-09-23-exclusion-returns.md``). It is tallied under
+:data:`RETURNED_CLASS`. **The coverage control still refuses** a row that is
+absent from the map AND carries no such marker, so the class cannot absorb a
+genuinely missing row.
+
+## HOW THE TWO RULES COMPOSE (lane Y2's integration, 2026-09-24)
+
+Both rules answer "which rows may be off the map", from two directions: the
+freeze rule from GIT (a row not GAP at ``FROZEN_REF`` cannot have a line), the
+returned class from the CELL (a marked row names its own blocker). Composed:
+
+* a row off the map that WAS GAP at the freeze is a HOLE in the map, marker or
+  not. An unmarked one is named by CONTROL 2; a MARKED one is named by CONTROL
+  2b (:func:`misfiled_returns`) -- without it the returned class would absorb a
+  hole whenever the missing row happened to carry the marker, which is exactly
+  the absorption lane R's own control forbids for unmarked rows;
+* a row off the map that entered GAP after the freeze is tallied under
+  :data:`RETURNED_CLASS` if its cell carries the marker, and in the entered
+  bucket otherwise (rows admitted from what LinkedIn draws, each naming its
+  blocker in its own line).
+
 USAGE:
 
     ./venv/Scripts/python.exe scripts/triage_messaging_gap_rows.py
@@ -59,6 +87,7 @@ from __future__ import annotations
 import argparse
 import collections
 import pathlib
+import re
 import subprocess
 import sys
 
@@ -81,6 +110,15 @@ DEFAULT_SLICE = "M"
 _READ = ("R",)
 _WRITE = ("W",)
 _BOTH = ("R+W",)
+
+#: The census's convention for a row lane R returned from an exclusion: its
+#: cell opens a note with this marker and names its blocker after it.
+RETURNED_MARKER = re.compile(
+    r"\*\*RETURNED TO GAP\b[^*]*\bBY LANE R\b.*?BLOCKER, NAMED:", re.S)
+
+#: The class such a row is tallied under when the frozen blocker map has no
+#: line for it. Not a blocker name: the blocker is in the row's own cell.
+RETURNED_CLASS = "RETURNED-OUTSIDE-LEDGER"
 
 
 def _gap_rows(letter: str):
@@ -187,7 +225,29 @@ def entered_since_freeze(letter: str, rows) -> list[str]:
     return sorted(row_id for row_id, _ in rows if row_id not in frozen)
 
 
-def unjoined_rows(letter, rows, blockers, entered=()) -> list[str]:
+def returned_outside_ledger(letter, rows, blockers, cells) -> set[str]:
+    """Row ids absent from the blocker map whose own cell carries the
+    returned-row marker, and so names its blocker. See the module docstring."""
+    return {
+        row_id
+        for row_id, _ in rows
+        if ("%s %s" % (letter, row_id)) not in blockers
+        and RETURNED_MARKER.search(" | ".join(cells.get(row_id, [])))
+    }
+
+
+def misfiled_returns(returned, entered) -> list[str]:
+    """CONTROL 2b: marked rows off the map that WERE GAP at the freeze.
+
+    The map holds every row that was GAP at ``FROZEN_REF``, so such a row is a
+    hole in the map that happens to carry the returned-row marker. The returned
+    class would otherwise absorb it; see "HOW THE TWO RULES COMPOSE" in the
+    module docstring.
+    """
+    return sorted(set(returned) - set(entered))
+
+
+def unjoined_rows(letter, rows, blockers, exempt=frozenset()) -> list[str]:
     """Row ids with no blocker assignment. CONTROL 2, as a callable.
 
     Extracted from :func:`main` so it can be SHOWN FAILING against a blocker
@@ -195,11 +255,13 @@ def unjoined_rows(letter, rows, blockers, entered=()) -> list[str]:
     map has never been observed to fail, and this repository counts that as
     uncertified.
 
-    ``entered`` is :func:`entered_since_freeze`'s answer -- rows the map
-    cannot hold. They are exempt here and named by :func:`main`. A row that
-    was GAP at the freeze is never in it, so a hole in the map is still named.
+    ``exempt`` holds the rows accounted for off the map: :func:`main` passes
+    :func:`returned_outside_ledger`'s set (classed, not missing) together with
+    :func:`entered_since_freeze`'s (rows the map cannot hold). A row that was
+    GAP at the freeze is never entered, so a hole in the map is still named --
+    here if unmarked, by :func:`misfiled_returns` if marked.
     """
-    exempt = set(entered)
+    exempt = set(exempt)
     return sorted(
         row_id
         for row_id, _ in rows
@@ -233,9 +295,18 @@ def main(argv: list[str] | None = None) -> int:
         print("REFUSING: %s" % problem)
         return 1
 
-    # ---- CONTROL 2: every row joins, save those the map cannot hold ------
+    # ---- CONTROL 2: every row joins, or is accounted for off the map ------
     entered = entered_since_freeze(letter, rows)
-    unjoined = unjoined_rows(letter, rows, blockers, entered)
+    returned = returned_outside_ledger(letter, rows, blockers, cells)
+    misfiled = misfiled_returns(returned, entered)
+    if misfiled:
+        print(
+            "REFUSING: %d GAP row(s) carry the returned-row marker but were GAP "
+            "at the map's freeze (%s), so the map should hold them: %s"
+            % (len(misfiled), bbm.FROZEN_REF, " ".join(misfiled))
+        )
+        return 1
+    unjoined = unjoined_rows(letter, rows, blockers, returned | set(entered))
     if unjoined:
         print(
             "REFUSING: %d of %d GAP rows carry no blocker assignment: %s"
@@ -247,13 +318,15 @@ def main(argv: list[str] | None = None) -> int:
     by_blocker: dict[str, list[str]] = collections.defaultdict(list)
     cross: dict[tuple[str, str], int] = collections.Counter()
 
-    # Not a blocker name: the bucket for rows the frozen map cannot hold. Each
-    # of them names its blocker in its own census line.
+    # Not a blocker name: the bucket for rows the frozen map cannot hold that
+    # carry no returned-row marker. Each names its blocker in its own line.
     entered_bucket = "(entered GAP after %s)" % bbm.FROZEN_REF
-    exempt = set(entered)
+    others = [row_id for row_id in entered if row_id not in returned]
     for row_id, _lineno in rows:
         direction = rcb.direction_of(cells[row_id])
-        if row_id in exempt:
+        if row_id in returned:
+            blocker = RETURNED_CLASS
+        elif row_id in entered:
             blocker = entered_bucket
         else:
             blocker = blockers["%s %s" % (letter, row_id)]
@@ -264,10 +337,14 @@ def main(argv: list[str] | None = None) -> int:
     print("slice                %s (%s)" % (letter, ccs.SLICES[letter]))
     print("GAP rows             %d" % len(rows))
     print("controls             counter agrees, every row GAP at the map's "
-          "freeze joined, direction reader shown refusing")
-    print("entered since %s  %d -- GAP rows the frozen map cannot hold, "
-          "named here rather than joined:" % (bbm.FROZEN_REF, len(entered)))
-    print("      %s" % (" ".join(entered) or "(none)"))
+          "freeze joined, rows off it classed, direction reader shown "
+          "refusing")
+    print("returned, off ledger %d   (%s: the blocker is named in the "
+          "row's own cell)" % (len(returned), RETURNED_CLASS))
+    print("entered since %s  %d -- GAP rows the frozen map cannot hold; "
+          "the %d not returned are named here rather than joined:"
+          % (bbm.FROZEN_REF, len(entered), len(others)))
+    print("      %s" % (" ".join(others) or "(none)"))
     print()
     print("BY DIRECTION, as the census's own R/W column states it")
     total = 0

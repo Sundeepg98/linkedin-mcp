@@ -8,9 +8,9 @@
 
 **THIS REGISTER IS NOT THE CORPUS AND DOES NOT CLAIM TO BE COMPLETE.** Read section 4 before concluding a question is unruled: the scan that keeps it honest reads ONE marker, and the ruling that caused this file to be written does not carry it.
 
-    rulings registered       53
-    documents scanned        243
-    RULED: declarations      40 claimed, 7 triaged, 0 unclaimed
+    rulings registered       57
+    documents scanned        247
+    RULED: declarations      44 claimed, 7 triaged, 0 unclaimed
 
 ---
 
@@ -51,6 +51,8 @@ Scan the CLAIM column against your question. Every claim is a paraphrase written
 | id | what was ruled | binds | when | where (document / section) |
 |---|---|---|---|---|
 | `D6-CAPABILITY-OVER-AFFORDANCE` | A row named for an affordance is discharged when the package delivers the same capability payload by its own sanctioned routes; the row names them and rests on their proofs (PROVEN if live-proven, else UNFIRED). | rows named for a control or surface | 2026-09-23 | [2026-09-23-rulings-write-class-and-delegated-calls.md](2026-09-23-rulings-write-class-and-delegated-calls.md)<br>*D6: a capability delivered without the named affordance* |
+| `D3-UNREGISTERED-REFUSAL-IS-NOT-A-RULING` | A refusal written only into an allowlist comment is not a ruling: it makes no row EXCLUDED-RULED or CANNOT-DELIVER, and a row resting on one is GAP, blocked on the decision the refusal asks for, until that decision is registered. | refusals recorded only beside an allowlist entry | 2026-09-24 | [2026-09-24-rulings-search-verticals-rosters-passive-costs.md](2026-09-24-rulings-search-verticals-rosters-passive-costs.md)<br>*D3: is a reasoned allowlist refusal a ruling?* |
+| `D5-PASSIVE-COST-IS-NOT-A-ROW` | A consequence of an act with no control of its own is recorded on the act's row, and its own row is EXCLUDED-RULED as NOT-AN-ACT (N 171). A preference he sets is an act, a setting, and stays a GAP write row (N 183). | passive costs | 2026-09-24 | [2026-09-24-rulings-search-verticals-rosters-passive-costs.md](2026-09-24-rulings-search-verticals-rosters-passive-costs.md)<br>*D5: is a passive cost a capability row?* |
 
 ### census state
 
@@ -105,6 +107,8 @@ Scan the CLAIM column against your question. Every claim is a paraphrase written
 |---|---|---|---|---|
 | `D1-SEARCH-AS-READS` | Search keywords and LinkedIn-written facets are permitted as reads: values from tool arguments only, never an identifying value of the operator, at most 5 test searches per session. | search keywords and facets | 2026-09-23 | [2026-09-23-rulings-write-class-and-delegated-calls.md](2026-09-23-rulings-write-class-and-delegated-calls.md)<br>*D1: search keywords and facets* |
 | `OTHER-MEMBER-IDS-AS-READS` | Another member's id in a search facet (e.g. connectionOf) is permitted as a read when it comes from the tool's arguments, never from page content, and is never stored in a tracked file. | search facets carrying another member's id | 2026-09-23 | [2026-09-23-rulings-write-class-and-delegated-calls.md](2026-09-23-rulings-write-class-and-delegated-calls.md)<br>*Other members' ids as search facets* |
+| `D2-SEARCH-VERTICALS-WIDENED` | The search admission widens from people to four CLOSED segments, /search/results/(people\|companies\|groups\|events)/, under D1-SEARCH-AS-READS's three conditions; serves N 104, N 161, M C70 and N 179. | search result verticals | 2026-09-24 | [2026-09-24-rulings-search-verticals-rosters-passive-costs.md](2026-09-24-rulings-search-verticals-rosters-passive-costs.md)<br>*D2: widen the search admission beyond people* |
+| `MEMBER-ROSTERS-AS-BOUNDED-READS` | A roster the operator can open himself (a group's members, an event's attendees, a company's or school's People tab) is admitted as a bounded read: one page per call, the id from tool arguments only, no automatic pagination, no member name or id in a tracked file, inside the live budget. | member rosters | 2026-09-24 | [2026-09-24-rulings-search-verticals-rosters-passive-costs.md](2026-09-24-rulings-search-verticals-rosters-passive-costs.md)<br>*Rosters he can open himself* |
 
 ### session model
 
@@ -153,7 +157,10 @@ Scan the CLAIM column against your question. Every claim is a paraphrase written
 | container and content | `CONTAINER-EXCLUSION-PROPAGATES-ONLY-IF-UNREACHABLE` |
 | counts and relations only | `FEED-CONTENT-READ-RULING` |
 | D1 | `D1-SEARCH-AS-READS` |
+| D2 | `D2-SEARCH-VERTICALS-WIDENED` |
+| D3 | `D3-UNREGISTERED-REFUSAL-IS-NOT-A-RULING` |
 | D4 | `D4-NO-OWN-BROWSER-CONTEXT` |
+| D5 | `D5-PASSIVE-COST-IS-NOT-A-ROW` |
 | D6 | `D6-CAPABILITY-OVER-AFFORDANCE` |
 | dark mode | `ONE-NAMED-SETTINGS-PAGE-AT-A-TIME` |
 | DECIDE not MEASURE | `GROUPS-ADDRESS-BUYS-NO-WRITE` |
@@ -239,7 +246,13 @@ Scan the CLAIM column against your question. Every claim is a paraphrase written
 
 **`D1-SEARCH-AS-READS`** -- Orchestrator's call under OUTWARD-ACTS-NEED-THE-OPERATOR; overridable.
 
+**`D2-SEARCH-VERTICALS-WIDENED`** -- Orchestrator's call under OUTWARD-ACTS-NEED-THE-OPERATOR; overridable. Question: _audit/2026-09-21-the-read-triage.md D2.
+
+**`D3-UNREGISTERED-REFUSAL-IS-NOT-A-RULING`** -- Orchestrator's call under OUTWARD-ACTS-NEED-THE-OPERATOR; overridable. Question: _audit/2026-09-21-the-read-triage.md D3. Governs N 99, N 177 and N 178.
+
 **`D4-NO-OWN-BROWSER-CONTEXT`** -- Orchestrator's call under OUTWARD-ACTS-NEED-THE-OPERATOR; overridable. Question: _audit/2026-09-21-the-read-triage.md D4.
+
+**`D5-PASSIVE-COST-IS-NOT-A-ROW`** -- Orchestrator's call under OUTWARD-ACTS-NEED-THE-OPERATOR; overridable. Question: _audit/2026-09-21-the-read-triage.md D5.
 
 **`D6-CAPABILITY-OVER-AFFORDANCE`** -- Orchestrator's call under OUTWARD-ACTS-NEED-THE-OPERATOR; overridable. Question: _audit/2026-09-21-the-read-triage.md D6. Governs N 132 and J 107.
 
@@ -258,6 +271,8 @@ Scan the CLAIM column against your question. Every claim is a paraphrase written
 **`INCIDENTAL-CAPTURE-IS-NOT-A-RULING`** -- THIS IS THE ANSWER TWO WAVES ESCALATED AS UNDECIDED AND A THIRD RE-DERIVED. It carries the three-way GENERAL FORM table that the 2026-09-21 re-derivation reconstructed from measurement. Its own citation is the 2026-09-03 ledger passage, so the chain is: census rule -> ledger asks -> 09-05 applies -> 09-19 RULES -> 09-21 re-derives.
 
 **`LIVE-BUDGET-40-LOADS`** -- Operator's words: "go, 40 loads is fine". Raised from 15 per wave, to feed one live lane from several offline build lanes.
+
+**`MEMBER-ROSTERS-AS-BOUNDED-READS`** -- Orchestrator's call under OUTWARD-ACTS-NEED-THE-OPERATOR; overridable. Decides the roster question the 2026-09-05 refusal recorded in readonly.py and census cells but never registered (D3). Rows it held: N 165, N 188, N 189, J 108, N 102, N 99, N 177.
 
 **`MESSAGING-SETTINGS-CAPABILITY-LEVEL`** -- The ruling CANONICAL-RULING-ID was written about: one sentence wearing three names across three slices. Its census twin is `_audit/_census/profile.md`.
 
@@ -289,12 +304,12 @@ Scan the CLAIM column against your question. Every claim is a paraphrase written
 
 | signal NOT scanned | files | lines |
 |---|---|---|
-| a heading naming a ruling | 115 | 254 |
-| a bold line opening on RULING/RULED | 59 | 135 |
+| a heading naming a ruling | 117 | 257 |
+| a bold line opening on RULING/RULED | 60 | 138 |
 | the phrase THE RULING | 35 | 56 |
-| a named -RULING id | 27 | 57 |
+| a named -RULING id | 31 | 85 |
 | the phrase standing ruling | 17 | 40 |
-| a lead or operator ruling in prose | 35 | 75 |
+| a lead or operator ruling in prose | 36 | 102 |
 
 **The ruling that caused this register to be written is in the first row and not in the scan.** `BOUNDARY-IS-NOT-A-REASON` is phrased as a quoted ledger rule under a heading that carries no marker at all. It is registered because a person read it, and nothing here would have found it.
 
@@ -346,6 +361,10 @@ Every `RULED:` line in the corpus, and what became of it. An UNCLAIMED row fails
 | [2026-09-23-rulings-write-class-and-delegated-calls.md](2026-09-23-rulings-write-class-and-delegated-calls.md) | RULED: (orchestrator, 2026-09-24, delegated) SHARE-LINK PROOFS USE THE | `SHARE-AND-POLL-PROOFS-OWN-POSTS` |
 | [2026-09-23-rulings-write-class-and-delegated-calls.md](2026-09-23-rulings-write-class-and-delegated-calls.md) | RULED: (orchestrator, 2026-09-24, delegated) CREDENTIAL, RECOVERY AND SESSION | `CREDENTIAL-SETTINGS-NEED-THE-OPERATOR` |
 | [2026-09-23-rulings-write-class-and-delegated-calls.md](2026-09-23-rulings-write-class-and-delegated-calls.md) | RULED: (orchestrator, 2026-09-23, delegated) /in/me/ presses get NO blanket | `IN-ME-NO-BLANKET-BAR` |
+| [2026-09-24-rulings-search-verticals-rosters-passive-costs.md](2026-09-24-rulings-search-verticals-rosters-passive-costs.md) | RULED: (orchestrator, 2026-09-24, delegated) D2 IS ANSWERED YES. The search | `D2-SEARCH-VERTICALS-WIDENED` |
+| [2026-09-24-rulings-search-verticals-rosters-passive-costs.md](2026-09-24-rulings-search-verticals-rosters-passive-costs.md) | RULED: (orchestrator, 2026-09-24, delegated) D3 IS ANSWERED NO. A refusal | `D3-UNREGISTERED-REFUSAL-IS-NOT-A-RULING` |
+| [2026-09-24-rulings-search-verticals-rosters-passive-costs.md](2026-09-24-rulings-search-verticals-rosters-passive-costs.md) | RULED: (orchestrator, 2026-09-24, delegated) MEMBER ROSTERS ARE ADMITTED AS | `MEMBER-ROSTERS-AS-BOUNDED-READS` |
+| [2026-09-24-rulings-search-verticals-rosters-passive-costs.md](2026-09-24-rulings-search-verticals-rosters-passive-costs.md) | RULED: (orchestrator, 2026-09-24, delegated) D5 IS ANSWERED: A PASSIVE COST IS | `D5-PASSIVE-COST-IS-NOT-A-ROW` |
 
 ### 5.1 Triaged -- a declaration hit that is not a ruling made here
 

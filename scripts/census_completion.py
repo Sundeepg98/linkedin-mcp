@@ -122,14 +122,23 @@ DELIVERED_STRICT = ("COVERED-PROVEN",)
 #: counts agreeing), and the `P-R` subsection's header declares 45 with its own
 #: closing note that 44 of them are the settings family and `P1` is the 45th.
 #:
-#: **THE REASON THIS CAN BE FOLDED INTO A PERCENTAGE AT ALL is that every one
-#: of the 58 extra capabilities is EXCLUDED-RULED.** They are out of the
-#: achievable surface either way, so the row-vs-capability argument moves the
-#: achievable-surface figures by almost nothing -- which is worth printing,
-#: because it is the objection anybody would raise first. `collapse()` ASSERTS
-#: the state on both rows rather than trusting this comment.
+#: **THE EXTRA CAPABILITIES TAKE THEIR ROW'S STATE**, and are counted in or out
+#: of the achievable surface by it: `collapse()` reads each row's state off the
+#: census rather than assuming it, and ASSERTS it equals the state written here
+#: so that a move is reported by name. Until 2026-09-23 every one of the 58
+#: extras was EXCLUDED-RULED, which is why this could be folded into a
+#: percentage "by almost nothing".
+#:
+#: `O6-O20` HAS BEEN GAP SINCE LANE R (2026-09-23, `_audit/2026-09-23-exclusion-
+#: returns.md` s4): the fifteen visibility toggles are settings pages awaiting
+#: admission by name, one blocker named in the row's cell, so its 14 extras are
+#: now inside the achievable surface. Re-read and re-pinned at lane R's merge,
+#: 2026-09-24. `P1` stays EXCLUDED-RULED on its own named key, and the P-R
+#: block's 44 settings-family capabilities are counted with it as that block's
+#: own paragraph states -- they carry no row ids, and the Integration section
+#: of the lane R audit names why they were not re-decided there.
 COLLAPSED = {
-    ("P", "O6-O20"): (15, "EXCLUDED-RULED"),
+    ("P", "O6-O20"): (15, "GAP"),
     ("P", "P1"): (45, "EXCLUDED-RULED"),
 }
 
@@ -158,11 +167,21 @@ COLLAPSED = {
 #: address table gates it READER. `_audit/2026-09-23-census-cleanup.md`
 #: section 12. The other three are refused addresses, rosters and a
 #: profile, which that ruling does not reach.
-RULING_BLOCKED_NAMED = {
-    ("N", "99"): "D3 -- is a reasoned allowlist refusal `written`?",
-    ("N", "177"): "D3 -- is a reasoned allowlist refusal `written`?",
-    ("N", "178"): "D3 -- is a reasoned allowlist refusal `written`?",
-}
+#:
+#: EMPTY SINCE 2026-09-24: D3 IS ANSWERED. The orchestrator ruled, under the
+#: operator's delegation, D3-UNREGISTERED-REFUSAL-IS-NOT-A-RULING
+#: (`_audit/2026-09-24-rulings-search-verticals-rosters-passive-costs.md`): a
+#: refusal written only into an allowlist comment is a question with its
+#: argument recorded, not a ruling. So `N 99`, `N 177` and `N 178` wait on no
+#: decision any more; they are GAP, blocked on an admission and a reader, and
+#: bucket 3 counts them off the address table like every other read row.
+#: MEMBER-ROSTERS-AS-BOUNDED-READS decides the roster question the first two
+#: waited on; `N 178`'s live proof loads another member's profile, so the
+#: operator names that member. Emptied by lane R at its merge
+#: (`_audit/2026-09-23-exclusion-returns.md`, Integration 2026-09-24). The
+#: dict is KEPT, empty, because bucket 2 still prints what it holds and a
+#: future enumerated question belongs here.
+RULING_BLOCKED_NAMED: dict[tuple[str, str], str] = {}
 
 # `PRESS_BLOCKED_NAMED` ({N 134, P O3}, "the remaining cost is a session and
 # nothing else") WAS REMOVED 2026-09-23. Both rows are GAP reads, so bucket 3
@@ -291,8 +310,9 @@ def tally(rows):
     return folded
 
 
-def collapse(rows) -> tuple[int, list[str]]:
-    """(extra capabilities beyond the row count, problems).
+def collapse(rows) -> tuple[int, int, list[str]]:
+    """(extra capabilities beyond the row count, how many of those are out of
+    scope by their row's state, problems).
 
     ASSERTS the state of every collapsed row instead of trusting `COLLAPSED`.
     If one of them is ever re-adjudicated -- and `O23` in the same section is
@@ -301,7 +321,7 @@ def collapse(rows) -> tuple[int, list[str]]:
     say so rather than keep printing a figure built on it.
     """
     state = {(l, r): st for l, r, st, _d in rows}
-    extra, problems = 0, []
+    extra, extra_out, problems = 0, 0, []
     for key, (n, want) in COLLAPSED.items():
         got = state.get(key)
         if got is None:
@@ -317,7 +337,9 @@ def collapse(rows) -> tuple[int, list[str]]:
                 f"no row count can show it. RE-READ THE SECTION before "
                 f"quoting any figure here.")
         extra += n - 1
-    return extra, problems
+        if got in OUT_OF_SCOPE:
+            extra_out += n - 1
+    return extra, extra_out, problems
 
 
 def pct(n: int, d: int) -> str:
@@ -488,12 +510,12 @@ def report(rows, out) -> dict:
     p("  ROWS ARE NOT CAPABILITIES. `profile.md` collapses two blocks into")
     p("  single rows, so the CAPABILITY total is larger than the row total:")
     p("")
-    extra, collapse_problems = collapse(rows)
+    extra, extra_out, collapse_problems = collapse(rows)
     for key, (n, _want) in sorted(COLLAPSED.items()):
         p(f"    {key[0]} {key[1]:8s} stands for {n:3d} capabilities in 1 row"
           f"   (+{n - 1})")
     cap_total = total + extra
-    cap_out = out_of_scope + extra
+    cap_out = out_of_scope + extra_out
     cap_achievable = cap_total - cap_out
     p(f"    {'':12s} {'':12s} collapse bonus        +{extra}")
     p(f"    CAPABILITIES, published surface   {cap_total:4d}   computed at HEAD")
@@ -525,11 +547,13 @@ def report(rows, out) -> dict:
         for problem in collapse_problems:
             p(f"    !! {problem}")
     p("")
-    p("  EVERY ONE OF THE 58 COLLAPSED CAPABILITIES IS EXCLUDED-RULED --")
-    p("  asserted above, not assumed -- so they leave the achievable surface")
-    p("  the moment they enter it. That is why the row-vs-capability argument,")
-    p("  which sounds decisive, moves the number that matters by almost")
-    p("  nothing:")
+    p(f"  {extra_out} OF THE {extra} COLLAPSED CAPABILITIES ARE OUT OF SCOPE BY"
+      f" THEIR ROW'S")
+    p("  STATE, read off the census and asserted above, so they leave the")
+    p("  achievable surface the moment they enter it; the other"
+      f" {extra - extra_out} are inside it")
+    p("  (`P O6-O20`, GAP since 2026-09-23). The capability reading of the")
+    p("  achievable surface is printed beside the row reading:")
     p("")
     p(f"    delivered / published surface    rows {pct(broad, total)}"
       f"   capabilities {pct(broad, cap_total)}")
@@ -861,16 +885,67 @@ def report(rows, out) -> dict:
 #: a report: a report that cannot disagree with the tree certifies nothing.
 #: Re-pin only alongside a statement of what moved the census.
 PINNED = {
-    "stated_rows": 704,
+    #: RE-DERIVED AT LANE R'S MERGE, 2026-09-24, from the merged tree and not
+    #: from any forecast (`_audit/2026-09-23-exclusion-returns.md`, its
+    #: Integration 2026-09-24 section, holds the whole list). Lane R returned
+    #: 245 exclusions to GAP with each blocker named in its row's cell, kept 59
+    #: on the census's written grounds, and rulings batch 3 then filed `N 171`
+    #: EXCLUDED-RULED as NOT-AN-ACT on D5-PASSIVE-COST-IS-NOT-A-ROW. So:
+    #:   out_of_scope   315 ->  70   (-246: 245 returned to GAP and `N 23` to
+    #:                               COVERED-UNFIRED; +1: `N 171`)
+    #:   achievable     389 -> 634   gap 270 -> 514, adjudicated 434 -> 190
+    #:   gap_read        66 ->  98   gap_write 150 -> 324, gap_unknown 54 -> 92
+    #:   unfired         25 ->  26   and delivered_broad 100 -> 101: `N 23`,
+    #:                               returned to COVERED-UNFIRED, not to GAP
+    #:   capabilities_achievable 389 -> 648: 634 rows plus `P O6-O20`'s 14
+    #:                               extra, GAP since lane R (see COLLAPSED)
+    #: A GAP count that grows here is not work that appeared; it is work that
+    #: was always there and was filed out of scope without one of the census's
+    #: four written grounds.
+    #:
+    #: RE-DERIVED AT LANE S'S MERGE, 2026-09-24, from the tree merged with
+    #: master d65759f and not as deltas from the lane's base
+    #: (`_audit/2026-09-24-lane-s-people-search.md`, Integration 2026-09-24).
+    #: Lane S built the people-search readers for seven rows, and the WHO
+    #: rule (the orchestrator's census call, 03:20) kept only the four FILTER
+    #: rows delivered: `N 84`, `N 85`, `N 87`, `N 94` GAP -> COVERED-UNFIRED.
+    #: `N 79`, `N 172` and `N 194` stay GAP -- their payload is WHO and the
+    #: reader publishes counts -- re-gated RULING in the address table. So:
+    #:   adjudicated 190 -> 194, delivered_broad 101 -> 105, unfired 26 -> 30
+    #:   gap 514 -> 510, gap_read 98 -> 94, b3_admitted 44 -> 40
+    #:   b3_blocked_on_nothing 9 -> 2 (four left bucket 3, three re-gated)
+    #:   b1_no_ruling 16 -> 20 (the four enter bucket 1, held by no ruling)
+    #:
+    #: RE-DERIVED AT LANE Y2'S INTEGRATION, 2026-09-24, from the tree merged
+    #: with master ff98a7f and not as deltas from the lane's base
+    #: (`_audit/2026-09-24-lane-y2-admission.md`, Integration 2026-09-24).
+    #: Lane Y2 admitted 43 capability rows LinkedIn draws that no row carried,
+    #: all at GAP; on the orchestrator's delegated call `J 158` then moved
+    #: GAP -> COVERED-UNFIRED (a shipped tool reaches it, its call at that
+    #: index never fired), and the WHO/WHICH rule re-gated `N 195` RULING.
+    #: So:
+    #:   stated_rows 704 -> 747, capabilities 762 -> 805,
+    #:   capabilities_achievable 648 -> 691, achievable 634 -> 677 (+43)
+    #:   gap 510 -> 552 (+43 admitted, -1 `J 158`); adjudicated 194 -> 195,
+    #:   delivered_broad 105 -> 106, unfired 30 -> 31 (`J 158`)
+    #:   gap_read 94 -> 107 (+13), gap_write 324 -> 338 (+14),
+    #:   gap_unknown 92 -> 107 (+16 jobs rows, -1 `J 158`)
+    #:   b3_admitted 40 -> 45, b3_refused 38 -> 46,
+    #:   b3_blocked_on_nothing 2 -> 4 (`P S5`, `M M53`; `N 195` is RULING)
+    #:   b1_no_ruling 20 -> 21 (`J 158`, a read no ruling holds)
+    #:   jobs_gap 92 -> 107, jobs_dir_r 33 -> 41, jobs_dir_w 53 -> 58,
+    #:   jobs_dir_rw 6 -> 8, jobs_refused 26 -> 36; jobs_admitted stays 11
+    #:   (`J 158` entered admitted and left GAP)
+    "stated_rows": 747,
     #: 762 = 704 stated rows + 58 declared collapses, computed at HEAD. NOT the
     #: published 761 and NOT the counter docstring's 760: those two differ only
     #: by a `- 2 stateless` term whose two rows are already outside the 704.
     #: Pinned at what the tree computes, with the other two named in the output.
-    "capabilities": 762,
-    "capabilities_achievable": 389,
-    "out_of_scope": 315,
-    "achievable": 389,
-    "adjudicated": 434,
+    "capabilities": 805,
+    "capabilities_achievable": 691,
+    "out_of_scope": 70,
+    "achievable": 677,
+    "adjudicated": 195,
     #: 434 / 100 / 270 / 25, and gap_write 150, since the lane-L4 merge
     #: (2026-09-23): `N 47` was built -- `linkedin_follow_company_page`, a
     #: WRITE, behind the flag and the single-use grant, never fired (GAP ->
@@ -886,15 +961,15 @@ PINNED = {
     #: (GAP -> COVERED-UNFIRED, `_audit/2026-09-23-lane-l1-refused-reads.md`).
     #: One row changing class moves all five; b3 admitted/refused 40/16 are
     #: L1's allowlist admissions, and b1_no_ruling 7 is P G6 entering bucket 1.
-    "delivered_broad": 100,
+    "delivered_broad": 106,
     #: 75 and 21 since the bucket-1 merge: `M C41` fired live and moved from
     #: COVERED-UNFIRED to COVERED-PROVEN (`_audit/2026-09-23-bucket1-fires.md`).
     #: One row changing class moves both, and leaves delivered_broad at 96.
     "delivered_strict": 75,
-    "gap": 270,
+    "gap": 552,
     "cannot_deliver": 19,
-    "unfired": 25,
-    "gap_read": 66,
+    "unfired": 31,
+    "gap_read": 107,
     #: 151, not the 152 published by `_audit/2026-09-21-the-write-ceiling.md`.
     #: That document scoped itself to `profile.md`, `network.md` and
     #: `messaging-and-content.md`; measured at HEAD those three carry W 151 and
@@ -905,12 +980,16 @@ PINNED = {
     #: 150 since the lane-L4 merge: `N 47` was built and left GAP. The same
     #: lane classed all 151 in `_audit/_census/write-classes.tsv`, which keeps
     #: the built row's line, and `scripts/check_write_classes.py` re-walks it.
-    "gap_write": 150,
+    #: 324 since lane R's merge: 173 write-direction rows returned, and `N 183`,
+    #: a read row until rulings batch 3 named it a setting -- every one classed
+    #: in the same table by its act (16 R1, 35 R2, 274 R3 over 325 lines, the
+    #: built `N 47` keeping its line).
+    "gap_write": 338,
     #: All 54 are `jobs.md`, which has no per-row R/W column (56 until the
     #: lane-L3 merge built J 18 and J 39). Not a coincidence
     #: and not a defect in the finder: it is the whole of that slice's still-GAP
-    #: population.
-    "gap_unknown": 54,
+    #: population. 92 since lane R's merge, which returned 38 jobs rows.
+    "gap_unknown": 107,
     "gap_ambiguous": 0,
     #: BUCKET 3, MEASURED 2026-09-23 (`_audit/2026-09-23-bucket3-addresses.md`),
     #: counted off `_audit/_census/read-addresses.tsv`, whose every verdict
@@ -921,10 +1000,19 @@ PINNED = {
     #: row entering or leaving bucket 3, or a boundary edit that moves a
     #: verdict and is carried into the table, cannot move the headline
     #: "blocked on nothing" figure without somebody re-pinning it out loud.
-    "b3_admitted": 40,
-    "b3_refused": 16,
-    "b3_no_address": 2,
-    "b3_needs_session": 6,
+    #: 44 / 38 / 1 / 13 / 2 SINCE LANE R'S MERGE (sum 98, `gap_read`): 34
+    #: returned read rows entered bucket 3, each driven through the shipped
+    #: boundary (ADMITTED 4, REFUSED 23, NEEDS-SESSION 7), and two left it --
+    #: `N 171` (NO-ADDRESS; NOT-AN-ACT now) and `N 183` (REFUSED; a setting, so
+    #: a write row). The boundary itself did not move.
+    #: 40 / 38 / 1 / 13 / 2 SINCE LANE S'S MERGE (sum 94, `gap_read`): the
+    #: four FILTER rows lane S built (`N 84`, `N 85`, `N 87`, `N 94`) left
+    #: bucket 3 for COVERED-UNFIRED, all four ADMITTED; the boundary did not
+    #: move.
+    "b3_admitted": 45,
+    "b3_refused": 46,
+    "b3_no_address": 1,
+    "b3_needs_session": 13,
     "b3_undetermined": 2,
     #: ITS HISTORY ON 2026-09-23 IS THE RULINGS AND THE LIVE READINGS MOVING
     #: UNDER IT, one line per move:
@@ -940,11 +1028,19 @@ PINNED = {
     #:       RULING on; seven need only a reader (N 79, N 84, N 85, N 87,
     #:       N 94, N 172, N 194) and N 93 a live look first
     #:   8   MEASURED at the merge of the two: M M49 and those seven
+    #:   9   at lane R's merge, 2026-09-24: `P K1`, returned from an
+    #:       exclusion, reads the Verifications section on the admitted
+    #:       /in/me/ page, and only a reader stands in its way
+    #:   2   at lane S's merge, 2026-09-24: lane S built the seven people-
+    #:       search readers. The four FILTER rows left for COVERED-UNFIRED;
+    #:       under the WHO rule `N 79`, `N 172` and `N 194` stay GAP, re-gated
+    #:       RULING on the name-free shaper doctrine, pending the operator's
+    #:       question on returning names at runtime. Left: `M M49`, `P K1`
     #: The gates past the boundary are re-judged BY HAND when a ruling lands;
     #: what `ruling_problems` asks on every run is only that no row blocked on
     #: nothing sits on a page a hold binds.
     #: `_audit/2026-09-23-census-cleanup.md` items 6 and 7, sections 11-13.
-    "b3_blocked_on_nothing": 8,
+    "b3_blocked_on_nothing": 4,
     #: BUCKET 1 BY WHAT HOLDS EACH ROW, DERIVED from the census and the
     #: holds in `scripts/ruling_holds.py`, BY THE STATUS OF THE HOLD: standing,
     #: relayed, pending, or none. They sum to `unfired`, and `PINNED_B1_ROWS`
@@ -973,6 +1069,17 @@ PINNED = {
     #:   merge of lane L4     10 standing / 0 / 0 / 15 none, 6 released, of 25:
     #:                        N 47 was built, a W row, held by the write hold
     #:                        with no marker (+1 standing).
+    #:   lane R's merge       10 standing / 0 / 0 / 16 none, 6 released, of 26:
+    #:                        N 23 was returned from an exclusion to
+    #:                        COVERED-UNFIRED, a read no ruling holds (+1 none).
+    #:   lane S's merge       10 standing / 0 / 0 / 20 none, 6 released, of 30:
+    #:                        the four people-search FILTER readers (N 84,
+    #:                        N 85, N 87, N 94), reads no ruling holds -- D1
+    #:                        and OTHER-MEMBER-IDS permit, they hold nothing
+    #:                        (+4 none).
+    #:   lane Y2's integration 10 standing / 0 / 0 / 21 none, 6 released, of 31:
+    #:                        `J 158`, a read no ruling holds, entered
+    #:                        COVERED-UNFIRED (+1 none).
     #: `b1_relayed` is the count this file called `b1_named_target` until the
     #: target condition was registered: a name for what a status COUNTS, not
     #: for which ruling happens to have it today. `b1_released` is a SUBSET of
@@ -980,13 +1087,16 @@ PINNED = {
     "b1_standing": 10,
     "b1_relayed": 0,
     "b1_pending": 0,
-    "b1_no_ruling": 15,
+    "b1_no_ruling": 21,
     "b1_released": 6,
     #: D3's enumerated list: FOUR once `M C83` left it, and THREE since
     #: `N 172` left it the same evening on OTHER-MEMBER-IDS-AS-READS -- see
     #: `RULING_BLOCKED_NAMED`. It was printed as "five rows" and pinned
     #: nowhere, which is how a list edit could have moved it silently.
-    "b2_d3_rows": 3,
+    #: ZERO since lane R's merge, 2026-09-24: D3 is answered
+    #: (D3-UNREGISTERED-REFUSAL-IS-NOT-A-RULING), the list is empty, and the
+    #: three rows are GAP blocked on an admission and a reader.
+    "b2_d3_rows": 0,
     #: THE JOBS SLICE BY SIDE TABLE, 2026-09-23 (lane L3), counted off
     #: `_audit/_census/jobs-directions.tsv`, whose every verdict and deciding
     #: phrase `scripts/check_jobs_directions.py` re-checks. `jobs_gap` equals
@@ -994,14 +1104,18 @@ PINNED = {
     #: partition its R + R+W rows (26 + 3 = 29). Kept OUT of `gap_read` and
     #: `gap_write` deliberately: `gap_read` feeds bucket 3, whose address
     #: table does not carry jobs rows.
-    "jobs_gap": 54,
-    "jobs_dir_r": 26,
-    "jobs_dir_w": 25,
-    "jobs_dir_rw": 3,
-    "jobs_admitted": 9,
-    "jobs_refused": 19,
+    #: 92 SINCE LANE R'S MERGE, 2026-09-24: 38 jobs rows returned, each given
+    #: a line -- directions R 7, W 28, R+W 3 (so 33 / 53 / 6), and of the ten
+    #: with a read half ADMITTED 2 (`J 17`, `J 115`), REFUSED 7, NEEDS-SESSION
+    #: 1 (`J 134`). 11 + 26 + 0 + 2 + 0 = 39 = 33 + 6.
+    "jobs_gap": 107,
+    "jobs_dir_r": 41,
+    "jobs_dir_w": 58,
+    "jobs_dir_rw": 8,
+    "jobs_admitted": 11,
+    "jobs_refused": 36,
     "jobs_no_address": 0,
-    "jobs_needs_session": 1,
+    "jobs_needs_session": 2,
     "jobs_undetermined": 0,
     "jobs_blocked_on_nothing": 0,
 }
@@ -1023,8 +1137,21 @@ PINNED_B1_ROWS: dict[str, tuple[str, ...]] = {
     #: lane-L3 merge, 2026-09-23: reads built offline, which no ruling holds.
     #: The six P A rows are the writes SELF-PROFILE-EDITS-NOT-OUTWARD
     #: releases, each by its own cell.
+    #: `N 23` entered with lane R, 2026-09-23: returned from an exclusion to
+    #: COVERED-UNFIRED, because `linkedin_connections` already reads his
+    #: connections list behind a before-and-after badge gate and no live fire
+    #: is on record. A read of his own list, which no ruling holds.
+    #: `N 84`, `N 85`, `N 87` and `N 94` entered with lane S's merge,
+    #: 2026-09-24: people-search FILTER readers built offline and never
+    #: fired, from the tool's arguments under D1-SEARCH-AS-READS (and, for
+    #: `N 85`, OTHER-MEMBER-IDS-AS-READS). Both rulings permit; neither holds.
+    #: `J 158` entered at lane Y2's integration, 2026-09-24: admitted at GAP,
+    #: then COVERED-UNFIRED on the orchestrator's delegated call --
+    #: `linkedin_premium_job_collection(1)` reaches it, its reader read the
+    #: page live on 2026-09-20, and the tool's call at index 1 never fired.
     NO_RULING: (
-        "J 18", "J 39", "J 121", "J 122", "M M33", "M M43", "N 20", "N 45",
+        "J 18", "J 39", "J 121", "J 122", "J 158", "M M33", "M M43", "N 20", "N 23",
+        "N 45", "N 84", "N 85", "N 87", "N 94",
         "P A8", "P A11", "P A13", "P A17", "P A19", "P A21", "P G6",
     ),
 }

@@ -126,20 +126,44 @@ def test_the_split_is_the_one_the_lane_report_quotes():
     at b0d3ab8 = 11 R1 + 23 R2 + 117 R3; the R1 disposition is re-counted from
     the table every run, so a build moves it without moving this.
 
-    165 after lane Y2's completeness admission (2026-09-24) = 11 R1 + 24 R2 +
-    130 R3: fourteen admitted write rows, one R2 (M C94, sending a post to one
-    person) and thirteen R3 (P S2, S4, S6-S10; M M52, C97, C100; N 196, 198,
-    200). R1 is untouched: no admitted row's act is one of the first round's
-    own verbs."""
+    325 SINCE LANE R'S MERGE, 2026-09-24 (`_audit/2026-09-23-exclusion-returns.md`,
+    Integration 2026-09-24): lane R returned 173 write-direction rows to GAP,
+    and rulings batch 3 made `N 183` a write row; each of the 174 was classed by
+    its act -- 5 R1 (`N 34`, `N 36`, `N 50`, `N 62`, `P I2`, all queued), 12 R2
+    (the sends and connects ruling (b) permits), 157 R3.
+    151 + 174 = 325 = 16 R1 + 35 R2 + 274 R3.
+
+    339 AFTER LANE Y2'S COMPLETENESS ADMISSION, measured on the tree that
+    merged it with lane R (`_audit/2026-09-24-lane-y2-admission.md`,
+    Integration 2026-09-24): fourteen admitted write rows, one R2 (`M C94`,
+    sending a post to one person) and thirteen R3 (`P S2`, `S4`, `S6`-`S10`;
+    `M M52`, `C97`, `C100`; `N 196`, `198`, `200`). R1 is untouched: no
+    admitted row's act is one of the first round's own verbs.
+    325 + 14 = 339 = 16 R1 + 36 R2 + 287 R3."""
     rows, _ = cwc.load()
     split = cwc.split(rows)
-    assert (split["R1"], split["R2"], split["R3"]) == (11, 24, 130)
+    assert (split["R1"], split["R2"], split["R3"]) == (16, 36, 287)
     assert split["R1:built"] + split["R1:queued"] == split["R1"]
 
 
 # ---------------------------------------------------------------------------
 # SHOWN FAILING -- one plant per defect class, each into a COPY
 # ---------------------------------------------------------------------------
+
+
+def test_a_range_id_citation_is_parsed_and_must_still_name_a_row(tmp_path):
+    """``profile.md row O6-O20`` is a census row with a RANGE id. The self-row
+    form admits it, and the admission is not a hole: a range that names no row
+    is convicted by the same resolver as any other id, not waved through and
+    not misread as an unparseable citation."""
+    lines = _lines()
+    i = _find(lines, lambda r: r["key"].startswith("P "))
+    row = _row(lines[i])
+    row["sources"] = row["sources"] + " ; _audit/_census/profile.md row O6-O99"
+    lines[i] = _line(row)
+    problems = _problems(_plant(tmp_path, lines))
+    _red_naming(problems, row["key"], "row O6-O99 is no longer a row of")
+    assert not [p for p in problems if "O6-O99" in p and "is neither a path" in p]
 
 
 def test_red_on_a_missing_row(tmp_path):

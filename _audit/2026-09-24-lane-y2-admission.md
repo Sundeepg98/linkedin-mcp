@@ -545,3 +545,179 @@ set (34) overlap on three, so 86 ran; CI's three-platform matrix, since nothing 
 pushed; anything live, since this lane was offline; and `census_completion`'s re-pin,
 deliberately (section 11). The gate of the commit that adds this section is reported in
 the lane's final message: a document cannot hold the gate of the commit that writes it.
+
+## Integration 2026-09-24
+
+**THE ORDER, AND WHAT DISK SAID.** The coordinator's integration order (04:45) asked
+for master `ff98a7f` merged into this branch. Sampled before acting: this worktree at
+`441f285`, clean; master and origin both at `ff98a7f`, 30 commits past `9c219c8` --
+rulings batch 3, lane R (245 exclusions returned to GAP), lane G (guard hardening) and
+lane S (people-search readers and the WHO rule). Disk agreed with the order.
+
+### I.1 The merge, file by file
+
+Fourteen files conflicted; three more merged on their own and were re-derived.
+
+    the four census slices     29 conflict blocks, resolved ROW BY ROW against the
+                               merge base: a row one side changed took that side; the
+                               19 rows both sides changed -- J 66, J 132; P D5, G4,
+                               I12, K1, K2, N15-N20, N22, N28, N29; M M42; N 97 --
+                               kept lane R's line and re-appended this lane's
+                               evidence sentence after it, unchanged. Every such
+                               sentence was a pure insertion at the end of the last
+                               cell, checked before it was carried
+    read-addresses.tsv         the base's last line (N 194) changed by lane S and
+                               three lines appended here: lane S's line kept, the
+                               three appended after it, then re-derived by the checker
+    jobs-directions.tsv,       merged on their own; re-derived by their checkers on
+    write-classes.tsv,         the merged census, not pasted (section I.5)
+    check_write_classes.py
+    triage_messaging_gap_      BOTH DESIGNS KEPT AND COMPOSED -- section I.2
+      rows.py and its test
+    triage_read_gap_rows.py    lane R's RETURNED block and CONTROL 9 kept beside this
+                               lane's six lines, two of them revised (I.3)
+    test_write_classes.py      both arithmetic paragraphs kept; the pin re-derived
+    INSTRUMENTS.md             number order: 64 (with 64.3), 65, 66, 67, 71
+    INDEX.md, RULINGS.md,      taken from master, then regenerated to a fixed point
+      blocker-map.tsv          with every resolved path staged
+
+**NO ROW ID COLLIDED.** On the merged tree the live population is exactly the 747-row
+pin (`scripts/pin_census_rows.py --check`: no drift) -- master's 704 plus this lane's
+43, and no row of master's carries a label this lane used.
+
+### I.2 Two rules for one question, composed
+
+Lane R's `RETURNED-OUTSIDE-LEDGER` and this lane's rows-after-freeze bucket both answer
+which GAP rows may be absent from the frozen blocker map: R's from the CELL (a marked
+row names its own blocker), this lane's from GIT (a row not GAP at `1c08e5f` cannot
+have a line). Composed in `scripts/triage_messaging_gap_rows.py`:
+
+* a row off the map that was GAP at the freeze is a HOLE, marker or not -- unmarked, it
+  is named by CONTROL 2 as before; marked, by a new CONTROL 2b, `misfiled_returns`.
+  Without 2b the returned class would absorb any hole whose row happened to carry the
+  marker, which is the absorption lane R's own control forbids for unmarked rows;
+* a row off the map that entered GAP after the freeze is tallied `RETURNED-OUTSIDE-
+  LEDGER` if its cell carries the marker, in the entered bucket otherwise.
+
+On the merged tree: 128 GAP rows in slice M; 25 entered since the freeze, of which 14
+are lane R's returned rows and 11 this lane's admissions; `misfiled_returns` empty. R's
+three tests and this lane's four keep their meaning; the hole tests now pass both
+exemptions, as `main` does; one test is new (a marked row lost from the map is refused,
+not classed, on a fixture BUILT by planting the marker, so it cannot pass because the
+tree holds no such row).
+
+### I.3 The WHO/WHICH rule on this lane's rows
+
+The order: a row whose payload is people, or which items of other people's content,
+served only by a count-only reader, is GAP on the doctrine, with its REOPENER. All 43
+rows were GAP; the question was whether any cell claimed more. Every READ row was
+judged on its own words:
+
+    REACHED -- the cell now names the doctrine and its REOPENER; the row stays GAP
+      J 159   which ads a company runs                       WHICH
+      J 160   the people hiring for the job he wants          WHO
+      J 165   which events a company hosts (N 180's case)     WHICH
+      J 166   the members a product page names                WHO    its cell had said
+                                                                     "a reader needs a
+                                                                     name-free shaper"
+      M C93   who and which a search finds                    WHO    its admission clause
+                                                                     brought up to D2
+      M C101  which editions a newsletter holds               WHICH
+      N 195   each recruiter viewer, by company and industry  WHO    its cell had said a
+              (the row's third part)                                 count reader names
+                                                                     nobody; gate READER
+                                                                     -> RULING, triage
+                                                                     BUILDABLE -> RULING
+      N 199   the people suggested for the job search         WHO    its cell had said
+                                                                     "a reader needs a
+                                                                     name-free shaper"
+
+    NOT REACHED -- unchanged
+      J 152          LinkedIn Learning's catalogue: products addressable by id, as job
+                     postings are; neither people nor members' content
+      J 153, C95,    one caller-chosen item's own content; each cell already says a
+        C98          reader could publish its facts, never its words or its video
+      J 154-156,     his own record
+        P S1, S3, S5
+      J 167          organisations' own Pages, consumable by id by
+                     `linkedin_company_page_counts`
+      M M53          a closed status word for a thread the caller names; no name
+      M C96, C99,    a provenance label on one item, a game's state, a link
+        N 197
+      the 21 write rows   the rule is about what a read may publish
+
+The WHICH rows name the precedent `N 162` / `N 180` and `FEED-CONTENT-READ-RULING`
+(counts and relations only); the WHO rows the name-free shaper doctrine, pending the
+operator's question on returning names at runtime -- the form lane S's three cells use.
+The side tables say the same, row by row.
+
+**ONE FINDING FOR WHOEVER ANSWERS THAT QUESTION.** `linkedin_who_viewed_me` already
+returns each profile viewer's name and headline -- and "Recruiter at <company>" for
+the anonymous ones -- and rows 129 and 130 are COVERED-PROVEN on it. The question the
+WHO rule leaves pending is therefore already answered once, for one page, with no
+ruling behind the answer. `N 195` asks for the same kind of reading on the recruiter
+page.
+
+### I.4 J 158, decided on evidence
+
+The orchestrator's call, delegated: COVERED-PROVEN only if
+`linkedin_premium_job_collection(1)` was live-proven for exactly this capability. The
+evidence:
+
+* LIVE, 2026-09-20: `scripts/_probe_premium_collections_live.py` read the top-choice
+  page through the tool's own composer and reader -- `collection_url(1)`, then
+  `read_job_collection(page, expect=1)` -- 25 slots, `list_container_seen` True, path
+  and route word intact, an id set disjoint from the control;
+* the tool shipped in the same commit, `3c99942`; its ONE recorded live call is the
+  one row 125 cites, and row 125's cell names index 0;
+* nothing records the tool called at index 1 -- this lane's own side-table line said
+  so on the day it admitted the row.
+
+**COVERED-UNFIRED.** The tool reaches the row and its reader has read the page live;
+the call the bar names never fired. Row 125's own bar banks it in one page load: one
+call of `linkedin_premium_job_collection(1)` returning `list_container_seen` True with
+`slots` above 0. `J 158` enters bucket 1 held by no ruling, its jobs-directions line
+leaves (the table holds still-GAP rows only), and it is a live-lane item.
+
+### I.5 The merged figures, and every pin, re-derived on the merged tree
+
+    stated rows 747 (J 166, P 213, M 153, N 215)   capabilities 805 (achievable 691)
+    GAP 552   achievable 677   delivered strict 75, broad 106   unfired 31
+    out of scope 70   cannot deliver 19   adjudicated 195
+    gap_read 107 / gap_write 338 / gap_unknown 107
+    bucket 3: admitted 45, refused 46, no address 1, needs session 13, undetermined 2;
+      blocked on nothing 4 -- M M49, P K1, P S5, M M53
+    bucket 1: standing 10, relayed 0, pending 0, none 21 (released 6)
+    jobs: GAP 107 = R 41 + W 58 + R+W 8; admitted 11, refused 36, needs session 2
+
+    scripts/census_completion.py PINNED, 20 moved, each measured:
+      stated_rows 704 -> 747, capabilities 762 -> 805, capabilities_achievable
+      648 -> 691, achievable 634 -> 677, adjudicated 194 -> 195, delivered_broad
+      105 -> 106, gap 510 -> 552, unfired 30 -> 31, gap_read 94 -> 107, gap_write
+      324 -> 338, gap_unknown 92 -> 107, b3_admitted 40 -> 45, b3_refused 38 -> 46,
+      b3_blocked_on_nothing 2 -> 4, b1_no_ruling 20 -> 21, jobs_gap 92 -> 107,
+      jobs_dir_r 33 -> 41, jobs_dir_w 53 -> 58, jobs_dir_rw 6 -> 8,
+      jobs_refused 26 -> 36; every other pin unchanged, jobs_admitted 11 included
+    PINNED_B1_ROWS: NO RULING gains J 158 (21 rows)
+    tests/census_row_pin.json and its literals: 747, per slice as above
+    tests/test_a_census_locator_names_its_row.py: 747
+    tests/test_write_classes.py: (16, 36, 287) over 339 lines
+    tests/test_triage_instrument.py: 128 = R 19 + W 105 + R+W 4
+    scripts/triage_read_gap_rows.py: 81 verdicts (lane S's 75, and this lane's 6);
+      RULING 16, RETURNED 28
+
+`census_completion --check`: every headline figure matches its pin. The side tables,
+re-derived by their own checkers on the merged census: `check_jobs_directions` GREEN,
+107 of 107 still-GAP jobs rows; `check_read_addresses` GREEN, 107 of 107 bucket-3 rows;
+`check_write_classes` GREEN, 339 lines for 338 write-direction rows.
+
+### I.6 The candidate table, regenerated here
+
+`completeness_harvest --write --captured-before 2026-09-23T00:00:00`, then `--check`:
+fixed point, verdict layer 0 problems. The merged census moved seven lines' columns and
+one line out: the app-scope OUT control on the profile-views explainer now reads as
+carried by a row, because words the merge brought in cover it -- a coincidence of
+words, like the five noted in section 1, and its OUT verdict stands. The table: 45
+lines, 8 app-scope (all OUT) and the 37 others.
+
+GATES ON THE MERGED TREE: the next commit records them.

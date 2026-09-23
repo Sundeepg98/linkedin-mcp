@@ -189,7 +189,12 @@ WRITE_CLASS_KNOWN_IN = ("M M6", "P A14", "N 4")
 WRITE_CLASS_KNOWN_OUT = ("N 1", "P A1")
 
 _WC_DISPOSITION_RX = re.compile(r"^(built:[a-z_]+|queued:[A-Z0-9][A-Z0-9-]*|classify-only)$")
-_WC_SELF_ROW_RX = re.compile(r"^(_audit/_census/[a-z\-]+\.md) row ([A-Za-z]*\d+)$")
+#: A row id may be a RANGE, ``O6-O20``: `profile.md` collapses fifteen toggles
+#: into that one row, and it entered the write-direction population with lane R
+#: (2026-09-23). The range form still has to name a row that exists -- the
+#: resolver below searches the census for it verbatim.
+_WC_SELF_ROW_RX = re.compile(
+    r"^(_audit/_census/[a-z\-]+\.md) row ([A-Za-z]*\d+(?:-[A-Za-z]*\d+)?)$")
 _WC_PATH_RX = re.compile(r"^([A-Za-z0-9_.\-/]+\.(?:py|md|tsv|json))(?:::(.+))?$")
 _WC_RULING_RX = re.compile(r"^RULING:([A-Z0-9][A-Z0-9\-]*)$")
 
