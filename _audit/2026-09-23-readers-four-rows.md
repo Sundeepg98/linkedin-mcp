@@ -2,7 +2,13 @@ claude-opus-5-5[1m]
 
 # READERS FOR THE FOUR ROWS BLOCKED ON NOTHING: P O3, N 134, M C72, M C85
 
-**CORRECTS:** `_audit/2026-09-23-bucket3-addresses.md` -- row `M C85` was gated READER ("no reader exists"); the first thing past its admitted boundary is a RULING on where a poll post's address may come from, so "blocked on nothing" is 4 of 67, not 5 (section 4).
+**CORRECTS:** `_audit/2026-09-23-bucket3-addresses.md` -- its "blocked on nothing" five are one: `M C85` is gated RULING (no sanctioned source for a poll post's address, section 4), and `P O3`, `N 134` and `M C72` are gated PRESS, each measured live (sections 3.0.1 and 5.1). Only `M M49` remains.
+
+**CORRECTS:** `_audit/2026-09-21-what-is-reachable-now.md` -- section 4.3's "THE WITNESS FIRED. THE PANEL OPENS." rests on a press at page-wide `[aria-expanded]` index 0, measured here to be the header nav's account menu (section 2.2).
+
+**CORRECTS:** `_audit/_census/profile.md` -- row `O3` carried that witness as "the panel opens" and one name-free shaper as its whole blocker; it is blocked by "Show more analytics" carrying no sanctioned attribute and by filter application being a submission (section 3.0.1).
+
+**CORRECTS:** `_audit/_census/network.md` -- row `134` likewise; the pill it names opens into a filter form whose payload needs APPLYING (section 3.0.1).
 
 **2026-09-23. Wave `readers-four-rows`, base `b0d3ab8`. WRITTEN AS THE WAVE
 RUNS, not at its end.** The four rows `_audit/2026-09-23-bucket3-addresses.md`
@@ -446,6 +452,77 @@ PLANTED rather than as a pass, which is why that was visible.)
   0.5): the pressed node inside `main`, and a reading of analytics content,
   not a nav menu.
 
+### 3.0.1 THE FIRE -- 19:10:23-19:11:03 IST, one call, one page load
+
+`scripts/_probe_readers_four_fires.py analytics` at `d912b25`: the SHIPPED
+`linkedin_who_viewed_me(limit=10, open_filter_menus=True)`, attach on
+127.0.0.1:9224, its own tab, closed after. Raw result (viewer rows carry
+names) in the worktree's gitignored `_state/readers4/fire-analytics-raw.json`;
+what is quoted here is the package's own literals and integers, printed by the
+harness and nothing else.
+
+    pages_loaded 1          rows 10          challenge terms none
+    insights  headline 39   delta 25%   trend present   filters COUNT 3
+    pills_found 3           stopped none
+
+    pill  permitted  witness            appeared        new_lines  values
+      0   True       expanded_true      show_results        32     show_results 365
+      1   True       expanded_true      show_results        22     -
+      2   True       expanded_true      show_results        37     -
+    held at every press (drawn before AND while open):
+        all_filters, interesting_viewers, recruiters, reset,
+        show_more_analytics, time_range
+    priced by (read at both ends, unmoved): headline_viewers, invitations,
+        notifications_unread -- the two nav badges READ on this load
+
+**WHAT IT ESTABLISHES, MEASURED:**
+
+1. **The three pills open, under the gate, and close.** Three PERMITTED
+   presses, each with its closure verified and its witness moving
+   `expanded_true` at the open moment; no counter moved, the headline among
+   them. This is the first press on this page that is KNOWN to have hit an
+   analytics control -- by the structural load's order, by the `main`
+   scope, and by what the reading saw arrive.
+2. **Every pill is a FILTER FORM.** Each one's disclosed content carries the
+   `show_results` control -- an apply button. Choosing an option and applying
+   it is the submission the disclosing-press ruling refuses by name, which is
+   `N 133`'s blocker, now measured on all three pills.
+3. **"Show more analytics" is DRAWN** (held at every moment), and the
+   zero-press load found it carrying neither sanctioned attribute. What it
+   discloses is unreachable by any sanctioned press.
+4. **The dialog fix holds live:** `insights.filters` read 3, where the
+   pre-fix fallback would publish the dialog's two labels too.
+
+**WHAT IT DOES NOT ESTABLISH, AND TWO LIMITS OF THE READING THAT THIS FIRE
+MEASURED ABOUT ITSELF:**
+
+* **A term already on the page cannot APPEAR.** `recruiters` was held
+  before any press (the page draws a "view all recruiters" control), and
+  `time_range` too (the first pill's own caption), so a disclosed option
+  carrying either word is invisible to the term diff. The reading counts
+  PRESENCE per phrase, not occurrences.
+* **A number beside a phrase can belong to a neighbour.** `show_results`
+  carried 365 on the time-range pill -- almost certainly the digits of the
+  adjacent "Past 365 days" option inside the same short line, not a result
+  count. DERIVED, not measured; published by the reading as a value, and
+  read here as nothing.
+* **22 new lines arrived on the interesting-viewers pill and none matched the
+  vocabulary.** What they say is not known here, and a counts-resolution
+  reading of viewer categories -- if the pill draws counts at all -- would
+  need an occurrence-counting reading, which the declared script does not
+  do. Not attempted: one fire per reader.
+
+**VERDICTS, by the rules registered in 3.0 before the fire:**
+
+* **`N 134` -- NOT PROVEN.** No viewer category appeared with a value; the
+  pill is a filter form whose payload -- the interesting viewers themselves
+  -- arrives only after APPLYING it, a submission. Gate PRESS-PERMITTED ->
+  PRESS.
+* **`P O3` -- NOT PROVEN.** Its Premium-insights half sits behind a control
+  drawn on the page with no sanctioned attribute (condition 2, terminal by
+  this route); its filters half is the same three filter forms. Gate
+  PRESS-PERMITTED -> PRESS.
+
 ### 3.1 A GUARD CAUGHT MY OWN COMMIT, AND IT WAS RIGHT
 
 `aba78f7` turned `tests/test_navigation_is_never_derived.py` RED on
@@ -562,3 +639,157 @@ to it whatever it shows.
   share link.
 * **They do not appear, or the press is refused** -> GAP, re-filed on what the
   witness and the refusal say opened, or did not.
+
+### 5.1 THE FIRE -- 19:12:31-19:13:25 IST, one page load, one press
+
+`scripts/_probe_readers_four_fires.py feed` at `d912b25`, attach on
+127.0.0.1:9224, its own tab, closed after. Verdict in the worktree's
+gitignored `_state/readers4/fire-feed-verdict.json`; every field quoted is a
+package literal or an integer.
+
+    pre-press    permitted_to_attempt, basis sensitive, scope main,
+                 reading feed_item_share_menu
+    load         walled False, challenge terms none, settle wait TimeoutError
+                 (the feed never goes network-idle; the 15 s bound ran out)
+    interlocks   in main: Playwright 48, in-page 48 -- ALIGNED
+                 candidate 2 is the control menu: True, visible: True
+    counter      off_state 8 before the gate took over
+    VERDICT      permitted True, pressed True, priced_by [off_state]
+                 (read at both ends, unmoved), closure verified
+    witness      disclosed True, moved [expanded_true]
+    reading      appeared [], held [], new_lines 0 (1391 -> 1391),
+                 new_elements 12 (1990 -> 2002)
+
+**THE MENU OPENED AND ITS ITEMS HAD NOT BEEN DRAWN WHEN THE GATE READ.** The
+witness saw the trigger go expanded and twelve elements arrive; the reading,
+taken in the same instant, found not one new line of text. The 2026-09-19
+census of this page counted 10 menu triggers against exactly 1 menu item --
+LinkedIn builds these menus ON DEMAND -- and a menu whose items are fetched
+after it opens is empty at the only moment `press.disclose` looks. **So this
+fire does not say whether "copy link" or "embed" is in the menu: UNDETERMINED,
+not absent.** The analytics pills, whose content is client-side, delivered
+22-37 new lines to the same reading moments before, which is the control.
+
+**A MEASURED LIMIT OF THE GATE, RECORDED AND NOT REPAIRED HERE:** the
+open-moment reading has no settle. A bounded wait between the click and the
+reading -- until new lines stop arriving, capped well under a second or two --
+would let an on-demand menu draw before the dismissal. It lengthens the time
+a disclosure is held open and changes a safety module's timing, so it wants
+its own tests and its own commit, and it would be first exercised by the
+wave that needs it, not by this one.
+
+**VERDICT, by the rule registered above -- `M C72` NOT PROVEN, and three
+blockers now stand in front of it, each measured:**
+
+1. **AIMING.** The feed draws no per-post container (section 2.2), and the
+   control menu shares its only class token with the repost button, so the
+   package cannot aim at one post's menu without a label (condition 2) or a
+   position in `main`. This fire aimed by position behind a refusing label
+   veto -- acceptable for a probe, not a shape for a package reader.
+2. **THE MENU'S CONTENT ARRIVES AFTER IT OPENS**, past the gate's only read.
+3. **OBTAINING needs a second press**, on a menu item rather than a
+   disclosure control -- condition 2, refused by shape.
+
+Gate in the bucket-3 table: PRESS-PERMITTED -> PRESS ("a second press that
+is not a disclosure"), with the other two named in its note.
+
+---
+
+## 6. WHAT CHANGED IN THE CENSUS AND THE BUCKET-3 TABLE
+
+**No row changed STATE.** `scripts/count_census_states.py --expect
+J=56,P=55,M=77,N=86` MATCHES on all four slices, GAP 274, stated rows 704.
+
+`_audit/_census/read-addresses.tsv`, my four lines only, class ADMITTED
+unchanged on each (the address is admitted; `is_read_url` re-driven by the
+checker):
+
+    row     gate before        gate after   the first thing past the boundary, measured
+    P O3    PRESS-PERMITTED    PRESS        "Show more analytics" carries no sanctioned
+                                            attribute; filters apply by submission
+    N 134   PRESS-PERMITTED    PRESS        the pill is a filter form; the viewers need
+                                            APPLYING it, a submission
+    M C72   PRESS-PERMITTED    PRESS        obtaining is a second press on a menu item;
+                                            no per-post aiming; items drawn on demand
+    M C85   READER             RULING       no sanctioned source for a poll post's address
+
+`scripts/check_read_addresses.py`: GREEN, 67 of 67; BLOCKED ON NOTHING 1 (`M M49`,
+excluded from this wave by `DO-NOT-OPEN-MESSAGING`).
+
+Census cells, each gaining a dated paragraph that cites this document:
+`profile.md` `O3`, `network.md` `134`, `messaging-and-content.md` `C72` and
+`C85`. Correction markers, both ends: this document CORRECTS
+`2026-09-23-bucket3-addresses.md`, `2026-09-21-what-is-reachable-now.md`,
+`_census/profile.md` and `_census/network.md`, and each carries its CORRECTED
+BY. The correction guard's three table-row-proximity candidates (the census
+files citing this document back) are triaged on `NOT_A_CORRECTION` with the
+line that produced each, as that list requires.
+
+## 7. EXPECTED PIN MOVES -- NOT RE-PINNED; THE ORCHESTRATOR RE-PINS AT MERGE
+
+`scripts/census_completion.py --check` at this worktree's head:
+
+    b3_blocked_on_nothing   pinned 5   now 1   (-4)
+
+and nothing else. Every other pin holds -- no row proved, so `delivered_*`,
+`gap`, `gap_read`, `unfired` and the other five `b3_` figures are unchanged.
+The tool-surface pin DID move and was re-pinned in the same commit that moved
+it, as that guard requires: `PINNED_PARAMETER_COUNT` 66 -> 67
+(`linkedin_who_viewed_me("open_filter_menus")`, `aba78f7`), with the row
+decision stated in the commit and in the pin's own comment.
+
+## 8. THE LEDGER
+
+    rows in scope                                   4   P O3, N 134, M C72, M C85
+    rows moved to COVERED-PROVEN                    0
+    rows NOT proven, each with a measured reason    4   sections 3.0.1, 3.0.1, 5.1, 4
+    rows excluded and untouched                     1   M M49 (DO-NOT-OPEN-MESSAGING)
+    LinkedIn page loads, serial, paced            4 of 15
+                                                        2 zero-press structure (18:57, 18:58)
+                                                        1 analytics fire (19:10)
+                                                        1 feed fire (19:12)
+    presses                                         4   3 pills + 1 feed menu, ALL through
+                                                        press.disclose, ALL permitted,
+                                                        closure verified, no counter moved
+    clicks outside the gate, keys, fills, scrolls   0   (the gate's own Escape after each press)
+    /messaging/ or /notifications/ loaded           0
+    writes                                          0   writes_enabled False throughout
+    tabs leaked                                     0   own tab closed; Chrome left serving
+    auth walls, checkpoints, challenges seen        0
+    raw captures committed                          0   _state/readers4/ only (gitignored)
+    new waivers spent                               0   the open-moment reading reuses
+                                                        dom.read_count_lines' call site
+    planted defects shown red                      23   7 gate, 9 reader, 7 probe
+                                                        (3 planted by the child, 4 by me)
+
+**FORCED PREDICTION (0.6): 1 of 4. ACTUAL: 0 of 4. The miss is the useful
+part.** I expected one of `P O3` / `M C72` to prove and blamed the other on
+targeting or content. Both failed, and on DIFFERENT walls from the ones I
+priced: `P O3` on a control drawn WITHOUT a sanctioned attribute (a shape
+question I had marked as merely DERIVED until the load measured it), and
+`M C72` on two things no offline reading could have shown -- the feed draws
+no per-post container at all, and its menu fills after it opens. The
+prediction was right about `N 134` and `M C85`, and for the reasons given.
+
+## 9. WHAT NEEDS AN OPERATOR RULING
+
+1. **A third sanctioned press shape, or not.** "Show more analytics" (the
+   gate to `P O3`'s Premium insights) is a plain button carrying neither
+   `[aria-expanded]` nor `[aria-haspopup]` -- the position the people search's
+   All-filters control is in. `press.py`'s own docstring says a third shape is
+   a RULING REQUEST with a measured blast radius. A NO should be written down
+   so `P O3` stops being re-priced.
+2. **May a filter be APPLIED on his own analytics page?** Every pill is a
+   form with an apply control; `N 133` and `N 134` (and `P O3`'s filters half)
+   all wait on applying one. The disclosing-press ruling refuses submission
+   by name, so this is his call, not a mechanism.
+3. **May a caller-supplied item urn be a READ target at call time?** The one
+   route to `M C85` with a poll he names (section 4.2).
+4. **Nothing for `M C72` until 1 is decided** -- and even then aiming at one
+   post's menu has no structural handle on today's feed (section 2.2).
+
+**AND ONE GATE REPAIR FOR THE NEXT WAVE, NOT A RULING:** the open-moment
+reading has no settle, so a menu built on demand reads empty (section 5.1);
+and `press.disclose` reads its before-counters and THEN clicks even when that
+reading has already doomed the press (section 3). Both are the "refuse before
+the click" class, and both belong in `press.py` with their own tests.

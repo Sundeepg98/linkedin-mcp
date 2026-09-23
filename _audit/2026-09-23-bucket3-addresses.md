@@ -4,7 +4,7 @@ claude-opus-5-5[1m]
 
 **CORRECTS:** `_audit/2026-09-21-the-read-triage.md` -- four address verdicts: P F1 and P H11 are pages on the admitted profile, not ADDRESS/ABSENT, and P L4 and N 61 wait on a live read, not on a refused address anybody has seen served.
 
-**CORRECTED BY:** `_audit/2026-09-23-readers-four-rows.md` -- row `M C85` is gated RULING, not READER: no sanctioned source exists for a poll post's address, so "blocked on nothing" is 4 of 67, not 5.
+**CORRECTED BY:** `_audit/2026-09-23-readers-four-rows.md` -- of the five "blocked on nothing", `M C85` is gated RULING (no sanctioned source for a poll post's address) and `P O3`, `N 134` and `M C72` are gated PRESS, measured live the same day; only `M M49` remains, so the figure is 1 of 67, not 5.
 
 Wave `bucket3-addresses`, 2026-09-23, from master `79c5f8e`. **READ-ONLY AND
 OFFLINE THROUGHOUT.** No browser was started or attached to, no page was
