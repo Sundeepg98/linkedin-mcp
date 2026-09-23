@@ -89,7 +89,20 @@ MIN_GAP_S = 20.0
 #: The keys, in the order they may run. Closed.
 KEYS: tuple[str, ...] = (
     "per_post", "badge", "m43", "m33", "notifications", "activity", "pv_capture",
+    "post_capture",
 )
+
+#: ``post_capture``: ONE OF HIS OWN POSTS, by an activity id this harness
+#: reads from ``_state/live1/activity.json`` -- the raw of the ``activity``
+#: key, i.e. ``linkedin_my_activity_items``' authorship-established output --
+#: and never from a command line or a page. The newest id is used (the
+#: largest number). The id is validated as 1-20 ASCII digits and placed in
+#: this constant template; it is never printed.
+POST_URL_TEMPLATE = "https://www.linkedin.com/feed/update/urn:li:activity:{digits}/"
+#: The post's own control menu, told from other [aria-expanded] controls by
+#: this prefix of its accessible name -- used as a VETO over a structural
+#: position, the way the 19:12 feed fire used it.
+POST_MENU_PREFIX = "open control menu"
 
 #: ``pv_capture``: the profile-views page, and each filter pill OPEN. The pills
 #: are opened through the shipped gate (``press.disclose``, priced by the
@@ -110,7 +123,7 @@ M33_FILTER = "starred"
 #: The most loads one key may spend, for the pre-check before it starts.
 MAX_LOADS: dict[str, int] = {
     "per_post": 1, "badge": 1, "m43": 1, "m33": 1, "notifications": 1, "activity": 2,
-    "pv_capture": 1,
+    "pv_capture": 1, "post_capture": 1,
 }
 
 #: String fields whose values are this package's own closed words.
@@ -507,6 +520,91 @@ async def fire_pv_capture(capture: bool) -> dict[str, Any]:
     return result
 
 
+def newest_own_activity_digits(raw: dict[str, Any]) -> Optional[str]:
+    """The digits of the NEWEST activity urn in the ``activity`` raw. PURE.
+
+    Only an envelope whose authorship is ESTABLISHED is used: that is what
+    makes every item his own. Returns None rather than guessing.
+    """
+    envelope = (raw or {}).get("envelope") or {}
+    if not ((envelope.get("authorship") or {}).get("established") is True):
+        return None
+    best: Optional[str] = None
+    for item in envelope.get("items") or []:
+        parts = str(item).split(":")
+        if len(parts) == 4 and parts[:3] == ["urn", "li", "activity"]:
+            digits = parts[3]
+            if 1 <= len(digits) <= 20 and all(ch in "0123456789" for ch in digits):
+                if best is None or int(digits) > int(best):
+                    best = digits
+    return best
+
+
+async def fire_post_capture(capture: bool) -> dict[str, Any]:
+    """Load one of his own posts; open its control menu through the gate."""
+    from linkedin_server import dom, press
+
+    raw_path = STATE / "activity.json"
+    digits = newest_own_activity_digits(
+        json.loads(raw_path.read_text(encoding="utf-8")) if raw_path.exists() else {})
+    if digits is None:
+        say("    NO AUTHORSHIP-ESTABLISHED ACTIVITY ID ON DISK. Nothing loaded.")
+        return {"stopped": "no_own_activity_id"}
+    url = POST_URL_TEMPLATE.format(digits=digits)
+    if not readonly.is_read_url(url):
+        return {"stopped": "post_address_not_admitted"}
+    result: dict[str, Any] = {}
+    async with BROWSER.session() as page:
+        await BROWSER.goto(page, url)
+        await _health("post_capture")
+        if capture:
+            await _capture("post-closed")
+        scoped = page.locator("main").locator("[aria-expanded]")
+        menus: list[int] = []
+        for position in range(int(await scoped.count())):
+            named = _normalised(await scoped.nth(position).get_attribute("aria-label") or "")
+            if named.startswith(POST_MENU_PREFIX):
+                menus.append(position)
+        say("    [aria-expanded] in main: " + str(int(await scoped.count()))
+            + "   whose name starts with the control-menu prefix: " + str(len(menus)))
+        result["control_menus"] = len(menus)
+        if len(menus) != 1:
+            say("    NOT EXACTLY ONE CONTROL MENU. NOTHING PRESSED.")
+            result["stopped"] = "control_menu_count_" + str(len(menus))
+            return result
+        calls = {"n": 0}
+        snapshot: dict[str, str] = {}
+
+        async def counters() -> dict[str, Any]:
+            calls["n"] += 1
+            surface = await dom.read_reaction_surface(page)
+            value = surface.get("off_state") if isinstance(surface, dict) else None
+            if calls["n"] == 2 and capture:
+                await asyncio.sleep(OPEN_SETTLE_S)
+                snapshot["html"] = await page.content()
+            return {"off_state": value if isinstance(value, int) and not isinstance(value, bool) else None}
+
+        first = await counters()
+        calls["n"] = 0
+        if first.get("off_state") is None:
+            say("    THE SENSITIVE COUNTER DOES NOT READ. NOTHING PRESSED.")
+            result["stopped"] = "off_state_unreadable"
+            return result
+        verdict = await press.disclose(page, shape="[aria-expanded]", index=menus[0],
+                                       read_counters=counters, scope="main")
+        result["verdict"] = verdict
+        # A GATE VERDICT IS BUILT FROM PACKAGE LITERALS, counts and closed
+        # words -- printed through the same shape printer as everything else.
+        say("    verdict: " + shape_of({k: verdict.get(k) for k in
+                                         ("permitted", "refused", "priced_by", "witness")}))
+        if "html" in snapshot:
+            (STATE / "post-open-menu.html").write_text(snapshot["html"], encoding="utf-8")
+            say("    open-moment capture written under _state/ (gitignored)")
+        if not verdict.get("permitted"):
+            result["stopped"] = "menu_press_not_permitted"
+    return result
+
+
 async def fire(key: str, capture: bool, carried: dict[str, Any]) -> dict[str, Any]:
     """Fire one key: pre-check, call, health, readings, capture, raw."""
     say("\n" + "=" * 70)
@@ -516,12 +614,13 @@ async def fire(key: str, capture: bool, carried: dict[str, Any]) -> dict[str, An
     if refusal:
         raise _Anomaly("ledger_refused_before_start", key)
     _CURRENT["key"] = key
-    if key == "pv_capture":
-        result = await fire_pv_capture(capture)
+    if key in ("pv_capture", "post_capture"):
+        result = await (fire_pv_capture(capture) if key == "pv_capture"
+                        else fire_post_capture(capture))
         _write_raw(key, result)
         say("    RAW written under _state/ (gitignored)")
         if result.get("stopped"):
-            raise _Anomaly("pv_capture_stopped", key)
+            raise _Anomaly(key + "_stopped", key)
         return result
     out = await _call(key)
     if not isinstance(out, dict):

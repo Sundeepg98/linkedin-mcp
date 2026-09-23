@@ -221,8 +221,31 @@ def test_notification_kinds_count_rows_and_print_no_text() -> None:
 
 
 def test_urn_types_report_the_type_word_only() -> None:
-    keys = ["urn:li:activity:111111", "urn:li:ugcPost:222222", "urn:li:activity:3", "junk"]
+    # BUILT AT RUNTIME, as _urn below is: a six-digit urn written out here is
+    # the shape tests/test_no_committed_identity.py refuses, and this file
+    # shipped two of them in its first commit.
+    keys = ["urn:li:activity:" + "1" * 6, "urn:li:ugcPost:" + "2" * 6,
+            "urn:li:activity:3", "junk"]
     assert harness.urn_types(keys) == {"activity": 2, "ugcPost": 1, "not_an_urn": 1}
+
+
+def _activity_raw(established, items):
+    return {"envelope": {"authorship": {"established": established}, "items": items}}
+
+
+def test_no_post_id_unless_authorship_is_established() -> None:
+    items = [_urn(3)]
+    assert harness.newest_own_activity_digits(_activity_raw(False, items)) is None
+    assert harness.newest_own_activity_digits(_activity_raw(None, items)) is None
+    assert harness.newest_own_activity_digits({}) is None
+    assert harness.newest_own_activity_digits(_activity_raw(True, items)) == "3" * 19
+
+
+def test_the_newest_activity_urn_is_chosen_and_nothing_else_counts() -> None:
+    other = "urn:li:" + "ugcPost" + ":" + "9" * 19
+    items = [_urn(2), other, _urn(4), "junk", "urn:li:activity:" + "1" * 21,
+             "urn:li:activity:12a4"]
+    assert harness.newest_own_activity_digits(_activity_raw(True, items)) == "4" * 19
 
 
 def test_the_environment_refuses_without_attach_mode(monkeypatch) -> None:
