@@ -80,6 +80,25 @@ def test_an_empty_frozen_census_refuses_rather_than_exempting_every_row(
     assert "could not fail" in str(refused.value)
 
 
+def test_a_dialect_at_the_freeze_refuses_rather_than_exempting_its_row(
+        monkeypatch):
+    """SHOWN FAILING. The enumerator drops a row whose frozen state cell is a
+    dialect, and a row that was GAP at the freeze would then read as entered."""
+    rows = triage._gap_rows(SLICE)
+    real = triage.egr.rows
+
+    def planted(ref=None, dialects=None):
+        yield from real(ref, dialects)
+        if ref is not None and dialects is not None:
+            dialects.append("M PLANTED spells its state in a planted dialect")
+
+    monkeypatch.setattr(triage.egr, "rows", planted)
+    with pytest.raises(SystemExit) as refused:
+        triage.entered_since_freeze(SLICE, rows)
+    assert "M PLANTED" in str(refused.value)
+    assert triage.bbm.FROZEN_REF in str(refused.value)
+
+
 def test_the_counter_agreement_control_passes_on_the_real_tree():
     rows = triage._gap_rows(SLICE)
     assert triage._control_count(SLICE, len(rows)) == ""
@@ -103,7 +122,9 @@ def test_the_join_coverage_control_can_fail():
     rows = triage._gap_rows(SLICE)
     blockers = dict(rcb.load_blockers())
     entered = triage.entered_since_freeze(SLICE, rows)
-    victim = [row_id for row_id, _ in rows if row_id not in entered][0]
+    joined = [row_id for row_id, _ in rows if row_id not in entered]
+    assert joined, "no row was GAP at the freeze, so there is no hole to punch"
+    victim = joined[0]
     del blockers["%s %s" % (SLICE, victim)]
     assert triage.unjoined_rows(SLICE, rows, blockers, entered) == [victim]
 
@@ -113,8 +134,11 @@ def test_the_join_coverage_control_names_every_hole_not_just_the_first():
     rows = triage._gap_rows(SLICE)
     blockers = dict(rcb.load_blockers())
     entered = triage.entered_since_freeze(SLICE, rows)
-    victims = sorted(
-        [row_id for row_id, _ in rows if row_id not in entered][:3])
+    joined = [row_id for row_id, _ in rows if row_id not in entered]
+    assert len(joined) >= 3, (
+        "fewer than three rows were GAP at the freeze -- punching holes in "
+        "nothing would pass this control without testing it")
+    victims = sorted(joined[:3])
     for victim in victims:
         del blockers["%s %s" % (SLICE, victim)]
     assert triage.unjoined_rows(SLICE, rows, blockers, entered) == victims

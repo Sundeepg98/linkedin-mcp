@@ -157,7 +157,10 @@ def entered_since_freeze(letter: str, rows) -> list[str]:
     being joined against; deriving "entered" from it would turn every hole in
     it into an exemption and leave CONTROL 2 unable to fail. An EMPTY frozen
     set would do the same from the other side -- every row today would read as
-    entered -- so that REFUSES rather than answering.
+    entered -- so that REFUSES rather than answering. So does a state cell
+    spelled in a DIALECT at the freeze: the enumerator drops such a row, and a
+    row that was GAP then would read as entered since, which is the one thing
+    this exemption may never do.
     """
     dialects: list[str] = []
     frozen = {
@@ -167,6 +170,13 @@ def entered_since_freeze(letter: str, rows) -> list[str]:
         )
         if slice_letter == letter and state == "GAP"
     }
+    if dialects:
+        raise SystemExit(
+            "REFUSING: the census at the blocker map's freeze (%s) spells a "
+            "state in a dialect the shipped vocabulary does not hold, so a row "
+            "that was GAP then could read as entered since:\n  %s"
+            % (bbm.FROZEN_REF, "\n  ".join(dialects))
+        )
     if not frozen:
         raise SystemExit(
             "REFUSING: the census at the blocker map's freeze (%s) holds no "
