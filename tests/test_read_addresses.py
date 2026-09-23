@@ -236,6 +236,26 @@ def test_a_class_contradicting_its_own_verdict_turns_it_red(
            f"recorded verdict" in out
 
 
+def test_a_refusal_contradicting_its_class_turns_it_red(
+        tmp_path, capsys) -> None:
+    lines = _lines()
+    i = _find(lines, lambda r: r["class"] == "REFUSED")
+    row = _row(lines[i])
+    row["refusal"] = "-"
+    lines[i] = _line(row)
+    code, out = _check(capsys, _plant(tmp_path, lines))
+    assert code == 1, out
+    assert f"{row['slice']} {row['row']}: class REFUSED contradicts its own " \
+           f"recorded refusal '-'" in out
+
+
+def test_a_missing_table_is_a_named_problem_not_a_traceback(
+        tmp_path, capsys) -> None:
+    code, out = _check(capsys, tmp_path / "read-addresses.tsv")
+    assert code == 1, out
+    assert "the address table does not exist" in out
+
+
 def test_an_off_alphabet_gate_turns_it_red(tmp_path, capsys) -> None:
     lines = _lines()
     i = _find(lines, lambda r: r["class"] == "ADMITTED")

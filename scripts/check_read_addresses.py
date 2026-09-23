@@ -110,6 +110,11 @@ def load(path: pathlib.Path = TABLE) -> tuple[list[dict[str, str]], list[str]]:
     problems: list[str] = []
     try:
         text = path.read_text(encoding="ascii")
+    except FileNotFoundError:
+        # A PROBLEM, NEVER AN EMPTY TABLE: zero rows would read as zero
+        # coverage for a reason nobody could see.
+        return rows, [f"{path.name}: the address table does not exist at "
+                      f"{path.parent.name}/{path.name}"]
     except UnicodeDecodeError as exc:
         return rows, [f"{path.name}: not ASCII ({exc.reason} at byte "
                       f"{exc.start})"]
@@ -139,7 +144,9 @@ def population() -> dict[tuple[str, str], str]:
     one the completion figure is computed over. Imported here rather than at
     module level because ``census_completion`` imports THIS module.
     """
-    sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
+    here = str(pathlib.Path(__file__).resolve().parent)
+    if here not in sys.path:
+        sys.path.insert(0, here)
     import census_completion as cc
 
     return {(letter, rid): direction
@@ -205,6 +212,9 @@ def shape_problems(rows: list[dict[str, str]]) -> list[str]:
                 problems.append(f"{tag}: class {cls} contradicts its own "
                                 f"recorded verdict is_read_url="
                                 f"{r['is_read_url']}")
+            if (r["refusal"] == "-") != (cls == "ADMITTED"):
+                problems.append(f"{tag}: class {cls} contradicts its own "
+                                f"recorded refusal {r['refusal']!r}")
         else:
             for column in ("address", "basis", "is_read_url", "refusal"):
                 if r[column] != "-":
