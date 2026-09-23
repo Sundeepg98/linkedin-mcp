@@ -211,7 +211,13 @@ FAMILIES: dict[str, Family] = {f.fid: f for f in (
     _f("OTW-SPEC-NEVER-LOADED",
        "set_open_to_work refuses: the editor was never loaded",
        "CODE", "CONTRARY",
+       # CONTRARY on HIS words, not only on a wave's: on 2026-08-23 he
+       # "approved save/unsave, follow, Open To Work". No census cell cites
+       # that passage, which is why the blind verifier classed this family
+       # op=NO -- recorded in the audit's section 7.
        [("linkedin_server/writes.py", "NEVER LOADED"),
+        ("_audit/2026-08-23-build-linkedin.md",
+         "and approved **save/unsave, follow, Open To"),
         ("_audit/2026-08-25-cannot-vs-will-not.md",
          "Open To Work -- I am OVERTURNING the pre-classification")],
        [r"(?i)set_open_to_work", r"NEVER.LOADED", r"(?i)never loaded", r"(?i)open.to.work"]),

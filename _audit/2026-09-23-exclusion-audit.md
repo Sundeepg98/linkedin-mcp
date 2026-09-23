@@ -6,8 +6,13 @@ claude-opus-5-5[1m]
 cell was edited and no row changed state.** Whether any row below returns to GAP
 is the operator's decision; this document is the evidence for it.
 
-**STATUS: IN PROGRESS -- written as the wave runs.** Sections marked PENDING are
-not yet measured and carry no figures.
+**THE ANSWER, IN ONE PARAGRAPH.** The pending count is not exact. Of the 308
+EXCLUDED-RULED rows, no row rests on an operator ruling that names it; 26 have
+no traceable basis at all; 27 rest on a basis he withdrew with his ruling (b)
+on 2026-09-23; and 61 more sit under a family his own recorded words point
+against. **114 rows -- 37% of the exclusions -- are left out of the pending
+count with no current written ground to leave them out** (section 2.1). Of the
+7 MEASURED-ABSENT rows, 6 are measured and recorded, 1 is not.
 
 ---
 
@@ -72,8 +77,11 @@ it.** Two closed-form slices were delegated and reviewed before use:
   pre-rename path was used. Evidence file, gitignored:
   `_audit/_scratch/exclusion-audit/code-provenance.tsv`.
 * **An attribution register** -- every passage in the corpus attributing a
-  decision to the operator, a lead, or the writing wave itself. PENDING at
-  the time this line was written; section 4 is reconciled against it.
+  decision to the operator, a lead, or the writing wave itself: 189 passages,
+  OPERATOR 88, LEAD 72, SELF 28, UNCLEAR 1, each spot-checked by its author
+  against the line it quotes. Every attribution this document relies on was
+  re-read at its source here before use. Evidence file, gitignored:
+  `_audit/_scratch/exclusion-audit/attribution-register.tsv`.
 
 **The classes.** Stated once in `scripts/check_exclusion_basis.py` and repeated
 here so the counts can be read:
@@ -83,12 +91,14 @@ here so the counts can be read:
 | **A** | the operator's own ruling reaches THIS row -- names the capability, act or address -- with no agent step between |
 | **B** | an agent placed the row under a family or area ruling; carries `op=` (did the operator make that family ruling: YES / NO / CONTRARY) and `scope=` (does the family's own wording reach the row: YES / EXTENDED / NO) |
 | **C** | no traceable basis: NONE cited, only SILENCE (allowlist silence, an unmeasured state), the only ground REFUTED at HEAD, a registered ruling that names the row OVERRULED it, or the citation is DANGLING from a clone |
+| **A-lifted / B-lifted** | as A or B, and the basis is one the operator withdrew with his ruling (b) of 2026-09-23 (section 2a) |
 | **M+ / M-** | MEASURED-ABSENT, the measurement recorded in a tracked document, or not |
 
 **CONTRARY is not a synonym for NO.** It means an operator ruling or
 instruction on record -- or the document recording it -- classes the capability
-or its family as something to BUILD or MEASURE. It is used for four families
-and every use quotes the passage.
+or its family as something to BUILD or MEASURE. It is used for three families
+-- the profile editors, Open To Work, endorse-or-recommend -- and each use
+quotes the passage.
 
 **The C line was drawn to be checkable, and it is narrower than it could have
 been.** A row is C only when the fact that sinks its basis is objective: a
@@ -120,8 +130,9 @@ register moved ONE family's `op=`: R9 rests at the root on the operator's own
 **A IS ZERO.** No out-of-scope row rests on an operator ruling that names it.
 Every mention of the operator in these cells is either a REOPENER naming him as
 the one who could reopen the row -- **30 cells name him in their own REOPENER
-clause**, while none names a ruling of his that closed it -- or a family ruling
-an agent applied. That is the direct answer to "who ruled each
+clause** -- or a family ruling of his that an agent applied to the row (the
+settings re-files' "the operator already made it", the typing ruling on
+`M C10` and `M C28`). No cell cites a ruling of his that names its own row. That is the direct answer to "who ruled each
 exclusion": **agents ruled every one, and in 106 cases they were applying a
 family ruling he made.**
 
@@ -209,6 +220,20 @@ because no out-of-scope row rested on an operator ruling that named it.
 | `/post/` and `/edit/` | `M C18` | the read-only rule (`/post/`) | YES -- `/edit/`, kept by the implementing wave on 2026-08-31 |
 | `/follow` substring | `N A2` | the read-only rule | no |
 
+**THE LIFT IS RECORDED FOR 17 ROWS AND INFERRED FOR 10, AND THE BLIND
+VERIFIER DISAGREED ON ONE OF THE 10 (section 7).** Recorded: `N 24`-`28`, `N 168`
+and `M C69` rest on `/invite` or `/connect`, which `readonly.py` says exist "to
+stop this server SENDING invitations"; `N 156 158` and `M M5` rest on R9, whose
+root is his own InMail cut; `P M1`-`M7` cite writes disabled in their own
+cells. Inferred: `N 9 11 13 14 16 19` rest on the `invitation` substring, and
+`J 71 73`, `M C18` and `N A2` on `/jobs/application`, `/post/` and `/follow` --
+all four entered in the read-only server's first commit, `1a94cf9`, with no
+purpose recorded, and are tagged because a fence built for a read-only server
+falls with the read-only rule. **If the orchestrator wants only the recorded
+set, it is the 17.** One more fact, found while tracing: the apply cut had
+already been reversed once, on 2026-08-25, when the operator's "technically
+possible" ruling shipped `linkedin_apply_job`.
+
 **21 rows are fully lifted -- nothing else on record holds them -- and 6 keep
 one other basis.** A row is tagged only when the basis it is PRIMARILY filed
 under is withdrawn. Eight more rows cite R2 as a SECOND basis while their first
@@ -239,7 +264,7 @@ until each is decided.
 | NONE | `J 115` | `server.py` job_detail docstring | says the tool does not read the hiring team: not a refusal, key, spec or measurement |
 | NONE | `P D26` | `my_profile` docstring | says the tool does not report the strength meter: not a refusal, key, spec or measurement |
 | SILENCE | `J 50 51 52` | the jobs-tracker stage allowlist | the allowlist names three stages; the rest are "absent -- nothing builds them" |
-| SILENCE | `M C33` | `server.py` reaction passage | says nobody measured which reaction the toggle applies; the same passage records the operator ruled react ships with the default (`writes.py`, 2026-09-01). It refuses nothing |
+| SILENCE | `M C33` | `server.py` reaction passage | the passage opens "SHIPS ANYWAY BECAUSE HE RULED IT SO" -- his 2026-09-01 ruling (dated in `writes.py`) shipped the toggle with whatever default LinkedIn applies -- and says the reactions menu was never opened. It ships a capability and rules none out |
 | SILENCE | `M C35` | `delete_or_withdraw_anything` text | the cited text says react_to_item does NOT lean on the key; the ground is an ON label never observed |
 | SILENCE | `M C42` | `finish.md` permalink passage | no tool returns a urn -- a missing tool; the register itself notes the permalink ruling does not reach it |
 | SILENCE | `M C47` | `lift.md`, not on the allowlist | allowlist silence, which `BOUNDARY-IS-NOT-A-REASON` rules out as a reason |
@@ -248,7 +273,7 @@ until each is decided.
 | REFUTED | `P B5`, `P G3` | `same ruling` | each resolves by POSITION to a different row (`B4`, a different address; `G1`, a COVERED row with no ruling); the section-6 roll-up files them under the upload ban, which the operator lifted |
 | REFUTED | `M C13` | the scheduled-posts measurement | the cited passage records `Schedule post` as a BUTTON opening a modal: the control is drawn |
 | REFUTED | `N 23` | R2 | the connections list is ADMITTED at HEAD (`is_read_url` True, measured offline this wave); `readonly.py` says the substrings "were hitting the wrong url" |
-| OVERRULED | `P B4`, `P C2`-`C6`, `P N12`, `P O5` | the `settings`, `/uas/`, `/create` substrings | `INCIDENTAL-CAPTURE-IS-NOT-A-RULING` (2026-09-19) names exactly these eight addresses and rules "they stay GAP"; a second wave the same day (`2026-09-19-unfired-but-built.md` s6) read the operator's settings ruling over `B4`/`C2`-`C6` and also concluded "They stay GAP". All eight moved to EXCLUDED-RULED on 2026-09-20 citing neither |
+| OVERRULED | `P B4`, `P C2`-`C6`, `P N12`, `P O5` | the `settings`, `/uas/`, `/create` substrings | `INCIDENTAL-CAPTURE-IS-NOT-A-RULING` (2026-09-19) names exactly these eight addresses and rules "they stay GAP"; a second wave reached the same verdict the same day (below). All eight moved to EXCLUDED-RULED on 2026-09-20 citing neither |
 | DANGLING | `M M3` | `_TEAM_LEAD_SUCCESSOR_BRIEF.md:63-80` | an untracked file that marks itself "SUPERSEDED ... DO NOT ACT ON THIS FILE"; its line is a lead's build instruction for `send_message` ("use the checked default"), not an exclusion. A 2026-09-20 table (`the-live-capture.md` 13.2) labels it an operator ruling and cites nothing |
 
 **Two locators were found rotted while tracing, and neither row is C for it.**
@@ -258,6 +283,12 @@ names; `C31` only through the key's own content ("the five specs that lean on
 the entry"). The checker links both by content and says why in the registry --
 the `CANONICAL-RULING-ID` failure, found by the instrument rather than by a
 reader.
+
+**The eight OVERRULED rows had two verdicts against them before they moved.**
+Besides the registered ruling, `2026-09-19-unfired-but-built.md` section 6,
+written the same day, read the operator's settings ruling over the six
+`/public-profile/settings` rows and concluded, in its own words, "They stay
+GAP and only he can revisit it."
 
 ## 4. THE B ROWS, BY FAMILY -- WHO MADE IT, AND ONE RECOMMENDATION EACH
 
@@ -271,7 +302,7 @@ most of the weight get a paragraph after the table.
 |---|---:|---|---|---|---|
 | `SETTINGS-BY-NAME` | 82 | OPERATOR, 2026-08-31 | YES | 73 YES, 9 EXT | Ask him the one question his words leave open (below). Re-file the 9 EXTENDED -- `P K1`-`K6` verification flows, `P N25` a nav path, `N A7 A8` Page-admin settings -- on their own grounds; his words do not reach them |
 | `EDIT-FAMILY` | 22 | CODE, `/edit/` from `1a94cf9`; narrowing refused by the 2026-08-31 wave | CONTRARY | 22 YES | Return to GAP, blocker "`/edit/` kept refusing by the implementing wave". He allowed the profile editors 2026-08-31 and dissolved the profile-edit prohibition 2026-08-30; one passage of the 2026-08-31 perform record calls a WRITE admission for `/in/<member>/edit/` still owed, since met for the intro editor |
-| `OTW-SPEC-NEVER-LOADED` | 20 | CODE, 2026-08-23 | CONTRARY | 20 YES | Return to GAP, blocked on capturing the modal. He approved Open To Work 2026-08-23; 2026-08-25 files it UNMEASURED; `2026-09-05-profile-modals.md` records the capture awaits one operator ruling "not yet taken" |
+| `OTW-SPEC-NEVER-LOADED` | 20 | CODE, 2026-08-23 | CONTRARY | 20 YES | Return to GAP, blocked on capturing the modal. He approved Open To Work 2026-08-23; 2026-08-25 files it UNMEASURED; `2026-09-05-profile-modals.md` s7 lists as still owed "An operator ruling ... may one capture of the open-to-work modal be taken with you watching" |
 | `PF-DELETE-OR-WITHDRAW` | 20 | CODE, 2026-08-23 | NO | 20 YES | Put to him once. It meets neither survival bar the `writes.py` header attributes to him -- impossible with a measurement, or unattended -- and five `reversible_by` claims rest on it |
 | `PF-ENDORSE-OR-RECOMMEND` | 19 | CODE, 2026-08-23; policy ground dissolved by him | CONTRARY | 3 YES, 16 NO | Return the 16 RECOMMENDATION rows to GAP -- the surviving measurement counted endorse controls, a different object. Keep the 3 endorse rows only while the zero-control reading stands; he ruled 2026-08-25 that endorsing gets built |
 | `NO-THIRD-PARTY-PROFILE-LOAD` | 14 | OPERATOR, 2026-09-04 | YES | 5 YES, 9 EXT | Keep the 5 reads of a member's profile content. Re-examine the 9 acts: the census routes them through the member's profile, and network.md s6 R4 says the key's text does not cover acting |
@@ -326,6 +357,61 @@ answered it -- *"32 rows are retired by a ruling written here"* -- and the
 recorded.** The grounds are the strongest in this table; the authority is not
 his. One ratification settles all twelve.
 
+### 4.1 THE ROWS IN EACH FAMILY
+
+`*` marks a B-lifted row. Grouped by `scope`.
+
+| family | scope | rows |
+|---|---|---|
+| `SETTINGS-BY-NAME` | YES | `J 74`, `J 75`, `J 76`, `J 77`, `J 87`, `P B10`, `P C7`, `P D7`, `P E8`, `P M10`, `P M8`, `P M9`, `P N10`, `P N11`, `P N15`, `P N16`, `P N17`, `P N18`, `P N19`, `P N20`, `P N21`, `P N22`, `P N23`, `P N24`, `P N26`, `P N27`, `P N28`, `P N29`, `P N4`, `P N5`, `P N6`, `P N7`, `P N8`, `P N9`, `P O21`, `P O22`, `P O4`, `P O6-O20`, `M C52`, `M C73`, `M C88`, `M C89`, `M M24`, `M M35`, `M M36`, `M M37`, `M M41`, `M M42`, `M M46`, `M M50`, `N 39`, `N 67`, `N 68`, `N 69`, `N 70`, `N 71`, `N 72`, `N 73`, `N 74`, `N 75`, `N 77`, `N 78`, `N 115`, `N 116`, `N 117`, `N 137`, `N 138`, `N 139`, `N 140`, `N 142`, `N 143`, `N 159`, `N 170` |
+| `SETTINGS-BY-NAME` | EXTENDED | `P K1`, `P K2`, `P K3`, `P K4`, `P K5`, `P K6`, `P N25`, `N A7`, `N A8` |
+| `EDIT-FAMILY` | YES | `P D11`, `P D12`, `P D13`, `P D14`, `P D15`, `P D16`, `P D17`, `P D18`, `P D19`, `P D2`, `P D20`, `P D21`, `P D22`, `P D23`, `P D5`, `P D6`, `P D8`, `P D9`, `P E2`, `P E3`, `P G4`, `P G5` |
+| `OTW-SPEC-NEVER-LOADED` | YES | `J 89`, `J 90`, `J 91`, `J 92`, `J 93`, `J 94`, `J 95`, `J 96`, `J 97`, `P B6`, `P I10`, `P I11`, `P I2`, `P I3`, `P I4`, `P I5`, `P I6`, `P I7`, `P I8`, `P I9` |
+| `PF-DELETE-OR-WITHDRAW` | YES | `P E5`, `P F5`, `P K7`, `M C17`, `M C19`, `M C22`, `M C31`, `M C62`, `M C77`, `M M12`, `M M26`, `N 10`, `N 12`, `N 29`, `N 96`, `N 110`, `N 113`, `N 125`, `N A14`, `N A15` |
+| `PF-ENDORSE-OR-RECOMMEND` | YES | `P E4`, `N 111`, `N 112` |
+| `PF-ENDORSE-OR-RECOMMEND` | NO | `P F2`, `P F3`, `P F4`, `P F6`, `P F7`, `P F8`, `P F9`, `N 119`, `N 120`, `N 121`, `N 122`, `N 123`, `N 124`, `N 126`, `N 127`, `N 128` |
+| `NO-THIRD-PARTY-PROFILE-LOAD` | YES | `N 2`, `N 30`, `N 31`, `N 65`, `N 103` |
+| `NO-THIRD-PARTY-PROFILE-LOAD` | EXTENDED | `N 34`, `N 35`, `N 36`, `N 66`, `N 141`, `N 144`, `N 145`, `N 146`, `N 147` |
+| `R2-INVITATION-SUBSTRINGS` | YES | `M C69*`, `N 9*`, `N 11*`, `N 13*`, `N 14*`, `N 16*`, `N 19*`, `N 168*` |
+| `R2-INVITATION-SUBSTRINGS` | NO | `N 24*`, `N 25*`, `N 26*`, `N 27*`, `N 28*` |
+| `RETIRE-AI-INTERVIEW-PRODUCT` | YES | `J 132`, `J 133`, `J 134`, `J 135`, `J 139`, `J 140`, `J 141`, `J 142`, `J 143`, `J 144`, `J 145` |
+| `R1-MYNETWORK-BADGE` | EXTENDED | `N 3`, `N 15`, `N 17`, `N 18`, `N 21`, `N 22`, `N 32`, `N 62`, `N 97`, `N 98` |
+| `JOBS-APPLICATION-SUBSTRING` | EXTENDED | `J 73*` |
+| `JOBS-APPLICATION-SUBSTRING` | NO | `J 71*`, `P M1*`, `P M2*`, `P M3*`, `P M4*`, `P M5*`, `P M6*`, `P M7*` |
+| `TYPING-RULING-MENTIONS` | EXTENDED | `M C10`, `M C28`, `M C55`, `M C66`, `M C86`, `M M23` |
+| `TYPING-RULING-MENTIONS` | NO | `M C11` |
+| `APPLY-NO-GUESSED-STEPS` | NO | `J 60`, `J 61`, `J 62`, `J 63`, `J 64`, `J 65` |
+| `RETIRE-CONTACT-IMPORT` | YES | `N 105`, `N 107`, `N 108`, `N 109` |
+| `RETIRE-CONTACT-IMPORT` | EXTENDED | `N 106` |
+| `RETIRE-PANEL-NOT-OBSERVED` | YES | `J 25`, `J 29`, `J 30` |
+| `RETIRE-HELP-CENTER-FORM` | YES | `P N30`, `P N31`, `N 152` |
+| `MEASURED-NO-LINK` | NO | `M C14`, `M C15`, `M C16` |
+| `R9-OUTREACH-AUTOMATION` | EXTENDED | `M M5*`, `N 156*`, `N 158*` |
+| `ROSTER-ENUMERATION` | YES | `N 165`, `N 188`, `N 189` |
+| `OFF-DOMAIN-FORM` | YES | `J 66`, `J 67` |
+| `URL-UNREACHABLE-237` | NO | `J 99`, `P I12` |
+| `RETIRE-LIVE-BROADCAST` | YES | `P L5`, `M C59` |
+| `PF-DEANONYMISE-A-VIEWER` | YES | `P O2`, `N 131` |
+| `PF-REPOST-OR-SHARE` | YES | `M C20`, `M C21` |
+| `RETIRE-AI-ASSIST-MESSAGING` | YES | `M M40`, `M M51` |
+| `RETIRE-DEVICE-GEOLOCATION` | YES | `J 17` |
+| `DRAFT-DELETE-NOT-PRESSED` | YES | `J 69` |
+| `NAV-FROM-PAGE-CONTENT` | YES | `J 112` |
+| `RETIRE-MOBILE-APP-ONLY` | YES | `P A23` |
+| `NO-ROUTE-MEASURED` | EXTENDED | `P A9` |
+| `RETIRE-SIGNIN-INTERSTITIAL` | YES | `P N13` |
+| `PF-MARK-NOTIFICATIONS-READ` | YES | `P P1` |
+| `POST-EDIT-SUBSTRINGS` | YES | `M C18*` |
+| `FEED-CONTENT-READ` | YES | `M C43` |
+| `ARTICLE-ROUTE-NOT-USED` | NO | `M C44` |
+| `RETIRE-PAID-BOOST` | YES | `M C71` |
+| `RETIRE-VOICE-CAPTURE` | YES | `M M19` |
+| `PF-LOOP-SWEEP-SCHEDULED` | YES | `M M32` |
+| `PF-AUTO-ACCEPT-OR-REPLY` | NO | `M M39` |
+| `FOLLOW-PEOPLE-LIST` | YES | `N 38` |
+| `RETIRE-OFF-PLATFORM-WIDGET` | YES | `N 50` |
+| `FOLLOW-SUBSTRING` | NO | `N A2*` |
+
 ## 5. MEASURED-ABSENT -- 7 ROWS, 6 WITH EVIDENCE, 1 WITHOUT
 
 "With evidence" means the reading -- instrument, surface, date, counts -- is
@@ -372,6 +458,75 @@ failures each.**
 checker proves the judgement cites something real and reachable, not that it
 is right. Section 7 is the only check on that.
 
-## 7. VERIFICATION -- PENDING
+## 7. VERIFICATION -- ONE COLD PASS, 20 ROWS, BLIND
 
-## 8. GATES RUN AND NOT RUN -- PENDING
+**The budget was one pass, and it was spent once.** A child with no access to
+this table, this document, the checker or its tests re-classified 20 rows
+drawn by a seeded random sample of the 315 (seed 20260923), from the corpus
+alone, under the same written definitions. Its file stays in the gitignored
+`_audit/_scratch/exclusion-audit/cold-verify.tsv`. It reported that it never
+opened a forbidden file.
+
+    rows sampled                  20     B 16, B-lifted 2, C 1, M+ 1 in this table
+    CLASS agreement            18/20     90%
+    both called B:  op         15/18     83%
+                    scope      11/18     61%
+
+**THE TWO CLASS DISAGREEMENTS ARE BOTH THE LIFTED TAG, AND NEITHER IS A
+DIFFERENT VERDICT ON THE ROW.** On `N 11` and `J 71` the verifier found the same
+basis and called it plain B: it read R2's purpose as the invitation badge cost
+and found no note tying `/jobs/application` to the read-only rule. `N 11` is one
+of the ten lifts section 2a records as INFERRED, and the verifier's reading is
+a fair one. `J 71` is inferred too. **So the lift is the softest claim in this
+document, and section 2a says which 17 rows carry it on a recorded purpose.**
+
+**THE THREE `op=` DISAGREEMENTS, and what each taught:**
+
+* **`J 92`, and `P I11` under it -- Open To Work.** The verifier found no
+  operator words for the family. They exist -- *"The operator ... approved
+  save/unsave, follow, Open To Work"*, `_audit/2026-08-23-build-linkedin.md`
+  -- and no census cell cites them. The registry now anchors that passage, so
+  the next reader starting from the row reaches it. `P I11` the verifier filed
+  under the delete key instead, which its cell also cites; both readings are B.
+* **`N 30` -- a connection's own connections.** The verifier read R4, the
+  `PERMANENTLY_FORBIDDEN` key an agent wrote, where this table reads the
+  operator's 2026-09-04 narrowing of the boundary to `/in/me/`, which removed
+  the page. Both are cited on the row; the table records the one he made.
+
+**THE SCOPE FLAG AGREED ON 11 OF 18, AND THAT IS ITS MEASURED RELIABILITY.**
+The seven disagreements split both ways -- the verifier called four rows
+EXTENDED that this table calls YES, and two YES that this table calls
+EXTENDED, one YES this table calls NO. **Read `scope=` as a pointer for the
+operator, not as a measurement.** The class and the `op=` flag reproduce; the
+scope flag reproduces six times in ten.
+
+**One row the verifier named ambiguous, and it is the same row this document
+would name:** `J 92`, between B and C/SILENCE -- a basis that is a capture
+nobody took. Section 4 recommends the whole family back to GAP on exactly that
+ground.
+
+## 8. GATES RUN AND NOT RUN
+
+**RUN 1, on `af18c50`: `scripts/impact_gate.py --against b0d3ab8` REFUSED.**
+2017 passed, 1 failed, 707s wall. The red test was
+`tests/test_a_correction_is_findable_from_the_claim.py::test_every_candidate_pair_is_declared_or_triaged`,
+and the pair was this document's: its citation of the 2026-09-19
+unfired-but-built audit sat in the C table one row from a word on that test's
+vocabulary list -- table-row proximity, the shape its own triage list records
+most often. The citation was corroboration, and the list that triages such
+pairs lives in a test this lane does not own, so the citation moved out of the
+table to a paragraph of its own. That test's scan, imported and run over this
+document, now finds zero candidate pairs.
+
+**NOT RUN by that gate: 179 of 216 test files**, about 4076 of 6094 tests. The
+17 corpus-wide guards (identity, credential, page-text) did run. It is a
+local, Windows-only signal; CI's three platforms are the certifier and nothing
+was pushed.
+
+**Run beside it:** `tests/test_exclusion_basis.py`, 36 passed, and the same file
+against five broken checkers, every one red; the three generated files
+regenerated until a second sweep changed nothing, then `--check`ed clean; the
+pre-commit identity gate, 8 staged files, 0 hits.
+
+**Deliberately NOT run:** anything touching LinkedIn, a browser, port 9224 or
+`_state/`. Nothing here needs them.
