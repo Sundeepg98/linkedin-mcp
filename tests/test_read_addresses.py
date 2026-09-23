@@ -23,11 +23,20 @@ the table -- remove the line of a row that left, measure the address of a row
 that entered -- never to relax the check. That is the tripwire that
 `scripts/triage_read_gap_rows.py` also carries, and that sat red at HEAD with
 nothing running it.
+
+**AND SINCE 2026-09-23, THE RULINGS ARE ASKED TOO.** The boundary says what
+the code may open; a ruling says what may be done. `M M49` was classed blocked
+on nothing on a messaging thread while `DO-NOT-OPEN-MESSAGING` stood, and every
+check here passed, because the row agreed with itself and with the boundary.
+The last block below plants that row back and requires it named, plus the
+converse: the `STANDING-RULING` gate may not be spent on a page its ruling
+does not hold.
 """
 from __future__ import annotations
 
 import pathlib
 import sys
+import urllib.parse
 
 import pytest
 
@@ -36,6 +45,7 @@ sys.path.insert(0, str(ROOT / "scripts"))
 sys.path.insert(0, str(ROOT))
 
 import check_read_addresses as cra  # noqa: E402
+import ruling_holds as rh  # noqa: E402
 
 # NO MODULE-LEVEL CONSTANT BEYOND THE CONVENTIONAL ``ROOT``, deliberately. The
 # impact gate couples every test file that NAMES an upper-case constant this
@@ -385,3 +395,145 @@ def test_census_completion_withholds_the_split_when_the_table_drifts(
 @pytest.mark.parametrize("gate", cra.BLOCKED_ON_NOTHING)
 def test_blocked_on_nothing_is_a_subset_of_the_gate_alphabet(gate) -> None:
     assert gate in cra.GATES
+
+
+# ------------------------------- the edge: a RULING holds the page (2026-09-23)
+#
+# `M M49` was classed READER -- blocked on nothing -- on a messaging thread,
+# and `DO-NOT-OPEN-MESSAGING` forbids opening messaging. The table agreed with
+# itself and with the boundary; only the rulings could convict it. These plant
+# into COPIES of the real table and must name the row.
+
+
+def _page(row: dict[str, str]) -> str:
+    return urllib.parse.urlsplit(row["address"]).path
+
+
+def _on_a_held_page(row: dict[str, str]) -> bool:
+    return (row["class"] == "ADMITTED"
+            and rh.surface_hold(_page(row)) is not None)
+
+
+def _off_every_held_page(row: dict[str, str]) -> bool:
+    return (row["class"] == "ADMITTED" and _page(row).endswith("/")
+            and rh.surface_hold(_page(row)) is None
+            and row["gate"] != "STANDING-RULING")
+
+
+def test_the_edge_has_a_real_row_to_check() -> None:
+    """Green on the real table means something only if a held row is in it."""
+    rows, _ = cra.load()
+    held = [r for r in rows if _on_a_held_page(r)]
+    assert held, "no ADMITTED row sits on a held page: the edge checks nothing"
+    assert cra.ruling_problems(rows) == []
+
+
+def test_blocked_on_nothing_on_a_held_page_turns_it_red(tmp_path, capsys) -> None:
+    """THE PLANT THIS EDGE EXISTS FOR: the row as the bucket-3 split first had it."""
+    lines = _lines()
+    i = _find(lines, _on_a_held_page)
+    row = _row(lines[i])
+    held = rh.surface_hold(_page(row))
+    row["gate"] = "READER"
+    lines[i] = _line(row)
+    code, out = _check(capsys, _plant(tmp_path, lines))
+    assert code == 1, out
+    assert f"{row['slice']} {row['row']}: classed blocked on nothing (gate " \
+           f"READER), but its page {_page(row)} sits on " in out
+    assert f"which {held} holds" in out
+
+
+def test_a_held_page_under_any_other_gate_turns_it_red(tmp_path, capsys) -> None:
+    lines = _lines()
+    i = _find(lines, _on_a_held_page)
+    row = _row(lines[i])
+    row["gate"] = "PRESS"
+    lines[i] = _line(row)
+    code, out = _check(capsys, _plant(tmp_path, lines))
+    assert code == 1, out
+    assert f"{row['slice']} {row['row']}: gate PRESS, but " in out
+    assert "before anything past the boundary -- the gate is STANDING-RULING" \
+        in out
+
+
+def test_a_held_page_whose_note_cites_no_hold_turns_it_red(
+        tmp_path, capsys) -> None:
+    lines = _lines()
+    i = _find(lines, _on_a_held_page)
+    row = _row(lines[i])
+    row["note"] = row["note"].replace("HELD BY", "held, once, by")
+    lines[i] = _line(row)
+    code, out = _check(capsys, _plant(tmp_path, lines))
+    assert code == 1, out
+    assert f"{row['slice']} {row['row']}: its page sits on " in out
+    assert "so its note must cite HELD BY `" in out
+
+
+def test_a_standing_ruling_gate_off_its_page_turns_it_red(
+        tmp_path, capsys) -> None:
+    """The new gate cannot be spent on a page the ruling it cites does not hold."""
+    lines = _lines()
+    i = _find(lines, _off_every_held_page)
+    row = _row(lines[i])
+    row["gate"] = "STANDING-RULING"
+    row["note"] += " HELD BY `DO-NOT-OPEN-MESSAGING`"
+    lines[i] = _line(row)
+    code, out = _check(capsys, _plant(tmp_path, lines))
+    assert code == 1, out
+    assert f"{row['slice']} {row['row']}: gate STANDING-RULING citing " \
+           f"DO-NOT-OPEN-MESSAGING, but its page {_page(row)} is not on " \
+           f"/messaging/" in out
+
+
+def test_a_standing_ruling_gate_citing_nothing_turns_it_red(
+        tmp_path, capsys) -> None:
+    lines = _lines()
+    i = _find(lines, _off_every_held_page)
+    row = _row(lines[i])
+    row["gate"] = "STANDING-RULING"
+    lines[i] = _line(row)
+    code, out = _check(capsys, _plant(tmp_path, lines))
+    assert code == 1, out
+    assert f"{row['slice']} {row['row']}: gate STANDING-RULING, and its note " \
+           f"cites no STANDING hold with HELD BY" in out
+
+
+def test_a_pending_question_on_a_page_convicts_a_blocked_on_nothing_row(
+        tmp_path, capsys, monkeypatch) -> None:
+    """A question not yet answered holds a page exactly as firmly as a ruling.
+
+    Self-sufficient on purpose: it makes its OWN blocked-on-nothing row, so it
+    does not depend on which rows are blocked on nothing today.
+    """
+    lines = _lines()
+    i = _find(lines, _off_every_held_page)
+    row = _row(lines[i])
+    row["gate"] = "READER"
+    lines[i] = _line(row)
+    monkeypatch.setitem(rh.ROW_HOLDS, "PLANTED-QUESTION", rh.Hold(
+        status="PENDING", binds="surface", surface=_page(row)))
+    code, out = _check(capsys, _plant(tmp_path, lines))
+    assert code == 1, out
+    assert f"{row['slice']} {row['row']}: classed blocked on nothing (gate " \
+           f"READER), but its page {_page(row)} sits on {_page(row)}, which " \
+           f"PLANTED-QUESTION holds (PENDING)" in out
+
+
+def test_census_completion_withholds_the_split_when_the_edge_fails(
+        tmp_path, monkeypatch) -> None:
+    """A blocked-on-nothing figure over a table the rulings refute is not printed."""
+    import census_completion as cc
+
+    lines = _lines()
+    i = _find(lines, _on_a_held_page)
+    row = _row(lines[i])
+    row["gate"] = "READER"
+    lines[i] = _line(row)
+    monkeypatch.setattr(cra, "TABLE", _plant(tmp_path, lines))
+    monkeypatch.setattr(cra.load, "__defaults__", (cra.TABLE,))
+    out: list[str] = []
+    figures = cc.report(list(cc.walk()), out)
+    text = "\n".join(out)
+    assert "BUCKET 3 SPLIT WITHHELD" in text
+    assert f"{row['slice']} {row['row']}: classed blocked on nothing" in text
+    assert "b3_blocked_on_nothing" not in figures

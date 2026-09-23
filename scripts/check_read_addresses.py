@@ -16,9 +16,11 @@ shipped boundary and exits 1 when:
   * an ``also_driven`` address's recorded verdict disagrees;
   * a bucket-3 row has no line (a row ENTERED the bucket and nobody measured
     it), or a line names a row that is no longer in the bucket (a row LEFT and
-    its verdict was left behind pointing at nothing -- the failure that has
-    kept ``scripts/triage_read_gap_rows.py`` red at HEAD);
-  * a row's direction cell moved, or a line breaks the table's vocabulary.
+    its verdict was left behind pointing at nothing -- the failure that kept
+    ``scripts/triage_read_gap_rows.py`` red at HEAD until 2026-09-23);
+  * a row's direction cell moved, or a line breaks the table's vocabulary;
+  * a row is classed BLOCKED ON NOTHING on a page a RULING holds -- the edge
+    this table first shipped without (``ruling_problems``, below).
 
 THE BOUNDARY IS IMPORTED, NEVER RE-IMPLEMENTED. The verdict is
 ``readonly.is_read_url(address)``. The refusal KIND is read off the exception
@@ -60,6 +62,11 @@ import collections
 import pathlib
 import re
 import sys
+import urllib.parse
+
+sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
+
+import ruling_holds as rh  # noqa: E402  -- pure at import, see its docstring
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 TABLE = ROOT / "_audit" / "_census" / "read-addresses.tsv"
@@ -76,12 +83,22 @@ SOURCE_KINDS = ("code-symbol", "test-fixture", "census-prose", "prior-audit")
 
 #: The first thing past an ADMITTED boundary, in the order a reader wave meets
 #: them. The definitions live in `_audit/2026-09-23-bucket3-addresses.md`.
+#:
+#: `STANDING-RULING` was added 2026-09-23 (`_audit/2026-09-23-census-cleanup.md`
+#: item 6), and NOT folded into `RULING`, because the two send a reader to
+#: different places. `RULING` is a decision nobody has made -- it belongs in
+#: the operator's open queue. `STANDING-RULING` is one he HAS made and that is
+#: in force (the row's note cites it with HELD BY): nothing past the boundary
+#: is reachable before it, and filing it as `RULING` would put a decided
+#: question back into the open queue.
 GATES = ("READER", "PRESS-PERMITTED", "MEASURE", "BUILT-UNFIRED", "PRESS",
-         "RULING")
+         "RULING", "STANDING-RULING")
 
-#: A reader could be written TODAY for these: no ruling, no boundary edit, and
-#: no press the shipped gate refuses. This is the measured size of "blocked on
-#: nothing at all" -- ADMITTED rows whose gate is one of these.
+#: A reader could be written TODAY for these: no ruling made or pending holds
+#: the page, no boundary edit, and no press the shipped gate refuses. This is
+#: the measured size of "blocked on nothing at all" -- ADMITTED rows whose gate
+#: is one of these. `ruling_problems` refuses the table if one of them sits on
+#: a page a ruling holds.
 BLOCKED_ON_NOTHING = ("READER", "PRESS-PERMITTED")
 
 #: Bucket 3 is census_completion's R + R+W still-GAP set; nothing else.
@@ -287,6 +304,80 @@ def source_problems(rows: list[dict[str, str]],
     return problems
 
 
+def ruling_problems(rows: list[dict[str, str]]) -> list[str]:
+    """No row is blocked on nothing on a page a RULING holds.
+
+    THE EDGE THIS TABLE SHIPPED WITHOUT, measured 2026-09-23. ``M M49`` was
+    classed READER -- blocked on nothing -- because the shipped boundary admits
+    ``/messaging/thread/<id>/``. ``DO-NOT-OPEN-MESSAGING`` forbids opening
+    messaging at all. The boundary says what the CODE may open; a ruling says
+    what may be DONE; the split asked only the first. Nothing in the table's
+    own vocabulary could see it, because the row was internally consistent.
+
+    Every ADMITTED row's page is looked up among the holds in
+    ``ruling_holds.ROW_HOLDS`` that bind a SURFACE. A hold that binds an ACT --
+    the write ruling -- cannot be read off an address, so a row held that way
+    must say so in its note, and nothing here can check it. On a held page:
+
+      * a BLOCKED-ON-NOTHING gate is RED -- the edge itself;
+      * a STANDING hold with any gate but STANDING-RULING is RED: nothing past
+        the boundary is reachable before a ruling in force;
+      * a PENDING hold with any gate but RULING is RED: the open question comes
+        first, and it is a decision nobody has made;
+      * a note that does not cite the hold with ``HELD BY`` is RED, so the
+        table says WHICH ruling in the row a reader will open.
+
+    And the converse, so the new gate cannot be spent carelessly: a
+    STANDING-RULING row must cite a STANDING hold, and when that hold binds a
+    surface the row's page must sit on it.
+
+    PURE: the holds table is imported, the register is not. That it still
+    agrees with the register is ``ruling_holds.register_problems``, which
+    ``main`` runs and ``census_completion.py`` cannot.
+    """
+    problems: list[str] = []
+    for r in rows:
+        if r["class"] != "ADMITTED" or not r["address"].startswith(HOST):
+            continue
+        tag = f"{r['slice']} {r['row']}"
+        path = urllib.parse.urlsplit(r["address"]).path
+        gate = r["gate"]
+        cites = rh.cited(r["note"])
+        held = rh.surface_hold(path)
+        if held is not None:
+            hold = rh.ROW_HOLDS[held]
+            if gate in BLOCKED_ON_NOTHING:
+                problems.append(f"{tag}: classed blocked on nothing (gate "
+                                f"{gate}), but its page {path} sits on "
+                                f"{hold.surface}, which {held} holds "
+                                f"({hold.status})")
+            elif hold.status == "STANDING" and gate != "STANDING-RULING":
+                problems.append(f"{tag}: gate {gate}, but {held} (STANDING) "
+                                f"holds its page {path} before anything past "
+                                f"the boundary -- the gate is STANDING-RULING")
+            elif hold.status == "PENDING" and gate != "RULING":
+                problems.append(f"{tag}: gate {gate}, but its page {path} "
+                                f"waits on the open question {held} first -- "
+                                f"the gate is RULING")
+            if held not in cites:
+                problems.append(f"{tag}: its page sits on {hold.surface}, so "
+                                f"its note must cite HELD BY `{held}`")
+        if gate == "STANDING-RULING":
+            standing = [c for c in cites
+                        if c in rh.ROW_HOLDS
+                        and rh.ROW_HOLDS[c].status == "STANDING"]
+            if not standing:
+                problems.append(f"{tag}: gate STANDING-RULING, and its note "
+                                f"cites no STANDING hold with HELD BY")
+            for c in standing:
+                hold = rh.ROW_HOLDS[c]
+                if hold.binds == "surface" and not path.startswith(hold.surface):
+                    problems.append(f"{tag}: gate STANDING-RULING citing {c}, "
+                                    f"but its page {path} is not on "
+                                    f"{hold.surface}")
+    return problems
+
+
 def _also(row: dict[str, str]) -> list[tuple[str, str]]:
     if row["also_driven"] == "-":
         return []
@@ -404,6 +495,8 @@ def main(argv: list[str] | None = None) -> int:
     problems += coverage_problems(rows, pop)
     problems += shape_problems(rows)
     problems += source_problems(rows)
+    problems += ruling_problems(rows)
+    problems += [f"HOLDS TABLE: {p}" for p in rh.register_problems()]
     problems += control_problems()
     problems += boundary_problems(rows)
 
