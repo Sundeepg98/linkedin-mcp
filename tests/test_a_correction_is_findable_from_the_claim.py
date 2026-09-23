@@ -2974,6 +2974,42 @@ NOT_A_CORRECTION: dict[tuple[str, str], str] = {
         "another document without marking it."
     ),
 
+    # 2026-09-24, lane L7 (profile writes). Read at every line the scan
+    # produced, not inferred from the filenames: 36 census rows end with a
+    # paragraph citing the lane's record as the source of their class and
+    # outcome, and the matched words belong to OTHER rows, to a row's own kept
+    # correction of itself, or -- once -- to the lane's own sentence about a
+    # public claim. None of them is about the lane record.
+    ("profile.md", "2026-09-24-lane-l7-profile-writes.md"): (
+        "THE ROWS CITE THEIR RECORD, AND EVERY MATCHED WORD IS ANOTHER ROW'S "
+        "OR THE ROW'S OWN. Thirty-four rows end with a LANE L7 paragraph that "
+        "cites the lane record as the source of the class and outcome it "
+        "records. Read at each site, the words fall in three groups: (1) "
+        "`WRONG` in the KEPT text of rows `A14`, `A15` and `A22` -- *'THE "
+        "BLOCKER'S PREMISE IS NOW WRONG'*, the census correcting its OWN "
+        "earlier blocker in place on 2026-09-19 -- and the in-place "
+        "self-corrections of rows `D25`, `K8` and `N12`, adjacent by table "
+        "position; (2) `False` / `false` as prose about a value or a split -- "
+        "`is_read_url=False` in row `B10`, 'would return False' in row `K10`, "
+        "and 'no cell ... is false of either half' in row `D27`'s compound "
+        "note; (3) the lane's OWN sentence on row `J1`, 'a false public claim "
+        "for a job seeker', which is about what switching #Hiring on would "
+        "assert in public, not about any document. The census rests these "
+        "cells on the lane record and corrects nothing in it. **WHAT WOULD "
+        "MAKE THIS ENTRY WRONG:** a profile.md row asserting that something "
+        "the lane record says is mistaken while leaving the record untouched."
+    ),
+    ("network.md", "2026-09-24-lane-l7-profile-writes.md"): (
+        "ADJACENCY, NOT A CORRECTION. The citing line is census row `176`, "
+        "whose LANE L7 paragraph cites the lane record as the source of its "
+        "class and outcome. The matched word is `corrected` on the row ABOVE, "
+        "`175`, in that row's own account of a route census whose first pass "
+        "'had its headline corrected' -- nothing to do with the lane. Row "
+        "`176` withdraws nothing from the lane record. **WHAT WOULD MAKE THIS "
+        "ENTRY WRONG:** row `176` or `114` asserting that something the lane "
+        "record says is mistaken while leaving the record untouched."
+    ),
+
 }
 
 

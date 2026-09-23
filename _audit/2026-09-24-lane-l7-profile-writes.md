@@ -188,6 +188,14 @@ holds it to one element. Every `why` is built from counts and constants: no page
 * **The undo.** `P I15` presses the ON control, which no capture holds; it is not built.
 * **The spend.** Census row `J 86` quotes LinkedIn's Help as "max 50, expires 1 year"; the spec's
   `spends` repeats it as a quotation, not a measurement.
+* **THE BRIEF'S BUILT BAR, CLAUSE BY CLAUSE, AND THE ONE THIS ROW DOES NOT MEET.** Off by default:
+  yes (`writes_enabled()`). Grant-gated where the family is: yes, the same single-use, action-bound,
+  target-bound grant. Failing controls: yes, the three in 4.4 plus the derived worlds. **A restore path
+  that is itself tested: NO.** The removal is `P I15`, and it presses the ON-state control, which no
+  capture holds, so there is no restore through this server and nothing to test. This record does not
+  round that off: a live proof of `P I14` leaves the interest signalled until he withdraws it himself in
+  LinkedIn, which is one more reason it fires only at a posting he names -- and its first press is also
+  the capture (C6) that would let `P I15` be built.
 
 ### 4.4 The three controls, and the rest -- `tests/test_mark_company_interest.py`
 
@@ -259,12 +267,12 @@ from the blocker ledger.
 | P B7 #Hiring frame | VISIBLE-TO-OTHERS | BLOCKED | the same capability as J2; part of Open to Hiring, which is blocked (J1) | OPEN-TO-HIRING-ENTRY |
 | P B8 Top Voice badge show/hide | SELF-PRIVATE | BLOCKED | the same capability as K9; no Top Voice badge on this account (`K8`: zero in text AND in names, on an instrument shown able to disagree with itself) | NO-TOP-VOICE-BADGE |
 | P B9 Premium badge show/hide | SELF-PRIVATE | NEEDS-CAPTURE | he is Premium (his profile draws the icon); where its switch lives is not on record; the intro editor's two UNNAMED switches are the candidates | INTRO-EDITOR-FULL-READ (C1) |
-| P D24 open to volunteering | VISIBLE-TO-OTHERS | NEEDS-CAPTURE | tells nonprofits he is open to volunteering; its entry is an ANCHOR on his profile render, `/in/me/opportunities/volunteering/education/`, refused today | OPEN-TO-EXPLAINER-PAGES (C3) |
-| P D27 secondary-language profile | VISIBLE-TO-OTHERS | BLOCKED | its editor is the anchor `/in/me/edit/secondary-language/`; its only undo is the delete half, which `delete_or_withdraw_anything` refuses, so no live proof can restore in the session | UNDO-IS-A-DELETE |
+| P D24 open to volunteering | VISIBLE-TO-OTHERS | NEEDS-CAPTURE | tells nonprofits he is open to volunteering; its entry is an ANCHOR on his profile render, to `/in/<member>/opportunities/volunteering/education/`; the `/in/me/` spelling is refused today | OPEN-TO-EXPLAINER-PAGES (C3) |
+| P D27 secondary-language profile | VISIBLE-TO-OTHERS | BLOCKED | its editor is the anchor to `/in/<member>/edit/secondary-language/`; its only undo is the delete half, which `delete_or_withdraw_anything` refuses, so no live proof can restore in the session | UNDO-IS-A-DELETE |
 | P D29 Learning certificate | BROADCAST-BY-NATURE | BLOCKED | a new section entry, the kind of change the ruling's own example names; its form is the excluded `/edit/` certifications editor (`D13`); its undo is a delete | BROADCAST-BY-NATURE |
 | P E6 hide an endorsement received | VISIBLE-TO-OTHERS | BLOCKED | the same capability as N 114; it targets one member's endorsement; no endorsement is drawn on his skills page (`E7`, network `118`); an endorsers address carries `/endorse` | NO-ENDORSEMENT-DRAWN |
-| P G2 activity default view | SELF-PRIVATE | NEEDS-CAPTURE | a display preference; its control is an ANCHOR, 'Edit default activity', to `/in/me/edit/forms/content-collections-star-pill/new/`, refused by `/edit/` today and admissible by the ruling `PROFILE-EDITOR-ADDRESSES-ALLOWED` | DEFAULT-ACTIVITY-FORM (C4) |
-| P H1 create a Service Page | VISIBLE-TO-OTHERS | NEEDS-CAPTURE | a public listing; its entry is an ANCHOR, `/in/me/opportunities/services/education/`, also drawn in the tracked `profile_topcard_hydrated.html`; refused today | OPEN-TO-EXPLAINER-PAGES (C3) |
+| P G2 activity default view | SELF-PRIVATE | NEEDS-CAPTURE | a display preference; its control is an ANCHOR, 'Edit default activity', to `/in/<member>/edit/forms/content-collections-star-pill/new/`, whose `/in/me/` spelling is refused by `/edit/` today and admissible by the ruling `PROFILE-EDITOR-ADDRESSES-ALLOWED` | DEFAULT-ACTIVITY-FORM (C4) |
+| P H1 create a Service Page | VISIBLE-TO-OTHERS | NEEDS-CAPTURE | a public listing; its entry is an ANCHOR to `/in/<member>/opportunities/services/education/`, also drawn in the tracked `profile_topcard_hydrated.html`; the `/in/me/` spelling is refused today | OPEN-TO-EXPLAINER-PAGES (C3) |
 | P H2 service categories | VISIBLE-TO-OTHERS | BLOCKED | no Service Page exists (H1) | NO-SERVICE-PAGE |
 | P H3 about text | VISIBLE-TO-OTHERS | BLOCKED | no Service Page exists | NO-SERVICE-PAGE |
 | P H4 location / remote | VISIBLE-TO-OTHERS | BLOCKED | no Service Page exists | NO-SERVICE-PAGE |
@@ -430,8 +438,9 @@ saved. LOADS: 1 + 1.
 
 **C3 -- THE OPEN-TO EXPLAINER PAGES** (`P D24`, `H1`).
 Addresses `https://www.linkedin.com/in/me/opportunities/volunteering/education/` and
-`https://www.linkedin.com/in/me/opportunities/services/education/` -- ANCHORS on his `/in/me/` render
-(a local capture; the services one also in the tracked `tests/fixtures/profile_topcard_hydrated.html`).
+`https://www.linkedin.com/in/me/opportunities/services/education/` -- the `/in/me/` spellings of two ANCHORS on his profile
+render (a local capture; the services one also in the tracked
+`tests/fixtures/profile_topcard_hydrated.html`).
 REFUSED by the read boundary today; prerequisite: both exact addresses admitted, `/in/me/` spelling
 only (the read boundary's owner's act, on the orchestrator's delegated call -- a page about his own
 profile, read without a press). Then one navigation each, shapes only: controls, tags, `has_href`,
@@ -442,8 +451,8 @@ where the Open To Work editor fires `saveAndFetchNextStep` (recorded 2026-08-24)
 can be shown not to save. LOADS: 2.
 
 **C4 -- THE DEFAULT-ACTIVITY FORM** (`P G2`).
-Address `https://www.linkedin.com/in/me/edit/forms/content-collections-star-pill/new/` -- the 'Edit
-default activity' ANCHOR on his `/in/me/` render (a local capture). REFUSED by `/edit/` today;
+Address `https://www.linkedin.com/in/me/edit/forms/content-collections-star-pill/new/` -- the `/in/me/`
+spelling of the 'Edit default activity' ANCHOR on his profile render (a local capture). REFUSED by `/edit/` today;
 prerequisite: that exact address admitted by the ruling `PROFILE-EDITOR-ADDRESSES-ALLOWED`, `/in/me/`
 spelling (the read boundary's owner's act). Then one navigation and
 `dom.read_self_owned_editor_fields` over its dialog (anchor `Save`): the option controls' names
