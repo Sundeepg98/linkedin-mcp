@@ -303,4 +303,8 @@ def test_both_rules_reject_the_registry_that_was_actually_measured():
     # FORTY-EIGHT AND FORTY-NINE FROM 2026-09-21: linkedin_group_page and
     # linkedin_company_page_counts, both READS, each opening an admitted
     # address that no registered tool could navigate to.
-    assert len(_tool_names()) == 49
+    # FIFTY FROM 2026-09-23: linkedin_own_item_link, the live lane's -- the
+    # share link of one of his own posts through the post's own "Copy link to
+    # post", on the orchestrator-delegated call recorded in its docstring. A
+    # READ by effect that PRESSES two controls; moved with every other site.
+    assert len(_tool_names()) == 50

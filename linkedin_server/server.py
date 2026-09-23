@@ -1,4 +1,4 @@
-"""The tool surface: forty-nine tools, twelve of which write to LinkedIn.
+"""The tool surface: fifty tools, twelve of which write to LinkedIn.
 
 THIS PARAGRAPH HAS NOW BEEN WRONG FIVE TIMES, in both directions, and the
 count is the part that keeps rotting. Until 2026-08-23 it read *"There is no
@@ -157,9 +157,16 @@ POINTER to it was dangling, so a reader who followed it found nothing and
 would reasonably conclude these numbers are unchecked. A citation is a claim
 like any other.
 The surface splits three ways and the split is the part a reader actually
-needs: THIRTY-SEVEN read, TWELVE write, and ZERO are write-shaped,
-registered, gated and unable to act. Thirty-seven plus twelve plus zero is
-forty-nine.
+needs: THIRTY-EIGHT read, TWELVE write, and ZERO are write-shaped,
+registered, gated and unable to act. Thirty-eight plus twelve plus zero is
+fifty.
+
+THE FIFTIETH, 2026-09-23, IS A READ THAT PRESSES: ``linkedin_own_item_link``,
+the share link of one of his own posts through the post's own "Copy link
+to post", on a recorded orchestrator-delegated call. It changes nothing on
+LinkedIn that the call did not accept, and the page's clipboard calls are
+captured in this server's own tab rather than reaching his system clipboard,
+with the one gap in that capture named in the tool's own docstring.
 
 THE FORTY-EIGHTH AND FORTY-NINTH ARE TWO READS, 2026-09-21, AND THEY ARE ONE
 FINDING RATHER THAN TWO TOOLS. ``linkedin_group_page`` and
@@ -7785,6 +7792,83 @@ async def linkedin_my_activity_items() -> dict[str, Any]:
             return out
     except Exception as exc:
         return _error(exc)
+
+
+@mcp.tool()
+async def linkedin_own_item_link(activity_id: str, include_link: bool = False) -> dict[str, Any]:
+    """The public link LinkedIn gives out for ONE of HIS OWN items. PRESSES TWO CONTROLS.
+
+    ================= WHAT THIS IS FOR -- READ FIRST =================
+    The link that opens one of his own items off LinkedIn, obtained the way
+    he would get it: the item's own page, opened by its activity id (an
+    argument -- linkedin_my_activity_items returns them), the item's own
+    control menu, and its copy-link entry (share_link.COPY_PHRASE). It rests
+    on a call recorded verbatim, as orchestrator-delegated on 2026-09-23, in
+    _audit/2026-09-23-live-lane-session-1.md section 0.1: M C72's copy-link
+    on his OWN items only, so no other author's figures are touched.
+    =================================================================
+
+    OWNERSHIP IS READ OFF THE MENU, NEVER ASSUMED FROM THE ID. The copy-link
+    entry is pressed only when the same menu also draws one of the two
+    author-only entries (share_link.OWNER_PHRASES), which LinkedIn draws for
+    an item's author alone. Otherwise the answer is refused (not_his_post)
+    and nothing past opening the menu is pressed.
+
+    HIS SYSTEM CLIPBOARD IS SHIELDED, AND THE SHIELD HAS ONE NAMED GAP. Just
+    before the copy-link entry is pressed, the page's clipboard calls are
+    replaced in this server's own tab (writeText, write and the copy
+    command), so the link comes back here instead of replacing whatever he
+    had copied. That covers every route the page looks up at the moment it
+    copies. A reference the page took BEFORE the replacement is not covered:
+    then nothing is captured, the answer reads copied: false, and whether his
+    clipboard was written cannot be read from here.
+
+    WHAT COMES BACK: copied (bool); captures (how many texts were kept);
+    shape -- whether it is an https LinkedIn link, its path kind, whether it
+    carries this activity id; permitted; and the gate's counter and closure
+    verdicts. THE LINK ITSELF ONLY WITH include_link=True: it can carry his
+    profile's vanity name.
+
+    Args:
+        activity_id: 1-20 ASCII digits -- the id of one of his own items.
+        include_link: also return the link itself (default False: its shape
+            only).
+    """
+    from linkedin_server import share_link as share_module
+
+    try:
+        own_item_digits = share_module.validated_activity_digits(activity_id)
+    except ValueError:
+        return {
+            "refused": "bad_activity_id",
+            "why": "activity_id must be 1 to 20 ASCII digits; nothing was loaded.",
+            "pages_loaded": 0,
+        }
+    own_item_url = share_module.post_url(own_item_digits)
+    try:
+        async with BROWSER.session() as page:
+            own_item_landed = await BROWSER.goto(page, own_item_url)
+            assert_not_authwall(own_item_landed, surface="post")
+
+            async def own_item_counters() -> dict[str, Optional[int]]:
+                own_item_surface = await dom.read_reaction_surface(page)
+                own_item_off = (
+                    own_item_surface.get("off_state")
+                    if isinstance(own_item_surface, dict) else None
+                )
+                if isinstance(own_item_off, bool) or not isinstance(own_item_off, int):
+                    return {"off_state": None}
+                return {"off_state": own_item_off}
+
+            own_item_outcome = await share_module.copy_own_post_link(
+                page, activity_digits=own_item_digits, read_counters=own_item_counters
+            )
+    except Exception as exc:
+        return _error(exc)
+    if not include_link:
+        own_item_outcome["link_withheld"] = own_item_outcome.pop("link", None) is not None
+    own_item_outcome["pages_loaded"] = 1
+    return own_item_outcome
 
 
 # ---------------------------------------------------------------------------

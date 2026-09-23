@@ -3106,6 +3106,37 @@ SANCTIONED_MUTATIONS: tuple[tuple[str, str, str], ...] = (
     # read before, the pill is closed, the path never moved and no counter
     # did. A switch left applied is its loudest refusal, not a quiet one.
     ("linkedin_server/view_switch.py", "_activate", "click"),
+    # THE TENTH, ELEVENTH AND TWELFTH, 2026-09-23, the live lane: THE COPY
+    # LINK OF ONE OF HIS OWN POSTS (``share_link.copy_own_post_link``, served
+    # by the tool ``linkedin_own_item_link``). Three kinds, one line each:
+    #
+    #   click     share_link._activate -- the drain point for both presses
+    #             (the post's control menu, then "Copy link to post");
+    #   evaluate  share_link._clipboard -- ONE script, CLIPBOARD_JS, in two
+    #             modes: install a capture of the page's clipboard calls in
+    #             this server's own tab, and read what was captured;
+    #   press     share_link.copy_own_post_link -- the one Escape that
+    #             closes the menu.
+    #
+    # THE CALL IT RESTS ON (orchestrator-delegated, 2026-09-23): "M C72's
+    # copy-link is proven on the operator's OWN posts only (C41's activity
+    # ids), so no other author's share figures are touched."
+    #
+    # WHY IT IS ARGUABLE RATHER THAN A WIDENING. Ownership is READ OFF THE
+    # MENU before the copy item is pressed -- only a post's author is offered
+    # "Delete post" / "Edit post" -- and without it the copy item is never
+    # pressed. The copy item is matched by EXACT equality of its normalised
+    # label, among measured neighbours that include five writes. The
+    # EVALUATE IS PROTECTIVE: without it the page's clipboard call would
+    # replace whatever the operator had on his own system clipboard; with it
+    # every clipboard route the page looks up when it copies is captured in
+    # this tab instead. Its one gap -- a reference the page took before the
+    # capture -- is named in share_link and reads as copied: false. The
+    # address is admitted, the gate's component checks run before any press,
+    # the reaction counter is read at both ends, and the closure is verified.
+    ("linkedin_server/share_link.py", "_activate", "click"),
+    ("linkedin_server/share_link.py", "_clipboard", "evaluate"),
+    ("linkedin_server/share_link.py", "copy_own_post_link", "press"),
 )
 
 

@@ -138,6 +138,7 @@ PINNED_TOOL_SURFACE: dict[str, tuple[str, ...]] = {
     "linkedin_update_profile_field": ("confirm_token", "field", "value"),
     "linkedin_update_setting": ("confirm_token", "setting", "value"),
     "linkedin_who_viewed_me": ("limit", "open_filter_menus", "show_more_analytics", "view_switch"),
+    "linkedin_own_item_link": ("activity_id", "include_link"),
 }
 
 #: 44 tools and 61 parameters at the pin. Asserted rather than assumed, so a
@@ -236,8 +237,18 @@ PINNED_TOOL_SURFACE: dict[str, tuple[str, ...]] = {
 #: COMMIT:** `N 134` and `P O3` are decided by ONE live fire of these two
 #: parameters and move, or keep their state with a named reason, in the commit
 #: that records it. See `_audit/2026-09-23-live-lane-session-1.md`.
-PINNED_TOOL_COUNT = 49
-PINNED_PARAMETER_COUNT = 69
+#:
+#: **RE-PINNED 2026-09-23 AT 50 TOOLS AND 71 PARAMETERS, by the live lane.**
+#: `linkedin_own_item_link("activity_id", "include_link")` -- the share link
+#: of one of HIS OWN posts through the post's own "Copy link to post", on the
+#: orchestrator-delegated call that `M C72`'s copy-link is proven on his own
+#: posts only. The id is a NUMERIC IDENTIFIER, refused unless it is 1-20
+#: ASCII digits, the exception `linkedin_group_page("group_id")` already
+#: carries: a builder has to be handed the thing it builds from.
+#: **NO ROW MOVES IN THIS COMMIT:** `M C72` moves, or keeps its state with a
+#: named reason, in the commit recording one live fire of this tool.
+PINNED_TOOL_COUNT = 50
+PINNED_PARAMETER_COUNT = 71
 
 
 def live_surface() -> dict[str, tuple[str, ...]]:

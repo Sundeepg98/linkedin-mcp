@@ -3,8 +3,17 @@
 An MCP server that shows you your own LinkedIn account data as structured tool
 results instead of pages you have to click through.
 
-**Forty-nine tools ship. Thirty-seven read. Twelve write. None is
+**Fifty tools ship. Thirty-eight read. Twelve write. None is
 write-shaped and unable to act.**
+
+**THAT LINE READ "Forty-nine ... Thirty-seven" UNTIL 2026-09-23.** The
+fiftieth is `linkedin_own_item_link`: the share link of one of your OWN
+posts, obtained through the post's own "Copy link to post" -- a read that
+presses two controls, on a recorded call delegated by the operator. It
+presses only when the same menu offers "Delete post" (which LinkedIn offers
+a post's author alone), and the page's clipboard calls are captured in
+this server's own tab instead of replacing what you had copied (one named gap,
+in the tool's row below).
 
 **THAT LINE READ "Forty-seven ... Thirty-five" UNTIL 2026-09-21.** The
 forty-eighth and forty-ninth arrive together because they are one finding
@@ -91,6 +100,12 @@ What is true now:
   still reports it -- it was not taught to stop looking -- and it is admitted by
   path, function and kind in a one-line allowlist that the tests fail if it
   widens.
+  **Since 2026-09-23 that allowlist also admits three presses that change
+  only what your own view shows**, each on a recorded call and each bound
+  to one function: a filter the view switch applies and proves it took off
+  again (`view_switch`), one plain button that reveals your profile-view
+  analytics (`reveal`), and the copy-link above, whose clipboard write
+  is captured in this server's own tab (`share_link`).
 - **Writes are off unless you turn them on.** `LINKEDIN_ENABLE_WRITES=1`, per
   process. A fresh clone cannot write to LinkedIn at all.
 - **Every write is two calls.** The first performs nothing and hands you a
@@ -273,6 +288,7 @@ whole file rather than as a side effect of a wave that touched one tool.
 | `linkedin_server_info` | The boundary, the rate settings and the launch flags, without reading the source. |
 | `linkedin_surface_census` | **An instrument for extending this server, not a job-search tool** -- its own docstring leads with that, and no answer about finding, comparing or tracking a job is in here. It measures what controls one page carries, so a capability this server has never built can be costed from what the page really holds instead of from a guessed selector found to be wrong at the moment it would fire. It takes a KEY and never a url, from a fixed set of five: `feed`, `profile`, `profile_edit_intro`, `settings`, `settings_dark_mode`. One page load, and it clicks nothing. It reports SHAPES and never names, so it identifies no member. Absent means UNKNOWN, never zero -- this server does not scroll, so a count describes the first render and nothing below the fold. A control being present is not evidence that using it is safe. Notifications, the network page and messaging are deliberately not offered: loading them costs a badge or opens somebody's conversation, and a census is not worth a side effect. |
 | `linkedin_profile_editor_fields` | **The second instrument, and the one tool here that publishes control NAMES.** It names the controls inside the intro editor on your own profile -- which `linkedin_surface_census` will not do, because the census reports shapes and returns `<opaque>` for any name failing its length or character gate. That gate is what makes the census safe to point at a page full of strangers, and it is why `linkedin_update_profile_field` cannot name a field to type into. This tool relaxes it on ONE ground and establishes that ground per call: it loads `/in/me/`, requires LinkedIn's own `isSelfProfile=true` on the landed url, loads the intro editor, and requires the same member segment on both -- and if either half fails it returns a refusal carrying no field data at all, so a refusal can never be read as "there are none". The container is found structurally, as the nearest dialog ancestor of the control named Save, never by an index; two such controls or none is a refusal rather than a guess. It takes NO ARGUMENT, so no caller can aim it at another page. Two page loads, and it clicks nothing. **LABELS, NEVER VALUES** -- a label is "First name", a value is your first name, and no value and no href leaves the page. Your member slug is compared and discarded: it is in no part of the answer. |
+| `linkedin_own_item_link` | **The share link LinkedIn gives out for ONE of your own posts**, by its activity id (which `linkedin_my_activity_items` returns). It opens the post, opens the post's own control menu, and presses "Copy link to post" -- ONLY if the same menu also offers "Delete post" or "Edit post", which LinkedIn shows a post's author alone; otherwise it refuses `not_his_post`. Just before the press, the page's clipboard calls are captured in this server's own tab, so the link comes back here instead of replacing what you had copied -- for every route the page looks up when it copies. A reference the page took earlier is not captured, and the answer then reads `copied: false`. By default it returns the link's SHAPE (https, LinkedIn host, path kind, whether it carries this id); `include_link=True` returns the link itself, which can carry your profile's vanity name. |
 | `linkedin_my_activity_items` | **The item keys, for your own posts only** -- which nothing else here returns, and which is why `linkedin_comment_on_item` and `linkedin_react_to_item` are registered and refusing: neither was ever blocked by the read boundary or by the click anchor, they simply had nothing to aim at. `linkedin_surface_census` cannot supply one by construction, since it substitutes every urn out before it counts, and the feed carries zero item permalinks. It reads `/in/me/` and takes NO ARGUMENT, so no caller can aim it at another page. **Authorship is established, not inferred from where an item sits**, and it takes all three of: LinkedIn's own `isSelfProfile=true` on the landed url; one single author name across every item overflow control on the page, so a rail carrying somebody else's item is refused outright; and that name standing in a prefix relation to the page's own `h1`. If any of the three fails there is no `items` key at all, so a refusal can never be read as "you have no posts". **No name ever leaves the page** -- the comparison happens inside the document and only booleans come back. A urn is published only if it matches the exact `urn:li:<type>:<digits>` shape and sits inside an item root that itself carries an overflow control; anything else is counted and dropped. **The output is real identifiers**: do not paste one into a tracked file in this repository, which is public and swept for exactly that shape. |
 
 ## The six that write
@@ -854,7 +870,7 @@ linkedin_server/
   cdp_bridge.py              the recovery path: attach to a running Chrome
   dom.py                     the read-only harvesters and the control readers
   shape.py                   pure parsers and the result envelope
-  server.py                  the forty-nine tools
+  server.py                  the fifty tools
   errors.py
 tests/                       1393 tests, no network, no account
   fixtures/                  frozen LinkedIn markup, scrubbed

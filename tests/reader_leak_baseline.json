@@ -99,6 +99,8 @@
     "server:_read_connection_rows": "returns_text",
     "server:_read_save_control_state": "returns_text",
     "server:_resolve_own_item_permalink": "not_driven:raises BrowserUnavailableError",
+    "share_link:_clipboard": "not_driven:raises ValueError",
+    "share_link:copy_own_post_link": "clean",
     "view_switch:_apply_positions": "clean",
     "view_switch:_option_positions": "clean",
     "view_switch:_pill_positions": "clean",

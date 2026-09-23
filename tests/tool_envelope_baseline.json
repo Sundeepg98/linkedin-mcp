@@ -28,6 +28,7 @@
     "linkedin_notifications": "clean",
     "linkedin_notify_cost_precondition": "returns_text:the plant reached a published payload",
     "linkedin_open_messaging": "clean",
+    "linkedin_own_item_link": "not_driven:never read the page",
     "linkedin_page_plugin_snippet": "not_driven:never read the page",
     "linkedin_people_search_shape": "clean",
     "linkedin_premium_job_collection": "clean",

@@ -667,3 +667,139 @@ lane's reach: the badge reading 0**, which happens when he opens Messaging
 himself. The next live session's first key should be `badge,m43,m33`: on a
 0 it fires `M M43`, captures the landing (the capture build (c) needs), and
 fires `M M33` with the `starred` pill -- three loads.
+
+### Entry 10 -- 23:30-00:10, build (d): the copy link of his own post, offline, 0 loads
+
+**Built by a child, bounced once, then changed again in the lead's review.**
+`linkedin_server/share_link.py`, `tests/test_share_link.py` (61 tests),
+`tests/fixtures/synthetic/own_post_menu.html` (synthetic; the post id is
+four digits). Served by a new tool, `linkedin_own_item_link(activity_id,
+include_link=False)`: it loads his post's permalink (the admitted
+`/feed/update/urn:li:activity:<digits>/`), prices the presses by `off_state`
+on that page, runs `share_link.copy_own_post_link`, and returns the link's
+SHAPE -- https, LinkedIn host, path kind, whether it carries this id. The
+link itself only with `include_link=True`, since it can carry his vanity
+name; the session harness never asks for it.
+
+**What it presses, in order, and what stops it.** The control-menu trigger,
+found by aria-label prefix among `main [aria-expanded]` (exactly one required;
+Entry 4 measured 1 of 4). Press's own four pre-press checks, called BY NAME
+(address, shape, scope, basis) as `reveal` and `view_switch` call them.
+Counters read before any click. **The owner check is read off the SAME menu,
+before the copy item is pressed:** "edit post" or "delete post" must be drawn,
+and LinkedIn draws them for a post's author alone. The copy item is matched by
+EXACT normalised equality, among eight items of which five are writes. The
+capture is installed just before the copy press. Escape only if the menu is
+still open. Counters and closure verified at the end.
+
+**Three sanctioned lines, one per kind** (`readonly.SANCTIONED_MUTATIONS`
+entries 10-12): click `_activate`, evaluate `_clipboard`, press
+`copy_own_post_link`. The package scanner reports exactly those three and 0
+unsanctioned -- read by the lead from disk, not taken from the child's report.
+
+**THE FIRST BOUNCE.** The child had imported `press.evaluate` under an alias:
+a pure function whose name collides with the scanner's `evaluate` pattern,
+renamed so the scanner could not see the call. Rejected as scanner evasion,
+whatever the call's own safety; the four component checks are now called by
+their own names. Its two clicks and two evaluates became two drain points and
+one script with two modes.
+
+**WHAT THE LEAD'S REVIEW CHANGED, and why each mattered for a one-shot live
+fire:**
+
+1. **The clipboard claim was stated six times and is false of one route.**
+   "His system clipboard is never touched" -- in the tool docstring, the
+   server headline, the README twice, a test comment and the mutation
+   entry's argument. A reference to the async clipboard API that the page
+   took BEFORE the capture was installed bypasses the replacement, and that
+   API fires no copy event, so no listener sees it either. Every one of the
+   six now names the gap, and a fixture variant pins the answer: `copied`
+   False, no link, no shape -- never a fabricated link, and no claim about
+   his clipboard either way.
+2. **The copy listener's comment overclaimed too.** It said the listener stops
+   code holding earlier references. It cannot for the async API, and in
+   Chromium a cancelled copy event writes whatever the page's own copy
+   handlers put into `clipboardData`. Reworded: it narrows that route and does
+   not close it.
+3. **The read now waits for the first text** -- woken by the write itself,
+   bounded at 3000 ms. A page that copies after an `await` of its own, and any
+   `ClipboardItem` write (async by nature), would otherwise have been read as
+   NOT copied: the fire would have spent its load and reported a miss that
+   was not one.
+4. **`write` keeps the `text/plain` part of each item.** The child kept a
+   placeholder ("[items]"), which the shape reader would have reported as a
+   non-link. An item carrying no text is kept as an empty string: counted in
+   `captures`, never promoted to `copied` or a link.
+5. **A refusal after the menu opened now carries `closure`** -- the menu was
+   opened, so the refusal says whether it was left as found.
+6. **The fixture never calls an unpatched clipboard function.** It decides
+   "unpatched" by identity and then counts and stops. Before, a planted
+   defect that skipped the hook made the fixture call the real `writeText` in
+   the test browser.
+
+**Red-proofs, each plant alone in a scratch copy, restored byte-for-byte.**
+The child's eight, re-anchored after the rework: owner check skipped (1 red),
+exact match loosened to `startswith` (1), hook not installed (4), Escape
+skipped (7), counters not compared (1), `\d` for `[0-9]` (2), a second
+caller of `_activate` (1), the mode not validated (2). The lead's eight:
+
+    plant                                               red  caught by
+    P9  the read does not wait for a late copy           2   the late copy; the ClipboardItem copy
+    P10 write keeps a placeholder, not the item's text   1   the ClipboardItem copy
+    P11 an empty kept text promoted to a link            1   the write with no text part
+    P12 a refusal after the menu opened drops closure    2   the non-owner refusal, twice
+    P13 Escape pressed whether or not the menu is open   1   the menu that closes itself
+    P14 empty captures dropped before they are counted   1   the write with no text part
+    P15 an empty box falls back to the page's own url    2   the captured reference; no text part
+    P16 the script's wait drifts from READ_WAIT_MS       3   the pin, and both shortened waits
+
+Baseline 61 passed; restored 61 passed.
+
+---
+
+## THE ROWS, ONE LINE EACH
+
+    queue  row      outcome           the reason, or the evidence (entry)
+    1      P G6     PROVEN            per_post readable, 2 items; totals = sums of lists (2)
+    2      M M43    NOT FIRED         messaging badge read 1 at 22:14 and 23:26 (2, 9)
+    2      M M33    NOT FIRED         the same reading (2, 9)
+    3      N 20     FIRED, NOT SHOWN  10 notifications, none invitation-kind (2)
+    3      N 45     FIRED, NOT SHOWN  10 notifications, none follow-kind (2)
+    4      M M49    NOT BUILT         the thread page it reads was never landed on (9)
+    5      N 134    PROVEN            6 viewers under the filter; restored, twice (7)
+    5      P O3     PROVEN            filters by the switch; insights revealed and read (8)
+    6      M C72    [pending]
+    --     M C85    NEEDS-TARGET      no poll among the 8 items his rail draws (2)
+    7      P A8 A11 A13 A17 A19 A21
+                    NOT SAVED         the dialog draws no notify control (5); zero writes
+    8      P A25 P L1 P L8 M C48 M C38
+                    CAPTURED          state unchanged; the captures await readers (5)
+    9      lane Y   CAPTURED          all 8 page items of its list (2, 4, 5)
+
+## INSTRUMENTS -- register candidates, and what is disposable
+
+Not appended to `_audit/INSTRUMENTS.md` on this branch: it is append-ordered
+and shared, and several lanes are writing it; an append here is a merge
+conflict. Each candidate names what killed it, as the register requires; the
+orchestrator appends them at merge or declines them.
+
+    candidate                                    shown failing by
+    scripts/_probe_live_lane_session_1.py        H1-H7 in a scratch copy (Entries 1, 2): the ceiling
+      the session ledger around BROWSER.goto     checked after the navigation, a refused address
+      (40-load ceiling refused BEFORE a load,    counted, the messaging rule dropped, strings printed,
+      20 s across processes), the badge-before-  the gap not waited, the budget off by one, and the
+      messaging rule, the shape printer          first run's own leak (urn keys printed) restored
+    linkedin_server/reveal.py                    R1-R6 (Entry 6)
+    linkedin_server/view_switch.py               V1-V7 (Entry 6), including a restore that never
+                                                 compares the view
+    linkedin_server/profile_views_more.py        M1-M5 (Entry 8)
+
+**DISPOSABLE, in the session scratchpad, never tracked:** the planted-defect
+runners, the child-free tree copier, the offline readers of captures
+(badges, popovers, options, switches, the post menu, the revealed sections),
+the census-paragraph inserter and the address-table row editor, and the
+correction-pair lister. The one method worth keeping from them is written
+in the entries: **read a capture offline in a local headless Chromium with
+every request aborted and LinkedIn's script and policy tags removed**, and
+check it against a live reading first (Entry 2's control: 20 live, 20
+offline) before trusting what it says about anything else.

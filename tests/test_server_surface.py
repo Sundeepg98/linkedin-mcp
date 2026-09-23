@@ -1,4 +1,4 @@
-"""The tool surface: forty-nine tools, thirty-seven of which do not write.
+"""The tool surface: fifty tools, thirty-eight of which do not write.
 
 **AND THIS LINE IS NOW DERIVED, NOT MAINTAINED, 2026-09-20.** It had gone stale
 a THIRD time -- "forty-four tools, thirty-two of which do not write" against a
@@ -267,6 +267,15 @@ EXPECTED_TOOLS = {
     # the page carries no table, and the collections reader returns rail names
     # and counts. `readonly.SANCTIONED_MUTATIONS` is unchanged by both.
     "linkedin_creator_analytics",
+    # THE FIFTIETH, 2026-09-23, the live lane: linkedin_own_item_link, the
+    # share link of ONE of HIS OWN posts through the post's own "Copy link to
+    # post". It is a READ by effect and it PRESSES two controls -- the menu
+    # and the copy item -- each through a drain point sanctioned in
+    # readonly.SANCTIONED_MUTATIONS; ownership is read off the menu ("Delete
+    # post" offered) and the page's clipboard calls are captured in this
+    # server's own tab instead of reaching his clipboard. The write
+    # count does not move.
+    "linkedin_own_item_link",
     "linkedin_job_collections",
     "linkedin_my_applications",
     "linkedin_saved_jobs",
@@ -698,7 +707,8 @@ async def test_the_surface_is_exactly_the_fortynine_tools(tools):
     # address was refused by the boundary until that commit and was admitted
     # only together with the shaper in front of it, which is condition 1 of
     # the ruling at 09f9961 section 6. This test's NAME moved with it.
-    assert len(tools) == 49
+    # FIFTY FROM 2026-09-23: linkedin_own_item_link (see EXPECTED_TOOLS).
+    assert len(tools) == 50
     # And the split is asserted, not just the total. A future tool arriving as
     # a write would otherwise only have to bump a number.
     #
@@ -837,7 +847,8 @@ async def test_the_surface_is_exactly_the_fortynine_tools(tools):
     # matters. Neither adds an entry to readonly.SANCTIONED_MUTATIONS; each
     # opens an address that was already on the read allowlist and that no
     # registered, parameterless tool could reach.
-    assert len(set(tools) - SANCTIONED_WRITE_TOOLS) == 37
+    # THIRTY-EIGHT FROM 2026-09-23: linkedin_own_item_link reads.
+    assert len(set(tools) - SANCTIONED_WRITE_TOOLS) == 38
 
 
 def test_the_read_that_was_nearly_named_a_write():

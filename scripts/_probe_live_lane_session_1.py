@@ -111,6 +111,7 @@ CAPTURE_URLS: dict[str, str] = {
 KEYS: tuple[str, ...] = (
     "per_post", "badge", "m43", "m33", "notifications", "activity", "pv_capture",
     "post_capture", "editor_fields", "people_search", "pv_switch", "pv_verify",
+    "own_link",
 ) + tuple(L1_KEYS) + tuple(CAPTURE_URLS)
 
 #: ``pv_switch``: the shipped tool with the view switch and the decided reveal.
@@ -157,7 +158,7 @@ M33_FILTER = "starred"
 MAX_LOADS: dict[str, int] = {
     "per_post": 1, "badge": 1, "m43": 1, "m33": 1, "notifications": 1, "activity": 2,
     "pv_capture": 1, "post_capture": 1, "editor_fields": 2, "people_search": 1,
-    "pv_switch": 2, "pv_verify": 2,
+    "pv_switch": 2, "pv_verify": 2, "own_link": 1,
     **{k: 1 for k in L1_KEYS}, **{k: 1 for k in CAPTURE_URLS},
 }
 
@@ -488,6 +489,15 @@ async def _call(key: str) -> dict[str, Any]:
             limit=10, view_switch=PV_SWITCH_KEY, show_more_analytics=True)
     if key == "pv_verify":
         return await server.linkedin_who_viewed_me(limit=10)
+    if key == "own_link":
+        # THE ID IS HIS OWN, read in-process from the activity raw (authorship
+        # established) and handed to the tool as its argument; never printed.
+        raw_path = STATE / "activity.json"
+        own_digits = newest_own_activity_digits(
+            json.loads(raw_path.read_text(encoding="utf-8")) if raw_path.exists() else {})
+        if own_digits is None:
+            raise _Anomaly("no_own_activity_id", key)
+        return await server.linkedin_own_item_link(activity_id=own_digits)
     raise ValueError("no tool for key " + key)
 
 
