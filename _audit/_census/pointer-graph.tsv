@@ -1,17 +1,17 @@
 dependent	donor	read_distance	donor_kind	dependent_state	slice	dependent_reason_head
-J 51	J 50	1	US-RULING	XR	jobs.md	same allowlist and same sentence
-J 52	J 50	2	US-RULING	XR	jobs.md	same allowlist and same sentence
-J 61	J 60	1	US-RULING	XR	jobs.md	same gate; a screening screen is an advance cont
-J 62	J 60	2	US-RULING	XR	jobs.md	same gate
-J 63	J 60	3	US-RULING	XR	jobs.md	same gate
-J 64	J 60	4	US-RULING	XR	jobs.md	same gate
-J 65	J 60	5	US-RULING	XR	jobs.md	same gate
-J 67	J 66	1	US-RULING	XR	jobs.md	same reason: off-domain
-J 75	J 74	1	US-BOUNDARY+US-RULING	XR	jobs.md	same settings-family refusal
-J 76	J 74	2	US-BOUNDARY+US-RULING	XR	jobs.md	same settings-family refusal
-J 77	J 74	3	US-BOUNDARY+US-RULING	XR	jobs.md	same settings-family refusal
-J 90	J 89	1	US-RULING	XR	jobs.md	same spec; `server.py:3652` -- "none of those an
-J 91	J 89	2	US-RULING	XR	jobs.md	same spec
+J 51	J 50	1	US-BOUNDARY|US-RULING	GAP	jobs.md	same allowlist and same sentence **RETURNED TO G
+J 52	J 50	2	US-BOUNDARY|US-RULING	GAP	jobs.md	same allowlist and same sentence **RETURNED TO G
+J 61	J 60	1	US-RULING	GAP	jobs.md	same gate; a screening screen is an advance cont
+J 62	J 60	2	US-RULING	GAP	jobs.md	same gate **RETURNED TO GAP 2026-09-23 BY LANE R
+J 63	J 60	3	US-RULING	GAP	jobs.md	same gate **RETURNED TO GAP 2026-09-23 BY LANE R
+J 64	J 60	4	US-RULING	GAP	jobs.md	same gate **RETURNED TO GAP 2026-09-23 BY LANE R
+J 65	J 60	5	US-RULING	GAP	jobs.md	same gate **RETURNED TO GAP 2026-09-23 BY LANE R
+J 67	J 66	1	ACCOUNT-FACT+US-RULING	XR	jobs.md	same reason: off-domain **KEPT OUT OF SCOPE 2026
+J 75	J 74	1	US-BOUNDARY|US-RULING	GAP	jobs.md	same settings-family refusal **RETURNED TO GAP 2
+J 76	J 74	2	US-BOUNDARY|US-RULING	GAP	jobs.md	same settings-family refusal **RETURNED TO GAP 2
+J 77	J 74	3	US-BOUNDARY|US-RULING	GAP	jobs.md	same settings-family refusal **RETURNED TO GAP 2
+J 90	J 89	1	US-BOUNDARY|US-RULING	GAP	jobs.md	same spec; `server.py:3652` -- "none of those an
+J 91	J 89	2	US-BOUNDARY|US-RULING	GAP	jobs.md	same spec **RETURNED TO GAP 2026-09-23 BY LANE R
 M M2	M M1	1	UNCLEAR	COVERED-CANNOT-DELIVER	messaging-and-content.md	same tool, same gate; additionally spends a mete
 M M8	M M7	1	-	GAP	messaging-and-content.md	same
 M M15	M M14	1	US-RULING	GAP	messaging-and-content.md	same mutation class  **THE STATED REASON WENT ST
@@ -19,18 +19,18 @@ M M18	M M17	1	-	GAP	messaging-and-content.md	same mutation class as M14  **THE S
 M M28	M M27	1	-	GAP	messaging-and-content.md	same  **THE LIVE ZERO REPRODUCES OFFLINE, WITH I
 M C4	M C3	1	US-BOUNDARY|US-RULING	GAP	messaging-and-content.md	same  **THE STATED REASON WENT STALE AND THE STA
 M C5	M C3	2	US-BOUNDARY|US-RULING	GAP	messaging-and-content.md	same  **THE STATED REASON WENT STALE AND THE STA
-M C14	M C13	1	US-RULING	EXCLUDED-RULED	messaging-and-content.md	same measurement
-M C15	M C13	2	US-RULING	EXCLUDED-RULED	messaging-and-content.md	same
-M C16	M C13	3	US-RULING	EXCLUDED-RULED	messaging-and-content.md	same
+M C14	M C13	1	US-RULING	GAP	messaging-and-content.md	same measurement **RETURNED TO GAP 2026-09-23 BY
+M C15	M C13	2	US-RULING	GAP	messaging-and-content.md	same **RETURNED TO GAP 2026-09-23 BY LANE R (202
+M C16	M C13	3	US-RULING	GAP	messaging-and-content.md	same **RETURNED TO GAP 2026-09-23 BY LANE R (202
 M C17	M C13	4	US-RULING	EXCLUDED-RULED	messaging-and-content.md	same, plus `delete_or_withdraw_anything`
-M C21	M C20	1	ACCOUNT-FACT+US-RULING	EXCLUDED-RULED	messaging-and-content.md	same entry
+M C21	M C20	1	ACCOUNT-FACT|US-RULING	GAP	messaging-and-content.md	same entry **RETURNED TO GAP 2026-09-23 BY LANE 
 M C24	M C23	1	-	GAP	messaging-and-content.md	same menu
 M C37	M C36	1	US-BOUNDARY|US-RULING	GAP	messaging-and-content.md	same  **COST CORRECTED 2026-09-19 with C36; the 
 M C51	M C50	1	-	GAP	messaging-and-content.md	same
 M C62	M C61	1	US-BOUNDARY|US-RULING	EXCLUDED-RULED	messaging-and-content.md	same; `/withdraw` is a forbidden substring, whic
 M C63	M C61	2	US-BOUNDARY|US-RULING	GAP	messaging-and-content.md	same
 M C65	M C64	1	-	GAP	messaging-and-content.md	same
-M C66	M C64	2	-	EXCLUDED-RULED	messaging-and-content.md	same  **RETIRED 2026-09-19 on the MENTION/TAG AC
+M C66	M C64	2	-	GAP	messaging-and-content.md	same  **RETIRED 2026-09-19 on the MENTION/TAG AC
 N 61	N 59	2	-	GAP	network.md	Same uncertainty
 N 100	N 99	1	US-BOUNDARY	GAP	network.md	Same -- **and this cell is DELIBERATELY STILL A 
 P A5	P A4	1	US-RULING	COVERED-PROVEN	profile.md	same live reading
@@ -38,31 +38,31 @@ P A6	P A4	2	US-RULING	COVERED-CANNOT-DELIVER	profile.md	same measurement
 P A27	P A26	1	-	GAP	profile.md	same. **There is no address field** -- `a565128`
 P A28	P A26	2	-	GAP	profile.md	same panel
 P A29	P A26	3	-	GAP	profile.md	same panel
-P B3	P B2	1	US-RULING	EXCLUDED-RULED	profile.md	same ruling. `a541850` names the pop-up controls
-P B5	P B4	1	US-BOUNDARY+US-RULING	EXCLUDED-RULED	profile.md	same ruling
-P C5	P C4	1	US-BOUNDARY+US-RULING	EXCLUDED-RULED	profile.md	same page **EXCLUDED-RULED 2026-09-20 BY CO-LOCA
-P C6	P C4	2	US-BOUNDARY+US-RULING	EXCLUDED-RULED	profile.md	same page **EXCLUDED-RULED 2026-09-20 BY CO-LOCA
-P D10	P D9	1	US-RULING	COVERED-CANNOT-DELIVER	profile.md	same shape as D4: `education_entries: None` decl
-P D15	P D14	1	US-RULING+WORLD-FACT	EXCLUDED-RULED	profile.md	same. One official fact only: the Project URL fi
-P D16	P D14	2	US-RULING+WORLD-FACT	EXCLUDED-RULED	profile.md	same
-P D17	P D14	3	US-RULING+WORLD-FACT	EXCLUDED-RULED	profile.md	same
+P B3	P B2	1	US-RULING	GAP	profile.md	same ruling. `a541850` names the pop-up controls
+P B5	P B4	1	US-BOUNDARY|US-RULING	GAP	profile.md	same ruling **RETURNED TO GAP 2026-09-23 BY LANE
+P C5	P C4	1	US-BOUNDARY|US-RULING	GAP	profile.md	same page **EXCLUDED-RULED 2026-09-20 BY CO-LOCA
+P C6	P C4	2	US-BOUNDARY|US-RULING	GAP	profile.md	same page **EXCLUDED-RULED 2026-09-20 BY CO-LOCA
+P D10	P D9	1	US-BOUNDARY|US-RULING	COVERED-CANNOT-DELIVER	profile.md	same shape as D4: `education_entries: None` decl
+P D15	P D14	1	US-BOUNDARY|US-RULING|WORLD-FACT	GAP	profile.md	same. One official fact only: the Project URL fi
+P D16	P D14	2	US-BOUNDARY|US-RULING|WORLD-FACT	GAP	profile.md	same **RETURNED TO GAP 2026-09-23 BY LANE R (202
+P D17	P D14	3	US-BOUNDARY|US-RULING|WORLD-FACT	GAP	profile.md	same **RETURNED TO GAP 2026-09-23 BY LANE R (202
 P E5	P E4	1	ACCOUNT-FACT+US-RULING	EXCLUDED-RULED	profile.md	same key, plus `delete_or_withdraw_anything`
-P F4	P F3	1	US-RULING	EXCLUDED-RULED	profile.md	same key, same caveat
-P G3	P G1	2	-	EXCLUDED-RULED	profile.md	same ruling
-P I3	P I2	1	US-RULING	EXCLUDED-RULED	profile.md	same, plus the green-frame residue clause. Help 
-P I5	P I4	1	UNCLEAR	EXCLUDED-RULED	profile.md	same
-P I6	P I4	2	UNCLEAR	EXCLUDED-RULED	profile.md	same
-P I7	P I4	3	UNCLEAR	EXCLUDED-RULED	profile.md	same
-P I8	P I4	4	UNCLEAR	EXCLUDED-RULED	profile.md	same
-P I9	P I4	5	UNCLEAR	EXCLUDED-RULED	profile.md	same
-P I10	P I4	6	UNCLEAR	EXCLUDED-RULED	profile.md	same
-P I11	P I4	7	UNCLEAR	EXCLUDED-RULED	profile.md	same, plus `delete_or_withdraw_anything`
+P F4	P F3	1	US-RULING	GAP	profile.md	same key, same caveat **RETURNED TO GAP 2026-09-
+P G3	P G1	2	-	GAP	profile.md	same ruling **RETURNED TO GAP 2026-09-23 BY LANE
+P I3	P I2	1	US-BOUNDARY|US-RULING	GAP	profile.md	same, plus the green-frame residue clause. Help 
+P I5	P I4	1	US-BOUNDARY|US-RULING	GAP	profile.md	same **RETURNED TO GAP 2026-09-23 BY LANE R (202
+P I6	P I4	2	US-BOUNDARY|US-RULING	GAP	profile.md	same **RETURNED TO GAP 2026-09-23 BY LANE R (202
+P I7	P I4	3	US-BOUNDARY|US-RULING	GAP	profile.md	same **RETURNED TO GAP 2026-09-23 BY LANE R (202
+P I8	P I4	4	US-BOUNDARY|US-RULING	GAP	profile.md	same **RETURNED TO GAP 2026-09-23 BY LANE R (202
+P I9	P I4	5	US-BOUNDARY|US-RULING	GAP	profile.md	same **RETURNED TO GAP 2026-09-23 BY LANE R (202
+P I10	P I4	6	US-BOUNDARY|US-RULING	GAP	profile.md	same **RETURNED TO GAP 2026-09-23 BY LANE R (202
+P I11	P I4	7	US-BOUNDARY|US-RULING	EXCLUDED-RULED	profile.md	same, plus `delete_or_withdraw_anything` **KEPT 
 P J2	P J1	1	-	GAP	profile.md	same
 P J3	P J1	2	-	GAP	profile.md	same
-P M2	P M1	1	US-BOUNDARY+US-RULING	EXCLUDED-RULED	profile.md	same address, same entry
-P M3	P M1	2	US-BOUNDARY+US-RULING	EXCLUDED-RULED	profile.md	same address, plus `delete_or_withdraw_anything`
-P M4	P M1	3	US-BOUNDARY+US-RULING	EXCLUDED-RULED	profile.md	same address
-P M5	P M1	4	US-BOUNDARY+US-RULING	EXCLUDED-RULED	profile.md	same address
-P M6	P M1	5	US-BOUNDARY+US-RULING	EXCLUDED-RULED	profile.md	same address
-P M7	P M1	6	US-BOUNDARY+US-RULING	EXCLUDED-RULED	profile.md	same address
+P M2	P M1	1	US-BOUNDARY|US-RULING	GAP	profile.md	same address, same entry **RETURNED TO GAP 2026-
+P M3	P M1	2	US-BOUNDARY|US-RULING	EXCLUDED-RULED	profile.md	same address, plus `delete_or_withdraw_anything`
+P M4	P M1	3	US-BOUNDARY|US-RULING	GAP	profile.md	same address **RETURNED TO GAP 2026-09-23 BY LAN
+P M5	P M1	4	US-BOUNDARY|US-RULING	GAP	profile.md	same address **RETURNED TO GAP 2026-09-23 BY LAN
+P M6	P M1	5	US-BOUNDARY|US-RULING	GAP	profile.md	same address **RETURNED TO GAP 2026-09-23 BY LAN
+P M7	P M1	6	US-BOUNDARY|US-RULING	GAP	profile.md	same address **RETURNED TO GAP 2026-09-23 BY LAN
 P N31	P N30	1	ACCOUNT-FACT+WORLD-FACT	EXCLUDED-RULED	profile.md	same article, different form slug (`/help/linked

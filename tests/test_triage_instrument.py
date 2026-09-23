@@ -43,12 +43,52 @@ import triage_messaging_gap_rows as triage  # noqa: E402
 SLICE = "M"
 
 
+def _returned(rows, blockers):
+    return triage.returned_outside_ledger(SLICE, rows, blockers,
+                                          triage._cells_by_row(SLICE))
+
+
+def _joined_unmarked(rows, blockers):
+    """Rows the map holds and whose cell carries no returned-row marker -- the
+    only rows a planted hole can leave unjoined, since a marked row would be
+    classed instead. Chosen from the tree, so the plant cannot miss."""
+    cells = triage._cells_by_row(SLICE)
+    return [row_id for row_id, _ in rows
+            if "%s %s" % (SLICE, row_id) in blockers
+            and not triage.RETURNED_MARKER.search(" | ".join(cells[row_id]))]
+
+
 def test_the_slice_is_enumerated_and_every_row_joins():
-    """THE POSITIVE CONTROL."""
+    """THE POSITIVE CONTROL: every GAP row joins the map, or is a returned row
+    that names its blocker in its own cell (lane R, 2026-09-23)."""
     rows = triage._gap_rows(SLICE)
     assert rows, "no GAP rows enumerated -- the parse found nothing"
     blockers = rcb.load_blockers()
-    assert triage.unjoined_rows(SLICE, rows, blockers) == []
+    assert triage.unjoined_rows(SLICE, rows, blockers, _returned(rows, blockers)) == []
+
+
+def test_the_returned_class_holds_only_marked_rows_outside_the_map():
+    """The own class is DERIVED from the cell, never typed: every member is off
+    the map and carries the marker, and it is not empty on this tree."""
+    rows = triage._gap_rows(SLICE)
+    blockers = rcb.load_blockers()
+    cells = triage._cells_by_row(SLICE)
+    returned = _returned(rows, blockers)
+    assert returned, "no returned row found -- the marker reader reads nothing"
+    for row_id in returned:
+        assert "%s %s" % (SLICE, row_id) not in blockers, row_id
+        assert triage.RETURNED_MARKER.search(" | ".join(cells[row_id])), row_id
+
+
+def test_an_unmarked_row_off_the_map_is_still_refused():
+    """SHOWN FAILING: the class cannot absorb a genuinely missing row. A row
+    removed from the map that carries no marker must come back unjoined."""
+    rows = triage._gap_rows(SLICE)
+    blockers = dict(rcb.load_blockers())
+    victim = _joined_unmarked(rows, blockers)[0]
+    del blockers["%s %s" % (SLICE, victim)]
+    assert victim not in _returned(rows, blockers)
+    assert triage.unjoined_rows(SLICE, rows, blockers, _returned(rows, blockers)) == [victim]
 
 
 def test_the_counter_agreement_control_passes_on_the_real_tree():
@@ -66,22 +106,25 @@ def test_the_counter_agreement_control_can_fail():
 
 
 def test_the_join_coverage_control_can_fail():
-    """SHOWN FAILING. Punch one hole in the blocker map and it must be named."""
+    """SHOWN FAILING. Punch one hole in the blocker map and it must be named.
+
+    The victim is a JOINED row (it was `rows[0]` until lane R's returns put
+    rows off the map at the head of the slice, where a delete raises)."""
     rows = triage._gap_rows(SLICE)
     blockers = dict(rcb.load_blockers())
-    victim = rows[0][0]
+    victim = _joined_unmarked(rows, blockers)[0]
     del blockers["%s %s" % (SLICE, victim)]
-    assert triage.unjoined_rows(SLICE, rows, blockers) == [victim]
+    assert triage.unjoined_rows(SLICE, rows, blockers, _returned(rows, blockers)) == [victim]
 
 
 def test_the_join_coverage_control_names_every_hole_not_just_the_first():
     """A control that stops at the first miss under-reports the damage."""
     rows = triage._gap_rows(SLICE)
     blockers = dict(rcb.load_blockers())
-    victims = sorted(row_id for row_id, _ in rows[:3])
+    victims = sorted(_joined_unmarked(rows, blockers)[:3])
     for victim in victims:
         del blockers["%s %s" % (SLICE, victim)]
-    assert triage.unjoined_rows(SLICE, rows, blockers) == victims
+    assert triage.unjoined_rows(SLICE, rows, blockers, _returned(rows, blockers)) == victims
 
 
 def test_the_direction_reader_control_is_the_inherited_one():
@@ -154,14 +197,22 @@ AFTER_THE_WRITE_CEILING_WAVE = (77, {"R": 10, "W": 66, "R+W": 1})
 #: file is the identical shape and has carried ``R+W`` since it was written.
 AFTER_THE_COMPOUND_ROWS_WAVE = (77, {"R": 10, "W": 65, "R+W": 2})
 
-#: AFTER THE LIVE LANE'S MERGE, 2026-09-24, re-derived on the merged tree:
-#: ``C72`` ("Share a post off LinkedIn") -- a READ -- was proven live on his own
-#: post and moved GAP -> COVERED-PROVEN
-#: (``_audit/2026-09-23-live-lane-session-1.md`` Entries 10-12). 77 - 1 = 76,
-#: reads 10 - 1 = 9; writes and read-and-writes UNTOUCHED, because the lane
-#: moved no write. ``_audit/2026-09-20-the-messaging-gap.md`` quotes the
+#: AFTER LANE R, 2026-09-23 (`_audit/2026-09-23-exclusion-returns.md`), which
+#: returned 40 of this slice's exclusions to GAP with each blocker named in
+#: its cell: 77 + 40 = 117. Reads 10 + 3 (`C14`, `C42`, `C43`), read-and-writes
+#: 2 + 1 (`C47`), writes 65 + 36. Fourteen of the forty were not GAP at the
+#: blocker map's freeze and are tallied RETURNED-OUTSIDE-LEDGER; the map is not
+#: grown (the orchestrator's call, delegated, 2026-09-24).
+AFTER_LANE_R = (117, {"R": 13, "W": 101, "R+W": 3})
+
+#: AFTER THE LIVE LANE'S MERGE, 2026-09-24, re-derived on the tree merged over
+#: lane R: ``C72`` ("Share a post off LinkedIn") -- a READ -- was proven live
+#: on his own post and moved GAP -> COVERED-PROVEN
+#: (``_audit/2026-09-23-live-lane-session-1.md`` Entries 10-12). 117 - 1 =
+#: 116, reads 13 - 1 = 12; writes and read-and-writes UNTOUCHED, because the
+#: lane moved no write. ``_audit/2026-09-20-the-messaging-gap.md`` quotes the
 #: wave-start 83, which stays true of that moment and is not edited.
-AFTER_THE_LIVE_LANE = (76, {"R": 9, "W": 65, "R+W": 2})
+AFTER_THE_LIVE_LANE = (116, {"R": 12, "W": 101, "R+W": 3})
 EXPECTED_NOW = AFTER_THE_LIVE_LANE
 
 

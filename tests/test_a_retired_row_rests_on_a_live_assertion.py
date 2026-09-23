@@ -39,6 +39,21 @@ the entire subject here.
   not require any row to be retired -- other rows may rest on the same rule
   for other reasons, and enumerating them is not this file's job.
 
+## LANE R, 2026-09-23: THE SIX ROWS ARE GAP NOW, AND THE BINDING PINS THEIR BLOCKER
+
+All six were returned to GAP on the orchestrator's delegated call
+(``_audit/2026-09-23-exclusion-returns.md`` section 3.6): the operator's typing
+ruling reaches them only through an agent's reading, and
+``MENTION-COMPOSITION-RULING`` permits the mechanism, so whether a mention the
+caller NAMES is text the caller supplied is his question and not a settled
+exclusion. **The assertion still ships and is now each row's NAMED BLOCKER.** So
+the table below requires ``GAP`` rather than ``EXCLUDED-RULED``, and a row must
+name the shipped test in its own cell. The coupling survives in the direction
+that still matters: delete a name from ``FORBIDDEN_PARAMETER_NAMES`` and the
+rows whose blocker it was turn red here, instead of sitting in GAP behind a
+blocker that no longer exists. Emptying the table was not an option: an empty
+parameter set is a skip, and a skip nobody declared fails this repository's CI.
+
 SHOWN FAILING before admission, three ways, each against a COPY so no contended
 file was edited: a state flipped in the census copy (red, naming the row), a
 row id deleted from the census copy (red, naming the row as missing rather
@@ -81,18 +96,18 @@ _ROW = re.compile(r"^\|\s*([CM]\d+)\s*\|[^|]*\|[^|]*\|\s*\*{0,2}([A-Z-]+)\*{0,2}
 #: BECAUSE of that promise, so they may not outlive it.
 RETIRED_ON_A_SHIPPED_ASSERTION: dict[str, tuple[str, str, str]] = {
     "C10": (
-        "EXCLUDED-RULED",
+        "GAP",
         "mentions",
         "a mention in a post is bytes the server inserts into his text at a "
         "position it chooses, which the operator's typing ruling forbids",
     ),
     "C28": (
-        "EXCLUDED-RULED",
+        "GAP",
         "mentions",
         "a mention in a comment is the same act on a shorter surface",
     ),
     "C55": (
-        "EXCLUDED-RULED",
+        "GAP",
         "collaborators",
         "inviting a named collaborator carries a third party's identity into "
         "content this server publishes, and the invitee is notified",
@@ -115,27 +130,36 @@ RETIRED_ON_A_SHIPPED_ASSERTION: dict[str, tuple[str, str, str]] = {
     # rules them out BY ARTICLE ID: they are self-scoped privacy controls
     # governing who may tag HIM, and "nothing above touches them".
     "M23": (
-        "EXCLUDED-RULED",
+        "GAP",
         "mentions",
         "a mention in a group chat is the same composition act as C10 and C28 "
         "on a conversational surface -- an entity the composer inserts, not "
         "text, so typing @Name produces no mention",
     ),
     "C66": (
-        "EXCLUDED-RULED",
+        "GAP",
         "mentions",
         "mentioning group members in a conversation names third parties to "
         "every other member of it, and is the fourth of the four mention rows "
         "the ruling's own document enumerates",
     ),
     "C86": (
-        "EXCLUDED-RULED",
+        "GAP",
         "tagged_people",
         "a coordinate-anchored tag names a third party on media published to "
         "others -- the TAG half of the action class, which is why five of the "
         "thirteen forbidden names are tag spellings",
     ),
 }
+
+
+def _line_of(row: str) -> str:
+    """The raw census line of ``row``, or '' when the row is absent."""
+    for line in _CENSUS.read_text(encoding="utf-8").splitlines():
+        found = _ROW.match(line)
+        if found is not None and found.group(1) == row:
+            return line
+    return ""
 
 
 def _states() -> dict[str, str]:
@@ -184,12 +208,20 @@ def test_the_row_is_present_and_carries_its_retired_state(row: str) -> None:
         "not deleted without amending this table."
     )
     assert states[row] == required, (
-        f"census row {row} reads {states[row]!r}, not {required!r}. It was "
-        f"retired because {why}. If it has been legitimately re-opened, remove "
-        "it from RETIRED_ON_A_SHIPPED_ASSERTION in this file with the reason -- "
-        "a row moved back to GAP while this table still claims it retired is "
-        "how a count starts disagreeing with itself."
+        f"census row {row} reads {states[row]!r}, not {required!r}. It rests on "
+        f"this assertion because {why}. If its state has legitimately moved, "
+        "change it in RETIRED_ON_A_SHIPPED_ASSERTION with the reason -- a row "
+        "whose state and this table disagree is how a count starts disagreeing "
+        "with itself."
     )
+    if required == "GAP":
+        # A GAP row must NAME the blocker this table binds it to, in its own
+        # cell -- the census's convention for a returned row, checked here.
+        line = _line_of(row)
+        assert "test_no_write_tool_names_a_third_party" in line, (
+            f"census row {row} is GAP on this assertion but its cell does not "
+            "name tests/test_no_write_tool_names_a_third_party.py as its blocker"
+        )
 
 
 @pytest.mark.parametrize("row", sorted(RETIRED_ON_A_SHIPPED_ASSERTION))
