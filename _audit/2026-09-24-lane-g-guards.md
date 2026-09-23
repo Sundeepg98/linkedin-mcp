@@ -13,12 +13,20 @@ one.
 
 ## 0. Status log
 
+EVERY TIME HERE IS A READING: the first from `date` at the start, the rest the
+commits' own times from `git log`, and the gate's from the process table. An
+earlier draft of this log carried times estimated from inside the work, one of
+them later than the clock when it was written.
+
     00:30  worktree clean at 9c219c8; the four gaps read off their source records
-    00:45  (b) prototype measured on the real tree
-    01:10  two implementer children launched for (c) and (d), each owning two files
-    01:40  (b) and (c) committed
-    01:55  (d) reviewed and committed; the blocker map regenerated, 0 lines moved
-    02:25  (a) red run: 24 readers launder; repaired; committed
+    01:08  (b) and (c) committed -- (c)'s slot measurement by an implementer child
+    01:12  (d) committed -- built by an implementer child, reviewed here; the
+           blocker map regenerated with the fix: 0 lines moved
+    01:49  (a) committed -- red run 24 readers laundering, 5 after
+    01:57  record, register section 67, generated files at a fixpoint
+    01:58  impact gate launched; killed at 02:28:34 by this lane's own 30-minute
+           timeout, WITHOUT a verdict, while a sibling lane's full-suite gate ran
+           beside it -- see section 6.1
     --     master moved to 001f70b while this lane ran (other lanes merging);
            this lane's gates stay --against 9c219c8, as briefed
 
@@ -51,11 +59,13 @@ ruled text.
 
 The consumers, mapped by instrument over `writes.py`: the four gates the brief
 named -- `_comment_submit_gate`, `_publish_submit_gate`, `_typeahead_gate`,
-`_send_gate` -- each print a `dom.py` reader's `error` into `out['why']`; four more
+`_send_gate` -- each print a `dom.py` reader's `error` into `out['why']`; three more
 functions carry the same fields onward (`_live_control`, `_verify_after`,
-`_read_item_comment_box`, `company_page_follow_verdict`); and
-`server._read_connection_rows` copies `dom.read_recipient_ids`'s `error` into the
-connections census. Fixing at the entry covers every one of them.
+`_read_item_comment_box`); and `server._read_connection_rows` copies
+`dom.read_recipient_ids`'s `error` into the connections census. Fixing at the
+entry covers every one of them. (`company_page_follow_verdict` also carries an
+`error` onward, but its only reader, `dom.read_company_page_follow`, renders no
+exception text -- and it never laundered in the run below.)
 
 ### 1.2 The repair
 
@@ -173,12 +183,19 @@ widened (its parity with the page-text walker holds); the two extra forms live
 in `_accumulations` and are pinned by their own test.
 
 **WHAT IT CANNOT SEE, PRICED.** A page-returning function in ANOTHER module whose
-name the convention misses: an over-approximate whole-tree summary counts 102
-such call sites across 44 callees. A whole-tree complement was built and
-declined: 17.4 s per run, and on this tree its one extra site was a bare-name
-collision between two modules' `_url_for` -- an artifact. The url-proven
-`_SANITISERS` are not honoured by the reader walk. All of it is written beside the
-code.
+name the convention misses: an over-approximate whole-tree summary counts 89
+such call sites across 37 callees under the convention as shipped (a first
+measurement, 102 across 44, was taken before `linkedin_` joined the convention).
+A whole-tree complement was built and declined: 17.4 s per run, and on this
+tree its one extra site was a bare-name collision between two modules'
+`_url_for` -- an artifact. The convention is a name, so it cuts both ways: a url
+BUILDER named `linkedin_*`, or a same-file page-returning function named like a
+common method, would be convicted -- loudly. The url-proven `_SANITISERS` are
+not honoured by the reader walk. All of it is written beside the code.
+
+**THE INDUCTION STEP, RUN RATHER THAN ARGUED.** `scripts/staged_navigation_guard.py
+--paths` over the three declared files and one untouched module: exit 0, "both
+rules agree with their declarations".
 
 **COST.** Reader walk 2.4-2.8 s of CPU over 276 files after a type-dispatch fix
 (4.9 s before it). The whole file, same box: HEAD's version 597 passed in 44.1 s,
@@ -302,3 +319,12 @@ Gates are recorded in section 6.1 as they complete.
                                             1 xfailed -- one failure was the retired
                                             positive control (mended, 1.4), the
                                             other the readiness race (5, item 6)
+    staged navigation guard, fast path     exit 0 on the three declared files + one
+    impact gate --against 9c219c8, run 1   NO VERDICT. 16 changed paths selected 197
+                                            of 234 test files (84%, above the 45%
+                                            line), so it widened to the full suite;
+                                            killed at 02:28:34 by this lane's own
+                                            `timeout 1790` while a sibling lane's
+                                            full-suite gate shared the box. A gate
+                                            killed by its caller is not a red and not
+                                            a green, and is not counted as either.

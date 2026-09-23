@@ -424,10 +424,16 @@ def _url_arg(call: ast.Call):
 #
 # WHAT IT DOES NOT SEE, said rather than implied. A page-returning function in
 # another module whose name the convention does not match: an over-approximate
-# whole-tree summary counts 102 such call sites across 44 callees. A whole-tree
-# complement was built and priced before it was declined -- 17.4 s per run,
-# and on this tree it found ONE extra site, a bare-name collision between two
-# modules' ``_url_for``, i.e. an artifact. Sanitisers are NOT honoured here:
+# whole-tree summary counts 89 such call sites across 37 callees under the
+# convention as shipped. A whole-tree complement was built and priced before
+# it was declined -- 17.4 s per run, and on this tree it found ONE extra site,
+# a bare-name collision between two modules' ``_url_for``, i.e. an artifact.
+# THE CONVENTION IS A NAME, SO IT CUTS BOTH WAYS: a url BUILDER named
+# ``linkedin_*`` would be convicted (none exists; the convention adds no
+# finding on this tree), and a same-file summary matches its callees by bare
+# name, so a page-returning function named like a common method (``get``,
+# ``format``) would make every such call a source. Both fail loudly, never
+# silently. Sanitisers are NOT honoured here:
 # ``_SANITISERS`` were proven against urls, and the sibling page-text rule has
 # already ruled that such a proof does not transfer to page text. A
 # comprehension's target leaks into its enclosing scope (over-approximate);
