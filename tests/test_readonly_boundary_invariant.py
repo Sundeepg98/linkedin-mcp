@@ -1221,8 +1221,24 @@ PINNED = (
 #: The pattern-exemption digest is 76d7b10899530d69 with the follower list
 #: and 419e64a3cd92ec7e without it. Computed with this file's `ast_digest`.
 #: ------------------------------------------------------------------------
+#: RE-FROZEN 2026-09-24 (lane G follow-up, item 8), ONE DIGEST MOVED, AND IT
+#: IS A REFUSAL THAT GREW -- NO PERMISSION MOVED:
+#:
+#:     <functions>   d7e1d0922e3af446 -> ff43e832d6f2b685
+#:     every table   unchanged (JS_MUTATION_TOKENS included: no token dropped)
+#:
+#: `scan_js_for_mutations` now also reports a script that REPLACES A BROWSER
+#: API -- an assignment or `delete` on a member reached from a browser global,
+#: any `.prototype` member, `Object.defineProperty` and its relatives. The live
+#: lane found a clipboard-capturing script passing the cannot-mutate test on
+#: tokens alone. Measured over the 58 JavaScript strings in this repository:
+#: zero detections, so no executed script changed verdict; 13 plants caught,
+#: 10 reads of the same globals left alone (`tests/test_readonly.py`).
+#: ATTRIBUTION: HEAD's readonly.py hashes to exactly the prior pin, so this
+#: change is the whole of the move. Seven of eight digests byte-identical.
+#: ------------------------------------------------------------------------
 READONLY_AST_AT_LAST_REFREEZE = {
-    "<functions>": "d7e1d0922e3af446",
+    "<functions>": "ff43e832d6f2b685",
     "JS_MUTATION_TOKENS": "d47e30b67c583c1b",
     # ab8fdd31f93ef4fc until 2026-09-19. See the re-freeze note above: two
     # entries added for press.disclose's click and its closing Escape, on the

@@ -3158,9 +3158,60 @@ JS_MUTATION_TOKENS: tuple[str, ...] = (
 )
 
 
+#: REPLACING A BROWSER API IS A MUTATION, AND NO TOKEN ABOVE COULD SEE IT.
+#: Found by the live lane 2026-09-24: a script that swaps
+#: ``navigator.clipboard.writeText`` for a capturing function calls nothing,
+#: sets no attribute and fetches nothing -- it replaces what the page's own code
+#: will call next -- and the cannot-mutate test passed it. So an ASSIGNMENT (or
+#: ``delete``) whose target is a member reached from a browser global, any
+#: ``.prototype`` member, and the property-definition calls are refused too.
+#: MEASURED BEFORE ADOPTION over the 58 JavaScript strings in this repository
+#: -- every executed script, every ``*_JS`` constant, every inline evaluate in
+#: ``scripts/`` -- with ZERO detections, and over 13 plants and 10 reads of the
+#: same globals (``tests/test_readonly.py``).
+_JS_BROWSER_ROOTS = (
+    "window|document|navigator|globalThis|self|top|parent|frames|location|"
+    "history|screen|console|localStorage|sessionStorage|indexedDB|caches|"
+    "crypto|Element|HTMLElement|HTML[A-Za-z]*Element|Node|EventTarget|Document|"
+    "Window|Navigator|Clipboard|ClipboardItem|Event|CustomEvent|MouseEvent|"
+    "KeyboardEvent|XMLHttpRequest|Request|Response|Headers|WebSocket|"
+    "MutationObserver|IntersectionObserver|Function|Object|Array|JSON|Promise|"
+    "Reflect|Proxy|Symbol|Date|Math|String|Number|Boolean|RegExp|Error|URL|"
+    "URLSearchParams|FormData|Blob|File|FileReader|Image|Audio|Notification|"
+    "Worker"
+)
+_JS_MEMBER_CHAIN = r"(?:\s*\.\s*[A-Za-z_$][\w$]*|\s*\[[^\]\n]*\])+"
+_JS_ASSIGNMENT = r"\s*(?:=(?![=>])|\+=|-=|\|\|=|&&=|\?\?=)"
+JS_API_REPLACEMENT_PATTERNS: tuple[re.Pattern[str], ...] = (
+    re.compile(
+        r"(?<![\w$.])(?:" + _JS_BROWSER_ROOTS + r")" + _JS_MEMBER_CHAIN
+        + _JS_ASSIGNMENT
+    ),
+    re.compile(r"\.\s*prototype" + _JS_MEMBER_CHAIN + _JS_ASSIGNMENT),
+    re.compile(r"\bdelete\s+(?:" + _JS_BROWSER_ROOTS + r")" + _JS_MEMBER_CHAIN),
+    re.compile(
+        r"\b(?:Object\s*\.\s*(?:defineProperty|defineProperties|setPrototypeOf)"
+        r"|Reflect\s*\.\s*(?:defineProperty|set|setPrototypeOf|deleteProperty)"
+        r"|__define[GS]etter__)\s*\("
+    ),
+    re.compile(
+        r"\bObject\s*\.\s*assign\s*\(\s*(?:" + _JS_BROWSER_ROOTS + r")\b"
+    ),
+)
+
+
 def scan_js_for_mutations(js: str) -> list[str]:
-    """Return every mutating token found in an injected script."""
-    return [token for token in JS_MUTATION_TOKENS if token in js]
+    """Return every mutating token found in an injected script.
+
+    Two kinds of entry: a token from :data:`JS_MUTATION_TOKENS`, verbatim, and
+    ``"API replacement: <what matched>"`` for a script that replaces a browser
+    API -- see :data:`JS_API_REPLACEMENT_PATTERNS`.
+    """
+    found = [token for token in JS_MUTATION_TOKENS if token in js]
+    for pattern in JS_API_REPLACEMENT_PATTERNS:
+        for match in pattern.finditer(js):
+            found.append("API replacement: " + " ".join(match.group(0).split()))
+    return found
 
 
 # ---------------------------------------------------------------------------

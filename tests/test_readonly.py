@@ -1262,6 +1262,67 @@ def test_the_js_scanner_catches_a_planted_mutation():
     assert ".click(" in found and ".value =" in found and "fetch(" in found, found
 
 
+#: REPLACING A BROWSER API, in every spelling measured, and it matched none of
+#: the tokens above until 2026-09-24. The live lane found it: a script that
+#: swaps ``navigator.clipboard.writeText`` for a capturing function calls
+#: nothing, sets no attribute and fetches nothing -- it REPLACES what the page
+#: will call -- and the cannot-mutate test passed it. A replaced API changes
+#: what LinkedIn's own code does next, which is a mutation of the page by any
+#: reading of the word.
+_API_REPLACEMENT_PLANTS = [
+    ("clipboard", "navigator.clipboard.writeText = (t) => { window.__c = t; };"),
+    ("fetch", "window.fetch = function () {};"),
+    ("click-prototype", "Element.prototype.click = function () {};"),
+    ("focus-prototype", "HTMLElement.prototype.focus = () => {};"),
+    ("define-property", "Object.defineProperty(navigator, 'clipboard', { value: fake });"),
+    ("exec-command", "document.execCommand = () => true;"),
+    ("window-open", "window.open = function () { return null; };"),
+    ("bracket-member", "navigator['clipboard'].writeText = x;"),
+    ("assign-onto", "Object.assign(navigator.clipboard, { writeText: fake });"),
+    ("delete", "delete navigator.clipboard;"),
+    ("reflect-set", "Reflect.set(window, 'fetch', fake);"),
+    ("listener-prototype", "EventTarget.prototype.addEventListener = wrap;"),
+    ("handler", "window.onbeforeunload = null;"),
+]
+
+#: THE READS THE SAME SCAN MUST LEAVE ALONE, so a detector that flagged every
+#: mention of ``navigator`` cannot pass the plants above and ship.
+#:
+#: ``window.location.href === x`` IS NOT HERE, and not because it is a write:
+#: the token list's substring rule already flags it (``"location.href ="`` is a
+#: prefix of ``"location.href ==="``). That conservatism predates this block
+#: and is not its subject; the strict comparison below is one no token covers.
+_API_READS = [
+    ("read-member", "const n = navigator.clipboard;"),
+    ("strict-compare", "if (navigator.userAgent === x) {}"),
+    ("loose-compare", "if (document.title == 'x') {}"),
+    ("local-object", "out.count = 1;"),
+    ("read-dimension", "let w = window.innerWidth;"),
+    ("not-equal", "const ok = navigator.userAgent !== '';"),
+    ("push", "rows.push({ href: a.href });"),
+    ("dom-parser", "const doc = new DOMParser().parseFromString(html, 'text/html');"),
+    ("greater-equal", "x = document.querySelectorAll('a').length >= 2;"),
+    ("for-of", "for (const node of document.querySelectorAll('button')) { n += 1; }"),
+]
+
+
+@pytest.mark.parametrize(
+    "script", [s for _, s in _API_REPLACEMENT_PLANTS],
+    ids=[i for i, _ in _API_REPLACEMENT_PLANTS],
+)
+def test_the_js_scanner_catches_an_api_replacement(script):
+    """SHOWN FAILING on the token list alone: every plant here scanned clean."""
+    found = readonly.scan_js_for_mutations("() => { " + script + " }")
+    assert any(entry.startswith("API replacement") for entry in found), found
+
+
+@pytest.mark.parametrize(
+    "script", [s for _, s in _API_READS], ids=[i for i, _ in _API_READS]
+)
+def test_the_js_scanner_leaves_a_read_of_an_api_alone(script):
+    assert readonly.scan_js_for_mutations("() => { " + script + " }") == []
+
+
 def test_every_injected_script_is_scanned():
     """Catches a fourth script being added to dom.py without a scan."""
     declared = {
