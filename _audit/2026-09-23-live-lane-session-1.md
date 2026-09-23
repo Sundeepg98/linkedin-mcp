@@ -633,7 +633,8 @@ the press. Census: `profile.md` `O3` GAP -> COVERED-PROVEN, the half-proven
 paragraph kept beneath; its `read-addresses.tsv` line removed.
 `check_read_addresses.py`: GREEN, 64 of 64; blocked on nothing 1 (`M M49`).
 
-**A DEFECT IN MY OWN COMMIT `85df223`, fixed in the next.** Entry 7 named the
+**A DEFECT IN MY OWN COMMIT `85df223` (a lane commit; it does not resolve on
+`master` until the lane merges), fixed in the next.** Entry 7 named the
 two census files in backticks beside the word "correction", and the
 correction guard reads that as this document correcting them -- two
 untriaged pairs, so that commit's tree fails that guard. Reworded, not

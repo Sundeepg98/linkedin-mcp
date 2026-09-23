@@ -1029,7 +1029,14 @@ async def read_company_about_card(page: Any) -> dict[str, Any]:
         container = page.locator(ABOUT_COMPANY_CONTAINER).first
         found = int(await container.count())
     except Exception as exc:
-        out["error"] = f"{type(exc).__name__}: {exc}"
+        # THE EXCEPTION'S TYPE, NEVER ITS TEXT -- here and at every returned
+        # `error`/`why` in this module that a failing read can reach (the one
+        # kept exception, in read_typeahead_options, says why). A library's
+        # message can quote a selector carrying his needle, a request, or the
+        # page itself, and write gates print this field in their refusals.
+        # Decided where the value enters (ERROR-MESSAGE-RULED-AT-THE-RAISE);
+        # held by tests/test_readers_emit_no_page_string.py's failing-page tests.
+        out["error"] = type(exc).__name__
         logger.debug("about-the-company container unreadable: %s", out["error"])
         return out
 
@@ -1047,7 +1054,7 @@ async def read_company_about_card(page: Any) -> dict[str, Any]:
             await container.inner_text(timeout=ELEMENT_READ_TIMEOUT_MS) or ""
         )
     except Exception as exc:
-        out["error"] = f"{type(exc).__name__}: {exc}"
+        out["error"] = type(exc).__name__
         logger.debug("about-the-company text unreadable: %s", out["error"])
         return out
 
@@ -1368,7 +1375,7 @@ async def read_radio_label_binding(
     except Exception as exc:  # noqa: BLE001 - reported, never raised
         out["why"] = (
             f"the control named {name!r} could not be counted: "
-            f"{type(exc).__name__}: {exc}"
+            f"{type(exc).__name__}"
         )
         return out
     out["observed"]["controls_named"] = found
@@ -1394,7 +1401,7 @@ async def read_radio_label_binding(
     except Exception as exc:  # noqa: BLE001 - reported, never raised
         out["why"] = (
             f"the label for {name!r} could not be counted: "
-            f"{type(exc).__name__}: {exc}"
+            f"{type(exc).__name__}"
         )
         return out
     out["observed"]["labels_matching"] = matching
@@ -5872,7 +5879,7 @@ async def read_post_composer(page: Any) -> dict[str, Any]:
         if out["submits"] == 1:
             out["submit_enabled"] = bool(await submits.first.is_enabled())
     except Exception as exc:  # pragma: no cover - defensive
-        out["error"] = f"{type(exc).__name__}: {exc}"
+        out["error"] = type(exc).__name__
         logger.debug("post composer unreadable: %s", out["error"])
     return out
 
@@ -6070,7 +6077,7 @@ async def read_sdui_actions(
     try:
         reading = await page.evaluate(SDUI_ACTIONS_JS, cfg)  # readonly-ok
     except Exception as exc:  # pragma: no cover - defensive
-        out["error"] = f"{type(exc).__name__}: {exc}"
+        out["error"] = type(exc).__name__
         logger.debug("sdui actions unreadable: %s", out["error"])
         return out
     for key in ("script_blocks", "payload_chars", "needle_hits"):
@@ -6444,7 +6451,7 @@ async def read_compose_fields(page: Any) -> dict[str, Any]:
         )
     except Exception as exc:  # pragma: no cover - defensive
         out["refused"] = "recipient_count_unreadable"
-        out["why"] = f"{type(exc).__name__}: {exc}"
+        out["why"] = type(exc).__name__
         return out
     out["recipients_selected"] = chosen
     if chosen:
@@ -7108,6 +7115,8 @@ async def read_typeahead_options(page: Any, needle: str) -> dict[str, Any]:
     try:
         out["selector"] = typeahead_option_selector(needle)
     except ExtractionFailedError as exc:
+        # KEPT AS TEXT: this try reads no page. Its only raises are the two
+        # refusals the selector builders compose, neither quoting the needle.
         out["error"] = str(exc)
         return out
 
@@ -7141,7 +7150,7 @@ async def read_typeahead_options(page: Any, needle: str) -> dict[str, Any]:
     try:
         out["matches"] = await page.locator(out["selector"]).count()
     except Exception as exc:  # noqa: BLE001 - reported, never raised
-        out["error"] = f"{type(exc).__name__}: {exc}"
+        out["error"] = type(exc).__name__
 
     # THE CENSUS, TAKEN ON EVERY READING AND NOT ONLY ON A REFUSAL. It costs
     # one locator count per candidate and presses nothing, and taking it
@@ -7285,7 +7294,7 @@ async def read_recipient_ids(page: Any) -> dict[str, Any]:
             },
         )
     except Exception as exc:  # noqa: BLE001 - reported, never raised
-        out["error"] = f"{type(exc).__name__}: {exc}"
+        out["error"] = type(exc).__name__
         return out
     out["buttons"] = as_count((data or {}).get("buttons"))
     for row in (data or {}).get("rows") or []:
@@ -7329,7 +7338,7 @@ async def read_compose_send_state(page: Any) -> dict[str, Any]:
         if out["controls"] == 1:
             out["enabled"] = bool(await control.first.is_enabled())
     except Exception as exc:  # pragma: no cover - reported, never raised
-        out["error"] = f"{type(exc).__name__}: {exc}"
+        out["error"] = type(exc).__name__
     return out
 
 
@@ -7452,7 +7461,7 @@ async def read_comment_surface(page: Any) -> dict[str, Any]:
         )
         census = await read_surface_census(page)
     except Exception as exc:  # pragma: no cover - defensive
-        out["error"] = f"{type(exc).__name__}: {exc}"
+        out["error"] = type(exc).__name__
         logger.debug("comment surface unreadable: %s", out["error"])
         return out
     counts: dict[str, int] = {}
@@ -7837,7 +7846,7 @@ async def read_thread_reply_surface(page: Any) -> dict[str, Any]:
             # resolved first.
             out["send_disabled"] = bool(await send.first.is_disabled())
     except Exception as exc:  # noqa: BLE001 - reported, never raised
-        out["error"] = f"{type(exc).__name__}: {exc}"
+        out["error"] = type(exc).__name__
     return out
 
 
@@ -8187,14 +8196,14 @@ async def read_invitation_badge(page: Any) -> dict[str, Any]:
         badges = page.locator(invitation_badge_selector())
         out["badge_links"] = int(await badges.count())
     except Exception as exc:  # noqa: BLE001 - reported, never raised
-        out["error"] = f"{type(exc).__name__}: {exc}"
+        out["error"] = type(exc).__name__
         return out
     if out["badge_links"] != 1:
         return out
     try:
         label = await badges.first.get_attribute("aria-label")
     except Exception as exc:  # noqa: BLE001 - reported, never raised
-        out["error"] = f"{type(exc).__name__}: {exc}"
+        out["error"] = type(exc).__name__
         return out
     out["label"] = shape.census_shape(str(label or "").strip()) or None
     return out
