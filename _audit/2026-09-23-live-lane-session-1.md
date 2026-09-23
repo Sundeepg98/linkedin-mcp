@@ -192,3 +192,101 @@ plants, one at a time, each restored before the next, against
 The test now uses `/my-items/`, which the boundary refuses and lane Y
 measured as refused. **And one assertion of mine could not fail** -- it ended
 `or True` -- and was deleted before the first run, not after.
+
+### Entry 2 -- 22:14:11-22:15:45, the first live run: 4 loads, 0 presses
+
+`scripts/_probe_live_lane_session_1.py --only per_post,badge,m43,m33,notifications,activity`,
+attach mode, `LINKEDIN_MIN_INTERVAL_S=20`. Every page: walled False,
+challenge terms 0. Ledger 0 -> 4.
+
+    key            load  result
+    per_post        1    RETURNED  per_post readable True, items_read 2
+    badge           2    RETURNED  new_since_last_visit 1; notifications badge 20 (state read)
+    m43             -    HELD      the badge read 1, not 0 -- /messaging/ NOT opened
+    m33             -    HELD      the same
+    notifications   3    RETURNED  10 rows, unread_when_read 10; invitation-kind 0, follow-kind 0
+    activity        4    RETURNED  authorship established; 8 items, all activity urns;
+                                   poll-shaped nodes in main 0
+
+**`P G6` -- PROVEN.** The field's claim, from its cell: impressions and
+engagements, integers, one per distinct item, no identifier. What came back:
+`readable` True, `items_read` 2, `impressions` a list of 2 integers,
+`engagements` a list of 2 integers, `engagements_drawn_for` 2. **The fields
+whose meaning was checked:** `total_impressions` equals the sum of
+`impressions`, and `total_engagements` the sum of `engagements`; both lists
+have one entry per item read; `unparsed` 0, `not_activity_links` 0,
+`duplicate_links` 0, `unreadable_links` 0. Nothing in `per_post` is a string
+except its `scope` sentence, which is this package's. Lane L1's own bank rule
+for this row: "PROVEN if per_post.readable".
+
+**`M M43`, `M M33` -- NOT FIRED, held by the rule written in 0.3 point 1.**
+`linkedin_new_messages` read `new_since_last_visit` 1: one message had
+landed since his last look at Messaging. `/messaging/` lands in a
+conversation LinkedIn chooses, most likely the newest, so opening it would
+have spent his unread marker on a message he has not seen and possibly shown
+its sender a read receipt. The ruling asks the lane to PREFER already-read
+threads; this was the one reading that could honour that, and it said no.
+**What moves them: the badge reading 0**, which it does once he opens
+Messaging himself. Nothing about these rows needs a ruling.
+
+**`N 20`, `N 45` -- FIRED, NOT PROVEN.** `linkedin_notifications` returned
+the documented shape (10 rows, each with `text`, `when`, `unread`, `link`;
+`side_effect` present; `unread_when_read` 10). None of the 10 is an
+invitation-kind or a follow-kind notification -- by the closed phrase lists in
+the harness, and cross-checked offline with broader stems (counts only): 0 rows
+mention an invitation, a follow or an acceptance; the one row mentioning a
+connection is a hiring notice. Each row proves only on a day his list holds
+its kind, as the bucket-1 wave priced. The page drew 10 rows; the badge had
+counted 20.
+
+**THE COST, MEASURED IN BAND FOR THE FIRST TIME.** The notifications badge
+read 20 on `/feed/` before the call. The notifications page draws no badge,
+so the harness's own after-reading was `unreadable` and `cost_delta` refused
+-- correctly. The `/in/me/` page loaded next draws it, and its capture read
+offline (a local headless Chromium, every request aborted, LinkedIn's script
+and policy tags removed) gives 0. **Control:** the same offline method on the
+`/feed/` capture gives 20, matching the live reading. The shipped
+`notify_cost.cost_delta` on the live before and the offline after: state
+`measured`, **delta 20**. His 20 unread notifications were spent, as
+`NOTIFICATIONS-UNREAD-SPEND` permits; the 10 rows returned carry their
+`unread` flags as they stood.
+
+**`M C85` -- NEEDS-TARGET.** Of the 8 items his profile's activity rail drew,
+none is a poll: 0 poll-shaped nodes in `main` live, and offline 0 nodes with a
+poll class and 0 "N votes" phrases in the capture. Scope stated rather than
+widened: the 8 the rail draws on first render, not every post he has made. By
+the DECIDED call (0.1) the lane records NEEDS-TARGET and moves on; no reader
+was built.
+
+**Ids in hand for `M C72` and `M C38`:** 8 activity urns of his own, in
+`_state/live1/activity.json` only.
+
+**TWO LEAKS OF MY OWN, AND WHERE THEY WENT.**
+1. **The harness printed eight item urns.** `anchors_per_item` is keyed BY
+   urn, and the first `shape_of` printed every dict key on the belief that
+   keys are field names this package wrote. They went to the run's scratch
+   output (outside the repository, scrubbed within minutes: 8 found, 0 left)
+   and to this session's context; not to any tracked file. **Fixed:**
+   `is_field_name` -- a key prints only if shaped like an identifier (ASCII
+   letters, digits, underscore; no six-digit run); the rest are counted and
+   withheld, at every depth. Three tests pin it, and the leak itself was
+   planted back in the scratch copy as H7: **3 tests red; baseline and
+   restored 21 passed.** The six earlier plants re-ran red as before.
+2. **An ad-hoc count of mine printed one profile slug** while tallying link
+   kinds (my mask covered digit runs only). Session output only. Link paths
+   are printed by first segment only from here.
+
+**THE CENSUS, AFTER ENTRY 2.** `profile.md` `G6` -> COVERED-PROVEN with the
+evidence above, lane L1's paragraph kept beneath it. `network.md` `20`, `45`,
+`messaging-and-content.md` `M33`, `M43`, `C85`: a dated paragraph each, state
+unchanged. `read-addresses.tsv` `M C85`: note rewritten (the source is
+DECIDED; NEEDS-TARGET), gate left RULING -- the table's alphabet has no
+"needs a target", and READER would count the row as blocked on nothing
+while no target exists. The correction guard's two proximity candidates
+from these edits (`G6` beside `G7`'s "false", `M33` two rows above `M35`'s
+"corrected") are triaged on `NOT_A_CORRECTION`, each after reading the line.
+
+**PIN MOVES SO FAR, NOT RE-PINNED** (`census_completion.py --check`):
+`delivered_strict` 75 -> 76, `unfired` 22 -> 21, `b1_no_ruling` 7 -> 6, and
+`PINNED_B1_ROWS` -- `P G6` leaves its hold (it is no longer COVERED-UNFIRED).
+`check_read_addresses.py`: GREEN, 66 of 66, blocked on nothing 1 (`M M49`).

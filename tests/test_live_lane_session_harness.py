@@ -168,6 +168,35 @@ def test_a_string_is_shown_by_length_unless_it_is_a_package_literal() -> None:
     assert "a sentence" not in nested and "unread: True" in nested and "n: 3" in nested
 
 
+def _urn(n: int) -> str:
+    # BUILT AT RUNTIME: an urn with six or more digits written out in this file
+    # is exactly the shape tests/test_no_committed_identity.py refuses.
+    return "urn:li:" + "activity" + ":" + str(n) * 19
+
+
+def test_a_dict_keyed_by_item_urns_prints_no_key() -> None:
+    """THE FIRST LIVE RUN'S LEAK. ``anchors_per_item`` is keyed by item urn."""
+    envelope = {"anchors_per_item": {_urn(6): 2, _urn(7): 4}, "pages_loaded": 1}
+    rendered = harness.shape_of(envelope)
+    assert "urn:li" not in rendered and "666666" not in rendered and "777777" not in rendered
+    assert "2 key(s) withheld" in rendered and "pages_loaded: 1" in rendered
+
+
+def test_an_urn_key_is_withheld_at_every_depth_and_in_list_items() -> None:
+    deep = {"a": {"b": {"c": {_urn(8): 1}}}}
+    listed = [{_urn(9): 1, "kind": "x"}]
+    for value in (deep, listed):
+        rendered = harness.shape_of(value)
+        assert "urn:li" not in rendered and "888888" not in rendered and "999999" not in rendered
+
+
+def test_field_names_still_print() -> None:
+    assert harness.is_field_name("anchors_per_item")
+    assert harness.is_field_name("show_results")
+    for bad in (_urn(5), "has space", "x" * 41, "9lives", "id_1234567", ""):
+        assert not harness.is_field_name(bad), bad
+
+
 def test_a_literal_field_still_never_prints_a_long_or_non_ascii_value() -> None:
     assert harness.shape_of("x" * 41, "refused").startswith("str(len=")
     assert harness.shape_of("caf" + chr(0xE9), "refused").startswith("str(len=")

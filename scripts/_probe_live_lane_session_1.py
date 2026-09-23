@@ -39,10 +39,12 @@ unless that is at least 20.
 
 ## WHAT LEAVES THIS PROCESS
 
-Integers, booleans, ``None``, dict KEYS (field names this package wrote),
-and the handful of string fields in :data:`LITERAL_FIELDS` whose values are
-this package's own closed words (a refusal key, an active filter). Every
-other string is reported by LENGTH. No url, no page text, no name, no item
+Integers, booleans, ``None``, dict keys that are SHAPED LIKE FIELD NAMES
+(:func:`is_field_name` -- a key that is an item urn is counted and withheld;
+the first live run printed eight of them, see the session document), and the
+handful of string fields in :data:`LITERAL_FIELDS` whose values are this
+package's own closed words (a refusal key, an active filter). Every other
+string is reported by LENGTH. No url, no page text, no name, no item
 key and no exception message is ever printed -- exception TYPE names only.
 Raw envelopes go to ``_state/live1/<key>.json`` and page captures to
 ``_state/live1/<key>.html``: gitignored, never printed, never committed.
@@ -249,6 +251,40 @@ def _install_counter() -> None:
 # ---------------------------------------------------------------------------
 
 
+_FIELD_NAME_CHARS = frozenset("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_")
+
+
+def is_field_name(key: Any) -> bool:
+    """Is this dict key a FIELD NAME, safe to print? PURE.
+
+    **A DICT KEY IS NOT ALWAYS A FIELD NAME, and this harness's first live run
+    said so by printing one.** ``linkedin_my_activity_items`` returns
+    ``anchors_per_item`` KEYED BY ITEM URN -- real identifiers for his posts --
+    and the first version of :func:`shape_of` printed every key on the
+    assumption that keys are names this package wrote. So a key prints only if
+    it is shaped like one: ASCII letters, digits and underscores, starting with
+    a letter or underscore, at most 40 characters, and no run of six digits.
+    Anything else is counted and withheld.
+    """
+    text = str(key)
+    if not text or len(text) > 40 or text[0].isdigit():
+        return False
+    if any(ch not in _FIELD_NAME_CHARS for ch in text):
+        return False
+    run = 0
+    for ch in text:
+        run = run + 1 if ch.isdigit() else 0
+        if run >= 6:
+            return False
+    return True
+
+
+def _key_list(keys: Any) -> str:
+    names = sorted(str(k) for k in keys if is_field_name(k))
+    withheld = sum(1 for k in keys if not is_field_name(k))
+    return str(names[:14]) + ("" if not withheld else " + " + str(withheld) + " withheld")
+
+
 def shape_of(value: Any, key: str = "", depth: int = 0) -> str:
     """One value, rendered without its content. PURE."""
     if value is None or isinstance(value, bool):
@@ -265,20 +301,26 @@ def shape_of(value: Any, key: str = "", depth: int = 0) -> str:
         inner = ""
         dicts = [v for v in value if isinstance(v, dict)]
         if dicts:
-            names = sorted({k for d in dicts for k in d})
-            inner = ", item keys " + str(names[:14])
+            inner = ", item keys " + _key_list({k for d in dicts for k in d})
         return "list(len=" + str(len(value)) + inner + ")"
     if isinstance(value, dict):
         if depth >= 2:
-            return "dict(keys=" + str(sorted(value)[:14]) + ")"
-        parts = [str(k) + ": " + shape_of(v, str(k), depth + 1) for k, v in sorted(value.items())]
+            return "dict(keys=" + _key_list(value) + ")"
+        named = sorted((str(k), v) for k, v in value.items() if is_field_name(k))
+        withheld = sum(1 for k in value if not is_field_name(k))
+        parts = [k + ": " + shape_of(v, k, depth + 1) for k, v in named]
+        if withheld:
+            parts.append(str(withheld) + " key(s) withheld: not field names")
         return "{" + "; ".join(parts) + "}"
     return type(value).__name__
 
 
 def _print_envelope(out: dict[str, Any]) -> None:
-    for field in sorted(out):
+    for field in sorted(str(k) for k in out if is_field_name(k)):
         say("    " + field + ": " + shape_of(out[field], field))
+    withheld = sum(1 for k in out if not is_field_name(k))
+    if withheld:
+        say("    " + str(withheld) + " top-level key(s) withheld: not field names")
 
 
 # ---------------------------------------------------------------------------

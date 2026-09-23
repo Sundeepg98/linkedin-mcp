@@ -708,6 +708,30 @@ NOT_A_CORRECTION: dict[tuple[str, str], str] = {
         "something IN that deliverable is false while leaving the deliverable "
         "untouched."
     ),
+    # 2026-09-23, the live lane's session 1. BOTH ARE TABLE-ROW PROXIMITY,
+    # found by reading the window line by line: the matched word sits in a
+    # DIFFERENT ROW, one or two lines from the row that cites the session.
+    ("profile.md", "2026-09-23-live-lane-session-1.md"): (
+        "TABLE-ROW PROXIMITY. The citing line is row `G6`, whose 2026-09-23 "
+        "paragraph banks the row on the session's fire and cites the session "
+        "document as its evidence -- it withdraws nothing from it. The matched "
+        "word is `false`, one line down in row `G7`: '\"no tool, no reason\" "
+        "is now half false, 2026-09-05', a paragraph about G7's own history "
+        "that predates the session by eighteen days. **WHAT WOULD MAKE THIS "
+        "ENTRY WRONG:** row `G6` asserting that something IN the session "
+        "document is false while leaving it untouched."
+    ),
+    ("messaging-and-content.md", "2026-09-23-live-lane-session-1.md"): (
+        "TABLE-ROW PROXIMITY. The citing line is row `M33`, whose 2026-09-23 "
+        "paragraph records that the live lane did NOT open messaging on a "
+        "measured badge reading, citing the session document for it. The "
+        "matched word is `corrected`, two lines down in row `M35`: 'the same "
+        "undercount 3.10 corrected, in a row it did not enumerate' -- an "
+        "earlier wave's census correction about a different row. Nothing in "
+        "`M33`'s line corrects the session document. **WHAT WOULD MAKE THIS "
+        "ENTRY WRONG:** row `M33` asserting that something IN the session "
+        "document is false while leaving it untouched."
+    ),
 
     ("network.md", "2026-09-21-the-fires-and-the-controls.md"): (
         "THE ARROW IS DECLARED IN THE OTHER DIRECTION AND THIS IS ITS "
