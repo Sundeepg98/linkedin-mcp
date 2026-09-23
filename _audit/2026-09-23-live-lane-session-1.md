@@ -1303,3 +1303,73 @@ the ones this document forecast in its closing section.
 
 **NOT RUN:** the full suite (CI runs it after the orchestrator's merge);
 CI itself (nothing pushed); the 3.10 cell; any live fire.
+
+### Master moved three more times while this lane integrated it
+
+The order says to integrate a newer master the same way. Master moved past
+`001f70b` three times during Part 1, and each was merged in turn:
+
+    at     master      lane                                   merge commit
+    03:42  d65759f     R: 245 exclusions returned to GAP       7bd064f
+    04:05  209a831     G: three guards hardened               2b118e6
+    04:33  ff98a7f     S: people search takes a keyword
+                          and four facets                     a77d194
+
+**Lane R (`7bd064f`).** The census, per row against the merge base: no row
+changed on both sides -- lane R's rows take lane R's cells (234 across the
+three table files), this lane's take this lane's (P A8 A11 A13 A17 A19 A21
+A25 G6 L1 L8 O3; N 20 45 134 135; M C38 C48 C72 C85 M33 M43 M49), and every
+line outside the tables was changed on lane R's side only. The triage
+headline split: lane R's 117 kept as a dated constant, `EXPECTED_NOW` 116
+(R 12, `M C72`). A selection of 43 files -- the 17 corpus-wide guards, the
+named corpus guards, the census tests, lane R's four new tests --
+**3283 passed, 0 failed**.
+
+**Lane G (`2b118e6`).** A clean merge, after which two hardened guards saw
+this lane's files for the first time:
+
+- **The navigation guard now treats a reader's RETURN as a derived
+  navigation** and found two sites in this lane's session-1 harness: the L1
+  post-summary capture and the post-menu capture, each opening an address
+  built from the newest activity id of his own rail. Lane G found the same
+  class in `server.py` and two probes and DECLARED them -- not fixed, not
+  waived -- pending a ruling on whether a walk of his own rail is a derived
+  navigation. This lane's two are declared beside them, with the same
+  argument plus the orchestrator's recorded call for `M C72`. **A finding
+  about session 1, stated rather than smoothed:** both navigations ran live
+  before the rule could see them.
+- **The cited-sha guard now case-folds its slot keywords** and found one of
+  this lane's commits cited in a capitalised "COMMIT" slot; the citation now
+  says it does not resolve on `master` until the lane merges.
+
+A selection of 32 files -- the corpus-wide guards, lane G's changed tests,
+and the tests of every module whose readers or error fields lane G touched
+and this lane calls (`test_share_link`, `test_view_switch`, `test_reveal`,
+`test_profile_views_more`, `test_press`, `test_readonly`, `test_writes`,
+`test_tools`, `test_server_surface`) -- **4063 passed, 0 failed**.
+
+**Lane S (`a77d194`).** The tool-surface pin: both branch pins kept, the
+merged pin re-derived at **52 tools and 78 parameters** (master's 69, this
+lane's 4, lane S's 5), measured off the merged registry. The surface and
+boundary tests: 282 passed. A selection of 32 files -- the corpus-wide
+guards, lane S's reader tests, the census tests, the page-string guards,
+`test_tools`, `test_readonly` -- **3730 passed, 0 failed**.
+
+**THE PINS AS THEY STAND AFTER THE LAST MERGE**, re-derived on that tree
+(each merge re-derived them on its own tree; only the last set is live):
+
+    adjudicated        197      delivered_broad    108
+    delivered_strict    79      gap                507
+    unfired             29      gap_read            91
+    b3_admitted         37      b1_no_ruling        19
+    PINNED_B1_ROWS      P G6 out; lane R's N 23 and lane S's four filter
+                        rows in
+
+After every merge: the derived files regenerated with `--write` twice (the
+second sweep changed nothing) and `--check` 0 on all three, and every census
+instrument exited 0 (`check_asserted_names_resolve.py` aside: the same
+eight findings in other waves' documents, pinned by its test, which passes).
+**NOT RUN after any of the three:** the full suite (six lanes share the box;
+the order says not to), CI, the 3.10 cell. **If master moves again before
+the orchestrator merges this branch, that merge is the orchestrator's;** the
+chase is stopped here so Part 2 can start.
