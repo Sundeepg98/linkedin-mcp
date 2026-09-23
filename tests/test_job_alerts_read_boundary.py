@@ -272,7 +272,11 @@ def test_this_widening_bought_no_forbidden_substring_exemption():
     """
     assert len(readonly._FORBIDDEN_URL_SUBSTRINGS) == 33
     assert len(readonly._FORBIDDEN_SUBSTRING_EXEMPTIONS) == 2
-    assert len(readonly._FORBIDDEN_SUBSTRING_PATTERN_EXEMPTIONS) == 2
+    # 2 UNTIL THE LANE-L1 REVIEW: COMMIT OF 2026-09-23, which added ONE entry
+    # (his own follower list, excusing `/follow` alone). That entry is not
+    # this widening's and does not touch an alert address -- the loop below
+    # is what this test is about, and it still holds.
+    assert len(readonly._FORBIDDEN_SUBSTRING_PATTERN_EXEMPTIONS) == 3
     for url in (CREATE_URL, DELETE_URL, FREQUENCY_URL):
         assert url not in readonly._FORBIDDEN_SUBSTRING_EXEMPTIONS
 

@@ -1179,6 +1179,25 @@ PINNED = (
 #: not move: no gate function changed. One interpreter, 3.13; the 3.10 cell is
 #: CI's.
 #: ------------------------------------------------------------------------
+#: RE-FROZEN AGAIN 2026-09-23 BY A `REVIEW:` COMMIT (lane L1), TWO DIGESTS
+#: MOVED, ONE ENTRY IN EACH OF TWO TABLES -- the pair that admits HIS OWN
+#: FOLLOWER LIST (census P L2b) past `/follow`:
+#:
+#:     _ALLOWED_URL_PATTERNS                     7d442864f68f61fc -> c8c476ea47f0dfdd   47 -> 48
+#:     _FORBIDDEN_SUBSTRING_PATTERN_EXEMPTIONS   419e64a3cd92ec7e -> 76d7b10899530d69    2 -> 3
+#:     _FORBIDDEN_URL_SUBSTRINGS                 unchanged                               33 -> 33
+#:
+#: THE SPEC IS `_audit/2026-09-05-network-tail.md` section 2, applied to ONE of
+#: its two addresses; the following list (N 38) stays refused by `/follow`.
+#: The exemption excuses exactly {"/follow"} for exactly the anchored address,
+#: and the spec's owed proof -- the acts `/follow` exists to stop, planted and
+#: each still refused on its own substring -- is
+#: `tests/test_l1_follower_list_carve_out.py`, which also shows EITHER gate
+#: alone refusing. ATTRIBUTION: the parent commit's tree hashes to the two
+#: prior values, and this commit adds exactly these two entries. SIX of eight
+#: digests byte-identical; `<functions>` unmoved. MERGES ONLY ON THE OPERATOR'S
+#: LOOK: a read bought past a write guard is his call, whatever the argument.
+#: ------------------------------------------------------------------------
 READONLY_AST_AT_LAST_REFREEZE = {
     "<functions>": "d7e1d0922e3af446",
     "JS_MUTATION_TOKENS": "d47e30b67c583c1b",
@@ -1317,9 +1336,15 @@ READONLY_AST_AT_LAST_REFREEZE = {
     # the `/in/me/` form, one post's analytics by activity urn, his audience
     # analytics and his analytics hub. 42 -> 47; denylist untouched at 33;
     # seven of eight digests byte-identical. See the ledger entry above.
-    "_ALLOWED_URL_PATTERNS": "7d442864f68f61fc",
+    #
+    # 7d442864f68f61fc until the REVIEW: commit of 2026-09-23 (lane L1) that
+    # admits his own follower list -- one line here, one pattern exemption
+    # beside it. See that ledger entry.
+    "_ALLOWED_URL_PATTERNS": "c8c476ea47f0dfdd",
     "_FORBIDDEN_SUBSTRING_EXEMPTIONS": "43e2bf7f3db0dbed",
-    "_FORBIDDEN_SUBSTRING_PATTERN_EXEMPTIONS": "419e64a3cd92ec7e",
+    # 419e64a3cd92ec7e until the same REVIEW: commit: a third entry, excusing
+    # exactly {"/follow"} for exactly the anchored follower-list address.
+    "_FORBIDDEN_SUBSTRING_PATTERN_EXEMPTIONS": "76d7b10899530d69",
     "_FORBIDDEN_URL_SUBSTRINGS": "b0291a66ec9bd51e",
     # 23aece1483afdee9 until 2026-09-19. See the re-freeze note above: eleven
     # detector classes added, zero removed, and the direction is pinned by

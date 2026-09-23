@@ -2037,6 +2037,50 @@ _ALLOWED_URL_PATTERNS: tuple[re.Pattern[str], ...] = (
     # `/recent-activity/all/`, `/comments/` or `/reactions/` (other people's
     # posts he acted on), any other member's activity, a query, a sub-path.
     re.compile(r"^https://www\.linkedin\.com/in/me/recent-activity/articles/?$"),
+    # ======================================================================
+    # REVIEW (lane L1, 2026-09-23) -- P L2b, HIS OWN FOLLOWER LIST. This line
+    # is HALF of a two-gate admission; the other half is the paired entry in
+    # `_FORBIDDEN_SUBSTRING_PATTERN_EXEMPTIONS`, and NEITHER ALONE ADMITS IT.
+    # It shipped in a commit whose subject starts `REVIEW:` because it buys
+    # a read past a write guard, and that is the operator's look to give.
+    #
+    # THE SPEC IS NOT THIS LANE'S. `_audit/2026-09-05-network-tail.md` section
+    # 2 wrote it -- "allowlist +2, exemptions +2, denylist UNCHANGED" -- for
+    # the follower list AND the following list, and handed it over unapplied.
+    # This applies ONE of the two: the follower list is census `P L2b`, the
+    # lane's row; the following list is `N 38`'s and stays refused, by
+    # `/follow`, exactly as before (pinned, not assumed).
+    #
+    # **AND A WRITTEN STANCE POINTS THE OTHER WAY, QUOTED SO THE REVIEW SEES
+    # IT.** The Manage-Pages entry above says of this family: "the right
+    # response to the luck running out is to leave the people list unread,
+    # never to shorten the forbidden list". This does not shorten the
+    # forbidden list -- `/follow` keeps its full reach -- but it does READ a
+    # people list. The passage was written about the FOLLOWING list, and the
+    # census files `N 38` EXCLUDED-RULED on it. Whether it reaches the list
+    # of people who follow HIM is exactly what this REVIEW asks the operator;
+    # the lane does not answer it for him. If it merges, `N 44` (this row's
+    # network-slice twin) says the list route is refused -- that sentence
+    # goes stale and is its owner's to correct.
+    #
+    # A WRITE GUARD MATCHING A READ ADDRESS, the connections-list shape
+    # again. `/follow` is forbidden to stop this server FOLLOWING somebody.
+    # This page follows nobody: it lists the people who already follow HIM.
+    #
+    # THE BASIS IS NAMED, AND THIS COMMENT WILL NOT DRESS IT UP. No capture on
+    # disk draws this address as an anchor. What corroborates the FAMILY is
+    # LinkedIn's own bundle: every capture carries the i18n namespace
+    # `mynetwork/templates/network-manager/people-follow/following` -- the
+    # sibling leaf, not this one. The first load settles whether LinkedIn
+    # serves it (live-lane key `followers`), and the invitation badge is
+    # bracketed around it, because `/mynetwork/` itself was refused on a
+    # measured badge cost and this is a sub-page of that tree.
+    #
+    # NO QUERY STRING -- a query is where a filter naming a person arrives --
+    # and no sub-path. THE PAGE IS A LIST OF PEOPLE: a reader owes COUNTS AND
+    # RELATIONS ONLY, structurally, the `groups.py` way; `census_substitute`
+    # returns a name unchanged, so no shape guard saves a reader here.
+    re.compile(r"^https://www\.linkedin\.com/mynetwork/network-manager/people-follow/followers/?$"),
 )
 
 #: Substrings that must never appear in a navigation target, checked before
@@ -2439,6 +2483,28 @@ _FORBIDDEN_SUBSTRING_PATTERN_EXEMPTIONS: tuple[
             r"connections/?$"
         ),
         frozenset({"/invite", "/connect"}),
+    ),
+    # HIS OWN FOLLOWER LIST (census `P L2b`), REVIEW, lane L1, 2026-09-23 --
+    # the second gate of the pair whose first gate is the matching line at the
+    # end of `_ALLOWED_URL_PATTERNS`. Same mechanism as the connections list
+    # above, ONE substring instead of two: this address trips `/follow` and
+    # nothing else, measured.
+    #
+    # WHAT IT EXCUSES: `/follow`, for this one anchored address, and nothing
+    # more. `/follow` and `/unfollow` keep their FULL reach everywhere else --
+    # the denylist is unchanged at 33 -- and the proof the network-tail spec
+    # said was owed is a test, not a sentence
+    # (`tests/test_l1_follower_list_carve_out.py`): `/in/me/follow/`,
+    # `/company/<x>/follow/`, `/company/<x>/unfollow/`, `/feed/follows/`, the
+    # sibling FOLLOWING list, this address with a query, and this address with
+    # an `/unfollow` sub-path all still refuse, each on the substring that
+    # names it.
+    (
+        re.compile(
+            r"^https://www\.linkedin\.com/mynetwork/network-manager/"
+            r"people-follow/followers/?$"
+        ),
+        frozenset({"/follow"}),
     ),
 )
 
