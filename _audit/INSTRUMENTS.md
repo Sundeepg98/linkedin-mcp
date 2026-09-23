@@ -10066,3 +10066,61 @@ per-capture shape probes, the offline run of the collections reader over the
 raw capture, the line-ending census -- are declared disposable. What they
 measured is re-derived by the checker on every run, carried into a committed
 fixture by a builder, or recorded with its number in the audit.
+
+## 71. THE COMPLETENESS VERDICT LAYER, THE ADJUDICATED CORPUS, AND THE TABLE AT A FIXED POINT (lane-y2-admission, 2026-09-24)
+
+**Registered 2026-09-24.** Full record: `_audit/2026-09-24-lane-y2-admission.md`.
+Numbered 71 by this lane's assignment, so lanes forked from one master cannot
+collide on it.
+
+Section 63's probe raises CANDIDATES; nothing held a decision about them. Lane Y2
+gave every app-scope candidate one verdict -- ADMIT (a new GAP row carries it),
+RECORDED (an existing row carried it in words and gained the address or control),
+OUT (not a user capability) -- in three new columns of the annotations file, and
+built the check that keeps those verdicts true against the tree.
+
+### 71.1 A VERDICT IS A CLAIM ABOUT THE CENSUS, SO THE CENSUS IS ASKED
+
+An ADMIT or RECORDED route leaves the candidate set BECAUSE a census row now
+carries it. So a table line still holding one is a verdict the census does not
+bear out, and `verdict_problems` names it -- with an app-scope line nobody
+adjudicated, a verdict naming a row no slice writes, and an OUT with no reason.
+It reads no capture, so CI runs it.
+
+### 71.2 THE TABLE RECORDS ONE CORPUS, AND THE CORPUS KEEPS GROWING
+
+A live lane writes captures every session, and a plain `--write` rewrites the
+committed table over whatever is on disk that hour -- a candidate nobody has
+read lands in a tracked file. `--captured-before <UTC stamp>` names the corpus
+(2026-09-23T00:00:00 reproduces lane Y's 71 captures exactly) and prints the rest
+as set aside; `--check` proves the committed table is byte for byte what
+`--write` would write over that corpus.
+
+### 71.3 THE CENSUS'S VOCABULARY RE-KEYS THE CONTROLS IT IS DIFFED AGAINST
+
+The control templater keeps a word only if the census slices use it, so every
+word a new row brings can change the key of a harvested label that has nothing
+to do with that row. Measured on this lane's own edits: a row citing
+`/games/zip/` and one quoting "get hired" turned 'City, state, or <X> code' and
+'Get <X> faster' into two NEW, unannotated templates. The check named both
+before anything was committed.
+
+    A CLOSED VOCABULARY TAKEN FROM THE THING UNDER MEASUREMENT MOVES WHEN THAT
+    THING IS EDITED; A KEY BUILT FROM IT MUST BE RE-CHECKED AFTER EVERY EDIT.
+
+### 71.4 THE ENTRIES
+
+| path | shown failing by |
+|---|---|
+| `scripts/completeness_harvest.py` (`select_corpus`, `verdict_problems`, `check`, `--captured-before`, `--check`, `OWN_DOCS`) | `tests/test_completeness_verdicts.py`, eight tests: the committed layer holds; every app-scope line left in the table is an OUT; a verdict removed, a RECORDED on a route that is still a candidate, and a verdict naming a row nobody wrote, each planted into COPIES, each red naming the line; the cutoff keeps the earlier of two planted captures and prints the later as set aside; `check` returns 0 on a table it wrote and 1 with "would CHANGE" on one edited by hand. Red under three mutations of the committed script, each restored from git: `verdict_problems` returning nothing (3 failed), the fixed-point comparison skipped (1 failed), the cutoff ignored (1 failed); restored, 8 passed. The test's own first draft edited a word the planted PATTERN also held, so the key moved and the check reported an ADD and a REMOVE instead of a CHANGE -- red for the right reason, asserted in the wrong words; the edit now touches one cell |
+| `_audit/_census/completeness-annotations.tsv` (`verdict`, `verdict_rows`, `verdict_basis`) | the tests above; 159 verdicts across the lane's two passes, 0 inconsistent with the census when re-derived without a capture |
+| `scripts/check_write_classes.py` (acts `feedback`, `purchase`, R3) | its own shipped test suite, unchanged; the two acts class `N 198` and `P S9`, which no act named |
+
+### 71.5 DECLARED DISPOSABLE
+
+The scratch scripts this lane ran -- the regeneration driver over a capture
+subset, the masked context readers used to see what a control sat beside, the
+boundary drives, the evidence-append and side-table writers, the verifier's
+sampler and its key, the census-only consistency check, the mutation runner --
+are declared disposable. Everything they wrote is in the census, the side
+tables, the annotations or the audit, and the checks above re-derive it.

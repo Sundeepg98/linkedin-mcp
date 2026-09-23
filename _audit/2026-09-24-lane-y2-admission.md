@@ -56,7 +56,7 @@ capability no census row carries in words or in synonyms.**
 (68 addresses, 53 controls) and 42 others -- a11y 8, docs 11, chrome 11 (5 addresses,
 6 controls), off-app 12 -- exactly the charter's classes. The 42 were not adjudicated.
 
-**NINE LINES HAD ALREADY MOVED BEFORE THIS LANE STARTED.** Regenerated over the same
+**THIRTEEN LINES HAD ALREADY MOVED BEFORE THIS LANE STARTED.** Regenerated over the same
 71 captures against the census at `9c219c8`, eight app-scope addresses were no longer
 candidates -- other waves had written them into side-table lines keyed to rows
 (`jobs-directions.tsv` for four company tabs, `/jobs/search-results`,
@@ -361,8 +361,72 @@ remaining 61 RECORDED verdicts would all survive a second cold pass. The review 
 
 ## 11. Expected pin moves
 
-IN PROGRESS.
+**The row population is re-pinned in its own commit** (`tests/census_row_pin.json` and
+the two literals in `tests/test_the_census_row_total_is_pinned.py`): 704 -> 747,
+J 150 -> 166, P 203 -> 213, M 142 -> 153, N 209 -> 215, no row removed, no state
+vocabulary moved. It is separate so a merge can take the population move apart from
+the rows.
+
+**`scripts/census_completion.py` is NOT re-pinned.** Measured with the row pin moved,
+`--check` is red on exactly these 17 of its pins and on nothing else (no bucket-1 row
+moves):
+
+    stated_rows              704 ->  747   +43
+    capabilities             762 ->  805   +43
+    capabilities_achievable  389 ->  432   +43
+    achievable               389 ->  432   +43
+    gap                      270 ->  313   +43
+    gap_read                  66 ->   79   +13   P S1, S3, S5; M M53, C93, C95,
+                                                 C96, C98, C99, C101; N 195, 197, 199
+    gap_write                150 ->  164   +14   P S2, S4, S6-S10; M M52, C94, C97,
+                                                 C100; N 196, 198, 200
+    gap_unknown               54 ->   70   +16   J 152-167 (jobs rows carry no
+                                                 direction cell)
+    b3_admitted               40 ->   45    +5   P S5, M M53, M C96, N 195, N 197
+    b3_refused                16 ->   24    +8   P S1, S3; M C93, C95, C98, C99,
+                                                 C101; N 199
+    b3_blocked_on_nothing      8 ->   11    +3   P S5, M M53, N 195 (READER)
+    jobs_gap                  54 ->   70   +16
+    jobs_dir_r                26 ->   35    +9
+    jobs_dir_w                25 ->   30    +5
+    jobs_dir_rw                3 ->    5    +2
+    jobs_admitted              9 ->   10    +1   J 158
+    jobs_refused              19 ->   29   +10
+
+Unmoved and checked: out_of_scope 315, adjudicated 434, delivered 100 and 75,
+cannot_deliver 19, unfired 25, gap_ambiguous 0, the other b3 classes (2, 6, 2), every
+b1 pin, b2_d3_rows 3, and the other jobs pins (0, 1, 0, 0). **These are this lane's
+moves against master `9c219c8`; other lanes moving states in parallel (lane R returns
+exclusions to GAP) will move several of the same pins, so the train re-pins once, on
+the merged tree.**
 
 ## 12. Gates
 
-IN PROGRESS.
+**CENSUS INSTRUMENTS, on the tree after the admission and the row re-pin:**
+
+    check_jobs_directions         GREEN   70 of 70 still-GAP jobs rows
+    check_read_addresses          GREEN   79 of 79 bucket-3 rows, every verdict
+                                          re-driven through the live boundary
+    check_write_classes           GREEN   165 lines for 164 write-direction GAP rows
+                                          (the one extra is N 47's built line)
+    measure_pointer_graph --check PASS    all 69 pinned pointers (after the P G2
+                                          revert, section 6)
+    classify_writeoff_reasons     ok      334 write-off rows, every kind identical
+                                          to 9c219c8 row by row
+    check_census_locators_resolve GREEN
+    build_blocker_map --check     GREEN   44 rows entered GAP since the freeze (this
+                                          lane's 43 and P L2b), today's GAP 313
+    pin_census_rows --check       GREEN   after the re-pin (747)
+    census_completion --check     RED on exactly the 17 pins of section 11
+    completeness_harvest --control         all five controls pass
+    completeness_harvest --check --captured-before 2026-09-23T00:00:00
+                                  GREEN   fixed point, verdict layer 0 problems
+    check_exclusion_basis         RED, as at master: 26 untraced and 27 lifted
+                                  EXCLUDED-RULED rows, 0 structural problems; its
+                                  own text says it stays red until the operator
+                                  decides, and lane R owns those rows
+    check_asserted_names_resolve  RED, as at master: 8 ASSERTED-ABSENT names, all in
+                                  other lanes' documents; none in this lane's files,
+                                  whose twenty new blocker names are all minted
+
+THE IMPACT GATE: recorded in section 13 once it has run.
