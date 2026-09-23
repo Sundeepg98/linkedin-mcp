@@ -9511,8 +9511,9 @@ the checker on every run or recorded with its result in the audit.
 ## 63. THE COMPLETENESS PROBE: WHAT LINKEDIN DREW THAT THE CENSUS NEVER WROTE DOWN (completeness-probe, 2026-09-23)
 
 **Registered 2026-09-23.** Full record:
-`_audit/2026-09-23-completeness-probe.md`. Numbered 63 by assignment: sibling
-lanes forked from the same master hold the integers between 57 and 63.
+`_audit/2026-09-23-completeness-probe.md`. Numbered 63 by this lane's
+assignment rather than as the next free integer, so that lanes forked from
+the same master cannot collide on it.
 
 `scripts/census_completion.py` prints fractions of rows somebody wrote, and says
 plainly that it cannot see a capability nobody enumerated. This instrument
@@ -9520,7 +9521,9 @@ measures that blind side from the only direction that does not start from our
 own wording: every route and control LinkedIn DREW on 71 captures already on
 disk, reduced to name-free shapes and diffed against every address token in the
 census. 96 of 137 routes and 67 control templates are carried by no census
-capability row, and the discovery curve has not flattened.
+capability row, and the discovery curve has not flattened. A cold verifier
+sampled 15 and, after review, 6 are true gaps: the rest are capabilities the
+census names in words without the address, so the counts are an upper bound.
 
 ### 63.1 IT IMPORTS THE THREE DISCIPLINES IT DEPENDS ON
 

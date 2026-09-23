@@ -19,17 +19,17 @@ address	/mypreferences/d	app	P	R	Settings index ('Manage your account and privac
 address	/mypreferences/d/categories/account	app	P	R	Settings category page: Account preferences (settings side nav)
 address	/analytics/creator/top-posts	app	M	R	Creator analytics: top posts list
 address	/analytics/recruiter-views	app	P	R	Premium: recruiters who viewed your profile ('N recruiters viewed your profile')
-address	/company/<entity>/about	app	J	R	Company page tab: About
-address	/company/<entity>/home	app	J	R	Company page tab: Home
-address	/company/<entity>/insights	app	J	R	Company page tab: Insights (Premium company insights)
-address	/company/<entity>/jobs	app	J	R	Company page tab: Jobs
-address	/company/<entity>/life	app	J	R	Company page tab: Life
-address	/company/<entity>/posts	app	J	R	Company page tab: Posts
-address	/company/<entity>/product	app	J	R	Company page Products tab, singular spelling
-address	/company/<entity>/products	app	J	R	Company page tab: Products
-address	/company/<entity>/products/<entity>	app	J	R	Company page: one product, 'Ask people about this product'
-address	/company/<entity>/services	app	J	R	Company page tab: Services
-address	/feed/followers	app	P	R	His own followers list ('N followers'); the list half of the L2 / L2b split
+address	/company/<entity>/about	app	J	R	Company page tab: About -- ADDRESS ONLY: the capability is census row J 106 in words [cold-verified: capability recorded]
+address	/company/<entity>/home	app	J	R	Company page tab: Home -- ADDRESS ONLY: the capability is census row J 110 in words [cold-verified: capability recorded]
+address	/company/<entity>/insights	app	J	R	Company page tab: Insights (Premium company insights) -- ADDRESS ONLY: the capability is census row J 113 in words
+address	/company/<entity>/jobs	app	J	R	Company page tab: Jobs -- ADDRESS ONLY: the capability is census row J 107 in words
+address	/company/<entity>/life	app	J	R	Company page tab: Life -- ADDRESS ONLY: the capability is census row J 109 in words
+address	/company/<entity>/posts	app	J	R	Company page tab: Posts -- ADDRESS ONLY: the capability is census row J 110 in words
+address	/company/<entity>/product	app	J	R	Company page Products tab, singular spelling -- ADDRESS ONLY: the capability is census row J 111 in words
+address	/company/<entity>/products	app	J	R	Company page tab: Products -- ADDRESS ONLY: the capability is census row J 111 in words
+address	/company/<entity>/products/<entity>	app	J	R	Company page: one product, 'Ask people about this product' -- ADDRESS ONLY: the capability is census row J 111 in words
+address	/company/<entity>/services	app	J	R	Company page tab: Services -- ADDRESS ONLY: the capability is census row J 111 in words
+address	/feed/followers	app	P	R	His own followers list ('N followers'); the list half of the L2 / L2b split -- ADDRESS ONLY: the capability is census row P L2b in words
 address	/help/learning	docs	-	R	LinkedIn Learning help
 address	/help/learning/answer/<opaque>	docs	-	R	LinkedIn Learning help article (team purchase)
 address	/help/linkedin/ask/DAD	docs	-	W	Help: accessibility feedback form
@@ -47,28 +47,28 @@ address	/in/<entity>/recent-activity/all	app	M	R	A member's activity: all posts
 address	/in/<entity>/skill-insights/<seg>	app	P	R	Profile: insight page for one skill (where it was used)
 address	/jobs/collections/top-choice	app	J	R	Premium job collection: Top choice
 address	/jobs/preferences	app	J	R	Jobs: job-seeker preferences page (jobs nav)
-address	/jobs/search-results	app	J	R	Jobs: the AI search results route ('See more jobs like this'), apart from /jobs/search/
-address	/jobs/view/<opaque>/apply	app	J	W	Apply entry route for a posting (Easy Apply); apply_job is inventoried, this address is not
-address	/learning	app	J	R	LinkedIn Learning home (global nav)
+address	/jobs/search-results	app	J	R	Jobs: the AI search results route ('See more jobs like this'), apart from /jobs/search/ -- ADDRESS ONLY: the capability is census row J 1 in words
+address	/jobs/view/<opaque>/apply	app	J	W	Apply entry route for a posting (Easy Apply); apply_job is inventoried, this address is not -- ADDRESS ONLY: the capability is census row J 60 in words
+address	/learning	app	J	R	LinkedIn Learning home (global nav) -- TRUE GAP [cold-verified]
 address	/learning/<opaque>/<opaque>	app	J	R	Learning: a course or video page
 address	/learning/browse	app	J	R	Learning: browse the catalogue
 address	/learning/browse/certifications	app	J	R	Learning: certifications catalogue
 address	/learning/career-journey	app	J	R	Learning: My career journey
 address	/learning/chatbot	app	J	R	Learning: AI coach (chat)
-address	/learning/me/my-library	app	J	R	Learning: My library
+address	/learning/me/my-library	app	J	R	Learning: My library -- TRUE GAP [cold-verified]
 address	/learning/me/my-library/in-progress	app	J	R	Learning: My library, in progress
-address	/learning/role-play/scenarios/new	app	J	W	Learning: start a new AI role-play scenario
+address	/learning/role-play/scenarios/new	app	J	W	Learning: start a new AI role-play scenario -- ADDRESS ONLY: the capability is census row J 132 in words
 address	/learning/settings	app	J	R	Learning: settings
 address	/learning/showcase/<entity>	app	J	R	Learning: a showcase collection
 address	/learning/subscription/teams	off-app	-	W	Learning: buy for my team (purchase)
 address	/learning/topics/<entity>	app	J	R	Learning: a topic page
-address	/messaging/thread/new	app	M	W	Messaging: new thread to a member ('Message X'), apart from /messaging/compose/
+address	/messaging/thread/new	app	M	W	Messaging: new thread to a member ('Message X'), apart from /messaging/compose/ -- ADDRESS ONLY: the capability is census row M M1 in words [cold-verified: capability recorded]
 address	/mynetwork/discover-hub	app	N	R	My Network: Discover more hub
-address	/mynetwork/discovery-see-all	app	N	R	My Network: full discovery lists (people you may know and similar)
+address	/mynetwork/discovery-see-all	app	N	R	My Network: full discovery lists (people you may know and similar) -- ADDRESS ONLY: the capability is census row N 97 in words [cold-verified]
 address	/mypreferences/d/categories/ads	app	P	R	Settings category page: Advertising data
 address	/mypreferences/d/categories/privacy	app	P	R	Settings category page: Data privacy
 address	/mypreferences/d/categories/profile-visibility	app	P	R	Settings category page: Visibility
-address	/mypreferences/d/categories/sign-in-and-security	app	P	R	Settings category page: Sign in and security
+address	/mypreferences/d/categories/sign-in-and-security	app	P	R	Settings category page: Sign in and security -- ADDRESS ONLY: its settings are census rows P N4 to P N11 [cold-verified]
 address	/newsletters/<entity>	app	M	R	A newsletter's own page
 address	/preload/report-in-modal	app	M	W	Report-abuse flow in a modal
 address	/premium/premium-perks	app	J	R	Premium: partner perks ('N months on us')
@@ -78,13 +78,13 @@ address	/premium/switcher	app	J	W	Premium: change plan
 address	/products/<entity>	app	J	R	A LinkedIn product page (a third party's software product)
 address	/products/<opaque>	app	J	R	A LinkedIn product page, id-keyed
 address	/psettings/group/<opaque>	app	N	W	One group's own settings page ('Update your settings')
-address	/search/results/all	app	M	R	All-results search, drawn from hashtags ('View hashtag: X')
+address	/search/results/all	app	M	R	All-results search, drawn from hashtags ('View hashtag: X') -- TRUE GAP [cold-verified; the verifier's neighbouring match set aside by the lead]
 address	/	chrome	-	R	LinkedIn home (the logo link, the feed)
 address	/accessibility	chrome	-	R	Accessibility statement (footer and nav menu)
 address	/ad-library/search	app	J	R	Ad Library search ('View ad library' on a company page)
 address	/ad/start	chrome	-	W	Advertise: Campaign Manager entry (footer and nav menu)
 address	/explore-career-insights	app	J	R	Premium career insights ('people and companies hiring for the job you want')
-address	/job-apply-resources	app	J	W	Jobs AI: tailor my resume to a posting
+address	/job-apply-resources	app	J	W	Jobs AI: tailor my resume to a posting -- ADDRESS ONLY: the capability is census row J 146 in words [cold-verified]
 address	/legal/<opaque>	docs	-	R	Legal and policy pages (community policies and similar)
 address	/legal/cookie-policy	docs	-	R	Cookie policy (footer)
 address	/legal/copyright-policy	docs	-	R	Copyright policy (footer)
@@ -96,7 +96,7 @@ address	/mobile	chrome	-	R	Get the LinkedIn app (footer)
 address	/safety/go	chrome	-	R	External-link interstitial that wraps off-site links ('Apply on company website')
 address	/showcase/<entity>	app	N	R	A showcase page (a company's sub-brand page)
 address	/talent/job-posting-redirect	app	J	W	Hiring side: post a job ('Post a free job')
-address	/trust/verification	app	P	W	Identity verification flow ('Verify now')
+address	/trust/verification	app	P	W	Identity verification flow ('Verify now') -- ADDRESS ONLY: the capability is census row P K2 in words [cold-verified]
 address	/video/event/<opaque>	app	M	R	LinkedIn Live video event page
 address	about.linkedin.com/	off-app	-	R	Corporate About site
 address	business.linkedin.com/advertise	off-app	-	R	Marketing Solutions site (For Business menu)
@@ -118,7 +118,7 @@ control	Apply current filter to show results	app	J	R	Jobs search: apply one filt
 control	Apply to <X> on company website	app	J	W	Apply off-site, on the company's website
 control	Are you finding what you're looking for? <X>	app	J	W	Feedback on search results (yes / no)
 control	Attach a file for your draft conversation	app	M	W	Messaging: attach a file to a draft
-control	Attach an image for your draft conversation	app	M	W	Messaging: attach an image to a draft
+control	Attach an image for your draft conversation	app	M	W	Messaging: attach an image to a draft -- CONTROL ONLY: the capability is census row M M14 [cold-verified]
 control	Business <X>	chrome	-	R	For Business / Business Services menu
 control	Cancel <X> filter	app	J	R	Jobs search: remove one filter pill
 control	Cancel <X> level filter	app	J	R	Jobs search: remove the experience-level filter pill
@@ -127,7 +127,7 @@ control	Change notification preferences	app	M	W	Notification card: change notifi
 control	City, state, or <X> code	app	J	R	Jobs search: location input
 control	Clear search keywords	app	J	R	Jobs search: clear keywords
 control	Clear search location	app	J	R	Jobs search: clear location
-control	Copy link to group	app	N	R	Groups: copy a group's link
+control	Copy link to group	app	N	R	Groups: copy a group's link -- TRUE GAP [cold-verified]
 control	Create cover letter	app	J	W	Jobs AI (Premium): generate a cover letter for a posting
 control	Delete notification	app	M	W	Notification card: delete a notification
 control	Dismiss <X> to work people you may know promo	app	N	W	My Network: dismiss a 'people you may know' promo
@@ -151,17 +151,17 @@ control	Messaging <X> enter to open the list of conversations.	a11y	M	R	Messagin
 control	Open send options	app	M	W	Share: send options (send a post in a message)
 control	Open the options list in your conversation with <X>	app	M	R	Messaging: per-conversation options menu
 control	Public group	app	N	R	Group privacy badge
-control	Rate job tracker as <X>	app	J	W	Feedback on the job tracker
+control	Rate job tracker as <X>	app	J	W	Feedback on the job tracker -- TRUE GAP [cold-verified]
 control	Scroll right	chrome	-	R	Carousel scroll
 control	Search by title, skill, or company	app	J	R	Jobs search: keywords box
-control	Send in a private message	app	M	W	Share a post in a private message
+control	Send in a private message	app	M	W	Share a post in a private message -- TRUE GAP [cold-verified]
 control	Set alert for similar jobs as <X>	app	J	W	Create a job alert from one posting ('similar jobs')
 control	Share that you're hiring	app	J	W	Hiring: share that you're hiring (#Hiring post)
 control	Show all filters. <X> this button displays all available filter options.	app	J	R	Jobs search: the All filters panel
 control	Someone recently clicked on your <X>	app	M	R	Notification text: someone clicked on your profile or post
 control	Start a post	app	M	W	Share box: start a post
 control	Start a post in this group	app	N	W	Groups: start a post in a group
-control	Start a public post	app	M	W	Share box: start a public post
+control	Start a public post	app	M	W	Share box: start a public post -- CONTROL ONLY: the capability is census row M C1 [cold-verified]
 control	Status is offline <X>	app	M	R	Messaging presence indicator
 control	Status is offline <X> group	app	M	R	Messaging presence indicator (group conversation)
 control	Status is reachable <X>	app	M	R	Messaging presence indicator

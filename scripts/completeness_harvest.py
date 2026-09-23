@@ -36,10 +36,12 @@ draw the line somewhere else; drawing it silently is how a count becomes a
 quotation.
 
 A census placeholder segment -- ``<id>``, ``{id}``, ``<slug>``, ``NUMERIC-ID``,
-anything carrying ``placeholder`` -- and a segment the reducer turned into
-``<entity>`` or ``<opaque>`` on the census side, matches ANY one harvested
-segment. The reverse is not true: a census literal never matches a harvested
-id.
+anything carrying ``placeholder`` -- is driven through the same reducer, so it
+becomes ``<entity>`` or ``<opaque>`` exactly as a real id does. A placeholder
+then matches a harvested placeholder and NOTHING ELSE: a census cell that writes
+``<name>`` knows a family and enumerated none of its members, so it never
+credits a literal route (``seg_match`` says why the first version did). A census
+literal never matches a harvested id either.
 
 ## TWO DISCIPLINES IMPORTED, NOT RE-WRITTEN
 
@@ -57,8 +59,10 @@ prefixes on top and never removes one.
 
 Route shapes; query parameter NAMES (never values); integers; capture LABELS
 derived from file names and checked against the same rules; and control
-TEMPLATES in which a word survives only if it is lowercase, or is the first word
-of two or more DISTINCT labels, and every other word is ``<X>``. Everything that
+TEMPLATES in which a word survives only if the census slice files themselves
+use it AND it is the label's first word or written in lowercase; every other
+word is ``<X>`` (``census_vocabulary`` records why a rule about capitals was
+not enough). Everything that
 leaves is vetoed against the exact-value identity wordlist when the key is on
 disk (it reaches across a worktree the way ``tests/repo_paths.py`` does), and
 against the committed-identity SHAPE rules always. **A vetoed pattern is not
@@ -304,17 +308,24 @@ def _mtime(path: Path) -> str:
     return stamp.strftime("%Y-%m-%dT%H:%M:%S")
 
 
-def _git_added(repo: Path, rel: str) -> str:
-    """When a tracked file was first committed -- a fixture's only date."""
+def _git_added(repo: Path, rel: str) -> str | None:
+    """When a tracked file was first committed -- a fixture's only date.
+
+    None when git cannot answer (no git on PATH, a shallow clone that lacks the
+    adding commit), NEVER an empty string: a blank date sorts before every real
+    one and would put the fixture at the head of the discovery curve as if it
+    were the oldest capture -- an outage filed as a reading. The caller falls
+    back to the file's own mtime and the curve says which it used.
+    """
     try:
         proc = subprocess.run(
             ["git", "log", "--diff-filter=A", "--format=%at", "--", rel],
             cwd=str(repo), capture_output=True, text=True, timeout=30)
     except (OSError, subprocess.SubprocessError):
-        return ""
+        return None
     stamps = [s for s in proc.stdout.split() if s.isdigit()]
     if not stamps:
-        return ""
+        return None
     stamp = datetime.fromtimestamp(int(stamps[-1]), tz=timezone.utc)
     return stamp.strftime("%Y-%m-%dT%H:%M:%S")
 
@@ -600,7 +611,7 @@ class Pattern:
     host: str      # "" for www.linkedin.com
     segments: tuple[str, ...]
 
-    def text(self) -> str:
+    def shape(self) -> str:
         path = "/" + "/".join(self.segments) if self.segments else "/"
         return (self.host + path) if self.host else path
 
@@ -656,7 +667,7 @@ def reduce_path(host: str, path: str, veto: Veto | None = None,
     elif not host.endswith("linkedin.com"):
         return None
     pattern = Pattern(host, tuple(out))
-    if veto is not None and not veto.clean(pattern.text(), "pattern"):
+    if veto is not None and not veto.clean(pattern.shape(), "pattern"):
         return None
     return pattern
 
@@ -857,11 +868,11 @@ def classify(pattern: Pattern, census: list[CensusAddress]) -> Verdict:
     exact_rows = [c for c in census if c.level == "row" and exact(c.pattern, pattern)]
     if exact_rows:
         rows = sorted({c.row for c in exact_rows})
-        return Verdict("ROW", "exact", exact_rows[0].pattern.text(), rows,
+        return Verdict("ROW", "exact", exact_rows[0].pattern.shape(), rows,
                        _slice_of(rows))
     exact_prose = [c for c in census if exact(c.pattern, pattern)]
     if exact_prose:
-        return Verdict("PROSE", "exact", exact_prose[0].pattern.text(),
+        return Verdict("PROSE", "exact", exact_prose[0].pattern.shape(),
                        sorted({"%s:%d" % (c.source, c.line) for c in exact_prose})[:3],
                        _slice_by_source(exact_prose))
     related = []
@@ -876,7 +887,7 @@ def classify(pattern: Pattern, census: list[CensusAddress]) -> Verdict:
         rel = "child-of" if any(r == "child-of" for r, _c in top) else "parent-of"
         chosen = [c for r, c in top if r == rel]
         rows = sorted({c.row for c in chosen if c.row})
-        return Verdict("FAMILY", rel, chosen[0].pattern.text(), rows[:6],
+        return Verdict("FAMILY", rel, chosen[0].pattern.shape(), rows[:6],
                        _slice_of(rows) if rows else _slice_by_source(chosen))
     def common(c: CensusAddress) -> int:
         n = 0
@@ -891,7 +902,7 @@ def classify(pattern: Pattern, census: list[CensusAddress]) -> Verdict:
     if best:  # shares a literal prefix, then diverges
         nearest = [c for c in same_host if common(c) == best]
         rows = sorted({c.row for c in nearest if c.row})
-        return Verdict("FAMILY", "sibling", nearest[0].pattern.text(), rows[:6],
+        return Verdict("FAMILY", "sibling", nearest[0].pattern.shape(), rows[:6],
                        _slice_of(rows) if rows else _slice_by_source(nearest))
     return Verdict("NEW", "-", "-", [], "?")
 
@@ -1381,7 +1392,7 @@ def rows_for_tsv(result: dict, annotations: dict | None = None) -> list[list[str
     out: list[list[str]] = []
     rank = {"PROSE": 0, "FAMILY": 1, "NEW": 2}
     cands = sorted(result["candidates"],
-                   key=lambda p: (rank[result["verdicts"][p].klass], p.text()))
+                   key=lambda p: (rank[result["verdicts"][p].klass], p.shape()))
     row_texts = result["row_texts"]
     for pattern in cands:
         v = result["verdicts"][pattern]
@@ -1393,9 +1404,9 @@ def rows_for_tsv(result: dict, annotations: dict | None = None) -> list[list[str
                 kinds |= found
         words = route_words(pattern)
         word_hits = rows_carrying(words, row_texts) if words else []
-        note = annotations.get(("address", pattern.text()), {})
+        note = annotations.get(("address", pattern.shape()), {})
         cell = {
-            "kind": "address", "pattern": pattern.text(), "class": v.klass,
+            "kind": "address", "pattern": pattern.shape(), "class": v.klass,
             "scope": note.get("scope") or scope_of(pattern, seen.regions),
             "relation": v.relation, "nearest_census": v.nearest,
             "census_rows": ",".join(v.rows) or "-",
@@ -1485,6 +1496,8 @@ def report(result: dict) -> None:
     print("=== CAPTURES")
     tiers = collections.Counter(c.tier for c in caps)
     print("  distinct captures read : %d   %s" % (len(caps), dict(sorted(tiers.items()))))
+    print("  distinct surfaces      : %d   (after the folds listed below)"
+          % len(set(result["surfaces"].values())))
     for why, labels in sorted(result["set_aside"].items()):
         print("  set aside              : %d  (%s)" % (len(labels), why))
     print("  exact-value veto       : %s" % ("ARMED" if veto.armed else "DISARMED -- " + veto.why))
@@ -1568,7 +1581,7 @@ def control() -> int:
     """Each control can void the run; each is then driven into its failing state."""
     failures = 0
     result = _planted_result()
-    texts = {p.text(): result["verdicts"][p] for p in result["patterns"]}
+    texts = {p.shape(): result["verdicts"][p] for p in result["patterns"]}
 
     print("=== CONTROL 1  A PLANTED ROUTE ABSENT FROM THE CENSUS IS A CANDIDATE")
     planted = texts.get("/zzz-planted-surface/report")
@@ -1620,7 +1633,7 @@ def control() -> int:
         for name in ccs.SLICES.values():
             (empty / name).write_text("# emptied\n", encoding="utf-8")
         broken = _planted_result(empty)
-        bt = {p.text(): broken["verdicts"][p].klass for p in broken["patterns"]}
+        bt = {p.shape(): broken["verdicts"][p].klass for p in broken["patterns"]}
     print("    census emptied: /analytics/profile-views -> %s" % bt.get("/analytics/profile-views"))
     driven += bt.get("/analytics/profile-views") == "NEW"
     # 3: the shipped reducer swapped for the identity leaks the planted slug
@@ -1630,7 +1643,7 @@ def control() -> int:
         reducer().shape_path = lambda href, depth=3: re.sub(
             r"^https?://[^/]+", "", href).split("?")[0].rstrip("/") or "/"
         bare = _planted_result()
-        emitted = " ".join(p.text() for p in bare["patterns"])
+        emitted = " ".join(p.shape() for p in bare["patterns"])
     finally:
         reducer().shape_path = shipped
     print("    reducer bypassed: planted slug in the output -> %s"

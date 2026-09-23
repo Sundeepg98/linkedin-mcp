@@ -18,18 +18,27 @@ and the orchestrator, not a row.
    order added 0, 0, 1, 8 and 2 new candidate routes, against a criterion of
    zero declared before the first run. The permutation-averaged curve still
    rises by about 1.6 candidates per surface at its end.
-3. **The instrument would have seen the one gap the census missed by accident.**
-   Run against the census as frozen at `1c08e5f` (2026-09-03), it flags
-   `/search/results/people` -- the people search that had no row -- together
-   with 112 other candidates, and 17 of those 113 have since been written into
-   census rows by other waves.
-4. **The cold verifier's true-gap rate is in section 13.**
+3. **Against the census as frozen at `1c08e5f` (2026-09-03) it raises 113
+   candidates, and 17 of them have since been written into census rows by other
+   waves.** `/search/results/people` is among the 113: at that freeze the 23
+   people-search rows already existed and not one of them carried the address,
+   which the census held only in prose. This is a check of the instrument's
+   reach on TODAY's captures -- it does not show that a capability nobody had
+   enumerated would have been found on that day (section 7).
+4. **A cold verifier found 5 true gaps in a random 15. After the lead's review
+   the figure is 6 of 15** (section 13). The other nine are capabilities the
+   census DOES record in words, only without this address or control. So the
+   counts in item 1 are an upper bound on capability gaps, and roughly a third
+   to two fifths of them are real: about 40 to 48 of the 121 app-scope
+   candidates (ESTIMATED from 15; the interval is wide).
 
 ## 1. The question
 
 `scripts/census_completion.py` cannot find a capability nobody enumerated. On
-2026-09-03, 23 unenumerated gaps were found by accident. Completeness has never
-been MEASURED. This probe measures it: harvest what LinkedIn itself rendered in
+2026-09-03 people search surfaced by accident, not by an instrument: the
+capability census of that day logs it as "23 gaps and largely unconsidered",
+with no address on the read allowlist. Completeness has never been MEASURED.
+This probe measures it: harvest what LinkedIn itself rendered in
 the captures already on disk, normalise every address to a path SHAPE, and diff
 the shapes against every address the census records. Axis-hunting: fitness is a
 class the census lacks; the saturation criterion is a measured flattening of the
@@ -170,11 +179,13 @@ furniture:
 
 **A SECOND, WORD-LEVEL READING PER ADDRESS.** A route can be absent as an address
 and present as a capability the census describes in words -- the company-page
-tabs are the plainest case: `J 106-114` describe tabs without writing their
-addresses. So every candidate also carries `word_rows`: the census rows that
+tabs are the plainest case: `J 106` to `J 113` describe tabs without writing
+their addresses. So every candidate also carries `word_rows`: the census rows that
 carry EVERY literal word of the route. **32 of the 68 app-scope candidates carry
 neither the address nor its words anywhere in a census row** -- that is the
-stronger subset.
+stronger subset. The annotations mark 19 of the 68 ADDRESS ONLY -- the
+capability is a census row in words: 15 read by the lead from `word_rows`, 4
+more found by the cold verifier (section 13).
 
 The shipped read boundary refuses 64 of the 68 app-scope candidates on a
 name-free spelling. That is expected, not a finding about them: nothing admits
@@ -186,46 +197,60 @@ Slice is the lead's reading where the derived one (the nearest census rows) was
 ambiguous; every line carries both its derived relation and its hand reading in
 `_audit/_census/completeness-candidates.tsv`.
 
-    slice   addresses (PROSE/FAMILY/NEW)    controls
-    J          35  (0 / 31 / 4)                22
-    P          21  (2 / 17 / 2)                 5
-    M           7  (0 /  6 / 1)                20
-    N           5  (1 /  3 / 1)                 5
-    none        -                               1
-    -------------------------------------------------
-    total      68                              53    (+14 a11y or chrome controls)
+    slice   addresses (PROSE/FAMILY/NEW)   address only   no row found   controls
+    J          35  (0 / 31 / 4)                 14             21            22
+    P          21  (2 / 17 / 2)                  3             18             5
+    M           7  (0 /  6 / 1)                  1              6            20
+    N           5  (1 /  3 / 1)                  1              4             5
+    none        -                                -              -             1
+    ---------------------------------------------------------------------------
+    total      68                               19             49            53
+                                                           (+14 a11y or chrome controls)
 
-What the classes hold, by family (the table has one line per route):
+`address only` is a candidate whose capability a census row names in words (the
+annotation cites the row); `no row found` is every other app-scope address. Four
+of the 19 moved into `address only` only because the cold verifier found their
+rows; of the seven sampled addresses that had no row identified before
+verification, three were true gaps (section 13).
 
-* **J -- jobs and the families the jobs slice already owns.** Twelve LinkedIn
-  Learning routes (home, browse, certifications, career journey, the AI coach,
-  my library, settings, showcases, topics) under a census that knows only the
-  role-play scenarios; ten company-page tabs and product pages; the AI job
-  search results route `/jobs/search-results`, apart from `/jobs/search/`;
-  `/jobs/preferences`; the Top choice collection; the apply entry route; the
-  resume-tailoring route `/job-apply-resources`; career insights; four Premium
-  pages (perks, explore, change plan, and the hub's offers); job posting on the
-  hiring side; the ad library.
-* **P -- profile, settings, account.** The profile's Featured detail page, the
-  add-experience and add-section editors, the second-language profile, the
-  'Open to' explainer pages, the AI 'Enhance profile' overlay, per-skill insight
-  pages; the settings index and five of its category pages (account, ads, data
-  privacy, visibility, sign-in and security); recruiter views (Premium); key
-  skills (Premium); subscription management; identity verification; the
-  followers list.
-* **M -- content.** Creator top posts, a member's all-posts activity, newsletter
-  pages, the report-abuse modal, all-results search reached from a hashtag, the
-  new-thread messaging route, LinkedIn Live event pages.
-* **N -- network.** The My Network hub itself (census prose only), its Discover
-  hub and discovery lists, showcase pages, a group's own settings page.
+**ADDRESS ONLY, 19.** The ten company-page tabs and product pages (`J 106` to
+`J 113` name every tab), the AI job-search results route (`J 1`), the apply
+entry route (`J 60`), role-play's new-scenario route (`J 132`), resume tailoring
+(`J 146`), the new-thread messaging route (`M M1`), the followers list
+(`P L2b`), identity verification (`P K2`), the sign-in settings category
+(`P N4` to `P N11`) and the discovery lists (`N 97`).
 
-Control candidates with the clearest capability shape: create a cover letter,
-tailor a resume, enhance a profile, add a custom profile button, set an alert for
-similar jobs from a posting, share that you're hiring, attach a file or image to
-a message draft, send a post in a private message, start a post in a group,
-delete a notification, change notification preferences, dismiss a
-people-you-may-know promo, hide or report an ad, the content-credentials badge,
-the verified-hiring badge, and five kinds of feedback control on AI answers.
+**NO ROW FOUND, 49, by family:**
+
+* **J, 21.** Eleven LinkedIn Learning routes (home, browse, certifications,
+  career journey, the AI coach, my library and its in-progress list, settings,
+  showcases, topics, course pages) under a census whose only Learning rows are
+  the role-play slice; `/jobs/preferences`; the Top choice collection; career
+  insights; three Premium pages (perks, explore, change plan); job posting on
+  the hiring side; the ad library; two product-page spellings.
+* **P, 18.** The profile's Featured detail page, the add-experience and
+  add-section editors, the second-language profile and a language-specific
+  rendering, the two 'Open to' explainer pages, the 'Enhance profile' AI
+  overlay, profile overlays by id, per-skill insight pages; the settings index
+  and four of its category pages (account, ads, data privacy, visibility);
+  recruiter views (Premium); key skills (Premium); subscription management.
+* **M, 6.** Creator top posts, a member's all-posts activity, newsletter pages,
+  the report-abuse modal, all-results search reached from a hashtag (a true gap
+  in section 13), LinkedIn Live event pages.
+* **N, 4.** The My Network hub itself (census prose only), its Discover hub,
+  showcase pages, a group's own settings page.
+
+Control candidates with a capability shape, as LEADS -- the cold sample found
+two of its five control candidates recorded in words (attaching an image to a
+message is `M M14`, starting a public post is `M C1`), so this axis over-reports
+more than the address axis does: create a cover letter, enhance a profile, add a
+custom profile button, set an alert for similar jobs from a posting, share that
+you're hiring, send a post in a private message (a true gap in section 13),
+copy a group's link (a true gap), start a post in a group, delete a
+notification, change notification preferences, dismiss a people-you-may-know
+promo, hide or report an ad, the content-credentials badge, the verified-hiring
+badge, and five kinds of feedback control on AI answers (rating the job tracker
+is a true gap).
 
 ## 7. The discovery curve
 
@@ -287,6 +312,18 @@ the declared criterion was zero. Two independent readings agree:
 What a single surface can still add is the plainest evidence: the premium hub
 added 9, the role-play page 15, the six company roots read on 2026-09-21 added 8
 that the first company root had not drawn.
+
+**A RETROSPECTIVE, AGAINST THE CENSUS AS FROZEN AT `1c08e5f`.** The five census
+files at that commit (2026-09-03, the reconciliation at 761) were exported to a
+scratch directory and today's harvest was classified against them. That census
+holds 359 address tokens against today's 947. Candidates then: 113; now: 96.
+**17 routes that were candidates against the frozen census are ROW today** --
+an address written into an existing row or a row added -- among them
+`/search/results/people` and `/events` (then PROSE), `/search/results/groups`
+and `/groups/<entity>` (then FAMILY), and `/dashboard` (then NEW). 15 more moved from
+NEW to FAMILY as the census learned the family (the Learning routes, the
+product pages). The people-search rows `N 80` onward existed at that freeze
+and carried no address; the probe reports exactly that absence and no more.
 
 ## 8. Live-capture list
 
@@ -417,8 +454,79 @@ ownership, so it is reported here rather than made.
 
 ## 13. Cold verification
 
-(pending)
+**THE DRAW.** The population is the 121 app-scope candidates (68 addresses, 53
+controls) -- the ones this document puts forward as possible capability gaps;
+docs, off-app, chrome and screen-reader candidates are not claimed and were not
+sampled. Sorted by (kind, pattern), 15 drawn with Python's
+`random.Random(20260923).sample`: 10 addresses, 5 controls.
+
+**THE VERIFIER.** One child, run once, cold: forbidden to read this document, the
+candidates table, the annotations, the script and the test. It had the census
+files and a five-verdict rubric -- TRUE-GAP, CAPABILITY-RECORDED,
+ADDRESS-RECORDED, NOT-A-CAPABILITY, UNCLEAR -- with one strictness rule: a row
+about a NEIGHBOURING capability does not count unless it plainly covers the
+specific one. Every verdict came back citing a census file, row id and line.
+
+    as judged by the verifier       TRUE-GAP 5   CAPABILITY-RECORDED 9   ADDRESS-RECORDED 1
+    after the lead's review         TRUE-GAP 6   CAPABILITY-RECORDED 9   ADDRESS-RECORDED 0
+
+**TWO VERDICTS WERE RECONCILED, EACH ON THE CENSUS TEXT.**
+
+* `/mypreferences/d/categories/sign-in-and-security` -- judged ADDRESS-RECORDED
+  because row `P B10` cites the family prefix `/mypreferences/d/categories/`.
+  A family cited is exactly what the probe calls FAMILY; the census holds the
+  family and not this member. The category's own settings ARE rows, `P N4` to
+  `P N11`, all under the settings-family ruling. Reconciled:
+  CAPABILITY-RECORDED. It is not a miss by the matcher.
+* `/search/results/all` -- judged CAPABILITY-RECORDED on `N 104`, which is
+  company-page search; the verifier's own note calls it a neighbouring match.
+  No census row covers content or all-results search: the nearest are `M C70`
+  (search within a group), `N 59` to `N 61` (following hashtags) and `N 194`
+  (the #Hiring people search). Under the brief's own rule: TRUE-GAP.
+
+**THE RATE.** 5 of 15 as judged (33 percent; Wilson 95 percent interval 15 to 58),
+6 of 15 after review (40 percent; 20 to 64). Carried to the 121 app-scope
+candidates that is about 40 to 48 true gaps, **ESTIMATED**, with an interval
+from about 18 to about 78 -- a sample of 15 does not narrow it further, and the
+verification budget was one pass.
+
+**WHAT THE TRUE GAPS ARE.** LinkedIn Learning's home and My Library -- the
+census holds only the role-play slice of Learning, `J 132` to `J 138`;
+content and all-results search; sending a post in a private message; copying a
+group's link; the job tracker's rating control.
+
+**WHAT THE NINE ARE.** Every one is a capability the census names in words and
+never gave this address or this control: the company About and Home tabs
+(`J 106`, `J 110`), a new message thread (`M M1`), the discovery lists (`N 97`,
+already ruled out), resume tailoring (`J 146`), identity verification (`P K2`),
+the sign-in settings (`P N4` to `P N11`), starting a post (`M C1`) and attaching
+an image to a message (`M M14`). **The probe's address diff therefore measures
+where the census wrote no ADDRESS, which is a strictly larger set than where it
+wrote no CAPABILITY.** The word-level column narrows it and misses synonyms:
+`photo` against `image` is how `M M14` escaped it. All fifteen outcomes are
+written into the annotations, marked `cold-verified`.
 
 ## 14. Gates
 
-(pending)
+**FIRST RUN, `scripts/impact_gate.py --against b0d3ab8` at `da12bf1`: RED, and
+both reds were this lane's.** 37 test files (the selection plus 17 corpus-wide
+guards), 2 failed, 1986 passed, 739 s wall on a box running two other lanes'
+full suites.
+
+* `test_an_outage_is_never_filed_as_an_absence` -- the fixture-date helper
+  returned an empty string when git could not answer, and an empty date sorts
+  before every real one: an outage filed as a reading. It now returns None and
+  the caller falls back to the file's mtime.
+* `test_page_text_is_never_printed` -- 19 sites, one cause. The route type's
+  method was named `text()`, which the guard's taint list holds as Playwright's
+  `response.text()`, so every print of a route SHAPE read as a print of page
+  text. What those sites print is shapes from the shipped reducer -- the same
+  thing `drawn_route_corpus.py` prints, and it has no inventory entry. **No
+  entry was added to the guard's inventory**; the method is now `shape()`,
+  which is what it returns, and the file measures 0 sites. The guard's own
+  scope is unchanged by this and is worth stating: it has no taint source for a
+  capture read from DISK, so it cannot see this file's reads at all. The
+  shaping here is the reducer and the census-vocabulary templater, and their
+  control is `--control` and the test above, not that guard.
+
+(The final run is recorded below.)

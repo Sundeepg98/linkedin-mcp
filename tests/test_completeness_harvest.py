@@ -45,7 +45,7 @@ recorded_route = "/analytics/profile-views"
 
 
 def _verdicts(result: dict) -> dict[str, str]:
-    return {p.text(): result["verdicts"][p].klass for p in result["patterns"]}
+    return {p.shape(): result["verdicts"][p].klass for p in result["patterns"]}
 
 
 def _census_copy(tmp_path: pathlib.Path) -> pathlib.Path:
@@ -57,7 +57,7 @@ def _census_copy(tmp_path: pathlib.Path) -> pathlib.Path:
 def test_a_planted_route_is_a_candidate_and_a_recorded_one_is_not():
     result = ch._planted_result()
     klass = _verdicts(result)
-    candidates = {p.text() for p in result["candidates"]}
+    candidates = {p.shape() for p in result["candidates"]}
 
     assert klass.get(planted_route) == "NEW", (
         "a route no census file has ever written came out %r, not NEW"
@@ -69,7 +69,7 @@ def test_a_planted_route_is_a_candidate_and_a_recorded_one_is_not():
         "parse or the matcher has stopped seeing it" % (recorded_route, klass.get(recorded_route)))
     assert recorded_route not in candidates
     rows = next(result["verdicts"][p].rows for p in result["patterns"]
-                if p.text() == recorded_route)
+                if p.shape() == recorded_route)
     assert any(r.startswith("P ") for r in rows), (
         "the profile slice carries this address in a row and was not credited: %r" % rows)
 
@@ -106,7 +106,7 @@ def test_its_own_output_is_never_read_back_as_census(tmp_path):
 
 def test_no_name_no_query_value_and_no_bundled_route_leaves():
     result = ch._planted_result()
-    emitted = " ".join(p.text() for p in result["patterns"])
+    emitted = " ".join(p.shape() for p in result["patterns"])
     emitted += " " + " ".join(k for s in result["patterns"].values() for k in s.keys)
     emitted += " " + " ".join(result["templates"])
     for needle in ("placeholder-member", "secret", "abc", "zzz-bundled-only",
