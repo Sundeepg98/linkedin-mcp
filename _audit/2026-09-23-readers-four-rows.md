@@ -10,6 +10,16 @@ claude-opus-5-5[1m]
 
 **CORRECTS:** `_audit/_census/network.md` -- row `134` likewise; the pill it names opens into a filter form whose payload needs APPLYING (section 3.0.1).
 
+**FOUR OF THE SHAS IN THIS DOCUMENT ARE BRANCH-ONLY TODAY.** `652cd2f`,
+`aba78f7`, `2bc3720` and `d912b25` are this wave's commits on its worktree
+branch and do not resolve on `master` until that branch merges. Their
+subjects, which survive a rewrite: `652cd2f` *"press: read what a press
+disclosed, through two more closed tables"*; `aba78f7` *"who_viewed_me: open
+the filter pills through the gate; filters skip a dialog"*; `2bc3720`
+*"server: the pill opener's names no longer spread taint through the
+module"*; `d912b25` *"record the zero-press load; aim the feed fire by
+position with two refusing interlocks"*.
+
 **2026-09-23. Wave `readers-four-rows`, base `b0d3ab8`. WRITTEN AS THE WAVE
 RUNS, not at its end.** The four rows `_audit/2026-09-23-bucket3-addresses.md`
 measured as ADMITTED with nothing but a reader between the page and the row
@@ -273,7 +283,16 @@ confined by shape, the feed-item ordinal by `[data-urn]`/`[data-id]` AND by
 term from a closed vocabulary or to shape facts. A detector control on a local
 headless Chromium gates the live load. Its offline test: 14, including the
 closed alphabet over synthetic names; shown failing under three planted
-defects by the child and four more by me (P1-P4, section 8).
+defects by the child (its report, `_state/readers4/probe-slice-report.md`)
+and four more by me, on the additions it did not cycle, each restored by
+sha256 (`615199cf4d7ebf10`):
+
+    BASELINE                                             14 passed
+    P1  role and type crossing the boundary raw          3 failed
+    P2  visible always true                              1 failed
+    P3  article detected by tag only, not by role        1 failed
+    P4  the comments term missing                        1 failed
+    RESTORED                                             14 passed
 
 **THE LOAD -- 18:56-18:58 IST, attach on 127.0.0.1:9224, 2 page loads,
 NOTHING PRESSED.** Detector control PASS (8 of 8). Both pages: `walled`
@@ -351,13 +370,17 @@ has measurably ended** -- its transcript quiet, not its report written.
 
 
 **AND A DEFECT IN THE SHIPPED INSIGHTS READER, on `P O3`'s own surface.** The
-same capture carries five `<label>` elements: three inside the pills, TWO in
-a form inside a closed dialog in the right rail, both under the reader's
-40-character cap. The page has no `data-view-name` at all, so
+section 2.1 capture carries five `<label>` elements: three inside the pills,
+TWO in a form inside a closed dialog in the right rail, both under the
+reader's 40-character cap. The page has no `data-view-name` at all, so
 `PROFILE_VIEWS_INSIGHTS_JS` takes its `<label>` fallback and publishes all
 five as `insights.filters` -- two of them a feedback form's options. Measured
 by my own structure-only census of the capture; L2 reported the same from the
-10:02 capture. Fixed in section 3.
+10:02 capture, and L2 -- not this wave -- declared the DOCUMENT correction of
+`_audit/2026-09-20-the-profile-views-recapture.md` section 9.2 (its two
+"undocumented filters" are those dialog labels), both markers on its own
+branch; this wave adds no second back-pointer there. This wave fixes the CODE
+(section 3), and the live fire read 3 (section 3.0.1).
 
 ---
 
@@ -483,10 +506,12 @@ harness and nothing else.
    them. This is the first press on this page that is KNOWN to have hit an
    analytics control -- by the structural load's order, by the `main`
    scope, and by what the reading saw arrive.
-2. **Every pill is a FILTER FORM.** Each one's disclosed content carries the
-   `show_results` control -- an apply button. Choosing an option and applying
-   it is the submission the disclosing-press ruling refuses by name, which is
-   `N 133`'s blocker, now measured on all three pills.
+2. **Every pill reads as a FILTER FORM -- DERIVED, from one phrase.** At each
+   pill's open moment the phrase "show results" came into view (`appeared`),
+   and nowhere before. Read here as the form's apply control; the reading
+   does not say which element drew the phrase. Choosing an option and
+   applying it is the submission the disclosing-press ruling refuses by name
+   -- `N 133`'s blocker, which the census measured by other means.
 3. **"Show more analytics" is DRAWN** (held at every moment), and the
    zero-press load found it carrying neither sanctioned attribute. What it
    discloses is unreachable by any sanctioned press.
@@ -514,10 +539,12 @@ MEASURED ABOUT ITSELF:**
 
 **VERDICTS, by the rules registered in 3.0 before the fire:**
 
-* **`N 134` -- NOT PROVEN.** No viewer category appeared with a value; the
-  pill is a filter form whose payload -- the interesting viewers themselves
-  -- arrives only after APPLYING it, a submission. Gate PRESS-PERMITTED ->
-  PRESS.
+* **`N 134` -- NOT PROVEN, on the registered clause it failed:** the pill
+  opened under a permitted press and NO viewer category appeared with a
+  value; its 22 new lines matched nothing in the vocabulary. The DERIVED
+  context (point 2): it reads as a filter form, whose payload -- the
+  interesting viewers themselves -- arrives only after APPLYING it, a
+  submission. Gate PRESS-PERMITTED -> PRESS.
 * **`P O3` -- NOT PROVEN.** Its Premium-insights half sits behind a control
   drawn on the page with no sanctioned attribute (condition 2, terminal by
   this route); its filters half is the same three filter forms. Gate
