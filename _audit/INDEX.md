@@ -27,16 +27,16 @@ are listed as `(undated)`; no date is taken from git history, because
 
 | what | count |
 | --- | --- |
-| audit documents git tracks under `_audit` | 234 |
-| of those, carrying a `YYYY-MM-DD-` date prefix | 194 |
+| audit documents git tracks under `_audit` | 235 |
+| of those, carrying a `YYYY-MM-DD-` date prefix | 195 |
 | distinct dates | 15 |
 | documents with no level-1 heading | 2 |
-| `CORRECTS:` marker lines | 93 |
-| `CORRECTED BY:` marker lines | 93 |
-| distinct declared correction edges | 90 |
-| documents something later corrects | 46 |
-| documents that correct something | 66 |
-| documents at either end of a cross-document edge | 93 |
+| `CORRECTS:` marker lines | 94 |
+| `CORRECTED BY:` marker lines | 94 |
+| distinct declared correction edges | 91 |
+| documents something later corrects | 47 |
+| documents that correct something | 67 |
+| documents at either end of a cross-document edge | 94 |
 | intra-document correction markers | 4 |
 | documents that correct themselves later on | 2 |
 | documents no correction marker touches at all | 139 |
@@ -394,6 +394,14 @@ document is dead; it says one thing in it was overtaken and names what.
 - CORRECTED BY [2026-09-20-the-profile-views-recapture.md](2026-09-20-the-profile-views-recapture.md)
 
   > the empty `view_names` is NOT a scope artifact: the scope fix `353c04f` had already landed when this reading was taken, `data-view-name` is absent document-wide, and on this page widening the scope cannot change any field the reader returns. The conclusion that `N 136` is absent survives on other grounds.
+
+### [2026-09-20-the-profile-views-recapture.md](2026-09-20-the-profile-views-recapture.md)
+
+2026-09-20 &middot; The profile-views recapture: one generation, not two, and a defect that was diagnosed backwards
+
+- CORRECTED BY [2026-09-23-lane-l2-refused-presses.md](2026-09-23-lane-l2-refused-presses.md)
+
+  > the captions of 32 and 31 characters are the two radio labels of a closed `<dialog>` form on this page, which the reader's every-`<label>` fallback collects; they are not filters, and no surface changed.
 
 ### [2026-09-20-the-reachable-ceiling.md](2026-09-20-the-reachable-ceiling.md)
 
@@ -1289,6 +1297,14 @@ reach is visible. The quoted reason here is the CORRECTOR's own
 
   > four address verdicts: P F1 and P H11 are pages on the admitted profile, not ADDRESS/ABSENT, and P L4 and N 61 wait on a live read, not on a refused address anybody has seen served.
 
+### [2026-09-23-lane-l2-refused-presses.md](2026-09-23-lane-l2-refused-presses.md)
+
+2026-09-23 &middot; Lane L2: nine refused presses, and none of them is a narrow extension away
+
+- CORRECTS [2026-09-20-the-profile-views-recapture.md](2026-09-20-the-profile-views-recapture.md)
+
+  > its section 9.2 reports two undocumented filters of 32 and 31 characters on the profile-views page; they are the two radio labels of a closed `<dialog>` form on that page, collected by the reader's every-`<label>` fallback, and are not filters.
+
 ## 5. Every document, by date
 
 `CORRECTED` means at least one later document declares a correction of
@@ -1490,7 +1506,7 @@ ways, which is a fact about markers and not a verdict on the document.
 | 2026-09-20 | [2026-09-20-the-premium-block.md](2026-09-20-the-premium-block.md) | The Premium block: 18 rows, none of them blocked on the subscription | corrects x1 |
 | 2026-09-20 | [2026-09-20-the-premium-four.md](2026-09-20-the-premium-four.md) | The Premium four: what a drawn address is worth before anybody opens it |  |
 | 2026-09-20 | [2026-09-20-the-premium-integration.md](2026-09-20-the-premium-integration.md) | THE PREMIUM INTEGRATION: a union neither side's CI ever ran, and a refusal one of them reversed without knowing |  |
-| 2026-09-20 | [2026-09-20-the-profile-views-recapture.md](2026-09-20-the-profile-views-recapture.md) | The profile-views recapture: one generation, not two, and a defect that was diagnosed backwards | corrects x1 |
+| 2026-09-20 | [2026-09-20-the-profile-views-recapture.md](2026-09-20-the-profile-views-recapture.md) | The profile-views recapture: one generation, not two, and a defect that was diagnosed backwards | **CORRECTED x1** corrects x1 |
 | 2026-09-20 | [2026-09-20-the-reachable-ceiling.md](2026-09-20-the-reachable-ceiling.md) | The census is not one schema, and 171 of the answerable GAP rows are writes | **CORRECTED x1** |
 | 2026-09-20 | [2026-09-20-the-reason-kinds.md](2026-09-20-the-reason-kinds.md) | The reason kinds |  |
 | 2026-09-20 | [2026-09-20-the-reopener-triggers.md](2026-09-20-the-reopener-triggers.md) | The reopener triggers | corrects x3 |
@@ -1534,6 +1550,7 @@ ways, which is a fact about markers and not a verdict on the document.
 | 2026-09-21 | [2026-09-21-what-was-ruled.md](2026-09-21-what-was-ruled.md) | A register keyed on RULINGS, not on documents -- and the fourth payment |  |
 | 2026-09-23 | [2026-09-23-bucket1-fires.md](2026-09-23-bucket1-fires.md) | BUCKET 1: the read-direction COVERED-UNFIRED rows, fired once each through attach | corrects x1 |
 | 2026-09-23 | [2026-09-23-bucket3-addresses.md](2026-09-23-bucket3-addresses.md) | Bucket 3, measured: 67 rows, 33 on an admitted page, and 5 a reader could close today | corrects x1 |
+| 2026-09-23 | [2026-09-23-lane-l2-refused-presses.md](2026-09-23-lane-l2-refused-presses.md) | Lane L2: nine refused presses, and none of them is a narrow extension away | corrects x1 |
 
 ## 6. What the scan rejected, could not join, or had to repair
 
