@@ -289,8 +289,9 @@ structure and never by label, on the `/feed/` load it was taking anyway
 record was read here directly rather than relayed: 47 `[aria-expanded]` nodes
 in the page's own order; exactly one classifies `sort`, at index 2, a
 `div[role=button]` in `<main>` that comes before the first post's control
-menu at index 4 -- the FEED-level sort, the `FeedSortOrder` of the first
-bullet, not a comment sort; none classifies as comments; and the page counts
+menu at index 4 -- the FEED-level sort (plausibly what the `FeedSortOrder`
+enum of the first bullet encodes; not measured), not a comment sort; none
+classifies as comments; and the page counts
 0 item containers and 0 articles, so nothing structural scopes a comment
 section to its post. The wave's own write-up lives on its branch, not this
 one.
@@ -311,8 +312,9 @@ The "witness fired, the panel opens" reading P O3 and N 134 rest on
 (`_audit/2026-09-21-what-is-reachable-now.md` section 4.3) came from
 `scripts/_probe_first_sanctioned_press.py`, which calls `press.disclose(page,
 shape="[aria-expanded]", index=0, ...)`. `disclose` presses
-`page.locator(shape).nth(index)` PAGE-WIDE. On the only raw capture of that
-page, node 0 is a header-navigation dropdown button outside `<main>`, and the
+`page.locator(shape).nth(index)` PAGE-WIDE. On the raw capture of that page
+(and on a second one, Entry 9), node 0 is a header-navigation dropdown button
+outside `<main>`, and the
 witness moved `menus` -- what a dropdown menu opening looks like. **"Show more
 analytics" carries neither sanctioned attribute in that capture**, so it is in
 neither node set a caller can name.
@@ -446,7 +448,7 @@ disposable there.
 
 ## 10. GATES RUN, AND GATES NOT RUN
 
-**RUN, all on this worktree, all offline** (per commit in Entries 7 and 8):
+**RUN, all on this worktree, all offline** (per commit in Entries 7, 8 and 10):
 
     scripts/check_read_addresses.py          GREEN, 67 of 67 -- after the table edit, and on
                                              each commit
@@ -696,6 +698,45 @@ and scripts: **SUPPORTED 14, NOT SUPPORTED 0, PARTLY 2, UNCHECKED 0.**
   write-up by a path that does not exist on this branch -- the citation is
   now a description, and the facts it carried are read from that wave's
   record directly.
+
+### Entry 10 -- the gates on `90afd0e`, and where this lane stops
+
+    scripts/census_completion.py --check     exit 0, every headline figure matches its pin
+    scripts/check_read_addresses.py          GREEN, 67 of 67
+    test_a_cited_sha_resolves, test_an_asserted_name_resolves, test_read_addresses
+                                             65 passed
+    scripts/impact_gate.py --against b0d3ab8 PASS over 48 files (2157 tests); NOT CHECKED
+                                             167 of 215 test files; 449.0 s wall clock
+
+**This entry's own commit changes only this document and the blocker map's
+locator scores**, so it carries the quick gates alone (the checker, the pins,
+the correction and cited-SHA guards); the impact gate's last run is the one
+above, on `90afd0e`. A hygiene scan over every line added after the verified
+commit found no absolute path, no non-ASCII byte, and no member slug, urn or
+email; its two path-shaped hits were the `s:/` inside `https://` addresses.
+
+**A LIKELY EXPLANATION FOR AN OLD ANOMALY, offered and not established.** The
+profile-views page has read 8 `[aria-expanded]` nodes in some audits and 9 in
+others, and a 2026-09-21 closure check was refused on an 8-before, 9-after
+pair. The live readers wave's record shows the page's own query counting 8
+where Playwright's locator counts 9 on the same load. If the ninth node is one
+the page's query cannot see and that attaches late, both the 8-or-9 history
+and that refusal would follow; nothing here tests that it does.
+
+**Two sentences of this document were tightened in this entry's commit:**
+section 5 no longer equates the feed's sort control with the `FeedSortOrder`
+enum (plausible, not measured), and section 6.1 no longer calls the first
+capture the only one.
+
+**ONE PROCESS DEVIATION, RECORDED.** While waiting on the impact gate above,
+this lane ran one bounded 100-second foreground loop that polled process
+liveness, against the order's rule never to wait with a sleep loop. It read
+process names and touched nothing, and it was not repeated.
+
+**THE LANE STOPS HERE, on the order's verification budget:** one cold pass,
+taken and acted on. Nothing in it is waiting on this lane. N 133 waits on a
+capture (the Live queue), the seven All-filters rows and M C29 on decisions
+(D1, section 7, C42), and P O3 / N 134 on the live readers wave.
 
 ---
 
