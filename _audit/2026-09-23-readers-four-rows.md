@@ -173,7 +173,118 @@ above), and `tests/test_readonly.py` (290 passed -- the scanner reads
 
 ---
 
-## 4. `M C85` -- STOPPED AT THE ADDRESS. ZERO PAGE LOADS.
+## 2. THE STRUCTURE OF THE TWO PAGES, BEFORE ANY PRESS
+
+### 2.1 `/analytics/profile-views/`, DERIVED from a capture at zero page loads
+
+Source: the gitignored raw capture `_state/cap-profile-views-captions.html` in
+the main checkout (2026-09-20 16:03), read by a scratch parser (declared
+disposable) that prints tags, roles, attribute presence, landmark ancestry and
+label LENGTHS, never a label or text. Phrase identity was tested locally by
+normalised equality against phrases the parser supplied, and only the phrase
+index is printed. Reached independently of the sibling lane L2, whose
+structure-only reading of the 10:02 capture (its
+`_audit/2026-09-23-lane-l2-refused-presses.md`, Entry 2 item 3, in its own
+worktree) says the same thing.
+
+    [aria-expanded], document order -- 8 nodes in this capture
+    idx  tag     role    landmark ancestry        what it is (by structure)
+      0  button  -       nav < header             a 2-character name
+      1  button  -       nav < header             a 12-character aria-label
+      2  button  -       main                     aria-haspopup=dialog, 48-char label
+      3  div     button  main                     a filter pill; wraps <label> (12 chars)
+      4  div     button  main                     a filter pill; wraps <label> (19 chars)
+      5  div     button  main                     a filter pill; wraps <label> (7 chars)
+      6  div     button  footer < aside < main    a right-rail footer dropdown
+      7  div     button  footer < aside < main    the same
+
+    phrase matched locally -> innermost element, and its nearest control
+      "show more analytics"   span < span < button   the button carries NEITHER
+                                                     aria-expanded NOR aria-haspopup
+      "all filters"           span < span < button   the same
+      "past 90 days"          label < div < div[role=button]{aria-expanded}  = node 3
+      "interesting viewers"   label < div < div[role=button]{aria-expanded}  = node 4
+      "company"               label < div < div[role=button]{aria-expanded}  = node 5
+
+    data-view-name attributes anywhere in the capture: 0
+
+**THREE CONSEQUENCES, all DERIVED from one capture until the live load below
+confirms them:**
+
+1. **The 2026-09-21 press, `index=0` page-wide, pressed a NAV BUTTON.** Node
+   0 is in the header's nav with a two-character name -- the account menu's
+   shape -- and nothing of his analytics precedes it. Its witness
+   (`moved: ["expanded_true", "menus"]`) is what a nav dropdown opening looks
+   like. **So "the panel opens" is not evidence about any analytics panel.**
+2. **"Show more analytics" cannot be pressed by this gate at all.** It carries
+   neither sanctioned attribute, so condition 2 refuses it TERMINALLY -- the
+   position the All-filters control on the people search is in. If the
+   Premium insights live behind it, they are NEVER reachable by this route; a
+   third shape is a ruling request with a measured blast radius
+   (`press.py` docstring), not an edit.
+3. **The filter pills ARE reachable, but only through a scope.** Inside `main`
+   the `[aria-expanded]` order is: the info button, the three pills, then the
+   two footer dropdowns -- so a main-scoped index is not a filter-bar index,
+   and a page-wide one lands in the nav.
+
+**AND A DEFECT IN THE SHIPPED INSIGHTS READER, on `P O3`'s own surface.** The
+same capture carries five `<label>` elements: three inside the pills, TWO in
+a form inside a closed dialog in the right rail, both under the reader's
+40-character cap. The page has no `data-view-name` at all, so
+`PROFILE_VIEWS_INSIGHTS_JS` takes its `<label>` fallback and publishes all
+five as `insights.filters` -- two of them a feedback form's options. Measured
+by my own structure-only census of the capture; L2 reported the same from the
+10:02 capture. Fixed in section 3.
+
+---
+
+## 3. THE ANALYTICS READER, BUILT OFFLINE
+
+**`linkedin_who_viewed_me(open_filter_menus=True)`** -- an opt-in on the tool
+that already loads the page, so it costs no page load of its own, and the
+first package caller of `press.disclose`. Default `False` is the tool
+byte-for-byte as it was (asserted at tool level).
+
+* **Which controls:** the `[aria-expanded]` controls inside `main` that are
+  `role="button"`, visible, and wrap a `<label>` -- the pills, by STRUCTURE,
+  re-enumerated before every press. Never a label's text, never a page-wide
+  index (page-wide, index 0 is the nav).
+* **How:** `press.disclose(shape="[aria-expanded]", scope="main",
+  reading="profile_views_filter_menu", read_counters=...)` per pill, at most
+  three, stopping at the first press the gate does not permit.
+* **Priced by:** the page's own HEADLINE viewer count -- the number that would
+  move if a press APPLIED a filter, which is the weak write the surface's
+  structural argument concedes -- plus each nav badge that reads at the first
+  read. Both badges were measured unreadable today by the bucket-1 preflight,
+  and `check_counters` refuses on any unreadable counter AFTER the click, so
+  the caller checks its counters first and presses NOTHING if they do not
+  read (`counters_unreadable_before_any_press`).
+* **Published per pill:** the gate's verdict fields, the witness, the reading's
+  `appeared` / `held` terms from `press.OPEN_READINGS`, any value drawn beside
+  an appeared term, and `new_lines`. The package's own words and integers.
+
+**`dom.PROFILE_VIEWS_INSIGHTS_JS`**: the `<label>` fallback now skips a label
+inside `dialog` / `[role="dialog"]` -- by where it sits, never by what it
+says. Same script, same call site, no waiver moved.
+
+**A GATE WEAKNESS FOUND WHILE WRITING THE CALLER, recorded and NOT repaired
+here:** `press.disclose` reads its BEFORE counters and then clicks, even when
+that reading has already doomed the press (`no_counter_reading`,
+`counter_unreadable`, a sensitive counter missing). All three are knowable
+before the click -- the same class the 2026-09-21 repair moved for the
+url-derivable refusals. A caller can guard it (this one does); the gate
+should refuse them before the click itself. That is a change to the
+exhaustive refusal inventory's classifications and belongs to its own commit.
+
+Tests, all offline: `tests/test_who_viewed_me_filter_menus.py` (10: structure
+not labels, scope `main`, an invisible control is never a pill, the cap, stop
+at the first refusal, no press on unreadable counters, the published
+alphabet, the counter set fixed at the first read, and the two tool-level
+cases), `tests/test_profile_views_filters_skip_dialogs.py` (3, the real script
+in a local headless Chromium, with a control that the same labels OUTSIDE a
+dialog are still read), and `tests/test_press_open_reading.py` gains the
+vocabulary-miss case (`new_lines`).
+ -- STOPPED AT THE ADDRESS. ZERO PAGE LOADS.
 
 **The row:** *Vote in a poll / view poll results*, `R+W`, GAP. Its READ half
 is the results, as COUNTS, under `FEED-CONTENT-READ-RULING`. Its address shape,

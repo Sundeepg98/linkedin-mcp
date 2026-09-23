@@ -393,6 +393,45 @@ OPEN_READINGS: tuple[tuple[str, dict[str, Any]], ...] = (
             ),
         },
     ),
+    (
+        "profile_views_filter_menu",
+        {
+            "surfaces": ("/analytics/profile-views/",),
+            "phrases": (
+                ("time_range", "past 7 days"),
+                ("time_range", "past 14 days"),
+                ("time_range", "past 28 days"),
+                ("time_range", "past 30 days"),
+                ("time_range", "past 90 days"),
+                ("time_range", "past 365 days"),
+                ("time_range", "past year"),
+                ("all_viewers", "all viewers"),
+                ("interesting_viewers", "interesting viewers"),
+                ("recruiters", "recruiters"),
+                ("hiring_managers", "hiring managers"),
+                ("your_network", "your network"),
+                ("your_company", "people at your company"),
+                ("senior_leaders", "senior leaders"),
+                ("decision_makers", "decision makers"),
+                ("show_results", "show results"),
+                ("reset", "reset"),
+                ("cancel", "cancel"),
+                ("apply", "apply"),
+            ),
+            "why": (
+                "P O3 and N 134: what the filter pills on his profile-views "
+                "analytics disclose when opened -- which time ranges, which "
+                "viewer categories, and the menu's own controls. The three "
+                "pills carry [aria-expanded] and a <label> caption (captions "
+                "per dom.PROFILE_VIEWS_INSIGHTS_JS's measured block: a time "
+                "range, 'Interesting viewers', 'Company'). The Company pill's "
+                "options are OTHER PEOPLE'S EMPLOYERS; this entry carries no "
+                "phrase that could match one, and a reading can only ever "
+                "publish these terms and integers, so opening it discloses "
+                "nothing further through this reading."
+            ),
+        },
+    ),
 )
 
 
@@ -1213,6 +1252,11 @@ async def _take_reading(page: Any, key: str) -> dict[str, Any]:
         return {
             "read": True,
             "terms": terms,
+            # THE TWO SIZES OF WHAT THE WALK SAW, so a VOCABULARY MISS is
+            # visible: a press that brought ten new lines into view and matched
+            # none of them reads differently from one that brought nothing.
+            "elements": _as_int((raw or {}).get("elements")),
+            "chunks": _as_int((raw or {}).get("chunks")),
             "hidden_skipped": _as_int((raw or {}).get("hidden_skipped")),
             "chunks_capped": bool((raw or {}).get("chunks_capped")),
         }
@@ -1242,7 +1286,15 @@ def reading_verdict(
     """
     out: dict[str, Any] = {"key": key, "before": before, "open": open_}
     if not before or not open_ or not before.get("read") or not open_.get("read"):
-        out.update({"appeared": None, "held": None, "gone": None})
+        out.update(
+            {
+                "appeared": None,
+                "held": None,
+                "gone": None,
+                "new_lines": None,
+                "new_elements": None,
+            }
+        )
         return out
     was = set((before.get("terms") or {}))
     now = set((open_.get("terms") or {}))
@@ -1251,6 +1303,15 @@ def reading_verdict(
             "appeared": sorted(now - was),
             "held": sorted(now & was),
             "gone": sorted(was - now),
+            # HOW MUCH ARRIVED, whatever it said. ``appeared`` empty with
+            # ``new_lines`` large is a VOCABULARY MISS, not an empty disclosure;
+            # both zero is a press that brought nothing a walk can see. A
+            # capped walk makes the line count a floor, and says so.
+            "new_lines": _as_int(open_.get("chunks")) - _as_int(before.get("chunks")),
+            "new_elements": (
+                _as_int(open_.get("elements")) - _as_int(before.get("elements"))
+            ),
+            "lines_capped": bool(before.get("chunks_capped") or open_.get("chunks_capped")),
         }
     )
     return out

@@ -92,11 +92,15 @@ class Page:
         opened=(),
         scoped_count=1,
         page_count=1,
+        closed_lines=10,
+        open_lines=10,
     ):
         self.url = url
         self.open = False
         self.closed = closed
         self.opened = opened
+        self.closed_lines = closed_lines
+        self.open_lines = open_lines
         self.scoped_count = scoped_count
         self.page_count = page_count
         self.events: list = []
@@ -120,9 +124,10 @@ class Page:
         answer = self.opened if self.open else self.closed
         if answer == "raise":
             raise RuntimeError("synthetic")
+        lines = self.open_lines if self.open else self.closed_lines
         return {
-            "elements": 10,
-            "chunks": 10,
+            "elements": lines * 3,
+            "chunks": lines,
             "chunks_capped": 0,
             "hidden_skipped": 2,
             "non_content_skipped": 0,
@@ -259,6 +264,24 @@ async def test_a_phrase_already_on_the_page_is_not_credited_to_the_press():
 
 
 @pytest.mark.asyncio
+async def test_a_vocabulary_miss_is_visible_as_new_lines():
+    """``appeared`` empty cannot say whether nothing opened or the vocabulary
+    missed what did. The line and element deltas can, in integers."""
+    miss = await press.disclose(
+        Page(closed_lines=10, open_lines=16), shape="[aria-expanded]",
+        read_counters=_steady, reading=SHARE,
+    )
+    assert miss["reading"]["appeared"] == [], miss["reading"]
+    assert miss["reading"]["new_lines"] == 6, miss["reading"]
+    assert miss["reading"]["new_elements"] == 18, miss["reading"]
+    quiet = await press.disclose(
+        Page(closed_lines=10, open_lines=10), shape="[aria-expanded]",
+        read_counters=_steady, reading=SHARE,
+    )
+    assert quiet["reading"]["appeared"] == [] and quiet["reading"]["new_lines"] == 0
+
+
+@pytest.mark.asyncio
 async def test_an_unread_moment_is_undetermined_and_still_closes_the_press():
     """A reading that did not happen is not a reading that found nothing -- and
     a reading that FAILED between the click and the Escape must not skip the
@@ -270,6 +293,7 @@ async def test_an_unread_moment_is_undetermined_and_still_closes_the_press():
     assert ("key", "Escape") in page.events, page.events
     reading = verdict["reading"]
     assert reading["appeared"] is None and reading["held"] is None, reading
+    assert reading["new_lines"] is None, "an unread moment has no line delta either"
     assert reading["open"] == {"read": False, "unreadable": "RuntimeError"}, reading
     # And the verdict is still decided on safety, exactly as without a reading.
     assert verdict.get("permitted") is True, verdict
