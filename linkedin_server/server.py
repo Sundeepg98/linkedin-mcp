@@ -2866,7 +2866,7 @@ async def linkedin_people_search_shape(
       keyword, id or member token is echoed, and the landing is not published.
 
     A KEYWORD THE READ BOUNDARY REFUSES IS ANSWERED BEFORE ANY PAGE LOADS. The
-    boundary scans the whole address, query included, and words like
+    boundary scans the whole address, query included, and words such as
     ``password``, ``settings`` and ``invitation`` trip a write guard. The
     composed address is put to ``readonly.assert_read_url`` first; a refusal
     comes back as ``refused_by_the_read_boundary`` naming the substring and
