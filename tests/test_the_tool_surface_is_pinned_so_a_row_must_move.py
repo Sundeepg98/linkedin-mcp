@@ -95,6 +95,7 @@ PINNED_TOOL_SURFACE: dict[str, tuple[str, ...]] = {
     "linkedin_draft_applications": ("limit",),
     "linkedin_events_home": (),
     "linkedin_follow_company": ("confirm_token", "job_id"),
+    "linkedin_follow_company_page": ("confirm_token", "organisation_id"),
     "linkedin_followed_companies": ("company", "limit"),
     "linkedin_group_memberships": (),
     "linkedin_group_page": ("group_id",),
@@ -217,8 +218,18 @@ PINNED_TOOL_SURFACE: dict[str, tuple[str, ...]] = {
 #: COVERED-PROVEN, because the wave that built them was forbidden the browser
 #: and nothing has seen either tool return a payload live. See
 #: `_audit/2026-09-21-the-three-readers.md`.
-PINNED_TOOL_COUNT = 49
-PINNED_PARAMETER_COUNT = 66
+#:
+#: **RE-PINNED 2026-09-23 AT 50 TOOLS AND 68 PARAMETERS**, by the lane that
+#: shipped the tool, and the census row moves IN THE SAME COMMIT:
+#: `linkedin_follow_company_page("organisation_id", "confirm_token")` banks
+#: `N 47` -- follow an organization's Page from the Page itself -- GAP ->
+#: COVERED-UNFIRED. Not PROVEN: it is a WRITE, built to ready-to-fire behind
+#: the flag and the single-use grant, and no grant was issued for it. Its two
+#: parameters are the two every gated write takes -- a numeric identifier,
+#: refused unless it is 4 to 20 ASCII digits, and the token. See
+#: `_audit/2026-09-23-lane-l4-writes.md`.
+PINNED_TOOL_COUNT = 50
+PINNED_PARAMETER_COUNT = 68
 
 
 def live_surface() -> dict[str, tuple[str, ...]]:

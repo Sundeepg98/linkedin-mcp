@@ -149,6 +149,21 @@ defect, recorded the evidence and deferred the state word to whoever owns the
 vocabulary; `_audit/2026-09-20-the-reopener-triggers.md` is that ruling.
 **GAP is untouched and no capability was added or removed.**
 
+**DELTA, 2026-09-23, LANE L4 -- THE FIRST WRITE ROW IN THIS SLICE TO LEAVE GAP
+BY BEING BUILT.** The blocks above stay UNCHANGED. What moved, taken from this
+slice at `b0d3ab8` with `scripts/count_census_states.py` before and after:
+
+    GAP                         86  ->   85    N 47 left it
+    COVERED-UNFIRED              5  ->    6    N 47 joined it
+
+`N 47` is BUILT and NOT FIRED -- `linkedin_follow_company_page`, behind the flag
+and the single-use grant, with no grant issued -- so COVERED-UNFIRED is this
+section's own word for it, and COVERED-PROVEN would need an audit recording a
+live firing. Re-measure with `scripts/count_census_states.py --expect
+J=56,P=55,M=77,N=85` AT THIS BRANCH ONLY: sibling lanes cut from the same base
+move other slices, so after the merge the whole-census expectation must be
+re-derived, never quoted from here. Detail: `_audit/2026-09-23-lane-l4-writes.md`.
+
 Counted separately so neither inflates the member denominator:
 
     ADMIN-ONLY capabilities (Page admin, group owner/manager,
@@ -393,7 +408,7 @@ read it out of Gmail instead. Rows 23-33 are why that skill exists.
 | # | capability | R/W | state | note |
 |---|---|---|---|---|
 | 46 | Follow the company attached to a job posting | W | **COVERED-UNFIRED** | `linkedin_follow_company`, from `/jobs/view/{id}/`. REV in LinkedIn, **NOT-REV through this server** -- see 8.2 |
-| 47 | Follow an organization's Page from the Page itself | W | GAP | REV. Blocker: no `/company/` pattern. `follow_company`'s own `residue` names the slug-vs-numeric-id gap |
+| 47 | Follow an organization's Page from the Page itself | W | **COVERED-UNFIRED** | **BUILT 2026-09-23 BY LANE L4, TO READY-TO-FIRE, AND NOT FIRED.** `linkedin_follow_company_page(organisation_id)` -- spec `follow_company_page` in `writes.SANCTIONED_WRITES` and `writes.PERFORMABLE`, behind `writes_enabled()` and the single-use, action-bound, target-bound grant; no grant was issued and nothing was pressed on LinkedIn. It acts on the Page ROOT, `/company/<numeric id>/`, admitted 2026-09-20, and it is addressed by the SAME numeric id `linkedin_unfollow_company` keys Manage Pages rows by -- **so this is the first follow whose undo this server can aim**, whenever Manage Pages draws the row. The gate reads the Page's own control (exactly one `Follow <Page name>` control in `<main>` outside `<aside>`, bound to a heading the Page prints, where the measured Page root draws eight such controls and six follow OTHER Pages), ties the page LinkedIn redirects to back to the id through the Page's own people-search link, and verifies on Manage Pages -- a different surface. **WHAT ONLY A LIVE FIRE SETTLES:** the label a FOLLOWED Page's control wears has never been captured, so a Page he already follows reads UNKNOWN and is refused; and whether Manage Pages draws a fresh follow among its ~20 rendered rows is unmeasured, so the verification may answer UNKNOWN on a follow that landed. REV. PRIOR CELL, kept: ~~Blocker: no `/company/` pattern~~ (false since 2026-09-20). `follow_company`'s own `residue` names the slug-vs-numeric-id gap -- the gap this route does not have. See `_audit/2026-09-23-lane-l4-writes.md` section 4 |
 | 48 | Unfollow an organization's Page | W | **COVERED-UNFIRED** | `linkedin_unfollow_company`, by numeric company id off Manage Pages. REV in LinkedIn, NOT-REV here |
 | 49 | Follow a skills Page | W | GAP | REV |
 | 50 | Follow a company or school via an off-site Follow button | W | EXCLUDED-RULED | REV. Off-platform **RETIRED 2026-09-05, `OFF-PLATFORM-WIDGET` (3.4).** The act is pressing a button embedded on a third party's website, and `server.py:5706-5711` already rules that out: driving a form on somebody else's domain, under their terms, is not this server's to do at any capture quality. Only the ROUTE is retired, not the outcome -- `linkedin_follow_company` holds the same follow and is built. REOPENER: none plausible; a third-party widget drivable without leaving linkedin.com is a contradiction. See `_audit/2026-09-05-decide-retire-rulings.md` |

@@ -303,4 +303,6 @@ def test_both_rules_reject_the_registry_that_was_actually_measured():
     # FORTY-EIGHT AND FORTY-NINE FROM 2026-09-21: linkedin_group_page and
     # linkedin_company_page_counts, both READS, each opening an admitted
     # address that no registered tool could navigate to.
-    assert len(_tool_names()) == 49
+    # FIFTY FROM 2026-09-23: linkedin_follow_company_page, a WRITE (census
+    # row N 47), moved with every other count site in the same edit.
+    assert len(_tool_names()) == 50

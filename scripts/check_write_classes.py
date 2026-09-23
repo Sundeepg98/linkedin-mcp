@@ -11,10 +11,20 @@ until this table that answer lived in nobody's column.
 
     R1  the sanctioned reversible first-round class -- save / unsave, follow /
         unfollow, the Open To Work signal
-    R2  deliberately cut by the operator -- apply, connect, a message or
-        InMail send
+    R2  OUTWARD (WAS CUT; ALLOWED 2026-09-23 18:15) -- apply, connect, a
+        message or InMail send. MEMBERSHIP is still defined by the operator's
+        cut, which names the acts; their STATUS changed on a ruling RELAYED
+        to this lane by the orchestrator (see the lane audit, section 5).
+        Every R2 line carries BUILD-READY detail for the lane that builds it.
     R3  other, or undecided -- including rows ADJACENT to R1 whose membership
         is a reading nobody has made
+
+THE R2 BUILD-READY COLUMNS. ``r2_action`` (what the write would be),
+``r2_target`` (opening with one of :data:`WRITE_CLASS_R2_TARGETS`),
+``r2_undo`` (whether it can be undone and how) and ``r2_live_proof`` (the
+minimal live proof and the kind of target the operator must name). Required
+on every R2 line, and ``-`` on every other line -- so detail cannot quietly
+attach to a row nobody has cleared to build.
 
 THE CLASS IS NOT TYPED, IT IS DERIVED FROM THE ACT. Every line names its act
 from the closed vocabulary :data:`WRITE_CLASS_ACTS`, and the class is a property of the
@@ -33,7 +43,9 @@ THIS FILE EXITS 1 WHEN:
   * a line does not cite its own census row, or an R1 / R2 line does not
     cite the passage that DEFINES its class, or any citation fails to resolve;
   * a ``built:`` line names an action that is not in ``writes.PERFORMABLE``,
-    or whose row is still GAP -- or a non-R1 line carries a build disposition.
+    or whose row is still GAP -- or a non-R1 line carries a build disposition;
+  * an R2 line lacks any of its four build-ready columns, its target does not
+    open with one of the four kinds, or a non-R2 line carries any of them.
 
 THE WALK IS REPLICATED AND EVERY DECISION IN IT IS IMPORTED -- the same shape
 ``scripts/census_completion.py`` states for its own ``walk()``. The row filter,
@@ -45,16 +57,17 @@ table needs the CAPABILITY cell and neither shipped walk returns it.
 THE IMPORT OF THE WRITE MODULE IS LAZY, and only the ``built:`` check needs it,
 so the parse and the population stay pure.
 
-SHOWN FAILING: ``tests/test_write_classes.py`` plants thirteen defects into a
+SHOWN FAILING: ``tests/test_write_classes.py`` plants sixteen defects into a
 COPY of the real table -- a missing row, a duplicate, a row that is not a
 write-direction GAP row, a class disagreeing with its act, a CONSISTENT
 widening (act and class rewritten together) that only the defining-passage
 rule can see, an off-vocabulary act, a drifted capability, a missing
 self-citation, a phrase that no longer resolves, a ruling id that is not
 registered, a build naming an action that cannot perform, a classify-only
-class carrying a build, and non-ASCII -- and asserts each turns this red and
-names the row. It asserts green on the real table too. A check that has only
-been seen passing certifies nothing.
+class carrying a build, an R2 line missing its build-ready detail, detail on
+an R3 line, an R2 target outside the four kinds, and non-ASCII -- and asserts
+each turns this red and names the row. It asserts green on the real table
+too. A check that has only been seen passing certifies nothing.
 
 WHAT IT DOES NOT CHECK, so its green is not read as more. WHICH ACT a
 capability is -- ``follow`` for "Follow a skills Page", ``subscribe`` for
@@ -85,7 +98,15 @@ import reader_closable_blockers as rcb  # noqa: E402  (the shipped direction fin
 WRITE_CLASS_TABLE = ROOT / "_audit" / "_census" / "write-classes.tsv"
 
 WRITE_CLASS_COLUMNS = ("key", "capability", "act", "class", "disposition",
-                       "ground", "sources")
+                       "ground", "sources", "r2_action", "r2_target",
+                       "r2_undo", "r2_live_proof")
+
+#: The four R2 build-ready columns, in table order.
+WRITE_CLASS_R2_DETAIL = ("r2_action", "r2_target", "r2_undo", "r2_live_proof")
+
+#: What an outward write lands on. ``r2_target`` must OPEN with one of these,
+#: the four the orchestrator's note named, so the next lane can group by it.
+WRITE_CLASS_R2_TARGETS = ("person", "thread", "job", "post")
 
 WRITE_CLASS_NAMES = ("R1", "R2", "R3")
 
@@ -312,6 +333,29 @@ def shape_problems(rows: list[dict[str, str]],
         if cls in WRITE_CLASS_DEFINING and WRITE_CLASS_DEFINING[cls] not in cites:
             problems.append(f"{tag}: {cls} must cite the passage that defines "
                             f"it: {WRITE_CLASS_DEFINING[cls]}")
+        problems += _r2_detail_problems(r)
+    return problems
+
+
+def _r2_detail_problems(r: dict[str, str]) -> list[str]:
+    """The build-ready columns: all four on an R2 line, none on any other."""
+    tag, cls = r["key"], r["class"]
+    problems: list[str] = []
+    for column in WRITE_CLASS_R2_DETAIL:
+        value = r.get(column, "").strip()
+        if cls != "R2":
+            if value != "-":
+                problems.append(f"{tag}: {column} is for R2 lines only; a {cls} "
+                                f"line carries '-'")
+            continue
+        if value == "-" or len(value) < 10:
+            problems.append(f"{tag}: R2 needs build-ready {column}, in words "
+                            f"the next lane can start from")
+    if cls == "R2":
+        target = r.get("r2_target", "").strip()
+        if target != "-" and not target.startswith(WRITE_CLASS_R2_TARGETS):
+            problems.append(f"{tag}: r2_target must open with one of "
+                            f"{WRITE_CLASS_R2_TARGETS}")
     return problems
 
 

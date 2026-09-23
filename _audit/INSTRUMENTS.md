@@ -9519,7 +9519,11 @@ the sibling lanes), so parallel appends do not collide.
 The census holds 151 write-direction still-GAP rows, and until this entry no
 column said which DECISION governs each one: the operator's reversible first
 round (R1), the three acts he cut (R2), or neither (R3).
-`_audit/_census/write-classes.tsv` is that column, one line per row.
+`_audit/_census/write-classes.tsv` is that column, one line per row. R2 is
+now labelled OUTWARD (WAS CUT; ALLOWED 2026-09-23 18:15) on a ruling relayed
+to the lane by the orchestrator and not yet registered (lane record section
+5); its membership is unchanged, and every R2 line carries four build-ready
+columns that no other line may carry.
 
 ### 61.1 THE CLASS IS A PROPERTY OF THE ACT, NOT A CELL
 
@@ -9559,4 +9563,41 @@ reason, and a `queued:` row that has left are all red.
 
 | path | shown failing by |
 |---|---|
-| `scripts/check_write_classes.py` | `tests/test_write_classes.py`: thirteen plants into a COPY of the real table -- a missing row, a duplicate, a row that is not write-direction GAP (`N 1`), a class disagreeing with its act, the CONSISTENT widening of 61.2, an off-vocabulary act, a drifted capability text, a dropped self-citation, a phrase that no longer resolves, an unregistered ruling id, a build naming an action outside `PERFORMABLE` (convicted twice: the action, and the row still reading GAP), an R2 line carrying a build disposition, and non-ASCII -- each red AND naming its row; a missing table reported as a named problem; the two class-defining passages resolved on their own; the walk's known answers (`M M6`, `P A14`, `N 4` in; `N 1`, `P A1` out); green on the real table with the table asserted equal to the population plus what was built; and the 11 / 23 / 117 split pinned |
+| `scripts/check_write_classes.py` | `tests/test_write_classes.py`: sixteen plants into a COPY of the real table -- a missing row, a duplicate, a row that is not write-direction GAP (`N 1`), a class disagreeing with its act, the CONSISTENT widening of 61.2, an off-vocabulary act, a drifted capability text, a dropped self-citation, a phrase that no longer resolves, an unregistered ruling id, a build naming an action outside `PERFORMABLE` (convicted twice: the action, and the row still reading GAP), an R2 line carrying a build disposition, an R2 line with one of its four build-ready columns dropped to `-`, build-ready detail on an R3 line, an R2 target outside person / thread / job / post, and non-ASCII -- each red AND naming its row; a missing table reported as a named problem; the two class-defining passages resolved on their own; the walk's known answers (`M M6`, `P A14`, `N 4` in; `N 1`, `P A1` out); green on the real table with the table asserted equal to the population plus what was built; and the 11 / 23 / 117 split pinned |
+
+### 61.5 A REDEEMED GRANT COULD BE PERFORMED TWICE, AND NOW IT CANNOT
+
+The single-use grant was single-use at ONE door. `consume` burns the token --
+a second redemption is refused -- and hands back the grant OBJECT; nothing
+stopped a caller holding that object from passing it to `perform` a second
+time. The tool path never does, so the hole was latent; the guarantee now
+does not depend on the tool path. `WriteGrant.performed` is set on entry to
+`perform`, after the redemption check and before anything is navigated, and a
+second entry refuses. Marked on ENTRY rather than after the click, so a
+perform that refuses part-way still spends the grant: a refused write is
+re-attempted from a fresh preview, never from a grant that has already been to
+the page once.
+
+    SINGLE USE IS A PROPERTY OF THE PERMISSION, NOT OF THE TOKEN THAT CARRIED
+    IT. A TOKEN BURNED AT ONE DOOR IS NOT A GRANT SPENT AT THE OTHER.
+
+### 61.6 THE ENTRIES
+
+| path | shown failing by |
+|---|---|
+| `linkedin_server/writes.py` -- `WriteGrant.performed` and its refusal in `perform` | `tests/test_follow_company_page.py::test_the_second_use_guard_is_shown_failing_without_its_flag`: after one real perform, the flag is cleared -- the state every redeemed grant was in before 2026-09-23 -- and the SAME grant object navigates back to the page and clicks again (`clicks_made == 1` on the replay). With the flag left set, `test_control_3_it_refuses_a_second_use_of_the_same_grant` refuses with zero navigations |
+| `tests/test_follow_company_page.py` section 5 -- the three grant controls for `follow_company_page` | each drives the REAL preview, `consume` and `perform` over the synthetic Page root in a local headless Chromium: (1) no grant -- writes off, then writes on with no token, `None`, `True`, a forged token, an unredeemed grant and a non-grant, zero navigations across all of them; (2) another target -- a token minted for one id refused for another, and refused for `unfollow_company` on the SAME id; (3) a second use -- at the token door and at `perform` |
+| `writes.company_page_follow_verdict` (the Page-root follow verdict) | five DERIVED worlds, each one asserted edit of the fixture -- the control relabelled to an unmeasured ON label, the identity link naming another organisation, no identity link, a second follow control moved into the main column, the heading no longer matching the control -- each refused at the verdict AND at the preview with no grant minted; every refusal asserted to quote nothing the page chose |
+| the coercion repair in `_live_control` and `_verify_after` | `tests/test_follow_company_page.py::test_a_string_count_no_longer_carries_itself_out_of_live_control`: with `coerce.as_count` put back to the `int(x or 0)` it replaced, a reaction reading whose count is a page string raises a `ValueError` quoting it; with the repair, the same reading is UNKNOWN and quotes nothing |
+| `writes._label_shape` on the unfollow arm's refusal | `tests/test_follow_company_page.py::test_the_unfollow_arm_no_longer_quotes_the_label_into_a_refusal` plants a person-shaped label; `tests/test_writes.py::test_an_unrecognised_label_is_unknown_and_the_branch_is_a_race_guard` still finds `'Following'` -- the control word survives and the name does not |
+
+### 61.7 DECLARED DISPOSABLE
+
+The scratchpad scripts this lane ran -- the W-GAP enumerator and its diff
+against `d92aa30`, the generator that first wrote the class table, and the
+three offline, shapes-only measurements of the local Page-root capture
+(follow controls by landmark, organisation-id carriers, and the label/heading/
+title relations) -- are declared disposable. What they measured is recorded
+with its numbers in `_audit/2026-09-23-lane-l4-writes.md` section 4.2, and the
+structure is carried by `tests/fixtures/synthetic/company_page_follow.html`,
+which the suite re-reads on every run.

@@ -4,6 +4,8 @@
 true: every write-direction still-GAP row has exactly one line, every class is
 DERIVED from the line's act through a closed vocabulary, every line cites its
 own census row, every R1 / R2 line cites the passage that defines its class,
+every R2 line -- outward, cut until the ruling relayed at 18:15 on
+2026-09-23 -- carries four build-ready columns that no other line may carry,
 and every citation still resolves. A check that runs only when somebody
 remembers to run it has already stopped working, so it runs here.
 
@@ -262,8 +264,43 @@ def test_red_on_a_classify_only_class_carrying_a_build(tmp_path):
                 "is classify-only in this lane")
 
 
+def test_red_on_an_r2_line_without_build_ready_detail(tmp_path):
+    """The relayed 18:15 ruling asks for BUILD-READY detail on every R2 line.
+    A line that drops one of the four columns back to '-' must go red."""
+    lines = _lines()
+    i = _find(lines, lambda r: r["class"] == "R2")
+    row = _row(lines[i])
+    row["r2_live_proof"] = "-"
+    lines[i] = _line(row)
+    _red_naming(_problems(_plant(tmp_path, lines)), row["key"],
+                "R2 needs build-ready r2_live_proof")
+
+
+def test_red_on_build_ready_detail_on_a_row_nobody_cleared(tmp_path):
+    """The other half: detail must not quietly attach to an R3 row, where it
+    would read as a build plan for an act nobody has ruled on."""
+    lines = _lines()
+    i = _find(lines, lambda r: r["class"] == "R3")
+    row = _row(lines[i])
+    row["r2_action"] = "Press the control and send the thing"
+    lines[i] = _line(row)
+    _red_naming(_problems(_plant(tmp_path, lines)), row["key"],
+                "r2_action is for R2 lines only")
+
+
+def test_red_on_an_r2_target_outside_the_four_kinds(tmp_path):
+    lines = _lines()
+    i = _find(lines, lambda r: r["class"] == "R2")
+    row = _row(lines[i])
+    row["r2_target"] = "company -- an organisation Page"
+    lines[i] = _line(row)
+    _red_naming(_problems(_plant(tmp_path, lines)), row["key"],
+                "r2_target must open with one of")
+
+
 def test_red_on_non_ascii(tmp_path):
-    raw = "\n".join(_lines()).encode("ascii") + "—\n".encode("utf-8")
+    # The em dash is built from its code point so this file stays ASCII.
+    raw = "\n".join(_lines()).encode("ascii") + (chr(0x2014) + "\n").encode("utf-8")
     problems = _problems(_plant(tmp_path, [], raw=raw))
     assert any("not ASCII" in p for p in problems), problems
 

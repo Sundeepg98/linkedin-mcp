@@ -1,4 +1,11 @@
-"""The tool surface: forty-nine tools, twelve of which write to LinkedIn.
+"""The tool surface: fifty tools, thirteen of which write to LinkedIn.
+
+THE FIFTIETH IS A WRITE, 2026-09-23, and every site that states these numbers
+moved in the same commit: ``linkedin_follow_company_page``, a follow performed
+on an organisation Page's own root and addressed by the Page's numeric id --
+the id ``linkedin_unfollow_company`` keys its rows by. Census row ``N 47``,
+COVERED-UNFIRED. The headline read "forty-nine tools, twelve of which write"
+until then.
 
 THIS PARAGRAPH HAS NOW BEEN WRONG FIVE TIMES, in both directions, and the
 count is the part that keeps rotting. Until 2026-08-23 it read *"There is no
@@ -142,9 +149,9 @@ assigned to anybody -- it waits for whoever next runs the suite, and in the
 meantime the pin goes on asserting the old number with full confidence.
 
 THE NUMBERS ABOVE ARE DERIVED NOW, and that is a statement about a test rather
-than about an intention. Forty-nine is ``len(await mcp.list_tools())``,
+than about an intention. Fifty is ``len(await mcp.list_tools())``,
 pinned in ``test_server_surface.py`` by
-``test_the_surface_is_exactly_the_fortynine_tools``; the split is pinned by
+``test_the_surface_is_exactly_the_fifty_tools``; the split is pinned by
 ``tests/test_prose_that_makes_a_claim.py::test_the_server_docstring_numbers_are_derived``,
 which reads THESE WORDS and fails if any of the three disagrees with the
 registry.
@@ -157,9 +164,9 @@ POINTER to it was dangling, so a reader who followed it found nothing and
 would reasonably conclude these numbers are unchecked. A citation is a claim
 like any other.
 The surface splits three ways and the split is the part a reader actually
-needs: THIRTY-SEVEN read, TWELVE write, and ZERO are write-shaped,
-registered, gated and unable to act. Thirty-seven plus twelve plus zero is
-forty-nine.
+needs: THIRTY-SEVEN read, THIRTEEN write, and ZERO are write-shaped,
+registered, gated and unable to act. Thirty-seven plus thirteen plus zero is
+fifty.
 
 THE FORTY-EIGHTH AND FORTY-NINTH ARE TWO READS, 2026-09-21, AND THEY ARE ONE
 FINDING RATHER THAN TWO TOOLS. ``linkedin_group_page`` and
@@ -260,12 +267,13 @@ the moment ``update_profile_field`` was given an address while still refusing.
 ``mint`` now refuses on ``PERFORMABLE`` MEMBERSHIP, which is the reason it
 always meant: an address is not a permission.
 
-NOTE THE SEVENTH ACTION THAT HAS NO TOOL. ``writes.SANCTIONED_WRITES`` holds
-THIRTEEN actions where this surface registers TWELVE write-shaped tools, and
+NOTE THE ACTION THAT HAS NO TOOL. ``writes.SANCTIONED_WRITES`` holds
+FOURTEEN actions where this surface registers THIRTEEN write-shaped tools, and
 the missing one is ``set_open_to_work``: it is sanctioned, it is refused by
-``_refuse_unperformable``, and no tool was ever registered for it. So six plus
-six counts TOOLS and thirteen counts ACTIONS, and a reader comparing the two
-numbers is not looking at a discrepancy.
+``_refuse_unperformable``, and no tool was ever registered for it. So thirteen
+counts TOOLS and fourteen counts ACTIONS, and a reader comparing the two
+numbers is not looking at a discrepancy. (THIRTEEN and TWELVE until
+2026-09-23; ``follow_company_page`` added one to each.)
 
 THE LINE NUMBERS THAT USED TO BE HERE ARE GONE, and that is part of this
 correction rather than tidying. It read "pinned at ``test_server_surface.py``
@@ -827,13 +835,13 @@ mcp = FastMCP(
     instructions=(
         "A window onto the operator's OWN LinkedIn account, driven by his own "
         "signed-in browser on his own machine. Most tools read and change "
-        "nothing. TWELVE WRITE: linkedin_save_job, "
+        "nothing. THIRTEEN WRITE: linkedin_save_job, "
         "linkedin_unsave_job, linkedin_unfollow_company, "
         "linkedin_follow_company, linkedin_apply_job, "
         "linkedin_update_setting, linkedin_react_to_item, "
         "linkedin_send_invitation, linkedin_publish_post, "
-        "linkedin_comment_on_item, linkedin_update_profile_field and "
-        "linkedin_send_message. "
+        "linkedin_comment_on_item, linkedin_update_profile_field, "
+        "linkedin_send_message and linkedin_follow_company_page. "
         "THE ELEVENTH is the only one here that can verify its own outcome "
         "by reading the field back; it also returns the PREVIOUS value "
         "verbatim and the exact call that puts it back, which this server "
@@ -944,7 +952,15 @@ mcp = FastMCP(
         "and cannot aim its own unfollow at what a follow creates, because a "
         "posting names its employer by SLUG and the unfollow surface "
         "addresses rows by NUMERIC ID. Reversible in LinkedIn, by hand; not "
-        "by this server. "
+        "by this server. THE THIRTEENTH, 2026-09-23, IS THE FOLLOW WHOSE UNDO "
+        "CAN BE AIMED: linkedin_follow_company_page acts on an organisation "
+        "Page's own root and takes the Page's NUMERIC id -- the id "
+        "linkedin_job_detail returns as company_id and "
+        "linkedin_followed_companies prints -- so its undo is "
+        "linkedin_unfollow_company on that same id, whenever Manage Pages "
+        "draws the row. It refuses a Page he already follows: the label that "
+        "control wears once followed has never been captured, and it reads "
+        "as unknown rather than being guessed. "
         "Endorsing a skill is IMPOSSIBLE AS SPECIFIED and is the one "
         "capability with no tool: zero endorse controls across 13 fixtures "
         "and across 222 controls read live on his own profile, and the only "
@@ -8002,6 +8018,64 @@ async def linkedin_follow_company(
     """
     try:
         return await _write_tool("follow_company", job_id, confirm_token)
+    except Exception as exc:
+        return _error(exc)
+
+
+@mcp.tool()
+async def linkedin_follow_company_page(
+    organisation_id: str, confirm_token: str = ""
+) -> dict[str, Any]:
+    """Follow one organisation Page, from the Page itself, by its numeric id.
+
+    Same two-step shape and the same five gates as ``linkedin_save_job``: no
+    ``confirm_token``, no action -- you get a block to read and a token that
+    works ONCE, only for this Page, only for this verb, within two minutes.
+    Census row ``N 47``.
+
+    WHY THIS EXISTS BESIDE ``linkedin_follow_company``. That tool follows the
+    employer of a JOB POSTING, and a posting names its employer by slug, so
+    the undo -- ``linkedin_unfollow_company``, which is addressed by NUMERIC id
+    -- could not be aimed at what it created. This tool is addressed by the
+    same numeric id the unfollow is. ``linkedin_job_detail`` publishes it as
+    ``company_page_url`` and ``company_id``; ``linkedin_followed_companies``
+    prints it beside every Page you follow.
+
+    WHAT THE PREVIEW READS, on the Page root itself, at one page load. The
+    Page's own follow control -- measured wearing ``Follow `` followed by the
+    Page's name -- must be the ONE such control in the page's main column
+    (LinkedIn draws the same control for every Page it recommends, in a side
+    column), its name must match a heading the Page prints, and the Page's
+    own people-search link must name the id you asked about. That last check
+    is what ties the page to the id: LinkedIn redirects ``/company/<id>/`` to
+    the Page's canonical address, which this block does not print -- it is a
+    slug, and a slug can be a name.
+
+    A PAGE YOU ALREADY FOLLOW IS REFUSED, NOT REPORTED. The label its control
+    wears once followed has never been captured, so this reads ``unknown``
+    rather than guessing -- pressing a follow control in its other state is
+    how a follow becomes an unfollow.
+
+    After the click the result is read off a DIFFERENT surface: your followed
+    companies, where the row for this id must render. That list shows about
+    twenty rows of however many you follow, so ``performed`` may come back
+    ``"unknown"`` on a follow that landed; open your followed companies and
+    look rather than retrying.
+
+    THE PAGE'S ADMINS SEE THEIR FOLLOWER COUNT MOVE, and a follow can surface
+    in your network's feed. The follow is reversible; that it was seen is not.
+
+    Args:
+        organisation_id: the numeric LinkedIn organisation id, 4 to 20 ASCII
+            digits -- as ``linkedin_followed_companies`` prints it, or as
+            ``linkedin_job_detail`` returns it in ``company_id``.
+        confirm_token: leave empty to preview. Pass the token from that
+            preview to actually follow.
+    """
+    try:
+        return await _write_tool(
+            "follow_company_page", organisation_id, confirm_token
+        )
     except Exception as exc:
         return _error(exc)
 

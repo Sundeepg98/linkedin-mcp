@@ -707,6 +707,11 @@ def test_what_ships_is_narrower_than_what_is_sanctioned():
         "update_setting",
         "send_invitation",
         "send_message",
+        # FOURTEEN FROM 2026-09-23: the follow from the Page itself (census
+        # row N 47). It entered the outer set and the middle one in the same
+        # move, as apply did on 2026-08-25 -- sanctioned and performable at
+        # once, on a surface and an anchor already measured.
+        "follow_company_page",
     }
     # THREE UNTIL 2026-08-25, four until 2026-08-30, five since. This line read
     # ``{"save_job", "unsave_job", "unfollow_company"}``.
@@ -813,6 +818,15 @@ def test_what_ships_is_narrower_than_what_is_sanctioned():
         # WriteSpec.click_from_state exists to express, and it arrived with
         # this action.
         "send_message",
+        # THE THIRTEENTH, 2026-09-23, and the first write added under the
+        # operator's reversible-first-round class since that round's own
+        # three: a follow performed on the organisation Page root, addressed
+        # by the numeric id unfollow_company keys its rows by -- so it is the
+        # first follow whose undo this server can aim. Verified on Manage
+        # Pages, a different surface. NOTHING WAS PERMITTED TO LET IT CROSS:
+        # readonly.SANCTIONED_MUTATIONS is unchanged, because the click is
+        # perform()'s existing one, and no boundary moved.
+        "follow_company_page",
     }
     assert writes.PERFORMABLE < sanctioned_actions
 
@@ -1319,6 +1333,10 @@ REVERSIBILITY_CLASS = {
     # withdrawing is permanently forbidden here in either direction.
     "apply_job": "STILL-UNKNOWN",
     "set_open_to_work": "REVERSIBLE",
+    # 2026-09-23. REVERSIBLE on the same measurement as unfollow_company --
+    # every followed Page carries its own unfollow control on Manage Pages --
+    # and the undo is keyed by the same numeric id this action is granted on.
+    "follow_company_page": "REVERSIBLE",
 }
 
 #: Which actions have had their reversibility MEASURED. Split out from the
@@ -1340,6 +1358,7 @@ REVERSIBILITY_MEASURED = {
     "update_setting": False,
     "send_invitation": False,
     "send_message": False,
+    "follow_company_page": True,
 }
 
 def test_the_two_reversibility_tables_agree_with_each_other():
@@ -1421,6 +1440,10 @@ async def test_the_gate_prints_every_measured_verdict_with_its_evidence(
             "target": "self",
             "to_state": "All LinkedIn members",
         },
+        # 2026-09-23. Measured REVERSIBLE on the unfollow's own evidence; its
+        # surface is the organisation Page root, which ``_gate`` does not
+        # freeze, so the loop below serves it from the action's own module.
+        "follow_company_page": {},
     }
     # THE UNMEASURED ACTIONS ARE DELIBERATELY NOT HERE: their reversibility is
     # unmeasured, so they belong to the sibling test below rather than being
@@ -1435,7 +1458,25 @@ async def test_the_gate_prints_every_measured_verdict_with_its_evidence(
 
     for action, kwargs in cases.items():
         spec = spec_for_action(action)
-        block, _nav = await _gate(browser_page, action, **kwargs)
+        if action == "follow_company_page":
+            # THE PAGE ROOT, served by the navigator and the synthetic fixture
+            # that live with the action's own tests -- imported here, never
+            # rebuilt, so this loop reads the same world those tests assert on.
+            # Imported inside the function because that module imports this
+            # one at its top.
+            from tests import test_follow_company_page as page_root
+
+            block = await preview(
+                spec,
+                target=page_root.COMPANY_PAGE_FOLLOW_ID,
+                navigator=page_root._navigator(
+                    page_root.COMPANY_PAGE_FOLLOW_MARKUP,
+                    page_root.COMPANY_PAGE_FOLLOW_ID,
+                ),
+                page=browser_page,
+            )
+        else:
+            block, _nav = await _gate(browser_page, action, **kwargs)
         assert spec.reversibility_measured is True, action
         assert block["reversibility_measured"] is True
         assert "UNMEASURED" not in block["reversibility"]

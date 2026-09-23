@@ -840,6 +840,107 @@ SANCTIONED_WRITES: dict[str, WriteSpec] = {
             "no supervised round trip would show that either."
         ),
     ),
+    # THE FOLLOW FROM THE PAGE ITSELF, 2026-09-23 (census row ``N 47``), and
+    # the first follow in this design whose undo is AIMABLE BY CONSTRUCTION.
+    #
+    # ``follow_company`` acts from a posting, which names its employer by
+    # SLUG, while ``unfollow_company`` acts on Manage Pages rows addressed by
+    # NUMERIC id -- the asymmetry both specs above spend paragraphs on. This
+    # action is addressed by the SAME numeric id the unfollow is, so a follow
+    # made here is one ``linkedin_unfollow_company`` can be pointed straight
+    # back at, whenever Manage Pages draws its row.
+    #
+    # BUILT UNDER THE STANDING SHAPE AND NOTHING WIDER: a spec, a live read of
+    # the page the click lands on, a measured anchor, a verification on a
+    # DIFFERENT surface, and the same two calls behind a single-use,
+    # action-bound, target-bound grant. The address was admitted on 2026-09-20
+    # (``/company/<id>/`` is on the read allowlist and the write door
+    # rebuilds it from the grant); no boundary moved to build this.
+    "linkedin_follow_company_page": WriteSpec(
+        action="follow_company_page",
+        tool_name="linkedin_follow_company_page",
+        # The NUMERIC form only. LinkedIn redirects it to the Page's canonical
+        # address, which is a slug and may carry a name -- so the landing is
+        # never compared as a url; the Page's own people-search link is what
+        # ties the landed page back to this id (see _company_page_follow_verdict
+        # and _assert_landed_on_target).
+        url_template="https://www.linkedin.com/company/{target}/",
+        url_pattern=re.compile(
+            r"^https://www\.linkedin\.com/company/([0-9]{4,20})/$"
+        ),
+        exempt_substring=None,
+        summary=(
+            "Follow one organisation Page, from the Page itself, addressed by "
+            "its numeric id."
+        ),
+        from_state="not_following",
+        to_state="following",
+        target_kind="company_id",
+        state_from="company_page",
+        wrong_state_note=(
+            "This gate acts only from the OFF label it has measured -- "
+            "'Follow ' followed by the Page's own name -- and a Page whose "
+            "control reads anything else is refused rather than pressed. That "
+            "includes a Page you ALREADY follow: the label LinkedIn draws on "
+            "that control once a Page is followed has never been captured, so "
+            "this server cannot recognise it, and pressing a follow control in "
+            "its other state is how a follow becomes an unfollow."
+        ),
+        direction_source=(
+            "the Page's OWN follow control, read off the Page root this action "
+            "clicks on, at no extra page load. MEASURED 2026-09-20 on one "
+            "Page-root capture: eight controls on that page open 'Follow ' and "
+            "every one reads 'Follow <that Page's name>' -- one outside <main>, "
+            "one in <main>, six in <aside>, where LinkedIn recommends OTHER "
+            "Pages. So the gate requires exactly one such control in the main "
+            "column outside every aside, requires its name to be 'Follow ' "
+            "followed by a heading the Page prints in that same column, and "
+            "requires the Page's own people-search link to name the numeric id "
+            "this action was asked about. Three agreements, all read on the "
+            "page; none typed here."
+        ),
+        reversibility="reversible by unfollowing the same Page",
+        reversibility_measured=True,
+        reversibility_class="REVERSIBLE",
+        reversibility_evidence=(
+            "MEASURED 2026-08-24 by observation, on the one surface that lists "
+            "followed Pages: LinkedIn writes the inverse action into every "
+            "row's own accessible name -- 'Click to stop following <Page>' -- "
+            "across 80 rows in five independent captures, and "
+            "linkedin_unfollow_company performs exactly that inverse, keyed by "
+            "the numeric id this action is addressed by. A follow is a "
+            "membership LinkedIn itself offers to reverse, on a control this "
+            "server already presses."
+        ),
+        reversible_by=(
+            "THIS SERVER, WHEN THE ROW RENDERS: linkedin_unfollow_company is "
+            "addressed by the SAME numeric id this action is granted on, which "
+            "makes this the first follow in the design whose undo can be aimed "
+            "without a resolver. What still stands between a follow made here "
+            "and that undo is COVERAGE, not identity: Manage Pages renders "
+            "about twenty rows of however many he follows and offers no "
+            "pagination, so a Page whose row is not drawn cannot be unfollowed "
+            "here -- then it is him, by hand, in LinkedIn's own interface."
+        ),
+        residue=(
+            "STILL-UNKNOWN, and unmeasurable by reading: WHO SAW IT. A follow "
+            "can surface in his network's feed and a Page's admins see their "
+            "follower count move; the data is restorable and the impression "
+            "is not. SECOND: the label the Page's control wears ONCE FOLLOWED "
+            "has never been captured, so a Page he already follows reads "
+            "UNKNOWN at preview rather than 'following'. THIRD: whether Manage "
+            "Pages draws a freshly followed Page among the rows it renders is "
+            "unmeasured, so the verification may honestly answer UNKNOWN on a "
+            "follow that landed."
+        ),
+        reversibility_procedure=(
+            "SETTLED for the verdict by reading, 2026-08-24: every followed "
+            "Page carries its own unfollow control. What a supervised round "
+            "trip would add is the residue above -- the Page-root ON label and "
+            "whether Manage Pages draws a fresh follow -- and neither is "
+            "needed for the verdict."
+        ),
+    ),
     "linkedin_set_open_to_work": WriteSpec(
         action="set_open_to_work",
         tool_name="linkedin_set_open_to_work",
@@ -2082,6 +2183,13 @@ class WriteGrant:
     token: str
     minted_at: float
     consumed: bool = False
+    #: SET BY :func:`perform` ON ENTRY, and refused on a second entry. Added
+    #: 2026-09-23. ``consume`` has always burned the TOKEN, so a token cannot
+    #: be redeemed twice -- but it hands back the grant OBJECT, and nothing
+    #: stopped a caller holding that object from handing it to ``perform``
+    #: again. The tool path never does; the guarantee now does not depend on
+    #: that. Single-use at both doors.
+    performed: bool = False
     preview: dict[str, Any] = field(default_factory=dict)
     #: The reading this grant was minted from. Not decoration: it is the only
     #: durable evidence that a grant came from a preview that looked, and the
@@ -3172,6 +3280,179 @@ async def _read_followed_state(
     return facts, str(verdict.get("state") or UNKNOWN), str(verdict.get("why") or "")
 
 
+#: A reader-reported exception TYPE is echoed only if it is spelled like one.
+_EXCEPTION_TYPE_NAME = re.compile(r"^[A-Za-z_][A-Za-z0-9_]{0,63}$")
+
+#: THE WORDS LINKEDIN USES ON ITS OWN FOLLOW AND SAVE CONTROLS, and the only
+#: words :func:`_label_shape` repeats verbatim. A CLOSED vocabulary on purpose:
+#: a word is repeated because it is known to be LinkedIn's furniture, never
+#: because it failed to look like a name -- ``shape.looks_name_shaped`` calls
+#: ``Following`` name-shaped, and a heuristic that cannot tell a verb from a
+#: surname is not what stands between a refusal and an exception.
+_LABEL_WORDS: frozenset[str] = frozenset(
+    {
+        "click", "to", "stop", "follow", "following", "unfollow", "save",
+        "saved", "unsave", "unsaved", "the", "job", "page", "subscribe",
+        "subscribed", "unsubscribe",
+    }
+)
+
+
+def _label_shape(label: Any) -> str:
+    """An accessible name with every word outside :data:`_LABEL_WORDS` reduced
+    to ``W<length>``.
+
+    FOR A REFUSAL THAT MUST NAME WHAT IT SAW AND MAY NOT QUOTE IT. The two
+    rules meet on the unfollow arm: a refusal that reports only what it did not
+    match is half a measurement, and the refusal is raised, so a Page's or a
+    person's name inside it would leave the process in an exception. The
+    shape keeps the half a reader needs -- which of LinkedIn's words were
+    there, and where -- and drops the half nobody may print.
+    """
+    words = str(label or "").split()
+    return " ".join(
+        word if word.casefold() in _LABEL_WORDS else f"W{len(word)}"
+        for word in words
+    )
+
+
+def company_page_follow_verdict(
+    reading: dict[str, Any], target: str
+) -> tuple[dict[str, Any], str, str]:
+    """``(facts, state, why)`` for ``follow_company_page``, from ONE reading.
+
+    PURE, and shared by the preview and the click on purpose: ``from_state``
+    is compared against a live reading at BOTH ends of a write, and two
+    readers of one page are two places for those readings to disagree --
+    ``tests/test_preview_state_and_click_state.py`` exists because they once
+    did. Both ends call ``dom.read_company_page_follow`` and then THIS.
+
+    EVERY ``why`` IS BUILT FROM COUNTS AND THE CALLER'S OWN TARGET, NEVER FROM
+    THE PAGE. That is not tidiness: ``_direction`` and ``_take_observation``
+    raise with ``state_why`` appended, and ``perform`` raises with the
+    click-time ``why``, so anything a ``why`` quotes can leave the process
+    inside an exception -- and ``ERROR-MESSAGE-RULED-AT-THE-RAISE`` forbids a
+    value the page chose inside any exception. The Page's name travels only in
+    ``facts``, which the confirm block prints and nothing raises.
+
+    ONE STATE IS REACHABLE BESIDES ``unknown``: ``not_following``. The label a
+    followed Page's control wears has never been captured, so this cannot say
+    ``following``, and it does not pretend to. For a follow that is the safe
+    direction twice over -- the gate acts only from the measured OFF shape,
+    and anything else refuses rather than pressing a control whose other
+    state is an unfollow.
+    """
+    controls = coerce.as_count(reading.get("follow_controls"))
+    anywhere = coerce.as_count(reading.get("follow_controls_anywhere"))
+    bound = coerce.as_count(reading.get("bound_controls"))
+    links = coerce.as_count(reading.get("identity_links"))
+    malformed = coerce.as_count(reading.get("identity_malformed"))
+    ids = [
+        value
+        for value in (reading.get("identity_ids") or [])
+        if isinstance(value, str) and value and set(value) <= set("0123456789")
+    ]
+    subject = reading.get("subject")
+    subject = subject if isinstance(subject, str) and subject else None
+    facts: dict[str, Any] = {
+        "company": subject,
+        "company_id": target,
+        "follow_controls_in_main_column": controls,
+        "follow_controls_on_the_page": anywhere,
+        "controls_bound_to_the_pages_own_heading": bound,
+        "identity_links": links,
+        "identity_ids_named": len(ids),
+    }
+    error = reading.get("error")
+    if error:
+        kind = str(error)
+        kind = kind if _EXCEPTION_TYPE_NAME.match(kind) else "an exception"
+        return (
+            facts,
+            UNKNOWN,
+            f"the Page's controls could not be read on this load ({kind} was "
+            "raised inside the reader, and its message is not repeated here). "
+            "A gate whose read failed reports the failure rather than a state.",
+        )
+    if len(ids) != 1:
+        return (
+            facts,
+            UNKNOWN,
+            f"the Page's own people-search link(s) in its main column -- "
+            f"{links} read, {malformed} unreadable -- name {len(ids)} distinct "
+            "organisation id(s), where exactly one is what ties the page the "
+            "browser landed on to the numeric id this action was asked about. "
+            "LinkedIn redirects the numeric address to the Page's canonical "
+            "one, so the url cannot answer that; without the link, nothing "
+            "here can.",
+        )
+    if ids[0] != target:
+        return (
+            facts,
+            UNKNOWN,
+            f"the page the browser is on names a DIFFERENT organisation id in "
+            f"its own people-search link than {target}, the id this action was "
+            "asked about. The id it names is not repeated here. Whatever the "
+            "redirect did, this is not the Page the grant would be for.",
+        )
+    if controls == 0:
+        return (
+            facts,
+            UNKNOWN,
+            f"no control whose name opens {dom.COMPANY_PAGE_FOLLOW_PREFIX!r} is "
+            f"in the Page's main column ({anywhere} on the page in all). Either "
+            "the Page had not drawn its controls, or its own control wears a "
+            "label this server has not measured -- and the label a Page he "
+            "ALREADY follows draws has never been captured, so that is where a "
+            "followed Page lands. UNKNOWN, never 'following' and never 'not "
+            "following'.",
+        )
+    if controls > 1:
+        return (
+            facts,
+            UNKNOWN,
+            f"{controls} controls whose name opens "
+            f"{dom.COMPANY_PAGE_FOLLOW_PREFIX!r} are in the Page's main column, "
+            "where the measured Page root draws exactly one; LinkedIn "
+            "recommends OTHER Pages with the same control, so pressing one of "
+            "several would be picking by position.",
+        )
+    if bound != 1 or subject is None:
+        return (
+            facts,
+            UNKNOWN,
+            "the one follow control in the Page's main column does not read "
+            f"{dom.COMPANY_PAGE_FOLLOW_PREFIX!r} followed by any heading the "
+            "Page prints in that column, so it cannot be shown to be THIS "
+            "Page's control rather than a recommended one. Neither the name it "
+            "wears nor the headings are repeated here.",
+        )
+    return (
+        facts,
+        "not_following",
+        "exactly one control in the Page's main column opens "
+        f"{dom.COMPANY_PAGE_FOLLOW_PREFIX!r}, and the rest of its name is the "
+        f"Page's own heading -- the control stating what a click will do, of "
+        f"{anywhere} such controls on the page. The Page's own people-search "
+        f"link names {target}, the id this action was asked about, which is "
+        "what ties the page LinkedIn redirected to back to the grant. Read off "
+        "the very control the click would land on.",
+    )
+
+
+async def _read_company_page_follow(
+    page: Any, spec: WriteSpec, *, target: str = ""
+) -> tuple[dict[str, Any], str, str]:
+    """The Page root's own follow control, read for ``follow_company_page``.
+
+    A THIN READER OVER TWO PIECES THAT ARE TESTED APART: the locator reading
+    in ``dom.read_company_page_follow``, driven over a fixture in a real
+    browser, and the pure verdict above, driven over hand-built readings.
+    """
+    reading = await dom.read_company_page_follow(page)
+    return company_page_follow_verdict(reading, target)
+
+
 async def _read_apply_route(page: Any, target: str) -> tuple[str, str]:
     """Which way this posting is applied to, off the posting already open.
 
@@ -4189,6 +4470,40 @@ async def observe(
             same_page_as_action=True,
         )
 
+    if spec.state_from == "company_page":
+        # ONE load, OF THE PAGE THE CLICK LANDS ON, and the url is the spec's
+        # own template filled from the target -- the numeric id -- through the
+        # read door like every other preview load. LinkedIn redirects it to the
+        # Page's canonical address; the reader establishes WHICH Page that is
+        # from the Page's own people-search link, never from the landed url.
+        #
+        # THE URL RECORDED IS THE ONE ASKED FOR, AND THE LANDING IS A BOOLEAN.
+        # Every other branch records where it landed, and on a posting or a
+        # list that is an address this package composed. Here the landing is
+        # the Page's canonical address -- a slug, which is a name, and for a
+        # sole trader or an eponymous firm a person's -- so it is published the
+        # way ``linkedin_company_page_counts`` publishes it: as ``redirected``,
+        # never as a string. What was READ is still the page the browser is on;
+        # the Page's own people-search link is what says which Page that is.
+        url = str(spec.url_template or "").format(
+            target=url_target_of(spec, target)
+        )
+        landed = await _load(navigator, page, url, surface="organisation Page")
+        facts, state, why = await _read_company_page_follow(
+            page, spec, target=target
+        )
+        facts["redirected"] = str(landed).rstrip("/") != url.rstrip("/")
+        return _record(
+            spec,
+            target=target,
+            facts=facts,
+            facts_url=url,
+            state=state,
+            state_why=why,
+            state_url=url,
+            same_page_as_action=True,
+        )
+
     if spec.state_from == "saved_list":
         # TWO loads, and the gate says so. The facts come off the posting; the
         # direction comes off his saved list, because the save control's ON
@@ -4588,6 +4903,24 @@ def _render(
         where["job_id"] = observation.target
         where["title"] = observation.facts.get("title")
         where["company"] = observation.facts.get("company")
+    elif spec.target_kind == "company_id" and spec.state_from == "company_page":
+        # THE PAGE ROOT, NOT A LIST. Two actions share this target kind and
+        # read different surfaces, and until 2026-09-23 there was one of them,
+        # so this branch keyed on the kind alone and printed Manage Pages'
+        # coverage sentence. A follow read off the Page itself has no list to
+        # cover; what it has instead is the identity check, and that is what
+        # the block says.
+        where["company_id"] = observation.target
+        where["company"] = observation.facts.get("company")
+        where["read_from_the_pages_own_control"] = True
+        where["identity"] = (
+            "the Page's own people-search link names this numeric id. LinkedIn "
+            "redirects the numeric address to the Page's canonical one, and "
+            "that link is what ties the page the browser landed on back to "
+            "the id you asked about. The canonical address is not printed: it "
+            "is a slug, and a slug can be a name."
+        )
+        where["redirected"] = observation.facts.get("redirected")
     elif spec.target_kind == "company_id":
         # THE NAME IS THE FIELD HE CAN CHECK; the id is what the click is
         # anchored to. Both are printed, and the coverage numbers with them --
@@ -4944,6 +5277,35 @@ _SAVE_FAMILY: frozenset[str] = frozenset({"save_job", "unsave_job"})
 
 PERFORMABLE: frozenset[str] = frozenset(
     {
+        # THE THIRTEENTH, 2026-09-23, census row ``N 47``, and the first write
+        # added under the operator's reversible-first-round class since the
+        # round's own three. Every clause the others needed is true of it:
+        #
+        #   a measured surface   /company/<numeric id>/, on the read allowlist
+        #                        since 2026-09-20 and loaded live on six Pages
+        #                        on 2026-09-21 by linkedin_company_page_counts
+        #   a measured anchor    'Follow ' + the Page's own name, measured on a
+        #                        Page-root capture: one such control in the
+        #                        main column, six more in the recommended
+        #                        <aside>, one in a header outside <main>
+        #   an aimable target    exactly one control in <main> outside <aside>,
+        #                        bound to the Page's own heading, on a page
+        #                        whose people-search link names the grant's id
+        #   a real verification  a DIFFERENT surface -- Manage Pages, where
+        #                        the row for this numeric id must render
+        #   no new permission    the click is perform()'s existing one;
+        #                        readonly.SANCTIONED_MUTATIONS is unchanged,
+        #                        and no boundary moved
+        #
+        # WHAT IT CANNOT SAY is the label a FOLLOWED Page's control wears --
+        # never captured -- so a Page he already follows reads UNKNOWN and is
+        # refused rather than pressed. That is disclosed in ``residue`` and in
+        # ``wrong_state_note``, and it fails in the safe direction.
+        #
+        # ENABLING IS NOT FIRING. It is behind the same flag and the same
+        # two-call gate as every other write, and nothing in this lane issued
+        # a grant for it.
+        "follow_company_page",
         # THE TWELFTH, 2026-09-02, AND IT SHIPS EXPECTING TO REFUSE.
         #
         # It is here on the operator's ruling and on a design that is NOT the
@@ -5392,6 +5754,13 @@ def anchor_label_for(
         # to, and already printed in the preview he confirms.
         field, _, _ = str(target or "").partition(TARGET_JOIN)
         return field.strip() or None
+    if spec.action == "follow_company_page":
+        # A PREFIX, like the unfollow's, and for the same reason: LinkedIn
+        # writes the Page's own name into the label, which makes it a strong
+        # anchor and an unusable table key. The rest of the name is checked
+        # against the Page's own heading on the page itself, at preview and
+        # again at click time -- see ``company_page_follow_verdict``.
+        return dom.COMPANY_PAGE_FOLLOW_PREFIX
     if spec.action == "unfollow_company":
         return UNFOLLOW_ANCHOR_PREFIX
     if spec.action == "follow_company":
@@ -5692,6 +6061,16 @@ _WRITE_SURFACE: dict[str, str] = {
     "setting_and_value": "settings",
 }
 
+#: THE SAME QUESTION, ANSWERED PER ACTION where two actions share a target
+#: kind and land on different surfaces. Consulted before :data:`_WRITE_SURFACE`.
+#: Added 2026-09-23 with ``follow_company_page``: it is addressed by a company
+#: id, as the unfollow is, and it lands on the Page root rather than on Manage
+#: Pages -- so the kind-keyed table would have named the wrong page in the one
+#: message he reads when a write meets an auth wall.
+_WRITE_SURFACE_FOR_ACTION: dict[str, str] = {
+    "follow_company_page": "organisation Page",
+}
+
 
 #: WHERE HE GOES TO SETTLE AN OUTCOME THIS SERVER COULD NOT, per action, as
 #: ``(url, what to call it in a sentence)``.
@@ -5742,6 +6121,9 @@ _WHERE_TO_LOOK: dict[str, str] = {
     # "Open your followed companies if you want a second opinion." This is
     # that sentence, in the field built for it.
     "follow_company": "your followed companies",
+    # The same list the verification reads, and the same list the undo acts
+    # on: the row for this numeric id is the whole of the evidence either way.
+    "follow_company_page": "your followed companies",
     "update_setting": "your dark-mode setting",
     "update_profile_field": "the profile editor for that field",
     # THE TWELFTH, and the only row here naming a surface this server
@@ -5773,7 +6155,7 @@ _WHERE_TO_LOOK: dict[str, str] = {
 #: applied to the receipt.
 _TOGGLE_ACTIONS: frozenset[str] = frozenset(
     {"save_job", "unsave_job", "follow_company", "unfollow_company",
-     "react_to_item"}
+     "react_to_item", "follow_company_page"}
 )
 
 
@@ -5874,6 +6256,15 @@ _VERIFIED_FROM["send_message"] = (
     "happened, which is the honest shape rather than a shortfall."
 )
 _VERIFIED_FROM["unsave_job"] = _VERIFIED_FROM["save_job"]
+_VERIFIED_FROM["follow_company_page"] = (
+    "a DIFFERENT surface from the one clicked: Manage Pages, where a followed "
+    "Page is a row keyed by the same numeric id this action was granted on. "
+    "The click happens on the Page root and the confirmation is read off the "
+    "list, which is the shape the save pair has and follow_company lacks. "
+    "What the list cannot give is COVERAGE: it renders about twenty rows of "
+    "however many Pages he follows, so a follow that landed but whose row is "
+    "not drawn is reported UNKNOWN, never as not having happened."
+)
 
 
 #: A landed profile path, split into the MEMBER SEGMENT and everything after
@@ -5892,6 +6283,36 @@ _MEMBER_PATH = re.compile(r"^(?:/in/)([^/?#]+)(/.*)?$")
 def _path_of(url: str) -> str:
     """The path of a url, with no scheme, host, query or fragment."""
     return urlsplit(str(url or "")).path
+
+
+#: An organisation Page ROOT: one segment under ``/company/``, nothing below.
+#: The segment is a slug or an id and is never read -- it is only required to
+#: be ONE segment, so a tab (``/people/``, ``/jobs/``) or a nested page is not
+#: mistaken for the root.
+_ORGANISATION_ROOT_PATH = re.compile(r"^/company/[^/?#]+/?$")
+
+
+def _is_an_organisation_root(url: str) -> bool:
+    """Is ``url`` an organisation Page root on LinkedIn's own host?"""
+    parts = urlsplit(str(url or ""))
+    return (
+        parts.scheme == "https"
+        and parts.netloc == "www.linkedin.com"
+        and bool(_ORGANISATION_ROOT_PATH.match(parts.path))
+    )
+
+
+def _publishable_landing(spec: "WriteSpec", url: str, landed: str) -> str:
+    """The address a RECEIPT may print for where the click happened.
+
+    An organisation Page root lands on the Page's canonical address, which is
+    a slug -- a name, and for a sole trader a person's -- so the receipt prints
+    the address this server ASKED FOR, as the preview already does. Every
+    other surface lands on an address this package composed, and prints it.
+    """
+    if spec.state_from == "company_page":
+        return url
+    return landed
 
 
 def _assert_landed_on_target(
@@ -5939,6 +6360,24 @@ def _assert_landed_on_target(
                 "LANDING IS WITHHELD rather than named -- see "
                 f"linkedin_server/landing.py. What is safe to say about it -- "
                 f"{landing.withheld(landed)}."
+            )
+        return
+    if spec.state_from == "company_page":
+        # THE ORGANISATION PAGE ROOT, WHICH REDIRECTS, AND THE URL CANNOT SAY
+        # WHICH PAGE IT IS. ``/company/<id>/`` lands on the Page's canonical
+        # address -- a slug -- so a whole-url comparison would refuse every
+        # correct landing, and a slug-to-id resolution does not exist in this
+        # package. What this checks is the SHAPE: an organisation Page root on
+        # LinkedIn's own host, one path segment, nothing below it. WHICH Page
+        # is established next, by ``_live_control``, off the Page's own
+        # people-search link -- the same check the preview made.
+        if not _is_an_organisation_root(landed):
+            raise WriteAttemptError(
+                "refusing to click: this action is performed on the "
+                "organisation Page its grant names, and the browser landed "
+                "somewhere that is not an organisation Page root. THE LANDING "
+                "IS WITHHELD rather than named; what is safe to say about it "
+                f"-- {landing.withheld(landed)}."
             )
         return
     # THE SUBJECT HALF, through the same derivation every other site uses --
@@ -6539,7 +6978,7 @@ async def _live_control(
         reading = await dom.read_comment_surface(page)
         if reading.get("error"):
             return (UNKNOWN, str(reading["error"]), "")
-        editors = int(reading.get("editors") or 0)
+        editors = coerce.as_count(reading.get("editors"))
         if editors != 1:
             return (
                 UNKNOWN,
@@ -6550,7 +6989,7 @@ async def _live_control(
                 "",
             )
         names = dict(reading.get("names") or {})
-        affordances = int(names.get(dom.COMMENT_CONTROL_NAME, 0))
+        affordances = coerce.as_count(names.get(dom.COMMENT_CONTROL_NAME, 0))
         return (
             "comment_control_present",
             "the permalink drew exactly one editor named "
@@ -6588,7 +7027,7 @@ async def _live_control(
         send = await dom.read_compose_send_state(page)
         if send.get("error"):
             return (UNKNOWN, str(send["error"]), "")
-        if int(send.get("textboxes") or 0) != 1:
+        if coerce.as_count(send.get("textboxes")) != 1:
             return (
                 UNKNOWN,
                 f"{send.get('textboxes')} div[role=textbox] on this page, "
@@ -6598,7 +7037,7 @@ async def _live_control(
                 "be aiming by document order.",
                 "",
             )
-        if int(send.get("controls") or 0) != 1:
+        if coerce.as_count(send.get("controls")) != 1:
             return (
                 UNKNOWN,
                 f"{send.get('controls')} control(s) named "
@@ -6646,8 +7085,8 @@ async def _live_control(
         reading = await dom.read_post_composer(page)
         if reading.get("error"):
             return (UNKNOWN, str(reading["error"]), "")
-        editors = int(reading.get("editors") or 0)
-        submits = int(reading.get("submits") or 0)
+        editors = coerce.as_count(reading.get("editors"))
+        submits = coerce.as_count(reading.get("submits"))
         if editors != 1 or submits != 1:
             return (
                 UNKNOWN,
@@ -6723,8 +7162,8 @@ async def _live_control(
         # position -- the objection that blocked this action until the
         # permalink was admitted.
         reading = await dom.read_reaction_surface(page)
-        controls = int(reading.get("controls") or 0)
-        off = int(reading.get("off_state") or 0)
+        controls = coerce.as_count(reading.get("controls"))
+        off = coerce.as_count(reading.get("off_state"))
         if controls != 1:
             return (
                 UNKNOWN,
@@ -6757,9 +7196,28 @@ async def _live_control(
             dom.reaction_control_selector(),
         )
 
+    if spec.action == "follow_company_page":
+        # THE SAME READING AND THE SAME VERDICT THE PREVIEW TOOK, on the page
+        # the click is about to land on -- so this is FRESHNESS, not a second
+        # source, and it says so for the reason ``follow_company``'s arm does.
+        # It is also where the IDENTITY is re-established after the redirect:
+        # the verdict refuses unless the Page's own people-search link names
+        # ``grant.target``, so a page LinkedIn redirected somewhere else is not
+        # pressed on the strength of the url it was asked for.
+        #
+        # THE SELECTOR IS A CONSTANT. The verdict has just required it to match
+        # exactly one element, and nothing the page wrote is spliced into it --
+        # Playwright's strict mode refuses the click if that stops being true
+        # between here and the press.
+        reading = await dom.read_company_page_follow(page)
+        _facts, state, why = company_page_follow_verdict(reading, grant.target)
+        if state != spec.from_state:
+            return (state, why, "")
+        return (state, why, dom.COMPANY_PAGE_FOLLOW_CONTROL)
+
     if spec.action == "unfollow_company":
         control = await dom.read_unfollow_control(page, grant.target)
-        count = int(control.get("count") or 0)
+        count = coerce.as_count(control.get("count"))
         label = str(control.get("label") or "")
         if count == 0:
             return (
@@ -6780,13 +7238,28 @@ async def _live_control(
                 "picking either would be picking by position.",
                 "",
             )
+        # ON THE REFUSAL PATH THE LABEL IS SHAPED, NEVER QUOTED, since
+        # 2026-09-23. This ``why`` is the one ``perform`` raises with when the
+        # click is refused, and it used to print the control's whole
+        # accessible name -- ``Click to stop following <Page>`` on the real
+        # surface -- inside a WriteAttemptError bound for ``server._error``. A
+        # value the page chose is not allowed into an exception
+        # (ERROR-MESSAGE-RULED-AT-THE-RAISE). It still NAMES WHAT IT SAW, the
+        # way a refusal here must: LinkedIn's own UI words verbatim, every
+        # other word reduced to its length -- see :func:`_label_shape`.
+        #
+        # THE SUCCESS PATH STILL QUOTES IT, and that is not an oversight: on
+        # that branch the state is ``following`` and a selector is built, so
+        # ``perform``'s refusal cannot fire and the sentence is never raised.
         if not label.startswith(anchor):
             return (
                 UNKNOWN,
-                f"the control is labelled {label!r}, which does not begin "
-                f"{anchor!r}. That prefix is the whole of the evidence that "
-                "pressing it stops a follow rather than starting one, so an "
-                "unrecognised label is refused rather than interpreted.",
+                f"the control's accessible name reads {_label_shape(label)!r} "
+                "(LinkedIn's own UI words kept, every other word reduced to its "
+                f"length), which does not begin {anchor!r}. That prefix is the "
+                "whole of the evidence that pressing it stops a follow rather "
+                "than starting one, so an unrecognised label is refused rather "
+                "than interpreted.",
                 "",
             )
         return (
@@ -6813,7 +7286,7 @@ async def _live_control(
         # describes the button about to be pressed.
         control = await dom.read_follow_control(page)
         verdict = shape.follow_state(
-            control.get("label"), count=int(control.get("count") or 0)
+            control.get("label"), count=coerce.as_count(control.get("count"))
         )
         state = str(verdict.get("state") or UNKNOWN)
         why = str(verdict.get("why") or "")
@@ -6834,7 +7307,7 @@ async def _live_control(
         verdict = shape.apply_route(
             control.get("label"),
             control.get("href"),
-            count=int(control.get("count") or 0),
+            count=coerce.as_count(control.get("count")),
             job_id=grant.target,
             link_target=control.get("link_target"),
         )
@@ -6859,7 +7332,7 @@ async def _live_control(
 
     control = await dom.read_save_control(page)
     verdict = shape.save_state(
-        control.get("label"), count=int(control.get("count") or 0)
+        control.get("label"), count=coerce.as_count(control.get("count"))
     )
     state = str(verdict.get("state") or UNKNOWN)
     why = str(verdict.get("why") or "")
@@ -7067,8 +7540,8 @@ async def _verify_after(
             surface="the item permalink",
         )
         reading = await dom.read_reaction_surface(page)
-        controls = int(reading.get("controls") or 0)
-        off = int(reading.get("off_state") or 0)
+        controls = coerce.as_count(reading.get("controls"))
+        off = coerce.as_count(reading.get("off_state"))
         if controls != 1:
             return (
                 UNKNOWN,
@@ -7124,6 +7597,32 @@ async def _verify_after(
         _facts, state, why = await _read_dark_mode(page, spec)
         return state, why, landed
 
+    if spec.action == "follow_company_page":
+        # A DIFFERENT SURFACE FROM THE ONE CLICKED, which is the shape
+        # ``follow_company`` could not have: that action's direction came off
+        # a posting that names its employer by slug, so no list keyed by the
+        # same identity existed to read. This one is addressed by the numeric
+        # id Manage Pages keys its rows by, so the confirmation is the row
+        # itself, read through the same reconciliation the unfollow uses.
+        #
+        # THREE ANSWERS AND ALL THREE ARE REAL. ``following`` -- the row for
+        # this id is drawn. ``not_following`` -- LinkedIn's own count says the
+        # whole list was drawn and the row is not in it, so the follow did not
+        # land. ``unknown`` -- the row is not among the rows that rendered on
+        # a list that renders part of itself, which is NOT evidence either
+        # way, and is said as such rather than read as a failure.
+        landed = await _load(
+            navigator, page, FOLLOWED_PAGES_URL, surface="followed companies"
+        )
+        _facts, state, why = await _read_followed_state(page, grant.target)
+        return (
+            state,
+            why
+            + " Read off Manage Pages, a different surface from the Page root "
+            "that was clicked, keyed by the same numeric id the grant names.",
+            landed,
+        )
+
     if spec.action == "follow_company":
         # THE WEAKEST WITNESS CLASS IN THIS DESIGN, and it is labelled as such
         # in the text it returns rather than quietly presented as equal to the
@@ -7143,7 +7642,7 @@ async def _verify_after(
         # rule the unfollow path already applies in the other direction.
         control = await dom.read_follow_control(page)
         verdict = shape.follow_state(
-            control.get("label"), count=int(control.get("count") or 0)
+            control.get("label"), count=coerce.as_count(control.get("count"))
         )
         state = str(verdict.get("state") or UNKNOWN)
         why = (
@@ -7208,7 +7707,7 @@ async def _verify_after(
                 f"says nothing about whether anything was sent: {reading['error']}",
                 "",
             )
-        boxes = int(reading.get("textboxes") or 0)
+        boxes = coerce.as_count(reading.get("textboxes"))
         if boxes != 1:
             return (
                 UNKNOWN,
@@ -8368,6 +8867,20 @@ async def perform(
             "single use, this action, this target, not expired -- have "
             "provably run. perform does not redeem its own permission."
         )
+    # SINGLE USE AT THIS DOOR TOO, 2026-09-23. ``consume`` burns the TOKEN and
+    # returns the grant OBJECT; before this line, a caller holding that object
+    # could hand it here twice and be clicked twice. Marked on ENTRY rather
+    # than after the click, so a perform that refuses part-way still spends the
+    # grant: a refused write is re-attempted from a fresh preview, never from a
+    # grant that has already been to the page once.
+    if grant.performed:
+        raise WriteAttemptError(
+            "this grant has already been used once. A grant is permission to "
+            "perform ONE action ONE time: its token was burned when it was "
+            "redeemed, and the redeemed grant is refused a second perform, so "
+            "holding on to it buys nothing. Run the preview again."
+        )
+    grant.performed = True
 
     observation = grant.observation
     if observation is None:
@@ -8446,7 +8959,8 @@ async def perform(
         navigator,
         page,
         url,
-        surface=_WRITE_SURFACE.get(spec.target_kind, "linkedin"),
+        surface=_WRITE_SURFACE_FOR_ACTION.get(spec.action)
+        or _WRITE_SURFACE.get(spec.target_kind, "linkedin"),
     )
 
     # We must be on the page the grant names -- compared by job id for a
@@ -9068,7 +9582,7 @@ async def perform(
         ),
         "clicked": {
             "selector": selector,
-            "on": landed,
+            "on": _publishable_landing(spec, url, landed),
             "state_before": live_state,
             "read_from": "the control itself, immediately before the click",
             "error": click_error,

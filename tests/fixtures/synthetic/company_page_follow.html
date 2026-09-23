@@ -1,0 +1,86 @@
+<!doctype html>
+<!--
+  SYNTHETIC. NOT A CAPTURE.
+
+  Its STRUCTURE is a measurement taken 2026-09-20 off one live organisation
+  Page ROOT (/company/<numeric id>/, redirected by LinkedIn to the Page's
+  canonical address). That capture is held outside the tree -- it is made of
+  an organisation's page -- and only SHAPES and COUNTS were taken from it:
+
+    * eight <button>s whose aria-label opens "Follow " and whose text is
+      "Follow", every one reading "Follow <that Page's name>":
+        1 outside <main>              (the Page's own, repeated in a header)
+        1 in <main>, outside <aside>  (the Page's own, in its top card)
+        6 in <main> > <aside>         (one per RECOMMENDED Page)
+    * no <h1> at all; the Page's own name printed as exactly ONE <h2> in the
+      main column outside the aside;
+    * exactly one people-search link in the main column outside the aside,
+      its text "<count> employees", its query naming the Page by numeric id
+      under currentCompany as a percent-encoded JSON list;
+    * the buttons carry no id and no organisation urn, only a class and a
+      per-render component key -- so a Page's identity is on the LINK, never
+      on the control.
+
+  Its CONTENT is invented. The Page names are not organisations anybody runs,
+  and the numeric id is one tests/test_no_committed_identity.py already
+  declares as synthetic (the 530000xx series), reused rather than invented
+  fresh so a reviewer asking "is this real?" can see what it belongs to.
+
+  WHAT THIS FILE DELIBERATELY DOES NOT DRAW: a FOLLOWED Page. The capture was
+  of a Page the account did not follow, so the label that control wears once
+  a Page IS followed has never been seen. Inventing it here would build a
+  reader against a label LinkedIn may not use; the tests derive the other
+  states from this document by an asserted edit instead, and label each one.
+-->
+<html lang="en">
+<head><title>Examplecorp Analytics: Overview | LinkedIn</title></head>
+<body>
+
+<header class="c3a1f0e2">
+  <nav>
+    <a href="https://www.linkedin.com/feed/">Home</a>
+    <a href="https://www.linkedin.com/mynetwork/">My Network</a>
+  </nav>
+  <!-- THE PAGE'S OWN CONTROL, REPEATED OUTSIDE <main>. A header that sticks
+       while the page scrolls; the measured page drew it here. A reader that
+       counted the whole document would see two controls for this Page. -->
+  <div class="f81d2c90">
+    <span>Examplecorp Analytics</span>
+    <button class="artdeco-button" type="button" aria-label="Follow Examplecorp Analytics" componentkey="page-f0e1d2c3-sticky">Follow</button>
+  </div>
+</header>
+
+<main>
+
+  <!-- THE TOP CARD: the Page's own name as the column's only <h2> that is a
+       name, its employee link carrying the numeric id, and the ONE follow
+       control in <main> outside <aside>. -->
+  <section class="org-top-card a90b1c2d">
+    <h2 class="org-top-card-summary__title">Examplecorp Analytics</h2>
+    <p>Software Development</p>
+    <a class="org-top-card-summary-info-list__info-item" href="https://www.linkedin.com/search/results/people/?currentCompany=%5B%2253000011%22%5D&amp;origin=COMPANY_PAGE_CANNED_SEARCH">1,234 employees</a>
+    <button class="artdeco-button artdeco-button--primary" type="button" aria-label="Follow Examplecorp Analytics" componentkey="page-a1b2c3d4-top">Follow</button>
+    <button class="artdeco-button" type="button" aria-label="Visit website">Visit website</button>
+  </section>
+
+  <section class="org-about">
+    <h2>Overview</h2>
+    <p>An invented organisation, described in invented words.</p>
+  </section>
+
+  <!-- THE RECOMMENDED PAGES. Six follow controls, each "Follow <another
+       Page>" -- the reason a label prefix alone is no aim at all. Their names
+       are spans, not headings, which is what the capture drew. -->
+  <aside class="org-recommendations">
+    <h2>Pages people also viewed</h2>
+    <div class="rec-card"><span>Otherway Example One</span><button class="artdeco-button" type="button" aria-label="Follow Otherway Example One" componentkey="rec-01">Follow</button></div>
+    <div class="rec-card"><span>Otherway Example Two</span><button class="artdeco-button" type="button" aria-label="Follow Otherway Example Two" componentkey="rec-02">Follow</button></div>
+    <div class="rec-card"><span>Otherway Example Three</span><button class="artdeco-button" type="button" aria-label="Follow Otherway Example Three" componentkey="rec-03">Follow</button></div>
+    <div class="rec-card"><span>Otherway Example Four</span><button class="artdeco-button" type="button" aria-label="Follow Otherway Example Four" componentkey="rec-04">Follow</button></div>
+    <div class="rec-card"><span>Otherway Example Five</span><button class="artdeco-button" type="button" aria-label="Follow Otherway Example Five" componentkey="rec-05">Follow</button></div>
+    <div class="rec-card"><span>Otherway Example Six</span><button class="artdeco-button" type="button" aria-label="Follow Otherway Example Six" componentkey="rec-06">Follow</button></div>
+  </aside>
+
+</main>
+</body>
+</html>
