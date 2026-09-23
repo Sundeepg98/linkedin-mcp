@@ -241,6 +241,15 @@ _HOST = "www.linkedin.com"
 #:
 #: The pattern admits a query shape so the address stays usable if a later
 #: wave rules that a keyword may be passed. Nothing today passes one.
+#:
+#: AMENDED 2026-09-24: THAT RULING WAS MADE AND THE LAST SENTENCE IS NOW FALSE.
+#: ``D1-SEARCH-AS-READS`` and ``OTHER-MEMBER-IDS-AS-READS`` (registered
+#: 2026-09-23) permit a keyword and LinkedIn's own facets as reads, from a
+#: tool's arguments only. ``people_search.compose`` appends them to THIS
+#: constant -- which still carries no query of its own and is still the whole
+#: address when no argument is given -- and answers the B.4 question above
+#: with the boundary's own refusal, before any page loads. Nothing in THIS
+#: module takes a query: every function here still takes a page or integers.
 PEOPLE_SEARCH_URL = f"https://{_HOST}/search/results/people/"
 
 #: THE SCRIPT LIVES IN ``dom.py``. Only that module may waive ``evaluate``, and

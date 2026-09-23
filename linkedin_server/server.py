@@ -200,7 +200,11 @@ opens the people search and reports COUNTS -- how many result links of each
 closed kind, which of fourteen known filters the page offers, and how many of
 those filters take a PERSON as their value. No name, slug, headline or member
 id can leave it; the matching happens inside the page and only integers come
-back. It takes NO PARAMETERS, because a search query is where a name is typed.
+back. It took NO PARAMETERS, because a search query is where a name is typed.
+AMENDED 2026-09-24: it now takes a keyword and four facets, OPTIONAL, composed
+by ``people_search.compose`` from its own arguments only under
+``D1-SEARCH-AS-READS`` and ``OTHER-MEMBER-IDS-AS-READS``; with none it opens
+exactly the address it opened before, and no argument is ever echoed back.
 Its address was refused by the boundary until this commit and was admitted
 only together with the shaper in front of it -- condition 1 of the ruling at
 ``09f9961`` section 6, which says admitting it without one would VIOLATE that
@@ -394,6 +398,7 @@ from linkedin_server import (
     newsletters,
     notify_cost,
     page_plugin,
+    people_search,
     preflight,
     premium,
     search_results,
@@ -2810,7 +2815,13 @@ async def linkedin_notify_cost_precondition() -> dict[str, Any]:
 
 
 @mcp.tool()
-async def linkedin_people_search_shape() -> dict[str, Any]:
+async def linkedin_people_search_shape(
+    keywords: str = "",
+    current_company_ids: str = "",
+    past_company_ids: str = "",
+    location_ids: str = "",
+    connections_of: str = "",
+) -> dict[str, Any]:
     """What your people search OFFERS. Counts and filter names, never a person.
 
     **THIS IS THE FIRST TOOL ON A THIRD-PARTY-DENSE SURFACE**, and every
@@ -2836,10 +2847,35 @@ async def linkedin_people_search_shape() -> dict[str, Any]:
                                 filters" is distinguishable from "the selector
                                 changed".
 
-    **IT TAKES NO PARAMETERS, AND THAT IS THE PRIVACY DESIGN.** A keyword is
-    where a name is typed. This tool opens one literal address,
-    ``search_results.PEOPLE_SEARCH_URL``, with no query at all -- so no needle
-    can be handed to it, by a caller or by a mistake.
+    **IT TOOK NO PARAMETERS UNTIL 2026-09-24, AND THE PRIVACY DESIGN MOVED
+    RATHER THAN WENT.** A keyword is where a name is typed, and this paragraph
+    said so to justify taking none. ``D1-SEARCH-AS-READS`` and
+    ``OTHER-MEMBER-IDS-AS-READS`` (registered 2026-09-23) decided that a
+    keyword and LinkedIn's own facets may be PASSED, from a tool's arguments
+    only. So the design now holds at two other places:
+
+    * ONE PURE FUNCTION COMPOSES THE ADDRESS -- ``people_search.compose``,
+      from this tool's own arguments and nothing else. No page, no landing and
+      no earlier reading can reach it. With no argument it returns
+      ``search_results.PEOPLE_SEARCH_URL`` exactly, the address this tool
+      always opened.
+    * NOTHING A CALLER PASSES COMES BACK. ``query_applied`` counts what each
+      argument contributed and ``query_kept`` says, per argument, what LinkedIn
+      did with it in the address it settled on -- ``verbatim``,
+      ``same_values``, ``different_values``, ``absent`` or ``unreadable``. No
+      keyword, id or member token is echoed, and the landing is not published.
+
+    A KEYWORD THE READ BOUNDARY REFUSES IS ANSWERED BEFORE ANY PAGE LOADS. The
+    boundary scans the whole address, query included, and words like
+    ``password``, ``settings`` and ``invitation`` trip a write guard. The
+    composed address is put to ``readonly.assert_read_url`` first; a refusal
+    comes back as ``refused_by_the_read_boundary`` naming the substring and
+    the argument that carried it, with ``pages_loaded`` 0. The denylist is not
+    narrowed for a search.
+
+    EACH CALL WITH AN ARGUMENT IS ONE PEOPLE SEARCH, and LinkedIn counts people
+    searches against the account's monthly limit -- which is why a live test
+    session makes at most five (``D1-SEARCH-AS-READS``).
 
     NOTHING IS FIRED FROM THIS SURFACE. Condition 5 of the admitting ruling,
     and it is structural here: this coroutine reaches ``read_results`` and
@@ -2874,11 +2910,45 @@ async def linkedin_people_search_shape() -> dict[str, Any]:
       query.** Still unmeasured as a general claim.
     * **Not that it saw every result.** Search pages lazy-load and re-rank, so
       a count is a reading with a timestamp.
+    * **Not that a kept argument FILTERED the results.** ``query_kept`` is a
+      fact about the address LinkedIn settled on, not about which people it
+      listed -- and never WHO any result is.
+
+    Args:
+        keywords: free text, up to 200 characters. Never quoted back.
+        current_company_ids: LinkedIn's NUMERIC organisation ids, comma-
+            separated, at most 5 -- the digits ``linkedin_job_detail`` returns
+            as ``company_id`` or ``linkedin_followed_companies`` reads off
+            Manage Pages. A company name or slug is refused, described by its
+            shape and never quoted.
+        past_company_ids: the same, for people who USED to work there.
+        location_ids: LinkedIn's NUMERIC geo ids (``geoUrn``), comma-separated,
+            at most 5; several in ONE search. A place name is refused.
+        connections_of: ONE member's opaque token -- the ``recipient_id``
+            ``linkedin_connections`` returns, which opens ``ACoAA`` -- to list
+            that member's connections as counts. A profile slug is a name and
+            is refused. Never stored and never echoed.
     """
     try:
+        # THE ADDRESS IS COMPOSED FROM THIS TOOL'S OWN ARGUMENTS AND NOTHING
+        # ELSE, and put to the read boundary before any session opens -- see
+        # ``people_search`` for the rulings and for why nothing is echoed.
+        composed = people_search.compose(
+            keywords=keywords,
+            current_company_ids=current_company_ids,
+            past_company_ids=past_company_ids,
+            location_ids=location_ids,
+            connections_of=connections_of,
+        )
+        if not composed["built"]:
+            return people_search.refusal_envelope(composed)
+        boundary = people_search.boundary_verdict(composed["url"])
+        if not boundary["admitted"]:
+            return people_search.refusal_envelope(boundary)
         async with BROWSER.session() as page:
-            landed = await BROWSER.goto(page, search_results.PEOPLE_SEARCH_URL)
+            landed = await BROWSER.goto(page, composed["url"])
             assert_not_authwall(landed, surface="people-search")
+            landing = people_search.landing_verdict(landed, composed["url"])
             results = await search_results.read_results(page)
             # NOT ``read_filters``. THE PANEL IS STILL DRAWING WHEN goto
             # RETURNS, and reading it then produced every filter as zero on
@@ -2893,10 +2963,14 @@ async def linkedin_people_search_shape() -> dict[str, Any]:
                 # itself is not published -- it is a value the browser chose,
                 # and on this surface it can carry a query.
                 "landed_where_it_was_sent": (
-                    landed.rstrip("/")
-                    == search_results.PEOPLE_SEARCH_URL.rstrip("/")
+                    landed.rstrip("/") == composed["url"].rstrip("/")
                 ),
+                "landed_on_people_search": landing["on_people_search"],
                 "pages_loaded": 1,
+                # COUNTS OF WHAT WAS APPLIED AND A LITERAL PER ARGUMENT, never
+                # a value: see ``people_search.landing_verdict``.
+                "query_applied": composed["applied"],
+                "query_kept": landing["query_kept"],
                 "results": search_results.tally(
                     results["counts"],
                     queries_present=results["queries_present"],
@@ -2933,6 +3007,9 @@ async def linkedin_people_search_shape() -> dict[str, Any]:
                     "pressed here to open the All filters panel",
                     "that the address serves a populated page with no query",
                     "that every result was seen; search pages lazy-load",
+                    "that a kept argument filtered the results; query_kept "
+                    "describes the address LinkedIn settled on, and no "
+                    "result is ever named",
                 ],
             }
     except Exception as exc:

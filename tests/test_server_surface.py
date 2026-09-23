@@ -242,6 +242,13 @@ EXPECTED_TOOLS = {
     # spelling measured (people only, 5 newly admitted against a family
     # wildcard's 18) and landed in the same commit as the shaper in front of
     # it, which is condition 1 of the ruling at 09f9961 section 6.
+    # AMENDED 2026-09-24: "NO PARAMETERS AT ALL" IS NO LONGER TRUE. It takes a
+    # keyword and four facets, optional, under D1-SEARCH-AS-READS and
+    # OTHER-MEMBER-IDS-AS-READS, composed from its own arguments by
+    # ``people_search.compose`` and never echoed back. Still no write verb,
+    # no confirm token and no SANCTIONED_MUTATIONS entry, and the address
+    # family is unchanged: every spelling it composes is admitted by the one
+    # people pattern as it stands.
     "linkedin_people_search_shape",
     # THE FORTY-SECOND, 2026-09-05 evening, a READ.
     # ``linkedin_group_memberships`` wires ``groups_page.read_group_
