@@ -449,8 +449,10 @@ takes the bucket-3 population from `census_completion.walk()`, and exits 1 on:
 a recorded verdict the live `readonly.is_read_url` disagrees with; a refusal
 kind the live `readonly.assert_read_url` disagrees with; an `also_driven`
 verdict that has moved; a bucket-3 row with no line; a line for a row that has
-left the bucket; a duplicated row; a moved direction cell; and any break in the
-table's vocabulary. Before it compares anything it shows the boundary saying
+left the bucket; a duplicated row; a moved direction cell; a source that no
+longer resolves (the file, a `::SYMBOL` in it, or a census row it names --
+24, 19 and 24 of each on the real table); and any break in the table's
+vocabulary. Before it compares anything it shows the boundary saying
 both words -- `/feed/` admitted, a third party's profile refused -- so a gate
 mutated into admit-everything is named as the cause rather than seen as drift.
 
@@ -468,8 +470,10 @@ the real table and every one asserted red AND naming its row:
     a row that left the bucket                        "NOT a bucket-3 row today"
     a duplicated row, a moved direction cell
     a wrong refusal kind, a wrong also_driven verdict
-    a class contradicting its own verdict, an off-alphabet gate,
-    an addressless row with no reason
+    a class contradicting its own verdict, or its own refusal,
+    an off-alphabet gate, an addressless row with no reason
+    a source whose file, symbol or census row is gone, or that is not a path
+    a table that does not exist                       a named problem, never a traceback
     a boundary monkeypatched to admit everything      the control names it
 
 and **green on the real table**, with the population asserted equal to the
