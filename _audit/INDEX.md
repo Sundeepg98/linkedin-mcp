@@ -625,7 +625,7 @@ document is dead; it says one thing in it was overtaken and names what.
 
 - CORRECTED BY [2026-09-23-exclusion-returns.md](2026-09-23-exclusion-returns.md)
 
-  > lane R returned 75 of this slice's 97 exclusions to GAP with each blocker named, moved N 23 to COVERED-UNFIRED because linkedin_connections reads that list, and kept 21 on the census's written grounds; GAP 86 -> 161.
+  > lane R returned 69 of this slice's 97 exclusions to GAP with each blocker named, moved N 23 to COVERED-UNFIRED because linkedin_connections reads that list, and kept 27 on the census's written grounds; GAP 86 -> 155.
 
 ### [_census/profile.md](_census/profile.md)
 
@@ -1339,7 +1339,7 @@ reach is visible. The quoted reason here is the CORRECTOR's own
 
 - CORRECTS [_census/network.md](_census/network.md)
 
-  > 75 of the slice's 97 exclusions returned to GAP with each blocker named, N 23 moved to COVERED-UNFIRED because a shipped tool reads it, 21 kept; GAP 86 to 161.
+  > 69 of the slice's 97 exclusions returned to GAP with each blocker named, N 23 moved to COVERED-UNFIRED because a shipped tool reads it, 27 kept; GAP 86 to 155.
 
 - CORRECTS [_census/profile.md](_census/profile.md)
 

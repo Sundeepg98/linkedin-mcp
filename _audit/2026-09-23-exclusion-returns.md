@@ -5,22 +5,22 @@ claude-opus-5-5[1m]
 **CORRECTS:** `_audit/_census/jobs.md` -- 38 of the slice's 48 exclusions returned to GAP with each blocker named, J 25, J 29 and J 30 re-filed MEASURED-ABSENT, 7 kept on written grounds; GAP 56 to 94.
 **CORRECTS:** `_audit/_census/profile.md` -- 98 of the slice's 113 exclusions returned to GAP with each blocker named, the profile editors, Open To Work and the unnamed settings pages among them; 15 kept on written grounds; GAP 55 to 153.
 **CORRECTS:** `_audit/_census/messaging-and-content.md` -- 40 of the slice's 50 exclusions returned to GAP with each blocker named, the mention and tag rows among them; 10 kept on written grounds; GAP 77 to 117.
-**CORRECTS:** `_audit/_census/network.md` -- 75 of the slice's 97 exclusions returned to GAP with each blocker named, N 23 moved to COVERED-UNFIRED because a shipped tool reads it, 21 kept; GAP 86 to 161.
+**CORRECTS:** `_audit/_census/network.md` -- 69 of the slice's 97 exclusions returned to GAP with each blocker named, N 23 moved to COVERED-UNFIRED because a shipped tool reads it, 27 kept; GAP 86 to 155.
 **CORRECTS:** `_audit/2026-09-23-exclusion-audit.md` -- N 136 has a tracked measurement that audit did not cite, so all 7 MEASURED-ABSENT rows are recorded, not 6; and P M3 cites the delete key in its own cell, so 20 lifted rows are held by nothing, not 21.
 
 **Lane R, 2026-09-23, worktree off `master` at `f89bd29`. OFFLINE throughout: no
 browser, no LinkedIn, no page load.**
 
-**THE ANSWER.** Of the 315 rows outside the census denominator, **251 are back in
+**THE ANSWER.** Of the 315 rows outside the census denominator, **245 are back in
 GAP** with the blocker that stands in each one's way named in its own cell, **1**
 (`N 23`) is COVERED-UNFIRED because a shipped tool reads it, **3** move from a
-wave's retirement to MEASURED-ABSENT, the state their cells report, and **53
-stay EXCLUDED-RULED** -- 45 re-decided and kept on one of the census's four
+wave's retirement to MEASURED-ABSENT, the state their cells report, and **59
+stay EXCLUDED-RULED** -- 51 re-decided and kept on one of the census's four
 written grounds, cited, and 8 held by the operator's own 2026-09-04 ruling and
 left untouched. `N 136` stays MEASURED-ABSENT and now cites a measurement.
-**The pending count moves from 274 to 525 GAP rows, and the achievable surface
-from 389 rows to 641.** The operator asked whether the pending count was exact;
-it was short by 251 rows of work nothing written ruled out.
+**The pending count moves from 274 to 519 GAP rows, and the achievable surface
+from 389 rows to 635.** The operator asked whether the pending count was exact;
+it was short by 245 rows of work nothing written ruled out.
 
 **AUTHORITY.** The operator ruled at 18:13 (OUTWARD-ACTS-NEED-THE-OPERATOR) that
 only acts toward other people, or irreversible ones, need him, and that every
@@ -34,7 +34,7 @@ family-level decisions are for the orchestrator to register at merge.
 nothing written rules it out. The pending count now includes it, and its cell
 says what stands in the way -- a boundary entry, a missing reader, an unmeasured
 surface, or a question only the operator can answer. Where the answer is his,
-the row says so; GAP is how the census says "not decided", and 251 rows had
+the row says so; GAP is how the census says "not decided", and 245 rows had
 been saying "decided" without a decider.
 
 ---
@@ -277,7 +277,8 @@ record, so the state is UNFIRED, and one call that returns rows moves it on.
 
 ## 3. SLICE 3 -- THE 121 CONTESTABLE ROWS
 
-**79 return to GAP, 39 stay out on a written ground, 3 move to MEASURED-ABSENT.**
+**73 return to GAP, 45 stay out on a written ground, 3 move to MEASURED-ABSENT.** Six of
+the 45 were re-decided on the cold pass (section 8).
 
 ### 3.1 The R1 and R2 rows
 
@@ -443,13 +444,27 @@ surface promise in `tests/test_no_write_tool_names_a_third_party.py`, and a
 typeahead name match measured dead on 2026-09-03. `M C11` is simpler: a '#' he
 types is his own text, and whether LinkedIn makes it an entity is unmeasured.
 
-DECIDED (orchestrator-delegated, 2026-09-23): the eight acts routed through a
-member's profile return to GAP -- `N 34`, `N 35`, `N 36`, `N 66`, `N 144`,
-`N 145`, `N 146`, `N 147`. His 2026-09-04 ruling removed third-party profile
-pages from the boundary, because a load leaves the member a viewer record; that
-closes the ROUTE the census names, not the act. Blocker: a route from an admitted
-surface, unmeasured; follows are acts he approved on 2026-08-23, and reports are
-accusations whose text and target are his.
+DECIDED (orchestrator-delegated, 2026-09-23): **six acts routed through a
+member's profile are KEPT, on ground two as his 2026-09-04 ruling reads it** --
+`N 35` (unfollow from their profile), `N 66` (follow an interest from their
+Interests section), `N 144` to `N 147` (reports of a member's profile). Each
+capability's ONLY route is that member's own profile page, and loading one is
+the act `load_a_third_partys_profile_to_measure_a_control` names: the key's own
+words say "for a measurement", and `readonly.py` records his 2026-09-04 ruling
+taking third-party profiles off the boundary with "`PERMANENTLY_FORBIDDEN` names
+the act" -- for any load, because a load leaves the member a viewer record. That
+is the same basis as `N 2`, an act the same ruling holds. **These six were GAP
+in this lane's first commit and went back on the cold pass (section 8):** a blocker
+that reads "a route off the profile is unmeasured" cannot be met for a
+capability defined by its profile route, which is the sign it was an exclusion
+and not a blocker.
+
+DECIDED (orchestrator-delegated, 2026-09-23): `N 34` and `N 36` return to GAP.
+Following a person and unfollowing a connection are also offered off the
+profile -- a person's card in the admitted people search, a post's author
+controls in the feed -- so his ruling closes one ROUTE of each, not the act.
+Blocker: those routes are unmeasured, and follows are acts he approved on
+2026-08-23.
 
 DECIDED (orchestrator-delegated, 2026-09-23): **`N 141` is kept on ground two,
 by act-class.** Blocking destroys the connection and removes the member's
@@ -521,8 +536,8 @@ own view name says it reveals a further section.
     J           56          94            48 ->  7                   1 ->  4
     P           55         153           113 -> 15                   2 ->  2
     M           77         117            50 -> 10                   1 ->  1
-    N           86         161            97 -> 21                   3 ->  3
-    all        274         525           308 -> 53                   7 -> 10
+    N           86         155            97 -> 27                   3 ->  3
+    all        274         519           308 -> 59                   7 -> 10
 
 `N 23` adds one COVERED-UNFIRED row on `network.md` (5 to 6). The stated-row
 population is 704 before and after: no row entered or left the census.
@@ -530,10 +545,10 @@ population is 704 before and after: no row entered or left the census.
 **EXPECTED PIN MOVES -- NOT RE-PINNED HERE, BY INSTRUCTION.** Each was measured
 on this worktree after the moves:
 
-* `scripts/census_completion.py` PINNED: `gap` 274 to 525, `out_of_scope` 315 to
-  63, `achievable` 389 to 641, `adjudicated` 430 to 179, `delivered_broad` 96 to
-  97, `unfired` 21 to 22, `gap_read` 67 to 101, `gap_write` 151 to 330,
-  `gap_unknown` 56 to 94. **`capabilities_achievable` prints 641 and is 655**:
+* `scripts/census_completion.py` PINNED: `gap` 274 to 519, `out_of_scope` 315 to
+  69, `achievable` 389 to 635, `adjudicated` 430 to 185, `delivered_broad` 96 to
+  97, `unfired` 21 to 22, `gap_read` 67 to 101, `gap_write` 151 to 324,
+  `gap_unknown` 56 to 94. **`capabilities_achievable` prints 635 and is 649**:
   `P O6-O20` stands for fifteen capabilities and is GAP now, and the file's
   COLLAPSED check says so with a "!!" line -- the fourteen extra are counted out
   of scope by an assumption the check exists to catch. That file is the cleanup
@@ -555,7 +570,7 @@ on this worktree after the moves:
   GAP at the 2026-09-03 freeze. 14 returned messaging rows were already
   excluded at that freeze, so they have no line (`C13`-`C16`, `C18`, `C20`,
   `C21`, `C33`, `C35`, `C42`, `C44`, `C47`, `M3`, `M39`), and the headline test
-  raises on `M M3` for the same reason. Across all four slices **175 of the 251
+  raises on `M M3` for the same reason. Across all four slices **169 of the 245
   returned rows were never in the 409-row ledger at all; 76 were**, and those 76
   still carry their ledger blocker in the map. Whether the map's spine grows or
   the triage treats a row outside it as its own class is a decision for whoever
@@ -572,10 +587,12 @@ on this worktree after the moves:
 
 ## 7. WHAT ELSE THIS LANE CHANGED, AND WHY EACH HAD TO
 
-* **`_audit/_census/exclusion-basis.tsv`** loses the 252 lines whose rows left the
-  out-of-scope states, re-files 9 kept rows onto the ground that holds them,
-  writes the ground into every kept row's note, and turns `J 25`, `J 29`, `J 30`
-  and `N 136` into M+ lines citing tracked measurements. 63 lines, one per row.
+* **`_audit/_census/exclusion-basis.tsv`** loses the 246 lines whose rows left the
+  out-of-scope states, re-files 9 kept rows onto the ground that holds them and
+  moves the six profile-routed acts of section 3.6 from EXTENDED to his plain
+  scope, writes the ground into every kept row's note, and turns `J 25`, `J 29`,
+  `J 30` and `N 136` into M+ lines citing tracked measurements. 69 lines, one per
+  row.
 * **`scripts/check_exclusion_basis.py`**: one new family, ACCOUNT-END-SUBSTRINGS,
   for `P N28` and `P N29`; the `apply_job` WriteSpec added as OFF-DOMAIN-FORM's
   third source, since it is the ground `J 66` and `J 67` stand on; and **an
@@ -583,7 +600,7 @@ on this worktree after the moves:
   reason. A family that holds nothing can no longer fail, and the registry's own
   test demanded each be used "or say why"; deleting them would have taken the
   record of who made each ruling with them. A row filed under a declared-empty
-  family is now a problem naming the row. The checker exits 0: 63 rows, 0
+  family is now a problem naming the row. The checker exits 0: 69 rows, 0
   untraced, 0 lifted, 0 structural problems.
 * **Four test files re-pointed, none weakened.** `tests/test_exclusion_basis.py`
   planted into `P D5`, `N 119` and `N 23`, which left the table -- now `N 10` and
@@ -612,18 +629,58 @@ on this worktree after the moves:
 
 ## 8. VERIFICATION -- ONE COLD PASS
 
-IN PROGRESS.
+**The budget was one pass, and it was spent once.** A child re-decided 20 rows
+drawn by a seeded random sample (seed 20260923) of the 301 rows this lane
+re-decided; the 8 rows held by the operator's own ruling and the 6 recorded
+MEASURED-ABSENT rows, which this lane did not touch, were outside the draw. It
+read the census and the rulings register only as they stood at `f89bd29`, under
+the rule of section 1 written out in full, and was forbidden this document, the
+exclusion-basis table, its checker and tests, and every commit after `f89bd29`.
+Its file is `_audit/_scratch/exclusion-returns/cold-verify.tsv` in this lane's
+worktree, which is gitignored and reaches no clone; every row of it is
+summarised below.
+
+**It reported one breach of its blindness, unprompted:** a repository-wide grep
+for "/jobs/application" returned three lines of `scripts/check_exclusion_basis.py`
+-- the family's source anchors, carrying no verdict -- and it says it relied on
+none of them.
+
+    rows sampled                     20    this lane: GAP 17, kept 2, MEASURED-ABSENT 1
+    STATE agreement               12/20    60%
+    both kept: ground agreement     2/2
+    settings class agreement        6/6
+
+**All eight disagreements run one way: the verifier kept a row this lane had
+returned.** None ran the other way. Each was re-read against the evidence the
+verifier cited:
+
+| row | verifier | its ground | adjudication |
+|---|---|---|---|
+| `N 66` | KEEP | G2, the third-party-profile key | **THE VERIFIER WAS RIGHT.** The capability is defined by its route -- another member's Interests section -- and the operator's 2026-09-04 ruling reads the key as naming any load. The same reasoning reached `N 35` and `N 144` to `N 147`, and all six went back to EXCLUDED-RULED (section 3.6). `N 34` and `N 36` have a route off the profile and stay GAP |
+| `J 73`, `P M7` | KEEP | G1, "/jobs/application" | not upheld. The entry names an ADDRESS and entered with the read-only server's first commit with no argument, so INCIDENTAL-CAPTURE-IS-NOT-A-RULING's general form files what it catches as GAP whether or not ruling (b) lifted it -- and the lift of this entry is the exclusion audit's softest inference, which its own blind verifier disputed on `J 71`. The verifier's confidence on `J 73` was MED: the address is inferred |
+| `P D22` | KEEP | G1, "/edit/" | not upheld. The operator ruled on 2026-08-31 that the profile editors are allowed (PROFILE-EDITOR-ADDRESSES-ALLOWED), which the verifier's evidence does not weigh; "/edit/" is the named blocker, as the brief required |
+| `J 93`, `P I9` | KEEP | G4, no url of 237 reaches the Open To Work editor | not upheld. No url is not unreachable: the editor opens as a modal from a control on his profile, which Amendment A1 of the 2026-09-19 conventions ruling calls the standing case of a click route where no url route exists; and he approved Open To Work on 2026-08-23 |
+| `N 19` | KEEP | G4, R1's badge cost | not upheld. A cost is not unreachability, and the reset of the invitation badge on `/mynetwork/` is DERIVED from the notifications and messaging badges -- `linkedin_connections`' own docstring says the sub-page's cost has never been measured |
+| `P K4` | KEEP | G1, "verification" | not upheld. "verification" is one of the six word entries added on 2026-09-03 as the settings family's second gate, a class filter for addresses below `/mypreferences/d/`, and not an entry aimed at verifying a workplace |
+
+**After adjudication the pass agrees on 13 of 20.** The seven that remain are one
+disagreement, repeated: the verifier read a boundary entry or a measurement as a
+ground wherever it reached the row, and this lane read the census's own general
+form, which files an address filter's catch as a blocker. Section 1 draws that
+line, and these seven are where it could reasonably be drawn the other way. Each
+is a GAP row whose cell names the entry as its blocker, so moving any of them is
+one edit, and the orchestrator can make it.
 
 ## 9. GATES RUN AND NOT RUN
 
 **RUN, on `ab26c14` and `af677b9`:**
 
-* `scripts/check_exclusion_basis.py`: **exit 0** -- population 63, table 63,
+* `scripts/check_exclusion_basis.py`: **exit 0** -- population 69, table 69,
   structural problems 0, **untraced 0, lifted 0**. It shipped red at 26 and 27.
 * `tests/test_exclusion_basis.py`: 37 passed; then the same file against three
   mutations of the `EMPTIED` machinery, each red (INSTRUMENTS section 64).
-* `scripts/count_census_states.py`: GAP J 94, P 153, M 117, N 161 -- 525 of 704
-  stated rows; EXCLUDED-RULED 49 plus `XR` 4; MEASURED-ABSENT 10.
+* `scripts/count_census_states.py`: GAP J 94, P 153, M 117, N 155 -- 519 of 704
+  stated rows; EXCLUDED-RULED 55 plus `XR` 4; MEASURED-ABSENT 10.
 * `scripts/pin_census_rows.py --check`: no drift, 704 rows. Not re-pinned, and
   nothing asked it to be.
 * `scripts/classify_writeoff_reasons.py --check` and
