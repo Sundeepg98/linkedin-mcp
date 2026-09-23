@@ -217,15 +217,33 @@ def _bankable(verdict: str) -> str:
 class FireAnomaly(Exception):
     """Raised to STOP EVERY FURTHER PAGE LOAD in this run.
 
-    Carries the server's own error KIND and where the run was, never a
-    message: an envelope's ``message`` may quote what the page said, and the
-    kind is a token this package chose.
+    Carries the server's own error KIND and where the run was, and PRINTS
+    nothing else: an envelope's ``message`` may quote what the page said, and
+    the kind is a token this package chose. The whole envelope rides along
+    only so it can be written to the gitignored ``_state/`` -- see
+    ``_anomaly_record`` -- because an anomaly nobody can diagnose afterwards
+    has to be diagnosed with another page load, which is the one thing a stop
+    exists to prevent.
     """
 
-    def __init__(self, kind: str, where: str) -> None:
+    def __init__(self, kind: str, where: str, envelope=None) -> None:
         self.kind = kind
         self.where = where
+        self.envelope = envelope
         super().__init__(kind + " at " + where)
+
+
+def _anomaly_record(stop: "FireAnomaly") -> dict:
+    """What the anomaly path writes to ``_state/``. PURE, so it is testable.
+
+    ADDED 2026-09-23 after this probe's stop rule fired for the first time --
+    ``extraction_failed`` at posting 2 -- and the envelope that would have said
+    WHY (``shape.job_detail_failure_note`` puts ``main_chars`` and the settle
+    branch into it) was discarded with the run. The stop was right and the
+    evidence was lost; this keeps the second without weakening the first.
+    """
+    return {"anomaly": {"kind": stop.kind, "where": stop.where,
+                        "envelope": stop.envelope}}
 
 
 def _anomaly(out) -> "str | None":
@@ -327,7 +345,7 @@ async def harvest_job_ids(wanted: int) -> list[str]:
         result = await server.linkedin_search_jobs(keywords=term, limit=10)
         kind = _anomaly(result)
         if kind:
-            raise FireAnomaly(kind, "the harvest search")
+            raise FireAnomaly(kind, "the harvest search", result)
         for row in result.get("results") or []:
             jid = str(row.get("job_id") or "").strip()
             if jid and jid not in found:
@@ -401,7 +419,7 @@ async def main() -> int:
                                   "posting " + str(n)) from None
             kind = _anomaly(out)
             if kind:
-                raise FireAnomaly(kind, "posting " + str(n))
+                raise FireAnomaly(kind, "posting " + str(n), out)
             if out.get("insights_error"):
                 name = "insights_error:" + str(out.get("insights_error"))
                 errors[name] = errors.get(name, 0) + 1
@@ -472,6 +490,13 @@ async def main() -> int:
         print("\n### ANOMALY: " + stop.kind + " at " + stop.where + ".")
         print("    EVERY FURTHER FIRE WAS STOPPED. This run is VOID and banks")
         print("    nothing; the kind above is the server's own error token.")
+        state = _ROOT / "_state"
+        state.mkdir(exist_ok=True)
+        dest = state / "unfired-job-detail-insights-raw.json"
+        dest.write_text(json.dumps(raw + [_anomaly_record(stop)], indent=2,
+                                   default=str), encoding="utf-8")
+        print("    the envelope and the postings read before it are under")
+        print("    _state/ (gitignored), for diagnosis at zero page loads.")
         return 1
     except Exception as error:  # noqa: BLE001
         name = type(error).__name__

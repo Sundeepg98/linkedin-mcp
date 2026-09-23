@@ -328,6 +328,19 @@ def test_the_anomaly_is_named_by_kind_and_never_by_message():
     assert len(insights._anomaly({"error": "k" * 500})) == 40
 
 
+def test_an_anomaly_keeps_its_envelope_for_state_and_never_prints_it():
+    """The first live stop (2026-09-23, `extraction_failed` at posting 2)
+    discarded the envelope that said why. The record keeps it for the
+    gitignored `_state/`; the exception's own text still carries none of it."""
+    env = {"error": "extraction_failed", "message": "PLANTED-PAGE-TEXT",
+           "hint": "open the url yourself"}
+    stop = insights.FireAnomaly("extraction_failed", "posting 2", env)
+    assert insights._anomaly_record(stop) == {
+        "anomaly": {"kind": "extraction_failed", "where": "posting 2",
+                    "envelope": env}}
+    assert "PLANTED-PAGE-TEXT" not in str(stop)
+
+
 def test_the_self_read_probe_stops_by_the_same_rule_and_holds_no_copy():
     """Lifted by import, like the proximity probe's control apparatus. A
     second copy of a stop rule is a stop rule that can drift."""
