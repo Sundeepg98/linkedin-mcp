@@ -185,6 +185,38 @@ CORRECTION_VOCABULARY = (
 #: outcome this file exists to require and so cannot also be a violation of it.
 NOT_A_CORRECTION: dict[tuple[str, str], str] = {
 
+    # 2026-09-24, lane D (D6 moves and the profile PDF). TWO CENSUS ROWS CITE
+    # THE LANE'S RECORD AS THE EVIDENCE FOR THEIR OWN CELLS, and in both the
+    # matched words belong to text the lane did not write -- read, not
+    # inferred from the filenames. The lane's real corrections are DECLARED:
+    # its record carries CORRECTS: for network.md, the lane-L3 record and the
+    # read triage, and each carries the back-pointer.
+    ("network.md", "2026-09-24-lane-d-d6-pdf.md"): (
+        "THE RECORD OF THE ROW'S OWN MOVE, NOT A CORRECTION OF IT. Row `132` "
+        "cites the lane's record for its GAP -> COVERED-UNFIRED move under D6. "
+        "The matched words are the KEPT prior cell on the same line -- "
+        "*'ONE CLAUSE ABOVE IS NOW FALSE, CORRECTED 2026-09-21'* and "
+        "*'over-correct'*, the 2026-09-21 wave's words about its own clause -- "
+        "and `false`/`correction` in rows `133` and `134` one and two lines "
+        "below (`expanded_false`, *'a self-correction'*). The census asserts "
+        "nothing about the record being wrong; the correction runs the other "
+        "way and is declared: the record carries CORRECTS: network.md and this "
+        "census carries the CORRECTED BY: back-pointer. **WHAT WOULD MAKE THIS "
+        "ENTRY WRONG:** row `132` saying something in the lane's record does "
+        "not hold while leaving the record unmarked."
+    ),
+    ("profile.md", "2026-09-24-lane-d-d6-pdf.md"): (
+        "ADJACENCY, NOT A CORRECTION. Row `C8` cites the lane's record as the "
+        "evidence for its own cell -- the transport built, the row held on the "
+        "press -- and the matched word is `FALSE` in row `C6`, two lines up: "
+        "*'Nothing else in this repo names it either' was measured FALSE on "
+        "2026-09-20*, that row's own verdict on a section header, about a "
+        "settings page. Nothing in `C8` withdraws anything from the record. "
+        "**WHAT WOULD MAKE THIS ENTRY WRONG:** a profile row asserting the "
+        "record wrong about that row while leaving it unmarked, which would "
+        "need its own CORRECTS: / CORRECTED BY: pair."
+    ),
+
     # 2026-09-23, lane L1 (refused reads). TWO CENSUS FILES CITE THE LANE'S
     # DELIVERABLE AS EVIDENCE, and in both the matched word is `false` on the
     # NEIGHBOURING row -- read, not inferred from the filenames.

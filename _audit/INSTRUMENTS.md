@@ -10066,3 +10066,58 @@ per-capture shape probes, the offline run of the collections reader over the
 raw capture, the line-ending census -- are declared disposable. What they
 measured is re-derived by the checker on every run, carried into a committed
 fixture by a builder, or recorded with its number in the audit.
+
+## 68. A DOWNLOAD TRANSPORT ON THE ATTACHED BROWSER, TESTED ON A FAKE CHROME THAT CAN SAY NO (lane-d, 2026-09-24)
+
+**Registered 2026-09-24.** Full record: `_audit/2026-09-24-lane-d-d6-pdf.md`.
+Numbered 68 as assigned to the lane; 66 and 67 belong to other lanes.
+
+`linkedin_server/cdp_download.py` is the transport the D4 ruling gave census
+row `P C8`: Chrome's own download behaviour, set over a DevTools session on the
+attached browser, with no browser context created, off unless
+`LINKEDIN_ENABLE_CDP_DOWNLOADS` is set. The module is a capability, not an
+instrument. What is registered here is what tests it.
+
+### 68.1 A FAKE IS ONLY AS GOOD AS WHAT IT REFUSES TO DO
+
+A fake browser that hands over a file whatever it is sent would make every
+capture test green and certify nothing. So `FakeChrome` models the four
+behaviours the protocol names -- `default` (his own folder, the page's name,
+no events to any session), `allow` (the page's name), `allowAndName` (the
+browser's GUID) and `deny` -- and sends events only to the session that
+switched them on. The CONTROL runs the same capture with the one step that
+sets the behaviour removed, and it must come back `no_download_began` with the
+bytes in HIS folder. A second control lets the PAGE name the file and must
+come back `file_missing`.
+
+    A CAPTURE TEST IS WORTH WHAT ITS FAKE WOULD DO WRONG. A FAKE THAT
+    CANNOT FAIL THE CAPTURE CANNOT PASS IT EITHER.
+
+### 68.2 THE SCANNER HAS NO DEVTOOLS PATTERN, SO THE SITES ARE PINNED BY AST
+
+`readonly.scan_source_for_mutations` does not see a DevTools `send`, and a
+DevTools session can do anything a page can. Until it has a pattern, the
+package's sites are pinned: exactly one `send` (in `cdp_download._send`,
+which refuses any method off its closed table) and one session (in
+`capture_download`), attributed through the shipped
+`readonly.enclosing_function` rather than a second copy of it. The detector is
+shown finding a planted second site before it is aimed at the package.
+
+### 68.3 THE ENTRIES
+
+| path | shown failing by |
+|---|---|
+| `tests/test_cdp_download.py` | its own two controls (the behaviour step removed; a page-named file), and five defects planted into the module from outside by a disposable plugin, each turning the file red: the behaviour step removed (15 of 33 red), `allow` for `allowAndName` (10), the restore dropped (5), the kind check off (2), an exception's text carried into the result (1). The AST pin's detector is shown finding a planted `send` and session in another module. |
+| `tests/test_profile_pdf_download_is_blocked_on_transport.py` (re-aimed) | the detector's second vocabulary is shown returning `cdp_download_behaviour` on a synthetic DevTools source, and the context route outranking it when both appear, before either is aimed at the package; the new tripwire's caller detector is shown finding a planted caller of `capture_download` |
+
+**A COST FOUND BY THE FIRST PLANT.** With the production timeouts a regression
+took the capture file from 3 s to 264 s, because every negative path waited
+out 20 s and 60 s. The test helper now passes 0.5 s bounds and the same plant
+fails in 11 s. A suite that turns slow instead of red is read as a hang.
+
+### 68.4 DECLARED DISPOSABLE
+
+The scratch mutation plugin, the offline `J 107` call-shape reading, the
+correction-vocabulary neighbour check and the census edit scripts this lane
+ran are declared disposable. What they measured is in the record with its
+numbers, and the capture file itself re-derives the controls on every run.
