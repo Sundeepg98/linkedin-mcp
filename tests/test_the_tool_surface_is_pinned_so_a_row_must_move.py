@@ -95,6 +95,7 @@ PINNED_TOOL_SURFACE: dict[str, tuple[str, ...]] = {
     "linkedin_draft_applications": ("limit",),
     "linkedin_events_home": (),
     "linkedin_follow_company": ("confirm_token", "job_id"),
+    "linkedin_follow_company_page": ("confirm_token", "organisation_id"),
     "linkedin_followed_companies": ("company", "limit"),
     "linkedin_group_memberships": (),
     "linkedin_group_page": ("group_id",),
@@ -119,6 +120,7 @@ PINNED_TOOL_SURFACE: dict[str, tuple[str, ...]] = {
     "linkedin_profile_editor_values": (),
     "linkedin_publish_post": ("confirm_token", "text"),
     "linkedin_react_to_item": ("confirm_token", "item"),
+    "linkedin_recent_job_searches": (),
     "linkedin_save_job": ("confirm_token", "job_id"),
     "linkedin_saved_jobs": ("limit",),
     "linkedin_search_appearances": (),
@@ -247,8 +249,48 @@ PINNED_TOOL_SURFACE: dict[str, tuple[str, ...]] = {
 #: carries: a builder has to be handed the thing it builds from.
 #: **NO ROW MOVES IN THIS COMMIT:** `M C72` moves, or keeps its state with a
 #: named reason, in the commit recording one live fire of this tool.
-PINNED_TOOL_COUNT = 50
-PINNED_PARAMETER_COUNT = 71
+#: (Both live-lane pins above were taken on the lane's branch, over the base's
+#: 49 and 67; the merge below reconciles them with master's two.)
+#:
+#: **RE-PINNED 2026-09-23 AT 50 TOOLS AND 67 PARAMETERS (lane L3), merged over the
+#: readers wave's 49 and 67 just above: one tool added, no parameter, and the
+#: surface change moves a census row in the same commit.**
+#: `linkedin_recent_job_searches()` reads the jobs home and banks `J 18`.
+#: **A SECOND TOOL WAS PINNED HERE AND WITHDRAWN BEFORE MERGE:**
+#: `linkedin_tracked_job_proximity(stage, limit)` joined the tracker to the
+#: posting's proximity read by navigating to job ids READ OFF THE TRACKER
+#: PAGE -- a derived navigation `tests/test_navigation_is_never_derived.py`
+#: forbids, and one its taint engine (a `goto` return and `.url` only) could
+#: not see. `J 57` stays GAP.
+#: **AND ONE MOVE THIS PIN CANNOT SEE, SAID HERE BECAUSE IT IS THE HOLE THIS
+#: FILE WAS DUG FOR ONE LEVEL DOWN:** `linkedin_premium_job_collection` gained
+#: a new VALUE, index 2 (`recommended`), on a parameter it already had, and it
+#: banks `J 39`. No name and no parameter moved, so this guard is silent about
+#: it by construction. Both rows move GAP -> COVERED-UNFIRED, not PROVEN: the
+#: lane that built them was offline. See `_audit/2026-09-23-lane-l3-jobs.md`.
+#: **RE-PINNED 2026-09-23 AT 51 TOOLS AND 69 PARAMETERS (lane L4), merged over
+#: master's 50 and 67 just above: one tool added, two parameters, and the
+#: census row moves in the same merge.** The lane's branch had pinned 50 and 68
+#: over the base's 49 and 66.
+#: `linkedin_follow_company_page("organisation_id", "confirm_token")` banks
+#: `N 47` -- follow an organization's Page from the Page itself -- GAP ->
+#: COVERED-UNFIRED. Not PROVEN: it is a WRITE, built to ready-to-fire behind
+#: the flag and the single-use grant, and no grant was issued for it. Its two
+#: parameters are the two every gated write takes -- a numeric identifier,
+#: refused unless it is 4 to 20 ASCII digits, and the token. See
+#: `_audit/2026-09-23-lane-l4-writes.md`.
+#:
+#: **RE-PINNED 2026-09-24 AT 52 TOOLS AND 73 PARAMETERS, at the live lane's
+#: merge of master.** The lane's branch stood at 50 and 71 over the base's 49
+#: and 67 (four parameters: `view_switch`, `show_more_analytics`,
+#: `activity_id`, `include_link`; one tool); master stood at 51 and 69 over
+#: the same base (two tools, two parameters). 49 + 1 + 2 = 52 and
+#: 67 + 4 + 2 = 73, and both are measured off the merged registry by the
+#: tests below rather than trusted from this sum. No row moves in the merge:
+#: every row the lane's surface serves moved in the lane commit that fired it
+#: (`N 134`, `P O3`, `M C72`), and master's rows in master's.
+PINNED_TOOL_COUNT = 52
+PINNED_PARAMETER_COUNT = 73
 
 
 def live_surface() -> dict[str, tuple[str, ...]]:

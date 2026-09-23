@@ -1,4 +1,20 @@
-"""The tool surface: fifty tools, twelve of which write to LinkedIn.
+"""The tool surface: fifty-two tools, thirteen of which write to LinkedIn.
+
+THE FIFTY-SECOND IS A READ THAT PRESSES, merged 2026-09-24:
+``linkedin_own_item_link``, the share link of one of his own posts. It was
+built on the live lane's branch as that branch's fiftieth, while master gained
+the fiftieth and fifty-first below; the merge made it the fifty-second, and
+every site that states these numbers moved in the merge. The headline read
+"fifty-one tools, thirteen of which write" until then.
+
+THE FIFTY-FIRST IS A WRITE, 2026-09-23, and every site that states these
+numbers moved in the same commit: ``linkedin_follow_company_page``, a follow
+performed on an organisation Page's own root and addressed by the Page's
+numeric id -- the id ``linkedin_unfollow_company`` keys its rows by. Census row
+``N 47``, COVERED-UNFIRED. It was built on a lane branch as the fiftieth while
+``linkedin_recent_job_searches`` became the fiftieth on master the same day;
+the merge made this one the fifty-first. The headline read "fifty tools,
+twelve of which write" until then.
 
 THIS PARAGRAPH HAS NOW BEEN WRONG FIVE TIMES, in both directions, and the
 count is the part that keeps rotting. Until 2026-08-23 it read *"There is no
@@ -142,9 +158,9 @@ assigned to anybody -- it waits for whoever next runs the suite, and in the
 meantime the pin goes on asserting the old number with full confidence.
 
 THE NUMBERS ABOVE ARE DERIVED NOW, and that is a statement about a test rather
-than about an intention. Forty-nine is ``len(await mcp.list_tools())``,
+than about an intention. Fifty-two is ``len(await mcp.list_tools())``,
 pinned in ``test_server_surface.py`` by
-``test_the_surface_is_exactly_the_fortynine_tools``; the split is pinned by
+``test_the_surface_is_exactly_the_fifty_two_tools``; the split is pinned by
 ``tests/test_prose_that_makes_a_claim.py::test_the_server_docstring_numbers_are_derived``,
 which reads THESE WORDS and fails if any of the three disagrees with the
 registry.
@@ -157,16 +173,22 @@ POINTER to it was dangling, so a reader who followed it found nothing and
 would reasonably conclude these numbers are unchecked. A citation is a claim
 like any other.
 The surface splits three ways and the split is the part a reader actually
-needs: THIRTY-EIGHT read, TWELVE write, and ZERO are write-shaped,
-registered, gated and unable to act. Thirty-eight plus twelve plus zero is
-fifty.
+needs: THIRTY-NINE read, THIRTEEN write, and ZERO are write-shaped,
+registered, gated and unable to act. Thirty-nine plus thirteen plus zero is
+fifty-two.
 
-THE FIFTIETH, 2026-09-23, IS A READ THAT PRESSES: ``linkedin_own_item_link``,
+THE FIFTY-SECOND, 2026-09-23, IS A READ THAT PRESSES: ``linkedin_own_item_link``,
 the share link of one of his own posts through the post's own "Copy link
 to post", on a recorded orchestrator-delegated call. It changes nothing on
 LinkedIn that the call did not accept, and the page's clipboard calls are
 captured in this server's own tab rather than reaching his system clipboard,
 with the one gap in that capture named in the tool's own docstring.
+
+THE FIFTIETH IS ONE READ, 2026-09-23. ``linkedin_recent_job_searches`` opens
+the jobs home, ``/jobs/jam/`` -- admitted 2026-09-20 with nothing behind it
+-- and returns the recent-searches list: each search's keywords and place,
+the names of the filters it carried, and whether LinkedIn draws its alert
+badge. Census row ``J 18``, COVERED-UNFIRED.
 
 THE FORTY-EIGHTH AND FORTY-NINTH ARE TWO READS, 2026-09-21, AND THEY ARE ONE
 FINDING RATHER THAN TWO TOOLS. ``linkedin_group_page`` and
@@ -267,12 +289,13 @@ the moment ``update_profile_field`` was given an address while still refusing.
 ``mint`` now refuses on ``PERFORMABLE`` MEMBERSHIP, which is the reason it
 always meant: an address is not a permission.
 
-NOTE THE SEVENTH ACTION THAT HAS NO TOOL. ``writes.SANCTIONED_WRITES`` holds
-THIRTEEN actions where this surface registers TWELVE write-shaped tools, and
+NOTE THE ACTION THAT HAS NO TOOL. ``writes.SANCTIONED_WRITES`` holds
+FOURTEEN actions where this surface registers THIRTEEN write-shaped tools, and
 the missing one is ``set_open_to_work``: it is sanctioned, it is refused by
-``_refuse_unperformable``, and no tool was ever registered for it. So six plus
-six counts TOOLS and thirteen counts ACTIONS, and a reader comparing the two
-numbers is not looking at a discrepancy.
+``_refuse_unperformable``, and no tool was ever registered for it. So thirteen
+counts TOOLS and fourteen counts ACTIONS, and a reader comparing the two
+numbers is not looking at a discrepancy. (THIRTEEN and TWELVE until
+2026-09-23; ``follow_company_page`` added one to each.)
 
 THE LINE NUMBERS THAT USED TO BE HERE ARE GONE, and that is part of this
 correction rather than tidying. It read "pinned at ``test_server_surface.py``
@@ -380,6 +403,7 @@ from linkedin_server import (
     group_page,
     groups_page,
     job_collections,
+    job_home,
     jobfilter,
     newsletters,
     notify_cost,
@@ -834,13 +858,13 @@ mcp = FastMCP(
     instructions=(
         "A window onto the operator's OWN LinkedIn account, driven by his own "
         "signed-in browser on his own machine. Most tools read and change "
-        "nothing. TWELVE WRITE: linkedin_save_job, "
+        "nothing. THIRTEEN WRITE: linkedin_save_job, "
         "linkedin_unsave_job, linkedin_unfollow_company, "
         "linkedin_follow_company, linkedin_apply_job, "
         "linkedin_update_setting, linkedin_react_to_item, "
         "linkedin_send_invitation, linkedin_publish_post, "
-        "linkedin_comment_on_item, linkedin_update_profile_field and "
-        "linkedin_send_message. "
+        "linkedin_comment_on_item, linkedin_update_profile_field, "
+        "linkedin_send_message and linkedin_follow_company_page. "
         "THE ELEVENTH is the only one here that can verify its own outcome "
         "by reading the field back; it also returns the PREVIOUS value "
         "verbatim and the exact call that puts it back, which this server "
@@ -951,7 +975,15 @@ mcp = FastMCP(
         "and cannot aim its own unfollow at what a follow creates, because a "
         "posting names its employer by SLUG and the unfollow surface "
         "addresses rows by NUMERIC ID. Reversible in LinkedIn, by hand; not "
-        "by this server. "
+        "by this server. THE THIRTEENTH, 2026-09-23, IS THE FOLLOW WHOSE UNDO "
+        "CAN BE AIMED: linkedin_follow_company_page acts on an organisation "
+        "Page's own root and takes the Page's NUMERIC id -- the id "
+        "linkedin_job_detail returns as company_id and "
+        "linkedin_followed_companies prints -- so its undo is "
+        "linkedin_unfollow_company on that same id, whenever Manage Pages "
+        "draws the row. It refuses a Page he already follows: the label that "
+        "control wears once followed has never been captured, and it reads "
+        "as unknown rather than being guessed. "
         "Endorsing a skill is IMPOSSIBLE AS SPECIFIED and is the one "
         "capability with no tool: zero endorse controls across 13 fixtures "
         "and across 222 controls read live on his own profile, and the only "
@@ -2557,10 +2589,18 @@ async def linkedin_premium_job_collection(collection: int = 0) -> dict[str, Any]
     ONE PAGE LOAD, NO SCROLLING, NO PRESSES. ``collection`` is an INDEX into a
     closed tuple in ``linkedin_server/job_collections.py``, never a free
     string, so the set of addresses this tool can ever reach is enumerable by
-    reading that constant: 0 is ``top-applicant``, 1 is ``top-choice``. Both
-    are on the read allowlist, root only. Out of range REFUSES rather than
-    clamping, because a reading filed under the wrong collection is worse than
-    no reading.
+    reading that constant: 0 is ``top-applicant``, 1 is ``top-choice``, 2 is
+    ``recommended``. All three are on the read allowlist, root only. Out of
+    range REFUSES rather than clamping, because a reading filed under the
+    wrong collection is worse than no reading.
+
+    **INDEX 2 IS NOT A PREMIUM COLLECTION** -- the tool's name predates it. It
+    is LinkedIn's own recommended-jobs list (census ``J 39``), the same page
+    ``linkedin_job_collections`` COUNTS; here its posting ids come back, so a
+    recommendation becomes a posting ``linkedin_job_detail`` can read. Added
+    2026-09-23 and exercised offline only, over a skeleton of the live capture
+    this reader's shape was measured on: it has NOT been fired against
+    LinkedIn at that index.
 
     **``slots`` IS THE POSTING COUNT AND ``hydrated`` IS NOT. Do not quote the
     second as the first.** LinkedIn draws one list slot per posting it has
@@ -2654,6 +2694,60 @@ async def linkedin_premium_job_collection(collection: int = 0) -> dict[str, Any]
             }
     except Exception as exc:
         return _error(exc)
+
+
+@mcp.tool()
+async def linkedin_recent_job_searches() -> dict[str, Any]:
+    """Your recent job searches, re-runnable, and which of them carry a job alert.
+
+    ONE PAGE LOAD, NO SCROLLING, NO PRESSES. The address is a module constant,
+    ``job_home.HOME_URL`` -- the jobs home, ``/jobs/jam/``, which is where
+    LinkedIn lands ``/jobs/alerts/`` (measured 2026-09-20). Census ``J 18``,
+    *recent searches: view and re-run*.
+
+    WHAT EACH ENTRY CARRIES. ``search_keywords`` -- the query exactly as
+    ``linkedin_search_jobs`` takes it, read off the entry's own href by the
+    same function that already hands you a job alert's keywords from your
+    notifications; ``location`` -- the place the search ran in, when the
+    subtitle isolates exactly one; ``alert_on`` -- whether LinkedIn draws its
+    alert badge on that search; ``in_your_network``, ``workplace``, and
+    ``facets``, the names of the filters the search carried. **TO RE-RUN ONE,
+    pass its ``search_keywords`` and ``location`` to ``linkedin_search_jobs``.**
+
+    WHAT IT WILL NOT TELL YOU. No filter VALUE -- a salary band is your pay
+    expectation, so only the fact that a salary filter was on comes back -- no
+    place id, no href, no job, no person. ``location`` is ``None`` with
+    ``location_state`` ``ambiguous`` when the subtitle carries two candidate
+    places, rather than a joined string the page never drew.
+
+    **A ZERO IS ONLY READABLE BESIDE ``list_label_seen``.** No entries with the
+    list drawn is a fact about your account; no entries with no list is this
+    reader failing to see, and carries ``refusal``.
+
+    **ALERTS: A PARTIAL VIEW, AND SAID SO.** The badge sits on RECENT searches,
+    so an alert whose search has aged out of the list is not shown here.
+    ``alerts_on`` counts the badges drawn, not every alert you have.
+
+    NOT YET FIRED LIVE. Built 2026-09-23 against a sanitised copy of the live
+    capture of that landing; the first live call is also the first check that
+    ``/jobs/jam/`` serves the same list when opened directly.
+    """
+    url = job_home.HOME_URL
+    try:
+        async with BROWSER.session() as page:
+            landed = await BROWSER.goto(page, url)
+            assert_not_authwall(landed, surface="jobs home")
+            reading = await job_home.read_recent_searches(page)
+            return {
+                "ok": True,
+                # A RELATION, NEVER THE ADDRESS -- the family's spelling.
+                "redirected": landed.rstrip("/") != url.rstrip("/"),
+                "pages_loaded": 1,
+                **reading,
+            }
+    except Exception as exc:
+        return _error(exc)
+
 
 
 @mcp.tool()
@@ -5080,11 +5174,13 @@ async def linkedin_job_detail(job_id: str) -> dict[str, Any]:
             # ever be performed from, so the state and the action are read from
             # and applied to the same rendering. Three-valued -- see
             # shape.follow_state for why "we could not tell" has to be one of
-            # the three.
+            # the three. BOTH CONVENTIONS since LinkedIn relabelled the control
+            # (measured 2026-09-19): ``shape.posting_follow_state`` reads the
+            # bare labels exactly as before and the card's relabelled control
+            # by the anchor its docstring states, and never says "had not
+            # hydrated" about a card that drew a control it cannot name.
             control = await dom.read_follow_control(page)
-            out["company_follow_state"] = shape.follow_state(
-                control.get("label"), count=int(control.get("count") or 0)
-            )
+            out["company_follow_state"] = shape.posting_follow_state(control)
 
             # AND WHETHER IT IS SAVED, off the same rendering, for the same
             # reason -- the save control sits beside the follow control on this
@@ -8433,6 +8529,64 @@ async def linkedin_follow_company(
     """
     try:
         return await _write_tool("follow_company", job_id, confirm_token)
+    except Exception as exc:
+        return _error(exc)
+
+
+@mcp.tool()
+async def linkedin_follow_company_page(
+    organisation_id: str, confirm_token: str = ""
+) -> dict[str, Any]:
+    """Follow one organisation Page, from the Page itself, by its numeric id.
+
+    Same two-step shape and the same five gates as ``linkedin_save_job``: no
+    ``confirm_token``, no action -- you get a block to read and a token that
+    works ONCE, only for this Page, only for this verb, within two minutes.
+    Census row ``N 47``.
+
+    WHY THIS EXISTS BESIDE ``linkedin_follow_company``. That tool follows the
+    employer of a JOB POSTING, and a posting names its employer by slug, so
+    the undo -- ``linkedin_unfollow_company``, which is addressed by NUMERIC id
+    -- could not be aimed at what it created. This tool is addressed by the
+    same numeric id the unfollow is. ``linkedin_job_detail`` publishes it as
+    ``company_page_url`` and ``company_id``; ``linkedin_followed_companies``
+    prints it beside every Page you follow.
+
+    WHAT THE PREVIEW READS, on the Page root itself, at one page load. The
+    Page's own follow control -- measured wearing ``Follow `` followed by the
+    Page's name -- must be the ONE such control in the page's main column
+    (LinkedIn draws the same control for every Page it recommends, in a side
+    column), its name must match a heading the Page prints, and the Page's
+    own people-search link must name the id you asked about. That last check
+    is what ties the page to the id: LinkedIn redirects ``/company/<id>/`` to
+    the Page's canonical address, which this block does not print -- it is a
+    slug, and a slug can be a name.
+
+    A PAGE YOU ALREADY FOLLOW IS REFUSED, NOT REPORTED. The label its control
+    wears once followed has never been captured, so this reads ``unknown``
+    rather than guessing -- pressing a follow control in its other state is
+    how a follow becomes an unfollow.
+
+    After the click the result is read off a DIFFERENT surface: your followed
+    companies, where the row for this id must render. That list shows about
+    twenty rows of however many you follow, so ``performed`` may come back
+    ``"unknown"`` on a follow that landed; open your followed companies and
+    look rather than retrying.
+
+    THE PAGE'S ADMINS SEE THEIR FOLLOWER COUNT MOVE, and a follow can surface
+    in your network's feed. The follow is reversible; that it was seen is not.
+
+    Args:
+        organisation_id: the numeric LinkedIn organisation id, 4 to 20 ASCII
+            digits -- as ``linkedin_followed_companies`` prints it, or as
+            ``linkedin_job_detail`` returns it in ``company_id``.
+        confirm_token: leave empty to preview. Pass the token from that
+            preview to actually follow.
+    """
+    try:
+        return await _write_tool(
+            "follow_company_page", organisation_id, confirm_token
+        )
     except Exception as exc:
         return _error(exc)
 

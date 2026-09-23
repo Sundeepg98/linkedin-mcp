@@ -8050,7 +8050,8 @@ reports what the GATE says -- and the gate's verdict is not a destination.
 `profile.md` and `network.md` by REMAINING COST -- BUILDABLE / ADDRESS / RULING
 / PRESS / SERVED -- and refuses to print a tally unless six controls pass.
 **[2026-09-23: 54 rows, after five left GAP, and a seventh control; section
-60 has the test that now runs it.]**
+60 has the test that now runs it. That evening an eighth control, over the
+four RULING verdicts the registered calls decided: section 60.6.]**
 Deliverable `_audit/2026-09-21-the-read-triage.md`.
 
 ### 46.1 THE LAW: A JUDGEMENT SHIPS WITH A TRIPWIRE ON ITS OWN DENOMINATOR
@@ -9472,7 +9473,10 @@ per bucket-3 row, and the measurement is taken: of 67 rows, 33 sit on a page the
 boundary admits, 24 on one it refuses, 10 carry no address at all -- and 5 have
 nothing between an admitted page and a reader but the reader. **[Later on
 2026-09-23: 4 while a standing ruling held `M M49`'s messaging page, and 5
-again after the operator lifted it at 18:15; section 60.]**
+again after the operator lifted it at 18:15; section 60. 1 after the live
+readers wave gated four of the five PRESS or RULING, 12 on the census-cleanup
+branch after the calls registered that evening re-gated seven RULING rows to
+READER, and 8 of 66 where the two met; section 60.6.]**
 
 ### 57.1 THE PLANT THAT MATTERS IS A CONSISTENT ONE
 
@@ -9694,10 +9698,10 @@ test of the edge installs its own hold on a page it chooses.
 
 | path | shown failing by |
 |---|---|
-| `scripts/ruling_holds.py` | The merge with master 53ba1b6, on real data (60.1). `tests/test_ruling_holds.py`: a STANDING hold handed in and resolved green, then register copies with that ruling removed, re-scoped to a narrower surface, and no longer STANDING; the write hold rebound to "one write only"; the merge's two events replayed against the real register (a RELAYED hold it now carries, a PENDING question it now answers); relayed and pending records whose words moved; a ruling listed both lifted and live; a lifted ruling the register puts back into force, and one it drops. Each is handed in as a parameter, so neither the real register nor the real table is touched |
-| `scripts/census_completion.py` -- bucket 1 by hold, four `b1_` pins, `PINNED_B1_ROWS`, and `b2_d3_rows` | on HEAD's cells before any marker existed: `--check` red, naming the seven rows whose holds were prose only. Demonstration D of `scripts/_check_census_completion_can_fail.py` (a COVERED-UNFIRED row W to R: two `b1_` pins move, the row is named, no GAP figure moves). `tests/test_ruling_holds.py`: a marker removed, the swap in 60.2, a direction flip, a row leaving the state, an unknown or LIFTED citation withholding the split and every `b1_` figure |
+| `scripts/ruling_holds.py` | The merge with master 53ba1b6, on real data (60.1). `tests/test_ruling_holds.py`: a STANDING hold handed in and resolved green, then register copies with that ruling removed, re-scoped to a narrower surface, and no longer STANDING; the write hold rebound to "one write only"; the merge's two events replayed against the real register (a RELAYED hold it now carries, a PENDING question it now answers); relayed and pending records whose words moved; a ruling listed both lifted and live; a lifted ruling the register puts back into force, and one it drops. RELEASES (60.6): a release nobody registered, one the register no longer holds STANDING, and one also listed as lifted; in `hold_of`, a release unknown to the table, cited on a read, on a jobs row, and beside the write hold's own marker. Each is handed in as a parameter, so neither the real register nor the real table is touched |
+| `scripts/census_completion.py` -- bucket 1 by hold, five `b1_` pins, `PINNED_B1_ROWS`, and `b2_d3_rows` | on HEAD's cells before any marker existed: `--check` red, naming the seven rows whose holds were prose only. Demonstration D of `scripts/_check_census_completion_can_fail.py` (a COVERED-UNFIRED row W to R: two `b1_` pins move, the row is named, no GAP figure moves), and demonstration E (one RELEASED BY marker stripped: three `b1_` pins move and the row is named). `tests/test_ruling_holds.py`: a marker removed, the swap in 60.2, a direction flip, a row leaving the state, an unknown or LIFTED citation withholding the split and every `b1_` figure, a release removed (the row named, back under the write hold), a released row flipped to a read (the split withheld) |
 | `scripts/check_read_addresses.py` -- `ruling_problems` and the STANDING-RULING gate | HEAD's own table, 60.3. `tests/test_read_addresses.py`, each on a hold the test installs: a row made blocked on nothing on a held page, a held page under a PRESS gate, a held page citing nothing, STANDING-RULING off its ruling's page or citing nothing, a PENDING question convicting a row the test makes blocked on nothing, a note still citing a LIFTED ruling, and `census_completion` withholding the split |
-| `scripts/triage_read_gap_rows.py` -- CONTROL 7 -- and `tests/test_triage_read_gap_rows.py` (the first test that runs the script) | `N 53` planted back into the real file: two tests red naming it, the file restored and compared by sha256. Each of the four `--plant` options refused by its own control's sentence |
+| `scripts/triage_read_gap_rows.py` -- CONTROLS 7 and 8 -- and `tests/test_triage_read_gap_rows.py` (the first test that runs the script) | `N 53` planted back into the real file: two tests red naming it, the file restored and compared by sha256. Each of the five `--plant` options refused by its own control's sentence; `undecided-annotation` (60.6) names `N 133`, a PRESS row annotated as decided |
 
 ### 60.5 DECLARED DISPOSABLE
 
@@ -9705,7 +9709,139 @@ The scratch join of the 33 admitted rows against the register's address-family
 entries, and the two scratches that rewrote one line of the address table (to
 STANDING-RULING, then back to READER after the lift). What the join measured is
 recorded in the audit, and `ruling_problems` re-derives the part that matters
-on every run.
+on every run. Likewise the evening's scratches (60.6): the one that appended
+the six release markers, the one that re-gated thirteen table lines, the one
+that appended the dated census notes -- each matched its lines exactly and
+aborted on anything else -- and an in-process probe of `press.check_basis`
+per page.
+
+### 60.6 A WRITE LEAVES THE HOLD ONLY BY A RELEASE ITS OWN CELL CITES
+
+Master 4a57b75 registered `SELF-PROFILE-EDITS-NOT-OUTWARD`: edits to his own
+profile fields are not outward acts. The write hold binds every OUTWARD write
+and holds a W row through its R/W cell with no marker, so the release could not
+be inferred from where a row sits -- a row's section is its topic, not its
+class. It is a marker, ``**RELEASED BY `<ID>`**``, read the way ``HELD BY`` is,
+from a table of releases (`ROW_RELEASES`) that must resolve to a registered
+STANDING ruling. A release cited on a read, on a jobs row (no R/W column), or
+beside the write hold's own marker is reported and never counted, and a release
+missing from the table un-holds nothing. Six bucket-1 cells cite it, and
+`b1_released` pins how many writes it takes out, as a subset of "held by NO
+ruling".
+
+    A RELEASE IS A STATEMENT IN THE CELL, NEVER A POSITION IN THE CENSUS.
+
+The same evening's re-gate is not an instrument and is recorded in the audit,
+section 12: thirteen bucket-3 rows moved on the registered calls, and "blocked
+on nothing" went from 5 to 12 on that branch -- 8 of 66 once it merged the live
+readers wave, which had gated four of the old five (audit section 13). What
+the instruments gained from it: the
+census_completion report lists the blocked-on-nothing rows off the table rather
+than pointing at a document that names another day's five, and the read
+triage's CONTROL 8 refuses a DECIDED_SINCE_TRIAGE entry whose row does not
+carry RULING, since only a row waiting on a decision can have had one made.
+
+---
+
+## 61. THE WRITE ROWS GET A CLASS COLUMN, AND THE CLASS IS DERIVED FROM THE ACT (lane-l4-writes, 2026-09-23)
+
+**Registered 2026-09-23.** Full record: `_audit/2026-09-23-lane-l4-writes.md`.
+Numbered 61 by the orchestrator's allocation for this lane (57 bucket 3, 58-60
+the sibling lanes), so parallel appends do not collide.
+
+The census holds 151 write-direction still-GAP rows, and until this entry no
+column said which DECISION governs each one: the operator's reversible first
+round (R1), the three acts he cut (R2), or neither (R3).
+`_audit/_census/write-classes.tsv` is that column, one line per row. R2 is
+now labelled OUTWARD (WAS CUT; ALLOWED 2026-09-23 18:15) on a ruling relayed
+to the lane by the orchestrator and not yet registered (lane record section
+5); its membership is unchanged, and every R2 line carries four build-ready
+columns that no other line may carry.
+
+### 61.1 THE CLASS IS A PROPERTY OF THE ACT, NOT A CELL
+
+Every line names its act from a closed vocabulary held in the checker
+(`WRITE_CLASS_ACTS`), and the class is looked up from the act. A line whose
+class disagrees with its act is red. So widening R1 -- deciding, say, that
+subscribing to a newsletter is a follow -- is an edit to the VOCABULARY, where
+a reviewer sees the class boundary move, and never one quiet cell in a
+151-line table.
+
+### 61.2 THE PLANT THAT MATTERS IS THE CONSISTENT ONE
+
+A line rewritten so that act and class agree with each other -- `subscribe`
+to `follow`, R3 to R1 -- passes every vocabulary check. It is caught because an
+R1 line must cite, verbatim, the passage that DEFINES R1 (the operator's own
+sentence, quoted in `_audit/_census/network.md` section 6), and an R2 line the
+passage that defines the cut (the comment above `writes.SANCTIONED_WRITES`).
+Shown both ways on 2026-09-23: the plant on `M C80` is convicted by exactly
+one problem, *"R1 must cite the passage that defines it"*; with that rule
+removed from the checker in process, the same plant produces NO problem naming
+the row. That rule is the only thing between the table and a silent widening.
+
+    A CLASS THAT CAN BE ASSERTED WITHOUT ITS AUTHORITY IS A CLASS NOBODY
+    DECIDED.
+
+### 61.3 A ROW MAY LEAVE THE POPULATION IN EXACTLY ONE WAY
+
+The population is re-walked on every run with the shipped decisions
+(`count_census_states`, `enumerate_gap_rows.ADMIN_ONLY`,
+`reader_closable_blockers.direction_of`), and the table must equal it. The one
+sanctioned departure is a BUILD: a line whose disposition is `built:<action>`
+must name an action in `writes.PERFORMABLE` AND its census row must no longer
+read GAP. A build that did not move its row, a row that moved for any other
+reason, and a `queued:` row that has left are all red.
+
+### 61.4 THE ENTRIES
+
+| path | shown failing by |
+|---|---|
+| `scripts/check_write_classes.py` | `tests/test_write_classes.py`: seventeen plants into a COPY of the real table -- a missing row, a duplicate, a row that is not write-direction GAP (`N 1`), a class disagreeing with its act, the CONSISTENT widening of 61.2, an off-vocabulary act, a drifted capability text, a dropped self-citation, a phrase that no longer resolves, an unregistered ruling id, a ruling the register reads SUPERSEDED (added at the lane-L4 merge, when the real table was found citing `DO-NOT-OPEN-MESSAGING` on 32 lines after `WRITE-CLASS-B` superseded it and every other rule passed; the new rule turned all 32 red before the table was regenerated), a build naming an action outside `PERFORMABLE` (convicted twice: the action, and the row still reading GAP), an R2 line carrying a build disposition, an R2 line with one of its four build-ready columns dropped to `-`, build-ready detail on an R3 line, an R2 target outside person / thread / job / post, and non-ASCII -- each red AND naming its row; a missing table reported as a named problem; the two class-defining passages resolved on their own; the walk's known answers (`M M6`, `P A14`, `N 4` in; `N 1`, `P A1` out); green on the real table with the table asserted equal to the population plus what was built; and the 11 / 23 / 117 split pinned |
+
+### 61.5 A REDEEMED GRANT COULD BE PERFORMED TWICE, AND NOW IT CANNOT
+
+The single-use grant was single-use at ONE door. `consume` burns the token --
+a second redemption is refused -- and hands back the grant OBJECT; nothing
+stopped a caller holding that object from passing it to `perform` a second
+time. The tool path never does, so the hole was latent; the guarantee now
+does not depend on the tool path. `WriteGrant.performed` is set on entry to
+`perform`, after the redemption check and before anything is navigated, and a
+second entry refuses. Marked on ENTRY rather than after the click, so a
+perform that refuses part-way still spends the grant: a refused write is
+re-attempted from a fresh preview, never from a grant that has already been to
+the page once.
+
+    SINGLE USE IS A PROPERTY OF THE PERMISSION, NOT OF THE TOKEN THAT CARRIED
+    IT. A TOKEN BURNED AT ONE DOOR IS NOT A GRANT SPENT AT THE OTHER.
+
+### 61.6 THE ENTRIES
+
+| path | shown failing by |
+|---|---|
+| `linkedin_server/writes.py` -- `WriteGrant.performed` and its refusal in `perform` | `tests/test_follow_company_page.py::test_the_second_use_guard_is_shown_failing_without_its_flag`: after one real perform, the flag is cleared -- the state every redeemed grant was in before 2026-09-23 -- and the SAME grant object navigates back to the page and clicks again (`clicks_made == 1` on the replay). With the flag left set, `test_control_3_it_refuses_a_second_use_of_the_same_grant` refuses with zero navigations |
+| `tests/test_follow_company_page.py` section 5 -- the three grant controls for `follow_company_page` | each drives the REAL preview, `consume` and `perform` over the synthetic Page root in a local headless Chromium: (1) no grant -- writes off, then writes on with no token, `None`, `True`, a forged token, an unredeemed grant and a non-grant, zero navigations across all of them; (2) another target -- a token minted for one id refused for another, and refused for `unfollow_company` on the SAME id; (3) a second use -- at the token door and at `perform` |
+| `writes.company_page_follow_verdict` (the Page-root follow verdict) | five DERIVED worlds, each one asserted edit of the fixture -- the control relabelled to an unmeasured ON label, the identity link naming another organisation, no identity link, a second follow control moved into the main column, the heading no longer matching the control -- each refused at the verdict AND at the preview with no grant minted; every refusal asserted to quote nothing the page chose |
+| the coercion repair in `_live_control` and `_verify_after` | `tests/test_follow_company_page.py::test_a_string_count_no_longer_carries_itself_out_of_live_control`: with `coerce.as_count` put back to the `int(x or 0)` it replaced, a reaction reading whose count is a page string raises a `ValueError` quoting it; with the repair, the same reading is UNKNOWN and quotes nothing |
+| `writes._label_shape` on the unfollow arm's refusal | `tests/test_follow_company_page.py::test_the_unfollow_arm_no_longer_quotes_the_label_into_a_refusal` plants a person-shaped label; `tests/test_writes.py::test_an_unrecognised_label_is_unknown_and_the_branch_is_a_race_guard` still finds `'Following'` -- the control word survives and the name does not |
+
+### 61.7 DECLARED DISPOSABLE
+
+The scratchpad scripts this lane ran -- the W-GAP enumerator and its diff
+against `d92aa30`, the generator that first wrote the class table, and the
+three offline, shapes-only measurements of the local Page-root capture
+(follow controls by landmark, organisation-id carriers, and the label/heading/
+title relations) -- are declared disposable. What they measured is recorded
+with its numbers in `_audit/2026-09-23-lane-l4-writes.md` section 4.2, and the
+structure is carried by `tests/fixtures/synthetic/company_page_follow.html`,
+which the suite re-reads on every run.
+
+### 61.8 THE THREE FOLLOW-UPS OF THE MERGE ORDER (2026-09-23, after the master merge)
+
+| path | shown failing by |
+|---|---|
+| `tests/test_no_int_on_a_page_value_in_writes.py` -- no `int()` call anywhere in `writes.py`, and every reader and gate driven over counts that are words | against the unrepaired module: 17 failed / 1 passed -- the scan listed 28 calls in 14 functions (the lane record's own list had named ten), and each of the thirteen driven functions raised a `ValueError` quoting the planted words; `aim_invitation` failed 3 of 3. The scan's own control finds a planted `int()` call |
+| `scripts/check_asserted_names_resolve.py` -- the slot join across one line break | `tests/test_an_asserted_name_resolves.py::test_the_detector_finds_a_wrapped_assertion` found nothing (`set()`) against the unjoined guard; `test_a_wrap_is_joined_across_one_ordinary_line_break_and_no_further` plants the join's limits. Its first corpus run found six wrapped sites: one reworded, five pinned in the ratchet |
+| `dom.read_follow_control` + `shape.posting_follow_state` -- the posting's relabelled follow control, anchored as the Page root's is | `tests/test_posting_follow_relabelled.py`: every world one asserted edit of `tests/fixtures/job_detail.html`. Against the unrepaired code: 5 failed / 5 passed -- the relabelled OFF control read `unknown` with a "had not hydrated" reason, no click selector was built, the ON shape was blamed on hydration, a card drawing both conventions read `not_following`, and the verdict did not exist |
 
 ## 62. WHO RULED EACH EXCLUSION, AND A CHECK THAT FAILS WHEN NOBODY DID (exclusion-audit, 2026-09-23)
 
@@ -9815,3 +9951,118 @@ captures, the label-distribution pass, the hub scoring behind the live-capture
 list, the export of the census frozen at `1c08e5f` for the retrospective check
 -- are declared disposable. Every number they produced is either re-derived by
 the instrument on each run or recorded with its result in the audit.
+
+## 65. THE JOBS SLICE GETS ITS DIRECTION COLUMN BESIDE THE CENSUS, AND A CHECK THAT RE-READS THE DECIDING WORDS (lane-l3-jobs, 2026-09-23)
+
+**Registered 2026-09-23.** Full record: `_audit/2026-09-23-lane-l3-jobs.md`.
+Numbered 65: the lane was assigned 60, and the census cleanup merged a 60 of
+its own first, so this one moved past the merged 58, 59, 60, 62 and 63 rather
+than renumber a section other documents already cite.
+
+`scripts/census_completion.py` printed 56 `jobs.md` rows as `direction
+unknown`, because that census carries no per-row R/W column, and section 8 of
+`_audit/2026-09-21-the-jobs-direction.md` argues it should not grow one. So the
+per-row reading lives beside the census, in `_audit/_census/jobs-directions.tsv`
+-- 56 classified R 28 / W 25 / R+W 3, then two rows built and banked, 54
+remaining at R 26 / W 25 / R+W 3 -- and every read row carries the bucket-3
+address columns, measured through the shipped boundary.
+
+### 65.1 A DIRECTION IS A READING OF WORDS, SO THE WORDS ARE CITED
+
+A direction column that holds only `R` or `W` can go stale without anything
+being able to notice: the capability cell it was read from can be rewritten
+under it. So each line also carries `dir_phrase` -- the words of the row's own
+capability cell that decide it -- and `dir_basis`, which says whether section
+2's ROW-RANGE cell agrees (`VERB`), is overruled by the row's own verb
+(`VERB-OVER-RANGE`, three rows the 2026-09-21 wave already found), or names
+both acts (`COMPOUND`, `RESOLVED`). The check re-finds every phrase in the live
+capability cell, word-bounded, and re-reads section 2 through the shipped
+`_check_jobs_range_directions.jobs_directions()`, so a recorded disagreement
+that has since gone away is named as stale rather than inherited.
+
+    A DIRECTION CANNOT BE CHECKED FOR TRUTH. THE WORDS IT WAS READ FROM CAN
+    BE CHECKED FOR EXISTENCE, AND THAT IS THE HALF AN INSTRUMENT CAN HOLD.
+
+### 65.2 REFUSED IS NOT WHERE IT IS DRAWN -- THE MIRROR OF ALLOWED IS NOT SERVED
+
+Three rows had been priced on an address that is not where their payload is
+drawn: `J 18`'s recent searches are drawn on the admitted jobs home, not the
+refused `/jobs/search-history/`; `J 56`'s date filter is a checkbox on the
+admitted tracker tab, not a refused query; `J 16`'s suggestions belong to the
+semantic search at the refused `/jobs/search-results/`, not the admitted
+classic search. The bucket-3 rule settled each -- the ADDRESS is the page whose
+load draws the payload -- and every other candidate is kept in `also_driven`
+and re-driven on every run.
+
+### 65.3 A FIXTURE THAT WOULD HAVE PASSED WHILE THE LIVE PAGE FAILED
+
+Half the recent-search entries sit in LinkedIn's collapsed state, and the
+capture records the class, not the stylesheet. A reader built on
+`inner_text` reads a `visibility:hidden` entry as empty and passes every test
+over a fixture with no CSS. `job_home.read_recent_searches` uses
+`text_content`, and `tests/test_job_home.py` hides the collapsed entries two
+ways. **ITS FIRST DRAFT HID THEM ONE WAY, `display:none`, AND ITS OWN CONTROL
+FIRED**: an element inside a `display:none` subtree is not rendered, so
+`innerText` falls back to its full text and that plant could not have caught a
+regression. The discriminating mode was added and the non-discriminating one
+kept, labelled, so the file says why the first is needed.
+
+### 65.4 A JOIN THAT WAS A DERIVED NAVIGATION, AND A GUARD THAT COULD NOT SEE IT
+
+`J 57`'s own census cell names *"the buildable route"*: tracker -> job ids ->
+each posting. A tool was built on it, tested end to end over committed
+captures, gated, committed -- and withdrawn before merge, because it navigates
+to ids READ OFF THE TRACKER PAGE. `tests/test_navigation_is_never_derived.py`
+forbids exactly that (*"a page that can choose the next url can choose a
+stranger's"*), and its engine could not have said so: it taints only a `goto`
+return and a `.url`, and its own docstring names page content as a deliberate
+gap. The guard's green was true and the rule was broken. What caught it was a
+review of the diff against the rule's TEXT, not against the guard's verdict.
+
+    A GUARD THAT NAMES ITS OWN BLIND SPOT HAS NOT CLOSED IT. A NEW NAVIGATION
+    IS CHECKED AGAINST THE RULE'S SENTENCE, NOT ONLY AGAINST ITS ENGINE.
+
+Not repaired here: widening the engine's sources to parsed page content is
+that file's owner's decision, and its docstring records why it was declined.
+
+### 65.5 THE ENTRIES
+
+| path | shown failing by |
+|---|---|
+| `scripts/check_jobs_directions.py` | `tests/test_jobs_directions.py`: 29 tests, every plant into a COPY of the real table and each red AND naming its row -- the two consistent lies only the live boundary can convict (an ADMITTED row made a tidy REFUSED and the reverse), a missing row, a line for a row that left GAP, a duplicate, a deciding phrase no longer in its capability cell, a `VERB` row section 2 now disagrees with, a `VERB-OVER-RANGE` disagreement gone stale, a read row classed `WRITE` and a `WRITE` row given an address, an `R+W` row with one phrase, a `RESOLVED` basis on an `R` row, a source whose file, token or census row is gone or that is prose, a wrong refusal kind, a wrong `also_driven` verdict, a missing table as a named problem, a boundary monkeypatched to admit everything named by the control; green on the real table; and the two pure functions `census_completion.py` is meant to call, shown returning figures on the real walk and WITHHOLDING them, never zeroing, on a table missing a row |
+
+`scripts/check_jobs_directions.py` imports `check_read_addresses`' shape,
+boundary, control and refusal functions unchanged rather than copying them, so
+a read row here obeys exactly the rules a bucket-3 row does.
+
+**AND THE RULING-HOLDS EDGE, ADDED AT THE MERGE WITH MASTER `c8fa6ea`.** The
+bucket-3 checker gained `ruling_problems` the same day -- no row blocked on
+nothing on a page a RULING holds (`scripts/ruling_holds.py`) -- and this
+checker now runs it on its read rows, in `main` and in the pure
+`census_figures` that `census_completion.py` calls. No hold binds a page
+today, so on the real table it has nothing to fire on; three of the 29
+tests install a hold themselves and show it firing, in the checker and in
+the census hook, which withholds the jobs split.
+
+**PROVENANCE, NOT INSTRUMENTS**: `scripts/_build_job_list_skeleton.py` and
+`scripts/_build_jobs_home_fixture.py` build two committed fixtures from
+gitignored live captures and are the record of what each fixture carried over
+and what it invented. Each REFUSES a capture whose shape would make its fixture
+misrepresent the page. They are not registered as instruments.
+
+### 65.6 SUPERSEDED, AND RED AT HEAD BEFORE THIS WAVE: SECTION 47's TABLE
+
+`scripts/_check_jobs_gap_directions.py` (section 47) carries its
+classification as a Python dict, a second copy of this data -- the drift its
+own author warned about. It has been RED at HEAD since `J 40` left GAP on
+2026-09-21 (its reconciliation names the row) and no test runs it, which is how
+nobody was told. This wave does not edit it; `_audit/_census/jobs-directions.tsv`
+supersedes its table, and retiring it is recorded as a merge note.
+
+### 65.7 DECLARED DISPOSABLE
+
+The scratchpad scripts this wave ran -- the generator that wrote the table, the
+per-capture shape probes, the offline run of the collections reader over the
+raw capture, the line-ending census -- are declared disposable. What they
+measured is re-derived by the checker on every run, carried into a committed
+fixture by a builder, or recorded with its number in the audit.

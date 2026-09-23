@@ -139,6 +139,22 @@ COVERED_ROWS: dict[tuple[str, str], tuple[str, str]] = {
         "gated on the /feed/update/ route and a census of the captures finds "
         "that route zero times, so the positive branch cannot fire at all",
     ),
+    # TWO JOBS ROWS, 2026-09-23 (lane L3), pinned at UNFIRED because the lane
+    # that built them was offline -- the same reasoning, and the same trap in
+    # the other direction, as the network rows above: an unannounced promotion
+    # is what inflates a count.
+    ("jobs.md", "18"): (
+        "COVERED-UNFIRED",
+        "recent job searches, read off the jobs home by "
+        "linkedin_recent_job_searches; built over a sanitised copy of the live "
+        "capture and never fired",
+    ),
+    ("jobs.md", "39"): (
+        "COVERED-UNFIRED",
+        "job recommendations as posting ids: index 2 of "
+        "linkedin_premium_job_collection, the recommended collection the "
+        "reader's shape was measured on; never fired at that index",
+    ),
     # PINNED AT UNFIRED, 2026-09-23, by lane L1 -- the state it belongs in,
     # for the reason the network rows above were first pinned there: the
     # wave that built it was offline, so nothing has seen the field return
@@ -429,6 +445,56 @@ def test_the_verified_badge_passthrough_is_still_whole() -> None:
         "server.py, so nothing else in this repository would notice it had "
         "stopped. Census row K10 claims COVERED on exactly this join."
     )
+
+
+#: ``module -> the names census rows J 18 and J 39 rest on``. Data, so the
+#: chain test and its control drive ONE predicate over ONE list.
+_JOBS_L3_CHAIN: dict[str, tuple[str, ...]] = {
+    "job_home.py": ("read_recent_searches", "recent_search_entry"),
+    "job_collections.py": ("read_job_collection", "collection_url"),
+    "server.py": (
+        "linkedin_recent_job_searches",
+        "linkedin_premium_job_collection",
+    ),
+}
+
+
+def test_the_two_jobs_rows_banked_by_lane_l3_are_still_whole() -> None:
+    """``J 18`` and ``J 39``: reader -> tool, and the one VALUE J 39 is.
+
+    ``J 39`` rests on a VALUE rather than a name -- ``recommended`` in
+    ``job_collections.COLLECTIONS`` -- which the tool-surface pin cannot see by
+    construction, so it is asserted here by importing the tuple and by pinning
+    the address it builds to the page the counts tool already opens.
+    """
+    for module, names in _JOBS_L3_CHAIN.items():
+        defined = _defined_names(_source(module))
+        for name in names:
+            assert name in defined, (
+                f"{module} no longer defines {name}. Census rows J 18 and J 39 "
+                "claim COVERED-UNFIRED against this chain."
+            )
+    from linkedin_server import collections_page, job_collections
+
+    assert "recommended" in job_collections.COLLECTIONS, (
+        "job_collections.COLLECTIONS lost 'recommended'; census row J 39 claims "
+        "COVERED on exactly that entry"
+    )
+    index = job_collections.COLLECTIONS.index("recommended")
+    assert job_collections.collection_url(index) == collections_page.COLLECTIONS_URL
+    server_src = _source("server.py")
+    assert "job_home.read_recent_searches(" in server_src, (
+        "no tool calls job_home.read_recent_searches; J 18's reader is orphaned")
+
+
+def test_control_the_jobs_chain_convicts_a_renamed_link() -> None:
+    """SHOWN FAILING against a MUTATED COPY: each chain's first link renamed."""
+    for module, names in _JOBS_L3_CHAIN.items():
+        source = _source(module)
+        target = names[0]
+        mutated = source.replace(f"def {target}(", f"def {target}_renamed(")
+        assert mutated != source, (module, target)
+        assert target not in _defined_names(mutated), (module, target)
 
 
 def _per_post_join(creator_src: str) -> bool:

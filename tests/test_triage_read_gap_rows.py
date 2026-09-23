@@ -15,7 +15,10 @@ moved. It also drives every ``--plant`` this module ships, and it checks
 CONTROL 7 (the ``MEASURED_PAST_BY_BUCKET3`` annotation table) against the
 real tree: every key it names must still carry a live verdict, and the
 population CONTROL 4 compares against must not be empty -- a control over an
-empty set passes vacuously and proves nothing.
+empty set passes vacuously and proves nothing. CONTROL 8 (the
+``DECIDED_SINCE_TRIAGE`` table, added when the rulings registered on
+2026-09-23 decided four RULING verdicts) is held the same way: every key must
+carry RULING, and a plant that annotates a row of any other verdict is named.
 """
 from __future__ import annotations
 
@@ -51,6 +54,7 @@ def test_green_on_the_real_tree(capsys) -> None:
     assert code == 0, out
     assert "identical -- OK" in out
     assert "annotations, every key carries a verdict -- OK" in out
+    assert "decided since the triage, each a RULING verdict -- OK" in out
     assert "THE READ-GAP TRIAGE, BY REMAINING COST" in out
 
 
@@ -103,6 +107,7 @@ def test_a_missing_verdict_turns_it_red(monkeypatch, capsys) -> None:
     ("bad-verdict", "which is not one of "),
     ("stale-census", "which is NOT a read GAP row today"),
     ("stale-annotation", "N 99999 carries an annotation but NO VERDICT"),
+    ("undecided-annotation", "is annotated as decided, and carries "),
 ])
 def test_every_built_in_plant_refuses(plant, named, capsys) -> None:
     """Each plant is refused BY THE CONTROL BUILT FOR IT, not merely refused.
@@ -124,6 +129,13 @@ def test_the_annotation_control_reads_the_real_dict() -> None:
     """Every MEASURED_PAST_BY_BUCKET3 key is a live TRIAGE key, and it is non-empty."""
     assert triage.MEASURED_PAST_BY_BUCKET3
     assert set(triage.MEASURED_PAST_BY_BUCKET3) <= set(triage.TRIAGE)
+
+
+def test_the_decided_control_reads_the_real_dict() -> None:
+    """Every DECIDED_SINCE_TRIAGE key is a live TRIAGE key carrying RULING, and it is non-empty."""
+    assert triage.DECIDED_SINCE_TRIAGE
+    for key in triage.DECIDED_SINCE_TRIAGE:
+        assert triage.TRIAGE[key][0] == "RULING", key
 
 
 def test_the_control_4_population_is_not_empty_and_equals_the_key_set() -> None:

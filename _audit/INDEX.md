@@ -27,19 +27,19 @@ are listed as `(undated)`; no date is taken from git history, because
 
 | what | count |
 | --- | --- |
-| audit documents git tracks under `_audit` | 242 |
-| of those, carrying a `YYYY-MM-DD-` date prefix | 202 |
-| distinct dates | 15 |
+| audit documents git tracks under `_audit` | 245 |
+| of those, carrying a `YYYY-MM-DD-` date prefix | 205 |
+| distinct dates | 16 |
 | documents with no level-1 heading | 2 |
-| `CORRECTS:` marker lines | 100 |
-| `CORRECTED BY:` marker lines | 100 |
-| distinct declared correction edges | 97 |
-| documents something later corrects | 49 |
-| documents that correct something | 69 |
-| documents at either end of a cross-document edge | 96 |
+| `CORRECTS:` marker lines | 101 |
+| `CORRECTED BY:` marker lines | 101 |
+| distinct declared correction edges | 98 |
+| documents something later corrects | 50 |
+| documents that correct something | 70 |
+| documents at either end of a cross-document edge | 97 |
 | intra-document correction markers | 4 |
 | documents that correct themselves later on | 2 |
-| documents no correction marker touches at all | 144 |
+| documents no correction marker touches at all | 146 |
 | blockquoted markers naming ANOTHER document | 0 |
 | edges missing one of their two markers | 0 |
 | edges declared a different number of times in each direction | 2 |
@@ -443,6 +443,14 @@ document is dead; it says one thing in it was overtaken and names what.
 
   > section 5 and section 8 of this document say the `All filters` press is forbidden by condition 5 of the admitting ruling and would be the one action that settles twelve rows. **Both halves are wrong and the second is the expensive one.** The disclosing press was ruled on 2026-09-19, and the control fails that ruling's condition 2 terminally: measured live, twice, it declares NEITHER `aria-expanded` NOR `aria-haspopup`, so it is not a member of either sanctioned node set and no caller naming a sanctioned shape can reach it. Condition 3 refuses it a second time -- no sensitivity basis is declared for this surface. **NOTHING MEASURED IN THIS DOCUMENT IS DISTURBED:** `locations` = 1, `actively hiring` = 2, `all filters` = 1, `next` = 1 and `school anise` = 0 all reproduced on two fresh loads, and every one of the fourteen verdicts stands.
 
+### [2026-09-21-the-jobs-direction.md](2026-09-21-the-jobs-direction.md)
+
+2026-09-21 &middot; THE JOBS DIRECTION: the fifth of the GAP that was never asked the question
+
+- CORRECTED BY [2026-09-23-lane-l3-jobs.md](2026-09-23-lane-l3-jobs.md)
+
+  > five of its address readings, re-taken through the shipped boundary: `J 16`'s suggestions belong to the semantic search at `/jobs/search-results/` (refused), not the classic `/jobs/search/` priced here; `J 18`'s list is drawn on the admitted jobs home `/jobs/jam/`, not on `/jobs/search-history/`; `J 56`'s date filter is a label-toggled checkbox on the admitted tracker tab, a press rather than a refused query; `J 116`-`J 120` sit behind the AI guide overlay that Amendment A13 of the 2026-09-03 gap-blockers ledger measured, a refused address, not on the admitted posting; and `J 110`'s Home tab is admitted but its content is organisation prose `shape.company_about_card` rules unpublished. `J 148` is resolved from AMBIGUOUS to R+W. `J 18` and `J 39` were then built and left GAP (a `J 57` join was built and withdrawn: it navigated to ids read off a page); the per-row directions of the rest live in `_audit/_census/jobs-directions.tsv`.
+
 ### [2026-09-21-the-open-queue.md](2026-09-21-the-open-queue.md)
 
 2026-09-21 &middot; The open queue, 2026-09-21 at master `9dbaad2`
@@ -509,7 +517,7 @@ document is dead; it says one thing in it was overtaken and names what.
 
 - CORRECTED BY [2026-09-23-census-cleanup.md](2026-09-23-census-cleanup.md)
 
-  > the split asked the boundary and never the rulings: `M M49` sat on a messaging page while `DO-NOT-OPEN-MESSAGING` stood, which made the five four until the operator lifted that ruling at 18:15 the same day. The five stands under the rulings as they now are, and the checker now asks them.
+  > the split asked the boundary and never the rulings: `M M49` sat on a messaging page while `DO-NOT-OPEN-MESSAGING` stood, which made the five four until the operator lifted that ruling at 18:15 the same day. The calls registered later that evening (`D1-SEARCH-AS-READS`, `OTHER-MEMBER-IDS-AS-READS`) decided what eight RULING rows waited on, and seven of them now need only a reader. With the four the readers wave took out (next line), the figure is 8 of 66 under the rulings and the live readings as they now are (its section 13). The checker asks the holds on every run; the gates are re-judged by hand when a ruling lands.
 
 - CORRECTED BY [2026-09-23-readers-four-rows.md](2026-09-23-readers-four-rows.md)
 
@@ -1335,7 +1343,7 @@ reach is visible. The quoted reason here is the CORRECTOR's own
 
 - CORRECTS [2026-09-23-bucket3-addresses.md](2026-09-23-bucket3-addresses.md)
 
-  > it sized "blocked on nothing" at 5 of 67 without asking the rulings, counting `M M49` on a messaging thread while `DO-NOT-OPEN-MESSAGING` stood, which made the size 4. The operator lifted that ruling at 18:15 the same day, so the size is 5 again under the rulings as they now are, and the checker now asks them.
+  > it sized "blocked on nothing" at 5 of 67 without asking the rulings, counting `M M49` on a messaging thread while `DO-NOT-OPEN-MESSAGING` stood, which made the size 4. The operator lifted that ruling at 18:15 the same day (5 again), and the calls registered later that evening decided what eight RULING rows waited on, seven of which now need only a reader (12 on this branch, section 12). Merged with the live readers wave, which gated four of the original five PRESS or RULING, the size is 8 of 66 under the rulings and the live readings as they now are (section 13). The checker asks the holds on every run; the gates are re-judged by hand when a ruling lands.
 
 - CORRECTS [_census/messaging-and-content.md](_census/messaging-and-content.md)
 
@@ -1348,6 +1356,14 @@ reach is visible. The quoted reason here is the CORRECTOR's own
 - CORRECTS [2026-09-20-the-profile-views-recapture.md](2026-09-20-the-profile-views-recapture.md)
 
   > its section 9.2 reports two undocumented filters of 32 and 31 characters on the profile-views page; they are the two radio labels of a closed `<dialog>` form on that page, collected by the reader's every-`<label>` fallback, and are not filters.
+
+### [2026-09-23-lane-l3-jobs.md](2026-09-23-lane-l3-jobs.md)
+
+2026-09-23 &middot; Lane L3, jobs rows: 56 directions, 31 read addresses, 2 readers built and 1 withdrawn
+
+- CORRECTS [2026-09-21-the-jobs-direction.md](2026-09-21-the-jobs-direction.md)
+
+  > five address readings re-taken through the shipped boundary (`J 16`, `J 18`, `J 56`, `J 110`, `J 116`-`J 120`), and `J 148` resolved from AMBIGUOUS to R+W; section 4 below gives each with its evidence.
 
 ### [2026-09-23-readers-four-rows.md](2026-09-23-readers-four-rows.md)
 
@@ -1596,7 +1612,7 @@ ways, which is a fact about markers and not a verdict on the document.
 | 2026-09-21 | [2026-09-21-the-four-loose-rows.md](2026-09-21-the-four-loose-rows.md) | THE FOUR LOOSE ROWS -- `shape.invitation_badge`, `hrefs_error`, `pill_label`, `J 57` |  |
 | 2026-09-21 | [2026-09-21-the-fourteen-fired.md](2026-09-21-the-fourteen-fired.md) | THE FOURTEEN FIRED: one banked, one refused, twelve behind a press | **CORRECTED x1** corrects x2 |
 | 2026-09-21 | [2026-09-21-the-gate-that-waves-data-through.md](2026-09-21-the-gate-that-waves-data-through.md) | The gate that waves data through |  |
-| 2026-09-21 | [2026-09-21-the-jobs-direction.md](2026-09-21-the-jobs-direction.md) | THE JOBS DIRECTION: the fifth of the GAP that was never asked the question | corrects x1 |
+| 2026-09-21 | [2026-09-21-the-jobs-direction.md](2026-09-21-the-jobs-direction.md) | THE JOBS DIRECTION: the fifth of the GAP that was never asked the question | **CORRECTED x1** corrects x1 |
 | 2026-09-21 | [2026-09-21-the-landed-url.md](2026-09-21-the-landed-url.md) | A LANDING IS A STRING THE SITE CHOSE, AND THIS PROCESS HAD NO ALLOWLIST FOR IT | corrects x1 |
 | 2026-09-21 | [2026-09-21-the-locators-that-point-elsewhere.md](2026-09-21-the-locators-that-point-elsewhere.md) | The locators that point elsewhere |  |
 | 2026-09-21 | [2026-09-21-the-open-queue.md](2026-09-21-the-open-queue.md) | The open queue, 2026-09-21 at master `9dbaad2` | **CORRECTED x1** |
@@ -1619,9 +1635,12 @@ ways, which is a fact about markers and not a verdict on the document.
 | 2026-09-23 | [2026-09-23-exclusion-audit.md](2026-09-23-exclusion-audit.md) | Who ruled each exclusion -- the 315 rows outside the denominator, traced |  |
 | 2026-09-23 | [2026-09-23-lane-l1-refused-reads.md](2026-09-23-lane-l1-refused-reads.md) | Lane L1, refused reads: 24 rows at the read boundary, taken one at a time |  |
 | 2026-09-23 | [2026-09-23-lane-l2-refused-presses.md](2026-09-23-lane-l2-refused-presses.md) | Lane L2: nine refused presses, and none of them is a narrow extension away | corrects x1 |
+| 2026-09-23 | [2026-09-23-lane-l3-jobs.md](2026-09-23-lane-l3-jobs.md) | Lane L3, jobs rows: 56 directions, 31 read addresses, 2 readers built and 1 withdrawn | corrects x1 |
+| 2026-09-23 | [2026-09-23-lane-l4-writes.md](2026-09-23-lane-l4-writes.md) | Lane L4 -- WRITES: classify the write-direction GAP rows, build the reversible first round to ready-to-fire |  |
 | 2026-09-23 | [2026-09-23-live-lane-session-1.md](2026-09-23-live-lane-session-1.md) | THE LIVE LANE, SESSION 1 |  |
 | 2026-09-23 | [2026-09-23-readers-four-rows.md](2026-09-23-readers-four-rows.md) | READERS FOR THE FOUR ROWS BLOCKED ON NOTHING: P O3, N 134, M C72, M C85 | corrects x4 |
 | 2026-09-23 | [2026-09-23-rulings-write-class-and-delegated-calls.md](2026-09-23-rulings-write-class-and-delegated-calls.md) | Rulings, 2026-09-23: the write class, the live budget, and the calls delegated to the orchestrator |  |
+| 2026-09-24 | [2026-09-24-rulings-search-verticals-rosters-passive-costs.md](2026-09-24-rulings-search-verticals-rosters-passive-costs.md) | Rulings, 2026-09-24: the search verticals, member rosters, refusals nobody registered, and passive costs |  |
 
 ## 6. What the scan rejected, could not join, or had to repair
 
@@ -1654,7 +1673,7 @@ against the same line, so a missing continuation satisfies it.
 - REASON PAST ITS LINE [2026-09-20-the-first-firing.md](2026-09-20-the-first-firing.md) line 233 -- a line-scoped reader sees 35 of 465 characters.
 - REASON PAST ITS LINE [2026-09-20-the-five-under-banked.md](2026-09-20-the-five-under-banked.md) line 3 -- a line-scoped reader sees 35 of 349 characters.
 - REASON PAST ITS LINE [2026-09-20-the-five-under-banked.md](2026-09-20-the-five-under-banked.md) line 457 -- a line-scoped reader sees 94 of 717 characters.
-- REASON PAST ITS LINE [_census/jobs.md](_census/jobs.md) line 382 -- a line-scoped reader sees 825 of 1189 characters.
+- REASON PAST ITS LINE [_census/jobs.md](_census/jobs.md) line 402 -- a line-scoped reader sees 825 of 1189 characters.
 
 - TIGHTEST ADMISSION MARGIN [2026-09-03-linkedin-gap-blockers.md](2026-09-03-linkedin-gap-blockers.md) line 272 clears the 20-character floor by 0. The floor is applied to the marker's OWN LINE, so a reason of 723 characters is admitted on the strength of 20. Reflow that paragraph by one word and a guard rejects it saying it *carries no reason after the citation*, which would not be true. Reported every regeneration rather than counted, because a count of rejections reads zero until the day it does not.
 

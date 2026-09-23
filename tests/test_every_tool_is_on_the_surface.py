@@ -85,6 +85,12 @@ EXPECTED_TOOLS = (
     "linkedin_session_info",
     "linkedin_group_page",
     "linkedin_company_page_counts",
+    # 2026-09-23, lane L3: a READ on the jobs surface, banking census row
+    # J 18 (recent searches, off the jobs home) in the same commit.
+    "linkedin_recent_job_searches",
+    # 2026-09-23, the live lane: a READ that presses, the share link of one of
+    # his own posts; census M C72, proven live on his own post.
+    "linkedin_own_item_link",
 )
 
 
@@ -303,8 +309,18 @@ def test_both_rules_reject_the_registry_that_was_actually_measured():
     # FORTY-EIGHT AND FORTY-NINE FROM 2026-09-21: linkedin_group_page and
     # linkedin_company_page_counts, both READS, each opening an admitted
     # address that no registered tool could navigate to.
-    # FIFTY FROM 2026-09-23: linkedin_own_item_link, the live lane's -- the
-    # share link of one of his own posts through the post's own "Copy link to
-    # post", on the orchestrator-delegated call recorded in its docstring. A
-    # READ by effect that PRESSES two controls; moved with every other site.
-    assert len(_tool_names()) == 50
+    # FIFTY FROM 2026-09-23 (lane L3): linkedin_recent_job_searches, a READ,
+    # banking census row J 18 as COVERED-UNFIRED in the same commit. It opens
+    # an address the boundary already admitted. (A fifty-first,
+    # linkedin_tracked_job_proximity, was built the same day and WITHDRAWN
+    # before merge: its join navigated to ids read off the tracker page.)
+    # FIFTY-ONE FROM THE SAME DAY, at the merge of lane L4:
+    # linkedin_follow_company_page, a WRITE (census row N 47), built on the
+    # lane branch as its own fiftieth and moved with every other count site
+    # in the merge commit.
+    # FIFTY-TWO AT THE LIVE LANE'S MERGE, 2026-09-24: linkedin_own_item_link --
+    # the share link of one of his own posts through the post's own "Copy link
+    # to post", on the orchestrator-delegated call recorded in its docstring. A
+    # READ by effect that PRESSES two controls; built on the lane branch as its
+    # own fiftieth and moved with every other site in the merge commit.
+    assert len(_tool_names()) == 52
