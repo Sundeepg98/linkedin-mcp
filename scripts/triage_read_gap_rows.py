@@ -178,13 +178,9 @@ TRIAGE: dict[str, tuple[str, str, str]] = {
                               "filter vocabulary"),
     "N 82": ("BUILDABLE", "", "served by the shipped people-search tool's "
                               "filter vocabulary"),
-    "N 84": ("BUILDABLE", "", "served by the shipped people-search tool's "
-                              "filter vocabulary"),
-    "N 85": ("BUILDABLE", "", "served by the shipped people-search tool's "
-                              "filter vocabulary"),
+    # N 84, N 85 and N 87 LEFT 2026-09-24: lane S built their facet readers
+    # (COVERED-UNFIRED), and the WHO rule keeps them there -- each is a FILTER.
     "N 86": ("BUILDABLE", "", "served by the shipped people-search tool's "
-                              "filter vocabulary"),
-    "N 87": ("BUILDABLE", "", "served by the shipped people-search tool's "
                               "filter vocabulary"),
     "N 88": ("BUILDABLE", "", "served by the shipped people-search tool's "
                               "filter vocabulary"),
@@ -198,10 +194,9 @@ TRIAGE: dict[str, tuple[str, str, str]] = {
                               "filter vocabulary"),
     "N 93": ("BUILDABLE", "", "served by the shipped people-search tool's "
                               "filter vocabulary"),
-    "N 94": ("RULING", "", "NO term serves it -- the shaper's own rule says a "
-                           "row with no term is a row it cannot serve; a "
-                           "multi-value query is the keyword decision again"),
-    "N 95": ("ADDRESS", "ABSENT", "no search-history address is admitted and "
+    # N 94 LEFT 2026-09-24: lane S composes several locations into one
+    # search from the tool's arguments (COVERED-UNFIRED, a FILTER row).
+    "N 95":("ADDRESS", "ABSENT", "no search-history address is admitted and "
                                   "none is refused either; the row is also "
                                   "unrouted in the blocker map"),
     "N 99": ("RULING", "", "the school root is admitted and the alumni tab is "
@@ -325,15 +320,26 @@ MEASURED_PAST_BY_BUCKET3: dict[str, str] = {
 #: CONTROL 8 refuses an entry whose row does not carry RULING: a decision can
 #: only have been made for a row that was waiting on one.
 DECIDED_SINCE_TRIAGE: dict[str, str] = {
+    # N 79, N 172 AND N 194: THE TRIAGE-DAY DECISION WAS MADE, THE READER WAS
+    # BUILT (lane S, 2026-09-24), AND A DIFFERENT DECISION NOW HOLDS THE ROW.
+    # The WHO rule (the orchestrator's census call, 2026-09-24 03:20) returned
+    # each to GAP: its payload is WHO and the reader publishes counts. So the
+    # row carries RULING again, on the name-free shaper doctrine, pending the
+    # operator's question on returning names at runtime -- and the bucket-3
+    # table gates it RULING. N 94 LEFT the same day: a FILTER, COVERED-UNFIRED.
     "N 79": "D1-SEARCH-AS-READS: a keyword may be passed, from tool "
-            "arguments only; bucket-3 gate READER",
-    "N 94": "D1-SEARCH-AS-READS: a location facet may be passed, more than "
-            "one value included; bucket-3 gate READER",
+            "arguments only; built by lane S 2026-09-24, and now held by a "
+            "DIFFERENT question -- the name-free shaper doctrine under the "
+            "WHO rule, pending the operator; bucket-3 gate RULING",
     "N 172": "OTHER-MEMBER-IDS-AS-READS with D1-SEARCH-AS-READS: another "
-             "member's id in a search facet, from tool arguments only; "
-             "bucket-3 gate READER",
-    "N 194": "D1-SEARCH-AS-READS: the hashtag is a keyword; bucket-3 gate "
-             "READER",
+             "member's id in a search facet, from tool arguments only; built "
+             "by lane S 2026-09-24, and now held by a DIFFERENT question -- "
+             "the name-free shaper doctrine under the WHO rule, pending the "
+             "operator; bucket-3 gate RULING",
+    "N 194": "D1-SEARCH-AS-READS: the hashtag is a keyword; built by lane S "
+             "2026-09-24, and now held by a DIFFERENT question -- the "
+             "name-free shaper doctrine under the WHO rule, pending the "
+             "operator; bucket-3 gate RULING",
     # ---- decided by the calls registered at master 9c219c8 and 001f70b,
     # annotated by lane R at its merge (2026-09-24), ruling by ruling ----
     "N 99": "D3-UNREGISTERED-REFUSAL-IS-NOT-A-RULING and "

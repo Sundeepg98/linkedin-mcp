@@ -1909,6 +1909,13 @@ _ALLOWED_URL_PATTERNS: tuple[re.Pattern[str], ...] = (
     # shape and never read by this server: the tool that consumes this address
     # sends no query at all, and the shaper drops any query before it reads a
     # segment and reports only that one was PRESENT.
+    # AMENDED 2026-09-24, COMMENT ONLY -- THIS LINE AND THE TWO NAMED ABOVE ARE
+    # UNCHANGED: the tool now SENDS a query, composed by
+    # `people_search.compose` from its own arguments only under
+    # D1-SEARCH-AS-READS and OTHER-MEMBER-IDS-AS-READS, and every spelling it
+    # composes is admitted by THIS pattern as it stands (driven over a corpus
+    # in `tests/test_people_search_readers.py`). The shaper still drops every
+    # result anchor's query before reading a segment.
     #
     # THE ROLLBACK IS THIS LINE. `tests/test_search_admission_blast_radius.py`
     # pins both directions and its `MUST_STAY_REFUSED` set -- which includes

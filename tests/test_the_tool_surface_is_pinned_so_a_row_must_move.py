@@ -113,7 +113,10 @@ PINNED_TOOL_SURFACE: dict[str, tuple[str, ...]] = {
     "linkedin_notify_cost_precondition": (),
     "linkedin_open_messaging": ("include_names", "message_filter"),
     "linkedin_page_plugin_snippet": ("page_id",),
-    "linkedin_people_search_shape": (),
+    "linkedin_people_search_shape": (
+        "connections_of", "current_company_ids", "keywords", "location_ids",
+        "past_company_ids",
+    ),
     "linkedin_premium_job_collection": ("collection",),
     "linkedin_premium_status": (),
     "linkedin_profile_editor_fields": (),
@@ -289,8 +292,31 @@ PINNED_TOOL_SURFACE: dict[str, tuple[str, ...]] = {
 #: tests below rather than trusted from this sum. No row moves in the merge:
 #: every row the lane's surface serves moved in the lane commit that fired it
 #: (`N 134`, `P O3`, `M C72`), and master's rows in master's.
+#:
+#: **RE-PINNED 2026-09-24 AT 51 TOOLS AND 74 PARAMETERS (lane S, at its
+#: merge with master d65759f): no tool added, five parameters on one, and the
+#: census rows move in the same merge.** `linkedin_people_search_shape` --
+#: which took NO parameters by design until D1-SEARCH-AS-READS and
+#: OTHER-MEMBER-IDS-AS-READS decided a keyword and LinkedIn's own facets may
+#: be passed from a tool's arguments -- gains `keywords`,
+#: `current_company_ids`, `past_company_ids`, `location_ids` and
+#: `connections_of`, all optional, composed by `people_search.compose` and
+#: never echoed. FOUR ROWS MOVE GAP -> COVERED-UNFIRED, the filters: `N 84`,
+#: `N 85`, `N 87`, `N 94`. THREE ROWS THE SAME PARAMETERS SERVE DO NOT MOVE,
+#: and that is stated rather than left for this guard to infer: `N 79`,
+#: `N 172` and `N 194` ask for WHO, and under the WHO rule (the orchestrator's
+#: census call, 2026-09-24) a count-only reader does not deliver them; they
+#: stay GAP on the name-free shaper doctrine, pending the operator. Not
+#: PROVEN: the lane was offline. See `_audit/2026-09-24-lane-s-people-search.md`.
+#:
+#: **RE-PINNED 2026-09-24 AT 52 TOOLS AND 78 PARAMETERS, at the live lane's
+#: merge of lane S's master.** The two pins above were each taken on its own
+#: branch: the live lane's 52 and 73, lane S's 51 and 74, over master's 51 and
+#: 69. The merge carries both -- the live lane's one tool and four parameters,
+#: lane S's five parameters -- so 52 tools and 69 + 4 + 5 = 78 parameters,
+#: measured off the merged registry below. No row moves in the merge.
 PINNED_TOOL_COUNT = 52
-PINNED_PARAMETER_COUNT = 73
+PINNED_PARAMETER_COUNT = 78
 
 
 def live_surface() -> dict[str, tuple[str, ...]]:
