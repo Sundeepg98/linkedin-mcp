@@ -664,6 +664,50 @@ NOT_A_CORRECTION: dict[tuple[str, str], str] = {
         "something IN that deliverable is false while leaving the deliverable "
         "untouched, which would be a real correction needing its own markers."
     ),
+    ("network.md", "2026-09-23-readers-four-rows.md"): (
+        "THE ARROW IS DECLARED IN THE OTHER DIRECTION AND THIS IS ITS "
+        "SHADOW. `2026-09-23-readers-four-rows.md` declares *'CORRECTS: "
+        "`_audit/_census/network.md` -- row `134`'* and this file carries the "
+        "matching CORRECTED BY in its header block. What the candidate pair "
+        "claims instead is that NETWORK.MD corrects the deliverable, which is "
+        "backwards: row `134` cites it as the evidence for its own "
+        "2026-09-23 paragraph and withdraws nothing from it. The matched "
+        "words are TABLE-ROW PROXIMITY -- `correction` and `false` sit in the "
+        "row's own 2026-09-05 paragraph ('a self-correction: that wave's s1 "
+        "had reported the page carries no such controls and s11 measured "
+        "that FALSE') and in its neighbours `133` and `135`. "
+        "**WHAT WOULD MAKE THIS ENTRY WRONG:** row `134` asserting that "
+        "something IN that deliverable is false while leaving it untouched."
+    ),
+    ("profile.md", "2026-09-23-readers-four-rows.md"): (
+        "THE ARROW IS DECLARED IN THE OTHER DIRECTION AND THIS IS ITS "
+        "SHADOW. `2026-09-23-readers-four-rows.md` declares *'CORRECTS: "
+        "`_audit/_census/profile.md` -- row `O3`'* and this file carries the "
+        "matching CORRECTED BY in its header block. Row `O3` cites the "
+        "deliverable as the evidence for its own 2026-09-23 paragraph and "
+        "withdraws nothing from it. The matched words are TABLE-ROW "
+        "PROXIMITY: `false` and `correction` are in row `O5` two lines down "
+        "('ALL THREE CLAUSES ARE FALSE AND THE ROW MOVES ON THE CORRECTION'), "
+        "a row about badge creation this deliverable never touches. "
+        "**WHAT WOULD MAKE THIS ENTRY WRONG:** row `O3` asserting that "
+        "something IN that deliverable is false while leaving it untouched."
+    ),
+    ("messaging-and-content.md", "2026-09-23-readers-four-rows.md"): (
+        "TABLE-ROW PROXIMITY, ON ONE LINE. Row `C85` is a single table line, "
+        "so every paragraph ever appended to it sits at distance zero from "
+        "every citation in it. The matched word is `false`, inside the "
+        "row's own 2026-09-21 RULED paragraph -- 'nothing this census "
+        "publishes had to be false' -- which is about the direction cell and "
+        "predates the cited document by two days. The citation is the "
+        "evidence pointer at the end of the row's 2026-09-23 paragraph, which "
+        "records that the row was STOPPED AT THE ADDRESS and withdraws "
+        "nothing from the deliverable it cites. The correction this wave did "
+        "make is a different pair and is declared: the deliverable CORRECTS "
+        "`2026-09-23-bucket3-addresses.md`, which carries the CORRECTED BY. "
+        "**WHAT WOULD MAKE THIS ENTRY WRONG:** row `C85` asserting that "
+        "something IN that deliverable is false while leaving the deliverable "
+        "untouched."
+    ),
 
     ("network.md", "2026-09-21-the-fires-and-the-controls.md"): (
         "THE ARROW IS DECLARED IN THE OTHER DIRECTION AND THIS IS ITS "

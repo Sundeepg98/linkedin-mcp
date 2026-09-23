@@ -137,7 +137,7 @@ PINNED_TOOL_SURFACE: dict[str, tuple[str, ...]] = {
     "linkedin_unsave_job": ("confirm_token", "job_id"),
     "linkedin_update_profile_field": ("confirm_token", "field", "value"),
     "linkedin_update_setting": ("confirm_token", "setting", "value"),
-    "linkedin_who_viewed_me": ("limit",),
+    "linkedin_who_viewed_me": ("limit", "open_filter_menus"),
 }
 
 #: 44 tools and 61 parameters at the pin. Asserted rather than assumed, so a
@@ -217,8 +217,18 @@ PINNED_TOOL_SURFACE: dict[str, tuple[str, ...]] = {
 #: COVERED-PROVEN, because the wave that built them was forbidden the browser
 #: and nothing has seen either tool return a payload live. See
 #: `_audit/2026-09-21-the-three-readers.md`.
+#:
+#: **RE-PINNED 2026-09-23 AT 49 TOOLS AND 67 PARAMETERS.**
+#: `linkedin_who_viewed_me("open_filter_menus")` -- the first package caller
+#: of `press.disclose`: it opens each filter pill on his profile-views
+#: analytics through the gate and reads what each disclosed, in the gate's
+#: closed reading. **NO ROW MOVES IN THIS COMMIT, AND THAT IS STATED RATHER
+#: THAN LEFT FOR THE GUARD TO INFER:** the rows it serves, `P O3` and `N 134`,
+#: are decided by ONE live fire of this parameter, and they move -- or keep
+#: their state with a named reason -- in the commit that records that fire.
+#: See `_audit/2026-09-23-readers-four-rows.md`.
 PINNED_TOOL_COUNT = 49
-PINNED_PARAMETER_COUNT = 66
+PINNED_PARAMETER_COUNT = 67
 
 
 def live_surface() -> dict[str, tuple[str, ...]]:

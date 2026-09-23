@@ -869,7 +869,10 @@ PINNED = {
     #: bucket-3 wave put it -- now because the rulings were asked.
     #: `ruling_problems` asks them on every run.
     #: `_audit/2026-09-23-census-cleanup.md` items 6 and 7, and section 11.
-    "b3_blocked_on_nothing": 5,
+    #: 1 since the live readers wave (2026-09-23): P O3, N 134 and M C72 each
+    #: need a press the gate does not yet reach, M C85 a caller-supplied poll
+    #: address; only M M49 is left a reader could close today.
+    "b3_blocked_on_nothing": 1,
     #: BUCKET 1 BY WHAT HOLDS EACH ROW, DERIVED from the census and the
     #: holds in `scripts/ruling_holds.py`, BY THE STATUS OF THE HOLD: standing,
     #: relayed, pending, or none. They sum to `unfired`, and `PINNED_B1_ROWS`

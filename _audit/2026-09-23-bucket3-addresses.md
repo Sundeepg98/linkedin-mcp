@@ -5,6 +5,7 @@ claude-opus-5-5[1m]
 **CORRECTS:** `_audit/2026-09-21-the-read-triage.md` -- four address verdicts: P F1 and P H11 are pages on the admitted profile, not ADDRESS/ABSENT, and P L4 and N 61 wait on a live read, not on a refused address anybody has seen served.
 
 **CORRECTED BY:** `_audit/2026-09-23-census-cleanup.md` -- the split asked the boundary and never the rulings: `M M49` sat on a messaging page while `DO-NOT-OPEN-MESSAGING` stood, which made the five four until the operator lifted that ruling at 18:15 the same day. The five stands under the rulings as they now are, and the checker now asks them.
+**CORRECTED BY:** `_audit/2026-09-23-readers-four-rows.md` -- of the five "blocked on nothing", `M C85` is gated RULING (no sanctioned source for a poll post's address) and `P O3`, `N 134` and `M C72` are gated PRESS, measured live the same day; only `M M49` remains, so the figure is 1 of 67, not 5.
 
 Wave `bucket3-addresses`, 2026-09-23, from master `79c5f8e`. **READ-ONLY AND
 OFFLINE THROUGHOUT.** No browser was started or attached to, no page was

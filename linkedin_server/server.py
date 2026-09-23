@@ -1652,8 +1652,200 @@ async def _attach_recipient_ids(page: Any, rows: list[dict[str, Any]]) -> None:
         row["recipient_id"] = by_slug.get(slug)
 
 
+#: THE READING the filter pills are opened under -- a KEY into
+#: ``press.OPEN_READINGS``, never phrases of this module's own. The table fixes
+#: what may be looked for at the open moment; this module only names it.
+PROFILE_VIEWS_MENU_READING = "profile_views_filter_menu"
+
+#: How many filter pills one call may open. The page draws THREE (a time
+#: range, a viewer type, a company filter -- measured on a capture 2026-09-20,
+#: `_audit/2026-09-23-readers-four-rows.md` section 2.1); a page that draws
+#: more is reported by ``pills_found`` and not opened past this cap.
+PROFILE_VIEWS_MAX_PILLS = 3
+
+
+def _as_count(value: Any) -> Optional[int]:
+    """A drawn number as an int, or None. "1,234" -> 1234; anything else None.
+
+    A percentage, an abbreviation and a decimal are NOT counts and come back
+    None rather than as a number that looks right -- the rule
+    ``company_root.NUMERAL_SHAPES`` keeps for the same reason.
+    """
+    text = str(value or "").strip().replace(",", "")
+    return int(text) if text.isdigit() else None
+
+
+async def _profile_views_press_counters(page: Any):
+    """The counter reader the filter-pill presses are priced with. A CLOSURE.
+
+    ``press.check_counters`` refuses a press on ANY unreadable counter, and
+    ``press.disclose`` reads its before-counters and then clicks -- so a
+    counter that does not read turns into a click followed by a refusal. Two
+    rules keep that from happening:
+
+    * THE SET IS FIXED AT THE FIRST READ. A nav badge is included only if it
+      read then; a badge that read before the press and not after is reported
+      as None and the gate refuses, which is right (a badge vanishing across a
+      press is a change nobody can price).
+    * THE HEADLINE VIEWER COUNT IS ALWAYS IN IT, and it is the counter this
+      surface's own structural argument names as its bound: *"an expansion
+      could plausibly cause a ... remembered-filter write"*. A press that
+      APPLIED a filter would change the count the page is headlining. It is a
+      tripwire for exactly the weak write the argument concedes, read through
+      the reader the tool already runs (one declared script, one call site).
+
+    Both badges were measured UNREADABLE (no count drawn) on 2026-09-23 by
+    ``_audit/2026-09-23-bucket1-fires.md`` section 0.4, which is why the
+    headline is not optional here.
+    """
+    # EVERY BINDING IN THESE THREE HELPERS CARRIES A NAME NO OTHER FUNCTION IN
+    # THIS MODULE USES. ``tests/test_navigation_is_never_derived.py`` tracks
+    # taint PER MODULE AND BY NAME: the first version of this code bound
+    # ``witness`` / ``reading`` / ``term`` / ``entry`` off a parameter named
+    # ``verdict`` -- a name already tainted elsewhere here -- and the taint
+    # spread by name until an unrelated navigation's loop variable read as
+    # page-chosen. The rule was right to refuse; the names were the defect.
+    chosen_keys: dict[str, Any] = {}
+
+    async def _badge_values() -> dict[str, Optional[int]]:
+        badge_out: dict[str, Optional[int]] = {}
+        try:
+            badge_out["invitations"] = shape.invitation_badge(
+                await dom.read_invitation_badge(page)
+            ).get("pending")
+        except Exception:  # noqa: BLE001 - an unread badge is None, never 0
+            badge_out["invitations"] = None
+        try:
+            badge_out["notifications_unread"] = notify_cost.notifications_badge(
+                await notify_cost.read_notifications_badge(page)
+            ).get("unread")
+        except Exception:  # noqa: BLE001
+            badge_out["notifications_unread"] = None
+        return badge_out
+
+    async def read_counters() -> dict[str, Optional[int]]:
+        try:
+            views_insights = await dom.read_profile_views_insights(page)
+            headline_count = _as_count(
+                (views_insights.get("headline") or {}).get("value")
+            )
+        except Exception:  # noqa: BLE001 - reported as unread, never raised
+            headline_count = None
+        badge_values = await _badge_values()
+        if "keys" not in chosen_keys:
+            chosen_keys["keys"] = ["headline_viewers"] + sorted(
+                badge for badge, got in badge_values.items() if got is not None
+            )
+        counter_values = {"headline_viewers": headline_count, **badge_values}
+        return {key: counter_values.get(key) for key in chosen_keys["keys"]}
+
+    return read_counters
+
+
+def _filter_menu_summary(ordinal: int, gate_verdict: dict[str, Any]) -> dict[str, Any]:
+    """One opened pill, reported in this module's and press.py's own words.
+
+    EVERY STRING HERE IS A LITERAL OF THIS PACKAGE: refusal reasons, witness
+    counter names, reading terms from ``press.OPEN_READINGS``. The reading's
+    ``before`` / ``open`` detail is not copied through; what the caller needs
+    is what APPEARED and how much arrived.
+    """
+    gate_witness = gate_verdict.get("witness") or {}
+    gate_reading = gate_verdict.get("reading") or {}
+    open_terms = (gate_reading.get("open") or {}).get("terms") or {}
+    appeared_terms = gate_reading.get("appeared") or []
+    return {
+        "pill": ordinal,
+        "permitted": bool(gate_verdict.get("permitted")),
+        "refused": gate_verdict.get("refused"),
+        "reachable_by_this_route": gate_verdict.get("reachable_by_this_route"),
+        "disclosed": gate_witness.get("disclosed"),
+        "witness_moved": list(gate_witness.get("moved") or []),
+        "appeared": gate_reading.get("appeared"),
+        "held": gate_reading.get("held"),
+        "values": {
+            menu_term: menu_entry.get("value")
+            for menu_term, menu_entry in open_terms.items()
+            if menu_entry.get("value") is not None and menu_term in appeared_terms
+        },
+        "new_lines": gate_reading.get("new_lines"),
+        "read_at_both_ends": list(gate_verdict.get("read_at_both_ends") or []),
+    }
+
+
+async def _open_profile_views_filter_menus(page: Any) -> dict[str, Any]:
+    """Open each filter pill through the press gate and read what it disclosed.
+
+    WHICH CONTROLS: the ``[aria-expanded]`` controls inside ``main`` that are
+    ``role="button"``, visible, and wrap a ``<label>`` -- the filter pills, by
+    STRUCTURE. Chosen without reading a label, because condition 2 forbids
+    deciding a press by page text. Page-wide, the first two such-shaped
+    indices are the NAV (measured on a capture), which is why the press is
+    scoped to ``main`` and the index is taken inside that scope.
+
+    RE-ENUMERATED BEFORE EVERY PRESS: an opened-and-closed dropdown may leave
+    the scoped list re-rendered, and an index taken before it would then name
+    a different control.
+
+    STOPS AT THE FIRST PRESS THAT IS NOT PERMITTED. A refusal after a click is
+    a measurement of something unexpected, and the next press would be taken
+    on a page nobody has classified.
+    """
+    from linkedin_server import press  # the one package caller of the gate
+
+    pill_candidates = page.locator("main").locator("[aria-expanded]")
+
+    async def _pill_indices() -> list[int]:
+        pill_found: list[int] = []
+        for pill_index in range(int(await pill_candidates.count())):
+            pill_control = pill_candidates.nth(pill_index)
+            if (await pill_control.get_attribute("role") or "") != "button":
+                continue
+            if not await pill_control.is_visible():
+                continue
+            if not int(await pill_control.locator("label").count()):
+                continue
+            pill_found.append(pill_index)
+        return pill_found
+
+    counter_reader = await _profile_views_press_counters(page)
+    first_counters = await counter_reader()
+    if not first_counters or any(got is None for got in first_counters.values()):
+        # KNOWABLE BEFORE ANY CLICK, so refused before any click: the gate
+        # itself would read these, press, and only then refuse.
+        return {
+            "pills_found": len(await _pill_indices()),
+            "menus": [],
+            "stopped": "counters_unreadable_before_any_press",
+            "counters": sorted(first_counters or {}),
+        }
+
+    menus_out: dict[str, Any] = {"pills_found": 0, "menus": [], "stopped": None}
+    for ordinal in range(PROFILE_VIEWS_MAX_PILLS):
+        pill_list = await _pill_indices()
+        menus_out["pills_found"] = len(pill_list)
+        if ordinal >= len(pill_list):
+            break
+        gate_verdict = await press.disclose(
+            page,
+            shape="[aria-expanded]",
+            index=pill_list[ordinal],
+            read_counters=counter_reader,
+            reading=PROFILE_VIEWS_MENU_READING,
+            scope="main",
+        )
+        menu_summary = _filter_menu_summary(ordinal, gate_verdict)
+        menus_out["menus"].append(menu_summary)
+        if not menu_summary["permitted"]:
+            menus_out["stopped"] = f"pill {ordinal} was not permitted"
+            break
+    return menus_out
+
+
 @mcp.tool()
-async def linkedin_who_viewed_me(limit: int = DEFAULT_LIMIT) -> dict[str, Any]:
+async def linkedin_who_viewed_me(
+    limit: int = DEFAULT_LIMIT, open_filter_menus: bool = False
+) -> dict[str, Any]:
     """List the people who viewed your profile, most recent first.
 
     The highest-intent signal in a job search: someone who opened your profile
@@ -1696,8 +1888,23 @@ async def linkedin_who_viewed_me(limit: int = DEFAULT_LIMIT) -> dict[str, Any]:
     page that had not finished rendering rather than a different surface; it
     still reports pages_loaded: 2 when it happens.
 
+    open_filter_menus=True ALSO OPENS EACH FILTER PILL -- the time range, the
+    viewer type and the company filter -- through the disclosing-press gate,
+    reads what each one disclosed, and closes it. No page is loaded for it and
+    no filter is applied. What comes back per pill is words from a fixed list
+    this server wrote (time ranges, viewer categories, the menu's own
+    controls) and numbers: which of them APPEARED when the pill opened, how
+    many new lines arrived at all, and the gate's verdict. The company
+    filter's options are other people's employers; none of them can come
+    back, because nothing but those fixed words and numbers ever can. The
+    presses are priced by the page's own headline viewer count, which would
+    move if a press applied a filter, and stop at the first press the gate
+    does not permit.
+
     Args:
         limit: maximum rows to return (default 25, max 100).
+        open_filter_menus: also open and read the filter pills (default
+            False, which is this tool exactly as it was).
     """
     limit = _clamp(limit, DEFAULT_LIMIT, MAX_LIMIT)
     urls = [
@@ -1784,6 +1991,16 @@ async def linkedin_who_viewed_me(limit: int = DEFAULT_LIMIT) -> dict[str, Any]:
                         )
                     except Exception as exc:  # noqa: BLE001 - never raised
                         extra["insights_error"] = type(exc).__name__
+                    # THE FILTER PILLS, OPENED ONLY WHEN ASKED FOR. Same load,
+                    # same page, same failure rule as the aggregates above: a
+                    # menu that will not open never costs the viewer list.
+                    if open_filter_menus:
+                        try:
+                            extra["filter_menus"] = (
+                                await _open_profile_views_filter_menus(page)
+                            )
+                        except Exception as exc:  # noqa: BLE001 - never raised
+                            extra["filter_menus_error"] = type(exc).__name__
                     return shape.envelope(
                         rows,
                         limit=limit,
