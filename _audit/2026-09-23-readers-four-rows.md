@@ -116,7 +116,35 @@ exactly what is unmeasured.
                                    measurement puts them on one control
     reserve                 10   not to be spent without a written reason here
 
-### 0.5 FORCED PREDICTION, logged before the first load
+### 0.5 THE ORCHESTRATOR'S NOTE ON THE 2026-09-21 WITNESS -- RECEIVED, AND HOW EACH POINT IS ANSWERED
+
+A note from the orchestrator (a `_TEAM_LEAD_*.md` ruling at this worktree's
+root, written ~18:02, acknowledged by deleting it once recorded here) relayed
+L2's DERIVED finding -- that the 2026-09-21 press may have landed on a
+header-nav button -- and set three conditions. Each, and where it is met:
+
+1. **"Before any press, take a ZERO-PRESS reading of the `[aria-expanded]`
+   node list on /analytics/profile-views/: order, text, and whether each node
+   is inside <main>."** Section 2.1 (DERIVED, from a capture) and section 2.2
+   (LIVE, one load, nothing pressed). *Text* is recorded as a TERM from a
+   closed vocabulary plus shape facts (length band, token count), never
+   verbatim: `tests/test_page_text_is_never_printed.py` binds every probe,
+   and on this page a control's name can be a stranger's ("Send a message to
+   <a person>").
+2. **"Claim the row only if the node you press is the analytics control
+   inside <main>, and the reading after the press shows the analytics
+   content, not a nav menu."** The reader presses only through
+   `press.disclose(scope="main")` -- the gate itself looks for the control
+   inside `main`, not index arithmetic by the caller -- and each row is judged
+   on the reading's `appeared` terms, which a nav menu cannot produce: the
+   phrases are time ranges, viewer categories and the menu's own controls.
+3. **"If the press cannot be scoped to <main> under the current gate, do not
+   claim the row."** It can, as of `652cd2f` (`press.PRESS_SCOPES`, key
+   `main`), shown failing when the scope is ignored (section 1, defect E).
+   **The note's own last clause applies: the scope and the reading were
+   already built for exactly this, and say so here.**
+
+### 0.6 FORCED PREDICTION, logged before the first load
 
 **1 of 4 moves to COVERED-PROVEN, and it is not `N 134`.** `M C85` stops at
 the address. `N 134` stays GAP because its payload is a filter's effect (F4),
@@ -227,6 +255,20 @@ confirms them:**
    two footer dropdowns -- so a main-scoped index is not a filter-bar index,
    and a page-wide one lands in the nav.
 
+### 2.2 BOTH PAGES LIVE, NOTHING PRESSED -- see the entry below, written when the load ran
+
+The instrument is `scripts/_probe_disclosure_targets.py`, written by an
+implementer child to a closed spec and reviewed here before it ran: one load
+per page, no click, keyboard, fill, scroll or hover; every `[aria-expanded]`
+and `[aria-haspopup]` node in the order `page.locator(shape)` resolves them,
+with landmark ancestry, `visible`, component names and safe class tokens
+confined by shape, the feed-item ordinal by `[data-urn]`/`[data-id]` AND by
+`article`/`[role=article]`, and the accessible name reduced IN THE PAGE to a
+term from a closed vocabulary or to shape facts. A detector control on a local
+headless Chromium gates the live load. Its offline test: 14, including the
+closed alphabet over synthetic names; shown failing under three planted
+defects by the child and four more by me (P1-P4, section 8).
+
 **AND A DEFECT IN THE SHIPPED INSIGHTS READER, on `P O3`'s own surface.** The
 same capture carries five `<label>` elements: three inside the pills, TWO in
 a form inside a closed dialog in the right rail, both under the reader's
@@ -284,7 +326,46 @@ cases), `tests/test_profile_views_filters_skip_dialogs.py` (3, the real script
 in a local headless Chromium, with a control that the same labels OUTSIDE a
 dialog are still read), and `tests/test_press_open_reading.py` gains the
 vocabulary-miss case (`new_lines`).
- -- STOPPED AT THE ADDRESS. ZERO PAGE LOADS.
+
+**SHOWN FAILING**, nine planted defects, each restored by sha256 before the
+next (`server.py` `2afa3f4294b603f4`, `dom.py` `4cdeb6ee06343ef4`):
+
+    BASELINE                                                   13 passed
+    S1  the press not scoped to main                           1 failed
+    S2  a control without a label counted as a pill            1 failed
+    S3  an invisible control counted as a pill                 1 failed
+    S4  no stop after a refused press                          1 failed
+    S5  no counter check before the first press                1 failed
+    S6  the counter set re-chosen at every read                1 failed
+    S7  the summary copying the reading's per-moment detail    1 failed
+    S8  the tool opening the pills by default                  1 failed
+    D1  labels inside a dialog read as filters                 2 failed
+    RESTORED                                                   13 passed
+
+(The first attempt planted NOTHING and said so -- all nine anchors missed
+because `server.py` and `dom.py` are CRLF in the working tree and the anchors
+were written with LF. The script reports an anchor found zero times as NOT
+PLANTED rather than as a pass, which is why that was visible.)
+
+### 3.1 A GUARD CAUGHT MY OWN COMMIT, AND IT WAS RIGHT
+
+`aba78f7` turned `tests/test_navigation_is_never_derived.py` RED on
+`server.py` -- on `PROFILE_DETAIL_URLS[section]`, an untouched navigation in
+`linkedin_my_profile`. That guard tracks taint PER MODULE AND BY NAME, and
+`verdict` is already a tainted name elsewhere in `server.py`; my summary
+helper bound `witness`, `reading`, `term` and `entry` off a parameter named
+`verdict`, and the taint spread by name until the unrelated loop variable
+`section` read as page-chosen. Measured with the guard's own
+`_tainted_names` against the base: **24 names newly tainted by `aba78f7`, 0
+after `2bc3720`**, which renames every binding in the three helpers and
+changes no behaviour. **Found by the implementer child's full guard run** (it
+flagged a red in a file it was forbidden to touch rather than staying
+silent), not by my own run, which had not included that guard -- the scoped
+gate at the end is what would otherwise have caught it.
+
+---
+
+## 4. `M C85` -- STOPPED AT THE ADDRESS. ZERO PAGE LOADS.
 
 **The row:** *Vote in a poll / view poll results*, `R+W`, GAP. Its READ half
 is the results, as COUNTS, under `FEED-CONTENT-READ-RULING`. Its address shape,
@@ -341,3 +422,44 @@ imagined markup would be a claim, not a check.
 the admitted boundary is not "write a reader" but "decide where a poll post's
 address may come from". That moves `b3_blocked_on_nothing` by -1, recorded in
 section 7 and not re-pinned.
+
+---
+
+## 5. `M C72` -- WHAT A PERMITTED PRESS CAN AND CANNOT DELIVER HERE, DECIDED BEFORE THE FIRE
+
+**The row's READ half, in its own cell's words:** *"obtaining the link or
+embed is done ON LinkedIn, on pages already admitted."* The census measured
+the share triggers drawn on `/feed/` and the off-platform ITEMS (`Copy link`,
+`Share via`, `Embed this post`) absent until a menu opens.
+
+**THE READER** is the gate's `feed_item_share_menu` reading, taken at the
+open moment of ONE press on the first feed item's own menu control, priced by
+`off_state` (the `/feed/` surface's declared sensitive counter: a reaction
+would move it, and a reaction is visible to the post's author). The scope
+that aims at a feed item's control, rather than at page chrome, is fixed from
+the structural load (section 2.2).
+
+**WHY NO TOOL IS BUILT FOR IT -- a judgement recorded before the evidence,
+not after:** a disclosure press can show that the menu OFFERS the link and
+the embed. It cannot OBTAIN either. The link is copied by pressing the
+menu's copy item and the embed code sits behind the menu's embed item --
+both a SECOND press, on a menu item rather than a disclosure control, which
+condition 2 refuses by shape (`[role=menuitem]` is on `tests/test_press.py`'s
+off-list, refused terminally). **A tool built on this press would ship unable
+to deliver the row's READ half**, and the tool surface does not shrink again
+(`menus.py`'s ruling on exactly that). So this fire is a MEASUREMENT through
+the shipped gate, and COVERED-PROVEN -- which needs a tool -- is not available
+to it whatever it shows.
+
+**THE VERDICT RULE, REGISTERED NOW:**
+
+* **The off-platform terms APPEAR at the open moment, press permitted** -> the
+  row stays GAP with its blocker re-filed from "a press" to "the SECOND
+  press": reached through a permitted press, not obtained. What would close
+  it: a ruling on a third sanctioned shape for a menu item, with its measured
+  blast radius; or a non-press route -- for HIS OWN posts the permalink
+  already addresses the post (`linkedin_my_activity_items` keys and the item
+  permalink template), which banks only if that permalink is accepted as the
+  share link.
+* **They do not appear, or the press is refused** -> GAP, re-filed on what the
+  witness and the refusal say opened, or did not.

@@ -417,6 +417,13 @@ OPEN_READINGS: tuple[tuple[str, dict[str, Any]], ...] = (
                 ("reset", "reset"),
                 ("cancel", "cancel"),
                 ("apply", "apply"),
+                # TWO CONTROLS THAT CARRY NO SANCTIONED ATTRIBUTE (measured on
+                # a capture, section 2.1 of the 2026-09-23 record). Present
+                # here so the reading says whether each is DRAWN -- they read
+                # as `held` if so -- which the structural probe cannot: it
+                # lists only nodes a press could name.
+                ("show_more_analytics", "show more analytics"),
+                ("all_filters", "all filters"),
             ),
             "why": (
                 "P O3 and N 134: what the filter pills on his profile-views "
