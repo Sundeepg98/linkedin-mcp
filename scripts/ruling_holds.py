@@ -92,6 +92,23 @@ a write in ``jobs.md``, which has no R/W column
 (``_audit/2026-09-21-the-jobs-direction.md`` argues it should not get one; a
 hold citation is not that column).
 
+HOW A WRITE IS RELEASED, AND WHY IT TAKES A MARKER TOO
+------------------------------------------------------
+The write hold binds every OUTWARD write, and a registered ruling can say a
+class of writes is not outward -- ``SELF-PROFILE-EDITS-NOT-OUTWARD`` does, for
+edits to his own profile fields. A W row in that class cites the ruling with::
+
+    **RELEASED BY `<ID>`**
+
+and is then held by no ruling (unless it also cites a hold). The release is
+stated IN THE CELL, never inferred from where the row sits in the census: a
+row's section is its topic, not its class, and inferring by position is what
+this module exists to stop. ``ROW_RELEASES`` names the releases a cell may
+cite; :func:`register_problems` requires each to be registered and STANDING,
+because a release the register does not carry would un-hold rows on nobody's
+say-so. A release cited on a row that is not a write, or beside a
+``HELD BY`` of the write hold, is reported, never counted.
+
 PURE AT IMPORT, AND THAT IS A CONSTRAINT RATHER THAN A STYLE
 ------------------------------------------------------------
 ``census_completion.py`` imports this module, and
@@ -145,16 +162,15 @@ WRITE_HOLD_ID = "OPERATOR-NAMES-THE-TARGET"
 #: (NOTIFICATIONS-UNREAD-SPEND, now a registered permission). What still holds
 #: census rows is the condition on every outward write.
 #:
-#: **ONE CLASSIFICATION IS THIS TABLE'S, NOT THE REGISTER'S.** The register
-#: binds this ruling to "every outward write"; this table holds every census
-#: W row with it, as the bucket-1 audit classed the writes. The six
-#: profile-field edits (P A8, A11, A13, A17, A19, A21) are the rows where
-#: "outward" could be argued: they are his own fields, reversible, and visible
-#: to everyone who opens his profile. `OUTWARD-ACTS-NEED-THE-OPERATOR` routes
-#: to him only acts toward other people or irreversible ones. Whether a
-#: profile field is such an act is the orchestrator's to call, and
-#: `_audit/2026-09-23-census-cleanup.md` puts it there; until then the rows
-#: stay held, which is the direction that cannot fire anything by mistake.
+#: **"OUTWARD" IS THE REGISTER'S WORD, AND A W ROW LEAVES IT ONLY BY CITATION.**
+#: The register binds this ruling to "every outward write". Every census W row
+#: is held by it unless its own cell cites a release from `ROW_RELEASES`. The
+#: six edits to his own profile fields (P A8, A11, A13, A17, A19, A21) were
+#: held here until master 4a57b75 registered SELF-PROFILE-EDITS-NOT-OUTWARD,
+#: the orchestrator's call that they are not outward acts; their cells now
+#: cite it and they are held by no ruling. The direction that cannot fire
+#: anything by mistake -- held -- stays the default for any write whose cell
+#: says nothing.
 ROW_HOLDS: dict[str, Hold] = {
     WRITE_HOLD_ID: Hold(
         status="STANDING",
@@ -201,8 +217,31 @@ LIFTED_ROW_HOLDS: dict[str, Lifted] = {
             "id is now a registered permission, not a hold"),
 }
 
+
+@dataclasses.dataclass(frozen=True)
+class Release:
+    """A registered ruling that takes a class of writes OUT of the write hold."""
+
+    #: One line a reader of the census output needs; printed beside the count.
+    gist: str
+
+
+#: Every release a census cell may cite, keyed by the ruling id it is cited by.
+ROW_RELEASES: dict[str, Release] = {
+    #: Registered on master 4a57b75 as the orchestrator's delegated call: an
+    #: edit to his own profile field targets no other person and reverses,
+    #: so it is not an outward act and needs no named target. Its proof
+    #: conditions ride with it and are the proof's, not a hold.
+    "SELF-PROFILE-EDITS-NOT-OUTWARD": Release(
+        gist="his own profile field is not an outward act: prove with "
+             "notify-network off, restore in-session, before/after reading"),
+}
+
 #: ``**HELD BY `<ID>`**`` -- the bold is optional, the backticked id is not.
 HELD_BY_MARKER = re.compile(r"HELD BY `([A-Z0-9][A-Z0-9-]*[A-Z0-9])`")
+
+#: ``**RELEASED BY `<ID>`**`` -- the same shape, for a release.
+RELEASED_BY_MARKER = re.compile(r"RELEASED BY `([A-Z0-9][A-Z0-9-]*[A-Z0-9])`")
 
 #: The order holds are counted in when a row has more than one: a ruling in
 #: force first, then a question open, then a ruling relayed whose condition
@@ -210,10 +249,10 @@ HELD_BY_MARKER = re.compile(r"HELD BY `([A-Z0-9][A-Z0-9-]*[A-Z0-9])`")
 _PRECEDENCE = {"STANDING": 0, "PENDING": 1, "RELAYED": 2}
 
 
-def cited(text: str) -> list[str]:
-    """Every id ``text`` cites with the marker, first-cited first, once each."""
+def cited(text: str, marker: re.Pattern = HELD_BY_MARKER) -> list[str]:
+    """Every id ``text`` cites with ``marker``, first-cited first, once each."""
     seen: list[str] = []
-    for hit in HELD_BY_MARKER.findall(text):
+    for hit in marker.findall(text):
         if hit not in seen:
             seen.append(hit)
     return seen
@@ -236,17 +275,33 @@ def hold_of(direction: str, text: str) -> tuple[str | None, list[str]]:
 
       * the row's own ``HELD BY`` citations are its holds;
       * a ``W`` row is also held by the hold whose ``binds`` is ``write``,
-        with no marker -- the R/W cell says so;
+        with no marker -- the R/W cell says so -- UNLESS its cell cites a
+        release from ``ROW_RELEASES`` with ``RELEASED BY``;
       * ``R+W`` and ``ambiguous`` are REFUSED: which half holds the fire is a
         judgement for a person, and a counter that picked one would publish it;
       * an id that is not a hold this census knows is reported, and an id in
-        ``LIFTED_ROW_HOLDS`` is reported as lifted -- neither is counted.
+        ``LIFTED_ROW_HOLDS`` is reported as lifted -- neither is counted;
+      * a release that is not in ``ROW_RELEASES``, a release on a row that is
+        not a ``W`` row, and a release beside a ``HELD BY`` of the write hold
+        are reported -- a release that cannot be read un-holds nothing.
 
     Several holds: the first by ``_PRECEDENCE``. No hold at all is ``None`` --
     held by NO ruling. That is a finding about the rulings, not a default: the
     row's own cell says what remains.
     """
     problems: list[str] = []
+    releases: list[str] = []
+    for i in cited(text, RELEASED_BY_MARKER):
+        if i in ROW_RELEASES:
+            releases.append(i)
+        else:
+            problems.append(f"cites RELEASED BY `{i}`, which is not a release "
+                            f"this census knows "
+                            f"(scripts/ruling_holds.py::ROW_RELEASES)")
+    if releases and direction != "W":
+        problems.append(f"cites RELEASED BY `{releases[0]}`, which releases the "
+                        f"hold on a write, on a row whose direction is "
+                        f"{direction!r}")
     ids: list[str] = []
     for i in cited(text):
         if i in ROW_HOLDS:
@@ -263,7 +318,11 @@ def hold_of(direction: str, text: str) -> tuple[str | None, list[str]]:
                         f"its fire is a judgement, not a count -- split it or "
                         f"state it by hand")
         return None, problems
-    if direction == "W" and WRITE_HOLD_ID not in ids:
+    if releases and WRITE_HOLD_ID in ids:
+        problems.append(f"cites both HELD BY `{WRITE_HOLD_ID}` and RELEASED BY "
+                        f"`{releases[0]}` -- the cell says it is held and "
+                        f"released at once")
+    if direction == "W" and WRITE_HOLD_ID not in ids and not releases:
         ids.append(WRITE_HOLD_ID)
     if not ids:
         return None, problems
@@ -311,16 +370,17 @@ _EVERY_WRITE = re.compile(r"every\b(?:\s+\w+)?\s+writes?\b")
 
 def register_problems(root: pathlib.Path = ROOT, register=None,
                       holds: dict[str, Hold] | None = None,
-                      lifted: dict[str, Lifted] | None = None) -> list[str]:
-    """Every entry of ``holds`` and ``lifted`` resolved against the corpus.
+                      lifted: dict[str, Lifted] | None = None,
+                      releases: dict[str, Release] | None = None) -> list[str]:
+    """Every entry of ``holds``, ``lifted`` and ``releases`` resolved against the corpus.
 
-    Empty is green. ``register``, ``holds`` and ``lifted`` default to the
-    shipped ones and exist as parameters so a control can hand in a damaged
-    copy without touching any of them.
+    Empty is green. Each table defaults to the shipped one and exists as a
+    parameter so a control can hand in a damaged copy without touching any.
     """
     register = _register() if register is None else register
     holds = ROW_HOLDS if holds is None else holds
     lifted = LIFTED_ROW_HOLDS if lifted is None else lifted
+    releases = ROW_RELEASES if releases is None else releases
     by_id = {r.id: r for r in register}
     problems: list[str] = []
     for hold_id, hold in holds.items():
@@ -379,6 +439,20 @@ def register_problems(root: pathlib.Path = ROOT, register=None,
                             f"{entry.register_status!r}, and the register now "
                             f"says {ruling.status!r} -- re-read every row it "
                             f"once held")
+    for release_id in releases:
+        if release_id in holds or release_id in lifted:
+            problems.append(f"{release_id}: listed as a release AND as a hold "
+                            f"or a lifted hold")
+        ruling = by_id.get(release_id)
+        if ruling is None:
+            problems.append(f"{release_id}: a release here, and the rulings "
+                            f"register has no ruling by that id -- a release "
+                            f"nobody registered would un-hold rows on nobody's "
+                            f"say-so")
+        elif ruling.status != "STANDING":
+            problems.append(f"{release_id}: a release here, and the register "
+                            f"now says {ruling.status!r}, not STANDING -- "
+                            f"re-read every row it released")
     return problems
 
 
@@ -391,15 +465,18 @@ def main(argv: list[str] | None = None) -> int:
     for hold_id, entry in LIFTED_ROW_HOLDS.items():
         print(f"    {hold_id:32s} LIFTED    register says "
               f"{entry.register_status}: {entry.why}")
+    for release_id, release in ROW_RELEASES.items():
+        print(f"    {release_id:32s} RELEASE   {release.gist}")
     if problems:
         print(f"RED: {len(problems)} problem(s):")
         for p in problems:
             print(f"  {p}")
         return 1
-    print(f"GREEN: {len(ROW_HOLDS)} hold(s) and {len(LIFTED_ROW_HOLDS)} lifted "
-          f"-- every STANDING hold resolves in the rulings register, every "
-          f"RELAYED and PENDING one to its own record, and every lifted one to "
-          f"the status the register gives it")
+    print(f"GREEN: {len(ROW_HOLDS)} hold(s), {len(LIFTED_ROW_HOLDS)} lifted, "
+          f"{len(ROW_RELEASES)} release(s) -- every STANDING hold and every "
+          f"release resolves in the rulings register, every RELAYED and PENDING "
+          f"hold to its own record, and every lifted one to the status the "
+          f"register gives it")
     return 0
 
 

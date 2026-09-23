@@ -517,7 +517,7 @@ document is dead; it says one thing in it was overtaken and names what.
 
 - CORRECTED BY [2026-09-23-census-cleanup.md](2026-09-23-census-cleanup.md)
 
-  > the split asked the boundary and never the rulings: `M M49` sat on a messaging page while `DO-NOT-OPEN-MESSAGING` stood, which made the five four until the operator lifted that ruling at 18:15 the same day. The five stands under the rulings as they now are, and the checker now asks them.
+  > the split asked the boundary and never the rulings: `M M49` sat on a messaging page while `DO-NOT-OPEN-MESSAGING` stood, which made the five four until the operator lifted that ruling at 18:15 the same day. The calls registered later that evening (`D1-SEARCH-AS-READS`, `OTHER-MEMBER-IDS-AS-READS`) decided what eight RULING rows waited on, and seven of them now need only a reader. With the four the readers wave took out (next line), the figure is 8 of 66 under the rulings and the live readings as they now are (its section 13). The checker asks the holds on every run; the gates are re-judged by hand when a ruling lands.
 
 - CORRECTED BY [2026-09-23-readers-four-rows.md](2026-09-23-readers-four-rows.md)
 
@@ -1343,7 +1343,7 @@ reach is visible. The quoted reason here is the CORRECTOR's own
 
 - CORRECTS [2026-09-23-bucket3-addresses.md](2026-09-23-bucket3-addresses.md)
 
-  > it sized "blocked on nothing" at 5 of 67 without asking the rulings, counting `M M49` on a messaging thread while `DO-NOT-OPEN-MESSAGING` stood, which made the size 4. The operator lifted that ruling at 18:15 the same day, so the size is 5 again under the rulings as they now are, and the checker now asks them.
+  > it sized "blocked on nothing" at 5 of 67 without asking the rulings, counting `M M49` on a messaging thread while `DO-NOT-OPEN-MESSAGING` stood, which made the size 4. The operator lifted that ruling at 18:15 the same day (5 again), and the calls registered later that evening decided what eight RULING rows waited on, seven of which now need only a reader (12 on this branch, section 12). Merged with the live readers wave, which gated four of the original five PRESS or RULING, the size is 8 of 66 under the rulings and the live readings as they now are (section 13). The checker asks the holds on every run; the gates are re-judged by hand when a ruling lands.
 
 - CORRECTS [_census/messaging-and-content.md](_census/messaging-and-content.md)
 

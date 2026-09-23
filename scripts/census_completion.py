@@ -148,9 +148,18 @@ COLLAPSED = {
 #: NO leaves it where it is. Its real first need is the live read, which the
 #: bucket-3 table records as NEEDS-SESSION and bucket 3 below counts.
 #: `_audit/2026-09-23-census-cleanup.md` item 3.
+#:
+#: THREE SINCE THE EVENING OF 2026-09-23: `N 172` LEFT TOO, and this time a
+#: ruling moved it. It was filed here for D3's other-people cause alone -- its
+#: page, the people search with `connectionOf`, is admitted -- and master
+#: 4a57b75 registered OTHER-MEMBER-IDS-AS-READS, which answers exactly that
+#: cause for a search facet (the id from tool arguments, never from the page,
+#: never stored). With D1-SEARCH-AS-READS it now needs only a reader: the
+#: address table gates it READER. `_audit/2026-09-23-census-cleanup.md`
+#: section 12. The other three are refused addresses, rosters and a
+#: profile, which that ruling does not reach.
 RULING_BLOCKED_NAMED = {
     ("N", "99"): "D3 -- is a reasoned allowlist refusal `written`?",
-    ("N", "172"): "D3 -- is a reasoned allowlist refusal `written`?",
     ("N", "177"): "D3 -- is a reasoned allowlist refusal `written`?",
     ("N", "178"): "D3 -- is a reasoned allowlist refusal `written`?",
 }
@@ -580,10 +589,14 @@ def report(rows, out) -> dict:
     p("       (b) at 18:15 (`WRITE-CLASS-B`) lifted the messaging ruling and the")
     p("       read-only rule, and every write now fires only at a target he")
     p("       names (`OPERATOR-NAMES-THE-TARGET`). The orchestrator's delegated")
-    p("       calls of the same day put his own inbox reads under (b) and")
-    p("       answered the notifications question. All registered.")
+    p("       calls of the same day put his own inbox reads under (b),")
+    p("       answered the notifications question, and took edits to his own")
+    p("       profile fields out of the write hold")
+    p("       (`SELF-PROFILE-EDITS-NOT-OUTWARD`, cited as RELEASED BY). All")
+    p("       registered.")
     holds, b1_problems = bucket1_holds(rows)
     split1 = None
+    released1 = 0
     if holds is None:
         p("     BUCKET 1 SPLIT WITHHELD -- a row's hold cannot be read, so any")
         p("     split would count a guess:")
@@ -629,6 +642,18 @@ def report(rows, out) -> dict:
           f"{len(free):4d}   DERIVED")
         p("       remains for each: a press, a build, or a session")
         _wrap(p, free)
+        # A W row can only be held by nothing when its own cell cites a
+        # release, so the released rows are exactly the W rows in this group.
+        released = [r for r in free if direction.get(r) == "W"]
+        released1 = len(released)
+        if released:
+            p(f"       of which WRITES RELEASED by a registered ruling    "
+              f"{released1:4d}   DERIVED  cited")
+            for release_id, release in rh.ROW_RELEASES.items():
+                p(f"         {release_id}")
+                for piece in textwrap.wrap(release.gist, 64):
+                    p(f"           {piece}")
+            _wrap(p, released, indent=11)
         total1 = sum(split1.values())
         p(f"     CHECK: {split1['standing']} + {split1['relayed']} + "
           f"{split1['pending']} + {split1['none']} = {total1}, and "
@@ -647,12 +672,22 @@ def report(rows, out) -> dict:
       f" {sorted(named_ruling)}")
     p(f"     write-direction still-GAP rows          {by_dir['W']:4d}   DERIVED from the"
       f" census R/W cell")
+    # Counted, not assumed: a still-GAP write leaves the target condition only
+    # the way a bucket-1 write does, by citing a release in its own cell.
+    released_gap = sum(
+        1 for _l, _r, st, d, cells in walk_cells()
+        if st == "GAP" and d == "W"
+        and rh.cited(" | ".join(cells), rh.RELEASED_BY_MARKER))
     p("       Governed until 18:15 on 2026-09-23 by `NO-IRREVERSIBLE-WRITE-IS-FIRED`,")
     p("       and since then by the operator's ruling (b), `WRITE-CLASS-B`, with")
-    p("       `OPERATOR-NAMES-THE-TARGET`: a write may be designed, gated and left")
-    p("       ready, and fired only at a target HE names. So the last step of")
-    p("       every one of these is his decision, whatever is built first. This")
-    p("       is a CEILING on the bucket, not a claim that each row is otherwise")
+    p("       `OPERATOR-NAMES-THE-TARGET`: an outward write may be designed, gated")
+    p("       and left ready, and fired only at a target HE names. So the last")
+    p("       step of each OUTWARD one is his decision, whatever is built first.")
+    p("       Edits to his own profile fields are not outward")
+    p("       (`SELF-PROFILE-EDITS-NOT-OUTWARD`), and which of these rows are such")
+    p("       edits is NOT counted here: a row says so only by citing the release")
+    p(f"       in its own cell, and {released_gap} still-GAP write row(s) do. This is a")
+    p("       CEILING on the bucket, not a claim that each row is otherwise")
     p("       ready -- most are not.")
     p("")
     p("  -- BUCKET 3: BLOCKED ON NOTHING AT ALL ---------------------------")
@@ -707,10 +742,17 @@ def report(rows, out) -> dict:
           f"{split3['blocked_on_nothing']:4d}   of {reader}: ADMITTED, and a"
           f" reader could be")
         p("       written today -- no ruling made or pending holds the page, no")
-        p("       boundary edit, no refused press. The rows are in")
-        p("       `_audit/2026-09-23-bucket3-addresses.md`; that no ruling holds")
-        p("       their pages is checked on every run against")
-        p("       `scripts/ruling_holds.py`, since 2026-09-23.")
+        p("       boundary edit, no refused press. Read off the table's gate")
+        p("       column; that no ruling holds their pages is checked on every")
+        p("       run against `scripts/ruling_holds.py`, since 2026-09-23:")
+        # LISTED, not pointed at. This line used to send the reader to the
+        # bucket-3 audit, which names the five of its own day; the table has
+        # moved since and a pointer cannot say so.
+        table3, _problems3 = cra.load()
+        _wrap(p, sorted((f"{r['slice']} {r['row']}" for r in table3
+                         if r["class"] == "ADMITTED"
+                         and r["gate"] in cra.BLOCKED_ON_NOTHING),
+                        key=_row_order))
     p(f"     of those {reader}, named elsewhere here as needing a ruling"
       f"    "
       f"{len([k for k in named_ruling if any((l, r) == k and d in ('R', 'R+W') for l, r, _s, d in rows)]):4d}")
@@ -792,6 +834,7 @@ def report(rows, out) -> dict:
             "b1_relayed": split1["relayed"],
             "b1_pending": split1["pending"],
             "b1_no_ruling": split1["none"],
+            "b1_released": released1,
         })
     # WITHHELD RATHER THAN ZEROED. When the address table does not cover
     # today's bucket 3 these keys are simply absent, so `--check` reports each
@@ -874,20 +917,25 @@ PINNED = {
     "b3_no_address": 2,
     "b3_needs_session": 6,
     "b3_undetermined": 2,
-    #: 5 -- AND IT WAS 4 FOR PART OF 2026-09-23. `M M49` sits on a messaging
-    #: page, and while `DO-NOT-OPEN-MESSAGING` stood that made it held, not
-    #: blocked on nothing: the bucket-3 split had asked the boundary and never
-    #: the rulings, and this pin read 4 in the census-cleanup wave's first
-    #: commit. The operator lifted the
-    #: ruling at 18:15 (his ruling (b), `WRITE-CLASS-B`, registered on master
-    #: 53ba1b6), so the row is READER again and the count is back where the
-    #: bucket-3 wave put it -- now because the rulings were asked.
-    #: `ruling_problems` asks them on every run.
-    #: `_audit/2026-09-23-census-cleanup.md` items 6 and 7, and section 11.
-    #: 1 since the live readers wave (2026-09-23): P O3, N 134 and M C72 each
-    #: need a press the gate does not yet reach, M C85 a caller-supplied poll
-    #: address; only M M49 is left a reader could close today.
-    "b3_blocked_on_nothing": 1,
+    #: ITS HISTORY ON 2026-09-23 IS THE RULINGS AND THE LIVE READINGS MOVING
+    #: UNDER IT, one line per move:
+    #:   5   the bucket-3 wave, which asked the boundary and not the rulings
+    #:   4   while `DO-NOT-OPEN-MESSAGING` held `M M49`'s messaging page
+    #:   5   after the operator's ruling (b) at 18:15 lifted it
+    #:   1   the live readers wave: P O3, N 134 and M C72 each need a press
+    #:       the gate does not yet reach, M C85 a caller-supplied poll
+    #:       address; only M M49 was left a reader could close
+    #:   12  on the census-cleanup branch, before it merged that wave: the
+    #:       calls registered at 4a57b75 (D1-SEARCH-AS-READS,
+    #:       OTHER-MEMBER-IDS-AS-READS) decided what eight rows were gated
+    #:       RULING on; seven need only a reader (N 79, N 84, N 85, N 87,
+    #:       N 94, N 172, N 194) and N 93 a live look first
+    #:   8   MEASURED at the merge of the two: M M49 and those seven
+    #: The gates past the boundary are re-judged BY HAND when a ruling lands;
+    #: what `ruling_problems` asks on every run is only that no row blocked on
+    #: nothing sits on a page a hold binds.
+    #: `_audit/2026-09-23-census-cleanup.md` items 6 and 7, sections 11-13.
+    "b3_blocked_on_nothing": 8,
     #: BUCKET 1 BY WHAT HOLDS EACH ROW, DERIVED from the census and the
     #: holds in `scripts/ruling_holds.py`, BY THE STATUS OF THE HOLD: standing,
     #: relayed, pending, or none. They sum to `unfired`, and `PINNED_B1_ROWS`
@@ -904,17 +952,29 @@ PINNED = {
     #:                        `OWN-INBOX-READS-COVERED-BY-B` released M M33 and
     #:                        M M43 and the notifications question was answered
     #:                        PERMITTED, releasing N 20 and N 45 (+4 to none).
+    #:   master 4a57b75       9 standing / 0 / 0 / 12 none, 6 of them RELEASED
+    #:                        writes: SELF-PROFILE-EDITS-NOT-OUTWARD took the
+    #:                        six edits to his own profile fields (P A8, A11,
+    #:                        A13, A17, A19, A21) out of the write hold, each
+    #:                        cell citing it with RELEASED BY (-6 standing,
+    #:                        +6 none).
+    #:   merge of master      9 standing / 0 / 0 / 15 none, 6 released, of 24:
+    #:   cab6995              lanes L1 and L3 had built three reads no ruling
+    #:                        holds (P G6; J 18, J 39), +3 none.
     #: `b1_relayed` is the count this file called `b1_named_target` until the
     #: target condition was registered: a name for what a status COUNTS, not
-    #: for which ruling happens to have it today.
-    "b1_standing": 15,
+    #: for which ruling happens to have it today. `b1_released` is a SUBSET of
+    #: `b1_no_ruling`: the writes held by nothing because a release says so.
+    "b1_standing": 9,
     "b1_relayed": 0,
     "b1_pending": 0,
-    "b1_no_ruling": 9,
-    #: D3's enumerated list: FOUR since 2026-09-23, when `M C83` left it --
-    #: see `RULING_BLOCKED_NAMED`. It was printed as "five rows" and pinned
+    "b1_no_ruling": 15,
+    "b1_released": 6,
+    #: D3's enumerated list: FOUR once `M C83` left it, and THREE since
+    #: `N 172` left it the same evening on OTHER-MEMBER-IDS-AS-READS -- see
+    #: `RULING_BLOCKED_NAMED`. It was printed as "five rows" and pinned
     #: nowhere, which is how a list edit could have moved it silently.
-    "b2_d3_rows": 4,
+    "b2_d3_rows": 3,
     #: THE JOBS SLICE BY SIDE TABLE, 2026-09-23 (lane L3), counted off
     #: `_audit/_census/jobs-directions.tsv`, whose every verdict and deciding
     #: phrase `scripts/check_jobs_directions.py` re-checks. `jobs_gap` equals
@@ -943,12 +1003,15 @@ PINNED_B1_ROWS: dict[str, tuple[str, ...]] = {
         "J 103", "J 104", "J 128",
         "M C1", "M C25", "M C32",
         "N 1", "N 46", "N 48",
-        "P A8", "P A11", "P A13", "P A17", "P A19", "P A21",
     ),
-    #: `J 18` and `J 39` entered 2026-09-23 with the lane-L3 merge: two reads,
-    #: built offline, which no ruling holds.
-    NO_RULING: ("J 18", "J 39", "J 121", "J 122", "M M33", "M M43", "N 20",
-                "N 45", "P G6"),
+    #: `P G6` entered with the lane-L1 merge and `J 18` and `J 39` with the
+    #: lane-L3 merge, 2026-09-23: reads built offline, which no ruling holds.
+    #: The six P A rows are the writes SELF-PROFILE-EDITS-NOT-OUTWARD
+    #: releases, each by its own cell.
+    NO_RULING: (
+        "J 18", "J 39", "J 121", "J 122", "M M33", "M M43", "N 20", "N 45",
+        "P A8", "P A11", "P A13", "P A17", "P A19", "P A21", "P G6",
+    ),
 }
 
 

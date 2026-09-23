@@ -69,6 +69,7 @@ USAGE
     python scripts/triage_read_gap_rows.py --plant drop-a-row
     python scripts/triage_read_gap_rows.py --plant bad-verdict
     python scripts/triage_read_gap_rows.py --plant stale-annotation
+    python scripts/triage_read_gap_rows.py --plant undecided-annotation
 
 `--plant` is how this file is SHOWN FAILING. An instrument that has only ever
 been seen passing certifies nothing, and a triage table is exactly the shape
@@ -112,9 +113,9 @@ TRIAGE: dict[str, tuple[str, str, str]] = {
     "P D25": ("ADDRESS", "ABSENT", "the add-section anchors measure "
                                    "is_read_url False with zero forbidden "
                                    "tokens; the operator must name the address"),
-    "P D28": ("PRESS", "", "measured distinct_langs 1 and the measuring "
-                           "document states it pressed nothing and proves no "
-                           "pressable control exists"),
+    "P D28": ("PRESS", "", "measured distinct_langs 1, and the measuring "
+                           "document states it pressed nothing and does not "
+                           "prove a pressable control exists"),
     "P F1": ("ADDRESS", "ABSENT", "the /in/me/details/ admission is restricted "
                                   "to experience, education and skills; "
                                   "recommendations.py ships and is UNWIRED"),
@@ -275,6 +276,26 @@ MEASURED_PAST_BY_BUCKET3: dict[str, str] = {
             "seen served",
 }
 
+#: RULING verdicts whose decision a REGISTERED ruling has since made -- the
+#: calls registered on master 4a57b75, 2026-09-23. A RULING verdict says
+#: "somebody has to decide something first", and for these four somebody has;
+#: kept as that day's reading, like the four above, with the ruling named
+#: instead of the verdict overwritten. The bucket-3 table re-gated each row
+#: READER the same evening (`_audit/2026-09-23-census-cleanup.md` section 12).
+#: CONTROL 8 refuses an entry whose row does not carry RULING: a decision can
+#: only have been made for a row that was waiting on one.
+DECIDED_SINCE_TRIAGE: dict[str, str] = {
+    "N 79": "D1-SEARCH-AS-READS: a keyword may be passed, from tool "
+            "arguments only; bucket-3 gate READER",
+    "N 94": "D1-SEARCH-AS-READS: a location facet may be passed, more than "
+            "one value included; bucket-3 gate READER",
+    "N 172": "OTHER-MEMBER-IDS-AS-READS with D1-SEARCH-AS-READS: another "
+             "member's id in a search facet, from tool arguments only; "
+             "bucket-3 gate READER",
+    "N 194": "D1-SEARCH-AS-READS: the hashtag is a keyword; bucket-3 gate "
+             "READER",
+}
+
 
 def read_rows() -> dict[str, str]:
     """Row key -> direction, for every stated GAP row in the two scoped slices.
@@ -321,7 +342,8 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--plant", default="", choices=["", "drop-a-row",
                                                     "bad-verdict",
                                                     "stale-census",
-                                                    "stale-annotation"],
+                                                    "stale-annotation",
+                                                    "undecided-annotation"],
                     help="SHOW THIS INSTRUMENT FAILING on a planted defect")
     args = ap.parse_args(argv)
 
@@ -345,6 +367,12 @@ def main(argv: list[str] | None = None) -> int:
         annotations["N 99999"] = "planted: no row carries this key"
         print("PLANTED: an annotation for a row with no verdict. "
               "Control 7 must refuse.\n")
+    decided = dict(DECIDED_SINCE_TRIAGE)
+    if args.plant == "undecided-annotation":
+        victim = next(k for k in sorted(triage) if triage[k][0] != "RULING")
+        decided[victim] = "planted: a decision for a row that awaited none"
+        print(f"PLANTED: {victim} annotated as decided, and its verdict is "
+              f"not RULING. Control 8 must refuse.\n")
 
     failures = 0
 
@@ -421,6 +449,21 @@ def main(argv: list[str] | None = None) -> int:
         print(f"      {len(annotations)} annotations, every key carries a "
               f"verdict -- OK")
 
+    print("\n  CONTROL 8 -- every DECIDED_SINCE_TRIAGE key carries the verdict "
+          "RULING")
+    undecidable = sorted(k for k in decided
+                         if triage.get(k, ("",))[0] != "RULING")
+    if undecidable:
+        failures += 1
+        for key in undecidable:
+            have = triage[key][0] if key in triage else "NO VERDICT"
+            print(f"      {key} is annotated as decided, and carries {have}, "
+                  f"not RULING -- only a row waiting on a decision can have "
+                  f"had one made")
+    else:
+        print(f"      {len(decided)} decided since the triage, each a RULING "
+              f"verdict -- OK")
+
     if failures:
         print(f"\n  REFUSING TO REPORT: {failures} control failure(s). A triage "
               f"that cannot be shown to cover every row should not print a "
@@ -451,6 +494,11 @@ def main(argv: list[str] | None = None) -> int:
         verdict = triage[key][0]
         note = MEASURED_PAST_BY_BUCKET3[key]
         print(f"    {key}  {verdict}  -- {note}")
+
+    print(f"\n  {len(DECIDED_SINCE_TRIAGE)} OF THE RULING VERDICTS WERE DECIDED "
+          f"SINCE, BY A REGISTERED RULING:")
+    for key in sorted(DECIDED_SINCE_TRIAGE, key=_sort_key):
+        print(f"    {key}  RULING  -- {DECIDED_SINCE_TRIAGE[key]}")
 
     if args.verdict:
         want_v = args.verdict.upper()
