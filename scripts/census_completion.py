@@ -625,10 +625,13 @@ PINNED = {
     "achievable": 389,
     "adjudicated": 430,
     "delivered_broad": 96,
-    "delivered_strict": 74,
+    #: 75 and 21 since the bucket-1 merge: `M C41` fired live and moved from
+    #: COVERED-UNFIRED to COVERED-PROVEN (`_audit/2026-09-23-bucket1-fires.md`).
+    #: One row changing class moves both, and leaves delivered_broad at 96.
+    "delivered_strict": 75,
     "gap": 274,
     "cannot_deliver": 19,
-    "unfired": 22,
+    "unfired": 21,
     "gap_read": 67,
     #: 151, not the 152 published by `_audit/2026-09-21-the-write-ceiling.md`.
     #: That document scoped itself to `profile.md`, `network.md` and
