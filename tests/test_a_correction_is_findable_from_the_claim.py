@@ -185,6 +185,33 @@ CORRECTION_VOCABULARY = (
 #: outcome this file exists to require and so cannot also be a violation of it.
 NOT_A_CORRECTION: dict[tuple[str, str], str] = {
 
+    # 2026-09-23, lane L1 (refused reads). TWO CENSUS FILES CITE THE LANE'S
+    # DELIVERABLE AS EVIDENCE, and in both the matched word is `false` on the
+    # NEIGHBOURING row -- read, not inferred from the filenames.
+    ("messaging-and-content.md", "2026-09-23-lane-l1-refused-reads.md"): (
+        "ADJACENCY, NOT A CORRECTION. The citing line is section 4's "
+        "allowlist-count cell, which cites the lane's deliverable for the "
+        "admissions that moved the count; the matched word is `FALSE` in the "
+        "row two lines below -- *'FALSE BOTH WAYS'*, the correction block's "
+        "verdict on its own 2026-09-03 claim about `set_input_files`, which "
+        "has nothing to do with the lane. The census cell corrects nothing IN "
+        "the deliverable; it rests a number on it. **WHAT WOULD MAKE THIS "
+        "ENTRY WRONG:** the census asserting that something the deliverable "
+        "says is false while leaving the deliverable untouched."
+    ),
+    ("profile.md", "2026-09-23-lane-l1-refused-reads.md"): (
+        "ADJACENCY, NOT A CORRECTION. Row `P G6` -- and, once the lane's "
+        "follower-list REVIEW commit is taken, row `P L2b` -- cites the "
+        "lane's deliverable as the evidence for its own cell (G6's move to "
+        "COVERED-UNFIRED, L2b's address admission), and the matched word is "
+        "`false` in the NEXT row down each time: `P G7`'s *'IS NOW HALF "
+        "FALSE'* and `P L3`'s *'no published cell is false of any of them'*, "
+        "both about their own rows. Neither row withdraws anything from the "
+        "deliverable. **WHAT WOULD MAKE THIS ENTRY WRONG:** a profile "
+        "row asserting the deliverable wrong about that row while leaving it "
+        "unmarked, which would need its own CORRECTS: / CORRECTED BY: pair."
+    ),
+
     # 2026-09-21, the FOUR-LOOSE-ROWS wave. THREE OF THESE FOUR ARE ROWS OF
     # ONE CHRONOLOGY TABLE, and the reason is one reason told three times
     # because the scan keys on a basename.

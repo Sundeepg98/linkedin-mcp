@@ -1914,6 +1914,129 @@ _ALLOWED_URL_PATTERNS: tuple[re.Pattern[str], ...] = (
     # pins both directions and its `MUST_STAY_REFUSED` set -- which includes
     # every sibling vertical -- must stay green with this entry present.
     re.compile(r"^https://www\.linkedin\.com/search/results/people/?(\?[^#]*)?$"),
+    # ======================================================================
+    # FIVE SELF-SCOPED READ PAGES, admitted 2026-09-23 by lane L1 (refused
+    # reads). Full per-row record: `_audit/2026-09-23-lane-l1-refused-reads.md`.
+    #
+    # WHAT THE FIVE HAVE IN COMMON, AND IT IS THE WHOLE ARGUMENT. Each is a
+    # page of HIS OWN account: three carry no member segment at all -- the
+    # account is chosen by the session cookie and by nothing in the string --
+    # and two carry the literal `me`, the one member segment that can only
+    # ever reach whoever is signed in. None carries a forbidden substring
+    # (checked, not assumed), so gate one is untouched for all five, and no
+    # exemption table was edited.
+    #
+    # WHAT THEY DO NOT HAVE IN COMMON, stated per entry below: FOUR were read
+    # off LinkedIn as drawn anchors, and ONE (`/recent-activity/articles/`)
+    # was NAMED by the census and never seen drawn. That one is admitted on
+    # the precedent `/in/me/details/interests/` and `/jobs/alerts/` set --
+    # a self-owned address opened once to find out, rather than refused
+    # until someone guesses where it lands -- and it says so on its line.
+    #
+    # EACH IS ONE LINE, for attribution: the invariant's re-freeze ledger
+    # hashes the tuple minus exactly these lines and gets the prior digest.
+    #
+    # BLAST RADIUS, measured with `scripts/blast_radius.newly_admitted` --
+    # imported, never re-implemented -- over its own 67-address corpus plus 75
+    # family spellings (142 tested): EACH of the five newly admits exactly TWO
+    # addresses, its own target with and without the trailing slash, and
+    # nothing else; `newly_refused` is empty for all five. Controls, run the
+    # same way: an `/analytics/.*` family pattern admits 22, including a
+    # traversal onto `/mypreferences/d/close-account`; an `/in/me/.*` family
+    # admits 16, including a traversal onto a THIRD PARTY's profile; a
+    # `/dashboard/.*` family admits 5 with the same close-account traversal;
+    # `\d+` in place of `[0-9]{1,20}` admits Arabic-Indic and fullwidth digit
+    # spellings (5 against 2); and a needle no line carries moves nothing.
+    # The anchors and the closed segments are what refuse every one of those.
+    #
+    # WHAT OPENING THEM COSTS, and what is NOT measured. Every one is reached
+    # in the product by an ordinary `<a href>` -- a GET navigation, the act a
+    # person performs by clicking the link on his own profile. No press, no
+    # form, no composer. Analytics pages of this account were measured to
+    # move no counter (`/analytics/creator/content/`: the invitation badge
+    # read before and after, twice, unmoved). THAT IS A SIBLING'S
+    # MEASUREMENT, NOT THESE PAGES'. None of the five has been loaded by this
+    # server; the first load belongs to the live lane and brackets the badge.
+    #
+    # THE BOUNDARY DECIDES WHAT MAY BE OPENED; THE SHAPER DECIDES WHAT MAY BE
+    # SAID. Two of these pages hold values that must never be printed (his
+    # contact details) or aggregates of other people (audience and per-post
+    # demographics). Neither fact is a reason to refuse the ADDRESS -- the
+    # admitted `/analytics/profile-views/` is the harder case -- and each is
+    # an obligation on any reader, stated on its line.
+    # ----------------------------------------------------------------------
+    # P A25 -- his CONTACT INFO overlay, `/in/me/` form only. Drawn as a real
+    # anchor labelled "Contact info" on his own profile: once in each of the
+    # tracked fixtures `tests/fixtures/profile_topcard.html` and its
+    # `_hydrated` sibling (slug form, sanitised), once on the 2026-09-20
+    # profile capture, and named in `dom.PROFILE_EDITOR_HREFS` as measured
+    # on `/in/me/` 2026-08-30. RULED, not argued: `PROFILE-EDITOR-ADDRESSES-
+    # ALLOWED` (2026-08-31) -- his own profile's editor surfaces are his to
+    # open -- and this is the intro editor's `/in/me/` discipline applied
+    # again, because a pattern that can name anybody but him is refused on
+    # that ground alone. It is a NAVIGATION to the overlay, not the press the
+    # disclosing-press ruling refused (that control declares nothing); the
+    # edit pencil inside stays unpressed and every contact write stays a
+    # write. PAYLOAD: email, phone, website, birthday -- NONE may cross back.
+    # A reader here returns closed-vocabulary presence and integers, the rule
+    # `scripts/_probe_contact_info_panel.py` already states. NOT admitted:
+    # any other member's overlay, `/in/me/overlay/` or any other overlay, a
+    # query, a sub-path, and `/in/me/edit/contact-info/` (still `/edit/`).
+    re.compile(r"^https://www\.linkedin\.com/in/me/overlay/contact-info/?$"),
+    # P G6, M C38 -- ONE POST'S analytics, by its ACTIVITY urn. Drawn by
+    # LinkedIn on two pages this server already opens: twice on
+    # `/analytics/creator/content/` (reproduced in the tracked
+    # `tests/fixtures/synthetic/creator_content_addresses.html`; the marker
+    # is `item_addresses.POST_SUMMARY_MARKER`) and three times on his own
+    # profile's activity rail, each anchor reading "<n> impressions / View
+    # analytics". EVERY drawn instance is `urn:li:activity:`, so that is the
+    # only urn type admitted: `share` and `ugcPost` are refused, as is a
+    # percent-encoded urn. The digit run is CLOSED -- the ten ASCII digits,
+    # at most 20, the groups entry's bound -- because `\d` admits other
+    # scripts' digits. The address names a POST, not a member, and every
+    # drawn instance sits beside one of HIS posts, on his profile or on his
+    # own analytics page. NOT admitted: the bare
+    # `/analytics/post-summary/`, any sub-path (a demographics tab would be
+    # its own decision), any query. The per-post page reports viewer
+    # demographics -- other people, aggregated -- so a reader owes
+    # `census_shape` plus `census_redact_rare`, exactly as the creator-content
+    # entry above states for its own surface.
+    re.compile(r"^https://www\.linkedin\.com/analytics/post-summary/urn:li:activity:[0-9]{1,20}/?$"),
+    # P L1 -- his AUDIENCE analytics. Drawn on `/analytics/creator/content/`
+    # as the analytics nav's "Audience analytics" anchor (the tracked
+    # synthetic fixture reproduces it), and filed by the 2026-09-20 live
+    # capture (section 12.8) as a candidate meeting the standard the
+    # role-play admission was granted on: "name-free, same-origin, and
+    # served-adjacent". `tests/test_analytics_creator_boundary.py` pinned it
+    # refused with the words "a reason to CONSIDER an address, never a reason
+    # to have admitted it"; this line is the consideration, with its own
+    # argument, rather than inheritance from the neighbour. The parent
+    # `/analytics/creator/` and the sibling `/analytics/creator/top-posts/`
+    # (drawn too, and no census row of this lane's) stay refused. The page is
+    # follower DEMOGRAPHICS, aggregated -- the reader's obligation, not the
+    # address's objection.
+    re.compile(r"^https://www\.linkedin\.com/analytics/creator/audience/?$"),
+    # P L8 -- his ANALYTICS HUB. The tie to the row is LinkedIn's own words,
+    # not an inference: the tracked `tests/fixtures/profile_topcard_hydrated.
+    # html` draws `/dashboard/` as an anchor whose accessible name is "Show
+    # all analytics", and the analytics nav on `/analytics/creator/content/`
+    # draws the same address as its "Overview" tab. The analytics TREE ROOT
+    # `/analytics/` is a different address and stays refused -- one named
+    # page at a time. No sub-path (a `/dashboard/<x>/` would be a tool or a
+    # setting nobody has named) and no query. This pattern is anchored at the
+    # host, so `/company/<x>/admin/dashboard/` -- Page administration -- is
+    # not reachable through it.
+    re.compile(r"^https://www\.linkedin\.com/dashboard/?$"),
+    # M C48 -- his ARTICLES list, `/in/me/` form only. THE ONE NAMED ADDRESS
+    # OF THE FIVE: the census row's own cell spells it and measured it
+    # refused (2026-09-19), and NO capture on disk draws it. What IS drawn is
+    # its parent family -- his own profile draws `/in/<him>/recent-activity/
+    # all/` as "Show all posts". Admitted on the interests / job-alerts
+    # precedent: a self-owned address whose first load says whether LinkedIn
+    # serves it, and if it redirects the line widens nothing. NOT admitted:
+    # `/recent-activity/all/`, `/comments/` or `/reactions/` (other people's
+    # posts he acted on), any other member's activity, a query, a sub-path.
+    re.compile(r"^https://www\.linkedin\.com/in/me/recent-activity/articles/?$"),
 )
 
 #: Substrings that must never appear in a navigation target, checked before

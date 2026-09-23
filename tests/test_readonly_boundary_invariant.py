@@ -1149,6 +1149,36 @@ PINNED = (
 #: the value above is verified under 3.13 only. The 3.10 cell is CI's and is
 #: available on push. Claiming two would be the cheapest false sentence here.
 #: ------------------------------------------------------------------------
+#: RE-FROZEN 2026-09-23 (lane L1, refused reads), FIVE TUPLE ENTRIES, ONE
+#: DIGEST MOVED:
+#:
+#:     _ALLOWED_URL_PATTERNS   1f9a6cef81e844af -> 7d442864f68f61fc   42 -> 47
+#:     _FORBIDDEN_URL_SUBSTRINGS               unchanged              33 -> 33
+#:     both exemption tables                   unchanged
+#:
+#: FIVE ANCHORED, ONE-LINE PATTERNS, each for one page of HIS OWN account:
+#:
+#:     /in/me/overlay/contact-info/                         P A25
+#:     /analytics/post-summary/urn:li:activity:<[0-9]{1,20}>/   P G6, M C38
+#:     /analytics/creator/audience/                         P L1
+#:     /dashboard/                                          P L8
+#:     /in/me/recent-activity/articles/                     M C48
+#:
+#: Three carry no member segment, two carry only the literal ``me``, none
+#: carries a forbidden substring, and no exemption was added. The argument
+#: for each is on its line in readonly.py; the edges are pinned in
+#: ``tests/test_l1_self_scoped_admissions.py``, which measures each line's
+#: blast radius with ``blast_radius.newly_admitted`` over 142 addresses:
+#: +2 apiece (its own target with and without the slash), nothing else.
+#:
+#: ATTRIBUTION, in this dict's form: the tree MINUS exactly the five lines
+#: hashes to ``1f9a6cef81e844af``, the value replaced, so nothing else rode
+#: in. Controls: dropping the PRE-EXISTING ``/school/`` line instead lands on
+#: ``c097bad13e06f159``, and a needle no line carries drops nothing and moves
+#: nothing. SEVEN of eight digests are byte-identical, so ``<functions>`` did
+#: not move: no gate function changed. One interpreter, 3.13; the 3.10 cell is
+#: CI's.
+#: ------------------------------------------------------------------------
 READONLY_AST_AT_LAST_REFREEZE = {
     "<functions>": "d7e1d0922e3af446",
     "JS_MUTATION_TOKENS": "d47e30b67c583c1b",
@@ -1281,7 +1311,13 @@ READONLY_AST_AT_LAST_REFREEZE = {
     # digests unchanged: the three denylists, both exemption tables,
     # SANCTIONED_MUTATIONS and `<functions>` are byte-identical across the
     # change -- only this one tuple entry moved.
-    "_ALLOWED_URL_PATTERNS": "1f9a6cef81e844af",
+    #
+    # 1f9a6cef81e844af until 2026-09-23. GREW by FIVE one-line anchored
+    # entries (lane L1): his contact-info overlay and his articles list in
+    # the `/in/me/` form, one post's analytics by activity urn, his audience
+    # analytics and his analytics hub. 42 -> 47; denylist untouched at 33;
+    # seven of eight digests byte-identical. See the ledger entry above.
+    "_ALLOWED_URL_PATTERNS": "7d442864f68f61fc",
     "_FORBIDDEN_SUBSTRING_EXEMPTIONS": "43e2bf7f3db0dbed",
     "_FORBIDDEN_SUBSTRING_PATTERN_EXEMPTIONS": "419e64a3cd92ec7e",
     "_FORBIDDEN_URL_SUBSTRINGS": "b0291a66ec9bd51e",

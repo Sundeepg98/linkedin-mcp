@@ -33,7 +33,7 @@ from __future__ import annotations
 
 from typing import Any, Optional
 
-from . import chart_labels, item_addresses
+from . import chart_labels, item_addresses, post_summary_counts
 from .config import BASE_URL
 
 CONTENT_ANALYTICS_URL = f"{BASE_URL}/analytics/creator/content/"
@@ -117,4 +117,12 @@ async def read_content_analytics(page: Any) -> dict[str, Any]:
         "but this route no longer finds datapoints."
     )
     reading["item_addresses"] = await item_addresses.read_item_addresses(page)
+    # THE THIRD READING, ADDED 2026-09-23 BY LANE L1, AND IT IS ADDITIVE IN
+    # THE SAME SENSE AS THE SECOND: same open page, no navigation, no press,
+    # and every key above is unchanged -- ``C40`` stays banked on the keys it
+    # quoted. The post-summary links this page draws carry each featured
+    # item's impressions and engagements IN THEIR OWN TEXT, measured on a
+    # capture of this page, so census row ``P G6`` needs no second page for
+    # its headline numbers. Integers only; see ``post_summary_counts``.
+    reading["per_post"] = await post_summary_counts.read_post_summary_counts(page)
     return reading

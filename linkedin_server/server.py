@@ -9590,6 +9590,15 @@ async def linkedin_creator_analytics() -> dict[str, Any]:
     integers and closed-vocabulary metric names. A label that does not parse
     into that shape is discarded, so a name has nowhere to land even if
     LinkedIn starts drawing one.
+
+    **``per_post`` -- EACH FEATURED ITEM'S IMPRESSIONS AND ENGAGEMENTS, ADDED
+    2026-09-23.** The links this page draws to each item's own analytics
+    carry that item's numbers in their text, and ``per_post`` reads them:
+    integers in page order, one per distinct item, and no identifier, title
+    or name. It covers only the items this page features, not everything you
+    have published -- read ``per_post.readable`` before believing a total.
+    Nothing extra is opened or pressed for it: same page, same single
+    navigation. It has not yet been seen returning live.
     """
     try:
         async with BROWSER.session() as page:
