@@ -10100,11 +10100,14 @@ as set aside; `--check` proves the committed table is byte for byte what
 
 **THAT FIXED POINT IS NOT MERGE-STABLE.** The table's `known_elsewhere` column is
 derived from every audit document, script and test, so a document another lane
-adds that names a candidate route moves it. Measured: one untracked document
-naming `/legal/eula` turned `--check` red ("would CHANGE address /legal/eula"),
-and removing it restored the fixed point. `verdict_problems` does not read that
-column, which is why CI cannot see this, and `--check` reads captures only the
-box that holds them has; after a merge, regenerate there with the same cutoff.
+adds that names a candidate route moves it. Measured twice: one untracked
+document naming a docs-scope candidate no other document named turned `--check`
+red ("would CHANGE" on that route) and removing it restored the fixed point; then
+the first draft of THIS paragraph, which named the same route, did exactly the
+same thing, so the route is described here rather than named.
+`verdict_problems` does not read that column, which is why CI cannot see this,
+and `--check` reads captures only the box that holds them has; after a merge,
+regenerate there with the same cutoff.
 
 ### 71.3 THE CENSUS'S VOCABULARY RE-KEYS THE CONTROLS IT IS DIFFED AGAINST
 

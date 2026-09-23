@@ -517,7 +517,12 @@ repaired here, since the file is not this lane's. The repair is a per-run
 package, so another lane's document naming a candidate route moves the column. Measured:
 an untracked document planted under `_audit/` naming `/legal/eula` (a docs-scope
 candidate nobody else names) turned `--check` red with "would CHANGE address
-/legal/eula"; removed, the fixed point came back and the tree was clean. The verdict
+/legal/eula"; removed, the fixed point came back and the tree was clean. **Then it
+happened for real, to this lane:** the first draft of the register note describing
+the control (section 71.2 of the instrument register) named the same route, and
+`--check` on the sixth commit read "would CHANGE address /legal/eula". The note now
+describes the route instead of naming it (this document is outside the column, by
+`OWN_DOCS`), and the seventh commit is at the fixed point again. The verdict
 layer stayed at 0 problems throughout -- `verdict_problems`, the half CI runs, does not
 read that column -- and `--check` needs captures that exist on this box only. **After
 the train merges, regenerate the table here with `--write --captured-before
