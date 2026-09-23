@@ -202,10 +202,6 @@ TRIAGE: dict[str, tuple[str, str, str]] = {
     "N 104": ("RULING", "", "the non-search half SHIPPED 2026-09-20; the "
                             "'by searching' half needs the companies vertical, "
                             "which the admission deliberately left out"),
-    "N 132": ("RULING", "", "both sides of the switch are reachable today by "
-                            "two shipped tools; whether that discharges a row "
-                            "named for the CONTROL is a census convention "
-                            "nobody has ruled"),
     "N 133": ("PRESS", "", "applying a filter SUBMITS, and the disclosing-press "
                            "ruling refuses submits by name"),
     "N 134": ("BUILDABLE", "", "address admitted, press RULED permitted, guard "
@@ -253,6 +249,10 @@ TRIAGE: dict[str, tuple[str, str, str]] = {
 #:     N 83   COVERED-PROVEN           (was BUILDABLE)
 #:     N 175  COVERED-CANNOT-DELIVER   (was BUILDABLE)
 #:
+#: and on 2026-09-24, lane D, under D6-CAPABILITY-OVER-AFFORDANCE:
+#:
+#:     N 132  COVERED-UNFIRED          (was RULING -- the D6 question itself)
+#:
 #: They were removed rather than kept because CONTROL 4 refuses a verdict for
 #: a row that is not a read-GAP row, and that refusal is the tripwire this
 #: file exists to carry.
@@ -294,6 +294,10 @@ DECIDED_SINCE_TRIAGE: dict[str, str] = {
              "bucket-3 gate READER",
     "N 194": "D1-SEARCH-AS-READS: the hashtag is a keyword; bucket-3 gate "
              "READER",
+    "P C8": "D4-NO-OWN-BROWSER-CONTEXT (registered 2026-09-24): no context "
+            "of its own; the download transport is built on the attached "
+            "browser (cdp_download.py), and what holds the row now is the "
+            "Save to PDF press; bucket-3 gate PRESS",
 }
 
 
