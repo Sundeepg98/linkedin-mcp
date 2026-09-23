@@ -225,18 +225,24 @@ async def _receipt_with_the_read_withheld(page, action: str, *, target: str):
 
 
 def _assert_the_exception_was_real(why: str, action: str) -> None:
-    """Pin that the raise came from a WITHHELD page, not from a fake.
+    """Pin that the raise came from a WITHHELD page -- and that its TEXT stayed out.
 
     A monkeypatched ``_verify_after`` would reach the same arm and print the
-    same stem, and a reader could not tell the two apart from a green run. The
-    navigator's refusal has a signature -- it is an ``AssertionError`` and its
-    message names the url it was asked for and did not have -- and the arm
-    interpolates ``type(exc).__name__`` and ``exc`` verbatim, so that signature
-    survives into the receipt and can be asserted on.
+    same stem, and a reader could not tell the two apart from a green run.
+
+    **THIS PROOF MOVED ON 2026-09-24, BECAUSE IT RESTED ON THE LEAK.** It used to
+    read the navigator's refusal message back OUT OF THE RECEIPT -- the url it
+    was asked for and did not have -- because the arm interpolated
+    ``type(exc).__name__`` and ``exc`` verbatim. That same interpolation is how
+    a refused address carrying his slug would reach a receipt, and the lane G
+    follow-up made the arm print the TYPE only. So the mechanism is now proven
+    where it happens: ``_receipt_with_the_read_withheld`` asserts the withheld
+    url was ASKED FOR and NOT SERVED, off the navigator's own record. What the
+    receipt must show is the navigator's exception TYPE, and never its message.
     """
-    assert f"{RAISED_STEM} (AssertionError:" in why, why
-    assert "which this test did not freeze" in why, why
-    assert WITHHELD_SURFACE[action] in why, why
+    assert f"{RAISED_STEM} (AssertionError;" in why, why
+    assert "which this test did not freeze" not in why, why
+    assert WITHHELD_SURFACE[action] not in why, why
 
 
 # ---------------------------------------------------------------------------

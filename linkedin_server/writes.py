@@ -9369,7 +9369,9 @@ async def perform(
                 if publish_gate["proceed"]:
                     click_plan.append(publish_gate["selector"])
     except Exception as exc:  # noqa: BLE001 - reported, never re-raised
-        click_error = f"{type(exc).__name__}: {exc}"
+        # THE TYPE ONLY: a failed press quotes the selector it waited on, and
+        # the typeahead's carries his needle (ERROR-MESSAGE-RULED-AT-THE-RAISE).
+        click_error = type(exc).__name__
 
     # The label the control changed INTO. Read for a human, never branched on.
     # This settled the missing half of shape.SAVE_LABELS on 2026-08-30 -- it
@@ -9418,8 +9420,10 @@ async def perform(
         state_landed = ""
         where = _where_to_look(spec.action)
         verified_why = (
-            f"the verification read itself failed ({type(exc).__name__}: "
-            f"{exc}), so this says nothing about whether the click landed, "
+            f"the verification read itself failed ({type(exc).__name__}; its "
+            "message is not repeated -- a failed read can render the address "
+            "or the selector it was reading), so this says nothing about "
+            "whether the click landed, "
             "and nothing was read anywhere -- this is not a reading that came "
             "back empty. "
             + (
