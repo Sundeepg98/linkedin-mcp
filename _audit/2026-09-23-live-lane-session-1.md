@@ -1,0 +1,194 @@
+claude-opus-5-5[1m]
+
+# THE LIVE LANE, SESSION 1
+
+**2026-09-23. Wave `live-lane-session-1`, base `c8fa6ea`. WRITTEN AS THE WAVE
+RUNS, not at its end.** This lane is the only agent that drives the browser.
+The brief is the orchestrator's re-brief of 22:00 IST: build four readers or
+presses offline, then fire a priority queue live, under the 2026-09-23
+rulings registered in `scripts/build_rulings_index.py`.
+
+Live rules this session runs under: the attached Chrome on `127.0.0.1:9224`
+only, its own tab only, never started, restarted or closed; at most 40
+LinkedIn page loads, serial, at least 20 seconds apart
+(`LIVE-BUDGET-40-LOADS`); stop at the first login page, checkpoint, captcha
+or challenge; no outward write (`OPERATOR-NAMES-THE-TARGET` holds all nine);
+raw captures only under this worktree's gitignored `_state/`.
+
+---
+
+## 0. THE PLAN, WRITTEN BEFORE ANY BUILD OR LOAD
+
+### 0.1 Three calls the brief carries, recorded as it asked
+
+- **DECIDED (orchestrator-delegated, 2026-09-23):** "Show more analytics"
+  (a plain button) is permitted as a DISCLOSURE, provided a before/after
+  reading shows it only reveals content and changes no state.
+- **DECIDED (orchestrator-delegated, 2026-09-23):** `M C72`'s copy-link is
+  proven on the operator's OWN posts only (`M C41`'s activity ids), so no
+  other author's share figures are touched.
+- **DECIDED (orchestrator-delegated, 2026-09-23):** `M C85`'s poll address
+  comes from tool arguments only. If one of his OWN posts carries a poll, use
+  it; otherwise record NEEDS-TARGET and move on.
+
+### 0.2 The rows, as their cells stand at `c8fa6ea`
+
+    queue  row              state            tool or mechanism named in the cell
+    1      P G6             COVERED-UNFIRED  linkedin_creator_analytics -> per_post (lane L1)
+    2      M M43            COVERED-UNFIRED  linkedin_open_messaging
+    2      M M33            COVERED-UNFIRED  linkedin_open_messaging(message_filter=...)
+    3      N 20             COVERED-UNFIRED  linkedin_notifications -- proves only if an
+                                             invitation-kind item is in his list today
+    3      N 45             COVERED-UNFIRED  linkedin_notifications -- only if a follow-kind item is
+    4      M M49            GAP              none: "blocked on a reader plus the cost of opening
+                                             somebody's thread"
+    5      N 134, P O3      GAP (gate PRESS) none: the view-switch and the insights press
+    6      M C72            GAP (gate PRESS) none: the copy-link press
+    --     M C85            GAP (gate RULING) none: a poll address, now DECIDED (0.1)
+    7      P A8 A11 A13     COVERED-UNFIRED  linkedin_update_profile_field (a WRITE, two-step
+           P A17 A19 A21                     token), linkedin_profile_editor_values (its restore read)
+    8      P A25 P L1 P L8  GAP, NEEDS-      scripts/_probe_l1_admitted_reads_live.py keys contact,
+           M C48 M C38      CAPTURE          audience, overview, articles, post_summary
+
+### 0.3 What reading the shipped code found BEFORE anything was built or loaded
+
+1. **`/messaging/` never stays on a list.** `linkedin_open_messaging`'s own
+   docstring: it "redirects into ONE SPECIFIC CONVERSATION, and LinkedIn
+   chooses which". So a fire cannot PREFER an already-read thread, which is
+   what `OWN-INBOX-READS-COVERED-BY-B` asks of the live lane; LinkedIn picks
+   the landing. What CAN be read first, at zero messaging cost, is
+   `linkedin_new_messages`: the messaging badge off `/feed/`, which counts
+   NEW-SINCE-LAST-VISIT. **The lane's rule, written before any load:** open
+   `/messaging/` only when that badge reads exactly 0. A number above 0 means
+   something has landed that he has not looked at, and the landing would
+   most likely open it -- spending both his unread marker and a possible read
+   receipt on a message he has not seen. `null` (badge not drawn) is not 0
+   and does not pass. A 0 is not proof the landing thread is read (the tool
+   says so itself); the residue is (b)'s, and is reported rather than smoothed.
+2. **`M M33`'s pill press is a closed set of seven.** `unread`, `inmail`,
+   `jobs` and `other` are the pills likeliest to put an unread thread first.
+   The pill this lane presses is `starred`: a conversation he starred is one
+   he has read. An empty starred list is a weaker proof and will be reported
+   as such.
+3. **`linkedin_notifications` clears his unread badge on load**, permitted by
+   `NOTIFICATIONS-UNREAD-SPEND`. One load serves `N 20` and `N 45`; each
+   proves only if its kind of item is in his list today.
+4. **ITEM 7 CANNOT SAVE, and the reason is in the shipped write path, not in
+   a guess.** The ruling's first condition is "notify network is confirmed
+   off in the edit dialog BEFORE saving". `linkedin_update_profile_field`'s
+   own spec (`writes.py`, its `residue`) says: "LinkedIn notifies a network
+   about some profile changes, which is a broadcast this server has not
+   measured and would not control." Nothing in `writes.py` reads or sets a
+   notify toggle (searched: `notify`, `share with network`, `broadcast`). So
+   the perform step cannot confirm the condition at save time, and making it
+   do so is an edit to `writes.py`, which lane L4 holds. **Planned outcome
+   for all six: NOT SAVED, condition 1 unprovable through the shipped write
+   path.** What this lane can do at zero writes is read the intro editor's
+   controls (`linkedin_profile_editor_fields`) and report whether a notify
+   toggle is drawn there at all -- the measurement lane L4 would need.
+5. **The package already spaces navigations.** `BROWSER.goto` waits
+   `LINKEDIN_MIN_INTERVAL_S` (default 3.0) between loads in one process,
+   tool-internal retries included. This session runs with it at `20`, and
+   the session harness enforces the same gap ACROSS processes from a ledger
+   on disk.
+6. **Activity ids.** `linkedin_my_activity_items` returns real item keys for
+   his own posts (authorship established three ways on every call). If those
+   keys are not ACTIVITY urns, lane L1 names the fallback: the post-summary
+   links on `/analytics/creator/content/`. Every id goes to `_state/` only,
+   and reaches a tool as a caller-supplied argument, never as a navigation
+   the package derives.
+
+### 0.4 ORDER OF WORK, AND THE ONE DEPARTURE FROM THE BRIEF'S PHASING
+
+The brief says build first, then fire. **Queue items 1-3 and the activity-id
+read need no build**, and the build for item 4 (`M M49`) is a reader for a
+page no capture in this repository has ever drawn -- a reader written before
+that page is seen is a guess about LinkedIn's DOM. The item-2 fire loads that
+page anyway. So:
+
+    1. fire items 1-3 (tools already shipped); capture on the same loads
+       (the /feed/ of the badge read and /notifications/ are lane Y items 1
+       and 3; the messaging landing is item 4's missing capture)
+    2. build (a) view switch, (b) insights disclosure, (d) copy-link offline,
+       and (c) against the capture from step 1
+    3. fire items 4, 5, 6
+    4. item 7 at zero writes (0.3 point 4), then items 8, 9 as budget allows
+
+Items 1-3 lead the priority order anyway, so this departs from the
+phasing only, not from the order. Nothing downstream is fired before its
+build.
+
+### 0.5 The load budget, allotted before any load
+
+    item   what                                                  loads (planned)
+    1      linkedin_creator_analytics (P G6)                        1
+    2      linkedin_new_messages (badge, + /feed/ capture)          1
+    2      linkedin_open_messaging (M M43, + landing capture)       1   only if badge == 0
+    2      linkedin_open_messaging(starred) (M M33)                 1   only if badge == 0
+    3      linkedin_notifications (N 20, N 45, + capture)           1
+    ids    linkedin_my_activity_items (for C72, C38, C85)           1-2
+    4      M M49 fire                                               1   only if badge == 0
+    5      N 134 / P O3: open-form capture, fire, verify reload     3
+    6      M C72 on his own post                                    1
+    7      intro editor fields, zero writes                         1-2
+    8      L1 harness: 5 keys + 2 control                           7
+           ------------------------------------------------------------
+           planned                                               19-21 of 40
+    9      lane Y's list, remainder                               <= 19
+
+### 0.6 Stop rules
+
+A login page, checkpoint, captcha or challenge phrase ends the session with
+no further load. An error envelope, or an exception from a tool, stops the
+queue until it is diagnosed offline; a refusal is an answer, not an anomaly.
+The ledger refuses a navigation that would be the 41st.
+
+### 0.7 FORCED PREDICTION, logged before the first load
+
+Of the nine rows a fire can prove this session (`P G6`, `M M43`, `M M33`,
+`N 20`, `N 45`, `M M49`, `N 134`, `P O3`, `M C72`): **4 prove.** `M C85`:
+NEEDS-TARGET (no poll among his posts). The six profile edits: 0 saved
+(0.3 point 4). The likeliest misses are the messaging three, on the badge
+rule.
+
+---
+
+## LOG
+
+### Entry 1 -- 21:50-22:10, step 0 and the session harness, zero loads
+
+**Step 0.** The disk agreed with the orchestrator's sample: `master` at
+`c8fa6ea`, this branch's `d4d5d62` an ancestor of it, tree clean.
+`git merge --ff-only master` fast-forwarded. The 9224 Chrome answered
+`/json/version` (Chrome 153) with ONE page target, a new tab -- nothing else
+was driving it.
+
+**The harness:** `scripts/_probe_live_lane_session_1.py`. A closed key table
+of SHIPPED tools, the badge-before-messaging rule in code, and a LEDGER: it
+wraps `BROWSER.goto` (the only `page.goto` in the package -- measured, no
+tool navigates around it) so every navigation a tool makes is counted
+against 40, a 41st is refused BEFORE it navigates, and 20 seconds since the
+ledger's last load are waited out across separate runs. It prints
+integers, booleans, field names and this package's own closed words; every
+other string by length.
+
+**Shown failing, in a scratch copy of the tree** (the register's rule --
+never the live tree; the copy was confirmed to be what imported). Six
+plants, one at a time, each restored before the next, against
+`tests/test_live_lane_session_harness.py`:
+
+    BASELINE                                              18 passed
+    H1 the ceiling checked AFTER the navigation           1 failed  (the ceiling test)
+    H2 a refused address counted as a load                1 failed  (the refused-address test)
+    H3 the messaging rule dropped from selection          2 failed  (m43, m33)
+    H4 strings printed whole                              2 failed  (both shape tests)
+    H5 the gap owed but not waited                        1 failed  (the gap test)
+    H6 the budget off by one                              1 failed  (the budget test)
+    RESTORED                                              18 passed
+
+**One test of mine was wrong before it ran, and the run said so.** I used
+`/messaging/compose/` as the address the boundary refuses. It is ADMITTED
+(the blank-composer read); the refused composer is `/messaging/thread/new/`.
+The test now uses `/my-items/`, which the boundary refuses and lane Y
+measured as refused. **And one assertion of mine could not fail** -- it ended
+`or True` -- and was deleted before the first run, not after.
