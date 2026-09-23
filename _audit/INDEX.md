@@ -27,8 +27,8 @@ are listed as `(undated)`; no date is taken from git history, because
 
 | what | count |
 | --- | --- |
-| audit documents git tracks under `_audit` | 234 |
-| of those, carrying a `YYYY-MM-DD-` date prefix | 194 |
+| audit documents git tracks under `_audit` | 235 |
+| of those, carrying a `YYYY-MM-DD-` date prefix | 195 |
 | distinct dates | 15 |
 | documents with no level-1 heading | 2 |
 | `CORRECTS:` marker lines | 93 |
@@ -39,7 +39,7 @@ are listed as `(undated)`; no date is taken from git history, because
 | documents at either end of a cross-document edge | 93 |
 | intra-document correction markers | 4 |
 | documents that correct themselves later on | 2 |
-| documents no correction marker touches at all | 139 |
+| documents no correction marker touches at all | 140 |
 | blockquoted markers naming ANOTHER document | 0 |
 | edges missing one of their two markers | 0 |
 | edges declared a different number of times in each direction | 2 |
@@ -1534,6 +1534,7 @@ ways, which is a fact about markers and not a verdict on the document.
 | 2026-09-21 | [2026-09-21-what-was-ruled.md](2026-09-21-what-was-ruled.md) | A register keyed on RULINGS, not on documents -- and the fourth payment |  |
 | 2026-09-23 | [2026-09-23-bucket1-fires.md](2026-09-23-bucket1-fires.md) | BUCKET 1: the read-direction COVERED-UNFIRED rows, fired once each through attach | corrects x1 |
 | 2026-09-23 | [2026-09-23-bucket3-addresses.md](2026-09-23-bucket3-addresses.md) | Bucket 3, measured: 67 rows, 33 on an admitted page, and 5 a reader could close today | corrects x1 |
+| 2026-09-23 | [2026-09-23-completeness-probe.md](2026-09-23-completeness-probe.md) | The completeness probe -- does the census know every address LinkedIn rendered? |  |
 
 ## 6. What the scan rejected, could not join, or had to repair
 
