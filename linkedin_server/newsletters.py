@@ -333,7 +333,9 @@ async def read_newsletter_subscriptions(page: Any) -> dict[str, Any]:
         # halfway would otherwise leave a PARTIAL row list that looks like a
         # complete short one. A half-read subscription list reporting three of
         # five is worse than an error, because nothing downstream can tell.
-        out["error"] = "%s: %s" % (type(exc).__name__, exc)
+        # THE TYPE, NEVER THE TEXT: a library's message can quote a selector,
+        # a request or the page (ERROR-MESSAGE-RULED-AT-THE-RAISE).
+        out["error"] = type(exc).__name__
         out["rows"] = []
         out["heading_seen"] = 0
         out["anchors"] = 0

@@ -841,31 +841,23 @@ LAUNDERS = "launders"
 #: Every variant let the failure propagate: the ruled channel, not this one.
 RAISES = "raises"
 
-#: READERS STILL LAUNDERING, DECLARED RATHER THAN WAIVED, and every entry is
-#: in a module lane G does not own. Asserted EXACTLY in both directions, so a
-#: new launderer fails naming itself and a repaired one fails until its entry
-#: goes -- the mechanism ``KNOWN_DERIVED_NAVIGATIONS`` uses. Each is one
-#: ``except Exception as exc`` writing ``f"{type(exc).__name__}: {exc}"`` into
-#: a returned ``error`` field; the repair is the one ``dom.py`` took on
-#: 2026-09-24, the exception's TYPE and nothing else.
+#: READERS STILL LAUNDERING, DECLARED RATHER THAN WAIVED. Asserted EXACTLY in
+#: both directions, so a new launderer fails naming itself and a repaired one
+#: fails until its entry goes -- the mechanism ``KNOWN_DERIVED_NAVIGATIONS``
+#: uses.
 #:
-#: MEASURED 2026-09-24 on the lane-G branch: 24 readers laundered before the
-#: ``dom.py`` repair -- ten in ``dom.py``, eight in ``writes.py`` and one in
-#: ``server.py`` that only CARRY a ``dom.py`` field onward (the four write
-#: gates among them), plus these five. After it, these five and no others.
-KNOWN_LAUNDERERS: dict[str, str] = {
-    "events:read_events_home": "events.read_events_home, its returned `error`",
-    "job_collections:read_job_collection": (
-        "job_collections.read_job_collection, its returned `error`"
-    ),
-    "newsletters:read_newsletter_subscriptions": (
-        "newsletters.read_newsletter_subscriptions, its returned `error`"
-    ),
-    "notify_cost:read_notifications_badge": (
-        "notify_cost.read_notifications_badge, its returned `error`, two handlers"
-    ),
-    "premium:read_premium_surface": "premium.read_premium_surface, its returned `error`",
-}
+#: **EMPTY SINCE THE LANE G FOLLOW-UP OF 2026-09-24.** Measured that day: 24
+#: readers laundered before the ``dom.py`` repair -- ten in ``dom.py``, eight in
+#: ``writes.py`` and one in ``server.py`` that only CARRY a ``dom.py`` field
+#: onward (the four write gates among them), plus five in other modules, which
+#: were declared here for one merge. Those five -- ``events.read_events_home``,
+#: ``job_collections.read_job_collection``,
+#: ``newsletters.read_newsletter_subscriptions``,
+#: ``notify_cost.read_notifications_badge`` (two handlers) and
+#: ``premium.read_premium_surface`` -- took the same repair the next morning:
+#: the exception's TYPE and nothing else. Leave it empty; an entry added here
+#: has to carry an argument that type-only is wrong for its site.
+KNOWN_LAUNDERERS: dict[str, str] = {}
 
 #: THE FAILING PAGE MUST REACH HANDLERS, or every verdict above is vacuous: a
 #: reader that raises before its handler is ``raises``, not ``clean``. The

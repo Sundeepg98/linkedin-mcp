@@ -168,7 +168,9 @@ async def read_premium_surface(page: Any) -> dict[str, Any]:
         controls = page.locator(_CONTROL_SELECTOR)
         total = int(await controls.count())
     except Exception as error:  # noqa: BLE001
-        out["error"] = f"{type(error).__name__}: {error}"
+        # THE TYPE, NEVER THE TEXT: a library's message can quote a selector,
+        # a request or the page (ERROR-MESSAGE-RULED-AT-THE-RAISE).
+        out["error"] = type(error).__name__
         return out
 
     scanned = min(total, _MAX_CONTROLS_SCANNED)
