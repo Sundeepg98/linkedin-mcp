@@ -358,3 +358,75 @@ So the time-range pill's option names ARE in the shipped vocabulary; the
 interesting-viewers pill's two categories are NOT (added for the build), and
 the popover's own "reset" and "show results" are the controls a view switch
 presses.
+
+### Entry 4 -- 22:37:44-22:38:27, his own post with its control menu open: 1 load, 1 press
+
+`--only post_capture`, ledger 5 -> 6. The newest activity id in the
+`activity` raw (authorship established) -- read by the harness, never printed
+or passed on a command line. Walled False, challenge terms 0. 4
+`[aria-expanded]` in `main`; exactly 1 whose name starts "open control menu".
+Opened through `press.disclose`, priced by `off_state`: **permitted**, closure
+verified. Captured closed (lane Y's item 5, a post permalink) and open.
+
+**The open menu, read offline:** eight `div[role=button]` items, each inside
+an `li` of one `ul`, no `role=menu` or `menuitem` anywhere -- "feature on top
+of profile", "save", **"copy link to post"**, "embed this post", "edit post",
+"delete post", "who can comment on this post", "who can see this post". **Five
+of the eight are writes, one of them irreversible.** So the copy-link press
+aims by EXACT equality, and "delete post" being drawn is the ownership proof
+(only a post's author is offered it). This is what the child building (d)
+was briefed on.
+
+### Entry 5 -- 22:45:15-22:51:37, items 7, 8 and 9: 13 loads, 0 presses, 0 writes
+
+`--only editor_fields,l1_*,people_search,cap_*`, ledger 6 -> 19. Every page:
+walled False, challenge terms 0. Every key RETURNED.
+
+**ITEM 7 -- NOTHING SAVED, AND THE REASON IS NOW MEASURED.** The shipped
+`linkedin_profile_editor_fields` (2 loads, self-ownership established) read
+17 controls in the intro editor. **None is a notify-network control.** The
+only two switches (`input[type=checkbox][role=switch]`, no accessible name,
+both checked) were identified offline from the capture by the text of their
+section: "Open Profile" (let anyone message him free) and "Profile Premium
+Badge". The ruling's first condition -- notify network CONFIRMED OFF IN THE
+EDIT DIALOG -- cannot be confirmed in a dialog that draws no such control, and
+the brief's own rule applies: **if any condition cannot be proven, do not
+save.** `P A8`, `A11`, `A13`, `A17`, `A19`, `A21`: NOT SAVED, zero writes.
+**What would make it provable:** a reading of the ACCOUNT-level setting that
+decides whether profile edits are shared ("share profile updates with your
+network", under the settings index captured below), plus a ruling that the
+account-level setting satisfies condition 1 -- and the write path asserting
+it at save time, which is an edit to `writes.py` (lane L4's).
+
+**ITEM 8 -- lane L1's five NEEDS-CAPTURE pages, captured** (L1's readers,
+L1's file names `_state/l1-<key>.html`, no control bracket):
+
+    row     key            relation                       reading (integers)
+    P A25   contact        REDIRECTED, path depth 4 -> 2  anchors 58 (30 member), 1 dialog
+    P L1    audience       SERVED, exact                  39 chart labels, 0 in the metric vocabulary
+    P L8    overview       SERVED, exact                  19 chart labels, 0 in the vocabulary
+    M C48   articles       SERVED, exact                  anchors 22, /pulse/ links 0
+    M C38   post_summary   SERVED, exact                  38 chart labels, 0 in the vocabulary
+
+Findings the next offline build needs: `chart_labels.KNOWN_METRICS`
+recognises NONE of the labels on the audience, overview and post-summary
+pages (33, 13 and 32 unrecognised); the contact overlay lands on his profile
+as a dialog; and the articles page is SERVED (not redirected) and draws no
+article link.
+
+**ITEM 9 -- lane Y's live-capture list: all eight of its page items are now
+captured**, three of them on loads spent for other rows: `/feed/` (the
+badge read), `/notifications/` (N 20/45), a post permalink (post_capture), plus
+`/mypreferences/d/` (REDIRECTED, depth 2 -> 4), the people search through the
+shipped `linkedin_people_search_shape` (one of D1's five test searches: 17
+person results, 3 filters offered, landed where sent), `/analytics/recruiter-views/`
+(SERVED at a different url of the same depth, 1 dialog),
+`/mynetwork/invite-connect/connections/` (SERVED exact) and two company roots
+of the kinds lane Y asked for, a large organisation and a services firm
+(SERVED exact, 268 and 342 anchors). Y's items 9 and 10 are presses and were
+not taken.
+
+**The people-search tool flagged its own process as stale** (loaded code
+older than disk): I was editing `press.py` and `readonly.py` while the run
+was in flight. Its detector was right; the reading is unaffected because
+nothing it calls was edited.
