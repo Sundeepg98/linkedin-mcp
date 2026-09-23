@@ -110,8 +110,13 @@ CAPTURE_URLS: dict[str, str] = {
 
 KEYS: tuple[str, ...] = (
     "per_post", "badge", "m43", "m33", "notifications", "activity", "pv_capture",
-    "post_capture", "editor_fields", "people_search",
+    "post_capture", "editor_fields", "people_search", "pv_switch", "pv_verify",
 ) + tuple(L1_KEYS) + tuple(CAPTURE_URLS)
+
+#: ``pv_switch``: the shipped tool with the view switch and the decided reveal.
+#: ``pv_verify``: the same tool plainly, AFTER, to see whether the restored
+#: view held server-side -- a fresh load, so nothing in the tab can answer it.
+PV_SWITCH_KEY = "interesting_viewers_verified"
 
 #: Control labels that would be a NOTIFY-NETWORK toggle in the intro editor.
 #: Matched as substrings of a normalised label; counted, never printed.
@@ -152,6 +157,7 @@ M33_FILTER = "starred"
 MAX_LOADS: dict[str, int] = {
     "per_post": 1, "badge": 1, "m43": 1, "m33": 1, "notifications": 1, "activity": 2,
     "pv_capture": 1, "post_capture": 1, "editor_fields": 2, "people_search": 1,
+    "pv_switch": 2, "pv_verify": 2,
     **{k: 1 for k in L1_KEYS}, **{k: 1 for k in CAPTURE_URLS},
 }
 
@@ -477,6 +483,11 @@ async def _call(key: str) -> dict[str, Any]:
         return await server.linkedin_profile_editor_fields()
     if key == "people_search":
         return await server.linkedin_people_search_shape()
+    if key == "pv_switch":
+        return await server.linkedin_who_viewed_me(
+            limit=10, view_switch=PV_SWITCH_KEY, show_more_analytics=True)
+    if key == "pv_verify":
+        return await server.linkedin_who_viewed_me(limit=10)
     raise ValueError("no tool for key " + key)
 
 
@@ -751,6 +762,17 @@ async def fire(key: str, capture: bool, carried: dict[str, Any]) -> dict[str, An
         say("    cost_delta: state " + shape_of(delta.get("state"), "state")
             + ", refused_on " + shape_of(delta.get("refused_on"), "refused_on")
             + ", delta " + shape_of(delta.get("delta")))
+    elif key in ("pv_switch", "pv_verify"):
+        insights = out.get("insights") or {}
+        headline = (insights.get("headline") or {}).get("value")
+        view = {"rows": out.get("count"), "headline_is_digits": str(headline or "").replace(",", "").isdigit()}
+        raw["view"] = {"rows": out.get("count"), "headline": headline}
+        carried[key + "_view"] = raw["view"]
+        say("    view: " + shape_of(view))
+        if key == "pv_verify" and "pv_switch_view" in carried:
+            same = carried["pv_switch_view"] == raw["view"]
+            raw["same_as_the_switch_load"] = same
+            say("    same rows count and headline as the switch's own load: " + str(same))
     elif key == "editor_fields":
         found = notify_controls(out.get("fields") or [])
         raw["notify_controls"] = found
