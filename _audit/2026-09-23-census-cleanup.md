@@ -111,10 +111,13 @@ browser is written down and left.
     CHECK: 0 + 17 + 2 + 2 = 21, and COVERED-UNFIRED is 21
 
 The pins read `b1_standing` 0, `b1_named_target` 17, `b1_pending` 2 and
-`b1_no_ruling` 2, and `PINNED_B1_ROWS` holds the three groups row by row.
+`b1_no_ruling` 2 (renamed from the first build's `b1_write_ruling` and
+`b1_other_standing`), and `PINNED_B1_ROWS` holds the three groups row by row.
+Demonstration D, re-run after the ruling, passes the same way: `N 1` is named
+moving from `OPERATOR-NAMES-THE-TARGET` to NO RULING, and no GAP figure moves.
 Everything below in this section is the state as first built and committed,
-before the ruling reached the wave; the mechanism is unchanged, and only the
-holds table and five cells moved.
+before the ruling reached the wave. The mechanism is unchanged; what moved is
+the holds table, five cells, and the pins' names and values.
 
 **DONE.** `scripts/census_completion.py` no longer calls bucket 1 "blocked on a
 live browser session". It prints what holds each COVERED-UNFIRED row, and every
@@ -219,8 +222,9 @@ moved. All four demonstrations pass, the byte-restored copy green again.
 **DONE, as a premise and not a state.** The cell now opens with what is true
 today: for his OWN posts a tool in this server returns the identifier
 (`linkedin_my_activity_items`, eight activity keys live on 2026-09-23, `C41`
-COVERED-PROVEN), and `C25` / `C32` are aimable at them and stay unfired under
-the write ruling. For anybody else's post the premise stands: no reader here
+COVERED-PROVEN), and `C25` / `C32` are aimable at them. Both are unfired; the
+write ruling held them until 18:15, and since then they wait on a target the
+operator names (section 7). For anybody else's post the premise stands: no reader here
 hands out a third party's item key (`linkedin_comment_on_item`'s own docstring)
 and `/feed/` was measured drawing zero item permalinks
 (`linkedin_my_activity_items`'s docstring). The 2026-08-31 quotation is kept
@@ -304,14 +308,14 @@ file rather than comparing sets, and the script reads TWO slices.
 
 ## 5. ITEM 5 -- A TEST THAT RUNS IT, SHOWN FAILING
 
-**DONE.** `tests/test_triage_read_gap_rows.py`, ten tests: green on the real
-tree; a verdict planted into `TRIAGE` for a row that has left GAP (found at runtime off
-`census_completion.walk()`, the first read-direction P/N row outside GAP) named
-by CONTROL 4; a MISSING verdict named; all four built-in plants refused, EACH BY
-ITS OWN CONTROL'S SENTENCE (review tightened this: the first draft accepted any
-refusal, which would have stayed green with CONTROL 7 dead); CONTROL 7's dict
-checked against the real table; and the population CONTROL 4 compares asserted
-non-empty and equal to the key set.
+**DONE.** `tests/test_triage_read_gap_rows.py`, nine tests (collected: 9):
+green on the real tree; a verdict planted into `TRIAGE` for a row that has left
+GAP (found at runtime off `census_completion.walk()`, the first read-direction
+P/N row outside GAP) named by CONTROL 4; a MISSING verdict named; all four
+built-in plants refused, EACH BY ITS OWN CONTROL'S SENTENCE (review tightened
+this: the child's draft accepted any refusal, which would have stayed green with
+CONTROL 7 dead); CONTROL 7's dict checked against the real table; and the
+population CONTROL 4 compares asserted non-empty and equal to the key set.
 
 **SHOWN FAILING ON THE REAL FILE, by the child, verified from its report:**
 
@@ -322,7 +326,10 @@ non-empty and equal to the key set.
     restored                   sha256 identical, all 64 characters compared
     pytest                     9 passed
 
-(Nine at that point; review then split one test into four parametrized cases.)
+(The count is nine before and after review. Review changed what the four plant
+cases assert, not how many there are. An earlier version of this sentence said
+review split one test into four; that was untrue, and the collected count
+settled it.)
 
 ---
 
@@ -354,7 +361,7 @@ register entry whose BINDS is an address family): four entries name a path.
 
     DO-NOT-OPEN-MESSAGING                       /messaging/        FORBIDS   touches M M49
     SEARCH-ADMISSION-APPROVED-FIVE-CONDITIONS   /search/results/   permits reading; bars firing
-                                                                             touches 18 rows, none
+                                                                             touches 17 rows, none
                                                                              blocked on nothing
     PERMALINK-READ-IS-ALLOWED                   /feed/update/<urn>/  permits  touches M C29, M C85
     ONE-NAMED-SETTINGS-PAGE-AT-A-TIME           /mypreferences/d/  touches no admitted row
@@ -422,14 +429,24 @@ touched: exit 1, exactly two problems, both `M M49` --
     M M49: its page sits on /messaging/, so its note must cite
            HELD BY `DO-NOT-OPEN-MESSAGING`
 
-Then green, 67 of 67, blocked on nothing 4. Eight plants in
+Then green, 67 of 67, blocked on nothing 4. Seven plants in
 `tests/test_read_addresses.py`, each into a copy of the real table and each
 required to name its row: the row planted back to READER; a held page under a
 PRESS gate; a held page whose note cites nothing; STANDING-RULING off its
 ruling's page; STANDING-RULING citing nothing; a PENDING question planted onto a
 page, convicting a row the test itself makes blocked on nothing (so it does not
-depend on which rows are blocked on nothing today); `census_completion`
-withholding the split; and the edge asserted to have a real row to check.
+depend on which rows are blocked on nothing today); and `census_completion`
+withholding the split. Plus one check that the edge had a real row to check.
+
+**After 18:15 the tests were reworked, because no admitted row sits on a held
+page any more and a plant needs one.** Each now installs its OWN hold on a page
+it chooses, into the holds table the edge reads, and requires the row named.
+Nine tests in all (37 in the file): the real table passes the edge and at
+least one surface hold exists; a row made blocked on nothing on a held page; a
+held page under a PRESS gate; a held page whose note cites nothing;
+STANDING-RULING off its ruling's page; STANDING-RULING citing nothing; a
+PENDING question convicting a row the test makes blocked on nothing; a note
+still citing a LIFTED ruling; and `census_completion` withholding the split.
 
 **WHAT THE EDGE CANNOT SEE.** A hold that binds an ACT is not readable off an
 address. A row held by the write ruling -- which `M C85` would be if its poll
@@ -543,10 +560,164 @@ every run.
 
 ## 9. GATES
 
-(Filled in after the commits: what ran, what it said, and what did not run.)
+**RUN, all on this worktree, all offline:**
+
+    scripts/impact_gate.py --against b0d3ab8   PASS over 46 test files (2184 tests),
+      at the wave's third commit               479.5 s wall. 18 changed paths; the 17
+                                               corpus-wide guards ran unconditionally,
+                                               4 sweeps inside them answering on the
+                                               CHANGE rather than the tree (the gate's
+                                               own induction step). NOT CHECKED, said
+                                               by the gate: 171 of 217 test files,
+                                               roughly 3910 of 6094 tests. Local and
+                                               Windows-only
+    the new and changed test files             81 passed: test_ruling_holds 35,
+                                               test_read_addresses 37,
+                                               test_triage_read_gap_rows 9
+    the correction and cited-SHA guards        41 passed before the second commit;
+                                               both again inside the gate's 46
+    scripts/census_completion.py --check       exit 0
+    scripts/_check_census_completion_can_fail.py
+                                               ALL FOUR DEMONSTRATIONS PASS, before
+                                               and after the ruling
+    scripts/check_read_addresses.py            GREEN, 67 of 67; blocked on nothing 5
+    scripts/ruling_holds.py                    GREEN
+    scripts/triage_read_gap_rows.py            exit 0, 54 of 54; each --plant exits 1
+    scripts/count_census_states.py --expect J=56,P=55,M=77,N=86
+                                               all four MATCH, GAP 274
+    scripts/pin_census_rows.py                 no drift
+    scripts/reader_closable_blockers.py        controls 1-4 OK; its one unjoined GAP
+                                               row predates this wave (the map's 409
+                                               row ids are identical to b0d3ab8's)
+    the three generators, per commit           --check green, and a second --write
+                                               sweep changed nothing
+    the pre-commit identity gate               0 hits, every commit
+    the commit messages                        no attribution line, checked
+    a cold verifier                            9.1
+
+**THE GATE'S PRINTED PLAN IS ABRIDGED, AND I MISREAD IT ONCE.** It lists 40 of
+the 46 files and ends "... and 6 more selected"; `tests/test_triage_read_gap_rows.py`
+is one of the six not printed, so a filter over the printed list made it look
+unselected. Calling `impact_set` directly shows it in the plan, reached through
+`census_completion.py` and as a changed test file. The selection is sound; the
+listing is short.
+
+**THE REGENERATED BLOCKER MAP, WHICH NO OTHER SECTION NAMES.** Every change is in
+its `reason_doc` column and nothing else. The candidate count grew because new
+documents joined the corpus the locator ranks, and for twelve rows the rank-1
+candidate is now this audit, where it was the bucket-3 audit: the ten
+CONVERSATION-OVERFLOW-MENU rows, whose blocker includes `M M49`, and the two
+POLL-SURFACE rows, whose blocker includes `M C85`. The locator scores
+paragraphs that argue a blocker's ROWS, and this audit argues about those two
+rows more often than any other document. It ranks what argues a row, not where
+a blocker's reason is written, and its own docstring puts its rank-1 recall at
+4 of 8. No row id, blocker, state or other column moved.
+
+**NOT RUN, and why:**
+
+* **The full suite.** 171 of 217 files, by the gate's own count. CI runs the
+  whole suite on three platforms on push, and this wave does not push.
+* **Anything live.** Every reading here is the census, the boundary called
+  in-process, the register, or a script over them.
+* **The gate over this section's own edit.** A document cannot quote the gate
+  that checks its last edit, so the re-run over the final commit is in the
+  wave's final message.
+
+### 9.1 A cold verifier, and what it found
+
+An implementer child with no part in the work, briefed with an eight-item
+checklist and read-only on the worktree, re-derived each claim from the tree:
+bucket 1 row by row from the census cells by hand; bucket 3 from the checker;
+the 33 admitted rows against the register and the round-two rulings by its own
+judgement; the sibling wave's four rows untouched (`git diff` against b0d3ab8);
+no census state or direction moved across all 704 rows (both versions parsed
+with the shipped functions); hygiene over every added line (ASCII, no absolute
+path, no six-digit urn, no name, no attribution line); the two marker pairs;
+and four spot checks. **Seven of eight matched. The one mismatch was mine:**
+section 6.1 said the search-admission ruling touches 18 admitted rows, and it
+touches 17 (`N 79` to `N 94` without `N 83`, plus `N 172` and `N 194`). Fixed
+in place. It also noted that the blocker map's diff was named nowhere in this
+document, now named above, and that section 2 still said the write ruling held
+`C25` / `C32` after the ruling, now brought to the cell's wording.
+
+### 9.2 The forced predictions, scored
+
+    item 6, one row on a forbidden page, 5 -> 4     MET before 18:15: the edge named
+                                                    M M49 and nothing else. The ruling
+                                                    then moved the answer back to 5
+    item 1, 15 / 2 / 2 / 2, no row moved            MET, row for row
+    item 4, green on the removal alone, 54 left     MET; the other edits to that
+                                                    file were additions
+
+**AND TWO STATEMENTS OF MINE THE MEASUREMENTS DID NOT BEAR OUT:** "touches 18 rows"
+(it is 17, found by the cold verifier) and "ten tests" with a review "split into
+four" (it is nine before and after review, found by counting the collection).
+Both are fixed in this document.
 
 ---
 
 ## 10. FOR THE ORCHESTRATOR AND THE OPERATOR
 
-(Filled in at the end.)
+### 10.1 At merge
+
+* **Registering ruling (b).** `scripts/ruling_holds.py` carries it as
+  `OPERATOR-NAMES-THE-TARGET`, status RELAYED, binding every write. The day the
+  register carries that id, `register_problems` goes RED on purpose ("mark it
+  STANDING"): flip the status there, and its BINDS must then read "every
+  write...". If the register entry takes a DIFFERENT id, rename the hold and
+  the five census cells that cite it (`J 103`, `J 104`, `J 128`, `M M33`,
+  `M M43`) in the same commit, or the RELAYED entry never sees that it was
+  registered. And nothing here reads the lifted list against the register:
+  it is the register entry that makes `DO-NOT-OPEN-MESSAGING` and
+  `NO-IRREVERSIBLE-WRITE-IS-FIRED` stop reading STANDING.
+* **The sibling wave's four rows.** If it banks any of `P O3`, `N 134`, `M C72`,
+  `M C85`: its line leaves `read-addresses.tsv`, the `b3_` pins move, and
+  `scripts/triage_read_gap_rows.py` loses the matching `TRIAGE` key (it holds
+  `P O3` and `N 134`). `tests/test_triage_read_gap_rows.py` goes red naming the
+  key until that is done, which is what item 5 is for.
+* **Generated files.** `_audit/INDEX.md`, `_audit/RULINGS.md` and the blocker
+  map are regenerated here and will conflict with any sibling that regenerated
+  them. Regenerate at the merge head; do not hand-merge either side.
+* **Pins this wave owns in `scripts/census_completion.py`:** the four `b1_`
+  counts and `PINNED_B1_ROWS`, `b2_d3_rows` 4, and `b3_blocked_on_nothing` 5
+  (the same value HEAD had, with its history now in the comment).
+
+### 10.2 What needs the operator
+
+1. **`N 20` and `N 45`: may one `linkedin_notifications` call spend his unread
+   notification state?** Ruling (b), as relayed, names connecting, messaging,
+   applying, posting and opening messaging; it does not name the notifications
+   page, whose cost falls on his own badge and does not come back. Both rows
+   cite the question and stay held by it until he answers. This is the third
+   wave to reach them.
+2. **The two messaging reads under ruling (b).** For `M M33` and `M M43` the
+   "target he names" is his own inbox, and what he accepts per fire is that
+   opening it lands in a conversation LinkedIn chooses and can mark that
+   person's message read. If he meant a standing permission for inbox reads
+   rather than a per-fire one, these two rows move from "waits on a named
+   target" to a session. (`M M49` is not in that position: it is a bucket-3
+   row with no reader yet, blocked on nothing for BUILDING one; only its first
+   fire would meet the same question.)
+
+### 10.3 A decision that is the orchestrator's, priced
+
+**`M C42`'s state.** The registered `EXCLUDED-RULED-ADMISSION` admits four
+grounds; the 2026-09-21 what-was-ruled report (question Q5) found the row's
+only ground is none of them, and today's fire removed that ground's force for
+his own posts. Moving it to GAP is what the register already implies. Priced:
+`out_of_scope` 315 -> 314, `achievable` and `capabilities_achievable`
+389 -> 390, `adjudicated` 430 -> 429, `gap` 274 -> 275, `gap_read` 67 -> 68,
+one new line in `read-addresses.tsv` (its class is a judgement: no known page
+draws another member's post key, which reads UNDETERMINED), and the messaging
+`--expect` 77 -> 78. It was left because it is a state move the brief did not
+ask for, made on the same day a sibling is moving rows on the same slice.
+**Recommendation: move it at merge, after the sibling's rows land.**
+
+### 10.4 Found and not fixed, outside the six items
+
+* `scripts/triage_read_gap_rows.py`'s CONTROL 6 cannot fail as written: the
+  set it inspects is computed from `SCOPE`, which can never name an index
+  file. The docstring now says what it does; making it able to fail is not
+  one of the six items.
+* The gate's abridged listing (9, above) hid a selected file from a reader.
+  Not a selection defect; a listing that could say which six it omitted.
