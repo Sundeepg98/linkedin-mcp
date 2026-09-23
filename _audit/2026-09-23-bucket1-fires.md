@@ -62,6 +62,13 @@ rows are not fired at all.
 
 ### 0.3 Two harness defects fixed BEFORE any fire, committed first (`599a0cb`)
 
+**TWO OF THE SHAS IN THIS DOCUMENT ARE BRANCH-ONLY TODAY.** `599a0cb` and
+`abd5d75` are this wave's commits on its worktree branch and do not resolve
+on `master` until that branch merges. Their subjects, which survive a rewrite:
+*"probes(unfired): stop at the first anomaly, and fire one self-read alone"*
+and *"probes(unfired): an anomaly keeps its envelope, so it can be read at
+zero loads"*.
+
 Reading the two harnesses before running them found that **neither stopped at
 an anomaly**. `_probe_unfired_job_detail_insights.py` counted an error
 envelope under "errors by type" and went on to the next posting, so a login
@@ -149,9 +156,10 @@ spent to try: the nav is the same nav on every page.
 and anchors_per_item only when authorship was established": seven top-level
 keys, those six plus `note`, and no `refused`.
 
-**THE FIELDS WHOSE MEANING WAS CHECKED**, from the raw capture in the
-gitignored `_state/`, read by a scratch reader that prints booleans, integers
-and this package's own tokens and never an item:
+**THE FIELDS WHOSE MEANING WAS CHECKED**, from the raw capture
+`_state/unfired-self-reads-raw.json` (gitignored, in this wave's worktree),
+read by a scratch reader that prints booleans, integers and this package's
+own tokens and never an item:
 
     authorship.established         True -- and it is a CONJUNCTION, not a
                                    default; each of its three conditions is
@@ -263,9 +271,11 @@ follows, and it is the last for these two rows whatever it shows.
     outcome    posting 1: insights dict arrived, 7 keys
                posting 2: ANOMALY extraction_failed -> stopped, envelope KEPT
 
-**THIS TIME THE ANOMALY WAS CLASSIFIED FROM DISK, AT ZERO PAGE LOADS**, by a
-scratch reader that parses only integers and closed-vocabulary tokens out of
-the package's own failure note (`shape.job_detail_failure_note`):
+**THIS TIME THE ANOMALY WAS CLASSIFIED FROM DISK, AT ZERO PAGE LOADS**, from
+`_state/unfired-job-detail-insights-raw.json` (gitignored, in this wave's
+worktree), by a scratch reader that parses only integers and
+closed-vocabulary tokens out of the package's own failure note
+(`shape.job_detail_failure_note`):
 
     missing required fields   description        (title present)
     main_chars                8785    -- the package's own DRAWN range is
@@ -286,12 +296,13 @@ position 2, but FIRE 2 kept no envelope, and this repository has measured the
 search drifting 2 of 7 ids between identical requests -- so it may have been a
 second posting of the same kind.
 
-**WHAT THAT COSTS, STATED AGAINST MY OWN CLAIM.** Section 0.3 says *"the cost of
-stopping on a harmless flake is one re-run."* Measured here, that is wrong: a
-posting-level miss that is not a flake stops the harness wherever the harvest
-puts it, and on both runs today that was position 2, so no sample past
-posting 1 was reachable. The
-rule is still the right default -- the alternative is loading pages into a
+**WHAT THAT COSTS, STATED AGAINST MY OWN CLAIM.** The `_anomaly` docstring I
+wrote at `599a0cb` said *"The cost of stopping on a harmless flake is one
+re-run."* Measured here, that is not so: a posting-level miss that is not a
+flake stops the harness wherever the harvest puts it, and on both runs today
+that was position 2, so no sample past posting 1 was reachable. The sentence
+is replaced in the docstring itself, in the commit after this document's
+first, rather than left in shipped source. The rule is still the right default -- the alternative is loading pages into a
 session nobody has classified -- and the repair is not to loosen it but to
 let the harness CLASSIFY before it decides: on `extraction_failed`, read the
 control once (exactly the health read taken by hand above) and continue only
@@ -423,7 +434,7 @@ owner's to word.
                                                             against 10 ids wanted)
     presses, clicks, fills, keys                        0
     tabs leaked                                         0   cdp_targets: 1 page before and
-                                                            after (the operator's own)
+                                                            after, not one of this wave's
     raw captures committed                              0   all under the gitignored _state/
     harness defects found and fixed before/while firing 3   no stop on anomaly; the composer
                                                             re-fired needlessly; the anomaly
@@ -492,3 +503,67 @@ rows 142 -> 142.
   re-measuring its neighbour no longer loads the composer.
 * Chrome on 9224 was attached to and left serving; it was never started,
   navigated in any tab but this wave's own, or stopped.
+
+## 7. THE GATE
+
+Committed first, then `scripts/impact_gate.py --against 79c5f8e`, the scoped
+gate over the wave's three commits, verbatim where it matters:
+
+    impact-gate: 9 changed path(s) -> 51 SELECTED + 17 corpus-wide = 51 test file(s).
+    REFUSED: a test this change can reach is RED.
+        FAILED tests/test_the_rulings_register_is_derived.py::test_the_committed_register_is_what_the_corpus_derives
+        FAILED tests/test_a_cited_sha_resolves.py::test_no_new_unresolvable_citation_appears
+        2 failed, 2334 passed in 253.11s (0:04:13)
+      NOT CHECKED: 163 of 214 test files (76.2% of the suite by file).
+      That is roughly 3758 of 6094 tests unrun (61.7%), against a suite count
+      taken 2026-09-20 at 970a276.
+
+**BOTH REDS WERE MINE AND BOTH WERE RIGHT.**
+
+1. **The rulings register.** I edited this document in the working copy after
+   the commit (the END STATE section), and its wording moved two of the
+   register's scan counts; the committed `RULINGS.md` had been derived before
+   that edit. Regenerated with `scripts/build_rulings_index.py --write`, never
+   hand-merged, and swept twice until nothing moved.
+2. **The cited SHAs.** `599a0cb` and `abd5d75` sit on this wave's branch only,
+   and the guard's predicate is ancestry of `master`, not existence. Its own
+   remedy, taken: disclose it and record the subjects (section 0.3) -- and do
+   not delete the hash.
+
+**What the gate did NOT run is stated by the gate:** 163 of 214 test files.
+Its 17 corpus-wide guards ran unconditionally, but four of their sweeps (the
+identity shape and exact-value sweeps, and two navigation sweeps) answered on
+the CHANGE rather than the whole tree, by the gate's own design -- an
+induction step whose base case is the whole-tree run in CI, which this
+branch has not had: it is not pushed, by the brief. **The re-run over the
+corrected range is reported in the wave's final message rather than here** --
+a document cannot quote the gate that checks the document's own last edit,
+and this is where that recursion stops.
+
+## 8. END STATE
+
+**MOVED TO COVERED-PROVEN: 1** -- `M C41`.
+
+**NEW CENSUS FIGURES** (`scripts/census_completion.py`, 704 stated rows,
+achievable surface 389):
+
+    DELIVERED, strict    75 / 704  10.7%     75 / 389  19.3%     (was 74)
+    DELIVERED, broad     96 / 704  13.6%     96 / 389  24.7%     (unchanged)
+    COVERED-UNFIRED      21                                      (was 22)
+
+**ROWS NOT PROVEN, AND WHY -- 6 of the 7 in scope:**
+
+    J 121   fired twice, both VOID at posting 2 by the stop rule; the
+            percentile sits behind a gated control (a press, out of scope)
+    J 122   the same runs; the reader carries no skills sub-key (a build)
+    M M33   not fired -- DO-NOT-OPEN-MESSAGING (a standing ruling)
+    M M43   not fired -- DO-NOT-OPEN-MESSAGING (a standing ruling)
+    N 20    not fired -- loading notifications clears HIS unread badge,
+            irreversibly (his decision); yield also conditional on the kinds
+            in his list
+    N 45    not fired -- the same
+
+**NEEDS AN OPERATOR RULING: one** -- may a single `linkedin_notifications`
+call spend his unread notification state (`N 20`, `N 45`)? Everything else
+left in bucket 1 needs a build, a sanctioned press, or a ruling that already
+exists; none of it needs another session.

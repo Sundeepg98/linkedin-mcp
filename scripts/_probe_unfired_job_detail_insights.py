@@ -262,9 +262,18 @@ def _anomaly(out) -> "str | None":
     ``not_authenticated`` (``auth.assert_not_authwall``), but a 999 or a
     throttled page that draws nothing reaches it as ``extraction_failed``,
     and the two cannot be told apart from inside the envelope -- no HTTP
-    status travels in it. The cost of stopping on a harmless flake is one
-    re-run; the cost of continuing into a throttled session lands on the
-    account. So the conservative reading wins.
+    status travels in it. The cost of continuing into a throttled session
+    lands on the account, so the conservative reading wins.
+
+    ITS COST IS NOT "ONE RE-RUN", and this docstring said it was until the
+    rule's first live day proved otherwise (2026-09-23,
+    ``_audit/2026-09-23-bucket1-fires.md`` FIRE 3). A posting-level miss that
+    is not a flake -- a drawn page whose description never attaches after
+    the full settle and the full wait -- stops the run wherever the harvest
+    puts it, and both runs that day stopped at posting 2. The repair is a
+    CLASSIFICATION step, not a looser rule: on ``extraction_failed``, read
+    the control once and continue only if it serves with no authwall marker.
+    Proposed there, not built here.
 
     A REFUSAL IS NOT AN ANOMALY. ``{"refused": ...}`` is a tool answering, and
     the census rows this probe exists for are decided by exactly those
