@@ -747,6 +747,45 @@ NOT_A_CORRECTION: dict[tuple[str, str], str] = {
         "row would be correcting it from outside and would need its own "
         "marker pair."
     ),
+    # 2026-09-23, LANE L2 (the refused presses). The same pair shape as the two
+    # entries directly above, on the same census rows, one document later --
+    # and a table-row-proximity pair in the messaging slice.
+    ("network.md", "2026-09-23-lane-l2-refused-presses.md"): (
+        "THE ARROW POINTS THE SAME WAY AS FOR THIS ROW'S TWO EARLIER RECEIPTS. "
+        "The line is census row 84 -- rows 85, 86, 87, 90, 91, 92 and 133 "
+        "cite the document the same way -- and the correction vocabulary on "
+        "it is the row's own 2026-09-21 text, *'BLOCKER CORRECTED "
+        "2026-09-21'*, which concerns `2026-09-21-the-all-filters-press.md` "
+        "and is triaged directly above. The new sentence is the row reporting "
+        "what the cited document MEASURED -- the query keys LinkedIn itself "
+        "writes into people-search hrefs, and that the address table now "
+        "gates the row RULING -- not a claim that the document got anything "
+        "wrong; it exists BECAUSE of that document. The document disputes "
+        "nothing in the slice and moves no state: every row it touches reads "
+        "GAP before and after. "
+        "**WHAT WOULD MAKE THIS ENTRY WRONG:** if a `network.md` row ever "
+        "asserted that a reading in this document is mistaken -- a later wave "
+        "finding a LinkedIn-authored facet for a filter this document lists "
+        "as having none, say -- while leaving the document unmarked. That row "
+        "would be correcting it from outside and would need its own marker "
+        "pair."
+    ),
+    ("messaging-and-content.md", "2026-09-23-lane-l2-refused-presses.md"): (
+        "TABLE-ROW PROXIMITY, AND THE MATCHED WORD IS ON A DIFFERENT ROW. The "
+        "citation is census row C29, citing the document as the receipt for "
+        "a finding appended to it. The correction vocabulary within two lines "
+        "is *'THE STATED REASON WENT STALE'* on row C27, two lines above -- a "
+        "different capability (media in a comment) and a different "
+        "document -- because a markdown table has no blank line between "
+        "rows. Row C29 reports what the cited document measured (no capture "
+        "holds a comment-sort control; C42 leaves the permalink unaddressable) "
+        "and disputes nothing in it; its state reads GAP before and after. "
+        "**WHAT WOULD MAKE THIS ENTRY WRONG:** if row C29, or a row within two "
+        "lines of it, ever asserted that a finding of this document is "
+        "mistaken -- a comment-sort control turning out to be recorded in a "
+        "capture that predates it, say -- while leaving the document "
+        "unmarked."
+    ),
     ("INSTRUMENTS.md", "jobs.md"): (
         "THE REGISTER DESCRIBES A MEASUREMENT OF THAT SLICE, IT DOES NOT "
         "WITHDRAW ANYTHING IN IT. Section 47's line reads *'recorded "

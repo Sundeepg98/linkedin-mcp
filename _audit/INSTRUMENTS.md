@@ -9507,3 +9507,52 @@ first wrote the table, the three-row drift control, the cross-check of every
 address the rows' own census cells name, and the offline press-condition
 runner -- are declared disposable. Everything they measured is re-derived by
 the checker on every run or recorded with its result in the audit.
+
+## 59. WHICH CONTROL AN INDEX PRESS REACHES, READ FROM A CAPTURE WITH NO BROWSER (lane-l2-refused-presses, 2026-09-23)
+
+**Registered 2026-09-23, as a METHOD rather than a file.** Full record:
+`_audit/2026-09-23-lane-l2-refused-presses.md`, sections 4 and 6.1.
+
+`press.disclose` presses `page.locator(shape).nth(index)` PAGE-WIDE, and
+condition 2 forbids naming a control by its label, so a caller chooses an index
+it may not identify. Which control that index is -- on that page, at that
+moment -- is a fact about document order, and a raw capture already on disk
+answers it without a browser.
+
+### 59.1 THE METHOD
+
+Parse the capture with the standard library's `html.parser` into a tree and
+report, for every member of each `press.SANCTIONED_SHAPES` node set IN
+DOCUMENT ORDER: tag, `role`, the sanctioned attribute's value, whether an
+ancestor is `header`/`nav`, `main`, or `aside`/`footer`, and whether it sits
+inside a `form` or a `dialog` (and whether that dialog carries `open`). Report
+the NON-members the question is about by the same fields. Text leaves the
+parse only as a length or a letter-shape (letters to `a`, digits to `9`),
+except membership in a closed vocabulary of control captions already named in
+committed fixtures or census cells. No href, id or accessible-name value is
+printed.
+
+### 59.2 SHOWN ABLE TO SAY BOTH WORDS, ON ONE PAGE
+
+A membership column that only ever reads "member" certifies nothing. On the
+profile-views capture the same reading returned 8 members of `[aria-expanded]`
+-- two of them in the header's navigation, OUTSIDE `<main>`, at positions 0
+and 1 -- and returned "Show more analytics", "All filters", "Reset", both
+`role=tab` controls and a closed dialog's submit as members of NEITHER set.
+That split is the finding: the press on record for P O3 / N 134 used index 0.
+
+### 59.3 WHAT IT CANNOT DO
+
+It reads the capture's moment, not the fire's. A page whose chrome differs by a
+node shifts every index after it (that page reads 8 to 9 settled), so the
+method prices a DESIGN offline, and a zero-press live reading of the same
+fields confirms it before any press relies on an index. It sees nothing built
+on demand: the viewer-filter popovers are in no capture for that reason.
+
+### 59.4 DECLARED DISPOSABLE
+
+The four scratchpad scripts that ran the method -- the structure reader, the
+dialog-shape dump, the per-node landmark reader and the people-search facet
+counter -- and the two editing scripts, for the address table and the census
+cells, are declared disposable. Everything they measured is recorded with its
+result in the audit, and the method above rebuilds them.
