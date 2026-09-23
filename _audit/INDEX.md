@@ -31,15 +31,15 @@ are listed as `(undated)`; no date is taken from git history, because
 | of those, carrying a `YYYY-MM-DD-` date prefix | 195 |
 | distinct dates | 15 |
 | documents with no level-1 heading | 2 |
-| `CORRECTS:` marker lines | 93 |
-| `CORRECTED BY:` marker lines | 93 |
-| distinct declared correction edges | 90 |
-| documents something later corrects | 46 |
-| documents that correct something | 66 |
-| documents at either end of a cross-document edge | 93 |
+| `CORRECTS:` marker lines | 94 |
+| `CORRECTED BY:` marker lines | 94 |
+| distinct declared correction edges | 91 |
+| documents something later corrects | 47 |
+| documents that correct something | 67 |
+| documents at either end of a cross-document edge | 94 |
 | intra-document correction markers | 4 |
 | documents that correct themselves later on | 2 |
-| documents no correction marker touches at all | 140 |
+| documents no correction marker touches at all | 139 |
 | blockquoted markers naming ANOTHER document | 0 |
 | edges missing one of their two markers | 0 |
 | edges declared a different number of times in each direction | 2 |
@@ -486,6 +486,14 @@ document is dead; it says one thing in it was overtaken and names what.
 - CORRECTED BY [2026-09-21-the-dict-literal-exclusion.md](2026-09-21-the-dict-literal-exclusion.md)
 
   > the exclusion was LIFTED on 2026-09-21 and this pricing was wrong in three ways. The `+124 sites` costs the baseline nothing: that guard admits only SHORTLISTED sub-expressions, so the site count is the wrong denominator. Exactly ONE committed baseline imports this walk, not two. And the delta figures reproduce exactly while one of the four names does not -- at the variant producing `+124 / +181 / +4` the fourth new EXCEPTION_TEXT sub-expression is `server.py::_badge_refusal`, not `server.py::_error`; `_error` is added there as a PASSTHROUGH bucketed PAGE_OR_SITE_DERIVED and reaches EXCEPTION_TEXT only under the wider all-dicts scope. Full lift measured: 311/558/19 -> 480/792/37, baseline 19 -> 37 rows, 0 changed, 0 vanished, 5 rows needing adjudication across 3 functions -- a line, not a wave. Section 2.3's premise that widening would bring `_error` inside `test_no_message_publishes_a_landing` is separately false: that guard's subject rule is the address shortlist, and `_error`'s three expressions name no address. What governs `_error` is the DRIVEN guard at the envelope, `tests/test_tool_envelopes_emit_no_page_string.py`, which this document itself shipped.
+
+### [2026-09-23-bucket3-addresses.md](2026-09-23-bucket3-addresses.md)
+
+2026-09-23 &middot; Bucket 3, measured: 67 rows, 33 on an admitted page, and 5 a reader could close today
+
+- CORRECTED BY [2026-09-23-readers-four-rows.md](2026-09-23-readers-four-rows.md)
+
+  > row `M C85` is gated RULING, not READER: no sanctioned source exists for a poll post's address, so "blocked on nothing" is 4 of 67, not 5.
 
 ### [INSTRUMENTS.md](INSTRUMENTS.md)
 
@@ -1289,6 +1297,14 @@ reach is visible. The quoted reason here is the CORRECTOR's own
 
   > four address verdicts: P F1 and P H11 are pages on the admitted profile, not ADDRESS/ABSENT, and P L4 and N 61 wait on a live read, not on a refused address anybody has seen served.
 
+### [2026-09-23-readers-four-rows.md](2026-09-23-readers-four-rows.md)
+
+2026-09-23 &middot; READERS FOR THE FOUR ROWS BLOCKED ON NOTHING: P O3, N 134, M C72, M C85
+
+- CORRECTS [2026-09-23-bucket3-addresses.md](2026-09-23-bucket3-addresses.md)
+
+  > row `M C85` was gated READER ("no reader exists"); the first thing past its admitted boundary is a RULING on where a poll post's address may come from, so "blocked on nothing" is 4 of 67, not 5 (section 4).
+
 ## 5. Every document, by date
 
 `CORRECTED` means at least one later document declares a correction of
@@ -1533,8 +1549,8 @@ ways, which is a fact about markers and not a verdict on the document.
 | 2026-09-21 | [2026-09-21-what-the-browser-said.md](2026-09-21-what-the-browser-said.md) | WHAT THE BROWSER SAID: `$.message`, adjudicated by PROVENANCE CLASS | **CORRECTED x1** |
 | 2026-09-21 | [2026-09-21-what-was-ruled.md](2026-09-21-what-was-ruled.md) | A register keyed on RULINGS, not on documents -- and the fourth payment |  |
 | 2026-09-23 | [2026-09-23-bucket1-fires.md](2026-09-23-bucket1-fires.md) | BUCKET 1: the read-direction COVERED-UNFIRED rows, fired once each through attach | corrects x1 |
-| 2026-09-23 | [2026-09-23-bucket3-addresses.md](2026-09-23-bucket3-addresses.md) | Bucket 3, measured: 67 rows, 33 on an admitted page, and 5 a reader could close today | corrects x1 |
-| 2026-09-23 | [2026-09-23-readers-four-rows.md](2026-09-23-readers-four-rows.md) | READERS FOR THE FOUR ROWS BLOCKED ON NOTHING: P O3, N 134, M C72, M C85 |  |
+| 2026-09-23 | [2026-09-23-bucket3-addresses.md](2026-09-23-bucket3-addresses.md) | Bucket 3, measured: 67 rows, 33 on an admitted page, and 5 a reader could close today | **CORRECTED x1** corrects x1 |
+| 2026-09-23 | [2026-09-23-readers-four-rows.md](2026-09-23-readers-four-rows.md) | READERS FOR THE FOUR ROWS BLOCKED ON NOTHING: P O3, N 134, M C72, M C85 | corrects x1 |
 
 ## 6. What the scan rejected, could not join, or had to repair
 

@@ -637,6 +637,22 @@ NOT_A_CORRECTION: dict[tuple[str, str], str] = {
         "something IN that deliverable is false while leaving the deliverable "
         "untouched, which would be a real correction needing its own markers."
     ),
+    ("messaging-and-content.md", "2026-09-23-readers-four-rows.md"): (
+        "TABLE-ROW PROXIMITY, ON ONE LINE. Row `C85` is a single table line, "
+        "so every paragraph ever appended to it sits at distance zero from "
+        "every citation in it. The matched word is `false`, inside the "
+        "row's own 2026-09-21 RULED paragraph -- 'nothing this census "
+        "publishes had to be false' -- which is about the direction cell and "
+        "predates the cited document by two days. The citation is the "
+        "evidence pointer at the end of the row's 2026-09-23 paragraph, which "
+        "records that the row was STOPPED AT THE ADDRESS and withdraws "
+        "nothing from the deliverable it cites. The correction this wave did "
+        "make is a different pair and is declared: the deliverable CORRECTS "
+        "`2026-09-23-bucket3-addresses.md`, which carries the CORRECTED BY. "
+        "**WHAT WOULD MAKE THIS ENTRY WRONG:** row `C85` asserting that "
+        "something IN that deliverable is false while leaving the deliverable "
+        "untouched."
+    ),
 
     ("network.md", "2026-09-21-the-fires-and-the-controls.md"): (
         "THE ARROW IS DECLARED IN THE OTHER DIRECTION AND THIS IS ITS "

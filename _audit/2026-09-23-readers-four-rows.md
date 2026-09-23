@@ -2,6 +2,8 @@ claude-opus-5-5[1m]
 
 # READERS FOR THE FOUR ROWS BLOCKED ON NOTHING: P O3, N 134, M C72, M C85
 
+**CORRECTS:** `_audit/2026-09-23-bucket3-addresses.md` -- row `M C85` was gated READER ("no reader exists"); the first thing past its admitted boundary is a RULING on where a poll post's address may come from, so "blocked on nothing" is 4 of 67, not 5 (section 4).
+
 **2026-09-23. Wave `readers-four-rows`, base `b0d3ab8`. WRITTEN AS THE WAVE
 RUNS, not at its end.** The four rows `_audit/2026-09-23-bucket3-addresses.md`
 measured as ADMITTED with nothing but a reader between the page and the row
@@ -121,3 +123,110 @@ the address. `N 134` stays GAP because its payload is a filter's effect (F4),
 which a disclosure cannot deliver. One of `P O3` / `M C72` proves; the other
 is stopped by what the structural load shows about targeting (F2) or content
 (F3).
+
+---
+
+## 1. THE GATE, EXTENDED OFFLINE -- `652cd2f`
+
+*"press: read what a press disclosed, through two more closed tables"*
+
+**`press.OPEN_READINGS`** -- a caller NAMES a reading and cannot supply one,
+exactly as it names a shape. An entry fixes the surfaces (EXACT paths, not a
+prefix) and the phrases; the page answers through `dom.read_count_lines`, a
+script already declared and waived, with phrase positions and integers. **So
+the reading costs ZERO new `# readonly-ok` waivers** -- the budget stays at 22
+of 22 -- and no page string crosses the boundary. It is taken immediately
+before the click and again at the open moment, before the Escape; `appeared`
+credits the press only with terms that were not on the page before it.
+It rides alongside the verdict like the witness and never decides it.
+
+**`press.PRESS_SCOPES`** -- narrows the candidates to `<scope> <shape>` before
+the index applies, so a package caller can aim at a control inside a
+structural container instead of at a page-wide position the chrome controls.
+One entry so far, `main`.
+
+**Three new refusals, all before any contact**: `reading_not_sanctioned`,
+`reading_not_for_this_surface`, `scope_not_sanctioned`. Classified in
+`tests/test_press.py`'s exhaustive `WHEN_KNOWABLE` and driven through its
+`_REACHES` harness (taught to pass the two keys). With both keys `None` the
+gate is byte-for-byte what it was, and a test asserts that.
+
+**SHOWN FAILING**, seven planted defects in `press.py`, each run against
+`tests/test_press.py` + `tests/test_press_open_reading.py`, each restored by
+sha256 (`fed03ec4a42819cb`) before the next:
+
+    BASELINE                                                  94 passed
+    A  the open reading taken AFTER the Escape                6 failed
+    B  an unknown reading key accepted                        2 failed (one is the
+                                                              inventory's own row)
+    C  the reading decides the verdict                        2 failed
+    D  an out-of-range phrase position clamped onto phrase 0  1 failed
+    E  the scope ignored                                      2 failed
+    F  a reading's surface matched by prefix                  1 failed
+    G  a value carried on a refused numeral shape             1 failed
+    RESTORED                                                  94 passed
+
+Also run on the change: `tests/test_the_press_gate_cannot_witness_disclosure.py`
+and `tests/test_the_presser_control_is_a_pair.py` (116 passed with the two
+above), and `tests/test_readonly.py` (290 passed -- the scanner reads
+`press.py` and the waiver budget).
+
+---
+
+## 4. `M C85` -- STOPPED AT THE ADDRESS. ZERO PAGE LOADS.
+
+**The row:** *Vote in a poll / view poll results*, `R+W`, GAP. Its READ half
+is the results, as COUNTS, under `FEED-CONTENT-READ-RULING`. Its address shape,
+`/feed/update/urn:li:activity:<id>/`, is admitted (`PERMALINK-READ-IS-ALLOWED`).
+A reader needs ONE SPECIFIC POLL POST, and the brief's rule is that the package
+never navigates to an address the browser chose.
+
+### 4.1 Every source this package has for a post's address, searched
+
+| source | what it can address | why it cannot address a poll to VIEW RESULTS OF |
+|---|---|---|
+| `server._resolve_own_item_permalink` (the census keys `feed_item`, `feed_item_commented`) | ONE OF HIS OWN items, authorship established by the own-activity reader, chosen by the rule `first` or `most_anchors` | no rule selects a POLL, and no capture has ever measured a poll marker on his rail. And it takes no urn BY DESIGN: *"a caller handing in a urn would be handing in an identifier this server never read"* (its caller, `linkedin_surface_census`) |
+| `linkedin_my_activity_items` keys, handed to `linkedin_react_to_item(item=...)` / `linkedin_comment_on_item` | his own items, at call time (*"Get it from linkedin_my_activity_items, which returns keys only for items established to be yours"*) | his own items only; and those are writes |
+| `linkedin_job_detail(job_id)` | a caller-supplied id | jobs only |
+| `item_addresses.py` | urns drawn on `/analytics/creator/content/`, his own, published only on opt-in | it navigates nowhere |
+
+**The READ half of this row is reader-side.** The row's own cell: *"voting is
+the reader-side act"*; the author-side poll row is a different row. The poll
+whose results a reader views is SOMEBODY ELSE'S post, and **no source in the
+package reaches another member's post address -- deliberately**. The one way
+left to get such an address is to take it off a page the browser loaded (the
+feed draws other people's posts), which is precisely the derivation
+`tests/test_navigation_is_never_derived.py` exists to forbid: *"a page that can
+choose the next url can choose a stranger's."*
+
+**And the reader could not be designed from evidence even with an address.**
+No capture of poll-result markup exists anywhere in this tree (every `poll`
+hit in the census and audits concerns CREATING a poll, blocker
+`POLL-SURFACE`), and whether per-option results render at all before a vote --
+the irreversible write -- is recorded as UNVERIFIED by the bucket-3 wave and is
+still unmeasured. **So no reader was built for this row**: a reader over
+imagined markup would be a claim, not a check.
+
+### 4.2 What would make it reachable -- any ONE of these, named precisely
+
+1. **THE OPERATOR NAMES A POLL POST, and a ruling admits a caller-supplied
+   item urn as a READ target at call time.** That is the targeting shape
+   `INVITATION-TARGETING-IS-CALL-TIME` rules for invitations and
+   `linkedin_job_detail(job_id)` already uses for jobs -- and the exact thing
+   the census resolver refuses today, by design. Then one capture of that
+   permalink, to write the reader against measured markup.
+2. **A POLL OF HIS OWN**, found on his own rail by a structural poll marker
+   (unmeasured). This reaches the AUTHOR'S view of results, which is not the
+   reader-side capability this row names -- it would bank the author-side row,
+   if any, not this one.
+3. **Results read IN PLACE on `/feed/`**, with no navigation at all, from
+   whatever poll the feed happens to draw. The page would choose the poll.
+   Named because it is the one route that needs no address; NOT BUILT, because
+   it is a source the brief forbids improvising, and because a reading whose
+   subject the page picks cannot be pointed at the poll anybody asked about.
+
+**State: GAP, unchanged.** The row's bucket-3 gate moves READER -> RULING in
+`_audit/_census/read-addresses.tsv` (section 6), because the first thing past
+the admitted boundary is not "write a reader" but "decide where a poll post's
+address may come from". That moves `b3_blocked_on_nothing` by -1, recorded in
+section 7 and not re-pinned.
