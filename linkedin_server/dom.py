@@ -1931,6 +1931,63 @@ async def read_apply_control(page: Any) -> dict[str, Any]:
 #: reversibility claim, one layer down.
 FOLLOW_CONTROL = 'button[aria-label="Follow"], button[aria-label="Following"]'
 
+# ---------------------------------------------------------------------------
+# THE RELABEL, 2026-09-19, AND THE ANCHOR THAT ANSWERS IT (census N 46, J 103)
+# ---------------------------------------------------------------------------
+#
+# MEASURED LIVE on five hydrated postings, ``_audit/2026-09-19-the-follow-
+# control-live.md``: the exact-value union above matched ZERO controls on all
+# five. The control was still there -- one ``<button>`` in the
+# About-the-company card, its visible text ``Follow`` -- but its accessible
+# name had become ``Follow `` followed by the EMPLOYER'S NAME (verified
+# mechanically, by length and token shape, against each posting's own
+# company name). The reader then answered "count 0", which the verdict read
+# as a page that had not hydrated: the one thing that happened was the one
+# thing it could not say, and ``linkedin_follow_company`` refused on every
+# live posting while its census rows read COVERED-UNFIRED.
+#
+# THE ANCHOR IS THE ORGANISATION PAGE ROOT'S (``COMPANY_PAGE_FOLLOW_*`` below),
+# carried over: a label PREFIX is not an identity. The posting's own control
+# is the ONE button inside the About-the-company card whose name opens
+# ``Follow `` -- the space is the discriminator, so a ``Following ...``
+# control never matches -- AND whose name, after that prefix, is the employer
+# name the card itself draws in its own ``/company/`` link. Both are read on
+# the page and nothing is typed here.
+#
+# THE READER NEVER RETURNS THAT LABEL. A bound control is reported by the
+# canonical state word ``Follow`` -- the only thing a caller acts on -- so the
+# employer's name (a sole trader's is a person's) never reaches a verdict, a
+# ``why`` or an exception. THE ON LABEL IS NOT MEASURED: every posting read was
+# an employer he did not follow. A card drawing a ``Following `` control is
+# COUNTED, so the verdict can say what it saw instead of blaming hydration,
+# and it is never mapped to ``following``.
+
+#: The part of the relabelled name this package writes down; the employer's
+#: name is the rest, and it is the page's to say.
+POSTING_FOLLOW_PREFIX = "Follow "
+
+#: The card, the relabelled OFF control inside it, the presumed ON control
+#: (counted, never pressed, never trusted), the same prefix page-wide (a fact,
+#: never an anchor), and the card's own employer-name links.
+POSTING_ABOUT_CARD = 'div[componentkey^="JobDetails_AboutTheCompany"]'
+POSTING_FOLLOW_IN_CARD = (
+    'div[componentkey^="JobDetails_AboutTheCompany"] '
+    'button[aria-label^="Follow "]'
+)
+POSTING_FOLLOWING_IN_CARD = (
+    'div[componentkey^="JobDetails_AboutTheCompany"] '
+    'button[aria-label^="Following "]'
+)
+POSTING_FOLLOW_ANYWHERE = 'button[aria-label^="Follow "]'
+POSTING_CARD_NAME_LINKS = (
+    'div[componentkey^="JobDetails_AboutTheCompany"] a[href*="/company/"]'
+)
+
+#: A bound on the name links read, so a card drawing an unusual number of
+#: company links cannot make the read unbounded. The card holds TWO distinct
+#: ``/company/`` targets on every capture (see ``ABOUT_COMPANY_MAX_LINKS``).
+POSTING_CARD_NAME_LINK_LIMIT = 6
+
 
 def follow_control_selector(label: str) -> str:
     """A selector for the follow control wearing exactly ``label``.
@@ -1974,22 +2031,86 @@ async def read_follow_control(page: Any) -> dict[str, Any]:
     * ``count`` above 1 -- ambiguous. More than one follow control means the
       page is drawing something besides the posting's own employer, and
       picking the first would be picking by position.
+
+    TWO CONVENTIONS SINCE THE RELABEL (see the block above), and ``form``
+    says which one answered: ``"bare"`` -- the measured exact labels, read
+    through :data:`FOLLOW_CONTROL` exactly as before -- or ``"prefixed"`` --
+    the card's relabelled control. A prefixed control that is BOUND (its name
+    is ``Follow `` plus the employer name the card draws) is reported with
+    the canonical label ``Follow``; an unbound one with ``None``. ``label`` is
+    therefore only ever ``Follow``, ``Following`` or ``None`` -- never the
+    page's own words. A page drawing BOTH conventions is ``form`` ``"both"``,
+    which the verdict refuses. Failures are logged and reported by TYPE only.
     """
-    out: dict[str, Any] = {"label": None, "count": 0}
+    out: dict[str, Any] = {
+        "label": None, "count": 0, "form": None,
+        "in_card": 0, "in_card_following": 0, "anywhere": 0, "bound": 0,
+        "error": None,
+    }
     try:
         controls = page.locator(FOLLOW_CONTROL)
-        out["count"] = int(await controls.count())
-    except Exception as exc:
-        logger.debug("follow control unreadable: %s: %s", type(exc).__name__, exc)
+        bare = as_count(await controls.count())
+        in_card = page.locator(POSTING_FOLLOW_IN_CARD)
+        out["in_card"] = as_count(await in_card.count())
+        out["in_card_following"] = as_count(
+            await page.locator(POSTING_FOLLOWING_IN_CARD).count())
+        out["anywhere"] = as_count(
+            await page.locator(POSTING_FOLLOW_ANYWHERE).count())
+    except Exception as exc:  # noqa: BLE001 -- the TYPE is the whole report
+        # LOGGED AS ``type(exc).__name__`` AND NEVER FROM ``out``: ``out``
+        # also holds a label read off the page, and
+        # ``tests/test_page_text_is_never_printed.py`` counts a subscript of
+        # such a dict -- or a name it has seen bound to page text anywhere in
+        # this module -- as page text reaching a print.
+        out["error"] = type(exc).__name__
+        logger.debug("follow control unreadable: %s", type(exc).__name__)
         return out
-    if out["count"] != 1:
+
+    if bare and out["in_card"]:
+        # Two conventions at once: which is the employer's is not a reading.
+        out["form"] = "both"
+        out["count"] = bare + out["in_card"]
+        return out
+    if bare or not out["in_card"]:
+        out["form"] = "bare" if bare else None
+        out["count"] = bare
+        if bare != 1:
+            return out
+        try:
+            label = await controls.first.get_attribute("aria-label")
+        except Exception as exc:  # pragma: no cover - defensive
+            logger.debug("follow label unreadable: %s", type(exc).__name__)
+            return out
+        # Only the two exact values the selector can match reach this line.
+        out["label"] = str(label or "").strip() or None
+        return out
+
+    out["form"] = "prefixed"
+    out["count"] = out["in_card"]
+    if out["in_card"] != 1:
         return out
     try:
-        label = await controls.first.get_attribute("aria-label")
-    except Exception as exc:  # pragma: no cover - defensive
-        logger.debug("follow label unreadable: %s: %s", type(exc).__name__, exc)
+        label = " ".join(str(await in_card.first.get_attribute(
+            "aria-label", timeout=ELEMENT_READ_TIMEOUT_MS) or "").split())
+        links = page.locator(POSTING_CARD_NAME_LINKS)
+        names: set[str] = set()
+        for index in range(min(as_count(await links.count()),
+                               POSTING_CARD_NAME_LINK_LIMIT)):
+            text = await links.nth(index).inner_text(
+                timeout=ELEMENT_READ_TIMEOUT_MS)
+            for line in str(text or "").splitlines():
+                name = " ".join(line.split())
+                if name:
+                    names.add(name)
+    except Exception as exc:  # noqa: BLE001 -- the TYPE is the whole report
+        out["error"] = type(exc).__name__
+        logger.debug("follow control label unreadable: %s", type(exc).__name__)
         return out
-    out["label"] = str(label or "").strip() or None
+    named = label[len(POSTING_FOLLOW_PREFIX):] if label.startswith(
+        POSTING_FOLLOW_PREFIX) else ""
+    if named and named in names:
+        out["bound"] = 1
+        out["label"] = POSTING_FOLLOW_PREFIX.strip()
     return out
 
 

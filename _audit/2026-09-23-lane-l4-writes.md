@@ -421,9 +421,11 @@ files: 49 -> 50 tools, `PERFORMABLE` 12 -> 13, `SANCTIONED_WRITES` 13 -> 14, pin
    follow takes the anchor this lane built for the Page root (a prefix, bound to a heading, tied to
    an id on the page), is the rows' owners' decision. This lane may not edit `jobs.md` and did not
    edit row `46`, so neither row carries a pointer from here. The Page-root build does not depend on
-   the answer.
+   the answer. RESOLVED after the merge, when the coordinator's order opened `jobs.md` to this lane:
+   the gate now reads the relabelled control (section 10.3).
 2. **Ten functions in `writes.py` still coerce page values with `int()`** -- named in section 4.6.
-   None was touched here, so none was repaired.
+   None was touched here, so none was repaired. RESOLVED after the merge, and the count was short:
+   28 calls in 14 functions (section 10.1).
 3. **The 18:15 ruling is not registered** -- section 5. Until it is, R2's label rests on a relay.
    RESOLVED at the merge: registered on master as `WRITE-CLASS-B` (section 9).
 4. **The asserted-name guard reads one line at a time, so a slot phrase wrapped across a line break
@@ -431,7 +433,8 @@ files: 49 -> 50 tools, `PERFORMABLE` 12 -> 13, `SANCTIONED_WRITES` 13 -> 14, pin
    ruling id opening the next line, and `scripts/check_asserted_names_resolve.py --all` lists no
    candidate site there, while the unwrapped instance in section 4 was convicted. Harmless here --
    that id resolves in `_audit/RULINGS.md` -- but an unresolvable BLOCKER name wrapped the same way
-   would pass.
+   would pass. RESOLVED after the merge: the guard joins one line break (section 10.2), and section
+   1's sentence was reworded when the join convicted it.
 
 ## 8. THE ONE COLD VERIFICATION PASS
 
@@ -481,9 +484,16 @@ twice). Fourteen files had changed on both sides; nine conflicted.
 | `_audit/INSTRUMENTS.md` | section 61 placed between master's 60 and 62; every line of both sides kept |
 | `_audit/INDEX.md`, `_audit/RULINGS.md`, `_audit/_census/blocker-map.tsv` | generated: master's copy taken, every other resolved path staged, then regenerated to a fixpoint |
 
-Auto-merged and then checked: `dom.py`, `network.md`, `test_a_correction_is_findable_from_the_claim.py`,
-and the three baselines (the reader-leak and tool-envelope baselines are unions of both sides; the
-landing baseline was changed on this side only). The five guards that read them: 217 passed.
+Auto-merged and then checked: `dom.py`, `network.md`, the triage list of the guard that pairs a
+claim with the document that withdraws it (both sides had appended entries), and the three
+baselines (the reader-leak and tool-envelope baselines are unions of both sides; the landing
+baseline was changed on this side only). The five guards that read the baselines: 217 passed.
+
+**A RED THE MERGE COMMIT CARRIED, FOUND AFTER IT.** The first version of the sentence above named
+that guard's test module by its file name, which contains the word the guard scans for, within two
+lines of three backticked `.md` citations -- so the guard read this record as correcting
+`INDEX.md`, `RULINGS.md` and `network.md`. No targeted run before the merge commit included that
+guard; the next commit's run did, and the sentence was reworded there.
 
 **THE PINS THAT MOVED**, every one named by `scripts/census_completion.py --check` on the merged tree
 and re-pinned from its measurement, not forecast:
@@ -598,3 +608,43 @@ narrow. **A DESIGN QUESTION FOR THE GUARD'S OWNER, not ruled here:** the registe
 ruling id resolvable in the tree, and the guard still resolves only against the blocker ledger.
 Resolving ruling ids too would clear four of the five and every future "under `<RULING>`"; it
 would also stop the guard catching a ruling id asserted where a blocker belongs.
+
+### 10.3 (a) THE POSTING'S FOLLOW CONTROL, READ THE WAY THE PAGE ROOT'S IS (`N 46`, `J 103`)
+
+**THE DEFECT, as section 7 item 1 raised it.** LinkedIn relabelled the posting's company-follow
+control on or before 2026-09-19: one button in the About-the-company card, visible text `Follow`,
+accessible name `Follow <the employer's name>`. The exact-label union `dom.FOLLOW_CONTROL` matched
+it on 0 of 5 live postings, `read_follow_control` answered "count 0", and `shape.follow_state`
+turned that into "no follow control rendered ... the page had not hydrated yet" -- false on a card
+that had drawn its follower line and its button. So `linkedin_follow_company` refused on every live
+posting while `N 46` and `J 103` read COVERED-UNFIRED, and `linkedin_job_detail` reported the same
+wrong reason on every posting it read.
+
+**THE REPAIR, the Page root's anchor carried over.** `read_follow_control` still reads the bare
+labels exactly as before, and now also the card: the ONE button inside
+`div[componentkey^="JobDetails_AboutTheCompany"]` whose name opens `Follow ` (the space keeps
+`Following ...` out), BOUND when the rest of its name is the employer name the card itself draws
+in its own `/company/` link. It never returns that label: a bound control is reported by the
+canonical word `Follow`. `shape.posting_follow_state` answers `not_following` from exactly one
+bound control; UNKNOWN from an unbound one, from several, from a card drawing BOTH conventions, and
+from a `Following ...` control -- the relabelled ON label, never measured -- with a reason that no
+longer blames hydration. The bare-label answers are delegated unchanged to `follow_state`. The
+click is aimed through the CONSTANT selector `dom.POSTING_FOLLOW_IN_CARD`, which the verdict
+accepted as matching exactly one element and Playwright's strict mode holds to one. The three
+`follow_company` readings (preview, click, verification) and `linkedin_job_detail`'s
+`company_follow_state` all route through the new verdict, and every reason it gives is built from
+counts. Failures are logged by exception TYPE; the page-text guard caught a first version that
+logged a name this module had elsewhere bound to page text, and it was rewritten before commit.
+
+**SHOWN FAILING, then passing.** `tests/test_posting_follow_relabelled.py`, every world one
+asserted edit of `tests/fixtures/job_detail.html`. Against the unrepaired code: **5 failed, 5
+passed** -- the relabelled OFF control read `unknown` with the hydration reason, no click selector
+was built for it, the ON shape was blamed on hydration, a card drawing both conventions was read as
+`not_following`, and the verdict did not exist. After: 10 passed, and the 22 suites that touch the
+follow path, the page-text inventory and the surface ran green (1059 passed once the log line was
+rewritten).
+
+**THE CENSUS.** `J 103` (`jobs.md`) and `N 46` (`network.md`) keep COVERED-UNFIRED -- the tool has
+still never fired -- and each cell now says the gate reads the relabelled control, since when, and
+which test shows it. What only a live fire settles: the ON label, and whether every live posting
+draws the card's name link the binding reads.

@@ -3242,9 +3242,9 @@ async def _read_posting_facts(
 async def _read_follow_state(page: Any) -> tuple[str, str]:
     """The follow direction, off the control on the page already open."""
     control = await dom.read_follow_control(page)
-    verdict = shape.follow_state(
-        control.get("label"), count=coerce.as_count(control.get("count"))
-    )
+    # BOTH CONVENTIONS, the bare labels measured 2026-08-23 and the relabelled
+    # control measured 2026-09-19 -- see ``dom.POSTING_FOLLOW_IN_CARD``.
+    verdict = shape.posting_follow_state(control)
     return str(verdict.get("state") or UNKNOWN), str(verdict.get("why") or "")
 
 
@@ -7300,9 +7300,7 @@ async def _live_control(
         # and present after, so the reading at click time is the one that
         # describes the button about to be pressed.
         control = await dom.read_follow_control(page)
-        verdict = shape.follow_state(
-            control.get("label"), count=coerce.as_count(control.get("count"))
-        )
+        verdict = shape.posting_follow_state(control)
         state = str(verdict.get("state") or UNKNOWN)
         why = str(verdict.get("why") or "")
         if state != spec.from_state:
@@ -7310,6 +7308,12 @@ async def _live_control(
             # reason rather than raising keeps the refusal in one place --
             # perform() prints spec.wrong_state_note beside it.
             return (state, why, "")
+        if control.get("form") == "prefixed":
+            # THE RELABELLED CONTROL, pressed through a CONSTANT selector. The
+            # verdict accepted exactly one bound control in the card, and
+            # Playwright's strict mode refuses a click whose selector matches
+            # more -- so no page string is spliced into what is pressed.
+            return (state, why, dom.POSTING_FOLLOW_IN_CARD)
         label = anchor_label_for(spec) or ""
         return (state, why, dom.follow_control_selector(label))
 
@@ -7656,9 +7660,7 @@ async def _verify_after(
         # An absent row on a partial list is not evidence, which is the same
         # rule the unfollow path already applies in the other direction.
         control = await dom.read_follow_control(page)
-        verdict = shape.follow_state(
-            control.get("label"), count=coerce.as_count(control.get("count"))
-        )
+        verdict = shape.posting_follow_state(control)
         state = str(verdict.get("state") or UNKNOWN)
         why = (
             str(verdict.get("why") or "")

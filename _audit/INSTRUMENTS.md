@@ -9835,6 +9835,14 @@ with its numbers in `_audit/2026-09-23-lane-l4-writes.md` section 4.2, and the
 structure is carried by `tests/fixtures/synthetic/company_page_follow.html`,
 which the suite re-reads on every run.
 
+### 61.8 THE THREE FOLLOW-UPS OF THE MERGE ORDER (2026-09-23, after the master merge)
+
+| path | shown failing by |
+|---|---|
+| `tests/test_no_int_on_a_page_value_in_writes.py` -- no `int()` call anywhere in `writes.py`, and every reader and gate driven over counts that are words | against the unrepaired module: 17 failed / 1 passed -- the scan listed 28 calls in 14 functions (the lane record's own list had named ten), and each of the thirteen driven functions raised a `ValueError` quoting the planted words; `aim_invitation` failed 3 of 3. The scan's own control finds a planted `int()` call |
+| `scripts/check_asserted_names_resolve.py` -- the slot join across one line break | `tests/test_an_asserted_name_resolves.py::test_the_detector_finds_a_wrapped_assertion` found nothing (`set()`) against the unjoined guard; `test_a_wrap_is_joined_across_one_ordinary_line_break_and_no_further` plants the join's limits. Its first corpus run found six wrapped sites: one reworded, five pinned in the ratchet |
+| `dom.read_follow_control` + `shape.posting_follow_state` -- the posting's relabelled follow control, anchored as the Page root's is | `tests/test_posting_follow_relabelled.py`: every world one asserted edit of `tests/fixtures/job_detail.html`. Against the unrepaired code: 5 failed / 5 passed -- the relabelled OFF control read `unknown` with a "had not hydrated" reason, no click selector was built, the ON shape was blamed on hydration, a card drawing both conventions read `not_following`, and the verdict did not exist |
+
 ## 62. WHO RULED EACH EXCLUSION, AND A CHECK THAT FAILS WHEN NOBODY DID (exclusion-audit, 2026-09-23)
 
 **Registered 2026-09-23.** Full record: `_audit/2026-09-23-exclusion-audit.md`.

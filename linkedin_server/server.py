@@ -5051,11 +5051,13 @@ async def linkedin_job_detail(job_id: str) -> dict[str, Any]:
             # ever be performed from, so the state and the action are read from
             # and applied to the same rendering. Three-valued -- see
             # shape.follow_state for why "we could not tell" has to be one of
-            # the three.
+            # the three. BOTH CONVENTIONS since LinkedIn relabelled the control
+            # (measured 2026-09-19): ``shape.posting_follow_state`` reads the
+            # bare labels exactly as before and the card's relabelled control
+            # by the anchor its docstring states, and never says "had not
+            # hydrated" about a card that drew a control it cannot name.
             control = await dom.read_follow_control(page)
-            out["company_follow_state"] = shape.follow_state(
-                control.get("label"), count=int(control.get("count") or 0)
-            )
+            out["company_follow_state"] = shape.posting_follow_state(control)
 
             # AND WHETHER IT IS SAVED, off the same rendering, for the same
             # reason -- the save control sits beside the follow control on this
