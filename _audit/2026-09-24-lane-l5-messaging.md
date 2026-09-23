@@ -21,8 +21,24 @@ this lane committed are SYNTHETIC: structure measured, content invented.
   identifier, so a listing cannot mark a caller-supplied thread id unread (section 2).
 - 01:50 -- `5eadfe7`: the build (sections 2 and 3), its fixtures and 80 tests, green over the
   three new or changed test files (39 + 41 passed, on a box running five other lanes' suites).
-- 02:05 -- the corpus-wide guards run over `5eadfe7`: two red, one of them this lane's (section
-  8.2). The census cells, the write-class dispositions and this record's R2 table written.
+- 02:05 -- the corpus-wide guards run over `5eadfe7`: two red, both from this lane -- the
+  navigation-derivation guard (a defect, fixed in `dd3d441`; section 6) and the timings table
+  (this lane's two new test files; section 8.3). The census cells, the write-class dispositions
+  and this record's R2 table written.
+- 02:13 -- the impact gate's plan against `9c219c8`: 174 of 236 test files (74%), so it WIDENED
+  TO THE FULL SUITE. As the brief orders, the full suite did not run here; the 174 and the
+  corpus-wide floor -- 179 files -- ran over `899b24b` instead (section 8.2).
+- 02:25 -- a probe of the captures found the defect in section 3.3: LinkedIn's global search is
+  a combobox on every page. The fix was written in the scratchpad and applied only after the
+  running gate finished, so that gate's result stays attributable to `899b24b`.
+- 02:31 -- ten mutations, ten kills (section 8.2).
+- 03:30 -- the 179-file gate over `899b24b` finished: 51 failed, 7705 passed. 29 are the pin
+  moves of section 7, 19 were harness rows this lane's new write was missing, and 3 were defects
+  in this lane's own content (section 8.2).
+- 03:48 -- `536300d`: section 3.3's fix, the send gate's words check, the closed `accept` token,
+  the harness rows, the landing guard's name match and the two census notes out of donor cells.
+- 04:07 -- the final gate over `536300d` (section 8.2); this record's sections 3.3, 7 and 8,
+  the `N 4` note, and `_audit/INSTRUMENTS.md` 69.5 to 69.8 written.
 
 ## 1. WHAT THE CAPTURES SHOW (measured offline, shapes and counts only)
 
@@ -40,7 +56,7 @@ occurrences and 4 `msg-overlay-list-bubble` -- and ZERO conversation rows
 `msg-overlay-list-bubble--is-minimized`; the two occurrences of the word "unread" on those pages
 are the filter pill and a `data-test` hook, not rows. **The overlay is not a receipt-free list on
 this account as captured**: minimised, it renders no conversation at all. Whether an EXPANDED
-overlay renders rows is unmeasured (capture spec C4, section 9).
+overlay renders rows is unmeasured (capture spec C4, in the Capture queue).
 
 ### 1.2 The composer page draws the whole list and opens no conversation
 
@@ -158,6 +174,9 @@ locator chain -- no injected script, so no `evaluate` waiver was spent (the budg
 Playwright's own text engine (`get_by_text(..., exact=True)` inside `filter(has=...)`) and only
 counts come back. No message body, no correspondent's name and no thread id is returned, except
 the list's names when the caller passes `include_names` and the reply preview's title (section 3).
+His own reply box is the one place page text is read into this process: the send gate and the
+NOT-SENT check read the box -- his words, typed from his grant -- to compare them with the grant,
+and keep a boolean and two lengths.
 
 ## 3. `M M10` -- A REPLY INSIDE A CALLER-SUPPLIED CONVERSATION, AND A SEND THAT CONFIRMS ITSELF
 
@@ -175,8 +194,10 @@ unchanged, and the thread address was already admitted.
    conversation named by id).
 2. PERFORM -- reloads the conversation, holds the landing to the thread id again, re-reads the
    box (`_live_control`), fills his words (the grant's own slice), and runs
-   `threads.reply_send_gate`: Send enabled, box not empty, still no recipient box. Only then is
-   Send pressed.
+   `threads.reply_send_gate`: Send enabled, box not empty, still no recipient box, and the box
+   holding EXACTLY his words. A box that changed them as they were typed -- an autocorrect, an
+   emoji substitution, a mention picked up -- refuses as `5_words_not_exact`, keeping two lengths
+   and no text, because a message cannot be taken back. Only then is Send pressed.
 3. VERIFY -- first IN PLACE: does the box still hold his words with Send enabled (the NOT-SENT
    evidence a reload would erase)? Then a FRESH LOAD: `reply_sent` needs ALL of -- his words are
    the LAST message, that message carries no `--other` modifier, and the count of messages
@@ -218,6 +239,62 @@ composer readings still never SENT, a drawn conversation carrying his words SENT
 UNKNOWN. **THE STATES DO NOT MOVE:** both rows stay COVERED-CANNOT-DELIVER, because the recipient
 gate still refuses before any send, and thread-first (3.1) reaches only existing conversations.
 
+### 3.3 THE DEFECT THE FIRST BUILD SHIPPED WITH -- LinkedIn's search box is a combobox on every page
+
+Found after `899b24b` by a probe of the two captures, before any live use, and fixed in
+`536300d`. `threads.RECIPIENT_BOX_SELECTOR` was `[role="combobox"]`, on the argument that a
+conversation has nobody to choose. LinkedIn's GLOBAL SEARCH input is a `role=combobox` on every
+page:
+
+    [role=combobox], composer capture                 2   the global search, and the
+                                                          composer's own typeahead
+    [role=combobox], /messaging/ capture              1   the global search alone
+    ... of those inside any form.msg-form             0   on both
+    the global search inside <main>                   no  on both
+
+So every real conversation would have counted one recipient box, `reply_state` would have
+answered UNKNOWN ("not a conversation's reply surface"), and `linkedin_send_reply` could never
+have typed a word. It failed CLOSED, so nothing unsafe could follow, and no test saw it: both
+synthetic fixtures had been cut to the messaging region and drew no global navigation, so the one
+element that breaks the selector was absent from every world the tests built. RED REPRODUCTION,
+in a scratch copy of the tree at `899b24b`: drawing the global search into the thread fixture and
+changing nothing else fails 17 of the 63 tests in `tests/test_send_reply.py` and
+`tests/test_messaging_threads.py`.
+
+**THE FIX WAS MEASURED BEFORE IT WAS WRITTEN.** On both captures a single `<main>`
+(`main#main.scaffold-layout__list-detail.msg__list-detail`) holds the list, the open conversation,
+the composer's form and the header; the messaging overlay sits outside it. Every conversation
+selector is now scoped to `<main>`, and the recipient box is named by its own component,
+`main .msg-connections-typeahead [role="combobox"]` or
+`main input.msg-connections-typeahead__search-field`. Each of the 17 selectors was counted in its
+old spelling and its scoped one on both captures: **no count moved except the recipient box** --
+composer 2 -> 1 (the search dropped, the typeahead kept), `/messaging/` 1 -> 0.
+
+**ONE EXCEPTION, ON PURPOSE: RECEIPT EVIDENCE STAYS PAGE-WIDE.** "Did loading this page display
+anybody's conversation?" is not a question about `<main>`: the overlay can hold an open
+conversation bubble outside it, and a list page that draws one has displayed a conversation,
+whoever opened it. So the list's evidence (`EVIDENCE_EVENT_SELECTOR`,
+`EVIDENCE_ACTIVE_ROW_SELECTOR`) counts anywhere on the page, and everything that AIMS -- what this
+conversation holds, what a reply would type into -- counts inside `<main>`.
+
+The fixtures now draw the global search outside `<main>` (and the composer's recipient box in its
+measured shape, named by a `<label for>` rather than an aria-label), and four tests hold the
+line: the global search is a combobox and not a recipient box (counts `(1, 0)` on the thread,
+`(2, 1)` with the typeahead drawn); the composer's typeahead IS one, so the composer reads as not
+a conversation; an overlay bubble outside `<main>` -- a form, a draft and a message of its own --
+is not this conversation (3 messages, one empty editor, reply box EMPTY); and the same bubble on
+the list page refuses the guard, opt-in or not. Mutations M12 to M14 (instrument register 69.6)
+undo each piece, and each of those tests fails.
+
+**A FINDING NEXT DOOR, RAISED AND NOT CHANGED.** `dom.read_thread_reply_surface`, which
+`linkedin_open_messaging` returns as `reply_surface`, counts recipient boxes as
+`[aria-label="Enter message recipients"]`. On the composer capture that box is named by a
+`<label for>`, not an aria-label: the role-and-name selector the send gate uses finds 1, the
+aria-label selector 0. So that reader's zero -- which its caller's comment calls "the finding
+rather than a formality" -- is also zero on the composer, where a recipient box IS drawn, and
+cannot tell a conversation from the composer. It is not this lane's reader (dom.py was left
+untouched); `threads.read_thread`'s count is the one that can fail, and does, on the composer.
+
 ## 4. THE 23 R2 ROWS -- one verdict each
 
 BUILT = grant-gated, off by default, with failing controls. The `queued:` token is what the
@@ -239,7 +316,7 @@ for what binds, and none is a blocker-ledger entry.
 | `M M13` forward | BLOCKED | BLOCKED-FIRST-CONTACT-ADDRESSING | a forward chooses a NEW recipient in a picker |
 | `M M21` group chat | BLOCKED | BLOCKED-FIRST-CONTACT-ADDRESSING | several new recipients |
 | `N 160` message requests (compound) | BLOCKED | BLOCKED-FIRST-CONTACT-ADDRESSING | its send half is `M M6` |
-| `N 4` invite from a search result | BLOCKED | BLOCKED-SEARCH-FIRES-NOTHING | the people-search admission binds that nothing is fired from that surface, and a result row's Connect can send with no dialog: a ruling first, then a CALLER-SUPPLIED profile identity (lane S's readers; not used here) |
+| `N 4` invite from a search result | BLOCKED | BLOCKED-SEARCH-FIRES-NOTHING | the people-search admission binds that nothing is fired from that surface, and a result row's Connect can send with no dialog: a ruling first, then a CALLER-SUPPLIED profile identity (lane S's readers; not used here). THE CALLER-SUPPLIED ROUTE ALONE WAS CHECKED: acting on a profile he names means loading that member's `/in/<slug>/`, which the read boundary refuses (re-measured), and `writes.PERMANENTLY_FORBIDDEN` prices a stranger's profile load as an emission on them; `linkedin_send_invitation` aims only at the rail on his own profile. Each route needs its own ruling |
 | `N 5` note on an invitation | BLOCKED | BLOCKED-N1-FIRST-FIRE | the note field appears only after Connect is pressed, and pressing Connect can send at once, so no capture of it can be made safe; the first supervised `N 1` send at a target he names is the capture |
 | `N 6` re-invite after expiry | BLOCKED | BLOCKED-SENT-INVITATIONS-SURFACE | knowing it expired needs the Sent manager, whose address carries a forbidden substring |
 | `N 166` invite a group member | BLOCKED | BLOCKED-GROUP-MEMBERS-ADDRESS | `/groups/<id>/members/` refused; ruling `GROUPS-ADDRESS-BUYS-NO-WRITE` |
@@ -280,6 +357,13 @@ until opened -- measured, section 1.5), and the star's ON label is uncaptured. A
 unread control is the guess this package refuses; C9 and C10 are one disclosure press and one
 page capture respectively, and both are safe on the composer or on a read conversation.
 
+**`M M7` AND `M M27` CARRY NO CENSUS NOTE, ON PURPOSE.** Each is the donor of a `same` row --
+`M M8` resolves to `M M7`'s cell and `M M28` to `M M27`'s -- so a note written into either cell
+becomes the argument of the row beneath it. The first version put this lane's notes there, and
+the pointer-graph guard showed `M M8` and `M M28` inheriting a class that belongs to a different
+capability (section 8.2). Their class lives in `_audit/_census/write-classes.tsv` and the table
+above.
+
 ## 6. THE SAFETY THE BRIEF ASKED FOR, AND WHERE EACH PIECE IS
 
 - **No capture press can send.** Every capture spec below that needs a press says why that press
@@ -299,6 +383,11 @@ page capture respectively, and both are safe on the composer or on a read conver
   another action, and refuses a second use at both doors, with the second-use guard shown failing
   when its flag is cleared. `UPLOAD_ACTIONS` is unchanged (empty).
   `readonly.SANCTIONED_MUTATIONS` is unchanged: the fill and the click are `perform()`'s own.
+- **Only the words he confirmed can be sent.** The grant binds the thread AND the exact words;
+  after the fill the send gate re-reads the box and refuses unless it holds exactly those words
+  (`tests/test_send_reply.py::test_send_is_not_pressed_when_the_box_holds_other_words_than_his`;
+  mutation M11 removes the check and the test fails). `text` is a REQUIRED argument of the gate,
+  so a caller that forgets it raises rather than skipping the check.
 - **Error fields carry a type or a composed reason.** Every `except` in `threads.py` records
   `type(exc).__name__`; every refusal is built from counts and closed tokens; a landing is
   described through `landing.withheld`, never quoted. `_send_gate` and the other existing gates
@@ -310,24 +399,35 @@ page capture respectively, and both are safe on the composer or on a read conver
 
 ## 7. EXPECTED PIN MOVES -- not re-pinned here, as the brief orders
 
-`scripts/census_completion.py --check`, run on this branch after the census edits:
+Every line below was MEASURED red by a gate on this branch (section 8.2), not predicted, and each
+names the file that holds the pin and the move it needs. None was edited here. Where a pin is a
+recorded DECISION rather than a count, the decision is taken below and only the typing is left.
 
-    adjudicated        434 -> 437
-    b1_no_ruling        15 ->  16     M M49
-    b1_standing         10 ->  12     M M10, M M17 (OPERATOR-NAMES-THE-TARGET)
-    delivered_broad    100 -> 103
-    gap                270 -> 267
-    gap_read            66 ->  65     M M49
-    gap_write          150 -> 148     M M10, M M17
-    unfired             25 ->  28
-    PINNED_B1_ROWS     + M M10 and M M17 on OPERATOR-NAMES-THE-TARGET, + M M49 on no ruling
+**The census.** `scripts/census_completion.py --check`, over `899b24b`:
 
-`scripts/count_census_states.py --expect J=54,P=54,M=74,N=85` MATCHES at 267 (messaging 77 -> 74;
-stated rows 704, unchanged; `pin_census_rows` reports no drift -- no row entered or left).
+    adjudicated            434 -> 437
+    b1_no_ruling            15 ->  16     M M49
+    b1_standing             10 ->  12     M M10, M M17 (OPERATOR-NAMES-THE-TARGET)
+    b3_admitted             40 ->  39     M M49: it left bucket 3, where its address was admitted
+    b3_blocked_on_nothing    8 ->   7     M M49: ... and blocked on nothing
+    delivered_broad        100 -> 103
+    gap                    270 -> 267
+    gap_read                66 ->  65     M M49
+    gap_write              150 -> 148     M M10, M M17
+    unfired                 25 ->  28
+    PINNED_B1_ROWS         + M M10 and M M17 on OPERATOR-NAMES-THE-TARGET, + M M49 on no ruling
 
-The tool surface, pinned in `tests/test_server_surface.py`,
-`tests/test_every_tool_is_on_the_surface.py` and
-`tests/test_the_tool_surface_is_pinned_so_a_row_must_move.py`:
+(The two `b3_` lines were added when the check was re-run over `899b24b`; the first draft of
+this table listed eight of the ten figures it names.) `scripts/count_census_states.py --expect
+J=54,P=54,M=74,N=85` MATCHES at 267 (messaging 77 -> 74; stated rows 704, unchanged;
+`pin_census_rows` no drift). Two tests carry the same movement:
+`tests/test_ruling_holds.py` (PINNED_B1_ROWS; its direction-flip plant now picks `M M10`, the first
+COVERED-UNFIRED write row in walk order, and passes once `M M10` is pinned) and
+`tests/test_triage_instrument.py` (the messaging slice's split, 77 `{R 10, W 65, R+W 2}` -> 74
+`{R 9, W 63, R+W 2}`, and the report that quotes it).
+
+**The tool surface** -- `tests/test_the_tool_surface_is_pinned_so_a_row_must_move.py`
+(PINNED_TOOL_SURFACE), `tests/test_server_surface.py`, `tests/test_every_tool_is_on_the_surface.py`:
 
     tools                     51 -> 54    + linkedin_list_conversations, linkedin_open_thread
                                             (reads), linkedin_send_reply (a write)
@@ -335,21 +435,171 @@ The tool surface, pinned in `tests/test_server_surface.py`,
     pinned parameters         69 -> 76    + include_names; + thread_id, allow_unread;
                                             + thread_id, text, confirm_token; and
                                             linkedin_open_messaging + allow_unread
-    PERFORMABLE               13 -> 14    + send_reply (pinned at 13 in
-                                            tests/test_preview_state_and_click_state.py and
-                                            tests/test_receipt_names_its_own_action.py)
-    SANCTIONED_WRITES         14 -> 15    + linkedin_send_reply
-    prose counts              README.md, server.py and __init__.py name the tool total
 
-Two derived tables that measure the change rather than pin it, also left for the merge:
-`tests/tool_envelope_baseline.json` and `tests/reader_leak_baseline.json` (one entry per new tool
-and reader, written with each module's own `--write-baseline`), and `scripts/ci_shard_timings.json`,
-which prices 157 test files and now falls under two thirds of 236 because this lane added two
-(section 8.2).
+**The write surface** (PERFORMABLE 13 -> 14, SANCTIONED_WRITES 14 -> 15, both + `send_reply`):
+
+| file | pin | move |
+|---|---|---|
+| `tests/test_server_surface.py` | `SANCTIONED_WRITE_TOOLS` and the two sets asserted equal to it; `DOCSTRING_WRITE_TOOLS` | + `linkedin_send_reply` |
+| same | server_info's two PERFORMABLE lists | + `send_reply` |
+| same | `performable_and_irreversible`, typed by hand ("a sixth arriving is a decision") | + `send_reply`. DECIDED HERE: irreversible, as `send_message` is -- a message cannot be taken back through this server |
+| same | the instructions must say `fourteen write` and name `linkedin_send_reply` (the number-words map now reaches 14) | the server's instructions text |
+| `tests/test_writes.py` | the sanctioned set; `_UNMEASURED_REVERSIBILITY`; `REVERSIBILITY_CLASS`, `REVERSIBILITY_MEASURED` | + `send_reply`; `"STILL-UNKNOWN"`; `False` |
+| `tests/test_writes_nine.py` | the actions whose `reversible_by` leans on `delete_or_withdraw_anything` | + `send_reply`; and that entry's note in `writes.PERMANENTLY_FORBIDDEN` says FIVE ("an application, a post, a comment, an invitation and a message") -- six, with a reply |
+| `tests/test_receipt_names_its_own_action.py` | the acknowledged PERFORMABLE count | 13 -> 14. The acknowledgement it asks for was DONE here: `send_reply`'s rows were read, its `_VERIFIED_FROM` row holds no owned phrase, and "LinkedIn messages" was re-derived with it as a second owner |
+| `tests/test_preview_state_and_click_state.py` | `len(PERFORMABLE)`, `len(REACHED)` | 13 -> 14 each; `send_reply` is now REACHED over the thread fixture |
+
+**Prose counts** -- `tests/test_the_other_two_count_claims_are_pinned_too.py` (README's headline
+and module listing: fifty-four) and `tests/test_prose_that_makes_a_claim.py` (the server docstring:
+"fifty-one tools, thirteen of which write" -> fifty-four and fourteen; the sanctioned total,
+fifteen).
+
+**Derived baselines**, each written by its own module at merge: `tests/reader_leak_baseline.json`
+(the new readers -- driven only since the fix commit repaired the harness, section 8.2),
+`tests/tool_envelope_baseline.json` (the three tools), `tests/landing_interpolation_baseline.json`
+(two new sites, both WITHHELD by measurement: `threads.off_thread_result` and
+`writes._assert_landed_on_target`), and
+`scripts/ci_shard_timings.json`, which prices 157 test files and falls under two thirds of 236
+because this lane added two (section 8.3).
 
 ## 8. COMMITS, GATES, AND WHAT DID NOT RUN
 
-(Filled at the end of the lane; see 8.1 to 8.3.)
+### 8.1 Commits -- on `worktree-agent-a6bb3cc0961290132`, none pushed, no AI attribution in any
+
+| commit | what |
+|---|---|
+| `5eadfe7` | the build: `linkedin_server/threads.py`; spec `send_reply` and its arms in `writes.py`; three tools and the guard in front of `linkedin_open_messaging` in `server.py`; `send_message`'s in-place read-back; the checker's R2 rule; two synthetic fixtures; the tests |
+| `dd3d441` | this record, the census cells, the 23 R2 and 9 R3 dispositions, section 69, the generated indexes; and the navigation-derivation fix (section 6) |
+| `899b24b` | the reply verdict's authorship condition gets its own test |
+| `536300d` | section 3.3's fix (every conversation selector scoped to `<main>`, the recipient box named by its component, receipt evidence page-wide, the fixtures drawing the global search); the send gate's words check (section 3); the closed `accept` token; the harness rows the new write was missing; the landing guard's name match; the two census notes out of donor cells (8.2); five tests |
+| the commit carrying this section | sections 3.3, 5's last paragraph, 7 and 8, the status log, the `N 4` note, `_audit/INSTRUMENTS.md` 69.5 to 69.8, and the generated indexes |
+
+### 8.2 Gates run
+
+1. **The lane's own tests at the build** (`5eadfe7`): the three new or changed test files, 39 + 41
+   passed, on a box running five other lanes' suites.
+2. **The corpus-wide guards over `5eadfe7`**: two red, both from this lane. The
+   navigation-derivation guard convicted `observe` (section 6) -- fixed in `dd3d441`. The timings
+   guard went under two thirds because this lane added two test files (8.3).
+3. **The impact gate's plan**, `scripts/impact_gate.py --against 9c219c8 --plan-only`: 174 of
+   236 test files (74%), at or above its 45% line, so it WIDENED TO THE FULL SUITE. Per the brief
+   the full suite was NOT run; the 174 plus the corpus-wide floor -- 179 files -- ran instead,
+   over `899b24b`, `-n 3 --dist loadfile`:
+
+   **51 failed, 7705 passed, 4 skipped, 1 xfailed, in 4295 s** (72 minutes; five other lanes'
+   suites shared the box). Every red was read and put in one of three classes:
+
+   - **29 are the pin moves section 7 lists**: the tool surface (4), the write surface (14),
+     prose counts (4), the census (3), derived baselines (3), the timings table (1). Left for
+     the merge by the brief's order.
+   - **19 were harness rows this lane's new write was missing, added in `536300d`.** The worst
+     of them was silent in effect: `tests/refusinggrant.py` had no synthetic target for
+     `thread_and_text`, and its KeyError stopped five writes readers -- `perform`,
+     `_live_control`, `_verify_after`, `_recipient_gate`, `_typeahead_gate` -- being driven for
+     ANY spec, so the page-string guard certified less than its baseline says (5, and 3 twins in
+     `tests/test_the_harness_grant_cannot_authorise_a_write.py`). The rest:
+     `tests/test_writes_nine.py`'s clean component for `thread` (8), the per-kind shape in
+     `tests/test_a_performable_action_can_reach_its_control.py` (2), and `send_reply` as a second
+     owner of "LinkedIn messages" in `tests/test_receipt_names_its_own_action.py` (1).
+     `send_reply` also entered the preview/click-state ledger's `REACHED`, over the thread
+     fixture; that file stays red only on its two count pins.
+   - **3 were defects in this lane's own content, fixed in `536300d`.** The landing guard matched
+     `server.py`'s `landed_reading` by its NAME; the value is `read_thread`'s counts and an
+     exception type name, and it was renamed rather than ruled, because that guard rules per
+     function and a ruling would pre-excuse any future site in `linkedin_open_messaging` (1). And
+     the pointer-graph guard (2): the R3 notes this lane had appended to `M M7` and `M M27` were
+     inherited, through `same`, by `M M8` and `M M28`, rows about other capabilities (section 5).
+
+   Reading the readers the repaired harness now drives turned up one thing the guard could not
+   see: `read_thread` returned each file input's `accept` attribute lowercased and cut to an
+   alphabet -- still a page string. The guard's plant is matched as a case-sensitive substring
+   (`tests/plantedpage.py`), so a lowercased copy with its space removed reads CLEAN; the
+   reader passed for that reason and no other. It is a closed token now (`images`,
+   `images_and_documents`, `any_file`, `unrecognised`).
+
+4. **The census instruments over `899b24b`**: `census_completion --check` exits 1 on exactly
+   the ten pinned figures and three bucket-1 rows section 7 lists (the two `b3_` figures were
+   added to section 7 by this run) and nothing else; `count_census_states --expect
+   J=54,P=54,M=74,N=85` MATCH at 267; `check_read_addresses` GREEN, 65 of 65 bucket-3 rows;
+   `check_write_classes` GREEN, 151 lines (R1 11, R2 23, R3 117); `ruling_holds` GREEN (1 hold, 3
+   lifted, 1 release); `pin_census_rows --check` no drift, 704 rows. The three generated files at
+   a fixed point: `build_audit_index --check`, `build_rulings_index --check`,
+   `build_blocker_map --check`, each exit 0.
+5. **Ten mutations at `899b24b`, ten kills** (instrument register 69.6), each applied alone to a
+   scratch copy of the tree and each failing its named test at the assertion named for it; the
+   unmutated copy passed all ten.
+6. **The defect of section 3.3, reproduced red and then fixed in a scratch copy first.** Red: the
+   fixture change alone, under the shipped selector, failed 17 of 63 lane tests. Fixed, in the
+   copy: 86 of 86 across the three lane test files. With the words check added, the lane files
+   and five source guards: 875 passed, 6 failed -- all six the harness gap of item 3, seen there
+   first. Four more mutations over the fix, four kills: the words check removed (M11), the
+   recipient box back to any combobox (M12), the receipt evidence scoped to `<main>` (M13), the
+   conversation's messages unscoped (M14). After the harness rows, in the worktree, the five
+   harness files: 266 passed, 3 failed, all three pins.
+7. **The final gate over `536300d`.** The analyser's plan for the delta, `--against 899b24b`,
+   selected 191 of 236 test files (81%) and widened again, so the full suite was again not run.
+   What ran is what the change can reach, read off the change itself -- every test file the
+   commit edited, every file that was red over `899b24b` for a reason the commit addressed, every
+   module importing an edited test module or `tests/refusinggrant.py` -- plus the 17-file
+   corpus-wide floor: **24 failed, 3957 passed, 3 skipped, 1 xfailed, in
+   915 s**, over 40 files (23 reached, 17 floor). All 24 are pins section 7 lists, each red over
+   `899b24b` for the same reason; the 19 harness rows and the 3 defects of item 3 are green. The
+   five pin tests red over `899b24b` that lie outside these 40 files -- two in the tool-surface
+   pin file, one in `tests/test_every_tool_is_on_the_surface.py`, two in
+   `tests/test_prose_that_makes_a_claim.py` -- test counts the fix did not move.
+
+   The page-string guard's shrink test stops at its FIRST assertion, so its whole delta was
+   measured separately: 133 readers live against 126 in the baseline; 7 appeared, all seven
+   CLEAN (the six `threads` readers and `writes._read_thread_reply_box`); none vanished; none
+   regressed; and three moved the safe way, `returns_text` -> `clean` (`writes._verify_after`,
+   `writes._read_follow_state`, `dom.read_follow_control`). And the harness's own control,
+   `scripts/_check_the_refusing_grant_can_fail.py`, PASS on all five sections, driving fifteen
+   sanctioned actions with `send_reply` among them.
+
+### 8.3 NOT run, and what that leaves open
+
+- **THE FULL SUITE, locally -- by the brief's order.** The impact gate widened to it; the 57 test
+  files outside the 179 never ran on this branch. It runs on CI after merge.
+- **CI.** Nothing was pushed.
+- **LIVE.** Nothing. Every row the Live queue names is unfired, and the two derived shapes the
+  first live preview settles -- that a conversation draws the composer's `msg-form`, and that his
+  own messages lack `--other` -- are still derived.
+- **A SECOND RUN OF THE WIDENED SELECTION, OVER THE FIX.** The fix commit was gated by what it
+  can reach and the corpus-wide floor (8.2, item 7), not by the 191 files the analyser selected:
+  it couples `threads.py` to every importer of `writes.py`, which is nearly the whole suite, while
+  the change is selector strings, one list reader's evidence lines, one gate's words check and its
+  one caller, one closed token, harness rows, one renamed local and census notes. The files that
+  selection holds and item 7 did not run were last run over `899b24b`.
+
+RAISED FOR THEIR OWNERS, NOT CHANGED HERE:
+
+- **The named-cost detector** (`tests/test_a_named_cost_names_a_tool_that_can_incur_it.py`)
+  cannot resolve navigation made through `threads.COMPOSE_URL` or `threads.thread_url(...)`, so
+  it does not see that `linkedin_list_conversations`, `linkedin_open_thread` and
+  `linkedin_send_reply` load messaging. It stays green by not seeing them -- a blind spot, not a
+  pass. `known_side_effects`' "Only ... can incur this" sentence was deliberately not edited.
+- **The timings table.** `scripts/ci_shard_timings.json` prices 157 test files; this lane's two
+  new files take the suite to 236 and the coverage under two thirds, so
+  `tests/test_ci_shard.py::test_the_timings_table_still_prices_most_of_the_suite` is red here.
+  The table is written only from a CI junit with provenance (`ci_shard.py --write-timings ...
+  --label`), so it is not hand-edited: regenerate it from the first CI run after merge.
+- **Three derived baselines** -- `tests/tool_envelope_baseline.json`,
+  `tests/reader_leak_baseline.json` and `tests/landing_interpolation_baseline.json` -- need
+  entries for the three new tools, the new readers and two WITHHELD sites, written by each
+  module's own writer at merge (section 7).
+- **`dom.read_thread_reply_surface`'s `recipient_boxes`** counts an aria-label the composer's
+  recipient box does not carry, so its zero cannot tell a conversation from the composer
+  (section 3.3).
+- **`writes.perform`'s `click_error`** is built as `f"{type(exc).__name__}: {exc}"`, predating
+  this lane (the same line is in `9c219c8`), and every write's receipt carries it, `send_reply`'s
+  included. A library's own exception text is publishable under ERROR-MESSAGE-RULED-AT-THE-RAISE,
+  but a Playwright click error can quote the element it failed on, and that is a value the page
+  chose. Lane G's territory; not touched here.
+
+THE DOCUMENTATION DELTA. The commit carrying this section is gated after it is written --
+by the corpus-wide floor, the census instruments, the pointer-graph guard and the three
+generators at a fixed point. A record cannot carry the result of a gate that runs over it;
+that result is in the lane's closing message.
 
 ## Live queue
 
@@ -361,8 +611,8 @@ loads; "HE NAMES" means OPERATOR-NAMES-THE-TARGET applies and nothing fires with
 | `M M43` | `linkedin_list_conversations()` | none (own inbox, nothing opened) | 1 | COVERED-PROVEN when it returns rows with `opened_a_conversation.opened == false` and `rows_rendered >= 1`. Its `rows[].unread` and `unread_rendered` are also the reading capture C1 wants whenever a row is unread |
 | `M M33` | `linkedin_open_messaging(message_filter="inmail")` | none (own inbox, read conversation) | 2, plus one pill press | COVERED-PROVEN when `receipt_guard.proceed` is true, `active_filter.activated` is true and `url_movement` is `filter_state`. If the guard refuses -- a rendered row reads unread -- it spends 1 load and banks nothing: he reads that conversation himself first, or passes `allow_unread=True` |
 | `M M49` | `linkedin_open_messaging()`; if its `landed_conversation.read_indicator.state` is `not_applicable` (the last message there is theirs), `linkedin_open_thread(thread_id=<a read conversation whose last message is his>)` | none (own inbox, read conversation) for the first; HE NAMES a thread id for the second | 2, then 2 | COVERED-PROVEN when `read_indicator.state` is `not_drawn` or `drawn` -- and a `drawn` reading also turns the derived `--with-seen-receipt` marker into a measured one |
-| `M M10` | `linkedin_send_reply(thread_id=<HE NAMES>, text=<HE NAMES>)`, he reads `who_this_would_reach`, then the same call with `confirm_token=<token>` within 120 s | HE NAMES the conversation and the exact words | 1 (preview), then 2 (act, and the fresh read-back) | COVERED-PROVEN when the receipt reads `performed: true, verified: true`. The preview alone also delivers capture C3(a) and C7's footer reading, as counts |
-| `M M17` | as `M M10`, with an emoji inside `text` | HE NAMES | 1, then 2 | COVERED-PROVEN on `performed: true`. `unknown` means LinkedIn drew the emoji as something other than the text -- record it; do NOT retry |
+| `M M10` | `linkedin_send_reply(thread_id=<HE NAMES>, text=<HE NAMES>)`, he reads `who_this_would_reach`, then the same call with `confirm_token=<token>` within 120 s | HE NAMES the conversation and the exact words | 1 (preview), then 2 (act, and the fresh read-back) | COVERED-PROVEN when the receipt reads `performed: true, verified: true`. The preview alone also delivers capture C3(a) and C7's footer reading, as counts. A `send_gate.refused_condition` of `5_words_not_exact` sent NOTHING and is itself a finding: its two lengths say how the box changed his words |
+| `M M17` | as `M M10`, with an emoji inside `text` | HE NAMES | 1, then 2 | COVERED-PROVEN on `performed: true`. If the box changes the emoji as it is typed, the send gate refuses BEFORE Send (`5_words_not_exact`) and nothing is sent; `unknown` after a send means the conversation drew it differently. Record either; do NOT retry |
 | `M M1`, `M M2` | none | -- | 0 | nothing can bank them: the recipient gate still refuses before any send. For an existing conversation the route is `M M10` |
 
 Total for the five rows, one pass: 9 to 11 loads.

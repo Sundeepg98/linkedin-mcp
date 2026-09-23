@@ -10109,16 +10109,81 @@ taken in place first, before the reload erases it.
 |---|---|
 | `linkedin_server/threads.py` -- `read_conversation_list`, `receipt_guard`, `list_opened_a_conversation` | `tests/test_messaging_threads.py`: four DERIVED unread worlds (a class token, a hidden word, a badge, an accessible name), each flipping exactly its own row; the guard refusing an unread row (and naming the position), refusing a list page that opened a conversation even with the opt-in, refusing no rendered rows, an unreadable list and a landing off the composer; the tools refusing BEFORE the conversation is loaded (one load recorded) |
 | `threads.read_thread`, `reply_state`, `seen_state`, the in-page text match | the same file: a sponsored conversation, a restored draft, a recipient box and an unrendered page each read UNKNOWN with the reason; the read indicator `not_drawn` (measured) and `drawn` (derived) worlds; exact, partial, case-changed and whitespace-changed words; a conversation redirected elsewhere is not read |
-| `writes.py` -- spec `send_reply` and its arms; `threads.reply_send_gate`, `threads.reply_verdict`, `threads.name_the_reply_recipient` | `tests/test_send_reply.py`: no grant (writes off; no token, `None`, `True`, forged; unredeemed; a non-grant -- zero navigations), another thread, other words, another action, a second use at both doors, and the second-use guard SHOWN FAILING when its flag is cleared (the replay types and sends again); SENT, NOT SENT and UNKNOWN end to end; an identical earlier message refused as a send; Send not pressed when the fill did not turn it on; the click refused before typing on a landing in another conversation, and over a draft; the title kept out of `grant.preview` and every receipt |
+| `writes.py` -- spec `send_reply` and its arms; `threads.reply_send_gate`, `threads.reply_verdict`, `threads.name_the_reply_recipient` | `tests/test_send_reply.py`: no grant (writes off; no token, `None`, `True`, forged; unredeemed; a non-grant -- zero navigations), another thread, other words, another action, a second use at both doors, and the second-use guard SHOWN FAILING when its flag is cleared (the replay types and sends again); SENT, NOT SENT and UNKNOWN end to end; an identical earlier message refused as a send; Send not pressed when the fill did not turn it on, nor when the box holds other words than his (`5_words_not_exact`, two lengths kept and no text); the click refused before typing on a landing in another conversation, and over a draft; the title kept out of `grant.preview` and every receipt |
 | `writes._verify_after` -- `send_message` read back in place | `tests/test_send_message_gate.py::test_verify_after_reaches_the_to_state_only_through_the_conversation_read_back` -- it replaced the test that pinned SENT unreachable: the two composer readings never SENT, a conversation drawn with his words SENT, other words UNKNOWN |
 | `scripts/check_write_classes.py` -- R2 and R3 may carry `built:` and `queued:` | `tests/test_write_classes.py::test_red_on_an_r1_line_left_classify_only` (the rule that remains) and `test_an_r2_line_may_record_a_build_or_a_blocker` |
+| `threads` -- every conversation selector scoped to `<main>`; `RECIPIENT_BOX_SELECTOR` named by the composer's own typeahead; `EVIDENCE_EVENT_SELECTOR` and `EVIDENCE_ACTIVE_ROW_SELECTOR` page-wide (69.5) | `tests/test_messaging_threads.py`: `test_the_global_search_box_is_a_combobox_and_not_a_recipient_box` (counts `(1, 0)` on the thread, `(2, 1)` with the typeahead drawn), `test_the_composer_is_not_a_conversation_and_its_recipient_box_says_so`, `test_an_open_overlay_bubble_is_not_this_conversation`, `test_a_conversation_the_overlay_draws_counts_against_nothing_was_opened`; and the RED REPRODUCTION -- the fixture change alone, under the shipped selector, failed 17 of 63 lane tests |
 
 ### 69.4 DECLARED DISPOSABLE
 
 The scratchpad probes this lane ran over the two captures -- overlay markers,
-payload markers, row structure, form controls, the thread view and the header
--- are declared disposable. What they measured is recorded with its numbers in
+payload markers, row structure, form controls, the thread view and the header,
+and the four added after the first build (landmarks, comboboxes, the recipient
+box's naming, and the old-against-scoped selector comparison) -- are declared
+disposable. What they measured is recorded with its numbers in
 the lane record's section 1, and the structure is carried by
 `tests/fixtures/synthetic/messaging_compose_list.html` and
 `tests/fixtures/synthetic/messaging_thread.html`, which the suite re-reads on
 every run.
+
+### 69.5 A ROLE IS NOT AN IDENTITY -- AND A FIXTURE CUT TO ONE REGION CANNOT CONVICT A LEAK
+
+Found after the first build by a probe of the captures, before any live
+use. The reply reader counted recipient boxes as `[role="combobox"]` -- "a
+thread has nobody to choose" -- and LinkedIn's global search input is a
+combobox on EVERY page: 2 on the composer capture (the search and the
+composer's own typeahead), 1 on the `/messaging/` capture (the search
+alone), 0 inside any reply form, and the search is outside `<main>` on
+both. Every real conversation would have read "not a conversation" and no
+reply could ever have been typed. The gate failed CLOSED, so nothing unsafe
+could follow -- and no test saw it, because every synthetic world had been
+cut to the messaging region and drew no global navigation.
+
+    A SELECTOR THAT NAMES ONLY A ROLE COUNTS EVERY WIDGET OF THAT ROLE ON THE PAGE.
+    SCOPE TO THE LANDMARK THE THING LIVES IN; NAME IT BY ITS OWN COMPONENT.
+    A FIXTURE MUST DRAW THE CHROME EVERY PAGE DRAWS, OR NO TEST CAN SEE A LEAK INTO IT.
+
+The fix was measured before it was written: each of the 17 selectors, old
+spelling against `<main>`-scoped, on both captures -- no count moved except
+the recipient box (composer 2 -> 1, `/messaging/` 1 -> 0). One exception is
+deliberate: RECEIPT EVIDENCE stays page-wide, because a conversation bubble
+the overlay draws outside `<main>` has still been displayed. Aim is
+`<main>`; a receipt is the whole page.
+
+### 69.6 FOURTEEN MUTATIONS, FOURTEEN KILLS
+
+Each load-bearing condition was broken ALONE in a scratch copy of the tree
+and its named test run. Ten at `899b24b`: the unread word signal, the
+guard's refusal on an unread row, the list page's opened check, the reply's
+delta (`== was + 1` weakened to `>= was`), the send gate's transition check,
+the title's copy into a NEW dict, the landing check before typing, the
+landing check in the preview, `send_message`'s in-place read-back, and the
+reply verdict's authorship condition. Four more over the fix: the send
+gate's words check removed, the recipient box put back to any combobox,
+the receipt evidence scoped to `<main>`, and the conversation's messages
+unscoped. Each unmutated copy passed its tests; each mutation failed its
+test AT THE ASSERTION NAMED FOR IT, not at an import or a collection
+error, and every file was restored byte for byte.
+
+### 69.7 A NEW TARGET KIND MUST REACH EVERY HARNESS TABLE KEYED BY KIND
+
+`send_reply` shipped with a new `target_kind`, `thread_and_text`, and
+`tests/refusinggrant.py` had no synthetic target for it. The KeyError did not
+fail one case: the page-string guard drives each writes reader with EVERY
+shipped spec, so five readers (`perform`, `_live_control`, `_verify_after`,
+`_recipient_gate`, `_typeahead_gate`) could no longer be driven for any spec
+at all. Three more tables keyed by kind or component had the same hole. The
+179-file gate found all of them; nothing in the lane's own tests could.
+
+    A KIND-KEYED HARNESS THAT RAISES ON AN UNKNOWN KIND STOPS MEASURING EVERY
+    CASE IT SHARES A CALL WITH. ADD THE KIND TO EVERY TABLE BEFORE THE SPEC SHIPS.
+
+### 69.8 A TRANSFORMED PAGE STRING IS STILL A PAGE STRING
+
+`threads.read_thread` returned each file input's `accept` attribute
+lowercased and cut to an alphabet. The page-string guard's plant is matched
+as a case-sensitive substring (`tests/plantedpage.py`), so the lowercased
+copy, its space removed, read CLEAN. It is a closed token now.
+
+    A NEEDLE MATCHED BY SUBSTRING CERTIFIES ONLY THE SPELLINGS IT WAS GIVEN.
+    A CLOSED VOCABULARY IS THE ONE SHAPE IT CAN CERTIFY WHOLE.
