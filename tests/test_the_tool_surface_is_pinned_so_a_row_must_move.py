@@ -119,6 +119,7 @@ PINNED_TOOL_SURFACE: dict[str, tuple[str, ...]] = {
     "linkedin_profile_editor_values": (),
     "linkedin_publish_post": ("confirm_token", "text"),
     "linkedin_react_to_item": ("confirm_token", "item"),
+    "linkedin_recent_job_searches": (),
     "linkedin_save_job": ("confirm_token", "job_id"),
     "linkedin_saved_jobs": ("limit",),
     "linkedin_search_appearances": (),
@@ -133,6 +134,7 @@ PINNED_TOOL_SURFACE: dict[str, tuple[str, ...]] = {
     "linkedin_server_info": ("verbose",),
     "linkedin_session_info": ("verify_live",),
     "linkedin_surface_census": ("surface",),
+    "linkedin_tracked_job_proximity": ("limit", "stage"),
     "linkedin_unfollow_company": ("company_id", "confirm_token"),
     "linkedin_unsave_job": ("confirm_token", "job_id"),
     "linkedin_update_profile_field": ("confirm_token", "field", "value"),
@@ -217,8 +219,21 @@ PINNED_TOOL_SURFACE: dict[str, tuple[str, ...]] = {
 #: COVERED-PROVEN, because the wave that built them was forbidden the browser
 #: and nothing has seen either tool return a payload live. See
 #: `_audit/2026-09-21-the-three-readers.md`.
-PINNED_TOOL_COUNT = 49
-PINNED_PARAMETER_COUNT = 66
+#:
+#: **RE-PINNED 2026-09-23 AT 51 TOOLS AND 68 PARAMETERS (lane L3), and every
+#: surface change in the commit moves a census row in the same commit.**
+#: `linkedin_recent_job_searches()` reads the jobs home and banks `J 18`;
+#: `linkedin_tracked_job_proximity(stage, limit)` joins the tracker to the
+#: posting's proximity read and banks `J 57` -- `stage` an INDEX into the three
+#: tracker stages the boundary admits, `limit` a declared cost ceiling of ten.
+#: **AND ONE MOVE THIS PIN CANNOT SEE, SAID HERE BECAUSE IT IS THE HOLE THIS
+#: FILE WAS DUG FOR ONE LEVEL DOWN:** `linkedin_premium_job_collection` gained
+#: a new VALUE, index 2 (`recommended`), on a parameter it already had, and it
+#: banks `J 39`. No name and no parameter moved, so this guard is silent about
+#: it by construction. All three rows move GAP -> COVERED-UNFIRED, not PROVEN:
+#: the lane that built them was offline. See `_audit/2026-09-23-lane-l3-jobs.md`.
+PINNED_TOOL_COUNT = 51
+PINNED_PARAMETER_COUNT = 68
 
 
 def live_surface() -> dict[str, tuple[str, ...]]:

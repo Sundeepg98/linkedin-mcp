@@ -5,6 +5,8 @@ no session, no page load, no `mcp__linkedin__*` call. Source, census and boundar
 
 **CORRECTS:** `_audit/2026-09-20-the-reachable-ceiling.md` -- it records the jobs slice's GAP rows as carrying **no direction column at all** and therefore leaves them unmeasured; the first half is true of the per-row tables and the second is now discharged, and its own non-jobs numbers need re-taking before anything combines them with these (section 7).
 
+**CORRECTED BY:** `_audit/2026-09-23-lane-l3-jobs.md` -- five of its address readings, re-taken through the shipped boundary: `J 16`'s suggestions belong to the semantic search at `/jobs/search-results/` (refused), not the classic `/jobs/search/` priced here; `J 18`'s list is drawn on the admitted jobs home `/jobs/jam/`, not on `/jobs/search-history/`; `J 56`'s date filter is a label-toggled checkbox on the admitted tracker tab, a press rather than a refused query; `J 116`-`J 120` sit behind the AI guide overlay that Amendment A13 of the 2026-09-03 gap-blockers ledger measured, a refused address, not on the admitted posting; and `J 110`'s Home tab is admitted but its content is organisation prose `shape.company_about_card` rules unpublished. `J 148` is resolved from AMBIGUOUS to R+W. `J 18`, `J 39` and `J 57` were then built and left GAP; the per-row directions of the rest live in `_audit/_census/jobs-directions.tsv`.
+
 ---
 
 ## 1. THE ANSWER, FIRST

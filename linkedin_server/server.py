@@ -373,6 +373,7 @@ from linkedin_server import (
     group_page,
     groups_page,
     job_collections,
+    job_home,
     jobfilter,
     newsletters,
     notify_cost,
@@ -2224,10 +2225,18 @@ async def linkedin_premium_job_collection(collection: int = 0) -> dict[str, Any]
     ONE PAGE LOAD, NO SCROLLING, NO PRESSES. ``collection`` is an INDEX into a
     closed tuple in ``linkedin_server/job_collections.py``, never a free
     string, so the set of addresses this tool can ever reach is enumerable by
-    reading that constant: 0 is ``top-applicant``, 1 is ``top-choice``. Both
-    are on the read allowlist, root only. Out of range REFUSES rather than
-    clamping, because a reading filed under the wrong collection is worse than
-    no reading.
+    reading that constant: 0 is ``top-applicant``, 1 is ``top-choice``, 2 is
+    ``recommended``. All three are on the read allowlist, root only. Out of
+    range REFUSES rather than clamping, because a reading filed under the
+    wrong collection is worse than no reading.
+
+    **INDEX 2 IS NOT A PREMIUM COLLECTION** -- the tool's name predates it. It
+    is LinkedIn's own recommended-jobs list (census ``J 39``), the same page
+    ``linkedin_job_collections`` COUNTS; here its posting ids come back, so a
+    recommendation becomes a posting ``linkedin_job_detail`` can read. Added
+    2026-09-23 and exercised offline only, over a skeleton of the live capture
+    this reader's shape was measured on: it has NOT been fired against
+    LinkedIn at that index.
 
     **``slots`` IS THE POSTING COUNT AND ``hydrated`` IS NOT. Do not quote the
     second as the first.** LinkedIn draws one list slot per posting it has
@@ -2321,6 +2330,172 @@ async def linkedin_premium_job_collection(collection: int = 0) -> dict[str, Any]
             }
     except Exception as exc:
         return _error(exc)
+
+
+@mcp.tool()
+async def linkedin_recent_job_searches() -> dict[str, Any]:
+    """Your recent job searches, re-runnable, and which of them carry a job alert.
+
+    ONE PAGE LOAD, NO SCROLLING, NO PRESSES. The address is a module constant,
+    ``job_home.HOME_URL`` -- the jobs home, ``/jobs/jam/``, which is where
+    LinkedIn lands ``/jobs/alerts/`` (measured 2026-09-20). Census ``J 18``,
+    *recent searches: view and re-run*.
+
+    WHAT EACH ENTRY CARRIES. ``search_keywords`` -- the query exactly as
+    ``linkedin_search_jobs`` takes it, read off the entry's own href by the
+    same function that already hands you a job alert's keywords from your
+    notifications; ``location`` -- the place the search ran in, when the
+    subtitle isolates exactly one; ``alert_on`` -- whether LinkedIn draws its
+    alert badge on that search; ``in_your_network``, ``workplace``, and
+    ``facets``, the names of the filters the search carried. **TO RE-RUN ONE,
+    pass its ``search_keywords`` and ``location`` to ``linkedin_search_jobs``.**
+
+    WHAT IT WILL NOT TELL YOU. No filter VALUE -- a salary band is your pay
+    expectation, so only the fact that a salary filter was on comes back -- no
+    place id, no href, no job, no person. ``location`` is ``None`` with
+    ``location_state`` ``ambiguous`` when the subtitle carries two candidate
+    places, rather than a joined string the page never drew.
+
+    **A ZERO IS ONLY READABLE BESIDE ``list_label_seen``.** No entries with the
+    list drawn is a fact about your account; no entries with no list is this
+    reader failing to see, and carries ``refusal``.
+
+    **ALERTS: A PARTIAL VIEW, AND SAID SO.** The badge sits on RECENT searches,
+    so an alert whose search has aged out of the list is not shown here.
+    ``alerts_on`` counts the badges drawn, not every alert you have.
+
+    NOT YET FIRED LIVE. Built 2026-09-23 against a sanitised copy of the live
+    capture of that landing; the first live call is also the first check that
+    ``/jobs/jam/`` serves the same list when opened directly.
+    """
+    url = job_home.HOME_URL
+    try:
+        async with BROWSER.session() as page:
+            landed = await BROWSER.goto(page, url)
+            assert_not_authwall(landed, surface="jobs home")
+            reading = await job_home.read_recent_searches(page)
+            return {
+                "ok": True,
+                # A RELATION, NEVER THE ADDRESS -- the family's spelling.
+                "redirected": landed.rstrip("/") != url.rstrip("/"),
+                "pages_loaded": 1,
+                **reading,
+            }
+    except Exception as exc:
+        return _error(exc)
+
+
+#: The tracker stages the proximity join may read, BY INDEX, in the order the
+#: read allowlist enumerates them: (stage token, tab label, surface word). The
+#: tokens are the three ``readonly`` admits, and nothing a caller types can
+#: reach the url -- the index selects a row of this table.
+_TRACKED_STAGES: tuple[tuple[str, str, str], ...] = (
+    ("saved", "Saved", "saved jobs"),
+    ("applied", "Applied", "applied jobs"),
+    ("draft", "Draft", "draft applications"),
+)
+
+#: THE JOIN'S COST CEILING, declared as one: a tracker load plus one posting
+#: load per job, so ``limit`` 10 is eleven page loads. Not a LinkedIn limit.
+_TRACKED_PROXIMITY_DEFAULT = 5
+_TRACKED_PROXIMITY_MAX = 10
+
+
+@mcp.tool()
+async def linkedin_tracked_job_proximity(
+    stage: int = 0, limit: int = _TRACKED_PROXIMITY_DEFAULT
+) -> dict[str, Any]:
+    """Which jobs in your tracker draw a network connection -- a JOIN, 1 + N page loads.
+
+    Census ``J 57``, *view network connections reachable for a tracked job*.
+    Both halves already ship and nothing joined them: the tracker yields job
+    ids (``linkedin_saved_jobs`` and its two siblings), and the posting page
+    draws the proximity ``linkedin_job_detail`` reads (census ``J 40``, fired
+    live). The tracker card itself draws none -- measured on the committed
+    ``jobs_tracker_row.html`` -- so the join has to open each posting.
+
+    ``stage`` IS AN INDEX, never a word: 0 saved, 1 applied, 2 draft. ``limit``
+    caps the postings opened, default 5, at most 10 -- so at most eleven loads.
+
+    WHAT EACH JOB CARRIES: its ``job_id``, a ``state`` -- ``drawn``,
+    ``not_drawn`` or ``posting_unread`` -- and ``proximity``, THREE INTEGERS OR
+    NONE, positions in ``proximity_states`` and ``proximity_relations``, which
+    are returned beside it. **ON A POSTING PAGE THIS IS A RELATION, NOT A
+    COUNT**: the detail page draws the relation over a face pile and states no
+    number, so ``relation_only`` is the expected reading and ``count`` is None.
+    No title, no company, no person comes back -- ``linkedin_saved_jobs`` has
+    the titles for the same ids.
+
+    ``posting_unread`` IS NOT ``not_drawn``. It means the posting did not
+    render a readable body (``error`` then carries an exception's TYPE NAME
+    only), and it says nothing about your network.
+
+    NOT YET FIRED LIVE. Built 2026-09-23 over the committed tracker and posting
+    fixtures; the first live call is also the first join of the two halves
+    against real pages.
+    """
+    if (isinstance(stage, bool) or not isinstance(stage, int)
+            or not 0 <= stage < len(_TRACKED_STAGES)):
+        return {
+            "error": "bad_argument",
+            "message": "stage is an index: 0 saved, 1 applied, 2 draft",
+            "stages": [token for token, _label, _surface in _TRACKED_STAGES],
+        }
+    limit = _clamp(limit, _TRACKED_PROXIMITY_DEFAULT, _TRACKED_PROXIMITY_MAX)
+    token, label, surface = _TRACKED_STAGES[stage]
+    try:
+        tracker = await _read_tracker(
+            token, tab_label=label, limit=limit, surface=surface
+        )
+    except Exception as exc:
+        return _error(exc)
+
+    rows = tracker.get("results") or []
+    ids: list[str] = []
+    for row in rows:
+        job_id = str(row.get("job_id") or "")
+        if job_id.isdigit() and len(job_id) >= 6 and job_id not in ids:
+            ids.append(job_id)
+
+    jobs: list[dict[str, Any]] = []
+    for job_id in ids[:limit]:
+        entry: dict[str, Any] = {
+            "job_id": job_id,
+            "state": "posting_unread",
+            "proximity": None,
+            "error": None,
+        }
+        try:
+            # Built from digits proven above, exactly as linkedin_job_detail
+            # builds it: nothing the page chose reaches the url.
+            async with BROWSER.session() as page:
+                final_url = await BROWSER.goto(
+                    page, f"{BASE_URL}/jobs/view/{job_id}"
+                )
+                assert_not_authwall(final_url, surface="job posting")
+                reading = await dom.read_job_posting(page)
+            detail = reading["detail"]
+            if not shape.job_detail_missing(detail):
+                entry["proximity"] = detail.get("proximity")
+                entry["state"] = "drawn" if entry["proximity"] else "not_drawn"
+        except Exception as exc:  # noqa: BLE001 -- recorded per job, by type
+            entry["error"] = type(exc).__name__
+        jobs.append(entry)
+
+    return {
+        "ok": True,
+        "stage": token,
+        "pages_loaded": 1 + len(jobs),
+        "tracked_rows": len(rows),
+        "linkedin_count": tracker.get("linkedin_count"),
+        "empty": bool(tracker.get("empty")),
+        "capped": len(ids) > limit,
+        "jobs_read": len(jobs),
+        "with_proximity": sum(1 for job in jobs if job["state"] == "drawn"),
+        "jobs": jobs,
+        "proximity_states": list(shape.PROXIMITY_STATES),
+        "proximity_relations": list(shape.PROXIMITY_RELATIONS),
+    }
 
 
 @mcp.tool()

@@ -85,6 +85,11 @@ EXPECTED_TOOLS = (
     "linkedin_session_info",
     "linkedin_group_page",
     "linkedin_company_page_counts",
+    # 2026-09-23, lane L3: two READS on the jobs surface, each banking a census
+    # row in the same commit -- J 18 (recent searches, off the jobs home) and
+    # J 57 (the tracker x posting proximity join).
+    "linkedin_recent_job_searches",
+    "linkedin_tracked_job_proximity",
 )
 
 
@@ -303,4 +308,8 @@ def test_both_rules_reject_the_registry_that_was_actually_measured():
     # FORTY-EIGHT AND FORTY-NINE FROM 2026-09-21: linkedin_group_page and
     # linkedin_company_page_counts, both READS, each opening an admitted
     # address that no registered tool could navigate to.
-    assert len(_tool_names()) == 49
+    # FIFTY AND FIFTY-ONE FROM 2026-09-23 (lane L3): linkedin_recent_job_searches
+    # and linkedin_tracked_job_proximity, both READS, banking census rows J 18
+    # and J 57 as COVERED-UNFIRED in the same commit. Neither opens an address
+    # the boundary did not already admit.
+    assert len(_tool_names()) == 51

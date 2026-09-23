@@ -27,16 +27,16 @@ are listed as `(undated)`; no date is taken from git history, because
 
 | what | count |
 | --- | --- |
-| audit documents git tracks under `_audit` | 234 |
-| of those, carrying a `YYYY-MM-DD-` date prefix | 194 |
+| audit documents git tracks under `_audit` | 235 |
+| of those, carrying a `YYYY-MM-DD-` date prefix | 195 |
 | distinct dates | 15 |
 | documents with no level-1 heading | 2 |
-| `CORRECTS:` marker lines | 93 |
-| `CORRECTED BY:` marker lines | 93 |
-| distinct declared correction edges | 90 |
-| documents something later corrects | 46 |
-| documents that correct something | 66 |
-| documents at either end of a cross-document edge | 93 |
+| `CORRECTS:` marker lines | 94 |
+| `CORRECTED BY:` marker lines | 94 |
+| distinct declared correction edges | 91 |
+| documents something later corrects | 47 |
+| documents that correct something | 67 |
+| documents at either end of a cross-document edge | 94 |
 | intra-document correction markers | 4 |
 | documents that correct themselves later on | 2 |
 | documents no correction marker touches at all | 139 |
@@ -434,6 +434,14 @@ document is dead; it says one thing in it was overtaken and names what.
 - CORRECTED BY [2026-09-21-the-all-filters-press.md](2026-09-21-the-all-filters-press.md)
 
   > section 5 and section 8 of this document say the `All filters` press is forbidden by condition 5 of the admitting ruling and would be the one action that settles twelve rows. **Both halves are wrong and the second is the expensive one.** The disclosing press was ruled on 2026-09-19, and the control fails that ruling's condition 2 terminally: measured live, twice, it declares NEITHER `aria-expanded` NOR `aria-haspopup`, so it is not a member of either sanctioned node set and no caller naming a sanctioned shape can reach it. Condition 3 refuses it a second time -- no sensitivity basis is declared for this surface. **NOTHING MEASURED IN THIS DOCUMENT IS DISTURBED:** `locations` = 1, `actively hiring` = 2, `all filters` = 1, `next` = 1 and `school anise` = 0 all reproduced on two fresh loads, and every one of the fourteen verdicts stands.
+
+### [2026-09-21-the-jobs-direction.md](2026-09-21-the-jobs-direction.md)
+
+2026-09-21 &middot; THE JOBS DIRECTION: the fifth of the GAP that was never asked the question
+
+- CORRECTED BY [2026-09-23-lane-l3-jobs.md](2026-09-23-lane-l3-jobs.md)
+
+  > five of its address readings, re-taken through the shipped boundary: `J 16`'s suggestions belong to the semantic search at `/jobs/search-results/` (refused), not the classic `/jobs/search/` priced here; `J 18`'s list is drawn on the admitted jobs home `/jobs/jam/`, not on `/jobs/search-history/`; `J 56`'s date filter is a label-toggled checkbox on the admitted tracker tab, a press rather than a refused query; `J 116`-`J 120` sit behind the AI guide overlay that Amendment A13 of the 2026-09-03 gap-blockers ledger measured, a refused address, not on the admitted posting; and `J 110`'s Home tab is admitted but its content is organisation prose `shape.company_about_card` rules unpublished. `J 148` is resolved from AMBIGUOUS to R+W. `J 18`, `J 39` and `J 57` were then built and left GAP; the per-row directions of the rest live in `_audit/_census/jobs-directions.tsv`.
 
 ### [2026-09-21-the-open-queue.md](2026-09-21-the-open-queue.md)
 
@@ -1289,6 +1297,14 @@ reach is visible. The quoted reason here is the CORRECTOR's own
 
   > four address verdicts: P F1 and P H11 are pages on the admitted profile, not ADDRESS/ABSENT, and P L4 and N 61 wait on a live read, not on a refused address anybody has seen served.
 
+### [2026-09-23-lane-l3-jobs.md](2026-09-23-lane-l3-jobs.md)
+
+2026-09-23 &middot; Lane L3, jobs rows: 56 directions, 31 read addresses, and 3 readers built
+
+- CORRECTS [2026-09-21-the-jobs-direction.md](2026-09-21-the-jobs-direction.md)
+
+  > five address readings re-taken through the shipped boundary (`J 16`, `J 18`, `J 56`, `J 110`, `J 116`-`J 120`), and `J 148` resolved from AMBIGUOUS to R+W; section 4 below gives each with its evidence.
+
 ## 5. Every document, by date
 
 `CORRECTED` means at least one later document declares a correction of
@@ -1516,7 +1532,7 @@ ways, which is a fact about markers and not a verdict on the document.
 | 2026-09-21 | [2026-09-21-the-four-loose-rows.md](2026-09-21-the-four-loose-rows.md) | THE FOUR LOOSE ROWS -- `shape.invitation_badge`, `hrefs_error`, `pill_label`, `J 57` |  |
 | 2026-09-21 | [2026-09-21-the-fourteen-fired.md](2026-09-21-the-fourteen-fired.md) | THE FOURTEEN FIRED: one banked, one refused, twelve behind a press | **CORRECTED x1** corrects x2 |
 | 2026-09-21 | [2026-09-21-the-gate-that-waves-data-through.md](2026-09-21-the-gate-that-waves-data-through.md) | The gate that waves data through |  |
-| 2026-09-21 | [2026-09-21-the-jobs-direction.md](2026-09-21-the-jobs-direction.md) | THE JOBS DIRECTION: the fifth of the GAP that was never asked the question | corrects x1 |
+| 2026-09-21 | [2026-09-21-the-jobs-direction.md](2026-09-21-the-jobs-direction.md) | THE JOBS DIRECTION: the fifth of the GAP that was never asked the question | **CORRECTED x1** corrects x1 |
 | 2026-09-21 | [2026-09-21-the-landed-url.md](2026-09-21-the-landed-url.md) | A LANDING IS A STRING THE SITE CHOSE, AND THIS PROCESS HAD NO ALLOWLIST FOR IT | corrects x1 |
 | 2026-09-21 | [2026-09-21-the-locators-that-point-elsewhere.md](2026-09-21-the-locators-that-point-elsewhere.md) | The locators that point elsewhere |  |
 | 2026-09-21 | [2026-09-21-the-open-queue.md](2026-09-21-the-open-queue.md) | The open queue, 2026-09-21 at master `9dbaad2` | **CORRECTED x1** |
@@ -1534,6 +1550,7 @@ ways, which is a fact about markers and not a verdict on the document.
 | 2026-09-21 | [2026-09-21-what-was-ruled.md](2026-09-21-what-was-ruled.md) | A register keyed on RULINGS, not on documents -- and the fourth payment |  |
 | 2026-09-23 | [2026-09-23-bucket1-fires.md](2026-09-23-bucket1-fires.md) | BUCKET 1: the read-direction COVERED-UNFIRED rows, fired once each through attach | corrects x1 |
 | 2026-09-23 | [2026-09-23-bucket3-addresses.md](2026-09-23-bucket3-addresses.md) | Bucket 3, measured: 67 rows, 33 on an admitted page, and 5 a reader could close today | corrects x1 |
+| 2026-09-23 | [2026-09-23-lane-l3-jobs.md](2026-09-23-lane-l3-jobs.md) | Lane L3, jobs rows: 56 directions, 31 read addresses, and 3 readers built | corrects x1 |
 
 ## 6. What the scan rejected, could not join, or had to repair
 
@@ -1566,7 +1583,7 @@ against the same line, so a missing continuation satisfies it.
 - REASON PAST ITS LINE [2026-09-20-the-first-firing.md](2026-09-20-the-first-firing.md) line 233 -- a line-scoped reader sees 35 of 465 characters.
 - REASON PAST ITS LINE [2026-09-20-the-five-under-banked.md](2026-09-20-the-five-under-banked.md) line 3 -- a line-scoped reader sees 35 of 349 characters.
 - REASON PAST ITS LINE [2026-09-20-the-five-under-banked.md](2026-09-20-the-five-under-banked.md) line 457 -- a line-scoped reader sees 94 of 717 characters.
-- REASON PAST ITS LINE [_census/jobs.md](_census/jobs.md) line 382 -- a line-scoped reader sees 825 of 1189 characters.
+- REASON PAST ITS LINE [_census/jobs.md](_census/jobs.md) line 401 -- a line-scoped reader sees 825 of 1189 characters.
 
 - TIGHTEST ADMISSION MARGIN [2026-09-03-linkedin-gap-blockers.md](2026-09-03-linkedin-gap-blockers.md) line 272 clears the 20-character floor by 0. The floor is applied to the marker's OWN LINE, so a reason of 723 characters is admitted on the strength of 20. Reflow that paragraph by one word and a guard rejects it saying it *carries no reason after the citation*, which would not be true. Reported every regeneration rather than counted, because a count of rejections reads zero until the day it does not.
 

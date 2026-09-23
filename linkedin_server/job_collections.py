@@ -1,10 +1,33 @@
-"""The two Premium job collections, read as COUNTS and NUMERIC IDS.
+"""Three job collections, read as COUNTS and NUMERIC IDS.
 
 ``/jobs/collections/top-applicant`` and ``/jobs/collections/top-choice`` are
 the two Premium job surfaces LinkedIn draws on this account's Premium hub. The
 first is the Top Applicant signal the standing question names by name.
 
+**THE THIRD IS NOT PREMIUM, AND IT IS THE PAGE THIS READER WAS BUILT FROM.**
+``/jobs/collections/recommended/`` is LinkedIn's own recommended-jobs list --
+census ``J 39``, *read job recommendations*. It joined :data:`COLLECTIONS` on
+2026-09-23 (lane L3) because every precondition was already met: admitted
+2026-09-05, loaded by ``linkedin_job_collections`` since 2026-09-19, captured
+live 2026-09-20 -- and the two-tier slot shape measured below WAS MEASURED ON
+IT. Run offline over that capture (scripts stripped, every request aborted),
+the reader returns 24 slots, 7 hydrated, 24 ids and 0 refused, exactly the
+table below. ``linkedin_job_collections`` returns COUNTS of that page by
+design; this reader returns its posting ids, which is the capability the row
+names and the same one ``J 125`` banked on for ``top-applicant``.
+
 ## NOBODY HAS EVER OPENED EITHER PAGE, AND THIS MODULE SAYS SO IN ITS OUTPUT
+
+**AMENDED 2026-09-23, AND LEFT STANDING RATHER THAN REWRITTEN:** that heading
+was true when this module was written and was false by the same evening. Both
+Premium pages were opened on 2026-09-20 through
+``scripts/_probe_premium_collections_live.py`` and ``linkedin_premium_job_
+collection`` banked ``J 125`` on the firing (``_audit/2026-09-20-the-first-
+firing.md``). ``_audit/2026-09-21-the-jobs-direction.md`` section 6 flagged the
+expired premise and routed it to the owner of this surface; a reader who starts
+here is no longer told the surface is unmeasured. The paragraphs below are the
+module's reasoning at the time and are kept because the design still rests on
+them.
 
 There is no capture of either address. This reader is built against the SHAPE
 of the two job-list surfaces that HAVE been captured -- ``/jobs/collections/
@@ -139,9 +162,19 @@ from typing import Any, Optional
 #: newsletter wave set and this module keeps. A third collection LinkedIn adds
 #: tomorrow needs a deliberate edit here, plus its own allowlist entry, which
 #: is the point.
+#:
+#: **``recommended`` IS THAT DELIBERATE EDIT, AND IT IS APPENDED, NEVER
+#: INSERTED** -- indices 0 and 1 keep naming what they have always named. It
+#: was not read off the Premium hub: its allowlist entry predates both of the
+#: others (2026-09-05), ``linkedin_job_collections`` has loaded it since
+#: 2026-09-19, and it is the captured sibling whose shape this reader was built
+#: against. ``collections_page.COLLECTIONS_URL`` is the same address, and
+#: ``tests/test_job_collections.py`` pins the two equal so the counts tool and
+#: the ids tool can never aim at different pages.
 COLLECTIONS: tuple[str, ...] = (
     "top-applicant",
     "top-choice",
+    "recommended",
 )
 
 _BASE = "https://www.linkedin.com/jobs/collections/"

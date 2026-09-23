@@ -467,8 +467,14 @@ async def test_an_exception_after_the_counts_still_clears_them():
 
 
 def test_the_collection_vocabulary_is_pinned_in_order():
-    """Reordering renames every reading ever taken, so the order is pinned."""
-    assert job_collections.COLLECTIONS == ("top-applicant", "top-choice")
+    """Reordering renames every reading ever taken, so the order is pinned.
+
+    ``recommended`` was APPENDED on 2026-09-23 (census ``J 39``): indices 0 and
+    1 still name what they always named, which is the only way a third entry
+    could join without renaming a reading already taken.
+    """
+    assert job_collections.COLLECTIONS == (
+        "top-applicant", "top-choice", "recommended")
 
 
 def test_collection_url_refuses_out_of_range_rather_than_clamping():
@@ -476,8 +482,9 @@ def test_collection_url_refuses_out_of_range_rather_than_clamping():
     answer wearing a measurement's clothes."""
     assert job_collections.collection_url(0).endswith("/top-applicant/")
     assert job_collections.collection_url(1).endswith("/top-choice/")
+    assert job_collections.collection_url(2).endswith("/recommended/")
     with pytest.raises(IndexError):
-        job_collections.collection_url(2)
+        job_collections.collection_url(3)
     with pytest.raises(IndexError):
         job_collections.collection_url(-1)
     with pytest.raises(TypeError):
@@ -581,3 +588,79 @@ def test_the_control_fixture_carries_its_decoy_outside_main():
     head = html[:opens_main]
     assert 'data-occludable-job-id="1000000099"' in head
     assert 'data-job-id="1000000099"' in head
+
+
+# ---------------------------------------------------------------------------
+# 8. The recommended collection: index 2, read over a skeleton of its capture
+# ---------------------------------------------------------------------------
+#
+# NO MODULE-LEVEL CONSTANT IS ADDED FOR THIS SECTION, deliberately: the impact
+# gate couples every file that NAMES an upper-case constant defined here, and a
+# word like SKELETON is exactly the kind a docstring elsewhere might carry.
+
+
+def _skeleton_path() -> Path:
+    return Path(__file__).parent / "fixtures" / "jobs_recommended_skeleton.html"
+
+
+def _skeleton_markup() -> str:
+    """The skeleton with its provenance COMMENT stripped, for the same reason
+    ``_markup`` strips the synthetic fixture's: prose about a tag is not one."""
+    text = _skeleton_path().read_text(encoding="ascii")
+    return re.sub(r"<!--.*?-->", "", text, flags=re.S)
+
+
+def test_the_recommended_skeleton_describes_itself():
+    """THE NUMBERS BELOW ARE MEASURED OFF THE FILE, NEVER TRANSCRIBED.
+
+    ``scripts/_build_job_list_skeleton.py`` built it from the live capture of
+    ``/jobs/collections/recommended/`` and measured 24 slots, 7 of them
+    hydrated, every card id equal to its slot id and no slot outside main --
+    the same figures ``job_collections``' own docstring table records for that
+    page. An independent parse here re-derives them from the committed bytes.
+    """
+    markup = _skeleton_markup()
+    slots = re.findall(r'data-occludable-job-id="([^"]*)"', markup)
+    cards = re.findall(r'data-job-id="([^"]*)"', markup)
+    assert len(slots) == 24
+    assert len(cards) == 7
+    assert cards == slots[:7], "the captured order put every card first"
+    assert all(re.fullmatch(r"[0-9]{10}", s) for s in slots)
+    assert len(set(slots)) == 24
+    inner = markup.split("<main>", 1)[-1].split("</main>", 1)[0]
+    assert re.sub(r"<[^>]+>", "", inner).strip() == "", "the skeleton drew text"
+
+
+@pytest.mark.asyncio
+async def test_index_two_reads_the_recommended_skeleton_as_measured():
+    """THE ROW'S CAPABILITY, OFFLINE: posting ids off the recommended list.
+
+    Census ``J 39`` -- read job recommendations -- asks for the postings
+    LinkedIn recommends, and ``linkedin_job_collections`` deliberately returns
+    only their COUNT. Index 2 returns the ids, each a digit run
+    ``linkedin_job_detail`` accepts. ``slots`` is the answer and ``hydrated``
+    sits beside it: 24 against 7, the 3.4x gap this module exists to report.
+    """
+    html = _skeleton_path().read_text(encoding="ascii")
+    out = await _read(html, expect=2)
+    assert out["collection"] == "recommended"
+    assert out["error"] is None and out["refusal"] is None
+    assert out["slots"] == 24 and out["slots_outside_main"] == 0
+    assert out["hydrated"] == 7 and out["containers"] == 7
+    assert out["list_container_seen"] is True
+    assert out["ids_refused"] == 0
+    assert out["job_ids"] == re.findall(
+        r'data-occludable-job-id="([^"]*)"', _skeleton_markup())
+
+
+def test_the_recommended_index_aims_at_the_page_the_counts_tool_opens():
+    """ONE PAGE, TWO READERS, AND THEY CANNOT DRIFT APART.
+
+    ``linkedin_job_collections`` COUNTS ``collections_page.COLLECTIONS_URL`` and
+    was fired live on it; index 2 returns that page's posting ids. If either
+    constant moved alone, the ids would describe a different page from the one
+    whose counts have been proven.
+    """
+    from linkedin_server import collections_page
+
+    assert job_collections.collection_url(2) == collections_page.COLLECTIONS_URL
