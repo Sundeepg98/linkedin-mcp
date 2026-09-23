@@ -60,6 +60,7 @@ import asyncio
 import time
 from contextlib import asynccontextmanager
 from typing import Any, AsyncIterator, Optional
+from urllib.parse import urlsplit
 
 from linkedin_server import preflight, profile_lock, profile_version
 from linkedin_server.session_store import SessionStore
@@ -456,8 +457,18 @@ class LinkedInBrowser:
         try:
             await page.goto(url, wait_until="domcontentloaded", timeout=NAV_TIMEOUT_MS)
         except Exception as exc:
+            # THE ADDRESS IS NOT QUOTED, AND NEITHER IS THE LIBRARY'S MESSAGE,
+            # which quotes it again. The address can carry the caller's words
+            # -- a search keyword, a member token -- and this message becomes
+            # the tool's $.message. Decided where the value enters the
+            # exception (ERROR-MESSAGE-RULED-AT-THE-RAISE): the TYPE, and the
+            # address's first path segment, a family that names nobody. The
+            # original stays chained, in-process only. Found by lane S.
+            family = urlsplit(url).path.strip("/").split("/")[0]
             raise BrowserUnavailableError(
-                f"navigation to {url} failed: {type(exc).__name__}: {exc}"
+                f"navigation to a /{family}/ page failed: {type(exc).__name__} "
+                "(the address and the library's message are withheld: the "
+                "address can carry what was searched for or whom it names)"
             ) from exc
         finally:
             self._last_navigation_at = time.monotonic()
