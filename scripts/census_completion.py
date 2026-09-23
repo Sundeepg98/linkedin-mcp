@@ -76,15 +76,18 @@ import argparse
 import collections
 import pathlib
 import sys
+import textwrap
 
 _HERE = pathlib.Path(__file__).resolve().parent
 sys.path.insert(0, str(_HERE))
 
+import check_jobs_directions as cjd  # noqa: E402
 import check_read_addresses as cra  # noqa: E402
 import count_census_states as ccs  # noqa: E402
 import enumerate_gap_rows as egr  # noqa: E402
 import pin_census_rows as pcr  # noqa: E402
 import reader_closable_blockers as rcb  # noqa: E402
+import ruling_holds as rh  # noqa: E402
 
 #: Short spellings folded to their long form. Taken from the shipped counter's
 #: own documented equivalences -- `XR` is `jobs.md`'s EXCLUDED-RULED, `CP`/`CU`
@@ -133,24 +136,42 @@ COLLAPSED = {
 #: ENUMERATED, not inferred. Rows the corpus names as waiting on a decision no
 #: engineering can substitute for. `_audit/2026-09-21-the-open-queue.md` s1
 #: calls D3 *"the single highest-yield decision left in this row set"*, quoting
-#: `_audit/2026-09-19-the-read-rows.md` s5.2, which lists these five by id.
+#: `_audit/2026-09-19-the-read-rows.md` s5.2, which listed FIVE rows by id.
+#:
+#: FOUR SINCE 2026-09-23: `M C83` LEFT THE LIST, and not because D3 moved. D3
+#: asks whether a reasoned refusal written into the allowlist counts as an
+#: EXCLUDED-RULED ground. For `M C83` the refused spelling was never seen
+#: served: the shipped boundary's own newsletters entry says the row is
+#: *"waiting on a LIVE READ that establishes which address serves"*, and that
+#: an entry written for it today would be *"a guessed address"*. So D3 answered
+#: YES could not bank it (the refusal is not about a page it has) and answered
+#: NO leaves it where it is. Its real first need is the live read, which the
+#: bucket-3 table records as NEEDS-SESSION and bucket 3 below counts.
+#: `_audit/2026-09-23-census-cleanup.md` item 3.
+#:
+#: THREE SINCE THE EVENING OF 2026-09-23: `N 172` LEFT TOO, and this time a
+#: ruling moved it. It was filed here for D3's other-people cause alone -- its
+#: page, the people search with `connectionOf`, is admitted -- and master
+#: 4a57b75 registered OTHER-MEMBER-IDS-AS-READS, which answers exactly that
+#: cause for a search facet (the id from tool arguments, never from the page,
+#: never stored). With D1-SEARCH-AS-READS it now needs only a reader: the
+#: address table gates it READER. `_audit/2026-09-23-census-cleanup.md`
+#: section 12. The other three are refused addresses, rosters and a
+#: profile, which that ruling does not reach.
 RULING_BLOCKED_NAMED = {
     ("N", "99"): "D3 -- is a reasoned allowlist refusal `written`?",
-    ("N", "172"): "D3 -- is a reasoned allowlist refusal `written`?",
     ("N", "177"): "D3 -- is a reasoned allowlist refusal `written`?",
     ("N", "178"): "D3 -- is a reasoned allowlist refusal `written`?",
-    ("M", "C83"): "D3 -- is a reasoned allowlist refusal `written`?",
 }
 
-#: ENUMERATED. Rows the corpus names as needing a control PRESSED on a live
-#: page -- `DISCLOSING-PRESS-PERMITTED` ruled it allowed and `press.disclose`
-#: is built, so the remaining cost is a session and nothing else.
-#: `_audit/2026-09-21-the-open-queue.md` s2: *"`N 134` and `P O3` need a press
-#: ... `press.disclose` has zero callers among the 47 shipped tools."*
-PRESS_BLOCKED_NAMED = {
-    ("N", "134"): "needs a disclosing press; the mechanism is built and unused",
-    ("P", "O3"): "needs a disclosing press; the mechanism is built and unused",
-}
+# `PRESS_BLOCKED_NAMED` ({N 134, P O3}, "the remaining cost is a session and
+# nothing else") WAS REMOVED 2026-09-23. Both rows are GAP reads, so bucket 3
+# counts them already, off a measured table: `_audit/_census/read-addresses.tsv`
+# gates them PRESS-PERMITTED together with `M C72`, and its notes name what
+# must be BUILT before any session helps -- a name-free shaper for the panel of
+# people, a caller wiring the counter. Listing two of the three again under
+# bucket 1 as session-only double-counted them and stated a premise the
+# measurement does not hold. `_audit/2026-09-23-census-cleanup.md` item 1.
 
 
 def walk():
@@ -165,7 +186,18 @@ def walk():
     The replication exists because `reader_closable_blockers.main()` does this
     same walk inline with no seam to import, and carving a seam out of a file
     three other waves may be editing is not worth the contention.
+
+    The loop itself lives in `walk_cells()`, which keeps each row's cells for
+    the one reader that needs them (bucket 1 reads the hold a cell cites).
+    This keeps its four-tuple shape because `check_read_addresses.population`
+    and the tests unpack it.
     """
+    for letter, rid, state, direction, _cells in walk_cells():
+        yield letter, rid, state, direction
+
+
+def walk_cells():
+    """`walk()`, with each row's parsed cells as a fifth element."""
     for letter, name in ccs.SLICES.items():
         path = ccs.CENSUS / name
         for line in path.read_text(encoding="utf-8",
@@ -184,7 +216,7 @@ def walk():
                 st = "GAP"
             if not st:
                 continue
-            yield letter, c[0], FOLD.get(st, st), rcb.direction_of(c)
+            yield letter, c[0], FOLD.get(st, st), rcb.direction_of(c), c
 
 
 def control(rows) -> list[str]:
@@ -292,6 +324,27 @@ def pct(n: int, d: int) -> str:
     return "  n/a" if not d else f"{100.0 * n / d:5.1f}%"
 
 
+def _row_order(row: str) -> tuple:
+    """"P A11" after "P A8": slice, the id's letters, its digits as a number."""
+    letter, _sep, rid = row.partition(" ")
+    digits = "".join(ch for ch in rid if ch.isdigit())
+    return (letter, rid.rstrip("0123456789"), int(digits) if digits else 0, rid)
+
+
+def _wrap(p, rows_held: list[str], indent: int = 9, width: int = 76) -> None:
+    """Print row ids comma-separated, wrapped, so every member is on the page."""
+    line = ""
+    for row in rows_held:
+        piece = row if not line else f", {row}"
+        if line and indent + len(line) + len(piece) > width:
+            p(" " * indent + line + ",")
+            line = row
+        else:
+            line += piece
+    if line:
+        p(" " * indent + line)
+
+
 def bucket3_split(rows) -> tuple[dict[str, int] | None, list[str]]:
     """(the measured split of bucket 3, problems) off the address table.
 
@@ -314,9 +367,81 @@ def bucket3_split(rows) -> tuple[dict[str, int] | None, list[str]]:
     table, problems = cra.load()
     problems += cra.coverage_problems(table, pop)
     problems += cra.shape_problems(table)
+    # And no row blocked on nothing where a ruling holds its page: the edge
+    # the split first shipped without, which let `M M49` count as blocked on
+    # nothing on a messaging page (`_audit/2026-09-23-census-cleanup.md` item
+    # 6). Pure -- it reads the holds table, never the register.
+    problems += cra.ruling_problems(table)
     if problems:
         return None, problems
     return cra.split(table), []
+
+
+#: The name the rows no ruling holds are counted under. NOT a hold id -- the
+#: absence of one -- and spelled with a space, which no id the HELD BY marker
+#: can read carries, so it can never collide with one.
+NO_RULING = "NO RULING"
+
+
+def bucket1_holds(rows, texts: dict | None = None):
+    """({"L id": hold id or None} for every COVERED-UNFIRED row, problems).
+
+    DERIVED FROM THE CENSUS, NEVER TYPED HERE -- `ruling_holds.hold_of` reads
+    the row's R/W cell and the hold its own cell cites, and says why for every
+    rule it applies. `texts` maps (letter, row id) to the row's cells joined
+    and defaults to a fresh read of the census; it is a parameter so a control
+    can plant a cell without writing one.
+
+    WITHHELD, NEVER GUESSED. A row whose hold cannot be read -- an id this
+    census does not know, a read row citing the write ruling, an R+W row --
+    withholds the whole split, as bucket 3's does, so each `b1_` pin reports
+    nothing to check rather than a figure somebody would quote.
+    """
+    unfired = [(letter, rid, d) for letter, rid, st, d in rows
+               if st == "COVERED-UNFIRED"]
+    if texts is None:
+        texts = {(letter, rid): " | ".join(c)
+                 for letter, rid, st, _d, c in walk_cells()
+                 if st == "COVERED-UNFIRED"}
+    holds: dict[str, str | None] = {}
+    problems: list[str] = []
+    for letter, rid, direction in unfired:
+        text = texts.get((letter, rid))
+        if text is None:
+            problems.append(f"{letter} {rid}: COVERED-UNFIRED, and no cells were "
+                            f"read for it")
+            continue
+        hold, row_problems = rh.hold_of(direction, text)
+        problems += [f"{letter} {rid}: {p}" for p in row_problems]
+        holds[f"{letter} {rid}"] = hold
+    if problems:
+        return None, problems
+    return holds, []
+
+
+def bucket1_moves(holds: dict) -> list[str]:
+    """Every COVERED-UNFIRED row whose hold differs from `PINNED_B1_ROWS`.
+
+    THE COUNT PINS CANNOT DO THIS. Two rows swapping holds leave every count
+    where it was; a row entering the state as another leaves it moves nothing
+    either. This compares ROW BY ROW and names each row: entered, left, or
+    moved from one hold to another.
+    """
+    pinned = {row: hold for hold, members in PINNED_B1_ROWS.items()
+              for row in members}
+    live = {row: (hold or NO_RULING) for row, hold in holds.items()}
+    out: list[str] = []
+    for row in sorted(set(live) - set(pinned)):
+        out.append(f"{row}: ENTERED COVERED-UNFIRED, held by {live[row]} -- "
+                   f"not pinned")
+    for row in sorted(set(pinned) - set(live)):
+        out.append(f"{row}: LEFT COVERED-UNFIRED (pinned as held by "
+                   f"{pinned[row]})")
+    for row in sorted(set(live) & set(pinned)):
+        if live[row] != pinned[row]:
+            out.append(f"{row}: pinned as held by {pinned[row]}, now held by "
+                       f"{live[row]}")
+    return out
 
 
 def report(rows, out) -> dict:
@@ -450,28 +575,118 @@ def report(rows, out) -> dict:
     gap_rows = [(l, r, d) for l, r, st, d in rows if st == "GAP"]
     by_dir = collections.Counter(d for _l, _r, d in gap_rows)
     reader = by_dir["R"] + by_dir["R+W"]
-    p("  -- BUCKET 1: BLOCKED ON A LIVE BROWSER SESSION -------------------")
+    p("  -- BUCKET 1: COVERED, NEVER FIRED -- AND WHAT HOLDS EACH ROW ------")
     p(f"     COVERED-UNFIRED                         {unfired:4d}   DERIVED from the state")
     p("       The code exists and has never returned a payload from live")
-    p("       LinkedIn. A session is the entire remaining cost, by definition")
-    p("       of the state -- no ruling, no design, no build.")
-    named_press = [k for k in PRESS_BLOCKED_NAMED
-                   if any((l, r) == k and st == "GAP" for l, r, st, _d in rows)]
-    p(f"     still-GAP rows needing a press          {len(named_press):4d}   ENUMERATED"
-      f" {sorted(named_press)}")
-    p(f"     bucket 1, named                         {unfired + len(named_press):4d}")
+    p("       LinkedIn. THE STATE SAYS NOTHING ABOUT WHY. Until 2026-09-23 this")
+    p("       bucket said a session was the entire remaining cost; measured row")
+    p("       by row that day, a session was the whole cost for none of them")
+    p("       (`_audit/2026-09-23-bucket1-fires.md` section 3). So what holds each")
+    p("       row is DERIVED here from the census and never typed: a W row by its")
+    p("       R/W cell, any other row by the hold its own cell cites as HELD BY.")
+    p("       `scripts/ruling_holds.py` resolves every cited id; this file only")
+    p("       counts them. THE RULINGS MOVED THE SAME DAY: the operator's ruling")
+    p("       (b) at 18:15 (`WRITE-CLASS-B`) lifted the messaging ruling and the")
+    p("       read-only rule, and every write now fires only at a target he")
+    p("       names (`OPERATOR-NAMES-THE-TARGET`). The orchestrator's delegated")
+    p("       calls of the same day put his own inbox reads under (b),")
+    p("       answered the notifications question, and took edits to his own")
+    p("       profile fields out of the write hold")
+    p("       (`SELF-PROFILE-EDITS-NOT-OUTWARD`, cited as RELEASED BY). All")
+    p("       registered.")
+    holds, b1_problems = bucket1_holds(rows)
+    split1 = None
+    released1 = 0
+    if holds is None:
+        p("     BUCKET 1 SPLIT WITHHELD -- a row's hold cannot be read, so any")
+        p("     split would count a guess:")
+        for problem in b1_problems[:12]:
+            p(f"       !! {problem}")
+        if len(b1_problems) > 12:
+            p(f"       !! ... and {len(b1_problems) - 12} more")
+    else:
+        direction = {f"{l} {r}": d for l, r, _st, d in rows}
+        members: dict[str, list[str]] = collections.defaultdict(list)
+        for row, hold in holds.items():
+            members[hold or NO_RULING].append(row)
+        split1 = {"standing": 0, "relayed": 0, "pending": 0, "none": 0}
+        headings = (
+            ("STANDING", "standing",
+             "held by a STANDING ruling -- made, registered, in force:"),
+            ("RELAYED", "relayed",
+             "held by a RELAYED ruling -- made, not yet in the register:"),
+            ("PENDING", "pending",
+             "waiting on a PENDING question to the operator -- NOT a ruling:"),
+        )
+        for status, key, heading in headings:
+            p(f"     {heading}")
+            ids = [i for i, h in rh.ROW_HOLDS.items() if h.status == status]
+            if not ids:
+                p("       none")
+            for hold_id in ids:
+                hold = rh.ROW_HOLDS[hold_id]
+                rows_held = sorted(members.get(hold_id, []), key=_row_order)
+                split1[key] += len(rows_held)
+                how = "DERIVED  cited"
+                if hold.binds == "write":
+                    by_cell = sum(1 for r in rows_held
+                                  if direction.get(r) == "W")
+                    how = (f"DERIVED  W {by_cell} by the R/W cell, "
+                           f"{len(rows_held) - by_cell} cited")
+                p(f"       {hold_id:37s} {len(rows_held):4d}   {how}")
+                p(f"         {hold.gist}")
+                _wrap(p, rows_held)
+        free = sorted(members.get(NO_RULING, []), key=_row_order)
+        split1["none"] = len(free)
+        p(f"     {'held by NO ruling -- the cell says what':39s} "
+          f"{len(free):4d}   DERIVED")
+        p("       remains for each: a press, a build, or a session")
+        _wrap(p, free)
+        # A W row can only be held by nothing when its own cell cites a
+        # release, so the released rows are exactly the W rows in this group.
+        released = [r for r in free if direction.get(r) == "W"]
+        released1 = len(released)
+        if released:
+            p(f"       of which WRITES RELEASED by a registered ruling    "
+              f"{released1:4d}   DERIVED  cited")
+            for release_id, release in rh.ROW_RELEASES.items():
+                p(f"         {release_id}")
+                for piece in textwrap.wrap(release.gist, 64):
+                    p(f"           {piece}")
+            _wrap(p, released, indent=11)
+        total1 = sum(split1.values())
+        p(f"     CHECK: {split1['standing']} + {split1['relayed']} + "
+          f"{split1['pending']} + {split1['none']} = {total1}, and "
+          f"COVERED-UNFIRED is {unfired}")
+        p("     LIFTED, and cited by no row as a hold (a stale citation withholds")
+        p("     this split):")
+        for hold_id, entry in rh.LIFTED_ROW_HOLDS.items():
+            p(f"       {hold_id}  (the register says {entry.register_status})")
+            for piece in textwrap.wrap(entry.why, 66):
+                p(f"         {piece}")
     p("")
     p("  -- BUCKET 2: BLOCKED ON AN OPERATOR RULING -----------------------")
     named_ruling = [k for k in RULING_BLOCKED_NAMED
                     if any((l, r) == k and st == "GAP" for l, r, st, _d in rows)]
-    p(f"     one undecided question, five rows       {len(named_ruling):4d}   ENUMERATED"
+    p(f"     one undecided question (D3)             {len(named_ruling):4d}   ENUMERATED"
       f" {sorted(named_ruling)}")
     p(f"     write-direction still-GAP rows          {by_dir['W']:4d}   DERIVED from the"
       f" census R/W cell")
-    p("       Governed by the STANDING ruling `NO-IRREVERSIBLE-WRITE-IS-FIRED`:")
-    p("       a write may be designed, gated and left ready, and may NOT be")
-    p("       fired at a real target without him. So the last step of every one")
-    p("       of these is a decision, whatever is built first. This is a")
+    # Counted, not assumed: a still-GAP write leaves the target condition only
+    # the way a bucket-1 write does, by citing a release in its own cell.
+    released_gap = sum(
+        1 for _l, _r, st, d, cells in walk_cells()
+        if st == "GAP" and d == "W"
+        and rh.cited(" | ".join(cells), rh.RELEASED_BY_MARKER))
+    p("       Governed until 18:15 on 2026-09-23 by `NO-IRREVERSIBLE-WRITE-IS-FIRED`,")
+    p("       and since then by the operator's ruling (b), `WRITE-CLASS-B`, with")
+    p("       `OPERATOR-NAMES-THE-TARGET`: an outward write may be designed, gated")
+    p("       and left ready, and fired only at a target HE names. So the last")
+    p("       step of each OUTWARD one is his decision, whatever is built first.")
+    p("       Edits to his own profile fields are not outward")
+    p("       (`SELF-PROFILE-EDITS-NOT-OUTWARD`), and which of these rows are such")
+    p("       edits is NOT counted here: a row says so only by citing the release")
+    p(f"       in its own cell, and {released_gap} still-GAP write row(s) do. This is a")
     p("       CEILING on the bucket, not a claim that each row is otherwise")
     p("       ready -- most are not.")
     p("")
@@ -519,30 +734,42 @@ def report(rows, out) -> dict:
             "BUILT-UNFIRED": "the reader ships, never fired",
             "PRESS": "a press the shipped gate refuses",
             "RULING": "a decision nobody has made",
+            "STANDING-RULING": "a ruling made holds the page",
         }
         for gate in cra.GATES:
             p(f"       {gate:16s} {labels[gate]:34s} {split3['gate:' + gate]:4d}")
         p(f"     BLOCKED ON NOTHING, MEASURED            "
           f"{split3['blocked_on_nothing']:4d}   of {reader}: ADMITTED, and a"
           f" reader could be")
-        p("       written today -- no ruling, no boundary edit, no refused press."
-          " See")
-        p("       `_audit/2026-09-23-bucket3-addresses.md` for the rows.")
-    p(f"     of those {reader}, named elsewhere here as needing a press"
-      f"     {len(named_press):4d}")
+        p("       written today -- no ruling made or pending holds the page, no")
+        p("       boundary edit, no refused press. Read off the table's gate")
+        p("       column; that no ruling holds their pages is checked on every")
+        p("       run against `scripts/ruling_holds.py`, since 2026-09-23:")
+        # LISTED, not pointed at. This line used to send the reader to the
+        # bucket-3 audit, which names the five of its own day; the table has
+        # moved since and a pointer cannot say so.
+        table3, _problems3 = cra.load()
+        _wrap(p, sorted((f"{r['slice']} {r['row']}" for r in table3
+                         if r["class"] == "ADMITTED"
+                         and r["gate"] in cra.BLOCKED_ON_NOTHING),
+                        key=_row_order))
     p(f"     of those {reader}, named elsewhere here as needing a ruling"
       f"    "
       f"{len([k for k in named_ruling if any((l, r) == k and d in ('R', 'R+W') for l, r, _s, d in rows)]):4d}")
     p("")
-    p("  -- UNCLASSIFIED: A MEASUREMENT GAP, NOT A BLOCKER ----------------")
-    p(f"     direction unknown                       {by_dir['unknown']:4d}")
+    p("  -- JOBS: DIRECTION BY SIDE TABLE, NOT BY CENSUS CELL ----------")
+    p(f"     direction unknown in the census cell    {by_dir['unknown']:4d}")
     p(f"     direction ambiguous                     {by_dir['ambiguous']:4d}")
-    p("       `jobs.md` has no per-row R/W column at all, so its rows cannot be")
-    p("       placed in bucket 2 or 3 by this method. That is a fact about the")
-    p("       census's shape, and `_audit/2026-09-21-the-jobs-direction.md`")
-    p("       argues the column should NOT be added. Until that is ruled, these")
-    p("       rows are honestly unplaceable and are not silently folded into a")
-    p("       neighbouring bucket to make the arithmetic tidy.")
+    p("       `jobs.md` has no per-row R/W column, by the argument of")
+    p("       `_audit/2026-09-21-the-jobs-direction.md` section 8; the")
+    p("       per-row reading lives in `_audit/_census/jobs-directions.tsv`,")
+    p("       checked by `scripts/check_jobs_directions.py`:")
+    # WITHHELD RATHER THAN ZEROED, as bucket 3: a jobs table that has
+    # drifted from the census returns None and each `jobs_` pin reports
+    # nothing to check. Pure -- no boundary import, so the can-fail copy runs.
+    jobs, jobs_problems = cjd.census_figures(rows)
+    for line in cjd.report_lines(jobs, jobs_problems):
+        p(line)
     p("")
     p(f"     CHECK: {by_dir['R']} + {by_dir['R+W']} + {by_dir['W']} + "
       f"{by_dir['unknown']} + {by_dir['ambiguous']} = "
@@ -561,7 +788,12 @@ def report(rows, out) -> dict:
     p("    one this server may OPEN, and nothing more: ALLOWED IS NOT SERVED,")
     p("    so an admitted address is not evidence that the page draws what the")
     p("    row wants, and the gate column past the boundary is a judgement")
-    p("    enumerated from committed sources rather than a measurement.")
+    p("    enumerated from committed sources rather than a measurement. One")
+    p("    part of that judgement IS checked, since 2026-09-23: no row may be")
+    p("    blocked on nothing on a page a ruling holds -- the holds that bind a")
+    p("    SURFACE, in `scripts/ruling_holds.py`. A hold that binds an ACT,")
+    p("    such as the one on every write, cannot be read off an address, so a")
+    p("    row it holds must say so in its note and no instrument checks that.")
     if split3 is not None:
         unaddressed = (split3["class:NO-ADDRESS"]
                        + split3["class:NEEDS-SESSION"]
@@ -592,7 +824,18 @@ def report(rows, out) -> dict:
         "gap_write": by_dir["W"],
         "gap_unknown": by_dir["unknown"],
         "gap_ambiguous": by_dir["ambiguous"],
+        "b2_d3_rows": len(named_ruling),
     }
+    # WITHHELD RATHER THAN ZEROED, for the same reason as bucket 3 below: a
+    # hold that cannot be read would otherwise count as a zero somewhere.
+    if split1 is not None:
+        figures.update({
+            "b1_standing": split1["standing"],
+            "b1_relayed": split1["relayed"],
+            "b1_pending": split1["pending"],
+            "b1_no_ruling": split1["none"],
+            "b1_released": released1,
+        })
     # WITHHELD RATHER THAN ZEROED. When the address table does not cover
     # today's bucket 3 these keys are simply absent, so `--check` reports each
     # of their pins as having nothing to check -- a zero here would read as a
@@ -606,6 +849,10 @@ def report(rows, out) -> dict:
             "b3_undetermined": split3["class:UNDETERMINED"],
             "b3_blocked_on_nothing": split3["blocked_on_nothing"],
         })
+    # THE JOBS SLICE, BY SIDE TABLE -- withheld, never zeroed, when
+    # `_audit/_census/jobs-directions.tsv` has drifted from the census.
+    if jobs is not None:
+        figures.update(jobs)
     return figures
 
 
@@ -623,16 +870,31 @@ PINNED = {
     "capabilities_achievable": 389,
     "out_of_scope": 315,
     "achievable": 389,
-    "adjudicated": 430,
-    "delivered_broad": 96,
+    "adjudicated": 434,
+    #: 434 / 100 / 270 / 25, and gap_write 150, since the lane-L4 merge
+    #: (2026-09-23): `N 47` was built -- `linkedin_follow_company_page`, a
+    #: WRITE, behind the flag and the single-use grant, never fired (GAP ->
+    #: COVERED-UNFIRED, `_audit/2026-09-23-lane-l4-writes.md`). It is a W row,
+    #: so it enters bucket 1 held by OPERATOR-NAMES-THE-TARGET with no marker
+    #: (b1_standing 9 -> 10), and it leaves the write-direction GAP count.
+    #: 433 / 99 / 271 / 24 since the lane-L3 merge (2026-09-23): `J 18` and
+    #: `J 39` were built (GAP -> COVERED-UNFIRED, `_audit/2026-09-23-lane-l3-
+    #: jobs.md`); both enter bucket 1 held by no ruling (b1_no_ruling 7 -> 9),
+    #: and gap_unknown 56 -> 54 because both were jobs rows. gap_read stays 66:
+    #: jobs rows are counted by the side table, below, not in bucket 3.
+    #: 431 / 97 / 273 / 22 / 66 since the lane-L1 merge: `P G6` was built
+    #: (GAP -> COVERED-UNFIRED, `_audit/2026-09-23-lane-l1-refused-reads.md`).
+    #: One row changing class moves all five; b3 admitted/refused 40/16 are
+    #: L1's allowlist admissions, and b1_no_ruling 7 is P G6 entering bucket 1.
+    "delivered_broad": 100,
     #: 75 and 21 since the bucket-1 merge: `M C41` fired live and moved from
     #: COVERED-UNFIRED to COVERED-PROVEN (`_audit/2026-09-23-bucket1-fires.md`).
     #: One row changing class moves both, and leaves delivered_broad at 96.
     "delivered_strict": 75,
-    "gap": 274,
+    "gap": 270,
     "cannot_deliver": 19,
-    "unfired": 21,
-    "gap_read": 67,
+    "unfired": 25,
+    "gap_read": 66,
     #: 151, not the 152 published by `_audit/2026-09-21-the-write-ceiling.md`.
     #: That document scoped itself to `profile.md`, `network.md` and
     #: `messaging-and-content.md`; measured at HEAD those three carry W 151 and
@@ -640,11 +902,15 @@ PINNED = {
     #: wave repaired `M C85` from `W` to `R+W` IN PLACE, which is a -1 on W and
     #: is CONSISTENT WITH the difference rather than proof of it -- stated that
     #: way because I did not re-derive that document's population.
-    "gap_write": 151,
-    #: All 56 are `jobs.md`, which has no per-row R/W column. Not a coincidence
+    #: 150 since the lane-L4 merge: `N 47` was built and left GAP. The same
+    #: lane classed all 151 in `_audit/_census/write-classes.tsv`, which keeps
+    #: the built row's line, and `scripts/check_write_classes.py` re-walks it.
+    "gap_write": 150,
+    #: All 54 are `jobs.md`, which has no per-row R/W column (56 until the
+    #: lane-L3 merge built J 18 and J 39). Not a coincidence
     #: and not a defect in the finder: it is the whole of that slice's still-GAP
     #: population.
-    "gap_unknown": 56,
+    "gap_unknown": 54,
     "gap_ambiguous": 0,
     #: BUCKET 3, MEASURED 2026-09-23 (`_audit/2026-09-23-bucket3-addresses.md`),
     #: counted off `_audit/_census/read-addresses.tsv`, whose every verdict
@@ -655,12 +921,112 @@ PINNED = {
     #: row entering or leaving bucket 3, or a boundary edit that moves a
     #: verdict and is carried into the table, cannot move the headline
     #: "blocked on nothing" figure without somebody re-pinning it out loud.
-    "b3_admitted": 33,
-    "b3_refused": 24,
+    "b3_admitted": 40,
+    "b3_refused": 16,
     "b3_no_address": 2,
     "b3_needs_session": 6,
     "b3_undetermined": 2,
-    "b3_blocked_on_nothing": 5,
+    #: ITS HISTORY ON 2026-09-23 IS THE RULINGS AND THE LIVE READINGS MOVING
+    #: UNDER IT, one line per move:
+    #:   5   the bucket-3 wave, which asked the boundary and not the rulings
+    #:   4   while `DO-NOT-OPEN-MESSAGING` held `M M49`'s messaging page
+    #:   5   after the operator's ruling (b) at 18:15 lifted it
+    #:   1   the live readers wave: P O3, N 134 and M C72 each need a press
+    #:       the gate does not yet reach, M C85 a caller-supplied poll
+    #:       address; only M M49 was left a reader could close
+    #:   12  on the census-cleanup branch, before it merged that wave: the
+    #:       calls registered at 4a57b75 (D1-SEARCH-AS-READS,
+    #:       OTHER-MEMBER-IDS-AS-READS) decided what eight rows were gated
+    #:       RULING on; seven need only a reader (N 79, N 84, N 85, N 87,
+    #:       N 94, N 172, N 194) and N 93 a live look first
+    #:   8   MEASURED at the merge of the two: M M49 and those seven
+    #: The gates past the boundary are re-judged BY HAND when a ruling lands;
+    #: what `ruling_problems` asks on every run is only that no row blocked on
+    #: nothing sits on a page a hold binds.
+    #: `_audit/2026-09-23-census-cleanup.md` items 6 and 7, sections 11-13.
+    "b3_blocked_on_nothing": 8,
+    #: BUCKET 1 BY WHAT HOLDS EACH ROW, DERIVED from the census and the
+    #: holds in `scripts/ruling_holds.py`, BY THE STATUS OF THE HOLD: standing,
+    #: relayed, pending, or none. They sum to `unfired`, and `PINNED_B1_ROWS`
+    #: below pins WHICH rows, because a count cannot see two rows swap.
+    #:
+    #: WHAT MOVED, AND WHY, three times on 2026-09-23:
+    #:   first build          15 standing (the write ruling) + 2 standing (the
+    #:                        messaging ruling) / 0 / 2 pending / 2 none --
+    #:                        the bucket-1 audit's section 3, row for row
+    #:   ruling (b), relayed  0 / 17 relayed (the writes and M M33, M M43) /
+    #:                        2 pending / 2 none
+    #:   master 53ba1b6       15 standing / 0 / 0 / 6 none. The register made
+    #:                        `OPERATOR-NAMES-THE-TARGET` STANDING (+15 here);
+    #:                        `OWN-INBOX-READS-COVERED-BY-B` released M M33 and
+    #:                        M M43 and the notifications question was answered
+    #:                        PERMITTED, releasing N 20 and N 45 (+4 to none).
+    #:   master 4a57b75       9 standing / 0 / 0 / 12 none, 6 of them RELEASED
+    #:                        writes: SELF-PROFILE-EDITS-NOT-OUTWARD took the
+    #:                        six edits to his own profile fields (P A8, A11,
+    #:                        A13, A17, A19, A21) out of the write hold, each
+    #:                        cell citing it with RELEASED BY (-6 standing,
+    #:                        +6 none).
+    #:   merge of master      9 standing / 0 / 0 / 15 none, 6 released, of 24:
+    #:   cab6995              lanes L1 and L3 had built three reads no ruling
+    #:                        holds (P G6; J 18, J 39), +3 none.
+    #:   merge of lane L4     10 standing / 0 / 0 / 15 none, 6 released, of 25:
+    #:                        N 47 was built, a W row, held by the write hold
+    #:                        with no marker (+1 standing).
+    #: `b1_relayed` is the count this file called `b1_named_target` until the
+    #: target condition was registered: a name for what a status COUNTS, not
+    #: for which ruling happens to have it today. `b1_released` is a SUBSET of
+    #: `b1_no_ruling`: the writes held by nothing because a release says so.
+    "b1_standing": 10,
+    "b1_relayed": 0,
+    "b1_pending": 0,
+    "b1_no_ruling": 15,
+    "b1_released": 6,
+    #: D3's enumerated list: FOUR once `M C83` left it, and THREE since
+    #: `N 172` left it the same evening on OTHER-MEMBER-IDS-AS-READS -- see
+    #: `RULING_BLOCKED_NAMED`. It was printed as "five rows" and pinned
+    #: nowhere, which is how a list edit could have moved it silently.
+    "b2_d3_rows": 3,
+    #: THE JOBS SLICE BY SIDE TABLE, 2026-09-23 (lane L3), counted off
+    #: `_audit/_census/jobs-directions.tsv`, whose every verdict and deciding
+    #: phrase `scripts/check_jobs_directions.py` re-checks. `jobs_gap` equals
+    #: `gap_unknown` and the three directions partition it; the five classes
+    #: partition its R + R+W rows (26 + 3 = 29). Kept OUT of `gap_read` and
+    #: `gap_write` deliberately: `gap_read` feeds bucket 3, whose address
+    #: table does not carry jobs rows.
+    "jobs_gap": 54,
+    "jobs_dir_r": 26,
+    "jobs_dir_w": 25,
+    "jobs_dir_rw": 3,
+    "jobs_admitted": 9,
+    "jobs_refused": 19,
+    "jobs_no_address": 0,
+    "jobs_needs_session": 1,
+    "jobs_undetermined": 0,
+    "jobs_blocked_on_nothing": 0,
+}
+
+#: BUCKET 1, ROW BY ROW -- the control that goes RED WHEN A ROW MOVES, and
+#: names it. `bucket1_moves()` compares every COVERED-UNFIRED row's DERIVED
+#: hold with this table: a row entering or leaving the state, or changing
+#: hold, is reported by id. Re-pin only in the commit that says why it moved.
+PINNED_B1_ROWS: dict[str, tuple[str, ...]] = {
+    #: `N 47` entered with the lane-L4 merge, 2026-09-23: a write to an
+    #: organisation Page, built offline and never fired, held until the
+    #: operator names the Page -- the same hold as its twin `N 48`.
+    "OPERATOR-NAMES-THE-TARGET": (
+        "J 103", "J 104", "J 128",
+        "M C1", "M C25", "M C32",
+        "N 1", "N 46", "N 47", "N 48",
+    ),
+    #: `P G6` entered with the lane-L1 merge and `J 18` and `J 39` with the
+    #: lane-L3 merge, 2026-09-23: reads built offline, which no ruling holds.
+    #: The six P A rows are the writes SELF-PROFILE-EDITS-NOT-OUTWARD
+    #: releases, each by its own cell.
+    NO_RULING: (
+        "J 18", "J 39", "J 121", "J 122", "M M33", "M M43", "N 20", "N 45",
+        "P A8", "P A11", "P A13", "P A17", "P A19", "P A21", "P G6",
+    ),
 }
 
 
@@ -702,7 +1068,14 @@ def main(argv: list[str] | None = None) -> int:
         print(f"  PINS WITH NO FIGURE TO CHECK: {missing} -- a pin that "
               f"checks nothing is worse than none.")
         moved = moved or {"_": (0, 1)}
-    return 1 if (args.check and (moved or missing)) else 0
+    holds, _problems = bucket1_holds(rows)
+    b1_moved = bucket1_moves(holds) if holds is not None else []
+    if b1_moved:
+        print(f"{len(b1_moved)} BUCKET-1 ROW(S) MOVED OFF THEIR PINNED HOLD:")
+        for line in b1_moved:
+            print(f"    {line}")
+        print("  Re-pin PINNED_B1_ROWS in the same commit that says why.")
+    return 1 if (args.check and (moved or missing or b1_moved)) else 0
 
 
 if __name__ == "__main__":

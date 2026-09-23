@@ -13,9 +13,10 @@ until this table that answer lived in nobody's column.
         unfollow, the Open To Work signal
     R2  OUTWARD (WAS CUT; ALLOWED 2026-09-23 18:15) -- apply, connect, a
         message or InMail send. MEMBERSHIP is still defined by the operator's
-        cut, which names the acts; their STATUS changed on a ruling RELAYED
-        to this lane by the orchestrator (see the lane audit, section 5).
-        Every R2 line carries BUILD-READY detail for the lane that builds it.
+        cut, which names the acts; their STATUS changed with WRITE-CLASS-B,
+        his ruling (b), relayed to this lane mid-wave and registered on
+        master at 53ba1b6 (the lane audit, section 5). Every R2 line carries
+        BUILD-READY detail for the lane that builds it.
     R3  other, or undecided -- including rows ADJACENT to R1 whose membership
         is a reading nobody has made
 
@@ -41,7 +42,9 @@ THIS FILE EXITS 1 WHEN:
   * a line's capability text no longer matches its census cell;
   * a class disagrees with its act, or an act is off the vocabulary;
   * a line does not cite its own census row, or an R1 / R2 line does not
-    cite the passage that DEFINES its class, or any citation fails to resolve;
+    cite the passage that DEFINES its class, or any citation fails to resolve
+    -- including a ruling the register now reads SUPERSEDED, which still
+    resolves by id and no longer says anything that is true;
   * a ``built:`` line names an action that is not in ``writes.PERFORMABLE``,
     or whose row is still GAP -- or a non-R1 line carries a build disposition;
   * an R2 line lacks any of its four build-ready columns, its target does not
@@ -57,13 +60,14 @@ table needs the CAPABILITY cell and neither shipped walk returns it.
 THE IMPORT OF THE WRITE MODULE IS LAZY, and only the ``built:`` check needs it,
 so the parse and the population stay pure.
 
-SHOWN FAILING: ``tests/test_write_classes.py`` plants sixteen defects into a
-COPY of the real table -- a missing row, a duplicate, a row that is not a
+SHOWN FAILING: ``tests/test_write_classes.py`` plants seventeen defects into
+a COPY of the real table -- a missing row, a duplicate, a row that is not a
 write-direction GAP row, a class disagreeing with its act, a CONSISTENT
 widening (act and class rewritten together) that only the defining-passage
 rule can see, an off-vocabulary act, a drifted capability, a missing
 self-citation, a phrase that no longer resolves, a ruling id that is not
-registered, a build naming an action that cannot perform, a classify-only
+registered, a ruling the register reads SUPERSEDED, a build naming an action
+that cannot perform, a classify-only
 class carrying a build, an R2 line missing its build-ready detail, detail on
 an R3 line, an R2 target outside the four kinds, and non-ASCII -- and asserts
 each turns this red and names the row. It asserts green on the real table
@@ -365,6 +369,23 @@ def _registered_rulings(root: pathlib.Path) -> set[str]:
     return set(re.findall(r"^\| `([A-Z0-9][A-Z0-9\-]*)` \|", text, re.M))
 
 
+def superseded_rulings(root: pathlib.Path = ROOT) -> set[str]:
+    """The registered rulings whose CLAIM cell opens ``SUPERSEDED``.
+
+    A superseded ruling keeps its row in the register, so its id still
+    resolves -- and that is the trap: a table citing it stays green while the
+    thing it cites no longer holds. MEASURED at the lane-L4 merge: this table
+    cited ``DO-NOT-OPEN-MESSAGING`` on 32 lines after ``WRITE-CLASS-B``
+    superseded it, every check here passed, and this rule turned all 32 red
+    before the table was regenerated. An AMENDED ruling is still in force in
+    part and is not refused.
+    """
+    text = (root / "_audit" / "RULINGS.md").read_text(encoding="utf-8",
+                                                     errors="replace")
+    return set(re.findall(r"^\| `([A-Z0-9][A-Z0-9\-]*)` \| SUPERSEDED\b",
+                          text, re.M))
+
+
 def source_problems(rows: list[dict[str, str]],
                     root: pathlib.Path = ROOT) -> list[str]:
     """Every citation RESOLVES: the file, the phrase, the census row, the ruling.
@@ -376,6 +397,7 @@ def source_problems(rows: list[dict[str, str]],
     """
     problems: list[str] = []
     rulings = _registered_rulings(root)
+    superseded = superseded_rulings(root)
     cache: dict[pathlib.Path, str] = {}
 
     def text_of(path: pathlib.Path) -> str:
@@ -395,6 +417,10 @@ def source_problems(rows: list[dict[str, str]],
                 if ruling.group(1) not in rulings:
                     problems.append(f"{tag}: ruling {ruling.group(1)} is not "
                                     f"registered in _audit/RULINGS.md")
+                elif ruling.group(1) in superseded:
+                    problems.append(f"{tag}: ruling {ruling.group(1)} is "
+                                    f"SUPERSEDED in _audit/RULINGS.md -- cite "
+                                    f"the ruling that replaced it")
                 continue
             self_row = _WC_SELF_ROW_RX.match(cite)
             if self_row:

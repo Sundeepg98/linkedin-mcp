@@ -50,15 +50,17 @@ VALUE-based because a positional reader read a Help Center reference as a
 direction. Four waves on 2026-09-05 wrote a second copy of a shipped instrument
 and three of the copies had a bug. The standing rule is to import.
 
-## IT SWEEPS NO CORPUS, AND CONTROL 5 PROVES IT
+## IT SWEEPS NO CORPUS, AND CONTROL 6 PROVES IT
 
 `_audit/INDEX.md` is a DERIVED view of `_audit/`, and three sweeping
 instruments have already needed an explicit exclusion for it (INSTRUMENTS.md
 45.9) because a derived view of a corpus must not be an input to the
-instruments that measure that corpus. This script reads the FOUR census slices
-named by `count_census_states.SLICES` and nothing else. Control 5 asserts that
-set by equality, so the exclusion is a measured property rather than a promise:
-if a future edit points this file at `_audit/` it goes red rather than quiet.
+instruments that measure that corpus. This script reads the TWO census slices
+of its `SCOPE` (`profile.md`, `network.md`), taken from
+`count_census_states.SLICES`, and nothing else. Control 6 prints the
+census files the module opens and refuses if any of them is an index file, so
+the exclusion is a measured property rather than a promise: if a future edit
+points this file at `_audit/` it goes red rather than quiet.
 
 USAGE
 
@@ -66,6 +68,8 @@ USAGE
     python scripts/triage_read_gap_rows.py --verdict BUILDABLE
     python scripts/triage_read_gap_rows.py --plant drop-a-row
     python scripts/triage_read_gap_rows.py --plant bad-verdict
+    python scripts/triage_read_gap_rows.py --plant stale-annotation
+    python scripts/triage_read_gap_rows.py --plant undecided-annotation
 
 `--plant` is how this file is SHOWN FAILING. An instrument that has only ever
 been seen passing certifies nothing, and a triage table is exactly the shape
@@ -109,14 +113,12 @@ TRIAGE: dict[str, tuple[str, str, str]] = {
     "P D25": ("ADDRESS", "ABSENT", "the add-section anchors measure "
                                    "is_read_url False with zero forbidden "
                                    "tokens; the operator must name the address"),
-    "P D28": ("PRESS", "", "measured distinct_langs 1 and the measuring "
-                           "document states it pressed nothing and proves no "
-                           "pressable control exists"),
+    "P D28": ("PRESS", "", "measured distinct_langs 1, and the measuring "
+                           "document states it pressed nothing and does not "
+                           "prove a pressable control exists"),
     "P F1": ("ADDRESS", "ABSENT", "the /in/me/details/ admission is restricted "
                                   "to experience, education and skills; "
                                   "recommendations.py ships and is UNWIRED"),
-    "P G6": ("ADDRESS", "ABSENT", "no per-post analytics address is admitted "
-                                  "and no module builds one from a urn"),
     "P H11": ("ADDRESS", "ABSENT", "the services detail address is unadmitted; "
                                    "the phrase is in an EXCLUSION set on the "
                                    "topcard path, discarded before parsing"),
@@ -148,14 +150,6 @@ TRIAGE: dict[str, tuple[str, str, str]] = {
                             "observing another account; writes_enabled is "
                             "False"),
     # ---- network.md ----
-    "N 33": ("BUILDABLE", "", "renders on the Page root, which is admitted; no "
-                              "reader exists. A second route already returns "
-                              "the per-connection ingredients"),
-    "N 53": ("SERVED", "", "shipped and pre-existing off the job posting's "
-                           "about-the-company card; the recorded blocker is "
-                           "false twice over"),
-    "N 54": ("BUILDABLE", "", "renders on the Page root, which is admitted; no "
-                              "reader exists"),
     "N 61": ("ADDRESS", "REFUSED", "both followed-hashtag spellings contain "
                                    "/follow, matching inside the word "
                                    "'followed' -- a substring hit, not a "
@@ -171,8 +165,6 @@ TRIAGE: dict[str, tuple[str, str, str]] = {
     "N 81": ("BUILDABLE", "", "served by the shipped people-search tool's "
                               "filter vocabulary"),
     "N 82": ("BUILDABLE", "", "served by the shipped people-search tool's "
-                              "filter vocabulary"),
-    "N 83": ("BUILDABLE", "", "served by the shipped people-search tool's "
                               "filter vocabulary"),
     "N 84": ("BUILDABLE", "", "served by the shipped people-search tool's "
                               "filter vocabulary"),
@@ -230,9 +222,6 @@ TRIAGE: dict[str, tuple[str, str, str]] = {
     "N 174": ("RULING", "", "the surface is unobservable until a pending "
                             "request exists, and creating one is a WRITE at a "
                             "real group"),
-    "N 175": ("BUILDABLE", "", "the group address is ADMITTED and no shipped "
-                               "tool can navigate to it -- every tool on this "
-                               "surface takes no parameter"),
     "N 177": ("RULING", "", "needs a group's member directory, refused here "
                             "and, in the boundary's own words, anywhere"),
     "N 178": ("RULING", "", "needs another member's profile, the boundary's "
@@ -253,6 +242,58 @@ TRIAGE: dict[str, tuple[str, str, str]] = {
                                    "exemption; and admin rights are unmeasured"),
     "N A5": ("ADDRESS", "REFUSED", "carries /invite, same double cost, same "
                                    "unmeasured precondition"),
+}
+
+#: LEFT GAP SINCE THE 2026-09-21 TRIAGE, measured 2026-09-23 with
+#: census_completion.walk():
+#:
+#:     N 33   COVERED-CANNOT-DELIVER   (its triage verdict was BUILDABLE)
+#:     N 53   COVERED-PROVEN           (was SERVED)
+#:     N 54   COVERED-CANNOT-DELIVER   (was BUILDABLE)
+#:     N 83   COVERED-PROVEN           (was BUILDABLE)
+#:     N 175  COVERED-CANNOT-DELIVER   (was BUILDABLE)
+#:
+#: They were removed rather than kept because CONTROL 4 refuses a verdict for
+#: a row that is not a read-GAP row, and that refusal is the tripwire this
+#: file exists to carry.
+
+#: These four 2026-09-21 verdicts were measured past by the bucket-3 address
+#: table (`_audit/_census/read-addresses.tsv`, audit
+#: `_audit/2026-09-23-bucket3-addresses.md`, whose CORRECTS line names exactly
+#: these four); this triage's closed alphabet has no class for MEASURE or
+#: NEEDS-SESSION, so the verdict letters are kept as that day's reading and
+#: the table that measured past them is named instead of being overwritten.
+MEASURED_PAST_BY_BUCKET3: dict[str, str] = {
+    "P F1": "the section sits on the ADMITTED /in/me/; bucket-3 gate MEASURE "
+            "(render unmeasured), not ADDRESS/ABSENT",
+    "P H11": "the section sits on the ADMITTED /in/me/; bucket-3 gate "
+             "MEASURE (render unmeasured), not ADDRESS/ABSENT",
+    "P L4": "waits on a LIVE READ of which address serves newsletter "
+            "analytics (bucket-3 NEEDS-SESSION), not on a refused address "
+            "anybody has seen served",
+    "N 61": "waits on a LIVE READ of where followed hashtags are drawn "
+            "(bucket-3 NEEDS-SESSION), not on a refused address anybody has "
+            "seen served",
+}
+
+#: RULING verdicts whose decision a REGISTERED ruling has since made -- the
+#: calls registered on master 4a57b75, 2026-09-23. A RULING verdict says
+#: "somebody has to decide something first", and for these four somebody has;
+#: kept as that day's reading, like the four above, with the ruling named
+#: instead of the verdict overwritten. The bucket-3 table re-gated each row
+#: READER the same evening (`_audit/2026-09-23-census-cleanup.md` section 12).
+#: CONTROL 8 refuses an entry whose row does not carry RULING: a decision can
+#: only have been made for a row that was waiting on one.
+DECIDED_SINCE_TRIAGE: dict[str, str] = {
+    "N 79": "D1-SEARCH-AS-READS: a keyword may be passed, from tool "
+            "arguments only; bucket-3 gate READER",
+    "N 94": "D1-SEARCH-AS-READS: a location facet may be passed, more than "
+            "one value included; bucket-3 gate READER",
+    "N 172": "OTHER-MEMBER-IDS-AS-READS with D1-SEARCH-AS-READS: another "
+             "member's id in a search facet, from tool arguments only; "
+             "bucket-3 gate READER",
+    "N 194": "D1-SEARCH-AS-READS: the hashtag is a keyword; bucket-3 gate "
+             "READER",
 }
 
 
@@ -289,7 +330,8 @@ def read_rows() -> dict[str, str]:
 
 
 def files_read() -> set[str]:
-    """Every census file this module opens. Control 5 compares it by equality."""
+    """Every census file this module opens. Control 6 prints it and refuses
+    if any member is an index file."""
     return {name for letter, name in ccs.SLICES.items() if letter in SCOPE}
 
 
@@ -299,7 +341,9 @@ def main(argv: list[str] | None = None) -> int:
                     help="list only the rows carrying this verdict")
     ap.add_argument("--plant", default="", choices=["", "drop-a-row",
                                                     "bad-verdict",
-                                                    "stale-census"],
+                                                    "stale-census",
+                                                    "stale-annotation",
+                                                    "undecided-annotation"],
                     help="SHOW THIS INSTRUMENT FAILING on a planted defect")
     args = ap.parse_args(argv)
 
@@ -314,6 +358,21 @@ def main(argv: list[str] | None = None) -> int:
         triage[victim] = ("PROBABLY-FINE", "", "a verdict off the alphabet")
         print(f"PLANTED: {victim} given a verdict off the closed alphabet. "
               f"Control 5 must refuse.\n")
+
+    # A COPY, NEVER THE MODULE DICT -- CONTROL 7 reads this, and the
+    # stale-annotation plant must not be able to touch MEASURED_PAST_BY_BUCKET3
+    # itself, or a planted defect would outlive the process that planted it.
+    annotations = dict(MEASURED_PAST_BY_BUCKET3)
+    if args.plant == "stale-annotation":
+        annotations["N 99999"] = "planted: no row carries this key"
+        print("PLANTED: an annotation for a row with no verdict. "
+              "Control 7 must refuse.\n")
+    decided = dict(DECIDED_SINCE_TRIAGE)
+    if args.plant == "undecided-annotation":
+        victim = next(k for k in sorted(triage) if triage[k][0] != "RULING")
+        decided[victim] = "planted: a decision for a row that awaited none"
+        print(f"PLANTED: {victim} annotated as decided, and its verdict is "
+              f"not RULING. Control 8 must refuse.\n")
 
     failures = 0
 
@@ -377,6 +436,34 @@ def main(argv: list[str] | None = None) -> int:
     else:
         print("      _audit/INDEX.md is NOT among them -- OK")
 
+    print("\n  CONTROL 7 -- every MEASURED_PAST_BY_BUCKET3 key still carries "
+          "a verdict")
+    orphaned = sorted(k for k in annotations if k not in triage)
+    if orphaned:
+        failures += 1
+        for key in orphaned:
+            print(f"      {key} carries an annotation but NO VERDICT in the "
+                  f"triage table -- an annotation for a row that has left "
+                  f"must not outlive the row")
+    else:
+        print(f"      {len(annotations)} annotations, every key carries a "
+              f"verdict -- OK")
+
+    print("\n  CONTROL 8 -- every DECIDED_SINCE_TRIAGE key carries the verdict "
+          "RULING")
+    undecidable = sorted(k for k in decided
+                         if triage.get(k, ("",))[0] != "RULING")
+    if undecidable:
+        failures += 1
+        for key in undecidable:
+            have = triage[key][0] if key in triage else "NO VERDICT"
+            print(f"      {key} is annotated as decided, and carries {have}, "
+                  f"not RULING -- only a row waiting on a decision can have "
+                  f"had one made")
+    else:
+        print(f"      {len(decided)} decided since the triage, each a RULING "
+              f"verdict -- OK")
+
     if failures:
         print(f"\n  REFUSING TO REPORT: {failures} control failure(s). A triage "
               f"that cannot be shown to cover every row should not print a "
@@ -399,6 +486,19 @@ def main(argv: list[str] | None = None) -> int:
               f"{counts[v]:7d}")
     print(f"  {'TOTAL':12s} {sum(per_slice['P'].values()):4d} "
           f"{sum(per_slice['N'].values()):4d} {sum(counts.values()):7d}")
+
+    print(f"\n  {len(MEASURED_PAST_BY_BUCKET3)} OF THESE VERDICTS WERE "
+          f"MEASURED PAST BY THE BUCKET-3 ADDRESS TABLE "
+          f"(_audit/_census/read-addresses.tsv):")
+    for key in sorted(MEASURED_PAST_BY_BUCKET3):
+        verdict = triage[key][0]
+        note = MEASURED_PAST_BY_BUCKET3[key]
+        print(f"    {key}  {verdict}  -- {note}")
+
+    print(f"\n  {len(DECIDED_SINCE_TRIAGE)} OF THE RULING VERDICTS WERE DECIDED "
+          f"SINCE, BY A REGISTERED RULING:")
+    for key in sorted(DECIDED_SINCE_TRIAGE, key=_sort_key):
+        print(f"    {key}  RULING  -- {DECIDED_SINCE_TRIAGE[key]}")
 
     if args.verdict:
         want_v = args.verdict.upper()

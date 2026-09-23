@@ -1,11 +1,13 @@
-"""The tool surface: fifty tools, thirteen of which write to LinkedIn.
+"""The tool surface: fifty-one tools, thirteen of which write to LinkedIn.
 
-THE FIFTIETH IS A WRITE, 2026-09-23, and every site that states these numbers
-moved in the same commit: ``linkedin_follow_company_page``, a follow performed
-on an organisation Page's own root and addressed by the Page's numeric id --
-the id ``linkedin_unfollow_company`` keys its rows by. Census row ``N 47``,
-COVERED-UNFIRED. The headline read "forty-nine tools, twelve of which write"
-until then.
+THE FIFTY-FIRST IS A WRITE, 2026-09-23, and every site that states these
+numbers moved in the same commit: ``linkedin_follow_company_page``, a follow
+performed on an organisation Page's own root and addressed by the Page's
+numeric id -- the id ``linkedin_unfollow_company`` keys its rows by. Census row
+``N 47``, COVERED-UNFIRED. It was built on a lane branch as the fiftieth while
+``linkedin_recent_job_searches`` became the fiftieth on master the same day;
+the merge made this one the fifty-first. The headline read "fifty tools,
+twelve of which write" until then.
 
 THIS PARAGRAPH HAS NOW BEEN WRONG FIVE TIMES, in both directions, and the
 count is the part that keeps rotting. Until 2026-08-23 it read *"There is no
@@ -149,9 +151,9 @@ assigned to anybody -- it waits for whoever next runs the suite, and in the
 meantime the pin goes on asserting the old number with full confidence.
 
 THE NUMBERS ABOVE ARE DERIVED NOW, and that is a statement about a test rather
-than about an intention. Fifty is ``len(await mcp.list_tools())``,
+than about an intention. Fifty-one is ``len(await mcp.list_tools())``,
 pinned in ``test_server_surface.py`` by
-``test_the_surface_is_exactly_the_fifty_tools``; the split is pinned by
+``test_the_surface_is_exactly_the_fifty_one_tools``; the split is pinned by
 ``tests/test_prose_that_makes_a_claim.py::test_the_server_docstring_numbers_are_derived``,
 which reads THESE WORDS and fails if any of the three disagrees with the
 registry.
@@ -164,9 +166,15 @@ POINTER to it was dangling, so a reader who followed it found nothing and
 would reasonably conclude these numbers are unchecked. A citation is a claim
 like any other.
 The surface splits three ways and the split is the part a reader actually
-needs: THIRTY-SEVEN read, THIRTEEN write, and ZERO are write-shaped,
-registered, gated and unable to act. Thirty-seven plus thirteen plus zero is
-fifty.
+needs: THIRTY-EIGHT read, THIRTEEN write, and ZERO are write-shaped,
+registered, gated and unable to act. Thirty-eight plus thirteen plus zero is
+fifty-one.
+
+THE FIFTIETH IS ONE READ, 2026-09-23. ``linkedin_recent_job_searches`` opens
+the jobs home, ``/jobs/jam/`` -- admitted 2026-09-20 with nothing behind it
+-- and returns the recent-searches list: each search's keywords and place,
+the names of the filters it carried, and whether LinkedIn draws its alert
+badge. Census row ``J 18``, COVERED-UNFIRED.
 
 THE FORTY-EIGHTH AND FORTY-NINTH ARE TWO READS, 2026-09-21, AND THEY ARE ONE
 FINDING RATHER THAN TWO TOOLS. ``linkedin_group_page`` and
@@ -381,6 +389,7 @@ from linkedin_server import (
     group_page,
     groups_page,
     job_collections,
+    job_home,
     jobfilter,
     newsletters,
     notify_cost,
@@ -1668,8 +1677,200 @@ async def _attach_recipient_ids(page: Any, rows: list[dict[str, Any]]) -> None:
         row["recipient_id"] = by_slug.get(slug)
 
 
+#: THE READING the filter pills are opened under -- a KEY into
+#: ``press.OPEN_READINGS``, never phrases of this module's own. The table fixes
+#: what may be looked for at the open moment; this module only names it.
+PROFILE_VIEWS_MENU_READING = "profile_views_filter_menu"
+
+#: How many filter pills one call may open. The page draws THREE (a time
+#: range, a viewer type, a company filter -- measured on a capture 2026-09-20,
+#: `_audit/2026-09-23-readers-four-rows.md` section 2.1); a page that draws
+#: more is reported by ``pills_found`` and not opened past this cap.
+PROFILE_VIEWS_MAX_PILLS = 3
+
+
+def _as_count(value: Any) -> Optional[int]:
+    """A drawn number as an int, or None. "1,234" -> 1234; anything else None.
+
+    A percentage, an abbreviation and a decimal are NOT counts and come back
+    None rather than as a number that looks right -- the rule
+    ``company_root.NUMERAL_SHAPES`` keeps for the same reason.
+    """
+    text = str(value or "").strip().replace(",", "")
+    return int(text) if text.isdigit() else None
+
+
+async def _profile_views_press_counters(page: Any):
+    """The counter reader the filter-pill presses are priced with. A CLOSURE.
+
+    ``press.check_counters`` refuses a press on ANY unreadable counter, and
+    ``press.disclose`` reads its before-counters and then clicks -- so a
+    counter that does not read turns into a click followed by a refusal. Two
+    rules keep that from happening:
+
+    * THE SET IS FIXED AT THE FIRST READ. A nav badge is included only if it
+      read then; a badge that read before the press and not after is reported
+      as None and the gate refuses, which is right (a badge vanishing across a
+      press is a change nobody can price).
+    * THE HEADLINE VIEWER COUNT IS ALWAYS IN IT, and it is the counter this
+      surface's own structural argument names as its bound: *"an expansion
+      could plausibly cause a ... remembered-filter write"*. A press that
+      APPLIED a filter would change the count the page is headlining. It is a
+      tripwire for exactly the weak write the argument concedes, read through
+      the reader the tool already runs (one declared script, one call site).
+
+    Both badges were measured UNREADABLE (no count drawn) on 2026-09-23 by
+    ``_audit/2026-09-23-bucket1-fires.md`` section 0.4, which is why the
+    headline is not optional here.
+    """
+    # EVERY BINDING IN THESE THREE HELPERS CARRIES A NAME NO OTHER FUNCTION IN
+    # THIS MODULE USES. ``tests/test_navigation_is_never_derived.py`` tracks
+    # taint PER MODULE AND BY NAME: the first version of this code bound
+    # ``witness`` / ``reading`` / ``term`` / ``entry`` off a parameter named
+    # ``verdict`` -- a name already tainted elsewhere here -- and the taint
+    # spread by name until an unrelated navigation's loop variable read as
+    # page-chosen. The rule was right to refuse; the names were the defect.
+    chosen_keys: dict[str, Any] = {}
+
+    async def _badge_values() -> dict[str, Optional[int]]:
+        badge_out: dict[str, Optional[int]] = {}
+        try:
+            badge_out["invitations"] = shape.invitation_badge(
+                await dom.read_invitation_badge(page)
+            ).get("pending")
+        except Exception:  # noqa: BLE001 - an unread badge is None, never 0
+            badge_out["invitations"] = None
+        try:
+            badge_out["notifications_unread"] = notify_cost.notifications_badge(
+                await notify_cost.read_notifications_badge(page)
+            ).get("unread")
+        except Exception:  # noqa: BLE001
+            badge_out["notifications_unread"] = None
+        return badge_out
+
+    async def read_counters() -> dict[str, Optional[int]]:
+        try:
+            views_insights = await dom.read_profile_views_insights(page)
+            headline_count = _as_count(
+                (views_insights.get("headline") or {}).get("value")
+            )
+        except Exception:  # noqa: BLE001 - reported as unread, never raised
+            headline_count = None
+        badge_values = await _badge_values()
+        if "keys" not in chosen_keys:
+            chosen_keys["keys"] = ["headline_viewers"] + sorted(
+                badge for badge, got in badge_values.items() if got is not None
+            )
+        counter_values = {"headline_viewers": headline_count, **badge_values}
+        return {key: counter_values.get(key) for key in chosen_keys["keys"]}
+
+    return read_counters
+
+
+def _filter_menu_summary(ordinal: int, gate_verdict: dict[str, Any]) -> dict[str, Any]:
+    """One opened pill, reported in this module's and press.py's own words.
+
+    EVERY STRING HERE IS A LITERAL OF THIS PACKAGE: refusal reasons, witness
+    counter names, reading terms from ``press.OPEN_READINGS``. The reading's
+    ``before`` / ``open`` detail is not copied through; what the caller needs
+    is what APPEARED and how much arrived.
+    """
+    gate_witness = gate_verdict.get("witness") or {}
+    gate_reading = gate_verdict.get("reading") or {}
+    open_terms = (gate_reading.get("open") or {}).get("terms") or {}
+    appeared_terms = gate_reading.get("appeared") or []
+    return {
+        "pill": ordinal,
+        "permitted": bool(gate_verdict.get("permitted")),
+        "refused": gate_verdict.get("refused"),
+        "reachable_by_this_route": gate_verdict.get("reachable_by_this_route"),
+        "disclosed": gate_witness.get("disclosed"),
+        "witness_moved": list(gate_witness.get("moved") or []),
+        "appeared": gate_reading.get("appeared"),
+        "held": gate_reading.get("held"),
+        "values": {
+            menu_term: menu_entry.get("value")
+            for menu_term, menu_entry in open_terms.items()
+            if menu_entry.get("value") is not None and menu_term in appeared_terms
+        },
+        "new_lines": gate_reading.get("new_lines"),
+        "read_at_both_ends": list(gate_verdict.get("read_at_both_ends") or []),
+    }
+
+
+async def _open_profile_views_filter_menus(page: Any) -> dict[str, Any]:
+    """Open each filter pill through the press gate and read what it disclosed.
+
+    WHICH CONTROLS: the ``[aria-expanded]`` controls inside ``main`` that are
+    ``role="button"``, visible, and wrap a ``<label>`` -- the filter pills, by
+    STRUCTURE. Chosen without reading a label, because condition 2 forbids
+    deciding a press by page text. Page-wide, the first two such-shaped
+    indices are the NAV (measured on a capture), which is why the press is
+    scoped to ``main`` and the index is taken inside that scope.
+
+    RE-ENUMERATED BEFORE EVERY PRESS: an opened-and-closed dropdown may leave
+    the scoped list re-rendered, and an index taken before it would then name
+    a different control.
+
+    STOPS AT THE FIRST PRESS THAT IS NOT PERMITTED. A refusal after a click is
+    a measurement of something unexpected, and the next press would be taken
+    on a page nobody has classified.
+    """
+    from linkedin_server import press  # the one package caller of the gate
+
+    pill_candidates = page.locator("main").locator("[aria-expanded]")
+
+    async def _pill_indices() -> list[int]:
+        pill_found: list[int] = []
+        for pill_index in range(int(await pill_candidates.count())):
+            pill_control = pill_candidates.nth(pill_index)
+            if (await pill_control.get_attribute("role") or "") != "button":
+                continue
+            if not await pill_control.is_visible():
+                continue
+            if not int(await pill_control.locator("label").count()):
+                continue
+            pill_found.append(pill_index)
+        return pill_found
+
+    counter_reader = await _profile_views_press_counters(page)
+    first_counters = await counter_reader()
+    if not first_counters or any(got is None for got in first_counters.values()):
+        # KNOWABLE BEFORE ANY CLICK, so refused before any click: the gate
+        # itself would read these, press, and only then refuse.
+        return {
+            "pills_found": len(await _pill_indices()),
+            "menus": [],
+            "stopped": "counters_unreadable_before_any_press",
+            "counters": sorted(first_counters or {}),
+        }
+
+    menus_out: dict[str, Any] = {"pills_found": 0, "menus": [], "stopped": None}
+    for ordinal in range(PROFILE_VIEWS_MAX_PILLS):
+        pill_list = await _pill_indices()
+        menus_out["pills_found"] = len(pill_list)
+        if ordinal >= len(pill_list):
+            break
+        gate_verdict = await press.disclose(
+            page,
+            shape="[aria-expanded]",
+            index=pill_list[ordinal],
+            read_counters=counter_reader,
+            reading=PROFILE_VIEWS_MENU_READING,
+            scope="main",
+        )
+        menu_summary = _filter_menu_summary(ordinal, gate_verdict)
+        menus_out["menus"].append(menu_summary)
+        if not menu_summary["permitted"]:
+            menus_out["stopped"] = f"pill {ordinal} was not permitted"
+            break
+    return menus_out
+
+
 @mcp.tool()
-async def linkedin_who_viewed_me(limit: int = DEFAULT_LIMIT) -> dict[str, Any]:
+async def linkedin_who_viewed_me(
+    limit: int = DEFAULT_LIMIT, open_filter_menus: bool = False
+) -> dict[str, Any]:
     """List the people who viewed your profile, most recent first.
 
     The highest-intent signal in a job search: someone who opened your profile
@@ -1712,8 +1913,23 @@ async def linkedin_who_viewed_me(limit: int = DEFAULT_LIMIT) -> dict[str, Any]:
     page that had not finished rendering rather than a different surface; it
     still reports pages_loaded: 2 when it happens.
 
+    open_filter_menus=True ALSO OPENS EACH FILTER PILL -- the time range, the
+    viewer type and the company filter -- through the disclosing-press gate,
+    reads what each one disclosed, and closes it. No page is loaded for it and
+    no filter is applied. What comes back per pill is words from a fixed list
+    this server wrote (time ranges, viewer categories, the menu's own
+    controls) and numbers: which of them APPEARED when the pill opened, how
+    many new lines arrived at all, and the gate's verdict. The company
+    filter's options are other people's employers; none of them can come
+    back, because nothing but those fixed words and numbers ever can. The
+    presses are priced by the page's own headline viewer count, which would
+    move if a press applied a filter, and stop at the first press the gate
+    does not permit.
+
     Args:
         limit: maximum rows to return (default 25, max 100).
+        open_filter_menus: also open and read the filter pills (default
+            False, which is this tool exactly as it was).
     """
     limit = _clamp(limit, DEFAULT_LIMIT, MAX_LIMIT)
     urls = [
@@ -1800,6 +2016,16 @@ async def linkedin_who_viewed_me(limit: int = DEFAULT_LIMIT) -> dict[str, Any]:
                         )
                     except Exception as exc:  # noqa: BLE001 - never raised
                         extra["insights_error"] = type(exc).__name__
+                    # THE FILTER PILLS, OPENED ONLY WHEN ASKED FOR. Same load,
+                    # same page, same failure rule as the aggregates above: a
+                    # menu that will not open never costs the viewer list.
+                    if open_filter_menus:
+                        try:
+                            extra["filter_menus"] = (
+                                await _open_profile_views_filter_menus(page)
+                            )
+                        except Exception as exc:  # noqa: BLE001 - never raised
+                            extra["filter_menus_error"] = type(exc).__name__
                     return shape.envelope(
                         rows,
                         limit=limit,
@@ -2240,10 +2466,18 @@ async def linkedin_premium_job_collection(collection: int = 0) -> dict[str, Any]
     ONE PAGE LOAD, NO SCROLLING, NO PRESSES. ``collection`` is an INDEX into a
     closed tuple in ``linkedin_server/job_collections.py``, never a free
     string, so the set of addresses this tool can ever reach is enumerable by
-    reading that constant: 0 is ``top-applicant``, 1 is ``top-choice``. Both
-    are on the read allowlist, root only. Out of range REFUSES rather than
-    clamping, because a reading filed under the wrong collection is worse than
-    no reading.
+    reading that constant: 0 is ``top-applicant``, 1 is ``top-choice``, 2 is
+    ``recommended``. All three are on the read allowlist, root only. Out of
+    range REFUSES rather than clamping, because a reading filed under the
+    wrong collection is worse than no reading.
+
+    **INDEX 2 IS NOT A PREMIUM COLLECTION** -- the tool's name predates it. It
+    is LinkedIn's own recommended-jobs list (census ``J 39``), the same page
+    ``linkedin_job_collections`` COUNTS; here its posting ids come back, so a
+    recommendation becomes a posting ``linkedin_job_detail`` can read. Added
+    2026-09-23 and exercised offline only, over a skeleton of the live capture
+    this reader's shape was measured on: it has NOT been fired against
+    LinkedIn at that index.
 
     **``slots`` IS THE POSTING COUNT AND ``hydrated`` IS NOT. Do not quote the
     second as the first.** LinkedIn draws one list slot per posting it has
@@ -2337,6 +2571,60 @@ async def linkedin_premium_job_collection(collection: int = 0) -> dict[str, Any]
             }
     except Exception as exc:
         return _error(exc)
+
+
+@mcp.tool()
+async def linkedin_recent_job_searches() -> dict[str, Any]:
+    """Your recent job searches, re-runnable, and which of them carry a job alert.
+
+    ONE PAGE LOAD, NO SCROLLING, NO PRESSES. The address is a module constant,
+    ``job_home.HOME_URL`` -- the jobs home, ``/jobs/jam/``, which is where
+    LinkedIn lands ``/jobs/alerts/`` (measured 2026-09-20). Census ``J 18``,
+    *recent searches: view and re-run*.
+
+    WHAT EACH ENTRY CARRIES. ``search_keywords`` -- the query exactly as
+    ``linkedin_search_jobs`` takes it, read off the entry's own href by the
+    same function that already hands you a job alert's keywords from your
+    notifications; ``location`` -- the place the search ran in, when the
+    subtitle isolates exactly one; ``alert_on`` -- whether LinkedIn draws its
+    alert badge on that search; ``in_your_network``, ``workplace``, and
+    ``facets``, the names of the filters the search carried. **TO RE-RUN ONE,
+    pass its ``search_keywords`` and ``location`` to ``linkedin_search_jobs``.**
+
+    WHAT IT WILL NOT TELL YOU. No filter VALUE -- a salary band is your pay
+    expectation, so only the fact that a salary filter was on comes back -- no
+    place id, no href, no job, no person. ``location`` is ``None`` with
+    ``location_state`` ``ambiguous`` when the subtitle carries two candidate
+    places, rather than a joined string the page never drew.
+
+    **A ZERO IS ONLY READABLE BESIDE ``list_label_seen``.** No entries with the
+    list drawn is a fact about your account; no entries with no list is this
+    reader failing to see, and carries ``refusal``.
+
+    **ALERTS: A PARTIAL VIEW, AND SAID SO.** The badge sits on RECENT searches,
+    so an alert whose search has aged out of the list is not shown here.
+    ``alerts_on`` counts the badges drawn, not every alert you have.
+
+    NOT YET FIRED LIVE. Built 2026-09-23 against a sanitised copy of the live
+    capture of that landing; the first live call is also the first check that
+    ``/jobs/jam/`` serves the same list when opened directly.
+    """
+    url = job_home.HOME_URL
+    try:
+        async with BROWSER.session() as page:
+            landed = await BROWSER.goto(page, url)
+            assert_not_authwall(landed, surface="jobs home")
+            reading = await job_home.read_recent_searches(page)
+            return {
+                "ok": True,
+                # A RELATION, NEVER THE ADDRESS -- the family's spelling.
+                "redirected": landed.rstrip("/") != url.rstrip("/"),
+                "pages_loaded": 1,
+                **reading,
+            }
+    except Exception as exc:
+        return _error(exc)
+
 
 
 @mcp.tool()
@@ -9664,6 +9952,15 @@ async def linkedin_creator_analytics() -> dict[str, Any]:
     integers and closed-vocabulary metric names. A label that does not parse
     into that shape is discarded, so a name has nowhere to land even if
     LinkedIn starts drawing one.
+
+    **``per_post`` -- EACH FEATURED ITEM'S IMPRESSIONS AND ENGAGEMENTS, ADDED
+    2026-09-23.** The links this page draws to each item's own analytics
+    carry that item's numbers in their text, and ``per_post`` reads them:
+    integers in page order, one per distinct item, and no identifier, title
+    or name. It covers only the items this page features, not everything you
+    have published -- read ``per_post.readable`` before believing a total.
+    Nothing extra is opened or pressed for it: same page, same single
+    navigation. It has not yet been seen returning live.
     """
     try:
         async with BROWSER.session() as page:

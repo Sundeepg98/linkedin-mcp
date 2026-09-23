@@ -1,4 +1,4 @@
-"""The tool surface: fifty tools, thirty-seven of which do not write.
+"""The tool surface: fifty-one tools, thirty-eight of which do not write.
 
 **AND THIS LINE IS NOW DERIVED, NOT MAINTAINED, 2026-09-20.** It had gone stale
 a THIRD time -- "forty-four tools, thirty-two of which do not write" against a
@@ -431,6 +431,11 @@ EXPECTED_TOOLS = {
     # no parameter. Both are READS. No write was added by either.
     "linkedin_group_page",
     "linkedin_company_page_counts",
+    # THE FIFTIETH, 2026-09-23 (lane L3), a READ on the jobs surface.
+    # ``linkedin_recent_job_searches`` reads the jobs home, /jobs/jam/,
+    # admitted 2026-09-20 with nothing behind it, and banks census J 18. It
+    # adds no address, no sanctioned mutation and no press.
+    "linkedin_recent_job_searches",
 }
 
 #: Names a reader must never grow. Listed explicitly so that adding one is a
@@ -500,10 +505,14 @@ async def tools():
     return {t.name: t for t in await mcp.list_tools()}
 
 
-async def test_the_surface_is_exactly_the_fifty_tools(tools):
-    """RENAMED AGAIN 2026-09-23, from ``..._fortynine_tools``: the fiftieth is
-    ``linkedin_follow_company_page``, a WRITE, and the name moved with the pin
-    in the same commit, as the rule below requires.
+async def test_the_surface_is_exactly_the_fifty_one_tools(tools):
+    """RENAMED TWICE ON 2026-09-23. From ``..._fortynine_tools`` to
+    ``..._fifty_tools`` on master, because a read arrived:
+    ``linkedin_recent_job_searches`` (census J 18). Then to
+    ``..._fifty_one_tools`` at the merge of lane L4, whose branch had made
+    ``linkedin_follow_company_page`` -- a WRITE, census N 47 -- its own
+    fiftieth. The name moved with the pin in the same commit, as the rule
+    below requires.
 
     RENAMED THREE TIMES ON 2026-08-25, from ``..._seventeen_tools`` through
     ``..._eighteen_tools`` and ``..._nineteen_tools``, and the rename is the
@@ -713,9 +722,12 @@ async def test_the_surface_is_exactly_the_fifty_tools(tools):
     # address was refused by the boundary until that commit and was admitted
     # only together with the shaper in front of it, which is condition 1 of
     # the ruling at 09f9961 section 6. This test's NAME moved with it.
-    # FIFTY FROM 2026-09-23: linkedin_follow_company_page, a WRITE, so the
-    # split below moves on its write side and the non-write count holds.
-    assert len(tools) == 50
+    # FIFTY FROM 2026-09-23 (lane L3): linkedin_recent_job_searches, a READ on
+    # an address the boundary already admitted. The NAME moved with it again.
+    # FIFTY-ONE FROM THE SAME DAY, at the merge of lane L4:
+    # linkedin_follow_company_page, a WRITE, so the split below moves on its
+    # write side and the non-write count holds.
+    assert len(tools) == 51
     # And the split is asserted, not just the total. A future tool arriving as
     # a write would otherwise only have to bump a number.
     #
@@ -855,7 +867,10 @@ async def test_the_surface_is_exactly_the_fifty_tools(tools):
     # matters. Neither adds an entry to readonly.SANCTIONED_MUTATIONS; each
     # opens an address that was already on the read allowlist and that no
     # registered, parameterless tool could reach.
-    assert len(set(tools) - SANCTIONED_WRITE_TOOLS) == 37
+    # THIRTY-EIGHT FROM 2026-09-23: linkedin_recent_job_searches is a READ, and
+    # the write side is BYTE-IDENTICAL across it: no entry in
+    # readonly.SANCTIONED_MUTATIONS, no new address, no press.
+    assert len(set(tools) - SANCTIONED_WRITE_TOOLS) == 38
 
 
 def test_the_read_that_was_nearly_named_a_write():

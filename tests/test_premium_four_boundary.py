@@ -384,7 +384,15 @@ def test_the_collections_reader_is_the_only_thing_that_builds_an_admitted_addres
         job_collections.collection_url(index)
         for index in range(len(job_collections.COLLECTIONS))
     }
-    assert built == {url for url, _token in ADMITTED[:2]}
+    # THE THIRD ADDRESS IS NOT ONE OF THIS WAVE'S FOUR, and it is named so the
+    # equality stays EXACT rather than loosening to a subset: `recommended`
+    # joined `job_collections.COLLECTIONS` on 2026-09-23 (census J 39), at the
+    # address admitted 2026-09-05 and loaded by `linkedin_job_collections`.
+    from linkedin_server import collections_page
+
+    assert built == (
+        {url for url, _token in ADMITTED[:2]} | {collections_page.COLLECTIONS_URL}
+    )
     for url in built:
         assert readonly.is_read_url(url) is True, url
 

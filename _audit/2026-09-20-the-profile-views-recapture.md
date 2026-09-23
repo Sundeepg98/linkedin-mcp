@@ -394,6 +394,8 @@ instrument that was never shown able to return non-zero. Section 5 and section
    whoever next holds a session, because an undocumented filter is a real
    surface change.
 
+   **CORRECTED BY:** `_audit/2026-09-23-lane-l2-refused-presses.md` -- the captions of 32 and 31 characters are the two radio labels of a closed `<dialog>` form on this page, which the reader's every-`<label>` fallback collects; they are not filters, and no surface changed.
+
 3. A raw-versus-drawn divergence persists on this surface, consistent with the
    law the live-capture wave established: `city` 1 drawn against 64 raw,
    `region` 0 drawn against 3 raw, `top compan` 0 drawn against 4 raw. Counting

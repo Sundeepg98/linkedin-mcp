@@ -288,6 +288,12 @@ ruling (a `RULED:` declaration the register can claim), because a class whose st
 deleted note is exactly the kind of claim this repository has learned to distrust. Until then the
 R2 label in this lane's files cites this section, and this section says it is a relay.
 
+**RESOLVED AT THE MERGE WITH MASTER (section 9).** Master registered the ruling at `53ba1b6` as
+`WRITE-CLASS-B` -- *"Lifts the read-only rule, the apply/connect/InMail cut and
+DO-NOT-OPEN-MESSAGING"* -- with its target condition `OPERATOR-NAMES-THE-TARGET`. The table's
+header and the checker now name it, and the 32 lines that cited the ruling it superseded cite it
+instead.
+
 ### 5.1 WHAT THE BUILD-READY COLUMNS FOUND
 
 Read off the census cells, `writes.py`, `_audit/RULINGS.md` and `readonly.is_read_url` on this
@@ -419,6 +425,7 @@ files: 49 -> 50 tools, `PERFORMABLE` 12 -> 13, `SANCTIONED_WRITES` 13 -> 14, pin
 2. **Ten functions in `writes.py` still coerce page values with `int()`** -- named in section 4.6.
    None was touched here, so none was repaired.
 3. **The 18:15 ruling is not registered** -- section 5. Until it is, R2's label rests on a relay.
+   RESOLVED at the merge: registered on master as `WRITE-CLASS-B` (section 9).
 4. **The asserted-name guard reads one line at a time, so a slot phrase wrapped across a line break
    is invisible to it.** MEASURED on this record: section 1 wraps "under" at a line end with a
    ruling id opening the next line, and `scripts/check_asserted_names_resolve.py --all` lists no
@@ -456,3 +463,49 @@ own pattern rather than the work:
 As briefed, that was the one pass; nothing was re-verified after it. The only changes since are
 this section and section 6's commit and gate lists -- documentation, with the three generated
 files re-run to a fixpoint -- and the gate-4 repair that section 6 describes.
+
+## 9. THE MERGE WITH MASTER `87e5976` -- the coordinator's order of 23:12
+
+**VERIFIED BEFORE OBEYED, 23:10:** this branch's head was `882e9e4`, master's `87e5976`, and their
+merge base `b0d3ab8` -- exactly what the order's sample said. Master had taken 54 commits since the
+base (lanes L1, L2, L3, X and Y, the live readers wave, the rulings register and the census cleanup
+twice). Fourteen files had changed on both sides; nine conflicted.
+
+| file | resolution |
+|---|---|
+| `linkedin_server/server.py` | both arrivals kept: master's fiftieth tool (`linkedin_recent_job_searches`, a read) and this lane's (`linkedin_follow_company_page`, a write) -- the headline is now fifty-one tools, thirteen of which write; the split THIRTY-EIGHT read, THIRTEEN write, ZERO refusing; the pin citation renamed to `..._fifty_one_tools` |
+| `README.md` | the same union in the headline and the tree line; both histories kept, newest first |
+| `tests/test_server_surface.py` | docstring line 1, the test name (`test_the_surface_is_exactly_the_fifty_one_tools`) and its history, and `len(tools) == 51`; the read split (38) and the write set (13, with this lane's tool) had auto-merged correctly |
+| `tests/test_every_tool_is_on_the_surface.py` | both histories kept, `51` |
+| `tests/test_the_tool_surface_is_pinned_so_a_row_must_move.py` | re-derived from the merged registry, not added up: **51 tools and 69 parameters** (master's 50 and 67, plus this lane's tool and its two parameters) |
+| `_audit/INSTRUMENTS.md` | section 61 placed between master's 60 and 62; every line of both sides kept |
+| `_audit/INDEX.md`, `_audit/RULINGS.md`, `_audit/_census/blocker-map.tsv` | generated: master's copy taken, every other resolved path staged, then regenerated to a fixpoint |
+
+Auto-merged and then checked: `dom.py`, `network.md`, `test_a_correction_is_findable_from_the_claim.py`,
+and the three baselines (the reader-leak and tool-envelope baselines are unions of both sides; the
+landing baseline was changed on this side only). The five guards that read them: 217 passed.
+
+**THE PINS THAT MOVED**, every one named by `scripts/census_completion.py --check` on the merged tree
+and re-pinned from its measurement, not forecast:
+
+    adjudicated        433 -> 434
+    delivered_broad     99 -> 100
+    gap                271 -> 270
+    gap_write          151 -> 150
+    unfired             24 ->  25
+    b1_standing          9 ->  10     N 47 enters bucket 1
+
+`N 47` is a W row, so `ruling_holds.hold_of` derives its hold as `OPERATOR-NAMES-THE-TARGET` with no
+marker in the cell -- the convention its twin `N 48` follows -- and `PINNED_B1_ROWS` now lists it
+under that hold. `scripts/count_census_states.py --expect J=54,P=54,M=77,N=85` MATCHES at 270; the
+network slice's DELTA block now carries that merged expectation in place of the branch-only one.
+
+**WHAT THE MERGE CHANGED IN THIS LANE'S OWN TABLE.** The register had moved under it:
+`WRITE-CLASS-B` now stands and `DO-NOT-OPEN-MESSAGING` reads SUPERSEDED. The class checker stayed
+GREEN on a table citing the superseded ruling on 32 lines, because a superseded ruling keeps its
+register row and its id still resolves. The checker now refuses a citation of a SUPERSEDED ruling --
+shown red on all 32 lines of the pre-merge table, then green on the regenerated one -- with a plant
+test (seventeen plants now). The R2 header cites `WRITE-CLASS-B`; `N 191` records that the event
+page is admitted since the L1 merge while its attendee list is refused; `N 192` records that lane
+X's exclusion-basis table reads `N 156` B-LIFTED -- R9's root was the cut ruling (b) withdrew --
+while the census still files `N 156` and `N 158` EXCLUDED-RULED, which is the census owner's call.

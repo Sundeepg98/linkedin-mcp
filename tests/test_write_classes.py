@@ -242,6 +242,21 @@ def test_red_on_an_unregistered_ruling(tmp_path):
                 "is not registered")
 
 
+def test_red_on_a_superseded_ruling(tmp_path):
+    """A superseded ruling keeps its register row, so its id RESOLVES -- the
+    unregistered-id rule cannot see it. The id is read off the register at
+    runtime, so this control does not rot the day one ruling is re-ruled."""
+    superseded = sorted(cwc.superseded_rulings())
+    assert superseded, "the register holds no SUPERSEDED ruling to plant"
+    lines = _lines()
+    i = _find(lines, lambda r: "RULING:" in r["sources"])
+    row = _row(lines[i])
+    row["sources"] += f" ; RULING:{superseded[0]}"
+    lines[i] = _line(row)
+    _red_naming(_problems(_plant(tmp_path, lines)), row["key"],
+                "is SUPERSEDED")
+
+
 def test_red_on_a_build_naming_an_action_that_cannot_perform(tmp_path):
     lines = _lines()
     i = _find(lines, lambda r: r["class"] == "R1")

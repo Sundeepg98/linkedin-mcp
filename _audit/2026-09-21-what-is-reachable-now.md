@@ -8,6 +8,8 @@
 
 **CORRECTS:** `_audit/_census/profile.md` -- row `O3`'s evidence cell gains the same, state unchanged. Its reason was `no tool, no reason`; there is now a reason.
 
+**CORRECTED BY:** `_audit/2026-09-23-readers-four-rows.md` -- section 4.3's *"THE WITNESS FIRED. THE PANEL OPENS."* rests on a press at page-wide `[aria-expanded]` index 0, which a zero-press load on 2026-09-23 measured to be the header nav's account menu. Something opened; it was not an analytics panel.
+
 **2026-09-21. Wave `what-is-reachable-now`, base `09b5f17`. READ-ONLY throughout.
 `writes_enabled()` False. Nothing was connected to, followed, messaged, invited,
 applied to, saved or posted. One sanctioned disclosing press was taken through

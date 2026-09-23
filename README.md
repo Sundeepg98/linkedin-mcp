@@ -3,16 +3,23 @@
 An MCP server that shows you your own LinkedIn account data as structured tool
 results instead of pages you have to click through.
 
-**Fifty tools ship. Thirty-seven read. Thirteen write. None is
+**Fifty-one tools ship. Thirty-eight read. Thirteen write. None is
 write-shaped and unable to act.**
 
-**THAT LINE READ "Forty-nine ... Twelve write" UNTIL 2026-09-23.** The fiftieth
-is a WRITE, `linkedin_follow_company_page`: a follow performed on an
-organisation Page's own root and addressed by the Page's numeric id -- the id
-`linkedin_unfollow_company` keys its rows by, which makes it the first follow
-here whose undo this server can aim. Census row `N 47`, COVERED-UNFIRED: built
-behind the same flag and the same single-use grant as every other write, and
-never fired.
+**THAT LINE READ "Fifty ... Twelve write" UNTIL THE LANE L4 MERGE, 2026-09-23.**
+The fifty-first is a WRITE, `linkedin_follow_company_page`: a follow performed
+on an organisation Page's own root and addressed by the Page's numeric id --
+the id `linkedin_unfollow_company` keys its rows by, which makes it the first
+follow here whose undo this server can aim. Census row `N 47`, COVERED-UNFIRED:
+built behind the same flag and the same single-use grant as every other write,
+and never fired. It was built on a lane branch as that branch's fiftieth, while
+the read below became the fiftieth on master the same day.
+
+**THAT LINE READ "Forty-nine ... Thirty-seven" EARLIER ON 2026-09-23.** The
+fiftieth is `linkedin_recent_job_searches`, a read of the jobs home that
+returns your recent job searches, re-runnable, and which carry an alert --
+census row `J 18`, COVERED-UNFIRED because nothing has yet seen it return a
+payload live.
 
 **THAT LINE READ "Forty-seven ... Thirty-five" UNTIL 2026-09-21.** The
 forty-eighth and forty-ninth arrive together because they are one finding
@@ -260,7 +267,7 @@ whole file rather than as a side effect of a wave that touched one tool.
 
 | Tool | Reads |
 |---|---|
-| `linkedin_who_viewed_me` | Who viewed your profile. Where the account has Premium Career this reaches back 365 days -- the highest-intent signal in a job search. |
+| `linkedin_who_viewed_me` | Who viewed your profile. Where the account has Premium Career this reaches back 365 days -- the highest-intent signal in a job search. `open_filter_menus=True` also opens each filter pill through the disclosing-press gate and reports what it disclosed, in a fixed vocabulary and numbers, on the same page load. |
 | `linkedin_search_appearances` | **The reciprocal of the row above** -- that one reads the receiving end of a profile view, this one the receiving end of a SEARCH: how often other people's searches put you in front of them. Your own analytics, no argument, and the address carries no member segment so it can only ever resolve to whoever is signed in. **It is the only tool here whose page nobody had opened when it shipped**, and its docstring says so rather than letting you find out: the parser was built against a fixture that is SYNTHETIC and labelled so, which proves the tool refuses to publish the third parties put in front of it and proves nothing about whether it reads the real surface. Past the first two number-and-caption pairs the caption is withheld INSIDE the page and never reaches the process -- LinkedIn's breakdown panels describe the SEARCHERS, in exactly the shape a headline metric has, and those are other people's employers and titles. `anchors.person` is a COUNT of member links and is the field worth reading first: non-zero means LinkedIn's record of a search names the people in it. **A zero settles less than it looks like** -- zero appearances is equally consistent with "searches leave no record" and "nobody searched for you this week", and this tool cannot separate them; `headline: null` means no metric was found at all, which is a different answer again. |
 | `linkedin_my_applications` | Jobs you applied to, with the status LinkedIn shows. |
 | `linkedin_draft_applications` | The applications you STARTED and never sent -- the tracker tab LinkedIn labels "In Progress" and addresses as `?stage=draft`, with title, company, location, how long ago, and the job id. A draft is not a stalled application: nothing went anywhere, so an empty list here is not evidence about anything you did send. It reads the list and nothing else -- the row's own Delete control, and the discard dialog behind it, are never pressed from here. An empty result carries LinkedIn's own tab count, so "you have no drafts" and "this could not be read" are never the same answer. |
@@ -862,7 +869,7 @@ linkedin_server/
   cdp_bridge.py              the recovery path: attach to a running Chrome
   dom.py                     the read-only harvesters and the control readers
   shape.py                   pure parsers and the result envelope
-  server.py                  the fifty tools
+  server.py                  the fifty-one tools
   errors.py
 tests/                       1393 tests, no network, no account
   fixtures/                  frozen LinkedIn markup, scrubbed
