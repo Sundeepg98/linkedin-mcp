@@ -62,11 +62,26 @@ FEED_URL = config.BASE_URL + "/feed/"
 FIRES = ("analytics", "feed")
 
 #: THE FEED PRESS, fixed from the structural load recorded in section 2.2 of
-#: the record -- the shape and scope under which the first feed item's own
-#: menu control is candidate 0. Filled in only from that measurement.
+#: the record (18:58 IST, nothing pressed). The feed draws NO per-post
+#: container a scope could name -- 0 [data-urn]/[data-id], 0 article -- so the
+#: press is scoped to ``main`` and aimed by POSITION inside it: the in-page
+#: order there was [feed sort, an unlabelled anchor, the first post's control
+#: menu, ...], so the first post's menu control is main-scoped candidate 2.
+#:
+#: TWO INTERLOCKS, BOTH OF WHICH CAN ONLY REFUSE:
+#: * ALIGNMENT -- Playwright's locator pierces shadow roots and the page's own
+#:   querySelectorAll does not (48 vs 47 on that load). If the two counts
+#:   inside ``main`` differ on the fire's load, positions do not line up and
+#:   nothing is pressed.
+#: * A LABEL VETO -- the candidate's accessible name must open with the
+#:   control-menu phrase, compared in place and never printed. A label is used
+#:   here ONLY to refuse a press chosen by position, never to choose one:
+#:   condition 2 forbids aiming by label, and a veto is stricter, not looser.
 FEED_SHAPE = "[aria-expanded]"
-FEED_SCOPE = "feed_item"
+FEED_SCOPE = "main"
+FEED_INDEX_IN_SCOPE = 2
 FEED_READING = "feed_item_share_menu"
+FEED_MENU_PHRASE = "open control menu"
 
 STATE = _ROOT / "_state" / "readers4"
 
@@ -149,7 +164,7 @@ async def fire_analytics() -> int:
 
 async def fire_feed() -> int:
     say("=" * 70)
-    say("FIRE feed -- press.disclose(" + FEED_SHAPE + ", scope=" + FEED_SCOPE
+    say("FIRE feed -- press.disclose(" + FEED_SHAPE + ", scope=" + FEED_SCOPE + ", index=" + str(FEED_INDEX_IN_SCOPE)
         + ", reading=" + FEED_READING + ")")
     say("=" * 70)
     pre = press.evaluate(url=FEED_URL, shape=FEED_SHAPE, reading=FEED_READING,
@@ -176,6 +191,29 @@ async def fire_feed() -> int:
         except Exception as exc:  # noqa: BLE001
             say("  settle wait: " + type(exc).__name__)
 
+        scoped = page.locator("main").locator(FEED_SHAPE)
+        pw_in_main = int(await scoped.count())
+        js_in_main = int(await page.evaluate(  # counts only; presses nothing
+            "(shape) => document.querySelectorAll('main ' + shape).length",
+            FEED_SHAPE,
+        ))
+        say("  in main: playwright " + str(pw_in_main) + "   in-page " + str(js_in_main))
+        if pw_in_main != js_in_main:
+            say("  POSITIONS DO NOT LINE UP (a shadow-root node inside main). NOTHING PRESSED.")
+            return 1
+        if pw_in_main <= FEED_INDEX_IN_SCOPE:
+            say("  fewer candidates than the measured position. NOTHING PRESSED.")
+            return 1
+        candidate = scoped.nth(FEED_INDEX_IN_SCOPE)
+        named = await candidate.get_attribute("aria-label") or ""
+        is_menu = named.lower()[: len(FEED_MENU_PHRASE)] == FEED_MENU_PHRASE
+        visible = await candidate.is_visible()
+        say("  candidate " + str(FEED_INDEX_IN_SCOPE) + " is the control menu: "
+            + str(is_menu) + "   visible: " + str(visible))
+        if not (is_menu and visible):
+            say("  THE VETO REFUSED. NOTHING PRESSED.")
+            return 1
+
         async def read_counters():
             surface = await dom.read_reaction_surface(page)
             value = surface.get("off_state") if isinstance(surface, dict) else None
@@ -187,8 +225,8 @@ async def fire_feed() -> int:
             say("  the sensitive counter does not read. NOTHING PRESSED.")
             return 1
         verdict = await press.disclose(
-            page, shape=FEED_SHAPE, index=0, read_counters=read_counters,
-            reading=FEED_READING, scope=FEED_SCOPE,
+            page, shape=FEED_SHAPE, index=FEED_INDEX_IN_SCOPE,
+            read_counters=read_counters, reading=FEED_READING, scope=FEED_SCOPE,
         )
     _write("fire-feed-verdict.json", {"verdict": verdict})
     # A GATE VERDICT IS BUILT FROM PACKAGE LITERALS, counts and the reading's

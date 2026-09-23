@@ -269,6 +269,81 @@ headless Chromium gates the live load. Its offline test: 14, including the
 closed alphabet over synthetic names; shown failing under three planted
 defects by the child and four more by me (P1-P4, section 8).
 
+**THE LOAD -- 18:56-18:58 IST, attach on 127.0.0.1:9224, 2 page loads,
+NOTHING PRESSED.** Detector control PASS (8 of 8). Both pages: `walled`
+False, challenge terms 0. Structured record in the worktree's gitignored
+`_state/readers4/disclosure-targets.json`.
+
+`/analytics/profile-views/` -- 8 `[aria-expanded]` nodes to the page's own
+query, stable across two readings 4 s apart:
+
+    idx  tag     role    landmark       term                 visible
+      0  button  -       nav            nav_me               True
+      1  button  -       nav            nav_for_business     True
+      2  button  -       main           (unmatched, 7 words) True   haspopup=dialog
+      3  div     button  main           time_range           True
+      4  div     button  main           interesting_viewers  True
+      5  div     button  main           company_filter       True
+      6  div     button  footer<main    (unmatched)          True
+      7  div     button  footer<main    (unmatched)          True
+    [aria-haspopup]: 1 node, idx 2 above.  No node classifies as
+    show_more_analytics or all_filters.  items 0, articles 0.
+
+**So the 2026-09-21 press at page-wide index 0 MEASURABLY landed on page
+chrome** -- the nav account menu, or the shadow-root node below; either way
+not an analytics control. *"The panel opens"* in the census cells of `P O3`
+and `N 134`, and in `_audit/2026-09-21-what-is-reachable-now.md` section 4.3,
+is not evidence about any analytics panel. The three pills are live exactly
+where the capture put them.
+
+**AND PLAYWRIGHT COUNTS ONE MORE THAN THE PAGE: 9 against 8** (`order_basis_ok`
+False). Playwright's CSS engine pierces open shadow roots and
+`querySelectorAll` does not, so one `[aria-expanded]` node sits in a shadow
+root -- which is also why the 2026-09-19/21 runs measured `shape_total` 9.
+**A page-wide Playwright index therefore does not map onto the page's own
+order**, and nothing recorded says where the ninth node sits. The analytics
+reader is unaffected: it enumerates AND presses through the same scoped
+Playwright locator.
+
+`/feed/` -- 47 `[aria-expanded]` to the page (48 to Playwright, the same
+one-node gap) and 19 `[aria-haspopup]`:
+
+    idx 0-1  nav_me, nav_for_business (nav)
+    idx 2    sort          div role=button, main  -- the FEED-level sort
+    idx 3    (no name)     a, main
+    idx 4    post_control_menu  button, main, visible  -- the first post's menu
+    then per post: reactions_menu, repost, an unlabelled anchor,
+                   post_control_menu -- 7 control menus drawn in all
+    video player menu buttons (vjs-*): 10 in [aria-expanded], all INVISIBLE
+    [aria-haspopup]: 19 -- unlabelled anchors (haspopup=dialog) and the
+                   invisible player buttons; the control menu is NOT one
+    items 0, articles 0
+
+**THE FEED DRAWS NO PER-POST CONTAINER A SCOPE COULD NAME** -- no
+`data-urn`, no `data-id`, no `article` -- and the control-menu trigger shares
+its only class token with the `repost` button, which carries `[aria-expanded]`
+too. **So nothing structural lets the package aim at ONE post's control menu:**
+it can only be told from its neighbours by its accessible name, which
+condition 2 forbids, or by a position in `main`. That is a measured blocker
+for `M C72` in its own right (section 5).
+
+**For the sibling lane L2 (`M C29`, sort a post's comments):** one node
+classifies as `sort` and it precedes the first post, so it is the feed-level
+sort; no node classifies as `comments`, and no comment-sort control is drawn
+among the disclosure-shaped nodes on first render. Sent to L2.
+
+**A TWO-WRITER COLLISION ON THIS FILE, AND IT WAS MY SEQUENCING.** The child
+reported at 18:42 and had not ended its turn. I then ran my own
+planted-defect cycle over the probe while it was still re-running its tests;
+it read the red from my P4 plant (the `comments` term removed) as a real gap
+and, AFTER my byte-for-byte restore, added its own `comments` entry -- so the
+file briefly carried the key twice (same value, so every test stayed green,
+which is why only `git status` showing the staged file modified again caught
+it). Nothing was committed from that state. The rule this cost: **a lead does
+not plant defects in a file a child can still read, until the child's turn
+has measurably ended** -- its transcript quiet, not its report written.
+
+
 **AND A DEFECT IN THE SHIPPED INSIGHTS READER, on `P O3`'s own surface.** The
 same capture carries five `<label>` elements: three inside the pills, TWO in
 a form inside a closed dialog in the right rail, both under the reader's
@@ -346,6 +421,30 @@ next (`server.py` `2afa3f4294b603f4`, `dom.py` `4cdeb6ee06343ef4`):
 because `server.py` and `dom.py` are CRLF in the working tree and the anchors
 were written with LF. The script reports an anchor found zero times as NOT
 PLANTED rather than as a pass, which is why that was visible.)
+
+### 3.0 THE VERDICT RULES FOR `P O3` AND `N 134`, REGISTERED BEFORE THE FIRE
+
+* **`N 134` (see notable or interesting viewers) is PROVEN only if** the pill
+  the structural load classified `interesting_viewers` opens under a PERMITTED
+  press with its closure verified, and the reading shows viewer CATEGORIES
+  (`recruiters`, `hiring_managers`, `your_network`, `your_company`,
+  `senior_leaders`, `decision_makers`) that APPEARED with a VALUE beside at
+  least one -- the notable viewers at counts resolution, name-free by
+  construction. If it discloses only a viewer-type choice (`all_viewers` /
+  `interesting_viewers`), seeing them means APPLYING that filter, which is a
+  submission the ruling refuses by name (`N 133`'s blocker): NOT PROVEN. If
+  lines arrive and nothing matches, it is a vocabulary miss: NOT PROVEN, and
+  said so.
+* **`P O3` (WVYP Premium insights and filters) is NOT PROVEN if** the reading
+  shows "show more analytics" DRAWN (`held`): the structural load found it
+  carrying no sanctioned attribute, so whatever insights sit behind it are
+  unreachable by any sanctioned press -- condition 2, terminal by this route.
+  The filters half (their options read name-free) and the header insights the
+  tool already returns do not make the row by themselves while its
+  Premium-insights half is walled off.
+* **Either row is claimed only on the orchestrator's two conditions** (section
+  0.5): the pressed node inside `main`, and a reading of analytics content,
+  not a nav menu.
 
 ### 3.1 A GUARD CAUGHT MY OWN COMMIT, AND IT WAS RIGHT
 
