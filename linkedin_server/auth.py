@@ -146,7 +146,7 @@ async def _warm_session_cookies(page: Any, cookies: dict[str, str]) -> tuple[
         final_url = await BROWSER.goto(page, FEED_URL)
     except Exception as exc:
         logger.info(
-            "cold-start warm-up navigation failed: %s: %s", type(exc).__name__, exc
+            "cold-start warm-up navigation failed: %s", type(exc).__name__
         )
         return cookies, None
 
@@ -260,7 +260,7 @@ async def _arm_session_store(page: Any) -> None:
             return
         await SESSION_STORE.save_from_context(context, method="check_auth")
     except Exception as exc:  # noqa: BLE001 - an errand, never a gate
-        logger.debug("session store not armed (%s): %s", type(exc).__name__, exc)
+        logger.debug("session store not armed (%s)", type(exc).__name__)
 
 
 async def check_auth(
@@ -478,7 +478,7 @@ async def _maybe_corroborate(
             final_url = await BROWSER.goto(page, FEED_URL)
         except Exception as exc:
             logger.info(
-                "corroborating navigation failed: %s: %s", type(exc).__name__, exc
+                "corroborating navigation failed: %s", type(exc).__name__
             )
             return result
 

@@ -61,6 +61,7 @@ import asyncio
 import importlib
 import inspect
 import json
+import logging
 import pkgutil
 from pathlib import Path
 from typing import Any, Callable, Optional
@@ -871,7 +872,38 @@ def _with_the_failing_page(values: list[Any]) -> list[Any]:
     return [RaisingPage() if type(v) is PlantedPage else v for v in values]
 
 
+#: EVERY LOG RECORD THE ``linkedin`` LOGGER EMITTED DURING THE CURRENT DRIVE,
+#: captured at DEBUG. A LOG RECORD IS ANOTHER WAY OUT OF THE PROCESS: the
+#: server's stderr is redirected to a file on disk by ``scripts/start_server.ps1``
+#: and DEBUG is the level one sets to diagnose. Measured where they land before
+#: this was added -- see ``tests/test_no_log_record_carries_a_library_message.py``.
+_DRIVE_LOG: list[str] = []
+
+
+class _CollectRecords(logging.Handler):
+    def emit(self, record: logging.LogRecord) -> None:
+        try:
+            _DRIVE_LOG.append(record.getMessage())
+        except Exception:  # noqa: BLE001 -- an unformattable record still counts
+            _DRIVE_LOG.append(repr(record.msg) + repr(record.args))
+
+
 def _drive_failing_once(
+    fn: Callable[..., Any], args: list[Any], kwargs: dict[str, Any]
+) -> tuple[str, str]:
+    log = logging.getLogger("linkedin")
+    handler = _CollectRecords(level=logging.DEBUG)
+    level = log.level
+    log.addHandler(handler)
+    log.setLevel(logging.DEBUG)
+    try:
+        return _drive_failing_once_logged(fn, args, kwargs)
+    finally:
+        log.removeHandler(handler)
+        log.setLevel(level)
+
+
+def _drive_failing_once_logged(
     fn: Callable[..., Any], args: list[Any], kwargs: dict[str, Any]
 ) -> tuple[str, str]:
     async def _run() -> Any:
@@ -918,13 +950,65 @@ def drive_failing(fn: Callable[..., Any]) -> tuple[str, str]:
 
 _FAILING_VERDICTS: dict[str, tuple[str, str]] = {}
 
+#: Per reader: how many log records emitted while it was driven carried what
+#: the failing library said. A COUNT, so a red never prints a record.
+_FAILING_LOG_HITS: dict[str, int] = {}
+
 
 def failing_verdicts() -> dict[str, tuple[str, str]]:
-    """Every discovered reader's verdict on the failing page, measured once."""
+    """Every discovered reader's verdict on the failing page, measured once.
+
+    The same drive fills :data:`_FAILING_LOG_HITS`, so the log check costs no
+    second pass over the readers.
+    """
     if not _FAILING_VERDICTS:
         for name, fn in discover_readers():
+            _DRIVE_LOG.clear()
             _FAILING_VERDICTS[name] = drive_failing(fn)
+            _FAILING_LOG_HITS[name] = sum(RAISED_PLANT in m for m in _DRIVE_LOG)
     return _FAILING_VERDICTS
+
+
+@pytest.mark.parametrize("name", [n for n, _ in discover_readers()])
+def test_no_reader_logs_what_a_failing_library_said(name: str) -> None:
+    """THE SAME DRIVE, READ FOR LOG RECORDS rather than for the return value."""
+    failing_verdicts()
+    hits = _FAILING_LOG_HITS[name]
+    assert hits == 0, (
+        f"{name} emitted {hits} log record(s) carrying what a failing library "
+        "said, captured at DEBUG. Log type(exc).__name__ and name the step in "
+        "the call's own words; a library's message can quote a selector, a "
+        "request or an address, and stderr is a file on disk."
+    )
+
+
+def test_the_log_capture_sees_a_record_it_was_not_shown() -> None:
+    """SHOWN FAILING: a reader that logs the message is counted, one that logs
+    the type is not -- through the real capture, not a copy of it."""
+    import logging as _logging
+
+    log = _logging.getLogger("linkedin")
+
+    async def logs_the_message(page: Any) -> dict[str, Any]:
+        try:
+            await page.locator("x").count()
+        except Exception as exc:  # noqa: BLE001 - the defect, on purpose
+            log.debug("read failed: %s: %s", type(exc).__name__, exc)
+        return {}
+
+    async def logs_the_type(page: Any) -> dict[str, Any]:
+        try:
+            await page.locator("x").count()
+        except Exception as exc:  # noqa: BLE001
+            log.debug("read failed: %s", type(exc).__name__)
+        return {}
+
+    _DRIVE_LOG.clear()
+    drive_failing(logs_the_message)
+    assert sum(RAISED_PLANT in m for m in _DRIVE_LOG) == 1, len(_DRIVE_LOG)
+    _DRIVE_LOG.clear()
+    drive_failing(logs_the_type)
+    assert _DRIVE_LOG and sum(RAISED_PLANT in m for m in _DRIVE_LOG) == 0
 
 
 @pytest.mark.parametrize("name", [n for n, _ in discover_readers()])

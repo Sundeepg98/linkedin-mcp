@@ -270,7 +270,7 @@ class LinkedInBrowser:
                     logger.info("session store: %s", outcome.get("why"))
             except Exception as exc:  # noqa: BLE001 - a net, never a gate
                 logger.debug(
-                    "session restore skipped (%s): %s", type(exc).__name__, exc
+                    "session restore skipped (%s)", type(exc).__name__
                 )
         except Exception as exc:
             # Never hold the lock, or a driver, for a browser that did not
@@ -297,7 +297,7 @@ class LinkedInBrowser:
         try:
             self._context.set_default_timeout(NAV_TIMEOUT_MS)
         except Exception as exc:  # pragma: no cover - older client
-            logger.debug("set_default_timeout raised %s: %s", type(exc).__name__, exc)
+            logger.debug("set_default_timeout raised %s", type(exc).__name__)
         logger.info("attached over CDP at %s", cdp_bridge.endpoint())
 
     async def stop(self) -> None:
@@ -327,22 +327,22 @@ class LinkedInBrowser:
                 try:
                     await own_page.close()
                 except Exception as exc:  # pragma: no cover - shutdown noise
-                    logger.debug("closing our tab raised %s: %s", type(exc).__name__, exc)
+                    logger.debug("closing our tab raised %s", type(exc).__name__)
             try:
                 await client.close()
             except Exception as exc:  # pragma: no cover - shutdown noise
-                logger.debug("cdp disconnect raised %s: %s", type(exc).__name__, exc)
+                logger.debug("cdp disconnect raised %s", type(exc).__name__)
         elif context is not None:
             try:
                 await context.close()
             except Exception as exc:  # pragma: no cover - shutdown noise
-                logger.debug("closing context raised %s: %s", type(exc).__name__, exc)
+                logger.debug("closing context raised %s", type(exc).__name__)
 
         if pw is not None:
             try:
                 await pw.stop()
             except Exception as exc:  # pragma: no cover - shutdown noise
-                logger.debug("stopping playwright raised %s: %s", type(exc).__name__, exc)
+                logger.debug("stopping playwright raised %s", type(exc).__name__)
         if self._holds_profile_lock:
             profile_lock.release()
             self._holds_profile_lock = False
@@ -374,7 +374,7 @@ class LinkedInBrowser:
         try:
             await self._teardown()
         except Exception as exc:  # pragma: no cover
-            logger.debug("idle close raised %s: %s", type(exc).__name__, exc)
+            logger.debug("idle close raised %s", type(exc).__name__)
 
     # -- the one entry point tools use ------------------------------------
 
@@ -505,7 +505,7 @@ class LinkedInBrowser:
                 await page.wait_for_timeout(settle_ms)
             except Exception as exc:  # pragma: no cover
                 branch = "settle_failed"
-                logger.debug("settle wait raised %s: %s", type(exc).__name__, exc)
+                logger.debug("settle wait raised %s", type(exc).__name__)
         self._last_settle = {
             "branch": branch,
             "settled_ms": round((time.monotonic() - settle_started) * 1000),

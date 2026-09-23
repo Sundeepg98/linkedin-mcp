@@ -634,7 +634,7 @@ async def harvest_census(
     try:
         result = await page.evaluate(HARVEST_LINKED_CARDS_JS, cfg)  # readonly-ok
     except Exception as exc:  # noqa: BLE001 - a diagnostic never raises
-        logger.debug("harvest census failed: %s: %s", type(exc).__name__, exc)
+        logger.debug("harvest census failed: %s", type(exc).__name__)
         return out
     if isinstance(result, dict):
         out["rows"] = list(result.get("rows") or [])
@@ -742,7 +742,7 @@ async def read_tracker_row_shape(page: Any) -> list[list[dict[str, Any]]]:
     try:
         result = await page.evaluate(TRACKER_ROW_SHAPE_JS, cfg)  # readonly-ok
     except Exception as exc:  # noqa: BLE001 - a diagnostic never raises
-        logger.debug("tracker row shape failed: %s: %s", type(exc).__name__, exc)
+        logger.debug("tracker row shape failed: %s", type(exc).__name__)
         return []
     return list(result or [])
 
@@ -882,7 +882,7 @@ async def read_job_identity(page: Any) -> dict[str, Any]:
     try:
         out["document_title"] = str(await page.title() or "").strip() or None
     except Exception as exc:  # pragma: no cover - defensive
-        logger.debug("document title unreadable: %s: %s", type(exc).__name__, exc)
+        logger.debug("document title unreadable: %s", type(exc).__name__)
 
     try:
         block = page.locator(COMPANY_BLOCK).first
@@ -890,7 +890,7 @@ async def read_job_identity(page: Any) -> dict[str, Any]:
             "aria-label", timeout=ELEMENT_READ_TIMEOUT_MS
         )
     except Exception as exc:
-        logger.debug("company block unreadable: %s: %s", type(exc).__name__, exc)
+        logger.debug("company block unreadable: %s", type(exc).__name__)
         return out
 
     match = _COMPANY_LABEL.match(str(label or ""))
@@ -902,7 +902,7 @@ async def read_job_identity(page: Any) -> dict[str, Any]:
             "href", timeout=ELEMENT_READ_TIMEOUT_MS
         )
     except Exception as exc:
-        logger.debug("company url unreadable: %s: %s", type(exc).__name__, exc)
+        logger.debug("company url unreadable: %s", type(exc).__name__)
         return out
 
     slug = _COMPANY_SLUG.search(str(href or ""))
@@ -1047,7 +1047,7 @@ async def read_company_about_card(page: Any) -> dict[str, Any]:
     try:
         out["sdui"] = bool(await page.locator(ABOUT_COMPANY_SDUI).count())
     except Exception as exc:  # pragma: no cover - defensive
-        logger.debug("sdui marker unreadable: %s: %s", type(exc).__name__, exc)
+        logger.debug("sdui marker unreadable: %s", type(exc).__name__)
 
     try:
         text = str(
@@ -1495,14 +1495,14 @@ async def read_save_control(page: Any) -> dict[str, Any]:
         controls = page.locator(SAVE_CONTROL)
         out["count"] = int(await controls.count())
     except Exception as exc:
-        logger.debug("save control unreadable: %s: %s", type(exc).__name__, exc)
+        logger.debug("save control unreadable: %s", type(exc).__name__)
         return out
     if out["count"] != 1:
         return out
     try:
         label = await controls.first.get_attribute("aria-label")
     except Exception as exc:  # pragma: no cover - defensive
-        logger.debug("save label unreadable: %s: %s", type(exc).__name__, exc)
+        logger.debug("save label unreadable: %s", type(exc).__name__)
         return out
     out["label"] = str(label or "").strip() or None
     return out
@@ -1615,7 +1615,7 @@ async def _sweep_save_shaped(page: Any) -> dict[str, Any]:
         controls = page.locator(SAVE_SWEEP_SELECTOR)
         total = int(await controls.count())
     except Exception as exc:
-        logger.debug("save sweep failed: %s: %s", type(exc).__name__, exc)
+        logger.debug("save sweep failed: %s", type(exc).__name__)
         return out
 
     # The two counts that separate an unattached page from a renamed control.
@@ -1796,10 +1796,9 @@ async def wait_for_save_control(page: Any, timeout_ms: int) -> dict[str, Any]:
     except Exception as exc:
         out["failure"] = type(exc).__name__
         logger.debug(
-            "save control did not attach in %dms: %s: %s",
+            "save control did not attach in %dms: %s",
             timeout_ms,
             type(exc).__name__,
-            exc,
         )
     out["waited_ms"] = int((time.monotonic() - started) * 1000)
     return out
@@ -1885,7 +1884,7 @@ async def read_apply_control(page: Any) -> dict[str, Any]:
         controls = page.locator(APPLY_CONTROL)
         out["count"] = int(await controls.count())
     except Exception as exc:
-        logger.debug("apply control unreadable: %s: %s", type(exc).__name__, exc)
+        logger.debug("apply control unreadable: %s", type(exc).__name__)
         return out
     if out["count"] != 1:
         return out
@@ -1898,7 +1897,7 @@ async def read_apply_control(page: Any) -> dict[str, Any]:
         try:
             value = await control.get_attribute(attribute)
         except Exception as exc:  # pragma: no cover - defensive
-            logger.debug("apply %s unreadable: %s", attribute, exc)
+            logger.debug("apply %s unreadable: %s", attribute, type(exc).__name__)
             continue
         out[field] = str(value or "").strip() or None
     return out
@@ -2421,7 +2420,7 @@ async def harvest_followed_pages(page: Any) -> list[dict[str, Any]]:
         buttons = page.locator(FOLLOWED_PAGE_BUTTON)
         count = int(await buttons.count())
     except Exception as exc:
-        logger.debug("followed pages unreadable: %s: %s", type(exc).__name__, exc)
+        logger.debug("followed pages unreadable: %s", type(exc).__name__)
         return []
 
     rows: list[dict[str, Any]] = []
@@ -2430,7 +2429,7 @@ async def harvest_followed_pages(page: Any) -> list[dict[str, Any]]:
         try:
             label = await button.get_attribute("aria-label")
         except Exception as exc:  # pragma: no cover - defensive
-            logger.debug("row %d label unreadable: %s", index, exc)
+            logger.debug("row %d label unreadable: %s", index, type(exc).__name__)
             continue
         href = None
         try:
@@ -2442,7 +2441,7 @@ async def harvest_followed_pages(page: Any) -> list[dict[str, Any]]:
         except Exception as exc:
             # A row with no readable link is still a row. Losing the id costs
             # corroboration; dropping the row would lose the follow itself.
-            logger.debug("row %d link unreadable: %s", index, exc)
+            logger.debug("row %d link unreadable: %s", index, type(exc).__name__)
         rows.append({"label": str(label or ""), "href": href})
     return rows
 
@@ -2536,14 +2535,14 @@ async def read_unfollow_control(page: Any, company_id: str) -> dict[str, Any]:
         controls = page.locator(selector)
         out["count"] = int(await controls.count())
     except Exception as exc:
-        logger.debug("unfollow control unreadable: %s: %s", type(exc).__name__, exc)
+        logger.debug("unfollow control unreadable: %s", type(exc).__name__)
         return out
     if out["count"] != 1:
         return out
     try:
         label = await controls.first.get_attribute("aria-label")
     except Exception as exc:  # pragma: no cover - defensive
-        logger.debug("unfollow label unreadable: %s: %s", type(exc).__name__, exc)
+        logger.debug("unfollow label unreadable: %s", type(exc).__name__)
         return out
     out["label"] = str(label or "").strip() or None
     return out
@@ -2563,7 +2562,7 @@ async def read_main_text(page: Any) -> str:
             await page.inner_text("main", timeout=ELEMENT_READ_TIMEOUT_MS) or ""
         )
     except Exception as exc:
-        logger.debug("main text unreadable: %s: %s", type(exc).__name__, exc)
+        logger.debug("main text unreadable: %s", type(exc).__name__)
         return ""
 
 
@@ -2692,7 +2691,7 @@ async def wait_for_job_description(page: Any) -> dict[str, Any]:
                 f"the readiness check itself failed ({name}), so this says "
                 "nothing about the page"
             )
-            logger.debug("description readiness check failed: %s: %s", name, exc)
+            logger.debug("description readiness check failed: %s", name)
     out["waited_ms"] = int((time.monotonic() - started) * 1000)
     return out
 
@@ -2891,7 +2890,7 @@ def parse_all(
         try:
             parsed: Optional[dict[str, Any]] = parser(record)
         except Exception as exc:  # a bad row must not lose the good ones
-            logger.debug("row parse failed: %s: %s", type(exc).__name__, exc)
+            logger.debug("row parse failed: %s", type(exc).__name__)
             parsed = None
         if parsed:
             rows.append(parsed)
@@ -7670,7 +7669,7 @@ async def _count_by_role(page, name):
     try:
         return int(await page.get_by_role("button", name=name, exact=True).count())
     except Exception as exc:  # pragma: no cover - defensive
-        logger.debug("role count unreadable: %s: %s", type(exc).__name__, exc)
+        logger.debug("role count unreadable: %s", type(exc).__name__)
         return 0
 
 
@@ -7679,7 +7678,7 @@ async def _count_links_with(page, fragment):
     try:
         return int(await page.locator('a[href*="' + fragment + '"]').count())
     except Exception as exc:  # pragma: no cover - defensive
-        logger.debug("href count unreadable: %s: %s", type(exc).__name__, exc)
+        logger.debug("href count unreadable: %s", type(exc).__name__)
         return 0
 
 
@@ -7701,7 +7700,7 @@ async def read_composer_surface(page: Any) -> dict[str, Any]:
     try:
         out["editors"] = int(await page.locator("[contenteditable]").count())
     except Exception as exc:  # pragma: no cover - defensive
-        logger.debug("editor count unreadable: %s: %s", type(exc).__name__, exc)
+        logger.debug("editor count unreadable: %s", type(exc).__name__)
     return out
 
 
@@ -7872,7 +7871,7 @@ async def read_reaction_surface(page: Any) -> dict[str, Any]:
         controls = page.locator(REACTION_CONTROL)
         out["controls"] = int(await controls.count())
     except Exception as exc:  # pragma: no cover - defensive
-        logger.debug("reaction controls unreadable: %s: %s", type(exc).__name__, exc)
+        logger.debug("reaction controls unreadable: %s", type(exc).__name__)
         return out
     try:
         out["menus"] = int(
@@ -7886,7 +7885,7 @@ async def read_reaction_surface(page: Any) -> dict[str, Any]:
             ).count()
         )
     except Exception as exc:  # pragma: no cover - defensive
-        logger.debug("reaction menus unreadable: %s: %s", type(exc).__name__, exc)
+        logger.debug("reaction menus unreadable: %s", type(exc).__name__)
     seen = set()
     for index in range(min(int(out["controls"]), CENSUS_MAX_CONTROLS)):
         try:
@@ -7913,7 +7912,7 @@ async def read_profile_editor_surface(page: Any) -> dict[str, Any]:
     try:
         out["forms"] = int(await page.locator("form").count())
     except Exception as exc:  # pragma: no cover - defensive
-        logger.debug("form count unreadable: %s: %s", type(exc).__name__, exc)
+        logger.debug("form count unreadable: %s", type(exc).__name__)
     return out
 
 
@@ -7988,7 +7987,7 @@ async def read_invitation_surface(
         try:
             out["controls"] = int(await page.locator(INVITE_CONTROL).count())
         except Exception as exc:  # pragma: no cover - defensive
-            logger.debug("invite controls unreadable: %s: %s", type(exc).__name__, exc)
+            logger.debug("invite controls unreadable: %s", type(exc).__name__)
         return out
     cfg = {
         "selector": INVITE_CONTROL,
@@ -8044,14 +8043,14 @@ async def read_messaging_badge(page: Any) -> dict[str, Any]:
         links = page.locator('a[href*="/messaging/"]')
         out["links"] = int(await links.count())
     except Exception as exc:  # pragma: no cover - defensive
-        logger.debug("messaging link unreadable: %s: %s", type(exc).__name__, exc)
+        logger.debug("messaging link unreadable: %s", type(exc).__name__)
         return out
     if out["links"] < 1:
         return out
     try:
         label = await links.first.get_attribute("aria-label")
     except Exception as exc:  # pragma: no cover - defensive
-        logger.debug("messaging label unreadable: %s: %s", type(exc).__name__, exc)
+        logger.debug("messaging label unreadable: %s", type(exc).__name__)
         return out
     out["label"] = shape.census_shape(str(label or "").strip()) or None
     return out
@@ -8340,7 +8339,7 @@ async def wait_for_tracker_list(page: Any) -> dict[str, Any]:
                 "the readiness check itself failed (%s), so this says nothing "
                 "about the page" % name
             )
-            logger.debug("tracker readiness check failed: %s: %s", name, exc)
+            logger.debug("tracker readiness check failed: %s", name)
     out["waited_ms"] = int((time.monotonic() - started) * 1000)
     return out
 
