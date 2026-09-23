@@ -9518,8 +9518,8 @@ master, and the next free integer is the one they would all take.
 unknown`, because that census carries no per-row R/W column, and section 8 of
 `_audit/2026-09-21-the-jobs-direction.md` argues it should not grow one. So the
 per-row reading lives beside the census, in `_audit/_census/jobs-directions.tsv`
--- 56 classified R 28 / W 25 / R+W 3, then three rows built and banked, 53
-remaining at R 25 / W 25 / R+W 3 -- and every read row carries the bucket-3
+-- 56 classified R 28 / W 25 / R+W 3, then two rows built and banked, 54
+remaining at R 26 / W 25 / R+W 3 -- and every read row carries the bucket-3
 address columns, measured through the shipped boundary.
 
 ### 60.1 A DIRECTION IS A READING OF WORDS, SO THE WORDS ARE CITED
@@ -9562,7 +9562,25 @@ FIRED**: an element inside a `display:none` subtree is not rendered, so
 regression. The discriminating mode was added and the non-discriminating one
 kept, labelled, so the file says why the first is needed.
 
-### 60.4 THE ENTRIES
+### 60.4 A JOIN THAT WAS A DERIVED NAVIGATION, AND A GUARD THAT COULD NOT SEE IT
+
+`J 57`'s own census cell names *"the buildable route"*: tracker -> job ids ->
+each posting. A tool was built on it, tested end to end over committed
+captures, gated, committed -- and withdrawn before merge, because it navigates
+to ids READ OFF THE TRACKER PAGE. `tests/test_navigation_is_never_derived.py`
+forbids exactly that (*"a page that can choose the next url can choose a
+stranger's"*), and its engine could not have said so: it taints only a `goto`
+return and a `.url`, and its own docstring names page content as a deliberate
+gap. The guard's green was true and the rule was broken. What caught it was a
+review of the diff against the rule's TEXT, not against the guard's verdict.
+
+    A GUARD THAT NAMES ITS OWN BLIND SPOT HAS NOT CLOSED IT. A NEW NAVIGATION
+    IS CHECKED AGAINST THE RULE'S SENTENCE, NOT ONLY AGAINST ITS ENGINE.
+
+Not repaired here: widening the engine's sources to parsed page content is
+that file's owner's decision, and its docstring records why it was declined.
+
+### 60.5 THE ENTRIES
 
 | path | shown failing by |
 |---|---|
@@ -9578,7 +9596,7 @@ gitignored live captures and are the record of what each fixture carried over
 and what it invented. Each REFUSES a capture whose shape would make its fixture
 misrepresent the page. They are not registered as instruments.
 
-### 60.5 SUPERSEDED, AND RED AT HEAD BEFORE THIS WAVE: SECTION 47's TABLE
+### 60.6 SUPERSEDED, AND RED AT HEAD BEFORE THIS WAVE: SECTION 47's TABLE
 
 `scripts/_check_jobs_gap_directions.py` (section 47) carries its
 classification as a Python dict, a second copy of this data -- the drift its
@@ -9587,7 +9605,7 @@ own author warned about. It has been RED at HEAD since `J 40` left GAP on
 nobody was told. This wave does not edit it; `_audit/_census/jobs-directions.tsv`
 supersedes its table, and retiring it is recorded as a merge note.
 
-### 60.6 DECLARED DISPOSABLE
+### 60.7 DECLARED DISPOSABLE
 
 The scratchpad scripts this wave ran -- the generator that wrote the table, the
 per-capture shape probes, the offline run of the collections reader over the

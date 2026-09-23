@@ -139,7 +139,7 @@ COVERED_ROWS: dict[tuple[str, str], tuple[str, str]] = {
         "gated on the /feed/update/ route and a census of the captures finds "
         "that route zero times, so the positive branch cannot fire at all",
     ),
-    # THREE JOBS ROWS, 2026-09-23 (lane L3), pinned at UNFIRED because the lane
+    # TWO JOBS ROWS, 2026-09-23 (lane L3), pinned at UNFIRED because the lane
     # that built them was offline -- the same reasoning, and the same trap in
     # the other direction, as the network rows above: an unannounced promotion
     # is what inflates a count.
@@ -154,12 +154,6 @@ COVERED_ROWS: dict[tuple[str, str], tuple[str, str]] = {
         "job recommendations as posting ids: index 2 of "
         "linkedin_premium_job_collection, the recommended collection the "
         "reader's shape was measured on; never fired at that index",
-    ),
-    ("jobs.md", "57"): (
-        "COVERED-UNFIRED",
-        "the tracker x posting proximity join, linkedin_tracked_job_proximity; "
-        "tested end to end over the committed tracker and posting captures, "
-        "never fired",
     ),
 }
 
@@ -432,7 +426,7 @@ def test_the_verified_badge_passthrough_is_still_whole() -> None:
     )
 
 
-#: ``module -> the names census rows J 18, J 39 and J 57 rest on``. Data, so the
+#: ``module -> the names census rows J 18 and J 39 rest on``. Data, so the
 #: chain test and its control drive ONE predicate over ONE list.
 _JOBS_L3_CHAIN: dict[str, tuple[str, ...]] = {
     "job_home.py": ("read_recent_searches", "recent_search_entry"),
@@ -440,14 +434,12 @@ _JOBS_L3_CHAIN: dict[str, tuple[str, ...]] = {
     "server.py": (
         "linkedin_recent_job_searches",
         "linkedin_premium_job_collection",
-        "linkedin_tracked_job_proximity",
-        "_read_tracker",
     ),
 }
 
 
-def test_the_three_jobs_rows_banked_by_lane_l3_are_still_whole() -> None:
-    """``J 18``, ``J 39``, ``J 57``: reader -> tool, and the one VALUE J 39 is.
+def test_the_two_jobs_rows_banked_by_lane_l3_are_still_whole() -> None:
+    """``J 18`` and ``J 39``: reader -> tool, and the one VALUE J 39 is.
 
     ``J 39`` rests on a VALUE rather than a name -- ``recommended`` in
     ``job_collections.COLLECTIONS`` -- which the tool-surface pin cannot see by
@@ -458,8 +450,8 @@ def test_the_three_jobs_rows_banked_by_lane_l3_are_still_whole() -> None:
         defined = _defined_names(_source(module))
         for name in names:
             assert name in defined, (
-                f"{module} no longer defines {name}. Census rows J 18, J 39 and "
-                "J 57 claim COVERED-UNFIRED against this chain."
+                f"{module} no longer defines {name}. Census rows J 18 and J 39 "
+                "claim COVERED-UNFIRED against this chain."
             )
     from linkedin_server import collections_page, job_collections
 
@@ -472,7 +464,6 @@ def test_the_three_jobs_rows_banked_by_lane_l3_are_still_whole() -> None:
     server_src = _source("server.py")
     assert "job_home.read_recent_searches(" in server_src, (
         "no tool calls job_home.read_recent_searches; J 18's reader is orphaned")
-    assert "dom.read_job_posting(" in server_src
 
 
 def test_control_the_jobs_chain_convicts_a_renamed_link() -> None:

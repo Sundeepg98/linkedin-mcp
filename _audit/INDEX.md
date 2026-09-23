@@ -441,7 +441,7 @@ document is dead; it says one thing in it was overtaken and names what.
 
 - CORRECTED BY [2026-09-23-lane-l3-jobs.md](2026-09-23-lane-l3-jobs.md)
 
-  > five of its address readings, re-taken through the shipped boundary: `J 16`'s suggestions belong to the semantic search at `/jobs/search-results/` (refused), not the classic `/jobs/search/` priced here; `J 18`'s list is drawn on the admitted jobs home `/jobs/jam/`, not on `/jobs/search-history/`; `J 56`'s date filter is a label-toggled checkbox on the admitted tracker tab, a press rather than a refused query; `J 116`-`J 120` sit behind the AI guide overlay that Amendment A13 of the 2026-09-03 gap-blockers ledger measured, a refused address, not on the admitted posting; and `J 110`'s Home tab is admitted but its content is organisation prose `shape.company_about_card` rules unpublished. `J 148` is resolved from AMBIGUOUS to R+W. `J 18`, `J 39` and `J 57` were then built and left GAP; the per-row directions of the rest live in `_audit/_census/jobs-directions.tsv`.
+  > five of its address readings, re-taken through the shipped boundary: `J 16`'s suggestions belong to the semantic search at `/jobs/search-results/` (refused), not the classic `/jobs/search/` priced here; `J 18`'s list is drawn on the admitted jobs home `/jobs/jam/`, not on `/jobs/search-history/`; `J 56`'s date filter is a label-toggled checkbox on the admitted tracker tab, a press rather than a refused query; `J 116`-`J 120` sit behind the AI guide overlay that Amendment A13 of the 2026-09-03 gap-blockers ledger measured, a refused address, not on the admitted posting; and `J 110`'s Home tab is admitted but its content is organisation prose `shape.company_about_card` rules unpublished. `J 148` is resolved from AMBIGUOUS to R+W. `J 18` and `J 39` were then built and left GAP (a `J 57` join was built and withdrawn: it navigated to ids read off a page); the per-row directions of the rest live in `_audit/_census/jobs-directions.tsv`.
 
 ### [2026-09-21-the-open-queue.md](2026-09-21-the-open-queue.md)
 
@@ -1299,7 +1299,7 @@ reach is visible. The quoted reason here is the CORRECTOR's own
 
 ### [2026-09-23-lane-l3-jobs.md](2026-09-23-lane-l3-jobs.md)
 
-2026-09-23 &middot; Lane L3, jobs rows: 56 directions, 31 read addresses, and 3 readers built
+2026-09-23 &middot; Lane L3, jobs rows: 56 directions, 31 read addresses, 2 readers built and 1 withdrawn
 
 - CORRECTS [2026-09-21-the-jobs-direction.md](2026-09-21-the-jobs-direction.md)
 
@@ -1550,7 +1550,7 @@ ways, which is a fact about markers and not a verdict on the document.
 | 2026-09-21 | [2026-09-21-what-was-ruled.md](2026-09-21-what-was-ruled.md) | A register keyed on RULINGS, not on documents -- and the fourth payment |  |
 | 2026-09-23 | [2026-09-23-bucket1-fires.md](2026-09-23-bucket1-fires.md) | BUCKET 1: the read-direction COVERED-UNFIRED rows, fired once each through attach | corrects x1 |
 | 2026-09-23 | [2026-09-23-bucket3-addresses.md](2026-09-23-bucket3-addresses.md) | Bucket 3, measured: 67 rows, 33 on an admitted page, and 5 a reader could close today | corrects x1 |
-| 2026-09-23 | [2026-09-23-lane-l3-jobs.md](2026-09-23-lane-l3-jobs.md) | Lane L3, jobs rows: 56 directions, 31 read addresses, and 3 readers built | corrects x1 |
+| 2026-09-23 | [2026-09-23-lane-l3-jobs.md](2026-09-23-lane-l3-jobs.md) | Lane L3, jobs rows: 56 directions, 31 read addresses, 2 readers built and 1 withdrawn | corrects x1 |
 
 ## 6. What the scan rejected, could not join, or had to repair
 
@@ -1583,7 +1583,7 @@ against the same line, so a missing continuation satisfies it.
 - REASON PAST ITS LINE [2026-09-20-the-first-firing.md](2026-09-20-the-first-firing.md) line 233 -- a line-scoped reader sees 35 of 465 characters.
 - REASON PAST ITS LINE [2026-09-20-the-five-under-banked.md](2026-09-20-the-five-under-banked.md) line 3 -- a line-scoped reader sees 35 of 349 characters.
 - REASON PAST ITS LINE [2026-09-20-the-five-under-banked.md](2026-09-20-the-five-under-banked.md) line 457 -- a line-scoped reader sees 94 of 717 characters.
-- REASON PAST ITS LINE [_census/jobs.md](_census/jobs.md) line 401 -- a line-scoped reader sees 825 of 1189 characters.
+- REASON PAST ITS LINE [_census/jobs.md](_census/jobs.md) line 402 -- a line-scoped reader sees 825 of 1189 characters.
 
 - TIGHTEST ADMISSION MARGIN [2026-09-03-linkedin-gap-blockers.md](2026-09-03-linkedin-gap-blockers.md) line 272 clears the 20-character floor by 0. The floor is applied to the marker's OWN LINE, so a reason of 723 characters is admitted on the strength of 20. Reflow that paragraph by one word and a guard rejects it saying it *carries no reason after the citation*, which would not be true. Reported every regeneration rather than counted, because a count of rejections reads zero until the day it does not.
 

@@ -134,7 +134,6 @@ PINNED_TOOL_SURFACE: dict[str, tuple[str, ...]] = {
     "linkedin_server_info": ("verbose",),
     "linkedin_session_info": ("verify_live",),
     "linkedin_surface_census": ("surface",),
-    "linkedin_tracked_job_proximity": ("limit", "stage"),
     "linkedin_unfollow_company": ("company_id", "confirm_token"),
     "linkedin_unsave_job": ("confirm_token", "job_id"),
     "linkedin_update_profile_field": ("confirm_token", "field", "value"),
@@ -220,20 +219,23 @@ PINNED_TOOL_SURFACE: dict[str, tuple[str, ...]] = {
 #: and nothing has seen either tool return a payload live. See
 #: `_audit/2026-09-21-the-three-readers.md`.
 #:
-#: **RE-PINNED 2026-09-23 AT 51 TOOLS AND 68 PARAMETERS (lane L3), and every
-#: surface change in the commit moves a census row in the same commit.**
-#: `linkedin_recent_job_searches()` reads the jobs home and banks `J 18`;
-#: `linkedin_tracked_job_proximity(stage, limit)` joins the tracker to the
-#: posting's proximity read and banks `J 57` -- `stage` an INDEX into the three
-#: tracker stages the boundary admits, `limit` a declared cost ceiling of ten.
+#: **RE-PINNED 2026-09-23 AT 50 TOOLS AND 66 PARAMETERS (lane L3), and the
+#: surface change moves a census row in the same commit.**
+#: `linkedin_recent_job_searches()` reads the jobs home and banks `J 18`.
+#: **A SECOND TOOL WAS PINNED HERE AND WITHDRAWN BEFORE MERGE:**
+#: `linkedin_tracked_job_proximity(stage, limit)` joined the tracker to the
+#: posting's proximity read by navigating to job ids READ OFF THE TRACKER
+#: PAGE -- a derived navigation `tests/test_navigation_is_never_derived.py`
+#: forbids, and one its taint engine (a `goto` return and `.url` only) could
+#: not see. `J 57` stays GAP.
 #: **AND ONE MOVE THIS PIN CANNOT SEE, SAID HERE BECAUSE IT IS THE HOLE THIS
 #: FILE WAS DUG FOR ONE LEVEL DOWN:** `linkedin_premium_job_collection` gained
 #: a new VALUE, index 2 (`recommended`), on a parameter it already had, and it
 #: banks `J 39`. No name and no parameter moved, so this guard is silent about
-#: it by construction. All three rows move GAP -> COVERED-UNFIRED, not PROVEN:
-#: the lane that built them was offline. See `_audit/2026-09-23-lane-l3-jobs.md`.
-PINNED_TOOL_COUNT = 51
-PINNED_PARAMETER_COUNT = 68
+#: it by construction. Both rows move GAP -> COVERED-UNFIRED, not PROVEN: the
+#: lane that built them was offline. See `_audit/2026-09-23-lane-l3-jobs.md`.
+PINNED_TOOL_COUNT = 50
+PINNED_PARAMETER_COUNT = 66
 
 
 def live_surface() -> dict[str, tuple[str, ...]]:
