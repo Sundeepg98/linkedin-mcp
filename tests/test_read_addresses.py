@@ -260,6 +260,41 @@ def test_an_unexplained_row_without_an_address_turns_it_red(
            in out
 
 
+# ------------------------------------------------- the source column resolves
+
+
+@pytest.mark.parametrize("plant, expect", [
+    (lambda s: "scripts/no_such_file.py", "does not exist"),
+    (lambda s: "linkedin_server/dom.py::NO_SUCH_SYMBOL_ANYWHERE",
+     "source symbol NO_SUCH_SYMBOL_ANYWHERE is no longer spelled"),
+    (lambda s: "_audit/_census/network.md row 9999",
+     "source row 9999 is no longer a row"),
+    (lambda s: "somewhere, as prose", "does not open on a repository path"),
+], ids=["missing-file", "missing-symbol", "missing-census-row", "not-a-path"])
+def test_a_source_that_no_longer_resolves_turns_it_red(
+        tmp_path, capsys, plant, expect) -> None:
+    """A citation rots into a plausible wrong answer, so it is re-resolved."""
+    lines = _lines()
+    i = _find(lines, lambda r: True)
+    row = _row(lines[i])
+    row["source"] = plant(row["source"])
+    lines[i] = _line(row)
+    code, out = _check(capsys, _plant(tmp_path, lines))
+    assert code == 1, out
+    assert f"{row['slice']} {row['row']}: " in out and expect in out
+
+
+def test_the_source_check_reaches_every_kind_it_claims() -> None:
+    """Green on the real table is only a reading if all three branches ran."""
+    rows, _ = cra.load()
+    assert not cra.source_problems(rows)
+    symbols = sum(1 for r in rows if (m := cra._SOURCE_PATH.match(r["source"]))
+                  and m.group(2))
+    census_rows = sum(1 for r in rows if r["source"].startswith("_audit/_census/")
+                      and cra._SOURCE_ROW.search(r["source"]))
+    assert symbols and census_rows
+
+
 # ---------------------------------------------- the boundary, seen working
 
 

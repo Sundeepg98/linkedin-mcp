@@ -232,6 +232,51 @@ def shape_problems(rows: list[dict[str, str]]) -> list[str]:
     return problems
 
 
+_SOURCE_PATH = re.compile(r"^([A-Za-z0-9_.\-/]+\.(?:py|md|tsv|json))(?:::([A-Za-z_][A-Za-z0-9_]*))?")
+_SOURCE_ROW = re.compile(r"\brow ([A-Za-z]*\d+[a-z]?)\b")
+
+
+def source_problems(rows: list[dict[str, str]],
+                    root: pathlib.Path = ROOT) -> list[str]:
+    """Every row's source still RESOLVES: the file, the symbol, the census row.
+
+    A citation in this repository does not rot into a dangling reference; it
+    rots into a plausible wrong answer. So the source column is checked the
+    way the verdict column is, on every run: the path must exist, a
+    ``::SYMBOL`` must still be spelled in that file, and ``<census slice> row
+    <id>`` must still be a row of that slice.
+
+    KEPT OUT OF ``shape_problems`` on purpose, because ``census_completion.py``
+    calls that one inside a copy of the tree that carries only ``scripts/`` and
+    ``_audit/_census/`` -- where most sources legitimately do not exist.
+    """
+    problems: list[str] = []
+    for r in rows:
+        tag = f"{r['slice']} {r['row']}"
+        found = _SOURCE_PATH.match(r["source"])
+        if not found:
+            problems.append(f"{tag}: source {r['source']!r} does not open on a "
+                            f"repository path")
+            continue
+        path = root / found.group(1)
+        if not path.is_file():
+            problems.append(f"{tag}: source file {found.group(1)} does not "
+                            f"exist")
+            continue
+        text = path.read_text(encoding="utf-8", errors="replace")
+        symbol = found.group(2)
+        if symbol and not re.search(rf"\b{re.escape(symbol)}\b", text):
+            problems.append(f"{tag}: source symbol {symbol} is no longer "
+                            f"spelled in {found.group(1)}")
+        cited = _SOURCE_ROW.search(r["source"])
+        if cited and found.group(1).startswith("_audit/_census/"):
+            if not re.search(rf"(?m)^\|\s*{re.escape(cited.group(1))}\s*\|",
+                             text):
+                problems.append(f"{tag}: source row {cited.group(1)} is no "
+                                f"longer a row of {found.group(1)}")
+    return problems
+
+
 def _also(row: dict[str, str]) -> list[tuple[str, str]]:
     if row["also_driven"] == "-":
         return []
@@ -348,6 +393,7 @@ def main(argv: list[str] | None = None) -> int:
     pop = population()
     problems += coverage_problems(rows, pop)
     problems += shape_problems(rows)
+    problems += source_problems(rows)
     problems += control_problems()
     problems += boundary_problems(rows)
 
