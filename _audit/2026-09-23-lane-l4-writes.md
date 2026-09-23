@@ -129,7 +129,7 @@ the table says what binds TODAY.
 ## 4. THE BUILD: `N 47`, FOLLOW AN ORGANISATION PAGE FROM THE PAGE ITSELF
 
 **`linkedin_follow_company_page(organisation_id)`** -- spec `follow_company_page`, the thirteenth
-in `writes.PERFORMABLE`. Built to ready-to-fire under `STANDING-SHAPE-OF-A-WRITE-RULING` and nothing
+in `writes.PERFORMABLE`. Built to ready-to-fire to the bar the ruling `STANDING-SHAPE-OF-A-WRITE-RULING` sets, and nothing
 wider: a spec, a live read of the page the click lands on, a measured anchor, a verification on a
 DIFFERENT surface, and the same two calls behind the single-use, action-bound, target-bound grant
 with its 120 s TTL. `writes_enabled()` gates every door; no grant was issued outside the fixture
@@ -350,3 +350,52 @@ run on this branch after the build, prints exactly five moved figures and nothin
 files: 49 -> 50 tools, `PERFORMABLE` 12 -> 13, `SANCTIONED_WRITES` 13 -> 14, pinned parameters
 66 -> 68, the reader-leak and tool-envelope baselines one entry each, and the counts in `README.md`,
 `server.py` and `__init__.py`.
+
+**Gates.**
+
+* Gate 1, over `b35ed54`: `scripts/impact_gate.py --against b0d3ab8` -- PASS over the 34 test files
+  it selected (1954 tests); NOT CHECKED 182 of 216 test files (84.3%), about 4140 of 6094 tests;
+  wall 301.7 s.
+* During the build (not gates; every red repaired before the commit): two targeted batches, 1688
+  passed / 22 failed (840 s) and 556 passed / 1 failed (716 s); the repaired tests re-run green.
+* Gate 2, over `3e91d6b`: `scripts/impact_gate.py --against b0d3ab8`. The impact set was 196 of
+  217 test files (touching `linkedin_server/__init__.py` couples almost everything), so the gate
+  WIDENED TO THE FULL SUITE: **3 failed, 8383 passed, 8 skipped, 1 xfailed in 1575 s. REFUSED.**
+  All three are guards doing their job on text this lane wrote, and none is a behaviour change:
+  1. `test_no_message_publishes_a_landing.py::test_the_subject_set_has_not_silently_changed` --
+     the new landing refusal in `_assert_landed_on_target` is a fifth message site interpolating
+     `landing.withheld(landed)`, and the baseline had no verdict for it. Regenerated with the
+     module's own `--write-baseline`, which MEASURED it `WITHHELD` (38 sites, 6 withheld).
+  2. `test_a_correction_is_findable_from_the_claim.py::test_every_candidate_pair_is_declared_or_triaged`
+     -- census row `47` cites this record within two lines of the word `false`, which sits in the
+     row's kept prior cell. Read at the line, it is the row naming its own receipt with an in-place
+     correction of its OWN prior blocker, not a claim about this record; triaged on
+     `NOT_A_CORRECTION` with that reason and what would make it wrong.
+  3. `test_an_asserted_name_resolves.py::test_no_new_asserted_name_is_absent` -- section 4 said a
+     build was made "under" a ruling id, and "under `X`" is this corpus's slot for a BLOCKER name, so
+     the guard resolved the ruling against the blocker ledger. The id is real (it is registered in
+     `_audit/RULINGS.md`); the sentence now names it as a ruling.
+
+## 7. RAISED FOR OTHER OWNERS -- NOT RULED HERE
+
+1. **`N 46`, and its jobs twin `J 103`, read COVERED-UNFIRED while a recorded measurement says the
+   gate refuses on live postings.** DERIVED, not re-measured (nothing here went live).
+   `linkedin_follow_company` reads `dom.FOLLOW_CONTROL`, the exact-value union of `Follow` and
+   `Following`, and at HEAD that union is unchanged. `_audit/2026-09-19-the-follow-control-live.md`
+   measured it matching ZERO controls on 5 of 5 hydrated postings -- LinkedIn now labels the button
+   `Follow` plus the employer's name -- and `_audit/2026-09-19-follow-company-has-no-direction.md`
+   records the gate's own reading that day as `unknown`. COVERED-UNFIRED is defined as a tool that
+   "would not refuse at the gate". Whether those two rows keep that state, and whether the posting
+   follow takes the anchor this lane built for the Page root (a prefix, bound to a heading, tied to
+   an id on the page), is the rows' owners' decision. This lane may not edit `jobs.md` and did not
+   edit row `46`, so neither row carries a pointer from here. The Page-root build does not depend on
+   the answer.
+2. **Ten functions in `writes.py` still coerce page values with `int()`** -- named in section 4.6.
+   None was touched here, so none was repaired.
+3. **The 18:15 ruling is not registered** -- section 5. Until it is, R2's label rests on a relay.
+4. **The asserted-name guard reads one line at a time, so a slot phrase wrapped across a line break
+   is invisible to it.** MEASURED on this record: section 1 wraps "under" at a line end with a
+   ruling id opening the next line, and `scripts/check_asserted_names_resolve.py --all` lists no
+   candidate site there, while the unwrapped instance in section 4 was convicted. Harmless here --
+   that id resolves in `_audit/RULINGS.md` -- but an unresolvable BLOCKER name wrapped the same way
+   would pass.
