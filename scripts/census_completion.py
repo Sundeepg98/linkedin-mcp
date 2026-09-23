@@ -80,6 +80,7 @@ import sys
 _HERE = pathlib.Path(__file__).resolve().parent
 sys.path.insert(0, str(_HERE))
 
+import check_read_addresses as cra  # noqa: E402
 import count_census_states as ccs  # noqa: E402
 import enumerate_gap_rows as egr  # noqa: E402
 import pin_census_rows as pcr  # noqa: E402
@@ -291,6 +292,33 @@ def pct(n: int, d: int) -> str:
     return "  n/a" if not d else f"{100.0 * n / d:5.1f}%"
 
 
+def bucket3_split(rows) -> tuple[dict[str, int] | None, list[str]]:
+    """(the measured split of bucket 3, problems) off the address table.
+
+    COUNTED, NOT RE-DRIVEN. The verdicts in `_audit/_census/read-addresses.tsv`
+    were measured through the shipped `readonly.is_read_url`, and
+    `scripts/check_read_addresses.py` re-drives every one of them; this file
+    counts the table's class and gate columns and does NOT import the boundary,
+    because `scripts/_check_census_completion_can_fail.py` runs it inside a
+    copy of the tree that carries no `linkedin_server` package.
+
+    WHAT IT DOES CHECK, and it is the half that needs no boundary: that the
+    table covers EXACTLY today's bucket 3, one line per row, directions
+    agreeing, vocabulary intact. A split over a table that has drifted from
+    the census would be a figure about a population nobody has, so on any
+    problem the split is WITHHELD -- its figures are missing, and `--check`
+    fails naming every pin that has nothing to check.
+    """
+    pop = {(letter, rid): d for letter, rid, st, d in rows
+           if st == "GAP" and d in cra.DIRECTIONS}
+    table, problems = cra.load()
+    problems += cra.coverage_problems(table, pop)
+    problems += cra.shape_problems(table)
+    if problems:
+        return None, problems
+    return cra.split(table), []
+
+
 def report(rows, out) -> dict:
     """Print the decomposition and return the headline figures as a dict."""
     folded = tally(rows)
@@ -451,12 +479,59 @@ def report(rows, out) -> dict:
     p("     THE ONLY BUCKET WHOSE SIZE IS A STATEMENT ABOUT WORK.")
     p(f"     read-direction still-GAP rows           {reader:4d}   DERIVED"
       f"  (R {by_dir['R']} + R+W {by_dir['R+W']})")
-    p("       An UPPER BOUND and nothing stronger. It is the set a reader could")
-    p("       close IN PRINCIPLE. It has not been shown that each one's address")
-    p("       is admitted by the shipped read boundary, and that is the exact")
-    p("       measurement missing -- see section 5.")
-    p(f"     of those, known to need a session       {len(named_press):4d}")
-    p(f"     of those, known to need a ruling        "
+    p("       That is the UPPER BOUND: the set a reader could close in")
+    p("       principle. EACH ROW'S PAGE ADDRESS IS NOW MEASURED through the")
+    p("       shipped read boundary -- `_audit/_census/read-addresses.tsv`, one")
+    p("       line per row, re-driven by `scripts/check_read_addresses.py`.")
+    p("       Counted off that table; this file does not re-drive it:")
+    split3, split3_problems = bucket3_split(rows)
+    if split3 is None:
+        p("     BUCKET 3 SPLIT WITHHELD -- the address table no longer covers")
+        p("     today's bucket 3, so any split of it would describe a")
+        p("     population the census does not have:")
+        for problem in split3_problems[:12]:
+            p(f"       !! {problem}")
+        if len(split3_problems) > 12:
+            p(f"       !! ... and {len(split3_problems) - 12} more; run "
+              f"`scripts/check_read_addresses.py`")
+    else:
+        refused_why = (f"forbidden substring {split3['refused:forbidden']}, "
+                       f"allowlist silence {split3['refused:no_pattern']}")
+        p(f"     the boundary ADMITS the row's page      "
+          f"{split3['class:ADMITTED']:4d}   MEASURED")
+        p(f"     the boundary REFUSES it                 "
+          f"{split3['class:REFUSED']:4d}   MEASURED  ({refused_why})")
+        p(f"     NO-ADDRESS: no page of its own          "
+          f"{split3['class:NO-ADDRESS']:4d}   ENUMERATED, each row says what"
+          f" it derives from")
+        p(f"     NEEDS-SESSION: address unknown offline  "
+          f"{split3['class:NEEDS-SESSION']:4d}   ENUMERATED, each row says what"
+          f" is unknown")
+        p(f"     UNDETERMINED                            "
+          f"{split3['class:UNDETERMINED']:4d}   ENUMERATED, reason per row")
+        p(f"     of the {split3['class:ADMITTED']} ADMITTED, the first thing past the"
+          f" boundary -- ENUMERATED in the")
+        p("     table's gate column, a judgement that names its source per row:")
+        labels = {
+            "READER": "a reader over the admitted page",
+            "PRESS-PERMITTED": "a press the shipped gate permits",
+            "MEASURE": "a live measurement first",
+            "BUILT-UNFIRED": "the reader ships, never fired",
+            "PRESS": "a press the shipped gate refuses",
+            "RULING": "a decision nobody has made",
+        }
+        for gate in cra.GATES:
+            p(f"       {gate:16s} {labels[gate]:34s} {split3['gate:' + gate]:4d}")
+        p(f"     BLOCKED ON NOTHING, MEASURED            "
+          f"{split3['blocked_on_nothing']:4d}   of {reader}: ADMITTED, and a"
+          f" reader could be")
+        p("       written today -- no ruling, no boundary edit, no refused press."
+          " See")
+        p("       `_audit/2026-09-23-bucket3-addresses.md` for the rows.")
+    p(f"     of those {reader}, named elsewhere here as needing a press"
+      f"     {len(named_press):4d}")
+    p(f"     of those {reader}, named elsewhere here as needing a ruling"
+      f"    "
       f"{len([k for k in named_ruling if any((l, r) == k and d in ('R', 'R+W') for l, r, _s, d in rows)]):4d}")
     p("")
     p("  -- UNCLASSIFIED: A MEASUREMENT GAP, NOT A BLOCKER ----------------")
@@ -478,19 +553,30 @@ def report(rows, out) -> dict:
     p("=" * 78)
     p("  * HOW LONG. Nothing here measures duration and nothing should be read")
     p("    as a schedule.")
-    p("  * WHETHER BUCKET 3 IS REALLY BLOCKED ON NOTHING. The missing")
-    p("    measurement is a per-row ADDRESS run through `readonly.is_read_url`.")
-    p("    The census records an address in prose, not in a column, so no")
-    p("    instrument can take it today. `_audit/2026-09-19-the-read-rows.md`")
-    p("    did it BY HAND for 39 rows; at that rate the remaining read rows are")
-    p("    a bounded, unglamorous job and it is the one that would turn this")
-    p("    upper bound into a number.")
+    p("  * WHETHER BUCKET 3 IS BLOCKED ON NOTHING BEYOND THE BOUNDARY. What is")
+    p("    measured since 2026-09-23 is the per-row ADDRESS through")
+    p("    `readonly.is_read_url` -- the census kept it in prose, and")
+    p("    `_audit/_census/read-addresses.tsv` is now the column, re-driven by")
+    p("    `scripts/check_read_addresses.py`. That settles whether the page is")
+    p("    one this server may OPEN, and nothing more: ALLOWED IS NOT SERVED,")
+    p("    so an admitted address is not evidence that the page draws what the")
+    p("    row wants, and the gate column past the boundary is a judgement")
+    p("    enumerated from committed sources rather than a measurement.")
+    if split3 is not None:
+        unaddressed = (split3["class:NO-ADDRESS"]
+                       + split3["class:NEEDS-SESSION"]
+                       + split3["class:UNDETERMINED"])
+        p(f"    {unaddressed} of the {split3['rows']} rows carry no address at all"
+          f" (NO-ADDRESS {split3['class:NO-ADDRESS']},")
+        p(f"    NEEDS-SESSION {split3['class:NEEDS-SESSION']}, UNDETERMINED"
+          f" {split3['class:UNDETERMINED']}); for those the boundary question")
+        p("    itself is still open, and each row says why.")
     p("  * WHETHER A ROW IS THE RIGHT ROW. Every count here is over the census")
     p("    as written. If a capability is missing from the census entirely, it")
     p("    is missing from every figure above, and no instrument in this")
     p("    repository can find what nobody enumerated.")
 
-    return {
+    figures = {
         "stated_rows": total,
         "capabilities": cap_total,
         "capabilities_achievable": cap_achievable,
@@ -507,6 +593,20 @@ def report(rows, out) -> dict:
         "gap_unknown": by_dir["unknown"],
         "gap_ambiguous": by_dir["ambiguous"],
     }
+    # WITHHELD RATHER THAN ZEROED. When the address table does not cover
+    # today's bucket 3 these keys are simply absent, so `--check` reports each
+    # of their pins as having nothing to check -- a zero here would read as a
+    # measurement.
+    if split3 is not None:
+        figures.update({
+            "b3_admitted": split3["class:ADMITTED"],
+            "b3_refused": split3["class:REFUSED"],
+            "b3_no_address": split3["class:NO-ADDRESS"],
+            "b3_needs_session": split3["class:NEEDS-SESSION"],
+            "b3_undetermined": split3["class:UNDETERMINED"],
+            "b3_blocked_on_nothing": split3["blocked_on_nothing"],
+        })
+    return figures
 
 
 #: EVERY headline figure this file prints, pinned. `--check` fails on any
@@ -543,6 +643,21 @@ PINNED = {
     #: population.
     "gap_unknown": 56,
     "gap_ambiguous": 0,
+    #: BUCKET 3, MEASURED 2026-09-23 (`_audit/2026-09-23-bucket3-addresses.md`),
+    #: counted off `_audit/_census/read-addresses.tsv`, whose every verdict
+    #: `scripts/check_read_addresses.py` re-drives through the shipped
+    #: boundary. The six sum to nothing on their own: the first five
+    #: partition `gap_read` (33 + 24 + 2 + 6 + 2 = 67) and the sixth is the
+    #: subset of the 33 a reader could be written for today. Pinned so that a
+    #: row entering or leaving bucket 3, or a boundary edit that moves a
+    #: verdict and is carried into the table, cannot move the headline
+    #: "blocked on nothing" figure without somebody re-pinning it out loud.
+    "b3_admitted": 33,
+    "b3_refused": 24,
+    "b3_no_address": 2,
+    "b3_needs_session": 6,
+    "b3_undetermined": 2,
+    "b3_blocked_on_nothing": 5,
 }
 
 

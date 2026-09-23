@@ -27,16 +27,16 @@ are listed as `(undated)`; no date is taken from git history, because
 
 | what | count |
 | --- | --- |
-| audit documents git tracks under `_audit` | 232 |
-| of those, carrying a `YYYY-MM-DD-` date prefix | 192 |
-| distinct dates | 14 |
+| audit documents git tracks under `_audit` | 233 |
+| of those, carrying a `YYYY-MM-DD-` date prefix | 193 |
+| distinct dates | 15 |
 | documents with no level-1 heading | 2 |
-| `CORRECTS:` marker lines | 91 |
-| `CORRECTED BY:` marker lines | 91 |
-| distinct declared correction edges | 88 |
+| `CORRECTS:` marker lines | 92 |
+| `CORRECTED BY:` marker lines | 92 |
+| distinct declared correction edges | 89 |
 | documents something later corrects | 46 |
-| documents that correct something | 64 |
-| documents at either end of a cross-document edge | 91 |
+| documents that correct something | 65 |
+| documents at either end of a cross-document edge | 92 |
 | intra-document correction markers | 4 |
 | documents that correct themselves later on | 2 |
 | documents no correction marker touches at all | 139 |
@@ -454,6 +454,10 @@ document is dead; it says one thing in it was overtaken and names what.
 - CORRECTED BY [2026-09-21-what-is-reachable-now.md](2026-09-21-what-is-reachable-now.md)
 
   > its denominator and its buildable count are both superseded, and NOT because anything in it was wrong. **The 59 is 68**: this wave scoped itself to profile and network, and the jobs slice holds 29-to-31 read rows that no direction-based sweep can see, because its per-row tables carry no direction column and `direction_of` returns `unknown` for all of them. **Of the 19 buildable, three were built and fired the same day and all three returned COVERED-CANNOT-DELIVER** (`N 33`, `N 54`, `N 175`); twelve are behind an `All filters` press since measured REFUSED terminally at condition 2; one banked (`N 83`). That document's own section 7 anticipated this -- *"ALLOWED IS NOT SERVED"* -- and its address verdicts were re-driven here and hold: 30 of 30 AGREE, 0 MOVED.
+
+- CORRECTED BY [2026-09-23-bucket3-addresses.md](2026-09-23-bucket3-addresses.md)
+
+  > four of its address verdicts, re-taken through the shipped boundary for every bucket-3 row: `P F1` and `P H11` are sections on the admitted `/in/me/`, not ADDRESS/ABSENT (the detail spellings priced here do refuse, and are not where the payload is drawn), and `P L4` and `N 61` wait on a live read of which address serves rather than on a refused one. The per-row addresses now live in `_audit/_census/read-addresses.tsv`, re-driven by `scripts/check_read_addresses.py`.
 
 ### [2026-09-21-the-three-readers.md](2026-09-21-the-three-readers.md)
 
@@ -1265,6 +1269,14 @@ reach is visible. The quoted reason here is the CORRECTOR's own
 
   > row `O3`'s evidence cell gains the same, state unchanged. Its reason was `no tool, no reason`; there is now a reason.
 
+### [2026-09-23-bucket3-addresses.md](2026-09-23-bucket3-addresses.md)
+
+2026-09-23 &middot; Bucket 3, measured: 67 rows, 33 on an admitted page, and 5 a reader could close today
+
+- CORRECTS [2026-09-21-the-read-triage.md](2026-09-21-the-read-triage.md)
+
+  > four address verdicts: P F1 and P H11 are pages on the admitted profile, not ADDRESS/ABSENT, and P L4 and N 61 wait on a live read, not on a refused address anybody has seen served.
+
 ## 5. Every document, by date
 
 `CORRECTED` means at least one later document declares a correction of
@@ -1497,7 +1509,7 @@ ways, which is a fact about markers and not a verdict on the document.
 | 2026-09-21 | [2026-09-21-the-locators-that-point-elsewhere.md](2026-09-21-the-locators-that-point-elsewhere.md) | The locators that point elsewhere |  |
 | 2026-09-21 | [2026-09-21-the-open-queue.md](2026-09-21-the-open-queue.md) | The open queue, 2026-09-21 at master `9dbaad2` | **CORRECTED x1** |
 | 2026-09-21 | [2026-09-21-the-proximity-field.md](2026-09-21-the-proximity-field.md) | The proximity field -- census row `J 40`, read per-job network proximity |  |
-| 2026-09-21 | [2026-09-21-the-read-triage.md](2026-09-21-the-read-triage.md) | The read rows are GATED, not backlogged -- but nineteen of the fifty-nine are not | **CORRECTED x2** corrects x2 |
+| 2026-09-21 | [2026-09-21-the-read-triage.md](2026-09-21-the-read-triage.md) | The read rows are GATED, not backlogged -- but nineteen of the fifty-nine are not | **CORRECTED x3** corrects x2 |
 | 2026-09-21 | [2026-09-21-the-search-results-surface.md](2026-09-21-the-search-results-surface.md) | THE SEARCH-RESULTS SURFACE -- the largest reader-closable concentration, and what a reader can actually do with it | corrects x2 |
 | 2026-09-21 | [2026-09-21-the-three-readers.md](2026-09-21-the-three-readers.md) | Two readers for three rows, on two addresses nothing could navigate to -- | **CORRECTED x2** |
 | 2026-09-21 | [2026-09-21-the-ungrantable-readers.md](2026-09-21-the-ungrantable-readers.md) | THE UNGRANTABLE READERS: what `GRANT_REFUSAL` was actually refusing |  |
@@ -1508,6 +1520,7 @@ ways, which is a fact about markers and not a verdict on the document.
 | 2026-09-21 | [2026-09-21-what-playwright-quotes.md](2026-09-21-what-playwright-quotes.md) | WHAT PLAYWRIGHT QUOTES: the parked question, measured offline |  |
 | 2026-09-21 | [2026-09-21-what-the-browser-said.md](2026-09-21-what-the-browser-said.md) | WHAT THE BROWSER SAID: `$.message`, adjudicated by PROVENANCE CLASS | **CORRECTED x1** |
 | 2026-09-21 | [2026-09-21-what-was-ruled.md](2026-09-21-what-was-ruled.md) | A register keyed on RULINGS, not on documents -- and the fourth payment |  |
+| 2026-09-23 | [2026-09-23-bucket3-addresses.md](2026-09-23-bucket3-addresses.md) | Bucket 3, measured: 67 rows, 33 on an admitted page, and 5 a reader could close today | corrects x1 |
 
 ## 6. What the scan rejected, could not join, or had to repair
 
