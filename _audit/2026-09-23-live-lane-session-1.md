@@ -578,8 +578,9 @@ above; `profile.md` `O3` a dated paragraph, state GAP; `read-addresses.tsv`
 `N 134`'s line REMOVED (a proven row is no longer bucket 3, and the checker
 flags a line for a non-bucket-3 row), `P O3` gate PRESS -> READER.
 `check_read_addresses.py`: GREEN, 65 of 65; blocked on nothing 2 (`M M49`,
-`P O3`). The correction guard's new `network.md` pair, and `O3` joining the
-`profile.md` pair, are triaged after reading each line in the window.
+`P O3`). The proximity scan's new pair from the network census, and `O3`
+joining the profile census's pair, are triaged after reading each line in the
+window.
 
 **PIN MOVES SO FAR, NOT RE-PINNED** (`census_completion.py --check`, now):
 
@@ -592,4 +593,59 @@ flags a line for a non-bucket-3 row), `P O3` gate PRESS -> READER.
     b1_no_ruling             7 -> 6     (-1)
     b3_admitted             40 -> 39    (-1)
     b3_blocked_on_nothing    1 -> 2     (+1: P O3 is now READER)
+    PINNED_B1_ROWS           P G6 leaves its hold
+
+### Entry 8 -- 23:14-23:24, the reader P O3 was waiting on, built and fired: 2 loads
+
+**Built:** `linkedin_server/profile_views_more.py`, reading what "Show more
+analytics" draws -- "Highlights" (value/label pairs: top location, top
+industry, top company) and "Details" (a "companies" breakdown, each entry
+"<name> (<n>%)"). Locators and `inner_text` only; no injected script (the
+`# readonly-ok` waiver budget stands at 22 of 22 and is untouched). **Fitted
+before it was wired:** run offline against the live capture, it read both
+sections, all three highlight values, 5 entries and 0 unparsed lines; on the
+closed page it found nothing, not an empty reading. **No name is redacted**,
+and its docstring says why and when that stops holding: the tool it is wired
+into already returns every viewer by name and headline, so an aggregate over
+the same people discloses nothing new -- the redaction is owed the day it is
+wired to a surface whose rows are not returned. Wired as
+`more_analytics.revealed_insights`, no new parameter. 10 tests; five plants in
+a scratch copy all red (M1 value paired with the NEXT line: 3 red; M2 entries
+without parentheses: 4; M3 unparsed not counted: 1; M4 headings read
+page-wide: 3; M5 the section climb stopping at the heading: 1); baseline and
+restored 10 passed. `reader_leak_baseline`: 1 reader added, clean.
+
+**Fired** (`--only pv_switch,pv_verify`, 23:21:53-23:22:39, ledger 21 -> 23,
+walled False, 0 challenge terms): the switch permitted and restored (6 rows
+under the filter, headline 6), the reveal permitted (url and counters held),
+`revealed_insights`: both sections, the three highlights, 5 company entries,
+0 unparsed; the fresh load agreed with the switch's own load again.
+
+**`P O3` -- PROVEN.** Filters by the switch, insights by the reveal and its
+reader, in one fire. **The fields whose meaning was checked:** the top
+company in "Highlights" EQUALS the largest entry in the "Details" breakdown,
+and that entry is unique -- two sections parsed independently, agreeing (a
+string comparison in memory; only the boolean left the process); the shares
+are percentages the reader's pattern admits; url and counters held across
+the press. Census: `profile.md` `O3` GAP -> COVERED-PROVEN, the half-proven
+paragraph kept beneath; its `read-addresses.tsv` line removed.
+`check_read_addresses.py`: GREEN, 64 of 64; blocked on nothing 1 (`M M49`).
+
+**A DEFECT IN MY OWN COMMIT `85df223`, fixed in the next.** Entry 7 named the
+two census files in backticks beside the word "correction", and the
+correction guard reads that as this document correcting them -- two
+untriaged pairs, so that commit's tree fails that guard. Reworded, not
+triaged: a triage entry would have muted the pair for good.
+
+**PIN MOVES NOW, NOT RE-PINNED:**
+
+    adjudicated            431 -> 433   (+2)
+    delivered_broad         97 -> 99    (+2)
+    delivered_strict        75 -> 78    (+3: P G6, N 134, P O3)
+    gap                    273 -> 271   (-2: N 134, P O3)
+    gap_read                66 -> 64    (-2)
+    unfired                 22 -> 21    (-1: P G6)
+    b1_no_ruling             7 -> 6     (-1)
+    b3_admitted             40 -> 38    (-2)
+    b3_blocked_on_nothing    1 -> 1     (P O3 in and out; M M49 remains)
     PINNED_B1_ROWS           P G6 leaves its hold
