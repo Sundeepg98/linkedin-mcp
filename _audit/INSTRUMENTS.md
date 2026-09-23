@@ -9606,3 +9606,34 @@ source on every run. The two delegated evidence files -- the git archaeology
 of 65 code refusals and the 189-passage attribution register -- stay in the
 gitignored `_audit/_scratch/exclusion-audit/` and are summarised, with their
 counts, in the audit.
+
+## 64. A FAMILY THAT HOLDS NO ROW MUST SAY WHY, AND A CONTROL THAT BUILDS ITS OWN FIXTURE (exclusion-returns, 2026-09-23)
+
+**Registered 2026-09-23.** Full record: `_audit/2026-09-23-exclusion-returns.md`.
+Numbered 64 because the orchestrator assigned it to this lane.
+
+Lane R returned 251 exclusions to GAP and re-filed nine kept rows onto the
+ground that holds them, which left 29 of the exclusion-basis registry's families
+holding no row at all. The registry's own test said a family must be used "or
+say why", and nothing could say why. Two cheap exits were both wrong: deleting
+the 29 would have taken the record of who made each ruling with them, and
+leaving them would have kept 29 vocabulary entries that can no longer fail.
+
+### 64.1 THE ENTRIES
+
+| path | shown failing by |
+|---|---|
+| `scripts/check_exclusion_basis.py` `EMPTIED`, and the row check beside it | Three mutations run against `tests/test_exclusion_basis.py` through a pytest plugin: one declared family dropped from `EMPTIED` (1 red, the used-or-says-why test), a family that still holds rows declared empty (3 red, including the real-table soundness test), and `row_problems` made to ignore the table (1 red, the new planted-row test). The unmutated control: 37 passed |
+| `tests/test_writeoff_kinds_are_derivable.py`, the moot-adjudication control | It moved `J 134`, the one real row-level adjudication, which this lane retired with its row -- so it would have gone on passing only by accident, or failing for the wrong reason. It now plants an adjudication, asserts the plant alone is green, then moves the row out and asserts the named red |
+
+    A REGISTRY ENTRY THAT HOLDS NOTHING IS KEPT FOR ITS ATTRIBUTION AND
+    DECLARED WITH ITS REASON -- AND THE DECLARATION IS ITSELF A CLAIM A ROW
+    CAN CONVICT.
+
+### 64.2 DECLARED DISPOSABLE
+
+The scratchpad scripts that carried out the returns -- the population splitter,
+the per-row decision table, the in-place cell editor that verified every state
+move against the shipped parse, the table rewriter, the delta-block inserter,
+the four test patches and the mutation plugin. The census cells, the table and
+the audit are the artifacts; the checker re-derives every link on every run.
