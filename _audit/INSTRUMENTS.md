@@ -10086,7 +10086,7 @@ and one reading had to be built for the live lane.
 | path | shown failing by |
 |---|---|
 | `tests/test_people_search_readers.py::test_every_composed_address_is_admitted_by_the_shipped_boundary` -- 26 composed addresses (every argument alone, every pair, all five, each facet at its value ceiling) through `readonly.is_read_url`, `people_search.boundary_verdict` and `check_read_addresses.refusal_of` | `test_THIS_CONTROL_CAN_FAIL_the_admission_check_can_say_refused` in the same file: the same three checks say REFUSED for `keywords=settings` |
-| `tests/test_people_search_readers.py::test_the_tool_navigates_only_to_the_composed_address_when_driven` -- a recording browser whose page answers in plants and whose landing appends a planted name, a planted slug and a stranger's member token under the tool's own keys; the tool must navigate exactly once, to the composed address | `test_THIS_CONTROL_CAN_FAIL_the_recorder_convicts_a_second_navigation`: the recorder's assertion raises on a second navigation to the landing, and on a lone navigation to it |
+| `tests/test_people_search_readers.py::test_the_tool_navigates_only_to_the_composed_address_when_driven` -- a recording browser whose page answers in plants and whose landing appends a planted name, a planted slug and a stranger's member token under the tool's own keys; the tool must navigate exactly once, to the composed address | `test_THIS_CONTROL_CAN_FAIL_the_recorder_convicts_a_second_navigation`: the recorder's assertion raises on a second navigation to the landing, and on a lone navigation to it. AND ON THE REAL TOOL: a disposable mutation run planted one `BROWSER.goto(page, landed)` into a copy of the tool body -- the mutant navigated twice and the committed assertion raised, while the taint guard's `violations()` read 1 violation at the planted line and 0 on the unmutated `server.py` |
 | `linkedin_server/people_search.py::landing_verdict` -- what LinkedIn kept of each composed argument in the address it settled on, as a literal from a closed alphabet (`verbatim`, `same_values`, `different_values`, `absent`, `unreadable`), never publishing the landing | `test_a_dropped_or_changed_value_is_never_read_as_kept` and `test_the_driven_tool_reports_what_linkedin_kept_as_literals`: a foreign value under the tool's own key reads `different_values` and a dropped key `absent` -- the reading is shown saying NO before its `verbatim` is believed |
 
 ### 66.2 WHY THE THIRD ONE IS AN INSTRUMENT AND NOT A FIELD
@@ -10109,6 +10109,7 @@ and the live queue banks on it.
 ### 66.4 DECLARED DISPOSABLE
 
 The scratchpad scripts this lane ran -- the capture parser that printed
-people-search parameter names and value shapes, the census-cell editor, and
-the ASCII escaper -- are declared disposable. What they measured is recorded
-in the audit or re-derived by a shipped test.
+people-search parameter names and value shapes, the census-cell editor, the
+ASCII escaper, the derived-navigation mutation run and the blocker-map diff
+summariser -- are declared disposable. What they measured is recorded in the
+audit or re-derived by a shipped test.

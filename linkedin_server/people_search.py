@@ -91,6 +91,7 @@ from __future__ import annotations
 
 import json
 import re
+import unicodedata
 from typing import Any, Optional
 from urllib.parse import parse_qsl, urlencode, urlsplit
 
@@ -356,7 +357,11 @@ def compose(
                 "A search is refused rather than truncated, because a "
                 "truncated search is a different search.",
             )
-        if any(not (ch.isprintable() or ch == " ") for ch in text):
+        # CONTROL CHARACTERS ONLY (Unicode category Cc), and deliberately not
+        # ``str.isprintable()``: that is False for a no-break space and for
+        # the zero-width joiners several Indian scripts need inside a word, so
+        # it would refuse ordinary names typed in those scripts.
+        if any(unicodedata.category(ch) == "Cc" for ch in text):
             return _refused(
                 "keywords",
                 "keywords_carry_a_control_character",

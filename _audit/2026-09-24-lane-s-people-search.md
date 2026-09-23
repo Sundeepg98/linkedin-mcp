@@ -143,7 +143,7 @@ and `test_the_no_argument_call_is_the_call_it_always_was`).
                                            passes one" amended
     linkedin_server/readonly.py            comment only, AST unchanged: the people entry's
                                            "sends no query at all" amended
-    tests/test_people_search_readers.py    NEW. 103 tests, section 6
+    tests/test_people_search_readers.py    NEW. 105 tests, section 6
     tests/test_server_surface.py           comment only: "NO PARAMETERS AT ALL" amended
     _audit/_census/network.md              seven cells, section 7
     _audit/_census/read-addresses.tsv      the seven lines removed: the rows left bucket 3
@@ -208,6 +208,15 @@ failing on the same run.
   address. Control: `test_THIS_CONTROL_CAN_FAIL_the_recorder_convicts_a_second_navigation`.
   The repository's own taint guard, `tests/test_navigation_is_never_derived.py`,
   runs over the new code as well (section 9).
+  **SHOWN FAILING ON THE REAL TOOL, NOT ONLY ON A FABRICATED LOG.** A
+  disposable mutation run lifted the tool's body out of `server.py`, planted
+  one line -- a second `BROWSER.goto(page, landed)`, to the address the
+  browser chose -- and drove the mutant with the committed recording browser:
+  the unmutated tool navigated once and passed, the mutant navigated twice and
+  the committed assertion raised. The same planted source put through the
+  taint guard's own `violations()` reads 1 violation, at the planted line;
+  the unmutated `server.py` reads 0 (and 0 output-sink violations). Two
+  instruments sharing no mechanism convict the same derived navigation.
 * **THE BOUNDARY'S OWN ANSWER.** All eight B.4 keywords refuse with their
   substring and `a_read_pattern_admits_the_address` True, the three clean ones
   are admitted, and the eleven split 8 / 3 exactly as B.4 measured. The
@@ -220,7 +229,11 @@ failing on the same run.
   `different_values`, never as kept. Seventeen refused arguments (slugs, the
   Arabic-Indic digits `str.isdigit()` accepts, over-long runs, empty members,
   duplicates, over budget, a short token, a control character, an over-long
-  keyword) each name their argument and never their value.
+  keyword) each name their argument and never their value. A keyword carrying
+  a no-break space or a zero-width joiner -- ordinary in several Indian
+  scripts -- is NOT refused: control characters are refused by Unicode
+  category `Cc`, not by `str.isprintable()`, which is False for both (found in
+  self-review after the first commit and fixed in the last).
 * **THE LANDING VERDICT** reads verbatim, same_values (a re-spaced keyword, a
   bare id for a list, a reordered list), different_values, absent and
   unreadable, and False for another vertical, a wall, another host and a
@@ -306,10 +319,6 @@ PENDING -- filled in after the census commit.
   come from `linkedin_job_detail` and `linkedin_followed_companies`, member
   tokens from `linkedin_connections`. A place resolver would be a keyword
   search of its own, and none was built.
-* **FACET PILL VOCABULARY.** The 2026-09-21 firings matched no
-  `current company` control; LinkedIn may label the pill in the plural, which
-  the single-phrase vocabulary would miss. Not this lane's rows (the filter-
-  offered rows are other lanes'), recorded as a reading to take on the fire.
 
 ## 11. Instruments
 
@@ -326,6 +335,11 @@ Declared disposable (scratchpad, not tracked):
   surprise; its result is the diff.
 * `ascii_escape.py` -- rewrote two non-ASCII string literals in the new test
   file as escapes.
+* `mutation_derived_nav.py` -- the mutation run of section 6: planted a
+  derived second navigation into a copy of the tool body and drove it. Its
+  result is recorded in section 6; the committed controls stand without it.
+* `bmap_summary.py` -- summarised the regenerated blocker map's diff by
+  column, to confirm no blocker's first reason candidate moved.
 
 ## Live queue
 

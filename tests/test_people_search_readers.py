@@ -351,6 +351,24 @@ def test_a_refused_argument_names_itself_and_describes_the_value(
             assert needle not in text, (argument, needle, envelope)
 
 
+@pytest.mark.parametrize(
+    "keyword",
+    [
+        # A no-break space, and a zero-width joiner as several Indian scripts
+        # use inside a word. ``str.isprintable()`` is False for both, which is
+        # why the composer refuses control characters by CATEGORY instead.
+        "example" + chr(0x00A0) + "keyword",
+        "example" + chr(0x200D) + "keyword",
+    ],
+)
+def test_a_keyword_in_an_ordinary_script_is_not_mistaken_for_a_control_character(
+    keyword: str,
+) -> None:
+    verdict = people_search.compose(keywords=keyword)
+    assert verdict["built"] is True, verdict
+    assert readonly.is_read_url(verdict["url"]) is True
+
+
 def test_a_non_string_argument_never_raises() -> None:
     for value in (None, 0, 12345, ["x"], {"a": 1}):
         verdict = people_search.compose(current_company_ids=value)
