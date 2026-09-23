@@ -48,7 +48,36 @@ def test_the_slice_is_enumerated_and_every_row_joins():
     rows = triage._gap_rows(SLICE)
     assert rows, "no GAP rows enumerated -- the parse found nothing"
     blockers = rcb.load_blockers()
-    assert triage.unjoined_rows(SLICE, rows, blockers) == []
+    entered = triage.entered_since_freeze(SLICE, rows)
+    assert triage.unjoined_rows(SLICE, rows, blockers, entered) == []
+
+
+def test_the_exemption_is_exactly_the_rows_the_map_cannot_hold():
+    """Rows that entered GAP after the map's freeze, and nothing else.
+
+    Without the exemption the join names EXACTLY the entered rows -- so the
+    exemption hides no other hole -- and no entered row has a map line, which
+    is what makes it an exemption rather than a skipped join. If the map ever
+    starts holding post-freeze rows, the second assertion goes red and the
+    exemption should go with it.
+    """
+    rows = triage._gap_rows(SLICE)
+    blockers = rcb.load_blockers()
+    entered = triage.entered_since_freeze(SLICE, rows)
+    assert triage.unjoined_rows(SLICE, rows, blockers) == entered
+    assert [r for r in entered if "%s %s" % (SLICE, r) in blockers] == []
+
+
+def test_an_empty_frozen_census_refuses_rather_than_exempting_every_row(
+        monkeypatch):
+    """SHOWN FAILING. A freeze read that came back empty would exempt the slice."""
+    rows = triage._gap_rows(SLICE)
+    monkeypatch.setattr(triage.egr, "rows",
+                        lambda ref=None, dialects=None: iter(()))
+    with pytest.raises(SystemExit) as refused:
+        triage.entered_since_freeze(SLICE, rows)
+    assert triage.bbm.FROZEN_REF in str(refused.value)
+    assert "could not fail" in str(refused.value)
 
 
 def test_the_counter_agreement_control_passes_on_the_real_tree():
@@ -66,22 +95,29 @@ def test_the_counter_agreement_control_can_fail():
 
 
 def test_the_join_coverage_control_can_fail():
-    """SHOWN FAILING. Punch one hole in the blocker map and it must be named."""
+    """SHOWN FAILING. Punch one hole in the blocker map and it must be named.
+
+    The hole is punched in a row that WAS GAP at the freeze, and the exemption
+    is passed in: it must not swallow a real hole.
+    """
     rows = triage._gap_rows(SLICE)
     blockers = dict(rcb.load_blockers())
-    victim = rows[0][0]
+    entered = triage.entered_since_freeze(SLICE, rows)
+    victim = [row_id for row_id, _ in rows if row_id not in entered][0]
     del blockers["%s %s" % (SLICE, victim)]
-    assert triage.unjoined_rows(SLICE, rows, blockers) == [victim]
+    assert triage.unjoined_rows(SLICE, rows, blockers, entered) == [victim]
 
 
 def test_the_join_coverage_control_names_every_hole_not_just_the_first():
     """A control that stops at the first miss under-reports the damage."""
     rows = triage._gap_rows(SLICE)
     blockers = dict(rcb.load_blockers())
-    victims = sorted(row_id for row_id, _ in rows[:3])
+    entered = triage.entered_since_freeze(SLICE, rows)
+    victims = sorted(
+        [row_id for row_id, _ in rows if row_id not in entered][:3])
     for victim in victims:
         del blockers["%s %s" % (SLICE, victim)]
-    assert triage.unjoined_rows(SLICE, rows, blockers) == victims
+    assert triage.unjoined_rows(SLICE, rows, blockers, entered) == victims
 
 
 def test_the_direction_reader_control_is_the_inherited_one():
@@ -152,7 +188,20 @@ AFTER_THE_WRITE_CEILING_WAVE = (77, {"R": 10, "W": 66, "R+W": 1})
 #: direction divergence can be told the truth in the cell and a state
 #: divergence cannot, which is the whole of the ruling. ``M28`` in the same
 #: file is the identical shape and has carried ``R+W`` since it was written.
-EXPECTED_NOW = (77, {"R": 10, "W": 65, "R+W": 2})
+AFTER_THE_COMPOUND_ROWS_RULING = (77, {"R": 10, "W": 65, "R+W": 2})
+
+#: AFTER ``_audit/2026-09-24-lane-y2-admission.md``, which ADMITTED eleven rows
+#: of this slice at GAP -- ``M52``, ``M53`` and ``C93``-``C101``, capabilities
+#: LinkedIn draws that no row carried. **THE ARITHMETIC:** 77 + 11 = 88; reads
+#: 10 + 6 = 16 (``M53``, ``C93``, ``C95``, ``C96``, ``C98``, ``C101``), writes
+#: 65 + 4 = 69 (``M52``, ``C94``, ``C97``, ``C100``), read-and-writes
+#: 2 + 1 = 3 (``C99``). No row LEFT GAP, so every earlier figure above still
+#: describes its own day. None of the eleven was GAP at the blocker map's
+#: freeze, which is why the join now names rows that entered after it rather
+#: than calling them unjoined.
+AFTER_THE_LANE_Y2_ADMISSION = (88, {"R": 16, "W": 69, "R+W": 3})
+
+EXPECTED_NOW = AFTER_THE_LANE_Y2_ADMISSION
 
 
 def test_the_headline_split_is_the_one_the_report_quotes():

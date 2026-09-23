@@ -30,7 +30,15 @@ blocker to anything; it joins.
    join that silently dropped rows would otherwise read as a tidy answer.
 2. **The coverage control.** Every enumerated GAP row must appear in the
    blocker map. An unjoined row is reported by id, never skipped -- a blocker
-   tally over 80 of 83 rows looks identical to one over 83.
+   tally over 80 of 83 rows looks identical to one over 83. **One class of row
+   is exempt, and it is derived, never listed:** the map enumerates the GAP
+   rows of the FROZEN census (``build_blocker_map.FROZEN_REF``), so a row that
+   entered GAP after that commit has no map line by construction. Those rows
+   are found by reading the census AT the freeze from git -- never from the
+   map, which would turn every hole in it into an exemption -- and printed by
+   id in a bucket of their own. A row that was GAP at the freeze is never
+   exempt. (Added 2026-09-24, when lane Y2 admitted the slice's first rows
+   since the freeze; ``_audit/2026-09-24-lane-y2-admission.md``.)
 3. **The negative control.** ``direction_of`` is shown REFUSING on a row with
    no direction cell and on one with two, using
    ``reader_closable_blockers.control_negative``. Without it, a run where every
@@ -58,6 +66,7 @@ _HERE = pathlib.Path(__file__).resolve().parent
 sys.path.insert(0, str(_HERE))
 sys.path.insert(0, str(_HERE.parent))
 
+import build_blocker_map as bbm  # noqa: E402  (the map's own freeze ref)
 import count_census_states as ccs  # noqa: E402
 import enumerate_gap_rows as egr  # noqa: E402
 import reader_closable_blockers as rcb  # noqa: E402
@@ -134,18 +143,58 @@ def _control_count(letter: str, enumerated: int) -> str:
     return "the shipped counter printed no GAP line for %s" % name
 
 
-def unjoined_rows(letter, rows, blockers) -> list[str]:
+def entered_since_freeze(letter: str, rows) -> list[str]:
+    """Ids among ``rows`` that were NOT GAP when the blocker map was frozen.
+
+    The map enumerates the GAP rows of the census at
+    ``build_blocker_map.FROZEN_REF`` -- the set the ledger divided -- so a row
+    that entered GAP later (admitted from what LinkedIn draws, or returned to
+    GAP) has no map line and never will. Reporting it as UNJOINED would make
+    CONTROL 2 red on every admission; dropping it would shrink the tally in
+    silence. So it is exempt from the join and named, by id, in its own bucket.
+
+    THE FROZEN SET IS READ FROM GIT, NEVER FROM THE MAP. The map is the thing
+    being joined against; deriving "entered" from it would turn every hole in
+    it into an exemption and leave CONTROL 2 unable to fail. An EMPTY frozen
+    set would do the same from the other side -- every row today would read as
+    entered -- so that REFUSES rather than answering.
+    """
+    dialects: list[str] = []
+    frozen = {
+        row_id
+        for slice_letter, row_id, state, _lineno, _prose in egr.rows(
+            bbm.FROZEN_REF, dialects
+        )
+        if slice_letter == letter and state == "GAP"
+    }
+    if not frozen:
+        raise SystemExit(
+            "REFUSING: the census at the blocker map's freeze (%s) holds no "
+            "GAP row for slice %s, so every row today would read as entered "
+            "since the freeze and the join control could not fail."
+            % (bbm.FROZEN_REF, letter)
+        )
+    return sorted(row_id for row_id, _ in rows if row_id not in frozen)
+
+
+def unjoined_rows(letter, rows, blockers, entered=()) -> list[str]:
     """Row ids with no blocker assignment. CONTROL 2, as a callable.
 
     Extracted from :func:`main` so it can be SHOWN FAILING against a blocker
     map with a hole in it. A check that only ever runs over the real, complete
     map has never been observed to fail, and this repository counts that as
     uncertified.
+
+    ``entered`` is :func:`entered_since_freeze`'s answer -- rows the map
+    cannot hold. They are exempt here and named by :func:`main`. A row that
+    was GAP at the freeze is never in it, so a hole in the map is still named.
     """
+    exempt = set(entered)
     return sorted(
         row_id
         for row_id, _ in rows
         if ("%s %s" % (letter, row_id)) not in blockers
+        and row_id not in exempt
     )
 
 
@@ -174,8 +223,9 @@ def main(argv: list[str] | None = None) -> int:
         print("REFUSING: %s" % problem)
         return 1
 
-    # ---- CONTROL 2: every row joins --------------------------------------
-    unjoined = unjoined_rows(letter, rows, blockers)
+    # ---- CONTROL 2: every row joins, save those the map cannot hold ------
+    entered = entered_since_freeze(letter, rows)
+    unjoined = unjoined_rows(letter, rows, blockers, entered)
     if unjoined:
         print(
             "REFUSING: %d of %d GAP rows carry no blocker assignment: %s"
@@ -187,17 +237,27 @@ def main(argv: list[str] | None = None) -> int:
     by_blocker: dict[str, list[str]] = collections.defaultdict(list)
     cross: dict[tuple[str, str], int] = collections.Counter()
 
+    # Not a blocker name: the bucket for rows the frozen map cannot hold. Each
+    # of them names its blocker in its own census line.
+    entered_bucket = "(entered GAP after %s)" % bbm.FROZEN_REF
+    exempt = set(entered)
     for row_id, _lineno in rows:
         direction = rcb.direction_of(cells[row_id])
-        blocker = blockers["%s %s" % (letter, row_id)]
+        if row_id in exempt:
+            blocker = entered_bucket
+        else:
+            blocker = blockers["%s %s" % (letter, row_id)]
         by_direction[direction].append(row_id)
         by_blocker[blocker].append(row_id)
         cross[(blocker, direction)] += 1
 
     print("slice                %s (%s)" % (letter, ccs.SLICES[letter]))
     print("GAP rows             %d" % len(rows))
-    print("controls             counter agrees, all rows joined, "
-          "direction reader shown refusing")
+    print("controls             counter agrees, every row GAP at the map's "
+          "freeze joined, direction reader shown refusing")
+    print("entered since %s  %d -- GAP rows the frozen map cannot hold, "
+          "named here rather than joined:" % (bbm.FROZEN_REF, len(entered)))
+    print("      %s" % (" ".join(entered) or "(none)"))
     print()
     print("BY DIRECTION, as the census's own R/W column states it")
     total = 0
@@ -216,7 +276,9 @@ def main(argv: list[str] | None = None) -> int:
     print("  reads %d   writes %d   read-and-write %d   unreadable-cell %d"
           % (reads, writes, both, other))
     print()
-    print("BY BLOCKER (from the committed blocker map, not assigned here)")
+    print("BY BLOCKER (from the committed blocker map, not assigned here; the "
+          "rows it cannot hold are one bucket, each naming its blocker in its "
+          "own census line)")
     for blocker in sorted(by_blocker, key=lambda b: (-len(by_blocker[b]), b)):
         ids = sorted(by_blocker[blocker])
         shape = " ".join(

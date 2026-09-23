@@ -149,6 +149,18 @@ TRIAGE: dict[str, tuple[str, str, str]] = {
     "P O23": ("RULING", "", "measurable only by firing a profile write and "
                             "observing another account; writes_enabled is "
                             "False"),
+    # Admitted at GAP 2026-09-24 by lane Y2 and triaged in the same pass; the
+    # evidence is each row's own line and _audit/_census/read-addresses.tsv,
+    # recorded in _audit/2026-09-24-lane-y2-admission.md.
+    "P S1": ("ADDRESS", "ABSENT", "the featured detail page is drawn and no "
+                                  "pattern names it, while its sibling "
+                                  "details pages are read"),
+    "P S3": ("ADDRESS", "ABSENT", "the skill-insights page is linked from "
+                                  "every skill card and no pattern names it"),
+    "P S5": ("BUILDABLE", "", "the search-appearances page is admitted and a "
+                              "shipped tool already loads it; a parser for two "
+                              "cards, which must not publish the employer the "
+                              "first one names"),
     # ---- network.md ----
     "N 61": ("ADDRESS", "REFUSED", "both followed-hashtag spellings contain "
                                    "/follow, matching inside the word "
@@ -242,6 +254,20 @@ TRIAGE: dict[str, tuple[str, str, str]] = {
                                    "exemption; and admin rights are unmeasured"),
     "N A5": ("ADDRESS", "REFUSED", "carries /invite, same double cost, same "
                                    "unmeasured precondition"),
+    # Admitted at GAP 2026-09-24 by lane Y2; see the profile block above.
+    "N 195": ("BUILDABLE", "", "the bare recruiter-views address is admitted "
+                               "and the page has been captured; one reader, "
+                               "publishing counts and the chart's series and "
+                               "naming nobody"),
+    "N 197": ("PRESS", "", "the group page is admitted and the copy-link item "
+                           "sits behind the group's own menu; whether a link "
+                           "composed from the group id discharges the row is "
+                           "D6-CAPABILITY-OVER-AFFORDANCE's question, not "
+                           "decided here"),
+    "N 199": ("ADDRESS", "ABSENT", "the Premium suggestions page is drawn from "
+                                   "a notification and no pattern names it; "
+                                   "the list is of other people, so a reader "
+                                   "needs a name-free shaper"),
 }
 
 #: LEFT GAP SINCE THE 2026-09-21 TRIAGE, measured 2026-09-23 with

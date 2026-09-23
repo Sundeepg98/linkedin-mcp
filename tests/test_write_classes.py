@@ -124,10 +124,16 @@ def test_the_walk_is_not_vacuous():
 def test_the_split_is_the_one_the_lane_report_quotes():
     """Pinned so a moved line is a visible decision. The arithmetic: 151 rows
     at b0d3ab8 = 11 R1 + 23 R2 + 117 R3; the R1 disposition is re-counted from
-    the table every run, so a build moves it without moving this."""
+    the table every run, so a build moves it without moving this.
+
+    165 after lane Y2's completeness admission (2026-09-24) = 11 R1 + 24 R2 +
+    130 R3: fourteen admitted write rows, one R2 (M C94, sending a post to one
+    person) and thirteen R3 (P S2, S4, S6-S10; M M52, C97, C100; N 196, 198,
+    200). R1 is untouched: no admitted row's act is one of the first round's
+    own verbs."""
     rows, _ = cwc.load()
     split = cwc.split(rows)
-    assert (split["R1"], split["R2"], split["R3"]) == (11, 23, 117)
+    assert (split["R1"], split["R2"], split["R3"]) == (11, 24, 130)
     assert split["R1:built"] + split["R1:queued"] == split["R1"]
 
 
