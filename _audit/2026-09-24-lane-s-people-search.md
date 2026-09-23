@@ -574,7 +574,48 @@ named), and that the three WHO rows sit in the address table gated RULING.
 
 ### I.4 Gates on the merged tree
 
-PENDING -- filled in once they have run on the merged tree.
+The merge commit, then two small commits after it (a hash disclosure; two
+guard repairs). The tree was clean during every run.
+
+    census_completion --check              every headline figure matches its pin
+    check_read_addresses                   GREEN, 94 of 94 bucket-3 rows
+    check_write_classes                    GREEN, 325 lines
+    ruling_holds                           GREEN
+    pin_census_rows --check                no drift (704)
+    triage_read_gap_rows                   all nine controls OK
+    check_contingent_writeoffs_carry_a_reopener   exit 0
+    check_cited_shas_resolve               exit 0 -- once the pre-merge head
+                                           `fe07ba6` was disclosed branch-only;
+                                           it had flagged that hash
+    build_audit_index / build_rulings_index / build_blocker_map --check
+                                           exit 0, at a fixed point
+    (all re-run on the final tree, the same results)
+
+**THE IMPACT GATE WIDENED, SO IT WAS NOT RUN.** `scripts/impact_gate.py
+--against d65759f --plan-only`: 17 changed paths select 193 of 235 test files
+(82%), and the gate widens to the full suite. By the order -- six lanes share
+the box -- that suite was NOT run locally; CI runs it after the merge.
+
+**RUN INSTEAD, `-n 4`**: the 17 corpus-wide guards the impact gate itself
+derives (identity, credential, correction, asserted names, the navigation
+derivation, page text, the census row total and the rest), the lane's tests,
+the two page-string guards, and every test coupled to the census instruments
+or to a file the lane changed -- 51 files. **First run: 2 failed, 4011
+passed**, and both reds were the lane's own new cell text:
+
+* `test_a_correction_is_findable_from_the_claim` -- network.md now cites the
+  doctrine's document on row 79, whose kept prior cell carries the word
+  `mistake` (the tool docstring it quotes). Triaged NOT_A_CORRECTION, with the
+  reason, after reading the line.
+* `test_an_asserted_name_resolves` -- rows 85 and 172 said "under
+  `OTHER-MEMBER-IDS-AS-READS`", and "under" is one of that guard's blocker
+  slot words, so a ruling id read as a blocker name. Reworded "as ...
+  permits"; no blocker is named there.
+
+**After both repairs**: the 23 census-coupled and corpus files plus the lane's
+tests, re-run: **1428 passed, 0 failed.** The lane's test file holds 109 tests.
+
+**NOT RUN**: the widened full suite (CI, after the merge); any live fire.
 
 ### I.5 What the follow-up inherits
 
