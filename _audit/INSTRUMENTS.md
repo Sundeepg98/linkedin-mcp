@@ -10066,3 +10066,59 @@ per-capture shape probes, the offline run of the collections reader over the
 raw capture, the line-ending census -- are declared disposable. What they
 measured is re-derived by the checker on every run, carried into a committed
 fixture by a builder, or recorded with its number in the audit.
+
+## 69. THE RECEIPT-SAFE INBOX AND THE REPLY THAT CONFIRMS ITSELF (lane-l5-messaging, 2026-09-24)
+
+**Registered 2026-09-24.** Full record: `_audit/2026-09-24-lane-l5-messaging.md`.
+Numbered 69 by the orchestrator's allocation for this lane, so parallel appends
+do not collide.
+
+Two blocks, each measured twice before this lane. Opening an unread
+conversation can show its sender a "seen", and `/messaging/` opens one of
+LinkedIn's choosing, so the live lane held three inbox rows; and
+`linkedin_send_message` could never report SENT, because the only surface that
+could confirm a send was forbidden until `WRITE-CLASS-B`.
+
+### 69.1 THE COMPOSER IS THE RECEIPT-FREE LIST, AND A ROW NAMES NO THREAD
+
+Measured offline on two gitignored captures of 2026-09-20, shapes and counts
+only: `/messaging/compose/` draws the whole conversation list with zero
+conversation messages and zero rows marked active, against one of each on
+`/messaging/` captured the same minute. No attribute on any row, or on any
+descendant, carries a thread identifier. So a list can be read without opening
+anything, and no list can say which row a given thread id is -- which is why
+the receipt guard refuses on ANY unread rendered row, not on "that" row.
+
+    A LIST THAT CANNOT NAME ITS ROWS CANNOT BE ASKED ABOUT ONE OF THEM.
+    REFUSE ON THE WHOLE, AND SAY WHAT THE WHOLE LEAVES OUT.
+
+### 69.2 A SEND CONFIRMS ITSELF BY A DELTA, NOT BY A REDRAW
+
+A page that just took a click redraws optimistically. `send_reply` therefore
+reads SENT off a FRESH load of the conversation he named, and requires three
+things at once: his exact words as the last message, that message without the
+`--other` modifier, and the count of messages carrying exactly those words up
+by EXACTLY ONE against the preview's before-count. The NOT-SENT reading is
+taken in place first, before the reload erases it.
+
+    AN IDENTICAL EARLIER MESSAGE IS NOT A SEND. ONLY THE DELTA IS.
+
+### 69.3 THE ENTRIES
+
+| path | shown failing by |
+|---|---|
+| `linkedin_server/threads.py` -- `read_conversation_list`, `receipt_guard`, `list_opened_a_conversation` | `tests/test_messaging_threads.py`: four DERIVED unread worlds (a class token, a hidden word, a badge, an accessible name), each flipping exactly its own row; the guard refusing an unread row (and naming the position), refusing a list page that opened a conversation even with the opt-in, refusing no rendered rows, an unreadable list and a landing off the composer; the tools refusing BEFORE the conversation is loaded (one load recorded) |
+| `threads.read_thread`, `reply_state`, `seen_state`, the in-page text match | the same file: a sponsored conversation, a restored draft, a recipient box and an unrendered page each read UNKNOWN with the reason; the read indicator `not_drawn` (measured) and `drawn` (derived) worlds; exact, partial, case-changed and whitespace-changed words; a conversation redirected elsewhere is not read |
+| `writes.py` -- spec `send_reply` and its arms; `threads.reply_send_gate`, `threads.reply_verdict`, `threads.name_the_reply_recipient` | `tests/test_send_reply.py`: no grant (writes off; no token, `None`, `True`, forged; unredeemed; a non-grant -- zero navigations), another thread, other words, another action, a second use at both doors, and the second-use guard SHOWN FAILING when its flag is cleared (the replay types and sends again); SENT, NOT SENT and UNKNOWN end to end; an identical earlier message refused as a send; Send not pressed when the fill did not turn it on; the click refused before typing on a landing in another conversation, and over a draft; the title kept out of `grant.preview` and every receipt |
+| `writes._verify_after` -- `send_message` read back in place | `tests/test_send_message_gate.py::test_verify_after_reaches_the_to_state_only_through_the_conversation_read_back` -- it replaced the test that pinned SENT unreachable: the two composer readings never SENT, a conversation drawn with his words SENT, other words UNKNOWN |
+| `scripts/check_write_classes.py` -- R2 and R3 may carry `built:` and `queued:` | `tests/test_write_classes.py::test_red_on_an_r1_line_left_classify_only` (the rule that remains) and `test_an_r2_line_may_record_a_build_or_a_blocker` |
+
+### 69.4 DECLARED DISPOSABLE
+
+The scratchpad probes this lane ran over the two captures -- overlay markers,
+payload markers, row structure, form controls, the thread view and the header
+-- are declared disposable. What they measured is recorded with its numbers in
+the lane record's section 1, and the structure is carried by
+`tests/fixtures/synthetic/messaging_compose_list.html` and
+`tests/fixtures/synthetic/messaging_thread.html`, which the suite re-reads on
+every run.

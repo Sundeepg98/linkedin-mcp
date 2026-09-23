@@ -330,6 +330,24 @@ async def test_an_identical_earlier_message_cannot_stand_in_for_this_one(writes_
     assert receipt["performed"] != True  # noqa: E712 -- "unknown" or False, never True
 
 
+#: DERIVED -- a reply box whose Send never follows the box: the fixture's
+#: script is removed, so a fill lands and Send stays drawn DISABLED. The
+#: transition the gate requires never happens.
+_SCRIPT = THREAD[THREAD.index("<script>"):THREAD.index("</script>") + len("</script>")]
+NO_TRANSITION = _derive(THREAD, _SCRIPT, "")
+
+
+async def test_send_is_not_pressed_when_the_words_did_not_turn_it_on(writes_on, browser_page):
+    block, _nav_used = await _preview(browser_page)
+    grant = consume(block["to_confirm"], action=_ACTION, target=TARGET)
+    receipt = await writes.perform(_nav(NO_TRANSITION, NO_TRANSITION), browser_page, grant)
+    assert receipt["send_gate"]["proceeded"] is False
+    assert receipt["send_gate"]["refused_condition"] == "4_fill_not_landed"
+    assert receipt["clicked"]["clicks_made"] == 0
+    assert receipt["typed_text"]["left_in_the_composer"] is True
+    assert receipt["performed"] is not True
+
+
 async def test_the_click_refuses_before_typing_when_the_landing_is_another_conversation(
     writes_on, browser_page
 ):

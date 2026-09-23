@@ -4418,26 +4418,17 @@ async def _read_messaging_badge(
 
 
 async def _read_thread_reply_box(
-    page: Any, spec: WriteSpec, *, target: str, landed: str
+    page: Any, spec: WriteSpec, *, target: str
 ) -> tuple[dict[str, Any], str, str]:
     """The named conversation's reply box, read live. ``(facts, state, why)``.
+
+    Called only AFTER ``observe`` has held the landing to the named thread id.
 
     THE FACTS ARE COUNTS. ``events_with_text`` is how many messages ALREADY
     carry exactly the words about to be sent, compared inside the page; it is
     the BEFORE half of the delta ``_verify_after`` reads, so an identical
     earlier message can never stand in for this reply.
     """
-    thread_id = url_target_of(spec, target)
-    if not threads.landed_on_thread(landed, thread_id):
-        return (
-            {"landed_on_the_named_thread": False},
-            UNKNOWN,
-            "the browser did not land on the conversation you named -- LinkedIn "
-            "sends an id it does not recognise into a conversation of its own "
-            "choosing, and a reply typed there would reach somebody else. "
-            "Nothing on that page was read. THE LANDING IS WITHHELD; what is "
-            f"safe to say about it -- {landing.withheld(landed)}.",
-        )
     reading = await threads.read_thread(page, text=_text_component_of(spec, target))
     facts = {"landed_on_the_named_thread": True, **threads.thread_facts(reading)}
     state, why = threads.reply_state(reading)
@@ -4703,9 +4694,32 @@ async def observe(
             target=url_target_of(spec, target)
         )
         landed = await _load(navigator, page, url, surface="messaging thread")
-        facts, state, why = await _read_thread_reply_box(
-            page, spec, target=target, landed=landed
-        )
+        # THE LANDING IS COMPARED IN A CONDITION AND BOUND TO NOTHING. A
+        # landing is a string the browser chose, and
+        # ``tests/test_navigation_is_never_derived.py`` taints every name bound
+        # from an expression carrying one -- module-wide, by name. Passing it
+        # into the reader's call bound three names to it and the taint spread
+        # to ``url``; so the comparison happens here, and the reader never sees
+        # the landing at all.
+        if not threads.landed_on_thread(landed, url_target_of(spec, target)):
+            return _record(
+                spec,
+                target=target,
+                facts={"landed_on_the_named_thread": False},
+                facts_url=url,
+                state=UNKNOWN,
+                state_why=(
+                    "the browser did not land on the conversation you named -- "
+                    "LinkedIn sends an id it does not recognise into a "
+                    "conversation of its own choosing, and a reply typed there "
+                    "would reach somebody else. Nothing on that page was read. "
+                    "THE LANDING IS WITHHELD; what is safe to say about it -- "
+                    f"{landing.withheld(landed)}."
+                ),
+                state_url=url,
+                same_page_as_action=True,
+            )
+        facts, state, why = await _read_thread_reply_box(page, spec, target=target)
         return _record(
             spec,
             target=target,
