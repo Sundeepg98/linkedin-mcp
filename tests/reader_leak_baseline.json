@@ -79,6 +79,7 @@
     "job_collections:read_job_collection": "clean",
     "newsletters:read_newsletter_subscriptions": "clean",
     "notify_cost:read_notifications_badge": "returns_text",
+    "post_summary_counts:read_post_summary_counts": "clean",
     "premium:read_premium_surface": "clean",
     "press:_read_witness": "clean",
     "press:disclose": "clean",

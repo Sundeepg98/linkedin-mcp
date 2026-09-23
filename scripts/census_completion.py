@@ -818,16 +818,20 @@ PINNED = {
     "capabilities_achievable": 389,
     "out_of_scope": 315,
     "achievable": 389,
-    "adjudicated": 430,
-    "delivered_broad": 96,
+    "adjudicated": 431,
+    #: 431 / 97 / 273 / 22 / 66 since the lane-L1 merge: `P G6` was built
+    #: (GAP -> COVERED-UNFIRED, `_audit/2026-09-23-lane-l1-refused-reads.md`).
+    #: One row changing class moves all five; b3 admitted/refused 40/16 are
+    #: L1's allowlist admissions, and b1_no_ruling 7 is P G6 entering bucket 1.
+    "delivered_broad": 97,
     #: 75 and 21 since the bucket-1 merge: `M C41` fired live and moved from
     #: COVERED-UNFIRED to COVERED-PROVEN (`_audit/2026-09-23-bucket1-fires.md`).
     #: One row changing class moves both, and leaves delivered_broad at 96.
     "delivered_strict": 75,
-    "gap": 274,
+    "gap": 273,
     "cannot_deliver": 19,
-    "unfired": 21,
-    "gap_read": 67,
+    "unfired": 22,
+    "gap_read": 66,
     #: 151, not the 152 published by `_audit/2026-09-21-the-write-ceiling.md`.
     #: That document scoped itself to `profile.md`, `network.md` and
     #: `messaging-and-content.md`; measured at HEAD those three carry W 151 and
@@ -850,8 +854,8 @@ PINNED = {
     #: row entering or leaving bucket 3, or a boundary edit that moves a
     #: verdict and is carried into the table, cannot move the headline
     #: "blocked on nothing" figure without somebody re-pinning it out loud.
-    "b3_admitted": 33,
-    "b3_refused": 24,
+    "b3_admitted": 40,
+    "b3_refused": 16,
     "b3_no_address": 2,
     "b3_needs_session": 6,
     "b3_undetermined": 2,
@@ -888,7 +892,7 @@ PINNED = {
     "b1_standing": 15,
     "b1_relayed": 0,
     "b1_pending": 0,
-    "b1_no_ruling": 6,
+    "b1_no_ruling": 7,
     #: D3's enumerated list: FOUR since 2026-09-23, when `M C83` left it --
     #: see `RULING_BLOCKED_NAMED`. It was printed as "five rows" and pinned
     #: nowhere, which is how a list edit could have moved it silently.
@@ -906,7 +910,7 @@ PINNED_B1_ROWS: dict[str, tuple[str, ...]] = {
         "N 1", "N 46", "N 48",
         "P A8", "P A11", "P A13", "P A17", "P A19", "P A21",
     ),
-    NO_RULING: ("J 121", "J 122", "M M33", "M M43", "N 20", "N 45"),
+    NO_RULING: ("J 121", "J 122", "M M33", "M M43", "N 20", "N 45", "P G6"),
 }
 
 

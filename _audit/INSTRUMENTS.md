@@ -9512,6 +9512,61 @@ address the rows' own census cells name, and the offline press-condition
 runner -- are declared disposable. Everything they measured is re-derived by
 the checker on every run or recorded with its result in the audit.
 
+## 58. ONE LINE, OUT AND BACK: A BLAST RADIUS PER ALLOWLIST LINE (lane-l1-refused-reads, 2026-09-23)
+
+**Registered 2026-09-23.** Full record:
+`_audit/2026-09-23-lane-l1-refused-reads.md`. Numbered 58 on the brief's
+instruction, so parallel lanes forked from one master do not collide.
+
+`scripts/blast_radius.py` answers "what would this CANDIDATE newly admit?"
+before a pattern lands. Once it has landed, nothing re-asked the question: the
+entry's comment carried the number and the number could only rot. The check
+this lane added asks it of a SHIPPED line, on every run -- take the line OUT
+of the live tuple, hand its own source back to `blast_radius.newly_admitted`
+as the candidate, and assert the newly-admitted set is exactly the entry's own
+target, with and without the trailing slash, over the instrument's corpus plus
+every family spelling the test names. `newly_refused` must be empty.
+
+    THE NUMBER IN THE COMMENT IS A CLAIM; THE LINE TAKEN OUT AND PUT BACK IS
+    THE MEASUREMENT, AND IT IS RE-TAKEN EVERY TIME THE SUITE RUNS.
+
+### 58.1 THE CONTROL THAT KEEPS A ZERO FROM BEING A DEAD INSTRUMENT
+
+A per-line reading of "+2, nothing else" is exactly what a broken
+`newly_admitted` would also say. So the same file measures a FAMILY pattern
+over the same corpus in the same way and requires it to admit MORE -- the
+`/analytics/.*` family admits a traversal onto `/mypreferences/d/close-account`
+that no forbidden substring names. The instrument is shown able to report the
+wide answer before its narrow answers are believed.
+
+### 58.2 THE ENTRIES
+
+| path | shown failing by |
+|---|---|
+| `tests/test_l1_self_scoped_admissions.py::test_each_line_newly_admits_exactly_its_own_two_spellings` | `test_a_family_pattern_would_have_admitted_what_these_refuse` in the same file (the instrument reporting more than two when a wide pattern is handed to it), and `test_the_control_removing_this_line_refuses_the_target_and_nothing_moves` (with the line gone, each target is REFUSED -- the rollback is tested, and the per-line reading is about THAT line) |
+
+### 58.3 NOT REGISTERED, AND WHY
+
+* `scripts/_probe_l1_admitted_reads_live.py`, the live harness this lane
+  hands to the live lane, is **PROVISIONAL-UNSMOKED**: it has never attached
+  to a browser, so no run has shown it failing or passing on a real page. Its
+  pure parts (selection, digit validation, address building, the
+  gate-refused skip) are pinned offline in
+  `tests/test_l1_live_harness_offline.py`. Its would-be control is written
+  into it: the jobs-search control page must serve before and after, or the
+  run is VOID.
+* `linkedin_server/post_summary_counts.py` is a reader, not an instrument; its
+  self-controlling `readable` flag is pinned in `tests/test_post_summary_counts.py`.
+
+### 58.4 DECLARED DISPOSABLE
+
+The scratchpad scripts this lane ran -- the slice re-driver, the blast-radius
+driver over 142 addresses, the digest and attribution computer, the capture
+readers that printed only shapes (anchor paths with slugs masked, digit
+counts, parse booleans), and the census and side-table editors -- are
+declared disposable. Everything they measured is either re-derived by a
+shipped test on every run or recorded with its result in the audit.
+
 ---
 
 ## 59. WHICH CONTROL AN INDEX PRESS REACHES, READ FROM A CAPTURE WITH NO BROWSER (lane-l2-refused-presses, 2026-09-23)

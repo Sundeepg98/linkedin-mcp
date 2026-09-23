@@ -118,8 +118,6 @@ TRIAGE: dict[str, tuple[str, str, str]] = {
     "P F1": ("ADDRESS", "ABSENT", "the /in/me/details/ admission is restricted "
                                   "to experience, education and skills; "
                                   "recommendations.py ships and is UNWIRED"),
-    "P G6": ("ADDRESS", "ABSENT", "no per-post analytics address is admitted "
-                                  "and no module builds one from a urn"),
     "P H11": ("ADDRESS", "ABSENT", "the services detail address is unadmitted; "
                                    "the phrase is in an EXCLUSION set on the "
                                    "topcard path, discarded before parsing"),

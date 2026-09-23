@@ -1548,7 +1548,12 @@ BLOCKED = [
     # that excluded the group roster; an event page is census row N 184, and
     # its refusal here is what makes the ledger's "allowlist +1" for this
     # blocker measurably short.
-    "https://www.linkedin.com/events/12345678901234567890/",
+    #
+    # THE NUMERIC EVENT PAGE ITSELF LEFT THIS LIST 2026-09-23: a lane-L1
+    # REVIEW: commit admits ONE event by its numeric id, on its own line,
+    # under the groups-id conditions. Its QUERY spelling stands in -- still
+    # refused -- and its sub-pages below are unchanged.
+    "https://www.linkedin.com/events/12345678901234567890/?x=1",
     "https://www.linkedin.com/events/12345678901234567890/about/",
     "https://www.linkedin.com/events/12345678901234567890/comments/",
     "https://www.linkedin.com/mynetwork/network-manager/events/",
@@ -1606,16 +1611,25 @@ def test_the_two_membership_roots_are_admitted_and_their_families_are_not():
     What did NOT move on either side is the part this test exists for: the
     member roster and the attendee list are still refused, and they are what
     the ruling on both roots was protecting.
+
+    **AMENDED AGAIN 2026-09-23, AND THE TWO FAMILIES MATCH AGAIN.** A lane-L1
+    ``REVIEW:`` commit admits one event by its NUMERIC id under the same four
+    conditions the groups id was admitted on, so both families are now one
+    step wider than their roots, and in the same way. The rosters are still
+    refused, which is what both rulings protect.
     """
     assert readonly.is_read_url(GROUPS_ROOT)
     assert readonly.is_read_url(EVENTS_ROOT)
-    # THE GROUPS FAMILY, ONE STEP WIDER THAN IT WAS.
+    # BOTH FAMILIES, ONE STEP WIDER THAN THEIR ROOTS.
     assert readonly.is_read_url("https://www.linkedin.com/groups/12345678/")
-    # AND THE EVENTS FAMILY, EXACTLY WHERE IT WAS.
+    assert readonly.is_read_url(
+        "https://www.linkedin.com/events/12345678901234567890/"
+    )
+    # AND WHAT BOTH RULINGS PROTECT, EXACTLY WHERE IT WAS.
     for url in (
         GROUP_MEMBER_ROSTER,
         "https://www.linkedin.com/groups/12345678/requests/",
-        "https://www.linkedin.com/events/12345678901234567890/",
+        "https://www.linkedin.com/events/12345678901234567890/attendees/",
         "https://www.linkedin.com/events/12345678901234567890/comments/",
     ):
         assert not readonly.is_read_url(url), url

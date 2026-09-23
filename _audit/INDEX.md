@@ -27,8 +27,8 @@ are listed as `(undated)`; no date is taken from git history, because
 
 | what | count |
 | --- | --- |
-| audit documents git tracks under `_audit` | 238 |
-| of those, carrying a `YYYY-MM-DD-` date prefix | 198 |
+| audit documents git tracks under `_audit` | 239 |
+| of those, carrying a `YYYY-MM-DD-` date prefix | 199 |
 | distinct dates | 15 |
 | documents with no level-1 heading | 2 |
 | `CORRECTS:` marker lines | 96 |
@@ -39,7 +39,7 @@ are listed as `(undated)`; no date is taken from git history, because
 | documents at either end of a cross-document edge | 95 |
 | intra-document correction markers | 4 |
 | documents that correct themselves later on | 2 |
-| documents no correction marker touches at all | 141 |
+| documents no correction marker touches at all | 142 |
 | blockquoted markers naming ANOTHER document | 0 |
 | edges missing one of their two markers | 0 |
 | edges declared a different number of times in each direction | 2 |
@@ -1576,6 +1576,7 @@ ways, which is a fact about markers and not a verdict on the document.
 | 2026-09-23 | [2026-09-23-bucket3-addresses.md](2026-09-23-bucket3-addresses.md) | Bucket 3, measured: 67 rows, 33 on an admitted page, and 5 a reader could close today | **CORRECTED x1** corrects x1 |
 | 2026-09-23 | [2026-09-23-census-cleanup.md](2026-09-23-census-cleanup.md) | Census cleanup: six statements the census makes about itself, measured against today | corrects x2 |
 | 2026-09-23 | [2026-09-23-exclusion-audit.md](2026-09-23-exclusion-audit.md) | Who ruled each exclusion -- the 315 rows outside the denominator, traced |  |
+| 2026-09-23 | [2026-09-23-lane-l1-refused-reads.md](2026-09-23-lane-l1-refused-reads.md) | Lane L1, refused reads: 24 rows at the read boundary, taken one at a time |  |
 | 2026-09-23 | [2026-09-23-lane-l2-refused-presses.md](2026-09-23-lane-l2-refused-presses.md) | Lane L2: nine refused presses, and none of them is a narrow extension away | corrects x1 |
 | 2026-09-23 | [2026-09-23-rulings-write-class-and-delegated-calls.md](2026-09-23-rulings-write-class-and-delegated-calls.md) | Rulings, 2026-09-23: the write class, the live budget, and the calls delegated to the orchestrator |  |
 

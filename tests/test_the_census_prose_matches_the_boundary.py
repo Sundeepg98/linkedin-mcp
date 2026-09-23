@@ -84,18 +84,22 @@ _CLAIMED_REACHABLE = {
     "events": "https://www.linkedin.com/events/",
     "newsletters": "https://www.linkedin.com/mynetwork/network-manager/newsletters/",
     "creator analytics": "https://www.linkedin.com/analytics/creator/content/",
+    # MOVED FROM THE REFUSED TABLE BELOW 2026-09-23, with the census cell it
+    # checks: lane L1 admitted ONE post's analytics by its activity urn, on
+    # its own anchored line. The guard did its job -- it went red at the edit
+    # and the census moved with the boundary, not the assertion.
+    "post analytics": (
+        "https://www.linkedin.com/analytics/post-summary/urn:li:activity:10001/"
+    ),
 }
 
-#: Surfaces the correction block says still REFUSE. Seven of the eleven the
-#: original sentence named.
+#: Surfaces the correction block says still REFUSE. Six of the eleven the
+#: original sentence named (seven until 2026-09-23; post analytics moved up).
 _CLAIMED_REFUSED = {
     "linkedin live": "https://www.linkedin.com/video/live/",
     "saved posts": "https://www.linkedin.com/my-items/saved-posts/",
     "hashtags": "https://www.linkedin.com/feed/hashtag/",
     "article drafts": "https://www.linkedin.com/article/drafts/",
-    "post analytics": (
-        "https://www.linkedin.com/analytics/post-summary/urn:li:activity:10001/"
-    ),
     "scheduled posts": "https://www.linkedin.com/scheduled-posts/",
     "media upload": "https://www.linkedin.com/mypreferences/d/media-upload/",
 }
