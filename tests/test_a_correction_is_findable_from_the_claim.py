@@ -620,6 +620,24 @@ NOT_A_CORRECTION: dict[tuple[str, str], str] = {
         "untouched, which would be a real correction needing its own markers."
     ),
 
+    # 2026-09-23, wave `bucket1-live-reads`. The same SHADOW shape as the
+    # refuse-first entry directly above.
+    ("messaging-and-content.md", "2026-09-23-bucket1-fires.md"): (
+        "THE ARROW IS DECLARED IN THE OTHER DIRECTION AND THIS IS ITS "
+        "SHADOW. `2026-09-23-bucket1-fires.md` declares *'CORRECTS: "
+        "`_audit/_census/messaging-and-content.md` -- row `C41`'* and this "
+        "file carries the matching CORRECTED BY in its section 1. What the "
+        "candidate pair claims instead is that MESSAGING-AND-CONTENT.MD "
+        "corrects THE DELIVERABLE, which is backwards: row `C41` cites that "
+        "document as the evidence for its own move to COVERED-PROVEN and "
+        "withdraws nothing from it. The matched word is `retract`, inside the "
+        "row's own caveat -- a later refusal 'would be a reliability fact and "
+        "not a retraction' -- which is the row qualifying ITS OWN bank. "
+        "**WHAT WOULD MAKE THIS ENTRY WRONG:** row `C41` asserting that "
+        "something IN that deliverable is false while leaving the deliverable "
+        "untouched, which would be a real correction needing its own markers."
+    ),
+
     ("network.md", "2026-09-21-the-fires-and-the-controls.md"): (
         "THE ARROW IS DECLARED IN THE OTHER DIRECTION AND THIS IS ITS "
         "SHADOW. The fires-and-the-controls deliverable declares "

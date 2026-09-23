@@ -56,6 +56,16 @@ Run it as::
 
     LINKEDIN_CDP_ATTACH=1 LINKEDIN_CDP_PORT=9224 \\
         ./venv/Scripts/python.exe scripts/_probe_unfired_self_reads.py
+
+and to fire ONE of the two rows only, ``--only C41`` or ``--only M45``. ADDED
+2026-09-23: by then `M M45` was COVERED-PROVEN and `M C41` was not, and a wave
+re-measuring `M C41` had no reason to load the composer again. The default is
+unchanged -- both, in the order they shipped.
+
+IT STOPS AT THE FIRST ANOMALY (also 2026-09-23). An error envelope from either
+tool ends the run with no further page load, not even the closing control --
+the same rule as its sibling, and the same function, imported rather than
+copied: ``_probe_unfired_job_detail_insights._anomaly``.
 """
 
 from __future__ import annotations
@@ -72,7 +82,33 @@ sys.path.insert(0, str(_ROOT / "scripts"))
 from linkedin_server import dom, server  # noqa: E402
 from linkedin_server.browser import BROWSER  # noqa: E402
 
+# THE SIBLING PROBE'S ANOMALY RULE, IMPORTED. Its `main()` is behind an
+# `if __name__` guard, so importing it runs constants and defs only -- the
+# same lift `_probe_proximity_live.py` makes for the control apparatus.
+import _probe_unfired_job_detail_insights as sibling  # noqa: E402
+
 CONTROL_URL = "https://www.linkedin.com/jobs/search/?keywords=node.js"
+
+#: The two rows this probe can fire, by the census id each one settles, in the
+#: order they have always fired.
+ROWS = ("M45", "C41")
+
+
+def _selected(argv: list) -> tuple:
+    """Which rows to fire. PURE, so the selection is testable without a browser.
+
+    No flag is both rows, as the probe always did. ``--only <row>`` is that
+    row alone, and anything else REFUSES rather than falling back to both --
+    a typo that quietly fired the composer is the one outcome the flag exists
+    to prevent.
+    """
+    if "--only" not in argv:
+        return ROWS
+    at = argv.index("--only")
+    want = argv[at + 1] if at + 1 < len(argv) else ""
+    if want not in ROWS:
+        raise SystemExit("--only takes exactly one of: " + ", ".join(ROWS))
+    return (want,)
 
 #: Keys whose VALUE is a verdict this server authored, safe to print. Anything
 #: not on this list is reported by TYPE and LENGTH only.
@@ -143,6 +179,10 @@ def _report(label: str, out: dict) -> str:
 async def main() -> int:
     outcomes: dict = {}
     raw: dict = {}
+    # DECIDED BEFORE THE BROWSER IS TOUCHED, so a bad flag refuses at zero
+    # page loads rather than after the control has already navigated.
+    rows = _selected(sys.argv[1:])
+    print("### rows selected: " + ", ".join(rows))
     try:
         print("### CONTROL, before anything")
         async with BROWSER.session() as page:
@@ -154,28 +194,36 @@ async def main() -> int:
             print("    THE CONTROL DID NOT SERVE. This run is VOID. Stopping.")
             return 1
 
-        # M M45 -- the blank composer.
-        try:
-            out = await server.linkedin_compose_fields()
-        except Exception as exc:  # noqa: BLE001
-            print("\n### M M45 -- linkedin_compose_fields RAISED "
-                  + type(exc).__name__)
-            out = {"error": type(exc).__name__}
-        outcomes["M M45 compose_fields"] = _report(
-            "M M45 -- linkedin_compose_fields (blank compose window)", out)
-        raw["M45"] = out
+        if "M45" in rows:
+            # M M45 -- the blank composer.
+            try:
+                out = await server.linkedin_compose_fields()
+            except Exception as exc:  # noqa: BLE001
+                print("\n### M M45 -- linkedin_compose_fields RAISED "
+                      + type(exc).__name__)
+                out = {"error": type(exc).__name__}
+            outcomes["M M45 compose_fields"] = _report(
+                "M M45 -- linkedin_compose_fields (blank compose window)", out)
+            raw["M45"] = out
+            kind = sibling._anomaly(out)
+            if kind:
+                raise sibling.FireAnomaly(kind, "M M45")
 
-        # M C41 -- his own activity feed.
-        try:
-            out2 = await server.linkedin_my_activity_items()
-        except Exception as exc:  # noqa: BLE001
-            print("\n### M C41 -- linkedin_my_activity_items RAISED "
-                  + type(exc).__name__)
-            out2 = {"error": type(exc).__name__}
-        outcomes["M C41 my_activity_items"] = _report(
-            "M C41 -- linkedin_my_activity_items (your own activity feed)",
-            out2)
-        raw["C41"] = out2
+        if "C41" in rows:
+            # M C41 -- his own activity feed.
+            try:
+                out2 = await server.linkedin_my_activity_items()
+            except Exception as exc:  # noqa: BLE001
+                print("\n### M C41 -- linkedin_my_activity_items RAISED "
+                      + type(exc).__name__)
+                out2 = {"error": type(exc).__name__}
+            outcomes["M C41 my_activity_items"] = _report(
+                "M C41 -- linkedin_my_activity_items (your own activity feed)",
+                out2)
+            raw["C41"] = out2
+            kind = sibling._anomaly(out2)
+            if kind:
+                raise sibling.FireAnomaly(kind, "M C41")
 
         async with BROWSER.session() as page:
             badge_after = await _badge(page)
@@ -187,6 +235,14 @@ async def main() -> int:
         if not last_control:
             print("    THE CONTROL STOPPED SERVING. Readings above are VOID.")
             return 1
+    except sibling.FireAnomaly as stop:
+        # NO FURTHER PAGE LOAD, not even the closing control. The raw result
+        # that raised is still written, so the anomaly can be diagnosed from
+        # disk without another navigation.
+        print("\n### ANOMALY: " + stop.kind + " at " + stop.where + ".")
+        print("    EVERY FURTHER FIRE WAS STOPPED. This run is VOID.")
+        _write_raw(raw)
+        return 1
     except Exception as error:  # noqa: BLE001
         print("\nRUN ABORTED: " + type(error).__name__)
         print("    " + str(error)[:300])
@@ -229,12 +285,17 @@ async def main() -> int:
     print("    measurement of a tool that ships expecting to refuse, and the")
     print("    row stays COVERED-UNFIRED carrying the reason above.")
 
+    _write_raw(raw)
+    return 0
+
+
+def _write_raw(raw: dict) -> None:
+    """The raw results, to the gitignored `_state/` and nowhere else."""
     state = _ROOT / "_state"
     state.mkdir(exist_ok=True)
     (state / "unfired-self-reads-raw.json").write_text(
         json.dumps(raw, indent=2, default=str), encoding="utf-8")
     print("\n### RAW results written under _state/ (gitignored)")
-    return 0
 
 
 if __name__ == "__main__":

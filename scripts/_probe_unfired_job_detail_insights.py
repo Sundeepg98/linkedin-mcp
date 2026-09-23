@@ -57,6 +57,10 @@ this probe's arithmetic without the capture ever being committable.
 * IT FIRES NO WRITE. It searches and it reads postings. Nothing is applied
   to, saved, followed or messaged, and ``LINKEDIN_ENABLE_WRITES`` is
   irrelevant to it.
+* IT STOPS AT THE FIRST ANOMALY (since 2026-09-23). Any error envelope from a
+  shipped tool -- a login or checkpoint landing, a throttled page that drew
+  nothing -- ends the run with no further page load, not even the closing
+  control. See ``_anomaly``.
 
 Run it as::
 
@@ -210,6 +214,79 @@ def _bankable(verdict: str) -> str:
     return "NOT BANKABLE -- no sample"
 
 
+class FireAnomaly(Exception):
+    """Raised to STOP EVERY FURTHER PAGE LOAD in this run.
+
+    Carries the server's own error KIND and where the run was, and PRINTS
+    nothing else: an envelope's ``message`` may quote what the page said, and
+    the kind is a token this package chose. The whole envelope rides along
+    only so it can be written to the gitignored ``_state/`` -- see
+    ``_anomaly_record`` -- because an anomaly nobody can diagnose afterwards
+    has to be diagnosed with another page load, which is the one thing a stop
+    exists to prevent.
+    """
+
+    def __init__(self, kind: str, where: str, envelope=None) -> None:
+        self.kind = kind
+        self.where = where
+        self.envelope = envelope
+        super().__init__(kind + " at " + where)
+
+
+def _anomaly_record(stop: "FireAnomaly") -> dict:
+    """What the anomaly path writes to ``_state/``. PURE, so it is testable.
+
+    ADDED 2026-09-23 after this probe's stop rule fired for the first time --
+    ``extraction_failed`` at posting 2 -- and the envelope that would have said
+    WHY (``shape.job_detail_failure_note`` puts ``main_chars`` and the settle
+    branch into it) was discarded with the run. The stop was right and the
+    evidence was lost; this keeps the second without weakening the first.
+    """
+    return {"anomaly": {"kind": stop.kind, "where": stop.where,
+                        "envelope": stop.envelope}}
+
+
+def _anomaly(out) -> "str | None":
+    """The error KIND that must stop the run, or None. PURE, so it is testable.
+
+    ADDED 2026-09-23, because until then an anomaly did not stop this probe.
+    A posting whose call came back as an error envelope was counted under
+    "errors by type" and the loop went on to the NEXT posting -- so a login
+    wall, a checkpoint or a throttled page reached mid-run would have been
+    answered with more page loads into the same broken session. The brief
+    that wave ran under says to stop at the first anomaly, and so does every
+    earlier fire audit.
+
+    ANY ERROR ENVELOPE IS AN ANOMALY HERE, deliberately, and not only
+    ``not_authenticated``. A login or checkpoint landing reaches a tool as
+    ``not_authenticated`` (``auth.assert_not_authwall``), but a 999 or a
+    throttled page that draws nothing reaches it as ``extraction_failed``,
+    and the two cannot be told apart from inside the envelope -- no HTTP
+    status travels in it. The cost of continuing into a throttled session
+    lands on the account, so the conservative reading wins.
+
+    ITS COST IS NOT "ONE RE-RUN", and this docstring said it was until the
+    rule's first live day proved otherwise (2026-09-23,
+    ``_audit/2026-09-23-bucket1-fires.md`` FIRE 3). A posting-level miss that
+    is not a flake -- a drawn page whose description never attaches after
+    the full settle and the full wait -- stops the run wherever the harvest
+    puts it, and both runs that day stopped at posting 2. The repair is a
+    CLASSIFICATION step, not a looser rule: on ``extraction_failed``, read
+    the control once and continue only if it serves with no authwall marker.
+    Proposed there, not built here.
+
+    A REFUSAL IS NOT AN ANOMALY. ``{"refused": ...}`` is a tool answering, and
+    the census rows this probe exists for are decided by exactly those
+    answers.
+    """
+    if not isinstance(out, dict):
+        return "not_a_dict"
+    kind = out.get("error")
+    if kind:
+        return str(kind)[:40]
+    return None
+
+
 async def _badge(page) -> dict:
     """The structured invitation-badge reading, or a dict carrying an error.
 
@@ -275,6 +352,9 @@ async def harvest_job_ids(wanted: int) -> list[str]:
         if len(found) >= wanted:
             break
         result = await server.linkedin_search_jobs(keywords=term, limit=10)
+        kind = _anomaly(result)
+        if kind:
+            raise FireAnomaly(kind, "the harvest search", result)
         for row in result.get("results") or []:
             jid = str(row.get("job_id") or "").strip()
             if jid and jid not in found:
@@ -342,10 +422,13 @@ async def main() -> int:
             try:
                 out = await server.linkedin_job_detail(jid)
             except Exception as exc:  # noqa: BLE001
-                name = type(exc).__name__
-                errors[name] = errors.get(name, 0) + 1
-                print("    posting " + str(n) + ": ERROR " + name)
-                continue
+                # A tool that RAISES has escaped its own error envelope, which
+                # is itself an anomaly: stop rather than count it and go on.
+                raise FireAnomaly(type(exc).__name__,
+                                  "posting " + str(n)) from None
+            kind = _anomaly(out)
+            if kind:
+                raise FireAnomaly(kind, "posting " + str(n), out)
             if out.get("insights_error"):
                 name = "insights_error:" + str(out.get("insights_error"))
                 errors[name] = errors.get(name, 0) + 1
@@ -409,6 +492,21 @@ async def main() -> int:
             print("    THE CONTROL STOPPED SERVING mid-session. Treat every")
             print("    reading above as VOID rather than as data.")
             return 1
+    except FireAnomaly as stop:
+        # NO FURTHER PAGE LOAD OF ANY KIND -- not even the closing control,
+        # which would be one more navigation into the session that just
+        # misbehaved. The `finally` below closes our own tab and nothing else.
+        print("\n### ANOMALY: " + stop.kind + " at " + stop.where + ".")
+        print("    EVERY FURTHER FIRE WAS STOPPED. This run is VOID and banks")
+        print("    nothing; the kind above is the server's own error token.")
+        state = _ROOT / "_state"
+        state.mkdir(exist_ok=True)
+        dest = state / "unfired-job-detail-insights-raw.json"
+        dest.write_text(json.dumps(raw + [_anomaly_record(stop)], indent=2,
+                                   default=str), encoding="utf-8")
+        print("    the envelope and the postings read before it are under")
+        print("    _state/ (gitignored), for diagnosis at zero page loads.")
+        return 1
     except Exception as error:  # noqa: BLE001
         name = type(error).__name__
         print("\nRUN ABORTED: " + name)

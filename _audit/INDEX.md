@@ -27,16 +27,16 @@ are listed as `(undated)`; no date is taken from git history, because
 
 | what | count |
 | --- | --- |
-| audit documents git tracks under `_audit` | 232 |
-| of those, carrying a `YYYY-MM-DD-` date prefix | 192 |
-| distinct dates | 14 |
+| audit documents git tracks under `_audit` | 233 |
+| of those, carrying a `YYYY-MM-DD-` date prefix | 193 |
+| distinct dates | 15 |
 | documents with no level-1 heading | 2 |
-| `CORRECTS:` marker lines | 91 |
-| `CORRECTED BY:` marker lines | 91 |
-| distinct declared correction edges | 88 |
+| `CORRECTS:` marker lines | 92 |
+| `CORRECTED BY:` marker lines | 92 |
+| distinct declared correction edges | 89 |
 | documents something later corrects | 46 |
-| documents that correct something | 64 |
-| documents at either end of a cross-document edge | 91 |
+| documents that correct something | 65 |
+| documents at either end of a cross-document edge | 92 |
 | intra-document correction markers | 4 |
 | documents that correct themselves later on | 2 |
 | documents no correction marker touches at all | 139 |
@@ -542,6 +542,10 @@ document is dead; it says one thing in it was overtaken and names what.
 - CORRECTED BY [2026-09-21-the-write-ceiling.md](2026-09-21-the-write-ceiling.md)
 
   > this slice's 71 write-direction GAP rows were adjudicated row by row on 2026-09-21; five moved to EXCLUDED-RULED and 66 stayed GAP.
+
+- CORRECTED BY [2026-09-23-bucket1-fires.md](2026-09-23-bucket1-fires.md)
+
+  > row `C41` moved COVERED-UNFIRED to COVERED-PROVEN: `linkedin_my_activity_items` returned items live for the first time on record, with authorship established on all three conditions.
 
 ### [_census/network.md](_census/network.md)
 
@@ -1265,6 +1269,14 @@ reach is visible. The quoted reason here is the CORRECTOR's own
 
   > row `O3`'s evidence cell gains the same, state unchanged. Its reason was `no tool, no reason`; there is now a reason.
 
+### [2026-09-23-bucket1-fires.md](2026-09-23-bucket1-fires.md)
+
+2026-09-23 &middot; BUCKET 1: the read-direction COVERED-UNFIRED rows, fired once each through attach
+
+- CORRECTS [_census/messaging-and-content.md](_census/messaging-and-content.md)
+
+  > row `C41` read COVERED-UNFIRED with *"It has never returned an item"*; it returned eight on its first fire here, with authorship established on all three conditions, and moves to COVERED-PROVEN.
+
 ## 5. Every document, by date
 
 `CORRECTED` means at least one later document declares a correction of
@@ -1313,7 +1325,7 @@ ways, which is a fact about markers and not a verdict on the document.
 | (undated) | [_slice-unfollow-census.md](_slice-unfollow-census.md) | Unfollow-anchor census -- linkedin MCP server |  |
 | (undated) | [_census/jobs.md](_census/jobs.md) | Census slice: JOBS, END TO END | **CORRECTED x6** |
 | (undated) | [_census/mcp-inventory.md](_census/mcp-inventory.md) | MCP inventory -- what this server ACTUALLY DELIVERS |  |
-| (undated) | [_census/messaging-and-content.md](_census/messaging-and-content.md) | Capability census -- MESSAGING AND CONTENT | **CORRECTED x5** |
+| (undated) | [_census/messaging-and-content.md](_census/messaging-and-content.md) | Capability census -- MESSAGING AND CONTENT | **CORRECTED x6** |
 | (undated) | [_census/network.md](_census/network.md) | CENSUS SLICE: NETWORK AND PEOPLE | **CORRECTED x11** |
 | (undated) | [_census/profile.md](_census/profile.md) | CENSUS SLICE: PROFILE, IDENTITY, SETTINGS AND PRIVACY | **CORRECTED x3** |
 | 2026-08-22 | [2026-08-22-linkedin-preflight.md](2026-08-22-linkedin-preflight.md) | 2026-08-22 - browser preflight, and a session_info that outlives the browser |  |
@@ -1508,6 +1520,7 @@ ways, which is a fact about markers and not a verdict on the document.
 | 2026-09-21 | [2026-09-21-what-playwright-quotes.md](2026-09-21-what-playwright-quotes.md) | WHAT PLAYWRIGHT QUOTES: the parked question, measured offline |  |
 | 2026-09-21 | [2026-09-21-what-the-browser-said.md](2026-09-21-what-the-browser-said.md) | WHAT THE BROWSER SAID: `$.message`, adjudicated by PROVENANCE CLASS | **CORRECTED x1** |
 | 2026-09-21 | [2026-09-21-what-was-ruled.md](2026-09-21-what-was-ruled.md) | A register keyed on RULINGS, not on documents -- and the fourth payment |  |
+| 2026-09-23 | [2026-09-23-bucket1-fires.md](2026-09-23-bucket1-fires.md) | BUCKET 1: the read-direction COVERED-UNFIRED rows, fired once each through attach | corrects x1 |
 
 ## 6. What the scan rejected, could not join, or had to repair
 
