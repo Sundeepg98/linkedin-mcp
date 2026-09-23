@@ -62,6 +62,13 @@ whole point: the process must be able to say what it is about to navigate to
 WITHOUT having asked the page, because a page that can choose the next url can
 choose a stranger's.
 
+**AND, FOR THE NAVIGATION SINK ONLY, A VALUE A READER RETURNED** -- added
+2026-09-24 after lane L3's ``J 57`` read job ids off a page and opened each one
+while this rule stayed green. See ``reader_derived_navigations``: its sources,
+its scoping and what it cannot see are argued there, beside the code. The
+output sink's taint is unchanged; page TEXT reaching a print is the sibling
+rule's subject.
+
 ## It is shown failing in BOTH directions, on synthetic source
 
 A checker that flags everything would pass a red-only demonstration while
@@ -73,6 +80,7 @@ from __future__ import annotations
 
 import ast
 import pathlib
+import re
 
 import pytest
 
@@ -381,6 +389,310 @@ def _url_arg(call: ast.Call):
     return None
 
 
+# ---------------------------------------------------------------------------
+# THE THIRD SOURCE: A VALUE A READER RETURNED.  Added 2026-09-24, lane G.
+#
+# The two sources above are a ``goto`` return and a ``.url``. Lane L3's
+# ``J 57`` read job ids off the tracker page through a reader and opened one
+# posting per id, and this rule was green on it -- the ids never passed
+# through either source. Everything below exists to see that route, and is
+# held by ``test_it_goes_red_on_a_value_a_reader_returned`` and its green twin.
+#
+# FOUR DECISIONS, EACH MEASURED ON THIS TREE BEFORE IT WAS MADE:
+#
+# * SCOPED, NOT PER MODULE BY NAME. Reader output is everywhere -- every tool
+#   body builds its answer from readings -- so a name tainted anywhere in a
+#   module taints it everywhere. Measured on the withdrawn ``server.py``:
+#   per module, 15 findings, 11 of them one ``url`` collision across eleven
+#   functions; scoped, 2. A caller-supplied ``job_id`` parameter must not be
+#   convicted because another function's loop variable shares its name.
+#   Closures still see their enclosing scope, which is the shape the module-
+#   wide rule above was written for.
+# * A TARGET'S KEY RECEIVES NOTHING. ``out[k] = <reading>`` puts the value in
+#   ``out`` and never in ``k``. The walk above adds every name in a target;
+#   here that convicted two navigations at HEAD whose address was keyed by the
+#   CALLER's own argument (``linkedin_my_profile``'s section, and a probe's
+#   loop key).
+# * AN ACCUMULATION CARRIES A VALUE. ``ids.append(job_id)`` is how J 57 moved
+#   the page's ids into the list it then visited. Rename the visiting loop's
+#   variable and nothing else carries them. ``+=`` is the same act.
+# * PER FILE, SO THE STAGED GUARD STAYS AN INDUCTION STEP.
+#   ``scripts/staged_navigation_guard.py`` is sound only while a file's verdict
+#   is a function of that file's text. So a reader in ANOTHER module is known
+#   by the package's naming convention (``read_``, ``harvest_``, the
+#   ``linkedin_`` tools), and a reader in THIS module by its own return value.
+#
+# WHAT IT DOES NOT SEE, said rather than implied. A page-returning function in
+# another module whose name the convention does not match: an over-approximate
+# whole-tree summary counts 102 such call sites across 44 callees. A whole-tree
+# complement was built and priced before it was declined -- 17.4 s per run,
+# and on this tree it found ONE extra site, a bare-name collision between two
+# modules' ``_url_for``, i.e. an artifact. Sanitisers are NOT honoured here:
+# ``_SANITISERS`` were proven against urls, and the sibling page-text rule has
+# already ruled that such a proof does not transfer to page text. A
+# comprehension's target leaks into its enclosing scope (over-approximate);
+# ``global`` and ``nonlocal`` writes are not followed (under-approximate); and
+# within a scope the analysis is flow-insensitive.
+# ---------------------------------------------------------------------------
+
+#: CALLS WHOSE RETURN IS SOMETHING THE PAGE WROTE. The sibling page-text rule's
+#: ``TEXT_CALLS`` exactly -- restated rather than imported because that module
+#: imports this one -- and held equal to it by
+#: ``test_the_reader_sources_are_the_page_text_rules``.
+_PAGE_CALLS = frozenset({
+    "inner_text",
+    "text_content",
+    "all_text_contents",
+    "all_inner_texts",
+    "input_value",
+    "inner_html",
+    "get_attribute",
+    "get_property",
+    "evaluate",
+    "eval_on_selector",
+    "eval_on_selector_all",
+    "content",
+    "text",
+    "json",
+    "accessible_name",
+    "aria_snapshot",
+})
+
+#: A CALLEE WHOSE NAME SAYS IT READS A PAGE: the package's reader convention
+#: (47 ``read_`` and 4 ``harvest_`` functions in ``dom.py`` alone) and the
+#: ``linkedin_`` tools, whose return value is always an envelope built from a
+#: reading. The last is what makes a SCRIPT composing two tools -- J 57 written
+#: outside the server -- visible without reading another file.
+_READER_NAME = re.compile(r"_?(?:read|harvest)_|linkedin_")
+
+#: Container mutations that put a value INTO a name without binding it.
+_ACCUMULATORS = frozenset({
+    "append", "extend", "insert", "add", "update", "setdefault",
+    "appendleft", "extendleft",
+})
+
+_SCOPE_NODES = (ast.FunctionDef, ast.AsyncFunctionDef, ast.Lambda, ast.ClassDef)
+
+#: The node classes ``_bindings`` answers for, so the reader walk can skip the
+#: rest without asking. Held equal to what ``_bindings`` binds by
+#: ``test_the_reader_walker_binds_the_shared_forms_and_two_more``.
+_BINDING_NODES = (
+    ast.Assign, ast.AnnAssign, ast.For, ast.AsyncFor, ast.ListComp,
+    ast.SetComp, ast.GeneratorExp, ast.DictComp, ast.withitem, ast.NamedExpr,
+)
+
+
+class _Facts:
+    """One expression, reduced ONCE, so every fixed point is set arithmetic.
+
+    ``direct`` -- it reads the page itself or calls a reader-named function;
+    ``names`` -- the names it reads; ``callees`` -- the bare names it calls,
+    which become sources when a function of this file turns out to return page
+    data. Both sets skip what the carve-outs skip: a comparison and a count.
+    """
+
+    __slots__ = ("direct", "names", "callees")
+
+    def __init__(self, direct: bool, names: frozenset, callees: frozenset) -> None:
+        self.direct = direct
+        self.names = names
+        self.callees = callees
+
+    def asks_the_page(self, tainted: set[str], returns_page: set[str]) -> bool:
+        return (
+            self.direct
+            or not self.names.isdisjoint(tainted)
+            or not self.callees.isdisjoint(returns_page)
+        )
+
+
+def _facts(node: ast.AST) -> _Facts:
+    direct = False
+    names: set[str] = set()
+    callees: set[str] = set()
+    stack: list[ast.AST] = [node]
+    while stack:
+        child = stack.pop()
+        if isinstance(child, ast.Compare):
+            continue
+        if isinstance(child, ast.Call):
+            func = child.func
+            if isinstance(func, ast.Name) and func.id in _COUNTING_CALLS:
+                continue
+            name = (
+                func.id if isinstance(func, ast.Name)
+                else func.attr if isinstance(func, ast.Attribute)
+                else None
+            )
+            if isinstance(func, ast.Attribute) and (
+                func.attr in _PAGE_CALLS or func.attr in _TAINTED_CALLS
+            ):
+                direct = True
+            elif name is not None and _READER_NAME.match(name):
+                direct = True
+            elif name is not None:
+                callees.add(name)
+        elif isinstance(child, ast.Name):
+            names.add(child.id)
+        elif isinstance(child, ast.Attribute) and child.attr in _TAINTED_ATTRS:
+            direct = True
+        stack.extend(ast.iter_child_nodes(child))
+    return _Facts(direct, frozenset(names), frozenset(callees))
+
+
+def _receiving(target: ast.AST):
+    """The names a target PUTS A VALUE INTO -- never a key or an index."""
+    if isinstance(target, ast.Name):
+        yield target.id
+    elif isinstance(target, (ast.Tuple, ast.List)):
+        for element in target.elts:
+            yield from _receiving(element)
+    elif isinstance(target, ast.Starred):
+        yield from _receiving(target.value)
+    elif isinstance(target, (ast.Subscript, ast.Attribute)):
+        yield from _receiving(target.value)
+
+
+def _accumulations(node: ast.AST):
+    """``(value, [container])`` for the mutations ``_bindings`` does not bind.
+
+    Deliberately OUTSIDE ``_bindings``: that function is held identical to the
+    page-text rule's by ``test_the_two_walkers_bind_the_same_forms``, and both
+    of those walkers keep ``AugAssign`` blind on purpose. This walker is a third
+    one with a different job, and its extra forms are pinned by
+    ``test_the_reader_walker_binds_the_shared_forms_and_two_more``.
+    """
+    if isinstance(node, ast.AugAssign):
+        yield node.value, [node.target]
+    elif (
+        isinstance(node, ast.Call)
+        and isinstance(node.func, ast.Attribute)
+        and node.func.attr in _ACCUMULATORS
+    ):
+        for argument in list(node.args) + [k.value for k in node.keywords]:
+            yield argument, [node.func.value]
+
+
+def _own_nodes(scope: ast.AST):
+    """Every node in ``scope``, stopping at nested scopes but yielding them.
+
+    A nested scope's decorators, defaults and bases are evaluated in THIS
+    scope, so they are walked here; its body is not.
+    """
+    body = [scope.body] if isinstance(scope, ast.Lambda) else list(scope.body)
+    stack: list[ast.AST] = body
+    while stack:
+        node = stack.pop()
+        yield node
+        if isinstance(node, _SCOPE_NODES):
+            if not isinstance(node, ast.Lambda):
+                stack.extend(node.decorator_list)
+            if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.Lambda)):
+                stack.extend(node.args.defaults)
+                stack.extend(d for d in node.args.kw_defaults if d is not None)
+            if isinstance(node, ast.ClassDef):
+                stack.extend(node.bases)
+                stack.extend(k.value for k in node.keywords)
+            continue
+        stack.extend(ast.iter_child_nodes(node))
+
+
+def _parameters(scope: ast.AST) -> set[str]:
+    if not isinstance(scope, (ast.FunctionDef, ast.AsyncFunctionDef, ast.Lambda)):
+        return set()
+    args = scope.args
+    out = {a.arg for a in args.posonlyargs + args.args + args.kwonlyargs}
+    if args.vararg:
+        out.add(args.vararg.arg)
+    if args.kwarg:
+        out.add(args.kwarg.arg)
+    return out
+
+
+class _ReaderScope:
+    """One lexical scope: its bindings, returns, navigations and children."""
+
+    __slots__ = ("node", "binds", "returns", "gotos", "children", "local")
+
+    def __init__(self, node: ast.AST) -> None:
+        self.node = node
+        self.binds: list[tuple[_Facts, frozenset]] = []
+        self.returns: list[_Facts] = []
+        self.gotos: list[tuple[int, str, _Facts]] = []
+        self.children: list["_ReaderScope"] = []
+        local = _parameters(node)
+        for child in _own_nodes(node):
+            # DISPATCH ON TYPE FIRST. Asking both binding walkers about every
+            # node built two generators per node and doubled this file's cost;
+            # measured 4.9 s over 276 files before, see the lane G record.
+            if isinstance(child, _BINDING_NODES):
+                pairs = _bindings(child)
+            elif isinstance(child, (ast.AugAssign, ast.Call)):
+                pairs = _accumulations(child)
+            else:
+                pairs = ()
+            for value, targets in pairs:
+                receivers = frozenset(n for t in targets for n in _receiving(t))
+                local |= receivers
+                if value is not None:
+                    self.binds.append((_facts(value), receivers))
+            if isinstance(child, (ast.Return, ast.Yield, ast.YieldFrom)):
+                if child.value is not None:
+                    self.returns.append(_facts(child.value))
+            elif (
+                isinstance(child, ast.Call)
+                and isinstance(child.func, ast.Attribute)
+                and child.func.attr == "goto"
+            ):
+                arg = _url_arg(child)
+                if arg is not None:
+                    self.gotos.append((child.lineno, ast.unparse(arg), _facts(arg)))
+            elif isinstance(child, _SCOPE_NODES):
+                if not isinstance(child, ast.Lambda):
+                    local.add(child.name)
+                self.children.append(_ReaderScope(child))
+        self.local = frozenset(local)
+
+
+def reader_derived_navigations(tree: ast.AST) -> list[tuple[int, str]]:
+    """Every ``goto`` whose address carries something a page returned.
+
+    Two fixed points. Inside: a scope's taint, from its bindings, seeded with
+    what its enclosing scope tainted minus the names it binds itself. Outside:
+    the set of THIS file's functions whose return value asks the page, which
+    turns every call to one into a source -- re-run until it stops growing.
+    """
+    root = _ReaderScope(tree)
+    returns_page: set[str] = set()
+    found: list[tuple[int, str]] = []
+    for _ in range(10):
+        before = len(returns_page)
+        found = []
+        pending: list[tuple[_ReaderScope, frozenset]] = [(root, frozenset())]
+        while pending:
+            scope, inherited = pending.pop()
+            tainted = set(inherited - scope.local)
+            grew = True
+            while grew:
+                grew = False
+                for facts, receivers in scope.binds:
+                    if not receivers <= tainted and facts.asks_the_page(tainted, returns_page):
+                        tainted |= receivers
+                        grew = True
+            if isinstance(scope.node, (ast.FunctionDef, ast.AsyncFunctionDef)) and any(
+                r.asks_the_page(tainted, returns_page) for r in scope.returns
+            ):
+                returns_page.add(scope.node.name)
+            for line, text, facts in scope.gotos:
+                if facts.asks_the_page(tainted, returns_page):
+                    found.append((line, text))
+            frozen = frozenset(tainted)
+            pending.extend((child, frozen) for child in scope.children)
+        if len(returns_page) == before:
+            break
+    return sorted(set(found))
+
+
 def violations(source: str, label: str = "<source>") -> list[tuple[int, str]]:
     """Every ``goto`` in this source whose url is derived from a navigation.
 
@@ -389,6 +701,11 @@ def violations(source: str, label: str = "<source>") -> list[tuple[int, str]]:
     shape both probes had -- ``_remember`` compared against a name bound
     outside it -- so a function-scoped analysis would have been blind to the
     thing it was written for.
+
+    AND, SINCE 2026-09-24, every ``goto`` whose address carries what a READER
+    returned -- see :func:`reader_derived_navigations`. The union, one entry
+    per site: the url walk's findings are unchanged, and the reader walk adds
+    only what the url walk could not see.
     """
     tree = ast.parse(source, filename=label)
     tainted = _tainted_names(tree)
@@ -399,6 +716,9 @@ def violations(source: str, label: str = "<source>") -> list[tuple[int, str]]:
             continue
         if _is_tainted_expr(arg, tainted):
             found.append((call.lineno, ast.unparse(arg)))
+    for site in reader_derived_navigations(tree):
+        if site not in found:
+            found.append(site)
     return sorted(found)
 
 
@@ -476,7 +796,37 @@ def _python_files() -> list[pathlib.Path]:
 #:
 #: Leave it empty. A new derived navigation fails naming itself, and an entry
 #: added here has to carry the same argument this one did.
-KNOWN_DERIVED_NAVIGATIONS: dict[str, list[str]] = {}
+#:
+#: **THREE ENTRIES SINCE 2026-09-24, AND NONE OF THEM IS NEW CODE.** The reader
+#: source (see ``reader_derived_navigations``) found them on its first run over
+#: the tree. All three read HIS OWN ACTIVITY RAIL through
+#: ``dom.read_own_activity_items`` and open an item permalink built from a urn
+#: the rail returned -- one navigation in the census tool, one per item in each
+#: probe. The url-only engine could not see them: the urn arrives as a reader's
+#: return value, never as a ``goto`` return or a ``.url``.
+#:
+#: * ``server.py`` -- ``linkedin_surface_census`` on its ``feed_item`` keys,
+#:   through ``_resolve_own_item_permalink`` (present since ``3b78dd6``,
+#:   2026-08-31, three days before this rule existed). SHIPPED CODE.
+#: * ``_probe_comment_overflow_menu.py`` (2026-09-04) and
+#:   ``_probe_comment_identifier.py`` (2026-09-05) -- hand-run probes walking
+#:   every item on the rail, richest first.
+#:
+#: **DECLARED, NOT FIXED, AND NOT WAIVED -- BECAUSE TWO STANDING RULES MEET
+#: HERE.** This file says the process must name its next address without
+#: asking the page, and lane L3 withdrew ``J 57`` for navigating to ids read off
+#: HIS OWN tracker. ``_resolve_own_item_permalink``'s own docstring argues the
+#: opposite direction on purpose: a caller-supplied urn would be "an identifier
+#: this server never read", so the census takes one only from a rail whose
+#: authorship it has established. Each rule is right about the hazard it names.
+#: Which one governs a walk of his own rail is a ruling for the census owner,
+#: not an edit for the lane that found it -- the same holding position the
+#: first entry here took before a live measurement settled it.
+KNOWN_DERIVED_NAVIGATIONS: dict[str, list[str]] = {
+    "_probe_comment_identifier.py": ["ITEM_PERMALINK_URL.format(urn=urn)"],
+    "_probe_comment_overflow_menu.py": ["ITEM_PERMALINK_URL.format(urn=urn)"],
+    "server.py": ["item_url"],
+}
 
 
 @pytest.mark.parametrize(
@@ -1279,3 +1629,316 @@ def test_why_refused_returns_only_its_own_literals() -> None:
         "admitted address and a substring-banned one. A sanitiser that cannot "
         "tell them apart is not reporting a rule."
     )
+
+
+# ---------------------------------------------------------------------------
+# THE THIRD SOURCE: A VALUE A READER RETURNED -- shown failing, then fixed.
+#
+# Added 2026-09-24 (lane G). Until then the engine tainted a ``goto`` return
+# and a ``.url`` and nothing else, and its own docstring named page content as
+# a deliberate gap. Lane L3 built ``J 57`` on exactly that gap: one tracker
+# load, the job ids read off it, then one ``/jobs/view/<id>`` load per id. The
+# guard was green on it and would have stayed green; a human reading the diff
+# against this file's text withdrew it (``_audit/2026-09-23-lane-l3-jobs.md``
+# section 2.3). The plants below are that route, taken from the withdrawn
+# commit and trimmed, and the shapes it could have been written in instead.
+# ---------------------------------------------------------------------------
+
+#: The withdrawn ``J 57`` route, trimmed to its flow and otherwise VERBATIM --
+#: including the comment its author wrote above the navigation, which is the
+#: argument this rule exists to refuse. Digits proven by ``isdigit`` are still
+#: digits the PAGE chose.
+_J57_ROUTE = (
+    "async def linkedin_tracked_job_proximity(stage: int = 0, limit: int = 5):\n"
+    "    token, label, surface = _TRACKED_STAGES[stage]\n"
+    "    try:\n"
+    "        tracker = await _read_tracker(\n"
+    "            token, tab_label=label, limit=limit, surface=surface\n"
+    "        )\n"
+    "    except Exception as exc:\n"
+    "        return _error(exc)\n"
+    "    rows = tracker.get('results') or []\n"
+    "    ids: list[str] = []\n"
+    "    for row in rows:\n"
+    "        job_id = str(row.get('job_id') or '')\n"
+    "        if job_id.isdigit() and len(job_id) >= 6 and job_id not in ids:\n"
+    "            ids.append(job_id)\n"
+    "    jobs = []\n"
+    "    for job_id in ids[:limit]:\n"
+    "        entry = {'job_id': job_id, 'state': 'posting_unread'}\n"
+    "        try:\n"
+    "            # Built from digits proven above, exactly as linkedin_job_detail\n"
+    "            # builds it: nothing the page chose reaches the url.\n"
+    "            async with BROWSER.session() as page:\n"
+    "                final_url = await BROWSER.goto(page, f'{BASE_URL}/jobs/view/{job_id}')  # J57\n"
+    "                assert_not_authwall(final_url, surface='job posting')\n"
+    "                reading = await dom.read_job_posting(page)\n"
+    "            entry['proximity'] = reading['detail'].get('proximity')\n"
+    "        except Exception as exc:\n"
+    "            entry['error'] = type(exc).__name__\n"
+    "        jobs.append(entry)\n"
+    "    return {'ok': True, 'jobs': jobs}\n"
+)
+
+#: The legitimate twin, in the SAME module, with a parameter of the SAME name.
+#: This is what the J 57 route's comment claimed to be: an address built from
+#: an id the CALLER supplied. It must stay green beside the route it resembles.
+_CALLER_SUPPLIED = (
+    "async def linkedin_job_detail(job_id: str):\n"
+    "    async with BROWSER.session() as page:\n"
+    "        final_url = await BROWSER.goto(page, f'{BASE_URL}/jobs/view/{job_id}')  # CALLER\n"
+    "        assert_not_authwall(final_url, surface='job posting')\n"
+    "        reading = await dom.read_job_posting(page)\n"
+    "    return {'detail': reading['detail']}\n"
+)
+
+
+def _marked_line(source: str, marker: str) -> int:
+    lines = [i for i, text in enumerate(source.splitlines(), 1) if text.endswith(marker)]
+    assert len(lines) == 1, (marker, lines)
+    return lines[0]
+
+
+@pytest.mark.parametrize(
+    "source, why",
+    [
+        (
+            _J57_ROUTE,
+            "THE WITHDRAWN ROUTE. Ids read off the tracker through a reader, then "
+            "one navigation per id. Green under the url-only engine",
+        ),
+        (
+            _J57_ROUTE.replace("for job_id in ids[:limit]:", "for jid in ids[:limit]:")
+            .replace("{'job_id': job_id,", "{'job_id': jid,")
+            .replace("/jobs/view/{job_id}'", "/jobs/view/{jid}'"),
+            "THE SAME ROUTE WITH THE VISITING LOOP RENAMED. Now the only thing "
+            "carrying the page's ids to the navigation is `ids.append(job_id)`, "
+            "a mutation rather than a binding",
+        ),
+        (
+            _J57_ROUTE.replace("_read_tracker(", "_tracker_rows(")
+            + "\nasync def _tracker_rows(stage, *, tab_label, limit, surface):\n"
+            "    async with BROWSER.session() as page:\n"
+            "        await BROWSER.goto(page, TRACKER_URL)\n"
+            "        records = await page.evaluate(CARDS_JS)\n"
+            "    return {'results': records}\n",
+            "THE READER RENAMED OUT OF THE CONVENTION. Only the helper's own "
+            "return value says it came from a page",
+        ),
+        (
+            _HEAD + "    reading = await dom.read_own_activity_items(page)\n"
+            "    for urn in reading['items']:\n"
+            "        await BROWSER.goto(page, ITEM_PERMALINK_URL.format(urn=urn))\n",
+            "a package reader's output, one navigation per identifier it returned",
+        ),
+        (
+            _HEAD + "    hrefs = await page.evaluate(HREFS_JS)\n"
+            "    for href in hrefs:\n"
+            "        await BROWSER.goto(page, href)\n",
+            "evaluate returns whatever the page's own script produced",
+        ),
+        (
+            _HEAD + "    href = await page.locator(NEXT).get_attribute('href')\n"
+            "    await BROWSER.goto(page, BASE_URL + href)\n",
+            "an attribute the page wrote, concatenated onto a constant",
+        ),
+        (
+            _HEAD + "    result = await server.linkedin_saved_jobs()\n"
+            "    for row in result['results']:\n"
+            "        await BROWSER.goto(page, f\"{BASE_URL}/jobs/view/{row['job_id']}/\")\n",
+            "A SCRIPT COMPOSING TWO TOOLS -- J 57 written outside the server, "
+            "the shape a probe would take",
+        ),
+        (
+            _HEAD + "    rows = await dom.harvest_linked_cards(page, href_pattern=dom.JOB_HREF)\n"
+            "    async def visit():\n"
+            "        for row in rows:\n"
+            "            await BROWSER.goto(page, row['href'])\n"
+            "    await visit()\n",
+            "a closure visiting what its enclosing scope read",
+        ),
+        (
+            _HEAD + "    reading = await dom.read_own_activity_items(page)\n"
+            "    urns = []\n"
+            "    for item in reading['items']:\n"
+            "        urns += [item]\n"
+            "    for u in urns:\n"
+            "        await BROWSER.goto(page, ITEM_PERMALINK_URL.format(urn=u))\n",
+            "an augmented assignment accumulating what a reader returned",
+        ),
+        (
+            "async def _land(page):\n"
+            "    return await BROWSER.goto(page, SELF_PROFILE_URL)\n"
+            "\n" + _HEAD + "    landed = await _land(page)\n"
+            "    await BROWSER.goto(page, landed)\n",
+            "A LANDED URL RETURNED THROUGH A HELPER. The url-only engine taints a "
+            "goto's return only where the goto is written, so one function "
+            "boundary hid the exact shape the rule was built for",
+        ),
+    ],
+    ids=[
+        "j57-verbatim",
+        "j57-visit-loop-renamed",
+        "j57-reader-renamed",
+        "dom-reader-per-urn",
+        "evaluate-hrefs",
+        "get-attribute-href",
+        "script-composes-two-tools",
+        "closure-over-a-reading",
+        "augassign-accumulation",
+        "landed-url-through-a-helper",
+    ],
+)
+def test_it_goes_red_on_a_value_a_reader_returned(source, why):
+    assert violations(source), why
+
+
+@pytest.mark.parametrize(
+    "source, why",
+    [
+        (
+            _CALLER_SUPPLIED,
+            "THE LEGITIMATE TWIN. The caller supplied the id, and the reader "
+            "runs only after the navigation it could not have chosen",
+        ),
+        (
+            _HEAD + "    reading = await dom.read_own_activity_items(page)\n"
+            "    if reading.get('items'):\n"
+            "        await BROWSER.goto(page, FEED_URL)\n",
+            "a reading may GATE a navigation to an address this package wrote",
+        ),
+        (
+            _HEAD + "    reading = await dom.read_own_activity_items(page)\n"
+            "    seen = len(reading['items'])\n"
+            "    await BROWSER.goto(page, f'{SEARCH_URL}&start={seen}')\n",
+            "a COUNT of what the page drew is the package's own arithmetic -- the "
+            "len() carve-out holds for this source exactly as for a url",
+        ),
+        (
+            "async def my_profile(details: str = ''):\n"
+            "    section = str(details or '').strip().lower()\n"
+            "    out = {}\n"
+            "    async with BROWSER.session() as page:\n"
+            "        reading = await dom.read_profile_detail_entries(page, section=section)\n"
+            "        out['%s_evidence' % section] = reading['evidence']\n"
+            "        await BROWSER.goto(page, PROFILE_DETAIL_URLS[section])\n",
+            "A KEY IS NOT A RECEIVER. `out[k] = <page value>` puts the value in "
+            "`out`, never in `k` -- measured: an engine that tainted every name "
+            "in a subscript target convicted linkedin_my_profile's detail read "
+            "for using its caller's section as a dict key",
+        ),
+        (
+            _HEAD + "    await BROWSER.goto(page, f'{BASE_URL}/jobs/view/{job_id}/')\n"
+            "    reading = await dom.read_job_posting(page)\n"
+            "    if reading['detail'].get('job_id') == job_id:\n"
+            "        return reading\n",
+            "comparing what the page said against the caller's id is a boolean",
+        ),
+    ],
+    ids=[
+        "caller-supplied-id",
+        "reading-gates-a-constant",
+        "count-as-offset",
+        "key-is-not-a-receiver",
+        "comparison-against-caller-id",
+    ],
+)
+def test_it_stays_green_on_an_address_the_caller_supplied(source, why):
+    assert violations(source) == [], why
+
+
+def test_one_module_holding_both_routes_convicts_only_the_derived_one():
+    """THE PAIR IN ONE FILE, because that is where they lived.
+
+    Both functions name their id ``job_id`` and both navigate to the SAME
+    template. A rule that collected reader taint per module by name would
+    convict the caller-supplied one for sharing a name with the derived one --
+    measured on the withdrawn ``server.py``: fifteen findings, eleven of them a
+    module-wide ``url`` collision, against two with scoping.
+    """
+    source = _J57_ROUTE + "\n" + _CALLER_SUPPLIED
+    found = violations(source)
+    assert [line for line, _expr in found] == [_marked_line(source, "# J57")], found
+
+
+def test_the_url_walk_alone_is_blind_to_the_withdrawn_route():
+    """WHAT THE READER SOURCE IS FOR, asserted rather than recounted.
+
+    The url walk -- the whole of this rule until 2026-09-24 -- must still find
+    NOTHING in the withdrawn route, and the reader walk must find it. If the
+    url walk ever learns to see it, this fails and the reader source should be
+    re-examined rather than kept on this file's say-so.
+    """
+    tree = ast.parse(_J57_ROUTE)
+    tainted = _tainted_names(tree)
+    url_walk = [
+        call.lineno
+        for call in _goto_calls(tree)
+        if _url_arg(call) is not None and _is_tainted_expr(_url_arg(call), tainted)
+    ]
+    assert url_walk == [], url_walk
+    assert [line for line, _ in reader_derived_navigations(tree)] == [
+        _marked_line(_J57_ROUTE, "# J57")
+    ]
+
+
+def test_the_reader_sources_are_the_page_text_rules():
+    """ONE LIST OF PAGE READS, HELD IN TWO FILES.
+
+    Restated here because the page-text rule imports this module and a module
+    cannot import back into its importer at load time. A read one rule learns
+    and the other does not is a read the other is blind to.
+    """
+    import test_page_text_is_never_printed as text_rule
+
+    assert _PAGE_CALLS == text_rule.TEXT_CALLS, (
+        "only here: %s ; only in the page-text rule: %s"
+        % (sorted(_PAGE_CALLS - text_rule.TEXT_CALLS),
+           sorted(text_rule.TEXT_CALLS - _PAGE_CALLS))
+    )
+
+
+def test_the_reader_walker_binds_the_shared_forms_and_two_more():
+    """The reader walk binds what ``_bindings`` binds, plus exactly two forms.
+
+    ``_bindings`` itself is NOT widened -- it is held identical to the page-text
+    rule's by ``test_the_two_walkers_bind_the_same_forms``, and both keep
+    ``AugAssign`` blind on purpose. The reader walk's extra forms are named here
+    so a third one cannot arrive unannounced: an augmented assignment, and a
+    call to one of ``_ACCUMULATORS`` on a container.
+    """
+    fixture = (
+        "a = SRC\n"
+        "b: str = SRC\n"
+        "for c in SRC:\n    pass\n"
+        "e = [f for f in SRC]\n"
+        "with SRC as o:\n    pass\n"
+        "if (p := SRC):\n    pass\n"
+        "r = []\nr += SRC\n"
+        "s = []\ns.append(SRC)\n"
+        "t = {}\nt.update(SRC)\n"
+        "u = []\nu.count(SRC)\n"
+    )
+    tree = ast.parse(fixture)
+    shared = {
+        type(node).__name__
+        for node in ast.walk(tree)
+        for _ in _bindings(node)
+    }
+    assert shared == {cls.__name__ for cls in _BINDING_NODES} - {
+        "AsyncFor", "SetComp", "GeneratorExp", "DictComp"
+    }, sorted(shared)
+    assert set(_BINDING_NODES) >= {
+        ast.Assign, ast.AnnAssign, ast.For, ast.AsyncFor, ast.ListComp,
+        ast.SetComp, ast.GeneratorExp, ast.DictComp, ast.withitem, ast.NamedExpr,
+    }
+    extra = {
+        (type(node).__name__, getattr(getattr(node, "func", None), "attr", ""))
+        for node in ast.walk(tree)
+        for _ in _accumulations(node)
+    }
+    assert extra == {("AugAssign", ""), ("Call", "append"), ("Call", "update")}, extra
+    assert not any(True for node in ast.walk(tree) if isinstance(node, ast.AugAssign)
+                   for _ in _bindings(node)), "_bindings must stay blind to AugAssign"
+    # And a method that is not an accumulation carries nothing: ``u.count(SRC)``.
+    assert ("Call", "count") not in extra
