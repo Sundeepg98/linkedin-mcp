@@ -482,8 +482,8 @@ blocker "awaiting admission by name", each classed for the build lanes:
 | class | rows | what it means for a build |
 |---|---:|---|
 | a pure read | 7 | `J 77`, `N 39`, `N 143`, `P M9`, `P N9`, `P N22`, `P O22` -- reads his own settings state; `J 77` and `P M9` carry a delete half the delete key still refuses |
-| a self-only reversible toggle | 26 | `J 76`, `M M24`, `M M35`, `M M36`, `M M41`, `M M50`, `M C52`, `N 78`, `N 117`, `N 140`, `P C7`, `P M10`, `P N4`, `P N5`, `P N6`, `P N7`, `P N8`, `P N10`, `P N11`, `P N15`, `P N16`, `P N17`, `P N18`, `P N20`, `P N23`, `P N24` -- changes only what he sees or receives |
-| a toggle that changes what OTHER members see of him or can do toward him | 36 | `J 74`, `J 75`, `M M37`, `M M42`, `M M46`, `M C73`, `M C88`, `M C89`, `N 67` to `N 75`, `N 77`, `N 115`, `N 116`, `N 137`, `N 138`, `N 139`, `N 142`, `N 159`, `N 170`, `P B10`, `P D7`, `P E8`, `P M8`, `P N19`, `P N21`, `P N26`, `P O4`, `P O6-O20`, `P O21` |
+| a self-only reversible toggle | 25 | `J 76`, `M M24`, `M M35`, `M M36`, `M M41`, `M M50`, `N 78`, `N 117`, `N 140`, `P C7`, `P M10`, `P N4`, `P N5`, `P N6`, `P N7`, `P N8`, `P N10`, `P N11`, `P N15`, `P N16`, `P N17`, `P N18`, `P N20`, `P N23`, `P N24` -- changes only what he sees or receives |
+| a toggle that changes what OTHER members see of him or can do toward him | 37 | `J 74`, `J 75`, `M M37`, `M M42`, `M M46`, `M C52`, `M C73`, `M C88`, `M C89`, `N 67` to `N 75`, `N 77`, `N 115`, `N 116`, `N 137`, `N 138`, `N 139`, `N 142`, `N 159`, `N 170`, `P B10`, `P D7`, `P E8`, `P M8`, `P N19`, `P N21`, `P N26`, `P O4`, `P O6-O20`, `P O21` |
 
 **Two flags the table cannot carry.** Seven of the self-only rows are CREDENTIAL
 or recovery controls -- `P N4`, `P N5`, `P N6`, `P N7`, `P N8`, `P N10`,
@@ -637,6 +637,12 @@ IN PROGRESS.
   `tests/test_triage_instrument.py` 4 (`EXPECTED_NOW` and the frozen-map join),
   `tests/test_pointer_graph_guard.py` 2 (the 30 moved pointers). No wall-clock
   budget test refused, so none needed a lone re-run.
+* **Run 2, on `e53bfac`: REFUSED on the same nine and nothing else -- 9 failed,
+  2162 passed in 273s** over 45 test files; the one file more is the
+  register-number guard `_audit/INSTRUMENTS.md` pulls in, green. Run 3 gates
+  the commit carrying this section, and its result is in the lane's final
+  report, because a document cannot record the gate run on the commit that
+  contains it.
 * **Beyond the gate's selection**, 20 census-adjacent test files the lane chose
   by hand: 338 passed, 1 failed -- `tests/test_gap_rows_on_refused_addresses.py`,
   `EXPECTED_GAP_ROWS` 4 to 55, section 6.
