@@ -228,6 +228,19 @@ NOT_A_CORRECTION: dict[tuple[str, str], str] = {
         "while leaving the record unmarked, which would need its own "
         "CORRECTS: / CORRECTED BY: pair."
     ),
+    # 2026-09-24, lane S at its integration. THE WHO RULE'S BLOCKER CITES THE
+    # DOCTRINE; it does not correct it -- read, not inferred from the names.
+    ("network.md", "2026-09-05-lead-rulings-round-two.md"): (
+        "CITATION AS A BLOCKER, NOT A CORRECTION. Rows 79, 172 and 194 now "
+        "name their blocker as the name-free shaper doctrine and cite this "
+        "document for it (*'this server does not publish names'*), pending "
+        "the operator's question on returning names at runtime. The matched "
+        "word on row 79 is `mistake`, inside that row's KEPT prior cell -- "
+        "the tool docstring it quotes, *'by a caller or by a mistake'*. The "
+        "rows rest on the document; none of them says it is wrong. **WHAT "
+        "WOULD MAKE THIS ENTRY WRONG:** a network row asserting the doctrine "
+        "withdrawn or mistaken while leaving the document unmarked."
+    ),
 
     # 2026-09-21, the FOUR-LOOSE-ROWS wave. THREE OF THESE FOUR ARE ROWS OF
     # ONE CHRONOLOGY TABLE, and the reason is one reason told three times
