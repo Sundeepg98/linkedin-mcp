@@ -42,15 +42,17 @@ about a sensitivity basis for `/in/me/`). None of the remaining nine sits under
     N 90    LEFT REFUSED     the same press; no facet on record
     N 91    LEFT REFUSED     the same press; no facet on record
     N 92    LEFT REFUSED     the same press; no facet on record
-    N 133   NEEDS-CAPTURE    opening a pill is ALREADY permitted; what it opens is uncaptured;
-                             applying a filter is a view switch no sanctioned press reaches
-    M C29   NEEDS-CAPTURE    its control is in no capture (its state is); its only reachable
-                             host is the feed; choosing an order is a view switch no
-                             sanctioned press reaches
+    N 133   NEEDS-CAPTURE    opening a pill is ALREADY permitted; what it opens is uncaptured,
+                             and may itself carry the payload; applying a filter is a view
+                             switch no sanctioned press reaches
+    M C29   LEFT REFUSED     measured live: no comment-sort control on the feed's first render
+                             and no per-post structure there; the permalink is unaddressable
+                             (C42); choosing an order is a view switch no sanctioned press
+                             reaches (M C29 was NEEDS-CAPTURE until the capture came back)
 
     permitted and built    0
-    NEEDS-CAPTURE          2
-    left refused           7
+    NEEDS-CAPTURE          1
+    left refused           8
                           --
                            9
 
@@ -69,8 +71,9 @@ seven named pills on one surface, matched by accessible name, which condition
 permissions, and section 7 files the second as one ruling request.
 
 **No reader was built.** A reader needs a press that can be taken or a DOM
-that has been recorded, and no row here has both: the seven have no press, and
-the two have no capture of the thing a reader would read.
+that has been recorded, and no row here has both: the seven have no press;
+M C29's payload needs a press no ruling reaches, on a host where nothing
+structural scopes a post; and what N 133's pill opens has never been captured.
 
 **The order's premise held for one row of the nine** -- section 2.
 
@@ -80,9 +83,9 @@ and no pin counts gates: `check_read_addresses.py` now prints PRESS 9 and
 RULING 12 (was 12 and 9), and `b3_blocked_on_nothing` stays 5.
 
 **One cross-lane finding outweighs everything above** -- section 6.1: the
-press P O3 and N 134 rest on may have opened the header navigation menu, not
-the analytics panel. It was sent to the live readers wave, which found the same
-independently and is settling it with a zero-press live reading.
+press P O3 and N 134 rest on pressed index 0, and in the page's own order index
+0 is the header's account menu, not the analytics panel -- derived here from
+two captures, then measured live by the readers wave's zero-press reading.
 
 ---
 
@@ -236,13 +239,24 @@ permission it needs after that.
 **Verdict: NEEDS-CAPTURE**, gate stays PRESS, the address table's note and the
 census cell revised to say all of the above.
 
+**THE CAPTURE QUESTION, PRECISELY -- and why it is not M C29's.** Does the
+popover a pill opens ITSELF show the viewer breakdown -- per-option counts, for
+instance? If it does, the opening press the gate already permits is the whole
+route, behind a name-free shaper, and no view switch is needed. If it only
+offers options to apply, the row waits on section 7. That is a question a
+capture can answer under today's rulings, which is what keeps this row
+NEEDS-CAPTURE while M C29, whose payload is an ORDER and so can only exist
+after a switch, is not.
+
 ---
 
 ## 5. M C29 -- SORT COMMENTS (MOST RELEVANT / MOST RECENT)
 
 * **Its control is in no capture; its STATE is.** No rendered comment-sort
-  control appears in any of the 25 raw captures or in any tracked fixture:
-  `Most recent` / `Most relevant` occur only as the profile-views viewer tabs.
+  control appears in any of the 25 raw captures or in any tracked fixture: as
+  CONTROLS, `Most recent` / `Most relevant` occur only as the profile-views
+  viewer tabs, and the one other occurrence -- `Most recent`, once, on the
+  badges capture -- sits inside a paragraph of prose, not in any control.
   But the company-root capture's server-driven payload carries **380
   `commentSortOrder`-prefixed keys** -- five distinct keys, 76 occurrences
   each, every one followed by an opaque value -- beside 190
@@ -268,11 +282,24 @@ census cell revised to say all of the above.
   already may. Whether that discharges a row named for sorting is for whoever
   takes the row next to argue, not for this lane to assume.
 
-**Verdict: NEEDS-CAPTURE**, gate stays PRESS. The shut-state half of the
-capture is already in flight at zero extra loads: the live readers wave
-agreed to count `sort` and `comments` terms, by structure and never by label,
-on the `/feed/` load it was taking anyway (its deliverable,
-`_audit/2026-09-23-readers-four-rows.md` section 2.2).
+**THE SHUT-STATE CAPTURE WAS TAKEN, AT ZERO EXTRA LOADS, AND IT SETTLES THE
+ROW.** The live readers wave counted `sort` and `comments` terms, by
+structure and never by label, on the `/feed/` load it was taking anyway
+(2026-09-23, about 18:58, first render, nothing pressed). Its structural
+record was read here directly rather than relayed: 47 `[aria-expanded]` nodes
+in the page's own order; exactly one classifies `sort`, at index 2, a
+`div[role=button]` in `<main>` that comes before the first post's control
+menu at index 4 -- the FEED-level sort, the `FeedSortOrder` of the first
+bullet, not a comment sort; none classifies as comments; and the page counts
+0 item containers and 0 articles, so nothing structural scopes a comment
+section to its post. The wave's own write-up lives on its branch, not this
+one.
+
+**Verdict: LEFT REFUSED**, gate stays PRESS. No capture today's rulings allow
+could change it: the payload is an ORDER, so it exists only after a view
+switch (section 7), reached through a reveal press on the one host a reader
+can load, with no structural post to aim at; the host where comments render
+expanded is unaddressable (C42).
 
 ---
 
@@ -290,13 +317,26 @@ witness moved `menus` -- what a dropdown menu opening looks like. **"Show more
 analytics" carries neither sanctioned attribute in that capture**, so it is in
 neither node set a caller can name.
 
-**Evidence class: DERIVED** -- a capture one day older than the fire, plus
-the probe's source -- not measured on the fire. **Sent to the live readers
-wave**, whose lead had reached the same conclusion independently from the
-2026-09-05 controls census and is taking the zero-press reading that settles
-it (the `[aria-expanded]` node list in document order, landmark ancestry, tag
-and role; never a label). **P O3 and N 134 are that wave's rows and are not
-edited here.** If the reading holds, two things outside this lane follow:
+**Evidence class, as first written: DERIVED** -- a capture one day older than
+the fire, plus the probe's source -- not measured on the fire. **Sent to the
+live readers wave**, whose lead had reached the same conclusion independently
+from the 2026-09-05 controls census and took the zero-press reading.
+
+**MEASURED LIVE SINCE, and its record was read here directly.** On today's
+`/analytics/profile-views/`, the page's own query of `[aria-expanded]` gives,
+in order: 0 `nav_me` (the header's account menu), 1 `nav_for_business`, 2 the
+info button, 3 `time_range`, 4 `interesting_viewers`, 5 `company_filter`, 6 and
+7 the right-rail footer -- the order both captures show. On `/feed/`, 0 and 1
+are the same two header buttons.
+
+**ONE CAVEAT, CARRIED RATHER THAN SMOOTHED.** Playwright's locator counts 9
+nodes there where the page's own query counts 8 -- one node sits where the
+query cannot see it, most likely a shadow root -- and the live record marks
+the two orders as not proven equal. So Playwright's index 0 is the account
+menu only if that extra node does not come first. **Either way it is not the
+analytics panel**: "Show more analytics" is in neither node set.
+
+**P O3 and N 134 are that wave's rows and are not edited here.** If the reading holds, two things outside this lane follow:
 the address table's PRESS-PERMITTED gate on both rows, and
 `census_completion.PRESS_BLOCKED_NAMED`, which lists both as a session and
 nothing else. The cleanup wave owns the second; neither is touched here.
@@ -374,11 +414,11 @@ basis question the order excluded.
   no child that could.
 * **Did not change `press.py`** -- section 1 says why -- **nor build a
   reader.**
-* **Did not build an open-moment structural instrument**, although N 133's
-  capture wants one (`disclose` exposes only the witness counts at the open
-  moment, and those name the container kind, not the controls inside it).
-  Building it before section 7 is ruled would be building ahead of the
-  decision it serves.
+* **Did not build an open-moment reading into `press.py`.** N 133's question
+  -- does the popover itself carry per-option counts -- is TEXT, and a
+  closed-set witness counts elements, so widening the witness could not answer
+  it. A raw capture taken while the popover is open does, and that is the live
+  lane's instrument (see the Live queue), not a change to the gate.
 * **Did not edit** `linkedin_server/readonly.py` (L1), `writes.py` (L4), the
   jobs modules (L3), `scripts/census_completion.py`,
   `scripts/check_read_addresses.py`, `scripts/triage_read_gap_rows.py`
@@ -426,7 +466,9 @@ disposable there.
     the pre-commit identity gate             0 hits on every commit
     scripts/impact_gate.py --against b0d3ab8 PASS over 48 files (2157 tests); NOT CHECKED 167 of
                                              215 test files, said by the gate itself
-    one cold verification pass               briefed on 9facb53; outcome in Entry 9
+    one cold verification pass               on 9facb53: SUPPORTED 14, NOT SUPPORTED 0,
+                                             PARTLY 2, UNCHECKED 0 -- both PARTLY items
+                                             acted on (Entry 9)
 
 **NOT RUN, and why:**
 
@@ -611,28 +653,72 @@ said a tab switch re-renders the viewer list "from the server". Empty
 tabpanels show the list sits outside them; they do not show where a re-render
 takes its data.
 
+### Entry 9 -- a second capture that agrees, a live reading that settles M C29, and the cold verification
+
+**A SECOND CAPTURE FILE REPRODUCES SECTION 4 EXACTLY.** The same
+structure-only reading over `_state/cap-profile-views-captions.html`, written
+at 16:03 the same day, six hours after the first: the same 8
+`[aria-expanded]` nodes in the same order -- the header's two navigation
+buttons at 0 and 1, outside `<main>` -- "Show more analytics" a plain button
+in neither node set, the same 5 labels with the last two inside the closed
+dialog, one form, and the same two empty tabpanels.
+
+**THE LIVE READERS WAVE'S ZERO-PRESS READING, read from its record on disk**
+(structure only; its write-up is on its own branch): on
+`/analytics/profile-views/` the page's own order is `nav_me`,
+`nav_for_business`, the info button, `time_range`, `interesting_viewers`,
+`company_filter`, and two footer nodes, with Playwright counting one node more
+than the page's own query (section 6.1 carries that caveat); on `/feed/`, one
+`sort` node (the feed-level sort) and no comments node among 47, and 0 item
+containers and 0 articles. **M C29 moves NEEDS-CAPTURE to LEFT REFUSED on it**
+-- section 5 says why no permitted capture could now move it back -- and its
+table note and census cell say so. N 133 stays NEEDS-CAPTURE, with its
+capture question sharpened in section 4.
+
+**THE COLD VERIFIER** -- one implementer child, briefed on `9facb53`,
+read-only, offline, no browser, re-deriving every figure with its own parser
+and scripts: **SUPPORTED 14, NOT SUPPORTED 0, PARTLY 2, UNCHECKED 0.**
+
+* Supported, by independent re-derivation: the denominator; every structural
+  fact of section 4 (element count cross-checked against a raw tag count, 986
+  and 986); the reader's `<label>` fallback; the probe's index 0 and
+  `disclose`'s page-wide locator; the Escape closure; the facet table, to the
+  count; C42; the table diff (exactly 9 rows, only gate and note) and the
+  checker GREEN on a clean snapshot of the commit (PRESS 9 / RULING 12 against
+  12 / 9 at the base); the census diff (9 lines, pure append, state
+  unchanged); the marker pair; no package change; the first line; path and
+  identity hygiene over all 715 added lines; the messaging-pill precedent.
+* **PARTLY, and acted on:** (1) the `sortOrder` figure of section 5 -- the
+  verifier measured 194, as Entry 6 had already recorded and `30ed210` had
+  already revised; (2) `Most recent` also occurs once on the badges capture,
+  which this document had not seen: it is inside a paragraph of prose, not a
+  control, and section 5 now says so; (3) section 5 cited the readers wave's
+  write-up by a path that does not exist on this branch -- the citation is
+  now a description, and the facts it carried are read from that wave's
+  record directly.
+
 ---
 
 ## Live queue
 
-**No row of this lane is ready to fire.** Nothing below is a reader. Each line
-is a CAPTURE that a NEEDS-CAPTURE row waits on, in the order's own fields --
-row, tool, page address, expected loads, press -- with the condition that
-makes the load worth taking.
+**No row of this lane is ready to fire.** Nothing below is a reader. The one
+line is a CAPTURE that the one NEEDS-CAPTURE row waits on, in the order's own
+fields -- row, tool, page address, expected loads, press -- with the question
+that makes the load worth taking. (M C29's capture was taken by the live
+readers wave at zero extra loads and closed that row: section 5.)
 
-    M C29 | the live readers wave's structural probe, ALREADY IN FLIGHT (its
-          |   deliverable 2026-09-23-readers-four-rows, section 2.2)
-          | /feed/
-          | 0 extra loads -- it rides the load that wave is taking anyway
-          | none: a shut-state reading of [aria-expanded] / [aria-haspopup]
-          |   membership with the terms sort and comments, never a label
-
-    N 133 | press.disclose with its shipped witness -- ONLY AFTER section 7 is
-          |   ruled YES; before that, the load buys nothing a ruling needs
+    N 133 | a capture of what the Company pill opens, taken WHILE it is open.
+          |   The shipped press.disclose closes before a caller can read the
+          |   open state, so this is a probe's job: it must take the same
+          |   counters before and after, verify the closure as disclose does,
+          |   and record structure only
           | /analytics/profile-views/
           | 1 load
-          | one [aria-expanded] press on the Company pill, which the shipped
-          |   gate ALREADY PERMITS, at the index the zero-press node-order
-          |   reading gives (never index 0); the witness names the popover's
-          |   container kind, and the controls inside it need an open-moment
-          |   reading no shipped instrument takes
+          | one [aria-expanded] press on the Company pill -- a press the shipped
+          |   gate ALREADY PERMITS -- at in-page index 5 today (company_filter in
+          |   the live readers wave's reading), never index 0; re-read the order
+          |   first, because Playwright counts one node more than the page does
+          | THE QUESTION: does the popover itself show per-option counts? If
+          |   yes, the permitted press is the whole route, behind a name-free
+          |   shaper; if it only offers options to apply, the row waits on the
+          |   view-switch ruling of section 7
