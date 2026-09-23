@@ -3243,7 +3243,7 @@ async def _read_follow_state(page: Any) -> tuple[str, str]:
     """The follow direction, off the control on the page already open."""
     control = await dom.read_follow_control(page)
     verdict = shape.follow_state(
-        control.get("label"), count=int(control.get("count") or 0)
+        control.get("label"), count=coerce.as_count(control.get("count"))
     )
     return str(verdict.get("state") or UNKNOWN), str(verdict.get("why") or "")
 
@@ -3466,7 +3466,7 @@ async def _read_apply_route(page: Any, target: str) -> tuple[str, str]:
     verdict = shape.apply_route(
         control.get("label"),
         control.get("href"),
-        count=int(control.get("count") or 0),
+        count=coerce.as_count(control.get("count")),
         job_id=target,
         link_target=control.get("link_target"),
     )
@@ -3739,8 +3739,8 @@ async def _read_feed_composer(
 ) -> tuple[dict[str, Any], str, str]:
     """Is there a composer on this page, and is its editor rendered?"""
     reading = await dom.read_composer_surface(page)
-    controls = int(reading.get("composer_controls") or 0)
-    editors = int(reading.get("editors") or 0)
+    controls = coerce.as_count(reading.get("composer_controls"))
+    editors = coerce.as_count(reading.get("editors"))
     facts = dict(reading)
     if controls < 1:
         return (
@@ -3818,8 +3818,8 @@ async def _read_item_permalink(
     """
     reading = await dom.read_reaction_surface(page)
     facts = dict(reading)
-    controls = int(reading.get("controls") or 0)
-    off_state = int(reading.get("off_state") or 0)
+    controls = coerce.as_count(reading.get("controls"))
+    off_state = coerce.as_count(reading.get("off_state"))
 
     if controls != 1:
         return (
@@ -3897,15 +3897,15 @@ async def _read_item_comment_box(
     print a page's name inventory.
     """
     reading = await dom.read_comment_surface(page)
-    editors = int(reading.get("editors") or 0)
+    editors = coerce.as_count(reading.get("editors"))
     names = dict(reading.get("names") or {})
-    affordances = int(names.get(dom.COMMENT_CONTROL_NAME, 0))
+    affordances = coerce.as_count(names.get(dom.COMMENT_CONTROL_NAME, 0))
     facts: dict[str, Any] = {
         "editors": editors,
         "comment_affordances": affordances,
-        "controls_read": int(reading.get("controls_read") or 0),
-        "unnamed_controls": int(reading.get("unnamed") or 0),
-        "menus": int(reading.get("menus") or 0),
+        "controls_read": coerce.as_count(reading.get("controls_read")),
+        "unnamed_controls": coerce.as_count(reading.get("unnamed")),
+        "menus": coerce.as_count(reading.get("menus")),
     }
 
     if reading.get("error"):
@@ -3950,7 +3950,8 @@ async def _read_profile_editors(
     """Which profile editors this page addresses by url."""
     reading = await dom.read_profile_editor_surface(page)
     editors = reading.get("editors") or {}
-    found = sorted(key for key, count in editors.items() if int(count or 0) > 0)
+    found = sorted(key for key, count in editors.items()
+                   if coerce.as_count(count) > 0)
     facts = dict(reading)
     if not found:
         return (
@@ -4155,7 +4156,7 @@ def aim_invitation(reading: dict[str, Any]) -> tuple[str, str, Optional[int]]:
     confirmation renumbers everything on it. Nothing acts on it today.
     """
     matches = reading.get("matches")
-    controls = int(reading.get("controls") or 0)
+    controls = coerce.as_count(reading.get("controls"))
     if matches is None:
         return (
             INVITE_UNASKED,
@@ -4163,7 +4164,20 @@ def aim_invitation(reading: dict[str, Any]) -> tuple[str, str, Optional[int]]:
             "given, so none of them was picked out. A count is not an aim.",
             None,
         )
-    matches = int(matches)
+    # A MALFORMED COUNT REFUSES, AND SAYS WHAT KIND OF THING IT WAS. ``int()``
+    # here quoted the value it refused inside a ValueError, and this reading is
+    # ``page.evaluate`` output -- the page's own script chose it. Treating it
+    # as zero would print "a count of zero" about a reading that was not one.
+    count = coerce.as_int(matches)
+    if count is None:
+        return (
+            INVITE_AMBIGUOUS,
+            f"the reader's match count for {controls} invitation control(s) "
+            f"was a {type(matches).__name__}, not a number, so nothing can be "
+            "aimed; the value is not repeated here.",
+            None,
+        )
+    matches = count
     if matches < 1:
         return (
             INVITE_NO_MATCH,
@@ -4183,7 +4197,7 @@ def aim_invitation(reading: dict[str, Any]) -> tuple[str, str, Optional[int]]:
             "merely drawn first. Narrow the word until exactly one matches.",
             None,
         )
-    position = reading.get("index")
+    position = coerce.as_int(reading.get("index"))
     if position is None:
         # UNREACHABLE FROM THE SCRIPT, and kept because a check that cannot
         # fail certifies nothing while THIS one can: it fires if the reader
@@ -4193,12 +4207,13 @@ def aim_invitation(reading: dict[str, Any]) -> tuple[str, str, Optional[int]]:
         # guess at 0.
         return (
             INVITE_AMBIGUOUS,
-            "exactly one control matched and the reader returned no position "
-            "for it. That combination should not occur, and an aim cannot be "
-            "invented from a missing index, so this refuses.",
+            "exactly one control matched and the reader returned no usable "
+            "position for it -- none at all, or something that is not a "
+            "number, which is not repeated here. That combination should not "
+            "occur, and an aim cannot be invented from a missing index, so "
+            "this refuses.",
             None,
         )
-    position = int(position)
     return (
         INVITE_AIMED,
         f"exactly 1 of the {controls} invitation control(s) matches, at "
@@ -4226,7 +4241,7 @@ async def _read_profile_invitations(
     reaches the confirm block and nothing else.
     """
     reading = await dom.read_invitation_surface(page, target or None)
-    controls = int(reading.get("controls") or 0)
+    controls = coerce.as_count(reading.get("controls"))
     # THE LABEL KEY IS DROPPED BEFORE THE FACTS ARE BUILT, not merely left
     # unset. This reader is never asked to reveal one, so the key is always
     # None here -- and popping it means a future edit that flips the default
@@ -4276,7 +4291,7 @@ async def _read_messaging_badge(
     """The messaging badge, read WITHOUT opening messaging."""
     reading = await dom.read_messaging_badge(page)
     facts = dict(reading)
-    if int(reading.get("links") or 0) < 1:
+    if coerce.as_count(reading.get("links")) < 1:
         return (
             facts,
             UNKNOWN,
@@ -5183,11 +5198,11 @@ async def _name_the_invitation_recipient(
     # THE SAME RAIL, STILL AIMING AT ONE. Either half failing means the page
     # is not the one the observation describes, and a name read off some other
     # page is a name nobody's needle selected.
-    if int(reading.get("controls") or 0) != int(
-        (observation.facts or {}).get("controls") or -1
+    if coerce.as_count(reading.get("controls")) != (
+        coerce.as_count((observation.facts or {}).get("controls")) or -1
     ):
         return block
-    if int(reading.get("matches") or 0) != 1:
+    if coerce.as_count(reading.get("matches")) != 1:
         return block
     label = reading.get("label")
     if not isinstance(label, str) or not label:
@@ -7935,10 +7950,11 @@ async def _comment_submit_gate(
             f"known about what appeared: {reading['error']}"
         )
         return out
-    if int(reading.get("editors") or 0) != 1:
+    editors = coerce.as_count(reading.get("editors"))
+    if editors != 1:
         out["refused_condition"] = "1_editor_absent"
         out["why"] = (
-            f"{reading.get('editors')} comment editor(s) after the fill, "
+            f"{editors} comment editor(s) after the fill, "
             "where exactly one is the shape measured. Zero means the page "
             "changed under the gate, not that the comment is ready."
         )
@@ -7967,7 +7983,7 @@ async def _comment_submit_gate(
     # below, menu items or not, because those branches do not depend on this
     # reader's blind spot.
     if not arrived:
-        menu_items = int(reading.get("menu_items") or 0)
+        menu_items = coerce.as_count(reading.get("menu_items"))
         if menu_items > 0:
             out["refused_condition"] = "2b_menu_items_present"
             out["why"] = (
@@ -8077,16 +8093,17 @@ async def _publish_submit_gate(page: Any) -> dict[str, Any]:
             f"known about whether it is ready to publish: {reading['error']}"
         )
         return out
-    if int(reading.get("editors") or 0) != 1:
+    editors = coerce.as_count(reading.get("editors"))
+    if editors != 1:
         out["refused_condition"] = "1_editor_absent"
         out["why"] = (
-            f"{reading.get('editors')} post editor(s) are on the page after "
+            f"{editors} post editor(s) are on the page after "
             "the fill, where exactly one is the shape this was measured on. "
             "Zero means the composer is gone, which is a page that changed "
             "under the gate rather than a composer declining to publish."
         )
         return out
-    submits = int(reading.get("submits") or 0)
+    submits = coerce.as_count(reading.get("submits"))
     if submits != 1:
         out["refused_condition"] = "2_no_submit_control"
         out["why"] = (
@@ -8167,7 +8184,8 @@ async def _typeahead_gate(page: Any, grant: WriteGrant) -> dict[str, Any]:
         out["why"] = (
             "the typeahead could not be read after the name was typed, so "
             "nothing is known about what it offered: "
-            f"{type(exc).__name__}: {exc}"
+            f"{type(exc).__name__} (its message is not repeated: a failed "
+            "read can render the selector that carries his needle)"
         )
         return out
 
@@ -8197,8 +8215,8 @@ async def _typeahead_gate(page: Any, grant: WriteGrant) -> dict[str, Any]:
         out["why"] = str(reading["error"])
         return out
 
-    total = int(reading.get("total") or 0)
-    matches = int(reading.get("matches") or 0)
+    total = coerce.as_count(reading.get("total"))
+    matches = coerce.as_count(reading.get("matches"))
 
     # THE LISTBOX AND THE OPTIONS ARE ASKED ABOUT SEPARATELY, because "it never
     # opened" and "it opened empty" are different facts about LinkedIn and only
@@ -8409,8 +8427,11 @@ async def _recipient_gate(page: Any, grant: WriteGrant) -> dict[str, Any]:
         "matches": reading.get("matches"),
         "selectors_tried": list(dom.RECIPIENT_CHIP_SELECTORS),
     }
-    # COERCED THROUGH THE HELPER, AND THE TWIN GATE ABOVE IS NOT. They look
-    # identical and they are not the same hazard:
+    # COERCED THROUGH THE HELPER, AND SINCE THE LANE-L4 MERGE (2026-09-23) THE
+    # TWIN GATE ABOVE IS TOO -- though it was never the same hazard, and the
+    # reasoning that let it keep ``int()`` is kept here because it is still
+    # true. ``tests/test_no_int_on_a_page_value_in_writes.py`` now holds ONE
+    # rule for the whole file instead of a per-site argument:
     #
     # * ``_typeahead_gate`` reads ``dom.read_typeahead_options``, whose
     #   ``total`` and ``matches`` are ``await page.locator(...).count()`` --
@@ -8525,19 +8546,21 @@ async def _send_gate(page: Any) -> dict[str, Any]:
             f"nothing is known about whether it is ready: {reading['error']}"
         )
         return out
-    if int(reading.get("textboxes") or 0) != 1:
+    textboxes = coerce.as_count(reading.get("textboxes"))
+    if textboxes != 1:
         out["refused_condition"] = "1_body_absent"
         out["why"] = (
-            f"{reading.get('textboxes')} div[role=textbox] after the fill, "
+            f"{textboxes} div[role=textbox] after the fill, "
             "where exactly one is the shape measured. Zero means the composer "
             "is gone -- a page that changed under the gate, not a composer "
             "declining to send."
         )
         return out
-    if int(reading.get("controls") or 0) != 1:
+    send_controls = coerce.as_count(reading.get("controls"))
+    if send_controls != 1:
         out["refused_condition"] = "2_no_send_control"
         out["why"] = (
-            f"{reading.get('controls')} control(s) named "
+            f"{send_controls} control(s) named "
             f"{dom.MESSAGE_SEND_NAME!r} are drawn, where exactly one is "
             "required."
         )

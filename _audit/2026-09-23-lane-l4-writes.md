@@ -509,3 +509,54 @@ test (seventeen plants now). The R2 header cites `WRITE-CLASS-B`; `N 191` record
 page is admitted since the L1 merge while its attendee list is refused; `N 192` records that lane
 X's exclusion-basis table reads `N 156` B-LIFTED -- R9's root was the cut ruling (b) withdrew --
 while the census still files `N 156` and `N 158` EXCLUDED-RULED, which is the census owner's call.
+
+## 10. THE THREE FOLLOW-UPS THE ORDER NAMED, EACH WITH A TEST SHOWN FAILING FIRST
+
+### 10.1 (b) EVERY `int()` ON A READING IN `writes.py` -- 28 CALLS IN 14 FUNCTIONS, NOT TEN
+
+**SECTION 4.6'S LIST WAS SHORT, AND THE SCAN THAT FOUND IT IS NOW A TEST.** It named ten functions.
+An AST walk of `writes.py` at the merge found **28 `int()` calls in 14 functions**: the ten named,
+plus four gates the list had missed -- `_comment_submit_gate`, `_publish_submit_gate`,
+`_typeahead_gate` and `_send_gate`. By where each value comes from, which separates a live leak from
+a latent one:
+
+    PAGE-CONTROLLED (page.evaluate output)   5 functions   _read_item_comment_box,
+                                                           _comment_submit_gate (read_comment_surface);
+                                                           _read_profile_invitations, aim_invitation,
+                                                           _name_the_invitation_recipient
+                                                           (read_invitation_surface)
+    PLAYWRIGHT-TYPED (locator counts)        9 functions   the rest -- int() could not be handed
+                                                           text there today
+
+All 28 are now `coerce.as_count`, or `coerce.as_int` with an explicit refusal where a number that
+is not one must not read as zero:
+
+* `aim_invitation` -- a match count or a position that is not a number REFUSES (no aim), and the
+  refusal names the value's TYPE. `as_count` would have printed "a count of zero" about a reading
+  that was not one.
+* `_name_the_invitation_recipient` -- the re-read compares against `as_count(<preview's count>) or
+  -1`, keeping the original's `x or -1`: a preview that saw NO controls never compares equal to a
+  re-read that also sees none.
+* **FOUR `why`s RE-QUOTED THE RAW FIELD THEY HAD JUST COERCED** -- the comment and publish gates'
+  editor counts, the send gate's textbox and control counts -- and now print the coerced integer.
+* `_typeahead_gate`'s failed-read `why` rendered `str(exc)`; it now names the exception type only,
+  because a failed read can render the selector that carries his needle.
+* The comment above `_recipient_gate`'s coercion, which explained why its twin kept `int()`, now
+  says the twin converted too and keeps the reasoning.
+
+**SHOWN FAILING, then passing.** `tests/test_no_int_on_a_page_value_in_writes.py`: a structural
+scan (no `int()` call anywhere in `writes.py`; the allow-list is empty and a control shows the scan
+finds a planted call), and a drive of all fourteen functions over a reading whose counts are
+planted words. Against the unrepaired module: **17 failed, 1 passed** -- the scan listed all 28
+calls, each of the thirteen driven functions raised `ValueError: invalid literal for int() with
+base 10: '<the planted words>'`, and `aim_invitation` failed all three of its cases. After the
+repair: 18 passed, and the fourteen suites that pin these texts or drive these functions ran green
+together (686 passed, 1 xfailed).
+
+**NOT COVERED, AND NAMED:** a raw reading value interpolated into a `why` WITHOUT passing through
+`int()`. Still present in functions this repair touched: `_read_feed_composer` quotes two route
+counts, `_read_item_permalink` the control labels, `_read_messaging_badge` the badge label, and the
+comment, publish and send gates interpolate `reading['error']`, which several dom readers fill with
+`f"{type(exc).__name__}: {exc}"`. Those are page TEXT by design in some readers ("returns_text" in
+the reader-leak baseline) and a message rendering in others; either is a different repair from
+this one.
