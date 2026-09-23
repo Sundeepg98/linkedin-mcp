@@ -204,6 +204,8 @@ async def test_happy_path_copies_the_link_without_touching_the_os_clipboard():
         # positive control for the itemClickCloses test's zero.
         assert await _trigger_expanded(page) == "false"
         assert await _escape_keydowns(page) == 1
+        # AND THE ANSWER COUNTS IT: the page's own tally and the verdict agree.
+        assert verdict["escape_pressed"] is True, verdict
 
 
 async def test_a_menu_that_closes_itself_on_the_copy_press_is_sent_no_escape():
@@ -219,6 +221,7 @@ async def test_a_menu_that_closes_itself_on_the_copy_press_is_sent_no_escape():
         assert verdict["copied"] is True, verdict
         assert verdict["closure"].get("closed") is True, verdict
         assert await _escape_keydowns(page) == 0
+        assert verdict["escape_pressed"] is False, verdict
 
 
 async def test_a_copy_made_after_the_click_returns_is_still_captured():
@@ -353,6 +356,9 @@ async def test_a_refusal_after_the_menu_opened_says_when_it_did_not_close():
         )
         assert verdict.get("refused") == "not_his_post", verdict
         assert verdict["closure"].get("refused") == "not_restored", verdict
+        # The Escape WAS pressed -- the menu ignored it. Pressed is not closed.
+        assert verdict["escape_pressed"] is True, verdict
+        assert await _escape_keydowns(page) == 1
 
 
 # ---------------------------------------------------------------------------

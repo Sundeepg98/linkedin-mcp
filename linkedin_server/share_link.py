@@ -766,8 +766,14 @@ async def copy_own_post_link(
         # It stays inline rather than becoming a third drain point: there is
         # already exactly one page.keyboard.press(...) call site, so a drain
         # point would rename it without reducing the count that matters.
+        # EVERY PRESS IS COUNTED IN THE ANSWER: the two clicks always happen
+        # on this path, the Escape only when the menu is still open, so the
+        # answer says which -- a press count read off an envelope that
+        # cannot say it is a guess.
+        escape_pressed = False
         if await trigger.get_attribute("aria-expanded") == "true":
             await page.keyboard.press("Escape")
+            escape_pressed = True
         expanded_after = await trigger.get_attribute("aria-expanded")
 
         if refusal is not None:
@@ -779,6 +785,7 @@ async def copy_own_post_link(
                 "refused": refusal,
                 "why": refusal_why,
                 "closure": press.check_closure(expanded_before, expanded_after),
+                "escape_pressed": escape_pressed,
             }
 
         after = await read_counters()
@@ -806,5 +813,6 @@ async def copy_own_post_link(
         "gate": gate,
         "counters": counters,
         "closure": closure,
+        "escape_pressed": escape_pressed,
         "link": link,
     }

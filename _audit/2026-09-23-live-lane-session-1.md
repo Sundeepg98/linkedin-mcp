@@ -855,6 +855,20 @@ price is disowned. Census: `messaging-and-content.md` `C72` GAP ->
 COVERED-PROVEN, its prior readings kept beneath; its `read-addresses.tsv`
 line removed.
 
+### Entry 13 -- 00:43:12-00:43:50, the held rows read once more: 2 loads, 0 presses
+
+`--only badge,m43,m33`, ledger 26 -> 27: `new_since_last_visit` **1**, the
+third reading of 1 (22:14, 23:26, 00:43), so no `/messaging/` page was
+opened; `M M43`, `M M33` and `M M49` stay held on the badge rule. The
+notifications badge on the same page read 2, as at 23:26.
+
+`--only notifications`, ledger 27 -> 28, on `NOTIFICATIONS-UNREAD-SPEND`:
+10 rows (4 unread when read), **0 invitation-kind and 0 follow-kind** --
+the same answer as 22:15 over a list with two newer items. `N 20` and `N 45`
+stay FIRED, NOT SHOWN: a row this tool serves is proven by an item of its
+kind being in his list, and there was none either time. The cost delta was
+not measured this time (no badge reading before the load in this key).
+
 ---
 
 ## THE ROWS, ONE LINE EACH
