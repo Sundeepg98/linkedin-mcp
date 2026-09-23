@@ -290,3 +290,71 @@ from these edits (`G6` beside `G7`'s "false", `M33` two rows above `M35`'s
 `delivered_strict` 75 -> 76, `unfired` 22 -> 21, `b1_no_ruling` 7 -> 6, and
 `PINNED_B1_ROWS` -- `P G6` leaves its hold (it is no longer COVERED-UNFIRED).
 `check_read_addresses.py`: GREEN, 66 of 66, blocked on nothing 1 (`M M49`).
+
+**THE GATE ON THOSE EDITS** (`scripts/impact_gate.py --against c8fa6ea` at
+`1d470d2`, 22:26:38-22:31:45, not widened: 58 of 229 test files, 171 NOT
+CHECKED): **REFUSED, 2 failed, 2542 passed.** Both reds are `P G6`'s
+promotion, and they are two different kinds of pin:
+
+1. `test_a_covered_row_names_the_artifact_that_covers_it.py`, the `G6` entry,
+   pinned at COVERED-UNFIRED by lane L1 with the instruction *"A fire that
+   promotes or demotes it must move this pin in the same commit."* That is a
+   per-row pin only this lane touches, so it is MOVED -- to COVERED-PROVEN,
+   with a comment pointing at the evidence -- in the next commit. 15 passed.
+2. `tests/test_ruling_holds.py::test_bucket_one_is_derived_and_sits_on_its_pins`:
+   `PINNED_B1_ROWS` in `scripts/census_completion.py`, an AGGREGATE pin.
+   **Left red by design**, per the brief ("Do NOT re-pin"): the orchestrator
+   re-pins it at merge, with the three figures listed above.
+
+### Entry 3 -- 22:28:38-22:29:31, the profile-views page with each pill open: 1 load, 3 presses
+
+`--only pv_capture`, ledger 4 -> 5. Walled False, challenge terms 0. The page
+is loaded once and each filter pill is opened through the SHIPPED gate --
+`press.disclose`, main-scoped, priced by the server's own
+`_profile_views_press_counters` -- and the page is snapshotted inside the
+counter reader's second call, the gate's open moment, after a 1.5-second
+settle (the popover is built after the click). Counters readable before any
+press: `headline_viewers`, `invitations`, `notifications_unread`.
+
+    pill  permitted  refused       disclosed  appeared       new_lines
+    0     True       -             True       show_results   32
+    1     True       -             True       show_results   22
+    2     False      not_restored  True       show_results   37
+
+**PILL 2 WAS REFUSED AFTER ITS PRESS, AND THE GATE WAS RIGHT.** Condition 4:
+its `aria-expanded` read `'false'` before and `'true'` after the gate's
+Escape -- the popover stayed open. At 19:10 today the same three pills were
+all permitted and closed. The difference is this probe's settle: pill 2 is
+the Company filter, whose popover holds a text input, and after 1.5 seconds
+focus is plausibly inside it, where Escape does not close the popover
+(DERIVED from the structure below, not measured by a second press). So **the
+settle was not neutral** -- a lesson for the build, not a gate defect: a
+view-switch press must close its popover by the popover's own controls, never
+by Escape. Nothing was applied (no "Show results" was pressed) and the
+popover lived only in this lane's own tab, which the run closed. The harness
+stopped on the refusal, as the rule says.
+
+**WHAT THE THREE OPEN POPOVERS DRAW** (read offline from the captures, in a
+local headless Chromium with every request aborted; labels printed only as
+closed-vocabulary TERMS or lengths):
+
+    pill 0  time range       4 div[role=radio] {aria-label, aria-checked}, each with a hidden
+                             input[type=radio] + label[for]; ONE checked; then
+                             button[type=button] "reset" (enabled), "show results"
+    pill 1  interesting      2 div[role=checkbox] {aria-label, aria-checked}, none checked --
+            viewers          LinkedIn's categories "works at a company you follow" and
+                             "verified"; "reset" DISABLED, "show results"
+    pill 2  company          a typeahead input (aria-autocomplete), 5 div[role=checkbox]
+                             options (other people's employers: lengths only, never read),
+                             "reset" disabled, "show results"
+    all     container        a div with only hashed class names; no role, no aria
+
+    closed page, main:  "all filters", "reset", "show more analytics" -- each a plain
+                        button[type=button] with attributes {class, componentkey, type}
+                        only: no aria-expanded, no aria-haspopup, no aria-controls, not in
+                        a dialog; the same six div ancestors up to a section
+
+So the time-range pill's option names ARE in the shipped vocabulary; the
+interesting-viewers pill's two categories are NOT (added for the build), and
+the popover's own "reset" and "show results" are the controls a view switch
+presses.

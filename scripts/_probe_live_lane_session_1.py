@@ -87,7 +87,18 @@ CEILING = 40
 MIN_GAP_S = 20.0
 
 #: The keys, in the order they may run. Closed.
-KEYS: tuple[str, ...] = ("per_post", "badge", "m43", "m33", "notifications", "activity")
+KEYS: tuple[str, ...] = (
+    "per_post", "badge", "m43", "m33", "notifications", "activity", "pv_capture",
+)
+
+#: ``pv_capture``: the profile-views page, and each filter pill OPEN. The pills
+#: are opened through the shipped gate (``press.disclose``, priced by the
+#: server's own counter reader); the page is snapshotted at the gate's second
+#: counter read, which is the open moment -- after the click, before the
+#: Escape. A settle of ``OPEN_SETTLE_S`` is taken first, because the popover is
+#: built after the click (it is absent from every closed capture).
+PROFILE_VIEWS_URL = "https://www.linkedin.com/analytics/profile-views/"
+OPEN_SETTLE_S = 1.5
 
 #: The keys that open /messaging/. Each needs ``badge`` earlier in the run.
 MESSAGING_KEYS = frozenset({"m43", "m33"})
@@ -99,6 +110,7 @@ M33_FILTER = "starred"
 #: The most loads one key may spend, for the pre-check before it starts.
 MAX_LOADS: dict[str, int] = {
     "per_post": 1, "badge": 1, "m43": 1, "m33": 1, "notifications": 1, "activity": 2,
+    "pv_capture": 1,
 }
 
 #: String fields whose values are this package's own closed words.
@@ -422,6 +434,79 @@ async def _call(key: str) -> dict[str, Any]:
     raise ValueError("no tool for key " + key)
 
 
+async def _pill_indices(page: Any) -> list[int]:
+    """The filter pills, chosen as the shipped opener chooses them: main-scoped
+    ``[aria-expanded]`` controls that are ``role=button``, visible, and wrap a
+    label. Mirrors ``server._open_profile_views_filter_menus``; STRUCTURE only."""
+    candidates = page.locator("main").locator("[aria-expanded]")
+    found: list[int] = []
+    for position in range(int(await candidates.count())):
+        control = candidates.nth(position)
+        if (await control.get_attribute("role") or "") != "button":
+            continue
+        if not await control.is_visible():
+            continue
+        if not int(await control.locator("label").count()):
+            continue
+        found.append(position)
+    return found
+
+
+async def fire_pv_capture(capture: bool) -> dict[str, Any]:
+    """Load the profile-views page once; open each pill through the gate."""
+    from linkedin_server import press
+
+    result: dict[str, Any] = {"menus": []}
+    async with BROWSER.session() as page:
+        await BROWSER.goto(page, PROFILE_VIEWS_URL)
+        await _health("pv_capture")
+        if capture:
+            await _capture("pv-closed")
+        counter_reader = await server._profile_views_press_counters(page)
+        first = await counter_reader()
+        say("    counters readable before any press: " + shape_of(
+            {k: v is not None for k, v in first.items()}))
+        if not first or any(v is None for v in first.values()):
+            say("    A COUNTER DOES NOT READ. NOTHING PRESSED.")
+            result["stopped"] = "counters_unreadable_before_any_press"
+            return result
+        indices = await _pill_indices(page)
+        say("    pills found: " + str(len(indices)))
+        for ordinal in range(min(len(await _pill_indices(page)), server.PROFILE_VIEWS_MAX_PILLS)):
+            indices = await _pill_indices(page)
+            calls = {"n": 0}
+            snapshot: dict[str, str] = {}
+
+            async def capturing_counters() -> dict[str, Any]:
+                calls["n"] += 1
+                values = await counter_reader()
+                if calls["n"] == 2 and capture:
+                    await asyncio.sleep(OPEN_SETTLE_S)
+                    snapshot["html"] = await page.content()
+                return values
+
+            verdict = await press.disclose(
+                page, shape="[aria-expanded]", index=indices[ordinal],
+                read_counters=capturing_counters,
+                reading=server.PROFILE_VIEWS_MENU_READING, scope="main",
+            )
+            summary = server._filter_menu_summary(ordinal, verdict)
+            result["menus"].append({"summary": summary, "verdict": verdict})
+            # EVERY STRING IN A SUMMARY IS A PACKAGE LITERAL -- see
+            # server._filter_menu_summary -- so it is printed whole.
+            say("    pill " + str(ordinal) + ": " + json.dumps(summary, sort_keys=True))
+            if "html" in snapshot:
+                STATE.mkdir(parents=True, exist_ok=True)
+                (STATE / ("pv-open-pill-" + str(ordinal) + ".html")).write_text(
+                    snapshot["html"], encoding="utf-8")
+                say("    open-moment capture written under _state/ (gitignored)")
+            if not summary["permitted"]:
+                result["stopped"] = "pill " + str(ordinal) + " was not permitted"
+                say("    NOT PERMITTED. No further pill pressed.")
+                break
+    return result
+
+
 async def fire(key: str, capture: bool, carried: dict[str, Any]) -> dict[str, Any]:
     """Fire one key: pre-check, call, health, readings, capture, raw."""
     say("\n" + "=" * 70)
@@ -431,6 +516,13 @@ async def fire(key: str, capture: bool, carried: dict[str, Any]) -> dict[str, An
     if refusal:
         raise _Anomaly("ledger_refused_before_start", key)
     _CURRENT["key"] = key
+    if key == "pv_capture":
+        result = await fire_pv_capture(capture)
+        _write_raw(key, result)
+        say("    RAW written under _state/ (gitignored)")
+        if result.get("stopped"):
+            raise _Anomaly("pv_capture_stopped", key)
+        return result
     out = await _call(key)
     if not isinstance(out, dict):
         raise _Anomaly("not_a_dict", key)
