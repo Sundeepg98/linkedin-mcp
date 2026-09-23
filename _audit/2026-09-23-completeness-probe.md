@@ -240,6 +240,24 @@ entry route (`J 60`), role-play's new-scenario route (`J 132`), resume tailoring
 * **N, 4.** The My Network hub itself (census prose only), its Discover hub,
   showcase pages, a group's own settings page.
 
+**THE STRONGEST 28.** App-scope addresses for which no census row carries the
+address or all of its words, and which the cold verifier did not find recorded
+-- the list to read first:
+
+    J 14  /learning/browse/certifications, /learning/career-journey,
+          /learning/chatbot, /learning/me/my-library (a verified true gap) and
+          its in-progress list, /learning/showcase/<entity>,
+          /learning/topics/<entity>, /jobs/preferences, /explore-career-insights,
+          /premium/premium-perks, /premium/sb/explore, /premium/switcher,
+          /talent/job-posting-redirect, /ad-library/search
+    P  9  /in/<entity>/details/featured, /in/<entity>/edit/secondary-language,
+          /in/<entity>/en, the two /in/<entity>/opportunities/ explainers,
+          /in/<entity>/overlay/enhance, /premium/profile-key-skills,
+          /manage/purchases-payments/purchases/<opaque>,
+          /mypreferences/d/categories/ads
+    N  3  /mynetwork/discover-hub, /showcase/<entity>, /psettings/group/<opaque>
+    M  2  /analytics/creator/top-posts, /preload/report-in-modal
+
 Control candidates with a capability shape, as LEADS -- the cold sample found
 two of its five control candidates recorded in words (attaching an image to a
 message is `M M14`, starting a public post is `M C1`), so this axis over-reports
@@ -355,9 +373,10 @@ that are presses, not pages). Ordered by expected yield.
     8  two or three more /company/<slug>/ roots of other kinds (a large org with
        showcase pages, a services firm): six company roots on 2026-09-21 still
        added 8 routes the first had not drawn
-    9  the Me menu, opened (a PRESS, not a page): it sits in the header of every
-       capture and its items render only on press, so no capture holds them.
-       Needs a press the disclosing-press ruling admits
+    9  the Me menu, opened (a PRESS, not a page): its button is drawn in 51 of
+       the 55 raw capture files and its items in none of them -- the only drawn
+       "Sign out" is the Learning app's own account menu, on the role-play
+       page. Needs a press the disclosing-press ruling admits
     10 the jobs search All filters panel, opened (a PRESS): its controls are the
        jobs slice's filter rows; take it only if the press is already sanctioned
 
@@ -378,7 +397,8 @@ loses one; the instrument never reads either of its own files back as census.
 **THE TEST, SHOWN FAILING.** `tests/test_completeness_harvest.py`, five tests,
 green on the real census and red under each of three mutations of the
 instrument, run 2026-09-23 against the committed script and restored from git
-after each:
+after each -- first against the lane's first commit, then again against its
+third, with identical results:
 
     MUTATION A  census_index returns an empty list
       FAILED test_a_planted_route_is_a_candidate_and_a_recorded_one_is_not
@@ -508,10 +528,15 @@ written into the annotations, marked `cold-verified`.
 
 ## 14. Gates
 
-**FIRST RUN, `scripts/impact_gate.py --against b0d3ab8` at `da12bf1`: RED, and
-both reds were this lane's.** 37 test files (the selection plus 17 corpus-wide
-guards), 2 failed, 1986 passed, 739 s wall on a box running two other lanes'
-full suites.
+This lane's own commits are named by position, never by SHA: they are not on
+master yet, a merge may rewrite them, and `tests/test_a_cited_sha_resolves.py`
+refuses a citation no clone can resolve -- which is how the final run below
+caught the one this section first carried.
+
+**FIRST RUN, `scripts/impact_gate.py --against b0d3ab8` at the lane's second
+commit: RED, and both reds were this lane's.** 37 test files (the selection plus
+17 corpus-wide guards), 2 failed, 1986 passed, 739 s wall on a box running two
+other lanes' full suites.
 
 * `test_an_outage_is_never_filed_as_an_absence` -- the fixture-date helper
   returned an empty string when git could not answer, and an empty date sorts
@@ -529,4 +554,21 @@ full suites.
   shaping here is the reducer and the census-vocabulary templater, and their
   control is `--control` and the test above, not that guard.
 
-(The final run is recorded below.)
+**SECOND RUN, same command, at the lane's third commit: RED on one test, and it
+was this document.** 37 test files, 1 failed, 1987 passed, 496 s wall. The red
+was `test_a_cited_sha_resolves`, on a lane commit SHA cited in this section; it
+is removed above. Everything the script, the test, the tables and the register
+touch was green in that run.
+
+**THE FINAL, DOCUMENT-ONLY COMMIT** was gated with the same instrument against
+the lane's third commit, so its plan is exactly what this document and the
+regenerated index can reach; its result is in the lane's final report, not
+here, because a document cannot record the gate that reads it.
+
+`--control` passed all five, and the three mutations of section 9 were re-run
+against the lane's third commit with identical results.
+
+**NOT RUN, said plainly.** 179 of 216 test files, outside the impact plan (the
+gate's own count, about 4106 of 6094 tests); CI's three-platform matrix,
+because this lane does not push; and everything live -- this lane is offline,
+so no capture was taken and no candidate was loaded.
