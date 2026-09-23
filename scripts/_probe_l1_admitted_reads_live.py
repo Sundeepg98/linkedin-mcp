@@ -17,14 +17,13 @@ mapping, and the docstrings of the modules those readers call
     followers     P L2b  /mynetwork/network-manager/people-follow/followers/
     event         N 184  /events/<ID>/ (only with --event-id)
 
-**FOLLOWERS AND EVENT ARE REFUSED BY TODAY'S GATE.** ``followers`` trips the
-``/follow`` forbidden substring (``/people-follow/followers/`` contains it,
-the same way ``.../following/`` does); ``event`` needs an id-shaped address
-the allowlist has not admitted, only the bare ``/events/`` root. Both are
-kept in the default selection anyway: the ``is_read_url`` PRE-CHECK catches
-the refusal before any navigation and prints a fixed skip line rather than
-attempting the load. If a pending REVIEW commit widens the gate for either,
-this file needs no edit -- it will simply stop skipping them.
+**FOLLOWERS AND EVENT ARE ADMITTED ONLY BY THEIR OWN ``REVIEW:`` COMMITS.**
+On a tree without them, ``followers`` trips the ``/follow`` forbidden
+substring and ``event`` has no id-shaped pattern (only the bare ``/events/``
+root). Both stay in the default selection either way: the ``is_read_url``
+PRE-CHECK decides at run time, so a key the gate refuses is skipped with a
+fixed line at zero page loads, and a key it admits runs. This file needs no
+edit in either case.
 
 ## SELECTION IS DECIDED BEFORE THE BROWSER IS TOUCHED
 
@@ -155,8 +154,11 @@ KEYS: tuple[str, ...] = (
 _ASCII_DIGITS = frozenset("0123456789")
 
 #: groups.py's `_MAX_IDENTIFIER_DIGITS`, restated rather than imported --
-#: that name is private to its own module. Twenty is more than twice the
-#: longest id this repository has measured on a LinkedIn address.
+#: that name is private to its own module -- and the same bound the two
+#: allowlist lines this file fills (`[0-9]{1,20}`) carry. The activity and
+#: event ids measured on the captures on disk are nineteen digits, so twenty
+#: is one digit of headroom, not a generous margin. (The first draft of this
+#: comment said "more than twice the longest id"; corrected at review.)
 MAX_ID_DIGITS = 20
 
 
