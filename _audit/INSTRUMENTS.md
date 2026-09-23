@@ -9507,3 +9507,53 @@ first wrote the table, the three-row drift control, the cross-check of every
 address the rows' own census cells name, and the offline press-condition
 runner -- are declared disposable. Everything they measured is re-derived by
 the checker on every run or recorded with its result in the audit.
+
+## 62. WHO RULED EACH EXCLUSION, AND A CHECK THAT FAILS WHEN NOBODY DID (exclusion-audit, 2026-09-23)
+
+**Registered 2026-09-23.** Full record: `_audit/2026-09-23-exclusion-audit.md`.
+Numbered 62 because the orchestrator assigned it to this lane; sibling lanes
+forked from the same master hold 58-61.
+
+`scripts/census_completion.py` plans on an achievable surface that leaves out
+315 rows -- EXCLUDED-RULED and MEASURED-ABSENT -- and no instrument had asked
+who ruled any of them. `_audit/_census/exclusion-basis.tsv` is one line per
+out-of-scope row: its class (A, B, C, A-lifted, B-lifted, M+, M-), the family
+ruling it is filed under, whether the operator made that family, whether the
+family's wording reaches the row, and a verbatim-anchored source.
+
+### 62.1 A CHECK WHOSE RED IS A QUESTION FOR THE OPERATOR
+
+The checker exits 1 at the commit that ships it -- 26 rows with no traceable
+basis, 27 resting on a ruling the operator withdrew the same day -- and the
+test file is green. That is the design, not a contradiction: the test asserts
+the verdict is CONSISTENT with the table, never that it is EMPTY, because
+emptying it is his decision. A check that went green by relabelling an open
+question would certify nothing.
+
+    A TABLE OF RULINGS IS CHECKED BY RE-READING THE RULING, AND A LINK IS
+    CHECKED FROM THE ROW -- NEVER FROM THE TABLE THAT ASSERTS IT.
+
+### 62.2 THE LINK THE CHECKER FOUND ON ITS FIRST RUN
+
+The first run went red on two rows of this wave's own table: `M C31` and
+`M M26` cite `writes.py:1801-1814`, a LINE RANGE that at HEAD lands inside
+`send_message`'s spec. Neither names the key it means. The table had asserted
+a link the census does not carry, which is the exact failure the link check
+exists for -- found on the author's own work before any reviewer saw it. Both
+are now linked by content and by a named pointer, and the registry says why.
+
+### 62.3 THE ENTRIES
+
+| path | shown failing by |
+|---|---|
+| `scripts/check_exclusion_basis.py` | `tests/test_exclusion_basis.py`: fourteen plants into a world built in the test (a C row, an unknown family, an `op=` contradicting the registry, an off-alphabet scope, a link the row does not carry, class A on an agent family, a rotted anchor, a missing file, an EXT-only source, an absolute path, an M+ without evidence, a class not allowed for its state, a `via=` the row does not name, `lifted=` on an unlifted row), each red and naming its row; four coverage drifts; a roll-up that no longer names its row; three malformed lifted rows; a family whose own source rots; four unreadable tables; three plants into a COPY of the real table; and the real table asserted structurally sound with its verdict equal to its own C and lifted rows. Then the tests run against five broken checkers -- link check always true, coverage blind, sources never read, untraced verdict dropped, lifted verdict dropped: control 36 passed, every mutation red |
+
+### 62.4 DECLARED DISPOSABLE
+
+The scratchpad generator that first wrote the table, the token-signature and
+dump scripts used to read the 315 rows, the pytest mutation plugin and its
+driver. The table is the artifact; the checker re-derives every link and
+source on every run. The two delegated evidence files -- the git archaeology
+of 65 code refusals and the 189-passage attribution register -- stay in the
+gitignored `_audit/_scratch/exclusion-audit/` and are summarised, with their
+counts, in the audit.
