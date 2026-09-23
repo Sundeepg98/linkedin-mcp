@@ -311,4 +311,8 @@ def test_both_rules_reject_the_registry_that_was_actually_measured():
     # an address the boundary already admitted. (A fifty-first,
     # linkedin_tracked_job_proximity, was built the same day and WITHDRAWN
     # before merge: its join navigated to ids read off the tracker page.)
-    assert len(_tool_names()) == 50
+    # FIFTY-ONE FROM THE SAME DAY, at the merge of lane L4:
+    # linkedin_follow_company_page, a WRITE (census row N 47), built on the
+    # lane branch as its own fiftieth and moved with every other count site
+    # in the merge commit.
+    assert len(_tool_names()) == 51

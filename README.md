@@ -3,10 +3,19 @@
 An MCP server that shows you your own LinkedIn account data as structured tool
 results instead of pages you have to click through.
 
-**Fifty tools ship. Thirty-eight read. Twelve write. None is
+**Fifty-one tools ship. Thirty-eight read. Thirteen write. None is
 write-shaped and unable to act.**
 
-**THAT LINE READ "Forty-nine ... Thirty-seven" UNTIL 2026-09-23.** The
+**THAT LINE READ "Fifty ... Twelve write" UNTIL THE LANE L4 MERGE, 2026-09-23.**
+The fifty-first is a WRITE, `linkedin_follow_company_page`: a follow performed
+on an organisation Page's own root and addressed by the Page's numeric id --
+the id `linkedin_unfollow_company` keys its rows by, which makes it the first
+follow here whose undo this server can aim. Census row `N 47`, COVERED-UNFIRED:
+built behind the same flag and the same single-use grant as every other write,
+and never fired. It was built on a lane branch as that branch's fiftieth, while
+the read below became the fiftieth on master the same day.
+
+**THAT LINE READ "Forty-nine ... Thirty-seven" EARLIER ON 2026-09-23.** The
 fiftieth is `linkedin_recent_job_searches`, a read of the jobs home that
 returns your recent job searches, re-runnable, and which carry an alert --
 census row `J 18`, COVERED-UNFIRED because nothing has yet seen it return a
@@ -860,7 +869,7 @@ linkedin_server/
   cdp_bridge.py              the recovery path: attach to a running Chrome
   dom.py                     the read-only harvesters and the control readers
   shape.py                   pure parsers and the result envelope
-  server.py                  the fifty tools
+  server.py                  the fifty-one tools
   errors.py
 tests/                       1393 tests, no network, no account
   fixtures/                  frozen LinkedIn markup, scrubbed

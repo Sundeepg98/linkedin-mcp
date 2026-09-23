@@ -57,6 +57,26 @@ PINNED: set[tuple[str, str, str, int]] = {
      "_audit/2026-09-20-the-contingent-writeoffs.md", 1),
     ("BLOCKER", "PROXIMITY-NOT-PARSED",
      "_audit/2026-09-20-the-contingent-writeoffs.md", 2),
+    # SURFACED 2026-09-23 BY THE WRAP JOIN (lane L4), and pinned rather than
+    # repaired because each sits in another lane's record. Every one is a
+    # slot phrase ("under") ending one line with a backticked id opening the
+    # next -- the same shape this guard has always convicted on ONE line,
+    # where the module docstring's MEASURED table counts such other-vocabulary
+    # names as findings. Four are registered ruling ids and one is a census
+    # STATE word; none is a blocker. The repair is a one-word rewording by the
+    # record's owner ("by the ruling", "filed as the state"), and the ratchet
+    # below then demands the pin narrow. The sixth site the join found was the
+    # lane-L4 record's own, and it was reworded in the same commit instead.
+    ("BLOCKER", "EXCLUDED-RULED",
+     "_audit/2026-09-20-the-premium-block.md", 1),
+    ("BLOCKER", "ERROR-URL-ASKED-FOR-OR-NOTHING",
+     "_audit/2026-09-21-the-auth-reason-leak.md", 1),
+    ("BLOCKER", "NO-IRREVERSIBLE-WRITE-IS-FIRED",
+     "_audit/2026-09-23-bucket1-fires.md", 1),
+    ("BLOCKER", "SELF-PROFILE-EDITS-NOT-OUTWARD",
+     "_audit/2026-09-23-census-cleanup.md", 1),
+    ("BLOCKER", "ONE-NAMED-SETTINGS-PAGE-AT-A-TIME",
+     "_audit/2026-09-23-lane-l1-refused-reads.md", 1),
 }
 
 #: REPAIRED 2026-09-20, and removed from PINNED by the ratchet's own instruction.
@@ -204,6 +224,91 @@ def test_the_detector_finds_a_planted_assertion():
         f"every slot form. It found {sorted(found)}. Until this passes, every "
         "other assertion in this module passes for the wrong reason -- a "
         "detector that finds nothing cannot fail."
+    )
+
+
+def test_the_detector_finds_a_wrapped_assertion():
+    """The detector must reach a name markdown's hard-wrap split from its slot.
+
+    THE DEFECT THIS PINS AGAINST, measured by the lane-L4 lead in
+    `_audit/2026-09-23-lane-l4-writes.md` section 1 (lines 48-49 there): that
+    document's own prose wraps "... under" at a line end with a backticked
+    ruling id opening the next line. `check_asserted_names_resolve.py --all`
+    listed no candidate at that site, because `_blocker_candidates` looks at
+    ONE line at a time -- the slot phrase and the name never share a `line`
+    string there, so neither `_SLOT_BEFORE` nor `_SLOT_AFTER` ever sees both
+    halves. An unresolvable name wrapped the same way passes silently, which
+    is the guard itself going blind to the exact line-wrapping this corpus's
+    own prose is written in.
+
+    Two shapes are planted, mirroring the two slot forms:
+      - `_SLOT_BEFORE` wrapped: the phrase ("under") ends one line, the
+        backticked name opens the next -- the real corpus shape above.
+      - `_SLOT_AFTER` wrapped: the backticked name ends one line, "blocker"
+        opens the next.
+    Run through the REAL classifier, not a copy of its logic, same as
+    `test_the_detector_finds_a_planted_assertion` above.
+    """
+    planted = {
+        "_audit/_planted_wrapped.md": [
+            "A repaired cell now stands `W` -> `R+W` under",
+            "`ZZZ-WRAPPED-BEFORE`. It is one of the three now listed.",
+            "",
+            "A single `ZZZ-WRAPPED-AFTER`",
+            "blocker holds the rest.",
+        ]
+    }
+    sites = guard.classify(
+        planted, guard.tool_registry(REPO), set(guard.blocker_registry(REPO))
+    )
+    found = {(s.kind, s.name, s.line)
+             for s in sites if s.verdict == "ASSERTED-ABSENT"}
+    assert found == {
+        ("BLOCKER", "ZZZ-WRAPPED-BEFORE", 2),
+        ("BLOCKER", "ZZZ-WRAPPED-AFTER", 4),
+    }, (
+        "the detector did not convict a planted, unmarked, unresolvable name "
+        f"that markdown wrapped across a line break. It found {sorted(found)}. "
+        "A slot phrase ending one line and a backticked name opening the next "
+        "is one reference to a reader; the guard must see it too, attributed "
+        "to the line the NAME sits on."
+    )
+
+
+def test_a_wrap_is_joined_across_one_ordinary_line_break_and_no_further():
+    """The join's limits, each planted, so a later widening is a visible edit.
+
+    Joined: an emphasised name opening the line after the slot phrase. NOT
+    joined: a blank line between them, a fence between them, a table row on
+    either side, or two line breaks. Every name here resolves nowhere, so a
+    join that fires where it must not shows up as an extra conviction.
+    """
+    planted = {
+        "_audit/_planted_wrap_limits.md": [
+            "The row stays filed under",                    # 1
+            "**`ZZZ-WRAP-EMPHASIS`** until a reader lands.",  # 2 joined
+            "",                                             # 3
+            "Its state was recorded under",                 # 4
+            "",                                             # 5
+            "`ZZZ-WRAP-AFTER-BLANK` and nothing else.",     # 6 not joined
+            "The blocker sits behind",                      # 7
+            "```",                                          # 8
+            "`ZZZ-WRAP-IN-FENCE`",                          # 9 not joined
+            "```",                                          # 10
+            "| a | cell under |",                           # 11
+            "`ZZZ-WRAP-AFTER-TABLE` in prose.",             # 12 not joined
+            "A paragraph filed under",                      # 13
+            "a second line of the same paragraph",          # 14
+            "`ZZZ-WRAP-TWO-BREAKS` three lines down.",      # 15 not joined
+        ]
+    }
+    sites = guard.classify(
+        planted, guard.tool_registry(REPO), set(guard.blocker_registry(REPO))
+    )
+    found = {(s.name, s.line) for s in sites if s.verdict == "ASSERTED-ABSENT"}
+    assert found == {("ZZZ-WRAP-EMPHASIS", 2)}, (
+        "the wrap join fired where it must not, or missed the one place it "
+        f"must fire: {sorted(found)}"
     )
 
 

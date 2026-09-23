@@ -870,7 +870,13 @@ PINNED = {
     "capabilities_achievable": 389,
     "out_of_scope": 315,
     "achievable": 389,
-    "adjudicated": 433,
+    "adjudicated": 434,
+    #: 434 / 100 / 270 / 25, and gap_write 150, since the lane-L4 merge
+    #: (2026-09-23): `N 47` was built -- `linkedin_follow_company_page`, a
+    #: WRITE, behind the flag and the single-use grant, never fired (GAP ->
+    #: COVERED-UNFIRED, `_audit/2026-09-23-lane-l4-writes.md`). It is a W row,
+    #: so it enters bucket 1 held by OPERATOR-NAMES-THE-TARGET with no marker
+    #: (b1_standing 9 -> 10), and it leaves the write-direction GAP count.
     #: 433 / 99 / 271 / 24 since the lane-L3 merge (2026-09-23): `J 18` and
     #: `J 39` were built (GAP -> COVERED-UNFIRED, `_audit/2026-09-23-lane-l3-
     #: jobs.md`); both enter bucket 1 held by no ruling (b1_no_ruling 7 -> 9),
@@ -880,14 +886,14 @@ PINNED = {
     #: (GAP -> COVERED-UNFIRED, `_audit/2026-09-23-lane-l1-refused-reads.md`).
     #: One row changing class moves all five; b3 admitted/refused 40/16 are
     #: L1's allowlist admissions, and b1_no_ruling 7 is P G6 entering bucket 1.
-    "delivered_broad": 99,
+    "delivered_broad": 100,
     #: 75 and 21 since the bucket-1 merge: `M C41` fired live and moved from
     #: COVERED-UNFIRED to COVERED-PROVEN (`_audit/2026-09-23-bucket1-fires.md`).
     #: One row changing class moves both, and leaves delivered_broad at 96.
     "delivered_strict": 75,
-    "gap": 271,
+    "gap": 270,
     "cannot_deliver": 19,
-    "unfired": 24,
+    "unfired": 25,
     "gap_read": 66,
     #: 151, not the 152 published by `_audit/2026-09-21-the-write-ceiling.md`.
     #: That document scoped itself to `profile.md`, `network.md` and
@@ -896,7 +902,10 @@ PINNED = {
     #: wave repaired `M C85` from `W` to `R+W` IN PLACE, which is a -1 on W and
     #: is CONSISTENT WITH the difference rather than proof of it -- stated that
     #: way because I did not re-derive that document's population.
-    "gap_write": 151,
+    #: 150 since the lane-L4 merge: `N 47` was built and left GAP. The same
+    #: lane classed all 151 in `_audit/_census/write-classes.tsv`, which keeps
+    #: the built row's line, and `scripts/check_write_classes.py` re-walks it.
+    "gap_write": 150,
     #: All 54 are `jobs.md`, which has no per-row R/W column (56 until the
     #: lane-L3 merge built J 18 and J 39). Not a coincidence
     #: and not a defect in the finder: it is the whole of that slice's still-GAP
@@ -961,11 +970,14 @@ PINNED = {
     #:   merge of master      9 standing / 0 / 0 / 15 none, 6 released, of 24:
     #:   cab6995              lanes L1 and L3 had built three reads no ruling
     #:                        holds (P G6; J 18, J 39), +3 none.
+    #:   merge of lane L4     10 standing / 0 / 0 / 15 none, 6 released, of 25:
+    #:                        N 47 was built, a W row, held by the write hold
+    #:                        with no marker (+1 standing).
     #: `b1_relayed` is the count this file called `b1_named_target` until the
     #: target condition was registered: a name for what a status COUNTS, not
     #: for which ruling happens to have it today. `b1_released` is a SUBSET of
     #: `b1_no_ruling`: the writes held by nothing because a release says so.
-    "b1_standing": 9,
+    "b1_standing": 10,
     "b1_relayed": 0,
     "b1_pending": 0,
     "b1_no_ruling": 15,
@@ -999,10 +1011,13 @@ PINNED = {
 #: hold with this table: a row entering or leaving the state, or changing
 #: hold, is reported by id. Re-pin only in the commit that says why it moved.
 PINNED_B1_ROWS: dict[str, tuple[str, ...]] = {
+    #: `N 47` entered with the lane-L4 merge, 2026-09-23: a write to an
+    #: organisation Page, built offline and never fired, held until the
+    #: operator names the Page -- the same hold as its twin `N 48`.
     "OPERATOR-NAMES-THE-TARGET": (
         "J 103", "J 104", "J 128",
         "M C1", "M C25", "M C32",
-        "N 1", "N 46", "N 48",
+        "N 1", "N 46", "N 47", "N 48",
     ),
     #: `P G6` entered with the lane-L1 merge and `J 18` and `J 39` with the
     #: lane-L3 merge, 2026-09-23: reads built offline, which no ruling holds.

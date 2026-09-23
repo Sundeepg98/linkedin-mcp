@@ -2697,6 +2697,94 @@ def follow_state(label: Optional[str], *, count: int) -> dict[str, Any]:
     return {"state": known, "why": f"the control is labelled {label!r}"}
 
 
+def posting_follow_state(reading: dict[str, Any]) -> dict[str, Any]:
+    """The posting's follow direction from ``dom.read_follow_control``'s reading.
+
+    BOTH CONVENTIONS, and the old one is delegated UNCHANGED to
+    :func:`follow_state`, so every measured answer about the bare labels --
+    and every sentence it gives -- is the one it gave before the relabel. The
+    new branches are the relabelled control (``form`` ``"prefixed"``, see
+    ``dom.POSTING_FOLLOW_IN_CARD``) and the two readings that used to fall
+    into "had not hydrated" when they were not that at all.
+
+    EVERY ``why`` HERE IS BUILT FROM COUNTS, never from the page's words: a
+    ``why`` is appended to the exceptions ``writes`` raises, and the
+    relabelled control's name carries the employer's.
+
+    ONE NEW STATE IS REACHABLE: ``not_following``, from exactly one bound
+    prefixed control. The relabelled ON label has never been measured, so a
+    card drawing ``Following ...`` is UNKNOWN -- and says so.
+    """
+    error = reading.get("error")
+    count = reading.get("count") if isinstance(reading.get("count"), int) else 0
+    in_card = reading.get("in_card") if isinstance(reading.get("in_card"), int) else 0
+    following = reading.get("in_card_following")
+    following = following if isinstance(following, int) else 0
+    form = reading.get("form")
+    if error:
+        return {
+            "state": FOLLOW_UNKNOWN,
+            "why": (
+                "the follow control could not be read on this load (an "
+                "exception was raised inside the reader and its message is not "
+                "repeated here). A read that failed reports the failure, not a "
+                "state."
+            ),
+        }
+    if form == "both":
+        return {
+            "state": FOLLOW_UNKNOWN,
+            "why": (
+                f"{count} follow controls are drawn in TWO conventions at once -- "
+                "the bare label measured 2026-08-23 and the relabelled one "
+                "measured 2026-09-19 -- so which one is the employer's is not "
+                "something a reading can settle. Choosing one would be choosing "
+                "by position."
+            ),
+        }
+    if form == "prefixed":
+        if in_card > 1:
+            return {
+                "state": FOLLOW_UNKNOWN,
+                "why": (
+                    f"{in_card} controls in the About-the-company card have names "
+                    "opening 'Follow ', where the relabelled card draws exactly "
+                    "one; pressing one of several would be picking by position."
+                ),
+            }
+        if reading.get("bound") == 1 and reading.get("label") == "Follow":
+            return {
+                "state": "not_following",
+                "why": (
+                    "the About-the-company card draws exactly one follow "
+                    "control, and its name is 'Follow ' followed by the "
+                    "employer name the card itself draws -- the relabelled OFF "
+                    "shape measured on five live postings on 2026-09-19. Read "
+                    "off the very control a click would land on."
+                ),
+            }
+        return {
+            "state": FOLLOW_UNKNOWN,
+            "why": (
+                "one control in the About-the-company card has a name opening "
+                "'Follow ', and the rest of that name is not the employer name "
+                "the card itself draws, so it cannot be shown to be the "
+                "employer's own control. Neither name is repeated here."
+            ),
+        }
+    if count == 0 and following:
+        return {
+            "state": FOLLOW_UNKNOWN,
+            "why": (
+                f"the About-the-company card draws {following} control(s) whose "
+                "name opens 'Following ' -- the relabelled ON shape, which has "
+                "never been measured, so it is not read as 'following'. This is "
+                "a drawn control, not a page that had not settled."
+            ),
+        }
+    return follow_state(reading.get("label"), count=count)
+
+
 # ---------------------------------------------------------------------------
 # Save state
 # ---------------------------------------------------------------------------

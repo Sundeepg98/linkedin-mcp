@@ -12,6 +12,7 @@
     "linkedin_draft_applications": "clean",
     "linkedin_events_home": "clean",
     "linkedin_follow_company": "not_driven:never read the page",
+    "linkedin_follow_company_page": "not_driven:never read the page",
     "linkedin_followed_companies": "clean",
     "linkedin_group_memberships": "clean",
     "linkedin_group_page": "not_driven:never read the page",

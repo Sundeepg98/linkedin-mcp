@@ -2950,6 +2950,30 @@ NOT_A_CORRECTION: dict[tuple[str, str], str] = {
         "dict-literal coverage being attributed to it."
     ),
 
+    # 2026-09-23, lane L4 (writes). Read at the line: census row 47, the row
+    # that lane built. The same shape as the jobs-direction and fourteen-fired
+    # entries above -- a correction made IN PLACE, and a row naming its receipt.
+    ("network.md", "2026-09-23-lane-l4-writes.md"): (
+        "THE ROW CITES ITS OWN RECEIPT AND THE CORRECTION IS IN PLACE. The "
+        "line is census row `47`, which moved GAP -> COVERED-UNFIRED because "
+        "the lane built `linkedin_follow_company_page`, and whose last "
+        "sentence cites that lane's record as the source of the move. The "
+        "matched word is `false`, inside the row's KEPT PRIOR CELL -- "
+        "*'~~Blocker: no `/company/` pattern~~ (false since 2026-09-20)'* -- "
+        "which is the row striking through what IT said before, in the same "
+        "cell, where no reader arriving at the claim can miss it. The pair "
+        "the scan produces says NETWORK.MD corrects THE LANE RECORD, which "
+        "is backwards: the row withdraws nothing from that document and "
+        "asserts nothing false about it; it exists in this shape because of "
+        "it. No CORRECTS: pair is declared in the other direction either, "
+        "because the stale blocker lived in this row and was corrected in "
+        "this row -- the one case the back-pointer mechanism does not serve. "
+        "**WHAT WOULD MAKE THIS ENTRY WRONG:** row `47` asserting that "
+        "something IN the lane record is mistaken while leaving the record "
+        "untouched, or the lane record withdrawing a claim that lives in "
+        "another document without marking it."
+    ),
+
 }
 
 

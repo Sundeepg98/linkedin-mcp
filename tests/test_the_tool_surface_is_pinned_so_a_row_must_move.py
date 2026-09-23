@@ -95,6 +95,7 @@ PINNED_TOOL_SURFACE: dict[str, tuple[str, ...]] = {
     "linkedin_draft_applications": ("limit",),
     "linkedin_events_home": (),
     "linkedin_follow_company": ("confirm_token", "job_id"),
+    "linkedin_follow_company_page": ("confirm_token", "organisation_id"),
     "linkedin_followed_companies": ("company", "limit"),
     "linkedin_group_memberships": (),
     "linkedin_group_page": ("group_id",),
@@ -244,8 +245,19 @@ PINNED_TOOL_SURFACE: dict[str, tuple[str, ...]] = {
 #: banks `J 39`. No name and no parameter moved, so this guard is silent about
 #: it by construction. Both rows move GAP -> COVERED-UNFIRED, not PROVEN: the
 #: lane that built them was offline. See `_audit/2026-09-23-lane-l3-jobs.md`.
-PINNED_TOOL_COUNT = 50
-PINNED_PARAMETER_COUNT = 67
+#: **RE-PINNED 2026-09-23 AT 51 TOOLS AND 69 PARAMETERS (lane L4), merged over
+#: master's 50 and 67 just above: one tool added, two parameters, and the
+#: census row moves in the same merge.** The lane's branch had pinned 50 and 68
+#: over the base's 49 and 66.
+#: `linkedin_follow_company_page("organisation_id", "confirm_token")` banks
+#: `N 47` -- follow an organization's Page from the Page itself -- GAP ->
+#: COVERED-UNFIRED. Not PROVEN: it is a WRITE, built to ready-to-fire behind
+#: the flag and the single-use grant, and no grant was issued for it. Its two
+#: parameters are the two every gated write takes -- a numeric identifier,
+#: refused unless it is 4 to 20 ASCII digits, and the token. See
+#: `_audit/2026-09-23-lane-l4-writes.md`.
+PINNED_TOOL_COUNT = 51
+PINNED_PARAMETER_COUNT = 69
 
 
 def live_surface() -> dict[str, tuple[str, ...]]:

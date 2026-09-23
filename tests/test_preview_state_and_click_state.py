@@ -101,6 +101,10 @@ from linkedin_server.writes import (
 # on each -- which is the standard this package holds every measurement to.
 from tests.test_apply_modal_fixture import VIEWPORT, over  # noqa: F401
 from tests.test_editor_fields import TWO_DIALOG_HTML
+from tests.test_follow_company_page import (
+    COMPANY_PAGE_FOLLOW_ID,
+    COMPANY_PAGE_FOLLOW_MARKUP,
+)
 from tests.test_result_verification_block import SHAREBOX_MARKUP
 from tests.test_send_message_gate import COMPOSER_MARKUP
 from tests.test_selectors_resolve import PAGE as SELECTOR_RESOLUTION_PAGE
@@ -234,6 +238,16 @@ REACHED: dict[str, tuple[str, str, str]] = {
         "tests/test_send_message_gate.py",
         COMPOSER_MARKUP,
         _canonical("send_message"),
+    ),
+    # THE THIRTEENTH, 2026-09-23 (census row ``N 47``). A SYNTHETIC Page root
+    # whose STRUCTURE is a measurement -- eight ``Follow <Page>`` controls, one
+    # of them in the main column -- and whose content is invented; its source
+    # module says which parts are which. The preview and the click call ONE
+    # verdict over ONE reading, which is the property this file pins.
+    "follow_company_page": (
+        "tests/test_follow_company_page.py",
+        COMPANY_PAGE_FOLLOW_MARKUP,
+        COMPANY_PAGE_FOLLOW_ID,
     ),
 }
 
@@ -464,8 +478,10 @@ def test_every_performable_action_is_either_reached_or_declared_unreachable():
     #
     # An empty ``CANNOT_REACH`` still asserts something -- that nothing is
     # currently unreachable -- which is why it is a table and not a deletion.
-    assert len(PERFORMABLE) == 12, sorted(PERFORMABLE)
-    assert len(REACHED) == 12, sorted(REACHED)
+    # 12 -> 13 on 2026-09-23: ``follow_company_page`` shipped, and it is
+    # reached over its own committed fixture rather than declared unreachable.
+    assert len(PERFORMABLE) == 13, sorted(PERFORMABLE)
+    assert len(REACHED) == 13, sorted(REACHED)
     assert len(CANNOT_REACH) == 0, sorted(CANNOT_REACH)
 
 
@@ -984,11 +1000,16 @@ async def test_the_unmutated_specs_still_pass_the_same_check(writes_on, over):
 #: have seen a tidy-up. What it actually is: the field stopped answering the
 #: click-time question, which was the tenth instance of an unruled coincidence
 #: in this package.
+#: ``_live_control`` MOVED 1 -> 2 ON 2026-09-23, and the new read carries NO
+#: new meaning: ``follow_company_page``'s arm compares its verdict against
+#: ``spec.from_state`` and returns no selector when they differ, which is the
+#: meaning ``follow_company``'s arm already had (see the block above). Both
+#: arms therefore compare TWICE -- there and again in ``valid_from``.
 FROM_STATE_READERS: dict[str, int] = {
     "_direction": 3,
     "valid_from": 1,
     "anchor_label_for": 2,
-    "_live_control": 1,
+    "_live_control": 2,
     "perform": 2,
 }
 
@@ -1067,7 +1088,7 @@ def test_every_reader_of_from_state_is_named_and_counted():
         "measured": dict(sorted(measured.items())),
         "pinned": dict(sorted(FROM_STATE_READERS.items())),
     }
-    assert sum(measured.values()) == 9, sum(measured.values())
+    assert sum(measured.values()) == 10, sum(measured.values())
     # The two ends this file is about must be among them, whatever else moves.
     for name in THE_TWO_ENDS:
         assert name in measured, (name, sorted(measured))

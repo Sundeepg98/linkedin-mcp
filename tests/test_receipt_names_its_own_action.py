@@ -204,7 +204,15 @@ _VERIFIED_FROM_OWNERS: dict[str, frozenset[str]] = {
 #: permalink is the shape this whole file exists to catch.
 _WHERE_TO_LOOK_OWNERS: dict[str, frozenset[str]] = {
     "saved jobs": frozenset({"save_job", "unsave_job"}),
-    "followed companies": frozenset({"follow_company", "unfollow_company"}),
+    # A THIRD OWNER FROM 2026-09-23, and it is entitled rather than borrowing:
+    # ``follow_company_page`` VERIFIES on the followed-companies page -- its
+    # ``_verify_after`` branch reads Manage Pages for the row keyed by the id
+    # it was granted on -- so the place a human opens is the place this server
+    # read. Its ``_VERIFIED_FROM`` row names Manage Pages and owns no phrase
+    # of another action's.
+    "followed companies": frozenset(
+        {"follow_company", "unfollow_company", "follow_company_page"}
+    ),
     "Applied tab": frozenset({"apply_job"}),
     "job tracker": frozenset({"apply_job"}),
     "dark-mode": frozenset({"update_setting"}),
@@ -229,7 +237,11 @@ _WHERE_TO_LOOK_OWNERS: dict[str, frozenset[str]] = {
 _LEGITIMATE_SHARED_PLACES: frozenset[frozenset[str]] = frozenset(
     {
         frozenset({"save_job", "unsave_job"}),
-        frozenset({"follow_company", "unfollow_company"}),
+        # THE FOLLOW GROUP GREW TO THREE ON 2026-09-23, deliberately and by
+        # this equality edit rather than by loosening the comparison:
+        # ``follow_company_page`` settles on the same page, for the reason
+        # given on its owner entry above.
+        frozenset({"follow_company", "unfollow_company", "follow_company_page"}),
     }
 )
 
@@ -545,8 +557,14 @@ def test_the_action_set_is_the_one_this_file_was_measured_against():
     number is a HUMAN ACKNOWLEDGEMENT that somebody looked at the new action's
     rows, and it is worth nothing if the machine can supply it.
     """
-    assert len(writes.PERFORMABLE) == 12, (
-        "writes.PERFORMABLE holds %d actions, not the 12 this file was "
+    # THIRTEEN FROM 2026-09-23, and the acknowledgement was earned the way
+    # this docstring asks: ``follow_company_page``'s two rows were read, its
+    # ``_WHERE_TO_LOOK`` value was measured to be the follow group's own
+    # phrase (and the group and the owner entry were widened to say so), and
+    # its ``_VERIFIED_FROM`` row was checked against every owned phrase above
+    # and found to contain none of them.
+    assert len(writes.PERFORMABLE) == 13, (
+        "writes.PERFORMABLE holds %d actions, not the 13 this file was "
         "measured against: %s. Re-derive the phrase owners in this file for "
         "the new action, then update this count."
         % (len(writes.PERFORMABLE), sorted(writes.PERFORMABLE))
