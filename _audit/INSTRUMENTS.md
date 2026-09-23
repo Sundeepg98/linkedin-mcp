@@ -9952,6 +9952,55 @@ list, the export of the census frozen at `1c08e5f` for the retrospective check
 -- are declared disposable. Every number they produced is either re-derived by
 the instrument on each run or recorded with its result in the audit.
 
+## 64. A FAMILY THAT HOLDS NO ROW MUST SAY WHY, AND A CONTROL THAT BUILDS ITS OWN FIXTURE (exclusion-returns, 2026-09-23)
+
+**Registered 2026-09-23.** Full record: `_audit/2026-09-23-exclusion-returns.md`.
+Numbered 64 because the orchestrator assigned it to this lane.
+
+Lane R returned 251 exclusions to GAP and re-filed nine kept rows onto the
+ground that holds them, which left 29 of the exclusion-basis registry's families
+holding no row at all. The registry's own test said a family must be used "or
+say why", and nothing could say why. Two cheap exits were both wrong: deleting
+the 29 would have taken the record of who made each ruling with them, and
+leaving them would have kept 29 vocabulary entries that can no longer fail.
+
+### 64.1 THE ENTRIES
+
+| path | shown failing by |
+|---|---|
+| `scripts/check_exclusion_basis.py` `EMPTIED`, and the row check beside it | Three mutations run against `tests/test_exclusion_basis.py` through a pytest plugin: one declared family dropped from `EMPTIED` (1 red, the used-or-says-why test), a family that still holds rows declared empty (3 red, including the real-table soundness test), and `row_problems` made to ignore the table (1 red, the new planted-row test). The unmutated control: 37 passed |
+| `tests/test_writeoff_kinds_are_derivable.py`, the moot-adjudication control | It moved `J 134`, the one real row-level adjudication, which this lane retired with its row -- so it would have gone on passing only by accident, or failing for the wrong reason. It now plants an adjudication, asserts the plant alone is green, then moves the row out and asserts the named red |
+
+    A REGISTRY ENTRY THAT HOLDS NOTHING IS KEPT FOR ITS ATTRIBUTION AND
+    DECLARED WITH ITS REASON -- AND THE DECLARATION IS ITSELF A CLAIM A ROW
+    CAN CONVICT.
+
+### 64.2 DECLARED DISPOSABLE
+
+The scratchpad scripts that carried out the returns -- the population splitter,
+the per-row decision table, the in-place cell editor that verified every state
+move against the shipped parse, the table rewriter, the delta-block inserter,
+the four test patches and the mutation plugin. The census cells, the table and
+the audit are the artifacts; the checker re-derives every link on every run.
+
+### 64.3 ADDED AT THE MERGE, 2026-09-24: A RETURNED ROW IS ITS OWN CLASS
+
+Lane R returned 245 rows to GAP, and 169 of them were never among the 409
+rows the blocker map's spine holds. The map is not grown (the coordinator's
+integration order, 2026-09-24). So a returned row is tallied as
+its OWN CLASS, read off its own cell -- the marker `RETURNED TO GAP ... BY LANE
+R ... BLOCKER, NAMED:` -- and each instrument still refuses a row that carries
+neither a map line nor the marker.
+
+| path | shown failing by |
+|---|---|
+| `scripts/triage_messaging_gap_rows.py` `RETURNED_CLASS`, `returned_outside_ledger` | `tests/test_triage_instrument.py::test_an_unmarked_row_off_the_map_is_still_refused`: a joined row with no marker, removed from the map, comes back UNJOINED rather than classed; the two older hole tests now pick their victims from joined, unmarked rows |
+| `scripts/triage_read_gap_rows.py` verdict `RETURNED` and CONTROL 9 | `--plant unmarked-returned` gives RETURNED to a row whose cell has no marker, and CONTROL 9 refuses naming it; `tests/test_triage_read_gap_rows.py` drives the plant |
+| `scripts/check_exclusion_basis.py` family `D5-PASSIVE-COST-IS-NOT-A-ROW` | the registry's standing controls: a row filed under it must carry the ruling id in its own cell, and its two anchors must resolve in the ruling document |
+
+    A CLASS THAT IS READ OFF THE ROW'S OWN CELL CANNOT BE TYPED ONTO A ROW
+    NOBODY RETURNED, AND A ROW NOBODY CLASSED STILL COMES BACK MISSING.
+
 ## 65. THE JOBS SLICE GETS ITS DIRECTION COLUMN BESIDE THE CENSUS, AND A CHECK THAT RE-READS THE DECIDING WORDS (lane-l3-jobs, 2026-09-23)
 
 **Registered 2026-09-23.** Full record: `_audit/2026-09-23-lane-l3-jobs.md`.

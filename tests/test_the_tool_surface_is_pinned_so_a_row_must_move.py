@@ -113,7 +113,10 @@ PINNED_TOOL_SURFACE: dict[str, tuple[str, ...]] = {
     "linkedin_notify_cost_precondition": (),
     "linkedin_open_messaging": ("include_names", "message_filter"),
     "linkedin_page_plugin_snippet": ("page_id",),
-    "linkedin_people_search_shape": (),
+    "linkedin_people_search_shape": (
+        "connections_of", "current_company_ids", "keywords", "location_ids",
+        "past_company_ids",
+    ),
     "linkedin_premium_job_collection": ("collection",),
     "linkedin_premium_status": (),
     "linkedin_profile_editor_fields": (),
@@ -256,8 +259,23 @@ PINNED_TOOL_SURFACE: dict[str, tuple[str, ...]] = {
 #: parameters are the two every gated write takes -- a numeric identifier,
 #: refused unless it is 4 to 20 ASCII digits, and the token. See
 #: `_audit/2026-09-23-lane-l4-writes.md`.
+#: **RE-PINNED 2026-09-24 AT 51 TOOLS AND 74 PARAMETERS (lane S, at its
+#: merge with master d65759f): no tool added, five parameters on one, and the
+#: census rows move in the same merge.** `linkedin_people_search_shape` --
+#: which took NO parameters by design until D1-SEARCH-AS-READS and
+#: OTHER-MEMBER-IDS-AS-READS decided a keyword and LinkedIn's own facets may
+#: be passed from a tool's arguments -- gains `keywords`,
+#: `current_company_ids`, `past_company_ids`, `location_ids` and
+#: `connections_of`, all optional, composed by `people_search.compose` and
+#: never echoed. FOUR ROWS MOVE GAP -> COVERED-UNFIRED, the filters: `N 84`,
+#: `N 85`, `N 87`, `N 94`. THREE ROWS THE SAME PARAMETERS SERVE DO NOT MOVE,
+#: and that is stated rather than left for this guard to infer: `N 79`,
+#: `N 172` and `N 194` ask for WHO, and under the WHO rule (the orchestrator's
+#: census call, 2026-09-24) a count-only reader does not deliver them; they
+#: stay GAP on the name-free shaper doctrine, pending the operator. Not
+#: PROVEN: the lane was offline. See `_audit/2026-09-24-lane-s-people-search.md`.
 PINNED_TOOL_COUNT = 51
-PINNED_PARAMETER_COUNT = 69
+PINNED_PARAMETER_COUNT = 74
 
 
 def live_surface() -> dict[str, tuple[str, ...]]:

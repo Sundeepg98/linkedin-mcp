@@ -718,8 +718,25 @@ def test_an_unparseable_landing_reads_unreadable_not_a_guess() -> None:
 
 
 # ---------------------------------------------------------------------------
-# 7. The census: the seven rows claim the coverage they were built with
+# 7. The census: each of the seven rows claims what the WHO rule gave it
 # ---------------------------------------------------------------------------
+#
+# THE WHO RULE (the orchestrator's census call, 2026-09-24 03:20, applied at
+# lane S's merge): a row whose capability's payload is WHO -- a person, or a
+# set of people -- served by a reader that publishes only counts, is NOT
+# delivered; the precedent is N 162 and N 180. So the four FILTER rows stay
+# COVERED-UNFIRED and the three WHO rows stay GAP with their blocker named.
+
+#: row -> the state the WHO rule gave it.
+ROW_STATES: dict[str, str] = {
+    "79": "GAP",   # search for a person -- WHO
+    "84": "COVERED-UNFIRED",   # filter by current company -- a FILTER
+    "85": "COVERED-UNFIRED",   # filter by connections of -- a FILTER
+    "87": "COVERED-UNFIRED",   # filter by past company -- a FILTER
+    "94": "COVERED-UNFIRED",   # several locations in one search -- a FILTER
+    "172": "GAP",  # view a member's connections -- WHO
+    "194": "GAP",  # find hiring managers -- WHO
+}
 
 _ROW = re.compile(r"^\|\s*(\d+)\s*\|[^|]*\|\s*R\s*\|\s*\*{0,2}([A-Z-]+)\*{0,2}\s*\|(.*)$")
 
@@ -739,14 +756,42 @@ def test_the_census_walk_reads_the_slice_at_all() -> None:
     assert set(ROWS) <= set(rows)
 
 
+def test_the_table_covers_exactly_the_seven_rows() -> None:
+    assert set(ROW_STATES) == set(ROWS)
+
+
 @pytest.mark.parametrize("row", ROWS)
-def test_the_row_claims_the_coverage_it_was_built_with(row: str) -> None:
-    """GAP -> COVERED-UNFIRED, 2026-09-24. A fire that promotes or demotes the
-    row must move this in the same commit."""
+def test_the_row_claims_what_the_who_rule_gave_it(row: str) -> None:
+    """A fire, or the operator's answer on names, that moves a row must move
+    this in the same commit."""
     state, note = _network_rows()[row]
-    assert state == "COVERED-UNFIRED", (row, state)
+    assert state == ROW_STATES[row], (row, state)
+    # Every row names the reader it rests on or is blocked beside.
     assert "linkedin_people_search_shape" in note
     assert "people_search" in note
+    if ROW_STATES[row] == "GAP":
+        # THE BLOCKER IS NAMED AND THE ROW CAN BE REOPENED, in its own cell.
+        assert "BLOCKER, NAMED: the name-free shaper doctrine" in note
+        assert "REOPENER: the operator rules that people reads may return " \
+               "who at runtime" in note
+        assert "HELD BY `" not in note
+    else:
+        assert "WHO RULE, 2026-09-24" in note and "STAYS COVERED-UNFIRED" in note
+
+
+def test_the_who_rows_are_gated_ruling_in_the_address_table() -> None:
+    """The three WHO rows are back in bucket 3, re-gated RULING, never READER."""
+    rows, problems = cra.load()
+    assert not problems, problems
+    by_row = {(r["slice"], r["row"]): r for r in rows}
+    for row, state in ROW_STATES.items():
+        line = by_row.get(("N", row))
+        if state == "GAP":
+            assert line is not None, f"N {row} is GAP and has no address line"
+            assert line["class"] == "ADMITTED" and line["gate"] == "RULING", line
+            assert "name-free shaper doctrine" in line["note"]
+        else:
+            assert line is None, f"N {row} left bucket 3 and still has a line"
 
 
 _CHAIN = {

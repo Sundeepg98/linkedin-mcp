@@ -16,6 +16,11 @@ blocked. Nothing re-pinned; the pin moves are listed in section 8. Gates in
 section 9, including two real failures the lane's own impact gate found and
 the lane fixed.
 
+AT INTEGRATION (section Integration 2026-09-24): the WHO rule kept four of
+the seven COVERED-UNFIRED (`N 84`, `N 85`, `N 87`, `N 94`, the filters) and
+left three GAP (`N 79`, `N 172`, `N 194`, whose payload is WHO); every pin was
+measured afresh on the tree merged with `master` `d65759f` and re-pinned.
+
 ## 1. The set, derived from the table
 
 Derived from `_audit/_census/read-addresses.tsv` at 9c219c8: class ADMITTED and
@@ -173,6 +178,10 @@ count stays 51.
     N 85   BUILT, COVERED-UNFIRED  connectionOf never LinkedIn-authored; list DERIVED
     N 172  BUILT, COVERED-UNFIRED  the same reader as N 85
 
+AT INTEGRATION the WHO rule re-decided three of these by their row text:
+`N 79`, `N 194` and `N 172` are GAP, the reader built and unchanged. See
+Integration 2026-09-24, I.2.
+
 **WHY NONE IS NEEDS-CAPTURE.** No new page reader was built. The page half of
 every row is the shipped shaper, which fired live on this page on 2026-09-21,
 so no capture-derived fixture was needed and none was made. What is not on
@@ -272,6 +281,9 @@ The seven `read-addresses.tsv` lines are removed: the rows left bucket 3, and
 after the edit: GREEN, 59 of 59 bucket-3 rows.
 
 ## 8. Expected pin moves -- NOT re-pinned, per the brief
+
+AT INTEGRATION these were measured afresh on the merged tree and re-pinned,
+as the integration order asked; the values are in Integration 2026-09-24, I.3.
 
     scripts/census_completion.py PINNED (census_completion --check, red on exactly these)
       adjudicated              434 -> 441   (+7)
@@ -444,11 +456,135 @@ Declared disposable (scratchpad, not tracked):
 * The cold verifier's own scripts (`check_c6.py` .. `check_c13.py`) and its
   report `cold_verify_lane_s.txt` -- its results are summarised in section 9.
 
+## Integration 2026-09-24
+
+Ordered by the orchestrator at 03:20. Sampled on disk before obeying: HEAD
+`fe07ba6`, tree clean, `master` at `d65759f` -- what the order said. The lane's
+commits before the merge end at `fe07ba6`; the merge commit is the one that
+carries this section (a commit cannot name its own hash). Where this section
+and sections 0 to 11 disagree, this section is the later reading.
+
+### I.1 The merge of `master` `d65759f`
+
+`d65759f` carries rulings batch 3 (the search verticals, the unregistered
+refusals, member rosters as bounded reads, passive costs) and lane R's merge
+(245 exclusions back to GAP with their blockers named). Six paths conflicted:
+three by content, three generated.
+
+    path                              resolution
+    _audit/_census/network.md         ONE hunk, rows 170-172: 170 and 171 from master
+                                      (lane R's return; 171 filed NOT-AN-ACT), 172 from
+                                      the lane. The lane's other six rows merged clean --
+                                      master touched none of them.
+    _audit/_census/read-addresses.tsv RE-DERIVED: master's table (lane R's re-derivation)
+                                      plus this lane's moves on the merged census. The
+                                      four FILTER rows' lines leave; the three WHO rows
+                                      keep theirs, re-gated READER -> RULING; master had
+                                      already dropped N 171's.
+    _audit/INDEX.md, _audit/RULINGS.md,
+    _audit/_census/blocker-map.tsv    generated: master's side taken to clear the
+                                      conflict, every resolved path staged, then
+                                      regenerated to a fixed point (two sweeps, --check)
+
+No textual conflict, integrated by hand: `scripts/triage_read_gap_rows.py`
+keeps master's RETURNED class and CONTROL 9; TRIAGE loses `N 84`, `N 85`,
+`N 87`, `N 94`; DECIDED_SINCE_TRIAGE loses `N 94` and re-words `N 79`, `N 172`,
+`N 194` -- the triage-day decision was made, the reader was built, and a
+different question now holds each. All nine controls OK. `_audit/INSTRUMENTS.md`
+merged in number order with no conflict: 64 (with lane R's 64.3), 65, 66.
+
+### I.2 The WHO rule, row by row
+
+The orchestrator's census call, 03:20: a row whose capability's payload is
+WHO -- a person, or a set of people -- served by a reader that publishes only
+counts, is NOT delivered, on the precedent of `N 162` and `N 180`; a FILTER, or
+a count the reader's output proves, stays COVERED-UNFIRED. Each row decided on
+its own words:
+
+    row    row text                                              payload  state
+    N 79   Search for a person by keyword or natural-language    WHO      GAP
+           query
+    N 194  Find hiring managers through the #Hiring hashtag      WHO      GAP
+           in search
+    N 172  View a fellow group member's connections only after   WHO      GAP
+           connecting with them
+    N 84   Filter by Current company                             FILTER   COVERED-UNFIRED
+    N 85   Filter by Connections of                              FILTER   COVERED-UNFIRED
+    N 87   Filter by Past company                                FILTER   COVERED-UNFIRED
+    N 94   Add more than one location to a single search         FILTER   COVERED-UNFIRED
+
+* `N 79` and `N 194`, as the order expected: a person, and hiring managers.
+* `N 172` on its words: to VIEW a member's connections is to see a set of
+  people. The count the reader publishes answers a narrower question -- are
+  that member's connections shown to this account at all -- and in one
+  direction only (a nonzero says yes, a zero says nothing). Section 5 argued the
+  count was this row's question; that reading is withdrawn here.
+* `N 85` is a filter whose VALUE is a person. The capability is the filter, the
+  reader applies it, and what it publishes is the filtered search's shape.
+* `N 94`'s capability is the shape of a query, several locations in one search.
+
+Each GAP cell now opens on the rule and carries, in its own words: BLOCKER,
+NAMED: the name-free shaper doctrine (`_audit/2026-09-05-lead-rulings-round-two.md`:
+this server does not publish names), pending the operator's question on
+returning names at runtime; REOPENER: the operator rules that people reads may
+return who at runtime. The build stays in the cell, below the rule, as that
+day's record. No `HELD BY` marker is written: no hold in `scripts/ruling_holds.py`
+binds these rows, and a marker would claim one. In the address table the three
+are gated RULING -- a decision the operator has not made -- with the same
+blocker and reopener in the note. **Nothing is built around the doctrine in
+either direction: the reader is unchanged.** Each FILTER cell carries one
+added sentence saying why the rule does not reach it.
+
+### I.3 Pins, re-derived on the merged tree
+
+Measured on the merged tree, not applied as deltas from `9c219c8`; section 8's
+forecast was taken against seven rows moving and is replaced by this table.
+
+    scripts/census_completion.py PINNED        master d65759f   merged
+      adjudicated                                    190          194
+      delivered_broad                                101          105
+      gap                                            514          510
+      unfired                                         26           30
+      gap_read                                        98           94
+      b3_admitted                                     44           40
+      b3_blocked_on_nothing                            9            2   (M M49, P K1)
+      b1_no_ruling                                    16           20
+      every other pin unchanged: stated_rows 704, capabilities 762,
+      capabilities_achievable 648, out_of_scope 70, achievable 634,
+      delivered_strict 75, cannot_deliver 19, gap_write 324, gap_unknown 92,
+      b3_refused 38, b1_standing 10, b1_released 6, b2_d3_rows 0, jobs_* all
+
+    scripts/census_completion.py PINNED_B1_ROWS
+      NO RULING gains N 84, N 85, N 87, N 94 (20 rows)
+
+    tests/test_the_tool_surface_is_pinned_so_a_row_must_move.py
+      linkedin_people_search_shape: () -> (connections_of, current_company_ids,
+      keywords, location_ids, past_company_ids); PINNED_PARAMETER_COUNT
+      69 -> 74 on the merged surface; PINNED_TOOL_COUNT 51 unchanged
+
+    scripts/triage_read_gap_rows.py
+      TRIAGE 75 verdicts (four keys fewer); DECIDED_SINCE_TRIAGE 13
+
+`census_completion --check` reads "every headline figure matches its pin" on
+the merged tree. `tests/test_people_search_readers.py` pins the per-row states
+the rule gave (four COVERED-UNFIRED, three GAP with the blocker and the reopener
+named), and that the three WHO rows sit in the address table gated RULING.
+
+### I.4 Gates on the merged tree
+
+PENDING -- filled in once they have run on the merged tree.
+
+### I.5 What the follow-up inherits
+
+* The live queue below is re-cut: the three WHO rows bank on no fire under the
+  rule, so the queue is the four filters, and they fit one session.
+* D2's verticals and the member-roster admissions arrive after this merge.
+
 ## Live queue
 
 Every call is ONE people search and ONE page load. `D1-SEARCH-AS-READS` caps a
-live session at FIVE test searches, so the six calls below are two sessions:
-the first five, then the member row once the operator names a member. No value
+live session at FIVE test searches; the four calls below are one session of
+four, or three and then `N 85` once the operator names a member. No value
 below identifies the operator; the member token and any organisation id are
 supplied at fire time and written into no tracked file.
 
@@ -459,10 +595,13 @@ at least 1, `panel_wait.settled` True and `denominators.values_refused` 0.
 with the finding); `person_results` 0 banks nothing, because hidden, empty and
 a dropped facet read alike.
 
-    N 79   linkedin_people_search_shape(keywords="engineer")                 1 load, search 1/5; banks the keyword row -- and records the scope judgement its cell asks for (PROVEN, or COVERED-CANNOT-DELIVER for a count-only answer)
-    N 194  linkedin_people_search_shape(keywords="#hiring")                  1 load, search 2/5; banks as N 79, the same scope judgement
-    N 84   linkedin_people_search_shape(current_company_ids="<id>")          1 load, search 3/5; <id> = the numeric Page id linkedin_job_detail resolves as company_id on a posting at any employer that is not his (the J 10 route, fired live 2026-09-20); banks on query_kept.current_company_ids
-    N 87   linkedin_people_search_shape(past_company_ids="<id>")             1 load, search 4/5; <id> as for N 84, from a different posting; query_kept.past_company_ids also settles the DERIVED list spelling
-    N 94   linkedin_people_search_shape(keywords="engineer", location_ids="103644278,101165590")  1 load, search 5/5; two country-level geo ids (the United States and the United Kingdom as publicly documented -- UNVERIFIED here, from recall; neither his city nor his country); banks on query_kept.location_ids with both ids sent, and settles the DERIVED two-value list
-    N 85   linkedin_people_search_shape(connections_of="<token>")            1 load, search 1/5 of a SECOND session; <token> = ONE member he names, e.g. the recipient_id linkedin_connections returns for a 1st-degree connection he picks; banks on query_kept.connections_of and settles the never-LinkedIn-authored key
-    N 172  (the same call as N 85, no second load)                           0 extra loads; banks with N 85, and person_results at least 1 also answers its own question: that member's connections are shown to this account
+    N 84   linkedin_people_search_shape(current_company_ids="<id>")          1 load, search 1/5; <id> = the numeric Page id linkedin_job_detail resolves as company_id on a posting at any employer that is not his (the J 10 route, fired live 2026-09-20); banks on query_kept.current_company_ids
+    N 87   linkedin_people_search_shape(past_company_ids="<id>")             1 load, search 2/5; <id> as for N 84, from a different posting; query_kept.past_company_ids also settles the DERIVED list spelling
+    N 94   linkedin_people_search_shape(keywords="engineer", location_ids="103644278,101165590")  1 load, search 3/5; two country-level geo ids (the United States and the United Kingdom as publicly documented -- UNVERIFIED here, from recall; neither his city nor his country); banks on query_kept.location_ids with both ids sent, and settles the DERIVED two-value list
+    N 85   linkedin_people_search_shape(connections_of="<token>")            1 load, search 4/5, or 1/5 of a later session; <token> = ONE member he names, e.g. the recipient_id linkedin_connections returns for a 1st-degree connection he picks; banks on query_kept.connections_of and settles the never-LinkedIn-authored key
+
+NOT QUEUED, and why: `N 79`, `N 194` and `N 172`. A fire of the same reader
+would prove the reader and bank nothing: under the WHO rule a count does not
+deliver those rows. They move when the operator answers the question on
+returning names at runtime -- and the reader they would then need is not the
+one this lane built.
