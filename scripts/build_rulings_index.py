@@ -878,6 +878,69 @@ REGISTER: tuple = (
              "overridable. Answers the other-members question N 172 was "
              "held on.",
     ),
+    Ruling(
+        id="D4-NO-OWN-BROWSER-CONTEXT",
+        claim="The package does not create its own browser context; it "
+              "attaches to the operator's signed-in browser. P C8's download "
+              "transport goes through DevTools download behaviour on the "
+              "attached browser, which creates no context.",
+        binds="session model -- browser contexts",
+        document="_audit/2026-09-23-rulings-write-class-and-delegated-calls.md",
+        anchor="RULED: (orchestrator, 2026-09-24, delegated) D4 IS ANSWERED NO",
+        aliases=("D4",),
+        note="Orchestrator's call under OUTWARD-ACTS-NEED-THE-OPERATOR; "
+             "overridable. Question: _audit/2026-09-21-the-read-triage.md D4.",
+    ),
+    Ruling(
+        id="D6-CAPABILITY-OVER-AFFORDANCE",
+        claim="A row named for an affordance is discharged when the package "
+              "delivers the same capability payload by its own sanctioned "
+              "routes; the row names them and rests on their proofs (PROVEN "
+              "if live-proven, else UNFIRED).",
+        binds="census convention -- rows named for a control or surface",
+        document="_audit/2026-09-23-rulings-write-class-and-delegated-calls.md",
+        anchor="RULED: (orchestrator, 2026-09-24, delegated) D6 IS ANSWERED YES",
+        aliases=("D6",),
+        note="Orchestrator's call under OUTWARD-ACTS-NEED-THE-OPERATOR; "
+             "overridable. Question: _audit/2026-09-21-the-read-triage.md D6. "
+             "Governs N 132 and J 107.",
+    ),
+    Ruling(
+        id="REVEAL-BUTTON-IS-A-DISCLOSURE",
+        claim="A plain button that only reveals content (e.g. 'Show more "
+              "analytics') is pressed as a disclosure, with before/after "
+              "readings proving it revealed content and changed no state.",
+        binds="press gate -- reveal-only buttons",
+        document="_audit/2026-09-23-rulings-write-class-and-delegated-calls.md",
+        anchor="RULED: (orchestrator, 2026-09-24, delegated) A PLAIN BUTTON "
+               "THAT ONLY",
+        note="Orchestrator's call under OUTWARD-ACTS-NEED-THE-OPERATOR; "
+             "overridable.",
+    ),
+    Ruling(
+        id="SHARE-AND-POLL-PROOFS-OWN-POSTS",
+        claim="Share-link proofs use the operator's own posts only (M C72); a "
+              "poll post's address (M C85) comes from tool arguments only -- "
+              "his own poll post, or NEEDS-TARGET.",
+        binds="live proofs -- share links and poll results",
+        document="_audit/2026-09-23-rulings-write-class-and-delegated-calls.md",
+        anchor="RULED: (orchestrator, 2026-09-24, delegated) SHARE-LINK PROOFS "
+               "USE THE",
+        note="Orchestrator's call under OUTWARD-ACTS-NEED-THE-OPERATOR; "
+             "overridable.",
+    ),
+    Ruling(
+        id="CREDENTIAL-SETTINGS-NEED-THE-OPERATOR",
+        claim="Credential, recovery and session settings -- the seven "
+              "credential/recovery controls and P N10 (sign out of sessions, "
+              "which ends this server's own session) -- are never live-proven "
+              "unless the operator names them.",
+        binds="live proofs -- account security settings",
+        document="_audit/2026-09-23-rulings-write-class-and-delegated-calls.md",
+        anchor="RULED: (orchestrator, 2026-09-24, delegated) CREDENTIAL, "
+               "RECOVERY AND SESSION",
+        note="The cannot-be-undone arm of OUTWARD-ACTS-NEED-THE-OPERATOR.",
+    ),
 )
 
 

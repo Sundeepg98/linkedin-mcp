@@ -8,9 +8,9 @@
 
 **THIS REGISTER IS NOT THE CORPUS AND DOES NOT CLAIM TO BE COMPLETE.** Read section 4 before concluding a question is unruled: the scan that keeps it honest reads ONE marker, and the ruling that caused this file to be written does not carry it.
 
-    rulings registered       48
+    rulings registered       53
     documents scanned        242
-    RULED: declarations      35 claimed, 7 triaged, 0 unclaimed
+    RULED: declarations      40 claimed, 7 triaged, 0 unclaimed
 
 ---
 
@@ -46,6 +46,12 @@ Scan the CLAIM column against your question. Every claim is a paraphrase written
 | `GROUPS-ADDRESS-BUYS-NO-WRITE` | Admitting a group address buys nothing for joining, leaving, posting, commenting or inviting. Each needs its own url, its own write sanction and its own ruling, so those rows stay GAP and no boundary change moves them. The price is three things and an admission pays one. | groups writes, and any address widening | 2026-09-19 | [2026-09-19-groups-admission.md](2026-09-19-groups-admission.md)<br>*The eight writes: the census already ruled this, TODAY, against itself* |
 | `WRITE-CLASS-B` | The package may CONNECT, MESSAGE, APPLY, POST and OPEN MESSAGING on the operator's account, behind the single-use grant model and off by default. Lifts the read-only rule, the apply/connect/InMail cut and DO-NOT-OPEN-MESSAGING. | outward writes and opening messaging | 2026-09-23 | [2026-09-23-rulings-write-class-and-delegated-calls.md](2026-09-23-rulings-write-class-and-delegated-calls.md)<br>*The write class (b)* |
 
+### census convention
+
+| id | what was ruled | binds | when | where (document / section) |
+|---|---|---|---|---|
+| `D6-CAPABILITY-OVER-AFFORDANCE` | A row named for an affordance is discharged when the package delivers the same capability payload by its own sanctioned routes; the row names them and rests on their proofs (PROVEN if live-proven, else UNFIRED). | rows named for a control or surface | 2026-09-23 | [2026-09-23-rulings-write-class-and-delegated-calls.md](2026-09-23-rulings-write-class-and-delegated-calls.md)<br>*D6: a capability delivered without the named affordance* |
+
 ### census state
 
 | id | what was ruled | binds | when | where (document / section) |
@@ -79,15 +85,18 @@ Scan the CLAIM column against your question. Every claim is a paraphrase written
 
 | id | what was ruled | binds | when | where (document / section) |
 |---|---|---|---|---|
+| `CREDENTIAL-SETTINGS-NEED-THE-OPERATOR` | Credential, recovery and session settings -- the seven credential/recovery controls and P N10 (sign out of sessions, which ends this server's own session) -- are never live-proven unless the operator names them. | account security settings | 2026-09-23 | [2026-09-23-rulings-write-class-and-delegated-calls.md](2026-09-23-rulings-write-class-and-delegated-calls.md)<br>*Credential and session settings* |
 | `OPERATOR-NAMES-THE-TARGET` | A live proof of an outward act fires ONLY at a target the operator names -- whom to connect with or message, which job to apply to, what to post. Never a real person or job chosen by the package or an agent. | every outward write | 2026-09-23 | [2026-09-23-rulings-write-class-and-delegated-calls.md](2026-09-23-rulings-write-class-and-delegated-calls.md)<br>*The operator names each live target* |
 | `OWN-INBOX-READS-COVERED-BY-B` | Reading the operator's own inbox, including opening threads, is covered by ruling (b) with no per-fire go-ahead; proofs prefer threads already read so no new read receipt is sent. | /messaging/ reads | 2026-09-23 | [2026-09-23-rulings-write-class-and-delegated-calls.md](2026-09-23-rulings-write-class-and-delegated-calls.md)<br>*Reading his own inbox* |
 | `SELF-PROFILE-EDITS-NOT-OUTWARD` | Edits to the operator's own profile fields are not outward acts: no other person is targeted and each edit reverses. Live proofs are permitted with notify-network off, the field restored in-session and proven by a before/after reading, and never a field that broadcasts by nature. | edits to the operator's own profile fields | 2026-09-23 | [2026-09-23-rulings-write-class-and-delegated-calls.md](2026-09-23-rulings-write-class-and-delegated-calls.md)<br>*Edits to his own profile fields* |
+| `SHARE-AND-POLL-PROOFS-OWN-POSTS` | Share-link proofs use the operator's own posts only (M C72); a poll post's address (M C85) comes from tool arguments only -- his own poll post, or NEEDS-TARGET. | share links and poll results | 2026-09-23 | [2026-09-23-rulings-write-class-and-delegated-calls.md](2026-09-23-rulings-write-class-and-delegated-calls.md)<br>*Share and poll proofs* |
 
 ### press gate
 
 | id | what was ruled | binds | when | where (document / section) |
 |---|---|---|---|---|
 | `IN-ME-NO-BLANKET-BAR` | /in/me/ presses get no blanket sensitivity-basis bar; each control is judged on evidence like any other press. | /in/me/ controls | 2026-09-23 | [2026-09-23-rulings-write-class-and-delegated-calls.md](2026-09-23-rulings-write-class-and-delegated-calls.md)<br>*Presses on /in/me/* |
+| `REVEAL-BUTTON-IS-A-DISCLOSURE` | A plain button that only reveals content (e.g. 'Show more analytics') is pressed as a disclosure, with before/after readings proving it revealed content and changed no state. | reveal-only buttons | 2026-09-23 | [2026-09-23-rulings-write-class-and-delegated-calls.md](2026-09-23-rulings-write-class-and-delegated-calls.md)<br>*A button that only reveals* |
 | `VIEW-SWITCH-PRESS-RESTORED` | A press that changes which rows a view shows is permitted if the view is RESTORED afterwards and a before/after reading proves it. | sort and filter controls | 2026-09-23 | [2026-09-23-rulings-write-class-and-delegated-calls.md](2026-09-23-rulings-write-class-and-delegated-calls.md)<br>*View-switch presses* |
 
 ### read boundary
@@ -96,6 +105,12 @@ Scan the CLAIM column against your question. Every claim is a paraphrase written
 |---|---|---|---|---|
 | `D1-SEARCH-AS-READS` | Search keywords and LinkedIn-written facets are permitted as reads: values from tool arguments only, never an identifying value of the operator, at most 5 test searches per session. | search keywords and facets | 2026-09-23 | [2026-09-23-rulings-write-class-and-delegated-calls.md](2026-09-23-rulings-write-class-and-delegated-calls.md)<br>*D1: search keywords and facets* |
 | `OTHER-MEMBER-IDS-AS-READS` | Another member's id in a search facet (e.g. connectionOf) is permitted as a read when it comes from the tool's arguments, never from page content, and is never stored in a tracked file. | search facets carrying another member's id | 2026-09-23 | [2026-09-23-rulings-write-class-and-delegated-calls.md](2026-09-23-rulings-write-class-and-delegated-calls.md)<br>*Other members' ids as search facets* |
+
+### session model
+
+| id | what was ruled | binds | when | where (document / section) |
+|---|---|---|---|---|
+| `D4-NO-OWN-BROWSER-CONTEXT` | The package does not create its own browser context; it attaches to the operator's signed-in browser. P C8's download transport goes through DevTools download behaviour on the attached browser, which creates no context. | browser contexts | 2026-09-23 | [2026-09-23-rulings-write-class-and-delegated-calls.md](2026-09-23-rulings-write-class-and-delegated-calls.md)<br>*D4: the package's own browser context* |
 
 ### verb
 
@@ -138,6 +153,8 @@ Scan the CLAIM column against your question. Every claim is a paraphrase written
 | container and content | `CONTAINER-EXCLUSION-PROPAGATES-ONLY-IF-UNREACHABLE` |
 | counts and relations only | `FEED-CONTENT-READ-RULING` |
 | D1 | `D1-SEARCH-AS-READS` |
+| D4 | `D4-NO-OWN-BROWSER-CONTEXT` |
+| D6 | `D6-CAPABILITY-OVER-AFFORDANCE` |
 | dark mode | `ONE-NAMED-SETTINGS-PAGE-AT-A-TIME` |
 | DECIDE not MEASURE | `GROUPS-ADDRESS-BUYS-NO-WRITE` |
 | decide-retire-rulings section 2 | `BOUNDARY-IS-NOT-A-REASON` |
@@ -218,7 +235,13 @@ Scan the CLAIM column against your question. Every claim is a paraphrase written
 
 **`CONTAINER-EXCLUSION-PROPAGATES-ONLY-IF-UNREACHABLE`** -- Built ON `P I12` as a SOUND exclusion: *zero of 237 urls reach one* is ground four of EXCLUDED-RULED-ADMISSION. Two later documents call `P I12` a miscategorisation; see the register's DISPUTED note in the report for this wave.
 
+**`CREDENTIAL-SETTINGS-NEED-THE-OPERATOR`** -- The cannot-be-undone arm of OUTWARD-ACTS-NEED-THE-OPERATOR.
+
 **`D1-SEARCH-AS-READS`** -- Orchestrator's call under OUTWARD-ACTS-NEED-THE-OPERATOR; overridable.
+
+**`D4-NO-OWN-BROWSER-CONTEXT`** -- Orchestrator's call under OUTWARD-ACTS-NEED-THE-OPERATOR; overridable. Question: _audit/2026-09-21-the-read-triage.md D4.
+
+**`D6-CAPABILITY-OVER-AFFORDANCE`** -- Orchestrator's call under OUTWARD-ACTS-NEED-THE-OPERATOR; overridable. Question: _audit/2026-09-21-the-read-triage.md D6. Governs N 132 and J 107.
 
 **`ERROR-MESSAGE-RULED-AT-THE-RAISE`** -- THE SIBLING OF `ERROR-URL-ASKED-FOR-OR-NOTHING`, and it goes the OTHER WAY for a stated reason rather than by temperament. The url field could be ruled PER SITE because every value feeding it is an address this package composed or read; `$.message` cannot, because `_error` holds only `type(exc)` and `str(exc)` and the provenance of what that text QUOTES is not among them. So the ruling moves the decision to the raise, which is where the corpus had already put it three times without naming it: `coerce.py`, `press.disclose` and `landing.py`. It also DECLINES the sibling's own recommendation to make the twelve `dom.py` messages type-only -- all twelve are inside `tests/test_readers_emit_no_page_string.py`'s driven subject set and green (4 clean, 8 returns_text, 0 not_driven), so the payload class is already closed for them and type-only would delete twelve diagnoses to close a channel no needle travels. What it SHIPPED is the other end of the pipe: `tests/test_tool_envelopes_emit_no_page_string.py`, because the reader guard discovers only `async def` functions taking a `page` and the 48 tool bodies that funnel into `_error` are therefore outside it, permanently.
 
@@ -246,9 +269,13 @@ Scan the CLAIM column against your question. Every claim is a paraphrase written
 
 **`PERMALINK-READ-IS-ALLOWED`** -- `M C42` records that this ruling DID NOT REACH naming the target -- which is why that row cannot rest on it. See the DISPUTED section of `_audit/2026-09-21-what-was-ruled.md`.
 
+**`REVEAL-BUTTON-IS-A-DISCLOSURE`** -- Orchestrator's call under OUTWARD-ACTS-NEED-THE-OPERATOR; overridable.
+
 **`SEARCH-ADMISSION-APPROVED-FIVE-CONDITIONS`** -- Condition 2 was AMENDED the same day -- see SEARCH-CONDITION-2-CLOSED. The ruling bars FIRING, not READING; conflating the two cost a later wave a decision it did not need.
 
 **`SELF-PROFILE-EDITS-NOT-OUTWARD`** -- Orchestrator's call under OUTWARD-ACTS-NEED-THE-OPERATOR; overridable. Narrows OPERATOR-NAMES-THE-TARGET to writes that target other people.
+
+**`SHARE-AND-POLL-PROOFS-OWN-POSTS`** -- Orchestrator's call under OUTWARD-ACTS-NEED-THE-OPERATOR; overridable.
 
 **`VIEW-SWITCH-PRESS-RESTORED`** -- Orchestrator's call under OUTWARD-ACTS-NEED-THE-OPERATOR; overridable.
 
@@ -313,6 +340,11 @@ Every `RULED:` line in the corpus, and what became of it. An UNCLAIMED row fails
 | [2026-09-23-rulings-write-class-and-delegated-calls.md](2026-09-23-rulings-write-class-and-delegated-calls.md) | RULED: (orchestrator, 2026-09-23, applying (b)) Reading the operator's own | `OWN-INBOX-READS-COVERED-BY-B` |
 | [2026-09-23-rulings-write-class-and-delegated-calls.md](2026-09-23-rulings-write-class-and-delegated-calls.md) | RULED: (orchestrator, 2026-09-23, delegated) EDITS TO THE OPERATOR'S OWN | `SELF-PROFILE-EDITS-NOT-OUTWARD` |
 | [2026-09-23-rulings-write-class-and-delegated-calls.md](2026-09-23-rulings-write-class-and-delegated-calls.md) | RULED: (orchestrator, 2026-09-23, delegated) OTHER MEMBERS' IDS IN SEARCH | `OTHER-MEMBER-IDS-AS-READS` |
+| [2026-09-23-rulings-write-class-and-delegated-calls.md](2026-09-23-rulings-write-class-and-delegated-calls.md) | RULED: (orchestrator, 2026-09-24, delegated) D4 IS ANSWERED NO: the package | `D4-NO-OWN-BROWSER-CONTEXT` |
+| [2026-09-23-rulings-write-class-and-delegated-calls.md](2026-09-23-rulings-write-class-and-delegated-calls.md) | RULED: (orchestrator, 2026-09-24, delegated) D6 IS ANSWERED YES. A row named | `D6-CAPABILITY-OVER-AFFORDANCE` |
+| [2026-09-23-rulings-write-class-and-delegated-calls.md](2026-09-23-rulings-write-class-and-delegated-calls.md) | RULED: (orchestrator, 2026-09-24, delegated) A PLAIN BUTTON THAT ONLY | `REVEAL-BUTTON-IS-A-DISCLOSURE` |
+| [2026-09-23-rulings-write-class-and-delegated-calls.md](2026-09-23-rulings-write-class-and-delegated-calls.md) | RULED: (orchestrator, 2026-09-24, delegated) SHARE-LINK PROOFS USE THE | `SHARE-AND-POLL-PROOFS-OWN-POSTS` |
+| [2026-09-23-rulings-write-class-and-delegated-calls.md](2026-09-23-rulings-write-class-and-delegated-calls.md) | RULED: (orchestrator, 2026-09-24, delegated) CREDENTIAL, RECOVERY AND SESSION | `CREDENTIAL-SETTINGS-NEED-THE-OPERATOR` |
 | [2026-09-23-rulings-write-class-and-delegated-calls.md](2026-09-23-rulings-write-class-and-delegated-calls.md) | RULED: (orchestrator, 2026-09-23, delegated) /in/me/ presses get NO blanket | `IN-ME-NO-BLANKET-BAR` |
 
 ### 5.1 Triaged -- a declaration hit that is not a ruling made here
