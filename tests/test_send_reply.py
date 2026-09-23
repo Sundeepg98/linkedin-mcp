@@ -319,6 +319,27 @@ async def test_what_proves_neither_is_unknown_and_says_do_not_retry(
     assert "Do NOT retry" in receipt["verification"]["why"]
 
 
+#: DERIVED -- the fresh load shows his exact words as the last message, count
+#: up by one, but WEARING THE --other MODIFIER: the other side sent them.
+AFTER_FROM_THEM = _derive(
+    AFTER,
+    '<div class="msg-s-event-listitem msg-s-event-listitem--last-in-group">'
+    f'<p class="msg-s-event-listitem__body t-14">{TEXT}</p>',
+    '<div class="msg-s-event-listitem msg-s-event-listitem--last-in-group msg-s-event-listitem--other">'
+    f'<p class="msg-s-event-listitem__body t-14">{TEXT}</p>',
+)
+
+
+async def test_the_same_words_from_the_other_side_are_not_his_send(writes_on, browser_page):
+    """Authorship is the third condition, and it is the one a delta and a text
+    match cannot supply: the other side can write the same words."""
+    block, _nav_used = await _preview(browser_page)
+    grant = consume(block["to_confirm"], action=_ACTION, target=TARGET)
+    receipt = await writes.perform(_nav(DISPATCHING, AFTER_FROM_THEM), browser_page, grant)
+    assert receipt["performed"] != True  # noqa: E712 -- never SENT
+    assert "last message from: other" in receipt["verification"]["why"]
+
+
 async def test_an_identical_earlier_message_cannot_stand_in_for_this_one(writes_on, browser_page):
     """The words are ALREADY the conversation's last message before the reply
     (DERIVED): the preview counts one, so a fresh load still showing one is
