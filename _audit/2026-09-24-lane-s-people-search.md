@@ -460,9 +460,11 @@ Declared disposable (scratchpad, not tracked):
 
 Ordered by the orchestrator at 03:20. Sampled on disk before obeying: HEAD
 `fe07ba6`, tree clean, `master` at `d65759f` -- what the order said. The lane's
-commits before the merge end at `fe07ba6`; the merge commit is the one that
-carries this section (a commit cannot name its own hash). Where this section
-and sections 0 to 11 disagree, this section is the later reading.
+commits before the merge end at `fe07ba6`, which is on the lane branch only:
+until this merge lands it is nowhere on `master`, and no clone can resolve it.
+The merge commit is the one that carries this section (a commit cannot name
+its own hash). Where this section and sections 0 to 11 disagree, this section
+is the later reading.
 
 ### I.1 The merge of `master` `d65759f`
 
