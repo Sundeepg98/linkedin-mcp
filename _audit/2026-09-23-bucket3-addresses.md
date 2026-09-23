@@ -524,9 +524,12 @@ demonstrations pass, unchanged.
     tests/test_read_addresses.py                   28 passed; its first run failed 1 of 21 on
                                                    its OWN assertion (the letters of RED inside
                                                    BUILT-UNFIRED), fixed before the first commit
-    scripts/impact_gate.py --against 79c5f8e       @@GATE@@
+    scripts/impact_gate.py --against 79c5f8e       PASS over 36 files, 1969 tests, 221.3s wall;
+                                                   NOT CHECKED 179 of 215 files, said by the gate itself
     the three generators, twice                    INDEX, RULINGS, blocker map at a fixpoint
     the pre-commit identity gate                   0 hits, on every commit of this wave
+    the drift control (section 4)                  6 of 6 addresses agree with 2026-09-19
+    a cold source verification (section 6)         67 of 67 supported; two caveats acted on
 
 **NOT RUN, and why:**
 
@@ -558,12 +561,23 @@ demonstrations pass, unchanged.
    under D3, but the boundary's own comment says its address has never been
    seen served; a D3 ruling would not make it buildable. Either the list or the
    row's reason should say so -- this wave changed neither.
-4. **A merge note, not a ruling.** `tests/test_read_addresses.py` goes red, by
-   design, the moment any bucket-3 row changes state or direction. If a sibling
-   wave in the same merge batch banks or re-directs a read row, the table needs
-   the matching edit at merge time; the checker names every row it disagrees
-   with. The register section is numbered 57, not 55, so the siblings that read
-   54 as the maximum do not collide with it.
+4. **Merge notes, not rulings.**
+   * `tests/test_read_addresses.py` goes red, by design, the moment any
+     bucket-3 row changes state or direction. If a sibling wave in the same
+     merge batch banks or re-directs a read row, the table needs the matching
+     edit at merge time; the checker names every row it disagrees with, and
+     `census_completion.py --check` will report the six `b3_` pins as having
+     nothing to check until it is made.
+   * `_audit/INDEX.md`, `_audit/RULINGS.md` and `_audit/_census/blocker-map.tsv`
+     are generated and every wave regenerates them, so they will conflict:
+     regenerate at the merge head rather than hand-merging either side.
+   * `scripts/census_completion.py` is touched in five places, all inside this
+     wave's own concern: one import, a new `bucket3_split()` after `pct()`, the
+     bucket-3 block and the section-5 caveat inside `report()`, the returned
+     figures, and six pins appended to `PINNED`. A sibling wiring bucket 1 or 2
+     will likely touch the neighbouring lines.
+   * The register section is numbered 57, not 55, so the siblings that read 54
+     as the maximum do not collide with it.
 
 ---
 
