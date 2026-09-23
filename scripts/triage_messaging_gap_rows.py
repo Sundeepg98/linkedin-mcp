@@ -39,6 +39,18 @@ blocker to anything; it joins.
 Any control that fails REFUSES THE WHOLE REPORT. A triage that cannot be
 trusted to have read every row should not print a tally at all.
 
+## A ROW RETURNED FROM AN EXCLUSION IS ITS OWN CLASS, NOT A HOLE IN THE MAP
+
+The blocker map's spine is the 409 rows that were GAP at the 2026-09-03 freeze,
+and it is not grown (the orchestrator's call, delegated, 2026-09-24). A row lane
+R returned from EXCLUDED-RULED on 2026-09-23 that was NOT one of those 409 has
+no map line, and never will. Such a row is not unjoined: its blocker is NAMED IN
+ITS OWN CELL, after the marker ``RETURNED TO GAP ... BY LANE R ... BLOCKER,
+NAMED:`` (``_audit/2026-09-23-exclusion-returns.md``). It is tallied under
+:data:`RETURNED_CLASS`. **The coverage control still refuses** a row that is
+absent from the map AND carries no such marker, so the class cannot absorb a
+genuinely missing row.
+
 USAGE:
 
     ./venv/Scripts/python.exe scripts/triage_messaging_gap_rows.py
@@ -51,6 +63,7 @@ from __future__ import annotations
 import argparse
 import collections
 import pathlib
+import re
 import subprocess
 import sys
 
@@ -72,6 +85,15 @@ DEFAULT_SLICE = "M"
 _READ = ("R",)
 _WRITE = ("W",)
 _BOTH = ("R+W",)
+
+#: The census's convention for a row lane R returned from an exclusion: its
+#: cell opens a note with this marker and names its blocker after it.
+RETURNED_MARKER = re.compile(
+    r"\*\*RETURNED TO GAP\b[^*]*\bBY LANE R\b.*?BLOCKER, NAMED:", re.S)
+
+#: The class such a row is tallied under when the frozen blocker map has no
+#: line for it. Not a blocker name: the blocker is in the row's own cell.
+RETURNED_CLASS = "RETURNED-OUTSIDE-LEDGER"
 
 
 def _gap_rows(letter: str):
@@ -134,18 +156,31 @@ def _control_count(letter: str, enumerated: int) -> str:
     return "the shipped counter printed no GAP line for %s" % name
 
 
-def unjoined_rows(letter, rows, blockers) -> list[str]:
+def returned_outside_ledger(letter, rows, blockers, cells) -> set[str]:
+    """Row ids absent from the blocker map whose own cell carries the
+    returned-row marker, and so names its blocker. See the module docstring."""
+    return {
+        row_id
+        for row_id, _ in rows
+        if ("%s %s" % (letter, row_id)) not in blockers
+        and RETURNED_MARKER.search(" | ".join(cells.get(row_id, [])))
+    }
+
+
+def unjoined_rows(letter, rows, blockers, returned=frozenset()) -> list[str]:
     """Row ids with no blocker assignment. CONTROL 2, as a callable.
 
     Extracted from :func:`main` so it can be SHOWN FAILING against a blocker
     map with a hole in it. A check that only ever runs over the real, complete
     map has never been observed to fail, and this repository counts that as
-    uncertified.
+    uncertified. ``returned`` is :func:`returned_outside_ledger`'s set: those
+    rows are classed, not missing.
     """
     return sorted(
         row_id
         for row_id, _ in rows
         if ("%s %s" % (letter, row_id)) not in blockers
+        and row_id not in returned
     )
 
 
@@ -174,8 +209,9 @@ def main(argv: list[str] | None = None) -> int:
         print("REFUSING: %s" % problem)
         return 1
 
-    # ---- CONTROL 2: every row joins --------------------------------------
-    unjoined = unjoined_rows(letter, rows, blockers)
+    # ---- CONTROL 2: every row joins, or names its blocker in its cell -----
+    returned = returned_outside_ledger(letter, rows, blockers, cells)
+    unjoined = unjoined_rows(letter, rows, blockers, returned)
     if unjoined:
         print(
             "REFUSING: %d of %d GAP rows carry no blocker assignment: %s"
@@ -189,15 +225,18 @@ def main(argv: list[str] | None = None) -> int:
 
     for row_id, _lineno in rows:
         direction = rcb.direction_of(cells[row_id])
-        blocker = blockers["%s %s" % (letter, row_id)]
+        blocker = (RETURNED_CLASS if row_id in returned
+                   else blockers["%s %s" % (letter, row_id)])
         by_direction[direction].append(row_id)
         by_blocker[blocker].append(row_id)
         cross[(blocker, direction)] += 1
 
     print("slice                %s (%s)" % (letter, ccs.SLICES[letter]))
     print("GAP rows             %d" % len(rows))
-    print("controls             counter agrees, all rows joined, "
-          "direction reader shown refusing")
+    print("controls             counter agrees, all rows joined or "
+          "classed, direction reader shown refusing")
+    print("returned, off ledger %d   (%s: the blocker is named in the "
+          "row's own cell)" % (len(returned), RETURNED_CLASS))
     print()
     print("BY DIRECTION, as the census's own R/W column states it")
     total = 0

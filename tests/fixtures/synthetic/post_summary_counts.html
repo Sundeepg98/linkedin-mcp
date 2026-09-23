@@ -1,0 +1,150 @@
+<!doctype html>
+<!--
+  SYNTHETIC. Nothing here was copied from a page.
+
+  It reproduces the ANCHOR STRUCTURE linkedin_server/post_summary_counts.py
+  cites as measured 2026-09-23 on two raw captures held in the gitignored
+  _state/ directory (never committed): one of /analytics/creator/content/
+  ("Top posts", SHAPE A below) and one of his own profile activity rail
+  (SHAPE B below). No name, no slug, no member token, no real urn.
+
+  Every digit run after urn:li:<letters>: is EXACTLY FIVE DIGITS.
+  tests/test_no_committed_identity.py's URN_ID_SHAPE fires at SIX digits or
+  more (\d{6,}) and URN_OPAQUE_SHAPE at eight-or-more opaque characters, so
+  five ASCII digits trips neither and is visibly not a real LinkedIn id.
+
+  SHAPE A -- analytics-page "Top posts" block: a post-summary anchor drawing
+  "<n> impressions <middot> <n> engagements" then "View analytics", followed
+  by a sibling feed-post block. Two of these (A1, A2); A2 carries the
+  thousands-comma case and the two draw different engagements values.
+
+  SHAPE B -- profile activity-rail item: a post-summary anchor wrapping
+  nested aria-labelled divs, an empty chart svg, and a lone "<n> impressions"
+  line (no engagements). Three of these (B1, B2, B3).
+
+  DECOYS, each proving one refusal/count path in post_summary_counts.tally()
+  or in the SELECTOR itself:
+
+    D1  an anchor OUTSIDE <main>, in <nav>, with a valid post-summary
+        activity href and "999 impressions" text. SELECTOR is scoped
+        'main a[...]', so this anchor is never even seen -- anchors_seen
+        does not move for it.
+
+    D2  inside main, a /feed/update/urn:li:share:.../ anchor with text
+        "555 impressions". Its href carries no "/analytics/post-summary/"
+        substring, so the CSS selector itself never matches it -- also
+        invisible to anchors_seen, for a different reason than D1.
+
+    D3  inside main, a post-summary-marker anchor whose urn TYPE is
+        "share", not "activity" (urn:li:share:20106 sitting behind
+        /analytics/post-summary/). The selector matches it (anchors_seen
+        +1), item_addresses.classify() recognises it as kind post_summary,
+        and post_summary_counts._activity_key() then refuses it because
+        the urn family is not "activity" -- counted in not_activity_links.
+
+    D4  a SECOND anchor pointing at the SAME activity urn as item B3
+        (urn:li:activity:20110). Counted in duplicate_links; does not add
+        a sixth item.
+
+    D5  inside main, a post-summary activity anchor with its own distinct
+        urn (urn:li:activity:20107), whose rendered text is "Show stats"
+        -- a real LinkedIn label that carries no impressions line. Counted
+        in unparsed.
+
+  No /in/<slug>/ anchor anywhere, not even invented. Any visible title text
+  is obviously synthetic ("A post title").
+-->
+<html lang="en">
+  <head><title>Content analytics</title></head>
+  <body>
+    <nav>
+      <a href="https://www.linkedin.com/">Home</a>
+      <!-- D1: valid post-summary activity link, but outside <main>. -->
+      <a href="https://www.linkedin.com/analytics/post-summary/urn:li:activity:20199/">999 impressions</a>
+    </nav>
+
+    <main>
+      <h2>Impressions</h2>
+      <div aria-label="Chart. Highcharts interactive chart."></div>
+
+      <!-- Shape A, item 1 -->
+      <div>
+        <a href="https://www.linkedin.com/analytics/post-summary/urn:li:activity:20101/">
+          <div>
+            <p>7 impressions &middot; 0 engagements</p>
+            <p>View analytics</p>
+          </div>
+        </a>
+        <hr role="presentation">
+        <div><div role="listitem"><h2><span>Feed post</span><span aria-hidden="true"></span></h2>
+          <a href="https://www.linkedin.com/feed/update/urn:li:share:20102/"><div><p><span>A post title</span></p></div></a>
+        </div></div>
+      </div>
+
+      <!-- Shape A, item 2. The thousands-comma case lives here. -->
+      <div>
+        <a href="https://www.linkedin.com/analytics/post-summary/urn:li:activity:20103/">
+          <div>
+            <p>1,234 impressions &middot; 88 engagements</p>
+            <p>View analytics</p>
+          </div>
+        </a>
+        <hr role="presentation">
+        <div><div role="listitem"><h2><span>Feed post</span><span aria-hidden="true"></span></h2>
+          <a href="https://www.linkedin.com/feed/update/urn:li:share:20104/"><div><p><span>A post title</span></p></div></a>
+        </div></div>
+      </div>
+
+      <!-- D2: feed permalink, not the post-summary marker; the selector must not see it -->
+      <a href="https://www.linkedin.com/feed/update/urn:li:share:20105/">555 impressions</a>
+
+      <!-- D3: post-summary marker, but a share urn, not an activity urn -->
+      <a href="https://www.linkedin.com/analytics/post-summary/urn:li:share:20106/">444 impressions</a>
+
+      <!-- D5: post-summary activity urn, unparsable line -->
+      <a href="https://www.linkedin.com/analytics/post-summary/urn:li:activity:20107/">Show stats</a>
+
+      <!-- Shape B, item 1 -->
+      <li><div role="listitem"><div>
+        <a href="https://www.linkedin.com/analytics/post-summary/urn:li:activity:20108/">
+          <div aria-label="View analytics">
+            <div aria-label="Content analytics">
+              <svg aria-label="Analytics chart" role="img" aria-hidden="false"></svg>
+              <p>352 impressions</p>
+            </div>
+            <p><span>View analytics</span><span aria-hidden="true">View analytics</span></p>
+          </div>
+        </a>
+      </div></div></li>
+
+      <!-- Shape B, item 2 -->
+      <li><div role="listitem"><div>
+        <a href="https://www.linkedin.com/analytics/post-summary/urn:li:activity:20109/">
+          <div aria-label="View analytics">
+            <div aria-label="Content analytics">
+              <svg aria-label="Analytics chart" role="img" aria-hidden="false"></svg>
+              <p>901 impressions</p>
+            </div>
+            <p><span>View analytics</span><span aria-hidden="true">View analytics</span></p>
+          </div>
+        </a>
+      </div></div></li>
+
+      <!-- Shape B, item 3. D4 (immediately after) duplicates its urn. -->
+      <li><div role="listitem"><div>
+        <a href="https://www.linkedin.com/analytics/post-summary/urn:li:activity:20110/">
+          <div aria-label="View analytics">
+            <div aria-label="Content analytics">
+              <svg aria-label="Analytics chart" role="img" aria-hidden="false"></svg>
+              <p>42 impressions</p>
+            </div>
+            <p><span>View analytics</span><span aria-hidden="true">View analytics</span></p>
+          </div>
+        </a>
+      </div></div></li>
+
+      <!-- D4: a second link to the same activity urn as the item directly above -->
+      <a href="https://www.linkedin.com/analytics/post-summary/urn:li:activity:20110/">View analytics</a>
+    </main>
+  </body>
+</html>

@@ -109,6 +109,10 @@ REACHABLE = {
 #: forward slashes, matched exactly. Keep this list to files a SCRIPT writes.
 DERIVED_ARTIFACTS = {
     "_audit/_census/blocker-map.tsv",
+    # Written by `scripts/completeness_harvest.py`, never by a person: it lists
+    # addresses the census lacks, so counting it as an argument document added
+    # one to many CANDIDATE-1-OF-N denominators without arguing anything.
+    "_audit/_census/completeness-candidates.tsv",
 }
 
 #: Words that mark a paragraph ARGUING a blocker rather than merely naming it.

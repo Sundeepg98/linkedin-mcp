@@ -68,16 +68,28 @@ def test_the_creator_content_page_is_admitted():
             "A QUERY. The entry is anchored with no query group on purpose: "
             "the url is built from one module constant with nothing appended",
         ),
+        # `/analytics/creator/audience/` STOOD HERE UNTIL 2026-09-23, as "A
+        # SIBLING LINKED FROM THE ADMITTED PAGE ... a reason to CONSIDER an
+        # address, never a reason to have admitted it". Lane L1 considered it
+        # and ADMITTED it on its own line in readonly.py, with its own
+        # argument and its own blast radius (`tests/test_l1_self_scoped_
+        # admissions.py`). The line is removed rather than edited, exactly as
+        # the recruiter-views line below was, so nobody reads a refusal this
+        # file no longer makes. Its QUERY and SUB-PATH spellings replace it:
+        # still refused, and still facts about this tree's discipline.
         (
-            "https://www.linkedin.com/analytics/creator/audience/",
-            "A SIBLING LINKED FROM THE ADMITTED PAGE. Measured 2026-09-05: "
-            "the content page draws this address. Being drawn by an admitted "
-            "page is a reason to CONSIDER an address, never a reason to have "
-            "admitted it -- one named page at a time, never the family",
+            "https://www.linkedin.com/analytics/creator/audience/?x=1",
+            "THE NEWLY ADMITTED SIBLING WITH A QUERY -- its entry takes none",
+        ),
+        (
+            "https://www.linkedin.com/analytics/creator/audience/detail/",
+            "THE NEWLY ADMITTED SIBLING WITH A SUB-PATH -- its entry takes none",
         ),
         (
             "https://www.linkedin.com/analytics/creator/top-posts/",
-            "THE OTHER SIBLING, same reading, same reason",
+            "THE OTHER SIBLING DRAWN ON THE CONTENT PAGE. Being drawn is a "
+            "reason to CONSIDER an address, never a reason to have admitted "
+            "it -- and nobody has argued for this one",
         ),
         # BOTH SPELLINGS ARE KEPT. The wave and the integration each replaced
         # the old row independently -- with the SUB-PATH and with the QUERY --
@@ -178,7 +190,12 @@ def test_the_refusals_are_not_carried_by_this_pattern():
     for url in (
         "https://www.linkedin.com/analytics/creator/",
         "https://www.linkedin.com/analytics/",
-        "https://www.linkedin.com/analytics/creator/audience/",
+        # `/analytics/creator/audience/` was here until 2026-09-23 and is now
+        # ADMITTED by its own entry (lane L1), so it can no longer be asserted
+        # refused with only the creator-content pattern removed. Its SUB-PATH
+        # stands in, and the admitted page itself is asserted below to be
+        # carried by its own line and not by this one.
+        "https://www.linkedin.com/analytics/creator/audience/detail/",
         # BOTH SPELLINGS ARE KEPT. The wave and the integration each replaced
         # the old row independently -- with the SUB-PATH and with the QUERY --
         # and they are different facts about the same entry: it takes no
@@ -214,6 +231,19 @@ def test_the_refusals_are_not_carried_by_this_pattern():
     ]
     assert len(matching) == 1, matching
     assert "recruiter-views" in matching[0].pattern, matching[0].pattern
+
+    # THE SAME, FOR THE SIBLING ADMITTED 2026-09-23. The audience page must be
+    # carried by its OWN entry: if removing the creator-content pattern were
+    # what refused it, that pattern would be far broader than it claims.
+    audience = "https://www.linkedin.com/analytics/creator/audience/"
+    assert readonly.is_read_url(audience) is True, audience
+    assert allowed_without(audience), audience
+    carriers = [
+        pattern for pattern in readonly._ALLOWED_URL_PATTERNS
+        if pattern.match(audience)
+    ]
+    assert len(carriers) == 1, carriers
+    assert "creator/audience" in carriers[0].pattern, carriers[0].pattern
 
 
 def test_the_pattern_carries_no_member_segment():
@@ -291,15 +321,27 @@ def test_the_admitted_analytics_pages_are_exactly_three():
     and never bumped silently, so the next arrival costs the same
     conversation this one did. The integration that merged the wave records
     the raise at `_audit/2026-09-20-the-premium-integration.md` section 3.
+
+    **RAISED AGAIN 2026-09-23, FROM FIVE TO SEVEN PATTERNS**, by lane L1:
+    the audience page (census ``P L1``) and ONE post's analytics by its
+    activity urn (``P G6``, ``M C38``), each on its own anchored line with
+    its own argument and a blast radius of +2, pinned in
+    ``tests/test_l1_self_scoped_admissions.py``. It is the same
+    conversation the last raise had, held in
+    ``_audit/2026-09-23-lane-l1-refused-reads.md``. The analytics HUB that
+    lane also admitted is ``/dashboard/``, which this count's pattern does
+    not match, and it is named there rather than smuggled in here.
     """
     analytics = [
         pattern.pattern
         for pattern in readonly._ALLOWED_URL_PATTERNS
         if re.search(r"analytics|profile-views", pattern.pattern)
     ]
-    assert len(analytics) == 5, analytics
+    assert len(analytics) == 7, analytics
     # AND THE PAGES, NAMED, so the count cannot be satisfied by a duplicate.
     assert sum("recruiter-views" in p for p in analytics) == 1, analytics
     assert sum("creator/content" in p for p in analytics) == 1, analytics
     assert sum("search-appearances" in p for p in analytics) == 1, analytics
     assert sum("profile-views" in p for p in analytics) == 2, analytics
+    assert sum("creator/audience" in p for p in analytics) == 1, analytics
+    assert sum("post-summary" in p for p in analytics) == 1, analytics

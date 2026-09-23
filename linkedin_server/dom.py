@@ -39,10 +39,11 @@ browser.
 
 from __future__ import annotations
 
+import json
 import re
 import time
 from typing import Any, Optional
-from urllib.parse import urlsplit
+from urllib.parse import parse_qs, urlsplit
 
 from linkedin_server import landing, shape
 from linkedin_server.coerce import as_count
@@ -1930,6 +1931,63 @@ async def read_apply_control(page: Any) -> dict[str, Any]:
 #: reversibility claim, one layer down.
 FOLLOW_CONTROL = 'button[aria-label="Follow"], button[aria-label="Following"]'
 
+# ---------------------------------------------------------------------------
+# THE RELABEL, 2026-09-19, AND THE ANCHOR THAT ANSWERS IT (census N 46, J 103)
+# ---------------------------------------------------------------------------
+#
+# MEASURED LIVE on five hydrated postings, ``_audit/2026-09-19-the-follow-
+# control-live.md``: the exact-value union above matched ZERO controls on all
+# five. The control was still there -- one ``<button>`` in the
+# About-the-company card, its visible text ``Follow`` -- but its accessible
+# name had become ``Follow `` followed by the EMPLOYER'S NAME (verified
+# mechanically, by length and token shape, against each posting's own
+# company name). The reader then answered "count 0", which the verdict read
+# as a page that had not hydrated: the one thing that happened was the one
+# thing it could not say, and ``linkedin_follow_company`` refused on every
+# live posting while its census rows read COVERED-UNFIRED.
+#
+# THE ANCHOR IS THE ORGANISATION PAGE ROOT'S (``COMPANY_PAGE_FOLLOW_*`` below),
+# carried over: a label PREFIX is not an identity. The posting's own control
+# is the ONE button inside the About-the-company card whose name opens
+# ``Follow `` -- the space is the discriminator, so a ``Following ...``
+# control never matches -- AND whose name, after that prefix, is the employer
+# name the card itself draws in its own ``/company/`` link. Both are read on
+# the page and nothing is typed here.
+#
+# THE READER NEVER RETURNS THAT LABEL. A bound control is reported by the
+# canonical state word ``Follow`` -- the only thing a caller acts on -- so the
+# employer's name (a sole trader's is a person's) never reaches a verdict, a
+# ``why`` or an exception. THE ON LABEL IS NOT MEASURED: every posting read was
+# an employer he did not follow. A card drawing a ``Following `` control is
+# COUNTED, so the verdict can say what it saw instead of blaming hydration,
+# and it is never mapped to ``following``.
+
+#: The part of the relabelled name this package writes down; the employer's
+#: name is the rest, and it is the page's to say.
+POSTING_FOLLOW_PREFIX = "Follow "
+
+#: The card, the relabelled OFF control inside it, the presumed ON control
+#: (counted, never pressed, never trusted), the same prefix page-wide (a fact,
+#: never an anchor), and the card's own employer-name links.
+POSTING_ABOUT_CARD = 'div[componentkey^="JobDetails_AboutTheCompany"]'
+POSTING_FOLLOW_IN_CARD = (
+    'div[componentkey^="JobDetails_AboutTheCompany"] '
+    'button[aria-label^="Follow "]'
+)
+POSTING_FOLLOWING_IN_CARD = (
+    'div[componentkey^="JobDetails_AboutTheCompany"] '
+    'button[aria-label^="Following "]'
+)
+POSTING_FOLLOW_ANYWHERE = 'button[aria-label^="Follow "]'
+POSTING_CARD_NAME_LINKS = (
+    'div[componentkey^="JobDetails_AboutTheCompany"] a[href*="/company/"]'
+)
+
+#: A bound on the name links read, so a card drawing an unusual number of
+#: company links cannot make the read unbounded. The card holds TWO distinct
+#: ``/company/`` targets on every capture (see ``ABOUT_COMPANY_MAX_LINKS``).
+POSTING_CARD_NAME_LINK_LIMIT = 6
+
 
 def follow_control_selector(label: str) -> str:
     """A selector for the follow control wearing exactly ``label``.
@@ -1973,22 +2031,288 @@ async def read_follow_control(page: Any) -> dict[str, Any]:
     * ``count`` above 1 -- ambiguous. More than one follow control means the
       page is drawing something besides the posting's own employer, and
       picking the first would be picking by position.
+
+    TWO CONVENTIONS SINCE THE RELABEL (see the block above), and ``form``
+    says which one answered: ``"bare"`` -- the measured exact labels, read
+    through :data:`FOLLOW_CONTROL` exactly as before -- or ``"prefixed"`` --
+    the card's relabelled control. A prefixed control that is BOUND (its name
+    is ``Follow `` plus the employer name the card draws) is reported with
+    the canonical label ``Follow``; an unbound one with ``None``. ``label`` is
+    therefore only ever ``Follow``, ``Following`` or ``None`` -- never the
+    page's own words. A page drawing BOTH conventions is ``form`` ``"both"``,
+    which the verdict refuses. Failures are logged and reported by TYPE only.
     """
-    out: dict[str, Any] = {"label": None, "count": 0}
+    out: dict[str, Any] = {
+        "label": None, "count": 0, "form": None,
+        "in_card": 0, "in_card_following": 0, "anywhere": 0, "bound": 0,
+        "error": None,
+    }
     try:
         controls = page.locator(FOLLOW_CONTROL)
-        out["count"] = int(await controls.count())
-    except Exception as exc:
-        logger.debug("follow control unreadable: %s: %s", type(exc).__name__, exc)
+        bare = as_count(await controls.count())
+        in_card = page.locator(POSTING_FOLLOW_IN_CARD)
+        out["in_card"] = as_count(await in_card.count())
+        out["in_card_following"] = as_count(
+            await page.locator(POSTING_FOLLOWING_IN_CARD).count())
+        out["anywhere"] = as_count(
+            await page.locator(POSTING_FOLLOW_ANYWHERE).count())
+    except Exception as exc:  # noqa: BLE001 -- the TYPE is the whole report
+        # LOGGED AS ``type(exc).__name__`` AND NEVER FROM ``out``: ``out``
+        # also holds a label read off the page, and
+        # ``tests/test_page_text_is_never_printed.py`` counts a subscript of
+        # such a dict -- or a name it has seen bound to page text anywhere in
+        # this module -- as page text reaching a print.
+        out["error"] = type(exc).__name__
+        logger.debug("follow control unreadable: %s", type(exc).__name__)
         return out
-    if out["count"] != 1:
+
+    if bare and out["in_card"]:
+        # Two conventions at once: which is the employer's is not a reading.
+        out["form"] = "both"
+        out["count"] = bare + out["in_card"]
+        return out
+    if bare or not out["in_card"]:
+        out["form"] = "bare" if bare else None
+        out["count"] = bare
+        if bare != 1:
+            return out
+        try:
+            label = await controls.first.get_attribute("aria-label")
+        except Exception as exc:  # pragma: no cover - defensive
+            logger.debug("follow label unreadable: %s", type(exc).__name__)
+            return out
+        # Only the two exact values the selector can match reach this line.
+        out["label"] = str(label or "").strip() or None
+        return out
+
+    out["form"] = "prefixed"
+    out["count"] = out["in_card"]
+    if out["in_card"] != 1:
         return out
     try:
-        label = await controls.first.get_attribute("aria-label")
-    except Exception as exc:  # pragma: no cover - defensive
-        logger.debug("follow label unreadable: %s: %s", type(exc).__name__, exc)
+        label = " ".join(str(await in_card.first.get_attribute(
+            "aria-label", timeout=ELEMENT_READ_TIMEOUT_MS) or "").split())
+        links = page.locator(POSTING_CARD_NAME_LINKS)
+        names: set[str] = set()
+        for index in range(min(as_count(await links.count()),
+                               POSTING_CARD_NAME_LINK_LIMIT)):
+            text = await links.nth(index).inner_text(
+                timeout=ELEMENT_READ_TIMEOUT_MS)
+            for line in str(text or "").splitlines():
+                name = " ".join(line.split())
+                if name:
+                    names.add(name)
+    except Exception as exc:  # noqa: BLE001 -- the TYPE is the whole report
+        out["error"] = type(exc).__name__
+        logger.debug("follow control label unreadable: %s", type(exc).__name__)
         return out
-    out["label"] = str(label or "").strip() or None
+    named = label[len(POSTING_FOLLOW_PREFIX):] if label.startswith(
+        POSTING_FOLLOW_PREFIX) else ""
+    if named and named in names:
+        out["bound"] = 1
+        out["label"] = POSTING_FOLLOW_PREFIX.strip()
+    return out
+
+
+# ---------------------------------------------------------------------------
+# The follow control on an organisation Page's OWN root (census row N 47)
+# ---------------------------------------------------------------------------
+#
+# A FIFTH FOLLOW CONVENTION, and the reason this is its own block rather than a
+# widening of :data:`FOLLOW_CONTROL`. The posting's control was bare --
+# ``Follow`` / ``Following`` -- until LinkedIn relabelled it (measured on five
+# live postings 2026-09-19, ``_audit/2026-09-19-the-follow-control-live.md``).
+# The Page ROOT names the Page in the control: MEASURED 2026-09-20 on one
+# Page-root capture held outside the tree (it is an organisation's page, and
+# only shapes and counts were taken from it), EIGHT buttons open with
+# ``Follow `` and every one reads ``Follow <that Page's name>``:
+#
+#     outside <main>                1   the Page's own, repeated in a header
+#     inside <main>, not <aside>    1   the Page's own, in its top card
+#     inside <aside>                6   one per RECOMMENDED Page
+#
+# So a label prefix alone matches eight controls and six of them follow
+# somebody else. What makes one of them THIS Page's is not its position but
+# two agreements, both read on the page and neither typed here: it is the ONE
+# follow control in the main column outside every aside, AND its name is
+# ``Follow `` followed by a heading the Page prints in that same column (the
+# measured page printed its own name as exactly one such heading).
+#
+# THE ON LABEL IS NOT KNOWN. The capture is of a Page the account did not
+# follow, so what the control reads once it IS followed has never been seen.
+# Nothing here guesses it: a Page whose control reads anything but the OFF
+# shape is reported with no binding, and the gate built on this reads that as
+# UNKNOWN -- never as "following" and never as "not following".
+#
+# NO SCRIPT IS INJECTED AND NO PAGE STRING IS SPLICED INTO A SELECTOR. Every
+# selector below is a constant, which is also what makes the click safe: the
+# gate requires the constant control selector to match EXACTLY ONE element,
+# and Playwright's strict mode refuses a click whose selector matches more.
+
+#: The part of the accessible name this package writes down. The Page's name
+#: is the rest, and it is the page's to say.
+COMPANY_PAGE_FOLLOW_PREFIX = "Follow "
+
+#: The follow controls a Page root draws FOR ITSELF: in <main>, outside every
+#: <aside>. ``Following`` does not start with ``Follow `` -- the space is the
+#: discriminator -- so a control in the other state never matches this.
+COMPANY_PAGE_FOLLOW_CONTROL = (
+    "xpath=//main//button[starts-with(@aria-label, 'Follow ')]"
+    "[not(ancestor::aside)]"
+)
+
+#: Every ``Follow ``-prefixed control on the page wherever it sits. COUNTED FOR
+#: THE DIAGNOSIS ONLY -- it is how a refusal says "eight on the page, none in
+#: the main column" rather than "none".
+COMPANY_PAGE_FOLLOW_ANYWHERE = "xpath=//button[starts-with(@aria-label, 'Follow ')]"
+
+#: The headings the Page prints in its main column. One of them is its own
+#: name; the others are section titles, which no follow control names.
+COMPANY_PAGE_HEADINGS = (
+    "xpath=//main//*[self::h1 or self::h2][not(ancestor::aside)]"
+)
+
+#: The Page's own people-search link -- LinkedIn draws its employee count as a
+#: link whose query names the Page by numeric id under ``currentCompany``. It
+#: is what ties the page the browser LANDED on to the numeric id a grant was
+#: minted for: LinkedIn redirects ``/company/<id>/`` to the Page's canonical
+#: address, so the landed url cannot answer that question. MEASURED on the
+#: same capture: one such link in <main> outside <aside>, naming one id, and
+#: the same id is the organisation urn the page's payload repeats most often.
+COMPANY_PAGE_IDENTITY_LINKS = (
+    "xpath=//main//a[contains(@href, '/search/results/people/')]"
+    "[contains(@href, 'currentCompany')][not(ancestor::aside)]"
+)
+
+#: How many headings, controls and links one reading will look at. The
+#: measured page draws one control and one link in the scope that counts; a
+#: bound keeps a pathological page from turning a read into a long walk.
+COMPANY_PAGE_READ_LIMIT = 12
+
+
+def company_ids_in_people_search_href(href: Any) -> tuple[list[str], int]:
+    """``(ids, malformed)`` -- the organisation ids ONE people-search href names.
+
+    The value is a JSON list on the Page root (``["<id>"]``, percent-encoded
+    in the attribute) and a bare id on a posting's canned search, so both are
+    read. An id is a run of 4 to 20 of the TEN ASCII DIGITS and nothing else --
+    the same membership test :func:`unfollow_control_selector` applies, for the
+    same reason: ``str.isdigit`` admits digits from other scripts.
+
+    ``malformed`` COUNTS what could not be read and never quotes it. Nothing
+    here raises: a value the page chose is not allowed into an exception.
+    """
+    ids: list[str] = []
+    malformed = 0
+    try:
+        values = parse_qs(urlsplit(str(href or "")).query).get("currentCompany") or []
+    except Exception:  # noqa: BLE001 -- a url the parser refuses names nothing
+        return [], 1
+    for raw in values:
+        text = str(raw or "").strip()
+        candidates: list[Any]
+        if text.startswith("["):
+            try:
+                parsed = json.loads(text)
+            except Exception:  # noqa: BLE001 -- counted, never quoted
+                malformed += 1
+                continue
+            candidates = parsed if isinstance(parsed, list) else [parsed]
+        else:
+            candidates = [text]
+        for candidate in candidates:
+            value = ""
+            if isinstance(candidate, str) or (
+                isinstance(candidate, int) and not isinstance(candidate, bool)
+            ):
+                value = str(candidate).strip()
+            if (
+                value
+                and set(value) <= _ASCII_DIGITS
+                and 4 <= len(value) <= _MAX_COMPANY_ID_DIGITS
+            ):
+                ids.append(value)
+            else:
+                malformed += 1
+    return ids, malformed
+
+
+async def read_company_page_follow(page: Any) -> dict[str, Any]:
+    """The Page root's own follow control, the name it binds to, and the id.
+
+    COUNTS, ONE NAME AND DIGITS -- NOTHING ELSE CROSSES BACK. ``subject`` is the
+    Page's own name, returned only when exactly one follow control in the main
+    column binds to exactly one of the column's headings; it is the field a
+    human checks in the confirm block, as a posting's employer is. Accessible
+    names that did NOT bind are never returned: on the measured page they
+    name six other organisations.
+
+    A FAILED READ IS REPORTED BY ITS TYPE AND NEVER ITS MESSAGE, and nothing is
+    logged but the type. A Playwright error can quote what it was looking at.
+    """
+    out: dict[str, Any] = {
+        "follow_controls": 0,
+        "follow_controls_anywhere": 0,
+        "bound_controls": 0,
+        "subject": None,
+        "headings_read": 0,
+        "identity_links": 0,
+        "identity_ids": [],
+        "identity_malformed": 0,
+        "error": None,
+    }
+    try:
+        controls = page.locator(COMPANY_PAGE_FOLLOW_CONTROL)
+        count = as_count(await controls.count())
+        out["follow_controls"] = count
+        out["follow_controls_anywhere"] = as_count(
+            await page.locator(COMPANY_PAGE_FOLLOW_ANYWHERE).count()
+        )
+
+        headings = page.locator(COMPANY_PAGE_HEADINGS)
+        heading_count = as_count(await headings.count())
+        names: set[str] = set()
+        for index in range(min(heading_count, COMPANY_PAGE_READ_LIMIT)):
+            text = await headings.nth(index).inner_text(
+                timeout=ELEMENT_READ_TIMEOUT_MS
+            )
+            name = " ".join(str(text or "").split())
+            if name:
+                names.add(name)
+        out["headings_read"] = len(names)
+
+        bound: list[str] = []
+        for index in range(min(count, COMPANY_PAGE_READ_LIMIT)):
+            label = await controls.nth(index).get_attribute(
+                "aria-label", timeout=ELEMENT_READ_TIMEOUT_MS
+            )
+            label = " ".join(str(label or "").split())
+            if not label.startswith(COMPANY_PAGE_FOLLOW_PREFIX):
+                continue
+            named = label[len(COMPANY_PAGE_FOLLOW_PREFIX):]
+            if named and named in names:
+                bound.append(named)
+        out["bound_controls"] = len(bound)
+        if len(bound) == 1:
+            out["subject"] = bound[0]
+
+        links = page.locator(COMPANY_PAGE_IDENTITY_LINKS)
+        link_count = as_count(await links.count())
+        out["identity_links"] = link_count
+        found: set[str] = set()
+        malformed = 0
+        for index in range(min(link_count, COMPANY_PAGE_READ_LIMIT)):
+            href = await links.nth(index).get_attribute(
+                "href", timeout=ELEMENT_READ_TIMEOUT_MS
+            )
+            ids, bad = company_ids_in_people_search_href(href)
+            found.update(ids)
+            malformed += bad
+        out["identity_ids"] = sorted(found)
+        out["identity_malformed"] = malformed
+    except Exception as exc:  # noqa: BLE001 -- the TYPE is the whole report
+        logger.debug("company page follow unreadable: %s", type(exc).__name__)
+        out["error"] = type(exc).__name__
     return out
 
 
@@ -8789,6 +9113,13 @@ PROFILE_VIEWS_INSIGHTS_JS = """
   }
   if (!out.filters.length) {
     for (const node of scope.querySelectorAll('label')) {
+      // A LABEL INSIDE A DIALOG IS NOT ONE OF THE PAGE'S FILTERS. Measured
+      // 2026-09-23 on a capture of this page: five <label> elements, three
+      // inside the filter pills and TWO inside a form in a closed dialog in
+      // the right rail, both short enough to pass the cap -- so this fallback
+      // published five "filters", two of which were a feedback form's
+      // options. Skipped by WHERE the label sits, never by what it says.
+      if (node.closest('dialog, [role="dialog"]')) continue;
       const label = textOf(node);
       if (label && label.length <= cfg.labelMaxChars &&
           out.filters.indexOf(label) === -1 &&

@@ -708,3 +708,203 @@ one edit, and the orchestrator can make it.
 a local, Windows-only signal and CI's three platforms are the certifier, and
 nothing was pushed. **Deliberately not run:** anything touching LinkedIn, a
 browser, port 9224 or `_state/` -- nothing here needs them.
+
+## Integration 2026-09-24
+
+**THE ORDER, AND WHAT DISK SHOWED WHEN IT RAN.** The coordinator's integration
+order of 01:15 was conditional on this branch's head being 10c7696 with a clean
+tree; 10c7696 is a commit of this branch and does not resolve on master until
+this branch merges. Sampled before the first step: that head, a clean tree, and
+`master` at `001f70b`, 56 commits past the base `f89bd29`. Master had not moved
+again when this section was written, so the order ran as written: `001f70b` was
+merged into this branch, and every figure below is re-derived from the merged
+tree, none carried over from a forecast.
+
+### I.1 The merge -- eight paths both sides had touched
+
+The four census slices, `_audit/INSTRUMENTS.md`, and the three generated files
+`_audit/INDEX.md`, `_audit/RULINGS.md` and `_audit/_census/blocker-map.tsv`.
+
+* **The census, row by row.** Since the base this lane changed 276 rows (J 48,
+  P 106, M 41, N 81) and master 44 (J 8, P 12, M 8, N 16). A row one side
+  changed took that side. A script then compared every row of the merged
+  slices with the side that changed it: no mismatch. Master's four state moves
+  arrived as master wrote them -- `J 18`, `J 39`, `P G6` and `N 47`, each GAP to
+  COVERED-UNFIRED.
+* **ONE ROW CHANGED ON BOTH SIDES, AND IT IS REPORTED HERE AS THE ORDER ASKS:
+  `M C42`.** Base EXCLUDED-RULED; this lane GAP (section 2.1); master kept
+  EXCLUDED-RULED and rewrote the cell, so this was not an append. Master's text
+  narrows the premise to other people's posts -- for his own, the item keys
+  come from linkedin_my_activity_items (bucket-1 FIRE 1) -- and then says in
+  its own words that the state is not re-decided there and is "left to an
+  explicit decision". Master's text is kept whole, and the decision it leaves
+  open is taken as section 2.1 took it, in a note appended after master's
+  text. DECIDED (orchestrator-delegated, 2026-09-24): `M C42` is GAP; for his
+  own posts it waits on one live open of one of his permalinks, for anybody
+  else's on a reader that hands out an item key. Undoing it is one state cell.
+* **`_audit/INSTRUMENTS.md`**: master's sections 63 and 65 and this lane's 64
+  interleave by number, nothing of either side dropped. Section 64.3 is new at
+  the merge and registers the own classes of I.3.
+* **The generated files** were taken from master, staged with every resolved
+  path, and regenerated at the end until a second sweep changed nothing: the
+  index, the rulings register and the blocker map.
+  `_audit/_census/completeness-candidates.tsv`, which only master had touched,
+  was NOT regenerated, and disk is why. The harvest reads the captures of every
+  worktree on this box, and a dry run written to the scratchpad measured 35
+  candidates added, every one unread, 15 dropped and 86 changed -- other
+  lanes' live captures, not this merge. The committed-table test refuses an
+  unread candidate, and admitting candidates is another lane's work; master's
+  file stands.
+
+### I.2 The read-address table, re-derived rather than pasted
+
+A child re-derived the 34 new bucket-3 lines against the merged census and the
+shipped boundary. Reviewed, and applied whole: 98 lines,
+`scripts/check_read_addresses.py` GREEN on 98 of 98. 34 lines added (ADMITTED
+4, REFUSED 23, NEEDS-SESSION 7); two removed -- `N 171`, NOT-AN-ACT now, and
+`N 183`, a setting and so a write row; and the notes of `N 99`, `N 177` and
+`N 178` rewritten for the D3 and roster rulings, the boundary itself unchanged.
+Every one of the 34 boundary verdicts matched the phase-one draft. Two
+judgement cells moved on re-reading the merged cells: `M C42`'s gate READER to
+MEASURE (its own-post half waits on the same live open `M C29` names) and
+`N 39`'s basis NAMED to MEASURED (its cell says the address was found live).
+
+### I.3 Triage -- a returned row outside the ledger is its own class
+
+The order's rule, applied: a returned row that is not one of the 409 rows the
+blocker map's spine holds is tallied as its own class, read off its own cell,
+and the ledger is not grown. 169 of the 245 returned rows are outside it.
+
+* `scripts/triage_messaging_gap_rows.py`: the class RETURNED-OUTSIDE-LEDGER
+  goes only to a row with no map line whose cell carries this lane's marker
+  ("RETURNED TO GAP ... BY LANE R ... BLOCKER, NAMED:"); a row with neither
+  still comes back unjoined, and a new test plants exactly that. The slice: 117
+  GAP -- R 13, W 101, R+W 3 -- 14 of them in the own class.
+* `scripts/triage_read_gap_rows.py`: the verdict RETURNED on the 28 returned
+  read rows of P and N, and CONTROL 9, which refuses that verdict on a row
+  whose cell lacks the marker, with a plant that proves it fires. `N 171` and
+  `N 183` left the read-GAP set; ten rows the registered calls have since
+  decided (`N 99`, `N 100`, `N 102`, `N 104`, `N 132`, `N 161`, `N 177`,
+  `N 178`, `N 179`, `P C8`) are annotated ruling by ruling.
+* `_audit/_census/write-classes.tsv`: 174 new write rows -- 173 returned, and
+  `N 183`, a write row since batch 3 -- classed by a child: R1 5, R2 12, R3
+  157. Reviewed, one line changed. `N 62` had
+  borrowed a ledger name for a different cost (a profile change notifying the
+  network); it is queued now with the own class, its cause -- R1's /mynetwork/
+  badge cost, and no WriteSpec for topics -- written in its ground. `P O6-O20`
+  could not be cited at all, because the checker's own-row form took no range
+  id: `scripts/check_write_classes.py` takes one now, and a new test shows a
+  range that names no row is convicted by the same resolver. 325 lines --
+  16 R1, 35 R2, 274 R3 -- GREEN.
+* `_audit/_census/jobs-directions.tsv`: the 38 returned jobs rows directed by a
+  child -- R 7, W 28, R+W 3 -- reviewed and applied whole; GREEN on 92 of 92.
+  Its close calls were read and kept: the Easy Apply family filed W as one
+  refusal, `J 77` a pure read, `J 112` on the alumni tab rather than the
+  school root, `J 115` gated MEASURE, `J 134` NEEDS-SESSION.
+
+### I.4 Rulings batch 3, applied to the rows
+
+From `_audit/2026-09-24-rulings-search-verticals-rosters-passive-costs.md`:
+
+* **MEMBER-ROSTERS-AS-BOUNDED-READS.** `N 165`, `N 188`, `N 189` were already GAP
+  and had left the exclusion-basis table in this lane's first phase; each
+  cell now cites the ruling and names what it waits on: an admission under its
+  five conditions, and a reader. The family ROSTER-ENUMERATION stays declared
+  empty, its reason extended with the ruling.
+* **D5-PASSIVE-COST-IS-NOT-A-ROW.** `N 171` is EXCLUDED-RULED as NOT-AN-ACT, with
+  its exclusion-basis line under a new family of that name in
+  `scripts/check_exclusion_basis.py` (anchors: the ruling's heading and "It
+  governs `N 171`"), and a REOPENER: LinkedIn drawing a control that turns the
+  exposure on or off. The cost is recorded on the join rows `N 163` and
+  `N 164`. `N 183` is direction W and stays GAP, awaiting admission by name.
+  The table: population 70, 70 lines, 0 untraced, 0 lifted, 0 problems.
+* **D3-UNREGISTERED-REFUSAL-IS-NOT-A-RULING.** `RULING_BLOCKED_NAMED` in
+  `scripts/census_completion.py` is empty and kept, with the reason. `N 99`,
+  `N 177` and `N 178` are GAP on an admission and a reader, and their address
+  notes say so. `N 178`'s live proof loads another member's profile, so the
+  member is one the operator names -- written in its cell and its note.
+
+### I.5 Every pin moved, and the ones that did not
+
+`scripts/census_completion.py` PINNED, 24 of 37 moved, each with its reason in
+the file:
+
+    achievable               389 -> 634     gap_write          150 -> 324
+    adjudicated              434 -> 190     jobs_admitted        9 ->  11
+    b1_no_ruling              15 ->  16     jobs_dir_r          26 ->  33
+    b2_d3_rows                 3 ->   0     jobs_dir_rw          3 ->   6
+    b3_admitted               40 ->  44     jobs_dir_w          25 ->  53
+    b3_blocked_on_nothing      8 ->   9     jobs_gap            54 ->  92
+    b3_needs_session           6 ->  13     jobs_needs_session   1 ->   2
+    b3_no_address              2 ->   1     jobs_refused        19 ->  26
+    b3_refused                16 ->  38     out_of_scope       315 ->  70
+    capabilities_achievable  389 -> 648     unfired             25 ->  26
+    delivered_broad          100 -> 101
+    gap                      270 -> 514
+    gap_read                  66 ->  98
+    gap_unknown               54 ->  92
+
+Unmoved: stated_rows 704, capabilities 762, delivered_strict 75,
+cannot_deliver 19, gap_ambiguous 0, b3_undetermined 2, b1_standing 10,
+b1_relayed 0, b1_pending 0, b1_released 6, and the three jobs zeros.
+
+* **`capabilities_achievable` is 648, not the 634 the file would have printed.**
+  The file counted every collapsed capability out of scope by assumption, and
+  its own check flagged `P O6-O20` as GAP. `COLLAPSED` now asserts GAP for that
+  row, and the extras are counted in or out by each row's state: 762 - (70 +
+  44) = 648. The printed sentence that all 58 collapsed capabilities are
+  EXCLUDED-RULED is derived from the states now.
+* `PINNED_B1_ROWS`: `N 23` joins the rows no ruling holds (a read, returned to
+  COVERED-UNFIRED). `RULING_BLOCKED_NAMED`: three rows to none.
+* `tests/test_triage_instrument.py` `EXPECTED_NOW`: 77 {R 10, W 65, R+W 2} to
+  117 {R 13, W 101, R+W 3}. `tests/test_gap_rows_on_refused_addresses.py`
+  `EXPECTED_GAP_ROWS`: 4 to 55. `tests/test_write_classes.py`, the split: (11,
+  23, 117) to (16, 35, 274).
+* `_audit/_census/pointer-graph.tsv`, re-pinned on the merged tree: 30 pointers
+  read a different donor kind, the thirty section 6 forecast by name, and 12
+  more changed only the pointing row's recorded state (`J 61`-`J 65`,
+  `M C14`-`M C16`, `M C66`, `P B3`, `P F4`, `P G3`). `--check` PASS.
+* `tests/census_row_pin.json`: no move, 704 rows.
+
+### I.6 The figures, measured on the merged tree
+
+    GAP                514 of 704 rows    J 92, P 152, M 117, N 153
+    out of scope        70                EXCLUDED-RULED 56 + XR 4, MEASURED-ABSENT 10
+    achievable         634                capabilities 648 of 762
+    delivered, strict   75                COVERED-PROVEN, CP included
+    delivered, broad   101                with COVERED-UNFIRED 26
+
+### I.7 Unresolved, and handed back
+
+* **The P-R block's 44 settings-family capabilities in `profile.md` were NOT
+  re-decided.** Read by this lane's rule they would await admission by name, as
+  34 of the 35 settings rows now do; but they carry no row ids, the block's
+  bullets group them rather than list them, and at least one (Delete Data) is
+  a deletion that ground two keeps. They have to be itemized into rows before
+  they can be decided one at a time. Until then they are counted with `P1`,
+  outside the achievable capability surface; no row figure depends on them,
+  and `capabilities_achievable` would rise by at most 44. The block's own
+  paragraph and section 6 of `profile.md` now say this in-line, with no line
+  added, so no row moved a line.
+* **The seven cold-verifier disagreements of section 8 stand as adjudicated.**
+  Each is a GAP row whose cell names its entry, one edit to move.
+* **Informational:** the returned profile-editor rows cite their `/edit/` entry
+  as the blocker and do not cite SELF-PROFILE-EDITS-NOT-OUTWARD as a release, so
+  bucket 2 counts 0 such rows; it will matter when one of them is built.
+  `write-classes.tsv`'s split of settings rows between profile-setting and
+  notification-preference is the classing child's granularity, not a
+  precedent.
+
+### I.8 The children at the merge
+
+Three implementer children, each given one closed table, a copy to write, and
+the rule that they commit nothing: the read addresses, the write classes, the
+jobs directions. Every output was reviewed against its checker and by diff
+before it replaced a tracked table. Two applied whole; one with the single
+`N 62` line changed.
+
+### I.9 Gates
+
+Recorded in the next commit on this branch: a document cannot record the gate
+run on the commit that contains it, and the house rule is commit first, then
+gate.

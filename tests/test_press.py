@@ -881,6 +881,12 @@ WHEN_KNOWABLE: dict[str, str] = {
     "third_party_surface": "before_any_contact",
     # condition 2 -- the shape key
     "shape_not_sanctioned": "before_any_contact",
+    # the caller's two other keys, added 2026-09-23 with the open-moment
+    # reading. Each is a closed table checked against the caller's own
+    # arguments, so each is knowable before the page is asked for anything.
+    "reading_not_sanctioned": "before_any_contact",
+    "reading_not_for_this_surface": "before_any_contact",
+    "scope_not_sanctioned": "before_any_contact",
     # condition 3, the url-derivable half. BOTH OF THESE USED TO BE
     # after_the_press, and that was the defect.
     "no_sensitivity_basis": "before_any_contact",
@@ -1001,6 +1007,18 @@ _REACHES: dict[str, dict] = {
         "url": f"{BASE}/in/another-person/detail/", "shape": "[aria-expanded]",
         "admit_all": True},
     "shape_not_sanctioned": {"url": f"{BASE}/feed/", "shape": "button"},
+    "reading_not_sanctioned": {
+        "url": f"{BASE}/feed/", "shape": "[aria-expanded]",
+        "reading": "a_reading_nobody_declared"},
+    # A REAL KEY ON THE WRONG SURFACE: the feed's share-menu phrases shipped
+    # into his analytics page. Admitted address, sanctioned shape, declared
+    # basis -- the reading's surface list is the only thing refusing it.
+    "reading_not_for_this_surface": {
+        "url": f"{BASE}/analytics/profile-views/", "shape": "[aria-expanded]",
+        "reading": "feed_item_share_menu"},
+    "scope_not_sanctioned": {
+        "url": f"{BASE}/feed/", "shape": "[aria-expanded]",
+        "scope": "a_scope_nobody_declared"},
     "no_sensitivity_basis": {
         "url": f"{BASE}/search/results/people/", "shape": "[aria-expanded]"},
     "no_counter_reader_supplied": {
@@ -1092,14 +1110,19 @@ async def test_every_refusal_is_classified_by_when_it_is_knowable(reason):
     reader_name = spec.pop("reader", "steady")
     factory = RaisingPage if spec.pop("raises", False) else FakePage
     admit_all = spec.pop("admit_all", False)
+    # The caller's two table keys, handed straight to disclose; absent means
+    # the gate exactly as it was before they existed.
+    keys = {name: spec.pop(name) for name in ("reading", "scope") if name in spec}
     page = factory(url, **spec)
     reader = _counters if reader_name == "steady" else _reader_named(reader_name)
 
     if admit_all:
         with mock.patch.object(press.readonly, "is_read_url", lambda _url: True):
-            verdict = await press.disclose(page, shape=shape, read_counters=reader)
+            verdict = await press.disclose(
+                page, shape=shape, read_counters=reader, **keys
+            )
     else:
-        verdict = await press.disclose(page, shape=shape, read_counters=reader)
+        verdict = await press.disclose(page, shape=shape, read_counters=reader, **keys)
     assert verdict.get("refused") == reason, verdict
 
     when = WHEN_KNOWABLE[reason]

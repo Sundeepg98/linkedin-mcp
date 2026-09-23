@@ -389,6 +389,18 @@ FAMILIES: dict[str, Family] = {f.fid: f for f in (
        "WAVE", "NO",
        [("_audit/_census/profile.md", "NO ROUTE REMAINS, which is why this is a refusal")],
        [r"NO ROUTE REMAINS"]),
+    # ---- rulings the ORCHESTRATOR made under the operator's delegation -------
+    # Registered 2026-09-24 (rulings batch 3). op is NO because the operator's
+    # own words do not make the family; he delegated the call and can override
+    # it. It names its one row, so the row cites the ruling id itself.
+    _f("D5-PASSIVE-COST-IS-NOT-A-ROW",
+       "a passive cost with no control of its own is recorded on the act's row, and its own row is NOT-AN-ACT",
+       "ORCHESTRATOR", "NO",
+       [("_audit/2026-09-24-rulings-search-verticals-rosters-passive-costs.md",
+         "D5 IS ANSWERED: A PASSIVE COST IS NOT A CAPABILITY ROW"),
+        ("_audit/2026-09-24-rulings-search-verticals-rosters-passive-costs.md",
+         "It governs `N 171`")],
+       [r"D5-PASSIVE-COST-IS-NOT-A-ROW", r"NOT-AN-ACT"]),
     # ---- the 2026-09-05 retirement families (wave-ruled; the queue was his) ----
     *_RETIREMENTS,
 )}
@@ -431,7 +443,8 @@ EMPTIED: dict[str, str] = {
     "FEED-CONTENT-READ": "M C43 returned: a lead's ruling he never made (returns s3.4)",
     "NAV-FROM-PAGE-CONTENT": "J 112 returned: its own reopener needs no new rule (returns s3.4)",
     "FOLLOW-PEOPLE-LIST": "N 38 returned: a class filter catching the address (returns s3.4)",
-    "ROSTER-ENUMERATION": "3 rows returned: a lead's ruling he never made (returns s3.4)",
+    "ROSTER-ENUMERATION": "3 rows returned: a lead's ruling he never made (returns s3.4); since 2026-09-24 "
+                          "MEMBER-ROSTERS-AS-BOUNDED-READS admits rosters as bounded reads",
     "DRAFT-DELETE-NOT-PRESSED": "J 69 re-filed on the delete key by act-class (returns s3.4)",
     "RETIRE-AI-ASSIST-MESSAGING": "2 rows returned: the composer was never opened (returns s3.5)",
     "RETIRE-DEVICE-GEOLOCATION": "J 17 returned (returns s3.5)",

@@ -1,4 +1,4 @@
-"""The tool surface: forty-nine tools, thirty-seven of which do not write.
+"""The tool surface: fifty-one tools, thirty-eight of which do not write.
 
 **AND THIS LINE IS NOW DERIVED, NOT MAINTAINED, 2026-09-20.** It had gone stale
 a THIRD time -- "forty-four tools, thirty-two of which do not write" against a
@@ -124,6 +124,12 @@ SANCTIONED_WRITE_TOOLS = frozenset(SANCTIONED_WRITES) & {
     "linkedin_update_setting",
     "linkedin_send_invitation",
     "linkedin_send_message",
+    # THE THIRTEENTH PERFORMABLE WRITE, 2026-09-23 (census row N 47): a follow
+    # performed on the organisation Page root and addressed by the numeric id
+    # linkedin_unfollow_company keys its rows by. It is a key in
+    # writes.SANCTIONED_WRITES, so the intersection still exempts nothing the
+    # write boundary has not admitted.
+    "linkedin_follow_company_page",
 }
 
 #: THE DOCSTRING EXEMPTION IS THE SAME SET AS THE NAME EXEMPTION, and it took
@@ -336,6 +342,11 @@ EXPECTED_TOOLS = {
     # test_readonly_boundary_invariant.py are unchanged across the commit that
     # added them -- which is checkable, and is the load-bearing half.
     "linkedin_follow_company",
+    # THE FIFTIETH, 2026-09-23: the follow from the Page itself, by numeric
+    # id. A WRITE behind the same two-call gate; it opens an address that was
+    # already on the read allowlist and adds no entry to
+    # readonly.SANCTIONED_MUTATIONS -- the click is perform()'s existing one.
+    "linkedin_follow_company_page",
     "linkedin_publish_post",
     "linkedin_comment_on_item",
     # THE THIRTY-SIXTH, 2026-09-03. A READ that SHIPS REFUSING: the read
@@ -420,6 +431,11 @@ EXPECTED_TOOLS = {
     # no parameter. Both are READS. No write was added by either.
     "linkedin_group_page",
     "linkedin_company_page_counts",
+    # THE FIFTIETH, 2026-09-23 (lane L3), a READ on the jobs surface.
+    # ``linkedin_recent_job_searches`` reads the jobs home, /jobs/jam/,
+    # admitted 2026-09-20 with nothing behind it, and banks census J 18. It
+    # adds no address, no sanctioned mutation and no press.
+    "linkedin_recent_job_searches",
 }
 
 #: Names a reader must never grow. Listed explicitly so that adding one is a
@@ -489,8 +505,16 @@ async def tools():
     return {t.name: t for t in await mcp.list_tools()}
 
 
-async def test_the_surface_is_exactly_the_fortynine_tools(tools):
-    """RENAMED THREE TIMES ON 2026-08-25, from ``..._seventeen_tools`` through
+async def test_the_surface_is_exactly_the_fifty_one_tools(tools):
+    """RENAMED TWICE ON 2026-09-23. From ``..._fortynine_tools`` to
+    ``..._fifty_tools`` on master, because a read arrived:
+    ``linkedin_recent_job_searches`` (census J 18). Then to
+    ``..._fifty_one_tools`` at the merge of lane L4, whose branch had made
+    ``linkedin_follow_company_page`` -- a WRITE, census N 47 -- its own
+    fiftieth. The name moved with the pin in the same commit, as the rule
+    below requires.
+
+    RENAMED THREE TIMES ON 2026-08-25, from ``..._seventeen_tools`` through
     ``..._eighteen_tools`` and ``..._nineteen_tools``, and the rename is the
     honest half of the edit rather than noise in a diff.
 
@@ -698,7 +722,12 @@ async def test_the_surface_is_exactly_the_fortynine_tools(tools):
     # address was refused by the boundary until that commit and was admitted
     # only together with the shaper in front of it, which is condition 1 of
     # the ruling at 09f9961 section 6. This test's NAME moved with it.
-    assert len(tools) == 49
+    # FIFTY FROM 2026-09-23 (lane L3): linkedin_recent_job_searches, a READ on
+    # an address the boundary already admitted. The NAME moved with it again.
+    # FIFTY-ONE FROM THE SAME DAY, at the merge of lane L4:
+    # linkedin_follow_company_page, a WRITE, so the split below moves on its
+    # write side and the non-write count holds.
+    assert len(tools) == 51
     # And the split is asserted, not just the total. A future tool arriving as
     # a write would otherwise only have to bump a number.
     #
@@ -724,6 +753,7 @@ async def test_the_surface_is_exactly_the_fortynine_tools(tools):
         "linkedin_update_setting",
         "linkedin_send_invitation",
         "linkedin_send_message",
+        "linkedin_follow_company_page",
     }
     # THE NON-WRITE COUNT MOVES TO SIXTEEN, and the reason is NOT the reason
     # it moved last time. The comment here said: "THE READ COUNT MOVES OFF
@@ -837,7 +867,10 @@ async def test_the_surface_is_exactly_the_fortynine_tools(tools):
     # matters. Neither adds an entry to readonly.SANCTIONED_MUTATIONS; each
     # opens an address that was already on the read allowlist and that no
     # registered, parameterless tool could reach.
-    assert len(set(tools) - SANCTIONED_WRITE_TOOLS) == 37
+    # THIRTY-EIGHT FROM 2026-09-23: linkedin_recent_job_searches is a READ, and
+    # the write side is BYTE-IDENTICAL across it: no entry in
+    # readonly.SANCTIONED_MUTATIONS, no new address, no press.
+    assert len(set(tools) - SANCTIONED_WRITE_TOOLS) == 38
 
 
 def test_the_read_that_was_nearly_named_a_write():
@@ -939,6 +972,7 @@ async def test_the_exemption_covers_only_the_names_on_it(tools):
         "linkedin_update_setting",
         "linkedin_send_invitation",
         "linkedin_send_message",
+        "linkedin_follow_company_page",
     }
     # The probe has to be genuinely sanctioned for this to test the thing it
     # claims to. A name nobody ever specced would only show that made-up names
@@ -1364,6 +1398,10 @@ async def test_server_info_stops_claiming_read_only_once_writes_are_on(monkeypat
         # TENTH, 2026-09-01. Typed here by hand like its nine siblings.
         "comment_on_item",
         "follow_company",
+        # THIRTEENTH, 2026-09-23 (census row N 47), typed here by hand like
+        # its twelve siblings: a follow performed on the organisation Page root,
+        # addressed by the numeric id the unfollow keys its rows by.
+        "follow_company_page",
         # NINTH, same day, and the first that TYPES. Typed here by hand like
         # its eight siblings, because a derived list would admit the tenth
         # silently.
@@ -1422,6 +1460,9 @@ async def test_the_capability_is_reported_even_with_the_flag_off(monkeypatch):
         # when two controls share a name.
         "comment_on_item",
         "follow_company",
+        # THE THIRTEENTH, 2026-09-23 (census row N 47). Typed by hand, as this
+        # list requires, by the lane that built it.
+        "follow_company_page",
         # THE NINTH, same day, and the FIRST THAT TYPES -- one page.fill
         # inside perform, which grew readonly.SANCTIONED_MUTATIONS from two
         # entries to three, the first growth that is not a click.
@@ -1792,6 +1833,9 @@ async def test_the_server_instructions_name_every_write_that_ships():
         # number, which is a better failure than a check that quietly stops
         # comparing.
         11: "eleven", 12: "twelve",
+        # THIRTEEN FROM 2026-09-23, extended the same way and for the same
+        # reason: follow_company_page is the thirteenth performable write.
+        13: "thirteen",
     }
     assert f"{words[len(writes.PERFORMABLE)]} write" in text
     for action in writes.PERFORMABLE:

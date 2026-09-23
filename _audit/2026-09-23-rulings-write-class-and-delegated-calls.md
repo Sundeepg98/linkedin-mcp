@@ -76,6 +76,71 @@ needs no go-ahead per fire. Opening a thread can show its sender "seen", so
 the live lane prefers threads whose last message is already read. That
 makes a proof send no new read receipt.
 
+### Edits to his own profile fields
+
+RULED: (orchestrator, 2026-09-23, delegated) EDITS TO THE OPERATOR'S OWN
+profile fields are not outward acts in the sense of
+OPERATOR-NAMES-THE-TARGET. No other person is targeted, the operator allowed
+the profile editors on 2026-08-31, and each edit is reversible. A live proof
+is permitted on four conditions:
+- "notify network" is confirmed off in the edit dialog;
+- the field is restored in the same session;
+- a before/after reading proves the restoration;
+- no field that broadcasts by its nature (for example, adding a new position)
+  is touched.
+
+### Other members' ids as search facets
+
+RULED: (orchestrator, 2026-09-23, delegated) OTHER MEMBERS' IDS IN SEARCH
+facets (for example `connectionOf`) are permitted as reads when the id comes
+from the tool's arguments, never from page content, and is never stored in
+a tracked file. This answers the open other-members question that N 172 was
+held on.
+
+### D4: the package's own browser context
+
+RULED: (orchestrator, 2026-09-24, delegated) D4 IS ANSWERED NO: the package
+does not create its own browser context. It attaches to the operator's
+signed-in browser, and that session model stands. `P C8` (saving the profile
+as a PDF) gets its download transport through the Chrome DevTools download
+behaviour on the ATTACHED browser, which creates no context. Basis: a new
+context would change the model the whole server is built on, and it would
+lack his session unless the session were copied into it.
+
+### D6: a capability delivered without the named affordance
+
+RULED: (orchestrator, 2026-09-24, delegated) D6 IS ANSWERED YES. A row named
+for an affordance (a control or a surface) is discharged when the package
+delivers the same capability payload by its own sanctioned routes. The row
+names those routes and rests on THEIR proofs: COVERED-PROVEN if they are
+live-proven, otherwise COVERED-UNFIRED. The affordance itself is not
+reproduced. It governs `N 132` and `J 107`, and every row named for an
+affordance this package replaces rather than reproduces.
+
+### A button that only reveals
+
+RULED: (orchestrator, 2026-09-24, delegated) A PLAIN BUTTON THAT ONLY
+REVEALS content, such as "Show more analytics", is pressed as a disclosure.
+Readings taken before and after the press must show that it revealed content
+and changed no state.
+
+### Share and poll proofs
+
+RULED: (orchestrator, 2026-09-24, delegated) SHARE-LINK PROOFS USE THE
+OPERATOR'S OWN posts only (`M C72`), so no other author's share figures are
+touched. A poll post's address (`M C85`) comes from the tool's arguments only.
+A proof uses one of his own posts that carries a poll, or it records
+NEEDS-TARGET.
+
+### Credential and session settings
+
+RULED: (orchestrator, 2026-09-24, delegated) CREDENTIAL, RECOVERY AND SESSION
+settings are never live-proven unless the operator names them. That covers
+the seven credential and recovery controls among the returned settings rows,
+and `P N10` (sign out of sessions), which would end this server's own
+session. They fall on the cannot-be-undone arm of
+OUTWARD-ACTS-NEED-THE-OPERATOR.
+
 ### Presses on /in/me/
 
 RULED: (orchestrator, 2026-09-23, delegated) /in/me/ presses get NO blanket

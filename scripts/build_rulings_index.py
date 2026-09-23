@@ -849,6 +849,160 @@ REGISTER: tuple = (
         note="Orchestrator's call under OUTWARD-ACTS-NEED-THE-OPERATOR; "
              "overridable.",
     ),
+    Ruling(
+        id="SELF-PROFILE-EDITS-NOT-OUTWARD",
+        claim="Edits to the operator's own profile fields are not outward "
+              "acts: no other person is targeted and each edit reverses. "
+              "Live proofs are permitted with notify-network off, the field "
+              "restored in-session and proven by a before/after reading, and "
+              "never a field that broadcasts by nature.",
+        binds="live proofs -- edits to the operator's own profile fields",
+        document="_audit/2026-09-23-rulings-write-class-and-delegated-calls.md",
+        anchor="RULED: (orchestrator, 2026-09-23, delegated) EDITS TO THE "
+               "OPERATOR'S OWN",
+        note="Orchestrator's call under OUTWARD-ACTS-NEED-THE-OPERATOR; "
+             "overridable. Narrows OPERATOR-NAMES-THE-TARGET to writes that "
+             "target other people.",
+    ),
+    Ruling(
+        id="OTHER-MEMBER-IDS-AS-READS",
+        claim="Another member's id in a search facet (e.g. connectionOf) is "
+              "permitted as a read when it comes from the tool's arguments, "
+              "never from page content, and is never stored in a tracked "
+              "file.",
+        binds="read boundary -- search facets carrying another member's id",
+        document="_audit/2026-09-23-rulings-write-class-and-delegated-calls.md",
+        anchor="RULED: (orchestrator, 2026-09-23, delegated) OTHER MEMBERS' "
+               "IDS IN SEARCH",
+        note="Orchestrator's call under OUTWARD-ACTS-NEED-THE-OPERATOR; "
+             "overridable. Answers the other-members question N 172 was "
+             "held on.",
+    ),
+    Ruling(
+        id="D4-NO-OWN-BROWSER-CONTEXT",
+        claim="The package does not create its own browser context; it "
+              "attaches to the operator's signed-in browser. P C8's download "
+              "transport goes through DevTools download behaviour on the "
+              "attached browser, which creates no context.",
+        binds="session model -- browser contexts",
+        document="_audit/2026-09-23-rulings-write-class-and-delegated-calls.md",
+        anchor="RULED: (orchestrator, 2026-09-24, delegated) D4 IS ANSWERED NO",
+        aliases=("D4",),
+        note="Orchestrator's call under OUTWARD-ACTS-NEED-THE-OPERATOR; "
+             "overridable. Question: _audit/2026-09-21-the-read-triage.md D4.",
+    ),
+    Ruling(
+        id="D6-CAPABILITY-OVER-AFFORDANCE",
+        claim="A row named for an affordance is discharged when the package "
+              "delivers the same capability payload by its own sanctioned "
+              "routes; the row names them and rests on their proofs (PROVEN "
+              "if live-proven, else UNFIRED).",
+        binds="census convention -- rows named for a control or surface",
+        document="_audit/2026-09-23-rulings-write-class-and-delegated-calls.md",
+        anchor="RULED: (orchestrator, 2026-09-24, delegated) D6 IS ANSWERED YES",
+        aliases=("D6",),
+        note="Orchestrator's call under OUTWARD-ACTS-NEED-THE-OPERATOR; "
+             "overridable. Question: _audit/2026-09-21-the-read-triage.md D6. "
+             "Governs N 132 and J 107.",
+    ),
+    Ruling(
+        id="REVEAL-BUTTON-IS-A-DISCLOSURE",
+        claim="A plain button that only reveals content (e.g. 'Show more "
+              "analytics') is pressed as a disclosure, with before/after "
+              "readings proving it revealed content and changed no state.",
+        binds="press gate -- reveal-only buttons",
+        document="_audit/2026-09-23-rulings-write-class-and-delegated-calls.md",
+        anchor="RULED: (orchestrator, 2026-09-24, delegated) A PLAIN BUTTON "
+               "THAT ONLY",
+        note="Orchestrator's call under OUTWARD-ACTS-NEED-THE-OPERATOR; "
+             "overridable.",
+    ),
+    Ruling(
+        id="SHARE-AND-POLL-PROOFS-OWN-POSTS",
+        claim="Share-link proofs use the operator's own posts only (M C72); a "
+              "poll post's address (M C85) comes from tool arguments only -- "
+              "his own poll post, or NEEDS-TARGET.",
+        binds="live proofs -- share links and poll results",
+        document="_audit/2026-09-23-rulings-write-class-and-delegated-calls.md",
+        anchor="RULED: (orchestrator, 2026-09-24, delegated) SHARE-LINK PROOFS "
+               "USE THE",
+        note="Orchestrator's call under OUTWARD-ACTS-NEED-THE-OPERATOR; "
+             "overridable.",
+    ),
+    Ruling(
+        id="CREDENTIAL-SETTINGS-NEED-THE-OPERATOR",
+        claim="Credential, recovery and session settings -- the seven "
+              "credential/recovery controls and P N10 (sign out of sessions, "
+              "which ends this server's own session) -- are never live-proven "
+              "unless the operator names them.",
+        binds="live proofs -- account security settings",
+        document="_audit/2026-09-23-rulings-write-class-and-delegated-calls.md",
+        anchor="RULED: (orchestrator, 2026-09-24, delegated) CREDENTIAL, "
+               "RECOVERY AND SESSION",
+        note="The cannot-be-undone arm of OUTWARD-ACTS-NEED-THE-OPERATOR.",
+    ),
+    Ruling(
+        id="D2-SEARCH-VERTICALS-WIDENED",
+        claim="The search admission widens from people to four CLOSED "
+              "segments, /search/results/(people|companies|groups|events)/, "
+              "under D1-SEARCH-AS-READS's three conditions; serves N 104, "
+              "N 161, M C70 and N 179.",
+        binds="read boundary -- search result verticals",
+        document="_audit/2026-09-24-rulings-search-verticals-rosters-passive-"
+                 "costs.md",
+        anchor="RULED: (orchestrator, 2026-09-24, delegated) D2 IS ANSWERED YES",
+        aliases=("D2",),
+        note="Orchestrator's call under OUTWARD-ACTS-NEED-THE-OPERATOR; "
+             "overridable. Question: _audit/2026-09-21-the-read-triage.md D2.",
+    ),
+    Ruling(
+        id="D3-UNREGISTERED-REFUSAL-IS-NOT-A-RULING",
+        claim="A refusal written only into an allowlist comment is not a "
+              "ruling: it makes no row EXCLUDED-RULED or CANNOT-DELIVER, and "
+              "a row resting on one is GAP, blocked on the decision the "
+              "refusal asks for, until that decision is registered.",
+        binds="census convention -- refusals recorded only beside an "
+              "allowlist entry",
+        document="_audit/2026-09-24-rulings-search-verticals-rosters-passive-"
+                 "costs.md",
+        anchor="RULED: (orchestrator, 2026-09-24, delegated) D3 IS ANSWERED NO",
+        aliases=("D3",),
+        note="Orchestrator's call under OUTWARD-ACTS-NEED-THE-OPERATOR; "
+             "overridable. Question: _audit/2026-09-21-the-read-triage.md D3. "
+             "Governs N 99, N 177 and N 178.",
+    ),
+    Ruling(
+        id="MEMBER-ROSTERS-AS-BOUNDED-READS",
+        claim="A roster the operator can open himself (a group's members, an "
+              "event's attendees, a company's or school's People tab) is "
+              "admitted as a bounded read: one page per call, the id from "
+              "tool arguments only, no automatic pagination, no member name "
+              "or id in a tracked file, inside the live budget.",
+        binds="read boundary -- member rosters",
+        document="_audit/2026-09-24-rulings-search-verticals-rosters-passive-"
+                 "costs.md",
+        anchor="RULED: (orchestrator, 2026-09-24, delegated) MEMBER ROSTERS "
+               "ARE ADMITTED AS",
+        note="Orchestrator's call under OUTWARD-ACTS-NEED-THE-OPERATOR; "
+             "overridable. Decides the roster question the 2026-09-05 "
+             "refusal recorded in readonly.py and census cells but never "
+             "registered (D3). Rows it held: N 165, N 188, N 189, J 108, "
+             "N 102, N 99, N 177.",
+    ),
+    Ruling(
+        id="D5-PASSIVE-COST-IS-NOT-A-ROW",
+        claim="A consequence of an act with no control of its own is recorded "
+              "on the act's row, and its own row is EXCLUDED-RULED as "
+              "NOT-AN-ACT (N 171). A preference he sets is an act, a setting, "
+              "and stays a GAP write row (N 183).",
+        binds="census convention -- passive costs",
+        document="_audit/2026-09-24-rulings-search-verticals-rosters-passive-"
+                 "costs.md",
+        anchor="RULED: (orchestrator, 2026-09-24, delegated) D5 IS ANSWERED",
+        aliases=("D5",),
+        note="Orchestrator's call under OUTWARD-ACTS-NEED-THE-OPERATOR; "
+             "overridable. Question: _audit/2026-09-21-the-read-triage.md D5.",
+    ),
 )
 
 
