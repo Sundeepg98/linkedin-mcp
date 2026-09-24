@@ -10317,3 +10317,24 @@ closed the same day). The exempt rows print by id in a bucket of their own.
 |---|---|
 | `scripts/triage_messaging_gap_rows.py` (`entered_since_freeze`, and the exemption `unjoined_rows` takes; since the integration with lane R, `misfiled_returns` -- see the lane record's Integration section) | `tests/test_triage_instrument.py`: an empty freeze read refuses and names the ref; a planted dialect at the freeze refuses and names the row; with the exemption passed, one hole and three holes punched in rows that WERE GAP at the freeze are still named, and each control first asserts there is such a row to punch; without the exemption, the join names exactly the rows that entered. Red under four mutations of the committed script, each restored from git: exempting every row (3 failed), no refusal on an empty freeze read (1 failed), the join ignoring the exemption (3 failed), no refusal on a dialect (1 failed); restored, 11 passed |
 | `scripts/triage_read_gap_rows.py` (six `TRIAGE` lines: `P S1`, `P S3`, `P S5`, `N 195`, `N 197`, `N 199`) | the shipped CONTROL 4, unchanged, which named all six `NO VERDICT` before they were written |
+
+### 71.7 TWO RULES FOR ONE QUESTION, AND WHAT EACH ALONE WOULD LET THROUGH (lane Y2's integration, 2026-09-24)
+
+Lane R's returned class (64.3) and the freeze rule above both decide which GAP rows
+may be absent from the frozen blocker map -- lane R's from the row's cell, the freeze
+rule from git. Merged, each alone would let one thing through that the other stops:
+
+* the returned class alone absorbs a HOLE -- a row that was GAP at the freeze, lost
+  from the map -- whenever that row happens to carry the marker. CONTROL 2b
+  (`misfiled_returns`) refuses a marked row off the map that was GAP at the freeze;
+* the freeze rule alone exempts any row that entered GAP after the freeze, whether or
+  not its cell says what blocks it -- which drops lane R's requirement that every row
+  off the map names its blocker in its own cell. CONTROL 2c (`unnamed_entered`,
+  `NAMED_BLOCKER`) refuses an entered row, not returned, that names none.
+
+    TWO EXEMPTIONS FROM ONE JOIN MUST BE CHECKED AGAINST EACH OTHER: EACH, ALONE,
+    ABSORBS WHAT THE OTHER WAS WRITTEN TO REFUSE.
+
+| path | shown failing by |
+|---|---|
+| `scripts/triage_messaging_gap_rows.py` (`misfiled_returns`, `unnamed_entered`, `NAMED_BLOCKER`, the composed exemption in `main`) | `tests/test_triage_instrument.py`: a marked row lost from the map is refused, not classed, and an entered row whose cell names no blocker is refused -- each on a BUILT fixture, through `main` as well as the function; on the real tree every returned row entered after the freeze and every other entered row names its blocker. Eight mutations of the committed script, each restored from git: the freeze rule exempting every row (7 failed), no refusal on an empty freeze read (1), the join ignoring every exemption (4), no refusal on a dialect (1), CONTROL 2b disabled (1), CONTROL 2c disabled (1), the returned class ignoring the marker (6), the marker never matching (3); restored, 17 passed |

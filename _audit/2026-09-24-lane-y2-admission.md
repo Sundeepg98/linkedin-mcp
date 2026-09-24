@@ -720,4 +720,64 @@ carried by a row, because words the merge brought in cover it -- a coincidence o
 words, like the five noted in section 1, and its OUT verdict stands. The table: 45
 lines, 8 app-scope (all OUT) and the 37 others.
 
-GATES ON THE MERGED TREE: the next commit records them.
+### I.7 After the merge commit: three more, and the gates
+
+    cd853b8  the pointer-graph selftest race, fixed as ordered, in its own commit:
+             each `--selftest`, `--plant` and `--plant-sweep` run gets its own
+             `mkdtemp` directory, removed when it ends. Written by a child in its
+             own worktree and reviewed here before it was cherry-picked; its test
+             runs two selftests at once under a private temp root with a sentinel
+             at the old fixed path, so the old code fails it every time, not by
+             timing. The child's mutations: the old fixed path (the sentinel
+             deleted -- and one run crashed on a file the other was writing), and
+             no cleanup (two directories left); restored, 4 passed
+    2355af5  CONTROL 2c, found by reading the composition again after the merge
+             commit: the freeze rule alone let any row that entered GAP pass
+             whether or not its cell names a blocker, which dropped lane R's
+             requirement for every row off the map (71.7). And the timings table:
+             the gate below was red on `tests/test_ci_shard.py`'s two-thirds line
+             -- master priced 157 of 235 test files, and this lane's one new file
+             made it 157 of 236. That file is now priced, measured alone (8 tests,
+             11.32 s), with the table's provenance saying so; the table still wants
+             regenerating from a full run, and the next lane to add a test file
+             would have tipped it the same way
+    this     the record and section 71.7
+
+**THE GATES, ON THE MERGED TREE.**
+
+    census instruments at cd853b8   GREEN: pin_census_rows (747, no drift),
+                                    check_jobs_directions 107/107,
+                                    check_read_addresses 107/107,
+                                    check_write_classes 339 lines, 338 rows,
+                                    check_exclusion_basis (70 of 70, 0 untraced,
+                                    0 lifted), measure_pointer_graph --check (69),
+                                    classify_writeoff_reasons,
+                                    check_census_locators_resolve,
+                                    census_completion --check (every figure),
+                                    both triages (all controls), build_blocker_map
+                                    --check, completeness_harvest --control and
+                                    --check (fixed point, 0 verdict problems)
+    check_asserted_names_resolve    exits 1 on 8 ASSERTED-ABSENT names, the same 8
+                                    as at `9c219c8`, all in documents older than
+                                    this train (the contingent write-offs three
+                                    times, the premium block, the auth-reason leak,
+                                    the bucket-1 fires, the census cleanup, lane L1's
+                                    refused reads). They are exactly the set
+                                    `tests/test_an_asserted_name_resolves.py` pins,
+                                    so that test is green and the script is red by
+                                    design until somebody repairs them. Not measured
+                                    on master itself: the script needs a git work
+                                    tree, and this lane made none
+    impact gate --against ff98a7f,  28 changed paths, 69 test files (19 of them
+      on cd853b8                    corpus-wide) -- not the full suite. 1 failed,
+                                    3483 passed, 7 skipped, 503 s; the one failure
+                                    was the timings line, closed in 2355af5
+    the composition's mutations     eight, on the committed script, each restored
+                                    from git: all eight convicted; restored, 17
+                                    passed (71.7)
+    the triage tests, the CI-shard  148 passed, on 2355af5's tree
+      tests
+
+**NOT RUN:** 167 of the suite's 236 test files (that gate's own count); CI's
+three-platform matrix, since nothing was pushed; anything live. The gate of this
+commit and the last is reported in the lane's final message.
