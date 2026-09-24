@@ -77,6 +77,9 @@ DETECTOR_CLASSES_EVER: tuple[str, ...] = (
     "expose",
     "route_family",
     "http_headers",
+    # -- added 2026-09-24: a DevTools session (lane D's 5.3) ------------
+    "cdp_session",
+    "cdp_send",
 )
 
 #: Classes deliberately retired, with the ruling that retired them.
@@ -257,6 +260,8 @@ def test_every_detector_actually_fires_on_something():
         "expose": "await page.expose_function('f', fn)",
         "route_family": "await page.unroute('**')",
         "http_headers": "await page.set_extra_http_headers({})",
+        "cdp_session": "session = await page.context.new_cdp_session(page)",
+        "cdp_send": "await session.send('Input.dispatchMouseEvent', {})",
     }
     live = _live()
     missing_probe = [kind for kind in live if kind not in probes]

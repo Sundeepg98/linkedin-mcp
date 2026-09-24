@@ -512,6 +512,51 @@ def test_exactly_one_place_in_this_package_can_reach_a_file_input():
     ], uploads_sanctioned
 
 
+@pytest.mark.parametrize(
+    "source, kinds",
+    [
+        (
+            "async def poke(page):\n"
+            "    session = await page.context.new_cdp_session(page)\n"
+            "    await session.send('Input.dispatchMouseEvent', {'type': 'mousePressed'})\n",
+            ["cdp_session", "cdp_send"],
+        ),
+        (
+            "async def poke(browser):\n"
+            "    session = await browser.new_browser_cdp_session()\n",
+            ["cdp_session"],
+        ),
+        (
+            # Lane D's shape: the method is a VARIABLE, so a pattern anchored on
+            # a quoted "Domain.method" would have seen nothing.
+            "async def _send(session, method, params):\n"
+            "    return await session.send(method, params)\n",
+            ["cdp_send"],
+        ),
+    ],
+    ids=["click-by-devtools", "browser-session", "variable-method"],
+)
+def test_the_mutation_scanner_catches_a_devtools_session(source, kinds):
+    """SHOWN FAILING before 2026-09-24: every plant here scanned clean.
+
+    A DevTools session can do anything the page can -- press, type, run script,
+    navigate past the read door -- and none of it spells a Playwright verb.
+    """
+    hits = readonly.scan_source_for_mutations(source)
+    assert [kind for _line, kind, _src in hits] == kinds, hits
+
+
+def test_a_send_that_is_not_a_devtools_send_is_not_a_devtools_pattern():
+    """The narrow half: a tool NAMED with send is not a send call, and a read
+    of a session attribute is not a send."""
+    reads = (
+        "async def tool(page):\n"
+        "    out = await linkedin_send_message(recipient, body)\n"
+        "    n = session.sent_count\n"
+    )
+    assert readonly.scan_source_for_mutations(reads) == []
+
+
 def test_evaluate_is_flagged_unless_explicitly_waived():
     """An unwaived evaluate() must trip the scanner; a waived one must not."""
     unwaived = "result = await page.evaluate(SOME_SCRIPT)\n"

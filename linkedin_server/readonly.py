@@ -2787,6 +2787,33 @@ _MUTATION_CALL_PATTERNS: tuple[tuple[str, re.Pattern[str]], ...] = (
     ("route_family", re.compile(
         r"\.(unroute(_all)?|route_from_har|route_web_socket)\s*\(")),
     ("http_headers", re.compile(r"\.set_extra_http_headers\s*\(")),
+    # -----------------------------------------------------------------------
+    # ADDED 2026-09-24 (lane D's 5.3, assigned to lane G): A DEVTOOLS SESSION
+    # CAN DO ANYTHING THE PAGE CAN, and nothing above could see one.
+    # ``session.send("Input.dispatchMouseEvent", ...)`` clicks without a
+    # ``.click(``; ``Runtime.evaluate`` runs script without an ``.evaluate(``;
+    # ``Page.navigate`` loads an address past the read door. Two patterns:
+    #
+    # * ``cdp_session`` -- OPENING one, ``new_cdp_session`` or
+    #   ``new_browser_cdp_session``, the capability itself;
+    # * ``cdp_send`` -- ANY ``.send(`` call. Not only a literal method name:
+    #   lane D's closed table sends through ``_send(method, params)``, where
+    #   the method is a variable, so a pattern anchored on a quoted
+    #   ``"Domain.method"`` would have seen nothing.
+    #
+    # THE COLLISION IS STATED, as the rejection of ``clear`` above demands: a
+    # generator's or a socket's ``.send(`` matches too. Measured over the 55
+    # package modules with this scanner's real semantics: ZERO hits for either
+    # pattern, so nothing needs sanctioning here and the collision costs
+    # nothing today; the day it fires on a generator, it fires loudly. Lane D's
+    # ``cdp_download.py`` (unmerged at the time of writing) is matched four
+    # times: one send (``_send``), two sessions (``capture_download`` and
+    # ``reset_download_behaviour``) -- each to be sanctioned in
+    # SANCTIONED_MUTATIONS at its merge, in the function that makes it -- and
+    # one line of its module docstring, which this scanner reads as source
+    # like every other docstring, so its merge rewords it.
+    ("cdp_session", re.compile(r"\.new_(?:browser_)?cdp_session\s*\(")),
+    ("cdp_send", re.compile(r"\.send\s*\(")),
 )
 
 

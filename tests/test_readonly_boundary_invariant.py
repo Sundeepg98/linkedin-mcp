@@ -1314,6 +1314,20 @@ PINNED = (
 #: narrowing the browser roots moves ``_JS_BROWSER_ROOTS``
 #: (``test_a_real_weakening_does_move_the_digest``). One interpreter, 3.13.
 #: ------------------------------------------------------------------------
+#: RE-FROZEN 2026-09-24 (lane D's 5.3, assigned to lane G), ONE DIGEST MOVED,
+#: AND IT IS A REFUSAL THAT GREW:
+#:
+#:     _MUTATION_CALL_PATTERNS   10a0e8e2bb4d7812 -> 579d20dc7c08eb52   29 -> 31
+#:     every other digest        unchanged
+#:
+#: A DevTools session can do anything the page can, and no pattern could see
+#: one: ``cdp_session`` (opening one) and ``cdp_send`` (any ``.send(``, since
+#: a method name can be a variable). Shown failing: three plants -- a click by
+#: ``Input.dispatchMouseEvent``, a browser-level session, and lane D's
+#: variable-method send -- each scanned CLEAN on the prior patterns; zero hits
+#: across the 55 tracked package modules after, so nothing needed sanctioning. The
+#: floor below rises 29 -> 31 and the detector roster names both classes.
+#: ------------------------------------------------------------------------
 READONLY_AST_AT_LAST_REFREEZE = {
     "<functions>": "ff43e832d6f2b685",
     "JS_MUTATION_TOKENS": "d47e30b67c583c1b",
@@ -1481,7 +1495,10 @@ READONLY_AST_AT_LAST_REFREEZE = {
     # detector classes added, zero removed, and the direction is pinned by
     # contents in tests/test_the_scanner_has_only_ever_gained_detectors.py
     # because this value cannot express it.
-    "_MUTATION_CALL_PATTERNS": "10a0e8e2bb4d7812",
+    # 10a0e8e2bb4d7812 until 2026-09-24: TWO MORE, a DevTools session
+    # (cdp_session, cdp_send), added and none removed; the last re-freeze
+    # note above, and the roster in that same file now names 31.
+    "_MUTATION_CALL_PATTERNS": "579d20dc7c08eb52",
 }
 
 _SUPERSEDED_READONLY_AST_AT_LAST_REFREEZE = {
@@ -2120,7 +2137,12 @@ DENYLISTS_AT_A76FE32 = {
     # fixture call, and asserts reads are not flagged. A removal now turns that
     # file red no matter what happens to this digest. Six mutations were shown
     # killing those checks before they were admitted.
-    "_MUTATION_CALL_PATTERNS": "10a0e8e2bb4d7812",
+    #
+    # UPDATED AGAIN 2026-09-24, FOR THE SAME KIND OF REASON:
+    # 10a0e8e2bb4d7812 -> 579d20dc7c08eb52, two DevTools detector classes
+    # added (lane D's 5.3), none removed. The same file's roster now names 31
+    # and its probes show both new classes firing.
+    "_MUTATION_CALL_PATTERNS": "579d20dc7c08eb52",
     "JS_MUTATION_TOKENS": "d47e30b67c583c1b",
 }
 
@@ -2322,7 +2344,7 @@ REFUSAL_FLOORS = {
     "_FORBIDDEN_URL_SUBSTRINGS": 33,
     "_FORBIDDEN_SUBSTRING_EXEMPTIONS": 2,
     "_FORBIDDEN_SUBSTRING_PATTERN_EXEMPTIONS": 2,
-    "_MUTATION_CALL_PATTERNS": 29,
+    "_MUTATION_CALL_PATTERNS": 31,
 }
 
 
