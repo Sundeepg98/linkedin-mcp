@@ -1793,3 +1793,80 @@ panel drawn under any name on that page" -- is met, so its state is for the
 census owner to re-rule, with `P O3`'s proving fire as the evidence and
 `linkedin_who_viewed_me(show_more_analytics=True)` as the tool that returns
 it (`more_analytics.revealed_insights`). Zero loads.
+
+### (f) The six own-profile edits: the account-level setting, found by name, not yet by address
+
+**THE ORDER:** where the dialog draws no notify control, his account-level
+"Share profile updates with your network" setting, read OFF before the edit,
+satisfies condition 1 of SELF-PROFILE-EDITS-NOT-OUTWARD (the orchestrator's
+amendment, to be registered at its next rulings commit); if neither can be
+established the row is NEEDS-OPERATOR. "Find that setting's page and build
+its reader. If a capture exists, do it offline; otherwise write a capture
+spec for session 2. Read only; never toggle it."
+
+**FOUND BY NAME, offline, in the settings index captured in session 1**
+(`/mypreferences/d/`, load 15, zero presses), read from the page's own data
+and re-checked for this section:
+
+    setting key      notifyNetworkForUpdates
+    display name     "Sharing profile edits"    (the key's display-name map)
+    identifier       notify_network_for_updates (the key's identifier map)
+
+LinkedIn's current label for the setting the amendment names is "Sharing
+profile edits"; the words "Share profile updates" occur 0 times in the
+capture.
+
+**NOT FOUND BY ADDRESS. No capture of the setting's own page exists** (every
+`_state/` of every checkout searched for the label and the identifier's
+spellings: the only hits are the settings index itself and the cached script
+bundle read below), so no reader is built: a reader over imagined markup
+would be a claim. Both candidates below, the category page and the old
+`/psettings/` address are refused by the shipped boundary today (driven
+through `readonly.is_read_url`, 2026-09-24); `/mypreferences/d/dark-mode` is
+admitted, the control. The index draws a link to the setting's CATEGORY,
+`/mypreferences/d/categories/profile-visibility`, and every category page is
+refused by the boundary's `/mypreferences/d/categories/` substring. The
+index's own slug-to-address pattern, measured on the settings it does link
+(`darkMode` -> `/mypreferences/d/dark-mode`; `showProfilePhotos` ->
+`/mypreferences/d/settings/show-profile-photos` -- the `/settings/` family
+holds 5 of the index's links, all display preferences), gives two
+candidates and no way to choose offline:
+
+    /mypreferences/d/notify-network-for-updates
+    /mypreferences/d/settings/notify-network-for-updates
+
+**ONE MORE READING, AND IT ORDERS THE TWO.** LinkedIn's own settings bundle,
+cached in the package's browser-profile backup in the gitignored state
+directory (2026-08-30), carries a list pairing its OLD settings slugs with
+the new ones. In that list `activity-broadcast` pairs with
+`notify-network-for-updates` -- the old `/psettings/activity-broadcast`
+page, a family the boundary refuses outright, named here so a ruling does
+not rediscover it -- and, in the same list, `profile-photo-visibility`
+pairs with `show-profile-photos` and `videos` with `autoplay-videos`, the
+two whose new addresses the index draws, both under
+`/mypreferences/d/settings/`. So the `/settings/` candidate goes FIRST:
+DERIVED from two of two known pairs, not measured.
+
+**THE CAPTURE SPEC FOR SESSION 2, each step a separate decision:**
+
+    step  what                                                  loads presses
+    1     a ruling admitting ONE candidate, exact and anchored --   0      0
+          /mypreferences/d/settings/notify-network-for-updates
+          first -- on the ONE-NAMED-SETTINGS-PAGE-AT-A-TIME
+          precedent that admitted dark-mode
+    2     one load, captured closed; the capture answers: SERVED    1      0
+          or REDIRECTED (as a relation, never the url); the
+          switch's accessible name; its aria-checked / checked;
+          whether the page draws exactly one switch
+    3     if it redirects, the same for the second candidate --    0-1     0
+          or, if the redirect lands on the category page, a
+          separate ruling for that one load
+
+**THE READER, specified and not built:** one switch; its state read off the
+browser's own `checked` property (the verification `update_setting` already
+trusts), its name matched by exact equality to the display name above;
+returns ON, OFF or UNREADABLE and nothing else. **READ ONLY: this lane never
+presses the switch.** Condition 1 asks for OFF to be READ, never made so --
+and turning it off would itself be a settings write this order does not
+grant. Until the page is admitted and read, the six rows (`P A8`, `A11`,
+`A13`, `A17`, `A19`, `A21`) stay where session 1 left them.
