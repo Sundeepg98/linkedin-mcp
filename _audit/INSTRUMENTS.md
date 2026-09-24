@@ -10348,3 +10348,39 @@ copy, its space removed, read CLEAN. It is a closed token now.
 
     A NEEDLE MATCHED BY SUBSTRING CERTIFIES ONLY THE SPELLINGS IT WAS GIVEN.
     A CLOSED VOCABULARY IS THE ONE SHAPE IT CAN CERTIFY WHOLE.
+
+### 69.9 A CONTROL PLANTED IN A SHAPE NO CAPTURE HOLDS CERTIFIES ONLY THE PLANT
+
+`dom.read_thread_reply_surface` counted recipient boxes by an aria-label, and
+its control planted the composer's box WITH that aria-label -- so reader and
+control agreed with each other and not with LinkedIn. The measured box is named
+by a `<label for>`: on the composer capture the aria-label selector finds 0 and
+the role-and-name selector the send gate types into finds 1. The reader read the
+composer as a conversation, the one confusion that field exists to refute.
+Found at integration (2026-09-24); the new control, in the measured shape, was
+RED on the unfixed reader.
+
+    A CONTROL MUST BE BUILT IN THE SHAPE THE CAPTURE HOLDS, OR IT TESTS THE
+    READER AGAINST ITS AUTHOR'S ASSUMPTION INSTEAD OF AGAINST THE PAGE.
+
+| path | shown failing by |
+|---|---|
+| `dom.read_thread_reply_surface` -- recipient boxes by `dom.compose_recipient_selector()` | `tests/test_thread_reply_surface.py::test_the_composer_is_counted_in_the_shape_it_was_measured_in` (red first: 0 against 1) and `test_the_global_search_combobox_is_not_a_recipient_box`; mutation M15 puts the aria-label back and the first fails |
+
+### 69.10 A NAVIGATION READER THAT RESOLVES ONLY CONSTANTS CANNOT SEE A HELPER, A MODULE OR A WRITE
+
+The named-cost reader (`tests/test_a_named_cost_names_a_tool_that_can_incur_it.py`)
+resolved config constants and census keys and kept anything else as unparsed
+source. Three of this lane's tools navigate through `threads.COMPOSE_URL`, a
+local bound to `threads.thread_url(...)`, and `_write_tool("send_reply")`,
+none of which unparses to `/messaging` -- so the closed claim it guards stayed
+green by not seeing them. It now resolves all three by AST, and a planted
+source, RED on the old reader, holds each shape; a write whose spec is a job
+posting is its control.
+
+    A STATIC READER THAT KEEPS WHAT IT CANNOT RESOLVE AS SOURCE TEXT MUST BE
+    SHOWN A PLANT OF EVERY SHAPE THE CODE USES, OR ITS SILENCE IS BLINDNESS.
+
+| path | shown failing by |
+|---|---|
+| the reader's module-constant, helper and write-spec resolution; the second clause of the messaging sentence, checked in both copies | `test_the_reader_resolves_a_module_constant_a_helper_and_a_write_spec` (red first on the old reader); mutations M16 (write-spec branch dead) and M17 (module-constant branch dead) each fail it; `test_every_tool_the_second_clause_names_exists_and_loads_messaging` |

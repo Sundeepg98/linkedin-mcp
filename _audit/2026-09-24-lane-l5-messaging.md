@@ -605,6 +605,147 @@ by the corpus-wide floor, the census instruments, the pointer-graph guard and th
 generators at a fixed point. A record cannot carry the result of a gate that runs over it;
 that result is in the lane's closing message.
 
+## Integration 2026-09-24
+
+THE ORDER (the orchestrator's, sampled at 05:10) was obeyed only after the disk agreed with it: this
+lane's head was `f3c862a` and clean, and local `master` was `ff98a7f` -- 30 commits past the base by
+`git rev-list --count 9c219c8..master` (the order said 31) -- carrying lanes R, G and S and rulings
+batch 3. `master` was re-read before each commit below and had not moved.
+
+### The merge and its conflicts
+
+`123186c` merges `ff98a7f` (parents `f3c862a`, `ff98a7f`). Seven paths conflicted, and no line was
+changed on both sides:
+
+| path | blocks | resolution |
+|---|---|---|
+| `_audit/_census/messaging-and-content.md` | 5 | ROW BY ROW against the base, each row taken from the side that changed it: 29 rows in the blocks, 17 this lane's cells and 12 lane R's returns (`M3`, `M5`, `M19`, `M23`, `M24`, `M39` to `M42`, `M46`, `M50`, `M51`) |
+| `_audit/_census/network.md` | 3 | the same: 13 rows, 6 this lane's (`4`, `5`, `6`, `160`, `166`, `167`) and 7 lane R's (`3`, `158`, `159`, `163`, `164`, `165`, `168`) |
+| `_audit/_census/write-classes.tsv` | 1 | this lane's `N A11` to `A13` dispositions, then lane R's 174 appended lines; checked with `scripts/check_write_classes.py`: GREEN, 325 lines (R1 16, R2 35, R3 274) |
+| `_audit/INSTRUMENTS.md` | 1 | both sides appended: master's 66 and 67, then this lane's 69, with the register's `---` separator |
+| `_audit/INDEX.md`, `_audit/RULINGS.md`, `_audit/_census/blocker-map.tsv` | generated | master's copies taken, every other path staged first, all three regenerated to a fixed point (two write rounds, three `--check` exit 0) |
+
+Checked after the resolution: each census file differs from `master` only in this lane's rows, and
+from this lane's head only in master's. Auto-merged and read: `server.py` (lane S's five
+people-search parameters and this lane's three tools sit apart), `writes.py` (lane G changed one
+line, `_recipient_gate`'s error field; this lane's hunks are elsewhere), `check_write_classes.py`
+(lane R's range-id row form beside this lane's R2 rule), `test_write_classes.py`,
+`test_server_surface.py`, and `_audit/_census/read-addresses.tsv`, which `check_read_addresses`
+re-drove GREEN, 93 of 93: lane R's returned read rows in, `M M49` out.
+
+LANE R'S RETURNED ROWS ARE LANE R'S. Twelve of its lines are R2 -- `M M3`, `M M5`, `M M19`,
+`M M23`, `M M40`, `M M51`, `M C66`, `N 3`, `N 15`, `N 18`, `N 156`, `N 158` -- and this lane classed
+none of them; they stay classify-only. The table's header said "every other R2 line names its
+blocker or capture", which the merge made false, and now says which 21 this lane classed.
+
+### Every pin, re-derived on the merged tree
+
+Section 7 was written as deltas from `9c219c8`. Each figure below is master's pin moved by this
+lane's rows, and every one was read off the merged tree. Committed in `7d13af2`.
+
+- `scripts/census_completion.py`: adjudicated 194 -> 197, delivered_broad 105 -> 108, unfired
+  30 -> 33, gap 510 -> 507, gap_read 94 -> 93, gap_write 324 -> 322, b3_admitted 40 -> 39,
+  b3_blocked_on_nothing 2 -> 1 (`P K1` is the one left), b1_standing 10 -> 12, b1_no_ruling
+  20 -> 21; `PINNED_B1_ROWS` gains `M M10` and `M M17` (OPERATOR-NAMES-THE-TARGET) and `M M49` (no
+  ruling). `--check` exit 0. `count_census_states --expect J=92,P=152,M=114,N=149` MATCH at 507.
+- The triage split, re-derived with master's `scripts/triage_messaging_gap_rows.py`: 117
+  `{R 13, W 101, R+W 3}` -> 114 `{R 12, W 99, R+W 3}`; RETURNED-OUTSIDE-LEDGER stays 14. Y2's
+  bucket had not landed on `master` at the merge.
+- The tool surface: 51 -> 54 tools, 74 -> 81 parameters (lane S's five included).
+- The write surface, in every list that types it: `SANCTIONED_WRITE_TOOLS` (which is also the
+  docstring exemption), `EXPECTED_TOOLS`, both `server_info` lists, `performable_and_irreversible`
+  (`send_reply` added by hand: irreversible, as `send_message` is), the reversibility tables
+  (STILL-UNKNOWN, unmeasured), the destruction-refusal list and `writes.py`'s FIVE -> SIX note, and
+  the receipt and preview-state counts, 13 -> 14.
+- Prose: the README headline "Fifty-four tools ship. Forty read. Fourteen write." and its module
+  listing, `server.py`'s docstring (headline, split, sum, the action with no tool),
+  `__init__.py`, and `test_server_surface.py`'s own first line.
+- THE INSTRUCTIONS a client answers from: FOURTEEN WRITE naming `linkedin_send_reply`, and a
+  paragraph for the reply. Two claims this lane had made false are corrected in place, quoted:
+  `send_message` "can never report SENT", and "Each call loads exactly one page".
+- NOT TOUCHED, by the order: `scripts/ci_shard_timings.json`.
+  `tests/test_ci_shard.py::test_the_timings_table_still_prices_most_of_the_suite` reads 157 of
+  237 and stays red until the table is regenerated after the train.
+
+### The three baselines, each by its own writer (`python -m tests.<module> --write-baseline`)
+
+- `tests/reader_leak_baseline.json`: 126 -> 133 readers. Seven appeared, all CLEAN (the six
+  `threads` readers and `writes._read_thread_reply_box`). Three verdicts moved `returns_text` ->
+  `clean` -- `dom.read_follow_control`, `writes._read_follow_state`, `writes._verify_after` -- and
+  NOT because of this lane: a scratch extract of `master` `ff98a7f`, driven reader by reader, reads
+  the same three clean. The committed baseline was stale, because the shrink test flags only a
+  regression.
+- `tests/tool_envelope_baseline.json`: `linkedin_list_conversations` CLEAN; `linkedin_open_thread`
+  and `linkedin_send_reply` NOT DRIVEN ("never read the page"). Every tool that takes an id and
+  every write reads the same, because the harness passes one synthetic string, which is no thread
+  id, and a write refuses at the flag. The lane's own tests drive both over the fixtures.
+- `tests/landing_interpolation_baseline.json`: two new sites, both WITHHELD by measurement
+  (`threads.off_thread_result`, `writes._assert_landed_on_target`).
+
+### Item 3: `dom.read_thread_reply_surface`, in this lane's domain now
+
+RED FIRST: `tests/test_thread_reply_surface.py` gained the composer in its MEASURED shape (a
+`<label for>`, the typeahead's class), and on the unfixed reader it read 0 against the expected
+1. The reader now counts `dom.compose_recipient_selector()` -- the role and the accessible name the
+send gate types into -- and a second new test holds the other side: LinkedIn's global search, a
+combobox on every page, is not a recipient box. Committed in `346b78f`. Measured offline on both
+captures after the fix: the composer reads 1 (the old aria-label selector 0), the `/messaging/`
+conversation 0, and `threads.read_thread` agrees on both. The synthetic composer fixture's label
+read "To", which no capture holds; it now carries the measured label text.
+
+### Item 4: the named-cost reader sees the messaging tools
+
+RED FIRST: a planted server source (never written into the package) reaches a messaging address
+through a module constant (`threads.COMPOSE_URL`), a local bound to a helper that formats a module
+template (`threads.thread_url`), and a write whose navigation is its spec's `url_template`
+(`_write_tool("send_reply", ...)`). On the old reader it found none of the three. The reader now
+resolves all three -- read by AST, never imported -- and its control, a write whose spec is a job
+posting, stays unseen. On the real server it then saw four more tools load a messaging address:
+`linkedin_list_conversations`, `linkedin_open_thread`, `linkedin_send_reply`, and
+`linkedin_send_message` when a send is performed. `known_side_effects` and its README twin name them
+in a second clause, "these also load a messaging address", open rather than closed and apart from
+the "Only ... can incur this" clause whose cost is the root's. The recorded defect is unchanged:
+exactly `linkedin_compose_fields`. The two copies are checked to name the same set, and every tool
+the clause names is checked to exist and to navigate there.
+
+OF THE ITEMS SECTION 8.3 RAISED, three are closed here (the named-cost reader, the baselines, the
+dom reader), one waits for the train (the timings table), and one is still lane G's:
+`writes.perform`'s `click_error` carries the exception's text.
+
+### Integration commits
+
+| commit | what |
+|---|---|
+| `123186c` | the merge of `master` `ff98a7f`; conflicts as above; generated files at a fixed point |
+| `346b78f` | item 3, red first |
+| `7d13af2` | every pin, the baselines, item 4 (red first), the instructions, the tsv header |
+| the commit carrying this section | this section, `_audit/INSTRUMENTS.md` 69.9 and 69.10, the generated files |
+
+### Gates run on the integrated branch
+
+- The census instruments over `7d13af2`: `census_completion --check` exit 0 (every figure on its
+  pin); `count_census_states` MATCH at 507; `check_read_addresses` GREEN 93 of 93;
+  `check_write_classes` GREEN 325; `ruling_holds` GREEN; `pin_census_rows` no drift, 704;
+  `measure_pointer_graph --check` PASS, 69 pointers.
+- The pin and lane files (26), over the tree between `346b78f` and `7d13af2`, before the commit:
+  1884 passed, 2 failed -- the timings table, and `test_server_surface.py`'s own headline, which
+  was then corrected and passed.
+- SEVENTEEN MUTATIONS, SEVENTEEN KILLS, over a scratch copy of `7d13af2`: the
+  lane's fourteen, re-run on the merged tree, and three for the integration's new code --
+  M15 the dom reader back on the aria-label, M16 the reader's write-spec branch dead, M17 its
+  module-constant branch dead. The unmutated copy passed all sixteen named tests; each mutation
+  failed its test at the assertion named for it; every file was restored byte for byte.
+- The impact gate's plan, `--against ff98a7f`: 222 of 237 test files (94%), so it WIDENED TO THE
+  FULL SUITE. By the order the full suite was NOT run locally; CI certifies at merge.
+- The final gate over the commit carrying this section is reported in the lane's closing
+  message: a record cannot carry the result of a gate that runs over it.
+
+### NOT run
+
+- The full suite, locally, by the order.
+- CI: nothing was pushed.
+- LIVE: nothing. The Live queue and Capture queue below are unchanged by the integration.
+
 ## Live queue
 
 Every call below runs in a process the live lane owns, spaced by its own budget. Loads are page
