@@ -1323,3 +1323,251 @@ shape since 2026-09-20), and an encoded slash INSIDE one root-line segment
 (`/company/a-company%2Fpeople/`), which a browser keeps encoded; whether
 LinkedIn's server decodes it before routing is UNVERIFIED, and it is filed
 here, not changed.
+
+## Integration (follow-up) 2026-09-24
+
+The orchestrator's integration order of 08:32: merge `master` `1902fcb`;
+rewrite the blocker of the nine WHO/WHICH rows, and of `N 79`, `N 194` and
+`N 172` from the first pass, on the operator's answer of 08:11
+(`NAMES-AT-RUNTIME`, registered on that commit with the orchestrator's
+`PEOPLE-DATA-MITIGATIONS` and `OUTWARD-CLASSES-BUILT-BEHIND-GRANTS`);
+re-derive the pins; run the gates; commit. The same order accepted section
+B's reading of condition 1 of the search admission: the admission is inert
+until a reader lands, and the reader now returns names under the six
+mitigations.
+
+### J.1 The merge of `master` `1902fcb` (`3a7da6b`)
+
+Master since `ff98a7f` carried the live lane's session 1, rulings batch 4,
+lanes L7 and Y2, the fix after L7, and the names-at-runtime calls. Conflicts,
+and how each was resolved:
+
+    census slices     jobs.md, network.md: row by row against the base, each
+                      row from the side that changed it -- Y2's appended
+                      evidence on J 107, J 109, J 110, J 111, N 103, N 176;
+                      this lane's cells on J 108, J 112, N 102, N 104, N 177,
+                      N 178. No row was changed on both sides.
+    read-addresses    this lane's M C70 and N 161 lines; M C72 and N 134 gone,
+                      as master removed them (proven live, out of bucket 3)
+    pointer-graph     this lane's N 100 donor kind; master's removal of the
+                      N 134 and N 135 pointers
+    boundary ledger   both entries kept: the two sides moved DIFFERENT tables
+                      -- master SANCTIONED_MUTATIONS e79a701b37ae9c39, this
+                      lane _ALLOWED_URL_PATTERNS 17409e16e7abbcc8
+    census pins       both histories kept; the four moved figures MEASURED on
+                      the merged tree, never summed from the two sides' claims
+    shard timings     master's table and convention; this lane's two test
+                      files re-priced on the merged tree
+
+**THE ENCODED DOT-SEGMENT FIX SURVIVED THE MERGE INTACT**, shown with the
+cold verifier's own break script on the merged boundary, not a new one: 0 of
+133 dot-segment spellings admitted, and 0 of the 7 encoded dots on the
+pre-existing root lines. The script still admits 17 addresses, the same 17
+as when the fix was re-checked (section G), in two pre-existing kinds -- 15
+open query shapes on the search line and 2 encoded slashes inside one root
+segment -- and for all 17 the browser's landing is the string itself: its
+list of admitted addresses whose landing differs is empty.
+
+The generated files (`_audit/INDEX.md`, `_audit/RULINGS.md`, the blocker
+map) were already at their fixed point for the merged corpus. The merge
+was gated after it was made (made 08:43, the run finished 08:51), on the
+tree J.2's squash re-used byte for byte: 4691 passed, 0 failed, including
+`tests/test_gap_rows_on_refused_addresses.py` and
+`tests/test_the_package_compiles_on_its_oldest_python.py`.
+
+### J.2 The two gate-fix pairs, squashed
+
+The order allowed squashing each gate-fix pair into its item only if that
+was clean. Section G had left both in place (the item-1 and item-2 commits
+each failed a corpus guard, and the commit after each repaired it). A rebase
+would have had to re-make the merge and re-resolve every conflict in it, so
+the squash was done by plumbing instead: each rewritten commit reuses its
+ORIGINAL TREE, byte for byte, so nothing was resolved twice. The merge was
+re-made from its own tree with the same second parent, `1902fcb`. Authors,
+committers and dates are the originals'. The only new text is the two
+squashed messages, each the item's message followed by its fix's.
+
+    the D2 item and its gate fix        -> one commit (`bfeeb61`)
+    the rosters item and its gate fix   -> one commit (`b9b3df2`)
+    every later commit, tree for tree   -> the merge (`3a7da6b`) and this
+                                           integration's census commit
+                                           (`e251be7`)
+
+Before the branch moved, three things were checked. Every new commit's tree
+hashes equal to its original's, and the new tip's tree equals the old tip's.
+Nothing cited a rewritten hash: no tracked file and no commit message on the
+branch. No other branch or tag contained any of them, and none was ever on
+`master`. The branch was moved with an old-value check, so a concurrent
+writer would have made the move refuse. No commit on the branch now holds an
+item without its gate fix.
+
+### J.3 Names at runtime, row by row
+
+**NO ROW'S STATE MOVED.** Every row below is GAP before and after: no
+reader returns names yet. What moved is each row's BLOCKER, and for nine of
+them the address table's gate. Each cell keeps the doctrine paragraph it was
+blocked on as that day's record and gains a paragraph after it, opening
+"NAMES AT RUNTIME, 2026-09-24", which says the doctrine question is answered
+and names what holds the row now. Each earlier address-table note is kept
+after a marker naming what answered it.
+
+| row | payload | holds it now | gate before | gate now |
+|---|---|---|---|---|
+| `N 79` | WHO | a name-returning reader | RULING | READER |
+| `N 194` | WHO | a name-returning reader | RULING | READER |
+| `N 172` | WHO | a name-returning reader; the member from tool arguments only | RULING | READER |
+| `N 161` | WHICH groups | the reader, and capture F.2 | RULING | MEASURE |
+| `N 179` | WHICH events | the reader, and capture F.3 | RULING | MEASURE |
+| `N 165` | WHO | the reader, and capture F.7 | RULING | MEASURE |
+| `N 177` | WHO, by degree | the reader, and capture F.7 | RULING | MEASURE |
+| `N 188` | WHO | the reader, and capture F.8, which also finds the address | RULING | MEASURE |
+| `N 100` | WHO, and a write | the reader and capture F.6, for the read half | RULING | MEASURE |
+| `N 189` | WHO, filtered | the reader, capture F.8, and an address | refused | refused |
+| `N 178` | WHICH, on another member's profile | the reader, and a member he names | refused | refused |
+| `M C70` | WHICH posts | the reader, capture F.4, and an admission | refused | refused |
+
+"The reader" in every row is the same thing: a name-returning reader held to
+`PEOPLE-DATA-MITIGATIONS`, on the shared people-record foundation lane G is
+building. The first three are READER because their page is already captured
+(the live lane's session 1 loaded the people-search results page through
+`linkedin_people_search_shape`: `_audit/2026-09-23-live-lane-session-1.md`,
+entry 5, item 9); the next six are MEASURE because nobody has captured
+theirs.
+
+**WHAT THE READER GATE COUNTS HERE, STATED.** The census counts a row
+BLOCKED ON NOTHING when it is ADMITTED and gated READER or PRESS-PERMITTED,
+so the three READER rows move that figure from 5 to 8. For these three it
+means blocked on no decision and no measurement. It does NOT mean buildable
+today: their reader waits on lane G's foundation, a build this lane does not
+own.
+
+**TWO QUESTIONS THE ANSWER LEAVES OPEN, for the orchestrator.**
+
+1. `M C70` asks for posts. The mitigations declare a person's record and a
+   group's or event's record, and no post's. Before any reader returns what
+   a search inside a group finds, somebody has to declare a post's fields.
+   A post is another member's text: is it a title and a link, like a group,
+   or more?
+2. `N 178` reads which groups a member belongs to, off that member's
+   profile. `THIRD-PARTY-PROFILE-FOR-A-NAMED-TARGET` loads such a profile
+   only inside an outward act whose target the operator names, and never for
+   a measurement. This row is a read, not an outward act, so even with a
+   member he names it has no route. Delivering it needs his decision that a
+   named member's profile may be loaded for a read; otherwise it stays GAP
+   on that, NEEDS-TARGET either way.
+
+### J.4 Pins, re-derived on the final tree
+
+    readonly.py AST digests      8 of 8 equal their pins; no change since
+                                 the merge
+    census_completion            b3 admitted 51, refused 37; jobs admitted
+                                 13, refused 34 (all measured at the merge);
+                                 b3_blocked_on_nothing 5 -> 8 in this
+                                 integration, with its history line
+    pin_census_rows              no drift: the live population is the pin
+    pointer graph                PASS, 66 pinned pointers
+    address table                GREEN 104 of 104: READER 8, MEASURE 25,
+                                 BUILT-UNFIRED 4, PRESS 8, RULING 6 (none of
+                                 them this lane's rows), BLOCKED ON NOTHING 8
+    jobs side table              GREEN 107 of 107
+    triage                       every control OK (1, 3-9); the
+                                 DECIDED_SINCE_TRIAGE notes for the nine rows
+                                 name the new blocker and gate, and keep the
+                                 verdict letter RULING, which CONTROL 8 needs
+    tool surface                 untouched: no tool added or removed
+    shard timings                the follow-up's two files priced at the
+                                 merge, serially on the merged tree
+                                 (3.947 s and 4.245 s); the first pass's
+                                 file, never priced before, priced now,
+                                 alone and serially on the final tree
+                                 (109 tests, 9.139 s); 168 files priced
+
+### J.5 Gates
+
+**RUN, on the integration's census commit**, whose tree J.2's squash
+re-used byte for byte (the record's own commit adds
+this section and the one timing, and is gated by the corpus-wide guards and
+the three generators after it):
+
+- The census instruments: `census_completion --check` (every figure
+  matches its pin), `check_read_addresses` (GREEN 104 of 104),
+  `check_jobs_directions` (GREEN 107 of 107), `triage_read_gap_rows`
+  (controls 1 and 3-9 OK), `ruling_holds` (GREEN), `check_write_classes`
+  (GREEN, 339 lines), `check_exclusion_basis` (70 of 70, no structural
+  problem), `pin_census_rows --check` (no drift),
+  `measure_pointer_graph --check` (PASS, 66), and the three generators
+  `--check` (the audit index, the rulings index, the blocker map).
+- The verifier's break script, as J.1 gives it.
+- One pytest run over 121 test files: the impact gate's own selection for
+  this integration's staged diff (68 files, the 20 corpus-wide guards among
+  them), every test file that names the read boundary (69), and ten named by
+  the order or this lane, `tests/test_gap_rows_on_refused_addresses.py` and
+  `tests/test_the_package_compiles_on_its_oldest_python.py` among them:
+  7223 passed, 4 skipped, 1 xfailed, 0 failed, in 16m48s on six
+  workers. The JUnit report agrees: 7228 cases across 120 files, the
+  121st path being `tests/conftest.py`, which holds none.
+
+**THE FIRST ATTEMPT AT THAT RUN RAN NOTHING.** The file list was written in
+text mode on Windows, so every path ended in a carriage return, and pytest
+collected zero tests ("no tests ran", exit 5). An exit of 5 is not a pass,
+and nothing was read off it: the list was rewritten with bare newlines,
+counted (121 paths, no carriage return), and run again.
+
+**NOT RUN, and why.** `impact_gate --against 1902fcb --plan-only`: 226 of
+245 test files (92%), past its 45% line, so it WIDENS TO THE FULL SUITE,
+which the order says not to run locally; CI certifies at merge. Nothing
+live: no browser, no LinkedIn page, no Chrome profile.
+
+### J.6 The session-2 plan and the capture specs, after the answer
+
+**E.1'S THIRD TIER NO LONGER HOLDS ITS REASON.** P3 was "moves no row until
+the operator answers the doctrine question". He has answered, so each P3
+capture now moves a row once the name-returning reader lands, which is P1's
+reason. Joined to P1, the session wants six searches -- `N 84`, `N 87`,
+`N 94`, `N 104`, `N 161` and `N 179` -- and `D1-SEARCH-AS-READS` allows five.
+The order that fits: the three people searches first (they fire readers
+already built); then `N 104`'s companies search (its reader returns Page
+addresses, not names, so it does not wait on lane G); then ONE of `N 161`
+and `N 179`, the other to the next session. Loads stay well inside forty:
+the ten E.1 counted, plus three of P3's four (one search waits), thirteen
+before the bracket loads.
+
+**THE CAPTURES THEMSELVES, AND MITIGATION 3.** Section F writes each page's
+full content to a gitignored file, the way this repository has always
+captured: `scripts/_build_job_list_skeleton.py` builds a committed skeleton,
+keeping only the attributes its reader reads, from a raw capture that stays
+local and is never committed. F was written before `PEOPLE-DATA-MITIGATIONS`,
+whose third mitigation says no third party's name, headline or link is
+written to a tracked file, a log, an error field, a receipt, a cache or a
+fixture; that fixtures use synthetic people; and that live evidence records
+counts and hashes. Whether a gitignored raw capture is such a store is
+decided nowhere. This lane reads it as one, for a page OF people, and adopts
+the stricter form for its own specs from here. Nothing F asks to read off a
+capture is lost by it, since all of that is read by SHAPE and COUNT:
+
+- The skeleton reduction moves INTO the session: the page is reduced before
+  anything is written, every text node and every attribute value replaced
+  by its shape (digit run, letter run, length) and a hash; tags, attribute
+  names and classes are kept, since a reader's selectors are built on those.
+- What F asks for -- landed vertical, card counts, ids by shape, controls
+  drawn -- is computed from the skeleton, and only counts and hashes are
+  recorded.
+- The name-returning reader's fixtures are synthetic people poured into that
+  skeleton, never a captured page.
+
+The session-1 capture of the people-search page was made before the
+mitigations were registered and sits in the live lane's gitignored state;
+this lane has not touched it. Whether it is reduced the same way, and
+whether this reading holds at all, is the orchestrator's call.
+
+### J.7 What comes next
+
+After lane G lands the shared people-record foundation, not before: switch
+`linkedin_people_search_shape` to return names through it, and build the
+roster and vertical readers on it -- their composers, `member_rosters` and
+`search_verticals`, exist and nothing calls them yet -- each held to all six
+mitigations and each mitigation shown failing without its code, as the call
+requires. `N 79`, `N 194` and `N 172` then become COVERED-UNFIRED, and
+`tests/test_people_search_readers.py`'s `ROW_STATES` table moves with them in
+the same commit. The six MEASURE rows then need their captures, in the order
+J.6 gives.
