@@ -88,6 +88,9 @@ EXPECTED_TOOLS = (
     # 2026-09-23, lane L3: a READ on the jobs surface, banking census row
     # J 18 (recent searches, off the jobs home) in the same commit.
     "linkedin_recent_job_searches",
+    # 2026-09-23, the live lane: a READ that presses, the share link of one of
+    # his own posts; census M C72, proven live on his own post.
+    "linkedin_own_item_link",
 )
 
 
@@ -315,7 +318,13 @@ def test_both_rules_reject_the_registry_that_was_actually_measured():
     # linkedin_follow_company_page, a WRITE (census row N 47), built on the
     # lane branch as its own fiftieth and moved with every other count site
     # in the merge commit.
-    # FIFTY-FOUR FROM 2026-09-24, at the merge of lane L5: two READS
+    # FIFTY-TWO AT THE LIVE LANE'S MERGE, 2026-09-24: linkedin_own_item_link --
+    # the share link of one of his own posts through the post's own "Copy link
+    # to post", on the orchestrator-delegated call recorded in its docstring. A
+    # READ by effect that PRESSES two controls; built on the lane branch as its
+    # own fiftieth and moved with every other site in the merge commit.
+    # FIFTY-FIVE AT LANE L5'S MERGE OF MASTER 9b9a4d0, 2026-09-24: two READS
     # (linkedin_list_conversations, linkedin_open_thread) and a WRITE
-    # (linkedin_send_reply), moved with every other count site in one commit.
-    assert len(_tool_names()) == 54
+    # (linkedin_send_reply) on top of the live lane's fifty-two, moved with
+    # every other count site in one commit.
+    assert len(_tool_names()) == 55

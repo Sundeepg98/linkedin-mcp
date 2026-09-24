@@ -195,20 +195,34 @@ AFTER_THE_WRITE_CEILING_WAVE = (77, {"R": 10, "W": 66, "R+W": 1})
 #: direction divergence can be told the truth in the cell and a state
 #: divergence cannot, which is the whole of the ruling. ``M28`` in the same
 #: file is the identical shape and has carried ``R+W`` since it was written.
+AFTER_THE_COMPOUND_ROWS_WAVE = (77, {"R": 10, "W": 65, "R+W": 2})
+
 #: AFTER LANE R, 2026-09-23 (`_audit/2026-09-23-exclusion-returns.md`), which
 #: returned 40 of this slice's exclusions to GAP with each blocker named in
 #: its cell: 77 + 40 = 117. Reads 10 + 3 (`C14`, `C42`, `C43`), read-and-writes
 #: 2 + 1 (`C47`), writes 65 + 36. Fourteen of the forty were not GAP at the
 #: blocker map's freeze and are tallied RETURNED-OUTSIDE-LEDGER; the map is not
 #: grown (the orchestrator's call, delegated, 2026-09-24).
+AFTER_LANE_R = (117, {"R": 13, "W": 101, "R+W": 3})
+
+#: AFTER THE LIVE LANE'S MERGE, 2026-09-24, re-derived on the tree merged over
+#: lane R: ``C72`` ("Share a post off LinkedIn") -- a READ -- was proven live
+#: on his own post and moved GAP -> COVERED-PROVEN
+#: (``_audit/2026-09-23-live-lane-session-1.md`` Entries 10-12). 117 - 1 =
+#: 116, reads 13 - 1 = 12; writes and read-and-writes UNTOUCHED, because the
+#: lane moved no write. ``_audit/2026-09-20-the-messaging-gap.md`` quotes the
+#: wave-start 83, which stays true of that moment and is not edited.
+AFTER_THE_LIVE_LANE = (116, {"R": 12, "W": 101, "R+W": 3})
+
 #: AFTER LANE L5, 2026-09-24 (`_audit/2026-09-24-lane-l5-messaging.md`),
 #: re-derived with `scripts/triage_messaging_gap_rows.py` on the tree merged
-#: with master ff98a7f: three rows built out of GAP -- `M10` and `M17`
+#: with master 9b9a4d0: three rows built out of GAP -- `M10` and `M17`
 #: (writes, `linkedin_send_reply`) and `M49` (a read, the read indicator on
-#: his own last message). 117 - 3 = 114: reads 13 - 1, writes 101 - 2,
+#: his own last message). 116 - 3 = 113: reads 12 - 1, writes 101 - 2,
 #: read-and-writes untouched at 3. RETURNED-OUTSIDE-LEDGER stays 14: none of
 #: the three was a lane-R return.
-EXPECTED_NOW = (114, {"R": 12, "W": 99, "R+W": 3})
+AFTER_LANE_L5 = (113, {"R": 11, "W": 99, "R+W": 3})
+EXPECTED_NOW = AFTER_LANE_L5
 
 
 def test_the_headline_split_is_the_one_the_report_quotes():

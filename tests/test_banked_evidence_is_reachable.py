@@ -55,6 +55,17 @@ PINNED = {
     ("_audit/_census/jobs.md", "27", "COVERED-PROVEN"),
     ("_audit/_census/jobs.md", "151", "COVERED-PROVEN"),
     ("_audit/_census/network.md", "136", "MEASURED-ABSENT"),
+    #: TWO MORE AT THE LIVE LANE'S MERGE, 2026-09-24, and the same generator
+    #: at work: `M C72` and `N 134` were proven live and banked, and a banked
+    #: row is the only kind this guard reads. Their gitignored citations (one
+    #: `_audit/_scratch/` file under C72, two under 134) sit in the PRIOR
+    #: READINGS each cell keeps, written by earlier waves before either row
+    #: was banked. The evidence for the promotion itself -- the lane's session
+    #: document, Entries 7 and 10-12, and its tracked harness -- is reachable.
+    #: `P O3` was the third such row and was repaired instead: its cell cited
+    #: a gitignored capture in the lane's own words, and was reworded.
+    ("_audit/_census/messaging-and-content.md", "C72", "COVERED-PROVEN"),
+    ("_audit/_census/network.md", "134", "COVERED-PROVEN"),
 }
 
 #: A census table shaped like the real ones, for planting defects into.
@@ -377,7 +388,9 @@ def test_every_unreachable_artifact_is_named_and_classified(measured):
     """A count with no per-row list is not a measurement anybody can act on."""
     rows, _, _ = measured
     bad = [a for r in rows for a in r.unreachable]
-    assert len(bad) == 15, [str(a) for a in bad]
+    # 18 since the live lane's merge, 2026-09-24: 15 plus C72's one and 134's
+    # two, all in kept prior readings (see PINNED).
+    assert len(bad) == 18, [str(a) for a in bad]
     assert {a.verdict for a in bad} == {"GITIGNORED"}, sorted({a.verdict for a in bad})
     assert all(a.path.startswith("_audit/_scratch/") for a in bad), bad
 

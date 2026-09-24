@@ -1,4 +1,4 @@
-"""The tool surface: fifty-four tools, forty of which do not write.
+"""The tool surface: fifty-five tools, forty-one of which do not write.
 
 **AND THIS LINE IS NOW DERIVED, NOT MAINTAINED, 2026-09-20.** It had gone stale
 a THIRD time -- "forty-four tools, thirty-two of which do not write" against a
@@ -285,6 +285,15 @@ EXPECTED_TOOLS = {
     # the page carries no table, and the collections reader returns rail names
     # and counts. `readonly.SANCTIONED_MUTATIONS` is unchanged by both.
     "linkedin_creator_analytics",
+    # THE FIFTIETH, 2026-09-23, the live lane: linkedin_own_item_link, the
+    # share link of ONE of HIS OWN posts through the post's own "Copy link to
+    # post". It is a READ by effect and it PRESSES two controls -- the menu
+    # and the copy item -- each through a drain point sanctioned in
+    # readonly.SANCTIONED_MUTATIONS; ownership is read off the menu ("Delete
+    # post" offered) and the page's clipboard calls are captured in this
+    # server's own tab instead of reaching his clipboard. The write
+    # count does not move.
+    "linkedin_own_item_link",
     "linkedin_job_collections",
     "linkedin_my_applications",
     "linkedin_saved_jobs",
@@ -528,11 +537,16 @@ async def tools():
     return {t.name: t for t in await mcp.list_tools()}
 
 
-async def test_the_surface_is_exactly_the_fifty_four_tools(tools):
-    """RENAMED AGAIN ON 2026-09-24, from ``..._fifty_one_tools``, at the merge
-    of lane L5: two reads and a write arrived together
+async def test_the_surface_is_exactly_the_fifty_five_tools(tools):
+    """RENAMED AGAIN ON 2026-09-24, from ``..._fifty_two_tools``, at lane L5's
+    second merge: two reads and a write arrived together
     (``linkedin_list_conversations``, ``linkedin_open_thread``,
     ``linkedin_send_reply``), and the name moved with the pin.
+
+    RENAMED AGAIN AT THE LIVE LANE'S MERGE, 2026-09-24, from
+    ``..._fifty_one_tools``: that branch had made ``linkedin_own_item_link`` --
+    a READ that presses, census M C72 -- its own fiftieth, and the merge made it
+    the fifty-second. The name moved with the pin in the merge commit.
 
     RENAMED TWICE ON 2026-09-23. From ``..._fortynine_tools`` to
     ``..._fifty_tools`` on master, because a read arrived:
@@ -755,10 +769,13 @@ async def test_the_surface_is_exactly_the_fifty_four_tools(tools):
     # FIFTY-ONE FROM THE SAME DAY, at the merge of lane L4:
     # linkedin_follow_company_page, a WRITE, so the split below moves on its
     # write side and the non-write count holds.
-    # FIFTY-FOUR FROM 2026-09-24, at the merge of lane L5: two READS and a
-    # WRITE, so both sides of the split below move -- the reads by two, the
-    # writes by one. The NAME moved with it.
-    assert len(tools) == 54
+    # FIFTY-TWO AT THE LIVE LANE'S MERGE, 2026-09-24: linkedin_own_item_link
+    # (see EXPECTED_TOOLS), a READ, so the split moves on its read side. The
+    # NAME moved with it again.
+    # FIFTY-FIVE FROM 2026-09-24, at lane L5's second merge: two READS and a
+    # WRITE on top of the live lane's fifty-two, so both sides of the split
+    # below move -- the reads by two, the writes by one. The NAME moved too.
+    assert len(tools) == 55
     # And the split is asserted, not just the total. A future tool arriving as
     # a write would otherwise only have to bump a number.
     #
@@ -902,12 +919,15 @@ async def test_the_surface_is_exactly_the_fifty_four_tools(tools):
     # THIRTY-EIGHT FROM 2026-09-23: linkedin_recent_job_searches is a READ, and
     # the write side is BYTE-IDENTICAL across it: no entry in
     # readonly.SANCTIONED_MUTATIONS, no new address, no press.
-    # FORTY FROM 2026-09-24 (lane L5): linkedin_list_conversations and
-    # linkedin_open_thread are READS on addresses the boundary already
-    # admitted, and the write side grew by exactly one, linkedin_send_reply,
-    # which is on the exemption -- so a read arriving did not hide a write:
-    # the write is named, gated and counted above.
-    assert len(set(tools) - SANCTIONED_WRITE_TOOLS) == 40
+    # THIRTY-NINE AT THE LIVE LANE'S MERGE, 2026-09-24: linkedin_own_item_link
+    # reads. Unlike the one above it DOES press, through three entries it
+    # brought into readonly.SANCTIONED_MUTATIONS; the write set is unmoved.
+    # FORTY-ONE AT LANE L5'S SECOND MERGE, 2026-09-24:
+    # linkedin_list_conversations and linkedin_open_thread are READS on
+    # addresses the boundary already admitted, and the write side grew by
+    # exactly one, linkedin_send_reply, which is on the exemption -- so a
+    # read arriving did not hide a write.
+    assert len(set(tools) - SANCTIONED_WRITE_TOOLS) == 41
 
 
 def test_the_read_that_was_nearly_named_a_write():

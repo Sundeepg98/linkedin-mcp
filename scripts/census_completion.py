@@ -928,6 +928,14 @@ PINNED = {
     #:   gap 510 -> 507, gap_read 94 -> 93, gap_write 324 -> 322
     #:   b3_admitted 40 -> 39, b3_blocked_on_nothing 2 -> 1 (`M M49` left)
     #:   b1_standing 10 -> 12, b1_no_ruling 20 -> 21
+    #: AND AT LANE L5'S SECOND MERGE, of master 9b9a4d0 (the live lane's four
+    #: proven rows and a rulings commit), the same three rows over the live
+    #: lane's figures, each MEASURED on the merged tree and equal to the sum:
+    #:   adjudicated 197 -> 200, delivered_broad 108 -> 111, unfired 29 -> 32
+    #:   gap 507 -> 504, gap_read 91 -> 90, b3_admitted 37 -> 36
+    #:   b1_no_ruling 19 -> 20; b1_standing 12, gap_write 322 and
+    #:   b3_blocked_on_nothing 1 as at the first merge (the live lane moved
+    #:   no write row and none of the rows those count)
     "stated_rows": 704,
     #: 762 = 704 stated rows + 58 declared collapses, computed at HEAD. NOT the
     #: published 761 and NOT the counter docstring's 760: those two differ only
@@ -937,7 +945,15 @@ PINNED = {
     "capabilities_achievable": 648,
     "out_of_scope": 70,
     "achievable": 634,
-    "adjudicated": 197,
+    "adjudicated": 200,
+    #: THE LIVE LANE'S FOUR ROWS, RE-DERIVED AT EACH OF ITS MERGES OF MASTER
+    #: (2026-09-24; last over lane S): four rows fired live and banked
+    #: (`_audit/2026-09-23-live-lane-session-1.md`). `P G6` COVERED-UNFIRED ->
+    #: COVERED-PROVEN, so it leaves `unfired` and bucket 1 and joins
+    #: delivered_strict; `N 134`, `P O3` and `M C72` GAP -> COVERED-PROVEN, so
+    #: each is newly adjudicated and delivered, and each leaves `gap`,
+    #: `gap_read` and bucket 3 (all three were ADMITTED). Every figure below
+    #: that the four move is measured on the merged tree, not summed.
     #: 434 / 100 / 270 / 25, and gap_write 150, since the lane-L4 merge
     #: (2026-09-23): `N 47` was built -- `linkedin_follow_company_page`, a
     #: WRITE, behind the flag and the single-use grant, never fired (GAP ->
@@ -953,15 +969,18 @@ PINNED = {
     #: (GAP -> COVERED-UNFIRED, `_audit/2026-09-23-lane-l1-refused-reads.md`).
     #: One row changing class moves all five; b3 admitted/refused 40/16 are
     #: L1's allowlist admissions, and b1_no_ruling 7 is P G6 entering bucket 1.
-    "delivered_broad": 108,
+    "delivered_broad": 111,
+    #: 79 since the live lane's merge (see `adjudicated`): P G6, N 134, P O3
+    #: and M C72 COVERED-PROVEN.
     #: 75 and 21 since the bucket-1 merge: `M C41` fired live and moved from
     #: COVERED-UNFIRED to COVERED-PROVEN (`_audit/2026-09-23-bucket1-fires.md`).
     #: One row changing class moves both, and leaves delivered_broad at 96.
-    "delivered_strict": 75,
-    "gap": 507,
+    "delivered_strict": 79,
+    "gap": 504,
     "cannot_deliver": 19,
-    "unfired": 33,
-    "gap_read": 93,
+    "unfired": 32,
+    #: The live lane's merge: N 134, P O3 and M C72 left GAP.
+    "gap_read": 90,
     #: 151, not the 152 published by `_audit/2026-09-21-the-write-ceiling.md`.
     #: That document scoped itself to `profile.md`, `network.md` and
     #: `messaging-and-content.md`; measured at HEAD those three carry W 151 and
@@ -1003,10 +1022,12 @@ PINNED = {
     #: four FILTER rows lane S built (`N 84`, `N 85`, `N 87`, `N 94`) left
     #: bucket 3 for COVERED-UNFIRED, all four ADMITTED; the boundary did not
     #: move.
-    #: 39 / 38 / 1 / 13 / 2 SINCE LANE L5'S MERGE (sum 93, `gap_read`):
-    #: `M M49` left bucket 3 for COVERED-UNFIRED, ADMITTED; the boundary did
-    #: not move.
-    "b3_admitted": 39,
+    #: THE LIVE LANE'S MERGE, 2026-09-24: N 134, P O3 and M C72 were proven
+    #: live and their address lines left the table; all three were ADMITTED.
+    #: 36 / 38 / 1 / 13 / 2 SINCE LANE L5'S MERGE OVER THE LIVE LANE'S (sum 90,
+    #: `gap_read`): `M M49` left bucket 3 for COVERED-UNFIRED, ADMITTED; the
+    #: boundary did not move.
+    "b3_admitted": 36,
     "b3_refused": 38,
     "b3_no_address": 1,
     "b3_needs_session": 13,
@@ -1077,7 +1098,11 @@ PINNED = {
     #:                        N 85, N 87, N 94), reads no ruling holds -- D1
     #:                        and OTHER-MEMBER-IDS permit, they hold nothing
     #:                        (+4 none).
-    #:   lane L5's merge      12 standing / 0 / 0 / 21 none, 6 released, of 33:
+    #:   live lane merge      10 standing / 0 / 0 / 19 none, 6 released, of 29:
+    #:   (2026-09-24)         P G6 fired live and was banked COVERED-PROVEN,
+    #:                        leaving bucket 1 (-1 none).
+    #:   lane L5's merge      12 standing / 0 / 0 / 20 none, 6 released, of 32,
+    #:   (over the live lane) measured on the tree merged with 9b9a4d0:
     #:                        the reply, `M M10` and by D6 `M M17`, two W rows
     #:                        the write hold binds with no marker (+2
     #:                        standing); `M M49`, a read no ruling holds (+1
@@ -1089,7 +1114,7 @@ PINNED = {
     "b1_standing": 12,
     "b1_relayed": 0,
     "b1_pending": 0,
-    "b1_no_ruling": 21,
+    "b1_no_ruling": 20,
     "b1_released": 6,
     #: D3's enumerated list: FOUR once `M C83` left it, and THREE since
     #: `N 172` left it the same evening on OTHER-MEMBER-IDS-AS-READS -- see
@@ -1140,10 +1165,9 @@ PINNED_B1_ROWS: dict[str, tuple[str, ...]] = {
         "M C1", "M C25", "M C32", "M M10", "M M17",
         "N 1", "N 46", "N 47", "N 48",
     ),
-    #: `P G6` entered with the lane-L1 merge and `J 18` and `J 39` with the
-    #: lane-L3 merge, 2026-09-23: reads built offline, which no ruling holds.
-    #: The six P A rows are the writes SELF-PROFILE-EDITS-NOT-OUTWARD
-    #: releases, each by its own cell.
+    #: `J 18` and `J 39` entered with the lane-L3 merge, 2026-09-23: reads
+    #: built offline, which no ruling holds. The six P A rows are the writes
+    #: SELF-PROFILE-EDITS-NOT-OUTWARD releases, each by its own cell.
     #: `N 23` entered with lane R, 2026-09-23: returned from an exclusion to
     #: COVERED-UNFIRED, because `linkedin_connections` already reads his
     #: connections list behind a before-and-after badge gate and no live fire
@@ -1152,6 +1176,8 @@ PINNED_B1_ROWS: dict[str, tuple[str, ...]] = {
     #: 2026-09-24: people-search FILTER readers built offline and never
     #: fired, from the tool's arguments under D1-SEARCH-AS-READS (and, for
     #: `N 85`, OTHER-MEMBER-IDS-AS-READS). Both rulings permit; neither holds.
+    #: `P G6` entered with the lane-L1 merge and LEFT with the live lane's
+    #: merge, 2026-09-24: fired live and banked COVERED-PROVEN.
     #: `M M49` entered with lane L5's merge, 2026-09-24: the read indicator on
     #: his own last message, read off his own inbox with no target
     #: (OWN-INBOX-READS-COVERED-BY-B permits; it holds nothing).
@@ -1159,7 +1185,7 @@ PINNED_B1_ROWS: dict[str, tuple[str, ...]] = {
         "J 18", "J 39", "J 121", "J 122", "M M33", "M M43", "M M49", "N 20",
         "N 23",
         "N 45", "N 84", "N 85", "N 87", "N 94",
-        "P A8", "P A11", "P A13", "P A17", "P A19", "P A21", "P G6",
+        "P A8", "P A11", "P A13", "P A17", "P A19", "P A21",
     ),
 }
 
