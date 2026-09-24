@@ -165,6 +165,15 @@ WRITE_CLASS_ACTS: dict[str, str] = {
     "admin-act": "R3",
     "filter-read": "R3",
     "notification-preference": "R3",
+    # Added 2026-09-24 (lane Y2) for `N 198`: a helpful / not-helpful verdict sent
+    # to LinkedIn itself about one of its surfaces. No act above names it -- a
+    # `report` concerns content or a member, not whether a page helped. R3, the
+    # residual class, so the first round's R1 is untouched.
+    "feedback": "R3",
+    # Added 2026-09-24 (lane Y2) for `P S9`: changing a paid plan. It spends money,
+    # which no act above does; R3 because the operator's cut named no purchase,
+    # and the row's own cell says a live proof of it needs him.
+    "purchase": "R3",
 }
 
 #: The passage each non-residual class RESTS ON. A line of that class must cite

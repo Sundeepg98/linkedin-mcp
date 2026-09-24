@@ -27,8 +27,8 @@ are listed as `(undated)`; no date is taken from git history, because
 
 | what | count |
 | --- | --- |
-| audit documents git tracks under `_audit` | 251 |
-| of those, carrying a `YYYY-MM-DD-` date prefix | 211 |
+| audit documents git tracks under `_audit` | 253 |
+| of those, carrying a `YYYY-MM-DD-` date prefix | 213 |
 | distinct dates | 16 |
 | documents with no level-1 heading | 2 |
 | `CORRECTS:` marker lines | 106 |
@@ -39,7 +39,7 @@ are listed as `(undated)`; no date is taken from git history, because
 | documents at either end of a cross-document edge | 99 |
 | intra-document correction markers | 4 |
 | documents that correct themselves later on | 2 |
-| documents no correction marker touches at all | 150 |
+| documents no correction marker touches at all | 152 |
 | blockquoted markers naming ANOTHER document | 0 |
 | edges missing one of their two markers | 0 |
 | edges declared a different number of times in each direction | 2 |
@@ -1693,6 +1693,8 @@ ways, which is a fact about markers and not a verdict on the document.
 | 2026-09-24 | [2026-09-24-lane-l5-messaging.md](2026-09-24-lane-l5-messaging.md) | Lane L5 -- MESSAGING: deliverable sends and a receipt-safe inbox |  |
 | 2026-09-24 | [2026-09-24-lane-l7-profile-writes.md](2026-09-24-lane-l7-profile-writes.md) | Lane L7 -- WRITES TO HIS OWN PROFILE: the 36 R3 profile-family rows, classed and given one outcome each |  |
 | 2026-09-24 | [2026-09-24-lane-s-people-search.md](2026-09-24-lane-s-people-search.md) | Lane S -- people-search readers (2026-09-24) |  |
+| 2026-09-24 | [2026-09-24-lane-y2-admission.md](2026-09-24-lane-y2-admission.md) | Lane Y2 -- completeness admission: one verdict for every app-scope candidate |  |
+| 2026-09-24 | [2026-09-24-rulings-names-at-runtime.md](2026-09-24-rulings-names-at-runtime.md) | Rulings, 2026-09-24 (third batch): names at runtime, their mitigations, and the classes built behind the grant |  |
 | 2026-09-24 | [2026-09-24-rulings-notify-veto-and-who-which.md](2026-09-24-rulings-notify-veto-and-who-which.md) | Rulings, 2026-09-24 (second batch): the notify condition, a page's veto, a named person's profile, and WHO/WHICH |  |
 | 2026-09-24 | [2026-09-24-rulings-search-verticals-rosters-passive-costs.md](2026-09-24-rulings-search-verticals-rosters-passive-costs.md) | Rulings, 2026-09-24: the search verticals, member rosters, refusals nobody registered, and passive costs |  |
 

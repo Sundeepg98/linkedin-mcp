@@ -8,9 +8,9 @@
 
 **THIS REGISTER IS NOT THE CORPUS AND DOES NOT CLAIM TO BE COMPLETE.** Read section 4 before concluding a question is unruled: the scan that keeps it honest reads ONE marker, and the ruling that caused this file to be written does not carry it.
 
-    rulings registered       61
-    documents scanned        250
-    RULED: declarations      48 claimed, 7 triaged, 0 unclaimed
+    rulings registered       64
+    documents scanned        252
+    RULED: declarations      51 claimed, 7 triaged, 0 unclaimed
 
 ---
 
@@ -27,7 +27,7 @@ Scan the CLAIM column against your question. Every claim is a paraphrase written
 | `PERMALINK-READ-IS-ALLOWED` | `/feed/update/<urn>/` is allowed and an ordinary read of a post at its permalink is permitted; reacting rests on the same permalink ruling. | /feed/update/<urn>/ | 2026-08-31 | [2026-08-31-linkedin-finish.md](2026-08-31-linkedin-finish.md)<br>*#2 comment on an item -- `linkedin_comment_on_item`. STILL REFUSING.* |
 | `PROFILE-EDITOR-ADDRESSES-ALLOWED` | `/in/<member>/edit/` and the profile editors are allowed. | the profile editor surfaces | 2026-08-31 | [2026-08-31-linkedin-finish.md](2026-08-31-linkedin-finish.md)<br>*#4 edit a profile field -- `linkedin_update_profile_field`. BUILT, NOT CAPTURED.* |
 | `MUST-STAY-REFUSED-ENTRIES-COME-OUT` | `MUST_STAY_REFUSED` listing `groups` and `events` is wrong and must come out, or move to a class the admission does not reach. | the guard's must-stay-refused table | 2026-09-19 | [2026-09-19-search-admission-condition-2-amended.md](2026-09-19-search-admission-condition-2-amended.md)<br>*`MUST_STAY_REFUSED` LISTING `groups` AND `events` IS WRONG AND MUST COME OUT* |
-| `SEARCH-ADMISSION-APPROVED-FIVE-CONDITIONS` | The search-results admission is APPROVED IN PRINCIPLE under five binding conditions, one of which is that nothing is FIRED from that surface. | /search/results/ | 2026-09-19 | [2026-09-19-two-census-conventions-ruled.md](2026-09-19-two-census-conventions-ruled.md)<br>*RULED: APPROVED IN PRINCIPLE. FIVE CONDITIONS, ALL BINDING.* |
+| `SEARCH-ADMISSION-APPROVED-FIVE-CONDITIONS` | The search-results admission is APPROVED IN PRINCIPLE under five binding conditions, one of which is that nothing is FIRED from that surface. Condition 1's name-free shaper AMENDED 2026-09-24 by NAMES-AT-RUNTIME for runtime returns. | /search/results/ | 2026-09-19 | [2026-09-19-two-census-conventions-ruled.md](2026-09-19-two-census-conventions-ruled.md)<br>*RULED: APPROVED IN PRINCIPLE. FIVE CONDITIONS, ALL BINDING.* |
 | `SEARCH-CONDITION-2-CLOSED` | Condition 2 of the search admission demands CLOSED PATH SEGMENTS, not a NARROW ANCHORED pattern. Anchoring was measured to do none of the work assigned to it. | the shape of any allowlist pattern | 2026-09-19 | [2026-09-19-search-admission-condition-2-amended.md](2026-09-19-search-admission-condition-2-amended.md)<br>*CONDITION 2 IS AMENDED: **CLOSED**, NOT **ANCHORED*** |
 | `NOTIFICATIONS-UNREAD-SPEND` | Loading /notifications/ is PERMITTED: it only clears the operator's own unread badge. Answers the question N 20 and N 45 were held on. | /notifications/ | 2026-09-23 | [2026-09-23-rulings-write-class-and-delegated-calls.md](2026-09-23-rulings-write-class-and-delegated-calls.md)<br>*Notifications: the unread-spend question* |
 
@@ -37,7 +37,7 @@ Scan the CLAIM column against your question. Every claim is a paraphrase written
 |---|---|---|---|---|
 | `COMPOSER-IS-THE-REFUSAL-NOT-THE-ADDRESS` | For publishing a post the composer is the wall, not the address. | publish a post | 2026-08-31 | [2026-08-31-linkedin-finish.md](2026-08-31-linkedin-finish.md)<br>*#1 publish a post -- `linkedin_publish_post`. STILL REFUSING. **Ruling declined back to him.*** |
 | `INVITATION-TARGETING-IS-CALL-TIME` | Targeting an invitation is allowed as a CALL-TIME responsibility. | send a connection invitation | 2026-08-31 | [2026-08-31-linkedin-finish.md](2026-08-31-linkedin-finish.md)<br>*#7 send a connection invitation -- `linkedin_send_invitation`. STILL REFUSING, and the blocker is now a different one.* |
-| `FEED-CONTENT-READ-RULING` | Feed content may be read as COUNTS AND RELATIONS ONLY, never text or names. | reads of feed and post content | 2026-09-05 | [2026-09-05-lead-rulings-round-two.md](2026-09-05-lead-rulings-round-two.md)<br>*5. `FEED-CONTENT-READ-RULING` -- COUNTS AND RELATIONS ONLY* |
+| `FEED-CONTENT-READ-RULING` | AMENDED 2026-09-24 by NAMES-AT-RUNTIME for what a read RETURNS at runtime (what is STORED is unchanged). Feed content may be read as COUNTS AND RELATIONS ONLY, never text or names. | reads of feed and post content | 2026-09-05 | [2026-09-05-lead-rulings-round-two.md](2026-09-05-lead-rulings-round-two.md)<br>*5. `FEED-CONTENT-READ-RULING` -- COUNTS AND RELATIONS ONLY* |
 | `MENTION-COMPOSITION-RULING` | Build the mention MECHANISM, forbid the SOURCE: composing a mention is permitted as a mechanism, and harvesting the candidate list it would mention from is not. | mentions in posts and comments | 2026-09-05 | [2026-09-05-lead-rulings-round-two.md](2026-09-05-lead-rulings-round-two.md)<br>*1. `MENTION-COMPOSITION-RULING` -- BUILD THE MECHANISM, FORBID THE SOURCE* |
 | `MESSAGING-SETTINGS-CAPABILITY-LEVEL` | The settings-family ruling is CAPABILITY-level, not path-level: a setting is admitted BY NAME or not at all, which excludes every page below the settings index whatever its URL spelling. It says 'a setting', not 'a profile setting'. | every persisted account preference | 2026-09-05 | [2026-09-05-decide-retire-rulings.md](2026-09-05-decide-retire-rulings.md)<br>*3.10 `MESSAGING-SETTINGS` -- 5 rows, RE-FILED, NOT RETIRED* |
 | `NO-IRREVERSIBLE-WRITE-IS-FIRED` | AMENDED 2026-09-23 by WRITE-CLASS-B: irreversible writes MAY now be fired, but ONLY at a target the operator names -- the consent-per-act half below still binds. Original: No irreversible write is fired at a real target -- not an application, a post, an invitation, a message or a comment. Permission to BUILD a capability is not consent to perform a specific act against a specific person. Writes may be designed, gated, tested against fixtures and left ready. | every write in the server, standing | 2026-09-05 | [2026-09-05-lead-rulings-round-two.md](2026-09-05-lead-rulings-round-two.md)<br>*The line I did NOT cross, and will not without him* |
@@ -53,7 +53,7 @@ Scan the CLAIM column against your question. Every claim is a paraphrase written
 | `D6-CAPABILITY-OVER-AFFORDANCE` | A row named for an affordance is discharged when the package delivers the same capability payload by its own sanctioned routes; the row names them and rests on their proofs (PROVEN if live-proven, else UNFIRED). | rows named for a control or surface | 2026-09-23 | [2026-09-23-rulings-write-class-and-delegated-calls.md](2026-09-23-rulings-write-class-and-delegated-calls.md)<br>*D6: a capability delivered without the named affordance* |
 | `D3-UNREGISTERED-REFUSAL-IS-NOT-A-RULING` | A refusal written only into an allowlist comment is not a ruling: it makes no row EXCLUDED-RULED or CANNOT-DELIVER, and a row resting on one is GAP, blocked on the decision the refusal asks for, until that decision is registered. | refusals recorded only beside an allowlist entry | 2026-09-24 | [2026-09-24-rulings-search-verticals-rosters-passive-costs.md](2026-09-24-rulings-search-verticals-rosters-passive-costs.md)<br>*D3: is a reasoned allowlist refusal a ruling?* |
 | `D5-PASSIVE-COST-IS-NOT-A-ROW` | A consequence of an act with no control of its own is recorded on the act's row, and its own row is EXCLUDED-RULED as NOT-AN-ACT (N 171). A preference he sets is an act, a setting, and stays a GAP write row (N 183). | passive costs | 2026-09-24 | [2026-09-24-rulings-search-verticals-rosters-passive-costs.md](2026-09-24-rulings-search-verticals-rosters-passive-costs.md)<br>*D5: is a passive cost a capability row?* |
-| `WHO-WHICH-COUNTS-ARE-NOT-DELIVERY` | A row whose payload is WHO (people) or WHICH (items of other people's content) is not delivered by a count-only reader under the shaper doctrine: GAP, pending the operator's names-and-titles question. Filters and aggregates are delivered by counts. | count-only readers | 2026-09-24 | [2026-09-24-rulings-notify-veto-and-who-which.md](2026-09-24-rulings-notify-veto-and-who-which.md)<br>*A count-only reader does not deliver WHO or WHICH* |
+| `WHO-WHICH-COUNTS-ARE-NOT-DELIVERY` | A row whose payload is WHO (people) or WHICH (items of other people's content) is not delivered by a count-only reader: GAP. Filters and aggregates are delivered by counts. The operator answered the names-and-titles question 2026-09-24 (NAMES-AT-RUNTIME): such rows now wait on a name-returning reader, not on the doctrine. | count-only readers | 2026-09-24 | [2026-09-24-rulings-notify-veto-and-who-which.md](2026-09-24-rulings-notify-veto-and-who-which.md)<br>*A count-only reader does not deliver WHO or WHICH* |
 
 ### census state
 
@@ -119,6 +119,13 @@ Scan the CLAIM column against your question. Every claim is a paraphrase written
 | `MEMBER-ROSTERS-AS-BOUNDED-READS` | A roster the operator can open himself (a group's members, an event's attendees, a company's or school's People tab) is admitted as a bounded read: one page per call, the id from tool arguments only, no automatic pagination, no member name or id in a tracked file, inside the live budget. | member rosters | 2026-09-24 | [2026-09-24-rulings-search-verticals-rosters-passive-costs.md](2026-09-24-rulings-search-verticals-rosters-passive-costs.md)<br>*Rosters he can open himself* |
 | `THIRD-PARTY-PROFILE-FOR-A-NAMED-TARGET` | A third party's profile (/in/<slug>/) may be loaded only inside an outward act whose target the operator names in that call: slug from tool arguments only, never for a measurement, the shaper name-free. Search-admission condition 5 stands. | third-party profiles inside outward acts | 2026-09-24 | [2026-09-24-rulings-notify-veto-and-who-which.md](2026-09-24-rulings-notify-veto-and-who-which.md)<br>*A third party's profile, inside his own outward act* |
 
+### read results
+
+| id | what was ruled | binds | when | where (document / section) |
+|---|---|---|---|---|
+| `NAMES-AT-RUNTIME` | A read whose capability is people, or which items of other people's content, RETURNS them as its result -- names, and group and event titles -- with the risks mitigated at runtime. What is stored is unchanged: no third party's name in a tracked file. | people, groups and events | 2026-09-24 | [2026-09-24-rulings-names-at-runtime.md](2026-09-24-rulings-names-at-runtime.md)<br>*Names at runtime* |
+| `PEOPLE-DATA-MITIGATIONS` | People data is returned under six mitigations, each enforced by code and a test: declared fields only; sanitised and marked untrusted; never stored; bounded to one page per call; visible only (no de-anonymising); never a target by itself. | people, groups and events | 2026-09-24 | [2026-09-24-rulings-names-at-runtime.md](2026-09-24-rulings-names-at-runtime.md)<br>*How people data is returned* |
+
 ### session model
 
 | id | what was ruled | binds | when | where (document / section) |
@@ -138,6 +145,12 @@ Scan the CLAIM column against your question. Every claim is a paraphrase written
 | `PUBLISHED-SPLIT-REPORT-NOW-GATE-LATER` | The published-split check REPORTS now and GATES once the deliberate over-runs are declared. | when a reporting check becomes a blocking gate | 2026-09-19 | [2026-09-19-the-five-requests-ruled.md](2026-09-19-the-five-requests-ruled.md)<br>*D. THE PUBLISHED-SPLIT CHECK -- RULED: report now, gate once the deliberate over-runs are declared* |
 | `ERROR-MESSAGE-RULED-AT-THE-RAISE` | What the error envelope's message may carry is decided WHERE THE VALUE ENTERS THE EXCEPTION, never where it leaves. The provenance classes are not classes of exception -- a page value inside a stdlib ValueError is indistinguishable at server._error from one that is not -- so no per-class policy may live at the envelope. The package's own exception text and a library's own exception text are PUBLISHABLE; a value the PAGE chose is FORBIDDEN inside any exception, whoever authored the class. | what server._error may publish in $.message, and where that is decided | 2026-09-21 | [2026-09-21-what-the-browser-said.md](2026-09-21-what-the-browser-said.md)<br>*3.4 THE RULING, STATED ONCE SO IT CAN BE CITED* |
 | `ERROR-URL-ASKED-FOR-OR-NOTHING` | The error envelope's url field carries the address this server ASKED FOR, or nothing at all. A landing is never published there; where a requested address exists in scope publishing it is REQUIRED rather than merely permitted, and where none exists the key is omitted and the landing is DESCRIBED in the hint. A descriptor never goes into the url field. | what ExtractionFailedError.url may carry, per site | 2026-09-21 | [2026-09-21-the-field-beside-the-message.md](2026-09-21-the-field-beside-the-message.md)<br>*5. THE RULING, STATED ONCE SO IT CAN BE CITED* |
+
+### writes
+
+| id | what was ruled | binds | when | where (document / section) |
+|---|---|---|---|---|
+| `OUTWARD-CLASSES-BUILT-BEHIND-GRANTS` | Repost or share, endorse or recommend, and delete or withdraw one of his own items are BUILT behind the single-use grant, off by default, fired only at a target he names. PERMANENTLY_FORBIDDEN keeps only entries whose grounds are mitigations. | the classes ruling (b) did not name | 2026-09-24 | [2026-09-24-rulings-names-at-runtime.md](2026-09-24-rulings-names-at-runtime.md)<br>*The outward classes ruling (b) did not name* |
 
 ---
 
@@ -190,6 +203,7 @@ Scan the CLAIM column against your question. Every claim is a paraphrase written
 | MATCH-DETAILS-COLLAPSED | `DISCLOSING-PRESS-PERMITTED` |
 | MESSAGING-SETTINGS | `MESSAGING-SETTINGS-CAPABILITY-LEVEL` |
 | N 163 re-cost | `GROUPS-ADDRESS-BUYS-NO-WRITE` |
+| names at runtime | `NAMES-AT-RUNTIME` |
 | one canonical id | `CANONICAL-RULING-ID` |
 | OWNED-BY-A-SIBLING-SLICE | `DUPLICATE-ROW-IS-MARKED-NEVER-DELETED` |
 | P I12 -> J99 | `CONTAINER-EXCLUSION-PROPAGATES-ONLY-IF-UNREACHABLE` |
@@ -285,13 +299,19 @@ Scan the CLAIM column against your question. Every claim is a paraphrase written
 
 **`MESSAGING-SETTINGS-CAPABILITY-LEVEL`** -- The ruling CANONICAL-RULING-ID was written about: one sentence wearing three names across three slices. Its census twin is `_audit/_census/profile.md`.
 
+**`NAMES-AT-RUNTIME`** -- The operator's ruling, verbatim in its document. Amends the 2026-09-05 name-free doctrine for runtime returns; answers WHO-WHICH-COUNTS-ARE-NOT-DELIVERY's question.
+
 **`NO-IRREVERSIBLE-WRITE-IS-FIRED`** -- The single widest write ruling in the corpus. It separates BUILD from FIRE, which is the distinction most re-escalations about writes collapse.
 
 **`NOTIFICATIONS-UNREAD-SPEND`** -- Orchestrator's call under OUTWARD-ACTS-NEED-THE-OPERATOR; overridable. Registered under the id the census holds used for the open question, so the holds resolve to the answer.
 
 **`OTHER-MEMBER-IDS-AS-READS`** -- Orchestrator's call under OUTWARD-ACTS-NEED-THE-OPERATOR; overridable. Answers the other-members question N 172 was held on.
 
+**`OUTWARD-CLASSES-BUILT-BEHIND-GRANTS`** -- Orchestrator's call applying the operator's 08:11 principle and OUTWARD-ACTS-NEED-THE-OPERATOR; overridable.
+
 **`PAGE-MAY-VETO-NEVER-SUPPLY`** -- Orchestrator's call under OUTWARD-ACTS-NEED-THE-OPERATOR; overridable. Reconciles the navigation guard with ownership checks; first applied to linkedin_surface_census feed_item.
+
+**`PEOPLE-DATA-MITIGATIONS`** -- Orchestrator's call applying the operator's ruling; overridable.
 
 **`PERMALINK-READ-IS-ALLOWED`** -- `M C42` records that this ruling DID NOT REACH naming the target -- which is why that row cannot rest on it. See the DISPUTED section of `_audit/2026-09-21-what-was-ruled.md`.
 
@@ -321,12 +341,12 @@ Scan the CLAIM column against your question. Every claim is a paraphrase written
 
 | signal NOT scanned | files | lines |
 |---|---|---|
-| a heading naming a ruling | 118 | 258 |
+| a heading naming a ruling | 119 | 260 |
 | a bold line opening on RULING/RULED | 60 | 138 |
 | the phrase THE RULING | 35 | 56 |
-| a named -RULING id | 31 | 82 |
+| a named -RULING id | 33 | 85 |
 | the phrase standing ruling | 17 | 40 |
-| a lead or operator ruling in prose | 36 | 102 |
+| a lead or operator ruling in prose | 37 | 103 |
 
 **The ruling that caused this register to be written is in the first row and not in the scan.** `BOUNDARY-IS-NOT-A-REASON` is phrased as a quoted ledger rule under a heading that carries no marker at all. It is registered because a person read it, and nothing here would have found it.
 
@@ -378,6 +398,9 @@ Every `RULED:` line in the corpus, and what became of it. An UNCLAIMED row fails
 | [2026-09-23-rulings-write-class-and-delegated-calls.md](2026-09-23-rulings-write-class-and-delegated-calls.md) | RULED: (orchestrator, 2026-09-24, delegated) SHARE-LINK PROOFS USE THE | `SHARE-AND-POLL-PROOFS-OWN-POSTS` |
 | [2026-09-23-rulings-write-class-and-delegated-calls.md](2026-09-23-rulings-write-class-and-delegated-calls.md) | RULED: (orchestrator, 2026-09-24, delegated) CREDENTIAL, RECOVERY AND SESSION | `CREDENTIAL-SETTINGS-NEED-THE-OPERATOR` |
 | [2026-09-23-rulings-write-class-and-delegated-calls.md](2026-09-23-rulings-write-class-and-delegated-calls.md) | RULED: (orchestrator, 2026-09-23, delegated) /in/me/ presses get NO blanket | `IN-ME-NO-BLANKET-BAR` |
+| [2026-09-24-rulings-names-at-runtime.md](2026-09-24-rulings-names-at-runtime.md) | RULED: (operator, 2026-09-24 08:11, verbatim) "It's not about returning or not returning. | `NAMES-AT-RUNTIME` |
+| [2026-09-24-rulings-names-at-runtime.md](2026-09-24-rulings-names-at-runtime.md) | RULED: (orchestrator, 2026-09-24, applying NAMES-AT-RUNTIME) PEOPLE DATA IS | `PEOPLE-DATA-MITIGATIONS` |
+| [2026-09-24-rulings-names-at-runtime.md](2026-09-24-rulings-names-at-runtime.md) | RULED: (orchestrator, 2026-09-24, applying the operator's 08:11 principle) | `OUTWARD-CLASSES-BUILT-BEHIND-GRANTS` |
 | [2026-09-24-rulings-notify-veto-and-who-which.md](2026-09-24-rulings-notify-veto-and-who-which.md) | RULED: (orchestrator, 2026-09-24, delegated) CONDITION 1 OF | `SELF-PROFILE-EDIT-NOTIFY-CONDITION-AMENDED` |
 | [2026-09-24-rulings-notify-veto-and-who-which.md](2026-09-24-rulings-notify-veto-and-who-which.md) | RULED: (orchestrator, 2026-09-24, delegated) A PAGE MAY VETO A NAVIGATION, | `PAGE-MAY-VETO-NEVER-SUPPLY` |
 | [2026-09-24-rulings-notify-veto-and-who-which.md](2026-09-24-rulings-notify-veto-and-who-which.md) | RULED: (orchestrator, 2026-09-24, applying (b)) A THIRD PARTY'S PROFILE | `THIRD-PARTY-PROFILE-FOR-A-NAMED-TARGET` |

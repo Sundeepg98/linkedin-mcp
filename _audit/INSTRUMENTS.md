@@ -10475,3 +10475,118 @@ exits 0 and the file passes 55 of 55.
 
 The script is disposable (70.4); the method is the part the merge can reuse,
 wherever a pin's owners read it from a module attribute.
+
+---
+
+## 71. THE COMPLETENESS VERDICT LAYER, THE ADJUDICATED CORPUS, AND THE TABLE AT A FIXED POINT (lane-y2-admission, 2026-09-24)
+
+**Registered 2026-09-24.** Full record: `_audit/2026-09-24-lane-y2-admission.md`.
+Numbered 71 by this lane's assignment, so lanes forked from one master cannot
+collide on it.
+
+Section 63's probe raises CANDIDATES; nothing held a decision about them. Lane Y2
+gave every app-scope candidate one verdict -- ADMIT (a new GAP row carries it),
+RECORDED (an existing row carried it in words and gained the address or control),
+OUT (not a user capability) -- in three new columns of the annotations file, and
+built the check that keeps those verdicts true against the tree. Admitting rows then
+broke a join that had assumed the GAP set only shrinks; 71.6 is the rule that
+replaced the assumption.
+
+### 71.1 A VERDICT IS A CLAIM ABOUT THE CENSUS, SO THE CENSUS IS ASKED
+
+An ADMIT or RECORDED route leaves the candidate set BECAUSE a census row now
+carries it. So a table line still holding one is a verdict the census does not
+bear out, and `verdict_problems` names it -- with an app-scope line nobody
+adjudicated, a verdict naming a row no slice writes, and an OUT with no reason.
+It reads no capture, so CI runs it.
+
+### 71.2 THE TABLE RECORDS ONE CORPUS, AND THE CORPUS KEEPS GROWING
+
+A live lane writes captures every session, and a plain `--write` rewrites the
+committed table over whatever is on disk that hour -- a candidate nobody has
+read lands in a tracked file. `--captured-before <UTC stamp>` names the corpus
+(2026-09-23T00:00:00 reproduces lane Y's 71 captures exactly) and prints the rest
+as set aside; `--check` proves the committed table is byte for byte what
+`--write` would write over that corpus.
+
+**THAT FIXED POINT IS NOT MERGE-STABLE.** The table's `known_elsewhere` column is
+derived from every audit document, script and test, so a document another lane
+adds that names a candidate route moves it. Measured twice: one untracked
+document naming a docs-scope candidate no other document named turned `--check`
+red ("would CHANGE" on that route) and removing it restored the fixed point; then
+the first draft of THIS paragraph, which named the same route, did exactly the
+same thing, so the route is described here rather than named.
+`verdict_problems` does not read that column, which is why CI cannot see this,
+and `--check` reads captures only the box that holds them has; after a merge,
+regenerate there with the same cutoff.
+
+### 71.3 THE CENSUS'S VOCABULARY RE-KEYS THE CONTROLS IT IS DIFFED AGAINST
+
+The control templater keeps a word only if the census slices use it, so every
+word a new row brings can change the key of a harvested label that has nothing
+to do with that row. Measured on this lane's own edits: a row citing
+`/games/zip/` and one quoting "get hired" turned 'City, state, or <X> code' and
+'Get <X> faster' into two NEW, unannotated templates. The check named both
+before anything was committed.
+
+    A CLOSED VOCABULARY TAKEN FROM THE THING UNDER MEASUREMENT MOVES WHEN THAT
+    THING IS EDITED; A KEY BUILT FROM IT MUST BE RE-CHECKED AFTER EVERY EDIT.
+
+### 71.4 THE ENTRIES
+
+| path | shown failing by |
+|---|---|
+| `scripts/completeness_harvest.py` (`select_corpus`, `verdict_problems`, `check`, `--captured-before`, `--check`, `OWN_DOCS`) | `tests/test_completeness_verdicts.py`, eight tests: the committed layer holds; every app-scope line left in the table is an OUT; a verdict removed, a RECORDED on a route that is still a candidate, and a verdict naming a row nobody wrote, each planted into COPIES, each red naming the line; the cutoff keeps the earlier of two planted captures and prints the later as set aside; `check` returns 0 on a table it wrote and 1 with "would CHANGE" on one edited by hand. Red under three mutations of the committed script, each restored from git: `verdict_problems` returning nothing (3 failed), the fixed-point comparison skipped (1 failed), the cutoff ignored (1 failed); restored, 8 passed. The test's own first draft edited a word the planted PATTERN also held, so the key moved and the check reported an ADD and a REMOVE instead of a CHANGE -- red for the right reason, asserted in the wrong words; the edit now touches one cell |
+| `_audit/_census/completeness-annotations.tsv` (`verdict`, `verdict_rows`, `verdict_basis`) | the tests above; 159 verdicts across the lane's two passes, 0 inconsistent with the census when re-derived without a capture |
+| `scripts/check_write_classes.py` (acts `feedback`, `purchase`, R3) | its own shipped test suite, unchanged; the two acts class `N 198` and `P S9`, which no act named |
+
+### 71.5 DECLARED DISPOSABLE
+
+The scratch scripts this lane ran -- the regeneration driver over a capture
+subset, the masked context readers used to see what a control sat beside, the
+boundary drives, the evidence-append and side-table writers, the verifier's
+sampler and its key, the census-only consistency check, the mutation runner --
+are declared disposable. Everything they wrote is in the census, the side
+tables, the annotations or the audit, and the checks above re-derive it.
+
+### 71.6 THE BLOCKER MAP IS FROZEN; A SLICE THAT GROWS CANNOT JOIN IT
+
+`scripts/triage_messaging_gap_rows.py` joins every GAP row of its slice to
+`_audit/_census/blocker-map.tsv` and refuses on any row that does not join. The
+map's spine is the census at `1c08e5f` -- the set the ledger divided -- so a row
+that entered GAP later has no line there by construction, and the slice's first
+admission (eleven rows) turned four tests red. The exemption is DERIVED: rows GAP
+today that were not GAP in the census read from git at the map's own
+`FROZEN_REF`. It is never read off the map, which would turn every hole in the map
+into an exemption. An empty freeze read refuses; so does a state cell spelled in
+a dialect at the freeze, which the enumerator drops (a cold reviewer's finding,
+closed the same day). The exempt rows print by id in a bucket of their own.
+
+    A JOIN AGAINST A FROZEN TABLE NEEDS A RULE FOR ROWS BORN AFTER THE FREEZE,
+    AND THE RULE MUST BE READ FROM THE FREEZE, NEVER FROM THE TABLE.
+
+| path | shown failing by |
+|---|---|
+| `scripts/triage_messaging_gap_rows.py` (`entered_since_freeze`, and the exemption `unjoined_rows` takes; since the integration with lane R, `misfiled_returns` -- see the lane record's Integration section) | `tests/test_triage_instrument.py`: an empty freeze read refuses and names the ref; a planted dialect at the freeze refuses and names the row; with the exemption passed, one hole and three holes punched in rows that WERE GAP at the freeze are still named, and each control first asserts there is such a row to punch; without the exemption, the join names exactly the rows that entered. Red under four mutations of the committed script, each restored from git: exempting every row (3 failed), no refusal on an empty freeze read (1 failed), the join ignoring the exemption (3 failed), no refusal on a dialect (1 failed); restored, 11 passed |
+| `scripts/triage_read_gap_rows.py` (six `TRIAGE` lines: `P S1`, `P S3`, `P S5`, `N 195`, `N 197`, `N 199`) | the shipped CONTROL 4, unchanged, which named all six `NO VERDICT` before they were written |
+
+### 71.7 TWO RULES FOR ONE QUESTION, AND WHAT EACH ALONE WOULD LET THROUGH (lane Y2's integration, 2026-09-24)
+
+Lane R's returned class (64.3) and the freeze rule above both decide which GAP rows
+may be absent from the frozen blocker map -- lane R's from the row's cell, the freeze
+rule from git. Merged, each alone would let one thing through that the other stops:
+
+* the returned class alone absorbs a HOLE -- a row that was GAP at the freeze, lost
+  from the map -- whenever that row happens to carry the marker. CONTROL 2b
+  (`misfiled_returns`) refuses a marked row off the map that was GAP at the freeze;
+* the freeze rule alone exempts any row that entered GAP after the freeze, whether or
+  not its cell says what blocks it -- which drops lane R's requirement that every row
+  off the map names its blocker in its own cell. CONTROL 2c (`unnamed_entered`,
+  `NAMED_BLOCKER`) refuses an entered row, not returned, that names none.
+
+    TWO EXEMPTIONS FROM ONE JOIN MUST BE CHECKED AGAINST EACH OTHER: EACH, ALONE,
+    ABSORBS WHAT THE OTHER WAS WRITTEN TO REFUSE.
+
+| path | shown failing by |
+|---|---|
+| `scripts/triage_messaging_gap_rows.py` (`misfiled_returns`, `unnamed_entered`, `NAMED_BLOCKER`, the composed exemption in `main`) | `tests/test_triage_instrument.py`: a marked row lost from the map is refused, not classed, and an entered row whose cell names no blocker is refused -- each on a BUILT fixture, through `main` as well as the function; on the real tree every returned row entered after the freeze and every other entered row names its blocker. Eight mutations of the committed script, each restored from git: the freeze rule exempting every row (7 failed), no refusal on an empty freeze read (1), the join ignoring every exemption (4), no refusal on a dialect (1), CONTROL 2b disabled (1), CONTROL 2c disabled (1), the returned class ignoring the marker (6), the marker never matching (3); restored, 17 passed |
