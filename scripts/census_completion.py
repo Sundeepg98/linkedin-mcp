@@ -1102,11 +1102,18 @@ PINNED = {
     #:       already admitted and loaded, each waiting only on a reader --
     #:       `P S5`, `M M53`, and `N 195`, whose third part is an AGGREGATE
     #:       that WHO-WHICH-COUNTS-ARE-NOT-DELIVERY says counts deliver
+    #:   8   at lane S's follow-up integration, 2026-09-24: NAMES-AT-RUNTIME
+    #:       (the operator's, 08:11) answered the question `N 79`, `N 172` and
+    #:       `N 194` were gated RULING on. Each now waits on a name-returning
+    #:       reader held to PEOPLE-DATA-MITIGATIONS, and their page is
+    #:       captured (the live lane's session 1), so each is re-gated READER.
+    #:       The six follow-up rows re-gated the same day went to MEASURE --
+    #:       no capture exists -- and are not in this count.
     #: The gates past the boundary are re-judged BY HAND when a ruling lands;
     #: what `ruling_problems` asks on every run is only that no row blocked on
     #: nothing sits on a page a hold binds.
     #: `_audit/2026-09-23-census-cleanup.md` items 6 and 7, sections 11-13.
-    "b3_blocked_on_nothing": 5,
+    "b3_blocked_on_nothing": 8,
     #: BUCKET 1 BY WHAT HOLDS EACH ROW, DERIVED from the census and the
     #: holds in `scripts/ruling_holds.py`, BY THE STATUS OF THE HOLD: standing,
     #: relayed, pending, or none. They sum to `unfired`, and `PINNED_B1_ROWS`
