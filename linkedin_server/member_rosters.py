@@ -28,11 +28,18 @@ package imports this module; ``tests/test_every_orphan_module_is_ruled.py``
 records that as a ruling, and the first tool that imports it lands with its
 reader, built against a capture, in the same commit.
 
-A roster is a list of PEOPLE, and this server does not publish names (the
-name-free shaper doctrine, ``_audit/2026-09-05-lead-rulings-round-two.md``).
-Whatever reader lands owes that doctrine a shaper; which rows a count can
-deliver is decided row by row in ``_audit/2026-09-24-lane-s-people-search.md``,
-Follow-up section D.
+A roster is a list of PEOPLE. When this module was written the server published
+no names (the name-free shaper doctrine,
+``_audit/2026-09-05-lead-rulings-round-two.md``), and the reader that lands was
+owed a name-free shaper. ``NAMES-AT-RUNTIME`` (registered 2026-09-24 from the
+operator's own words) amended that doctrine for what a read RETURNS: a people
+read returns people's names as its result, held to ``PEOPLE-DATA-MITIGATIONS``
+-- declared fields only, sanitised and marked untrusted, never stored, one page
+per call, visible only, never a target by itself. So the reader that wires this
+module returns names through the shared people-record foundation, each
+mitigation shown failing without its code. Which rows it delivers is decided
+row by row in ``_audit/2026-09-24-lane-s-people-search.md`` (Follow-up section
+D, and section J.3 of the integration that followed it).
 
 ## THE CONDITIONS, AS THIS FILE CARRIES THEM
 

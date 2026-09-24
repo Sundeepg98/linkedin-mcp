@@ -115,10 +115,12 @@ DELIBERATELY_UNWIRED: dict[str, str] = {
         "same way. Readers here are built against captures only, and none of "
         "the three pages has been captured -- the capture specs are in "
         "_audit/2026-09-24-lane-s-people-search.md, section F. And the "
-        "search admission's condition 1 binds any tool that opens one: a "
-        "name-free reader lands in the SAME commit or neither does. So the "
-        "first tool that imports this module brings its reader with it, and "
-        "this entry is deleted in that commit. NOT PERMANENT."
+        "search admission's condition 1 binds any tool that opens one: its "
+        "reader lands in the SAME commit or neither does -- a reader that, "
+        "since NAMES-AT-RUNTIME amended the condition (2026-09-24), returns "
+        "what it finds held to PEOPLE-DATA-MITIGATIONS rather than no names "
+        "at all. So the first tool that imports this module brings its reader "
+        "with it, and this entry is deleted in that commit. NOT PERMANENT."
     ),
     "member_rosters": (
         "A CAPABILITY HELD ON A WRITTEN CONDITION, ruled by its author "
@@ -129,8 +131,10 @@ DELIBERATELY_UNWIRED: dict[str, str] = {
         "readers here are built against captures only and no roster page has "
         "been captured (specs in _audit/2026-09-24-lane-s-people-search.md, "
         "section F). A roster is a list of people, so the reader that wires "
-        "it owes the name-free shaper doctrine a shaper in the same commit, "
-        "and this entry is deleted then. NOT PERMANENT."
+        "it returns names held to PEOPLE-DATA-MITIGATIONS -- NAMES-AT-RUNTIME "
+        "amended the name-free doctrine for what a read returns, 2026-09-24 "
+        "-- and lands in the same commit, and this entry is deleted then. "
+        "NOT PERMANENT."
     ),
 }
 

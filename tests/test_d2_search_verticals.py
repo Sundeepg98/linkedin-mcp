@@ -326,8 +326,9 @@ def _imports_of(path: pathlib.Path) -> set[str]:
 
 def test_no_package_module_or_entry_point_imports_the_composer():
     """CONDITION 1 OF THE SEARCH ADMISSION, HELD BY ABSENCE. The first tool
-    that imports this module must land with its name-free reader in the same
-    commit, and delete the orphan ruling that says so."""
+    that imports this module must land with its reader in the same commit --
+    held to PEOPLE-DATA-MITIGATIONS since NAMES-AT-RUNTIME amended the
+    condition, 2026-09-24 -- and delete the orphan ruling that says so."""
     importers = [
         path.name
         for path in sorted(PKG.glob("*.py")) + sorted(ROOT.glob("*.py"))

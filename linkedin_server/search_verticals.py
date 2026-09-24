@@ -26,13 +26,18 @@ which address they meant.
 
 The search admission's CONDITION 1 is the other reason, and it binds:
 *"ADMISSION AND A NAME-FREE SHAPER LAND IN THE SAME COMMIT, OR NEITHER
-LANDS"* (``_audit/2026-09-19-two-census-conventions-ruled.md`` section 6). The
-admission landed; what condition 1 protects -- nothing about the people on a
-results page leaving this server unshaped -- is held by the absence of any
-route: no module in the package imports this one, and
+LANDS"* (``_audit/2026-09-19-two-census-conventions-ruled.md`` section 6).
+``NAMES-AT-RUNTIME`` (registered 2026-09-24) amended condition 1 for what a
+read RETURNS at runtime: a reader may return the items it finds -- a group or
+an event as its title and its link -- held to ``PEOPLE-DATA-MITIGATIONS``. What
+still binds is the pairing. The admission landed; what the condition protects
+-- nothing a results page shows leaving this server except through that
+reader, shaped to the declared fields -- is held by the absence of any route:
+no module in the package imports this one, and
 ``tests/test_every_orphan_module_is_ruled.py`` records that as a ruling rather
 than an accident. **The first tool that imports this module lands with its
-name-free reader in the same commit**, and that entry is deleted then.
+reader in the same commit**, held to the six mitigations, and that entry is
+deleted then.
 
 ## THE SAME KEYWORD RULES AS THE PEOPLE SEARCH, BY THE SAME CODE
 
