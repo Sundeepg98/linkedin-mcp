@@ -722,7 +722,12 @@ lines, 8 app-scope (all OUT) and the 37 others.
 
 ### I.7 After the merge commit: three more, and the gates
 
-    cd853b8  the pointer-graph selftest race, fixed as ordered, in its own commit:
+Named by subject, as this record names every commit of its own: a branch hash stops
+resolving the moment a merge rewrites it, and a subject does not.
+
+    "pointer graph: each selftest gets its own sandbox, so concurrent lanes stop
+    deleting each other's"
+             the pointer-graph selftest race, fixed as ordered, in its own commit:
              each `--selftest`, `--plant` and `--plant-sweep` run gets its own
              `mkdtemp` directory, removed when it ends. Written by a child in its
              own worktree and reviewed here before it was cherry-picked; its test
@@ -731,7 +736,9 @@ lines, 8 app-scope (all OUT) and the 37 others.
              timing. The child's mutations: the old fixed path (the sentinel
              deleted -- and one run crashed on a file the other was writing), and
              no cleanup (two directories left); restored, 4 passed
-    2355af5  CONTROL 2c, found by reading the composition again after the merge
+    "triage: an entered row off the map must still name its blocker; price the
+    lane's new test file"
+             CONTROL 2c, found by reading the composition again after the merge
              commit: the freeze rule alone let any row that entered GAP pass
              whether or not its cell names a blocker, which dropped lane R's
              requirement for every row off the map (71.7). And the timings table:
@@ -745,7 +752,8 @@ lines, 8 app-scope (all OUT) and the 37 others.
 
 **THE GATES, ON THE MERGED TREE.**
 
-    census instruments at cd853b8   GREEN: pin_census_rows (747, no drift),
+    census instruments, on the      GREEN: pin_census_rows (747, no drift),
+      pointer-graph commit's tree
                                     check_jobs_directions 107/107,
                                     check_read_addresses 107/107,
                                     check_write_classes 339 lines, 338 rows,
@@ -769,14 +777,19 @@ lines, 8 app-scope (all OUT) and the 37 others.
                                     on master itself: the script needs a git work
                                     tree, and this lane made none
     impact gate --against ff98a7f,  28 changed paths, 69 test files (19 of them
-      on cd853b8                    corpus-wide) -- not the full suite. 1 failed,
-                                    3483 passed, 7 skipped, 503 s; the one failure
-                                    was the timings line, closed in 2355af5
+      on the pointer-graph          corpus-wide) -- not the full suite. 1 failed,
+      commit's tree                 3483 passed, 7 skipped, 503 s; the one failure
+                                    was the timings line, closed by the CONTROL 2c
+                                    commit
     the composition's mutations     eight, on the committed script, each restored
                                     from git: all eight convicted; restored, 17
                                     passed (71.7)
-    the triage tests, the CI-shard  148 passed, on 2355af5's tree
+    the triage tests, the CI-shard  148 passed, on the CONTROL 2c commit's tree
       tests
+    the gate of the record commit   5 changed paths, 45 test files (19 corpus-wide):
+      --against the pointer-graph   1 failed, 2534 passed, 3 skipped -- the one
+      commit                        failure the SHA-citation guard, on a branch hash
+                                    this section first used; named by subject since
 
 **NOT RUN:** 167 of the suite's 236 test files (that gate's own count); CI's
 three-platform matrix, since nothing was pushed; anything live. The gate of this
