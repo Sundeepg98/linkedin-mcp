@@ -131,10 +131,18 @@ def test_the_split_is_the_one_the_lane_report_quotes():
     and rulings batch 3 made `N 183` a write row; each of the 174 was classed by
     its act -- 5 R1 (`N 34`, `N 36`, `N 50`, `N 62`, `P I2`, all queued), 12 R2
     (the sends and connects ruling (b) permits), 157 R3.
-    151 + 174 = 325 = 16 R1 + 35 R2 + 274 R3."""
+    151 + 174 = 325 = 16 R1 + 35 R2 + 274 R3.
+
+    339 AFTER LANE Y2'S COMPLETENESS ADMISSION, measured on the tree that
+    merged it with lane R (`_audit/2026-09-24-lane-y2-admission.md`,
+    Integration 2026-09-24): fourteen admitted write rows, one R2 (`M C94`,
+    sending a post to one person) and thirteen R3 (`P S2`, `S4`, `S6`-`S10`;
+    `M M52`, `C97`, `C100`; `N 196`, `198`, `200`). R1 is untouched: no
+    admitted row's act is one of the first round's own verbs.
+    325 + 14 = 339 = 16 R1 + 36 R2 + 287 R3."""
     rows, _ = cwc.load()
     split = cwc.split(rows)
-    assert (split["R1"], split["R2"], split["R3"]) == (16, 35, 274)
+    assert (split["R1"], split["R2"], split["R3"]) == (16, 36, 287)
     assert split["R1:built"] + split["R1:queued"] == split["R1"]
 
 
@@ -353,3 +361,35 @@ def test_every_defining_passage_resolves_on_its_own(cls):
     source is caught by name even before any row cites it."""
     row = {"key": "X 0", "sources": cwc.WRITE_CLASS_DEFINING[cls]}
     assert cwc.source_problems([row]) == []
+
+
+# ---------------------------------------------------------------------------
+# R3 CARRIES A DISPOSITION SINCE 2026-09-24 (lane L7): a build must still be
+# true, and R2 is still classify-only
+# ---------------------------------------------------------------------------
+
+
+def test_an_r3_line_may_carry_a_named_queue(tmp_path):
+    """The relaxation itself: an R3 GAP row queued on a named token is not a
+    problem. The rule it replaced read 'R3 is classify-only in this lane'."""
+    lines = _lines()
+    i = _find(lines, lambda r: r["class"] == "R3" and r["disposition"] == "classify-only")
+    row = _row(lines[i])
+    row["disposition"] = "queued:ANY-NAMED-CAPTURE"
+    lines[i] = _line(row)
+    problems = _problems(_plant(tmp_path, lines))
+    assert not [p for p in problems if p.startswith(row["key"] + ":")], problems
+
+
+def test_red_on_an_r3_build_that_cannot_perform(tmp_path):
+    """The relaxation does NOT let an R3 line claim a build that is not one:
+    both halves of the build check still convict it."""
+    lines = _lines()
+    i = _find(lines, lambda r: r["class"] == "R3" and r["disposition"] == "classify-only")
+    row = _row(lines[i])
+    row["disposition"] = "built:a_write_nobody_built"
+    lines[i] = _line(row)
+    problems = _problems(_plant(tmp_path, lines),
+                         performable=frozenset({"save_job"}))
+    _red_naming(problems, row["key"], "is not in writes.PERFORMABLE")
+    _red_naming(problems, row["key"], "a build that did not move its row")

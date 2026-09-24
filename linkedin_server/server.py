@@ -1,4 +1,18 @@
-"""The tool surface: fifty-one tools, thirteen of which write to LinkedIn.
+"""The tool surface: fifty-three tools, fourteen of which write to LinkedIn.
+
+THE FIFTY-THIRD IS A WRITE, merged 2026-09-24: ``linkedin_mark_company_interest``
+(lane L7, census row ``P I14``). It was built on the lane's branch as that
+branch's fifty-second, while master gained ``linkedin_own_item_link`` as its
+fifty-second; the merge made it the fifty-third, and every site that states
+these numbers moved in the merge. The headline read "fifty-two tools, thirteen
+of which write" until then.
+
+THE FIFTY-SECOND IS A READ THAT PRESSES, merged 2026-09-24:
+``linkedin_own_item_link``, the share link of one of his own posts. It was
+built on the live lane's branch as that branch's fiftieth, while master gained
+the fiftieth and fifty-first below; the merge made it the fifty-second, and
+every site that states these numbers moved in the merge. The headline read
+"fifty-one tools, thirteen of which write" until then.
 
 THE FIFTY-FIRST IS A WRITE, 2026-09-23, and every site that states these
 numbers moved in the same commit: ``linkedin_follow_company_page``, a follow
@@ -151,9 +165,9 @@ assigned to anybody -- it waits for whoever next runs the suite, and in the
 meantime the pin goes on asserting the old number with full confidence.
 
 THE NUMBERS ABOVE ARE DERIVED NOW, and that is a statement about a test rather
-than about an intention. Fifty-one is ``len(await mcp.list_tools())``,
+than about an intention. Fifty-three is ``len(await mcp.list_tools())``,
 pinned in ``test_server_surface.py`` by
-``test_the_surface_is_exactly_the_fifty_one_tools``; the split is pinned by
+``test_the_surface_is_exactly_the_fifty_three_tools``; the split is pinned by
 ``tests/test_prose_that_makes_a_claim.py::test_the_server_docstring_numbers_are_derived``,
 which reads THESE WORDS and fails if any of the three disagrees with the
 registry.
@@ -166,9 +180,24 @@ POINTER to it was dangling, so a reader who followed it found nothing and
 would reasonably conclude these numbers are unchecked. A citation is a claim
 like any other.
 The surface splits three ways and the split is the part a reader actually
-needs: THIRTY-EIGHT read, THIRTEEN write, and ZERO are write-shaped,
-registered, gated and unable to act. Thirty-eight plus thirteen plus zero is
-fifty-one.
+needs: THIRTY-NINE read, FOURTEEN write, and ZERO are write-shaped,
+registered, gated and unable to act. Thirty-nine plus fourteen plus zero is
+fifty-three.
+
+THE FIFTY-THIRD IS ONE WRITE, 2026-09-24 (lane L7, census row ``P I14``).
+``linkedin_mark_company_interest`` presses "I'm interested" in the
+About-the-company card of one posting, behind the flag and the single-use
+grant: the card must open by naming the posting's own employer and draw
+exactly one control wearing the measured OFF label. It tells that employer's
+recruiters, and this server holds no undo for it -- the ON label has never
+been captured -- so it fires only at a company he names. Never fired.
+
+THE FIFTY-SECOND, 2026-09-23, IS A READ THAT PRESSES: ``linkedin_own_item_link``,
+the share link of one of his own posts through the post's own "Copy link
+to post", on a recorded orchestrator-delegated call. It changes nothing on
+LinkedIn that the call did not accept, and the page's clipboard calls are
+captured in this server's own tab rather than reaching his system clipboard,
+with the one gap in that capture named in the tool's own docstring.
 
 THE FIFTIETH IS ONE READ, 2026-09-23. ``linkedin_recent_job_searches`` opens
 the jobs home, ``/jobs/jam/`` -- admitted 2026-09-20 with nothing behind it
@@ -280,12 +309,13 @@ the moment ``update_profile_field`` was given an address while still refusing.
 always meant: an address is not a permission.
 
 NOTE THE ACTION THAT HAS NO TOOL. ``writes.SANCTIONED_WRITES`` holds
-FOURTEEN actions where this surface registers THIRTEEN write-shaped tools, and
+FIFTEEN actions where this surface registers FOURTEEN write-shaped tools, and
 the missing one is ``set_open_to_work``: it is sanctioned, it is refused by
-``_refuse_unperformable``, and no tool was ever registered for it. So thirteen
-counts TOOLS and fourteen counts ACTIONS, and a reader comparing the two
-numbers is not looking at a discrepancy. (THIRTEEN and TWELVE until
-2026-09-23; ``follow_company_page`` added one to each.)
+``_refuse_unperformable``, and no tool was ever registered for it. So fourteen
+counts TOOLS and fifteen counts ACTIONS, and a reader comparing the two
+numbers is not looking at a discrepancy. (FOURTEEN and THIRTEEN until
+2026-09-24, ``mark_company_interest`` adding one to each; THIRTEEN and TWELVE
+until 2026-09-23, ``follow_company_page`` adding one to each.)
 
 THE LINE NUMBERS THAT USED TO BE HERE ARE GONE, and that is part of this
 correction rather than tidying. It read "pinned at ``test_server_surface.py``
@@ -849,13 +879,14 @@ mcp = FastMCP(
     instructions=(
         "A window onto the operator's OWN LinkedIn account, driven by his own "
         "signed-in browser on his own machine. Most tools read and change "
-        "nothing. THIRTEEN WRITE: linkedin_save_job, "
+        "nothing. FOURTEEN WRITE: linkedin_save_job, "
         "linkedin_unsave_job, linkedin_unfollow_company, "
         "linkedin_follow_company, linkedin_apply_job, "
         "linkedin_update_setting, linkedin_react_to_item, "
         "linkedin_send_invitation, linkedin_publish_post, "
         "linkedin_comment_on_item, linkedin_update_profile_field, "
-        "linkedin_send_message and linkedin_follow_company_page. "
+        "linkedin_send_message, linkedin_follow_company_page and "
+        "linkedin_mark_company_interest. "
         "THE ELEVENTH is the only one here that can verify its own outcome "
         "by reading the field back; it also returns the PREVIOUS value "
         "verbatim and the exact call that puts it back, which this server "
@@ -863,7 +894,15 @@ mcp = FastMCP(
         "ACT and was repaired the same day: three separate defects meant it "
         "raised at the first guard without ever loading a page, while still "
         "issuing him a confirm_token to approve. If you were told it worked "
-        "before that repair, that was wrong. "
+        "before that repair, that was wrong. AND UNTIL 2026-09-24 IT NEVER "
+        "PRESSED SAVE: it entered the change, pressed nothing, and read back "
+        "the unsaved dialog, so a success it reported before that date stored "
+        "nothing. It now presses Save only once notify-network is confirmed "
+        "off in the edit dialog -- otherwise it refuses before the press, "
+        "NEEDS-OPERATOR -- and reads the stored value back on a fresh render. "
+        "THE FOURTEENTH, linkedin_mark_company_interest, tells one posting's "
+        "employer's recruiters he is interested; this server cannot take it "
+        "back, so offer it only for a company he names. "
         "THE TWELFTH ARRIVED 2026-09-02 AND SHIPS EXPECTING TO REFUSE, "
         "which is the design and not a fault -- say so plainly rather than "
         "presenting a refusal as a surprise. linkedin_send_message types the "
@@ -1872,9 +1911,87 @@ async def _open_profile_views_filter_menus(page: Any) -> dict[str, Any]:
     return menus_out
 
 
+#: The reveal this tool may press, by its key in ``reveal.DECIDED_REVEALS``.
+PROFILE_VIEWS_REVEAL = "profile_views_show_more_analytics"
+
+
+async def _profile_views_switch(page: Any, switch_key: str, row_cap: int) -> dict[str, Any]:
+    """Apply one ruled filter, read the viewers it leaves, and take it off.
+
+    THE VIEW IS READ THE WAY THIS TOOL READS IT: the same harvest and the same
+    row parser as the unfiltered list, plus the headline count. The module
+    compares that whole reading before the switch and after the restore; the
+    filtered reading comes back as ``viewers_when_applied`` and
+    ``headline_when_applied``. Every binding here carries a name no other
+    function in this module uses (the navigation guard tracks taint by name).
+    """
+    from linkedin_server import view_switch as switch_module
+
+    switch_counters = await _profile_views_press_counters(page)
+
+    async def switch_view_now() -> dict[str, Any]:
+        switch_records = await dom.harvest_linked_cards(
+            page, href_pattern=dom.PERSON_HREF, max_items=row_cap * 3, sibling_rows=True
+        )
+        switch_rows, _switch_dropped = dom.parse_all(switch_records, shape.parse_person_card)
+        try:
+            switch_insights = await dom.read_profile_views_insights(page)
+            switch_headline = _as_count((switch_insights.get("headline") or {}).get("value"))
+        except Exception:  # noqa: BLE001 - an unread headline is None, never 0
+            switch_headline = None
+        return {"headline": switch_headline, "rows": switch_rows}
+
+    switch_outcome = await switch_module.apply_and_restore(
+        page, key=switch_key, read_view=switch_view_now, read_counters=switch_counters
+    )
+    switch_applied_view = switch_outcome.pop("view_applied", None) or {}
+    switch_outcome["viewers_when_applied"] = switch_applied_view.get("rows")
+    switch_outcome["headline_when_applied"] = switch_applied_view.get("headline")
+    return switch_outcome
+
+
+async def _profile_views_more_analytics(page: Any) -> dict[str, Any]:
+    """Press the one decided plain button, then read the page's insights again.
+
+    The reveal's own verdict says whether it only revealed content; the
+    insights reader then runs a second time on the revealed page, so a caller
+    can compare it with ``insights`` above.
+    """
+    from linkedin_server import reveal as reveal_module
+
+    reveal_counters = await _profile_views_press_counters(page)
+    reveal_outcome = await reveal_module.reveal(
+        page,
+        key=PROFILE_VIEWS_REVEAL,
+        read_counters=reveal_counters,
+        reading=PROFILE_VIEWS_MENU_READING,
+    )
+    reveal_block: dict[str, Any] = {"reveal": reveal_outcome}
+    if reveal_outcome.get("pressed"):
+        try:
+            reveal_block["insights_after"] = await dom.read_profile_views_insights(page)
+        except Exception as exc:  # noqa: BLE001 - never raised
+            reveal_block["insights_after_error"] = type(exc).__name__
+        # WHAT THE BUTTON REVEALED, read: the "Highlights" and "Details"
+        # sections (top location, industry and company; each company's share).
+        # See profile_views_more's docstring for why no name is redacted here.
+        from linkedin_server import profile_views_more
+
+        try:
+            reveal_block["revealed_insights"] = (
+                await profile_views_more.read_profile_views_more_insights(page)
+            )
+        except Exception as exc:  # noqa: BLE001 - never raised
+            reveal_block["revealed_insights_error"] = type(exc).__name__
+    return reveal_block
+
+
 @mcp.tool()
 async def linkedin_who_viewed_me(
-    limit: int = DEFAULT_LIMIT, open_filter_menus: bool = False
+    limit: int = DEFAULT_LIMIT,
+    open_filter_menus: bool = False,
+    view_switch: str = "",
+    show_more_analytics: bool = False,
 ) -> dict[str, Any]:
     """List the people who viewed your profile, most recent first.
 
@@ -1935,6 +2052,20 @@ async def linkedin_who_viewed_me(
         limit: maximum rows to return (default 25, max 100).
         open_filter_menus: also open and read the filter pills (default
             False, which is this tool exactly as it was).
+        view_switch: APPLY ONE FILTER, read the viewers it leaves, and TAKE
+            IT OFF again -- one key of view_switch.VIEW_SWITCHES:
+            "interesting_viewers_verified" or
+            "interesting_viewers_company_you_follow". Empty (the default)
+            does nothing. The filtered viewers come back under
+            view_switch.viewers_when_applied; view_switch.restored says
+            whether the page was proven put back (the view read after equals
+            the view read before). Anything else is refused, not pressed.
+        show_more_analytics: also press "Show more analytics" -- one plain
+            button, admitted by name in reveal.DECIDED_REVEALS -- and report
+            whether it only revealed content (url unchanged, no counter
+            moved), plus what it revealed under
+            more_analytics.revealed_insights: the top location, industry and
+            company of his viewers, and each company's share. Default False.
     """
     limit = _clamp(limit, DEFAULT_LIMIT, MAX_LIMIT)
     urls = [
@@ -2031,6 +2162,23 @@ async def linkedin_who_viewed_me(
                             )
                         except Exception as exc:  # noqa: BLE001 - never raised
                             extra["filter_menus_error"] = type(exc).__name__
+                    # THE VIEW SWITCH, THEN THE REVEAL -- in that order so the
+                    # switch reads and restores the page as the tool found it.
+                    # Same failure rule: neither can cost the viewer list.
+                    if view_switch:
+                        try:
+                            extra["view_switch"] = await _profile_views_switch(
+                                page, view_switch, limit
+                            )
+                        except Exception as exc:  # noqa: BLE001 - never raised
+                            extra["view_switch_error"] = type(exc).__name__
+                    if show_more_analytics:
+                        try:
+                            extra["more_analytics"] = await _profile_views_more_analytics(
+                                page
+                            )
+                        except Exception as exc:  # noqa: BLE001 - never raised
+                            extra["more_analytics_error"] = type(exc).__name__
                     return shape.envelope(
                         rows,
                         limit=limit,
@@ -7846,6 +7994,104 @@ async def linkedin_my_activity_items() -> dict[str, Any]:
         return _error(exc)
 
 
+@mcp.tool()
+async def linkedin_own_item_link(activity_id: str, include_link: bool = False) -> dict[str, Any]:
+    """The public link LinkedIn gives out for ONE of HIS OWN items. PRESSES TWO CONTROLS.
+
+    ================= WHAT THIS IS FOR -- READ FIRST =================
+    The link that opens one of his own items off LinkedIn, obtained the way
+    he would get it: the item's own page, opened by its activity id (an
+    argument -- linkedin_my_activity_items returns them), the item's own
+    control menu, and its copy-link entry (share_link.COPY_PHRASE). It rests
+    on a call recorded verbatim, as orchestrator-delegated on 2026-09-23, in
+    _audit/2026-09-23-live-lane-session-1.md section 0.1: M C72's copy-link
+    on his OWN items only, so no other author's figures are touched.
+    =================================================================
+
+    OWNERSHIP IS READ OFF THE MENU, NEVER ASSUMED FROM THE ID. The copy-link
+    entry is pressed only when the same menu also draws one of the two
+    author-only entries (share_link.OWNER_PHRASES), which LinkedIn draws for
+    an item's author alone. Otherwise the answer is refused (not_his_post)
+    and nothing past opening the menu is pressed.
+
+    HIS SYSTEM CLIPBOARD IS SHIELDED, AND THE SHIELD HAS ONE NAMED GAP. Just
+    before the copy-link entry is pressed, the page's clipboard calls are
+    replaced in this server's own tab (writeText, write and the copy
+    command), so the link comes back here instead of replacing whatever he
+    had copied. That covers every route the page looks up at the moment it
+    copies. A reference the page took BEFORE the replacement is not covered:
+    then nothing is captured, the answer reads copied: false, and whether his
+    clipboard was written cannot be read from here.
+
+    THE PRESSES ARE PRICED BY THE ITEM'S OWN REACTION TOGGLE, read in both
+    measured dialects (share_link.read_item_price) before the first press and
+    after the last. A page that draws no toggle at all is refused
+    (price_cannot_move) with nothing pressed: a counter that cannot move
+    prices nothing, whatever it reads.
+
+    WHAT COMES BACK: copied (bool); captures (how many texts were kept);
+    shape -- whether it is an https LinkedIn link, its path kind, whether it
+    carries this activity id; permitted; the gate's counter and closure
+    verdicts; and price_readings, every price reading taken, integers only.
+    THE LINK ITSELF ONLY WITH include_link=True: it can carry his profile's
+    vanity name.
+
+    Args:
+        activity_id: 1-20 ASCII digits -- the id of one of his own items.
+        include_link: also return the link itself (default False: its shape
+            only).
+    """
+    from linkedin_server import share_link as share_module
+
+    try:
+        own_item_digits = share_module.validated_activity_digits(activity_id)
+    except ValueError:
+        return {
+            "refused": "bad_activity_id",
+            "why": "activity_id must be 1 to 20 ASCII digits; nothing was loaded.",
+            "pages_loaded": 0,
+        }
+    own_item_url = share_module.post_url(own_item_digits)
+    # EVERY PRICE READING IS KEPT AND RETURNED, integers only: the price is
+    # evidence, and a verdict that only names its counter ("priced by
+    # off_state") cannot show whether that counter could have moved. The
+    # first live fire was priced by an off_state of 0 at both ends.
+    own_item_readings: list[dict[str, Optional[int]]] = []
+    try:
+        async with BROWSER.session() as page:
+            own_item_landed = await BROWSER.goto(page, own_item_url)
+            assert_not_authwall(own_item_landed, surface="post")
+
+            async def own_item_counters() -> dict[str, Optional[int]]:
+                own_item_reading = await share_module.read_item_price(page)
+                own_item_readings.append(dict(own_item_reading))
+                return own_item_reading
+
+            # A PRICE THAT CANNOT MOVE IS REFUSED BEFORE THE FIRST PRESS.
+            if not share_module.price_can_move(await own_item_counters()):
+                return {
+                    "refused": "price_cannot_move",
+                    "why": (
+                        "the item's page drew no reaction toggle in either "
+                        "measured dialect, so no counter read here could move "
+                        "for an outward act. A press nothing can price is not "
+                        "made: nothing was pressed."
+                    ),
+                    "price_readings": own_item_readings,
+                    "pages_loaded": 1,
+                }
+            own_item_outcome = await share_module.copy_own_post_link(
+                page, activity_digits=own_item_digits, read_counters=own_item_counters
+            )
+    except Exception as exc:
+        return _error(exc)
+    if not include_link:
+        own_item_outcome["link_withheld"] = own_item_outcome.pop("link", None) is not None
+    own_item_outcome["price_readings"] = own_item_readings
+    own_item_outcome["pages_loaded"] = 1
+    return own_item_outcome
+
+
 # ---------------------------------------------------------------------------
 # The five writes
 # ---------------------------------------------------------------------------
@@ -8445,6 +8691,44 @@ async def linkedin_follow_company_page(
         return await _write_tool(
             "follow_company_page", organisation_id, confirm_token
         )
+    except Exception as exc:
+        return _error(exc)
+
+
+@mcp.tool()
+async def linkedin_mark_company_interest(
+    job_id: str, confirm_token: str = ""
+) -> dict[str, Any]:
+    """Mark yourself interested in one posting's employer ("I'm interested") -- a WRITE.
+
+    It tells that employer's recruiters you are interested in working there.
+    Same two-step shape and the same five gates as ``linkedin_save_job``: no
+    ``confirm_token``, no action -- you get a block to read and a token that
+    works ONCE, only for this posting, only for this verb, within two minutes.
+    Census row ``P I14``; ``linkedin_job_detail`` reports the control as
+    ``interest_control``.
+
+    WHO SEES IT: that employer's recruiters -- it is FOR them. It is not a post
+    and your network is not told, but it is not private to you either, and a
+    removal later does not un-show it to anyone who already looked.
+
+    THE PREVIEW READS the posting's About-the-company card, which must open by
+    naming the posting's own employer, and requires exactly one control in it
+    wearing the label LinkedIn draws before an interest is signalled. An
+    employer you have ALREADY signalled is refused, not reported: that label
+    has never been captured.
+
+    AFTER THE PRESS the posting is re-rendered: the OFF label still drawn means
+    the interest did NOT land and ``performed`` is ``false`` -- including when
+    LinkedIn asked for a further step, which this server does not take.
+
+    Args:
+        job_id: the numeric LinkedIn job id whose employer you want to signal.
+        confirm_token: leave empty to preview. Pass the token from that
+            preview to actually press "I'm interested".
+    """
+    try:
+        return await _write_tool("mark_company_interest", job_id, confirm_token)
     except Exception as exc:
         return _error(exc)
 

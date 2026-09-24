@@ -10223,3 +10223,209 @@ measurement harnesses, the per-channel census of exception-text renders, the
 consumer map of `error` fields, the per-slot fold measurement, the timing
 script -- are declared disposable. Every number they produced is recorded in
 the lane record, and what they found is held by the entries above.
+
+## 70. THE BEST-VERIFIED WRITE NEVER PRESSED SAVE, AND A WRITE AIMED BY ITS CARD (lane-l7-profile-writes, 2026-09-24)
+
+**Registered 2026-09-24.** Full record: `_audit/2026-09-24-lane-l7-profile-writes.md`.
+Numbered 70 by the orchestrator's allocation for this lane, so parallel appends
+do not collide.
+
+### 70.1 A VERIFICATION THAT READS THE PAGE IT TYPED INTO CANNOT FAIL
+
+`linkedin_update_profile_field` filled or selected a field and never pressed
+the editor's `Save`: after its fill it fell through to the POST composer's gate,
+which found no post editor on the intro editor and pressed nothing, and a
+select never reached a gate at all. Its verification then re-read the SAME,
+still-open dialog -- which held exactly the value just typed -- and reported
+`field_changed`. So the write the package called its best verified returned
+`performed: true` for an edit LinkedIn never stored, and the six
+COVERED-UNFIRED intro-editor rows rested on a check that could not fail.
+
+    A READ-BACK IS EVIDENCE ONLY IF IT COULD HAVE COME BACK DIFFERENT. THE
+    DIALOG THAT WAS TYPED INTO WILL ALWAYS AGREE WITH THE TYPING; THE VALUE
+    THE SITE STORED IS THE ONLY WITNESS.
+
+The instrument that exposed it is a frozen world with STATE: the editor's
+value persists only if its Save handler ran before the next navigation, which
+is how a server-backed form behaves and what no static fixture can model. Every
+earlier fixture served one fixed document per url, so "filled" and "saved" were
+indistinguishable in it -- the defect was invisible to the suite for three
+weeks for exactly that reason.
+
+### 70.2 A CAPABILITY SHIPPED FOR AN ACT IS AIMED BY THE CONTAINER, NOT BY THE LABEL
+
+"I'm interested" carries no company in its name; the employer it signals is
+whoever owns the card it sits in. The gate therefore takes identity from the
+CARD (it must open by naming the posting's own employer -- the rule
+`linkedin_job_detail` already applied to its facts) and only the aim from the
+label (exactly one OFF-labelled control inside that card). An unmeasured ON
+label reads unknown and is refused, and the verification's negative (the OFF
+label still drawn on a fresh render) is its strong answer.
+
+### 70.3 THE ENTRIES
+
+| path | shown failing by |
+|---|---|
+| `linkedin_server/profile_editor.py` -- `save_gate_verdict`, `read_save_gate`, `wait_for_editor_to_close`, `notify_network_note`; and in `writes.py`: `EDITOR_SAVE_ACTIONS`, the save gate asked after a fill and after a select, the fresh-render branch of `_verify_after`, `_editor_value_of(when=)` | `tests/test_profile_editor_commit.py`, over a stateful frozen world. Against the unrepaired `writes.py` (the `9c219c8` file swapped in, then swapped back and byte-compared): 4 failed -- `performed` true with the stored value unchanged; `field_changed` reported for a change nobody saved; a select never saved; the prior value described as read "after the write". After: 24 passed, including notify-network ON refusing the press (`4_notify_network_not_off`), an unnamed switch reported `NOT CONFIRMED` rather than off, a disabled Save, LinkedIn declining the value (`performed: false`), seven verdict refusals by code, the selector matching nothing once the dialog closes, and the restore path run as a round trip whose before and after readings are equal |
+| `linkedin_server/company_interest.py` -- `read_interest_control`, `interest_verdict`, `read_state`, `read_after_press`, `verification_verdict`; the `mark_company_interest` spec and arms in `writes.py`; `server.linkedin_mark_company_interest` | `tests/test_mark_company_interest.py`: three tracked captures read `not_signalled`, a skeleton and a shell read unknown; four DERIVED worlds (unmeasured ON label, two OFF controls, another company's card, no control) refused at the verdict and at the preview with no grant minted and no page string quoted; the three grant controls (no grant, another target or verb on the same posting, a second use) with zero navigations on every refusal; four end-to-end runs (moved control true, OFF label still drawn false, a section that vanished unknown, another company's card unknown). The SECTION BOUND was shown failing first: the unbounded version climbed from the Help link to the nearest ancestor holding any button, so a card with the interest control removed read "the section draws 2 controls" -- the card's Follow and 'more' toggle -- which the verification would have read as a control that MOVED; bounded to the section's own keyed block, it counts 0 |
+| `scripts/check_write_classes.py` -- R3 lines may carry `built:` / `queued:` | `tests/test_write_classes.py`: an R3 queue is green; an R3 build naming a non-performable action on a row still GAP is convicted twice by name; the R2 plant still convicts. Against the old rule, the real table as this lane left it is red on all 36 of its lines |
+
+### 70.4 DECLARED DISPOSABLE
+
+The scratchpad scripts this lane ran -- the red reproduction of the missing
+Save, the offline run of the interest reader over the five posting captures,
+the counts over the local captures that found the Open-to explainer anchors,
+the default-activity form anchor and the job-seeker preferences anchor, and
+the two generators that wrote the census cells and the class-table lines --
+are declared disposable. What they measured is recorded with its numbers in
+the lane record, and the two behaviours they established are carried by the
+two test files above, which re-derive them on every run. So are the gate's:
+the writer of the impact selection (the gate's own `impact_set()`, written
+out in full because `--plan-only` prints 40 names), its runner, the
+in-memory re-pin of 70.5, and the two drivers that put the five new readers
+and the new tool through their families' harnesses without writing either
+baseline. And the integration's (2026-09-24): the row-by-row census resolver
+and the register's append resolver, the census row editor, the lister of
+every site behind one correction-guard pair, and the harness that swapped the
+pre-seam gate in to show the new tests failing. The census resolver is the
+one worth keeping as a METHOD -- resolve a census conflict three-way from the
+index stages, row by row, refusing on any row both sides changed -- and it is
+recorded in the lane record's integration section rather than registered
+here, because none of its refusals was shown firing on a planted collision.
+
+### 70.5 A LIST OF PIN MOVES IS PROVEN COMPLETE BY APPLYING IT, IN MEMORY
+
+A lane that may not re-pin still owes the merge the list of pins it moves,
+and that list is a claim nothing in the suite checks for completeness. This
+lane checked it by applying the list to the IMPORTED module --
+`census_completion.PINNED` and `PINNED_B1_ROWS` patched in one process,
+nothing written -- and running the owners in that same process:
+`census_completion.main(["--check"])`, then `tests/test_ruling_holds.py`
+through `pytest.main`, which imports the same module object and so reads the
+patched pins.
+
+SHOWN FAILING: with only the `PINNED_B1_ROWS` entry applied, two reds, both
+naming `unfired` at 26 against 25; with the six figures added, `--check`
+exits 0 and the file passes 55 of 55.
+
+    A LIST OF PIN MOVES IS A PREDICTION ABOUT A RE-PIN NOBODY HAS RUN.
+    APPLY IT WHERE IT CANNOT PERSIST AND RUN ITS OWNERS: THEN IT IS A
+    MEASUREMENT.
+
+The script is disposable (70.4); the method is the part the merge can reuse,
+wherever a pin's owners read it from a module attribute.
+
+---
+
+## 71. THE COMPLETENESS VERDICT LAYER, THE ADJUDICATED CORPUS, AND THE TABLE AT A FIXED POINT (lane-y2-admission, 2026-09-24)
+
+**Registered 2026-09-24.** Full record: `_audit/2026-09-24-lane-y2-admission.md`.
+Numbered 71 by this lane's assignment, so lanes forked from one master cannot
+collide on it.
+
+Section 63's probe raises CANDIDATES; nothing held a decision about them. Lane Y2
+gave every app-scope candidate one verdict -- ADMIT (a new GAP row carries it),
+RECORDED (an existing row carried it in words and gained the address or control),
+OUT (not a user capability) -- in three new columns of the annotations file, and
+built the check that keeps those verdicts true against the tree. Admitting rows then
+broke a join that had assumed the GAP set only shrinks; 71.6 is the rule that
+replaced the assumption.
+
+### 71.1 A VERDICT IS A CLAIM ABOUT THE CENSUS, SO THE CENSUS IS ASKED
+
+An ADMIT or RECORDED route leaves the candidate set BECAUSE a census row now
+carries it. So a table line still holding one is a verdict the census does not
+bear out, and `verdict_problems` names it -- with an app-scope line nobody
+adjudicated, a verdict naming a row no slice writes, and an OUT with no reason.
+It reads no capture, so CI runs it.
+
+### 71.2 THE TABLE RECORDS ONE CORPUS, AND THE CORPUS KEEPS GROWING
+
+A live lane writes captures every session, and a plain `--write` rewrites the
+committed table over whatever is on disk that hour -- a candidate nobody has
+read lands in a tracked file. `--captured-before <UTC stamp>` names the corpus
+(2026-09-23T00:00:00 reproduces lane Y's 71 captures exactly) and prints the rest
+as set aside; `--check` proves the committed table is byte for byte what
+`--write` would write over that corpus.
+
+**THAT FIXED POINT IS NOT MERGE-STABLE.** The table's `known_elsewhere` column is
+derived from every audit document, script and test, so a document another lane
+adds that names a candidate route moves it. Measured twice: one untracked
+document naming a docs-scope candidate no other document named turned `--check`
+red ("would CHANGE" on that route) and removing it restored the fixed point; then
+the first draft of THIS paragraph, which named the same route, did exactly the
+same thing, so the route is described here rather than named.
+`verdict_problems` does not read that column, which is why CI cannot see this,
+and `--check` reads captures only the box that holds them has; after a merge,
+regenerate there with the same cutoff.
+
+### 71.3 THE CENSUS'S VOCABULARY RE-KEYS THE CONTROLS IT IS DIFFED AGAINST
+
+The control templater keeps a word only if the census slices use it, so every
+word a new row brings can change the key of a harvested label that has nothing
+to do with that row. Measured on this lane's own edits: a row citing
+`/games/zip/` and one quoting "get hired" turned 'City, state, or <X> code' and
+'Get <X> faster' into two NEW, unannotated templates. The check named both
+before anything was committed.
+
+    A CLOSED VOCABULARY TAKEN FROM THE THING UNDER MEASUREMENT MOVES WHEN THAT
+    THING IS EDITED; A KEY BUILT FROM IT MUST BE RE-CHECKED AFTER EVERY EDIT.
+
+### 71.4 THE ENTRIES
+
+| path | shown failing by |
+|---|---|
+| `scripts/completeness_harvest.py` (`select_corpus`, `verdict_problems`, `check`, `--captured-before`, `--check`, `OWN_DOCS`) | `tests/test_completeness_verdicts.py`, eight tests: the committed layer holds; every app-scope line left in the table is an OUT; a verdict removed, a RECORDED on a route that is still a candidate, and a verdict naming a row nobody wrote, each planted into COPIES, each red naming the line; the cutoff keeps the earlier of two planted captures and prints the later as set aside; `check` returns 0 on a table it wrote and 1 with "would CHANGE" on one edited by hand. Red under three mutations of the committed script, each restored from git: `verdict_problems` returning nothing (3 failed), the fixed-point comparison skipped (1 failed), the cutoff ignored (1 failed); restored, 8 passed. The test's own first draft edited a word the planted PATTERN also held, so the key moved and the check reported an ADD and a REMOVE instead of a CHANGE -- red for the right reason, asserted in the wrong words; the edit now touches one cell |
+| `_audit/_census/completeness-annotations.tsv` (`verdict`, `verdict_rows`, `verdict_basis`) | the tests above; 159 verdicts across the lane's two passes, 0 inconsistent with the census when re-derived without a capture |
+| `scripts/check_write_classes.py` (acts `feedback`, `purchase`, R3) | its own shipped test suite, unchanged; the two acts class `N 198` and `P S9`, which no act named |
+
+### 71.5 DECLARED DISPOSABLE
+
+The scratch scripts this lane ran -- the regeneration driver over a capture
+subset, the masked context readers used to see what a control sat beside, the
+boundary drives, the evidence-append and side-table writers, the verifier's
+sampler and its key, the census-only consistency check, the mutation runner --
+are declared disposable. Everything they wrote is in the census, the side
+tables, the annotations or the audit, and the checks above re-derive it.
+
+### 71.6 THE BLOCKER MAP IS FROZEN; A SLICE THAT GROWS CANNOT JOIN IT
+
+`scripts/triage_messaging_gap_rows.py` joins every GAP row of its slice to
+`_audit/_census/blocker-map.tsv` and refuses on any row that does not join. The
+map's spine is the census at `1c08e5f` -- the set the ledger divided -- so a row
+that entered GAP later has no line there by construction, and the slice's first
+admission (eleven rows) turned four tests red. The exemption is DERIVED: rows GAP
+today that were not GAP in the census read from git at the map's own
+`FROZEN_REF`. It is never read off the map, which would turn every hole in the map
+into an exemption. An empty freeze read refuses; so does a state cell spelled in
+a dialect at the freeze, which the enumerator drops (a cold reviewer's finding,
+closed the same day). The exempt rows print by id in a bucket of their own.
+
+    A JOIN AGAINST A FROZEN TABLE NEEDS A RULE FOR ROWS BORN AFTER THE FREEZE,
+    AND THE RULE MUST BE READ FROM THE FREEZE, NEVER FROM THE TABLE.
+
+| path | shown failing by |
+|---|---|
+| `scripts/triage_messaging_gap_rows.py` (`entered_since_freeze`, and the exemption `unjoined_rows` takes; since the integration with lane R, `misfiled_returns` -- see the lane record's Integration section) | `tests/test_triage_instrument.py`: an empty freeze read refuses and names the ref; a planted dialect at the freeze refuses and names the row; with the exemption passed, one hole and three holes punched in rows that WERE GAP at the freeze are still named, and each control first asserts there is such a row to punch; without the exemption, the join names exactly the rows that entered. Red under four mutations of the committed script, each restored from git: exempting every row (3 failed), no refusal on an empty freeze read (1 failed), the join ignoring the exemption (3 failed), no refusal on a dialect (1 failed); restored, 11 passed |
+| `scripts/triage_read_gap_rows.py` (six `TRIAGE` lines: `P S1`, `P S3`, `P S5`, `N 195`, `N 197`, `N 199`) | the shipped CONTROL 4, unchanged, which named all six `NO VERDICT` before they were written |
+
+### 71.7 TWO RULES FOR ONE QUESTION, AND WHAT EACH ALONE WOULD LET THROUGH (lane Y2's integration, 2026-09-24)
+
+Lane R's returned class (64.3) and the freeze rule above both decide which GAP rows
+may be absent from the frozen blocker map -- lane R's from the row's cell, the freeze
+rule from git. Merged, each alone would let one thing through that the other stops:
+
+* the returned class alone absorbs a HOLE -- a row that was GAP at the freeze, lost
+  from the map -- whenever that row happens to carry the marker. CONTROL 2b
+  (`misfiled_returns`) refuses a marked row off the map that was GAP at the freeze;
+* the freeze rule alone exempts any row that entered GAP after the freeze, whether or
+  not its cell says what blocks it -- which drops lane R's requirement that every row
+  off the map names its blocker in its own cell. CONTROL 2c (`unnamed_entered`,
+  `NAMED_BLOCKER`) refuses an entered row, not returned, that names none.
+
+    TWO EXEMPTIONS FROM ONE JOIN MUST BE CHECKED AGAINST EACH OTHER: EACH, ALONE,
+    ABSORBS WHAT THE OTHER WAS WRITTEN TO REFUSE.
+
+| path | shown failing by |
+|---|---|
+| `scripts/triage_messaging_gap_rows.py` (`misfiled_returns`, `unnamed_entered`, `NAMED_BLOCKER`, the composed exemption in `main`) | `tests/test_triage_instrument.py`: a marked row lost from the map is refused, not classed, and an entered row whose cell names no blocker is refused -- each on a BUILT fixture, through `main` as well as the function; on the real tree every returned row entered after the freeze and every other entered row names its blocker. Eight mutations of the committed script, each restored from git: the freeze rule exempting every row (7 failed), no refusal on an empty freeze read (1), the join ignoring every exemption (4), no refusal on a dialect (1), CONTROL 2b disabled (1), CONTROL 2c disabled (1), the returned class ignoring the marker (6), the marker never matching (3); restored, 17 passed |

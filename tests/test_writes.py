@@ -712,6 +712,11 @@ def test_what_ships_is_narrower_than_what_is_sanctioned():
         # move, as apply did on 2026-08-25 -- sanctioned and performable at
         # once, on a surface and an anchor already measured.
         "follow_company_page",
+        # FIFTEEN FROM 2026-09-24: "I'm interested" (census row P I14, lane
+        # L7), sanctioned and performable in the same move, on the posting
+        # address save and follow already act on and an anchor measured on
+        # three tracked captures.
+        "mark_company_interest",
     }
     # THREE UNTIL 2026-08-25, four until 2026-08-30, five since. This line read
     # ``{"save_job", "unsave_job", "unfollow_company"}``.
@@ -827,6 +832,14 @@ def test_what_ships_is_narrower_than_what_is_sanctioned():
         # readonly.SANCTIONED_MUTATIONS is unchanged, because the click is
         # perform()'s existing one, and no boundary moved.
         "follow_company_page",
+        # THE FOURTEENTH, 2026-09-24 (census row P I14): "I'm interested" in
+        # one posting's About-the-company card, aimed by the card's own
+        # employer, verified on a fresh render. Its undo (P I15) presses an
+        # ON-state control no capture holds, so it crossed with NO tested
+        # restore -- stated in its spec and its census cell, and the reason its
+        # live fire waits on that capture. NOTHING WAS PERMITTED TO LET IT
+        # CROSS: the click is perform()'s existing one.
+        "mark_company_interest",
     }
     assert writes.PERFORMABLE < sanctioned_actions
 
@@ -1311,6 +1324,10 @@ _UNMEASURED_REVERSIBILITY = {
     "update_setting",
     "send_invitation",
     "send_message",
+    # 2026-09-24 (census row P I14). Its removal is P I15, which presses an
+    # ON-state control no capture holds, so nothing about undoing it has been
+    # observed on this surface.
+    "mark_company_interest",
 }
 
 REVERSIBILITY_CLASS = {
@@ -1337,6 +1354,9 @@ REVERSIBILITY_CLASS = {
     # every followed Page carries its own unfollow control on Manage Pages --
     # and the undo is keyed by the same numeric id this action is granted on.
     "follow_company_page": "REVERSIBLE",
+    # 2026-09-24. STILL-UNKNOWN: LinkedIn's Help describes removing an
+    # interest, but the control that would do it has never been captured.
+    "mark_company_interest": "STILL-UNKNOWN",
 }
 
 #: Which actions have had their reversibility MEASURED. Split out from the
@@ -1359,6 +1379,7 @@ REVERSIBILITY_MEASURED = {
     "send_invitation": False,
     "send_message": False,
     "follow_company_page": True,
+    "mark_company_interest": False,
 }
 
 def test_the_two_reversibility_tables_agree_with_each_other():

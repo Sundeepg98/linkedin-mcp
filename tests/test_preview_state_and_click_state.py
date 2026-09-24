@@ -249,6 +249,15 @@ REACHED: dict[str, tuple[str, str, str]] = {
         COMPANY_PAGE_FOLLOW_MARKUP,
         COMPANY_PAGE_FOLLOW_ID,
     ),
+    # 2026-09-24 (census row ``P I14``, lane L7). A TRACKED capture: the OFF
+    # control is drawn in the About-the-company card of this posting, and the
+    # preview and the click read it through ONE verdict,
+    # ``company_interest.read_state``.
+    "mark_company_interest": (
+        "tests/fixtures/job_detail_hydrated.html",
+        markup("job_detail_hydrated"),
+        JOB,
+    ),
 }
 
 #: WHAT THIS INSTRUMENT CANNOT REACH, WITH THE REASON -- AND THE REASON IS NOT
@@ -480,8 +489,10 @@ def test_every_performable_action_is_either_reached_or_declared_unreachable():
     # currently unreachable -- which is why it is a table and not a deletion.
     # 12 -> 13 on 2026-09-23: ``follow_company_page`` shipped, and it is
     # reached over its own committed fixture rather than declared unreachable.
-    assert len(PERFORMABLE) == 13, sorted(PERFORMABLE)
-    assert len(REACHED) == 13, sorted(REACHED)
+    # 13 -> 14 on 2026-09-24 (lane L7's merge): ``mark_company_interest``
+    # shipped, reached over the tracked ``job_detail_hydrated`` capture.
+    assert len(PERFORMABLE) == 14, sorted(PERFORMABLE)
+    assert len(REACHED) == 14, sorted(REACHED)
     assert len(CANNOT_REACH) == 0, sorted(CANNOT_REACH)
 
 
