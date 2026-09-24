@@ -365,3 +365,133 @@ async def test_the_preview_reading_and_the_click_reading_agree(
         browser_page, spec, grant, dom.REACTION_OFF_LABEL
     )
     assert live_state == expected, (live_state, why)
+
+
+# ---------------------------------------------------------------------------
+# THE OTHER LABEL FAMILY, 2026-09-24. Nothing is fired: every world below is
+# a frozen string served by FixtureNavigator to a local page.
+# ---------------------------------------------------------------------------
+
+#: THE MEASURED "UNREACT" ON LABEL: his own liked post's permalink drew its one
+#: toggle as this in three captures, 2026-09-23 and 2026-09-24, and drew no
+#: "Reaction button state:" label at all -- so the state prefix counted ZERO
+#: controls there, and a reacted item read UNKNOWN, never "reacted".
+_UNREACT_ON_LABEL = dom.REACTION_UNREACT_PREFIX + "Like"
+_ONE_UNREACT = (
+    "<html><body>"
+    '<button aria-label="' + _UNREACT_ON_LABEL + '"></button>'
+    "</body></html>"
+)
+
+#: THE UNMEASURED OFF FORM the "Unreact" family implies. Counted; never aimed.
+_UNMEASURED_OFF_LABEL = dom.REACTION_REACT_PREFIX + "Like"
+_ONE_REACT_UNMEASURED = (
+    "<html><body>"
+    '<button aria-label="' + _UNMEASURED_OFF_LABEL + '"></button>'
+    "</body></html>"
+)
+assert _ONE_UNREACT.count("aria-label=") == _ONE_REACT_UNMEASURED.count("aria-label=") == 1
+assert dom.REACTION_STATE_PREFIX not in _ONE_UNREACT + _ONE_REACT_UNMEASURED, (
+    "these two worlds must draw NO state-family label, or they would pass "
+    "through the old reader and prove nothing about the new one"
+)
+
+
+async def test_a_target_reacted_in_the_unreact_family_is_refused_as_reacted(
+    writes_on, browser_page
+):
+    """SHOWN FAILING ON THE CODE BEFORE 2026-09-24, where this page read as
+    ZERO reaction controls -- a refusal, but for the wrong reason: 'unknown,
+    0 controls', a reacted item described as a page that had not arrived."""
+    with pytest.raises(WriteAttemptError) as caught:
+        await _preview_over(browser_page, {_item_url(): _ONE_UNREACT})
+    message = str(caught.value)
+    assert "'reacted'" in message, message
+    assert "ALREADY CARRIES A REACTION" in message, message
+    assert "0 reaction control(s)" not in message, message
+
+
+async def test_an_unmeasured_off_label_is_never_offered_as_no_reaction(
+    writes_on, browser_page
+):
+    """The toggle is OFF, in a family nobody has measured: the gate says so
+    and refuses, rather than aiming a click at an inferred label."""
+    with pytest.raises(WriteAttemptError) as caught:
+        await _preview_over(browser_page, {_item_url(): _ONE_REACT_UNMEASURED})
+    message = str(caught.value)
+    assert "unknown" in message, message
+    assert "never MEASURED" in message, message
+
+
+@pytest.mark.parametrize(
+    "html,expected",
+    [(_ONE_UNREACT, "reacted"), (_ONE_REACT_UNMEASURED, "unknown")],
+    ids=["unreact_on", "unmeasured_off"],
+)
+async def test_the_preview_and_the_click_agree_on_the_other_family(
+    writes_on, browser_page, html, expected
+):
+    """THE PARITY, over the two new worlds: the preview and _live_control read
+    one pure function, so they cannot disagree."""
+    spec = spec_for_action("react_to_item")
+    try:
+        block, _nav = await _preview_over(browser_page, {_item_url(): html})
+        block_state = block["direction"]["currently"]
+    except WriteAttemptError as exc:
+        block_state = "reacted" if "'reacted'" in str(exc) else "unknown"
+    assert block_state == expected, block_state
+
+    await browser_page.set_content(html, wait_until="domcontentloaded")
+    grant = writes.WriteGrant(
+        action="react_to_item", target=REACTED_ITEM,
+        token="not-a-minted-token", minted_at=0.0,
+    )
+    live_state, why, selector = await writes._live_control(
+        browser_page, spec, grant, dom.REACTION_OFF_LABEL
+    )
+    assert live_state == expected, (live_state, why)
+    assert selector == "", "no click target is offered off an ON or unmeasured label"
+
+
+async def test_a_reaction_that_lands_in_the_unreact_family_verifies_reacted(
+    writes_on, browser_page
+):
+    """THE VERIFICATION, end to end over frozen worlds, and nothing fired: the
+    click's url serves the measured OFF page to gate 5 and the "Unreact" ON
+    page to _verify_after's fresh render. Before 2026-09-24 the re-read
+    counted zero state-family controls and returned UNKNOWN -- a reaction
+    that landed would have been verified as nothing."""
+    from linkedin_server.writes import consume, preview as _preview
+    from tests.test_writes import _REACTION_OFF_PAGE
+
+    spec = spec_for_action("react_to_item")
+    item_url = spec.url_template.format(target=REACTED_ITEM)
+    block = await _preview(
+        spec, target=REACTED_ITEM,
+        navigator=FixtureNavigator({item_url: _REACTION_OFF_PAGE}),
+        page=browser_page,
+    )
+    grant = consume(block["to_confirm"], action="react_to_item", target=REACTED_ITEM)
+    perform_nav = FixtureNavigator({item_url: [_REACTION_OFF_PAGE, _ONE_UNREACT]})
+    block = await writes.perform(perform_nav, browser_page, grant)
+    assert block["clicked"]["selector"] == dom.reaction_control_selector()
+    assert block["verification"]["observed_state"] == "reacted", block["verification"]
+    assert block["verified"] is True
+    assert block["newly_observed_reaction_labels"] == [_UNREACT_ON_LABEL]
+
+
+def test_the_toggle_state_reader_on_every_world():
+    """The pure reader the three arms share, on each family's shapes."""
+    base = {"controls": 0, "off_state": 0, "unreact_controls": 0, "react_controls": 0}
+    cases = [
+        (dict(base, controls=1, off_state=1), ("no_reaction", 1)),
+        (dict(base, controls=1), ("reacted", 1)),
+        (dict(base, unreact_controls=1), ("reacted", 1)),
+        (dict(base, react_controls=1), ("unmeasured_off", 1)),
+        (dict(base), ("unknown", 0)),
+        (dict(base, controls=2, off_state=1), ("unknown", 2)),
+        (dict(base, unreact_controls=None), ("unknown", None)),
+        (None, ("unknown", None)),
+    ]
+    for reading, want in cases:
+        assert dom.reaction_toggle_state(reading) == want, (reading, want)

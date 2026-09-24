@@ -1455,3 +1455,57 @@ counts). Plus eight plants, each alone in a scratch copy, all red:
     A8 share_link's pre-trigger unread check removed               1
 
 Baseline and restored: 167 passed (`test_press` and `test_share_link`).
+
+### (b) REACT: the react write reads the other label family; nothing fired
+
+**THE DEFECT, stated from (a)'s correction rather than from the order's
+wording.** The order said the react write should "also aim at the permalink
+label ('Unreact Like')". It should not AIM there -- a reaction is made from
+the OFF state, and the OFF label the write aims at is the one measured on
+permalinks on 2026-08-31. What it could not do was READ the ON state in the
+other family: its three reading sites -- the preview's direction
+(`_read_item_permalink`), the click-time re-read (`_live_control`) and the
+verification after the click (`_verify_after`) -- counted only the state
+family's prefix, so his own reacted post, whose toggle reads "Unreact Like",
+counted ZERO controls: UNKNOWN at preview (a refusal for the wrong reason:
+"a page that had not arrived"), and a reaction that LANDED in that family
+would have been verified UNKNOWN. That item is very likely the one this
+write last reacted to (the spec records a reaction left on one of his items
+on 2026-09-03, and the post reads "1 reaction").
+
+**BUILT (offline, against frozen worlds; nothing fired, no grant issued):**
+one pure reader in `dom`, `reaction_toggle_state`, shared by all three sites
+so the preview and the click cannot read one page two ways: `reacted` when
+the one toggle wears an ON label in either family, `no_reaction` only on the
+state family's MEASURED OFF label (the only label a click is aimed at),
+`unmeasured_off` -- refused, never aimed -- on the "React" family's inferred
+OFF label, and `unknown` for anything but exactly one toggle. The
+verification treats either OFF family as not reacted. `read_reaction_surface`
+reports the other family's names in `labels` too, so the receipt's
+`newly_observed_reaction_labels` carries "Unreact Like" after such a
+reaction. The spec's residue and two comments that still said the ON label
+had never been observed are corrected.
+
+**A SIBLING LANE'S TEST, re-aimed rather than deleted.** Lane L4's
+`test_a_string_count_no_longer_carries_itself_out_of_live_control` proved
+its repair by planting a bare `int()` in `coerce.as_count` and expecting the
+page's string to escape in a ValueError. The react arm no longer calls
+`coerce.as_count`: its counts are type-checked inside
+`dom.reaction_toggle_counts` (a string count makes the state `unknown`). The
+property the test asserts first -- the string does not escape -- still
+holds; its control now plants the naive `int()` counter where the
+protection lives. Nothing was loosened: the control still goes red.
+
+**RED-PROOFS, each plant alone in a scratch copy of the package:**
+
+    plant                                                           red
+    B1 the preview reads the state family only                       3
+    B2 the click reads the state family only                         1
+    B3 the verification reads the state family only                  1
+    B4 an unmeasured OFF label treated as the measured one           3
+    B5 the other family's names left out of the labels               1
+
+Baseline and restored: 14 passed (`test_react_direction_is_read_where_it_
+acts`, six of them new). The write suites, the follow-page tests, the
+page-string guards and the corpus guards: 2185 passed with the one sibling
+test red before its re-aim, then 54 passed on the two files it touches.

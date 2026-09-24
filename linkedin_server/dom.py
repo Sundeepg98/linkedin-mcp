@@ -7908,6 +7908,39 @@ def reaction_toggle_counts(reading: Any) -> dict[str, Optional[int]]:
     }
 
 
+#: The four states :func:`reaction_toggle_state` can answer. ``unmeasured_off``
+#: is its own answer, not ``no_reaction``: the toggle is OFF, and it wears a
+#: label this repository has never measured, so a write may not aim at it.
+TOGGLE_STATES = ("reacted", "no_reaction", "unmeasured_off", "unknown")
+
+
+def reaction_toggle_state(reading: Any) -> tuple[str, Optional[int]]:
+    """The state of the ONE reaction toggle a single-item page draws, and how
+    many toggles it drew. PURE, over one :func:`read_reaction_surface` reading.
+
+    ``unknown`` when the counts did not read, or when the page drew other than
+    exactly one toggle (0 is a page that had not arrived -- absent is not off;
+    more than one is not the single-item render). Otherwise ``reacted`` when
+    the one toggle wears an ON label in EITHER family, ``no_reaction`` when it
+    wears the state family's MEASURED OFF label -- the only label a write aims
+    a click at -- and ``unmeasured_off`` when it wears the unmeasured "React"
+    family's OFF label. The second element is the toggle count, None when it
+    did not read.
+    """
+    counts = reaction_toggle_counts(reading)
+    toggles_off, toggles_on = counts["toggles_off"], counts["toggles_on"]
+    if toggles_off is None or toggles_on is None:
+        return "unknown", None
+    drawn = toggles_off + toggles_on
+    if drawn != 1:
+        return "unknown", drawn
+    if toggles_on == 1:
+        return "reacted", drawn
+    if reading.get("off_state") == 1:
+        return "no_reaction", drawn
+    return "unmeasured_off", drawn
+
+
 async def read_reaction_surface(page: Any) -> dict[str, Any]:
     """The reaction and comment controls on this page, and the states worn.
 
@@ -7970,6 +8003,25 @@ async def read_reaction_surface(page: Any) -> dict[str, Any]:
         shaped = shape.census_shape(str(label or "").strip())
         if shaped:
             seen.add(shaped)
+    # THE OTHER FAMILY'S NAMES TOO, shaped the same way: a toggle wearing
+    # "Unreact Like" is a reaction control whose name belongs in the same
+    # list, or the list claims to be complete while missing the state.
+    for key, prefix in (
+        ("unreact_controls", REACTION_UNREACT_PREFIX),
+        ("react_controls", REACTION_REACT_PREFIX),
+    ):
+        drawn = out.get(key)
+        if not isinstance(drawn, int) or isinstance(drawn, bool):
+            continue
+        family = page.locator('button[aria-label^="' + prefix + '"]')
+        for index in range(min(drawn, CENSUS_MAX_CONTROLS)):
+            try:
+                label = await family.nth(index).get_attribute("aria-label")
+            except Exception:  # noqa: BLE001 - a measurement, not a gate
+                continue
+            shaped = shape.census_shape(str(label or "").strip())
+            if shaped:
+                seen.add(shaped)
     out["labels"] = sorted(seen)
     return out
 
