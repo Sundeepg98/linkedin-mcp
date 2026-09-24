@@ -7753,7 +7753,10 @@ async def read_thread_reply_surface(page: Any) -> dict[str, Any]:
     * ``recipient_boxes`` -- **EXPECTED TO BE ZERO, AND THE ZERO IS THE
       POINT.** A thread has nobody to choose, so a recipient combobox here
       would mean this is not the surface it looks like. It is the one field
-      whose non-zero reading would refute the whole approach.
+      whose non-zero reading would refute the whole approach -- and until
+      2026-09-24 it could not produce one on the real composer: it counted
+      an aria-label the measured box does not carry. It now counts the box
+      the send gate types into, by role and accessible name.
 
     NOTHING IS ASSERTED FROM A PREVIOUS RUN. Every number is taken afresh, and
     a caller that gets zeroes everywhere is looking at a page this reader
@@ -7832,10 +7835,17 @@ async def read_thread_reply_surface(page: Any) -> dict[str, Any]:
         out["text_inputs"] = int(
             await page.locator('input[type="text"]').count()
         )
+        # BY ROLE AND ACCESSIBLE NAME, the selector the send gate types a
+        # recipient into -- NOT ``[aria-label=...]``, which is what this
+        # counted until 2026-09-24. The measured box is named by a
+        # ``<label for>``: on the 2026-09-20 composer capture the role-and-name
+        # selector finds 1 and the aria-label selector 0, so this reader read
+        # the COMPOSER as a conversation -- the one confusion the field exists
+        # to refute -- while its own control, planted with an aria-label,
+        # passed. And NOT ``[role=combobox]`` alone: LinkedIn's global search
+        # is a combobox on every page. See tests/test_thread_reply_surface.py.
         out["recipient_boxes"] = int(
-            await page.locator(
-                '[aria-label="' + MESSAGE_RECIPIENT_LABEL + '"]'
-            ).count()
+            await page.locator(compose_recipient_selector()).count()
         )
         send = page.locator(compose_send_selector())
         out["send_controls"] = int(await send.count())

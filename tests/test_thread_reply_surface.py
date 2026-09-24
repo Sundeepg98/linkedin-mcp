@@ -88,6 +88,35 @@ COMPOSER = _page(
     f"<button disabled>{SEND}</button>"
 )
 
+#: THE COMPOSER IN ITS MEASURED SHAPE, 2026-09-24. On the 2026-09-20 capture
+#: of /messaging/compose/ the recipient box carries NO aria-label: it is an
+#: ``input.msg-connections-typeahead__search-field`` inside LinkedIn's
+#: typeahead, NAMED BY A ``<label for>`` whose text is
+#: ``dom.MESSAGE_RECIPIENT_LABEL``. ``COMPOSER`` above names it by an
+#: aria-label no capture holds -- which is how this reader counted zero on
+#: the real composer while its own control passed. Measured on that capture:
+#: ``dom.compose_recipient_selector()`` (the role and the accessible name)
+#: finds 1, the aria-label selector 0. The label text is LinkedIn's UI
+#: string, not member data.
+COMPOSER_MEASURED = _page(
+    '<div class="msg-connections-typeahead">'
+    f'<label for="recipient-box">{RECIPIENT_LABEL}</label>'
+    '<input id="recipient-box" class="msg-connections-typeahead__search-field" '
+    'role="combobox" type="text"></div>'
+    '<div contenteditable="true" role="textbox"></div>'
+    f"<button disabled>{SEND}</button>"
+)
+
+#: A CONVERSATION WITH THE CHROME EVERY PAGE DRAWS. LinkedIn's global search
+#: input is a ``role=combobox`` on every page (measured on both messaging
+#: captures), named "Search". It chooses nobody and must not be counted.
+THREAD_WITH_GLOBAL_SEARCH = _page(
+    '<input class="search-global-typeahead__input" role="combobox" '
+    'aria-label="Search" type="text">'
+    '<div contenteditable="true" role="textbox"></div>'
+    f'<button disabled>{SEND}</button>'
+)
+
 #: TWO SENDS. Which one is disabled is not a question this reader may answer.
 TWO_SENDS = _page(
     '<div role="textbox"></div>'
@@ -140,6 +169,35 @@ async def test_the_reader_can_tell_a_composer_from_a_thread():
     """
     reading = await _read(COMPOSER)
     assert reading["recipient_boxes"] == 1, reading
+
+
+@pytest.mark.asyncio
+async def test_the_composer_is_counted_in_the_shape_it_was_measured_in():
+    """THE CONTROL ABOVE PASSED ON A SHAPE NO CAPTURE HOLDS.
+
+    ``COMPOSER`` names its recipient box by aria-label, and the reader
+    counted aria-labels -- so the control and the reader agreed with each
+    other and not with LinkedIn. The real box is named by a ``<label
+    for>``, and on it the old reader read ZERO: the composer looked exactly
+    like a conversation, which is the one confusion this field exists to
+    refute. Written red first, 2026-09-24, before the reader changed.
+    """
+    reading = await _read(COMPOSER_MEASURED)
+    assert reading["recipient_boxes"] == 1, reading
+
+
+@pytest.mark.asyncio
+async def test_the_global_search_combobox_is_not_a_recipient_box():
+    """THE FIX MUST NOT OVERSHOOT INTO THE PAGE CHROME.
+
+    Counting every ``role=combobox`` would repair the composer and break
+    every conversation, because LinkedIn's global search is one on every
+    page -- the defect ``threads.RECIPIENT_BOX_SELECTOR`` shipped with and
+    lost (lane L5 record, section 3.3). A conversation with the search box
+    drawn still offers nobody to choose.
+    """
+    reading = await _read(THREAD_WITH_GLOBAL_SEARCH)
+    assert reading["recipient_boxes"] == 0, reading
 
 
 # ---------------------------------------------------------------------------
