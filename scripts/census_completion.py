@@ -996,8 +996,17 @@ PINNED = {
     #: No row entered or left bucket 3 and no state moved; `M C70` stays
     #: REFUSED on its content-vertical address, its groups spelling now an
     #: admitted also-driven line.
-    "b3_admitted": 43,
-    "b3_refused": 35,
+    #: 49 / 29 / 1 / 13 / 2 SINCE ITEM 2 OF THE SAME FOLLOW-UP: THE BOUNDARY
+    #: MOVED AGAIN. `MEMBER-ROSTERS-AS-BOUNDED-READS` put four rosters on lines
+    #: of their own, and the six rows whose recorded page is one of them went
+    #: REFUSED -> ADMITTED, each gated MEASURE: `N 165` and `N 177` (a group's
+    #: members), `N 188` (an event's attendees), `N 102` (a company's People
+    #: tab), `N 99` and `N 100` (a school's). `N 189` stays REFUSED on its
+    #: filtered spelling -- the roster line takes no query -- and `N 178` on
+    #: its third-party profile. No row entered or left bucket 3; no state
+    #: moved.
+    "b3_admitted": 49,
+    "b3_refused": 29,
     "b3_no_address": 1,
     "b3_needs_session": 13,
     "b3_undetermined": 2,
@@ -1092,12 +1101,18 @@ PINNED = {
     #: a line -- directions R 7, W 28, R+W 3 (so 33 / 53 / 6), and of the ten
     #: with a read half ADMITTED 2 (`J 17`, `J 115`), REFUSED 7, NEEDS-SESSION
     #: 1 (`J 134`). 11 + 26 + 0 + 2 + 0 = 39 = 33 + 6.
+    #: 13 / 24 SINCE LANE S'S FOLLOW-UP, ITEM 2 (2026-09-24): THE BOUNDARY
+    #: MOVED. `MEMBER-ROSTERS-AS-BOUNDED-READS` put the company and school
+    #: People tabs on lines of their own, and the two jobs rows whose recorded
+    #: page is one of them went REFUSED -> ADMITTED, gated MEASURE: `J 108`
+    #: (the company People tab) and `J 112` (a school's alumni tab). No row
+    #: left the table and no state moved. 13 + 24 + 0 + 2 + 0 = 39.
     "jobs_gap": 92,
     "jobs_dir_r": 33,
     "jobs_dir_w": 53,
     "jobs_dir_rw": 6,
-    "jobs_admitted": 11,
-    "jobs_refused": 26,
+    "jobs_admitted": 13,
+    "jobs_refused": 24,
     "jobs_no_address": 0,
     "jobs_needs_session": 2,
     "jobs_undetermined": 0,

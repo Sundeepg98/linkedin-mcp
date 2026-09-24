@@ -120,6 +120,18 @@ DELIBERATELY_UNWIRED: dict[str, str] = {
         "first tool that imports this module brings its reader with it, and "
         "this entry is deleted in that commit. NOT PERMANENT."
     ),
+    "member_rosters": (
+        "A CAPABILITY HELD ON A WRITTEN CONDITION, ruled by its author "
+        "2026-09-24 (lane S follow-up, item 2). It composes ONE page of a "
+        "group's members, an event's attendees or a company's or school's "
+        "People tab from a caller-supplied numeric id -- the four rosters "
+        "MEMBER-ROSTERS-AS-BOUNDED-READS admitted -- and it is unwired because "
+        "readers here are built against captures only and no roster page has "
+        "been captured (specs in _audit/2026-09-24-lane-s-people-search.md, "
+        "section F). A roster is a list of people, so the reader that wires "
+        "it owes the name-free shaper doctrine a shaper in the same commit, "
+        "and this entry is deleted then. NOT PERMANENT."
+    ),
 }
 
 # THE search_results ENTRY WAS DELETED 2026-09-20, ON ITS OWN INSTRUCTION.

@@ -30,6 +30,13 @@ denylist holds ``/create`` and LinkedIn does not spell Page creation with it.
 They are refused by the allowlist anchor and by nothing else, which is
 asserted below and is the sharpest thing this file has to say.
 
+**AMENDED 2026-09-24: THE FIRST OF THOSE CLASSES IS ADMITTED NOW, BY ITS OWN
+LINE.** ``MEMBER-ROSTERS-AS-BOUNDED-READS`` admitted ``/company/<x>/people/``
+-- slug and number, no query -- on a roster line of its own, because the
+2026-09-05 refusal was an argument and not a ruling. This file's root entry
+still refuses it, and that is asserted; the query spelling, a roster's second
+page, stays refused by both. The two write classes are unchanged.
+
 ## AND THREE CHARACTER-CLASS MUTATIONS, EACH SHOWN OPENING SOMETHING
 
 A guard that has only ever passed certifies nothing, so this file plants the
@@ -67,12 +74,27 @@ WRITE_SURFACES = (
     f"{BASE}/company/{SLUG}/admin/dashboard/",
 )
 
-#: THE MEMBER ROSTER, in both spellings. Out of scope BY NAME.
+#: THE MEMBER ROSTER. **UNTIL 2026-09-24 ALL THREE SPELLINGS STOOD HERE, "Out
+#: of scope BY NAME".** `MEMBER-ROSTERS-AS-BOUNDED-READS` then admitted the
+#: People tab on its OWN line -- slug and number, no query -- because the
+#: 2026-09-05 refusal was an argument and not a ruling
+#: (`D3-UNREGISTERED-REFUSAL-IS-NOT-A-RULING`). The two bare spellings moved
+#: to `ROSTERS_ADMITTED_BY_THEIR_OWN_LINE`; the query spelling stays here,
+#: refused by that line too, because a roster read is one page and a query is
+#: where a second one would be asked for.
 ROSTERS = (
-    f"{BASE}/company/{SLUG}/people/",
-    f"{BASE}/company/{IDENTIFIER}/people/",
     f"{BASE}/company/{SLUG}/people/?keywords=x",
 )
+
+#: The People tab in both spellings, admitted 2026-09-24 by the roster line
+#: and never by this file's root entry. Asserted below exactly that way.
+ROSTERS_ADMITTED_BY_THEIR_OWN_LINE = (
+    f"{BASE}/company/{SLUG}/people/",
+    f"{BASE}/company/{IDENTIFIER}/people/",
+)
+
+#: This file's entry, by its text: the ROOT, one segment deep.
+ROOT_PATTERN = r"^https://www\.linkedin\.com/company/[A-Za-z0-9%\-_]{1,100}/?$"
 
 #: What the entry DELIBERATELY DID NOT BUY. Each is a real neighbour of the
 #: admitted address -- the tabs are drawn by the Page itself, the traversals
@@ -149,9 +171,12 @@ def _with(mutation: re.Pattern[str]) -> tuple:
     a smaller blast radius than it has. That is not hypothetical: the probe
     this file's numbers come from made exactly that mistake on its first run.
     """
+    # BY ITS EXACT TEXT since 2026-09-24: a second `/company/` line -- the
+    # People-tab roster line -- now shares the prefix this used to match on,
+    # and removing both would measure every mutation against a baseline the
+    # boundary does not have.
     kept = tuple(
-        p for p in readonly._ALLOWED_URL_PATTERNS
-        if not p.pattern.startswith("^https://www\\.linkedin\\.com/company/")
+        p for p in readonly._ALLOWED_URL_PATTERNS if p.pattern != ROOT_PATTERN
     )
     assert len(kept) == len(readonly._ALLOWED_URL_PATTERNS) - 1, (
         "this wave's entry was not found on the roster, so every measurement "
@@ -242,18 +267,34 @@ def test_the_neighbours_stay_refused(url):
     assert readonly.is_read_url(url) is False, url
 
 
-@pytest.mark.parametrize("url", WRITE_SURFACES + ROSTERS[:2])
+@pytest.mark.parametrize("url", WRITE_SURFACES)
 def test_the_dangerous_neighbours_are_refused_by_this_anchor_and_nothing_else(
     url,
 ):
-    """**THE SHARPEST ASSERTION IN THIS FILE.** Page creation, Page
-    administration and the member roster carry NO forbidden substring -- the
-    denylist has ``/create`` and LinkedIn does not spell Page creation with
-    it. So the count of gates refusing each is ONE, and that one is the
-    anchor. A future widening of this entry has nothing behind it."""
+    """**THE SHARPEST ASSERTION IN THIS FILE.** Page creation and Page
+    administration carry NO forbidden substring -- the denylist has
+    ``/create`` and LinkedIn does not spell Page creation with it. So the
+    count of gates refusing each is ONE, and that one is the anchor. A future
+    widening of this entry has nothing behind it.
+
+    The member roster was the third class here until 2026-09-24; it is
+    admitted now, by its own line -- see the test below."""
     assert _forbidden_hits(url) == [], url
     assert _matching_patterns(url) == [], url
     assert readonly.is_read_url(url) is False, url
+
+
+@pytest.mark.parametrize("url", ROSTERS_ADMITTED_BY_THEIR_OWN_LINE)
+def test_the_people_tab_is_admitted_by_its_own_line_and_not_by_this_one(url):
+    """INVERTED 2026-09-24 from the roster half of the test above. Still no
+    forbidden substring; exactly one line admits it, and that line is the
+    roster's -- never this file's root entry, which still refuses it."""
+    assert _forbidden_hits(url) == [], url
+    patterns = _matching_patterns(url)
+    assert len(patterns) == 1 and patterns[0] != ROOT_PATTERN, patterns
+    assert patterns[0].endswith("/people/?$"), patterns
+    assert not re.match(ROOT_PATTERN, url)
+    assert readonly.is_read_url(url) is True
 
 
 def test_a_slug_carrying_a_forbidden_substring_refuses_at_gate_one():
@@ -310,11 +351,18 @@ def test_the_family_pattern_admits_page_creation_and_page_administration():
 
 
 def test_the_family_pattern_admits_the_member_roster_and_two_traversals():
-    """SHOWN FIRING, on the two classes the anchor exists to refuse."""
+    """SHOWN FIRING, on the classes the anchor exists to refuse.
+
+    **THE NAME IS KEPT; THE ROSTER HALF IS NOW A QUERY.** The two bare
+    People-tab spellings were here until 2026-09-24, when their own roster
+    line admitted them, so a family pattern opening them measures nothing.
+    What the family pattern still opens that the boundary refuses is the
+    roster WITH A QUERY -- the second page a roster read must never ask
+    for -- and the two traversals."""
     roster = _with(_FAMILY_MUTATION)
     for url in (
-        f"{BASE}/company/{SLUG}/people/",
-        f"{BASE}/company/{IDENTIFIER}/people/",
+        f"{BASE}/company/{SLUG}/people/?keywords=x",
+        f"{BASE}/company/{IDENTIFIER}/people/?page=2",
         f"{BASE}/company/{SLUG}/../../mypreferences/d/close-account",
         f"{BASE}/company/{SLUG}/../../in/someone-else/",
     ):
@@ -381,8 +429,12 @@ def test_the_refusal_still_names_the_url_it_refused():
     the url STAYS in the refusal, because a navigation refusal that will not
     name what it refused makes every boundary bug harder to find. This test
     exists so the entry's argument above is anchored to real behaviour rather
-    than to a remembered one."""
-    blocked = f"{BASE}/company/{SLUG}/people/"
+    than to a remembered one.
+
+    The People tab was the address here until 2026-09-24, when its roster
+    line admitted it; the About tab, still refused by this anchor alone,
+    stands in."""
+    blocked = f"{BASE}/company/{SLUG}/about/"
     with pytest.raises(Exception) as caught:
         readonly.assert_read_url(blocked)
     assert blocked in str(caught.value)

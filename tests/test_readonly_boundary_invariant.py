@@ -1242,6 +1242,28 @@ PINNED = (
 #: so nothing else rode in. Seven of eight digests byte-identical;
 #: `<functions>` unmoved, so `assert_read_url` did not change.
 #: ------------------------------------------------------------------------
+#: RE-FROZEN AGAIN 2026-09-24 (lane S follow-up, item 2), ONE DIGEST MOVED BY
+#: FOUR NEW TUPLE ENTRIES -- MEMBER ROSTERS AS BOUNDED READS, on
+#: `MEMBER-ROSTERS-AS-BOUNDED-READS`:
+#:
+#:     _ALLOWED_URL_PATTERNS   d7b3315318c877d0 -> a13f66bebba387cd   49 -> 53
+#:     every other table       unchanged
+#:
+#:     ^https://www\.linkedin\.com/groups/[0-9]{1,20}/members/?$
+#:     ^https://www\.linkedin\.com/events/[0-9]{1,20}/attendees/?$
+#:     ^https://www\.linkedin\.com/company/[A-Za-z0-9%\-_]{1,100}/people/?$
+#:     ^https://www\.linkedin\.com/school/[A-Za-z0-9%\-_]{1,100}/people/?$
+#:
+#: Their blast radius was measured before they landed with
+#: `blast_radius.newly_admitted` over 197 addresses (+2, +2, +4, +4, nothing
+#: else) and is pinned per line in `tests/test_member_rosters.py`, which also
+#: holds a test for each of the ruling's conditions. ATTRIBUTION: the tree
+#: minus exactly these four lines hashes to d7b3315318c877d0 on the allowlist
+#: key and to the prior pin on all eight. Controls: a needle no line carries
+#: removes nothing and moves nothing, and dropping the pre-existing
+#: `/groups/discover/` line instead lands on 1018aafe63a9f35c. Seven of eight
+#: digests byte-identical; `<functions>` unmoved.
+#: ------------------------------------------------------------------------
 READONLY_AST_AT_LAST_REFREEZE = {
     "<functions>": "d7e1d0922e3af446",
     "JS_MUTATION_TOKENS": "d47e30b67c583c1b",
@@ -1392,7 +1414,10 @@ READONLY_AST_AT_LAST_REFREEZE = {
     # c37e98f84ee443f2 until 2026-09-24 (lane S follow-up): the people-only
     # search line widened to four closed words on D2-SEARCH-VERTICALS-WIDENED.
     # One entry edited, none added. See that ledger entry.
-    "_ALLOWED_URL_PATTERNS": "d7b3315318c877d0",
+    #
+    # d7b3315318c877d0 until item 2 of the same follow-up: four roster lines
+    # on MEMBER-ROSTERS-AS-BOUNDED-READS, 49 -> 53. See that ledger entry.
+    "_ALLOWED_URL_PATTERNS": "a13f66bebba387cd",
     "_FORBIDDEN_SUBSTRING_EXEMPTIONS": "43e2bf7f3db0dbed",
     # 419e64a3cd92ec7e until the same REVIEW: commit: a third entry, excusing
     # exactly {"/follow"} for exactly the anchored follower-list address.

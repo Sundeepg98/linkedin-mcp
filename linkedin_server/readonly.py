@@ -753,6 +753,12 @@ _ALLOWED_URL_PATTERNS: tuple[re.Pattern[str], ...] = (
     # not by this one. The list above says what THIS root does not inherit,
     # and that is unchanged.
     #
+    # AND ``/groups/<id>/members/`` IS ADMITTED TOO, 2026-09-24, by the roster
+    # entries at the end of this tuple, on `MEMBER-ROSTERS-AS-BOUNDED-READS`:
+    # the refusal above was an argument, not a ruling
+    # (`D3-UNREGISTERED-REFUSAL-IS-NOT-A-RULING`), and that ruling weighed it
+    # the other way. The requests queue stays refused.
+    #
     # ``/groups/<id>/invite/`` IS REFUSED TWICE AND THAT IS WORTH KNOWING
     # RATHER THAN DISCOVERING. It contains ``/invite``, which is on
     # :data:`_FORBIDDEN_URL_SUBSTRINGS` and checked BEFORE this list, AND it
@@ -835,6 +841,11 @@ _ALLOWED_URL_PATTERNS: tuple[re.Pattern[str], ...] = (
     #                              have: measured today on a sibling surface,
     #                              an ``.*`` anchored at BOTH ends admitted 18
     #                              addresses, identical to the bare wildcard.
+    #
+    # AMENDED 2026-09-24, COMMENT ONLY: THE MEMBER ROSTER AT THE TOP OF THAT
+    # LIST IS ADMITTED NOW -- by its own line at the end of this tuple, on
+    # `MEMBER-ROSTERS-AS-BOUNDED-READS`, and not by this one. This line still
+    # refuses it, and the rest of the list stands.
     #
     # CONDITION 4 -- NOTHING IS FIRED, AND NOTHING HERE FIRES ANYTHING. This
     # entry opens two addresses. It builds no tool, and **no tool in this
@@ -942,6 +953,12 @@ _ALLOWED_URL_PATTERNS: tuple[re.Pattern[str], ...] = (
     # AMENDED 2026-09-24, COMMENT ONLY: ``/search/results/events/`` IS NOW
     # ADMITTED -- by the search entry, on `D2-SEARCH-VERTICALS-WIDENED`, and
     # not by this one. What THIS root does not inherit is unchanged.
+    #
+    # AND THE ATTENDEE LIST, ``/events/<id>/attendees/``, IS ADMITTED BY ITS
+    # OWN LINE at the end of this tuple, on `MEMBER-ROSTERS-AS-BOUNDED-READS`;
+    # the "same ruling" named above was an argument and not a ruling
+    # (`D3-UNREGISTERED-REFUSAL-IS-NOT-A-RULING`). Its filtered spellings --
+    # any query -- stay refused.
     re.compile(r"^https://www\.linkedin\.com/events/?$"),
     # THE INTRO EDITOR ON HIS OWN PROFILE. Added 2026-08-31 on the operator's
     # ruling: the profile editors are his own profile, no third party, and
@@ -1452,6 +1469,12 @@ _ALLOWED_URL_PATTERNS: tuple[re.Pattern[str], ...] = (
     # cause could start to apply again. It is refused, and it is refused by
     # this anchor rather than by a promise.
     #
+    # AMENDED 2026-09-24, COMMENT ONLY: ``/people/`` IS ADMITTED NOW -- by its
+    # own line at the end of this tuple, on `MEMBER-ROSTERS-AS-BOUNDED-READS`,
+    # and this anchor still refuses it. The member-profile cause does not
+    # apply to the tab itself: a roster lists members, and no member's
+    # profile loads when it does.
+    #
     # A DOT IS DELIBERATELY OUTSIDE THE CHARACTER CLASS. A slug containing
     # ``.`` is a real, if uncommon, spelling, and admitting it would also
     # admit a segment of ``..`` -- which the browser normalises AWAY,
@@ -1623,6 +1646,12 @@ _ALLOWED_URL_PATTERNS: tuple[re.Pattern[str], ...] = (
     # line is STEPPED OVER inside the page, counted, and never assembled into
     # a string this process holds. ``/company/<x>/people/``, the roster that
     # would name them, is refused by this list exactly as it was.
+    #
+    # AMENDED 2026-09-24, COMMENT ONLY: THAT ROSTER IS ADMITTED NOW -- by its
+    # own line at the end of this tuple, on `MEMBER-ROSTERS-AS-BOUNDED-READS`,
+    # and not by this one, which still refuses it. The sentence above was
+    # true when written. Whatever reader lands for the People tab owes it the
+    # strictness spent here: a count, never a list.
     re.compile(r"^https://www\.linkedin\.com/company/[A-Za-z0-9%\-_]{1,100}/?$"),
     # THE RECOMMENDED JOB COLLECTION, ONE NAMED ADDRESS. Admitted
     # 2026-09-05, census row 75 ``JOB-COLLECTIONS-SURFACE``, on the same
@@ -2170,7 +2199,9 @@ _ALLOWED_URL_PATTERNS: tuple[re.Pattern[str], ...] = (
     #      `/events/12345678/`), nothing else. An `/events/.*` family admits
     #      12, including the ATTENDEE ROSTER -- N 188, out of scope by the
     #      ruling that put N 165 out of scope -- and a traversal onto a member
-    #      profile.
+    #      profile. [AMENDED 2026-09-24, COMMENT ONLY: the attendee roster is
+    #      admitted since, by its own line at the end of this tuple, on
+    #      MEMBER-ROSTERS-AS-BOUNDED-READS; this line still does not reach it.]
     #   4. NOTHING IS FIRED: no attend, no share, no invite; `/events/<id>/
     #      invite/` stays refused twice (`/invite` first). NO READER SHIPS WITH
     #      IT: no event page has ever been captured, so the first load belongs
@@ -2184,6 +2215,75 @@ _ALLOWED_URL_PATTERNS: tuple[re.Pattern[str], ...] = (
     # nothing in this repository says it records who viewed it. The first load
     # brackets the invitation badge.
     re.compile(r"^https://www\.linkedin\.com/events/[0-9]{1,20}/?$"),
+    # ======================================================================
+    # MEMBER ROSTERS AS BOUNDED READS, admitted 2026-09-24 (lane S follow-up)
+    # on `MEMBER-ROSTERS-AS-BOUNDED-READS` (the orchestrator's delegated call,
+    # `_audit/2026-09-24-rulings-search-verticals-rosters-passive-costs.md`).
+    # FOUR LINES, ONE PER ROSTER: a group's members (N 165, N 177), an event's
+    # attendees (N 188, N 189), a company's People tab (J 108, N 102) and a
+    # school's (N 99, N 100, J 112).
+    #
+    # WHAT THIS REVERSES, AND WHOSE CALL IT IS. Every entry above that names
+    # one of these addresses -- the groups root and id entries, the events
+    # root and id entries, the school entry and the company entry -- carries a
+    # 2026-09-05 refusal: "a list of people who did not choose to be
+    # enumerated by him". `D3-UNREGISTERED-REFUSAL-IS-NOT-A-RULING` made that
+    # refusal a question with its argument recorded, and the roster ruling
+    # answers it the other way: the census asks what he can do on LinkedIn
+    # directly, he can open each of these lists himself, and what keeps a
+    # roster read at the scale of one person browsing is carried by the CODE
+    # -- one page, a caller-supplied id, the live budget -- not by refusing the
+    # address. Each of those entries now carries a dated comment-only
+    # amendment pointing here; their refusal text is left standing as written.
+    #
+    # THE FIVE CONDITIONS, AND WHERE EACH IS CARRIED.
+    #   1  ONE PAGE PER CALL, NO AUTOMATIC PAGINATION. No line below takes a
+    #      query or a deeper path, so `?page=2`, `?start=25`, every filter
+    #      spelling and `/page/2/` are refused HERE, before any browser sees
+    #      them; a roster's further rows arrive by scrolling or a "show more"
+    #      press, and `SCROLL-NOT-SANCTIONED` stands. A planted paginator is
+    #      refused at its second step (`tests/test_member_rosters.py`).
+    #   2  THE ID FROM THE TOOL'S ARGUMENTS ONLY. `member_rosters.compose` is
+    #      the only place this package assembles a roster address, from an id
+    #      it is handed, the numeric form only; the navigation-derivation guard
+    #      covers it like every module.
+    #   3  NO MEMBER'S NAME OR ID IN A TRACKED FILE. The composer writes
+    #      nothing; a capture goes to the gitignored `_state/`.
+    #   4  INSIDE THE LIVE BUDGET. One call is one load, counted against the
+    #      forty of `LIVE-BUDGET-40-LOADS`.
+    #   5  THE ROWS BECOME GAP, BLOCKED ON A READER. No reader ships with these
+    #      lines: no roster page has ever been captured, and readers here are
+    #      built against captures only. Nothing in the package imports the
+    #      composer yet.
+    #
+    # THE SPELLINGS. Groups and events: the closed numeric segment their id
+    # entries use, `[0-9]{1,20}`, and nothing else -- a slug is a name, and an
+    # event's slug is its title. Company and school: the root entries'
+    # character class, slug AND number, because LinkedIn DRAWS the People tab
+    # by slug (measured by shape on two captures in `_state/`: the company root
+    # and a school page each draw it twice, the school page under `/company/`)
+    # and serves a numeric organisation address by redirecting to the slug --
+    # the `/company/` entry's argument, which applies here unchanged. The
+    # composer assembles the numeric form only.
+    #
+    # THE BLAST RADIUS, MEASURED BEFORE THESE LANDED with the shipped
+    # `blast_radius.newly_admitted` over a 197-address corpus (its own 67 plus
+    # 130 roster-family spellings), each candidate against the 49 patterns
+    # then on disk: groups +2 and events +2 (the target with and without the
+    # slash), company +4 and school +4 (slug and number, each both ways) -- 12
+    # in all, and no page spelling, no query, no deeper path, no traversal, no
+    # dotted segment, no over-long run and no non-ASCII digit. The control: a
+    # `/groups/<id>/.*` family admits 23 over the same corpus.
+    #
+    # NOTHING IS FIRED. A roster page may draw a connect, follow or message
+    # control beside each member; pressing one is a write with its own row
+    # and its own ruling, and nothing here reaches it. This list decides what
+    # may be OPENED; whatever reader lands owes the name-free shaper doctrine
+    # (`_audit/2026-09-05-lead-rulings-round-two.md`) what may be SAID.
+    re.compile(r"^https://www\.linkedin\.com/groups/[0-9]{1,20}/members/?$"),
+    re.compile(r"^https://www\.linkedin\.com/events/[0-9]{1,20}/attendees/?$"),
+    re.compile(r"^https://www\.linkedin\.com/company/[A-Za-z0-9%\-_]{1,100}/people/?$"),
+    re.compile(r"^https://www\.linkedin\.com/school/[A-Za-z0-9%\-_]{1,100}/people/?$"),
 )
 
 #: Substrings that must never appear in a navigation target, checked before

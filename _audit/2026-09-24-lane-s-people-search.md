@@ -797,6 +797,123 @@ no STATE moved. `census_completion` pins `b3_admitted 40 -> 43`,
 `b3_refused 38 -> 35`, re-pinned in the same commit with the reason. The
 triage's three D2 annotations now say the address is on the boundary.
 
+**TWO GUARDS WENT RED ON THE ITEM-1 COMMIT, AND A SECOND COMMIT FIXED THEM**
+(3824 passed and 2 failed over the 18 always-run guards and the touched
+files). `tests/test_ci_shard.py`: the committed timings priced 157 of
+236 live test files, under its two-thirds line, because one test file was
+new; that file is priced from a serial run of it alone, under a new
+`_amended` provenance key, rather than by a full local run. And the
+correction guard: `M C70`'s cell now cites this record two lines from the
+cell's own 2026-09-21 correction vocabulary, triaged NOT_A_CORRECTION with
+the line read.
+
+### C. Item 2 -- member rosters as bounded reads
+
+**THE FOUR LINES**, at the end of `readonly._ALLOWED_URL_PATTERNS`, one per
+roster `MEMBER-ROSTERS-AS-BOUNDED-READS` names:
+
+    ^https://www\.linkedin\.com/groups/[0-9]{1,20}/members/?$                  N 165, N 177
+    ^https://www\.linkedin\.com/events/[0-9]{1,20}/attendees/?$                N 188 (N 189 filtered)
+    ^https://www\.linkedin\.com/company/[A-Za-z0-9%\-_]{1,100}/people/?$       N 102, J 108
+    ^https://www\.linkedin\.com/school/[A-Za-z0-9%\-_]{1,100}/people/?$        N 99, N 100, J 112
+
+Groups and events take the closed numeric segment their id entries already
+use. Company and school take the root entries' class, slug AND number: the
+captures in `_state/` draw the People tab by slug (by shape: twice on the
+company-root capture and twice on a school capture, which draws its own tabs
+under `/company/`, never `/school/`), and the `/company/` entry's argument --
+a numeric request lands on the slug -- applies unchanged. No line takes a
+query or a deeper path.
+
+**THE BLAST RADIUS, BEFORE THE LINES LANDED**, with the shipped
+`blast_radius.newly_admitted` over 197 addresses (its 67 plus 130
+roster-family spellings: page and filter queries, deeper paths, traversals
+onto a profile and an account ending, slugs where the family is numeric,
+non-ASCII and over-long ids, dotted segments, a case change, a glued tab
+word): groups +2, events +2, company +4, school +4 -- exactly the targets,
+nothing unexpected, nothing newly refused. The control: a `/groups/<id>/.*`
+family admits 23 over the same corpus.
+
+**THE DIGEST.** `_ALLOWED_URL_PATTERNS` `d7b3315318c877d0 ->
+a13f66bebba387cd`, 49 -> 53; the tree minus exactly the four lines hashes to
+the prior pin on all eight keys; a needle no line carries moves nothing, and
+dropping the pre-existing `/groups/discover/` line instead lands on
+`1018aafe63a9f35c`. The six entries that carried the 2026-09-05 refusal
+(groups root and id, events root and id, school, company) each gained a dated
+comment-only amendment pointing at the roster lines; their refusal text
+stands as written.
+
+**`linkedin_server/member_rosters.py::compose(roster, identifier)`** is the
+only place the package assembles a roster address: one address per call from
+a caller-supplied numeric id, validated by `group_page.group_page_url` for a
+group, `company_page.company_identifier` for an organisation, and the same
+ten-ASCII-digit, twenty-long rule for an event or a school. Slugs, urns,
+non-ASCII digits and over-long runs are refused and described, never quoted.
+Nothing in the package imports it (orphan ruling recorded): readers are built
+against captures only, and no roster page has been captured.
+
+**THE CONDITIONS, EACH WITH A TEST** (`tests/test_member_rosters.py`, 111):
+
+    1  one page, no automatic pagination   no second page admitted for any
+       roster, nine spellings each; A PLANTED PAGINATION LOOP walks ?page=
+       and ?start= through assert_read_url and is refused at every step
+       past the first; the control installs a query-admitting roster line
+       and the loop's second step goes through. compose takes (roster,
+       identifier) and nothing else. A pagination-findings guard holds the
+       module to no loop, comprehension, await or navigating attribute, and
+       six planted paginators (a for over pages, a navigating while, a
+       comprehension, a scroll, a show-more press, a page-side import) are
+       each convicted.
+    2  the id from the tool's arguments     eight refused id shapes on all
+       four rosters; the composer and the boundary agree on the numeric
+       rosters segment for segment; on company and school the composer is
+       STRICTER (no slug), asserted; lane G's navigation-derivation guard,
+       both walks and the reader walk, green over the module.
+    3  nothing in a tracked file            a storage guard (no open, write,
+       dump, and no json/pickle/sqlite/csv/os/io/logging import), with four
+       planted stores convicted.
+    4  inside the live budget               LOADS_PER_CALL is 1, and the
+       ruled forty is the register's LIVE-BUDGET-40-LOADS.
+    5  the rows GAP, blocked on a reader    the census, below.
+
+**THE OTHER TESTS THE ROSTERS MOVED**, each inverted with what it used to
+assert recorded, none deleted, names kept where an audit cites them:
+`test_readonly.py` (two BLOCKED entries inverted into ALLOWED; the roster's
+second page and a profile under the tab stand in; the membership-roots test
+now asserts each roster on its own line; the "refused by ONE gate" test's
+last assertion inverted, same name; the SHOWN-FAILING control now plants a
+family and admits the roster's second page), `test_the_groups_id_segment_is_closed.py`,
+`test_the_events_boundary_is_root_only.py` (its family control re-measured:
+8 of 11), `test_l1_event_by_id_admission.py` (its carrier fragment tightened,
+because the attendee line begins with the same characters),
+`test_company_page_boundary.py` (its mutation baseline now removes the root
+entry by exact text), `test_company_page.py`, `test_company_root.py`,
+`test_group_page.py`, `test_school_and_collections_boundary.py`.
+
+**THE CENSUS.** Bucket 3: `N 165`, `N 177`, `N 188`, `N 102`, `N 99` and
+`N 100` REFUSED -> ADMITTED, gate MEASURE; `N 189` stays REFUSED on its
+filtered spelling (the roster line takes no query) with the bare roster now
+an admitted also-driven line; `N 178` unchanged. The jobs side table: `J 108`
+and `J 112` REFUSED -> ADMITTED, MEASURE. Pins: `b3_admitted 43 -> 49`,
+`b3_refused 35 -> 29`, `jobs_admitted 11 -> 13`, `jobs_refused 26 -> 24`.
+**TWO ROWS THE ROSTER DECISION DID NOT LIST MOVED WITH THEIR ADDRESS**: `N 100` (the
+same alumni tab as `N 99`) and `J 112` (a school's alumni tab). `N 100` is a
+pinned pointer to `N 99`, and the pointer graph went red when `N 99`'s
+verdict kind moved (US-BOUNDARY -> US-BOUNDARY|US-RULING); that move is the
+point of the commit, so the graph was re-pinned (one line) and `N 100`'s
+cell says so rather than moving silently. No STATE moved. The triage's four
+roster annotations now say the admission is made.
+
+**THREE GUARDS WENT RED ON THE ITEM-2 COMMIT, AND A SECOND COMMIT FIXED THEM**
+(3895 passed, 3 failed). The identity guard read a urn spelled with a digit
+run in the new test file's refusal corpus -- now built from the invented id,
+as the groups boundary test builds its own; the census prose guard caught
+`messaging-and-content.md` still saying the allowlist holds 49 patterns --
+now 53, with the rosters and the D2 edit named in the cell; and the
+correction guard wanted `J 112`'s citation of this record triaged -- the
+matched word is `wrong`, in that row's own sentence about a containment
+matcher.
+
 ### F. Capture specs for live session 2
 
 Every capture below is ONE page load through `BROWSER.goto` (which asserts
@@ -881,3 +998,91 @@ more, so the session budget is set in section E.
   `content`, which D2 did not make; if it is its own address, that address
   needs its own admission.
 * **Cost.** 1 load, 0 searches.
+
+#### F.5 `N 102` and `J 108` -- a company's People tab
+
+* **Page.** `member_rosters.compose("company_people", "<id>")` ->
+  `https://www.linkedin.com/company/<id>/people/`. `<id>` is the numeric
+  organisation id of a LARGE organisation that is not his employer, current
+  or past -- the `company_id` `linkedin_job_detail` resolves on a posting. The
+  live queue's `N 84` call already resolves one such id in the same session,
+  so this costs no extra load for the id.
+* **State.** Signed in; nothing pressed, nothing scrolled.
+* **Why the load changes nothing.** An organisation's page emits no view
+  receipt to anybody -- the cause the `/company/` entry turns on. The tab
+  lists members and loads none of their profiles, so nobody is left a
+  who-viewed record. A follow or connect control drawn beside a member is a
+  write, and nothing is pressed.
+* **What to read off it.** Where it landed (did the number redirect to the
+  slug? by shape); the INSIGHT panels -- how many, and whether each is a
+  count-bearing chart drawn on the first load or behind a "next" press (a
+  press would be a PRESS gate, not a reader); the number of member cards
+  (`anchors.read_anchors`' member-profile count); whether a "show more"
+  control is drawn (never pressed).
+* **What it decides.** Whether an aggregate reader can deliver both rows from
+  the first page alone (section D).
+* **Cost.** 1 load.
+
+#### F.6 `N 99` (and `N 100`, `J 112`) -- a school's alumni tab
+
+* **Page.** `member_rosters.compose("school_people", "<id>")` ->
+  `https://www.linkedin.com/school/<id>/people/`. `<id>` is a numeric school
+  id the operator supplies at fire time, and for the CAPTURE it is a school
+  that is not his campus: the capture reads the page's structure, and the
+  row's own proof -- his school -- is a later, separate fire.
+* **State.** As F.5.
+* **Why the load changes nothing.** As F.5: a school is an organisation page,
+  and the tab loads no member's profile.
+* **What to read off it.** First, WHERE IT LANDS -- a captured school page
+  draws its own tabs under `/company/<slug>/`, so the numeric school address
+  may redirect there, which the landing shape shows (both spellings are
+  admitted); then the same readings as F.5.
+* **Cost.** 1 load.
+
+#### F.7 `N 165` and `N 177` -- a group's member list
+
+* **Page.** `member_rosters.compose("group_members", "<id>")` ->
+  `https://www.linkedin.com/groups/<id>/members/`, `<id>` a group he belongs
+  to, from the numeric ids `linkedin_group_memberships` returns, passed at
+  fire time.
+* **State.** As F.5.
+* **Why the load changes nothing.** A member of a group can open its member
+  list; the list loads no member's profile; joining, leaving and messaging
+  are writes and nothing is pressed.
+* **What to read off it.** Member cards (member-profile anchor count); any
+  drawn member COUNT; whether connection-degree badges are drawn per card
+  (`N 177` is about people he knows); "show more" drawn, never pressed.
+* **Cost.** 1 load.
+
+#### F.8 `N 188` and `N 189` -- an event's attendees
+
+* **Step 1.** `/events/<id>/` (admitted since 2026-09-23; the L1 harness's
+  `event` key already loads it), `<id>` an event he can open, supplied at
+  fire time. Read the attendee control's href BY SHAPE -- is it
+  `/events/<id>/attendees/`, or a people search carrying an event facet? --
+  and press nothing. Also read, by shape, the address the 1st-degree filter
+  is drawn with, if one is drawn (`N 189`).
+* **Step 2, ONLY if step 1 draws `/events/<id>/attendees/`.**
+  `member_rosters.compose("event_attendees", "<id>")`, once. If the list is
+  a people search with an event facet instead, stop: that is a people-search
+  facet, D1 governs it, and `people_search.compose` would need the facet --
+  a composer change, not this admission -- and the roster line should then be
+  withdrawn as a page LinkedIn does not serve.
+* **Why the loads change nothing.** An event page is an entity page; attending
+  is `N 185`'s write and nothing is pressed.
+* **Cost.** 1 load, or 2; step 1 is shared with the `event` key.
+
+#### F.9 `N 178` -- NEEDS-TARGET
+
+* **Page.** Another member's profile, at the section that lists their groups
+  (their interests, the groups tab). It is REFUSED by the boundary: the
+  third-party profile pattern was removed on his own call of 2026-09-04,
+  and `PERMANENTLY_FORBIDDEN` names the act.
+* **Why the load is NOT nothing.** Loading another member's profile leaves
+  that member a who-viewed record: an act toward that person, so
+  `OUTWARD-ACTS-NEED-THE-OPERATOR` governs it and HE NAMES THE MEMBER. Even
+  then the address needs a boundary decision that reverses his own
+  2026-09-04 ruling, which is his, not a lane's.
+* **State.** NEEDS-TARGET. Not in session 2 unless he names a member and
+  rules on the address.
+* **Cost.** 1 load, when he does.

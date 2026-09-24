@@ -1,11 +1,12 @@
 {
   "_measured": "f65ec88, 2026-09-19, one Windows laptop (3.13.14), serial run in a detached worktree, NOT a quiet box -- short foreground test batches overlapped parts of it",
   "_amended": [
-    "2026-09-24, lane S follow-up: tests/test_d2_search_verticals.py priced from a serial run of that file alone on the same kind of laptop, not by a regenerated table -- a new file tipped the priced share to 157 of 236, under the two-thirds line"
+    "2026-09-24, lane S follow-up: tests/test_d2_search_verticals.py priced from a serial run of that file alone on the same kind of laptop, not by a regenerated table -- a new file tipped the priced share to 157 of 236, under the two-thirds line",
+    "2026-09-24, lane S follow-up item 2: tests/test_member_rosters.py priced the same way, from a serial run of that file alone"
   ],
-  "_files": 158,
-  "_tests": 5837,
-  "_total_seconds": 948.3,
+  "_files": 159,
+  "_tests": 5948,
+  "_total_seconds": 949.9,
   "seconds": {
     "tests/test_a_correction_is_findable_from_the_claim.py": 3.519,
     "tests/test_a_covered_row_names_the_artifact_that_covers_it.py": 0.074,
@@ -68,6 +69,7 @@
     "tests/test_job_search_result_window.py": 0.047,
     "tests/test_launch_boundary.py": 0.557,
     "tests/test_leakwalk.py": 0.348,
+    "tests/test_member_rosters.py": 1.58,
     "tests/test_membership_row.py": 0.289,
     "tests/test_membership_tally.py": 0.148,
     "tests/test_menus.py": 0.358,

@@ -346,11 +346,16 @@ DECIDED_SINCE_TRIAGE: dict[str, str] = {
     # annotated by lane R at its merge (2026-09-24), ruling by ruling ----
     "N 99": "D3-UNREGISTERED-REFUSAL-IS-NOT-A-RULING and "
             "MEMBER-ROSTERS-AS-BOUNDED-READS: the alumni tab is a roster he "
-            "can open; GAP, blocked on an admission and a reader",
+            "can open; GAP, blocked on an admission and a reader -- the "
+            "admission made in lane S's follow-up (2026-09-24, bucket-3 gate "
+            "MEASURE), so a capture and a reader remain",
     "N 100": "MEMBER-ROSTERS-AS-BOUNDED-READS: the same school People tab; "
-             "an admission and a reader",
+             "an admission and a reader -- admitted in lane S's follow-up "
+             "(2026-09-24), so a capture and a reader remain",
     "N 102": "MEMBER-ROSTERS-AS-BOUNDED-READS: a Page's People tab is a "
-             "roster he can open; an admission and a reader",
+             "roster he can open; an admission and a reader -- admitted in "
+             "lane S's follow-up (2026-09-24), so a capture and a reader "
+             "remain",
     "N 104": "D2-SEARCH-VERTICALS-WIDENED: the companies vertical is "
              "admitted in principle, and on the boundary since lane S's "
              "follow-up (2026-09-24, bucket-3 gate MEASURE); it needs a "
@@ -363,7 +368,8 @@ DECIDED_SINCE_TRIAGE: dict[str, str] = {
              "reader",
     "N 177": "D3-UNREGISTERED-REFUSAL-IS-NOT-A-RULING and "
              "MEMBER-ROSTERS-AS-BOUNDED-READS: a group's member directory; "
-             "an admission and a reader",
+             "an admission and a reader -- admitted in lane S's follow-up "
+             "(2026-09-24), so a capture and a reader remain",
     "N 178": "D3-UNREGISTERED-REFUSAL-IS-NOT-A-RULING: GAP on an admission "
              "and a reader; its live proof loads another member's profile, "
              "so the operator names that member",

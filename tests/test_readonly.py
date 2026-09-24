@@ -1376,6 +1376,12 @@ ALLOWED = [
     # opens them yet (`tests/test_d2_search_verticals.py`).
     "https://www.linkedin.com/search/results/groups/?keywords=engineering",
     "https://www.linkedin.com/search/results/events/?keywords=hiring",
+    # THE GROUP ROSTER AND A COMPANY'S PEOPLE TAB, later on 2026-09-24, on
+    # `MEMBER-ROSTERS-AS-BOUNDED-READS`. Inverted from two BLOCKED lines,
+    # spelled as they were there; each is admitted by a roster line of its
+    # own, one page and no query (`tests/test_member_rosters.py`).
+    "https://www.linkedin.com/groups/12345678/members/",
+    "https://www.linkedin.com/company/acme/people/",
 ]
 
 BLOCKED = [
@@ -1428,7 +1434,13 @@ BLOCKED = [
     # its name-freedom proof in
     # `tests/test_the_search_shaper_emits_no_name.py`.
     "https://www.linkedin.com/search/results/people/example-person-a1b2c3/",
-    "https://www.linkedin.com/company/acme/people/",
+    # ``/company/acme/people/`` STOOD HERE UNTIL 2026-09-24 and is in ALLOWED
+    # now, for the same reason as the people search above: a READ OF ONE PAGE
+    # of a roster, admitted on its own line by MEMBER-ROSTERS-AS-BOUNDED-READS.
+    # What stays is the reach past that page -- a member's profile under the
+    # tab, and the tab's second page.
+    "https://www.linkedin.com/company/acme/people/in/someone-else/",
+    "https://www.linkedin.com/company/acme/people/?page=2",
     "https://evil.example.com/steal",
     "http://www.linkedin.com/feed/",
     "javascript:alert(1)",
@@ -1531,7 +1543,12 @@ BLOCKED = [
     # ruling, as a CLOSED numeric segment and a literal page name. What did
     # NOT move is everything below, and the roster is still the line that goes
     # red if a future widening reaches it.
-    "https://www.linkedin.com/groups/12345678/members/",
+    #
+    # AND THE ROSTER LEFT ON 2026-09-24, REWRITTEN INTO ALLOWED THE SAME WAY:
+    # ``/groups/12345678/members/`` was admitted on its own line by
+    # MEMBER-ROSTERS-AS-BOUNDED-READS. Its SECOND PAGE takes its place here --
+    # the one condition of that ruling a boundary can carry.
+    "https://www.linkedin.com/groups/12345678/members/?page=2",
     "https://www.linkedin.com/groups/12345678/requests/",
     "https://www.linkedin.com/groups/12345678/about/",
     # A SLUG STAYS REFUSED, and this line is why the admission above is narrow
@@ -1628,6 +1645,18 @@ def test_the_two_membership_roots_are_admitted_and_their_families_are_not():
     conditions the groups id was admitted on, so both families are now one
     step wider than their roots, and in the same way. The rosters are still
     refused, which is what both rulings protect.
+
+    **AMENDED A THIRD TIME 2026-09-24: THE ROSTERS ARE ADMITTED, EACH ON ITS
+    OWN LINE.** The 2026-09-05 refusal both roots carried -- "a directory of
+    other people no" -- was an argument and not a ruling
+    (D3-UNREGISTERED-REFUSAL-IS-NOT-A-RULING), and
+    MEMBER-ROSTERS-AS-BOUNDED-READS weighed it the other way: a roster he can
+    open himself is a bounded read, one page, a caller-supplied numeric id, no
+    query. So the member roster and the attendee list moved from the refused
+    half below to the admitted half, and what the two roots' own lines
+    protect is asserted separately: neither root line, nor either id line,
+    admits a roster -- each roster has its own line -- and a roster's second
+    page stays shut.
     """
     assert readonly.is_read_url(GROUPS_ROOT)
     assert readonly.is_read_url(EVENTS_ROOT)
@@ -1636,12 +1665,19 @@ def test_the_two_membership_roots_are_admitted_and_their_families_are_not():
     assert readonly.is_read_url(
         "https://www.linkedin.com/events/12345678901234567890/"
     )
-    # AND WHAT BOTH RULINGS PROTECT, EXACTLY WHERE IT WAS.
+    # THE ROSTERS, 2026-09-24, ON LINES OF THEIR OWN.
+    attendees = "https://www.linkedin.com/events/12345678901234567890/attendees/"
+    for url, tab in ((GROUP_MEMBER_ROSTER, "/members/?$"),
+                     (attendees, "/attendees/?$")):
+        assert readonly.is_read_url(url), url
+        carriers = [p for p in readonly._ALLOWED_URL_PATTERNS if p.match(url)]
+        assert len(carriers) == 1 and carriers[0].pattern.endswith(tab), url
+    # AND WHAT THE ROOTS STILL DO NOT OPEN.
     for url in (
-        GROUP_MEMBER_ROSTER,
         "https://www.linkedin.com/groups/12345678/requests/",
-        "https://www.linkedin.com/events/12345678901234567890/attendees/",
         "https://www.linkedin.com/events/12345678901234567890/comments/",
+        GROUP_MEMBER_ROSTER + "?page=2",
+        attendees + "?facetConnectionOf=1",
     ):
         assert not readonly.is_read_url(url), url
 
@@ -1672,6 +1708,13 @@ def test_the_member_roster_is_refused_by_ONE_gate_and_the_count_is_the_point():
     the current one in
     ``tests/test_the_groups_id_segment_is_closed.py::test_the_roster_is_still_refused_by_exactly_one_gate``
     rather than left to be read as a claim about a line that no longer exists.
+
+    **AND ON 2026-09-24 THE COUNT CAME OUT THE OTHER WAY, SO THE NAME IS KEPT
+    AND THE LAST ASSERTION IS INVERTED.** MEMBER-ROSTERS-AS-BOUNDED-READS
+    admitted the roster on a line of its own. The count is still the point:
+    the roster still carries NO forbidden substring, and exactly ONE gate now
+    decides it -- the roster line, which ADMITS it. Removing that one line is
+    the whole rollback, and nothing in the denylist had to move for it.
     """
     invite_substrings = [
         substring
@@ -1694,31 +1737,40 @@ def test_the_member_roster_is_refused_by_ONE_gate_and_the_count_is_the_point():
         "this test's whole claim is the count, so update the claim rather "
         f"than deleting the assertion. Fired: {roster_substrings}"
     )
-    assert not readonly.is_read_url(GROUP_MEMBER_ROSTER)
+    carriers = [p for p in readonly._ALLOWED_URL_PATTERNS
+                if p.match(GROUP_MEMBER_ROSTER)]
+    assert len(carriers) == 1 and carriers[0].pattern.endswith("/members/?$"), (
+        [p.pattern for p in carriers])
+    assert readonly.is_read_url(GROUP_MEMBER_ROSTER)
 
 
-def test_the_anchor_is_what_refuses_the_roster_SHOWN_FAILING():
+def test_the_anchor_is_what_refuses_the_rosters_second_page_SHOWN_FAILING():
     """Plant the widening a future reader is most likely to write.
 
-    The obvious "improvement" to the groups entry is to let it reach a group
-    -- ``^.../groups/.*$`` -- and the point of this test is that the roster
-    falls out of the same edit, silently, because nothing else refuses it.
-    A guard that has not been shown failing certifies nothing.
+    RENAMED 2026-09-24 from ``test_the_anchor_is_what_refuses_the_roster_
+    SHOWN_FAILING``: the roster itself is admitted now, on its own line, so
+    what the anchoring must still refuse is the roster's SECOND PAGE -- the
+    one condition of MEMBER-ROSTERS-AS-BOUNDED-READS a boundary can carry.
+    The obvious "improvement" is still ``^.../groups/.*$``, and the point is
+    unchanged: the second page falls out of that edit, silently, because
+    nothing else refuses it. A guard that has not been shown failing
+    certifies nothing.
     """
+    second_page = GROUP_MEMBER_ROSTER + "?page=2"
     original = readonly._ALLOWED_URL_PATTERNS
-    assert not readonly.is_read_url(GROUP_MEMBER_ROSTER)
+    assert not readonly.is_read_url(second_page)
     try:
         readonly._ALLOWED_URL_PATTERNS = original + (
             re.compile(r"^https://www\.linkedin\.com/groups/.*$"),
         )
-        assert readonly.is_read_url(GROUP_MEMBER_ROSTER), (
-            "the roster is STILL refused with a wildcard groups pattern "
+        assert readonly.is_read_url(second_page), (
+            "the second page is STILL refused with a wildcard groups pattern "
             "installed, so something other than the anchor is refusing it "
             "and this test is measuring the wrong thing"
         )
     finally:
         readonly._ALLOWED_URL_PATTERNS = original
-    assert not readonly.is_read_url(GROUP_MEMBER_ROSTER)
+    assert not readonly.is_read_url(second_page)
 
 
 def test_neither_new_root_carries_a_query_or_a_subpath():
@@ -2286,14 +2338,15 @@ MUST_STAY_UNREADABLE = (
     # where the member-profile cause starts to apply again. Census rows
     # ``J 108`` and ``N 102`` want it and it is out of scope by the same
     # ruling that put a group's roster out of scope by name.
-    "https://www.linkedin.com/company/example-co/people/",
-    # THE SAME ROSTER IN THE NUMERIC SPELLING, because the admitted pattern
-    # takes both and a refusal that holds for only one of them is half a
-    # refusal. The id is the one ``tests/fixtures/notifications.html``
-    # actually carries -- an already-declared synthetic value rather than a
-    # freshly minted one, so the identity guard keeps its precision and a
-    # reviewer can see where the number came from.
-    "https://www.linkedin.com/company/5417062/people/",
+    #
+    # ITS TWO BARE SPELLINGS -- ``/company/example-co/people/`` and
+    # ``/company/5417062/people/`` -- LEFT THIS TABLE ON 2026-09-24, recorded
+    # rather than silently dropped: MEMBER-ROSTERS-AS-BOUNDED-READS admitted
+    # the People tab on its own line, the "same ruling" above having been an
+    # argument and not a ruling (D3-UNREGISTERED-REFUSAL-IS-NOT-A-RULING).
+    # The member-profile cause does not reach the tab: a roster lists members
+    # and loads none of their profiles. What stays is the tab's QUERY
+    # spelling, which is where a roster's second page would be asked for.
     "https://www.linkedin.com/company/example-co/people/?keywords=x",
     # THE WRITE HALF OF THE SAME ROOT, and NONE OF THESE THREE CARRIES A
     # FORBIDDEN SUBSTRING -- ``/create`` is on the denylist and LinkedIn does

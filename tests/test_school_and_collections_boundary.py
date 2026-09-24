@@ -55,10 +55,13 @@ COLLECTIONS_URL = f"{BASE}/jobs/collections/recommended/"
 #: path segment up from something now open. A pattern is narrow only if the
 #: things beside it stay shut.
 NOT_BOUGHT = (
-    # The school Page's own tabs. ``/people/`` is the load-bearing one: it is
-    # a roster of MEMBERS, which is the one place under this root where the
-    # member-profile cause the ruling turns on could start to apply again.
-    f"{BASE}/school/example-university/people/",
+    # The school Page's own tabs. ``/people/`` WAS the load-bearing one here
+    # until 2026-09-24 -- "a roster of MEMBERS, which is the one place under
+    # this root where the member-profile cause the ruling turns on could start
+    # to apply again". MEMBER-ROSTERS-AS-BOUNDED-READS admitted it on its OWN
+    # line (a roster lists members; no member's profile loads when it does),
+    # so it moved to ``PEOPLE_TAB_ON_ITS_OWN_LINE`` below, which asserts that
+    # the school entry itself still does not reach it.
     f"{BASE}/school/example-university/jobs/",
     f"{BASE}/school/example-university/posts/",
     f"{BASE}/school/example-university/about/",
@@ -187,9 +190,23 @@ def test_the_new_patterns_are_the_only_thing_standing():
 
 
 def test_the_neighbours_stay_refused():
-    """Fifteen addresses beside the two that opened, all still shut."""
+    """Fifteen addresses beside the two that opened, all still shut -- fourteen
+    since the People tab left for its own line on 2026-09-24."""
     for url in NOT_BOUGHT:
         assert readonly.is_read_url(url) is False, url
+
+
+#: The school People tab, admitted 2026-09-24 by the roster line.
+PEOPLE_TAB_ON_ITS_OWN_LINE = f"{BASE}/school/example-university/people/"
+
+
+def test_the_people_tab_is_admitted_by_its_own_line_and_not_the_schools():
+    assert readonly.is_read_url(PEOPLE_TAB_ON_ITS_OWN_LINE) is True
+    carriers = [p for p in readonly._ALLOWED_URL_PATTERNS
+                if p.match(PEOPLE_TAB_ON_ITS_OWN_LINE)]
+    assert len(carriers) == 1 and carriers[0].pattern.endswith("/people/?$"), (
+        [p.pattern for p in carriers])
+    assert not carriers[0].match(SCHOOL_URL)
 
 
 def test_the_school_pattern_admits_one_path_segment_only():
