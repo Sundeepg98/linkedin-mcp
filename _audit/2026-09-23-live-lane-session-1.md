@@ -1886,16 +1886,21 @@ never presses the switch.** Condition 1 asks for OFF to be READ, never made
 so -- and turning it off would itself be a settings write this order does
 not grant.
 
-**AND ON ITS OWN IT UNBLOCKS NONE OF THE SIX.** Lane L7's save gate also
-refuses while the dialog draws a switch it cannot NAME
+**IT IS NOW THE LAST OFFLINE PIECE THE SIX ROWS WAIT ON.** Lane L7's save
+gate also refuses while the dialog draws a switch it cannot NAME
 (`6_unnamed_switch_unresolved`), which the registered amendment requires,
 and the intro editor draws two. Session 1's capture identified them ('Open
-Profile' and 'Profile Premium Badge', Entry 5) -- by the text of their
-section, read offline; the switches themselves carry no accessible name,
-which is the one thing the gate classifies on. So the six rows (`P A8`,
-`A11`, `A13`, `A17`, `A19`, `A21`) need BOTH this reader AND lane L7's named
-build that recognises those two switches against that capture; until both
-land they stay where session 1 left them.
+Profile' and 'Profile Premium Badge', Entry 5) by the text of their section,
+read offline -- the switches carry no accessible name, which was the one
+thing the gate classified on. **This paragraph first said the six rows
+needed that recognition built as well; lane L7 built it the same day** (its
+follow-up 1, "recognised by structure -- code 6 lifted there only", merged
+into this branch at the second master merge below), and its session-2 queue
+for `P A8`, `A11`, `A13`, `A17`, `A19` and `A21` now waits on exactly two
+things: this reader wired at the seam, and his setting reading OFF at fire
+time. So the critical path is the capture spec above -- a ruling admitting
+one address, one load, the reader built offline from that capture -- and
+until it is walked the six rows stay where session 1 left them.
 
 ### Master merged once more, after Part 2 (`b230287`)
 
@@ -1931,7 +1936,12 @@ suite was not run locally, by order.
 
 Two Part 2 sections now cite what the merge brought: (d)'s later key takes
 its address from its arguments (`PAGE-MAY-VETO-NEVER-SUPPLY`), and (f)'s
-reader returns lane L7's `ACCOUNT_READINGS` into the seam L7 built for it --
-and, on its own, unblocks none of the six intro rows, because L7's gate
-refuses on the dialog's two unnamed switches until a second build
-recognises them.
+reader returns lane L7's `ACCOUNT_READINGS` into the seam L7 built for it.
+
+**MASTER MOVED ONCE MORE, TO `7d89b8d`, AND MERGED WITHOUT CONFLICT** --
+lane L7's three follow-ups: the intro editor's two unnamed switches
+recognised by structure, `P B9` and `P I14`/`I15` recorded, and its
+session-2 queue for the six intro rows. That follow-up is why (f)'s last
+paragraph now names this lane's reader as the last offline piece. The
+blocker map regenerated to a fixed point (derived candidate columns only);
+the census instruments green, no pin moves.
