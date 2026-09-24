@@ -10315,6 +10315,28 @@ exits 0 and the file passes 55 of 55.
 The script is disposable (70.4); the method is the part the merge can reuse,
 wherever a pin's owners read it from a module attribute.
 
+### 70.6 A SWITCH THE DIALOG CANNOT NAME, TIED TO ITS CAPTURE BY STRUCTURE (follow-up, 2026-09-24)
+
+The ruling `SELF-PROFILE-EDIT-NOTIFY-CONDITION-AMENDED` holds an unnamed switch
+against condition 1 "until a capture identifies that switch". A capture's
+identification is made by a person reading TEXT the gate may not read, so the
+gate needs a way to recognise the identified switch that never reads that text.
+
+    THE CAPTURE SAYS WHAT A THING IS; THE GATE MAY ONLY SAY WHERE IT IS.
+    RECOGNISE BY THE SHAPE AROUND IT, UNDER THE NEAREST ANCHOR THE PAGE
+    NAMES, AND LET ANY DEPARTURE FROM THAT SHAPE FALL BACK TO THE REFUSAL.
+
+And the half that is easy to drop: **"unnamed" is a property of the accessible
+name, not of the attributes.** Every attribute can match while a label
+elsewhere on the page names the control; a recogniser that asks attributes
+alone then recognises a switch the fields reader never counted as unnamed, and
+subtracting it lifts the refusal for a switch nobody identified.
+
+| path | shown failing by |
+|---|---|
+| `linkedin_server/profile_editor.py` -- `INTRO_SWITCH_COLUMN`, `INTRO_SWITCH_ROW`, `INTRO_SWITCH_BLOCKS`, `recognise_intro_editor_switches` (every question a `locator(...).count()`; no new script, no new waiver), `_recognised_identities`, and code 6 counting only the switches NOT recognised | `tests/test_intro_editor_switches.py` (18) over `tests/fixtures/synthetic/intro_editor_switches.html`. The gate as committed before it, driven over that fixture with the account setting read OFF, refuses `6_unnamed_switch_unresolved`; after, it proceeds with both recognised -- and the same holds on the RAW capture, offline (page scripts disabled, every one of its 25 requests aborted). Each load-bearing half knocked out in process turns exactly its own test red: without the accessible-name half the gate PROCEEDS over two planted unnamed switches while the capture's pair is named from elsewhere (as built: code 6); without `include_hidden`, a stylesheet-hidden pair is not recognised; without the column anchor, a row under any other parent is. |
+| `scripts/_build_intro_editor_switches_fixture.py --check` -- the same signature in Python, against any file | the test file's builder test: exit 0 and "one settings row, 2 switch blocks" on the fixture, and on the raw capture; a page whose row loses its leading paragraph, or whose column loses its test id, refuses, exit 1. |
+
 ---
 
 ## 71. THE COMPLETENESS VERDICT LAYER, THE ADJUDICATED CORPUS, AND THE TABLE AT A FIXED POINT (lane-y2-admission, 2026-09-24)
