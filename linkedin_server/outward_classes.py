@@ -71,24 +71,24 @@ from dataclasses import dataclass
 from typing import Optional
 
 #: The ruling every record here rests on, by its registered id.
-RULING = "OUTWARD-CLASSES-BUILT-BEHIND-GRANTS"
+OUTWARD_CLASSES_RULING = "OUTWARD-CLASSES-BUILT-BEHIND-GRANTS"
 
 #: The three classes, by the names the ruling gives them. The first two reuse
 #: the retired keys' own words; the third is narrower than the retired
 #: ``delete_or_withdraw_anything`` on purpose -- HIS OWN items only.
-CLASSES: tuple[str, ...] = (
+OUTWARD_CLASS_NAMES: tuple[str, ...] = (
     "repost_or_share",
     "endorse_or_recommend",
     "delete_or_withdraw_own",
 )
 
 #: The three statuses a record may carry. See the module docstring.
-STATUSES: tuple[str, ...] = ("BUILT", "NEEDS-CAPTURE", "BLOCKED")
+OUTWARD_CLASS_STATUSES: tuple[str, ...] = ("BUILT", "NEEDS-CAPTURE", "BLOCKED")
 
 #: What a target may be. Every one is a LINK or an ID the caller supplies;
 #: none of them is a name, and ``tests/test_outward_classes.py`` refuses a
 #: record whose kind is not on this list.
-TARGET_KINDS: tuple[str, ...] = (
+OUTWARD_TARGET_KINDS: tuple[str, ...] = (
     "item_urn",
     "item_urn_and_text",
     "profile_link_and_skill",

@@ -1730,7 +1730,7 @@ def test_the_claims_that_depend_on_the_destruction_refusal_are_the_measured_ones
     for action, (record, verdict) in restated.items():
         text = spec_for_action(action).reversible_by
         assert text.startswith(verdict), (action, text[:60])
-        assert outward_classes.RULING in text, action
+        assert outward_classes.OUTWARD_CLASSES_RULING in text, action
         # The retired refusal appears only as a QUOTED RETRACTION -- "used to
         # say" ahead of the quote -- never as the live reason.
         if "PERMANENTLY_FORBIDDEN" in text:

@@ -48,11 +48,11 @@ def _record_problems(records, performable, sanctioned_actions) -> list[str]:
         tag = f"{key}"
         if rec.action != key:
             problems.append(f"{tag}: keyed under a different action ({rec.action!r})")
-        if rec.status not in outward_classes.STATUSES:
+        if rec.status not in outward_classes.OUTWARD_CLASS_STATUSES:
             problems.append(f"{tag}: status {rec.status!r} is off the list")
-        if rec.outward_class not in outward_classes.CLASSES:
+        if rec.outward_class not in outward_classes.OUTWARD_CLASS_NAMES:
             problems.append(f"{tag}: class {rec.outward_class!r} is not one of the three")
-        if rec.target_kind not in outward_classes.TARGET_KINDS:
+        if rec.target_kind not in outward_classes.OUTWARD_TARGET_KINDS:
             problems.append(f"{tag}: target kind {rec.target_kind!r} is off the closed list")
         if "name" in rec.target_kind:
             problems.append(f"{tag}: a target kind may never be a name")
@@ -138,7 +138,7 @@ def test_every_record_says_only_what_is_true():
 
 def test_each_class_the_ruling_names_has_a_record():
     classes = {r.outward_class for r in outward_classes.OUTWARD_CLASS_SPECS.values()}
-    assert classes == set(outward_classes.CLASSES)
+    assert classes == set(outward_classes.OUTWARD_CLASS_NAMES)
 
 
 def test_the_brief_s_acts_each_have_a_record():
@@ -219,7 +219,7 @@ def test_every_row_a_record_names_is_a_census_row_in_the_state_it_implies():
 
 
 def test_records_for_row_and_by_status_are_consistent():
-    for status in outward_classes.STATUSES:
+    for status in outward_classes.OUTWARD_CLASS_STATUSES:
         for action in outward_classes.records_by_status(status):
             assert outward_classes.OUTWARD_CLASS_SPECS[action].status == status
     for action, rec in outward_classes.OUTWARD_CLASS_SPECS.items():
