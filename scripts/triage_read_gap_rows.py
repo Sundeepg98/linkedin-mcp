@@ -377,7 +377,10 @@ DECIDED_SINCE_TRIAGE: dict[str, str] = {
              "rule, pending the operator; bucket-3 gate RULING",
     "N 178": "D3-UNREGISTERED-REFUSAL-IS-NOT-A-RULING: GAP on an admission "
              "and a reader; its live proof loads another member's profile, "
-             "so the operator names that member",
+             "so the operator names that member -- and since lane S's "
+             "follow-up (2026-09-24) also held by the name-free shaper "
+             "doctrine under the WHO/WHICH rule: which groups, pending the "
+             "operator; NEEDS-TARGET",
     "N 179": "D2-SEARCH-VERTICALS-WIDENED: the events vertical is admitted "
              "in principle, and on the boundary since lane S's follow-up "
              "(2026-09-24); now held by a DIFFERENT question -- which events "

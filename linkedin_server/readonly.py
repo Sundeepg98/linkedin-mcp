@@ -2264,9 +2264,11 @@ _ALLOWED_URL_PATTERNS: tuple[re.Pattern[str], ...] = (
     #   1  ONE PAGE PER CALL, NO AUTOMATIC PAGINATION. No line below takes a
     #      query or a deeper path, so `?page=2`, `?start=25`, every filter
     #      spelling and `/page/2/` are refused HERE, before any browser sees
-    #      them; a roster's further rows arrive by scrolling or a "show more"
-    #      press, and `SCROLL-NOT-SANCTIONED` stands. A planted paginator is
-    #      refused at its second step (`tests/test_member_rosters.py`).
+    #      them. How LinkedIn serves a roster's further rows -- a scroll, a
+    #      "show more" press, a page parameter -- is UNMEASURED; the capture
+    #      counts which is drawn, and `SCROLL-NOT-SANCTIONED` stands whichever
+    #      it is. A planted paginator is refused at its second step
+    #      (`tests/test_member_rosters.py`).
     #   2  THE ID FROM THE TOOL'S ARGUMENTS ONLY. `member_rosters.compose` is
     #      the only place this package assembles a roster address, from an id
     #      it is handed, the numeric form only; the navigation-derivation guard

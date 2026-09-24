@@ -188,8 +188,9 @@ def test_exactly_one_pattern_admits_each_word():
 
 def test_the_composer_composes_exactly_the_three_new_words():
     assert search_verticals.VERTICALS == ("companies", "groups", "events")
-    assert set(search_verticals.ROWS_SERVED) == set(search_verticals.VERTICALS)
-    assert sorted(r for rows in search_verticals.ROWS_SERVED.values() for r in rows) \
+    named = search_verticals.ROWS_NAMED_BY_THE_RULING
+    assert set(named) == set(search_verticals.VERTICALS)
+    assert sorted(r for rows in named.values() for r in rows) \
         == ["M C70", "N 104", "N 161", "N 179"]
 
 

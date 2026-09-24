@@ -3334,8 +3334,10 @@ async def linkedin_company_page_counts(organisation_id: str) -> dict[str, Any]:
     MANY does not cover a row asking WHICH* -- and it is structural here: the
     page is reduced to integers inside the document and no string of any kind
     crosses back. The roster tab that WOULD name people,
-    ``/company/<x>/people/``, is refused by the read boundary and is not
-    reachable from anything in this tool.
+    ``/company/<x>/people/``, is not reachable from anything in this tool.
+    [Amended 2026-09-24: the read boundary refused that tab until then; it is
+    admitted since on a roster line of its own, under
+    MEMBER-ROSTERS-AS-BOUNDED-READS, and no tool opens it yet.]
 
     **THE SCREEN-READER COPY OF EVERY LINE IS STEPPED OVER AND COUNTED.**
     LinkedIn draws these lines twice -- an ``aria-hidden`` visible span that

@@ -89,6 +89,16 @@ classes in that 35 are worth naming, because neither is a tab:
     ``search_results.RESULT_KINDS``: it is the class anything misclassified
     INTO or OUT OF is the defect the rules exist to prevent.
 
+    AMENDED 2026-09-24: THAT OBJECTION WAS AN ARGUMENT, NOT A RULING
+    (``D3-UNREGISTERED-REFUSAL-IS-NOT-A-RULING``), and
+    ``MEMBER-ROSTERS-AS-BOUNDED-READS`` weighed it the other way. The tab is
+    admitted since, on a roster line of its own -- one page, no query -- and
+    only ``member_rosters.compose`` assembles it, from a numeric id; nothing
+    in this module does, and no tool opens it yet. It stays first here, and
+    still the hazard class: a roster is made of people, so whatever reads it
+    owes the name-free shaper doctrine exactly the strictness this module
+    spends on the root.
+
 ``admin_surface`` and ``page_creation``
     ``/company/<x>/admin/``, ``/company/<x>/admin/dashboard/`` and
     ``/company/setup/new/`` are the WRITE half of this root -- Page
@@ -205,7 +215,9 @@ _ENCODED_DOT_SEGMENTS = frozenset({"%2e", "%2e%2e"})
 #: ``people_tab`` IS THE HAZARD CLASS and is first on purpose. See the module
 #: docstring: it is a member roster, it is the one surface under this root the
 #: member-profile cause reaches, and it is out of scope by the same ruling
-#: that put a group's roster out of scope by name.
+#: that put a group's roster out of scope by name. [AMENDED 2026-09-24: that
+#: "ruling" was an argument; the tab is admitted on a roster line of its own
+#: under MEMBER-ROSTERS-AS-BOUNDED-READS, and stays the hazard class here.]
 TAB_KINDS: tuple[str, ...] = (
     "people_tab",
     "home_tab",

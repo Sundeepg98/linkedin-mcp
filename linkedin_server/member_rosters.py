@@ -39,10 +39,12 @@ Follow-up section D.
 **ONE PAGE PER CALL.** :func:`compose` returns exactly one address, takes no
 page, offset or count argument, and the roster entries admit no query string
 -- so a second page spelled ``?page=2`` or ``?start=25`` is refused by the read
-boundary before any browser sees it. LinkedIn serves a roster's further rows
-by scrolling or by a "show more" control, and neither is done here or anywhere
-(``SCROLL-NOT-SANCTIONED``). :data:`LOADS_PER_CALL` is 1, and the tests hold
-this module to containing no loop, no await and no navigation at all.
+boundary before any browser sees it. How LinkedIn serves a roster's further
+rows is UNMEASURED -- a scroll, a "show more" control, or a page parameter --
+and the capture specs count which one is drawn; none of them is done here or
+anywhere (``SCROLL-NOT-SANCTIONED``, and no press). :data:`LOADS_PER_CALL` is
+1, and the tests hold this module to containing no loop, no await and no
+navigation at all.
 
 **THE ID FROM THE TOOL'S ARGUMENTS ONLY.** :func:`compose` takes the id as its
 argument and nothing else; it reads no page. A group id goes through
@@ -67,6 +69,11 @@ tab by its slug (measured on two captures) and serves an organisation's
 numeric address by redirecting to it. This module ASSEMBLES ONLY THE NUMERIC
 FORM -- the boundary admits what the product serves; the package builds only
 what names nobody.
+
+THE SLUG CLASS ON THOSE TWO LINES HOLDS NO ``%``, unlike the root entries':
+the cold verification of lane S's follow-up admitted ``/company/%2e%2e/people/``
+through a class that did, and the URL standard reads ``%2e%2e`` as ``..``. A
+percent-encoded People tab is refused whatever it encodes.
 """
 
 from __future__ import annotations

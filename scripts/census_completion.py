@@ -1005,6 +1005,11 @@ PINNED = {
     #: filtered spelling -- the roster line takes no query -- and `N 178` on
     #: its third-party profile. No row entered or left bucket 3; no state
     #: moved.
+    #: THE GATES THEN MOVED AGAIN, AND NO FIGURE HERE DID: item 3 of the same
+    #: follow-up (the WHO/WHICH rule, row by row) re-gated six of the rows
+    #: above MEASURE -> RULING -- `N 161`, `N 179`, `N 165`, `N 177`, `N 188`,
+    #: `N 100`, whose payload is WHO or WHICH -- so "each gated MEASURE" is
+    #: that commit's reading, not HEAD's. Class counts do not see a gate.
     "b3_admitted": 49,
     "b3_refused": 29,
     "b3_no_address": 1,

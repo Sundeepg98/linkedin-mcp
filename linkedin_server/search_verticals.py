@@ -80,9 +80,13 @@ from linkedin_server import jobfilter, people_search
 #: order. The fourth word, ``people``, is ``people_search.py``'s.
 VERTICALS: tuple[str, ...] = ("companies", "groups", "events")
 
-#: The census rows each word serves, as the ruling names them. Read by the
-#: tests, never by a page.
-ROWS_SERVED: dict[str, tuple[str, ...]] = {
+#: The census rows the RULING NAMES for each word -- not the rows each word's
+#: page delivers, which is a different claim. ``M C70`` is the case that
+#: separates them: D2 names it among the groups rows, and its own census cell
+#: says a groups search lists GROUPS while the row asks for content WITHIN
+#: them. Renamed from ``ROWS_SERVED`` on 2026-09-24 for that reason. Read by
+#: the tests, never by a page.
+ROWS_NAMED_BY_THE_RULING: dict[str, tuple[str, ...]] = {
     "companies": ("N 104",),
     "groups": ("N 161", "M C70"),
     "events": ("N 179",),

@@ -1017,10 +1017,17 @@ BLOCKED ON NOTHING -- is 2 before and after.
 `check_write_classes` (GREEN), `pin_census_rows` (no drift),
 `measure_pointer_graph --check` (pass), and the three generators `--check`
 (INDEX, RULINGS, blocker map at their fixed points) -- and one pytest run over
-57 test files -- 4657 passed, 0 failed, in 4m48s --: the 18 always-run corpus guards (the navigation-derivation guard
-and the page-string guards among them), this follow-up's four test files, the
-lane's people-search tests, and every test file the admissions touched or that
-pins a search, roster, company, school, group or event address.
+58 test files, 4657 passed and 0 failed in 4m48s: the always-run corpus guards
+(18 at the base and 19 now, because `tests/test_member_rosters.py` joined
+them -- it sweeps the package for importers, so every future gate runs it,
+about two seconds), the navigation-derivation guard among them; the two
+page-string guards; this follow-up's four test files; the lane's
+people-search tests; and every test file the admissions touched or that pins
+a search, roster, company, school, group or event address. Then, while the
+cold verifier ran, the other 30 test files that touch the read boundary at
+all (every file naming `is_read_url`, `assert_read_url` or the allowlist):
+1161 passed, 4 skipped, 0 failed. [The first version of this paragraph said
+57 files and 18 guards; the cold verification counted 58 and 19.]
 
 **GATES NOT RUN, and why.** `impact_gate --against ff98a7f --plan-only`:
 34 changed paths select 192 of 237 test files (81%), past its 45% line, so it
@@ -1054,9 +1061,12 @@ the row it serves can move when its reader is built.
 P1 and P2 together are 8 loads and 4 searches, plus the two
 `linkedin_job_detail` loads that resolve organisation ids for `N 84` and
 `N 87` (F.5 reuses `N 84`'s) -- ten loads, well inside forty, and four
-searches of five. P3's two searches would take the session to six with the
-people queue, so they wait for a later session or for the operator's answer,
-which would also make them worth their loads.
+searches of five. TEN IS A FLOOR: every harness run is bracketed by the
+control page before and after (two more loads a run, the L1 harness's
+convention), which the cold verification pointed out this sum left out; two
+runs still stay under twenty. P3's two searches would take the session to six
+with the people queue, so they wait for a later session or for the operator's
+answer, which would also make them worth their loads.
 
 ### F. Capture specs for live session 2
 
@@ -1230,3 +1240,75 @@ more, so the session budget is set in section E.
 * **State.** NEEDS-TARGET. Not in session 2 unless he names a member and
   rules on the address.
 * **Cost.** 1 load, when he does.
+
+### G. The cold verification, and what it changed
+
+One cold pass by a `general-purpose` child after the four items, briefed to
+find what is wrong rather than to confirm, read-only, with its own
+adversarial corpora (1557 spellings of its own), its own AST diff of the
+boundary, the shipped digest function, extracted trees of three commits and
+the WHATWG URL parser in Node for landings. Its verdicts: the boundary diff,
+the digests, every blast-radius number, reachability, census consistency and
+the instruments PASS; 44 of the record's numbers MATCH. It ran 2065 tests on
+its own list and 4535 on a 55-file gate of its own choosing, 0 failed. It
+FAILED three checks, and each is answered below.
+
+**1. AN ENCODED DOT SEGMENT WALKED PAST THE BOUNDARY (MEDIUM) -- FIXED.** The
+two new People-tab lines carried the root entries' class, `%` included, and
+admitted `/company/%2e%2e/people/`: the URL standard reads `%2e%2e` as `..`,
+so a browser lands on `/people/`, which the boundary refuses and `goto` never
+re-checks. The root lines had the same hole, older (`/company/%2e%2e/` and
+`/school/%2e%2e/` landed on the site root), and their own comments promised
+a dotted slug fails closed. The 197-address corpus held literal dots only.
+Fixed on all four lines -- `%` dropped from the People lines, a lookahead
+refusing a segment of one or two encoded dots on the roots -- with
+`company_page.slug_is_addressable` refusing the same six spellings so the
+root/shaper coupling still agrees. Over 1705 addresses (the shipped corpus,
+the verifier's 1562, 96 more): 90 newly refused, nothing newly admitted,
+percent-encoded names still admitted on the roots. Digest `a13f66bebba387cd ->
+17409e16e7abbcc8`. Reach before the fix was nil (nothing composes such an
+address), so this was defence in depth, not an open route.
+
+**2. THREE PROBES HELD A CONTROL THE ADMISSIONS OPENED (MEDIUM) -- FIXED.**
+`_probe_newsletter_routes.py` and `_probe_route_vs_surface.py` refused to
+certify their tables, and `_probe_unmeasured_surface_addresses.py` failed
+its control and exited 0 anyway. Each control is re-aimed at the People
+tab's query spelling, the class it held; the last probe now exits 1 on a
+failed control; and `_probe_route_vs_surface.py`'s OTHER control, the people
+search, had failed since 2026-09-20 unnoticed and is re-aimed at the content
+vertical. `_probe_company_family_blast.py` was removing two `/company/`
+entries by prefix again -- the defect its own comment records from its first
+run -- and now removes the root by its full text. All four exit 0 with every
+control passing.
+
+**3. A SHIPPED PAYLOAD STATED A FALSE BOUNDARY FACT (MEDIUM) -- FIXED.**
+`company_root`'s `count_read` verdict told every caller the People tab "is
+refused by the read boundary", as did `linkedin_company_page_counts`'
+description and `company_page`'s docstrings. Each now says the tab is not
+opened by that tool, and is admitted on its own roster line that no tool
+reads yet.
+
+**THE LOWER FINDINGS, AND WHAT WAS DONE.** The roster test's import walk was
+blind to relative imports; it now uses the orphan test's reader, with five
+planted forms. Its condition-4 test now says it cannot catch a budget overrun
+-- the budget is carried by process, not code. `ROSTER-ENUMERATION` in
+`scripts/check_exclusion_basis.py` needed nothing: it is already in `EMPTIED`,
+so a row filed on it fails the run. The PINNED comment in
+`census_completion.py` now says six of the moved rows were re-gated RULING;
+the triage's `N 178` annotation carries its item-3 verdict;
+`search_verticals.ROWS_SERVED` is renamed `ROWS_NAMED_BY_THE_RULING`, because
+`M C70` is named for groups and its page is not the groups search; and the
+kept prior notes that still said "refused" carry a dated marker. Section E's
+counts are corrected (58 files, 19 always-run guards) and E.1 prices the
+bracket loads.
+
+**LEFT AS THEY ARE, and why.** The two red intermediate commits (the item-1
+and item-2 commits each failed a corpus guard, repaired by the commit after)
+stay: history is not rewritten here, and the merge can squash each pair.
+Fifteen non-ASCII bytes in `_audit/_census/network.md` are on four lines this
+lane never touched. The school People line admits a spelling no capture draws
+-- capture F.6 decides, and the line should go if the tab lives only under
+`/company/`. The argument separating `N 161` from `N 104` ("discovers" against
+"names") is weaker than the rule it supports; the verdict stands on the rule.
+And condition 1 of the search admission still needs the orchestrator's
+reading (section B).
