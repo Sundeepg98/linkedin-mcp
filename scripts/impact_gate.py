@@ -875,6 +875,35 @@ _TOPLEVEL_FOLDERS = ("scripts", "linkedin_server", "tests", "_audit")
 _TRACKED_SET = re.compile(r"ls-files|ls_files")
 _ROOT_WALK = re.compile(r"(?:REPO|_ROOT|ROOT)\s*\.\s*rglob")
 
+#: CORPUS-WIDE BY WHAT THEIR SCRIPTS READ, which the detectors below cannot see
+#: -- declared, each with the measured reason, and held so a declaration can
+#: never outlive the blind spot that made it necessary
+#: (``tests/test_impact_gate_selects_data_dependencies.py``: every entry must
+#: exist, and none may be one the derivation already finds).
+#:
+#: WHY NOT WIDEN THE DERIVATION INSTEAD, measured 2026-09-24: applying the same
+#: three detectors to every script a test names or imports adds EIGHT files,
+#: one of them ``tests/test_sdui_surfaces_fixture.py`` at 716 s of test time,
+#: pulled in by a HELPER it imports from the identity sweep script rather than
+#: by the sweep. The floor runs on every gate; a rule that cannot tell a sweep
+#: from a helper import would have made every gate twelve minutes longer. And it
+#: would still miss the census entry below, whose enumeration is a fixed slice
+#: table two imports away.
+ALWAYS_RUN_DECLARED: dict[str, str] = {
+    "tests/test_the_package_compiles_on_its_oldest_python.py": (
+        "its script, scripts/py_baseline_lint.py, enumerates every tracked .py "
+        "(git ls-files) and parses each under the floor's rules, so an edit "
+        "anywhere can break it; CI went red on 603f4d3 with no selection "
+        "having run it"
+    ),
+    "tests/test_gap_rows_on_refused_addresses.py": (
+        "its script reads EVERY census slice (count_census_states' slice "
+        "table) and the read boundary, so any census edit can move its pin; "
+        "it moved twice unselected, 55 -> 60 on 603f4d3 and 60 -> 70 at lane "
+        "Y2's merge"
+    ),
+}
+
 
 def always_run_files(corpus: "Corpus") -> list[tuple[str, str]]:
     """``(path, why)`` for every corpus-wide sweep. DERIVED, never listed.
@@ -942,6 +971,10 @@ def always_run_files(corpus: "Corpus") -> list[tuple[str, str]]:
                 why.append("sweeps " + " + ".join(folders))
         if why:
             out.append((rel, "; ".join(why)))
+    derived = {rel for rel, _why in out}
+    for rel, reason in ALWAYS_RUN_DECLARED.items():
+        if rel not in derived and (REPO / rel).exists():
+            out.append((rel, "DECLARED: " + reason))
     corpus.floor = out
     return out
 
