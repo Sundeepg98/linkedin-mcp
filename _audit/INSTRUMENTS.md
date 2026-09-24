@@ -10284,7 +10284,14 @@ the writer of the impact selection (the gate's own `impact_set()`, written
 out in full because `--plan-only` prints 40 names), its runner, the
 in-memory re-pin of 70.5, and the two drivers that put the five new readers
 and the new tool through their families' harnesses without writing either
-baseline.
+baseline. And the integration's (2026-09-24): the row-by-row census resolver
+and the register's append resolver, the census row editor, the lister of
+every site behind one correction-guard pair, and the harness that swapped the
+pre-seam gate in to show the new tests failing. The census resolver is the
+one worth keeping as a METHOD -- resolve a census conflict three-way from the
+index stages, row by row, refusing on any row both sides changed -- and it is
+recorded in the lane record's integration section rather than registered
+here, because none of its refusals was shown firing on a planted collision.
 
 ### 70.5 A LIST OF PIN MOVES IS PROVEN COMPLETE BY APPLYING IT, IN MEMORY
 
