@@ -84,7 +84,30 @@ SCRIPT = ROOT / "scripts" / "check_gap_rows_on_refused_addresses.py"
 #: names its entry as that blocker. The four above are still here and still
 #: named by the script's own output. The count moves again only when a row
 #: leaves GAP or a boundary entry changes, and either is visible here.
-EXPECTED_GAP_ROWS = 55
+#:
+#: **55 -> 60 on 2026-09-24, lane L7's merge, A THIRD CAUSE, NAMED: A CELL
+#: NEWLY NAMING AN ADDRESS.** Record: `_audit/2026-09-24-lane-l7-profile-writes.md`.
+#: No row entered GAP and no boundary entry changed. Lane L7 classed five rows
+#: that were already GAP, and their cells now backtick the address each would
+#: need: ``P D27``, ``P D29`` and ``P G2`` on ``/edit/``, and ``P E6`` and
+#: ``N 114`` on ``/endorse``. Each stays GAP on the blocker its own cell names
+#: (for ``P G2``, the refused ``/edit/`` form; for the other four, reasons of
+#: their own), under ``INCIDENTAL-CAPTURE-IS-NOT-A-RULING``. The five were
+#: found by diffing this script's row list at `9b9a4d0` (55) against the
+#: merged tree (60): five added, none removed.
+#:
+#: **60 -> 70 on 2026-09-24, lane Y2's integration, BOTH CAUSES AT ONCE.**
+#: Record: `_audit/2026-09-24-lane-y2-admission.md`, Integration 2026-09-24.
+#: No boundary entry changed. Two rows ENTERED GAP -- lane Y2 admitted them --
+#: on a settings address the gate refuses on ``/settings/``: ``J 157``
+#: (LinkedIn Learning's settings) and ``M C100`` (the feed's default view). And
+#: eight rows already GAP gained a cell NEWLY NAMING AN ADDRESS, each an
+#: evidence sentence lane Y2 appended with the address LinkedIn draws for it:
+#: ``P K1``, ``P K2``, ``P L2b``, ``P N15``, ``P N16``, ``P N17``, ``P N18``
+#: and ``P N20``. Each stays GAP on the blocker its own cell names. Found by
+#: diffing this script's row list on master `66aaa95` (60) against the merged
+#: tree (70): ten added, none removed.
+EXPECTED_GAP_ROWS = 70
 
 
 def _run(*args: str) -> subprocess.CompletedProcess:
