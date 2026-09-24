@@ -720,12 +720,17 @@ SANCTIONED_WRITES: dict[str, WriteSpec] = {
             "is stated in reversible_by."
         ),
         reversible_by=(
-            "NOBODY, through this server, in either direction. Withdrawing is "
-            "in PERMANENTLY_FORBIDDEN ('destruction is not a write this design "
-            "covers, at any confirm level') and /withdraw is on the read "
-            "boundary's forbidden list. So whatever LinkedIn's product may "
-            "allow, an application this server sent is one it can never take "
-            "back, and it must be treated as irreversible on that ground alone."
+            "NOBODY -- and since 2026-09-24 the ground is LinkedIn's, not this "
+            "server's. This field used to say \"Withdrawing is in "
+            "PERMANENTLY_FORBIDDEN ('destruction is not a write this design "
+            "covers, at any confirm level')\"; that entry was retired by "
+            "OUTWARD-CLASSES-BUILT-BEHIND-GRANTS, which builds withdrawing his "
+            "own items behind the grant. What stands is LinkedIn's own Help "
+            "Center (a512388), quoted in _audit/_census/jobs.md: 'You cannot "
+            "edit or withdraw an application once submitted through "
+            "LinkedIn.' So outward_classes records withdraw_application as "
+            "BLOCKED, not a LinkedIn capability, and an application this "
+            "server sends is one nobody can take back."
         ),
         residue=(
             "IRREVERSIBLE IN AUDIENCE, and that half is certain even though "
@@ -1261,22 +1266,27 @@ SANCTIONED_WRITES: dict[str, WriteSpec] = {
         reversibility_measured=False,
         reversibility_class="STILL-UNKNOWN",
         reversibility_evidence=(
-            "NOT MEASURED, and the shape of the gap is worth stating because "
-            "it is the same one the notifications census hit. Each post draws "
-            "an overflow control -- 'Open control menu for post by <him>', "
-            "measured 8 times on his own profile -- and it renders "
-            "aria-expanded='false'. Its ITEMS have never been read. So "
-            "whether LinkedIn offers Delete on a post is something this "
-            "server has not established, and the notifications precedent is "
-            "that an unopened overflow menu is not evidence about what is "
-            "inside it."
+            "NOT MEASURED as a reversal, and the half that was unmeasured has "
+            "moved. Each post draws an overflow control that renders "
+            "aria-expanded='false', and this field used to say \"Its ITEMS "
+            "have never been read\". On 2026-09-23 and 2026-09-24 the live "
+            "lane opened that menu on his own post's permalink "
+            "(linkedin_server/share_link.py): its items include 'delete post' "
+            "and 'edit post', which are absent on another member's item. So "
+            "LinkedIn draws a delete on his own post. What pressing it draws "
+            "-- a confirmation, or the deletion itself -- has never been "
+            "observed, and this server has deleted nothing."
         ),
         reversible_by=(
-            "NOBODY, through this server. Deleting is in "
-            "PERMANENTLY_FORBIDDEN ('destruction is not a write this design "
-            "covers, at any confirm level') and '/delete' is on the read "
-            "boundary's forbidden list. Whatever LinkedIn's product allows, a "
-            "post published here is one this server can never take down."
+            "NOT YET through this server; by hand, he can. This field used to "
+            "say \"NOBODY, through this server. Deleting is in "
+            "PERMANENTLY_FORBIDDEN\"; that entry was retired 2026-09-24 "
+            "(OUTWARD-CLASSES-BUILT-BEHIND-GRANTS), and deleting his own post "
+            "is a class built behind the grant -- outward_classes records "
+            "delete_own_post as NEEDS-CAPTURE, because the step after "
+            "'delete post' has never been captured. Until that is built, "
+            "nobody takes a post down through this server. And a deletion "
+            "removes the post, not what its audience has already read."
         ),
         residue=(
             "IRREVERSIBLE IN AUDIENCE, and this half is certain even though "
@@ -1405,14 +1415,24 @@ SANCTIONED_WRITES: dict[str, WriteSpec] = {
         reversibility_measured=False,
         reversibility_class="STILL-UNKNOWN",
         reversibility_evidence=(
-            "NOT MEASURED. No comment has ever been opened by this server and "
-            "no comment's own overflow menu has been read, so whether "
-            "LinkedIn offers a delete on one is unestablished -- the same gap "
-            "as publish_post and for the same reason."
+            "NOT MEASURED as a reversal. This field used to say \"no comment's "
+            "own overflow menu has been read\"; one was read on 2026-09-04 "
+            "(_audit/INSTRUMENTS.md, the census-delta entry): three "
+            "[role=menuitem] nodes -- 'Copy link to comment', 'Edit', "
+            "'Delete'. So LinkedIn draws a delete on a comment's own menu. "
+            "What pressing it draws has never been observed, and this server "
+            "has deleted nothing."
         ),
         reversible_by=(
-            "NOBODY, through this server: deletion is permanently forbidden "
-            "here and '/delete' is on the read boundary's forbidden list."
+            "NOT YET through this server; by hand, he can. This field used to "
+            "say \"NOBODY, through this server: deletion is permanently "
+            "forbidden here\"; that refusal was retired 2026-09-24 "
+            "(OUTWARD-CLASSES-BUILT-BEHIND-GRANTS), and deleting his own "
+            "comment is a class built behind the grant -- outward_classes "
+            "records delete_own_comment as NEEDS-CAPTURE: what 'Delete' draws "
+            "has never been captured, and aiming one comment by its id is "
+            "measured on one page only. A deletion does not recall the "
+            "notification the item's author received."
         ),
         residue=(
             "IRREVERSIBLE IN AUDIENCE, and worse than a post's in one "
@@ -1937,9 +1957,17 @@ SANCTIONED_WRITES: dict[str, WriteSpec] = {
             "and holds no evidence either way."
         ),
         reversible_by=(
-            "NOBODY, through this server. Withdrawing is destruction, which "
-            "is in PERMANENTLY_FORBIDDEN, and '/withdraw' and 'invitation' "
-            "are both on the read boundary's forbidden list."
+            "NOT YET through this server; by hand, he can. This field used to "
+            "say \"Withdrawing is destruction, which is in "
+            "PERMANENTLY_FORBIDDEN\"; that refusal was retired 2026-09-24 "
+            "(OUTWARD-CLASSES-BUILT-BEHIND-GRANTS), and withdrawing his own "
+            "invitation is a class built behind the grant -- outward_classes "
+            "records withdraw_invitation as BLOCKED: the Sent Invitations "
+            "manager is refused by the read boundary ('invitation' and "
+            "'/withdraw' are both on its forbidden list) and the badge cost "
+            "of that /mynetwork/ sub-page is unmeasured. LinkedIn does offer "
+            "the withdraw (Help Center, _audit/_census/network.md s8.5); a "
+            "withdraw does not un-notify."
         ),
         residue=(
             "AN INVITATION IS A REQUEST TO A REAL PERSON, and it lands as a "
@@ -2094,10 +2122,17 @@ SANCTIONED_WRITES: dict[str, WriteSpec] = {
             "unestablished here."
         ),
         reversible_by=(
-            "NOBODY, through this server, and the VERDICT is unchanged while "
-            "half its reasoning was false until 2026-09-03. What is true is "
-            "the whole of it: deletion is permanently forbidden here, at any "
-            "confirm level, so an un-send does not exist in this design. "
+            "NOBODY: a delivered message cannot be recalled. The verdict is "
+            "unchanged and its ground moved twice. This field used to say "
+            "\"deletion is permanently forbidden here, at any confirm level, "
+            "so an un-send does not exist in this design\"; that refusal was "
+            "retired 2026-09-24 (OUTWARD-CLASSES-BUILT-BEHIND-GRANTS), so the "
+            "ground is now the message's own nature: it is delivered to a "
+            "person and arrives as an email as well as a notification. "
+            "LinkedIn documents deleting a sent message within 60 minutes "
+            "(census M M12); that removes it from a thread, never from an "
+            "inbox or from what was read, and no per-message menu has been "
+            "opened by this server, so even that is unbuilt. "
             "WHAT THIS FIELD USED TO ADD WAS WRONG -- \"'/messaging/compose' "
             "is on the read boundary's forbidden list, so nothing here can "
             "reach a composer in either direction.\" The SUBSTRING is "
@@ -2152,44 +2187,29 @@ SANCTIONED_WRITES: dict[str, WriteSpec] = {
 # IMPOSSIBLE with a measurement behind it, or if performing it would be
 # unattended -- taste and discomfort are not grounds, and three of these were
 # nothing else.
+#
+# THREE MORE LEFT ON 2026-09-24, and what is left is exactly the six whose
+# grounds are themselves MITIGATIONS. Ruling OUTWARD-CLASSES-BUILT-BEHIND-
+# GRANTS (the orchestrator applying the operator's 08:11 principle, registered
+# in _audit/RULINGS.md) builds three classes behind the single-use grant, off
+# by default, each fired only at a target he names: repost or share, endorse or
+# recommend, and delete or withdraw one of HIS OWN items. So
+# "repost_or_share", "endorse_or_recommend" and "delete_or_withdraw_anything"
+# are gone from this dict. Their text is kept VERBATIM in
+# outward_classes.RETIRED_PERMANENT_REFUSALS rather than deleted, because
+# their grounds were measurements and the measurements are still true -- each
+# fact now sits in the record that needs it (outward_classes.
+# OUTWARD_CLASS_SPECS), and every spec above whose reversible_by leaned on
+# the destruction entry now names its own route or why there is none.
 PERMANENTLY_FORBIDDEN: dict[str, str] = {
-    "repost_or_share": (
-        "NARROWED 2026-08-30 from an entry that read 'post_or_comment_or_like_"
-        "or_share: public speech in his name, unbounded blast radius, no "
-        "job-hunt value'. Three quarters of that entry is gone because its "
-        "ground was TASTE and the operator dissolved that bucket: posting, "
-        "commenting and reacting are now sanctioned specs behind the gate, "
-        "each refusing on a measured blocker rather than on distaste. What "
-        "survives is the fourth: a repost republishes SOMEBODY ELSE'S item to "
-        "his network under his name, so the thing broadcast is not his and "
-        "the audience is. Measured beside the others -- 'Repost' is a button "
-        "with aria-expanded='false', 3 on the feed and 8 on his profile, and "
-        "its menu has never been opened, so what a repost even offers is "
-        "unobserved. It was not among the capabilities asked for, and it is "
-        "not quietly added here"
-    ),
-    "endorse_or_recommend": (
-        "REASON REPLACED 2026-08-30. It used to read 'a statement ABOUT "
-        "ANOTHER PERSON, which is not his to automate' -- which was POLICY, "
-        "and was overtaken by the operator's own 2026-08-25 ruling that an "
-        "endorsement is a gift to the person receiving it rather than an "
-        "extraction from them. The refusal survives on a MEASUREMENT instead, "
-        "and the measurement was re-taken the day the reason changed: zero "
-        "endorse controls across 13 tracked fixtures with zero shaping "
-        "blindness, zero on his own skills surface, and zero among the 222 "
-        "controls read live on his own profile on 2026-08-30. You cannot "
-        "endorse yourself, so the only surface that would carry the control "
-        "is a THIRD PARTY'S PROFILE -- and loading one leaves them a durable "
-        "record, which this package measures from the receiving end with "
-        "linkedin_who_viewed_me. IMPOSSIBLE AS SPECIFIED, not unwanted"
-    ),
     "deanonymise_a_viewer": (
         "six of ten profile viewers chose anonymity; the row LinkedIn renders "
         "him is the whole of what he is entitled to"
     ),
     "load_a_third_partys_profile_to_measure_a_control": (
-        "ADDED 2026-08-30, and it is the rule the endorsement ruling above "
-        "rests on rather than a restatement of it. A profile view is an "
+        "ADDED 2026-08-30, and it is the rule the endorsement ruling that "
+        "stood above it until 2026-09-24 rested on rather than a restatement "
+        "of it. A profile view is an "
         "EMISSION, and this server can read the receiving end of that signal: "
         "linkedin_who_viewed_me returns rows, reaching 365 days back on his "
         "Premium Career account, and every row is somebody who loaded a "
@@ -2199,20 +2219,6 @@ PERMANENTLY_FORBIDDEN: dict[str, str] = {
         "cost lands entirely on somebody who is not him. Whether HE chooses "
         "to open a profile is his own affair; this server may not do it for a "
         "measurement"
-    ),
-    "delete_or_withdraw_anything": (
-        "destruction is not a write this design covers, at any confirm level. "
-        "NOTE WHAT NOW DEPENDS ON THIS ENTRY, added 2026-08-30 and CORRECTED "
-        "the same day after a review counted it: FIVE of the specs above cite "
-        "it in reversible_by -- an application, a post, a comment, an "
-        "invitation and a message all say NOBODY can take them back through "
-        "this server, and this line is the reason. Shortening it would "
-        "silently make five reversibility claims wrong at once. The list first "
-        "written here named a REACTION and omitted an APPLICATION, which was "
-        "wrong in both directions at once; react_to_item does not lean on this "
-        "entry at all, because its reversible_by rests on a different gap -- "
-        "the ON-state label has never been observed, so there is no selector "
-        "for the inverse whatever this list says"
     ),
     "mark_notifications_read": (
         "clearing his unread badge destroys signal he has not seen, and the "

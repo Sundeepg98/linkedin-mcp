@@ -1347,7 +1347,10 @@ REVERSIBILITY_CLASS = {
     # surface that would settle it -- his applied list -- is empty, so there is
     # nothing there to look for a withdraw control on. It carries
     # irreversible=True regardless, on the separate and certain ground that
-    # withdrawing is permanently forbidden here in either direction.
+    # LinkedIn offers no withdraw of a submitted application (Help Center
+    # a512388). That ground read "withdrawing is permanently forbidden here in
+    # either direction" until 2026-09-24, when OUTWARD-CLASSES-BUILT-BEHIND-
+    # GRANTS retired the refusal; the verdict did not move, its reason did.
     "apply_job": "STILL-UNKNOWN",
     "set_open_to_work": "REVERSIBLE",
     # 2026-09-23. REVERSIBLE on the same measurement as unfollow_company --
@@ -3343,8 +3346,23 @@ def test_the_write_module_passes_its_own_confinement_rule():
 
 def test_every_permanent_refusal_carries_its_reason():
     """An omission that does not explain itself reads as an oversight, and the
-    next agent 'fixes' it."""
-    assert len(PERMANENTLY_FORBIDDEN) >= 8
+    next agent 'fixes' it.
+
+    PINNED BY NAME SINCE 2026-09-24, NOT BY A FLOOR. This said ``>= 8`` and
+    the dict held nine; OUTWARD-CLASSES-BUILT-BEHIND-GRANTS then retired three
+    (repost or share, endorse or recommend, delete or withdraw), leaving the
+    six whose grounds are themselves mitigations. A floor would have gone red
+    for the right change and stayed green for a wrong one -- any six names
+    pass ``>= 6`` -- so the set is asserted against the ruling's own list in
+    ``outward_classes``, and the three retired names are asserted gone.
+    """
+    from linkedin_server import outward_classes
+
+    assert sorted(PERMANENTLY_FORBIDDEN) == sorted(
+        outward_classes.SURVIVING_PERMANENT_REFUSALS
+    )
+    for retired in outward_classes.RETIRED_PERMANENT_REFUSALS:
+        assert retired not in PERMANENTLY_FORBIDDEN, retired
     for name, reason in PERMANENTLY_FORBIDDEN.items():
         assert len(reason) > 40, name
 
