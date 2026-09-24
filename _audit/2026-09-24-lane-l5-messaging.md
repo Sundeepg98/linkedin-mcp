@@ -610,7 +610,10 @@ that result is in the lane's closing message.
 THE ORDER (the orchestrator's, sampled at 05:10) was obeyed only after the disk agreed with it: this
 lane's head was `f3c862a` and clean, and local `master` was `ff98a7f` -- 30 commits past the base by
 `git rev-list --count 9c219c8..master` (the order said 31) -- carrying lanes R, G and S and rulings
-batch 3. `master` was re-read before each commit below and had not moved.
+batch 3. `master` was re-read before each commit of the first merge below and had not moved.
+It moved three times afterwards -- to `9b9a4d0`, `603f4d3` and `66aaa95` -- and the second
+and third merge subsections say what each brought.
+(This sentence said "before each commit below" until the third merge was recorded.)
 
 ### The merge and its conflicts
 
@@ -747,6 +750,74 @@ Fourteen paths conflicted, and each was a count both sides moved or a note both 
 - `_audit/INDEX.md`, `_audit/RULINGS.md`, `_audit/_census/blocker-map.tsv`: master's copies, every
   other path staged first, regenerated to a fixed point.
 
+### The third merge: master moved to `603f4d3`, then `66aaa95`, while the second was being checked
+
+After `ad7254b`, local `master` read `603f4d3` -- lane L7's merge: `linkedin_mark_company_interest`,
+a write (census `P I14`, COVERED-UNFIRED), and `linkedin_update_profile_field` pressing Save -- and,
+by the time the cold re-check of `ad7254b` had finished, `66aaa95`, which fixed the two tests CI
+failed on `603f4d3`. The merge was resolved in a scratch dry run first (`git merge-tree` of this
+branch and `master`, each diff3 block resolved by its index with its content asserted), and the
+real merge's index stages were then checked byte-identical to the blobs the dry run resolved.
+`cb2457b` merges `66aaa95` (parents `ad7254b`, `66aaa95`). Sixteen paths conflicted; no census row
+and no write-class line changed on both sides.
+
+- THE CHANGES BOTH SIDES MADE IDENTICALLY, AND THE ORDINAL BOTH SIDES CLAIMED. Each lane made its
+  own new write the fourteenth. Where both sides changed a line the SAME way, a three-way merge
+  takes one copy without a conflict: `FOURTEEN WRITE` in the instructions and "FIFTEEN actions
+  where this surface registers FOURTEEN write-shaped tools" merged clean and wrong, and the
+  instruction-words map's `14` and the receipt and preview-state `== 14` conflicted only through
+  their comments. Those were found by listing every line both sides added identically against
+  `9b9a4d0` (21 files changed on both sides). Where each side wrote the same ordinal about a
+  different action -- the instructions' paragraphs, the spec and `PERFORMABLE` comments, both
+  hand-typed `server_info` lists -- a search for the ordinal found them. Each was moved by hand:
+  fifteen write tools, sixteen sanctioned actions; `mark_company_interest` is the fourteenth,
+  because it landed on `master` first, and `send_reply` the fifteenth. Sections 3 and 8, written
+  before either merge, still call it the fourteenth.
+- The counts, MEASURED on the merged registry: 56 tools, 87 parameters, 41 read, 15 write, 15
+  performable, 16 sanctioned actions (`set_open_to_work` still has no tool), 12 sanctioned
+  mutating calls -- lane L7's 53 and 80 plus this lane's three tools and seven parameters. README,
+  `__init__.py`, `server.py`'s docstring and instructions, the two surface tests and the tool pin
+  each keep both sides' dated notes.
+- `scripts/check_write_classes.py`: the two lanes relaxed the same rule differently on the same
+  day. Lane L7 let R3 carry a disposition and kept R2 classify-only; this lane let R2 and R3 both
+  (WRITE-CLASS-B let R2 be built: `M M10` and `M M17` are `built:send_reply`, `M M47` is queued).
+  The merge keeps the wider rule -- lane L7's R2 clause would convict three of this lane's lines --
+  and lane L7's two R3 tests pass under it. The header in `tests/test_write_classes.py` that said
+  R2 "is still classify-only" was made false by the merge and is corrected in place.
+- `_audit/_census/write-classes.tsv`: merged row by row against the base, each line from the side
+  that changed it -- 31 this lane's, 36 lane L7's (its profile-family rows, `N 114` and `N 176`),
+  none changed on both -- and the preamble this lane's, which lane L7 had left as it was.
+  `check_write_classes` GREEN, 325 lines.
+- `scripts/census_completion.py`: every figure MEASURED on the merged tree, and each equals lane
+  L7's pin moved by this lane's three rows: adjudicated 198 -> 201, delivered_broad 109 -> 112,
+  unfired 30 -> 33, gap 506 -> 503, gap_write 323 -> 321, b1_standing 11 -> 13; delivered_strict
+  79, gap_read 90, b3_admitted 36, b3_blocked_on_nothing 1 and b1_no_ruling 20 not moved by the
+  merge, because lane L7 moved no read row. `--check` exit 0; bucket 1 reads 13 standing (`P I14`
+  beside `M M10` and `M M17`) and 20 held by no ruling, of 33.
+- The triage split, re-derived with `scripts/triage_messaging_gap_rows.py`: 113
+  `{R 11, W 99, R+W 3}`, RETURNED-OUTSIDE-LEDGER 14 -- unchanged, because lane L7 moved no
+  messaging row.
+- `tests/test_gap_rows_on_refused_addresses.py`, one of the two tests `66aaa95` repaired, pins 60
+  on `master`. Its script counts 55 on this lane's previous head, as on `9b9a4d0`, and 60 on the
+  merged tree, where the test passes.
+- `tests/reader_leak_baseline.json` and `tests/tool_envelope_baseline.json`: both sides' entries,
+  then each regenerated by its own writer, byte-identical to the union.
+  `tests/landing_interpolation_baseline.json` regenerated unchanged.
+- `_audit/INSTRUMENTS.md`: both sides appended -- this lane's 69, then lane L7's 70.
+- `_audit/INDEX.md`, `_audit/RULINGS.md`, `_audit/_census/blocker-map.tsv`: master's copies, every
+  other path staged first, all three regenerated to a fixed point (two write rounds, three
+  `--check` exit 0).
+
+THE METHOD, FOR THE NEXT MERGE OF TWO LANES THAT EACH ADD A WRITE: a clean auto-merge of a count
+is not evidence the count is right. Before trusting one, list the lines both sides added
+identically against the merge base, and search both sides' additions for the ordinal each one
+claimed; here those two searches found the sites this merge moved by hand. The dry-run scripts
+(the merge-tree preview, the per-block resolver, the identical-line lister, the row merger) lived
+in a scratch directory outside the repository and are declared disposable.
+
+WHERE THE CHASE STOPS: `master` read `66aaa95` when this subsection was committed. If it has
+moved again, this branch is one more merge behind it, and nothing here was measured against it.
+
 ### Integration commits
 
 | commit | what |
@@ -756,7 +827,10 @@ Fourteen paths conflicted, and each was a count both sides moved or a note both 
 | `7d13af2` | every pin, the baselines, item 4 (red first), the instructions, the tsv header |
 | `fd485c2` | this section as first written, `_audit/INSTRUMENTS.md` 69.9 and 69.10, the generated files |
 | `9fbdef0` | the merge of `master` `9b9a4d0`; conflicts as in the subsection above |
-| the commit carrying this line | the second merge's subsection, and the generated files |
+| `ad7254b` | the second merge's subsection, and the generated files |
+| `cb2457b` | the merge of `master` `66aaa95` (lane L7's merge and its CI fix); conflicts as in the third merge's subsection |
+| `afe9b1c` | the merge's dated notes name the master it merged, `66aaa95`; they said `603f4d3`, the commit the resolutions were first built against |
+| the commit carrying this line | the third merge's subsection, and the generated files |
 
 ### Gates run on the integrated branch
 
@@ -776,10 +850,28 @@ Fourteen paths conflicted, and each was a count both sides moved or a note both 
   `count_census_states --expect J=92,P=151,M=113,N=148` MATCH at 504; `check_read_addresses`
   GREEN 90 of 90; `check_write_classes` GREEN 325; `ruling_holds` GREEN; `pin_census_rows` no
   drift, 704; `measure_pointer_graph --check` PASS, 67 pointers. The seventeen mutations were
-  run again over a copy of `9fbdef0`; their result is in the closing message with the final
-  gate.
+  run again over a copy of `9fbdef0`: seventeen kills, every file restored byte for byte.
+- The gate over `ad7254b` (the corpus-wide floor of 18 files and 31 lane and pin files): 4434
+  passed, 1 xfailed, 0 failed. A cold re-check of `ad7254b` against a fourteen-item checklist
+  passed thirteen items; the one it marked failed by its letter, a search of the added lines
+  for path strings, found three uses of the bare word for a scratch directory and no path.
+- THE THIRD MERGE, over the merge's own tree (`cb2457b`): the census instruments --
+  `census_completion --check` exit 0; `count_census_states --expect J=92,P=150,M=113,N=148`
+  MATCH at 503; `check_read_addresses` GREEN 90 of 90; `check_write_classes` GREEN 325;
+  `ruling_holds` GREEN; `pin_census_rows` no drift, 704; `measure_pointer_graph --check` PASS,
+  66 pointers. The identity sweep: PASS, 0 hits across 854 files; the pre-commit identity gate
+  on the merge: 0 hits across 33 staged files. No added line against `master` or against this
+  branch's previous head holds a non-ASCII byte.
+- SEVENTEEN MUTATIONS over a copy of `cb2457b`: seventeen kills, each failing the test named for
+  it; every anchor was found once, every file was restored byte for byte, and the unmutated copy
+  passed all sixteen named tests.
+- The gate over `cb2457b`, 94 test files -- the corpus-wide floor, the lane and pin files, the two
+  tests CI failed on `603f4d3`, lane L7's two test files, and every test file that reads the
+  census -- sharded over four workers by file: 5982 passed, 3 skipped (a symlink this platform
+  will not create), 1 xfailed (the known defect whose strict marker holds it), 0 failed.
 - The impact gate's plan, `--against ff98a7f`: 222 of 237 test files (94%), so it WIDENED TO THE
-  FULL SUITE. By the order the full suite was NOT run locally; CI certifies at merge.
+  FULL SUITE. By the order the full suite was NOT run locally; CI certifies at merge. Against
+  `9b9a4d0`: 227 of 242. Against `66aaa95`: 229 of 244 (94%), widened the same way.
 - The final gate over the commit carrying this section is reported in the lane's closing
   message: a record cannot carry the result of a gate that runs over it.
 
