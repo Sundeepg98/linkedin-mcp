@@ -277,11 +277,12 @@ def self_landing(url: Optional[str]) -> bool:
     """IS THIS THE URL ``/in/me/`` LANDS ON, BY LINKEDIN'S OWN ASSERTION? PURE.
 
     **ADDED 2026-09-24, BECAUSE THE GATE COULD NOT SEE HIS PROFILE AT ALL.**
-    ``/in/me/`` REDIRECTS to his vanity form, ``/in/<member>/`` with
-    ``?isSelfProfile=true`` behind it (measured four landings across two days,
-    section 2d of ``_audit/2026-08-31-linkedin-finish.md``; the redirect is
-    why ``/in/me/`` is the only profile spelling the read allowlist admits).
-    :func:`disclose` reads ``page.url`` -- the LANDED url -- so every press on
+    ``/in/me/`` REDIRECTS to his vanity form -- a member path carrying his
+    slug, with ``?isSelfProfile=true`` behind it (measured four landings
+    across two days, section 2d of ``_audit/2026-08-31-linkedin-finish.md``).
+    That redirect is also why ``/in/me/`` is the one profile spelling the
+    read boundary lets in. :func:`disclose` reads ``page.url`` -- the LANDED
+    url -- so every press on
     his own profile was refused ``address_not_admitted``, TERMINAL: NEVER, for
     the one profile the allowlist exists to admit. Measured in-process
     2026-09-24 on an invented vanity. Reads and writes already accept this

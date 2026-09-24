@@ -1666,5 +1666,19 @@ NOT run locally. Run instead: the 15 test files that use the press gate, the
 editor-field, orphan-module and blast-radius tests, and the 18 corpus-wide
 guards -- 36 files, 3643 passed and 1 red, `test_page_text_is_never_printed`,
 which had been red since (a)'s commit and is repaired in its own commit
-(`45c46c8`; see (a)'s correction). The census instruments and the derived
-files: see the commit.
+(`45c46c8`; see (a)'s correction). Then, on the committed tree, that
+selection widened by everything the changed DOCUMENTS reach (the shipped
+`impact_gate.impact_set` over the session document, the network census
+table, the rulings register and the blocker map: 94 files, under the widening line on
+their own): 97 files, 5893 passed, 1 skipped, 3 red. Two were
+`test_stale_process_is_announced`, an artifact of committing `404da96` while
+the run was loading `2b75d01`, green on the stable tree. The third was real:
+`test_prose_that_makes_a_claim` found a sentence in `self_landing`'s
+docstring that put a member-path placeholder beside the words "the read
+allowlist admits" -- a sentence saying the allowlist admits ONLY `/in/me/`,
+but the guard reads the sentence, not the intent, and the repository has
+paid for exactly that shape before. Reworded in the next commit; the three
+files re-run: 164 passed. The census instruments: all exit 0 but
+`check_asserted_names_resolve`, whose eight findings sit in other waves'
+documents and are pinned by its test; the derived files are at a fixed
+point.
