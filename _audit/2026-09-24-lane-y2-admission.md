@@ -904,3 +904,41 @@ standing 11, none 20. Against lane L7's pins, six moved: achievable 634 -> 677,
 adjudicated 198 -> 199, delivered_broad 109 -> 110, gap 506 -> 548, gap_write
 323 -> 337, unfired 30 -> 31. Slice M 127; the read triage 79 verdicts; the candidate
 table at its fixed point.
+
+### I.11 The fifth master, a pin every gate here missed, and the final gates
+
+Master then read `66aaa95`, a fix after lane L7's merge: two test files, one of them
+re-pinning `tests/test_gap_rows_on_refused_addresses.py` at 60 for "a cell newly
+naming an address". Merged cleanly. **On this branch the same check lists 70**, and
+the pin now says so with every row named: two rows this lane admitted sit on
+addresses the gate refuses on `/settings/` (`J 157`, `M C100`), and eight rows already
+GAP gained an evidence sentence naming the address LinkedIn draws for them (`P K1`,
+`P K2`, `P L2b`, `P N15`-`P N18`, `P N20`). Found by running the check's row list on a
+clean copy of `66aaa95` (60) and on this tree (70): ten added, none removed.
+
+**THE FINDING: NO IMPACT GATE THIS LANE RAN SELECTED THAT TEST, AND IT WAS RED FROM THE
+FIRST MERGE ON.** The test runs `scripts/check_gap_rows_on_refused_addresses.py` as a
+subprocess, and the script reaches the census through `count_census_states`, so
+neither a path nor an import couples the test to a census slice; the gate's observed
+read map was recorded before the test was written. Every gate section I.7 and I.8
+report passed while this pin was off by this lane's own rows -- CI would have caught
+it at the train's merge, and master's own fix is what surfaced it here. So the last
+gates below add the census-reading test files the plan does not select, found by a
+text search for the census modules and paths: 38 of them.
+
+**THE FINAL GATES, on the fifth merge's tree:**
+
+    impact gate --against 66aaa95   30 changed paths, 71 test files (19 corpus-
+                                    wide) -- not the full suite. PASS over 3557
+                                    tests. NOT CHECKED: 172 of 243 test files
+    the 38 census-reading test      1374 passed, 1 xfailed
+      files outside that plan
+    whole-tree identity,            2407 passed
+      navigation, page-text and
+      credential guards
+    census instruments              GREEN; check_asserted_names_resolve on the same
+                                    eight pinned findings as before, its test green
+    the candidate table             at its fixed point, verdict layer 0 problems
+
+**NOT RUN:** 134 of the suite's 243 test files (the 172 outside the plan, less the 38
+run by hand); CI's three-platform matrix, since nothing was pushed; anything live.
