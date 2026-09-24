@@ -1033,6 +1033,35 @@ the census and pin guards a cell and a class line can move, the doc guards over 
 (it is a ruling). Reworded to "by the ruling"; the checker then finds nothing in this record, and that
 file with the cited-sha and correction guards: **65 passed**.
 
+### F.3 `P I14` / `P I15` -- NO CAPTURE ON RECORD DRAWS THE ON STATE; LEFT AS RECORDED
+
+**THE SEARCH.** Every HTML and JSON file under the main checkout's `_state/`, the live lane's
+worktree `_state/` and `tests/fixtures/`, offline, for the company-interest section (its help link,
+`/answer/a1380509`) and for any recorded reading of its control. Printed: file names, counts, and a
+button's text only when it is the measured OFF label or one of a closed set of guessed ON labels.
+
+**WHAT IT FOUND.** Five files draw the section: two raw captures in the main checkout's `_state/`
+(`cap-collection-top-applicant.html`, `cap-collection-top-choice.html`) and three tracked fixtures
+(`job_detail.html`, `job_detail_hydrated.html`, `job_detail_following_hydrated.html`). **Every one draws
+the OFF label, 'I'm interested', and none draws an ON state.** The recorded job-detail readings
+(`_state/live-job-detail-1.json` to `-7.json`, main checkout, 2026-09-20) all read the about section
+(`state: read`): `-6` and `-7` read `interest_control: true`, the OFF label drawn; `-1` to `-5` read
+`false`. That reading's rule is "the OFF label is among the section's lines", so `false` cannot tell an
+employer that draws no interest block from one that draws the block in another state -- including ON.
+
+**SO NOTHING IS BUILT, AND BOTH ROWS STAY AS RECORDED:** `P I14` BUILT and unfired behind its
+prerequisites, `P I15` `queued:INTEREST-ON-LABEL`. **ONE ADDITION TO C6, the cheapest first step of its
+route (a):** the five postings read in `-1` to `-5` are the only recorded employers whose card might
+draw the ON state. Those files name them by posting id; the files are gitignored and reach no clone,
+and this record does not copy them, so the list exists on this box only -- whoever takes the question
+to him reads it there. He can say, without a load, whether he has signalled any of those employers; a
+yes names C6's route-(a) posting, and a no rules the five out.
+
+**GATES (item 3).** This record is the only file the item moves (F.3, and two lines in the Capture
+queue: C1 marked done, C6's cheapest first step). The asserted-name checker finds nothing in this record;
+the cited-sha, asserted-name, correction-findable, banked-evidence, ignored-path, prose-claim, page-text,
+identity, person-name, credential and blocker-reason-locator guards, 4 workers: **1946 passed**.
+
 ## Live queue
 
 Loads counted off the code: `linkedin_profile_editor_values` and `linkedin_profile_editor_fields`
@@ -1091,6 +1120,10 @@ never a value, never an href, never a person's name.
 
 **C1 -- THE INTRO EDITOR, READ TO ITS LAST CONTROL** (`P A14`, `A15`, `A22`, `B9`; and condition 1 for
 every intro-editor live proof, in or out of this slice).
+**DONE 2026-09-23 BY THE LIVE LANE** (session 1, Entry 5 of `_audit/2026-09-23-live-lane-session-1.md`),
+and read at this lane's follow-up (F.1 to F.3): 17 controls, no notify control, and two unnamed
+switches identified as Open Profile and the Premium badge; `P A14`, `A15` and `A22` are not drawn. The
+spec is kept below as the record of what was asked.
 Address `https://www.linkedin.com/in/me/edit/intro/` -- ADMITTED (exact exemption,
 `PROFILE-EDITOR-ADDRESSES-ALLOWED`). Take `linkedin_profile_editor_fields()` (2 loads: the
 self-ownership read, then the editor) and, on the same page, for each control whose `name_source` is
@@ -1168,3 +1201,8 @@ exists, the two prerequisites deadlock**: nothing can show the ON label without 
 whether to accept a first press with an undo by hand is his call, not this lane's. Once C6 has the
 label, `P I15` is an offline build (the label, the section bound already in `company_interest`, the
 same grant) and its restore can be tested before `P I14` fires.
+
+**ROUTE (a)'S CHEAPEST FIRST STEP (follow-up, F.3):** five recorded job-detail readings
+(`_state/live-job-detail-1.json` to `-5.json` in the main checkout, 2026-09-20) read the about section
+without the OFF label. Their postings' employers are the only recorded candidates for a card drawing
+the ON state. He can say, at no load, whether he has signalled any of those employers.
