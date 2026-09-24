@@ -1255,6 +1255,34 @@ PINNED = (
 #: nothing. SEVEN of eight digests byte-identical; ``<functions>`` unmoved.
 #: One interpreter, 3.13; the 3.10 cell is CI's.
 #: ------------------------------------------------------------------------
+#: RE-FROZEN AGAIN 2026-09-24 BY THE LIVE LANE (Part 2 (d) of the
+#: orchestrator's integration order), ONE TUPLE ENTRY, ONE DIGEST MOVED --
+#: HIS ALL-ACTIVITY LIST, `/in/me/` FORM ONLY (census M C85):
+#:
+#:     _ALLOWED_URL_PATTERNS   c37e98f84ee443f2 -> b99f3c765fcb8043   49 -> 50
+#:     every other table       unchanged
+#:
+#:     ^https://www\.linkedin\.com/in/me/recent-activity/all/?$
+#:
+#: THE ORDER'S WORDS: "Admit /in/me/recent-activity/all/ (his own activity, a
+#: closed segment) so his own poll posts can be found." IT REVERSES A STATED
+#: SCOPE, and says so: lane L1's articles line listed `/recent-activity/all/`
+#: among what it did not admit, and `tests/test_l1_self_scoped_admissions.py`
+#: pinned it refused; that neighbour now points at this line's own file,
+#: `tests/test_own_activity_all_admission.py`, which pins the edges -- two
+#: spellings admitted, fourteen neighbours refused (other members, the
+#: activity root, the comments and reactions lists, five other tabs, a
+#: query, a sub-path, a longer word, two traversals), a control removing the
+#: line, and the blast radius with ``blast_radius.newly_admitted``: exactly
+#: its own two spellings, nothing newly refused.
+#:
+#: ATTRIBUTION, in this dict's form: the tree MINUS exactly this line hashes
+#: to ``c37e98f84ee443f2``, the value replaced, so nothing else rode in.
+#: Control: dropping the PRE-EXISTING articles line instead lands on
+#: ``fcd2612ef29ac056``. SEVEN of eight digests byte-identical;
+#: ``<functions>`` unmoved. Computed with this file's ``ast_digest``, one
+#: interpreter, 3.13.
+#: ------------------------------------------------------------------------
 READONLY_AST_AT_LAST_REFREEZE = {
     "<functions>": "d7e1d0922e3af446",
     "JS_MUTATION_TOKENS": "d47e30b67c583c1b",
@@ -1403,7 +1431,11 @@ READONLY_AST_AT_LAST_REFREEZE = {
     # c8c476ea47f0dfdd until the second REVIEW: commit of 2026-09-23 (lane
     # L1): one event by its numeric id. See that ledger entry, which also
     # lists the value for every combination of the two REVIEW commits.
-    "_ALLOWED_URL_PATTERNS": "c37e98f84ee443f2",
+    #
+    # c37e98f84ee443f2 until 2026-09-24 (the live lane, Part 2 (d)): his
+    # all-activity list in the `/in/me/` form, one line, on the
+    # orchestrator's order. See that ledger entry.
+    "_ALLOWED_URL_PATTERNS": "b99f3c765fcb8043",
     "_FORBIDDEN_SUBSTRING_EXEMPTIONS": "43e2bf7f3db0dbed",
     # 419e64a3cd92ec7e until the same REVIEW: commit: a third entry, excusing
     # exactly {"/follow"} for exactly the anchored follower-list address.

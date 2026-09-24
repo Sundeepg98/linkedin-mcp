@@ -119,8 +119,12 @@ NEIGHBOURS: dict[str, tuple[tuple[str, str], ...]] = {
         (f"{B}/in/{OTHER}/recent-activity/articles/",
          "ANOTHER MEMBER'S articles"),
         (f"{B}/in/me/recent-activity/", "the activity root"),
-        (f"{B}/in/me/recent-activity/all/",
-         "the drawn parent -- a different capability"),
+        # `/in/me/recent-activity/all/` -- "the drawn parent, a different
+        # capability" -- stood here until 2026-09-24, when the live lane
+        # admitted it by its OWN line on the orchestrator's order (M C85).
+        # Its edges are pinned in tests/test_own_activity_all_admission.py,
+        # which also shows this articles line and that one are two lines,
+        # neither standing in for the other.
         (f"{B}/in/me/recent-activity/comments/",
          "other people's posts he commented on"),
         (f"{B}/in/me/recent-activity/reactions/",

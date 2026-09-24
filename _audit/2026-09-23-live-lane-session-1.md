@@ -1682,3 +1682,84 @@ files re-run: 164 passed. The census instruments: all exit 0 but
 `check_asserted_names_resolve`, whose eight findings sit in other waves'
 documents and are pinned by its test; the derived files are at a fixed
 point.
+
+### (d) M C85: his all-activity list admitted, so a poll post of his can be found
+
+**THE ORDER'S WORDS:** "Admit `/in/me/recent-activity/all/` (his own
+activity, a closed segment) so his own poll posts can be found. If he has
+none, NEEDS-TARGET stands." Session 1 found no poll among the 8 items his
+profile's activity rail draws (Entry 2); the rail's "Show all posts" anchor
+opens this list, which draws the rest.
+
+**BUILT (nothing loaded, nothing pressed):**
+
+* `readonly._ALLOWED_URL_PATTERNS` gains ONE anchored line,
+  `^https://www\.linkedin\.com/in/me/recent-activity/all/?$` -- the `/in/me/`
+  form only, no class, no wildcard, no query, no sub-path -- with its
+  argument on the line. It REVERSES A STATED SCOPE and says so: lane L1's
+  articles line listed `/recent-activity/all/` among what it did not admit;
+  that comment now carries a dated pointer, and L1's test moves the address
+  out of its refused neighbours with the same pointer.
+* `tests/test_own_activity_all_admission.py`, in L1's shape: both spellings
+  admitted through the shipped gate; fourteen neighbours refused (another
+  member's list, the activity root, the comments and reactions lists, five
+  other activity tabs, a query, a sub-path, a longer word, two traversals);
+  the articles list shown admitted by its OWN line, so neither line stands
+  in for the other; a control removing this line, which refuses the target
+  and moves no neighbour (the revert path, proven); the blast radius with
+  `blast_radius.newly_admitted` -- exactly its own two spellings, nothing
+  newly refused -- and the instrument's own control, a family pattern over
+  the activity tree, admitting the comments list and a traversal onto a
+  third party.
+* The boundary re-freeze: `_ALLOWED_URL_PATTERNS` `c37e98f84ee443f2 ->
+  b99f3c765fcb8043`, 49 -> 50 patterns; the tree minus exactly this line
+  hashes to the value replaced; dropping the pre-existing articles line
+  instead lands on `fcd2612ef29ac056`; seven of eight digests
+  byte-identical, `<functions>` unmoved.
+* The address table: `M C85` gains the list as an also-driven address
+  (admitted), and its gate moves RULING -> MEASURE -- the next thing past the
+  boundary is a look at an admitted page, not a decision. No pin moves
+  (`census_completion --check` green: MEASURE is not blocked-on-nothing).
+  The census cell carries a dated note.
+
+**EXPECTED, NOT MEASURED: WHETHER THE LIST KEEPS THE `/in/me/` FORM.** Its
+sibling `/in/me/recent-activity/articles/` SERVED EXACTLY on its first load
+(session 1, load 12: relation "SERVED, exact"), so this one probably does
+too. A redirect would widen nothing: `browser.goto` asserts the requested
+url.
+
+**RED-PROOFS, each plant alone in a scratch copy (the new file, L1's
+admission tests and the boundary invariant):**
+
+    plant                                                        red
+    on the readonly.py before (d)                                  6
+    D1 the line widened to every activity tab                     19
+    D2 the line accepting any member's activity                    4
+    D3 the line accepting a query                                  4
+    D4 the line admitting a sub-path                               8
+    D5 the line removed (the admission not made)                   6
+
+Baseline and restored: 104 passed.
+
+**THE CAPTURE SPEC FOR SESSION 2 (one load, zero presses, zero writes):**
+
+    step  what
+    1     load /in/me/recent-activity/all/ once; record the landing as a
+          RELATION (served exact, or redirected by depth), never the url;
+          read the health line (walled, challenge terms)
+    2     in main, by structure: item urns by type, the rail reader's
+          authorship check on each item, poll-shaped nodes
+          (`main [class*="poll"]`), and -- offline in the capture -- the
+          count of "N votes" phrases. State the scope: what the first render
+          draws; scrolling for more is not sanctioned
+    3     capture the page to the gitignored state directory; if a poll post
+          OF HIS is found, its urn stays there, never in a tracked file
+    4     offline, not in the session: if a poll of his exists, build the
+          results reader from the captured markup -- counts only, under the
+          feed-content ruling -- and fire it in a later key; if none exists,
+          NEEDS-TARGET stands and the address table's gate returns to RULING
+
+**GATES:** the admission, L1-admission, boundary-invariant, blast-radius,
+search-blast-radius and prose tests, 142 passed; the address table's checker
+91 of 91 green with the new also-driven verdict; the census instruments as
+before.
