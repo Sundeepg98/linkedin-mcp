@@ -563,8 +563,15 @@ def test_the_action_set_is_the_one_this_file_was_measured_against():
     # phrase (and the group and the owner entry were widened to say so), and
     # its ``_VERIFIED_FROM`` row was checked against every owned phrase above
     # and found to contain none of them.
-    assert len(writes.PERFORMABLE) == 13, (
-        "writes.PERFORMABLE holds %d actions, not the 13 this file was "
+    # FOURTEEN FROM 2026-09-24 (lane L7's merge): ``mark_company_interest``'s
+    # two rows were read. Its ``_WHERE_TO_LOOK`` value ("the About-the-company
+    # card on that posting") and its ``_VERIFIED_FROM`` row were checked by the
+    # rest of this file with the rows in place -- every other test here passed,
+    # so neither prints a phrase another action owns -- and no owner entry was
+    # needed. ``update_profile_field``'s ``_VERIFIED_FROM`` row was rewritten
+    # the same day (a fresh navigation after Save) and passed the same checks.
+    assert len(writes.PERFORMABLE) == 14, (
+        "writes.PERFORMABLE holds %d actions, not the 14 this file was "
         "measured against: %s. Re-derive the phrase owners in this file for "
         "the new action, then update this count."
         % (len(writes.PERFORMABLE), sorted(writes.PERFORMABLE))

@@ -3,8 +3,20 @@
 An MCP server that shows you your own LinkedIn account data as structured tool
 results instead of pages you have to click through.
 
-**Fifty-two tools ship. Thirty-nine read. Thirteen write. None is
+**Fifty-three tools ship. Thirty-nine read. Fourteen write. None is
 write-shaped and unable to act.**
+
+**THAT LINE READ "Fifty-two ... Thirteen write" ON MASTER UNTIL LANE L7'S
+MERGE, 2026-09-24,** and "Fifty-two ... Thirty-eight read ... Fourteen write"
+on that lane's branch: each side had made a different tool its fifty-second.
+The fifty-third is a WRITE, `linkedin_mark_company_interest`: "I'm
+interested", pressed in the About-the-company card of one posting and aimed by
+the card's own employer. It tells that employer's recruiters, and this server
+holds no undo for it, so it fires only at a company you name. Census row
+`P I14`, COVERED-UNFIRED: built behind the same flag and single-use grant as
+every other write, and never fired. The same merge repaired
+`linkedin_update_profile_field`, which until then never pressed the editor's
+Save and reported success on an edit LinkedIn never stored.
 
 **THAT LINE READ "Fifty-one ... Thirty-eight read" UNTIL THE LIVE LANE MERGE,
 2026-09-24.** The fifty-second is `linkedin_own_item_link`: the share link of
@@ -886,7 +898,7 @@ linkedin_server/
   cdp_bridge.py              the recovery path: attach to a running Chrome
   dom.py                     the read-only harvesters and the control readers
   shape.py                   pure parsers and the result envelope
-  server.py                  the fifty-two tools
+  server.py                  the fifty-three tools
   errors.py
 tests/                       1393 tests, no network, no account
   fixtures/                  frozen LinkedIn markup, scrubbed
