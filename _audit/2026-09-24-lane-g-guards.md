@@ -867,3 +867,212 @@ scratchpad. What it found:
 
 As briefed, that was the one pass; the second round and this section are the
 only changes since, and the second round was gated by its own six suites.
+
+## Integration (follow-up) 2026-09-24
+
+The orchestrator's integration order, stamped 07:05: merge master `66aaa95`
+into this branch, with a ruling for each predicted conflict. Checked on disk
+first, at 07:02: the tree was clean at this branch's previous record commit
+(`72879f2`, which does not resolve on `master` until this branch merges), and
+master was at `66aaa95`.
+Since `209a831`, master had taken lane S, the live lane's session 1, rulings
+batch 4, lane L7, and the orchestrator's fix for L7's two CI reds.
+
+### I.0 Commits, with their times from `git log`
+
+| time | hash | subject |
+|---|---|---|
+| 07:48 | `7cec6dd` | merge master 66aaa95 into lane G's follow-up: six conflicts resolved, two semantic ones found by lane G's guards |
+| 07:56 | `2e3aad2` | floor lint: an f-string expression is judged by its own piece's quote, not the first piece's |
+
+This record, the register and the generated files follow in one more commit.
+
+### I.1 The textual conflicts, each resolved as ruled
+
+The trial merge against `d9ec640` (F.11 item 6) predicted four. Against
+`66aaa95` there were SIX: the register and the rulings register joined them,
+because L7 appended section 70 and rulings batch 4 moved the generated file.
+
+* **The navigation declarations (ruling a).** `KNOWN_DERIVED_NAVIGATIONS` keeps
+  ONE entry: the live lane's session-1 harness, `["url", "url"]`. It carries the
+  ordered note verbatim: pending PAGE-MAY-VETO-NEVER-SUPPLY (rulings batch 4),
+  the live lane converts this harness to the caller-names-the-item shape before
+  session 2, and this entry is debt, not a waiver. The three entries this
+  branch retired stay retired. The harness is not edited.
+* **The reader baseline (ruling b).** Regenerated with `--write-baseline` on the
+  merged tree: 143 readers (86 clean, 40 returns_text, 17 not driven), none
+  leaking. It differs from master's by the census rename alone.
+* **The tool-surface pin (ruling b).** Measured off the merged registry at 53
+  tools and 81 parameters, and the pin table equals it tool for tool. That is
+  master's 53 and 80, plus `item`.
+* **The boundary freeze (ruling b).** Both sides' re-freeze notes are kept, and
+  the digests were re-derived with the file's own `ast_digest` (I.2).
+* **The register and the generated files (ruling d).** Both appended sections
+  are kept (67.5-67.7, and 70). `_audit/RULINGS.md`, `_audit/INDEX.md` and the
+  blocker map were regenerated after every resolved path was staged, and a
+  second pass changed nothing.
+
+### I.2 The live lane's clipboard capture (ruling c) -- declared, and the scan kept whole
+
+* **Failing test.** On the merged tree, test_readonly's check that a declared
+  replacement script is invisible to the scan went red: 1 failed. The scan now
+  reports seven replacements in `share_link.CLIPBOARD_JS`:
+  - `navigator.clipboard.writeText` and `.write`;
+  - `document.execCommand`;
+  - one listener flag;
+  - three `Object.defineProperty` calls.
+* **Fix.** `readonly.SANCTIONED_API_REPLACEMENTS` is the scanner's sanctioned
+  list. It has one entry: exactly those seven, keyed by
+  `("linkedin_server/share_link.py", "CLIPBOARD_JS")`. Beside it are the
+  ruling, SHARE-AND-POLL-PROOFS-OWN-POSTS, and the evidence:
+  - the one sanctioned `evaluate` it runs from;
+  - everything it replaces lives in this server's own tab;
+  - `M C72` was proven on it live (the live lane's session-1 record, entry 12).
+
+  The scan itself is untouched. The test now holds each declared script to
+  EXACTLY its entry: no mutation token, no replacement beyond the list, and none
+  of the list missing. A second test holds the list and the test-side
+  declaration to the same scripts.
+* **Shown refusing, on plants:**
+  - the capture plus `window.fetch = ...` is refused, naming that one
+    replacement;
+  - the capture minus its listener flag is refused as a stale declaration;
+  - the clipboard shape in an undeclared script is refused by the plain scan.
+* **The freeze.** Five more names are pinned:
+  - the new permission table;
+  - the replacement scan's pattern tuple, and the three fragments it is built
+    from BY NAME. `_literal` renders a name as a constant, so pinning the tuple
+    alone would have frozen nothing of the fragments. Item 8 left all four
+    unpinned when it built them, while `JS_MUTATION_TOKENS` had been pinned
+    from the start.
+
+  Thirteen digests in all, each attributed:
+
+      <functions>                  ff43e832d6f2b685   this branch (the replacement scan)
+      SANCTIONED_MUTATIONS         e79a701b37ae9c39   master (the live lane's five presses)
+      six other tables             byte-identical on both sides
+      _JS_BROWSER_ROOTS            75b6af8aaa6e187d   }
+      _JS_MEMBER_CHAIN             c5d9d0c2da7553b0   } as item 8 built them
+      _JS_ASSIGNMENT               40d484166bfbebbc   }
+      JS_API_REPLACEMENT_PATTERNS  98a46c7ce6183658   }
+      SANCTIONED_API_REPLACEMENTS  c1608a90b6669d78   new, one entry
+
+  The merged file equals the branch on every key except SANCTIONED_MUTATIONS,
+  and equals master on every key except `<functions>`. Removing the new table
+  moves exactly its own digest. Controls: a planted eighth replacement moves that
+  digest and no other, and dropping `navigator` from the browser roots moves
+  `_JS_BROWSER_ROOTS`.
+* **Passing.** The readonly suite and the boundary invariant: 342 passed.
+
+### I.3 Lane L7's verification receipts, found by this branch's receipt guard
+
+* **Failing test.** On the merged tree, the structural scan named two lines in
+  `writes._verify_after`, both of the form `return (UNKNOWN, str(exc)...)`. Both
+  render the landing gate's refusal: `mark_company_interest`'s fresh render, and
+  `update_profile_field`'s editor.
+* **The same site, driven.** A new driven test replays L7's own press through a
+  navigator whose fresh render lands on another posting. With L7's lines put
+  back, it failed. The receipt read "refusing to click: the grant is for job
+  ... and the browser landed somewhere that is not that posting", AFTER the
+  click had landed: 2 failed.
+* **MEASURED, AND IT IS NOT A LEAK.** The gate's own message already withheld the
+  landing: the planted landing's marker and its job id appeared nowhere. So the
+  finding is two things:
+  - the form this guard forbids;
+  - a sentence that is wrong after the click.
+* **Fix.** Each site composes its own sentence: the exception's type, and what
+  `landing.withheld(landed)` says is safe to say about the landing.
+* **Passing.** The receipt guard with L7's two suites: 75 passed.
+* **The cost.** The editor branch no longer carries the gate's two route tails
+  (what the page was expected to show, and what it showed). The landing's safe
+  description replaces them.
+
+### I.4 The floor lint's false positive -- and its worse mirror
+
+The orchestrator suspected the oldest-Python guard of a false positive on L7's
+f-string, which it had fixed in `66aaa95`.
+
+**Measured on CPython 3.10.19 (through `uv`) and on 3.13.** L7's line as it
+shipped, `f'<input ... value="{self.store["City"]}">'`, PARSES ON BOTH, and
+the lint convicted it on both.
+
+**THE CAUSE.** Implicit concatenation merges several literal pieces into ONE
+`JoinedStr`, and the lint took the quote of the node's FIRST piece for every
+expression inside it. L7's concatenation opened with `"`.
+
+**THE WORSE HALF, found by building the mirror.** Take a first piece in `'...'`
+and a later `f"{d["k"]}"`. That is a SyntaxError on 3.10.19, and the lint, on
+3.13, reported NOTHING: the defect class it exists for, passed green.
+
+* **Fix.** Each expression is judged by the quote of the innermost piece that
+  contains it, read from the tokenizer:
+  - on 3.12+, an f-string piece runs from its START token to its matching END;
+  - before 3.12, a piece is one STRING token;
+  - where the tokenizer refuses, the node-level quote is the fallback.
+
+  A file is tokenized only if one of its expressions quotes something at all.
+* **Failing test.** 2 failed on the unfixed lint: L7's line convicted, and the
+  mirror passed.
+* **Passing.** The file: 18 passed on 3.13. Also 18 passed on CPython 3.10
+  through `uv`, where the mirror is refused by the parser instead, as every
+  fixture there is judged. The whole-tree scan (534 files, loaded box) took
+  8.1-9.4 s before and 9.9-10.5 s after, and no file was convicted either way.
+
+### I.5 The shard timings -- the merge did not tip them
+
+`test_the_timings_table_still_prices_most_of_the_suite` passes on the merged
+tree: 164 of 245 test files priced, against a line of 163.33. The live lane
+and L7 each priced their own files, so the order's condition was not met and
+nothing was repriced. This branch's three new test files stay unpriced.
+
+**The margin is two test files.** At 247 files the line is 164.67. The real
+repair is queued to this lane by the next order: regenerate the table from a
+green CI run's junit artifacts.
+
+### I.6 Gates run, and what did not run
+
+    gate                                           result
+    each ruling's and finding's shown-failing test I.2-I.4, red then green
+    impact_gate --against 66aaa95, plan only       WIDENED: 40 changed paths select
+                                                   213 of 245 test files (87%), so it
+                                                   would run the full suite -- NOT
+                                                   RUN locally, as ordered; CI
+                                                   certifies at merge
+    the integration gate, on 2e3aad2               130 of 245 test files, -n 3,
+      every test this branch changes against     2472 s on a loaded box:
+      master; the 18 corpus-wide guards; 24      7044 passed, 8 skipped, 1 xfailed,
+      census instruments; every test naming a    0 failed. The skips: the CI-only
+      symbol a change touched; and the 28 test   complement (below), three symlink-
+      files of lane S's, the live lane's and     privilege skips, four empty-
+      L7's new modules, under every hardened     parameter declared skips. Both
+      guard                                      files the next order names as
+                                                 missed by recent selections
+                                                 (the gap-rows pin, the floor
+                                                 lint) were in it
+    the whole-tree navigation complement (CI=1)  1 passed, 8.85 s, on the merged
+                                                 tree: nothing beyond the per-file
+                                                 walk, and the planted pair caught
+    twelve document, register and identity       over this text: 1091 passed, 1
+      guards                                     failed -- the SHA guard, on this
+                                                 branch's own record commit cited
+                                                 in an "at" slot; the sentence now
+                                                 says it resolves only on this
+                                                 branch. Then the SHA, correction,
+                                                 rulings and blocker-map guards:
+                                                 84 passed
+    generated files --check                      0 / 0 / 0
+
+**NOT RUN, and what that leaves open:**
+- the full suite: 115 test files outside the gate's selection;
+- CI on any platform (nothing pushed);
+- a cold verification pass, which this order did not ask for;
+- anything live.
+
+### I.7 Open, for other owners
+
+1. **The live lane's session-1 harness** is the one remaining derived navigation.
+   Converting it fails the navigation file until its entry goes. That is the
+   mechanism the entry's note describes.
+2. **Census row `C85`** still names the retired resolver and census key. It goes
+   to the live lane, as ordered.
+3. **The shard-timings margin**, I.5.

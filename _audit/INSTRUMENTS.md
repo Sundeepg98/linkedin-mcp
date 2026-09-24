@@ -10273,6 +10273,25 @@ measurements, the gate's symbol-based selection, the census of every
 sources -- are declared disposable. Every number they produced is in the lane
 record, and what they found is held by the entries above.
 
+### 67.8 THE INTEGRATION'S ENTRIES, 2026-09-24 (lane G's merge of master 66aaa95)
+
+Record: the lane record's `## Integration (follow-up) 2026-09-24`.
+
+| path | shown failing by |
+|---|---|
+| `linkedin_server/readonly.py` (`SANCTIONED_API_REPLACEMENTS`) + `tests/test_readonly.py` (exact-declaration check and its plants) | the live lane's clipboard capture on the merged tree, 1 failed: seven replacements in a script declared invisible to the scan. After the declaration: an eighth replacement (`window.fetch`) refused, a missing one refused, the clipboard shape in an undeclared script refused by the plain scan |
+| `tests/test_readonly_boundary_invariant.py` (five more pinned names) | a planted eighth sanctioned replacement moves exactly `SANCTIONED_API_REPLACEMENTS`; dropping `navigator` from the browser roots moves `_JS_BROWSER_ROOTS` -- a fragment the pattern tuple reaches only by name, which `_literal` renders as a constant |
+| `tests/test_a_write_receipt_carries_no_library_message.py` (a fresh render that landed elsewhere, driven) | lane L7's two verification lines put back: the scan named both and the driven receipt read "refusing to click" after the click, 2 failed |
+| `scripts/py_baseline_lint.py` (the piece's quote) + two controls in `tests/test_the_package_compiles_on_its_oldest_python.py` | L7's line as it shipped (legal on 3.10.19, convicted) and its mirror (a SyntaxError on 3.10.19, passed): 2 failed on the unfixed lint; after, 18 passed on 3.13 and on 3.10 through `uv` |
+
+### 67.9 DECLARED DISPOSABLE (THE INTEGRATION)
+
+The merge's scratch helpers -- the keep-both resolver, the merged-registry
+surface measurement, the three-way boundary digest table, the L7 red
+reconstruction, the floor-lint control and timing scripts, and the second
+gate's selection and runner -- are declared disposable. Their numbers are in
+the lane record.
+
 ## 70. THE BEST-VERIFIED WRITE NEVER PRESSED SAVE, AND A WRITE AIMED BY ITS CARD (lane-l7-profile-writes, 2026-09-24)
 
 **Registered 2026-09-24.** Full record: `_audit/2026-09-24-lane-l7-profile-writes.md`.
