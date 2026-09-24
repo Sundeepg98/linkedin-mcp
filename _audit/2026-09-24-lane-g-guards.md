@@ -435,6 +435,11 @@ barred the type; the two follow-up children's transcripts read
 | 05:08 | `d618fc8` | 8 | mutation scan: replacing a browser API is a mutation, and the scan now sees it |
 | 05:12 | `98e1937` | 9 | retire scripts/_check_jobs_gap_directions.py: a stale, crashing subset of a maintained table |
 | 05:37 | `845b38c` | 10 | navigation guard: a whole-tree complement resolves calls through imports, and runs in CI |
+| 05:55 | `73ed8e5` | record | lane G follow-up record: per item, the failing test, the fix and the passing result |
+| 06:41 | `3cea7a0` | 3, 4 | items 3 and 4, second round: the gate found a deleted reason and a vanished site |
+
+The commit that adds F.12 and F.13 follows these and changes this record, the
+register and the generated files alone.
 
 ### F.1 Item 1 -- the census `feed_item` route: the caller names the item, his rail may only veto it
 
@@ -506,6 +511,20 @@ NEVER SUPPLY ONE.
   proved its raise was real by reading the navigator's refusal back OUT OF THE
   RECEIPT -- the leak itself; that proof now rests on the navigator's own
   record, and the receipt is asserted to carry the type and NOT the address.
+* **SECOND ROUND -- THE FOLLOW-UP'S GATE FOUND WHAT THIS ITEM'S OWN SELECTION
+  MISSED.** Type-only erased reasons this package COMPOSES: the upload gate
+  raises three refusals inside the same block (no digest on the grant, the file
+  changed since the preview, a control not classified as a file input), and
+  `tests/test_uploads.py` pins their text in `click_error`: 4 failed on
+  `73ed8e5`, each reading `'WriteAttemptError'` where the reason should be.
+  The item's selection had not included that file. Repaired with
+  `_PerformRefused(WriteAttemptError)`, raised by exactly those three and caught
+  in one place, the only handler whose text `click_error` keeps; every other
+  exception there still keeps its type. What its messages may interpolate is
+  pinned -- `spec.action`, the two digest prefixes, the control kind and the one
+  kind a file may go to -- and a plant interpolating a selector or a needle, by
+  f-string, `%` and `format`, is shown failing. After: the four upload tests and
+  the whole receipt guard green (numbers in F.12).
 
 ### F.4 Item 4 -- a failed navigation names its type and the address's family
 
@@ -519,6 +538,15 @@ NEVER SUPPLY ONE.
   in-process for a debugger.
 * **Passing.** 3 passed; the browser, auth, preflight, CDP, envelope and
   error-url suites 235 passed.
+* **SECOND ROUND, ALSO FOUND BY THE GATE.** `tests/test_no_message_publishes_a_landing.py`
+  keeps a baseline of every message that interpolates an address, and
+  `browser.py:goto:url` -- ruled `ASKED_FOR` there -- VANISHED, which that guard
+  reports as coverage lost: 1 failed on `73ed8e5`. The site vanished because the
+  address left the message, so the baseline moved (`--write-baseline`: that one
+  line, nothing else) and the `ASKED_FOR` ruling for `browser.py:goto` left with
+  it, with a comment saying why: putting the address back now arrives as a site
+  with no verdict and has to be ruled again, where a lingering entry would have
+  filed it as allowed.
 
 ### F.5 Item 5 -- logs: where they land was measured, then type-only was chosen
 
@@ -700,13 +728,19 @@ package's relative imports, re-exports followed to their definition), so the
 ### F.11 What the follow-up exposed -- open, not repaired here
 
 1. **`tests/test_ci_shard.py::test_the_timings_table_still_prices_most_of_the_suite`
-   is red on this branch: 157 priced of 237 test files, and two thirds is 158.**
-   This branch adds three test files (items 3, 4, 5); the table was measured at
-   `f65ec88` over 157 files. Master is at 235 files since lane S merged, so the
-   merge makes it 157 of 238 against 159. Regeneration needs a full junit run
-   (the recipe is in `scripts/ci_shard.py`'s docstring), which this order bars on
-   the shared box, and CI uploads no junit. **A DECISION FOR THE MERGE:**
-   regenerate the table from one full run, or accept this red until someone does.
+   is red on this branch ALONE, and passes after the merge with nothing to
+   spare.** Here: 157 priced of 237 test files against a line of 158 -- this
+   branch adds three test files (items 3, 4, 5) to a table whose label names
+   `f65ec88` -- a commit that does not resolve on `master`.
+   Master has moved: at `d9ec640` it prices 162 of 240, because the live lane
+   added five files' seconds at its merge from a junit run of those five alone
+   and wrote that into the table's `_measured` label. Merged: 243 test files
+   against 162 priced, and the line is 162.0 -- green by zero; the next lane to
+   add a file turns it red. Computed with the test's own expression over
+   `git ls-tree master` plus this branch's three names, not by running a merge.
+   A full regeneration is the real repair (the recipe is in
+   `scripts/ci_shard.py`'s docstring), and it needs the full junit run this
+   order bars on the shared box.
 2. **Census row `C85`** (`_audit/_census/messaging-and-content.md`) names
    `server._resolve_own_item_permalink` behind the keys `feed_item` /
    `feed_item_commented`; both are retired by item 1. Prose in a census row, so
@@ -722,9 +756,114 @@ package's relative imports, re-exports followed to their definition), so the
 5. **`profile_lock`'s two WARNING records still carry `_LOCK_FILE`**, the lock
    path from package config -- not exception text, so outside item 5's order,
    and they land in the gitignored stderr log when they fire.
-6. **Five files this branch changed also moved on master since `209a831`**
-   (lane S): `_audit/INSTRUMENTS.md`, `linkedin_server/readonly.py`,
-   `linkedin_server/server.py`, `tests/test_a_correction_is_findable_from_the_claim.py`,
-   `tests/test_the_tool_surface_is_pinned_so_a_row_must_move.py`. The last pins a
-   parameter COUNT this branch moved 69 -> 70; `readonly.py` carries this
-   branch's re-frozen AST digest. Both are merge-time checks.
+6. **A TRIAL MERGE WITH MASTER, RUN WITHOUT TOUCHING ANY TREE**
+   (`git merge-tree --write-tree master HEAD`, master at `d9ec640`): four
+   content conflicts, each with its resolution --
+   * `tests/reader_leak_baseline.json` -- both sides regenerated it; regenerate
+     once more on the merged tree with `--write-baseline`.
+   * `tests/test_readonly_boundary_invariant.py` -- both sides re-froze
+     `readonly.py`'s digests; recompute them on the merged module and re-freeze
+     with a note naming both changes.
+   * `tests/test_the_tool_surface_is_pinned_so_a_row_must_move.py` -- both moved
+     the pinned parameter count; merged, it is master's plus this branch's one
+     (`item`).
+   * `tests/test_navigation_is_never_derived.py` -- **master DECLARED A FOURTH
+     derived navigation** into the dict this branch emptied:
+     `_probe_live_lane_session_1.py: ["url", "url"]`, "held here under the same
+     pending ruling". That harness takes the newest id from
+     `linkedin_my_activity_items`' raw output and, by its own comment, "never
+     from a command line or a page" -- the opposite of the shape item 1 gave the
+     two comment probes. **A RULING'S APPLICATION FOR THE MERGE, NOT AN EDIT FOR
+     THIS LANE** (the file is the live lane's and exists only on master): either
+     the harness takes the id from its caller and lets the rail veto it, or the
+     declaration returns with an argument that survives THE PAGE MAY VETO A
+     NAVIGATION, NEVER SUPPLY ONE.
+
+   Seven more files changed on both sides merged cleanly, among them `server.py`,
+   `readonly.py` and the register; the generated index and rulings register
+   need their usual fixpoint after the merge. **The whole-tree complement, run
+   over master's 282 files, adds nothing beyond the per-file findings** (the
+   four declared sites; reach 72), so item 10's CI test holds after the merge
+   however the fourth site is settled.
+
+### F.12 Gates run, and what did not run
+
+    gate                                         result
+    each item's shown-failing test               F.1-F.10, red then green, every one
+    impact gate --against 209a831, plan only     WIDENED: 36 changed paths (one a
+                                                 deletion) select 206 of 237 test files
+                                                 (87%, above the 45% line), so it would
+                                                 run the full suite -- NOT RUN, as ordered
+    the follow-up's gate, on the record commit   99 of 237 test files, -n 3, 932 s:
+      every test changed on the branch, every    7 failed, 6024 passed, 8 skipped,
+      test naming a symbol a changed item        1 xfailed
+      touched, and the impact gate's 18
+      corpus-wide guards
+        the shard-timings coverage test          known -- F.11 item 1
+        four upload tests                        item 3's deleted reason -- F.3, repaired
+        the landing-message baseline             item 4's vanished site -- F.4, repaired
+        the correction guard's triage            this record's own F.11 text: a correction
+                                                 word inside a test FILE NAME, within two
+                                                 lines of a cited document; rewritten
+    after the second round, its six suites       upload, receipt, landing, verification,
+                                                 performable action, writes: 295 passed,
+                                                 3 skipped (symlink privilege)
+    the document guards over this record         a first run convicted a new citation of a
+                                                 hash that does not resolve on `master`
+                                                 (the timings table's label); the sentence
+                                                 now says so. Over the text as committed,
+                                                 save this row's last line: ten document,
+                                                 register and identity guards, 1032 passed
+    whole-tree complement under CI=1             19 passed (item 10); 5.20 s in the cold pass
+    generated files --check                      0 / 0 / 0, at every record commit
+    cold verification                            16 of 17 PASS -- F.13
+
+**THREE COUPLINGS THE ITEMS' OWN SELECTIONS MISSED.** Item 1's renamed reader
+and the reader baseline (caught at the next commit, repaired in `e88ed47`);
+item 3's composed refusals and `tests/test_uploads.py`; item 4's vanished site
+and the landing-message baseline. Each item ran a hand-picked selection. The
+gate's was built by symbol -- a test is in if it names something a changed
+item touched -- and it found the other two on its first run.
+
+**NOT RUN, and what that leaves open:** the full suite -- 138 test files
+outside the gate's selection, 54 of which import `dom.py`, `browser.py`,
+`server.py` or `writes.py`; CI on any platform (nothing pushed); the merge with
+master, which F.11 item 6 measured without performing; anything live.
+
+### F.13 The one cold verification pass
+
+One `general-purpose` child, cold to this work, ran a 17-item closed checklist
+over `209a831`..`73ed8e5` from 05:57 to 06:30, read-only, reporting facts for
+the lead to judge; its transcript reads `claude-opus-5-5` throughout (221
+fields). **16 PASS, 1 FAIL, 0 CANNOT-TELL.** The report stays in the session
+scratchpad. What it found:
+
+* **THE FAIL IS ITS CLEAN-TREE CHECK, AND THE CAUSE IS THIS LEAD.** The tree was
+  clean at its start and dirty at its end: the second-round edits (F.3, F.4)
+  landed at 06:16:52 while the pass ran -- after its last run, by the files'
+  mtimes -- and it re-ran the two checks that read a now-dirty file against the
+  committed blobs, with the same results. It also flagged the new
+  `click_error = str(exc)` as exception text in a receipt: the carve-out F.3
+  describes, uncommitted when it looked and pinned since.
+* 12 commits, no attribution line (one literal hit, "generated with" inside the
+  word "regenerated"); 2591 added lines, no non-ASCII character; the one
+  drive-letter-shaped hit is fixture text; no user directory; nothing under the
+  census directory changed, and the only rulings path is the generated one.
+* **THE RED PROOFS RE-DERIVED FROM THE OLD REVISIONS, not taken from this
+  record:** the five readers' handlers (6 renders at `209a831`, 0 at HEAD); the
+  log sites (dom 30, browser 8, auth 3, cdp_bridge 2, profile_lock 2 at
+  `209a831`; 0 at HEAD, and 0 across all 48 modules); the two listings (4
+  entries at `209a831` on a stubbed tripled listing, 2 at HEAD); the mutation
+  scan (the clipboard plant clean at `209a831`, convicted at HEAD); and the
+  complement (7 of 7 red plants empty with the resolver stubbed, 7 of 7 found
+  with it restored, the four green plants empty both ways).
+* `_fast_wait` requested by exactly one test (seventeen at `209a831`); the census
+  file 178 passed; the boundary invariant 14 passed; the three generated files'
+  checks 0, 0, 0; every path in register section 67.6 exists.
+* Beyond the checklist, measured by its own instrument and shown failing on its
+  own plant: two shapes the log scan does not look for -- `exc_info=True` in a
+  handler, and an exception copied to another name before it is logged -- occur
+  0 and 0 times across the package.
+
+As briefed, that was the one pass; the second round and this section are the
+only changes since, and the second round was gated by its own six suites.

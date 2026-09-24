@@ -10200,7 +10200,7 @@ record is the lane record's `## Follow-up 2026-09-24`.
 
 | path | shown failing by |
 |---|---|
-| `tests/test_a_write_receipt_carries_no_library_message.py` | a failing click and a failing verification read, each quoting a marker, driven end to end through the follow-a-Page harness, plus a structural scan of `writes.py` for exception text outside a `raise` with its own control: 3 failed, 1 passed on the unrepaired module |
+| `tests/test_a_write_receipt_carries_no_library_message.py` | a failing click and a failing verification read, each quoting a marker, driven end to end through the follow-a-Page harness, plus a structural scan of `writes.py` for exception text outside a `raise` with its own control: 3 failed, 1 passed on the unrepaired module. Its second round pins what a `_PerformRefused` message may interpolate -- plants carrying a selector or a needle by f-string, `%` and `format` are convicted -- and with that exemption switched off the scan convicts exactly the one handler that keeps a composed refusal's text |
 | `tests/test_a_failed_navigation_withholds_its_address.py` | a page whose navigation fails quoting its address, over two admitted addresses carrying a keyword: the keyword appeared twice in the unrepaired message |
 | `tests/test_no_log_record_carries_a_library_message.py`, and the DEBUG log capture in `tests/test_readers_emit_no_page_string.py` | the scan named all 45 logging calls that rendered a caught exception (its control expects lines 5, 9 and 13 of a planted module); the failing-page drive, capturing the `linkedin` logger at DEBUG, convicted 35 readers (36 failed) |
 | `tests/test_click_is_not_its_own_evidence.py` (`_fast_wait`) | the premise check -- no reading under the 250 ms cut on a page that draws the wrapper, and at least one reading -- failed exactly the sixteen non-takers of the seventeen, twice, under two load profiles |
@@ -10212,7 +10212,9 @@ record is the lane record's `## Follow-up 2026-09-24`.
 
 The follow-up's scratchpad helpers -- the exception-text and log-site
 censuses, the log rewriter, the boundary-digest comparer, the API-replacement
-prototype, the directions comparison, the retired census's red drive, and the
+prototype, the directions comparison, the retired census's red drive, the
 whole-tree prototype with its tracer, calibration and counterfactual
-measurements -- are declared disposable. Every number they produced is in the
-lane record, and what they found is held by the entries above.
+measurements, the gate's symbol-based selection, the census of every
+`WriteAttemptError` raise, and the run of the complement over master's
+sources -- are declared disposable. Every number they produced is in the lane
+record, and what they found is held by the entries above.
