@@ -131,10 +131,18 @@ def test_the_split_is_the_one_the_lane_report_quotes():
     and rulings batch 3 made `N 183` a write row; each of the 174 was classed by
     its act -- 5 R1 (`N 34`, `N 36`, `N 50`, `N 62`, `P I2`, all queued), 12 R2
     (the sends and connects ruling (b) permits), 157 R3.
-    151 + 174 = 325 = 16 R1 + 35 R2 + 274 R3."""
+    151 + 174 = 325 = 16 R1 + 35 R2 + 274 R3.
+
+    339 AFTER LANE Y2'S COMPLETENESS ADMISSION, measured on the tree that
+    merged it with lane R (`_audit/2026-09-24-lane-y2-admission.md`,
+    Integration 2026-09-24): fourteen admitted write rows, one R2 (`M C94`,
+    sending a post to one person) and thirteen R3 (`P S2`, `S4`, `S6`-`S10`;
+    `M M52`, `C97`, `C100`; `N 196`, `198`, `200`). R1 is untouched: no
+    admitted row's act is one of the first round's own verbs.
+    325 + 14 = 339 = 16 R1 + 36 R2 + 287 R3."""
     rows, _ = cwc.load()
     split = cwc.split(rows)
-    assert (split["R1"], split["R2"], split["R3"]) == (16, 35, 274)
+    assert (split["R1"], split["R2"], split["R3"]) == (16, 36, 287)
     assert split["R1:built"] + split["R1:queued"] == split["R1"]
 
 
