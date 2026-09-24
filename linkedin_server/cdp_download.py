@@ -44,26 +44,33 @@ to ``"accept"``, and ``CRBrowserContext.initialize`` sends
 ``Browser.setDownloadBehavior`` with ``allowAndName``, NO context id (so the
 default context -- his own tabs) and Playwright's temporary artifacts
 directory, which ``_connectOverCDPImpl`` removes when the connection closes.
+The same holds at 1.40.0, the floor of this repository's ``playwright>=1.40``:
+read in that release's driver source on 2026-09-24.
 
 So "there is nowhere to write it" was true of THIS PACKAGE and not of the
-library underneath it: while this server is attached, a download in any of
-his tabs is already being written into a temporary directory that is deleted
-when the server disconnects. That is recorded as a hazard in
-``_audit/2026-09-24-lane-d-d6-pdf.md`` for the owner of ``cdp_bridge.py``; it
-is not fixed here.
+library underneath it: until 2026-09-24, while this server was attached, a
+download in any of his tabs was written into a temporary directory deleted
+when the server disconnected. **:func:`reset_download_behaviour` closes that
+at the attach itself:** ``cdp_bridge.attach`` calls it right after it
+connects, and it sends ``default`` for that same context (no id), so from
+the attach onward his downloads follow his own Chrome settings. The lane D
+record's follow-up (``_audit/2026-09-24-lane-d-d6-pdf.md``) says why that,
+and not the library's own ``no_defaults`` option, is the fix.
 
-This module does not rely on that default, for three reasons: it is a
-library default a version can change; it puts the file in a directory this
-server does not name; and it is never undone. Here the behaviour is set
-explicitly, the directory is ours, and the ``finally`` sets it back.
+The capture does not rely on the library's default either, for three
+reasons: it is a library default a version can change; it puts the file in
+a directory this server does not name; and it is never undone. Here the
+behaviour is set explicitly, the directory is ours, and the ``finally`` sets
+it back.
 
 ## WHAT "RESTORED" MEANS, EXACTLY
 
 ``default`` is Chrome's OWN behaviour -- the state his browser was in before
 anything attached to it. It is deliberately NOT Playwright's attach-time
 setting above, which diverts his downloads into a directory that is later
-deleted. So after a capture, downloads in his browser follow his own Chrome
-settings again for the rest of the attach session.
+deleted, and it is what the attach itself now sends. So after a capture, as
+after the attach, downloads in his browser follow his own Chrome settings for
+the rest of the attach session.
 
 **THE RESTORATION IS SENT AND ACKNOWLEDGED, NOT MEASURED.** The protocol has
 no call that reads the current download behaviour back, so nothing here can
@@ -81,10 +88,13 @@ Nothing here ever deletes a file.
 
 ## OFF BY DEFAULT, AND ATTACH ONLY
 
-Nothing happens unless ``LINKEDIN_ENABLE_CDP_DOWNLOADS`` is set, read at call
-time. With the flag off the call returns ``downloads_disabled`` before it
-makes a directory or a session. In LAUNCH mode it returns ``not_attached``:
-D4 scopes this transport to the attached browser.
+Nothing is CAPTURED unless ``LINKEDIN_ENABLE_CDP_DOWNLOADS`` is set, read at
+call time. With the flag off the capture returns ``downloads_disabled`` before
+it makes a directory or a session. In LAUNCH mode it returns
+``not_attached``: D4 scopes this transport to the attached browser.
+
+The RESET is not behind the switch. It takes no download -- it gives his
+back -- and ``cdp_bridge.attach`` runs it on every attach.
 
 ## WHAT CROSSES INTO THE RESULT
 
@@ -101,17 +111,21 @@ username.
 
 :data:`CDP_METHODS` is a closed table, and :func:`_send` -- the one place in
 the package that calls a DevTools session's ``send`` -- refuses anything not
-on it. ``readonly.scan_source_for_mutations`` has no pattern for a DevTools
-``send`` at all, so this table and ``tests/test_cdp_download.py``, which pins
-the package's send sites by AST, are what stand in for one.
+on it. Two functions open a session -- the capture and the reset -- and both
+send through it. ``readonly.scan_source_for_mutations`` has no pattern for a
+DevTools ``send`` at all, so this table and ``tests/test_cdp_download.py``,
+which pins the package's send and session sites by AST, are what stand in
+for one.
 
 ## WHAT THIS IS NOT
 
 It is not a press and not a navigation, and it reads nothing off a page. The
 act that starts P C8's download is LinkedIn's own "Save to PDF" item behind
-the profile's "More" menu, and no press in this package reaches it yet:
-``tests/test_every_orphan_module_is_ruled.py`` records why nothing imports
-this module today.
+the profile's "More" menu, and no press in this package reaches it yet, so
+nothing calls the capture, and
+``tests/test_profile_pdf_download_is_blocked_on_transport.py``
+fails the moment anything does. ``cdp_bridge`` imports this module for the
+reset alone.
 """
 
 from __future__ import annotations
@@ -454,3 +468,60 @@ async def capture_download(
             await session.detach()
         except Exception as exc:  # noqa: BLE001
             logger.debug("cdp download: detach raised %s", type(exc).__name__)
+
+
+#: How long each step of the attach-time reset may take before it is
+#: abandoned. It is one session and one command on a local socket; the bound
+#: exists so a wedged browser cannot hang the attach, not because the reset
+#: is slow.
+RESET_TIMEOUT_S = 10.0
+
+
+async def reset_download_behaviour(
+    browser: Any, *, timeout_s: float = RESET_TIMEOUT_S
+) -> dict[str, Any]:
+    """Hand the attached browser's downloads back to Chrome's own behaviour.
+
+    ``cdp_bridge.attach`` calls this right after it connects, because the
+    library's own handshake has just pointed his default context's downloads
+    at a temporary directory it deletes on disconnect (the module docstring's
+    section on what Playwright does at attach time). One browser-level
+    session, one command -- the same ``default`` the capture restores with --
+    sent with NO context id, which is the context the library's own setting
+    named. The session is detached afterwards whatever happened.
+
+    Returns ``{"restored": bool, "error": <exception TYPE or None>}``.
+    ``restored`` means the command was SENT AND ACKNOWLEDGED: the protocol
+    has no call that reads the behaviour back. A browser with no DevTools
+    session method returns ``error: "no_cdp_session"``. Never raises,
+    except :class:`CdpMethodRefused`, which is a defect in this module; each
+    step is bounded by ``timeout_s``.
+
+    NOT behind ``LINKEDIN_ENABLE_CDP_DOWNLOADS``: this takes no download, it
+    gives his back.
+    """
+    if browser is None or not hasattr(browser, "new_browser_cdp_session"):
+        return {"restored": False, "error": "no_cdp_session"}
+    session = None
+    try:
+        session = await asyncio.wait_for(
+            browser.new_browser_cdp_session(), timeout=timeout_s
+        )
+        await asyncio.wait_for(
+            _send(session, SET_DOWNLOAD_BEHAVIOR, dict(_RESTORE)), timeout=timeout_s
+        )
+        outcome: dict[str, Any] = {"restored": True, "error": None}
+    except CdpMethodRefused:
+        raise
+    except Exception as exc:  # noqa: BLE001 -- the TYPE only, never the text
+        outcome = {"restored": False, "error": type(exc).__name__}
+    finally:
+        if session is not None:
+            try:
+                await asyncio.wait_for(session.detach(), timeout=timeout_s)
+            except Exception as exc:  # noqa: BLE001
+                logger.debug(
+                    "cdp download: detaching the reset session raised %s",
+                    type(exc).__name__,
+                )
+    return outcome

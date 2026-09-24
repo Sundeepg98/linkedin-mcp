@@ -36,6 +36,7 @@ asks. A fresh fake starts at ``default`` -- a browser nobody has told anything.
 from __future__ import annotations
 
 import ast
+import asyncio
 import json
 import pathlib
 import uuid
@@ -685,16 +686,20 @@ def test_the_site_detector_finds_a_planted_devtools_call():
     assert sites["session"] == [("elsewhere.py", "sneak")]
 
 
-def test_the_package_has_exactly_one_devtools_send_and_one_session_site():
+def test_the_package_has_exactly_one_devtools_send_and_two_session_sites():
     """``scan_source_for_mutations`` has no DevTools pattern; this pin stands in.
 
     Exactly one ``send``, in ``cdp_download._send``, which refuses anything
-    off :data:`cdp_download.CDP_METHODS`; exactly one session, in the capture.
-    A second site anywhere in the package is a new capability and fails here.
+    off :data:`cdp_download.CDP_METHODS`; exactly two sessions, the capture's
+    and the attach-time reset's, both in this module. A further site
+    anywhere in the package is a new capability and fails here.
     """
     sites = _devtools_sites(_package_sources())
     assert sites["send"] == [("cdp_download.py", "_send")], sites["send"]
-    assert sites["session"] == [("cdp_download.py", "capture_download")], sites["session"]
+    assert sites["session"] == [
+        ("cdp_download.py", "capture_download"),
+        ("cdp_download.py", "reset_download_behaviour"),
+    ], sites["session"]
     assert cdp_download.CDP_METHODS == frozenset({"Browser.setDownloadBehavior"})
 
 
@@ -718,3 +723,97 @@ def test_every_why_the_capture_can_return_is_in_the_closed_vocabulary():
             returned.add(node.args[1].value)
     returned.add("saved")
     assert returned == set(cdp_download.WHY), sorted(returned ^ set(cdp_download.WHY))
+
+
+# ---------------------------------------------------------------------------
+# 5. THE RESET AT ATTACH -- his downloads handed back to his own Chrome
+# ---------------------------------------------------------------------------
+#
+# The library's handshake sets ``allowAndName`` on his default context, into a
+# temporary directory it deletes on disconnect. ``cdp_bridge.attach`` calls
+# ``reset_download_behaviour`` straight after; ``tests/test_cdp_attach.py``
+# shows the attach sending it. These show what it does to the fake Chrome.
+
+
+def _the_library_took_his_downloads(chrome: FakeChrome, tmp_path) -> pathlib.Path:
+    """What the library's own handshake does, per its driver source."""
+    artifacts = tmp_path / "library-artifacts"
+    artifacts.mkdir()
+    chrome.set_behaviour(FakeSession(chrome), {
+        "behavior": "allowAndName",
+        "downloadPath": str(artifacts),
+        "eventsEnabled": True,
+    })
+    return artifacts
+
+
+async def test_control_after_the_handshake_alone_his_file_lands_in_the_librarys_folder(
+    chrome, tmp_path
+):
+    """THE HAZARD, in the fake, as the control: with no reset, his own
+    download is written under a GUID into the folder the library deletes."""
+    artifacts = _the_library_took_his_downloads(chrome, tmp_path)
+    chrome.download(b"his own file", suggested="his-own.bin")
+
+    assert _files_under(chrome.user_downloads) == []
+    assert len(_files_under(artifacts)) == 1
+
+
+async def test_the_reset_hands_his_downloads_back_to_chromes_own_behaviour(
+    chrome, tmp_path
+):
+    artifacts = _the_library_took_his_downloads(chrome, tmp_path)
+
+    outcome = await cdp_download.reset_download_behaviour(FakeBrowser(chrome))
+
+    assert outcome == {"restored": True, "error": None}
+    assert chrome.behaviour == "default"
+    (session,) = chrome.sessions
+    assert session.sent == [("Browser.setDownloadBehavior", {"behavior": "default"})]
+    assert session.detached is True
+    chrome.download(b"his own file", suggested="his-own.bin")
+    assert [p.name for p in _files_under(chrome.user_downloads)] == ["his-own.bin"]
+    assert _files_under(artifacts) == []
+
+
+async def test_the_reset_is_not_behind_the_capture_switch(chrome, tmp_path):
+    """The switch gates TAKING a download. The reset gives his back."""
+    assert cdp_download.downloads_enabled() is False
+    _the_library_took_his_downloads(chrome, tmp_path)
+
+    outcome = await cdp_download.reset_download_behaviour(FakeBrowser(chrome))
+
+    assert outcome["restored"] is True
+    assert chrome.behaviour == "default"
+
+
+async def test_a_reset_with_no_devtools_session_says_so():
+    assert await cdp_download.reset_download_behaviour(None) == {
+        "restored": False, "error": "no_cdp_session",
+    }
+
+
+async def test_a_reset_that_raises_is_named_by_type_and_its_session_detached(chrome):
+    class _Dropping(FakeBrowser):
+        async def new_browser_cdp_session(self):
+            session = await super().new_browser_cdp_session()
+            session.fail_on.add("Browser.setDownloadBehavior")
+            return session
+
+    outcome = await cdp_download.reset_download_behaviour(_Dropping(chrome))
+
+    assert outcome == {"restored": False, "error": "ConnectionError"}
+    assert chrome.sessions[0].detached is True
+
+
+async def test_a_reset_that_hangs_is_abandoned_within_its_bound(chrome):
+    """A wedged browser must not hang the attach."""
+    class _Hanging(FakeBrowser):
+        async def new_browser_cdp_session(self):
+            await asyncio.Event().wait()
+
+    outcome = await cdp_download.reset_download_behaviour(
+        _Hanging(chrome), timeout_s=0.05
+    )
+
+    assert outcome == {"restored": False, "error": "TimeoutError"}

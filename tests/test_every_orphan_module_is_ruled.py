@@ -107,24 +107,19 @@ DELIBERATELY_UNWIRED: dict[str, str] = {
         "it was ruled unwireable, and the author should replace this reason "
         "with theirs. NOT PERMANENT."
     ),
-    "cdp_download": (
-        "A TRANSPORT WITH NO TRIGGER YET, ruled by its author 2026-09-24 (lane "
-        "D). It is the download route D4-NO-OWN-BROWSER-CONTEXT gave census "
-        "row P C8: Chrome's own download behaviour, set over a DevTools "
-        "session on the attached browser, off unless "
-        "LINKEDIN_ENABLE_CDP_DOWNLOADS is set. Its only intended caller is "
-        "the press that starts P C8's download -- LinkedIn's 'Save to PDF' "
-        "item behind the profile's 'More' menu -- and that press is not "
-        "built: the item's shape has never been measured, and a press that is "
-        "an ACT rather than a disclosure has no sanctioned route. Wiring a "
-        "tool before then would ship a capability that can only refuse. "
-        "Driven end to end offline by tests/test_cdp_download.py, and "
-        "tests/test_profile_pdf_download_is_blocked_on_transport.py fails "
-        "the moment anything calls it, so the row is re-filed rather than "
-        "left behind. NOT PERMANENT: delete this entry when the press lands. "
-        "Record: _audit/2026-09-24-lane-d-d6-pdf.md."
-    ),
 }
+
+# THE cdp_download ENTRY WAS DELETED 2026-09-24, AND NOT ON ITS OWN INSTRUCTION.
+#
+# It read "NOT PERMANENT: delete this entry when the press lands", and the
+# press has not landed. The module gained an importer for a different reason:
+# `cdp_bridge.attach` now calls `cdp_download.reset_download_behaviour` right
+# after it connects, to hand his downloads back to Chrome's own behaviour
+# (lane D's follow-up on the download hazard). So the module is no longer an
+# orphan and `test_every_ruling_is_still_about_a_real_orphan` would fail on a
+# kept entry. What the entry was really guarding -- that nothing calls the
+# CAPTURE -- is held where it always was, by the last test of
+# tests/test_profile_pdf_download_is_blocked_on_transport.py.
 
 # THE search_results ENTRY WAS DELETED 2026-09-20, ON ITS OWN INSTRUCTION.
 #

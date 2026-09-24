@@ -10281,6 +10281,25 @@ correction-vocabulary neighbour check and the census edit scripts this lane
 ran are declared disposable. What they measured is in the record with its
 numbers, and the capture file itself re-derives the controls on every run.
 
+### 68.5 THE RESET AT ATTACH, AND A CONTROL THAT TAKES IT OUT (added 2026-09-24)
+
+`cdp_bridge.attach` now hands his downloads back to Chrome's own behaviour
+right after it connects, through `cdp_download.reset_download_behaviour`,
+because the library's own handshake points them at a temporary directory it
+deletes on disconnect. Two tests carry it, and each is shown failing:
+
+| path | shown failing by |
+|---|---|
+| `tests/test_cdp_attach.py` (the REAL `attach` over a fake Playwright) | its control swaps the reset for a stand-in that claims success and sends nothing, and the shared assertion -- one reset to `default`, no context id, after the library's handshake, on a session then detached -- goes red |
+| `tests/test_cdp_download.py` section 5 | its control is the hazard itself on the fake Chrome: after the library's `allowAndName` alone his own download lands in the library's folder, and after the reset it lands in his |
+
+The AST pin moved with it: still one DevTools `send` site, and now two
+session sites, the capture's and the reset's, both in `cdp_download.py`.
+
+    WHAT A FAKE CAN SHOW IS THAT THE RESET IS SENT, IN ORDER, AND WHAT IT
+    WOULD DO IF CHROME DOES WHAT THE PROTOCOL SAYS. WHETHER IT DOES IS A
+    LIVE QUESTION, AND THE LANE RECORD QUEUES IT.
+
 ---
 
 ## 70. THE BEST-VERIFIED WRITE NEVER PRESSED SAVE, AND A WRITE AIMED BY ITS CARD (lane-l7-profile-writes, 2026-09-24)
