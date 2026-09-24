@@ -688,8 +688,15 @@ by its subject:
    FULL SUITE**, so, by the order, the full suite was NOT run here; CI certifies at the merge.
 4. **The order's gate list, instead** -- the gate's own 18 corpus-wide guards, the lane's three test
    files, the tool-surface and census pin files the integration moved, and the page-string and lane G
-   guards: 38 files in one run. FINAL_GATE_RESULT
-5. **The diff and the documents:** FINAL_SCAN_RESULT
+   guards: 38 files in one run, on the committed tip. **1 failed, 4069 passed, no skips, no errors,
+   10 min 30 s.** The one red is
+   `tests/test_ci_shard.py::test_the_timings_table_still_prices_most_of_the_suite`, the table the
+   order keeps for the orchestrator (I.5). After it, every census instrument in item 1 was re-run at
+   the tip with the same results, and the three generators' `--check` pass.
+5. **The diff and the documents:** the branch's diff against `ff98a7f` -- 31 files, 3454 added lines --
+   is all ASCII and carries no absolute workspace path, user directory or operator name (the byte and
+   pattern scans, the pattern's four planted controls each firing); no commit message on the branch
+   carries an attribution line; `scripts/check_cited_shas_resolve.py` OK at the tip.
 
 **Not run, and why:**
 
