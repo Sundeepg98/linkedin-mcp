@@ -577,7 +577,7 @@ def test_the_action_set_is_the_one_this_file_was_measured_against():
     # so neither prints a phrase another action owns -- and no owner entry was
     # needed. ``update_profile_field``'s ``_VERIFIED_FROM`` row was rewritten
     # the same day (a fresh navigation after Save) and passed the same checks.
-    # FIFTEEN FROM LANE L5'S MERGE OF MASTER 603f4d3, the same day, and the
+    # FIFTEEN FROM LANE L5'S MERGE OF MASTER 66aaa95, the same day, and the
     # acknowledgement was earned the same way: ``send_reply``'s two rows
     # were read (on the lane's branch, where it was the fourteenth). Its
     # ``_WHERE_TO_LOOK`` value is the conversation in his LinkedIn

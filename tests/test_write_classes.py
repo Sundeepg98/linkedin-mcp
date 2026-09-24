@@ -377,7 +377,7 @@ def test_every_defining_passage_resolves_on_its_own(cls):
 # ---------------------------------------------------------------------------
 # R3 CARRIES A DISPOSITION SINCE 2026-09-24 (lane L7): a build must still be
 # true. (This header went on "and R2 is still classify-only" until lane L5's
-# merge of master 603f4d3, the same day: WRITE-CLASS-B let R2 be built, and
+# merge of master 66aaa95, the same day: WRITE-CLASS-B let R2 be built, and
 # test_an_r2_line_may_record_a_build_or_a_blocker, above, pins that.)
 # ---------------------------------------------------------------------------
 

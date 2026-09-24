@@ -327,7 +327,7 @@ the missing one is ``set_open_to_work``: it is sanctioned, it is refused by
 ``_refuse_unperformable``, and no tool was ever registered for it. So fifteen
 counts TOOLS and sixteen counts ACTIONS, and a reader comparing the two
 numbers is not looking at a discrepancy. (FIFTEEN and FOURTEEN until lane
-L5's merge of master 603f4d3, 2026-09-24, ``send_reply`` adding one to each;
+L5's merge of master 66aaa95, 2026-09-24, ``send_reply`` adding one to each;
 FOURTEEN and THIRTEEN until lane L7's merge the same day,
 ``mark_company_interest`` adding one to each; THIRTEEN and TWELVE until
 2026-09-23, ``follow_company_page`` adding one to each.)

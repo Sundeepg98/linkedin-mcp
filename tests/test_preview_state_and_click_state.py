@@ -510,7 +510,7 @@ def test_every_performable_action_is_either_reached_or_declared_unreachable():
     # reached over its own committed fixture rather than declared unreachable.
     # 13 -> 14 on 2026-09-24 (lane L7's merge): ``mark_company_interest``
     # shipped, reached over the tracked ``job_detail_hydrated`` capture.
-    # 14 -> 15 the same day (lane L5's merge of master 603f4d3):
+    # 14 -> 15 the same day (lane L5's merge of master 66aaa95):
     # ``send_reply`` shipped, and it is reached over the synthetic
     # conversation its own tests read, not declared unreachable.
     assert len(PERFORMABLE) == 15, sorted(PERFORMABLE)

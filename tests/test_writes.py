@@ -717,7 +717,7 @@ def test_what_ships_is_narrower_than_what_is_sanctioned():
         # address save and follow already act on and an anchor measured on
         # three tracked captures.
         "mark_company_interest",
-        # SIXTEEN FROM LANE L5'S MERGE OF MASTER 603f4d3, the same day (fifteen
+        # SIXTEEN FROM LANE L5'S MERGE OF MASTER 66aaa95, the same day (fifteen
         # on the lane's branch): the reply inside a conversation he names
         # (census M M10), sanctioned and performable in the same move.
         "send_reply",

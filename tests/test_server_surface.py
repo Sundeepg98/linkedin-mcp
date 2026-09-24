@@ -550,7 +550,7 @@ async def tools():
 
 
 async def test_the_surface_is_exactly_the_fifty_six_tools(tools):
-    """RENAMED AGAIN AT LANE L5'S MERGE OF MASTER 603f4d3, 2026-09-24, to
+    """RENAMED AGAIN AT LANE L5'S MERGE OF MASTER 66aaa95, 2026-09-24, to
     ``..._fifty_six_tools``: two reads and a write arrived together
     (``linkedin_list_conversations``, ``linkedin_open_thread``,
     ``linkedin_send_reply``) on top of lane L7's fifty-three. The lane's
@@ -796,7 +796,7 @@ async def test_the_surface_is_exactly_the_fifty_six_tools(tools):
     # linkedin_mark_company_interest, a WRITE, so the split moves on its write
     # side and the non-write count holds. MEASURED off mcp.list_tools() on the
     # merged tree, not summed from the two branches' fifty-twos.
-    # FIFTY-SIX AT LANE L5'S MERGE OF MASTER 603f4d3, the same day: two
+    # FIFTY-SIX AT LANE L5'S MERGE OF MASTER 66aaa95, the same day: two
     # READS and a WRITE on top of lane L7's fifty-three, so both sides of
     # the split below move -- the reads by two, the writes by one. The NAME
     # moved too. MEASURED off mcp.list_tools() on the merged tree.
@@ -1939,7 +1939,7 @@ async def test_the_server_instructions_name_every_write_that_ships():
         13: "thirteen",
         # FOURTEEN FROM 2026-09-24: mark_company_interest is the fourteenth.
         14: "fourteen",
-        # FIFTEEN FROM LANE L5'S MERGE OF MASTER 603f4d3, the same day:
+        # FIFTEEN FROM LANE L5'S MERGE OF MASTER 66aaa95, the same day:
         # send_reply. Extended the same way; the instructions still have to
         # SAY it, which this map does not do.
         15: "fifteen",

@@ -348,7 +348,8 @@ PINNED_TOOL_SURFACE: dict[str, tuple[str, ...]] = {
 #: this lane's three tools and seven parameters, measured off the merged
 #: registry below. No row moves in the merge itself.
 #: **AND 56 TOOLS AND 87 PARAMETERS AT LANE L5'S THIRD MERGE, of master
-#: 603f4d3 (lane L7's), 2026-09-24:** lane L7's 53 and 80 plus this lane's
+#: 66aaa95 (lane L7's, and its CI fix), 2026-09-24:** lane L7's 53 and 80
+#: plus this lane's
 #: three tools and seven parameters, measured off the merged registry
 #: below. No row moves in the merge itself.
 PINNED_TOOL_COUNT = 56

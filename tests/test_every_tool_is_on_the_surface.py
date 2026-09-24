@@ -327,7 +327,7 @@ def test_both_rules_reject_the_registry_that_was_actually_measured():
     # linkedin_mark_company_interest, a WRITE (census row P I14), built on that
     # lane's branch as its own fifty-second, measured off the merged registry
     # and moved with every other count site.
-    # FIFTY-SIX AT LANE L5'S MERGE OF MASTER 603f4d3, the same day: two
+    # FIFTY-SIX AT LANE L5'S MERGE OF MASTER 66aaa95, the same day: two
     # READS (linkedin_list_conversations, linkedin_open_thread) and a WRITE
     # (linkedin_send_reply) on top of lane L7's fifty-three -- fifty-five on
     # the lane's branch, which had counted from the live lane's fifty-two --

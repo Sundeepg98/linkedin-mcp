@@ -954,8 +954,9 @@ PINNED = {
     #:   b1_no_ruling 19 -> 20; b1_standing 12, gap_write 322 and
     #:   b3_blocked_on_nothing 1 as at the first merge (the live lane moved
     #:   no write row and none of the rows those count)
-    #: AND AT LANE L5'S THIRD MERGE, of master 603f4d3 (lane L7's `P I14`,
-    #: above), the same three rows over lane L7's figures, each MEASURED on
+    #: AND AT LANE L5'S THIRD MERGE, of master 66aaa95 (lane L7's merge,
+    #: with `P I14` above, and a CI fix after it that moved no figure here),
+    #: the same three rows over lane L7's figures, each MEASURED on
     #: the merged tree and equal to the sum:
     #:   adjudicated 198 -> 201, delivered_broad 109 -> 112, unfired 30 -> 33
     #:   gap 506 -> 503, gap_write 323 -> 321, b1_standing 11 -> 13
@@ -1025,7 +1026,7 @@ PINNED = {
     #: stays, built.
     #: 322 since lane L5's merge: `M M10` and `M M17` were built
     #: (`linkedin_send_reply`) and left GAP; both keep their lines, built.
-    #: 321 since lane L5's merge of master 603f4d3, the two over
+    #: 321 since lane L5's merge of master 66aaa95, the two over
     #: lane L7's one.
     "gap_write": 321,
     #: All 54 are `jobs.md`, which has no per-row R/W column (56 until the
@@ -1141,7 +1142,7 @@ PINNED = {
     #:                        standing); `M M49`, a read no ruling holds (+1
     #:                        none).
     #:   lane L5's third      13 standing / 0 / 0 / 20 none, 6 released, of 33,
-    #:   merge (over L7)      measured on the tree merged with 603f4d3: the
+    #:   merge (over L7)      measured on the tree merged with 66aaa95: the
     #:                        same three rows over lane L7's figures.
     #: `b1_relayed` is the count this file called `b1_named_target` until the
     #: target condition was registered: a name for what a status COUNTS, not

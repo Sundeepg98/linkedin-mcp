@@ -62,7 +62,7 @@ twelve sanctioned mutating calls exist, writes are off unless a per-process
 flag is set, and every write needs a single-use token from its own preview --
 a token that works once, and a redeemed grant that ``perform`` will not act on
 twice. (This read "fourteen write tools" until lane L5's merge of master
-603f4d3, 2026-09-24, which brought ``linkedin_send_reply`` -- the fourteenth
+66aaa95, 2026-09-24, which brought ``linkedin_send_reply`` -- the fourteenth
 on that lane's branch; "thirteen write tools" until lane L7's merge the same
 day brought ``linkedin_mark_company_interest``; and "twelve write tools"
 until 2026-09-23, when ``linkedin_follow_company_page`` shipped. The
