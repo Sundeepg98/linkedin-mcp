@@ -609,54 +609,55 @@ tree holds no such row).
 ### I.3 The WHO/WHICH rule on this lane's rows
 
 The order: a row whose payload is people, or which items of other people's content,
-served only by a count-only reader, is GAP on the doctrine, with its REOPENER. All 43
-rows were GAP; the question was whether any cell claimed more. Every READ row was
-judged on its own words:
+served only by a count-only reader, is GAP on the doctrine, with its REOPENER. Master
+then registered the rule as `WHO-WHICH-COUNTS-ARE-NOT-DELIVERY` (I.9), and this is the
+classification by its text -- WHO a person or a set of people, WHICH items of other
+people's content such as groups or events; a FILTER or an AGGREGATE (counts by title,
+school, skill or location) is delivered by counts. All 43 rows were GAP; the question
+was whether any cell claimed more. Every READ row was judged on its own words:
 
-    REACHED -- the cell now names the doctrine and its REOPENER; the row stays GAP
-      J 159   which ads a company runs                       WHICH
+    REACHED -- the cell names the ruling, the doctrine and the REOPENER; stays GAP
+      J 152   which courses the Learning catalogue lists      WHICH
+      J 154   which courses his library holds                 WHICH
+      J 159   which ads a company runs                        WHICH
       J 160   the people hiring for the job he wants          WHO
       J 165   which events a company hosts (N 180's case)     WHICH
       J 166   the members a product page names                WHO    its cell had said
                                                                      "a reader needs a
                                                                      name-free shaper"
+      J 167   which showcase Pages a company has (N 162's     WHICH
+              case: which groups)
       M C93   who and which a search finds                    WHO    its admission clause
                                                                      brought up to D2
       M C101  which editions a newsletter holds               WHICH
-      N 195   each recruiter viewer, by company and industry  WHO    its cell had said a
-              (the row's third part)                                 count reader names
-                                                                     nobody; gate READER
-                                                                     -> RULING, triage
-                                                                     BUILDABLE -> RULING
       N 199   the people suggested for the job search         WHO    its cell had said
                                                                      "a reader needs a
                                                                      name-free shaper"
 
-    NOT REACHED -- unchanged
-      J 152          LinkedIn Learning's catalogue: products addressable by id, as job
-                     postings are; neither people nor members' content
+    NOT REACHED -- the cell unchanged, or saying why
+      N 195          an AGGREGATE: the page names no member (the live lane's capture:
+                     no member link in main), and draws each recruiter viewer as a
+                     company, an industry and a time; counts by company and industry
+                     deliver it. Its cell had said a count reader names nobody; it now
+                     says why that suffices. Gate READER, triage BUILDABLE
       J 153, C95,    one caller-chosen item's own content; each cell already says a
         C98          reader could publish its facts, never its words or its video
-      J 154-156,     his own record
+      J 155, 156,    his own record
         P S1, S3, S5
-      J 167          organisations' own Pages, consumable by id by
-                     `linkedin_company_page_counts`
       M M53          a closed status word for a thread the caller names; no name
       M C96, C99,    a provenance label on one item, a game's state, a link
         N 197
       the 21 write rows   the rule is about what a read may publish
 
-The WHICH rows name the precedent `N 162` / `N 180` and `FEED-CONTENT-READ-RULING`
-(counts and relations only); the WHO rows the name-free shaper doctrine, pending the
-operator's question on returning names at runtime -- the form lane S's three cells use.
-The side tables say the same, row by row.
+Every reached cell carries the same sentence: the ruling's id, the name-free shaper
+doctrine, pending the operator's question on returning names and titles at runtime,
+and the REOPENER in the ruling's words. The side tables say the same, row by row.
 
 **ONE FINDING FOR WHOEVER ANSWERS THAT QUESTION.** `linkedin_who_viewed_me` already
 returns each profile viewer's name and headline -- and "Recruiter at <company>" for
 the anonymous ones -- and rows 129 and 130 are COVERED-PROVEN on it. The question the
 WHO rule leaves pending is therefore already answered once, for one page, with no
-ruling behind the answer. `N 195` asks for the same kind of reading on the recruiter
-page.
+ruling behind the answer. `N 195` needs less than that: its page names nobody.
 
 ### I.4 J 158, decided on evidence
 
@@ -832,3 +833,41 @@ Slice M: 127 GAP rows = R 18 + W 105 + R+W 4 (the live lane's 116 plus this lane
 tables GREEN on their checkers (jobs 107 of 107, bucket 3 104 of 104, write classes
 339 lines). The candidate table was already at its fixed point on this tree, verdict
 layer 0 problems. The gates of this merge are reported in the lane's final message.
+
+### I.9 And once more: master registered the rule this lane had applied
+
+Master then read `9b9a4d0` -- a rulings commit, local and origin alike -- which
+registers `WHO-WHICH-COUNTS-ARE-NOT-DELIVERY`, among three other calls. Merged the same
+way: only the three generated files conflicted, and were regenerated to a fixed point.
+
+The ruling's text differs from the order's wording in two places this lane had to
+act on, and I.3 is now the classification by the registered text:
+
+* **WHICH names its examples** -- "items of other people's content, such as groups or
+  events" -- and its precedent `N 162` withheld WHICH GROUPS, organisations a tool can
+  also read by id. So `J 167` (which showcase Pages a company has) is WHICH, and so are
+  `J 152` and `J 154` (which courses the catalogue lists, which his library holds):
+  each now carries the sentence. At the first merge this lane had classed those three
+  as not reached.
+* **AN AGGREGATE IS DELIVERED BY COUNTS.** `N 195`'s third part is each recruiter viewer
+  as a company, an industry and a time, on a page that names no member -- measured on
+  the live lane's capture with a name-free reader (no member link in main; each entry a
+  company, an industry and a time). That is counts by company and industry. So the
+  ruling does not hold `N 195`: back to gate READER and triage BUILDABLE, its cell
+  saying why. At the first merge this lane had held it as WHO.
+
+Every reached cell now names the ruling by its id, the doctrine and the REOPENER in the
+ruling's words -- "pending the operator's question on returning names and titles at
+runtime; REOPENER: he rules that such reads may return them" -- where the first merge
+had written the order's wording and, for WHICH rows, `FEED-CONTENT-READ-RULING`.
+
+**THE FIGURES THIS LANE LEAVES, re-measured on this tree.** Rows 747 (J 166, P 213,
+M 153, N 215); GAP 549; achievable 677; delivered strict 79, broad 109; unfired 30;
+adjudicated 198; out of scope 70; gap_read 104 / gap_write 338 / gap_unknown 107;
+bucket 3 admitted 42, refused 46, no address 1, needs session 13, undetermined 2,
+BLOCKED ON NOTHING 5 -- `M M49`, `P K1`, `P S5`, `M M53`, `N 195`; bucket 1 standing
+10, none 20 (released 6); jobs GAP 107 = R 41 + W 58 + R+W 8. One pin moved from the
+second merge's values, `b3_blocked_on_nothing` 4 -> 5, and `census_completion --check`
+matches every figure. Slice M: 127 = R 18 + W 105 + R+W 4. The read triage: 79
+verdicts -- BUILDABLE 12, ADDRESS 17, RULING 15, PRESS 6, SERVED 1, RETURNED 28. The
+write classes: (16, 36, 287) over 339 lines. Row pin and locator copy: 747.

@@ -923,7 +923,9 @@ PINNED = {
     #: Lane Y2 admitted 43 capability rows LinkedIn draws that no row carried,
     #: all at GAP; on the orchestrator's delegated call `J 158` then moved
     #: GAP -> COVERED-UNFIRED (a shipped tool reaches it, its call at that
-    #: index never fired), and the WHO/WHICH rule re-gated `N 195` RULING.
+    #: index never fired). Under WHO-WHICH-COUNTS-ARE-NOT-DELIVERY, as
+    #: registered at master 9b9a4d0, ten of the 43 stay GAP on the
+    #: doctrine and `N 195` does not: its third part is an aggregate.
     #: Against the live lane's figures:
     #:   stated_rows 704 -> 747, capabilities 762 -> 805,
     #:   capabilities_achievable 648 -> 691, achievable 634 -> 677 (+43)
@@ -932,7 +934,7 @@ PINNED = {
     #:   gap_read 91 -> 104 (+13), gap_write 324 -> 338 (+14),
     #:   gap_unknown 92 -> 107 (+16 jobs rows, -1 `J 158`)
     #:   b3_admitted 37 -> 42, b3_refused 38 -> 46,
-    #:   b3_blocked_on_nothing 2 -> 4 (`P S5`, `M M53`; `N 195` is RULING)
+    #:   b3_blocked_on_nothing 2 -> 5 (`P S5`, `M M53`, `N 195`)
     #:   b1_no_ruling 19 -> 20 (`J 158`, a read no ruling holds)
     #:   jobs_gap 92 -> 107, jobs_dir_r 33 -> 41, jobs_dir_w 53 -> 58,
     #:   jobs_dir_rw 6 -> 8, jobs_refused 26 -> 36; jobs_admitted stays 11
@@ -1050,11 +1052,15 @@ PINNED = {
     #:       under the WHO rule `N 79`, `N 172` and `N 194` stay GAP, re-gated
     #:       RULING on the name-free shaper doctrine, pending the operator's
     #:       question on returning names at runtime. Left: `M M49`, `P K1`
+    #:   5   at lane Y2's integration, 2026-09-24: three admitted reads on pages
+    #:       already admitted and loaded, each waiting only on a reader --
+    #:       `P S5`, `M M53`, and `N 195`, whose third part is an AGGREGATE
+    #:       that WHO-WHICH-COUNTS-ARE-NOT-DELIVERY says counts deliver
     #: The gates past the boundary are re-judged BY HAND when a ruling lands;
     #: what `ruling_problems` asks on every run is only that no row blocked on
     #: nothing sits on a page a hold binds.
     #: `_audit/2026-09-23-census-cleanup.md` items 6 and 7, sections 11-13.
-    "b3_blocked_on_nothing": 4,
+    "b3_blocked_on_nothing": 5,
     #: BUCKET 1 BY WHAT HOLDS EACH ROW, DERIVED from the census and the
     #: holds in `scripts/ruling_holds.py`, BY THE STATUS OF THE HOLD: standing,
     #: relayed, pending, or none. They sum to `unfired`, and `PINNED_B1_ROWS`

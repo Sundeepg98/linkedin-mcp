@@ -255,15 +255,15 @@ TRIAGE: dict[str, tuple[str, str, str]] = {
     "N A5": ("ADDRESS", "REFUSED", "carries /invite, same double cost, same "
                                    "unmeasured precondition"),
     # Admitted at GAP 2026-09-24 by lane Y2; see the profile block above.
-    # N 195 is RULING, not BUILDABLE, since lane Y2's integration: under the
-    # WHO rule (the orchestrator's census call, 2026-09-24 03:20) a reader of
-    # the counts and the chart's series serves the row's first two parts, and
-    # its third -- each recruiter viewer, by company and industry -- is WHO.
-    "N 195": ("RULING", "", "the address is admitted and the page captured, "
-                            "and a count reader would not deliver the row: its "
-                            "payload is partly WHO, held by the name-free "
-                            "shaper doctrine pending the operator's question "
-                            "on returning names at runtime"),
+    # N 195 stays BUILDABLE under WHO-WHICH-COUNTS-ARE-NOT-DELIVERY as
+    # registered (2026-09-24): the page names no member, and its third part
+    # -- each recruiter viewer as a company, an industry and a time -- is an
+    # AGGREGATE, which the ruling says a count or aggregate reader delivers.
+    "N 195": ("BUILDABLE", "", "the bare recruiter-views address is admitted "
+                               "and the page has been captured; one reader, "
+                               "publishing the counts, the chart's series and "
+                               "the company and industry aggregates, naming "
+                               "nobody"),
     "N 197": ("PRESS", "", "the group page is admitted and the copy-link item "
                            "sits behind the group's own menu; whether a link "
                            "composed from the group id discharges the row is "
@@ -271,10 +271,10 @@ TRIAGE: dict[str, tuple[str, str, str]] = {
                            "decided here"),
     "N 199": ("ADDRESS", "ABSENT", "the Premium suggestions page is drawn from "
                                    "a notification and no pattern names it; "
-                                   "the list is of other people, so under the "
-                                   "WHO rule an admission and a count reader "
-                                   "would still not deliver it (the name-free "
-                                   "shaper doctrine)"),
+                                   "the list is of other people, so as "
+                                   "WHO-WHICH-COUNTS-ARE-NOT-DELIVERY rules an "
+                                   "admission and a count reader would still "
+                                   "not deliver it"),
     # ---- RETURNED by lane R, 2026-09-23 (its own class; see VERDICTS) ----
     "N 9": ("RETURNED", "", "returned by lane R 2026-09-23 from EXCLUDED-RULED; its blocker is named in its own cell and its address is measured in read-addresses.tsv"),
     "N 11": ("RETURNED", "", "returned by lane R 2026-09-23 from EXCLUDED-RULED; its blocker is named in its own cell and its address is measured in read-addresses.tsv"),
