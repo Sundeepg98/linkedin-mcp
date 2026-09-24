@@ -1456,6 +1456,17 @@ counts). Plus eight plants, each alone in a scratch copy, all red:
 
 Baseline and restored: 167 passed (`test_press` and `test_share_link`).
 
+**CORRECTED 2026-09-24, found by (c)'s gate: THIS BUILD GREW THE PAGE-TEXT
+INVENTORY.** `read_reaction_surface`'s new family loop handed its loop name
+`key` to a debug line, and `key` is a name `dom.py` binds from page data
+elsewhere; `tests/test_page_text_is_never_printed.py` tracks a tainted name
+module-wide, so the pinned count for `linkedin_server/dom.py` read 10 against
+9 from this commit on. Nothing the page wrote reached a log -- the value was
+always one of two literals -- but the rule is on the binding, and it was
+right to go red. Nothing in this build's gate ran that guard; the next
+build's selection is where it showed. Repaired by renaming the loop's names
+(the commit after `cdf1c42`), and the inventory reads 9 again.
+
 ### (b) REACT: the react write reads the other label family; nothing fired
 
 **THE DEFECT, stated from (a)'s correction rather than from the order's
@@ -1509,3 +1520,10 @@ Baseline and restored: 14 passed (`test_react_direction_is_read_where_it_
 acts`, six of them new). The write suites, the follow-page tests, the
 page-string guards and the corpus guards: 2185 passed with the one sibling
 test red before its re-aim, then 54 passed on the two files it touches.
+
+**CORRECTED 2026-09-24: "the corpus guards" OVERCLAIMED.** One of them,
+`tests/test_page_text_is_never_printed.py`, was red on this tree from (a)'s
+commit on (see (a)'s correction above), so the run that read 2185 passed with
+only the sibling test red cannot have included it. Run afterwards on an
+archive of this commit (`cdf1c42`), it fails: 1 failed, 19 passed. The other
+numbers stand as they were read.

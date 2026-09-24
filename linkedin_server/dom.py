@@ -7965,16 +7965,26 @@ async def read_reaction_surface(page: Any) -> dict[str, Any]:
         "permalinks": await _count_links_with(page, "/feed/update/"),
         "labels": [],
     }
-    for key, prefix in (
+    # THE LOOP NAMES ARE THIS LOOP'S OWN. ``key`` is bound from page data
+    # elsewhere in this module, and the page-text guard tracks a tainted name
+    # module-wide, so a debug line handed ``key`` counted as printing what the
+    # page wrote (tests/test_page_text_is_never_printed.py, dom.py 9 -> 10,
+    # introduced 2026-09-24 by the price build and caught by the next build's
+    # gate). Every value here is this module's own literal.
+    for family_count_name, family_prefix in (
         ("unreact_controls", REACTION_UNREACT_PREFIX),
         ("react_controls", REACTION_REACT_PREFIX),
     ):
         try:
-            out[key] = int(
-                await page.locator('button[aria-label^="' + prefix + '"]').count()
+            out[family_count_name] = int(
+                await page.locator(
+                    'button[aria-label^="' + family_prefix + '"]'
+                ).count()
             )
         except Exception as exc:  # noqa: BLE001 - an unread count stays None
-            logger.debug("%s unreadable: %s", key, type(exc).__name__)
+            logger.debug(
+                "%s unreadable: %s", family_count_name, type(exc).__name__
+            )
     try:
         controls = page.locator(REACTION_CONTROL)
         out["controls"] = int(await controls.count())
