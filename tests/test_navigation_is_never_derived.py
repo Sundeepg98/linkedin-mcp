@@ -79,6 +79,7 @@ carefully as the red ones -- including the exact shape both probes now use.
 from __future__ import annotations
 
 import ast
+import os
 import pathlib
 import re
 
@@ -424,10 +425,15 @@ def _url_arg(call: ast.Call):
 #
 # WHAT IT DOES NOT SEE, said rather than implied. A page-returning function in
 # another module whose name the convention does not match: an over-approximate
-# whole-tree summary counts 89 such call sites across 37 callees under the
-# convention as shipped. A whole-tree complement was built and priced before
-# it was declined -- 17.4 s per run, and on this tree it found ONE extra site,
-# a bare-name collision between two modules' ``_url_for``, i.e. an artifact.
+# whole-tree summary counted 89 such call sites across 37 callees under the
+# convention as shipped. The first whole-tree complement was built and priced,
+# then declined -- 17.4 s per run, and its one extra site on this tree was a
+# bare-name collision between two modules' ``_url_for``, i.e. an artifact.
+# SINCE THE SAME DAY'S FOLLOW-UP THAT GAP IS COVERED -- IN CI, NOT HERE:
+# ``derived_across_modules`` (end of this file) resolves each call through the
+# calling file's imports, so that collision cannot recur, and
+# ``test_no_navigation_is_derived_through_another_module`` runs it over the
+# whole tree wherever ``CI`` is set. This walk stays per file.
 # THE CONVENTION IS A NAME, SO IT CUTS BOTH WAYS: a url BUILDER named
 # ``linkedin_*`` would be convicted (none exists; the convention adds no
 # finding on this tree), and a same-file summary matches its callees by bare
@@ -495,20 +501,34 @@ class _Facts:
     ``names`` -- the names it reads; ``callees`` -- the bare names it calls,
     which become sources when a function of this file turns out to return page
     data. Both sets skip what the carve-outs skip: a comparison and a count.
+
+    ``calls`` -- the same calls with their receiver, ``("", "f")`` for ``f()``
+    and ``("m", "f")`` for ``m.f()``. Only the whole-tree complement reads it
+    (see :func:`derived_across_modules`): it is what lets a call be resolved
+    through the calling file's imports rather than matched by bare name. A call
+    on anything but a plain name (``a.b.f()``, ``g().f()``) is not recorded.
     """
 
-    __slots__ = ("direct", "names", "callees")
+    __slots__ = ("direct", "names", "callees", "calls")
 
-    def __init__(self, direct: bool, names: frozenset, callees: frozenset) -> None:
+    def __init__(
+        self, direct: bool, names: frozenset, callees: frozenset,
+        calls: frozenset = frozenset(),
+    ) -> None:
         self.direct = direct
         self.names = names
         self.callees = callees
+        self.calls = calls
 
-    def asks_the_page(self, tainted: set[str], returns_page: set[str]) -> bool:
+    def asks_the_page(
+        self, tainted: set[str], returns_page: set[str],
+        elsewhere: frozenset = frozenset(),
+    ) -> bool:
         return (
             self.direct
             or not self.names.isdisjoint(tainted)
             or not self.callees.isdisjoint(returns_page)
+            or not self.calls.isdisjoint(elsewhere)
         )
 
 
@@ -516,6 +536,7 @@ def _facts(node: ast.AST) -> _Facts:
     direct = False
     names: set[str] = set()
     callees: set[str] = set()
+    calls: set[tuple[str, str]] = set()
     stack: list[ast.AST] = [node]
     while stack:
         child = stack.pop()
@@ -538,12 +559,16 @@ def _facts(node: ast.AST) -> _Facts:
                 direct = True
             elif name is not None:
                 callees.add(name)
+                if isinstance(func, ast.Name):
+                    calls.add(("", name))
+                elif isinstance(func.value, ast.Name):
+                    calls.add((func.value.id, name))
         elif isinstance(child, ast.Name):
             names.add(child.id)
         elif isinstance(child, ast.Attribute) and child.attr in _TAINTED_ATTRS:
             direct = True
         stack.extend(ast.iter_child_nodes(child))
-    return _Facts(direct, frozenset(names), frozenset(callees))
+    return _Facts(direct, frozenset(names), frozenset(callees), frozenset(calls))
 
 
 def _receiving(target: ast.AST):
@@ -673,30 +698,50 @@ def reader_derived_navigations(tree: ast.AST) -> list[tuple[int, str]]:
     found: list[tuple[int, str]] = []
     for _ in range(10):
         before = len(returns_page)
-        found = []
-        pending: list[tuple[_ReaderScope, frozenset]] = [(root, frozenset())]
-        while pending:
-            scope, inherited = pending.pop()
-            tainted = set(inherited - scope.local)
-            grew = True
-            while grew:
-                grew = False
-                for facts, receivers in scope.binds:
-                    if not receivers <= tainted and facts.asks_the_page(tainted, returns_page):
-                        tainted |= receivers
-                        grew = True
-            if isinstance(scope.node, (ast.FunctionDef, ast.AsyncFunctionDef)) and any(
-                r.asks_the_page(tainted, returns_page) for r in scope.returns
-            ):
-                returns_page.add(scope.node.name)
-            for line, text, facts in scope.gotos:
-                if facts.asks_the_page(tainted, returns_page):
-                    found.append((line, text))
-            frozen = frozenset(tainted)
-            pending.extend((child, frozen) for child in scope.children)
+        found, _asking = _reader_pass(root, returns_page)
         if len(returns_page) == before:
             break
     return sorted(set(found))
+
+
+def _reader_pass(
+    root: _ReaderScope, returns_page: set[str], elsewhere: frozenset = frozenset(),
+) -> tuple[list[tuple[int, str]], set[int]]:
+    """One walk of a file's scopes: the inner fixed point, once per scope.
+
+    Grows ``returns_page`` (this file's page-returning function names) and
+    returns the navigations that ask the page, plus the ids of the function
+    scopes whose return value does. ``elsewhere`` is the whole-tree
+    complement's only way in: the ``(receiver, name)`` calls in this file that
+    resolve to a page-returning function in ANOTHER file. Empty, this is the
+    per-file walk exactly.
+    """
+    found: list[tuple[int, str]] = []
+    asking: set[int] = set()
+    pending: list[tuple[_ReaderScope, frozenset]] = [(root, frozenset())]
+    while pending:
+        scope, inherited = pending.pop()
+        tainted = set(inherited - scope.local)
+        grew = True
+        while grew:
+            grew = False
+            for facts, receivers in scope.binds:
+                if not receivers <= tainted and facts.asks_the_page(
+                    tainted, returns_page, elsewhere
+                ):
+                    tainted |= receivers
+                    grew = True
+        if isinstance(scope.node, (ast.FunctionDef, ast.AsyncFunctionDef)) and any(
+            r.asks_the_page(tainted, returns_page, elsewhere) for r in scope.returns
+        ):
+            returns_page.add(scope.node.name)
+            asking.add(id(scope))
+        for line, text, facts in scope.gotos:
+            if facts.asks_the_page(tainted, returns_page, elsewhere):
+                found.append((line, text))
+        frozen = frozenset(tainted)
+        pending.extend((child, frozen) for child in scope.children)
+    return found, asking
 
 
 def violations(source: str, label: str = "<source>") -> list[tuple[int, str]]:
@@ -1938,3 +1983,490 @@ def test_the_reader_walker_binds_the_shared_forms_and_two_more():
                    for _ in _bindings(node)), "_bindings must stay blind to AugAssign"
     # And a method that is not an accumulation carries nothing: ``u.count(SRC)``.
     assert ("Call", "count") not in extra
+
+
+# ---------------------------------------------------------------------------
+# THE WHOLE-TREE COMPLEMENT.  Added 2026-09-24, lane G follow-up, item 10.
+#
+# The reader walk is PER FILE, and must stay so: the staged guard is an
+# induction step only while a file's verdict is a function of that file's own
+# text. What that costs is written beside the walk -- a page-returning function
+# in ANOTHER module whose name misses the reader convention is invisible to it.
+#
+# THIS SECTION SEES THOSE CALLS FROM THE OTHER SIDE: one fixed point over every
+# scanned file at once, where a call is resolved THROUGH THE CALLING FILE'S
+# IMPORTS to the function it names -- ``from m import f``, ``import m as x``,
+# ``from pkg import m``, relative imports inside the package, and re-exports
+# followed to their definition. NEVER BY BARE NAME: the first complement, built
+# and declined earlier the same day, matched callees by name alone and
+# convicted a probe for another script's ``_url_for``. That pair is a green
+# plant below.
+#
+# WHERE IT RUNS, AND WHY THERE. It is O(tree): parsing and scoping every
+# scanned file is most of its cost, so it runs where walking the tree is free
+# -- in CI, where GitHub Actions sets ``CI=true`` on every runner and
+# ``scripts/ci_full_run_check.py`` refuses an undeclared environment skip, so
+# it cannot quietly skip THERE. Locally it skips and says so; ``CI=1`` runs it.
+# Its plants are a few lines each and run everywhere.
+#
+# WHAT IT SAW ON THIS TREE, 2026-09-24: 275 files, 2306 module-level
+# functions, 476 of them page-returning under the convention; 435 distinct
+# calls resolve into another file, 65 of them into a page-returning function
+# (38 functions) -- and no navigation anywhere carries one. Cost on a shared,
+# loaded box: 6.7 s to parse and scope, 0.14 s per fixed point.
+#
+# WHAT IT STILL DOES NOT SEE. A method on an instance (``store.items()``):
+# resolving one needs the receiver's type, and matching methods by bare name
+# is the collision this section exists to avoid -- a prototype that did match
+# them found the page-returning methods on this tree to be ``code composed
+# describe evaluate goto imports raw read restore_into_context``, and the two
+# that reach a page, ``goto`` and ``evaluate``, are direct sources already. A
+# dotted receiver (``linkedin_server.dom.f()``), ``import *``, a module loaded
+# through ``importlib``, and anything outside ``SCANNED``. And it inherits the
+# per-file walk's over-approximations: ``read_text`` matches the reader
+# convention, so 181 of those 476 functions are "page-returning" only because
+# they read a FILE (measured by re-running without ``read_text`` and
+# ``read_bytes`` as readers: 295).
+# ---------------------------------------------------------------------------
+
+
+def _module_name(path: pathlib.Path) -> str:
+    """The name the rest of the tree imports ``path`` by.
+
+    The package's modules by their dotted name; a script by its stem, because
+    scripts run with ``scripts/`` on ``sys.path`` and import one another bare
+    (``import count_census_states``).
+    """
+    if path.parent.name == "linkedin_server":
+        return "linkedin_server" if path.stem == "__init__" else "linkedin_server." + path.stem
+    return path.stem
+
+
+class _Module:
+    """One file, parsed once: its scopes, its top-level functions, its imports."""
+
+    __slots__ = ("name", "label", "root", "tops", "aliases", "imported", "calls")
+
+    def __init__(
+        self, name: str, source: str, label: str = "", package: str | None = None,
+    ) -> None:
+        self.name = name
+        self.label = label or name + ".py"
+        self.root = _ReaderScope(ast.parse(source, filename=self.label))
+        #: this file's own module-level functions, by name
+        self.tops = {
+            child.node.name: child
+            for child in self.root.children
+            if isinstance(child.node, (ast.FunctionDef, ast.AsyncFunctionDef))
+        }
+        #: ``import m as x`` -> ``{x: m}``; ``from p import n as y`` -> ``{y: (p, n)}``.
+        #: An import anywhere in the file counts, including a function's lazy one.
+        self.aliases: dict[str, str] = {}
+        self.imported: dict[str, tuple[str, str]] = {}
+        if package is None:
+            package = name.rpartition(".")[0]
+        for node in ast.walk(self.root.node):
+            if isinstance(node, ast.Import):
+                for alias in node.names:
+                    if alias.asname:
+                        self.aliases[alias.asname] = alias.name
+                    else:
+                        head = alias.name.partition(".")[0]
+                        self.aliases[head] = head
+            elif isinstance(node, ast.ImportFrom):
+                base = node.module or ""
+                if node.level:
+                    parts = package.split(".") if package else []
+                    if node.level - 1 > len(parts):
+                        continue
+                    anchor = ".".join(parts[: len(parts) - (node.level - 1)])
+                    base = ".".join(part for part in (anchor, base) if part)
+                for alias in node.names:
+                    if alias.name != "*":
+                        self.imported[alias.asname or alias.name] = (base, alias.name)
+        #: every ``(receiver, name)`` call any of this file's facts makes
+        calls: set[tuple[str, str]] = set()
+        stack = [self.root]
+        while stack:
+            scope = stack.pop()
+            for facts, _receivers in scope.binds:
+                calls |= facts.calls
+            for facts in scope.returns:
+                calls |= facts.calls
+            for _line, _text, facts in scope.gotos:
+                calls |= facts.calls
+            stack.extend(scope.children)
+        self.calls = frozenset(calls)
+
+
+def _resolve(
+    module: _Module, call: tuple[str, str], modules: dict[str, _Module],
+) -> tuple[str, str] | None:
+    """The ``(module, function)`` a call in ``module`` names -- if another file's.
+
+    ``None`` for a function this file defines itself (the per-file walk's job),
+    a name nothing imported, and anything that does not end at a module-level
+    function of a scanned file.
+    """
+    receiver, name = call
+    if receiver == "":
+        if name in module.tops or name not in module.imported:
+            return None
+        target = module.imported[name]
+    else:
+        home = module.aliases.get(receiver)
+        if home is None and receiver in module.imported:
+            home = ".".join(part for part in module.imported[receiver] if part)
+        if home is None or home not in modules:
+            return None
+        target = (home, name)
+    for _hop in range(8):  # a re-export is followed to the definition
+        home, name = target
+        owner = modules.get(home)
+        if owner is None:
+            return None
+        if name in owner.tops:
+            return None if home == module.name else target
+        if name not in owner.imported:
+            return None
+        target = owner.imported[name]
+    return None
+
+
+def derived_across_modules(
+    modules: list[_Module], *, across: bool = True,
+) -> tuple[dict[str, list[tuple[int, str]]], int]:
+    """Every navigation whose address carries a reading, calls resolved tree-wide.
+
+    Returns ``(found, reach)``: the findings by file label, and how many
+    distinct ``(file, call)`` pairs resolved to a page-returning function in
+    ANOTHER file -- the premise, since a resolver that resolved nothing would
+    report nothing and look exactly like a clean tree. ``across=False`` is the
+    per-file walk over the same parse, which is what the complement is
+    measured against.
+    """
+    by_name = {m.name: m for m in modules}
+    routes: dict[str, dict[tuple[str, str], tuple[str, str]]] = {}
+    for m in modules:
+        routes[m.name] = {}
+        if not across:
+            continue
+        for call in m.calls:
+            target = _resolve(m, call, by_name)
+            if target is not None:
+                routes[m.name][call] = target
+    local: dict[str, set[str]] = {m.name: set() for m in modules}
+    page_functions: set[tuple[str, str]] = set()
+    for _round in range(50):
+        before = len(page_functions) + sum(len(names) for names in local.values())
+        found: dict[str, list[tuple[int, str]]] = {}
+        for m in modules:
+            elsewhere = frozenset(
+                call for call, target in routes[m.name].items() if target in page_functions
+            )
+            sites, asking = _reader_pass(m.root, local[m.name], elsewhere)
+            page_functions.update(
+                (m.name, name) for name, scope in m.tops.items() if id(scope) in asking
+            )
+            if sites:
+                found[m.label] = sorted(set(sites))
+        if len(page_functions) + sum(len(names) for names in local.values()) == before:
+            reach = sum(
+                1 for m in modules for target in routes[m.name].values()
+                if target in page_functions
+            )
+            return found, reach
+    raise AssertionError("the whole-tree fixed point did not settle in 50 rounds")
+
+
+def _plant(*modules: tuple[str, str]) -> list[_Module]:
+    return [_Module(name, source) for name, source in modules]
+
+
+#: A page-returning helper whose name is outside the reader convention -- the
+#: exact thing the per-file walk cannot see from another file.
+_RAIL_HELPER = (
+    "rail_helper",
+    "async def rail_urns(page):\n"
+    "    return await page.evaluate(RAIL_JS)\n",
+)
+
+_NAVIGATE = "        await BROWSER.goto(page, ITEM_PERMALINK_URL.format(urn=urn))  # DERIVED\n"
+
+#: ``(modules, label of the file holding the navigation, why)``. Every route
+#: navigates once, on the line marked ``# DERIVED``.
+_ACROSS_RED = {
+    "from-import": (
+        (_RAIL_HELPER, (
+            "route",
+            "from rail_helper import rail_urns\n"
+            "async def main(page):\n"
+            "    for urn in await rail_urns(page):\n" + _NAVIGATE,
+        )),
+        "route.py",
+        "a page-returning function imported by name from another script",
+    ),
+    "module-alias": (
+        (_RAIL_HELPER, (
+            "route",
+            "import rail_helper as rail\n"
+            "async def main(page):\n"
+            "    urns = await rail.rail_urns(page)\n"
+            "    for urn in urns:\n" + _NAVIGATE,
+        )),
+        "route.py",
+        "the same function reached through a module alias",
+    ),
+    "package-relative-module": (
+        (
+            ("linkedin_server.rail", _RAIL_HELPER[1]),
+            (
+                "linkedin_server.tool",
+                "from . import rail\n"
+                "async def open_items(page):\n"
+                "    for urn in await rail.rail_urns(page):\n" + _NAVIGATE,
+            ),
+        ),
+        "linkedin_server.tool.py",
+        "inside the package, a relative import of the module",
+    ),
+    "package-relative-name": (
+        (
+            ("linkedin_server.rail", _RAIL_HELPER[1]),
+            (
+                "linkedin_server.tool",
+                "from .rail import rail_urns as items_on_rail\n"
+                "async def open_items(page):\n"
+                "    for urn in await items_on_rail(page):\n" + _NAVIGATE,
+            ),
+        ),
+        "linkedin_server.tool.py",
+        "inside the package, a relative import of the name, renamed",
+    ),
+    "two-hops": (
+        (
+            ("rail_source", "async def fetch(page):\n    return await page.evaluate(RAIL_JS)\n"),
+            (
+                "rail_helper",
+                "import rail_source\n"
+                "async def rail_urns(page):\n"
+                "    return await rail_source.fetch(page)\n",
+            ),
+            (
+                "route",
+                "from rail_helper import rail_urns\n"
+                "async def main(page):\n"
+                "    for urn in await rail_urns(page):\n" + _NAVIGATE,
+            ),
+        ),
+        "route.py",
+        "the reading travels two files before it reaches the navigation",
+    ),
+    "re-export": (
+        (
+            _RAIL_HELPER,
+            ("rail_facade", "from rail_helper import rail_urns\n"),
+            (
+                "route",
+                "from rail_facade import rail_urns\n"
+                "async def main(page):\n"
+                "    for urn in await rail_urns(page):\n" + _NAVIGATE,
+            ),
+        ),
+        "route.py",
+        "a facade re-exports the reader; resolution follows it to the definition",
+    ),
+    "accumulated": (
+        (_RAIL_HELPER, (
+            "route",
+            "from rail_helper import rail_urns\n"
+            "async def main(page):\n"
+            "    urns = []\n"
+            "    for item in await rail_urns(page):\n"
+            "        urns.append(item)\n"
+            "    for urn in urns:\n" + _NAVIGATE,
+        )),
+        "route.py",
+        "the J 57 accumulation, fed from another file",
+    ),
+}
+
+_ACROSS_GREEN = {
+    "same-name-collision": (
+        (
+            (
+                "reads_live",
+                "async def _url_for(page):\n"
+                "    return await page.evaluate(HREF_JS)\n",
+            ),
+            (
+                "route",
+                "def _url_for(key):\n"
+                "    return BASE_URL + PATHS[key]\n"
+                "async def main(page, key):\n"
+                "    await BROWSER.goto(page, _url_for(key))\n",
+            ),
+        ),
+        "THE ARTIFACT THE FIRST COMPLEMENT PRODUCED: two files each define "
+        "`_url_for`, one of them page-returning. The route calls its OWN",
+    ),
+    "same-name-other-module": (
+        (
+            _RAIL_HELPER,
+            ("fixtures", "def rail_urns(page):\n    return ['urn:li:activity:1']\n"),
+            (
+                "route",
+                "from fixtures import rail_urns\n"
+                "async def main(page):\n"
+                "    for urn in rail_urns(page):\n"
+                "        await BROWSER.goto(page, ITEM_PERMALINK_URL.format(urn=urn))\n",
+            ),
+        ),
+        "the name matches the page-returning helper, the IMPORT names another "
+        "module's constant -- resolution follows the import, not the name",
+    ),
+    "imported-builder": (
+        (
+            (
+                "rail_helper",
+                "def permalink(urn):\n    return ITEM_PERMALINK_URL.format(urn=urn)\n",
+            ),
+            (
+                "route",
+                "from rail_helper import permalink\n"
+                "async def main(page, urn):\n"
+                "    await BROWSER.goto(page, permalink(urn))\n",
+            ),
+        ),
+        "an imported url BUILDER fed the caller's value carries nothing",
+    ),
+    "veto-across-modules": (
+        (
+            (
+                "rail_helper",
+                "async def on_his_rail(page, urn):\n"
+                "    items = await page.evaluate(RAIL_JS)\n"
+                "    return urn in items\n",
+            ),
+            (
+                "route",
+                "from rail_helper import on_his_rail\n"
+                "async def open_item(page, urn):\n"
+                "    if await on_his_rail(page, urn):\n"
+                "        await BROWSER.goto(page, ITEM_PERMALINK_URL.format(urn=urn))\n",
+            ),
+        ),
+        "THE RULING'S SHAPE ACROSS FILES: the page may veto a navigation "
+        "(a membership test is a boolean), never supply one",
+    ),
+}
+
+
+@pytest.mark.parametrize("key", sorted(_ACROSS_RED))
+def test_the_complement_goes_red_on_a_reading_from_another_module(key):
+    pairs, label, why = _ACROSS_RED[key]
+    found, reach = derived_across_modules(_plant(*pairs))
+    route = next(source for name, source in pairs if name + ".py" == label)
+    assert found == {label: [(_marked_line(route, "# DERIVED"), "ITEM_PERMALINK_URL.format(urn=urn)")]}, (
+        "%s: %s. %s" % (key, found, why)
+    )
+    assert reach >= 1, (key, reach)
+
+
+@pytest.mark.parametrize("key", sorted(_ACROSS_GREEN))
+def test_the_complement_stays_green_on_a_route_that_carries_no_reading(key):
+    pairs, why = _ACROSS_GREEN[key]
+    found, _reach = derived_across_modules(_plant(*pairs))
+    assert found == {}, "%s: %s. %s" % (key, found, why)
+
+
+@pytest.mark.parametrize("key", sorted(_ACROSS_RED))
+def test_the_per_file_walk_is_blind_to_every_red_plant(key):
+    """WHAT THE COMPLEMENT IS FOR, asserted rather than recounted.
+
+    Each red plant's navigation must be INVISIBLE to the per-file walk -- the
+    rule every commit is held to, run here both as the shipped ``violations``
+    and as the complement with resolution switched off. If the per-file walk
+    ever learns to see a plant, this fails and the complement should be
+    re-examined rather than kept on this file's say-so.
+    """
+    pairs, _label, _why = _ACROSS_RED[key]
+    assert [violations(source, name) for name, source in pairs] == [[] for _ in pairs], key
+    per_file, reach = derived_across_modules(_plant(*pairs), across=False)
+    assert per_file == {} and reach == 0, (key, per_file, reach)
+
+
+#: SITES THE WHOLE-TREE COMPLEMENT FINDS AND THE PER-FILE WALK DOES NOT,
+#: declared rather than waived -- the contract of ``KNOWN_DERIVED_NAVIGATIONS``,
+#: keyed by path from the repository root. Empty: the one site the first
+#: complement found was a name collision, which import resolution cannot make.
+KNOWN_DERIVED_ACROSS_MODULES: dict[str, list[str]] = {}
+
+_WHOLE_TREE = pytest.mark.skipif(
+    not os.environ.get("CI"),
+    reason=(
+        "whole-tree complement: parses and scopes every scanned file at once, so "
+        "it runs where CI is set (GitHub Actions sets CI=true on every runner); "
+        "CI=1 runs it here"
+    ),
+)
+
+
+def _tree_modules() -> list[_Module]:
+    return [
+        _Module(
+            _module_name(path),
+            path.read_text(encoding="utf-8"),
+            path.relative_to(REPO).as_posix(),
+            package="linkedin_server" if _module_name(path) == "linkedin_server" else None,
+        )
+        for path in _python_files()
+    ]
+
+
+#: THE CONTROL, BUILT RATHER THAN FOUND: a pair of modules added to the real
+#: tree, whose names nothing in the tree uses.
+_CONTROL = (
+    ("_whole_tree_control_rail", _RAIL_HELPER[1]),
+    (
+        "_whole_tree_control_route",
+        "from _whole_tree_control_rail import rail_urns\n"
+        "async def main(page):\n"
+        "    for urn in await rail_urns(page):\n" + _NAVIGATE,
+    ),
+)
+
+
+@_WHOLE_TREE
+def test_no_navigation_is_derived_through_another_module():
+    """THE COMPLEMENT ON THIS TREE: nothing beyond what the per-file walk sees.
+
+    Three assertions, each able to fail on its own. (1) The complement's extra
+    sites are exactly the declared set. (2) THE CONTROL: the same tree plus one
+    planted pair convicts the planted navigation and nothing else, so the
+    machinery is live at tree scale and not only on the plants above. (3) THE
+    PREMISE: calls on this tree do resolve into page-returning functions in
+    other files -- a resolver that resolved nothing would make (1) green for
+    the wrong reason.
+    """
+    modules = _tree_modules()
+    per_file, _ = derived_across_modules(modules, across=False)
+    whole, reach = derived_across_modules(modules)
+    extra = {}
+    for label, sites in whole.items():
+        new = [expr for site in sites if site not in per_file.get(label, []) for expr in [site[1]]]
+        if new:
+            extra[label] = new
+    assert extra == KNOWN_DERIVED_ACROSS_MODULES, (
+        "navigations whose address carries what a page-returning function in "
+        "ANOTHER file returned: %s. The per-file rule cannot see these by design "
+        "(the staged guard is an induction step only while a verdict is one "
+        "file's). Build the address from what the CALLER supplied and let the "
+        "page only veto it -- see KNOWN_DERIVED_NAVIGATIONS for the ruling." % extra
+    )
+    planted, _ = derived_across_modules(modules + _plant(*_CONTROL))
+    assert [expr for _line, expr in planted.get("_whole_tree_control_route.py", [])] == [
+        "ITEM_PERMALINK_URL.format(urn=urn)"
+    ], planted.get("_whole_tree_control_route.py")
+    assert {k: v for k, v in planted.items() if k != "_whole_tree_control_route.py"} == whole
+    assert reach > 0, "no call on this tree resolved into another file: the resolver is dead"
