@@ -111,6 +111,37 @@ def test_a_marked_row_missing_from_the_map_is_refused_not_classed(monkeypatch, c
     assert "were GAP at the map's freeze" in out and victim in out, out
 
 
+def test_every_entered_row_names_its_blocker_in_its_own_cell():
+    """CONTROL 2c on the real tree: no row off the map is exempted in silence."""
+    rows = triage._gap_rows(SLICE)
+    blockers = rcb.load_blockers()
+    entered = triage.entered_since_freeze(SLICE, rows)
+    others = set(entered) - _returned(rows, blockers)
+    assert others, "no entered row outside the returned class -- nothing to read"
+    assert triage.unnamed_entered(entered, _returned(rows, blockers),
+                                  triage._cells_by_row(SLICE)) == []
+
+
+def test_an_entered_row_that_names_no_blocker_is_refused(monkeypatch, capsys):
+    """SHOWN FAILING, CONTROL 2c. The fixture is BUILT: an entered row outside
+    the returned class has its cell replaced by one that names nothing, and
+    the refusal must name that row, through ``main`` as well."""
+    rows = triage._gap_rows(SLICE)
+    blockers = rcb.load_blockers()
+    cells = dict(triage._cells_by_row(SLICE))
+    entered = triage.entered_since_freeze(SLICE, rows)
+    returned = _returned(rows, blockers)
+    victim = sorted(set(entered) - returned)[0]
+    cells[victim] = [victim, "planted: a capability", "GAP", "R",
+                     "planted: this cell says nothing about what holds it"]
+    assert triage.unnamed_entered(entered, returned, cells) == [victim]
+
+    monkeypatch.setattr(triage, "_cells_by_row", lambda letter: cells)
+    assert triage.main([]) == 1
+    out = capsys.readouterr().out
+    assert "name no blocker in their own cell" in out and victim in out, out
+
+
 def test_the_exemption_is_exactly_the_rows_the_map_cannot_hold():
     """Rows that entered GAP after the map's freeze, and nothing else.
 

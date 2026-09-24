@@ -1,8 +1,8 @@
 {
-  "_measured": "f65ec88, 2026-09-19, one Windows laptop (3.13.14), serial run in a detached worktree, NOT a quiet box -- short foreground test batches overlapped parts of it",
-  "_files": 157,
-  "_tests": 5736,
-  "_total_seconds": 946.1,
+  "_measured": "f65ec88, 2026-09-19, one Windows laptop (3.13.14), serial run in a detached worktree, NOT a quiet box -- short foreground test batches overlapped parts of it; AMENDED 2026-09-24 by lane Y2 at cd853b8: tests/test_completeness_verdicts.py measured ALONE (8 tests, 11.32s, same laptop, not a quiet box), because adding it put the table under its two-thirds line (157 of 236 priced); every other entry is the f65ec88 run, and the table still wants regenerating from a full run",
+  "_files": 158,
+  "_tests": 5744,
+  "_total_seconds": 957.4,
   "seconds": {
     "tests/test_a_correction_is_findable_from_the_claim.py": 3.519,
     "tests/test_a_covered_row_names_the_artifact_that_covers_it.py": 0.074,
@@ -41,6 +41,7 @@
     "tests/test_company_about_card.py": 4.149,
     "tests/test_company_id_resolver.py": 5.197,
     "tests/test_company_job_filter.py": 0.045,
+    "tests/test_completeness_verdicts.py": 11.32,
     "tests/test_compose_fields.py": 0.808,
     "tests/test_connections_reader.py": 12.707,
     "tests/test_cookie_jar.py": 0.483,

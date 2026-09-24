@@ -72,8 +72,13 @@ returned class from the CELL (a marked row names its own blocker). Composed:
   the absorption lane R's own control forbids for unmarked rows;
 * a row off the map that entered GAP after the freeze is tallied under
   :data:`RETURNED_CLASS` if its cell carries the marker, and in the entered
-  bucket otherwise (rows admitted from what LinkedIn draws, each naming its
-  blocker in its own line).
+  bucket otherwise (rows admitted from what LinkedIn draws);
+* and an entered row WITHOUT the marker must still name its blocker in its
+  own cell (:data:`NAMED_BLOCKER`), or CONTROL 2c (:func:`unnamed_entered`)
+  refuses it. That is lane R's requirement for every row off the map --
+  the marker is how a returned row names its blocker -- kept for the rows
+  lane R did not return. Without it the freeze rule would exempt, in
+  silence, any row that entered GAP naming no blocker at all.
 
 USAGE:
 
@@ -119,6 +124,14 @@ RETURNED_MARKER = re.compile(
 #: The class such a row is tallied under when the frozen blocker map has no
 #: line for it. Not a blocker name: the blocker is in the row's own cell.
 RETURNED_CLASS = "RETURNED-OUTSIDE-LEDGER"
+
+#: How a row that is not a returned row names its blocker in its own cell:
+#: the word blocker, then a colon, a backticked name, or lane R's
+#: ``, NAMED:``. The census's three spellings -- ``New blocker: `X` ``,
+#: ``Blocker `X` `` and ``Blocker: words`` -- all read; a cell that never says
+#: what blocks it does not.
+NAMED_BLOCKER = re.compile(
+    r"\bblocker\b(?:\*\*)?\s*(?::|`[A-Z][A-Z0-9-]+`|, NAMED:)", re.I)
 
 
 def _gap_rows(letter: str):
@@ -247,6 +260,20 @@ def misfiled_returns(returned, entered) -> list[str]:
     return sorted(set(returned) - set(entered))
 
 
+def unnamed_entered(entered, returned, cells) -> list[str]:
+    """CONTROL 2c: entered rows, not returned, whose cell names no blocker.
+
+    See "HOW THE TWO RULES COMPOSE" in the module docstring. A returned row
+    names its blocker by lane R's marker; any other row off the map must
+    name it in words :data:`NAMED_BLOCKER` can read, or be refused.
+    """
+    return sorted(
+        row_id for row_id in entered
+        if row_id not in returned
+        and not NAMED_BLOCKER.search(" | ".join(cells.get(row_id, [])))
+    )
+
+
 def unjoined_rows(letter, rows, blockers, exempt=frozenset()) -> list[str]:
     """Row ids with no blocker assignment. CONTROL 2, as a callable.
 
@@ -306,6 +333,14 @@ def main(argv: list[str] | None = None) -> int:
             % (len(misfiled), bbm.FROZEN_REF, " ".join(misfiled))
         )
         return 1
+    unnamed = unnamed_entered(entered, returned, cells)
+    if unnamed:
+        print(
+            "REFUSING: %d GAP row(s) entered GAP after the map's freeze (%s), "
+            "carry no returned-row marker and name no blocker in their own "
+            "cell: %s" % (len(unnamed), bbm.FROZEN_REF, " ".join(unnamed))
+        )
+        return 1
     unjoined = unjoined_rows(letter, rows, blockers, returned | set(entered))
     if unjoined:
         print(
@@ -337,8 +372,8 @@ def main(argv: list[str] | None = None) -> int:
     print("slice                %s (%s)" % (letter, ccs.SLICES[letter]))
     print("GAP rows             %d" % len(rows))
     print("controls             counter agrees, every row GAP at the map's "
-          "freeze joined, rows off it classed, direction reader shown "
-          "refusing")
+          "freeze joined, every row off it classed and naming its blocker, "
+          "direction reader shown refusing")
     print("returned, off ledger %d   (%s: the blocker is named in the "
           "row's own cell)" % (len(returned), RETURNED_CLASS))
     print("entered since %s  %d -- GAP rows the frozen map cannot hold; "
