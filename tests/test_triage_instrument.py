@@ -58,13 +58,135 @@ def _joined_unmarked(rows, blockers):
             and not triage.RETURNED_MARKER.search(" | ".join(cells[row_id]))]
 
 
+def _accounted(rows, blockers):
+    """What ``main`` exempts from the join: the returned class together with the
+    rows that entered GAP after the map's freeze (lane Y2's integration)."""
+    return _returned(rows, blockers) | set(triage.entered_since_freeze(SLICE, rows))
+
+
 def test_the_slice_is_enumerated_and_every_row_joins():
     """THE POSITIVE CONTROL: every GAP row joins the map, or is a returned row
-    that names its blocker in its own cell (lane R, 2026-09-23)."""
+    that names its blocker in its own cell (lane R, 2026-09-23), or entered GAP
+    after the map's freeze (lane Y2, 2026-09-24)."""
     rows = triage._gap_rows(SLICE)
     assert rows, "no GAP rows enumerated -- the parse found nothing"
     blockers = rcb.load_blockers()
-    assert triage.unjoined_rows(SLICE, rows, blockers, _returned(rows, blockers)) == []
+    assert triage.unjoined_rows(SLICE, rows, blockers, _accounted(rows, blockers)) == []
+    entered = triage.entered_since_freeze(SLICE, rows)
+    assert triage.misfiled_returns(_returned(rows, blockers), entered) == []
+
+
+def test_every_returned_row_entered_gap_after_the_freeze():
+    """The two rules agree on this tree: each returned row is off the map
+    because it was not GAP at the freeze, never because the map lost it."""
+    rows = triage._gap_rows(SLICE)
+    blockers = rcb.load_blockers()
+    returned = _returned(rows, blockers)
+    assert returned, "no returned row found -- the marker reader reads nothing"
+    assert returned <= set(triage.entered_since_freeze(SLICE, rows))
+
+
+def test_a_marked_row_missing_from_the_map_is_refused_not_classed(monkeypatch, capsys):
+    """SHOWN FAILING, CONTROL 2b. A row that WAS GAP at the freeze, lost from
+    the map, whose cell carries the returned-row marker: the returned class
+    alone would absorb it. The fixture is BUILT -- a joined, unmarked row given
+    the marker and removed from the map -- so the control cannot pass because
+    the tree happens to hold no such row."""
+    rows = triage._gap_rows(SLICE)
+    blockers = dict(rcb.load_blockers())
+    cells = dict(triage._cells_by_row(SLICE))
+    victim = _joined_unmarked(rows, blockers)[0]
+    del blockers["%s %s" % (SLICE, victim)]
+    cells[victim] = list(cells[victim]) + [
+        "**RETURNED TO GAP 2026-09-23 BY LANE R (planted).** BLOCKER, NAMED: planted"]
+    returned = triage.returned_outside_ledger(SLICE, rows, blockers, cells)
+    assert victim in returned, "the planted marker was not read"
+    entered = triage.entered_since_freeze(SLICE, rows)
+    assert triage.misfiled_returns(returned, entered) == [victim]
+
+    monkeypatch.setattr(triage.rcb, "load_blockers", lambda: blockers)
+    monkeypatch.setattr(triage, "_cells_by_row", lambda letter: cells)
+    assert triage.main([]) == 1
+    out = capsys.readouterr().out
+    assert "were GAP at the map's freeze" in out and victim in out, out
+
+
+def test_every_entered_row_names_its_blocker_in_its_own_cell():
+    """CONTROL 2c on the real tree: no row off the map is exempted in silence."""
+    rows = triage._gap_rows(SLICE)
+    blockers = rcb.load_blockers()
+    entered = triage.entered_since_freeze(SLICE, rows)
+    others = set(entered) - _returned(rows, blockers)
+    assert others, "no entered row outside the returned class -- nothing to read"
+    assert triage.unnamed_entered(entered, _returned(rows, blockers),
+                                  triage._cells_by_row(SLICE)) == []
+
+
+def test_an_entered_row_that_names_no_blocker_is_refused(monkeypatch, capsys):
+    """SHOWN FAILING, CONTROL 2c. The fixture is BUILT: an entered row outside
+    the returned class has its cell replaced by one that names nothing, and
+    the refusal must name that row, through ``main`` as well."""
+    rows = triage._gap_rows(SLICE)
+    blockers = rcb.load_blockers()
+    cells = dict(triage._cells_by_row(SLICE))
+    entered = triage.entered_since_freeze(SLICE, rows)
+    returned = _returned(rows, blockers)
+    victim = sorted(set(entered) - returned)[0]
+    cells[victim] = [victim, "planted: a capability", "GAP", "R",
+                     "planted: this cell says nothing about what holds it"]
+    assert triage.unnamed_entered(entered, returned, cells) == [victim]
+
+    monkeypatch.setattr(triage, "_cells_by_row", lambda letter: cells)
+    assert triage.main([]) == 1
+    out = capsys.readouterr().out
+    assert "name no blocker in their own cell" in out and victim in out, out
+
+
+def test_the_exemption_is_exactly_the_rows_the_map_cannot_hold():
+    """Rows that entered GAP after the map's freeze, and nothing else.
+
+    Without the exemption the join names EXACTLY the entered rows -- so the
+    exemption hides no other hole -- and no entered row has a map line, which
+    is what makes it an exemption rather than a skipped join. If the map ever
+    starts holding post-freeze rows, the second assertion goes red and the
+    exemption should go with it.
+    """
+    rows = triage._gap_rows(SLICE)
+    blockers = rcb.load_blockers()
+    entered = triage.entered_since_freeze(SLICE, rows)
+    assert triage.unjoined_rows(SLICE, rows, blockers) == entered
+    assert [r for r in entered if "%s %s" % (SLICE, r) in blockers] == []
+
+
+def test_an_empty_frozen_census_refuses_rather_than_exempting_every_row(
+        monkeypatch):
+    """SHOWN FAILING. A freeze read that came back empty would exempt the slice."""
+    rows = triage._gap_rows(SLICE)
+    monkeypatch.setattr(triage.egr, "rows",
+                        lambda ref=None, dialects=None: iter(()))
+    with pytest.raises(SystemExit) as refused:
+        triage.entered_since_freeze(SLICE, rows)
+    assert triage.bbm.FROZEN_REF in str(refused.value)
+    assert "could not fail" in str(refused.value)
+
+
+def test_a_dialect_at_the_freeze_refuses_rather_than_exempting_its_row(
+        monkeypatch):
+    """SHOWN FAILING. The enumerator drops a row whose frozen state cell is a
+    dialect, and a row that was GAP at the freeze would then read as entered."""
+    rows = triage._gap_rows(SLICE)
+    real = triage.egr.rows
+
+    def planted(ref=None, dialects=None):
+        yield from real(ref, dialects)
+        if ref is not None and dialects is not None:
+            dialects.append("M PLANTED spells its state in a planted dialect")
+
+    monkeypatch.setattr(triage.egr, "rows", planted)
+    with pytest.raises(SystemExit) as refused:
+        triage.entered_since_freeze(SLICE, rows)
+    assert "M PLANTED" in str(refused.value)
+    assert triage.bbm.FROZEN_REF in str(refused.value)
 
 
 def test_the_returned_class_holds_only_marked_rows_outside_the_map():
@@ -82,13 +204,15 @@ def test_the_returned_class_holds_only_marked_rows_outside_the_map():
 
 def test_an_unmarked_row_off_the_map_is_still_refused():
     """SHOWN FAILING: the class cannot absorb a genuinely missing row. A row
-    removed from the map that carries no marker must come back unjoined."""
+    removed from the map that carries no marker must come back unjoined -- and
+    since it was GAP at the freeze, the entered exemption cannot absorb it
+    either (what ``main`` passes is both)."""
     rows = triage._gap_rows(SLICE)
     blockers = dict(rcb.load_blockers())
     victim = _joined_unmarked(rows, blockers)[0]
     del blockers["%s %s" % (SLICE, victim)]
     assert victim not in _returned(rows, blockers)
-    assert triage.unjoined_rows(SLICE, rows, blockers, _returned(rows, blockers)) == [victim]
+    assert triage.unjoined_rows(SLICE, rows, blockers, _accounted(rows, blockers)) == [victim]
 
 
 def test_the_counter_agreement_control_passes_on_the_real_tree():
@@ -109,22 +233,30 @@ def test_the_join_coverage_control_can_fail():
     """SHOWN FAILING. Punch one hole in the blocker map and it must be named.
 
     The victim is a JOINED row (it was `rows[0]` until lane R's returns put
-    rows off the map at the head of the slice, where a delete raises)."""
+    rows off the map at the head of the slice, where a delete raises), so it
+    WAS GAP at the freeze; both exemptions are passed in, as ``main`` passes
+    them, and neither may swallow a real hole."""
     rows = triage._gap_rows(SLICE)
     blockers = dict(rcb.load_blockers())
-    victim = _joined_unmarked(rows, blockers)[0]
+    joined = _joined_unmarked(rows, blockers)
+    assert joined, "no row joins the map unmarked, so there is no hole to punch"
+    victim = joined[0]
     del blockers["%s %s" % (SLICE, victim)]
-    assert triage.unjoined_rows(SLICE, rows, blockers, _returned(rows, blockers)) == [victim]
+    assert triage.unjoined_rows(SLICE, rows, blockers, _accounted(rows, blockers)) == [victim]
 
 
 def test_the_join_coverage_control_names_every_hole_not_just_the_first():
     """A control that stops at the first miss under-reports the damage."""
     rows = triage._gap_rows(SLICE)
     blockers = dict(rcb.load_blockers())
-    victims = sorted(_joined_unmarked(rows, blockers)[:3])
+    joined = _joined_unmarked(rows, blockers)
+    assert len(joined) >= 3, (
+        "fewer than three rows join the map unmarked -- punching holes in "
+        "nothing would pass this control without testing it")
+    victims = sorted(joined[:3])
     for victim in victims:
         del blockers["%s %s" % (SLICE, victim)]
-    assert triage.unjoined_rows(SLICE, rows, blockers, _returned(rows, blockers)) == victims
+    assert triage.unjoined_rows(SLICE, rows, blockers, _accounted(rows, blockers)) == victims
 
 
 def test_the_direction_reader_control_is_the_inherited_one():
@@ -213,7 +345,20 @@ AFTER_LANE_R = (117, {"R": 13, "W": 101, "R+W": 3})
 #: lane moved no write. ``_audit/2026-09-20-the-messaging-gap.md`` quotes the
 #: wave-start 83, which stays true of that moment and is not edited.
 AFTER_THE_LIVE_LANE = (116, {"R": 12, "W": 101, "R+W": 3})
-EXPECTED_NOW = AFTER_THE_LIVE_LANE
+
+#: AFTER ``_audit/2026-09-24-lane-y2-admission.md``, which ADMITTED eleven rows
+#: of this slice at GAP -- ``M52``, ``M53`` and ``C93``-``C101``, capabilities
+#: LinkedIn draws that no row carried -- measured on the tree that merged it
+#: with lane R and then the live lane. **THE ARITHMETIC:** 116 + 11 = 127;
+#: reads 12 + 6 = 18 (``M53``, ``C93``, ``C95``, ``C96``, ``C98``, ``C101``),
+#: writes 101 + 4 = 105 (``M52``, ``C94``, ``C97``, ``C100``), read-and-writes
+#: 3 + 1 = 4 (``C99``). No row LEFT GAP. None of the eleven was GAP at the
+#: blocker map's freeze and none carries lane R's marker, so they are the
+#: entered-since-freeze bucket, beside lane R's fourteen RETURNED-OUTSIDE-LEDGER
+#: rows.
+AFTER_THE_LANE_Y2_ADMISSION = (127, {"R": 18, "W": 105, "R+W": 4})
+
+EXPECTED_NOW = AFTER_THE_LANE_Y2_ADMISSION
 
 
 def test_the_headline_split_is_the_one_the_report_quotes():

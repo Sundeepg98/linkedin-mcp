@@ -29,6 +29,7 @@ proves the guard convicts as the tree stands. It does not prove anything about H
 """
 from __future__ import annotations
 
+import os
 import pathlib
 import subprocess
 import sys
@@ -79,3 +80,56 @@ def test_every_failure_class_is_convicted_and_the_calibration_is_not():
             f"reports the same green as one that passed it.\n" + out)
     assert p.returncode == 0, out
     assert "all 5 controls behaved as specified" in out, out
+
+
+def test_two_concurrent_selftests_do_not_collide(tmp_path):
+    """Two lanes running `--selftest` at once must not delete each other's sandbox.
+
+    WHAT IT GUARDS. `--selftest` used to build at ONE fixed path,
+    `<temp>/pointer-graph-selftest`, and `make_sandbox` starts with an `rmtree` -- so
+    two worktrees gating at the same moment deleted each other's tree mid-check, and
+    the test above failed intermittently in every lane. Each run now makes its own
+    directory and removes it when it ends.
+
+    WHY THE SENTINEL, and it is what makes this a test rather than a lottery. Two runs
+    that merely overlap collide only when their controls happen to interleave, so a
+    race test built on timing alone passes by luck whenever they do not. The SENTINEL
+    sits at the OLD fixed path and stands for another run's live sandbox: code that
+    still builds there deletes it on its first control, every time, so the old defect
+    fails this test DETERMINISTICALLY, not by luck of timing. The two concurrent runs
+    are the realistic load on top of that, and the leftover check proves each run
+    cleaned up after itself rather than trading a collision for a leak.
+    """
+    root = tmp_path / "tmp"
+    sentinel = root / "pointer-graph-selftest" / "SENTINEL"
+    sentinel.parent.mkdir(parents=True)
+    sentinel.write_text("another run's live sandbox\n", encoding="ascii")
+    # All three: `tempfile.gettempdir()` takes the first of TMPDIR, TEMP and TMP that
+    # names a usable directory, so setting one would leave the child free to pick
+    # another -- and to run against the real, shared temp directory.
+    env = dict(os.environ, TMPDIR=str(root), TEMP=str(root), TMP=str(root))
+    runs = [subprocess.Popen([sys.executable, str(SCRIPT), "--selftest"],
+                             stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+                             text=True, cwd=str(ROOT), env=env)
+            for _ in range(2)]
+    try:
+        outs = [(p.communicate(timeout=900)[0], p.returncode) for p in runs]
+    finally:
+        for p in runs:          # a hung run must not outlive the test that started it
+            if p.poll() is None:
+                p.kill()
+                p.wait()
+    both = "\n----- the other run -----\n".join(out for out, _rc in outs)
+
+    # The two DETERMINISTIC checks go first, so a failure names its cause the same way
+    # every time; whether the runs also crashed each other depends on timing.
+    assert sentinel.exists(), (
+        "a selftest deleted <temp>/pointer-graph-selftest: it still builds at the old "
+        "fixed path, so two lanes gating at once delete each other's sandbox.\n" + both)
+    left = sorted(d.name for d in root.glob("pointer-graph-selftest-*"))
+    assert left == [], (
+        f"a selftest left its per-run directory behind: {left}. A run that does not "
+        f"remove its own sandbox fills the temp directory one gate at a time.\n" + both)
+    for out, rc in outs:
+        assert rc == 0, both
+        assert "all 5 controls behaved as specified" in out, both
