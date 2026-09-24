@@ -22,6 +22,7 @@
     "linkedin_login": "not_driven:never read the page",
     "linkedin_login_browser": "not_driven:never read the page",
     "linkedin_logout": "not_driven:never read the page",
+    "linkedin_mark_company_interest": "not_driven:never read the page",
     "linkedin_my_activity_items": "not_driven:never read the page",
     "linkedin_my_applications": "clean",
     "linkedin_my_profile": "returns_text:the plant reached a published payload",

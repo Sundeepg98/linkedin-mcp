@@ -1,12 +1,22 @@
-"""The tool surface: fifty-five tools, fourteen of which write to LinkedIn.
+"""The tool surface: fifty-six tools, fifteen of which write to LinkedIn.
 
-THE FIFTY-THIRD TO FIFTY-FIFTH ARRIVED TOGETHER, 2026-09-24, at the merge
+THE FIFTY-FOURTH TO FIFTY-SIXTH ARRIVED TOGETHER, 2026-09-24, at the merge
 of lane L5, and every site that states these numbers moved in the same
 commit: two READS on the messaging surface, ``linkedin_list_conversations``
 and ``linkedin_open_thread``, and a WRITE, ``linkedin_send_reply`` -- a reply
 inside a conversation he names by thread id. Census rows ``M M10``,
-``M M17`` and ``M M49``, COVERED-UNFIRED. The headline read "fifty-two tools,
-thirteen of which write" until then.
+``M M17`` and ``M M49``, COVERED-UNFIRED. The headline read "fifty-three
+tools, fourteen of which write" until then. The lane's branch had numbered
+the three fifty-third to fifty-fifth, counting from the live lane's
+fifty-two, before lane L7's merge made ``linkedin_mark_company_interest``
+the fifty-third.
+
+THE FIFTY-THIRD IS A WRITE, merged 2026-09-24: ``linkedin_mark_company_interest``
+(lane L7, census row ``P I14``). It was built on the lane's branch as that
+branch's fifty-second, while master gained ``linkedin_own_item_link`` as its
+fifty-second; the merge made it the fifty-third, and every site that states
+these numbers moved in the merge. The headline read "fifty-two tools, thirteen
+of which write" until then.
 
 THE FIFTY-SECOND IS A READ THAT PRESSES, merged 2026-09-24:
 ``linkedin_own_item_link``, the share link of one of his own posts. It was
@@ -166,9 +176,9 @@ assigned to anybody -- it waits for whoever next runs the suite, and in the
 meantime the pin goes on asserting the old number with full confidence.
 
 THE NUMBERS ABOVE ARE DERIVED NOW, and that is a statement about a test rather
-than about an intention. Fifty-five is ``len(await mcp.list_tools())``,
+than about an intention. Fifty-six is ``len(await mcp.list_tools())``,
 pinned in ``test_server_surface.py`` by
-``test_the_surface_is_exactly_the_fifty_five_tools``; the split is pinned by
+``test_the_surface_is_exactly_the_fifty_six_tools``; the split is pinned by
 ``tests/test_prose_that_makes_a_claim.py::test_the_server_docstring_numbers_are_derived``,
 which reads THESE WORDS and fails if any of the three disagrees with the
 registry.
@@ -181,10 +191,19 @@ POINTER to it was dangling, so a reader who followed it found nothing and
 would reasonably conclude these numbers are unchecked. A citation is a claim
 like any other.
 The surface splits three ways and the split is the part a reader actually
-needs: FORTY-ONE read, FOURTEEN write, and ZERO are write-shaped,
-registered, gated and unable to act. Forty-one plus fourteen plus zero is
-fifty-five. (Thirty-eight, thirteen and fifty-one until 2026-09-24; thirty-nine,
-thirteen and fifty-two at the live lane's merge the same day.)
+needs: FORTY-ONE read, FIFTEEN write, and ZERO are write-shaped,
+registered, gated and unable to act. Forty-one plus fifteen plus zero is
+fifty-six. (Thirty-eight, thirteen and fifty-one until 2026-09-24; thirty-nine,
+thirteen and fifty-two at the live lane's merge the same day; thirty-nine,
+fourteen and fifty-three at lane L7's.)
+
+THE FIFTY-THIRD IS ONE WRITE, 2026-09-24 (lane L7, census row ``P I14``).
+``linkedin_mark_company_interest`` presses "I'm interested" in the
+About-the-company card of one posting, behind the flag and the single-use
+grant: the card must open by naming the posting's own employer and draw
+exactly one control wearing the measured OFF label. It tells that employer's
+recruiters, and this server holds no undo for it -- the ON label has never
+been captured -- so it fires only at a company he names. Never fired.
 
 THE FIFTY-SECOND, 2026-09-23, IS A READ THAT PRESSES: ``linkedin_own_item_link``,
 the share link of one of his own posts through the post's own "Copy link
@@ -303,13 +322,15 @@ the moment ``update_profile_field`` was given an address while still refusing.
 always meant: an address is not a permission.
 
 NOTE THE ACTION THAT HAS NO TOOL. ``writes.SANCTIONED_WRITES`` holds
-FIFTEEN actions where this surface registers FOURTEEN write-shaped tools, and
+SIXTEEN actions where this surface registers FIFTEEN write-shaped tools, and
 the missing one is ``set_open_to_work``: it is sanctioned, it is refused by
-``_refuse_unperformable``, and no tool was ever registered for it. So fourteen
-counts TOOLS and fifteen counts ACTIONS, and a reader comparing the two
-numbers is not looking at a discrepancy. (THIRTEEN and TWELVE until
-2026-09-23; ``follow_company_page`` added one to each. FOURTEEN and THIRTEEN
-until 2026-09-24; ``send_reply`` added one to each.)
+``_refuse_unperformable``, and no tool was ever registered for it. So fifteen
+counts TOOLS and sixteen counts ACTIONS, and a reader comparing the two
+numbers is not looking at a discrepancy. (FIFTEEN and FOURTEEN until lane
+L5's merge of master 603f4d3, 2026-09-24, ``send_reply`` adding one to each;
+FOURTEEN and THIRTEEN until lane L7's merge the same day,
+``mark_company_interest`` adding one to each; THIRTEEN and TWELVE until
+2026-09-23, ``follow_company_page`` adding one to each.)
 
 THE LINE NUMBERS THAT USED TO BE HERE ARE GONE, and that is part of this
 correction rather than tidying. It read "pinned at ``test_server_surface.py``
@@ -874,14 +895,14 @@ mcp = FastMCP(
     instructions=(
         "A window onto the operator's OWN LinkedIn account, driven by his own "
         "signed-in browser on his own machine. Most tools read and change "
-        "nothing. FOURTEEN WRITE: linkedin_save_job, "
+        "nothing. FIFTEEN WRITE: linkedin_save_job, "
         "linkedin_unsave_job, linkedin_unfollow_company, "
         "linkedin_follow_company, linkedin_apply_job, "
         "linkedin_update_setting, linkedin_react_to_item, "
         "linkedin_send_invitation, linkedin_publish_post, "
         "linkedin_comment_on_item, linkedin_update_profile_field, "
-        "linkedin_send_message, linkedin_follow_company_page and "
-        "linkedin_send_reply. "
+        "linkedin_send_message, linkedin_follow_company_page, "
+        "linkedin_mark_company_interest and linkedin_send_reply. "
         "THE ELEVENTH is the only one here that can verify its own outcome "
         "by reading the field back; it also returns the PREVIOUS value "
         "verbatim and the exact call that puts it back, which this server "
@@ -889,7 +910,15 @@ mcp = FastMCP(
         "ACT and was repaired the same day: three separate defects meant it "
         "raised at the first guard without ever loading a page, while still "
         "issuing him a confirm_token to approve. If you were told it worked "
-        "before that repair, that was wrong. "
+        "before that repair, that was wrong. AND UNTIL 2026-09-24 IT NEVER "
+        "PRESSED SAVE: it entered the change, pressed nothing, and read back "
+        "the unsaved dialog, so a success it reported before that date stored "
+        "nothing. It now presses Save only once notify-network is confirmed "
+        "off in the edit dialog -- otherwise it refuses before the press, "
+        "NEEDS-OPERATOR -- and reads the stored value back on a fresh render. "
+        "THE FOURTEENTH, linkedin_mark_company_interest, tells one posting's "
+        "employer's recruiters he is interested; this server cannot take it "
+        "back, so offer it only for a company he names. "
         "THE TWELFTH ARRIVED 2026-09-02 AND SHIPS EXPECTING TO REFUSE, "
         "which is the design and not a fault -- say so plainly rather than "
         "presenting a refusal as a surprise. linkedin_send_message types the "
@@ -1006,7 +1035,7 @@ mcp = FastMCP(
         "draws the row. It refuses a Page he already follows: the label that "
         "control wears once followed has never been captured, and it reads "
         "as unknown rather than being guessed. "
-        "THE FOURTEENTH, 2026-09-24, IS A REPLY INSIDE A CONVERSATION HE "
+        "THE FIFTEENTH, 2026-09-24, IS A REPLY INSIDE A CONVERSATION HE "
         "NAMES: linkedin_send_reply takes the conversation's thread id -- "
         "the part of its address after /messaging/thread/, copied from his "
         "own browser; this server never reads one off a page -- and the exact "
@@ -8840,6 +8869,44 @@ async def linkedin_follow_company_page(
         return await _write_tool(
             "follow_company_page", organisation_id, confirm_token
         )
+    except Exception as exc:
+        return _error(exc)
+
+
+@mcp.tool()
+async def linkedin_mark_company_interest(
+    job_id: str, confirm_token: str = ""
+) -> dict[str, Any]:
+    """Mark yourself interested in one posting's employer ("I'm interested") -- a WRITE.
+
+    It tells that employer's recruiters you are interested in working there.
+    Same two-step shape and the same five gates as ``linkedin_save_job``: no
+    ``confirm_token``, no action -- you get a block to read and a token that
+    works ONCE, only for this posting, only for this verb, within two minutes.
+    Census row ``P I14``; ``linkedin_job_detail`` reports the control as
+    ``interest_control``.
+
+    WHO SEES IT: that employer's recruiters -- it is FOR them. It is not a post
+    and your network is not told, but it is not private to you either, and a
+    removal later does not un-show it to anyone who already looked.
+
+    THE PREVIEW READS the posting's About-the-company card, which must open by
+    naming the posting's own employer, and requires exactly one control in it
+    wearing the label LinkedIn draws before an interest is signalled. An
+    employer you have ALREADY signalled is refused, not reported: that label
+    has never been captured.
+
+    AFTER THE PRESS the posting is re-rendered: the OFF label still drawn means
+    the interest did NOT land and ``performed`` is ``false`` -- including when
+    LinkedIn asked for a further step, which this server does not take.
+
+    Args:
+        job_id: the numeric LinkedIn job id whose employer you want to signal.
+        confirm_token: leave empty to preview. Pass the token from that
+            preview to actually press "I'm interested".
+    """
+    try:
+        return await _write_tool("mark_company_interest", job_id, confirm_token)
     except Exception as exc:
         return _error(exc)
 

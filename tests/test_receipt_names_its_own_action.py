@@ -570,14 +570,24 @@ def test_the_action_set_is_the_one_this_file_was_measured_against():
     # phrase (and the group and the owner entry were widened to say so), and
     # its ``_VERIFIED_FROM`` row was checked against every owned phrase above
     # and found to contain none of them.
-    # FOURTEEN FROM 2026-09-24, and the acknowledgement was earned the same
-    # way: ``send_reply``'s two rows were read. Its ``_WHERE_TO_LOOK`` value
-    # is the conversation in his LinkedIn messages -- the surface it VERIFIES
-    # on, reloaded -- so it was added as a second owner of "LinkedIn
-    # messages" rather than stripped of the phrase; its ``_VERIFIED_FROM``
-    # row was checked against every owned phrase above and holds none.
-    assert len(writes.PERFORMABLE) == 14, (
-        "writes.PERFORMABLE holds %d actions, not the 14 this file was "
+    # FOURTEEN FROM 2026-09-24 (lane L7's merge): ``mark_company_interest``'s
+    # two rows were read. Its ``_WHERE_TO_LOOK`` value ("the About-the-company
+    # card on that posting") and its ``_VERIFIED_FROM`` row were checked by the
+    # rest of this file with the rows in place -- every other test here passed,
+    # so neither prints a phrase another action owns -- and no owner entry was
+    # needed. ``update_profile_field``'s ``_VERIFIED_FROM`` row was rewritten
+    # the same day (a fresh navigation after Save) and passed the same checks.
+    # FIFTEEN FROM LANE L5'S MERGE OF MASTER 603f4d3, the same day, and the
+    # acknowledgement was earned the same way: ``send_reply``'s two rows
+    # were read (on the lane's branch, where it was the fourteenth). Its
+    # ``_WHERE_TO_LOOK`` value is the conversation in his LinkedIn
+    # messages -- the surface it VERIFIES on, reloaded -- so it was added as
+    # a second owner of "LinkedIn messages" rather than stripped of the
+    # phrase; its ``_VERIFIED_FROM`` row was checked against every owned
+    # phrase above and holds none. On the merged tree the rest of this file
+    # passed with both new actions' rows in place.
+    assert len(writes.PERFORMABLE) == 15, (
+        "writes.PERFORMABLE holds %d actions, not the 15 this file was "
         "measured against: %s. Re-derive the phrase owners in this file for "
         "the new action, then update this count."
         % (len(writes.PERFORMABLE), sorted(writes.PERFORMABLE))

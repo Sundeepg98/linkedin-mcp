@@ -51,7 +51,9 @@ THIS FILE EXITS 1 WHEN:
     2026-09-24, every non-R1 line had to be ``classify-only`` -- lane L4's
     own scope. WRITE-CLASS-B let R2 be built, and a lane that builds an R2
     or R3 row, or names the blocker of one it cannot build, records it here
-    in the same two dispositions R1 uses.)
+    in the same two dispositions R1 uses. Lane L7 relaxed the same rule for
+    R3 alone the same day, when it took its profile-family rows to a build or
+    a named queue; the merge of the two keeps the wider rule.)
   * an R2 line lacks any of its four build-ready columns, its target does not
     open with one of the four kinds, or a non-R2 line carries any of them.
 
@@ -325,6 +327,13 @@ def shape_problems(rows: list[dict[str, str]],
         if not _WC_DISPOSITION_RX.match(r["disposition"]):
             problems.append(f"{tag}: disposition {r['disposition']!r} is not "
                             f"built:<action>, queued:<BLOCKER> or classify-only")
+        # R2 AND R3 MAY CARRY A DISPOSITION SINCE 2026-09-24. Lane L7 relaxed
+        # the classify-only rule for R3 (its 36 profile-family rows went to a
+        # build or a named queue) and lane L5 for R2 (WRITE-CLASS-B let R2 be
+        # built); the merge of the two keeps neither restriction. The checks
+        # that make a disposition TRUE are unchanged and apply to every class
+        # (``disposition_problems``: a build must be performable and have left
+        # GAP; a queued row must still be GAP).
         elif cls == "R1" and r["disposition"] == "classify-only":
             problems.append(f"{tag}: R1 must say built: or queued:, not "
                             f"classify-only")

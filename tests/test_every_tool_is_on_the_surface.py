@@ -323,8 +323,13 @@ def test_both_rules_reject_the_registry_that_was_actually_measured():
     # to post", on the orchestrator-delegated call recorded in its docstring. A
     # READ by effect that PRESSES two controls; built on the lane branch as its
     # own fiftieth and moved with every other site in the merge commit.
-    # FIFTY-FIVE AT LANE L5'S MERGE OF MASTER 9b9a4d0, 2026-09-24: two READS
-    # (linkedin_list_conversations, linkedin_open_thread) and a WRITE
-    # (linkedin_send_reply) on top of the live lane's fifty-two, moved with
-    # every other count site in one commit.
-    assert len(_tool_names()) == 55
+    # FIFTY-THREE AT LANE L7'S MERGE, the same day:
+    # linkedin_mark_company_interest, a WRITE (census row P I14), built on that
+    # lane's branch as its own fifty-second, measured off the merged registry
+    # and moved with every other count site.
+    # FIFTY-SIX AT LANE L5'S MERGE OF MASTER 603f4d3, the same day: two
+    # READS (linkedin_list_conversations, linkedin_open_thread) and a WRITE
+    # (linkedin_send_reply) on top of lane L7's fifty-three -- fifty-five on
+    # the lane's branch, which had counted from the live lane's fifty-two --
+    # measured off the merged registry and moved with every other count site.
+    assert len(_tool_names()) == 56

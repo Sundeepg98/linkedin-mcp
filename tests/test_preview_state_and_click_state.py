@@ -251,7 +251,17 @@ REACHED: dict[str, tuple[str, str, str]] = {
         COMPANY_PAGE_FOLLOW_MARKUP,
         COMPANY_PAGE_FOLLOW_ID,
     ),
-    # THE FOURTEENTH, 2026-09-24 (census row ``M M10``). A SYNTHETIC
+    # 2026-09-24 (census row ``P I14``, lane L7). A TRACKED capture: the OFF
+    # control is drawn in the About-the-company card of this posting, and the
+    # preview and the click read it through ONE verdict,
+    # ``company_interest.read_state``.
+    "mark_company_interest": (
+        "tests/fixtures/job_detail_hydrated.html",
+        markup("job_detail_hydrated"),
+        JOB,
+    ),
+    # THE FIFTEENTH, 2026-09-24 (census row ``M M10``; the fourteenth on
+    # lane L5's branch, before lane L7's merge landed). A SYNTHETIC
     # conversation whose STRUCTURE is measured -- the composer's own
     # ``msg-form``, its editor empty and Send drawn DISABLED -- and whose
     # content is invented; its source module says which parts are which.
@@ -498,10 +508,13 @@ def test_every_performable_action_is_either_reached_or_declared_unreachable():
     # currently unreachable -- which is why it is a table and not a deletion.
     # 12 -> 13 on 2026-09-23: ``follow_company_page`` shipped, and it is
     # reached over its own committed fixture rather than declared unreachable.
-    # 13 -> 14 on 2026-09-24: ``send_reply`` shipped, and it is reached over
-    # the synthetic conversation its own tests read, not declared unreachable.
-    assert len(PERFORMABLE) == 14, sorted(PERFORMABLE)
-    assert len(REACHED) == 14, sorted(REACHED)
+    # 13 -> 14 on 2026-09-24 (lane L7's merge): ``mark_company_interest``
+    # shipped, reached over the tracked ``job_detail_hydrated`` capture.
+    # 14 -> 15 the same day (lane L5's merge of master 603f4d3):
+    # ``send_reply`` shipped, and it is reached over the synthetic
+    # conversation its own tests read, not declared unreachable.
+    assert len(PERFORMABLE) == 15, sorted(PERFORMABLE)
+    assert len(REACHED) == 15, sorted(REACHED)
     assert len(CANNOT_REACH) == 0, sorted(CANNOT_REACH)
 
 

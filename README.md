@@ -3,20 +3,34 @@
 An MCP server that shows you your own LinkedIn account data as structured tool
 results instead of pages you have to click through.
 
-**Fifty-five tools ship. Forty-one read. Fourteen write. None is
+**Fifty-six tools ship. Forty-one read. Fifteen write. None is
 write-shaped and unable to act.**
 
-**THAT LINE READ "Fifty-two ... Thirty-nine read. Thirteen write" UNTIL THE
-LANE L5 MERGE, 2026-09-24.** Two reads and a write arrived on the messaging
-surface together. `linkedin_list_conversations` reads your conversation list
-off the composer, which opens no conversation, with unread paired to each
-row. `linkedin_open_thread` opens one conversation YOU name by thread id, and
-by default refuses while any listed row reads unread, so it shows nobody a
-new "seen". `linkedin_send_reply` replies inside a conversation you name --
-the fourteenth write, behind the same flag and single-use grant as every
-other, and the first that confirms itself off the surface a person reads: a
-fresh load of that conversation. Census rows `M M10`, `M M17` and `M M49`,
-COVERED-UNFIRED: built offline and never fired.
+**THAT LINE READ "Fifty-three ... Thirty-nine read. Fourteen write" UNTIL THE
+LANE L5 MERGE, 2026-09-24,** and "Fifty-five ... Forty-one read. Fourteen
+write" on that lane's branch, which had counted from the live lane's
+fifty-two before lane L7's merge landed. Two reads and a write arrived on the
+messaging surface together. `linkedin_list_conversations` reads your
+conversation list off the composer, which opens no conversation, with unread
+paired to each row. `linkedin_open_thread` opens one conversation YOU name by
+thread id, and by default refuses while any listed row reads unread, so it
+shows nobody a new "seen". `linkedin_send_reply` replies inside a conversation
+you name -- the fifteenth write, behind the same flag and single-use grant as
+every other, and the first that confirms itself off the surface a person
+reads: a fresh load of that conversation. Census rows `M M10`, `M M17` and
+`M M49`, COVERED-UNFIRED: built offline and never fired.
+
+**THAT LINE READ "Fifty-two ... Thirteen write" ON MASTER UNTIL LANE L7'S
+MERGE, 2026-09-24,** and "Fifty-two ... Thirty-eight read ... Fourteen write"
+on that lane's branch: each side had made a different tool its fifty-second.
+The fifty-third is a WRITE, `linkedin_mark_company_interest`: "I'm
+interested", pressed in the About-the-company card of one posting and aimed by
+the card's own employer. It tells that employer's recruiters, and this server
+holds no undo for it, so it fires only at a company you name. Census row
+`P I14`, COVERED-UNFIRED: built behind the same flag and single-use grant as
+every other write, and never fired. The same merge repaired
+`linkedin_update_profile_field`, which until then never pressed the editor's
+Save and reported success on an edit LinkedIn never stored.
 
 **THAT LINE READ "Fifty-one ... Thirty-eight read" UNTIL THE LIVE LANE MERGE,
 2026-09-24.** The fifty-second is `linkedin_own_item_link`: the share link of
@@ -904,7 +918,7 @@ linkedin_server/
   cdp_bridge.py              the recovery path: attach to a running Chrome
   dom.py                     the read-only harvesters and the control readers
   shape.py                   pure parsers and the result envelope
-  server.py                  the fifty-five tools
+  server.py                  the fifty-six tools
   errors.py
 tests/                       1393 tests, no network, no account
   fixtures/                  frozen LinkedIn markup, scrubbed

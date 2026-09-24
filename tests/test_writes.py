@@ -712,7 +712,13 @@ def test_what_ships_is_narrower_than_what_is_sanctioned():
         # move, as apply did on 2026-08-25 -- sanctioned and performable at
         # once, on a surface and an anchor already measured.
         "follow_company_page",
-        # FIFTEEN FROM 2026-09-24: the reply inside a conversation he names
+        # FIFTEEN FROM 2026-09-24: "I'm interested" (census row P I14, lane
+        # L7), sanctioned and performable in the same move, on the posting
+        # address save and follow already act on and an anchor measured on
+        # three tracked captures.
+        "mark_company_interest",
+        # SIXTEEN FROM LANE L5'S MERGE OF MASTER 603f4d3, the same day (fifteen
+        # on the lane's branch): the reply inside a conversation he names
         # (census M M10), sanctioned and performable in the same move.
         "send_reply",
     }
@@ -830,7 +836,16 @@ def test_what_ships_is_narrower_than_what_is_sanctioned():
         # readonly.SANCTIONED_MUTATIONS is unchanged, because the click is
         # perform()'s existing one, and no boundary moved.
         "follow_company_page",
-        # THE FOURTEENTH, 2026-09-24, and the first write that CONFIRMS ITSELF
+        # THE FOURTEENTH, 2026-09-24 (census row P I14): "I'm interested" in
+        # one posting's About-the-company card, aimed by the card's own
+        # employer, verified on a fresh render. Its undo (P I15) presses an
+        # ON-state control no capture holds, so it crossed with NO tested
+        # restore -- stated in its spec and its census cell, and the reason its
+        # live fire waits on that capture. NOTHING WAS PERMITTED TO LET IT
+        # CROSS: the click is perform()'s existing one.
+        "mark_company_interest",
+        # THE FIFTEENTH, 2026-09-24 (the fourteenth on lane L5's branch), and
+        # the first write that CONFIRMS ITSELF
         # FROM THE SURFACE A PERSON READS: a reply inside a conversation he
         # names by thread id, typed only into an empty reply box, pressed only
         # when the box holds exactly his words, and SENT only off a FRESH load
@@ -1324,6 +1339,10 @@ _UNMEASURED_REVERSIBILITY = {
     "update_setting",
     "send_invitation",
     "send_message",
+    # 2026-09-24 (census row P I14). Its removal is P I15, which presses an
+    # ON-state control no capture holds, so nothing about undoing it has been
+    # observed on this surface.
+    "mark_company_interest",
     # 2026-09-24. Whether LinkedIn lets a sent reply be recalled has never
     # been observed, and recalling one is destruction this server may not
     # perform at any confirm level either way.
@@ -1355,6 +1374,9 @@ REVERSIBILITY_CLASS = {
     # every followed Page carries its own unfollow control on Manage Pages --
     # and the undo is keyed by the same numeric id this action is granted on.
     "follow_company_page": "REVERSIBLE",
+    # 2026-09-24. STILL-UNKNOWN: LinkedIn's Help describes removing an
+    # interest, but the control that would do it has never been captured.
+    "mark_company_interest": "STILL-UNKNOWN",
 }
 
 #: Which actions have had their reversibility MEASURED. Split out from the
@@ -1377,6 +1399,7 @@ REVERSIBILITY_MEASURED = {
     "send_invitation": False,
     "send_message": False,
     "follow_company_page": True,
+    "mark_company_interest": False,
     "send_reply": False,
 }
 

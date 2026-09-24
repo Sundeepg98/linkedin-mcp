@@ -57,17 +57,19 @@ chosen by hand and did not include it. The instrument worked; the selection
 of instruments did not. The count is twelve now: the same lane added three
 for the copy link of the operator's own post.
 
-WHAT IS TRUE, measured rather than remembered: fourteen write tools ship, twelve
-sanctioned mutating calls exist, writes are off unless a per-process flag is
-set, and every write needs a single-use token from its own preview -- a token
-that works once, and a redeemed grant that ``perform`` will not act on twice.
-(This read "twelve write tools" until 2026-09-23, when
-``linkedin_follow_company_page`` shipped; the mutating-call count did not move
-for it, because its click is ``perform``'s existing one. It moved for the live
-lane's five presses, above, which the lane merge of 2026-09-24 brought in. It
-read "thirteen" write tools until 2026-09-24, when ``linkedin_send_reply``
-shipped, and the mutating-call count did not move for it: its fill and its
-click are ``perform``'s own.) See
+WHAT IS TRUE, measured rather than remembered: fifteen write tools ship,
+twelve sanctioned mutating calls exist, writes are off unless a per-process
+flag is set, and every write needs a single-use token from its own preview --
+a token that works once, and a redeemed grant that ``perform`` will not act on
+twice. (This read "fourteen write tools" until lane L5's merge of master
+603f4d3, 2026-09-24, which brought ``linkedin_send_reply`` -- the fourteenth
+on that lane's branch; "thirteen write tools" until lane L7's merge the same
+day brought ``linkedin_mark_company_interest``; and "twelve write tools"
+until 2026-09-23, when ``linkedin_follow_company_page`` shipped. The
+mutating-call count moved for none of the three: each click is ``perform``'s
+existing one, and ``send_reply``'s fill is ``perform``'s own too. It moved
+for the live lane's five presses, above, which the lane merge of 2026-09-24
+brought in.) See
 ``writes.py``, and prefer ``server.py``'s docstring over this one for counts,
 because that one is checked.
 """
