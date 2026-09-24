@@ -327,7 +327,7 @@ AFTER_THE_WRITE_CEILING_WAVE = (77, {"R": 10, "W": 66, "R+W": 1})
 #: direction divergence can be told the truth in the cell and a state
 #: divergence cannot, which is the whole of the ruling. ``M28`` in the same
 #: file is the identical shape and has carried ``R+W`` since it was written.
-AFTER_THE_COMPOUND_ROWS_RULING = (77, {"R": 10, "W": 65, "R+W": 2})
+AFTER_THE_COMPOUND_ROWS_WAVE = (77, {"R": 10, "W": 65, "R+W": 2})
 
 #: AFTER LANE R, 2026-09-23 (`_audit/2026-09-23-exclusion-returns.md`), which
 #: returned 40 of this slice's exclusions to GAP with each blocker named in
@@ -337,16 +337,26 @@ AFTER_THE_COMPOUND_ROWS_RULING = (77, {"R": 10, "W": 65, "R+W": 2})
 #: grown (the orchestrator's call, delegated, 2026-09-24).
 AFTER_LANE_R = (117, {"R": 13, "W": 101, "R+W": 3})
 
+#: AFTER THE LIVE LANE'S MERGE, 2026-09-24, re-derived on the tree merged over
+#: lane R: ``C72`` ("Share a post off LinkedIn") -- a READ -- was proven live
+#: on his own post and moved GAP -> COVERED-PROVEN
+#: (``_audit/2026-09-23-live-lane-session-1.md`` Entries 10-12). 117 - 1 =
+#: 116, reads 13 - 1 = 12; writes and read-and-writes UNTOUCHED, because the
+#: lane moved no write. ``_audit/2026-09-20-the-messaging-gap.md`` quotes the
+#: wave-start 83, which stays true of that moment and is not edited.
+AFTER_THE_LIVE_LANE = (116, {"R": 12, "W": 101, "R+W": 3})
+
 #: AFTER ``_audit/2026-09-24-lane-y2-admission.md``, which ADMITTED eleven rows
 #: of this slice at GAP -- ``M52``, ``M53`` and ``C93``-``C101``, capabilities
 #: LinkedIn draws that no row carried -- measured on the tree that merged it
-#: with lane R. **THE ARITHMETIC:** 117 + 11 = 128; reads 13 + 6 = 19
-#: (``M53``, ``C93``, ``C95``, ``C96``, ``C98``, ``C101``), writes 101 + 4 = 105
-#: (``M52``, ``C94``, ``C97``, ``C100``), read-and-writes 3 + 1 = 4 (``C99``).
-#: No row LEFT GAP. None of the eleven was GAP at the blocker map's freeze and
-#: none carries lane R's marker, so they are the entered-since-freeze bucket,
-#: beside lane R's fourteen RETURNED-OUTSIDE-LEDGER rows.
-AFTER_THE_LANE_Y2_ADMISSION = (128, {"R": 19, "W": 105, "R+W": 4})
+#: with lane R and then the live lane. **THE ARITHMETIC:** 116 + 11 = 127;
+#: reads 12 + 6 = 18 (``M53``, ``C93``, ``C95``, ``C96``, ``C98``, ``C101``),
+#: writes 101 + 4 = 105 (``M52``, ``C94``, ``C97``, ``C100``), read-and-writes
+#: 3 + 1 = 4 (``C99``). No row LEFT GAP. None of the eleven was GAP at the
+#: blocker map's freeze and none carries lane R's marker, so they are the
+#: entered-since-freeze bucket, beside lane R's fourteen RETURNED-OUTSIDE-LEDGER
+#: rows.
+AFTER_THE_LANE_Y2_ADMISSION = (127, {"R": 18, "W": 105, "R+W": 4})
 
 EXPECTED_NOW = AFTER_THE_LANE_Y2_ADMISSION
 

@@ -163,12 +163,18 @@ COVERED_ROWS: dict[tuple[str, str], tuple[str, str]] = {
     # server.py for the field name finds nothing. The chain is asserted
     # below. A fire that promotes or demotes it must move this pin in the
     # same commit.
+    #
+    # MOVED TO PROVEN 2026-09-23 22:14 by the live lane's session 1, on the
+    # instruction above: fired once through the shipped tool, per_post
+    # readable with 2 items, totals equal to the sums of their lists. The
+    # evidence is in the census row and in
+    # _audit/2026-09-23-live-lane-session-1.md Entry 2, not here.
     ("profile.md", "G6"): (
-        "COVERED-UNFIRED",
+        "COVERED-PROVEN",
         "per-post impressions and engagements, read off the post-summary "
         "links /analytics/creator/content/ draws beside his featured items, "
-        "by linkedin_creator_analytics's per_post field; built offline "
-        "against a structure measured on two captures, never fired",
+        "by linkedin_creator_analytics's per_post field; fired live once "
+        "and returned its documented shape",
     ),
 }
 

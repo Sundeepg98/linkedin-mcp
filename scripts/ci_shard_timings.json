@@ -1,8 +1,8 @@
 {
-  "_measured": "f65ec88, 2026-09-19, one Windows laptop (3.13.14), serial run in a detached worktree, NOT a quiet box -- short foreground test batches overlapped parts of it; AMENDED 2026-09-24 by lane Y2 at cd853b8: tests/test_completeness_verdicts.py measured ALONE (8 tests, 11.32s, same laptop, not a quiet box), because adding it put the table under its two-thirds line (157 of 236 priced); every other entry is the f65ec88 run, and the table still wants regenerating from a full run",
-  "_files": 158,
-  "_tests": 5744,
-  "_total_seconds": 957.4,
+  "_measured": "f65ec88, 2026-09-19, one Windows laptop (3.13.14), serial run in a detached worktree, NOT a quiet box -- short foreground test batches overlapped parts of it || PLUS FIVE FILES added 2026-09-24 at the live lane's merge of master (5f11f1e), measured by a junit run of those five alone on the same laptop, serially, NOT a quiet box: six lanes' suites were running, so these seconds are high rather than low. _tests is still the base run's collected count; the five add 5 files and 218.6s. || PLUS ONE FILE added 2026-09-24 at lane Y2's merge of master (d9ec640): tests/test_completeness_verdicts.py, measured by a junit run of that file alone on the same laptop, NOT a quiet box: 8 tests, 11.32s. _tests is still the base run's collected count.",
+  "_files": 163,
+  "_tests": 5736,
+  "_total_seconds": 1175.9,
   "seconds": {
     "tests/test_a_correction_is_findable_from_the_claim.py": 3.519,
     "tests/test_a_covered_row_names_the_artifact_that_covers_it.py": 0.074,
@@ -65,6 +65,7 @@
     "tests/test_job_search_result_window.py": 0.047,
     "tests/test_launch_boundary.py": 0.557,
     "tests/test_leakwalk.py": 0.348,
+    "tests/test_live_lane_session_harness.py": 0.645,
     "tests/test_membership_row.py": 0.289,
     "tests/test_membership_tally.py": 0.148,
     "tests/test_menus.py": 0.358,
@@ -95,6 +96,7 @@
     "tests/test_profile_pdf_download_is_blocked_on_transport.py": 0.124,
     "tests/test_profile_version_gate.py": 0.817,
     "tests/test_profile_views_fixture.py": 15.412,
+    "tests/test_profile_views_more.py": 12.952,
     "tests/test_prose_that_makes_a_claim.py": 0.49,
     "tests/test_publish_post_names_its_audience.py": 0.125,
     "tests/test_radio_label_binding.py": 6.285,
@@ -109,6 +111,7 @@
     "tests/test_refusal_names_both_gates.py": 0.103,
     "tests/test_requirements_pins.py": 0.102,
     "tests/test_result_verification_block.py": 1.706,
+    "tests/test_reveal.py": 0.287,
     "tests/test_save_candidates_fixture.py": 84.089,
     "tests/test_school_and_collections_boundary.py": 0.245,
     "tests/test_scripts_are_import_safe.py": 1.716,
@@ -123,6 +126,7 @@
     "tests/test_session_info_offline.py": 0.419,
     "tests/test_session_store.py": 0.772,
     "tests/test_shape.py": 1.613,
+    "tests/test_share_link.py": 203.91,
     "tests/test_stale_process_is_announced.py": 1.269,
     "tests/test_subscription_row.py": 0.152,
     "tests/test_surface_census.py": 74.63,
@@ -160,6 +164,7 @@
     "tests/test_urn_substitution_covers_the_class.py": 0.852,
     "tests/test_vendored_buildinfo.py": 0.034,
     "tests/test_verification_that_could_not_read.py": 10.917,
+    "tests/test_view_switch.py": 0.771,
     "tests/test_writes.py": 101.74,
     "tests/test_writes_nine.py": 26.23
   }

@@ -33,8 +33,6 @@ M C65	M C64	1	-	GAP	messaging-and-content.md	same
 M C66	M C64	2	-	GAP	messaging-and-content.md	same  **RETIRED 2026-09-19 on the MENTION/TAG AC
 N 61	N 59	2	-	GAP	network.md	Same uncertainty
 N 100	N 99	1	US-BOUNDARY	GAP	network.md	Same -- **and this cell is DELIBERATELY STILL A 
-N 134	N 133	1	ACCOUNT-FACT|US-BOUNDARY|US-RULING	GAP	network.md	Same. **THE PANEL EXISTS AND ITS CONTROL IS REND
-N 135	N 133	2	ACCOUNT-FACT|US-BOUNDARY|US-RULING	COVERED-PROVEN	network.md	Same  **BANKED 2026-09-19. BUILT AFTER THE CENSU
 P A5	P A4	1	US-RULING	COVERED-PROVEN	profile.md	same live reading
 P A6	P A4	2	US-RULING	COVERED-CANNOT-DELIVER	profile.md	same measurement
 P A27	P A26	1	-	GAP	profile.md	same. **There is no address field** -- `a565128`

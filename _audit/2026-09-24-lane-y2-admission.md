@@ -794,3 +794,41 @@ resolving the moment a merge rewrites it, and a subject does not.
 **NOT RUN:** 167 of the suite's 236 test files (that gate's own count); CI's
 three-platform matrix, since nothing was pushed; anything live. The gate of this
 commit and the last is reported in the lane's final message.
+
+### I.8 Master moved while this ran: the live lane merged first
+
+After the three commits above, local master read `d9ec640` -- the live lane's
+session 1, merged over the same `ff98a7f` (origin still read `ff98a7f`). The order
+covers that case ("integrate the newer master the same way"), so it was merged the
+same way, against the merge base `ff98a7f`:
+
+    messaging-and-content.md,  row by row: C38 and C72 took the live lane's line with
+      profile.md               this lane's evidence re-appended (C72 is now
+                               COVERED-PROVEN, fired live on his own post); A25 the
+                               same; M43 the live lane's; M42 this lane's
+    read-addresses.tsv         the base's C85 line changed by the live lane, this
+                               lane's seven M lines appended after it
+    census_completion.py       the live lane's four proven rows and this lane's 43
+                               meet in the same pins; every value re-measured, the
+                               bucket-1 tuple merged on its own (J 158 in, P G6 out)
+    ci_shard_timings.json      the live lane had priced its own five new files the
+                               same way; its table kept, this lane's one file added,
+                               the provenance extended in the form it used
+    test_triage_instrument.py  the live lane's constant names kept
+                               (AFTER_THE_COMPOUND_ROWS_WAVE, AFTER_THE_LIVE_LANE);
+                               this lane's split re-derived on the tree
+    blocker-map.tsv, INDEX.md, taken from master, regenerated to a fixed point
+      RULINGS.md
+    measure_pointer_graph.py,  merged on their own: the live lane's 67-pointer literal
+      test_pointer_graph_guard beside this branch's per-run sandbox
+
+**THE FIGURES, RE-MEASURED ON THIS TREE.** Rows 747; GAP 549; achievable 677;
+delivered strict 79 (the live lane's four), broad 109; unfired 30; adjudicated 198;
+gap_read 104 / gap_write 338 / gap_unknown 107; bucket 3 admitted 42, refused 46,
+blocked on nothing 4; bucket 1 none 20; the jobs figures unchanged. Nine pins moved
+against the live lane's values, and `census_completion --check` matches every figure.
+Slice M: 127 GAP rows = R 18 + W 105 + R+W 4 (the live lane's 116 plus this lane's
+11). The read triage: 79 verdicts (P O3 and N 134 left with the live lane). Side
+tables GREEN on their checkers (jobs 107 of 107, bucket 3 104 of 104, write classes
+339 lines). The candidate table was already at its fixed point on this tree, verdict
+layer 0 problems. The gates of this merge are reported in the lane's final message.

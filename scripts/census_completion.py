@@ -917,25 +917,26 @@ PINNED = {
     #:   b1_no_ruling 16 -> 20 (the four enter bucket 1, held by no ruling)
     #:
     #: RE-DERIVED AT LANE Y2'S INTEGRATION, 2026-09-24, from the tree merged
-    #: with master ff98a7f and not as deltas from the lane's base
+    #: with master ff98a7f and then with master d9ec640 (the live lane's
+    #: merge), never as deltas from the lane's base
     #: (`_audit/2026-09-24-lane-y2-admission.md`, Integration 2026-09-24).
     #: Lane Y2 admitted 43 capability rows LinkedIn draws that no row carried,
     #: all at GAP; on the orchestrator's delegated call `J 158` then moved
     #: GAP -> COVERED-UNFIRED (a shipped tool reaches it, its call at that
     #: index never fired), and the WHO/WHICH rule re-gated `N 195` RULING.
-    #: So:
+    #: Against the live lane's figures:
     #:   stated_rows 704 -> 747, capabilities 762 -> 805,
     #:   capabilities_achievable 648 -> 691, achievable 634 -> 677 (+43)
-    #:   gap 510 -> 552 (+43 admitted, -1 `J 158`); adjudicated 194 -> 195,
-    #:   delivered_broad 105 -> 106, unfired 30 -> 31 (`J 158`)
-    #:   gap_read 94 -> 107 (+13), gap_write 324 -> 338 (+14),
+    #:   gap 507 -> 549 (+43 admitted, -1 `J 158`); adjudicated 197 -> 198,
+    #:   delivered_broad 108 -> 109, unfired 29 -> 30 (`J 158`)
+    #:   gap_read 91 -> 104 (+13), gap_write 324 -> 338 (+14),
     #:   gap_unknown 92 -> 107 (+16 jobs rows, -1 `J 158`)
-    #:   b3_admitted 40 -> 45, b3_refused 38 -> 46,
+    #:   b3_admitted 37 -> 42, b3_refused 38 -> 46,
     #:   b3_blocked_on_nothing 2 -> 4 (`P S5`, `M M53`; `N 195` is RULING)
-    #:   b1_no_ruling 20 -> 21 (`J 158`, a read no ruling holds)
+    #:   b1_no_ruling 19 -> 20 (`J 158`, a read no ruling holds)
     #:   jobs_gap 92 -> 107, jobs_dir_r 33 -> 41, jobs_dir_w 53 -> 58,
     #:   jobs_dir_rw 6 -> 8, jobs_refused 26 -> 36; jobs_admitted stays 11
-    #:   (`J 158` entered admitted and left GAP)
+    #:   (`J 158` entered admitted and left GAP); delivered_strict stays 79
     "stated_rows": 747,
     #: 762 = 704 stated rows + 58 declared collapses, computed at HEAD. NOT the
     #: published 761 and NOT the counter docstring's 760: those two differ only
@@ -945,7 +946,15 @@ PINNED = {
     "capabilities_achievable": 691,
     "out_of_scope": 70,
     "achievable": 677,
-    "adjudicated": 195,
+    "adjudicated": 198,
+    #: THE LIVE LANE'S FOUR ROWS, RE-DERIVED AT EACH OF ITS MERGES OF MASTER
+    #: (2026-09-24; last over lane S): four rows fired live and banked
+    #: (`_audit/2026-09-23-live-lane-session-1.md`). `P G6` COVERED-UNFIRED ->
+    #: COVERED-PROVEN, so it leaves `unfired` and bucket 1 and joins
+    #: delivered_strict; `N 134`, `P O3` and `M C72` GAP -> COVERED-PROVEN, so
+    #: each is newly adjudicated and delivered, and each leaves `gap`,
+    #: `gap_read` and bucket 3 (all three were ADMITTED). Every figure below
+    #: that the four move is measured on the merged tree, not summed.
     #: 434 / 100 / 270 / 25, and gap_write 150, since the lane-L4 merge
     #: (2026-09-23): `N 47` was built -- `linkedin_follow_company_page`, a
     #: WRITE, behind the flag and the single-use grant, never fired (GAP ->
@@ -961,15 +970,18 @@ PINNED = {
     #: (GAP -> COVERED-UNFIRED, `_audit/2026-09-23-lane-l1-refused-reads.md`).
     #: One row changing class moves all five; b3 admitted/refused 40/16 are
     #: L1's allowlist admissions, and b1_no_ruling 7 is P G6 entering bucket 1.
-    "delivered_broad": 106,
+    "delivered_broad": 109,
+    #: 79 since the live lane's merge (see `adjudicated`): P G6, N 134, P O3
+    #: and M C72 COVERED-PROVEN.
     #: 75 and 21 since the bucket-1 merge: `M C41` fired live and moved from
     #: COVERED-UNFIRED to COVERED-PROVEN (`_audit/2026-09-23-bucket1-fires.md`).
     #: One row changing class moves both, and leaves delivered_broad at 96.
-    "delivered_strict": 75,
-    "gap": 552,
+    "delivered_strict": 79,
+    "gap": 549,
     "cannot_deliver": 19,
-    "unfired": 31,
-    "gap_read": 107,
+    "unfired": 30,
+    #: The live lane's merge: N 134, P O3 and M C72 left GAP.
+    "gap_read": 104,
     #: 151, not the 152 published by `_audit/2026-09-21-the-write-ceiling.md`.
     #: That document scoped itself to `profile.md`, `network.md` and
     #: `messaging-and-content.md`; measured at HEAD those three carry W 151 and
@@ -1009,7 +1021,9 @@ PINNED = {
     #: four FILTER rows lane S built (`N 84`, `N 85`, `N 87`, `N 94`) left
     #: bucket 3 for COVERED-UNFIRED, all four ADMITTED; the boundary did not
     #: move.
-    "b3_admitted": 45,
+    #: THE LIVE LANE'S MERGE, 2026-09-24: N 134, P O3 and M C72 were proven
+    #: live and their address lines left the table; all three were ADMITTED.
+    "b3_admitted": 42,
     "b3_refused": 46,
     "b3_no_address": 1,
     "b3_needs_session": 13,
@@ -1077,9 +1091,12 @@ PINNED = {
     #:                        N 85, N 87, N 94), reads no ruling holds -- D1
     #:                        and OTHER-MEMBER-IDS permit, they hold nothing
     #:                        (+4 none).
-    #:   lane Y2's integration 10 standing / 0 / 0 / 21 none, 6 released, of 31:
-    #:                        `J 158`, a read no ruling holds, entered
-    #:                        COVERED-UNFIRED (+1 none).
+    #:   live lane merge      10 standing / 0 / 0 / 19 none, 6 released, of 29:
+    #:   (2026-09-24)         P G6 fired live and was banked COVERED-PROVEN,
+    #:                        leaving bucket 1 (-1 none).
+    #:   lane Y2's integration 10 standing / 0 / 0 / 20 none, 6 released, of 30:
+    #:   (after the live       `J 158`, a read no ruling holds, entered
+    #:   lane's merge)        COVERED-UNFIRED (+1 none).
     #: `b1_relayed` is the count this file called `b1_named_target` until the
     #: target condition was registered: a name for what a status COUNTS, not
     #: for which ruling happens to have it today. `b1_released` is a SUBSET of
@@ -1087,7 +1104,7 @@ PINNED = {
     "b1_standing": 10,
     "b1_relayed": 0,
     "b1_pending": 0,
-    "b1_no_ruling": 21,
+    "b1_no_ruling": 20,
     "b1_released": 6,
     #: D3's enumerated list: FOUR once `M C83` left it, and THREE since
     #: `N 172` left it the same evening on OTHER-MEMBER-IDS-AS-READS -- see
@@ -1133,10 +1150,9 @@ PINNED_B1_ROWS: dict[str, tuple[str, ...]] = {
         "M C1", "M C25", "M C32",
         "N 1", "N 46", "N 47", "N 48",
     ),
-    #: `P G6` entered with the lane-L1 merge and `J 18` and `J 39` with the
-    #: lane-L3 merge, 2026-09-23: reads built offline, which no ruling holds.
-    #: The six P A rows are the writes SELF-PROFILE-EDITS-NOT-OUTWARD
-    #: releases, each by its own cell.
+    #: `J 18` and `J 39` entered with the lane-L3 merge, 2026-09-23: reads
+    #: built offline, which no ruling holds. The six P A rows are the writes
+    #: SELF-PROFILE-EDITS-NOT-OUTWARD releases, each by its own cell.
     #: `N 23` entered with lane R, 2026-09-23: returned from an exclusion to
     #: COVERED-UNFIRED, because `linkedin_connections` already reads his
     #: connections list behind a before-and-after badge gate and no live fire
@@ -1145,6 +1161,8 @@ PINNED_B1_ROWS: dict[str, tuple[str, ...]] = {
     #: 2026-09-24: people-search FILTER readers built offline and never
     #: fired, from the tool's arguments under D1-SEARCH-AS-READS (and, for
     #: `N 85`, OTHER-MEMBER-IDS-AS-READS). Both rulings permit; neither holds.
+    #: `P G6` entered with the lane-L1 merge and LEFT with the live lane's
+    #: merge, 2026-09-24: fired live and banked COVERED-PROVEN.
     #: `J 158` entered at lane Y2's integration, 2026-09-24: admitted at GAP,
     #: then COVERED-UNFIRED on the orchestrator's delegated call --
     #: `linkedin_premium_job_collection(1)` reaches it, its reader read the
@@ -1152,7 +1170,7 @@ PINNED_B1_ROWS: dict[str, tuple[str, ...]] = {
     NO_RULING: (
         "J 18", "J 39", "J 121", "J 122", "J 158", "M M33", "M M43", "N 20", "N 23",
         "N 45", "N 84", "N 85", "N 87", "N 94",
-        "P A8", "P A11", "P A13", "P A17", "P A19", "P A21", "P G6",
+        "P A8", "P A11", "P A13", "P A17", "P A19", "P A21",
     ),
 }
 

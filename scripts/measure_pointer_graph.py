@@ -888,8 +888,11 @@ def selftest(box: pathlib.Path) -> int:
     assert p.read_bytes().decode("utf-8") != raw, \
         "G5 postcondition: the calibration must really change the file"
     out, rc = _check_in(tree)
+    # 67 since the live lane's merge, 2026-09-24 (69 before): `N 134` gained
+    # evidence of its own and `N 135`'s vestigial "Same" was written out, so
+    # the pin lost both pointers in the same commit as this literal.
     record("G5 CALIBRATION -- whitespace in P D15's capability cell", False, out, rc,
-           "PASS -- all 69 pinned pointers")
+           "PASS -- all 67 pinned pointers")
 
     print("THE POINTER-GRAPH GUARD, SHOWN FAILING")
     print("=" * 92)
