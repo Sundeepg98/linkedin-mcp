@@ -139,10 +139,17 @@ def test_the_split_is_the_one_the_lane_report_quotes():
     sending a post to one person) and thirteen R3 (`P S2`, `S4`, `S6`-`S10`;
     `M M52`, `C97`, `C100`; `N 196`, `198`, `200`). R1 is untouched: no
     admitted row's act is one of the first round's own verbs.
-    325 + 14 = 339 = 16 R1 + 36 R2 + 287 R3."""
+    325 + 14 = 339 = 16 R1 + 36 R2 + 287 R3.
+
+    358 AFTER THE P-R SETTINGS BLOCK WAS ITEMIZED, 2026-09-24 (the same
+    record, "Follow-up: the P-R settings block"): nineteen new write rows,
+    all R3 -- P4 and P5 (two data-rights requests) and P6-P14, P16-P23
+    (settings awaiting admission by name). P3 and P15 are reads and P2 is
+    EXCLUDED-RULED, so none of the three has a line here.
+    339 + 19 = 358 = 16 R1 + 36 R2 + 306 R3."""
     rows, _ = cwc.load()
     split = cwc.split(rows)
-    assert (split["R1"], split["R2"], split["R3"]) == (16, 36, 287)
+    assert (split["R1"], split["R2"], split["R3"]) == (16, 36, 306)
     assert split["R1:built"] + split["R1:queued"] == split["R1"]
 
 

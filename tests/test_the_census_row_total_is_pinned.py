@@ -91,14 +91,17 @@ import pin_census_rows as P  # noqa: E402
 #: (J 152-167, P S1-S10, M M52-M53 and C93-C101, N 195-200), each a capability
 #: LinkedIn drew on a captured page that no row carried -- see
 #: `_audit/2026-09-24-lane-y2-admission.md`. No row left.
-PINNED_ROW_TOTAL = 747
+#: 747 -> 769 the same day: the P-R block's settings-family 44, counted until
+#: then as a collapse on `P1`, were itemized into rows -- 22 of them, P2-P23
+#: (the same record, "Follow-up: the P-R settings block"). No row left.
+PINNED_ROW_TOTAL = 769
 
 #: Per slice, because a delta of zero across four slices is reachable by two
 #: errors cancelling -- one row added to `jobs.md` and one dropped from
 #: `network.md` sum to the same total and are not the same census.
 PINNED_SLICE_ROWS = {
     "J": 166,   # jobs.md                    (150 + 16)
-    "P": 213,   # profile.md                 (203 + 10)
+    "P": 235,   # profile.md                 (203 + 10 + 22)
     "M": 153,   # messaging-and-content.md   (142 + 11)
     "N": 215,   # network.md                 (209 + 6)
 }

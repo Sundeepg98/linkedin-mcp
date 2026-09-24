@@ -169,6 +169,21 @@ TRIAGE: dict[str, tuple[str, str, str]] = {
                                   "details pages are read"),
     "P S3": ("ADDRESS", "ABSENT", "the skill-insights page is linked from "
                                   "every skill card and no pattern names it"),
+    # Itemized 2026-09-24 from the P-R settings block (lane Y2, the follow-up
+    # order); each row's address, or its absence, is in
+    # _audit/_census/read-addresses.tsv. RULING, not ADDRESS, for both: the
+    # EARLIEST gate is the operator naming the page, because the settings
+    # ruling admits a settings page only by name; the boundary is the second.
+    "P P3": ("RULING", "", "the operator names the page first: the settings "
+                           "ruling admits a settings page only by name, and "
+                           "no committed source spells this one; the archive "
+                           "then needs the download transport "
+                           "D4-NO-OWN-BROWSER-CONTEXT names for P C8"),
+    "P P15": ("RULING", "", "the operator names the page first: the settings "
+                            "ruling admits a settings page only by name; the "
+                            "drawn address is then refused on the forbidden "
+                            "substring /mypreferences/d/categories/, which "
+                            "fires before the allowlist"),
     "P S5": ("BUILDABLE", "", "the search-appearances page is admitted and a "
                               "shipped tool already loads it; a parser for two "
                               "cards, which must not publish the employer the "

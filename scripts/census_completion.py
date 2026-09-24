@@ -133,13 +133,17 @@ DELIVERED_STRICT = ("COVERED-PROVEN",)
 #: returns.md` s4): the fifteen visibility toggles are settings pages awaiting
 #: admission by name, one blocker named in the row's cell, so its 14 extras are
 #: now inside the achievable surface. Re-read and re-pinned at lane R's merge,
-#: 2026-09-24. `P1` stays EXCLUDED-RULED on its own named key, and the P-R
-#: block's 44 settings-family capabilities are counted with it as that block's
-#: own paragraph states -- they carry no row ids, and the Integration section
-#: of the lane R audit names why they were not re-decided there.
+#: 2026-09-24. `P1` stays EXCLUDED-RULED on its own named key.
+#:
+#: `P1` STOOD FOR 45 UNTIL 2026-09-24, and stands for one since: lane Y2
+#: itemized the P-R block's settings-family 44 on the orchestrator's follow-up
+#: order (`_audit/2026-09-24-lane-y2-admission.md`, "Follow-up: the P-R
+#: settings block"). Of the stated 44, 22 are rows now (P2-P23), 9 were rows
+#: already elsewhere, 5 are choices inside a row, 1 is named twice, and 7
+#: are named nowhere or disputed. The collapse left with the count it
+#: rested on.
 COLLAPSED = {
     ("P", "O6-O20"): (15, "GAP"),
-    ("P", "P1"): (45, "EXCLUDED-RULED"),
 }
 
 #: ENUMERATED, not inferred. Rows the corpus names as waiting on a decision no
@@ -507,8 +511,8 @@ def report(rows, out) -> dict:
       f" + MEASURED-ABSENT {folded['MEASURED-ABSENT']}")
     p(f"    ACHIEVABLE SURFACE  {achievable:4d}   what is left to be built or ruled")
     p("")
-    p("  ROWS ARE NOT CAPABILITIES. `profile.md` collapses two blocks into")
-    p("  single rows, so the CAPABILITY total is larger than the row total:")
+    p("  ROWS ARE NOT CAPABILITIES. `profile.md` collapses one block into a")
+    p("  single row, so the CAPABILITY total is larger than the row total:")
     p("")
     extra, extra_out, collapse_problems = collapse(rows)
     for key, (n, _want) in sorted(COLLAPSED.items()):
@@ -532,15 +536,14 @@ def report(rows, out) -> dict:
     p("          counter never counted them. Subtracting them removes them a")
     p("          second time.")
     p("")
-    p("  ONE OF THE THREE FUTURES THAT 2026-09-19 COULD NOT SEPARATE IS NOW")
-    p("  CLOSED. That wave reported `THE P-R BLOCK DOES NOT EXIST` because no")
-    p("  row is named `P-R`, and could not tell whether the +45 double-counted")
-    p("  rows that had since been expanded or was simply stale. Measured at")
-    p("  HEAD: the block is a SECTION, not a row -- `### P-R ... (45)` -- its")
-    p("  44 settings-family items are PROSE BULLETS CARRYING NO ROW IDS, and")
-    p("  its own closing note reads `P1 is counted in the 45`. So the +44 is")
-    p("  not double-counted: those capabilities have no rows to double-count.")
-    p("  THE UNEXPLAINED TERM IS THE `- 2`, AND IT IS THE WHOLE DIFFERENCE.")
+    p("  THE P-R BLOCK IS ITEMIZED, 2026-09-24. Its settings-family 44 were")
+    p("  prose bullets carrying no row ids, counted as a +44 collapse on `P1`.")
+    p("  Itemized at the grain LinkedIn draws, 22 are rows now (P2-P23), 9")
+    p("  were rows already elsewhere -- so the +44 DID double-count, which")
+    p("  this paragraph said until then it could not -- 5 are choices inside")
+    p("  a row, 1 is named twice, and 7 are named nowhere or disputed. The")
+    p("  capability total falls by 22 with it; the rows are counted as rows.")
+    p("  The unexplained term in the 761 is still the `- 2`.")
     p("  Reported, not corrected: this denominator's owner is the counter's,")
     p("  and moving it silently is how the 761 became unreproducible.")
     if collapse_problems:
@@ -958,16 +961,33 @@ PINNED = {
     #:   jobs_gap 92 -> 107, jobs_dir_r 33 -> 41, jobs_dir_w 53 -> 58,
     #:   jobs_dir_rw 6 -> 8, jobs_refused 26 -> 36; jobs_admitted stays 11
     #:   (`J 158` entered admitted and left GAP); delivered_strict stays 79
-    "stated_rows": 747,
+    #:
+    #: RE-DERIVED AT LANE Y2'S FOLLOW-UP, 2026-09-24, on master 1902fcb and
+    #: MEASURED, not summed (`_audit/2026-09-24-lane-y2-admission.md`,
+    #: "Follow-up: the P-R settings block"). The P-R block's settings-family
+    #: 44, a +44 collapse on `P1` until then, were itemized into 22 rows,
+    #: `P2`-`P23`, and the collapse left (see COLLAPSED). `P2` is
+    #: EXCLUDED-RULED on ground two; the other 21 are GAP -- 19 writes, and
+    #: two reads, `P3` (NEEDS-SESSION) and `P15` (REFUSED). Lane R's handback
+    #: bounded the rise of capabilities_achievable at 43; measured, it is 21.
+    #:   stated_rows 747 -> 769 (+22); capabilities 805 -> 783 (-22: the +44
+    #:   collapse left and 22 rows entered); capabilities_achievable
+    #:   691 -> 712 (+21); achievable 677 -> 698 (+21)
+    #:   out_of_scope 70 -> 71 and adjudicated 199 -> 200 (`P2`)
+    #:   gap 548 -> 569 (+21), gap_read 104 -> 106, gap_write 337 -> 356
+    #:   b3_refused 46 -> 47 (`P15`), b3_needs_session 13 -> 14 (`P3`)
+    "stated_rows": 769,
     #: 762 = 704 stated rows + 58 declared collapses, computed at HEAD. NOT the
     #: published 761 and NOT the counter docstring's 760: those two differ only
     #: by a `- 2 stateless` term whose two rows are already outside the 704.
     #: Pinned at what the tree computes, with the other two named in the output.
-    "capabilities": 805,
-    "capabilities_achievable": 691,
-    "out_of_scope": 70,
-    "achievable": 677,
-    "adjudicated": 199,
+    #: 783 SINCE THE P-R BLOCK WAS ITEMIZED, 2026-09-24: 769 stated rows + 14
+    #: for `O6-O20`, the only collapse left.
+    "capabilities": 783,
+    "capabilities_achievable": 712,
+    "out_of_scope": 71,
+    "achievable": 698,
+    "adjudicated": 200,
     #: THE LIVE LANE'S FOUR ROWS, RE-DERIVED AT EACH OF ITS MERGES OF MASTER
     #: (2026-09-24; last over lane S): four rows fired live and banked
     #: (`_audit/2026-09-23-live-lane-session-1.md`). `P G6` COVERED-UNFIRED ->
@@ -998,11 +1018,12 @@ PINNED = {
     #: COVERED-UNFIRED to COVERED-PROVEN (`_audit/2026-09-23-bucket1-fires.md`).
     #: One row changing class moves both, and leaves delivered_broad at 96.
     "delivered_strict": 79,
-    "gap": 548,
+    "gap": 569,
     "cannot_deliver": 19,
     "unfired": 31,
     #: The live lane's merge: N 134, P O3 and M C72 left GAP.
-    "gap_read": 104,
+    #: 106 since the P-R block was itemized: `P3` and `P15` entered.
+    "gap_read": 106,
     #: 151, not the 152 published by `_audit/2026-09-21-the-write-ceiling.md`.
     #: That document scoped itself to `profile.md`, `network.md` and
     #: `messaging-and-content.md`; measured at HEAD those three carry W 151 and
@@ -1017,7 +1038,10 @@ PINNED = {
     #: a read row until rulings batch 3 named it a setting -- every one classed
     #: in the same table by its act (16 R1, 35 R2, 274 R3 over 325 lines, the
     #: built `N 47` keeping its line).
-    "gap_write": 337,
+    #: 356 since the P-R block was itemized, 2026-09-24: nineteen settings
+    #: and data-rights rows entered, each classed R3 in the same table (16 R1,
+    #: 36 R2, 306 R3 over 358 lines).
+    "gap_write": 356,
     #: All 54 are `jobs.md`, which has no per-row R/W column (56 until the
     #: lane-L3 merge built J 18 and J 39). Not a coincidence
     #: and not a defect in the finder: it is the whole of that slice's still-GAP
@@ -1044,10 +1068,14 @@ PINNED = {
     #: move.
     #: THE LIVE LANE'S MERGE, 2026-09-24: N 134, P O3 and M C72 were proven
     #: live and their address lines left the table; all three were ADMITTED.
+    #: 42 / 47 / 1 / 14 / 2 SINCE THE P-R BLOCK WAS ITEMIZED, 2026-09-24 (sum
+    #: 106, `gap_read`): `P15` REFUSED on the forbidden substring
+    #: /mypreferences/d/categories/, and `P3` NEEDS-SESSION, no committed
+    #: source spelling its page. The boundary did not move.
     "b3_admitted": 42,
-    "b3_refused": 46,
+    "b3_refused": 47,
     "b3_no_address": 1,
-    "b3_needs_session": 13,
+    "b3_needs_session": 14,
     "b3_undetermined": 2,
     #: ITS HISTORY ON 2026-09-23 IS THE RULINGS AND THE LIVE READINGS MOVING
     #: UNDER IT, one line per move:

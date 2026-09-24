@@ -942,3 +942,213 @@ text search for the census modules and paths: 38 of them.
 
 **NOT RUN:** 134 of the suite's 243 test files (the 172 outside the plan, less the 38
 run by hand); CI's three-platform matrix, since nothing was pushed; anything live.
+
+## Follow-up: the P-R settings block
+
+**THE ORDER, AND WHAT DISK SAID.** The orchestrator's follow-up order (08:36,
+2026-09-24) carried lane R's handback I.7 (`_audit/2026-09-23-exclusion-returns.md`):
+itemize the P-R block's settings-family capabilities into rows, decide each by name,
+give each its side-table line, re-derive every pin, and add one line each to `P I12`
+and `J 99`. Sampled first: this branch at the lane's last record commit ("lane Y2
+record: the fifth merge, the pin no gate here selected, and the final gates"), clean;
+master at `1902fcb`, holding this lane's merge (`530227e`) and the names rulings.
+Step 0, `git merge --ff-only 1902fcb`, fast-forwarded.
+
+### F.1 What the block names, counted
+
+The block states 45: `P1` and 44 settings-family capabilities in five bullets. Read
+at the grain LinkedIn draws -- one row per control it draws, and "a parameter value is
+not a capability" (`GRAIN-FOLLOWS-WHAT-THE-PLATFORM-DRAWS`) -- **the bullets name 37
+entries, not 44**:
+
+    21  new rows from the bullets (F.3)
+     6  already rows elsewhere: search history (network row 96), the
+        invitations-to-connect audience (network row 72), the InMail opt-out
+        (messaging M46), read receipts and typing indicators (M37), message
+        nudges (M50), and the category Activity in your network (network row 78)
+     5  choices inside a row: the two download tiers (P3); the three channels,
+        in-app, push and email (each of P17-P22)
+     1  named twice: research invitations (P7)
+     4  counted and named nowhere: the four connection-notification toggles
+    ---
+    37
+
+**THE STATED 44 IS WHOLE ONLY WITH SEVEN MORE THE BULLETS DROPPED.** The block as
+first written (`61d3816`) listed its settings by name under "(34)", and that list
+added up: 18 named, seven advertising toggles and seven notification-channel
+controls, 32. Revision 2 (`7931cef`, the same afternoon) rewrote it as these bullets
+and wrote 44. Seven first-revision settings are in no bullet, and 37 + 7 = 44:
+demographic information (`P S6` carries it), permitted services (`P N24`), network
+invitations (network row 73), GenAI training data (a new row, `P9`, at the address
+finding 7.2 names), and three the census itself leaves unresolved -- the data log,
+research participation (by its wording the "Social, economic, and workplace research"
+of `profile.md` section 10; inferred) and "manage personal data". A second reading
+also makes seven: revision 1's seven channel controls left in the tally beside the
+seven categories that replaced them. The file cannot tell the two apart. Either way:
+
+    22 rows + 9 carried by rows elsewhere + 5 parameters + 1 duplicate
+      + 7 unwritten (4 unnamed toggles, 3 unresolved) = 44
+
+**THE ONE THAT CANNOT BE WRITTEN.** The four connection-notification toggles are
+counted by number and named nowhere, and a row cannot carry an unnamed item. Network
+row 78 may hold them; the first capture of the notifications page settles it.
+
+### F.2 The keys
+
+`P2`-`P23`: the block's own letter and the next free ids after `P1`. **Not a letter
+per sub-area**, though the block's name spans three: `profile.md`'s cells already cite
+`R3`, `R5` and `R6` bare, meaning `network.md`'s rulings -- 24 such tokens in 9 cells,
+measured -- and a profile row named `R5` would turn "IF `R5` IS EVER APPLIED TO THE
+DELETE HALF" in `P D27` into a pointer at a notifications setting. Revision 1 held a
+`P2` of its own ("Stop invitation emails to join LinkedIn", an unauthenticated
+opt-out form); revision 2 dropped it, no tracked file cites it, and the id is reused.
+That dropped row is recorded here for the census's owner: it has been neither a row
+nor named since revision 2.
+
+### F.3 Each row, decided by name
+
+    P2   Delete his data -- "Delete Data"                        W  EXCLUDED-RULED
+    P3   Get a copy of his data -- "Access and Download Data",   R  GAP
+         in either tier
+    P4   Change or correct his data                              W  GAP
+    P5   Restrict or object to the use of his data               W  GAP
+    P6   Salary data                                             W  GAP
+    P7   Research invitations                                    W  GAP
+    P8   Harmful message detection                               W  GAP
+    P9   Data for generative AI improvement                      W  GAP
+    P10  Profile data used to show him ads                       W  GAP
+    P11  Activity and inferred data used to show him ads         W  GAP
+    P12  Off-LinkedIn data used to show him ads                  W  GAP
+    P13  Ads personalization                                     W  GAP
+    P14  Demographic data used to show him ads                   W  GAP
+    P15  See the Advertising data page                           R  GAP
+    P16  Cookie preferences, as a signed-in member               W  GAP
+    P17-P22  Which notifications he gets, and on which channels, W  GAP
+         one row per category: invitations and messages; jobs
+         and opportunities; activity that involves him; news
+         and articles; offers and tips from LinkedIn; updates
+         from events
+    P23  Job-post email notifications                            W  GAP
+
+Every cell opens by citing the block's own paragraph, which is kept as written. By
+the order's four classes:
+
+* **ADMITTED BY NAME AS A SETTING -- 21 rows, GAP.** Each cell names its blocker in
+  lane R's words: the settings ruling (`ONE-NAMED-SETTINGS-PAGE-AT-A-TIME`) admits one
+  named page at a time and names none of these. Three name their own refused address,
+  each driven through the shipped boundary today: `P9` on "/settings/", `P15` on
+  "/mypreferences/d/categories/", `P16` on "cookies". Each is a filter catching an
+  ADDRESS, so GAP under `INCIDENTAL-CAPTURE-IS-NOT-A-RULING` -- the "cookies" word
+  entry was written as a second gate on the ten settings-shaped addresses finding 7.1
+  found, member-cookies among them, and names no act. `P3` adds the download transport
+  `D4-NO-OWN-BROWSER-CONTEXT` names for `P C8`.
+* **CREDENTIAL, RECOVERY OR SESSION -- none.** `CREDENTIAL-SETTINGS-NEED-THE-OPERATOR`
+  names the seven credential and recovery controls and `P N10`, all in section N; the
+  block holds none.
+* **A DELETION OF HIS DATA -- `P2`, EXCLUDED-RULED** on lane R's ground two:
+  `delete_or_withdraw_anything` covers destruction at any confirm level, the ground
+  `P N27` and `P N28`, the account-level destructions, are kept out on. An
+  exclusion-basis line files it under `PF-DELETE-OR-WITHDRAW`, and the cell carries
+  its REOPENER: he rules that a deletion of his account data may be made, naming the
+  data, in the call that makes it. **The cell states why
+  `OUTWARD-CLASSES-BUILT-BEHIND-GRANTS` does not reach it:** that ruling builds
+  deleting or withdrawing one of HIS OWN ITEMS -- a post, a comment, an invitation he
+  sent: a thing he made, fired only at the one item he names. `P2` erases what
+  LinkedIn holds about him, which is not an item he made, and nothing in the package
+  restores it. `P6` carries the same line conditionally: if the salary page offers
+  deleting the data, that half splits off under `COMPOUND-ROW-SPLITS-ONLY-ON-STATE`
+  and is kept out the same way. What the page offers is not captured.
+* **A PASSIVE COST -- none.** Every entry is a setting he sets or a right he
+  exercises, and `D5-PASSIVE-COST-IS-NOT-A-ROW` names a preference he sets an act.
+
+**FOR THE OWNER OF THE DELETE PATH, AND NOTHING IS CHANGED FOR IT HERE.** The same
+ruling keeps in `PERMANENTLY_FORBIDDEN` "only the entries whose grounds are themselves
+mitigations", and its six do not include `delete_or_withdraw_anything`. Every
+`PF-DELETE-OR-WITHDRAW` line in `exclusion-basis.tsv`, `P2`'s now among them, anchors
+on that key's text in `writes.py`. When the delete path is built and the key changes,
+`scripts/check_exclusion_basis.py` reports each line whose anchor stops resolving, and
+the account-level three need a ground that survives: `P N28` has one already (ground
+one, "/close-accounts"); `P2` and `P N27` rest on ground two alone.
+
+### F.4 The side tables, and the triage
+
+* `write-classes.tsv`: 19 lines, all R3 and classify-only -- `P4` and `P5` under a new
+  act, `data-rights-request` (a request to LinkedIn under a data right, which no act
+  named; added to `WRITE_CLASS_ACTS` in `scripts/check_write_classes.py`), the rest
+  `profile-setting` or `notification-preference` as the returned settings rows are.
+* `read-addresses.tsv`: `P15` REFUSED, MEASURED, `FORBIDDEN[/mypreferences/d/
+  categories/]+NO-PATTERN`, the address the settings index draws as 'Advertising
+  data'; `P3` NEEDS-SESSION -- no committed source spells the download page.
+* `exclusion-basis.tsv`: `P2`, class B, `PF-DELETE-OR-WITHDRAW`.
+* The read triage: `P3` and `P15` both RULING. The earliest gate is the operator
+  naming the page, since the settings ruling admits a page only by name; the boundary
+  is the second, and each line says so.
+* `completeness-annotations.tsv`: the Advertising data candidate, RECORDED under
+  `P N3` at the admission, now points at `P15`, the page's own row. The candidate
+  table is unchanged by it and still at its fixed point.
+
+### F.5 The cold check
+
+A cold `general-purpose` verifier itemized the block from the census alone, told
+nothing of this lane's reading. It counted the same 37 entries, and it found the two
+seven-item explanations of the 44 that F.1 adopts; the first draft of this
+itemization had only the shortfall. Of the 37 it classed 33 as this itemization
+does. The other four are the unnamed toggles: it classed them NEW-ROW and said
+itself that none can be written until someone names them -- here, counted and not
+written. One direction differs: salary data, which it split into a read and a
+deletion on its product knowledge, marked UNVERIFIED; here one W row, with the split
+written into the cell as the condition that would make it. Two of its readings
+replaced the first draft's: the data download is a read (`P3`), and cookie
+preferences are a row of their own on finding 7.1's member address (`P16`) rather
+than carried by `P C7`, the guest controls. Its bound on lane R's forecast was "at
+most 24"; measured, 21 enter.
+
+### F.6 Item 4: the career-interests page
+
+`P I12` and `J 99` each gained one line, and neither state moved. Both rows rest on
+"no url among 237 reaches the page"; the jobs nav draws `/jobs/preferences/` as
+'Preferences' (captured 2026-09-20), and the shipped read boundary refuses that
+address by allowlist silence alone -- no pattern, no forbidden substring -- measured
+2026-09-24. So what stands between the page and a read is an admission, not
+reachability. That is evidence for the rows' owner; the premise, not the state, is
+what it moves. In `P I12` the line follows this lane's own DRAWN sentence of the
+admission, which named the address; `J 99` had none.
+
+### F.7 The pins, measured
+
+`scripts/census_completion.py --check`, on this tree, named eleven moved figures, each
+re-pinned with its reason in the same commit:
+
+    stated_rows              747 -> 769   (+22 rows)
+    capabilities             805 -> 783   (the +44 collapse left, 22 rows entered)
+    capabilities_achievable  691 -> 712   (+21)
+    achievable               677 -> 698   (+21)
+    out_of_scope              70 ->  71   (P2)
+    adjudicated              199 -> 200   (P2)
+    gap                      548 -> 569   (+21)
+    gap_read                 104 -> 106   (P3, P15)
+    gap_write                337 -> 356   (+19)
+    b3_refused                46 ->  47   (P15)
+    b3_needs_session          13 ->  14   (P3)
+
+**"AT MOST 43 WOULD ENTER": MEASURED, 21.** Lane R's bound treated the 44 as 44
+uncounted capabilities less Delete Data. Itemized, 22 are rows and `P2` stays out;
+the other 22 of the 44 are carried by rows elsewhere, are choices inside a row, are
+named twice, or are unwritten (F.1). `COLLAPSED` keeps
+only `O6-O20`; its comment and the report's prose say what `P1` stood for and why
+it stopped. The report's paragraph that read "the +44 is not double-counted" is
+replaced: nine of the 44 were rows elsewhere already, so it did.
+
+Also re-pinned, each measured: the row population (`tests/census_row_pin.json`, 22
+added, none removed; the literal totals in the row-total and locator tests, 769 and
+P 235); the write-class split, 16 R1 + 36 R2 + 306 R3 over 358 lines; and the
+refused-address rows, 70 -> 73, the three named in the pin -- `P P9`, `P P15`,
+`P P16`, found by running the shipped check on master `1902fcb`'s census (70) and on
+this tree (73): three added, none removed.
+
+### F.8 Housekeeping
+
+The child worktree `agent-ad2507e69a91a848d` was still registered. Its branch's one
+commit ("pointer graph: each selftest gets its own sandbox ...") is on master as
+`cd853b8` -- `git cherry` marks it "-". `git worktree remove`, without force, removed
+it clean; the branch `worktree-agent-ad2507e69a91a848d` is left in place.
