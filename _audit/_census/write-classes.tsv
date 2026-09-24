@@ -11,7 +11,8 @@
 #     (b), relayed to this lane at 18:17 and registered on master at 53ba1b6.
 #     A live proof of any of them fires only at a target he names
 #     (OPERATOR-NAMES-THE-TARGET). Lane L5 (2026-09-24) built M M10 and, by
-#     D6, M M17 (send_reply); every other R2 line names its blocker or capture.
+#     D6, M M17 (send_reply), and gave each of the other 21 R2 lines it classed
+#     a blocker or a capture; the 12 R2 lines lane R returned are classify-only.
 # R3  other, or undecided.
 #
 # The class is DERIVED from the act (scripts/check_write_classes.py ACTS). The

@@ -915,6 +915,19 @@ PINNED = {
     #:   gap 514 -> 510, gap_read 98 -> 94, b3_admitted 44 -> 40
     #:   b3_blocked_on_nothing 9 -> 2 (four left bucket 3, three re-gated)
     #:   b1_no_ruling 16 -> 20 (the four enter bucket 1, held by no ruling)
+    #:
+    #: RE-DERIVED AT LANE L5'S MERGE, 2026-09-24, from the tree merged with
+    #: master ff98a7f and not as deltas from the lane's base
+    #: (`_audit/2026-09-24-lane-l5-messaging.md`, Integration 2026-09-24).
+    #: Lane L5 built the reply (`linkedin_send_reply`) and the receipt-safe
+    #: inbox: `M M10` and, by D6-CAPABILITY-OVER-AFFORDANCE, `M M17` GAP ->
+    #: COVERED-UNFIRED, two W rows held by OPERATOR-NAMES-THE-TARGET; and
+    #: `M M49` GAP -> COVERED-UNFIRED, an R row no ruling holds (the read
+    #: indicator on his own last message, read with no target). So:
+    #:   adjudicated 194 -> 197, delivered_broad 105 -> 108, unfired 30 -> 33
+    #:   gap 510 -> 507, gap_read 94 -> 93, gap_write 324 -> 322
+    #:   b3_admitted 40 -> 39, b3_blocked_on_nothing 2 -> 1 (`M M49` left)
+    #:   b1_standing 10 -> 12, b1_no_ruling 20 -> 21
     "stated_rows": 704,
     #: 762 = 704 stated rows + 58 declared collapses, computed at HEAD. NOT the
     #: published 761 and NOT the counter docstring's 760: those two differ only
@@ -924,7 +937,7 @@ PINNED = {
     "capabilities_achievable": 648,
     "out_of_scope": 70,
     "achievable": 634,
-    "adjudicated": 194,
+    "adjudicated": 197,
     #: 434 / 100 / 270 / 25, and gap_write 150, since the lane-L4 merge
     #: (2026-09-23): `N 47` was built -- `linkedin_follow_company_page`, a
     #: WRITE, behind the flag and the single-use grant, never fired (GAP ->
@@ -940,15 +953,15 @@ PINNED = {
     #: (GAP -> COVERED-UNFIRED, `_audit/2026-09-23-lane-l1-refused-reads.md`).
     #: One row changing class moves all five; b3 admitted/refused 40/16 are
     #: L1's allowlist admissions, and b1_no_ruling 7 is P G6 entering bucket 1.
-    "delivered_broad": 105,
+    "delivered_broad": 108,
     #: 75 and 21 since the bucket-1 merge: `M C41` fired live and moved from
     #: COVERED-UNFIRED to COVERED-PROVEN (`_audit/2026-09-23-bucket1-fires.md`).
     #: One row changing class moves both, and leaves delivered_broad at 96.
     "delivered_strict": 75,
-    "gap": 510,
+    "gap": 507,
     "cannot_deliver": 19,
-    "unfired": 30,
-    "gap_read": 94,
+    "unfired": 33,
+    "gap_read": 93,
     #: 151, not the 152 published by `_audit/2026-09-21-the-write-ceiling.md`.
     #: That document scoped itself to `profile.md`, `network.md` and
     #: `messaging-and-content.md`; measured at HEAD those three carry W 151 and
@@ -963,7 +976,9 @@ PINNED = {
     #: a read row until rulings batch 3 named it a setting -- every one classed
     #: in the same table by its act (16 R1, 35 R2, 274 R3 over 325 lines, the
     #: built `N 47` keeping its line).
-    "gap_write": 324,
+    #: 322 since lane L5's merge: `M M10` and `M M17` were built
+    #: (`linkedin_send_reply`) and left GAP; both keep their lines, built.
+    "gap_write": 322,
     #: All 54 are `jobs.md`, which has no per-row R/W column (56 until the
     #: lane-L3 merge built J 18 and J 39). Not a coincidence
     #: and not a defect in the finder: it is the whole of that slice's still-GAP
@@ -988,7 +1003,10 @@ PINNED = {
     #: four FILTER rows lane S built (`N 84`, `N 85`, `N 87`, `N 94`) left
     #: bucket 3 for COVERED-UNFIRED, all four ADMITTED; the boundary did not
     #: move.
-    "b3_admitted": 40,
+    #: 39 / 38 / 1 / 13 / 2 SINCE LANE L5'S MERGE (sum 93, `gap_read`):
+    #: `M M49` left bucket 3 for COVERED-UNFIRED, ADMITTED; the boundary did
+    #: not move.
+    "b3_admitted": 39,
     "b3_refused": 38,
     "b3_no_address": 1,
     "b3_needs_session": 13,
@@ -1015,11 +1033,14 @@ PINNED = {
     #:       under the WHO rule `N 79`, `N 172` and `N 194` stay GAP, re-gated
     #:       RULING on the name-free shaper doctrine, pending the operator's
     #:       question on returning names at runtime. Left: `M M49`, `P K1`
+    #:   1   at lane L5's merge, 2026-09-24: `M M49` was built -- the read
+    #:       indicator on his own last message, returned by
+    #:       `linkedin_open_messaging` and `linkedin_open_thread`. Left: `P K1`
     #: The gates past the boundary are re-judged BY HAND when a ruling lands;
     #: what `ruling_problems` asks on every run is only that no row blocked on
     #: nothing sits on a page a hold binds.
     #: `_audit/2026-09-23-census-cleanup.md` items 6 and 7, sections 11-13.
-    "b3_blocked_on_nothing": 2,
+    "b3_blocked_on_nothing": 1,
     #: BUCKET 1 BY WHAT HOLDS EACH ROW, DERIVED from the census and the
     #: holds in `scripts/ruling_holds.py`, BY THE STATUS OF THE HOLD: standing,
     #: relayed, pending, or none. They sum to `unfired`, and `PINNED_B1_ROWS`
@@ -1056,14 +1077,19 @@ PINNED = {
     #:                        N 85, N 87, N 94), reads no ruling holds -- D1
     #:                        and OTHER-MEMBER-IDS permit, they hold nothing
     #:                        (+4 none).
+    #:   lane L5's merge      12 standing / 0 / 0 / 21 none, 6 released, of 33:
+    #:                        the reply, `M M10` and by D6 `M M17`, two W rows
+    #:                        the write hold binds with no marker (+2
+    #:                        standing); `M M49`, a read no ruling holds (+1
+    #:                        none).
     #: `b1_relayed` is the count this file called `b1_named_target` until the
     #: target condition was registered: a name for what a status COUNTS, not
     #: for which ruling happens to have it today. `b1_released` is a SUBSET of
     #: `b1_no_ruling`: the writes held by nothing because a release says so.
-    "b1_standing": 10,
+    "b1_standing": 12,
     "b1_relayed": 0,
     "b1_pending": 0,
-    "b1_no_ruling": 20,
+    "b1_no_ruling": 21,
     "b1_released": 6,
     #: D3's enumerated list: FOUR once `M C83` left it, and THREE since
     #: `N 172` left it the same evening on OTHER-MEMBER-IDS-AS-READS -- see
@@ -1104,9 +1130,14 @@ PINNED_B1_ROWS: dict[str, tuple[str, ...]] = {
     #: `N 47` entered with the lane-L4 merge, 2026-09-23: a write to an
     #: organisation Page, built offline and never fired, held until the
     #: operator names the Page -- the same hold as its twin `N 48`.
+    #: `M M10` and `M M17` entered with lane L5's merge, 2026-09-24: the
+    #: reply inside a conversation he names (`linkedin_send_reply`), built
+    #: offline and never fired; `M M17` rests on it by D6 (an emoji is a
+    #: character of the words it types). Held until he names the
+    #: conversation and the words.
     "OPERATOR-NAMES-THE-TARGET": (
         "J 103", "J 104", "J 128",
-        "M C1", "M C25", "M C32",
+        "M C1", "M C25", "M C32", "M M10", "M M17",
         "N 1", "N 46", "N 47", "N 48",
     ),
     #: `P G6` entered with the lane-L1 merge and `J 18` and `J 39` with the
@@ -1121,8 +1152,12 @@ PINNED_B1_ROWS: dict[str, tuple[str, ...]] = {
     #: 2026-09-24: people-search FILTER readers built offline and never
     #: fired, from the tool's arguments under D1-SEARCH-AS-READS (and, for
     #: `N 85`, OTHER-MEMBER-IDS-AS-READS). Both rulings permit; neither holds.
+    #: `M M49` entered with lane L5's merge, 2026-09-24: the read indicator on
+    #: his own last message, read off his own inbox with no target
+    #: (OWN-INBOX-READS-COVERED-BY-B permits; it holds nothing).
     NO_RULING: (
-        "J 18", "J 39", "J 121", "J 122", "M M33", "M M43", "N 20", "N 23",
+        "J 18", "J 39", "J 121", "J 122", "M M33", "M M43", "M M49", "N 20",
+        "N 23",
         "N 45", "N 84", "N 85", "N 87", "N 94",
         "P A8", "P A11", "P A13", "P A17", "P A19", "P A21", "P G6",
     ),

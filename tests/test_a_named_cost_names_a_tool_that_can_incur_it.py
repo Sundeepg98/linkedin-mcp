@@ -58,7 +58,9 @@ demonstrably DOES navigate to messaging.
 from __future__ import annotations
 
 import ast
+import functools
 import re
+import sys
 from pathlib import Path
 
 import pytest
@@ -143,6 +145,109 @@ def _census_surfaces() -> dict[str, str]:
     return out
 
 
+#: The package, for the three module readers below. Read by AST, never
+#: imported, for the reason ``_url_constants`` gives.
+PACKAGE = REPO / "linkedin_server"
+
+
+@functools.lru_cache(maxsize=None)
+def _module_tree(module: str):
+    """``linkedin_server/<module>.py`` parsed, or None when no such module."""
+    path = PACKAGE / f"{module}.py"
+    if not path.is_file():
+        return None
+    return ast.parse(path.read_text(encoding="utf-8"))
+
+
+def _module_string_constants(module: str) -> dict[str, str]:
+    """A package module's module-level STRING constants, by AST.
+
+    ``threads.COMPOSE_URL`` is one: ADDED 2026-09-24, because lane L5's
+    tools navigate through ``threads``' constants and this reader kept
+    ``threads.COMPOSE_URL`` as its unparsed source -- which never contains
+    ``/messaging`` -- so it could not see them.
+    """
+    tree = _module_tree(module)
+    out: dict[str, str] = {}
+    for node in tree.body if tree is not None else []:
+        if isinstance(node, ast.Assign) and len(node.targets) == 1:
+            target, value = node.targets[0], node.value
+        elif isinstance(node, ast.AnnAssign) and node.value is not None:
+            target, value = node.target, node.value
+        else:
+            continue
+        if (
+            isinstance(target, ast.Name)
+            and isinstance(value, ast.Constant)
+            and isinstance(value.value, str)
+        ):
+            out[target.id] = value.value
+    return out
+
+
+def _module_url_helpers(module: str) -> dict[str, str]:
+    """Functions whose EVERY return is one module template, or a ``.format``
+    of it, mapped to that template -- ``threads.thread_url`` returns
+    ``THREAD_URL_TEMPLATE.format(...)``. A function with any other return is
+    left out rather than guessed at.
+    """
+    tree = _module_tree(module)
+    consts = _module_string_constants(module)
+    out: dict[str, str] = {}
+    for node in tree.body if tree is not None else []:
+        if not isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+            continue
+        templates: set[str] = set()
+        other = False
+        for sub in ast.walk(node):
+            if not isinstance(sub, ast.Return) or sub.value is None:
+                continue
+            value = sub.value
+            if (
+                isinstance(value, ast.Call)
+                and isinstance(value.func, ast.Attribute)
+                and value.func.attr == "format"
+                and isinstance(value.func.value, ast.Name)
+                and value.func.value.id in consts
+            ):
+                templates.add(consts[value.func.value.id])
+            elif isinstance(value, ast.Name) and value.id in consts:
+                templates.add(consts[value.id])
+            else:
+                other = True
+        if len(templates) == 1 and not other:
+            out[node.name] = templates.pop()
+    return out
+
+
+def _write_spec_templates() -> dict[str, str]:
+    """``writes.SANCTIONED_WRITES``' ``url_template`` per action, by AST.
+
+    A write tool navigates in ``writes.py``, not here: its body is one
+    ``_write_tool("<action>", ...)`` call, and the page it loads is that
+    action's spec template. ``linkedin_send_reply`` loads a conversation
+    that way and ``linkedin_send_message``'s perform loads the composer.
+    """
+    tree = _module_tree("writes")
+    out: dict[str, str] = {}
+    for node in ast.walk(tree) if tree is not None else []:
+        if not (
+            isinstance(node, ast.Call)
+            and isinstance(node.func, ast.Name)
+            and node.func.id == "WriteSpec"
+        ):
+            continue
+        keywords = {k.arg: k.value for k in node.keywords if k.arg}
+        action, template = keywords.get("action"), keywords.get("url_template")
+        if (
+            isinstance(action, ast.Constant)
+            and isinstance(template, ast.Constant)
+            and isinstance(template.value, str)
+        ):
+            out[str(action.value)] = template.value
+    return out
+
+
 def _navigation_targets_by_tool() -> dict[str, set[str]]:
     """For every ``linkedin_*`` function, the set of urls it navigates to.
 
@@ -150,14 +255,23 @@ def _navigation_targets_by_tool() -> dict[str, set[str]]:
     through the config constants and through ``CENSUS_SURFACES``; anything that
     resolves to nothing is kept as its unparsed source so a reader can see that
     it was seen and not silently dropped -- a refusal must name what it SAW.
+
+    SINCE 2026-09-24 IT ALSO RESOLVES, and each was a blind spot: a package
+    module's constant (``threads.COMPOSE_URL``); a local bound, in the same
+    function, to that or to a module helper that formats a module template
+    (``url = threads.thread_url(thread_id)``); and ``_write_tool("<action>",
+    ...)``, whose navigation is that action's spec ``url_template``. See
+    ``test_the_reader_resolves_a_module_constant_a_helper_and_a_write_spec``.
     """
     urls = _url_constants()
     surfaces = _census_surfaces()
+    specs = _write_spec_templates()
     out: dict[str, set[str]] = {}
 
     class Visitor(ast.NodeVisitor):
         def __init__(self) -> None:
             self.stack: list[str] = []
+            self.bound: list[dict[str, ast.expr]] = []
 
         def visit_FunctionDef(self, node: ast.FunctionDef) -> None:
             self._enter(node)
@@ -166,8 +280,20 @@ def _navigation_targets_by_tool() -> dict[str, set[str]]:
             self._enter(node)
 
         def _enter(self, node) -> None:
+            # The function's own single-name assignments, so a ``goto`` on a
+            # local can be followed to what the local was bound to.
+            bound: dict[str, ast.expr] = {}
+            for sub in ast.walk(node):
+                if (
+                    isinstance(sub, ast.Assign)
+                    and len(sub.targets) == 1
+                    and isinstance(sub.targets[0], ast.Name)
+                ):
+                    bound[sub.targets[0].id] = sub.value
             self.stack.append(node.name)
+            self.bound.append(bound)
             self.generic_visit(node)
+            self.bound.pop()
             self.stack.pop()
 
         def visit_Call(self, node: ast.Call) -> None:
@@ -181,12 +307,30 @@ def _navigation_targets_by_tool() -> dict[str, set[str]]:
                 out.setdefault(self.stack[-1], set()).add(
                     self._resolve(node.args[1])
                 )
+            name = (
+                func.id if isinstance(func, ast.Name)
+                else func.attr if isinstance(func, ast.Attribute) else ""
+            )
+            if (
+                name == "_write_tool"
+                and node.args
+                and isinstance(node.args[0], ast.Constant)
+                and self.stack
+            ):
+                action = str(node.args[0].value)
+                out.setdefault(self.stack[-1], set()).add(
+                    specs.get(action, "_write_tool(%r)" % action)
+                )
             self.generic_visit(node)
 
-        @staticmethod
-        def _resolve(node: ast.expr) -> str:
+        def _resolve(self, node: ast.expr, depth: int = 0) -> str:
             if isinstance(node, ast.Name):
-                return urls.get(node.id, node.id)
+                if node.id in urls:
+                    return urls[node.id]
+                local = self.bound[-1].get(node.id) if self.bound else None
+                if local is not None and depth < 3:
+                    return self._resolve(local, depth + 1)
+                return node.id
             if isinstance(node, ast.Constant) and isinstance(node.value, str):
                 return node.value
             if (
@@ -196,6 +340,16 @@ def _navigation_targets_by_tool() -> dict[str, set[str]]:
                 and isinstance(node.slice, ast.Constant)
             ):
                 return surfaces.get(str(node.slice.value), ast.unparse(node))
+            if isinstance(node, ast.Attribute) and isinstance(node.value, ast.Name):
+                consts = _module_string_constants(node.value.id)
+                return consts.get(node.attr, ast.unparse(node))
+            if (
+                isinstance(node, ast.Call)
+                and isinstance(node.func, ast.Attribute)
+                and isinstance(node.func.value, ast.Name)
+            ):
+                helpers = _module_url_helpers(node.func.value.id)
+                return helpers.get(node.func.attr, ast.unparse(node))
             return ast.unparse(node)
 
     Visitor().visit(_server_tree())
@@ -246,6 +400,31 @@ def _asserted_tools() -> set[str]:
     return set(re.findall(r"linkedin_[a-z_]+", match.group(1)))
 
 
+#: THE SENTENCE'S SECOND CLAUSE, 2026-09-24. Tools that load a messaging
+#: address and open no conversation LinkedIn chooses are named after this
+#: marker -- deliberately NOT in the closed ``Only ... can incur this``
+#: clause, whose cost is the root's, and deliberately NOT as a closed list
+#: ("these also", not "only these"): an open list can be true while
+#: ``linkedin_compose_fields`` and ``linkedin_surface_census`` stand as they
+#: are recorded below.
+_ALSO_MARKER = re.compile(
+    r"these also load a messaging address(.+?)whether", re.S | re.I
+)
+
+
+def _also_named_tools(text: str | None = None) -> set[str]:
+    """The tools the sentence names as loading a messaging address outside
+    the closed clause. From ``known_side_effects`` unless ``text`` is given."""
+    source = _messaging_sentence() if text is None else text
+    match = _ALSO_MARKER.search(source)
+    assert match, (
+        "the 'these also load a messaging address ... whether' clause is "
+        "gone. It is what names the messaging loaders outside the closed "
+        "claim; re-read the sentence before trusting the comparisons here."
+    )
+    return set(re.findall(r"linkedin_[a-z_]+", match.group(1)))
+
+
 def _tools_that_navigate_to_messaging() -> set[str]:
     return {
         tool: None
@@ -284,6 +463,57 @@ def test_the_reader_finds_a_true_positive() -> None:
         "the 'Only ... can incur this' clause parsed to an EMPTY tool set, so "
         "the set comparisons below would trivially hold. Dead extractor."
     )
+
+
+#: THREE WAYS A TOOL HERE REACHES AN ADDRESS WITHOUT NAMING A CONFIG CONSTANT,
+#: planted as SOURCE -- nothing is written into the package. Each is the shape
+#: one of lane L5's tools really uses (2026-09-24): a module's own constant
+#: (``threads.COMPOSE_URL``), a local bound to a module helper that formats a
+#: module template (``threads.thread_url``), and a write whose navigation is
+#: its spec's ``url_template``, reached through ``_write_tool``. The fourth is
+#: the control: a write whose spec is NOT on the messaging surface.
+_PLANTED_SERVER = '''
+async def linkedin_planted_constant(page):
+    await BROWSER.goto(page, threads.COMPOSE_URL)
+
+
+async def linkedin_planted_helper(page, thread_id):
+    url = threads.thread_url(thread_id)
+    await BROWSER.goto(page, url)
+
+
+async def linkedin_planted_write(thread_id, text, confirm_token=""):
+    return await _write_tool("send_reply", {"thread": thread_id}, confirm_token)
+
+
+async def linkedin_planted_elsewhere(job_id, confirm_token=""):
+    return await _write_tool("save_job", {"job": job_id}, confirm_token)
+'''
+
+
+def test_the_reader_resolves_a_module_constant_a_helper_and_a_write_spec(
+    monkeypatch,
+) -> None:
+    """THE BLIND SPOT LANE L5 REPORTED, AS A PLANT THAT FAILED FIRST.
+
+    Until 2026-09-24 the reader resolved config constants and
+    ``CENSUS_SURFACES`` keys and kept anything else as its unparsed source --
+    ``threads.COMPOSE_URL``, ``url``, and no navigation at all for a write --
+    none of which contains ``/messaging``. So three tools that load messaging
+    addresses were invisible, and every set comparison below stayed green by
+    not seeing them. Run against that reader, this test was RED.
+    """
+    planted = ast.parse(_PLANTED_SERVER)
+    monkeypatch.setattr(sys.modules[__name__], "_server_tree", lambda: planted)
+    navigating = set(_tools_that_navigate_to_messaging())
+    assert {
+        "linkedin_planted_constant",
+        "linkedin_planted_helper",
+        "linkedin_planted_write",
+    } <= navigating, sorted(navigating)
+    # THE CONTROL: resolving a write is not the same as calling every write
+    # a messaging load. save_job's spec is a job posting.
+    assert "linkedin_planted_elsewhere" not in navigating, sorted(navigating)
 
 
 # ---------------------------------------------------------------------------
@@ -339,11 +569,26 @@ def test_a_tool_loads_a_messaging_address_and_the_sentence_does_not_name_it() ->
     that is a different and larger finding than the one I was asserting.
 
     WHEN THIS GOES RED: somebody scoped the claim. Read the new wording.
+
+    **2026-09-24: THE READER LEARNED THREE SHAPES AND SAW FOUR MORE TOOLS**
+    load a messaging address -- ``linkedin_list_conversations``,
+    ``linkedin_open_thread``, ``linkedin_send_reply`` and, at perform,
+    ``linkedin_send_message``. They are named in the sentence's second
+    clause, which the comparison below subtracts; the recorded defect is
+    unchanged, still exactly ``linkedin_compose_fields``.
     """
     asserted = _asserted_tools()
     navigating = _tools_that_navigate_to_messaging()
 
-    unnamed = navigating - asserted
+    assert {
+        "linkedin_list_conversations",
+        "linkedin_open_thread",
+        "linkedin_send_reply",
+    } <= set(navigating), (
+        "the reader no longer sees lane L5's messaging tools: %r"
+        % (sorted(navigating),)
+    )
+    unnamed = navigating - asserted - _also_named_tools()
     assert unnamed == {"linkedin_compose_fields"}, (
         "the set of tools that navigate to a STATICALLY RESOLVABLE messaging "
         "address WITHOUT being named in the sentence has changed. measured "
@@ -480,6 +725,12 @@ def test_the_readme_repeats_the_claim_and_the_two_copies_must_not_diverge() -> N
     two copies agree -- both wrong, identically. It fires the moment they stop
     agreeing, which is precisely what a one-sided fix looks like.
     """
+    readme_also = _also_named_tools(" ".join(README.read_text(encoding="utf-8").split()))
+    assert readme_also == _also_named_tools(), (
+        "README.md and server.py now name DIFFERENT messaging loaders in the "
+        "'these also load a messaging address' clause: %r against %r"
+        % (sorted(readme_also), sorted(_also_named_tools()))
+    )
     assert _readme_asserted_tools() == _asserted_tools(), (
         "README.md and server.py's known_side_effects now name DIFFERENT tool "
         "sets in their 'Only ... can incur this' clauses.\n"
@@ -518,6 +769,16 @@ def test_the_readme_contradicts_itself_four_lines_later() -> None:
         "the README's closed clause now names linkedin_compose_fields, so the "
         "contradiction is resolved. Delete this test and say so."
     )
+
+
+def test_every_tool_the_second_clause_names_exists_and_loads_messaging() -> None:
+    """The second clause is an open list, so it cannot be too SMALL -- but it
+    can name a tool that does not exist, or one that loads no messaging
+    address, and either would be a claim with nothing behind it."""
+    also = _also_named_tools()
+    assert also, "the second clause parsed to no tools -- dead extractor"
+    navigating = set(_tools_that_navigate_to_messaging())
+    assert also <= navigating, sorted(also - navigating)
 
 
 @pytest.mark.parametrize("tool", ["linkedin_new_messages", "linkedin_open_messaging"])

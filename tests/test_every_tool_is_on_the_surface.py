@@ -315,4 +315,7 @@ def test_both_rules_reject_the_registry_that_was_actually_measured():
     # linkedin_follow_company_page, a WRITE (census row N 47), built on the
     # lane branch as its own fiftieth and moved with every other count site
     # in the merge commit.
-    assert len(_tool_names()) == 51
+    # FIFTY-FOUR FROM 2026-09-24, at the merge of lane L5: two READS
+    # (linkedin_list_conversations, linkedin_open_thread) and a WRITE
+    # (linkedin_send_reply), moved with every other count site in one commit.
+    assert len(_tool_names()) == 54

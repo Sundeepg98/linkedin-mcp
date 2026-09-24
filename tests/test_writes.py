@@ -712,6 +712,9 @@ def test_what_ships_is_narrower_than_what_is_sanctioned():
         # move, as apply did on 2026-08-25 -- sanctioned and performable at
         # once, on a surface and an anchor already measured.
         "follow_company_page",
+        # FIFTEEN FROM 2026-09-24: the reply inside a conversation he names
+        # (census M M10), sanctioned and performable in the same move.
+        "send_reply",
     }
     # THREE UNTIL 2026-08-25, four until 2026-08-30, five since. This line read
     # ``{"save_job", "unsave_job", "unfollow_company"}``.
@@ -827,6 +830,16 @@ def test_what_ships_is_narrower_than_what_is_sanctioned():
         # readonly.SANCTIONED_MUTATIONS is unchanged, because the click is
         # perform()'s existing one, and no boundary moved.
         "follow_company_page",
+        # THE FOURTEENTH, 2026-09-24, and the first write that CONFIRMS ITSELF
+        # FROM THE SURFACE A PERSON READS: a reply inside a conversation he
+        # names by thread id, typed only into an empty reply box, pressed only
+        # when the box holds exactly his words, and SENT only off a FRESH load
+        # -- his words the last message, not the other side's, one more copy
+        # of them than the preview counted. NOTHING WAS PERMITTED TO LET IT
+        # CROSS: readonly.SANCTIONED_MUTATIONS is unchanged -- the fill and
+        # the click are perform()'s own -- and the thread address was
+        # already on the read allowlist.
+        "send_reply",
     }
     assert writes.PERFORMABLE < sanctioned_actions
 
@@ -1311,6 +1324,10 @@ _UNMEASURED_REVERSIBILITY = {
     "update_setting",
     "send_invitation",
     "send_message",
+    # 2026-09-24. Whether LinkedIn lets a sent reply be recalled has never
+    # been observed, and recalling one is destruction this server may not
+    # perform at any confirm level either way.
+    "send_reply",
 }
 
 REVERSIBILITY_CLASS = {
@@ -1325,6 +1342,7 @@ REVERSIBILITY_CLASS = {
     "update_setting": "STILL-UNKNOWN",
     "send_invitation": "STILL-UNKNOWN",
     "send_message": "STILL-UNKNOWN",
+    "send_reply": "STILL-UNKNOWN",
     # THE ONE THAT IS NOT, and it is the whole reason this table is per-action
     # rather than a claim about the set. apply_job is STILL-UNKNOWN because the
     # surface that would settle it -- his applied list -- is empty, so there is
@@ -1359,6 +1377,7 @@ REVERSIBILITY_MEASURED = {
     "send_invitation": False,
     "send_message": False,
     "follow_company_page": True,
+    "send_reply": False,
 }
 
 def test_the_two_reversibility_tables_agree_with_each_other():

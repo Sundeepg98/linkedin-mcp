@@ -201,7 +201,14 @@ AFTER_THE_WRITE_CEILING_WAVE = (77, {"R": 10, "W": 66, "R+W": 1})
 #: 2 + 1 (`C47`), writes 65 + 36. Fourteen of the forty were not GAP at the
 #: blocker map's freeze and are tallied RETURNED-OUTSIDE-LEDGER; the map is not
 #: grown (the orchestrator's call, delegated, 2026-09-24).
-EXPECTED_NOW = (117, {"R": 13, "W": 101, "R+W": 3})
+#: AFTER LANE L5, 2026-09-24 (`_audit/2026-09-24-lane-l5-messaging.md`),
+#: re-derived with `scripts/triage_messaging_gap_rows.py` on the tree merged
+#: with master ff98a7f: three rows built out of GAP -- `M10` and `M17`
+#: (writes, `linkedin_send_reply`) and `M49` (a read, the read indicator on
+#: his own last message). 117 - 3 = 114: reads 13 - 1, writes 101 - 2,
+#: read-and-writes untouched at 3. RETURNED-OUTSIDE-LEDGER stays 14: none of
+#: the three was a lane-R return.
+EXPECTED_NOW = (114, {"R": 12, "W": 99, "R+W": 3})
 
 
 def test_the_headline_split_is_the_one_the_report_quotes():

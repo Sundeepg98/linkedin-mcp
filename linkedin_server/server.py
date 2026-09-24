@@ -1,4 +1,12 @@
-"""The tool surface: fifty-one tools, thirteen of which write to LinkedIn.
+"""The tool surface: fifty-four tools, fourteen of which write to LinkedIn.
+
+THE FIFTY-SECOND TO FIFTY-FOURTH ARRIVED TOGETHER, 2026-09-24, at the merge
+of lane L5, and every site that states these numbers moved in the same
+commit: two READS on the messaging surface, ``linkedin_list_conversations``
+and ``linkedin_open_thread``, and a WRITE, ``linkedin_send_reply`` -- a reply
+inside a conversation he names by thread id. Census rows ``M M10``,
+``M M17`` and ``M M49``, COVERED-UNFIRED. The headline read "fifty-one tools,
+thirteen of which write" until then.
 
 THE FIFTY-FIRST IS A WRITE, 2026-09-23, and every site that states these
 numbers moved in the same commit: ``linkedin_follow_company_page``, a follow
@@ -151,9 +159,9 @@ assigned to anybody -- it waits for whoever next runs the suite, and in the
 meantime the pin goes on asserting the old number with full confidence.
 
 THE NUMBERS ABOVE ARE DERIVED NOW, and that is a statement about a test rather
-than about an intention. Fifty-one is ``len(await mcp.list_tools())``,
+than about an intention. Fifty-four is ``len(await mcp.list_tools())``,
 pinned in ``test_server_surface.py`` by
-``test_the_surface_is_exactly_the_fifty_one_tools``; the split is pinned by
+``test_the_surface_is_exactly_the_fifty_four_tools``; the split is pinned by
 ``tests/test_prose_that_makes_a_claim.py::test_the_server_docstring_numbers_are_derived``,
 which reads THESE WORDS and fails if any of the three disagrees with the
 registry.
@@ -166,9 +174,9 @@ POINTER to it was dangling, so a reader who followed it found nothing and
 would reasonably conclude these numbers are unchecked. A citation is a claim
 like any other.
 The surface splits three ways and the split is the part a reader actually
-needs: THIRTY-EIGHT read, THIRTEEN write, and ZERO are write-shaped,
-registered, gated and unable to act. Thirty-eight plus thirteen plus zero is
-fifty-one.
+needs: FORTY read, FOURTEEN write, and ZERO are write-shaped,
+registered, gated and unable to act. Forty plus fourteen plus zero is
+fifty-four. (Thirty-eight, thirteen and fifty-one until 2026-09-24.)
 
 THE FIFTIETH IS ONE READ, 2026-09-23. ``linkedin_recent_job_searches`` opens
 the jobs home, ``/jobs/jam/`` -- admitted 2026-09-20 with nothing behind it
@@ -280,12 +288,13 @@ the moment ``update_profile_field`` was given an address while still refusing.
 always meant: an address is not a permission.
 
 NOTE THE ACTION THAT HAS NO TOOL. ``writes.SANCTIONED_WRITES`` holds
-FOURTEEN actions where this surface registers THIRTEEN write-shaped tools, and
+FIFTEEN actions where this surface registers FOURTEEN write-shaped tools, and
 the missing one is ``set_open_to_work``: it is sanctioned, it is refused by
-``_refuse_unperformable``, and no tool was ever registered for it. So thirteen
-counts TOOLS and fourteen counts ACTIONS, and a reader comparing the two
+``_refuse_unperformable``, and no tool was ever registered for it. So fourteen
+counts TOOLS and fifteen counts ACTIONS, and a reader comparing the two
 numbers is not looking at a discrepancy. (THIRTEEN and TWELVE until
-2026-09-23; ``follow_company_page`` added one to each.)
+2026-09-23; ``follow_company_page`` added one to each. FOURTEEN and THIRTEEN
+until 2026-09-24; ``send_reply`` added one to each.)
 
 THE LINE NUMBERS THAT USED TO BE HERE ARE GONE, and that is part of this
 correction rather than tidying. It read "pinned at ``test_server_surface.py``
@@ -850,13 +859,14 @@ mcp = FastMCP(
     instructions=(
         "A window onto the operator's OWN LinkedIn account, driven by his own "
         "signed-in browser on his own machine. Most tools read and change "
-        "nothing. THIRTEEN WRITE: linkedin_save_job, "
+        "nothing. FOURTEEN WRITE: linkedin_save_job, "
         "linkedin_unsave_job, linkedin_unfollow_company, "
         "linkedin_follow_company, linkedin_apply_job, "
         "linkedin_update_setting, linkedin_react_to_item, "
         "linkedin_send_invitation, linkedin_publish_post, "
         "linkedin_comment_on_item, linkedin_update_profile_field, "
-        "linkedin_send_message and linkedin_follow_company_page. "
+        "linkedin_send_message, linkedin_follow_company_page and "
+        "linkedin_send_reply. "
         "THE ELEVENTH is the only one here that can verify its own outcome "
         "by reading the field back; it also returns the PREVIOUS value "
         "verbatim and the exact call that puts it back, which this server "
@@ -889,10 +899,15 @@ mcp = FastMCP(
         "counts these refusals return are the measurement nobody can take "
         "another way. His words are never "
         "typed until that check passes, so a refusal costs him a name "
-        "sitting in a composer and never his message. It can report NOT SENT "
-        "and can never report SENT: the only surface that could confirm a "
-        "send is the thread, which is forbidden here AND costs a read "
-        "receipt on a real person. AND IT MAY SPEND AN INMAIL CREDIT whose "
+        "sitting in a composer and never his message. IT CAN NOW REPORT "
+        "SENT, ON A WEAK FOOTING -- this paragraph said it 'can never report "
+        "SENT' until 2026-09-24, because the only surface that could confirm "
+        "a send, the conversation, was forbidden; ruling WRITE-CLASS-B lifted "
+        "that. After a send it reads the conversation left drawn on the same "
+        "page, in place, and says SENT only when his exact words are its last "
+        "message; with no earlier count to compare, an identical earlier "
+        "message of his would read the same, and anything else is unknown. "
+        "AND IT MAY SPEND AN INMAIL CREDIT whose "
         "size is UNMEASURED rather than denied -- no countable balance "
         "exists on either surface this server may read. "
         "Call any of them "
@@ -976,6 +991,22 @@ mcp = FastMCP(
         "draws the row. It refuses a Page he already follows: the label that "
         "control wears once followed has never been captured, and it reads "
         "as unknown rather than being guessed. "
+        "THE FOURTEENTH, 2026-09-24, IS A REPLY INSIDE A CONVERSATION HE "
+        "NAMES: linkedin_send_reply takes the conversation's thread id -- "
+        "the part of its address after /messaging/thread/, copied from his "
+        "own browser; this server never reads one off a page -- and the exact "
+        "words. The preview loads that conversation, refuses unless the "
+        "browser landed on it, and prints its title as who_this_would_reach; "
+        "if it holds messages he has not read, loading it may show their "
+        "sender a seen, as replying would. The act types only into an EMPTY "
+        "reply box, presses Send only when the box holds exactly his confirmed "
+        "words, and reports SENT only off a FRESH load: his words the last "
+        "message, not drawn as the other side's, and one more copy of them "
+        "than the preview counted. Anything else is unknown, and an unknown "
+        "reply must NOT be retried. To see conversations without opening one, "
+        "linkedin_list_conversations reads the composer's list, which opens "
+        "nothing; linkedin_open_thread opens one conversation he names, and by "
+        "default refuses while any listed row reads unread. "
         "Endorsing a skill is IMPOSSIBLE AS SPECIFIED and is the one "
         "capability with no tool: zero endorse controls across 13 fixtures "
         "and across 222 controls read live on his own profile, and the only "
@@ -988,9 +1019,12 @@ mcp = FastMCP(
         "both a server restart and a reboot, and linkedin_session_info says "
         "when it lapses. The highest-signal tool is linkedin_who_viewed_me: "
         "where the account has Premium Career it reaches back 365 days. "
-        "Each call "
-        "loads exactly one page, so ask for one thing at a time rather than "
-        "sweeping."
+        "Most calls "
+        "load exactly one page, so ask for one thing at a time rather than "
+        "sweeping; a call that loads more says so in pages_loaded -- the "
+        "messaging tools read the composer's list before they open a "
+        "conversation. (This read 'Each call loads exactly one page' until "
+        "2026-09-24.)"
     ),
 )
 
@@ -9457,8 +9491,10 @@ async def linkedin_send_reply(
     token it hands you, within two minutes, once.
 
     ON CONFIRM: the reply box must be EMPTY, with Send drawn disabled; your
-    words are typed; Send must turn enabled with no recipient box drawn; then
-    Send is pressed. THEN IT CONFIRMS ITSELF: the conversation is loaded fresh
+    words are typed; Send must turn enabled, the box must hold EXACTLY your
+    words -- a box that changed them as they were typed refuses, keeping two
+    lengths and no text -- and no recipient box may be drawn; then Send is
+    pressed. THEN IT CONFIRMS ITSELF: the conversation is loaded fresh
     and ``performed`` is true only if your exact words are its last message
     AND the number of messages carrying them rose by exactly one. False means
     the box still held your words with Send enabled and nothing new appeared.
@@ -10078,9 +10114,16 @@ async def linkedin_server_info(verbose: bool = False) -> dict[str, Any]:
                 "opening messaging clears the messaging badge AND opens one "
                 "conversation LinkedIn chooses -- measured twice. Only "
                 "linkedin_open_messaging and linkedin_new_messages can incur "
-                "this, and only when called. linkedin_send_message "
+                "this, and only when called. linkedin_send_message's preview "
                 "deliberately does NOT open messaging: it reads the nav badge "
-                "off a page already loaded and refuses.",
+                "off a page already loaded. THESE ALSO LOAD A MESSAGING "
+                "ADDRESS, and none of them opens a conversation LinkedIn "
+                "chooses: linkedin_list_conversations (the composer's list, "
+                "which opens none), linkedin_open_thread and "
+                "linkedin_send_reply (only the conversation you name by id), "
+                "and linkedin_send_message (the composer, when a confirmed "
+                "send is performed). Whether any of those loads clears the "
+                "messaging badge is unmeasured.",
                 "loading /mynetwork/ ITSELF would consume the pending-"
                 "invitation badge, and no tool here loads that root. TWO "
                 "tools DO load addresses UNDER it -- linkedin_connections "
