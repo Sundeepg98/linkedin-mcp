@@ -143,7 +143,8 @@ PINNED_TOOL_SURFACE: dict[str, tuple[str, ...]] = {
     "linkedin_unsave_job": ("confirm_token", "job_id"),
     "linkedin_update_profile_field": ("confirm_token", "field", "value"),
     "linkedin_update_setting": ("confirm_token", "setting", "value"),
-    "linkedin_who_viewed_me": ("limit", "open_filter_menus"),
+    "linkedin_who_viewed_me": ("limit", "open_filter_menus", "show_more_analytics", "view_switch"),
+    "linkedin_own_item_link": ("activity_id", "include_link"),
 }
 
 #: 44 tools and 61 parameters at the pin. Asserted rather than assumed, so a
@@ -233,6 +234,28 @@ PINNED_TOOL_SURFACE: dict[str, tuple[str, ...]] = {
 #: are decided by ONE live fire of this parameter, and they move -- or keep
 #: their state with a named reason -- in the commit that records that fire.
 #: See `_audit/2026-09-23-readers-four-rows.md`.
+#:
+#: **RE-PINNED 2026-09-23 AT 49 TOOLS AND 69 PARAMETERS, by the live lane.**
+#: `linkedin_who_viewed_me("view_switch", "show_more_analytics")` -- the view
+#: switch (one ruled filter applied, read, and proven restored, on
+#: VIEW-SWITCH-PRESS-RESTORED) and the one decided reveal ("Show more
+#: analytics", on its orchestrator-delegated call). **NO ROW MOVES IN THIS
+#: COMMIT:** `N 134` and `P O3` are decided by ONE live fire of these two
+#: parameters and move, or keep their state with a named reason, in the commit
+#: that records it. See `_audit/2026-09-23-live-lane-session-1.md`.
+#:
+#: **RE-PINNED 2026-09-23 AT 50 TOOLS AND 71 PARAMETERS, by the live lane.**
+#: `linkedin_own_item_link("activity_id", "include_link")` -- the share link
+#: of one of HIS OWN posts through the post's own "Copy link to post", on the
+#: orchestrator-delegated call that `M C72`'s copy-link is proven on his own
+#: posts only. The id is a NUMERIC IDENTIFIER, refused unless it is 1-20
+#: ASCII digits, the exception `linkedin_group_page("group_id")` already
+#: carries: a builder has to be handed the thing it builds from.
+#: **NO ROW MOVES IN THIS COMMIT:** `M C72` moves, or keeps its state with a
+#: named reason, in the commit recording one live fire of this tool.
+#: (Both live-lane pins above were taken on the lane's branch, over the base's
+#: 49 and 67; the merge below reconciles them with master's two.)
+#:
 #: **RE-PINNED 2026-09-23 AT 50 TOOLS AND 67 PARAMETERS (lane L3), merged over the
 #: readers wave's 49 and 67 just above: one tool added, no parameter, and the
 #: surface change moves a census row in the same commit.**
@@ -260,6 +283,17 @@ PINNED_TOOL_SURFACE: dict[str, tuple[str, ...]] = {
 #: parameters are the two every gated write takes -- a numeric identifier,
 #: refused unless it is 4 to 20 ASCII digits, and the token. See
 #: `_audit/2026-09-23-lane-l4-writes.md`.
+#:
+#: **RE-PINNED 2026-09-24 AT 52 TOOLS AND 73 PARAMETERS, at the live lane's
+#: merge of master.** The lane's branch stood at 50 and 71 over the base's 49
+#: and 67 (four parameters: `view_switch`, `show_more_analytics`,
+#: `activity_id`, `include_link`; one tool); master stood at 51 and 69 over
+#: the same base (two tools, two parameters). 49 + 1 + 2 = 52 and
+#: 67 + 4 + 2 = 73, and both are measured off the merged registry by the
+#: tests below rather than trusted from this sum. No row moves in the merge:
+#: every row the lane's surface serves moved in the lane commit that fired it
+#: (`N 134`, `P O3`, `M C72`), and master's rows in master's.
+#:
 #: **RE-PINNED 2026-09-24 AT 51 TOOLS AND 74 PARAMETERS (lane S, at its
 #: merge with master d65759f): no tool added, five parameters on one, and the
 #: census rows move in the same merge.** `linkedin_people_search_shape` --
@@ -275,17 +309,24 @@ PINNED_TOOL_SURFACE: dict[str, tuple[str, ...]] = {
 #: census call, 2026-09-24) a count-only reader does not deliver them; they
 #: stay GAP on the name-free shaper doctrine, pending the operator. Not
 #: PROVEN: the lane was offline. See `_audit/2026-09-24-lane-s-people-search.md`.
-#: **RE-PINNED 2026-09-24 AT 52 TOOLS AND 76 PARAMETERS (lane L7, at its merge
-#: with master ff98a7f), MEASURED off the merged registry rather than added to
-#: the lane's own 52 and 71: one tool, two parameters, and the census row moves
-#: in the same merge.** `linkedin_mark_company_interest("job_id",
-#: "confirm_token")` banks `P I14` -- signal interest in working for a company
-#: -- GAP -> COVERED-UNFIRED. Not PROVEN: a WRITE built to ready-to-fire
-#: behind the flag and the single-use grant, never granted. Its two parameters
-#: are the two every gated posting write takes. See
+#:
+#: **RE-PINNED 2026-09-24 AT 52 TOOLS AND 78 PARAMETERS, at the live lane's
+#: merge of lane S's master.** The two pins above were each taken on its own
+#: branch: the live lane's 52 and 73, lane S's 51 and 74, over master's 51 and
+#: 69. The merge carries both -- the live lane's one tool and four parameters,
+#: lane S's five parameters -- so 52 tools and 69 + 4 + 5 = 78 parameters,
+#: measured off the merged registry below. No row moves in the merge.
+#: **RE-PINNED 2026-09-24 AT 53 TOOLS AND 80 PARAMETERS (lane L7,
+#: at its merge of master 9b9a4d0), MEASURED off the merged registry, not
+#: summed.** The lane's branch had pinned 52 and 76 at its first merge (master
+#: ff98a7f); master had since pinned 52 and 78. The lane adds one tool and two
+#: parameters: `linkedin_mark_company_interest("job_id", "confirm_token")`,
+#: which banks `P I14` -- signal interest in working for a company -- GAP ->
+#: COVERED-UNFIRED. Not PROVEN: a WRITE built to ready-to-fire behind the flag
+#: and the single-use grant, never granted. See
 #: `_audit/2026-09-24-lane-l7-profile-writes.md`.
-PINNED_TOOL_COUNT = 52
-PINNED_PARAMETER_COUNT = 76
+PINNED_TOOL_COUNT = 53
+PINNED_PARAMETER_COUNT = 80
 
 
 def live_surface() -> dict[str, tuple[str, ...]]:

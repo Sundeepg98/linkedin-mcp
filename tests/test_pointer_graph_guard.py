@@ -1,7 +1,9 @@
 """`scripts/measure_pointer_graph.py --check` must be able to go RED.
 
-WHAT IT GUARDS. 69 census reason cells (68 since 2026-09-24, when lane L7's
-integration named `P G3`'s ruling in place of its positional 'same ruling') say
+WHAT IT GUARDS. 66 census reason cells (69 until the live lane's merge,
+2026-09-24, which banked `N 134` and wrote out `N 135`'s vestigial pointer;
+67 until lane L7's merge the same day, which named `P G3`'s ruling in place of
+its positional 'same ruling') say
 `same` and resolve BY POSITION to the
 nearest substantive row above them in the same table. Nothing marks a row as
 load-bearing for the rows beneath it, so a row inserted mid-table re-points every

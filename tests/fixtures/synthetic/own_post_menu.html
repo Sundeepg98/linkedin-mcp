@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<!--
+Synthetic control-menu fixture for linkedin_server/share_link.py.
+
+Strictly ASCII. No real person, company, id or slug appears anywhere in
+this file -- the trigger's aria-label is the literal measured live text,
+"Open control menu for post", carrying no name. The synthetic post id
+("1234") is fewer than six digits on purpose: tests/test_no_committed_identity.py
+refuses a urn-shaped string with a six-or-more digit run in a tracked file,
+and this file is tracked.
+
+Behaviour is driven entirely by window.__fixtureConfig, read once when this
+script runs. A test that wants a variant edits the HTML TEXT before calling
+page.set_content -- replacing the FIXTURE_CONFIG marker comment below (it
+sits on its own line, right before the behaviour script) with a script tag
+that sets window.__fixtureConfig BEFORE this script tag, since document
+order is what decides which script runs first for inline content set this
+way (measured: page.add_init_script does not reliably run ahead of an
+inline script inside content handed to page.set_content, so the config
+must arrive as markup, not as an init script). Left untouched, the marker
+is inert and every flag below defaults to the happy-path shape: one
+trigger, owner items present, the copy item present and unique, a
+navigator.clipboard copier, and an Escape that closes the menu.
+
+NOTE FOR THE NEXT EDITOR: this top comment must never spell the marker's
+own delimiters out in full (open-marker, then the word, then close-marker)
+as literal text in one place -- HTML comments do not nest, and the CLOSE
+half of a quoted marker would end THIS comment early, silently corrupting
+everything that follows. That defect shipped once already and cascaded
+into a JS syntax error several hundred characters later, from prose that
+should never have been parsed as a document body at all. The word alone,
+FIXTURE_CONFIG, is how this file refers to it from inside this comment.
+
+Recognised flags, all optional, all default false:
+  nonOwner          -- omit "Edit post" and "Delete post" from the items.
+  twoTriggers       -- render a second, inert trigger with the same label.
+  missingCopyItem   -- omit "Copy link to post" from the items.
+  duplicateCopyItem -- render "Copy link to post" twice.
+  execCommandCopier -- copy via a selected <textarea> + document.execCommand
+                       ("copy") instead of navigator.clipboard.writeText.
+  ignoreEscape      -- the Escape handler does nothing; the menu stays open.
+  startsWithDecoy   -- also render "Copy link to post to a group", whose
+                       normalised text STARTS WITH but does not EQUAL the
+                       copy phrase. Off by default so it never interferes
+                       with missingCopyItem's timeout; a test opts in to
+                       prove exact-match discrimination.
+  clipboardItemCopier -- copy via navigator.clipboard.write([ClipboardItem])
+                       carrying a text/plain part, instead of writeText.
+  htmlOnlyItem      -- with clipboardItemCopier: the item carries text/html
+                       only, so there is no text for the hook to keep.
+  asyncCopier       -- make the copy 400ms AFTER the click handler returns,
+                       as a page does that awaits something of its own
+                       first; a read taken at once would see nothing yet.
+  capturedReference -- copy through a reference to writeText taken at LOAD,
+                       before any hook could run: the one route the hook
+                       cannot see. Counted as an unpatched write.
+  itemClickCloses   -- the copy item's own click closes the menu, as a real
+                       menu's item usually does; no Escape is then needed.
+  reactionControl   -- draw the item's reaction toggle in the FEED's dialect,
+                       OFF ("Reaction button state: no reaction"): off_state
+                       reads 1 with it, 0 without.
+  permalinkToggle   -- "liked" or "unliked": draw the toggle in the
+                       PERMALINK's dialect instead, measured live as "Unreact
+                       Like" on a liked item ("React Like" is its inferred
+                       OFF form). off_state reads 0 here, which is the point.
+  copyReacts        -- the copy press ALSO flips whichever toggle is drawn,
+                       as an outward act would; the price must refuse.
+
+window.__osClipboardWrites counts an UNPATCHED clipboard write -- a copy
+that reached the function this script captured at load time, before any
+hook could have run. It is decided by IDENTITY, never by whether a promise
+resolved, since a patched stub also resolves its promise and that would
+prove nothing about which function ran. AND THIS FIXTURE NEVER CALLS THE
+UNPATCHED FUNCTION: on that route it counts and stops, so no run of this
+suite -- a planted defect included -- writes any clipboard at all.
+
+window.__escapeKeydowns counts every Escape keydown the page receives,
+honoured or not, so a test can tell "closed without Escape" from "closed
+by Escape".
+-->
+<html>
+<head><meta charset="utf-8"></head>
+<body>
+<main>
+  <button type="button" id="decoy-toggle" aria-expanded="false"
+          aria-label="Show image options">D</button>
+  <div id="post-root"></div>
+</main>
+<!--FIXTURE_CONFIG-->
+<script>
+(function () {
+  "use strict";
+
+  var cfg = window.__fixtureConfig || {};
+  var POST_ID = "1234";
+  var LINK = "https://www.linkedin.com/posts/synthetic-share_lq-activity-"
+    + POST_ID + "-abcd?utm_source=share&utm_medium=member_desktop";
+
+  // Captured BEFORE anything in this test process could have patched them,
+  // so the click handler can tell "the real thing ran" from "a stub ran"
+  // by IDENTITY rather than by whether a promise happened to resolve --
+  // a patched stub resolves its promise too, which would prove nothing.
+  var realWriteText = (window.navigator.clipboard
+    && window.navigator.clipboard.writeText) || null;
+  var realWrite = (window.navigator.clipboard
+    && window.navigator.clipboard.write) || null;
+  var realExecCommand = document.execCommand;
+
+  function countUnpatchedWrite() {
+    window.__osClipboardWrites = (window.__osClipboardWrites || 0) + 1;
+  }
+
+  var root = document.getElementById("post-root");
+
+  function buildTrigger(id) {
+    var trigger = document.createElement("button");
+    trigger.type = "button";
+    trigger.id = id;
+    trigger.className = "control-menu-trigger";
+    trigger.setAttribute("aria-expanded", "false");
+    trigger.setAttribute("aria-label", "Open control menu for post");
+    return trigger;
+  }
+
+  var trigger1 = buildTrigger("trigger-1");
+  root.appendChild(trigger1);
+
+  // [label drawn, label after the toggle flips], per dialect.
+  var REACTION_LABELS = {
+    feed: ["Reaction button state: no reaction", "Reaction button state: like"],
+    liked: ["Unreact Like", "React Like"],
+    unliked: ["React Like", "Unreact Like"]
+  };
+  var dialect = cfg.reactionControl ? "feed" : (cfg.permalinkToggle || null);
+  var reaction = null;
+  if (dialect && REACTION_LABELS[dialect]) {
+    reaction = document.createElement("button");
+    reaction.type = "button";
+    reaction.id = "reaction-toggle";
+    reaction.setAttribute("aria-label", REACTION_LABELS[dialect][0]);
+    reaction.textContent = "Like";
+    root.appendChild(reaction);
+  }
+
+  var holder1 = document.createElement("div");
+  holder1.id = "items-holder-1";
+  root.appendChild(holder1);
+
+  if (cfg.twoTriggers) {
+    var trigger2 = buildTrigger("trigger-2");
+    root.appendChild(trigger2);
+    // Inert on purpose: the module under test refuses for
+    // control_menu_not_unique before it ever clicks anything, so this
+    // second trigger never needs a working click handler.
+  }
+
+  function itemTexts() {
+    var texts = [];
+    texts.push("Feature on top of profile");
+    texts.push("Save");
+    if (cfg.startsWithDecoy) {
+      // STARTS WITH the copy phrase, is not EQUAL to it. Off by default:
+      // present unconditionally it would satisfy the loose Playwright wait
+      // in the missingCopyItem scenario (a substring match) even though no
+      // exact match exists, turning that test's expected timeout into a
+      // copy_item_not_unique refusal instead.
+      texts.push("Copy link to post to a group");
+    }
+    if (!cfg.missingCopyItem) {
+      texts.push("Copy link to post");
+    }
+    if (cfg.duplicateCopyItem) {
+      texts.push("Copy link to post");
+    }
+    texts.push("Embed this post");
+    if (!cfg.nonOwner) {
+      texts.push("Edit post");
+      texts.push("Delete post");
+    }
+    texts.push("Who can comment on this post");
+    texts.push("Who can see this post");
+    return texts;
+  }
+
+  function onCopyClickExecCommand() {
+    var ta = document.getElementById("lq-copy-textarea");
+    if (!ta) {
+      ta = document.createElement("textarea");
+      ta.id = "lq-copy-textarea";
+      ta.style.position = "fixed";
+      ta.style.top = "-1000px";
+      ta.style.left = "-1000px";
+      document.body.appendChild(ta);
+    }
+    ta.value = LINK;
+    ta.style.display = "block";
+    ta.focus();
+    ta.select();
+    if (document.execCommand === realExecCommand) {
+      countUnpatchedWrite();
+    } else {
+      try {
+        document.execCommand("copy");
+      } catch (e) {
+        // A throwing hook is the module's defect to surface, not ours.
+      }
+    }
+    ta.style.display = "none";
+  }
+
+  function onCopyClickClipboardApi() {
+    var clip = window.navigator.clipboard;
+    if (!clip) {
+      return;
+    }
+    if (cfg.capturedReference || clip.writeText === realWriteText) {
+      // capturedReference: the page holds the reference it took at load,
+      // so whatever the hook replaced since, THIS route reaches the
+      // original. Counted, never called.
+      countUnpatchedWrite();
+      return;
+    }
+    clip.writeText(LINK).then(function () {}, function () {});
+  }
+
+  function onCopyClickClipboardItem() {
+    var clip = window.navigator.clipboard;
+    if (!clip) {
+      return;
+    }
+    if (clip.write === realWrite) {
+      countUnpatchedWrite();
+      return;
+    }
+    var parts = cfg.htmlOnlyItem
+      ? { "text/html": new Blob(["<b>x</b>"], { type: "text/html" }) }
+      : { "text/plain": new Blob([LINK], { type: "text/plain" }) };
+    clip.write([new ClipboardItem(parts)]).then(function () {}, function () {});
+  }
+
+  function onCopyClick() {
+    var copier = onCopyClickClipboardApi;
+    if (cfg.execCommandCopier) {
+      copier = onCopyClickExecCommand;
+    } else if (cfg.clipboardItemCopier) {
+      copier = onCopyClickClipboardItem;
+    }
+    if (cfg.asyncCopier) {
+      window.setTimeout(copier, 400);
+    } else {
+      copier();
+    }
+    if (cfg.copyReacts && reaction) {
+      reaction.setAttribute("aria-label", REACTION_LABELS[dialect][1]);
+    }
+    if (cfg.itemClickCloses) {
+      closeMenu1();
+    }
+  }
+
+  function renderItems() {
+    var ul = document.createElement("ul");
+    itemTexts().forEach(function (text) {
+      var li = document.createElement("li");
+      var item = document.createElement("div");
+      item.setAttribute("role", "button");
+      item.setAttribute("tabindex", "0");
+      item.textContent = text;
+      if (text === "Copy link to post") {
+        item.addEventListener("click", onCopyClick);
+      }
+      li.appendChild(item);
+      ul.appendChild(li);
+    });
+    holder1.appendChild(ul);
+  }
+
+  function closeMenu1() {
+    trigger1.setAttribute("aria-expanded", "false");
+    holder1.innerHTML = "";
+  }
+
+  trigger1.addEventListener("click", function () {
+    trigger1.setAttribute("aria-expanded", "true");
+    window.setTimeout(renderItems, 300);
+  });
+
+  document.addEventListener("keydown", function (event) {
+    if (event.key !== "Escape") {
+      return;
+    }
+    window.__escapeKeydowns = (window.__escapeKeydowns || 0) + 1;
+    if (cfg.ignoreEscape) {
+      return;
+    }
+    if (trigger1.getAttribute("aria-expanded") === "true") {
+      closeMenu1();
+    }
+  });
+})();
+</script>
+</body>
+</html>

@@ -914,6 +914,12 @@ PINNED = {
     #:   gap 510 -> 509, gap_write 324 -> 323, b1_standing 10 -> 11
     #: The same lane's other 35 rows kept their states, and its six intro-
     #: editor notes and `P G3`'s named ruling moved no figure.
+    #: AND RE-DERIVED AGAIN AT THE LANE'S MERGE OF MASTER 9b9a4d0, which had
+    #: meanwhile taken the live lane's four proven rows (below): measured on
+    #: that merged tree, `P I14` is the only move against master's pins --
+    #:   adjudicated 197 -> 198, delivered_broad 108 -> 109, unfired 29 -> 30,
+    #:   gap 507 -> 506; gap_write 323 and b1_standing 11 as this branch had
+    #:   them, because the live lane's rows were reads.
     #:
     #: RE-DERIVED AT LANE S'S MERGE, 2026-09-24, from the tree merged with
     #: master d65759f and not as deltas from the lane's base
@@ -936,7 +942,15 @@ PINNED = {
     "capabilities_achievable": 648,
     "out_of_scope": 70,
     "achievable": 634,
-    "adjudicated": 195,
+    "adjudicated": 198,
+    #: THE LIVE LANE'S FOUR ROWS, RE-DERIVED AT EACH OF ITS MERGES OF MASTER
+    #: (2026-09-24; last over lane S): four rows fired live and banked
+    #: (`_audit/2026-09-23-live-lane-session-1.md`). `P G6` COVERED-UNFIRED ->
+    #: COVERED-PROVEN, so it leaves `unfired` and bucket 1 and joins
+    #: delivered_strict; `N 134`, `P O3` and `M C72` GAP -> COVERED-PROVEN, so
+    #: each is newly adjudicated and delivered, and each leaves `gap`,
+    #: `gap_read` and bucket 3 (all three were ADMITTED). Every figure below
+    #: that the four move is measured on the merged tree, not summed.
     #: 434 / 100 / 270 / 25, and gap_write 150, since the lane-L4 merge
     #: (2026-09-23): `N 47` was built -- `linkedin_follow_company_page`, a
     #: WRITE, behind the flag and the single-use grant, never fired (GAP ->
@@ -952,15 +966,18 @@ PINNED = {
     #: (GAP -> COVERED-UNFIRED, `_audit/2026-09-23-lane-l1-refused-reads.md`).
     #: One row changing class moves all five; b3 admitted/refused 40/16 are
     #: L1's allowlist admissions, and b1_no_ruling 7 is P G6 entering bucket 1.
-    "delivered_broad": 106,
+    "delivered_broad": 109,
+    #: 79 since the live lane's merge (see `adjudicated`): P G6, N 134, P O3
+    #: and M C72 COVERED-PROVEN.
     #: 75 and 21 since the bucket-1 merge: `M C41` fired live and moved from
     #: COVERED-UNFIRED to COVERED-PROVEN (`_audit/2026-09-23-bucket1-fires.md`).
     #: One row changing class moves both, and leaves delivered_broad at 96.
-    "delivered_strict": 75,
-    "gap": 509,
+    "delivered_strict": 79,
+    "gap": 506,
     "cannot_deliver": 19,
-    "unfired": 31,
-    "gap_read": 94,
+    "unfired": 30,
+    #: The live lane's merge: N 134, P O3 and M C72 left GAP.
+    "gap_read": 91,
     #: 151, not the 152 published by `_audit/2026-09-21-the-write-ceiling.md`.
     #: That document scoped itself to `profile.md`, `network.md` and
     #: `messaging-and-content.md`; measured at HEAD those three carry W 151 and
@@ -1000,7 +1017,9 @@ PINNED = {
     #: four FILTER rows lane S built (`N 84`, `N 85`, `N 87`, `N 94`) left
     #: bucket 3 for COVERED-UNFIRED, all four ADMITTED; the boundary did not
     #: move.
-    "b3_admitted": 40,
+    #: THE LIVE LANE'S MERGE, 2026-09-24: N 134, P O3 and M C72 were proven
+    #: live and their address lines left the table; all three were ADMITTED.
+    "b3_admitted": 37,
     "b3_refused": 38,
     "b3_no_address": 1,
     "b3_needs_session": 13,
@@ -1068,8 +1087,11 @@ PINNED = {
     #:                        N 85, N 87, N 94), reads no ruling holds -- D1
     #:                        and OTHER-MEMBER-IDS permit, they hold nothing
     #:                        (+4 none).
-    #:   lane L7's merge      11 standing / 0 / 0 / 20 none, 6 released, of 31:
-    #:                        P I14 was built, a W row, held by the write hold
+    #:   live lane merge      10 standing / 0 / 0 / 19 none, 6 released, of 29:
+    #:   (2026-09-24)         P G6 fired live and was banked COVERED-PROVEN,
+    #:                        leaving bucket 1 (-1 none).
+    #:   lane L7's merge      11 standing / 0 / 0 / 19 none, 6 released, of 30:
+    #:   (2026-09-24)         P I14 was built, a W row, held by the write hold
     #:                        with no marker (+1 standing).
     #: `b1_relayed` is the count this file called `b1_named_target` until the
     #: target condition was registered: a name for what a status COUNTS, not
@@ -1078,7 +1100,7 @@ PINNED = {
     "b1_standing": 11,
     "b1_relayed": 0,
     "b1_pending": 0,
-    "b1_no_ruling": 20,
+    "b1_no_ruling": 19,
     "b1_released": 6,
     #: D3's enumerated list: FOUR once `M C83` left it, and THREE since
     #: `N 172` left it the same evening on OTHER-MEMBER-IDS-AS-READS -- see
@@ -1129,10 +1151,9 @@ PINNED_B1_ROWS: dict[str, tuple[str, ...]] = {
         "N 1", "N 46", "N 47", "N 48",
         "P I14",
     ),
-    #: `P G6` entered with the lane-L1 merge and `J 18` and `J 39` with the
-    #: lane-L3 merge, 2026-09-23: reads built offline, which no ruling holds.
-    #: The six P A rows are the writes SELF-PROFILE-EDITS-NOT-OUTWARD
-    #: releases, each by its own cell.
+    #: `J 18` and `J 39` entered with the lane-L3 merge, 2026-09-23: reads
+    #: built offline, which no ruling holds. The six P A rows are the writes
+    #: SELF-PROFILE-EDITS-NOT-OUTWARD releases, each by its own cell.
     #: `N 23` entered with lane R, 2026-09-23: returned from an exclusion to
     #: COVERED-UNFIRED, because `linkedin_connections` already reads his
     #: connections list behind a before-and-after badge gate and no live fire
@@ -1141,10 +1162,12 @@ PINNED_B1_ROWS: dict[str, tuple[str, ...]] = {
     #: 2026-09-24: people-search FILTER readers built offline and never
     #: fired, from the tool's arguments under D1-SEARCH-AS-READS (and, for
     #: `N 85`, OTHER-MEMBER-IDS-AS-READS). Both rulings permit; neither holds.
+    #: `P G6` entered with the lane-L1 merge and LEFT with the live lane's
+    #: merge, 2026-09-24: fired live and banked COVERED-PROVEN.
     NO_RULING: (
         "J 18", "J 39", "J 121", "J 122", "M M33", "M M43", "N 20", "N 23",
         "N 45", "N 84", "N 85", "N 87", "N 94",
-        "P A8", "P A11", "P A13", "P A17", "P A19", "P A21", "P G6",
+        "P A8", "P A11", "P A13", "P A17", "P A19", "P A21",
     ),
 }
 

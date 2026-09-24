@@ -8,8 +8,20 @@ permission to act ahead of the guard that bounds it.*
 
 ## WHICH RULE GOVERNS A CALL SITE, because the confusion cost a fortnight
 
-**THIS MODULE GOVERNS THE PACKAGE.** Any press from `linkedin_server/*.py` goes
-through :func:`disclose` and is bound by all four conditions below.
+**THIS MODULE GOVERNS THE PACKAGE'S DISCLOSING PRESSES.** Any press from
+`linkedin_server/*.py` that is matched by ATTRIBUTE goes through
+:func:`disclose` and is bound by all four conditions below.
+
+**AND SINCE 2026-09-23 IT IS NOT THE ONLY PRESS, which this paragraph said it
+was.** A press a recorded, delegated call has DECIDED -- one named control, on
+one named surface -- lives in its own module with its own closed table and its
+own entry in ``readonly.SANCTIONED_MUTATIONS``: :mod:`linkedin_server.reveal`
+(plain buttons admitted by name) and :mod:`linkedin_server.view_switch` (one
+filter applied and restored, on VIEW-SWITCH-PRESS-RESTORED). Each reuses this
+module's pure checks --
+:func:`check_address`, :func:`check_basis`, :func:`check_counters` -- rather
+than a second copy of them. ``readonly.SANCTIONED_MUTATIONS`` is the complete
+list of where the package presses, and it is pinned.
 
 **PROBES UNDER ``scripts/`` ARE GOVERNED BY A DIFFERENT RULE** --
 ``tests/test_probe_interaction_budget.py``, which splits verbs into OPEN and

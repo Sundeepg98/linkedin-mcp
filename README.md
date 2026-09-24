@@ -3,18 +3,30 @@
 An MCP server that shows you your own LinkedIn account data as structured tool
 results instead of pages you have to click through.
 
-**Fifty-two tools ship. Thirty-eight read. Fourteen write. None is
+**Fifty-three tools ship. Thirty-nine read. Fourteen write. None is
 write-shaped and unable to act.**
 
-**THAT LINE READ "Fifty-one ... Thirteen write" UNTIL THE LANE L7 MERGE,
-2026-09-24.** The fifty-second is a WRITE, `linkedin_mark_company_interest`:
-"I'm interested", pressed in the About-the-company card of one posting and
-aimed by the card's own employer. It tells that employer's recruiters, and
-this server holds no undo for it, so it fires only at a company you name.
-Census row `P I14`, COVERED-UNFIRED: built behind the same flag and single-use
-grant as every other write, and never fired. The same merge repaired
+**THAT LINE READ "Fifty-two ... Thirteen write" ON MASTER UNTIL LANE L7'S
+MERGE, 2026-09-24,** and "Fifty-two ... Thirty-eight read ... Fourteen write"
+on that lane's branch: each side had made a different tool its fifty-second.
+The fifty-third is a WRITE, `linkedin_mark_company_interest`: "I'm
+interested", pressed in the About-the-company card of one posting and aimed by
+the card's own employer. It tells that employer's recruiters, and this server
+holds no undo for it, so it fires only at a company you name. Census row
+`P I14`, COVERED-UNFIRED: built behind the same flag and single-use grant as
+every other write, and never fired. The same merge repaired
 `linkedin_update_profile_field`, which until then never pressed the editor's
 Save and reported success on an edit LinkedIn never stored.
+
+**THAT LINE READ "Fifty-one ... Thirty-eight read" UNTIL THE LIVE LANE MERGE,
+2026-09-24.** The fifty-second is `linkedin_own_item_link`: the share link of
+one of your OWN posts, obtained through the post's own "Copy link to post" --
+a read that presses two controls, on a recorded call delegated by the
+operator. It presses only when the same menu offers "Delete post" (which
+LinkedIn offers a post's author alone), and the page's clipboard calls are
+captured in this server's own tab instead of replacing what you had copied
+(one named gap, in the tool's row below). It was built on the live lane's
+branch as that branch's fiftieth, while master gained the two below.
 
 **THAT LINE READ "Fifty ... Twelve write" UNTIL THE LANE L4 MERGE, 2026-09-23.**
 The fifty-first is a WRITE, `linkedin_follow_company_page`: a follow performed
@@ -116,6 +128,12 @@ What is true now:
   still reports it -- it was not taught to stop looking -- and it is admitted by
   path, function and kind in a one-line allowlist that the tests fail if it
   widens.
+  **Since 2026-09-23 that allowlist also admits three presses that change
+  only what your own view shows**, each on a recorded call and each bound
+  to one function: a filter the view switch applies and proves it took off
+  again (`view_switch`), one plain button that reveals your profile-view
+  analytics (`reveal`), and the copy-link above, whose clipboard write
+  is captured in this server's own tab (`share_link`).
 - **Writes are off unless you turn them on.** `LINKEDIN_ENABLE_WRITES=1`, per
   process. A fresh clone cannot write to LinkedIn at all.
 - **Every write is two calls.** The first performs nothing and hands you a
@@ -277,7 +295,7 @@ whole file rather than as a side effect of a wave that touched one tool.
 
 | Tool | Reads |
 |---|---|
-| `linkedin_who_viewed_me` | Who viewed your profile. Where the account has Premium Career this reaches back 365 days -- the highest-intent signal in a job search. `open_filter_menus=True` also opens each filter pill through the disclosing-press gate and reports what it disclosed, in a fixed vocabulary and numbers, on the same page load. |
+| `linkedin_who_viewed_me` | Who viewed your profile. Where the account has Premium Career this reaches back 365 days -- the highest-intent signal in a job search. `open_filter_menus=True` also opens each filter pill through the disclosing-press gate and reports what it disclosed, in a fixed vocabulary and numbers, on the same page load. `view_switch="interesting_viewers_verified"` (or `"interesting_viewers_company_you_follow"`) applies that one filter, returns the viewers it leaves, and takes it off again -- `restored` says whether the page was proven put back. `show_more_analytics=True` presses the one decided "Show more analytics" button and reports whether it only revealed content. |
 | `linkedin_search_appearances` | **The reciprocal of the row above** -- that one reads the receiving end of a profile view, this one the receiving end of a SEARCH: how often other people's searches put you in front of them. Your own analytics, no argument, and the address carries no member segment so it can only ever resolve to whoever is signed in. **It is the only tool here whose page nobody had opened when it shipped**, and its docstring says so rather than letting you find out: the parser was built against a fixture that is SYNTHETIC and labelled so, which proves the tool refuses to publish the third parties put in front of it and proves nothing about whether it reads the real surface. Past the first two number-and-caption pairs the caption is withheld INSIDE the page and never reaches the process -- LinkedIn's breakdown panels describe the SEARCHERS, in exactly the shape a headline metric has, and those are other people's employers and titles. `anchors.person` is a COUNT of member links and is the field worth reading first: non-zero means LinkedIn's record of a search names the people in it. **A zero settles less than it looks like** -- zero appearances is equally consistent with "searches leave no record" and "nobody searched for you this week", and this tool cannot separate them; `headline: null` means no metric was found at all, which is a different answer again. |
 | `linkedin_my_applications` | Jobs you applied to, with the status LinkedIn shows. |
 | `linkedin_draft_applications` | The applications you STARTED and never sent -- the tracker tab LinkedIn labels "In Progress" and addresses as `?stage=draft`, with title, company, location, how long ago, and the job id. A draft is not a stalled application: nothing went anywhere, so an empty list here is not evidence about anything you did send. It reads the list and nothing else -- the row's own Delete control, and the discard dialog behind it, are never pressed from here. An empty result carries LinkedIn's own tab count, so "you have no drafts" and "this could not be read" are never the same answer. |
@@ -298,6 +316,7 @@ whole file rather than as a side effect of a wave that touched one tool.
 | `linkedin_server_info` | The boundary, the rate settings and the launch flags, without reading the source. |
 | `linkedin_surface_census` | **An instrument for extending this server, not a job-search tool** -- its own docstring leads with that, and no answer about finding, comparing or tracking a job is in here. It measures what controls one page carries, so a capability this server has never built can be costed from what the page really holds instead of from a guessed selector found to be wrong at the moment it would fire. It takes a KEY and never a url, from a fixed set of five: `feed`, `profile`, `profile_edit_intro`, `settings`, `settings_dark_mode`. One page load, and it clicks nothing. It reports SHAPES and never names, so it identifies no member. Absent means UNKNOWN, never zero -- this server does not scroll, so a count describes the first render and nothing below the fold. A control being present is not evidence that using it is safe. Notifications, the network page and messaging are deliberately not offered: loading them costs a badge or opens somebody's conversation, and a census is not worth a side effect. |
 | `linkedin_profile_editor_fields` | **The second instrument, and the one tool here that publishes control NAMES.** It names the controls inside the intro editor on your own profile -- which `linkedin_surface_census` will not do, because the census reports shapes and returns `<opaque>` for any name failing its length or character gate. That gate is what makes the census safe to point at a page full of strangers, and it is why `linkedin_update_profile_field` cannot name a field to type into. This tool relaxes it on ONE ground and establishes that ground per call: it loads `/in/me/`, requires LinkedIn's own `isSelfProfile=true` on the landed url, loads the intro editor, and requires the same member segment on both -- and if either half fails it returns a refusal carrying no field data at all, so a refusal can never be read as "there are none". The container is found structurally, as the nearest dialog ancestor of the control named Save, never by an index; two such controls or none is a refusal rather than a guess. It takes NO ARGUMENT, so no caller can aim it at another page. Two page loads, and it clicks nothing. **LABELS, NEVER VALUES** -- a label is "First name", a value is your first name, and no value and no href leaves the page. Your member slug is compared and discarded: it is in no part of the answer. |
+| `linkedin_own_item_link` | **The share link LinkedIn gives out for ONE of your own posts**, by its activity id (which `linkedin_my_activity_items` returns). It opens the post, opens the post's own control menu, and presses "Copy link to post" -- ONLY if the same menu also offers "Delete post" or "Edit post", which LinkedIn shows a post's author alone; otherwise it refuses `not_his_post`. Just before the press, the page's clipboard calls are captured in this server's own tab, so the link comes back here instead of replacing what you had copied -- for every route the page looks up when it copies. A reference the page took earlier is not captured, and the answer then reads `copied: false`. The presses are priced by the post's own reaction toggle, read before the first and after the last, and every reading comes back as `price_readings`; a page that draws no toggle is refused `price_cannot_move` with nothing pressed. By default it returns the link's SHAPE (https, LinkedIn host, path kind, whether it carries this id); `include_link=True` returns the link itself, which can carry your profile's vanity name. |
 | `linkedin_my_activity_items` | **The item keys, for your own posts only** -- which nothing else here returns, and which is why `linkedin_comment_on_item` and `linkedin_react_to_item` are registered and refusing: neither was ever blocked by the read boundary or by the click anchor, they simply had nothing to aim at. `linkedin_surface_census` cannot supply one by construction, since it substitutes every urn out before it counts, and the feed carries zero item permalinks. It reads `/in/me/` and takes NO ARGUMENT, so no caller can aim it at another page. **Authorship is established, not inferred from where an item sits**, and it takes all three of: LinkedIn's own `isSelfProfile=true` on the landed url; one single author name across every item overflow control on the page, so a rail carrying somebody else's item is refused outright; and that name standing in a prefix relation to the page's own `h1`. If any of the three fails there is no `items` key at all, so a refusal can never be read as "you have no posts". **No name ever leaves the page** -- the comparison happens inside the document and only booleans come back. A urn is published only if it matches the exact `urn:li:<type>:<digits>` shape and sits inside an item root that itself carries an overflow control; anything else is counted and dropped. **The output is real identifiers**: do not paste one into a tracked file in this repository, which is public and swept for exactly that shape. |
 
 ## The six that write
@@ -879,7 +898,7 @@ linkedin_server/
   cdp_bridge.py              the recovery path: attach to a running Chrome
   dom.py                     the read-only harvesters and the control readers
   shape.py                   pure parsers and the result envelope
-  server.py                  the fifty-two tools
+  server.py                  the fifty-three tools
   errors.py
 tests/                       1393 tests, no network, no account
   fixtures/                  frozen LinkedIn markup, scrubbed
