@@ -17,6 +17,17 @@ the ruling ``ERROR-MESSAGE-RULED-AT-THE-RAISE`` decides a field where the value
 enters it, and a field is not the ``$.message`` channel that ruling leaves to
 library text.
 
+**AND ONE CLASS OF EXCEPTION KEEPS ITS TEXT, BECAUSE THE TYPE-ONLY REPAIR
+DELETED A REASON.** The same block raises refusals ``perform`` composes itself
+-- the upload gate's three: no digest on the grant, the file changed since the
+preview, a control not classified as a file input. Their message IS the
+receipt's reason, and ``tests/test_uploads.py`` pins it: the first type-only
+repair turned four of those tests red, found by the follow-up's gate rather
+than by the item's own selection. They now raise ``_PerformRefused``, the one
+class whose text ``click_error`` keeps, and what each of its messages may
+interpolate is pinned below, so a selector or a library's text cannot ride in
+on it.
+
 WHY A DRIVEN TEST AND A STRUCTURAL ONE. ``tests/test_readers_emit_no_page_string.py``
 drives every page READER against a page whose reads all fail, and it cannot
 reach ``perform``: the process-wide writes door stands in front of it. So the
@@ -98,12 +109,28 @@ async def test_a_failed_verification_is_reported_by_type(
     assert "the verification read itself failed" in blob
 
 
+#: The one exception class whose text a handler in ``writes.py`` may render:
+#: refusals ``perform`` composed itself. See the module docstring.
+COMPOSED_REFUSAL = "_PerformRefused"
+
+#: EVERYTHING A ``_PerformRefused`` MESSAGE MAY INTERPOLATE, each for a reason:
+#: the action's name (a package constant), the two digest prefixes of HIS OWN
+#: file (the preview already printed the first), and the control's KIND as the
+#: live reader classified it, beside the one kind a file may go to. A new entry
+#: here is a review of a new thing the receipt will say.
+COMPOSED_REFUSAL_INTERPOLATES = frozenset(
+    {"spec.action", "approved", "current", "control_kind", "UPLOAD_CONTROL_KIND"}
+)
+
+
 def _exception_text_renders(source: str) -> list[tuple[int, str]]:
     """Every use of a caught exception's TEXT outside a ``raise`` statement.
 
     A use of the bound name is harmless only as ``type(exc)`` or
     ``isinstance(exc, ...)``, or inside a ``raise`` -- the ``$.message``
-    channel, ruled at the raise and deliberately left alone here.
+    channel, ruled at the raise and deliberately left alone here -- or in a
+    handler that catches exactly :data:`COMPOSED_REFUSAL`, whose messages
+    :func:`_composed_refusal_interpolations` holds to a pinned set.
     """
     tree = ast.parse(source)
     parents = {
@@ -112,6 +139,8 @@ def _exception_text_renders(source: str) -> list[tuple[int, str]]:
     out: list[tuple[int, str]] = []
     for handler in ast.walk(tree):
         if not isinstance(handler, ast.ExceptHandler) or not handler.name:
+            continue
+        if isinstance(handler.type, ast.Name) and handler.type.id == COMPOSED_REFUSAL:
             continue
         for statement in handler.body:
             for use in ast.walk(statement):
@@ -167,3 +196,63 @@ def test_that_scan_can_fail():
     )
     assert [line for line, _ in _exception_text_renders(dirty)] == [5]
     assert _exception_text_renders(clean) == []
+
+
+def _composed_refusal_interpolations(source: str) -> list[tuple[int, str]]:
+    """``(line, expression)`` for every value a ``_PerformRefused`` message
+    interpolates -- f-string fields, ``%`` operands and ``format`` arguments
+    alike, since each is a way for a value to reach the receipt."""
+    out: list[tuple[int, str]] = []
+    for node in ast.walk(ast.parse(source)):
+        if not (
+            isinstance(node, ast.Raise)
+            and isinstance(node.exc, ast.Call)
+            and isinstance(node.exc.func, ast.Name)
+            and node.exc.func.id == COMPOSED_REFUSAL
+        ):
+            continue
+        for part in ast.walk(node.exc):
+            if isinstance(part, ast.FormattedValue):
+                out.append((node.lineno, ast.unparse(part.value)))
+            elif isinstance(part, ast.BinOp) and isinstance(part.op, ast.Mod):
+                out.append((node.lineno, ast.unparse(part.right)))
+            elif (
+                isinstance(part, ast.Call)
+                and isinstance(part.func, ast.Attribute)
+                and part.func.attr == "format"
+            ):
+                out.extend((node.lineno, ast.unparse(a)) for a in part.args)
+                out.extend((node.lineno, ast.unparse(k.value)) for k in part.keywords)
+    return sorted(out)
+
+
+def test_a_refusal_perform_composed_carries_only_what_it_was_written_to():
+    """THE CARVE-OUT, HELD. The class exists, its refusals interpolate only the
+    pinned values, and it is caught in exactly one place -- ``perform``."""
+    source = WRITES_SOURCE.read_text(encoding="utf-8")
+    found = _composed_refusal_interpolations(source)
+    assert found, "no _PerformRefused raise found: the carve-out has nothing to hold"
+    assert {expr for _line, expr in found} <= COMPOSED_REFUSAL_INTERPOLATES, found
+    handlers = [
+        node for node in ast.walk(ast.parse(source))
+        if isinstance(node, ast.ExceptHandler)
+        and isinstance(node.type, ast.Name)
+        and node.type.id == COMPOSED_REFUSAL
+    ]
+    assert len(handlers) == 1, [h.lineno for h in handlers]
+    assert issubclass(writes._PerformRefused, writes.WriteAttemptError)
+
+
+def test_that_pin_can_fail():
+    """SHOWN FAILING: a refusal that interpolates a selector, by each route."""
+    planted = (
+        "def f(selector, needle):\n"
+        "    raise _PerformRefused(f'could not press {selector}')\n"
+        "def g(selector, needle):\n"
+        "    raise _PerformRefused('typed %s' % needle)\n"
+        "def h(selector, needle):\n"
+        "    raise _PerformRefused('pressed {}'.format(selector))\n"
+    )
+    found = _composed_refusal_interpolations(planted)
+    assert found == [(2, "selector"), (4, "needle"), (6, "selector")], found
+    assert not {expr for _line, expr in found} <= COMPOSED_REFUSAL_INTERPOLATES

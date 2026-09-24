@@ -149,11 +149,12 @@ ASKED_FOR_SITES: dict[str, str] = {
         "subject is the REQUESTED address, checked before any navigation, so "
         "there is no landing here to withhold."
     ),
-    "browser.py:goto": (
-        "the navigation target this package asked for, reported when the "
-        "navigation itself failed. No page was reached, so nothing LinkedIn "
-        "chose exists at this point."
-    ),
+    # ``browser.py:goto`` WAS RULED HERE UNTIL 2026-09-24, and its entry left
+    # with the address: the lane G follow-up made a failed navigation's message
+    # name the exception's type and the address's first path segment, because
+    # an address can carry what was searched for or whom it names -- asked for
+    # is not the same as safe to repeat. With no entry, putting the address back
+    # arrives here as a site with no verdict, and has to be ruled again.
 }
 
 PUBLISHED_BY_CONTRACT_SITES: dict[str, str] = {

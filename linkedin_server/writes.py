@@ -8804,6 +8804,18 @@ def typed_text_residue(
     }
 
 
+class _PerformRefused(WriteAttemptError):
+    """A refusal ``perform`` composed itself, inside its dispatch block.
+
+    Its message names the action, a digest prefix or a control KIND -- never a
+    selector and never a library's text -- and it IS the reason the write
+    stopped, so ``click_error`` keeps it. Everything else raised in that block
+    keeps only its type (ERROR-MESSAGE-RULED-AT-THE-RAISE). What each message
+    may interpolate is pinned by
+    ``tests/test_a_write_receipt_carries_no_library_message.py``.
+    """
+
+
 async def perform(
     navigator: Any, page: Any, grant: WriteGrant
 ) -> dict[str, Any]:
@@ -9176,7 +9188,7 @@ async def perform(
             # no longer that file.
             approved = (grant.preview.get("file") or {}).get("sha256_prefix")
             if not approved:
-                raise WriteAttemptError(
+                raise _PerformRefused(
                     f"refusing to upload for {spec.action!r}: this grant "
                     "carries no file digest, so there is nothing to compare "
                     "the file on disk against. A grant reaches here only "
@@ -9186,7 +9198,7 @@ async def perform(
                 )
             current = uploads.digest_of(upload_file)
             if current != approved:
-                raise WriteAttemptError(
+                raise _PerformRefused(
                     f"refusing to upload for {spec.action!r}: the file at "
                     "that path has changed since you were shown it. The "
                     f"preview read {approved!r} and it now reads {current!r}. "
@@ -9236,7 +9248,7 @@ async def perform(
             # check: it fires on a div, and it would NOT fire on a file input
             # that is simply the wrong one.
             if control_kind != UPLOAD_CONTROL_KIND:
-                raise WriteAttemptError(
+                raise _PerformRefused(
                     f"refusing to upload for {spec.action!r}: the live reader "
                     f"resolved a control it classified as {control_kind!r}, "
                     f"and a file may only be handed to one classified "
@@ -9368,6 +9380,9 @@ async def perform(
                 publish_gate = await _publish_submit_gate(page)
                 if publish_gate["proceed"]:
                     click_plan.append(publish_gate["selector"])
+    except _PerformRefused as exc:
+        # A REFUSAL THIS FUNCTION COMPOSED, and its message is the reason.
+        click_error = str(exc)
     except Exception as exc:  # noqa: BLE001 - reported, never re-raised
         # THE TYPE ONLY: a failed press quotes the selector it waited on, and
         # the typeahead's carries his needle (ERROR-MESSAGE-RULED-AT-THE-RAISE).

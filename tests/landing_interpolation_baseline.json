@@ -3,7 +3,6 @@
   "sites": {
     "auth.py:_maybe_corroborate:landing.withheld(final_url)": "WITHHELD",
     "auth.py:login_via_browser:LOGIN_URL": "SERVER_CONSTRUCTED",
-    "browser.py:goto:url": "ASKED_FOR",
     "dom.py:read_job_identity:slug.group(1)": "PUBLISHED_BY_CONTRACT",
     "readonly.py:assert_read_url:url": "ASKED_FOR",
     "readonly.py:assert_read_url:url#2": "ASKED_FOR",
