@@ -299,14 +299,33 @@ def test_red_on_a_build_naming_an_action_that_cannot_perform(tmp_path):
     _red_naming(problems, row["key"], "a build that did not move its row")
 
 
-def test_red_on_a_classify_only_class_carrying_a_build(tmp_path):
+def test_red_on_an_r1_line_left_classify_only(tmp_path):
+    """THE RULE THAT REMAINS. This plant was ``queued:`` on an R2 line, red
+    while R2 was classify-only in lane L4's scope. WRITE-CLASS-B let R2 be
+    built, and lane L5 (2026-09-24) records its R2 builds and blockers in the
+    same two dispositions R1 uses -- so that plant is now a legal line, and
+    ``test_an_r2_line_may_record_a_build_or_a_blocker`` says so. What is
+    still refused is the mirror: an R1 line that decides nothing."""
     lines = _lines()
-    i = _find(lines, lambda r: r["class"] == "R2")
+    i = _find(lines, lambda r: r["class"] == "R1")
     row = _row(lines[i])
-    row["disposition"] = "queued:SOMETHING"
+    row["disposition"] = "classify-only"
     lines[i] = _line(row)
     _red_naming(_problems(_plant(tmp_path, lines)), row["key"],
-                "is classify-only in this lane")
+                "R1 must say built: or queued:")
+
+
+def test_an_r2_line_may_record_a_build_or_a_blocker(tmp_path):
+    """GREEN FOR THE ROW: a queued R2 line draws no disposition problem."""
+    lines = _lines()
+    i = _find(lines, lambda r: r["class"] == "R2"
+              and not r["disposition"].startswith("built:"))
+    row = _row(lines[i])
+    row["disposition"] = "queued:ANY-BLOCKER"
+    lines[i] = _line(row)
+    problems = [p for p in _problems(_plant(tmp_path, lines))
+                if p.startswith(row["key"] + ":")]
+    assert problems == [], problems
 
 
 def test_red_on_an_r2_line_without_build_ready_detail(tmp_path):
@@ -365,7 +384,9 @@ def test_every_defining_passage_resolves_on_its_own(cls):
 
 # ---------------------------------------------------------------------------
 # R3 CARRIES A DISPOSITION SINCE 2026-09-24 (lane L7): a build must still be
-# true, and R2 is still classify-only
+# true. (This header went on "and R2 is still classify-only" until lane L5's
+# merge of master 66aaa95, the same day: WRITE-CLASS-B let R2 be built, and
+# test_an_r2_line_may_record_a_build_or_a_blocker, above, pins that.)
 # ---------------------------------------------------------------------------
 
 

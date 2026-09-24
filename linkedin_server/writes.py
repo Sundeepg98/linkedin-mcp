@@ -216,6 +216,7 @@ from linkedin_server import (
     landing,
     profile_editor,
     shape,
+    threads,
     uploads,
 )
 from linkedin_server.errors import WriteAttemptError
@@ -2027,11 +2028,15 @@ SANCTIONED_WRITES: dict[str, WriteSpec] = {
         # composer, do not send, and observe what UNCHANGED looks like. That
         # is a read.
         #
-        # IT STILL CANNOT REPORT "sent". expected_after is "message_sent" and
-        # verified_state initialises to UNKNOWN, so with no surface writing
-        # that state the True arm is unreachable by construction. This action
-        # can be shown NOT to have happened and cannot be shown to have
-        # happened.
+        # IT COULD NOT REPORT "sent" UNTIL 2026-09-24, and the paragraph that
+        # said so read: "expected_after is 'message_sent' and verified_state
+        # initialises to UNKNOWN, so with no surface writing that state the
+        # True arm is unreachable by construction." True while the thread was
+        # forbidden. Ruling WRITE-CLASS-B lifted that, and ``_verify_after``
+        # now reads the conversation a send leaves drawn on the same page --
+        # in place, never navigating to its page-derived id -- and returns
+        # "message_sent" only when his exact words are its last message. See
+        # ``threads.sent_in_place`` for the limit that reading carries.
         #
         # AND WHY THIS NAMES A COMPOSER STATE WHILE from_state ABOVE DOES NOT.
         # The two fields are read at opposite ends of the action and the cost
@@ -2136,6 +2141,103 @@ SANCTIONED_WRITES: dict[str, WriteSpec] = {
             "is not him."
         ),
     ),
+    # THE FIFTEENTH, 2026-09-24, census row ``M M10`` (the fourteenth on lane
+    # L5's branch, before lane L7's merge landed): a reply inside ONE
+    # existing conversation, named by the thread id HE supplies. The first
+    # outward act in this design that can confirm it happened.
+    #
+    # WHY A REPLY AND NOT A NEW MESSAGE. ``send_message`` stops at the
+    # recipient: a name typed into a typeahead commits nobody (measured
+    # 2026-09-03), and the chip selectors that would observe a committed
+    # recipient have never matched anything. A conversation FIXES who
+    # receives the words, so that whole question does not arise. What
+    # replaces it is a question an id inside an admitted address CAN answer:
+    # is the browser on the conversation he named? ``_assert_landed_on_target``
+    # asks it before the click and ``_verify_after`` again after.
+    #
+    # WHAT IS MEASURED AND WHAT IS DERIVED, per ``linkedin_server.threads``:
+    # the reply form is measured on the COMPOSER (the same ``msg-form``
+    # component, class ``msg-form--thread-footer-feature``) -- that a
+    # conversation draws the same form is derived, and the first live preview
+    # measures it. "His" message is the absence of the measured ``--other``
+    # modifier -- derived, and the first confirmed reply is the reading that
+    # settles it. The preview refuses on anything but exactly one empty editor
+    # and one disabled Send, so a wrong derivation refuses rather than types.
+    "linkedin_send_reply": WriteSpec(
+        action="send_reply",
+        tool_name="linkedin_send_reply",
+        # THE THREAD ID IS THE URL'S ONLY VARIABLE PART, and it is the
+        # subject half of the target, taken by ``url_target_of``. The pattern
+        # is the read allowlist's own thread shape with this module's length
+        # cap, so a target that is not a thread id cannot rebuild an address
+        # that passes the write door.
+        url_template="https://www.linkedin.com/messaging/thread/{target}/",
+        url_pattern=re.compile(
+            r"^https://www\.linkedin\.com/messaging/thread/"
+            r"[0-9][A-Za-z0-9%\-_=]{0,199}/$"
+        ),
+        exempt_substring=None,
+        summary=(
+            "Reply inside one existing LinkedIn conversation, named by its "
+            "thread id."
+        ),
+        from_state="reply_box_empty",
+        to_state=threads.REPLY_SENT,
+        not_performed_state=threads.REPLY_HELD,
+        target_kind="thread_and_text",
+        state_from="thread_page",
+        direction_source=(
+            "THE CONVERSATION YOU NAMED, loaded by its thread id, and the "
+            "state is read off the very reply box this action types into: "
+            "exactly one editor, empty, and exactly one Send control drawn "
+            "DISABLED. Before anything is read, the page must be on that "
+            "thread id -- LinkedIn redirects an id it does not recognise into "
+            "a conversation of its own choosing, and a reply typed there would "
+            "reach somebody else. After the send, the same conversation is "
+            "loaded FRESH and read back."
+        ),
+        wrong_state_note=(
+            "Not a toggle. A reply box that is not empty holds words this "
+            "server did not type and cannot read back, and a fill replaces "
+            "them -- so it refuses rather than typing over a draft."
+        ),
+        reversibility="STILL-UNKNOWN whether a sent reply can be recalled",
+        reversibility_measured=False,
+        reversibility_class="STILL-UNKNOWN",
+        reversibility_evidence=(
+            "NOT MEASURED by this server. LinkedIn's Help Center describes "
+            "deleting a sent message within 60 minutes (census row M M12), "
+            "and no message control has ever been read here -- and deletion "
+            "is permanently forbidden in this design whatever LinkedIn offers."
+        ),
+        reversible_by=(
+            "NOBODY, through this server. Deletion is permanently forbidden "
+            "here at any confirm level (delete_or_withdraw_anything), so an "
+            "un-send does not exist in this design."
+        ),
+        residue=(
+            "A REPLY IS READ BY A PERSON, and it usually arrives as an email "
+            "and a notification too. Even where LinkedIn lets a sender delete "
+            "a message, that does not un-send the email or un-read what was "
+            "read. Opening the conversation to preview this reply can also "
+            "show its sender a 'seen' if the conversation holds a message you "
+            "have not read -- replying shows them more than that."
+        ),
+        irreversible=True,
+        spends=(
+            "UNMEASURED, and stated rather than denied: a reply inside an "
+            "existing conversation is not a new InMail. Whether LinkedIn "
+            "meters a follow-up in a conversation you opened by InMail before "
+            "the recipient answered is unmeasured -- such a conversation may "
+            "draw no reply box, which this gate refuses."
+        ),
+        reversibility_procedure=(
+            "Open the per-message menu on one of your own messages under 60 "
+            "minutes old and read its items WITHOUT pressing one (capture "
+            "spec C6 in _audit/2026-09-24-lane-l5-messaging.md). Deleting "
+            "stays forbidden here whatever the menu offers."
+        ),
+    ),
 }
 
 
@@ -2203,11 +2305,12 @@ PERMANENTLY_FORBIDDEN: dict[str, str] = {
     "delete_or_withdraw_anything": (
         "destruction is not a write this design covers, at any confirm level. "
         "NOTE WHAT NOW DEPENDS ON THIS ENTRY, added 2026-08-30 and CORRECTED "
-        "the same day after a review counted it: FIVE of the specs above cite "
-        "it in reversible_by -- an application, a post, a comment, an "
-        "invitation and a message all say NOBODY can take them back through "
+        "the same day after a review counted it: SIX of the specs above cite "
+        "it in reversible_by (FIVE until 2026-09-24, when send_reply joined) "
+        "-- an application, a post, a comment, an invitation, a message and "
+        "a reply all say NOBODY can take them back through "
         "this server, and this line is the reason. Shortening it would "
-        "silently make five reversibility claims wrong at once. The list first "
+        "silently make six reversibility claims wrong at once. The list first "
         "written here named a REACTION and omitted an APPLICATION, which was "
         "wrong in both directions at once; react_to_item does not lean on this "
         "entry at all, because its reversible_by rests on a different gap -- "
@@ -2814,6 +2917,10 @@ _COMPOSITE_TARGET_KINDS: dict[str, tuple[str, str]] = {
     "field_and_value": ("field", "value"),
     "setting_and_value": ("setting", "value"),
     "member_and_text": ("member", "text"),
+    # 2026-09-24, ``send_reply``. The SUBJECT is a thread id and it is the
+    # only part that reaches a url; the content is the reply, typed and never
+    # composed here.
+    "thread_and_text": ("thread", "text"),
 }
 
 
@@ -4406,6 +4513,24 @@ async def _read_messaging_badge(
     )
 
 
+async def _read_thread_reply_box(
+    page: Any, spec: WriteSpec, *, target: str
+) -> tuple[dict[str, Any], str, str]:
+    """The named conversation's reply box, read live. ``(facts, state, why)``.
+
+    Called only AFTER ``observe`` has held the landing to the named thread id.
+
+    THE FACTS ARE COUNTS. ``events_with_text`` is how many messages ALREADY
+    carry exactly the words about to be sent, compared inside the page; it is
+    the BEFORE half of the delta ``_verify_after`` reads, so an identical
+    earlier message can never stand in for this reply.
+    """
+    reading = await threads.read_thread(page, text=_text_component_of(spec, target))
+    facts = {"landed_on_the_named_thread": True, **threads.thread_facts(reading)}
+    state, why = threads.reply_state(reading)
+    return facts, state, why
+
+
 #: WHICH SURFACE EACH REFUSING ACTION READS, and it is chosen by the SPEC's own
 #: ``state_from`` rather than by anything a caller passes -- the same rule the
 #: four original actions follow. Each entry is (url, surface name for the
@@ -4669,6 +4794,60 @@ async def observe(
             state_why=why,
             state_url=landed,
             same_page_as_action=False,
+        )
+
+    if spec.state_from == "thread_page":
+        # ONE load, OF THE CONVERSATION HE NAMED, and the url is the spec's
+        # own template filled with the SUBJECT half of the target -- the
+        # thread id, a tool argument, through the read door like every other
+        # preview load. The state is read off the reply box the action types
+        # into, so the state and the action share a rendering.
+        #
+        # THE LANDING IS CHECKED BEFORE ANYTHING IS READ. An id LinkedIn does
+        # not recognise can be redirected into a conversation of its own
+        # choosing; a reading of THAT page would describe the wrong person's
+        # conversation, and a token minted from it would aim a reply there.
+        # So a landing that is not the named thread reads UNKNOWN, mints
+        # nothing, and is described without being quoted.
+        url = str(spec.url_template or "").format(
+            target=url_target_of(spec, target)
+        )
+        landed = await _load(navigator, page, url, surface="messaging thread")
+        # THE LANDING IS COMPARED IN A CONDITION AND BOUND TO NOTHING. A
+        # landing is a string the browser chose, and
+        # ``tests/test_navigation_is_never_derived.py`` taints every name bound
+        # from an expression carrying one -- module-wide, by name. Passing it
+        # into the reader's call bound three names to it and the taint spread
+        # to ``url``; so the comparison happens here, and the reader never sees
+        # the landing at all.
+        if not threads.landed_on_thread(landed, url_target_of(spec, target)):
+            return _record(
+                spec,
+                target=target,
+                facts={"landed_on_the_named_thread": False},
+                facts_url=url,
+                state=UNKNOWN,
+                state_why=(
+                    "the browser did not land on the conversation you named -- "
+                    "LinkedIn sends an id it does not recognise into a "
+                    "conversation of its own choosing, and a reply typed there "
+                    "would reach somebody else. Nothing on that page was read. "
+                    "THE LANDING IS WITHHELD; what is safe to say about it -- "
+                    f"{landing.withheld(landed)}."
+                ),
+                state_url=url,
+                same_page_as_action=True,
+            )
+        facts, state, why = await _read_thread_reply_box(page, spec, target=target)
+        return _record(
+            spec,
+            target=target,
+            facts=facts,
+            facts_url=url,
+            state=state,
+            state_why=why,
+            state_url=url,
+            same_page_as_action=True,
         )
 
     if spec.state_from in _PERMALINK_READS:
@@ -5247,6 +5426,10 @@ async def preview(
             # wrong and no copy to forget.
             grant.preview = block
         block = await _name_the_invitation_recipient(page, spec, observation, block)
+        # THE SAME ORDER FOR A REPLY: the conversation's title is added to a
+        # NEW dict after ``grant.preview`` was assigned, so the retained block
+        # never held it. Returns the block unchanged for every other action.
+        block = await threads.name_the_reply_recipient(page, spec, observation, block)
         return block
     finally:
         _OBSERVED.pop(observation.receipt, None)
@@ -5426,6 +5609,32 @@ PERFORMABLE: frozenset[str] = frozenset(
         # employer already signalled reads UNKNOWN and is refused. ENABLING IS
         # NOT FIRING: its live proof is aimed by the operator.
         "mark_company_interest",
+        # THE FIFTEENTH, 2026-09-24, census row ``M M10`` (the fourteenth on
+        # lane L5's branch, before lane L7's merge landed): a reply inside ONE
+        # existing conversation he names by thread id. Every clause the
+        # others needed is true of it, and the one ``send_message`` lacks --
+        # an aimable recipient -- does not arise, because a conversation
+        # already fixes who receives the words:
+        #
+        #   a measured surface   /messaging/thread/<id>/, on the read
+        #                        allowlist since 2026-08-26 under the digit-
+        #                        first shape of 2026-09-03
+        #   a measured anchor    the reply editor 'Write a message...' and a
+        #                        Send drawn DISABLED while empty -- measured on
+        #                        the composer's form, the same component a
+        #                        conversation's footer draws (derived for the
+        #                        conversation; the preview refuses otherwise)
+        #   an aimable target    the thread id HE supplies, compared against
+        #                        the landing before the click
+        #   a real verification  a FRESH LOAD of the same conversation: his
+        #                        words as the last message, and the count of
+        #                        messages carrying them up by exactly one
+        #   no new permission    perform()'s existing fill and click;
+        #                        readonly.SANCTIONED_MUTATIONS is unchanged
+        #
+        # ENABLING IS NOT FIRING, and nothing in the lane that built it issued
+        # a grant. OPERATOR-NAMES-THE-TARGET governs its first live proof.
+        "send_reply",
         # THE THIRTEENTH, 2026-09-23, census row ``N 47``, and the first write
         # added under the operator's reversible-first-round class since the
         # round's own three. Every clause the others needed is true of it:
@@ -5489,11 +5698,15 @@ PERFORMABLE: frozenset[str] = frozenset(
         # taking the measurement requires typing into the box. Exactly the
         # shape comment_on_item shipped in, and unsave_job before it.
         #
-        # WHAT IT STILL CANNOT DO is report "sent". to_state is
-        # "message_sent" and no surface this server may read writes that
-        # state, so the True arm is unreachable by construction; what it CAN
-        # report is NOT SENT, from not_performed_state. And the InMail cost
-        # stays UNMEASURED rather than denied -- the preview says so.
+        # WHAT IT COULD NOT DO UNTIL 2026-09-24 was report "sent" -- no surface
+        # this server could read wrote that state. Since ruling WRITE-CLASS-B
+        # the conversation a send leaves drawn is read IN PLACE, so SENT is
+        # reachable, on a weaker footing than ``send_reply``'s delta (no
+        # before-count; see ``threads.sent_in_place``). What it CAN still
+        # report without that is NOT SENT, from not_performed_state. And the
+        # InMail cost stays UNMEASURED rather than denied -- the preview says
+        # so. NONE OF THIS MOVES THE RECIPIENT: the action still refuses at
+        # the recipient gate, so no send has ever reached the read-back.
         "send_message",
         # THE ELEVENTH, 2026-09-02, on the operator's ruling "I want all
         # capabilities". Everything the earlier refusal named as missing was
@@ -5846,6 +6059,14 @@ def anchor_label_for(
             if destination.strip().casefold() == known.casefold():
                 return known
         return None
+    if spec.action == "send_reply":
+        # THE REPLY EDITOR, the control that will be FILLED -- the same
+        # distinction every typing action's arm makes. Send is reached only
+        # through ``threads.reply_send_gate``, after the words have landed.
+        # MEASURED: ``div.msg-form__contenteditable`` named 'Write a message'
+        # plus U+2026, on the composer's form (the conversation footer's own
+        # component); the selector ``_live_control`` builds is scoped to it.
+        return threads.REPLY_EDITOR_LABEL
     if spec.action == "send_message":
         # THE RECIPIENT COMBOBOX, NOT THE SEND CONTROL, and that is the same
         # distinction ``publish_post``'s arm makes: for a typing action the
@@ -6223,6 +6444,10 @@ _WRITE_SURFACE: dict[str, str] = {
 #: message he reads when a write meets an auth wall.
 _WRITE_SURFACE_FOR_ACTION: dict[str, str] = {
     "follow_company_page": "organisation Page",
+    # 2026-09-24. Its target kind is new, so the kind-keyed table has no row
+    # for it and would fall back to "linkedin" -- the least useful word in
+    # the one message he reads when a write meets an auth wall.
+    "send_reply": "messaging thread",
 }
 
 
@@ -6297,6 +6522,9 @@ _WHERE_TO_LOOK: dict[str, str] = {
     "comment_on_item": "the post you commented on",
     "publish_post": "your profile's recent activity",
     "send_invitation": "My Network, then Manage, then Sent",
+    # 2026-09-24. The conversation he named, which is also the surface this
+    # action's own verification re-reads.
+    "send_reply": "the conversation itself, in your LinkedIn messages",
 }
 
 #: THE ACTIONS THAT ARE ACTUAL TOGGLES, for the one sentence that is only true
@@ -6406,13 +6634,17 @@ _VERIFIED_FROM: dict[str, str] = {
     ),
 }
 _VERIFIED_FROM["send_message"] = (
-    "THE COMPOSER, RE-READ, and it answers only the NEGATIVE. A composer "
-    "still on screen with Send still enabled is what holding un-dispatched "
-    "text looks like on this surface, so that reading reports NOT SENT. "
-    "Nothing here can report SENT: the only surface that could is the thread, "
-    "which is forbidden AND costs a read receipt on a real person. So this "
-    "action can be shown not to have happened and cannot be shown to have "
-    "happened, which is the honest shape rather than a shortfall."
+    "THE COMPOSER, RE-READ, and then THE CONVERSATION THE SEND LEFT OPEN, "
+    "read in place. A composer still on screen with Send still enabled is "
+    "what holding un-dispatched text looks like on this surface, so that "
+    "reading reports NOT SENT. SENT is reported only off the conversation "
+    "LinkedIn draws on the same page after a send -- your exact words as its "
+    "last message -- read IN PLACE, because that conversation's id is "
+    "page-derived and is never navigated to. Until 2026-09-24 this said "
+    "nothing could report SENT, because the conversation was forbidden; "
+    "ruling WRITE-CLASS-B lifted that. It is weaker than a reply's check: no "
+    "before-count exists, so an identical earlier last message of yours in "
+    "the same conversation would read the same."
 )
 _VERIFIED_FROM["unsave_job"] = _VERIFIED_FROM["save_job"]
 _VERIFIED_FROM["mark_company_interest"] = (
@@ -6422,6 +6654,15 @@ _VERIFIED_FROM["mark_company_interest"] = (
     "independent witness. Its NEGATIVE is strong -- the OFF label still drawn "
     "means the interest was not signalled -- and its positive says only that "
     "the control moved, because the label it moves to has never been captured."
+)
+_VERIFIED_FROM["send_reply"] = (
+    "THE SAME CONVERSATION, LOADED FRESH, and there is no other surface: the "
+    "conversation is the only place a reply lives. What makes it evidence "
+    "rather than a control redrawing itself is the DELTA -- the number of "
+    "messages carrying exactly your words must rise by exactly one against "
+    "the preview's reading of the same conversation, and your words must be "
+    "its last message. The NOT-SENT answer is read in place first: the reply "
+    "box still holding your words with Send enabled."
 )
 _VERIFIED_FROM["follow_company_page"] = (
     "a DIFFERENT surface from the one clicked: Manage Pages, where a followed "
@@ -6545,6 +6786,22 @@ def _assert_landed_on_target(
                 "somewhere that is not an organisation Page root. THE LANDING "
                 "IS WITHHELD rather than named; what is safe to say about it "
                 f"-- {landing.withheld(landed)}."
+            )
+        return
+    if spec.state_from == "thread_page":
+        # ONE CONVERSATION, BY ITS THREAD ID, compared on the path -- the id
+        # is the path, and a query is LinkedIn's view state, which cannot
+        # re-address a conversation. The stakes are the highest on this
+        # surface: LinkedIn sends an unrecognised id into a conversation of
+        # its own choosing, so "landed somewhere" can mean "landed in
+        # somebody else's conversation, reply box and all".
+        if not threads.landed_on_thread(landed, url_target_of(spec, grant.target)):
+            raise WriteAttemptError(
+                "refusing to type: this reply is for the conversation your "
+                "grant names, and the browser landed somewhere that is not "
+                "that conversation. A reply box on any other page would reach "
+                "somebody else. THE LANDING IS WITHHELD rather than named; "
+                f"what is safe to say about it -- {landing.withheld(landed)}."
             )
         return
     # THE SUBJECT HALF, through the same derivation every other site uses --
@@ -7187,6 +7444,19 @@ async def _live_control(
             "reason a delta is needed.",
             dom.comment_editor_selector(),
         )
+
+    if spec.action == "send_reply":
+        # THE REPLY BOX, RE-READ ON THE PAGE ABOUT TO BE TYPED INTO. The
+        # landing was already held to the named thread id by
+        # ``_assert_landed_on_target``; this is the box itself, by the same
+        # verdict the preview used, so the two readings cannot disagree about
+        # what "empty" means. The text is not passed: at click time nothing is
+        # compared, only the box's state is read.
+        reading = await threads.read_thread(page)
+        state, why = threads.reply_state(reading)
+        if state != "reply_box_empty":
+            return (UNKNOWN, why, "")
+        return (state, why, threads.REPLY_EDITOR_SELECTOR)
 
     if spec.action == "send_message":
         # THE COMPOSER MUST BE EMPTY, AND EVERY CLAUSE HERE IS A MEASURED
@@ -7934,6 +8204,48 @@ async def _verify_after(
         )
         return state, why, landed
 
+    if spec.action == "send_reply":
+        # SENT, READ BACK -- the confirmation ``send_message`` could never
+        # have while the thread was forbidden. Two reads, in this order:
+        #
+        #   IN PLACE, BEFORE ANY RELOAD: does the reply box still hold his
+        #   words with Send enabled? That is the NOT-SENT evidence, and a
+        #   reload would erase it.
+        #   A FRESH LOAD of the conversation he named, by the grant's own
+        #   thread id: is his exact text now the LAST message, and did the
+        #   count of messages carrying it rise by EXACTLY ONE against the
+        #   preview's reading? That is the SENT evidence.
+        #
+        # A FRESH LOAD RATHER THAN THE PAGE IN FRONT OF US, because a page
+        # that just took a click redraws optimistically: a message LinkedIn
+        # has not accepted can still be drawn where it was typed. A new render
+        # of the conversation is LinkedIn's own answer.
+        text = _text_component_of(spec, grant.target)
+        held = await threads.composer_holds(page, text)
+        landed = await _load(
+            navigator,
+            page,
+            spec.url_template.format(target=url_target_of(spec, grant.target)),
+            surface="messaging thread",
+        )
+        if not threads.landed_on_thread(landed, url_target_of(spec, grant.target)):
+            return (
+                UNKNOWN,
+                "the re-read did not land on the conversation you named, so it "
+                "says nothing about whether the reply landed. THE LANDING IS "
+                "WITHHELD; what is safe to say about it -- "
+                f"{landing.withheld(landed)}. Open the conversation "
+                "yourself and look before retrying.",
+                "",
+            )
+        after = await threads.read_thread(page, text=text)
+        state, why = threads.reply_verdict(
+            observation.facts, after, held_in_place=held
+        )
+        return state, why, str(spec.url_template).format(
+            target=url_target_of(spec, grant.target)
+        )
+
     if spec.action == "send_message":
         # THE BRANCH THAT PROVES IT DID **NOT** HAPPEN, and cannot prove that
         # it did. That asymmetry is the design and it is stated rather than
@@ -7982,14 +8294,31 @@ async def _verify_after(
                 "go, and cannot show that one did.",
                 "",
             )
+        # THE CONVERSATION THE SEND LEFT OPEN, READ IN PLACE -- 2026-09-24.
+        # The only surface that tells a sent message from a cleared composer is
+        # the conversation, and ruling WRITE-CLASS-B (2026-09-23 18:15) lifted
+        # the prohibition that kept this branch from looking at it. A send
+        # from the composer leaves LinkedIn drawing that conversation on the
+        # SAME page. Its id is page-derived, so it is NEVER navigated to --
+        # this reads only what is already in front of it, and decides by
+        # structure (the page draws a conversation's messages) rather than by
+        # an address. ``threads.sent_in_place`` says why this is weaker than a
+        # reply's verdict: there is no before-count to take a delta against.
+        drawn = await threads.read_thread(
+            page, text=_text_component_of(spec, grant.target)
+        )
+        if coerce.as_count(drawn.get("events")):
+            state, why = threads.sent_in_place(drawn)
+            if state == spec.to_state:
+                return (state, why, "")
         return (
             UNKNOWN,
             "the composer no longer has Send enabled. This server will NOT "
             "read that as 'sent': a cleared composer and a composer that "
-            "never received the text look identical from here, and the only "
-            "surface that could tell them apart is the thread -- which is "
-            "forbidden AND costs a read receipt on a real person. Open your "
-            "messages and look.",
+            "never received the text look identical from here, and the one "
+            "surface that tells them apart -- the conversation the send would "
+            "have left open -- is not drawn with your words as its last "
+            "message on this page. Open your messages and look.",
             "",
         )
 
@@ -8085,8 +8414,15 @@ async def _verify_after(
 #: are different claims -- ``update_setting``'s target has a value component
 #: and that value is a RADIO DESTINATION, clicked and never typed.
 TYPING_ACTIONS: frozenset[str] = frozenset(
-    {"publish_post", "comment_on_item", "send_message"}
+    {"publish_post", "comment_on_item", "send_message", "send_reply"}
 )
+
+
+#: THE ACTIONS THAT TYPE INTO A CONVERSATION'S OWN REPLY BOX, and whose submit
+#: is therefore gated by :func:`threads.reply_send_gate` rather than by the
+#: publish gate the plain typing branch would otherwise fall into. A set rather
+#: than a test on the action name for the reason the two sets above give.
+REPLY_ACTIONS: frozenset[str] = frozenset({"send_reply"})
 
 
 #: THE ACTIONS THAT TYPE **TWO** THINGS: a subject into one control and the
@@ -9639,6 +9975,19 @@ async def perform(
                 editor_save_gate = await profile_editor.read_save_gate(page)
                 if editor_save_gate["proceed"]:
                     click_plan.append(editor_save_gate["selector"])
+            elif spec.action in REPLY_ACTIONS:
+                # A CONVERSATION'S OWN SEND, gated on the transition its form
+                # draws (disabled while empty, enabled once the words land),
+                # on no recipient box having appeared, and on the box holding
+                # EXACTLY the grant's words -- a message is irreversible, so
+                # words changed as they were typed are not sent. Reported in
+                # the receipt's ``send_gate`` block, which is the field a
+                # reader of any send already looks at.
+                send_gate = await threads.reply_send_gate(
+                    page, text=_text_component_of(spec, grant.target)
+                )
+                if send_gate["proceed"]:
+                    click_plan.append(send_gate["selector"])
             else:
                 publish_gate = await _publish_submit_gate(page)
                 if publish_gate["proceed"]:

@@ -1,0 +1,240 @@
+<!doctype html>
+<!--
+  SYNTHETIC. NOT A CAPTURE.
+
+  Its STRUCTURE is a measurement taken 2026-09-20 off one capture of
+  /messaging/compose/ (the composer, reached by its exact-url exemption).
+  That capture is held outside the tree -- it is made of the operator's own
+  conversations -- and only SHAPES and COUNTS were taken from it
+  (_audit/2026-09-24-lane-l5-messaging.md section 1):
+
+    * the conversation list is ul.msg-conversations-container__conversations-list
+      holding li.msg-conversation-listitem rows; about half are PLACEHOLDERS
+      wearing msg-conversation-card--occluded and holding nothing at all;
+    * a rendered row's clickable element is div.msg-conversation-listitem__link
+      with tabindex=0 and NO href -- no attribute anywhere in a row carries a
+      thread identifier, which is the finding the receipt guard is built on;
+    * each rendered row draws its participants in an h3 with class
+      msg-conversation-card__participant-names, a time, a snippet, a star
+      ICON (div role=img, not a control) and an options trigger whose menu
+      is not in the DOM until opened;
+    * the filter pills are buttons carrying data-test hooks with UPPERCASE
+      values (JOB, UNREAD, CONNECTIONS, INMAIL, STARRED) and aria-pressed; the
+      folder (Focused) is a separate dropdown trigger;
+    * the messaging overlay is present and MINIMISED, with no rows;
+    * LinkedIn's global search input is a role=combobox OUTSIDE <main>, on
+      every page; the composer's own recipient box is
+      input.msg-connections-typeahead__search-field, inside <main>;
+    * NO li.msg-s-message-list__event and NO row marked active: the composer
+      opens no conversation. That absence is the property under test and is
+      drawn here exactly as measured.
+
+  Its CONTENT is invented. The names are not anybody's, the snippets were
+  written for this file, and every row is READ: no capture holds an unread
+  row in LinkedIn's current markup, so the tests DERIVE unread worlds from
+  this document by asserted edits and label each one.
+-->
+<html lang="en">
+<head><title>Messaging | LinkedIn</title></head>
+<body>
+
+<header class="global-nav">
+  <div class="global-nav__search"><input class="search-global-typeahead__input" role="combobox" aria-expanded="false" aria-label="Search" type="text"></div>
+  <nav>
+    <a href="https://www.linkedin.com/feed/">Home</a>
+    <a href="https://www.linkedin.com/messaging/">Messaging</a>
+  </nav>
+</header>
+
+<main class="scaffold-layout__main">
+<div class="scaffold-layout__list-detail-container">
+<div class="scaffold-layout__list-detail-inner scaffold-layout__list-detail-inner--grow">
+
+<div class="scaffold-layout__list msg__list">
+  <div class="msg-conversations-container__title-row">
+    <div class="msg-cross-pillar-inbox-filters-v3__container">
+      <button type="button" class="artdeco-dropdown__trigger artdeco-button msg-cross-pillar-inbox-filters-v3__drop-down-trigger" aria-expanded="false" data-test-messaging-inbox-filters__folder-pill="">Focused</button>
+      <div class="artdeco-pill-choice-group">
+        <button type="button" role="button" aria-pressed="false" aria-checked="false" class="artdeco-pill artdeco-pill--slate artdeco-pill--3 artdeco-pill--choice" data-test-messaging-inbox-filters__filter-pill="JOB">Jobs</button>
+        <button type="button" role="button" aria-pressed="false" aria-checked="false" class="artdeco-pill artdeco-pill--slate artdeco-pill--3 artdeco-pill--choice" data-test-messaging-inbox-filters__filter-pill="UNREAD">Unread</button>
+        <button type="button" role="button" aria-pressed="false" aria-checked="false" class="artdeco-pill artdeco-pill--slate artdeco-pill--3 artdeco-pill--choice" data-test-messaging-inbox-filters__filter-pill="CONNECTIONS">Connections</button>
+        <button type="button" role="button" aria-pressed="false" aria-checked="false" class="artdeco-pill artdeco-pill--slate artdeco-pill--3 artdeco-pill--choice" data-test-messaging-inbox-filters__filter-pill="INMAIL">InMail</button>
+        <button type="button" role="button" aria-pressed="false" aria-checked="false" class="artdeco-pill artdeco-pill--slate artdeco-pill--3 artdeco-pill--choice" data-test-messaging-inbox-filters__filter-pill="STARRED">Starred</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="msg-conversations-container--inbox-shortcuts">
+  <ul class="msg-conversations-container__conversations-list">
+
+    <li tabindex="-1" class="scaffold-layout__list-item msg-conversation-listitem msg-conversations-container__convo-item msg-conversations-container__pillar">
+      <div class="msg-conversation-card msg-conversations-container__pillar">
+        <div>
+          <div></div>
+          <div tabindex="0" class="msg-conversation-listitem__link msg-conversations-container__convo-item-link">
+            <div class="msg-selectable-entity msg-selectable-entity--4">
+              <div class="msg-selectable-entity__checkbox-container">
+                <input type="checkbox" class="msg-selectable-entity__input">
+                <label class="msg-selectable-entity__checkbox-label" aria-label="Select conversation with Kai Example"></label>
+              </div>
+            </div>
+            <div class="msg-conversation-card__content--selectable">
+              <div class="msg-conversation-card__rows">
+                <div class="msg-conversation-card__row msg-conversation-card__title-row">
+                  <h3 class="msg-conversation-listitem__participant-names msg-conversation-card__participant-names t-16 t-black t-normal"><div><span>Kai Example</span></div></h3>
+                  <div class="msg-conversation-card__mute-icon-holder"></div>
+                  <time class="msg-conversation-listitem__time-stamp t-14 t-black t-normal msg-conversation-card__time-stamp">Sep 20</time>
+                  <span class="visually-hidden">Sep 20</span>
+                  <div class="msg-conversation-card__inbox-shortcuts-placeholder"></div>
+                </div>
+                <div class="msg-conversation-card__row msg-conversation-card__body-row">
+                  <div class="msg-conversation-card__message-snippet-container">
+                    <p class="msg-conversation-card__message-snippet t-14">Thanks for the note about the fixture schedule.</p>
+                  </div>
+                  <div><div class="msg-conversation-card__conversation-status msg-conversation-card__star-icon" role="img" aria-label="Star conversation"></div></div>
+                </div>
+              </div>
+            </div>
+            <span class="visually-hidden">. Press return to go to conversation details</span>
+          </div>
+        </div>
+        <div class="msg-conversation-card__inbox-shortcuts">
+          <div class="artdeco-dropdown msg-thread-actions__dropdown">
+            <button type="button" tabindex="0" aria-expanded="false" class="msg-thread-actions__control artdeco-button artdeco-dropdown__trigger"><span class="visually-hidden">Open the options list in your conversation with Kai Example</span></button>
+            <div class="msg-thread-actions__dropdown-container"><div class="msg-thread-actions__dropdown-options--inbox-shortcuts artdeco-dropdown__content" tabindex="-1" aria-hidden="true"></div></div>
+          </div>
+        </div>
+      </div>
+    </li>
+
+    <li tabindex="-1" class="scaffold-layout__list-item msg-conversation-listitem msg-conversations-container__convo-item msg-conversations-container__pillar">
+      <div class="msg-conversation-card msg-conversations-container__pillar">
+        <div>
+          <div></div>
+          <div tabindex="0" class="msg-conversation-listitem__link msg-conversations-container__convo-item-link">
+            <div class="msg-selectable-entity msg-selectable-entity--4">
+              <div class="msg-selectable-entity__checkbox-container">
+                <input type="checkbox" class="msg-selectable-entity__input">
+                <label class="msg-selectable-entity__checkbox-label" aria-label="Select conversation with Juno Fixture"></label>
+              </div>
+            </div>
+            <div class="msg-conversation-card__content--selectable">
+              <div class="msg-conversation-card__rows">
+                <div class="msg-conversation-card__row msg-conversation-card__title-row">
+                  <h3 class="msg-conversation-listitem__participant-names msg-conversation-card__participant-names t-16 t-black t-normal"><div><span>Juno Fixture</span></div></h3>
+                  <div class="msg-conversation-card__mute-icon-holder"></div>
+                  <time class="msg-conversation-listitem__time-stamp t-14 t-black t-normal msg-conversation-card__time-stamp">Sep 18</time>
+                  <span class="visually-hidden">Sep 18</span>
+                  <div class="msg-conversation-card__inbox-shortcuts-placeholder"></div>
+                </div>
+                <div class="msg-conversation-card__row msg-conversation-card__body-row">
+                  <div class="msg-conversation-card__message-snippet-container">
+                    <p class="msg-conversation-card__message-snippet t-14"><span class="msg-conversation-card__pill t-14 t-bold">InMail</span><span class="msg-conversation-card__message-label-dot" aria-hidden="true">.</span>A role that may interest you, written for this file.</p>
+                  </div>
+                  <div><div class="msg-conversation-card__conversation-status msg-conversation-card__star-icon" role="img" aria-label="Star conversation"></div></div>
+                </div>
+              </div>
+            </div>
+            <span class="visually-hidden">. Press return to go to conversation details</span>
+          </div>
+        </div>
+        <div class="msg-conversation-card__inbox-shortcuts">
+          <div class="artdeco-dropdown msg-thread-actions__dropdown">
+            <button type="button" tabindex="0" aria-expanded="false" class="msg-thread-actions__control artdeco-button artdeco-dropdown__trigger"><span class="visually-hidden">Open the options list in your conversation with Juno Fixture</span></button>
+            <div class="msg-thread-actions__dropdown-container"><div class="msg-thread-actions__dropdown-options--inbox-shortcuts artdeco-dropdown__content" tabindex="-1" aria-hidden="true"></div></div>
+          </div>
+        </div>
+      </div>
+    </li>
+
+    <li tabindex="-1" class="scaffold-layout__list-item msg-conversation-listitem msg-conversations-container__convo-item msg-conversations-container__pillar">
+      <div class="msg-conversation-card msg-conversations-container__pillar">
+        <div>
+          <div></div>
+          <div tabindex="0" class="msg-conversation-listitem__link msg-conversations-container__convo-item-link">
+            <div class="msg-selectable-entity msg-selectable-entity--4">
+              <div class="msg-facepile-grid msg-facepile-grid--4"><img class="msg-facepile-grid__img msg-facepile-grid__img--multiple-participants" alt=""></div>
+              <div class="msg-selectable-entity__checkbox-container">
+                <input type="checkbox" class="msg-selectable-entity__input">
+                <label class="msg-selectable-entity__checkbox-label" aria-label="Select conversation with Ivo Placeholder and Lea Sample"></label>
+              </div>
+            </div>
+            <div class="msg-conversation-card__content--selectable">
+              <div class="msg-conversation-card__rows">
+                <div class="msg-conversation-card__row msg-conversation-card__title-row">
+                  <h3 class="msg-conversation-listitem__participant-names msg-conversation-card__participant-names t-16 t-black t-normal"><div><span>Ivo Placeholder, Lea Sample</span></div></h3>
+                  <div class="msg-conversation-card__mute-icon-holder"></div>
+                  <time class="msg-conversation-listitem__time-stamp t-14 t-black t-normal msg-conversation-card__time-stamp">Sep 11</time>
+                  <span class="visually-hidden">Sep 11</span>
+                  <div class="msg-conversation-card__inbox-shortcuts-placeholder"></div>
+                </div>
+                <div class="msg-conversation-card__row msg-conversation-card__body-row">
+                  <div class="msg-conversation-card__message-snippet-container">
+                    <p class="msg-conversation-card__message-snippet t-14">Group plans, invented for this file.</p>
+                  </div>
+                  <div><div class="msg-conversation-card__conversation-status msg-conversation-card__star-icon" role="img" aria-label="Star conversation"></div></div>
+                </div>
+              </div>
+            </div>
+            <span class="visually-hidden">. Press return to go to conversation details</span>
+          </div>
+        </div>
+        <div class="msg-conversation-card__inbox-shortcuts">
+          <div class="artdeco-dropdown msg-thread-actions__dropdown">
+            <button type="button" tabindex="0" aria-expanded="false" class="msg-thread-actions__control artdeco-button artdeco-dropdown__trigger"><span class="visually-hidden">Open the options list in your conversation with Ivo Placeholder and Lea Sample</span></button>
+            <div class="msg-thread-actions__dropdown-container"><div class="msg-thread-actions__dropdown-options--inbox-shortcuts artdeco-dropdown__content" tabindex="-1" aria-hidden="true"></div></div>
+          </div>
+        </div>
+      </div>
+    </li>
+
+    <!-- PLACEHOLDERS: the measured shape is an li wearing the occluded class
+         and holding nothing. Their content is not in the DOM. -->
+    <li tabindex="-1" class="msg-conversation-card--occluded scaffold-layout__list-item msg-conversation-listitem msg-conversations-container__convo-item msg-conversations-container__pillar"></li>
+    <li tabindex="-1" class="msg-conversation-card--occluded scaffold-layout__list-item msg-conversation-listitem msg-conversations-container__convo-item msg-conversations-container__pillar"></li>
+
+  </ul>
+  </div>
+</div>
+
+<!-- THE COMPOSER: the recipient box, then the form whose component a
+     conversation's footer also draws (class msg-form--thread-footer-feature).
+     Send is DISABLED while empty, as measured. -->
+<div class="scaffold-layout__detail msg__detail">
+  <div class="msg-connections-typeahead">
+    <label for="recipient-box">Enter message recipients</label>
+    <input id="recipient-box" class="msg-connections-typeahead__search-field" role="combobox" aria-expanded="false" type="text">
+  </div>
+  <form class="msg-form msg-form--thread-footer-feature">
+    <div class="msg-form__contenteditable t-14 t-black--light t-normal" contenteditable="true" role="textbox" aria-multiline="true" aria-label="Write a message&#8230;"></div>
+    <button type="button" class="msg-form__expand-btn artdeco-button">Maximize compose field</button>
+    <input type="file" class="msg-form__attachment-upload-input" accept="image/*">
+    <button type="button" class="msg-form__footer-action artdeco-button" aria-label="Attach an image for your draft conversation">Attach an image for your draft conversation</button>
+    <input type="file" class="msg-form__attachment-upload-input" accept="image/*,.ai,.psd,.pdf,.doc,.docx,.ppt,.pptx,.pps,.ppsx,.xls,.xlsx,.txt,.eml,.mov,.mp4">
+    <button type="button" class="msg-form__footer-action artdeco-button" aria-label="Attach a file for your draft conversation">Attach a file for your draft conversation</button>
+    <button type="button" class="msg-form__footer-action artdeco-button" aria-label="Open GIF Keyboard">Open GIF Keyboard</button>
+    <button type="button" class="msg-form__footer-action artdeco-button" aria-label="Open Emoji Keyboard">Open Emoji Keyboard</button>
+    <button type="submit" class="msg-form__send-button artdeco-button" disabled>Send</button>
+    <button type="button" class="msg-form__send-toggle artdeco-button">Open send options</button>
+  </form>
+</div>
+
+</div>
+</div>
+</main>
+
+<!-- THE OVERLAY, MINIMISED, WITH NO ROWS: the measured shape on every
+     captured page. It is not a list. -->
+<aside class="msg-overlay-container">
+  <div class="msg-overlay-list-bubble msg-overlay-list-bubble--is-minimized" tabindex="-1">
+    <header>
+      <div class="msg-overlay-bubble-header__badge-container"></div>
+      <div class="msg-overlay-bubble-header__details">
+        <button type="button" class="msg-overlay-bubble-header__button"><span class="t-14 t-bold t-black"><span aria-hidden="true">Messaging</span><span class="visually-hidden">You are on the messaging overlay. Press enter to open the list of conversations.</span></span></button>
+      </div>
+    </header>
+  </div>
+</aside>
+
+</body>
+</html>

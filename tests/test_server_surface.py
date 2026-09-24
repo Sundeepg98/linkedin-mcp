@@ -1,4 +1,4 @@
-"""The tool surface: fifty-three tools, thirty-nine of which do not write.
+"""The tool surface: fifty-six tools, forty-one of which do not write.
 
 **AND THIS LINE IS NOW DERIVED, NOT MAINTAINED, 2026-09-20.** It had gone stale
 a THIRD time -- "forty-four tools, thirty-two of which do not write" against a
@@ -135,6 +135,12 @@ SANCTIONED_WRITE_TOOLS = frozenset(SANCTIONED_WRITES) & {
     # posting. A key in writes.SANCTIONED_WRITES like the rest, so the
     # intersection still exempts nothing the write boundary has not admitted.
     "linkedin_mark_company_interest",
+    # THE FIFTEENTH, 2026-09-24 (census rows M M10 and, by D6, M M17; the
+    # fourteenth on lane L5's branch, before lane L7's merge landed): a
+    # reply inside a conversation he names by thread id. Its NAME announces
+    # the write and its docstring must describe one, so it is on both
+    # exemptions -- which are one set. A key in writes.SANCTIONED_WRITES.
+    "linkedin_send_reply",
 }
 
 #: THE DOCSTRING EXEMPTION IS THE SAME SET AS THE NAME EXEMPTION, and it took
@@ -463,6 +469,17 @@ EXPECTED_TOOLS = {
     # admitted 2026-09-20 with nothing behind it, and banks census J 18. It
     # adds no address, no sanctioned mutation and no press.
     "linkedin_recent_job_searches",
+    # THE FIFTY-SECOND AND FIFTY-THIRD, 2026-09-24 (lane L5), two READS on
+    # the messaging surface, each on an address the boundary already
+    # admitted. ``linkedin_list_conversations`` reads the conversation list
+    # off the COMPOSER, which is measured to open no conversation (census
+    # M M43 rests on it). ``linkedin_open_thread`` opens ONE conversation
+    # the caller names by thread id, and refuses by default while any
+    # rendered row reads unread (census M M49).
+    "linkedin_list_conversations",
+    "linkedin_open_thread",
+    # THE FIFTY-FOURTH, the same merge, a WRITE: see SANCTIONED_WRITE_TOOLS.
+    "linkedin_send_reply",
 }
 
 #: Names a reader must never grow. Listed explicitly so that adding one is a
@@ -532,8 +549,15 @@ async def tools():
     return {t.name: t for t in await mcp.list_tools()}
 
 
-async def test_the_surface_is_exactly_the_fifty_three_tools(tools):
-    """RENAMED AGAIN AT LANE L7'S MERGE, 2026-09-24, to ``..._fifty_three_tools``:
+async def test_the_surface_is_exactly_the_fifty_six_tools(tools):
+    """RENAMED AGAIN AT LANE L5'S MERGE OF MASTER 66aaa95, 2026-09-24, to
+    ``..._fifty_six_tools``: two reads and a write arrived together
+    (``linkedin_list_conversations``, ``linkedin_open_thread``,
+    ``linkedin_send_reply``) on top of lane L7's fifty-three. The lane's
+    branch had renamed it ``..._fifty_five_tools`` at its second merge,
+    counting from the live lane's fifty-two. The name moved with the pin.
+
+    RENAMED AGAIN AT LANE L7'S MERGE, 2026-09-24, to ``..._fifty_three_tools``:
     that lane's branch had made ``linkedin_mark_company_interest`` -- a WRITE,
     census P I14 -- its own fifty-second (renaming this test
     ``..._fifty_two_tools`` there), and the merge made it the fifty-third. The
@@ -772,7 +796,11 @@ async def test_the_surface_is_exactly_the_fifty_three_tools(tools):
     # linkedin_mark_company_interest, a WRITE, so the split moves on its write
     # side and the non-write count holds. MEASURED off mcp.list_tools() on the
     # merged tree, not summed from the two branches' fifty-twos.
-    assert len(tools) == 53
+    # FIFTY-SIX AT LANE L5'S MERGE OF MASTER 66aaa95, the same day: two
+    # READS and a WRITE on top of lane L7's fifty-three, so both sides of
+    # the split below move -- the reads by two, the writes by one. The NAME
+    # moved too. MEASURED off mcp.list_tools() on the merged tree.
+    assert len(tools) == 56
     # And the split is asserted, not just the total. A future tool arriving as
     # a write would otherwise only have to bump a number.
     #
@@ -800,6 +828,7 @@ async def test_the_surface_is_exactly_the_fifty_three_tools(tools):
         "linkedin_send_message",
         "linkedin_follow_company_page",
         "linkedin_mark_company_interest",
+        "linkedin_send_reply",
     }
     # THE NON-WRITE COUNT MOVES TO SIXTEEN, and the reason is NOT the reason
     # it moved last time. The comment here said: "THE READ COUNT MOVES OFF
@@ -919,7 +948,12 @@ async def test_the_surface_is_exactly_the_fifty_three_tools(tools):
     # THIRTY-NINE AT THE LIVE LANE'S MERGE, 2026-09-24: linkedin_own_item_link
     # reads. Unlike the one above it DOES press, through three entries it
     # brought into readonly.SANCTIONED_MUTATIONS; the write set is unmoved.
-    assert len(set(tools) - SANCTIONED_WRITE_TOOLS) == 39
+    # FORTY-ONE AT LANE L5'S SECOND MERGE, 2026-09-24:
+    # linkedin_list_conversations and linkedin_open_thread are READS on
+    # addresses the boundary already admitted, and the write side grew by
+    # exactly one, linkedin_send_reply, which is on the exemption -- so a
+    # read arriving did not hide a write.
+    assert len(set(tools) - SANCTIONED_WRITE_TOOLS) == 41
 
 
 def test_the_read_that_was_nearly_named_a_write():
@@ -1023,6 +1057,7 @@ async def test_the_exemption_covers_only_the_names_on_it(tools):
         "linkedin_send_message",
         "linkedin_follow_company_page",
         "linkedin_mark_company_interest",
+        "linkedin_send_reply",
     }
     # The probe has to be genuinely sanctioned for this to test the thing it
     # claims to. A name nobody ever specced would only show that made-up names
@@ -1479,6 +1514,11 @@ async def test_server_info_stops_claiming_read_only_once_writes_are_on(monkeypat
         # the wrong name refuses. Nobody has typed into that combobox through
         # this server, so the first refusal IS the measurement.
         "send_message",
+        # FIFTEENTH, 2026-09-24 (census M M10; the fourteenth on lane L5's
+        # branch, before lane L7's merge landed), typed here by hand like its
+        # fourteen siblings: a reply inside a conversation he names by thread
+        # id, which reports SENT only off a fresh load of that conversation.
+        "send_reply",
         "unfollow_company",
         "unsave_job",
         # SIXTH, 2026-08-31. The first write here that acts on neither a job
@@ -1541,6 +1581,10 @@ async def test_the_capability_is_reported_even_with_the_flag_off(monkeypatch):
         # the wrong name refuses. Nobody has typed into that combobox through
         # this server, so the first refusal IS the measurement.
         "send_message",
+        # THE FIFTEENTH, 2026-09-24 (census M M10; the fourteenth on lane L5's
+        # branch). Typed by hand, as this list requires, by the lane that
+        # built it.
+        "send_reply",
         "unfollow_company",
         "unsave_job",
         # THE TWELFTH, 2026-09-02, on his ruling "I want all capabilities".
@@ -1895,6 +1939,10 @@ async def test_the_server_instructions_name_every_write_that_ships():
         13: "thirteen",
         # FOURTEEN FROM 2026-09-24: mark_company_interest is the fourteenth.
         14: "fourteen",
+        # FIFTEEN FROM LANE L5'S MERGE OF MASTER 66aaa95, the same day:
+        # send_reply. Extended the same way; the instructions still have to
+        # SAY it, which this map does not do.
+        15: "fifteen",
     }
     assert f"{words[len(writes.PERFORMABLE)]} write" in text
     for action in writes.PERFORMABLE:
@@ -2210,9 +2258,16 @@ async def test_server_info_reports_irreversibility_before_a_caller_commits(
         # this is the only entry here that can consume a resource nobody in
         # this process can count.
         "send_message",
+        # THE SIXTH, 2026-09-24, TYPED BY HAND AS THIS LIST DEMANDS: a reply
+        # reaches the named people in a conversation he chose, and nothing
+        # this server may do takes it back -- deletion is permanently
+        # forbidden here, and even a recall would not un-read it. It spends
+        # no credit this server can see, and whether LinkedIn meters a reply
+        # inside an InMail conversation is UNMEASURED; its spec says so.
+        "send_reply",
     ], (
         "the permanent things this server performs are typed in here by "
-        "whoever added one. A SIXTH arriving is a decision, not a diff."
+        "whoever added one. A SEVENTH arriving is a decision, not a diff."
     )
     # THE SECOND ARRIVED ON 2026-09-01 AND IT IS DIFFERENT IN KIND, which is
     # why this is written out rather than the list quietly growing by one.

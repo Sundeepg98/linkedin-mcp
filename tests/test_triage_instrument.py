@@ -358,7 +358,24 @@ AFTER_THE_LIVE_LANE = (116, {"R": 12, "W": 101, "R+W": 3})
 #: rows.
 AFTER_THE_LANE_Y2_ADMISSION = (127, {"R": 18, "W": 105, "R+W": 4})
 
-EXPECTED_NOW = AFTER_THE_LANE_Y2_ADMISSION
+#: AFTER LANE L5, 2026-09-24 (`_audit/2026-09-24-lane-l5-messaging.md`),
+#: re-derived with `scripts/triage_messaging_gap_rows.py` on the tree merged
+#: with master 9b9a4d0: three rows built out of GAP -- `M10` and `M17`
+#: (writes, `linkedin_send_reply`) and `M49` (a read, the read indicator on
+#: his own last message). 116 - 3 = 113: reads 12 - 1, writes 101 - 2,
+#: read-and-writes untouched at 3. RETURNED-OUTSIDE-LEDGER stays 14: none of
+#: the three was a lane-R return.
+AFTER_LANE_L5 = (113, {"R": 11, "W": 99, "R+W": 3})
+
+#: BOTH, AT LANE L5'S MERGE OF MASTER 530227e (lane Y2's), 2026-09-24,
+#: re-derived with the merged tree's `scripts/triage_messaging_gap_rows.py`
+#: -- not summed: lane Y2's eleven admitted rows are GAP and this lane's
+#: three built rows are not. 127 - 3 = 124: reads 18 - 1, writes 105 - 2,
+#: read-and-writes 4, untouched. RETURNED-OUTSIDE-LEDGER stays 14, and the
+#: eleven admitted rows stay in the entered-since-freeze bucket.
+AFTER_LANE_L5_OVER_Y2 = (124, {"R": 17, "W": 103, "R+W": 4})
+
+EXPECTED_NOW = AFTER_LANE_L5_OVER_Y2
 
 
 def test_the_headline_split_is_the_one_the_report_quotes():

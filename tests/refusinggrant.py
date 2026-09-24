@@ -97,6 +97,15 @@ SYNTHETIC_RAW_TARGETS: dict[str, Any] = {
         "member": "example-harness-member",
         "text": "example-harness-message-text",
     },
+    # A CONVERSATION AND THE WORDS OF A REPLY (``send_reply``). The thread id
+    # must pass ``threads.valid_thread_id`` -- a digit first, then the read
+    # allowlist's own alphabet -- or ``_target_for`` refuses it and no reader
+    # is ever driven with this spec. Missing, it was worse than refused: the
+    # KeyError stopped five writes readers being driven for ANY spec.
+    "thread_and_text": {
+        "thread": "2-SYNTHETICHARNESSTHREAD==",
+        "text": "example-harness-reply-text",
+    },
 }
 
 
