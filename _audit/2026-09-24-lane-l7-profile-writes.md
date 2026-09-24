@@ -1062,6 +1062,19 @@ queue: C1 marked done, C6's cheapest first step). The asserted-name checker find
 the cited-sha, asserted-name, correction-findable, banked-evidence, ignored-path, prose-claim, page-text,
 identity, person-name, credential and blocker-reason-locator guards, 4 workers: **1946 passed**.
 
+### F.4 The live queue, rewritten for session 2
+
+The order's live path: the intro-editor rows need the account-setting reader the live lane is building,
+and his setting reading OFF at fire time, and session 2 must be able to fire them in order -- read the
+setting, then edit, restore, and read before and after. The Live queue's intro-editor block below is
+rewritten IN PLACE to say exactly that: the two prerequisites, the five-step sequence with a STOP at
+every step that does not read as expected, the six rows ordered most deterministic first, and the loads
+(64 over two 32-load sessions, with the one ESTIMATE named -- the reader's own cost). Its old table rows
+for `P A14`, `A15`, `A22` and `P B9` are replaced by one paragraph saying why none is newly buildable;
+the rows for `P A26`-`A29`, `P G2` and `P I13` are kept verbatim under their own heading. `P I14`'s
+block above it is unchanged. GATES: the record only; the asserted-name checker finds nothing in it, and
+the same doc guards as item 3, 4 workers: **1946 passed**.
+
 ## Live queue
 
 Loads counted off the code: `linkedin_profile_editor_values` and `linkedin_profile_editor_fields`
@@ -1083,25 +1096,80 @@ restore its BUILT bar lacked; (4) this row fires, and `P I15` restores it in the
 |---|---|---|---|---|---|---|
 | P I14 | `linkedin_mark_company_interest(job_id=<posting>)`, he reads the block (it names the employer), then the same call with `confirm_token=<token>` within 120 s -- ONLY after prerequisites (1) to (3) | none -- the target is that posting's employer | `P I15`, built from C6, in the same session; until C6 and that build exist this row does not fire | before: the preview's own reading (`not_signalled`) and `linkedin_job_detail(job_id)` `interest_control: true`; after: the receipt's `verification` and `linkedin_job_detail` `interest_control: false`; after the restore: `interest_control: true` again | a posting HE names, at an employer he chooses to signal -- `OPERATOR-NAMES-THE-TARGET` | 3 (+2 for the two `linkedin_job_detail` readings, +the restore's own) |
 
-**Ready once a capture names the control -- no new code for the intro-editor rows.** Each is a
-SELF-PRIVATE live proof on the four conditions of the ruling `SELF-PROFILE-EDITS-NOT-OUTWARD`.
-**CONDITION 1 IS ENFORCED BY THE GATE SINCE THE INTEGRATION, BEFORE THE PRESS** (Integration, I.2):
-it presses only on a notify control in the dialog read off, or -- once the amended condition's
-account-level reader is wired -- on that setting read OFF before the edit with no unnamed switch in
-the dialog; otherwise it refuses, NEEDS-OPERATOR, and the receipt's `editor_save_gate.condition_1`
-names which basis it used. **Until 2026-09-24 this paragraph read "NOT DRAWN with no unnamed switch"
-as satisfying condition 1; the order registering the amendment says it does not.** The measured intro
-editor draws two unnamed switches and no named notify control, so every row in this table waits on C1
-naming those switches, or on the amendment's text covering them. Conditions 2 and 3 are the restore
-call and the two readings; condition 4 is met because none of these fields adds an entry. The six
-intro-editor rows outside the slice (`P A8`, `A11`, `A13`, `A17`, `A19`, `A21`) wait on the same.
+**THE INTRO-EDITOR ROWS -- FOR SESSION 2, IN THIS ORDER (rewritten at the follow-up, 2026-09-24).**
+Each is a SELF-PRIVATE live proof on the four conditions of the ruling `SELF-PROFILE-EDITS-NOT-OUTWARD`.
+**CONDITION 1 IS ENFORCED BY THE GATE, BEFORE THE PRESS** (Integration, I.2): it presses only on a
+notify control in the dialog read off, or on his account-level setting read OFF before the edit with
+every unnamed switch in the dialog one a capture identified; otherwise it refuses, NEEDS-OPERATOR, and
+the receipt's `editor_save_gate` names why. The measured intro editor draws no notify control and two
+unnamed switches, and since F.1 those two are recognised, so the account-level route is the one these
+rows take. Conditions 2 and 3 are the restore and the two readings; condition 4 holds because none of
+these fields adds an entry.
+
+**TWO THINGS MUST HOLD BEFORE ANY ROW FIRES:**
+1. **THE ACCOUNT-SETTING READER, WIRED AT THE SEAM** -- the live lane's reader of 'Share profile updates
+   with your network', its reading (`'off'`, `'on'` or `'unknown'`) taken BEFORE the change is entered and
+   passed as `account_share_updates` to `profile_editor.read_save_gate` by the write (the edit and its
+   restore both go through the same gate). The seam is `profile_editor.ACCOUNT_READINGS`; no rule in the
+   module moves when it is wired. Until it is, every row below refuses `5_condition_1_not_established` at
+   the press -- safely: nothing is saved, and the verification's fresh navigation discards the entered
+   change.
+2. **HIS SETTING READS OFF AT FIRE TIME.** If it reads ON or unknown: STOP and report. The session does
+   not switch it off -- that is his account setting, and changing it is a second change nobody
+   confirmed.
+
+**THE SEQUENCE, PER ROW** -- every STOP is a report, not a retry:
+1. **Read the setting** (the live lane's reader). Not OFF -> STOP.
+2. **Before:** `linkedin_profile_editor_values()`. For every row after a session's first, the previous
+   row's step-5 reading is this one.
+3. **Edit:** `linkedin_update_profile_field(field=<the row's field>, value=<a value HE picks>)`, then
+   the same call with `confirm_token=<token>` within 120 s. Go on only if the receipt shows
+   `performed: true`, `editor_save_gate.proceed: true`, `condition_1: account_setting_off`,
+   `recognised_switches: [open_profile, profile_premium_badge]`, `unresolved_switches: 0`, and a
+   verification of `field_changed`. Anything else -> STOP, and the receipt's `editor_save_gate` block is
+   the report.
+4. **Restore:** the receipt's `restore.to_put_it_back`, previewed and confirmed the same way (the setting
+   read again first, if the wiring reads it per write); the same gate conditions, and a verification of
+   `field_changed` back to the before value. Anything else -> STOP: the field is left changed, and that
+   is the first line of the report.
+5. **After:** `linkedin_profile_editor_values()`; every field equal to step 2's reading. Not equal ->
+   STOP.
+
+| order | row | field (the name `linkedin_profile_editor_fields()` returns) | kind, as the live lane's capture draws it | loads |
+|---|---|---|---|---|
+| 1 | `P A8` | Additional name | text input, named by its label | 12 |
+| 2 | `P A19` | Pronouns | select, chosen by its own option text | 10 |
+| 3 | `P A21` | Education | select -- one of his own education entries, chosen by its own option text | 10 |
+| 4 | `P A13` | City | text input, named by `aria-label` -- a typeahead | 12 (second session) |
+| 5 | `P A11` | Country/Region | text input, named by `aria-label` -- a typeahead | 10 |
+| 6 | `P A17` | Industry | text input, named by `aria-label` -- a typeahead | 10 |
+
+**THE ORDER IS THE MOST DETERMINISTIC FIRST.** A plain text input and two selects, whose options the
+tool chooses by their own text, open the first session. The three typeaheads fill the second: LinkedIn
+may not accept a typed value that is not one of its suggestions, and the tool types without choosing a
+suggestion. If it does not, `Save` stays disabled (`2_save_disabled`) or the dialog stays open and the
+verification reads `value_unchanged` -- nothing is saved either way, and the row STOPS as a finding for
+the write's owner, not a retry. (`writes.py`'s own comment calls `Country/Region` a select; the live
+lane's capture draws it as a text input named by `aria-label`, and this table follows the capture.)
+
+**LOADS, COUNTED OFF THE CODE, with ONE ESTIMATE NAMED:** `linkedin_profile_editor_values` is 2 loads;
+an intro-editor write's preview is 1 and its confirm 2; the account-setting reader is taken as **1 load
+per write -- ESTIMATED: it is the live lane's reader and its cost is its own.** A row is therefore
+1 + 3 (edit) + 1 + 3 (restore) + 2 (after) = 10, and a session's first row adds its 2-load before
+reading: 12. Six rows are 64 loads over two sessions, beyond one 40-load budget, so they run as TWO
+SESSIONS of three rows, 32 loads each, spaced 20 s apart (about 11 minutes each), in the order above. If
+the reader costs R loads per write, a row costs 8 + 2R and the split is recomputed before a session
+starts, never during it.
+
+**Not newly buildable at this follow-up:** `P B9` is blocked on the aim (F.2); `P I15` has no ON capture
+(F.3); `P A14`, `A15`, `A22` -- postal code, location display, primary position -- are not among the 17
+controls the live lane's reading of the intro editor draws, so they have nothing to fire; each is a
+candidate for MEASURED-ABSENT for this account, the census owner's call.
+
+**THE OTHER SELF-PRIVATE ROWS -- NOT BUILT, each waiting on its own capture (unchanged).**
 
 | row | tool call | field | restore step | before / after reading | target | loads |
 |---|---|---|---|---|---|---|
-| P A14 | `linkedin_update_profile_field(field=<the name C1 records>, value=<a value HE picks>)`, then confirm | postal code, if C1 finds it drawn | the receipt's `restore.to_put_it_back`, previewed and confirmed within the session | `linkedin_profile_editor_values()` before and after; equal | self | 10 |
-| P A15 | as A14 | the location display choice (a select, chosen by its own option text) | as A14 | as A14 | self | 10 |
-| P A22 | as A14 | the primary-position select | as A14 | as A14 | self | 10 |
-| P B9 | a toggle kind in the same family, NOT BUILT -- designed after C1 shows how the switch's row names it | the Premium-icon switch | the same call with the opposite state | the editor values reader, which reads a switch's checked state | self | 10 once built |
 | P A26 / A27 / A28 / A29 | an editor spec for the contact-info editor, NOT BUILT -- it needs C2's address and field names; then the same two calls | website / phone / messenger / birthday and its audience | the receipt's restore block, within the session; A29 restores the audience too | the values reader over that editor | self | ~10 each, fixed by C2 |
 | P G2 | an editor spec for the default-activity form, NOT BUILT -- it needs C4 | which activity type shows first | the same call with the prior option | the values reader over that form | self | ~10, fixed by C4 |
 | P I13 | NOT BUILT -- it needs C5 to say whether the control is a field, a modal or a flow | minimum pay | as the build decides | as the build decides | self | fixed by C5 |
