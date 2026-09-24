@@ -1264,6 +1264,28 @@ PINNED = (
 #: `/groups/discover/` line instead lands on 1018aafe63a9f35c. Seven of eight
 #: digests byte-identical; `<functions>` unmoved.
 #: ------------------------------------------------------------------------
+#: RE-FROZEN AGAIN 2026-09-24 (lane S follow-up, after its cold verification),
+#: ONE DIGEST MOVED BY FOUR EDITED ENTRIES -- A NARROWING, NOTHING ADMITTED:
+#:
+#:     _ALLOWED_URL_PATTERNS   a13f66bebba387cd -> 17409e16e7abbcc8   53 -> 53
+#:     every other table       unchanged
+#:
+#: The cold verifier admitted `/company/%2e%2e/people/` through the new
+#: People-tab lines: `%` was in their class, and the URL standard reads a
+#: segment of `%2e%2e` as `..`. The same hole was older on the company and
+#: school ROOT lines (`/company/%2e%2e/` landed on the site root). So:
+#:
+#:     company and school roots   + (?!(?:%2[eE]){1,2}/?$) after the path word
+#:     company and school People  `%` dropped from the class
+#:
+#: Measured over 1705 addresses (the shipped corpus, the verifier's 1562
+#: adversarial spellings and 96 more): 90 newly refused -- 12 per root line,
+#: all six one-or-two-encoded-dot spellings with and without the slash, and
+#: 33 per People line, every `%` spelling -- and NOTHING newly admitted.
+#: ATTRIBUTION: the tree with exactly those four lines put back hashes to the
+#: prior pin on all eight keys. Seven of eight digests byte-identical;
+#: `<functions>` unmoved.
+#: ------------------------------------------------------------------------
 READONLY_AST_AT_LAST_REFREEZE = {
     "<functions>": "d7e1d0922e3af446",
     "JS_MUTATION_TOKENS": "d47e30b67c583c1b",
@@ -1417,7 +1439,10 @@ READONLY_AST_AT_LAST_REFREEZE = {
     #
     # d7b3315318c877d0 until item 2 of the same follow-up: four roster lines
     # on MEMBER-ROSTERS-AS-BOUNDED-READS, 49 -> 53. See that ledger entry.
-    "_ALLOWED_URL_PATTERNS": "a13f66bebba387cd",
+    #
+    # a13f66bebba387cd until the same follow-up's cold verification: the
+    # encoded-dot narrowing on four lines, nothing admitted. See that entry.
+    "_ALLOWED_URL_PATTERNS": "17409e16e7abbcc8",
     "_FORBIDDEN_SUBSTRING_EXEMPTIONS": "43e2bf7f3db0dbed",
     # 419e64a3cd92ec7e until the same REVIEW: commit: a third entry, excusing
     # exactly {"/follow"} for exactly the anchored follower-list address.

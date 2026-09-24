@@ -199,6 +199,31 @@ def test_the_neighbours_stay_refused():
 #: The school People tab, admitted 2026-09-24 by the roster line.
 PEOPLE_TAB_ON_ITS_OWN_LINE = f"{BASE}/school/example-university/people/"
 
+#: THE DOTTED SLUG FAILS CLOSED -- AND SINCE 2026-09-24 SO DOES AN ENCODED ONE.
+#: ``%`` is in the class and the URL standard reads ``%2e``/``%2e%2e`` as
+#: ``.``/``..``: ``/school/%2e%2e/`` was admitted and landed on the site root
+#: until lane S's follow-up, whose cold verification found it.
+ENCODED_DOT_SCHOOL_ROOTS = tuple(
+    f"{BASE}/school/{segment}{slash}"
+    for segment in ("%2e", "%2E", "%2e%2e", "%2E%2E", "%2e%2E", "%2E%2e")
+    for slash in ("/", "")
+)
+
+
+def test_an_encoded_dot_segment_is_not_a_school():
+    admitted = [u for u in ENCODED_DOT_SCHOOL_ROOTS if readonly.is_read_url(u)]
+    assert admitted == [], admitted
+
+
+def test_control_the_school_entry_before_the_lookahead_admits_them():
+    """SHOWN FAILING, on the entry's own spelling before the lookahead; and a
+    percent-encoded name stays admitted, so the narrowing is the dot only."""
+    before = re.compile(
+        r"^https://www\.linkedin\.com/school/[A-Za-z0-9%\-_]{1,100}/?$")
+    assert all(before.match(u) for u in ENCODED_DOT_SCHOOL_ROOTS)
+    assert readonly.is_read_url(f"{BASE}/school/univ%C3%A9rsit%C3%A9/") is True
+    assert readonly.is_read_url(SCHOOL_URL) is True
+
 
 def test_the_people_tab_is_admitted_by_its_own_line_and_not_the_schools():
     assert readonly.is_read_url(PEOPLE_TAB_ON_ITS_OWN_LINE) is True

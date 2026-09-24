@@ -75,9 +75,11 @@ def _carriers(url: str) -> list:
 
 #: What each roster line was admitted for. Groups and events: the numeric id
 #: only, as their id entries are. Company and school: the slug form as well,
-#: because LinkedIn DRAWS the People tab by slug (two tracked-into-_state
-#: captures, by shape) and the ``/company/`` root entry's argument about a
-#: numeric request landing on a slug arrival applies unchanged.
+#: because LinkedIn DRAWS the People tab by slug (two captures in the
+#: gitignored ``_state/``, counted by shape) and the ``/company/`` root
+#: entry's argument about a numeric request landing on a slug arrival applies
+#: unchanged -- but WITHOUT ``%`` in the class; see
+#: ``ENCODED_PEOPLE_TAB_SPELLINGS``.
 ADMITTED = {
     "group_members": (
         f"{BASE}/groups/{GROUP_ID}/members/",
@@ -172,6 +174,44 @@ def test_the_four_rosters_are_four_distinct_lines():
 @pytest.mark.parametrize("url", NEIGHBOURS)
 def test_the_neighbours_stay_refused(url):
     assert readonly.is_read_url(url) is False, url
+
+
+#: ENCODED SPELLINGS OF A PEOPLE TAB, added after this follow-up's cold
+#: verification ADMITTED the first five through the People-tab lines as they
+#: first shipped, with ``%`` in their class. The URL standard reads ``%2e``
+#: and ``%2e%2e`` as ``.`` and ``..``, so those land on ``/company/people/``
+#: and ``/people/``; the rest are encoded characters no composer here builds.
+#: The 197-address corpus above held literal dots only, which is how the
+#: blast-radius test could pass while this class was open.
+ENCODED_PEOPLE_TAB_SPELLINGS = tuple(
+    f"{BASE}/{word}/{segment}/people/"
+    for word in ("company", "school")
+    for segment in ("%2e", "%2E", "%2e%2e", "%2E%2E", "%2e%2E", "a%2Fb",
+                    "a%2fb", "a-company%3Bx", "%2e%2e%2e", "a%2e",
+                    "soci%C3%A9t%C3%A9")
+)
+
+
+@pytest.mark.parametrize("url", ENCODED_PEOPLE_TAB_SPELLINGS)
+def test_no_encoded_spelling_of_a_people_tab_is_admitted(url):
+    assert readonly.is_read_url(url) is False, url
+
+
+def test_control_the_root_entries_class_would_admit_the_encoded_dot():
+    """SHOWN FAILING: put the root entries' class -- ``%`` included -- back on
+    the company People-tab line, and the encoded ``..`` goes through. So the
+    refusal above is the narrower class, not an accident."""
+    line = _carriers(f"{BASE}/company/{ORG_ID}/people/")[0]
+    wider = re.compile(
+        r"^https://www\.linkedin\.com/company/[A-Za-z0-9%\-_]{1,100}/people/?$")
+    original = readonly._ALLOWED_URL_PATTERNS
+    readonly._ALLOWED_URL_PATTERNS = tuple(
+        wider if p is line else p for p in original)
+    try:
+        assert readonly.is_read_url(f"{BASE}/company/%2e%2e/people/") is True
+    finally:
+        readonly._ALLOWED_URL_PATTERNS = original
+    assert readonly.is_read_url(f"{BASE}/company/%2e%2e/people/") is False
 
 
 def _corpus() -> list[str]:
@@ -486,7 +526,14 @@ def test_control_every_planted_store_is_convicted(name):
 def test_a_roster_read_costs_one_load_and_the_budget_is_the_ruled_one():
     """One call is one load, so every roster read is countable against the
     live session's forty (``LIVE-BUDGET-40-LOADS``), exactly like any other
-    load; the capture specs price each one."""
+    load; the capture specs price each one.
+
+    **WHAT THIS CANNOT DO, said so it is not read as more (the cold
+    verification's point):** it cannot fail on a budget OVERRUN. Nothing in
+    this package counts a session's loads -- the budget is carried by the live
+    lane's process, as every other load's is. What code carries is the half
+    this asserts: a roster read is exactly one load, with no loop that could
+    make it more (section 2)."""
     assert member_rosters.LOADS_PER_CALL == 1
     register = (ROOT / "_audit" / "RULINGS.md").read_text(encoding="utf-8")
     assert "`LIVE-BUDGET-40-LOADS`" in register
@@ -496,24 +543,41 @@ def test_a_roster_read_costs_one_load_and_the_budget_is_the_ruled_one():
 # 6. Nothing opens a roster yet -- the rows stay GAP until a reader lands
 # ---------------------------------------------------------------------------
 
+def _orphan_walk():
+    """The orphan test's own import reader, loaded rather than copied: it sees
+    ``from . import x`` and ``from .x import y``, the relative forms four
+    package modules use. The first version of this test had its own walk and
+    was blind to both -- the cold verification planted them and it passed."""
+    spec = importlib.util.spec_from_file_location(
+        "_orphan_rule", ROOT / "tests" / "test_every_orphan_module_is_ruled.py")
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module._imported_submodules
+
+
 def test_no_package_module_or_entry_point_imports_the_composer():
-    importers = []
-    for path in sorted(PKG.glob("*.py")) + sorted(ROOT.glob("*.py")):
-        if path.name == "member_rosters.py":
-            continue
-        tree = ast.parse(path.read_text(encoding="utf-8"))
-        for node in ast.walk(tree):
-            if isinstance(node, ast.ImportFrom) and (
-                node.module == "linkedin_server"
-                and any(a.name == "member_rosters" for a in node.names)
-                or (node.module or "").endswith("member_rosters")
-            ):
-                importers.append(path.name)
-            elif isinstance(node, ast.Import) and any(
-                a.name.endswith("member_rosters") for a in node.names
-            ):
-                importers.append(path.name)
+    imported_by = _orphan_walk()
+    importers = [
+        path.name
+        for path in sorted(PKG.glob("*.py")) + sorted(ROOT.glob("*.py"))
+        if path.name != "member_rosters.py"
+        and "member_rosters" in imported_by(path)
+    ]
     assert importers == [], importers
+
+
+@pytest.mark.parametrize("line", [
+    "from . import member_rosters\n",
+    "from .member_rosters import compose\n",
+    "from linkedin_server import member_rosters\n",
+    "from linkedin_server.member_rosters import compose\n",
+    "import linkedin_server.member_rosters\n",
+])
+def test_control_the_import_walk_sees_every_import_form(line, tmp_path):
+    """SHOWN FAILING, on the five forms, relative ones included."""
+    planted = tmp_path / "planted_module.py"
+    planted.write_text(line, encoding="utf-8")
+    assert "member_rosters" in _orphan_walk()(planted), line
 
 
 def test_the_rows_each_roster_serves_are_the_rulings_and_the_address_tables():

@@ -93,8 +93,27 @@ ROSTERS_ADMITTED_BY_THEIR_OWN_LINE = (
     f"{BASE}/company/{IDENTIFIER}/people/",
 )
 
-#: This file's entry, by its text: the ROOT, one segment deep.
-ROOT_PATTERN = r"^https://www\.linkedin\.com/company/[A-Za-z0-9%\-_]{1,100}/?$"
+#: This file's entry, by its text: the ROOT, one segment deep. Since the lane S
+#: follow-up's cold verification it carries a lookahead refusing a segment of
+#: one or two ENCODED dots -- ``%2e`` and ``%2e%2e`` are ``.`` and ``..`` to the
+#: URL standard, and ``%`` is in the class.
+ROOT_PATTERN = (
+    r"^https://www\.linkedin\.com/company/(?!(?:%2[eE]){1,2}/?$)"
+    r"[A-Za-z0-9%\-_]{1,100}/?$"
+)
+
+#: The entry as it stood before that lookahead, kept to show it failing.
+ROOT_PATTERN_BEFORE_THE_ENCODED_DOT = (
+    r"^https://www\.linkedin\.com/company/[A-Za-z0-9%\-_]{1,100}/?$"
+)
+
+#: The encoded dot segments that entry admitted, each a step UP the path once
+#: a browser has read it: ``/company/%2e%2e/`` lands on the site root.
+ENCODED_DOT_ROOTS = tuple(
+    f"{BASE}/company/{segment}{slash}"
+    for segment in ("%2e", "%2E", "%2e%2e", "%2E%2E", "%2e%2E", "%2E%2e")
+    for slash in ("/", "")
+)
 
 #: What the entry DELIBERATELY DID NOT BUY. Each is a real neighbour of the
 #: admitted address -- the tabs are drawn by the Page itself, the traversals
@@ -282,6 +301,25 @@ def test_the_dangerous_neighbours_are_refused_by_this_anchor_and_nothing_else(
     assert _forbidden_hits(url) == [], url
     assert _matching_patterns(url) == [], url
     assert readonly.is_read_url(url) is False, url
+
+
+@pytest.mark.parametrize("url", ENCODED_DOT_ROOTS)
+def test_an_encoded_dot_segment_is_not_a_page(url):
+    """Refused since the lookahead; each one is ``.`` or ``..`` to a browser."""
+    assert readonly.is_read_url(url) is False, url
+
+
+def test_control_the_entry_before_the_lookahead_admits_every_encoded_dot():
+    """SHOWN FAILING: the entry as it stood admits all twelve, and a slug that
+    merely CONTAINS an encoded dot, or a percent-encoded name, stays admitted
+    with the lookahead -- the narrowing is exactly the dot-only segment."""
+    before = re.compile(ROOT_PATTERN_BEFORE_THE_ENCODED_DOT)
+    now = re.compile(ROOT_PATTERN)
+    assert all(before.match(url) for url in ENCODED_DOT_ROOTS)
+    assert not any(now.match(url) for url in ENCODED_DOT_ROOTS)
+    for kept in (f"{BASE}/company/a%2e/", f"{BASE}/company/%2e%2e%2e/",
+                 f"{BASE}/company/soci%C3%A9t%C3%A9/", PAGE_URL, PAGE_URL_NUMERIC):
+        assert now.match(kept) and before.match(kept), kept
 
 
 @pytest.mark.parametrize("url", ROSTERS_ADMITTED_BY_THEIR_OWN_LINE)

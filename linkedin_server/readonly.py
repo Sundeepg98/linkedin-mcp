@@ -1483,11 +1483,24 @@ _ALLOWED_URL_PATTERNS: tuple[re.Pattern[str], ...] = (
     # class. So a dotted slug fails CLOSED here, which is a refusal to be
     # widened deliberately on evidence, never by relaxing the class.
     #
+    # AMENDED 2026-09-24 (lane S follow-up, its cold verification): THE
+    # SENTENCE ABOVE WAS TRUE OF A LITERAL DOT AND FALSE OF AN ENCODED ONE.
+    # ``%`` is in the class, and the URL standard reads a segment of ``%2e``
+    # or ``%2e%2e`` (either case) exactly as ``.`` or ``..`` -- so
+    # ``/school/%2e%2e/`` was admitted and landed on the site root, one level
+    # up. The lookahead refuses a segment made of nothing but one or two
+    # encoded dots; every other ``%`` slug stays admitted, including the
+    # percent-encoded non-ASCII names LinkedIn draws. Measured over 1705
+    # addresses (the shipped corpus, the cold verifier's 1562 adversarial
+    # spellings, and 96 written for this): 12 newly refused on this line, all
+    # of them those six spellings with and without the slash; nothing newly
+    # admitted.
+    #
     # WHAT STILL REFUSES A SLUG THAT HAPPENS TO CARRY A FORBIDDEN SUBSTRING.
     # Nothing about this entry excuses gate one: a school whose slug
     # contains ``connect`` or ``invite`` refuses, and that is correct
     # fail-closed behaviour rather than a defect to route around.
-    re.compile(r"^https://www\.linkedin\.com/school/[A-Za-z0-9%\-_]{1,100}/?$"),
+    re.compile(r"^https://www\.linkedin\.com/school/(?!(?:%2[eE]){1,2}/?$)[A-Za-z0-9%\-_]{1,100}/?$"),
     # AN ORGANISATION PAGE, THE ROOT ONLY, BOTH SPELLINGS. Added 2026-09-20 for
     # ``COMPANY-PAGE-SURFACE`` -- 18 published rows, 16 filed, the largest
     # BUILD in the census and every row of it filed behind this one line.
@@ -1652,7 +1665,18 @@ _ALLOWED_URL_PATTERNS: tuple[re.Pattern[str], ...] = (
     # and not by this one, which still refuses it. The sentence above was
     # true when written. Whatever reader lands for the People tab owes it the
     # strictness spent here: a count, never a list.
-    re.compile(r"^https://www\.linkedin\.com/company/[A-Za-z0-9%\-_]{1,100}/?$"),
+    #
+    # AND AMENDED AGAIN THE SAME DAY: AN ENCODED DOT SEGMENT. The class was
+    # the school entry's byte for byte, dot outside, and ``%`` inside -- so
+    # ``/company/%2e%2e/`` (which the URL standard reads as ``..``) was
+    # admitted and landed on the site root. The cold verification of lane S's
+    # follow-up found it through the roster lines, which had copied this
+    # class. The same lookahead as the school entry now refuses a segment of
+    # one or two encoded dots and nothing else: 12 newly refused on this line
+    # over the same 1705 addresses, nothing newly admitted, percent-encoded
+    # names untouched. ``company_page.slug_is_addressable`` refuses the same
+    # six spellings, so the coupling test still asserts the two agree.
+    re.compile(r"^https://www\.linkedin\.com/company/(?!(?:%2[eE]){1,2}/?$)[A-Za-z0-9%\-_]{1,100}/?$"),
     # THE RECOMMENDED JOB COLLECTION, ONE NAMED ADDRESS. Admitted
     # 2026-09-05, census row 75 ``JOB-COLLECTIONS-SURFACE``, on the same
     # ruling.
@@ -2258,13 +2282,23 @@ _ALLOWED_URL_PATTERNS: tuple[re.Pattern[str], ...] = (
     #
     # THE SPELLINGS. Groups and events: the closed numeric segment their id
     # entries use, `[0-9]{1,20}`, and nothing else -- a slug is a name, and an
-    # event's slug is its title. Company and school: the root entries'
-    # character class, slug AND number, because LinkedIn DRAWS the People tab
-    # by slug (measured by shape on two captures in `_state/`: the company root
-    # and a school page each draw it twice, the school page under `/company/`)
-    # and serves a numeric organisation address by redirecting to the slug --
-    # the `/company/` entry's argument, which applies here unchanged. The
-    # composer assembles the numeric form only.
+    # event's slug is its title. Company and school: slug AND number, because
+    # LinkedIn DRAWS the People tab by slug (measured by shape on two captures
+    # in `_state/`: the company root and a school page each draw it twice, the
+    # school page under `/company/`) and serves a numeric organisation address
+    # by redirecting to the slug -- the `/company/` entry's argument, which
+    # applies here unchanged. The composer assembles the numeric form only.
+    #
+    # BUT NOT THE ROOT ENTRIES' CLASS BYTE FOR BYTE: `%` IS OUT OF IT HERE.
+    # These two lines first shipped with it, and the cold verification of
+    # lane S's follow-up admitted `/company/%2e%2e/people/` through them: the
+    # URL standard reads `%2e%2e` as `..`, so that request lands on `/people/`,
+    # an address this list refuses, and `BROWSER.goto` never re-checks a
+    # landing. Without `%` every encoded spelling of a People tab is refused
+    # -- 66 over the 1705-address measurement on the root entries, nothing
+    # newly admitted, the real targets untouched -- at no cost to anything
+    # this package does: the composer builds digits, and a percent-encoded
+    # slug is a name it never assembles.
     #
     # THE BLAST RADIUS, MEASURED BEFORE THESE LANDED with the shipped
     # `blast_radius.newly_admitted` over a 197-address corpus (its own 67 plus
@@ -2273,7 +2307,9 @@ _ALLOWED_URL_PATTERNS: tuple[re.Pattern[str], ...] = (
     # slash), company +4 and school +4 (slug and number, each both ways) -- 12
     # in all, and no page spelling, no query, no deeper path, no traversal, no
     # dotted segment, no over-long run and no non-ASCII digit. The control: a
-    # `/groups/<id>/.*` family admits 23 over the same corpus.
+    # `/groups/<id>/.*` family admits 23 over the same corpus. [That corpus
+    # held literal dots only; the ENCODED dot it missed is the paragraph above
+    # this one's subject.]
     #
     # NOTHING IS FIRED. A roster page may draw a connect, follow or message
     # control beside each member; pressing one is a write with its own row
@@ -2282,8 +2318,8 @@ _ALLOWED_URL_PATTERNS: tuple[re.Pattern[str], ...] = (
     # (`_audit/2026-09-05-lead-rulings-round-two.md`) what may be SAID.
     re.compile(r"^https://www\.linkedin\.com/groups/[0-9]{1,20}/members/?$"),
     re.compile(r"^https://www\.linkedin\.com/events/[0-9]{1,20}/attendees/?$"),
-    re.compile(r"^https://www\.linkedin\.com/company/[A-Za-z0-9%\-_]{1,100}/people/?$"),
-    re.compile(r"^https://www\.linkedin\.com/school/[A-Za-z0-9%\-_]{1,100}/people/?$"),
+    re.compile(r"^https://www\.linkedin\.com/company/[A-Za-z0-9\-_]{1,100}/people/?$"),
+    re.compile(r"^https://www\.linkedin\.com/school/[A-Za-z0-9\-_]{1,100}/people/?$"),
 )
 
 #: Substrings that must never appear in a navigation target, checked before

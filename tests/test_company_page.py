@@ -465,6 +465,15 @@ AGREEMENT_CORPUS = [
     f"{BASE}/company/{EPONYMOUS_SLUG}/",
     f"{BASE}/company/{EPONYMOUS_SLUG}",
     f"{BASE}/company/{IDENTIFIER}/",
+    # ENCODED DOT SEGMENTS, added 2026-09-24 when the boundary's root line and
+    # ``slug_is_addressable`` both learned to refuse them: ``%2e%2e`` is ``..``
+    # to a browser. Before that, both said YES -- they agreed, and were both
+    # wrong, which is the case a coupling check alone cannot catch.
+    f"{BASE}/company/%2e%2e/",
+    f"{BASE}/company/%2E/",
+    f"{BASE}/company/%2e%2E",
+    # and a slug that merely CONTAINS an encoded dot, which both still admit
+    f"{BASE}/company/a%2e/",
     f"{BASE}/company/{'a' * 100}/",
     f"{BASE}/company/{'a' * 101}/",
     # ``/company/<slug>/people/`` STOOD HERE UNTIL 2026-09-24, both gates

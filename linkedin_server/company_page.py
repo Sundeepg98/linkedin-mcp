@@ -190,6 +190,14 @@ _SLUG_CHARS = frozenset(
     "%-_"
 )
 
+#: AND THE DOT KEPT OUT ABOVE CAN COME BACK IN ENCODED, which the sentence
+#: above did not reckon with until 2026-09-24: ``%`` is in the class, and the
+#: URL standard reads a segment of ``%2e`` or ``%2e%2e`` (either case) as
+#: ``.`` or ``..``. These are the lowered spellings of a segment made of
+#: nothing but one or two encoded dots; :func:`slug_is_addressable` refuses
+#: them, as the boundary's ``/company/`` root line now does.
+_ENCODED_DOT_SEGMENTS = frozenset({"%2e", "%2e%2e"})
+
 #: THE CLOSED OUTPUT ALPHABET. Order is the contract: a reading is a POSITION
 #: in this tuple, so reordering silently renames every reading ever taken.
 #: ``tests/test_company_page.py`` pins it.
@@ -557,6 +565,13 @@ def slug_is_addressable(href: Optional[str]) -> bool:
         return False
     segment = segments[1]
     if not segment or len(segment) > MAX_SLUG_CHARS:
+        return False
+    # AN ENCODED DOT SEGMENT, added 2026-09-24 with the same refusal on the
+    # boundary's root line: the URL standard reads ``%2e`` and ``%2e%2e``
+    # (either case) as ``.`` and ``..``, so a segment made of nothing else
+    # is not a slug at all but a step up the path. The character check below
+    # would pass it, because ``%`` is in the class.
+    if segment.lower() in _ENCODED_DOT_SEGMENTS:
         return False
     return set(segment) <= _SLUG_CHARS
 
