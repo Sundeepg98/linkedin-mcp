@@ -1759,6 +1759,15 @@ Baseline and restored: 104 passed.
           feed-content ruling -- and fire it in a later key; if none exists,
           NEEDS-TARGET stands and the address table's gate returns to RULING
 
+**AND THE LATER KEY TAKES ITS ADDRESS FROM ITS ARGUMENTS** -- registered
+since this spec was drafted, `PAGE-MAY-VETO-NEVER-SUPPLY` (on master, and
+merged into this branch after Part 2 -- the last section below): the poll
+post's id is the tool's argument, supplied by
+the caller, and the package may only VERIFY it against his own list and
+refuse it when it is not his; the list never supplies the address. That is
+the DECIDED source this row already carried ("from tool arguments only"),
+now a registered rule.
+
 **GATES:** the admission, L1-admission, boundary-invariant, blast-radius,
 search-blast-radius and prose tests, 142 passed; the address table's checker
 91 of 91 green with the new also-driven verdict; the census instruments as
@@ -1799,7 +1808,8 @@ it (`more_analytics.revealed_insights`). Zero loads.
 **THE ORDER:** where the dialog draws no notify control, his account-level
 "Share profile updates with your network" setting, read OFF before the edit,
 satisfies condition 1 of SELF-PROFILE-EDITS-NOT-OUTWARD (the orchestrator's
-amendment, to be registered at its next rulings commit); if neither can be
+amendment, registered since as `SELF-PROFILE-EDIT-NOTIFY-CONDITION-AMENDED`
+on master, and merged into this branch after Part 2); if neither can be
 established the row is NEEDS-OPERATOR. "Find that setting's page and build
 its reader. If a capture exists, do it offline; otherwise write a capture
 spec for session 2. Read only; never toggle it."
@@ -1820,10 +1830,7 @@ capture.
 `_state/` of every checkout searched for the label and the identifier's
 spellings: the only hits are the settings index itself and the cached script
 bundle read below), so no reader is built: a reader over imagined markup
-would be a claim. Both candidates below, the category page and the old
-`/psettings/` address are refused by the shipped boundary today (driven
-through `readonly.is_read_url`, 2026-09-24); `/mypreferences/d/dark-mode` is
-admitted, the control. The index draws a link to the setting's CATEGORY,
+would be a claim. The index draws a link to the setting's CATEGORY,
 `/mypreferences/d/categories/profile-visibility`, and every category page is
 refused by the boundary's `/mypreferences/d/categories/` substring. The
 index's own slug-to-address pattern, measured on the settings it does link
@@ -1834,6 +1841,10 @@ candidates and no way to choose offline:
 
     /mypreferences/d/notify-network-for-updates
     /mypreferences/d/settings/notify-network-for-updates
+
+Both, the category page and the old `/psettings/` address below are refused
+by the shipped boundary today (driven through `readonly.is_read_url`,
+2026-09-24); `/mypreferences/d/dark-mode` is admitted, the control.
 
 **ONE MORE READING, AND IT ORDERS THE TWO.** LinkedIn's own settings bundle,
 cached in the package's browser-profile backup in the gitignored state
@@ -1865,8 +1876,62 @@ DERIVED from two of two known pairs, not measured.
 **THE READER, specified and not built:** one switch; its state read off the
 browser's own `checked` property (the verification `update_setting` already
 trusts), its name matched by exact equality to the display name above;
-returns ON, OFF or UNREADABLE and nothing else. **READ ONLY: this lane never
-presses the switch.** Condition 1 asks for OFF to be READ, never made so --
-and turning it off would itself be a settings write this order does not
-grant. Until the page is admitted and read, the six rows (`P A8`, `A11`,
-`A13`, `A17`, `A19`, `A21`) stay where session 1 left them.
+returns one of lane L7's `profile_editor.ACCOUNT_READINGS` -- `off`, `on`,
+`unknown` -- and nothing else. It is taken BEFORE the change is entered and
+handed to the seam lane L7 built for exactly this (master, merged here):
+the `account_share_updates` keyword of `profile_editor.read_save_gate`,
+which `writes.perform` calls without it today, so the save gate refuses
+wherever the dialog draws no named notify control. **READ ONLY: this lane
+never presses the switch.** Condition 1 asks for OFF to be READ, never made
+so -- and turning it off would itself be a settings write this order does
+not grant.
+
+**AND ON ITS OWN IT UNBLOCKS NONE OF THE SIX.** Lane L7's save gate also
+refuses while the dialog draws a switch it cannot NAME
+(`6_unnamed_switch_unresolved`), which the registered amendment requires,
+and the intro editor draws two. Session 1's capture identified them ('Open
+Profile' and 'Profile Premium Badge', Entry 5) -- by the text of their
+section, read offline; the switches themselves carry no accessible name,
+which is the one thing the gate classifies on. So the six rows (`P A8`,
+`A11`, `A13`, `A17`, `A19`, `A21`) need BOTH this reader AND lane L7's named
+build that recognises those two switches against that capture; until both
+land they stay where session 1 left them.
+
+### Master merged once more, after Part 2 (`b230287`)
+
+Master moved to `1902fcb` while Part 2 was built -- lanes L7 (writes to his
+own profile) and Y2 (43 capabilities admitted as rows), and two rulings
+batches, among them the amended notify condition (f) was written for and
+`PAGE-MAY-VETO-NEVER-SUPPLY`. Integrated so the branch hands over
+merge-ready; the order's rules, applied as in Part 1:
+
+    file                                   resolution
+    _audit/_census/messaging-and-content   C72 changed on both sides: ours the
+                                           (a) correction mid-cell, theirs
+                                           only APPENDED lane Y2's DRAWN note
+                                           -> both kept; every other row one
+                                           side only -> that side
+    _audit/_census/read-addresses.tsv      no row on both sides: ours C85,
+                                           N 76, P D28, P J4; theirs sixteen,
+                                           including Y2's new rows
+    _audit/RULINGS.md, blocker-map.tsv     derived: theirs, every resolved
+                                           path staged, all three generators
+                                           --write twice, then --check
+
+Code merged without conflict (`server.py`, `writes.py`, the correction
+guard). The census instruments are green on the merged tree,
+`census_completion --check` included -- no pin moves -- and the
+asserted-name checker's findings are the pinned eight. **Gate, on the
+committed merge, scoped to where the two sides meet** (the write tests where
+(b) meets lane L7's `writes.py`; the tool-surface, envelope and reader
+guards where (a) meets `server.py`; the press and boundary files by their
+own tests; the census and document guards where the Part 2 notes meet lane
+Y2's rows; the 18 corpus-wide guards): 57 files, **4396 passed**. The full
+suite was not run locally, by order.
+
+Two Part 2 sections now cite what the merge brought: (d)'s later key takes
+its address from its arguments (`PAGE-MAY-VETO-NEVER-SUPPLY`), and (f)'s
+reader returns lane L7's `ACCOUNT_READINGS` into the seam L7 built for it --
+and, on its own, unblocks none of the six intro rows, because L7's gate
+refuses on the dialog's two unnamed switches until a second build
+recognises them.
