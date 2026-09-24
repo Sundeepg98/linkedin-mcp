@@ -10191,3 +10191,28 @@ distinctive control -- a boundary stub that admits everything, which proved
 the reachability column read the shipped boundary -- lives on in the
 successor's tests (section 65.5). Section 47's text stays as the record of
 what it measured; this note is where it ended.
+
+### 67.6 THE FOLLOW-UP'S ENTRIES, 2026-09-24
+
+The orchestrator's follow-up order closed the gaps section 5 of the lane record
+named. Each entry below was shown failing before its repair; the per-item
+record is the lane record's `## Follow-up 2026-09-24`.
+
+| path | shown failing by |
+|---|---|
+| `tests/test_a_write_receipt_carries_no_library_message.py` | a failing click and a failing verification read, each quoting a marker, driven end to end through the follow-a-Page harness, plus a structural scan of `writes.py` for exception text outside a `raise` with its own control: 3 failed, 1 passed on the unrepaired module |
+| `tests/test_a_failed_navigation_withholds_its_address.py` | a page whose navigation fails quoting its address, over two admitted addresses carrying a keyword: the keyword appeared twice in the unrepaired message |
+| `tests/test_no_log_record_carries_a_library_message.py`, and the DEBUG log capture in `tests/test_readers_emit_no_page_string.py` | the scan named all 45 logging calls that rendered a caught exception (its control expects lines 5, 9 and 13 of a planted module); the failing-page drive, capturing the `linkedin` logger at DEBUG, convicted 35 readers (36 failed) |
+| `tests/test_click_is_not_its_own_evidence.py` (`_fast_wait`) | the premise check -- no reading under the 250 ms cut on a page that draws the wrapper, and at least one reading -- failed exactly the sixteen non-takers of the seventeen, twice, under two load profiles |
+| `linkedin_server/readonly.py` (`JS_API_REPLACEMENT_PATTERNS`) + `tests/test_readonly.py` | 13 plants replacing a browser API (the clipboard shape, `window.fetch`, a prototype member, `defineProperty`, `delete`, `Reflect.set`, a bracketed member) each scanned clean on the token list: 13 failed; 10 reads of the same globals stay clean before and after |
+| `scripts/check_asserted_names_resolve.py` (`tracked`), `tests/test_a_correction_is_findable_from_the_claim.py` (`_documents`) | a conflict manufactured in a throwaway repository: both listings returned the path three times; a planted tripled listing turned the basename-uniqueness assertion red (249 == 247) |
+| `tests/test_navigation_is_never_derived.py` (`derived_across_modules`; the tree test runs where `CI` is set) | with the import resolver stubbed to resolve nothing, the seven red plants failed and the tree test failed on its planted control; four green plants, the `_url_for` collision among them, hold either way |
+
+### 67.7 DECLARED DISPOSABLE (THE FOLLOW-UP)
+
+The follow-up's scratchpad helpers -- the exception-text and log-site
+censuses, the log rewriter, the boundary-digest comparer, the API-replacement
+prototype, the directions comparison, the retired census's red drive, and the
+whole-tree prototype with its tracer, calibration and counterfactual
+measurements -- are declared disposable. Every number they produced is in the
+lane record, and what they found is held by the entries above.

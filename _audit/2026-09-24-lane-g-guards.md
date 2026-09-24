@@ -233,7 +233,7 @@ so a fix forces its entries out.
 lowercase-only, so "Committed `d111560`" (lane L3's record, line 888) was never a
 candidate. Every other keyword slot had the same property.
 
-**MEASURED BEFORE WIDENING.** An implementer child folded each other keyword in
+**MEASURED BEFORE WIDENING.** An implementer child (`claude-sonnet-5`, measured afterwards -- see the Follow-up) folded each other keyword in
 isolation over the tracked corpus: 35 (token, site) pairs added that nothing had
 checked -- 33 resolve, and the two that do not are already suppressed at the same
 site (`56e03b0` in a document declaring its SHAs dead; `c4d2be2` already
@@ -256,7 +256,7 @@ of `master`.
 stage. The census cleanup lane measured 33/30/24 against 11/10/8 for one document
 (`_audit/2026-09-23-census-cleanup.md` section 13.5).
 
-**THE REPAIR**, by an implementer child and reviewed here: the listing is now
+**THE REPAIR**, by an implementer child (`claude-sonnet-5`, measured afterwards -- see the Follow-up) and reviewed here: the listing is now
 `tracked_audit_paths(root)`, collapsed with a set exactly as
 `scripts/build_audit_index.py` already does -- not `--deduplicate`, which older git
 lacks under `check=True`.
@@ -370,7 +370,7 @@ record alone, with the generated files re-run to a fixpoint.
 
 ## 7. THE ONE COLD VERIFICATION PASS
 
-One implementer child, cold to this work, ran an 11-item closed checklist over
+One implementer child (`claude-sonnet-5`, measured afterwards -- see the Follow-up), cold to this work, ran an 11-item closed checklist over
 the tree at the section 6 table's last row, from disk, read-only, reporting facts
 for the lead to judge. **11 of 11
 PASS**, no CANNOT-TELL. The report stays in the session scratchpad; what it found:
@@ -400,3 +400,331 @@ PASS**, no CANNOT-TELL. The report stays in the session scratchpad; what it foun
 
 As briefed, that was the one pass; nothing was re-verified after it. The gate run
 2 result and this section are the only changes since.
+
+## Follow-up 2026-09-24
+
+The orchestrator's follow-up order, stamped 03:48, after lane G merged as
+`209a831`: ten items, one commit each, each with a test shown failing first.
+STEP 0 fast-forwarded this branch to `209a831`; every commit below sits on it.
+Two children did closed slices (items 6 and 7), both `general-purpose`, both
+reporting `claude-opus-5-5`; each was told this lead was writing in the same
+worktree, which files were its own, and not to commit. Both reports stay in the
+session scratchpad; this lead reviewed each diff before committing it.
+
+**A CORRECTION TO THIS RECORD'S EARLIER SECTIONS, measured rather than
+assumed.** The original lane's three children -- slice (c)'s measurement,
+slice (d)'s build, and section 7's cold verification -- were `implementer`-typed,
+and every model field in their transcripts reads `claude-sonnet-5` (54, 90 and
+163 fields respectively; no other model appears). Sections 3, 4 and 7 name no
+model; this is the model. The orchestrator measured the same leak tonight and
+barred the type; the two follow-up children's transcripts read
+`claude-opus-5-5` throughout (115 and 152 fields).
+
+### F.0 Commits, with their times from `git log`
+
+| time | hash | item | subject |
+|---|---|---|---|
+| 04:41 | `c6486f2` | 1 | census feed_item: the caller names the item, and his own rail may only veto it |
+| 04:42 | `da3354d` | 3 | write receipts: perform's click_error and verified_why carry the exception TYPE |
+| 04:47 | `e88ed47` | 1 | reader baseline: record _own_item_veto, which replaced the census resolver |
+| 04:47 | `2c1a676` | 2 | five readers' error fields carry the exception TYPE; KNOWN_LAUNDERERS is empty |
+| 04:48 | `3e6fb24` | 4 | browser: a failed navigation names its type and the address's family, never the address |
+| 04:48 | `892f7d5` | 6 | two more ls-files listings read a conflicted path once, not once per merge stage |
+| 04:52 | `fd5fc78` | 7 | typeahead tests: the 250 ms cut goes to the one test that wants the timeout, and checks its own premise |
+| 05:00 | `a90a7a0` | 5 | logs: every record that carried a caught exception's text now carries its type |
+| 05:08 | `d618fc8` | 8 | mutation scan: replacing a browser API is a mutation, and the scan now sees it |
+| 05:12 | `98e1937` | 9 | retire scripts/_check_jobs_gap_directions.py: a stale, crashing subset of a maintained table |
+| 05:37 | `845b38c` | 10 | navigation guard: a whole-tree complement resolves calls through imports, and runs in CI |
+
+### F.1 Item 1 -- the census `feed_item` route: the caller names the item, his rail may only veto it
+
+THE RULING, delegated by the orchestrator: THE PAGE MAY VETO A NAVIGATION,
+NEVER SUPPLY ONE.
+
+* **Failing test.** With the three `KNOWN_DERIVED_NAVIGATIONS` declarations
+  removed, the navigation guard went red on all three routes: 3 failed. The
+  retired code, driven through the same rail from `209a831`'s `server.py`,
+  opened the page's FIRST item for `feed_item` and its RICHEST for
+  `feed_item_commented`, and refused an `item` argument outright.
+* **Fix.** `linkedin_surface_census(surface, item)`. `feed_item` requires
+  `item`, one of the keys `linkedin_my_activity_items` returned; a missing or
+  malformed one is refused before any page loads (`pages_loaded` 0) and is
+  never echoed, and a fixed surface refuses an item. `_own_item_veto` replaces
+  `_resolve_own_item_permalink`: it reads his rail, inherits every authorship
+  refusal, answers one membership question and RETURNS NO ADDRESS; an item not
+  on the rail is refused with its page never loaded, naming none of the rail's
+  other keys. The permalink is built from the caller's argument. The anchor
+  count is coerced (the retired resolver called `int()` on a page value).
+  `feed_item_commented` and `CENSUS_ITEM_RULES` are retired -- they differed
+  only in how the page chose; the caller now picks the richest item from
+  `anchors_per_item`. The two comment probes take the items on the command
+  line, verify each on the rail, and visit in the operator's order. The tool
+  surface moves from 69 to 70 parameters; the README's census row is corrected.
+* **Passing.** Seven new census tests (the named item and no other; an item off
+  the rail refused before its page; a rail refusal still stops the census; no
+  item or a malformed one refused before any load, eight shapes; a fixed
+  surface refuses an item; the item shape is the reader's own regex; the veto
+  cannot supply an address). The whole navigation file and the staged guard's
+  tests 629 passed; the census and pin files green; `KNOWN_DERIVED_NAVIGATIONS`
+  empty again.
+* **MISSED, AND OWNED.** That commit's gate selection did not include the
+  reader guard, and the renamed reader broke
+  `test_the_driven_set_has_not_silently_shrunk` ("a new reader with no recorded
+  verdict"). Repaired in `e88ed47` with `--write-baseline`, which also moved
+  three entries from `returns_text` to `clean` that were ALREADY stale at
+  `209a831` -- the guard does not fail on an improvement, so nothing had said so.
+
+### F.2 Item 2 -- five readers write the exception's type; `KNOWN_LAUNDERERS` is empty
+
+* **Failing test.** With `KNOWN_LAUNDERERS` emptied first, the failing-page
+  family went red on exactly these five: 5 failed, 121 passed.
+* **Fix.** `out["error"] = type(exc).__name__`, one line per handler:
+  `events.read_events_home`, `job_collections.read_job_collection`,
+  `newsletters.read_newsletter_subscriptions`,
+  `notify_cost.read_notifications_badge` (two handlers),
+  `premium.read_premium_surface`.
+* **Passing.** The reader guard, the five modules' own tests, and the envelope
+  and page-text guards: 496 passed.
+* **The cost this order accepted, written down rather than deleted.** Three tests
+  pinned the old message (`RuntimeError: frame was detached`); they now assert
+  the class and the message's absence. The newsletter test is renamed, and its
+  docstring keeps the argument it made for the message -- a diagnostic that
+  named its own cause.
+
+### F.3 Item 3 -- `writes.perform`'s `click_error` and `verified_why` carry the type
+
+* **Failing test.** `tests/test_a_write_receipt_carries_no_library_message.py`:
+  a failing click and a failing verification read, each quoting a marker,
+  driven end to end through the follow-a-Page harness on a local headless page,
+  plus a structural scan that `writes.py` renders a caught exception's text
+  nowhere but a `raise`, with its own control. On the unrepaired module: 3
+  failed, 1 passed -- the click receipt carried the selector and the marker,
+  the verification receipt the marker, and the scan named both lines.
+* **Fix.** Two hunks, line-local for lanes L5 and L7: `click_error` is the
+  type; `verified_why` names the type and says why its message is not repeated.
+* **Passing.** 4 passed. `tests/test_verification_that_could_not_read.py` had
+  proved its raise was real by reading the navigator's refusal back OUT OF THE
+  RECEIPT -- the leak itself; that proof now rests on the navigator's own
+  record, and the receipt is asserted to carry the type and NOT the address.
+
+### F.4 Item 4 -- a failed navigation names its type and the address's family
+
+* **Failing test.** `tests/test_a_failed_navigation_withholds_its_address.py`
+  drives `goto` with a page whose navigation fails quoting its address, over two
+  admitted addresses carrying a keyword: the keyword appeared twice in the
+  unrepaired message (once from the f-string, once inside Playwright's text).
+* **Fix.** `BrowserUnavailableError(f"navigation to a /{family}/ page failed:
+  {type} (the address and the library's message are withheld ...)")`, the
+  family being the address's first path segment; the original stays chained
+  in-process for a debugger.
+* **Passing.** 3 passed; the browser, auth, preflight, CDP, envelope and
+  error-url suites 235 passed.
+
+### F.5 Item 5 -- logs: where they land was measured, then type-only was chosen
+
+    where a record goes                  measured
+    the linkedin logger                  one StreamHandler to stderr, propagate
+                                         False, level LINKEDIN_LOG_LEVEL,
+                                         default INFO
+    LINKEDIN_LOG_LEVEL                   unset in the process, user and machine
+                                         scopes; set by no launcher; absent
+                                         from the MCP registration (type http,
+                                         a url, no env)
+    the server's stderr                  scripts/start_server.ps1 redirects it
+                                         to _state/http-server.err.log --
+                                         gitignored, ON DISK; it held 5 INFO
+                                         lifecycle lines, none from these sites
+    at the default level                 41 DEBUG sites land nowhere; 4 land in
+                                         that file when they fire (auth INFO x2,
+                                         profile_lock WARNING x2)
+    at DEBUG, the level one diagnoses at all 45 land there
+
+* **Decision: type-only, and 45 sites rather than the order's 30.** Redaction is
+  not honestly available: `config.scrub` substitutes paths only, and the
+  page-text rule records that this package has no instrument that can tell a
+  name. The sites that land BY DEFAULT were outside `dom.py`, so the scope
+  widened: `dom.py` 30, `browser.py` 8, `auth.py` 3, `cdp_bridge.py` 2,
+  `profile_lock.py` 2, each rewritten by AST position, one line each.
+* **Failing test.** `tests/test_no_log_record_carries_a_library_message.py`, a
+  structural pin over every module with its own control (a planted module, red
+  on lines 5, 9 and 13), named all 45. The failing-page drive, now capturing the
+  `linkedin` logger at DEBUG, convicted 35 readers whose records carried the
+  marker: 36 failed.
+* **Passing.** 409 passed; the caplog, profile-lock, browser, auth and CDP
+  suites 779 passed; the page-text and navigation sink inventories 636 passed,
+  unmoved.
+
+### F.6 Item 6 -- two more `ls-files` listings read a conflicted path once
+
+* **Failing test.** A conflict manufactured in a throwaway repository (git lists
+  the path three times -- the premise, measured): `tracked()` and `_documents()`
+  both returned it three times. For `_documents()` the symptom is a verdict: a
+  planted tripled listing turned the corpus check's basename-uniqueness
+  assertion red on a duplicate that does not exist (249 == 247).
+* **Fix.** `tracked()` dedupes by `dict.fromkeys` (git's order kept -- stage
+  repeats are adjacent); `_documents()` by a set over git's exact strings,
+  taken before they become case-blind Windows paths, then sorted as before.
+* **Passing.** Both modules 27 passed.
+* **THE HONEST HALF, from the child's measurement.** In the asserted-names guard
+  the repeat changed no verdict -- `load_corpus` keys by path -- so the symptom
+  test written for it passed on the unrepaired code and was not kept. The real
+  mid-merge hazard for that ratchet is the conflict-marked WORKING COPY: a name
+  inside a conflicting hunk counts twice, and no listing dedupe reaches it.
+  Suggested, not built: refuse while `git ls-files -u` is non-empty.
+
+### F.7 Item 7 -- the 250 ms cut goes to the one test that wants the timeout
+
+* **Measured by instrument first** (each reading followed by a count of
+  `[role="listbox"]` on its page): of the seventeen tests that took `_fast_wait`,
+  ONE reads a page with no wrapper and asserts `1_no_listbox`; seven read pages
+  that DO draw the wrapper, where 250 ms is a race (four assert a refusal that
+  needs the wait, three assert counts only and raced silently -- one was caught
+  reading `1_no_listbox` and passing); nine never took a typeahead reading.
+* **Failing test.** The fixture now fails a test, by name, at teardown if any
+  reading under the cut was taken on a wrapper page, or if none was taken.
+  Against the seventeen-test list it failed exactly the sixteen non-takers,
+  twice, under two load profiles (`-n 2` and serial).
+* **Fix.** `_fast_wait` removed from the sixteen; it also requests `over`, so a
+  machine without Playwright skips before the fixture exists.
+* **Passing.** The module 30 passed, 1 xfailed (pre-existing, strict). The
+  mechanism, shown in scratch: a wrapper attaching 300 ms late reads
+  `1_no_listbox` under the 250 ms bound and passes under 5000 ms; the former
+  racers' waits returned in 24 to 69 ms on the real bound.
+
+### F.8 Item 8 -- replacing a DOM or browser API is a mutation, and the scan sees it
+
+* **Failing test.** 13 plants in `tests/test_readonly.py` -- the clipboard shape
+  (`navigator.clipboard.writeText` swapped for a capturing function), a
+  replaced `window.fetch`, `Element.prototype.click`, `Object.defineProperty`,
+  `delete`, `Reflect.set`, a bracketed member and more -- each scanned CLEAN on
+  the token list: 13 failed. Ten reads of the same globals stay clean before
+  and after.
+* **Fix.** `scan_js_for_mutations` also reports `API replacement: <what
+  matched>` for an assignment or `delete` on a member reached from a browser
+  global, any `.prototype` member, `Object.defineProperty` and its relatives,
+  and `Object.assign` onto a global -- `JS_API_REPLACEMENT_PATTERNS`, five
+  compiled patterns. The token list is untouched. Measured before adoption over
+  the 58 JavaScript strings in this repository (every executed script, every
+  `*_JS` constant, every inline `evaluate` in `scripts/`): zero detections, so
+  no shipped script changes verdict.
+* **Passing.** The plants and reads green; the read-only boundary re-frozen with
+  a note -- `<functions>` `d7e1d0922e3af446` -> `ff43e832d6f2b685`, the other
+  seven digests byte-identical, HEAD hashing to exactly the prior pin. A
+  refusal grew; no permission moved.
+* **The first control was wrong, and the file says so.** `window.location.href
+  === x` was written as a read that must stay clean; the token list's substring
+  rule already flags it (`location.href =`). It was replaced by a comparison no
+  token covers.
+
+### F.9 Item 9 -- `scripts/_check_jobs_gap_directions.py`: deleted, on evidence
+
+    jobs.md GAP rows today                                     92
+    rows it classified                                         57
+      still GAP                                                54
+        covered by _audit/_census/jobs-directions.tsv          54   0 disagree
+      no longer GAP (J 18, J 39, J 40)                          3
+    today's GAP rows it did not classify                       40
+    its own run                                                crashed: KeyError on row 17
+    anything that ran it (tests, scripts, CI)                  nothing
+    its successor, scripts/check_jobs_directions.py            GREEN, 92 of 92
+
+* **Failing test.** None was possible for a script nothing ran: its own run
+  crashed, and the comparison (a scratch instrument, keyed on slice AND row
+  after its first draft keyed on slice alone) showed it a stale subset.
+* **Fix.** Deleted rather than wired: wiring it would have kept the second copy
+  of the data its own author warned against. Its one distinctive proof -- a
+  boundary stub that admits everything -- already lives in the successor's tests.
+  Register section 67.5 records the retirement.
+* **Passing.** The successor green over 92 of 92.
+
+### F.10 Item 10 (optional) -- built: a whole-tree complement, run in CI
+
+**THE CALL, AND WHY.** Built, because the gap it closes was named and priced
+but not covered anywhere, and CI is where walking the whole tree is free. The
+declined first complement matched callees by bare name; this one resolves every
+call THROUGH THE CALLING FILE'S IMPORTS (from-imports, module aliases, the
+package's relative imports, re-exports followed to their definition), so the
+`_url_for` artifact cannot recur.
+
+* **Failing test.** With the resolver stubbed to resolve nothing: the seven red
+  plants (from-import, module alias, package-relative module and name, two hops,
+  re-export, the J 57 accumulation fed from another file) 7 failed, 11 passed
+  (four green plants, seven premise tests), and the tree test under `CI=1` failed
+  on its planted control (`assert [] == ['ITEM_PERMALINK_URL.format(urn=urn)']`).
+* **Fix.** `derived_across_modules` runs the reader walk's own pass --
+  factored out as `_reader_pass`, so the per-file verdicts are unchanged -- over
+  every scanned file at once; `_Facts` gains the receiver of each call it
+  already recorded, which nothing else reads. The tree test asserts three
+  things, each able to fail alone: the complement adds exactly
+  `KNOWN_DERIVED_ACROSS_MODULES` (empty); a planted module pair added to the real
+  tree is convicted and nothing else moves; and calls on this tree do resolve
+  (the premise -- a dead resolver would look like a clean tree).
+* **Passing.** 19 passed under `CI=1`, the tree test 6.09 s. The navigation
+  file and its three dependents: 763 passed, 1 skipped (the tree test, locally,
+  saying why).
+* **WHERE IT RUNS.** `skipif(not os.environ.get("CI"))`: GitHub Actions sets
+  `CI=true` on every runner, and `scripts/ci_full_run_check.py` fails a shard on
+  any skip not declared in `scripts/ci_expected_skips.json` -- so it cannot
+  quietly skip in CI. `CI=1` runs it locally. The first CI run after merge
+  should show the node `test_no_navigation_is_derived_through_another_module`
+  PASSED in a shard's junit, not skipped.
+
+      measured on this tree (a shared, loaded box)
+      files                                             275
+      module-level functions                            2306
+        page-returning under the reader convention       476
+          of them only because they read a FILE          181  (re-run without
+                                                               read_text/read_bytes
+                                                               as readers: 295)
+      distinct calls resolving into another file         435
+        into a page-returning function                    65  (38 functions)
+      navigations carrying one                             0
+      parse and scope / each fixed point           6.7 s / 0.14 s
+
+* **THE RECORDED 89 WAS NOT REPRODUCED, AND IS NOT CLAIMED AS COVERED.** "89
+  call sites across 37 callees" came from an over-approximate bare-name summary
+  whose exact definition was not kept; two recomputations here under stated
+  definitions gave 1107 across 63 and 1189 across 99. The instrument's own count
+  is the 65 above.
+* **A BARE-NAME COMPLEMENT IS WRONG ON TODAY'S TREE IN A NEW WAY.** Run by name
+  over the tree as it stands, it convicts three sites, all by coincidence: both
+  item-1 probes -- `pathlib.Path(__file__).resolve()` inside
+  `sys.path.insert(...)` matched some module's page-returning `resolve`, which
+  tainted `sys`, then `sys.argv`, then the operator's own items -- and the
+  `_url_for` probe. Import resolution convicts none of them.
+* **Not seen, said in the file:** a method on an instance (a prototype that
+  matched methods by name found nine page-returning ones, and the two that reach
+  a page, `goto` and `evaluate`, are direct sources already), a dotted receiver,
+  `import *`, `importlib`, anything outside `SCANNED`.
+
+### F.11 What the follow-up exposed -- open, not repaired here
+
+1. **`tests/test_ci_shard.py::test_the_timings_table_still_prices_most_of_the_suite`
+   is red on this branch: 157 priced of 237 test files, and two thirds is 158.**
+   This branch adds three test files (items 3, 4, 5); the table was measured at
+   `f65ec88` over 157 files. Master is at 235 files since lane S merged, so the
+   merge makes it 157 of 238 against 159. Regeneration needs a full junit run
+   (the recipe is in `scripts/ci_shard.py`'s docstring), which this order bars on
+   the shared box, and CI uploads no junit. **A DECISION FOR THE MERGE:**
+   regenerate the table from one full run, or accept this red until someone does.
+2. **Census row `C85`** (`_audit/_census/messaging-and-content.md`) names
+   `server._resolve_own_item_permalink` behind the keys `feed_item` /
+   `feed_item_commented`; both are retired by item 1. Prose in a census row, so
+   left for its owner.
+3. **The live lane's clipboard-capturing script is now convicted by the
+   mutation scan (item 8)** -- the finding that started the item. The scan runs
+   at TEST time, not as a runtime gate: once that script sits where a test
+   asserts it scans clean (`tests/test_readonly.py`'s executed-script check, or a
+   module's own `scan_js_for_mutations(...) == []` pin), that test fails until
+   the script reads instead of replacing.
+4. **The asserted-names ratchet's conflict-marked working copy** (item 6):
+   named, not repaired.
+5. **`profile_lock`'s two WARNING records still carry `_LOCK_FILE`**, the lock
+   path from package config -- not exception text, so outside item 5's order,
+   and they land in the gitignored stderr log when they fire.
+6. **Five files this branch changed also moved on master since `209a831`**
+   (lane S): `_audit/INSTRUMENTS.md`, `linkedin_server/readonly.py`,
+   `linkedin_server/server.py`, `tests/test_a_correction_is_findable_from_the_claim.py`,
+   `tests/test_the_tool_surface_is_pinned_so_a_row_must_move.py`. The last pins a
+   parameter COUNT this branch moved 69 -> 70; `readonly.py` carries this
+   branch's re-frozen AST digest. Both are merge-time checks.
