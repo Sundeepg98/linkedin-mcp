@@ -771,8 +771,10 @@ and no write-class line changed on both sides.
   different action -- the instructions' paragraphs, the spec and `PERFORMABLE` comments, both
   hand-typed `server_info` lists -- a search for the ordinal found them. Each was moved by hand:
   fifteen write tools, sixteen sanctioned actions; `mark_company_interest` is the fourteenth,
-  because it landed on `master` first, and `send_reply` the fifteenth. Sections 3 and 8, written
-  before either merge, still call it the fourteenth.
+  because it landed on `master` first, and `send_reply` the fifteenth. Section 3, written before
+  either merge, still calls it the fourteenth, and sections 7 and 8 keep their pre-merge counts.
+  (This read "Sections 3 and 8 ... still call it the fourteenth" until a cold re-check found the
+  ordinal in section 3 only.)
 - The counts, MEASURED on the merged registry: 56 tools, 87 parameters, 41 read, 15 write, 15
   performable, 16 sanctioned actions (`set_open_to_work` still has no tool), 12 sanctioned
   mutating calls -- lane L7's 53 and 80 plus this lane's three tools and seven parameters. README,
@@ -818,6 +820,53 @@ in a scratch directory outside the repository and are declared disposable.
 WHERE THE CHASE STOPS: `master` read `66aaa95` when this subsection was committed. If it has
 moved again, this branch is one more merge behind it, and nothing here was measured against it.
 
+### The fourth merge: master moved to `530227e`, then `1902fcb`, while the third was being gated
+
+When the third merge was recorded, local `master` read `66aaa95`; minutes later it read `530227e`,
+lane Y2's merge -- 43 capabilities the census never enumerated, admitted as GAP rows (704 -> 747
+stated rows), `J 158` then COVERED-UNFIRED, the refused-address pin 60 -> 70, and its triage
+bucket, which the order had said might land first -- and then `1902fcb`, a rulings commit (names
+at runtime, their six mitigations, and the classes built behind the grant) that touches documents
+and the rulings generator only. `6d60867` merges `1902fcb` (parents `8d1cdf7`, `1902fcb`),
+resolved in a scratch dry run first as the third was; the index stages were checked
+byte-identical to the blobs the dry run resolved. Eight paths conflicted:
+
+- `_audit/_census/messaging-and-content.md` and `_audit/_census/network.md`, row by row. Five rows
+  changed on BOTH sides -- `M M1`, `M M14`, `M M18`, `M M29` and `N 4` -- and on each, both sides
+  APPENDED a note to the last cell and changed nothing else, verified before it was applied: each
+  cell now reads the base, then lane Y2's DRAWN note, then this lane's. Every other row came from
+  the one side that changed it, lane Y2's eleven admitted messaging rows among them.
+- `_audit/_census/write-classes.tsv`: row by row, no line changed on both sides -- lane Y2's
+  fourteen admitted write rows and this lane's 31 lines kept. `check_write_classes` GREEN, 339
+  lines, 16 R1 / 36 R2 / 287 R3, lane Y2's pin.
+- `scripts/census_completion.py`: every figure MEASURED on the merged tree, and each equals lane
+  Y2's pin moved by this lane's three rows: adjudicated 199 -> 202, delivered_broad 110 -> 113,
+  unfired 31 -> 34, gap 548 -> 545, gap_read 104 -> 103, gap_write 337 -> 335, b3_admitted 42 ->
+  41, b3_blocked_on_nothing 5 -> 4, b1_standing 11 -> 13, b1_no_ruling 20 -> 21. THE LAST MERGED
+  CLEAN AND WRONG: both sides moved `b1_no_ruling` 19 -> 20, lane Y2 by `J 158` and this lane by
+  `M M49`, and git keeps one copy of an identical change; the list of lines both sides added
+  identically found it, as it found the third merge's. `--check` exit 0.
+- `tests/test_triage_instrument.py`: lane Y2's 127 `{R 18, W 105, R+W 4}` and this lane's 113 are
+  kept as history, and the split the merged tree's `scripts/triage_messaging_gap_rows.py` measures
+  is pinned: 124 `{R 17, W 103, R+W 4}`.
+- `_audit/INDEX.md`, `_audit/RULINGS.md`, `_audit/_census/blocker-map.tsv`: master's copies,
+  every other path staged first, all three regenerated to a fixed point.
+- Unconflicted, and measured: `count_census_states --expect J=107,P=160,M=124,N=154` MATCH at 545;
+  `check_read_addresses` GREEN 103 of 103 (lane Y2's admitted read lines in, `M M49`'s out);
+  `pin_census_rows` no drift at 747; the refused-address GAP rows 70, lane Y2's pin, so this
+  lane's three built rows were none of the ten lane Y2 named.
+
+THE NAMES-AT-RUNTIME RULINGS, READ AGAINST THIS LANE, and not acted on here -- an integration
+merges rulings, it does not implement them. `linkedin_list_conversations` and
+`linkedin_open_messaging` return participant names when `include_names` is passed; the names are
+whitespace-normalised, and mitigation 2's other steps (control, zero-width and bidirectional
+characters stripped, a length cap, marked as untrusted third-party text) are not yet applied to
+them. And the same commit schedules `delete_or_withdraw_anything` to leave the forbidden list when
+the delete path is built, at which point `send_reply`'s `reversible_by`, which cites it, is to be
+re-read with the other five.
+
+WHERE THE CHASE STOPS NOW: `master` read `1902fcb` when this subsection was committed.
+
 ### Integration commits
 
 | commit | what |
@@ -830,7 +879,9 @@ moved again, this branch is one more merge behind it, and nothing here was measu
 | `ad7254b` | the second merge's subsection, and the generated files |
 | `cb2457b` | the merge of `master` `66aaa95` (lane L7's merge and its CI fix); conflicts as in the third merge's subsection |
 | `afe9b1c` | the merge's dated notes name the master it merged, `66aaa95`; they said `603f4d3`, the commit the resolutions were first built against |
-| the commit carrying this line | the third merge's subsection, and the generated files |
+| `8d1cdf7` | the third merge's subsection, and the generated files |
+| `6d60867` | the merge of `master` `1902fcb` (lane Y2's admission, then the names-at-runtime rulings); conflicts as in the fourth merge's subsection |
+| the commit carrying this line | the fourth merge's subsection, and the generated files |
 
 ### Gates run on the integrated branch
 
@@ -872,6 +923,19 @@ moved again, this branch is one more merge behind it, and nothing here was measu
 - The impact gate's plan, `--against ff98a7f`: 222 of 237 test files (94%), so it WIDENED TO THE
   FULL SUITE. By the order the full suite was NOT run locally; CI certifies at merge. Against
   `9b9a4d0`: 227 of 242. Against `66aaa95`: 229 of 244 (94%), widened the same way.
+- The gate over `8d1cdf7` -- the corpus-wide floor, the pin and prose files, the files the
+  dated-notes commit touched, and the document guards: 3409 passed, 0 failed.
+- THE FOURTH MERGE, over the merge's own tree (`6d60867`): the census instruments --
+  `census_completion --check` exit 0; `count_census_states --expect J=107,P=160,M=124,N=154`
+  MATCH at 545; `check_read_addresses` GREEN 103 of 103; `check_write_classes` GREEN 339;
+  `ruling_holds` GREEN; `pin_census_rows` no drift, 747; `measure_pointer_graph --check` PASS,
+  66 pointers; and the triage script's 124 `{R 17, W 103, R+W 4}`. The identity sweep: PASS, 0
+  hits across 857 files; the pre-commit identity gate on the merge: 0 hits across 32 staged
+  files; no added line against `master` or against this branch's previous head holds a
+  non-ASCII byte. Lane Y2 changed no module under `linkedin_server/`, so the gate after this
+  merge is the census side -- the corpus-wide floor, every test file that reads the census,
+  lane Y2's test files, the triage and pin tests -- and it runs over the commit carrying this
+  section.
 - The final gate over the commit carrying this section is reported in the lane's closing
   message: a record cannot carry the result of a gate that runs over it.
 
