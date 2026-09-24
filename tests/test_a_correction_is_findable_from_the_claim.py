@@ -760,9 +760,15 @@ NOT_A_CORRECTION: dict[tuple[str, str], str] = {
         "session document is false while leaving it untouched."
     ),
     ("network.md", "2026-09-23-live-lane-session-1.md"): (
-        "TABLE-ROW PROXIMITY, AND TWO ROWS' OWN HISTORY. Four rows cite the "
-        "session document -- `20`, `45`, `76` and `134` -- and the windows of "
-        "`20` and `45` hold no correction vocabulary at all. Row `134`'s "
+        "TABLE-ROW PROXIMITY, AND THREE ROWS' OWN HISTORY. Five rows cite the "
+        "session document -- `20`, `45`, `76`, `134` and `136` -- and the "
+        "windows of `20` and `45` hold no correction vocabulary at all. Row "
+        "`136` (cited 2026-09-24, the lane's Part 2 (e)) is ONE table line "
+        "whose matches are its own older paragraphs -- a 2026-09-03 source "
+        "that 'corrected the census on exactly this row' and a 2026-09-05 "
+        "'self-correction' that measured an earlier claim 'FALSE' -- and its "
+        "2026-09-24 note reports what session 1's press read and withdraws "
+        "nothing from the session document. Row `134`'s "
         "2026-09-23 23:08 paragraph banks it on the session's fire and cites "
         "the session document as its evidence. Read window by window: rows "
         "`132`, `133`, `135` and `136` each carry their own "
@@ -776,9 +782,9 @@ NOT_A_CORRECTION: dict[tuple[str, str], str] = {
         "2026-09-21 'Not a wrong reading -- a reading with a timestamp', about "
         "the row's 2026-09-19 permit; its 2026-09-24 paragraph reports what "
         "the gate and a capture now say and withdraws nothing from the "
-        "session document. **WHAT WOULD MAKE THIS ENTRY WRONG:** row `76` or "
-        "`134` asserting that something IN the session document is false "
-        "while leaving it untouched."
+        "session document. **WHAT WOULD MAKE THIS ENTRY WRONG:** row `76`, "
+        "`134` or `136` asserting that something IN the session document is "
+        "false while leaving it untouched."
     ),
     ("messaging-and-content.md", "2026-09-23-live-lane-session-1.md"): (
         "TABLE-ROW PROXIMITY. SEVEN lines cite the session document -- `M33`, "

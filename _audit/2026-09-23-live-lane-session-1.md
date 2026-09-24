@@ -1770,3 +1770,26 @@ out of a census correction row, which still said 49. The row now says 50
 and names this line as the latest admission (the next commit). The full
 suite was not run locally: `readonly.py` is imported by nearly every test
 file, so the plan widens, and by order that run is CI's.
+
+### (e) N 136: the panel is probably the one behind "Show more analytics" -- a note, the state left as it stands
+
+**THE ORDER:** "A census note that it may be the 'Details' panel behind
+'Show more analytics'." Written into row `136` of the network census. What
+the note rests on is this document's own record, not a guess: the press row
+`136` names as its REOPENER was taken live in session 1 for `P O3`
+(Entries 7 and 8), permitted by the reveal gate with the url and the
+counters held, and `profile_views_more` read what it drew -- a
+"Highlights" section of three value/label pairs (top location, top
+industry, top company) and a "Details" section, a companies breakdown of 5
+entries, each a share in percent, whose largest entry equals the top
+company. So a breakdown IS drawn on that page, behind the press.
+
+**NOT MEASURED, and the note says so:** whether "Details" also breaks down
+locations and industries (the reader found one breakdown, of companies), and
+whether the row's "top locations, industries and companies" means the three
+top values or three breakdowns. **The state stays MEASURED-ABSENT, as the
+order asked for a note;** the row's own reopener condition -- "a breakdown
+panel drawn under any name on that page" -- is met, so its state is for the
+census owner to re-rule, with `P O3`'s proving fire as the evidence and
+`linkedin_who_viewed_me(show_more_analytics=True)` as the tool that returns
+it (`more_analytics.revealed_insights`). Zero loads.
