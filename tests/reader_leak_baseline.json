@@ -90,6 +90,7 @@
     "press:_take_reading": "clean",
     "press:disclose": "clean",
     "profile_editor:read_save_gate": "clean",
+    "profile_editor:recognise_intro_editor_switches": "clean",
     "profile_editor:wait_for_editor_to_close": "clean",
     "profile_views_more:read_profile_views_more_insights": "clean",
     "reveal:reveal": "clean",

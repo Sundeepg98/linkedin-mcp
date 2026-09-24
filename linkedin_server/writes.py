@@ -10029,6 +10029,11 @@ async def perform(
                 "notify_network": editor_save_gate.get("notify_network"),
                 "condition_1": editor_save_gate.get("condition_1"),
                 "unnamed_switches": editor_save_gate.get("unnamed_switches"),
+                # The capture-identified switches among them, by identity from
+                # a closed tuple, and what code 6 counts: unnamed and not
+                # recognised. See profile_editor.recognise_intro_editor_switches.
+                "recognised_switches": editor_save_gate.get("recognised_switches"),
+                "unresolved_switches": editor_save_gate.get("unresolved_switches"),
                 "notify_network_means": profile_editor.notify_network_note(
                     editor_save_gate
                 ),

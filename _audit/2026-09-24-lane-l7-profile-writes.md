@@ -815,6 +815,156 @@ of 242 live test files against a line of 161.33, and `tests/test_ci_shard.py` pa
   stays NEEDS-CAPTURE until a way exists to aim a switch with no accessible name, which is the same
   build as the bullet above.
 
+## Follow-up 2026-09-24
+
+On the orchestrator's follow-up order (06:48), after lane L7 merged as `master` `603f4d3`. Step 0: the
+branch fast-forwarded to `603f4d3` cleanly. **One step the order did not name, taken on disk's word:**
+by 07:22 `master` had moved to `66aaa95`, a fix to this lane's merge -- CI on `603f4d3` failed two tests
+on every platform that this lane's local gates had not run: the oldest-Python f-string guard
+(`tests/test_the_package_compiles_on_its_oldest_python.py`, over a form in
+`tests/test_profile_editor_commit.py`) and the gap-rows pin (`tests/test_gap_rows_on_refused_addresses.py`,
+55 -> 60, five of this lane's cells newly naming an address). The branch fast-forwarded to `66aaa95`
+before any commit here, and both guards are in every gate below. One commit per item. Offline
+throughout: no LinkedIn, no browser against LinkedIn, no grant; every load below is a local headless
+Chromium over `set_content`.
+
+### F.1 The two unnamed switches, recognised by structure -- code 6 lifted for the intro editor only
+
+**WHERE THE CAPTURE IS, AND ONE DIFFERENCE FROM THE ORDER.** The order said to read the raw capture from
+the MAIN checkout's gitignored `_state/`. It is not there: the main checkout's `_state/` holds no
+intro-editor capture. The live lane's is at `_state/live1/editor_fields.html` in that lane's OWN
+worktree, gitignored the same way (`_audit/2026-09-23-live-lane-session-1.md` says its raw captures
+stay there). It was read from there, read-only, offline, with the order's discipline: structure dumps
+that fold every id and value to its shape and print text only when it is a closed list of LinkedIn UI
+strings or a code identifier, and nothing raw copied into a tracked file.
+
+**WHAT THE CAPTURE DRAWS -- AND IT IS LESS THAN THE ORDER EXPECTED.** Both switches are
+`input[type=checkbox][role=switch]` whose own `label` is drawn EMPTY, each the only input in a
+wrapper `div` carrying `role=switch` and `aria-checked` (its accessible name, 'Tap to toggle
+setting', is the same on both). Each wrapper sits in a setting block of exactly two parts -- a text
+part (a title paragraph and a description paragraph, no control) and the part holding the wrapper --
+and the two blocks sit in one row after a leading paragraph. That row is the last of ten direct
+children of the dialog's scrolling column, `div[data-testid="lazy-column"]`. **None of the three
+anchors the order named is drawn around the switches:** the dialog's one `section` is not an ancestor
+of the row; `aria-describedby` is carried by five text inputs and nothing else; the only heading ids
+are the dialog's own label, `header` elements whose one id is shared by five elements in the document.
+Compared node by node, the two blocks are identical in every attribute but two random ones: a
+`componentkey` of random-UUID shape (version 4, as 247 of the capture's 315 keys are) and an input id
+of the shape React generates. Both are random BY THOSE SHAPES: one render is on record, so "a new
+value on every render" is DERIVED from the shape, not measured across two. So the nearest anchor the
+page itself names is the column, by its test id, and the only things that tell the two switches apart
+are the visible text of each block's title paragraph -- which the order rules out -- and their ORDER in
+the row.
+
+**WHAT WAS BUILT** (`linkedin_server/profile_editor.py`):
+
+* **The shapes** -- `INTRO_SWITCH_COLUMN` (the column's test id: an attribute value, as `role="switch"`
+  is, a name in LinkedIn's code and never text a viewer reads), `INTRO_SWITCH_ROW` (a direct child of
+  the column whose element children are exactly a paragraph and two blocks, the second and third each
+  holding a wrapper with a checkbox) and `INTRO_SWITCH_BLOCKS` (one per identity, in the recorded order,
+  each exactly two parts with a paragraph and no control in the first). The press rules' discipline: an
+  enumerated shape by attribute, exact membership, never a label. Identity is a block's ORDER, taken
+  from a closed tuple (`INTRO_SWITCH_IDENTITIES`: `open_profile`, `profile_premium_badge`), never from
+  the page.
+* **`recognise_intro_editor_switches`** -- every question to the page is a `locator(...).count()`, so
+  the page runs nothing it did not already run and what comes back is integers: **no new script and no
+  new waiver**, the promise the module already made. All or nothing: one dialog holding the one `Save`
+  control (found by `SAVE_SELECTOR`'s own two halves, pinned equal by a test), one row, and for EACH
+  identity exactly one block holding exactly one checkbox, which is the recorded unnamed switch by its
+  attributes AND has no accessible name by Playwright's own name computation, hidden or not (the fields
+  reader counts hidden controls too).
+* **THE ACCESSIBLE-NAME HALF IS NOT OPTIONAL.** Every attribute can match while a label elsewhere on
+  the page names the input. A recogniser that asked attributes alone would then "recognise" two switches
+  the fields reader did not count as unnamed, and subtracting them would lift code 6 over two OTHER
+  unnamed switches nobody identified. Measured: two labels naming the row's inputs plus two planted
+  unnamed switches -- as built, `6_unnamed_switch_unresolved`; with the name half knocked out in
+  process, the gate PROCEEDS.
+* **The verdict** counts `unresolved_switches` -- unnamed and NOT recognised -- and code 6 fires only on
+  those; `recognised_switches` names the others. A reading that recognises more than the fields reader
+  counts unnamed recognises none. The receipt carries both. The amendment's wording is kept exact: the
+  condition is not met while a switch the dialog cannot name is present, until a capture identifies it
+  -- and only the intro editor's recorded pair is tied to a capture (the gate runs for
+  `update_profile_field` alone, `writes.EDITOR_SAVE_ACTIONS`).
+* **WHAT IT DOES NOT DO:** order is enough to LIFT code 6 -- both switches are identified as not notify
+  controls, so which is which changes nothing there -- and it is NOT enough to AIM a press at one of
+  them (F.2).
+
+**THE FIRST CUT WAS REFUSED BY THE READ-ONLY BOUNDARY, AND WAS REBUILT RATHER THAN WAIVED.** It
+recognised with a new injected script (`page.evaluate`), and six guards failed:
+`test_readonly.py`'s unsanctioned-mutating-call, sanctioned-entry-present, mutating-call-count and
+scripts-executed checks, `test_writes.py`'s mutation count (`14 == 12 + 1`), and the unwired-reader
+inventory. A new injected script is a sanctioned-mutation entry, and adding one is the review moment
+those checks exist to create -- the operator's say-so, not a lane's. So the recognition became locator
+counts, which the boundary classes as reads. The function was also renamed from `read_...` to
+`recognise_...`: the inventory flags a `read_*` function no OTHER module calls, and this one is called
+only by `read_save_gate` in its own module -- wired, through the gate, not unwired.
+
+**THE FIXTURE** -- `tests/fixtures/synthetic/intro_editor_switches.html`, built by
+`scripts/_build_intro_editor_switches_fixture.py` in the repo's builder pattern (the provenance script,
+structure carried over, every text, id and key invented, no sanitisation key needed, counts printed
+only). It carries the row inside the column's test id, because the recognition anchors on it. Its
+`--check` mode applies the same signature -- the column, the empty label before the input, no naming
+attribute, one checkbox per block, and no label naming the input from anywhere in the document -- to any
+file; the raw capture passes it.
+
+**TESTS** (`tests/test_intro_editor_switches.py`, 18): each switch recognised in the recorded order and
+neither treated as a notify control; with the account setting read OFF the recognised pair no longer
+blocks; states read per identity, and an input and wrapper that disagree read `None`; a third unnamed
+switch planted OUTSIDE the row keeps code 6; a third block planted INSIDE the row, a second copy of the
+row, a wrapper that loses `role=switch`, or the row under any other parent than the column recognises
+none; a decoy row of the same outline without switches does not confuse it; a switch the page names
+from elsewhere is not recognised (the case above); a stylesheet-hidden pair is still recognised; the gate
+still refuses (code 5) whenever condition 1 is not established; swapping, blanking or renaming every
+label moves nothing; the verdict's all-or-nothing rule; a reader failure reports only its type; the
+dialog is found by the press selector's own halves; the builder signature holds on the fixture and
+refuses a page whose row loses its leading paragraph or whose column loses its test id.
+
+**SHOWN FAILING, FOUR WAYS.** (1) The gate as committed before this change (`66aaa95`), driven over the
+fixture with the account setting read OFF: `6_unnamed_switch_unresolved`, 2 unnamed; after: proceeds,
+both recognised. (2) Against the old module the new test file fails 17 of 18 (the builder test is
+independent of the gate); both swapped files restored byte-identical. (3) The recogniser and the gate
+over the RAW capture, strictly offline -- page scripts disabled and every one of the 25 requests the
+capture references aborted: containers 1, rows 1, checkables 2, recognised 2, `open_profile` then
+`profile_premium_badge`, both checked; no account reading -> code 5; account OFF -> proceeds on
+`account_setting_off`. (4) Each load-bearing half knocked out in process, no tracked file edited, turns
+exactly its own test red: the accessible-name half (recognised 2 where 0 is required -- and the gate
+proceeds, above), `include_hidden` (the hidden pair recognised 0), the column anchor (rows 1 where 0 is
+required).
+
+**ALSO MOVED:** `tests/reader_leak_baseline.json` regenerated by its generator (+1 reader,
+`profile_editor:recognise_intro_editor_switches`, `clean`); the tool-envelope baseline regenerated and
+unchanged; `writes.py`'s receipt carries `recognised_switches` and `unresolved_switches` beside
+`unnamed_switches`; `scripts/ci_shard_timings.json` prices the new test file the live lane's way
+(a junit run of it alone, `ci_shard.seconds_per_file`, provenance appended: 64.966 s for 18 tests, each on a fresh local page, on a box other lanes were loading -- so high rather than low); INSTRUMENTS 70.6 registers the recognition, its accessible-name half and the builder's
+check with the evidence above.
+
+**GATES -- AND WHAT DID NOT RUN.** `scripts/impact_gate.py --against 603f4d3 --plan-only`: 7 changed paths
+-> 168 of 243 test files (69%), **WIDENING TO THE FULL SUITE**; item 1's own paths without `writes.py`
+still plan 128 of 243 (53%), past the same 45% line, because `profile_editor` is imported by `writes`
+and `writes` by nearly everything. So, as the order says, the impact gate was NOT run locally: the full
+suite is CI's on push. Run locally instead, on a box reading 100% CPU with other lanes' suites running:
+1. **One xdist run (4 workers, by file) of 36 files** -- item 1's own tests, the read-only boundary,
+   `test_writes.py`, the profile-editor commit tests, both page-string guards, the oldest-Python f-string
+   guard and the gap-rows pin (the two CI caught), the editor readers, the harness-grant, control-reach,
+   spec-denial and click-evidence guards, the orphan-module ruling, and the 18 corpus-wide guards
+   impact_gate always runs: **1 failed, 3941 passed, 1 xfailed** in 18 min 41 s. The one failure,
+   `test_click_is_not_its_own_evidence.py::test_the_counts_can_differ_so_the_instrument_has_been_shown_to_speak`,
+   is a messaging-composer census that returned `1_no_listbox` where `3_no_option_carries_the_needle` was
+   expected -- the listbox gone before the gate looked, under that test's shortened waits. It touches
+   neither `profile_editor` nor the receipt keys. Alone it passed (1 passed, 23.8 s), and its whole file
+   passed again beside item 1's tests, the read-only boundary, the f-string guard and the inventory
+   (3 workers, after the last comment edit): **371 passed, 1 xfailed** -- the xfail its own KNOWN DEFECT
+   marker. It is recorded here as a load flake that CI should see green, not as a finding of this item.
+2. **The receipt, surface and pin files** the integration gate carried and the list above did not
+   (receipt-names-its-action, preview/click state, server surface, prose claims, reader reachability,
+   every-tool-on-the-surface, the tool-surface and count-claim pins, `P I14`'s own tests), 3 workers:
+   **287 passed**. Only two test files read the save gate's receipt keys, and both are in run 1.
+3. **Generated files** -- `build_audit_index`, `build_rulings_index` and `build_blocker_map --check`, at a
+   fixed point on the staged tree.
+4. **This record, with F.1 in it** -- the cited-sha, asserted-name, correction-findable, banked-evidence,
+   ignored-path, prose-claim, page-text, identity, credential and person-name guards, with the shard
+   table's, ignore-entry and impact-gate tests, 4 workers: **2086 passed**.
+
 ## Live queue
 
 Loads counted off the code: `linkedin_profile_editor_values` and `linkedin_profile_editor_fields`
