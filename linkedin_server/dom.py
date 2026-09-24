@@ -7850,6 +7850,64 @@ async def read_thread_reply_surface(page: Any) -> dict[str, Any]:
     return out
 
 
+#: THE TOGGLE'S OTHER LABEL FAMILY, AND WHY THE READER COUNTS BOTH.
+#:
+#: LinkedIn writes a reaction toggle's state into its accessible name, and
+#: this repository has MEASURED it in two families:
+#:
+#:     "Reaction button state: no reaction"   OFF  the feed, his profile rail
+#:                                                 and an item permalink,
+#:                                                 2026-08-30 and 2026-08-31
+#:     "Reaction button state: Like"          ON   his profile rail, 2026-09-04
+#:     "Unreact Like"                         ON   his own liked post's
+#:                                                 permalink, 2026-09-23 and
+#:                                                 2026-09-24, in three
+#:                                                 captures that draw no
+#:                                                 "Reaction button state:"
+#:                                                 label at all
+#:
+#: and one it has NOT measured: "React <kind>", the OFF counterpart the
+#: "Unreact" family implies. It is COUNTED, not trusted -- a toggle wearing it
+#: is not invisible to a price -- and no write ever aims a click at it.
+#:
+#: Whether the permalink changed families after 2026-09-05 or draws a
+#: different component there is NOT known; counting both families is what
+#: makes the answer unnecessary for a price. Both prefixes end in a SPACE so
+#: neither matches the other family: "Reaction button state:" does not start
+#: with "React " (its sixth character is "i").
+REACTION_UNREACT_PREFIX = "Unreact "
+REACTION_REACT_PREFIX = "React "
+
+
+def reaction_toggle_counts(reading: Any) -> dict[str, Optional[int]]:
+    """How many reaction toggles wear an OFF label and how many an ON label.
+
+    PURE, over one :func:`read_reaction_surface` reading, and across BOTH
+    label families (see :data:`REACTION_UNREACT_PREFIX`). ``toggles_off`` is
+    the state family's OFF label plus the unmeasured "React" family;
+    ``toggles_on`` is the state family's other labels plus the "Unreact"
+    family. A reaction or an unreaction moves BOTH, one up and one down,
+    whichever family the page draws -- which is what makes the pair a price.
+
+    A count that did not read makes BOTH None: an unread count is not a zero,
+    and a price read off a zero that could not have moved is the defect this
+    exists to stop (the live lane's session document, Entry 11).
+    """
+    if not isinstance(reading, dict):
+        return {"toggles_off": None, "toggles_on": None}
+    values = [
+        reading.get(name)
+        for name in ("controls", "off_state", "unreact_controls", "react_controls")
+    ]
+    if any(isinstance(value, bool) or not isinstance(value, int) for value in values):
+        return {"toggles_off": None, "toggles_on": None}
+    controls, off_state, unreact, react = values
+    return {
+        "toggles_off": off_state + react,
+        "toggles_on": (controls - off_state) + unreact,
+    }
+
+
 async def read_reaction_surface(page: Any) -> dict[str, Any]:
     """The reaction and comment controls on this page, and the states worn.
 
@@ -7859,15 +7917,31 @@ async def read_reaction_surface(page: Any) -> dict[str, Any]:
     the neighbouring ``Hide post by <name>`` control -- an unshaped read would
     publish it into a confirm block. The measured label carries no name and
     survives shaping unchanged, so nothing is lost while that stays true.
+
+    ``unreact_controls`` and ``react_controls`` count the toggle's OTHER label
+    family (see :data:`REACTION_UNREACT_PREFIX`); each is None when its count
+    did not read, never a zero standing in for one.
     """
     out: dict[str, Any] = {
         "controls": 0,
         "off_state": 0,
+        "unreact_controls": None,
+        "react_controls": None,
         "menus": 0,
         "comment_controls": await _count_by_role(page, COMMENT_CONTROL_NAME),
         "permalinks": await _count_links_with(page, "/feed/update/"),
         "labels": [],
     }
+    for key, prefix in (
+        ("unreact_controls", REACTION_UNREACT_PREFIX),
+        ("react_controls", REACTION_REACT_PREFIX),
+    ):
+        try:
+            out[key] = int(
+                await page.locator('button[aria-label^="' + prefix + '"]').count()
+            )
+        except Exception as exc:  # noqa: BLE001 - an unread count stays None
+            logger.debug("%s unreadable: %s", key, type(exc).__name__)
     try:
         controls = page.locator(REACTION_CONTROL)
         out["controls"] = int(await controls.count())

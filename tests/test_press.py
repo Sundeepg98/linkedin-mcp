@@ -894,6 +894,9 @@ WHEN_KNOWABLE: dict[str, str] = {
     "no_counter_reader_supplied": "before_any_contact",
     # the page is read but never pressed
     "shape_absent_on_this_page": "after_a_read",
+    # condition 3's zero case, 2026-09-24: knowable from the counters' first
+    # reading, so refused after that read and before the click
+    "price_cannot_move": "after_a_read",
     # condition 3, the measured half -- these are facts about what the press
     # did and there is nothing about them a gate could know in advance
     "no_counter_reading": "after_the_press",
@@ -1025,6 +1028,8 @@ _REACHES: dict[str, dict] = {
         "url": f"{BASE}/feed/", "shape": "[aria-expanded]", "reader": None},
     "shape_absent_on_this_page": {
         "url": f"{BASE}/feed/", "shape": "[aria-expanded]", "control_count": 0},
+    "price_cannot_move": {
+        "url": f"{BASE}/feed/", "shape": "[aria-expanded]", "reader": "zero"},
     "counter_moved": {
         "url": f"{BASE}/feed/", "shape": "[aria-expanded]", "reader": "moving"},
     "counter_unreadable": {
@@ -1072,6 +1077,10 @@ def _reader_named(name):
     if name == "no_off_state":
         async def read():
             return {"invitations": 0}
+        return read
+    if name == "zero":
+        async def read():
+            return {"off_state": 0}
         return read
     raise AssertionError(name)
 
@@ -1277,3 +1286,117 @@ async def test_the_witness_never_asserts_permission():
                 "was permitted, and it is attached to refusals too."
             )
 
+
+
+# ---------------------------------------------------------------------------
+# A PRICE THAT CANNOT MOVE, and the permalink's own basis (2026-09-24)
+# ---------------------------------------------------------------------------
+
+#: The permalink the live lane's copy-link fired on, spelled with a synthetic
+#: id (four digits: this file is tracked and swept for real ones).
+PERMALINK = f"{BASE}/feed/update/urn:li:activity:1234/"
+
+
+def test_the_vacuous_first_fire_is_refused_now_and_was_permitted_then():
+    """THE SHAPE OF THE FIRST LIVE FIRE OF THE COPY LINK, SHOWN FAILING.
+
+    Load 25 of the live lane's session 1: a press on his own post's
+    permalink, priced by ``off_state`` alone, reading 0 before and after,
+    the menu closed again. Until 2026-09-24 the gate PERMITTED exactly this
+    (the permalink fell through to the feed's basis, and an unmoved zero is
+    unmoved); now the permalink has its own basis and the feed's lone
+    counter prices nothing there.
+    """
+    verdict = press.evaluate(
+        url=PERMALINK, shape="[aria-expanded]",
+        before={"off_state": 0}, after={"off_state": 0},
+        expanded_before="false", expanded_after="false",
+        already_pressed=True,
+    )
+    assert verdict.get("permitted") is not True, verdict
+    assert verdict.get("refused") == "sensitive_counter_not_read", verdict
+
+
+def test_a_zero_pair_on_the_permalink_basis_is_a_price_that_cannot_move():
+    verdict = press.evaluate(
+        url=PERMALINK, shape="[aria-expanded]",
+        before={"toggles_off": 0, "toggles_on": 0},
+        after={"toggles_off": 0, "toggles_on": 0},
+        expanded_before="false", expanded_after="false",
+        already_pressed=True,
+    )
+    assert verdict.get("refused") == "price_cannot_move", verdict
+
+
+def test_a_zero_on_the_feed_basis_is_a_price_that_cannot_move_too():
+    """The rule is the gate's, not the permalink's: the feed's one counter
+    reading 0 at both ends could not have told a reaction from none."""
+    verdict = press.evaluate(
+        url=f"{BASE}/feed/", shape="[aria-expanded]",
+        before={"off_state": 0}, after={"off_state": 0},
+        expanded_before="false", expanded_after="false",
+        already_pressed=True,
+    )
+    assert verdict.get("refused") == "price_cannot_move", verdict
+
+
+@pytest.mark.parametrize(
+    ("before", "after"),
+    [
+        ({"toggles_off": 0, "toggles_on": 1}, {"toggles_off": 0, "toggles_on": 1}),
+        ({"toggles_off": 1, "toggles_on": 0}, {"toggles_off": 1, "toggles_on": 0}),
+    ],
+    ids=["one_toggle_on", "one_toggle_off"],
+)
+def test_the_permalink_basis_permits_a_price_that_could_move(before, after):
+    """THE POSITIVE CONTROL: the live-shaped reading (his own liked post) and
+    its OFF twin are prices, so the rule above is not a blanket refusal."""
+    verdict = press.evaluate(
+        url=PERMALINK, shape="[aria-expanded]", before=before, after=after,
+        expanded_before="false", expanded_after="false", already_pressed=True,
+    )
+    assert verdict.get("permitted") is True, verdict
+    assert verdict["priced_by"] == ["toggles_off", "toggles_on"], verdict
+
+
+def test_the_permalink_resolves_to_its_own_basis_and_the_feed_to_the_feeds():
+    """ORDER IS THE MECHANISM: ``sensitivity_basis`` takes the first marker
+    the path contains, and a permalink's path contains ``/feed/``."""
+    assert press.sensitivity_basis(PERMALINK)["counters"] == (
+        "toggles_off", "toggles_on"
+    )
+    assert press.sensitivity_basis(f"{BASE}/feed/")["counters"] == ("off_state",)
+
+
+@pytest.mark.parametrize(
+    ("before", "outcome"),
+    [
+        ({"toggles_off": 0, "toggles_on": 1}, True),
+        ({"toggles_off": 1, "toggles_on": 0}, True),
+        ({"toggles_off": 0, "toggles_on": 0}, "price_cannot_move"),
+        ({"toggles_off": None, "toggles_on": 1}, None),
+        ({"toggles_off": 0, "toggles_on": True}, None),
+        ({"toggles_on": 1}, None),
+        (None, None),
+    ],
+    ids=["on", "off", "zero", "one_unread", "a_bool", "a_counter_missing", "none"],
+)
+def test_check_price_can_move_decides_only_the_zero_case(before, outcome):
+    """True for a price that can move; a refusal for the zero; None -- not
+    this check's question -- for everything the post-press gate answers."""
+    verdict = press.check_price_can_move(
+        before, press.sensitivity_basis(PERMALINK)
+    )
+    if isinstance(outcome, str):
+        assert verdict.get("refused") == outcome, verdict
+    else:
+        assert verdict.get("refused") is None, verdict
+        assert verdict.get("price_can_move") is outcome, verdict
+
+
+def test_check_price_can_move_leaves_a_structural_basis_alone():
+    verdict = press.check_price_can_move(
+        {"headline_viewers": 0},
+        press.sensitivity_basis(f"{BASE}/analytics/profile-views/"),
+    )
+    assert verdict.get("refused") is None and verdict["price_can_move"] is None

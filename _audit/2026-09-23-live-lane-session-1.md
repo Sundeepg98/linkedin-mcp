@@ -800,7 +800,9 @@ capture draws three. His post's permalink draws NONE: its one toggle reads
 "Unreact Like" (the post is liked) in all three captures of that page, 22:38
 closed, 22:38 open and 00:15. So `off_state` read 0 before and after the
 press whatever happened; the gate compared two zeros and reported them as a
-price. It cannot tell "did not move" from "could not move", and the `/feed/`
+price. **(Overclaimed, and corrected in Part 2 (a) below: had an unreaction
+drawn the toggle OFF in the state family, `off_state` would have moved; what
+the zero could not do is tell unmoved from unmovable.)** It cannot tell "did not move" from "could not move", and the `/feed/`
 basis reaches `/feed/update/` by path prefix while its counter exists only
 on `/feed/`. **The same zero priced Entry 4's press** on the same page, which
 Entry 4 records as "priced by `off_state`: permitted" without the value.
@@ -817,7 +819,9 @@ not the gate's price, and the gate is what failed.
 **THE FIX, offline, before the fire is repeated.**
 `share_link.read_item_price` counts the item's toggle in both measured
 dialects -- `off_state` (the basis's own), plus the permalink's "Unreact "
-(on) and "React " (off; inferred from the on form, not yet seen). The tool
+(on) and "React " (off; inferred from the on form, not yet seen; **Part 2
+(a) below: the permalink's OFF label had been MEASURED on 2026-08-31, in the
+state family, so "dialects" was the wrong model**). The tool
 asks `price_can_move` BEFORE the first press and refuses `price_cannot_move`,
 with nothing pressed, when every counter reads 0; every reading comes back
 as integers in `price_readings`. 84 tests. Seven plants, all red: the zero
@@ -1061,12 +1065,17 @@ and the commit that adds this section.
    this lane's: a basis of its own for `/feed/update/`, or a refusal when the
    basis-named counter reads 0 at both ends and nothing else priced the
    press. The gate's `priced_by` field also names the basis counter rather
-   than whatever counter could move (Entry 12).
+   than whatever counter could move (Entry 12). **Built in Part 2 (a), and
+   narrowed there: "prices nothing" overclaimed -- the zero cannot tell
+   unmoved from unmovable.**
 2. **The react write aims by the feed's label** (`dom.REACTION_OFF_LABEL`,
    `reaction_control_selector`, used on item permalinks). On his own post's
    permalink the measured toggle is "Unreact Like" (the post liked; the OFF
    form "React Like" is inferred). n=1, one liked post, but it suggests the
-   write would find no control there. For lane L4.
+   write would find no control there. For lane L4. **Corrected in Part 2
+   (a): the permalink's OFF label was measured on 2026-08-31 in the state
+   family, and an ON label on 2026-09-04 ("Reaction button state: Like");
+   the write's real defect is reading the "Unreact" ON label -- Part 2 (b).**
 3. **`JS_MUTATION_TOKENS` cannot see API replacement -- now VERIFIED BY
    INSTRUMENT.** With `CLIPBOARD_JS` undeclared (RC) or declared as an
    ordinary injected script (RD),
@@ -1373,3 +1382,76 @@ eight findings in other waves' documents, pinned by its test, which passes).
 the order says not to), CI, the 3.10 cell. **If master moves again before
 the orchestrator merges this branch, that merge is the orchestrator's;** the
 chase is stopped here so Part 2 can start.
+
+---
+
+## Part 2 -- offline follow-ups, 2026-09-24
+
+The order's six follow-ups, one commit each, after Part 1. Nothing is fired.
+
+### (a) PRICE: the gate refuses a price that cannot move, and the permalink gets its own basis
+
+**FIRST, A CORRECTION TO SESSION 1, FOUND WHILE BUILDING THIS.** Before
+writing the basis I read what this repository had already measured about the
+reaction toggle, and it contradicts part of Entry 11:
+
+    "Reaction button state: no reaction"  OFF  the feed, his rail, AND an item
+                                               permalink, 2026-08-30/31
+    "Reaction button state: Like"         ON   his profile rail, 2026-09-04
+    "Unreact Like"                        ON   his own liked post's permalink,
+                                               2026-09-23/24 (session 1)
+
+So there are two label FAMILIES, not a feed dialect and a permalink dialect:
+the permalink drew the state family's OFF label on 2026-08-31, and the
+"Unreact" family on 2026-09-23. Whether LinkedIn changed the permalink's
+labels in between, or draws a different component there, is not known.
+Three session-1 statements follow from that and are corrected in place, each
+with a pointer here: Entry 11's "`off_state` read 0 whatever happened"
+(overclaimed -- an unreaction drawn in the state family would have moved
+it; what a zero cannot do is tell unmoved from unmovable); Entry 11's
+inferred OFF form "React Like" (unmeasured, and the measured permalink OFF
+label is the state family's); and finding 2 of the closing section (the
+react write's real defect is reading the "Unreact" ON label, which (b)
+takes). **The first fire's price is still unverifiable, and the fix still
+stands**: 0 of a counter that counts one label cannot distinguish a toggle
+drawn ON, a toggle drawn in the other family, and no toggle at all.
+
+**BUILT (offline):**
+
+- `dom`: the "Unreact" family's two prefixes as constants, dated and
+  sourced; `read_reaction_surface` counts both (None, never 0, when a count
+  did not read); a pure `reaction_toggle_counts` turns one reading into
+  `toggles_off` and `toggles_on` across both families -- a reaction or an
+  unreaction moves both, one up and one down, whichever family is drawn.
+- `press`: a sensitivity basis of its own for `/feed/update/`, ordered before
+  `/feed/` (the table matches by containment, first entry wins), naming the
+  two toggle counts; a pure `check_price_can_move` -- a sensitive basis whose
+  named counters all read an integer and sum to 0 is refused
+  `price_cannot_move`; `disclose` asks it after its first reading and BEFORE
+  the click, and `check_counters` refuses the same zero after a press for a
+  caller that skipped it. Classified `after_a_read` in the refusal inventory
+  and reached by a real input, like every other refusal.
+- `share_link`: `read_item_price` is now a thin reader over `dom`, and the
+  zero rule is `press`'s -- the lane's own copy of both is deleted; the
+  module also refuses an unreadable price before its trigger. The tool drops
+  its pre-check (the module refuses first) and returns two readings, not
+  three.
+
+**SHOWN FAILING ON THE SHAPE OF THE VACUOUS FIRST FIRE.** The new test feeds
+`press.evaluate` exactly load 25's reading -- a permalink, `off_state` 0
+before and after, the menu closed -- and asserts no permit. Run against the
+committed `press.py` it FAILS with `permitted: True`; on the new code it is
+refused (`sensitive_counter_not_read`: the permalink's basis names the toggle
+counts). Plus eight plants, each alone in a scratch copy, all red:
+
+    plant                                                        red
+    A1 the permalink basis removed                                28
+    A2 the post-press zero rule removed                            2
+    A3 disclose's pre-click check removed                          1
+    A4 check_price_can_move never refuses a zero                   3
+    A5 toggles_on ignoring the "Unreact" family                    3
+    A6 an unread family count made a zero                          2
+    A7 share_link's pre-trigger zero check removed                 1
+    A8 share_link's pre-trigger unread check removed               1
+
+Baseline and restored: 167 passed (`test_press` and `test_share_link`).

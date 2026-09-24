@@ -290,6 +290,33 @@ _SELF_SEGMENTS = frozenset({"me"})
 _STRUCTURAL_REQUIRED = ("why", "bound", "refuters")
 
 SENSITIVITY_BASES: tuple[tuple[str, dict[str, Any]], ...] = (
+    # A POST'S OWN PERMALINK, keyed apart from the feed and placed BEFORE it:
+    # :func:`sensitivity_basis` takes the first marker the path contains, and
+    # ``/feed/update/`` contains ``/feed/``. Until 2026-09-24 a permalink fell
+    # through to the feed's basis, whose one counter counts the state family's
+    # OFF label alone -- and on a permalink whose toggle is ON, or drawn in
+    # the other label family, that counter reads 0 whether or not anything
+    # could move. The first live fire of the copy link was priced by exactly
+    # that zero (the live lane's session document, Entry 11).
+    (
+        "/feed/update/",
+        {
+            "kind": "sensitive",
+            "counters": ("toggles_off", "toggles_on"),
+            "why": (
+                "An item permalink draws its item's ONE reaction toggle, and "
+                "LinkedIn writes the toggle's state into its accessible name "
+                "in two measured label families (dom.REACTION_UNREACT_PREFIX "
+                "records both, with dates). dom.reaction_toggle_counts counts "
+                "toggles OFF and ON across both families, so a reaction or an "
+                "unreaction moves BOTH counters, one up and one down, and a "
+                "reaction is visible to the item's author -- so it is "
+                "OUTWARD. Availability verified by instrument (toggles_on 1 "
+                "on his own post, live, 2026-09-24); sensitivity DERIVED and "
+                "marked as such."
+            ),
+        },
+    ),
     (
         "/feed/",
         {
@@ -728,6 +755,47 @@ def _basis_refusal(
     return None
 
 
+def check_price_can_move(
+    before: Optional[dict], basis: Optional[dict[str, Any]]
+) -> dict[str, Any]:
+    """CONDITION 3'S ZERO CASE, answerable after one reading and BEFORE any
+    press. PURE.
+
+    **A ZERO THAT COULD NOT HAVE MOVED CERTIFIES NOTHING.** A sensitive
+    counter prices a press by NOT moving across it -- which a counter reading
+    0 on a page that draws nothing it counts also does, whatever the press
+    did. So when every counter the surface's basis names read an integer
+    before the press and they sum to 0, nothing they count is drawn, and the
+    press is refused before it happens: unmeasurable resolves AGAINST the
+    press. MEASURED, not imagined: the first live fire of the copy link was
+    priced by the feed's ``off_state`` reading 0 at both ends on a permalink
+    (the live lane's session document, Entry 11).
+
+    Only the ZERO case is this function's. A route (b) basis, a missing
+    counter, or one that did not read is answered where it always was, by
+    :func:`check_counters` after the press -- so a caller sees exactly the
+    refusal it saw before this existed, and one more.
+    """
+    if not basis or str(basis.get("kind")) != "sensitive":
+        return {"pressed": False, "price_can_move": None}
+    named = tuple(basis.get("counters") or ())
+    if not named or not isinstance(before, dict):
+        return {"pressed": False, "price_can_move": None}
+    values = [before.get(name) for name in named]
+    if any(isinstance(value, bool) or not isinstance(value, int) for value in values):
+        return {"pressed": False, "price_can_move": None}
+    if sum(values) == 0:
+        return _refuse(
+            "price_cannot_move",
+            f"every counter this surface's basis names {sorted(named)} read 0 "
+            "before the press, so nothing they count is drawn here and none "
+            "of them could move whatever the press did. A zero that could not "
+            "have moved certifies nothing; nothing was pressed.",
+            terminal=False,
+        )
+    return {"pressed": False, "price_can_move": True}
+
+
 def check_basis(url: Optional[str]) -> dict[str, Any]:
     """CONDITION 3, THE HALF ANSWERABLE BEFORE ANY PAGE CONTACT. PURE.
 
@@ -860,6 +928,19 @@ def check_counters(
             f"sensitive, and none of them was read at both ends -- only "
             f"{sorted(shared)} was. A basis that names a counter nobody read "
             "prices nothing.",
+            terminal=False,
+        )
+    # THE ZERO CASE, after the press, for a caller that reached here without
+    # :func:`check_price_can_move` before it. The named counters did not move
+    # (``counter_moved`` above is terminal); if they also sum to 0 before the
+    # press, they could not have moved, and the unmoved reading prices nothing.
+    if sum(before[name] for name in named) == 0:
+        return _refuse(
+            "price_cannot_move",
+            f"the sensitive counters {sorted(named)} read 0 at both ends. A "
+            "zero that could not have moved certifies nothing: nothing they "
+            "count was drawn, so the press is not shown to have left an "
+            "outward counter alone.",
             terminal=False,
         )
 
@@ -1165,6 +1246,13 @@ async def disclose(
         if reading is not None:
             reading_before = await _take_reading(page, reading)
         before = await read_counters()
+        # A PRICE THAT CANNOT MOVE IS REFUSED BEFORE THE CLICK, not after it:
+        # it is knowable from this one reading. See check_price_can_move.
+        price = check_price_can_move(
+            before, sensitivity_basis(getattr(page, "url", None))
+        )
+        if price.get("refused"):
+            return price
         await locator.click(timeout=CLICK_TIMEOUT_MS)
         after = await read_counters()
         # THE OBSERVATION AT THE OPEN MOMENT, and it is the whole of the fix.

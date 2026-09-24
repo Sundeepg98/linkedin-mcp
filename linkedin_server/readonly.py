@@ -3141,11 +3141,13 @@ SANCTIONED_MUTATIONS: tuple[tuple[str, str, str], ...] = (
     # capture -- is named in share_link and reads as copied: false. The
     # address is admitted, the gate's component checks run before any press,
     # and the closure is verified. THE PRICE IS THE ITEM'S OWN REACTION
-    # TOGGLE, in both measured dialects (share_link.read_item_price), read
-    # before the first press and after the last; a page drawing no toggle is
-    # refused before any press, because the /feed/ basis's own off_state
-    # reads 0 on a permalink whatever happens -- measured on the first live
-    # fire, which that zero priced.
+    # TOGGLE: the permalink's own basis in press.SENSITIVITY_BASES counts
+    # toggles OFF and ON across both measured label families, before the
+    # first press and after the last, and a zero pair is refused before any
+    # press (press.check_price_can_move). The first live fire was priced by
+    # the feed basis's off_state at 0, which on a permalink whose toggle is
+    # ON -- or drawn in the other label family -- cannot tell unmoved from
+    # unmovable.
     ("linkedin_server/share_link.py", "_activate", "click"),
     ("linkedin_server/share_link.py", "_clipboard", "evaluate"),
     ("linkedin_server/share_link.py", "copy_own_post_link", "press"),
