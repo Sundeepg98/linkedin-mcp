@@ -12,167 +12,215 @@
 #         holds), M messaging and content, - none of the four
 # rw      R reads a surface, W changes something or starts a flow that does
 # A blank cell keeps the value the instrument derives.
-kind	pattern	scope	slice	rw	appears_to_be
-address	/help/linkedin/answer/<opaque>	docs	-	R	Help Center article ('Learn more' links); the census's own taxonomy source, not a capability
-address	/mynetwork	app	N	R	My Network hub, global nav; census rows name its sub-pages, no row carries the hub
-address	/mypreferences/d	app	P	R	Settings index ('Manage your account and privacy'); census carries it in prose only
-address	/mypreferences/d/categories/account	app	P	R	Settings category page: Account preferences (settings side nav)
-address	/analytics/creator/top-posts	app	M	R	Creator analytics: top posts list
-address	/analytics/recruiter-views	app	P	R	Premium: recruiters who viewed your profile ('N recruiters viewed your profile')
-address	/company/<entity>/about	app	J	R	Company page tab: About -- ADDRESS ONLY: the capability is census row J 106 in words [cold-verified: capability recorded]
-address	/company/<entity>/home	app	J	R	Company page tab: Home -- ADDRESS ONLY: the capability is census row J 110 in words [cold-verified: capability recorded]
-address	/company/<entity>/insights	app	J	R	Company page tab: Insights (Premium company insights) -- ADDRESS ONLY: the capability is census row J 113 in words
-address	/company/<entity>/jobs	app	J	R	Company page tab: Jobs -- ADDRESS ONLY: the capability is census row J 107 in words
-address	/company/<entity>/life	app	J	R	Company page tab: Life -- ADDRESS ONLY: the capability is census row J 109 in words
-address	/company/<entity>/posts	app	J	R	Company page tab: Posts -- ADDRESS ONLY: the capability is census row J 110 in words
-address	/company/<entity>/product	app	J	R	Company page Products tab, singular spelling -- ADDRESS ONLY: the capability is census row J 111 in words
-address	/company/<entity>/products	app	J	R	Company page tab: Products -- ADDRESS ONLY: the capability is census row J 111 in words
-address	/company/<entity>/products/<entity>	app	J	R	Company page: one product, 'Ask people about this product' -- ADDRESS ONLY: the capability is census row J 111 in words
-address	/company/<entity>/services	app	J	R	Company page tab: Services -- ADDRESS ONLY: the capability is census row J 111 in words
-address	/feed/followers	app	P	R	His own followers list ('N followers'); the list half of the L2 / L2b split -- ADDRESS ONLY: the capability is census row P L2b in words
-address	/help/learning	docs	-	R	LinkedIn Learning help
-address	/help/learning/answer/<opaque>	docs	-	R	LinkedIn Learning help article (team purchase)
-address	/help/linkedin/ask/DAD	docs	-	W	Help: accessibility feedback form
-address	/help/linkedin/ask/PR-CGPA	docs	-	W	Help: contact customer support form
-address	/in/<entity>/details/featured	app	P	R	Profile: Featured section detail page
-address	/in/<entity>/edit/forms/<opaque>/new	app	P	W	Profile editor: an add-to-profile form keyed by id
-address	/in/<entity>/edit/forms/position/new	app	P	W	Profile editor: add an Experience (position)
-address	/in/<entity>/edit/secondary-language	app	P	W	Profile: create the profile in another language
-address	/in/<entity>/en	app	P	R	Profile: a language-specific rendering of a profile
-address	/in/<entity>/opportunities/services/education	app	P	R	Profile: 'Open to' providing services, explainer page
-address	/in/<entity>/opportunities/volunteering/education	app	P	R	Profile: 'Open to' volunteering, explainer page
-address	/in/<entity>/overlay/<opaque>	app	P	R	Profile overlays keyed by id ('people also viewed', 'Try it')
-address	/in/<entity>/overlay/enhance	app	P	W	Profile: 'Enhance profile' AI writing overlay
-address	/in/<entity>/recent-activity/all	app	M	R	A member's activity: all posts
-address	/in/<entity>/skill-insights/<seg>	app	P	R	Profile: insight page for one skill (where it was used)
-address	/jobs/collections/top-choice	app	J	R	Premium job collection: Top choice
-address	/jobs/preferences	app	J	R	Jobs: job-seeker preferences page (jobs nav)
-address	/jobs/search-results	app	J	R	Jobs: the AI search results route ('See more jobs like this'), apart from /jobs/search/ -- ADDRESS ONLY: the capability is census row J 1 in words
-address	/jobs/view/<opaque>/apply	app	J	W	Apply entry route for a posting (Easy Apply); apply_job is inventoried, this address is not -- ADDRESS ONLY: the capability is census row J 60 in words
-address	/learning	app	J	R	LinkedIn Learning home (global nav) -- TRUE GAP [cold-verified]
-address	/learning/<opaque>/<opaque>	app	J	R	Learning: a course or video page
-address	/learning/browse	app	J	R	Learning: browse the catalogue
-address	/learning/browse/certifications	app	J	R	Learning: certifications catalogue
-address	/learning/career-journey	app	J	R	Learning: My career journey
-address	/learning/chatbot	app	J	R	Learning: AI coach (chat)
-address	/learning/me/my-library	app	J	R	Learning: My library -- TRUE GAP [cold-verified]
-address	/learning/me/my-library/in-progress	app	J	R	Learning: My library, in progress
-address	/learning/role-play/scenarios/new	app	J	W	Learning: start a new AI role-play scenario -- ADDRESS ONLY: the capability is census row J 132 in words
-address	/learning/settings	app	J	R	Learning: settings
-address	/learning/showcase/<entity>	app	J	R	Learning: a showcase collection
-address	/learning/subscription/teams	off-app	-	W	Learning: buy for my team (purchase)
-address	/learning/topics/<entity>	app	J	R	Learning: a topic page
-address	/messaging/thread/new	app	M	W	Messaging: new thread to a member ('Message X'), apart from /messaging/compose/ -- ADDRESS ONLY: the capability is census row M M1 in words [cold-verified: capability recorded]
-address	/mynetwork/discover-hub	app	N	R	My Network: Discover more hub
-address	/mynetwork/discovery-see-all	app	N	R	My Network: full discovery lists (people you may know and similar) -- ADDRESS ONLY: the capability is census row N 97 in words [cold-verified]
-address	/mypreferences/d/categories/ads	app	P	R	Settings category page: Advertising data
-address	/mypreferences/d/categories/privacy	app	P	R	Settings category page: Data privacy
-address	/mypreferences/d/categories/profile-visibility	app	P	R	Settings category page: Visibility
-address	/mypreferences/d/categories/sign-in-and-security	app	P	R	Settings category page: Sign in and security -- ADDRESS ONLY: its settings are census rows P N4 to P N11 [cold-verified]
-address	/newsletters/<entity>	app	M	R	A newsletter's own page
-address	/preload/report-in-modal	app	M	W	Report-abuse flow in a modal
-address	/premium/premium-perks	app	J	R	Premium: partner perks ('N months on us')
-address	/premium/profile-key-skills	app	P	W	Premium: add key skills so recruiters find the profile
-address	/premium/sb/explore	app	J	R	Premium: explore all features
-address	/premium/switcher	app	J	W	Premium: change plan
-address	/products/<entity>	app	J	R	A LinkedIn product page (a third party's software product)
-address	/products/<opaque>	app	J	R	A LinkedIn product page, id-keyed
-address	/psettings/group/<opaque>	app	N	W	One group's own settings page ('Update your settings')
-address	/search/results/all	app	M	R	All-results search, drawn from hashtags ('View hashtag: X') -- TRUE GAP [cold-verified; the verifier's neighbouring match set aside by the lead]
-address	/	chrome	-	R	LinkedIn home (the logo link, the feed)
-address	/accessibility	chrome	-	R	Accessibility statement (footer and nav menu)
-address	/ad-library/search	app	J	R	Ad Library search ('View ad library' on a company page)
-address	/ad/start	chrome	-	W	Advertise: Campaign Manager entry (footer and nav menu)
-address	/explore-career-insights	app	J	R	Premium career insights ('people and companies hiring for the job you want')
-address	/job-apply-resources	app	J	W	Jobs AI: tailor my resume to a posting -- ADDRESS ONLY: the capability is census row J 146 in words [cold-verified]
-address	/legal/<opaque>	docs	-	R	Legal and policy pages (community policies and similar)
-address	/legal/cookie-policy	docs	-	R	Cookie policy (footer)
-address	/legal/copyright-policy	docs	-	R	Copyright policy (footer)
-address	/legal/eula	docs	-	R	End user licence agreement
-address	/legal/privacy-policy	docs	-	R	Privacy policy (footer)
-address	/legal/user-agreement	docs	-	R	User agreement (footer)
-address	/manage/purchases-payments/purchases/<opaque>	app	P	W	Account: manage a subscription purchase ('Manage subscription')
-address	/mobile	chrome	-	R	Get the LinkedIn app (footer)
-address	/safety/go	chrome	-	R	External-link interstitial that wraps off-site links ('Apply on company website')
-address	/showcase/<entity>	app	N	R	A showcase page (a company's sub-brand page)
-address	/talent/job-posting-redirect	app	J	W	Hiring side: post a job ('Post a free job')
-address	/trust/verification	app	P	W	Identity verification flow ('Verify now') -- ADDRESS ONLY: the capability is census row P K2 in words [cold-verified]
-address	/video/event/<opaque>	app	M	R	LinkedIn Live video event page
-address	about.linkedin.com/	off-app	-	R	Corporate About site
-address	business.linkedin.com/advertise	off-app	-	R	Marketing Solutions site (For Business menu)
-address	business.linkedin.com/grow	off-app	-	R	Small business site (For Business menu)
-address	business.linkedin.com/sales-solutions	off-app	-	R	Sales Solutions site (For Business menu)
-address	business.linkedin.com/talent-solutions	off-app	-	R	Talent Solutions site (For Business menu)
-address	careers.linkedin.com/	off-app	-	R	LinkedIn careers site
-address	learning.linkedin.com/en-us/<opaque>	off-app	-	R	Learning for organisations (sales site)
-address	learning.linkedin.com/instructors	off-app	-	R	Learning instructors site
-address	mobile.linkedin.com/	off-app	-	R	Mobile apps site
-address	premium.linkedin.com/cx/<seg>/<seg>/<opaque>	off-app	P	R	Premium offers page ('See your offers')
-address	safety.linkedin.com/	off-app	-	R	Safety Center site
-control	<X> to active job details	a11y	J	R	Skip link to the active job's details
-control	<X> to aside	a11y	-	R	Skip link (aside)
-control	<X> to primary content	a11y	-	R	Skip link (primary content)
-control	Activate to view larger image,	app	M	R	Open an image in the viewer
-control	Add custom button	app	P	W	Profile: add a custom button (Premium / creator)
-control	Apply current filter to show results	app	J	R	Jobs search: apply one filter panel's selection
-control	Apply to <X> on company website	app	J	W	Apply off-site, on the company's website
-control	Are you finding what you're looking for? <X>	app	J	W	Feedback on search results (yes / no)
-control	Attach a file for your draft conversation	app	M	W	Messaging: attach a file to a draft
-control	Attach an image for your draft conversation	app	M	W	Messaging: attach an image to a draft -- CONTROL ONLY: the capability is census row M M14 [cold-verified]
-control	Business <X>	chrome	-	R	For Business / Business Services menu
-control	Cancel <X> filter	app	J	R	Jobs search: remove one filter pill
-control	Cancel <X> level filter	app	J	R	Jobs search: remove the experience-level filter pill
-control	Cancel <X> posted filter	app	J	R	Jobs search: remove the date-posted filter pill
-control	Change notification preferences	app	M	W	Notification card: change notification preferences
-control	City, state, or <X> code	app	J	R	Jobs search: location input
-control	Clear search keywords	app	J	R	Jobs search: clear keywords
-control	Clear search location	app	J	R	Jobs search: clear location
-control	Copy link to group	app	N	R	Groups: copy a group's link -- TRUE GAP [cold-verified]
-control	Create cover letter	app	J	W	Jobs AI (Premium): generate a cover letter for a posting
-control	Delete notification	app	M	W	Notification card: delete a notification
-control	Dismiss <X> to work people you may know promo	app	N	W	My Network: dismiss a 'people you may know' promo
-control	Enhance profile	app	P	W	Profile: AI 'Enhance profile' writing assistant
-control	Featured overflow menu	app	P	R	Profile Featured section: overflow menu
-control	Get <X> faster	chrome	J	R	Premium upsell ('Get hired faster')
-control	Hide list of <X> you are following	app	N	R	Collapse a 'you are following' list (groups, recent)
-control	Hide or report this ad <X> don't want to see this ad in my feed	app	M	W	Feed ad: hide or report an ad
-control	Home, <n> new notification	chrome	-	R	Global nav Home with its badge count
-control	Home, <n> new notifications	chrome	-	R	Global nav Home with its badge count
-control	I want to know more!	app	-	R	A call to action seen once; purpose not evident from the label
-control	I'm looking for...	chrome	-	R	Global search box placeholder
-control	Keyboard <X>	a11y	-	R	Keyboard shortcuts
-control	Learn more about applicant insights	app	J	R	Premium: applicant insights explainer
-control	Mark feedback as <X>	app	J	W	Feedback on an AI answer (thumbs)
-control	Mark feedback as good	app	J	W	Feedback on an AI answer (thumbs up)
-control	Mark information as <X>	app	J	W	Feedback on an insight (helpful)
-control	Mark information as not <X>	app	J	W	Feedback on an insight (not helpful)
-control	Mark suggestion as good	app	J	W	Feedback on an AI suggestion
-control	Messaging <X> enter to open the list of conversations.	a11y	M	R	Messaging overlay label
-control	Open send options	app	M	W	Share: send options (send a post in a message)
-control	Open the options list in your conversation with <X>	app	M	R	Messaging: per-conversation options menu
-control	Public group	app	N	R	Group privacy badge
-control	Rate job tracker as <X>	app	J	W	Feedback on the job tracker -- TRUE GAP [cold-verified]
-control	Scroll right	chrome	-	R	Carousel scroll
-control	Search by title, skill, or company	app	J	R	Jobs search: keywords box
-control	Send in a private message	app	M	W	Share a post in a private message -- TRUE GAP [cold-verified]
-control	Set alert for similar jobs as <X>	app	J	W	Create a job alert from one posting ('similar jobs')
-control	Share that you're hiring	app	J	W	Hiring: share that you're hiring (#Hiring post)
-control	Show all filters. <X> this button displays all available filter options.	app	J	R	Jobs search: the All filters panel
-control	Someone recently clicked on your <X>	app	M	R	Notification text: someone clicked on your profile or post
-control	Start a post	app	M	W	Share box: start a post
-control	Start a post in this group	app	N	W	Groups: start a post in a group
-control	Start a public post	app	M	W	Share box: start a public post -- CONTROL ONLY: the capability is census row M C1 [cold-verified]
-control	Status is offline <X>	app	M	R	Messaging presence indicator
-control	Status is offline <X> group	app	M	R	Messaging presence indicator (group conversation)
-control	Status is reachable <X>	app	M	R	Messaging presence indicator
-control	Status is reachable <X> <n>	app	M	R	Messaging presence indicator
-control	Suggested: <X> <n> participants	app	M	R	Messaging: a suggested group conversation
-control	Text editor for creating content	app	M	W	Post composer text editor
-control	This image has content <X>	app	M	R	Content credentials badge on an image
-control	Type a name or multiple names	app	M	W	Messaging compose: recipients input
-control	View verified hiring modal	app	J	R	Verified-hiring badge on a posting
-control	You are on the messaging overlay. <X> enter to open the list of conversations.	a11y	M	R	Messaging overlay label
-control	You have <n> impressions on your experience at <X>	app	P	R	Profile analytics: impressions on one experience entry
-control	more information about <X> viewed your profile	app	P	R	Who's viewed your profile: info tooltip
-control	see more, <X> reveals content which is already detected by screen readers	a11y	-	R	See-more toggle (screen-reader text)
-control	show more, <X> reveals content which is already detected by screen readers	a11y	-	R	See-more toggle (screen-reader text)
+#
+# verdict        lane Y2, 2026-09-24, one per APP-scope candidate (the harvester's
+#                VERDICTS): ADMIT (a new GAP census row carries it), RECORDED (an
+#                existing row carried the capability in words and gained the address
+#                or control as evidence), OUT (not a user capability). '-' on the
+#                a11y, docs, chrome and off-app lines: out of scope by construction.
+# verdict_rows   the census row(s) that carry it now, comma-separated; '-' for OUT
+# verdict_basis  one line: why this verdict, against which rows
+# Checked by completeness_harvest.verdict_problems (tests/test_completeness_verdicts.py).
+# Method and the counts: _audit/2026-09-24-lane-y2-admission.md
+kind	pattern	scope	slice	rw	appears_to_be	verdict	verdict_rows	verdict_basis
+address	/help/linkedin/answer/<opaque>	docs	-	R	Help Center article ('Learn more' links); the census's own taxonomy source, not a capability	-	-	-
+address	/mynetwork	app	N	R	My Network hub, global nav; census rows name its sub-pages, no row carries the hub	RECORDED	N 97	the My Network hub; its content is the fourteen R1 rows (invitations received, PYMK); carried at 9c219c8 by their exclusion-basis lines
+address	/mypreferences/d	app	P	R	Settings index ('Manage your account and privacy'); census carries it in prose only	RECORDED	P N3	the settings index, which P N3 names in words; address appended to P N3
+address	/mypreferences/d/categories/account	app	P	R	Settings category page: Account preferences (settings side nav)	RECORDED	P N3	one of the six sections P N3 names; its settings are P N15-N27
+address	/analytics/creator/top-posts	app	M	R	Creator analytics: top posts list	RECORDED	M C40	the top-posts list of creator analytics, which M C40 reads
+address	/analytics/recruiter-views	app	P	R	Premium: recruiters who viewed your profile ('N recruiters viewed your profile')	ADMIT	N 195	recruiter insights: no WVYP row (N 129-136, P O3) carried the recruiter view
+address	/company/<entity>/about	app	J	R	Company page tab: About -- ADDRESS ONLY: the capability is census row J 106 in words [cold-verified: capability recorded]	RECORDED	J 106	Company Page About tab; carried at 9c219c8 by J 106's jobs-directions line
+address	/company/<entity>/home	app	J	R	Company page tab: Home -- ADDRESS ONLY: the capability is census row J 110 in words [cold-verified: capability recorded]	RECORDED	J 110	Company Page Home tab; address appended to J 110
+address	/company/<entity>/insights	app	J	R	Company page tab: Insights (Premium company insights) -- ADDRESS ONLY: the capability is census row J 113 in words	RECORDED	J 113	Premium Insights tab; carried at 9c219c8 by J 113 and J 114's jobs-directions lines
+address	/company/<entity>/jobs	app	J	R	Company page tab: Jobs -- ADDRESS ONLY: the capability is census row J 107 in words	RECORDED	J 107	Company Page Jobs tab; address appended to J 107
+address	/company/<entity>/life	app	J	R	Company page tab: Life -- ADDRESS ONLY: the capability is census row J 109 in words	RECORDED	J 109	Company Page Life tab; carried at 9c219c8 by J 109's jobs-directions line
+address	/company/<entity>/posts	app	J	R	Company page tab: Posts -- ADDRESS ONLY: the capability is census row J 110 in words	RECORDED	J 110	Company Page Posts tab; address appended to J 110
+address	/company/<entity>/product	app	J	R	Company page Products tab, singular spelling -- ADDRESS ONLY: the capability is census row J 111 in words	RECORDED	J 111	the Products tab under a singular spelling; address appended to J 111
+address	/company/<entity>/products	app	J	R	Company page tab: Products -- ADDRESS ONLY: the capability is census row J 111 in words	RECORDED	J 111	Company Page Products tab; carried at 9c219c8 by J 111's jobs-directions line
+address	/company/<entity>/products/<entity>	app	J	R	Company page: one product, 'Ask people about this product' -- ADDRESS ONLY: the capability is census row J 111 in words	ADMIT	J 166	one product inside a company Page: J 111 is the tab (moved from RECORDED on the cold verifier's standard)
+address	/company/<entity>/services	app	J	R	Company page tab: Services -- ADDRESS ONLY: the capability is census row J 111 in words	RECORDED	J 111	Company Page Services tab; address appended to J 111
+address	/feed/followers	app	P	R	His own followers list ('N followers'); the list half of the L2 / L2b split -- ADDRESS ONLY: the capability is census row P L2b in words	RECORDED	P L2b	his own follower list, a second address for P L2b
+address	/help/learning	docs	-	R	LinkedIn Learning help	-	-	-
+address	/help/learning/answer/<opaque>	docs	-	R	LinkedIn Learning help article (team purchase)	-	-	-
+address	/help/linkedin/ask/DAD	docs	-	W	Help: accessibility feedback form	-	-	-
+address	/help/linkedin/ask/PR-CGPA	docs	-	W	Help: contact customer support form	-	-	-
+address	/in/<entity>/details/featured	app	P	R	Profile: Featured section detail page	ADMIT	P S1	reading the Featured section: G3-G5 are its writes and no row read it
+address	/in/<entity>/edit/forms/<opaque>/new	app	P	W	Profile editor: an add-to-profile form keyed by id	RECORDED	P G2	drawn as 'Edit default activity', the editor of P G2; recorded in P G2's blocker-assignments line because the row's own cell would re-point P G3
+address	/in/<entity>/edit/forms/position/new	app	P	W	Profile editor: add an Experience (position)	RECORDED	P D5	the add-an-Experience form; address appended to P D5
+address	/in/<entity>/edit/secondary-language	app	P	W	Profile: create the profile in another language	RECORDED	P D27	'Edit profile language', the secondary-language editor of P D27
+address	/in/<entity>/en	app	P	R	Profile: a language-specific rendering of a profile	RECORDED	P D28	a language rendering of a profile, P D28 in words
+address	/in/<entity>/opportunities/services/education	app	P	R	Profile: 'Open to' providing services, explainer page	RECORDED	P H1	the 'Open to' services item P H1 names
+address	/in/<entity>/opportunities/volunteering/education	app	P	R	Profile: 'Open to' volunteering, explainer page	RECORDED	P D24	the 'Open to' volunteering item, P D24
+address	/in/<entity>/overlay/<opaque>	app	P	R	Profile overlays keyed by id ('people also viewed', 'Try it')	RECORDED	N 103	'Show all people also viewed', the similar-profiles list N 103 names; the pattern's other instance is a Premium upsell
+address	/in/<entity>/overlay/enhance	app	P	W	Profile: 'Enhance profile' AI writing overlay	ADMIT	P S2	the AI 'Enhance profile' assist; A2 and D2 are only the plain edits
+address	/in/<entity>/recent-activity/all	app	M	R	A member's activity: all posts	RECORDED	M C41	his own all-activity page, which M C41 reads
+address	/in/<entity>/skill-insights/<seg>	app	P	R	Profile: insight page for one skill (where it was used)	ADMIT	P S3	where a skill is used: E1 reads the list, D6 is the tying write, no row reads this
+address	/jobs/collections/top-choice	app	J	R	Premium job collection: Top choice	ADMIT	J 158	reading the Top choice collection; J 79-80 are the marking write; already served by a shipped tool, entered GAP
+address	/jobs/preferences	app	J	R	Jobs: job-seeker preferences page (jobs nav)	RECORDED	P I12	the job-preferences page P I12 names -- whose cell says zero urls reach it; this is a drawn one
+address	/jobs/search-results	app	J	R	Jobs: the AI search results route ('See more jobs like this'), apart from /jobs/search/ -- ADDRESS ONLY: the capability is census row J 1 in words	RECORDED	J 1	the natural-language search J 1 names; address appended to J 1 and carried at 9c219c8 by J 16 and J 38's lines
+address	/jobs/view/<opaque>/apply	app	J	W	Apply entry route for a posting (Easy Apply); apply_job is inventoried, this address is not -- ADDRESS ONLY: the capability is census row J 60 in words	RECORDED	J 59	the Easy Apply entry route; appended to J 59 and carried at 9c219c8 by J 82's line
+address	/learning	app	J	R	LinkedIn Learning home (global nav) -- TRUE GAP [cold-verified]	ADMIT	J 152	LinkedIn Learning's home; the only Learning rows were the AI-interview slice J 132-138
+address	/learning/<opaque>/<opaque>	app	J	R	Learning: a course or video page	ADMIT	J 153	watching a Learning course or video
+address	/learning/browse	app	J	R	Learning: browse the catalogue	ADMIT	J 152	the Learning catalogue
+address	/learning/browse/certifications	app	J	R	Learning: certifications catalogue	ADMIT	J 152	the Learning certifications catalogue
+address	/learning/career-journey	app	J	R	Learning: My career journey	ADMIT	J 156	Learning's 'My career journey'
+address	/learning/chatbot	app	J	R	Learning: AI coach (chat)	ADMIT	J 155	Learning's AI coach
+address	/learning/me/my-library	app	J	R	Learning: My library -- TRUE GAP [cold-verified]	ADMIT	J 154	the member's Learning library
+address	/learning/me/my-library/in-progress	app	J	R	Learning: My library, in progress	ADMIT	J 154	the library's in-progress list
+address	/learning/role-play/scenarios/new	app	J	W	Learning: start a new AI role-play scenario -- ADDRESS ONLY: the capability is census row J 132 in words	RECORDED	J 132	starting an AI role-play scenario, J 132 in words
+address	/learning/settings	app	J	R	Learning: settings	ADMIT	J 157	Learning's own settings
+address	/learning/showcase/<entity>	app	J	R	Learning: a showcase collection	ADMIT	J 152	a Learning showcase collection
+address	/learning/subscription/teams	off-app	-	W	Learning: buy for my team (purchase)	-	-	-
+address	/learning/topics/<entity>	app	J	R	Learning: a topic page	ADMIT	J 152	a Learning topic page
+address	/messaging/thread/new	app	M	W	Messaging: new thread to a member ('Message X'), apart from /messaging/compose/ -- ADDRESS ONLY: the capability is census row M M1 in words [cold-verified: capability recorded]	RECORDED	M M1	a new thread to a member, M M1 in words
+address	/mynetwork/discover-hub	app	N	R	My Network: Discover more hub	RECORDED	N 97	the left rail's 'Discover more' page in the /mynetwork/ family, recorded under R1's discovery row as the verifier read /mynetwork/discovery-see-all
+address	/mynetwork/discovery-see-all	app	N	R	My Network: full discovery lists (people you may know and similar) -- ADDRESS ONLY: the capability is census row N 97 in words [cold-verified]	RECORDED	N 97	the full PYMK lists, N 97
+address	/mypreferences/d/categories/ads	app	P	R	Settings category page: Advertising data	RECORDED	P N3	the Advertising data section P N3 names; its settings are the P-R block
+address	/mypreferences/d/categories/privacy	app	P	R	Settings category page: Data privacy	RECORDED	P N3	the Data privacy section P N3 names; its settings are the P-R block
+address	/mypreferences/d/categories/profile-visibility	app	P	R	Settings category page: Visibility	RECORDED	P N3	the Visibility section P N3 names; its settings are the O block
+address	/mypreferences/d/categories/sign-in-and-security	app	P	R	Settings category page: Sign in and security -- ADDRESS ONLY: its settings are census rows P N4 to P N11 [cold-verified]	RECORDED	P N3	the Sign in and security section P N3 names; its settings are P N4-N11
+address	/newsletters/<entity>	app	M	R	A newsletter's own page	ADMIT	M C101	reading a newsletter's own page: N 57 lists which, C80 subscribes (cold verifier: TRUE-GAP; accepted)
+address	/preload/report-in-modal	app	M	W	Report-abuse flow in a modal	ADMIT	N 196	reporting an organization Page: report rows cover members, posts and messages only
+address	/premium/premium-perks	app	J	R	Premium: partner perks ('N months on us') -- OUT (lane Y2): partner offers ('months on us') -- a promotion for other companies' products, not a LinkedIn capability	OUT	-	partner offers ('months on us') -- a promotion for other companies' products, not a LinkedIn capability
+address	/premium/profile-key-skills	app	P	W	Premium: add key skills so recruiters find the profile	ADMIT	P S8	Premium key skills for recruiter search: P E2 is the editor's add/remove (cold verifier: TRUE-GAP; accepted)
+address	/premium/sb/explore	app	J	R	Premium: explore all features -- OUT (lane Y2): 'See all features' -- a Premium feature tour, promotional navigation	OUT	-	'See all features' -- a Premium feature tour, promotional navigation
+address	/premium/switcher	app	J	W	Premium: change plan	ADMIT	P S9	changing the paid plan: P N22 is the subscriptions read (moved from RECORDED on the cold verifier's standard)
+address	/products/<entity>	app	J	R	A LinkedIn product page (a third party's software product)	ADMIT	J 166	one product's own page: J 111 is the Products tab, the list (moved from RECORDED on the cold verifier's standard)
+address	/products/<opaque>	app	J	R	A LinkedIn product page, id-keyed	ADMIT	J 166	one product's own page by id: J 111 is the Products tab (moved from RECORDED on the cold verifier's standard)
+address	/psettings/group/<opaque>	app	N	W	One group's own settings page ('Update your settings')	RECORDED	M M42	one group's own settings page; M M42 (and N 170) name its settings
+address	/search/results/all	app	M	R	All-results search, drawn from hashtags ('View hashtag: X') -- TRUE GAP [cold-verified; the verifier's neighbouring match set aside by the lead]	ADMIT	M C93	all-results search: no row carried content or all-results search
+address	/	chrome	-	R	LinkedIn home (the logo link, the feed)	-	-	-
+address	/accessibility	chrome	-	R	Accessibility statement (footer and nav menu)	-	-	-
+address	/ad-library/search	app	J	R	Ad Library search ('View ad library' on a company page)	ADMIT	J 159	a company's ads in the Ad Library
+address	/ad/start	chrome	-	W	Advertise: Campaign Manager entry (footer and nav menu)	-	-	-
+address	/explore-career-insights	app	J	R	Premium career insights ('people and companies hiring for the job you want')	ADMIT	J 160	Premium career insights for a target job
+address	/job-apply-resources	app	J	W	Jobs AI: tailor my resume to a posting -- ADDRESS ONLY: the capability is census row J 146 in words [cold-verified]	RECORDED	J 146	'Tailor my resume', J 146 in words; carried at 9c219c8 by J 147-149's lines
+address	/legal/<opaque>	docs	-	R	Legal and policy pages (community policies and similar)	-	-	-
+address	/legal/cookie-policy	docs	-	R	Cookie policy (footer)	-	-	-
+address	/legal/copyright-policy	docs	-	R	Copyright policy (footer)	-	-	-
+address	/legal/eula	docs	-	R	End user licence agreement	-	-	-
+address	/legal/privacy-policy	docs	-	R	Privacy policy (footer)	-	-	-
+address	/legal/user-agreement	docs	-	R	User agreement (footer)	-	-	-
+address	/manage/purchases-payments/purchases/<opaque>	app	P	W	Account: manage a subscription purchase ('Manage subscription')	RECORDED	P N22	the purchase's manage link: P N22 in words
+address	/mobile	chrome	-	R	Get the LinkedIn app (footer)	-	-	-
+address	/safety/go	chrome	-	R	External-link interstitial that wraps off-site links ('Apply on company website')	-	-	-
+address	/showcase/<entity>	app	N	R	A showcase page (a company's sub-brand page)	ADMIT	J 167	a company's affiliated showcase Pages: J 110 is its own Home and Posts (moved from RECORDED on the cold verifier's standard)
+address	/talent/job-posting-redirect	app	J	W	Hiring side: post a job ('Post a free job')	ADMIT	P S10	posting a job as a hirer: P J1 is the #Hiring signal (moved from RECORDED on the cold verifier's standard)
+address	/trust/verification	app	P	W	Identity verification flow ('Verify now') -- ADDRESS ONLY: the capability is census row P K2 in words [cold-verified]	RECORDED	P K2	'Verify now', identity verification: P K2 in words
+address	/video/event/<opaque>	app	M	R	LinkedIn Live video event page	ADMIT	M C95	watching a LinkedIn Live broadcast: C59 and P L5 are the broadcasting side only
+address	about.linkedin.com/	off-app	-	R	Corporate About site	-	-	-
+address	business.linkedin.com/advertise	off-app	-	R	Marketing Solutions site (For Business menu)	-	-	-
+address	business.linkedin.com/grow	off-app	-	R	Small business site (For Business menu)	-	-	-
+address	business.linkedin.com/sales-solutions	off-app	-	R	Sales Solutions site (For Business menu)	-	-	-
+address	business.linkedin.com/talent-solutions	off-app	-	R	Talent Solutions site (For Business menu)	-	-	-
+address	careers.linkedin.com/	off-app	-	R	LinkedIn careers site	-	-	-
+address	learning.linkedin.com/en-us/<opaque>	off-app	-	R	Learning for organisations (sales site)	-	-	-
+address	learning.linkedin.com/instructors	off-app	-	R	Learning instructors site	-	-	-
+address	mobile.linkedin.com/	off-app	-	R	Mobile apps site	-	-	-
+address	premium.linkedin.com/cx/<seg>/<seg>/<opaque>	off-app	P	R	Premium offers page ('See your offers')	-	-	-
+address	safety.linkedin.com/	off-app	-	R	Safety Center site	-	-	-
+control	<X> to active job details	a11y	J	R	Skip link to the active job's details	-	-	-
+control	<X> to aside	a11y	-	R	Skip link (aside)	-	-	-
+control	<X> to primary content	a11y	-	R	Skip link (primary content)	-	-	-
+control	Activate to view larger image,	app	M	R	Open an image in the viewer -- OUT (lane Y2): an image lightbox on a post -- presentation, not a capability	OUT	-	an image lightbox on a post -- presentation, not a capability
+control	Add custom button	app	P	W	Profile: add a custom button (Premium / creator)	ADMIT	P S4	a Premium custom button on the intro; no intro row names it
+control	Apply current filter to show results	app	J	R	Jobs search: apply one filter panel's selection	RECORDED	J 15	the filter panel's apply control, J 15
+control	Apply to <X> on company website	app	J	W	Apply off-site, on the company's website	RECORDED	J 66	applying off-site, J 66 in words
+control	Are you finding what you're looking for? <X>	app	J	W	Feedback on search results (yes / no)	ADMIT	J 163	feedback on the job recommendations
+control	Attach a file for your draft conversation	app	M	W	Messaging: attach a file to a draft	RECORDED	M M18	attaching files to a message, M M18
+control	Attach an image for your draft conversation	app	M	W	Messaging: attach an image to a draft -- CONTROL ONLY: the capability is census row M M14 [cold-verified]	RECORDED	M M14	attaching a photo to a message, M M14
+control	Business <X>	chrome	-	R	For Business / Business Services menu	-	-	-
+control	Cancel <X> filter	app	J	R	Jobs search: remove one filter pill	RECORDED	J 15	removing a filter pill, part of the filter panel J 15
+control	Cancel <X> level filter	app	J	R	Jobs search: remove the experience-level filter pill	RECORDED	J 6	removing the experience-level filter, J 6
+control	Cancel <X> posted filter	app	J	R	Jobs search: remove the date-posted filter pill	RECORDED	J 4	removing the date-posted filter, J 4
+control	Change notification preferences	app	M	W	Notification card: change notification preferences	RECORDED	P N3	routes into the Notifications section P N3 names; its settings are the P-R block
+control	City, state, or zip code	app	J	R	Jobs search: location input	RECORDED	J 3	the location box, J 3 (template re-keyed: the census vocabulary now holds 'zip')
+control	Clear search keywords	app	J	R	Jobs search: clear keywords	RECORDED	J 1	the keyword box, J 1
+control	Clear search location	app	J	R	Jobs search: clear location	RECORDED	J 3	the location box, J 3
+control	Copy link to group	app	N	R	Groups: copy a group's link -- TRUE GAP [cold-verified]	ADMIT	N 197	copying a group's link; the census named the control in prose and no row
+control	Create cover letter	app	J	W	Jobs AI (Premium): generate a cover letter for a posting	RECORDED	J 78	Premium cover-letter drafting, J 78 in words
+control	Delete notification	app	M	W	Notification card: delete a notification	ADMIT	M C97	deleting a notification; P P1 (mark read) is the only card act a row names
+control	Dismiss <X> to work people you may know promo	app	N	W	My Network: dismiss a 'people you may know' promo -- OUT (lane Y2): dismisses a promotional card on his own profile ('Connect with people ... Search for people') -- a promo	OUT	-	dismisses a promotional card on his own profile ('Connect with people ... Search for people') -- a promo
+control	Enhance profile	app	P	W	Profile: AI 'Enhance profile' writing assistant	ADMIT	P S2	the AI 'Enhance profile' assist
+control	Featured overflow menu	app	P	R	Profile Featured section: overflow menu	RECORDED	P G4	the Featured section's menu, where P G4's acts sit
+control	Get <X> faster	chrome	J	R	Premium upsell ('Get hired faster')	-	-	-
+control	Hide list of <X> you are following	app	N	R	Collapse a 'you are following' list (groups, recent) -- OUT (lane Y2): collapses a left-rail list (Recent, Groups) -- a presentation toggle	OUT	-	collapses a left-rail list (Recent, Groups) -- a presentation toggle
+control	Hide or report this ad <X> don't want to see this ad in my feed	app	M	W	Feed ad: hide or report an ad	ADMIT	N 200	an ad's own hide-or-report control: N 153-154 hide organic items, N 148 reports a post (cold verifier: TRUE-GAP; accepted)
+control	Home, <n> new notification	chrome	-	R	Global nav Home with its badge count	-	-	-
+control	Home, <n> new notifications	chrome	-	R	Global nav Home with its badge count	-	-	-
+control	I want to know more!	app	-	R	A call to action seen once; purpose not evident from the label -- OUT (lane Y2): the call-to-action button of a sponsored message in the inbox -- an advertiser's promo	OUT	-	the call-to-action button of a sponsored message in the inbox -- an advertiser's promo
+control	I'm looking for...	chrome	-	R	Global search box placeholder	-	-	-
+control	Keyboard <X>	a11y	-	R	Keyboard shortcuts	-	-	-
+control	Learn more about applicant insights	app	J	R	Premium: applicant insights explainer -- OUT (lane Y2): an explainer for the applicant insights J 121 and J 122 carry -- documentation, not a capability	OUT	-	an explainer for the applicant insights J 121 and J 122 carry -- documentation, not a capability
+control	Mark feedback as <X>	app	J	W	Feedback on an AI answer (thumbs)	ADMIT	J 164	rating AI-generated content on a jobs surface
+control	Mark feedback as good	app	J	W	Feedback on an AI answer (thumbs up)	ADMIT	J 164	rating AI-generated content on a jobs surface
+control	Mark information as <X>	app	J	W	Feedback on an insight (helpful)	ADMIT	J 164	rating an AI insight on a posting
+control	Mark information as not <X>	app	J	W	Feedback on an insight (not helpful)	ADMIT	J 164	rating an AI insight on a posting
+control	Mark suggestion as good	app	J	W	Feedback on an AI suggestion	ADMIT	J 164	rating an AI suggestion on a posting
+control	Messaging <X> enter to open the list of conversations.	a11y	M	R	Messaging overlay label	-	-	-
+control	Open send options	app	M	W	Share: send options (send a post in a message)	ADMIT	M M52	the composer's send options; M35 and M36 name other messaging preferences
+control	Open the options list in your conversation with <X>	app	M	R	Messaging: per-conversation options menu	RECORDED	M M29	each conversation's menu, where M M25-M31's acts sit
+control	Public group	app	N	R	Group privacy badge -- OUT (lane Y2): a group's privacy label -- a label, not an act	OUT	-	a group's privacy label -- a label, not an act
+control	Rate job tracker as <X>	app	J	W	Feedback on the job tracker -- TRUE GAP [cold-verified]	ADMIT	J 162	rating the job tracker
+control	Scroll right	chrome	-	R	Carousel scroll	-	-	-
+control	Search by title, skill, or company	app	J	R	Jobs search: keywords box	RECORDED	J 1	the keyword search box, J 1
+control	Send in a private message	app	M	W	Share a post in a private message -- TRUE GAP [cold-verified]	ADMIT	M C94	sending a post in a message: reposts C20-C21 go to the network
+control	Set alert for similar jobs as <X>	app	J	W	Create a job alert from one posting ('similar jobs')	ADMIT	J 161	a job alert from a posting; J 31 and J 32 are the search and Page entries
+control	Share that you're hiring	app	J	W	Hiring: share that you're hiring (#Hiring post)	RECORDED	P J1	P J1 in words ('share that you are hiring')
+control	Show all filters. <X> this button displays all available filter options.	app	J	R	Jobs search: the All filters panel	RECORDED	J 15	the All filters panel's trigger, J 15
+control	Someone recently clicked on your <X>	app	M	R	Notification text: someone clicked on your profile or post	ADMIT	P S5	a profile-section engagement insight on the search-appearances page
+control	Start a post	app	M	W	Share box: start a post	RECORDED	M C1	opening the post composer, M C1
+control	Start a post in this group	app	N	W	Groups: start a post in a group	RECORDED	M C64	posting in a group feed, M C64
+control	Start a public post	app	M	W	Share box: start a public post -- CONTROL ONLY: the capability is census row M C1 [cold-verified]	RECORDED	M C1	opening the post composer, M C1
+control	Status is offline <X>	app	M	R	Messaging presence indicator	ADMIT	M M53	another member's messaging presence
+control	Status is offline <X> group	app	M	R	Messaging presence indicator (group conversation)	ADMIT	M M53	another member's messaging presence
+control	Status is reachable <X>	app	M	R	Messaging presence indicator	ADMIT	M M53	another member's messaging presence
+control	Status is reachable <X> <n>	app	M	R	Messaging presence indicator	ADMIT	M M53	another member's messaging presence
+control	Suggested: <X> <n> participants	app	M	R	Messaging: a suggested group conversation	RECORDED	M M45	a suggested recipient in the compose window M M45 opens
+control	Text editor for creating content	app	M	W	Post composer text editor	RECORDED	M C1	the post composer's editor, M C1
+control	This image has content <X>	app	M	R	Content credentials badge on an image	ADMIT	M C96	an image's Content Credentials; no row carried provenance
+control	Type a name or multiple names	app	M	W	Messaging compose: recipients input	RECORDED	M M45	the compose window's recipient box, M M45
+control	View verified hiring modal	app	J	R	Verified-hiring badge on a posting	RECORDED	J 27	the verification badge on a posting, J 27
+control	You are on the messaging overlay. <X> enter to open the list of conversations.	a11y	M	R	Messaging overlay label	-	-	-
+control	You have <n> impressions on your experience at <X>	app	P	R	Profile analytics: impressions on one experience entry	ADMIT	P S5	a profile-section engagement insight on the search-appearances page
+control	more information about <X> viewed your profile	app	P	R	Who's viewed your profile: info tooltip -- OUT (lane Y2): an info tooltip on the profile-views page -- documentation	OUT	-	an info tooltip on the profile-views page -- documentation
+control	see more, <X> reveals content which is already detected by screen readers	a11y	-	R	See-more toggle (screen-reader text)	-	-	-
+control	show more, <X> reveals content which is already detected by screen readers	a11y	-	R	See-more toggle (screen-reader text)	-	-	-
+address	/me/profile-views	app	N	R	A shortcut to his profile viewers ('Profile viewers N') [re-harvest 2026-09-24]	RECORDED	N 129	who viewed his profile, N 129 in words
+address	/mynetwork/network-manager/newsletters	app	N	R	My Network menu: the newsletters he subscribes to [re-harvest 2026-09-24]	RECORDED	N 57	the subscribed-newsletters list N 57 reads
+address	/mypreferences/d/verifications	app	P	R	Settings: Verifications page [re-harvest 2026-09-24]	RECORDED	P K1	the verifications section, P K1 in words
+address	/analytics/post-summary/followers/<opaque>	app	M	R	Post analytics: followers gained from one post [re-harvest 2026-09-24]	RECORDED	M C38	per-post analytics, M C38 in words
+address	/analytics/post/<opaque>	app	M	R	Post analytics: one post's reactions [re-harvest 2026-09-24]	RECORDED	M C38	per-post analytics, M C38 in words
+address	/company/<entity>/events	app	J	R	Company page tab: Events ('Show all') [re-harvest 2026-09-24]	ADMIT	J 165	a company Page's Events tab: J 106-114 are the other tabs, N 181 finds events across followed Pages
+address	/company/<entity>/life/<opaque>	app	J	R	Company page Life tab: one video [re-harvest 2026-09-24]	RECORDED	J 109	the Life tab, J 109
+address	/dashboard/share	app	M	W	Analytics dashboard: 'Start a post' [re-harvest 2026-09-24]	RECORDED	M C1	the post composer, M C1
+address	/in/<entity>/edit/forms/contact-info/new	app	P	W	Profile editor: edit contact info [re-harvest 2026-09-24]	RECORDED	P A25	the contact-info panel P A25 names, its 'Edit contact info' control
+address	/manage/purchases-payments/purchases	app	P	R	Account: purchase history [re-harvest 2026-09-24]	RECORDED	P N22	subscriptions and payments, P N22
+address	/mynetwork/settings/manage-syncing	app	P	W	Settings: sync calendar and contacts [re-harvest 2026-09-24]	RECORDED	P N20	calendar sync P N20 and contact sync P N21
+address	/mypreferences/d/close-accounts	app	P	W	Settings: close and delete account [re-harvest 2026-09-24]	RECORDED	P N28	closing the account, P N28
+address	/mypreferences/d/demographic-info-copy	app	P	W	Settings: personal demographic information [re-harvest 2026-09-24]	ADMIT	P S6	no account-settings row names it
+address	/mypreferences/d/hibernate-account	app	P	W	Settings: hibernate account [re-harvest 2026-09-24]	RECORDED	P N29	hibernating the account, P N29
+address	/mypreferences/d/language-for-translation	app	P	W	Settings: content language [re-harvest 2026-09-24]	ADMIT	P S7	the content language; N15 is the interface language
+address	/mypreferences/d/premium-manage-account	app	P	R	Settings: manage the Premium account [re-harvest 2026-09-24]	RECORDED	P N22	subscriptions and payments, P N22
+address	/mypreferences/d/settings/autoplay-videos	app	P	W	Settings: autoplay videos [re-harvest 2026-09-24]	RECORDED	P N16	P N16 in words
+address	/mypreferences/d/settings/enable-sounds-desktop	app	P	W	Settings: sound effects [re-harvest 2026-09-24]	RECORDED	P N17	P N17 in words
+address	/mypreferences/d/settings/language	app	P	W	Settings: interface language [re-harvest 2026-09-24]	RECORDED	P N15	P N15 in words
+address	/mypreferences/d/settings/preferred-view	app	M	W	Settings: preferred feed view (most relevant or most recent) [re-harvest 2026-09-24]	ADMIT	M C100	the feed's default order; C52 is topics and sources
+address	/mypreferences/d/settings/show-profile-photos	app	P	W	Settings: showing other members' profile photos [re-harvest 2026-09-24]	RECORDED	P N18	P N18 in words
+address	/preload/search-custom-invite	app	N	W	People search: invite a result to connect [re-harvest 2026-09-24]	RECORDED	N 4	an invitation from a people-search result, N 4
+address	/premium/matches	app	N	R	Premium: networking suggestions ('who can help you get hired'), from a notification [re-harvest 2026-09-24]	ADMIT	N 199	a Premium list of people who can help; N 97 is PYMK
+address	/games/mini-sudoku	app	M	R	LinkedIn games in the right rail [re-harvest 2026-09-24]	ADMIT	M C99	playing LinkedIn's daily games; no slice held games
+address	/games/patches	app	M	R	LinkedIn games in the right rail [re-harvest 2026-09-24]	ADMIT	M C99	playing LinkedIn's daily games; no slice held games
+address	/games/wend	app	M	R	LinkedIn games in the right rail [re-harvest 2026-09-24]	ADMIT	M C99	playing LinkedIn's daily games; no slice held games
+address	/games/zip	app	M	R	LinkedIn games in the right rail [re-harvest 2026-09-24]	ADMIT	M C99	playing LinkedIn's daily games; no slice held games
+address	/news/story/<opaque>	app	M	R	LinkedIn News story in the right rail [re-harvest 2026-09-24]	ADMIT	M C98	LinkedIn's own news stories; C74 reads the feed
+address	/posts/<opaque>	app	M	R	A post's shareable address ('View post') [re-harvest 2026-09-24]	RECORDED	M C72	the link of a post, M C72's read half
+address	/profile/<entity>	app	P	W	Settings: name, location and industry [re-harvest 2026-09-24]	RECORDED	P N19	P N19 in words
+address	/sharing/compose	app	M	W	Post composer ('Create a post') [re-harvest 2026-09-24]	RECORDED	M C1	the post composer, M C1
+control	<X> to live, currently behind live	app	M	R	A live video player's jump-to-live control [re-harvest 2026-09-24]	RECORDED	M C95	part of watching a LinkedIn Live, M C95
+control	Are these results helpful? <X> these search results are helpful	app	N	W	People search: results feedback (yes) [re-harvest 2026-09-24]	ADMIT	N 198	a verdict on people-search results; J 163 is the jobs one
+control	Are these results helpful? <X> these search results are not helpful	app	N	W	People search: results feedback (no) [re-harvest 2026-09-24]	ADMIT	N 198	a verdict on people-search results; J 163 is the jobs one
+control	Dismiss <X> notification <n> of <n>	app	-	R	Dismisses a toast notification [re-harvest 2026-09-24] -- OUT (lane Y2): closes a transient toast -- presentation, not a capability	OUT	-	closes a transient toast -- presentation, not a capability
+control	default , selected	app	-	R	A video player's caption or track menu item [re-harvest 2026-09-24] -- OUT (lane Y2): a media player's caption setting -- presentation	OUT	-	a media player's caption setting -- presentation
+control	descriptions off , selected	app	-	R	A video player's audio-description menu item [re-harvest 2026-09-24] -- OUT (lane Y2): a media player's audio-description setting -- presentation	OUT	-	a media player's audio-description setting -- presentation
+control	restore all settings to the default values	app	-	R	A video player's caption-settings reset [re-harvest 2026-09-24] -- OUT (lane Y2): a media player's caption-settings reset -- presentation	OUT	-	a media player's caption-settings reset -- presentation

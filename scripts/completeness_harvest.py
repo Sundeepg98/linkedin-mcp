@@ -88,6 +88,17 @@ href, no page text, no accessible name leaves verbatim.
     ./venv/Scripts/python.exe scripts/completeness_harvest.py               # report
     ./venv/Scripts/python.exe scripts/completeness_harvest.py --write       # + TSV
     ./venv/Scripts/python.exe scripts/completeness_harvest.py --control     # controls
+    ./venv/Scripts/python.exe scripts/completeness_harvest.py --check       # fixed point
+    ... --captured-before 2026-09-23T00:00:00                              # the corpus
+
+THE ADJUDICATED CORPUS. The committed table records ONE corpus: the 71
+captures taken before 2026-09-23T00:00:00 UTC, whose every app-scope candidate
+lane Y2 gave a verdict (``VERDICTS``). Captures keep arriving, so regenerate
+and check the committed table WITH that cutoff; a run without it is a
+re-harvest, and its new candidates are read before anything is written.
+``--check`` exits 1 unless the committed table is exactly what ``--write``
+would write over the named corpus AND the verdict layer holds
+(``verdict_problems``, which needs no capture and is what the test suite runs).
 
 ``--state-root`` names the checkout that holds the gitignored captures; by
 default it is the MAIN checkout, found with ``git rev-parse --git-common-dir``,
@@ -133,6 +144,27 @@ ANNOTATIONS = CENSUS / "completeness-annotations.tsv"
 #: find every candidate of the first run "recorded" in the candidates table and
 #: report zero -- a completeness probe measuring its own output.
 OWN_FILES = frozenset({OUT_TSV.name, ANNOTATIONS.name})
+
+#: THIS INSTRUMENT'S OWN REPORTS, by a fragment of their file names. They name
+#: every candidate they adjudicate, so reading them as "somebody else knows this
+#: address" would make the ``known_elsewhere`` column measure the instrument's
+#: own paperwork -- the same circularity ``OWN_FILES`` closes for the census.
+OWN_DOCS = ("completeness-probe", "lane-y2-admission")
+
+#: THE VERDICT LAYER, lane Y2 (2026-09-24). Every APP-scope candidate gets ONE
+#: of these, written in the annotations file's ``verdict`` column:
+#:
+#:     ADMIT     a user capability no census row carried -- a new GAP row now
+#:               carries it, named in ``verdict_rows``
+#:     RECORDED  a census row already carried the capability in words; that row
+#:               gained the address or control as evidence, named likewise
+#:     OUT       not a user capability (chrome, a promo, a label, a pure
+#:               navigation), with its one-line reason in ``verdict_basis``
+#:
+#: An ADMIT or RECORDED route leaves the candidate set BECAUSE a census row now
+#: carries it, so a table line still holding one is a verdict the census does
+#: not bear out -- :func:`verdict_problems` says so, by name.
+VERDICTS = ("ADMIT", "RECORDED", "OUT")
 
 #: The four capability slices, plus the inward inventory of tools.
 SLICE_FILES = dict(ccs.SLICES)
@@ -830,7 +862,7 @@ def elsewhere_index() -> dict[Pattern, set[str]]:
     out: dict[Pattern, set[str]] = collections.defaultdict(set)
     sources: list[tuple[str, Path]] = []
     sources += [("audit", p) for p in (ROOT / "_audit").glob("*.md")
-                if "completeness-probe" not in p.name]
+                if not any(own in p.name for own in OWN_DOCS)]
     sources += [("code", p) for p in (ROOT / "linkedin_server").rglob("*.py")]
     sources += [("script", p) for p in (ROOT / "scripts").glob("*.py")
                 if p.name != Path(__file__).name]
@@ -1089,12 +1121,37 @@ class Seen:
     regions: set[str] = dataclasses.field(default_factory=set)
 
 
+def select_corpus(state_root: Path, *, worktrees: bool = True, fixtures: bool = True,
+                  captured_before: str = "") -> tuple[list[Capture], dict]:
+    """``discover``, then keep only captures taken BEFORE ``captured_before``.
+
+    WHY A CUTOFF EXISTS. The committed table is the record of ONE adjudicated
+    corpus. Captures keep arriving under ``_state/`` -- a live lane writes them
+    every session -- so a plain ``--write`` rewrites the table over whatever is
+    on disk that hour, and a candidate nobody has read lands in a tracked file.
+    ``--captured-before`` names the corpus: a capture whose ``when`` (UTC, the
+    same stamp the curve orders by) is on or after the cutoff is SET ASIDE, and
+    the set-aside count is printed like every other exclusion -- an exclusion
+    is a printed number, never a silence. An empty cutoff keeps everything.
+    """
+    captures, set_aside = discover(state_root, worktrees=worktrees, fixtures=fixtures)
+    if not captured_before:
+        return captures, set_aside
+    kept = [c for c in captures if c.when < captured_before]
+    later = [c.label for c in captures if c.when >= captured_before]
+    if later:
+        set_aside = dict(set_aside)
+        set_aside["captured on or after %s (--captured-before)" % captured_before] = later
+    return kept, set_aside
+
+
 def run(state_root: Path, *, worktrees: bool = True, fixtures: bool = True,
         veto: Veto | None = None, census_dir: Path = CENSUS,
-        captures: list[Capture] | None = None) -> dict:
+        captures: list[Capture] | None = None,
+        set_aside: dict | None = None) -> dict:
     """Harvest every capture, diff against the census, and build the curve."""
     veto = veto or Veto()
-    set_aside: dict = {}
+    set_aside = dict(set_aside or {})
     if captures is None:
         captures, set_aside = discover(state_root, worktrees=worktrees, fixtures=fixtures)
     census = census_index(census_dir)
@@ -1449,7 +1506,20 @@ def rows_for_tsv(result: dict, annotations: dict | None = None) -> list[list[str
 
 
 def write_tsv(result: dict, path: Path = OUT_TSV) -> int:
-    body = rows_for_tsv(result)
+    lines, n = tsv_lines(result)
+    path.write_text("\n".join(lines) + "\n", encoding="ascii")
+    return n
+
+
+def tsv_lines(result: dict, annotations: dict | None = None) -> tuple[list[str], int]:
+    """The table ``--write`` would write, as lines, and its data-line count.
+
+    Split out of ``write_tsv`` so ``--check`` compares the table it WOULD
+    write with the one committed, through the one function that writes it --
+    a checker with its own copy of the format is a second writer that can
+    disagree with the first.
+    """
+    body = rows_for_tsv(result, annotations)
     veto = result["veto"]
     lines = [
         "# COMPLETENESS CANDIDATES -- generated by scripts/completeness_harvest.py --write",
@@ -1479,6 +1549,9 @@ def write_tsv(result: dict, path: Path = OUT_TSV) -> int:
         % ("ARMED" if veto.armed else "DISARMED (%s)" % veto.why),
         "#",
         "# Method and findings: _audit/2026-09-23-completeness-probe.md",
+        "# Verdicts (ADMIT / RECORDED / OUT, one per app-scope candidate) are the",
+        "# verdict columns of completeness-annotations.tsv; an ADMIT or RECORDED route",
+        "# is a census row now and leaves this table. _audit/2026-09-24-lane-y2-admission.md",
         "\t".join(TSV_COLUMNS),
     ]
     for row in body:
@@ -1486,8 +1559,134 @@ def write_tsv(result: dict, path: Path = OUT_TSV) -> int:
         if not text.isascii():
             raise SystemExit("refusing to write a non-ASCII line: %r" % row[1])
         lines.append(text)
-    path.write_text("\n".join(lines) + "\n", encoding="ascii")
-    return len(body)
+    return lines, len(body)
+
+
+# ---------------------------------------------------------------------------
+# the verdict layer, and the table at a fixed point
+# ---------------------------------------------------------------------------
+
+def _census_row_ids(census_dir: Path = CENSUS) -> set[str]:
+    """Every ``<slice> <id>`` a slice file writes as a table row, off the shipped parse."""
+    ids: set[str] = set()
+    for letter, name in ccs.SLICES.items():
+        path = census_dir / name
+        if not path.exists():
+            continue
+        for line in path.read_text(encoding="utf-8", errors="replace").splitlines():
+            if not line.startswith("|") or not ccs.ROW.match(line):
+                continue
+            cells = ccs.cells(line)
+            if len(cells) < 3:
+                continue
+            rid = _row_id(letter, cells)
+            if rid:
+                ids.add(rid)
+    return ids
+
+
+def _table_lines(path: Path) -> list[dict]:
+    """The data lines of a committed candidates table, as dicts. Absent -> []."""
+    if not path.exists():
+        return []
+    out: list[dict] = []
+    for line in path.read_text(encoding="ascii").splitlines():
+        if not line or line.startswith("#") or line.startswith("kind\t"):
+            continue
+        out.append(dict(zip(TSV_COLUMNS, line.split("\t"))))
+    return out
+
+
+def verdict_problems(table: Path = OUT_TSV, annotations: Path = ANNOTATIONS,
+                     census_dir: Path = CENSUS) -> list[str]:
+    """Everything wrong with the verdict layer, each naming its line.
+
+    Needs no capture, so it runs in CI. Three failures, each a way the layer
+    could say more than the tree bears out:
+
+      * an APP-scope line in the table with no verdict, or with ADMIT or
+        RECORDED -- an adjudicated route that is still a candidate means the
+        census row said to carry it does not;
+      * a verdict off the alphabet, or ADMIT / RECORDED naming no row, or a
+        row the census does not have;
+      * an OUT with no reason.
+    """
+    problems: list[str] = []
+    notes = load_annotations(annotations)
+    rows = _census_row_ids(census_dir)
+    for line in _table_lines(table):
+        key = (line.get("kind", ""), line.get("pattern", ""))
+        if line.get("scope") != "app":
+            continue
+        verdict = notes.get(key, {}).get("verdict", "").strip()
+        if verdict in ("", "-"):
+            problems.append("%s %s: an app-scope candidate with no verdict"
+                            % (key[0], key[1]))
+        elif verdict != "OUT":
+            problems.append("%s %s: verdict %s, and the route is still a candidate "
+                            "-- the row it names does not carry it"
+                            % (key[0], key[1], verdict))
+    for key, note in sorted(notes.items()):
+        verdict = note.get("verdict", "").strip()
+        if verdict in ("", "-"):
+            continue
+        if verdict not in VERDICTS:
+            problems.append("%s %s: verdict %r is off %s" % (key[0], key[1], verdict,
+                                                              VERDICTS))
+            continue
+        named = [r.strip() for r in note.get("verdict_rows", "").split(",")
+                 if r.strip() and r.strip() != "-"]
+        if verdict == "OUT":
+            if len(note.get("verdict_basis", "").strip()) < 12:
+                problems.append("%s %s: OUT with no reason" % key)
+            continue
+        if not named:
+            problems.append("%s %s: %s names no census row" % (key[0], key[1], verdict))
+        for rid in named:
+            if rid not in rows:
+                problems.append("%s %s: %s names %s, which no slice file writes as a row"
+                                % (key[0], key[1], verdict, rid))
+    return problems
+
+
+def check(result: dict, table: Path = OUT_TSV, annotations: Path = ANNOTATIONS,
+          census_dir: Path = CENSUS) -> int:
+    """``--check``: the committed table is what ``--write`` would write, and the
+    verdict layer holds. Exit 1 naming every difference; 0 otherwise.
+
+    A FIXED POINT, NOT A SNAPSHOT. The table is a function of the captures, the
+    census and the annotations; regenerating it over the same corpus must
+    reproduce it byte for byte. A difference means one of the three moved and
+    nobody regenerated -- or that the table was edited by hand.
+    """
+    want, _n = tsv_lines(result, load_annotations(annotations))
+    have = table.read_text(encoding="ascii").splitlines() if table.exists() else []
+    failures = 0
+    if want != have:
+        def keyed(lines):
+            return {tuple(l.split("\t")[:2]): l for l in lines
+                    if l and not l.startswith("#") and not l.startswith("kind\t")}
+        w, h = keyed(want), keyed(have)
+        print("=== FIXED POINT: the committed table is NOT what --write would write")
+        for k in sorted(set(w) - set(h)):
+            print("    would ADD     %s %s" % k)
+        for k in sorted(set(h) - set(w)):
+            print("    would REMOVE  %s %s" % k)
+        changed = sorted(k for k in set(w) & set(h) if w[k] != h[k])
+        for k in changed:
+            print("    would CHANGE  %s %s" % k)
+        header = [l for l in want if l.startswith("#")] != [l for l in have if l.startswith("#")]
+        if header:
+            print("    the header differs")
+        failures += 1
+    else:
+        print("=== FIXED POINT: the committed table is exactly what --write would write")
+    problems = verdict_problems(table, annotations, census_dir)
+    print("=== VERDICT LAYER: %d problem(s)" % len(problems))
+    for p in problems:
+        print("    " + p)
+    failures += bool(problems)
+    return 1 if failures else 0
 
 
 def report(result: dict) -> None:
@@ -1676,17 +1875,28 @@ def main(argv: list[str] | None = None) -> int:
                         help="the checkout holding _state/ (default: the main checkout)")
     parser.add_argument("--no-worktrees", action="store_true")
     parser.add_argument("--no-fixtures", action="store_true")
+    parser.add_argument("--captured-before", default="",
+                        help="keep only captures taken before this UTC stamp "
+                             "(e.g. 2026-09-23T00:00:00): the adjudicated corpus")
+    parser.add_argument("--check", action="store_true",
+                        help="exit 1 unless the committed table is what --write "
+                             "would write and every app-scope line has a verdict")
     args = parser.parse_args(argv)
     if args.control:
         return control()
     state_root = Path(args.state_root) if args.state_root else main_checkout(ROOT)
-    result = run(state_root, worktrees=not args.no_worktrees,
-                 fixtures=not args.no_fixtures)
+    captures, set_aside = select_corpus(
+        state_root, worktrees=not args.no_worktrees, fixtures=not args.no_fixtures,
+        captured_before=args.captured_before)
+    result = run(state_root, captures=captures, set_aside=set_aside)
     if not result["captures"]:
         print("NO CAPTURES FOUND under %s. An absence is not a zero; run from a "
               "machine that holds the captures." % "the state root")
         return 2
     report(result)
+    if args.check:
+        print()
+        return check(result)
     if args.write:
         n = write_tsv(result)
         print()

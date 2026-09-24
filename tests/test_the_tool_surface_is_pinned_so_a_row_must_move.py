@@ -104,6 +104,7 @@ PINNED_TOOL_SURFACE: dict[str, tuple[str, ...]] = {
     "linkedin_login": ("wait_seconds",),
     "linkedin_login_browser": ("wait_seconds",),
     "linkedin_logout": ("confirm",),
+    "linkedin_mark_company_interest": ("confirm_token", "job_id"),
     "linkedin_my_activity_items": (),
     "linkedin_my_applications": ("limit",),
     "linkedin_my_profile": ("details", "include_skills"),
@@ -315,8 +316,17 @@ PINNED_TOOL_SURFACE: dict[str, tuple[str, ...]] = {
 #: 69. The merge carries both -- the live lane's one tool and four parameters,
 #: lane S's five parameters -- so 52 tools and 69 + 4 + 5 = 78 parameters,
 #: measured off the merged registry below. No row moves in the merge.
-PINNED_TOOL_COUNT = 52
-PINNED_PARAMETER_COUNT = 78
+#: **RE-PINNED 2026-09-24 AT 53 TOOLS AND 80 PARAMETERS (lane L7,
+#: at its merge of master 9b9a4d0), MEASURED off the merged registry, not
+#: summed.** The lane's branch had pinned 52 and 76 at its first merge (master
+#: ff98a7f); master had since pinned 52 and 78. The lane adds one tool and two
+#: parameters: `linkedin_mark_company_interest("job_id", "confirm_token")`,
+#: which banks `P I14` -- signal interest in working for a company -- GAP ->
+#: COVERED-UNFIRED. Not PROVEN: a WRITE built to ready-to-fire behind the flag
+#: and the single-use grant, never granted. See
+#: `_audit/2026-09-24-lane-l7-profile-writes.md`.
+PINNED_TOOL_COUNT = 53
+PINNED_PARAMETER_COUNT = 80
 
 
 def live_surface() -> dict[str, tuple[str, ...]]:
