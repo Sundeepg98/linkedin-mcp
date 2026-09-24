@@ -8,9 +8,9 @@
 
 **THIS REGISTER IS NOT THE CORPUS AND DOES NOT CLAIM TO BE COMPLETE.** Read section 4 before concluding a question is unruled: the scan that keeps it honest reads ONE marker, and the ruling that caused this file to be written does not carry it.
 
-    rulings registered       57
-    documents scanned        247
-    RULED: declarations      44 claimed, 7 triaged, 0 unclaimed
+    rulings registered       61
+    documents scanned        248
+    RULED: declarations      48 claimed, 7 triaged, 0 unclaimed
 
 ---
 
@@ -53,6 +53,7 @@ Scan the CLAIM column against your question. Every claim is a paraphrase written
 | `D6-CAPABILITY-OVER-AFFORDANCE` | A row named for an affordance is discharged when the package delivers the same capability payload by its own sanctioned routes; the row names them and rests on their proofs (PROVEN if live-proven, else UNFIRED). | rows named for a control or surface | 2026-09-23 | [2026-09-23-rulings-write-class-and-delegated-calls.md](2026-09-23-rulings-write-class-and-delegated-calls.md)<br>*D6: a capability delivered without the named affordance* |
 | `D3-UNREGISTERED-REFUSAL-IS-NOT-A-RULING` | A refusal written only into an allowlist comment is not a ruling: it makes no row EXCLUDED-RULED or CANNOT-DELIVER, and a row resting on one is GAP, blocked on the decision the refusal asks for, until that decision is registered. | refusals recorded only beside an allowlist entry | 2026-09-24 | [2026-09-24-rulings-search-verticals-rosters-passive-costs.md](2026-09-24-rulings-search-verticals-rosters-passive-costs.md)<br>*D3: is a reasoned allowlist refusal a ruling?* |
 | `D5-PASSIVE-COST-IS-NOT-A-ROW` | A consequence of an act with no control of its own is recorded on the act's row, and its own row is EXCLUDED-RULED as NOT-AN-ACT (N 171). A preference he sets is an act, a setting, and stays a GAP write row (N 183). | passive costs | 2026-09-24 | [2026-09-24-rulings-search-verticals-rosters-passive-costs.md](2026-09-24-rulings-search-verticals-rosters-passive-costs.md)<br>*D5: is a passive cost a capability row?* |
+| `WHO-WHICH-COUNTS-ARE-NOT-DELIVERY` | A row whose payload is WHO (people) or WHICH (items of other people's content) is not delivered by a count-only reader under the shaper doctrine: GAP, pending the operator's names-and-titles question. Filters and aggregates are delivered by counts. | count-only readers | 2026-09-24 | [2026-09-24-rulings-notify-veto-and-who-which.md](2026-09-24-rulings-notify-veto-and-who-which.md)<br>*A count-only reader does not deliver WHO or WHICH* |
 
 ### census state
 
@@ -92,6 +93,13 @@ Scan the CLAIM column against your question. Every claim is a paraphrase written
 | `OWN-INBOX-READS-COVERED-BY-B` | Reading the operator's own inbox, including opening threads, is covered by ruling (b) with no per-fire go-ahead; proofs prefer threads already read so no new read receipt is sent. | /messaging/ reads | 2026-09-23 | [2026-09-23-rulings-write-class-and-delegated-calls.md](2026-09-23-rulings-write-class-and-delegated-calls.md)<br>*Reading his own inbox* |
 | `SELF-PROFILE-EDITS-NOT-OUTWARD` | Edits to the operator's own profile fields are not outward acts: no other person is targeted and each edit reverses. Live proofs are permitted with notify-network off, the field restored in-session and proven by a before/after reading, and never a field that broadcasts by nature. | edits to the operator's own profile fields | 2026-09-23 | [2026-09-23-rulings-write-class-and-delegated-calls.md](2026-09-23-rulings-write-class-and-delegated-calls.md)<br>*Edits to his own profile fields* |
 | `SHARE-AND-POLL-PROOFS-OWN-POSTS` | Share-link proofs use the operator's own posts only (M C72); a poll post's address (M C85) comes from tool arguments only -- his own poll post, or NEEDS-TARGET. | share links and poll results | 2026-09-23 | [2026-09-23-rulings-write-class-and-delegated-calls.md](2026-09-23-rulings-write-class-and-delegated-calls.md)<br>*Share and poll proofs* |
+| `SELF-PROFILE-EDIT-NOTIFY-CONDITION-AMENDED` | Amends condition 1 of SELF-PROFILE-EDITS-NOT-OUTWARD: where the edit dialog draws no notify control, his account-level 'Share profile updates with your network' setting read OFF before the edit satisfies it; an unnamed switch blocks until a capture names it; neither established -> NEEDS-OPERATOR. | edits to the operator's own profile fields | 2026-09-24 | [2026-09-24-rulings-notify-veto-and-who-which.md](2026-09-24-rulings-notify-veto-and-who-which.md)<br>*Where the dialog draws no notify control* |
+
+### navigation
+
+| id | what was ruled | binds | when | where (document / section) |
+|---|---|---|---|---|
+| `PAGE-MAY-VETO-NEVER-SUPPLY` | Every navigation address is composed from tool arguments; page content may only REFUSE a navigation (e.g. a caller-supplied id that is not his own), never provide the address. | addresses and page content | 2026-09-24 | [2026-09-24-rulings-notify-veto-and-who-which.md](2026-09-24-rulings-notify-veto-and-who-which.md)<br>*The address comes from the caller* |
 
 ### press gate
 
@@ -109,6 +117,7 @@ Scan the CLAIM column against your question. Every claim is a paraphrase written
 | `OTHER-MEMBER-IDS-AS-READS` | Another member's id in a search facet (e.g. connectionOf) is permitted as a read when it comes from the tool's arguments, never from page content, and is never stored in a tracked file. | search facets carrying another member's id | 2026-09-23 | [2026-09-23-rulings-write-class-and-delegated-calls.md](2026-09-23-rulings-write-class-and-delegated-calls.md)<br>*Other members' ids as search facets* |
 | `D2-SEARCH-VERTICALS-WIDENED` | The search admission widens from people to four CLOSED segments, /search/results/(people\|companies\|groups\|events)/, under D1-SEARCH-AS-READS's three conditions; serves N 104, N 161, M C70 and N 179. | search result verticals | 2026-09-24 | [2026-09-24-rulings-search-verticals-rosters-passive-costs.md](2026-09-24-rulings-search-verticals-rosters-passive-costs.md)<br>*D2: widen the search admission beyond people* |
 | `MEMBER-ROSTERS-AS-BOUNDED-READS` | A roster the operator can open himself (a group's members, an event's attendees, a company's or school's People tab) is admitted as a bounded read: one page per call, the id from tool arguments only, no automatic pagination, no member name or id in a tracked file, inside the live budget. | member rosters | 2026-09-24 | [2026-09-24-rulings-search-verticals-rosters-passive-costs.md](2026-09-24-rulings-search-verticals-rosters-passive-costs.md)<br>*Rosters he can open himself* |
+| `THIRD-PARTY-PROFILE-FOR-A-NAMED-TARGET` | A third party's profile (/in/<slug>/) may be loaded only inside an outward act whose target the operator names in that call: slug from tool arguments only, never for a measurement, the shaper name-free. Search-admission condition 5 stands. | third-party profiles inside outward acts | 2026-09-24 | [2026-09-24-rulings-notify-veto-and-who-which.md](2026-09-24-rulings-notify-veto-and-who-which.md)<br>*A third party's profile, inside his own outward act* |
 
 ### session model
 
@@ -282,17 +291,25 @@ Scan the CLAIM column against your question. Every claim is a paraphrase written
 
 **`OTHER-MEMBER-IDS-AS-READS`** -- Orchestrator's call under OUTWARD-ACTS-NEED-THE-OPERATOR; overridable. Answers the other-members question N 172 was held on.
 
+**`PAGE-MAY-VETO-NEVER-SUPPLY`** -- Orchestrator's call under OUTWARD-ACTS-NEED-THE-OPERATOR; overridable. Reconciles the navigation guard with ownership checks; first applied to linkedin_surface_census feed_item.
+
 **`PERMALINK-READ-IS-ALLOWED`** -- `M C42` records that this ruling DID NOT REACH naming the target -- which is why that row cannot rest on it. See the DISPUTED section of `_audit/2026-09-21-what-was-ruled.md`.
 
 **`REVEAL-BUTTON-IS-A-DISCLOSURE`** -- Orchestrator's call under OUTWARD-ACTS-NEED-THE-OPERATOR; overridable.
 
 **`SEARCH-ADMISSION-APPROVED-FIVE-CONDITIONS`** -- Condition 2 was AMENDED the same day -- see SEARCH-CONDITION-2-CLOSED. The ruling bars FIRING, not READING; conflating the two cost a later wave a decision it did not need.
 
+**`SELF-PROFILE-EDIT-NOTIFY-CONDITION-AMENDED`** -- Orchestrator's call under OUTWARD-ACTS-NEED-THE-OPERATOR; overridable. Measured cause: the intro editor draws no named notify control (live lane session 1, lane L7).
+
 **`SELF-PROFILE-EDITS-NOT-OUTWARD`** -- Orchestrator's call under OUTWARD-ACTS-NEED-THE-OPERATOR; overridable. Narrows OPERATOR-NAMES-THE-TARGET to writes that target other people.
 
 **`SHARE-AND-POLL-PROOFS-OWN-POSTS`** -- Orchestrator's call under OUTWARD-ACTS-NEED-THE-OPERATOR; overridable.
 
+**`THIRD-PARTY-PROFILE-FOR-A-NAMED-TARGET`** -- The orchestrator applying WRITE-CLASS-B and OPERATOR-NAMES-THE-TARGET; overridable. Unblocks N 1, N 4, N 5, M M1 and M M6 as builds.
+
 **`VIEW-SWITCH-PRESS-RESTORED`** -- Orchestrator's call under OUTWARD-ACTS-NEED-THE-OPERATOR; overridable.
+
+**`WHO-WHICH-COUNTS-ARE-NOT-DELIVERY`** -- Orchestrator's call under OUTWARD-ACTS-NEED-THE-OPERATOR; overridable. Precedent: N 162 and N 180.
 
 **`WRITE-CLASS-B`** -- Operator's word: "b". Supersedes DO-NOT-OPEN-MESSAGING and amends NO-IRREVERSIBLE-WRITE-IS-FIRED; its target condition is OPERATOR-NAMES-THE-TARGET.
 
@@ -361,6 +378,10 @@ Every `RULED:` line in the corpus, and what became of it. An UNCLAIMED row fails
 | [2026-09-23-rulings-write-class-and-delegated-calls.md](2026-09-23-rulings-write-class-and-delegated-calls.md) | RULED: (orchestrator, 2026-09-24, delegated) SHARE-LINK PROOFS USE THE | `SHARE-AND-POLL-PROOFS-OWN-POSTS` |
 | [2026-09-23-rulings-write-class-and-delegated-calls.md](2026-09-23-rulings-write-class-and-delegated-calls.md) | RULED: (orchestrator, 2026-09-24, delegated) CREDENTIAL, RECOVERY AND SESSION | `CREDENTIAL-SETTINGS-NEED-THE-OPERATOR` |
 | [2026-09-23-rulings-write-class-and-delegated-calls.md](2026-09-23-rulings-write-class-and-delegated-calls.md) | RULED: (orchestrator, 2026-09-23, delegated) /in/me/ presses get NO blanket | `IN-ME-NO-BLANKET-BAR` |
+| [2026-09-24-rulings-notify-veto-and-who-which.md](2026-09-24-rulings-notify-veto-and-who-which.md) | RULED: (orchestrator, 2026-09-24, delegated) CONDITION 1 OF | `SELF-PROFILE-EDIT-NOTIFY-CONDITION-AMENDED` |
+| [2026-09-24-rulings-notify-veto-and-who-which.md](2026-09-24-rulings-notify-veto-and-who-which.md) | RULED: (orchestrator, 2026-09-24, delegated) A PAGE MAY VETO A NAVIGATION, | `PAGE-MAY-VETO-NEVER-SUPPLY` |
+| [2026-09-24-rulings-notify-veto-and-who-which.md](2026-09-24-rulings-notify-veto-and-who-which.md) | RULED: (orchestrator, 2026-09-24, applying (b)) A THIRD PARTY'S PROFILE | `THIRD-PARTY-PROFILE-FOR-A-NAMED-TARGET` |
+| [2026-09-24-rulings-notify-veto-and-who-which.md](2026-09-24-rulings-notify-veto-and-who-which.md) | RULED: (orchestrator, 2026-09-24, delegated) A ROW WHOSE PAYLOAD IS WHO (a | `WHO-WHICH-COUNTS-ARE-NOT-DELIVERY` |
 | [2026-09-24-rulings-search-verticals-rosters-passive-costs.md](2026-09-24-rulings-search-verticals-rosters-passive-costs.md) | RULED: (orchestrator, 2026-09-24, delegated) D2 IS ANSWERED YES. The search | `D2-SEARCH-VERTICALS-WIDENED` |
 | [2026-09-24-rulings-search-verticals-rosters-passive-costs.md](2026-09-24-rulings-search-verticals-rosters-passive-costs.md) | RULED: (orchestrator, 2026-09-24, delegated) D3 IS ANSWERED NO. A refusal | `D3-UNREGISTERED-REFUSAL-IS-NOT-A-RULING` |
 | [2026-09-24-rulings-search-verticals-rosters-passive-costs.md](2026-09-24-rulings-search-verticals-rosters-passive-costs.md) | RULED: (orchestrator, 2026-09-24, delegated) MEMBER ROSTERS ARE ADMITTED AS | `MEMBER-ROSTERS-AS-BOUNDED-READS` |
