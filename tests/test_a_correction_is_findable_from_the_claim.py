@@ -212,6 +212,36 @@ NOT_A_CORRECTION: dict[tuple[str, str], str] = {
         "unmarked, which would need its own CORRECTS: / CORRECTED BY: pair."
     ),
 
+    # 2026-09-24, lane S (people-search readers). SEVEN NETWORK ROWS CITE THE
+    # LANE'S RECORD as the home of their live queue; the scan reports the
+    # first, row 79, and the reason is the same for all seven -- read, not
+    # inferred from the filenames.
+    ("network.md", "2026-09-24-lane-s-people-search.md"): (
+        "QUOTATION AND ADJACENCY, NOT A CORRECTION. Rows 79, 84, 85, 87, 94, "
+        "172 and 194 moved to COVERED-UNFIRED on the lane's reader, and each "
+        "cites the lane's record for its live queue. The matched word on row "
+        "79 is `mistake`, inside that row's KEPT prior cell -- the tool "
+        "docstring it quotes, *'by a caller or by a mistake'* -- and `false` "
+        "sits in rows 80 and 81, about their own filter terms. No network row "
+        "withdraws anything the record says. **WHAT WOULD MAKE THIS ENTRY "
+        "WRONG:** a network row asserting the record wrong about that row "
+        "while leaving the record unmarked, which would need its own "
+        "CORRECTS: / CORRECTED BY: pair."
+    ),
+    # 2026-09-24, lane S at its integration. THE WHO RULE'S BLOCKER CITES THE
+    # DOCTRINE; it does not correct it -- read, not inferred from the names.
+    ("network.md", "2026-09-05-lead-rulings-round-two.md"): (
+        "CITATION AS A BLOCKER, NOT A CORRECTION. Rows 79, 172 and 194 now "
+        "name their blocker as the name-free shaper doctrine and cite this "
+        "document for it (*'this server does not publish names'*), pending "
+        "the operator's question on returning names at runtime. The matched "
+        "word on row 79 is `mistake`, inside that row's KEPT prior cell -- "
+        "the tool docstring it quotes, *'by a caller or by a mistake'*. The "
+        "rows rest on the document; none of them says it is wrong. **WHAT "
+        "WOULD MAKE THIS ENTRY WRONG:** a network row asserting the doctrine "
+        "withdrawn or mistaken while leaving the document unmarked."
+    ),
+
     # 2026-09-21, the FOUR-LOOSE-ROWS wave. THREE OF THESE FOUR ARE ROWS OF
     # ONE CHRONOLOGY TABLE, and the reason is one reason told three times
     # because the scan keys on a basename.
@@ -707,6 +737,58 @@ NOT_A_CORRECTION: dict[tuple[str, str], str] = {
         "**WHAT WOULD MAKE THIS ENTRY WRONG:** row `C85` asserting that "
         "something IN that deliverable is false while leaving the deliverable "
         "untouched."
+    ),
+    # 2026-09-23, the live lane's session 1. BOTH ARE TABLE-ROW PROXIMITY,
+    # found by reading the window line by line: the matched word sits in a
+    # DIFFERENT ROW, one or two lines from the row that cites the session.
+    ("profile.md", "2026-09-23-live-lane-session-1.md"): (
+        "TABLE-ROW PROXIMITY, from ELEVEN citing lines, every matched word in "
+        "a NEIGHBOURING row. The session document is cited by rows `A8`, `A11`, "
+        "`A13`, `A17`, `A19`, `A21` (each 'NOT SAVED', recording why the "
+        "profile-edit proof did not save), `A25`, `L1`, `L8` (each 'CAPTURED', "
+        "state unchanged), `G6` (banked on the session's fire) and `O3` (half "
+        "proven, state unchanged). Read window by window: `A13`, `A17` and "
+        "`A21` sit beside rows `A14`, `A15` and `A22`, whose own paragraph "
+        "reads 'the blocker's premise is now wrong: the controls are read' -- "
+        "about those rows' blockers, written before this session; `G6` sits "
+        "above `G7`, whose 2026-09-05 paragraph reads '\"no tool, no reason\" "
+        "is now half false'; and `O3` sits two rows above `O5` ('ALL THREE "
+        "CLAUSES ARE FALSE AND THE ROW MOVES ON THE CORRECTION', about badge "
+        "creation). No citing "
+        "line withdraws anything from the session document. **WHAT WOULD MAKE "
+        "THIS ENTRY WRONG:** any of those rows asserting that something IN the "
+        "session document is false while leaving it untouched."
+    ),
+    ("network.md", "2026-09-23-live-lane-session-1.md"): (
+        "TABLE-ROW PROXIMITY, AND ONE ROW'S OWN HISTORY. The citing line is "
+        "row `134`, whose 2026-09-23 23:08 paragraph banks it on the session's "
+        "fire and cites the session document as its evidence. Read window by "
+        "window: rows `132`, `133`, `135` and `136` each carry their own "
+        "'corrected' / 'correction' / 'false' / 'wrong' from earlier waves; "
+        "and row `134`'s older paragraphs carry 'correction' and 'false' "
+        "about its own earlier blockers -- including this lane's earlier wave "
+        "recording it NOT PROVEN, which was true under the rulings of that "
+        "hour and moved because a ruling (VIEW-SWITCH-PRESS-RESTORED) and a "
+        "build arrived, not because it was wrong. No citing line withdraws "
+        "anything from the session document. **WHAT WOULD MAKE THIS ENTRY "
+        "WRONG:** row `134` asserting that something IN the session document "
+        "is false while leaving it untouched."
+    ),
+    ("messaging-and-content.md", "2026-09-23-live-lane-session-1.md"): (
+        "TABLE-ROW PROXIMITY. SIX lines cite the session document -- `M33`, "
+        "`M43`, `M49`, `C38`, `C48`, `C85` -- and the windows of `M49` and "
+        "`C48` hold no correction vocabulary at all. The other four, read window "
+        "by window: `M33` and `M43` (NOT OPENED on a measured badge reading) sit two rows "
+        "above `M35` ('the same undercount 3.10 corrected') and `M45` (a "
+        "'superseded' in its own history); `C38` (CAPTURED) sits below `C36` "
+        "and `C37`, each carrying an earlier wave's 'corrected'; and `C85` is "
+        "ONE table line, where the matched `false` is its own 2026-09-21 "
+        "paragraph -- 'nothing this census publishes had to be false', about "
+        "the direction cell -- two days older than this session's NEEDS-TARGET "
+        "paragraph on the same line. No citing line withdraws anything from "
+        "the session document. **WHAT WOULD MAKE THIS ENTRY WRONG:** any of "
+        "those rows asserting that something IN the session document is false "
+        "while leaving it untouched."
     ),
 
     ("network.md", "2026-09-21-the-fires-and-the-controls.md"): (
@@ -2972,6 +3054,50 @@ NOT_A_CORRECTION: dict[tuple[str, str], str] = {
         "something IN the lane record is mistaken while leaving the record "
         "untouched, or the lane record withdrawing a claim that lives in "
         "another document without marking it."
+    ),
+
+    # 2026-09-24, lane L7 (profile writes). Read at every line the scan
+    # produced, not inferred from the filenames: 36 census rows end with a
+    # paragraph citing the lane's record as the source of their class and
+    # outcome, and the matched words belong to OTHER rows, to a row's own kept
+    # correction of itself, or -- once -- to the lane's own sentence about a
+    # public claim. None of them is about the lane record.
+    ("profile.md", "2026-09-24-lane-l7-profile-writes.md"): (
+        "THE ROWS CITE THEIR RECORD, AND EVERY MATCHED WORD IS ANOTHER ROW'S "
+        "OR THE ROW'S OWN. Forty-one rows cite the lane record: its own "
+        "thirty-four, each ending with a LANE L7 paragraph that records its "
+        "class and outcome; and, since the lane's integration (2026-09-24, on "
+        "the orchestrator's call), the six intro-editor rows `A8`, `A11`, "
+        "`A13`, `A17`, `A19`, `A21`, whose note records that their "
+        "COVERED-UNFIRED now rests on the repaired save gate, and `P G3`, "
+        "whose ruling the same call named. All 41 sites were re-read on the "
+        "merged tree; seventeen have a matched word near, and the words fall in "
+        "three groups: (1) `WRONG` in the KEPT text of rows `A14`, `A15` and "
+        "`A22` -- *'THE BLOCKER'S PREMISE IS NOW WRONG'*, the census correcting "
+        "its OWN earlier blocker in place on 2026-09-19, now also beside the "
+        "citing notes on `A13`, `A17` and `A21` -- and the in-place "
+        "self-corrections of rows `D25`, `K8` and `N12`, adjacent by table "
+        "position; (2) `False` / `false` as prose about a value or a split -- "
+        "`is_read_url=False` in row `B10`, 'would return False' in row `K10`, "
+        "and 'no cell ... is false of either half' in row `D27`'s compound "
+        "note; (3) the lane's OWN sentence on row `J1`, 'a false public claim "
+        "for a job seeker', which is about what switching #Hiring on would "
+        "assert in public, not about any document. The six intro-editor notes "
+        "and `P G3`'s carry no matched word of their own. The census rests "
+        "these cells on the lane record and corrects nothing in it. **WHAT "
+        "WOULD MAKE THIS ENTRY WRONG:** a profile.md row asserting that "
+        "something the lane record says is mistaken while leaving the record "
+        "untouched."
+    ),
+    ("network.md", "2026-09-24-lane-l7-profile-writes.md"): (
+        "ADJACENCY, NOT A CORRECTION. The citing line is census row `176`, "
+        "whose LANE L7 paragraph cites the lane record as the source of its "
+        "class and outcome. The matched word is `corrected` on the row ABOVE, "
+        "`175`, in that row's own account of a route census whose first pass "
+        "'had its headline corrected' -- nothing to do with the lane. Row "
+        "`176` withdraws nothing from the lane record. **WHAT WOULD MAKE THIS "
+        "ENTRY WRONG:** row `176` or `114` asserting that something the lane "
+        "record says is mistaken while leaving the record untouched."
     ),
 
 }

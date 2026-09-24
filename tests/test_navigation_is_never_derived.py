@@ -860,14 +860,29 @@ def _python_files() -> list[pathlib.Path]:
 #: caller-supplied urn as "an identifier this server never read".
 #:
 #: **THE RULING THAT SETTLED IT, delegated by the orchestrator 2026-09-24:
-#: THE PAGE MAY VETO A NAVIGATION, NEVER SUPPLY ONE.** The item now comes from
+#: THE PAGE MAY VETO A NAVIGATION, NEVER SUPPLY ONE** (registered as
+#: ``PAGE-MAY-VETO-NEVER-SUPPLY``, rulings batch 4). The item now comes from
 #: the CALLER -- a tool argument, or a probe's command line -- and a read of his
 #: own rail only VERIFIES it: an item that is not on the rail is refused and its
 #: page never loaded. The address is built from the caller's value, and the
 #: rail's answer reaches the navigation only as a boolean, which this engine
 #: already treats as carrying nothing. So the rule is satisfied rather than
 #: waived, and the three entries left with the code that needed them.
-KNOWN_DERIVED_NAVIGATIONS: dict[str, list[str]] = {}
+#:
+#: **ONE ENTRY REMAINS, AND IT IS DEBT.** The live lane declared a fourth file
+#: of the same class at its merge of lane G, before the ruling above existed:
+#: ``_probe_live_lane_session_1.py``, its hand-run session-1 harness, opens two
+#: addresses built from the newest activity id ``linkedin_my_activity_items``
+#: returned for HIS OWN rail (the post-summary capture for lane L1, and his own
+#: post's permalink for the post-menu capture). The orchestrator's integration
+#: order of 2026-09-24 keeps it here, in its words: pending
+#: PAGE-MAY-VETO-NEVER-SUPPLY (rulings batch 4): the live lane converts this
+#: harness to the caller-names-the-item shape before session 2; this entry is
+#: debt, not a waiver. Converting the harness fails this file until the entry
+#: goes -- the mechanism above, a third time.
+KNOWN_DERIVED_NAVIGATIONS: dict[str, list[str]] = {
+    "_probe_live_lane_session_1.py": ["url", "url"],
+}
 
 
 @pytest.mark.parametrize(

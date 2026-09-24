@@ -1003,6 +1003,61 @@ REGISTER: tuple = (
         note="Orchestrator's call under OUTWARD-ACTS-NEED-THE-OPERATOR; "
              "overridable. Question: _audit/2026-09-21-the-read-triage.md D5.",
     ),
+    Ruling(
+        id="SELF-PROFILE-EDIT-NOTIFY-CONDITION-AMENDED",
+        claim="Amends condition 1 of SELF-PROFILE-EDITS-NOT-OUTWARD: where the "
+              "edit dialog draws no notify control, his account-level 'Share "
+              "profile updates with your network' setting read OFF before the "
+              "edit satisfies it; an unnamed switch blocks until a capture "
+              "names it; neither established -> NEEDS-OPERATOR.",
+        binds="live proofs -- edits to the operator's own profile fields",
+        document="_audit/2026-09-24-rulings-notify-veto-and-who-which.md",
+        anchor="RULED: (orchestrator, 2026-09-24, delegated) CONDITION 1 OF",
+        status="AMENDS SELF-PROFILE-EDITS-NOT-OUTWARD",
+        note="Orchestrator's call under OUTWARD-ACTS-NEED-THE-OPERATOR; "
+             "overridable. Measured cause: the intro editor draws no named "
+             "notify control (live lane session 1, lane L7).",
+    ),
+    Ruling(
+        id="PAGE-MAY-VETO-NEVER-SUPPLY",
+        claim="Every navigation address is composed from tool arguments; page "
+              "content may only REFUSE a navigation (e.g. a caller-supplied id "
+              "that is not his own), never provide the address.",
+        binds="navigation -- addresses and page content",
+        document="_audit/2026-09-24-rulings-notify-veto-and-who-which.md",
+        anchor="RULED: (orchestrator, 2026-09-24, delegated) A PAGE MAY VETO A "
+               "NAVIGATION,",
+        note="Orchestrator's call under OUTWARD-ACTS-NEED-THE-OPERATOR; "
+             "overridable. Reconciles the navigation guard with ownership "
+             "checks; first applied to linkedin_surface_census feed_item.",
+    ),
+    Ruling(
+        id="THIRD-PARTY-PROFILE-FOR-A-NAMED-TARGET",
+        claim="A third party's profile (/in/<slug>/) may be loaded only inside "
+              "an outward act whose target the operator names in that call: "
+              "slug from tool arguments only, never for a measurement, the "
+              "shaper name-free. Search-admission condition 5 stands.",
+        binds="read boundary -- third-party profiles inside outward acts",
+        document="_audit/2026-09-24-rulings-notify-veto-and-who-which.md",
+        anchor="RULED: (orchestrator, 2026-09-24, applying (b)) A THIRD PARTY'S "
+               "PROFILE",
+        note="The orchestrator applying WRITE-CLASS-B and "
+             "OPERATOR-NAMES-THE-TARGET; overridable. Unblocks N 1, N 4, N 5, "
+             "M M1 and M M6 as builds.",
+    ),
+    Ruling(
+        id="WHO-WHICH-COUNTS-ARE-NOT-DELIVERY",
+        claim="A row whose payload is WHO (people) or WHICH (items of other "
+              "people's content) is not delivered by a count-only reader under "
+              "the shaper doctrine: GAP, pending the operator's names-and-titles "
+              "question. Filters and aggregates are delivered by counts.",
+        binds="census convention -- count-only readers",
+        document="_audit/2026-09-24-rulings-notify-veto-and-who-which.md",
+        anchor="RULED: (orchestrator, 2026-09-24, delegated) A ROW WHOSE PAYLOAD "
+               "IS WHO (a",
+        note="Orchestrator's call under OUTWARD-ACTS-NEED-THE-OPERATOR; "
+             "overridable. Precedent: N 162 and N 180.",
+    ),
 )
 
 

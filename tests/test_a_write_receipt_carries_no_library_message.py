@@ -123,6 +123,48 @@ COMPOSED_REFUSAL_INTERPOLATES = frozenset(
 )
 
 
+#: Where the fresh render of a posting LANDED, in the branch where it is not
+#: the posting the grant names. Not name-shaped; finding it anywhere in the
+#: receipt means the landing was quoted.
+LANDED_ELSEWHERE = "https://www.linkedin.com/jobs/view/4000000001/?refId=example-landed-elsewhere"
+
+
+async def test_a_fresh_render_that_landed_elsewhere_is_described_not_quoted(
+    writes_on, browser_page
+):
+    """LANE L7'S VERIFICATION BRANCH, DRIVEN (found by this file's scan at lane
+    G's merge of master). ``mark_company_interest`` confirms on a FRESH RENDER
+    of the posting; when that render lands on an address the grant does not
+    name, the receipt used to carry the landing gate's own refusal verbatim --
+    "refusing to click", after the click had landed. It now says what happened
+    in its own words: the exception's type, and what the landing module says
+    is safe to say about the landing, never the landing itself.
+    """
+    from tests.test_mark_company_interest import _ACTION as INTEREST
+    from tests.test_mark_company_interest import _BASE, _SPEC as INTEREST_SPEC, _URL
+    from tests.test_writes import JOB, FixtureNavigator
+
+    class LandsElsewhereTheSecondTime(FixtureNavigator):
+        async def goto(self, page, url):
+            landed = await super().goto(page, url)
+            return LANDED_ELSEWHERE if len(self.gotos) == 2 else landed
+
+    block = await preview(
+        INTEREST_SPEC, target=JOB, navigator=FixtureNavigator({_URL: _BASE}), page=browser_page
+    )
+    grant = consume(block["to_confirm"], action=INTEREST, target=JOB)
+    act = LandsElsewhereTheSecondTime({_URL: [_BASE, _BASE]})
+    receipt = await writes.perform(act, browser_page, grant)
+
+    assert act.gotos == [_URL, _URL], act.gotos
+    why = receipt["verification"]["why"]
+    assert receipt["verification"]["observed_state"] == "unknown", receipt["verification"]
+    assert "did not land on the posting this grant names (WriteAttemptError)" in why, why
+    assert "refusing to click" not in why, why
+    blob = json.dumps(receipt)
+    assert "example-landed-elsewhere" not in blob and "4000000001" not in blob, why
+
+
 def _exception_text_renders(source: str) -> list[tuple[int, str]]:
     """Every use of a caught exception's TEXT outside a ``raise`` statement.
 

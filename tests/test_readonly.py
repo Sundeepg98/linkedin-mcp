@@ -9,12 +9,14 @@ guarantee at all -- it manufactures confidence.
 from __future__ import annotations
 
 import ast
+import importlib
 import re
+from collections import Counter
 from pathlib import Path
 
 import pytest
 
-from linkedin_server import dom, readonly
+from linkedin_server import dom, readonly, share_link
 from linkedin_server.errors import WriteAttemptError
 
 PACKAGE_DIR = Path(readonly.__file__).resolve().parent
@@ -157,8 +159,23 @@ def test_the_sanctioned_list_is_exactly_these_calls():
         ("linkedin_server/writes.py", "perform", "fill"),
         ("linkedin_server/writes.py", "perform", "select_option"),
         ("linkedin_server/writes.py", "perform", "set_input_files"),
+        ("linkedin_server/reveal.py", "reveal", "click"),
+        ("linkedin_server/view_switch.py", "_activate", "click"),
+        ("linkedin_server/share_link.py", "_activate", "click"),
+        ("linkedin_server/share_link.py", "_clipboard", "evaluate"),
+        ("linkedin_server/share_link.py", "copy_own_post_link", "press"),
     )
-    assert len(readonly.SANCTIONED_MUTATIONS) == 7
+    # EIGHT FROM 2026-09-23: ``reveal.reveal``'s one click, the first press
+    # admitted BY NAME -- per control, in reveal.DECIDED_REVEALS, on a recorded
+    # orchestrator-delegated call. Its argument is beside it in readonly.py.
+    # NINE, the same day: ``view_switch._activate``, the one click of the view
+    # switch, on VIEW-SWITCH-PRESS-RESTORED. Argument beside it too.
+    # TEN TO TWELVE, the same day: the copy link of one of his own posts --
+    # one click drain, ONE evaluate (the first sanctioned evaluate in the
+    # package, and a protective one: it captures the page's clipboard calls in
+    # this server's tab so they do not overwrite his system clipboard), and the
+    # menu's Escape. Argument beside them.
+    assert len(readonly.SANCTIONED_MUTATIONS) == 12
     # THE KINDS ARE ASSERTED SEPARATELY, because the count alone would let a
     # click be swapped for a fill without moving the number, and those are
     # different capabilities: a click presses what is already there, a fill
@@ -184,7 +201,12 @@ def test_the_sanctioned_list_is_exactly_these_calls():
         "click",
         "click",
         "click",
+        "click",
+        "click",
+        "click",
+        "evaluate",
         "fill",
+        "press",
         "press",
         "select_option",
         "set_input_files",
@@ -267,7 +289,13 @@ def test_the_package_contains_exactly_as_many_mutating_calls_as_are_listed():
     # The widening also moves the SHAPE the module docstring describes: seven
     # entries across THREE files now (writes.py, dom.py, press.py), where the
     # prose still says five. That sentence is press.py's owner to correct.
-    assert total == len(readonly.SANCTIONED_MUTATIONS) == 7, total
+    #
+    # EIGHT, 2026-09-23: reveal.reveal's one click. Bumped in the same change
+    # that added the entry -- and only because the red named this line, which
+    # is the paragraph above being right a third time. NINE, the same day:
+    # view_switch._activate, bumped deliberately this time. TWELVE, the same
+    # day: share_link's click drain, its one evaluate and its one Escape.
+    assert total == len(readonly.SANCTIONED_MUTATIONS) == 12, total
 
 
 def test_the_partition_conserves_every_hit():
@@ -1028,6 +1056,51 @@ INJECTED_SCRIPTS = {
 }
 
 
+#: SCRIPTS THAT DO NOT ONLY READ, declared APART from the list above so that
+#: list stays true to its heading. Each may run ONLY from an ``evaluate`` call
+#: site that ``readonly.SANCTIONED_MUTATIONS`` names, which
+#: :func:`test_a_script_that_replaces_page_behaviour_runs_only_from_a_sanctioned_evaluate`
+#: asserts, and each must actually replace something, which
+#: :func:`test_every_declared_replacement_script_really_replaces_something`
+#: asserts -- so this dict cannot become a place to park a reader.
+#:
+#: 2026-09-23, the live lane: ``share_link.CLIPBOARD_JS``. It REPLACES the
+#: page's clipboard calls in this server's OWN TAB -- ``writeText`` and
+#: ``write`` on ``navigator.clipboard``, ``document.execCommand("copy")``, and
+#: a capturing "copy" listener -- so that pressing "Copy link to post" puts
+#: the link here instead of overwriting the operator's own system clipboard,
+#: for every route the page looks up when it copies (share_link names the
+#: one gap: a reference the page took before the capture).
+#: It changes the tab's JavaScript environment and nothing on LinkedIn.
+#:
+#: **AND THE TOKEN SCAN WOULD HAVE PASSED IT AS A READER**, which is a finding
+#: about the scan rather than about this script: ``JS_MUTATION_TOKENS`` lists
+#: DOM and network mutations and no API REPLACEMENT -- no assignment to a page
+#: function, no ``Object.defineProperty``, no ``addEventListener`` -- so
+#: ``test_every_script_this_package_executes_cannot_mutate`` would have
+#: certified a script whose whole purpose is to replace page behaviour. It is
+#: declared here instead, and the blind spot is reported rather than silently
+#: relied on.
+#:
+#: **THE BLIND SPOT CLOSED ON 2026-09-24, AND THIS DICT STAYED.** Lane G's
+#: follow-up taught ``scan_js_for_mutations`` to report an API replacement
+#: (``readonly.JS_API_REPLACEMENT_PATTERNS``), and it reports seven in this
+#: script. So WHAT a declared script may replace is now declared in the
+#: scanner's own sanctioned list, ``readonly.SANCTIONED_API_REPLACEMENTS``,
+#: which the boundary freeze pins; this dict still names which scripts are
+#: exempt from the cannot-mutate test, and
+#: :func:`test_every_declared_replacement_script_replaces_exactly_what_it_declares`
+#: holds the two together.
+SCRIPTS_THAT_REPLACE_PAGE_BEHAVIOUR = {
+    "CLIPBOARD_JS": share_link.CLIPBOARD_JS,
+}
+
+#: What REPLACING page behaviour looks like in a script. A declared entry must
+#: carry at least one, or it is not what the dict above says it is.
+_REPLACEMENT_MARKERS = ("defineProperty", "addEventListener", ".writeText =",
+                        ".write =", "execCommand =")
+
+
 def evaluate_targets(source: str) -> list[tuple[str, str, int]]:
     """Return what every ``.evaluate(...)`` in ``source`` is handed, by AST.
 
@@ -1093,7 +1166,10 @@ def _scripts_this_package_executes() -> dict[str, str]:
 EXECUTED_SCRIPTS = _scripts_this_package_executes()
 
 
-@pytest.mark.parametrize("name", sorted(EXECUTED_SCRIPTS))
+@pytest.mark.parametrize("name", sorted(
+    label for label in EXECUTED_SCRIPTS
+    if label.split()[-1] not in SCRIPTS_THAT_REPLACE_PAGE_BEHAVIOUR
+))
 def test_every_script_this_package_executes_cannot_mutate(name: str):
     """The scan, bound to what RUNS rather than to what is named a certain way.
 
@@ -1192,7 +1268,7 @@ def test_the_scripts_executed_are_exactly_the_ones_declared():
     or h3 at all, so the heading walker returns nothing of it.
     """
     names = {label.split()[-1] for label in EXECUTED_SCRIPTS if " " in label}
-    assert names == set(INJECTED_SCRIPTS), names
+    assert names == set(INJECTED_SCRIPTS) | set(SCRIPTS_THAT_REPLACE_PAGE_BEHAVIOUR), names
     # EIGHTEEN AND NINETEEN, 2026-09-19: ANCHOR_CLASSIFY_JS and
     # COLLECTION_GROUPINGS_JS. They are the first scripts here whose
     # VOCABULARY IS AN ARGUMENT rather than a constant -- the caller ships
@@ -1222,7 +1298,128 @@ def test_the_scripts_executed_are_exactly_the_ones_declared():
     # rather than 22 is written out beside that budget. Read it before
     # reconciling the two numbers -- they are equal by fact, not by
     # construction, and one of them is a ceiling.
-    assert len(EXECUTED_SCRIPTS) == 22, sorted(EXECUTED_SCRIPTS)
+    #
+    # 22 -> 23 on 2026-09-23 for share_link.CLIPBOARD_JS, run from ONE call
+    # site, share_link._clipboard -- and THE TWO 22s NOW DIVERGE, as the
+    # paragraph above says they would the first time a script ran from
+    # somewhere other than a dom.py waiver: this one is not a waived read
+    # but a SANCTIONED MUTATION, declared in SCRIPTS_THAT_REPLACE_PAGE_BEHAVIOUR.
+    assert len(EXECUTED_SCRIPTS) == 23, sorted(EXECUTED_SCRIPTS)
+
+
+def test_a_script_that_replaces_page_behaviour_runs_only_from_a_sanctioned_evaluate():
+    """A script that does not only read may run only where the mutation list
+    admits an ``evaluate``. Resolved from each CALL SITE: its module and the
+    function enclosing its line must form a sanctioned ``evaluate`` entry."""
+    sites = [label for label in EXECUTED_SCRIPTS
+             if label.split()[-1] in SCRIPTS_THAT_REPLACE_PAGE_BEHAVIOUR]
+    assert sites, "a declared replacement script runs from nowhere -- a stale entry"
+    for label in sites:
+        stem, lineno = label.split()[0].split(":")
+        source = (PACKAGE_DIR / f"{stem}.py").read_text(encoding="utf-8")
+        function = readonly.enclosing_function(source, int(lineno))
+        assert (f"linkedin_server/{stem}.py", function, "evaluate") in readonly.SANCTIONED_MUTATIONS, (
+            label, function)
+
+
+_API_REPLACEMENT = "API replacement: "
+
+
+def _replacement_verdict(key: tuple[str, str], script: str) -> dict[str, list[str]]:
+    """Measure ``script`` against ``readonly.SANCTIONED_API_REPLACEMENTS[key]``.
+
+    ``tokens`` -- DOM and network mutation tokens, which no declaration
+    excuses; ``undeclared`` -- API replacements the scan found beyond the
+    declared ones; ``missing`` -- declared ones the scan no longer finds, a
+    stale declaration. Each is a list of scan entries, one per occurrence.
+    """
+    found = readonly.scan_js_for_mutations(script)
+    replacements = Counter(f for f in found if f.startswith(_API_REPLACEMENT))
+    declared = Counter(readonly.SANCTIONED_API_REPLACEMENTS.get(key, ()))
+    return {
+        "tokens": [f for f in found if not f.startswith(_API_REPLACEMENT)],
+        "undeclared": sorted((replacements - declared).elements()),
+        "missing": sorted((declared - replacements).elements()),
+    }
+
+
+def _sanctioned_key(name: str) -> tuple[str, str]:
+    """The sanctioned list's key for a script declared in this file by NAME."""
+    keys = [k for k in readonly.SANCTIONED_API_REPLACEMENTS if k[1] == name]
+    assert len(keys) == 1, (name, keys)
+    return keys[0]
+
+
+def test_every_declared_replacement_script_replaces_exactly_what_it_declares():
+    """The dict of mutating scripts is not a hiding place for a reader, and not
+    a door for a second replacement either.
+
+    UNTIL 2026-09-24 this test asserted the opposite of what it now asserts --
+    that the token scan could NOT see a declared script, which was the whole
+    reason for declaring it. The scan learned to see API replacement that day,
+    so the claim became: the scan sees each declared script, and what it sees
+    is EXACTLY the scanner's sanctioned list for it -- no mutation token at all,
+    no replacement beyond the declared ones, and none of them gone missing.
+    """
+    for name, script in SCRIPTS_THAT_REPLACE_PAGE_BEHAVIOUR.items():
+        assert any(marker in script for marker in _REPLACEMENT_MARKERS), name
+        verdict = _replacement_verdict(_sanctioned_key(name), script)
+        assert verdict == {"tokens": [], "undeclared": [], "missing": []}, (name, verdict)
+        assert readonly.scan_js_for_mutations(script), (
+            f"{name} is declared as replacing page behaviour and the scan finds "
+            "nothing in it: either it no longer replaces anything, or the scan "
+            "went blind again")
+
+
+def test_the_sanctioned_list_and_the_declared_scripts_are_the_same_scripts():
+    """No sanctioned entry without a declared script, and none the other way;
+    and each entry names the module the constant really lives in."""
+    names = {name for _module, name in readonly.SANCTIONED_API_REPLACEMENTS}
+    assert names == set(SCRIPTS_THAT_REPLACE_PAGE_BEHAVIOUR), names
+    for (module, name), declared in readonly.SANCTIONED_API_REPLACEMENTS.items():
+        assert declared, (module, name)
+        stem = module.rsplit("/", 1)[-1].removesuffix(".py")
+        imported = importlib.import_module(f"linkedin_server.{stem}")
+        assert getattr(imported, name, None) is SCRIPTS_THAT_REPLACE_PAGE_BEHAVIOUR[name], (
+            module, name)
+
+
+def test_a_replacement_the_list_does_not_declare_is_still_refused():
+    """SHOWN FAILING, both directions, on the one sanctioned script.
+
+    A capture that ALSO replaces ``window.fetch`` is refused, naming exactly
+    the new replacement; a capture with one declared replacement REMOVED is
+    refused as a stale declaration; and the clipboard replacement on its own,
+    in a script nobody declared, is refused by the plain scan -- the
+    declaration excuses one script's own findings, never a shape.
+    """
+    key = ("linkedin_server/share_link.py", "CLIPBOARD_JS")
+    capture = share_link.CLIPBOARD_JS
+
+    widened = capture.replace(
+        "return true;\n  }\n\n  if (mode === \"read\")",
+        "window.fetch = function () {};\n    return true;\n  }\n\n  if (mode === \"read\")",
+        1,
+    )
+    assert widened != capture, "the plant did not apply"
+    assert _replacement_verdict(key, widened) == {
+        "tokens": [], "undeclared": ["API replacement: window.fetch ="], "missing": [],
+    }
+
+    narrowed = capture.replace("window.__lqCopyListenerInstalled = true;", "", 1)
+    assert narrowed != capture, "the plant did not apply"
+    assert _replacement_verdict(key, narrowed) == {
+        "tokens": [], "undeclared": [],
+        "missing": ["API replacement: window.__lqCopyListenerInstalled ="],
+    }
+
+    undeclared = "() => { navigator.clipboard.writeText = (t) => { window.__c = t; }; }"
+    assert _replacement_verdict(("linkedin_server/dom.py", "SOME_NEW_JS"), undeclared)[
+        "undeclared"
+    ] == [
+        "API replacement: navigator.clipboard.writeText =",
+        "API replacement: window.__c =",
+    ]
 
 
 def test_the_call_site_resolver_sees_a_script_hiding_behind_a_name():
