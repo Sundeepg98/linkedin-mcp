@@ -115,6 +115,15 @@ for the surface is an available ruling and the verdict names it -- and the
 alternative was making the verdict true by declaration, which is what a permit
 on a surface the gate would refuse anyway amounts to.
 
+**SUPERSEDED FOR `/in/me/` ON 2026-09-24 by IN-ME-NO-BLANKET-BAR** (ruled
+2026-09-23): his profile now has an entry, judged CONTROL BY CONTROL -- a
+control is admitted or refused by a judgement recorded with its evidence, and
+one nobody has judged is refused NOT-YET as `control_not_judged`. The rule of
+the paragraph above is unchanged for every other surface. And the same day the
+gate learned to SEE his profile: it reads the LANDED url, and `/in/me/` lands
+on his vanity form, which condition 1 used to refuse as NEVER. See
+:func:`self_landing`.
+
 **THE SECOND INSTANCE, same root cause, found by enumerating the branches.**
 :func:`evaluate` inferred "I am being called before a press" from the ABSENCE of
 counter readings. A ``read_counters`` that returns ``None`` produces exactly
@@ -211,8 +220,9 @@ whatever it selects still matches a sanctioned shape.
 """
 from __future__ import annotations
 
+import re
 from typing import Any, Callable, Optional
-from urllib.parse import urlsplit
+from urllib.parse import parse_qs, urlsplit
 
 from linkedin_server import readonly
 
@@ -246,6 +256,86 @@ _COMPOSER_MARKERS: tuple[str, ...] = (
 #: A member path segment that is NOT his own. ``/in/me/`` resolves to whoever
 #: is signed in; anything else under ``/in/`` is a third party's surface.
 _SELF_SEGMENTS = frozenset({"me"})
+
+#: HIS OWN PROFILE, as the read allowlist spells it -- the one profile address
+#: ``readonly`` admits.
+SELF_PROFILE_ADDRESS = "https://www.linkedin.com/in/me/"
+
+#: LINKEDIN'S OWN CLAIM THAT A LANDED PROFILE IS THE VIEWER'S. The parameter
+#: ``server._SELF_ASSERTION_PARAM`` names, pinned equal to it by a test so the
+#: two readers of one assertion cannot drift onto two spellings.
+_SELF_ASSERTION_PARAM = "isSelfProfile"
+
+#: A member profile ROOT and nothing beneath it: the one page ``/in/me/``
+#: lands on. A page under the profile (``/recent-activity/``, ``/details/``,
+#: ``/edit/``) is a different page, and ``/in/me/``'s admission says nothing
+#: about where anything else lands.
+_PROFILE_ROOT = re.compile(r"^/in/[^/?#]+/?$")
+
+
+def self_landing(url: Optional[str]) -> bool:
+    """IS THIS THE URL ``/in/me/`` LANDS ON, BY LINKEDIN'S OWN ASSERTION? PURE.
+
+    **ADDED 2026-09-24, BECAUSE THE GATE COULD NOT SEE HIS PROFILE AT ALL.**
+    ``/in/me/`` REDIRECTS to his vanity form, ``/in/<member>/`` with
+    ``?isSelfProfile=true`` behind it (measured four landings across two days,
+    section 2d of ``_audit/2026-08-31-linkedin-finish.md``; the redirect is
+    why ``/in/me/`` is the only profile spelling the read allowlist admits).
+    :func:`disclose` reads ``page.url`` -- the LANDED url -- so every press on
+    his own profile was refused ``address_not_admitted``, TERMINAL: NEVER, for
+    the one profile the allowlist exists to admit. Measured in-process
+    2026-09-24 on an invented vanity. Reads and writes already accept this
+    landing (``browser.goto`` asserts the requested url;
+    ``writes._assert_landed`` has its self-profile rule); the press gate was
+    the one reader that did not.
+
+    **THE ANCHOR IS LINKEDIN'S ASSERTION, NOT THIS MODULE'S REASONING** about
+    what a vanity url might mean -- the same anchor the operator-ruled names
+    reader stands on (``server._self_assertion_state``). Stricter than that
+    reader in one direction, deliberately: EVERY value of the parameter must
+    say ``true``, where the reader takes any. A contradictory url is not an
+    assertion.
+
+    **WHAT IT DOES NOT ADMIT, and each is refused exactly as before:** a
+    profile url with no assertion (ABSENT is not FALSE -- the parameter is
+    measured to ride transiently -- but it is not an assertion either, so the
+    caller reloads ``/in/me/`` as the self-profile loader already does); an
+    assertion of ``false``; a page BENEATH a profile root; any other host or
+    scheme.
+    """
+    if not url:
+        return False
+    parts = urlsplit(str(url).strip())
+    if parts.scheme != "https" or parts.netloc != "www.linkedin.com":
+        return False
+    if not _PROFILE_ROOT.match(parts.path):
+        return False
+    values = [
+        str(value).strip().lower()
+        for value in parse_qs(parts.query).get(_SELF_ASSERTION_PARAM, [])
+    ]
+    return bool(values) and all(value == "true" for value in values)
+
+
+def admitted_address(url: Optional[str]) -> Optional[str]:
+    """THE ADMITTED FORM OF AN ADDRESS, which is what the gate reasons about.
+    PURE.
+
+    An address the read allowlist admits is its own admitted form. His own
+    profile as LANDED (:func:`self_landing`) is admitted AS ``/in/me/`` -- the
+    page the allowlist admits, reached by the redirect it was written for --
+    so every later check (the composer and third-party refusals, the basis,
+    the reading's surface) sees the page by the name the tables use. Anything
+    else is None: not admitted.
+    """
+    if not url or not str(url).strip():
+        return None
+    address = str(url).strip()
+    if readonly.is_read_url(address):
+        return address
+    if self_landing(address):
+        return SELF_PROFILE_ADDRESS
+    return None
 
 #: HOW CONDITION 3 MAY BE SATISFIED, PER SURFACE, AS A CLOSED TABLE.
 #:
@@ -375,22 +465,145 @@ SENSITIVITY_BASES: tuple[tuple[str, dict[str, Any]], ...] = (
             ),
         },
     ),
+    # HIS OWN PROFILE, JUDGED CONTROL BY CONTROL. RULED 2026-09-23,
+    # IN-ME-NO-BLANKET-BAR (_audit/2026-09-23-rulings-write-class-and-
+    # delegated-calls.md, "Presses on /in/me/"): no blanket sensitivity-basis
+    # bar; each control is judged on evidence, disclosure versus action, like
+    # any other press. Until 2026-09-24 this surface had no entry, so every
+    # press on it was refused ``no_sensitivity_basis`` whatever the control --
+    # the blanket bar the ruling removes. Now a control is admitted by a
+    # judgement recorded under ``controls`` with its evidence, refused by one,
+    # or refused NOT-YET because nobody has judged it. See
+    # :func:`sensitivity_basis`.
+    #
+    # EXACT, NOT CONTAINED. ``/in/me/`` is a prefix of every page beneath his
+    # profile (``/in/me/recent-activity/all/``, ``/in/me/details/...``), and a
+    # judgement made on the profile ROOT's markup says nothing about theirs.
+    (
+        "/in/me/",
+        {
+            "kind": "per_control",
+            "match": "exact",
+            "ruling": "IN-ME-NO-BLANKET-BAR",
+            "controls": {
+                "[aria-haspopup]": {
+                    "judged": "action",
+                    "why": (
+                        "EVERY CONTROL THIS SHAPE MATCHES HERE IS A LINK. On "
+                        "his profile as captured, all 9 [aria-haspopup] "
+                        "elements are anchors -- <a href> to a member "
+                        "profile's root, aria-haspopup=\"dialog\" -- and "
+                        "activating an anchor follows it: a NAVIGATION, "
+                        "which this gate refuses whatever the dialog would "
+                        "have shown. None of the 9 is the profile's overflow "
+                        "trigger: that control is a button carrying "
+                        "aria-expanded and no aria-haspopup."
+                    ),
+                    "evidence": (
+                        "his profile captured 2026-09-23 (the live lane, "
+                        "session 1, load 4) and read offline 2026-09-24: 9 of "
+                        "9 [aria-haspopup] are <a> with an href to a member "
+                        "profile root, all 9 to one member -- the one 60 of "
+                        "the page's 70 member links point to, a proxy for "
+                        "the page's owner and stated as one; 0 role=menu, 0 "
+                        "role=menuitem. The 2026-09-19 probe "
+                        "(scripts/_probe_off_platform_controls.py) counted 1 "
+                        "page-wide: a reading with its own date, superseded "
+                        "rather than wrong. Recorded in "
+                        "_audit/2026-09-23-live-lane-session-1.md, Part 2 (c)."
+                    ),
+                },
+            },
+        },
+    ),
 )
 
+#: WHAT A PER-CONTROL JUDGEMENT MAY SAY. ``action`` refuses the control;
+#: ``disclosure`` admits it on the basis the entry carries, which must be of
+#: one of the two kinds condition 3 knows. An entry that says anything else,
+#: or carries no ``evidence``, is not a judgement and is treated as none.
+_CONTROL_VERDICTS = ("action", "disclosure")
+_DISCLOSURE_BASIS_KINDS = ("sensitive", "structural")
 
-def sensitivity_basis(url: Optional[str]) -> Optional[dict[str, Any]]:
-    """The declared basis for this surface, or None. PURE.
+
+def _control_judgement(
+    marker: str, surface: dict[str, Any], shape: Optional[str]
+) -> dict[str, Any]:
+    """THE BASIS OF ONE CONTROL ON A SURFACE JUDGED PER CONTROL. PURE.
+
+    Always a mapping, never None, so the two moments that consult a basis --
+    :func:`check_basis` before the press, :func:`check_counters` after it --
+    reach the SAME refusal through :func:`_basis_refusal`, whichever the
+    verdict. A None here would make the post-press moment say
+    ``no_sensitivity_basis`` about a surface that has an entry.
+
+    * a DISCLOSURE judgement returns the control's entry, which IS a basis of
+      kind ``sensitive`` or ``structural`` and is checked like any other;
+    * an ACTION judgement returns ``{"kind": "judged_action", ...}``;
+    * anything else -- no control named, a control nobody judged, an entry
+      with no evidence or an unknown verdict -- returns
+      ``{"kind": "not_judged", ...}``. Unmeasurable resolves against the
+      press.
+    """
+    entry = (surface.get("controls") or {}).get(shape) if shape else None
+    verdict = str((entry or {}).get("judged") or "")
+    judged = (
+        entry is not None
+        and verdict in _CONTROL_VERDICTS
+        and bool(entry.get("evidence"))
+        and (
+            verdict == "action"
+            or str(entry.get("kind")) in _DISCLOSURE_BASIS_KINDS
+        )
+    )
+    if not judged:
+        return {
+            "kind": "not_judged",
+            "surface": marker,
+            "control": shape,
+            "ruling": surface.get("ruling"),
+        }
+    if verdict == "action":
+        return {
+            "kind": "judged_action",
+            "surface": marker,
+            "control": shape,
+            "ruling": surface.get("ruling"),
+            "why": entry.get("why"),
+            "evidence": entry.get("evidence"),
+        }
+    return entry
+
+
+def sensitivity_basis(
+    url: Optional[str], shape: Optional[str] = None
+) -> Optional[dict[str, Any]]:
+    """The declared basis for this surface -- or, on a surface judged per
+    control, for this CONTROL -- or None. PURE.
 
     None means condition 3 has no way to be satisfied here yet -- not that the
     press is unsafe, and not that no basis could ever exist. Supplying one is
     an edit to the table above with an argument, which is the point.
+
+    ``shape`` matters only on a ``per_control`` surface, and every caller that
+    omits it gets exactly what it got before one existed. On such a surface
+    the answer is a mapping even when nothing is judged -- see
+    :func:`_control_judgement`. The address is taken in its ADMITTED FORM
+    (:func:`admitted_address`), so his profile as landed is looked up as the
+    ``/in/me/`` the table names.
     """
     if not url:
         return None
-    path = urlsplit(str(url).strip()).path
+    path = urlsplit(admitted_address(url) or str(url).strip()).path
     for marker, basis in SENSITIVITY_BASES:
-        if marker in path:
-            return basis
+        if basis.get("match") == "exact":
+            if path.rstrip("/") != marker.rstrip("/"):
+                continue
+        elif marker not in path:
+            continue
+        if basis.get("kind") == "per_control":
+            return _control_judgement(marker, basis, shape)
+        return basis
     return None
 
 
@@ -510,7 +723,9 @@ def check_reading(url: Optional[str], reading: Optional[str]) -> dict[str, Any]:
             "outside would run inside it.",
             terminal=True,
         )
-    path = urlsplit(str(url or "").strip()).path
+    # THE ADMITTED FORM, so a reading sanctioned on ``/in/me/`` is sanctioned
+    # on his profile as landed and on nothing else (see admitted_address).
+    path = urlsplit(admitted_address(url) or str(url or "").strip()).path
     if path not in tuple(entry.get("surfaces") or ()):
         return _refuse(
             "reading_not_for_this_surface",
@@ -637,7 +852,8 @@ def check_address(url: Optional[str]) -> dict[str, Any]:
         )
 
     address = str(url).strip()
-    if not readonly.is_read_url(address):
+    admitted = admitted_address(address)
+    if admitted is None:
         return _refuse(
             "address_not_admitted",
             "the page is not on the read allowlist. A PRESS NEVER EXTENDS "
@@ -647,7 +863,10 @@ def check_address(url: Optional[str]) -> dict[str, Any]:
             terminal=True,
         )
 
-    path = urlsplit(address).path.lower()
+    # EVERY CHECK BELOW READS THE ADMITTED FORM. For his profile as landed
+    # that is ``/in/me/`` -- whose member segment is the self one -- and for
+    # every other admitted page it is the address itself, unchanged.
+    path = urlsplit(admitted).path.lower()
 
     for marker in _COMPOSER_MARKERS:
         if marker in path:
@@ -675,7 +894,12 @@ def check_address(url: Optional[str]) -> dict[str, Any]:
                 terminal=True,
             )
 
-    return {"pressed": False, "admitted": True}
+    verdict: dict[str, Any] = {"pressed": False, "admitted": True}
+    if admitted != address:
+        # SAID, NEVER INFERRED: the page was admitted as /in/me/'s landing,
+        # on LinkedIn's own assertion, and not by the allowlist directly.
+        verdict["self_landing"] = True
+    return verdict
 
 
 def check_shape(shape: Optional[str]) -> dict[str, Any]:
@@ -736,7 +960,55 @@ def _basis_refusal(
             terminal=False,
         )
 
-    if str(basis.get("kind")) != "structural":
+    # A SURFACE JUDGED PER CONTROL (IN-ME-NO-BLANKET-BAR). Both refusals are
+    # pure functions of the url and the shape key, so both are taken before
+    # any contact -- and reached again here after a press by a caller that
+    # skipped :func:`evaluate`, with the same reason, because the reasoning
+    # lives in this one place.
+    kind = str(basis.get("kind"))
+    read = (
+        ""
+        if read_at_both_ends is None
+        else (
+            f"Counters {sorted(read_at_both_ends)} were read at both ends and "
+            "did not move, which shows they are READABLE and nothing more. "
+        )
+    )
+    if kind == "not_judged":
+        control = basis.get("control")
+        return _refuse(
+            "control_not_judged",
+            read
+            + f"this surface ({basis.get('surface')}) is judged CONTROL BY "
+            f"CONTROL under {basis.get('ruling')}: no blanket bar, and no "
+            "blanket permit either. "
+            + (
+                "No control was named, and a per-control judgement cannot "
+                "price a press on nothing in particular. "
+                if not control
+                else f"press.SENSITIVITY_BASES records no judgement of "
+                f"{control!r} here. "
+            )
+            + "A control is admitted by an entry under this surface's "
+            "'controls' that carries its EVIDENCE and a basis (disclosure), "
+            "or refused by one (action); until one is recorded, unmeasurable "
+            "resolves against the press.",
+            terminal=False,
+        )
+    if kind == "judged_action":
+        return _refuse(
+            "control_judged_an_action",
+            read
+            + f"{basis.get('control')!r} on {basis.get('surface')} is JUDGED "
+            f"AN ACTION, not a disclosure, on evidence: {basis.get('why')} "
+            "NEVER BY THIS ROUTE while that evidence stands; only a new "
+            "capture showing different markup could reopen it, and that is a "
+            "new judgement recorded in press.SENSITIVITY_BASES with its own "
+            "evidence.",
+            terminal=True,
+        )
+
+    if kind != "structural":
         return None
 
     # A BARE ASSERTION IS NOT AN ARGUMENT. An entry without its BOUND and its
@@ -796,7 +1068,7 @@ def check_price_can_move(
     return {"pressed": False, "price_can_move": True}
 
 
-def check_basis(url: Optional[str]) -> dict[str, Any]:
+def check_basis(url: Optional[str], shape: Optional[str] = None) -> dict[str, Any]:
     """CONDITION 3, THE HALF ANSWERABLE BEFORE ANY PAGE CONTACT. PURE.
 
     :data:`SENSITIVITY_BASES` is keyed by SURFACE and :func:`sensitivity_basis`
@@ -805,12 +1077,17 @@ def check_basis(url: Optional[str]) -> dict[str, Any]:
     question, and until 2026-09-21 it was asked after the click. See the module
     docstring and `_audit/2026-09-21-refuse-before-the-click.md`.
 
+    ``shape`` is the control's shape key, and it decides the answer only on a
+    surface judged per control (``/in/me/``, IN-ME-NO-BLANKET-BAR) -- still a
+    pure function of the caller's arguments, so still pre-press. A caller that
+    omits it gets what it always got everywhere else.
+
     On success the verdict carries the basis KIND and, for route (a), the
     counters the surface declares sensitive -- so a caller knows what its
     ``read_counters`` must return before it builds one, rather than discovering
     ``sensitive_counter_not_read`` after a press.
     """
-    basis = sensitivity_basis(url)
+    basis = sensitivity_basis(url, shape)
     refusal = _basis_refusal(basis)
     if refusal is not None:
         return refusal
@@ -819,12 +1096,17 @@ def check_basis(url: Optional[str]) -> dict[str, Any]:
     # under ``-O``, and a safety module must not narrow a type with a statement
     # the interpreter is allowed to delete.
     declared = basis or {}
-    return {
+    verdict: dict[str, Any] = {
         "pressed": False,
         "basis_declared": True,
         "basis": str(declared.get("kind")),
         "requires_counters": sorted(declared.get("counters") or ()),
     }
+    if declared.get("judged") == "disclosure":
+        # ECHOED ONLY ON A PER-CONTROL SURFACE, so every other verdict is
+        # byte-for-byte what it was: this basis is one CONTROL's, judged.
+        verdict["judged"] = "disclosure"
+    return verdict
 
 
 def check_counters(
@@ -1106,9 +1388,10 @@ def evaluate(
         # of the 2026-09-21 repair. A surface with no declared basis can only
         # ever end in ``no_sensitivity_basis``, so a permit here was a promise
         # the gate had already decided not to keep.
-        verdict = check_basis(url)
+        verdict = check_basis(url, shape)
         if verdict.get("refused"):
             return verdict
+        judged = verdict.get("judged")
         still_to_show = ["counters_unmoved", "closure_verified"]
         if verdict.get("basis") == "sensitive":
             # Route (a) can still fail on the READING -- a basis naming a
@@ -1129,13 +1412,17 @@ def evaluate(
             permit["reading"] = reading
         if scope is not None:
             permit["scope"] = scope
+        if judged is not None:
+            permit["judged"] = judged
         return permit
 
     # THE BASIS IS RESOLVED FROM THE SURFACE, never handed in. See
     # SENSITIVITY_BASES: a basis a caller can assert is a basis a caller can
     # invent, and "no outward effect is possible here" is exactly the claim
-    # somebody in a hurry would make about a surface they had not read.
-    verdict = check_counters(before, after, basis=sensitivity_basis(url))
+    # somebody in a hurry would make about a surface they had not read. On a
+    # surface judged per control the shape KEY picks the control's entry --
+    # a key from a closed tuple, already checked above, never a selector.
+    verdict = check_counters(before, after, basis=sensitivity_basis(url, shape))
     if verdict.get("refused"):
         return verdict
     priced_by = verdict.get("priced_by")
@@ -1249,7 +1536,7 @@ async def disclose(
         # A PRICE THAT CANNOT MOVE IS REFUSED BEFORE THE CLICK, not after it:
         # it is knowable from this one reading. See check_price_can_move.
         price = check_price_can_move(
-            before, sensitivity_basis(getattr(page, "url", None))
+            before, sensitivity_basis(getattr(page, "url", None), shape)
         )
         if price.get("refused"):
             return price

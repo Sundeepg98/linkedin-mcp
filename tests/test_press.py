@@ -198,15 +198,20 @@ def test_his_own_profile_is_admitted_and_a_third_party_is_not():
     this is a narrower claim than the old one rather than a weaker one -- and
     the refusal is NOT-YET, with the remedy named in the verdict.
     See `_audit/2026-09-21-refuse-before-the-click.md` section 2.
+
+    **RE-AIMED AGAIN 2026-09-24, ON IN-ME-NO-BLANKET-BAR.** His profile is
+    now judged CONTROL BY CONTROL, so the NOT-YET half is asserted on a control
+    nobody has judged (``[aria-expanded]``); ``[aria-haspopup]`` is judged an
+    action there on a capture's evidence and has its own test below.
     """
     assert press.check_address(f"{BASE}/in/me/").get("admitted") is True, (
         "his own profile must still pass condition 1 -- the third-party "
         "branch must not be catching /in/me/."
     )
-    mine = press.evaluate(url=f"{BASE}/in/me/", shape="[aria-haspopup]")
-    assert mine["refused"] == "no_sensitivity_basis", mine
+    mine = press.evaluate(url=f"{BASE}/in/me/", shape="[aria-expanded]")
+    assert mine["refused"] == "control_not_judged", mine
     assert mine["reachable_by_this_route"] is True, (
-        "declaring a basis for his own profile is an available ruling, so "
+        "judging a control on his own profile is an available next step, so "
         "this must not read as NEVER."
     )
     assert "SENSITIVITY_BASES" in mine["why"], (
@@ -434,7 +439,14 @@ def test_the_basis_table_is_closed_and_not_caller_supplied():
     signature = inspect.signature(press.disclose)
     assert "basis" not in signature.parameters
     assert "sensitivity" not in signature.parameters
-    assert press.sensitivity_basis("https://www.linkedin.com/in/me/") is None
+    # A surface the table does not name has no basis. (This spot check read
+    # /in/me/ until 2026-09-24, when IN-ME-NO-BLANKET-BAR gave his profile a
+    # per-control entry; with no control named it resolves to NOT JUDGED,
+    # which is still no basis a press could stand on.)
+    assert press.sensitivity_basis("https://www.linkedin.com/notifications/") is None
+    assert press.sensitivity_basis("https://www.linkedin.com/in/me/")["kind"] == (
+        "not_judged"
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -489,8 +501,16 @@ _REFUSED_BEFORE_ANY_CONTACT = (
     # rows are the defect this file's ordering test used to miss entirely.
     ("condition 3", f"{BASE}/search/results/people/", "[aria-expanded]",
      {"no_sensitivity_basis"}),
+    # His own profile, judged per control since 2026-09-24
+    # (IN-ME-NO-BLANKET-BAR): this row read {"no_sensitivity_basis"} until
+    # then. Both per-control refusals are pure functions of the url and the
+    # shape key, and the third row is the same page AS LANDED.
     ("condition 3", f"{BASE}/in/me/", "[aria-haspopup]",
-     {"no_sensitivity_basis"}),
+     {"control_judged_an_action"}),
+    ("condition 3", f"{BASE}/in/me/", "[aria-expanded]",
+     {"control_not_judged"}),
+    ("condition 3", f"{BASE}/in/placeholder-vanity/?isSelfProfile=true",
+     "[aria-expanded]", {"control_not_judged"}),
 )
 
 
@@ -800,10 +820,17 @@ async def test_a_surface_with_no_declared_basis_is_refused_before_it_is_pressed(
     URL, so a surface that can only ever end in ``no_sensitivity_basis`` is
     refused with the page untouched. The refusal is NOT-YET rather than NEVER,
     and its ``why`` names the remedy: declare a basis for the surface.
+
+    ``/in/me/`` LEFT THIS LOOP 2026-09-24: IN-ME-NO-BLANKET-BAR gave his
+    profile a per-control entry, so it is no longer a surface with no basis.
+    Its refusals are taken before any contact too, and
+    ``test_his_profile_is_judged_control_by_control_and_never_touched`` below
+    asserts that on the same fake page. ``/notifications/`` takes its place: an
+    admitted page the table does not name.
     """
     for surface, shape in (
         (f"{BASE}/search/results/people/", "[aria-expanded]"),
-        (f"{BASE}/in/me/", "[aria-haspopup]"),
+        (f"{BASE}/notifications/", "[aria-haspopup]"),
     ):
         # Condition 1 passes on its own merits, which is what makes the rest
         # mean something: this is not an artefact of an unadmitted address.
@@ -892,6 +919,10 @@ WHEN_KNOWABLE: dict[str, str] = {
     "no_sensitivity_basis": "before_any_contact",
     "structural_argument_incomplete": "before_any_contact",
     "no_counter_reader_supplied": "before_any_contact",
+    # a surface judged per control (IN-ME-NO-BLANKET-BAR, 2026-09-24): pure
+    # functions of the url and the caller's shape key
+    "control_not_judged": "before_any_contact",
+    "control_judged_an_action": "before_any_contact",
     # the page is read but never pressed
     "shape_absent_on_this_page": "after_a_read",
     # condition 3's zero case, 2026-09-24: knowable from the counters' first
@@ -1024,6 +1055,12 @@ _REACHES: dict[str, dict] = {
         "scope": "a_scope_nobody_declared"},
     "no_sensitivity_basis": {
         "url": f"{BASE}/search/results/people/", "shape": "[aria-expanded]"},
+    # HIS OWN PROFILE, the committed table and no plant: one control judged
+    # an action on a capture's evidence, and one nobody has judged.
+    "control_judged_an_action": {
+        "url": f"{BASE}/in/me/", "shape": "[aria-haspopup]"},
+    "control_not_judged": {
+        "url": f"{BASE}/in/me/", "shape": "[aria-expanded]"},
     "no_counter_reader_supplied": {
         "url": f"{BASE}/feed/", "shape": "[aria-expanded]", "reader": None},
     "shape_absent_on_this_page": {
@@ -1216,7 +1253,6 @@ def test_the_two_moments_give_the_same_reason_for_the_same_surface():
     """
     surfaces = (
         f"{BASE}/search/results/people/",   # no basis
-        f"{BASE}/in/me/",                   # no basis
         f"{BASE}/notifications/",           # no basis, not in the table at all
     )
     for surface in surfaces:
@@ -1234,6 +1270,26 @@ def test_the_two_moments_give_the_same_reason_for_the_same_surface():
             "the post-press refusal must ALSO report what was read at both "
             "ends; if the two texts are identical that evidence was dropped."
         )
+        assert "READABLE" in post["why"] and "READABLE" not in pre["why"]
+
+    # HIS OWN PROFILE, judged per control since 2026-09-24 -- it sat in the
+    # no-basis list above until then. The two moments must agree PER CONTROL,
+    # and they reach the same refusal only because sensitivity_basis answers a
+    # mapping for a control nobody judged: were it None, the post-press moment
+    # would say no_sensitivity_basis about a surface that has an entry.
+    for shape, reason, reachable in (
+        ("[aria-haspopup]", "control_judged_an_action", False),
+        ("[aria-expanded]", "control_not_judged", True),
+    ):
+        pre = press.check_basis(f"{BASE}/in/me/", shape)
+        post = press.check_counters(
+            {"invitations": 0},
+            {"invitations": 0},
+            basis=press.sensitivity_basis(f"{BASE}/in/me/", shape),
+        )
+        assert pre["refused"] == post["refused"] == reason, (shape, pre, post)
+        assert pre["reachable_by_this_route"] is post["reachable_by_this_route"]
+        assert pre["reachable_by_this_route"] is reachable
         assert "READABLE" in post["why"] and "READABLE" not in pre["why"]
 
     # And the surfaces that DO declare a basis are not refused at either moment.
@@ -1400,3 +1456,291 @@ def test_check_price_can_move_leaves_a_structural_basis_alone():
         press.sensitivity_basis(f"{BASE}/analytics/profile-views/"),
     )
     assert verdict.get("refused") is None and verdict["price_can_move"] is None
+
+
+# ---------------------------------------------------------------------------
+# HIS OWN PROFILE, JUDGED CONTROL BY CONTROL (IN-ME-NO-BLANKET-BAR), AND SEEN
+# AS IT LANDS. 2026-09-24. Nothing is pressed: every page below is a fake.
+# ---------------------------------------------------------------------------
+
+#: HIS PROFILE AS ``/in/me/`` LANDS ON IT, with an invented vanity:
+#: ``placeholder`` is one of ``test_no_committed_identity.SYNTHETIC_SLUG_TOKENS``.
+LANDED = f"{BASE}/in/placeholder-vanity/?isSelfProfile=true"
+
+
+def test_the_blanket_bar_is_gone_and_each_control_has_its_own_verdict():
+    """SHOWN FAILING ON THE GATE BEFORE 2026-09-24, where both shapes got the
+    one surface-wide answer ``no_sensitivity_basis`` -- the blanket bar the
+    ruling removes. Now two shapes on one page get two different verdicts,
+    each from its own judgement or from the absence of one."""
+    haspopup = press.evaluate(url=f"{BASE}/in/me/", shape="[aria-haspopup]")
+    expanded = press.evaluate(url=f"{BASE}/in/me/", shape="[aria-expanded]")
+    assert haspopup["refused"] == "control_judged_an_action", haspopup
+    assert haspopup["reachable_by_this_route"] is False
+    assert expanded["refused"] == "control_not_judged", expanded
+    assert expanded["reachable_by_this_route"] is True
+    assert "IN-ME-NO-BLANKET-BAR" in expanded["why"]
+    assert "NAVIGATION" in haspopup["why"] and "NEVER BY THIS ROUTE" in haspopup["why"], (
+        "an action judgement must carry its evidence into the refusal, or the "
+        "NEVER is an assertion nobody can check."
+    )
+
+
+def test_every_per_control_judgement_carries_its_evidence():
+    """A JUDGEMENT WITHOUT ITS EVIDENCE IS A PERMISSION MATRIX, which is the
+    thing the ruling says safety is not. The table cannot acquire one later
+    without this going red."""
+    per_control = [
+        (marker, basis) for marker, basis in press.SENSITIVITY_BASES
+        if basis.get("kind") == "per_control"
+    ]
+    assert per_control, "the /in/me/ entry is gone"
+    for marker, surface in per_control:
+        assert surface.get("match") == "exact", marker
+        assert surface.get("ruling"), marker
+        for shape, entry in surface["controls"].items():
+            assert shape in press.SANCTIONED_SHAPES, (marker, shape)
+            assert entry.get("judged") in ("action", "disclosure"), (marker, shape)
+            assert entry.get("evidence") and entry.get("why"), (marker, shape)
+            if entry["judged"] == "disclosure":
+                assert entry.get("kind") in ("sensitive", "structural"), (marker, shape)
+                if entry["kind"] == "structural":
+                    for field in press._STRUCTURAL_REQUIRED:
+                        assert entry.get(field), (marker, shape, field)
+
+
+def test_a_judgement_on_the_profile_root_says_nothing_about_the_pages_beneath_it():
+    """EXACT, NOT CONTAINED. ``/in/me/`` is a prefix of every page under his
+    profile, and a judgement made on the root's markup says nothing about
+    theirs. Asserted on the pure lookup, so the address boundary -- which
+    refuses some of these on its own -- is not what stands."""
+    for beneath in (
+        "/in/me/recent-activity/all/",
+        "/in/me/details/experience/",
+        "/in/me/edit/intro/",
+    ):
+        assert press.sensitivity_basis(f"{BASE}{beneath}", "[aria-haspopup]") is None, (
+            beneath
+        )
+    assert press.sensitivity_basis(f"{BASE}/in/me", "[aria-haspopup]")["kind"] == (
+        "judged_action"
+    ), "the root without its trailing slash is the same page"
+
+
+@pytest.mark.parametrize(
+    ("url", "admitted"),
+    [
+        (LANDED, True),
+        (f"{BASE}/in/placeholder-vanity?isSelfProfile=true", True),
+        (f"{BASE}/in/placeholder-vanity/?isSelfProfile=TRUE", True),
+        (f"{BASE}/in/placeholder-vanity/?trk=x&isSelfProfile=true", True),
+        (f"{BASE}/in/placeholder-vanity/", False),
+        (f"{BASE}/in/placeholder-vanity/?isSelfProfile=false", False),
+        (f"{BASE}/in/placeholder-vanity/?isSelfProfile=true&isSelfProfile=false", False),
+        (f"{BASE}/in/placeholder-vanity/?isSelfProfile=", False),
+        (f"{BASE}/in/placeholder-vanity/recent-activity/all/?isSelfProfile=true", False),
+        (f"{BASE}/in/placeholder-vanity/edit/intro/?isSelfProfile=true", False),
+        ("http://www.linkedin.com/in/placeholder-vanity/?isSelfProfile=true", False),
+        ("https://linkedin.com/in/placeholder-vanity/?isSelfProfile=true", False),
+        ("https://example.test/in/placeholder-vanity/?isSelfProfile=true", False),
+        (f"{BASE}/company/placeholder/?isSelfProfile=true", False),
+        (f"{BASE}/in/?isSelfProfile=true", False),
+        (None, False),
+        ("", False),
+    ],
+    ids=[
+        "landed", "no_slash", "upper_true", "another_param_first", "absent",
+        "false", "contradictory", "empty_value", "beneath_the_root",
+        "the_editor", "http", "bare_host", "another_host", "not_a_profile",
+        "no_member", "none", "empty",
+    ],
+)
+def test_self_landing_admits_only_linkedins_own_assertion_on_a_profile_root(url, admitted):
+    """THE ANCHOR IS LINKEDIN'S ASSERTION, and nothing else passes for it:
+    ABSENT is not an assertion (the caller reloads), FALSE is a statement,
+    and a page beneath the root is a different page."""
+    assert press.self_landing(url) is admitted, url
+
+
+def test_his_profile_as_landed_is_admitted_as_in_me_and_says_so():
+    """SHOWN FAILING ON THE GATE BEFORE 2026-09-24: this url was refused
+    ``address_not_admitted`` with ``reachable_by_this_route`` False -- NEVER,
+    for the one profile the allowlist exists to admit -- because the gate
+    reads the landed url and ``/in/me/`` lands on his vanity form."""
+    verdict = press.check_address(LANDED)
+    assert verdict.get("admitted") is True, verdict
+    assert verdict.get("self_landing") is True, (
+        "a page admitted as /in/me/'s landing must say so, never let a reader "
+        "infer the allowlist admitted it directly."
+    )
+    assert press.admitted_address(LANDED) == press.SELF_PROFILE_ADDRESS
+    assert press.check_address(f"{BASE}/in/me/") == {"pressed": False, "admitted": True}, (
+        "an address the allowlist admits directly gets exactly the verdict it "
+        "always got."
+    )
+    for other in (
+        f"{BASE}/in/another-person/",
+        f"{BASE}/in/another-person/?isSelfProfile=false",
+    ):
+        refused = press.check_address(other)
+        assert refused["refused"] == "address_not_admitted", (other, refused)
+        assert refused["reachable_by_this_route"] is False
+
+
+@pytest.mark.asyncio
+async def test_his_profile_is_judged_control_by_control_and_never_touched():
+    """BOTH per-control refusals are taken before any contact, on the page as
+    requested and as landed. ``control_count=9`` is the capture's count of
+    the shape these refusals are about; the control IS on the page."""
+    for url in (f"{BASE}/in/me/", LANDED):
+        for shape, reason in (
+            ("[aria-haspopup]", "control_judged_an_action"),
+            ("[aria-expanded]", "control_not_judged"),
+        ):
+            page = FakePage(url, control_count=9)
+            verdict = await press.disclose(page, shape=shape, read_counters=_counters)
+            assert verdict["refused"] == reason, (url, shape, verdict)
+            assert page.clicks == [] and page.keys == [] and page.selectors == [], (
+                url, shape, page.selectors
+            )
+
+
+#: A DISCLOSURE JUDGEMENT, PLANTED: the committed table judges no /in/me/
+#: control a disclosure, so the admitting path can only be reached this way.
+_PLANTED_DISCLOSURE = {
+    "judged": "disclosure",
+    "kind": "structural",
+    "why": "planted for this test",
+    "bound": "planted for this test",
+    "refuters": ("planted for this test",),
+    "evidence": "planted: no capture stands behind this entry",
+}
+
+
+def _with_control(shape, entry):
+    """The committed table, with one control's judgement planted on every
+    per-control surface. Everything else is left as committed."""
+    table = []
+    for marker, basis in press.SENSITIVITY_BASES:
+        if basis.get("kind") == "per_control":
+            controls = dict(basis["controls"])
+            controls[shape] = entry
+            basis = dict(basis, controls=controls)
+        table.append((marker, basis))
+    return tuple(table)
+
+
+@pytest.mark.asyncio
+async def test_a_control_judged_a_disclosure_is_pressed_like_any_other():
+    """THE POSITIVE CONTROL. Without it every refusal above could be a
+    per-control table that refuses everything -- a blanket bar by another
+    name, which is what the ruling removed."""
+    planted = _with_control("[aria-expanded]", _PLANTED_DISCLOSURE)
+    with mock.patch.object(press, "SENSITIVITY_BASES", planted):
+        pre = press.evaluate(url=f"{BASE}/in/me/", shape="[aria-expanded]")
+        assert pre.get("permitted_to_attempt") is True, pre
+        assert pre["basis"] == "structural" and pre["judged"] == "disclosure", pre
+        for url in (f"{BASE}/in/me/", LANDED):
+            page = FakePage(url)
+            verdict = await press.disclose(
+                page, shape="[aria-expanded]", read_counters=_counters
+            )
+            assert verdict.get("pressed") is True, (url, verdict)
+            assert verdict["basis"] == "structural", verdict
+            assert page.clicks == ["[aria-expanded]"] and page.keys == ["Escape"]
+        other = press.evaluate(url=f"{BASE}/in/me/", shape="[aria-haspopup]")
+        assert other["refused"] == "control_judged_an_action", (
+            "a disclosure judgement of one control must not reach another"
+        )
+    # And no permit outlives the plant.
+    assert press.evaluate(url=f"{BASE}/in/me/", shape="[aria-expanded]")["refused"] == (
+        "control_not_judged"
+    )
+
+
+@pytest.mark.parametrize(
+    "broken",
+    [
+        {k: v for k, v in _PLANTED_DISCLOSURE.items() if k != "evidence"},
+        {k: v for k, v in _PLANTED_DISCLOSURE.items() if k != "kind"},
+        dict(_PLANTED_DISCLOSURE, judged="probably_fine"),
+        dict(_PLANTED_DISCLOSURE, kind="per_control"),
+        {k: v for k, v in _PLANTED_DISCLOSURE.items() if k != "judged"},
+    ],
+    ids=["no_evidence", "no_kind", "unknown_verdict", "a_surface_kind", "no_verdict"],
+)
+def test_an_entry_that_is_not_a_judgement_is_treated_as_none(broken):
+    """UNMEASURABLE RESOLVES AGAINST THE PRESS. An entry with no evidence, no
+    verdict, or a basis kind condition 3 does not know is not a judgement --
+    and it must be refused BEFORE the press, where a malformed basis used to
+    earn a permit and a refusal after the click."""
+    planted = _with_control("[aria-expanded]", broken)
+    with mock.patch.object(press, "SENSITIVITY_BASES", planted):
+        verdict = press.evaluate(url=f"{BASE}/in/me/", shape="[aria-expanded]")
+    assert verdict["refused"] == "control_not_judged", verdict
+
+
+@pytest.mark.asyncio
+async def test_a_per_control_price_that_cannot_move_is_refused_before_the_click():
+    """A ROUTE (a) DISCLOSURE JUDGEMENT IS PRICED BY ITS OWN COUNTERS, and the
+    zero case is refused before the click on a per-control surface as on any
+    other -- so the pre-click price check must resolve the CONTROL's basis,
+    not the surface's. Planted: no /in/me/ control is judged on route (a)."""
+    sensitive = {
+        "judged": "disclosure",
+        "kind": "sensitive",
+        "counters": ("invitations",),
+        "why": "planted for this test",
+        "evidence": "planted: no capture stands behind this entry",
+    }
+    with mock.patch.object(
+        press, "SENSITIVITY_BASES", _with_control("[aria-expanded]", sensitive)
+    ):
+        page = FakePage(f"{BASE}/in/me/")
+        verdict = await press.disclose(
+            page, shape="[aria-expanded]", read_counters=_counters
+        )
+    assert verdict["refused"] == "price_cannot_move", verdict
+    assert page.clicks == [] and page.keys == [], (
+        "a zero that could not have moved was pressed anyway: the pre-click "
+        "check read the surface's basis instead of the control's"
+    )
+
+
+def test_a_structural_disclosure_judgement_still_needs_its_whole_argument():
+    """A disclosure judgement IS a basis, and route (b)'s shape binds it: no
+    BOUND, no permit -- refused before the press like any malformed basis."""
+    bare = {k: v for k, v in _PLANTED_DISCLOSURE.items() if k != "bound"}
+    with mock.patch.object(press, "SENSITIVITY_BASES", _with_control("[aria-expanded]", bare)):
+        verdict = press.evaluate(url=f"{BASE}/in/me/", shape="[aria-expanded]")
+    assert verdict["refused"] == "structural_argument_incomplete", verdict
+
+
+def test_a_reading_sanctioned_on_in_me_is_sanctioned_on_its_landing_only():
+    """The reading's surface list is compared on the ADMITTED FORM too, so a
+    reading written for ``/in/me/`` reaches his profile as landed -- and not a
+    vanity url that carries no assertion."""
+    planted = (
+        (
+            "planted_profile_reading",
+            {"surfaces": ("/in/me/",), "phrases": (("x", "planted"),), "why": "planted"},
+        ),
+    )
+    with mock.patch.object(press, "OPEN_READINGS", planted):
+        assert press.check_reading(LANDED, "planted_profile_reading").get("reading_ok")
+        assert press.check_reading(f"{BASE}/in/me/", "planted_profile_reading").get(
+            "reading_ok"
+        )
+        refused = press.check_reading(
+            f"{BASE}/in/placeholder-vanity/", "planted_profile_reading"
+        )
+    assert refused["refused"] == "reading_not_for_this_surface", refused
+
+
+def test_the_self_assertion_is_read_by_one_name_across_the_package():
+    """Two readers of one LinkedIn assertion, pinned to one spelling: the
+    press gate's and the self-profile loader's."""
+    from linkedin_server import server
+
+    assert press._SELF_ASSERTION_PARAM == server._SELF_ASSERTION_PARAM
+    assert press.SELF_PROFILE_ADDRESS == server.SELF_PROFILE_URL

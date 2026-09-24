@@ -1527,3 +1527,144 @@ commit on (see (a)'s correction above), so the run that read 2185 passed with
 only the sibling test red cannot have included it. Run afterwards on an
 archive of this commit (`cdf1c42`), it fails: 1 failed, 19 passed. The other
 numbers stand as they were read.
+
+### (c) N 76: his own profile judged control by control, and the gate taught to see it
+
+**WHAT THE ORDER ASKED, AND TWO FACTS THE BUILD TURNED UP.** The order: the
+gate's blanket `no_sensitivity_basis` for `/in/me/` becomes per-control
+evidence, per `IN-ME-NO-BLANKET-BAR`. That is built. Building it turned up
+two measured facts that decide what `N 76` can do next, and neither was on
+the record:
+
+1. **THE GATE COULD NOT SEE HIS PROFILE AT ALL.** `press.disclose` reads
+   `page.url`, the LANDED url, and `/in/me/` lands on his vanity form with
+   `?isSelfProfile=true` behind it. Measured in-process on an invented
+   vanity before this build: `check_address` refused it
+   `address_not_admitted`, `reachable_by_this_route` False -- NEVER, for the
+   one profile the allowlist exists to admit -- and `evaluate` never reached
+   condition 3. Every live press on `/in/me/` would have been refused there
+   whatever any basis said. Reads accept the redirect (`browser.goto` asserts
+   the requested url) and writes accept it (`writes._assert_landed`); the
+   press gate was the one reader that did not.
+2. **THE SHAPE THIS ROW WAS PLANNED ON NOW MATCHES LINKS.** Read offline from
+   the 2026-09-23 capture of his profile (session 1, load 4, in `_state/`;
+   zero loads), structure only:
+
+        on his profile as captured                       2026-09-19   2026-09-23
+        [aria-haspopup], page-wide                                1            9
+          of which <a href> to a member profile root              -            9
+          all 9 to one member (the one 60 of the page's
+            70 member links point to: a proxy for the owner)      -          yes
+        [role=menu] / [role=menuitem] / [role=dialog]         0 / 0 / -    0 / 0 / 0
+        [aria-expanded], page-wide                                -           43
+          in main (38) + main's footer (1)                        -           39
+          of which the 9 links above                              -            9
+        the overflow control: button, type=button, aria-expanded,
+          no aria-haspopup, no href; main-scope [aria-expanded] index        5
+
+   Every `[aria-haspopup]` there is an anchor carrying
+   `aria-haspopup="dialog"`, and activating an anchor follows it: a
+   navigation. None of the nine is the overflow trigger the 2026-09-19 plan
+   meant, which carries `aria-expanded` and no `aria-haspopup`. The 2026-09-19
+   count is a reading with its own date, not a wrong one. Nor can
+   `[aria-expanded]` be judged as a shape: on this page it also matches the
+   same nine links, and top-card and rail toggles whose function nobody has
+   identified. The `componentkey` attribute every control carries is a
+   per-render UUID, so no component name pins the overflow either: only its
+   position does.
+
+**BUILT, in `linkedin_server/press.py` (nothing pressed, nothing loaded):**
+
+* **`/in/me/` IS JUDGED PER CONTROL.** A `SENSITIVITY_BASES` entry of kind
+  `per_control`, matched EXACTLY (a judgement on the profile root says
+  nothing about `/in/me/recent-activity/all/` or `/in/me/edit/...`), naming
+  its ruling. A control is admitted by a recorded DISCLOSURE judgement -- which
+  is a basis like any other, so route (b)'s whole-argument rule and the price
+  rules apply to it -- refused by an ACTION judgement (`control_judged_an_action`,
+  NEVER while its evidence stands), or refused NOT-YET because nobody has
+  judged it (`control_not_judged`, which names the remedy). Both refusals are
+  pure functions of the url and the shape key, so both are taken before any
+  contact. An entry with no evidence, no verdict, or a basis kind condition 3
+  does not know is not a judgement and is treated as none.
+* **THE TWO MOMENTS AGREE.** `sensitivity_basis(url, shape)` answers a mapping
+  for every control on a per-control surface, judged or not, so the pre-press
+  `check_basis` and the post-press `check_counters` reach the same refusal
+  through the one `_basis_refusal` -- were it None, the post-press moment
+  would say `no_sensitivity_basis` about a surface that has an entry. `shape`
+  is optional throughout, and every caller that omits it gets what it got.
+* **COMMITTED JUDGEMENTS:** `[aria-haspopup]` on `/in/me/` is JUDGED AN
+  ACTION, with the evidence above written into the entry. `[aria-expanded]`
+  is NOT judged, for the reason above.
+* **HIS PROFILE AS LANDED IS ADMITTED AS `/in/me/`, ON LINKEDIN'S OWN
+  ASSERTION** (`press.self_landing`, `press.admitted_address`): a profile ROOT
+  on `https://www.linkedin.com` whose `isSelfProfile` values all say `true` --
+  the anchor the operator-ruled names reader already stands on, and stricter
+  than it (every value, not any). The verdict says `self_landing: True`; the
+  composer and third-party checks, the basis lookup and a reading's surface
+  list all read the admitted form. Absent, `false`, contradictory, a page
+  beneath the root, another host or scheme: refused exactly as before. The
+  parameter name and the self-profile address are pinned equal to
+  `server`'s.
+
+**WHAT `N 76` WAITS ON NOW, specified for session 2.** The row stays PRESS.
+The overflow control can be aimed only by position, and a position-pinned
+judgement is a table shape the gate does not have: `controls` is keyed by
+shape. So the next step is a decision before it is a build:
+
+    step  what                                                   loads presses
+    1     load his profile through the self-profile loader        1-2      0
+          (isSelfProfile retried once on ABSENT); capture the
+          page to _state/
+    2     offline: the main-scope [aria-expanded] list by           0      0
+          structure (tag, type, href, aria-haspopup, an svg
+          inside), and the overflow's index read BY NAME from
+          the capture by the lead -- never by the gate
+    3     DECISION FOR THE ORCHESTRATOR: is an index-pinned         0      0
+          disclosure judgement admissible -- one control at one
+          scope and index, with a pre-click check that the
+          control there still carries the judged signature
+          (button, type=button, no href, no aria-haspopup)? If
+          yes, that is a table extension to build and red-prove
+          offline before any press
+    4     one press through press.disclose, scope main, that        0      1
+          index, with a reading key whose needles are the
+          2026-09-19 set: copy link, follow link, share
+          profile, personal link
+
+`P J4` and `P D28`, the two other `/in/me/` rows the cleanup moved to
+MEASURE under the same ruling, meet the same table: `[aria-haspopup]` is
+refused there, `[aria-expanded]` is not judged, and `P J4`'s "Open to"
+dropdown is another position in the same top card.
+
+**RED-PROOFS, each plant alone in a scratch copy of the package; the new
+tests are also run against the `press.py` before this build:**
+
+    plant                                                              red
+    on the press.py before (c) (the new and re-aimed tests)            41
+    C1  the blanket bar restored                                       19
+    C2  the /in/me/ entry matched by containment, not exactly           1
+    C3  a landing with NO assertion admitted                            6
+    C4  a page BENEATH the profile root admitted as the landing         3
+    C5  an action judgement reported as NOT-YET                         2
+    C6  a disclosure entry with no basis kind taken as a judgement      2
+    C7  an entry with no evidence taken as a judgement                  1
+    C8  the landing's member segment checked as landed                  4
+    C9  a reading's surface compared on the raw landed path             1
+    C10 the pre-click price read off the surface, not the control       1
+    C11 the post-press basis read off the surface, not the control      1
+    C12 the pre-press basis read off the surface, not the control       8
+    C13 an unjudged control resolving to None (the moments drift)      14
+
+Baseline and restored: 128 passed (`test_press`). C3 also turns a
+STRANGER's unasserted profile into a per-control verdict instead of
+`address_not_admitted` -- the ordering test's third-party row goes red --
+which is the failure the root-and-assertion rule exists to prevent.
+
+**GATES.** The impact plan for `press.py` widened to the full suite (161 of
+240 test files, since `server.py` imports it), so by order the full suite was
+NOT run locally. Run instead: the 15 test files that use the press gate, the
+editor-field, orphan-module and blast-radius tests, and the 18 corpus-wide
+guards -- 36 files, 3643 passed and 1 red, `test_page_text_is_never_printed`,
+which had been red since (a)'s commit and is repaired in its own commit
+(`45c46c8`; see (a)'s correction). The census instruments and the derived
+files: see the commit.

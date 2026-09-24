@@ -306,7 +306,7 @@ Scan the CLAIM column against your question. Every claim is a paraphrase written
 |---|---|---|
 | a heading naming a ruling | 117 | 257 |
 | a bold line opening on RULING/RULED | 60 | 138 |
-| the phrase THE RULING | 35 | 56 |
+| the phrase THE RULING | 36 | 57 |
 | a named -RULING id | 30 | 81 |
 | the phrase standing ruling | 17 | 40 |
 | a lead or operator ruling in prose | 36 | 102 |
