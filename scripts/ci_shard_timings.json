@@ -1,8 +1,8 @@
 {
-  "_measured": "f65ec88, 2026-09-19, one Windows laptop (3.13.14), serial run in a detached worktree, NOT a quiet box -- short foreground test batches overlapped parts of it || PLUS FIVE FILES added 2026-09-24 at the live lane's merge of master (5f11f1e), measured by a junit run of those five alone on the same laptop, serially, NOT a quiet box: six lanes' suites were running, so these seconds are high rather than low. _tests is still the base run's collected count; the five add 5 files and 218.6s. || PLUS TWO FILES added 2026-09-24 at lane L7's merge of master 9b9a4d0, measured by a junit run of those two alone on the same laptop, serially, NOT a quiet box: other lanes' suites were running, so these seconds are high rather than low. _tests is still the base run's collected count; the two add 2 files and 147.2s.",
-  "_files": 164,
+  "_measured": "f65ec88, 2026-09-19, one Windows laptop (3.13.14), serial run in a detached worktree, NOT a quiet box -- short foreground test batches overlapped parts of it || PLUS FIVE FILES added 2026-09-24 at the live lane's merge of master (5f11f1e), measured by a junit run of those five alone on the same laptop, serially, NOT a quiet box: six lanes' suites were running, so these seconds are high rather than low. _tests is still the base run's collected count; the five add 5 files and 218.6s. || PLUS TWO FILES added 2026-09-24 at lane L7's merge of master 9b9a4d0, measured by a junit run of those two alone on the same laptop, serially, NOT a quiet box: other lanes' suites were running, so these seconds are high rather than low. _tests is still the base run's collected count; the two add 2 files and 147.2s. || PLUS ONE FILE added 2026-09-24 at lane Y2's merge of master (603f4d3): tests/test_completeness_verdicts.py, measured by a junit run of that file alone on the same laptop, NOT a quiet box: 8 tests, 11.32s. _tests is still the base run's collected count.",
+  "_files": 165,
   "_tests": 5736,
-  "_total_seconds": 1311.8,
+  "_total_seconds": 1323.2,
   "seconds": {
     "tests/test_a_correction_is_findable_from_the_claim.py": 3.519,
     "tests/test_a_covered_row_names_the_artifact_that_covers_it.py": 0.074,
@@ -41,6 +41,7 @@
     "tests/test_company_about_card.py": 4.149,
     "tests/test_company_id_resolver.py": 5.197,
     "tests/test_company_job_filter.py": 0.045,
+    "tests/test_completeness_verdicts.py": 11.32,
     "tests/test_compose_fields.py": 0.808,
     "tests/test_connections_reader.py": 12.707,
     "tests/test_cookie_jar.py": 0.483,

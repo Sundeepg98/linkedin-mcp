@@ -41,10 +41,19 @@ THE THREE NUMBERS THIS PRODUCES, and what each one means.
     python scripts/measure_pointer_graph.py --plant-sweep
 
 `--plant` and `--plant-sweep` NEVER WRITE INTO THE REPO. They copy the tree into a
-sandbox under the system temp directory, mutate the copy, run the real scripts there
-as subprocesses, and compare. `linkedin_server/` is not touched even briefly: several
-agents write that package concurrently and `_audit/INSTRUMENTS.md` already records a
-wave that mutated it in the live tree and had to be ruled against.
+sandbox, mutate the copy, run the real scripts there as subprocesses, and compare.
+`linkedin_server/` is not touched even briefly: several agents write that package
+concurrently and `_audit/INSTRUMENTS.md` already records a wave that mutated it in the
+live tree and had to be ruled against.
+
+EVERY RUN GETS A SANDBOX OF ITS OWN. Unless `--sandbox` names a path, `--plant`,
+`--plant-sweep` and `--selftest` each make a fresh directory under the system temp
+directory (`pointer-graph-sandbox-*` / `pointer-graph-selftest-*`), build the tree one
+level inside it -- so the two TSVs a plant writes beside the tree land in that run's
+directory too, not in the shared temp root -- and remove it when the run ends, passed
+or failed. It used to be one fixed path, and two concurrent runs deleted each other's
+sandbox mid-check. A `--sandbox` path is the caller's: wiped and rebuilt before use,
+and left in place afterwards.
 
 WHAT A PLANT PROVES, STATED SO IT CAN BE ARGUED WITH. It is not a defect in the
 classifier and the classifier is not what is on trial. `same` means "the row above",
@@ -909,6 +918,31 @@ def selftest(box: pathlib.Path) -> int:
     return 0
 
 
+def _in_own_sandbox(given: str, prefix: str, run) -> int:
+    """`run(sandbox)`, in the caller's `--sandbox` or in a directory no other run uses.
+
+    With `--sandbox`, exactly as before: that path, owned by the caller, left in place.
+    Without it, a FRESH directory from `mkdtemp`, removed when the run ends, passed or
+    failed -- the default used to be one fixed path, and because `make_sandbox` starts
+    with an `rmtree`, two concurrent runs deleted each other's sandbox mid-check. The
+    tree sits one level inside, so `sandbox.parent`, where `plant` writes its two TSVs,
+    is this run's directory and not the shared temp root.
+    """
+    if given:
+        return run(pathlib.Path(given))
+    import tempfile
+    run_dir = pathlib.Path(tempfile.mkdtemp(prefix=prefix))
+    try:
+        return run(run_dir / "tree")
+    finally:
+        # A failed removal must not turn the verdict above into a crash, and must not
+        # pass in silence either: nothing else will ever delete this directory.
+        shutil.rmtree(run_dir, ignore_errors=True)
+        if run_dir.exists():
+            print(f"WARNING: could not remove this run's sandbox {run_dir}; it is "
+                  f"left behind and nothing else will delete it.")
+
+
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description="Measure the positional pointer graph")
     ap.add_argument("--selftest", action="store_true",
@@ -929,23 +963,23 @@ def main(argv: list[str] | None = None) -> int:
                          "and the sweep must REFUSE, because a row that cannot become "
                          "a donor must not be reported as evidence of safety")
     ap.add_argument("--sandbox", default="",
-                    help="where to build the throwaway tree (default: system temp)")
+                    help="where to build the throwaway tree. Default: a fresh directory "
+                         "per run under the system temp directory, removed when the run "
+                         "ends (one fixed path let two concurrent runs delete each "
+                         "other's sandbox). A path given here is kept afterwards")
     args = ap.parse_args(argv)
 
     if args.selftest:
-        import tempfile
-        return selftest(pathlib.Path(
-            args.sandbox or (pathlib.Path(tempfile.gettempdir())
-                             / "pointer-graph-selftest")))
+        return _in_own_sandbox(args.sandbox, "pointer-graph-selftest-", selftest)
     if args.pin:
         return write_pin(args.ref)
     if args.check:
         return check_pin(args.ref)
     if args.plant or args.plant_sweep:
-        import tempfile
-        box = pathlib.Path(args.sandbox or
-                           (pathlib.Path(tempfile.gettempdir()) / "pointer-graph-sandbox"))
-        return plant(args.plant or None, args.plant_sweep, box, args.plant_reason)
+        return _in_own_sandbox(
+            args.sandbox, "pointer-graph-sandbox-",
+            lambda box: plant(args.plant or None, args.plant_sweep, box,
+                              args.plant_reason))
     return report(args.ref, args.edges)
 
 

@@ -232,9 +232,11 @@ def test_a_row_label_is_a_unique_key():
             "locator citing one of them resolves to whichever the index "
             "happened to keep."
         )
-    assert total == 704, (
+    # 704 -> 747 on 2026-09-24: lane Y2's completeness admission added 43
+    # GAP rows (J 16, P 10, M 11, N 6), each under a label no row held.
+    assert total == 747, (
         f"the four slices hold {total} stated rows with distinct labels, and "
-        "the census holds 704. If the census really moved, re-run "
+        "the census holds 747. If the census really moved, re-run "
         "`scripts/count_census_states.py` and re-derive; if it did not, this "
         "index has started merging or dropping labels and every RESOLVES it "
         "prints is resting on a set that moved."
