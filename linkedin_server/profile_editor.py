@@ -97,12 +97,13 @@ NOTIFY_NETWORK_WORDS: tuple[tuple[str, ...], ...] = (
 
 #: THE SEAM FOR THE AMENDED CONDITION 1 -- DELIBERATELY NOT WIRED (2026-09-24).
 #:
-#: The orchestrator is amending condition 1 of ``SELF-PROFILE-EDITS-NOT-OUTWARD``
-#: (to be registered after the live lane merges): where the edit dialog draws
-#: no notify control, his ACCOUNT-LEVEL setting "Share profile updates with your
-#: network", read OFF BEFORE the edit, satisfies the condition; where neither
-#: that nor a dialog control read off is established, the write is
-#: NEEDS-OPERATOR.
+#: Condition 1 of ``SELF-PROFILE-EDITS-NOT-OUTWARD`` is amended by the ruling
+#: ``SELF-PROFILE-EDIT-NOTIFY-CONDITION-AMENDED`` (registered 2026-09-24, in
+#: ``_audit/2026-09-24-rulings-notify-veto-and-who-which.md``): where the edit
+#: dialog draws no notify control, his ACCOUNT-LEVEL setting "Share profile
+#: updates with your network", read OFF BEFORE the edit, satisfies the
+#: condition; where neither that nor a dialog control read off is established,
+#: the write is NEEDS-OPERATOR.
 #:
 #: The account-level reading enters here and nowhere else: the keyword
 #: ``account_share_updates`` of :func:`save_gate_verdict` and
@@ -114,12 +115,17 @@ NOTIFY_NETWORK_WORDS: tuple[tuple[str, ...], ...] = (
 #: reading BEFORE the change is entered (the amendment's word), pass it here;
 #: no rule in this module moves.
 #:
-#: ONE QUESTION THIS SEAM DOES NOT ANSWER, AND REFUSES ON: the measured intro
-#: editor draws switches with NO accessible name. The amendment speaks of a
-#: dialog that draws NO notify control; while an unnamed switch is drawn that
-#: is not established, so an account-level OFF beside one refuses too
-#: (``6_unnamed_switch_unresolved``). The amendment's text, or capture C1
-#: naming those switches, is what would lift it.
+#: AN UNNAMED SWITCH REFUSES, AND THE AMENDMENT SAYS SO: the measured intro
+#: editor draws switches with NO accessible name, and the ruling holds that a
+#: switch the dialog cannot name is not evidence either way -- the condition is
+#: not met while one is present, even with the account setting read OFF, until
+#: a capture identifies that switch (``6_unnamed_switch_unresolved``). The live
+#: lane's capture has since identified the intro editor's two ('Open Profile'
+#: and 'Profile Premium Badge', `_audit/2026-09-23-live-lane-session-1.md`),
+#: but this gate classifies by accessible name only, so it cannot yet tell a
+#: capture-identified switch from any other unnamed one. Recognising those two
+#: by what the capture measured is the build that lifts this refusal for the
+#: intro editor; until it lands, the refusal stands.
 ACCOUNT_READINGS: tuple[str, ...] = ("off", "on", "unknown")
 
 #: How long to wait, after the press, for the editor to close before the
