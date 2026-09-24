@@ -1966,8 +1966,10 @@ SANCTIONED_WRITES: dict[str, WriteSpec] = {
             "manager is refused by the read boundary ('invitation' and "
             "'/withdraw' are both on its forbidden list) and the badge cost "
             "of that /mynetwork/ sub-page is unmeasured. LinkedIn does offer "
-            "the withdraw (Help Center, _audit/_census/network.md s8.5); a "
-            "withdraw does not un-notify."
+            "the withdraw (Help Center a568295, quoted in "
+            "_audit/_census/network.md s8.5), with a three-week wait before "
+            "the same member can be invited again; a withdraw does not "
+            "un-notify."
         ),
         residue=(
             "AN INVITATION IS A REQUEST TO A REAL PERSON, and it lands as a "

@@ -611,8 +611,13 @@ OUTWARD_CLASS_SPECS: dict[str, OutwardClassSpec] = {
         census_rows=("N 10", "N 12"),
         summary="Withdraw one pending invitation he sent.",
         carried_facts=(
-            "LinkedIn DOES offer the withdraw (Help Center, recorded in "
-            "_audit/_census/network.md s8.5). send_invitation's own "
+            "LinkedIn DOES offer the withdraw: its Help Center (a568295, "
+            "fetched and quoted by the network census, "
+            "_audit/_census/network.md s8.5) documents My Network, "
+            "Invitations, the Sent tab, Withdraw, then Withdraw again in a "
+            "confirmation pop-up, and the price: 'You won't be able to send a "
+            "new invitation to the same member for up to three weeks.' "
+            "send_invitation's own "
             "unverifiable block names the only surface: the Sent "
             "Invitations manager under My Network > Manage > Sent. Its "
             "address contains 'invitation', on "
@@ -625,8 +630,8 @@ OUTWARD_CLASS_SPECS: dict[str, OutwardClassSpec] = {
         ),
         reversible_by=(
             "NOBODY: a withdrawn invitation is re-sent only as a new "
-            "invitation, and LinkedIn may delay re-inviting the same "
-            "person (unmeasured here)."
+            "invitation, which LinkedIn refuses for up to three weeks "
+            "(Help Center a568295)."
         ),
         live_proof=(
             "HE NAMES a pending invitation he sent. One manager load for the "
@@ -638,9 +643,8 @@ OUTWARD_CLASS_SPECS: dict[str, OutwardClassSpec] = {
             "('invitation') and unadmitted; an exact-url admission, with "
             "its badge cost measured, comes first. Then the capture: the "
             "sent list with his named pending invitation, its row's "
-            "withdraw control and whatever pressing it draws (expected a "
-            "confirmation), taken only on an invitation he names for "
-            "withdrawal."
+            "withdraw control and the confirmation pop-up LinkedIn documents "
+            "(a568295), taken only on an invitation he names for withdrawal."
         ),
     ),
     "withdraw_application": OutwardClassSpec(
