@@ -815,6 +815,266 @@ of 242 live test files against a line of 161.33, and `tests/test_ci_shard.py` pa
   stays NEEDS-CAPTURE until a way exists to aim a switch with no accessible name, which is the same
   build as the bullet above.
 
+## Follow-up 2026-09-24
+
+On the orchestrator's follow-up order (06:48), after lane L7 merged as `master` `603f4d3`. Step 0: the
+branch fast-forwarded to `603f4d3` cleanly. **One step the order did not name, taken on disk's word:**
+by 07:22 `master` had moved to `66aaa95`, a fix to this lane's merge -- CI on `603f4d3` failed two tests
+on every platform that this lane's local gates had not run: the oldest-Python f-string guard
+(`tests/test_the_package_compiles_on_its_oldest_python.py`, over a form in
+`tests/test_profile_editor_commit.py`) and the gap-rows pin (`tests/test_gap_rows_on_refused_addresses.py`,
+55 -> 60, five of this lane's cells newly naming an address). The branch fast-forwarded to `66aaa95`
+before any commit here, and both guards are in every gate below. One commit per item. Offline
+throughout: no LinkedIn, no browser against LinkedIn, no grant; every load below is a local headless
+Chromium over `set_content`.
+
+### F.1 The two unnamed switches, recognised by structure -- code 6 lifted for the intro editor only
+
+**WHERE THE CAPTURE IS, AND ONE DIFFERENCE FROM THE ORDER.** The order said to read the raw capture from
+the MAIN checkout's gitignored `_state/`. It is not there: the main checkout's `_state/` holds no
+intro-editor capture. The live lane's is at `_state/live1/editor_fields.html` in that lane's OWN
+worktree, gitignored the same way (`_audit/2026-09-23-live-lane-session-1.md` says its raw captures
+stay there). It was read from there, read-only, offline, with the order's discipline: structure dumps
+that fold every id and value to its shape and print text only when it is a closed list of LinkedIn UI
+strings or a code identifier, and nothing raw copied into a tracked file.
+
+**WHAT THE CAPTURE DRAWS -- AND IT IS LESS THAN THE ORDER EXPECTED.** Both switches are
+`input[type=checkbox][role=switch]` whose own `label` is drawn EMPTY, each the only input in a
+wrapper `div` carrying `role=switch` and `aria-checked` (its accessible name, 'Tap to toggle
+setting', is the same on both). Each wrapper sits in a setting block of exactly two parts -- a text
+part (a title paragraph and a description paragraph, no control) and the part holding the wrapper --
+and the two blocks sit in one row after a leading paragraph. That row is the last of ten direct
+children of the dialog's scrolling column, `div[data-testid="lazy-column"]`. **None of the three
+anchors the order named is drawn around the switches:** the dialog's one `section` is not an ancestor
+of the row; `aria-describedby` is carried by five text inputs and nothing else; the only heading ids
+are the dialog's own label, `header` elements whose one id is shared by five elements in the document.
+Compared node by node, the two blocks are identical in every attribute but two random ones: a
+`componentkey` of random-UUID shape (version 4, as 247 of the capture's 315 keys are) and an input id
+of the shape React generates. Both are random BY THOSE SHAPES: one render is on record, so "a new
+value on every render" is DERIVED from the shape, not measured across two. So the nearest anchor the
+page itself names is the column, by its test id, and the only things that tell the two switches apart
+are the visible text of each block's title paragraph -- which the order rules out -- and their ORDER in
+the row.
+
+**WHAT WAS BUILT** (`linkedin_server/profile_editor.py`):
+
+* **The shapes** -- `INTRO_SWITCH_COLUMN` (the column's test id: an attribute value, as `role="switch"`
+  is, a name in LinkedIn's code and never text a viewer reads), `INTRO_SWITCH_ROW` (a direct child of
+  the column whose element children are exactly a paragraph and two blocks, the second and third each
+  holding a wrapper with a checkbox) and `INTRO_SWITCH_BLOCKS` (one per identity, in the recorded order,
+  each exactly two parts with a paragraph and no control in the first). The press rules' discipline: an
+  enumerated shape by attribute, exact membership, never a label. Identity is a block's ORDER, taken
+  from a closed tuple (`INTRO_SWITCH_IDENTITIES`: `open_profile`, `profile_premium_badge`), never from
+  the page.
+* **`recognise_intro_editor_switches`** -- every question to the page is a `locator(...).count()`, so
+  the page runs nothing it did not already run and what comes back is integers: **no new script and no
+  new waiver**, the promise the module already made. All or nothing: one dialog holding the one `Save`
+  control (found by `SAVE_SELECTOR`'s own two halves, pinned equal by a test), one row, and for EACH
+  identity exactly one block holding exactly one checkbox, which is the recorded unnamed switch by its
+  attributes AND has no accessible name by Playwright's own name computation, hidden or not (the fields
+  reader counts hidden controls too).
+* **THE ACCESSIBLE-NAME HALF IS NOT OPTIONAL.** Every attribute can match while a label elsewhere on
+  the page names the input. A recogniser that asked attributes alone would then "recognise" two switches
+  the fields reader did not count as unnamed, and subtracting them would lift code 6 over two OTHER
+  unnamed switches nobody identified. Measured: two labels naming the row's inputs plus two planted
+  unnamed switches -- as built, `6_unnamed_switch_unresolved`; with the name half knocked out in
+  process, the gate PROCEEDS.
+* **The verdict** counts `unresolved_switches` -- unnamed and NOT recognised -- and code 6 fires only on
+  those; `recognised_switches` names the others. A reading that recognises more than the fields reader
+  counts unnamed recognises none. The receipt carries both. The amendment's wording is kept exact: the
+  condition is not met while a switch the dialog cannot name is present, until a capture identifies it
+  -- and only the intro editor's recorded pair is tied to a capture (the gate runs for
+  `update_profile_field` alone, `writes.EDITOR_SAVE_ACTIONS`).
+* **WHAT IT DOES NOT DO:** order is enough to LIFT code 6 -- both switches are identified as not notify
+  controls, so which is which changes nothing there -- and it is NOT enough to AIM a press at one of
+  them (F.2).
+
+**THE FIRST CUT WAS REFUSED BY THE READ-ONLY BOUNDARY, AND WAS REBUILT RATHER THAN WAIVED.** It
+recognised with a new injected script (`page.evaluate`), and six guards failed:
+`test_readonly.py`'s unsanctioned-mutating-call, sanctioned-entry-present, mutating-call-count and
+scripts-executed checks, `test_writes.py`'s mutation count (`14 == 12 + 1`), and the unwired-reader
+inventory. A new injected script is a sanctioned-mutation entry, and adding one is the review moment
+those checks exist to create -- the operator's say-so, not a lane's. So the recognition became locator
+counts, which the boundary classes as reads. The function was also renamed from `read_...` to
+`recognise_...`: the inventory flags a `read_*` function no OTHER module calls, and this one is called
+only by `read_save_gate` in its own module -- wired, through the gate, not unwired.
+
+**THE FIXTURE** -- `tests/fixtures/synthetic/intro_editor_switches.html`, built by
+`scripts/_build_intro_editor_switches_fixture.py` in the repo's builder pattern (the provenance script,
+structure carried over, every text, id and key invented, no sanitisation key needed, counts printed
+only). It carries the row inside the column's test id, because the recognition anchors on it. Its
+`--check` mode applies the same signature -- the column, the empty label before the input, no naming
+attribute, one checkbox per block, and no label naming the input from anywhere in the document -- to any
+file; the raw capture passes it.
+
+**TESTS** (`tests/test_intro_editor_switches.py`, 18): each switch recognised in the recorded order and
+neither treated as a notify control; with the account setting read OFF the recognised pair no longer
+blocks; states read per identity, and an input and wrapper that disagree read `None`; a third unnamed
+switch planted OUTSIDE the row keeps code 6; a third block planted INSIDE the row, a second copy of the
+row, a wrapper that loses `role=switch`, or the row under any other parent than the column recognises
+none; a decoy row of the same outline without switches does not confuse it; a switch the page names
+from elsewhere is not recognised (the case above); a stylesheet-hidden pair is still recognised; the gate
+still refuses (code 5) whenever condition 1 is not established; swapping, blanking or renaming every
+label moves nothing; the verdict's all-or-nothing rule; a reader failure reports only its type; the
+dialog is found by the press selector's own halves; the builder signature holds on the fixture and
+refuses a page whose row loses its leading paragraph or whose column loses its test id.
+
+**SHOWN FAILING, FOUR WAYS.** (1) The gate as committed before this change (`66aaa95`), driven over the
+fixture with the account setting read OFF: `6_unnamed_switch_unresolved`, 2 unnamed; after: proceeds,
+both recognised. (2) Against the old module the new test file fails 17 of 18 (the builder test is
+independent of the gate); both swapped files restored byte-identical. (3) The recogniser and the gate
+over the RAW capture, strictly offline -- page scripts disabled and every one of the 25 requests the
+capture references aborted: containers 1, rows 1, checkables 2, recognised 2, `open_profile` then
+`profile_premium_badge`, both checked; no account reading -> code 5; account OFF -> proceeds on
+`account_setting_off`. (4) Each load-bearing half knocked out in process, no tracked file edited, turns
+exactly its own test red: the accessible-name half (recognised 2 where 0 is required -- and the gate
+proceeds, above), `include_hidden` (the hidden pair recognised 0), the column anchor (rows 1 where 0 is
+required).
+
+**ALSO MOVED:** `tests/reader_leak_baseline.json` regenerated by its generator (+1 reader,
+`profile_editor:recognise_intro_editor_switches`, `clean`); the tool-envelope baseline regenerated and
+unchanged; `writes.py`'s receipt carries `recognised_switches` and `unresolved_switches` beside
+`unnamed_switches`; `scripts/ci_shard_timings.json` prices the new test file the live lane's way
+(a junit run of it alone, `ci_shard.seconds_per_file`, provenance appended: 64.966 s for 18 tests, each on a fresh local page, on a box other lanes were loading -- so high rather than low); INSTRUMENTS 70.6 registers the recognition, its accessible-name half and the builder's
+check with the evidence above.
+
+**GATES -- AND WHAT DID NOT RUN.** `scripts/impact_gate.py --against 603f4d3 --plan-only`: 7 changed paths
+-> 168 of 243 test files (69%), **WIDENING TO THE FULL SUITE**; item 1's own paths without `writes.py`
+still plan 128 of 243 (53%), past the same 45% line, because `profile_editor` is imported by `writes`
+and `writes` by nearly everything. So, as the order says, the impact gate was NOT run locally: the full
+suite is CI's on push. Run locally instead, on a box reading 100% CPU with other lanes' suites running:
+1. **One xdist run (4 workers, by file) of 36 files** -- item 1's own tests, the read-only boundary,
+   `test_writes.py`, the profile-editor commit tests, both page-string guards, the oldest-Python f-string
+   guard and the gap-rows pin (the two CI caught), the editor readers, the harness-grant, control-reach,
+   spec-denial and click-evidence guards, the orphan-module ruling, and the 18 corpus-wide guards
+   impact_gate always runs: **1 failed, 3941 passed, 1 xfailed** in 18 min 41 s. The one failure,
+   `test_click_is_not_its_own_evidence.py::test_the_counts_can_differ_so_the_instrument_has_been_shown_to_speak`,
+   is a messaging-composer census that returned `1_no_listbox` where `3_no_option_carries_the_needle` was
+   expected -- the listbox gone before the gate looked, under that test's shortened waits. It touches
+   neither `profile_editor` nor the receipt keys. Alone it passed (1 passed, 23.8 s), and its whole file
+   passed again beside item 1's tests, the read-only boundary, the f-string guard and the inventory
+   (3 workers, after the last comment edit): **371 passed, 1 xfailed** -- the xfail its own KNOWN DEFECT
+   marker. It is recorded here as a load flake that CI should see green, not as a finding of this item.
+2. **The receipt, surface and pin files** the integration gate carried and the list above did not
+   (receipt-names-its-action, preview/click state, server surface, prose claims, reader reachability,
+   every-tool-on-the-surface, the tool-surface and count-claim pins, `P I14`'s own tests), 3 workers:
+   **287 passed**. Only two test files read the save gate's receipt keys, and both are in run 1.
+3. **Generated files** -- `build_audit_index`, `build_rulings_index` and `build_blocker_map --check`, at a
+   fixed point on the staged tree.
+4. **This record, with F.1 in it** -- the cited-sha, asserted-name, correction-findable, banked-evidence,
+   ignored-path, prose-claim, page-text, identity, credential and person-name guards, with the shard
+   table's, ignore-entry and impact-gate tests, 4 workers: **2086 passed**.
+
+### F.2 `P B9`, the Premium badge's show / hide -- SELF-PRIVATE; NOT BUILT, BLOCKED ON THE AIM
+
+**ON RECORD NOW.** The capture puts the control on record: the SECOND of the two unnamed switches in the
+intro editor's settings row, in the block whose title reads 'Profile Premium Badge'. The FIRST is the
+Open Profile switch -- census row `P B10`.
+
+**THE CLASS: SELF-PRIVATE, and the reason.** Section 6 classed it so before the capture; the evidence
+does not move it. Showing or hiding the badge changes what viewers of his profile see -- as a city or a
+headline does, and those are SELF-PRIVATE by the ruling `SELF-PROFILE-EDITS-NOT-OUTWARD`. Section 2's rule turns
+on whether the act's POINT is other people, not on whether others can see it: VISIBLE-TO-OTHERS is a
+signal to a company's recruiters, a frame whose point is a message ("open to work", "hiring"), a named
+third party's endorsement. A membership badge shown or hidden carries no message he authors, targets no
+one, notifies no one, broadcasts nothing and reverses with the same switch -- the same class as `P B8`'s
+Top Voice badge, and for the same reason.
+
+**WHY IT IS NOT BUILT -- EXACTLY.** A toggle kind in the family would press the badge's switch. Nothing
+aims that press. **No attribute tells this switch from the Open Profile switch beside it:** the two
+blocks differ only in a key of random-UUID shape and an input id of the shape React generates (random
+by those shapes; one render is on record), and both wrappers carry the same accessible name. What does
+tell them apart is each block's visible title, which the family does not aim by, and the ORDER of the
+two blocks. Order is enough for the save gate to know that neither is a notify
+control (F.1), because there which is which changes nothing. It is not enough to aim a press: a render
+that drew the two the other way round -- one reordering by LinkedIn, nothing this server could see --
+would turn an order-aimed press on the badge into a change to Open Profile, which decides who may
+message him without a connection: row `P B10`, a permission setting nobody has admitted. The restore
+would press the same wrong switch back, so the damage would be bounded, but the write itself would be
+one no ruling covers, and its receipt would report the badge.
+
+**WHAT LIFTS IT -- any one of:**
+1. **LinkedIn gives the switch an accessible name of its own** (today its `label` is drawn empty). The
+   family aims by name; the build would then be the family's ordinary toggle.
+2. **A render shows a stable attribute that tells the two apart** -- a test id, a name, anything not
+   random by its shape. A re-capture checks it in one navigation to the admitted editor, no press --
+   and a second render is also the first measurement of whether today's two keys really change.
+3. **A ruling admitting the block's title as the aim, compared inside the page.** The title is a
+   LinkedIn UI string, not his data, and the comparison can run in the page's own selector engine, so no
+   text crosses into this process. This is the cheapest lift and it is a decision, not a build: it is
+   the orchestrator's to take or refuse.
+
+With any of them the build is offline: the fixture, its builder and the recognition already carry the
+structure, the grant is the family's, off by default, and the restore is the same switch pressed back,
+tested against the fixture before any live proof.
+
+**CENSUS.** `P B9` stays GAP. Its cell gains the follow-up note, and its class-table line in
+`_audit/_census/write-classes.tsv` moves from `queued:INTRO-EDITOR-FULL-READ` (C1 is done) to
+`queued:NO-ATTRIBUTE-AIMS-THE-SWITCH`.
+
+**A FINDING FOR ANOTHER OWNER -- raised, not ruled.** `P B10` is GAP on "awaiting admission by name":
+its blocker, as its cell records, is that the toggle sits behind the refused settings pages. The capture
+shows the same Open Profile switch drawn IN THE INTRO EDITOR, an admitted address, as block 1 of this
+row. That is a second route to the control that passes through no settings page. What it changes for
+`P B10` -- its class ("a toggle that changes what OTHER members see of him or can do toward him") and its
+admission -- is that row's owner's call; this lane does not touch the row.
+
+**GATES (item 2).** The fourteen census instruments -- `census_completion --check`, `count_census_states`,
+`check_write_classes`, `check_read_addresses`, `ruling_holds`, `pin_census_rows --check`,
+`measure_pointer_graph --check`, `classify_writeoff_reasons --check`, `check_exclusion_basis`,
+`check_jobs_directions`, `check_gap_rows_on_refused_addresses` and the three generators' `--check` --
+exit 0 before the edit and after it, and three of them print byte-identical output across it
+(`count_census_states`, `check_write_classes`, `check_gap_rows_on_refused_addresses`: the gap-rows pin does
+not move, because the note names no address). Nothing generated needed regenerating. Then, 4 workers,
+the census and pin guards a cell and a class line can move, the doc guards over this record, and the
+18 corpus-wide guards: **1 failed, 3112 passed** -- and the one was this section's own:
+`test_an_asserted_name_resolves.py::test_no_new_asserted_name_is_absent` read
+`SELF-PROFILE-EDITS-NOT-OUTWARD`, written after the word "under", as a BLOCKER name that resolves nowhere
+(it is a ruling). Reworded to "by the ruling"; the checker then finds nothing in this record, and that
+file with the cited-sha and correction guards: **65 passed**.
+
+### F.3 `P I14` / `P I15` -- NO CAPTURE ON RECORD DRAWS THE ON STATE; LEFT AS RECORDED
+
+**THE SEARCH.** Every HTML and JSON file under the main checkout's `_state/`, the live lane's
+worktree `_state/` and `tests/fixtures/`, offline, for the company-interest section (its help link,
+`/answer/a1380509`) and for any recorded reading of its control. Printed: file names, counts, and a
+button's text only when it is the measured OFF label or one of a closed set of guessed ON labels.
+
+**WHAT IT FOUND.** Five files draw the section: two raw captures in the main checkout's `_state/`
+(`cap-collection-top-applicant.html`, `cap-collection-top-choice.html`) and three tracked fixtures
+(`job_detail.html`, `job_detail_hydrated.html`, `job_detail_following_hydrated.html`). **Every one draws
+the OFF label, 'I'm interested', and none draws an ON state.** The recorded job-detail readings
+(`_state/live-job-detail-1.json` to `-7.json`, main checkout, 2026-09-20) all read the about section
+(`state: read`): `-6` and `-7` read `interest_control: true`, the OFF label drawn; `-1` to `-5` read
+`false`. That reading's rule is "the OFF label is among the section's lines", so `false` cannot tell an
+employer that draws no interest block from one that draws the block in another state -- including ON.
+
+**SO NOTHING IS BUILT, AND BOTH ROWS STAY AS RECORDED:** `P I14` BUILT and unfired behind its
+prerequisites, `P I15` `queued:INTEREST-ON-LABEL`. **ONE ADDITION TO C6, the cheapest first step of its
+route (a):** the five postings read in `-1` to `-5` are the only recorded employers whose card might
+draw the ON state. Those files name them by posting id; the files are gitignored and reach no clone,
+and this record does not copy them, so the list exists on this box only -- whoever takes the question
+to him reads it there. He can say, without a load, whether he has signalled any of those employers; a
+yes names C6's route-(a) posting, and a no rules the five out.
+
+**GATES (item 3).** This record is the only file the item moves (F.3, and two lines in the Capture
+queue: C1 marked done, C6's cheapest first step). The asserted-name checker finds nothing in this record;
+the cited-sha, asserted-name, correction-findable, banked-evidence, ignored-path, prose-claim, page-text,
+identity, person-name, credential and blocker-reason-locator guards, 4 workers: **1946 passed**.
+
+### F.4 The live queue, rewritten for session 2
+
+The order's live path: the intro-editor rows need the account-setting reader the live lane is building,
+and his setting reading OFF at fire time, and session 2 must be able to fire them in order -- read the
+setting, then edit, restore, and read before and after. The Live queue's intro-editor block below is
+rewritten IN PLACE to say exactly that: the two prerequisites, the five-step sequence with a STOP at
+every step that does not read as expected, the six rows ordered most deterministic first, and the loads
+(64 over two 32-load sessions, with the one ESTIMATE named -- the reader's own cost). Its old table rows
+for `P A14`, `A15`, `A22` and `P B9` are replaced by one paragraph saying why none is newly buildable;
+the rows for `P A26`-`A29`, `P G2` and `P I13` are kept verbatim under their own heading. `P I14`'s
+block above it is unchanged. GATES: the record only; the asserted-name checker finds nothing in it, and
+the same doc guards as item 3, 4 workers: **1946 passed**.
+
 ## Live queue
 
 Loads counted off the code: `linkedin_profile_editor_values` and `linkedin_profile_editor_fields`
@@ -836,25 +1096,80 @@ restore its BUILT bar lacked; (4) this row fires, and `P I15` restores it in the
 |---|---|---|---|---|---|---|
 | P I14 | `linkedin_mark_company_interest(job_id=<posting>)`, he reads the block (it names the employer), then the same call with `confirm_token=<token>` within 120 s -- ONLY after prerequisites (1) to (3) | none -- the target is that posting's employer | `P I15`, built from C6, in the same session; until C6 and that build exist this row does not fire | before: the preview's own reading (`not_signalled`) and `linkedin_job_detail(job_id)` `interest_control: true`; after: the receipt's `verification` and `linkedin_job_detail` `interest_control: false`; after the restore: `interest_control: true` again | a posting HE names, at an employer he chooses to signal -- `OPERATOR-NAMES-THE-TARGET` | 3 (+2 for the two `linkedin_job_detail` readings, +the restore's own) |
 
-**Ready once a capture names the control -- no new code for the intro-editor rows.** Each is a
-SELF-PRIVATE live proof on the four conditions of the ruling `SELF-PROFILE-EDITS-NOT-OUTWARD`.
-**CONDITION 1 IS ENFORCED BY THE GATE SINCE THE INTEGRATION, BEFORE THE PRESS** (Integration, I.2):
-it presses only on a notify control in the dialog read off, or -- once the amended condition's
-account-level reader is wired -- on that setting read OFF before the edit with no unnamed switch in
-the dialog; otherwise it refuses, NEEDS-OPERATOR, and the receipt's `editor_save_gate.condition_1`
-names which basis it used. **Until 2026-09-24 this paragraph read "NOT DRAWN with no unnamed switch"
-as satisfying condition 1; the order registering the amendment says it does not.** The measured intro
-editor draws two unnamed switches and no named notify control, so every row in this table waits on C1
-naming those switches, or on the amendment's text covering them. Conditions 2 and 3 are the restore
-call and the two readings; condition 4 is met because none of these fields adds an entry. The six
-intro-editor rows outside the slice (`P A8`, `A11`, `A13`, `A17`, `A19`, `A21`) wait on the same.
+**THE INTRO-EDITOR ROWS -- FOR SESSION 2, IN THIS ORDER (rewritten at the follow-up, 2026-09-24).**
+Each is a SELF-PRIVATE live proof on the four conditions of the ruling `SELF-PROFILE-EDITS-NOT-OUTWARD`.
+**CONDITION 1 IS ENFORCED BY THE GATE, BEFORE THE PRESS** (Integration, I.2): it presses only on a
+notify control in the dialog read off, or on his account-level setting read OFF before the edit with
+every unnamed switch in the dialog one a capture identified; otherwise it refuses, NEEDS-OPERATOR, and
+the receipt's `editor_save_gate` names why. The measured intro editor draws no notify control and two
+unnamed switches, and since F.1 those two are recognised, so the account-level route is the one these
+rows take. Conditions 2 and 3 are the restore and the two readings; condition 4 holds because none of
+these fields adds an entry.
+
+**TWO THINGS MUST HOLD BEFORE ANY ROW FIRES:**
+1. **THE ACCOUNT-SETTING READER, WIRED AT THE SEAM** -- the live lane's reader of 'Share profile updates
+   with your network', its reading (`'off'`, `'on'` or `'unknown'`) taken BEFORE the change is entered and
+   passed as `account_share_updates` to `profile_editor.read_save_gate` by the write (the edit and its
+   restore both go through the same gate). The seam is `profile_editor.ACCOUNT_READINGS`; no rule in the
+   module moves when it is wired. Until it is, every row below refuses `5_condition_1_not_established` at
+   the press -- safely: nothing is saved, and the verification's fresh navigation discards the entered
+   change.
+2. **HIS SETTING READS OFF AT FIRE TIME.** If it reads ON or unknown: STOP and report. The session does
+   not switch it off -- that is his account setting, and changing it is a second change nobody
+   confirmed.
+
+**THE SEQUENCE, PER ROW** -- every STOP is a report, not a retry:
+1. **Read the setting** (the live lane's reader). Not OFF -> STOP.
+2. **Before:** `linkedin_profile_editor_values()`. For every row after a session's first, the previous
+   row's step-5 reading is this one.
+3. **Edit:** `linkedin_update_profile_field(field=<the row's field>, value=<a value HE picks>)`, then
+   the same call with `confirm_token=<token>` within 120 s. Go on only if the receipt shows
+   `performed: true`, `editor_save_gate.proceed: true`, `condition_1: account_setting_off`,
+   `recognised_switches: [open_profile, profile_premium_badge]`, `unresolved_switches: 0`, and a
+   verification of `field_changed`. Anything else -> STOP, and the receipt's `editor_save_gate` block is
+   the report.
+4. **Restore:** the receipt's `restore.to_put_it_back`, previewed and confirmed the same way (the setting
+   read again first, if the wiring reads it per write); the same gate conditions, and a verification of
+   `field_changed` back to the before value. Anything else -> STOP: the field is left changed, and that
+   is the first line of the report.
+5. **After:** `linkedin_profile_editor_values()`; every field equal to step 2's reading. Not equal ->
+   STOP.
+
+| order | row | field (the name `linkedin_profile_editor_fields()` returns) | kind, as the live lane's capture draws it | loads |
+|---|---|---|---|---|
+| 1 | `P A8` | Additional name | text input, named by its label | 12 |
+| 2 | `P A19` | Pronouns | select, chosen by its own option text | 10 |
+| 3 | `P A21` | Education | select -- one of his own education entries, chosen by its own option text | 10 |
+| 4 | `P A13` | City | text input, named by `aria-label` -- a typeahead | 12 (second session) |
+| 5 | `P A11` | Country/Region | text input, named by `aria-label` -- a typeahead | 10 |
+| 6 | `P A17` | Industry | text input, named by `aria-label` -- a typeahead | 10 |
+
+**THE ORDER IS THE MOST DETERMINISTIC FIRST.** A plain text input and two selects, whose options the
+tool chooses by their own text, open the first session. The three typeaheads fill the second: LinkedIn
+may not accept a typed value that is not one of its suggestions, and the tool types without choosing a
+suggestion. If it does not, `Save` stays disabled (`2_save_disabled`) or the dialog stays open and the
+verification reads `value_unchanged` -- nothing is saved either way, and the row STOPS as a finding for
+the write's owner, not a retry. (`writes.py`'s own comment calls `Country/Region` a select; the live
+lane's capture draws it as a text input named by `aria-label`, and this table follows the capture.)
+
+**LOADS, COUNTED OFF THE CODE, with ONE ESTIMATE NAMED:** `linkedin_profile_editor_values` is 2 loads;
+an intro-editor write's preview is 1 and its confirm 2; the account-setting reader is taken as **1 load
+per write -- ESTIMATED: it is the live lane's reader and its cost is its own.** A row is therefore
+1 + 3 (edit) + 1 + 3 (restore) + 2 (after) = 10, and a session's first row adds its 2-load before
+reading: 12. Six rows are 64 loads over two sessions, beyond one 40-load budget, so they run as TWO
+SESSIONS of three rows, 32 loads each, spaced 20 s apart (about 11 minutes each), in the order above. If
+the reader costs R loads per write, a row costs 8 + 2R and the split is recomputed before a session
+starts, never during it.
+
+**Not newly buildable at this follow-up:** `P B9` is blocked on the aim (F.2); `P I15` has no ON capture
+(F.3); `P A14`, `A15`, `A22` -- postal code, location display, primary position -- are not among the 17
+controls the live lane's reading of the intro editor draws, so they have nothing to fire; each is a
+candidate for MEASURED-ABSENT for this account, the census owner's call.
+
+**THE OTHER SELF-PRIVATE ROWS -- NOT BUILT, each waiting on its own capture (unchanged).**
 
 | row | tool call | field | restore step | before / after reading | target | loads |
 |---|---|---|---|---|---|---|
-| P A14 | `linkedin_update_profile_field(field=<the name C1 records>, value=<a value HE picks>)`, then confirm | postal code, if C1 finds it drawn | the receipt's `restore.to_put_it_back`, previewed and confirmed within the session | `linkedin_profile_editor_values()` before and after; equal | self | 10 |
-| P A15 | as A14 | the location display choice (a select, chosen by its own option text) | as A14 | as A14 | self | 10 |
-| P A22 | as A14 | the primary-position select | as A14 | as A14 | self | 10 |
-| P B9 | a toggle kind in the same family, NOT BUILT -- designed after C1 shows how the switch's row names it | the Premium-icon switch | the same call with the opposite state | the editor values reader, which reads a switch's checked state | self | 10 once built |
 | P A26 / A27 / A28 / A29 | an editor spec for the contact-info editor, NOT BUILT -- it needs C2's address and field names; then the same two calls | website / phone / messenger / birthday and its audience | the receipt's restore block, within the session; A29 restores the audience too | the values reader over that editor | self | ~10 each, fixed by C2 |
 | P G2 | an editor spec for the default-activity form, NOT BUILT -- it needs C4 | which activity type shows first | the same call with the prior option | the values reader over that form | self | ~10, fixed by C4 |
 | P I13 | NOT BUILT -- it needs C5 to say whether the control is a field, a modal or a flow | minimum pay | as the build decides | as the build decides | self | fixed by C5 |
@@ -873,6 +1188,10 @@ never a value, never an href, never a person's name.
 
 **C1 -- THE INTRO EDITOR, READ TO ITS LAST CONTROL** (`P A14`, `A15`, `A22`, `B9`; and condition 1 for
 every intro-editor live proof, in or out of this slice).
+**DONE 2026-09-23 BY THE LIVE LANE** (session 1, Entry 5 of `_audit/2026-09-23-live-lane-session-1.md`),
+and read at this lane's follow-up (F.1 to F.3): 17 controls, no notify control, and two unnamed
+switches identified as Open Profile and the Premium badge; `P A14`, `A15` and `A22` are not drawn. The
+spec is kept below as the record of what was asked.
 Address `https://www.linkedin.com/in/me/edit/intro/` -- ADMITTED (exact exemption,
 `PROFILE-EDITOR-ADDRESSES-ALLOWED`). Take `linkedin_profile_editor_fields()` (2 loads: the
 self-ownership read, then the editor) and, on the same page, for each control whose `name_source` is
@@ -950,3 +1269,8 @@ exists, the two prerequisites deadlock**: nothing can show the ON label without 
 whether to accept a first press with an undo by hand is his call, not this lane's. Once C6 has the
 label, `P I15` is an offline build (the label, the section bound already in `company_interest`, the
 same grant) and its restore can be tested before `P I14` fires.
+
+**ROUTE (a)'S CHEAPEST FIRST STEP (follow-up, F.3):** five recorded job-detail readings
+(`_state/live-job-detail-1.json` to `-5.json` in the main checkout, 2026-09-20) read the about section
+without the OFF label. Their postings' employers are the only recorded candidates for a card drawing
+the ON state. He can say, at no load, whether he has signalled any of those employers.
