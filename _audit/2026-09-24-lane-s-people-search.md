@@ -984,6 +984,80 @@ because the item-2 admission moved their address: `N 100` is `N 99`'s tab with
 a WHO payload and a write half; `J 112` is `N 99`'s tab in the jobs slice, an
 AGGREGATE.
 
+### E. Item 4 -- pins and gates
+
+**PINS RE-DERIVED ON THIS BRANCH, each in the commit that moved it.** No STATE
+moved anywhere in this follow-up, so every state-derived figure --
+`gap`, `adjudicated`, `delivered`, `unfired`, `PINNED_B1_ROWS`, and
+`RULING_BLOCKED_NAMED` (still empty) -- is what `ff98a7f` left. What moved:
+
+    readonly digest   _ALLOWED_URL_PATTERNS  c37e98f84ee443f2 -> d7b3315318c877d0   item 1
+                                             d7b3315318c877d0 -> a13f66bebba387cd   item 2
+                      seven of eight unmoved each time; attribution shown both times
+    census_completion b3_admitted   40 -> 43 -> 49      b3_refused  38 -> 35 -> 29
+                      jobs_admitted 11 -> 13            jobs_refused 26 -> 24
+    pointer graph     N 100 -> N 99, donor kind US-BOUNDARY -> US-BOUNDARY|US-RULING
+    ci shard timings  two new test files priced, each from a serial run of
+                      itself alone, under an _amended provenance key
+    triage            seven DECIDED_SINCE_TRIAGE annotations (N 99, N 100,
+                      N 102, N 104, N 161, N 177, N 179); key set unchanged
+    orphan rulings    + search_verticals, + member_rosters
+    census prose      the allowlist-count row, 49 -> 53
+
+The tool-surface pin is untouched (51 tools, 74 parameters): no tool was
+added, and `tests/test_the_tool_surface_is_pinned_so_a_row_must_move.py` is
+green. The address table's gates moved in item 3 (six rows MEASURE ->
+RULING); no figure pins the gate split, and the one that could matter --
+BLOCKED ON NOTHING -- is 2 before and after.
+
+**GATES RUN, on the final committed tree:** the census instruments --
+`census_completion --check` (every figure matches its pin),
+`check_read_addresses` (GREEN 94 of 94), `check_jobs_directions` (GREEN 92 of
+92), `triage_read_gap_rows` (every control it prints, 1 and 3-9, OK), `ruling_holds` (GREEN),
+`check_write_classes` (GREEN), `pin_census_rows` (no drift),
+`measure_pointer_graph --check` (pass), and the three generators `--check`
+(INDEX, RULINGS, blocker map at their fixed points) -- and one pytest run over
+57 test files -- 4657 passed, 0 failed, in 4m48s --: the 18 always-run corpus guards (the navigation-derivation guard
+and the page-string guards among them), this follow-up's four test files, the
+lane's people-search tests, and every test file the admissions touched or that
+pins a search, roster, company, school, group or event address.
+
+**GATES NOT RUN, and why.** `impact_gate --against ff98a7f --plan-only`:
+34 changed paths select 192 of 237 test files (81%), past its 45% line, so it
+WIDENS TO THE FULL SUITE -- and the order says not to run that locally; CI
+certifies at merge. Nothing live: no browser, no LinkedIn page, no Chrome
+profile.
+
+#### E.1 The session-2 budget, and the order to spend it in
+
+`LIVE-BUDGET-40-LOADS` caps a session at forty page loads; `D1-SEARCH-AS-READS`
+at five test searches. The lane S live queue already holds four people
+searches. Priorities follow section D: a capture is worth a load now only if
+the row it serves can move when its reader is built.
+
+    P1  moves a row once its reader is built
+        N 84, N 87, N 94   people searches (the live queue)     3 loads, 3 searches
+        N 104  F.1         companies search                      1 load,  1 search
+        N 102 / J 108 F.5  company People tab                    1 load
+        N 99 / J 112  F.6  school alumni tab                     1 load
+    P2  measures an address a later admission needs
+        M C70  F.4         a group page's search control         1 load
+        N 188/189 F.8/1    an event page's attendee control      1 load (the L1 `event` key)
+    P3  moves no row until the operator answers the doctrine question
+        N 161  F.2 groups search; N 179 F.3 events search        2 loads, 2 searches
+        N 165 / N 177 F.7  group member list                     1 load
+        N 188  F.8/2       attendee list, if F.8/1 draws it      1 load
+    NEEDS-TARGET
+        N 85   people search on a member he names                1 load, 1 search
+        N 178  F.9         a member's profile, and his ruling    not in session 2
+
+P1 and P2 together are 8 loads and 4 searches, plus the two
+`linkedin_job_detail` loads that resolve organisation ids for `N 84` and
+`N 87` (F.5 reuses `N 84`'s) -- ten loads, well inside forty, and four
+searches of five. P3's two searches would take the session to six with the
+people queue, so they wait for a later session or for the operator's answer,
+which would also make them worth their loads.
+
 ### F. Capture specs for live session 2
 
 Every capture below is ONE page load through `BROWSER.goto` (which asserts
