@@ -1312,3 +1312,14 @@ lane never touched. The school People line admits a spelling no capture draws
 "names") is weaker than the rule it supports; the verdict stands on the rule.
 And condition 1 of the search admission still needs the orchestrator's
 reading (section B).
+
+**THE FIX, RE-CHECKED WITH THE VERIFIER'S OWN INSTRUMENT** (its break script,
+re-run on the fixed tree rather than a second pass): dot segments 133 of 133
+refused (8 admitted before), encoded `;` parameters 28 of 28, the root lines'
+encoded dots 7 of 7. What it still admits is 17 addresses of two pre-existing
+kinds: the search line's open query shape (`?` alone, `??`, a second `?`
+inside the query -- a query cannot move the path, and S1 carried the same
+shape since 2026-09-20), and an encoded slash INSIDE one root-line segment
+(`/company/a-company%2Fpeople/`), which a browser keeps encoded; whether
+LinkedIn's server decodes it before routing is UNVERIFIED, and it is filed
+here, not changed.
