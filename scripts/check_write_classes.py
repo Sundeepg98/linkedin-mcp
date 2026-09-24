@@ -46,7 +46,8 @@ THIS FILE EXITS 1 WHEN:
     -- including a ruling the register now reads SUPERSEDED, which still
     resolves by id and no longer says anything that is true;
   * a ``built:`` line names an action that is not in ``writes.PERFORMABLE``,
-    or whose row is still GAP -- or a non-R1 line carries a build disposition;
+    or whose row is still GAP -- or an R2 line carries a disposition (R3 may,
+    since lane L7 took its profile-family rows to a build or a named queue);
   * an R2 line lacks any of its four build-ready columns, its target does not
     open with one of the four kinds, or a non-R2 line carries any of them.
 
@@ -329,7 +330,12 @@ def shape_problems(rows: list[dict[str, str]],
         if not _WC_DISPOSITION_RX.match(r["disposition"]):
             problems.append(f"{tag}: disposition {r['disposition']!r} is not "
                             f"built:<action>, queued:<BLOCKER> or classify-only")
-        elif cls != "R1" and r["disposition"] != "classify-only":
+        # R3 MAY CARRY A DISPOSITION SINCE 2026-09-24 (lane L7), which took
+        # its 36 profile-family rows to a build or a named queue. The checks
+        # that make a disposition TRUE are unchanged and apply to R3 as to R1
+        # (``disposition_problems``: a build must be performable and have left
+        # GAP; a queued row must still be GAP). R2 stays classify-only here.
+        elif cls == "R2" and r["disposition"] != "classify-only":
             problems.append(f"{tag}: {cls} is classify-only in this lane; it "
                             f"carries {r['disposition']!r}")
         elif cls == "R1" and r["disposition"] == "classify-only":

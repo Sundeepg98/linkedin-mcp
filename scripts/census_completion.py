@@ -903,6 +903,24 @@ PINNED = {
     #: was always there and was filed out of scope without one of the census's
     #: four written grounds.
     #:
+    #: RE-DERIVED AT LANE L7'S MERGE, 2026-09-24, from the tree merged with
+    #: master ff98a7f, MEASURED there and not added as deltas
+    #: (`_audit/2026-09-24-lane-l7-profile-writes.md`, Integration 2026-09-24).
+    #: Lane L7 built `P I14` (`linkedin_mark_company_interest`, a WRITE, behind
+    #: the flag and the single-use grant, never fired): GAP -> COVERED-UNFIRED.
+    #: A W row, so it enters bucket 1 held by OPERATOR-NAMES-THE-TARGET with no
+    #: marker, and leaves the write-direction GAP count. So:
+    #:   adjudicated 194 -> 195, delivered_broad 105 -> 106, unfired 30 -> 31
+    #:   gap 510 -> 509, gap_write 324 -> 323, b1_standing 10 -> 11
+    #: The same lane's other 35 rows kept their states, and its six intro-
+    #: editor notes and `P G3`'s named ruling moved no figure.
+    #: AND RE-DERIVED AGAIN AT THE LANE'S MERGE OF MASTER 9b9a4d0, which had
+    #: meanwhile taken the live lane's four proven rows (below): measured on
+    #: that merged tree, `P I14` is the only move against master's pins --
+    #:   adjudicated 197 -> 198, delivered_broad 108 -> 109, unfired 29 -> 30,
+    #:   gap 507 -> 506; gap_write 323 and b1_standing 11 as this branch had
+    #:   them, because the live lane's rows were reads.
+    #:
     #: RE-DERIVED AT LANE S'S MERGE, 2026-09-24, from the tree merged with
     #: master d65759f and not as deltas from the lane's base
     #: (`_audit/2026-09-24-lane-s-people-search.md`, Integration 2026-09-24).
@@ -916,22 +934,23 @@ PINNED = {
     #:   b3_blocked_on_nothing 9 -> 2 (four left bucket 3, three re-gated)
     #:   b1_no_ruling 16 -> 20 (the four enter bucket 1, held by no ruling)
     #:
-    #: RE-DERIVED AT LANE Y2'S INTEGRATION, 2026-09-24, from the tree merged
-    #: with master ff98a7f and then with master d9ec640 (the live lane's
-    #: merge), never as deltas from the lane's base
-    #: (`_audit/2026-09-24-lane-y2-admission.md`, Integration 2026-09-24).
-    #: Lane Y2 admitted 43 capability rows LinkedIn draws that no row carried,
-    #: all at GAP; on the orchestrator's delegated call `J 158` then moved
-    #: GAP -> COVERED-UNFIRED (a shipped tool reaches it, its call at that
-    #: index never fired). Under WHO-WHICH-COUNTS-ARE-NOT-DELIVERY, as
-    #: registered at master 9b9a4d0, ten of the 43 stay GAP on the
-    #: doctrine and `N 195` does not: its third part is an aggregate.
-    #: Against the live lane's figures:
+    #: RE-DERIVED AT LANE Y2'S INTEGRATION, 2026-09-24, on the tree merged
+    #: with master four times as it moved (ff98a7f, the live lane's d9ec640,
+    #: the rulings at 9b9a4d0, lane L7's 603f4d3), never as deltas from the
+    #: lane's base (`_audit/2026-09-24-lane-y2-admission.md`, Integration
+    #: 2026-09-24). Lane Y2 admitted 43 capability rows LinkedIn draws that no
+    #: row carried, all at GAP; on the orchestrator's delegated call `J 158`
+    #: then moved GAP -> COVERED-UNFIRED (a shipped tool reaches it, its call
+    #: at that index never fired). Under WHO-WHICH-COUNTS-ARE-NOT-DELIVERY ten
+    #: of the 43 stay GAP on the doctrine and `N 195` does not: its third part
+    #: is an aggregate. Against lane L7's figures (master 603f4d3):
     #:   stated_rows 704 -> 747, capabilities 762 -> 805,
     #:   capabilities_achievable 648 -> 691, achievable 634 -> 677 (+43)
-    #:   gap 507 -> 549 (+43 admitted, -1 `J 158`); adjudicated 197 -> 198,
-    #:   delivered_broad 108 -> 109, unfired 29 -> 30 (`J 158`)
-    #:   gap_read 91 -> 104 (+13), gap_write 324 -> 338 (+14),
+    #:   gap 506 -> 548 (+43 admitted, -1 `J 158`); adjudicated 198 -> 199,
+    #:   delivered_broad 109 -> 110, unfired 30 -> 31 (`J 158`) -- the three
+    #:   git merged as ONE change, because lane L7's `P I14` moved them by the
+    #:   same one: two rows moved them, the tree holds both
+    #:   gap_read 91 -> 104 (+13), gap_write 323 -> 337 (+14),
     #:   gap_unknown 92 -> 107 (+16 jobs rows, -1 `J 158`)
     #:   b3_admitted 37 -> 42, b3_refused 38 -> 46,
     #:   b3_blocked_on_nothing 2 -> 5 (`P S5`, `M M53`, `N 195`)
@@ -948,7 +967,7 @@ PINNED = {
     "capabilities_achievable": 691,
     "out_of_scope": 70,
     "achievable": 677,
-    "adjudicated": 198,
+    "adjudicated": 199,
     #: THE LIVE LANE'S FOUR ROWS, RE-DERIVED AT EACH OF ITS MERGES OF MASTER
     #: (2026-09-24; last over lane S): four rows fired live and banked
     #: (`_audit/2026-09-23-live-lane-session-1.md`). `P G6` COVERED-UNFIRED ->
@@ -972,16 +991,16 @@ PINNED = {
     #: (GAP -> COVERED-UNFIRED, `_audit/2026-09-23-lane-l1-refused-reads.md`).
     #: One row changing class moves all five; b3 admitted/refused 40/16 are
     #: L1's allowlist admissions, and b1_no_ruling 7 is P G6 entering bucket 1.
-    "delivered_broad": 109,
+    "delivered_broad": 110,
     #: 79 since the live lane's merge (see `adjudicated`): P G6, N 134, P O3
     #: and M C72 COVERED-PROVEN.
     #: 75 and 21 since the bucket-1 merge: `M C41` fired live and moved from
     #: COVERED-UNFIRED to COVERED-PROVEN (`_audit/2026-09-23-bucket1-fires.md`).
     #: One row changing class moves both, and leaves delivered_broad at 96.
     "delivered_strict": 79,
-    "gap": 549,
+    "gap": 548,
     "cannot_deliver": 19,
-    "unfired": 30,
+    "unfired": 31,
     #: The live lane's merge: N 134, P O3 and M C72 left GAP.
     "gap_read": 104,
     #: 151, not the 152 published by `_audit/2026-09-21-the-write-ceiling.md`.
@@ -998,7 +1017,7 @@ PINNED = {
     #: a read row until rulings batch 3 named it a setting -- every one classed
     #: in the same table by its act (16 R1, 35 R2, 274 R3 over 325 lines, the
     #: built `N 47` keeping its line).
-    "gap_write": 338,
+    "gap_write": 337,
     #: All 54 are `jobs.md`, which has no per-row R/W column (56 until the
     #: lane-L3 merge built J 18 and J 39). Not a coincidence
     #: and not a defect in the finder: it is the whole of that slice's still-GAP
@@ -1100,14 +1119,17 @@ PINNED = {
     #:   live lane merge      10 standing / 0 / 0 / 19 none, 6 released, of 29:
     #:   (2026-09-24)         P G6 fired live and was banked COVERED-PROVEN,
     #:                        leaving bucket 1 (-1 none).
-    #:   lane Y2's integration 10 standing / 0 / 0 / 20 none, 6 released, of 30:
-    #:   (after the live       `J 158`, a read no ruling holds, entered
-    #:   lane's merge)        COVERED-UNFIRED (+1 none).
+    #:   lane L7's merge      11 standing / 0 / 0 / 19 none, 6 released, of 30:
+    #:   (2026-09-24)         P I14 was built, a W row, held by the write hold
+    #:                        with no marker (+1 standing).
+    #:   lane Y2's integration 11 standing / 0 / 0 / 20 none, 6 released, of 31:
+    #:   (after lane L7's     `J 158`, a read no ruling holds, entered
+    #:   merge)               COVERED-UNFIRED (+1 none).
     #: `b1_relayed` is the count this file called `b1_named_target` until the
     #: target condition was registered: a name for what a status COUNTS, not
     #: for which ruling happens to have it today. `b1_released` is a SUBSET of
     #: `b1_no_ruling`: the writes held by nothing because a release says so.
-    "b1_standing": 10,
+    "b1_standing": 11,
     "b1_relayed": 0,
     "b1_pending": 0,
     "b1_no_ruling": 20,
@@ -1151,10 +1173,15 @@ PINNED_B1_ROWS: dict[str, tuple[str, ...]] = {
     #: `N 47` entered with the lane-L4 merge, 2026-09-23: a write to an
     #: organisation Page, built offline and never fired, held until the
     #: operator names the Page -- the same hold as its twin `N 48`.
+    #: `P I14` entered with lane L7's merge, 2026-09-24: "I'm interested",
+    #: built offline and never fired; it tells one employer's recruiters, so
+    #: it fires only at a company he names -- and, on the orchestrator's call,
+    #: only once `P I15`'s undo control has been captured.
     "OPERATOR-NAMES-THE-TARGET": (
         "J 103", "J 104", "J 128",
         "M C1", "M C25", "M C32",
         "N 1", "N 46", "N 47", "N 48",
+        "P I14",
     ),
     #: `J 18` and `J 39` entered with the lane-L3 merge, 2026-09-23: reads
     #: built offline, which no ruling holds. The six P A rows are the writes

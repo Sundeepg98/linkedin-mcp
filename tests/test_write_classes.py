@@ -361,3 +361,35 @@ def test_every_defining_passage_resolves_on_its_own(cls):
     source is caught by name even before any row cites it."""
     row = {"key": "X 0", "sources": cwc.WRITE_CLASS_DEFINING[cls]}
     assert cwc.source_problems([row]) == []
+
+
+# ---------------------------------------------------------------------------
+# R3 CARRIES A DISPOSITION SINCE 2026-09-24 (lane L7): a build must still be
+# true, and R2 is still classify-only
+# ---------------------------------------------------------------------------
+
+
+def test_an_r3_line_may_carry_a_named_queue(tmp_path):
+    """The relaxation itself: an R3 GAP row queued on a named token is not a
+    problem. The rule it replaced read 'R3 is classify-only in this lane'."""
+    lines = _lines()
+    i = _find(lines, lambda r: r["class"] == "R3" and r["disposition"] == "classify-only")
+    row = _row(lines[i])
+    row["disposition"] = "queued:ANY-NAMED-CAPTURE"
+    lines[i] = _line(row)
+    problems = _problems(_plant(tmp_path, lines))
+    assert not [p for p in problems if p.startswith(row["key"] + ":")], problems
+
+
+def test_red_on_an_r3_build_that_cannot_perform(tmp_path):
+    """The relaxation does NOT let an R3 line claim a build that is not one:
+    both halves of the build check still convict it."""
+    lines = _lines()
+    i = _find(lines, lambda r: r["class"] == "R3" and r["disposition"] == "classify-only")
+    row = _row(lines[i])
+    row["disposition"] = "built:a_write_nobody_built"
+    lines[i] = _line(row)
+    problems = _problems(_plant(tmp_path, lines),
+                         performable=frozenset({"save_job"}))
+    _red_naming(problems, row["key"], "is not in writes.PERFORMABLE")
+    _red_naming(problems, row["key"], "a build that did not move its row")

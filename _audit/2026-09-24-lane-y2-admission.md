@@ -871,3 +871,36 @@ second merge's values, `b3_blocked_on_nothing` 4 -> 5, and `census_completion --
 matches every figure. Slice M: 127 = R 18 + W 105 + R+W 4. The read triage: 79
 verdicts -- BUILDABLE 12, ADDRESS 17, RULING 15, PRESS 6, SERVED 1, RETURNED 28. The
 write classes: (16, 36, 287) over 339 lines. Row pin and locator copy: 747.
+
+### I.10 And lane L7: the fourth master, and a pin git merged as one change
+
+Master then read `603f4d3`, lane L7's merge (writes to his own profile), local and
+origin alike. Merged the same way against `9b9a4d0`:
+
+    profile.md           row by row: H1 and J1 took lane L7's line with this lane's
+                         evidence re-appended; G4, I12 and N15-N20 kept this lane's
+    write-classes.tsv    the base's P N14 line changed by lane L7 (queued on the
+                         credential condition), this lane's seven P lines after it;
+                         `check_write_classes` GREEN, 339 lines, the split
+                         (16, 36, 287) unchanged
+    INSTRUMENTS.md       lane L7's section 70 before this lane's 71
+    census_completion    re-measured; see below
+    ci_shard_timings     lane L7's two priced files kept, this lane's one added again
+    blocker-map.tsv,     taken from master, regenerated to a fixed point
+      INDEX.md, RULINGS.md
+
+**A PIN GIT MERGED AS ONE CHANGE WHEN TWO ROWS MADE IT.** `adjudicated`,
+`delivered_broad` and `unfired` each read 197 / 108 / 29 at the base. Lane L7's
+`P I14` and this lane's `J 158` each moved all three by one, the same edit on both
+sides, so git merged them without a conflict -- to 198 / 109 / 30. The tree holds both
+rows: 199 / 110 / 31, which `census_completion --check` measured and the pins now say.
+A merge that re-derives pins by measurement catches this; a merge that trusts a clean
+auto-merge would have shipped three figures one short.
+
+**THE FIGURES THIS LANE LEAVES, on this tree.** Rows 747; GAP 548; achievable 677;
+delivered strict 79, broad 110; unfired 31; adjudicated 199; gap_read 104 / gap_write
+337 / gap_unknown 107; bucket 3 admitted 42, refused 46, blocked on nothing 5; bucket 1
+standing 11, none 20. Against lane L7's pins, six moved: achievable 634 -> 677,
+adjudicated 198 -> 199, delivered_broad 109 -> 110, gap 506 -> 548, gap_write
+323 -> 337, unfired 30 -> 31. Slice M 127; the read triage 79 verdicts; the candidate
+table at its fixed point.
