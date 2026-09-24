@@ -131,11 +131,14 @@ class _EditorWorld:
                 "this.closest('dialog').remove()"
             )
         disabled = " disabled" if self.save_disabled else ""
+        # Read outside the f-string: an expression quoting inside an f-string
+        # is a form the package's oldest-Python guard refuses.
+        city = self.store["City"]
         return (
             "<!doctype html><html><body><main><h1>Profile</h1></main>"
             "<dialog open>"
             '<label for="e-city">City</label>'
-            f'<input id="e-city" type="text" value="{self.store["City"]}">'
+            f'<input id="e-city" type="text" value="{city}">'
             '<label for="e-month">Month</label>'
             f'<select id="e-month">{months}</select>'
             f"{notify}{switch}"
