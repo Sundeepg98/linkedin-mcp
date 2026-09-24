@@ -70,11 +70,16 @@ import pytest
 import linkedin_server
 from tests.plantedpage import (
     PLANT,
+    RAISED_PLANT,
     SYNTHETIC_ARGUMENT,
     NavigationAttempted,
+    PlantedLibraryError,
     PlantedPage,
+    RaisingLocator,
+    RaisingPage,
     carries_a_laundered_exception,
     carries_the_plant,
+    carries_the_raised_plant,
 )
 
 REPO = Path(__file__).resolve().parents[1]
@@ -804,6 +809,263 @@ def test_a_reader_that_launders_a_coercion_failure_is_called_a_leak() -> None:
         f"the guard let a caught-and-returned coercion failure through as "
         f"{verdict!r} ({detail}). A name that leaves through a caught exception "
         f"has still left."
+    )
+
+
+# ---------------------------------------------------------------------------
+# THE CHANNEL A FAILING LIBRARY OPENS -- an exception's text in a returned field
+#
+# Added 2026-09-24 (lane G). ``carries_a_laundered_exception`` above catches one
+# shape of this: a COERCION's message, recognised by its wording. It could not
+# see the rest, and lane L4 measured the rest: readers in ``dom.py`` writing
+# ``f"{type(exc).__name__}: {exc}"`` into an ``error`` or ``why`` field, and
+# four write gates printing that field in their refusal reasons. What a
+# Playwright failure quotes -- a selector carrying his needle, a request, a
+# JSON snippet of the page -- carries no signature to recognise.
+#
+# So this does not recognise anything. It drives every reader against
+# ``plantedpage.RaisingPage``, where EVERY read fails quoting
+# ``RAISED_PLANT``, and hunts that marker in what the reader RETURNS. No read
+# can return it, so a return value carrying it carries an exception's text,
+# whatever the syntax -- ``str(exc)``, ``repr(exc)``, ``exc.args``, ``%s``.
+#
+# THE RAISE IS NOT JUDGED HERE. A reader that lets the failure propagate is
+# the ``$.message`` channel, ruled at the raise by
+# ``ERROR-MESSAGE-RULED-AT-THE-RAISE``, and the twelve ``dom.py`` raise sites
+# keep their messages by that ruling. ``raises`` is recorded, never failed.
+# ---------------------------------------------------------------------------
+
+#: A returned value carried what a failing library said. The only failure.
+LAUNDERS = "launders"
+
+#: Every variant let the failure propagate: the ruled channel, not this one.
+RAISES = "raises"
+
+#: READERS STILL LAUNDERING, DECLARED RATHER THAN WAIVED, and every entry is
+#: in a module lane G does not own. Asserted EXACTLY in both directions, so a
+#: new launderer fails naming itself and a repaired one fails until its entry
+#: goes -- the mechanism ``KNOWN_DERIVED_NAVIGATIONS`` uses. Each is one
+#: ``except Exception as exc`` writing ``f"{type(exc).__name__}: {exc}"`` into
+#: a returned ``error`` field; the repair is the one ``dom.py`` took on
+#: 2026-09-24, the exception's TYPE and nothing else.
+#:
+#: MEASURED 2026-09-24 on the lane-G branch: 24 readers laundered before the
+#: ``dom.py`` repair -- ten in ``dom.py``, eight in ``writes.py`` and one in
+#: ``server.py`` that only CARRY a ``dom.py`` field onward (the four write
+#: gates among them), plus these five. After it, these five and no others.
+KNOWN_LAUNDERERS: dict[str, str] = {
+    "events:read_events_home": "events.read_events_home, its returned `error`",
+    "job_collections:read_job_collection": (
+        "job_collections.read_job_collection, its returned `error`"
+    ),
+    "newsletters:read_newsletter_subscriptions": (
+        "newsletters.read_newsletter_subscriptions, its returned `error`"
+    ),
+    "notify_cost:read_notifications_badge": (
+        "notify_cost.read_notifications_badge, its returned `error`, two handlers"
+    ),
+    "premium:read_premium_surface": "premium.read_premium_surface, its returned `error`",
+}
+
+#: THE FAILING PAGE MUST REACH HANDLERS, or every verdict above is vacuous: a
+#: reader that raises before its handler is ``raises``, not ``clean``. The
+#: number of readers that RETURNED under it, measured 2026-09-24 after the
+#: repair -- 78 of 126 (clean 73, launders 5; raises 47, not driven 1); a
+#: floor, so it may rise freely and may fall only with a reason.
+FAILING_PAGE_RETURNED_FLOOR = 78
+
+
+def _with_the_failing_page(values: list[Any]) -> list[Any]:
+    return [RaisingPage() if type(v) is PlantedPage else v for v in values]
+
+
+def _drive_failing_once(
+    fn: Callable[..., Any], args: list[Any], kwargs: dict[str, Any]
+) -> tuple[str, str]:
+    async def _run() -> Any:
+        # OBSERVATIONS ARE RESOLVED ON THE ORDINARY PAGE FIRST, and then the
+        # reader's own page is swapped. An Observation is a PRIOR reading; built
+        # on the failing page it would raise before the reader ran a line.
+        call_args, call_kwargs = await resolve_paired_observations(args, kwargs)
+        call_args = _with_the_failing_page(call_args)
+        call_kwargs = dict(
+            zip(call_kwargs, _with_the_failing_page(list(call_kwargs.values())))
+        )
+        return await asyncio.wait_for(
+            fn(*call_args, **call_kwargs), timeout=DRIVE_TIMEOUT_S
+        )
+
+    try:
+        result = asyncio.run(_run())
+    except NavigationAttempted as exc:
+        return f"not_driven:navigates ({exc})", str(exc)
+    except asyncio.TimeoutError:
+        return f"not_driven:timed out after {DRIVE_TIMEOUT_S}s", ""
+    except BaseException as exc:  # noqa: BLE001 -- the ruled channel, recorded
+        return RAISES, type(exc).__name__
+    hits = carries_the_raised_plant(result)
+    if hits:
+        return LAUNDERS, f"a failing library's message was returned at {hits[0]}"
+    return CLEAN, ""
+
+
+def drive_failing(fn: Callable[..., Any]) -> tuple[str, str]:
+    """One reader against the failing page. ``(verdict, detail)``.
+
+    The WORST variant decides, as in :func:`drive`: one variant returning the
+    marker is the reader returning it. ``clean`` outranks ``raises`` because a
+    variant that returned was measured, and one that raised was not.
+    """
+    variants, refusal = _build_call(fn)
+    if variants is None:
+        return f"not_driven:{refusal}", refusal
+    order = {LAUNDERS: 3, CLEAN: 2, RAISES: 1}
+    verdicts = [_drive_failing_once(fn, a, k) for a, k in variants]
+    return max(verdicts, key=lambda v: order.get(v[0], 0))
+
+
+_FAILING_VERDICTS: dict[str, tuple[str, str]] = {}
+
+
+def failing_verdicts() -> dict[str, tuple[str, str]]:
+    """Every discovered reader's verdict on the failing page, measured once."""
+    if not _FAILING_VERDICTS:
+        for name, fn in discover_readers():
+            _FAILING_VERDICTS[name] = drive_failing(fn)
+    return _FAILING_VERDICTS
+
+
+@pytest.mark.parametrize("name", [n for n, _ in discover_readers()])
+def test_no_reader_returns_what_a_failing_library_said(name: str) -> None:
+    verdict, detail = failing_verdicts()[name]
+    if name in KNOWN_LAUNDERERS:
+        assert verdict == LAUNDERS, (
+            f"{name} is declared in KNOWN_LAUNDERERS and no longer launders "
+            f"({verdict}). If it was repaired, delete its entry -- the record "
+            "of a defect may not outlive the defect."
+        )
+        return
+    assert verdict != LAUNDERS, (
+        f"{name} returned what a failing library said: {detail}. The field is "
+        "decided where the value enters it (ERROR-MESSAGE-RULED-AT-THE-RAISE): "
+        "write the exception's TYPE, or a reason this package composed, never "
+        "str(exc). A write gate that prints the field prints whatever it holds."
+    )
+
+
+def test_the_failing_page_reached_the_handlers() -> None:
+    returned = sorted(
+        n for n, (v, _) in failing_verdicts().items() if v in {CLEAN, LAUNDERS}
+    )
+    assert len(returned) >= FAILING_PAGE_RETURNED_FLOOR, (
+        f"only {len(returned)} readers returned under the failing page, below "
+        f"the floor of {FAILING_PAGE_RETURNED_FLOOR}. A reader that raises "
+        "before its handler is not measured by this rule, so a falling count "
+        "is coverage leaving silently."
+    )
+
+
+def test_the_failing_page_fails_every_read_and_refuses_every_action() -> None:
+    """THE DOUBLE, CONTROLLED. A read that quietly answers would let a reader
+    reach a return without its handler ever running, and read as clean."""
+    from tests import plantedpage
+
+    async def _probe() -> None:
+        for cls, instance in (
+            (PlantedPage, RaisingPage()),
+            (plantedpage.PlantedLocator, RaisingLocator()),
+        ):
+            reads = plantedpage._async_reads(cls)
+            assert len(reads) >= 8, (cls.__name__, reads)
+            for name in reads:
+                with pytest.raises(PlantedLibraryError) as caught:
+                    await getattr(instance, name)("x")
+                assert RAISED_PLANT in str(caught.value), name
+        with pytest.raises(NavigationAttempted):
+            await RaisingPage().goto("x")
+        with pytest.raises(NavigationAttempted):
+            await RaisingLocator().click()
+        assert await RaisingPage().wait_for_timeout(1) is None
+
+    asyncio.run(_probe())
+    assert RAISED_PLANT not in PLANT and PLANT not in RAISED_PLANT
+    assert RAISED_PLANT not in SYNTHETIC_ARGUMENT
+    assert SYNTHETIC_ARGUMENT not in RAISED_PLANT
+
+
+@pytest.mark.parametrize(
+    "render",
+    [
+        lambda exc: f"{type(exc).__name__}: {exc}",
+        lambda exc: str(exc),
+        lambda exc: repr(exc),
+        lambda exc: exc.args[0],
+        lambda exc: "failed (%s)" % (exc,),
+    ],
+    ids=["dom-shape", "str", "repr", "args", "percent"],
+)
+def test_a_reader_returning_a_libraries_message_is_convicted(render: Any) -> None:
+    """SHOWN FAILING, and on the form rather than the spelling: all five."""
+
+    async def laundering_reader(page: Any) -> dict[str, Any]:
+        out: dict[str, Any] = {"count": 0, "error": None}
+        try:
+            out["count"] = await page.locator("x").count()
+        except Exception as exc:  # noqa: BLE001 - the defect, on purpose
+            out["error"] = render(exc)
+        return out
+
+    verdict, detail = drive_failing(laundering_reader)
+    assert verdict == LAUNDERS, (verdict, detail)
+
+
+def test_the_type_and_the_raise_are_not_convicted() -> None:
+    """The other direction: the repair must stay writable, and the ruled
+    channel must stay out of this rule's reach."""
+
+    async def type_only(page: Any) -> dict[str, Any]:
+        out: dict[str, Any] = {"count": 0, "error": None}
+        try:
+            out["count"] = await page.locator("x").count()
+        except Exception as exc:  # noqa: BLE001
+            out["error"] = type(exc).__name__
+        return out
+
+    async def raises_with_it(page: Any) -> dict[str, Any]:
+        try:
+            await page.evaluate("x")
+        except Exception as exc:
+            raise RuntimeError(f"could not read the page: {exc}") from exc
+        return {}
+
+    assert drive_failing(type_only)[0] == CLEAN
+    assert drive_failing(raises_with_it)[0] == RAISES
+
+
+def test_the_radio_binding_reader_is_driven_through_its_library_path() -> None:
+    """ONE READER THE FAMILY CANNOT DISCRIMINATE, driven the way it ships.
+
+    ``dom.read_radio_label_binding`` rendered the exception into its ``why``
+    at two sites. In the family above it is ``clean`` for the wrong reason:
+    the harness hands ``role`` the synthetic argument, ``named_role_selector``
+    refuses that before any read, and the handler returns a message this
+    package composed -- the library path never runs, before a repair or after.
+    Its one shipped caller, ``writes._live_control``, passes ``"radio"`` and
+    nothing else, so that is what this passes.
+    """
+    from linkedin_server import dom
+
+    async def as_shipped(page: Any, name: str) -> dict[str, Any]:
+        return await dom.read_radio_label_binding(page, "radio", name)
+
+    verdict, detail = drive_failing(as_shipped)
+    assert verdict == CLEAN, (verdict, detail)
+    reading = asyncio.run(
+        dom.read_radio_label_binding(RaisingPage(), "radio", SYNTHETIC_ARGUMENT)
+    )
+    assert "PlantedLibraryError" in reading["why"], (
+        "the handler was not reached through a failing read, so the verdict "
+        f"above measured nothing: {reading['why']!r}"
     )
 
 

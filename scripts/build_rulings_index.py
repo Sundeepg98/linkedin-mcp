@@ -941,6 +941,123 @@ REGISTER: tuple = (
                "RECOVERY AND SESSION",
         note="The cannot-be-undone arm of OUTWARD-ACTS-NEED-THE-OPERATOR.",
     ),
+    Ruling(
+        id="D2-SEARCH-VERTICALS-WIDENED",
+        claim="The search admission widens from people to four CLOSED "
+              "segments, /search/results/(people|companies|groups|events)/, "
+              "under D1-SEARCH-AS-READS's three conditions; serves N 104, "
+              "N 161, M C70 and N 179.",
+        binds="read boundary -- search result verticals",
+        document="_audit/2026-09-24-rulings-search-verticals-rosters-passive-"
+                 "costs.md",
+        anchor="RULED: (orchestrator, 2026-09-24, delegated) D2 IS ANSWERED YES",
+        aliases=("D2",),
+        note="Orchestrator's call under OUTWARD-ACTS-NEED-THE-OPERATOR; "
+             "overridable. Question: _audit/2026-09-21-the-read-triage.md D2.",
+    ),
+    Ruling(
+        id="D3-UNREGISTERED-REFUSAL-IS-NOT-A-RULING",
+        claim="A refusal written only into an allowlist comment is not a "
+              "ruling: it makes no row EXCLUDED-RULED or CANNOT-DELIVER, and "
+              "a row resting on one is GAP, blocked on the decision the "
+              "refusal asks for, until that decision is registered.",
+        binds="census convention -- refusals recorded only beside an "
+              "allowlist entry",
+        document="_audit/2026-09-24-rulings-search-verticals-rosters-passive-"
+                 "costs.md",
+        anchor="RULED: (orchestrator, 2026-09-24, delegated) D3 IS ANSWERED NO",
+        aliases=("D3",),
+        note="Orchestrator's call under OUTWARD-ACTS-NEED-THE-OPERATOR; "
+             "overridable. Question: _audit/2026-09-21-the-read-triage.md D3. "
+             "Governs N 99, N 177 and N 178.",
+    ),
+    Ruling(
+        id="MEMBER-ROSTERS-AS-BOUNDED-READS",
+        claim="A roster the operator can open himself (a group's members, an "
+              "event's attendees, a company's or school's People tab) is "
+              "admitted as a bounded read: one page per call, the id from "
+              "tool arguments only, no automatic pagination, no member name "
+              "or id in a tracked file, inside the live budget.",
+        binds="read boundary -- member rosters",
+        document="_audit/2026-09-24-rulings-search-verticals-rosters-passive-"
+                 "costs.md",
+        anchor="RULED: (orchestrator, 2026-09-24, delegated) MEMBER ROSTERS "
+               "ARE ADMITTED AS",
+        note="Orchestrator's call under OUTWARD-ACTS-NEED-THE-OPERATOR; "
+             "overridable. Decides the roster question the 2026-09-05 "
+             "refusal recorded in readonly.py and census cells but never "
+             "registered (D3). Rows it held: N 165, N 188, N 189, J 108, "
+             "N 102, N 99, N 177.",
+    ),
+    Ruling(
+        id="D5-PASSIVE-COST-IS-NOT-A-ROW",
+        claim="A consequence of an act with no control of its own is recorded "
+              "on the act's row, and its own row is EXCLUDED-RULED as "
+              "NOT-AN-ACT (N 171). A preference he sets is an act, a setting, "
+              "and stays a GAP write row (N 183).",
+        binds="census convention -- passive costs",
+        document="_audit/2026-09-24-rulings-search-verticals-rosters-passive-"
+                 "costs.md",
+        anchor="RULED: (orchestrator, 2026-09-24, delegated) D5 IS ANSWERED",
+        aliases=("D5",),
+        note="Orchestrator's call under OUTWARD-ACTS-NEED-THE-OPERATOR; "
+             "overridable. Question: _audit/2026-09-21-the-read-triage.md D5.",
+    ),
+    Ruling(
+        id="SELF-PROFILE-EDIT-NOTIFY-CONDITION-AMENDED",
+        claim="Amends condition 1 of SELF-PROFILE-EDITS-NOT-OUTWARD: where the "
+              "edit dialog draws no notify control, his account-level 'Share "
+              "profile updates with your network' setting read OFF before the "
+              "edit satisfies it; an unnamed switch blocks until a capture "
+              "names it; neither established -> NEEDS-OPERATOR.",
+        binds="live proofs -- edits to the operator's own profile fields",
+        document="_audit/2026-09-24-rulings-notify-veto-and-who-which.md",
+        anchor="RULED: (orchestrator, 2026-09-24, delegated) CONDITION 1 OF",
+        status="AMENDS SELF-PROFILE-EDITS-NOT-OUTWARD",
+        note="Orchestrator's call under OUTWARD-ACTS-NEED-THE-OPERATOR; "
+             "overridable. Measured cause: the intro editor draws no named "
+             "notify control (live lane session 1, lane L7).",
+    ),
+    Ruling(
+        id="PAGE-MAY-VETO-NEVER-SUPPLY",
+        claim="Every navigation address is composed from tool arguments; page "
+              "content may only REFUSE a navigation (e.g. a caller-supplied id "
+              "that is not his own), never provide the address.",
+        binds="navigation -- addresses and page content",
+        document="_audit/2026-09-24-rulings-notify-veto-and-who-which.md",
+        anchor="RULED: (orchestrator, 2026-09-24, delegated) A PAGE MAY VETO A "
+               "NAVIGATION,",
+        note="Orchestrator's call under OUTWARD-ACTS-NEED-THE-OPERATOR; "
+             "overridable. Reconciles the navigation guard with ownership "
+             "checks; first applied to linkedin_surface_census feed_item.",
+    ),
+    Ruling(
+        id="THIRD-PARTY-PROFILE-FOR-A-NAMED-TARGET",
+        claim="A third party's profile (/in/<slug>/) may be loaded only inside "
+              "an outward act whose target the operator names in that call: "
+              "slug from tool arguments only, never for a measurement, the "
+              "shaper name-free. Search-admission condition 5 stands.",
+        binds="read boundary -- third-party profiles inside outward acts",
+        document="_audit/2026-09-24-rulings-notify-veto-and-who-which.md",
+        anchor="RULED: (orchestrator, 2026-09-24, applying (b)) A THIRD PARTY'S "
+               "PROFILE",
+        note="The orchestrator applying WRITE-CLASS-B and "
+             "OPERATOR-NAMES-THE-TARGET; overridable. Unblocks N 1, N 4, N 5, "
+             "M M1 and M M6 as builds.",
+    ),
+    Ruling(
+        id="WHO-WHICH-COUNTS-ARE-NOT-DELIVERY",
+        claim="A row whose payload is WHO (people) or WHICH (items of other "
+              "people's content) is not delivered by a count-only reader under "
+              "the shaper doctrine: GAP, pending the operator's names-and-titles "
+              "question. Filters and aggregates are delivered by counts.",
+        binds="census convention -- count-only readers",
+        document="_audit/2026-09-24-rulings-notify-veto-and-who-which.md",
+        anchor="RULED: (orchestrator, 2026-09-24, delegated) A ROW WHOSE PAYLOAD "
+               "IS WHO (a",
+        note="Orchestrator's call under OUTWARD-ACTS-NEED-THE-OPERATOR; "
+             "overridable. Precedent: N 162 and N 180.",
+    ),
 )
 
 

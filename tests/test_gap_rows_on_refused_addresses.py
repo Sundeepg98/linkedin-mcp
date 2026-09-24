@@ -68,7 +68,23 @@ SCRIPT = ROOT / "scripts" / "check_gap_rows_on_refused_addresses.py"
 #: CAPABILITY; never because a general mechanism happens to block its address.
 #: That is `EXCLUDED-RULED-ADMISSION` and `INCIDENTAL-CAPTURE-IS-NOT-A-RULING`,
 #: both registered in `_audit/RULINGS.md`.
-EXPECTED_GAP_ROWS = 4
+#:
+#: **4 -> 55 on 2026-09-23 (lane R, `_audit/2026-09-23-exclusion-returns.md`),
+#: AND THE FIFTY-ONE ARE NAMED AS A CLASS RATHER THAN RE-PINNED IN SILENCE.**
+#: Lane R returned 245 exclusions to GAP; 51 of them backtick an address the
+#: read gate refuses on a forbidden substring -- the 22 profile editors on
+#: ``/edit/``, the ``/public-profile/settings`` six on ``settings``,
+#: ``/jobs/application`` and ``/follow`` and ``/invite`` rows, the settings
+#: pages on ``/psettings/`` and ``/mypreferences/d/categories/``. **THEY ARE
+#: GAP ON PURPOSE, AND UNDER THE REGISTERED RULE, NOT AGAINST IT.** This
+#: reporter's docstring reads a forbidden-substring entry as the census's bar
+#: for EXCLUDED-RULED; ``INCIDENTAL-CAPTURE-IS-NOT-A-RULING`` (registered
+#: 2026-09-19) rules that a filter written for a CLASS of addresses that
+#: catches a capability incidentally is a BLOCKER, and each of these cells
+#: names its entry as that blocker. The four above are still here and still
+#: named by the script's own output. The count moves again only when a row
+#: leaves GAP or a boundary entry changes, and either is visible here.
+EXPECTED_GAP_ROWS = 55
 
 
 def _run(*args: str) -> subprocess.CompletedProcess:

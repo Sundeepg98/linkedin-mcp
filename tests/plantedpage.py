@@ -433,6 +433,121 @@ class _PlantedKeyboard:
         raise NavigationAttempted("keyboard.type")
 
 
+# ---------------------------------------------------------------------------
+# THE FAILING PAGE -- what a library SAID while failing, as the only channel.
+#
+# Added 2026-09-24 (lane G). The page above answers in strings so a reader's
+# COERCIONS can be measured. This one answers nothing: every read FAILS, and
+# the failure's message carries :data:`RAISED_PLANT`. That models the leak
+# class the error envelope's ruling names -- a failed request renders the
+# request, ``int()`` quotes what it refused, a selector error quotes the
+# selector, V8's JSON.parse quotes the input it choked on -- none of which the
+# package composed.
+#
+# BECAUSE EVERY READ FAILS, NO READ CAN RETURN THE MARKER. So a reader whose
+# RETURN VALUE carries it put an exception's text into its output, and nothing
+# else could have. That is the whole design: one channel open, one marker.
+#
+# A RAISED exception carrying the marker is NOT this double's subject. That is
+# the ``$.message`` channel, ruled at the raise by
+# ``ERROR-MESSAGE-RULED-AT-THE-RAISE`` -- a library's own text is publishable
+# there and the twelve ``dom.py`` raise sites were deliberately left carrying
+# it. What the ruling forbids is the value arriving where it was not decided:
+# a returned field, printed onward by a write gate's refusal.
+# ---------------------------------------------------------------------------
+
+#: What every failing read says. Distinct from :data:`PLANT` on purpose: an
+#: ``Observation`` built on the ordinary page may carry PLANT legitimately, and
+#: this hunt must not confuse the two. Not name-shaped, like
+#: :data:`SYNTHETIC_ARGUMENT`.
+RAISED_PLANT = "example-library-quoted-this"
+
+
+class PlantedLibraryError(Exception):
+    """A library call that failed and quoted text nobody here composed."""
+
+
+#: The ACTIONS stay loud refusals; the one TIMER stays a no-op, because a
+#: sleep does not fail. Everything else async on the ordinary doubles FAILS on
+#: the failing ones -- derived from those classes below, not listed, so a read
+#: added to :class:`PlantedPage` tomorrow is a failing read here the same day.
+_NOT_A_READ = frozenset({
+    "click", "fill", "set_input_files", "select_option", "goto", "close",
+    "wait_for_timeout",
+})
+
+
+def _async_reads(cls: type) -> list[str]:
+    import inspect
+
+    return sorted(
+        name
+        for name, member in vars(cls).items()
+        if inspect.iscoroutinefunction(member) and name not in _NOT_A_READ
+    )
+
+
+def _failing(qualified: str) -> Any:
+    async def fail(self: Any, *args: Any, **kwargs: Any) -> Any:
+        raise PlantedLibraryError(f"{qualified}: {RAISED_PLANT}")
+
+    fail.__name__ = qualified.rsplit(".", 1)[-1]
+    return fail
+
+
+class RaisingLocator(PlantedLocator):
+    """:class:`PlantedLocator` whose every read fails with the marker."""
+
+    def locator(self, *args: Any, **kwargs: Any) -> "RaisingLocator":
+        return RaisingLocator(self._depth + 1)
+
+    def get_by_role(self, *args: Any, **kwargs: Any) -> "RaisingLocator":
+        return RaisingLocator(self._depth + 1)
+
+    def get_by_text(self, *args: Any, **kwargs: Any) -> "RaisingLocator":
+        return RaisingLocator(self._depth + 1)
+
+    def nth(self, index: int) -> "RaisingLocator":
+        return RaisingLocator(self._depth + 1)
+
+    @property
+    def first(self) -> "RaisingLocator":
+        return RaisingLocator(self._depth + 1)
+
+    @property
+    def last(self) -> "RaisingLocator":
+        return RaisingLocator(self._depth + 1)
+
+
+class RaisingPage(PlantedPage):
+    """:class:`PlantedPage` whose every read fails with the marker."""
+
+    def locator(self, *args: Any, **kwargs: Any) -> RaisingLocator:
+        return RaisingLocator()
+
+    def get_by_role(self, *args: Any, **kwargs: Any) -> RaisingLocator:
+        return RaisingLocator()
+
+    def get_by_text(self, *args: Any, **kwargs: Any) -> RaisingLocator:
+        return RaisingLocator()
+
+    def frame_locator(self, *args: Any, **kwargs: Any) -> RaisingLocator:
+        return RaisingLocator()
+
+
+for _name in _async_reads(PlantedLocator):
+    setattr(RaisingLocator, _name, _failing(f"locator.{_name}"))
+for _name in _async_reads(PlantedPage):
+    setattr(RaisingPage, _name, _failing(f"page.{_name}"))
+
+
+def carries_the_raised_plant(obj: Any) -> list[str]:
+    """Every place in ``obj`` holding what a failing library said."""
+    from tests.leakwalk import walk
+
+    return [path for path, text in walk(obj) if RAISED_PLANT in text]
+
+
 #: Phrases only a FAILED COERCION produces. No contract field in this package
 #: says any of these, so a returned string carrying one is an exception message
 #: that was caught and put into the output.

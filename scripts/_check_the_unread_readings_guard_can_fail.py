@@ -190,21 +190,42 @@ def main() -> int:
             sync(T.test_a_page_value_in_the_raise_does_not_reach_hrefs_error),
         )
     )
+    # THE POSITIVE CONTROL'S SUBJECT CHANGED ON 2026-09-24, and so did these
+    # two mutations. It used to be dom.py's own `error` field, which carried
+    # the plant; lane G repaired that field (and ten like it) to the TYPE, so
+    # the old mutation -- blind the control by making the field type-only --
+    # became the shipped code and planted nothing. The control now drives the
+    # retired handler verbatim, and the repaired field has its own record.
+    results.append(
+        _convict(
+            "the repaired field regains the retired formula",
+            "the record of the repair cannot tell it from the defect",
+            plant_about(
+                'out["error"] = type(exc).__name__',
+                'out["error"] = f"{type(exc).__name__}: {exc}"',
+                # FOURTEEN: the eleven lane G repaired and three that were
+                # already type-only. Exact, so the source moving is loud.
+                14,
+            ),
+            sync(T.test_the_sibling_error_field_is_the_type_alone),
+        )
+    )
+
+    def blind_the_instrument():
+        original = T.carries_the_plant
+        T.carries_the_plant = lambda obj: []
+
+        def _undo():
+            T.carries_the_plant = original
+
+        return _undo
+
     results.append(
         _convict(
             "the positive control is blinded",
             "the control cannot notice its own instrument going blind",
-            plant_about(
-                'out["error"] = f"{type(exc).__name__}: {exc}"',
-                'out["error"] = type(exc).__name__',
-                # ELEVEN, NOT THREE. This is a package-wide idiom in dom.py,
-                # not a habit of one function, and the count was WRONG in this
-                # control's first draft -- the exact-count assertion refused to
-                # plant and said so, which is the assertion earning its keep
-                # before the guard it checks ever ran.
-                11,
-            ),
-            sync(T.test_the_sibling_error_field_does_carry_the_page_value),
+            blind_the_instrument,
+            sync(T.test_the_instrument_sees_a_page_value_in_an_error_field),
         )
     )
     print()

@@ -40,6 +40,7 @@ about. Run by loading that revision's module and calling it:
 from __future__ import annotations
 
 import pathlib
+import subprocess
 import sys
 
 import pytest
@@ -358,3 +359,169 @@ def test_a_word_the_vocabulary_must_not_claim():
             "stemmed to `prov` -- `Providing services` is a capability in this "
             "census, not a reason."
         )
+
+
+# ---------------------------------------------------------------------------
+# THE MERGE-STAGE DUPLICATION DEFECT.
+#
+# `corpus()` built its listing from `git ls-files _audit` without removing
+# repeats. `git ls-files` prints an UNMERGED path once per merge stage (1 =
+# common ancestor, 2 = ours, 3 = theirs) -- while a merge has unresolved
+# conflicts, a conflicted document is therefore read three times and every
+# score it earns is tripled. Measured live by the census cleanup lane: a
+# conflicted document scored 33, 30, 24 for three blockers while six paths
+# were unmerged, against 11, 10, 8 for the SAME document once those paths
+# were staged (`_audit/2026-09-23-census-cleanup.md` section 13.5). The
+# sibling `scripts/build_audit_index.py`'s `tracked_documents` already
+# collapses the same listing with a set, for the identical reason.
+# ---------------------------------------------------------------------------
+
+def test_a_conflicted_listing_is_read_once(tmp_path):
+    """A REAL multi-stage listing, manufactured, never found.
+
+    Builds an actual conflicted merge in `tmp_path` rather than trusting the
+    "once per stage" description, because a premise nobody re-measures is a
+    premise that can quietly stop holding on a future git version. Never
+    touches the real repository and never reads the global/user git identity
+    -- every commit carries its own throwaway `-c user.name`/`user.email`.
+    """
+    audit = tmp_path / "_audit"
+    audit.mkdir()
+    doc = audit / "a.md"
+    identity = ["-c", "user.name=control", "-c", "user.email=control@example.invalid"]
+
+    def run(args, check=True):
+        result = subprocess.run(
+            ["git"] + args, cwd=str(tmp_path), capture_output=True, text=True,
+        )
+        if check:
+            assert result.returncode == 0, (
+                f"git {args!r} failed in {tmp_path}: rc={result.returncode} "
+                f"stdout={result.stdout!r} stderr={result.stderr!r}"
+            )
+        return result
+
+    run(["init", "-q"])
+    run(["checkout", "-q", "-b", "main"])
+
+    doc.write_text("original line\n", encoding="ascii")
+    run(["add", "_audit/a.md"])
+    run(identity + ["commit", "-q", "-m", "base"])
+
+    run(["checkout", "-q", "-b", "side"])
+    doc.write_text("side change\n", encoding="ascii")
+    run(["add", "_audit/a.md"])
+    run(identity + ["commit", "-q", "-m", "side"])
+
+    run(["checkout", "-q", "main"])
+    doc.write_text("main change\n", encoding="ascii")
+    run(["add", "_audit/a.md"])
+    run(identity + ["commit", "-q", "-m", "main"])
+
+    merge = run(identity + ["merge", "-m", "merge", "side"], check=False)
+    assert merge.returncode != 0, (
+        "the manufactured merge did not conflict (rc="
+        f"{merge.returncode}); this test's premise -- a real multi-stage "
+        f"listing -- was never created. stdout={merge.stdout!r} "
+        f"stderr={merge.stderr!r}"
+    )
+
+    raw = run(["ls-files", "_audit"])
+    raw_lines = [line for line in raw.stdout.splitlines() if line]
+    raw_count = raw_lines.count("_audit/a.md")
+    assert raw_count > 1, (
+        "STOP AND REPORT: plain `git ls-files _audit` lists _audit/a.md "
+        f"{raw_count} time(s) during this manufactured conflict, not more "
+        "than once. The premise this test measures -- that git lists an "
+        "unmerged path once per stage -- does not hold on this git version "
+        f"or repo shape. Raw listing: {raw_lines!r}"
+    )
+
+    result = fbr.tracked_audit_paths(tmp_path)
+    assert result.count("_audit/a.md") == 1, (
+        "tracked_audit_paths(tmp_path) lists _audit/a.md "
+        f"{result.count('_audit/a.md')} time(s) during an unresolved merge "
+        f"conflict ({raw_count} stages in the raw listing); expected exactly "
+        f"1. Got: {result!r}"
+    )
+
+
+def test_a_tripled_listing_scores_once(monkeypatch):
+    """THE SYMPTOM: a document appearing 3x in the listing must not score 3x.
+
+    Plants the defect directly rather than depending on a live conflict:
+    takes the real listing and appends two more copies of a document known to
+    score for a real blocker, so the RAW `git ls-files` output this module's
+    own `subprocess.run` call would see carries it three times -- the exact
+    shape an unresolved merge produces. Measured on a real merge,
+    `_audit/2026-09-23-census-cleanup.md` section 13.5: 33/30/24 tripled
+    against 11/10/8 once staged.
+
+    Patches `subprocess.run`, NOT `tracked_audit_paths` itself -- replacing
+    the whole function would skip over its own dedup logic and the test would
+    no longer be exercising the fix. Only the exact `git ls-files _audit` call
+    is intercepted; anything else (e.g. a subprocess call made while building
+    the blocker map) reaches the real `subprocess.run` unchanged.
+
+    Clears the module's `corpus`/`_ranking` lru caches before AND after, so a
+    tripled corpus can never leak into another test in this module.
+    """
+    real_paths = fbr.tracked_audit_paths(fbr.ROOT)
+    assert real_paths.count(KNOWN_MISS_DOC) == 1, (
+        f"the real listing already carries {KNOWN_MISS_DOC} "
+        f"{real_paths.count(KNOWN_MISS_DOC)} time(s); this test's premise -- "
+        "one real occurrence, tripled by the plant -- does not hold. Got: "
+        f"{real_paths!r}"
+    )
+
+    fbr.corpus.cache_clear()
+    fbr._ranking.cache_clear()
+    try:
+        baseline_by_doc = {d: s for s, d in fbr.candidates(KNOWN_MISS_BLOCKER)}
+        baseline = baseline_by_doc.get(KNOWN_MISS_DOC)
+        assert baseline is not None and baseline > 0, (
+            f"{KNOWN_MISS_DOC} does not score for {KNOWN_MISS_BLOCKER} under "
+            f"the real listing (got {baseline!r}); the tripling this test "
+            "checks for would be invisible against a zero baseline."
+        )
+
+        tripled_cmd = ["git", "-C", str(fbr.ROOT), "ls-files", "_audit"]
+        tripled_stdout = (
+            "\n".join(real_paths + [KNOWN_MISS_DOC, KNOWN_MISS_DOC]) + "\n"
+        ).encode("utf-8")
+        real_run = subprocess.run
+
+        class _FakeCompletedProcess:
+            def __init__(self, stdout):
+                self.stdout = stdout
+                self.returncode = 0
+
+        def _fake_run(cmd, *args, **kwargs):
+            if cmd == tripled_cmd:
+                return _FakeCompletedProcess(tripled_stdout)
+            return real_run(cmd, *args, **kwargs)
+
+        monkeypatch.setattr(fbr.subprocess, "run", _fake_run)
+        fbr.corpus.cache_clear()
+        fbr._ranking.cache_clear()
+
+        tripled_by_doc = {d: s for s, d in fbr.candidates(KNOWN_MISS_BLOCKER)}
+        tripled_score = tripled_by_doc.get(KNOWN_MISS_DOC)
+        assert tripled_score == baseline, (
+            f"{KNOWN_MISS_DOC}'s score for {KNOWN_MISS_BLOCKER} is "
+            f"{tripled_score} under a corpus that lists it 3 times, against "
+            f"{baseline} under the real listing -- an unmerged path listed "
+            "once per stage triples every score it earns, exactly the "
+            "33/30/24-vs-11/10/8 measured in "
+            "_audit/2026-09-23-census-cleanup.md section 13.5."
+        )
+
+        corpus_paths = [rel for rel, _text in fbr.corpus()]
+        assert corpus_paths.count(KNOWN_MISS_DOC) == 1, (
+            f"corpus() itself still holds {corpus_paths.count(KNOWN_MISS_DOC)} "
+            f"copies of {KNOWN_MISS_DOC} under the tripled listing; expected "
+            "exactly 1."
+        )
+    finally:
+        fbr.corpus.cache_clear()
+        fbr._ranking.cache_clear()

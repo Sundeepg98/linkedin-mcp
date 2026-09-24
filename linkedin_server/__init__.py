@@ -48,13 +48,23 @@ mutation count from ``SANCTIONED_MUTATIONS``, and went red on its own three
 hours after the table moved. It is left standing above rather than edited,
 because the correction is the record.
 
-WHAT IS TRUE, measured rather than remembered: thirteen write tools ship, seven
+**AND A FOURTH TIME, 2026-09-23, WHERE THE GUARD WAS RIGHT AND NOBODY RAN
+IT.** ``readonly.SANCTIONED_MUTATIONS`` went from seven to nine in c523769
+(a decided reveal and a view switch, two presses on recorded calls) and this
+sentence still said seven. The test above went red on that commit, on
+schedule -- and stayed red for six commits, because the gate run on each was
+chosen by hand and did not include it. The instrument worked; the selection
+of instruments did not. The count is twelve now: the same lane added three
+for the copy link of the operator's own post.
+
+WHAT IS TRUE, measured rather than remembered: thirteen write tools ship, twelve
 sanctioned mutating calls exist, writes are off unless a per-process flag is
 set, and every write needs a single-use token from its own preview -- a token
 that works once, and a redeemed grant that ``perform`` will not act on twice.
 (This read "twelve write tools" until 2026-09-23, when
-``linkedin_follow_company_page`` shipped; the mutating-call count did not move,
-because its click is ``perform``'s existing one.) See
+``linkedin_follow_company_page`` shipped; the mutating-call count did not move
+for it, because its click is ``perform``'s existing one. It moved for the live
+lane's five presses, above, which the lane merge of 2026-09-24 brought in.) See
 ``writes.py``, and prefer ``server.py``'s docstring over this one for counts,
 because that one is checked.
 """

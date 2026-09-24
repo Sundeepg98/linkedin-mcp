@@ -197,14 +197,8 @@ def _bbm():
     return mod
 
 
-@functools.lru_cache(maxsize=1)
-def corpus() -> tuple[tuple[str, str], ...]:
-    """(repo-relative path, text) for every audit document, read ONCE.
-
-    An unreadable file is UNKNOWN and says so on stderr; it is never silently
-    absent, because a file that vanished from the scan and a file that argues
-    nothing produce the same score and must not produce the same report.
-    """
+def tracked_audit_paths(root: pathlib.Path = ROOT) -> list[str]:
+    """Every `.md`/`.tsv` path under `_audit` that git tracks, sorted."""
     # TRACKED FILES ONLY, and this is a correctness rule rather than a filter.
     #
     # `_audit/_scratch/` is gitignored (.gitignore:156) and holds 113 markdown
@@ -224,7 +218,7 @@ def corpus() -> tuple[tuple[str, str], ...]:
     # same point about `_progress-unlocatable-recovery.md`: standing verdicts
     # were resting on a file no reader could open.
     tracked = subprocess.run(
-        ["git", "-C", str(ROOT), "ls-files", "_audit"],
+        ["git", "-C", str(root), "ls-files", "_audit"],
         capture_output=True, check=True,
     ).stdout.decode("utf-8", "replace").splitlines()
     # AND THE GENERATED INDEX IS NOT AN AUDIT DOCUMENT. `_audit/INDEX.md` is a
@@ -236,13 +230,37 @@ def corpus() -> tuple[tuple[str, str], ...]:
     # would hold a file that is only a picture of the others. Measured the hour
     # it was added: GROUPS-SURFACE's real argument fell from rank 1 to rank 17
     # and the recall floor went red. See INSTRUMENTS.md section 45.
-    wanted = sorted(
+    #
+    # DEDUPED WITH A SET. `git ls-files` prints an UNMERGED path once per merge
+    # stage (1 = common ancestor, 2 = ours, 3 = theirs), so while a merge has
+    # conflicts a conflicted document is listed -- and therefore read and
+    # scored -- up to three times. Measured live by the census cleanup lane: a
+    # conflicted document scored 33, 30, 24 for three blockers while six paths
+    # were unmerged, against 11, 10, 8 for the SAME document once those paths
+    # were staged (`_audit/2026-09-23-census-cleanup.md` section 13.5) -- each
+    # number exactly 3x its staged value. `scripts/build_audit_index.py`'s
+    # `tracked_documents` already collapses the identical listing with a set,
+    # for the identical reason; this mirrors that precedent rather than adding
+    # a new mechanism (`git ls-files --deduplicate` is not used here, because
+    # older git lacks the flag and this call runs under `check=True`).
+    wanted = sorted(set(
         r for r in tracked
         if r and (r.endswith(".md") or r.endswith(".tsv"))
         and r != "_audit/INDEX.md"
-    )
+    ))
+    return wanted
+
+
+@functools.lru_cache(maxsize=1)
+def corpus() -> tuple[tuple[str, str], ...]:
+    """(repo-relative path, text) for every audit document, read ONCE.
+
+    An unreadable file is UNKNOWN and says so on stderr; it is never silently
+    absent, because a file that vanished from the scan and a file that argues
+    nothing produce the same score and must not produce the same report.
+    """
     out: list[tuple[str, str]] = []
-    for rel in wanted:
+    for rel in tracked_audit_paths(ROOT):
         path = ROOT / rel
         try:
             out.append((rel, path.read_text(encoding="utf-8", errors="replace")))

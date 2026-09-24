@@ -6,11 +6,13 @@ MEASURED-ABSENT), each naming who ruled the row out and where that ruling is.
 It exits 1 when an EXCLUDED-RULED row has NO TRACEABLE BASIS, when a row rests on
 a ruling the operator has WITHDRAWN, and on any structural defect.
 
-**THE CHECKER IS RED AT HEAD BY DESIGN, AND THIS FILE IS GREEN.** Whether a row
-with no basis returns to GAP is the operator's decision, so nothing here asserts
+**THE CHECKER SHIPPED RED BY DESIGN, AND THIS FILE WAS GREEN THROUGHOUT.**
+Whether a row with no basis returns to GAP is a decision, so nothing here asserts
 the verdict is empty. What is asserted is that the verdict is CONSISTENT -- the
 checker names exactly the rows the table classes as untraced or lifted -- and
-that every other kind of defect is caught.
+that every other kind of defect is caught. Lane R decided every open row on
+2026-09-23 (``_audit/2026-09-23-exclusion-returns.md``), so the checker now exits
+0 for that reason; the consistency test below would say so either way.
 
 **GREEN ON ITS OWN IS AMBIGUOUS.** A checker broken into one that finds nothing
 passes too. So each failure mode is planted twice: into a world built entirely
@@ -242,15 +244,34 @@ def test_every_family_in_the_registry_is_used_or_says_why(real):
         used.update(x for x in (b.get("family") or b.get("ruling") or "").split("+") if x)
     unused = sorted(set(ceb.FAMILIES) - used)
     # An unused family is a registered ruling nothing is filed under: a
-    # vocabulary entry that can no longer fail. None is expected today.
-    assert unused == [], unused
+    # vocabulary entry that can no longer fail. Each one must SAY WHY, in
+    # EMPTIED, and nothing may be declared empty that a row still uses -- both
+    # directions, so neither a silent orphan nor a stale declaration survives.
+    assert unused == sorted(ceb.EMPTIED), (
+        f"unused and undeclared: {sorted(set(unused) - set(ceb.EMPTIED))}; "
+        f"declared empty and used: {sorted(set(ceb.EMPTIED) - set(unused))}")
+    assert set(ceb.EMPTIED) <= set(ceb.FAMILIES), sorted(set(ceb.EMPTIED) - set(ceb.FAMILIES))
+    assert all(len(why) > 20 for why in ceb.EMPTIED.values())
 
 
+def test_a_row_filed_under_a_declared_empty_family_is_red_and_named(world):
+    """The declaration is a claim, so it can be convicted: a row filed under an
+    EMPTIED family is a problem naming the row, in a world built here."""
+    fams, pop, hay, rows, root, _lift = world
+    structural, _u, _l = ceb.row_problems(rows, hay, fams, root, emptied={"FAM-AG": "declared empty"})
+    hits = [p for p in structural if "EMPTIED declares holds no row" in p]
+    assert {h.split(":")[0] for h in hits} == {"N 2", "P R2b", "N 5"}, structural
+    clean, _u, _l = ceb.row_problems(rows, hay, fams, root, emptied={})
+    assert clean == [], clean
+
+
+#: RE-POINTED 2026-09-23 by lane R: `P D5` and `N 119` left the table when their
+#: rows returned to GAP, so the plants now sit on rows the table still holds.
 @pytest.mark.parametrize("row, field, old, new, needle", [
-    ("P D5", "basis", "family=EDIT-FAMILY; op=CONTRARY",
-     "family=R9-OUTREACH-AUTOMATION; op=YES", "cites R9-OUTREACH-AUTOMATION"),
-    ("P D5", "basis", "op=CONTRARY", "op=YES", "records op=CONTRARY"),
-    ("N 119", "source", '"endorse_or_recommend": (', '"endorse_or_admire": (', "no longer contains"),
+    ("N 10", "basis", "family=PF-DELETE-OR-WITHDRAW; op=NO",
+     "family=NO-THIRD-PARTY-PROFILE-LOAD; op=YES", "cites NO-THIRD-PARTY-PROFILE-LOAD"),
+    ("N 10", "basis", "op=NO", "op=YES", "records op=NO"),
+    ("N 111", "source", '"endorse_or_recommend": (', '"endorse_or_admire": (', "no longer contains"),
 ])
 def test_a_plant_in_a_copy_of_the_real_table_is_red_and_named(real, tmp_path, row, field, old, new, needle):
     rows = [dict(r) for r in real[0]]
@@ -267,12 +288,14 @@ def test_a_plant_in_a_copy_of_the_real_table_is_red_and_named(real, tmp_path, ro
 def test_main_on_a_copy_missing_a_line_is_red_and_names_it(tmp_path, capsys):
     copy = tmp_path / "exclusion-basis.tsv"
     lines = ceb.TABLE.read_text(encoding="ascii").splitlines(keepends=True)
-    kept = [ln for ln in lines if not ln.startswith("N\t23\t")]
+    # N 23 until 2026-09-23; it left the table when lane R moved it to
+    # COVERED-UNFIRED, so the removed line is now a row the table still holds.
+    kept = [ln for ln in lines if not ln.startswith("N\t10\t")]
     assert len(kept) == len(lines) - 1
     copy.write_text("".join(kept), encoding="ascii")
     assert ceb.main(["--table", str(copy)]) == 1
     out = capsys.readouterr().out
-    assert "N 23: is EXCLUDED-RULED in the census and has NO LINE" in out
+    assert "N 10: is EXCLUDED-RULED in the census and has NO LINE" in out
 
 
 def test_main_is_red_exactly_while_the_table_holds_an_open_question(real, capsys):

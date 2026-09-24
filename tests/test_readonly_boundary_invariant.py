@@ -1221,13 +1221,49 @@ PINNED = (
 #: The pattern-exemption digest is 76d7b10899530d69 with the follower list
 #: and 419e64a3cd92ec7e without it. Computed with this file's `ast_digest`.
 #: ------------------------------------------------------------------------
+#: RE-FROZEN 2026-09-24 BY THE LIVE LANE, FIVE TUPLE ENTRIES, ONE DIGEST
+#: MOVED -- AND LATE, WHICH IS PART OF THE RECORD:
+#:
+#:     SANCTIONED_MUTATIONS   3676d309ead50c61 -> e79a701b37ae9c39   7 -> 12
+#:     every other table      unchanged
+#:
+#: FIVE PRESSES, EACH ON A RECORDED CALL, EACH BOUND TO ONE FUNCTION:
+#:
+#:     ("linkedin_server/reveal.py", "reveal", "click")                  8
+#:     ("linkedin_server/view_switch.py", "_activate", "click")          9
+#:     ("linkedin_server/share_link.py", "_activate", "click")          10
+#:     ("linkedin_server/share_link.py", "_clipboard", "evaluate")      11
+#:     ("linkedin_server/share_link.py", "copy_own_post_link", "press") 12
+#:
+#: The argument for each is beside it in readonly.py. A PERMISSION grew; no
+#: refusal moved, and the floors below are untouched.
+#:
+#: LATE: entries 8 and 9 landed in c523769 WITHOUT this re-freeze, so this
+#: test was red on that commit and the five after it. The per-commit runs
+#: were chosen by hand and did not select this file -- the name-scoped-gate
+#: trap this repository has already paid for once. Measured, not inferred:
+#: the committed tree at f100efa, exported and run, fails here with the live
+#: value 73e0da781fb369b4.
+#:
+#: ATTRIBUTION, in this dict's form: the tree MINUS exactly the five lines
+#: hashes to 3676d309ead50c61, the value replaced, so nothing else rode in.
+#: The intermediate states, for whoever merges only part of the lane: reveal
+#: alone 7795b6185c04f218; reveal and view_switch 73e0da781fb369b4; all
+#: five e79a701b37ae9c39. Controls: dropping the PRE-EXISTING
+#: ``writes.perform`` click instead lands on 2e0ef579d40102d1, somewhere
+#: else entirely, and a needle no line carries drops nothing and moves
+#: nothing. SEVEN of eight digests byte-identical; ``<functions>`` unmoved.
+#: One interpreter, 3.13; the 3.10 cell is CI's.
+#: ------------------------------------------------------------------------
 READONLY_AST_AT_LAST_REFREEZE = {
     "<functions>": "d7e1d0922e3af446",
     "JS_MUTATION_TOKENS": "d47e30b67c583c1b",
     # ab8fdd31f93ef4fc until 2026-09-19. See the re-freeze note above: two
     # entries added for press.disclose's click and its closing Escape, on the
     # disclosing-press ruling. A PERMISSION grew; no refusal moved.
-    "SANCTIONED_MUTATIONS": "3676d309ead50c61",
+    # 3676d309ead50c61 until 2026-09-24: five more (reveal, view_switch and
+    # share_link), the live lane's; the last re-freeze note above.
+    "SANCTIONED_MUTATIONS": "e79a701b37ae9c39",
     # 34f364971cf9e81c until 2026-09-19. GREW by TWO anchored deep paths in
     # the groups family -- a group by its NUMERIC id, bounded at twenty
     # digits, and the recommendation listing -- on the team lead's ruling.

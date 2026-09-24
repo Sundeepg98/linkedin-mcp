@@ -279,30 +279,51 @@ def test_a_pinned_quote_that_moved_goes_red(census):
 # M3 -- an adjudication that has gone moot
 # ---------------------------------------------------------------------------
 def test_an_adjudication_on_a_row_that_left_the_writeoffs_goes_red(census):
-    """`J 134` stops being a write-off; its row-level judgement is now moot.
+    """A row stops being a write-off; its row-level judgement is now moot.
 
     A hand ruling that survives the row it rules on is not merely useless --
     it is a claim about a row nobody is checking any more.
+
+    **RE-POINTED 2026-09-23 BY LANE R, AND NOW IT PLANTS ITS OWN FIXTURE.** This
+    control moved `J 134`, the one real row-level adjudication. Lane R returned
+    `J 134` to GAP on the very fact that adjudication named -- its own help-text
+    quote documents the text mode whose absence was the retirement's reopener --
+    and retired the adjudication with it
+    (``_audit/2026-09-23-exclusion-returns.md`` section 3.5). No real row-level
+    adjudication is left to exercise. So the control PLANTS one, on a row that
+    is still a write-off, proves the plant alone is green, then moves the row
+    out and expects the moot red: a control whose fixture is found in the
+    corpus stops working the day the corpus moves; one it builds does not.
     """
+    row, quote = "133", "You can practice out loud"
+    adj = census / "reason-kind-adjudications.tsv"
+    before_adj = _read(adj)
+    nl = "\r\n" if "\r\n" in before_adj else "\n"
+    _write(adj, before_adj.rstrip("\r\n") + nl
+           + f"J {row}\tWORLD-FACT\t{quote}\tplanted by this control" + nl)
+    _landed(before_adj, _read(adj), "reason-kind-adjudications.tsv")
+    code0, out0 = _check()
+    assert code0 == 0, f"the planted adjudication is not green on its own:\n{out0}"
+
     path = census / "jobs.md"
     before = _read(path)
     out_lines, touched = [], 0
     for line in before.splitlines(keepends=True):
         raw = _raw_cells(line)
-        if raw and len(raw) >= 3 and raw[0].strip() == "134":
+        if raw and len(raw) >= 3 and raw[0].strip() == row:
             idx, state = _state_index(raw)
             if idx >= 0 and state in cw.WRITEOFF:
                 raw[idx] = " GAP "
                 line = _rebuild(line, raw)
                 touched += 1
         out_lines.append(line)
-    assert touched == 1, f"expected exactly one J 134 write-off row, hit {touched}"
+    assert touched == 1, f"expected exactly one J {row} write-off row, hit {touched}"
     _write(path, "".join(out_lines))
     _landed(before, _read(path), "jobs.md")
 
     code, out = _check()
     assert code != 0, f"the moot-adjudication control did not fire:\n{out}"
-    assert "ADJUDICATION for 'J 134' names a row that is not a write-off row" in out, out
+    assert f"ADJUDICATION for 'J {row}' names a row that is not a write-off row" in out, out
 
 
 # ---------------------------------------------------------------------------

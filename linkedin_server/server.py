@@ -1,4 +1,11 @@
-"""The tool surface: fifty-one tools, thirteen of which write to LinkedIn.
+"""The tool surface: fifty-two tools, thirteen of which write to LinkedIn.
+
+THE FIFTY-SECOND IS A READ THAT PRESSES, merged 2026-09-24:
+``linkedin_own_item_link``, the share link of one of his own posts. It was
+built on the live lane's branch as that branch's fiftieth, while master gained
+the fiftieth and fifty-first below; the merge made it the fifty-second, and
+every site that states these numbers moved in the merge. The headline read
+"fifty-one tools, thirteen of which write" until then.
 
 THE FIFTY-FIRST IS A WRITE, 2026-09-23, and every site that states these
 numbers moved in the same commit: ``linkedin_follow_company_page``, a follow
@@ -151,9 +158,9 @@ assigned to anybody -- it waits for whoever next runs the suite, and in the
 meantime the pin goes on asserting the old number with full confidence.
 
 THE NUMBERS ABOVE ARE DERIVED NOW, and that is a statement about a test rather
-than about an intention. Fifty-one is ``len(await mcp.list_tools())``,
+than about an intention. Fifty-two is ``len(await mcp.list_tools())``,
 pinned in ``test_server_surface.py`` by
-``test_the_surface_is_exactly_the_fifty_one_tools``; the split is pinned by
+``test_the_surface_is_exactly_the_fifty_two_tools``; the split is pinned by
 ``tests/test_prose_that_makes_a_claim.py::test_the_server_docstring_numbers_are_derived``,
 which reads THESE WORDS and fails if any of the three disagrees with the
 registry.
@@ -166,9 +173,16 @@ POINTER to it was dangling, so a reader who followed it found nothing and
 would reasonably conclude these numbers are unchecked. A citation is a claim
 like any other.
 The surface splits three ways and the split is the part a reader actually
-needs: THIRTY-EIGHT read, THIRTEEN write, and ZERO are write-shaped,
-registered, gated and unable to act. Thirty-eight plus thirteen plus zero is
-fifty-one.
+needs: THIRTY-NINE read, THIRTEEN write, and ZERO are write-shaped,
+registered, gated and unable to act. Thirty-nine plus thirteen plus zero is
+fifty-two.
+
+THE FIFTY-SECOND, 2026-09-23, IS A READ THAT PRESSES: ``linkedin_own_item_link``,
+the share link of one of his own posts through the post's own "Copy link
+to post", on a recorded orchestrator-delegated call. It changes nothing on
+LinkedIn that the call did not accept, and the page's clipboard calls are
+captured in this server's own tab rather than reaching his system clipboard,
+with the one gap in that capture named in the tool's own docstring.
 
 THE FIFTIETH IS ONE READ, 2026-09-23. ``linkedin_recent_job_searches`` opens
 the jobs home, ``/jobs/jam/`` -- admitted 2026-09-20 with nothing behind it
@@ -200,7 +214,11 @@ opens the people search and reports COUNTS -- how many result links of each
 closed kind, which of fourteen known filters the page offers, and how many of
 those filters take a PERSON as their value. No name, slug, headline or member
 id can leave it; the matching happens inside the page and only integers come
-back. It takes NO PARAMETERS, because a search query is where a name is typed.
+back. It took NO PARAMETERS, because a search query is where a name is typed.
+AMENDED 2026-09-24: it now takes a keyword and four facets, OPTIONAL, composed
+by ``people_search.compose`` from its own arguments only under
+``D1-SEARCH-AS-READS`` and ``OTHER-MEMBER-IDS-AS-READS``; with none it opens
+exactly the address it opened before, and no argument is ever echoed back.
 Its address was refused by the boundary until this commit and was admitted
 only together with the shaper in front of it -- condition 1 of the ruling at
 ``09f9961`` section 6, which says admitting it without one would VIOLATE that
@@ -394,6 +412,7 @@ from linkedin_server import (
     newsletters,
     notify_cost,
     page_plugin,
+    people_search,
     preflight,
     premium,
     search_results,
@@ -1867,9 +1886,87 @@ async def _open_profile_views_filter_menus(page: Any) -> dict[str, Any]:
     return menus_out
 
 
+#: The reveal this tool may press, by its key in ``reveal.DECIDED_REVEALS``.
+PROFILE_VIEWS_REVEAL = "profile_views_show_more_analytics"
+
+
+async def _profile_views_switch(page: Any, switch_key: str, row_cap: int) -> dict[str, Any]:
+    """Apply one ruled filter, read the viewers it leaves, and take it off.
+
+    THE VIEW IS READ THE WAY THIS TOOL READS IT: the same harvest and the same
+    row parser as the unfiltered list, plus the headline count. The module
+    compares that whole reading before the switch and after the restore; the
+    filtered reading comes back as ``viewers_when_applied`` and
+    ``headline_when_applied``. Every binding here carries a name no other
+    function in this module uses (the navigation guard tracks taint by name).
+    """
+    from linkedin_server import view_switch as switch_module
+
+    switch_counters = await _profile_views_press_counters(page)
+
+    async def switch_view_now() -> dict[str, Any]:
+        switch_records = await dom.harvest_linked_cards(
+            page, href_pattern=dom.PERSON_HREF, max_items=row_cap * 3, sibling_rows=True
+        )
+        switch_rows, _switch_dropped = dom.parse_all(switch_records, shape.parse_person_card)
+        try:
+            switch_insights = await dom.read_profile_views_insights(page)
+            switch_headline = _as_count((switch_insights.get("headline") or {}).get("value"))
+        except Exception:  # noqa: BLE001 - an unread headline is None, never 0
+            switch_headline = None
+        return {"headline": switch_headline, "rows": switch_rows}
+
+    switch_outcome = await switch_module.apply_and_restore(
+        page, key=switch_key, read_view=switch_view_now, read_counters=switch_counters
+    )
+    switch_applied_view = switch_outcome.pop("view_applied", None) or {}
+    switch_outcome["viewers_when_applied"] = switch_applied_view.get("rows")
+    switch_outcome["headline_when_applied"] = switch_applied_view.get("headline")
+    return switch_outcome
+
+
+async def _profile_views_more_analytics(page: Any) -> dict[str, Any]:
+    """Press the one decided plain button, then read the page's insights again.
+
+    The reveal's own verdict says whether it only revealed content; the
+    insights reader then runs a second time on the revealed page, so a caller
+    can compare it with ``insights`` above.
+    """
+    from linkedin_server import reveal as reveal_module
+
+    reveal_counters = await _profile_views_press_counters(page)
+    reveal_outcome = await reveal_module.reveal(
+        page,
+        key=PROFILE_VIEWS_REVEAL,
+        read_counters=reveal_counters,
+        reading=PROFILE_VIEWS_MENU_READING,
+    )
+    reveal_block: dict[str, Any] = {"reveal": reveal_outcome}
+    if reveal_outcome.get("pressed"):
+        try:
+            reveal_block["insights_after"] = await dom.read_profile_views_insights(page)
+        except Exception as exc:  # noqa: BLE001 - never raised
+            reveal_block["insights_after_error"] = type(exc).__name__
+        # WHAT THE BUTTON REVEALED, read: the "Highlights" and "Details"
+        # sections (top location, industry and company; each company's share).
+        # See profile_views_more's docstring for why no name is redacted here.
+        from linkedin_server import profile_views_more
+
+        try:
+            reveal_block["revealed_insights"] = (
+                await profile_views_more.read_profile_views_more_insights(page)
+            )
+        except Exception as exc:  # noqa: BLE001 - never raised
+            reveal_block["revealed_insights_error"] = type(exc).__name__
+    return reveal_block
+
+
 @mcp.tool()
 async def linkedin_who_viewed_me(
-    limit: int = DEFAULT_LIMIT, open_filter_menus: bool = False
+    limit: int = DEFAULT_LIMIT,
+    open_filter_menus: bool = False,
+    view_switch: str = "",
+    show_more_analytics: bool = False,
 ) -> dict[str, Any]:
     """List the people who viewed your profile, most recent first.
 
@@ -1930,6 +2027,20 @@ async def linkedin_who_viewed_me(
         limit: maximum rows to return (default 25, max 100).
         open_filter_menus: also open and read the filter pills (default
             False, which is this tool exactly as it was).
+        view_switch: APPLY ONE FILTER, read the viewers it leaves, and TAKE
+            IT OFF again -- one key of view_switch.VIEW_SWITCHES:
+            "interesting_viewers_verified" or
+            "interesting_viewers_company_you_follow". Empty (the default)
+            does nothing. The filtered viewers come back under
+            view_switch.viewers_when_applied; view_switch.restored says
+            whether the page was proven put back (the view read after equals
+            the view read before). Anything else is refused, not pressed.
+        show_more_analytics: also press "Show more analytics" -- one plain
+            button, admitted by name in reveal.DECIDED_REVEALS -- and report
+            whether it only revealed content (url unchanged, no counter
+            moved), plus what it revealed under
+            more_analytics.revealed_insights: the top location, industry and
+            company of his viewers, and each company's share. Default False.
     """
     limit = _clamp(limit, DEFAULT_LIMIT, MAX_LIMIT)
     urls = [
@@ -2026,6 +2137,23 @@ async def linkedin_who_viewed_me(
                             )
                         except Exception as exc:  # noqa: BLE001 - never raised
                             extra["filter_menus_error"] = type(exc).__name__
+                    # THE VIEW SWITCH, THEN THE REVEAL -- in that order so the
+                    # switch reads and restores the page as the tool found it.
+                    # Same failure rule: neither can cost the viewer list.
+                    if view_switch:
+                        try:
+                            extra["view_switch"] = await _profile_views_switch(
+                                page, view_switch, limit
+                            )
+                        except Exception as exc:  # noqa: BLE001 - never raised
+                            extra["view_switch_error"] = type(exc).__name__
+                    if show_more_analytics:
+                        try:
+                            extra["more_analytics"] = await _profile_views_more_analytics(
+                                page
+                            )
+                        except Exception as exc:  # noqa: BLE001 - never raised
+                            extra["more_analytics_error"] = type(exc).__name__
                     return shape.envelope(
                         rows,
                         limit=limit,
@@ -2810,7 +2938,13 @@ async def linkedin_notify_cost_precondition() -> dict[str, Any]:
 
 
 @mcp.tool()
-async def linkedin_people_search_shape() -> dict[str, Any]:
+async def linkedin_people_search_shape(
+    keywords: str = "",
+    current_company_ids: str = "",
+    past_company_ids: str = "",
+    location_ids: str = "",
+    connections_of: str = "",
+) -> dict[str, Any]:
     """What your people search OFFERS. Counts and filter names, never a person.
 
     **THIS IS THE FIRST TOOL ON A THIRD-PARTY-DENSE SURFACE**, and every
@@ -2836,10 +2970,35 @@ async def linkedin_people_search_shape() -> dict[str, Any]:
                                 filters" is distinguishable from "the selector
                                 changed".
 
-    **IT TAKES NO PARAMETERS, AND THAT IS THE PRIVACY DESIGN.** A keyword is
-    where a name is typed. This tool opens one literal address,
-    ``search_results.PEOPLE_SEARCH_URL``, with no query at all -- so no needle
-    can be handed to it, by a caller or by a mistake.
+    **IT TOOK NO PARAMETERS UNTIL 2026-09-24, AND THE PRIVACY DESIGN MOVED
+    RATHER THAN WENT.** A keyword is where a name is typed, and this paragraph
+    said so to justify taking none. ``D1-SEARCH-AS-READS`` and
+    ``OTHER-MEMBER-IDS-AS-READS`` (registered 2026-09-23) decided that a
+    keyword and LinkedIn's own facets may be PASSED, from a tool's arguments
+    only. So the design now holds at two other places:
+
+    * ONE PURE FUNCTION COMPOSES THE ADDRESS -- ``people_search.compose``,
+      from this tool's own arguments and nothing else. No page, no landing and
+      no earlier reading can reach it. With no argument it returns
+      ``search_results.PEOPLE_SEARCH_URL`` exactly, the address this tool
+      always opened.
+    * NOTHING A CALLER PASSES COMES BACK. ``query_applied`` counts what each
+      argument contributed and ``query_kept`` says, per argument, what LinkedIn
+      did with it in the address it settled on -- ``verbatim``,
+      ``same_values``, ``different_values``, ``absent`` or ``unreadable``. No
+      keyword, id or member token is echoed, and the landing is not published.
+
+    A KEYWORD THE READ BOUNDARY REFUSES IS ANSWERED BEFORE ANY PAGE LOADS. The
+    boundary scans the whole address, query included, and words such as
+    ``password``, ``settings`` and ``invitation`` trip a write guard. The
+    composed address is put to the boundary (``readonly.is_read_url``) first;
+    a refusal comes back as ``refused_by_the_read_boundary`` naming the
+    boundary's own substrings it carries and the argument that carried them,
+    with ``pages_loaded`` 0. The denylist is not narrowed for a search.
+
+    EACH CALL WITH AN ARGUMENT IS ONE PEOPLE SEARCH, and LinkedIn counts people
+    searches against the account's monthly limit -- which is why a live test
+    session makes at most five (``D1-SEARCH-AS-READS``).
 
     NOTHING IS FIRED FROM THIS SURFACE. Condition 5 of the admitting ruling,
     and it is structural here: this coroutine reaches ``read_results`` and
@@ -2874,11 +3033,45 @@ async def linkedin_people_search_shape() -> dict[str, Any]:
       query.** Still unmeasured as a general claim.
     * **Not that it saw every result.** Search pages lazy-load and re-rank, so
       a count is a reading with a timestamp.
+    * **Not that a kept argument FILTERED the results.** ``query_kept`` is a
+      fact about the address LinkedIn settled on, not about which people it
+      listed -- and never WHO any result is.
+
+    Args:
+        keywords: free text, up to 200 characters. Never quoted back.
+        current_company_ids: LinkedIn's NUMERIC organisation ids, comma-
+            separated, at most 5 -- the digits ``linkedin_job_detail`` returns
+            as ``company_id`` or ``linkedin_followed_companies`` reads off
+            Manage Pages. A company name or slug is refused, described by its
+            shape and never quoted.
+        past_company_ids: the same, for people who USED to work there.
+        location_ids: LinkedIn's NUMERIC geo ids (``geoUrn``), comma-separated,
+            at most 5; several in ONE search. A place name is refused.
+        connections_of: ONE member's opaque token -- the ``recipient_id``
+            ``linkedin_connections`` returns, which opens ``ACoAA`` -- to list
+            that member's connections as counts. A profile slug is a name and
+            is refused. Never stored and never echoed.
     """
     try:
+        # THE ADDRESS IS COMPOSED FROM THIS TOOL'S OWN ARGUMENTS AND NOTHING
+        # ELSE, and put to the read boundary before any session opens -- see
+        # ``people_search`` for the rulings and for why nothing is echoed.
+        composed = people_search.compose(
+            keywords=keywords,
+            current_company_ids=current_company_ids,
+            past_company_ids=past_company_ids,
+            location_ids=location_ids,
+            connections_of=connections_of,
+        )
+        if not composed["built"]:
+            return people_search.refusal_envelope(composed)
+        boundary = people_search.boundary_verdict(composed["url"])
+        if not boundary["admitted"]:
+            return people_search.refusal_envelope(boundary)
         async with BROWSER.session() as page:
-            landed = await BROWSER.goto(page, search_results.PEOPLE_SEARCH_URL)
+            landed = await BROWSER.goto(page, composed["url"])
             assert_not_authwall(landed, surface="people-search")
+            landing = people_search.landing_verdict(landed, composed["url"])
             results = await search_results.read_results(page)
             # NOT ``read_filters``. THE PANEL IS STILL DRAWING WHEN goto
             # RETURNS, and reading it then produced every filter as zero on
@@ -2893,10 +3086,14 @@ async def linkedin_people_search_shape() -> dict[str, Any]:
                 # itself is not published -- it is a value the browser chose,
                 # and on this surface it can carry a query.
                 "landed_where_it_was_sent": (
-                    landed.rstrip("/")
-                    == search_results.PEOPLE_SEARCH_URL.rstrip("/")
+                    landed.rstrip("/") == composed["url"].rstrip("/")
                 ),
+                "landed_on_people_search": landing["on_people_search"],
                 "pages_loaded": 1,
+                # COUNTS OF WHAT WAS APPLIED AND A LITERAL PER ARGUMENT, never
+                # a value: see ``people_search.landing_verdict``.
+                "query_applied": composed["applied"],
+                "query_kept": landing["query_kept"],
                 "results": search_results.tally(
                     results["counts"],
                     queries_present=results["queries_present"],
@@ -2933,6 +3130,9 @@ async def linkedin_people_search_shape() -> dict[str, Any]:
                     "pressed here to open the All filters panel",
                     "that the address serves a populated page with no query",
                     "that every result was seen; search pages lazy-load",
+                    "that a kept argument filtered the results; query_kept "
+                    "describes the address LinkedIn settled on, and no "
+                    "result is ever named",
                 ],
             }
     except Exception as exc:
@@ -7765,6 +7965,104 @@ async def linkedin_my_activity_items() -> dict[str, Any]:
             return out
     except Exception as exc:
         return _error(exc)
+
+
+@mcp.tool()
+async def linkedin_own_item_link(activity_id: str, include_link: bool = False) -> dict[str, Any]:
+    """The public link LinkedIn gives out for ONE of HIS OWN items. PRESSES TWO CONTROLS.
+
+    ================= WHAT THIS IS FOR -- READ FIRST =================
+    The link that opens one of his own items off LinkedIn, obtained the way
+    he would get it: the item's own page, opened by its activity id (an
+    argument -- linkedin_my_activity_items returns them), the item's own
+    control menu, and its copy-link entry (share_link.COPY_PHRASE). It rests
+    on a call recorded verbatim, as orchestrator-delegated on 2026-09-23, in
+    _audit/2026-09-23-live-lane-session-1.md section 0.1: M C72's copy-link
+    on his OWN items only, so no other author's figures are touched.
+    =================================================================
+
+    OWNERSHIP IS READ OFF THE MENU, NEVER ASSUMED FROM THE ID. The copy-link
+    entry is pressed only when the same menu also draws one of the two
+    author-only entries (share_link.OWNER_PHRASES), which LinkedIn draws for
+    an item's author alone. Otherwise the answer is refused (not_his_post)
+    and nothing past opening the menu is pressed.
+
+    HIS SYSTEM CLIPBOARD IS SHIELDED, AND THE SHIELD HAS ONE NAMED GAP. Just
+    before the copy-link entry is pressed, the page's clipboard calls are
+    replaced in this server's own tab (writeText, write and the copy
+    command), so the link comes back here instead of replacing whatever he
+    had copied. That covers every route the page looks up at the moment it
+    copies. A reference the page took BEFORE the replacement is not covered:
+    then nothing is captured, the answer reads copied: false, and whether his
+    clipboard was written cannot be read from here.
+
+    THE PRESSES ARE PRICED BY THE ITEM'S OWN REACTION TOGGLE, read in both
+    measured dialects (share_link.read_item_price) before the first press and
+    after the last. A page that draws no toggle at all is refused
+    (price_cannot_move) with nothing pressed: a counter that cannot move
+    prices nothing, whatever it reads.
+
+    WHAT COMES BACK: copied (bool); captures (how many texts were kept);
+    shape -- whether it is an https LinkedIn link, its path kind, whether it
+    carries this activity id; permitted; the gate's counter and closure
+    verdicts; and price_readings, every price reading taken, integers only.
+    THE LINK ITSELF ONLY WITH include_link=True: it can carry his profile's
+    vanity name.
+
+    Args:
+        activity_id: 1-20 ASCII digits -- the id of one of his own items.
+        include_link: also return the link itself (default False: its shape
+            only).
+    """
+    from linkedin_server import share_link as share_module
+
+    try:
+        own_item_digits = share_module.validated_activity_digits(activity_id)
+    except ValueError:
+        return {
+            "refused": "bad_activity_id",
+            "why": "activity_id must be 1 to 20 ASCII digits; nothing was loaded.",
+            "pages_loaded": 0,
+        }
+    own_item_url = share_module.post_url(own_item_digits)
+    # EVERY PRICE READING IS KEPT AND RETURNED, integers only: the price is
+    # evidence, and a verdict that only names its counter ("priced by
+    # off_state") cannot show whether that counter could have moved. The
+    # first live fire was priced by an off_state of 0 at both ends.
+    own_item_readings: list[dict[str, Optional[int]]] = []
+    try:
+        async with BROWSER.session() as page:
+            own_item_landed = await BROWSER.goto(page, own_item_url)
+            assert_not_authwall(own_item_landed, surface="post")
+
+            async def own_item_counters() -> dict[str, Optional[int]]:
+                own_item_reading = await share_module.read_item_price(page)
+                own_item_readings.append(dict(own_item_reading))
+                return own_item_reading
+
+            # A PRICE THAT CANNOT MOVE IS REFUSED BEFORE THE FIRST PRESS.
+            if not share_module.price_can_move(await own_item_counters()):
+                return {
+                    "refused": "price_cannot_move",
+                    "why": (
+                        "the item's page drew no reaction toggle in either "
+                        "measured dialect, so no counter read here could move "
+                        "for an outward act. A press nothing can price is not "
+                        "made: nothing was pressed."
+                    ),
+                    "price_readings": own_item_readings,
+                    "pages_loaded": 1,
+                }
+            own_item_outcome = await share_module.copy_own_post_link(
+                page, activity_digits=own_item_digits, read_counters=own_item_counters
+            )
+    except Exception as exc:
+        return _error(exc)
+    if not include_link:
+        own_item_outcome["link_withheld"] = own_item_outcome.pop("link", None) is not None
+    own_item_outcome["price_readings"] = own_item_readings
+    own_item_outcome["pages_loaded"] = 1
+    return own_item_outcome
 
 
 # ---------------------------------------------------------------------------

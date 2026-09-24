@@ -33,7 +33,15 @@ row. This file keeps it TRUE, and exits 1 when:
     longer occurs in it. Anchors are VERBATIM TEXT, never line numbers, because a
     line-number citation rots into a plausible wrong answer rather than a
     dangling one (``CANONICAL-RULING-ID``);
-  * a family's own registered sources do not resolve.
+  * a family's own registered sources do not resolve;
+  * a row is filed under a family ``EMPTIED`` declares holds no row.
+
+LANE R DECIDED EVERY OPEN ROW ON 2026-09-23 (``_audit/2026-09-23-exclusion-returns.md``),
+on the orchestrator's delegated call: each untraced or lifted row was returned to
+GAP with its blocker named, or kept on one of the census's four written grounds.
+So the red this file shipped with is gone for a reason, not relabelled -- and the
+families those rows were filed under are declared in ``EMPTIED`` rather than
+deleted, because an attribution deleted with its rows cannot be found again.
 
 THE CLASSES, stated so they can be argued with.
 
@@ -309,10 +317,23 @@ FAMILIES: dict[str, Family] = {f.fid: f for f in (
     _f("OFF-DOMAIN-FORM",
        "a form on somebody else's domain is reported, not driven",
        "CODE", "NO",
+       # The third source is the WRITESPEC refusing in its own words, which is
+       # the census's third written ground and the one lane R kept J 66 and
+       # J 67 on (2026-09-23); the docstring and the audit are its witnesses.
        [("linkedin_server/server.py", "OFF-SITE POSTINGS ARE REPORTED, NOT DRIVEN"),
         ("_audit/2026-08-25-cannot-vs-will-not.md",
-         "Driving an off-site applicant-tracking system stays, and it was NOT part of")],
+         "Driving an off-site applicant-tracking system stays, and it was NOT part of"),
+        ("linkedin_server/writes.py", "THE OFF-SITE ROUTE IS NOT THIS SERVER'S TO PERFORM")],
        [r"(?i)somebody else's domain", r"(?i)off-domain", r"(?i)off-site"]),
+    # Added by lane R, 2026-09-23, for the two rows its settings pass found were
+    # NOT unnamed settings awaiting admission: each address has an entry of its
+    # own, aimed at it, with the argument written beside it in readonly.py.
+    _f("ACCOUNT-END-SUBSTRINGS",
+       "forbidden substrings /close-accounts and /hibernate-account, aimed at the two account-ending addresses",
+       "CODE", "NO",
+       [("linkedin_server/readonly.py", '"/close-accounts",'),
+        ("linkedin_server/readonly.py", '"/hibernate-account",')],
+       [r"/close-accounts", r"/hibernate-account"]),
     _f("APPLY-NO-GUESSED-STEPS",
        "multi-step apply refused: unseen steps are the one guess not made",
        "CODE", "NO",
@@ -368,9 +389,71 @@ FAMILIES: dict[str, Family] = {f.fid: f for f in (
        "WAVE", "NO",
        [("_audit/_census/profile.md", "NO ROUTE REMAINS, which is why this is a refusal")],
        [r"NO ROUTE REMAINS"]),
+    # ---- rulings the ORCHESTRATOR made under the operator's delegation -------
+    # Registered 2026-09-24 (rulings batch 3). op is NO because the operator's
+    # own words do not make the family; he delegated the call and can override
+    # it. It names its one row, so the row cites the ruling id itself.
+    _f("D5-PASSIVE-COST-IS-NOT-A-ROW",
+       "a passive cost with no control of its own is recorded on the act's row, and its own row is NOT-AN-ACT",
+       "ORCHESTRATOR", "NO",
+       [("_audit/2026-09-24-rulings-search-verticals-rosters-passive-costs.md",
+         "D5 IS ANSWERED: A PASSIVE COST IS NOT A CAPABILITY ROW"),
+        ("_audit/2026-09-24-rulings-search-verticals-rosters-passive-costs.md",
+         "It governs `N 171`")],
+       [r"D5-PASSIVE-COST-IS-NOT-A-ROW", r"NOT-AN-ACT"]),
     # ---- the 2026-09-05 retirement families (wave-ruled; the queue was his) ----
     *_RETIREMENTS,
 )}
+
+#: FAMILIES THAT HOLD NO ROW, AND WHY. Lane R (2026-09-23,
+#: `_audit/2026-09-23-exclusion-returns.md`) returned every row filed under each
+#: of these to GAP, re-filed it on a written ground that still stands, or moved
+#: it to MEASURED-ABSENT. The family STAYS in the registry, because its
+#: attribution -- who made it, and whether the operator did -- is the record a
+#: later re-filing would need, and a family deleted with its rows is a ruling
+#: nobody can find again. But a registered family that holds nothing can no
+#: longer fail, so each is DECLARED here with its reason, and a row filed under a
+#: declared-empty family is a problem: re-filing one means removing it from this
+#: table in the same edit, with the reason that changed.
+EMPTIED: dict[str, str] = {
+    "SETTINGS-BY-NAME": "his ruling admits settings by name and rules none out: 69 rows returned to GAP "
+                        "awaiting admission, 4 re-filed on a ground of their own (returns s4)",
+    "EDIT-FAMILY": "he allowed the profile editors on 2026-08-31: 22 rows returned, blocker the /edit/ entry "
+                   "(returns s2.3)",
+    "OTW-SPEC-NEVER-LOADED": "he approved Open To Work on 2026-08-23: 19 rows returned, P I11 re-filed on the "
+                             "delete key (returns s2.3, s2.5)",
+    "R2-INVITATION-SUBSTRINGS": "written to stop sending invitations, a purpose ruling (b) withdrew: 13 rows "
+                                "returned (returns s2.2, s3.1)",
+    "JOBS-APPLICATION-SUBSTRING": "a read-only fence ruling (b) withdrew: 8 rows returned, P M3 re-filed on "
+                                  "the delete key (returns s2.2, s2.5)",
+    "R9-OUTREACH-AUTOMATION": "his InMail cut, withdrawn by ruling (b): 3 rows returned (returns s2.2, s3.6)",
+    "POST-EDIT-SUBSTRINGS": "M C18 returned (returns s2.2)",
+    "FOLLOW-SUBSTRING": "N A2 returned (returns s2.2)",
+    "R1-MYNETWORK-BADGE": "a wave's address refusal on a derived cost: 10 rows returned (returns s3.1)",
+    "TYPING-RULING-MENTIONS": "his typing ruling read by an agent past its words: 7 rows returned "
+                              "(returns s3.6)",
+    "APPLY-NO-GUESSED-STEPS": "a refusal conditional on an unmeasured form: 6 rows returned (returns s3.2)",
+    "MEASURED-NO-LINK": "a measurement of a narrower object: 3 rows returned (returns s3.2)",
+    "URL-UNREACHABLE-237": "url routes only; no click route tried: 2 rows returned (returns s3.2)",
+    "NO-ROUTE-MEASURED": "P A9 returned: a write route is unbuilt, not measured closed (returns s3.2)",
+    "ARTICLE-ROUTE-NOT-USED": "M C44 returned (returns s3.2)",
+    "PF-AUTO-ACCEPT-OR-REPLY": "M M39 returned: the key's hinge does not reach text he writes (returns s3.2)",
+    "PF-REPOST-OR-SHARE": "M C20 and M C21 returned: the key's grounds were 'not asked for', which ruling "
+                          "(b) answers, and taste, which he dissolved (returns s3.4)",
+    "FEED-CONTENT-READ": "M C43 returned: a lead's ruling he never made (returns s3.4)",
+    "NAV-FROM-PAGE-CONTENT": "J 112 returned: its own reopener needs no new rule (returns s3.4)",
+    "FOLLOW-PEOPLE-LIST": "N 38 returned: a class filter catching the address (returns s3.4)",
+    "ROSTER-ENUMERATION": "3 rows returned: a lead's ruling he never made (returns s3.4); since 2026-09-24 "
+                          "MEMBER-ROSTERS-AS-BOUNDED-READS admits rosters as bounded reads",
+    "DRAFT-DELETE-NOT-PRESSED": "J 69 re-filed on the delete key by act-class (returns s3.4)",
+    "RETIRE-AI-ASSIST-MESSAGING": "2 rows returned: the composer was never opened (returns s3.5)",
+    "RETIRE-DEVICE-GEOLOCATION": "J 17 returned (returns s3.5)",
+    "RETIRE-OFF-PLATFORM-WIDGET": "N 50 returned (returns s3.5)",
+    "RETIRE-PAID-BOOST": "M C71 returned: an irreversible spend is his per act (returns s3.5)",
+    "RETIRE-PANEL-NOT-OBSERVED": "3 rows re-filed MEASURED-ABSENT, the state their cells report (returns s3.5)",
+    "RETIRE-SIGNIN-INTERSTITIAL": "P N13 returned (returns s3.5)",
+    "RETIRE-VOICE-CAPTURE": "M M19 returned: an attachment route is unmeasured (returns s3.5)",
+}
 
 
 # ---------------------------------------------------------------------------
@@ -565,7 +648,8 @@ def family_problems(families: dict[str, Family], root: pathlib.Path) -> list[str
 
 
 def row_problems(rows, hay, families: dict[str, Family],
-                 root: pathlib.Path) -> tuple[list[str], list[str], list[str]]:
+                 root: pathlib.Path,
+                 emptied: dict[str, str] | None = None) -> tuple[list[str], list[str], list[str]]:
     """(structural problems, UNTRACED rows, LIFTED rows).
 
     The second and third lists are the VERDICT, and each fails the run under its
@@ -603,6 +687,11 @@ def row_problems(rows, hay, families: dict[str, Family],
             if unknown:
                 problems.append(f"{tag}: unknown family {unknown}")
                 continue
+            declared = [f for f in fids if f in (EMPTIED if emptied is None else emptied)]
+            if declared:
+                problems.append(
+                    f"{tag}: filed under {declared}, which EMPTIED declares holds no row -- "
+                    f"re-filing a row there means removing the declaration, with its reason")
             primary = families[fids[0]]
             if b.get("op") != primary.op:
                 problems.append(

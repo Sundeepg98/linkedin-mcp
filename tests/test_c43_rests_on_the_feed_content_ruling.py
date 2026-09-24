@@ -79,9 +79,18 @@ _CENSUS = (
 
 _ROW = re.compile(r"^\|\s*([CM]\d+)\s*\|[^|]*\|[^|]*\|\s*\*{0,2}([A-Z-]+)\*{0,2}\s*\|")
 
-#: The row, the state its retirement requires, and the one-line why.
+#: The row, the state the binding requires, and the one-line why.
+#:
+#: GAP SINCE 2026-09-23, NOT EXCLUDED-RULED, and the ruling did not change.
+#: Lane R returned the row on the orchestrator's delegated call
+#: (``_audit/2026-09-23-exclusion-returns.md`` section 3.4): the
+#: FEED-CONTENT-READ-RULING is a lead's, the operator never made it, and a
+#: lead's ruling is not one of the census's four written grounds. The ruling
+#: still ships and is now the row's NAMED BLOCKER, so the coupling keeps its
+#: point -- put ``text`` into ``feed._PERMITTED_PARAMETER_NAMES`` and this
+#: file goes red, telling you the row's blocker just moved.
 ROW_ID = "C43"
-REQUIRED_STATE = "EXCLUDED-RULED"
+REQUIRED_STATE = "GAP"
 
 #: Parameter names that would carry a post's TEXT or an author's NAME into a
 #: feed reader. The ruling forbids exactly these, and ``feed.py``'s own
@@ -134,10 +143,17 @@ def test_the_row_is_present_and_retired() -> None:
         "nobody can check." % (ROW_ID, _CENSUS.name)
     )
     assert states[ROW_ID] == REQUIRED_STATE, (
-        "%s carries state %r but is retired on the FEED-CONTENT-READ-RULING. "
-        "If the row is being re-opened, remove this binding in the same "
-        "commit and say which ruling changed."
-        % (ROW_ID, states[ROW_ID])
+        "%s carries state %r, but the binding requires %r: the row is GAP "
+        "with the FEED-CONTENT-READ-RULING as its named blocker. If its state "
+        "is legitimately moving, change this binding in the same commit and "
+        "say which ruling changed."
+        % (ROW_ID, states[ROW_ID], REQUIRED_STATE)
+    )
+    line = next(ln for ln in _CENSUS.read_text(encoding="utf-8").splitlines()
+                if (m := _ROW.match(ln)) is not None and m.group(1) == ROW_ID)
+    assert "FEED-CONTENT-READ-RULING" in line, (
+        "%s is GAP on the FEED-CONTENT-READ-RULING but its cell does not name "
+        "that ruling as its blocker" % ROW_ID
     )
 
 
