@@ -1762,4 +1762,11 @@ Baseline and restored: 104 passed.
 **GATES:** the admission, L1-admission, boundary-invariant, blast-radius,
 search-blast-radius and prose tests, 142 passed; the address table's checker
 91 of 91 green with the new also-driven verdict; the census instruments as
-before.
+before. Then, on the committed tree (`7b38ffd`), every test file that drives
+the read boundary (68), the 18 corpus-wide guards and the census and
+document guards -- 93 files: 5918 passed, 4 skipped, 1 red, and the red was
+real: `test_the_census_prose_matches_the_boundary` reads the allowlist COUNT
+out of a census correction row, which still said 49. The row now says 50
+and names this line as the latest admission (the next commit). The full
+suite was not run locally: `readonly.py` is imported by nearly every test
+file, so the plan widens, and by order that run is CI's.
