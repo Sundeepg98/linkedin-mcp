@@ -1,8 +1,8 @@
 {
-  "_measured": "f65ec88, 2026-09-19, one Windows laptop (3.13.14), serial run in a detached worktree, NOT a quiet box -- short foreground test batches overlapped parts of it || PLUS FIVE FILES added 2026-09-24 at the live lane's merge of master (5f11f1e), measured by a junit run of those five alone on the same laptop, serially, NOT a quiet box: six lanes' suites were running, so these seconds are high rather than low. _tests is still the base run's collected count; the five add 5 files and 218.6s.",
-  "_files": 162,
+  "_measured": "f65ec88, 2026-09-19, one Windows laptop (3.13.14), serial run in a detached worktree, NOT a quiet box -- short foreground test batches overlapped parts of it || PLUS FIVE FILES added 2026-09-24 at the live lane's merge of master (5f11f1e), measured by a junit run of those five alone on the same laptop, serially, NOT a quiet box: six lanes' suites were running, so these seconds are high rather than low. _tests is still the base run's collected count; the five add 5 files and 218.6s. || PLUS TWO FILES added 2026-09-24 at lane L7's merge of master 9b9a4d0, measured by a junit run of those two alone on the same laptop, serially, NOT a quiet box: other lanes' suites were running, so these seconds are high rather than low. _tests is still the base run's collected count; the two add 2 files and 147.2s.",
+  "_files": 164,
   "_tests": 5736,
-  "_total_seconds": 1164.6,
+  "_total_seconds": 1311.8,
   "seconds": {
     "tests/test_a_correction_is_findable_from_the_claim.py": 3.519,
     "tests/test_a_covered_row_names_the_artifact_that_covers_it.py": 0.074,
@@ -65,6 +65,7 @@
     "tests/test_launch_boundary.py": 0.557,
     "tests/test_leakwalk.py": 0.348,
     "tests/test_live_lane_session_harness.py": 0.645,
+    "tests/test_mark_company_interest.py": 66.773,
     "tests/test_membership_row.py": 0.289,
     "tests/test_membership_tally.py": 0.148,
     "tests/test_menus.py": 0.358,
@@ -92,6 +93,7 @@
     "tests/test_probe_interaction_budget.py": 0.804,
     "tests/test_probe_navigation_budget.py": 2.549,
     "tests/test_probe_redaction.py": 0.31,
+    "tests/test_profile_editor_commit.py": 80.442,
     "tests/test_profile_pdf_download_is_blocked_on_transport.py": 0.124,
     "tests/test_profile_version_gate.py": 0.817,
     "tests/test_profile_views_fixture.py": 15.412,
