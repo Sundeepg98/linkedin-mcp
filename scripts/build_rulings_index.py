@@ -434,8 +434,9 @@ REGISTER: tuple = (
     ),
     Ruling(
         id="FEED-CONTENT-READ-RULING",
-        claim="Feed content may be read as COUNTS AND RELATIONS ONLY, never "
-              "text or names.",
+        claim="AMENDED 2026-09-24 by NAMES-AT-RUNTIME for what a read RETURNS "
+              "at runtime (what is STORED is unchanged). Feed content may be "
+              "read as COUNTS AND RELATIONS ONLY, never text or names.",
         binds="capability class -- reads of feed and post content",
         document="_audit/2026-09-05-lead-rulings-round-two.md",
         anchor="`FEED-CONTENT-READ-RULING` -- COUNTS AND RELATIONS ONLY",
@@ -465,7 +466,8 @@ REGISTER: tuple = (
         id="SEARCH-ADMISSION-APPROVED-FIVE-CONDITIONS",
         claim="The search-results admission is APPROVED IN PRINCIPLE under "
               "five binding conditions, one of which is that nothing is FIRED "
-              "from that surface.",
+              "from that surface. Condition 1's name-free shaper AMENDED "
+              "2026-09-24 by NAMES-AT-RUNTIME for runtime returns.",
         binds="address family -- /search/results/",
         document="_audit/2026-09-19-two-census-conventions-ruled.md",
         anchor="RULED: APPROVED IN PRINCIPLE. FIVE CONDITIONS, ALL BINDING.",
@@ -1048,15 +1050,58 @@ REGISTER: tuple = (
     Ruling(
         id="WHO-WHICH-COUNTS-ARE-NOT-DELIVERY",
         claim="A row whose payload is WHO (people) or WHICH (items of other "
-              "people's content) is not delivered by a count-only reader under "
-              "the shaper doctrine: GAP, pending the operator's names-and-titles "
-              "question. Filters and aggregates are delivered by counts.",
+              "people's content) is not delivered by a count-only reader: GAP. "
+              "Filters and aggregates are delivered by counts. The operator "
+              "answered the names-and-titles question 2026-09-24 "
+              "(NAMES-AT-RUNTIME): such rows now wait on a name-returning "
+              "reader, not on the doctrine.",
         binds="census convention -- count-only readers",
         document="_audit/2026-09-24-rulings-notify-veto-and-who-which.md",
         anchor="RULED: (orchestrator, 2026-09-24, delegated) A ROW WHOSE PAYLOAD "
                "IS WHO (a",
         note="Orchestrator's call under OUTWARD-ACTS-NEED-THE-OPERATOR; "
              "overridable. Precedent: N 162 and N 180.",
+    ),
+    Ruling(
+        id="NAMES-AT-RUNTIME",
+        claim="A read whose capability is people, or which items of other "
+              "people's content, RETURNS them as its result -- names, and "
+              "group and event titles -- with the risks mitigated at runtime. "
+              "What is stored is unchanged: no third party's name in a "
+              "tracked file.",
+        binds="read results -- people, groups and events",
+        document="_audit/2026-09-24-rulings-names-at-runtime.md",
+        anchor="RULED: (operator, 2026-09-24 08:11, verbatim) \"It's not about "
+               "returning",
+        aliases=("names at runtime",),
+        note="The operator's ruling, verbatim in its document. Amends the "
+             "2026-09-05 name-free doctrine for runtime returns; answers "
+             "WHO-WHICH-COUNTS-ARE-NOT-DELIVERY's question.",
+    ),
+    Ruling(
+        id="PEOPLE-DATA-MITIGATIONS",
+        claim="People data is returned under six mitigations, each enforced by "
+              "code and a test: declared fields only; sanitised and marked "
+              "untrusted; never stored; bounded to one page per call; visible "
+              "only (no de-anonymising); never a target by itself.",
+        binds="read results -- people, groups and events",
+        document="_audit/2026-09-24-rulings-names-at-runtime.md",
+        anchor="RULED: (orchestrator, 2026-09-24, applying NAMES-AT-RUNTIME) "
+               "PEOPLE DATA IS",
+        note="Orchestrator's call applying the operator's ruling; overridable.",
+    ),
+    Ruling(
+        id="OUTWARD-CLASSES-BUILT-BEHIND-GRANTS",
+        claim="Repost or share, endorse or recommend, and delete or withdraw "
+              "one of his own items are BUILT behind the single-use grant, off "
+              "by default, fired only at a target he names. PERMANENTLY_"
+              "FORBIDDEN keeps only entries whose grounds are mitigations.",
+        binds="writes -- the classes ruling (b) did not name",
+        document="_audit/2026-09-24-rulings-names-at-runtime.md",
+        anchor="RULED: (orchestrator, 2026-09-24, applying the operator's 08:11 "
+               "principle)",
+        note="Orchestrator's call applying the operator's 08:11 principle and "
+             "OUTWARD-ACTS-NEED-THE-OPERATOR; overridable.",
     ),
 )
 
