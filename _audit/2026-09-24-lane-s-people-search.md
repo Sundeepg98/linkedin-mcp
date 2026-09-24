@@ -907,12 +907,82 @@ roster annotations now say the admission is made.
 **THREE GUARDS WENT RED ON THE ITEM-2 COMMIT, AND A SECOND COMMIT FIXED THEM**
 (3895 passed, 3 failed). The identity guard read a urn spelled with a digit
 run in the new test file's refusal corpus -- now built from the invented id,
-as the groups boundary test builds its own; the census prose guard caught
-`messaging-and-content.md` still saying the allowlist holds 49 patterns --
-now 53, with the rosters and the D2 edit named in the cell; and the
-correction guard wanted `J 112`'s citation of this record triaged -- the
-matched word is `wrong`, in that row's own sentence about a containment
-matcher.
+as the groups boundary test builds its own. The census prose guard compares
+the allowlist count the messaging slice states with the shipped tuple, which
+had grown to 53; the slice's cell now says 53 and names the rosters and the
+D2 edit. And the citation guard wanted `J 112`'s citation of this record
+triaged: the word it matched sits in that row's own sentence about a
+containment matcher.
+
+### D. Item 3 -- the WHO/WHICH rule, row by row
+
+The rule as ordered: a row whose payload is WHO (people) or WHICH (items of
+other people's content, such as groups or events), served by a count-only
+reader, is GAP, its blocker the name-free shaper doctrine pending the
+operator's question, with a REOPENER; a row whose payload is an AGGREGATE or a
+FILTER, delivered by a count or aggregate reader, can reach COVERED-UNFIRED
+once built. Each row below is decided by its OWN words, and the reason is
+written into its cell (and its address-table note).
+
+**NO ROW'S STATE MOVED**: every row here is GAP before and after, because no
+reader exists -- none of these pages has been captured. What moved is each
+row's BLOCKER, and for six rows the address table's gate.
+
+| row | its words | payload | verdict | gate |
+|---|---|---|---|---|
+| `N 104` | Find an organization's Page by searching for it | an organisation's Page | REACHABLE, if the page draws numeric ids | MEASURE |
+| `N 161` | Search for groups by name or keyword | WHICH groups | doctrine | MEASURE -> RULING |
+| `N 179` | Search for events by keyword ... Events tab | WHICH events | doctrine | MEASURE -> RULING |
+| `M C70` | Search for content within Groups | WHICH posts | doctrine, and an unmeasured address | n/a (refused) |
+| `N 165` | View the full member list of a group | WHO | doctrine | MEASURE -> RULING |
+| `N 177` | Find people you know through shared group membership | WHO | doctrine | MEASURE -> RULING |
+| `N 188` | View the complete attendee list of an event | WHO | doctrine | MEASURE -> RULING |
+| `N 189` | See which of your 1st-degree connections ... attend | WHO | doctrine, and a refused filtered spelling | n/a (refused) |
+| `N 100` | Use a school's alumni tab to find and contact alumni | WHO, and a write | doctrine for the read half | MEASURE -> RULING |
+| `N 178` | See which groups a member belongs to | WHICH, on a third party's profile | doctrine, and NEEDS-TARGET | n/a (refused) |
+| `N 102` | Read employee insights on a Page's People tab | AGGREGATE | REACHABLE once built | MEASURE |
+| `J 108` | People tab (titles, study areas, skills, how connected) | AGGREGATE | REACHABLE once built; one facet may be WHO | MEASURE |
+| `N 99` | View the Alumni page for your school | AGGREGATE | REACHABLE once built | MEASURE |
+| `J 112` | School Page Alumni tab | AGGREGATE | REACHABLE once built | MEASURE |
+
+The doctrine rows carry, verbatim in their cells: "BLOCKER, NAMED: the
+name-free shaper doctrine (`_audit/2026-09-05-lead-rulings-round-two.md`: this
+server does not publish names), pending the operator's question on returning
+names at runtime" -- with "here, which groups / events / posts" on the WHICH
+rows -- and a REOPENER naming the ruling that would reopen each: the operator
+ruling that a search may return which groups, events or posts it found, or
+that roster reads may return who, at runtime.
+
+**THE NUMERIC-ID QUESTION FOR `N 104`, ANSWERED.** Yes, on the row's own
+words, IF the companies results page draws a numeric organisation id per
+result. The row's query names the organisation; what it lacks is where the
+Page is, and the package already publishes an organisation by its numeric
+Page address (`company_page.company_page_url`, "a digit run cannot be a
+name"). A reader returning `company_page_url(<id>)` per result therefore
+delivers "find an organization's Page by searching for it": the search is his
+keyword, the Page is its address. The limit, stated: the Pages come back in
+LinkedIn's order and by address, so where a name is ambiguous the choice is
+his. And the branch that says no: if the cards carry slugs only, the reader
+cannot publish them (a slug is a name) and cannot resolve them to numbers
+without a load per result aimed by page content, which the navigation-
+derivation guard forbids. Capture F.1 reads which branch the page is on.
+
+**WHY THE SAME ANSWER DOES NOT CARRY TO `N 161` OR `N 179`**, which a reader of
+the table above might expect, given that group and event ids are digit runs
+too. Two reasons, both the rows' own: (1) their keyword DISCOVERS items he does
+not already know -- "by name or keyword", "by keyword" -- so the payload is
+which items exist, where `N 104`'s query already names the organisation; and
+(2) the census has ruled on exactly this pairing already.
+`linkedin_group_memberships` publishes the numeric ids of the groups LinkedIn
+recommends (its `others` tally carries `identifiers`), and `N 162` -- browse
+recommended groups -- is COVERED-CANNOT-DELIVER all the same: how many, never
+which. `N 180` is the events twin. An id says where a group is; it does not
+say which group it is.
+
+**`N 100` AND `J 112` ARE NOT ON THE ORDER'S LIST** and were decided anyway,
+because the item-2 admission moved their address: `N 100` is `N 99`'s tab with
+a WHO payload and a write half; `J 112` is `N 99`'s tab in the jobs slice, an
+AGGREGATE.
 
 ### F. Capture specs for live session 2
 

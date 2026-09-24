@@ -351,7 +351,9 @@ DECIDED_SINCE_TRIAGE: dict[str, str] = {
             "MEASURE), so a capture and a reader remain",
     "N 100": "MEMBER-ROSTERS-AS-BOUNDED-READS: the same school People tab; "
              "an admission and a reader -- admitted in lane S's follow-up "
-             "(2026-09-24), so a capture and a reader remain",
+             "(2026-09-24), and now held by a DIFFERENT question: finding "
+             "alumni is WHO, so the name-free shaper doctrine under the "
+             "WHO/WHICH rule, pending the operator; bucket-3 gate RULING",
     "N 102": "MEMBER-ROSTERS-AS-BOUNDED-READS: a Page's People tab is a "
              "roster he can open; an admission and a reader -- admitted in "
              "lane S's follow-up (2026-09-24), so a capture and a reader "
@@ -364,19 +366,23 @@ DECIDED_SINCE_TRIAGE: dict[str, str] = {
              "is discharged by the package's own sanctioned routes",
     "N 161": "D2-SEARCH-VERTICALS-WIDENED: the groups vertical is admitted "
              "in principle, and on the boundary since lane S's follow-up "
-             "(2026-09-24, bucket-3 gate MEASURE); it needs a capture and a "
-             "reader",
+             "(2026-09-24); now held by a DIFFERENT question -- which groups "
+             "is WHICH, so the name-free shaper doctrine under the WHO/WHICH "
+             "rule, pending the operator; bucket-3 gate RULING",
     "N 177": "D3-UNREGISTERED-REFUSAL-IS-NOT-A-RULING and "
              "MEMBER-ROSTERS-AS-BOUNDED-READS: a group's member directory; "
              "an admission and a reader -- admitted in lane S's follow-up "
-             "(2026-09-24), so a capture and a reader remain",
+             "(2026-09-24), and now held by a DIFFERENT question: the people "
+             "are WHO, so the name-free shaper doctrine under the WHO/WHICH "
+             "rule, pending the operator; bucket-3 gate RULING",
     "N 178": "D3-UNREGISTERED-REFUSAL-IS-NOT-A-RULING: GAP on an admission "
              "and a reader; its live proof loads another member's profile, "
              "so the operator names that member",
     "N 179": "D2-SEARCH-VERTICALS-WIDENED: the events vertical is admitted "
              "in principle, and on the boundary since lane S's follow-up "
-             "(2026-09-24, bucket-3 gate MEASURE); it needs a capture and a "
-             "reader",
+             "(2026-09-24); now held by a DIFFERENT question -- which events "
+             "is WHICH, so the name-free shaper doctrine under the WHO/WHICH "
+             "rule, pending the operator; bucket-3 gate RULING",
     "P C8": "D4-NO-OWN-BROWSER-CONTEXT: the download transport is the "
             "DevTools download behaviour on the attached browser",
 }
