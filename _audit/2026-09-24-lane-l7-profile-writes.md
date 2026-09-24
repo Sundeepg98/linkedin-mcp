@@ -965,6 +965,74 @@ suite is CI's on push. Run locally instead, on a box reading 100% CPU with other
    ignored-path, prose-claim, page-text, identity, credential and person-name guards, with the shard
    table's, ignore-entry and impact-gate tests, 4 workers: **2086 passed**.
 
+### F.2 `P B9`, the Premium badge's show / hide -- SELF-PRIVATE; NOT BUILT, BLOCKED ON THE AIM
+
+**ON RECORD NOW.** The capture puts the control on record: the SECOND of the two unnamed switches in the
+intro editor's settings row, in the block whose title reads 'Profile Premium Badge'. The FIRST is the
+Open Profile switch -- census row `P B10`.
+
+**THE CLASS: SELF-PRIVATE, and the reason.** Section 6 classed it so before the capture; the evidence
+does not move it. Showing or hiding the badge changes what viewers of his profile see -- as a city or a
+headline does, and those are SELF-PRIVATE by the ruling `SELF-PROFILE-EDITS-NOT-OUTWARD`. Section 2's rule turns
+on whether the act's POINT is other people, not on whether others can see it: VISIBLE-TO-OTHERS is a
+signal to a company's recruiters, a frame whose point is a message ("open to work", "hiring"), a named
+third party's endorsement. A membership badge shown or hidden carries no message he authors, targets no
+one, notifies no one, broadcasts nothing and reverses with the same switch -- the same class as `P B8`'s
+Top Voice badge, and for the same reason.
+
+**WHY IT IS NOT BUILT -- EXACTLY.** A toggle kind in the family would press the badge's switch. Nothing
+aims that press. **No attribute tells this switch from the Open Profile switch beside it:** the two
+blocks differ only in a key of random-UUID shape and an input id of the shape React generates (random
+by those shapes; one render is on record), and both wrappers carry the same accessible name. What does
+tell them apart is each block's visible title, which the family does not aim by, and the ORDER of the
+two blocks. Order is enough for the save gate to know that neither is a notify
+control (F.1), because there which is which changes nothing. It is not enough to aim a press: a render
+that drew the two the other way round -- one reordering by LinkedIn, nothing this server could see --
+would turn an order-aimed press on the badge into a change to Open Profile, which decides who may
+message him without a connection: row `P B10`, a permission setting nobody has admitted. The restore
+would press the same wrong switch back, so the damage would be bounded, but the write itself would be
+one no ruling covers, and its receipt would report the badge.
+
+**WHAT LIFTS IT -- any one of:**
+1. **LinkedIn gives the switch an accessible name of its own** (today its `label` is drawn empty). The
+   family aims by name; the build would then be the family's ordinary toggle.
+2. **A render shows a stable attribute that tells the two apart** -- a test id, a name, anything not
+   random by its shape. A re-capture checks it in one navigation to the admitted editor, no press --
+   and a second render is also the first measurement of whether today's two keys really change.
+3. **A ruling admitting the block's title as the aim, compared inside the page.** The title is a
+   LinkedIn UI string, not his data, and the comparison can run in the page's own selector engine, so no
+   text crosses into this process. This is the cheapest lift and it is a decision, not a build: it is
+   the orchestrator's to take or refuse.
+
+With any of them the build is offline: the fixture, its builder and the recognition already carry the
+structure, the grant is the family's, off by default, and the restore is the same switch pressed back,
+tested against the fixture before any live proof.
+
+**CENSUS.** `P B9` stays GAP. Its cell gains the follow-up note, and its class-table line in
+`_audit/_census/write-classes.tsv` moves from `queued:INTRO-EDITOR-FULL-READ` (C1 is done) to
+`queued:NO-ATTRIBUTE-AIMS-THE-SWITCH`.
+
+**A FINDING FOR ANOTHER OWNER -- raised, not ruled.** `P B10` is GAP on "awaiting admission by name":
+its blocker, as its cell records, is that the toggle sits behind the refused settings pages. The capture
+shows the same Open Profile switch drawn IN THE INTRO EDITOR, an admitted address, as block 1 of this
+row. That is a second route to the control that passes through no settings page. What it changes for
+`P B10` -- its class ("a toggle that changes what OTHER members see of him or can do toward him") and its
+admission -- is that row's owner's call; this lane does not touch the row.
+
+**GATES (item 2).** The fourteen census instruments -- `census_completion --check`, `count_census_states`,
+`check_write_classes`, `check_read_addresses`, `ruling_holds`, `pin_census_rows --check`,
+`measure_pointer_graph --check`, `classify_writeoff_reasons --check`, `check_exclusion_basis`,
+`check_jobs_directions`, `check_gap_rows_on_refused_addresses` and the three generators' `--check` --
+exit 0 before the edit and after it, and three of them print byte-identical output across it
+(`count_census_states`, `check_write_classes`, `check_gap_rows_on_refused_addresses`: the gap-rows pin does
+not move, because the note names no address). Nothing generated needed regenerating. Then, 4 workers,
+the census and pin guards a cell and a class line can move, the doc guards over this record, and the
+18 corpus-wide guards: **1 failed, 3112 passed** -- and the one was this section's own:
+`test_an_asserted_name_resolves.py::test_no_new_asserted_name_is_absent` read
+`SELF-PROFILE-EDITS-NOT-OUTWARD`, written after the word "under", as a BLOCKER name that resolves nowhere
+(it is a ruling). Reworded to "by the ruling"; the checker then finds nothing in this record, and that
+file with the cited-sha and correction guards: **65 passed**.
+
 ## Live queue
 
 Loads counted off the code: `linkedin_profile_editor_values` and `linkedin_profile_editor_fields`
