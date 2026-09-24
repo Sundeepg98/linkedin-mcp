@@ -775,9 +775,9 @@ NOT_A_CORRECTION: dict[tuple[str, str], str] = {
         "is false while leaving it untouched."
     ),
     ("messaging-and-content.md", "2026-09-23-live-lane-session-1.md"): (
-        "TABLE-ROW PROXIMITY. SIX lines cite the session document -- `M33`, "
-        "`M43`, `M49`, `C38`, `C48`, `C85` -- and the windows of `M49` and "
-        "`C48` hold no correction vocabulary at all. The other four, read window "
+        "TABLE-ROW PROXIMITY. SEVEN lines cite the session document -- `M33`, "
+        "`M43`, `M49`, `C38`, `C48`, `C72`, `C85` -- and the windows of `M49` and "
+        "`C48` hold no correction vocabulary at all. The other five, read window "
         "by window: `M33` and `M43` (NOT OPENED on a measured badge reading) sit two rows "
         "above `M35` ('the same undercount 3.10 corrected') and `M45` (a "
         "'superseded' in its own history); `C38` (CAPTURED) sits below `C36` "
@@ -785,10 +785,16 @@ NOT_A_CORRECTION: dict[tuple[str, str], str] = {
         "ONE table line, where the matched `false` is its own 2026-09-21 "
         "paragraph -- 'nothing this census publishes had to be false', about "
         "the direction cell -- two days older than this session's NEEDS-TARGET "
-        "paragraph on the same line. No citing line withdraws anything from "
-        "the session document. **WHAT WOULD MAKE THIS ENTRY WRONG:** any of "
-        "those rows asserting that something IN the session document is false "
-        "while leaving it untouched."
+        "paragraph on the same line. `C72` (added 2026-09-24; its session-1 "
+        "citation predates that and was missed here) is a SELF-CORRECTION IN "
+        "PLACE: its 'CORRECTED 2026-09-24' paragraph withdraws the cell's OWN "
+        "earlier 'whatever happens' sentence, and the session document it cites "
+        "carries the same correction in place (its Part 2 (a), with pointers at "
+        "Entry 11 and at findings 1 and 2); `C70` two lines up carries an older "
+        "wave's 'correction', 'wrong' and 'false'. No citing line withdraws "
+        "anything from the session document. **WHAT WOULD MAKE THIS ENTRY "
+        "WRONG:** any of those rows asserting that something IN the session "
+        "document is false while leaving it untouched."
     ),
 
     ("network.md", "2026-09-21-the-fires-and-the-controls.md"): (
