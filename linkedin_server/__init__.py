@@ -48,13 +48,14 @@ mutation count from ``SANCTIONED_MUTATIONS``, and went red on its own three
 hours after the table moved. It is left standing above rather than edited,
 because the correction is the record.
 
-WHAT IS TRUE, measured rather than remembered: thirteen write tools ship, seven
+WHAT IS TRUE, measured rather than remembered: fourteen write tools ship, seven
 sanctioned mutating calls exist, writes are off unless a per-process flag is
 set, and every write needs a single-use token from its own preview -- a token
 that works once, and a redeemed grant that ``perform`` will not act on twice.
-(This read "twelve write tools" until 2026-09-23, when
-``linkedin_follow_company_page`` shipped; the mutating-call count did not move,
-because its click is ``perform``'s existing one.) See
+(This read "thirteen write tools" until 2026-09-24, when
+``linkedin_mark_company_interest`` shipped, and "twelve" until 2026-09-23, when
+``linkedin_follow_company_page`` did; the mutating-call count moved for
+neither, because each click is ``perform``'s existing one.) See
 ``writes.py``, and prefer ``server.py``'s docstring over this one for counts,
 because that one is checked.
 """

@@ -104,6 +104,7 @@ PINNED_TOOL_SURFACE: dict[str, tuple[str, ...]] = {
     "linkedin_login": ("wait_seconds",),
     "linkedin_login_browser": ("wait_seconds",),
     "linkedin_logout": ("confirm",),
+    "linkedin_mark_company_interest": ("confirm_token", "job_id"),
     "linkedin_my_activity_items": (),
     "linkedin_my_applications": ("limit",),
     "linkedin_my_profile": ("details", "include_skills"),
@@ -274,8 +275,17 @@ PINNED_TOOL_SURFACE: dict[str, tuple[str, ...]] = {
 #: census call, 2026-09-24) a count-only reader does not deliver them; they
 #: stay GAP on the name-free shaper doctrine, pending the operator. Not
 #: PROVEN: the lane was offline. See `_audit/2026-09-24-lane-s-people-search.md`.
-PINNED_TOOL_COUNT = 51
-PINNED_PARAMETER_COUNT = 74
+#: **RE-PINNED 2026-09-24 AT 52 TOOLS AND 76 PARAMETERS (lane L7, at its merge
+#: with master ff98a7f), MEASURED off the merged registry rather than added to
+#: the lane's own 52 and 71: one tool, two parameters, and the census row moves
+#: in the same merge.** `linkedin_mark_company_interest("job_id",
+#: "confirm_token")` banks `P I14` -- signal interest in working for a company
+#: -- GAP -> COVERED-UNFIRED. Not PROVEN: a WRITE built to ready-to-fire
+#: behind the flag and the single-use grant, never granted. Its two parameters
+#: are the two every gated posting write takes. See
+#: `_audit/2026-09-24-lane-l7-profile-writes.md`.
+PINNED_TOOL_COUNT = 52
+PINNED_PARAMETER_COUNT = 76
 
 
 def live_surface() -> dict[str, tuple[str, ...]]:
