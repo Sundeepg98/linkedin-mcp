@@ -10292,6 +10292,34 @@ reconstruction, the floor-lint control and timing scripts, and the second
 gate's selection and runner -- are declared disposable. Their numbers are in
 the lane record.
 
+### 67.10 THE FOUNDATION'S ENTRIES, 2026-09-24 TO 2026-09-27 (people data)
+
+Record: the lane record's `## Foundation: people data`. The rulings are
+NAMES-AT-RUNTIME and PEOPLE-DATA-MITIGATIONS
+(`_audit/2026-09-24-rulings-names-at-runtime.md`).
+
+| path | shown failing by |
+|---|---|
+| `linkedin_server/people_data.py` + `tests/test_people_data.py` | planted headlines -- instruction-shaped, zero-width and direction tricks, over-length -- and records built by hand with an unsanitised field, a widened envelope or a foreign link: each refused; the instructions paragraph held to name exactly `PEOPLE_TOOLS`, with a control naming one tool too few |
+| `tests/plantedpage.py` (`carries_the_plant_outside_records`, `text_ratchet`, `text_paths_a_baseline_may_not_record`) + the two driven guards' `returns_records` verdict | a plant beside a record, in a widened record, used as a key, and inside a record carried out by an exception or an `_error` envelope: each still text or a leak; the ratchet refuses a new text path, a stale entry and a converted reader that fell back, and the writers refuse to record a new text path |
+| `tests/test_page_strings_leave_only_as_people_records.py` | the first adopter's pre-adoption parser, driven on a planted list: four viewers for three and the plant twice outside a record; each guard convicting a planted leak after the redesign; the second adopter's two drives with the record builder swapped for the raw label: text, not records |
+| `tests/test_no_write_is_aimed_by_a_name.py` | twelve controls, fourteen cases, planted in strings: an unclassified kind, a class outside the vocabulary, a third name-aimed write, a converted debt write, a name parameter on a planted write tool, a person field classified as an id, a second write door, two routes disagreeing, a registered schema disagreeing |
+| `tests/test_fixtures_hold_only_synthetic_people.py` | an undeclared name planted in every slot kind, a declared one passing in each, a stale declaration, a failure message searched for the value it convicts, a conversation label splitting a declared name from an undeclared one; twelve places it does not read, each planted and shown unseen |
+| `tests/test_a_people_reader_reads_one_page.py` | thirteen planted shapes (a cursor, `while True`, `range(pages)`, a `load_more` helper, a large ceiling, a parameter bound, a module literal, a stepped slice, a navigating comprehension, a helper loop, a paging generator, recursion, a reader that loads no page), each convicted by its own rule and no other; the real reader with its slice removed, its bound raised, its `for` made a `while`: refused; a call-only derivation missing the real reader |
+| `tests/record_typed.py` + `tests/test_a_name_enters_a_shaper_only_as_a_record.py`, and the eight shaper tests that apply it | a bare name parameter planted into each of the seven modules turned its test red, 8 of 8; the same parameter annotated as a record turned it green, 8 of 8; the reading's own controls refuse a bare string, no annotation, `Any`, a list of strings and an unresolvable annotation |
+| `scripts/impact_gate.py` (`ALWAYS_RUN_DECLARED`) | with the declaration cleared, neither the oldest-Python lint nor the refused-address pin is in the floor -- the blind spot that let each turn CI red |
+| `linkedin_server/readonly.py` (`cdp_session`, `cdp_send`) + `tests/test_readonly.py` | a click by `Input.dispatchMouseEvent`, a browser-level session and a variable-method send each scanned clean before; after the merge, one more send or session in any other function of `cdp_download` is refused |
+| `tests/test_messaging_overview.py` (the DevTools split in `_read_path_gated`) | the transport's method table with an input method in it, an empty table, and a DevTools call in another module: each refused |
+
+### 67.11 DECLARED DISPOSABLE (THE FOUNDATION)
+
+The foundation's scratchpad helpers -- the adopter's red drive, the regenerator
+and the ASCII, re-escape and keep-both helpers, the three-way and working-tree
+boundary digest tables, the merged-registry and write-registry measurements,
+the hunk stager, the shaper-rewrite red script, the unpriced-file lister and
+the pricing merger, the gate selections and runners, and the child-transcript
+model search -- are declared disposable. Their numbers are in the lane record.
+
 ---
 
 ## 68. A DOWNLOAD TRANSPORT ON THE ATTACHED BROWSER, TESTED ON A FAKE CHROME THAT CAN SAY NO (lane-d, 2026-09-24)

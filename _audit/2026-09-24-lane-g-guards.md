@@ -1076,3 +1076,377 @@ green CI run's junit artifacts.
 2. **Census row `C85`** still names the retired resolver and census key. It goes
    to the live lane, as ordered.
 3. **The shard-timings margin**, I.5.
+
+## Foundation: people data
+
+Two orders, both the orchestrator's. **2026-09-24 08:34** applied the
+operator's NAMES-AT-RUNTIME (08:11, verbatim: "It's not about returning or not
+returning. The functionality is to return people's names as the result.
+During runtime, if you want to be careful, then follow the best procedure and
+practice to mitigate the risk.") as PEOPLE-DATA-MITIGATIONS -- six
+mitigations, one worked adopter (`linkedin_who_viewed_me`), the shaper tests
+rewritten around the record type, and three queued items. **2026-09-27 13:25**
+resumed the lane after a usage-limit restart: pin the WIP, finish the
+foundation, make lane L5's two `include_names` readers the SECOND worked
+adopter, integrate the then-current master ONCE, no new scope. The rulings
+document is `_audit/2026-09-24-rulings-names-at-runtime.md`.
+
+Every child was `general-purpose` -- four of them, one slice each, each told it
+shared the worktree, which files were its own, and not to commit. None of them
+could write a report file (the harness returns a child's findings as text), so
+their reports arrived as notifications and were reviewed against the files
+before anything was committed. Their model, measured rather than assumed:
+every assistant message in each of the four transcripts carries
+`claude-opus-5-5` (four of this lane's commit messages said so before it was
+measured; it held).
+
+### P.0 Commits, with their times from `git log`
+
+```
+e2e6273  09-24 09:41  impact gate: the oldest-Python lint and the refused-address pin run on every gate, declared
+6a14864  09-24 09:49  mutation scanner: a DevTools session is a mutation (lane D's 5.3)
+950cac8  09-24 10:00  ci: each shard keeps its junit in its artifact
+90e087b  09-27 13:21  WIP, pinned after the restart: the record, its sanitiser and marker, a record-aware walk
+26d32cc  09-27 14:23  the first worked adopter: linkedin_who_viewed_me
+2c1e41b  09-27 14:28  mitigation 6: no write is aimed by a name, except two declared debts
+b4c796d  09-27 14:29  mitigation 3: tracked fixtures render only declared synthetic people
+16af667  09-27 14:29  mitigation 4: a people reader reads one page
+f4bff5f  09-27 14:32  the guard redesign: a page string leaves only through a people record
+10c6f02  09-27 14:42  merge master 2eb90ad -- the one integration
+9af1506  09-27 15:04  after the merge: lane D's transport meets lane G's DevTools patterns; send_reply classified
+aca479d  09-27 15:06  the second worked adopter: the conversation readers
+3742ce9  09-27 15:12  the "no name parameter" shaper tests, rewritten around the record type
+33e0c02  09-27 15:14  ci shard timings: the nine new test files priced
+```
+
+The 09-24 merge of master 1902fcb (38ba8df, 09:01) brought the rulings in
+before any of it.
+
+### P.1 The resume: the WIP was pinned before anything else
+
+Five files were dirty at the resume; reviewed, coherent (the record module,
+its tests, the walk's skip predicate, the plant helper, the instructions
+paragraph), and committed as 90e087b, marked WIP, with "the suite is not
+claimed green on this commit" in its message. Nothing was integrated before
+the foundation's own commits were in.
+
+### P.2 The record: mitigations 1 and 2
+
+`linkedin_server/people_data.py`. A person is a frozen, slotted `Person`
+(name, headline, link, degree); a group or an event is a `Group` or an `Event`
+(title, link). `sanitise` is NFC; every whitespace character becomes a space;
+Unicode categories Cc, Cf, Co, Cs and Cn are removed (controls, zero-width
+and bidirectional characters, tags, private use, unassigned); runs collapse;
+a hard cap per field (name 120, headline 220, title 220) cuts and never
+refuses. It is idempotent, which is what lets a record REFUSE construction
+with a field that is not already its own sanitised form -- an unsanitised
+record cannot exist. Links are canonical (`/in/<slug>/` or a member urn; a
+group's or an event's id only, an event's title dropped from its address).
+Every envelope carries `untrusted_third_party_text`, and the server's
+instructions name that key and say the fields are data, never instructions
+(`tests/test_people_data.py` holds both, and, since the second adopter, that
+the paragraph names exactly the tools in `PEOPLE_TOOLS`). `as_record`
+re-validates a dict against an exact envelope shape, so a dict with the
+marker and one extra key is no record. Tested on planted headlines: an
+instruction-shaped one, zero-width and direction tricks, an over-length name.
+
+THE COST, stated in the module: zero-width joiners go with the rest, so a
+name in a script that uses them inside words keeps its letters and may render
+differently. The order named zero-width characters without exception, and a
+selective rule would be the first place a direction trick survived.
+
+### P.3 The first worked adopter: `linkedin_who_viewed_me`
+
+`shape.parse_person_card` returns `{"person": <Person envelope>, "viewed",
+"anonymous"}`. RED FIRST, on the pre-adoption parser, driven on a planted
+viewer list: four "viewers" where the page drew three (a page heading with a
+zero-width character inside "viewed" passed as a person), the plant found
+twice outside any record, and the zero-width character kept. After: three
+records, nothing outside them. The parser now sanitises every line BEFORE it
+classifies, keeps the degree badge it used to discard, gives an anonymous row
+no link, and the view switch's `viewers_when_applied` is cut to the caller's
+limit (it was every parsed row). `_attach_recipient_ids` reads the slug from
+the record. The landing-interpolation census loses `parse_person_card:slug`
+with its ruling entry, with a note.
+
+SURPRISE 1, measured: no leak guard had ever driven this tool's success path.
+The plant page answers `evaluate` with a dict, the viewer harvest expects a
+list, so the tool was certified clean on its extraction-failure path alone.
+`tests/test_page_strings_leave_only_as_people_records.py` drives it on a
+list-answering page.
+
+### P.4 The guard redesign: a page string leaves only through a record
+
+The order: "page strings leave ONLY through the declared record, and NEVER
+through an error field, a log record, a receipt, a cache or a fixture." Both
+driven guards learn one verdict, `returns_records`: the plant came back, and
+only inside records (`plantedpage.carries_the_plant_outside_records`, the
+record-aware walk). The leak checks run first and stay on the PLAIN walk, so a
+record in an exception or an `_error` envelope is a leak like any page string.
+`returns_text` becomes a legacy inventory dated 2026-09-24 that may shrink and
+may not grow: `text_ratchet`, asserted beside each guard's shrink check,
+refuses a new text path, a stale inventory entry and a converted reader that
+fell back, and both baseline writers refuse to record a new text path.
+Existing verdicts did not move over either committed baseline. ITS LIMIT: the
+inventory IS the committed baseline, so a text entry added to it by hand
+passes the ratchet -- the writers refuse it, and only the diff shows it; and
+a text path merged in from another branch's baseline arrives as inventory the
+same way.
+
+Each guard shown convicting AFTER the redesign, through its own code: the
+reader guard (a record beside page text, a widened record, a plant used as a
+key, a record carried out by an exception); the RaisingPage family (a library
+message laundered into a record) and its DEBUG log capture (a record's name
+in a log record); the page-text rule (a logged record built from the page);
+the envelope guard (a record in an `_error` envelope). Plus: the ratchet's
+controls, no declared people tool on the text inventory, and no module-level
+cache written on the record path (both adopters' functions, with a control).
+
+### P.5 Mitigation 3, fixtures: a slot reader, not a name detector
+
+`tests/test_fixtures_hold_only_synthetic_people.py` (the fixtures child).
+Names have no shape, so it reads the PLACES LinkedIn's markup puts a person
+-- a member link's first visible text, heading and picture alt, and
+aria-label templates -- over `git ls-files tests/fixtures`, and requires every
+value found there to be declared: `SYNTHETIC_PEOPLE` here, or
+`INVENTED_NAMES`, imported. Slots measured holding interface text were
+rejected; a member-link label no template knows is taken whole, so a new
+label shape fails closed. A failure prints the path, line, slot and a
+SHA-256 prefix, never the value: a CI log is a publication channel. Twelve
+places the guard does NOT read are planted and shown unseen. With the second
+adopter it gained the conversation label as a slot, split into participants
+so a declared name cannot vouch for one beside it, and declared the compose
+list's four names on that fixture's own "Its CONTENT is invented" header.
+
+### P.6 Mitigation 4: a people reader reads one page
+
+`tests/test_a_people_reader_reads_one_page.py` (the bounded child). The
+people-tool set is DERIVED -- functions referencing a record class through
+`people_data`, a fixed point over every module, the `@mcp.tool()` functions
+in it -- and held equal to `PEOPLE_TOOLS`. By reference, not by call,
+measured: the first adopter hands its builder to `dom.parse_all` as a value,
+so a call-only derivation finds no reader at all. No paging parameter, in the
+signature or the published schema; no pagination-shaped definition anywhere;
+every navigating loop a people tool reaches a plain `for` over a slice bounded
+by a config ceiling of at most 2; navigating recursion refused; thirteen
+planted shapes, each convicted by the rule it breaks and no other (16af667's
+message says twelve; the table holds thirteen). 80 passed on 3.13 and on
+3.10. `linkedin_open_messaging` loads two pages -- the receipt guard's
+list, then `/messaging/` -- and its names come from the second only.
+
+### P.7 Mitigation 5: visible only
+
+"LinkedIn Member" comes back as exactly that, with no link and no recipient
+id; a viewer drawn as a role at an employer comes back as drawn; `Person`
+never looks anywhere else for who a row was; `deanonymise_a_viewer` stays in
+`PERMANENTLY_FORBIDDEN` (asserted).
+
+### P.8 Mitigation 6: no write is aimed by a name -- except two debts
+
+`tests/test_no_write_is_aimed_by_a_name.py` (the writes child). Every
+`target_kind` in `writes.SANCTIONED_WRITES` is classified into a closed
+vocabulary with a one-line reason; the name-aimed actions are exactly
+`NAME_AIMED_DEBT`: `send_invitation` (`member`, his word for a person,
+matched against control labels) and `send_message` (the `member` half of its
+target, typed into the recipient typeahead). Both predate the ruling; they
+are declared as debt, not waived, and converting either fails the file until
+its entry goes. No write tool takes a name-shaped parameter beyond the two
+debt pairs, found off the syntax tree by two routes that must agree and held
+equal to the registered schema. Twelve controls -- fourteen cases -- and four
+link-or-id parameters that must pass (2c1e41b's message says seventeen
+controls; counted here from the file). The older
+`tests/test_no_write_tool_names_a_third_party.py` said a needle "is not
+forbidden and must not be"; that sentence now says "not forbidden by THIS
+file", with a dated paragraph pointing at the debt. At the merge, lane L5's
+`send_reply` (`thread_and_text`) was classified `id_and_own_text`: a thread
+id the caller supplies, never read off a page.
+
+### P.9 The "no name parameter" shaper tests, rewritten around the record type
+
+Eight tests over seven modules -- `groups` (twice), `search_results`,
+`anchors`, `company_root`, `group_page`, `recommendations`, `feed` -- each
+held its module name-free on `inspect.signature`. NAMES-AT-RUNTIME amended
+that doctrine for what a read returns, and the order said rewrite, not
+delete. `tests/record_typed.py` is the one reading all eight now apply: a
+parameter named like a person, a name or an address of one is refused unless
+its annotation is a people record (alone, in a container, or optional; an
+unresolvable annotation fails closed); needles, page text and a company stay
+refused outright. Shown both ways, per test: a BARE name parameter planted
+into each module turns its test red (8 of 8, the old failure kept) and the
+same parameter annotated as a record turns it green (8 of 8). The reading's
+own controls are `tests/test_a_name_enters_a_shaper_only_as_a_record.py`.
+On the real tree none of the seven modules takes such a parameter.
+
+### P.10 The one integration: master 2eb90ad
+
+Merged at 10c6f02, after the foundation's own commits and before the second
+adopter -- the adopter's code existed only on master, which is why the one
+integration came here rather than last. Eight conflicts, each from both
+sides: the instructions (master's pages_loaded sentence, then the people
+paragraph); `writes.py` (the composed fresh-render refusal, then lane L7's
+badge branch); the boundary freeze (both histories, and a note: the merged
+`readonly.py` equals the branch on every key but `_ALLOWED_URL_PATTERNS`,
+and master on every key it pins but `<functions>` and
+`_MUTATION_CALL_PATTERNS`, computed on each side's own copy of the test);
+the tool pin (56 tools and 88 parameters, MEASURED off the merged registry);
+the landing baseline (regenerated, equal to the union, 38 sites); the
+register (both sides); `RULINGS.md` and the blocker map (regenerated to a
+fixed point).
+
+The post-merge gate (81 files) found what the merge had joined: 5740 passed,
+6 failed. Four were one meeting -- lane D's `cdp_download` (P C8's download
+transport, on D4-NO-OWN-BROWSER-CONTEXT) under the DevTools patterns this
+lane added at lane D's own request; 6a14864's message had predicted exactly
+this ("its merge sanctions the three calls and rewords the docstring"). So:
+the docstring's call-shaped prose reworded; the one send and two sessions
+declared in `SANCTIONED_MUTATIONS` by function, with their argument, on the
+precedent of integration ruling (c); a control that one more send or session
+anywhere else in that module is refused; `SANCTIONED_MUTATIONS`
+e79a701b37ae9c39 -> e9d953efc8ab8d0e, the tree minus exactly the 35 added
+lines hashing to the prior pin on every key. `tests/test_messaging_overview.py`'s
+read-path gate imports a taxonomy in which both DevTools classes are gated by
+default; they stay gated everywhere else, and on that one module are judged by
+the METHODS its send can carry (one: `Browser.setDownloadBehavior`), shown
+refusing an input method in the table, an empty table, and any other module.
+The fifth was `send_reply`'s kind (P.8); the sixth the timings (P.13).
+
+### P.11 The second worked adopter: the conversation readers
+
+`linkedin_list_conversations` and `linkedin_open_messaging` with
+`include_names`. A row now carries `with`, a people record, and never the raw
+label; without `include_names` it keeps its `name` placeholder, unchanged.
+The reader still reads the raw label into its reading, which is not returned,
+and the shaper builds the record -- the first adopter's pattern:
+`threads.conversation_with` makes a `Person` of a one-to-one row and a title
+record of a group row (the row's group marker says which); `list_result`
+publishes it. `shape.messaging_overview` makes a `Person` of every label;
+ITS LIMIT, stated where a caller meets it: `/messaging/`'s label does not say
+how many people it names, so a group's label comes back in a person record
+too. Both tools joined `PEOPLE_TOOLS`, which the bounded file derives and
+holds.
+
+SURPRISE 2, the same blind spot by another route: the guards drive every tool
+with its defaults, `include_names` defaults to False, so no guard had ever
+seen a name cross either tool (both clean in the baseline). Section 1b of the
+invariant file drives both with `include_names`, on a page whose two rows are
+labelled with the plant, laced with a zero-width space and a direction
+override: only inside records, sanitised, a person and a title record;
+without `include_names` neither carries it; and each drive is shown failing
+-- with the builder swapped for the raw label, the same envelope is text.
+Lane L5's two tests moved to the record form without weakening: the names
+are read out of the records, a bare name beside one fails, the group row must
+be a title record.
+
+### P.12 The three queued items of 08:34
+
+- **The impact gate's floor** (e2e6273): `test_the_package_compiles_on_its_
+  oldest_python.py` and `test_gap_rows_on_refused_addresses.py` run on every
+  gate as DECLARED members -- what makes each corpus-wide lives in the script
+  it runs, which no detector reads; derived detection was measured and pulled
+  in eight files (one at 716 s) while still missing the census walker. Held,
+  with the control that clearing the declaration drops both.
+- **Lane D's 5.3** (6a14864): `cdp_session` and `cdp_send` in the mutation
+  scanner; three plants that scanned clean before are caught after.
+- **The CI junit artifact** (950cac8). DISK DISAGREED with the premise that CI
+  already uploaded each shard's junit: the artifact carried the JSON reports
+  only, which record counts, not per-file seconds. Each shard now keeps its
+  junit under a unique name; the totals job reads only JSON, so it counts
+  nothing new. The table can be rebuilt from the first green master run
+  after the merge.
+
+### P.13 Timings
+
+The merge left the table pricing 170 of 259 test files, under its two-thirds
+line. The nine files this branch added were measured by a junit run of those
+nine alone, serially, on a busy box (high rather than low): 292 tests, 36.6 s,
+the largest the write-receipt guard at 18.9 s. 179 of 260 priced after.
+
+### P.14 Gates run, and what did not run
+
+RUN, with the interpreter the repository's venv holds (3.13) unless said:
+
+- **The post-merge gate**, at 10c6f02: 81 files (every test file the branch
+  changes against master, the impact gate's corpus-wide floor, every
+  page-string, log, envelope and identity guard, the tool pin, the boundary
+  freeze, the three files the order names, the census instruments, the
+  adopter's tests), 5 workers, 514.5 s: 5740 passed, 6 failed, 1 skipped, 1
+  xfailed. The six are P.10's four and one, and P.13.
+- **Slices on the way**, each on the files it touched: the four foundation
+  children's files, 170 passed; the redesign's four, 550; the repair, the
+  second adopter and the invariant file, 716; the fixtures and identity
+  guards, 992; the eight rewritten shaper tests and their controls, 264;
+  `test_ci_shard.py`, 131.
+- **The final gate**, at 33e0c02: 113 files -- the post-merge selection plus
+  every test file that names `threads`, `messaging_overview`, `list_result`,
+  `people_data`, `cdp_download`, the server's instructions, either
+  conversation tool or `SANCTIONED_MUTATIONS` -- 5 workers, 970.1 s: 6723
+  passed, 2 failed, 4 skipped (symlinks this platform will not make), 1
+  xfailed. The two failures were claims the DevTools declaration moved: the P
+  C8 transport's vocabulary named in `readonly.py`'s prose (red since the
+  merge commit -- the post-merge gate had not selected that file, which reads
+  the package's TEXT, the data-dependency blind spot a name-scoped selection
+  has) and the package docstring's mutation count. Repaired in 1175ba5;
+  those two files and six neighbours re-run: 449 passed.
+- **The three files the order names** ran in both gates:
+  `test_the_package_compiles_on_its_oldest_python.py`,
+  `test_gap_rows_on_refused_addresses.py`, `test_ci_shard.py`.
+
+NOT RUN, deliberately:
+
+- **The full suite.** `scripts/impact_gate.py --against master --plan-only`:
+  62 changed paths, 242 of 259 test files (93%), which widens to the whole
+  suite. By order, not run locally; CI certifies at merge.
+- **The 3.10 cell**, except the bounded file (80 passed on 3.10, run by its
+  child) and the oldest-Python lint, which reads the source rather than
+  running it. CI's matrix runs 3.10.
+- **The final gate on the record commit.** The record touches `_audit/` only;
+  the census instruments and the register's own tests were re-run on it.
+
+### P.15 Open -- and for other owners
+
+- **Mitigation 6's debt.** `send_invitation` and `send_message` are still
+  aimed by a name; converting each to a link or member id the caller supplies
+  is the direction, and the debt file fails when one converts.
+- **For the next merges, by design.** Every new `target_kind` -- lane L8's
+  outward classes among them -- fails `test_no_write_is_aimed_by_a_name.py`
+  until it is classified in `TARGET_KIND_CLASS`; a write aimed by a name is a
+  ruling change, not a classification. A reader that starts building records
+  fails the bounded file until it joins `PEOPLE_TOOLS`, and the instructions
+  test until the paragraph names it.
+- **Receipts are covered for a library's message, not for page text.** All
+  fourteen of the branch's write tools were `not_driven` by the envelope
+  guard; `send_invitation`'s preview (`who_this_would_reach`) quotes the label
+  its needle matched, and lane L5's `send_reply` preview prints the
+  conversation's title, both in the confirm block. Mitigation 6 REQUIRES the
+  tool to report whom it resolved before it acts, and mitigation 3 says no
+  name in a receipt: the two meet in a preview, and whether a preview is a
+  receipt, or should carry that name as a record, is a ruling this lane did
+  not make.
+- **The insights reader** under `linkedin_who_viewed_me` returns LinkedIn's
+  labels and view names as page text: a baselined legacy path, pinned so the
+  plant may appear only under `$.insights`. Its `<p>` scan covers viewer rows;
+  narrowing it needs a live capture.
+- **The overview's group label** comes back in a person record (P.11).
+- **Other readers still return names as text** -- the reader baseline's
+  legacy inventory holds 40 `returns_text` readers. Not converted, by order.
+- **The DevTools declaration and split** (P.10) were made on the precedent of
+  ruling (c); both are the orchestrator's to overturn.
+- **`PERMANENTLY_FORBIDDEN` holds nine keys; the rulings name six** as the ones
+  whose grounds are mitigations. Not touched here: the rulings register is
+  another owner's.
+- **`INVENTED_NAMES` holds a real historical person's name**, unused in any
+  fixture; the fixtures guard accepts that table, so such a name would pass
+  there. For the table's owner.
+- **The Write tool decodes `\uXXXX` escapes into the characters they name.**
+  Twice in this lane a strict-ASCII file received non-ASCII bytes that way;
+  the files now build such characters with `chr()`, and the fixtures guard
+  asserts its own file stays ASCII.
+
+### P.16 The one cold verification pass
+
+One general-purpose child, cold, adversarial, launched on the final code
+(33e0c02) with this record in draft beside it: to break the three people
+tools, the redesigned guards, the ratchet, the derivation, the record-typed
+reading, the DevTools split and the conversation slot, and to spot-check this
+record's numbers. Its findings, and what was done about each, follow in the
+next commit.
