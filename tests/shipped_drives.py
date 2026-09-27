@@ -967,12 +967,15 @@ async def read_profile_detail_entries_as_shipped(page: Any) -> Any:
 #: one dialog. The city field's LABEL and VALUE are free page text the two
 #: readers PUBLISH, so here they are the plant; Save is the anchor's own name
 #: (``dom.EDITOR_ANCHOR_NAME``), a closed word the anchor rule counts.
-_EDITOR_CONTROLS = (
-    # name, name_source, tag, type, role, checked, value, value_source
-    (PLANT, "label-for", "input", "text", None, None, PLANT, "native"),
-    ("", "none", "input", "checkbox", "switch", True, None, "state_not_value"),
-    ("", "none", "input", "checkbox", "switch", True, None, "state_not_value"),
-    ("Save", "text", "button", None, None, None, None, "none"),
+_EDITOR_CONTROLS: tuple[dict[str, Any], ...] = (
+    {"name": PLANT, "name_source": "label-for", "tag": "input", "type": "text",
+     "role": None, "checked": None, "value": PLANT, "value_source": "native"},
+    {"name": "", "name_source": "none", "tag": "input", "type": "checkbox",
+     "role": "switch", "checked": True, "value": None, "value_source": "state_not_value"},
+    {"name": "", "name_source": "none", "tag": "input", "type": "checkbox",
+     "role": "switch", "checked": True, "value": None, "value_source": "state_not_value"},
+    {"name": "Save", "name_source": "text", "tag": "button", "type": None,
+     "role": None, "checked": None, "value": None, "value_source": "none"},
 )
 
 
@@ -981,22 +984,22 @@ def _editor_reading(values: bool) -> PageAnswer:
     four controls -- each ONLY the keys its reader projects; every other key
     the planted page's own."""
     controls = []
-    for index, (name, source, tag, kind, role, checked, value, value_source) in enumerate(
-        _EDITOR_CONTROLS
-    ):
+    for index, control in enumerate(_EDITOR_CONTROLS):
         shown: dict[str, Any] = {
-            "name": name, "name_source": source, "tag": tag, "type": kind, "role": role,
+            key: control[key] for key in ("name", "name_source", "tag", "type", "role")
         }
         if values:
+            value = control["value"]
             shown.update(
-                index=index, value=value, value_source=value_source,
+                index=index, value=value, value_source=control["value_source"],
                 value_chars=None if value is None else len(value), value_truncated=False,
             )
         else:
+            checked = control["checked"]
             shown.update(
                 disabled=False, checked=checked,
                 checked_source="native" if checked is not None else "none",
-                required=False if tag == "input" else None,
+                required=False if control["tag"] == "input" else None,
                 has_href=False,
             )
         controls.append(_planted_answer_with(**shown))
