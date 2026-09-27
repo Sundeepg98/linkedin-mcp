@@ -1055,19 +1055,30 @@ PINNED = {
     #: for `O6-O20`, the only collapse left.
     #: 783 AT THE ORCHESTRATOR'S MERGE OF LANE Y2'S FOLLOW-UP (2026-09-27), MEASURED:
     #: the P-R settings block itemized into 22 rows (P2-P23; Delete Data EXCLUDED-RULED).
-    "capabilities": 783,
     #: 712 AT THE ORCHESTRATOR'S MERGE OF LANE Y2'S FOLLOW-UP (2026-09-27), MEASURED:
     #: the P-R settings block itemized into 22 rows (P2-P23; Delete Data EXCLUDED-RULED).
-    "capabilities_achievable": 712,
     #: 71 AT THE ORCHESTRATOR'S MERGE OF LANE Y2'S FOLLOW-UP (2026-09-27), MEASURED:
     #: the P-R settings block itemized into 22 rows (P2-P23; Delete Data EXCLUDED-RULED).
-    "out_of_scope": 71,
     #: 698 AT THE ORCHESTRATOR'S MERGE OF LANE Y2'S FOLLOW-UP (2026-09-27), MEASURED:
     #: the P-R settings block itemized into 22 rows (P2-P23; Delete Data EXCLUDED-RULED).
-    "achievable": 698,
     #: 204 AT THE ORCHESTRATOR'S MERGE OF LANE Y2'S FOLLOW-UP (2026-09-27), MEASURED:
     #: the P-R settings block itemized into 22 rows (P2-P23; Delete Data EXCLUDED-RULED).
-    "adjudicated": 204,
+    #: LANE L7'S P B9 BUILD (2026-09-24), integrated over master 0e4f4b3,
+    #: MEASURED on the merged tree: `P B9` GAP -> COVERED-UNFIRED, the Premium
+    #: badge switch pressed through `linkedin_update_profile_field` and aimed
+    #: by its block's title compared in the page, never fired
+    #: (`_audit/2026-09-24-lane-l7-profile-writes.md`, Follow-up F.5). A W row
+    #: whose cell cites RELEASED BY SELF-PROFILE-EDITS-NOT-OUTWARD, as the six
+    #: intro-field edits do, so it enters bucket 1 held by no ruling. One row
+    #: changing class moves seven figures: adjudicated, delivered_broad and
+    #: unfired +1; gap and gap_write -1; b1_no_ruling and b1_released +1.
+    "capabilities": 783,
+    "capabilities_achievable": 712,
+    "out_of_scope": 71,
+    "achievable": 698,
+    #: 205 AT THE ORCHESTRATOR'S MERGE OF LANE L7'S P B9 (2026-09-27), MEASURED: P B9
+    #: (Premium badge) moved GAP -> COVERED-UNFIRED, released like the intro edits.
+    "adjudicated": 205,
     #: THE LIVE LANE'S FOUR ROWS, RE-DERIVED AT EACH OF ITS MERGES OF MASTER
     #: (2026-09-24; last over lane S): four rows fired live and banked
     #: (`_audit/2026-09-23-live-lane-session-1.md`). `P G6` COVERED-UNFIRED ->
@@ -1093,7 +1104,9 @@ PINNED = {
     #: L1's allowlist admissions, and b1_no_ruling 7 is P G6 entering bucket 1.
     #: 114 AT THE ORCHESTRATOR'S MERGE OF LANE D (2026-09-27), MEASURED: lane D
     #: moved `N 132` GAP -> COVERED-UNFIRED under D6-CAPABILITY-OVER-AFFORDANCE.
-    "delivered_broad": 114,
+    #: 115 AT THE ORCHESTRATOR'S MERGE OF LANE L7'S P B9 (2026-09-27), MEASURED: P B9
+    #: (Premium badge) moved GAP -> COVERED-UNFIRED, released like the intro edits.
+    "delivered_broad": 115,
     #: 79 since the live lane's merge (see `adjudicated`): P G6, N 134, P O3
     #: and M C72 COVERED-PROVEN.
     #: 75 and 21 since the bucket-1 merge: `M C41` fired live and moved from
@@ -1111,9 +1124,13 @@ PINNED = {
     #: 106 since the P-R block was itemized: `P3` and `P15` entered.
     #: 565 AT THE ORCHESTRATOR'S MERGE OF LANE Y2'S FOLLOW-UP (2026-09-27), MEASURED:
     #: the P-R settings block itemized into 22 rows (P2-P23; Delete Data EXCLUDED-RULED).
-    "gap": 565,
+    #: 564 AT THE ORCHESTRATOR'S MERGE OF LANE L7'S P B9 (2026-09-27), MEASURED: P B9
+    #: (Premium badge) moved GAP -> COVERED-UNFIRED, released like the intro edits.
+    "gap": 564,
     "cannot_deliver": 19,
-    "unfired": 35,
+    #: 36 AT THE ORCHESTRATOR'S MERGE OF LANE L7'S P B9 (2026-09-27), MEASURED: P B9
+    #: (Premium badge) moved GAP -> COVERED-UNFIRED, released like the intro edits.
+    "unfired": 36,
     #: 104 AT THE ORCHESTRATOR'S MERGE OF LANE Y2'S FOLLOW-UP (2026-09-27), MEASURED:
     #: the P-R settings block itemized into 22 rows (P2-P23; Delete Data EXCLUDED-RULED).
     "gap_read": 104,
@@ -1144,7 +1161,9 @@ PINNED = {
     #: 36 R2, 306 R3 over 358 lines).
     #: 354 AT THE ORCHESTRATOR'S MERGE OF LANE Y2'S FOLLOW-UP (2026-09-27), MEASURED:
     #: the P-R settings block itemized into 22 rows (P2-P23; Delete Data EXCLUDED-RULED).
-    "gap_write": 354,
+    #: 353 AT THE ORCHESTRATOR'S MERGE OF LANE L7'S P B9 (2026-09-27), MEASURED: P B9
+    #: (Premium badge) moved GAP -> COVERED-UNFIRED, released like the intro edits.
+    "gap_write": 353,
     #: All 54 are `jobs.md`, which has no per-row R/W column (56 until the
     #: lane-L3 merge built J 18 and J 39). Not a coincidence
     #: and not a defect in the finder: it is the whole of that slice's still-GAP
@@ -1327,6 +1346,11 @@ PINNED = {
     #:   (2026-09-24)         N 132 GAP -> COVERED-UNFIRED under D6, a read no
     #:                        ruling holds (+1 none). Counted on the tree merged
     #:                        with master 530227e, after lane Y2's line above.
+    #:   lane L7's P B9       13 standing / 0 / 0 / 22 none, 7 released,
+    #:   build (over 0e4f4b3)  measured on the merged tree: `P B9`, a W row
+    #:                        whose cell cites RELEASED BY
+    #:                        SELF-PROFILE-EDITS-NOT-OUTWARD (+1 none,
+    #:                        +1 released).
     #: `b1_relayed` is the count this file called `b1_named_target` until the
     #: target condition was registered: a name for what a status COUNTS, not
     #: for which ruling happens to have it today. `b1_released` is a SUBSET of
@@ -1336,8 +1360,12 @@ PINNED = {
     "b1_pending": 0,
     #: 22 AT THE ORCHESTRATOR'S MERGE OF LANE D (2026-09-27), MEASURED: lane D
     #: moved `N 132` GAP -> COVERED-UNFIRED under D6-CAPABILITY-OVER-AFFORDANCE.
-    "b1_no_ruling": 22,
-    "b1_released": 6,
+    #: 23 AT THE ORCHESTRATOR'S MERGE OF LANE L7'S P B9 (2026-09-27), MEASURED: P B9
+    #: (Premium badge) moved GAP -> COVERED-UNFIRED, released like the intro edits.
+    "b1_no_ruling": 23,
+    #: 7 AT THE ORCHESTRATOR'S MERGE OF LANE L7'S P B9 (2026-09-27), MEASURED: P B9
+    #: (Premium badge) moved GAP -> COVERED-UNFIRED, released like the intro edits.
+    "b1_released": 7,
     #: D3's enumerated list: FOUR once `M C83` left it, and THREE since
     #: `N 172` left it the same evening on OTHER-MEMBER-IDS-AS-READS -- see
     #: `RULING_BLOCKED_NAMED`. It was printed as "five rows" and pinned
@@ -1431,13 +1459,17 @@ PINNED_B1_ROWS: dict[str, tuple[str, ...]] = {
     #: Search appearances and Who viewed your profile, discharged under D6 by
     #: two shipped tools, one of which has never been called live. A read of
     #: his own analytics, which no ruling holds.
+    #: `P B9` entered with lane L7's P B9 build, 2026-09-24, integrated over
+    #: master 0e4f4b3: the Premium badge switch, built offline and never
+    #: fired, a write its own cell releases by SELF-PROFILE-EDITS-NOT-OUTWARD --
+    #: the seventh, beside the six P A rows.
     NO_RULING: (
         "J 18", "J 39", "J 121", "J 122", "J 158", "M M33", "M M43", "M M49",
         #: `N 132` entered at the orchestrator's merge of lane D (2026-09-27): D6 moved it
         #: GAP -> COVERED-UNFIRED on two shipped reads; no ruling holds it.
         "N 20", "N 23", "N 132",
         "N 45", "N 84", "N 85", "N 87", "N 94",
-        "P A8", "P A11", "P A13", "P A17", "P A19", "P A21",
+        "P A8", "P A11", "P A13", "P A17", "P A19", "P A21", "P B9",
     ),
 }
 

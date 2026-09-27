@@ -3356,6 +3356,22 @@ def _target_for(spec: WriteSpec, target: Any) -> str:
         return _opaque_target(spec, raw)
     if spec.target_kind in _COMPOSITE_TARGET_KINDS:
         canonical = _composite_target(spec, target)
+        if spec.action == "update_profile_field":
+            # THE PREMIUM BADGE IS A SWITCH (P B9), so it takes one of two
+            # values and nothing else. Refused HERE, where ``observe`` and
+            # ``mint`` both pass, so no token is ever minted for a value the
+            # switch cannot take. See ``profile_editor.PREMIUM_BADGE_TITLE``.
+            badge_field, _, badge_value = canonical.partition(TARGET_JOIN)
+            if (
+                badge_field == profile_editor.PREMIUM_BADGE_TITLE
+                and badge_value not in profile_editor.PREMIUM_BADGE_STATES
+            ):
+                raise WriteAttemptError(
+                    repr(profile_editor.PREMIUM_BADGE_TITLE)
+                    + " is a switch and takes 'on' or 'off'; "
+                    + repr(badge_value)
+                    + " is neither. Refused before any token exists for it."
+                )
         if spec.action in UPLOAD_ACTIONS:
             # THE FILE IS CHECKED WHERE THE TARGET IS MADE, so that BOTH doors
             # get it. ``observe`` canonicalises and ``mint`` canonicalises
@@ -7164,6 +7180,20 @@ async def _live_control(
         return (state, why, company_interest.OFF_CONTROL_IN_CARD)
 
     if spec.action == "update_profile_field":
+        # THE ONE SWITCH IN THIS FAMILY, P B9 (2026-09-24): the Premium
+        # badge. The fields reader below cannot aim it -- the switch has no
+        # accessible name -- so it is aimed by its BLOCK'S TITLE, compared in
+        # the page, on the ruling and five conditions recorded at
+        # ``profile_editor.PREMIUM_BADGE_TITLE``. Its kind is ``switch``: a
+        # click through the one click call site, never a fill.
+        badge_field, _, badge_value = grant.target.partition(TARGET_JOIN)
+        if badge_field.strip() == profile_editor.PREMIUM_BADGE_TITLE:
+            badge = await profile_editor.read_premium_badge(page)
+            aim = profile_editor.premium_badge_aim(badge, badge_value.strip())
+            if not aim["proceed"]:
+                return ("editor_addressed", aim["why"], "")
+            return ("editor_addressed", aim["why"], aim["selector"], "switch")
+
         # AIM FROM THE LIVE CONTROL LIST, never from a remembered selector.
         # ``perform`` has already navigated to the editor, so this reads the
         # controls that are on the page RIGHT NOW and matches the requested
@@ -7905,6 +7935,8 @@ async def _verify_after(
     grant: WriteGrant,
     observation: Observation,
     prior_value: Optional[str] = None,
+    badge_before: Optional[dict[str, Any]] = None,
+    witness: Optional[dict[str, Any]] = None,
 ) -> tuple[str, str, str]:
     """Read whether it landed, and read it somewhere the click did not reach.
 
@@ -8041,6 +8073,20 @@ async def _verify_after(
             _assert_landed_on_target(spec, grant, landed)
         except WriteAttemptError as exc:
             return (UNKNOWN, str(exc), editor_url)
+        if badge_before is not None:
+            # THE PREMIUM BADGE: both switches on the fresh render, against
+            # the reading taken before the write -- condition 4 of its ruling.
+            fresh = await profile_editor.read_premium_badge(page)
+            if witness is not None:
+                witness.update(fresh)
+            badge_state, badge_why = profile_editor.badge_verification(
+                badge_before, fresh, requested.strip()
+            )
+            return (
+                UNKNOWN if badge_state is None else badge_state,
+                badge_why + " Read by the block's title, compared in the page.",
+                editor_url,
+            )
         current, why = await _editor_value_of(
             page, wanted, when="after the write, on a fresh render of the editor"
         )
@@ -9682,6 +9728,13 @@ async def perform(
     # that follows its press. See ``profile_editor``.
     editor_save_gate: Optional[dict[str, Any]] = None
     editor_close: Optional[dict[str, Any]] = None
+    # THE SWITCH'S OWN READINGS, for the one control_kind that is a switch
+    # (the Premium badge, P B9): condition 1 read BEFORE the press, the
+    # switches read after it, and whether only the badge moved.
+    switch_gate: Optional[dict[str, Any]] = None
+    switch_after_press: Optional[dict[str, Any]] = None
+    switch_check: Optional[dict[str, Any]] = None
+    switch_fresh: dict[str, Any] = {}
 
     # THE TYPING PLAN, and it is a QUEUE FOR THE SAME REASON THE CLICK PLAN IS.
     #
@@ -9761,7 +9814,15 @@ async def perform(
     # preview reads his profile and the value lives in the editor.
     prior_value: Optional[str] = None
     prior_why = ""
-    if spec.action == "update_profile_field":
+    badge_before: Optional[dict[str, Any]] = None
+    badge_value = grant.target.partition(TARGET_JOIN)[2].strip()
+    if spec.action == "update_profile_field" and control_kind == "switch":
+        # THE PREMIUM BADGE: the prior value is the switch's state, read by
+        # its title in the page -- and the same reading holds the OTHER
+        # switch's state, which is what later proves only this one moved.
+        badge_before = await profile_editor.read_premium_badge(page)
+        prior_value, prior_why = profile_editor.premium_badge_value(badge_before)
+    elif spec.action == "update_profile_field":
         prior_field, _, _ = grant.target.partition(TARGET_JOIN)
         prior_value, prior_why = await _editor_value_of(
             page, prior_field.strip(), when="before the write"
@@ -9936,6 +9997,13 @@ async def perform(
         # there is no fill and no select to do (see its construction above), so
         # for every other action the queues are never both loaded and
         # click-first is the same sequence it always was.
+        # A SWITCH MAY STORE ITSELF THE MOMENT IT IS PRESSED -- whether this
+        # one does is not measured -- so its condition 1 is read BEFORE the
+        # press, not only before Save. Refused, nothing is pressed at all.
+        if control_kind == "switch":
+            switch_gate = await profile_editor.read_save_gate(page, require_save=False)
+            if not switch_gate["proceed"]:
+                click_plan.clear()
         while fill_plan or click_plan:
             if click_plan:
                 await page.click(click_plan.pop(0), timeout=CLICK_TIMEOUT_MS)
@@ -9964,6 +10032,20 @@ async def perform(
                                 _text_component_of(spec, grant.target),
                             )
                         )
+                elif control_kind == "switch" and clicks_made == 1:
+                    # THE SWITCH WAS PRESSED; SAVE IS PRESSED ONLY IF THE
+                    # BADGE, AND NOTHING ELSE, MOVED. Read in the dialog,
+                    # before Save, against the reading taken before the
+                    # press. Otherwise the change sits unsaved and the
+                    # verification's fresh navigation discards it.
+                    switch_after_press = await profile_editor.read_premium_badge(page)
+                    switch_check = profile_editor.badge_moved_alone(
+                        badge_before, switch_after_press, badge_value
+                    )
+                    if switch_check["proceed"]:
+                        editor_save_gate = await profile_editor.read_save_gate(page)
+                        if editor_save_gate["proceed"]:
+                            click_plan.append(editor_save_gate["selector"])
                 continue
             fill_selector, fill_text = fill_plan.pop(0)
             await page.fill(fill_selector, fill_text, timeout=CLICK_TIMEOUT_MS)
@@ -10072,7 +10154,14 @@ async def perform(
     verified_why = ""
     try:
         verified_state, verified_why, state_landed = await _verify_after(
-            navigator, page, spec, grant, observation, prior_value=prior_value
+            navigator,
+            page,
+            spec,
+            grant,
+            observation,
+            prior_value=prior_value,
+            badge_before=badge_before,
+            witness=switch_fresh,
         )
     except Exception as exc:  # noqa: BLE001 - the click already happened
         # WHERE TO GO AND LOOK, when the verification read itself failed.
@@ -10429,6 +10518,54 @@ async def perform(
                 ),
                 "editor_closed_after_save": (
                     None if editor_close is None else editor_close.get("closed")
+                ),
+            }
+        ),
+        # THE SWITCH PRESS, for the Premium badge (P B9) and nothing else:
+        # the two switches before, after the press, and on a fresh render --
+        # booleans and one position, never page text -- with condition 1 as
+        # read BEFORE the press and the in-dialog verdict Save waited on.
+        "switch_press": (
+            None
+            if badge_before is None
+            else {
+                "field": profile_editor.PREMIUM_BADGE_TITLE,
+                "aimed_by": (
+                    "the block's title, compared in the page; the other switch "
+                    "in the row -- Open Profile, by the capture -- is read by "
+                    "structure to prove it did not move"
+                ),
+                "before": {
+                    "badge_on": badge_before.get("badge_checked"),
+                    "other_on": badge_before.get("other_checked"),
+                    "badge_position": badge_before.get("badge_position"),
+                },
+                "condition_1_before_the_press": (
+                    None
+                    if switch_gate is None
+                    else {
+                        "proceeded": bool(switch_gate.get("proceed")),
+                        "refused_condition": switch_gate.get("refused_condition"),
+                        "condition_1": switch_gate.get("condition_1"),
+                        "why": switch_gate.get("why"),
+                    }
+                ),
+                "after_the_press": (
+                    None
+                    if switch_after_press is None
+                    else {
+                        "badge_on": switch_after_press.get("badge_checked"),
+                        "other_on": switch_after_press.get("other_checked"),
+                    }
+                ),
+                "only_the_badge_moved": switch_check,
+                "after_a_fresh_render": (
+                    None
+                    if not switch_fresh
+                    else {
+                        "badge_on": switch_fresh.get("badge_checked"),
+                        "other_on": switch_fresh.get("other_checked"),
+                    }
                 ),
             }
         ),

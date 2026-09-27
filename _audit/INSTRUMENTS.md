@@ -10576,6 +10576,24 @@ subtracting it lifts the refusal for a switch nobody identified.
 
 ---
 
+### 70.7 A PRESS AIMED BY A UI STRING THE PAGE COMPARES, AND A SWITCH THAT MAY COMMIT ON ITS OWN (P B9, 2026-09-24)
+
+The orchestrator ruled that one LinkedIn UI string, the Premium badge block's title, may aim a press,
+on five conditions. Two methods fell out of building it, and both generalise past this row.
+
+    A STRING THAT MAY AIM MAY STILL NOT BE READ. PUT IT IN THE SELECTOR, LET
+    THE PAGE'S ENGINE COMPARE IT, AND TAKE BACK ONLY A COUNT -- THEN A UI IN
+    ANOTHER LANGUAGE REFUSES BY CONSTRUCTION, WITH NO LANGUAGE CHECK TO BE
+    WRONG.
+
+    A SWITCH MAY STORE ITSELF THE MOMENT IT IS PRESSED. A CONDITION THAT MUST
+    HOLD BEFORE THE CHANGE IS STORED MUST BE READ BEFORE THE PRESS, NOT BEFORE
+    THE SAVE THAT FOLLOWS IT.
+
+| path | shown failing by |
+|---|---|
+| `linkedin_server/profile_editor.py` -- `PREMIUM_BADGE_TITLE`, `read_premium_badge`, `premium_badge_aim`, `badge_moved_alone`, `badge_verification`, the save gate's `require_save=False`, and `writes.perform`'s `switch` kind | `tests/test_premium_badge.py` (17). Written first: the four tests the order named -- two rows, none, a swapped order, a non-English title -- fail 4 of 4 on the module before the build. Three knock-outs in process each turn their own tests red: aiming by order (3 red -- the swapped render presses the other switch, and the no-row and non-English worlds stop refusing), pressing Save whatever moved (1 red -- the other switch is stored), and condition 1 read only before Save (1 red -- in the world where the press stores itself, the change lands with condition 1 never established). Over the RAW capture, offline, no press: exactly one titled row, the badge on its second block, agreeing with 70.6's order. |
+
 ## 71. THE COMPLETENESS VERDICT LAYER, THE ADJUDICATED CORPUS, AND THE TABLE AT A FIXED POINT (lane-y2-admission, 2026-09-24)
 
 **Registered 2026-09-24.** Full record: `_audit/2026-09-24-lane-y2-admission.md`.

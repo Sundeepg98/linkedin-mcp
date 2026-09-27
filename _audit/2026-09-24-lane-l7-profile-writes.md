@@ -1075,6 +1075,201 @@ the rows for `P A26`-`A29`, `P G2` and `P I13` are kept verbatim under their own
 block above it is unchanged. GATES: the record only; the asserted-name checker finds nothing in it, and
 the same doc guards as item 3, 4 workers: **1946 passed**.
 
+### F.5 `P B9` BUILT -- the press aimed by the block's title, compared in the page (COVERED-UNFIRED)
+
+**THE CALL, AS RELAYED.** The coordinator's order after the follow-up merged (`7d89b8d`) relayed the orchestrator's
+call of 09:15: F.2's third lift is ruled yes. The block's title, 'Profile Premium Badge', is a LinkedIn
+UI string, not his data, and may aim the press when all five of these hold. **It is not yet in the
+rulings register at `7d89b8d`**, so it is cited here as relayed; registering it is the orchestrator's
+act, and until it is registered no census cell names it in a slot the asserted-name checker reads.
+
+| the ruling's condition | how the build holds it | the test that fails without it |
+|---|---|---|
+| compared INSIDE the page, never read out or returned | the title rides in a `:text-is(...)` selector the page's own engine evaluates -- exact, case-sensitive -- and every answer is a count; the reader returns counts, one position and two booleans | `test_no_page_text_leaves_through_the_receipt`, `test_the_reader_returns_counts_positions_and_states_only` |
+| EXACTLY ONE settings row in the intro editor's column, otherwise refuse | counted over every row of the column that carries the title anywhere (`PREMIUM_BADGE_ANY_ROW`), then that row must be the recorded row and the title must sit on exactly one of its two blocks | `test_two_rows_carrying_the_title_refuse`, `test_no_row_carrying_the_title_refuses` |
+| a non-English UI refuses, fail-closed by construction | no language check exists to be wrong: the English string matches nothing, the count is 0, and the refusal is the no-row refusal | `test_a_non_english_ui_refuses_by_construction` |
+| a before/after reading proves ONLY that switch changed, and Open Profile did not | in the dialog after the press and before Save (`badge_moved_alone`: Save is pressed only if the badge reached the requested state and the other switch did not move), and on a fresh render after the write (`badge_verification`) | `test_a_press_that_also_moves_open_profile_is_not_saved`, `test_a_press_that_moves_nothing_is_not_saved`, `test_switching_the_badge_off_moves_only_the_badge` |
+| the restore is tested the same way | the receipt's restore block is the same call with the other value; the test runs it and compares the store before and after the round trip | `test_the_restore_switches_it_back_the_same_way` |
+
+**WHAT WAS BUILT.** No new tool and no new mutation: the badge is a field of the family,
+`linkedin_update_profile_field(field="Profile Premium Badge", value="on")` or `value="off"`, behind the
+family's single-use grant and off by default.
+* `profile_editor.read_premium_badge` -- the reader above; `premium_badge_aim` (gate 5: a value outside
+  on/off, a reading not aimable, or a badge ALREADY in the requested state refuses -- pressing that one
+  would switch it the other way); `premium_badge_value` (the prior value, for the restore);
+  `badge_moved_alone` and `badge_verification` (condition 4). The block shape and the per-switch reading
+  are now shared with F.1's recognition (`_INTRO_BLOCK_SHAPE`, `_read_switch_block`), and the
+  recognition's selectors were asserted byte-identical before and after the refactor.
+* **The press goes through the one click call site**, as a fourth control kind, `switch`. The click
+  selector itself carries the title and the position, scoped to the dialog, so the click re-checks the
+  aim at the moment it lands; strict mode holds it to one element.
+* **CONDITION 1 IS READ BEFORE THE PRESS, NOT ONLY BEFORE SAVE.** Whether the switch stores itself the
+  moment it is pressed is NOT MEASURED. If it does, a gate that waited for Save would check condition 1
+  after the change was already stored. So the save gate gained a pre-press mode (`require_save=False`:
+  the Save conditions skipped, every notify condition kept), and a refusal there presses nothing at all.
+  Today, with the account-setting reader unwired, that is what every live attempt will do.
+* `_target_for` refuses a badge value other than 'on' or 'off' where both doors pass, so no token is
+  ever minted for one. The tool's docstring says what the field does and how it refuses.
+
+**THE WORLD THE TESTS RUN IN** is the capture's settings row (the fixture), with the one real string the
+ruling admits placed on the badge's block, two switches whose state persists only on a Save press -- or,
+in one world, the moment the switch is pressed -- and condition 1 established the way the unwired gate
+accepts it (a planted notify control, read off), as in the commit tests.
+
+**SHOWN FAILING, FOUR WAYS.** (1) WRITTEN FIRST: the four tests the order named -- two rows, none, a
+swapped order, a non-English title -- run against the module as it stood at `7d89b8d`: **4 failed**. The
+old path aimed by the fields reader, found no control named for the title, and refused everything --
+including the swapped render, which must succeed. (2) On the build: **17 passed**. (3) Three knock-outs
+in process, no tracked file edited, each turning its own tests red: aiming by ORDER instead of by title
+(3 failed -- the swapped order presses Open Profile, and the no-row and non-English worlds stop refusing);
+pressing Save whatever moved (1 failed -- Open Profile is stored); condition 1 not read before the press
+(1 failed -- in the world where the press stores itself, the badge is changed with condition 1 never
+established). (4) Over the RAW capture, strictly offline (page scripts disabled, all 25 requests
+aborted), no press: `containers 1, rows_titled 1, recorded_rows_titled 1, badge_position 2`, both
+switches checked; the current value reads 'on'; an aim at 'off' proceeds and an aim at 'on' refuses. The
+title aim and F.1's order agree on the one render on record.
+
+**CENSUS.** `P B9` GAP -> COVERED-UNFIRED. Its cell strikes 'no tool, no reason', marks F.2's
+not-built note superseded, and gains the build note and **RELEASED BY `SELF-PROFILE-EDITS-NOT-OUTWARD`**
+-- lane L7's class, SELF-PRIVATE: a display choice on his own profile, in the same editor as the six
+field edits that ruling released, aimed at nobody and reversed by the same switch. Without the marker
+`scripts/ruling_holds.py` holds every W row by OPERATOR-NAMES-THE-TARGET, which for a write aimed at
+himself would be a hold nobody could meet by naming a target. Its class line moves to
+`built:update_profile_field`. `scripts/census_completion.py` re-pinned, seven figures and one bucket-1
+row, each move beside its pin -- ON THE BRANCH OVER `7d89b8d`: adjudicated 199 -> 200, delivered_broad
+110 -> 111, unfired 31 -> 32, gap 548 -> 547, gap_write 337 -> 336, b1_no_ruling 20 -> 21, b1_released
+6 -> 7 (b1_standing stays 11), and `P B9` joins the NO_RULING rows beside the six P A rows. The same
+seven moved by the same step when master was integrated; the values measured on the merged tree are in
+F.7.
+
+**WHAT IS STILL NOT MEASURED, AND WHICH WAY EACH FAILS.** (a) Which element LinkedIn's switch listens
+on: the press lands on the wrapper, the element the page marks as the switch (`role=switch`,
+`aria-checked`, `tabindex`). If it is not the one, the in-dialog reading shows the badge unmoved, Save is
+not pressed, and the write reports `value_unchanged`. (b) Whether the switch stores itself when pressed:
+either way the fresh render decides, and condition 1 is read before the press. (c) That 'checked' means
+the badge is SHOWN is DERIVED from one render; the write compares states, so a wrong meaning mislabels
+nothing in the proof, only the word 'on'.
+
+### F.6 NOT DONE -- the lane closes here; what it would have done next, and whose each item is
+
+The operator has said NO MORE NEW WAVES, so after `P B9` this lane is done except to integrate if
+`master` moves again before it is merged. Everything below is recorded rather than built.
+
+1. **Wiring the account-setting reader at the seam** (`profile_editor.ACCOUNT_READINGS`): the live
+   lane's reader, passed as `account_share_updates` to both save-gate reads -- the pre-press one F.5
+   added and the one before Save. Until it lands, all seven intro-editor rows, `P B9` included, refuse
+   at condition 1 and press nothing. The live lane's.
+2. **Registering the orchestrator's ruling of 09:15** (the block title as `P B9`'s aim) in the rulings
+   register. The orchestrator's act; this record cites it as relayed and no cell names it.
+3. **A cold verification of the `P B9` build** by an agent that did not write it -- a different lens on
+   the five conditions and on `perform`'s switch path. Not a new wave, and not run, on the operator's
+   no-more-waves call; the mutation controls in F.5 are the author's own.
+4. **F.1's identity labels by title.** The recognition names the intro editor's two switches by their
+   ORDER. Now that the badge's title is admitted as an aim, the same comparison could confirm the
+   labels, so a swapped render would not report them the wrong way round. It changes no verdict --
+   the lift of code 6 does not depend on which is which -- and it would widen the ruling's use from
+   aiming a press to labelling a receipt, which is the orchestrator's to say.
+5. **`P B10`, Open Profile, drawn in the intro editor** (F.2's finding): a route to that control through
+   no settings page. Its owner's call, class and admission alike.
+6. **`P A14`, `A15`, `A22` as MEASURED-ABSENT for this account** (F.3's queue note): not among the 17
+   controls the capture draws. The census owner's call.
+7. **`P I15`, the ON label of 'I'm interested'** (F.3, C6): needs him to say whether he has signalled
+   any of the five recorded employers, or a surface that lists his signals.
+8. **Two stale sentences in this lane's own write.** `linkedin_update_profile_field`'s `field` argument
+   still says no editor has been opened to enumerate a list of fields (it was opened on 2026-08-31),
+   and a comment in `writes.perform` calls `Country/Region` a select where the live capture draws a
+   text input. Neither changes behaviour: the kind is read from the live control at the moment of the
+   write.
+9. **Three facts only a live press can settle** (F.5): which element the switch listens on, whether it
+   stores itself when pressed, and that 'checked' means the badge is shown. Each fails safe as F.5
+   says, and the first live fire's receipt answers all three.
+
+### F.7 After the restart (2026-09-27): the WIP pinned, master integrated once, the gates
+
+**THE RESTART.** The session stopped on 2026-09-24 during `P B9`'s gate run. The orchestrator's resume
+order (2026-09-27 13:25) sampled HEAD `7d89b8d` with 11 files uncommitted, and disk agreed at 13:20. No
+process of this lane had survived the stop, and that gate run's output ended part-way with four errors
+and no summary, so it is recorded as NOT RUN rather than as a result. The 11 files were reviewed -- one
+build: code, tests, census, record, register, timing and baseline; strict ASCII wherever HEAD was; every
+Python file compiles -- and pinned as `ce73eb1` before anything else touched the tree. On `ce73eb1`,
+before the merge: the lane's three test files, the read-only boundary, `test_writes.py` and the reader
+inventory, 4 workers, **541 passed**.
+
+**THE INTEGRATION, ONCE, AT THE END: master `0e4f4b3`** -- lanes L5 and S's follow-up, then the live
+lane's Part 2, since `7d89b8d`. A first attempt merged `0d896de`, the tip at 13:25; master moved to
+`0e4f4b3` while its gate was running, so that merge was aborted UNCOMMITTED, its gate run stopped and its
+processes gone, and the merge redone against `0e4f4b3`: one integration, not two. Two conflicts, the two
+a dry run predicted, both files where each side priced or pinned its own move:
+* `scripts/ci_shard_timings.json` -- master's table, plus this lane's one file, re-priced from its own
+  junit run: `tests/test_premium_badge.py` 147.954 s; `_files` 169 -> 170, `_total_seconds` 1405.4 ->
+  1553.4.
+* `scripts/census_completion.py` -- master's pins, then `P B9`'s move MEASURED ON THE MERGED TREE, never
+  summed from either side. `census_completion --check` found exactly seven figures and one bucket-1 row
+  off master's pins, each by `P B9`'s own step, and nothing else: adjudicated 202 -> 203,
+  delivered_broad 113 -> 114, unfired 34 -> 35, gap 545 -> 544, gap_write 335 -> 334, b1_no_ruling
+  21 -> 22, b1_released 6 -> 7 (b1_standing 13), with `P B9` in NO_RULING. Re-pinned with the reason
+  beside each; `--check` then exits 0.
+
+`writes.py`, `server.py`, `INSTRUMENTS.md`, `write-classes.tsv` and the reader baseline merged without
+a conflict. Lane L5's reply and this lane's switch sit in different arms of `perform` (the fill arm and
+the click arm) and of `_verify_after`, the live lane's writes change is the reaction toggle's two label
+families, and the merged package imports with 15 performable actions. Both baselines were regenerated
+by their generators on the merged tree: the reader baseline differs from master's by this lane's one
+reader, `profile_editor:read_premium_badge` (`clean`, 152 readers), and the tool-envelope baseline not at
+all. `_audit/INDEX.md` and `_audit/RULINGS.md` are at a fixed point by their generators' `--check`, and
+the fourteen census instruments exit 0 on the merged tree. The merge is committed as `a2e6f66`, and the
+gates below ran on it.
+
+**THE BLOCKER MAP WAS NOT AT A FIXED POINT, AND ITS `--check` COULD NOT SAY SO.**
+`scripts/build_blocker_map.py --check` runs the map's assertions and never compares the file with what
+`--write` would produce, so it exited 0 here, and at every item of this follow-up, over two stale
+things, both this lane's: `P B9`'s `state_today` still reading GAP since the build, and the derived
+`reason_doc` column, whose ranked candidate moves when this record's text does. A read-only comparison
+through the generator's own `build()` found `P B9` the only stale state. `--write` then changed that
+state and the `reason_doc` of every row whose ranked candidate this record's own text now wins, and a
+second `--write` changed nothing. The counts are NOT printed here, measured rather than guessed: an
+earlier draft of this paragraph named the blockers and their counts, and naming them moved them, since
+the locator scores this text too. They are in the commit that carries the map. No test catches either
+column:
+`tests/test_blocker_map_is_derived.py` compares the blocker and class columns, and recomputes the GAP
+total from the live census rather than from the file. The map is committed with this record, after it.
+
+**WHAT THE LIVE LANE'S PART 2 CHANGES FOR THIS LANE -- NOTHING YET, AND THE REASON.** Its record's
+section (f) finds the account-level setting by name in the settings index -- LinkedIn's current label
+is 'Sharing profile edits', key `notifyNetworkForUpdates` -- and SPECIFIES its reader without building
+it: the setting's own page has no capture, and both candidate addresses are refused by the boundary
+today. So `account_share_updates` is still passed by no caller, and F.6's first item stands as written:
+when the reader is wired, both of this write's save-gate reads take it -- the one BEFORE the switch is
+pressed and the one before Save.
+
+**GATES -- the resume order's set, on the committed merge `a2e6f66`. No full suite locally, by order.**
+1. **The fourteen census instruments** -- `census_completion --check` among them -- exit 0 on the merged
+   tree.
+2. **One xdist run, 4 workers, 28 files**: this lane's tests (`test_premium_badge.py`,
+   `test_intro_editor_switches.py`, `test_profile_editor_commit.py`, `test_mark_company_interest.py`);
+   the three the order named (`test_the_package_compiles_on_its_oldest_python.py`,
+   `test_gap_rows_on_refused_addresses.py`, `test_ci_shard.py`); the guards over the modules this lane
+   changed (the read-only boundary, `test_writes.py`, both page-string guards, the reader inventory,
+   receipt-names-its-action, preview/click state, control reach, the server surface); the census and pin
+   tests the move touches (write classes, ruling holds, the row-total pin, the blocker map, the
+   covered-row artifact, row states); and the document and identity guards over this record:
+   **2303 passed**, in 7 min 24 s.
+3. **The new test file's timing** is measured, not estimated: `tests/test_premium_badge.py`, a junit run
+   of it alone, 147.954 s, in `scripts/ci_shard_timings.json` with its provenance.
+4. **After this record was completed**, the document, identity and blocker-map tests again over its final
+   text and the regenerated map, before either was committed; the count is in the commit that carries
+   them.
+
+**MASTER HAS MOVED PAST THE INTEGRATION, AND THIS LANE DID NOT FOLLOW IT -- ONCE, BY ORDER.** While the
+gate ran, master reached `effcb2e`: lane D's merge (`cf530fa`, `P C8` and the download transport) and a
+one-line census fix. A dry run of merging this branch over it predicts ONE conflict,
+`scripts/census_completion.py`, the pins both lanes moved from the same base; `profile.md`, `server.py`
+and `INSTRUMENTS.md` auto-merge. THE RESOLUTION IS THE ONE USED HERE: take master's pins and MEASURE on
+the merged tree. `census_completion --check` should then name exactly `P B9`'s seven figures and its
+bucket-1 row, each one step past master's value -- adjudicated, delivered_broad and unfired +1, gap and
+gap_write -1, b1_no_ruling and b1_released +1 -- and `P B9` joins NO_RULING beside the six P A rows. Any
+other figure it names is a finding, not a resolution.
+
 ## Live queue
 
 Loads counted off the code: `linkedin_profile_editor_values` and `linkedin_profile_editor_fields`
@@ -1143,6 +1338,7 @@ these fields adds an entry.
 | 4 | `P A13` | City | text input, named by `aria-label` -- a typeahead | 12 (second session) |
 | 5 | `P A11` | Country/Region | text input, named by `aria-label` -- a typeahead | 10 |
 | 6 | `P A17` | Industry | text input, named by `aria-label` -- a typeahead | 10 |
+| 7 | `P B9` | Profile Premium Badge | a switch, aimed by its block's title compared in the page (F.5); 'on' or 'off' | 8 |
 
 **THE ORDER IS THE MOST DETERMINISTIC FIRST.** A plain text input and two selects, whose options the
 tool chooses by their own text, open the first session. The three typeaheads fill the second: LinkedIn
@@ -1161,10 +1357,23 @@ SESSIONS of three rows, 32 loads each, spaced 20 s apart (about 11 minutes each)
 the reader costs R loads per write, a row costs 8 + 2R and the split is recomputed before a session
 starts, never during it.
 
-**Not newly buildable at this follow-up:** `P B9` is blocked on the aim (F.2); `P I15` has no ON capture
-(F.3); `P A14`, `A15`, `A22` -- postal code, location display, primary position -- are not among the 17
+**`P B9`, ROW 7 -- ADDED WITH ITS BUILD (F.5).** The same two prerequisites and the same sequence,
+with three differences. (1) ITS BEFORE AND AFTER READINGS ARE ITS OWN RECEIPTS: the edit's
+`switch_press.before` and the restore's `switch_press.after_a_fresh_render`, each reading BOTH
+switches -- so steps 2 and 5 cost no load, and the row is 1 + 3 (edit) + 1 + 3 (restore) = 8, or
+6 + 2R. (2) Go on only if the edit's receipt shows `performed: true`,
+`switch_press.condition_1_before_the_press.proceeded: true`,
+`switch_press.only_the_badge_moved.proceed: true`, `switch_press.after_a_fresh_render` with the
+badge at the requested value and `other_on` equal to its before -- Open Profile unmoved -- and
+`editor_save_gate.condition_1: account_setting_off`; the restore's receipt the same way, back. (3)
+The value is the OPPOSITE of the badge's current state, which the edit's own receipt names -- the
+write refuses a badge already in the requested state -- and the restore is the receipt's
+`to_put_it_back`. It fits either session exactly (32 + 8 = 40 loads) or runs alone.
+
+**Not newly buildable at this follow-up:** `P I15` has no ON capture (F.3); `P A14`, `A15`, `A22` -- postal code, location display, primary position -- are not among the 17
 controls the live lane's reading of the intro editor draws, so they have nothing to fire; each is a
-candidate for MEASURED-ABSENT for this account, the census owner's call.
+candidate for MEASURED-ABSENT for this account, the census owner's call. `P B9` read "blocked on
+the aim (F.2)" here until the orchestrator's ruling of 09:15; it is built (F.5) and is row 7.
 
 **THE OTHER SELF-PRIVATE ROWS -- NOT BUILT, each waiting on its own capture (unchanged).**
 

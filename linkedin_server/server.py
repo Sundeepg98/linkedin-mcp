@@ -9419,6 +9419,19 @@ async def linkedin_update_profile_field(
     network about some profile changes, which this server has not measured and
     would not control.
 
+    ONE FIELD IS A SWITCH, AND IT IS AIMED DIFFERENTLY (2026-09-24, census
+    row P B9). ``field="Profile Premium Badge"`` shows or hides the Premium
+    badge on your profile, and its ``value`` is ``"on"`` or ``"off"``;
+    anything else is refused before a token exists. The switch has no
+    accessible name, so it is found by its block's TITLE, compared inside the
+    page and never read out, in exactly one settings row of the intro
+    editor: a second row carrying the title, no such row, or a UI in another
+    language refuses. Condition 1 is read BEFORE the switch is pressed, Save
+    is pressed only if the badge and nothing else moved, and the
+    verification reads both switches on a fresh render -- the other one, Open
+    Profile, must not have moved. The restore is the same call with the
+    other value.
+
     Args:
         field: which field. Named freely; nothing here validates it against a
             list of fields, because no editor has been opened to enumerate one.
