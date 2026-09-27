@@ -515,6 +515,25 @@ def fingerprint(value: str) -> str:
     return "sha256:" + hashlib.sha256(value.encode("utf-8")).hexdigest()[:12]
 
 
+def is_reduced_to_shape(value: str) -> bool:
+    """A value whose every letter is ``X`` or ``x``: a name REDUCED TO SHAPE.
+
+    ADDED 2026-09-28 (lane G, slice S) for the profile-views skeletons, which
+    ``scripts/_build_profile_views_skeleton.py`` writes with every member's
+    text reduced to shape -- upper-case letters to ``X``, the rest to ``x``,
+    digits, spaces and punctuation kept. Such a value is the LENGTH of a name
+    and none of its letters. Declaring it in SYNTHETIC_PEOPLE would be the
+    wrong claim (it is nobody, not an invented somebody), and it is not
+    interface text either, so neither remedy :func:`render_failure` offers
+    fits it. THE ALPHABET IS THE WHOLE ARGUMENT: one letter that is not ``X``
+    or ``x`` and the value is a candidate again, which
+    :func:`test_THIS_CONTROL_CAN_FAIL_one_real_letter_makes_a_shape_a_candidate`
+    shows. A value with no letter at all is not a shape and stays a candidate.
+    """
+    letters = [character for character in value if character.isalpha()]
+    return bool(letters) and all(character in "Xx" for character in letters)
+
+
 def violations(rel: str, text: str, accepted) -> list[str]:
     """One line per undeclared candidate. A PURE FUNCTION of its inputs, so the
     rule can be shown failing on a planted string without a planted file."""
@@ -522,7 +541,7 @@ def violations(rel: str, text: str, accepted) -> list[str]:
         "%s:%d:%d [%s] undeclared value %s"
         % (rel, found.line, found.col, found.slot, fingerprint(found.value))
         for found in candidates_in(text)
-        if found.value not in accepted
+        if found.value not in accepted and not is_reduced_to_shape(found.value)
     ]
 
 
@@ -734,6 +753,29 @@ def test_the_same_plant_with_a_declared_synthetic_name_passes(slot):
         (slot, declared)
     ]
     assert violations(PLANTED_PATH, planted, ACCEPTED) == []
+
+
+#: A name as the profile-views skeleton builder writes one, and the same shape
+#: with ONE letter left as the page drew it.
+SHAPED_NAME = "Xxxxx Xxxxxxxxx"
+SHAPED_BUT_ONE = "Xxxxx Xxxxxxxxa"
+
+
+def test_a_name_reduced_to_shape_is_read_but_not_convicted():
+    """The slot still READS the shape -- a reader that stopped reading would
+    pass this -- and the rule does not convict it: it names nobody."""
+    planted = PLANTS[MEMBER_TEXT].format(name=SHAPED_NAME)
+    assert [(found.slot, found.value) for found in candidates_in(planted)] == [
+        (MEMBER_TEXT, SHAPED_NAME)
+    ]
+    assert violations(PLANTED_PATH, planted, ACCEPTED) == []
+
+
+def test_THIS_CONTROL_CAN_FAIL_one_real_letter_makes_a_shape_a_candidate():
+    """The exemption is the alphabet and nothing wider."""
+    planted = PLANTS[MEMBER_TEXT].format(name=SHAPED_BUT_ONE)
+    found = violations(PLANTED_PATH, planted, ACCEPTED)
+    assert len(found) == 1 and "[%s]" % MEMBER_TEXT in found[0], found
 
 
 def test_a_name_on_the_invented_table_is_accepted_by_the_import():

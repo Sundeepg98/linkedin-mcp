@@ -299,7 +299,9 @@ DECLARED_PLANTS = {
     # controls, which is what keeps the new "no alphanumerics in the local
     # part" exemption from being widened into one that swallows name+tag@.
     ("tests/test_no_committed_identity.py", "email"): 3,
-    ("tests/test_no_committed_identity.py", "linkedin slug"): 1,
+    # 1 -> 2 on 2026-09-28: the slug with one letter left unshaped, the
+    # planted control that keeps SHAPED_SLUG from widening.
+    ("tests/test_no_committed_identity.py", "linkedin slug"): 2,
     ("tests/test_no_committed_identity.py", "member token"): 3,
     # TWO, not one, since 2026-09-04: the contiguous plant and the GROUPED
     # plant are different spellings of the same class and each proves a
@@ -674,9 +676,23 @@ def _phone_ok(match: re.Match[str], text: str) -> bool:
     return any(context.search(before) for context in ID_CONTEXTS)
 
 
+#: A SLUG REDUCED TO SHAPE, and nothing else. A committed skeleton builder
+#: (scripts/_build_profile_views_skeleton.py) writes a member's address with
+#: every letter as ``x`` and every digit as ``0``, keeping ``-``, ``_`` and
+#: ``%`` -- so what it writes is the LENGTH and punctuation of somebody's slug
+#: and none of its characters. The alphabet IS the argument, which is why the
+#: rule admits that alphabet and nothing wider: one letter that is not ``x``
+#: and it fires again (the plant beside the others below). Added 2026-09-28,
+#: lane G slice S, for the four profile-views skeletons, which carry six such
+#: links each and were RED here before this line.
+SHAPED_SLUG = re.compile(r"[x0_%-]*x[x0_%-]*")
+
+
 def _slug_ok(match: re.Match[str], text: str) -> bool:
     slug = match.group(1)
     if slug in SYNTHETIC_SLUGS or slug.lower() in {"me", "in"}:
+        return True
+    if SHAPED_SLUG.fullmatch(slug):
         return True
     lowered = slug.lower()
     return any(token in lowered for token in SYNTHETIC_SLUG_TOKENS)
@@ -852,6 +868,10 @@ def test_the_sweep_actually_looked():
         ("email", "somebody+newsletter@a-real-company.co.uk"),
         ("phone", "he can be reached on 9123456789 any evening"),
         ("linkedin slug", "https://www.linkedin.com/in/jordan-mcallister-7f21/"),
+        # THE CONTROL THAT KEEPS SHAPED_SLUG NARROW: a skeleton's slug with ONE
+        # letter left unshaped. If the exemption were ever widened from "only
+        # x, 0, - _ %" to anything looser, this row is what goes red.
+        ("linkedin slug", "https://www.linkedin.com/in/xxxxx-xxxxxxx-0a0/"),
         ("company id", "/company/98765432"),
         ("member token", "urn%3Ali%3Afsd_profile%3AACoAAZz9Yy8Xx7Ww6Vv5Uu4Tt3Ss2Rr1Qq0Pp"),
         ("urn id", "urn:li:ugcPost:7511111111111111111"),
@@ -932,6 +952,8 @@ def test_every_shape_can_actually_fail(shape, planted):
         ("phone", "id=ab7dc03f-6282-46a6-a3b9-7312345620e2 is a uuid"),
         ("phone", "the placeholder 9876543210 is not a person"),
         ("linkedin slug", "https://www.linkedin.com/in/alex-rivera-8c21/"),
+        # A slug as the profile-views skeleton builder writes one.
+        ("linkedin slug", "https://www.linkedin.com/in/xxxxx-xxxxxxx-000/"),
         ("company id", "/company/5417062"),
         ("member token", "ACoAAB1c2D3e4F5g6H7i8J9k0L1m2N3o4P5q6R7"),
         ("urn id", "urn:li:ugcPost:7400000000000000001"),
