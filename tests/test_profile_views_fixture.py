@@ -201,8 +201,9 @@ def test_a_row_with_no_link_is_anonymous_and_stays_anonymous(text):
     assert card["person"]["link"] is None
     assert card["viewed"]
     # The company is the only thing LinkedIn showed, so it is the name. It is
-    # not a headline and must not be dressed up as one.
-    assert card["person"]["headline"] == ""
+    # not a headline and must not be dressed up as one: the row drew none, and
+    # the record says ABSENT (null) rather than "" since 2026-09-27.
+    assert card["person"]["headline"] is None
 
 
 def test_the_recruiter_rollup_card_is_not_a_viewer():

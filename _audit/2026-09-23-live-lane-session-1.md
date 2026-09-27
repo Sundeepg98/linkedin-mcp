@@ -1,5 +1,3 @@
-claude-opus-5-5[1m]
-
 # THE LIVE LANE, SESSION 1
 
 **2026-09-23. Wave `live-lane-session-1`, base `c8fa6ea`. WRITTEN AS THE WAVE
@@ -1945,3 +1943,454 @@ session-2 queue for the six intro rows. That follow-up is why (f)'s last
 paragraph now names this lane's reader as the last offline piece. The
 blocker map regenerated to a fixed point (derived candidate columns only);
 the census instruments green, no pin moves.
+
+## Session-2 preparation, 2026-09-27 -- OFFLINE ONLY
+
+The orchestrator's order of 2026-09-27 16:45 IST: prepare live session 2 with
+no browser, no attach and no page loads; session 2 itself runs only on its
+separate go. Four items -- (a) the setting's address, (b) its reader wired at
+the save gate's seam, (c) a session-2 harness written under
+PAGE-MAY-VETO-NEVER-SUPPLY, (d) the plan,
+`_audit/2026-09-27-live-session-2-plan.md` -- each its own commit, on a branch
+fast-forwarded to master `2eb90ad` first (the order's sample said the tree was
+clean at `aa559de`, an ancestor of master; disk agreed at 16:34).
+
+**THE OPERATOR'S NAMED LIVE-PROOF TARGETS appear nowhere in this repository.**
+They live only in the gitignored identity key and the orchestrator's own
+memory; every step that needs one names it by role.
+
+### (a) The setting's address: admitted for reading, on an application of ONE-NAMED-SETTINGS-PAGE-AT-A-TIME
+
+**THE CALL IS THE ORCHESTRATOR'S, AND IT APPLIES AN EXISTING DECISION.**
+Step 1 of the capture spec in (f) above: admit
+`/mypreferences/d/settings/notify-network-for-updates`, exact and anchored,
+for reading, and that path alone -- the operator's settings ruling of
+2026-08-31 (ONE-NAMED-SETTINGS-PAGE-AT-A-TIME) applied to a second named
+page, as it was once to dark mode. No register entry is written.
+
+**BUILT, as lane L1's follower-list carve-out was built -- two gates, each
+naming the one address:**
+
+* one anchored line in `readonly._ALLOWED_URL_PATTERNS`, beside the dark-mode
+  entry, with its argument on the line: what the page is for (condition 1 as
+  amended), where its identity comes from (the settings index captured in
+  session 1), that the address is DERIVED and never drawn on a capture, that
+  the other candidate is not admitted, and that it is READ ONLY;
+* one entry in `readonly._FORBIDDEN_SUBSTRING_PATTERN_EXEMPTIONS` excusing
+  exactly `/settings/` and `settings` -- the two forbidden substrings the
+  address trips, measured -- for exactly that anchored address. The forbidden
+  tuple is unchanged at 33, so both words keep their full reach everywhere
+  else: nothing is NARROWED, which is the trade the dark-mode entry declined
+  for `language` and `autoplay-videos`.
+
+**THE CONTROLS THE ORDER NAMED, and more** (`tests/test_notify_setting_admission.py`):
+both spellings admitted through the shipped gate; refused, each on the gate
+that names it -- the sibling `/mypreferences/d/settings/show-profile-photos`,
+the two siblings the dark-mode entry declined by name, this address with a
+sub-path (`/anything`), a query, a traversal onto a sibling and onto the
+account-ending address, the same path in another case, the OTHER candidate
+(`/mypreferences/d/notify-network-for-updates`, allowlist), the category page
+(`/mypreferences/d/categories/`), the old `/psettings/activity-broadcast`
+(`/psettings/`) and the settings family root. EITHER gate alone admits
+nothing; the pair's blast radius over the shipped corpus plus these spellings
+is exactly its own two spellings, nothing newly refused; and no write spec
+names the address or exempts either word, so it is no write surface.
+
+**THE RE-FREEZE, in the comment chain's attribution form:**
+
+    _ALLOWED_URL_PATTERNS                     6240409ec52c4ab2 -> 18e5958586c2c367   54 -> 55
+    _FORBIDDEN_SUBSTRING_PATTERN_EXEMPTIONS   76d7b10899530d69 -> 14f567fd160048a8    3 -> 4
+
+The tree minus exactly the two entries hashes to the two values replaced;
+the line alone is 18e5958586c2c367 / 76d7b10899530d69 and the exemption alone
+6240409ec52c4ab2 / 14f567fd160048a8; dropping the pre-existing dark-mode line
+instead lands on ec6311ecf485ba6a; six of eight digests byte-identical,
+`<functions>` unmoved. Two other pins moved with it and say why:
+`tests/test_job_alerts_read_boundary.py`'s count of pattern exemptions
+(3 -> 4, a dated note) and the census allowlist-count claim in
+`_audit/_census/messaging-and-content.md` (54 -> 55, naming this admission as
+the latest). `P O6-O20` in `_audit/_census/profile.md` -- the fifteen
+visibility toggles, one of which this setting is -- carries a dated note: its
+page is named for reading; its toggles stay GAP.
+
+**RED-PROOFS, each plant alone in a scratch copy (the new file and the
+boundary invariant):**
+
+    plant                                                        red
+    on the readonly.py before (a)                                  8
+    R1 the admission not made                                      8
+    R2 the exemption widened to the settings family                5
+    R3 the allowlist line widened to the settings family           4
+    R4 the exemption excusing '/settings/' only                    6
+    R5 the exemption left open at the end (sub-paths excused)      6
+    R6 the allowlist line left open at the end                     2
+
+Baseline and restored: 35 passed. **If session 2's capture shows this
+address redirects, the second candidate gets its own admission then** -- not
+now.
+
+### (b) The reader for "Sharing profile edits", wired at the save gate's seam
+
+**THE CHOICE THE ORDER LEFT OPEN, TAKEN: BUILD IT NOW, against synthetic
+pages, because session 2's plan validates it on the real capture, offline
+and inside the session, BEFORE any of the six edits fires** (the plan's step
+for it, and the harness's offline check). The other option -- capture in
+session 2, fire the edits in a session 3 -- stays the fallback the plan names
+if that validation does not agree.
+
+**THE READER, `profile_editor.read_account_share_updates`, exactly the spec
+from (f):** one control of role switch or checkbox whose accessible name is
+EXACTLY "Sharing profile edits" (Playwright's own role-and-name engine, the
+comparison made inside the page -- lane L7's P B9 discipline, so a count comes
+back and never text); its state from the browser's `checked` PROPERTY when it
+is an `input[type=checkbox]`, cross-checked against `aria-checked` when both
+are drawn, and from `aria-checked` alone otherwise; the answer one of lane
+L7's `ACCOUNT_READINGS`. Every doubt is 'unknown', and 'unknown' is never
+'off': no control of that name, two of them, a name that only contains it, a
+disagreement, a control with no state, a button of that name, a failure (its
+exception TYPE only). **READ ONLY: it presses nothing** -- asserted on its
+body's calls. The address and the name are constants beside it
+(`ACCOUNT_SETTING_URL`, `ACCOUNT_SETTING_NAME`), and
+`served_at_account_setting` says whether the page kept its own path: a
+redirect -- to the other candidate, to the category page that lists this
+setting among others -- reads 'unknown', because an admitted address is not a
+served one.
+
+**THE WIRING, in `writes.perform`, for EDITOR_SAVE_ACTIONS only:** one load of
+the setting's page through `_load` -- the read door, unrelaxed -- BEFORE the
+editor is opened, so before the change is entered (the amendment's word; the
+setting lives on another page); the answer handed to all four
+`profile_editor.read_save_gate` calls the action can make (select, fill, the
+Premium badge's switch gate and its Save gate); the receipt gains
+`account_setting` (the reading, whether the page was served, the counts,
+constants-only reasons). A page that cannot be loaded gives None, never 'off',
+and does not stop the write: a dialog drawing its own notify control can still
+establish condition 1, so the gate decides -- and it refuses None wherever the
+dialog draws no control of its own. No rule in `profile_editor` moved; lane
+L7's seam received its input, and three stale sentences that said nothing
+supplied it were corrected in place.
+
+**THE ORDER'S FOUR TESTS, through the real preview, `consume` and `perform`
+over lane L7's editor world with his settings page added**
+(`tests/test_account_share_updates.py`): OFF passes (Save pressed, value
+stored, `condition_1: account_setting_off`); ON refuses (two shapes of switch);
+unknown refuses (no switch, an unnamed one, two named, a redirect); a missing
+reading refuses (the page cannot load: `reading: null`, the error's type).
+Beside them: the reading is taken before the editor is opened, once per write;
+a dialog control still governs whatever the account reads, both ways; an
+unrecognised unnamed switch still refuses with the account OFF (code 6); every
+save-gate call in `perform` passes the reading (structural); and the reader
+on twelve synthetic pages.
+
+**ONE GUARD CAUGHT THE FIRST DRAFT, and was right.** The navigation guard
+tracks a tainted name across the whole module, and `landed` is one in
+`writes.py`: binding the new function's booleans from it spread the taint
+through `value` and `reading` to every `goto(page, url)` in the file. The
+locals are now named for the function, as the probes' own docstrings say to.
+`tests/reader_leak_baseline.json` gains the two new readers, both measured
+`clean` by the guard's own `measure()`; no other verdict moved, so only those
+two lines were added.
+
+**RED-PROOFS, each plant alone in a scratch copy (the new file and lane L7's
+editor-commit tests):**
+
+    plant                                                          red
+    on writes.py and profile_editor.py before (b)   the new file does not
+                                                    import: collection errors
+    B1 the fill path's save gate loses the reading                   9
+    B2 the reading taken AFTER the editor is opened                 10
+    B3 a reading that could not be taken made 'off'                  3
+    B4 a redirected page's reading counted                           1
+    B5 a named control with no state read as off                     1
+    B6 the checked pseudo-class asked of any control                 3
+    B7 the name matched loosely                                      1
+    B8 two controls of that name accepted                            1
+    B9 an input whose aria-checked disagrees trusted                 1
+
+Baseline and restored: 75 passed. B8 SURVIVED THE FIRST RUN: the later
+exactly-one counts refused the same world for another reason, so the test
+now asserts the count the reading reports and the reason it gives, and B8
+goes red.
+
+**WHAT THE SYNTHETIC PAGES CANNOT SAY:** whether LinkedIn draws this setting
+as any of these shapes. The live page may name its switch through a title
+paragraph with no accessible name -- the intro editor's shape -- and then this
+reader answers 'unknown' and nothing fires. That is the case the in-session
+validation exists for.
+
+### (c) The session-2 harness, written under PAGE-MAY-VETO-NEVER-SUPPLY -- and session 1's harness converted to it
+
+**`scripts/_probe_live_lane_session_2.py`: 34 closed keys**, one for every
+step of the plan (d) that is not an outward act. **The rule is three
+mechanisms, each enforced:**
+
+* **every address is a module constant, or one of the package's own
+  composers** -- `search_verticals.compose`, `member_rosters.compose`, the
+  digit templates lane L1 and session 1 already use -- **filled from the
+  caller's `--item`**, each item validated as a closed shape before anything
+  loads (1-20 ASCII digits; a thread id by `threads.valid_thread_id`). A
+  refusal never echoes what was typed;
+* **a reading may only say no:** a group must be among the MEMBERSHIPS his
+  Groups page returned this session (not its suggestions), a post among the
+  ids his rail returned with authorship established, an attendees list only
+  after this session's `event` read that event and saw it link its own list.
+  A mismatch stops the key with nothing loaded;
+* **the caller may read a result and name an item from it; the file never
+  does.** `job_detail` writes the organisation it resolved; `n84` takes an
+  organisation only as `--item`.
+
+**THE NAVIGATION GUARD FINDS NOTHING IN IT, AND IS SHOWN ABLE TO:** its own
+engine over this file reports zero derived sites, and over a copy with one
+line changed -- an item taken from a reading on disk, a navigation to where
+the last one landed -- it reports the site (both in the new test file). No
+entry was added to `KNOWN_DERIVED_NAVIGATIONS`.
+
+**The ledger** (`_state/live2/ledger.json`, gitignored) is session 1's --
+every load counted through a wrapper around `BROWSER.goto`, the 41st refused
+before it navigates, the spacing waited out across processes -- plus two
+things session 1 did not have: **D1's five searches**, a sixth `/search/`
+load refused before it navigates, and **one driver at a time**, a lock that
+refuses a second harness process.
+
+**What it writes.** His settings page raw -- it draws no other person -- and
+every other page as a SKELETON reduced in the process before anything is
+written: tags, attribute names, classes, roles and closed ARIA states kept;
+every other text node and attribute value replaced by its shape (letters,
+digits, length) and an 8-hex HMAC under a key made once per session and kept
+in the gitignored state directory, so two captures compare and a list of
+names cannot reverse a hash; an id and every attribute naming it shaped with
+one key, so a label still finds its control; addresses keep LinkedIn's own
+path words and query parameter names; a closed set of LinkedIn's own UI words
+survives verbatim. Tool envelopes are raw where the tool is name-free by its
+own contract, and reduced where it can carry a person (notifications,
+connections, a job posting, an opened thread): integers, booleans, the
+package's literal fields and organisation, group and posting ids kept, every
+other string shaped. **The (b) reader still reads a skeleton**: shown on a
+synthetic page, it finds "Sharing profile edits" through a label and an id
+both shaped with one key, and reads the state.
+
+**Presses: ONE click site in the file**, `press_and_read` (asserted on the
+syntax tree), on a trigger found as exactly one match: a click -- an open
+verb by the probe rule -- a reading of the opened menu BY ATTRIBUTE and by
+our own words compared inside the page (only our words and integers come
+back), a skeleton of the open state, then Escape. Two anomalies stop the
+session: a menu whose own words do not go away again, and any message event
+on `/messaging/`, which is a conversation opened. Words are counted only
+where VISIBLE, because a menu LinkedIn keeps in the DOM while closed must not
+read as opened.
+
+**The setting's offline check** (`setting_offline`): the (b) reader over the
+setting's own capture in a local headless Chromium whose context is offline
+and runs no script (both flags asserted on the syntax tree), against the live
+reading, as one of seven verdicts. **The case a capture cannot answer is
+reproduced, not argued:** a switch whose ON is held only in the `checked`
+PROPERTY reads ON live, and its capture -- no `checked` attribute -- replays
+OFF. The live step therefore records the property and the attribute side by
+side, and that case reads `STATE-NOT-IN-MARKUP`, never `DISAGREES` or
+`AGREES`.
+
+**Lane D's LQ-4** (`attach_check`): the attach runs in a child process with
+the driver's protocol log on; the parent keeps only the
+`Browser.setDownloadBehavior` sends and the answers matched to them by id,
+each reduced to closed words, as the lines arrive -- a decoy line naming a
+tab never survives (tested). Its filter is proven on synthetic lines only;
+the plan says what a mismatch with the real log's form reads as.
+
+**Read offline before it was written, counts only, from session 1's own
+captures (no load):** his profile draws exactly ONE
+`button[aria-label="More"][aria-expanded="false"]`, page-wide and in main --
+so lane D's LQ-1 and the overflow `N 76` waits on are one control, which the
+inventory had as DERIVED; the header's Me trigger is one button named exactly
+"Me" on two captures; his newest post draws an empty comments list while his
+profile's rail draws four "N comments" phrases; all eight rail items are
+activity urns with authorship established. What each changed is in the plan.
+
+**SESSION 1 CONVERTED, AND ITS DECLARED ENTRY DELETED.** Judged cheap, and
+it was: `post_capture`, `l1_post_summary` and `own_link` take the post from
+the caller's `--activity` (1-20 ASCII digits, never echoed) and
+`activity_veto` refuses one that is not among his authorship-established rail
+ids; `newest_own_activity_digits` is gone. The navigation guard now finds
+nothing in `_probe_live_lane_session_1.py`, so its entry in
+`KNOWN_DERIVED_NAVIGATIONS` is deleted and the comment beside it records why.
+Its tests: the two that pinned the old choice are replaced by five that pin
+the veto, the digits rule and the selection.
+
+**Every corpus instrument over both files, run on them directly:**
+navigation 0, output 0, page text 0, import-time effects 0, gated
+interactions 0, context closers 0, tab leaks 0, never-branched controls 0,
+unguarded navigations 0. The tests: `tests/test_live_lane_session_2_harness.py`,
+106; `tests/test_live_lane_session_harness.py`, 33.
+
+**RED-PROOFS, each plant alone in a scratch copy (the two harness test files
+and the navigation guard):**
+
+    plant                                                            red
+    on the session-1 harness before the conversion      2, and 4 errors
+    C1  an address taken from a reading on disk                        3
+    C2  the search cap removed                                         1
+    C3  the ceiling not checked before the navigation                  1
+    C4  a suggested group accepted as a membership                     1
+    C5  authorship not required (session 1's rail ids)                 3
+    C6  a text node kept verbatim in a skeleton                        2
+    C7  classes shaped in a skeleton                                   2
+    C8  the shape's hash not keyed                                     4
+    C9  every envelope string kept                                     1
+    C10 hidden words counted as drawn                                  1
+    C11 a conversation opened by a press not an anomaly                1
+    C12 every menu taken as closed again                               2
+    C13 no STATE-NOT-IN-MARKUP verdict                                 2
+    C14 every protocol answer kept, not only the sends' own            5
+    C15 the artifacts folder not checked                               2
+    C16 a rider allowed without its page                               1
+    C17 an item's digits read by isdigit, not as ASCII                 1
+    C18 a second click site                                            1
+    C19 session 1 takes his post off the rail again                    1
+    C20 the replay runs the capture's scripts                          2
+    C21 the replay reaches the network                                 1
+    C22 a second driver let in                                         1
+
+Baseline and restored: 783 passed. None survived. C21 is caught only by the
+structural test, which is why that test exists: no synthetic document can
+witness a network the replay never needed.
+
+**ONE DEFECT CAUGHT BY THE STRICT-ASCII CHECK BEFORE THE COMMIT:** the
+ellipsis in one of LinkedIn's labels, written as a `\u` escape, reached the
+file as the character itself -- the tool channel decoded it. It is now built
+with `chr()`, and the check reads the file's bytes, not the intent.
+
+**WHAT IT DOES NOT DO.** The outward block is not in it; its loads are added
+to the ledger by hand. Its vocabulary of LinkedIn's words is a list written
+from the captures and lanes' records, not measured complete: a menu label
+outside it survives only as its shape and count (the plan's D-2). Its
+triggers were measured on captures of 2026-09-20 and 2026-09-23, and a
+trigger that is not exactly one match refuses without pressing.
+
+### (d) The session-2 plan
+
+**`_audit/2026-09-27-live-session-2-plan.md`**, from an inventory of every
+open capture spec and every built-unfired row on master, taken by a
+read-only child of this lane over this branch at `2eb90ad` and kept in the
+lane's scratch (its counts were re-derived four ways and agreed: 36 rows by
+the header parse, the repository's own counter, `PINNED_B1_ROWS` and
+`census_completion --check`). The plan orders it: the attach first (no
+load), captures that need nothing from a fire, then the no-target fires,
+then the captures that need a fire's result, then the outward block, which
+fires only after he has seen each resolved identity once and names every
+target by role. **At most 38 of the 40 loads and 5 of the 5 searches, two in
+reserve.** Every step names its loads, the ruling it rests on, and whether it
+needs him; the credential and session controls are excluded by name, `P N10`
+among the seven.
+
+**What the plan found that the inventory had not, all offline:**
+
+* **the More control on his profile is ONE control** -- one match on
+  session 1's capture, page-wide -- so lane D's LQ-1 and the overflow `N 76`
+  waits on meet in one press; the plan asks the orchestrator to govern it
+  once (D-1);
+* **`linkedin_group_memberships` costs three loads, not one**: the tool
+  brackets the Groups page with the feed at both ends, which moved the
+  group steps' price;
+* **`M C29` and `M C42` need a DIFFERENT post of his** than session 1
+  captured: that post draws no comment, while his profile page, where the
+  rail is, draws four comment counts -- so the plan's `own_post` takes one of
+  those posts, named by the lead and vetoed against the rail;
+* **a skeleton cannot learn a label nobody has measured** -- the ON form of
+  "I'm interested" (`P I15`), a menu item outside the harness's words -- so
+  the raw-capture question (D-2) is priced in the plan, not left abstract.
+
+**The count, against the inventory:** of its 46 open capture specs, 27 are
+captured in session 2, 6 (and one part) wait on items only he can supply,
+3 go to session 3, 4 need an admission first, and 6 are optional,
+superseded, conditional or unspecified. Of the 36 built-unfired rows, 15 are
+fired -- every one of the 11 that need no target, `N 84` and `N 87`, and
+`M M10` and `M M17` in the outward block -- 8 go to session 3 (the six
+intro edits, `P B9`, `N 85`), 11 are outward rows whose target he has not
+named (three of them blocked), and 2 are blocked reads.
+
+**The decisions it puts to the orchestrator, D-1 to D-8,** and one to him,
+D-9 -- the ids only he can supply. None is taken here.
+
+### Integration, gates, and what did not run
+
+**Commits on this branch, none pushed, none attributed**, each through the
+pre-commit identity gate with 0 hits: `93d90c2` (a), `2761e35` (b), `4453124`
+(c), `56f129a` (d), `826ad09` (a's census note, below), `3233ebd` (the merge
+of master), and this section's commit.
+
+**ITEM (a)'S CENSUS NOTE, MENDED AT THE GATE OF (c) AND (d).** Its note on
+the profile census row O6-O20 wrote the two substrings its exemption excuses
+in backticks. The refused-address check reads every backticked path in a GAP
+row's cell as an address the row rests on, so it checked the substring
+itself, found it refused, and counted the row: 74 against its pin of 73. (a)'s
+gate never ran that check -- its selection named the read boundary's tests,
+and this one reads the census through a script -- and the gate of (c) and
+(d), built from every test that reads `scripts/`, did. The note now quotes
+them, as the cell's own text does, and the check reads 73.
+
+**THE ONE INTEGRATION**, at master's tip when the preparation was done:
+`52b55b6`, 68 commits and 137 files past `2eb90ad` -- lane L8's outward
+classes, the census applications of their rulings, and lane G's people-data
+foundation. Six conflicts, each resolved against the merge base:
+
+    file                                     resolution
+    the profile census                       O6-O20 changed here only, O21 on
+                                             master only, on neighbouring lines:
+                                             each side's row kept
+    tests/test_navigation_is_never_derived   master had emptied the table of
+                                             three entries and kept session 1's
+                                             harness as debt pending its
+                                             conversion; (c) converted it, so
+                                             the table is EMPTY and its note
+                                             records the debt as paid
+    tests/test_readonly_boundary_invariant   only the ledger notes: both kept,
+                                             master's first, one more for the
+                                             merge. The merged readonly.py equals
+                                             master on eleven digests and this
+                                             branch on its two, and the pin dict
+                                             matches all thirteen, no hand edit
+    the audit index, the rulings register,   master's, regenerated to a fixed
+    the blocker map                          point over the merged corpus
+
+`writes.py` and the reader baseline merged without conflict: (b)'s wiring --
+the reading before the editor, the four save-gate calls, the receipt's key --
+and its two readers are present beside lanes L8's and G's changes, and the
+merged gate below runs both sides' tests over them.
+
+**AND ONE THING THE MERGE BROUGHT INTO THE PLAN:** since lane G, the reply
+preview's `who_this_would_reach` is a people record, as the ruling
+`PREVIEW-NAMES-THE-RESOLVED-TARGET` has it -- the name and headline the page draws
+for the conversation he named, sanitised, marked untrusted, returned at
+runtime and never written. That is the identity the plan's outward block
+shows him once; the plan's D-6 and its step 4.1 now cite it.
+
+**GATES, each on a committed tree:**
+
+    item     tree       files   result
+    (a)      93d90c2       94   6100 passed, 4 skipped
+    (b)      2761e35       75   4993 passed, 3 skipped, 1 xfailed
+    (c)(d)   56f129a       97   5813 passed, 4 skipped, 1 xfailed, 1 FAILED:
+                                the refused-address pin, mended in 826ad09;
+                                that file and two boundary-reading census
+                                files re-run, 28 passed
+    merge    3233ebd      185   8822 passed, 8 skipped, 1 xfailed: (b)'s and
+                                (c)(d)'s selections, every test file master
+                                changed since the base, and the census and
+                                boundary files (a) reaches
+
+plus: the census instruments on the merged tree, all exit 0 but the
+asserted-name checker, whose eight findings are the pinned eight in other
+waves' documents; the three generators at a fixed point; red-proofs, (a) 6
+plants, (b) 9, (c) 22, none surviving; strict ASCII over every file touched;
+the changed Python compiled under Python 3.10.19.
+
+**NOT RUN, named:**
+
+* **the full suite locally**, by order: 82 of the merged tree's 267 test
+  files were outside its gate, and CI's cells run them at the merge;
+* **anything live**, by order: no attach, no load, no press. So every
+  harness key, `attach_check` against the real driver's protocol log, and the
+  offline replay of a REAL capture are proven only on synthetic pages, fakes
+  and synthetic log lines;
+* **the impact gate**: the selections above were built by hand and are
+  named, each with its reason;
+* **session 2 itself**, which runs on the orchestrator's separate go.

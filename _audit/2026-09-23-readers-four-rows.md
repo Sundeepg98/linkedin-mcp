@@ -1,5 +1,3 @@
-claude-opus-5-5[1m]
-
 # READERS FOR THE FOUR ROWS BLOCKED ON NOTHING: P O3, N 134, M C72, M C85
 
 **CORRECTS:** `_audit/2026-09-23-bucket3-addresses.md` -- its "blocked on nothing" five are one: `M C85` is gated RULING (no sanctioned source for a poll post's address, section 4), and `P O3`, `N 134` and `M C72` are gated PRESS, each measured live (sections 3.0.1 and 5.1). Only `M M49` remains.

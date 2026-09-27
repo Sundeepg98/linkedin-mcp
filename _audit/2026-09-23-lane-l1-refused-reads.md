@@ -1,5 +1,3 @@
-claude-opus-5-5[1m]
-
 # Lane L1, refused reads: 24 rows at the read boundary, taken one at a time
 
 Wave `lane-l1-refused-reads`, 2026-09-23, worktree branch off master `b0d3ab8`.

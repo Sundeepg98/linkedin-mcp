@@ -231,24 +231,33 @@ def main() -> int:
     print()
 
     print("2. pill_label -- the page string published at active_filter.pill_label")
+    # RE-POINTED 2026-09-27 (lane G). The activator presses only an EXACT pill
+    # inside the one filter bar since that day, so the plant's own label never
+    # reaches its success dict and the three tests this section drove were
+    # rewritten -- and this script kept calling the deleted names, dying on
+    # an AttributeError before it convicted anything. Each plant now lands on
+    # a path its test actually drives: the REFUSAL (the double's pill is named
+    # the plant) and the SUCCESS (an exact pill).
+    from tests import test_a_thread_id_never_leaves_the_module as R
+
     results.append(
         _convict(
-            "an eighth raw field is added",
-            "the SET pin did not notice a new page-text field",
+            "the refusal gains a raw field",
+            "the SET pin did not notice a page-text field on the refusal",
             plant_filter(
-                '"pill_label": label,',
-                '"pill_label": label,\n        "pill_label_echo": label,',
+                '"found": len(exact),\n            "bars": 1,',
+                '"found": len(exact),\n            "seen": seen,\n            "bars": 1,',
                 1,
             ),
-            sync(T.test_exactly_one_returned_field_carries_page_text, "inmail"),
+            sync(T.test_no_returned_field_carries_page_text, "inmail"),
         )
     )
     results.append(
         _convict(
             "the label becomes the argument",
-            "the test could not tell the page's string from the caller's",
+            "the test could not tell the pill's own spelling from the caller's word",
             plant_filter('"pill_label": label,', '"pill_label": wanted,', 1),
-            sync(T.test_the_pill_label_is_not_drawn_from_the_closed_tuple),
+            sync(T.test_the_pill_label_is_the_permitted_word_and_never_other_text),
         )
     )
     results.append(
@@ -260,7 +269,7 @@ def main() -> int:
                 '"url_before": label,',
                 1,
             ),
-            sync(T.test_the_two_redacted_url_fields_are_still_redacted_beside_it),
+            sync(R.test_the_two_url_fields_are_redacted_and_still_present),
         )
     )
 

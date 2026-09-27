@@ -1254,6 +1254,47 @@ _ALLOWED_URL_PATTERNS: tuple[re.Pattern[str], ...] = (
     # No query string and no sub-path: nothing builds either, and the
     # anchoring is what keeps this one page from becoming the family.
     re.compile(r"^https://www\.linkedin\.com/mypreferences/d/dark-mode/?$"),
+    # A SECOND NAMED SETTINGS PAGE, FOR READING ONLY: "SHARING PROFILE EDITS".
+    # Admitted 2026-09-27 on the orchestrator's APPLICATION of the ruling
+    # above -- ONE-NAMED-SETTINGS-PAGE-AT-A-TIME, the operator's of 2026-08-31
+    # -- recorded by the live lane as an application of that ruling, not as a
+    # new one (`_audit/2026-09-23-live-lane-session-1.md`, the session-2
+    # preparation section).
+    #
+    # WHAT IT IS FOR. Condition 1 of SELF-PROFILE-EDITS-NOT-OUTWARD, as
+    # amended (SELF-PROFILE-EDIT-NOTIFY-CONDITION-AMENDED): where the edit
+    # dialog draws no notify control, his account-level "share profile updates
+    # with your network" setting READ OFF before the edit satisfies it. LinkedIn
+    # names that setting "Sharing profile edits" today -- key
+    # notifyNetworkForUpdates, identifier notify_network_for_updates -- read off
+    # the settings index the live lane captured in session 1.
+    #
+    # THE ADDRESS IS DERIVED, NOT MEASURED, and that is stated on the line it
+    # buys: no capture on record draws it. LinkedIn's own settings bundle pairs
+    # the old slug activity-broadcast with notify-network-for-updates in the
+    # list that pairs two settings whose new addresses the index DOES draw,
+    # both under /mypreferences/d/settings/. The other candidate, without
+    # /settings/, is NOT admitted; if this one redirects on its first load,
+    # that one gets its own admission then.
+    #
+    # IT BUYS PAST TWO GATES AND BOTH NAME THIS ONE ADDRESS: this line, and the
+    # paired entry in _FORBIDDEN_SUBSTRING_PATTERN_EXEMPTIONS, which excuses
+    # "/settings/" and "settings" for exactly this anchored address. Both keep
+    # their full reach everywhere else -- the forbidden tuple is unchanged --
+    # which is the difference from the trade the dark-mode entry above
+    # declined for language and autoplay-videos: nothing is NARROWED.
+    #
+    # READ ONLY. writes.assert_write_url consults neither exemption table and
+    # no WriteSpec names this address, so it is no write surface. The reader
+    # that opens it (profile_editor.read_account_share_updates) counts; it
+    # never presses the switch, which is his to change.
+    #
+    # NOT ADMITTED: a query, a sub-path, a sibling settings page, the category
+    # page that lists it, the other candidate, the old /psettings/ address.
+    re.compile(
+        r"^https://www\.linkedin\.com/mypreferences/d/settings/"
+        r"notify-network-for-updates/?$"
+    ),
     # ONE ITEM PERMALINK. Added 2026-08-31 on the operator's ruling: ONE NAMED
     # ITEM PERMALINK PER CALL. It is the write surface ``react_to_item`` acts
     # on and the read surface ``linkedin_surface_census("feed_item")``
@@ -2776,6 +2817,24 @@ _FORBIDDEN_SUBSTRING_PATTERN_EXEMPTIONS: tuple[
             r"people-follow/followers/?$"
         ),
         frozenset({"/follow"}),
+    ),
+    # "SHARING PROFILE EDITS", READ ONLY -- the second gate of the pair whose
+    # first gate is the matching allowlist line beside dark-mode. 2026-09-27,
+    # the live lane, on the orchestrator's application of
+    # ONE-NAMED-SETTINGS-PAGE-AT-A-TIME. The address trips "/settings/" AND
+    # "settings" -- measured, and nothing else -- and both are excused for this
+    # one anchored address only; each keeps its full reach everywhere else, and
+    # the forbidden tuple is unchanged. The proof is a test, not a sentence
+    # (`tests/test_notify_setting_admission.py`): a sibling settings page, this
+    # address with a sub-path or a query, a traversal, the category page, the
+    # other candidate address and the old /psettings/ one all still refuse,
+    # each on the gate that names it, and EITHER gate alone admits nothing.
+    (
+        re.compile(
+            r"^https://www\.linkedin\.com/mypreferences/d/settings/"
+            r"notify-network-for-updates/?$"
+        ),
+        frozenset({"/settings/", "settings"}),
     ),
 )
 

@@ -229,6 +229,17 @@ def _require(condition: bool, message: str) -> None:
         raise ValueError(message)
 
 
+#: THE HEADLINE THE READING DID NOT DRAW. ``None``, and a different state from
+#: the empty string: ``""`` is a headline the page drew with nothing left after
+#: sanitising, and ABSENT is none drawn where the reader reads -- a list row, a
+#: control's label, a header that draws no line under the name. Added
+#: 2026-09-27 on the orchestrator's order (lane G): until then a person record
+#: carried ``""`` for both, so "no headline here" and "an empty one" read the
+#: same. ``None`` and not a sentinel string, because a string can be forged by
+#: the page it describes and ``None`` cannot.
+ABSENT = None
+
+
 @dataclass(frozen=True, slots=True)
 class Person:
     """One member, as LinkedIn showed him or her: the four declared fields.
@@ -236,20 +247,12 @@ class Person:
     Build one with :meth:`from_page`. Direct construction is allowed and
     checked: every string must already be its own sanitised form, the link its
     own canonical form and the degree one of :data:`DEGREES` -- so an
-    unsanitised record cannot exist.
-
-    ``headline`` MAY BE ``None``: ABSENT, the page drew none (added at lane
-    L5's merge of master 52b55b6, 2026-09-27). The orchestrator's order for a
-    write's preview reads "a headline the page does not draw is ABSENT, never
-    ''": an empty string reads as a member whose headline is empty, where the
-    truth is that nothing was drawn to read. ``from_page`` is unchanged and
-    still answers "" for a reader's missing headline; a preview marks the
-    absence through ``people_seam.person``. ``None`` carries no text, so it
-    widens nothing a guard reads.
+    unsanitised record cannot exist. ``headline`` is :data:`ABSENT` unless a
+    reader read one.
     """
 
     name: str
-    headline: Optional[str] = ""
+    headline: Optional[str] = ABSENT
     link: Optional[str] = None
     degree: Optional[str] = None
 
@@ -257,7 +260,7 @@ class Person:
         _require(isinstance(self.name, str) and self.name != "", "a person has a name")
         _require(self.name == sanitise(self.name, cap=CAPS["name"]), "name is not sanitised")
         _require(
-            self.headline is None
+            self.headline is ABSENT
             or (
                 isinstance(self.headline, str)
                 and self.headline == sanitise(self.headline, cap=CAPS["headline"])
@@ -284,13 +287,16 @@ class Person:
         VISIBLE ONLY: the name is what the page drew. A row LinkedIn renders
         as :data:`ANONYMISED_NAME` stays exactly that, with whatever link the
         row itself carried (normally none); nothing here looks elsewhere.
+
+        ``headline=None`` -- the reader read none -- is :data:`ABSENT`; a
+        headline it did read is sanitised, and may come back ``""``.
         """
         clean = sanitise(name, cap=CAPS["name"])
         if not clean:
             return None
         return cls(
             name=clean,
-            headline=sanitise(headline, cap=CAPS["headline"]),
+            headline=ABSENT if headline is None else sanitise(headline, cap=CAPS["headline"]),
             link=canonical_profile_link(href),
             degree=canonical_degree(degree),
         )

@@ -126,6 +126,11 @@ class _Pills:
         and presses the one exact match; every candidate here is this pill."""
         return self
 
+    def locator(self, _selector: str):
+        """Since 2026-09-27 the pills are found inside the ONE filter bar; this
+        double is that bar and its pill at once."""
+        return self
+
     async def get_attribute(self, _name: str, timeout=None, **_kwargs) -> str:
         return "InMail"
 
@@ -149,6 +154,9 @@ class _Page:
         self._pills = _Pills(self)
 
     def get_by_role(self, *_a, **_kw):
+        return self._pills
+
+    def locator(self, _selector: str):
         return self._pills
 
     async def wait_for_timeout(self, _ms: int) -> None:

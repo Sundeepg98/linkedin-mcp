@@ -1,5 +1,3 @@
-claude-opus-5-5[1m]
-
 # Lane L7 -- WRITES TO HIS OWN PROFILE: the 36 R3 profile-family rows, classed and given one outcome each
 
 Written as the lane runs. Worktree branch cut from `master` at `9c219c8`. Nothing in this lane

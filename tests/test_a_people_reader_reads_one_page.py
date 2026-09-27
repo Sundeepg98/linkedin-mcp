@@ -223,22 +223,31 @@ READS_NO_PAGE: Dict[str, str] = {}
 #: behind it -- a new one fails until somebody decides which side it is on.
 WRITE_DOOR: "Key" = ("server", "_write_tool")
 
-#: The record builders reached only through the write door: the ONE builder
-#: every preview that names a person goes through.
+#: The record builders the write door reaches: the builders of the previews
+#: that name a third party.
 #:
-#: TWO ENTRIES UNTIL LANE L5'S MERGE OF MASTER 52b55b6 (2026-09-27), and the
-#: previews did not change -- where their records are BUILT did. They read
-#: ``("writes", "_name_the_invitation_recipient")`` and
-#: ``("threads", "name_the_reply_recipient")``, each building a
-#: ``people_data.Person`` itself. The merge routed both, and lane L5's two
-#: named-person previews (``named_profile.name_the_profile_target``), through
-#: ``people_seam.person`` -- the builder that makes a headline the page does
-#: not draw ABSENT -- so the three functions call a builder and build nothing,
-#: and the one builder behind the door is the seam. A preview that builds a
-#: record of its own again arrives here as a second builder.
+#: MASTER'S SET, AND THIS LANE'S, MET AT LANE L5'S MERGE OF MASTER b6993e5
+#: (2026-09-27), and the set below is what the derivation MEASURED on the
+#: merged tree, not a union typed by hand:
+#:
+#: * ``("people_seam", "person")`` -- the named-person previews
+#:   (``named_profile.name_the_profile_target``) and, since lane L5's merge of
+#:   master 52b55b6, the invitation's (``writes._name_the_invitation_recipient``
+#:   calls it and builds nothing, which is why that function left this set);
+#: * ``("threads", "name_the_reply_recipient")`` -- the reply preview builds its
+#:   person record itself (lane G's, on master; it went through the seam on
+#:   this lane's branch from the 52b55b6 merge until this one);
+#: * ``("threads", "conversation_with")`` -- the builder the reply preview
+#:   shares with ``linkedin_list_conversations`` for a GROUP conversation's
+#:   title record (2026-09-27). That one is ALSO a reader's builder, reached
+#:   through ``threads.list_result``, and the stop does not hide it from that
+#:   path: the list tool is still derived a people reader
+#:   (``test_the_write_door_stops_only_itself`` holds the stop to itself).
 PREVIEW_BUILDERS: FrozenSet["Key"] = frozenset(
     {
         ("people_seam", "person"),
+        ("threads", "name_the_reply_recipient"),
+        ("threads", "conversation_with"),
     }
 )
 

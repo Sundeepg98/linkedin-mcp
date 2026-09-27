@@ -12,12 +12,18 @@ THE SWAP HAPPENED AT LANE L5'S MERGE OF MASTER 52b55b6 (2026-09-27), and this
 file changed with it:
 
 * ``people_seam.person`` now builds a ``people_data.Person`` and returns its
-  envelope. It is the ONE builder every write PREVIEW that names a person goes
-  through: the named acts' ``whom_this_resolves_to``, ``linkedin_send_reply``'s
-  ``who_this_would_reach``, and -- since the merge, when the orchestrator's
-  order found it building a record of its own -- ``linkedin_send_invitation``'s
-  ``who_this_would_reach``. Section 2 shows each preview's record IS the seam's
-  output.
+  envelope: the builder of the named acts' ``whom_this_resolves_to`` and --
+  since that merge, when the orchestrator's order found it building a record
+  of its own -- ``linkedin_send_invitation``'s ``who_this_would_reach``.
+  Section 2 shows each of those records IS the seam's output.
+  ``linkedin_send_reply``'s went through the seam at that merge and does not
+  since lane L5's merge of master b6993e5: lane G's reply preview reads the
+  line the header draws under the title and returns a GROUP conversation as
+  its TITLE record, a shape a person builder does not make. Its record is
+  still held to mitigation 2 in section 3.
+* THE HEADLINE FOLLOWS LANE G'S CONVENTION since the b6993e5 merge:
+  ``people_data.ABSENT`` (``None``) where nothing was read, and a read
+  headline sanitised -- ``""`` when it was drawn empty.
 * Lane G wired the two READERS -- ``linkedin_list_conversations`` and
   ``linkedin_open_messaging`` -- to ``people_data`` directly, so the seam's
   ``name`` half lost its callers and went. They are still two of the four
@@ -99,14 +105,20 @@ def test_the_seam_returns_lane_gs_record_exactly():
     assert people_seam.person(name="Casey Example", degree="4th")["degree"] is None
 
 
-@pytest.mark.parametrize("headline", [None, "", "   ", ZERO_WIDTH + RIGHT_TO_LEFT_OVERRIDE])
-def test_a_headline_with_nothing_to_show_is_absent_never_empty(headline):
-    """PREVIEW-NAMES-THE-RESOLVED-TARGET as the orchestrator applied it to the
-    previews: a headline the page does not draw -- or that sanitises to
-    nothing -- is ``None``, never ``""``. And the record still validates."""
-    record = people_seam.person(name="Casey Example", headline=headline)
-    assert record["headline"] is None, record
-    assert _is_a_person_record(record)
+def test_a_headline_not_read_is_absent_and_one_read_empty_is_empty():
+    """LANE G'S ABSENT CONVENTION, which the named previews follow since lane
+    L5's merge of master b6993e5: a headline NOT READ is ``people_data.ABSENT``
+    (``None``), never ``""``; a headline READ is sanitised, and one drawn empty
+    -- or holding only what the sanitiser removes -- comes back ``""``. Until
+    that merge this builder turned the second into the first too, which lost
+    the difference lane G's records keep. Both shapes still validate."""
+    absent = people_seam.person(name="Casey Example", headline=None)
+    assert absent["headline"] is people_data.ABSENT is None, absent
+    assert _is_a_person_record(absent)
+    for drawn in ("", "   ", ZERO_WIDTH + RIGHT_TO_LEFT_OVERRIDE):
+        record = people_seam.person(name="Casey Example", headline=drawn)
+        assert record["headline"] == "", (drawn, record)
+        assert _is_a_person_record(record)
 
 
 def test_the_seam_holds_mitigation_2_on_its_own_input():
@@ -145,19 +157,25 @@ async def _reply_block(page, world: str = THREAD) -> dict:
     )
 
 
-async def test_the_reply_recipient_comes_out_of_the_seam(writes_on, browser_page, monkeypatch):
-    """Before the seam, a send_reply preview made ZERO seam calls and printed
-    the conversation's title unmarked (the cold re-check of 2026-09-27)."""
+async def test_the_reply_recipient_is_lane_gs_record_and_not_the_seams(
+    writes_on, browser_page, monkeypatch
+):
+    """SINCE LANE L5'S MERGE OF MASTER b6993e5 THE REPLY IS NOT THE SEAM'S:
+    lane G's preview builds a person record where the page says there is one
+    other member, and a title record for a group. So the seam is never called
+    for it, and its record is still a people record (section 3 holds its
+    mitigation-2 properties)."""
     calls = []
 
     def _mark(**fields):
         calls.append(fields)
-        return {"marked_by": "SEAM", "name": fields.get("name")}
+        return {"marked_by": "SEAM"}
 
     monkeypatch.setattr(people_seam, "person", _mark)
     block = await _reply_block(browser_page)
-    assert calls == [{"name": "Kai Example"}], calls
-    assert block["who_this_would_reach"] == {"marked_by": "SEAM", "name": "Kai Example"}
+    assert calls == [], calls
+    record = block["who_this_would_reach"]
+    assert people_data.as_record(record) is not None, record
 
 
 async def test_the_invitation_recipient_comes_out_of_the_seam(writes_on, browser_page, monkeypatch):

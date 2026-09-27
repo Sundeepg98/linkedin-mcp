@@ -518,15 +518,36 @@ def test_the_detector_returns_true_on_an_unread_row():
         assert out["rows"][0]["unread"] is True, marker
 
 
+#: THE MEASURED STRUCTURE every enumerator case below is drawn in (2026-09-27):
+#: one filter bar, a radiogroup carrying the bar hook, inside <main>; a pill is
+#: a control inside it carrying the pill hook. See ``dom.FILTER_BAR_HOOK``.
+_PILL_HOOK = 'data-test-messaging-inbox-filters__filter-pill="X"'
+
+
+def _in_bar(*controls: str) -> str:
+    return (
+        '<main><div role="radiogroup" data-test-messaging-inbox-filters__filter-pill-group="">'
+        + "".join(controls)
+        + "</div></main>"
+    )
+
+
 @pytest.mark.parametrize(
     "html,seen,navigable",
     [
         (
-            '<a href="/messaging/?filter=unread" aria-label="Unread">x</a>',
+            _in_bar(
+                "<a " + _PILL_HOOK
+                + ' href="/messaging/?filter=unread" aria-label="Unread">x</a>'
+            ),
             ["unread"],
             ["unread"],
         ),
-        ('<button aria-label="InMail"><span>InMail</span></button>', ["inmail"], []),
+        (
+            _in_bar("<button " + _PILL_HOOK + ' aria-label="InMail"><span>InMail</span></button>'),
+            ["inmail"],
+            [],
+        ),
         ("<div>no pills rendered</div>", [], []),
     ],
     ids=["anchor carries the parameter", "button is client-side", "nothing rendered"],
@@ -800,7 +821,7 @@ def test_a_label_that_only_contains_the_word_is_seen_by_neither_path(label):
     activator will not press, the enumerator does not report as a pill."""
     from linkedin_server import dom
 
-    html = f'<button aria-label="{label}"><span>x</span></button>'
+    html = _in_bar(f'<button {_PILL_HOOK} aria-label="{label}"><span>x</span></button>')
     assert shape.messaging_filters(html)["filters_seen"] == []
     assert dom.filter_name_matches(label, "inmail") is False
 
@@ -825,7 +846,7 @@ def test_whatever_the_enumerator_SEES_the_activator_can_FIND(label):
     """
     from linkedin_server import dom
 
-    html = f'<button aria-label="{label}"><span>x</span></button>'
+    html = _in_bar(f'<button {_PILL_HOOK} aria-label="{label}"><span>x</span></button>')
     seen = shape.messaging_filters(html)["filters_seen"]
 
     assert seen == ["inmail"], f"enumerator missed {label!r}"
@@ -845,11 +866,56 @@ def test_the_shared_rule_still_says_no_to_a_different_pill():
     assert dom.filter_name_matches("Starred", "unread") is False
 
 
+#: The folder beside the bar, AS MEASURED (2026-09-27): its own dropdown hook,
+#: and a trigger named exactly "Focused" that carries the folder hook.
+_FOLDER = (
+    '<div data-test-messaging-inbox-filters__folder-dropdown="">'
+    '<button data-test-messaging-inbox-filters__folder-pill="">Focused</button></div>'
+)
+
+
+def test_the_enumerator_reads_only_the_bar_the_activator_presses_in():
+    """THE SAME WHERE AS WELL AS THE SAME WHAT (2026-09-27). The folder trigger
+    beside the bar, named exactly "Focused", and a control outside the bar
+    named exactly "Unread" are pills to neither path; until that day this
+    reader read every button on the page and reported both."""
+    html = _in_bar(f"<button {_PILL_HOOK}>Jobs</button>").replace(
+        "<main>", "<main>" + _FOLDER + "<button>Unread</button>"
+    )
+    out = shape.messaging_filters(html)
+
+    assert out["filters_seen"] == ["jobs"], out
+    assert out["filter_bars"] == 1, out
+
+
+@pytest.mark.parametrize("bars", [0, 2])
+def test_a_page_without_exactly_one_bar_reports_no_pill(bars):
+    """No bar, or two: no pill is read, as the activator presses none, and the
+    verdict says the bar did not render rather than calling filtering
+    client-side state."""
+    bar = _in_bar(f"<button {_PILL_HOOK}>Jobs</button>")
+    html = "<main><button>Jobs</button></main>" if bars == 0 else bar + bar
+    out = shape.messaging_filters(html)
+
+    assert out["filters_seen"] == [] and out["filter_bars"] == bars, out
+    assert "did not render" in out["verdict"], out
+
+
+def test_the_composer_fixture_reports_its_five_pills_and_not_the_folder():
+    fixture = (
+        REPO / "tests" / "fixtures" / "synthetic" / "messaging_compose_list.html"
+    ).read_text(encoding="ascii")
+
+    assert shape.messaging_filters(fixture)["filters_seen"] == [
+        "connections", "inmail", "jobs", "starred", "unread",
+    ]
+
+
 @pytest.mark.parametrize(
     "html,name,source",
     [
-        ('<button aria-label="InMail">x</button>', "InMail", "aria-label"),
-        ('<button class="pill">InMail</button>', "InMail", "text"),
+        (_in_bar(f'<button {_PILL_HOOK} aria-label="InMail">x</button>'), "InMail", "aria-label"),
+        (_in_bar(f'<button {_PILL_HOOK} class="pill">InMail</button>'), "InMail", "text"),
     ],
     ids=["labelled", "text only"],
 )
@@ -878,7 +944,7 @@ def test_the_verdict_no_longer_claims_inmails_are_unreachable():
     activation shipped. A verdict that contradicts the capability sitting
     beside it in the same response is the going-stale defect this wave keeps
     finding."""
-    out = shape.messaging_filters('<button aria-label="InMail">x</button>')
+    out = shape.messaging_filters(_in_bar(f'<button {_PILL_HOOK} aria-label="InMail">x</button>'))
     verdict = out["verdict"]
 
     assert "which it does not do" not in verdict

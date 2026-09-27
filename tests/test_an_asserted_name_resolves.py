@@ -232,7 +232,7 @@ def test_the_detector_finds_a_wrapped_assertion():
     """The detector must reach a name markdown's hard-wrap split from its slot.
 
     THE DEFECT THIS PINS AGAINST, measured by the lane-L4 lead in
-    `_audit/2026-09-23-lane-l4-writes.md` section 1 (lines 48-49 there): that
+    `_audit/2026-09-23-lane-l4-writes.md` section 1 (lines 46-47 there): that
     document's own prose wraps "... under" at a line end with a backticked
     ruling id opening the next line. `check_asserted_names_resolve.py --all`
     listed no candidate at that site, because `_blocker_candidates` looks at

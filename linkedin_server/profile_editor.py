@@ -40,8 +40,11 @@ package called its best verified.
   unchecked establishes condition 1 in the dialog. Where the dialog draws NO
   such control, the condition is established only by his account-level
   setting read OFF before the edit -- the amendment described at
-  :data:`ACCOUNT_READINGS`, whose reader does not exist yet -- so today the
-  gate REFUSES there (``5_condition_1_not_established``, NEEDS-OPERATOR).
+  :data:`ACCOUNT_READINGS`. Its reader, :func:`read_account_share_updates`,
+  exists since 2026-09-27 and ``writes.perform`` takes its reading before the
+  editor is opened; anything but OFF refuses there
+  (``5_condition_1_not_established``, NEEDS-OPERATOR). Until 2026-09-27 no
+  reader existed and the gate refused there always.
   Switches drawn with NO accessible name are COUNTED, because an unnamed
   switch may be exactly that control and this module will not guess.
   **UNTIL 2026-09-24 (lane L7 integration) a dialog drawing no notify control
@@ -63,6 +66,7 @@ it calls returns labels and states, never ``.value``.
 from __future__ import annotations
 
 from typing import Any, Optional
+from urllib.parse import urlsplit
 
 from linkedin_server import coerce, dom
 
@@ -99,7 +103,8 @@ NOTIFY_NETWORK_WORDS: tuple[tuple[str, ...], ...] = (
     ("share", "profile", "update"),
 )
 
-#: THE SEAM FOR THE AMENDED CONDITION 1 -- DELIBERATELY NOT WIRED (2026-09-24).
+#: THE SEAM FOR THE AMENDED CONDITION 1 -- BUILT UNWIRED 2026-09-24 (lane L7),
+#: WIRED 2026-09-27 (the live lane).
 #:
 #: Condition 1 of ``SELF-PROFILE-EDITS-NOT-OUTWARD`` is amended by the ruling
 #: ``SELF-PROFILE-EDIT-NOTIFY-CONDITION-AMENDED`` (registered 2026-09-24, in
@@ -112,12 +117,13 @@ NOTIFY_NETWORK_WORDS: tuple[tuple[str, ...], ...] = (
 #: The account-level reading enters here and nowhere else: the keyword
 #: ``account_share_updates`` of :func:`save_gate_verdict` and
 #: :func:`read_save_gate`, one of these values, or ``None`` for "not read".
-#: NOTHING SUPPLIES IT YET. The reader is the live lane's to build, and
-#: ``writes.perform`` calls :func:`read_save_gate` without it -- so the gate
-#: presses only on a dialog control read off, and refuses wherever the dialog
-#: draws none. Wiring is the caller's whole job when the reader lands: take the
-#: reading BEFORE the change is entered (the amendment's word), pass it here;
-#: no rule in this module moves.
+#: SUPPLIED SINCE 2026-09-27: ``writes.perform`` loads the setting's page
+#: (:data:`ACCOUNT_SETTING_URL`) BEFORE the editor, reads it with
+#: :func:`read_account_share_updates`, and passes the answer to every
+#: :func:`read_save_gate` call it makes -- ``None`` when the page could not be
+#: read at all. It was NOT SUPPLIED until then, and the gate pressed only on
+#: a dialog control read off. No rule in this module moved when it was wired;
+#: only the input arrived.
 #:
 #: AN UNNAMED SWITCH REFUSES UNTIL A CAPTURE IDENTIFIES IT, AND THE AMENDMENT
 #: SAYS SO: a switch the dialog cannot name is not evidence either way -- the
@@ -277,7 +283,8 @@ def save_gate_verdict(
     PURE, so every refusal is testable without a browser. ``reading`` is what
     ``dom.read_self_owned_editor_fields`` returned (no dom ids -- this decides
     whether to press, it does not aim by id). ``account_share_updates`` is the
-    seam described at :data:`ACCOUNT_READINGS`; nothing passes it today.
+    seam described at :data:`ACCOUNT_READINGS`; ``writes.perform`` passes its
+    reading since 2026-09-27.
     ``recognised_switches`` is :func:`recognise_intro_editor_switches`'s reading;
     absent, no switch is recognised. ``require_save=False`` is the reading
     taken BEFORE a switch is pressed: a switch may store itself the moment
@@ -407,7 +414,7 @@ def save_gate_verdict(
         if account != "off":
             out["refused_condition"] = "5_condition_1_not_established"
             heard = {
-                None: "was not read before the edit (nothing supplies that reading yet)",
+                None: "was not read before the edit (the reading could not be taken)",
                 "on": "was read ON before the edit",
                 "unknown": "could not be read before the edit",
             }[account]
@@ -917,7 +924,7 @@ async def read_save_gate(
     else: a Playwright message can quote a selector, and through it page
     content, while a class name cannot. ``account_share_updates`` is passed
     through to :func:`save_gate_verdict` unchanged; see :data:`ACCOUNT_READINGS`
-    for why no caller supplies it yet.
+    for where ``writes.perform`` takes it.
     """
     try:
         reading = await dom.read_self_owned_editor_fields(page)
@@ -1028,3 +1035,152 @@ def notify_network_note(gate: Optional[dict[str, Any]]) -> str:
         "not reached: the gate refused before condition 1 was read "
         f"({code!r}), so nothing was pressed."
     )
+
+
+#: HIS ACCOUNT-LEVEL SETTING'S PAGE -- THE READER BEHIND THE SEAM ABOVE
+#: (2026-09-27, the live lane, session-2 preparation item (b)).
+#:
+#: The address is admitted for READING ONLY, on the orchestrator's
+#: application of ONE-NAMED-SETTINGS-PAGE-AT-A-TIME (see its line in
+#: ``readonly._ALLOWED_URL_PATTERNS``). ``writes.perform`` loads it for an
+#: editor write BEFORE the editor -- so before the change is entered, the
+#: amendment's word -- and hands :func:`read_account_share_updates`' answer
+#: to :func:`read_save_gate` as ``account_share_updates``. It decides nothing
+#: by itself: the save gate decides, with it.
+ACCOUNT_SETTING_URL: str = (
+    "https://www.linkedin.com/mypreferences/d/settings/notify-network-for-updates"
+)
+
+#: LINKEDIN'S OWN NAME FOR THE SETTING, as the settings index captured in the
+#: live lane's session 1 draws it: the display-name map's value for the key
+#: ``notifyNetworkForUpdates``. A LinkedIn UI string, never his data, and it
+#: is COMPARED INSIDE THE PAGE -- Playwright's role-and-name engine, exact --
+#: so what comes back is a count, never text: the discipline
+#: :data:`PREMIUM_BADGE_TITLE` set. A UI in another language matches nothing,
+#: and nothing is read: 'unknown', by construction.
+ACCOUNT_SETTING_NAME: str = "Sharing profile edits"
+
+#: The roles a control holding this setting's on/off state can carry. Both
+#: are asked, and exactly ONE control of either, of this exact name, may be
+#: drawn: a second is ambiguity, and ambiguity reads 'unknown'.
+_ACCOUNT_SETTING_ROLES: tuple[str, ...] = ("switch", "checkbox")
+
+
+def served_at_account_setting(landed: Optional[str]) -> bool:
+    """Did the page keep its own address? PURE.
+
+    AN ADMITTED ADDRESS IS NOT A SERVED ONE. The address is derived, never seen
+    drawn; if LinkedIn redirects it -- to the other candidate, to the category
+    page that lists this setting among others -- the page read is not the one
+    admitted, and the reading does not count (``writes.perform`` makes it
+    'unknown'). The PATH is compared, host fixed, trailing slash and query
+    ignored: a tracking parameter on a served page is the same page.
+    """
+    if not landed:
+        return False
+    parts = urlsplit(str(landed).strip())
+    want = urlsplit(ACCOUNT_SETTING_URL)
+    return (
+        parts.scheme == want.scheme
+        and parts.netloc == want.netloc
+        and parts.path.rstrip("/") == want.path.rstrip("/")
+    )
+
+
+async def read_account_share_updates(page: Any) -> dict[str, Any]:
+    """Read his "Sharing profile edits" switch. READ ONLY, and never raises.
+
+    ONE CONTROL, ITS NAME BY EXACT EQUALITY, ITS STATE FROM ``checked``. Every
+    question is a ``count()``: the page runs nothing it did not already run,
+    and what comes back is integers. Returns:
+
+        reading    one of :data:`ACCOUNT_READINGS` -- 'off' | 'on' | 'unknown'
+        named      controls of role switch or checkbox whose accessible name
+                   is exactly :data:`ACCOUNT_SETTING_NAME` (1 required)
+        input      1 when that control is an ``input[type=checkbox]``
+        aria       'true' | 'false' | None -- its ``aria-checked``
+        why        built from constants and counts, never page text
+        error      an exception's TYPE if the reading failed
+
+    THE STATE: an ``input[type=checkbox]`` answers through the browser's own
+    ``checked`` PROPERTY (the ``:checked`` pseudo-class), and if it also
+    carries ``aria-checked`` the two must agree; any other control answers
+    through ``aria-checked`` alone, and one with neither holds no state this
+    reader can read. EVERY DOUBT IS 'unknown' AND 'unknown' IS NEVER 'off':
+    no control of that name, two of them, a name that only contains it, a
+    disagreement, no state, a failure.
+
+    IT PRESSES NOTHING. The setting is his; condition 1 asks for OFF to be
+    READ, never made so -- and turning it off would be a settings write
+    nothing here is granted.
+    """
+    out: dict[str, Any] = {
+        "reading": "unknown",
+        "named": 0,
+        "input": None,
+        "aria": None,
+        "why": "",
+        "error": None,
+    }
+    try:
+        named = page.get_by_role(
+            _ACCOUNT_SETTING_ROLES[0],
+            name=ACCOUNT_SETTING_NAME,
+            exact=True,
+            include_hidden=True,
+        ).or_(
+            page.get_by_role(
+                _ACCOUNT_SETTING_ROLES[1],
+                name=ACCOUNT_SETTING_NAME,
+                exact=True,
+                include_hidden=True,
+            )
+        )
+        out["named"] = coerce.as_count(await named.count())
+        if out["named"] != 1:
+            out["why"] = (
+                f"{out['named']} controls of role switch or checkbox are named "
+                f"exactly {ACCOUNT_SETTING_NAME!r} on the page, where exactly "
+                "one is required; the setting is not read."
+            )
+            return out
+        out["input"] = coerce.as_count(
+            await named.and_(page.locator('input[type="checkbox"]')).count()
+        )
+        aria_on = coerce.as_count(
+            await named.and_(page.locator('[aria-checked="true"]')).count()
+        )
+        aria_off = coerce.as_count(
+            await named.and_(page.locator('[aria-checked="false"]')).count()
+        )
+        aria: Optional[bool] = True if aria_on == 1 else (False if aria_off == 1 else None)
+        out["aria"] = None if aria is None else ("true" if aria else "false")
+        if out["input"] == 1:
+            checked = (
+                coerce.as_count(await named.and_(page.locator(":checked")).count()) == 1
+            )
+            if aria is not None and aria is not checked:
+                out["why"] = (
+                    "the switch's checked property and its aria-checked "
+                    "disagree, so its state is not read."
+                )
+                return out
+            state = checked
+        elif aria is None:
+            out["why"] = (
+                "the control of that name is not a checkbox and carries no "
+                "aria-checked, so it holds no state this reader can read."
+            )
+            return out
+        else:
+            state = aria
+    except Exception as exc:  # noqa: BLE001 - the TYPE is the whole report
+        out["error"] = type(exc).__name__
+        out["why"] = "the reading itself failed; only its exception type is kept."
+        return out
+    out["reading"] = "on" if state else "off"
+    out["why"] = (
+        f"exactly one control is named {ACCOUNT_SETTING_NAME!r}, and it reads "
+        + ("ON." if state else "OFF.")
+    )
+    return out

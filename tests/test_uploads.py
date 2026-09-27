@@ -1383,7 +1383,7 @@ async def test_a_file_inputs_name_gets_the_SINGLETON_redaction_too(browser_page)
     """
     await browser_page.set_content(
         "<html><body>"
-        '<input type="file" aria-label="Message Ada Lovelace">'
+        '<input type="file" aria-label="Message Tamsin Stubworth">'
         "</body></html>",
         wait_until="domcontentloaded",
     )

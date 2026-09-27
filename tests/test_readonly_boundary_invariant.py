@@ -1568,6 +1568,58 @@ PINNED = (
 #: ATTRIBUTION: readonly.py minus exactly the 35 added lines hashes to the
 #: prior pin on every key. One interpreter, 3.13.
 #: ------------------------------------------------------------------------
+#: RE-FROZEN AGAIN 2026-09-27 BY THE LIVE LANE (the session-2 preparation),
+#: TWO DIGESTS MOVED, ONE ENTRY IN EACH OF TWO TABLES -- HIS "SHARING PROFILE
+#: EDITS" SETTING PAGE, FOR READING ONLY, on the orchestrator's APPLICATION of
+#: ONE-NAMED-SETTINGS-PAGE-AT-A-TIME (recorded as an application of that
+#: ruling, not a new one):
+#:
+#:     _ALLOWED_URL_PATTERNS                     6240409ec52c4ab2 -> 18e5958586c2c367   54 -> 55
+#:     _FORBIDDEN_SUBSTRING_PATTERN_EXEMPTIONS   76d7b10899530d69 -> 14f567fd160048a8    3 -> 4
+#:     _FORBIDDEN_URL_SUBSTRINGS                 unchanged                               33 -> 33
+#:
+#:     ^https://www\.linkedin\.com/mypreferences/d/settings/notify-network-for-updates/?$
+#:     excusing exactly {"/settings/", "settings"} for that anchored address
+#:
+#: The page holds the account-level setting condition 1 of
+#: SELF-PROFILE-EDITS-NOT-OUTWARD rests on where the edit dialog draws no
+#: notify control (SELF-PROFILE-EDIT-NOTIFY-CONDITION-AMENDED). The address is
+#: DERIVED, never drawn on a capture, and the other candidate is NOT
+#: admitted -- it gets its own admission only if this one redirects. The
+#: follower-list mechanism exactly: two gates, each naming the one address,
+#: the forbidden tuple untouched. `tests/test_notify_setting_admission.py`
+#: pins it: both spellings admitted; a sibling settings page, this address
+#: with a sub-path, a query, a traversal or another case, the other
+#: candidate, the category page, the old /psettings/ address and the family
+#: root all refused on the gate that names them; EITHER gate alone admits
+#: nothing; the pair's blast radius is exactly its own two spellings; and no
+#: write spec names or exempts it.
+#:
+#: ATTRIBUTION, in this dict's form: the tree MINUS exactly these two entries
+#: hashes to ``6240409ec52c4ab2`` and ``76d7b10899530d69``, the values
+#: replaced, so nothing else rode in. Partial states, for whoever merges only
+#: one half: the line alone 18e5958586c2c367 / 76d7b10899530d69; the exemption
+#: alone 6240409ec52c4ab2 / 14f567fd160048a8. Control: dropping the
+#: PRE-EXISTING dark-mode line instead lands on ec6311ecf485ba6a. SIX of eight
+#: digests byte-identical; ``<functions>`` unmoved, so ``assert_read_url`` did
+#: not change. Computed with this file's ``ast_digest``, one interpreter, 3.13.
+#: ------------------------------------------------------------------------
+#: RE-FROZEN AT THE LIVE LANE'S MERGE OF MASTER 52b55b6 (2026-09-27): LANE G'S
+#: RE-FREEZES AND THE LIVE LANE'S ADMISSION MEET, AND NOTHING ELSE MOVES.
+#: THIRTEEN DIGESTS, measured on the merged readonly.py:
+#:
+#:     _ALLOWED_URL_PATTERNS                     18e5958586c2c367   the live lane's, the note above
+#:     _FORBIDDEN_SUBSTRING_PATTERN_EXEMPTIONS   14f567fd160048a8   the live lane's, the note above
+#:     the other eleven                          master's, byte-identical
+#:
+#: ATTRIBUTION, with this file's ``ast_digest`` on each side's own
+#: readonly.py: the merged file equals master on every key but those two, and
+#: the live lane's branch on those two. Git merged the dict below line by
+#: line; every value in it was checked against the merged file and none
+#: needed a hand edit. Only these notes conflicted -- both branches had
+#: appended one here -- and both are kept, master's first. One interpreter,
+#: 3.13.
+#: ------------------------------------------------------------------------
 #: RE-FROZEN AT LANE L5'S MERGE OF MASTER 52b55b6 (2026-09-27): THE TWO
 #: BRANCHES' FREEZES MEET, AND ONLY ``<functions>`` TAKES A VALUE NEITHER
 #: SIDE HAD. SIXTEEN DIGESTS:
@@ -1590,6 +1642,24 @@ PINNED = (
 #: moves; the rest were equal on both sides). Controls: dropping
 #: ``is_read_url`` instead lands on 2ecccd9f7752394d, and a name no function
 #: carries drops nothing and moves nothing. One interpreter, 3.13.
+#: ------------------------------------------------------------------------
+#: CHECKED AT LANE L5'S MERGE OF MASTER b6993e5 (2026-09-27): THE LIVE LANE'S
+#: ADMISSION AND THIS LANE'S SECOND DOOR MEET, AND NOTHING NEEDED A NEW VALUE.
+#: SIXTEEN DIGESTS, measured on the merged readonly.py:
+#:
+#:     _ALLOWED_URL_PATTERNS                     18e5958586c2c367   master's (the live lane's admission)
+#:     _FORBIDDEN_SUBSTRING_PATTERN_EXEMPTIONS   14f567fd160048a8   master's (its exemption)
+#:     <functions>                               bd677a42da1d190f   this lane's (the second door)
+#:     the door's three names                    this lane's, byte-identical
+#:     the other ten                             equal on both sides
+#:
+#: ATTRIBUTION, with this file's ``ast_digest`` on each side's own
+#: readonly.py: the merged file equals master on the two admission keys and
+#: this branch on the door's four; the merged tree MINUS the door's three
+#: functions still hashes to ff43e832d6f2b685, master's ``<functions>`` --
+#: the live lane's admission moved no function. The merge took the dict below
+#: line by line and every value in it equals the merged file; only these
+#: notes conflicted, both kept, master's first. One interpreter, 3.13.
 #: ------------------------------------------------------------------------
 READONLY_AST_AT_LAST_REFREEZE = {
     # ff43e832d6f2b685 on master (lane G's replacement scan) and
@@ -1785,11 +1855,19 @@ READONLY_AST_AT_LAST_REFREEZE = {
     # 17409e16e7abbcc8 (lane S) and b99f3c765fcb8043 (the live lane) met at the
     # orchestrator's merge of the live lane over lane S, 2026-09-27: both
     # admissions together, 53 + 1 = 54 lines; merged digest 6240409ec52c4ab2.
-    "_ALLOWED_URL_PATTERNS": "6240409ec52c4ab2",
+    #
+    # 6240409ec52c4ab2 until 2026-09-27 (the live lane, session-2
+    # preparation): his "Sharing profile edits" setting page, one line here and
+    # one pattern exemption beside it, on the orchestrator's application of
+    # ONE-NAMED-SETTINGS-PAGE-AT-A-TIME. See that ledger entry.
+    "_ALLOWED_URL_PATTERNS": "18e5958586c2c367",
     "_FORBIDDEN_SUBSTRING_EXEMPTIONS": "43e2bf7f3db0dbed",
     # 419e64a3cd92ec7e until the same REVIEW: commit: a third entry, excusing
     # exactly {"/follow"} for exactly the anchored follower-list address.
-    "_FORBIDDEN_SUBSTRING_PATTERN_EXEMPTIONS": "76d7b10899530d69",
+    # 76d7b10899530d69 until 2026-09-27: a fourth, excusing exactly
+    # {"/settings/", "settings"} for exactly his "Sharing profile edits"
+    # setting page (the live lane; the same ledger entry).
+    "_FORBIDDEN_SUBSTRING_PATTERN_EXEMPTIONS": "14f567fd160048a8",
     "_FORBIDDEN_URL_SUBSTRINGS": "b0291a66ec9bd51e",
     # 23aece1483afdee9 until 2026-09-19. See the re-freeze note above: eleven
     # detector classes added, zero removed, and the direction is pinned by

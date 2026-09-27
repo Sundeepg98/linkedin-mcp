@@ -1,5 +1,3 @@
-claude-opus-5-5[1m]
-
 # Lane S -- people-search readers (2026-09-24)
 
 Worktree branch `worktree-agent-a8a566ecd397e5d82`, based on `master` 9c219c8.
