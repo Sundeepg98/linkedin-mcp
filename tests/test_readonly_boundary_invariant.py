@@ -1444,6 +1444,24 @@ PINNED = (
 #: merged the dict below line by line; every value in it was then checked
 #: against the merged file and none needed a hand edit. One interpreter, 3.13.
 #: ------------------------------------------------------------------------
+#: RE-FROZEN RIGHT AFTER THAT MERGE (2026-09-27), ONE DIGEST MOVED, AND IT IS
+#: A PERMISSION DECLARED FOR A CAPABILITY ALREADY RULED:
+#:
+#:     SANCTIONED_MUTATIONS   e79a701b37ae9c39 -> e9d953efc8ab8d0e   12 -> 15
+#:     every other digest     unchanged
+#:
+#: The merge brought lane D's ``cdp_download`` (P C8's download transport, on
+#: D4-NO-OWN-BROWSER-CONTEXT) together with the DevTools patterns lane G had
+#: added to ``_MUTATION_CALL_PATTERNS`` at lane D's own request, and the
+#: scanner saw its one send and its two sessions: three unsanctioned calls
+#: and a docstring. The docstring was reworded (a call shape in prose); the
+#: three calls were declared, by function, with their argument beside them in
+#: readonly.py. Shown failing: one more send, or one more session, in any
+#: other function of that module is refused
+#: (``tests/test_readonly.py::test_the_download_transport_is_declared_by_function_and_not_by_file``).
+#: ATTRIBUTION: readonly.py minus exactly the 35 added lines hashes to the
+#: prior pin on every key. One interpreter, 3.13.
+#: ------------------------------------------------------------------------
 READONLY_AST_AT_LAST_REFREEZE = {
     "<functions>": "ff43e832d6f2b685",
     "JS_MUTATION_TOKENS": "d47e30b67c583c1b",
@@ -1452,7 +1470,15 @@ READONLY_AST_AT_LAST_REFREEZE = {
     # disclosing-press ruling. A PERMISSION grew; no refusal moved.
     # 3676d309ead50c61 until 2026-09-24: five more (reveal, view_switch and
     # share_link), the live lane's; the last re-freeze note above.
-    "SANCTIONED_MUTATIONS": "e79a701b37ae9c39",
+    # e79a701b37ae9c39 until 2026-09-27: THREE MORE, lane D's download
+    # transport (cdp_download's one DevTools send and its two sessions),
+    # declared on D4-NO-OWN-BROWSER-CONTEXT after lane G's merge of master
+    # 2eb90ad showed the widened scanner seeing them. A PERMISSION was
+    # declared; no refusal moved. ATTRIBUTION, with this file's ast_digest:
+    # readonly.py minus exactly the 35 lines of those entries and their
+    # argument hashes to e79a701b37ae9c39 on this key and to the prior pin
+    # on all thirteen; the other twelve digests are byte-identical.
+    "SANCTIONED_MUTATIONS": "e9d953efc8ab8d0e",
     # PINNED FROM 2026-09-24, lane G's merge of master: the replacement scan's
     # four tables (unchanged since lane G built them; pinned late, see PINNED)
     # and the scanner's sanctioned list, born with ONE entry -- the live

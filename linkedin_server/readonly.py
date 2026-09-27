@@ -3395,6 +3395,41 @@ SANCTIONED_MUTATIONS: tuple[tuple[str, str, str], ...] = (
     ("linkedin_server/share_link.py", "_activate", "click"),
     ("linkedin_server/share_link.py", "_clipboard", "evaluate"),
     ("linkedin_server/share_link.py", "copy_own_post_link", "press"),
+    # THE THIRTEENTH, FOURTEENTH AND FIFTEENTH, 2026-09-27, declared at lane
+    # G's merge of master 2eb90ad: LANE D'S DOWNLOAD TRANSPORT
+    # (``cdp_download``, census row P C8). NOT NEW CAPABILITY. Lane D's module
+    # reached master after lane G had taught this scanner to see a DevTools
+    # session (lane D's own item 5.3: the ``cdp_session`` and ``cdp_send``
+    # patterns), and the two met for the first time in that merge:
+    #
+    #   cdp_send     cdp_download._send -- THE ONE DevTools send in the
+    #                package, refusing any method outside
+    #                ``cdp_download.CDP_METHODS``, which holds one:
+    #                ``Browser.setDownloadBehavior``;
+    #   cdp_session  cdp_download.capture_download -- the browser-level
+    #                session a capture sets that behaviour over;
+    #   cdp_session  cdp_download.reset_download_behaviour -- the session
+    #                ``cdp_bridge.attach`` uses to hand his downloads back to
+    #                Chrome's own default.
+    #
+    # THE RULING IT RESTS ON is ``D4-NO-OWN-BROWSER-CONTEXT``: the package
+    # creates no browser context of its own, and P C8's download transport
+    # goes through the DevTools download behaviour on the attached browser.
+    # Declared here on the precedent of the orchestrator's integration ruling
+    # (c) of 2026-09-24, which had lane G declare the live lane's clipboard
+    # capture rather than weaken the scan: a capability another lane was
+    # ruled to have is declared where the widened scanner can see it.
+    #
+    # WHY IT IS ARGUABLE RATHER THAN A WIDENING. The send is bound to a
+    # one-method table; each session attaches to the browser already there,
+    # creates no context and opens no tab, and is detached in a ``finally``;
+    # the capture is off unless ``LINKEDIN_ENABLE_CDP_DOWNLOADS`` turns it on,
+    # and restores Chrome's own behaviour whatever happens; the reset sends
+    # only that default. None of it reaches a page LinkedIn serves: it
+    # decides where HIS browser writes a download.
+    ("linkedin_server/cdp_download.py", "_send", "cdp_send"),
+    ("linkedin_server/cdp_download.py", "capture_download", "cdp_session"),
+    ("linkedin_server/cdp_download.py", "reset_download_behaviour", "cdp_session"),
 )
 
 

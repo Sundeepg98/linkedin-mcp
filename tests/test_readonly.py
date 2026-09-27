@@ -164,6 +164,9 @@ def test_the_sanctioned_list_is_exactly_these_calls():
         ("linkedin_server/share_link.py", "_activate", "click"),
         ("linkedin_server/share_link.py", "_clipboard", "evaluate"),
         ("linkedin_server/share_link.py", "copy_own_post_link", "press"),
+        ("linkedin_server/cdp_download.py", "_send", "cdp_send"),
+        ("linkedin_server/cdp_download.py", "capture_download", "cdp_session"),
+        ("linkedin_server/cdp_download.py", "reset_download_behaviour", "cdp_session"),
     )
     # EIGHT FROM 2026-09-23: ``reveal.reveal``'s one click, the first press
     # admitted BY NAME -- per control, in reveal.DECIDED_REVEALS, on a recorded
@@ -175,7 +178,12 @@ def test_the_sanctioned_list_is_exactly_these_calls():
     # package, and a protective one: it captures the page's clipboard calls in
     # this server's tab so they do not overwrite his system clipboard), and the
     # menu's Escape. Argument beside them.
-    assert len(readonly.SANCTIONED_MUTATIONS) == 12
+    # THIRTEEN TO FIFTEEN, 2026-09-27, at lane G's merge of master 2eb90ad:
+    # lane D's download transport -- ``cdp_download``'s one DevTools send and
+    # the two browser-level sessions it goes over -- which the scanner lane G
+    # had widened (lane D's 5.3) saw for the first time in that merge. Not new
+    # capability: declared on D4-NO-OWN-BROWSER-CONTEXT. Argument beside them.
+    assert len(readonly.SANCTIONED_MUTATIONS) == 15
     # THE KINDS ARE ASSERTED SEPARATELY, because the count alone would let a
     # click be swapped for a fill without moving the number, and those are
     # different capabilities: a click presses what is already there, a fill
@@ -196,8 +204,15 @@ def test_the_sanctioned_list_is_exactly_these_calls():
     # why the probe rule next door splits that verb by its ARGUMENT rather than
     # by its name, and why this entry is bound to one function that sends one
     # key.
+    #
+    # FIFTEEN FROM 2026-09-27, and two kinds are FIRSTS on this list:
+    # ``cdp_send`` and ``cdp_session``, the DevTools patterns, each bound to
+    # ``cdp_download`` and to a one-method table (see the entries' argument).
     kinds = sorted(kind for _p, _f, kind in readonly.SANCTIONED_MUTATIONS)
     assert kinds == [
+        "cdp_send",
+        "cdp_session",
+        "cdp_session",
         "click",
         "click",
         "click",
@@ -295,7 +310,11 @@ def test_the_package_contains_exactly_as_many_mutating_calls_as_are_listed():
     # is the paragraph above being right a third time. NINE, the same day:
     # view_switch._activate, bumped deliberately this time. TWELVE, the same
     # day: share_link's click drain, its one evaluate and its one Escape.
-    assert total == len(readonly.SANCTIONED_MUTATIONS) == 12, total
+    # FIFTEEN, 2026-09-27, at lane G's merge of master 2eb90ad: lane D's
+    # download transport -- cdp_download's one DevTools send and its two
+    # sessions -- met the scanner lane G had widened to see them, and was
+    # declared on D4-NO-OWN-BROWSER-CONTEXT (see the entries' argument).
+    assert total == len(readonly.SANCTIONED_MUTATIONS) == 15, total
 
 
 def test_the_partition_conserves_every_hit():
@@ -544,6 +563,37 @@ def test_the_mutation_scanner_catches_a_devtools_session(source, kinds):
     """
     hits = readonly.scan_source_for_mutations(source)
     assert [kind for _line, kind, _src in hits] == kinds, hits
+
+
+@pytest.mark.parametrize(
+    "planted, kind",
+    [
+        (
+            "\n\nasync def _planted_click(session):\n"
+            "    return await session.send('Input.dispatchMouseEvent', {})\n",
+            "cdp_send",
+        ),
+        (
+            "\n\nasync def _planted_session(browser):\n"
+            "    return await browser.new_browser_cdp_session()\n",
+            "cdp_session",
+        ),
+    ],
+    ids=["a-second-send", "a-third-session"],
+)
+def test_the_download_transport_is_declared_by_function_and_not_by_file(planted, kind):
+    """THE DECLARATION OF 2026-09-27 CANNOT BE READ AS A LICENCE FOR THE FILE.
+
+    ``cdp_download``'s three entries name three FUNCTIONS. The real module
+    partitions clean; the same module with one more DevTools call in a
+    function of its own is refused, naming the kind -- so the next session or
+    send in that file has to come here and argue, as these three did.
+    """
+    rel = "linkedin_server/cdp_download.py"
+    source = (PACKAGE_DIR / "cdp_download.py").read_text(encoding="utf-8")
+    assert readonly.partition_mutation_hits(rel, source)[1] == []
+    _sanctioned, unsanctioned = readonly.partition_mutation_hits(rel, source + planted)
+    assert [hit_kind for _line, hit_kind, _src in unsanctioned] == [kind], unsanctioned
 
 
 def test_a_send_that_is_not_a_devtools_send_is_not_a_devtools_pattern():

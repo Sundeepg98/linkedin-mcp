@@ -30,8 +30,37 @@ REPO = pathlib.Path(__file__).resolve().parents[1]
 #: subtracts it rather than reasoning about its contents.
 _TOKEN_GATED_DRAIN = ("linkedin_server/writes.py", "perform")
 
+#: DEVTOOLS CALLS ARE SPLIT BY THE METHODS THEY CAN SEND, read from the module
+#: rather than assumed -- as ``press`` is split by its key below. A DevTools
+#: session can do anything a page can, which is why both of its classes are
+#: GATED by default and stay gated everywhere else. The one module that holds
+#: them, ``cdp_download``, sends through one function that refuses any method
+#: outside ``cdp_download.CDP_METHODS`` (the scanner holds every ``.send(`` in
+#: the package to that function), and every method on the list below decides
+#: where HIS browser writes a download -- nothing a page LinkedIn serves
+#: receives. Declared 2026-09-27 on ``D4-NO-OWN-BROWSER-CONTEXT``, at lane G's
+#: merge of master 2eb90ad, where the widened scanner first met that module.
+#: An ``Input.*`` or ``Runtime.*`` method joining ``CDP_METHODS`` turns this
+#: file red, and so does a DevTools call in any other module.
+_DEVTOOLS_KINDS = frozenset({"cdp_send", "cdp_session"})
+_DEVTOOLS_TRANSPORT = "linkedin_server/cdp_download.py"
+_DEVTOOLS_METHODS_THAT_HAND_LINKEDIN_NOTHING = frozenset({"Browser.setDownloadBehavior"})
 
-def _read_path_gated(entries, source_for):
+
+def _devtools_hands_linkedin_nothing(path, methods=None):
+    """True only for the download transport, and only while every method its
+    one send can carry is on the list above. ``methods`` stands in for the
+    module's table in the control."""
+    if path != _DEVTOOLS_TRANSPORT:
+        return False
+    if methods is None:
+        from linkedin_server import cdp_download
+
+        methods = cdp_download.CDP_METHODS
+    return bool(methods) and set(methods) <= _DEVTOOLS_METHODS_THAT_HAND_LINKEDIN_NOTHING
+
+
+def _read_path_gated(entries, source_for, devtools_methods=None):
     """Sanctioned mutations a READ PATH owns that hand LinkedIn real input.
 
     **THIS REPLACED TWO HARD-CODED COUNTS AND ONE BROKEN PROXY**, and the
@@ -64,6 +93,8 @@ def _read_path_gated(entries, source_for):
             in practice.
         source_for: ``path -> source text``. A parameter so the control below
             can run this over a tree that does not exist.
+        devtools_methods: the download transport's method table, for the
+            control; the module's own when omitted.
     """
     from linkedin_server import readonly
     from tests.test_probe_interaction_budget import DISMISS_KEYS, gated_classes
@@ -74,6 +105,10 @@ def _read_path_gated(entries, source_for):
         if (path, function) == _TOKEN_GATED_DRAIN:
             continue
         if kind not in gated:
+            continue
+        if kind in _DEVTOOLS_KINDS and _devtools_hands_linkedin_nothing(
+            path, devtools_methods
+        ):
             continue
         source = source_for(path)
         texts = [
@@ -629,6 +664,26 @@ def test_the_read_path_rule_is_shown_refusing_and_shown_allowing():
     assert _read_path_gated(
         [("linkedin_server/submit.py", "send", "press")], sources.get
     ) == [("linkedin_server/submit.py", "send", "press")]
+
+
+def test_the_devtools_split_is_shown_refusing_and_shown_allowing():
+    """THE CONTROL FOR THE DEVTOOLS SPLIT (2026-09-27), in the form of the one
+    above: the same entries, judged by the METHODS the transport can send.
+
+    Allowed while the table holds only the download behaviour; REFUSED the
+    moment it holds an input method; and refused on any other module whatever
+    its table says, because the split is the transport's and nobody else's.
+    """
+    entries = [
+        (_DEVTOOLS_TRANSPORT, "_send", "cdp_send"),
+        (_DEVTOOLS_TRANSPORT, "capture_download", "cdp_session"),
+    ]
+    assert _read_path_gated(entries, _package_source) == []
+    with_input = {"Browser.setDownloadBehavior", "Input.dispatchMouseEvent"}
+    assert _read_path_gated(entries, _package_source, devtools_methods=with_input) == entries
+    assert _read_path_gated(entries, _package_source, devtools_methods=set()) == entries
+    elsewhere = [("linkedin_server/dom.py", "poke", "cdp_send")]
+    assert _read_path_gated(elsewhere, lambda _path: "") == elsewhere
 
 
 def test_the_live_press_entry_really_is_the_escape_and_not_a_submit():

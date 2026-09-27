@@ -14,8 +14,8 @@ that transport, and nothing more.
 
 ## HOW IT WORKS
 
-1. A DevTools session on the BROWSER TARGET, from
-   ``Browser.new_browser_cdp_session()`` -- which the installed Playwright
+1. A DevTools session on the BROWSER TARGET, from Playwright's
+   ``Browser.new_browser_cdp_session`` -- which the installed Playwright
    driver's source implements as one ``Target.attachToBrowserTarget``. It
    attaches to the browser that is already there. It makes no context and
    opens no tab.

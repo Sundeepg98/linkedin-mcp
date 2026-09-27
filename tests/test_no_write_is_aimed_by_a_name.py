@@ -130,6 +130,10 @@ TARGET_KIND_CLASS: dict[str, tuple[str, str]] = {
         "closed_setting_and_value",
         "dark mode, admitted by name at the tool, and one of its three states",
     ),
+    "thread_and_text": (
+        "id_and_own_text",
+        "send_reply: a thread id the caller supplies, shape-checked, never read off a page",
+    ),
     "member": (
         NAME_CLASS,
         "send_invitation's needle: his word for a person, matched against labels",
@@ -199,9 +203,11 @@ NAME_SHAPED_SUFFIXES = ("_name", "_names")
 
 #: The write tools on this tree, measured 2026-09-27 off server.py and
 #: mcp.list_tools(): fourteen, for fifteen sanctioned actions --
-#: set_open_to_work registers no tool.
+#: set_open_to_work registers no tool. Re-measured the same day on lane G's
+#: merge of master 2eb90ad: fifteen, for sixteen, with lane L5's send_reply.
 KNOWN_WRITE_TOOLS = frozenset(
     {
+        "linkedin_send_reply",
         "linkedin_save_job",
         "linkedin_unsave_job",
         "linkedin_apply_job",
