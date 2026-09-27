@@ -112,10 +112,14 @@ username.
 :data:`CDP_METHODS` is a closed table, and :func:`_send` -- the one place in
 the package that calls a DevTools session's ``send`` -- refuses anything not
 on it. Two functions open a session -- the capture and the reset -- and both
-send through it. ``readonly.scan_source_for_mutations`` has no pattern for a
-DevTools ``send`` at all, so this table and ``tests/test_cdp_download.py``,
-which pins the package's send and session sites by AST, are what stand in
-for one.
+send through it. ``tests/test_cdp_download.py`` pins the package's send and
+session sites by AST. ``readonly.scan_source_for_mutations`` had no pattern
+for a DevTools ``send`` when this module was written; since lane G's merge of
+master 2eb90ad (2026-09-27) it has two, ``cdp_session`` and ``cdp_send``,
+and the three sites here are declared in ``readonly.SANCTIONED_MUTATIONS``.
+BOTH READ SYNTAX, not behaviour: a ``send`` reached through an alias, a
+bound-method variable or ``getattr`` is invisible to each (measured by lane
+G's cold verification).
 
 ## WHAT THIS IS NOT
 

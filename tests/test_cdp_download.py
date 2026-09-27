@@ -687,7 +687,13 @@ def test_the_site_detector_finds_a_planted_devtools_call():
 
 
 def test_the_package_has_exactly_one_devtools_send_and_two_session_sites():
-    """``scan_source_for_mutations`` has no DevTools pattern; this pin stands in.
+    """The package's DevTools send and session sites, pinned by AST.
+
+    Written when ``scan_source_for_mutations`` had no DevTools pattern, to
+    stand in for one; since lane G's merge of master 2eb90ad (2026-09-27) the
+    scanner has two, and these sites are declared in
+    ``readonly.SANCTIONED_MUTATIONS``. Both read syntax: a send through an
+    alias, a bound-method variable or ``getattr`` passes each.
 
     Exactly one ``send``, in ``cdp_download._send``, which refuses anything
     off :data:`cdp_download.CDP_METHODS`; exactly two sessions, the capture's

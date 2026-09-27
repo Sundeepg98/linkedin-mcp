@@ -35,13 +35,16 @@ _TOKEN_GATED_DRAIN = ("linkedin_server/writes.py", "perform")
 #: session can do anything a page can, which is why both of its classes are
 #: GATED by default and stay gated everywhere else. The one module that holds
 #: them, ``cdp_download``, sends through one function that refuses any method
-#: outside ``cdp_download.CDP_METHODS`` (the scanner holds every ``.send(`` in
-#: the package to that function), and every method on the list below decides
-#: where HIS browser writes a download -- nothing a page LinkedIn serves
-#: receives. Declared 2026-09-27 on ``D4-NO-OWN-BROWSER-CONTEXT``, at lane G's
-#: merge of master 2eb90ad, where the widened scanner first met that module.
-#: An ``Input.*`` or ``Runtime.*`` method joining ``CDP_METHODS`` turns this
-#: file red, and so does a DevTools call in any other module.
+#: outside ``cdp_download.CDP_METHODS`` (the scanner holds every LITERAL
+#: ``.send(`` call in the package to that function), and every method on the
+#: list below decides where HIS browser writes a download -- nothing a page
+#: LinkedIn serves receives. Declared 2026-09-27 on
+#: ``D4-NO-OWN-BROWSER-CONTEXT``, at lane G's merge of master 2eb90ad, where
+#: the widened scanner first met that module. An ``Input.*`` or ``Runtime.*``
+#: method joining ``CDP_METHODS`` turns this file red, and so does a literal
+#: DevTools call in any other module. THE LIMIT, measured by lane G's cold
+#: verification: a ``send`` reached through an alias, a bound-method variable
+#: or ``getattr`` is invisible to the scanner, and so to this split.
 _DEVTOOLS_KINDS = frozenset({"cdp_send", "cdp_session"})
 _DEVTOOLS_TRANSPORT = "linkedin_server/cdp_download.py"
 _DEVTOOLS_METHODS_THAT_HAND_LINKEDIN_NOTHING = frozenset({"Browser.setDownloadBehavior"})

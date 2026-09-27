@@ -3402,8 +3402,9 @@ SANCTIONED_MUTATIONS: tuple[tuple[str, str, str], ...] = (
     # session (lane D's own item 5.3: the ``cdp_session`` and ``cdp_send``
     # patterns), and the two met for the first time in that merge:
     #
-    #   cdp_send     cdp_download._send -- THE ONE DevTools send in the
-    #                package, refusing any method outside
+    #   cdp_send     cdp_download._send -- THE ONE literal DevTools send in
+    #                the package (an alias or ``getattr`` would pass the
+    #                scanner unseen), refusing any method outside
     #                ``cdp_download.CDP_METHODS``, which holds one: the
     #                command that sets where downloads go (its name lives in
     #                that module alone, as the P C8 transport test requires);
