@@ -1,4 +1,4 @@
-"""No write is aimed by a name -- except two, and they are declared debt.
+"""No write is aimed by a name -- except one, and it is declared debt.
 
 THE RULING. ``PEOPLE-DATA-MITIGATIONS``, mitigation 6, NOT A TARGET BY ITSELF
 (``_audit/2026-09-24-rulings-names-at-runtime.md``): "A name read off a page is
@@ -15,19 +15,23 @@ WHAT THIS FILE HOLDS, on the write registry and on the tool surface:
    fails until somebody classifies it; a classified kind that left the
    registry fails as stale.
 2. The actions whose kind is classified ``NAME`` are EXACTLY the keys of
-   ``NAME_AIMED_DEBT``: a third name-aimed write fails, and so does converting
-   one of the two, until its entry is deleted.
+   ``NAME_AIMED_DEBT``: a new name-aimed write fails, and so does converting a
+   declared one, until its entry is deleted.
 3. No field of a kind -- the kind itself, or each half of a composite -- is
    name-shaped unless the kind is classified ``NAME``, so a person-shaped field
    cannot be classified as an id to get past (2).
 4. No write TOOL in ``server.py`` takes a name-shaped parameter beyond
    ``DEBT_PARAMETERS``, asserted exactly.
 
-THE DEBT. ``send_invitation`` is aimed by ``member``, his own word for the
-person, matched against the invitation controls' labels; ``send_message`` by
-the ``member`` half of its target, a name typed into the recipient typeahead.
-Both predate the ruling. They are not converted here; they are declared, and a
-declaration is a debt, not a waiver.
+THE DEBT. ``send_message`` is aimed by the ``member`` half of its target, a
+name typed into the recipient typeahead. It predates the ruling; it is
+declared, and a declaration is a debt, not a waiver.
+
+PAID, 2026-09-27: ``send_invitation`` was aimed by ``member``, his own word
+for the person, matched against the invitation controls' labels. Lane L5
+converted it on the orchestrator's order of 23:36 -- it takes the person's
+profile link, compared in the page against each rail card's own link -- and
+this file stayed red until its entry went, which is the design working.
 
 HOW A WRITE TOOL IS FOUND, off ``server.py``'s syntax tree: an ``@mcp.tool()``
 function whose body calls ``_write_tool``, the one function that reaches
@@ -48,12 +52,14 @@ THE LIMIT, plainly:
   outside it; ``tests/test_readonly.py``'s mutation scanner watches mutating
   calls package-wide.
 * It cannot stop a CLIENT copying a name a people read returned into a write's
-  argument. It makes true that no write, beyond the two debts, has a parameter
-  through which a name is the aim.
+  argument. It makes true that no write, beyond the declared debt, has a
+  parameter through which a name is the aim.
 * Mitigation 6's second sentence, reporting whom it resolved before acting, is
   behaviour and is not asserted here. ``send_invitation``'s preview names the
-  one recipient its needle matched (``writes._name_the_invitation_recipient``,
-  exercised in ``tests/test_writes_nine.py``).
+  person on the one rail card its link matched
+  (``writes._name_the_invitation_recipient``, exercised in
+  ``tests/test_writes_nine.py`` and
+  ``tests/test_an_invitation_is_aimed_by_a_link.py``).
 * MENTION-COMPOSITION-RULING's source rule -- a mention is never assembled from
   a name read off a page -- is held elsewhere: ``tests/test_typed_bytes.py``
   (every typed string is a bare slice of the caller's own target, never
@@ -160,9 +166,12 @@ TARGET_KIND_CLASS: dict[str, tuple[str, str]] = {
         "profile_link_or_member_id_and_own_text",
         "message_from_profile: the same parser for the profile half, and his own one line",
     ),
-    "member": (
-        NAME_CLASS,
-        "send_invitation's needle: his word for a person, matched against labels",
+    # PAID 2026-09-27 (lane L5, the orchestrator's order of 23:36): the
+    # ``member`` kind -- send_invitation's needle, his word for a person,
+    # matched against labels -- left the registry. Its replacement is here.
+    "rail_profile": (
+        "profile_link_or_member_id",
+        "send_invitation: /in/<segment>/ or an ACoAA id, compared in the page with each rail card's link",
     ),
     "member_and_text": (
         NAME_CLASS,
@@ -172,12 +181,8 @@ TARGET_KIND_CLASS: dict[str, tuple[str, str]] = {
 
 #: THE NAME-AIMED WRITES THAT EXIST TODAY. Declared, not waived.
 NAME_AIMED_DEBT: dict[str, str] = {
-    "send_invitation": (
-        "PEOPLE-DATA-MITIGATIONS, mitigation 6: aimed by member, his own word "
-        "for the person, matched against the invitation controls' labels. "
-        "Debt, not a waiver: converting this write to a link or member id "
-        "supplied by the caller fails this file until the entry goes."
-    ),
+    # ``send_invitation``'s entry went on 2026-09-27: aimed by the person's
+    # profile link since lane L5's order of 23:36 (kind ``rail_profile``).
     "send_message": (
         "PEOPLE-DATA-MITIGATIONS, mitigation 6: aimed by the member half of "
         "its target, a name typed into the recipient typeahead. Debt, not a "
@@ -189,15 +194,15 @@ NAME_AIMED_DEBT: dict[str, str] = {
 #: The (tool, parameter) through which each debt write takes its name.
 DEBT_PARAMETERS = frozenset(
     {
-        ("linkedin_send_invitation", "member"),
         ("linkedin_send_message", "member"),
     }
 )
 
 #: PARAMETER NAMES THAT SAY THEY HOLD A PERSON, and say nothing of a link or
 #: an id. Compared exactly, lower-cased. ``member`` is here because THIS
-#: registry uses it for a name needle; a write taking a member link or id
-#: says so in its parameter's name.
+#: registry used it for a name needle (``linkedin_send_invitation`` until
+#: 2026-09-27); a write taking a member link or id says so in its
+#: parameter's name -- ``profile``, as the three named-person writes do.
 NAME_SHAPED_PARAMETERS = frozenset(
     {
         "name",
@@ -696,6 +701,30 @@ def _registry_with(action: str, kind: str) -> dict:
     return planted
 
 
+#: A NAME-CLASSIFIED KIND, planted in a COPY of the classification and never in
+#: ``TARGET_KIND_CLASS``. The controls below stood on the real debt entries
+#: until 2026-09-27, when the first was paid; built on this plant instead,
+#: each keeps failing where it should whether the real table holds one entry
+#: or none.
+_PLANTED_NAME_KIND = "planted_name"
+
+
+def _classification_with_a_name_kind() -> dict:
+    classification = dict(TARGET_KIND_CLASS)
+    classification[_PLANTED_NAME_KIND] = (NAME_CLASS, "a planted word for a person")
+    return classification
+
+
+#: A planted debt entry that says everything an entry must.
+_PLANTED_DEBT = {
+    "planted_write": (
+        "PEOPLE-DATA-MITIGATIONS, mitigation 6: planted. Debt, not a waiver: "
+        "converting this write to a link or member id supplied by the caller "
+        "fails this file until the entry goes."
+    )
+}
+
+
 #: A server source, planted. PARAM is replaced per case. The read tool and the
 #: undecorated helper are there to be NOT found.
 _PLANTED_SERVER = '''
@@ -730,9 +759,9 @@ def test_control_an_unclassified_kind_fails_and_so_does_a_stale_one():
 
 def test_control_a_class_outside_the_vocabulary_fails():
     typo = dict(TARGET_KIND_CLASS)
-    typo["member"] = ("Name", "the name class, misspelled")
+    typo["rail_profile"] = ("Name", "the name class, misspelled")
     assert vocabulary_defects(typo, TARGET_CLASSES) == [
-        "member: class 'Name' is not in TARGET_CLASSES"
+        "rail_profile: class 'Name' is not in TARGET_CLASSES"
     ]
     two_lines = dict(TARGET_KIND_CLASS)
     two_lines["job_id"] = ("id", "a reason\nthat runs on")
@@ -742,56 +771,58 @@ def test_control_a_class_outside_the_vocabulary_fails():
 
 
 def test_control_a_name_aimed_write_outside_the_debt_fails():
-    planted = _registry_with("planted_write", "member")
-    assert debt_drift(planted, TARGET_KIND_CLASS, NAME_AIMED_DEBT) == (
+    planted = _registry_with("planted_write", _PLANTED_NAME_KIND)
+    classification = _classification_with_a_name_kind()
+    assert debt_drift(planted, classification, NAME_AIMED_DEBT) == (
         ["planted_write"],
         [],
     )
+    # Declared, the same plant passes: the check reads the table.
+    declared = {**NAME_AIMED_DEBT, **_PLANTED_DEBT}
+    assert debt_drift(planted, classification, declared) == ([], [])
     assert debt_drift(
         writes.SANCTIONED_WRITES, TARGET_KIND_CLASS, NAME_AIMED_DEBT
     ) == ([], [])
 
 
 def test_control_the_debt_table_with_an_entry_removed_fails():
-    shrunk = {k: v for k, v in NAME_AIMED_DEBT.items() if k != "send_message"}
-    assert debt_drift(writes.SANCTIONED_WRITES, TARGET_KIND_CLASS, shrunk) == (
-        ["send_message"],
-        [],
+    planted = _registry_with("planted_write", _PLANTED_NAME_KIND)
+    classification = _classification_with_a_name_kind()
+    declared = {**NAME_AIMED_DEBT, **_PLANTED_DEBT}
+    assert debt_drift(planted, classification, declared) == ([], [])
+    shrunk = {k: v for k, v in declared.items() if k != "planted_write"}
+    assert debt_drift(planted, classification, shrunk) == (["planted_write"], [])
+    # The signature half: a planted tool taking ``member``, its pair declared
+    # and then removed.
+    tools = write_tools(
+        tool_definitions(ast.parse(_PLANTED_SERVER.replace("PARAM", "member"))),
+        writes.SANCTIONED_WRITES,
     )
-    # The signature half: the same entry gone from DEBT_PARAMETERS.
-    shrunk_parameters = DEBT_PARAMETERS - {("linkedin_send_message", "member")}
-    found = name_shaped_parameters(_real_write_tools())
-    assert sorted(found - shrunk_parameters) == [("linkedin_send_message", "member")]
-    assert found == DEBT_PARAMETERS
+    pair = ("linkedin_planted_write", "member")
+    assert sorted(name_shaped_parameters(tools) - (DEBT_PARAMETERS | {pair})) == []
+    assert sorted(name_shaped_parameters(tools) - DEBT_PARAMETERS) == [pair]
+    # And on this tree the declared pairs are exactly what the tools take.
+    assert name_shaped_parameters(_real_write_tools()) == DEBT_PARAMETERS
 
 
 def test_control_a_converted_debt_write_fails_until_its_entry_goes():
-    """The debt has to be paid in the table, not only in the code."""
-    planted = dict(writes.SANCTIONED_WRITES)
-    planted["linkedin_send_invitation"] = dataclasses.replace(
-        planted["linkedin_send_invitation"], target_kind="planted_member_link"
-    )
-    classification = {k: v for k, v in TARGET_KIND_CLASS.items() if k != "member"}
-    classification["planted_member_link"] = ("id", "a member link the caller supplies")
-    assert debt_drift(planted, classification, NAME_AIMED_DEBT) == (
-        [],
-        ["send_invitation"],
-    )
+    """The debt has to be paid in the table, not only in the code -- which
+    is what happened for real on 2026-09-27, when ``send_invitation`` took a
+    profile link and this file stayed red until its entry went."""
+    # A declared debt whose write is aimed by a profile link now.
+    planted = _registry_with("planted_write", "profile")
+    declared = {**NAME_AIMED_DEBT, **_PLANTED_DEBT}
+    assert debt_drift(planted, TARGET_KIND_CLASS, declared) == ([], ["planted_write"])
 
-    # The signature half, on a parsed COPY of server.py.
-    tree = ast.parse(SERVER.read_text(encoding="utf-8"))
-    renamed = 0
-    for node in ast.walk(tree):
-        if isinstance(node, ast.AsyncFunctionDef) and node.name == "linkedin_send_invitation":
-            for argument in node.args.args:
-                if argument.arg == "member":
-                    argument.arg = "member_link"
-                    renamed += 1
-    assert renamed == 1, "the plant did not land: linkedin_send_invitation(member) not found"
-    found = name_shaped_parameters(
-        write_tools(tool_definitions(tree), writes.SANCTIONED_WRITES)
+    # The signature half: the pair declared, the tool's parameter renamed.
+    pair = ("linkedin_planted_write", "member")
+    tools = write_tools(
+        tool_definitions(ast.parse(_PLANTED_SERVER.replace("PARAM", "member_link"))),
+        writes.SANCTIONED_WRITES,
     )
-    assert sorted(DEBT_PARAMETERS - found) == [("linkedin_send_invitation", "member")]
+    found = name_shaped_parameters(tools)
+    assert pair not in found
+    assert sorted((DEBT_PARAMETERS | {pair}) - found) == sorted(DEBT_PARAMETERS | {pair})
 
 
 @pytest.mark.parametrize("parameter", ["name", "member", "recipient_full_name"])
@@ -890,9 +921,10 @@ def test_control_a_surface_disagreement_fails():
 
 
 def test_control_a_debt_entry_that_forgets_its_ruling_fails():
-    weakened = dict(NAME_AIMED_DEBT)
-    weakened["send_message"] = "legacy, fine as it is"
+    assert debt_entry_defects(_PLANTED_DEBT) == []
+    weakened = dict(_PLANTED_DEBT)
+    weakened["planted_write"] = "legacy, fine as it is"
     assert debt_entry_defects(weakened) == [
-        "send_message: its entry does not say %r" % phrase
+        "planted_write: its entry does not say %r" % phrase
         for phrase in DEBT_ENTRY_MUST_SAY
     ]

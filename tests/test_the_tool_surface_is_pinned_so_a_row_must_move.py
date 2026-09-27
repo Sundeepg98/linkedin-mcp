@@ -138,7 +138,10 @@ PINNED_TOOL_SURFACE: dict[str, tuple[str, ...]] = {
         "limit", "location", "locations", "remote", "sort_by", "start",
         "under_ten_applicants",
     ),
-    "linkedin_send_invitation": ("confirm_token", "member"),
+    # ``member`` -> ``profile`` on 2026-09-27 (lane L5, the orchestrator's
+    # order of 23:36): aimed by the person's profile link, never a name.
+    # Census N 1 keeps its state; its note records the new aim.
+    "linkedin_send_invitation": ("confirm_token", "profile"),
     "linkedin_send_message": ("confirm_token", "member", "text"),
     "linkedin_send_reply": ("confirm_token", "text", "thread_id"),
     "linkedin_server_info": ("verbose",),

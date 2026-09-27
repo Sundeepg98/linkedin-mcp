@@ -166,7 +166,14 @@ PAGE = (
     f'<div role="textbox" aria-label="{dom.COMMENT_EDITOR_LABEL}"></div>'
     f"<button>{dom.COMMENT_CONTROL_NAME}</button>"
     f'<button aria-label="{dom.REACTION_OFF_LABEL}">react</button>'
-    '<button aria-label="Someone to connect">invite</button>'
+    # A RAIL CARD, since 2026-09-27 (lane L5, the orchestrator's order of
+    # 23:36): the nearest element holding a profile link holds ONE member's
+    # link and ONE invitation control, as measured on his own profile's
+    # suggestion rail (32 of 32 controls). It replaced a bare "... to connect"
+    # button that the index aim pressed by position. The segment carries
+    # ``example``, a declared synthetic slug token.
+    '<div class="rail-card"><a href="/in/someone-example-rail/">Someone</a>'
+    '<button aria-label="Invite Someone to connect">invite</button></div>'
     # THE COMPOSER'S THREE, added 2026-09-02 with send_message. The recipient
     # is drawn as a LABEL-FOR pair rather than with an aria-label, because
     # that is how the live surface names it -- measured, "an input with
@@ -257,7 +264,12 @@ def build_all() -> dict[str, str]:
             dom.COMMENT_CONTROL_NAME
         ),
         "reaction_control_selector": dom.reaction_control_selector(),
-        "invite_control_selector": dom.invite_control_selector(0),
+        # AIMED BY A LINK SINCE 2026-09-27: the one control whose card links
+        # to the segment given, and to nobody else. It replaced
+        # ``invite_control_selector(index)``, which pressed a position.
+        "rail_invite_control_selector": dom.rail_invite_control_selector(
+            "someone-example-rail"
+        ),
         # THE NAMED-PERSON ACTS' TWO PRESSES, scoped to the topcard and
         # carrying no position (the re-checks of 2026-09-27): each must be the
         # only control of its kind inside the page's one topcard above, which

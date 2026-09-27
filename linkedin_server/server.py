@@ -8602,10 +8602,11 @@ _WHY_NOT_PERFORMED: dict[str, str] = {
         "account' are in it."
     ),
     # ``"send_invitation"`` LEFT THIS TABLE ON 2026-09-01. Its aim closed --
-    # aim_invitation resolves his own needle to exactly one control, with the
+    # aim_invitation resolved his own needle to exactly one control, with the
     # comparison run inside the page -- and its verification did not, so the
     # gate now DECLARES that nothing can confirm a sent invitation rather than
-    # refusing over it.
+    # refusing over it. (Since 2026-09-27 the aim is the person's profile LINK,
+    # compared against each rail card's own link; the needle is gone.)
     "send_message": (
         "'/messaging/compose' is on the forbidden-url list, and one "
         "exact-url exemption was ruled in on 2026-08-31, so the composer HAS "
@@ -9806,23 +9807,38 @@ async def linkedin_update_setting(
 
 @mcp.tool()
 async def linkedin_send_invitation(
-    member: str, confirm_token: str = ""
+    profile: str, confirm_token: str = ""
 ) -> dict[str, Any]:
     """Send one connection invitation. PERFORMS, behind the gate, and CANNOT BE CONFIRMED.
 
-    THIS SAID "BUILT, GATED, AND REFUSING" UNTIL 2026-09-01. Two things
-    changed and they are different in kind, which is the part to carry out of
-    here.
+    THE TARGET IS THEIR PROFILE LINK, NEVER A NAME (since 2026-09-27). Pass
+    ``https://www.linkedin.com/in/<segment>/`` from your own browser. The
+    control pressed is the one invitation control on YOUR OWN profile's
+    suggestion rail whose card links to that profile and to nobody else; the
+    comparison runs in the page and comes back as a count, and exactly one
+    such card is the only aimable answer -- two refuse rather than choose. A
+    bare word is refused before anything loads. A member id is accepted as a
+    shape and matches no card: the rail's cards carry each person's vanity
+    link (measured, 32 of 32), so for an id use
+    ``linkedin_connect_from_profile``, which loads the profile the id names.
 
-    THE AIM CLOSED, by measurement. It refused because the accessible name of
-    an invitation control IS the other person's name -- a string this server
-    will not read -- so the only measurable part, the suffix " to connect",
-    selected all nine controls on the page. You now supply a NEEDLE: your own
-    word for the person. The comparison runs INSIDE THE PAGE, so the name
-    never reaches this process, and exactly one match is the only aimable
-    answer. **Two matches refuse rather than shortlist**, because an
-    invitation that reaches whoever was drawn first is precisely the failure
-    worth refusing.
+    UNTIL 2026-09-27 THIS TOOK A NAME -- "your own word for the person", a
+    needle compared in the page against the controls' labels, which ARE
+    names. The comparison kept the names out of this process; it did not keep
+    a name from being the aim, and once people search returns names, a name
+    read off a page could reach this argument. Lane L5, on the orchestrator's
+    order of 23:36 (PEOPLE-DATA-MITIGATIONS, mitigation 6).
+
+    THIS SAID "BUILT, GATED, AND REFUSING" UNTIL 2026-09-01, when the needle
+    aim closed; the verification did not, as below.
+
+    CALL IT WITHOUT ``confirm_token`` FIRST. Nothing is pressed. You get back
+    WHOM IT RESOLVED TO -- the name on the one control your link selected, as a
+    people record, the other member's words to be read as data, its headline
+    absent (the rail card's headline has never been captured) -- and a token
+    that works once, only for this link, within two minutes. CHECK THE NAME: a
+    link to the wrong person is the one failure this gate cannot catch. The
+    receipt after the press names only the link you supplied.
 
     THE VERIFICATION DID NOT CLOSE, AND THIS SHIPS ANYWAY BECAUSE HE RULED IT
     SO. **Nothing this server can read will tell you whether the invitation
@@ -9871,17 +9887,18 @@ async def linkedin_send_invitation(
     section 8.5).
 
     Args:
-        member: YOUR OWN WORD for the person -- a name fragment that picks
-            out exactly one of the invitation controls on your profile. It is
-            handed into the page and compared there; it is never used to
-            discover anybody, and this server reads no names back out of the
-            match except the single label it shows you in the preview to
-            confirm your word selected who you meant.
+        profile: their profile link (or member id; see above). Never a name.
+            Compared in the page against each rail card's own link; it is
+            never navigated to.
         confirm_token: leave empty to read the gate. NEVER confirm on his
             behalf -- this one reaches another person.
     """
     try:
-        return await _write_tool("send_invitation", member, confirm_token)
+        if writes.writes_enabled():
+            # A NAME IS REFUSED BEFORE A BROWSER IS OPENED (2026-09-27) -- the
+            # same normalisation ``mint`` and ``consume`` apply, run first.
+            writes._target_for(writes.spec_for_action("send_invitation"), profile)
+        return await _write_tool("send_invitation", profile, confirm_token)
     except Exception as exc:
         return _error(exc)
 

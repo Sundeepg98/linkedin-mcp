@@ -273,6 +273,13 @@ ITEM = "an-item-key-this-server-has-never-parsed"
 #: "nobody matched", which is a real answer to the wrong question.
 MEMBER = "Somebody"
 
+#: THE TARGET SINCE 2026-09-27: the person's PROFILE LINK (lane L5, the
+#: orchestrator's order of 23:36). ``MEMBER`` above stays as the NAME the
+#: card's control and link draw -- read back only by the preview -- and is no
+#: longer anything a caller passes. The segment carries ``example``, a
+#: declared synthetic slug token.
+MEMBER_LINK = "https://www.linkedin.com/in/somebody-example-7f3c/"
+
 #: Two different comments on the SAME item. The whole of section 4 is the
 #: distance between these two strings surviving into the canonical target.
 COMMENT_A = "Congratulations on the launch."
@@ -358,10 +365,15 @@ PROFILE_MARKUP = (
     + '<a href="https://www.linkedin.com/in/somebody'
     + dom.PROFILE_EDITOR_HREFS[0]
     + '">Edit intro</a>'
-    # The label LinkedIn writes here is another person's name, so the fake
-    # carries a placeholder and the reader never reads it -- see
-    # dom.read_invitation_surface, which returns a count and nothing else.
-    + '<button aria-label="Invite Somebody' + dom.INVITE_CONTROL_SUFFIX + '"></button>'
+    # A RAIL CARD, as MEASURED on his own profile's suggestion rail (32 of 32
+    # controls): the nearest element holding a profile link holds ONE member's
+    # link and ONE invitation control, and the link's text names the person
+    # the control names. The aim is that link, compared in the page with the
+    # caller's (``dom.rail_invite_control_selector``) -- never the label. The
+    # label is another person's name, so the fake carries a placeholder, read
+    # back only by the preview.
+    + '<div class="rail-card"><a href="' + MEMBER_LINK + '">' + MEMBER + "</a>"
+    + '<button aria-label="Invite ' + MEMBER + dom.INVITE_CONTROL_SUFFIX + '"></button></div>'
     + "</body></html>"
 )
 
@@ -521,7 +533,7 @@ TARGETS: dict[str, object] = {
     "react_to_item": ITEM,
     "update_profile_field": {"field": "headline", "value": "Node.js engineer"},
     "update_setting": {"setting": "dark-mode", "value": "Always on"},
-    "send_invitation": MEMBER,
+    "send_invitation": MEMBER_LINK,
     "send_message": {"member": MEMBER, "text": "Hello, are you hiring?"},
     # ADDED 2026-09-02, when the corpus stopped excluding this action. Its
     # target_kind is ``self`` -- the write lands on his own account and names
@@ -1941,550 +1953,19 @@ def test_the_description_rule_convicts_the_two_sentences_it_was_built_for():
 
 
 # ---------------------------------------------------------------------------
-# 8. Aiming ONE invitation control, and the name that never reaches Python
+# 8. (RETIRED 2026-09-27) Aiming ONE invitation control by a NEEDLE
 # ---------------------------------------------------------------------------
 #
-# RULED 2026-08-31: this server MAY receive a person's identity as a call-time
-# argument and MUST NOT persist it -- no identity in any file, log, cache or
-# audit. Everything in this section exists to make the second half of that
-# ENFORCEABLE rather than promised, and the load-bearing test is
-# ``test_no_planted_name_survives_into_python``: it plants names in a page,
-# runs the real reader over it, and asserts that nothing which comes back
-# contains any fragment of them.
-#
-# THAT TEST HAS BEEN SHOWN FAILING. With ``INVITE_NEEDLE_JS`` altered to put
-# the matched label in its return value, it reports the leak by name. The
-# receipt is in ``_audit/_slice-invitation-needle.md``; without it this whole
-# section would be a set of assertions about a mechanism nobody had ever seen
-# break, which is the shape that certifies nothing.
-#
-# WHAT IS *NOT* TESTED HERE, because it does not exist: no click, no anchor, no
-# grant. ``send_invitation`` still refuses, sections 1 through 7 above still
-# certify that it cannot hold a grant, and this section adds a READER and a
-# DECISION, not a route. The index it produces is re-derivable on demand and
-# is deliberately not stored anywhere, so nothing can act on a stale one.
-
-#: The measured suffix, and the ONLY thing about these labels this server has
-#: ever read. The prefixes below are INVENTED AND DELIBERATELY INCONSISTENT --
-#: one bare name, one lowercase, one a strict superstring of another -- so no
-#: assertion in this section can come to depend on a prefix form. LinkedIn's
-#: real prefix has never been observed and is not guessed here or anywhere
-#: else in this package.
-#:
-#: Every name is nonsense on purpose. ``tests/test_no_committed_identity.py``
-#: cannot detect a personal name -- names have no shape -- so the protection
-#: against a real one landing in a fixture is that the fixture is written to be
-#: obviously synthetic, and these are.
-UNIQUE_NAME = "Marigold Underbough"
-SHARED_NAME = "Quill Featherstone"
-SHARED_LONGER = "Quill Featherstone the Younger"
-LOWER_NAME = "tobias winterbottom"
-DECOY_NAME = "Pemberley Voss"
-
-#: Every planted name, for the leak sweep. Swept as WORDS as well as whole
-#: strings: a reader that returned only a surname would still have collected
-#: one, and a whole-string check would call that clean.
-PLANTED_NAMES = (
-    UNIQUE_NAME, SHARED_NAME, SHARED_LONGER, LOWER_NAME, DECOY_NAME,
-)
-
-#: The control that must NOT be counted. Its label ends in something else
-#: entirely, so it is not part of the suffix-matched list and cannot be aimed
-#: at even by a needle that names it. Without this row every count below would
-#: pass against a reader that had dropped the suffix predicate altogether.
-DECOY_SUFFIX = " to send a message"
-
-#: Five controls, four of which wear the suffix. The order is the thing the
-#: index is an index INTO, so it is fixed here and asserted before use.
-INVITE_MARKUP = (
-    "<html><body>"
-    '<button aria-label="' + SHARED_NAME + dom.INVITE_CONTROL_SUFFIX + '"></button>'
-    '<button aria-label="' + UNIQUE_NAME + dom.INVITE_CONTROL_SUFFIX + '"></button>'
-    '<button aria-label="' + DECOY_NAME + DECOY_SUFFIX + '"></button>'
-    '<button aria-label="' + LOWER_NAME + dom.INVITE_CONTROL_SUFFIX + '"></button>'
-    '<button aria-label="' + SHARED_LONGER + dom.INVITE_CONTROL_SUFFIX + '"></button>'
-    "</body></html>"
-)
-
-#: Suffix-matched controls in the markup above, and where each sits. Written
-#: down rather than derived from the reader, so the reader is compared against
-#: the markup instead of against itself.
-SUFFIX_CONTROLS = 4
-POSITION_OF_UNIQUE = 1
-POSITION_OF_LOWER = 2
-
-#: A page with the suffix nowhere on it. The zero-match case above is "nobody
-#: matched"; this is "there is nothing here at all", and they are different
-#: refusals that a single fixture would have collapsed into one.
-BARE_MARKUP = '<html><body><button aria-label="Nothing at all"></button></body></html>'
-
-#: Fixed width, asserted on every reading. Nothing this reader answers is
-#: laid-out -- it counts attributes -- but a measurement whose conditions were
-#: not recorded is a measurement that cannot be repeated, and the cost is one
-#: integer comparison.
-INVITE_VIEWPORT = {"width": 1280, "height": 900}
-
-
-@pytest.fixture
-async def over_invites():
-    """One browser, a FRESH ISOLATED CONTEXT per reading.
-
-    The pattern is ``tests/test_apply_modal_fixture.py``'s, for its stated
-    reason: the launch is what costs, so paying it once per test and taking
-    the isolation per MEASUREMENT is both cheaper and stricter than a page
-    shared across readings.
-    """
-    playwright = pytest.importorskip("playwright.async_api")
-    async with playwright.async_playwright() as pw:
-        browser = await pw.chromium.launch(headless=True)
-
-        async def _run(html: str, work):
-            context = await browser.new_context(viewport=dict(INVITE_VIEWPORT))
-            try:
-                page = await context.new_page()
-                await page.set_content(
-                    html, wait_until="domcontentloaded", timeout=60_000
-                )
-                width = await page.evaluate("window.innerWidth")
-                assert width == INVITE_VIEWPORT["width"], (
-                    f"the page laid out at {width}px, not "
-                    f"{INVITE_VIEWPORT['width']}px -- the reading below was "
-                    "taken under conditions nobody recorded."
-                )
-                return await work(page)
-            finally:
-                await context.close()
-
-        try:
-            yield _run
-        finally:
-            await browser.close()
-
-
-async def _read(runner, needle, html=INVITE_MARKUP):
-    """One reading of the real reader, over frozen markup."""
-    return await runner(html, lambda page: dom.read_invitation_surface(page, needle))
-
-
-# --- the fixture is the shape every assertion below assumes ----------------
-
-
-def test_the_invitation_fixture_is_the_shape_this_section_assumes():
-    """Pins the markup, so a later edit degrades tests loudly instead of quietly.
-
-    The ambiguity case is only a test of ambiguity while two labels genuinely
-    share a substring, and the decoy is only a test of the suffix predicate
-    while its label genuinely ends in something else. Both are checked here
-    rather than assumed where they are used.
-    """
-    assert INVITE_MARKUP.count(dom.INVITE_CONTROL_SUFFIX + '"') == SUFFIX_CONTROLS
-    assert DECOY_SUFFIX in INVITE_MARKUP
-    assert not DECOY_SUFFIX.endswith(dom.INVITE_CONTROL_SUFFIX)
-    # The ambiguity is a real one: SHARED_NAME is a strict prefix of the other.
-    assert SHARED_LONGER.startswith(SHARED_NAME) and SHARED_LONGER != SHARED_NAME
-    # And the case-insensitivity case is real: the label is not title case.
-    assert LOWER_NAME != LOWER_NAME.title()
-    assert dom.INVITE_CONTROL_SUFFIX not in BARE_MARKUP
-
-
-# --- the reader ------------------------------------------------------------
-
-
-async def test_a_unique_needle_aims_at_exactly_one_control(over_invites):
-    """The only aimable state, and the index is the aim."""
-    reading = await _read(over_invites, UNIQUE_NAME)
-    assert reading["controls"] == SUFFIX_CONTROLS
-    assert reading["matches"] == 1
-    assert reading["index"] == POSITION_OF_UNIQUE
-    assert writes.aim_invitation(reading)[0] == writes.INVITE_AIMED
-    assert writes.aim_invitation(reading)[2] == POSITION_OF_UNIQUE
-
-
-async def test_a_needle_nobody_carries_matches_nothing_and_aims_at_nothing(
-    over_invites,
-):
-    """Zero is a READ answer: the question was put and nobody carried it."""
-    reading = await _read(over_invites, "Nobody Whatsoever")
-    assert reading["controls"] == SUFFIX_CONTROLS
-    assert reading["matches"] == 0
-    assert reading["index"] is None
-    state, why, index = writes.aim_invitation(reading)
-    assert state == writes.INVITE_NO_MATCH
-    assert index is None
-    assert str(SUFFIX_CONTROLS) in why
-
-
-async def test_two_matches_are_ambiguous_and_the_aim_is_erased(over_invites):
-    """THE REFUSAL THAT MATTERS. Two controls, no way to tell them apart.
-
-    ``SHARED_NAME`` is a strict prefix of ``SHARED_LONGER``, which is exactly
-    how this goes wrong in the world: a needle that looks specific matches a
-    second person whose name merely extends it. Picking either would be
-    picking by position.
-    """
-    reading = await _read(over_invites, SHARED_NAME)
-    assert reading["matches"] == 2
-    assert reading["index"] is None, "an index survived an ambiguous read"
-    state, why, index = writes.aim_invitation(reading)
-    assert state == writes.INVITE_AMBIGUOUS
-    assert index is None
-    assert "position" in why
-
-
-async def test_the_match_is_case_insensitive(over_invites):
-    """Folded on BOTH sides, and the second half is why this is two cases.
-
-    Written first with only the top half, this test could not fail. Both
-    needles there are variations of a label that is ALREADY lowercase, so
-    folding the NEEDLE alone satisfies them -- and a mutation that removed the
-    fold from the LABEL side left the suite green. The bottom half is the
-    control: an uppercase label reached by a lowercase needle can only match
-    if the label is folded too.
-    """
-    # A lowercase label, reached by needles that are not.
-    for needle in (LOWER_NAME.upper(), LOWER_NAME.title()):
-        reading = await _read(over_invites, needle)
-        assert reading["matches"] == 1, needle
-        assert reading["index"] == POSITION_OF_LOWER, needle
-    # A title-case label, reached by a lowercase needle. THIS is the half that
-    # exercises the fold on the label.
-    assert UNIQUE_NAME != UNIQUE_NAME.lower(), "the control needs a cased label"
-    reading = await _read(over_invites, UNIQUE_NAME.lower())
-    assert reading["matches"] == 1
-    assert reading["index"] == POSITION_OF_UNIQUE
-
-
-async def test_a_control_ending_differently_is_neither_counted_nor_aimable(
-    over_invites,
-):
-    """The suffix predicate, shown doing work.
-
-    The decoy is on the page and carries a name. It is absent from the count,
-    and a needle naming it directly still matches nothing -- so the suffix is
-    a filter on the SET, not merely on what gets reported.
-    """
-    reading = await _read(over_invites, DECOY_NAME)
-    assert reading["controls"] == SUFFIX_CONTROLS, "the decoy was counted"
-    assert reading["matches"] == 0, "the decoy was aimable"
-    assert writes.aim_invitation(reading)[0] == writes.INVITE_NO_MATCH
-
-
-async def test_a_surface_drawing_no_invitation_control_reads_zero(over_invites):
-    """Nothing here at all, which is a different answer from nobody matched."""
-    reading = await _read(over_invites, UNIQUE_NAME, html=BARE_MARKUP)
-    assert reading == {
-        "controls": 0,
-        "matches": 0,
-        "index": None,
-        "label": None,
-    }
-
-
-async def test_no_needle_is_a_count_only_and_says_it_did_not_look(over_invites):
-    """The unchanged path: no needle, no comparison, and ``None`` says so.
-
-    ``matches is None`` and ``matches == 0`` are DIFFERENT ANSWERS and this is
-    what keeps them apart -- one means nobody asked, the other means nobody
-    carried it. A reader that returned 0 for both would let the aiming rule
-    report a confident "nobody matched" about a question never put.
-    """
-    reading = await over_invites(
-        INVITE_MARKUP, lambda page: dom.read_invitation_surface(page)
-    )
-    assert reading == {
-        "controls": SUFFIX_CONTROLS,
-        "matches": None,
-        "index": None,
-        # ``None`` for TWO reasons here and either alone is enough: nobody
-        # asked for a label, and no needle was given for one to be selected
-        # by. ``matches: None`` is itself the "nobody asked" answer, which is
-        # a different fact from a zero.
-        "label": None,
-    }
-    state, why, index = writes.aim_invitation(reading)
-    assert state == writes.INVITE_UNASKED
-    assert index is None
-    assert "not an aim" in why
-
-
-async def test_an_empty_needle_is_not_a_needle(over_invites):
-    """A blank string is a substring of every label. It is refused as unasked.
-
-    Passed through, it would report four matches on four controls -- true,
-    useless, and indistinguishable from a genuine ambiguity. Reported as
-    ``None`` it stays separable from both.
-    """
-    for blank in ("", "   ", "\t"):
-        reading = await _read(over_invites, blank)
-        assert reading["matches"] is None, repr(blank)
-        assert writes.aim_invitation(reading)[0] == writes.INVITE_UNASKED
-
-
-async def test_the_css_suffix_selector_and_the_scripts_endswith_agree(over_invites):
-    """The two predicates are written in different languages. They must agree.
-
-    ``controls`` comes from a Playwright locator over a CSS ``$=`` selector
-    when no needle is given, and from the script's own ``endsWith`` when one
-    is. Nothing else compares them, so a drift between the CSS engine and the
-    script would silently change which controls an index is an index into.
-    """
-    without = await over_invites(
-        INVITE_MARKUP, lambda page: dom.read_invitation_surface(page)
-    )
-    with_needle = await _read(over_invites, UNIQUE_NAME)
-    assert without["controls"] == with_needle["controls"] == SUFFIX_CONTROLS
-
-
-# --- THE TESTS THAT CERTIFY THE RULING -------------------------------------
-
-
-class _RecordingPage:
-    """A real page whose ``evaluate`` RETURN VALUES are kept verbatim.
-
-    WHY A SPY AND NOT JUST THE READER'S OUTPUT. The ruling is that a third
-    party's name must never enter this process -- not that the reader must
-    decline to forward one. Those are different claims, and the difference is
-    not academic: it was measured. With the script altered to return the
-    matched label, ``test_no_planted_name_survives_into_python`` below STAYED
-    GREEN, because the reader copies three fields out of the payload and drops
-    the rest. The name had crossed the boundary and was sitting in a local
-    variable; the only test watching was looking one step too late.
-
-    This watches the boundary itself. Everything ``evaluate`` hands back is
-    recorded before the reader gets to filter it.
-    """
-
-    def __init__(self, page):
-        self._page = page
-        self.returned: list = []
-
-    def __getattr__(self, name):
-        return getattr(self._page, name)
-
-    async def evaluate(self, script, arg=None):
-        value = await self._page.evaluate(script, arg)
-        self.returned.append(value)
-        return value
-
-
-async def test_nothing_carrying_a_name_crosses_out_of_the_page(over_invites):
-    """THE RULING AS AN ASSERTION, taken AT THE BOUNDARY.
-
-    Whatever the script hands back is what entered Python. It must contain no
-    planted name, no fragment of one, and no echo of the needle -- and it must
-    contain something, or this is a test of a reader that never ran.
-    """
-
-    async def work(page):
-        spy = _RecordingPage(page)
-        reading = await dom.read_invitation_surface(spy, UNIQUE_NAME)
-        return reading, list(spy.returned)
-
-    reading, crossed = await over_invites(INVITE_MARKUP, work)
-    assert crossed, "the reader executed no script, so nothing was certified"
-    assert reading["matches"] == 1, reading
-    blob = repr(crossed)
-    for name in PLANTED_NAMES:
-        assert name not in blob, f"{name!r} crossed out of the page: {blob}"
-        for word in name.split():
-            if len(word) < 4:
-                continue
-            assert word not in blob, (
-                f"the fragment {word!r} of a planted name crossed out of the "
-                f"page: {blob}"
-            )
-    assert UNIQUE_NAME not in blob, f"the needle was echoed back: {blob}"
-    # Every value that crossed is a number or nothing. A label is neither.
-    for payload in crossed:
-        assert isinstance(payload, dict), payload
-        for key, value in payload.items():
-            assert isinstance(value, (int, bool, type(None))), (
-                f"the script returned {key}={value!r}, a "
-                f"{type(value).__name__}. Only integers may cross."
-            )
-
-
-async def test_no_planted_name_survives_into_python(over_invites):
-    """NOTHING THAT COMES BACK CONTAINS ANY FRAGMENT OF A PLANTED NAME.
-
-    This is the whole ruling as an assertion. Every other test here would pass
-    against a reader that fetched all four labels, compared them in Python and
-    returned the right numbers -- and that reader would have collected four
-    strangers' names into a process that logs, caches and renders. This one
-    would not.
-
-    It sweeps the WHOLE returned structure as text, and it sweeps individual
-    WORDS as well as whole names, because a reader that returned only a
-    surname has still collected one.
-    """
-    for needle in (UNIQUE_NAME, SHARED_NAME, "Nobody Whatsoever", DECOY_NAME):
-        reading = await _read(over_invites, needle)
-        blob = repr(reading)
-        for name in PLANTED_NAMES:
-            assert name not in blob, f"the reader returned {name!r}: {blob}"
-            for word in name.split():
-                if len(word) < 4:
-                    continue
-                assert word not in blob, (
-                    f"the reader returned the fragment {word!r} of a planted "
-                    f"name: {blob}"
-                )
-        # AND THE NEEDLE ITSELF IS NOT ECHOED. It is his to type, not this
-        # server's to keep, and a result that carried it would be a result a
-        # caller could store without ever deciding to.
-        assert needle not in blob, f"the reading echoed the needle: {blob}"
-
-
-async def test_only_numbers_come_back(over_invites):
-    """The return shape, enforced by TYPE rather than by reading the source.
-
-    A label is a string. If every value that crosses the boundary is an int,
-    a bool or ``None``, then no label crossed it -- which is a stronger claim
-    than any assertion about particular keys, and it survives somebody adding
-    a field.
-    """
-    for needle in (UNIQUE_NAME, SHARED_NAME, "Nobody Whatsoever", None):
-        reading = await _read(over_invites, needle)
-        for key, value in reading.items():
-            assert isinstance(value, (int, bool, type(None))), (
-                f"{key} came back as {type(value).__name__}, and only "
-                f"integers cross this boundary: {value!r}"
-            )
-
-
-def test_the_script_emits_a_label_only_behind_two_conditions():
-    """Read the script itself: WHEN it may hand back a label, and when not.
-
-    THIS TEST ASSERTED THAT IT NEVER COULD, and that property was deliberately
-    changed by the operator on 2026-08-31 rather than eroded. So it is
-    REWRITTEN to assert the new, narrower thing rather than deleted -- a guard
-    that is removed when its subject moves leaves nothing behind, and this is
-    the line in this package that can emit a third party's name.
-
-    THE RULING, and the distinction it turned on: loading a stranger's PROFILE
-    stays refused because it EMITS -- ``linkedin_who_viewed_me`` measures the
-    receiving end -- so the cost falls on somebody who did not agree to it.
-    Reading one accessible name off a page already rendered on HIS OWN profile
-    emits nothing at all. And he already knows the name: he supplied the
-    needle, so reading the label back CONFIRMS that the control his own word
-    selected is the person he meant, which is verification of his input rather
-    than collection.
-
-    TWO CONDITIONS IN THE SCRIPT, ``&&``-ed rather than nested, and a THIRD in
-    Python. Three gates in two languages, so no single edit opens them all.
-    """
-    js = dom.INVITE_NEEDLE_JS
-    # The caller has to ask, AND the needle has to have picked out one.
-    assert "cfg.revealSingleMatch === true" in js
-    assert "(matches === 1)" in js
-    assert "const reveal = (cfg.revealSingleMatch === true) && (matches === 1)" in js
-    # And the emission is that flag, not the label directly.
-    assert "label: reveal ? only : null" in js
-    # A SECOND MATCH ERASES IT, exactly as it erases the index. There is
-    # nothing to check if the word picked out two people.
-    assert "only = (matches === 1) ? label : null;" in js
-    # Still counted, still never pushed to an array or accumulated.
-    assert "out.push" not in js
-    # And the suffix is matched AS A SUFFIX -- never rebuilt into a whole
-    # label from a prefix nobody has measured.
-    assert "endsWith(cfg.suffix)" in js
-
-
-async def test_the_label_is_withheld_unless_the_caller_asks(browser_page):
-    """THE DEFAULT IS OFF, and the default is what every existing caller gets.
-
-    ``read_invitation_surface`` grew a keyword rather than changing behaviour,
-    so the reader the gate uses -- which must never hold a name, because its
-    answer becomes a retained Observation -- is unaffected by the ruling.
-    """
-    await browser_page.set_content(PROFILE_MARKUP)
-    off = await dom.read_invitation_surface(browser_page, MEMBER)
-    assert off["matches"] == 1
-    assert off["label"] is None, off
-
-    on = await dom.read_invitation_surface(
-        browser_page, MEMBER, reveal_single_match=True
-    )
-    assert on["matches"] == 1
-    assert on["label"] and MEMBER in on["label"], on
-
-
-async def test_two_matches_erase_the_label_even_when_asked(browser_page):
-    """CONDITION 1 OF THE RULING: exactly ONE label, the one the needle
-    uniquely selected. Zero or more than one reads nothing.
-
-    A word matching two controls is precisely the case where a name would be
-    least safe to print and most tempting to print anyway -- he would see one
-    of two people and confirm against it.
-    """
-    two = PROFILE_MARKUP.replace(
-        "</body>",
-        '<button aria-label="Invite Somebody Else'
-        + dom.INVITE_CONTROL_SUFFIX
-        + '"></button></body>',
-    )
-    assert two != PROFILE_MARKUP
-    await browser_page.set_content(two)
-    reading = await dom.read_invitation_surface(
-        browser_page, MEMBER, reveal_single_match=True
-    )
-    assert reading["matches"] == 2
-    assert reading["label"] is None, reading
-    assert reading["index"] is None
-
-
-# --- the aiming rule, without a browser ------------------------------------
-
-
-@pytest.mark.parametrize(
-    "reading,expected",
-    [
-        ({"controls": 9, "matches": None, "index": None}, "no_needle"),
-        ({"controls": 9, "matches": 0, "index": None}, "no_match"),
-        ({"controls": 9, "matches": 2, "index": None}, "ambiguous"),
-        ({"controls": 9, "matches": 9, "index": None}, "ambiguous"),
-        # TWO MATCHES *AND* AN INDEX, and this row exists because without it
-        # this whole parametrisation had a case that could not fail. The
-        # script erases the index on a second match, so every ambiguous
-        # reading it produces carries ``index: None`` -- which means the
-        # ambiguity refusal here was being satisfied by the missing-index
-        # guard further down rather than by the count check it is testing.
-        # Weakening ``matches > 1`` left the suite green. It does not now.
-        ({"controls": 9, "matches": 2, "index": 3}, "ambiguous"),
-        ({"controls": 9, "matches": 1, "index": 0}, "aimed"),
-        ({"controls": 9, "matches": 1, "index": 8}, "aimed"),
-        # ONE MATCH AND NO POSITION, which the script cannot produce and a
-        # hand-built or half-read dict can. The safe answer is the ambiguous
-        # refusal, never a guess at position 0.
-        ({"controls": 9, "matches": 1, "index": None}, "ambiguous"),
-    ],
-)
-def test_the_aiming_rule_is_exactly_one_or_nothing(reading, expected):
-    state, why, index = writes.aim_invitation(reading)
-    assert state == expected, why
-    assert (index is not None) == (expected == "aimed"), why
-    if index is not None:
-        assert index == reading["index"]
-
-
-def test_no_aiming_verdict_can_carry_a_name():
-    """The signature is the enforcement: this function never sees a needle.
-
-    Asserted rather than merely stated, because "it takes a dict of integers"
-    is a property somebody could break by adding a convenience argument, and
-    the first thing such an argument would be used for is a friendlier
-    message.
-    """
-    import inspect
-
-    parameters = list(inspect.signature(writes.aim_invitation).parameters)
-    assert parameters == ["reading"], parameters
-    for matches in (None, 0, 1, 2, 9):
-        reading = {"controls": 9, "matches": matches, "index": 3}
-        why = writes.aim_invitation(reading)[1]
-        for name in PLANTED_NAMES:
-            assert name not in why
-        assert why == why.strip()
+# THIS SECTION HELD THE NEEDLE'S TESTS -- ``dom.INVITE_NEEDLE_JS``,
+# ``dom.read_invitation_surface`` and ``writes.aim_invitation`` -- and they
+# left with the needle, on the orchestrator's order of 2026-09-27 23:36 (lane
+# L5; PEOPLE-DATA-MITIGATIONS, mitigation 6: no write is aimed by a name).
+# What they certified -- a third party's name never enters this process to
+# AIM -- is kept, and more strongly: the aim is the person's profile LINK,
+# compared by the browser against each rail card's own link, and nothing
+# compares a name at all. Its tests are
+# ``tests/test_an_invitation_is_aimed_by_a_link.py``; the one label the
+# preview reads is section 10's, below.
 
 
 # ---------------------------------------------------------------------------
@@ -3076,8 +2557,10 @@ async def test_the_confirm_block_names_who_the_invitation_would_reach(
     assert named, block
     # A PEOPLE RECORD since 2026-09-27 (PREVIEW-NAMES-THE-RESOLVED-TARGET):
     # the name the label carries, sanitised and marked; the rest is held by
-    # tests/test_a_preview_names_the_resolved_target.py.
+    # tests/test_a_preview_names_the_resolved_target.py. Its link is the one
+    # HE gave, and its headline ABSENT -- the rail card's is uncaptured.
     assert named["name"] == MEMBER, named
+    assert named["link"] == MEMBER_LINK and named["headline"] is None, named
     # IT TELLS HIM TO CHECK IT, and says what it cannot catch. A word that
     # uniquely selects the WRONG person is the one failure this gate has no
     # way to see, and a block that printed a name without saying so would read
@@ -3111,16 +2594,15 @@ async def test_the_label_does_not_reach_the_grant(writes_on, browser_page, monke
     grant = grants[0]
     # NOT IN THE RETAINED BLOCK -- neither the key nor the LABEL.
     #
-    # THE NEEDLE IS NOT WHAT IS BEING SWEPT FOR, and getting that wrong was
-    # this test's first draft: ``MEMBER`` is HIS OWN WORD and appears in the
-    # retained block legitimately, as ``target``. That is the guarantee this
-    # design declined to trade away rather than a leak. What must not be there
-    # is the string LINKEDIN wrote -- the accessible name of somebody else's
-    # control.
+    # HIS TARGET IS NOT WHAT IS BEING SWEPT FOR: his link appears in the
+    # retained block legitimately, as ``target`` -- the caller-supplied target
+    # a receipt may carry. What must not be there is the string LINKEDIN wrote
+    # -- the accessible name of somebody else's control. (His target was his
+    # WORD for the person until 2026-09-27; it is the person's link now.)
     label = "Invite " + MEMBER + dom.INVITE_CONTROL_SUFFIX
     assert "who_this_would_reach" not in grant.preview, grant.preview
     assert label not in json.dumps(grant.preview), grant.preview
-    assert grant.target == MEMBER
+    assert grant.target == MEMBER_LINK
     # AND NOT IN THE OBSERVATION, which is retained on the grant too -- which
     # is exactly why _read_profile_invitations does not read the label at all.
     assert grant.observation is not None
@@ -3140,14 +2622,17 @@ async def test_two_matches_print_no_name(writes_on, browser_page):
     anyway -- he would be shown one of two people and confirm against it.
 
     The preview refuses outright here, which is the older half of the rule:
-    ``aim_invitation`` calls two matches AMBIGUOUS because choosing between
-    indistinguishable controls is choosing by position.
+    two cards linking to the profile he gave are AMBIGUOUS, because choosing
+    between indistinguishable controls is choosing by position. (The two
+    matches were two labels carrying his WORD until 2026-09-27; they are two
+    cards carrying his LINK now.)
     """
     two = PROFILE_MARKUP.replace(
         "</body>",
+        '<div class="rail-card"><a href="' + MEMBER_LINK + '">x</a>'
         '<button aria-label="Invite Somebody Else'
         + dom.INVITE_CONTROL_SUFFIX
-        + '"></button></body>',
+        + '"></button></div></body>',
     )
     assert two != PROFILE_MARKUP
     pages = _nine_pages()
@@ -3157,7 +2642,7 @@ async def test_two_matches_print_no_name(writes_on, browser_page):
 
     with pytest.raises(WriteAttemptError) as excinfo:
         await preview(
-            spec, target=MEMBER, navigator=nav, page=browser_page, to_state=None
+            spec, target=MEMBER_LINK, navigator=nav, page=browser_page, to_state=None
         )
     message = str(excinfo.value)
     assert "ambiguous" in message.lower() or "choosing by position" in message
@@ -3180,8 +2665,8 @@ async def test_no_other_part_of_the_answer_carries_the_name(
         if key != "who_this_would_reach"
     }
     blob = json.dumps(rest)
-    # The needle IS his own word and DOES legitimately appear as the target;
-    # what must not appear anywhere else is the LABEL LinkedIn wrote.
+    # His link DOES legitimately appear as the target; what must not appear
+    # anywhere else is the LABEL LinkedIn wrote.
     assert "Invite " + MEMBER not in blob, rest
     assert dom.INVITE_CONTROL_SUFFIX not in blob, rest
 
@@ -3204,20 +2689,19 @@ async def test_the_python_gate_holds_when_the_script_stops_gating(
     stopped gating, which is precisely the failure defence in depth exists
     for.
     """
-    real = dom.read_invitation_surface
+    real = dom.read_invitation_rail
     calls = {"n": 0}
 
-    async def _ungated(page, needle=None, **kwargs):
+    async def _ungated(page, segment=None, **kwargs):
         calls["n"] += 1
-        reading = dict(await real(page, needle, **kwargs))
+        reading = dict(await real(page, segment, **kwargs))
         if calls["n"] > 1:
-            # A script that lost its ``matches === 1`` condition: two
-            # controls matched and it handed back a name anyway.
+            # A reading that lost its exactly-one condition: two cards now
+            # carry his link, and the label read must not happen.
             reading["matches"] = 2
-            reading["label"] = "Invite Somebody" + dom.INVITE_CONTROL_SUFFIX
         return reading
 
-    monkeypatch.setattr(dom, "read_invitation_surface", _ungated)
+    monkeypatch.setattr(dom, "read_invitation_rail", _ungated)
     block, _nav = await _preview_the_refusal(browser_page, "send_invitation")
     assert calls["n"] >= 2, "the label read did not happen at all"
     assert "who_this_would_reach" not in block, block
@@ -3241,11 +2725,11 @@ async def test_a_page_that_moved_is_not_read_for_a_name(
     thing.
     """
     calls = {"n": 0}
-    real = dom.read_invitation_surface
+    real = dom.read_invitation_rail
 
-    async def _wandered(page, needle=None, **kwargs):
+    async def _wandered(page, segment=None, **kwargs):
         calls["n"] += 1
-        reading = await real(page, needle, **kwargs)
+        reading = await real(page, segment, **kwargs)
         if calls["n"] > 1:
             # The SECOND read -- the one the label would come from -- finds a
             # different rail. In production that is a page that re-rendered
@@ -3256,7 +2740,7 @@ async def test_a_page_that_moved_is_not_read_for_a_name(
             reading["controls"] = int(reading["controls"]) + 3
         return reading
 
-    monkeypatch.setattr(dom, "read_invitation_surface", _wandered)
+    monkeypatch.setattr(dom, "read_invitation_rail", _wandered)
     block, _nav = await _preview_the_refusal(browser_page, "send_invitation")
     assert calls["n"] >= 2, "the label read did not happen at all"
     assert "who_this_would_reach" not in block, block

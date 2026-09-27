@@ -1991,12 +1991,15 @@ SANCTIONED_WRITES: dict[str, WriteSpec] = {
     "linkedin_send_invitation": WriteSpec(
         action="send_invitation",
         tool_name="linkedin_send_invitation",
-        # HIS OWN PROFILE, and the url carries NO ``{target}``. That is not a
-        # simplification: the target here is his NEEDLE, which has no
-        # measurable shape and must never reach a navigation. The controls
-        # live on a page addressed by a constant, and the aiming is done by
-        # aim_invitation refusing anything but exactly one match -- so the
-        # needle selects a control and never a url.
+        # HIS OWN PROFILE, and the url carries NO ``{target}``. The target is
+        # the PROFILE LINK of the person he names, since 2026-09-27 (lane L5,
+        # the orchestrator's order of 23:36; PEOPLE-DATA-MITIGATIONS,
+        # mitigation 6). It was his WORD for the person until then -- a name,
+        # compared in the page against the controls' labels, which are names.
+        # The link reaches no navigation either: the controls live on a page
+        # addressed by a constant, and the aim is each rail card's OWN link
+        # compared with his, in the page (``dom.rail_invite_control_selector``),
+        # refusing anything but exactly one card.
         #
         # This surface costs NO BADGE. /mynetwork/ would consume the
         # pending-invitation counter, which is why no tool here loads it; his
@@ -2004,10 +2007,13 @@ SANCTIONED_WRITES: dict[str, WriteSpec] = {
         url_template="https://www.linkedin.com/in/me/",
         url_pattern=re.compile(r"^https://www\.linkedin\.com/in/me/$"),
         exempt_substring=None,
-        summary="Send one connection invitation to another LinkedIn member.",
+        summary=(
+            "Send one connection invitation to a person you name by their "
+            "profile link, from the suggestion rail on your own profile."
+        ),
         from_state="invite_control_present",
         to_state="invitation_sent",
-        target_kind="member",
+        target_kind="rail_profile",
         state_from="profile_invitations",
         # RULING 1, 2026-09-01. Nothing can confirm this, and the gate says so
         # in three parts rather than one paragraph -- the third is the only
@@ -2045,12 +2051,19 @@ SANCTIONED_WRITES: dict[str, WriteSpec] = {
             "9 invitation controls on his own profile, a page this server "
             "already loads and which carries no such counter. So the "
             "capability has a route that costs no badge, and this gate uses "
-            "it. The controls are COUNTED and their labels are never read -- "
-            "see _NINE_REFUSALS for why that is a rule and not a limitation."
+            "it. THE AIM IS A LINK, NOT A NAME (since 2026-09-27): the one "
+            "control pressed is the one whose card -- the nearest element "
+            "holding a profile link -- links to the profile YOU gave, and to "
+            "nobody else, and holds exactly one invitation control. The "
+            "comparison runs in the page and comes back as a count; no label "
+            "is read to aim."
         ),
         wrong_state_note=(
             "Not a toggle. No invitation control on the page means the rail "
-            "did not render, not that there is nobody to invite."
+            "did not render, not that there is nobody to invite; and no card "
+            "carrying your link means that person is not on the rail right "
+            "now -- linkedin_connect_from_profile reaches them on their own "
+            "profile."
         ),
         reversibility=(
             "STILL-UNKNOWN through this server whether an invitation it sent "
@@ -3252,7 +3265,10 @@ TARGET_JOIN = " :: "
 
 #: Targets that are ONE opaque string this server has never measured the shape
 #: of, and says so rather than validating a guessed one.
-_OPAQUE_TARGET_KINDS: frozenset[str] = frozenset({"item_urn", "member"})
+#: ``"member"`` LEFT THIS SET ON 2026-09-27 (lane L5): it was
+#: ``send_invitation``'s kind, his word for a person, and that action is
+#: now addressed by the person's profile link (``"rail_profile"``).
+_OPAQUE_TARGET_KINDS: frozenset[str] = frozenset({"item_urn"})
 
 #: Targets made of a SUBJECT and the CONTENT that would be published or set.
 #: Mapped to the two argument names each takes, so the error a caller reads
@@ -3609,11 +3625,11 @@ def _opaque_target(spec: WriteSpec, raw: str) -> str:
     opaque-kind action that becomes performable must carry a ``url_pattern``
     that CONSTRAINS its target, and
     ``tests/test_opaque_targets.py`` fails if one does not.
-    ``send_invitation`` is the case that shows why the rule is about the
-    pattern and not about this function: its target is a NEEDLE, which has no
-    shape to enforce at all, and its url_template is a constant carrying no
-    ``{target}`` -- so its target never reaches a url, and its aiming is done
-    by :func:`aim_invitation` refusing anything but exactly one match.
+    ``send_invitation`` WAS the case that showed why the rule is about the
+    pattern and not about this function: its target was a NEEDLE, which has no
+    shape to enforce at all. Since 2026-09-27 it is addressed by a profile LINK
+    (``"rail_profile"``), parsed by the named-profile parser, and is no longer
+    opaque; its url_template is still a constant carrying no ``{target}``.
     """
     return _clean_target_part(spec, spec.target_kind, raw)
 
@@ -3757,6 +3773,12 @@ def _target_for(spec: WriteSpec, target: Any) -> str:
         # A NAMED PERSON'S PROFILE, canonical as its link (2026-09-27). See
         # :data:`_PROFILE_TARGET_KINDS`: a link or a member id, never a name.
         return _canonical_profile(raw)
+    if spec.target_kind == "rail_profile":
+        # ``send_invitation``'s, 2026-09-27: the same parser -- a link or a
+        # member id, never a name, refused before a token exists -- and the
+        # same canonical link. NOT a named-profile kind: nothing loads it; the
+        # rail on his own profile is compared against it, in the page.
+        return _canonical_profile(raw)
     if spec.target_kind in _OPAQUE_TARGET_KINDS:
         return _opaque_target(spec, raw)
     if spec.target_kind in _COMPOSITE_TARGET_KINDS:
@@ -3856,6 +3878,12 @@ NAMED_PROFILE_ACTIONS: frozenset[str] = frozenset(
 #: static count, not on a press, and ``dom.POSTING_FOLLOW_IN_CARD``'s comment
 #: says so. FILLS ARE NOT IN THIS: the claims were about presses, and only the
 #: named-person acts' fill was measured strict (``perform``'s own note).
+#:
+#: ``send_invitation`` JOINED LATER THE SAME DAY (the orchestrator's order of
+#: 23:36), with its aim: the press is the selector the gate counted --
+#: ``dom.rail_invite_control_selector``, the card linking to the profile he
+#: gave -- measured to match exactly one control on each of 44 invitation
+#: controls in 16 captures, so a second match at press time throws.
 STRICT_PRESS_ACTIONS: frozenset[str] = NAMED_PROFILE_ACTIONS | frozenset(
     {
         "mark_company_interest",
@@ -3863,6 +3891,7 @@ STRICT_PRESS_ACTIONS: frozenset[str] = NAMED_PROFILE_ACTIONS | frozenset(
         "update_profile_field",
         "withdraw_from_group",
         "follow_company",
+        "send_invitation",
     }
 )
 
@@ -4510,7 +4539,8 @@ async def _read_profile_state(
 # NONE OF THEM READS A THIRD PARTY'S NAME. The invitation reader is the one
 # that could -- LinkedIn writes a member's name into that control's accessible
 # name -- and it returns a count and nothing else. See
-# ``dom.read_invitation_surface``.
+# ``dom.read_invitation_rail`` (``dom.read_invitation_surface`` until
+# 2026-09-27, when the aim became the person's profile link).
 
 
 async def _read_feed_composer(
@@ -4910,135 +4940,99 @@ async def _read_dark_mode(
     )
 
 
-#: THE FOUR ANSWERS A NEEDLE CAN PRODUCE, and only the last is aimable.
-#: Written as constants because three of them are REFUSALS and a refusal
-#: compared against a typo'd string literal is a refusal that stops refusing.
-INVITE_UNASKED = "no_needle"
+#: THE ANSWERS THE LINK AIM CAN PRODUCE, and only the last is aimable. Written
+#: as constants because two of them are REFUSALS and a refusal compared against
+#: a typo'd string literal is a refusal that stops refusing.
+#:
+#: THEY WERE FOUR UNTIL 2026-09-27, answers to a NEEDLE -- his word for the
+#: person, compared against the controls' labels -- and ``aim_invitation``
+#: returned a POSITION in the suffix-matched list. The needle, the position and
+#: that function are gone (lane L5, the orchestrator's order of 23:36): the aim
+#: is the card's own profile link, and the press is the selector the gate
+#: counted, so there is no position to carry between them.
 INVITE_NO_MATCH = "no_match"
 INVITE_AMBIGUOUS = "ambiguous"
 INVITE_AIMED = "aimed"
 
 
-def aim_invitation(reading: dict[str, Any]) -> tuple[str, str, Optional[int]]:
-    """Which ONE invitation control a needle picked out, or why none.
+def aim_invitation_by_link(reading: dict[str, Any], segment: str) -> tuple[str, str]:
+    """Which ONE rail card is the profile he linked, or why none. ``(aim, why)``.
 
-    EXACTLY ONE MATCH IS THE ONLY AIMABLE STATE, and the two refusals either
-    side of it are refusing different things:
+    EXACTLY ONE MATCH IS THE ONLY AIMABLE STATE. ``reading`` is
+    :func:`dom.read_invitation_rail`'s: ``controls`` counts the invitation
+    controls drawn, ``matches`` how many sit in a card that links to
+    ``segment`` and to nobody else, holding one control.
 
-    * **none** -- nobody drawn on this surface carries that word. Not "try
-      again with a click"; there is nothing here to aim at.
-    * **two or more** -- AMBIGUOUS, and this is the refusal that matters. The
-      controls are indistinguishable to this function; picking one would be
-      picking BY POSITION, which is how a request lands on a stranger who
-      merely sorted earlier. ``unfollow_company`` refuses on exactly this
-      ground when a company id resolves more than one row, and an invitation
-      is less recoverable than an unfollow, not more.
-    * **one** -- aimable, and the index IS the aim.
+    * **none** -- no card on this rail is that profile's. The rail is a
+      suggestion rail and draws whom LinkedIn chooses; and its cards carry
+      VANITY links (measured: 32 of 32 on his own profile's captures), so a
+      member id never matches one.
+    * **two or more** -- two cards link to the same profile. Nothing tells
+      them apart, so this refuses rather than choosing.
+    * **one** -- aimable; the press is the selector that counted it.
 
-    THIS FUNCTION NEVER SEES THE NEEDLE, which is not an accident of the
-    signature -- it is the signature doing the work. Its inputs are three
-    integers and its ``why`` strings are built from counts, so there is no
-    branch on which a person's name could reach the text a caller reads,
-    stores or logs. The needle lives in :func:`dom.read_invitation_surface`'s
-    argument list and nowhere downstream of it.
-
-    AN INDEX IS NOT A PROMISE. It describes the list AS READ. Anything that
-    would act on it must re-resolve it against the page immediately before
-    acting, because a rail that re-renders between a preview and a
-    confirmation renumbers everything on it. Nothing acts on it today.
+    THE WHY STRINGS CARRY COUNTS AND NEVER THE LINK: a refusal is printed where
+    his argument is not, and a link names a person.
     """
-    matches = reading.get("matches")
     controls = coerce.as_count(reading.get("controls"))
-    if matches is None:
-        return (
-            INVITE_UNASKED,
-            f"{controls} invitation control(s) are drawn and no needle was "
-            "given, so none of them was picked out. A count is not an aim.",
-            None,
-        )
-    # A MALFORMED COUNT REFUSES, AND SAYS WHAT KIND OF THING IT WAS. ``int()``
-    # here quoted the value it refused inside a ValueError, and this reading is
-    # ``page.evaluate`` output -- the page's own script chose it. Treating it
-    # as zero would print "a count of zero" about a reading that was not one.
-    count = coerce.as_int(matches)
-    if count is None:
-        return (
-            INVITE_AMBIGUOUS,
-            f"the reader's match count for {controls} invitation control(s) "
-            f"was a {type(matches).__name__}, not a number, so nothing can be "
-            "aimed; the value is not repeated here.",
-            None,
-        )
-    matches = count
-    if matches < 1:
+    matches = coerce.as_int(reading.get("matches"))
+    if matches is None or matches < 1:
+        member_id = bool(named_profile.MEMBER_ID.fullmatch(str(segment or "")))
         return (
             INVITE_NO_MATCH,
-            f"none of the {controls} invitation control(s) on this surface "
-            "carries the word given. The comparison ran inside the page and "
-            "what came back was a count of zero -- no label was read here, so "
-            "this cannot say who IS drawn, only that nobody matched.",
-            None,
+            f"none of the {controls} invitation control(s) on your profile's "
+            "suggestion rail sits in a card linking to the profile you gave. "
+            + (
+                "You gave a MEMBER ID, and the rail's cards carry each person's "
+                "VANITY link -- measured on 32 of 32 rail controls across the "
+                "captures of your own profile, none carrying an id -- so an id "
+                "matches no card here. "
+                if member_id
+                else "The rail draws whom LinkedIn chooses, and that person is "
+                "not on it right now. "
+            )
+            + "linkedin_connect_from_profile reaches the person on their own "
+            "profile, by link or member id.",
         )
     if matches > 1:
         return (
             INVITE_AMBIGUOUS,
-            f"{matches} of the {controls} invitation control(s) match, and "
-            "that is a refusal rather than a shortlist. Nothing here "
-            "distinguishes them, so choosing one would be choosing by "
-            "position -- which is how an invitation reaches somebody who was "
-            "merely drawn first. Narrow the word until exactly one matches.",
-            None,
-        )
-    position = coerce.as_int(reading.get("index"))
-    if position is None:
-        # UNREACHABLE FROM THE SCRIPT, and kept because a check that cannot
-        # fail certifies nothing while THIS one can: it fires if the reader
-        # ever reports a single match without a position -- a partial read, a
-        # hand-built dict, a future reader that forgets the field. The safe
-        # answer to "one match, no index" is the ambiguous refusal, never a
-        # guess at 0.
-        return (
-            INVITE_AMBIGUOUS,
-            "exactly one control matched and the reader returned no usable "
-            "position for it -- none at all, or something that is not a "
-            "number, which is not repeated here. That combination should not "
-            "occur, and an aim cannot be invented from a missing index, so "
-            "this refuses.",
-            None,
+            f"AMBIGUOUS: {matches} of the {controls} invitation control(s) sit "
+            "in cards linking to the profile you gave, and nothing tells them "
+            "apart. That is a refusal rather than a choice: choosing either "
+            "would be choosing by position.",
         )
     return (
         INVITE_AIMED,
-        f"exactly 1 of the {controls} invitation control(s) matches, at "
-        f"position {position} in the suffix-matched list. The match was made "
-        "inside the page; no label crossed into this process.",
-        position,
+        f"exactly 1 of the {controls} invitation control(s) on your profile's "
+        "suggestion rail sits in the card of the profile you gave: that card "
+        "links to that profile and to nobody else, and holds that one control. "
+        "The comparison ran in the page and came back as a count.",
     )
 
 
 async def _read_profile_invitations(
     page: Any, spec: WriteSpec, *, target: str = ""
 ) -> tuple[dict[str, Any], str, str]:
-    """Which ONE invitation control his needle picks out, or why none.
+    """Which ONE invitation control is the card of the profile he linked.
 
-    A COUNT ONLY UNTIL 2026-08-31, and the needle never reached it: ``observe``
-    handed its readers no target, so ``aim_invitation`` -- the matcher this
-    whole capability is built around -- had no caller in this package at all.
-    It aims now, and the aim is three integers.
+    A COUNT ONLY UNTIL 2026-08-31, then a NEEDLE -- his word for the person,
+    compared against the controls' labels -- and since 2026-09-27 (lane L5,
+    the orchestrator's order of 23:36) the person's PROFILE LINK, compared
+    against each rail card's own link. What comes back is counts, whichever
+    it is.
 
     THE LABEL IS NOT READ HERE, and that is structural rather than tidy. This
     reader's answer becomes ``Observation.facts``, and an Observation is
     RETAINED on the grant -- so anything it returns is held for the life of
-    that grant. The one label the operator's ruling admits is read by
-    :func:`preview` instead, off the page this call already opened, and it
-    reaches the confirm block and nothing else.
+    that grant. The one label the preview prints is read by
+    :func:`_name_the_invitation_recipient` instead, off the page this call
+    already opened, into the confirm block and nothing else.
     """
-    reading = await dom.read_invitation_surface(page, target or None)
+    segment = named_profile.profile_segment(target) if target else ""
+    reading = await dom.read_invitation_rail(page, segment or None)
     controls = coerce.as_count(reading.get("controls"))
-    # THE LABEL KEY IS DROPPED BEFORE THE FACTS ARE BUILT, not merely left
-    # unset. This reader is never asked to reveal one, so the key is always
-    # None here -- and popping it means a future edit that flips the default
-    # cannot leak through this path without also changing this line.
-    facts = {key: value for key, value in reading.items() if key != "label"}
+    facts = {key: reading.get(key) for key in ("controls", "matches", "error")}
     if controls < 1:
         return (
             facts,
@@ -5048,32 +5042,16 @@ async def _read_profile_invitations(
             "that carries them is a suggestion rail and need not be drawn, so "
             "this is unknown rather than zero.",
         )
-    aim, aim_why, index = aim_invitation(reading)
+    aim, aim_why = aim_invitation_by_link(reading, segment)
     facts["aim"] = aim
-    facts["aim_index"] = index
     if aim != INVITE_AIMED:
-        # NOT AIMABLE IS NOT A STATE THIS ACTION IS VALID FROM. Zero matches
-        # and two-or-more are different failures and ``aim_why`` says which;
-        # both come back UNKNOWN, so ``_direction`` refuses to render a gate
-        # rather than rendering one aimed at nobody in particular.
-        return (
-            facts,
-            UNKNOWN,
-            f"{controls} invitation control(s) are on HIS OWN PROFILE -- a "
-            "page this server already loads, carrying no pending-invitation "
-            f"counter -- and the aim did not settle. {aim_why} The comparison "
-            "ran INSIDE the page and no label crossed into this process, "
-            "which is why this can say how many matched and not who they are.",
-        )
+        return (facts, UNKNOWN, aim_why)
     return (
         facts,
         "invite_control_present",
-        f"exactly one of {controls} invitation control(s) on HIS OWN PROFILE "
-        f"carries the word given, at position {index} in the suffix-matched "
-        "list. That page is one this server already loads and it carries no "
-        "pending-invitation counter, so this route costs no badge -- which is "
-        "the finding /mynetwork/ was refused for. The match was made inside "
-        "the page and no label crossed into this reader.",
+        aim_why + " That page is one this server already loads and it carries "
+        "no pending-invitation counter, so this route costs no badge -- which "
+        "is the finding /mynetwork/ was refused for.",
     )
 
 
@@ -5589,7 +5567,8 @@ async def observe(
         #
         # ``aim_invitation`` -- the needle matcher the previous wave built,
         # with its exactly-one rule, its ambiguous refusal and its
-        # three-integer return -- HAD NO CALLER IN THIS PACKAGE. Only tests
+        # three-integer return (retired 2026-09-27 for the link aim,
+        # ``aim_invitation_by_link``) -- HAD NO CALLER IN THIS PACKAGE. Only tests
         # called it. ``_read_profile_invitations`` counted controls and never
         # saw a needle, because this line handed the reader no target, so the
         # aiming this design is built around had never run against a page.
@@ -6144,80 +6123,69 @@ async def _name_the_invitation_recipient(
     """Print WHO one invitation would reach, in the confirm block and nowhere
     else. Returns the block to hand back.
 
-    THE PROBLEM THIS SOLVES, and it is the one that kept ``send_invitation``
-    refusing after every boundary question had been answered. The aiming is
-    safe precisely BECAUSE no label enters this process -- the needle goes
-    into the page, three integers come back. So the block could say "exactly
-    one of nine controls carries the word you gave, at position 3" and could
-    not say WHO. Every other action here names its target in terms he can
-    check: a job title and an employer, a company name, his own name and
-    headline. A gate that fires an irreversible, third-party-visible act while
-    unable to say who receives it is a confirm prompt with the important word
-    missing.
+    WHY IT EXISTS. The aim is a comparison in the page that comes back as a
+    count, so without this the block could say "exactly one card on your rail
+    links to the profile you gave" and could not say WHO -- a confirm prompt
+    for an irreversible, third-party-visible act with the important word
+    missing. PREVIEW-NAMES-THE-RESOLVED-TARGET: the preview names whom it
+    resolved, in a people record, and a receipt carries only his target.
 
-    THE RULING, 2026-08-31, and the distinction it turns on. Loading a
-    stranger's PROFILE stays refused because it EMITS -- ``who_viewed_me``
-    reads the receiving end of exactly that signal, so the cost lands on
-    somebody who did not agree to it. Reading one accessible name off a page
-    already rendered on HIS OWN profile emits NOTHING: nobody is notified, no
-    record is created, the person is not made aware. And he already knows the
-    name, because he supplied the needle -- so this CONFIRMS that the control
-    his own word selected is the person he meant, which is verification of his
-    input rather than collection of somebody's identity.
+    READ OFF HIS OWN PROFILE, and that emits nothing (the ruling of
+    2026-08-31): the rail is already rendered on his page; nobody is notified,
+    no record is created. The label is the ONE control the link aim selected
+    -- ``"Invite <name> to connect"`` -- read through the very selector the
+    gate counted, and the record's link is HIS link, not the page's.
 
     WHERE IT GOES AND WHERE IT MUST NOT, by construction and not by care:
 
-    * INTO the returned block, as prose he reads.
-    * NOT into ``grant.preview`` -- assigned above, before this runs, so the
-      retained object never held it.
-    * NOT into ``grant.target``, which stays HIS OWN NEEDLE. That is the
-      guarantee this design declined to trade away and it is untouched.
-    * NOT into the ``Observation`` -- which is why
-      ``_read_profile_invitations`` does not read the label at all: its answer
-      becomes ``observation.facts`` and an Observation is retained on a grant.
-      This reads it separately, here.
-    * NOT into ``consume``'s mismatch message, which interpolates targets.
-    * NOT into a log line: ``dom.read_invitation_surface`` deliberately does
-      not stringify its own exceptions, for exactly this reason.
+    * INTO the returned block, as a people record he reads.
+    * NOT into ``grant.preview`` -- assigned before this runs, so the retained
+      object never held it -- and NOT into ``grant.target``, which is his link.
+    * NOT into the ``Observation``: :func:`_read_profile_invitations` reads
+      counts only, because an Observation is retained on a grant.
+    * NOT into a log line: a failure here is logged by its TYPE.
 
-    NO SECOND PAGE LOAD. ``observe`` has just loaded his profile and left the
-    page on it. THAT IS CHECKED RATHER THAN ASSUMED, and the check is about
-    the RAIL rather than the url: this re-read must find the same number of
-    invitation controls the observation recorded, and the needle must still
-    pick out exactly one. A url comparison would have been the obvious guard
-    and it is the weaker one -- a page can be re-rendered at the same address,
-    and the thing that matters is whether the control the name is read off is
-    the control the aim was taken on.
+    NO SECOND PAGE LOAD, and the page is CHECKED rather than assumed: the
+    re-read must find the same number of invitation controls the observation
+    recorded, and the link must still select exactly one.
+
+    UNTIL 2026-09-27 (lane L5, the orchestrator's order of 23:36) the control
+    was the one HIS WORD selected -- a name compared against labels -- and the
+    label was revealed by the script that compared it. The word is gone; the
+    aim is his link, and nothing here compares a name.
     """
     if spec.action != "send_invitation":
         return block
-    reading = await dom.read_invitation_surface(
-        page, observation.target, reveal_single_match=True
-    )
-    # THE SAME RAIL, STILL AIMING AT ONE. Either half failing means the page
-    # is not the one the observation describes, and a name read off some other
-    # page is a name nobody's needle selected.
-    if coerce.as_count(reading.get("controls")) != (
-        coerce.as_count((observation.facts or {}).get("controls")) or -1
-    ):
+    try:
+        segment = named_profile.profile_segment(observation.target)
+        reading = await dom.read_invitation_rail(page, segment)
+        # THE SAME RAIL, STILL AIMING AT ONE. Either half failing means the
+        # page is not the one the observation describes, and a name read off
+        # some other page is a name his link did not select.
+        if coerce.as_count(reading.get("controls")) != (
+            coerce.as_count((observation.facts or {}).get("controls")) or -1
+        ):
+            return block
+        if coerce.as_int(reading.get("matches")) != 1:
+            return block
+        label = await page.locator(dom.rail_invite_control_selector(segment)).first.get_attribute(
+            "aria-label"
+        )
+    except Exception as exc:  # noqa: BLE001 - a read for a human, never raised
+        logger.debug("invitation label unreadable: %s", type(exc).__name__)
         return block
-    if coerce.as_count(reading.get("matches")) != 1:
+    if not isinstance(label, str) or not label.strip():
         return block
-    label = reading.get("label")
-    if not isinstance(label, str) or not label:
-        return block
-    # THE PERSON THE LABEL NAMES, AS A PEOPLE RECORD (2026-09-27,
-    # PREVIEW-NAMES-THE-RESOLVED-TARGET): the control reads "Invite <name> to
-    # connect", and the record holds the name -- sanitised, capped and marked
-    # as another member's words -- or the whole label if it is drawn otherwise.
+    # THE PERSON THE LABEL NAMES, AS A PEOPLE RECORD: the control reads
+    # "Invite <name> to connect", and the record holds the name -- sanitised,
+    # capped and marked as another member's words -- or the whole label if it
+    # is drawn otherwise. The headline is ABSENT: the rail card's headline has
+    # never been captured, so it is not read.
     name = label.strip()
     prefix, suffix = "Invite ", dom.INVITE_CONTROL_SUFFIX
     if name.startswith(prefix) and name.endswith(suffix) and len(name) > len(prefix + suffix):
         name = name[len(prefix):-len(suffix)]
-    # BUILT BY ``people_seam.person`` (lane L5's merge of master 52b55b6), the
-    # one builder every preview that names a person goes through: the control
-    # draws no headline, so the record's is ABSENT (None), never "".
-    person = people_seam.person(name=name)
+    person = people_seam.person(name=name, href=observation.target)
     if person is None:
         return block
     # A NEW DICT. The one on the grant is not touched, and this adds
@@ -6225,16 +6193,16 @@ async def _name_the_invitation_recipient(
     out = dict(block)
     out["who_this_would_reach"] = person
     out["who_this_would_reach_check"] = (
-        "who_this_would_reach is the person LinkedIn labels on the ONE control "
-        "your word selected. That is read off your own profile, where it was "
-        "already rendered -- nobody is notified, no record is created, and this "
-        "server keeps no copy of it: it is returned here for you to check and "
-        "is in no grant, no log and no file. CHECK IT. Your word picked this "
-        "control out uniquely, and a word that uniquely picks out the WRONG "
-        "person is the one failure this gate cannot catch for you."
+        "who_this_would_reach is the person LinkedIn labels on the ONE "
+        "invitation control whose card on your profile's suggestion rail links "
+        "to the profile you gave, and to nobody else. It is read off your own "
+        "profile, where it was already rendered -- nobody is notified, no "
+        "record is created, and this server keeps no copy: it is returned here "
+        "for you to check and is in no grant, no log and no file. CHECK IT: a "
+        "link to the WRONG person is the one failure this gate cannot catch "
+        "for you."
     )
     return out
-
 
 # ---------------------------------------------------------------------------
 # 7. The click
@@ -7075,9 +7043,12 @@ _NINE_REFUSALS: dict[str, str] = {
     #
     # THE AIM CLOSED. It refused because the label is another person's NAME,
     # which this server will not read, so the measurable suffix selected all
-    # nine controls. ``aim_invitation`` now resolves HIS OWN needle to exactly
-    # one control, with the comparison run inside the page, and refuses two
-    # matches rather than shortlisting them.
+    # nine controls. ``aim_invitation`` then resolved HIS OWN needle to exactly
+    # one control, with the comparison run inside the page, and refused two
+    # matches rather than shortlisting them. SINCE 2026-09-27 the aim is the
+    # person's profile LINK, compared against each rail card's own link --
+    # still in the page, still exactly one or refuse -- and no name is
+    # compared at all (lane L5, the orchestrator's order of 23:36).
     #
     # THE VERIFICATION DID NOT CLOSE. It was RULED ON instead: nothing this
     # server may read can confirm a sent invitation, and that is now a
@@ -7261,6 +7232,9 @@ _WRITE_SURFACE_FOR_ACTION: dict[str, str] = {
     # A group id is a kind no other action uses; named per action anyway, so
     # the auth-wall message names the page the click was going to land on.
     "withdraw_from_group": "groups",
+    # 2026-09-27: addressed by a person's link, acting on HIS OWN profile's
+    # suggestion rail -- the page the press lands on, not the linked one.
+    "send_invitation": "your own profile's suggestion rail",
 }
 
 
@@ -8511,29 +8485,28 @@ async def _live_control(
         )
 
     if spec.action == "send_invitation":
-        # THE NEEDLE IS HANDED STRAIGHT INTO THE PAGE and the comparison
-        # happens there. That is what makes "the label is never stored"
-        # ENFORCEABLE rather than promised: a name that reaches Python can
-        # reach a traceback, a log line or a cache key, and no care downstream
-        # un-rings that. See dom.INVITE_NEEDLE_JS.
-        #
-        # reveal_single_match is NOT asked for here. The label is revealed
-        # only in the preview, by _name_the_invitation_recipient, into a dict
-        # built AFTER grant.preview is assigned -- so the grant provably never
-        # held it. Asking for it again at click time would put it in this
-        # function's scope for no purpose, and the purpose is the whole test.
-        reading = await dom.read_invitation_surface(page, grant.target)
-        verdict, why, index = aim_invitation(reading)
-        if verdict != INVITE_AIMED or index is None:
-            # THE NEEDLE IS NOT IN ``why`` and must never be: aim_invitation
-            # builds these sentences out of COUNTS. Asserted by
-            # tests/test_needle_never_escapes.py, shown failing at a mutation
-            # that interpolates it.
+        # THE LINK AIM, RE-TAKEN ON THE PAGE ABOUT TO BE PRESSED (2026-09-27,
+        # lane L5): the card linking to his profile, and to nobody else, holding
+        # one invitation control -- counted in the page by the selector below,
+        # which is then the press, strictly (STRICT_PRESS_ACTIONS). No label
+        # is read here: the label is the preview's alone. Until 2026-09-27 this
+        # was his WORD compared against labels, and the press a position.
+        segment = named_profile.profile_segment(grant.target)
+        reading = await dom.read_invitation_rail(page, segment)
+        if coerce.as_count(reading.get("controls")) < 1:
+            return (
+                UNKNOWN,
+                "no invitation control rendered on the page about to be "
+                "pressed; the rail need not be drawn, so nothing is pressed.",
+                "",
+            )
+        verdict, why = aim_invitation_by_link(reading, segment)
+        if verdict != INVITE_AIMED:
             return (UNKNOWN, why, "")
         return (
             "invite_control_present",
             why,
-            dom.invite_control_selector(index),
+            dom.rail_invite_control_selector(segment),
         )
 
     if spec.action == "react_to_item":

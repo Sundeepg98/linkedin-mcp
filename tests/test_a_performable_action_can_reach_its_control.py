@@ -122,7 +122,12 @@ _TARGETS: dict[str, object] = {
     "company_id": "1234567",
     "group_id": "10001",
     "item_urn": _ACTIVITY_URN,
-    "member": "a needle nobody is",
+    # ``send_invitation``'s since 2026-09-27: the person's profile LINK, which
+    # the rail card's own link is compared against. It replaced the
+    # ``member`` row -- a needle, his word for a person -- when that action
+    # stopped being aimed by a name (lane L5, the orchestrator's order of
+    # 23:36). The segment carries a declared synthetic slug token.
+    "rail_profile": "https://www.linkedin.com/in/someone-shape-example/",
     "post_text": "some text",
     "item_and_text": {"item": _ACTIVITY_URN, "text": "some text"},
     "field_and_value": {"field": "City", "value": "somewhere"},

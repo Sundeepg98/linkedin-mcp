@@ -78,7 +78,11 @@ from linkedin_server import writes
 SYNTHETIC_RAW_TARGETS: dict[str, Any] = {
     "job_id": "4600000042",
     "company_id": "9900000001",
-    "member": "example-harness-member",
+    # ``send_invitation``'s, since 2026-09-27: a person's profile LINK, compared
+    # against the rail cards' own links. It replaced the ``member`` row -- his
+    # word for a person, a name -- when that action stopped being aimed by
+    # one. A link, because a bare word is refused by ``_target_for``.
+    "rail_profile": "https://www.linkedin.com/in/example-harness-person/",
     "item_urn": "example-harness-item",
     "self": "self",
     # A NUMERIC GROUP ID (``withdraw_from_group``, 2026-09-24). Five digits, under the

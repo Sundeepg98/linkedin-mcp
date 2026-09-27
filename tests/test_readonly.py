@@ -666,7 +666,7 @@ def test_only_dom_module_waives_evaluate():
     # numbers -- total, matches, index -- and no label, no name, and no
     # fragment of either. The cheap side of the usual trade is the unacceptable
     # one here, which is the argument, and it is the only reason this number
-    # moved.
+    # moved. (RETIRED 2026-09-27 with the needle: see the last paragraph.)
     #
     # EIGHT FROM 2026-08-31, and it is the SECOND waiver spent on privacy
     # rather than on a reading -- EDITOR_FIELDS_JS, run by
@@ -931,7 +931,15 @@ def test_only_dom_module_waives_evaluate():
     # name. Compared in the page, what crosses is integers, booleans, a
     # POSITION and closed tokens -- INVITE_NEEDLE_JS's argument, on the page
     # where it matters most.
-    assert waived_in.get("dom.py", 0) <= 23, waived_in
+    #
+    # 23 -> 22 on 2026-09-27 (lane L5, the orchestrator's order of 23:36):
+    # INVITE_NEEDLE_JS LEFT, with the needle. The invitation is aimed by the
+    # person's profile LINK now, compared against each rail card's own link by
+    # the browser's XPath engine -- a LOCATOR COUNT, which runs no script at
+    # all, so the privacy argument that bought the seventh waiver is kept by a
+    # cheaper instrument. THE CEILING COMES DOWN WITH IT: a ceiling left above
+    # the count is a waiver nobody has to argue for.
+    assert waived_in.get("dom.py", 0) <= 22, waived_in
 
 
 # ---------------------------------------------------------------------------
@@ -1026,18 +1034,12 @@ INJECTED_SCRIPTS = {
     # hit count and nothing else; there is no path by which a payload string
     # reaches this process.
     "SDUI_ACTIONS_JS": dom.SDUI_ACTIONS_JS,
-    # 2026-08-31. The invitation needle. It is declared here for the ordinary
-    # reason -- every script this package executes is scanned, and one that is
-    # not declared is one nobody reviewed -- and declaring it ENROLS it in
-    # test_every_script_this_package_executes_cannot_mutate, which is the
-    # point of the list rather than a side effect of joining it.
-    #
-    # It is also the only script here whose OUTPUT shape is part of the
-    # boundary rather than only its input. It reads aria-labels carrying real
-    # people's names and returns three integers, so the privacy property is
-    # structural: there is no string in the return value to leak. The test that
-    # certifies THAT lives with the reader, not here.
-    "INVITE_NEEDLE_JS": dom.INVITE_NEEDLE_JS,
+    # (2026-08-31 to 2026-09-27: INVITE_NEEDLE_JS, the invitation needle. It
+    # read aria-labels carrying real people's names and returned three
+    # integers. It left with the needle on lane L5's order of 2026-09-27
+    # 23:36: the invitation is aimed by the person's profile link, compared
+    # by an XPath locator count -- no script -- in
+    # dom.rail_invite_control_selector and dom.read_invitation_rail.)
     # 2026-08-31. The self-owned editor reader. Declared for the ordinary
     # reason -- an undeclared script is one nobody reviewed -- and declaring it
     # ENROLS it in test_every_script_this_package_executes_cannot_mutate.
@@ -1435,7 +1437,13 @@ def test_the_scripts_executed_are_exactly_the_ones_declared():
     # INJECTED_SCRIPTS in the same change and run from exactly one call site,
     # dom.read_named_profile -- a dom.py waived read, so the waiver budget
     # moved 22 -> 23 with it and the two counts stay one apart.
-    assert len(EXECUTED_SCRIPTS) == 24, sorted(EXECUTED_SCRIPTS)
+    #
+    # 24 -> 23 the same day, later (lane L5, the orchestrator's order of
+    # 23:36): INVITE_NEEDLE_JS left with the needle, and its one call site,
+    # dom.read_invitation_surface, with it. The invitation's aim is a locator
+    # count now. The waiver budget came down 23 -> 22 in the same change, so
+    # the two counts stay one apart.
+    assert len(EXECUTED_SCRIPTS) == 23, sorted(EXECUTED_SCRIPTS)
 
 
 def test_a_script_that_replaces_page_behaviour_runs_only_from_a_sanctioned_evaluate():

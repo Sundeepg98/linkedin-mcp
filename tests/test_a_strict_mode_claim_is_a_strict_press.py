@@ -49,9 +49,16 @@ PACKAGE = Path(writes.__file__).resolve().parent
 WRITES = Path(writes.__file__)
 
 #: THE SET, BY NAME. Seven since lane L5's merge of master 52b55b6; its
-#: comment in writes.py gives each member's measurement.
+#: comment in writes.py gives each member's measurement. EIGHT since lane
+#: L5's order of 2026-09-27 23:36: ``send_invitation``, pressed by the
+#: selector its link aim counted (``dom.rail_invite_control_selector``) --
+#: which matched exactly one element for each of the 44 invitation buttons in
+#: the captures, 32 of them on his own profile's rail -- and shown stopping a
+#: second card drawn mid-press in
+#: ``tests/test_an_invitation_is_aimed_by_a_link.py``.
 PINNED_STRICT_PRESS_ACTIONS = frozenset(
     {
+        "send_invitation",
         "connect_from_profile",
         "message_from_profile",
         "mark_company_interest",

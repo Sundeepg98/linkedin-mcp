@@ -4659,9 +4659,10 @@ async def read_self_owned_editor_fields(
 #   Publishing ``value`` here would answer a different question in the same
 #   slot, which is how a caller ends up restoring the wrong thing.
 #
-# Withheld IN THE PAGE, for the reason ``INVITE_NEEDLE_JS`` does its
-# comparison there: a string that reaches this process can reach a traceback
-# or a log line, and no care downstream un-rings that.
+# Withheld IN THE PAGE, for the reason ``INVITE_NEEDLE_JS`` did its
+# comparison there (retired 2026-09-27 with the needle): a string that reaches
+# this process can reach a traceback or a log line, and no care downstream
+# un-rings that.
 #
 # TEN FIELDS PER CONTROL, enumerated rather than summarised for the reason the
 # label reader's ten are -- this module has dropped a field by describing a
@@ -5102,7 +5103,8 @@ async def read_self_owned_editor_values(
 #
 # NO NAME AND NO HEADING TEXT LEAVES THE PAGE. The C3 comparison happens
 # INSIDE the document and only booleans come out -- the same discipline
-# :data:`INVITE_NEEDLE_JS` keeps, and for the same reason: a string that
+# ``INVITE_NEEDLE_JS`` kept until it retired on 2026-09-27, and for the same
+# reason: a string that
 # reaches Python can reach a traceback, a cache key or a log line. The author
 # string and the ``h1`` text are read, compared and discarded in the page;
 # neither is in this script's return value, and there is nothing for the
@@ -5863,21 +5865,22 @@ async def read_own_activity_items(
 # now and here is what was there" is a different artefact from "somebody
 # looked once in August", and the second is what goes stale silently.
 #
-# WHY ALMOST NO ``page.evaluate`` BELOW, AND WHY EXACTLY ONE. This comment
-# read "WHY NO ``page.evaluate`` ANYWHERE BELOW" until 2026-08-31 and it is
-# quoted rather than deleted, because the trade it describes is still the
-# right one for six of these seven readers: an injected script has to be
-# declared in ``test_readonly.py``'s ``INJECTED_SCRIPTS`` and put through the
-# JS mutation scanner, and a locator chain injects nothing.
+# WHY NO ``page.evaluate`` BELOW -- AGAIN, SINCE 2026-09-27. This comment
+# read "WHY NO ``page.evaluate`` ANYWHERE BELOW" until 2026-08-31, then "WHY
+# ALMOST NO ``page.evaluate`` BELOW, AND WHY EXACTLY ONE", and it is quoted
+# rather than deleted, because the trade it describes is the right one for all
+# seven of these readers again: an injected script has to be declared in
+# ``test_readonly.py``'s ``INJECTED_SCRIPTS`` and put through the JS mutation
+# scanner, and a locator chain injects nothing.
 #
-# ``INVITE_NEEDLE_JS`` is the exception and it BUYS something the other six do
-# not need. Their readers count controls; this one has to COMPARE a label
-# against a needle, and the label is a third party's name. A locator chain
-# doing that comparison in Python would have to fetch the label into this
-# process first, which is the exact thing the ruling on this capability
-# forbids -- so here the cheap side of the trade is the unacceptable one. The
-# script pays a boundary declaration in order to keep a name out of Python
-# entirely. See the constant for what it returns, which is three numbers.
+# ``INVITE_NEEDLE_JS`` WAS the exception, from 2026-08-31 to 2026-09-27, and it
+# bought something the other six did not need: its reader had to COMPARE a
+# label against a needle, and the label is a third party's name, so a locator
+# chain doing that comparison in Python would have fetched the label into this
+# process first. The needle left on lane L5's order of 2026-09-27 23:36 -- the
+# invitation is aimed by the person's profile LINK -- and a link comparison is
+# one an XPath locator makes in the page and answers with a COUNT
+# (:func:`rail_invite_control_selector`), so the exception left with it.
 
 #: The feed composer's entry control. MEASURED on ``/feed/`` 2026-08-30 as
 #: ``shape "Start a post", tag div, role button, name_source text,
@@ -7650,105 +7653,84 @@ INVITE_CONTROL_SUFFIX = " to connect"
 INVITE_CONTROL = 'button[aria-label$=" to connect"]'
 
 
-def invite_control_selector(index: int) -> str:
-    """A selector for ONE of the invitation controls, by its position.
+#: THE RAIL'S CARD, AIMED BY THE CALLER'S OWN LINK -- 2026-09-27, lane L5, on
+#: the orchestrator's order of 23:36 (PEOPLE-DATA-MITIGATIONS, mitigation 6: an
+#: outward act fires at the exact member the operator names, by link or id).
+#:
+#: UNTIL THEN THIS WAS AIMED BY A NAME, and the design around it was careful
+#: about the wrong thing. ``INVITE_NEEDLE_JS`` took HIS WORD for the person,
+#: compared it inside the page against every invitation control's label --
+#: which IS that person's name -- and returned a position, so no name crossed
+#: into Python; ``invite_control_selector(index)`` then pressed that position.
+#: The name never leaked. But the name was the AIM, and once people search
+#: returns names a name read off a page can reach a write's argument. Both are
+#: gone, with ``read_invitation_surface``, and nothing in this package compares
+#: a name to choose what to press.
+#:
+#: WHAT IS COMPARED NOW IS THE CARD'S OWN LINK, and it is compared by the
+#: browser: the selector below is XPath, evaluated in the page, and what crosses
+#: back is a COUNT. MEASURED 2026-09-27 over every capture on disk (95, offline,
+#: counts and shapes only): the 32 invitation controls on his own profile's
+#: suggestion rail each sit in a card -- the nearest ancestor holding any
+#: ``/in/`` link -- that holds EXACTLY ONE member segment and EXACTLY ONE
+#: invitation control, and that link's own text names the person the control
+#: names. The rail's links are VANITY segments on all 32: none carries a member
+#: id, so a member id matches no card here, and the gate says so.
+#:
+#: THE PRESS USES THE SELECTOR THE GATE COUNTED, strictly
+#: (``writes.STRICT_PRESS_ACTIONS``), so a second match drawn between the
+#: reading and the press stops the press rather than choosing.
+_RAIL_SEGMENT = re.compile(r"^[A-Za-z0-9_%\-]{1,200}$")
+_ASCII_LOWER = str.maketrans("ABCDEFGHIJKLMNOPQRSTUVWXYZ", "abcdefghijklmnopqrstuvwxyz")
+#: An invitation control as MEASURED: a button labelled "Invite <X> to connect".
+_XPATH_INVITE_BUTTON = (
+    "button[starts-with(@aria-label, 'Invite ')]"
+    "[substring(@aria-label, string-length(@aria-label) - "
+    + str(len(INVITE_CONTROL_SUFFIX) - 1)
+    + ") = '"
+    + INVITE_CONTROL_SUFFIX
+    + "']"
+)
+_XPATH_MEMBER_LINK = "contains(@href, '/in/')"
+#: The ONE path segment after ``/in/`` -- stopped at the next ``/``, ``?`` or
+#: ``#`` -- with ASCII case folded, because vanity segments are case-insensitive
+#: on LinkedIn (``named_profile.landed_on_profile`` folds the same way).
+_XPATH_LINK_SEGMENT = (
+    "translate(substring-before(concat(substring-before(concat(substring-before("
+    "concat(substring-after(@href, '/in/'), '/'), '/'), '?'), '?'), '#'), '#'), "
+    "'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz')"
+)
 
-    GUARDED, like every other selector builder here that takes an argument.
-    ``index`` must be a real, non-negative ``int`` -- a bool is refused too,
-    because ``True`` is ``1`` in Python and a boolean arriving here means a
-    caller passed the wrong thing entirely.
 
-    POSITION, AND WHY THAT IS NOT "PICKING BY POSITION". This package refuses
-    to aim a write by position, and this selector is an index -- so the
-    distinction has to be exact. The index is not CHOSEN; it is the output of
-    :func:`writes.aim_invitation`, which returns one ONLY when the operator's
-    own needle matched exactly one control on the surface. Two matches erase
-    it rather than picking the first. So the position is a way of ADDRESSING
-    a control his word already selected, not a way of selecting one.
+def rail_invite_control_selector(segment: str) -> str:
+    """THE invitation control whose card is the profile the caller linked.
 
-    THE ANCHOR IS THE SUFFIX, NOT A NAME. These controls are labelled with
-    another person's name plus :data:`INVITE_CONTROL_SUFFIX`, and this server
-    does not read those names. Anchoring on the suffix keeps the selector free
-    of any third-party identity while still restricting it to controls that
-    are demonstrably invitations.
+    The button whose NEAREST ancestor holding any ``/in/`` link (its card)
+    holds a link to ``segment``, no link to any other segment, and exactly ONE
+    invitation control. Nothing in it is a name or a position: it is built from
+    constants and the caller's own segment, and the page supplies nothing.
+
+    GUARDED, like every builder here that takes an argument. ``segment`` is the
+    output of ``named_profile.profile_segment`` -- letters, digits, hyphens,
+    underscores and percent-encoded octets -- and anything else is refused
+    here, so no quote or bracket can reach the expression. It is ASCII-folded
+    exactly as the page side is.
     """
-    if isinstance(index, bool) or not isinstance(index, int) or index < 0:
+    text = str(segment or "")
+    if not _RAIL_SEGMENT.fullmatch(text):
         raise ValueError(
-            "invite_control_selector needs a non-negative int index; a click "
+            "rail_invite_control_selector needs a profile segment -- letters, "
+            "digits, hyphens, underscores or percent-encoded octets; a press "
             "target is built from this string, so nothing else may reach it."
         )
-    return INVITE_CONTROL + " >> nth=" + str(index)
-
-#: AIMING ONE OF THOSE NINE, AND THE REASON THIS IS A SCRIPT RATHER THAN A
-#: LOCATOR CHAIN. Every other reader in the block below deliberately injects
-#: nothing; this one injects, and the trade runs the other way here for one
-#: reason: A NAME THAT REACHES PYTHON CANNOT BE TAKEN BACK. It can reach an
-#: exception message, a log line, a cache key, a traceback, a rendered confirm
-#: block -- and no care downstream un-rings that. So the comparison happens
-#: INSIDE THE PAGE, where the label already lives, and what crosses back is
-#: arithmetic.
-#:
-#: WHAT GOES IN is a needle THE OPERATOR TYPED at call time, handed over as a
-#: script ARGUMENT rather than spliced into source -- so the script is a
-#: constant that ``test_readonly.py`` can read whole, and no caller string ever
-#: becomes executable text.
-#:
-#: WHAT COMES OUT IS THREE NUMBERS AND NOTHING ELSE: how many controls wear the
-#: suffix, how many of those contain the needle, and -- only when that is
-#: exactly one -- which position in the suffix-matched list it sits at. No
-#: label, no fragment of one, no href, not even truncated. The prefix of these
-#: labels has never been read by this server and is not read here either: the
-#: suffix is matched AS A SUFFIX with ``endsWith``, never by rebuilding a whole
-#: label from a prefix nobody has seen.
-#:
-#: ``index`` IS ``null`` AND NOT ``-1`` when there is no aim, deliberately. A
-#: sentinel integer is an index, and ``-1`` handed to Playwright's ``nth``
-#: means THE LAST CONTROL -- so the sentinel for "do not aim" would aim, at a
-#: stranger, which is the one failure this whole reader exists to prevent.
-INVITE_NEEDLE_JS = """
-(cfg) => {
-  const needle = String(cfg.needle).toLowerCase();
-  const nodes = document.querySelectorAll(cfg.selector);
-  let total = 0;
-  let matches = 0;
-  let index = null;
-  let only = null;
-  for (const node of nodes) {
-    const label = node.getAttribute('aria-label') || '';
-    // MATCHED AS A SUFFIX, and re-checked here even though cfg.selector is
-    // itself a suffix selector. The two predicates are written in different
-    // languages over the same fact, so a CSS engine that ever matched more
-    // loosely than endsWith would be narrowed by this line rather than
-    // followed by it.
-    if (!label.endsWith(cfg.suffix)) continue;
-    const position = total;
-    total += 1;
-    if (label.toLowerCase().indexOf(needle) !== -1) {
-      matches += 1;
-      // The FIRST match records where it sits; a SECOND erases the aim rather
-      // than keeping either. Choosing between two would be choosing by
-      // position, which is what the caller is refused for doing.
-      index = (matches === 1) ? position : null;
-      // THE LABEL RIDES THE SAME RULE AS THE INDEX, and it is erased by a
-      // second match for the same reason: it exists only to let him CHECK
-      // that the control his own word selected is the person he meant, and
-      // there is nothing to check if the word picked out two people.
-      only = (matches === 1) ? label : null;
-    }
-  }
-  // GATED ON THE CALLER ASKING, ON TOP OF matches === 1. Two independent
-  // conditions rather than one, because this is the only line in this script
-  // that can emit a third party's name and a single condition is a single
-  // edit away from always being true.
-  const reveal = (cfg.revealSingleMatch === true) && (matches === 1);
-  return {
-    total: total,
-    matches: matches,
-    index: index,
-    label: reveal ? only : null
-  };
-}
-"""
+    wanted = text.translate(_ASCII_LOWER)
+    card = (
+        "ancestor::*[.//a[" + _XPATH_MEMBER_LINK + "]][1]"
+        "[.//a[" + _XPATH_MEMBER_LINK + " and " + _XPATH_LINK_SEGMENT + " = '" + wanted + "']]"
+        "[not(.//a[" + _XPATH_MEMBER_LINK + " and " + _XPATH_LINK_SEGMENT + " != '" + wanted + "'])]"
+        "[count(.//" + _XPATH_INVITE_BUTTON + ") = 1]"
+    )
+    return "xpath=//" + _XPATH_INVITE_BUTTON + "[" + card + "]"
 
 #: The profile editors, MEASURED as ordinary anchors on ``/in/me/``
 #: 2026-08-30 -- each a single ``<a href>`` with an aria-label, count 1.
@@ -8168,111 +8150,36 @@ async def read_profile_editor_surface(page: Any) -> dict[str, Any]:
     return out
 
 
-async def read_invitation_surface(
-    page: Any,
-    needle: Optional[str] = None,
-    *,
-    reveal_single_match: bool = False,
-) -> dict[str, Any]:
-    """How many invitation controls this page draws, and -- if asked -- which.
+async def read_invitation_rail(page: Any, segment: Optional[str] = None) -> dict[str, Any]:
+    """How many invitation controls the page draws, and how many sit in the
+    card of the profile the caller linked. COUNTS, AND NOTHING ELSE.
 
-    STILL NUMBERS AND NOTHING ELSE, WHICHEVER QUESTION IS ASKED. This control's
-    accessible name IS another person's name. A reader that returned the label
-    would be collecting third-party identity in order to populate a confirm
-    block, which is the cost this whole family of rulings refuses to pay. So
-    the label is never returned -- not shaped, not truncated, not dropped after
-    a peek in Python.
+    NO SCRIPT RUNS: both answers are locator counts -- the suffix selector,
+    and :func:`rail_invite_control_selector` evaluated by the browser's XPath
+    engine -- so no label, no link and no fragment of either crosses into
+    this process. The one label the preview prints is read separately, by
+    ``writes._name_the_invitation_recipient``, off the one control matched.
 
-    ``needle`` IS THE OPERATOR'S OWN WORD, NOT A STORED ONE. Ruled 2026-08-31:
-    this server may RECEIVE a person's identity per call and must not persist
-    it. That is why the needle is a parameter and not a field: it arrives, it
-    is handed into the page, and it leaves with the frame. It is not written
-    into the result, not into a log line, and not into any exception message
-    raised below.
+    * ``controls`` -- controls wearing :data:`INVITE_CONTROL_SUFFIX`.
+    * ``matches`` -- ``None`` when no segment was given, which is a different
+      answer from ``0``: zero means the question was put and no card on this
+      page is that profile's.
+    * ``error`` -- an exception's TYPE when the page could not be read.
 
-    WHY THE COMPARISON HAPPENS IN THE PAGE. It is what makes "never stored"
-    ENFORCEABLE rather than promised. Doing it in Python would require the
-    label here first, and a name that reaches this process can reach a
-    traceback, a cache key or a rendered block, where no downstream care
-    retrieves it. See :data:`INVITE_NEEDLE_JS`.
-
-    THE THREE FIELDS, and the difference between two of them is the whole
-    aiming rule:
-
-    * ``controls`` -- how many controls wear :data:`INVITE_CONTROL_SUFFIX`.
-    * ``matches`` -- ``None`` when NO needle was asked for, which is a
-      different answer from ``0``. Zero means the question was put and nobody
-      on this surface carries that word; ``None`` means nobody asked.
-    * ``index`` -- the position within the suffix-matched list, set ONLY when
-      ``matches`` is exactly 1. Two matches erase it rather than picking one.
-
-    AN EMPTY NEEDLE IS NOT A NEEDLE. A blank string is a substring of every
-    label, so passing one through would report a match on all nine controls --
-    true, useless, and indistinguishable from a real ambiguity. It is treated
-    as "nothing was asked" instead, so the two honest answers stay separable
-    and no branch silently matches everybody.
+    REPLACED 2026-09-27 (lane L5): ``read_invitation_surface`` answered the
+    same two questions about a NAME the caller typed. See the note above
+    :func:`rail_invite_control_selector`.
     """
-    out: dict[str, Any] = {
-        "controls": 0,
-        "matches": None,
-        "index": None,
-        # THE ONE LABEL, and ``None`` unless the caller ASKED for it AND the
-        # needle picked out exactly one control.
-        #
-        # ADMITTED 2026-08-31, and the ruling turned on a distinction worth
-        # keeping in view: loading a stranger's PROFILE stays refused because
-        # it EMITS -- linkedin_who_viewed_me measures the receiving end, so
-        # the cost lands on somebody who did not agree to it. Reading one
-        # accessible name off a page already rendered on HIS OWN profile emits
-        # NOTHING. Nobody is notified, no record is created, and the person is
-        # not made aware. The cost to the third party is nil.
-        #
-        # AND HE ALREADY KNOWS THE NAME -- he supplied the needle. Reading the
-        # label back is not disclosing a stranger to him; it confirms that the
-        # control his own word uniquely selected belongs to the person he
-        # meant. That is verification of his input, which is the opposite of
-        # collection.
-        "label": None,
-    }
-    wanted = "" if needle is None else str(needle).strip()
-    if not wanted:
-        try:
-            out["controls"] = int(await page.locator(INVITE_CONTROL).count())
-        except Exception as exc:  # pragma: no cover - defensive
-            logger.debug("invite controls unreadable: %s", type(exc).__name__)
-        return out
-    cfg = {
-        "selector": INVITE_CONTROL,
-        "suffix": INVITE_CONTROL_SUFFIX,
-        "needle": wanted,
-        "revealSingleMatch": bool(reveal_single_match),
-    }
+    out: dict[str, Any] = {"controls": 0, "matches": None, "error": None}
+    selector = rail_invite_control_selector(segment) if segment else None
     try:
-        reading = await page.evaluate(INVITE_NEEDLE_JS, cfg)  # readonly-ok
-    except Exception as exc:  # pragma: no cover - defensive
-        # THE EXCEPTION IS NOT STRINGIFIED HERE, and every other reader in this
-        # module does stringify its own. The needle was handed to that call;
-        # a driver that echoes an argument back inside its error text would be
-        # publishing the operator's word into a log through this line. The
-        # type alone says which failure happened and carries nothing.
-        logger.debug("invite needle unreadable: %s", type(exc).__name__)
-        return out
-    out["controls"] = as_count(reading.get("total"))
-    out["matches"] = as_count(reading.get("matches"))
-    position = reading.get("index")
-    # ABSENT STAYS None. ``as_count`` answers 0 for a missing value, and 0 is a
-    # real index on this surface -- collapsing "no match" into "the first one"
-    # is the conflation the explicit None here exists to refuse.
-    out["index"] = None if position is None else as_count(position)
-    # THE THIRD GATE, IN PYTHON, over the two already applied in the page.
-    # Three conditions rather than one on the line that can carry a name, and
-    # they are written in two different languages so that a single edit
-    # cannot open all of them.
-    label = reading.get("label")
-    if reveal_single_match and out["matches"] == 1 and isinstance(label, str):
-        out["label"] = label
+        out["controls"] = as_count(await page.locator(INVITE_CONTROL).count())
+        if selector is not None:
+            out["matches"] = as_count(await page.locator(selector).count())
+    except Exception as exc:  # noqa: BLE001 - reported as a type, never raised
+        out["error"] = type(exc).__name__
+        logger.debug("invitation rail unreadable: %s", type(exc).__name__)
     return out
-
 
 # ---------------------------------------------------------------------------
 # A NAMED PERSON'S PROFILE -- read only inside an act he ordered

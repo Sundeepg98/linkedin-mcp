@@ -20,7 +20,11 @@ and a latent one:
   script decides the value: ``_read_item_comment_box`` and
   ``_comment_submit_gate`` (``dom.read_comment_surface``), and
   ``_read_profile_invitations``, ``aim_invitation`` and
-  ``_name_the_invitation_recipient`` (``dom.read_invitation_surface``).
+  ``_name_the_invitation_recipient`` (``dom.read_invitation_surface``). SINCE
+  2026-09-27 those three read ``dom.read_invitation_rail`` -- two locator
+  counts, so Playwright-typed now -- and the aim is ``aim_invitation_by_link``
+  (lane L5, the orchestrator's order of 23:36: the invitation is aimed by the
+  person's profile link, never a name). They are driven below all the same.
 * PLAYWRIGHT-TYPED -- ``locator.count()`` and friends, which a document cannot
   make answer with a string: the other nine. ``int()`` could not be handed text
   there TODAY; it is converted anyway, so the file carries ONE rule a test can
@@ -135,7 +139,11 @@ def _whys(result) -> list[str]:
 def _cases():
     grant = _bare_grant(action="send_message",
                         target="Needle Q" + writes.TARGET_JOIN + "a body")
-    observation = types.SimpleNamespace(target="Needle Q",
+    # A PROFILE LINK since 2026-09-27: a word is refused before any reading,
+    # which would leave the invitation readers undriven. The segment carries
+    # ``example``, a declared synthetic slug token.
+    link = "https://www.linkedin.com/in/example-harness-person/"
+    observation = types.SimpleNamespace(target=link,
                                         facts={"controls": _planted})
     return [
         ("_read_follow_state", "read_follow_control",
@@ -161,15 +169,15 @@ def _cases():
          {"editors": {"intro": _planted}, "forms": 0},
          lambda: writes._read_profile_editors(None,
                                               _spec("update_profile_field"))),
-        ("_read_profile_invitations", "read_invitation_surface",
-         {"controls": _planted, "matches": _planted, "index": _planted},
+        ("_read_profile_invitations", "read_invitation_rail",
+         {"controls": _planted, "matches": _planted, "error": None},
          lambda: writes._read_profile_invitations(
-             None, _spec("send_invitation"), target="Needle Q")),
+             None, _spec("send_invitation"), target=link)),
         ("_read_messaging_badge", "read_messaging_badge",
          {"links": _planted, "label": None},
          lambda: writes._read_messaging_badge(None, _spec("send_message"))),
-        ("_name_the_invitation_recipient", "read_invitation_surface",
-         {"controls": _planted, "matches": _planted, "label": None},
+        ("_name_the_invitation_recipient", "read_invitation_rail",
+         {"controls": _planted, "matches": _planted, "error": None},
          lambda: writes._name_the_invitation_recipient(
              None, _spec("send_invitation"), observation, {})),
         ("_comment_submit_gate", "read_comment_surface",
@@ -210,11 +218,12 @@ async def test_a_count_that_is_words_is_never_quoted(case, monkeypatch):
 @pytest.mark.parametrize("reading", [
     {"controls": _planted, "matches": None},
     {"controls": 3, "matches": _planted},
-    {"controls": 3, "matches": 1, "index": _planted},
-], ids=["controls", "matches", "index"])
-def test_aim_invitation_refuses_a_count_that_is_words(reading):
-    """The pure aim, driven directly: a malformed count or position REFUSES --
-    no aim is returned -- and the refusal quotes nothing it was handed."""
-    state, why, aim = writes.aim_invitation(dict(reading))
-    assert aim is None, f"a malformed reading produced an aim: {state}"
+], ids=["controls", "matches"])
+def test_the_link_aim_refuses_a_count_that_is_words(reading):
+    """The pure aim, driven directly: a malformed count REFUSES -- nothing
+    is aimed -- and the refusal quotes nothing it was handed. (Until
+    2026-09-27 this drove ``aim_invitation``, whose third input was a
+    POSITION; the link aim carries none, so that case left with it.)"""
+    aim, why = writes.aim_invitation_by_link(dict(reading), "example-harness-person")
+    assert aim != writes.INVITE_AIMED, f"a malformed reading produced an aim: {why}"
     assert _planted not in why, why
