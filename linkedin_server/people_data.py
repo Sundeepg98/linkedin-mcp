@@ -349,9 +349,15 @@ class Event:
 #: helper -- applies to it from that change on. The first adopter was
 #: ``linkedin_who_viewed_me`` (2026-09-24); the two conversation readers
 #: joined on 2026-09-27, returning records when their caller passes
-#: ``include_names``.
+#: ``include_names``, and the people search the same day, on the same opt-in
+#: (lane S, ``people_results.read_result_people``).
 PEOPLE_TOOLS: frozenset[str] = frozenset(
-    {"linkedin_who_viewed_me", "linkedin_list_conversations", "linkedin_open_messaging"}
+    {
+        "linkedin_who_viewed_me",
+        "linkedin_list_conversations",
+        "linkedin_open_messaging",
+        "linkedin_people_search_shape",
+    }
 )
 
 #: Every record type, and the exact keys of each envelope SHAPE. A group and
