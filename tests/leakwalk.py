@@ -188,7 +188,9 @@ def url_spellings(needle: str) -> set[str]:
     return {spelling for spelling in out if len(spelling) >= 5}
 
 
-def walk(obj: Any, path: str = "$") -> Iterator[tuple[str, str]]:
+def walk(
+    obj: Any, path: str = "$", skip: Optional[Any] = None
+) -> Iterator[tuple[str, str]]:
     """Yield ``(path, text)`` for every readable leaf under ``obj``.
 
     Deliberately total. Dict KEYS are walked as well as values (a credential
@@ -197,7 +199,15 @@ def walk(obj: Any, path: str = "$") -> Iterator[tuple[str, str]]:
     anything this function does not recognise falls through to ``repr``, so an
     unknown type cannot be a hiding place. Silence about a leaf is the one
     failure mode a leak walker may not have.
+
+    ``skip``, a predicate, is the ONE exception, and its caller must justify
+    it: a value it answers true for is not walked at all. Added 2026-09-24 for
+    exactly one caller -- ``tests.plantedpage.carries_the_plant_outside_records``,
+    where a people-data record is the declared channel for a third party's
+    words and everything AROUND it must still be walked. ``None`` walks all.
     """
+    if skip is not None and skip(obj):
+        return
     if obj is None or isinstance(obj, bool):
         return
     if isinstance(obj, str):
@@ -213,15 +223,15 @@ def walk(obj: Any, path: str = "$") -> Iterator[tuple[str, str]]:
             here = f"{path}.{key}"
             if isinstance(key, str):
                 yield here + "(key)", key
-            yield from walk(val, here)
+            yield from walk(val, here, skip)
     elif isinstance(obj, (list, tuple, set, frozenset)):
         for i, item in enumerate(obj):
-            yield from walk(item, f"{path}[{i}]")
+            yield from walk(item, f"{path}[{i}]", skip)
     elif isinstance(obj, BaseException):
         yield path + "(str)", str(obj)
         yield path + "(repr)", repr(obj)
         for i, arg in enumerate(obj.args):
-            yield from walk(arg, f"{path}.args[{i}]")
+            yield from walk(arg, f"{path}.args[{i}]", skip)
     else:
         yield path + "(repr)", repr(obj)
 

@@ -609,3 +609,31 @@ def carries_the_plant(obj: Any) -> list[str]:
     from tests.leakwalk import walk
 
     return [path for path, text in walk(obj) if PLANT in text]
+
+
+def carries_the_plant_outside_records(obj: Any) -> tuple[list[str], int]:
+    """``(places holding the plant OUTSIDE a people record, records seen)``.
+
+    NAMES-AT-RUNTIME, applied by PEOPLE-DATA-MITIGATIONS: a people reader
+    returns another member's words, and returns them ONLY inside a
+    ``linkedin_server.people_data`` record -- an instance, or its envelope dict
+    with exactly the declared keys, the marker's exact note and fields that
+    rebuild into a valid record. Such a record is the declared channel and is
+    not walked. EVERYTHING AROUND IT IS: a plant beside a record, in a key, in
+    a widened record-shaped dict, in an error field or an exception, is still
+    found. A dict that merely LOOKS like a record fails ``as_record`` and is
+    walked like any other dict.
+    """
+    from linkedin_server.people_data import as_record
+    from tests.leakwalk import walk
+
+    records: list[Any] = []
+
+    def is_record(value: Any) -> bool:
+        if as_record(value) is None:
+            return False
+        records.append(value)
+        return True
+
+    hits = [path for path, text in walk(obj, skip=is_record) if PLANT in text]
+    return hits, len(records)
