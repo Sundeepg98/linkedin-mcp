@@ -84,6 +84,35 @@ CAPS: dict[str, int] = {"name": 120, "headline": 220, "title": 220}
 #: place a direction trick survived.
 STRIPPED_CATEGORIES = frozenset({"Cc", "Cf", "Co", "Cs", "Cn"})
 
+#: AND THE INVISIBLE CHARACTERS NO CATEGORY ABOVE NAMES, removed too: the
+#: default-ignorable code points (Unicode's ``Default_Ignorable_Code_Point``)
+#: that are letters or marks rather than format characters -- the combining
+#: grapheme joiner, the Hangul fillers, two Khmer inherent vowels, the
+#: Mongolian variation selectors and both variation-selector blocks. Found by
+#: the cold verification of 2026-09-27: 267 of them survived the categories
+#: alone, a name made only of a Hangul filler came back looking blank, and
+#: variation selectors rode through a name and a headline unseen. THE COST,
+#: as for the joiners above: an emoji loses its presentation selector, and a
+#: Mongolian name its variant forms; its letters stay.
+STRIPPED_CODE_POINT_RANGES: tuple[tuple[int, int], ...] = (
+    (0x034F, 0x034F),    # combining grapheme joiner
+    (0x115F, 0x1160),    # Hangul choseong and jungseong fillers
+    (0x17B4, 0x17B5),    # Khmer inherent vowels
+    (0x180B, 0x180F),    # Mongolian free variation selectors (180E is Cf)
+    (0x3164, 0x3164),    # Hangul filler
+    (0xFE00, 0xFE0F),    # variation selectors
+    (0xFFA0, 0xFFA0),    # halfwidth Hangul filler
+    (0xE0100, 0xE01EF),  # variation selectors supplement
+)
+
+
+def _stripped(ch: str) -> bool:
+    """Is ``ch`` removed by :func:`sanitise` (whitespace aside)?"""
+    if unicodedata.category(ch) in STRIPPED_CATEGORIES:
+        return True
+    point = ord(ch)
+    return any(low <= point <= high for low, high in STRIPPED_CODE_POINT_RANGES)
+
 #: The connection degrees LinkedIn draws, as this module returns them.
 DEGREES = ("1st", "2nd", "3rd+")
 
@@ -103,10 +132,20 @@ def sanitise(text: Any, *, cap: int) -> str:
 
     NFC first, so a composed and a decomposed spelling of one name are one
     string; then every whitespace character becomes a space and every
-    character in :data:`STRIPPED_CATEGORIES` is removed; then runs of spaces
-    collapse and the ends are trimmed; then the cap. Idempotent: a sanitised
-    string sanitises to itself, which is what lets a record check its own
-    fields at construction.
+    character in :data:`STRIPPED_CATEGORIES` or
+    :data:`STRIPPED_CODE_POINT_RANGES` is removed; then NFC AGAIN; then
+    runs of spaces collapse and the ends are trimmed; then the cap.
+    Idempotent: a sanitised string sanitises to itself, which is what lets a
+    record check its own fields at construction.
+
+    WHY NFC TWICE, measured by the cold verification of 2026-09-27: removing
+    an invisible character can join what it kept apart. ``e``, a zero-width
+    space and a combining acute sanitised to ``e`` plus the combining acute,
+    which composes only on a SECOND pass -- so the string was not its own
+    sanitised form, and the record refused its own builder's output. The
+    same held for two Hangul jamo split by a zero-width space. After the
+    strip nothing is left for a later pass to compose, and a prefix of a
+    composed string stays composed, so the cap cannot undo it.
     """
     if cap < 1:
         raise ValueError("a cap is a positive number of characters")
@@ -115,9 +154,10 @@ def sanitise(text: Any, *, cap: int) -> str:
     for ch in unicodedata.normalize("NFC", raw):
         if ch.isspace():
             kept.append(" ")
-        elif unicodedata.category(ch) not in STRIPPED_CATEGORIES:
+        elif not _stripped(ch):
             kept.append(ch)
-    collapsed = " ".join("".join(kept).split())
+    composed = unicodedata.normalize("NFC", "".join(kept))
+    collapsed = " ".join(composed.split())
     return collapsed[:cap].rstrip()
 
 
