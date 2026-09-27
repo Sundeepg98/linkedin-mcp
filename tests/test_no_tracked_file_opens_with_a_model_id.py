@@ -4,8 +4,9 @@ THE CALL (orchestrator, 2026-09-27 19:52, to lane G): a bare model-id first
 line in a tracked document is model attribution -- the class the operator's
 no-attribution rule exists for, in a file instead of a commit trailer.
 Nineteen `_audit/` records opened with one (the id, a blank line, then the
-title), across nine lanes' records from 2026-09-23 on; every one was removed
-the same day, and this file keeps the line out.
+title) -- twelve dated 2026-09-23 and seven 2026-09-24, twelve of them named
+for a lane; every one was removed the same day, and this file keeps the line
+out.
 
 WHAT IT IS ABOUT, AND WHAT IT IS NOT. An attribution HEADER: the WHOLE first
 line is a model id and nothing else -- the anchored shape the orchestrator
