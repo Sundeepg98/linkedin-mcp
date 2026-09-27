@@ -883,6 +883,7 @@ apart, and it unblocks the recruiter-views reader as a side effect.
     allowlist patterns added                    4    36 -> 40
     of those, shipping a reader                 2
     of those, buying no row today               2    section 7c, declared
+                                                     (one since: see below)
     readers shipped                             1    serving two addresses
     synthetic fixtures committed                1    plus one in-module control
     captures committed                          0    and none may ever be
@@ -909,6 +910,15 @@ readers. The brief asked for that trade explicitly and this is it: an honest
 "two of four, and the other two need one page load each" beats four readers
 built on a sibling's guess, one of which would have been built on a surface
 whose two captures disagree with each other.
+
+**ONE OF THE TWO HAS A READER SINCE 2026-09-28**, built the way section 9
+prescribed: the live lane captured `/analytics/recruiter-views/` on
+2026-09-23, and lane S built `recruiter_views.read_recruiter_views` and the
+tool `linkedin_recruiter_insights` over that capture's structure -- census
+`N 195`, COVERED-UNFIRED, never fired. The ledger above is that day's
+reading and stays as written; `/premium/profile-key-skills` still has none.
+Where it was built: `_audit/2026-09-24-lane-s-people-search.md`, The offline
+frontier.
 
 **THE NUMBERS IN THIS DOCUMENT WERE RE-DERIVED FROM THE ARTIFACTS BEFORE IT
 WAS FROZEN**, because a wave that writes numbers into prose should re-take them

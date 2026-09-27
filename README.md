@@ -3,10 +3,23 @@
 An MCP server that shows you your own LinkedIn account data as structured tool
 results instead of pages you have to click through.
 
-**Fifty-nine tools ship. Forty-one read. Eighteen write. None is
+**Sixty-one tools ship. Forty-three read. Eighteen write. None is
 write-shaped and unable to act.**
 
-**THAT LINE READ "Fifty-seven ... Forty-one read. Sixteen write" UNTIL LANE
+**THAT LINE READ "Fifty-nine ... Forty-one read. Eighteen write" UNTIL LANE
+S'S OFFLINE FRONTIER, 2026-09-28.** Two reads arrived whose answer is people,
+as records marked as other members' words. `linkedin_recruiter_insights` reads
+Premium's recruiter insights: how many recruiters viewed your profile, the
+trend week by week, and each recruiter viewer as LinkedIn draws them -- an
+employer, an industry and a time, no link, no name. `linkedin_messaging_presence`
+reads the people the empty composer suggests, each with LinkedIn's own
+presence word -- reachable, offline or online. `linkedin_search_appearances`
+also returns your two engagement cards now, and `linkedin_search_jobs` takes a
+`company_id` with no keyword for every posting at one employer. Census rows
+`N 195`, `M M53`, `P S5` and `J 107`, COVERED-UNFIRED: built offline over
+captures and never fired.
+
+**AND "Fifty-seven ... Forty-one read. Sixteen write" UNTIL LANE
 L5'S MERGE OF MASTER, 2026-09-27.** Two writes arrived that act on a person YOU
 name, from that person's own profile: `linkedin_connect_from_profile` sends a
 connection invitation and `linkedin_message_from_profile` a message. Each takes

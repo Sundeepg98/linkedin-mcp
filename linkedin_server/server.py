@@ -2523,13 +2523,15 @@ async def linkedin_messaging_presence() -> dict[str, Any]:
 
     BUILT OVER A CAPTURE OF 2026-09-20, NOT YET CALLED LIVE.
     """
+    url = CENSUS_SURFACES["messaging_compose"]
     try:
         async with BROWSER.session() as page:
-            landed = await BROWSER.goto(page, CENSUS_SURFACES["messaging_compose"])
+            landed = await BROWSER.goto(page, url)
             reading = await presence.read_suggested_presence(page)
             return {
                 "ok": True,
                 "source_url": shape.census_substitute(landed),
+                "redirected": landed.rstrip("/") != url.rstrip("/"),
                 "pages_loaded": 1,
                 **reading,
             }

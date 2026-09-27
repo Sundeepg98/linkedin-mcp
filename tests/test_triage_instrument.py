@@ -386,7 +386,14 @@ AFTER_LANE_L5_OVER_Y2 = (124, {"R": 17, "W": 103, "R+W": 4})
 #: bucket.
 AFTER_LANE_L8 = (131, {"R": 17, "W": 110, "R+W": 4})
 
-EXPECTED_NOW = AFTER_LANE_L8
+#: AT LANE S'S OFFLINE FRONTIER (2026-09-28), MEASURED with this tree's
+#: `scripts/triage_messaging_gap_rows.py`: `M53` left GAP, built
+#: (`linkedin_messaging_presence`, COVERED-UNFIRED;
+#: `_audit/2026-09-24-lane-s-people-search.md`, The offline frontier).
+#: 131 - 1 = 130: reads 17 - 1, writes and read-and-writes untouched.
+AFTER_LANE_S_FRONTIER = (130, {"R": 16, "W": 110, "R+W": 4})
+
+EXPECTED_NOW = AFTER_LANE_S_FRONTIER
 
 
 def test_the_headline_split_is_the_one_the_report_quotes():
