@@ -1494,6 +1494,11 @@ RUN, with the interpreter the repository's venv holds (3.13) unless said:
   reader, envelope, landing and page-text files 1417; the seven guard files
   755; the fixtures guard 56; the DevTools claims' files 474. Each repair was
   also shown by re-running the verifier's own repro on the repaired tree.
+- **The final gate, again, over all of it**, at 00cd2cf (a hash which
+  does not resolve on `master` until this branch merges): 114 files -- the post-merge
+  selection recomputed, every test file naming a changed symbol, the census
+  and register instruments -- 5 workers, 701.2 s: 6780 passed, 0 failed, 4
+  skipped (symlinks this platform will not make), 1 xfailed.
 
 NOT RUN, deliberately:
 
@@ -1503,8 +1508,6 @@ NOT RUN, deliberately:
 - **The 3.10 cell for the browser-driven files** (the messaging threads, the
   viewer fixtures): under `uv` they would resolve a Playwright whose browser
   build this box's shared cache may not hold. CI's matrix runs 3.10.
-- **A final gate over P.16's repairs as one set.** Each repair ran its own
-  files, listed above; CI certifies the whole at merge.
 
 ### P.15 Open -- and for other owners
 
