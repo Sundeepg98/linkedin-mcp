@@ -5051,8 +5051,17 @@ async def linkedin_search_jobs(
     genuine ONE-request multi-location search would need, and nothing here has
     them. Evidence: scripts/_probe_job_search_result_sets.py, pass two.
 
+    ALL OF ONE EMPLOYER'S POSTINGS: pass company_id and leave keywords
+    empty. That is the company Page's "see all jobs" as a search, with no
+    keyword narrowing it; with neither, the call is refused. BUILT, NOT YET
+    FIRED LIVE (census J 107, 2026-09-28): whether LinkedIn's default location
+    narrows a keyword-less employer search is UNVERIFIED -- the Page lists the
+    employer's postings wherever they are -- so pass `location` when the
+    answer must not depend on that default.
+
     Args:
-        keywords: what to search for, e.g. "senior node.js engineer".
+        keywords: what to search for, e.g. "senior node.js engineer". May be
+            empty ONLY when company_id is given (see above).
         location: city, region or country. Empty means LinkedIn's default.
             ONE location. For several, use `locations` instead of putting
             commas in here; see the note above for why a comma cannot mean
@@ -5097,10 +5106,23 @@ async def linkedin_search_jobs(
     """
     limit = _clamp(limit, SEARCH_DEFAULT_LIMIT, SEARCH_MAX_LIMIT)
     try:
-        if not (keywords or "").strip():
+        # AN EMPLOYER STANDS IN FOR THE KEYWORD, AND NOTHING ELSE DOES (census
+        # ``J 107``, 2026-09-28). The guard exists because an empty search is
+        # a page of noise; a search scoped to ONE employer is not, and it is
+        # the only call shape whose payload is the company Page's "see all
+        # jobs" -- every posting there, not the ones that match a word the
+        # caller had to invent. So a keyword-less call is admitted exactly
+        # when a company id is given, and whether that id is a Page id is
+        # decided by the company verdict below, before any page load.
+        keywordless = not (keywords or "").strip()
+        if keywordless and not str(company_id or "").strip():
             return {
                 "error": "bad_argument",
-                "message": "keywords is required -- an empty search is a page of noise.",
+                "message": (
+                    "keywords is required unless company_id is given -- an "
+                    "empty search is a page of noise, and an employer's own "
+                    "postings are the one keyword-less search that is not."
+                ),
             }
 
         # WHICH PLACES THIS CALL VISITS, decided before any parameter is built
@@ -5237,7 +5259,13 @@ async def linkedin_search_jobs(
             own url would be free to reinvent either of them.
             """
 
-            head: list[tuple[str, str]] = [("keywords", keywords.strip())]
+            # A KEYWORD-LESS CALL CARRIES NO keywords KEY AT ALL, not an empty
+            # one: `/jobs/search/?f_C=<id>` is the address the boundary was
+            # measured admitting for this call shape (lane D, 2026-09-24), and
+            # a keyworded call builds the url it always built.
+            head: list[tuple[str, str]] = (
+                [] if keywordless else [("keywords", keywords.strip())]
+            )
             if place.strip():
                 head.append(("location", place.strip()))
             return f"{BASE_URL}/jobs/search/?{urlencode(head + params)}"

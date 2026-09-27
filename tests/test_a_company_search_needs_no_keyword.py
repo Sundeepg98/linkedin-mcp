@@ -1,0 +1,118 @@
+"""An employer stands in for the keyword -- census ``J 107``, "see all jobs".
+
+THE ROW. ``J 107`` is the company Page's Jobs tab: every open posting at one
+employer. Lane D applied D6 to it on 2026-09-24 and measured why the package's
+own route did not deliver it (``_audit/2026-09-24-lane-d-d6-pdf.md`` section
+1): ``linkedin_search_jobs(company_id=...)`` put the id in the ``f_C`` facet,
+but the guard at the top of the tool refused any call without a keyword, so
+the route could only ever return the postings at that employer that MATCHED A
+WORD the caller had to invent -- a subset of a size nobody could know. The
+keyword-less address, ``/jobs/search/?f_C=<id>``, was already admitted.
+
+WHAT CHANGED, AND ALL THAT CHANGED. The guard now admits a keyword-less call
+exactly when a company id is given, and a keyword-less call's url carries no
+``keywords`` key at all. Every other call builds the url it always built.
+
+WHAT THESE TESTS HOLD, and each has the control that makes it readable:
+
+* the employer-only call makes ONE navigation, to exactly ``f_C=<id>`` and
+  nothing else, and the shipped boundary admits that address;
+* the guard still refuses a call with neither a keyword nor an employer, with
+  ZERO navigations -- the control, without which "admits the employer call"
+  cannot be told from "admits everything";
+* an employer id that is not a Page id is refused by the company verdict
+  before any load, so a keyword-less call cannot become a slug search;
+* a keyworded call still builds keywords first.
+
+NOT PROVEN HERE, and the census says so: nothing has fired a keyword-less
+``f_C`` search live, and whether LinkedIn's DEFAULT location narrows one is
+UNVERIFIED. The row is COVERED-UNFIRED until a live fire answers that.
+
+The company id is a synthetic number, the one lane D measured the boundary
+with; the card is ``tests/test_tools.py``'s shared synthetic card.
+"""
+from __future__ import annotations
+
+from urllib.parse import parse_qsl, urlsplit
+
+import pytest
+
+from linkedin_server import readonly
+from linkedin_server.server import linkedin_search_jobs
+
+from tests.conftest import FakePage
+from tests.test_tools import SEARCH_CARD, drive  # noqa: F401 - drive by injection
+
+#: A synthetic Page id -- the number lane D measured the boundary with.
+EMPLOYER = "12345"
+
+
+def _pairs(url: str) -> list[tuple[str, str]]:
+    return parse_qsl(urlsplit(url).query, keep_blank_values=True)
+
+
+async def test_an_employer_alone_is_a_search_and_its_url_is_only_the_facet(drive):
+    page = FakePage(evaluate_result=[dict(SEARCH_CARD)])
+    navigations = drive(page)
+
+    result = await linkedin_search_jobs(keywords="", company_id=EMPLOYER)
+
+    assert "error" not in result, result
+    assert len(navigations) == 1, navigations
+    assert _pairs(navigations[0]) == [("f_C", EMPLOYER)], navigations[0]
+    assert urlsplit(navigations[0]).path == "/jobs/search/", navigations[0]
+    assert readonly.is_read_url(navigations[0]), (
+        "the keyword-less employer address must be one the shipped boundary "
+        f"admits: {navigations[0]}"
+    )
+    assert result["results"], result
+    assert result["query"]["keywords"] == "", result["query"]
+
+
+async def test_blank_keywords_with_an_employer_build_the_same_address(drive):
+    page = FakePage(evaluate_result=[dict(SEARCH_CARD)])
+    navigations = drive(page)
+
+    result = await linkedin_search_jobs(keywords="   ", company_id=f" {EMPLOYER} ")
+
+    assert "error" not in result, result
+    assert [_pairs(url) for url in navigations] == [[("f_C", EMPLOYER)]], navigations
+
+
+async def test_neither_a_keyword_nor_an_employer_is_still_refused_before_any_load(drive):
+    """THE CONTROL. Without it, the test above cannot tell "the employer call
+    is admitted" from "the guard admits everything"."""
+    page = FakePage(evaluate_result=[dict(SEARCH_CARD)])
+    navigations = drive(page)
+
+    for company in ("", "   "):
+        result = await linkedin_search_jobs(keywords="", company_id=company)
+        assert result.get("error") == "bad_argument", (company, result)
+        assert "keywords is required" in result["message"], result
+    assert navigations == [], navigations
+
+
+async def test_an_employer_that_is_not_a_page_id_is_refused_before_any_load(drive):
+    """A keyword-less call cannot become a search for a company's NAME: the
+    company verdict still refuses a slug, and says so without quoting it."""
+    page = FakePage(evaluate_result=[dict(SEARCH_CARD)])
+    navigations = drive(page)
+
+    result = await linkedin_search_jobs(keywords="", company_id="umbrella-systems")
+
+    assert result.get("error") == "bad_argument", result
+    assert "umbrella-systems" not in result["message"], result["message"]
+    assert navigations == [], navigations
+
+
+@pytest.mark.parametrize("company", ["", EMPLOYER])
+async def test_a_keyworded_search_builds_keywords_first_as_it_always_did(drive, company):
+    page = FakePage(evaluate_result=[dict(SEARCH_CARD)])
+    navigations = drive(page)
+
+    result = await linkedin_search_jobs(keywords="node.js engineer", company_id=company)
+
+    assert "error" not in result, result
+    pairs = _pairs(navigations[0])
+    assert pairs[0] == ("keywords", "node.js engineer"), pairs
+    assert (("f_C", EMPLOYER) in pairs) is bool(company), pairs
