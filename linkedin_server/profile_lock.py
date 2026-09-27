@@ -131,7 +131,7 @@ def _read_lock_pid() -> "int | None":
     except FileNotFoundError:
         return None
     except OSError as e:
-        logger.warning("profile_lock: could not read lock file %s: %s", _LOCK_FILE, e)
+        logger.warning("profile_lock: could not read lock file %s: %s", _LOCK_FILE, type(e).__name__)
         return None
     if not raw:
         return None
@@ -216,7 +216,7 @@ def release() -> None:
     except FileNotFoundError:
         pass
     except Exception as e:  # never let cleanup raise during shutdown
-        logger.warning("profile_lock: error releasing lock %s: %s", _LOCK_FILE, e)
+        logger.warning("profile_lock: error releasing lock %s: %s", _LOCK_FILE, type(e).__name__)
 
 
 def held_by() -> "int | None":

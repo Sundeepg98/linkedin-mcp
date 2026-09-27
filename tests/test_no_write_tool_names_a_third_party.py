@@ -29,12 +29,19 @@ arbitrary string, therefore cannot carry a member's name". They are exempted BY
 NAME below rather than by silence, so a reader can see the ruling rather than
 infer it from an absence.
 
-AND WHAT THIS DOES NOT CLAIM. A needle is not forbidden and must not be:
+AND WHAT THIS DOES NOT CLAIM. A needle is not forbidden by THIS file:
 ``send_message`` and ``send_invitation`` take one, and this repository ruled on
 2026-08-31 that a needle is HIS OWN WORD going INTO the page, with integers
 coming back -- collection of nobody's identity. The distinction this file draws
 is DESTINATION, not presence: a needle selects a control and is discarded; a
 mention becomes part of an outward, permanent, third-party-visible artifact.
+
+SUPERSEDED IN PART ON 2026-09-24. PEOPLE-DATA-MITIGATIONS, mitigation 6, rules
+that an outward act fires at the member the operator names BY LINK OR ID, so
+those two needles are now DECLARED DEBT in
+``tests/test_no_write_is_aimed_by_a_name.py`` -- still permitted, and no longer
+"must not be" forbidden: converting either write to a link or member id is the
+direction, and that file fails until the debt entry goes.
 
 SHOWN FAILING before admission: adding ``mentions: list[str] = []`` to
 ``linkedin_publish_post``'s signature turns this red, naming the tool and the

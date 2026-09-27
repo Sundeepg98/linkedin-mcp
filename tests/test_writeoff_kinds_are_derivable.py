@@ -583,7 +583,7 @@ def test_process_fact_has_exactly_one_needle_and_it_is_alive():
 # ---------------------------------------------------------------------------
 @pytest.mark.parametrize("damage", ["renamed", "emptied", "absent"])
 def test_forbidden_keys_never_returns_an_empty_list(tmp_path, damage):
-    """Every failure path returns the nine-name fallback, and says which path.
+    """Every failure path returns the six-name fallback, and says which path.
 
     THE HAZARD IS SPECIFIC. `"|".join([])` inside an alternation yields
     `\\b(?:)\\b`, which matches at every position -- so an empty key list would
@@ -646,7 +646,17 @@ def test_the_live_key_list_is_read_from_the_package():
     """
     keys, source = cw.forbidden_keys()
     assert source == "read from linkedin_server/writes.py", source
-    assert len(keys) >= 9, keys
+    # WAS `len(keys) >= 9` UNTIL 2026-09-24. OUTWARD-CLASSES-BUILT-BEHIND-GRANTS
+    # retired three entries and left six, so the floor went red for the right
+    # change -- and a floor stays green for a wrong one (a key renamed, a key
+    # swapped for another). Asserted BY NAME against the ruling's own list, as
+    # tests/test_writes.py asserts the dict itself since lane L8; and the
+    # fallback must name the same six, or a run that cannot read the package
+    # classifies against a list the package no longer holds.
+    from linkedin_server import outward_classes
+
+    assert sorted(keys) == sorted(outward_classes.SURVIVING_PERMANENT_REFUSALS), keys
+    assert sorted(cw._FORBIDDEN_FALLBACK) == sorted(keys), cw._FORBIDDEN_FALLBACK
 
 
 # ---------------------------------------------------------------------------

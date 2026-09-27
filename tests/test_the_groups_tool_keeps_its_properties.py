@@ -27,6 +27,7 @@ from pathlib import Path
 import pytest
 
 from linkedin_server import groups, groups_page, server
+from tests.record_typed import identity_parameters_outside_a_record
 
 REPO = Path(__file__).resolve().parents[1]
 PACKAGE = REPO / "linkedin_server"
@@ -80,10 +81,17 @@ def test_the_shaper_below_it_is_still_name_free():
     quietly widened -- somebody adds a ``name`` parameter "just in case" the
     caller has one. It has no such parameter today and this fails the day it
     does, from the file that would benefit.
+
+    REWRITTEN AROUND THE RECORD TYPE ON 2026-09-27, not deleted: a name, a
+    title or a slug may reach ``groups`` only annotated as a ``people_data``
+    record (NAMES-AT-RUNTIME, PEOPLE-DATA-MITIGATIONS; ``tests/record_typed.py``),
+    and a label or page text not at all -- no record type carries either.
     """
     for name in ("group_identifier", "membership_tally", "disjoint"):
-        params = set(inspect.signature(getattr(groups, name)).parameters)
-        assert not (params & {"name", "title", "label", "text", "slug"}), (
+        function = getattr(groups, name)
+        params = set(inspect.signature(function).parameters)
+        outside = identity_parameters_outside_a_record(function, {"name", "title", "slug"})
+        assert outside == [] and not (params & {"label", "text"}), (
             f"groups.{name} grew a name-shaped parameter: {sorted(params)}"
         )
 

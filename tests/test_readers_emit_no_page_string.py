@@ -61,6 +61,7 @@ import asyncio
 import importlib
 import inspect
 import json
+import logging
 import pkgutil
 from pathlib import Path
 from typing import Any, Callable, Optional
@@ -79,7 +80,10 @@ from tests.plantedpage import (
     RaisingPage,
     carries_a_laundered_exception,
     carries_the_plant,
+    carries_the_plant_outside_records,
     carries_the_raised_plant,
+    text_paths_a_baseline_may_not_record,
+    text_ratchet,
 )
 
 REPO = Path(__file__).resolve().parents[1]
@@ -112,9 +116,28 @@ DRIVE_TIMEOUT_S = 5.0
 #: So an exception carrying the plant is a leak unconditionally, with no
 #: exemption list to be argued into -- and an exemption list is exactly how the
 #: previous three instances of this class stayed open.
+#:
+#: **THE INVARIANT WAS REDESIGNED ON 2026-09-24 (NAMES-AT-RUNTIME, applied by
+#: PEOPLE-DATA-MITIGATIONS; lane G's foundation), AND NOTHING ABOVE WAS
+#: WEAKENED.** It was "no page string leaves, except by a contract the shapers
+#: govern". It is now: A PAGE STRING LEAVES ONLY THROUGH A DECLARED PEOPLE
+#: RECORD (``linkedin_server.people_data``), and NEVER through an exception, an
+#: error field, a log record, a receipt, a cache or a fixture. So:
+#:
+#: * ``RETURNS_RECORDS`` -- the plant came back, and ONLY inside people
+#:   records: the declared channel. Nothing else in the value carries it.
+#: * ``RETURNS_TEXT`` -- the plant came back OUTSIDE a record. A LEGACY
+#:   INVENTORY FROM THIS DATE: every reader recorded so in the baseline may
+#:   stay so until it is converted, and none may join it --
+#:   :func:`text_ratchet` refuses a new one, a stale one, and a record reader
+#:   that fell back to text, and the baseline writer refuses to record one.
+#: * ``LEAKS`` is untouched, and it is checked on the PLAIN walk: a record in
+#:   an exception is a leak like any other page string in one. The failing-
+#:   page family and the log capture below also walk records.
 CLEAN = "clean"
 LEAKS = "leaks"
 RETURNS_TEXT = "returns_text"
+RETURNS_RECORDS = "returns_records"
 
 
 # ---------------------------------------------------------------------------
@@ -208,6 +231,15 @@ def _argument_for(param: inspect.Parameter) -> tuple[bool, Any]:
         from linkedin_server import writes
 
         return True, writes.FEED_URL
+    # AND BEFORE ``Any`` FOR THE SAME REASON (2026-09-27, lane G's merge of
+    # master 7986ae3). ``identifier`` is lane L8's GROUP ID, the only reader
+    # parameter by that name (group_leave's five), annotated ``Any``: the
+    # harness handed it a page double, ``group_leave.disclosure_selector``
+    # refused it as not 1 to 20 digits on the FIRST line of every try block,
+    # and the five were recorded ``clean`` having read nothing. A five-digit id
+    # -- under the identity guard's six-digit line -- reaches the page reads.
+    if param.name == "identifier":
+        return True, _GROUP_ID
     if param.annotation is inspect.Parameter.empty:
         # Unannotated. Every such parameter in this package is a selector or a
         # needle, and a string is the only thing that could be passed anyway.
@@ -236,6 +268,11 @@ def _argument_for(param: inspect.Parameter) -> tuple[bool, Any]:
 #: A sentinel meaning "this parameter has several faithful values; run them
 #: all". See :func:`_domain_values`.
 _VARY = object()
+
+#: The group id group_leave's readers are driven with: numeric, as
+#: ``group_leave.checked_group_id`` requires, and five digits, under the
+#: six-digit run ``tests/test_no_committed_identity.py`` refuses.
+_GROUP_ID = "12345"
 
 
 class _Paired:
@@ -531,19 +568,31 @@ def _drive_once(
         if hits:
             return LEAKS, f"{type(exc).__name__} carries it at {hits[0]}"
         return f"not_driven:raises {type(exc).__name__}", str(exc)[:120]
+    return classify_returned(result)
 
+
+def classify_returned(result: Any) -> tuple[str, str]:
+    """The verdict on what a reader RETURNED. ``(verdict, detail)``.
+
+    A pure function of the value, so the controls below drive the same code the
+    guard does rather than a copy of it.
+    """
     # CHECKED BEFORE ``returns_text``, because it IS a leak wearing its costume.
     # A caught coercion failure put into an output field has carried the value
     # out just as surely as a raise would have -- see
-    # ``plantedpage.carries_a_laundered_exception``.
+    # ``plantedpage.carries_a_laundered_exception``. A record does not excuse
+    # it: this walk is plain.
     laundered = carries_a_laundered_exception(result)
     if laundered:
         return LEAKS, f"a caught coercion failure was returned at {laundered[0]}"
 
     hits = carries_the_plant(result)
-    if hits:
-        return RETURNS_TEXT, f"returns page text at {hits[0]}"
-    return CLEAN, ""
+    if not hits:
+        return CLEAN, ""
+    outside, records = carries_the_plant_outside_records(result)
+    if not outside:
+        return RETURNS_RECORDS, f"page text only inside {records} people record(s)"
+    return RETURNS_TEXT, f"returns page text at {outside[0]}"
 
 
 def _worst(verdicts: list[tuple[str, str]]) -> tuple[str, str]:
@@ -556,7 +605,7 @@ def _worst(verdicts: list[tuple[str, str]]) -> tuple[str, str]:
     -- if any variant actually ran and came back clean, the reader WAS measured,
     and reporting it as un-measurable would understate the coverage.
     """
-    order = {LEAKS: 3, RETURNS_TEXT: 2, CLEAN: 1}
+    order = {LEAKS: 4, RETURNS_TEXT: 3, RETURNS_RECORDS: 2, CLEAN: 1}
     best = max(verdicts, key=lambda v: order.get(v[0], 0))
     return best
 
@@ -635,6 +684,15 @@ def test_the_driven_set_has_not_silently_shrunk() -> None:
         "reader(s) that this guard used to DRIVE can no longer be driven: "
         + ", ".join(f"{n} -> {live[n]}" for n in regressed)
         + ". The guard now certifies less than the baseline says it does."
+    )
+    # THE LEGACY TEXT INVENTORY MAY SHRINK AND MAY NOT GROW (2026-09-24).
+    ratchet = text_ratchet(baseline, live)
+    assert not ratchet, (
+        "the page-text inventory moved: " + "; ".join(ratchet) + ". A page "
+        "string leaves only through a people_data record: a NEW text path must "
+        "return records instead; a STALE entry means a reader stopped returning "
+        f"text and {BASELINE_PATH.name} must be regenerated so the inventory "
+        "shrinks; LOST RECORDS means a converted reader fell back."
     )
 
 
@@ -841,31 +899,23 @@ LAUNDERS = "launders"
 #: Every variant let the failure propagate: the ruled channel, not this one.
 RAISES = "raises"
 
-#: READERS STILL LAUNDERING, DECLARED RATHER THAN WAIVED, and every entry is
-#: in a module lane G does not own. Asserted EXACTLY in both directions, so a
-#: new launderer fails naming itself and a repaired one fails until its entry
-#: goes -- the mechanism ``KNOWN_DERIVED_NAVIGATIONS`` uses. Each is one
-#: ``except Exception as exc`` writing ``f"{type(exc).__name__}: {exc}"`` into
-#: a returned ``error`` field; the repair is the one ``dom.py`` took on
-#: 2026-09-24, the exception's TYPE and nothing else.
+#: READERS STILL LAUNDERING, DECLARED RATHER THAN WAIVED. Asserted EXACTLY in
+#: both directions, so a new launderer fails naming itself and a repaired one
+#: fails until its entry goes -- the mechanism ``KNOWN_DERIVED_NAVIGATIONS``
+#: uses.
 #:
-#: MEASURED 2026-09-24 on the lane-G branch: 24 readers laundered before the
-#: ``dom.py`` repair -- ten in ``dom.py``, eight in ``writes.py`` and one in
-#: ``server.py`` that only CARRY a ``dom.py`` field onward (the four write
-#: gates among them), plus these five. After it, these five and no others.
-KNOWN_LAUNDERERS: dict[str, str] = {
-    "events:read_events_home": "events.read_events_home, its returned `error`",
-    "job_collections:read_job_collection": (
-        "job_collections.read_job_collection, its returned `error`"
-    ),
-    "newsletters:read_newsletter_subscriptions": (
-        "newsletters.read_newsletter_subscriptions, its returned `error`"
-    ),
-    "notify_cost:read_notifications_badge": (
-        "notify_cost.read_notifications_badge, its returned `error`, two handlers"
-    ),
-    "premium:read_premium_surface": "premium.read_premium_surface, its returned `error`",
-}
+#: **EMPTY SINCE THE LANE G FOLLOW-UP OF 2026-09-24.** Measured that day: 24
+#: readers laundered before the ``dom.py`` repair -- ten in ``dom.py``, eight in
+#: ``writes.py`` and one in ``server.py`` that only CARRY a ``dom.py`` field
+#: onward (the four write gates among them), plus five in other modules, which
+#: were declared here for one merge. Those five -- ``events.read_events_home``,
+#: ``job_collections.read_job_collection``,
+#: ``newsletters.read_newsletter_subscriptions``,
+#: ``notify_cost.read_notifications_badge`` (two handlers) and
+#: ``premium.read_premium_surface`` -- took the same repair the next morning:
+#: the exception's TYPE and nothing else. Leave it empty; an entry added here
+#: has to carry an argument that type-only is wrong for its site.
+KNOWN_LAUNDERERS: dict[str, str] = {}
 
 #: THE FAILING PAGE MUST REACH HANDLERS, or every verdict above is vacuous: a
 #: reader that raises before its handler is ``raises``, not ``clean``. The
@@ -879,7 +929,38 @@ def _with_the_failing_page(values: list[Any]) -> list[Any]:
     return [RaisingPage() if type(v) is PlantedPage else v for v in values]
 
 
+#: EVERY LOG RECORD THE ``linkedin`` LOGGER EMITTED DURING THE CURRENT DRIVE,
+#: captured at DEBUG. A LOG RECORD IS ANOTHER WAY OUT OF THE PROCESS: the
+#: server's stderr is redirected to a file on disk by ``scripts/start_server.ps1``
+#: and DEBUG is the level one sets to diagnose. Measured where they land before
+#: this was added -- see ``tests/test_no_log_record_carries_a_library_message.py``.
+_DRIVE_LOG: list[str] = []
+
+
+class _CollectRecords(logging.Handler):
+    def emit(self, record: logging.LogRecord) -> None:
+        try:
+            _DRIVE_LOG.append(record.getMessage())
+        except Exception:  # noqa: BLE001 -- an unformattable record still counts
+            _DRIVE_LOG.append(repr(record.msg) + repr(record.args))
+
+
 def _drive_failing_once(
+    fn: Callable[..., Any], args: list[Any], kwargs: dict[str, Any]
+) -> tuple[str, str]:
+    log = logging.getLogger("linkedin")
+    handler = _CollectRecords(level=logging.DEBUG)
+    level = log.level
+    log.addHandler(handler)
+    log.setLevel(logging.DEBUG)
+    try:
+        return _drive_failing_once_logged(fn, args, kwargs)
+    finally:
+        log.removeHandler(handler)
+        log.setLevel(level)
+
+
+def _drive_failing_once_logged(
     fn: Callable[..., Any], args: list[Any], kwargs: dict[str, Any]
 ) -> tuple[str, str]:
     async def _run() -> Any:
@@ -926,13 +1007,65 @@ def drive_failing(fn: Callable[..., Any]) -> tuple[str, str]:
 
 _FAILING_VERDICTS: dict[str, tuple[str, str]] = {}
 
+#: Per reader: how many log records emitted while it was driven carried what
+#: the failing library said. A COUNT, so a red never prints a record.
+_FAILING_LOG_HITS: dict[str, int] = {}
+
 
 def failing_verdicts() -> dict[str, tuple[str, str]]:
-    """Every discovered reader's verdict on the failing page, measured once."""
+    """Every discovered reader's verdict on the failing page, measured once.
+
+    The same drive fills :data:`_FAILING_LOG_HITS`, so the log check costs no
+    second pass over the readers.
+    """
     if not _FAILING_VERDICTS:
         for name, fn in discover_readers():
+            _DRIVE_LOG.clear()
             _FAILING_VERDICTS[name] = drive_failing(fn)
+            _FAILING_LOG_HITS[name] = sum(RAISED_PLANT in m for m in _DRIVE_LOG)
     return _FAILING_VERDICTS
+
+
+@pytest.mark.parametrize("name", [n for n, _ in discover_readers()])
+def test_no_reader_logs_what_a_failing_library_said(name: str) -> None:
+    """THE SAME DRIVE, READ FOR LOG RECORDS rather than for the return value."""
+    failing_verdicts()
+    hits = _FAILING_LOG_HITS[name]
+    assert hits == 0, (
+        f"{name} emitted {hits} log record(s) carrying what a failing library "
+        "said, captured at DEBUG. Log type(exc).__name__ and name the step in "
+        "the call's own words; a library's message can quote a selector, a "
+        "request or an address, and stderr is a file on disk."
+    )
+
+
+def test_the_log_capture_sees_a_record_it_was_not_shown() -> None:
+    """SHOWN FAILING: a reader that logs the message is counted, one that logs
+    the type is not -- through the real capture, not a copy of it."""
+    import logging as _logging
+
+    log = _logging.getLogger("linkedin")
+
+    async def logs_the_message(page: Any) -> dict[str, Any]:
+        try:
+            await page.locator("x").count()
+        except Exception as exc:  # noqa: BLE001 - the defect, on purpose
+            log.debug("read failed: %s: %s", type(exc).__name__, exc)
+        return {}
+
+    async def logs_the_type(page: Any) -> dict[str, Any]:
+        try:
+            await page.locator("x").count()
+        except Exception as exc:  # noqa: BLE001
+            log.debug("read failed: %s", type(exc).__name__)
+        return {}
+
+    _DRIVE_LOG.clear()
+    drive_failing(logs_the_message)
+    assert sum(RAISED_PLANT in m for m in _DRIVE_LOG) == 1, len(_DRIVE_LOG)
+    _DRIVE_LOG.clear()
+    drive_failing(logs_the_type)
+    assert _DRIVE_LOG and sum(RAISED_PLANT in m for m in _DRIVE_LOG) == 0
 
 
 @pytest.mark.parametrize("name", [n for n, _ in discover_readers()])
@@ -1097,15 +1230,30 @@ def write_baseline() -> int:
         for name in leaking:
             print(f"  {name}  {rows[name][1]}")
         return 1
+    # NOR IS IT WHERE A NEW PAGE-TEXT PATH IS RECORDED (2026-09-24). The text
+    # inventory is the one committed before this rule, and it only shrinks.
+    new_text = text_paths_a_baseline_may_not_record(
+        _baseline(), {name: verdict for name, (verdict, _) in rows.items()}
+    )
+    if new_text:
+        print(f"REFUSED: {len(new_text)} reader(s) return page text outside a")
+        print("people record and the committed baseline does not already say so.")
+        print("A page string leaves only through linkedin_server.people_data:")
+        for name in new_text:
+            print(f"  {name}")
+        return 1
 
     payload = {
         "_comment": (
             "Verdict per page reader, from tests/plantedpage.py. Regenerate "
             "with: python -m tests.test_readers_emit_no_page_string "
             "--write-baseline. 'clean' means the reader was DRIVEN and carried "
-            "nothing out; 'returns_text' means it returns page text by "
-            "contract, which the shapers govern; 'not_driven:<reason>' means "
-            "this offline harness could not reach it, which is never a pass."
+            "nothing out; 'returns_records' means page text came back ONLY "
+            "inside linkedin_server.people_data records, the declared channel; "
+            "'returns_text' means page text came back outside a record -- a "
+            "legacy inventory since 2026-09-24 that may shrink and may not "
+            "grow; 'not_driven:<reason>' means this offline harness could not "
+            "reach it, which is never a pass."
         ),
         "readers": {name: verdict for name, (verdict, _) in sorted(rows.items())},
     }

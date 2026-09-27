@@ -185,6 +185,10 @@ _VERIFIED_FROM_OWNERS: dict[str, frozenset[str]] = {
     # ``"read receipt"`` is a cost, not a surface, which puts it in the same
     # class as the strength-class candidates rejected in the module docstring.
     "composer": frozenset({"send_message"}),
+    # ADDED 2026-09-27 FOR ``withdraw_from_group`` (lane L8). It verifies on a fresh
+    # render of the Groups root, the one surface that lists his memberships,
+    # and no other row names that page. Measured to occur in exactly one row.
+    "Groups root": frozenset({"withdraw_from_group"}),
 }
 
 #: THE SAME, FOR ``_WHERE_TO_LOOK``. These values are short phrases rather
@@ -235,6 +239,10 @@ _WHERE_TO_LOOK_OWNERS: dict[str, frozenset[str]] = {
     # read. Its ``_VERIFIED_FROM`` row was checked against every owned phrase
     # above and contains none of them.
     "LinkedIn messages": frozenset({"send_message", "send_reply"}),
+    # ADDED 2026-09-27 FOR ``withdraw_from_group`` (lane L8): his Groups page is where
+    # his memberships are listed and where the leave is verified, and no other
+    # row sends him there. Measured to occur in exactly one row.
+    "Groups page": frozenset({"withdraw_from_group"}),
 }
 
 #: THE ONLY SETS OF ACTIONS ALLOWED TO SHARE A ``_WHERE_TO_LOOK`` VALUE
@@ -586,8 +594,17 @@ def test_the_action_set_is_the_one_this_file_was_measured_against():
     # phrase; its ``_VERIFIED_FROM`` row was checked against every owned
     # phrase above and holds none. On the merged tree the rest of this file
     # passed with both new actions' rows in place.
-    assert len(writes.PERFORMABLE) == 15, (
-        "writes.PERFORMABLE holds %d actions, not the 15 this file was "
+    # SIXTEEN FROM LANE L8'S MERGE OF MASTER, 2026-09-27 (fifteen on the
+    # lane's branch): ``withdraw_from_group``'s two rows were read. Its
+    # ``_WHERE_TO_LOOK`` value ("your LinkedIn Groups page") and its
+    # ``_VERIFIED_FROM`` row (a fresh render of the Groups root) were checked
+    # against every owned phrase above -- lane L5's second owner of "LinkedIn
+    # messages" included -- and contain none of another action's; each gained
+    # an owner entry of its own ("Groups page", "Groups root"), measured to
+    # occur in exactly its own row. On the merged tree the rest of this file
+    # passed with both lanes' rows in place.
+    assert len(writes.PERFORMABLE) == 16, (
+        "writes.PERFORMABLE holds %d actions, not the 16 this file was "
         "measured against: %s. Re-derive the phrase owners in this file for "
         "the new action, then update this count."
         % (len(writes.PERFORMABLE), sorted(writes.PERFORMABLE))

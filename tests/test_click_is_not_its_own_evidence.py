@@ -711,14 +711,96 @@ async def test_his_own_needle_never_leaks_out_of_a_block_that_READ_the_page(
 
 
 @pytest.fixture
-def _fast_wait(monkeypatch):
-    """Shorten the dropdown wait for the one test that WANTS it to time out.
+def _fast_wait(monkeypatch, request, over):
+    # ``over`` IS REQUESTED FOR ITS ORDER, NOT ITS VALUE: it is set up first, so
+    # a machine without Playwright SKIPS the test before this fixture exists,
+    # rather than reaching the no-reading check below at teardown and turning
+    # a skip into an error.
+    """Cut the dropdown wait to 250 ms -- ONLY where the timeout is the subject.
 
-    The bound is five seconds because a real typeahead is fetched. Here the
-    timeout is the subject rather than an obstacle, so waiting the full five
-    would buy nothing but a slower suite.
+    WHAT IT IS FOR. ``dom.read_typeahead_options`` waits up to
+    ``dom.TYPEAHEAD_TIMEOUT_MS`` -- five seconds, because a real typeahead is
+    fetched -- for ``dom.TYPEAHEAD_LISTBOX_SELECTOR`` to attach. On a page
+    that never draws that wrapper the wait always runs to its bound, so a
+    test whose SUBJECT is that timeout would spend five seconds proving it.
+    The cut makes that proof cheap, and that is the only thing it is right
+    for.
+
+    WHO TAKES IT, AND WHY: ONE TEST.
+    ``test_the_no_listbox_refusal_does_not_claim_the_list_was_empty``, whose
+    page draws option rows and no wrapper, and whose subject is the
+    ``1_no_listbox`` refusal the timeout produces.
+
+    WHY NOBODY ELSE MAY. On a page that DOES draw the wrapper the bound is
+    not the subject but a RACE: the wrapper is attached before the wait
+    starts and the wait only has to see it, and on a loaded box the wait's
+    own round trip has run past 250 ms and read ``1_no_listbox`` where the
+    test asserts ``4_several_options_match``
+    (_audit/2026-09-21-the-four-loose-rows.md section 5A.1, and
+    _audit/2026-09-24-lane-g-guards.md section 5). Such a test needs no cut:
+    the real bound returns the moment the wrapper attaches, so it is no
+    slower. SEVENTEEN tests took this fixture until 2026-09-24, and the
+    split was measured by instrument rather than read: seven took typeahead
+    readings on wrapper pages, nine took no typeahead reading at all, and
+    one was the test above.
+
+    IT CHECKS ITS OWN PREMISE, so the race cannot come back by copy-paste.
+    While the cut is in force every typeahead reading is followed by a count
+    of the wrapper on the page it was taken on, and at teardown the test
+    FAILS, by name, if
+
+      * any reading was taken on a page carrying the wrapper -- the race; or
+      * no reading was taken at all -- the cut was never consumed, so the
+        timeout is not that test's subject either.
+
+    BOTH HAVE BEEN SHOWN FAILING: run against the seventeen-test list, this
+    fixture failed exactly the sixteen tests that no longer take it, twice,
+    and no other. The count is taken the moment the reading returns, which
+    is exact for the static markup every page in this module is; a page that
+    drew its wrapper LATE could be counted either way, and no page here does.
     """
-    monkeypatch.setattr(dom, "TYPEAHEAD_TIMEOUT_MS", 250)
+    cut = 250
+    real_bound = dom.TYPEAHEAD_TIMEOUT_MS
+    real_reader = dom.read_typeahead_options
+    wrappers: list[int | str] = []
+
+    async def _reading_then_its_wrapper_count(page, needle):
+        reading = await real_reader(page, needle)
+        try:
+            wrappers.append(
+                int(await page.locator(dom.TYPEAHEAD_LISTBOX_SELECTOR).count())
+            )
+        except Exception as exc:  # noqa: BLE001 - uncounted is not clean
+            wrappers.append(type(exc).__name__)
+        return reading
+
+    monkeypatch.setattr(dom, "TYPEAHEAD_TIMEOUT_MS", cut)
+    monkeypatch.setattr(
+        dom, "read_typeahead_options", _reading_then_its_wrapper_count
+    )
+    yield
+
+    if not wrappers:
+        pytest.fail(
+            f"{request.node.nodeid} takes _fast_wait but took NO typeahead "
+            f"reading, so the {cut} ms cut was never consumed and the "
+            "timeout is not this test's subject. Take _fast_wait off it.",
+            pytrace=False,
+        )
+    carried = [count for count in wrappers if count != 0]
+    if carried:
+        pytest.fail(
+            f"{request.node.nodeid} takes _fast_wait, and {len(carried)} of "
+            f"its {len(wrappers)} typeahead reading(s) were taken on a page "
+            f"carrying {dom.TYPEAHEAD_LISTBOX_SELECTOR} (wrapper count after "
+            f"each reading: {wrappers}). There the {cut} ms bound is a RACE, "
+            "not the subject: the wrapper is already attached, and a loaded "
+            "box can spend longer than that on the wait's own round trip "
+            "and read '1_no_listbox'. Take _fast_wait off this test; the "
+            f"real {real_bound} ms bound returns the moment the wrapper "
+            "attaches.",
+            pytrace=False,
+        )
 
 
 #: OPTIONS WITH NO WRAPPER. A page can draw suggestion rows without the
@@ -935,7 +1017,7 @@ async def _census(over, html: str, needle: str) -> dict:
 
 
 async def test_the_counts_can_differ_so_the_instrument_has_been_shown_to_speak(
-    over, _fast_wait
+    over,
 ):
     """**THE CONTROL. ``matches`` is not welded to ``total``.**
 
@@ -963,7 +1045,7 @@ async def test_the_counts_can_differ_so_the_instrument_has_been_shown_to_speak(
 
 
 async def test_the_census_separates_rows_the_shipped_matcher_cannot(
-    over, _fast_wait
+    over,
 ):
     """THE MEASUREMENT THAT DECIDES THE FIX, taken before the fix.
 
@@ -997,7 +1079,7 @@ async def test_the_census_separates_rows_the_shipped_matcher_cannot(
 
 
 async def test_the_census_tells_the_two_plausible_live_shapes_apart(
-    over, _fast_wait
+    over,
 ):
     """IT IS A DIAGNOSTIC, NOT A PREFERENCE ORDER.
 
@@ -1023,7 +1105,7 @@ async def test_the_census_tells_the_two_plausible_live_shapes_apart(
 
 
 async def test_the_refusal_names_the_ambiguity_when_no_matcher_can_help(
-    over, _fast_wait
+    over,
 ):
     """THE CASE THE FIX MUST NOT DODGE.
 
@@ -1049,7 +1131,7 @@ async def test_the_refusal_names_the_ambiguity_when_no_matcher_can_help(
 
 
 async def test_the_refusal_says_when_a_matcher_would_have_separated_them(
-    over, _fast_wait
+    over,
 ):
     """The other side of the same refusal, and it is the useful one.
 
@@ -1076,7 +1158,7 @@ UNDOTTED_NAME = "Nimblewick JrX"
 
 
 async def test_a_metacharacter_in_the_needle_is_escaped_and_it_matters(
-    over, _fast_wait
+    over,
 ):
     """**HIS INPUT REACHES A REGEX NOW, WHICH IT DID NOT BEFORE.**
 
@@ -1121,7 +1203,7 @@ async def test_a_metacharacter_in_the_needle_is_escaped_and_it_matters(
 
 
 async def test_the_census_escapes_the_needle_in_every_candidate(
-    over, _fast_wait
+    over,
 ):
     """EVERY template, not just the aim's.
 
@@ -1151,7 +1233,7 @@ async def test_the_census_escapes_the_needle_in_every_candidate(
 
 
 async def test_the_strictest_selector_resolves_to_one_row_on_a_real_listbox(
-    over, _fast_wait
+    over,
 ):
     """THE INSTRUMENT'S AIM, HANDED TO A BROWSER. A selector nobody resolves
     is a string.
@@ -1248,7 +1330,7 @@ COMPOSER_VARYING_PREFIX = _composer_with(
 
 
 async def test_a_prefixed_listbox_reproduces_the_live_census_signature(
-    over, _fast_wait
+    over,
 ):
     """**THE FIXTURE THAT FINALLY MATCHES THE LIVE READING.**
 
@@ -1276,7 +1358,7 @@ async def test_a_prefixed_listbox_reproduces_the_live_census_signature(
     assert "EVERY STRICTER CANDIDATE MATCHES NOTHING" in found["why"], found["why"]
 
 
-async def test_a_constant_prefix_reports_as_one_offset(over, _fast_wait):
+async def test_a_constant_prefix_reports_as_one_offset(over):
     """CONSTANT FURNITURE -> ONE OFFSET, every row on it.
 
     This is the outcome that would unblock the send path: the prefix is the
@@ -1306,7 +1388,7 @@ async def test_a_constant_prefix_reports_as_one_offset(over, _fast_wait):
     assert found["lengths"], found
 
 
-async def test_a_varying_prefix_reports_as_several_offsets(over, _fast_wait):
+async def test_a_varying_prefix_reports_as_several_offsets(over):
     """VARIABLE FURNITURE -> SEVERAL OFFSETS, and that is CONCLUSIVE.
 
     The three rows carry furniture of three different widths. The instrument
@@ -1329,7 +1411,7 @@ async def test_a_varying_prefix_reports_as_several_offsets(over, _fast_wait):
     assert sum(offsets.values()) == 3, offsets
 
 
-async def test_the_offset_scan_returns_integers_and_no_name(over, _fast_wait):
+async def test_the_offset_scan_returns_integers_and_no_name(over):
     """THE PRIVACY PROPERTY, asserted rather than argued.
 
     The whole reason this is a scan of locator counts instead of a page
@@ -1367,7 +1449,7 @@ async def test_the_offset_scan_returns_integers_and_no_name(over, _fast_wait):
 
 
 async def test_a_needle_nobody_carries_reports_no_offset_at_all(
-    over, _fast_wait
+    over,
 ):
     """THE THIRD OUTCOME, and it must not look like the other two.
 
@@ -1503,7 +1585,7 @@ def _anchored_patterns() -> tuple[str, ...]:
 
 
 async def test_no_anchored_matcher_can_work_on_the_shape_the_page_actually_has(
-    over, _fast_wait
+    over,
 ):
     """**THE DEAD END, AS A TEST.** Every anchored candidate reads zero.
 
@@ -1537,7 +1619,7 @@ async def test_no_anchored_matcher_can_work_on_the_shape_the_page_actually_has(
 
 
 async def test_the_offsets_reproduce_the_live_verdict_including_recurrence(
-    over, _fast_wait
+    over,
 ):
     """THE THREE FACTS, each asserted, on markup shaped like the live page.
 
@@ -1566,7 +1648,7 @@ async def test_the_offsets_reproduce_the_live_verdict_including_recurrence(
 
 
 async def test_the_reading_still_carries_no_name_on_the_live_shape(
-    over, _fast_wait
+    over,
 ):
     """The privacy property holds on the longest, busiest rows in this file.
 

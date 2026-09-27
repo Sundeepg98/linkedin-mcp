@@ -28,6 +28,7 @@ from typing import Any, Optional
 import pytest
 
 from linkedin_server import browser as browser_module
+from linkedin_server import people_data
 from linkedin_server import server as server_module
 from linkedin_server import shape
 from linkedin_server.config import (
@@ -462,11 +463,15 @@ async def test_profile_views_carry_name_headline_and_when_it_happened(drive):
 
     assert result["results"] == [
         {
-            "name": "Priya Raman",
-            "headline": "Engineering Manager at Razorpay | Hiring backend engineers",
+            "person": {
+                "name": "Priya Raman",
+                "headline": "Engineering Manager at Razorpay | Hiring backend engineers",
+                "link": "https://www.linkedin.com/in/priya-raman-123/",
+                "degree": None,
+                "untrusted_third_party_text": people_data.UNTRUSTED_NOTE,
+            },
             "viewed": "2 days ago",
             "anonymous": False,
-            "profile": "https://www.linkedin.com/in/priya-raman-123",
             # ADDED 2026-09-03 WITH THE MEMBER-ID READ, and None is the
             # RIGHT answer on this page rather than a missing one: the fake
             # draws no Message button, and a row with no button has no id.
@@ -490,9 +495,9 @@ async def test_an_anonymous_viewer_is_flagged_and_given_no_link(drive):
 
     hidden = result["results"][1]
     assert hidden["anonymous"] is True
-    assert hidden["name"] == "LinkedIn Member"
+    assert hidden["person"]["name"] == "LinkedIn Member"
     assert hidden["viewed"] == "1 week ago"
-    assert "profile" not in hidden, "an anonymous viewer must not get a link"
+    assert hidden["person"]["link"] is None, "an anonymous viewer must not get a link"
     assert result["results"][0]["anonymous"] is False
 
 
@@ -1122,7 +1127,7 @@ async def test_who_viewed_me_falls_back_to_the_classic_page_once(drive):
     assert result["pages_loaded"] == 2
     assert navigations == [ANALYTICS_VIEWS_URL, CLASSIC_VIEWS_URL]
     assert result["source_url"] == CLASSIC_VIEWS_URL
-    assert result["results"][0]["name"] == "Priya Raman"
+    assert result["results"][0]["person"]["name"] == "Priya Raman"
     assert page.evaluate_overrun is False
 
 

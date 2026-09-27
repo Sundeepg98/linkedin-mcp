@@ -25,6 +25,12 @@ import types
 import pytest
 
 from linkedin_server import feed
+from tests.record_typed import identity_parameters_outside_a_record
+
+#: Post text, by the names the closed-set test below keeps out of it: refused
+#: as a parameter even annotated as a record, because no record type carries
+#: a post's words.
+_POST_TEXT_PARAMETERS = frozenset({"text", "body", "reason", "label", "post"})
 
 #: A SYNTHETIC SLUG that resembles no real identifier: no digit run, no
 #: name, no urn. It exists to be looked for in output, so it must be a
@@ -188,13 +194,21 @@ def test_no_public_callable_accepts_a_parameter_outside_the_closed_set(name):
 
     The failure message names the offending parameter, because a refusal
     that reports only what it did NOT match is half a measurement.
+
+    REWRITTEN AROUND THE RECORD TYPE ON 2026-09-27, not deleted.
+    NAMES-AT-RUNTIME amended FEED-CONTENT-READ-RULING's "never text or names"
+    for what a read returns, and PEOPLE-DATA-MITIGATIONS says a person crosses
+    as a ``people_data`` record. So a parameter outside the closed set is
+    still refused -- unless it is annotated as a record
+    (``tests/record_typed.py``) -- and post text is refused as anything.
     """
-    signature = inspect.signature(getattr(feed, name))
-    offending = [
-        parameter
-        for parameter in signature.parameters
-        if parameter not in feed._PERMITTED_PARAMETER_NAMES
-    ]
+    function = getattr(feed, name)
+    signature = inspect.signature(function)
+    outside_the_set = identity_parameters_outside_a_record(
+        function, lambda parameter: parameter not in feed._PERMITTED_PARAMETER_NAMES
+    )
+    post_text = [p for p in signature.parameters if p in _POST_TEXT_PARAMETERS]
+    offending = sorted(set(outside_the_set) | set(post_text))
     assert not offending, (
         "feed." + name + " accepts " + repr(offending) + ", which is outside "
         "_PERMITTED_PARAMETER_NAMES. If this parameter is meant to carry post "

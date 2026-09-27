@@ -265,8 +265,8 @@ async def _abandon(pw: Any, client: Any) -> None:
         try:
             await client.close()
         except Exception as exc:  # pragma: no cover - shutdown noise
-            logger.debug("cdp disconnect raised %s: %s", type(exc).__name__, exc)
+            logger.debug("cdp disconnect raised %s", type(exc).__name__)
     try:
         await pw.stop()
     except Exception as exc:  # pragma: no cover - shutdown noise
-        logger.debug("stopping playwright raised %s: %s", type(exc).__name__, exc)
+        logger.debug("stopping playwright raised %s", type(exc).__name__)

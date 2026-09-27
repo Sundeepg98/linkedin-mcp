@@ -609,3 +609,111 @@ def carries_the_plant(obj: Any) -> list[str]:
     from tests.leakwalk import walk
 
     return [path for path, text in walk(obj) if PLANT in text]
+
+
+def carries_the_plant_outside_records(obj: Any) -> tuple[list[str], int]:
+    """``(places holding the plant OUTSIDE a people record, records seen)``.
+
+    NAMES-AT-RUNTIME, applied by PEOPLE-DATA-MITIGATIONS: a people reader
+    returns another member's words, and returns them ONLY inside a
+    ``linkedin_server.people_data`` record's ENVELOPE -- a dict with exactly
+    the declared keys, the marker's exact note and fields that rebuild into a
+    valid record. Such a record is the declared channel and is not walked.
+    EVERYTHING AROUND IT IS: a plant beside a record, in a key, in a widened
+    record-shaped dict, in an error field or an exception, is still found. A
+    dict that merely LOOKS like a record fails ``as_record`` and is walked
+    like any other dict.
+
+    HARDENED 2026-09-27 on lane G's cold verification, in two ways:
+
+    * A record INSTANCE is not the declared channel, only its envelope: the
+      server publishes an instance without the marker, so an instance is
+      walked like any other value.
+    * Outside a record the plant is found in ANY SPELLING that carries one of
+      its words -- a first name alone, a slug, another case, a no-break
+      space, an entity, a prefix -- not only verbatim. Each word of
+      :data:`PLANT` is long and invented, so one found anywhere is the plant.
+      (The plain hunt, :func:`carries_the_plant`, still matches verbatim; this
+      one is consulted once the verbatim plant is known to be present.)
+    """
+    from linkedin_server.people_data import as_record
+    from tests.leakwalk import walk
+
+    records: list[Any] = []
+
+    def is_record(value: Any) -> bool:
+        if not isinstance(value, dict) or as_record(value) is None:
+            return False
+        records.append(value)
+        return True
+
+    hits = [
+        path for path, text in walk(obj, skip=is_record) if carries_a_plant_word(text)
+    ]
+    return hits, len(records)
+
+
+#: The plant's words, case-folded. See :func:`carries_the_plant_outside_records`.
+PLANT_WORDS = tuple(word.casefold() for word in PLANT.split())
+
+
+def carries_a_plant_word(text: str) -> bool:
+    """Does ``text`` carry any word of the plant, in any case?"""
+    folded = str(text).casefold()
+    return any(word in folded for word in PLANT_WORDS)
+
+
+#: The two verdict words the ratchet below turns on, shared by the reader guard
+#: and the tool-envelope guard (both baselines store ``"<verdict>:<reason>"``,
+#: so a verdict is compared by the part before the first colon).
+RETURNS_TEXT_VERDICT = "returns_text"
+RETURNS_RECORDS_VERDICT = "returns_records"
+
+
+def _verdict_class(value: Any) -> str:
+    return str(value).split(":", 1)[0].strip()
+
+
+def text_ratchet(baseline: dict[str, str], live: dict[str, str]) -> list[str]:
+    """What a live verdict table may not do against its committed baseline.
+
+    THE LEGACY INVENTORY MAY SHRINK AND MAY NOT GROW (2026-09-24,
+    PEOPLE-DATA-MITIGATIONS). Three problems, one line each, names only:
+
+    * ``new text path``   -- live returns text outside records where the
+      baseline does not say so: a page string leaving by a path that is not the
+      declared record. Return people data through ``people_data`` records.
+    * ``stale inventory`` -- the baseline says text and the live verdict is
+      anything else: the inventory is larger than the truth; regenerate it so
+      it shrinks.
+    * ``lost records``    -- the baseline says records and the live verdict is
+      anything else: a converted reader fell back.
+
+    Names present on only one side are the callers' existing appeared/vanished
+    checks, and are skipped here.
+    """
+    problems: list[str] = []
+    for name in sorted(set(baseline) & set(live)):
+        was, now = _verdict_class(baseline[name]), _verdict_class(live[name])
+        if now == RETURNS_TEXT_VERDICT and was != RETURNS_TEXT_VERDICT:
+            problems.append(f"new text path: {name} ({was} -> {now})")
+        elif was == RETURNS_TEXT_VERDICT and now != RETURNS_TEXT_VERDICT:
+            problems.append(f"stale inventory: {name} ({was} -> {now})")
+        elif was == RETURNS_RECORDS_VERDICT and now != RETURNS_RECORDS_VERDICT:
+            problems.append(f"lost records: {name} ({was} -> {now})")
+    return problems
+
+
+def text_paths_a_baseline_may_not_record(
+    baseline: dict[str, str], live: dict[str, str]
+) -> list[str]:
+    """Names a baseline WRITER must refuse: live text outside records where the
+    committed baseline does not already record text -- including names it does
+    not record at all. So a new page-text path cannot be written into the
+    inventory; it has to return records."""
+    return sorted(
+        name
+        for name, verdict in live.items()
+        if _verdict_class(verdict) == RETURNS_TEXT_VERDICT
+        and _verdict_class(baseline.get(name, "")) != RETURNS_TEXT_VERDICT
+    )

@@ -55,7 +55,7 @@ from linkedin_server import browser as browser_module
 from linkedin_server import dom, errors, readonly, shape
 from linkedin_server import server as server_module
 from linkedin_server.server import (
-    CENSUS_ITEM_RULES,
+    CENSUS_ITEM_SHAPE,
     CENSUS_RESOLVED_SURFACES,
     CENSUS_SETTLED_CONTROLS,
     CENSUS_SURFACES,
@@ -715,11 +715,12 @@ def test_the_surface_table_is_a_closed_set_of_eight_plus_one_resolved():
         "groups",
         "events",
     }
-    assert CENSUS_RESOLVED_SURFACES == {"feed_item", "feed_item_commented"}
-    # EVERY RESOLVED SURFACE NAMES ITS SELECTION RULE. A resolved key with no
-    # rule would fall through to a KeyError at call time, on a path that has
-    # already loaded a page.
-    assert set(CENSUS_ITEM_RULES) == CENSUS_RESOLVED_SURFACES
+    # ONE RESOLVED KEY SINCE 2026-09-24. ``feed_item_commented`` and its
+    # selection-rule table left together: they differed from ``feed_item`` only
+    # in how the PAGE chose the item, and the page no longer chooses -- the
+    # caller names the item and his own rail may only veto it.
+    assert CENSUS_RESOLVED_SURFACES == {"feed_item"}
+    assert not hasattr(server_module, "CENSUS_ITEM_RULES")
     # THE TWO SETS ARE DISJOINT AND THEIR UNION IS WHAT A CALLER IS OFFERED.
     # Without this a key could be in both and the refusal branch would never
     # be reached for it.
@@ -734,7 +735,8 @@ def test_the_surface_table_is_a_closed_set_of_eight_plus_one_resolved():
     # mirror of the older defect this test's own docstring records, where the
     # count was right by accident and the membership was wrong. Two
     # assertions, two failure modes, and neither one covers the other.
-    assert len(census_surface_keys()) == 14
+    # 14 -> 13 ON 2026-09-24: ``feed_item_commented`` retired (see above).
+    assert len(census_surface_keys()) == 13
     assert CENSUS_SURFACES["feed"] == FEED_URL
     assert CENSUS_SURFACES["profile"] == PROFILE_URL
     assert CENSUS_SURFACES["settings"] == SETTINGS_URL
@@ -866,7 +868,7 @@ def test_every_surface_is_a_permitted_read_url():
     # dom.ACTIVITY_ITEMS_JS refuses to publish a key that does not match
     # ``urn:li:<type>:<digits>``, so a urn this url could be built from is
     # necessarily one this pattern admits.
-    assert CENSUS_RESOLVED_SURFACES == {"feed_item", "feed_item_commented"}
+    assert CENSUS_RESOLVED_SURFACES == {"feed_item"}
     synthetic = server_module.ITEM_PERMALINK_URL.format(
         urn="urn:li:activity:" + ACTIVITY_ID
     )
@@ -948,7 +950,6 @@ async def test_an_unknown_surface_is_refused_without_navigating(drive, bad):
         "events",
         "feed",
         "feed_item",
-        "feed_item_commented",
         "groups",
         "messaging_compose",
         "post_composer",
@@ -3591,65 +3592,193 @@ def test_the_settle_report_calls_every_observed_reading_correctly(
     assert census_settle_report(surface, read)["verdict"] == verdict
 
 
-async def test_the_richest_item_is_chosen_without_indexing_a_moving_list(
-    monkeypatch,
-):
-    """THE BUG THIS RESOLVER SHIPPED WITH, and it failed on first live use.
+# ---------------------------------------------------------------------------
+# feed_item: THE CALLER NAMES THE ITEM, AND HIS OWN RAIL MAY ONLY VETO IT
+#
+# The orchestrator's ruling of 2026-09-24, delegated for this route: THE PAGE
+# MAY VETO A NAVIGATION, NEVER SUPPLY ONE. These replace the test of the
+# retired resolver's richest-item tie-break -- a correct test of a choice the
+# page is no longer allowed to make.
+# ---------------------------------------------------------------------------
 
-    ``feed_item_commented`` picks the item carrying the most permalink
-    anchors. The first version broke ties with ``items.index(urn)`` INSIDE the
-    sort key -- which ``list.sort`` evaluates WHILE it is mutating the very
-    list being indexed, so a urn already moved by the partial sort was no
-    longer where ``index`` looked and the call raised ``ValueError: '<urn>' is
-    not in list``.
+#: Synthetic items in the activity reader's own shape. Five digits, under the
+#: identity guard's six-digit urn floor, and sequential: none is a real post.
+_ITEM_A = "urn:li:activity:10001"
+_ITEM_B = "urn:li:activity:10002"
+_ITEM_C = "urn:li:activity:10003"
 
-    It failed LOUDLY on its first call, before the census had navigated
-    anywhere, which is the good version of that bug. This pins both halves:
-    the selection is correct, and ties keep DOCUMENT ORDER -- a census whose
-    subject moved between readings could not be compared with itself.
+
+class _SelfAssertingPage(FakePage):
+    """A FakePage whose load of /in/me/ lands with LinkedIn's self-assertion.
+
+    LANDED, NOT STUBBED -- the choice the retired resolver's test made, and
+    for its reason: stubbing the assertion reader names a seam, and the seam
+    moved once already. Only the rail is supplied.
     """
+
+    async def goto(self, url: str, **kwargs) -> None:
+        await super().goto(url, **kwargs)
+        if url == server_module.SELF_PROFILE_URL:
+            self.url = url + "?isSelfProfile=true"
+
+
+def _install_rail(monkeypatch, *items: str, **extra: Any) -> None:
     rail = {
         "authorship_facts": {"authors_found": 1, "unanimous": True},
-        "items": ["urn:a", "urn:b", "urn:c", "urn:d"],
-        # Two items tie at the top; the earlier one must win.
-        "anchors_per_item": {"urn:a": 2, "urn:b": 4, "urn:c": 4, "urn:d": 2},
+        "items": list(items),
+        "anchors_per_item": {urn: 2 + n for n, urn in enumerate(items)},
         "counts": {},
         "item_root_source": {},
     }
+    rail.update(extra)
 
-    async def _rail(page, **kwargs):
+    async def _read(page, **kwargs):
         return dict(rail)
 
-    monkeypatch.setattr(dom, "read_own_activity_items", _rail)
+    monkeypatch.setattr(dom, "read_own_activity_items", _read)
 
-    # THE ASSERTION IS LANDED, NOT STUBBED, and that is a deliberate change
-    # from the version of this test that patched ``_self_assertion_on`` to
-    # return True. That patch named a SEAM rather than a fact, so when the
-    # resolver moved to the tri-state reader on 2026-09-03 the stub stopped
-    # intercepting anything and this test failed for a reason that had
-    # nothing to do with what it pins. Landing a url that CARRIES the
-    # assertion lets the real reader run and keeps the subject of this test
-    # -- which item the tie-break chooses -- the only thing it can fail on.
-    class _Nav:
-        async def goto(self, page, url):
-            return url + "?isSelfProfile=true"
 
-    monkeypatch.setattr(server_module, "BROWSER", _Nav())
+async def test_feed_item_opens_the_item_the_caller_named_and_no_other(
+    drive, monkeypatch
+):
+    """THE DISCRIMINATING CASE. His rail's FIRST item is A; the caller names B.
 
-    aimed, url = await server_module._resolve_own_item_permalink(
-        object(), "most_anchors"
+    The retired resolver would have opened A -- the first in document order --
+    whatever the caller wanted. Now B is opened, built from the argument, and
+    A is never loaded.
+    """
+    _install_rail(monkeypatch, _ITEM_A, _ITEM_B, _ITEM_C)
+    page = _SelfAssertingPage(url=FEED_URL, evaluate_result=_payload([]))
+    navigations = drive(page)
+
+    result = await linkedin_surface_census("feed_item", item=_ITEM_B)
+
+    assert navigations == [
+        server_module.SELF_PROFILE_URL,
+        server_module.ITEM_PERMALINK_URL.format(urn=_ITEM_B),
+    ], navigations
+    assert result["surface"] == "feed_item"
+    assert result["aimed_at"]["verified"] is True
+    assert "the caller" in result["aimed_at"]["chosen_by"]
+    assert result["aimed_at"]["anchors_on_the_item"] == 3
+    assert result["pages_loaded"] == 2
+
+
+async def test_an_item_his_rail_does_not_carry_is_refused_before_its_page_loads(
+    drive, monkeypatch
+):
+    """THE VETO. The rail is read, the item is not on it, and nothing else loads.
+
+    And the refusal is not a route to the rail: none of the keys the page DID
+    carry appears anywhere in the answer.
+    """
+    _install_rail(monkeypatch, _ITEM_A, _ITEM_C)
+    page = _SelfAssertingPage(url=FEED_URL, evaluate_result=_payload([]))
+    navigations = drive(page)
+
+    result = await linkedin_surface_census("feed_item", item=_ITEM_B)
+
+    assert result["refused"] == "item_not_on_his_rail", result
+    assert navigations == [server_module.SELF_PROFILE_URL], navigations
+    assert result["pages_loaded"] == 1
+    blob = json.dumps(result)
+    for other in (_ITEM_A, _ITEM_C, _ITEM_B):
+        assert other not in blob, other
+
+
+async def test_a_rail_refusal_still_stops_the_census_before_the_item(
+    drive, monkeypatch
+):
+    """The reader's own refusals are forwarded WHOLE, as they always were."""
+    _install_rail(monkeypatch, refused="authors_not_unanimous", reason="r")
+    page = _SelfAssertingPage(url=FEED_URL, evaluate_result=_payload([]))
+    navigations = drive(page)
+
+    result = await linkedin_surface_census("feed_item", item=_ITEM_B)
+
+    assert result["refused"] == "authors_not_unanimous", result
+    assert navigations == [server_module.SELF_PROFILE_URL], navigations
+
+
+@pytest.mark.parametrize(
+    "given, refused",
+    [
+        ("", "item_required"),
+        (None, "item_required"),
+        ("   ", "item_required"),
+        ("urn:li:activity:10002/edit", "item_unrecognised"),
+        ("https://www.linkedin.com/feed/update/urn:li:activity:10002/",
+         "item_unrecognised"),
+        ("urn:li:activity:", "item_unrecognised"),
+        ("urn:li:activity:10002?x=1", "item_unrecognised"),
+        ("not-a-urn", "item_unrecognised"),
+    ],
+)
+async def test_no_item_or_a_malformed_one_is_refused_before_any_load(
+    drive, monkeypatch, given, refused
+):
+    """REFUSED BEFORE A PAGE EXISTS, and the caller's value is never echoed."""
+    _install_rail(monkeypatch, _ITEM_B)
+    page = _SelfAssertingPage(url=FEED_URL, evaluate_result=_payload([]))
+    navigations = drive(page)
+
+    result = await linkedin_surface_census("feed_item", item=given)
+
+    assert result["refused"] == refused, result
+    assert result["pages_loaded"] == 0
+    assert navigations == []
+    assert page.evaluations == []
+    if given and given.strip():
+        assert given.strip() not in json.dumps(result)
+
+
+async def test_a_fixed_surface_refuses_an_item(drive):
+    """Only feed_item measures a named item; the others are fixed addresses."""
+    page = _raw_page(RAW_CONTROLS)
+    navigations = drive(page)
+
+    result = await linkedin_surface_census("feed", item=_ITEM_B)
+
+    assert result["refused"] == "item_not_accepted", result
+    assert navigations == []
+
+
+def test_the_item_shape_is_the_readers_own():
+    """ONE SHAPE, HELD IN TWO LANGUAGES.
+
+    The tool refuses a malformed item before any page exists, so it cannot run
+    the reader's own check -- and a tool that admitted a shape the reader never
+    publishes would be checking a key no caller could have been handed.
+    """
+    found = re.search(
+        r"const urnShape = /\^(.+?)\$/;", dom.ACTIVITY_ITEMS_JS
     )
-    assert url is not None, aimed
-    assert url.endswith("urn:b/"), url
-    assert aimed["anchors_on_the_chosen_item"] == 4
-    assert "MOST" in aimed["chosen_by"]
+    assert found, "the reader's urnShape moved; this cannot compare"
+    assert CENSUS_ITEM_SHAPE.pattern == found.group(1)
 
-    # AND THE DEFAULT RULE IS UNTOUCHED: document order, first item.
-    aimed, url = await server_module._resolve_own_item_permalink(
-        object(), "first"
+
+def test_the_veto_cannot_supply_an_address():
+    """THE RULING, STRUCTURALLY: the helper never touches the permalink.
+
+    It answers a question about the caller's item and returns a report. If it
+    ever builds or returns an address, the page is back to supplying one.
+    """
+    tree = ast.parse(
+        ast.unparse(ast.parse(
+            __import__("inspect").getsource(server_module._own_item_veto)
+        ))
     )
-    assert url.endswith("urn:a/"), url
-    assert "first item in document order" in aimed["chosen_by"]
+    named = {
+        node.id for node in ast.walk(tree) if isinstance(node, ast.Name)
+    } | {node.attr for node in ast.walk(tree) if isinstance(node, ast.Attribute)}
+    assert "ITEM_PERMALINK_URL" not in named
+    assert "goto" not in named or all(
+        "SELF_PROFILE_URL" in ast.unparse(call)
+        for call in ast.walk(tree)
+        if isinstance(call, ast.Call)
+        and isinstance(call.func, ast.Attribute)
+        and call.func.attr == "goto"
+    )
 
 
 def test_an_unmeasured_surface_reports_unknown_rather_than_passing():
@@ -3698,7 +3827,6 @@ def test_an_unmeasured_surface_reports_unknown_rather_than_passing():
     for surface in (
         "article_composer",
         "feed_item",
-        "feed_item_commented",
         "premium",
         # BOTH ADDED 2026-09-05, and they belong in THIS list rather than in
         # CENSUS_SETTLED_CONTROLS for the reason the paragraph above gives:
@@ -3825,7 +3953,7 @@ def test_a_surface_earns_its_entry_by_being_measured_more_than_once():
 TEMPLATE_LEAKS = [
     ("Invite Savita Krishnan to connect", "Savita Krishnan"),
     ("Open control menu for post by Thornwick M", "Thornwick M"),
-    ("Grace Hopper & 70 other connections follow this page", "Grace Hopper"),
+    ("Wren Fixturewright & 70 other connections follow this page", "Wren Fixturewright"),
 ]
 
 

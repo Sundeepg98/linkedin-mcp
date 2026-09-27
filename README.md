@@ -3,8 +3,22 @@
 An MCP server that shows you your own LinkedIn account data as structured tool
 results instead of pages you have to click through.
 
-**Fifty-six tools ship. Forty-one read. Fifteen write. None is
+**Fifty-seven tools ship. Forty-one read. Sixteen write. None is
 write-shaped and unable to act.**
+
+**THAT LINE READ "Fifty-six ... Fifteen write" UNTIL LANE L8'S MERGE,
+2026-09-27.** The sixteenth write is `linkedin_withdraw_from_group`: leaving
+one group you name by its numeric id, behind the same flag and single-use
+grant as every other write. It presses the group row's own menu and then
+"Leave this group" -- two presses through the one click site -- and verifies
+off a fresh render of your Groups page. It is called "withdraw" because the
+naming law requires a write verb and "leave" is not one. Census rows `M C63`
+and `N 64`, COVERED-UNFIRED: built offline and never fired. The same merge
+narrowed the permanently forbidden acts to the six that are themselves
+mitigations: reposting or sharing, endorsing or recommending, and deleting or
+withdrawing one of your own items are no longer refused outright, but built
+behind the grant as their controls are captured (ruling
+OUTWARD-CLASSES-BUILT-BEHIND-GRANTS).
 
 **THAT LINE READ "Fifty-three ... Thirty-nine read. Fourteen write" UNTIL THE
 LANE L5 MERGE, 2026-09-24,** and "Fifty-five ... Forty-one read. Fourteen
@@ -328,7 +342,7 @@ whole file rather than as a side effect of a wave that touched one tool.
 | `linkedin_logout` | Ends the **local** sign-in by erasing this machine's cookie jar. The one destructive tool here: `confirm=False` (the default) performs nothing and previews what would go. Issues no request, so LinkedIn is never told. |
 | `linkedin_cdp_status` | Recovery diagnostic: is there a Chrome this server could attach to? Touches nothing on LinkedIn. |
 | `linkedin_server_info` | The boundary, the rate settings and the launch flags, without reading the source. |
-| `linkedin_surface_census` | **An instrument for extending this server, not a job-search tool** -- its own docstring leads with that, and no answer about finding, comparing or tracking a job is in here. It measures what controls one page carries, so a capability this server has never built can be costed from what the page really holds instead of from a guessed selector found to be wrong at the moment it would fire. It takes a KEY and never a url, from a fixed set of five: `feed`, `profile`, `profile_edit_intro`, `settings`, `settings_dark_mode`. One page load, and it clicks nothing. It reports SHAPES and never names, so it identifies no member. Absent means UNKNOWN, never zero -- this server does not scroll, so a count describes the first render and nothing below the fold. A control being present is not evidence that using it is safe. Notifications, the network page and messaging are deliberately not offered: loading them costs a badge or opens somebody's conversation, and a census is not worth a side effect. |
+| `linkedin_surface_census` | **An instrument for extending this server, not a job-search tool** -- its own docstring leads with that, and no answer about finding, comparing or tracking a job is in here. It measures what controls one page carries, so a capability this server has never built can be costed from what the page really holds instead of from a guessed selector found to be wrong at the moment it would fire. It takes a KEY and never a url, from a fixed set its own docstring enumerates (thirteen since 2026-09-24). One page load, and it clicks nothing -- except `feed_item`, which measures an item YOU name, as `item`, from the keys `linkedin_my_activity_items` returned: your own activity rail is read first and may only VETO it, so the page never chooses the address. It reports SHAPES and never names, so it identifies no member. Absent means UNKNOWN, never zero -- this server does not scroll, so a count describes the first render and nothing below the fold. A control being present is not evidence that using it is safe. Notifications, the network page and messaging are deliberately not offered: loading them costs a badge or opens somebody's conversation, and a census is not worth a side effect. |
 | `linkedin_profile_editor_fields` | **The second instrument, and the one tool here that publishes control NAMES.** It names the controls inside the intro editor on your own profile -- which `linkedin_surface_census` will not do, because the census reports shapes and returns `<opaque>` for any name failing its length or character gate. That gate is what makes the census safe to point at a page full of strangers, and it is why `linkedin_update_profile_field` cannot name a field to type into. This tool relaxes it on ONE ground and establishes that ground per call: it loads `/in/me/`, requires LinkedIn's own `isSelfProfile=true` on the landed url, loads the intro editor, and requires the same member segment on both -- and if either half fails it returns a refusal carrying no field data at all, so a refusal can never be read as "there are none". The container is found structurally, as the nearest dialog ancestor of the control named Save, never by an index; two such controls or none is a refusal rather than a guess. It takes NO ARGUMENT, so no caller can aim it at another page. Two page loads, and it clicks nothing. **LABELS, NEVER VALUES** -- a label is "First name", a value is your first name, and no value and no href leaves the page. Your member slug is compared and discarded: it is in no part of the answer. |
 | `linkedin_own_item_link` | **The share link LinkedIn gives out for ONE of your own posts**, by its activity id (which `linkedin_my_activity_items` returns). It opens the post, opens the post's own control menu, and presses "Copy link to post" -- ONLY if the same menu also offers "Delete post" or "Edit post", which LinkedIn shows a post's author alone; otherwise it refuses `not_his_post`. Just before the press, the page's clipboard calls are captured in this server's own tab, so the link comes back here instead of replacing what you had copied -- for every route the page looks up when it copies. A reference the page took earlier is not captured, and the answer then reads `copied: false`. The presses are priced by the post's own reaction toggle, read before the first and after the last, and every reading comes back as `price_readings`; a page that draws no toggle is refused `price_cannot_move` with nothing pressed. By default it returns the link's SHAPE (https, LinkedIn host, path kind, whether it carries this id); `include_link=True` returns the link itself, which can carry your profile's vanity name. |
 | `linkedin_my_activity_items` | **The item keys, for your own posts only** -- which nothing else here returns, and which is why `linkedin_comment_on_item` and `linkedin_react_to_item` are registered and refusing: neither was ever blocked by the read boundary or by the click anchor, they simply had nothing to aim at. `linkedin_surface_census` cannot supply one by construction, since it substitutes every urn out before it counts, and the feed carries zero item permalinks. It reads `/in/me/` and takes NO ARGUMENT, so no caller can aim it at another page. **Authorship is established, not inferred from where an item sits**, and it takes all three of: LinkedIn's own `isSelfProfile=true` on the landed url; one single author name across every item overflow control on the page, so a rail carrying somebody else's item is refused outright; and that name standing in a prefix relation to the page's own `h1`. If any of the three fails there is no `items` key at all, so a refusal can never be read as "you have no posts". **No name ever leaves the page** -- the comparison happens inside the document and only booleans come back. A urn is published only if it matches the exact `urn:li:<type>:<digits>` shape and sits inside an item root that itself carries an overflow control; anything else is counted and dropped. **The output is real identifiers**: do not paste one into a tracked file in this repository, which is public and swept for exactly that shape. |
@@ -439,7 +453,10 @@ but for reasons that were measured:
    would be filled in or pressed. This is the same standard `unsave_job` is
    held to, applied to the action that deserves it most.
 2. **An application cannot be undone from here**, at any confirm level, in any
-   circumstances. Withdrawing is permanently forbidden.
+   circumstances -- and since 2026-09-24 the reason is LinkedIn's: its Help
+   Center (a512388) says an application submitted through LinkedIn cannot be
+   withdrawn. This line used to say "Withdrawing is permanently forbidden";
+   that refusal was retired by OUTWARD-CLASSES-BUILT-BEHIND-GRANTS.
 3. **The off-site half is not this server's to do at all**, however good a
    capture got. Driving somebody else's form, on somebody else's domain, under
    their terms, is a different piece of software.
@@ -918,7 +935,7 @@ linkedin_server/
   cdp_bridge.py              the recovery path: attach to a running Chrome
   dom.py                     the read-only harvesters and the control readers
   shape.py                   pure parsers and the result envelope
-  server.py                  the fifty-six tools
+  server.py                  the fifty-seven tools
   errors.py
 tests/                       1393 tests, no network, no account
   fixtures/                  frozen LinkedIn markup, scrubbed

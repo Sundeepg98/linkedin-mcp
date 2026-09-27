@@ -3,7 +3,6 @@
   "sites": {
     "auth.py:_maybe_corroborate:landing.withheld(final_url)": "WITHHELD",
     "auth.py:login_via_browser:LOGIN_URL": "SERVER_CONSTRUCTED",
-    "browser.py:goto:url": "ASKED_FOR",
     "dom.py:read_job_identity:slug.group(1)": "PUBLISHED_BY_CONTRACT",
     "readonly.py:assert_read_url:url": "ASKED_FOR",
     "readonly.py:assert_read_url:url#2": "ASKED_FOR",
@@ -27,7 +26,6 @@
     "shape.py:apply_route:raw_href#2": "PUBLISHED_BY_CONTRACT",
     "shape.py:apply_route:raw_href#3": "PUBLISHED_BY_CONTRACT",
     "shape.py:parse_connection_card:slug": "PUBLISHED_BY_CONTRACT",
-    "shape.py:parse_person_card:slug": "PUBLISHED_BY_CONTRACT",
     "threads.py:off_thread_result:landing.withheld(landed)": "WITHHELD",
     "transport.py:_serve:http_url(chosen)": "SERVER_CONSTRUCTED",
     "writes.py:_assert_landed_on_target:landing.withheld(landed)": "WITHHELD",

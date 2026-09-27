@@ -332,4 +332,8 @@ def test_both_rules_reject_the_registry_that_was_actually_measured():
     # (linkedin_send_reply) on top of lane L7's fifty-three -- fifty-five on
     # the lane's branch, which had counted from the live lane's fifty-two --
     # measured off the merged registry and moved with every other count site.
-    assert len(_tool_names()) == 56
+    # FIFTY-SEVEN AT LANE L8'S MERGE OF MASTER 2eb90ad, 2026-09-27: one WRITE,
+    # linkedin_withdraw_from_group (census rows M C63 / N 64), on top of
+    # master's fifty-six, measured off the merged registry and moved with
+    # every other count site in the merge commit.
+    assert len(_tool_names()) == 57

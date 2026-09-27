@@ -416,7 +416,10 @@ async def test_a_detached_frame_resets_every_field_rather_than_keeping_some():
             raise RuntimeError("frame was detached")
 
     out = await job_collections.read_job_collection(Exploding(), expect=0)
-    assert out["error"] == "RuntimeError: frame was detached"
+    # THE TYPE ONLY since 2026-09-24 (lane G follow-up, item 2): a library's
+    # message can quote a selector, a request or the page.
+    assert out["error"] == "RuntimeError"
+    assert "frame was detached" not in str(out)
     assert out["slots"] == 0
     assert out["slots_outside_main"] == 0
     assert out["hydrated"] == 0

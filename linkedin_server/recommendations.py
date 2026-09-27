@@ -91,13 +91,14 @@ importing ``_MEMBERSHIP_FOREIGN_MARKERS`` outright.
   trusts that label and counts what it is handed under it.
 * It is **not** the write side. Requesting a recommendation, writing one
   for somebody, or accepting or declining a request are outward-facing
-  acts that name a real person, and none of them is implemented here. A
-  related action, ``endorse_or_recommend``, already sits in
-  ``writes.PERMANENTLY_FORBIDDEN`` for adjacent reasons (measured zero
-  endorse controls across every tracked fixture and his own live
-  profile) -- but that entry was not re-verified for this module, and
-  this paragraph makes no claim about recommendation-specific writes
-  beyond: they are not here.
+  acts that name a real person, and none of them is implemented here.
+  This paragraph used to say that ``endorse_or_recommend`` "already sits
+  in ``writes.PERMANENTLY_FORBIDDEN``"; it left that dict on 2026-09-24
+  (OUTWARD-CLASSES-BUILT-BEHIND-GRANTS), and requesting or giving a
+  recommendation is now a class built behind the grant, recorded in
+  ``outward_classes.OUTWARD_CLASS_SPECS`` as NEEDS-CAPTURE -- the controls
+  live on the named member's own profile and have never been captured.
+  This module still makes no claim beyond: they are not here.
 
 ## MEASURED VERSUS ASSERTED
 

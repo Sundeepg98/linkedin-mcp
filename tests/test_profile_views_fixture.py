@@ -45,7 +45,7 @@ from pathlib import Path
 
 import pytest
 
-from linkedin_server import dom, shape
+from linkedin_server import dom, people_data, shape
 
 FIXTURE_DIR = Path(__file__).parent / "fixtures"
 #: name -> the render it froze. Every harvester test runs against both.
@@ -173,7 +173,7 @@ def test_degree_badge_does_not_become_the_headline():
         {"href": "/in/priya-sharma-8a41b207/", "text": NAMED_ROW}
     )
     assert card is not None
-    assert card["headline"] == PRIYA_HEADLINE
+    assert card["person"]["headline"] == PRIYA_HEADLINE
 
 
 def test_compact_timestamp_is_read_and_spelled_out():
@@ -189,7 +189,7 @@ def test_mutual_connections_line_does_not_become_the_headline():
         {"href": "/in/arun-balakrishnan-4c19d833/", "text": NAMED_ROW_WITH_MUTUALS}
     )
     assert card is not None
-    assert card["headline"].startswith("Heavy Industry professional")
+    assert card["person"]["headline"].startswith("Heavy Industry professional")
     assert card["viewed"] == "5 days ago"
 
 
@@ -198,11 +198,11 @@ def test_a_row_with_no_link_is_anonymous_and_stays_anonymous(text):
     card = shape.parse_person_card({"href": "", "text": text})
     assert card is not None
     assert card["anonymous"] is True
-    assert "profile" not in card
+    assert card["person"]["link"] is None
     assert card["viewed"]
     # The company is the only thing LinkedIn showed, so it is the name. It is
     # not a headline and must not be dressed up as one.
-    assert card["headline"] is None
+    assert card["person"]["headline"] == ""
 
 
 def test_the_recruiter_rollup_card_is_not_a_viewer():
@@ -285,7 +285,7 @@ async def test_every_row_is_a_different_person(which):
     true throughout; distinctness is what was false.
     """
     rows, _ = await _rows(which)
-    names = [row["name"] for row in rows]
+    names = [row["person"]["name"] for row in rows]
     assert len(names) == len(set(names)), names
 
 
@@ -294,25 +294,25 @@ async def test_no_row_is_named_after_the_page(which):
     rows, _ = await _rows(which)
     assert rows
     for row in rows:
-        assert row["name"] != PAGE_HEADING, row
-        assert PAGE_HEADING not in (row["name"] or "")
-        assert row["headline"] != PAGE_FILTER, row
+        assert row["person"]["name"] != PAGE_HEADING, row
+        assert PAGE_HEADING not in (row["person"]["name"] or "")
+        assert row["person"]["headline"] != PAGE_FILTER, row
 
 
 @pytest.mark.parametrize("which", BOTH)
 async def test_the_named_viewers_come_back_whole(which):
     rows, _ = await _rows(which)
-    by_name = {row["name"]: row for row in rows}
+    by_name = {row["person"]["name"]: row for row in rows}
 
     assert "Priya Sharma" in by_name, sorted(by_name)
     priya = by_name["Priya Sharma"]
-    assert priya["headline"] == PRIYA_HEADLINE
+    assert priya["person"]["headline"] == PRIYA_HEADLINE
     assert priya["viewed"] == "3 days ago"
     assert priya["anonymous"] is False
-    assert priya["profile"] == "https://www.linkedin.com/in/priya-sharma-8a41b207"
+    assert priya["person"]["link"] == "https://www.linkedin.com/in/priya-sharma-8a41b207/"
 
     assert by_name["Rohan Desai"]["viewed"] == "1 week ago"
-    assert by_name["Meera Iyer"]["headline"] == (
+    assert by_name["Meera Iyer"]["person"]["headline"] == (
         "Humans and AI for clinics | Co-Founder @ northgate.example"
     )
 
@@ -344,7 +344,7 @@ async def test_no_anonymous_viewer_carries_a_link_or_a_slug(which):
         if not row["anonymous"]:
             continue
         seen_anonymous = True
-        assert "profile" not in row, row
+        assert row["person"]["link"] is None, row
         assert not any("linkedin.com/in/" in str(v) for v in row.values()), row
     assert seen_anonymous, "no anonymous row to check -- the fixture regressed"
 
@@ -353,7 +353,7 @@ async def test_no_anonymous_viewer_carries_a_link_or_a_slug(which):
 async def test_the_rollup_card_never_becomes_a_viewer(which):
     rows, _ = await _rows(which)
     for row in rows:
-        assert "viewed your profile" not in row["name"].lower(), row
+        assert "viewed your profile" not in row["person"]["name"].lower(), row
 
 
 @pytest.mark.parametrize("which", BOTH)
@@ -361,11 +361,11 @@ async def test_the_container_fix_holds_without_the_sibling_harvest(which):
     """The row boundary is right on its own, not only in sibling mode."""
     rows, _ = await _rows(which, sibling_rows=False)
     assert len(rows) == NAMED_VIEWERS
-    names = [row["name"] for row in rows]
+    names = [row["person"]["name"] for row in rows]
     assert len(names) == len(set(names)), names
     assert PAGE_HEADING not in names
     assert all(row["viewed"] for row in rows), rows
-    assert all(row["headline"] for row in rows), rows
+    assert all(row["person"]["headline"] for row in rows), rows
 
 
 @pytest.mark.parametrize("which", BOTH)
@@ -384,7 +384,28 @@ async def test_each_harvested_record_holds_exactly_one_person(which):
 async def test_both_renders_produce_the_same_answer(which):
     """Hydration timing must not change what the operator is told."""
     rows, _ = await _rows(which)
-    summary = [(row["name"], row["viewed"], row["anonymous"]) for row in rows]
+    summary = [(row["person"]["name"], row["viewed"], row["anonymous"]) for row in rows]
     reference, _ = await _rows("pre_hydration")
-    expected = [(row["name"], row["viewed"], row["anonymous"]) for row in reference]
+    expected = [
+        (row["person"]["name"], row["viewed"], row["anonymous"]) for row in reference
+    ]
     assert summary == expected
+
+
+@pytest.mark.parametrize("which", BOTH)
+async def test_every_viewer_comes_back_as_a_people_record(which):
+    """Every row the real harvest returns holds its viewer as a PEOPLE RECORD.
+
+    ``person`` re-validates through ``people_data.as_record`` and carries the
+    untrusted-third-party-text marker, and the row around it holds only
+    ``viewed`` and ``anonymous``, which this package computed: any other key
+    would be somewhere the viewer's words could ride outside the record.
+    """
+    rows, _ = await _rows(which)
+    assert rows, "no rows to check -- the fixture or the harvest regressed"
+    for row in rows:
+        assert set(row) == {"person", "viewed", "anonymous"}, row
+        person = row["person"]
+        assert people_data.as_record(person) is not None, row
+        assert people_data.UNTRUSTED_KEY in person, row
+        assert person[people_data.UNTRUSTED_KEY] == people_data.UNTRUSTED_NOTE, row

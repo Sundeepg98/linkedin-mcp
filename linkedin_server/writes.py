@@ -213,7 +213,9 @@ from linkedin_server import (
     coerce,
     company_interest,
     dom,
+    group_leave,
     landing,
+    people_data,
     profile_editor,
     shape,
     threads,
@@ -721,12 +723,17 @@ SANCTIONED_WRITES: dict[str, WriteSpec] = {
             "is stated in reversible_by."
         ),
         reversible_by=(
-            "NOBODY, through this server, in either direction. Withdrawing is "
-            "in PERMANENTLY_FORBIDDEN ('destruction is not a write this design "
-            "covers, at any confirm level') and /withdraw is on the read "
-            "boundary's forbidden list. So whatever LinkedIn's product may "
-            "allow, an application this server sent is one it can never take "
-            "back, and it must be treated as irreversible on that ground alone."
+            "NOBODY -- and since 2026-09-24 the ground is LinkedIn's, not this "
+            "server's. This field used to say \"Withdrawing is in "
+            "PERMANENTLY_FORBIDDEN ('destruction is not a write this design "
+            "covers, at any confirm level')\"; that entry was retired by "
+            "OUTWARD-CLASSES-BUILT-BEHIND-GRANTS, which builds withdrawing his "
+            "own items behind the grant. What stands is LinkedIn's own Help "
+            "Center (a512388), quoted in _audit/_census/jobs.md: 'You cannot "
+            "edit or withdraw an application once submitted through "
+            "LinkedIn.' So outward_classes records withdraw_application as "
+            "BLOCKED, not a LinkedIn capability, and an application this "
+            "server sends is one nobody can take back."
         ),
         residue=(
             "IRREVERSIBLE IN AUDIENCE, and that half is certain even though "
@@ -739,20 +746,17 @@ SANCTIONED_WRITES: dict[str, WriteSpec] = {
         ),
         irreversible=True,
         reversibility_procedure=(
-            "NOBODY HAS ESTABLISHED THAT LINKEDIN OFFERS A WITHDRAW AT ALL, "
-            "and that is a worse sentence than 'this server cannot withdraw "
-            "it' -- which would invite you to assume LinkedIn can. It might. "
-            "It has not been measured. "
-            "The measurement is: load /jobs-tracker/?stage=applied on an "
-            "account that HAS an application and look for a withdraw control "
-            "on a row. That requires an application to exist, which requires "
-            "performing the very action whose reversibility is in question. "
-            "Measured 2026-08-25, this account's Applied tab reads 0 with "
-            "LinkedIn's own 'No matches' empty state, so there is no row to "
-            "read. The loop resolves in one direction only: the first "
-            "application made here is the one that settles the question, and "
-            "if the answer is no, it will have been settled by an "
-            "application nobody can take back. "
+            "LINKEDIN OFFERS NO WITHDRAW OF AN APPLICATION SUBMITTED THROUGH "
+            "IT, and it says so itself: its Help Center (a512388, quoted in "
+            "_audit/_census/jobs.md) reads 'You cannot edit or withdraw an "
+            "application once submitted through LinkedIn.' This field used to "
+            "open \"NOBODY HAS ESTABLISHED THAT LINKEDIN OFFERS A WITHDRAW AT "
+            "ALL ... It might. It has not been measured\" and proposed "
+            "settling it on an applied row of /jobs-tracker/?stage=applied, "
+            "which needed an application to exist first. LinkedIn's own "
+            "documentation settles it without one, so there is no control to "
+            "look for and nothing to build (outward_classes "
+            "withdraw_application, BLOCKED). "
             "THE FLOW ITSELF IS NO LONGER A GAP, and this sentence used to "
             "say the opposite -- 'no capture in this repo shows the LinkedIn "
             "apply form at all'. It was captured on 2026-08-24 by "
@@ -1032,6 +1036,99 @@ SANCTIONED_WRITES: dict[str, WriteSpec] = {
             "on this surface at all."
         ),
     ),
+    # LEAVING ONE GROUP, 2026-09-27 (census rows ``M C63`` and ``N 64``, one
+    # capability counted twice; lane L8, whose child wrote it on 2026-09-24
+    # and whose lead landed it three days later). Specified field by field on
+    # 2026-09-05 (``_audit/2026-09-05-leave-group-writespec.md``) and built
+    # now under ``OUTWARD-CLASSES-BUILT-BEHIND-GRANTS``: withdrawing one of HIS
+    # OWN items is built behind the single-use grant, off by default, and fired
+    # only at a group he names by numeric id in that call. The selectors and
+    # verdicts live in ``group_leave``; this entry and the arms below delegate.
+    #
+    # THE ADDRESS IS A CONSTANT, the admitted ``/groups/`` root, so the id
+    # never enters a navigation -- ``PAGE-MAY-VETO-NEVER-SUPPLY`` by
+    # construction. The page can refuse the id (it is not one of his rows);
+    # it cannot supply one. And the group's NAME is read nowhere: it is in the
+    # disclosure's own label, which no selector here names.
+    #
+    # NAMED ``withdraw_from_group``, NOT ``leave_group`` AS THE 2026-09-05 SPEC
+    # PROPOSED: a sanctioned write's tool name must carry a write verb
+    # (``readonly.name_implies_write``; ``tests/test_writes.py``'s naming
+    # law), and "leave" is not one. Adding it to ``readonly.WRITE_VERBS`` was
+    # measured and refused: the whole word appears in six READ tools'
+    # descriptions, which the docstring check would then read as write claims.
+    # "withdraw" is on the list and is the ruling's own verb for this class.
+    "linkedin_withdraw_from_group": WriteSpec(
+        action="withdraw_from_group",
+        tool_name="linkedin_withdraw_from_group",
+        url_template=group_leave.GROUPS_URL,
+        url_pattern=re.compile(r"^https://www\.linkedin\.com/groups/$"),
+        exempt_substring=None,
+        summary=(
+            "Leave one LinkedIn group you belong to, named by its numeric id."
+        ),
+        from_state=group_leave.MEMBER,
+        to_state=group_leave.NOT_MEMBER,
+        target_kind="group_id",
+        state_from="groups_memberships",
+        direction_source=(
+            "the Groups page itself, /groups/ -- the page this action clicks "
+            "on, at one page load. MEASURED 2026-09-05 by "
+            "scripts/_probe_groups_menu.py, which opened all five per-row "
+            "menus and pressed nothing inside them: 'Leave this group' is on "
+            "the menu of every membership row and on no suggestion row. The "
+            "row is found FROM THE CONTROL: from each button declaring "
+            "aria-expanded, the first ancestor holding a numeric group anchor "
+            "is its row, and the gate requires exactly one such disclosure "
+            "whose row carries the numeric id you named and no other id. The "
+            "group's name is in that button's label and is never read."
+        ),
+        wrong_state_note=(
+            "A row that is not one of your memberships draws no leave control "
+            "at all. Aiming this action at one does not join it; it aims at a "
+            "control that is not there -- so a group that does not read as a "
+            "membership is refused, never pressed."
+        ),
+        reversibility="STILL-UNKNOWN whether a group left can be rejoined",
+        reversibility_measured=False,
+        reversibility_class="STILL-UNKNOWN",
+        reversibility_evidence=(
+            "NOT MEASURED. Nobody has left a group through this server or "
+            "watched LinkedIn complete a leave, and nothing here joins a group, "
+            "so no rejoin has ever been observed. What IS measured is "
+            "narrower: the wave that read the Groups root observed no "
+            "entry-rule or privacy marker on any row, so nothing on the page "
+            "this action acts on says which of his groups are open and which "
+            "need a manager's approval (groups-surface, 2026-09-05)."
+        ),
+        reversible_by=(
+            "NOT through this server: no join write is built (census M C61 is "
+            "GAP). Rejoining a group that requires approval needs a MANAGER to "
+            "act, and an unlisted group may not be findable again without a "
+            "link you still hold (census N 175) -- so treat leaving as "
+            "irreversible."
+        ),
+        residue=(
+            "WHAT PRESSING 'Leave this group' DOES IS UNMEASURED: LinkedIn may "
+            "leave at once or open a confirmation. This server presses nothing "
+            "past that item -- a dialog left open is counted, reported and "
+            "discarded by the fresh render that decides whether the leave "
+            "landed. SECOND: whether the group's managers are told is "
+            "unreadable here. THIRD: what becomes of your own posts and "
+            "comments inside the group is unmeasured."
+        ),
+        irreversible=True,
+        reversibility_procedure=(
+            "Read the TARGET group's entry rule BEFORE the act. /groups/<id>/ "
+            "IS on the read allowlist (readonly, admitted 2026-09-19, "
+            "[0-9]{1,20}) and linkedin_group_page opens it -- but that reader "
+            "reports anchor-class counts only and reads no join or privacy "
+            "control, so the entry rule is still unread by this server. Until "
+            "a name-free reader of that control exists, open the group's own "
+            "page yourself before confirming: an open group can be rejoined by "
+            "joining; one that requires approval cannot be without a manager."
+        ),
+    ),
     "linkedin_set_open_to_work": WriteSpec(
         action="set_open_to_work",
         tool_name="linkedin_set_open_to_work",
@@ -1262,22 +1359,27 @@ SANCTIONED_WRITES: dict[str, WriteSpec] = {
         reversibility_measured=False,
         reversibility_class="STILL-UNKNOWN",
         reversibility_evidence=(
-            "NOT MEASURED, and the shape of the gap is worth stating because "
-            "it is the same one the notifications census hit. Each post draws "
-            "an overflow control -- 'Open control menu for post by <him>', "
-            "measured 8 times on his own profile -- and it renders "
-            "aria-expanded='false'. Its ITEMS have never been read. So "
-            "whether LinkedIn offers Delete on a post is something this "
-            "server has not established, and the notifications precedent is "
-            "that an unopened overflow menu is not evidence about what is "
-            "inside it."
+            "NOT MEASURED as a reversal, and the half that was unmeasured has "
+            "moved. Each post draws an overflow control that renders "
+            "aria-expanded='false', and this field used to say \"Its ITEMS "
+            "have never been read\". On 2026-09-23 and 2026-09-24 the live "
+            "lane opened that menu on his own post's permalink "
+            "(linkedin_server/share_link.py): its items include 'delete post' "
+            "and 'edit post', which are absent on another member's item. So "
+            "LinkedIn draws a delete on his own post. What pressing it draws "
+            "-- a confirmation, or the deletion itself -- has never been "
+            "observed, and this server has deleted nothing."
         ),
         reversible_by=(
-            "NOBODY, through this server. Deleting is in "
-            "PERMANENTLY_FORBIDDEN ('destruction is not a write this design "
-            "covers, at any confirm level') and '/delete' is on the read "
-            "boundary's forbidden list. Whatever LinkedIn's product allows, a "
-            "post published here is one this server can never take down."
+            "NOT YET through this server; by hand, he can. This field used to "
+            "say \"NOBODY, through this server. Deleting is in "
+            "PERMANENTLY_FORBIDDEN\"; that entry was retired 2026-09-24 "
+            "(OUTWARD-CLASSES-BUILT-BEHIND-GRANTS), and deleting his own post "
+            "is a class built behind the grant -- outward_classes records "
+            "delete_own_post as NEEDS-CAPTURE, because the step after "
+            "'delete post' has never been captured. Until that is built, "
+            "nobody takes a post down through this server. And a deletion "
+            "removes the post, not what its audience has already read."
         ),
         residue=(
             "IRREVERSIBLE IN AUDIENCE, and this half is certain even though "
@@ -1292,13 +1394,14 @@ SANCTIONED_WRITES: dict[str, WriteSpec] = {
         ),
         irreversible=True,
         reversibility_procedure=(
-            "Open the overflow menu on one of his own posts and read its "
-            "items -- the same measurement that settled what the "
-            "notifications overflow holds, on a surface already allowed. That "
-            "establishes whether a delete affordance exists AT ALL, which is "
-            "the question, and it costs one click on his own content with "
-            "nothing published. It has not been taken because this wave "
-            "performed nothing."
+            "The first half is DONE: the live lane opened the control menu on "
+            "his own post's permalink (linkedin_server/share_link.py) and read "
+            "'delete post' in it, so a delete affordance exists. This field "
+            "used to end \"It has not been taken because this wave performed "
+            "nothing\". What remains is what pressing 'delete post' draws -- "
+            "capture C6 in _audit/2026-09-24-lane-l8-outward-classes.md, "
+            "taken only on a post he names for deletion (outward_classes "
+            "delete_own_post, NEEDS-CAPTURE)."
         ),
     ),
     "linkedin_comment_on_item": WriteSpec(
@@ -1406,14 +1509,24 @@ SANCTIONED_WRITES: dict[str, WriteSpec] = {
         reversibility_measured=False,
         reversibility_class="STILL-UNKNOWN",
         reversibility_evidence=(
-            "NOT MEASURED. No comment has ever been opened by this server and "
-            "no comment's own overflow menu has been read, so whether "
-            "LinkedIn offers a delete on one is unestablished -- the same gap "
-            "as publish_post and for the same reason."
+            "NOT MEASURED as a reversal. This field used to say \"no comment's "
+            "own overflow menu has been read\"; one was read on 2026-09-04 "
+            "(_audit/INSTRUMENTS.md, the census-delta entry): three "
+            "[role=menuitem] nodes -- 'Copy link to comment', 'Edit', "
+            "'Delete'. So LinkedIn draws a delete on a comment's own menu. "
+            "What pressing it draws has never been observed, and this server "
+            "has deleted nothing."
         ),
         reversible_by=(
-            "NOBODY, through this server: deletion is permanently forbidden "
-            "here and '/delete' is on the read boundary's forbidden list."
+            "NOT YET through this server; by hand, he can. This field used to "
+            "say \"NOBODY, through this server: deletion is permanently "
+            "forbidden here\"; that refusal was retired 2026-09-24 "
+            "(OUTWARD-CLASSES-BUILT-BEHIND-GRANTS), and deleting his own "
+            "comment is a class built behind the grant -- outward_classes "
+            "records delete_own_comment as NEEDS-CAPTURE: what 'Delete' draws "
+            "has never been captured, and aiming one comment by its id is "
+            "measured on one page only. A deletion does not recall the "
+            "notification the item's author received."
         ),
         residue=(
             "IRREVERSIBLE IN AUDIENCE, and worse than a post's in one "
@@ -1426,12 +1539,16 @@ SANCTIONED_WRITES: dict[str, WriteSpec] = {
         ),
         irreversible=True,
         reversibility_procedure=(
-            "Two things, and the first is the cheap one: open the overflow "
-            "menu on one of his OWN existing comments and read its items. "
-            "That settles whether a delete exists without publishing "
-            "anything. The second is the boundary question -- whether this "
-            "server may load /feed/update/<urn>/ at all -- which is a ruling "
-            "and not a measurement."
+            "Both halves this field used to prescribe are DONE. It said \"Two "
+            "things, and the first is the cheap one: open the overflow menu on "
+            "one of his OWN existing comments and read its items\" -- read on "
+            "2026-09-04, and it draws 'Delete' (_audit/INSTRUMENTS.md) -- and "
+            "named a boundary question, whether this server may load "
+            "/feed/update/<urn>/ at all, which the read allowlist answers yes. "
+            "What remains is what pressing 'Delete' draws -- capture C7 in "
+            "_audit/2026-09-24-lane-l8-outward-classes.md, taken only on a "
+            "comment he names for deletion (outward_classes "
+            "delete_own_comment, NEEDS-CAPTURE)."
         ),
     ),
     "linkedin_react_to_item": WriteSpec(
@@ -1934,20 +2051,38 @@ SANCTIONED_WRITES: dict[str, WriteSpec] = {
             "Not a toggle. No invitation control on the page means the rail "
             "did not render, not that there is nobody to invite."
         ),
-        reversibility="STILL-UNKNOWN whether an invitation can be withdrawn",
+        reversibility=(
+            "STILL-UNKNOWN through this server whether an invitation it sent "
+            "can be withdrawn; LinkedIn documents a withdraw (a568295) that "
+            "nothing here has observed"
+        ),
         reversibility_measured=False,
         reversibility_class="STILL-UNKNOWN",
         reversibility_evidence=(
-            "NOT MEASURED, and it cannot be measured from here. The surface "
-            "that would show a withdraw affordance is the sent-invitations "
+            "NOT MEASURED here, and it cannot be measured from here. The "
+            "surface that would show the withdraw is the sent-invitations "
             "manager, whose address contains 'invitation' and is on the read "
-            "boundary's forbidden list -- so this server has never seen it "
-            "and holds no evidence either way."
+            "boundary's forbidden list, so this server has never seen it. "
+            "This field used to end \"and holds no evidence either way\"; the "
+            "evidence is LinkedIn's own. Its Help Center documents the "
+            "withdraw (a568295, quoted in _audit/_census/network.md section "
+            "8.5), with a wait of up to three weeks before the same person "
+            "can be invited again. Never observed here, and never pressed."
         ),
         reversible_by=(
-            "NOBODY, through this server. Withdrawing is destruction, which "
-            "is in PERMANENTLY_FORBIDDEN, and '/withdraw' and 'invitation' "
-            "are both on the read boundary's forbidden list."
+            "NOT YET through this server; by hand, he can. This field used to "
+            "say \"Withdrawing is destruction, which is in "
+            "PERMANENTLY_FORBIDDEN\"; that refusal was retired 2026-09-24 "
+            "(OUTWARD-CLASSES-BUILT-BEHIND-GRANTS), and withdrawing his own "
+            "invitation is a class built behind the grant -- outward_classes "
+            "records withdraw_invitation as BLOCKED: the Sent Invitations "
+            "manager is refused by the read boundary ('invitation' and "
+            "'/withdraw' are both on its forbidden list) and the badge cost "
+            "of that /mynetwork/ sub-page is unmeasured. LinkedIn does offer "
+            "the withdraw (Help Center a568295, quoted in "
+            "_audit/_census/network.md s8.5), with a three-week wait before "
+            "the same member can be invited again; a withdraw does not "
+            "un-notify."
         ),
         residue=(
             "AN INVITATION IS A REQUEST TO A REAL PERSON, and it lands as a "
@@ -2106,10 +2241,18 @@ SANCTIONED_WRITES: dict[str, WriteSpec] = {
             "unestablished here."
         ),
         reversible_by=(
-            "NOBODY, through this server, and the VERDICT is unchanged while "
-            "half its reasoning was false until 2026-09-03. What is true is "
-            "the whole of it: deletion is permanently forbidden here, at any "
-            "confirm level, so an un-send does not exist in this design. "
+            "NOBODY: a delivered message cannot be recalled. The verdict is "
+            "unchanged and its ground moved twice. This field used to say "
+            "\"deletion is permanently forbidden here, at any confirm level, "
+            "so an un-send does not exist in this design\"; that refusal was "
+            "retired 2026-09-24 (OUTWARD-CLASSES-BUILT-BEHIND-GRANTS), so the "
+            "ground is now the message's own nature: it is delivered to a "
+            "person and arrives as an email as well as a notification. "
+            "LinkedIn documents deleting a sent message within 60 minutes "
+            "(census M M12, a550661). What that delete removes, and from "
+            "whom, is unestablished here -- no per-message menu has been "
+            "opened by this server, so it is unbuilt too -- and no delete "
+            "reaches the email copy or un-reads what was read. "
             "WHAT THIS FIELD USED TO ADD WAS WRONG -- \"'/messaging/compose' "
             "is on the read boundary's forbidden list, so nothing here can "
             "reach a composer in either direction.\" The SUBSTRING is "
@@ -2214,13 +2357,24 @@ SANCTIONED_WRITES: dict[str, WriteSpec] = {
         reversibility_evidence=(
             "NOT MEASURED by this server. LinkedIn's Help Center describes "
             "deleting a sent message within 60 minutes (census row M M12), "
-            "and no message control has ever been read here -- and deletion "
-            "is permanently forbidden in this design whatever LinkedIn offers."
+            "and no message control has ever been read here. This field used "
+            "to add \"and deletion is permanently forbidden in this design "
+            "whatever LinkedIn offers\"; that refusal was retired 2026-09-24 "
+            "(OUTWARD-CLASSES-BUILT-BEHIND-GRANTS), and the 60-minute delete "
+            "is unbuilt: the per-message menu has never been opened."
         ),
         reversible_by=(
-            "NOBODY, through this server. Deletion is permanently forbidden "
-            "here at any confirm level (delete_or_withdraw_anything), so an "
-            "un-send does not exist in this design."
+            "NOBODY: a delivered reply cannot be recalled. The verdict is "
+            "unchanged and its ground moved. This field used to say "
+            "\"Deletion is permanently forbidden here at any confirm level "
+            "(delete_or_withdraw_anything), so an un-send does not exist in "
+            "this design\"; that refusal was retired 2026-09-24 "
+            "(OUTWARD-CLASSES-BUILT-BEHIND-GRANTS), so the ground is the "
+            "reply's own nature: it is delivered to a person and arrives as "
+            "an email and a notification too. LinkedIn documents a delete "
+            "within 60 minutes (census M M12, a550661); what it removes, and "
+            "from whom, is unestablished here, it is unbuilt, and no delete "
+            "reaches the email copy or un-reads what was read."
         ),
         residue=(
             "A REPLY IS READ BY A PERSON, and it usually arrives as an email "
@@ -2241,8 +2395,11 @@ SANCTIONED_WRITES: dict[str, WriteSpec] = {
         reversibility_procedure=(
             "Open the per-message menu on one of your own messages under 60 "
             "minutes old and read its items WITHOUT pressing one (capture "
-            "spec C6 in _audit/2026-09-24-lane-l5-messaging.md). Deleting "
-            "stays forbidden here whatever the menu offers."
+            "spec C6 in _audit/2026-09-24-lane-l5-messaging.md). This field "
+            "used to end \"Deleting stays forbidden here whatever the menu "
+            "offers\"; that refusal was retired 2026-09-24 "
+            "(OUTWARD-CLASSES-BUILT-BEHIND-GRANTS). No delete is built here, "
+            "and building one would not recall a reply already read."
         ),
     ),
 }
@@ -2261,44 +2418,29 @@ SANCTIONED_WRITES: dict[str, WriteSpec] = {
 # IMPOSSIBLE with a measurement behind it, or if performing it would be
 # unattended -- taste and discomfort are not grounds, and three of these were
 # nothing else.
+#
+# THREE MORE LEFT ON 2026-09-24, and what is left is exactly the six whose
+# grounds are themselves MITIGATIONS. Ruling OUTWARD-CLASSES-BUILT-BEHIND-
+# GRANTS (the orchestrator applying the operator's 08:11 principle, registered
+# in _audit/RULINGS.md) builds three classes behind the single-use grant, off
+# by default, each fired only at a target he names: repost or share, endorse or
+# recommend, and delete or withdraw one of HIS OWN items. So
+# "repost_or_share", "endorse_or_recommend" and "delete_or_withdraw_anything"
+# are gone from this dict. Their text is kept VERBATIM in
+# outward_classes.RETIRED_PERMANENT_REFUSALS rather than deleted, because
+# their grounds were measurements and the measurements are still true -- each
+# fact now sits in the record that needs it (outward_classes.
+# OUTWARD_CLASS_SPECS), and every spec above whose reversible_by leaned on
+# the destruction entry now names its own route or why there is none.
 PERMANENTLY_FORBIDDEN: dict[str, str] = {
-    "repost_or_share": (
-        "NARROWED 2026-08-30 from an entry that read 'post_or_comment_or_like_"
-        "or_share: public speech in his name, unbounded blast radius, no "
-        "job-hunt value'. Three quarters of that entry is gone because its "
-        "ground was TASTE and the operator dissolved that bucket: posting, "
-        "commenting and reacting are now sanctioned specs behind the gate, "
-        "each refusing on a measured blocker rather than on distaste. What "
-        "survives is the fourth: a repost republishes SOMEBODY ELSE'S item to "
-        "his network under his name, so the thing broadcast is not his and "
-        "the audience is. Measured beside the others -- 'Repost' is a button "
-        "with aria-expanded='false', 3 on the feed and 8 on his profile, and "
-        "its menu has never been opened, so what a repost even offers is "
-        "unobserved. It was not among the capabilities asked for, and it is "
-        "not quietly added here"
-    ),
-    "endorse_or_recommend": (
-        "REASON REPLACED 2026-08-30. It used to read 'a statement ABOUT "
-        "ANOTHER PERSON, which is not his to automate' -- which was POLICY, "
-        "and was overtaken by the operator's own 2026-08-25 ruling that an "
-        "endorsement is a gift to the person receiving it rather than an "
-        "extraction from them. The refusal survives on a MEASUREMENT instead, "
-        "and the measurement was re-taken the day the reason changed: zero "
-        "endorse controls across 13 tracked fixtures with zero shaping "
-        "blindness, zero on his own skills surface, and zero among the 222 "
-        "controls read live on his own profile on 2026-08-30. You cannot "
-        "endorse yourself, so the only surface that would carry the control "
-        "is a THIRD PARTY'S PROFILE -- and loading one leaves them a durable "
-        "record, which this package measures from the receiving end with "
-        "linkedin_who_viewed_me. IMPOSSIBLE AS SPECIFIED, not unwanted"
-    ),
     "deanonymise_a_viewer": (
         "six of ten profile viewers chose anonymity; the row LinkedIn renders "
         "him is the whole of what he is entitled to"
     ),
     "load_a_third_partys_profile_to_measure_a_control": (
-        "ADDED 2026-08-30, and it is the rule the endorsement ruling above "
-        "rests on rather than a restatement of it. A profile view is an "
+        "ADDED 2026-08-30, and it is the rule the endorsement ruling that "
+        "stood above it until 2026-09-24 rested on rather than a restatement "
+        "of it. A profile view is an "
         "EMISSION, and this server can read the receiving end of that signal: "
         "linkedin_who_viewed_me returns rows, reaching 365 days back on his "
         "Premium Career account, and every row is somebody who loaded a "
@@ -2308,21 +2450,6 @@ PERMANENTLY_FORBIDDEN: dict[str, str] = {
         "cost lands entirely on somebody who is not him. Whether HE chooses "
         "to open a profile is his own affair; this server may not do it for a "
         "measurement"
-    ),
-    "delete_or_withdraw_anything": (
-        "destruction is not a write this design covers, at any confirm level. "
-        "NOTE WHAT NOW DEPENDS ON THIS ENTRY, added 2026-08-30 and CORRECTED "
-        "the same day after a review counted it: SIX of the specs above cite "
-        "it in reversible_by (FIVE until 2026-09-24, when send_reply joined) "
-        "-- an application, a post, a comment, an invitation, a message and "
-        "a reply all say NOBODY can take them back through "
-        "this server, and this line is the reason. Shortening it would "
-        "silently make six reversibility claims wrong at once. The list first "
-        "written here named a REACTION and omitted an APPLICATION, which was "
-        "wrong in both directions at once; react_to_item does not lean on this "
-        "entry at all, because its reversible_by rests on a different gap -- "
-        "the ON-state label has never been observed, so there is no selector "
-        "for the inverse whatever this list says"
     ),
     "mark_notifications_read": (
         "clearing his unread badge destroys signal he has not seen, and the "
@@ -3345,6 +3472,21 @@ def _target_for(spec: WriteSpec, target: Any) -> str:
                 "click is anchored to the row carrying the id."
             )
         return raw
+    if spec.target_kind == "group_id":
+        # THE NUMERIC GROUP ID, AND THE REFUSAL NEVER REPEATS WHAT IT GOT. The
+        # commonest wrong value is the group's NAME or slug, and a group named
+        # after a person makes that a person's name -- so, unlike the two
+        # kinds above, this refusal reports a SHAPE, through the builder
+        # ``group_page`` already ships for this very id (``group_leave``).
+        digits, why = group_leave.checked_group_id(raw)
+        if digits is None:
+            raise WriteAttemptError(
+                f"{spec.action!r} is addressed by the numeric LinkedIn group id "
+                "-- as linkedin_group_memberships returns it -- and the value "
+                f"given is not one: {why} A name is not accepted here, and it "
+                "is not repeated here either."
+            )
+        return digits
     if spec.target_kind == "self":
         if raw.casefold() not in {"self", "me", ""}:
             raise WriteAttemptError(
@@ -4792,6 +4934,32 @@ async def observe(
             same_page_as_action=True,
         )
 
+    if spec.state_from == "groups_memberships":
+        # ONE load, of the page the click lands on, and the url is the spec's
+        # CONSTANT -- the group id never enters a navigation. The reading is
+        # COUNTS ONLY, off selectors built from constants and the caller's own
+        # digits (``group_leave.read_rows``); the group's name is not read. A
+        # landing anywhere but the Groups root reads ``unknown`` and is not
+        # recorded as a string: what was asked for is.
+        url = str(spec.url_template or "")
+        landed = await _load(navigator, page, url, surface="groups")
+        reading = await group_leave.read_rows(page, target)
+        facts, state, why = group_leave.membership_verdict(
+            reading,
+            target,
+            landed_elsewhere=str(landed).rstrip("/") != url.rstrip("/"),
+        )
+        return _record(
+            spec,
+            target=target,
+            facts=facts,
+            facts_url=url,
+            state=state,
+            state_why=why,
+            state_url=url,
+            same_page_as_action=True,
+        )
+
     if spec.state_from == "apply_control":
         # ONE load, and the facts and the route come off the same page. The
         # route is read from the CONTROL rather than from the payload, which
@@ -5355,6 +5523,21 @@ def _render(
         where["whose"] = "your own LinkedIn profile"
         where["name"] = observation.facts.get("name")
         where["headline"] = observation.facts.get("headline")
+    elif spec.target_kind == "group_id":
+        # THE ID YOU NAMED AND THE COUNTS THE PAGE GAVE -- AND NO NAME. Every
+        # other block names its target in words he can check; this one cannot,
+        # because a group's name can be a person's and the rulings forbid
+        # returning it from a write. What he checks instead is the id against
+        # the identifiers ``linkedin_group_memberships`` returns.
+        where["group_id"] = observation.target
+        where["what_the_page_showed"] = observation.facts
+        where["the_name_is_not_read"] = (
+            "this block does not print the group's name: this server never "
+            "reads it. You named the group by its numeric id, and the page "
+            "only confirmed that exactly one of your membership rows carries "
+            "that id. Check the id against linkedin_group_memberships before "
+            "confirming."
+        )
     else:
         # THE SEVEN. Their target is a subject, or a subject AND the content
         # that would be published, and the content is PRINTED IN FULL rather
@@ -5612,14 +5795,26 @@ async def _name_the_invitation_recipient(
     label = reading.get("label")
     if not isinstance(label, str) or not label:
         return block
-    # A NEW DICT. The one on the grant is not touched, and this adds a
-    # top-level key only -- so nothing nested is shared into.
+    # THE PERSON THE LABEL NAMES, AS A PEOPLE RECORD (2026-09-27,
+    # PREVIEW-NAMES-THE-RESOLVED-TARGET): the control reads "Invite <name> to
+    # connect", and the record holds the name -- sanitised, capped and marked
+    # as another member's words -- or the whole label if it is drawn otherwise.
+    name = label.strip()
+    prefix, suffix = "Invite ", dom.INVITE_CONTROL_SUFFIX
+    if name.startswith(prefix) and name.endswith(suffix) and len(name) > len(prefix + suffix):
+        name = name[len(prefix):-len(suffix)]
+    person = people_data.Person.from_page(name=name)
+    if person is None:
+        return block
+    # A NEW DICT. The one on the grant is not touched, and this adds
+    # top-level keys only -- so nothing nested is shared into.
     out = dict(block)
-    out["who_this_would_reach"] = (
-        "LinkedIn labels the ONE control your word selected: "
-        f"{label!r}. That is read off your own profile, where it was already "
-        "rendered -- nobody is notified, no record is created, and this "
-        "server keeps no copy of it: it is printed here for you to check and "
+    out["who_this_would_reach"] = person.envelope()
+    out["who_this_would_reach_check"] = (
+        "who_this_would_reach is the person LinkedIn labels on the ONE control "
+        "your word selected. That is read off your own profile, where it was "
+        "already rendered -- nobody is notified, no record is created, and this "
+        "server keeps no copy of it: it is returned here for you to check and "
         "is in no grant, no log and no file. CHECK IT. Your word picked this "
         "control out uniquely, and a word that uniquely picks out the WRONG "
         "person is the one failure this gate cannot catch for you."
@@ -5741,6 +5936,33 @@ PERFORMABLE: frozenset[str] = frozenset(
         # ENABLING IS NOT FIRING, and nothing in the lane that built it issued
         # a grant. OPERATOR-NAMES-THE-TARGET governs its first live proof.
         "send_reply",
+        # THE SIXTEENTH, 2026-09-27, census rows ``M C63`` / ``N 64`` (lane L8;
+        # the fifteenth on its branch until its merge of master brought
+        # ``send_reply``): LEAVING ONE GROUP, under
+        # ``OUTWARD-CLASSES-BUILT-BEHIND-GRANTS``. Every clause the others
+        # needed is true of it:
+        #
+        #   a measured surface   /groups/, on the read allowlist since
+        #                        2026-09-05 and loaded live there; the one
+        #                        address this action ever loads, a CONSTANT
+        #   a measured anchor    'Leave this group', on the per-row menu of
+        #                        all five membership rows and no suggestion
+        #                        row (scripts/_probe_groups_menu.py)
+        #   an aimable target    exactly one row-scoped disclosure whose row
+        #                        carries the numeric id he named and no other
+        #                        -- walked up from the control, never from the
+        #                        anchor, and never by the group's name
+        #   a real verification  a fresh render of /groups/: a row still
+        #                        carrying the id means NOT left
+        #   no new permission    TWO presses through perform()'s ONE click
+        #                        site: the disclosure, then -- appended only by
+        #                        a gate that re-reads the menu -- the item.
+        #                        readonly.SANCTIONED_MUTATIONS is unchanged
+        #
+        # WHAT IT CANNOT SAY is what the leave press does: a confirmation, if
+        # one opens, is counted and never answered, and the fresh render
+        # decides. ENABLING IS NOT FIRING: its live proof is aimed by him.
+        "withdraw_from_group",
         # THE THIRTEENTH, 2026-09-23, census row ``N 47``, and the first write
         # added under the operator's reversible-first-round class since the
         # round's own three. Every clause the others needed is true of it:
@@ -5969,6 +6191,14 @@ PERFORMABLE: frozenset[str] = frozenset(
 #: exception is visible from the top of the file instead of buried in a
 #: branch. See :func:`_apply_submit_gate` for what the gate requires.
 TWO_CLICK_ACTIONS: frozenset[str] = frozenset({"apply_job"})
+
+#: Actions whose control is an ITEM IN A MENU the first press opens: the first
+#: click is the row's disclosure, and the item is appended to the one click
+#: queue only by a gate that re-reads the page after that press. Named for the
+#: same reason ``TWO_CLICK_ACTIONS`` is, and kept SEPARATE from it on purpose:
+#: that set is apply's, pinned, and its gate reads a modal rather than a menu.
+#: See ``group_leave.menu_item_gate`` for what the gate requires.
+MENU_ITEM_ACTIONS: frozenset[str] = frozenset({"withdraw_from_group"})
 
 #: How long to wait for the anchor to be actionable. Generous, because the
 #: alternative to waiting is clicking early, and a click that lands on a
@@ -6246,6 +6476,12 @@ def anchor_label_for(
         # control's name carries no company; identity comes from the card it
         # sits in, checked at preview and again at click time.
         return company_interest.OFF_LABEL
+    if spec.action == "withdraw_from_group":
+        # THE ITEM THAT PERFORMS THE LEAVE, exact, measured on all five
+        # membership rows' menus. The FIRST press is the row's disclosure, and
+        # it is aimed STRUCTURALLY -- by the row carrying the numeric id --
+        # never by its label, which carries the group's name.
+        return group_leave.LEAVE_LABEL
     if spec.action == "follow_company_page":
         # A PREFIX, like the unfollow's, and for the same reason: LinkedIn
         # writes the Page's own name into the label, which makes it a strong
@@ -6565,6 +6801,9 @@ _WRITE_SURFACE_FOR_ACTION: dict[str, str] = {
     # for it and would fall back to "linkedin" -- the least useful word in
     # the one message he reads when a write meets an auth wall.
     "send_reply": "messaging thread",
+    # A group id is a kind no other action uses; named per action anyway, so
+    # the auth-wall message names the page the click was going to land on.
+    "withdraw_from_group": "groups",
 }
 
 
@@ -6625,6 +6864,9 @@ _WHERE_TO_LOOK: dict[str, str] = {
     # The card the press was made in, on the posting he named. No other
     # surface this server may read lists his interest signals.
     "mark_company_interest": "the About-the-company card on that posting",
+    # The page the leave is pressed on and verified off: his memberships are
+    # listed there and nowhere else this server may read.
+    "withdraw_from_group": "your LinkedIn Groups page",
     # THE TWELFTH, and the only row here naming a surface this server
     # deliberately will NOT open. Reading the thread is what would settle
     # a send, and it costs a read receipt on a real person -- his to
@@ -6780,6 +7022,16 @@ _VERIFIED_FROM["send_reply"] = (
     "the preview's reading of the same conversation, and your words must be "
     "its last message. The NOT-SENT answer is read in place first: the reply "
     "box still holding your words with Send enabled."
+)
+_VERIFIED_FROM["withdraw_from_group"] = (
+    "THE SAME PAGE, RE-RENDERED by a fresh navigation to the Groups root: his "
+    "memberships are listed there and on no other surface this server may "
+    "read, so this is a new render from LinkedIn rather than an independent "
+    "witness. Its NEGATIVE is strong -- a row still carrying the id means the "
+    "leave did not land. Its positive needs the page to draw EXACTLY ONE "
+    "membership row fewer than the preview counted, every other row still "
+    "there; any other count -- a page still drawing, a list that changed in "
+    "between, or no row at all -- answers unknown."
 )
 _VERIFIED_FROM["follow_company_page"] = (
     "a DIFFERENT surface from the one clicked: Manage Pages, where a followed "
@@ -7248,6 +7500,21 @@ async def _live_control(
         if state != company_interest.NOT_SIGNALLED:
             return (state, why, "")
         return (state, why, company_interest.OFF_CONTROL_IN_CARD)
+
+    if spec.action == "withdraw_from_group":
+        # THE SAME READING AND THE SAME VERDICT THE PREVIEW TOOK, on the Groups
+        # page the click is about to land on: freshness, not a second source.
+        # The selector returned is the FIRST press only -- the row's
+        # disclosure, built from constants and the grant's own digits, which
+        # the verdict has just required to match exactly one element; strict
+        # mode refuses the click if that stops being true. The leave item is
+        # appended later, by ``group_leave.menu_item_gate``, or not at all.
+        # The verdict's own state decides, not ``spec.from_state`` (see the
+        # ``mark_company_interest`` arm above for why).
+        _facts, state, why = await group_leave.read_state(page, grant.target)
+        if state != group_leave.MEMBER:
+            return (state, why, "")
+        return (state, why, group_leave.disclosure_selector(grant.target))
 
     if spec.action == "update_profile_field":
         # THE ONE SWITCH IN THIS FAMILY, P B9 (2026-09-24): the Premium
@@ -8100,7 +8367,18 @@ async def _verify_after(
         try:
             _assert_landed_on_target(spec, grant, landed)
         except WriteAttemptError as exc:
-            return (UNKNOWN, str(exc) + left, url)
+            # COMPOSED HERE, NOT QUOTED FROM THE RAISE: a receipt carries no
+            # exception's text (tests/test_a_write_receipt_carries_no_library_
+            # message.py), and the gate's own words -- "refusing to click" --
+            # are wrong after the click. What the landing may say is the same.
+            return (
+                UNKNOWN,
+                "the fresh render did not land on the posting this grant names "
+                f"({type(exc).__name__}); the landing is withheld, and what is "
+                f"safe to say about it is {landing.withheld(landed)}. So it says "
+                "nothing about this signal." + left,
+                url,
+            )
         try:
             facts = await _read_posting_facts(page, grant.target, navigator=navigator)
         except WriteAttemptError as exc:
@@ -8142,7 +8420,15 @@ async def _verify_after(
         try:
             _assert_landed_on_target(spec, grant, landed)
         except WriteAttemptError as exc:
-            return (UNKNOWN, str(exc), editor_url)
+            # Composed here for the reason given at the posting branch above.
+            return (
+                UNKNOWN,
+                "the fresh render of the editor did not land where this write "
+                f"asked ({type(exc).__name__}); the landing is withheld, and "
+                f"what is safe to say about it is {landing.withheld(landed)}. "
+                "So it says nothing about whether the value was stored.",
+                editor_url,
+            )
         if badge_before is not None:
             # THE PREMIUM BADGE: both switches on the fresh render, against
             # the reading taken before the write -- condition 4 of its ruling.
@@ -8303,6 +8589,49 @@ async def _verify_after(
             + " Read off Manage Pages, a different surface from the Page root "
             "that was clicked, keyed by the same numeric id the grant names.",
             landed,
+        )
+
+    if spec.action == "withdraw_from_group":
+        # A FRESH RENDER OF THE GROUPS ROOT, and the navigation is also what
+        # discards a menu or a confirmation the press left open -- the one
+        # this server counted after the press and did not answer. Three
+        # answers, all real: ``member`` (a row still carries the id: NOT
+        # left), ``not_member`` (none carries it AND the page drew exactly one
+        # membership row fewer than the preview counted), ``unknown``
+        # (anything else -- no membership row drawn at all, which a finished
+        # leave of his only group and a page that has not arrived share, or a
+        # count that says the page is still drawing). The count half is
+        # ``group_leave.verification_verdict``, added 2026-09-27 for finding
+        # F-6 of lane L8's cold verification: one other row drawn used to be
+        # enough, and a half-drawn page satisfies that.
+        url = str(spec.url_template)
+        landed = await _load(navigator, page, url, surface="groups")
+        try:
+            _assert_landed_on_target(spec, grant, landed)
+        except WriteAttemptError as exc:
+            # Composed here for the reason given at the posting branch above
+            # (lane G's merge of master 7986ae3: its receipt guard convicted
+            # the exception's text in this return).
+            return (
+                UNKNOWN,
+                "the fresh render of the groups root did not land where this "
+                f"write asked ({type(exc).__name__}); the landing is withheld, "
+                f"and what is safe to say about it is {landing.withheld(landed)}. "
+                "So it says nothing about whether he left the group.",
+                url,
+            )
+        _facts, state, why = group_leave.verification_verdict(
+            observation.facts,
+            await group_leave.read_rows(page, grant.target),
+            grant.target,
+        )
+        return (
+            state,
+            why
+            + " Read off a FRESH render of the Groups page, after the press "
+            "and by a new navigation, so a menu or dialog the press left open "
+            "is not what was read.",
+            url,
         )
 
     if spec.action == "follow_company":
@@ -9544,6 +9873,18 @@ def typed_text_residue(
     }
 
 
+class _PerformRefused(WriteAttemptError):
+    """A refusal ``perform`` composed itself, inside its dispatch block.
+
+    Its message names the action, a digest prefix or a control KIND -- never a
+    selector and never a library's text -- and it IS the reason the write
+    stopped, so ``click_error`` keeps it. Everything else raised in that block
+    keeps only its type (ERROR-MESSAGE-RULED-AT-THE-RAISE). What each message
+    may interpolate is pinned by
+    ``tests/test_a_write_receipt_carries_no_library_message.py``.
+    """
+
+
 async def perform(
     navigator: Any, page: Any, grant: WriteGrant
 ) -> dict[str, Any]:
@@ -9824,6 +10165,10 @@ async def perform(
     switch_after_press: Optional[dict[str, Any]] = None
     switch_check: Optional[dict[str, Any]] = None
     switch_fresh: dict[str, Any] = {}
+    # THE MENU GATE, for MENU_ITEM_ACTIONS only: what the page drew after the
+    # disclosure press, and what the item press left behind. See group_leave.
+    menu_gate: Optional[dict[str, Any]] = None
+    menu_after_press: Optional[dict[str, Any]] = None
 
     # THE TYPING PLAN, and it is a QUEUE FOR THE SAME REASON THE CLICK PLAN IS.
     #
@@ -9956,7 +10301,7 @@ async def perform(
             # no longer that file.
             approved = (grant.preview.get("file") or {}).get("sha256_prefix")
             if not approved:
-                raise WriteAttemptError(
+                raise _PerformRefused(
                     f"refusing to upload for {spec.action!r}: this grant "
                     "carries no file digest, so there is nothing to compare "
                     "the file on disk against. A grant reaches here only "
@@ -9966,7 +10311,7 @@ async def perform(
                 )
             current = uploads.digest_of(upload_file)
             if current != approved:
-                raise WriteAttemptError(
+                raise _PerformRefused(
                     f"refusing to upload for {spec.action!r}: the file at "
                     "that path has changed since you were shown it. The "
                     f"preview read {approved!r} and it now reads {current!r}. "
@@ -10016,7 +10361,7 @@ async def perform(
             # check: it fires on a div, and it would NOT fire on a file input
             # that is simply the wrong one.
             if control_kind != UPLOAD_CONTROL_KIND:
-                raise WriteAttemptError(
+                raise _PerformRefused(
                     f"refusing to upload for {spec.action!r}: the live reader "
                     f"resolved a control it classified as {control_kind!r}, "
                     f"and a file may only be handed to one classified "
@@ -10142,6 +10487,23 @@ async def perform(
                         )
                         if editor_save_gate["proceed"]:
                             click_plan.append(editor_save_gate["selector"])
+                elif spec.action in MENU_ITEM_ACTIONS and clicks_made == 1:
+                    # THE DISCLOSURE JUST OPENED A MENU, AND THAT PROVES
+                    # NOTHING ABOUT WHOSE. The item is appended to this same
+                    # queue only if a fresh read finds exactly one pressable
+                    # item on the page and it is inside the row carrying the
+                    # grant's id -- through the SAME call site, no second one.
+                    menu_gate = await group_leave.menu_item_gate(page, grant.target)
+                    if menu_gate["proceed"]:
+                        click_plan.append(menu_gate["selector"])
+                elif spec.action in MENU_ITEM_ACTIONS and clicks_made == 2:
+                    # THE ITEM WAS PRESSED. Read what it left BEFORE anything
+                    # navigates -- counts only, and it presses nothing: a
+                    # dialog here is a further step that opened and is NOT
+                    # taken. The verification's fresh render decides.
+                    menu_after_press = group_leave.after_press_note(
+                        await group_leave.read_after_press(page, grant.target)
+                    )
                 continue
             fill_selector, fill_text = fill_plan.pop(0)
             await page.fill(fill_selector, fill_text, timeout=CLICK_TIMEOUT_MS)
@@ -10213,8 +10575,19 @@ async def perform(
                 publish_gate = await _publish_submit_gate(page)
                 if publish_gate["proceed"]:
                     click_plan.append(publish_gate["selector"])
+    except _PerformRefused as exc:
+        # A REFUSAL THIS FUNCTION COMPOSED, and its message is the reason.
+        click_error = str(exc)
     except Exception as exc:  # noqa: BLE001 - reported, never re-raised
-        click_error = f"{type(exc).__name__}: {exc}"
+        # THE TYPE ONLY, for every action: a failed press quotes the selector
+        # it waited on, and the typeahead's carries his needle
+        # (ERROR-MESSAGE-RULED-AT-THE-RAISE). Lane L8 reached the same rule for
+        # its menu item actions from the other side -- the one disclosure a
+        # leave presses is labelled with the group's NAME, which may be a
+        # person's and may not leave in a receipt (PEOPLE-DATA-MITIGATIONS
+        # item 3) -- and the merge of 2026-09-27 keeps lane G's wider form,
+        # which already covers it.
+        click_error = type(exc).__name__
 
     # THE EDITOR CLOSING, polled after the Save press so the verification's
     # fresh navigation does not race LinkedIn's own save request -- navigating
@@ -10284,8 +10657,10 @@ async def perform(
         state_landed = ""
         where = _where_to_look(spec.action)
         verified_why = (
-            f"the verification read itself failed ({type(exc).__name__}: "
-            f"{exc}), so this says nothing about whether the click landed, "
+            f"the verification read itself failed ({type(exc).__name__}; its "
+            "message is not repeated -- a failed read can render the address "
+            "or the selector it was reading), so this says nothing about "
+            "whether the click landed, "
             "and nothing was read anywhere -- this is not a reading that came "
             "back empty. "
             + (
@@ -10380,6 +10755,10 @@ async def perform(
     elif spec.target_kind == "company_id":
         target_block["company_id"] = grant.target
         target_block["company"] = observation.facts.get("company")
+    elif spec.target_kind == "group_id":
+        # THE ID ALONE. The group's name is never read, so there is none to
+        # print -- and a one-part target is not the composite split below.
+        target_block["group_id"] = grant.target
     else:
         # THE SUBJECT AND THE VALUE, SPLIT, for every composite kind -- and
         # ``subject`` is EMPTY for a one-component target rather than being
@@ -10714,6 +11093,24 @@ async def perform(
                     "condition failed before concluding anything about the "
                     "job."
                 ),
+            }
+        ),
+        # WHAT THE MENU GATE SAW, for MENU_ITEM_ACTIONS, and what the item
+        # press left on the page. Null for every other action. COUNTS AND
+        # SENTENCES BUILT FROM THEM: nothing here was read as text, and the
+        # group's name is not in it. ``after_the_item_press`` is null when the
+        # item was never pressed; when it was, it says in words whether a
+        # further step opened -- which, if it did, was not taken.
+        "menu_gate": (
+            None
+            if menu_gate is None
+            else {
+                "proceeded": bool(menu_gate.get("proceed")),
+                "refused_condition": menu_gate.get("refused_condition"),
+                "why": menu_gate.get("why"),
+                "observed": menu_gate.get("observed"),
+                "polls": menu_gate.get("polls"),
+                "after_the_item_press": menu_after_press,
             }
         ),
         "verified": verified,

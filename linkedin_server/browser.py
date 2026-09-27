@@ -60,6 +60,7 @@ import asyncio
 import time
 from contextlib import asynccontextmanager
 from typing import Any, AsyncIterator, Optional
+from urllib.parse import urlsplit
 
 from linkedin_server import preflight, profile_lock, profile_version
 from linkedin_server.session_store import SessionStore
@@ -269,7 +270,7 @@ class LinkedInBrowser:
                     logger.info("session store: %s", outcome.get("why"))
             except Exception as exc:  # noqa: BLE001 - a net, never a gate
                 logger.debug(
-                    "session restore skipped (%s): %s", type(exc).__name__, exc
+                    "session restore skipped (%s)", type(exc).__name__
                 )
         except Exception as exc:
             # Never hold the lock, or a driver, for a browser that did not
@@ -296,7 +297,7 @@ class LinkedInBrowser:
         try:
             self._context.set_default_timeout(NAV_TIMEOUT_MS)
         except Exception as exc:  # pragma: no cover - older client
-            logger.debug("set_default_timeout raised %s: %s", type(exc).__name__, exc)
+            logger.debug("set_default_timeout raised %s", type(exc).__name__)
         logger.info("attached over CDP at %s", cdp_bridge.endpoint())
 
     async def stop(self) -> None:
@@ -326,22 +327,22 @@ class LinkedInBrowser:
                 try:
                     await own_page.close()
                 except Exception as exc:  # pragma: no cover - shutdown noise
-                    logger.debug("closing our tab raised %s: %s", type(exc).__name__, exc)
+                    logger.debug("closing our tab raised %s", type(exc).__name__)
             try:
                 await client.close()
             except Exception as exc:  # pragma: no cover - shutdown noise
-                logger.debug("cdp disconnect raised %s: %s", type(exc).__name__, exc)
+                logger.debug("cdp disconnect raised %s", type(exc).__name__)
         elif context is not None:
             try:
                 await context.close()
             except Exception as exc:  # pragma: no cover - shutdown noise
-                logger.debug("closing context raised %s: %s", type(exc).__name__, exc)
+                logger.debug("closing context raised %s", type(exc).__name__)
 
         if pw is not None:
             try:
                 await pw.stop()
             except Exception as exc:  # pragma: no cover - shutdown noise
-                logger.debug("stopping playwright raised %s: %s", type(exc).__name__, exc)
+                logger.debug("stopping playwright raised %s", type(exc).__name__)
         if self._holds_profile_lock:
             profile_lock.release()
             self._holds_profile_lock = False
@@ -373,7 +374,7 @@ class LinkedInBrowser:
         try:
             await self._teardown()
         except Exception as exc:  # pragma: no cover
-            logger.debug("idle close raised %s: %s", type(exc).__name__, exc)
+            logger.debug("idle close raised %s", type(exc).__name__)
 
     # -- the one entry point tools use ------------------------------------
 
@@ -456,8 +457,18 @@ class LinkedInBrowser:
         try:
             await page.goto(url, wait_until="domcontentloaded", timeout=NAV_TIMEOUT_MS)
         except Exception as exc:
+            # THE ADDRESS IS NOT QUOTED, AND NEITHER IS THE LIBRARY'S MESSAGE,
+            # which quotes it again. The address can carry the caller's words
+            # -- a search keyword, a member token -- and this message becomes
+            # the tool's $.message. Decided where the value enters the
+            # exception (ERROR-MESSAGE-RULED-AT-THE-RAISE): the TYPE, and the
+            # address's first path segment, a family that names nobody. The
+            # original stays chained, in-process only. Found by lane S.
+            family = urlsplit(url).path.strip("/").split("/")[0]
             raise BrowserUnavailableError(
-                f"navigation to {url} failed: {type(exc).__name__}: {exc}"
+                f"navigation to a /{family}/ page failed: {type(exc).__name__} "
+                "(the address and the library's message are withheld: the "
+                "address can carry what was searched for or whom it names)"
             ) from exc
         finally:
             self._last_navigation_at = time.monotonic()
@@ -494,7 +505,7 @@ class LinkedInBrowser:
                 await page.wait_for_timeout(settle_ms)
             except Exception as exc:  # pragma: no cover
                 branch = "settle_failed"
-                logger.debug("settle wait raised %s: %s", type(exc).__name__, exc)
+                logger.debug("settle wait raised %s", type(exc).__name__)
         self._last_settle = {
             "branch": branch,
             "settled_ms": round((time.monotonic() - settle_started) * 1000),

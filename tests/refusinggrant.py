@@ -81,6 +81,11 @@ SYNTHETIC_RAW_TARGETS: dict[str, Any] = {
     "member": "example-harness-member",
     "item_urn": "example-harness-item",
     "self": "self",
+    # A NUMERIC GROUP ID (``withdraw_from_group``, 2026-09-24). Five digits, under the
+    # identity guard's six-digit line. Missing, the KeyError stopped every
+    # writes reader taking a grant from being driven for ANY spec -- measured:
+    # 46 reader-leak parametrisations red at once.
+    "group_id": "10001",
     "post_text": "example-harness-post-text",
     "item_and_text": {
         "item": "example-harness-item",

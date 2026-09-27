@@ -33,10 +33,12 @@ from __future__ import annotations
 
 import argparse
 import ast
+import io
 import json
 import re
 import subprocess
 import sys
+import tokenize
 from pathlib import Path
 
 #: Version below which PEP 701 does not apply. Both rules below are about
@@ -126,6 +128,70 @@ def _segment(lines: list[str], node: ast.AST) -> str:
     return "".join(out)
 
 
+#: From 3.12 the tokenizer splits an f-string into START/MIDDLE/END tokens with
+#: the expression's own tokens between; before 3.12 an f-string is ONE STRING
+#: token. Absent on the floor, so read with a default.
+_FSTRING_START = getattr(tokenize, "FSTRING_START", None)
+_FSTRING_END = getattr(tokenize, "FSTRING_END", None)
+
+
+def _pieces(source: str) -> list[tuple[tuple[int, int], tuple[int, int], str]] | None:
+    """Every string-literal PIECE in ``source``: ``(start, end, its quote)``.
+
+    **ONE JoinedStr CAN HOLD SEVERAL PIECES, EACH WITH ITS OWN QUOTE.**
+    Implicit concatenation merges ``"a" f'{b["k"]}'`` into one node, and the
+    quote that would have terminated ``b["k"]`` before 3.12 is the quote of
+    ITS piece -- ``'`` here, so the ``"`` inside is legal on every version.
+    Positions are the tokenizer's (row, character column). On 3.12+ an
+    f-string piece runs from its START token to its matching END, nested
+    f-strings included; before 3.12 it is the one STRING token.
+
+    A source the tokenizer refuses yields None -- NO piece table, which is a
+    different answer from an empty one -- and the caller falls back to the
+    node's own quote. It returned ``[]`` until 2026-09-27, the outage-as-
+    absence shape tests/test_an_outage_is_never_filed_as_an_absence.py
+    refuses: a refusal and a file with no pieces read the same.
+    """
+    out: list[tuple[tuple[int, int], tuple[int, int], str]] = []
+    open_fstrings: list[tuple[tuple[int, int], str]] = []
+    try:
+        for token in tokenize.generate_tokens(io.StringIO(source).readline):
+            if _FSTRING_START is not None and token.type == _FSTRING_START:
+                open_fstrings.append((token.start, _quote_of(token.string)))
+            elif _FSTRING_END is not None and token.type == _FSTRING_END:
+                if open_fstrings:
+                    start, quote = open_fstrings.pop()
+                    out.append((start, token.end, quote))
+            elif token.type == tokenize.STRING:
+                out.append((token.start, token.end, _quote_of(token.string)))
+    except (tokenize.TokenError, SyntaxError):
+        return None
+    return out
+
+
+def _enclosing_quote(
+    pieces: list[tuple[tuple[int, int], tuple[int, int], str]],
+    position: tuple[int, int],
+) -> str | None:
+    """The quote of the INNERMOST piece containing ``position``.
+
+    Strictly after the piece's start, so an expression that is itself a nested
+    f-string is judged by the piece around it, not by its own opening.
+    """
+    best: tuple[tuple[int, int], str] | None = None
+    for start, end, quote in pieces:
+        if start < position <= end and (best is None or start > best[0]):
+            best = (start, quote)
+    return best[1] if best else None
+
+
+def _character_position(lines: list[str], node: ast.AST) -> tuple[int, int]:
+    """``node``'s start as the tokenizer counts it: ``col_offset`` is a UTF-8
+    BYTE offset (see :func:`_segment`) and a token column is a character one."""
+    line = lines[node.lineno - 1]
+    return node.lineno, len(line.encode("utf-8")[: node.col_offset].decode("utf-8"))
+
+
 def violations(source: str, label: str = "<source>") -> list[tuple[int, str, str]]:
     """Every construct in ``source`` that a pre-PEP-701 interpreter refuses.
 
@@ -136,21 +202,47 @@ def violations(source: str, label: str = "<source>") -> list[tuple[int, str, str
     Raises ``SyntaxError`` if ``source`` does not parse HERE -- which is a
     different and louder problem, and the caller is expected to report it as
     one rather than fold it in.
+
+    **THE QUOTE IS THE PIECE'S, NOT THE NODE'S** (since 2026-09-24). This took
+    the quote of a JoinedStr's FIRST piece for every expression in it, and an
+    implicit concatenation of pieces with different quotes broke that both
+    ways: lane L7's ``f'...{self.store["City"]}...'``, legal on 3.10, was
+    convicted because the concatenation opened with ``"``; and a later
+    ``f"{d["k"]}"`` after a ``'...'`` piece -- a SyntaxError on 3.10 -- passed.
+    See tests/test_the_package_compiles_on_its_oldest_python.py.
     """
     tree = ast.parse(source, filename=label)
     lines = source.splitlines(keepends=True)
+    pieces: list[tuple[tuple[int, int], tuple[int, int], str]] | None = None
+    tokenized = False
     found: list[tuple[int, str, str]] = []
     for node in ast.walk(tree):
         if not isinstance(node, ast.JoinedStr):
             continue
-        quote = _quote_of(_segment(lines, node))
+        fallback = _quote_of(_segment(lines, node))
         for part in node.values:
             if not isinstance(part, ast.FormattedValue):
                 continue
             expression = _segment(lines, part.value)
             if "\\" in expression:
                 found.append((part.value.lineno, BACKSLASH, expression))
-            elif quote and quote in expression:
+                continue
+            if "'" not in expression and '"' not in expression:
+                # No quote at all, so no quote can be reused: most expressions
+                # stop here, and their file is never tokenized.
+                continue
+            if not tokenized:
+                # Tokenized once per file, and only for a file with an
+                # expression that quotes something.
+                pieces = _pieces(source)
+                tokenized = True
+            quote = (
+                _enclosing_quote(pieces, _character_position(lines, part.value))
+                if pieces is not None
+                else None  # the tokenizer refused: the node's quote decides
+            )
+            quote = quote or fallback
+            if quote and quote in expression:
                 found.append((part.value.lineno, REUSED_QUOTE, expression))
     return sorted(set(found))
 

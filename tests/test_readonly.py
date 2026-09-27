@@ -9,7 +9,9 @@ guarantee at all -- it manufactures confidence.
 from __future__ import annotations
 
 import ast
+import importlib
 import re
+from collections import Counter
 from pathlib import Path
 
 import pytest
@@ -162,6 +164,9 @@ def test_the_sanctioned_list_is_exactly_these_calls():
         ("linkedin_server/share_link.py", "_activate", "click"),
         ("linkedin_server/share_link.py", "_clipboard", "evaluate"),
         ("linkedin_server/share_link.py", "copy_own_post_link", "press"),
+        ("linkedin_server/cdp_download.py", "_send", "cdp_send"),
+        ("linkedin_server/cdp_download.py", "capture_download", "cdp_session"),
+        ("linkedin_server/cdp_download.py", "reset_download_behaviour", "cdp_session"),
     )
     # EIGHT FROM 2026-09-23: ``reveal.reveal``'s one click, the first press
     # admitted BY NAME -- per control, in reveal.DECIDED_REVEALS, on a recorded
@@ -173,7 +178,12 @@ def test_the_sanctioned_list_is_exactly_these_calls():
     # package, and a protective one: it captures the page's clipboard calls in
     # this server's tab so they do not overwrite his system clipboard), and the
     # menu's Escape. Argument beside them.
-    assert len(readonly.SANCTIONED_MUTATIONS) == 12
+    # THIRTEEN TO FIFTEEN, 2026-09-27, at lane G's merge of master 2eb90ad:
+    # lane D's download transport -- ``cdp_download``'s one DevTools send and
+    # the two browser-level sessions it goes over -- which the scanner lane G
+    # had widened (lane D's 5.3) saw for the first time in that merge. Not new
+    # capability: declared on D4-NO-OWN-BROWSER-CONTEXT. Argument beside them.
+    assert len(readonly.SANCTIONED_MUTATIONS) == 15
     # THE KINDS ARE ASSERTED SEPARATELY, because the count alone would let a
     # click be swapped for a fill without moving the number, and those are
     # different capabilities: a click presses what is already there, a fill
@@ -194,8 +204,15 @@ def test_the_sanctioned_list_is_exactly_these_calls():
     # why the probe rule next door splits that verb by its ARGUMENT rather than
     # by its name, and why this entry is bound to one function that sends one
     # key.
+    #
+    # FIFTEEN FROM 2026-09-27, and two kinds are FIRSTS on this list:
+    # ``cdp_send`` and ``cdp_session``, the DevTools patterns, each bound to
+    # ``cdp_download`` and to a one-method table (see the entries' argument).
     kinds = sorted(kind for _p, _f, kind in readonly.SANCTIONED_MUTATIONS)
     assert kinds == [
+        "cdp_send",
+        "cdp_session",
+        "cdp_session",
         "click",
         "click",
         "click",
@@ -293,7 +310,11 @@ def test_the_package_contains_exactly_as_many_mutating_calls_as_are_listed():
     # is the paragraph above being right a third time. NINE, the same day:
     # view_switch._activate, bumped deliberately this time. TWELVE, the same
     # day: share_link's click drain, its one evaluate and its one Escape.
-    assert total == len(readonly.SANCTIONED_MUTATIONS) == 12, total
+    # FIFTEEN, 2026-09-27, at lane G's merge of master 2eb90ad: lane D's
+    # download transport -- cdp_download's one DevTools send and its two
+    # sessions -- met the scanner lane G had widened to see them, and was
+    # declared on D4-NO-OWN-BROWSER-CONTEXT (see the entries' argument).
+    assert total == len(readonly.SANCTIONED_MUTATIONS) == 15, total
 
 
 def test_the_partition_conserves_every_hit():
@@ -508,6 +529,82 @@ def test_exactly_one_place_in_this_package_can_reach_a_file_input():
     assert uploads_sanctioned == [
         ("linkedin_server/writes.py", "perform", "set_input_files")
     ], uploads_sanctioned
+
+
+@pytest.mark.parametrize(
+    "source, kinds",
+    [
+        (
+            "async def poke(page):\n"
+            "    session = await page.context.new_cdp_session(page)\n"
+            "    await session.send('Input.dispatchMouseEvent', {'type': 'mousePressed'})\n",
+            ["cdp_session", "cdp_send"],
+        ),
+        (
+            "async def poke(browser):\n"
+            "    session = await browser.new_browser_cdp_session()\n",
+            ["cdp_session"],
+        ),
+        (
+            # Lane D's shape: the method is a VARIABLE, so a pattern anchored on
+            # a quoted "Domain.method" would have seen nothing.
+            "async def _send(session, method, params):\n"
+            "    return await session.send(method, params)\n",
+            ["cdp_send"],
+        ),
+    ],
+    ids=["click-by-devtools", "browser-session", "variable-method"],
+)
+def test_the_mutation_scanner_catches_a_devtools_session(source, kinds):
+    """SHOWN FAILING before 2026-09-24: every plant here scanned clean.
+
+    A DevTools session can do anything the page can -- press, type, run script,
+    navigate past the read door -- and none of it spells a Playwright verb.
+    """
+    hits = readonly.scan_source_for_mutations(source)
+    assert [kind for _line, kind, _src in hits] == kinds, hits
+
+
+@pytest.mark.parametrize(
+    "planted, kind",
+    [
+        (
+            "\n\nasync def _planted_click(session):\n"
+            "    return await session.send('Input.dispatchMouseEvent', {})\n",
+            "cdp_send",
+        ),
+        (
+            "\n\nasync def _planted_session(browser):\n"
+            "    return await browser.new_browser_cdp_session()\n",
+            "cdp_session",
+        ),
+    ],
+    ids=["a-second-send", "a-third-session"],
+)
+def test_the_download_transport_is_declared_by_function_and_not_by_file(planted, kind):
+    """THE DECLARATION OF 2026-09-27 CANNOT BE READ AS A LICENCE FOR THE FILE.
+
+    ``cdp_download``'s three entries name three FUNCTIONS. The real module
+    partitions clean; the same module with one more DevTools call in a
+    function of its own is refused, naming the kind -- so the next session or
+    send in that file has to come here and argue, as these three did.
+    """
+    rel = "linkedin_server/cdp_download.py"
+    source = (PACKAGE_DIR / "cdp_download.py").read_text(encoding="utf-8")
+    assert readonly.partition_mutation_hits(rel, source)[1] == []
+    _sanctioned, unsanctioned = readonly.partition_mutation_hits(rel, source + planted)
+    assert [hit_kind for _line, hit_kind, _src in unsanctioned] == [kind], unsanctioned
+
+
+def test_a_send_that_is_not_a_devtools_send_is_not_a_devtools_pattern():
+    """The narrow half: a tool NAMED with send is not a send call, and a read
+    of a session attribute is not a send."""
+    reads = (
+        "async def tool(page):\n"
+        "    out = await linkedin_send_message(recipient, body)\n"
+        "    n = session.sent_count\n"
+    )
+    assert readonly.scan_source_for_mutations(reads) == []
 
 
 def test_evaluate_is_flagged_unless_explicitly_waived():
@@ -1079,6 +1176,16 @@ INJECTED_SCRIPTS = {
 #: certified a script whose whole purpose is to replace page behaviour. It is
 #: declared here instead, and the blind spot is reported rather than silently
 #: relied on.
+#:
+#: **THE BLIND SPOT CLOSED ON 2026-09-24, AND THIS DICT STAYED.** Lane G's
+#: follow-up taught ``scan_js_for_mutations`` to report an API replacement
+#: (``readonly.JS_API_REPLACEMENT_PATTERNS``), and it reports seven in this
+#: script. So WHAT a declared script may replace is now declared in the
+#: scanner's own sanctioned list, ``readonly.SANCTIONED_API_REPLACEMENTS``,
+#: which the boundary freeze pins; this dict still names which scripts are
+#: exempt from the cannot-mutate test, and
+#: :func:`test_every_declared_replacement_script_replaces_exactly_what_it_declares`
+#: holds the two together.
 SCRIPTS_THAT_REPLACE_PAGE_BEHAVIOUR = {
     "CLIPBOARD_JS": share_link.CLIPBOARD_JS,
 }
@@ -1310,15 +1417,104 @@ def test_a_script_that_replaces_page_behaviour_runs_only_from_a_sanctioned_evalu
             label, function)
 
 
-def test_every_declared_replacement_script_really_replaces_something():
-    """The dict of mutating scripts is not a hiding place for a reader: each
-    entry must carry a replacement marker, and each must also be one the token
-    scan cannot see -- which is the whole reason it is declared separately."""
+_API_REPLACEMENT = "API replacement: "
+
+
+def _replacement_verdict(key: tuple[str, str], script: str) -> dict[str, list[str]]:
+    """Measure ``script`` against ``readonly.SANCTIONED_API_REPLACEMENTS[key]``.
+
+    ``tokens`` -- DOM and network mutation tokens, which no declaration
+    excuses; ``undeclared`` -- API replacements the scan found beyond the
+    declared ones; ``missing`` -- declared ones the scan no longer finds, a
+    stale declaration. Each is a list of scan entries, one per occurrence.
+    """
+    found = readonly.scan_js_for_mutations(script)
+    replacements = Counter(f for f in found if f.startswith(_API_REPLACEMENT))
+    declared = Counter(readonly.SANCTIONED_API_REPLACEMENTS.get(key, ()))
+    return {
+        "tokens": [f for f in found if not f.startswith(_API_REPLACEMENT)],
+        "undeclared": sorted((replacements - declared).elements()),
+        "missing": sorted((declared - replacements).elements()),
+    }
+
+
+def _sanctioned_key(name: str) -> tuple[str, str]:
+    """The sanctioned list's key for a script declared in this file by NAME."""
+    keys = [k for k in readonly.SANCTIONED_API_REPLACEMENTS if k[1] == name]
+    assert len(keys) == 1, (name, keys)
+    return keys[0]
+
+
+def test_every_declared_replacement_script_replaces_exactly_what_it_declares():
+    """The dict of mutating scripts is not a hiding place for a reader, and not
+    a door for a second replacement either.
+
+    UNTIL 2026-09-24 this test asserted the opposite of what it now asserts --
+    that the token scan could NOT see a declared script, which was the whole
+    reason for declaring it. The scan learned to see API replacement that day,
+    so the claim became: the scan sees each declared script, and what it sees
+    is EXACTLY the scanner's sanctioned list for it -- no mutation token at all,
+    no replacement beyond the declared ones, and none of them gone missing.
+    """
     for name, script in SCRIPTS_THAT_REPLACE_PAGE_BEHAVIOUR.items():
         assert any(marker in script for marker in _REPLACEMENT_MARKERS), name
-        assert readonly.scan_js_for_mutations(script) == [], (
-            f"{name} is caught by the token scan after all; it should then be "
-            "certified by that scan's refusal, not declared here")
+        verdict = _replacement_verdict(_sanctioned_key(name), script)
+        assert verdict == {"tokens": [], "undeclared": [], "missing": []}, (name, verdict)
+        assert readonly.scan_js_for_mutations(script), (
+            f"{name} is declared as replacing page behaviour and the scan finds "
+            "nothing in it: either it no longer replaces anything, or the scan "
+            "went blind again")
+
+
+def test_the_sanctioned_list_and_the_declared_scripts_are_the_same_scripts():
+    """No sanctioned entry without a declared script, and none the other way;
+    and each entry names the module the constant really lives in."""
+    names = {name for _module, name in readonly.SANCTIONED_API_REPLACEMENTS}
+    assert names == set(SCRIPTS_THAT_REPLACE_PAGE_BEHAVIOUR), names
+    for (module, name), declared in readonly.SANCTIONED_API_REPLACEMENTS.items():
+        assert declared, (module, name)
+        stem = module.rsplit("/", 1)[-1].removesuffix(".py")
+        imported = importlib.import_module(f"linkedin_server.{stem}")
+        assert getattr(imported, name, None) is SCRIPTS_THAT_REPLACE_PAGE_BEHAVIOUR[name], (
+            module, name)
+
+
+def test_a_replacement_the_list_does_not_declare_is_still_refused():
+    """SHOWN FAILING, both directions, on the one sanctioned script.
+
+    A capture that ALSO replaces ``window.fetch`` is refused, naming exactly
+    the new replacement; a capture with one declared replacement REMOVED is
+    refused as a stale declaration; and the clipboard replacement on its own,
+    in a script nobody declared, is refused by the plain scan -- the
+    declaration excuses one script's own findings, never a shape.
+    """
+    key = ("linkedin_server/share_link.py", "CLIPBOARD_JS")
+    capture = share_link.CLIPBOARD_JS
+
+    widened = capture.replace(
+        "return true;\n  }\n\n  if (mode === \"read\")",
+        "window.fetch = function () {};\n    return true;\n  }\n\n  if (mode === \"read\")",
+        1,
+    )
+    assert widened != capture, "the plant did not apply"
+    assert _replacement_verdict(key, widened) == {
+        "tokens": [], "undeclared": ["API replacement: window.fetch ="], "missing": [],
+    }
+
+    narrowed = capture.replace("window.__lqCopyListenerInstalled = true;", "", 1)
+    assert narrowed != capture, "the plant did not apply"
+    assert _replacement_verdict(key, narrowed) == {
+        "tokens": [], "undeclared": [],
+        "missing": ["API replacement: window.__lqCopyListenerInstalled ="],
+    }
+
+    undeclared = "() => { navigator.clipboard.writeText = (t) => { window.__c = t; }; }"
+    assert _replacement_verdict(("linkedin_server/dom.py", "SOME_NEW_JS"), undeclared)[
+        "undeclared"
+    ] == [
+        "API replacement: navigator.clipboard.writeText =",
+        "API replacement: window.__c =",
+    ]
 
 
 def test_the_call_site_resolver_sees_a_script_hiding_behind_a_name():
@@ -1356,6 +1552,67 @@ def test_the_js_scanner_catches_a_planted_mutation():
     """
     found = readonly.scan_js_for_mutations(bad)
     assert ".click(" in found and ".value =" in found and "fetch(" in found, found
+
+
+#: REPLACING A BROWSER API, in every spelling measured, and it matched none of
+#: the tokens above until 2026-09-24. The live lane found it: a script that
+#: swaps ``navigator.clipboard.writeText`` for a capturing function calls
+#: nothing, sets no attribute and fetches nothing -- it REPLACES what the page
+#: will call -- and the cannot-mutate test passed it. A replaced API changes
+#: what LinkedIn's own code does next, which is a mutation of the page by any
+#: reading of the word.
+_API_REPLACEMENT_PLANTS = [
+    ("clipboard", "navigator.clipboard.writeText = (t) => { window.__c = t; };"),
+    ("fetch", "window.fetch = function () {};"),
+    ("click-prototype", "Element.prototype.click = function () {};"),
+    ("focus-prototype", "HTMLElement.prototype.focus = () => {};"),
+    ("define-property", "Object.defineProperty(navigator, 'clipboard', { value: fake });"),
+    ("exec-command", "document.execCommand = () => true;"),
+    ("window-open", "window.open = function () { return null; };"),
+    ("bracket-member", "navigator['clipboard'].writeText = x;"),
+    ("assign-onto", "Object.assign(navigator.clipboard, { writeText: fake });"),
+    ("delete", "delete navigator.clipboard;"),
+    ("reflect-set", "Reflect.set(window, 'fetch', fake);"),
+    ("listener-prototype", "EventTarget.prototype.addEventListener = wrap;"),
+    ("handler", "window.onbeforeunload = null;"),
+]
+
+#: THE READS THE SAME SCAN MUST LEAVE ALONE, so a detector that flagged every
+#: mention of ``navigator`` cannot pass the plants above and ship.
+#:
+#: ``window.location.href === x`` IS NOT HERE, and not because it is a write:
+#: the token list's substring rule already flags it (``"location.href ="`` is a
+#: prefix of ``"location.href ==="``). That conservatism predates this block
+#: and is not its subject; the strict comparison below is one no token covers.
+_API_READS = [
+    ("read-member", "const n = navigator.clipboard;"),
+    ("strict-compare", "if (navigator.userAgent === x) {}"),
+    ("loose-compare", "if (document.title == 'x') {}"),
+    ("local-object", "out.count = 1;"),
+    ("read-dimension", "let w = window.innerWidth;"),
+    ("not-equal", "const ok = navigator.userAgent !== '';"),
+    ("push", "rows.push({ href: a.href });"),
+    ("dom-parser", "const doc = new DOMParser().parseFromString(html, 'text/html');"),
+    ("greater-equal", "x = document.querySelectorAll('a').length >= 2;"),
+    ("for-of", "for (const node of document.querySelectorAll('button')) { n += 1; }"),
+]
+
+
+@pytest.mark.parametrize(
+    "script", [s for _, s in _API_REPLACEMENT_PLANTS],
+    ids=[i for i, _ in _API_REPLACEMENT_PLANTS],
+)
+def test_the_js_scanner_catches_an_api_replacement(script):
+    """SHOWN FAILING on the token list alone: every plant here scanned clean."""
+    found = readonly.scan_js_for_mutations("() => { " + script + " }")
+    assert any(entry.startswith("API replacement") for entry in found), found
+
+
+@pytest.mark.parametrize(
+    "script", [s for _, s in _API_READS], ids=[i for i, _ in _API_READS]
+)
+def test_the_js_scanner_leaves_a_read_of_an_api_alone(script):
+    assert readonly.scan_js_for_mutations("() => { " + script + " }") == []
 
 
 def test_every_injected_script_is_scanned():

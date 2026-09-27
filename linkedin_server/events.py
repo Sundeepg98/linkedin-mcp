@@ -357,7 +357,9 @@ async def read_events_home(page: Any) -> dict[str, Any]:
         cards = page.locator(EVENTS_HOME_CARD_SELECTOR)
         count = await cards.count()
     except Exception as error:  # noqa: BLE001
-        out["error"] = f"{type(error).__name__}: {error}"
+        # THE TYPE, NEVER THE TEXT: a library's message can quote a selector,
+        # a request or the page (ERROR-MESSAGE-RULED-AT-THE-RAISE).
+        out["error"] = type(error).__name__
         return out
 
     out["cards_read"] = int(count)

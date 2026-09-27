@@ -258,9 +258,9 @@ def test_linkedin_member_viewer_is_anonymous_and_has_no_profile_url():
         {"href": "/in/acoaaab-anonymous-1234/", "text": ANONYMOUS_VIEWER_CARD}
     )
     assert card is not None
-    assert card["name"] == "LinkedIn Member"
+    assert card["person"]["name"] == "LinkedIn Member"
     assert card["anonymous"] is True
-    assert "profile" not in card
+    assert card["person"]["link"] is None
     assert card["viewed"] == "3 days ago"
 
 
@@ -269,10 +269,10 @@ def test_named_viewer_is_not_anonymous_and_carries_a_profile_url():
         {"href": "/in/priya-sharma-12ab34/", "text": NAMED_VIEWER_CARD}
     )
     assert card is not None
-    assert card["name"] == "Priya Sharma"
+    assert card["person"]["name"] == "Priya Sharma"
     assert card["anonymous"] is False
-    assert card["profile"] == "https://www.linkedin.com/in/priya-sharma-12ab34"
-    assert card["headline"] == "Engineering Manager at Globex"
+    assert card["person"]["link"] == "https://www.linkedin.com/in/priya-sharma-12ab34/"
+    assert card["person"]["headline"] == "Engineering Manager at Globex"
     assert card["viewed"] == "2 days ago"
 
 
@@ -282,7 +282,7 @@ def test_every_anonymous_marker_suppresses_the_profile_url(name_line, marker):
     card = parse_person_card({"href": "/in/some-real-slug-99/", "text": text})
     assert card is not None, marker
     assert card["anonymous"] is True, marker
-    assert "profile" not in card, marker
+    assert card["person"]["link"] is None, marker
 
 
 def test_anonymous_marker_cases_cover_every_marker_in_the_module():
@@ -332,7 +332,7 @@ def test_time_line_does_not_become_the_person_headline():
     )
     assert card is not None
     assert card["viewed"] == "2 days ago"
-    assert card["headline"] == "Engineering Manager at Globex"
+    assert card["person"]["headline"] == "Engineering Manager at Globex"
 
 
 def test_time_line_between_title_and_company_does_not_become_the_company():
@@ -473,8 +473,8 @@ def test_chrome_lines_do_not_become_the_person_headline():
     )
     card = parse_person_card({"href": "/in/priya-sharma-12ab34/", "text": text})
     assert card is not None
-    assert card["name"] == "Priya Sharma"
-    assert card["headline"] == "Engineering Manager at Globex"
+    assert card["person"]["name"] == "Priya Sharma"
+    assert card["person"]["headline"] == "Engineering Manager at Globex"
 
 
 def test_a_row_without_a_viewed_time_is_not_a_viewer():
@@ -751,8 +751,8 @@ def test_envelope_merges_extra_fields():
 #: values are the whole point: see the docstring below.
 DESCRIPTOR_CASES = [
     ("Ada Lovelace will send message", 1, False, "will send message"),
-    ("Ada Lovelace to Grace Hopper will send message", 2, True, "will send message"),
-    ("Grace Hopper", 1, False, ""),
+    ("Ada Lovelace to Wren Fixturewright will send message", 2, True, "will send message"),
+    ("Wren Fixturewright", 1, False, ""),
     ("Send", 1, False, ""),
     ("Open send options", 1, False, "send options"),
     # NONE, NOT "". No run was found, so no name-free tail can be derived.

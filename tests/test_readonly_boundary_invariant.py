@@ -188,6 +188,17 @@ READONLY = REPO / "linkedin_server" / "readonly.py"
 #: ADDING THEM IS PURELY ADDITIVE. It can only make the freeze notice more; no
 #: existing digest changes meaning, and the four originals are byte-identical
 #: across the addition.
+#:
+#: FIVE MORE, 2026-09-24, at lane G's merge of master, and the same argument.
+#: ``SANCTIONED_API_REPLACEMENTS`` is a PERMISSION table -- what a declared
+#: script may replace in the page -- entered with its first entry at that
+#: merge; a permission table outside this tuple could grow with no digest
+#: moving. The other four are the replacement scan's own tables, which lane G
+#: left unpinned when it built them that morning while ``JS_MUTATION_TOKENS``,
+#: the scan's other table, has been pinned from the start: the pattern tuple,
+#: and the three string fragments it is concatenated from BY NAME. All four are
+#: needed, because ``_literal`` renders a name as ``<unhandled>`` -- a constant
+#: -- so the tuple's digest alone would not move when a fragment is edited.
 PINNED = (
     "_ALLOWED_URL_PATTERNS",
     "_FORBIDDEN_URL_SUBSTRINGS",
@@ -196,6 +207,11 @@ PINNED = (
     "_MUTATION_CALL_PATTERNS",
     "JS_MUTATION_TOKENS",
     "SANCTIONED_MUTATIONS",
+    "_JS_BROWSER_ROOTS",
+    "_JS_MEMBER_CHAIN",
+    "_JS_ASSIGNMENT",
+    "JS_API_REPLACEMENT_PATTERNS",
+    "SANCTIONED_API_REPLACEMENTS",
 )
 
 #: Digests of ``linkedin_server/readonly.py`` at "perform() for save_job, and
@@ -1221,6 +1237,22 @@ PINNED = (
 #: The pattern-exemption digest is 76d7b10899530d69 with the follower list
 #: and 419e64a3cd92ec7e without it. Computed with this file's `ast_digest`.
 #: ------------------------------------------------------------------------
+#: RE-FROZEN 2026-09-24 (lane G follow-up, item 8), ONE DIGEST MOVED, AND IT
+#: IS A REFUSAL THAT GREW -- NO PERMISSION MOVED:
+#:
+#:     <functions>   d7e1d0922e3af446 -> ff43e832d6f2b685
+#:     every table   unchanged (JS_MUTATION_TOKENS included: no token dropped)
+#:
+#: `scan_js_for_mutations` now also reports a script that REPLACES A BROWSER
+#: API -- an assignment or `delete` on a member reached from a browser global,
+#: any `.prototype` member, `Object.defineProperty` and its relatives. The live
+#: lane found a clipboard-capturing script passing the cannot-mutate test on
+#: tokens alone. Measured over the 58 JavaScript strings in this repository:
+#: zero detections, so no executed script changed verdict; 13 plants caught,
+#: 10 reads of the same globals left alone (`tests/test_readonly.py`).
+#: ATTRIBUTION: HEAD's readonly.py hashes to exactly the prior pin, so this
+#: change is the whole of the move. Seven of eight digests byte-identical.
+#: ------------------------------------------------------------------------
 #: RE-FROZEN 2026-09-24 BY THE LIVE LANE, FIVE TUPLE ENTRIES, ONE DIGEST
 #: MOVED -- AND LATE, WHICH IS PART OF THE RECORD:
 #:
@@ -1254,6 +1286,47 @@ PINNED = (
 #: else entirely, and a needle no line carries drops nothing and moves
 #: nothing. SEVEN of eight digests byte-identical; ``<functions>`` unmoved.
 #: One interpreter, 3.13; the 3.10 cell is CI's.
+#: ------------------------------------------------------------------------
+#: RE-FROZEN 2026-09-24 AT LANE G'S MERGE OF MASTER 66aaa95, THIRTEEN DIGESTS
+#: NOW, AND EVERY ONE ATTRIBUTED -- the two re-freezes just above each moved
+#: one digest on its own side, and the merge carries both:
+#:
+#:     <functions>              ff43e832d6f2b685   lane G's (the replacement scan)
+#:     SANCTIONED_MUTATIONS     e79a701b37ae9c39   the live lane's five presses
+#:     six other tables         byte-identical on both sides
+#:
+#: plus FIVE NEWLY PINNED NAMES (see PINNED): the replacement scan's pattern
+#: tuple and the three fragments it is built from, each hashing to exactly
+#: what lane G's branch built, and ONE NEW PERMISSION TABLE,
+#: ``SANCTIONED_API_REPLACEMENTS`` (c1608a90b6669d78), whose one entry declares
+#: the seven replacements the live lane's ``share_link.CLIPBOARD_JS`` makes
+#: -- on SHARE-AND-POLL-PROOFS-OWN-POSTS, with its evidence beside it in
+#: readonly.py. A PERMISSION was declared; no refusal moved, and the floors
+#: below are untouched.
+#:
+#: ATTRIBUTION, computed with this file's ``ast_digest``: the merged file
+#: equals lane G's branch on every key the branch had except
+#: SANCTIONED_MUTATIONS, and master on every key master had except
+#: ``<functions>``; the merged file MINUS the new table's block moves exactly
+#: one key, SANCTIONED_API_REPLACEMENTS. Shown failing: planting an eighth
+#: replacement in the table moves that digest and no other
+#: (``test_a_planted_api_replacement_moves_exactly_its_digest``), and
+#: narrowing the browser roots moves ``_JS_BROWSER_ROOTS``
+#: (``test_a_real_weakening_does_move_the_digest``). One interpreter, 3.13.
+#: ------------------------------------------------------------------------
+#: RE-FROZEN 2026-09-24 (lane D's 5.3, assigned to lane G), ONE DIGEST MOVED,
+#: AND IT IS A REFUSAL THAT GREW:
+#:
+#:     _MUTATION_CALL_PATTERNS   10a0e8e2bb4d7812 -> 579d20dc7c08eb52   29 -> 31
+#:     every other digest        unchanged
+#:
+#: A DevTools session can do anything the page can, and no pattern could see
+#: one: ``cdp_session`` (opening one) and ``cdp_send`` (any ``.send(``, since
+#: a method name can be a variable). Shown failing: three plants -- a click by
+#: ``Input.dispatchMouseEvent``, a browser-level session, and lane D's
+#: variable-method send -- each scanned CLEAN on the prior patterns; zero hits
+#: across the 55 tracked package modules after, so nothing needed sanctioning. The
+#: floor below rises 29 -> 31 and the detector roster names both classes.
 #: ------------------------------------------------------------------------
 #: RE-FROZEN AGAIN 2026-09-24 (lane S follow-up), ONE DIGEST MOVED BY ONE
 #: EDITED TUPLE ENTRY -- THE SEARCH ADMISSION WIDENED TO FOUR CLOSED WORDS on
@@ -1356,6 +1429,39 @@ PINNED = (
 #: to 17409e16e7abbcc8, lane S's pin, so nothing else rode in. Control:
 #: minus the pre-existing articles line instead lands on 173ff7a49fd2bf66.
 #: ------------------------------------------------------------------------
+#: RE-FROZEN AT LANE G'S MERGE OF MASTER 2eb90ad (2026-09-27): THE TWO
+#: BRANCHES' RE-FREEZES MEET, AND NOTHING ELSE MOVES. THIRTEEN DIGESTS:
+#:
+#:     _ALLOWED_URL_PATTERNS     6240409ec52c4ab2   master's, the notes above
+#:     <functions>               ff43e832d6f2b685   lane G's replacement scan
+#:     _MUTATION_CALL_PATTERNS   579d20dc7c08eb52   lane G's, lane D's 5.3
+#:     the five names lane G pinned, and every other table: byte-identical
+#:
+#: ATTRIBUTION, computed with this file's ``ast_digest`` on each side's own
+#: copy of this file: the merged readonly.py equals lane G's branch on every
+#: key except ``_ALLOWED_URL_PATTERNS``, and equals master on every key
+#: master pins except ``<functions>`` and ``_MUTATION_CALL_PATTERNS``. Git
+#: merged the dict below line by line; every value in it was then checked
+#: against the merged file and none needed a hand edit. One interpreter, 3.13.
+#: ------------------------------------------------------------------------
+#: RE-FROZEN RIGHT AFTER THAT MERGE (2026-09-27), ONE DIGEST MOVED, AND IT IS
+#: A PERMISSION DECLARED FOR A CAPABILITY ALREADY RULED:
+#:
+#:     SANCTIONED_MUTATIONS   e79a701b37ae9c39 -> e9d953efc8ab8d0e   12 -> 15
+#:     every other digest     unchanged
+#:
+#: The merge brought lane D's ``cdp_download`` (P C8's download transport, on
+#: D4-NO-OWN-BROWSER-CONTEXT) together with the DevTools patterns lane G had
+#: added to ``_MUTATION_CALL_PATTERNS`` at lane D's own request, and the
+#: scanner saw its one send and its two sessions: three unsanctioned calls
+#: and a docstring. The docstring was reworded (a call shape in prose); the
+#: three calls were declared, by function, with their argument beside them in
+#: readonly.py. Shown failing: one more send, or one more session, in any
+#: other function of that module is refused
+#: (``tests/test_readonly.py::test_the_download_transport_is_declared_by_function_and_not_by_file``).
+#: ATTRIBUTION: readonly.py minus exactly the 35 added lines hashes to the
+#: prior pin on every key. One interpreter, 3.13.
+#: ------------------------------------------------------------------------
 #: RE-FROZEN AGAIN 2026-09-27 BY THE LIVE LANE (the session-2 preparation),
 #: TWO DIGESTS MOVED, ONE ENTRY IN EACH OF TWO TABLES -- HIS "SHARING PROFILE
 #: EDITS" SETTING PAGE, FOR READING ONLY, on the orchestrator's APPLICATION of
@@ -1392,15 +1498,48 @@ PINNED = (
 #: digests byte-identical; ``<functions>`` unmoved, so ``assert_read_url`` did
 #: not change. Computed with this file's ``ast_digest``, one interpreter, 3.13.
 #: ------------------------------------------------------------------------
+#: RE-FROZEN AT THE LIVE LANE'S MERGE OF MASTER 52b55b6 (2026-09-27): LANE G'S
+#: RE-FREEZES AND THE LIVE LANE'S ADMISSION MEET, AND NOTHING ELSE MOVES.
+#: THIRTEEN DIGESTS, measured on the merged readonly.py:
+#:
+#:     _ALLOWED_URL_PATTERNS                     18e5958586c2c367   the live lane's, the note above
+#:     _FORBIDDEN_SUBSTRING_PATTERN_EXEMPTIONS   14f567fd160048a8   the live lane's, the note above
+#:     the other eleven                          master's, byte-identical
+#:
+#: ATTRIBUTION, with this file's ``ast_digest`` on each side's own
+#: readonly.py: the merged file equals master on every key but those two, and
+#: the live lane's branch on those two. Git merged the dict below line by
+#: line; every value in it was checked against the merged file and none
+#: needed a hand edit. Only these notes conflicted -- both branches had
+#: appended one here -- and both are kept, master's first. One interpreter,
+#: 3.13.
+#: ------------------------------------------------------------------------
 READONLY_AST_AT_LAST_REFREEZE = {
-    "<functions>": "d7e1d0922e3af446",
+    "<functions>": "ff43e832d6f2b685",
     "JS_MUTATION_TOKENS": "d47e30b67c583c1b",
     # ab8fdd31f93ef4fc until 2026-09-19. See the re-freeze note above: two
     # entries added for press.disclose's click and its closing Escape, on the
     # disclosing-press ruling. A PERMISSION grew; no refusal moved.
     # 3676d309ead50c61 until 2026-09-24: five more (reveal, view_switch and
     # share_link), the live lane's; the last re-freeze note above.
-    "SANCTIONED_MUTATIONS": "e79a701b37ae9c39",
+    # e79a701b37ae9c39 until 2026-09-27: THREE MORE, lane D's download
+    # transport (cdp_download's one DevTools send and its two sessions),
+    # declared on D4-NO-OWN-BROWSER-CONTEXT after lane G's merge of master
+    # 2eb90ad showed the widened scanner seeing them. A PERMISSION was
+    # declared; no refusal moved. ATTRIBUTION, with this file's ast_digest:
+    # readonly.py minus exactly the 35 lines of those entries and their
+    # argument hashes to e79a701b37ae9c39 on this key and to the prior pin
+    # on all thirteen; the other twelve digests are byte-identical.
+    "SANCTIONED_MUTATIONS": "e9d953efc8ab8d0e",
+    # PINNED FROM 2026-09-24, lane G's merge of master: the replacement scan's
+    # four tables (unchanged since lane G built them; pinned late, see PINNED)
+    # and the scanner's sanctioned list, born with ONE entry -- the live
+    # lane's clipboard capture. The last re-freeze note above.
+    "_JS_BROWSER_ROOTS": "75b6af8aaa6e187d",
+    "_JS_MEMBER_CHAIN": "c5d9d0c2da7553b0",
+    "_JS_ASSIGNMENT": "40d484166bfbebbc",
+    "JS_API_REPLACEMENT_PATTERNS": "98a46c7ce6183658",
+    "SANCTIONED_API_REPLACEMENTS": "c1608a90b6669d78",
     # 34f364971cf9e81c until 2026-09-19. GREW by TWO anchored deep paths in
     # the groups family -- a group by its NUMERIC id, bounded at twenty
     # digits, and the recommendation listing -- on the team lead's ruling.
@@ -1576,7 +1715,10 @@ READONLY_AST_AT_LAST_REFREEZE = {
     # detector classes added, zero removed, and the direction is pinned by
     # contents in tests/test_the_scanner_has_only_ever_gained_detectors.py
     # because this value cannot express it.
-    "_MUTATION_CALL_PATTERNS": "10a0e8e2bb4d7812",
+    # 10a0e8e2bb4d7812 until 2026-09-24: TWO MORE, a DevTools session
+    # (cdp_session, cdp_send), added and none removed; the last re-freeze
+    # note above, and the roster in that same file now names 31.
+    "_MUTATION_CALL_PATTERNS": "579d20dc7c08eb52",
 }
 
 _SUPERSEDED_READONLY_AST_AT_LAST_REFREEZE = {
@@ -2215,7 +2357,12 @@ DENYLISTS_AT_A76FE32 = {
     # fixture call, and asserts reads are not flagged. A removal now turns that
     # file red no matter what happens to this digest. Six mutations were shown
     # killing those checks before they were admitted.
-    "_MUTATION_CALL_PATTERNS": "10a0e8e2bb4d7812",
+    #
+    # UPDATED AGAIN 2026-09-24, FOR THE SAME KIND OF REASON:
+    # 10a0e8e2bb4d7812 -> 579d20dc7c08eb52, two DevTools detector classes
+    # added (lane D's 5.3), none removed. The same file's roster now names 31
+    # and its probes show both new classes firing.
+    "_MUTATION_CALL_PATTERNS": "579d20dc7c08eb52",
     "JS_MUTATION_TOKENS": "d47e30b67c583c1b",
 }
 
@@ -2417,7 +2564,7 @@ REFUSAL_FLOORS = {
     "_FORBIDDEN_URL_SUBSTRINGS": 33,
     "_FORBIDDEN_SUBSTRING_EXEMPTIONS": 2,
     "_FORBIDDEN_SUBSTRING_PATTERN_EXEMPTIONS": 2,
-    "_MUTATION_CALL_PATTERNS": 29,
+    "_MUTATION_CALL_PATTERNS": 31,
 }
 
 
@@ -2487,6 +2634,25 @@ def test_adding_a_second_sanctioned_mutation_moves_the_digest():
     )
 
 
+def test_a_planted_api_replacement_moves_exactly_its_digest():
+    """SHOWN FAILING on the permission the scanner's sanctioned list grants.
+
+    One more replacement declared for the clipboard capture -- the edit that
+    would let that script also replace ``window.fetch`` -- must move the
+    sanctioned list's digest and nothing else, or the list is frozen in name
+    only.
+    """
+    source = READONLY.read_text(encoding="ascii")
+    anchor = '        "API replacement: navigator.clipboard.writeText =",\n'
+    assert anchor in source, "the sanctioned entry moved; this control aims at nothing"
+    planted = source.replace(
+        anchor, anchor + '        "API replacement: window.fetch =",\n', 1
+    )
+    before, after = ast_digest(source), ast_digest(planted)
+    moved = {name for name in before if before[name] != after.get(name)}
+    assert moved == {"SANCTIONED_API_REPLACEMENTS"}, sorted(moved) or "NOTHING"
+
+
 def test_every_pinned_structure_was_actually_found():
     """A digest map that silently lost an entry would pass the check above by
     comparing two equally-empty dictionaries."""
@@ -2543,12 +2709,20 @@ def test_a_comment_or_an_identity_swap_does_not_move_the_digest():
             "_MUTATION_CALL_PATTERNS",
             lambda s: s.replace('("click", re.compile(r"\\.click\\s*\\(")),', "", 1),
         ),
+        (
+            # ADDED 2026-09-24: the replacement scan stops seeing ``navigator``
+            # -- the root the clipboard capture replaces -- in a fragment the
+            # pattern tuple reaches only by NAME.
+            "_JS_BROWSER_ROOTS",
+            lambda s: s.replace('"window|document|navigator|', '"window|document|', 1),
+        ),
     ],
 )
 def test_a_real_weakening_does_move_the_digest(name, edit):
-    """SHOWN FAILING, on the three edits that would actually matter: deleting
-    a forbidden substring, widening the allowlist to everything on the domain,
-    and removing the click detector from the scanner."""
+    """SHOWN FAILING, on the edits that would actually matter: deleting a
+    forbidden substring, widening the allowlist to everything on the domain,
+    removing the click detector from the scanner, and blinding the
+    replacement scan to a browser root."""
     source = READONLY.read_text(encoding="ascii")
     weakened = edit(source)
     assert weakened != source, f"the edit for {name} did not apply"

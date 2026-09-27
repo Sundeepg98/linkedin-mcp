@@ -241,7 +241,16 @@ def tracked(repo: pathlib.Path, *paths: str) -> list[str]:
     )
     if proc.returncode != 0:
         raise RuntimeError(f"git ls-files failed: {proc.stderr.strip()}")
-    return [p for p in proc.stdout.splitlines() if p.strip()]
+    # REPEATS DROPPED, GIT'S ORDER KEPT. An UNMERGED path is listed once per
+    # merge stage, so mid-merge a conflicted document arrived up to three
+    # times -- on the blocker locator's copy of this listing that tripled one
+    # document's scores, 33/30/24 against 11/10/8
+    # (`_audit/2026-09-23-census-cleanup.md` section 13.5). In THIS guard the
+    # repeat changed no verdict, because ``load_corpus`` keys by path; it is
+    # removed here because it is this function's contract, and a consumer
+    # that counts must not inherit it. Stage repeats are adjacent, so
+    # first-seen order is git's order. Not ``--deduplicate``: older git lacks it.
+    return list(dict.fromkeys(p for p in proc.stdout.splitlines() if p.strip()))
 
 
 #: `_audit/INDEX.md` is GENERATED -- a derived view of this corpus, not a

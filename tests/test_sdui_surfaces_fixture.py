@@ -601,8 +601,8 @@ async def test_a_row_whose_photo_link_comes_first_is_not_lost():
     records, rows, _ = await _people_from(NESTED_ROWS_HTML)
 
     assert len(records) == 2, records
-    assert [row["name"] for row in rows] == ["Priya Sharma", "Arun Balakrishnan"]
-    assert rows[0]["headline"] == "Engineer at Northwind"
+    assert [row["person"]["name"] for row in rows] == ["Priya Sharma", "Arun Balakrishnan"]
+    assert rows[0]["person"]["headline"] == "Engineer at Northwind"
     assert rows[0]["viewed"] == "3 days ago"
     assert rows[1]["viewed"] == "5 days ago"
 

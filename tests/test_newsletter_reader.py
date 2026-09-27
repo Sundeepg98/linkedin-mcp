@@ -367,12 +367,19 @@ async def test_rows_without_the_heading_still_read_because_the_control_is_not_a_
 
 
 @pytest.mark.asyncio
-async def test_a_page_that_cannot_be_evaluated_reports_the_class_and_the_message():
-    """A HANDLER THAT KEEPS THE CLASS AND DROPS THE MESSAGE IS A SCAR HERE.
+async def test_a_page_that_cannot_be_evaluated_reports_the_class_and_withholds_the_message():
+    """THE CLASS, AND SINCE 2026-09-24 ONLY THE CLASS -- a decision, with its cost.
 
-    The diagnostic named its own cause and was nearly discarded, three times in
-    one day. The error carries neither a title nor an href: the strings go INTO
-    the page and nothing is interpolated back out.
+    This test was named for keeping the message, and its docstring called a
+    handler that dropped it a scar: the diagnostic named its own cause and was
+    nearly discarded three times in one day. That cost is real and is recorded
+    rather than argued away. The orchestrator's order of 2026-09-24 (lane G
+    follow-up, item 2) put this field under the same rule as every ``dom.py``
+    error field: a library's message can quote a selector, a request or the
+    page, and write gates print such fields onward, so the field is decided
+    where the value enters it (``ERROR-MESSAGE-RULED-AT-THE-RAISE``) and carries
+    the exception's TYPE. The strings still go INTO the page and nothing is
+    interpolated back out.
     """
 
     class Exploding:
@@ -380,7 +387,8 @@ async def test_a_page_that_cannot_be_evaluated_reports_the_class_and_the_message
             raise RuntimeError("frame was detached")
 
     out = await newsletters.read_newsletter_subscriptions(Exploding())
-    assert out["error"] == "RuntimeError: frame was detached"
+    assert out["error"] == "RuntimeError"
+    assert "frame was detached" not in str(out)
     assert out["rows"] == []
     assert out["distinct"] == 0
     assert out["heading_seen"] == 0
@@ -481,7 +489,7 @@ async def test_a_detached_frame_resets_the_create_counts_rather_than_keeping_the
             raise RuntimeError("frame was detached")
 
     out = await newsletters.read_newsletter_subscriptions(Exploding())
-    assert out["error"] == "RuntimeError: frame was detached"
+    assert out["error"] == "RuntimeError"
     assert out["create_control"] == 0
     assert out["create_control_outside_main"] == 0
 
