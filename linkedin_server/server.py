@@ -8203,11 +8203,12 @@ async def linkedin_own_item_link(activity_id: str, include_link: bool = False) -
     then nothing is captured, the answer reads copied: false, and whether his
     clipboard was written cannot be read from here.
 
-    THE PRESSES ARE PRICED BY THE ITEM'S OWN REACTION TOGGLE, read in both
-    measured dialects (share_link.read_item_price) before the first press and
-    after the last. A page that draws no toggle at all is refused
-    (price_cannot_move) with nothing pressed: a counter that cannot move
-    prices nothing, whatever it reads.
+    THE PRESSES ARE PRICED BY THE ITEM'S OWN REACTION TOGGLE: the count of
+    toggles wearing an OFF label and of those wearing an ON label, across both
+    measured label families (the permalink's basis in press.SENSITIVITY_BASES),
+    read before the first press and after the last. A page on which both read
+    0 is refused (price_cannot_move) with nothing pressed: a counter that
+    cannot move prices nothing, whatever it reads.
 
     WHAT COMES BACK: copied (bool); captures (how many texts were kept);
     shape -- whether it is an https LinkedIn link, its path kind, whether it
@@ -8235,7 +8236,9 @@ async def linkedin_own_item_link(activity_id: str, include_link: bool = False) -
     # EVERY PRICE READING IS KEPT AND RETURNED, integers only: the price is
     # evidence, and a verdict that only names its counter ("priced by
     # off_state") cannot show whether that counter could have moved. The
-    # first live fire was priced by an off_state of 0 at both ends.
+    # first live fire was priced by an off_state of 0 at both ends. A price
+    # that cannot move is refused inside copy_own_post_link, before its first
+    # press, by press.check_price_can_move -- one rule, in the gate.
     own_item_readings: list[dict[str, Optional[int]]] = []
     try:
         async with BROWSER.session() as page:
@@ -8247,19 +8250,6 @@ async def linkedin_own_item_link(activity_id: str, include_link: bool = False) -
                 own_item_readings.append(dict(own_item_reading))
                 return own_item_reading
 
-            # A PRICE THAT CANNOT MOVE IS REFUSED BEFORE THE FIRST PRESS.
-            if not share_module.price_can_move(await own_item_counters()):
-                return {
-                    "refused": "price_cannot_move",
-                    "why": (
-                        "the item's page drew no reaction toggle in either "
-                        "measured dialect, so no counter read here could move "
-                        "for an outward act. A press nothing can price is not "
-                        "made: nothing was pressed."
-                    ),
-                    "price_readings": own_item_readings,
-                    "pages_loaded": 1,
-                }
             own_item_outcome = await share_module.copy_own_post_link(
                 page, activity_digits=own_item_digits, read_counters=own_item_counters
             )

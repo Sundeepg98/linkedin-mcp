@@ -2152,7 +2152,30 @@ _ALLOWED_URL_PATTERNS: tuple[re.Pattern[str], ...] = (
     # serves it, and if it redirects the line widens nothing. NOT admitted:
     # `/recent-activity/all/`, `/comments/` or `/reactions/` (other people's
     # posts he acted on), any other member's activity, a query, a sub-path.
+    # (`/recent-activity/all/` WAS ADMITTED 2026-09-24 by its own line below,
+    # on the orchestrator's order; `/comments/` and `/reactions/` still are
+    # not.)
     re.compile(r"^https://www\.linkedin\.com/in/me/recent-activity/articles/?$"),
+    # M C85 -- his ALL-ACTIVITY list, `/in/me/` form only. ADMITTED 2026-09-24
+    # by the live lane on the orchestrator's integration order of that day,
+    # Part 2 (d): "Admit /in/me/recent-activity/all/ (his own activity, a
+    # closed segment) so his own poll posts can be found." The row's own
+    # address source is DECIDED (orchestrator-delegated, 2026-09-23): only
+    # one of HIS OWN posts is used. His profile's activity rail draws 8 items
+    # and none was a poll (session 1); this is the list the rail's "Show all
+    # posts" anchor opens -- DRAWN on his own profile as
+    # `/in/<him>/recent-activity/all/`, which is why the parent was named when
+    # the articles line above was admitted. Its sibling `/recent-activity/
+    # articles/` SERVED EXACTLY on its first load (session 1, load 12: no
+    # redirect), so the `/in/me/` form is expected to be the address the page
+    # keeps; the first load here says so or not, and a redirect widens
+    # nothing. THE BOUNDARY DECIDES WHAT MAY BE OPENED; THE SHAPER DECIDES
+    # WHAT MAY BE SAID: the list can draw OTHER people's posts he reposted, so
+    # a reader owes the feed-content ruling's "counts and relations only,
+    # never text or names". NOT admitted: `/comments/` and `/reactions/`
+    # (other people's posts he acted on), the other activity tabs, the
+    # activity root, any other member's activity, a query, a sub-path.
+    re.compile(r"^https://www\.linkedin\.com/in/me/recent-activity/all/?$"),
     # ======================================================================
     # REVIEW (lane L1, 2026-09-23) -- P L2b, HIS OWN FOLLOWER LIST. This line
     # is HALF of a two-gate admission; the other half is the paired entry in
@@ -3335,11 +3358,13 @@ SANCTIONED_MUTATIONS: tuple[tuple[str, str, str], ...] = (
     # capture -- is named in share_link and reads as copied: false. The
     # address is admitted, the gate's component checks run before any press,
     # and the closure is verified. THE PRICE IS THE ITEM'S OWN REACTION
-    # TOGGLE, in both measured dialects (share_link.read_item_price), read
-    # before the first press and after the last; a page drawing no toggle is
-    # refused before any press, because the /feed/ basis's own off_state
-    # reads 0 on a permalink whatever happens -- measured on the first live
-    # fire, which that zero priced.
+    # TOGGLE: the permalink's own basis in press.SENSITIVITY_BASES counts
+    # toggles OFF and ON across both measured label families, before the
+    # first press and after the last, and a zero pair is refused before any
+    # press (press.check_price_can_move). The first live fire was priced by
+    # the feed basis's off_state at 0, which on a permalink whose toggle is
+    # ON -- or drawn in the other label family -- cannot tell unmoved from
+    # unmovable.
     ("linkedin_server/share_link.py", "_activate", "click"),
     ("linkedin_server/share_link.py", "_clipboard", "evaluate"),
     ("linkedin_server/share_link.py", "copy_own_post_link", "press"),
