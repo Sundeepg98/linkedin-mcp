@@ -58,7 +58,7 @@ of instruments did not. The count is twelve now: the same lane added three
 for the copy link of the operator's own post.
 
 WHAT IS TRUE, measured rather than remembered: fifteen write tools ship,
-twelve sanctioned mutating calls exist, writes are off unless a per-process
+fifteen sanctioned mutating calls exist, writes are off unless a per-process
 flag is set, and every write needs a single-use token from its own preview --
 a token that works once, and a redeemed grant that ``perform`` will not act on
 twice. (This read "fourteen write tools" until lane L5's merge of master
@@ -69,7 +69,11 @@ until 2026-09-23, when ``linkedin_follow_company_page`` shipped. The
 mutating-call count moved for none of the three: each click is ``perform``'s
 existing one, and ``send_reply``'s fill is ``perform``'s own too. It moved
 for the live lane's five presses, above, which the lane merge of 2026-09-24
-brought in.) See
+brought in; and it read "twelve sanctioned mutating calls" until lane G's
+merge of master 2eb90ad, 2026-09-27, where lane D's download transport --
+one DevTools send and two DevTools sessions -- met the scanner lane G had
+widened to see them, and was declared: calls that already shipped, newly
+visible, not a new capability.) See
 ``writes.py``, and prefer ``server.py``'s docstring over this one for counts,
 because that one is checked.
 """

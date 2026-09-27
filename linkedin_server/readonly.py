@@ -3011,8 +3011,8 @@ _MUTATION_CALL_PATTERNS: tuple[tuple[str, re.Pattern[str]], ...] = (
     # ``.click(``; ``Runtime.evaluate`` runs script without an ``.evaluate(``;
     # ``Page.navigate`` loads an address past the read door. Two patterns:
     #
-    # * ``cdp_session`` -- OPENING one, ``new_cdp_session`` or
-    #   ``new_browser_cdp_session``, the capability itself;
+    # * ``cdp_session`` -- OPENING one, by either of Playwright's two session
+    #   factories (a page's, or the whole browser's), the capability itself;
     # * ``cdp_send`` -- ANY ``.send(`` call. Not only a literal method name:
     #   lane D's closed table sends through ``_send(method, params)``, where
     #   the method is a variable, so a pattern anchored on a quoted
@@ -3404,8 +3404,9 @@ SANCTIONED_MUTATIONS: tuple[tuple[str, str, str], ...] = (
     #
     #   cdp_send     cdp_download._send -- THE ONE DevTools send in the
     #                package, refusing any method outside
-    #                ``cdp_download.CDP_METHODS``, which holds one:
-    #                ``Browser.setDownloadBehavior``;
+    #                ``cdp_download.CDP_METHODS``, which holds one: the
+    #                command that sets where downloads go (its name lives in
+    #                that module alone, as the P C8 transport test requires);
     #   cdp_session  cdp_download.capture_download -- the browser-level
     #                session a capture sets that behaviour over;
     #   cdp_session  cdp_download.reset_download_behaviour -- the session
