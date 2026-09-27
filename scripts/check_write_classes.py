@@ -168,6 +168,22 @@ WRITE_CLASS_ACTS: dict[str, str] = {
     # which no act above does; R3 because the operator's cut named no purchase,
     # and the row's own cell says a live proof of it needs him.
     "purchase": "R3",
+    # Added 2026-09-27 (lane L8, `_audit/2026-09-24-lane-l8-outward-classes.md` s5)
+    # for the rows OUTWARD-CLASSES-BUILT-BEHIND-GRANTS returned to GAP when it
+    # retired three PERMANENTLY_FORBIDDEN keys. No act above names them. All R3,
+    # so the first round's R1 is untouched.
+    #   endorse                 endorsing a member's skill, or removing an
+    #                           endorsement he gave.
+    #   delete-or-withdraw-own  deleting or withdrawing one of HIS OWN items --
+    #                           the third class the ruling built.
+    #   outside-the-classes     an act the retired delete_or_withdraw_anything
+    #                           held that is none of the three classes the ruling
+    #                           built (a connection, a block, another member's
+    #                           attendance): not `connect`, which is R2 and
+    #                           classify-only here, and not his own item.
+    "endorse": "R3",
+    "delete-or-withdraw-own": "R3",
+    "outside-the-classes": "R3",
 }
 
 #: The passage each non-residual class RESTS ON. A line of that class must cite

@@ -271,7 +271,7 @@ reads 13 against 12 as an arithmetic error.
 | `publish_post` | STILL-UNKNOWN | no | deleting the post | **NO** -- deletion permanently forbidden; `/delete` on the forbidden URL list |
 | `comment_on_item` | STILL-UNKNOWN | no | deleting the comment | **NO** -- same two grounds |
 | `send_invitation` | STILL-UNKNOWN | no | withdrawing the invitation | **NO** -- and the Sent-invitations manager is doubly unreachable: its address contains `invitation` (forbidden), and reaching it via `/mynetwork/` CONSUMES his pending-invitation badge |
-| `send_message` | STILL-UNKNOWN | no | recalling the message | **NO** -- "deletion is permanently forbidden here and `/messaging/compose` is on the read boundary's forbidden list" |
+| `send_message` | STILL-UNKNOWN | no | recalling the message | **NO** -- "deletion is permanently forbidden here and `/messaging/compose` is on the read boundary's forbidden list" **RESTATED 2026-09-27 (lane L8):** the verdict stands on a different ground -- NOBODY: a delivered message cannot be recalled. The quoted deletion clause leaned on `delete_or_withdraw_anything`, retired 2026-09-24 (OUTWARD-CLASSES-BUILT-BEHIND-GRANTS); LinkedIn's 60-minute delete (census M M12) removes a message from a thread, never from an inbox, and is unbuilt. |
 | `react_to_item` | STILL-UNKNOWN | no | un-reacting -- **the control for it has never been observed** | **NO** -- "with the ON label unmeasured there is no selector for the inverse, so nothing here could aim an un-react even if LinkedIn offers one" |
 
 ## The risk class the class column does not show
@@ -622,18 +622,26 @@ On a sibling server in this family, counting refusals undercounted the real gap
 size. Any number derived from it is a lower bound, and reporting it as a
 measurement of the gap would repeat the exact error that memory records.
 
-## 1. Permanently forbidden acts -- 9
+## 1. Permanently forbidden acts -- 6
 
 From `writes.PERMANENTLY_FORBIDDEN`. These are refused at the design level, not
 gated. Each carries its reason in the code; grounds are summarised here.
 
+**RESTATED 2026-09-27 (lane L8, 2026-09-24-lane-l8-outward-classes.md s5): SIX, NOT
+NINE.** Three entries -- `repost_or_share`, `endorse_or_recommend` and
+`delete_or_withdraw_anything` -- were retired from `writes.PERMANENTLY_FORBIDDEN` on
+2026-09-24 by OUTWARD-CLASSES-BUILT-BEHIND-GRANTS, which builds their acts behind the
+single-use grant instead, and they are kept verbatim in
+`linkedin_server/outward_classes.py` :: `RETIRED_PERMANENT_REFUSALS`. Their three rows
+below stay, each marked RETIRED; the six unmarked rows are the entries that remain.
+
 | # | act | ground |
 |---|---|---|
-| 1 | `repost_or_share` | a repost republishes SOMEBODY ELSE'S item to his network under his name. Menu never opened, so what a repost offers is unobserved. MEASUREMENT + not-asked-for |
-| 2 | `endorse_or_recommend` | IMPOSSIBLE AS SPECIFIED, not unwanted. Zero endorse controls across 13 fixtures and 222 live controls; you cannot endorse yourself, so the only surface carrying the control is a third party's profile. MEASUREMENT |
+| 1 | `repost_or_share` | **RETIRED 2026-09-24** (OUTWARD-CLASSES-BUILT-BEHIND-GRANTS; kept verbatim in outward_classes.RETIRED_PERMANENT_REFUSALS) -- a repost republishes SOMEBODY ELSE'S item to his network under his name. Menu never opened, so what a repost offers is unobserved. MEASUREMENT + not-asked-for |
+| 2 | `endorse_or_recommend` | **RETIRED 2026-09-24** (OUTWARD-CLASSES-BUILT-BEHIND-GRANTS; kept verbatim in outward_classes.RETIRED_PERMANENT_REFUSALS) -- IMPOSSIBLE AS SPECIFIED, not unwanted. Zero endorse controls across 13 fixtures and 222 live controls; you cannot endorse yourself, so the only surface carrying the control is a third party's profile. MEASUREMENT |
 | 3 | `deanonymise_a_viewer` | six of ten profile viewers chose anonymity. POLICY |
 | 4 | `load_a_third_partys_profile_to_measure_a_control` | a profile view is an EMISSION; this server can read the receiving end of that signal 365 days back. The cost lands entirely on somebody who is not him. POLICY, measured |
-| 5 | `delete_or_withdraw_anything` | destruction is not a write this design covers, at any confirm level. **FIVE specs cite this entry in `reversible_by`** -- shortening it would silently make five reversibility claims wrong at once |
+| 5 | `delete_or_withdraw_anything` | **RETIRED 2026-09-24** (OUTWARD-CLASSES-BUILT-BEHIND-GRANTS; kept verbatim in outward_classes.RETIRED_PERMANENT_REFUSALS) -- destruction is not a write this design covers, at any confirm level. **FIVE specs cite this entry in `reversible_by`** -- shortening it would silently make five reversibility claims wrong at once |
 | 6 | `mark_notifications_read` | clearing his unread badge destroys signal he has not seen, server-side on page serve so it cannot be confirmed first. Plus: 34 activatable controls on that surface, not one changes read state, no notification carries an id. POLICY + MEASUREMENT |
 | 7 | `auto_accept_or_auto_reply` | a reply in his name that he did not read. POLICY |
 | 8 | `any_loop_sweep_or_scheduled_write` | -- |
