@@ -10343,6 +10343,33 @@ The verifier's scripts (`scratchpad/lane-g/cold2/`, r01 to r12) and this
 repair's own red drive of both sanitiser versions and census re-measure are
 declared disposable; their numbers are in the lane record.
 
+### 67.13 THE TWO ORDERS OF 2026-09-27 EVENING: 17:05 AND 19:52
+
+Record: the lane record's `## Order of 2026-09-27 17:05` and
+`## Order of 2026-09-27 19:52: the residuals`. Every entry was shown failing
+on the tree before its fix.
+
+| path | shown failing by |
+|---|---|
+| `linkedin_server/dom.py` (`filter_name_matches`, exact) + `tests/test_a_filter_pill_is_pressed_by_its_exact_name.py` | the substring activator pressed a decoy containing `other`, refused an exact pill beside a decoy, and the rule said True for a label containing the word: 6 failed |
+| `linkedin_server/dom.py` (`FILTER_BAR_HOOK`, `FILTER_PILL_HOOK`) + `linkedin_server/shape.py` (`_FilterBar`) + the same test file and `tests/test_messaging_overview.py` | the exact-only activator pressed the folder trigger for `focused`, an outside namesake and a hooked button outside any bar, and told two bars from none: 5 failed; HEAD's enumerator reported `focused` and an outside `unread` |
+| `scripts/_check_the_unread_readings_guard_can_fail.py` (re-pointed) | it died on an AttributeError after the tests it drives were renamed, convicting nothing in its pill section; re-pointed, 11 of 11 |
+| `tests/test_a_person_name_is_never_a_literal.py` (`RETIRED_REAL_NAMES_SHA256`, the whole-tree sweep) | the first retired name in the table and six files: 2 failed; the second, with the sweep widened past `tests/` and `scripts/`: 23 sites in 8 files; a control retires an invented pair at runtime |
+| `scripts/check_cited_shas_resolve.py` (a disclosure read across a line wrap) + `tests/test_a_cited_sha_resolves.py` | three wrapped disclosures read as candidates: 3 failed; each with its control, the disclosure removed |
+| `tests/test_a_preview_names_the_resolved_target.py` + `tests/test_a_people_reader_reads_one_page.py` (`WRITE_DOOR`, `PREVIEW_BUILDERS`) | prose where a record belongs: 3 failed; crossing the write door declared fifteen write tools people readers: 3 failed; a named block planted into a grant, a receipt and a log record, each convicted |
+| `linkedin_server/people_data.py` (`ABSENT`) + `linkedin_server/threads.py` (the reply's headline and group) + the preview file | HEAD's modules, with only the name added: 6 failed -- `""` for ABSENT, a group and an undrawn row named as a person, two header lines naming one |
+| `tests/test_no_tracked_file_opens_with_a_model_id.py` | the tree before the strip: 19 offenders; the measured shape planted in a throwaway repository; seven prose and binary controls pass |
+| `tests/test_apply_modal_fixture.py` (the page's record of presses) | a plant emptying `TWO_CLICK_ACTIONS`: the record held only the apply control's press |
+| `scripts/py_baseline_lint.py` (`_pieces` answers None on a refusal) + `tests/test_the_package_compiles_on_its_oldest_python.py` | the pre-fix module answered `[]` to a refused tokenizer |
+
+### 67.14 DECLARED DISPOSABLE (THE TWO ORDERS)
+
+The scratchpad helpers -- the name retirers, the model-id measurer and
+stripper, the line-pointer census, the capture class and facepile and pill
+censuses, the hunk stager, the enumerator red drive, the pricing runner, the
+re-escaper and the gate runners -- are declared disposable. Their numbers
+are in the lane record.
+
 ---
 
 ## 68. A DOWNLOAD TRANSPORT ON THE ATTACHED BROWSER, TESTED ON A FAKE CHROME THAT CAN SAY NO (lane-d, 2026-09-24)
