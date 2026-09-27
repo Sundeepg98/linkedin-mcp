@@ -2030,3 +2030,92 @@ boundary invariant):**
 Baseline and restored: 35 passed. **If session 2's capture shows this
 address redirects, the second candidate gets its own admission then** -- not
 now.
+
+### (b) The reader for "Sharing profile edits", wired at the save gate's seam
+
+**THE CHOICE THE ORDER LEFT OPEN, TAKEN: BUILD IT NOW, against synthetic
+pages, because session 2's plan validates it on the real capture, offline
+and inside the session, BEFORE any of the six edits fires** (the plan's step
+for it, and the harness's offline check). The other option -- capture in
+session 2, fire the edits in a session 3 -- stays the fallback the plan names
+if that validation does not agree.
+
+**THE READER, `profile_editor.read_account_share_updates`, exactly the spec
+from (f):** one control of role switch or checkbox whose accessible name is
+EXACTLY "Sharing profile edits" (Playwright's own role-and-name engine, the
+comparison made inside the page -- lane L7's P B9 discipline, so a count comes
+back and never text); its state from the browser's `checked` PROPERTY when it
+is an `input[type=checkbox]`, cross-checked against `aria-checked` when both
+are drawn, and from `aria-checked` alone otherwise; the answer one of lane
+L7's `ACCOUNT_READINGS`. Every doubt is 'unknown', and 'unknown' is never
+'off': no control of that name, two of them, a name that only contains it, a
+disagreement, a control with no state, a button of that name, a failure (its
+exception TYPE only). **READ ONLY: it presses nothing** -- asserted on its
+body's calls. The address and the name are constants beside it
+(`ACCOUNT_SETTING_URL`, `ACCOUNT_SETTING_NAME`), and
+`served_at_account_setting` says whether the page kept its own path: a
+redirect -- to the other candidate, to the category page that lists this
+setting among others -- reads 'unknown', because an admitted address is not a
+served one.
+
+**THE WIRING, in `writes.perform`, for EDITOR_SAVE_ACTIONS only:** one load of
+the setting's page through `_load` -- the read door, unrelaxed -- BEFORE the
+editor is opened, so before the change is entered (the amendment's word; the
+setting lives on another page); the answer handed to all four
+`profile_editor.read_save_gate` calls the action can make (select, fill, the
+Premium badge's switch gate and its Save gate); the receipt gains
+`account_setting` (the reading, whether the page was served, the counts,
+constants-only reasons). A page that cannot be loaded gives None, never 'off',
+and does not stop the write: a dialog drawing its own notify control can still
+establish condition 1, so the gate decides -- and it refuses None wherever the
+dialog draws no control of its own. No rule in `profile_editor` moved; lane
+L7's seam received its input, and three stale sentences that said nothing
+supplied it were corrected in place.
+
+**THE ORDER'S FOUR TESTS, through the real preview, `consume` and `perform`
+over lane L7's editor world with his settings page added**
+(`tests/test_account_share_updates.py`): OFF passes (Save pressed, value
+stored, `condition_1: account_setting_off`); ON refuses (two shapes of switch);
+unknown refuses (no switch, an unnamed one, two named, a redirect); a missing
+reading refuses (the page cannot load: `reading: null`, the error's type).
+Beside them: the reading is taken before the editor is opened, once per write;
+a dialog control still governs whatever the account reads, both ways; an
+unrecognised unnamed switch still refuses with the account OFF (code 6); every
+save-gate call in `perform` passes the reading (structural); and the reader
+on twelve synthetic pages.
+
+**ONE GUARD CAUGHT THE FIRST DRAFT, and was right.** The navigation guard
+tracks a tainted name across the whole module, and `landed` is one in
+`writes.py`: binding the new function's booleans from it spread the taint
+through `value` and `reading` to every `goto(page, url)` in the file. The
+locals are now named for the function, as the probes' own docstrings say to.
+`tests/reader_leak_baseline.json` gains the two new readers, both measured
+`clean` by the guard's own `measure()`; no other verdict moved, so only those
+two lines were added.
+
+**RED-PROOFS, each plant alone in a scratch copy (the new file and lane L7's
+editor-commit tests):**
+
+    plant                                                          red
+    on writes.py and profile_editor.py before (b)   the new file does not
+                                                    import: collection errors
+    B1 the fill path's save gate loses the reading                   9
+    B2 the reading taken AFTER the editor is opened                 10
+    B3 a reading that could not be taken made 'off'                  3
+    B4 a redirected page's reading counted                           1
+    B5 a named control with no state read as off                     1
+    B6 the checked pseudo-class asked of any control                 3
+    B7 the name matched loosely                                      1
+    B8 two controls of that name accepted                            1
+    B9 an input whose aria-checked disagrees trusted                 1
+
+Baseline and restored: 75 passed. B8 SURVIVED THE FIRST RUN: the later
+exactly-one counts refused the same world for another reason, so the test
+now asserts the count the reading reports and the reason it gives, and B8
+goes red.
+
+**WHAT THE SYNTHETIC PAGES CANNOT SAY:** whether LinkedIn draws this setting
+as any of these shapes. The live page may name its switch through a title
+paragraph with no accessible name -- the intro editor's shape -- and then this
+reader answers 'unknown' and nothing fires. That is the case the in-session
+validation exists for.
