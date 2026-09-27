@@ -135,7 +135,7 @@ _FSTRING_START = getattr(tokenize, "FSTRING_START", None)
 _FSTRING_END = getattr(tokenize, "FSTRING_END", None)
 
 
-def _pieces(source: str) -> list[tuple[tuple[int, int], tuple[int, int], str]]:
+def _pieces(source: str) -> list[tuple[tuple[int, int], tuple[int, int], str]] | None:
     """Every string-literal PIECE in ``source``: ``(start, end, its quote)``.
 
     **ONE JoinedStr CAN HOLD SEVERAL PIECES, EACH WITH ITS OWN QUOTE.**
@@ -144,8 +144,13 @@ def _pieces(source: str) -> list[tuple[tuple[int, int], tuple[int, int], str]]:
     ITS piece -- ``'`` here, so the ``"`` inside is legal on every version.
     Positions are the tokenizer's (row, character column). On 3.12+ an
     f-string piece runs from its START token to its matching END, nested
-    f-strings included; before 3.12 it is the one STRING token. A source the
-    tokenizer refuses yields no pieces, and the caller falls back.
+    f-strings included; before 3.12 it is the one STRING token.
+
+    A source the tokenizer refuses yields None -- NO piece table, which is a
+    different answer from an empty one -- and the caller falls back to the
+    node's own quote. It returned ``[]`` until 2026-09-27, the outage-as-
+    absence shape tests/test_an_outage_is_never_filed_as_an_absence.py
+    refuses: a refusal and a file with no pieces read the same.
     """
     out: list[tuple[tuple[int, int], tuple[int, int], str]] = []
     open_fstrings: list[tuple[tuple[int, int], str]] = []
@@ -160,7 +165,7 @@ def _pieces(source: str) -> list[tuple[tuple[int, int], tuple[int, int], str]]:
             elif token.type == tokenize.STRING:
                 out.append((token.start, token.end, _quote_of(token.string)))
     except (tokenize.TokenError, SyntaxError):
-        return []
+        return None
     return out
 
 
@@ -209,6 +214,7 @@ def violations(source: str, label: str = "<source>") -> list[tuple[int, str, str
     tree = ast.parse(source, filename=label)
     lines = source.splitlines(keepends=True)
     pieces: list[tuple[tuple[int, int], tuple[int, int], str]] | None = None
+    tokenized = False
     found: list[tuple[int, str, str]] = []
     for node in ast.walk(tree):
         if not isinstance(node, ast.JoinedStr):
@@ -225,11 +231,16 @@ def violations(source: str, label: str = "<source>") -> list[tuple[int, str, str
                 # No quote at all, so no quote can be reused: most expressions
                 # stop here, and their file is never tokenized.
                 continue
-            if pieces is None:
+            if not tokenized:
                 # Tokenized once per file, and only for a file with an
                 # expression that quotes something.
                 pieces = _pieces(source)
-            quote = _enclosing_quote(pieces, _character_position(lines, part.value))
+                tokenized = True
+            quote = (
+                _enclosing_quote(pieces, _character_position(lines, part.value))
+                if pieces is not None
+                else None  # the tokenizer refused: the node's quote decides
+            )
             quote = quote or fallback
             if quote and quote in expression:
                 found.append((part.value.lineno, REUSED_QUOTE, expression))
