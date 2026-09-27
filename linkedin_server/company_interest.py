@@ -65,7 +65,11 @@ HELP_ARTICLE_FRAGMENT: str = "/answer/a1380509"
 
 #: The OFF control inside the card: a button named EXACTLY the OFF label. The
 #: ``s`` suffix is Playwright's case-sensitive whole-name match. This is the
-#: click selector too, and strict mode holds the click to one element.
+#: click selector too, and strict mode holds the click to one element --
+#: TRUE SINCE LANE L5'S MERGE OF MASTER 52b55b6 (2026-09-27), when ``perform``
+#: began pressing this action strictly (``writes.STRICT_PRESS_ACTIONS``, on
+#: six recorded presses that each counted exactly one). Until then the press
+#: passed no ``strict=``, and this sentence described a property it lacked.
 OFF_CONTROL_IN_CARD: str = (
     "css=" + CARD + ' >> role=button[name="' + OFF_LABEL + '"s]'
 )

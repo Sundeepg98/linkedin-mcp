@@ -1,10 +1,13 @@
 """`scripts/measure_pointer_graph.py --check` must be able to go RED.
 
-WHAT IT GUARDS. 65 census reason cells (69 until the live lane's merge,
+WHAT IT GUARDS. 64 census reason cells (69 until the live lane's merge,
 2026-09-24, which banked `N 134` and wrote out `N 135`'s vestigial pointer;
 67 until lane L7's merge the same day, which named `P G3`'s ruling in place of
 its positional 'same ruling'; 66 until lane L8's merge of master, 2026-09-27,
-which built `M C63` and struck its 'same') say
+which built `M C63` and struck its 'same'; 65 until lane L5's merge of master
+52b55b6 the same day, which brought its follow-up's write-out of `M M2`'s 'same
+tool, same gate' when `M M1` moved to another tool -- each side had moved 66 to
+65 on its own, and the merged tree measures 64) say
 `same` and resolve BY POSITION to the
 nearest substantive row above them in the same table. Nothing marks a row as
 load-bearing for the rows beneath it, so a row inserted mid-table re-points every

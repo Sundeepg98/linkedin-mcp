@@ -199,6 +199,22 @@ READONLY = REPO / "linkedin_server" / "readonly.py"
 #: and the three string fragments it is concatenated from BY NAME. All four are
 #: needed, because ``_literal`` renders a name as ``<unhandled>`` -- a constant
 #: -- so the tuple's digest alone would not move when a fragment is edited.
+#:
+#: THE SECOND DOOR'S TWO SHAPES, ADDED 2026-09-27 BY LANE L5'S FOLLOW-UP, AND
+#: FOR THE SAME REASON AS THE EXEMPTION TABLES. The named-profile door
+#: (``assert_named_profile_url``) admits exactly what ``NAMED_PROFILE_SEGMENT``
+#: and ``_NAMED_PROFILE_URL`` say, and neither was pinned: a cold re-check of
+#: the route measured that widening either -- which is widening the one door
+#: that loads a third party's profile -- moved NO digest here, and only a list
+#: of examples in ``tests/test_named_profile_route.py`` would have noticed.
+#: The same re-check found the segment's percent-encoded unit admitting every
+#: octet, and the fix moved the first of these two. Purely additive: the names
+#: above and ``<functions>``' meaning are unchanged by the addition.
+#: ``_INVISIBLE_LETTER_CODES`` joined them the same day, when a warm re-check
+#: found four letters that draw as nothing passing the decoded check; it is
+#: the third thing the second door's admission rests on. The three follow lane
+#: G's five since lane L5's merge of master 52b55b6, which brought both sets
+#: together.
 PINNED = (
     "_ALLOWED_URL_PATTERNS",
     "_FORBIDDEN_URL_SUBSTRINGS",
@@ -212,6 +228,9 @@ PINNED = (
     "_JS_ASSIGNMENT",
     "JS_API_REPLACEMENT_PATTERNS",
     "SANCTIONED_API_REPLACEMENTS",
+    "NAMED_PROFILE_SEGMENT",
+    "_NAMED_PROFILE_URL",
+    "_INVISIBLE_LETTER_CODES",
 )
 
 #: Digests of ``linkedin_server/readonly.py`` at "perform() for save_job, and
@@ -1428,6 +1447,93 @@ PINNED = (
 #: ATTRIBUTION on the merged tree: minus exactly the all-activity line hashes
 #: to 17409e16e7abbcc8, lane S's pin, so nothing else rode in. Control:
 #: minus the pre-existing articles line instead lands on 173ff7a49fd2bf66.
+#: RE-FROZEN 2026-09-27 BY LANE L5'S FOLLOW-UP, AND ONLY ``<functions>``
+#: MOVED -- A SECOND DOOR, NOT A WIDER FIRST ONE:
+#:
+#:     <functions>   d7e1d0922e3af446 -> 6bdd6beaef275129
+#:     every table   unchanged: the allowlist, all three denylists, both
+#:                   exemption tables, SANCTIONED_MUTATIONS, the JS tokens
+#:
+#: Ruling THIRD-PARTY-PROFILE-FOR-A-NAMED-TARGET. Three functions were added
+#: -- ``valid_named_profile_segment``, ``named_profile_url`` and
+#: ``assert_named_profile_url`` -- the door a named act's load of ONE
+#: third party's profile goes through, reached only by
+#: ``browser.LinkedInBrowser.goto(named_profile=True)``, which only
+#: ``writes._load_named_profile`` passes (both pinned in
+#: ``tests/test_named_profile_route.py``). ``assert_read_url`` and
+#: ``is_read_url`` are byte-identical, so the read door still refuses every
+#: such address; the forbidden-substring list applies to the new door with
+#: no exemption table.
+#:
+#: ATTRIBUTION, in this dict's form: the tree MINUS exactly those three
+#: functions (52 lines) hashes to d7e1d0922e3af446, the value replaced, so
+#: nothing else rode in. Controls: dropping ``is_read_url`` instead lands on
+#: f42c70c7413142d5, somewhere else entirely, and a name no function carries
+#: drops nothing and moves nothing. SEVEN of eight digests byte-identical.
+#: One interpreter, 3.13; the 3.10 cell is CI's.
+#:
+#: AT LANE L5'S MERGE OF MASTER 2eb90ad (2026-09-27) THE TWO RE-FREEZES
+#: MEET AND NOTHING ELSE MOVES: ``<functions>`` is this lane's
+#: 6bdd6beaef275129 and ``_ALLOWED_URL_PATTERNS`` master's 6240409ec52c4ab2,
+#: each MEASURED on the merged tree, where the tree minus the door's three
+#: functions still hashes to d7e1d0922e3af446 -- master's own `<functions>`,
+#: which none of master's re-freezes above moved.
+#: ------------------------------------------------------------------------
+#: RE-FROZEN 2026-09-27 BY LANE L5'S FOLLOW-UP A SECOND TIME, AFTER ITS COLD
+#: RE-CHECK: THE SECOND DOOR NARROWED, AND ITS TWO SHAPES PINNED.
+#:
+#:     <functions>              6bdd6beaef275129 -> 4221c17c31fdd935
+#:     NAMED_PROFILE_SEGMENT    (unpinned)       -> b3de160186fb187d
+#:     _NAMED_PROFILE_URL       (unpinned)       -> 32c49c9c6bc0626f
+#:     every other table        unchanged
+#:
+#: The re-check found the segment's percent-encoded unit, ``%[0-9A-Fa-f]{2}``,
+#: admitting every octet -- an encoded space let a two-word NAME through the
+#: link parser, and an encoded slash, NUL, newline or forbidden substring
+#: reached the door. The unit is now a non-ASCII octet only, and
+#: ``valid_named_profile_segment`` decodes the segment (strict UTF-8) and holds
+#: it to letters, digits, hyphens and underscores. ``named_profile_url``'s
+#: refusal text says so. Under the cc8a509 regex the segment constant
+#: rendered to 8ed98430ec62b61c; it was not pinned then, which is why this
+#: freeze adds it.
+#:
+#: ATTRIBUTION, TWO WAYS. The tree MINUS the door's three functions still
+#: hashes to d7e1d0922e3af446 -- master's -- so nothing outside the door
+#: moved; and with ``valid_named_profile_segment`` and ``named_profile_url``
+#: swapped back to their cc8a509 source the tree hashes to 6bdd6beaef275129,
+#: the value replaced, so those two and nothing else moved. Controls: swapping
+#: back ``assert_named_profile_url``, which did not change, moves nothing; and
+#: dropping ``is_read_url`` instead lands on 00aa3e33eda0838f. One
+#: interpreter, 3.13.
+#: ------------------------------------------------------------------------
+#: RE-FROZEN A THIRD TIME ON 2026-09-27, AFTER THE WARM RE-CHECK: FOUR
+#: INVISIBLE LETTERS REFUSED.
+#:
+#:     <functions>                4221c17c31fdd935 -> c191182c4f66d789
+#:     _INVISIBLE_LETTER_CODES    (new, pinned)    -> 02528c398b97abab
+#:     every other table          unchanged, the door's two shapes included
+#:
+#: ``str.isalnum()`` accepts the four default-ignorable code points that are
+#: letters -- the Hangul fillers U+115F, U+1160, U+3164, U+FFA0, which draw as
+#: nothing -- so a two-word name with U+3164 where the space was passed the
+#: decoded check. ``valid_named_profile_segment`` now refuses them, listed as
+#: code points in the pinned tuple. ATTRIBUTION, two ways again: minus the
+#: door's three functions the tree still hashes to master's d7e1d0922e3af446,
+#: and with ``valid_named_profile_segment`` alone swapped back to its 149e787
+#: source it hashes to 4221c17c31fdd935, the value replaced. Controls:
+#: swapping back the unchanged ``named_profile_url`` moves nothing; dropping
+#: ``is_read_url`` lands on ecac963caf105263. One interpreter, 3.13.
+#:
+#: AND THE TUPLE GREW BY TWO THE SAME DAY, AT A SECOND WARM RE-CHECK, AND
+#: ONLY ITS OWN DIGEST MOVED:
+#:
+#:     _INVISIBLE_LETTER_CODES    02528c398b97abab -> 80bce706e3a2b2c2
+#:     <functions> and the rest   unchanged (the function names the tuple)
+#:
+#: U+13441 and U+13442, EGYPTIAN HIEROGLYPH FULL BLANK and HALF BLANK: letters
+#: that draw as blank space without being default-ignorable. A sweep of every
+#: code point ``isalnum()`` accepts, by name, found these two beside the four
+#: fillers and no other blank-drawing letter.
 #: ------------------------------------------------------------------------
 #: RE-FROZEN AT LANE G'S MERGE OF MASTER 2eb90ad (2026-09-27): THE TWO
 #: BRANCHES' RE-FREEZES MEET, AND NOTHING ELSE MOVES. THIRTEEN DIGESTS:
@@ -1462,8 +1568,112 @@ PINNED = (
 #: ATTRIBUTION: readonly.py minus exactly the 35 added lines hashes to the
 #: prior pin on every key. One interpreter, 3.13.
 #: ------------------------------------------------------------------------
+#: RE-FROZEN AGAIN 2026-09-27 BY THE LIVE LANE (the session-2 preparation),
+#: TWO DIGESTS MOVED, ONE ENTRY IN EACH OF TWO TABLES -- HIS "SHARING PROFILE
+#: EDITS" SETTING PAGE, FOR READING ONLY, on the orchestrator's APPLICATION of
+#: ONE-NAMED-SETTINGS-PAGE-AT-A-TIME (recorded as an application of that
+#: ruling, not a new one):
+#:
+#:     _ALLOWED_URL_PATTERNS                     6240409ec52c4ab2 -> 18e5958586c2c367   54 -> 55
+#:     _FORBIDDEN_SUBSTRING_PATTERN_EXEMPTIONS   76d7b10899530d69 -> 14f567fd160048a8    3 -> 4
+#:     _FORBIDDEN_URL_SUBSTRINGS                 unchanged                               33 -> 33
+#:
+#:     ^https://www\.linkedin\.com/mypreferences/d/settings/notify-network-for-updates/?$
+#:     excusing exactly {"/settings/", "settings"} for that anchored address
+#:
+#: The page holds the account-level setting condition 1 of
+#: SELF-PROFILE-EDITS-NOT-OUTWARD rests on where the edit dialog draws no
+#: notify control (SELF-PROFILE-EDIT-NOTIFY-CONDITION-AMENDED). The address is
+#: DERIVED, never drawn on a capture, and the other candidate is NOT
+#: admitted -- it gets its own admission only if this one redirects. The
+#: follower-list mechanism exactly: two gates, each naming the one address,
+#: the forbidden tuple untouched. `tests/test_notify_setting_admission.py`
+#: pins it: both spellings admitted; a sibling settings page, this address
+#: with a sub-path, a query, a traversal or another case, the other
+#: candidate, the category page, the old /psettings/ address and the family
+#: root all refused on the gate that names them; EITHER gate alone admits
+#: nothing; the pair's blast radius is exactly its own two spellings; and no
+#: write spec names or exempts it.
+#:
+#: ATTRIBUTION, in this dict's form: the tree MINUS exactly these two entries
+#: hashes to ``6240409ec52c4ab2`` and ``76d7b10899530d69``, the values
+#: replaced, so nothing else rode in. Partial states, for whoever merges only
+#: one half: the line alone 18e5958586c2c367 / 76d7b10899530d69; the exemption
+#: alone 6240409ec52c4ab2 / 14f567fd160048a8. Control: dropping the
+#: PRE-EXISTING dark-mode line instead lands on ec6311ecf485ba6a. SIX of eight
+#: digests byte-identical; ``<functions>`` unmoved, so ``assert_read_url`` did
+#: not change. Computed with this file's ``ast_digest``, one interpreter, 3.13.
+#: ------------------------------------------------------------------------
+#: RE-FROZEN AT THE LIVE LANE'S MERGE OF MASTER 52b55b6 (2026-09-27): LANE G'S
+#: RE-FREEZES AND THE LIVE LANE'S ADMISSION MEET, AND NOTHING ELSE MOVES.
+#: THIRTEEN DIGESTS, measured on the merged readonly.py:
+#:
+#:     _ALLOWED_URL_PATTERNS                     18e5958586c2c367   the live lane's, the note above
+#:     _FORBIDDEN_SUBSTRING_PATTERN_EXEMPTIONS   14f567fd160048a8   the live lane's, the note above
+#:     the other eleven                          master's, byte-identical
+#:
+#: ATTRIBUTION, with this file's ``ast_digest`` on each side's own
+#: readonly.py: the merged file equals master on every key but those two, and
+#: the live lane's branch on those two. Git merged the dict below line by
+#: line; every value in it was checked against the merged file and none
+#: needed a hand edit. Only these notes conflicted -- both branches had
+#: appended one here -- and both are kept, master's first. One interpreter,
+#: 3.13.
+#: ------------------------------------------------------------------------
+#: RE-FROZEN AT LANE L5'S MERGE OF MASTER 52b55b6 (2026-09-27): THE TWO
+#: BRANCHES' FREEZES MEET, AND ONLY ``<functions>`` TAKES A VALUE NEITHER
+#: SIDE HAD. SIXTEEN DIGESTS:
+#:
+#:     <functions>                ff43e832d6f2b685 (master)
+#:                                c191182c4f66d789 (lane L5)  -> bd677a42da1d190f
+#:     NAMED_PROFILE_SEGMENT, _NAMED_PROFILE_URL,
+#:     _INVISIBLE_LETTER_CODES    lane L5's three, byte-identical
+#:     every key master pins      master's, byte-identical
+#:
+#: ATTRIBUTION, computed with this file's ``ast_digest`` on the merged
+#: readonly.py and on each side's own: the merged tree MINUS the door's three
+#: functions (``valid_named_profile_segment``, ``named_profile_url``,
+#: ``assert_named_profile_url``; 71 lines) hashes to ff43e832d6f2b685 --
+#: master's ``<functions>`` exactly -- so nothing but the door rode in, and
+#: the door is the one this file's three lane L5 notes above already froze.
+#: Every other key equals the side that owns it: the three door names equal
+#: lane L5's branch, and the thirteen master pins equal master
+#: (``SANCTIONED_MUTATIONS`` and ``_MUTATION_CALL_PATTERNS`` are master's
+#: moves; the rest were equal on both sides). Controls: dropping
+#: ``is_read_url`` instead lands on 2ecccd9f7752394d, and a name no function
+#: carries drops nothing and moves nothing. One interpreter, 3.13.
+#: ------------------------------------------------------------------------
+#: CHECKED AT LANE L5'S MERGE OF MASTER b6993e5 (2026-09-27): THE LIVE LANE'S
+#: ADMISSION AND THIS LANE'S SECOND DOOR MEET, AND NOTHING NEEDED A NEW VALUE.
+#: SIXTEEN DIGESTS, measured on the merged readonly.py:
+#:
+#:     _ALLOWED_URL_PATTERNS                     18e5958586c2c367   master's (the live lane's admission)
+#:     _FORBIDDEN_SUBSTRING_PATTERN_EXEMPTIONS   14f567fd160048a8   master's (its exemption)
+#:     <functions>                               bd677a42da1d190f   this lane's (the second door)
+#:     the door's three names                    this lane's, byte-identical
+#:     the other ten                             equal on both sides
+#:
+#: ATTRIBUTION, with this file's ``ast_digest`` on each side's own
+#: readonly.py: the merged file equals master on the two admission keys and
+#: this branch on the door's four; the merged tree MINUS the door's three
+#: functions still hashes to ff43e832d6f2b685, master's ``<functions>`` --
+#: the live lane's admission moved no function. The merge took the dict below
+#: line by line and every value in it equals the merged file; only these
+#: notes conflicted, both kept, master's first. One interpreter, 3.13.
+#: ------------------------------------------------------------------------
 READONLY_AST_AT_LAST_REFREEZE = {
-    "<functions>": "ff43e832d6f2b685",
+    # ff43e832d6f2b685 on master (lane G's replacement scan) and
+    # c191182c4f66d789 on lane L5's follow-up branch (the named-profile door)
+    # until lane L5's merge of master 52b55b6 brought both; the last re-freeze
+    # note above attributes it.
+    "<functions>": "bd677a42da1d190f",
+    # PINNED 2026-09-27 -- the second door's segment and address shapes, and
+    # the letters it refuses; the re-freeze notes above.
+    "NAMED_PROFILE_SEGMENT": "b3de160186fb187d",
+    "_NAMED_PROFILE_URL": "32c49c9c6bc0626f",
+    # 02528c398b97abab until the second warm re-check added the two
+    # Egyptian blanks; the re-freeze notes above.
+    "_INVISIBLE_LETTER_CODES": "80bce706e3a2b2c2",
     "JS_MUTATION_TOKENS": "d47e30b67c583c1b",
     # ab8fdd31f93ef4fc until 2026-09-19. See the re-freeze note above: two
     # entries added for press.disclose's click and its closing Escape, on the
@@ -1645,11 +1855,19 @@ READONLY_AST_AT_LAST_REFREEZE = {
     # 17409e16e7abbcc8 (lane S) and b99f3c765fcb8043 (the live lane) met at the
     # orchestrator's merge of the live lane over lane S, 2026-09-27: both
     # admissions together, 53 + 1 = 54 lines; merged digest 6240409ec52c4ab2.
-    "_ALLOWED_URL_PATTERNS": "6240409ec52c4ab2",
+    #
+    # 6240409ec52c4ab2 until 2026-09-27 (the live lane, session-2
+    # preparation): his "Sharing profile edits" setting page, one line here and
+    # one pattern exemption beside it, on the orchestrator's application of
+    # ONE-NAMED-SETTINGS-PAGE-AT-A-TIME. See that ledger entry.
+    "_ALLOWED_URL_PATTERNS": "18e5958586c2c367",
     "_FORBIDDEN_SUBSTRING_EXEMPTIONS": "43e2bf7f3db0dbed",
     # 419e64a3cd92ec7e until the same REVIEW: commit: a third entry, excusing
     # exactly {"/follow"} for exactly the anchored follower-list address.
-    "_FORBIDDEN_SUBSTRING_PATTERN_EXEMPTIONS": "76d7b10899530d69",
+    # 76d7b10899530d69 until 2026-09-27: a fourth, excusing exactly
+    # {"/settings/", "settings"} for exactly his "Sharing profile edits"
+    # setting page (the live lane; the same ledger entry).
+    "_FORBIDDEN_SUBSTRING_PATTERN_EXEMPTIONS": "14f567fd160048a8",
     "_FORBIDDEN_URL_SUBSTRINGS": "b0291a66ec9bd51e",
     # 23aece1483afdee9 until 2026-09-19. See the re-freeze note above: eleven
     # detector classes added, zero removed, and the direction is pinned by

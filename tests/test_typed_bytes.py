@@ -133,6 +133,12 @@ def test_the_fill_types_the_grants_own_text_and_nothing_else():
     # A test that must change is not a test that may be weakened, and the
     # change was flagged before the code was touched rather than discovered in
     # the diff.
+    #
+    # FOUR SINCE 2026-09-27, EXTENDED THE SAME WAY. ``message_from_profile``
+    # types into a composer that exists only once its Message press opens it,
+    # so its words are appended inside the click loop, after the opened-
+    # conversation gate -- a fourth site, held to exactly the bar the other
+    # three are: a bare ``_text_component_of(spec, grant.target)``.
     appended = [
         node
         for node in ast.walk(_TREE)
@@ -142,7 +148,7 @@ def test_the_fill_types_the_grants_own_text_and_nothing_else():
         and isinstance(node.func.value, ast.Name)
         and node.func.value.id == "fill_plan"
     ]
-    assert len(appended) == 3, [ast.unparse(a) for a in appended]
+    assert len(appended) == 4, [ast.unparse(a) for a in appended]
 
     # THE ARGUMENT MUST BE THE CALL ITSELF, not merely contain it.
     #
@@ -176,12 +182,14 @@ def test_the_fill_types_the_grants_own_text_and_nothing_else():
         extractors.append(text_expr.func.id)
 
     # AND BOTH HALVES ARE NAMED. Not "some extractor" -- the SUBJECT extractor
-    # exactly once and the CONTENT extractor twice, because two actions type a
-    # body and only one types a recipient. A queue that pushed the subject
-    # where the content belongs would type his message into the recipient box,
-    # which no count-only assertion would notice.
+    # exactly once and the CONTENT extractor three times (twice until
+    # 2026-09-27), because three sites type a body and only one types a
+    # recipient. A queue that pushed the subject where the content belongs
+    # would type his message into the recipient box, which no count-only
+    # assertion would notice.
     assert sorted(extractors) == [
         "_subject_component_of",
+        "_text_component_of",
         "_text_component_of",
         "_text_component_of",
     ], extractors

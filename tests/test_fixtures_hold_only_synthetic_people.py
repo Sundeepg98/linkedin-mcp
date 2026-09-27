@@ -190,6 +190,14 @@ SYNTHETIC_PEOPLE = frozenset(
         "Juno Fixture",
         "Ivo Placeholder",
         "Lea Sample",
+        # synthetic/named_profile.html (declared 2026-09-27 at lane L5's
+        # merge of master 52b55b6): the owner of the invented profile the
+        # named-person acts read, whose invented slug casey-example-3f9a
+        # carries the declared token `example`, and the stranger drawn in its
+        # rail. The fixture's header says which parts are measured structure
+        # and that its people are invented.
+        "Casey Example",
+        "Morgan Example",
     }
 )
 

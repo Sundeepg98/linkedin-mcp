@@ -1,4 +1,4 @@
-"""The tool surface: fifty-seven tools, forty-one of which do not write.
+"""The tool surface: fifty-nine tools, forty-one of which do not write.
 
 **AND THIS LINE IS NOW DERIVED, NOT MAINTAINED, 2026-09-20.** It had gone stale
 a THIRD time -- "forty-four tools, thirty-two of which do not write" against a
@@ -147,6 +147,15 @@ SANCTIONED_WRITE_TOOLS = frozenset(SANCTIONED_WRITES) & {
     # no list -- so its name DOES announce the write, and this exemption is
     # what lets it. A key in writes.SANCTIONED_WRITES like the rest.
     "linkedin_withdraw_from_group",
+    # THE SEVENTEENTH AND EIGHTEENTH, 2026-09-27, at lane L5's merge of master
+    # 52b55b6 (the sixteenth and seventeenth on its follow-up branch; census
+    # rows N 4 by D6, N 2 and M M1, ruling THIRD-PARTY-PROFILE-FOR-A-NAMED-
+    # TARGET): Connect and Message on the profile of a person he names by
+    # link or member id. Their NAMES announce the write and their docstrings
+    # must describe one, so they are on both exemptions -- which are one set.
+    # Keys in writes.SANCTIONED_WRITES.
+    "linkedin_connect_from_profile",
+    "linkedin_message_from_profile",
 }
 
 #: THE DOCSTRING EXEMPTION IS THE SAME SET AS THE NAME EXEMPTION, and it took
@@ -489,6 +498,10 @@ EXPECTED_TOOLS = {
     # THE FIFTY-SEVENTH, 2026-09-27 (lane L8, at its merge of master), a
     # WRITE: see SANCTIONED_WRITE_TOOLS.
     "linkedin_withdraw_from_group",
+    # THE FIFTY-EIGHTH AND FIFTY-NINTH, 2026-09-27 (lane L5's follow-up, at
+    # its merge of master 52b55b6), two WRITES: see SANCTIONED_WRITE_TOOLS.
+    "linkedin_connect_from_profile",
+    "linkedin_message_from_profile",
 }
 
 #: Names a reader must never grow. Listed explicitly so that adding one is a
@@ -565,8 +578,17 @@ async def tools():
     return {t.name: t for t in await mcp.list_tools()}
 
 
-async def test_the_surface_is_exactly_the_fifty_seven_tools(tools):
-    """RENAMED AGAIN AT LANE L8'S MERGE OF MASTER 2eb90ad, 2026-09-27, to
+async def test_the_surface_is_exactly_the_fifty_nine_tools(tools):
+    """RENAMED AGAIN AT LANE L5'S MERGE OF MASTER 52b55b6, 2026-09-27, to
+    ``..._fifty_nine_tools``: that lane's follow-up branch had brought two
+    writes together (``linkedin_connect_from_profile``,
+    ``linkedin_message_from_profile``) and renamed this test
+    ``..._fifty_eight_tools`` there, counting from fifty-six, while master
+    made it ``..._fifty_seven_tools`` at lane L8's merge. MEASURED off the
+    merged registry, not summed; the name moved with the pin in the merge
+    commit.
+
+    RENAMED AGAIN AT LANE L8'S MERGE OF MASTER 2eb90ad, 2026-09-27, to
     ``..._fifty_seven_tools``: one write arrived, ``linkedin_withdraw_from_group``
     (census M C63 / N 64), on top of master's fifty-six. The lane's branch had
     not renamed it; the name moved with the pin in the merge commit.
@@ -825,7 +847,13 @@ async def test_the_surface_is_exactly_the_fifty_seven_tools(tools):
     # linkedin_withdraw_from_group, a WRITE, so the split moves on its write
     # side and the non-write count holds at forty-one. MEASURED off
     # mcp.list_tools() on the merged tree.
-    assert len(tools) == 57
+    # FIFTY-NINE AT LANE L5'S MERGE OF MASTER 52b55b6, the same day: two
+    # WRITES from its follow-up branch (fifty-eight there) --
+    # linkedin_connect_from_profile and linkedin_message_from_profile -- on top
+    # of master's fifty-seven, so the split moves on its write side and the
+    # non-write count holds. The NAME moved again. MEASURED off
+    # mcp.list_tools() on the merged tree, not summed.
+    assert len(tools) == 59
     # And the split is asserted, not just the total. A future tool arriving as
     # a write would otherwise only have to bump a number.
     #
@@ -855,6 +883,8 @@ async def test_the_surface_is_exactly_the_fifty_seven_tools(tools):
         "linkedin_mark_company_interest",
         "linkedin_send_reply",
         "linkedin_withdraw_from_group",
+        "linkedin_connect_from_profile",
+        "linkedin_message_from_profile",
     }
     # THE NON-WRITE COUNT MOVES TO SIXTEEN, and the reason is NOT the reason
     # it moved last time. The comment here said: "THE READ COUNT MOVES OFF
@@ -981,6 +1011,10 @@ async def test_the_surface_is_exactly_the_fifty_seven_tools(tools):
     # read arriving did not hide a write.
     # STILL FORTY-ONE AT LANE L8'S MERGE, 2026-09-27: the one tool it brought,
     # linkedin_withdraw_from_group, is a write and on the exemption.
+    # STILL FORTY-ONE AT LANE L5'S MERGE OF MASTER 52b55b6, the same day: the
+    # two tools its follow-up brought (linkedin_connect_from_profile,
+    # linkedin_message_from_profile) are writes, both on the exemption, and
+    # the read side is byte-identical across them.
     assert len(set(tools) - SANCTIONED_WRITE_TOOLS) == 41
 
 
@@ -1087,6 +1121,8 @@ async def test_the_exemption_covers_only_the_names_on_it(tools):
         "linkedin_mark_company_interest",
         "linkedin_send_reply",
         "linkedin_withdraw_from_group",
+        "linkedin_connect_from_profile",
+        "linkedin_message_from_profile",
     }
     # The probe has to be genuinely sanctioned for this to test the thing it
     # claims to. A name nobody ever specced would only show that made-up names
@@ -1511,6 +1547,10 @@ async def test_server_info_stops_claiming_read_only_once_writes_are_on(monkeypat
         "apply_job",
         # TENTH, 2026-09-01. Typed here by hand like its nine siblings.
         "comment_on_item",
+        # SIXTEENTH, 2026-09-27 (census N 4 by D6; lane L5's follow-up), typed
+        # here by hand like its fifteen siblings: Connect on the profile of a
+        # person he names by link or member id, never by name.
+        "connect_from_profile",
         "follow_company",
         # THIRTEENTH, 2026-09-23 (census row N 47), typed here by hand like
         # its twelve siblings: a follow performed on the organisation Page root,
@@ -1520,6 +1560,10 @@ async def test_server_info_stops_claiming_read_only_once_writes_are_on(monkeypat
         # hand like its thirteen siblings: "I'm interested", pressed in one
         # posting's About-the-company card, aimed by the card's own employer.
         "mark_company_interest",
+        # SEVENTEENTH, 2026-09-27 (census M M1; lane L5's follow-up), typed
+        # here by hand like its sixteen siblings: Message on the profile of a
+        # person he names, typing only for a first-degree connection.
+        "message_from_profile",
         # NINTH, same day, and the first that TYPES. Typed here by hand like
         # its eight siblings, because a derived list would admit the tenth
         # silently.
@@ -1587,6 +1631,9 @@ async def test_the_capability_is_reported_even_with_the_flag_off(monkeypatch):
         # finds it by arrival after the fill and stops with the observation
         # when two controls share a name.
         "comment_on_item",
+        # THE SIXTEENTH, 2026-09-27 (census N 4 by D6). Typed by hand, as this
+        # list requires, by the lane that built it.
+        "connect_from_profile",
         "follow_company",
         # THE THIRTEENTH, 2026-09-23 (census row N 47). Typed by hand, as this
         # list requires, by the lane that built it.
@@ -1594,6 +1641,9 @@ async def test_the_capability_is_reported_even_with_the_flag_off(monkeypatch):
         # THE FOURTEENTH, 2026-09-24 (census row P I14). Typed by hand, as
         # this list requires, at the merge of the lane that built it.
         "mark_company_interest",
+        # THE SEVENTEENTH, 2026-09-27 (census M M1). Typed by hand, as this
+        # list requires, by the lane that built it.
+        "message_from_profile",
         # THE NINTH, same day, and the FIRST THAT TYPES -- one page.fill
         # inside perform, which grew readonly.SANCTIONED_MUTATIONS from two
         # entries to three, the first growth that is not a click.
@@ -1985,6 +2035,12 @@ async def test_the_server_instructions_name_every_write_that_ships():
         # map raises on a missing count is what caught the extension missing
         # on the merged tree's first gate.
         16: "sixteen",
+        # SEVENTEEN AND EIGHTEEN FROM LANE L5'S MERGE OF MASTER 52b55b6, the
+        # same day: connect_from_profile and message_from_profile arrived
+        # together from its follow-up branch, so only eighteen is ever
+        # reached; seventeen is spelled so the map has no hole a later count
+        # could fall into.
+        17: "seventeen", 18: "eighteen",
     }
     assert f"{words[len(writes.PERFORMABLE)]} write" in text
     for action in writes.PERFORMABLE:
@@ -2287,6 +2343,22 @@ async def test_server_info_reports_irreversibility_before_a_caller_commits(
     assert expected_performable == [
         "apply_job",
         "comment_on_item",
+        # THE EIGHTH AND NINTH, 2026-09-27, TYPED BY HAND AS THIS LIST
+        # DEMANDS (lane L5's follow-up; the seventh and eighth on its branch
+        # until its merge of master 52b55b6 brought withdraw_from_group in
+        # first). connect_from_profile lands an invitation with his name on it
+        # on a person he names, and pressing Connect may send it at once;
+        # message_from_profile delivers words a person reads. Nothing this
+        # server does takes either back: its withdraw is outward_classes'
+        # withdraw_invitation, BLOCKED, and no message delete is built -- and a
+        # delete would not un-read what was read. (This comment used to say
+        # both were "destruction, forbidden here at any confirm level"; that
+        # refusal was retired 2026-09-24 by OUTWARD-CLASSES-BUILT-BEHIND-GRANTS,
+        # restated at the merge.) And BOTH COST SOMETHING BEFORE ANYTHING IS
+        # PRESSED: the preview loads that person's profile, which may show him
+        # among their viewers, and both specs' residue says so.
+        "connect_from_profile",
+        "message_from_profile",
         "publish_post",
         "send_invitation",
         # THE FIFTH, 2026-09-02, ADDED BY HAND BECAUSE THAT IS THE POINT OF
@@ -2323,7 +2395,7 @@ async def test_server_info_reports_irreversibility_before_a_caller_commits(
         "withdraw_from_group",
     ], (
         "the permanent things this server performs are typed in here by "
-        "whoever added one. An EIGHTH arriving is a decision, not a diff."
+        "whoever added one. A TENTH arriving is a decision, not a diff."
     )
     # THE SECOND ARRIVED ON 2026-09-01 AND IT IS DIFFERENT IN KIND, which is
     # why this is written out rather than the list quietly growing by one.

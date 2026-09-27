@@ -727,6 +727,13 @@ def test_what_ships_is_narrower_than_what_is_sanctioned():
         # OUTWARD-CLASSES-BUILT-BEHIND-GRANTS, on the admitted /groups/ root
         # and an item measured on all five membership rows' menus.
         "withdraw_from_group",
+        # EIGHTEEN AND NINETEEN FROM LANE L5'S MERGE OF MASTER 52b55b6, the
+        # same day (seventeen and eighteen on its follow-up branch): Connect
+        # and Message on the profile of a person he names (census N 4 by D6,
+        # N 2, and M M1), sanctioned and performable in the same move, on
+        # ruling THIRD-PARTY-PROFILE-FOR-A-NAMED-TARGET.
+        "connect_from_profile",
+        "message_from_profile",
     }
     # THREE UNTIL 2026-08-25, four until 2026-08-30, five since. This line read
     # ``{"save_job", "unsave_job", "unfollow_company"}``.
@@ -869,6 +876,18 @@ def test_what_ships_is_narrower_than_what_is_sanctioned():
         # a gate that re-reads the menu (writes.MENU_ITEM_ACTIONS). No undo
         # is built here, and its spec says so.
         "withdraw_from_group",
+        # THE SEVENTEENTH AND EIGHTEENTH, 2026-09-27 (lane L5's follow-up; the
+        # sixteenth and seventeenth on its branch until its merge of master
+        # 52b55b6 brought withdraw_from_group in first): Connect and Message on
+        # the profile of a person he names by link or member id, each printing
+        # whom it resolved to before anything is pressed. ONE THING WAS
+        # PERMITTED TO LET THEM CROSS, and it is a NAVIGATION, not a mutation:
+        # a second door, readonly.assert_named_profile_url, which the read door
+        # does not share and which only writes._load_named_profile can ask
+        # for. readonly.SANCTIONED_MUTATIONS is unchanged -- the click and the
+        # fill are perform()'s own.
+        "connect_from_profile",
+        "message_from_profile",
     }
     assert writes.PERFORMABLE < sanctioned_actions
 
@@ -1367,6 +1386,17 @@ _UNMEASURED_REVERSIBILITY = {
     # 2026-09-27 (census rows M C63 / N 64). No rejoin has ever been observed
     # and nothing here joins a group; its spec treats it as irreversible.
     "withdraw_from_group",
+    # 2026-09-27 (lane L5's follow-up). What a pressed Connect becomes on a
+    # profile has never been captured, so neither has a withdraw control; and
+    # whether a message sent from a profile can be recalled has never been
+    # observed here. Neither undo is built: an invitation's withdraw is
+    # outward_classes' withdraw_invitation, BLOCKED, and no message delete
+    # exists. This comment used to end "Both undo routes are destruction,
+    # forbidden here at any confirm level"; that refusal was retired
+    # 2026-09-24 (OUTWARD-CLASSES-BUILT-BEHIND-GRANTS) and restated at lane
+    # L5's merge of master 52b55b6.
+    "connect_from_profile",
+    "message_from_profile",
 }
 
 REVERSIBILITY_CLASS = {
@@ -1404,6 +1434,10 @@ REVERSIBILITY_CLASS = {
     # carries irreversible=True regardless, because no join is built here and
     # an approval-gated group needs a manager to let him back in.
     "withdraw_from_group": "STILL-UNKNOWN",
+    # 2026-09-27 (lane L5's follow-up). STILL-UNKNOWN, both: see
+    # _UNMEASURED_REVERSIBILITY.
+    "connect_from_profile": "STILL-UNKNOWN",
+    "message_from_profile": "STILL-UNKNOWN",
 }
 
 #: Which actions have had their reversibility MEASURED. Split out from the
@@ -1429,6 +1463,8 @@ REVERSIBILITY_MEASURED = {
     "mark_company_interest": False,
     "send_reply": False,
     "withdraw_from_group": False,
+    "connect_from_profile": False,
+    "message_from_profile": False,
 }
 
 def test_the_two_reversibility_tables_agree_with_each_other():
@@ -3247,7 +3283,13 @@ def test_a_second_click_inside_perform_is_still_caught():
     # site. Draining a queue fires it twice for apply without adding a second
     # place to audit, which is the property SANCTIONED_MUTATIONS exists to
     # police.
-    call_site = "await page.click(click_plan.pop(0), timeout=CLICK_TIMEOUT_MS)"
+    # 2026-09-27: ``strict=press_strictly`` joined the call -- the named-person
+    # acts press strictly (lane L5's follow-up, after two re-checks); every
+    # other action passes False, the call it always made. Still ONE site.
+    call_site = (
+        "await page.click(click_plan.pop(0), timeout=CLICK_TIMEOUT_MS, "
+        "strict=press_strictly)"
+    )
     assert call_site in source, (
         "the mutating call site has been rewritten again. Update this literal "
         "to match it -- and do NOT relax the assertion below, which is the "

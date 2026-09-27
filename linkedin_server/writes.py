@@ -215,7 +215,8 @@ from linkedin_server import (
     dom,
     group_leave,
     landing,
-    people_data,
+    named_profile,
+    people_seam,
     profile_editor,
     shape,
     threads,
@@ -2402,6 +2403,209 @@ SANCTIONED_WRITES: dict[str, WriteSpec] = {
             "and building one would not recall a reply already read."
         ),
     ),
+    # A PERSON HE NAMES, THROUGH THAT PERSON'S OWN PROFILE -- 2026-09-27,
+    # lane L5's follow-up, on ruling THIRD-PARTY-PROFILE-FOR-A-NAMED-TARGET.
+    # The two acts the ruling unblocks as builds: Connect (census N 1's route
+    # through the profile, and N 4 by D6-CAPABILITY-OVER-AFFORDANCE) and
+    # Message (M M1; for anyone who is not a first-degree connection it
+    # presses, records what opened, and stops before typing -- M M6's
+    # capture). N 5, the note on an invitation, is NOT built: pressing
+    # Connect can send at once, so a note-bearing act could send without the
+    # note, and the dialog it would need has never been captured. See
+    # ``_audit/2026-09-24-lane-l5-messaging.md``, "Follow-up: the named-person
+    # route", for the NEEDS-CAPTURE specs C-P1 to C-P6.
+    #
+    # THE PROFILE IS LOADED THROUGH A SECOND DOOR, never the read door, which
+    # still refuses it: ``readonly.assert_named_profile_url``, reached only by
+    # :func:`_load_named_profile`. And the page may only VETO: the landing is
+    # compared and withheld, and each control is addressed by the topcard's
+    # own scope and NO position -- ``dom.topcard_invite_control_selector`` and
+    # ``dom.topcard_message_control_selector`` -- pressed STRICTLY, after the
+    # page's own script has compared, without letting a name leave it, that
+    # the topcard holds exactly one such control and that it is the owner's.
+    # (This comment said "addressed by a position the page's own script
+    # computes" until lane L5's merge of master 52b55b6; the position was
+    # removed by the follow-up's second re-check, and the comment was not.)
+    "linkedin_connect_from_profile": WriteSpec(
+        action="connect_from_profile",
+        tool_name="linkedin_connect_from_profile",
+        url_template="https://www.linkedin.com/in/{target}/",
+        url_pattern=re.compile(
+            r"^https://www\.linkedin\.com/in/"
+            r"(?:[A-Za-z0-9]|%[89A-Fa-f][0-9A-Fa-f])(?:[A-Za-z0-9_\-]|%[89A-Fa-f][0-9A-Fa-f]){2,99}/$"
+        ),
+        exempt_substring=None,
+        summary=(
+            "Send one connection invitation to a person you name, from that "
+            "person's own profile."
+        ),
+        from_state=named_profile.CONNECT_FROM,
+        to_state=named_profile.INVITATION_SENT,
+        not_performed_state=named_profile.CONNECT_STILL_DRAWN,
+        target_kind="profile",
+        state_from="named_profile",
+        direction_source=(
+            "THE PROFILE YOU NAMED, loaded from your link or member id through "
+            "the named-profile door and nothing else. Before anything is read "
+            "the browser must be on that profile; then the page must name its "
+            "own owner -- its title, and its topcard's first heading, compared "
+            "in the page -- and draw exactly ONE control named 'Invite <that "
+            "person> to connect', the label measured 44 times on other "
+            "surfaces, and it must be the ONLY Connect control in that "
+            "person's topcard. No label, name or id crosses into this server: "
+            "the press names the topcard and nothing else, and it is STRICT, "
+            "so a page redrawn mid-press that draws a second such control "
+            "stops the press rather than handing it to somebody else."
+        ),
+        wrong_state_note=(
+            "Not a toggle. No Connect control naming this person means you may "
+            "already be connected, an invitation may be pending, or Connect "
+            "sits in the 'More' menu, which has never been captured and which "
+            "this act does not open."
+        ),
+        reversibility="STILL-UNKNOWN whether an invitation can be withdrawn",
+        reversibility_measured=False,
+        reversibility_class="STILL-UNKNOWN",
+        reversibility_evidence=(
+            "NOT MEASURED here. What a pressed Connect turns into on a profile "
+            "has never been captured, so neither has a withdraw control on it. "
+            "LinkedIn's own Help Center documents withdrawing a sent "
+            "invitation (a568295, quoted in _audit/_census/network.md section "
+            "8.5), with a wait of up to three weeks before the same person can "
+            "be invited again. Never observed here, and never pressed. This "
+            "field used to end \"and withdrawing is destruction, permanently "
+            "forbidden in this design\"; that refusal was retired 2026-09-24 "
+            "(OUTWARD-CLASSES-BUILT-BEHIND-GRANTS) and this field restated at "
+            "lane L5's merge of master 52b55b6."
+        ),
+        reversible_by=(
+            "NOT YET through this server; by hand, he can. This field used to "
+            "say \"Withdrawing an invitation is destruction, which is in "
+            "PERMANENTLY_FORBIDDEN\"; that refusal was retired 2026-09-24 "
+            "(OUTWARD-CLASSES-BUILT-BEHIND-GRANTS), and withdrawing his own "
+            "invitation is a class built behind the grant -- outward_classes "
+            "records withdraw_invitation as BLOCKED: the Sent Invitations "
+            "manager is refused by the read boundary ('invitation' and "
+            "'/withdraw' are both on its forbidden list) and the badge cost "
+            "of that /mynetwork/ sub-page is unmeasured. An invitation sent "
+            "from a profile lands in the same Sent list as one sent by "
+            "linkedin_send_invitation, so the same record governs its undo. "
+            "LinkedIn does offer the withdraw (Help Center a568295, quoted in "
+            "_audit/_census/network.md s8.5), with a three-week wait before "
+            "the same member can be invited again; a withdraw does not "
+            "un-notify."
+        ),
+        residue=(
+            "AN INVITATION IS A REQUEST TO A REAL PERSON, and it lands as a "
+            "notification with your name on it. PRESSING CONNECT MAY SEND IT "
+            "AT ONCE, with no dialog. THE PREVIEW ITSELF COSTS SOMETHING TOO: "
+            "loading their profile shows you as a viewer on it, in the way "
+            "your own profile-viewing setting presents you, and the act loads "
+            "it twice more (the press, and a fresh render to verify). "
+            "LinkedIn restricts accounts whose invitations are often ignored."
+        ),
+        irreversible=True,
+        reversibility_procedure=(
+            "One supervised press on a person he names: the receipt's "
+            "in-place reading and the fresh render record, as closed tokens, "
+            "what the Connect control turns into (NEEDS-CAPTURE C-P2) and "
+            "whether a dialog opens (C-P3). The withdraw itself is "
+            "outward_classes' withdraw_invitation, BLOCKED behind the read "
+            "boundary and an unmeasured badge cost. This field used to end "
+            "\"Withdrawing stays forbidden here whatever the page offers\"; "
+            "that refusal was retired 2026-09-24 "
+            "(OUTWARD-CLASSES-BUILT-BEHIND-GRANTS)."
+        ),
+    ),
+    "linkedin_message_from_profile": WriteSpec(
+        action="message_from_profile",
+        tool_name="linkedin_message_from_profile",
+        url_template="https://www.linkedin.com/in/{target}/",
+        url_pattern=re.compile(
+            r"^https://www\.linkedin\.com/in/"
+            r"(?:[A-Za-z0-9]|%[89A-Fa-f][0-9A-Fa-f])(?:[A-Za-z0-9_\-]|%[89A-Fa-f][0-9A-Fa-f]){2,99}/$"
+        ),
+        exempt_substring=None,
+        summary=(
+            "Send one message to a first-degree connection you name, from the "
+            "Message control on that person's own profile."
+        ),
+        from_state=named_profile.MESSAGE_FROM,
+        to_state=named_profile.MESSAGE_SENT,
+        not_performed_state=named_profile.MESSAGE_NOT_SENT,
+        target_kind="profile_and_text",
+        state_from="named_profile",
+        direction_source=(
+            "THE PROFILE YOU NAMED, loaded from your link or member id through "
+            "the named-profile door. The page must name its own owner, and "
+            "draw exactly ONE control named 'Message <that person>' -- a "
+            "button, or a link to the composer (the destination measured on "
+            "16 of the 18 Message controls captured), the only Message control "
+            "in their topcard -- with no conversation composer already open. "
+            "The words are typed only when the profile reads '1st' and exactly "
+            "ONE empty composer is on the page after the press, in the one "
+            "conversation whose title reads exactly that person's name "
+            "(compared in the page), and Send is pressed only when the box "
+            "holds exactly your words and that title still reads their name. "
+            "Every press and the fill are STRICT: a second match drawn "
+            "mid-press stops it."
+        ),
+        wrong_state_note=(
+            "Not a toggle. A Message control that is a link anywhere but the "
+            "composer, or a composer already open, is refused before anything "
+            "is pressed."
+        ),
+        reversibility="STILL-UNKNOWN whether a sent message can be recalled",
+        reversibility_measured=False,
+        reversibility_class="STILL-UNKNOWN",
+        reversibility_evidence=(
+            "NOT MEASURED by this server. LinkedIn's Help Center describes "
+            "deleting a sent message within 60 minutes (census row M M12), "
+            "and no message control has ever been read here. This field used "
+            "to add \"and deletion is permanently forbidden in this design "
+            "whatever LinkedIn offers\"; that refusal was retired 2026-09-24 "
+            "(OUTWARD-CLASSES-BUILT-BEHIND-GRANTS), and the 60-minute delete "
+            "is unbuilt: the per-message menu has never been opened."
+        ),
+        reversible_by=(
+            "NOBODY: a delivered message cannot be recalled. This field used "
+            "to say \"Deletion is permanently forbidden here at any confirm "
+            "level (delete_or_withdraw_anything)\"; that refusal was retired "
+            "2026-09-24 (OUTWARD-CLASSES-BUILT-BEHIND-GRANTS), so the ground "
+            "is the message's own nature: it is delivered to a person and "
+            "arrives as an email and a notification too. LinkedIn documents "
+            "a delete within 60 minutes (census M M12, a550661); what it "
+            "removes, and from whom, is unestablished here, it is unbuilt, "
+            "and no delete reaches the email copy or un-reads what was read."
+        ),
+        residue=(
+            "A MESSAGE IS READ BY A PERSON and usually arrives as an email and "
+            "a notification too. THE PREVIEW ITSELF COSTS SOMETHING: loading "
+            "their profile shows you as a viewer on it, in the way your own "
+            "profile-viewing setting presents you, and the act loads it once "
+            "more. For anyone who is not a first-degree connection the act "
+            "presses Message and stops before typing -- such a message may be "
+            "an InMail that spends a credit, and that composer has never been "
+            "captured."
+        ),
+        irreversible=True,
+        spends=(
+            "NOTHING for a first-degree connection, which is the only case in "
+            "which this act types. For anyone else it stops before typing, "
+            "because a message there may be an InMail that spends one of your "
+            "credits, and the composer that would say so has never been "
+            "captured."
+        ),
+        reversibility_procedure=(
+            "Open the per-message menu on one of your own messages under 60 "
+            "minutes old and read its items WITHOUT pressing one (capture "
+            "spec C6 in the lane L5 record). This field used to end "
+            "\"Deleting stays forbidden here\"; that refusal was retired "
+            "2026-09-24 (OUTWARD-CLASSES-BUILT-BEHIND-GRANTS). No delete is "
+            "built here, and building one would not recall a message already "
+            "read."
+        ),
+    ),
 }
 
 
@@ -2449,7 +2653,15 @@ PERMANENTLY_FORBIDDEN: dict[str, str] = {
         "controls it carries spends THEIR privacy on OUR measurement, and the "
         "cost lands entirely on somebody who is not him. Whether HE chooses "
         "to open a profile is his own affair; this server may not do it for a "
-        "measurement"
+        "measurement. STILL IN FORCE, AND NARROWER THAN IT MAY NOW LOOK, "
+        "2026-09-27: the ruling THIRD-PARTY-PROFILE-FOR-A-NAMED-TARGET lets "
+        "the two named-person acts (connect_from_profile, message_from_profile) "
+        "load the ONE profile he names, inside the act he ordered toward that "
+        "person, through a separate door the read boundary does not share. "
+        "That is his choice made per call, and the view it emits lands on the "
+        "person he chose to act toward. A load for a measurement -- a probe, "
+        "a read tool, a census -- stays forbidden, and no read can reach that "
+        "door"
     ),
     "mark_notifications_read": (
         "clearing his unread badge destroys signal he has not seen, and the "
@@ -3055,7 +3267,25 @@ _COMPOSITE_TARGET_KINDS: dict[str, tuple[str, str]] = {
     # only part that reaches a url; the content is the reply, typed and never
     # composed here.
     "thread_and_text": ("thread", "text"),
+    # 2026-09-27, ``message_from_profile``. The SUBJECT is the profile of the
+    # person he names -- canonical as the profile LINK, so re-normalising a
+    # canonical target is idempotent -- and only its segment reaches a url.
+    "profile_and_text": ("profile", "text"),
 }
+
+#: THE TARGET KINDS OF A NAMED PERSON'S PROFILE (2026-09-27). The one-part
+#: kind is Connect's; the two-part kind is Message's. Both are CANONICAL AS
+#: THE PROFILE LINK -- ``https://www.linkedin.com/in/<segment>/`` -- composed
+#: by the named-profile door from the caller's own argument, and both reach a
+#: url only through :func:`url_target_of`, which hands the template the
+#: SEGMENT. A name is never a target: :func:`named_profile.profile_segment`
+#: refuses anything that is not a link or a member id.
+_PROFILE_TARGET_KINDS: frozenset[str] = frozenset({"profile", "profile_and_text"})
+
+
+def _canonical_profile(value: Any) -> str:
+    """The canonical profile LINK for a caller's link or member id, or raise."""
+    return named_profile.profile_url(named_profile.profile_segment(value))
 
 
 def _clean_target_part(spec: WriteSpec, name: str, value: Any) -> str:
@@ -3218,6 +3448,12 @@ def url_target_of(spec: WriteSpec, target: str) -> str:
     which is the rule this module already applies to the two functions above.
     """
     kind = spec.target_kind
+    if kind == "profile":
+        # THE SEGMENT OF THE CANONICAL LINK, 2026-09-27: the template is
+        # ``https://www.linkedin.com/in/{target}/`` and the grant holds the
+        # link, so the segment is re-derived here through the same parser
+        # that canonicalised it -- never sliced out of a string by position.
+        return named_profile.profile_segment(target)
     if kind not in _COMPOSITE_TARGET_KINDS:
         return target
     _first, second = _COMPOSITE_TARGET_KINDS[kind]
@@ -3228,7 +3464,10 @@ def url_target_of(spec: WriteSpec, target: str) -> str:
         return target
     if target.count(TARGET_JOIN) != 1:
         return target
-    return target.split(TARGET_JOIN, 1)[0]
+    subject = target.split(TARGET_JOIN, 1)[0]
+    if kind in _PROFILE_TARGET_KINDS:
+        return named_profile.profile_segment(subject)
+    return subject
 
 
 #: THE ACTIONS THAT PUT A FILE FROM THIS MACHINE INTO A COMPOSER.
@@ -3400,6 +3639,26 @@ def _composite_target(spec: WriteSpec, target: Any) -> str:
         if isinstance(target, dict):
             value = target.get(first)
         return _clean_target_part(spec, first, value)
+    if spec.target_kind in _PROFILE_TARGET_KINDS:
+        # THE SUBJECT IS A PROFILE, CANONICAL AS ITS LINK (2026-09-27). The
+        # caller's link or member id goes through the named-profile parser, so
+        # a bare word -- a name -- is refused here, before a token exists, and
+        # the canonical link re-parses to itself on the second normalisation.
+        if isinstance(target, str) and target.count(TARGET_JOIN) == 1:
+            subject, _, content = target.partition(TARGET_JOIN)
+        elif isinstance(target, dict):
+            subject, content = target.get(first), target.get(second)
+        else:
+            raise WriteAttemptError(
+                f"{spec.action!r} is addressed by {first!r} AND {second!r} "
+                "together: the profile of the person you name and the exact "
+                "words, as a mapping of the two."
+            )
+        return (
+            _canonical_profile(_clean_target_part(spec, first, subject))
+            + TARGET_JOIN
+            + _clean_target_part(spec, second, content)
+        )
     if isinstance(target, str) and target.count(TARGET_JOIN) == 1:
         # THE CANONICAL FORM IS A VALID SPELLING OF THE TARGET, and accepting
         # it is what makes this function IDEMPOTENT. It was not, and the
@@ -3494,6 +3753,10 @@ def _target_for(spec: WriteSpec, target: Any) -> str:
                 f"{target!r} names nothing. Pass 'self'."
             )
         return "self"
+    if spec.target_kind == "profile":
+        # A NAMED PERSON'S PROFILE, canonical as its link (2026-09-27). See
+        # :data:`_PROFILE_TARGET_KINDS`: a link or a member id, never a name.
+        return _canonical_profile(raw)
     if spec.target_kind in _OPAQUE_TARGET_KINDS:
         return _opaque_target(spec, raw)
     if spec.target_kind in _COMPOSITE_TARGET_KINDS:
@@ -3552,6 +3815,157 @@ async def _load(navigator: Any, page: Any, url: str, *, surface: str) -> str:
     landed = str(await navigator.goto(page, url) or url)
     assert_not_authwall(landed, surface=surface)
     return landed
+
+
+#: THE ACTIONS THAT LOAD A NAMED PERSON'S PROFILE, 2026-09-27. A closed set,
+#: and :func:`_load_named_profile` refuses every spec outside it -- so the
+#: second door is reachable from these two write specs and from nothing else.
+NAMED_PROFILE_ACTIONS: frozenset[str] = frozenset(
+    {"connect_from_profile", "message_from_profile"}
+)
+
+#: THE ACTIONS ``perform`` PRESSES STRICTLY: ``page.click(..., strict=True)``,
+#: so a selector matching two elements at the moment of the press THROWS
+#: instead of taking the first. Playwright's page-level click is NOT strict
+#: unless asked (measured 2026-09-27: two matching buttons, the first was
+#: pressed).
+#:
+#: FIVE BESIDE THE NAMED-PERSON ACTS SINCE LANE L5'S MERGE OF MASTER 52b55b6
+#: (2026-09-27, the orchestrator's call (b)). Eight sentences in this package
+#: said Playwright's strict mode held a click to one element, of presses that
+#: ``perform`` made with no ``strict=`` at all -- so the claim was false and
+#: the property it described did not exist. The code was moved to match the
+#: claims, action by action, where each action's fixtures MEASURED exactly
+#: one match at the moment of every press (a recording run over their tests,
+#: every press counted before it was made; the lane L5 record, "Integration:
+#: lane L5's merge of master 52b55b6"). The sentences are pinned to this set
+#: by ``tests/test_a_strict_mode_claim_is_a_strict_press.py``:
+#:
+#:   mark_company_interest  company_interest.OFF_CONTROL_IN_CARD   6 presses, 1 each
+#:   follow_company_page    dom.COMPANY_PAGE_FOLLOW_CONTROL        6 presses, 1 each
+#:   update_profile_field   profile_editor.SAVE_SELECTOR          12 presses, 1 each
+#:                          and the Premium badge switch           8 presses, 1 each
+#:   withdraw_from_group    group_leave.disclosure_selector       16 presses, 1 each
+#:                          and the leave item in its row          9 presses, 1 each
+#:   follow_company         NEVER PRESSED IN ANY TEST; its label-form control
+#:                          counts exactly 1 on each of the three captured
+#:                          postings ("Follow" on two, "Following" on the
+#:                          third), and its prefixed form 0 on every fixture
+#:
+#: No press counted 0 or 2+. ``follow_company`` is here on its captures'
+#: static count, not on a press, and ``dom.POSTING_FOLLOW_IN_CARD``'s comment
+#: says so. FILLS ARE NOT IN THIS: the claims were about presses, and only the
+#: named-person acts' fill was measured strict (``perform``'s own note).
+STRICT_PRESS_ACTIONS: frozenset[str] = NAMED_PROFILE_ACTIONS | frozenset(
+    {
+        "mark_company_interest",
+        "follow_company_page",
+        "update_profile_field",
+        "withdraw_from_group",
+        "follow_company",
+    }
+)
+
+
+async def _load_named_profile(
+    navigator: Any, page: Any, spec: WriteSpec, target: str
+) -> str:
+    """Open the ONE profile a named act's caller named, and return the landing.
+
+    NOT THE READ DOOR, and deliberately not :func:`_load`. Ruling
+    THIRD-PARTY-PROFILE-FOR-A-NAMED-TARGET admits a third party's profile ONLY
+    inside an outward act whose target the operator names in that call; the
+    read door still refuses every such address. So this is the one function in
+    the package that asks the navigator for ``named_profile=True``, and it
+    asks only for a spec in :data:`NAMED_PROFILE_ACTIONS`, with the address
+    COMPOSED by the boundary from the segment of the caller's own target --
+    never a landing, never a link read off a page.
+    """
+    from linkedin_server import readonly
+    from linkedin_server.auth import assert_not_authwall
+
+    if spec.action not in NAMED_PROFILE_ACTIONS or spec.target_kind not in _PROFILE_TARGET_KINDS:
+        raise WriteAttemptError(
+            f"{spec.action!r} is not a named-person act, and a third party's "
+            "profile is loaded for nothing else -- not a read, not a "
+            "measurement."
+        )
+    url = readonly.assert_named_profile_url(
+        readonly.named_profile_url(url_target_of(spec, target))
+    )
+    landed = str(await navigator.goto(page, url, named_profile=True) or url)
+    assert_not_authwall(landed, surface="profile")
+    return landed
+
+
+async def _read_account_share_updates(navigator: Any, page: Any) -> dict[str, Any]:
+    """Load his "Sharing profile edits" page and read the switch. Never raises.
+
+    THE AMENDED CONDITION 1'S READING (``profile_editor.ACCOUNT_READINGS``),
+    taken by :func:`perform` before an editor write opens the editor. One
+    load, through :func:`_load` -- the read door, unrelaxed: the address is
+    admitted for READING ONLY -- then counts; nothing is pressed. Returns:
+
+        reading   'off' | 'on' | 'unknown', or None when no reading could be
+                  taken at all -- never 'off' for either
+        read      True once the page loaded
+        served    True when the page kept its own address; a redirect makes
+                  the reading 'unknown' (an admitted address is not a served
+                  one: the other candidate needs its own admission first)
+        named / input / aria   the reader's counts
+        why       constants and counts only
+        error     an exception's TYPE when the load or the read failed
+
+    A NAVIGATION THAT FAILS IS NOT A REFUSAL HERE, and that is deliberate: a
+    dialog that draws its own notify control can still establish condition 1,
+    so the editor is still opened and the save gate decides -- on None, which
+    it refuses wherever the dialog draws no control of its own.
+    """
+    from linkedin_server import profile_editor
+
+    # THE LOCALS ARE NAMED FOR THIS FUNCTION, and that is not cosmetic: the
+    # navigation guard tracks a tainted name ACROSS THE WHOLE MODULE, and
+    # ``landed`` is one here -- binding this function's booleans from it
+    # spread the taint through ``value`` and ``reading`` to every
+    # ``goto(page, url)`` in the file. Measured, not supposed.
+    try:
+        setting_landed = await _load(
+            navigator, page, profile_editor.ACCOUNT_SETTING_URL, surface="settings"
+        )
+    except Exception as exc:  # noqa: BLE001 - its TYPE is the whole report
+        return {
+            "reading": None,
+            "read": False,
+            "served": None,
+            "named": None,
+            "input": None,
+            "aria": None,
+            "why": (
+                "his 'Sharing profile edits' page could not be loaded, so the "
+                "account-level setting was not read."
+            ),
+            "error": type(exc).__name__,
+        }
+    setting_served = profile_editor.served_at_account_setting(setting_landed)
+    setting_reading = await profile_editor.read_account_share_updates(page)
+    setting_value = setting_reading.get("reading") if setting_served else "unknown"
+    setting_why = str(setting_reading.get("why") or "")
+    if not setting_served:
+        setting_why = (
+            "the settings page did not keep its own address -- LinkedIn "
+            "redirected it -- so what it drew is not the page admitted, and the "
+            "setting counts as unread. " + setting_why
+        )
+    return {
+        "reading": setting_value,
+        "read": True,
+        "served": setting_served,
+        "named": setting_reading.get("named"),
+        "input": setting_reading.get("input"),
+        "aria": setting_reading.get("aria"),
+        "why": setting_why,
+        "error": setting_reading.get("error"),
+    }
 
 
 async def _read_posting_facts(
@@ -5000,6 +5414,58 @@ async def observe(
             same_page_as_action=False,
         )
 
+    if spec.state_from == "named_profile":
+        # ONE load, OF THE PROFILE HE NAMED, through the named-profile door --
+        # never the read door, which still refuses it. The landing is compared
+        # in a condition and bound to nothing, as on a thread page: LinkedIn
+        # may send a member id to a vanity address, and an act aimed at an
+        # address the page chose is the thing PAGE-MAY-VETO-NEVER-SUPPLY
+        # forbids. So a landing that is not the named profile reads UNKNOWN,
+        # mints nothing, and is described without being quoted.
+        #
+        # WHAT IS RECORDED IS INTEGERS, BOOLEANS AND CLOSED TOKENS. WHO the
+        # profile belongs to is printed in the confirm block by
+        # ``named_profile.name_the_profile_target`` and never enters the
+        # observation, which a grant retains.
+        url = named_profile.profile_url(url_target_of(spec, target))
+        landed = await _load_named_profile(navigator, page, spec, target)
+        if not named_profile.landed_on_profile(landed, url_target_of(spec, target)):
+            return _record(
+                spec,
+                target=target,
+                facts={"landed_on_the_named_profile": False},
+                facts_url=url,
+                state=UNKNOWN,
+                state_why=(
+                    "the browser did not land on the profile you named -- "
+                    "LinkedIn can send an address to another one, and an act "
+                    "aimed there could reach somebody else. Nothing on that "
+                    "page was read. THE LANDING IS WITHHELD; what is safe to "
+                    f"say about it -- {landing.withheld(landed)}. If you gave "
+                    "a member id, give the profile's link instead (NEEDS-"
+                    "CAPTURE C-P6: whether an id redirects is unmeasured)."
+                ),
+                state_url=url,
+                same_page_as_action=True,
+            )
+        reading = await dom.read_named_profile(page)
+        facts = named_profile.profile_facts(reading)
+        facts["landed_on_the_named_profile"] = True
+        if spec.action == "connect_from_profile":
+            state, why = named_profile.connect_state(reading)
+        else:
+            state, why = named_profile.message_state(reading)
+        return _record(
+            spec,
+            target=target,
+            facts=facts,
+            facts_url=url,
+            state=state,
+            state_why=why,
+            state_url=url,
+            same_page_as_action=True,
+        )
+
     if spec.state_from == "thread_page":
         # ONE load, OF THE CONVERSATION HE NAMED, and the url is the spec's
         # own template filled with the SUBJECT half of the target -- the
@@ -5469,7 +5935,11 @@ def _render(
             "confirming."
         )
     else:
-        # THE SEVEN. Their target is a subject, or a subject AND the content
+        # THE REST -- TEN target kinds, counted 2026-09-27. This line said
+        # "THE SEVEN", which was true until lane L5's thread_and_text made it
+        # eight on 2026-09-24 without the word moving; the named-person route
+        # added profile and profile_and_text. Their target is a subject, or a
+        # subject AND the content
         # that would be published, and the content is PRINTED IN FULL rather
         # than summarised or truncated. That is the point of showing him a
         # block at all: a comment, a post and a message are published under
@@ -5649,6 +6119,17 @@ async def preview(
         # NEW dict after ``grant.preview`` was assigned, so the retained block
         # never held it. Returns the block unchanged for every other action.
         block = await threads.name_the_reply_recipient(page, spec, observation, block)
+        # AND FOR A NAMED PERSON (2026-09-27): WHOM the act resolved to --
+        # PEOPLE-DATA-MITIGATIONS item 6 -- in a NEW dict after
+        # ``grant.preview`` was assigned, so the retained block never held it.
+        if spec.action in NAMED_PROFILE_ACTIONS:
+            block = await named_profile.name_the_profile_target(
+                page,
+                spec,
+                observation,
+                block,
+                segment=url_target_of(spec, observation.target),
+            )
         return block
     finally:
         _OBSERVED.pop(observation.receipt, None)
@@ -5733,13 +6214,16 @@ async def _name_the_invitation_recipient(
     prefix, suffix = "Invite ", dom.INVITE_CONTROL_SUFFIX
     if name.startswith(prefix) and name.endswith(suffix) and len(name) > len(prefix + suffix):
         name = name[len(prefix):-len(suffix)]
-    person = people_data.Person.from_page(name=name)
+    # BUILT BY ``people_seam.person`` (lane L5's merge of master 52b55b6), the
+    # one builder every preview that names a person goes through: the control
+    # draws no headline, so the record's is ABSENT (None), never "".
+    person = people_seam.person(name=name)
     if person is None:
         return block
     # A NEW DICT. The one on the grant is not touched, and this adds
     # top-level keys only -- so nothing nested is shared into.
     out = dict(block)
-    out["who_this_would_reach"] = person.envelope()
+    out["who_this_would_reach"] = person
     out["who_this_would_reach_check"] = (
         "who_this_would_reach is the person LinkedIn labels on the ONE control "
         "your word selected. That is read off your own profile, where it was "
@@ -5822,6 +6306,34 @@ _SAVE_FAMILY: frozenset[str] = frozenset({"save_job", "unsave_job"})
 
 PERFORMABLE: frozenset[str] = frozenset(
     {
+        # THE SIXTEENTH AND SEVENTEENTH, 2026-09-27 (lane L5's follow-up, on
+        # ruling THIRD-PARTY-PROFILE-FOR-A-NAMED-TARGET): Connect and Message
+        # on the profile of a person he names. Every clause the others needed,
+        # and where each rests:
+        #
+        #   a measured surface   the profile TEMPLATE (his own, 6 captures);
+        #                        a third party's copy of it has never been
+        #                        captured, so identity is a VETO -- title,
+        #                        one topcard, first heading, compared in page
+        #   a measured anchor    'Invite <name> to connect' (a button, 44
+        #                        times) and 'Message <name>' (18 times, a
+        #                        link to the composer 16 of them), both
+        #                        compared whole, in the page
+        #   an aimable target    the caller's link or member id -- never a
+        #                        name -- through the named-profile door, the
+        #                        landing held to it
+        #   a real verification  Connect: a fresh render, whose negative is
+        #                        strong; Message: the opened conversation in
+        #                        place, with a before-count
+        #   no new permission    perform()'s existing click and fill; the new
+        #                        door is a NAVIGATION, and the read door
+        #                        still refuses the address
+        #
+        # ENABLING IS NOT FIRING, and nothing in the lane that built them
+        # issued a grant. OPERATOR-NAMES-THE-TARGET governs their first live
+        # proofs, which are also their captures (C-P1 to C-P6).
+        "connect_from_profile",
+        "message_from_profile",
         # "I'M INTERESTED", 2026-09-24, census row ``P I14`` (lane L7). Every
         # clause the others needed is true of it:
         #
@@ -6297,6 +6809,18 @@ def anchor_label_for(
         # the only part an anchor needs.
         return dom.INVITE_CONTROL_SUFFIX
 
+    if spec.action == "connect_from_profile":
+        # THE SAME SUFFIX (2026-09-27). The whole label -- ``Invite <owner> to
+        # connect`` -- is compared inside the page against the profile's own
+        # owner; what an anchor names here is the part that makes the control
+        # an invitation.
+        return dom.INVITE_CONTROL_SUFFIX
+
+    if spec.action == "message_from_profile":
+        # THE PREFIX, measured on all 18 Message controls captured
+        # (2026-09-27). The name half is compared inside the page.
+        return dom.MESSAGE_CONTROL_PREFIX
+
     if spec.action == "react_to_item":
         # THE OFF LABEL, MEASURED ON THREE SURFACES -- the feed, his profile,
         # and the item permalink itself. LinkedIn writes the toggle state into
@@ -6731,6 +7255,9 @@ _WRITE_SURFACE_FOR_ACTION: dict[str, str] = {
     # for it and would fall back to "linkedin" -- the least useful word in
     # the one message he reads when a write meets an auth wall.
     "send_reply": "messaging thread",
+    # 2026-09-27: the profile of the person he names.
+    "connect_from_profile": "the named person's profile",
+    "message_from_profile": "the named person's profile",
     # A group id is a kind no other action uses; named per action anyway, so
     # the auth-wall message names the page the click was going to land on.
     "withdraw_from_group": "groups",
@@ -6814,6 +7341,10 @@ _WHERE_TO_LOOK: dict[str, str] = {
     # 2026-09-24. The conversation he named, which is also the surface this
     # action's own verification re-reads.
     "send_reply": "the conversation itself, in your LinkedIn messages",
+    # 2026-09-27, the named-person acts. The Sent list settles an invitation
+    # (this server may not open it); the conversation settles a message.
+    "connect_from_profile": "My Network, then Manage, then Sent",
+    "message_from_profile": "your conversation with them, in your LinkedIn messages",
 }
 
 #: THE ACTIONS THAT ARE ACTUAL TOGGLES, for the one sentence that is only true
@@ -6953,6 +7484,21 @@ _VERIFIED_FROM["send_reply"] = (
     "its last message. The NOT-SENT answer is read in place first: the reply "
     "box still holding your words with Send enabled."
 )
+_VERIFIED_FROM["connect_from_profile"] = (
+    "THE SAME PROFILE, RENDERED FRESH by a new load of the address your link "
+    "composed. Its NEGATIVE is strong: the Connect control for this person "
+    "drawn again means no invitation went. Its positive is never claimed, "
+    "because what a pressed Connect turns into on a profile has never been "
+    "captured -- the closed tokens it now reads are reported instead."
+)
+_VERIFIED_FROM["message_from_profile"] = (
+    "THE CONVERSATION THE PRESS OPENED, READ IN PLACE -- not reloaded, because "
+    "its address is page-supplied and this route never navigates to one. What "
+    "makes it evidence is the DELTA against the count taken when it opened: "
+    "the number of messages carrying exactly your words must rise by exactly "
+    "one, and your words must be its last message. The NOT-SENT answer is "
+    "read first: the composer still holding your words with Send enabled."
+)
 _VERIFIED_FROM["withdraw_from_group"] = (
     "THE SAME PAGE, RE-RENDERED by a fresh navigation to the Groups root: his "
     "memberships are listed there and on no other surface this server may "
@@ -7016,8 +7562,12 @@ def _publishable_landing(spec: "WriteSpec", url: str, landed: str) -> str:
     a slug -- a name, and for a sole trader a person's -- so the receipt prints
     the address this server ASKED FOR, as the preview already does. Every
     other surface lands on an address this package composed, and prints it.
+
+    A NAMED PERSON'S PROFILE PRINTS THE ADDRESS ASKED FOR TOO (2026-09-27):
+    the landing was held to the caller's segment with case folded, and any
+    query LinkedIn appended to it is the page's, not the caller's.
     """
-    if spec.state_from == "company_page":
+    if spec.state_from in ("company_page", "named_profile"):
         return url
     return landed
 
@@ -7085,6 +7635,21 @@ def _assert_landed_on_target(
                 "somewhere that is not an organisation Page root. THE LANDING "
                 "IS WITHHELD rather than named; what is safe to say about it "
                 f"-- {landing.withheld(landed)}."
+            )
+        return
+    if spec.state_from == "named_profile":
+        # ONE PERSON'S PROFILE, by the segment of the caller's own link,
+        # compared with case and percent-encoding folded (2026-09-27). A
+        # landing anywhere else -- a member id redirected to a vanity address,
+        # a removed profile, a sign-in wall -- VETOES the act: the page may
+        # refuse a navigation, never supply one.
+        if not named_profile.landed_on_profile(landed, url_target_of(spec, grant.target)):
+            raise WriteAttemptError(
+                "refusing to act: this act is for the profile your link names, "
+                "and the browser landed somewhere that is not that profile. An "
+                "invitation or a message pressed on any other page would reach "
+                "somebody else. THE LANDING IS WITHHELD rather than named; what "
+                f"is safe to say about it -- {landing.withheld(landed)}."
             )
         return
     if spec.state_from == "thread_page":
@@ -7413,12 +7978,43 @@ async def _live_control(
     still carries exactly one unfollow button, which is the precondition a
     click needs and a list read does not.
     """
+    if spec.action in NAMED_PROFILE_ACTIONS:
+        # THE SAME READER THE PREVIEW USED, ON THE PROFILE ABOUT TO BE PRESSED
+        # ON (2026-09-27). ``perform`` has loaded it again through the
+        # named-profile door and held the landing to the named segment; this
+        # re-reads who the page names and which control is theirs, and the
+        # selector is built from the POSITION the page's own script returned
+        # -- no name, label or id reaches this process.
+        #
+        # NO POSITION, AND A STRICT PRESS (the re-checks of 2026-09-27). A
+        # ``control >> nth=K`` is re-resolved by Playwright when the element
+        # it found is re-rendered while the press waits: page-wide, a
+        # stranger's control drawn earlier in the page took position K; scoped
+        # to the topcard, one drawn inside the topcard, or a second element
+        # whose id ends ``Topcard``, still did. So the state functions require
+        # the topcard to hold exactly ONE control of the kind -- the owner's --
+        # and the selector is that scope alone, which ``perform`` presses with
+        # ``strict=True``: a second match at press time throws, and nothing
+        # else is ever pressed in its place.
+        reading = await dom.read_named_profile(page)
+        if spec.action == "connect_from_profile":
+            state, why = named_profile.connect_state(reading)
+            if state != named_profile.CONNECT_FROM:
+                return (state, why, "")
+            return (state, why, dom.topcard_invite_control_selector())
+        state, why = named_profile.message_state(reading)
+        if state != named_profile.MESSAGE_FROM:
+            return (state, why, "")
+        return (state, why, dom.topcard_message_control_selector())
+
     if spec.action == "mark_company_interest":
         # THE SAME READER THE PREVIEW USED, ON THE SAME PAGE: freshness, not a
         # second source. The posting is re-identified first, because the card
         # must open by naming the employer the posting itself names, and the
         # click selector is the module's CONSTANT -- strict mode holds it to
-        # the one OFF control in the card.
+        # the one OFF control in the card (true since lane L5's merge of
+        # master 52b55b6: STRICT_PRESS_ACTIONS; the press passed no
+        # ``strict=`` before).
         facts = await _read_posting_facts(page, grant.target)
         _interest, state, why = await company_interest.read_state(
             page, company=facts.get("company")
@@ -7437,7 +8033,9 @@ async def _live_control(
         # The selector returned is the FIRST press only -- the row's
         # disclosure, built from constants and the grant's own digits, which
         # the verdict has just required to match exactly one element; strict
-        # mode refuses the click if that stops being true. The leave item is
+        # mode refuses the click if that stops being true (since lane L5's
+        # merge of master 52b55b6: STRICT_PRESS_ACTIONS, both presses; the
+        # press passed no ``strict=`` before). The leave item is
         # appended later, by ``group_leave.menu_item_gate``, or not at all.
         # The verdict's own state decides, not ``spec.from_state`` (see the
         # ``mark_company_interest`` arm above for why).
@@ -8000,7 +8598,8 @@ async def _live_control(
         # THE SELECTOR IS A CONSTANT. The verdict has just required it to match
         # exactly one element, and nothing the page wrote is spliced into it --
         # Playwright's strict mode refuses the click if that stops being true
-        # between here and the press.
+        # between here and the press (since lane L5's merge of master 52b55b6:
+        # STRICT_PRESS_ACTIONS; the press passed no ``strict=`` before).
         reading = await dom.read_company_page_follow(page)
         _facts, state, why = company_page_follow_verdict(reading, grant.target)
         if state != spec.from_state:
@@ -8090,6 +8689,12 @@ async def _live_control(
             # verdict accepted exactly one bound control in the card, and
             # Playwright's strict mode refuses a click whose selector matches
             # more -- so no page string is spliced into what is pressed.
+            # CORRECTED AT LANE L5'S MERGE OF MASTER 52b55b6 (2026-09-27), in
+            # what it rests on: the press passed no ``strict=`` until then, so
+            # the strict half was not so; it is now (STRICT_PRESS_ACTIONS) BY
+            # CONSTRUCTION, not by a measured press. NO FIXTURE DRAWS THIS
+            # FORM -- ``dom.POSTING_FOLLOW_IN_CARD`` counts 0 on every one of
+            # the 33 fixture files -- and no test has ever pressed it.
             return (state, why, dom.POSTING_FOLLOW_IN_CARD)
         label = anchor_label_for(spec) or ""
         return (state, why, dom.follow_control_selector(label))
@@ -8202,12 +8807,19 @@ async def _verify_after(
     grant: WriteGrant,
     observation: Observation,
     prior_value: Optional[str] = None,
+    opened: Optional[dict[str, Any]] = None,
+    typed: bool = False,
     badge_before: Optional[dict[str, Any]] = None,
     witness: Optional[dict[str, Any]] = None,
 ) -> tuple[str, str, str]:
     """Read whether it landed, and read it somewhere the click did not reach.
 
     Returns ``(state, why, read_from_url)``.
+
+    ``opened`` and ``typed`` (2026-09-27) carry what a named-person Message
+    press opened and whether his words were entered: that action's SENT
+    verdict diffs against the count taken when the composer opened, and
+    "nothing was typed" is its strongest negative.
 
     THE SAVE PAIR gets the ideal shape: the click happens on the posting and
     the confirmation is read off the saved list, a different surface entirely,
@@ -8620,6 +9232,53 @@ async def _verify_after(
         )
         return state, why, landed
 
+    if spec.action == "connect_from_profile":
+        # IN PLACE FIRST, THEN A FRESH RENDER (2026-09-27). The in-place read
+        # is taken before any reload because a reload erases the one thing it
+        # can see -- whether a dialog opened after the press -- and the fresh
+        # render is LinkedIn's own answer to whether the Connect control for
+        # this person is still drawn. Both are integers and closed tokens.
+        in_place = await dom.read_named_profile(page)
+        profile = named_profile.profile_url(url_target_of(spec, grant.target))
+        landed = await _load_named_profile(navigator, page, spec, grant.target)
+        if not named_profile.landed_on_profile(landed, url_target_of(spec, grant.target)):
+            return (
+                UNKNOWN,
+                "the fresh render did not land on the profile you named, so it "
+                "says nothing about the invitation. THE LANDING IS WITHHELD; "
+                f"what is safe to say about it -- {landing.withheld(landed)}. "
+                "Look at My Network > Manage > Sent before doing anything else.",
+                "",
+            )
+        fresh = await dom.read_named_profile(page)
+        state, why = named_profile.connect_verdict(
+            observation.facts, in_place, fresh
+        )
+        return state, why, profile
+
+    if spec.action == "message_from_profile":
+        # IN PLACE, WITH THE BEFORE-COUNT THE OPENED GATE TOOK (2026-09-27).
+        # The conversation's address is on the page and this route never
+        # navigates to a page-supplied address, so there is no fresh load to
+        # take -- see ``named_profile.message_verdict`` for what that costs.
+        text = _text_component_of(spec, grant.target)
+        held = await named_profile.composer_holds(page, text) if typed else None
+        after = await named_profile.read_opened_conversation(page, text=text)
+        # AND WHOSE CONVERSATION IT IS NOW -- the page's own comparison, one
+        # boolean (the second warm re-check, 2026-09-27): a conversation swapped
+        # in place during the Send press would otherwise be read as his.
+        theirs = await dom.read_named_profile(page)
+        state, why = named_profile.message_verdict(
+            opened,
+            after,
+            held_in_place=held,
+            typed=typed,
+            conversation_is_theirs=(
+                not theirs.get("error") and theirs.get("bubble_title_names_owner") is True
+            ),
+        )
+        return state, why, ""
+
     if spec.action == "send_reply":
         # SENT, READ BACK -- the confirmation ``send_message`` could never
         # have while the thread was forbidden. Two reads, in this order:
@@ -8830,8 +9489,66 @@ async def _verify_after(
 #: are different claims -- ``update_setting``'s target has a value component
 #: and that value is a RADIO DESTINATION, clicked and never typed.
 TYPING_ACTIONS: frozenset[str] = frozenset(
-    {"publish_post", "comment_on_item", "send_message", "send_reply"}
+    {
+        "publish_post",
+        "comment_on_item",
+        "send_message",
+        "send_reply",
+        # 2026-09-27. It types AFTER a click rather than before one -- see
+        # OPEN_THEN_TYPE_ACTIONS -- and it is here because it types his words
+        # into a composer, which is the claim this set makes.
+        "message_from_profile",
+    }
 )
+
+
+#: THE ACTIONS WHOSE COMPOSER DOES NOT EXIST UNTIL A CLICK OPENS IT
+#: (2026-09-27). ``message_from_profile`` presses the Message control on a
+#: named person's profile, and only then is there anything to type into. So
+#: its words are queued INSIDE the click loop, after
+#: :func:`named_profile.opened_conversation_gate` confirms that exactly one
+#: conversation composer opened, empty, for a first-degree connection -- the
+#: same append-on-proceed shape ``send_message`` uses after its typeahead
+#: click, so forgetting a branch fails closed: the default is "do not type".
+OPEN_THEN_TYPE_ACTIONS: frozenset[str] = frozenset({"message_from_profile"})
+
+
+async def _opened_conversation_gate(
+    page: Any, spec: WriteSpec, grant: WriteGrant, *, address_before_press: Optional[str]
+) -> dict[str, Any]:
+    """After the Message press and BEFORE a word is typed: may they go in?
+
+    A BOUNDED WAIT for a composer to be drawn (it decides nothing -- see
+    :func:`named_profile.wait_for_opened_composer`), then three reads, none
+    of them a navigation: WHETHER the press moved the browser (the address
+    after it, compared in a condition with the one before it -- the landing
+    was already held to the named profile before the press, so an unchanged
+    address is still that profile), what the profile now names and whose
+    conversation the one composer sits in (the page's own comparisons), and
+    the conversation the press opened, with his words compared in the page
+    for the before-count. Neither address is bound to anything a navigation
+    could take. The decision is :func:`named_profile.opened_conversation_gate`'s.
+
+    THE WAIT COMES FIRST so the address is read after it: a press that
+    navigates may not have moved ``page.url`` the instant it returned.
+    """
+    composer_wait = await named_profile.wait_for_opened_composer(page)
+    try:
+        still_on_the_profile = (
+            address_before_press is not None and str(page.url) == address_before_press
+        )
+    except Exception:  # noqa: BLE001 - an unreadable address is not the profile
+        still_on_the_profile = False
+    profile_after = await dom.read_named_profile(page)
+    conversation = await named_profile.read_opened_conversation(
+        page, text=_text_component_of(spec, grant.target)
+    )
+    return named_profile.opened_conversation_gate(
+        profile_after,
+        conversation,
+        still_on_the_profile=still_on_the_profile,
+        composer_wait=composer_wait,
+    )
 
 
 #: THE ACTIONS THAT TYPE INTO A CONVERSATION'S OWN REPLY BOX, and whose submit
@@ -9993,13 +10710,39 @@ async def perform(
         ),
         grant,
     )
-    landed = await _load(
-        navigator,
-        page,
-        url,
-        surface=_WRITE_SURFACE_FOR_ACTION.get(spec.action)
-        or _WRITE_SURFACE.get(spec.target_kind, "linkedin"),
-    )
+
+    # THE AMENDED CONDITION 1'S ACCOUNT-LEVEL READING, for an editor write
+    # only, and TAKEN BEFORE THE CHANGE IS ENTERED -- the amendment's own word
+    # (SELF-PROFILE-EDIT-NOTIFY-CONDITION-AMENDED) -- which here means before
+    # the editor is even opened: the setting lives on another page. Wired
+    # 2026-09-27 by the live lane at the seam ``profile_editor.ACCOUNT_READINGS``
+    # describes. A READ of his own settings page, admitted for reading only;
+    # nothing is pressed there.
+    #
+    # IT DECIDES NOTHING HERE. It is handed to every save-gate call below and
+    # the gate decides: a dialog that draws its own notify control is governed
+    # by that control whatever this reads. A reading that could not be taken
+    # is None -- never 'off' -- and the gate refuses on it like any other.
+    account_setting: Optional[dict[str, Any]] = None
+    account_share_updates: Optional[str] = None
+    if spec.action in EDITOR_SAVE_ACTIONS:
+        account_setting = await _read_account_share_updates(navigator, page)
+        account_share_updates = account_setting.get("reading")
+
+    if spec.action in NAMED_PROFILE_ACTIONS:
+        # THE NAMED-PROFILE DOOR, NOT THE READ DOOR (2026-09-27). The write
+        # door above has rebuilt the address from the grant; this loads it
+        # through the only door that admits a third party's profile, which
+        # rebuilds it again from the same segment.
+        landed = await _load_named_profile(navigator, page, spec, grant.target)
+    else:
+        landed = await _load(
+            navigator,
+            page,
+            url,
+            surface=_WRITE_SURFACE_FOR_ACTION.get(spec.action)
+            or _WRITE_SURFACE.get(spec.target_kind, "linkedin"),
+        )
 
     # We must be on the page the grant names -- compared by job id for a
     # posting, and whole for a list. See :func:`_assert_landed_on_target`.
@@ -10059,6 +10802,11 @@ async def perform(
     # re-decide which click this was, and that decision already exists
     # twenty lines below. See ``typed_text_residue``.
     typeahead_clicks = 0
+    # AND THE PRESS THAT ONLY OPENS A COMPOSER (2026-09-27): a named-person
+    # Message press dispatches nothing, so it is counted apart from the
+    # submits the same way a typeahead click is.
+    opener_clicks = 0
+    opened_gate: Optional[dict[str, Any]] = None
     fills_made = 0
     apply_gate: Optional[dict[str, Any]] = None
     publish_gate: Optional[dict[str, Any]] = None
@@ -10111,6 +10859,13 @@ async def perform(
     select_plan: list[tuple[str, str]] = []
     if control_kind == "select_option":
         select_plan.append((selector, _text_component_of(spec, grant.target)))
+    elif spec.action in OPEN_THEN_TYPE_ACTIONS:
+        # NOTHING IS QUEUED BEFORE THE CLICK (2026-09-27). The composer this
+        # action types into does not exist until the Message press opens it,
+        # so the queue starts empty, the press is the first click, and his
+        # words are appended inside the loop only when
+        # ``_opened_conversation_gate`` says exactly one empty composer opened.
+        pass
     elif spec.action in ADDRESSED_TYPING_ACTIONS:
         # THE SUBJECT ONLY. The content is appended by ``_recipient_gate``
         # inside the loop, and ONLY if that gate confirms a committed
@@ -10120,6 +10875,17 @@ async def perform(
         fill_plan.append((selector, _subject_component_of(spec, grant.target)))
     elif spec.action in TYPING_ACTIONS or control_kind == "fill":
         fill_plan.append((selector, _text_component_of(spec, grant.target)))
+    # THE ADDRESS BEFORE THE PRESS, for OPEN_THEN_TYPE_ACTIONS only (2026-09-27):
+    # what the gate after the press compares against, in a condition, to tell
+    # a press that opened a composer from one that navigated. It is taken
+    # after the landing was held to the named profile and before any click,
+    # and it is never navigated to.
+    address_before_press: Optional[str] = None
+    if spec.action in OPEN_THEN_TYPE_ACTIONS:
+        try:
+            address_before_press = str(page.url)
+        except Exception:  # noqa: BLE001 - absent means "cannot tell": refuses
+            address_before_press = None
     # THE FOURTH QUEUE, 2026-09-04, AND IT IS A QUEUE FOR THE REASON THE OTHER
     # THREE ARE. ``readonly.SANCTIONED_MUTATIONS`` is keyed by
     # ``(path, function, kind)`` and the scanner counts CALL SITES, so
@@ -10176,6 +10942,26 @@ async def perform(
     selects_made = 0
     uploads_made = 0
     uploaded: Optional[dict[str, Any]] = None
+    # STRICT PRESSES AND FILLS FOR THE NAMED-PERSON ACTS (2026-09-27): a
+    # selector that matches two elements at the moment of the call THROWS
+    # instead of taking the first. Their controls carry no position -- the
+    # gate required exactly one of each kind where it presses -- so a second
+    # match can only be something drawn since the gate read the page: a
+    # stranger's control in the topcard, a second topcard, another
+    # conversation's composer or Send. MEASURED 2026-09-27 on a local page:
+    # ``page.click`` is NOT strict unless asked (two matching buttons, the
+    # first was pressed); with ``strict=True`` it raised a strict mode
+    # violation.
+    #
+    # THE PRESSES OF FIVE MORE ACTIONS SINCE LANE L5'S MERGE OF MASTER
+    # 52b55b6 -- see STRICT_PRESS_ACTIONS, where each is listed with the
+    # measurement that put it there. Their FILLS are not: only the named-person
+    # acts' fill was measured strict, so every other fill keeps the call it has
+    # always made. A strict violation's message quotes every matched element's
+    # outer HTML (scripts/_census_strict_mode_call_sites.py); the except clauses
+    # below keep only the exception's TYPE, so none of it reaches a receipt.
+    press_strictly = spec.action in STRICT_PRESS_ACTIONS
+    fill_strictly = spec.action in NAMED_PROFILE_ACTIONS
     try:
         # THE UPLOAD DRAINS FIRST, AND THE ORDER IS AN ARGUMENT RATHER THAN A
         # PREFERENCE.
@@ -10310,13 +11096,14 @@ async def perform(
         # one that changed its field by typing asks inside the loop, after the
         # fill. Either way the press joins the ONE click queue -- no new click
         # call site is bought. Until 2026-09-24 neither path asked at all.
-        # NEITHER CALL PASSES ``account_share_updates``: the amended condition
-        # 1's account-level reader does not exist yet, so the gate refuses
-        # wherever the dialog draws no notify control. Wiring that reading --
-        # taken BEFORE the change is entered -- is the seam at
-        # ``profile_editor.ACCOUNT_READINGS``.
+        # EVERY SAVE-GATE CALL PASSES ``account_share_updates`` since
+        # 2026-09-27: the account-level reading taken above, BEFORE the change
+        # was entered. Until then none did, and the gate refused wherever the
+        # dialog drew no notify control. See ``profile_editor.ACCOUNT_READINGS``.
         if spec.action in EDITOR_SAVE_ACTIONS and selects_made:
-            editor_save_gate = await profile_editor.read_save_gate(page)
+            editor_save_gate = await profile_editor.read_save_gate(
+                page, account_share_updates=account_share_updates
+            )
             if editor_save_gate["proceed"]:
                 click_plan.append(editor_save_gate["selector"])
         # ONE LOOP OVER TWO QUEUES, AND CLICKS DRAIN FIRST.
@@ -10346,12 +11133,16 @@ async def perform(
         # one does is not measured -- so its condition 1 is read BEFORE the
         # press, not only before Save. Refused, nothing is pressed at all.
         if control_kind == "switch":
-            switch_gate = await profile_editor.read_save_gate(page, require_save=False)
+            switch_gate = await profile_editor.read_save_gate(
+                page,
+                require_save=False,
+                account_share_updates=account_share_updates,
+            )
             if not switch_gate["proceed"]:
                 click_plan.clear()
         while fill_plan or click_plan:
             if click_plan:
-                await page.click(click_plan.pop(0), timeout=CLICK_TIMEOUT_MS)
+                await page.click(click_plan.pop(0), timeout=CLICK_TIMEOUT_MS, strict=press_strictly)
                 clicks_made += 1
                 if spec.action in TWO_CLICK_ACTIONS and clicks_made == 1:
                     apply_gate = await _apply_submit_gate(page)
@@ -10377,6 +11168,24 @@ async def perform(
                                 _text_component_of(spec, grant.target),
                             )
                         )
+                elif spec.action in OPEN_THEN_TYPE_ACTIONS and clicks_made == 1:
+                    # THE MESSAGE PRESS JUST LANDED, AND IT PROVES NOTHING
+                    # (2026-09-27). It dispatched nothing -- it opens a
+                    # composer -- so it is counted apart from the submits, and
+                    # his words are queued ONLY if the gate finds exactly one
+                    # empty composer that the press opened, on the named
+                    # profile, for a first-degree connection.
+                    opener_clicks += 1
+                    opened_gate = await _opened_conversation_gate(
+                        page, spec, grant, address_before_press=address_before_press
+                    )
+                    if opened_gate["proceed"]:
+                        fill_plan.append(
+                            (
+                                named_profile.COMPOSER_EDITOR_SELECTOR,
+                                _text_component_of(spec, grant.target),
+                            )
+                        )
                 elif control_kind == "switch" and clicks_made == 1:
                     # THE SWITCH WAS PRESSED; SAVE IS PRESSED ONLY IF THE
                     # BADGE, AND NOTHING ELSE, MOVED. Read in the dialog,
@@ -10388,7 +11197,9 @@ async def perform(
                         badge_before, switch_after_press, badge_value
                     )
                     if switch_check["proceed"]:
-                        editor_save_gate = await profile_editor.read_save_gate(page)
+                        editor_save_gate = await profile_editor.read_save_gate(
+                            page, account_share_updates=account_share_updates
+                        )
                         if editor_save_gate["proceed"]:
                             click_plan.append(editor_save_gate["selector"])
                 elif spec.action in MENU_ITEM_ACTIONS and clicks_made == 1:
@@ -10410,7 +11221,7 @@ async def perform(
                     )
                 continue
             fill_selector, fill_text = fill_plan.pop(0)
-            await page.fill(fill_selector, fill_text, timeout=CLICK_TIMEOUT_MS)
+            await page.fill(fill_selector, fill_text, timeout=CLICK_TIMEOUT_MS, strict=fill_strictly)
             fills_made += 1
             # THE GATE BETWEEN THE FILL AND THE CLICK. The submit selector is
             # appended only if a fresh read says it should be, so the decision
@@ -10457,9 +11268,20 @@ async def perform(
                 # reached the ``else`` below until 2026-09-24, where the POST
                 # composer's gate looked for a post editor on the intro editor,
                 # found none, and pressed nothing -- so Save was never pressed.
-                editor_save_gate = await profile_editor.read_save_gate(page)
+                editor_save_gate = await profile_editor.read_save_gate(
+                    page, account_share_updates=account_share_updates
+                )
                 if editor_save_gate["proceed"]:
                     click_plan.append(editor_save_gate["selector"])
+            elif spec.action in OPEN_THEN_TYPE_ACTIONS:
+                # THE COMPOSER THE PRESS OPENED, held to the reply's bar
+                # (2026-09-27): no recipient box, one editor, one Send, the
+                # fill landed, and the box holds EXACTLY the grant's words.
+                send_gate = await named_profile.composer_send_gate(
+                    page, text=_text_component_of(spec, grant.target)
+                )
+                if send_gate["proceed"]:
+                    click_plan.append(send_gate["selector"])
             elif spec.action in REPLY_ACTIONS:
                 # A CONVERSATION'S OWN SEND, gated on the transition its form
                 # draws (disabled while empty, enabled once the words land),
@@ -10533,6 +11355,8 @@ async def perform(
             grant,
             observation,
             prior_value=prior_value,
+            opened=opened_gate,
+            typed=fills_made > 0,
             badge_before=badge_before,
             witness=switch_fresh,
         )
@@ -10738,8 +11562,10 @@ async def perform(
             # THE SUBMITS, NOT THE CLICKS. A typeahead suggestion is
             # pressed to ADDRESS the message and dispatches nothing, so
             # counting it here would tell him his words had gone out when
-            # what happened was a name being chosen in a dropdown.
-            submit_clicks=clicks_made - typeahead_clicks,
+            # what happened was a name being chosen in a dropdown. A
+            # named-person Message press only OPENS a composer, and it is
+            # subtracted for the same reason (2026-09-27).
+            submit_clicks=clicks_made - typeahead_clicks - opener_clicks,
             click_error=click_error,
         ),
         # WHAT WAS PUT INTO THE COMPOSER FROM THIS MACHINE, and it sits beside
@@ -10770,7 +11596,27 @@ async def perform(
             # sent". For send_message a lone click is the SUGGESTION being
             # pressed and nothing has been dispatched.
             "typeahead_clicks": typeahead_clicks,
+            # AND THE PRESSES THAT ONLY OPENED A COMPOSER (2026-09-27): a
+            # named-person Message press. For that action a lone click is
+            # the Message control, and nothing has been dispatched.
+            "opener_clicks": opener_clicks,
         },
+        # WHAT THE COMPOSER A NAMED-PERSON MESSAGE PRESS OPENED LOOKED LIKE,
+        # BEFORE A WORD WAS TYPED (2026-09-27). Null for every other action.
+        # On its first supervised use this block IS the capture of what a
+        # profile's Message press opens (NEEDS-CAPTURE C-P4) -- and, for a
+        # person who is not a first-degree connection, of the composer that
+        # opens for them (C-P5), where the act stops having typed nothing.
+        "opened_conversation_gate": (
+            None
+            if opened_gate is None
+            else {
+                "proceeded": bool(opened_gate.get("proceed")),
+                "refused_condition": opened_gate.get("refused_condition"),
+                "why": opened_gate.get("why"),
+                "observed": opened_gate.get("observed"),
+            }
+        ),
         # WHAT THE DELTA GATE SAW, and this block is the POINT of the action
         # rather than a diagnostic. comment_on_item is expected to refuse on
         # its first use -- the submit's accessible name has never been
@@ -10900,6 +11746,12 @@ async def perform(
                 ),
             }
         ),
+        # HIS ACCOUNT-LEVEL "SHARING PROFILE EDITS" SETTING, as read BEFORE the
+        # change was entered, for EDITOR_SAVE_ACTIONS only (null otherwise):
+        # the amended condition 1's input. 'off' | 'on' | 'unknown', or null
+        # when no reading could be taken -- counts and constants, never page
+        # text. See ``_read_account_share_updates``.
+        "account_setting": account_setting,
         # THE SWITCH PRESS, for the Premium badge (P B9) and nothing else:
         # the two switches before, after the press, and on a fresh render --
         # booleans and one position, never page text -- with condition 1 as

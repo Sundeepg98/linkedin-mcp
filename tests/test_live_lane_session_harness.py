@@ -12,6 +12,11 @@ document before the harness was trusted live:
 * the ceiling refuses BEFORE the original ``goto`` is called, never after;
 * a refused address is never counted as a load;
 * ``m43`` / ``m33`` cannot be selected without ``badge`` earlier in the run.
+
+AND A FOURTH SINCE 2026-09-27: the keys that open one of his posts take the
+post from the caller's ``--activity``, and his rail may only VETO it
+(PAGE-MAY-VETO-NEVER-SUPPLY). Its tests replace the two that pinned the old
+route, which chose the newest id off the rail.
 """
 from __future__ import annotations
 
@@ -233,19 +238,45 @@ def _activity_raw(established, items):
     return {"envelope": {"authorship": {"established": established}, "items": items}}
 
 
-def test_no_post_id_unless_authorship_is_established() -> None:
+def test_no_post_is_his_unless_authorship_is_established() -> None:
     items = [_urn(3)]
-    assert harness.newest_own_activity_digits(_activity_raw(False, items)) is None
-    assert harness.newest_own_activity_digits(_activity_raw(None, items)) is None
-    assert harness.newest_own_activity_digits({}) is None
-    assert harness.newest_own_activity_digits(_activity_raw(True, items)) == "3" * 19
+    assert harness.own_activity_ids(_activity_raw(False, items)) == frozenset()
+    assert harness.own_activity_ids(_activity_raw(None, items)) == frozenset()
+    assert harness.own_activity_ids({}) == frozenset()
+    assert harness.own_activity_ids(None) == frozenset()
+    assert harness.own_activity_ids(_activity_raw(True, items)) == {"3" * 19}
 
 
-def test_the_newest_activity_urn_is_chosen_and_nothing_else_counts() -> None:
+def test_only_activity_urns_of_the_closed_digit_shape_count() -> None:
     other = "urn:li:" + "ugcPost" + ":" + "9" * 19
     items = [_urn(2), other, _urn(4), "junk", "urn:li:activity:" + "1" * 21,
              "urn:li:activity:12a4"]
-    assert harness.newest_own_activity_digits(_activity_raw(True, items)) == "4" * 19
+    assert harness.own_activity_ids(_activity_raw(True, items)) == {"2" * 19, "4" * 19}
+
+
+def test_the_rail_may_refuse_the_callers_post_and_never_supplies_one() -> None:
+    """PAGE-MAY-VETO-NEVER-SUPPLY, the conversion of 2026-09-27: the id is the
+    caller's, and the rail answers yes or no."""
+    raw = _activity_raw(True, [_urn(2), _urn(4)])
+    assert harness.activity_veto("4" * 19, raw) is None
+    assert harness.activity_veto("5" * 19, raw) is not None
+    assert harness.activity_veto("4" * 19, _activity_raw(False, [_urn(4)])) is not None
+    assert harness.activity_veto("", raw) is not None
+
+
+@pytest.mark.parametrize("key", sorted(harness.ACTIVITY_KEYS))
+def test_a_key_opening_his_post_needs_the_callers_activity(key: str) -> None:
+    with pytest.raises(SystemExit):
+        harness._selected(["--only", key])
+    assert harness._selected(["--only", key, "--activity", "4" * 19]) == [key]
+
+
+@pytest.mark.parametrize("value", ["12a4", "1" * 21, "", chr(0x0661)])
+def test_the_activity_item_is_ascii_digits_and_never_echoed(value: str) -> None:
+    with pytest.raises(SystemExit) as refused:
+        harness.activity_item(["--activity", value])
+    assert value == "" or value not in str(refused.value)
+    assert harness.activity_item([]) is None
 
 
 def test_a_notify_toggle_is_counted_and_its_label_never_returned() -> None:

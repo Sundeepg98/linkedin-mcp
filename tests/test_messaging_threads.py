@@ -140,6 +140,30 @@ async def test_the_composer_list_reads_rows_placeholders_and_no_open_conversatio
     _clean(reading)
 
 
+#: The filter bar's opening tag in the composer fixture, and a hooked pill
+#: button drawn OUTSIDE it -- the shape lane G's activator never presses.
+_BAR_OPEN = '<div class="artdeco-pill-choice-group" role="radiogroup" data-test-messaging-inbox-filters__filter-pill-group="">'
+_STRAY_PILL = '<button type="button" data-test-messaging-inbox-filters__filter-pill="STARRED">Starred</button>'
+
+
+async def test_the_list_reads_pills_only_inside_the_one_filter_bar(over):
+    """SINCE LANE L5'S MERGE OF MASTER b6993e5, the list reads its pills where
+    lane G's activator presses them: inside the ONE filter bar. A hooked
+    button outside the bar is not a pill -- the page-wide selector this reader
+    used until then counted it, six pills where the bar draws five -- and a
+    page drawing two bars reports none, as the activator refuses both."""
+    stray = _derive(COMPOSE_LIST, _BAR_OPEN, _STRAY_PILL + _BAR_OPEN)
+    reading = await over(stray, threads.read_conversation_list)
+    assert len(reading["pills"]) == 5, reading["pills"]
+    assert await over(stray, _page_wide_pill_count) == 6, "the plant must be a hooked button"
+    two_bars = _derive(COMPOSE_LIST, _BAR_OPEN, _BAR_OPEN + "</div>" + _BAR_OPEN)
+    assert (await over(two_bars, threads.read_conversation_list))["pills"] == []
+
+
+async def _page_wide_pill_count(page) -> int:
+    return await page.locator(threads.PILL_SELECTOR).count()
+
+
 async def test_names_cross_only_when_asked_for(over):
     async def named(page):
         return await threads.read_conversation_list(page, include_names=True)

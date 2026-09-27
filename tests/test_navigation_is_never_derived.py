@@ -869,19 +869,21 @@ def _python_files() -> list[pathlib.Path]:
 #: already treats as carrying nothing. So the rule is satisfied rather than
 #: waived, and the three entries left with the code that needed them.
 #:
-#: **ONE ENTRY REMAINS, AND IT IS DEBT.** The live lane declared a fourth file
-#: of the same class at its merge of lane G, before the ruling above existed:
-#: ``_probe_live_lane_session_1.py``, its hand-run session-1 harness, opens two
-#: addresses built from the newest activity id ``linkedin_my_activity_items``
-#: returned for HIS OWN rail (the post-summary capture for lane L1, and his own
-#: post's permalink for the post-menu capture). The orchestrator's integration
-#: order of 2026-09-24 keeps it here, in its words: pending
-#: PAGE-MAY-VETO-NEVER-SUPPLY (rulings batch 4): the live lane converts this
-#: harness to the caller-names-the-item shape before session 2; this entry is
-#: debt, not a waiver. Converting the harness fails this file until the entry
-#: goes -- the mechanism above, a third time.
+#: **EMPTY A THIRD TIME, 2026-09-27: THE LAST ENTRY WAS DEBT, AND IT IS PAID.**
+#: The live lane declared a fourth file of the same class at its merge of lane
+#: G, before the ruling above existed: ``_probe_live_lane_session_1.py``, its
+#: hand-run session-1 harness, opened two addresses built from the newest
+#: activity id ``linkedin_my_activity_items`` returned for HIS OWN rail (the
+#: post-summary capture for lane L1, and his own post's permalink for the
+#: post-menu capture). The orchestrator's integration order of 2026-09-24 kept
+#: it here as debt, pending its conversion before session 2. Converted in the
+#: live lane's session-2 preparation, item (c): the caller names the post with
+#: ``--activity``, and the rail only VETOES an id that is not his
+#: (``activity_veto``). The entry left with the code that needed it -- the
+#: mechanism above, a third time -- and the session-2 harness,
+#: ``_probe_live_lane_session_2.py``, was written under the ruling from its
+#: first line and never needed one.
 KNOWN_DERIVED_NAVIGATIONS: dict[str, list[str]] = {
-    "_probe_live_lane_session_1.py": ["url", "url"],
 }
 
 

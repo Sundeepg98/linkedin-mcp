@@ -861,8 +861,11 @@ def selftest(box: pathlib.Path) -> int:
         lines[ed.dep.lineno - 1] = "| " + " | ".join(cells) + " |"
     p.write_bytes(nl.join(lines).encode("utf-8"))
     out, rc = _check_in(tree)
-    record("G3 jobs.md loses every pointer (56 remain elsewhere -- a union "
-           "assertion would pass)", True, out, rc,
+    # COUNTED, NOT TYPED (2026-09-27): this label read "56 remain elsewhere"
+    # -- 69 less jobs.md's 13 -- and stayed 56 while the pin fell to 65.
+    elsewhere = sum(1 for x in edges if x.dep.letter != "J")
+    record(f"G3 jobs.md loses every pointer ({elsewhere} remain elsewhere -- a "
+           "union assertion would pass)", True, out, rc,
            "jobs.md contributed ZERO positional pointers")
 
     # -- G4 EMPTY PIN -----------------------------------------------------------------
@@ -896,8 +899,13 @@ def selftest(box: pathlib.Path) -> int:
     # 65 AT LANE L8'S MERGE OF MASTER (2026-09-27), MEASURED by `--pin`:
     # `M C63` was built (`linkedin_withdraw_from_group`) and its 'same' was
     # struck for evidence of its own, so it is no longer a pointer.
+    # 64 AT LANE L5'S MERGE OF MASTER 52b55b6 (2026-09-27), MEASURED by
+    # `--check` on the merged tree: lane L5's follow-up had written out `M M2`'s
+    # positional 'same tool, same gate' when `M M1` moved to another tool, which
+    # took ITS branch from 66 to 65 as well. Both sides typed "65", so git
+    # merged the two moves as one; the pointers they removed are different.
     record("G5 CALIBRATION -- whitespace in P D15's capability cell", False, out, rc,
-           "PASS -- all 65 pinned pointers")
+           "PASS -- all 64 pinned pointers")
 
     print("THE POINTER-GRAPH GUARD, SHOWN FAILING")
     print("=" * 92)

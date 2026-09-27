@@ -3,11 +3,24 @@
 An MCP server that shows you your own LinkedIn account data as structured tool
 results instead of pages you have to click through.
 
-**Fifty-seven tools ship. Forty-one read. Sixteen write. None is
+**Fifty-nine tools ship. Forty-one read. Eighteen write. None is
 write-shaped and unable to act.**
 
-**THAT LINE READ "Fifty-six ... Fifteen write" UNTIL LANE L8'S MERGE,
-2026-09-27.** The sixteenth write is `linkedin_withdraw_from_group`: leaving
+**THAT LINE READ "Fifty-seven ... Forty-one read. Sixteen write" UNTIL LANE
+L5'S MERGE OF MASTER, 2026-09-27.** Two writes arrived that act on a person YOU
+name, from that person's own profile: `linkedin_connect_from_profile` sends a
+connection invitation and `linkedin_message_from_profile` a message. Each takes
+the person's profile link or member id -- never a name -- and loads that one
+profile through a second door the read tools cannot reach (ruling
+`THIRD-PARTY-PROFILE-FOR-A-NAMED-TARGET`). The preview is not free: loading
+their profile may show you among their viewers. It returns whom it resolved to
+-- name, headline, link, degree, as a people record marked as another member's
+words -- before anything is pressed. Message types only for a first-degree
+connection. Census rows `N 2`, `N 4` and `M M1`, COVERED-UNFIRED: built offline
+and never fired.
+
+**AND "Fifty-six ... Fifteen write" UNTIL LANE L8'S MERGE, 2026-09-27.** The
+sixteenth write is `linkedin_withdraw_from_group`: leaving
 one group you name by its numeric id, behind the same flag and single-use
 grant as every other write. It presses the group row's own menu and then
 "Leave this group" -- two presses through the one click site -- and verifies
@@ -935,7 +948,7 @@ linkedin_server/
   cdp_bridge.py              the recovery path: attach to a running Chrome
   dom.py                     the read-only harvesters and the control readers
   shape.py                   pure parsers and the result envelope
-  server.py                  the fifty-seven tools
+  server.py                  the fifty-nine tools
   errors.py
 tests/                       1393 tests, no network, no account
   fixtures/                  frozen LinkedIn markup, scrubbed

@@ -533,6 +533,96 @@ def _with_optionals(
     return out
 
 
+class _ConfirmsTheNamedProfile:
+    """The planted page, read as the profile of ONE named person.
+
+    ``dom.NAMED_PROFILE_JS`` answers a CONFIRMED identity -- a profile title,
+    one topcard, its first heading matching the title, first degree -- and
+    ``dom.READ_PROFILE_JS`` answers a title and a topcard whose name and
+    headline ARE the plant. Every other read is the planted page's own, so a
+    string the namer reads anywhere else is still the plant.
+
+    ADDED AT LANE L5'S MERGE OF MASTER 52b55b6 (2026-09-27, the
+    orchestrator's order). Driven by signature alone,
+    ``named_profile.name_the_profile_target`` was handed an observation built
+    off the planted page, whose identity reading is page strings and never a
+    confirmed identity -- so it took its first-line early return, named
+    nobody, and was recorded ``clean`` having read nothing: the false clean
+    lane G found in group_leave's five readers, in one more reader.
+    """
+
+    def __init__(self, page: Any) -> None:
+        self._page = page
+
+    def __getattr__(self, name: str) -> Any:
+        return getattr(self._page, name)
+
+    async def evaluate(self, script: Any, arg: Any = None, **kwargs: Any) -> Any:
+        from linkedin_server import dom
+
+        if script == dom.NAMED_PROFILE_JS:
+            return {
+                "title_shape": "profile",
+                "topcards": 1,
+                "topcard_headings": 1,
+                "heading_matches_title": True,
+                "degree": "1st",
+                "degree_tokens": 1,
+            }
+        if script == dom.READ_PROFILE_JS:
+            return {
+                "title": PLANT + " | LinkedIn",
+                "sections": [
+                    {
+                        "heading": PLANT,
+                        "lines": [PLANT, "Headline of " + PLANT],
+                    }
+                ],
+            }
+        return await self._page.evaluate(script, arg, **kwargs)
+
+
+async def _name_the_profile_target_as_shipped(page: Any) -> Any:
+    """The namer as a named act's preview calls it: on the page the preview
+    confirmed, with the facts ``writes.observe`` records there --
+    ``named_profile.profile_facts`` of that page's own reading, and the
+    landing flag -- for a named act's spec and a segment of the caller's."""
+    from linkedin_server import dom, named_profile, writes
+
+    confirming = _ConfirmsTheNamedProfile(page)
+    facts = named_profile.profile_facts(await dom.read_named_profile(confirming))
+    facts["landed_on_the_named_profile"] = True
+    spec = writes.spec_for_action("connect_from_profile")
+    observation = writes.Observation(
+        target=SYNTHETIC_ARGUMENT,
+        target_kind=spec.target_kind,
+        facts=facts,
+        facts_url="",
+        state=named_profile.CONNECT_FROM,
+        state_why="",
+        state_url="",
+        same_page_as_action=True,
+        receipt="",
+        observed_at=float("-inf"),
+    )
+    return await named_profile.name_the_profile_target(
+        confirming, spec, observation, {}, segment=SYNTHETIC_ARGUMENT
+    )
+
+
+#: READERS THE SIGNATURE PLUMBING CAN ONLY DRIVE INTO AN EARLY RETURN, each
+#: with one more variant that reaches its page reads the way it ships. The
+#: generic variants still run and the worst verdict of all of them is the
+#: reader's, so this can only ADD a finding, never hide one.
+AS_SHIPPED: dict[str, Callable[..., Any]] = {
+    "named_profile:name_the_profile_target": _name_the_profile_target_as_shipped,
+}
+
+
+def _reader_key(fn: Callable[..., Any]) -> str:
+    return f"{getattr(fn, '__module__', '').split('.')[-1]}:{getattr(fn, '__name__', '')}"
+
+
 def drive(fn: Callable[..., Any]) -> tuple[str, str]:
     """Run one reader against the planted page. ``(verdict, detail)``.
 
@@ -541,10 +631,14 @@ def drive(fn: Callable[..., Any]) -> tuple[str, str]:
     finding is that an exception carries values a return value would not.
     """
     variants, refusal = _build_call(fn)
-    if variants is None:
+    verdicts = (
+        [] if variants is None else [_drive_once(fn, args, kwargs) for args, kwargs in variants]
+    )
+    shipped = AS_SHIPPED.get(_reader_key(fn))
+    if shipped is not None:
+        verdicts.append(_drive_once(shipped, [PlantedPage()], {}))
+    if not verdicts:
         return f"not_driven:{refusal}", refusal
-
-    verdicts = [_drive_once(fn, args, kwargs) for args, kwargs in variants]
     return _worst(verdicts)
 
 
@@ -694,6 +788,28 @@ def test_the_driven_set_has_not_silently_shrunk() -> None:
         f"text and {BASELINE_PATH.name} must be regenerated so the inventory "
         "shrinks; LOST RECORDS means a converted reader fell back."
     )
+
+
+def test_the_named_profile_namer_is_driven_through_a_real_read() -> None:
+    """``name_the_profile_target`` READS THE PAGE AND RETURNS A RECORD, here.
+
+    Its as-shipped variant reaches both page reads and names the plant inside
+    a people record -- the declared channel -- while its signature variants
+    alone take the early return and read nothing. So its verdict in the
+    baseline is the shipped variant's work, and a namer that stopped reading
+    the page, or printed the plant outside the record, fails here by name.
+    """
+    from linkedin_server import named_profile
+
+    fn = named_profile.name_the_profile_target
+    shipped = _drive_once(AS_SHIPPED[_reader_key(fn)], [PlantedPage()], {})
+    assert shipped[0] == RETURNS_RECORDS, shipped
+    variants, _refusal = _build_call(fn)
+    generic = [_drive_once(fn, args, kwargs) for args, kwargs in variants or []]
+    assert generic and all(verdict == CLEAN for verdict, _ in generic), generic
+    assert drive(fn)[0] == RETURNS_RECORDS
+    block = asyncio.run(_name_the_profile_target_as_shipped(PlantedPage()))
+    assert block["whom_this_resolves_to"]["name"] == PLANT, block
 
 
 def test_the_harness_plant_is_never_the_harness_argument() -> None:

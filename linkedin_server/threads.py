@@ -181,7 +181,14 @@ PARTICIPANT_NAMES_SELECTOR = ".msg-conversation-card__participant-names"
 GROUP_FACEPILE_SELECTOR = ".msg-facepile-grid__img--multiple-participants"
 #: The row whose conversation is open. 0 on the composer, 1 on the inbox.
 ACTIVE_ROW_SELECTOR = "main .msg-conversations-container__convo-item-link--active"
-#: The filter pills: buttons, no href, a data-test hook naming each.
+#: The filter pills: buttons, no href, a data-test hook naming each -- READ
+#: INSIDE THE ONE FILTER BAR since lane L5's merge of master b6993e5
+#: (2026-09-27): ``dom.FILTER_BAR_SELECTOR``, then ``dom.FILTER_PILL_IN_BAR``,
+#: the scoping lane G measured and the filter activator presses by (its
+#: record's R.2 and R.7). Until then this read ``PILL_SELECTOR`` below across
+#: all of ``<main>``; on the measured page the two agree, and where they would
+#: not -- a hooked button outside the bar, or two bars -- the list now reports
+#: what the activator would press, and nothing it would refuse.
 PILL_SELECTOR = "main button[data-test-messaging-inbox-filters__filter-pill]"
 PILL_HOOK = "data-test-messaging-inbox-filters__filter-pill"
 
@@ -403,9 +410,17 @@ async def read_conversation_list(page: Any, *, include_names: bool = False) -> d
 
 
 async def _read_pills(page: Any) -> list[dict[str, Any]]:
-    """The filter pills, by the hook LinkedIn writes on each -- a closed set."""
+    """The filter pills, by the hook LinkedIn writes on each -- a closed set --
+    INSIDE THE ONE FILTER BAR. A page drawing no bar, or more than one,
+    reports no pills: which bar a pill belongs to is the question, and the
+    activator refuses both shapes without a press."""
+    from linkedin_server import dom
+
     known = set(_pill_names())
-    pills = page.locator(PILL_SELECTOR)
+    bars = page.locator(dom.FILTER_BAR_SELECTOR)
+    if await _count(bars) != 1:
+        return []
+    pills = bars.first.locator(dom.FILTER_PILL_IN_BAR)
     found: list[dict[str, Any]] = []
     for index in range(await _count(pills)):
         pill = pills.nth(index)

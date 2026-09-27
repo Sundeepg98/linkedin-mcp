@@ -55,11 +55,22 @@ An error envelope or an exception from any key stops every further page
 load, as the sibling harnesses do. A login page, a checkpoint or a challenge
 phrase on the page stops the SESSION. A refusal is an answer, not an anomaly.
 
+## HIS POST IS NAMED BY THE CALLER; THE RAIL MAY ONLY SAY NO
+
+CONVERTED 2026-09-27 under ``PAGE-MAY-VETO-NEVER-SUPPLY``. The three keys
+that open one of HIS posts -- ``post_capture``, ``l1_post_summary`` and
+``own_link`` -- first took the newest activity id off the ``activity`` raw,
+so a page supplied the address, and ``tests/test_navigation_is_never_derived.py``
+carried this file as a declared entry. Now the caller names the post with
+``--activity <digits>``, and the raw -- ``linkedin_my_activity_items``'
+authorship-established output -- only VETOES an id that is not among his own
+(:func:`activity_veto`). The entry is deleted.
+
 Run it as::
 
     LINKEDIN_CDP_ATTACH=1 LINKEDIN_CDP_PORT=9224 LINKEDIN_MIN_INTERVAL_S=20 \\
         ./venv/Scripts/python.exe scripts/_probe_live_lane_session_1.py \\
-        --only badge,m43 [--no-capture]
+        --only badge,m43 [--no-capture] [--activity <digits>]
 """
 from __future__ import annotations
 
@@ -95,7 +106,8 @@ MIN_GAP_S = 20.0
 #: without L1's jobs-search control bracket (two loads, and a jobs search
 #: adds to his recent-search history). The ``cap_*`` keys are lane Y's
 #: live-capture list, items the boundary admits today and that need no press.
-#: ``l1_post_summary`` takes its id from the activity raw, as post_capture does.
+#: ``l1_post_summary`` takes its id from ``--activity``, as post_capture does,
+#: vetoed against the activity raw.
 L1_KEYS: dict[str, str] = {
     "l1_contact": "contact", "l1_audience": "audience", "l1_overview": "overview",
     "l1_articles": "articles", "l1_post_summary": "post_summary",
@@ -126,13 +138,16 @@ NOTIFY_PHRASES: tuple[str, ...] = (
     "share with your network", "share profile updates", "share profile changes",
 )
 
-#: ``post_capture``: ONE OF HIS OWN POSTS, by an activity id this harness
-#: reads from ``_state/live1/activity.json`` -- the raw of the ``activity``
-#: key, i.e. ``linkedin_my_activity_items``' authorship-established output --
-#: and never from a command line or a page. The newest id is used (the
-#: largest number). The id is validated as 1-20 ASCII digits and placed in
-#: this constant template; it is never printed.
+#: ``post_capture``: ONE OF HIS OWN POSTS, by the activity id the CALLER names
+#: with ``--activity`` -- validated as 1-20 ASCII digits, placed in this
+#: constant template, never printed -- and VETOED unless it is among the ids
+#: in ``_state/live1/activity.json``, the raw of the ``activity`` key, i.e.
+#: ``linkedin_my_activity_items``' authorship-established output. The raw
+#: may refuse the id; it never supplies it.
 POST_URL_TEMPLATE = "https://www.linkedin.com/feed/update/urn:li:activity:{digits}/"
+
+#: The keys that open one of his posts, each needing ``--activity``.
+ACTIVITY_KEYS = frozenset({"own_link", "l1_post_summary", "post_capture"})
 #: The post's own control menu, told from other [aria-expanded] controls by
 #: this prefix of its accessible name -- used as a VETO over a structural
 #: position, the way the 19:12 feed fire used it.
@@ -220,7 +235,65 @@ def _selected(argv: list[str]) -> list[str]:
         if key in MESSAGING_KEYS and "badge" not in wanted[:position]:
             raise SystemExit("REFUSING: " + key + " opens /messaging/ and needs "
                              "'badge' earlier in the same run.")
+    needing = [key for key in wanted if key in ACTIVITY_KEYS]
+    if needing and activity_item(argv) is None:
+        raise SystemExit("REFUSING: " + ",".join(needing) + " opens one of his posts; "
+                         "name it with --activity <digits>. No page supplies it.")
     return wanted
+
+
+def activity_item(argv: list[str]) -> Optional[str]:
+    """The caller's ``--activity`` post id, or None when absent. PURE.
+
+    SystemExit on anything present but not 1-20 ASCII digits, and the
+    message never echoes the value: whatever was typed might be a pasted
+    address, and a refusal is not a print.
+    """
+    if "--activity" not in argv:
+        return None
+    at = argv.index("--activity")
+    value = argv[at + 1] if at + 1 < len(argv) else ""
+    if not (1 <= len(value) <= 20 and all(ch in "0123456789" for ch in value)):
+        raise SystemExit("REFUSING: --activity is not 1-20 ASCII digits.")
+    return value
+
+
+def own_activity_ids(raw: Any) -> frozenset[str]:
+    """The digits of every activity urn in the ``activity`` raw. PURE.
+
+    Only an envelope whose authorship is ESTABLISHED counts: that is what
+    makes every item his own. Anything else is the empty set, never a guess.
+    """
+    envelope = (raw or {}).get("envelope") if isinstance(raw, dict) else None
+    if not isinstance(envelope, dict):
+        return frozenset()
+    if (envelope.get("authorship") or {}).get("established") is not True:
+        return frozenset()
+    found: set[str] = set()
+    for item in envelope.get("items") or []:
+        parts = str(item).split(":")
+        if len(parts) == 4 and parts[:3] == ["urn", "li", "activity"]:
+            digits = parts[3]
+            if 1 <= len(digits) <= 20 and all(ch in "0123456789" for ch in digits):
+                found.add(digits)
+    return frozenset(found)
+
+
+def activity_veto(activity: str, raw: Any) -> Optional[str]:
+    """THE RAIL MAY SAY NO. ``None`` when the caller's ``activity`` is among
+    his own ids (:func:`own_activity_ids`); else the reason. PURE. The id is
+    the caller's either way; this answers yes or no."""
+    his = own_activity_ids(raw)
+    if not his:
+        return "no authorship-established activity raw on disk"
+    if activity not in his:
+        return "the post is not among the items his rail returned as his own"
+    return None
+
+
+def _activity_raw() -> Any:
+    raw_path = STATE / "activity.json"
+    return json.loads(raw_path.read_text(encoding="utf-8")) if raw_path.exists() else {}
 
 
 def _environment_refusal() -> Optional[str]:
@@ -466,7 +539,7 @@ async def _notifications_badge_here() -> Optional[dict[str, Any]]:
 # ---------------------------------------------------------------------------
 
 
-async def _call(key: str) -> dict[str, Any]:
+async def _call(key: str, activity: Optional[str] = None) -> dict[str, Any]:
     """Call the shipped tool for ``key``. Returns its envelope untouched."""
     if key == "per_post":
         return await server.linkedin_creator_analytics()
@@ -490,14 +563,13 @@ async def _call(key: str) -> dict[str, Any]:
     if key == "pv_verify":
         return await server.linkedin_who_viewed_me(limit=10)
     if key == "own_link":
-        # THE ID IS HIS OWN, read in-process from the activity raw (authorship
-        # established) and handed to the tool as its argument; never printed.
-        raw_path = STATE / "activity.json"
-        own_digits = newest_own_activity_digits(
-            json.loads(raw_path.read_text(encoding="utf-8")) if raw_path.exists() else {})
-        if own_digits is None:
-            raise _Anomaly("no_own_activity_id", key)
-        return await server.linkedin_own_item_link(activity_id=own_digits)
+        # THE ID IS THE CALLER'S (--activity), and the activity raw -- his
+        # rail, authorship established -- may only refuse it. Never printed.
+        refused = activity_veto(activity or "", _activity_raw())
+        if refused is not None:
+            say("    VETOED: " + refused + ". Nothing loaded.")
+            raise _Anomaly("activity_vetoed", key)
+        return await server.linkedin_own_item_link(activity_id=activity)
     raise ValueError("no tool for key " + key)
 
 
@@ -522,7 +594,8 @@ def notify_controls(fields: list[Any]) -> dict[str, Any]:
     return {"fields": len(fields or []), "notify_like_controls": len(matches), "matches": matches}
 
 
-async def fire_capture_key(key: str, capture: bool, carried: dict[str, Any]) -> dict[str, Any]:
+async def fire_capture_key(key: str, capture: bool, carried: dict[str, Any],
+                           activity: Optional[str] = None) -> dict[str, Any]:
     """One zero-press load of a constant address, read and captured."""
     import _probe_l1_admitted_reads_live as l1
 
@@ -530,11 +603,11 @@ async def fire_capture_key(key: str, capture: bool, carried: dict[str, Any]) -> 
         l1_key = L1_KEYS[key]
         post_id = None
         if l1_key == "post_summary":
-            raw_path = STATE / "activity.json"
-            post_id = newest_own_activity_digits(
-                json.loads(raw_path.read_text(encoding="utf-8")) if raw_path.exists() else {})
-            if post_id is None:
-                return {"stopped": "no_own_activity_id"}
+            refused = activity_veto(activity or "", _activity_raw())
+            if refused is not None:
+                say("    VETOED: " + refused + ". Nothing loaded.")
+                return {"stopped": "activity_vetoed"}
+            post_id = activity
         url = l1._url_for(l1_key, post_id, None)
     else:
         url = CAPTURE_URLS[key]
@@ -635,37 +708,15 @@ async def fire_pv_capture(capture: bool) -> dict[str, Any]:
     return result
 
 
-def newest_own_activity_digits(raw: dict[str, Any]) -> Optional[str]:
-    """The digits of the NEWEST activity urn in the ``activity`` raw. PURE.
-
-    Only an envelope whose authorship is ESTABLISHED is used: that is what
-    makes every item his own. Returns None rather than guessing.
-    """
-    envelope = (raw or {}).get("envelope") or {}
-    if not ((envelope.get("authorship") or {}).get("established") is True):
-        return None
-    best: Optional[str] = None
-    for item in envelope.get("items") or []:
-        parts = str(item).split(":")
-        if len(parts) == 4 and parts[:3] == ["urn", "li", "activity"]:
-            digits = parts[3]
-            if 1 <= len(digits) <= 20 and all(ch in "0123456789" for ch in digits):
-                if best is None or int(digits) > int(best):
-                    best = digits
-    return best
-
-
-async def fire_post_capture(capture: bool) -> dict[str, Any]:
+async def fire_post_capture(capture: bool, activity: Optional[str] = None) -> dict[str, Any]:
     """Load one of his own posts; open its control menu through the gate."""
     from linkedin_server import dom, press
 
-    raw_path = STATE / "activity.json"
-    digits = newest_own_activity_digits(
-        json.loads(raw_path.read_text(encoding="utf-8")) if raw_path.exists() else {})
-    if digits is None:
-        say("    NO AUTHORSHIP-ESTABLISHED ACTIVITY ID ON DISK. Nothing loaded.")
-        return {"stopped": "no_own_activity_id"}
-    url = POST_URL_TEMPLATE.format(digits=digits)
+    refused = activity_veto(activity or "", _activity_raw())
+    if refused is not None:
+        say("    VETOED: " + refused + ". Nothing loaded.")
+        return {"stopped": "activity_vetoed"}
+    url = POST_URL_TEMPLATE.format(digits=activity)
     if not readonly.is_read_url(url):
         return {"stopped": "post_address_not_admitted"}
     result: dict[str, Any] = {}
@@ -720,7 +771,8 @@ async def fire_post_capture(capture: bool) -> dict[str, Any]:
     return result
 
 
-async def fire(key: str, capture: bool, carried: dict[str, Any]) -> dict[str, Any]:
+async def fire(key: str, capture: bool, carried: dict[str, Any],
+               activity: Optional[str] = None) -> dict[str, Any]:
     """Fire one key: pre-check, call, health, readings, capture, raw."""
     say("\n" + "=" * 70)
     say("KEY " + key)
@@ -733,15 +785,15 @@ async def fire(key: str, capture: bool, carried: dict[str, Any]) -> dict[str, An
         if key == "pv_capture":
             result = await fire_pv_capture(capture)
         elif key == "post_capture":
-            result = await fire_post_capture(capture)
+            result = await fire_post_capture(capture, activity)
         else:
-            result = await fire_capture_key(key, capture, carried)
+            result = await fire_capture_key(key, capture, carried, activity)
         _write_raw(key, result)
         say("    RAW written under _state/ (gitignored)")
         if result.get("stopped"):
             raise _Anomaly(key + "_stopped", key)
         return result
-    out = await _call(key)
+    out = await _call(key, activity)
     if not isinstance(out, dict):
         raise _Anomaly("not_a_dict", key)
     raw: dict[str, Any] = {"envelope": out}
@@ -808,6 +860,7 @@ async def fire(key: str, capture: bool, carried: dict[str, Any]) -> dict[str, An
 async def main() -> int:
     argv = sys.argv[1:]
     keys = _selected(argv)
+    activity = activity_item(argv)
     capture = "--no-capture" not in argv
     refusal = _environment_refusal()
     if refusal:
@@ -827,7 +880,7 @@ async def main() -> int:
                         + shape_of(seen) + ", and the rule opens /messaging/ only on exactly 0")
                     outcomes[key] = "HELD-BY-BADGE"
                     continue
-            await fire(key, capture, carried)
+            await fire(key, capture, carried, activity)
             outcomes[key] = "RETURNED"
     except _Anomaly as stop:
         say("\n### ANOMALY: " + stop.kind + " at " + stop.where + ". EVERY FURTHER LOAD STOPPED.")

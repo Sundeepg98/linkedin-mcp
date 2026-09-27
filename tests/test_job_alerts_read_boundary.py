@@ -276,7 +276,11 @@ def test_this_widening_bought_no_forbidden_substring_exemption():
     # (his own follower list, excusing `/follow` alone). That entry is not
     # this widening's and does not touch an alert address -- the loop below
     # is what this test is about, and it still holds.
-    assert len(readonly._FORBIDDEN_SUBSTRING_PATTERN_EXEMPTIONS) == 3
+    # 3 UNTIL 2026-09-27, when the live lane added ONE more on the
+    # orchestrator's application of ONE-NAMED-SETTINGS-PAGE-AT-A-TIME: his
+    # "Sharing profile edits" setting page, excusing "/settings/" and
+    # "settings" for that one anchored address. Not an alert address either.
+    assert len(readonly._FORBIDDEN_SUBSTRING_PATTERN_EXEMPTIONS) == 4
     for url in (CREATE_URL, DELETE_URL, FREQUENCY_URL):
         assert url not in readonly._FORBIDDEN_SUBSTRING_EXEMPTIONS
 

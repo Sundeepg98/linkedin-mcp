@@ -229,8 +229,12 @@ def disclosure_selector(identifier: Any) -> str:
     Every button declaring ``aria-expanded`` whose row holds anchors of exactly
     one group id, and that id is the caller's. The CLICK SELECTOR for the first
     press: the verdict requires it to match exactly one element, and
-    Playwright's strict mode refuses the click if that stops being true. It
-    never names the button's label, which carries the group's name.
+    Playwright's strict mode refuses the click if that stops being true -- TRUE
+    SINCE LANE L5'S MERGE OF MASTER 52b55b6 (2026-09-27), when ``perform``
+    began pressing ``withdraw_from_group`` strictly
+    (``writes.STRICT_PRESS_ACTIONS``); until then the press passed no
+    ``strict=``. It never names the button's label, which carries the
+    group's name.
     """
     digits = _required_digits(identifier)
     return f"xpath=//button[@aria-expanded][{_ROW_OF}{_carries_only(digits)}]"

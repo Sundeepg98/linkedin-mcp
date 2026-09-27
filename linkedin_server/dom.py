@@ -2153,7 +2153,11 @@ async def read_follow_control(page: Any) -> dict[str, Any]:
 # NO SCRIPT IS INJECTED AND NO PAGE STRING IS SPLICED INTO A SELECTOR. Every
 # selector below is a constant, which is also what makes the click safe: the
 # gate requires the constant control selector to match EXACTLY ONE element,
-# and Playwright's strict mode refuses a click whose selector matches more.
+# and Playwright's strict mode refuses a click whose selector matches more --
+# TRUE SINCE LANE L5'S MERGE OF MASTER 52b55b6 (2026-09-27), when ``perform``
+# began pressing ``follow_company_page`` strictly
+# (``writes.STRICT_PRESS_ACTIONS``). Until then the press passed no
+# ``strict=``, and the second half of this sentence was not so.
 
 #: The part of the accessible name this package writes down. The Page's name
 #: is the rest, and it is the page's to say.
@@ -8255,6 +8259,406 @@ async def read_invitation_surface(
     label = reading.get("label")
     if reveal_single_match and out["matches"] == 1 and isinstance(label, str):
         out["label"] = label
+    return out
+
+
+# ---------------------------------------------------------------------------
+# A NAMED PERSON'S PROFILE -- read only inside an act he ordered
+# ---------------------------------------------------------------------------
+#
+# Ruling THIRD-PARTY-PROFILE-FOR-A-NAMED-TARGET (2026-09-24). Nothing in this
+# block navigates: ``writes._load_named_profile`` has already loaded the one
+# profile the caller named, through the named-profile door, and these readers
+# read what is in front of them.
+
+#: The Message control, MEASURED 2026-09-27 over every capture on disk: 18
+#: controls whose accessible name is ``Message <full name>`` -- ALL of them
+#: ``<a>``, 16 with an href on ``/messaging/compose/`` and 2 on
+#: ``/messaging/thread/``, and NONE a ``<button>``. Measured on people cards
+#: (search appearances, company people, his own profile's rail). A third
+#: party's profile has never been captured, so how ITS Message control is drawn
+#: is the first supervised act's to see; the reader below reports it.
+MESSAGE_CONTROL_PREFIX = "Message "
+MESSAGE_CONTROL = 'a[aria-label^="Message "], button[aria-label^="Message "]'
+
+
+#: THE PROFILE'S OWN TOPCARD, the one element whose id ends ``Topcard``
+#: (measured on his own profile, 6 captures; derived on a third party's).
+NAMED_PROFILE_TOPCARD = '[id$="Topcard"]'
+
+
+def _in_topcard(selector_list: str) -> str:
+    """Each alternative of a comma-separated selector, scoped to the topcard."""
+    return ", ".join(
+        NAMED_PROFILE_TOPCARD + " " + part.strip() for part in selector_list.split(",")
+    )
+
+
+def topcard_invite_control_selector() -> str:
+    """THE Connect control of the profile's OWN topcard -- no position in it.
+
+    THE AIM, AS TWO RE-CHECKS OF 2026-09-27 LEFT IT. The first build pressed
+    ``INVITE_CONTROL >> nth=K`` over the whole page, and Playwright RE-RESOLVES
+    a selector whose element is re-rendered while the press waits: a
+    stranger's control drawn earlier in the page mid-press took position K
+    and the press. Scoping that position to the topcard closed the page and
+    left the topcard: a stranger's control drawn INSIDE the topcard, or a
+    second element whose id ends ``Topcard``, drawn mid-press, still took the
+    press -- a position is an address only while the list holds still.
+
+    So there is no position. The gate requires, when the page is read, that
+    the topcard holds exactly ONE control of this kind and that it is the
+    owner's (both compared in :data:`NAMED_PROFILE_JS`), and ``perform``
+    presses this selector STRICTLY -- ``strict=True``, so a press that finds
+    two matches at press time throws instead of choosing. Anything drawn
+    mid-press that would give the selector a second match stops the press; a
+    re-render of the owner's own control, and nothing else, is pressed. No
+    name crosses into this string.
+
+    NAMED ``*_selector`` ON PURPOSE: ``tests/test_selectors_resolve.py``
+    enumerates this module's builders by that suffix and resolves each one in
+    a browser, and a builder named otherwise would never be handed to one.
+    """
+    return _in_topcard(INVITE_CONTROL)
+
+
+def topcard_message_control_selector() -> str:
+    """THE Message control of the profile's OWN topcard -- see
+    :func:`topcard_invite_control_selector`, whose reasons are this one's.
+
+    It replaced ``message_control_selector``, the page-wide builder the
+    route's first build pressed Message with; nothing else in the package
+    pressed a Message control, so it was removed rather than kept beside this
+    one.
+    """
+    return _in_topcard(MESSAGE_CONTROL)
+
+
+#: THE OVERLAY CONVERSATION a profile's Message press is expected to open, and
+#: the two parts of it the named acts compare. MEASURED 2026-09-27 on the four
+#: captures on disk that draw a ``msg-overlay-conversation-bubble`` (one
+#: minimised bubble, the same in all four, with no form in it): the bubble's
+#: header is a ``<header>``, and its title is ONE ``h2`` carrying the class
+#: ``msg-overlay-bubble-header__title``, its text drawn directly in it. The
+#: editor is the measured reply form's (lane L5, 2026-09-24). That the title
+#: of a conversation with ONE person reads exactly that person's name is
+#: DERIVED -- the captured bubble's title is not a person's name -- and the
+#: first supervised Message press records what it read (NEEDS-CAPTURE C-P4).
+OVERLAY_BUBBLE = ".msg-overlay-conversation-bubble"
+OVERLAY_BUBBLE_TITLE = ".msg-overlay-bubble-header__title"
+OVERLAY_COMPOSER_EDITOR = 'form.msg-form div.msg-form__contenteditable[role="textbox"]'
+
+
+#: THE ONE SCRIPT A NAMED ACT RUNS ON THE PROFILE, and why it is a script.
+#:
+#: WHO the page belongs to and WHICH control is his are both questions about
+#: STRINGS THE PAGE HOLDS -- the owner's name, and every control's accessible
+#: name, which LinkedIn writes the name into. Comparing them in Python would
+#: bring every such label into this process; comparing them HERE returns
+#: integers, booleans and closed tokens and nothing else. Every field below is
+#: one of those. No name, no label, no href and no id crosses.
+#:
+#: WHAT IT RESTS ON, measured and derived, stated so a reader can weigh it:
+#:
+#: * the OWNER'S NAME is the document title minus a leading ``(N) `` -- the
+#:   notification count 21 of 95 captures carry -- and minus the trailing
+#:   `` | LinkedIn`` every profile title carries (measured);
+#: * the TOPCARD is the one element whose id ends ``Topcard`` (measured on his
+#:   own profile, 6 captures) and its FIRST HEADING must equal that name --
+#:   the same cross-check ``shape.pick_topcard`` makes. On a third party's
+#:   profile both are DERIVED: that page has never been captured;
+#: * the CONNECT control is ``INVITE_CONTROL`` (a ``<button>`` whose name ends
+#:   `` to connect``, measured 44 times) whose whole name is ``Invite <name>
+#:   to connect``; the MESSAGE control is ``MESSAGE_CONTROL`` whose whole name
+#:   is ``Message <name>``. Both conventions are measured on people cards;
+#: * the DEGREE is a topcard line that is exactly ``1st``, ``2nd`` or ``3rd``
+#:   (optionally ``3rd+``, optionally after a middle dot). DERIVED: no
+#:   capture holds a third party's topcard.
+#:
+#: A control whose name carries the owner's name but is neither of the two is
+#: reported as a CLOSED TOKEN -- pending, withdraw, follow, unfollow, more,
+#: remove, or unrecognised -- which is how the first supervised act records
+#: what a pressed Connect turns into without a label crossing.
+#:
+#: TWO ADDITIONS FROM THE RE-CHECKS OF 2026-09-27, both readings that never
+#: leave the page:
+#:
+#: * how many controls OF EACH KIND the topcard holds, whatever their labels
+#:   (``invite_controls_in_topcard``, ``message_controls_in_topcard``). The
+#:   press carries NO POSITION -- it is the topcard-scoped selector, pressed
+#:   strictly -- so the gate needs the topcard to hold exactly one control of
+#:   the kind, and that one the owner's (see
+#:   :func:`topcard_invite_control_selector`). This script returned positions
+#:   until a second re-check showed a position is an address only while the
+#:   list holds still;
+#: * WHOSE CONVERSATION a composer belongs to: the overlay bubbles that hold
+#:   an editor are counted, and when exactly one does, its title
+#:   (:data:`OVERLAY_BUBBLE_TITLE`) is compared with the owner's name from the
+#:   document title -- ``bubble_title_names_owner`` when it reads exactly that
+#:   name, ``bubble_title_contains_owner`` (a hint for the capture, read by no
+#:   gate) when the name is somewhere in it. The re-check found that nothing
+#:   compared the conversation a Message press's words went into with the
+#:   person named: a conversation headed by somebody else took them.
+NAMED_PROFILE_JS = """
+(cfg) => {
+  const norm = (s) => String(s === null || s === undefined ? '' : s).replace(/\\s+/g, ' ').trim();
+  const out = {
+    title_shape: 'none',
+    topcards: 0,
+    topcard_headings: 0,
+    heading_matches_title: false,
+    degree: null,
+    degree_tokens: 0,
+    invite_controls: 0,
+    invite_matches: 0,
+    invite_in_topcard: 0,
+    invite_controls_in_topcard: 0,
+    message_controls: 0,
+    message_matches: 0,
+    message_tag: null,
+    message_href: null,
+    message_in_topcard: 0,
+    message_controls_in_topcard: 0,
+    more_actions: 0,
+    dialogs: 0,
+    composer_editors: 0,
+    conversation_bubbles: 0,
+    bubbles_with_editor: 0,
+    bubble_titles: 0,
+    bubble_title_names_owner: false,
+    bubble_title_contains_owner: false,
+    named_controls: [],
+    dialog_controls: [],
+    dialog_note_fields: 0
+  };
+  out.dialogs = document.querySelectorAll('[role="dialog"]').length;
+  const dialogWords = {
+    'add a note': 'add_a_note',
+    'send without a note': 'send_without_a_note',
+    'send': 'send',
+    'send now': 'send',
+    'cancel': 'cancel',
+    'dismiss': 'dismiss',
+    'close': 'dismiss',
+    'connect': 'connect'
+  };
+  for (const dlg of document.querySelectorAll('[role="dialog"]')) {
+    out.dialog_note_fields += dlg.querySelectorAll('textarea, [contenteditable="true"]').length;
+    for (const b of dlg.querySelectorAll('button, [role="button"]')) {
+      const said = norm(b.getAttribute('aria-label') || b.innerText).toLowerCase();
+      out.dialog_controls.push(
+        Object.prototype.hasOwnProperty.call(dialogWords, said) ? dialogWords[said] : 'unrecognised'
+      );
+    }
+  }
+  out.composer_editors = document.querySelectorAll('.msg-form__contenteditable').length;
+  out.conversation_bubbles = document.querySelectorAll('.msg-overlay-conversation-bubble').length;
+  const holding = [];
+  for (const bubble of document.querySelectorAll(cfg.bubbleSelector)) {
+    if (bubble.querySelector(cfg.editorSelector)) holding.push(bubble);
+  }
+  out.bubbles_with_editor = holding.length;
+  const bubbleTitles = holding.length === 1
+    ? holding[0].querySelectorAll(cfg.bubbleTitleSelector)
+    : [];
+  out.bubble_titles = bubbleTitles.length;
+  out.invite_controls = document.querySelectorAll(cfg.inviteSelector).length;
+  out.message_controls = document.querySelectorAll(cfg.messageSelector).length;
+  const labelled = document.querySelectorAll('button[aria-label], a[aria-label]');
+  for (const el of labelled) {
+    if (norm(el.getAttribute('aria-label')) === 'More actions') out.more_actions += 1;
+  }
+  const title = norm(document.title).replace(/^\\(\\d+\\)\\s*/, '');
+  const suffix = ' | LinkedIn';
+  if (!title.endsWith(suffix)) return out;
+  const name = title.slice(0, title.length - suffix.length).trim();
+  if (!name) return out;
+  out.title_shape = 'profile';
+  const cards = document.querySelectorAll('[id$="Topcard"]');
+  out.topcards = cards.length;
+  const card = cards.length === 1 ? cards[0] : null;
+  if (card) {
+    const heads = card.querySelectorAll('h1, h2');
+    out.topcard_headings = heads.length;
+    out.heading_matches_title = heads.length >= 1 && norm(heads[0].innerText) === name;
+    out.invite_controls_in_topcard = card.querySelectorAll(cfg.inviteSelector).length;
+    out.message_controls_in_topcard = card.querySelectorAll(cfg.messageSelector).length;
+    const found = [];
+    for (const raw of String(card.innerText || '').split('\\n')) {
+      const line = norm(raw).replace(/^\\u00b7\\s*/, '');
+      const m = line.match(/^(1st|2nd|3rd\\+?)$/);
+      if (m) {
+        const token = m[1].indexOf('3rd') === 0 ? '3rd+' : m[1];
+        if (found.indexOf(token) === -1) found.push(token);
+      }
+    }
+    out.degree_tokens = found.length;
+    out.degree = found.length === 1 ? found[0] : null;
+  }
+  if (bubbleTitles.length === 1) {
+    const said = norm(bubbleTitles[0].innerText);
+    out.bubble_title_names_owner = said === name;
+    out.bubble_title_contains_owner = said.indexOf(name) !== -1;
+  }
+  const wantInvite = 'Invite ' + name + ' to connect';
+  const invites = document.querySelectorAll(cfg.inviteSelector);
+  let matches = 0;
+  for (let i = 0; i < invites.length; i += 1) {
+    if (norm(invites[i].getAttribute('aria-label')) !== wantInvite) continue;
+    matches += 1;
+    if (card && card.contains(invites[i])) out.invite_in_topcard += 1;
+  }
+  out.invite_matches = matches;
+  const wantMessage = 'Message ' + name;
+  const messages = document.querySelectorAll(cfg.messageSelector);
+  const hrefToken = (href) => {
+    if (href === null || href === undefined) return 'none';
+    const path = String(href).replace(/^https?:\\/\\/[^\\/]+/, '').split('?')[0].split('#')[0];
+    if (path === '/messaging/compose/' || path === '/messaging/compose') return 'compose';
+    if (path.indexOf('/messaging/thread/') === 0) return 'thread';
+    return 'other';
+  };
+  matches = 0;
+  let tag = null;
+  let href = null;
+  for (let i = 0; i < messages.length; i += 1) {
+    if (norm(messages[i].getAttribute('aria-label')) !== wantMessage) continue;
+    matches += 1;
+    const t = messages[i].tagName.toLowerCase();
+    tag = matches === 1 ? (t === 'a' || t === 'button' ? t : 'other') : null;
+    href = matches === 1 ? hrefToken(messages[i].getAttribute('href')) : null;
+    if (card && card.contains(messages[i])) out.message_in_topcard += 1;
+  }
+  out.message_matches = matches;
+  out.message_tag = matches === 1 ? tag : null;
+  out.message_href = matches === 1 ? href : null;
+  const vocabulary = [
+    ['pending', /^Pending\\b/i],
+    ['withdraw', /withdraw/i],
+    ['unfollow', /^(Unfollow|Following)\\b/i],
+    ['follow', /^Follow\\b/i],
+    ['more', /^More\\b/i],
+    ['remove', /^Remove\\b/i]
+  ];
+  for (const el of labelled) {
+    const label = norm(el.getAttribute('aria-label'));
+    if (label === wantInvite || label === wantMessage) continue;
+    if (label.indexOf(name) === -1) continue;
+    let token = 'unrecognised';
+    for (const pair of vocabulary) {
+      if (pair[1].test(label)) { token = pair[0]; break; }
+    }
+    out.named_controls.push(token);
+  }
+  return out;
+}
+"""
+
+#: The degrees the script may return, and nothing else crosses in that field.
+PROFILE_DEGREES = ("1st", "2nd", "3rd+")
+
+#: The href tokens the script may return for the Message control.
+MESSAGE_HREF_TOKENS = ("none", "compose", "thread", "other")
+
+#: The tokens a control naming the owner may be classed as.
+NAMED_CONTROL_TOKENS = (
+    "pending", "withdraw", "unfollow", "follow", "more", "remove", "unrecognised",
+)
+
+#: The tokens a control inside an open dialog may be classed as -- NEEDS-CAPTURE
+#: C-P3's first reading, taken in the page on the press that opened it. The
+#: vocabulary is the invitation dialog LinkedIn's help describes; it has never
+#: been captured, so a word outside it reads ``unrecognised`` and is the
+#: finding.
+DIALOG_CONTROL_TOKENS = (
+    "add_a_note", "send_without_a_note", "send", "cancel", "dismiss", "connect",
+    "unrecognised",
+)
+
+
+async def read_named_profile(page: Any) -> dict[str, Any]:
+    """What a named person's profile draws, as integers and closed tokens.
+
+    Runs :data:`NAMED_PROFILE_JS` once and RE-CLOSES every field in Python, in
+    a second language, so a script edit that let a string through would be
+    narrowed here rather than followed: a count is coerced to an int, a token
+    outside its closed set becomes ``None`` (or ``unrecognised`` in the list),
+    and a field the script did not return reads as absent. ``error`` carries
+    an exception's TYPE only -- the page's own words never ride an exception
+    out of this function.
+    """
+    out: dict[str, Any] = {
+        "title_shape": "none",
+        "topcards": 0,
+        "topcard_headings": 0,
+        "heading_matches_title": False,
+        "degree": None,
+        "degree_tokens": 0,
+        "invite_controls": 0,
+        "invite_matches": 0,
+        "invite_in_topcard": 0,
+        "invite_controls_in_topcard": 0,
+        "message_controls": 0,
+        "message_matches": 0,
+        "message_tag": None,
+        "message_href": None,
+        "message_in_topcard": 0,
+        "message_controls_in_topcard": 0,
+        "more_actions": 0,
+        "dialogs": 0,
+        "composer_editors": 0,
+        "conversation_bubbles": 0,
+        "bubbles_with_editor": 0,
+        "bubble_titles": 0,
+        "bubble_title_names_owner": False,
+        "bubble_title_contains_owner": False,
+        "named_controls": [],
+        "dialog_controls": [],
+        "dialog_note_fields": 0,
+        "error": None,
+    }
+    cfg = {
+        "inviteSelector": INVITE_CONTROL,
+        "messageSelector": MESSAGE_CONTROL,
+        "bubbleSelector": OVERLAY_BUBBLE,
+        "editorSelector": OVERLAY_COMPOSER_EDITOR,
+        "bubbleTitleSelector": OVERLAY_BUBBLE_TITLE,
+    }
+    try:
+        raw = await page.evaluate(NAMED_PROFILE_JS, cfg)  # readonly-ok
+    except Exception as exc:  # noqa: BLE001 - reported as a type, never raised
+        out["error"] = type(exc).__name__
+        logger.debug("named profile unreadable: %s", type(exc).__name__)
+        return out
+    reading = raw if isinstance(raw, dict) else {}
+    for key in (
+        "topcards", "topcard_headings", "degree_tokens", "invite_controls",
+        "invite_matches", "invite_in_topcard", "invite_controls_in_topcard",
+        "message_controls", "message_matches", "message_in_topcard",
+        "message_controls_in_topcard", "more_actions", "dialogs",
+        "composer_editors", "conversation_bubbles", "bubbles_with_editor",
+        "bubble_titles", "dialog_note_fields",
+    ):
+        out[key] = as_count(reading.get(key))
+    out["title_shape"] = "profile" if reading.get("title_shape") == "profile" else "none"
+    for key in ("heading_matches_title", "bubble_title_names_owner", "bubble_title_contains_owner"):
+        out[key] = reading.get(key) is True
+    degree = reading.get("degree")
+    out["degree"] = degree if degree in PROFILE_DEGREES else None
+    tag = reading.get("message_tag")
+    out["message_tag"] = tag if tag in ("a", "button", "other") else None
+    href = reading.get("message_href")
+    out["message_href"] = href if href in MESSAGE_HREF_TOKENS else None
+    named = reading.get("named_controls")
+    out["named_controls"] = [
+        token if token in NAMED_CONTROL_TOKENS else "unrecognised"
+        for token in (named if isinstance(named, list) else [])
+    ][:40]
+    in_dialogs = reading.get("dialog_controls")
+    out["dialog_controls"] = [
+        token if token in DIALOG_CONTROL_TOKENS else "unrecognised"
+        for token in (in_dialogs if isinstance(in_dialogs, list) else [])
+    ][:40]
     return out
 
 

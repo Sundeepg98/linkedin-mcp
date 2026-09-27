@@ -82,6 +82,17 @@ GUARDED_RECEIVERS = frozenset({"BROWSER", "browser"})
 #: Calls that establish the address before a raw navigation.
 GUARD_CALLS = frozenset({"assert_read_url", "is_read_url"})
 
+#: THE SECOND DOOR, AT THE ONE PLACE IT IS ALLOWED (2026-09-27). Ruling
+#: THIRD-PARTY-PROFILE-FOR-A-NAMED-TARGET lets a named act load ONE third
+#: party's profile, through ``readonly.assert_named_profile_url`` -- which
+#: the read door, ``assert_read_url``, still refuses. It counts as a guard
+#: ONLY in this (file, function), not wherever it appears: adding it to
+#: GUARD_CALLS would have let any function call it and then navigate.
+#: ``tests/test_named_profile_route.py`` pins the rest -- that this function
+#: is the only one asking the browser for that door, and that nothing but
+#: ``browser.py`` and ``writes.py`` names it.
+SECOND_DOOR_GUARD = ("writes.py", "_load_named_profile", "assert_named_profile_url")
+
 #: RAW SITES THAT EXIST TODAY WITH NO GUARD, recorded with the commit that owns
 #: each. **THIS IS NOT AN EXEMPTION TABLE.** An exemption says "this is fine";
 #: this says "this is unguarded, here is who owns it, and the guard will notice
@@ -406,7 +417,9 @@ def test_the_package_navigation_guarantee_still_holds():
 
     Every navigation in ``linkedin_server`` goes through the guarded door
     except two, and both are legitimate: ``browser.goto`` IS the enforcement
-    point, and ``writes`` calls ``assert_read_url`` immediately before.
+    point, and ``writes`` calls ``assert_read_url`` immediately before -- or,
+    since 2026-09-27 and in ``writes._load_named_profile`` alone, the
+    named-profile door (``SECOND_DOOR_GUARD``).
 
     Asserted here rather than assumed, because the mutation half of this
     question was clean too -- right up until two modules landed unwaived.
@@ -435,7 +448,11 @@ def test_the_package_navigation_guarantee_still_holds():
                 for inner in ast.walk(function):
                     if (
                         isinstance(inner, ast.Call)
-                        and _call_name(inner) in GUARD_CALLS
+                        and (
+                            _call_name(inner) in GUARD_CALLS
+                            or (path.name, function.name, _call_name(inner))
+                            == SECOND_DOOR_GUARD
+                        )
                         and inner.lineno < node.lineno
                     ):
                         guarded = True
@@ -445,8 +462,9 @@ def test_the_package_navigation_guarantee_still_holds():
     assert not raw, (
         f"unguarded navigation inside the package: {raw}. The package's "
         "navigation guarantee is that every address goes through "
-        "assert_read_url. browser.py is the one exception because it IS the "
-        "enforcement point."
+        "assert_read_url -- or, in writes._load_named_profile alone, the "
+        "named-profile door. browser.py is the one exception because it IS "
+        "the enforcement point."
     )
 
 

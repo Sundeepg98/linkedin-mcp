@@ -155,6 +155,18 @@ ASKED_FOR_SITES: dict[str, str] = {
     # an address can carry what was searched for or whom it names -- asked for
     # is not the same as safe to repeat. With no entry, putting the address back
     # arrives here as a site with no verdict, and has to be ruled again.
+    # 2026-09-27, lane L5's follow-up: the SECOND door. Its entry survived
+    # lane L5's merge of master 52b55b6 beside the retirement above, on
+    # ``assert_read_url``'s ground rather than ``goto``'s: a gate refusing the
+    # address it was handed, before any navigation.
+    "readonly.py:assert_named_profile_url": (
+        "same shape as readonly.assert_read_url: the named-profile door "
+        "refuses the url it was HANDED, before any navigation. That url is "
+        "composed by readonly.named_profile_url from the segment of the "
+        "caller's own link or member id, so quoting it quotes the caller's "
+        "argument back; no page has been reached and nothing LinkedIn chose "
+        "exists at this point."
+    ),
 }
 
 PUBLISHED_BY_CONTRACT_SITES: dict[str, str] = {

@@ -223,16 +223,29 @@ READS_NO_PAGE: Dict[str, str] = {}
 #: behind it -- a new one fails until somebody decides which side it is on.
 WRITE_DOOR: "Key" = ("server", "_write_tool")
 
-#: The record builders the write door reaches: the two previews that name a
-#: third party, and -- since the reply preview returns a GROUP conversation's
-#: title record (2026-09-27) -- ``threads.conversation_with``, the builder that
-#: preview shares with ``linkedin_list_conversations``. That one is ALSO a
-#: reader's builder, reached through ``threads.list_result``, and the stop does
-#: not hide it from that path: the list tool is still derived a people reader
-#: (``test_the_write_door_stops_only_itself`` holds the stop to itself).
+#: The record builders the write door reaches: the builders of the previews
+#: that name a third party.
+#:
+#: MASTER'S SET, AND THIS LANE'S, MET AT LANE L5'S MERGE OF MASTER b6993e5
+#: (2026-09-27), and the set below is what the derivation MEASURED on the
+#: merged tree, not a union typed by hand:
+#:
+#: * ``("people_seam", "person")`` -- the named-person previews
+#:   (``named_profile.name_the_profile_target``) and, since lane L5's merge of
+#:   master 52b55b6, the invitation's (``writes._name_the_invitation_recipient``
+#:   calls it and builds nothing, which is why that function left this set);
+#: * ``("threads", "name_the_reply_recipient")`` -- the reply preview builds its
+#:   person record itself (lane G's, on master; it went through the seam on
+#:   this lane's branch from the 52b55b6 merge until this one);
+#: * ``("threads", "conversation_with")`` -- the builder the reply preview
+#:   shares with ``linkedin_list_conversations`` for a GROUP conversation's
+#:   title record (2026-09-27). That one is ALSO a reader's builder, reached
+#:   through ``threads.list_result``, and the stop does not hide it from that
+#:   path: the list tool is still derived a people reader
+#:   (``test_the_write_door_stops_only_itself`` holds the stop to itself).
 PREVIEW_BUILDERS: FrozenSet["Key"] = frozenset(
     {
-        ("writes", "_name_the_invitation_recipient"),
+        ("people_seam", "person"),
         ("threads", "name_the_reply_recipient"),
         ("threads", "conversation_with"),
     }
@@ -1380,9 +1393,11 @@ def builders_behind_the_write_door(modules: Mapping[str, ast.Module]) -> FrozenS
 
 
 def test_the_builders_behind_the_write_door_are_the_declared_previews():
-    """WHAT THE STOP SETS ASIDE, HELD EXACTLY: the two previews that name a
-    third party (PREVIEW-NAMES-THE-RESOLVED-TARGET). A new builder behind the
-    door fails here until somebody decides it is a preview, not a reader."""
+    """WHAT THE STOP SETS ASIDE, HELD EXACTLY: the builder the previews that
+    name a third party go through (PREVIEW-NAMES-THE-RESOLVED-TARGET) -- two
+    preview functions until lane L5's merge of master 52b55b6, one seam since.
+    A new builder behind the door fails here until somebody decides it is a
+    preview, not a reader."""
     behind = builders_behind_the_write_door(package_modules())
     assert behind == PREVIEW_BUILDERS, (
         "record builders behind the write door: %s; declared previews: %s"

@@ -149,6 +149,14 @@ PAGE = (
     '<div class="setting-radio__button"></div>'
     '<label for="theme__dark" id="theme__dark__label">Device settings</label>'
     '</div>'
+    # THE "Always on" LABEL, STANDALONE AND BOUND TO NOTHING -- added at lane
+    # L5's merge of master 52b55b6 (2026-09-27, call (d)), when build_all()
+    # stopped overwriting its "Always on" label aim and began resolving it.
+    # This file asks only whether a selector FINDS its element. Bound to a
+    # radio, this label would give the role test below a second radio named
+    # "Always on" and break the suffix pin it exists for; whether a label is
+    # bound is tests/test_radio_label_binding.py's question.
+    "<label>Always on</label>"
     # ... and a NEAR MISS, so exactness is tested rather than assumed.
     '<input type="radio" aria-label="Always on, recommended">'
     f'<button aria-label="{SAVE_LABEL}">save</button>'
@@ -192,6 +200,15 @@ PAGE = (
     # whose prefix is arbitrary and which still resolves is the proof of that.
     f'<a href="/mynetwork/" aria-label="Nav, 0 {dom.INVITATION_BADGE_TAIL}s">n</a>'
     '<a href="/mynetwork/grow/">grow your network</a>'
+    # A NAMED PERSON'S TOPCARD, added 2026-09-27 with the two builders the
+    # named-person acts press by. The element whose id ends "Topcard" is the
+    # measured container (his own profile, 6 captures); the two labels are
+    # the measured conventions, "Invite <name> to connect" on a <button> and
+    # "Message <name>" on an <a> to the composer. The name is invented.
+    '<div id="exampleSyntheticTopcard">'
+    '<a aria-label="Message Someone Example" href="/messaging/compose/">m</a>'
+    '<button aria-label="Invite Someone Example to connect">c</button>'
+    "</div>"
     "</main></body></html>"
 )
 
@@ -221,7 +238,14 @@ def build_all() -> dict[str, str]:
         # -- "Always on" versus "Always on, recommended" -- and a third control
         # carrying either name would break that test rather than this one.
         # Dark mode really does render three radios; this is one of them.
-        "settings_radio_label_selector": dom.settings_radio_label_selector(
+        #
+        # ITS OWN KEY SINCE LANE L5'S MERGE OF MASTER 52b55b6 (2026-09-27, the
+        # orchestrator's call (d)). It shared the key above, so this dict kept
+        # only the LAST value and the "Always on" selector was built and never
+        # handed to a browser -- a repeated key is a silent overwrite, not an
+        # error. The suffix keeps both resolved;
+        # ``test_build_all_names_every_selector_once`` below keeps it so.
+        "settings_radio_label_selector[Device settings]": dom.settings_radio_label_selector(
             "Device settings"
         ),
         "save_control_selector": dom.save_control_selector(SAVE_LABEL),
@@ -234,6 +258,12 @@ def build_all() -> dict[str, str]:
         ),
         "reaction_control_selector": dom.reaction_control_selector(),
         "invite_control_selector": dom.invite_control_selector(0),
+        # THE NAMED-PERSON ACTS' TWO PRESSES, scoped to the topcard and
+        # carrying no position (the re-checks of 2026-09-27): each must be the
+        # only control of its kind inside the page's one topcard above, which
+        # is what ``perform``'s strict press requires.
+        "topcard_invite_control_selector": dom.topcard_invite_control_selector(),
+        "topcard_message_control_selector": dom.topcard_message_control_selector(),
         "tracker_list_selector": dom.tracker_list_selector(),
         "compose_recipient_selector": dom.compose_recipient_selector(),
         "compose_body_selector": dom.compose_body_selector(),
@@ -397,3 +427,45 @@ def test_no_builder_emits_the_attribute_that_does_not_exist():
             "%s emits %r. Playwright's role engine has no 'exact' attribute; "
             "exact matching is the 's' suffix on the name value." % (name, selector)
         )
+
+
+def _repeated_build_all_keys(source: str) -> list[str]:
+    """Every key the dict ``build_all`` returns names MORE THAN ONCE, read off
+    the syntax tree of ``source`` -- a repeated key never raises; the later
+    value silently replaces the earlier, so only the source can show it."""
+    tree = ast.parse(source)
+    function = next(
+        node
+        for node in tree.body
+        if isinstance(node, ast.FunctionDef) and node.name == "build_all"
+    )
+    returned = next(
+        node.value for node in ast.walk(function) if isinstance(node, ast.Return)
+    )
+    assert isinstance(returned, ast.Dict), "build_all must return a dict literal"
+    keys = [key.value for key in returned.keys if isinstance(key, ast.Constant)]
+    assert len(keys) == len(returned.keys), "every build_all key must be a literal"
+    return sorted({key for key in keys if keys.count(key) > 1})
+
+
+def test_build_all_names_every_selector_once():
+    """A REPEATED KEY IN ``build_all`` IS A SELECTOR NOBODY CHECKS.
+
+    ADDED AT LANE L5'S MERGE OF MASTER 52b55b6 (2026-09-27, the orchestrator's
+    call (d)). ``settings_radio_label_selector`` was a key TWICE -- "Always
+    on", then "Device settings" -- so the dict kept the second, and the first
+    selector was built and never resolved in a browser, with every test here
+    green. SHOWN FAILING on exactly that source: the file with the second key
+    put back convicts it, by name.
+    """
+    source = pathlib.Path(__file__).read_text(encoding="utf-8")
+    assert _repeated_build_all_keys(source) == []
+    planted = source.replace(
+        '"settings_radio_label_selector[Device settings]": dom.', '"settings_radio_label_selector": dom.', 1
+    )
+    assert planted != source, "the plant must really put the repeated key back"
+    assert _repeated_build_all_keys(planted) == ["settings_radio_label_selector"]
+    # And BOTH are built, each from its own name.
+    built = build_all()
+    assert '"Always on"' in built["settings_radio_label_selector"], built
+    assert '"Device settings"' in built["settings_radio_label_selector[Device settings]"], built

@@ -10607,6 +10607,167 @@ posting is its control.
 |---|---|
 | the reader's module-constant, helper and write-spec resolution; the second clause of the messaging sentence, checked in both copies | `test_the_reader_resolves_a_module_constant_a_helper_and_a_write_spec` (red first on the old reader); mutations M16 (write-spec branch dead) and M17 (module-constant branch dead) each fail it; `test_every_tool_the_second_clause_names_exists_and_loads_messaging` |
 
+### 69.11 A SECOND DOOR IS PINNED BY WHO MAY CALL IT, AND A PENDING MITIGATION BY ITS FLIP (the named-person route, 2026-09-27)
+
+Lane L5's follow-up, on ruling `THIRD-PARTY-PROFILE-FOR-A-NAMED-TARGET`; the
+record is the lane file's "Follow-up: the named-person route". Two acts load
+the ONE profile a caller names. The read door was not widened: a SECOND door,
+`readonly.assert_named_profile_url`, admits exactly
+`https://www.linkedin.com/in/<segment>/`, and what makes it a door rather than
+an allowlist line is WHO may ask for it.
+
+    A DOOR ADMITS AN ADDRESS FOR EVERY CALLER. WHEN THE RULING IS ABOUT WHO,
+    PIN THE CALLERS -- THE ONE FUNCTION THAT ASKS, AND THE FILES THAT NAME IT.
+
+A same-name stranger was the first thing the tests caught: a page naming its
+owner consistently still drew, in a side card, a control naming somebody else
+with the owner's name, and the in-page comparison matched it. A control is the
+owner's only INSIDE the owner's topcard.
+
+    A NAME COMPARED ACROSS THE WHOLE PAGE FINDS EVERY PERSON WHO SHARES IT.
+    SCOPE THE MATCH TO THE CONTAINER THAT IS THE PERSON, OR REFUSE.
+
+The mitigation the lane may not build (lane G owns the sanitiser) is held as
+strict xfails over what each READER returns for a planted name, and an
+adoption dry-run -- lane G's WIP sanitiser wired into the seam by a scratch
+plugin -- flipped seven of the nine, leaving exactly the two a string field
+cannot satisfy (a marker beside a list name).
+
+    A FAILING-UNTIL-ADOPTED TEST IS WORTH ITS MARKER ONLY IF THE ADOPTION HAS
+    BEEN SHOWN TO FLIP IT. RUN THE ADOPTION ONCE, IN SCRATCH, BEFORE IT LANDS.
+
+A cold re-check refuted six claims of the first build, each DEMONSTRATED on the
+synthetic profile, and three of them are lessons wider than this route. The
+press was a page-wide `control >> nth=K`: Playwright re-resolves a selector
+whose element is re-rendered while the press retries, and a stranger's control
+drawn earlier in the page mid-press took position K and the press.
+
+The first fix scoped the position to the person's topcard, and a warm
+re-check put the stranger's control INSIDE the topcard, and then in a second
+element whose id ends Topcard: the press followed the position both times.
+The press now carries no position -- the topcard must hold exactly one control
+of the kind, and the press is STRICT, so a second match at press time throws
+(measured first: Playwright's page.click is not strict unless asked).
+
+    A POSITION IS AN ADDRESS ONLY WHILE THE LIST HOLDS STILL, AND A PRESS
+    THAT RETRIES RE-READS THE LIST. DO NOT SCOPE THE POSITION -- REMOVE IT:
+    REQUIRE THE ONE MATCH WHEN READING, AND PRESS STRICTLY.
+
+A second warm re-check drew strictness's own limit: the owner's control
+replaced IN PLACE by somebody else's is still one match, and was pressed; the
+receipt then read NOT SENT off a fresh render. What the press cannot bind, the
+receipt now re-checks before it claims anything.
+
+    STRICTNESS BINDS THE COUNT, NOT THE PERSON. WHERE IDENTITY CANNOT BE
+    RE-CHECKED AT THE PRESS, THE RECEIPT MUST RE-CHECK IT BEFORE IT CLAIMS.
+
+The Message gate counted composers -- none before the press, one after -- and
+a conversation headed by somebody else, and one drawn during a press that
+opened nothing, both took his words and read SENT.
+
+    COUNTS CANNOT SAY WHOSE. BEFORE WORDS GO INTO A CONVERSATION, COMPARE WHO
+    IT IS WITH, IN THE PAGE -- AND AGAIN BEFORE SEND.
+
+And the warm re-check drew the limit of that comparison: a same-name
+stranger's conversation passes it. A name is what the page shows; identity is
+a link or an id, and the bubble that would carry one has never been captured.
+
+    NAME EQUALITY IS NOT IDENTITY. WHERE ONLY A NAME CAN BE COMPARED, SAY SO,
+    AND MAKE THE IDENTITY-BEARING FIELD THE CAPTURE'S FIRST QUESTION.
+
+And the door's percent-encoded unit admitted every octet, so an encoded space
+carried a two-word name through a parser whose literal rules refuse spaces.
+
+    AN ENCODED UNIT MUST NOT READMIT WHAT THE LITERAL RULES REFUSE. ADMIT ONLY
+    THE OCTETS THE ENCODING IS FOR, AND HOLD THE DECODED FORM TO THE RULE.
+
+The fix round found one more by itself: `tests/test_selectors_resolve.py`
+enumerates `dom.py`'s `*_selector` builders and resolves each, and it was red
+for the whole build on a builder this route added -- every gate list had been
+hand-built from the files the build touched, and that guard is coupled by a
+naming convention, not an import.
+
+    A GUARD COUPLED BY CONVENTION IS INVISIBLE TO A HAND-BUILT GATE LIST. TAKE
+    THE LIST FROM THE ANALYSER; AND NAME A NEW BUILDER SO THE ENUMERATION SEES
+    IT.
+
+And the first fix for the receipt's leak -- a failed press reported by its
+type alone -- turned another lane's guard red: the apply flow's test proved
+its second click was attempted by finding that click's selector in the very
+library text the fix removed. The line is now COMPOSED from what the package
+knows at the call -- the type, the call's kind, the selector it built.
+
+    WHEN A FIX REMOVES LEAKY TEXT, ASK WHAT EVIDENCE RODE IN IT. REBUILD THAT
+    EVIDENCE FROM WHAT THE PACKAGE ITSELF KNOWS, RATHER THAN DROPPING IT.
+
+| path | shown failing by |
+|---|---|
+| `readonly.assert_named_profile_url`, `named_profile_url`, `valid_named_profile_segment`; `browser.LinkedInBrowser.goto(named_profile=True)` | `tests/test_named_profile_route.py` section 1: one shape admitted, no exemption from the forbidden list, the read door still refusing every such address, the browser swapping doors only when asked; mutations N1 (forbidden check removed) and N2 (always the second door) each kill a named test |
+| the door's encoded unit, a non-ASCII octet only, the DECODED segment held to letters, digits, hyphens and underscores and never one of the six letters that draw as nothing or as blank space (derived by a sweep of every code point by name), and both WriteSpec patterns; the door's shapes and that tuple pinned in `tests/test_readonly_boundary_invariant.py`'s freeze | `test_no_encoding_lets_back_in_what_the_segment_refuses` (sixteen segments), `test_the_write_specs_own_address_pattern_refuses_an_encoded_ascii_octet`, `test_a_vanity_name_with_a_non_ascii_letter_is_still_admitted`; mutations N21 (any octet again), N22 (the decoded form unchecked), N23 (the Connect spec's pattern widened), N36 (the blank letters admitted), N39 (the two Egyptian blanks admitted) |
+| the press with no position -- `dom.topcard_invite_control_selector()`, `topcard_message_control_selector()`, the topcard's per-kind counts `dom.NAMED_PROFILE_JS` returns, and `perform`'s strict press and fill (`strict=press_strictly` on the press, over `writes.STRICT_PRESS_ACTIONS` since lane L5's merge of master 52b55b6, and `strict=fill_strictly` on the fill, the named acts only) | `test_a_re_render_during_the_press_cannot_hand_it_to_a_stranger`, `test_a_re_render_during_the_message_press_cannot_hand_it_to_a_stranger`, `test_a_second_match_drawn_mid_press_stops_the_press` (inside the topcard; a second topcard), `test_a_second_send_drawn_during_the_send_press_stops_it`, `test_a_topcard_holding_a_second_control_of_the_kind_is_refused`, `tests/test_selectors_resolve.py`; mutations N9 and N35 (a second control of the kind allowed, in Python and in the page), N24 and N31 (Connect and Message pressed page-wide), N32 (not strict) |
+| what strictness cannot bind, re-checked by the receipt -- `connect_verdict`'s in-place reading (no control naming the person right after the press reads UNKNOWN, never NOT SENT) and `message_verdict`'s `conversation_is_theirs` (read after Send by the page's own comparison) | `test_a_control_swapped_in_place_mid_press_is_never_reported_not_sent`, `test_a_conversation_swapped_in_place_during_send_is_never_read_as_his`; mutations N37 and N38 |
+| WHOSE CONVERSATION -- the holding bubble's title compared in the page, `opened_conversation_gate`'s condition 6, `composer_send_gate`'s sixth refusal, the bounded wait | the parametrised refusals (somebody else's; a group that includes the person), `test_a_conversation_the_press_did_not_open_never_takes_his_words`, `test_the_title_compared_is_the_one_on_the_conversation_holding_the_composer` (two bubbles, both orders), `test_send_is_not_pressed_when_the_conversation_changes_hands_after_the_fill`, `test_a_conversation_drawn_a_moment_after_the_press_is_still_found`; mutations N25 (the opened gate's check removed), N26 (the send gate's), N27 (containment for equality), N28 (no wait), N34 (the first bubble's title read) |
+| a failed press, fill, choice or upload reported by its exception's TYPE alone, unless the refusal is this package's own -- lane G's rule in `perform`, which REPLACED this lane's composed `writes.describe_click_error` (the type, the call's kind and the selector) at lane L5's merge of master 52b55b6; this row read "`writes.describe_click_error` -- ... never by the browser library's own text" until then | `test_a_press_that_fails_is_reported_by_its_type_and_names_nobody` (both acts, a press held under a transparent layer until it times out: `TimeoutError`, and the selector in `clicked.selector`); the composer's unit test and mutations N29 and N33 went with the function |
+| the callers pinned -- only `writes._load_named_profile` passes `named_profile=`, only `browser.py` and `writes.py` name the door, and the loader refuses every other spec; `tests/test_probe_navigation_budget.py`'s `SECOND_DOOR_GUARD`, admitted for that one (file, function) | `test_exactly_one_function_in_the_package_asks_for_the_named_door`, `test_the_second_door_is_referenced_only_by_the_browser_and_the_loader`, `test_the_loader_refuses_every_spec_that_is_not_a_named_person_act`; mutations N3 (loader stops refusing) and N4 (loader navigates without the door -- the package-navigation guarantee goes red) |
+| `named_profile` -- the target parser, the landing veto, the topcard-scoped control states, the opened-conversation and send gates, the SENT delta, whom it resolved to; with `dom.NAMED_PROFILE_JS` and `perform`'s open-then-type branch | the same file, sections 2 to 6, over `tests/fixtures/synthetic/named_profile.html` (SYNTHETIC: no third party's profile has been captured) and its asserted derivations; mutations N5 to N18 -- in `named_profile`, in the page's script and in `perform` -- each kill the test named for them (39 of 39 killed in all -- N1 to N39 -- each file restored byte for byte) |
+| `people_seam.person` -- since lane L5's merge of master 52b55b6 the ONE builder of every write preview's people record (the named acts' `whom_this_resolves_to`, `send_reply`'s and `send_invitation`'s `who_this_would_reach`), lane G's `people_data.Person` with a headline the page does not draw ABSENT; the two conversation readers build lane G's records directly. This row named the seam's four routes and twelve strict xfails until the merge | `tests/test_people_seam.py`: routing tests for the three previews, and the TWELVE mitigation-2 tests -- three properties by four outputs -- passing with no marker on the merged tree, each beside a control showing its plant arrived |
+
+**DECLARED DISPOSABLE:** the scratch probes of the captures (`np_inventory`,
+`np_controls`, `np_titles`, `np_topcard_probe`, `np_topcard_fixture_probe`),
+the adoption dry-run plugin (`np_adopt/`), the mutation runners (`np_mutate.py`,
+`np_mutate2.py`, `np_mutate3.py`), the bubble-header probes
+(`np_bubble_probe*.py`), the strictness and invisible-letter probes
+(`np_strict_probe.py`, `np_di_letters.py`, `np_blank_letters.py`), the re-freeze attributions
+(`np_refreeze2.py`, `np_refreeze3.py`) and the gate runners and list builders
+-- all under the lane's scratch directory. What they
+measured is in the lane record with its numbers; what they check is carried
+by the two test files above.
+
+### 69.12 A COMMENT THAT CLAIMS A LIBRARY'S BEHAVIOUR IS A CLAIM ABOUT A CALL ARGUMENT (lane L5's merge of master 52b55b6, 2026-09-27)
+
+Eight sentences in the package said Playwright's strict mode held a press to
+one element, and `perform` passed no `strict=` for any of the five actions
+they described -- so the property did not exist, and nothing could notice: a
+comment is not executed, and every test of those actions was green. The
+orchestrator's call: make the code match where each action's fixtures show
+exactly one match. A recording run over their tests counted every press
+before it was made -- 76 presses, none counting 0 or 2 -- and five actions
+joined the named acts in `writes.STRICT_PRESS_ACTIONS`; `follow_company`
+joined on its three captures' static count, its prefixed control never drawn
+by any fixture, and its comment says so.
+
+    A SENTENCE THAT SAYS WHAT A LIBRARY DOES TO A CALL IS A CLAIM ABOUT THAT
+    CALL'S ARGUMENTS. PIN THE SENTENCE TO THE ARGUMENT, OR THE ARGUMENT CAN
+    LEAVE AND THE SENTENCE STAYS TRUE-SOUNDING.
+
+And the reader-leak harness recorded the named-person namer `clean` having
+read nothing: driven by signature, it got an observation built off the planted
+page, whose identity reading is never confirmed, and took its first-line
+early return -- the false clean lane G found in group_leave's readers.
+
+    A READER THAT GATES ON AN OBSERVATION IS MEASURED ONLY PAST THE GATE. GIVE
+    THE HARNESS THE OBSERVATION THE SERVER WOULD HAVE MADE, OR IT MEASURES THE
+    GATE AND CALLS THE READER CLEAN.
+
+| path | shown failing by |
+|---|---|
+| `writes.STRICT_PRESS_ACTIONS`, `perform`'s `press_strictly` / `fill_strictly`, and a pinned table of the eight claim sentences, each naming its action | `tests/test_a_strict_mode_claim_is_a_strict_press.py`: the set pinned by name; the click and fill arguments read off the syntax tree; every claim-shaped sentence counted off the package source against the table; `test_the_claim_rules_are_shown_failing` (a planted sentence is counted; an action dropped from the set turns its two sentences red); and through the real call, a second OFF control drawn mid-press stops the `mark_company_interest` press with `Error`, while the same world pressed without the set's membership is pressed |
+| the reader-leak harness's `AS_SHIPPED` variant for `named_profile.name_the_profile_target`: a planted page that CONFIRMS the named profile's identity and draws the plant as its owner, with the facts `observe` records there | `tests/test_readers_emit_no_page_string.py::test_the_named_profile_namer_is_driven_through_a_real_read`: the shipped variant returns the plant inside a people record while every signature variant alone reads `clean`; the baseline records `returns_records`, so a namer that stopped reading the page, or printed outside the record, fails the ratchet |
+| `tests/test_selectors_resolve.py`'s `build_all` names every selector once | `test_build_all_names_every_selector_once`: the file with its repeated key put back convicts that key by name, and both label aims are built and resolved |
+
+**DECLARED DISPOSABLE:** the strict-press recording run
+(`strict_measure/`: its plugin, launcher and analysis), the merge's
+hunk and resolution scripts (`np_hunks.py`, `np_resolve.py`, `m_*.txt`),
+the duplicate-key scan (`np_dupkeys.py`, shown failing on its own plant), the
+surface and freeze measurements (`np_measure_surface.py`,
+`np_refreeze_merge.py`), the census re-pin (`np_repin_census.py`) and the
+offline guard its local gates ran under (`offline_plugin/np_offline.py`,
+shown working on its own control first, and its launcher
+`np_run_offline.py`) -- all under the lane's scratch directory; their numbers
+are in the lane record. The guard is DISPOSABLE HERE AND NOT IN GENERAL: its
+finding -- eleven tests in two files send a browser to LinkedIn -- is the lane
+record's I.5, left for the owners of the shared browser fixtures.
+
 ## 70. THE BEST-VERIFIED WRITE NEVER PRESSED SAVE, AND A WRITE AIMED BY ITS CARD (lane-l7-profile-writes, 2026-09-24)
 
 **Registered 2026-09-24.** Full record: `_audit/2026-09-24-lane-l7-profile-writes.md`.

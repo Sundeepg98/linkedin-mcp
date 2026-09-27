@@ -19,7 +19,10 @@ What this module guarantees, and why each guarantee exists:
   package are ``goto``, waits, and text/JSON reads. There is no click, no
   fill, no form submission, no non-GET request. ``readonly.assert_read_url``
   gates every navigation, and ``tests/test_readonly.py`` greps this package
-  to keep it that way.
+  to keep it that way. ONE NAVIGATION IS GATED BY A SECOND DOOR since
+  2026-09-27: a named act's load of the one profile its caller named, which
+  :meth:`LinkedInBrowser.goto` checks with ``readonly.assert_named_profile_url``
+  when ``named_profile=True`` -- and which the read door still refuses.
 
 * **The window does not linger.** After :data:`config.IDLE_CLOSE_S` with no
   tool call the context closes and the lock is released.
@@ -77,6 +80,7 @@ from linkedin_server.config import (
 from linkedin_server.errors import BrowserUnavailableError
 from linkedin_server.readonly import (
     assert_launch_flags_permitted,
+    assert_named_profile_url,
     assert_read_url,
 )
 
@@ -442,17 +446,37 @@ class LinkedInBrowser:
             return round(wait, 2)
         return 0.0
 
-    async def goto(self, page: Any, url: str, *, settle_ms: int = SETTLE_MS) -> str:
+    async def goto(
+        self,
+        page: Any,
+        url: str,
+        *,
+        settle_ms: int = SETTLE_MS,
+        named_profile: bool = False,
+    ) -> str:
         """Navigate to an allowlisted read url and let its XHRs settle.
 
         Returns the FINAL url after any redirect, which is itself a signal:
         LinkedIn bounces signed-out visitors to an auth wall.
 
+        ``named_profile`` SWAPS THE DOOR, IT DOES NOT OPEN ONE. With it set the
+        url is checked by ``readonly.assert_named_profile_url`` -- exactly
+        ``https://www.linkedin.com/in/<segment>/``, the segment a caller's --
+        INSTEAD of the read door, which still refuses every such address. One
+        call site in the package passes it, ``writes._load_named_profile``,
+        and that function refuses any spec that is not a named-profile write
+        (ruling THIRD-PARTY-PROFILE-FOR-A-NAMED-TARGET). Everything after the
+        door -- the rate slot, the navigation, the settle -- is the same code.
+
         Raises:
-            WriteAttemptError: url is not a permitted read surface.
+            WriteAttemptError: url is not a permitted read surface, or, with
+                ``named_profile``, not one named profile's address.
             BrowserUnavailableError: the navigation itself failed.
         """
-        assert_read_url(url)
+        if named_profile is True:
+            assert_named_profile_url(url)
+        else:
+            assert_read_url(url)
         await self.wait_for_rate_slot()
         try:
             await page.goto(url, wait_until="domcontentloaded", timeout=NAV_TIMEOUT_MS)

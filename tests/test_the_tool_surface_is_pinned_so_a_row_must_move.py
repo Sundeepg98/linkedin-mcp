@@ -90,6 +90,7 @@ PINNED_TOOL_SURFACE: dict[str, tuple[str, ...]] = {
     "linkedin_comment_on_item": ("confirm_token", "item", "text"),
     "linkedin_company_page_counts": ("organisation_id",),
     "linkedin_compose_fields": (),
+    "linkedin_connect_from_profile": ("confirm_token", "profile"),
     "linkedin_connections": ("limit",),
     "linkedin_creator_analytics": (),
     "linkedin_draft_applications": ("limit",),
@@ -106,6 +107,7 @@ PINNED_TOOL_SURFACE: dict[str, tuple[str, ...]] = {
     "linkedin_login_browser": ("wait_seconds",),
     "linkedin_logout": ("confirm",),
     "linkedin_mark_company_interest": ("confirm_token", "job_id"),
+    "linkedin_message_from_profile": ("confirm_token", "profile", "text"),
     "linkedin_my_activity_items": (),
     "linkedin_my_applications": ("limit",),
     "linkedin_my_profile": ("details", "include_skills"),
@@ -387,6 +389,24 @@ PINNED_TOOL_SURFACE: dict[str, tuple[str, ...]] = {
 #: master 7986ae3 (lane L8's), MEASURED off the merged registry, not
 #: summed.** Master's 57 and 89 carry every pin above; the branch adds one
 #: parameter (`item`) and no tool. No row moves in the merge.
+#: **RE-PINNED 2026-09-27 AT 59 TOOLS AND 95 PARAMETERS, at lane L5's merge of
+#: master 52b55b6, MEASURED off the merged registry, not summed: two tools and
+#: five parameters from lane L5's follow-up branch (58 and 92 there, over
+#: master 96c1165), on top of master's 57 and 90.** The census rows moved in
+#: the lane's own commits on its branch, which this merge carries, and one
+#: more moves in the merge itself.
+#: `linkedin_connect_from_profile("profile", "confirm_token")` banks `N 4`, by
+#: D6-CAPABILITY-OVER-AFFORDANCE, GAP -> COVERED-UNFIRED -- and `N 2`, whose
+#: only ground (R4) the ruling dissolved, NOT-REV -> COVERED-UNFIRED at this
+#: merge, on the orchestrator's application of the same ruling;
+#: `linkedin_message_from_profile("profile", "text", "confirm_token")` banks
+#: `M M1`, COVERED-CANNOT-DELIVER -> COVERED-UNFIRED. Ruling
+#: THIRD-PARTY-PROFILE-FOR-A-NAMED-TARGET. `profile` is a profile LINK or a
+#: member id, parsed by shape and refused when it could be a name. Not PROVEN:
+#: two WRITES built to ready-to-fire behind the flag and the single-use grant,
+#: never granted. See `_audit/2026-09-24-lane-l5-messaging.md`, "Follow-up:
+#: the named-person route" and "Integration: lane L5's merge of master
+#: 52b55b6".
 #: **RE-PINNED 2026-09-27 AT 57 TOOLS AND 91 PARAMETERS (lane S, names at
 #: runtime): no tool added, one parameter on one, and three census rows move
 #: in the same commit.** `linkedin_people_search_shape` gains
@@ -398,8 +418,13 @@ PINNED_TOOL_SURFACE: dict[str, tuple[str, ...]] = {
 #: returns names. Not PROVEN: the lane was offline, and the reader was built
 #: over the one captured results page. See
 #: `_audit/2026-09-24-lane-s-people-search.md`, "Names returned".
-PINNED_TOOL_COUNT = 57
-PINNED_PARAMETER_COUNT = 91
+#: **RE-PINNED 2026-09-27 AT 59 TOOLS AND 96 PARAMETERS, at lane S's merge of
+#: master 687b07c, MEASURED off the merged registry, not summed.** Master's
+#: 59 and 95 carry lane L5's two tools and every pin above; this branch
+#: adds one parameter (`include_names`) and no tool. The census rows moved
+#: in each side's own commits; none moves in the merge itself.
+PINNED_TOOL_COUNT = 59
+PINNED_PARAMETER_COUNT = 96
 
 
 def live_surface() -> dict[str, tuple[str, ...]]:

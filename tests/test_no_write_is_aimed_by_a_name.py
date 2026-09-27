@@ -93,6 +93,18 @@ TARGET_CLASSES: dict[str, str] = {
     "closed_setting_and_value": (
         "one of his own settings, admitted by name, and a state from a closed set"
     ),
+    # ADDED AT LANE L5'S MERGE OF MASTER 52b55b6 (2026-09-27), for the two
+    # named-person acts: a PERSON chosen by the caller, by an address or an
+    # id -- not "id" above, which names no person, and not NAME, which is
+    # the word the parser refuses.
+    "profile_link_or_member_id": (
+        "a person's profile link or member id the caller supplies; a bare "
+        "word, which could be a name, is refused before a browser opens"
+    ),
+    "profile_link_or_member_id_and_own_text": (
+        "a person's profile link or member id the caller supplies, and his "
+        "own words"
+    ),
     NAME_CLASS: "a word for a person, matched against what the page draws",
 }
 
@@ -137,6 +149,16 @@ TARGET_KIND_CLASS: dict[str, tuple[str, str]] = {
     "group_id": (
         "id",
         "withdraw_from_group: a numeric group id the caller supplies, 1 to 20 ASCII digits",
+    ),
+    # LANE L5'S TWO, classified at its merge of master 52b55b6 (2026-09-27).
+    # The parser is writes._target_for -> named_profile.parse_profile_target.
+    "profile": (
+        "profile_link_or_member_id",
+        "connect_from_profile: /in/<segment>/ or an ACoAA member id; a bare word is refused",
+    ),
+    "profile_and_text": (
+        "profile_link_or_member_id_and_own_text",
+        "message_from_profile: the same parser for the profile half, and his own one line",
     ),
     "member": (
         NAME_CLASS,
@@ -210,9 +232,12 @@ NAME_SHAPED_SUFFIXES = ("_name", "_names")
 #: set_open_to_work registers no tool. Re-measured the same day on lane G's
 #: merge of master 2eb90ad: fifteen, for sixteen, with lane L5's send_reply;
 #: and on its merge of master 7986ae3: sixteen, for seventeen, with lane L8's
-#: withdraw_from_group.
+#: withdraw_from_group; and on lane L5's merge of master 52b55b6: eighteen,
+#: for nineteen, with connect_from_profile and message_from_profile.
 KNOWN_WRITE_TOOLS = frozenset(
     {
+        "linkedin_connect_from_profile",
+        "linkedin_message_from_profile",
         "linkedin_withdraw_from_group",
         "linkedin_send_reply",
         "linkedin_save_job",

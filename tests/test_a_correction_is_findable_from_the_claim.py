@@ -185,6 +185,22 @@ CORRECTION_VOCABULARY = (
 #: outcome this file exists to require and so cannot also be a violation of it.
 NOT_A_CORRECTION: dict[tuple[str, str], str] = {
 
+    # 2026-09-27, lane L5's follow-up (the named-person route). ITS RECORD
+    # REPORTS A GENERATED FILE STALE AND REGENERATED, and that is read here,
+    # not inferred from the filename.
+    ("2026-09-24-lane-l5-messaging.md", "RULINGS.md"): (
+        "A GENERATED REGISTER REPORTED STALE, NOT A CLAIM CORRECTED. The "
+        "follow-up's cold-re-check table (row NEW-6) cites `_audit/RULINGS.md` "
+        "with the word `stale` because the register's derived phrase counts had "
+        "fallen one behind the corpus -- and the same commit regenerated it with "
+        "its own writer (`build_rulings_index.py --write`, then `--check`). The "
+        "register is DERIVED: no author's claim in it was wrong, and it cannot "
+        "carry a CORRECTED BY: back-pointer, because hand edits to it are "
+        "overwritten by the next regeneration. **WHAT WOULD MAKE THIS ENTRY "
+        "WRONG:** the lane record saying a ruling the register lists is "
+        "mis-stated, rather than that the generated counts lagged."
+    ),
+
     # 2026-09-24, lane D (D6 moves and the profile PDF). TWO CENSUS ROWS CITE
     # THE LANE'S RECORD AS THE EVIDENCE FOR THEIR OWN CELLS, and in both the
     # matched words belong to text the lane did not write -- read, not

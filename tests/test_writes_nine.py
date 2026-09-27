@@ -544,6 +544,10 @@ CLEAN_COMPONENT = {
     # allowlist's own shape (a digit first). SYNTHETIC, as every thread id in
     # this suite is.
     "thread": "2-SYNTHETICCLEANTHREAD==",
+    # ``message_from_profile``'s subject, 2026-09-27: a profile LINK, because
+    # a bare word is refused as a possible name. The segment carries the
+    # declared synthetic slug token ``someone``.
+    "profile": "https://www.linkedin.com/in/someone-clean-example/",
 }
 
 
@@ -1721,6 +1725,15 @@ def test_the_claims_that_depend_on_the_destruction_refusal_are_the_measured_ones
     leaning on the refusal. It is restated like the other five, and the rule
     below this test reads EVERY sanctioned spec, so a seventh cannot arrive
     the same way unseen.
+
+    EIGHT SINCE LANE L5'S MERGE OF MASTER 52b55b6, the same day, and the rule
+    below is what made that visible rather than a reader: lane L5's follow-up
+    built ``connect_from_profile`` and ``message_from_profile`` on its branch
+    with the same lean ("Withdrawing an invitation is destruction, which is in
+    PERMANENTLY_FORBIDDEN"; "Deletion is permanently forbidden here"). Both are
+    restated by name above -- the invitation onto ``withdraw_invitation``'s
+    record, as ``send_invitation``'s is, and the message onto delivery, as
+    ``send_message``'s is.
     """
     from linkedin_server import outward_classes
 
@@ -1730,7 +1743,8 @@ def test_the_claims_that_depend_on_the_destruction_refusal_are_the_measured_ones
     assert "CORRECTED" in note
     assert "react_to_item does not lean on this" in note
 
-    # THE SIX, BY NAME, and the record each one's undo now rests on.
+    # THE SIX, BY NAME, and the record each one's undo now rests on -- EIGHT
+    # since lane L5's merge of master 52b55b6 (see the docstring).
     restated = {
         "apply_job": ("withdraw_application", "NOBODY"),
         "publish_post": ("delete_own_post", "NOT YET"),
@@ -1739,6 +1753,12 @@ def test_the_claims_that_depend_on_the_destruction_refusal_are_the_measured_ones
         "send_message": (None, "NOBODY"),
         # The sixth, from lane L5, restated at this lane's merge of master.
         "send_reply": (None, "NOBODY"),
+        # The seventh and eighth, from lane L5's follow-up, restated at its
+        # merge of master 52b55b6. An invitation sent from a profile lands in
+        # the same Sent list as send_invitation's, so its undo is the same
+        # record; a message sent from a profile is delivered like any other.
+        "connect_from_profile": ("withdraw_invitation", "NOT YET"),
+        "message_from_profile": (None, "NOBODY"),
     }
     for action, (record, verdict) in restated.items():
         text = spec_for_action(action).reversible_by
@@ -1753,12 +1773,14 @@ def test_the_claims_that_depend_on_the_destruction_refusal_are_the_measured_ones
             status = outward_classes.OUTWARD_CLASS_SPECS[record].status
             assert record in text, (action, record)
             assert status in text, (action, record, status)
-    # The three NOBODY verdicts rest on grounds outside this server: LinkedIn's
-    # own Help Center for an application, delivery itself for a message and a
-    # reply.
+    # The four NOBODY verdicts rest on grounds outside this server: LinkedIn's
+    # own Help Center for an application, delivery itself for a message, a
+    # reply and a message sent from a profile. (Three until lane L5's merge of
+    # master 52b55b6 brought message_from_profile.)
     assert "a512388" in spec_for_action("apply_job").reversible_by
     assert "cannot be recalled" in spec_for_action("send_message").reversible_by
     assert "cannot be recalled" in spec_for_action("send_reply").reversible_by
+    assert "cannot be recalled" in spec_for_action("message_from_profile").reversible_by
 
     # THE ONE NAMED IN THE ORIGINAL NOTE THAT DOES NOT BELONG, and what it
     # actually rests on. If somebody later rewrites react's reversible_by to

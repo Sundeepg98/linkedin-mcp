@@ -111,6 +111,18 @@ SYNTHETIC_RAW_TARGETS: dict[str, Any] = {
         "thread": "2-SYNTHETICHARNESSTHREAD==",
         "text": "example-harness-reply-text",
     },
+    # A NAMED PERSON'S PROFILE (``connect_from_profile``) and that profile
+    # with the words of a message (``message_from_profile``), 2026-09-27. A
+    # profile LINK, because ``_target_for`` refuses a bare word -- a name is
+    # never a target -- and a refused target would leave every writes reader
+    # undriven for these specs, as the missing ``thread_and_text`` row once
+    # did for five. The segment carries ``example``, a declared synthetic
+    # slug token.
+    "profile": "https://www.linkedin.com/in/example-harness-person/",
+    "profile_and_text": {
+        "profile": "https://www.linkedin.com/in/example-harness-person/",
+        "text": "example-harness-message-text",
+    },
 }
 
 

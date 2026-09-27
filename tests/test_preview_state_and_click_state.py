@@ -108,6 +108,8 @@ from tests.test_follow_company_page import (
 from tests.test_messaging_threads import THREAD as MESSAGING_THREAD
 from tests.test_messaging_threads import THREAD_ID as MESSAGING_THREAD_ID
 from tests.test_leave_group import GROUPS_LEAVE_ID, GROUPS_LEAVE_MARKUP
+from tests.test_named_profile_route import LINK as NAMED_PROFILE_LINK
+from tests.test_named_profile_route import PROFILE as NAMED_PROFILE
 from tests.test_result_verification_block import SHAREBOX_MARKUP
 from tests.test_send_message_gate import COMPOSER_MARKUP
 from tests.test_selectors_resolve import PAGE as SELECTOR_RESOLUTION_PAGE
@@ -290,6 +292,30 @@ REACHED: dict[str, tuple[str, str, str]] = {
         "tests/test_leave_group.py",
         GROUPS_LEAVE_MARKUP,
         GROUPS_LEAVE_ID,
+    ),
+    # THE SEVENTEENTH AND EIGHTEENTH, 2026-09-27 (census rows ``N 4`` by D6,
+    # ``N 2`` and ``M M1``, lane L5's follow-up; the sixteenth and seventeenth
+    # on its branch until its merge of master 52b55b6). A SYNTHETIC
+    # third-party profile -- no capture of one exists -- whose STRUCTURE
+    # borrows his own profile's measured topcard and the people cards'
+    # measured Connect and Message labels, and whose content is invented; its
+    # header says which parts are which. The preview and the click read the
+    # profile through ONE reader, ``dom.read_named_profile``, and ONE verdict
+    # per action, which is the property this file pins.
+    "connect_from_profile": (
+        "tests/fixtures/synthetic/named_profile.html",
+        NAMED_PROFILE,
+        str(writes._target_for(spec_for_action("connect_from_profile"), NAMED_PROFILE_LINK)),
+    ),
+    "message_from_profile": (
+        "tests/fixtures/synthetic/named_profile.html",
+        NAMED_PROFILE,
+        str(
+            writes._target_for(
+                spec_for_action("message_from_profile"),
+                {"profile": NAMED_PROFILE_LINK, "text": "Thursday works."},
+            )
+        ),
     ),
 }
 
@@ -530,8 +556,12 @@ def test_every_performable_action_is_either_reached_or_declared_unreachable():
     # 15 -> 16 on 2026-09-27 (lane L8's merge of master; 14 -> 15 on its
     # branch): ``withdraw_from_group`` shipped, reached over its own committed
     # synthetic Groups root rather than declared unreachable.
-    assert len(PERFORMABLE) == 16, sorted(PERFORMABLE)
-    assert len(REACHED) == 16, sorted(REACHED)
+    # 16 -> 18 the same day (lane L5's merge of master 52b55b6; 15 -> 17 on
+    # its follow-up branch): ``connect_from_profile`` and
+    # ``message_from_profile`` shipped, both reached over the synthetic named
+    # profile their own tests read. MEASURED on the merged tree, not summed.
+    assert len(PERFORMABLE) == 18, sorted(PERFORMABLE)
+    assert len(REACHED) == 18, sorted(REACHED)
     assert len(CANNOT_REACH) == 0, sorted(CANNOT_REACH)
 
 

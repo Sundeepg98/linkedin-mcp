@@ -139,6 +139,7 @@ from __future__ import annotations
 import ast
 import re
 from typing import Iterable, Optional
+from urllib.parse import unquote
 
 from linkedin_server.errors import WriteAttemptError
 
@@ -529,6 +530,10 @@ _ALLOWED_URL_PATTERNS: tuple[re.Pattern[str], ...] = (
     # that signal, so a third-party profile load leaves a durable record in
     # that person's own viewer list. `PERMANENTLY_FORBIDDEN` names the act.
     # Removing this line makes the boundary say what the server already claims.
+    # (SINCE 2026-09-27 `known_side_effects` names two WRITE tools that load
+    # the ONE profile a caller names, inside that act, through the second door
+    # below -- `assert_named_profile_url`. This allowlist still admits no
+    # third party's profile, and no read reaches that door.)
     #
     # NOT "NOTHING USES IT, SO CLOSE IT" -- that is the weaker argument and it
     # was rejected. The measurement is the second reason, not the first.
@@ -563,7 +568,9 @@ _ALLOWED_URL_PATTERNS: tuple[re.Pattern[str], ...] = (
     # file says about itself: `known_side_effects` states that no tool here
     # loads a third party's profile, and the intro editor below is confined to
     # `/in/me/` on the MEASURED ground that loading a third party's profile
-    # leaves them a durable record in their own viewer list.
+    # leaves them a durable record in their own viewer list. (The first is
+    # narrower since 2026-09-27 -- see the note above on the second door --
+    # and neither admits a stranger's detail pages to this allowlist.)
     #
     # IT WAS NEARLY INHERITED. The Interests page was first admitted by adding
     # a fourth word to this alternation, which for one commit ALLOWED
@@ -1247,6 +1254,47 @@ _ALLOWED_URL_PATTERNS: tuple[re.Pattern[str], ...] = (
     # No query string and no sub-path: nothing builds either, and the
     # anchoring is what keeps this one page from becoming the family.
     re.compile(r"^https://www\.linkedin\.com/mypreferences/d/dark-mode/?$"),
+    # A SECOND NAMED SETTINGS PAGE, FOR READING ONLY: "SHARING PROFILE EDITS".
+    # Admitted 2026-09-27 on the orchestrator's APPLICATION of the ruling
+    # above -- ONE-NAMED-SETTINGS-PAGE-AT-A-TIME, the operator's of 2026-08-31
+    # -- recorded by the live lane as an application of that ruling, not as a
+    # new one (`_audit/2026-09-23-live-lane-session-1.md`, the session-2
+    # preparation section).
+    #
+    # WHAT IT IS FOR. Condition 1 of SELF-PROFILE-EDITS-NOT-OUTWARD, as
+    # amended (SELF-PROFILE-EDIT-NOTIFY-CONDITION-AMENDED): where the edit
+    # dialog draws no notify control, his account-level "share profile updates
+    # with your network" setting READ OFF before the edit satisfies it. LinkedIn
+    # names that setting "Sharing profile edits" today -- key
+    # notifyNetworkForUpdates, identifier notify_network_for_updates -- read off
+    # the settings index the live lane captured in session 1.
+    #
+    # THE ADDRESS IS DERIVED, NOT MEASURED, and that is stated on the line it
+    # buys: no capture on record draws it. LinkedIn's own settings bundle pairs
+    # the old slug activity-broadcast with notify-network-for-updates in the
+    # list that pairs two settings whose new addresses the index DOES draw,
+    # both under /mypreferences/d/settings/. The other candidate, without
+    # /settings/, is NOT admitted; if this one redirects on its first load,
+    # that one gets its own admission then.
+    #
+    # IT BUYS PAST TWO GATES AND BOTH NAME THIS ONE ADDRESS: this line, and the
+    # paired entry in _FORBIDDEN_SUBSTRING_PATTERN_EXEMPTIONS, which excuses
+    # "/settings/" and "settings" for exactly this anchored address. Both keep
+    # their full reach everywhere else -- the forbidden tuple is unchanged --
+    # which is the difference from the trade the dark-mode entry above
+    # declined for language and autoplay-videos: nothing is NARROWED.
+    #
+    # READ ONLY. writes.assert_write_url consults neither exemption table and
+    # no WriteSpec names this address, so it is no write surface. The reader
+    # that opens it (profile_editor.read_account_share_updates) counts; it
+    # never presses the switch, which is his to change.
+    #
+    # NOT ADMITTED: a query, a sub-path, a sibling settings page, the category
+    # page that lists it, the other candidate, the old /psettings/ address.
+    re.compile(
+        r"^https://www\.linkedin\.com/mypreferences/d/settings/"
+        r"notify-network-for-updates/?$"
+    ),
     # ONE ITEM PERMALINK. Added 2026-08-31 on the operator's ruling: ONE NAMED
     # ITEM PERMALINK PER CALL. It is the write surface ``react_to_item`` acts
     # on and the read surface ``linkedin_surface_census("feed_item")``
@@ -2770,6 +2818,24 @@ _FORBIDDEN_SUBSTRING_PATTERN_EXEMPTIONS: tuple[
         ),
         frozenset({"/follow"}),
     ),
+    # "SHARING PROFILE EDITS", READ ONLY -- the second gate of the pair whose
+    # first gate is the matching allowlist line beside dark-mode. 2026-09-27,
+    # the live lane, on the orchestrator's application of
+    # ONE-NAMED-SETTINGS-PAGE-AT-A-TIME. The address trips "/settings/" AND
+    # "settings" -- measured, and nothing else -- and both are excused for this
+    # one anchored address only; each keeps its full reach everywhere else, and
+    # the forbidden tuple is unchanged. The proof is a test, not a sentence
+    # (`tests/test_notify_setting_admission.py`): a sibling settings page, this
+    # address with a sub-path or a query, a traversal, the category page, the
+    # other candidate address and the old /psettings/ one all still refuse,
+    # each on the gate that names it, and EITHER gate alone admits nothing.
+    (
+        re.compile(
+            r"^https://www\.linkedin\.com/mypreferences/d/settings/"
+            r"notify-network-for-updates/?$"
+        ),
+        frozenset({"/settings/", "settings"}),
+    ),
 )
 
 
@@ -2909,6 +2975,152 @@ def is_read_url(url: str) -> bool:
     except WriteAttemptError:
         return False
     return True
+
+
+# ---------------------------------------------------------------------------
+# 1b. The SECOND door: one third party's profile, for an act he named
+# ---------------------------------------------------------------------------
+#
+# RULING ``THIRD-PARTY-PROFILE-FOR-A-NAMED-TARGET`` (the orchestrator,
+# 2026-09-24, applying WRITE-CLASS-B; registered in
+# ``_audit/2026-09-24-rulings-notify-veto-and-who-which.md``): a third party's
+# profile, ``/in/<slug>/``, may be loaded ONLY inside an outward act whose
+# target the operator names in that call -- the slug from the tool's arguments
+# only, never from page content, and never for a measurement.
+#
+# SO IT IS NOT A READ, AND THE READ DOOR STILL REFUSES IT. ``assert_read_url``
+# and every table above are unchanged: ``/in/me/`` is the one member segment
+# the allowlist admits, and ``is_read_url`` is False for every other profile.
+# This door is SEPARATE and NARROWER. It admits exactly one shape --
+# ``https://www.linkedin.com/in/<segment>/``, the segment a caller's -- and the
+# forbidden-substring list applies to it WITHOUT ANY EXEMPTION. It has one
+# caller in the package: ``browser.LinkedInBrowser.goto`` with
+# ``named_profile=True``, which ``writes._load_named_profile`` alone passes,
+# and that function refuses any spec that is not a named-profile write. Both
+# facts are pinned in ``tests/test_named_profile_route.py``.
+#
+# WHY A SECOND DOOR RATHER THAN AN ALLOWLIST LINE. An allowlist line admits a
+# shape for EVERY caller, and the whole of the ruling is WHO may load it: the
+# act he ordered, aimed at the person he named. A read tool that could reach
+# ``/in/<slug>/`` is the thing ``PERMANENTLY_FORBIDDEN`` names -- a stranger's
+# privacy spent on a measurement.
+
+#: One profile's address segment, as a caller hands it over: a vanity name or
+#: a member id. Three to a hundred units, each a letter, a digit, a hyphen, an
+#: underscore or one percent-encoded NON-ASCII octet (LinkedIn serves non-ASCII
+#: vanity names percent-encoded), and it may not open with a hyphen or an
+#: underscore. ``me`` cannot pass: it is two characters, and it is HIS OWN
+#: profile, which the read door already admits and which this door has no
+#: reason to.
+#:
+#: THE OCTET WAS ANY OCTET UNTIL THE COLD RE-CHECK OF 2026-09-27, and an
+#: encoded ASCII octet is never needed -- ASCII letters and digits are written
+#: as themselves -- while it let everything the literal rules refuse back in
+#: through the encoding: a space (a two-word NAME, ``Casey%20Example``), a
+#: slash, a newline, a NUL, and a forbidden substring spelled ``%2Finvite``.
+#: So the unit is ``%[89A-Fa-f][0-9A-Fa-f]`` -- the octets UTF-8 uses for
+#: non-ASCII letters -- and :func:`valid_named_profile_segment` decodes the
+#: whole segment and holds it to letters, digits, hyphens and underscores.
+NAMED_PROFILE_SEGMENT = re.compile(
+    r"^(?:[A-Za-z0-9]|%[89A-Fa-f][0-9A-Fa-f])(?:[A-Za-z0-9_\-]|%[89A-Fa-f][0-9A-Fa-f]){2,99}$"
+)
+
+#: The one address this door admits. Rebuilt, never parsed loosely: no query,
+#: no fragment, no sub-page, the host LinkedIn's own, and the trailing slash.
+_NAMED_PROFILE_URL = re.compile(r"^https://www\.linkedin\.com/in/([^/?#]+)/$")
+
+
+#: THE LETTERS THAT DRAW AS NOTHING OR AS BLANK SPACE. ``str.isalnum()`` says
+#: yes to them, so a two-word name with one standing where the space was
+#: passed the decoded check -- found by the warm re-checks of 2026-09-27, first
+#: with U+3164 and then with U+13441. MEASURED the same day with Python 3.13's
+#: unicodedata (Unicode 15.1), two ways: of the default-ignorable ranges of
+#: DerivedCoreProperties, exactly four are letters -- the Hangul fillers
+#: U+115F, U+1160, U+3164, U+FFA0; and a sweep of EVERY code point that
+#: ``isalnum()`` accepts whose name carries FILLER, BLANK, SPACE, INVISIBLE,
+#: NULL or EMPTY found those four and two more -- EGYPTIAN HIEROGLYPH FULL
+#: BLANK and HALF BLANK, U+13441 and U+13442 -- and otherwise only the
+#: MATHEMATICAL MONOSPACE letters and digits, which matched on the substring
+#: and draw as letters. Kept as code points, not characters, so this file
+#: stays ASCII and the freeze can pin the tuple.
+_INVISIBLE_LETTER_CODES = (0x115F, 0x1160, 0x3164, 0xFFA0, 0x13441, 0x13442)
+
+
+def valid_named_profile_segment(segment: object) -> bool:
+    """True only for a segment :data:`NAMED_PROFILE_SEGMENT` admits AND whose
+    DECODED form is still a slug.
+
+    The shape check alone admits any run of non-ASCII octets. Decoded -- as
+    strict UTF-8, so a broken octet sequence refuses -- every character must be
+    a letter or a digit of any script, a hyphen or an underscore, and not one
+    of :data:`_INVISIBLE_LETTER_CODES`: an encoded no-break space, a direction
+    override, a zero-width character or a letter that draws as nothing does
+    not make a name into a slug.
+    """
+    if not isinstance(segment, str) or not NAMED_PROFILE_SEGMENT.fullmatch(segment):
+        return False
+    try:
+        decoded = unquote(segment, errors="strict")
+    except UnicodeDecodeError:
+        return False
+    return all(
+        (character.isalnum() and ord(character) not in _INVISIBLE_LETTER_CODES)
+        or character in "-_"
+        for character in decoded
+    )
+
+
+def named_profile_url(segment: str) -> str:
+    """The profile address for ONE caller-supplied segment, or raise.
+
+    Composed here from the segment and nothing else, so the address a named
+    act loads is provably the caller's own argument with LinkedIn's host
+    around it.
+    """
+    if not valid_named_profile_segment(segment):
+        raise WriteAttemptError(
+            f"navigation blocked: {segment!r} is not a profile segment this "
+            "server can address -- three to a hundred letters, digits, hyphens, "
+            "underscores or percent-encoded non-ASCII letters, taken from the "
+            "link you gave. A name is never accepted here."
+        )
+    return "https://www.linkedin.com/in/" + segment + "/"
+
+
+def assert_named_profile_url(url: str) -> str:
+    """Return ``url`` if it is ONE named profile's address, else raise.
+
+    Raises:
+        WriteAttemptError: the url is not exactly
+            ``https://www.linkedin.com/in/<segment>/`` for an admissible
+            segment, or it carries a forbidden substring. There is no
+            exemption table here: a segment that happens to contain
+            ``/invite``, ``/edit/`` or any other listed substring is refused,
+            and that costs a caller nothing but the one profile it names.
+    """
+    if not isinstance(url, str) or not url:
+        raise WriteAttemptError("empty navigation target")
+    if any(character.isspace() for character in url):
+        raise WriteAttemptError(
+            f"navigation blocked: {url!r} contains whitespace, which no "
+            "address this door rebuilds ever does."
+        )
+    matched = _NAMED_PROFILE_URL.fullmatch(url)
+    if not matched or not valid_named_profile_segment(matched.group(1)):
+        raise WriteAttemptError(
+            f"navigation blocked: {url!r} is not one named profile's address. "
+            "This door admits https://www.linkedin.com/in/<segment>/ and "
+            "nothing else -- no query, no sub-page, no other host."
+        )
+    lowered = url.lower()
+    for bad in _FORBIDDEN_URL_SUBSTRINGS:
+        if bad in lowered:
+            raise WriteAttemptError(
+                f"navigation blocked: {url!r} contains {bad!r}. The named-"
+                "profile door takes no exemption, so a segment carrying a "
+                "forbidden substring is refused rather than excused."
+            )
+    return url
 
 
 # ---------------------------------------------------------------------------

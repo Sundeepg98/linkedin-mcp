@@ -129,6 +129,13 @@ _TARGETS: dict[str, object] = {
     "setting_and_value": {"setting": "dark mode", "value": "Always on"},
     "member_and_text": {"member": "a needle nobody is", "text": "some text"},
     "thread_and_text": {"thread": "2-SYNTHETICTHREADAAAA==", "text": "some text"},
+    # 2026-09-27: a named person's profile, as a LINK -- a bare word is refused
+    # as a possible name. The segment carries a declared synthetic slug token.
+    "profile": "https://www.linkedin.com/in/someone-shape-example/",
+    "profile_and_text": {
+        "profile": "https://www.linkedin.com/in/someone-shape-example/",
+        "text": "some text",
+    },
 }
 
 

@@ -336,4 +336,10 @@ def test_both_rules_reject_the_registry_that_was_actually_measured():
     # linkedin_withdraw_from_group (census rows M C63 / N 64), on top of
     # master's fifty-six, measured off the merged registry and moved with
     # every other count site in the merge commit.
-    assert len(_tool_names()) == 57
+    # FIFTY-NINE AT LANE L5'S MERGE OF MASTER 52b55b6, the same day: two
+    # WRITES from its follow-up branch, linkedin_connect_from_profile and
+    # linkedin_message_from_profile (census N 4 by D6, N 2, and M M1; fifty-
+    # eight on that branch), on top of master's fifty-seven -- measured off the
+    # merged registry, not summed, and moved with every other count site in
+    # the merge commit.
+    assert len(_tool_names()) == 59
