@@ -10390,6 +10390,28 @@ census and the rule's mutation, the flake reproduction, the timings
 regenerator and the child's artifact, comparison and plan scripts -- are
 declared disposable. Their numbers are in the lane record.
 
+### 67.17 THE ORDER OF 2026-09-28 01:30: EVERY COLUMN, AND THE 22 READERS TRIAGED
+
+Record: the lane record's `## Order of 2026-09-28 01:30`. Every entry was
+shown failing on the tree before its fix.
+
+| path | shown failing by |
+|---|---|
+| `scripts/build_blocker_map.py` (`render`, `drift`, `--check` over the whole file) + `tests/test_blocker_map_is_derived.py` | master 5354d42's map and documents put back: HEAD's `--check` exited 0 and its test passed; the new `--check` exited 1 naming 64 rows by column, the new test failed; the old comparison noticed 1227 of 4100 mutated cells, the new one 4100 |
+| `tests/shipped_drives.py` (`DRIVES`, `TO_THE_PRESS`, `HELD_FOR_A_RULING`, `_drawn`) | each reader was recorded not driven before its drive; each drive raises when its fixture stops drawing the shape it rests on; the held drives return page text and are pinned so |
+| `tests/test_readers_emit_no_page_string.py` (`WHAT_WOULD_DRIVE_IT` and its holding test) | with an empty table, the committed guard failed naming all 22; before the last four entries, naming exactly those four |
+| `tests/test_readers_emit_no_page_string.py` (`REFUSED_AFTER_READ`, `ERRORED_AFTER_READ`, the furthest-variant rank in `_worst`) | of the new control rows, four failed on the prior guard's `classify_drive` and four on its `_worst` (the other nine pass on both, the controls against over-reach); against the prior baseline the coverage comparison failed naming the readers the refusal rule takes |
+| `tests/plantedpage.py` (`NavigationAttempted` a `BaseException`; `and_`/`or_`/`filter` on the planted and failing locators) | a reader that reads, clicks inside `except Exception` and returns what it had was clean on HEAD; with the three methods removed, three readers returned `{"error": "AttributeError"}` and read as clean |
+
+### 67.18 DECLARED DISPOSABLE (THE ORDER OF 01:30)
+
+The scratchpad helpers -- the column and mutation probes, the red
+reproductions against HEAD's guard, the censuses (refusal-only cleans,
+error-envelope cleans, swallowed navigation over the reader, failing-page
+and tool-envelope families, the two rank measurements), the drive verifiers
+and the children's drive drafts -- are declared disposable. Their numbers are
+in the lane record.
+
 ---
 
 ## 68. A DOWNLOAD TRANSPORT ON THE ATTACHED BROWSER, TESTED ON A FAKE CHROME THAT CAN SAY NO (lane-d, 2026-09-24)
