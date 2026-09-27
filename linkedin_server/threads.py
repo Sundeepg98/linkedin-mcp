@@ -58,7 +58,7 @@ import re
 from typing import Any, Optional
 from urllib.parse import urlsplit
 
-from linkedin_server import coerce, landing, shape
+from linkedin_server import coerce, landing, people_seam, shape
 from linkedin_server.errors import WriteAttemptError
 
 logger = logging.getLogger(__name__)
@@ -367,8 +367,12 @@ async def read_conversation_list(page: Any, *, include_names: bool = False) -> d
             record["group"] = bool(await _count(row.locator(GROUP_FACEPILE_SELECTOR)))
             if include_names:
                 names = row.locator(PARTICIPANT_NAMES_SELECTOR)
+                # THROUGH THE SEAM, 2026-09-27: every name this reader returns
+                # passes ``people_seam.name`` and nothing else, so lane G's
+                # shared sanitiser and marker adopt it in one place. Today the
+                # seam applies what ``_normalise`` did, character for character.
                 record["name"] = (
-                    _normalise(await names.first.inner_text())
+                    people_seam.name(await names.first.inner_text())
                     if await _count(names) == 1
                     else None
                 )

@@ -8033,6 +8033,280 @@ async def read_invitation_surface(
     return out
 
 
+# ---------------------------------------------------------------------------
+# A NAMED PERSON'S PROFILE -- read only inside an act he ordered
+# ---------------------------------------------------------------------------
+#
+# Ruling THIRD-PARTY-PROFILE-FOR-A-NAMED-TARGET (2026-09-24). Nothing in this
+# block navigates: ``writes._load_named_profile`` has already loaded the one
+# profile the caller named, through the named-profile door, and these readers
+# read what is in front of them.
+
+#: The Message control, MEASURED 2026-09-27 over every capture on disk: 18
+#: controls whose accessible name is ``Message <full name>`` -- ALL of them
+#: ``<a>``, 16 with an href on ``/messaging/compose/`` and 2 on
+#: ``/messaging/thread/``, and NONE a ``<button>``. Measured on people cards
+#: (search appearances, company people, his own profile's rail). A third
+#: party's profile has never been captured, so how ITS Message control is drawn
+#: is the first supervised act's to see; the reader below reports it.
+MESSAGE_CONTROL_PREFIX = "Message "
+MESSAGE_CONTROL = 'a[aria-label^="Message "], button[aria-label^="Message "]'
+
+
+def message_control_selector(index: int) -> str:
+    """ONE Message control, by its position in :data:`MESSAGE_CONTROL`'s list.
+
+    GUARDED the way :func:`invite_control_selector` is, and for the same
+    reason: the index is not chosen here, it is the output of
+    :data:`NAMED_PROFILE_JS`, which sets it ONLY when exactly one control's
+    accessible name names the profile's own owner. The name never reaches this
+    process; the position does.
+    """
+    if isinstance(index, bool) or not isinstance(index, int) or index < 0:
+        raise ValueError(
+            "message_control_selector needs a non-negative int index; a click "
+            "target is built from this string, so nothing else may reach it."
+        )
+    return MESSAGE_CONTROL + " >> nth=" + str(index)
+
+
+#: THE ONE SCRIPT A NAMED ACT RUNS ON THE PROFILE, and why it is a script.
+#:
+#: WHO the page belongs to and WHICH control is his are both questions about
+#: STRINGS THE PAGE HOLDS -- the owner's name, and every control's accessible
+#: name, which LinkedIn writes the name into. Comparing them in Python would
+#: bring every such label into this process; comparing them HERE returns
+#: integers, booleans and closed tokens and nothing else. Every field below is
+#: one of those. No name, no label, no href and no id crosses.
+#:
+#: WHAT IT RESTS ON, measured and derived, stated so a reader can weigh it:
+#:
+#: * the OWNER'S NAME is the document title minus a leading ``(N) `` -- the
+#:   notification count 21 of 95 captures carry -- and minus the trailing
+#:   `` | LinkedIn`` every profile title carries (measured);
+#: * the TOPCARD is the one element whose id ends ``Topcard`` (measured on his
+#:   own profile, 6 captures) and its FIRST HEADING must equal that name --
+#:   the same cross-check ``shape.pick_topcard`` makes. On a third party's
+#:   profile both are DERIVED: that page has never been captured;
+#: * the CONNECT control is ``INVITE_CONTROL`` (a ``<button>`` whose name ends
+#:   `` to connect``, measured 44 times) whose whole name is ``Invite <name>
+#:   to connect``; the MESSAGE control is ``MESSAGE_CONTROL`` whose whole name
+#:   is ``Message <name>``. Both conventions are measured on people cards;
+#: * the DEGREE is a topcard line that is exactly ``1st``, ``2nd`` or ``3rd``
+#:   (optionally ``3rd+``, optionally after a middle dot). DERIVED: no
+#:   capture holds a third party's topcard.
+#:
+#: A control whose name carries the owner's name but is neither of the two is
+#: reported as a CLOSED TOKEN -- pending, withdraw, follow, unfollow, more,
+#: remove, or unrecognised -- which is how the first supervised act records
+#: what a pressed Connect turns into without a label crossing.
+NAMED_PROFILE_JS = """
+(cfg) => {
+  const norm = (s) => String(s === null || s === undefined ? '' : s).replace(/\\s+/g, ' ').trim();
+  const out = {
+    title_shape: 'none',
+    topcards: 0,
+    topcard_headings: 0,
+    heading_matches_title: false,
+    degree: null,
+    degree_tokens: 0,
+    invite_controls: 0,
+    invite_matches: 0,
+    invite_index: null,
+    invite_in_topcard: 0,
+    message_controls: 0,
+    message_matches: 0,
+    message_index: null,
+    message_tag: null,
+    message_href: null,
+    message_in_topcard: 0,
+    more_actions: 0,
+    dialogs: 0,
+    composer_editors: 0,
+    conversation_bubbles: 0,
+    named_controls: []
+  };
+  out.dialogs = document.querySelectorAll('[role="dialog"]').length;
+  out.composer_editors = document.querySelectorAll('.msg-form__contenteditable').length;
+  out.conversation_bubbles = document.querySelectorAll('.msg-overlay-conversation-bubble').length;
+  out.invite_controls = document.querySelectorAll(cfg.inviteSelector).length;
+  out.message_controls = document.querySelectorAll(cfg.messageSelector).length;
+  const labelled = document.querySelectorAll('button[aria-label], a[aria-label]');
+  for (const el of labelled) {
+    if (norm(el.getAttribute('aria-label')) === 'More actions') out.more_actions += 1;
+  }
+  const title = norm(document.title).replace(/^\\(\\d+\\)\\s*/, '');
+  const suffix = ' | LinkedIn';
+  if (!title.endsWith(suffix)) return out;
+  const name = title.slice(0, title.length - suffix.length).trim();
+  if (!name) return out;
+  out.title_shape = 'profile';
+  const cards = document.querySelectorAll('[id$="Topcard"]');
+  out.topcards = cards.length;
+  const card = cards.length === 1 ? cards[0] : null;
+  if (card) {
+    const heads = card.querySelectorAll('h1, h2');
+    out.topcard_headings = heads.length;
+    out.heading_matches_title = heads.length >= 1 && norm(heads[0].innerText) === name;
+    const found = [];
+    for (const raw of String(card.innerText || '').split('\\n')) {
+      const line = norm(raw).replace(/^\\u00b7\\s*/, '');
+      const m = line.match(/^(1st|2nd|3rd\\+?)$/);
+      if (m) {
+        const token = m[1].indexOf('3rd') === 0 ? '3rd+' : m[1];
+        if (found.indexOf(token) === -1) found.push(token);
+      }
+    }
+    out.degree_tokens = found.length;
+    out.degree = found.length === 1 ? found[0] : null;
+  }
+  const wantInvite = 'Invite ' + name + ' to connect';
+  const invites = document.querySelectorAll(cfg.inviteSelector);
+  let matches = 0;
+  let index = null;
+  for (let i = 0; i < invites.length; i += 1) {
+    if (norm(invites[i].getAttribute('aria-label')) !== wantInvite) continue;
+    matches += 1;
+    index = matches === 1 ? i : null;
+    if (card && card.contains(invites[i])) out.invite_in_topcard += 1;
+  }
+  out.invite_matches = matches;
+  out.invite_index = matches === 1 ? index : null;
+  const wantMessage = 'Message ' + name;
+  const messages = document.querySelectorAll(cfg.messageSelector);
+  const hrefToken = (href) => {
+    if (href === null || href === undefined) return 'none';
+    const path = String(href).replace(/^https?:\\/\\/[^\\/]+/, '').split('?')[0].split('#')[0];
+    if (path === '/messaging/compose/' || path === '/messaging/compose') return 'compose';
+    if (path.indexOf('/messaging/thread/') === 0) return 'thread';
+    return 'other';
+  };
+  matches = 0;
+  index = null;
+  let tag = null;
+  let href = null;
+  for (let i = 0; i < messages.length; i += 1) {
+    if (norm(messages[i].getAttribute('aria-label')) !== wantMessage) continue;
+    matches += 1;
+    index = matches === 1 ? i : null;
+    const t = messages[i].tagName.toLowerCase();
+    tag = matches === 1 ? (t === 'a' || t === 'button' ? t : 'other') : null;
+    href = matches === 1 ? hrefToken(messages[i].getAttribute('href')) : null;
+    if (card && card.contains(messages[i])) out.message_in_topcard += 1;
+  }
+  out.message_matches = matches;
+  out.message_index = matches === 1 ? index : null;
+  out.message_tag = matches === 1 ? tag : null;
+  out.message_href = matches === 1 ? href : null;
+  const vocabulary = [
+    ['pending', /^Pending\\b/i],
+    ['withdraw', /withdraw/i],
+    ['unfollow', /^(Unfollow|Following)\\b/i],
+    ['follow', /^Follow\\b/i],
+    ['more', /^More\\b/i],
+    ['remove', /^Remove\\b/i]
+  ];
+  for (const el of labelled) {
+    const label = norm(el.getAttribute('aria-label'));
+    if (label === wantInvite || label === wantMessage) continue;
+    if (label.indexOf(name) === -1) continue;
+    let token = 'unrecognised';
+    for (const pair of vocabulary) {
+      if (pair[1].test(label)) { token = pair[0]; break; }
+    }
+    out.named_controls.push(token);
+  }
+  return out;
+}
+"""
+
+#: The degrees the script may return, and nothing else crosses in that field.
+PROFILE_DEGREES = ("1st", "2nd", "3rd+")
+
+#: The href tokens the script may return for the Message control.
+MESSAGE_HREF_TOKENS = ("none", "compose", "thread", "other")
+
+#: The tokens a control naming the owner may be classed as.
+NAMED_CONTROL_TOKENS = (
+    "pending", "withdraw", "unfollow", "follow", "more", "remove", "unrecognised",
+)
+
+
+async def read_named_profile(page: Any) -> dict[str, Any]:
+    """What a named person's profile draws, as integers and closed tokens.
+
+    Runs :data:`NAMED_PROFILE_JS` once and RE-CLOSES every field in Python, in
+    a second language, so a script edit that let a string through would be
+    narrowed here rather than followed: a count is coerced to an int, a token
+    outside its closed set becomes ``None`` (or ``unrecognised`` in the list),
+    and a field the script did not return reads as absent. ``error`` carries
+    an exception's TYPE only -- the page's own words never ride an exception
+    out of this function.
+    """
+    out: dict[str, Any] = {
+        "title_shape": "none",
+        "topcards": 0,
+        "topcard_headings": 0,
+        "heading_matches_title": False,
+        "degree": None,
+        "degree_tokens": 0,
+        "invite_controls": 0,
+        "invite_matches": 0,
+        "invite_index": None,
+        "invite_in_topcard": 0,
+        "message_controls": 0,
+        "message_matches": 0,
+        "message_index": None,
+        "message_tag": None,
+        "message_href": None,
+        "message_in_topcard": 0,
+        "more_actions": 0,
+        "dialogs": 0,
+        "composer_editors": 0,
+        "conversation_bubbles": 0,
+        "named_controls": [],
+        "error": None,
+    }
+    cfg = {"inviteSelector": INVITE_CONTROL, "messageSelector": MESSAGE_CONTROL}
+    try:
+        raw = await page.evaluate(NAMED_PROFILE_JS, cfg)  # readonly-ok
+    except Exception as exc:  # noqa: BLE001 - reported as a type, never raised
+        out["error"] = type(exc).__name__
+        logger.debug("named profile unreadable: %s", type(exc).__name__)
+        return out
+    reading = raw if isinstance(raw, dict) else {}
+    for key in (
+        "topcards", "topcard_headings", "degree_tokens", "invite_controls",
+        "invite_matches", "invite_in_topcard", "message_controls",
+        "message_matches", "message_in_topcard", "more_actions", "dialogs",
+        "composer_editors", "conversation_bubbles",
+    ):
+        out[key] = as_count(reading.get(key))
+    out["title_shape"] = "profile" if reading.get("title_shape") == "profile" else "none"
+    out["heading_matches_title"] = reading.get("heading_matches_title") is True
+    degree = reading.get("degree")
+    out["degree"] = degree if degree in PROFILE_DEGREES else None
+    for key in ("invite_index", "message_index"):
+        position = reading.get(key)
+        # ABSENT STAYS None: 0 is a real position, and "no match" must not
+        # collapse into "the first one".
+        out[key] = (
+            position
+            if isinstance(position, int) and not isinstance(position, bool) and position >= 0
+            else None
+        )
+    tag = reading.get("message_tag")
+    out["message_tag"] = tag if tag in ("a", "button", "other") else None
+    href = reading.get("message_href")
+    out["message_href"] = href if href in MESSAGE_HREF_TOKENS else None
+    named = reading.get("named_controls")
+    out["named_controls"] = [
+        token if token in NAMED_CONTROL_TOKENS else "unrecognised"
+        for token in (named if isinstance(named, list) else [])
+    ][:40]
+    return out
+
+
 async def read_messaging_badge(page: Any) -> dict[str, Any]:
     """The messaging nav badge, read WITHOUT opening messaging.
 

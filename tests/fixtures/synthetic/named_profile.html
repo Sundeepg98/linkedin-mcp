@@ -1,0 +1,206 @@
+<!doctype html>
+<!--
+  SYNTHETIC. NOT A CAPTURE -- AND NO CAPTURE OF THIS SURFACE EXISTS.
+
+  A third party's profile at /in/<segment>/, as the two named-person acts
+  (linkedin_connect_from_profile, linkedin_message_from_profile) read it. No
+  third party's profile has ever been captured by this server (0 of the 95
+  captures on disk, measured 2026-09-27), so every structural claim below is
+  either MEASURED ON ANOTHER SURFACE or DERIVED, and each says which.
+
+  MEASURED on his OWN profile (tests/fixtures/profile_topcard*.html and six
+  captures): the topcard is the one element whose id ends "Topcard"; its
+  name is an h2 (the page draws no h1); the title is "<name> | LinkedIn";
+  under the name come the headline, the location, "Contact info" and the
+  connection count, then the topcard's controls.
+
+  MEASURED on people cards (search appearances, company people, his own
+  profile's rail -- lane L5, 2026-09-27): the Connect control is a <button>
+  whose accessible name is "Invite <full name> to connect" (44 of 44); the
+  Message control is an <a> whose accessible name is "Message <full name>"
+  (18 of 18), 16 of them pointing at /messaging/compose/.
+
+  MEASURED on the messaging captures (lane L5, 2026-09-24): the reply form --
+  form.msg-form, one contenteditable role=textbox, a type=submit Send drawn
+  DISABLED while empty -- and the message list's event items, the other
+  side's wearing msg-s-event-listitem--other.
+
+  DERIVED, and every test that leans on one says so:
+    * that a third party's topcard is his topcard's template with a degree
+      line (a middle dot and "1st") under the name, and the two controls
+      above inside it;
+    * that a profile's Message press opens a conversation in LinkedIn's
+      overlay -- div.msg-overlay-conversation-bubble, OUTSIDE main --
+      carrying the measured form (NEEDS-CAPTURE C-P4);
+    * what a pressed Connect turns into (C-P2) and whether a dialog opens
+      (C-P3).
+
+  THE SCRIPT at the bottom stands in for LinkedIn's own, and attributes on
+  <body> choose its behaviour per test:
+    data-message-opens  conversation (default) | nothing | draft |
+                        new-message | navigates
+    data-dispatches     yes: a Send draws the words as a new last message
+                        and empties the box, as LinkedIn redraws
+    data-connect        nothing (default) | pending | dialog
+  Every labelled control pressed is appended to body[data-pressed], so a
+  test can say WHICH control a click reached. It is the fixture's script,
+  not this package's; nothing in linkedin_server injects script into a page.
+
+  Its CONTENT is invented: the names are nobody's, the member ids are the
+  declared synthetic tokens, and the words were written for this file.
+-->
+<html lang="en">
+<head><title>Casey Example | LinkedIn</title></head>
+<body data-message-opens="conversation" data-connect="nothing">
+
+<header class="global-nav">
+  <div class="global-nav__search"><input class="search-global-typeahead__input" role="combobox" aria-expanded="false" aria-label="Search" type="text"></div>
+</header>
+
+<main class="scaffold-layout__main">
+<section aria-label="Primary content">
+<div id="com.linkedin.sdui.profile.card.refACoAASYNTHETICSYNTHETICSYNTHETIC0000002Topcard">
+  <section class="topcard-body">
+    <h2>Casey Example</h2>
+    <p>&#183; 1st</p>
+    <p>Invented headline for a synthetic person</p>
+    <p>Example City, Example Region</p>
+    <p><a href="#contact-info">Contact info</a></p>
+    <p>312 connections</p>
+    <div class="topcard-actions">
+      <a aria-label="Message Casey Example" href="/messaging/compose/?recipient=ACoAASYNTHETICSYNTHETICSYNTHETIC0000002&amp;screenContext=NON_SELF_PROFILE_VIEW" id="topcard-message">Message</a>
+      <button type="button" aria-label="Invite Casey Example to connect" id="topcard-connect">Connect</button>
+      <button type="button" aria-label="More actions">More</button>
+    </div>
+  </section>
+</div>
+</section>
+
+<section class="about">
+  <h2>About</h2>
+  <p>Invented about text, written for this file.</p>
+</section>
+</main>
+
+<aside class="scaffold-layout__aside">
+  <section>
+    <h2>More profiles for you</h2>
+    <ul>
+      <li><span>Morgan Example</span> <button type="button" aria-label="Invite Morgan Example to connect">Connect</button></li>
+      <li><span>Riley Example</span> <a aria-label="Message Riley Example" href="/messaging/compose/?recipient=ACoAASYNTHETICSYNTHETICSYNTHETIC0000003">Message</a></li>
+    </ul>
+  </section>
+</aside>
+
+<div class="msg-overlay-container" id="msg-overlay"></div>
+
+<script>
+(function () {
+  var body = document.body;
+  var owner = 'Casey Example';
+  var overlay = document.getElementById('msg-overlay');
+
+  function pressed(label) {
+    body.setAttribute('data-pressed', (body.getAttribute('data-pressed') || '') + '[' + label + ']');
+  }
+
+  function openConversation() {
+    var mode = body.getAttribute('data-message-opens') || 'conversation';
+    if (mode === 'nothing') { return; }
+    if (mode === 'navigates') { window.location.hash = 'conversation'; }
+    var bubble = document.createElement('div');
+    bubble.className = 'msg-overlay-conversation-bubble';
+    var header = document.createElement('header');
+    header.className = 'msg-overlay-bubble-header';
+    header.textContent = owner;
+    bubble.appendChild(header);
+    var list = document.createElement('ul');
+    list.className = 'msg-s-message-list-content';
+    list.innerHTML =
+      '<li class="msg-s-message-list__event clearfix msg-s-message-list__last-msg-">' +
+      '<div class="msg-s-event-listitem msg-s-event-listitem--last-in-group msg-s-event-listitem--other">' +
+      '<p class="msg-s-event-listitem__body t-14">Good to hear from you last month.</p></div></li>' +
+      '<li class="msg-s-message-list__typing-indicator-container--without-seen-receipt"></li>';
+    bubble.appendChild(list);
+    if (mode === 'new-message') {
+      var typeahead = document.createElement('div');
+      typeahead.className = 'msg-connections-typeahead';
+      typeahead.innerHTML = '<input class="msg-connections-typeahead__search-field" role="combobox" aria-expanded="false" type="text">';
+      bubble.appendChild(typeahead);
+    }
+    var form = document.createElement('form');
+    form.className = 'msg-form';
+    if (body.getAttribute('data-dispatches') === 'yes') { form.setAttribute('data-dispatches', 'yes'); }
+    var editor = document.createElement('div');
+    editor.className = 'msg-form__contenteditable t-14';
+    editor.setAttribute('contenteditable', 'true');
+    editor.setAttribute('role', 'textbox');
+    editor.setAttribute('aria-multiline', 'true');
+    editor.setAttribute('aria-label', 'Write a message…');
+    var send = document.createElement('button');
+    send.type = 'submit';
+    send.className = 'msg-form__send-button artdeco-button';
+    send.textContent = 'Send';
+    if (mode === 'draft') {
+      editor.textContent = 'an old draft';
+    } else {
+      send.disabled = true;
+    }
+    form.appendChild(editor);
+    form.appendChild(send);
+    bubble.appendChild(form);
+    overlay.appendChild(bubble);
+    editor.addEventListener('input', function () {
+      send.disabled = (editor.textContent.trim().length === 0);
+    });
+    form.addEventListener('submit', function (event) {
+      event.preventDefault();
+      if (form.getAttribute('data-dispatches') !== 'yes') { return; }
+      var words = editor.textContent.trim();
+      var previous = list.querySelector('.msg-s-message-list__last-msg-');
+      if (previous) { previous.className = 'msg-s-message-list__event clearfix'; }
+      var li = document.createElement('li');
+      li.className = 'msg-s-message-list__event clearfix msg-s-message-list__last-msg-';
+      var item = document.createElement('div');
+      item.className = 'msg-s-event-listitem msg-s-event-listitem--last-in-group';
+      var words_node = document.createElement('p');
+      words_node.className = 'msg-s-event-listitem__body t-14';
+      words_node.textContent = words;
+      item.appendChild(words_node);
+      li.appendChild(item);
+      list.insertBefore(li, list.lastElementChild);
+      editor.textContent = '';
+      send.disabled = true;
+    });
+  }
+
+  function connect(control) {
+    var mode = body.getAttribute('data-connect') || 'nothing';
+    if (mode === 'pending') {
+      control.setAttribute('aria-label', 'Pending, click to withdraw invitation sent to ' + owner);
+      control.textContent = 'Pending';
+    } else if (mode === 'dialog') {
+      var dialog = document.createElement('div');
+      dialog.setAttribute('role', 'dialog');
+      dialog.innerHTML =
+        '<p>Add a note to your invitation?</p>' +
+        '<button type="button">Add a note</button>' +
+        '<button type="button">Send without a note</button>';
+      body.appendChild(dialog);
+    }
+  }
+
+  document.addEventListener('click', function (event) {
+    var control = event.target.closest('a[aria-label], button[aria-label]');
+    if (!control) { return; }
+    var label = control.getAttribute('aria-label');
+    pressed(label);
+    if (control.tagName === 'A') { event.preventDefault(); }
+    if (label === 'Message ' + owner) { openConversation(); }
+    if (label === 'Invite ' + owner + ' to connect') { connect(control); }
+  }, true);
+}());
+</script>
+
+</body>
+</html>

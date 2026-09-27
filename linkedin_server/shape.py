@@ -19,6 +19,7 @@ import re
 from typing import Any, Iterable, Optional, Sequence
 from urllib.parse import parse_qs, unquote, unquote_plus, urlsplit
 
+from linkedin_server import people_seam
 from linkedin_server.config import MAX_TEXT_CHARS
 
 # ---------------------------------------------------------------------------
@@ -4560,10 +4561,14 @@ def messaging_overview(
     in_rows = sum(1 for r in rows if r["unread"])
     on_a_thread = "/messaging/thread/" in (landed_url or "")
 
+    # A NAME LEAVES THROUGH THE PEOPLE SEAM (2026-09-27), where lane G's
+    # shared sanitiser and untrusted-text marker adopt it: PEOPLE-DATA-
+    # MITIGATIONS item 2. See ``linkedin_server/people_seam.py`` and the
+    # failing-until-adopted tests in ``tests/test_people_seam.py``.
     conversations = [
         {
             "position": row["position"],
-            "name": row["name"] if include_names else NAME_PLACEHOLDER,
+            "name": people_seam.name(row["name"]) if include_names else NAME_PLACEHOLDER,
             "unread": row["unread"],
         }
         for row in rows

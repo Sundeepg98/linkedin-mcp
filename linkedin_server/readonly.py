@@ -2695,6 +2695,107 @@ def is_read_url(url: str) -> bool:
 
 
 # ---------------------------------------------------------------------------
+# 1b. The SECOND door: one third party's profile, for an act he named
+# ---------------------------------------------------------------------------
+#
+# RULING ``THIRD-PARTY-PROFILE-FOR-A-NAMED-TARGET`` (the orchestrator,
+# 2026-09-24, applying WRITE-CLASS-B; registered in
+# ``_audit/2026-09-24-rulings-notify-veto-and-who-which.md``): a third party's
+# profile, ``/in/<slug>/``, may be loaded ONLY inside an outward act whose
+# target the operator names in that call -- the slug from the tool's arguments
+# only, never from page content, and never for a measurement.
+#
+# SO IT IS NOT A READ, AND THE READ DOOR STILL REFUSES IT. ``assert_read_url``
+# and every table above are unchanged: ``/in/me/`` is the one member segment
+# the allowlist admits, and ``is_read_url`` is False for every other profile.
+# This door is SEPARATE and NARROWER. It admits exactly one shape --
+# ``https://www.linkedin.com/in/<segment>/``, the segment a caller's -- and the
+# forbidden-substring list applies to it WITHOUT ANY EXEMPTION. It has one
+# caller in the package: ``browser.LinkedInBrowser.goto`` with
+# ``named_profile=True``, which ``writes._load_named_profile`` alone passes,
+# and that function refuses any spec that is not a named-profile write. Both
+# facts are pinned in ``tests/test_named_profile_route.py``.
+#
+# WHY A SECOND DOOR RATHER THAN AN ALLOWLIST LINE. An allowlist line admits a
+# shape for EVERY caller, and the whole of the ruling is WHO may load it: the
+# act he ordered, aimed at the person he named. A read tool that could reach
+# ``/in/<slug>/`` is the thing ``PERMANENTLY_FORBIDDEN`` names -- a stranger's
+# privacy spent on a measurement.
+
+#: One profile's address segment, as a caller hands it over: a vanity name or
+#: a member id. Three to a hundred units, each a letter, a digit, a hyphen, an
+#: underscore or one percent-encoded octet (LinkedIn serves non-ASCII vanity
+#: names percent-encoded), and it may not open with a hyphen or an underscore.
+#: ``me`` cannot pass: it is two characters, and it is HIS OWN profile, which
+#: the read door already admits and which this door has no reason to.
+NAMED_PROFILE_SEGMENT = re.compile(
+    r"^(?:[A-Za-z0-9]|%[0-9A-Fa-f]{2})(?:[A-Za-z0-9_\-]|%[0-9A-Fa-f]{2}){2,99}$"
+)
+
+#: The one address this door admits. Rebuilt, never parsed loosely: no query,
+#: no fragment, no sub-page, the host LinkedIn's own, and the trailing slash.
+_NAMED_PROFILE_URL = re.compile(r"^https://www\.linkedin\.com/in/([^/?#]+)/$")
+
+
+def valid_named_profile_segment(segment: object) -> bool:
+    """True only for a segment :data:`NAMED_PROFILE_SEGMENT` admits."""
+    return isinstance(segment, str) and bool(NAMED_PROFILE_SEGMENT.fullmatch(segment))
+
+
+def named_profile_url(segment: str) -> str:
+    """The profile address for ONE caller-supplied segment, or raise.
+
+    Composed here from the segment and nothing else, so the address a named
+    act loads is provably the caller's own argument with LinkedIn's host
+    around it.
+    """
+    if not valid_named_profile_segment(segment):
+        raise WriteAttemptError(
+            f"navigation blocked: {segment!r} is not a profile segment this "
+            "server can address -- three to a hundred letters, digits, hyphens, "
+            "underscores or percent-encoded octets, taken from the link you "
+            "gave. A name is never accepted here."
+        )
+    return "https://www.linkedin.com/in/" + segment + "/"
+
+
+def assert_named_profile_url(url: str) -> str:
+    """Return ``url`` if it is ONE named profile's address, else raise.
+
+    Raises:
+        WriteAttemptError: the url is not exactly
+            ``https://www.linkedin.com/in/<segment>/`` for an admissible
+            segment, or it carries a forbidden substring. There is no
+            exemption table here: a segment that happens to contain
+            ``/invite``, ``/edit/`` or any other listed substring is refused,
+            and that costs a caller nothing but the one profile it names.
+    """
+    if not isinstance(url, str) or not url:
+        raise WriteAttemptError("empty navigation target")
+    if any(character.isspace() for character in url):
+        raise WriteAttemptError(
+            f"navigation blocked: {url!r} contains whitespace, which no "
+            "address this door rebuilds ever does."
+        )
+    matched = _NAMED_PROFILE_URL.fullmatch(url)
+    if not matched or not valid_named_profile_segment(matched.group(1)):
+        raise WriteAttemptError(
+            f"navigation blocked: {url!r} is not one named profile's address. "
+            "This door admits https://www.linkedin.com/in/<segment>/ and "
+            "nothing else -- no query, no sub-page, no other host."
+        )
+    lowered = url.lower()
+    for bad in _FORBIDDEN_URL_SUBSTRINGS:
+        if bad in lowered:
+            raise WriteAttemptError(
+                f"navigation blocked: {url!r} contains {bad!r}. The named-"
+                "profile door takes no exemption, so a segment carrying a "
+                "forbidden substring is refused rather than excused."
+            )
+    return url
+
+
+# ---------------------------------------------------------------------------
 # 2. Source scanner
 # ---------------------------------------------------------------------------
 
