@@ -2116,3 +2116,239 @@ NOT RUN:
 - `focused` and `other` stay in the tool's permitted set and can never be
   activated on the measured page; whether to retire them from what the
   tool accepts is the tool owner's call.
+
+## Order of 2026-09-27 23:36: the suite reaches the network, and three guard and infra items
+
+The orchestrator's order to lane G, 2026-09-27 23:36 IST. Disk agreed with
+its sample at the start: master at 687b07c, this branch at ae24426 and an
+ancestor of it, a clean tree; the branch was fast-forwarded to 687b07c.
+
+### S.0 Commits, with their times from `git log`
+
+```
+a6151e7  09-28 00:02  no test reaches the network: the guard refuses every request off the machine, and fails the test that made it by name
+514c6fc  09-28 00:02  tracker readiness: the empty-tab test compares against the ceiling it exists to catch, not a wall-clock constant
+4201345  09-28 00:11  network guard test: its local file address names no drive root
+041903b  09-28 00:11  reader guard: clean is earned -- a drive counts clean only when the reader read the page and returned something
+1e48adb  09-28 00:13  ci shard timings: --write-timings reads every shard's junit, and the table is rebuilt from green run 36338770074
+447936d  09-28 00:37  merge master 5354d42 into lane G: lane S's people search meets the network guard and the earned-clean rule
+0a7e496  09-28 00:39  reader guard: a people reader's clean is earned only by its records -- lane S's reader, which built none
+```
+
+This record's commit follows them. None of these hashes is on `master` yet:
+each does not resolve on `master` until the orchestrator merges this branch.
+
+### S.1 Item 1 (HIGH): no test reaches the network, enforced
+
+`tests/network_guard.py`, registered by `tests/conftest.py` through
+`pytest_plugins`, so CI and every local run have it with no flag. At
+configure time it wraps Playwright's `Browser.new_context`,
+`Browser.new_page` and `BrowserType.launch_persistent_context`, async and
+sync, and gives every context one route. Loopback and `data:`, `about:`,
+`blob:`, `file:` and browser-internal addresses fall back to the test's own
+routes and then the browser. Every other request is aborted before it leaves
+-- `blockedbyclient`, an error a DNS failure never produces -- and recorded
+against the running test, and `pytest_runtest_makereport` fails that test's
+report, naming the test and every refused address. A page route a test
+registers outranks it, so a page a test serves itself is untouched. The
+conftest's opening sentence now says the rule is enforced.
+
+RED FIRST, the guard on and nothing else changed, the two files lane L5 named:
+exactly 11 failed -- 7 and 4 -- each naming itself and one address, the apply
+anchor's href on the job posting captures
+(`https://www.linkedin.com/jobs/view/4600000042/apply/?openSDUIApplyFlow=true&`).
+Measured here, and the same eleven L5 measured.
+
+SERVED LOCALLY. `tests/test_writes.py`'s `FixtureNavigator`, which serves the
+posting, now answers its apply anchor too: `APPLY_NAVIGATION`, fulfilled with
+`204 No Content`, which a browser treats as a navigation that lands nowhere --
+the page stays on the capture, as on LinkedIn, where script opens the apply
+flow in place -- and each answer is recorded in `.answered`. The two files,
+guard on: 45 passed.
+
+THE GUARD SHOWN WORKING, `tests/test_no_test_reaches_the_network.py`: it is
+registered with no flag; a planted request to an `.invalid` address -- a name
+that can never resolve, so a broken guard would still send nothing -- is
+refused with the guard's own error and recorded, through `new_page` and
+through `new_context`; a loopback request and a page the test serves itself
+are not refused; and a test that reaches out FAILS, in its own pytest process,
+naming itself and the address. 17 passed. Three mutations of the guard, each
+in a scratch copy of the tree -- it never refuses; a refusal never fails the
+test; `new_page` left unwrapped -- each turned its tests red, and the clean
+copy passed 17.
+
+AND A SLIP OF THIS LANE'S, FOUND BY ITS CHILD. That test file's table of local
+addresses held a file URL rooted at a Windows drive, and
+`tests/test_no_committed_identity.py`'s drive-root rule refuses one in any
+tracked file. The guard's own gate had run its own files and not the corpus
+sweeps; the child ran them. `4201345` makes the address POSIX.
+
+WHAT IT DOES NOT COVER, named in the module: a request made outside a browser
+(`urllib`, `requests`, Playwright's `APIRequestContext`), and a browser a test
+starts in a subprocess -- no test does either today.
+
+### S.2 Item 2: the reader guard counts a reader clean only when its success path ran
+
+MEASURED FIRST over the 109 readers the committed baseline called clean, with
+the guard's own variants and a page that counts its reads: 86 read the page
+and returned something; 13 returned without one read; 10 read and returned
+only an empty shape. Ten of the thirteen returned a refusal with a sentence in
+it -- `{"refused": ..., "why": ...}` -- which is not empty and read nothing, so
+a non-empty result alone is not the proof. Three read by hand to check the
+counter: an argument refused on the first line (a section name, an activity
+id), and a refused navigation caught and returned as a normal-looking dict.
+
+- `tests/plantedpage.py`: `PlantedPage` counts its reads, through
+  `__getattribute__` over its read entry points, so an overriding subclass is
+  counted too.
+- The guard: `classify_drive` takes the drive's OWN reads -- a paired
+  Observation's are the harness's and are subtracted -- and a clean drive must
+  show a read AND a result that is not an empty shape. Otherwise it is a
+  not-driven reason, never a pass: "returned without reading the page", or
+  "read the page and returned only an empty shape". A plant in the result
+  already shows both.
+- THIS LANE'S TWO PREVIEW NAMERS -- the reply's and the invitation's -- were
+  two of the vacuous cleans. They get as-shipped drives beside L5's for
+  `named_profile`: the reply namer over a group conversation and a
+  one-member one, the invitation namer over a rail holding one matched
+  control. Both now drive to `returns_records`.
+
+RED FIRST: the new rule against the committed baseline named every reader that
+had been clean on nothing. Regenerated with the baseline's own writer: 23
+verdicts moved -- 21 from clean to an honest not-driven reason, the two namers
+to `returns_records` -- and no other verdict moved. Clean 86, text 40, not
+driven 39, records 3.
+
+THE CONTROL THE ORDER NAMED: `anchors.read_anchors` is clean; stubbed to return
+a refusal before reading, or to read and return an empty shape, it is not; and
+with the stub in the package the coverage comparison fails, naming it. With
+`classify_drive` put back to the old rule, the stub control and both rule-table
+rows go red. The guard and its neighbours: 770 passed.
+
+AND THE RULE AS FIRST BUILT DID NOT CATCH THE READER THE ORDER NAMED. Lane S's
+`people_results.read_result_people` arrived with the merge of master 5354d42
+(S.5), and "a read and a non-empty result" counted it clean: SHOWN, it read the
+planted page once, skipped its one card for want of a member link, and returned
+its denominators -- non-empty, and no record in them. The order's own words
+cover it: "records, or a non-empty result". A reader whose code reaches a
+people-record builder -- `record_readers()`, from the bounded-reader guard's own
+closure, stopped at the write door as there -- earns clean only with a record:
+"not_driven:reaches a people-record builder and built no record". Of the 7
+discovered readers that reach a builder, lane S's was the only one recorded
+clean. Regenerated: that one verdict moved. Its drive that reaches the records
+is its owner's to build, as `named_profile`'s was.
+
+### S.3 Item 3: the timings table is written from every shard's junit
+
+Built by this lane's child to a closed spec and reviewed here line by line.
+`--write-timings` takes one or more reports; `slowest_seconds_per_file`
+prices a file found in several -- it ran in several cells -- at the LARGEST of
+its per-report totals, because every cell runs the same split and the slowest
+cell sets the wall clock; a report that prices nothing is refused by name.
+RED FIRST on the unchanged script: 4 failed ("unrecognized arguments"), the
+fifth -- the single-report output, pinned to the character -- passing, as a
+regression pin should. Eight wrong combining rules planted in scratch copies,
+each caught.
+
+SHOWN ON GREEN RUN 36338770074 (head 687b07c): 18 artifacts' junits, 3 cells x
+6 shards, no failure and no error in any. The table rebuilt from them prices
+271 files, 3258.6 s, `_tests` 11396 -- the run's own collected count. It was
+regenerated a second time here from the downloaded artifacts with the reviewed
+code, and is byte-identical. It replaced a table of 186 files, 1810.6 s,
+measured serially on one laptop, pricing only 4.7 files above its own
+two-thirds line. Windows is the slowest cell for 231 of the 271 files. The
+shard tests over it: 378 passed.
+
+### S.4 Item 4: the empty-tab test measures the ceiling, not a wall clock
+
+RED FIRST, deterministically: the wait over the empty tab capture in a real
+headless Chromium with 320 ms of round-trip latency added to its locator, as
+the load: `attached=True`, 444 ms, and the test's 300 ms assertion failed on a
+tab that had resolved. Without the latency: 126 ms.
+
+CHOSEN: compare against the delay the test exists to catch. That delay is the
+ceiling -- a wait that ignores the empty half of the disjunction pays all of
+it on every empty tab -- so the test waits under a 4 s ceiling and asserts the
+tab resolved and paid under half: load adds hundreds of milliseconds, the
+defect adds the whole ceiling. NOT isolation from `-n` load, which hides the
+latency rather than tolerating it. IT STILL FAILS WHEN THE DELAY IS REAL,
+driven in a new test: with 350 ms of added latency the rule holds, and the old
+assertion on the same verdict would not; with the empty half removed from the
+selector, under a 1 s ceiling, the wait pays the whole bound and the rule
+fails. The file: 21 passed.
+
+### S.5 Integration: master 5354d42
+
+At the end of the four items master had moved from 687b07c to 5354d42, lane
+S's merge: its people search reader, names tests and fixture, census moves and
+the tool-surface pin, 10 commits. Integrated once, in one merge commit, after a
+dry run.
+
+- ONE CONFLICT, `scripts/ci_shard_timings.json`: lane S had added one file,
+  `tests/test_people_search_names.py`, priced serially on a laptop, to the old
+  table. Resolved to this branch's table whole, so the table stays one
+  measurement from one CI run; lane S's file is priced at the mean rate until
+  the next regeneration, one command over a green run's artifacts. It prices
+  271 of the merged tree's 273 test files.
+- `tests/reader_leak_baseline.json` merged cleanly with lane S's reader recorded
+  clean -- the vacuous verdict S.2's refinement then moved.
+- LANE S'S BROWSER TESTS UNDER THE GUARD: its files, with the reader guard and
+  its neighbours, 1201 passed, 1 xfailed, and no test refused for reaching the
+  network.
+
+### S.6 Gates run, and what did not run
+
+    gate                                         result
+    item 1: the two files, guard on, before       11 failed, 34 passed: the eleven,
+      the local answer                            each by name
+    item 1: the same, after                       45 passed
+    item 1: the guard's own tests                 17 passed; 3 mutations, each red
+    item 2: the rule against the committed        red, naming every vacuous clean
+      baseline
+    item 2: the guard and its neighbours          770 passed; the rule's mutation red
+    item 3: the child's red, reviewed on disk     4 failed, 132 passed
+    item 3: the shard tests over the new table    378 passed
+    item 4: the file                              21 passed
+    before the merge: THE IMPACT GATE at 1e48adb  it WIDENED TO THE FULL SUITE (the
+      (does not resolve on `master` until this    conftest is runner-wide): PASS,
+      branch merges), guard on                   11434 tests, 1226.3 s; no test
+                                                 refused for the network
+    the merge: lane S's files and the guards     1201 passed, 1 xfailed
+    THE FINAL GATE: the impact gate against      WIDENED TO THE FULL SUITE: PASS,
+      master 5354d42, on this branch's head      11532 tests, 950.0 s, a clean tree;
+      0a7e496, which does not resolve on         no test refused for the network
+      `master` until this branch merges;
+      sharded under xdist, guard on
+    CPython 3.10.19 through uv, Playwright       721 passed on the same head, a clean
+      pinned to the venv's 1.63.0: the three     tree (714 before the merge)
+      changed test files that use no browser,
+      and the guard's own test file
+    this record and the register entries: the    1189 passed, on their text as
+      twelve document, register and identity     staged before this row was added;
+      guards; nothing else changed since the     then the cited-hash guard alone on
+      final gate                                 the final text, OK
+
+NOT RUN:
+
+- **CI on any platform** (nothing pushed), **a cold verification pass**,
+  **anything live**.
+- **The 3.10 cell for the browser-driven files this order changed**
+  (`tests/test_writes.py`, `tests/test_tracker_readiness.py`); CI's matrix
+  runs 3.10, and the guard's own browser tests did run on 3.10 above.
+- **The whole suite on 3.10.**
+
+### S.7 Open, for other owners
+
+- 21 READERS ARE NOW RECORDED NOT DRIVEN, each with its reason in
+  `tests/reader_leak_baseline.json`: they had been clean having read nothing,
+  or having read and returned only empty shapes. Each needs a drive that
+  reaches its success path, the way this lane's two namers and
+  `named_profile`'s got one; their owners know which values unlock them.
+- THE SHARD SPLIT MOVES WHEN ANY PRICED FILE GAINS A TEST, measured by the
+  child: an unpriced file is weighted by test count times a mean rate whose
+  denominator includes the priced files' tests. Under the new table, pricing
+  271 of 272 files, 7 added tests moved no file; under the old one they moved
+  155 of 271. The rule remains.
+- THE WINDOWS WALL CLOCK IS BOUNDED BY ONE FILE, not by this table:
+  `tests/test_writes.py` took 185.7 s of its shard's 200.1 s, and `--dist
+  loadfile` keeps a file on one worker.
