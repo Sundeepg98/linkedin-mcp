@@ -462,7 +462,11 @@ def test_the_tool_hands_compose_its_own_parameters_and_nothing_else() -> None:
     call = calls[0]
     assert not call.args, "compose is called by keyword only"
     passed = {kw.arg: kw.value for kw in call.keywords}
-    assert sorted(passed) == sorted(params)
+    # EVERY PARAMETER BUT ONE. ``include_names`` (2026-09-27, lane S, names at
+    # runtime) decides what is READ off the page, never where the tool goes:
+    # it is not handed to compose, so the address cannot depend on it.
+    assert "include_names" in params and "include_names" not in passed
+    assert sorted(passed) == sorted(p for p in params if p != "include_names")
     for name, value in passed.items():
         assert isinstance(value, ast.Name) and value.id == name, (
             f"compose({name}=...) is handed {ast.unparse(value)}, not the "
@@ -737,17 +741,27 @@ def test_an_unparseable_landing_reads_unreadable_not_a_guess() -> None:
 # page having been captured. When that reader lands and
 # `linkedin_people_search_shape` returns names through it, the three move to
 # COVERED-UNFIRED, and this table moves with them in the same commit.
+#
+# AND THEY DID, 2026-09-27 (lane S, names adoption): the reader is
+# `people_results.read_result_people`, reached by
+# `linkedin_people_search_shape(include_names=True)`, held to the six
+# mitigations by tests/test_people_search_names.py. All seven rows are
+# COVERED-UNFIRED now -- four FILTER rows by the counts, three WHO rows by the
+# names -- and none of them is in the address table.
 
-#: row -> the state the WHO rule gave it.
+#: row -> its state, and what delivers it.
 ROW_STATES: dict[str, str] = {
-    "79": "GAP",   # search for a person -- WHO
+    "79": "COVERED-UNFIRED",   # search for a person -- WHO, by the names
     "84": "COVERED-UNFIRED",   # filter by current company -- a FILTER
     "85": "COVERED-UNFIRED",   # filter by connections of -- a FILTER
     "87": "COVERED-UNFIRED",   # filter by past company -- a FILTER
     "94": "COVERED-UNFIRED",   # several locations in one search -- a FILTER
-    "172": "GAP",  # view a member's connections -- WHO
-    "194": "GAP",  # find hiring managers -- WHO
+    "172": "COVERED-UNFIRED",  # view a member's connections -- WHO, by the names
+    "194": "COVERED-UNFIRED",  # find hiring managers -- WHO, by the names
 }
+
+#: The three rows whose payload is WHO, delivered by the names since 2026-09-27.
+WHO_ROWS = ("79", "172", "194")
 
 _ROW = re.compile(r"^\|\s*(\d+)\s*\|[^|]*\|\s*R\s*\|\s*\*{0,2}([A-Z-]+)\*{0,2}\s*\|(.*)$")
 
@@ -772,60 +786,53 @@ def test_the_table_covers_exactly_the_seven_rows() -> None:
 
 
 @pytest.mark.parametrize("row", ROWS)
-def test_the_row_claims_what_the_who_rule_gave_it(row: str) -> None:
-    """A fire that moves a row must move this in the same commit. The
-    operator's answer on names (NAMES-AT-RUNTIME, 2026-09-24) moved each GAP
-    row's BLOCKER, not its state, and this reads the blocker a reader of the
-    cell ends on."""
+def test_the_row_claims_what_delivers_it(row: str) -> None:
+    """A fire that moves a row must move this in the same commit.
+
+    THE THREE WHO ROWS OPEN ON THE PARAGRAPH THAT MOVED THEM (2026-09-27),
+    naming the reader and the file that holds it to the mitigations; the WHO
+    rule's paragraph and the names-at-runtime paragraph stay after it as those
+    days' record, in the order they were written. The four FILTER rows keep
+    the WHO rule's verdict on them."""
     state, note = _network_rows()[row]
     assert state == ROW_STATES[row], (row, state)
-    # Every row names the reader it rests on or is blocked beside.
+    # Every row names the reader it rests on.
     assert "linkedin_people_search_shape" in note
     assert "people_search" in note
-    if ROW_STATES[row] == "GAP":
-        # THE DOCTRINE BLOCKER STAYS IN THE CELL AS THAT DAY'S RECORD, AND
-        # THE PARAGRAPH AFTER IT SAYS IT WAS ANSWERED AND NAMES WHAT HOLDS
-        # THE ROW NOW -- in that order, so the cell cannot end on a blocker
-        # that no longer holds.
-        doctrine = note.find("BLOCKER, NAMED: the name-free shaper doctrine")
-        answered = note.find("THE DOCTRINE BLOCKER ABOVE IS ANSWERED AND "
-                             "ITS REOPENER HAS FIRED")
-        now = note.find("BLOCKER, NAMED, SINCE THEN: a name-returning reader "
-                        "held to `PEOPLE-DATA-MITIGATIONS`")
-        assert 0 <= doctrine < answered < now, (row, doctrine, answered, now)
-        assert "`NAMES-AT-RUNTIME`" in note[answered:]
-        assert "people-record foundation lane G is building" in note[now:]
-        assert "HELD BY `" not in note
+    assert "HELD BY `" not in note
+    if row in WHO_ROWS:
+        opened = "**COVERED-UNFIRED 2026-09-27 (lane S, names at runtime):"
+        assert note.lstrip().startswith(opened), row
+        head = note[: note.find("**GAP 2026-09-24 UNDER THE WHO RULE")]
+        assert "`people_results.read_result_people`" in head
+        assert "include_names=True" in head
+        assert "`tests/test_people_search_names.py`" in head
+        assert "`PEOPLE-DATA-MITIGATIONS`" in head
+        # The earlier record is kept, and in the order it was written.
+        who = note.find("**GAP 2026-09-24 UNDER THE WHO RULE")
+        names = note.find("NAMES AT RUNTIME, 2026-09-24 (lane S, integrating")
+        assert 0 < who < names, (row, who, names)
     else:
         assert "WHO RULE, 2026-09-24" in note and "STAYS COVERED-UNFIRED" in note
 
 
-def test_the_who_rows_are_gated_reader_in_the_address_table() -> None:
-    """The three WHO rows stay in bucket 3. Gated RULING from the WHO rule
-    until NAMES-AT-RUNTIME answered the question (2026-09-24), READER since:
-    their page is captured and each waits on a name-returning reader. The
-    earlier note is kept, after a marker saying what answered it."""
+def test_none_of_the_seven_is_in_the_address_table() -> None:
+    """Bucket 3 holds read GAP rows only. The four FILTER rows left it on
+    2026-09-24; the three WHO rows, gated READER there from their follow-up
+    until the names reader was built, left it on 2026-09-27."""
     rows, problems = cra.load()
     assert not problems, problems
     by_row = {(r["slice"], r["row"]): r for r in rows}
-    for row, state in ROW_STATES.items():
-        line = by_row.get(("N", row))
-        if state == "GAP":
-            assert line is not None, f"N {row} is GAP and has no address line"
-            assert line["class"] == "ADMITTED" and line["gate"] == "READER", line
-            note = line["note"]
-            assert "ON NAMES-AT-RUNTIME" in note
-            assert "PEOPLE-DATA-MITIGATIONS" in note
-            earlier = note.find("EARLIER NOTE, ITS DOCTRINE BLOCKER ANSWERED "
-                                "BY THAT RULING:")
-            assert 0 <= earlier < note.find("name-free shaper doctrine"), row
-        else:
-            assert line is None, f"N {row} left bucket 3 and still has a line"
+    for row in ROW_STATES:
+        assert ("N", row) not in by_row, f"N {row} left bucket 3 and still has a line"
 
 
 _CHAIN = {
     "people_search.py": ("compose", "boundary_verdict", "landing_verdict",
                          "refusal_envelope"),
+    # The reader that returns the names (2026-09-27, lane S): a module of its
+    # own, so people_search.py still touches no page.
+    "people_results.py": ("read_result_people", "degree_beside"),
 }
 
 
@@ -835,15 +842,16 @@ def _defined(source: str) -> set[str]:
 
 
 def test_the_chain_the_rows_rest_on_is_whole() -> None:
-    source = MODULE.read_text(encoding="utf-8")
-    for name in _CHAIN["people_search.py"]:
-        assert name in _defined(source), name
+    for module, names in _CHAIN.items():
+        source = (MODULE.parent / module).read_text(encoding="utf-8")
+        for name in names:
+            assert name in _defined(source), (module, name)
     keys = {key for _arg, key, _kind, _most in people_search.FACETS}
     assert keys == {"currentCompany", "pastCompany", "geoUrn", "connectionOf"}
     tool = _tool_node()
     assert [a.arg for a in tool.args.args] == [
         "keywords", "current_company_ids", "past_company_ids",
-        "location_ids", "connections_of",
+        "location_ids", "connections_of", "include_names",
     ]
 
 

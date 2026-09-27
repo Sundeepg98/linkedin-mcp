@@ -96,6 +96,7 @@
     "named_profile:wait_for_opened_composer": "clean",
     "newsletters:read_newsletter_subscriptions": "clean",
     "notify_cost:read_notifications_badge": "returns_text",
+    "people_results:read_result_people": "clean",
     "post_summary_counts:read_post_summary_counts": "clean",
     "premium:read_premium_surface": "clean",
     "press:_read_witness": "clean",

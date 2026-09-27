@@ -197,9 +197,8 @@ TRIAGE: dict[str, tuple[str, str, str]] = {
     "N 76": ("PRESS", "", "named by the disclosing-press ruling as a consumer; "
                           "nothing has pressed the control and no tool builds "
                           "a personal follow link"),
-    "N 79": ("RULING", "", "the shipped tool takes NO parameter by design; "
-                           "passing a keyword is a decision the shaper names "
-                           "and nobody has made"),
+    # N 79 LEFT 2026-09-27: lane S's names adoption -- the people search
+    # returns WHO as people records (COVERED-UNFIRED); see the note below.
     "N 80": ("BUILDABLE", "", "served by the shipped people-search tool's "
                               "filter vocabulary"),
     "N 81": ("BUILDABLE", "", "served by the shipped people-search tool's "
@@ -244,8 +243,8 @@ TRIAGE: dict[str, tuple[str, str, str]] = {
     "N 161":("RULING", "", "the groups vertical was deliberately left out of "
                             "the search admission, which names the "
                             "request-to-widen route instead"),
-    "N 172": ("RULING", "", "needs another member's connection list, refused "
-                            "by the boundary's sharpest cause in its own words"),
+    # N 172 LEFT 2026-09-27 with N 79: the connections of a member named by
+    # token, returned as people records (COVERED-UNFIRED).
     "N 174": ("RULING", "", "the surface is unobservable until a pending "
                             "request exists, and creating one is a WRITE at a "
                             "real group"),
@@ -258,9 +257,8 @@ TRIAGE: dict[str, tuple[str, str, str]] = {
     "N 184": ("ADDRESS", "ABSENT", "the events family admits the root only -- "
                                    "one segment narrower than the groups "
                                    "family, which admits the id"),
-    "N 194": ("RULING", "", "its recorded blocker has EXPIRED; what remains is "
-                            "the keyword decision, since the needle is a "
-                            "hashtag typed into a search"),
+    # N 194 LEFT 2026-09-27 with N 79: a hashtag is a keyword, and the people
+    # it finds come back as people records (COVERED-UNFIRED).
     "N A3": ("ADDRESS", "REFUSED", "carries /follow, which fires before the "
                                    "allowlist, so it needs a pattern AND an "
                                    "exemption; and admin rights are unmeasured"),
@@ -340,6 +338,17 @@ TRIAGE: dict[str, tuple[str, str, str]] = {
 #:     N 171  EXCLUDED-RULED as NOT-AN-ACT  (was RULING) -- D5-PASSIVE-COST-IS-NOT-A-ROW
 #:     N 183  still GAP, direction W        (was RULING) -- the same ruling
 #:            names it a setting, so it is a write row admitted by name
+#:
+#: LEFT THE READ-GAP SET 2026-09-27, on lane S's names adoption: the people
+#: search returns WHO as people records when its caller passes include_names
+#: (people_results.read_result_people, NAMES-AT-RUNTIME and the six
+#: PEOPLE-DATA-MITIGATIONS), built over the one captured results page and
+#: never fired. Their DECIDED_SINCE_TRIAGE entries left with them, since
+#: CONTROL 4 refuses an entry for a row that is not a read-GAP row:
+#:
+#:     N 79   COVERED-UNFIRED  (was RULING) -- search for a person by keyword
+#:     N 172  COVERED-UNFIRED  (was RULING) -- a member's connections
+#:     N 194  COVERED-UNFIRED  (was RULING) -- the people a hashtag search finds
 
 #: These four 2026-09-21 verdicts were measured past by the bucket-3 address
 #: table (`_audit/_census/read-addresses.tsv`, audit
@@ -369,35 +378,9 @@ MEASURED_PAST_BY_BUCKET3: dict[str, str] = {
 #: CONTROL 8 refuses an entry whose row does not carry RULING: a decision can
 #: only have been made for a row that was waiting on one.
 DECIDED_SINCE_TRIAGE: dict[str, str] = {
-    # N 79, N 172 AND N 194: THE TRIAGE-DAY DECISION WAS MADE, THE READER WAS
-    # BUILT (lane S, 2026-09-24), AND A DIFFERENT DECISION HELD THE ROW UNTIL
-    # IT, TOO, WAS MADE. The WHO rule (the orchestrator's census call,
-    # 2026-09-24 03:20) returned each to GAP: its payload is WHO and the reader
-    # publishes counts. The operator then ruled that a people read returns
-    # names at runtime (NAMES-AT-RUNTIME, 08:11; registered on master
-    # 1902fcb), so what holds each row now is no decision at all but a
-    # name-returning reader held to PEOPLE-DATA-MITIGATIONS, on the shared
-    # people-record foundation lane G is building. Their page is captured (the
-    # live lane's session 1), so the bucket-3 table gates each READER (lane
-    # S's integration of its follow-up, 2026-09-24). The verdict letter stays
-    # that day's reading, as for every entry here. N 94 LEFT on the WHO rule's
-    # day: a FILTER, COVERED-UNFIRED.
-    "N 79": "D1-SEARCH-AS-READS: a keyword may be passed, from tool "
-            "arguments only; built by lane S 2026-09-24; the WHO rule's "
-            "doctrine question since answered by NAMES-AT-RUNTIME, so it now "
-            "waits on a name-returning reader held to PEOPLE-DATA-MITIGATIONS "
-            "on lane G's people-record foundation; bucket-3 gate READER",
-    "N 172": "OTHER-MEMBER-IDS-AS-READS with D1-SEARCH-AS-READS: another "
-             "member's id in a search facet, from tool arguments only; built "
-             "by lane S 2026-09-24; the WHO rule's doctrine question since "
-             "answered by NAMES-AT-RUNTIME, so it now waits on a "
-             "name-returning reader held to PEOPLE-DATA-MITIGATIONS on lane "
-             "G's people-record foundation; bucket-3 gate READER",
-    "N 194": "D1-SEARCH-AS-READS: the hashtag is a keyword; built by lane S "
-             "2026-09-24; the WHO rule's doctrine question since answered by "
-             "NAMES-AT-RUNTIME, so it now waits on a name-returning reader "
-             "held to PEOPLE-DATA-MITIGATIONS on lane G's people-record "
-             "foundation; bucket-3 gate READER",
+    # N 79, N 172 AND N 194 LEFT 2026-09-27 (lane S's names adoption): the
+    # name-returning reader their three entries here waited on was built,
+    # and each row is COVERED-UNFIRED -- see LEFT THE READ-GAP SET above.
     # ---- decided by the calls registered at master 9c219c8 and 001f70b,
     # annotated by lane R at its merge (2026-09-24), ruling by ruling ----
     "N 99": "D3-UNREGISTERED-REFUSAL-IS-NOT-A-RULING and "
@@ -411,7 +394,7 @@ DECIDED_SINCE_TRIAGE: dict[str, str] = {
              "answered by NAMES-AT-RUNTIME, so it now waits on a "
              "name-returning reader held to PEOPLE-DATA-MITIGATIONS on lane "
              "G's people-record foundation, and a capture; bucket-3 gate "
-             "MEASURE",
+             "MEASURE (the foundation landed 2026-09-27; the cell names the capture it waits on)",
     "N 102": "MEMBER-ROSTERS-AS-BOUNDED-READS: a Page's People tab is a "
              "roster he can open; an admission and a reader -- admitted in "
              "lane S's follow-up (2026-09-24), so a capture and a reader "
@@ -429,7 +412,7 @@ DECIDED_SINCE_TRIAGE: dict[str, str] = {
              "answered by NAMES-AT-RUNTIME, so it now waits on a "
              "name-returning reader held to PEOPLE-DATA-MITIGATIONS on lane "
              "G's people-record foundation, and a capture; bucket-3 gate "
-             "MEASURE",
+             "MEASURE (the foundation landed 2026-09-27; the cell names the capture it waits on)",
     "N 177": "D3-UNREGISTERED-REFUSAL-IS-NOT-A-RULING and "
              "MEMBER-ROSTERS-AS-BOUNDED-READS: a group's member directory; "
              "an admission and a reader -- admitted in lane S's follow-up "
@@ -437,7 +420,7 @@ DECIDED_SINCE_TRIAGE: dict[str, str] = {
              "answered by NAMES-AT-RUNTIME, so it now waits on a "
              "name-returning reader held to PEOPLE-DATA-MITIGATIONS on lane "
              "G's people-record foundation, and a capture; bucket-3 gate "
-             "MEASURE",
+             "MEASURE (the foundation landed 2026-09-27; the cell names the capture it waits on)",
     "N 178": "D3-UNREGISTERED-REFUSAL-IS-NOT-A-RULING: GAP on an admission "
              "and a reader; its live proof loads another member's profile, "
              "so the operator names that member "
@@ -445,14 +428,14 @@ DECIDED_SINCE_TRIAGE: dict[str, str] = {
              "WHICH, a doctrine question since answered by NAMES-AT-RUNTIME, "
              "so its reader must return names held to "
              "PEOPLE-DATA-MITIGATIONS on lane G's people-record foundation; "
-             "NEEDS-TARGET",
+             "NEEDS-TARGET (the foundation landed 2026-09-27; the cell names the capture it waits on)",
     "N 179": "D2-SEARCH-VERTICALS-WIDENED: the events vertical is admitted "
              "in principle, and on the boundary since lane S's follow-up "
              "(2026-09-24); which events is WHICH, a doctrine question since "
              "answered by NAMES-AT-RUNTIME, so it now waits on a "
              "name-returning reader held to PEOPLE-DATA-MITIGATIONS on lane "
              "G's people-record foundation, and a capture; bucket-3 gate "
-             "MEASURE",
+             "MEASURE (the foundation landed 2026-09-27; the cell names the capture it waits on)",
     "P C8": "D4-NO-OWN-BROWSER-CONTEXT (registered 2026-09-24): no context "
             "of its own; the download transport is built on the attached "
             "browser (cdp_download.py), and what holds the row now is the "
