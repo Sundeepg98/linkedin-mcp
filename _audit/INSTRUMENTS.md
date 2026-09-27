@@ -10320,6 +10320,29 @@ the hunk stager, the shaper-rewrite red script, the unpriced-file lister and
 the pricing merger, the gate selections and runners, and the child-transcript
 model search -- are declared disposable. Their numbers are in the lane record.
 
+### 67.12 THE COLD VERIFICATION'S REPAIRS, 2026-09-27
+
+The one cold verification of the foundation (lane record P.16) found 4 HIGH
+and 8 MEDIUM findings. Each repair below was shown failing first -- by the
+verifier's own repro on the unrepaired tree, and again green on the repaired
+one.
+
+| path | shown failing by |
+|---|---|
+| `linkedin_server/people_data.py` (`sanitise`'s second NFC pass, `STRIPPED_CODE_POINT_RANGES`) + `tests/test_people_data.py` | on the previous commit, 4 of 5 planted strips that join a base and a combining mark (or two jamo) made the record builders raise, and 267 default-ignorable code points survived; after, 0 and 0, held to Unicode's own list |
+| `linkedin_server/shape.py` (`_ConversationLabels`) + `tests/test_messaging_overview.py` | message text spelling a label forged a row (7 rows for 6 labels) and entities came back undecoded; after, 6 rows, decoded |
+| `linkedin_server/dom.py` (`RECIPIENT_ID_SHAPE`, `is_recipient_id`) + the recipient drive in `tests/test_page_strings_leave_only_as_people_records.py` | a planted recipient published at `$.results[0].recipient_id`; after, nothing outside a record |
+| `tests/plantedpage.py` (envelopes only, plant words) and `tests/test_tool_envelopes_emit_no_page_string.py` (sets, reprs, `records_outside_the_people_tools`) | six respellings called `returns_records`, a set in an `_error` envelope called clean, an instance admitted; each convicted after, with controls |
+| `tests/test_a_people_reader_reads_one_page.py` (three more builder routes) | records built through another module's `people_data`, `RECORD_TYPES` and `getattr` were not derived; after, all three |
+| `tests/record_typed.py` (identity) | a `str` subclass whose metaclass equals anything was admitted as a record |
+| `cache_writes` in the invariant file | 1 of 5 planted caches found; after, 5 of 5 |
+| `tests/test_fixtures_hold_only_synthetic_people.py` (two class slots) | a row naming an undeclared person in the participant-names element, with no label, read nothing; after, convicted |
+| the two legacy-path pins in the invariant file | text leaving `who_viewed_me` under `more_analytics` and `open_messaging` under `filters`, unseen by both baselines; pinned to those subtrees |
+
+The verifier's scripts (`scratchpad/lane-g/cold2/`, r01 to r12) and this
+repair's own red drive of both sanitiser versions and census re-measure are
+declared disposable; their numbers are in the lane record.
+
 ---
 
 ## 68. A DOWNLOAD TRANSPORT ON THE ATTACHED BROWSER, TESTED ON A FAKE CHROME THAT CAN SAY NO (lane-d, 2026-09-24)

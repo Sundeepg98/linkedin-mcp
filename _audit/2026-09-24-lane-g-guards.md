@@ -1118,9 +1118,18 @@ aca479d  09-27 15:06  the second worked adopter: the conversation readers
 3742ce9  09-27 15:12  the "no name parameter" shaper tests, rewritten around the record type
 33e0c02  09-27 15:14  ci shard timings: the nine new test files priced
 1175ba5  09-27 15:34  after the merge, found by the final gate: two claims the DevTools declaration moved
+dbdc43c  09-27 15:36  lane G record: Foundation: people data (this section, first form)
+68d2668  09-27 15:47  lane G record: the branch hashes it cites are disclosed as not yet on master
+934a9d0  09-27 16:13  the sanitiser reaches a fixed point, and strips every default-ignorable code point
+de826d4  09-27 16:19  the overview reads labels as attributes, decoded; a recipient id only in an id's shape
+6c16385  09-27 16:26  the guards harden where the cold verification got past them
+b27ecbd  09-27 16:28  the adopters' other text paths are pinned where the cold verification found them
+22e6886  09-27 16:29  fixtures: read names where the messaging readers read them
+f474851  09-27 16:30  DevTools claims: the scanner and the split see LITERAL calls
 ```
 
-This record's own commit follows them. None of these hashes is on `master`
+The last seven are P.16's: what the cold verification found, repaired. This
+record's final commit follows them. None of these hashes is on `master`
 yet: each does not resolve on `master` until the orchestrator merges this
 branch, which is why every one carries its subject.
 
@@ -1141,11 +1150,19 @@ the foundation's own commits were in.
 (name, headline, link, degree); a group or an event is a `Group` or an `Event`
 (title, link). `sanitise` is NFC; every whitespace character becomes a space;
 Unicode categories Cc, Cf, Co, Cs and Cn are removed (controls, zero-width
-and bidirectional characters, tags, private use, unassigned); runs collapse;
-a hard cap per field (name 120, headline 220, title 220) cuts and never
-refuses. It is idempotent, which is what lets a record REFUSE construction
-with a field that is not already its own sanitised form -- an unsanitised
-record cannot exist. Links are canonical (`/in/<slug>/` or a member urn; a
+and bidirectional characters, tags, private use, unassigned), and -- since
+934a9d0 -- every other default-ignorable code point (the Hangul fillers, the
+variation selectors, the combining grapheme joiner and the rest, held to
+Unicode's own list); NFC again; runs collapse; a hard cap per field (name
+120, headline 220, title 220) cuts and never refuses. It is idempotent, which
+is what lets a record REFUSE construction with a field that is not already
+its own sanitised form -- an unsanitised record cannot exist. IT WAS NOT, as
+first committed, and this section said it was: the cold verification (P.16)
+found a strip that joins a base and a combining mark, or two Hangul jamo,
+leaving a string that composes only on a second pass, so the record refused
+its own builder's output and one such label made both conversation tools fail
+with every row lost (4 of 5 planted joins raised). The second NFC pass is the
+fix. Links are canonical (`/in/<slug>/` or a member urn; a
 group's or an event's id only, an event's title dropped from its address).
 Every envelope carries `untrusted_third_party_text`, and the server's
 instructions name that key and say the fields are data, never instructions
@@ -1171,8 +1188,15 @@ records, nothing outside them. The parser now sanitises every line BEFORE it
 classifies, keeps the degree badge it used to discard, gives an anonymous row
 no link, and the view switch's `viewers_when_applied` is cut to the caller's
 limit (it was every parsed row). `_attach_recipient_ids` reads the slug from
-the record. The landing-interpolation census loses `parse_person_card:slug`
-with its ruling entry, with a note.
+the record, and -- since de826d4 -- publishes a recipient id only in the
+shape the page script captures (`dom.RECIPIENT_ID_SHAPE`, checked again by
+`dom.is_recipient_id`): it was published with `str()` alone, beside the
+record, so a page answering the id script with the plant published it (P.16).
+The landing-interpolation census loses `parse_person_card:slug` with its
+ruling entry, with a note. The tool's two other readings are LinkedIn's
+aggregates about his viewers, not people, and are pinned as its declared
+legacy text paths: `insights`, and `more_analytics` when
+`show_more_analytics` is passed (the second found by P.16).
 
 SURPRISE 1, measured: no leak guard had ever driven this tool's success path.
 The plant page answers `evaluate` with a dict, the viewer harvest expects a
@@ -1192,11 +1216,32 @@ record in an exception or an `_error` envelope is a leak like any page string.
 may not grow: `text_ratchet`, asserted beside each guard's shrink check,
 refuses a new text path, a stale inventory entry and a converted reader that
 fell back, and both baseline writers refuse to record a new text path.
-Existing verdicts did not move over either committed baseline. ITS LIMIT: the
-inventory IS the committed baseline, so a text entry added to it by hand
-passes the ratchet -- the writers refuse it, and only the diff shows it; and
-a text path merged in from another branch's baseline arrives as inventory the
-same way.
+Existing verdicts did not move over either committed baseline. ITS LIMITS,
+three of them measured by P.16:
+
+- The inventory IS the committed baseline, so a text entry added to it by
+  hand passes the ratchet -- the writers refuse it, and only the diff shows
+  it; and a text path merged in from another branch's baseline arrives as
+  inventory the same way.
+- It works PER READER, not per path: a reader already on the inventory can
+  return a second field of page text and nothing moves.
+- It sees what the default drive reaches. The guards drive every function
+  with its defaults, so a path behind an opt-in (`include_names`,
+  `show_more_analytics`) is invisible to both baselines: all three people
+  tools are `clean` there, no committed entry is `returns_records`, and the
+  "lost records" check is armed with nothing to act on. The people tools'
+  record paths are held by the invariant file's own drives, not by the
+  baselines; `threads.read_conversation_list` returns the raw label in its
+  reading with `include_names`, by design -- the reading is not published.
+
+HARDENED on P.16's evidence (6c16385): only an ENVELOPE is the declared
+channel (an instance is published without its marker); outside a record the
+plant is found by any of its words, case-folded (a first name, a slug,
+another case, a no-break space, an entity, a prefix were each
+`returns_records` before); the envelope walk descends sets and searches an
+object's repr; and a `returns_records` verdict from any tool not in
+`PEOPLE_TOOLS` is refused by the envelope guard and its baseline writer,
+because an envelope-shaped dict built by hand passes `as_record` by shape.
 
 Each guard shown convicting AFTER the redesign, through its own code: the
 reader guard (a record beside page text, a widened record, a plant used as a
@@ -1205,7 +1250,10 @@ message laundered into a record) and its DEBUG log capture (a record's name
 in a log record); the page-text rule (a logged record built from the page);
 the envelope guard (a record in an `_error` envelope). Plus: the ratchet's
 controls, no declared people tool on the text inventory, and no module-level
-cache written on the record path (both adopters' functions, with a control).
+cache written on the record path (both adopters' functions, with a control
+-- which found 1 of the 5 caches P.16 planted until 6c16385 taught it caching
+decorators, dotted constructors, `globals()` writes and rooted mutator calls;
+5 of 5 after).
 
 ### P.5 Mitigation 3, fixtures: a slot reader, not a name detector
 
@@ -1222,6 +1270,9 @@ places the guard does NOT read are planted and shown unseen. With the second
 adopter it gained the conversation label as a slot, split into participants
 so a declared name cannot vouch for one beside it, and declared the compose
 list's four names on that fixture's own "Its CONTENT is invented" header.
+P.16 found the label slot missing the element the list tool actually reads,
+and the open conversation's title: both are read by class token since
+22e6886 (3 elements and 1 title, all declared).
 
 ### P.6 Mitigation 4: a people reader reads one page
 
@@ -1234,10 +1285,19 @@ so a call-only derivation finds no reader at all. No paging parameter, in the
 signature or the published schema; no pagination-shaped definition anywhere;
 every navigating loop a people tool reaches a plain `for` over a slice bounded
 by a config ceiling of at most 2; navigating recursion refused; thirteen
-planted shapes, each convicted by the rule it breaks and no other (16af667's
-message says twelve; the table holds thirteen). 80 passed on 3.13 and on
-3.10. `linkedin_open_messaging` loads two pages -- the receipt guard's
-list, then `/messaging/` -- and its names come from the second only.
+planted shapes, each convicted by exactly the rules it breaks -- one, or two
+for `range(pages)`, which is both a paging parameter and an unbounded loop --
+and no other (16af667's message says twelve; the table holds thirteen). 80
+passed on 3.13 and on 3.10 at 16af667 (which does not resolve on `master`
+until this branch merges); the file has grown since. P.16 built
+records through three routes it did not derive -- another module's
+`people_data` attribute, `RECORD_TYPES`, `getattr` -- and all three are
+derived since 6c16385; a hand-built envelope dict is not, and is held instead
+by the envelope guard's `PEOPLE_TOOLS` check (P.4). Its dated census was
+re-measured on the merged tree: 157 `page` parameters (152 first, 5 after
+`navigator`), 13 `before` and 9 `after`. `linkedin_open_messaging` loads two
+pages -- the receipt guard's list, then `/messaging/` -- and its names come
+from the second only.
 
 ### P.7 Mitigation 5: visible only
 
@@ -1277,9 +1337,14 @@ parameter named like a person, a name or an address of one is refused unless
 its annotation is a people record (alone, in a container, or optional; an
 unresolvable annotation fails closed); needles, page text and a company stay
 refused outright. Shown both ways, per test: a BARE name parameter planted
-into each module turns its test red (8 of 8, the old failure kept) and the
-same parameter annotated as a record turns it green (8 of 8). The reading's
-own controls are `tests/test_a_name_enters_a_shaper_only_as_a_record.py`.
+into a function each test already reads turns it red (8 of 8, the old
+failure kept) and the same parameter annotated as a record turns it green (8
+of 8). P.16 measured the other case: a NEW function taking `name: str` turns
+only 5 of the 8 red, because the two `groups` tests and the `anchors` test
+read fixed lists of functions -- as they did before the rewrite, which kept
+their structure. `**kwargs` passes all eight; a class whose metaclass equals
+anything was admitted as a record until 6c16385 compared by identity. The
+reading's own controls are `tests/test_a_name_enters_a_shaper_only_as_a_record.py`.
 On the real tree none of the seven modules takes such a parameter.
 
 ### P.10 The one integration: master 2eb90ad
@@ -1314,7 +1379,13 @@ read-path gate imports a taxonomy in which both DevTools classes are gated by
 default; they stay gated everywhere else, and on that one module are judged by
 the METHODS its send can carry (one: `Browser.setDownloadBehavior`), shown
 refusing an input method in the table, an empty table, and any other module.
-The fifth was `send_reply`'s kind (P.8); the sixth the timings (P.13).
+The fifth was `send_reply`'s kind (P.8); the sixth the timings (P.13). ALL OF
+IT READS SYNTAX: P.16 sent an input method over DevTools three ways the
+scanner cannot see -- a bound-method alias, a send handed to a helper,
+`getattr` -- and 2263 tests passed identically with and without them.
+f474851 corrects every sentence that claimed more (the scanner holds every
+LITERAL call), including lane D's docstrings, which still said the scanner
+had no DevTools pattern at all.
 
 ### P.11 The second worked adopter: the conversation readers
 
@@ -1342,6 +1413,18 @@ without `include_names` neither carries it; and each drive is shown failing
 Lane L5's two tests moved to the record form without weakening: the names
 are read out of the records, a bare name beside one fails, the group row must
 be a title record.
+
+WHAT P.16 FOUND HERE, and what was done. The sanitiser crash (P.2) took down
+both tools with `include_names` -- fixed. `messaging_overview` read labels
+with a pattern over the serialised page, so a message whose words spelled a
+label became a row, its "name" the words and markup after it, and no entity
+was decoded: it reads labels as ATTRIBUTES with an HTML parser since de826d4.
+And `linkedin_open_messaging` publishes the filter controls it finds -- each
+one's accessible name and href -- outside any record: pinned since b27ecbd as
+its declared legacy path, the plant leaving a record only under `filters`.
+That finding's other half is NOT this lane's: asking for a filter can press a
+control that is not a pill, because `dom.activate_messaging_filter` matches
+the word inside any label (P.15).
 
 ### P.12 The three queued items of 08:34
 
@@ -1397,50 +1480,83 @@ RUN, with the interpreter the repository's venv holds (3.13) unless said:
 - **The three files the order names** ran in both gates:
   `test_the_package_compiles_on_its_oldest_python.py`,
   `test_gap_rows_on_refused_addresses.py`, `test_ci_shard.py`.
+- **At the first record's head** (68d2668), the ordered guards and the three
+  named files again: 920 passed. The record's own files through
+  `scripts/impact_gate.py --paths`: 42 files, 2423 tests, PASS -- its first
+  run refused on two branch hashes cited "at" a gate, disclosed in 68d2668.
+- **Python 3.10.19**, through `uv run --python 3.10`: 26 of the files this
+  lane changed -- the foundation's own, the rewritten shaper tests, the
+  messaging overview, the boundary freeze, readonly, the reader and envelope
+  guards, the landing census, the tool and shape tests, `test_ci_shard.py`
+  and the two files the final gate caught -- 1860 passed.
+- **After P.16's repairs**, each on the files it touched: the sanitiser's
+  consumers 413; the overview, recipient, messaging, viewer, connections,
+  reader, envelope, landing and page-text files 1417; the seven guard files
+  755; the fixtures guard 56; the DevTools claims' files 474. Each repair was
+  also shown by re-running the verifier's own repro on the repaired tree.
 
 NOT RUN, deliberately:
 
 - **The full suite.** `scripts/impact_gate.py --against master --plan-only`:
   62 changed paths, 242 of 259 test files (93%), which widens to the whole
   suite. By order, not run locally; CI certifies at merge.
-- **The 3.10 cell**, except the bounded file (80 passed on 3.10, run by its
-  child) and the oldest-Python lint, which reads the source rather than
-  running it. CI's matrix runs 3.10.
-- **The final gate on the record commit.** The record touches `_audit/` only;
-  the census instruments and the register's own tests were re-run on it.
+- **The 3.10 cell for the browser-driven files** (the messaging threads, the
+  viewer fixtures): under `uv` they would resolve a Playwright whose browser
+  build this box's shared cache may not hold. CI's matrix runs 3.10.
+- **A final gate over P.16's repairs as one set.** Each repair ran its own
+  files, listed above; CI certifies the whole at merge.
 
 ### P.15 Open -- and for other owners
 
 - **Mitigation 6's debt.** `send_invitation` and `send_message` are still
   aimed by a name; converting each to a link or member id the caller supplies
   is the direction, and the debt file fails when one converts.
+- **HIGH, for `dom.activate_messaging_filter`'s owner (P.16).** Asking
+  `linkedin_open_messaging` for a filter can PRESS A CONTROL THAT IS NOT A
+  PILL: the activator matches the filter word inside any label
+  (`get_by_role(..., exact=False)`), and the composer's list draws no "Other"
+  pill, so `message_filter="other"` presses whatever control's label contains
+  the word -- on a planted page, a non-pill button. It is a sanctioned click
+  on a read path, and it predates this lane; changing a sanctioned mutation
+  is not this lane's scope. Repro: the verifier's
+  `scratchpad/lane-g/cold2/r03b_filter_click_label.py`.
+- **Where a viewer's member id lives.** Mitigation 1's record has one
+  identity slot, "profile link or member id"; the viewer row carries both, the
+  link inside the record and the recipient id (a member id, now shape-checked)
+  beside it. Inside it as a fifth field, or beside it as today, is the
+  orchestrator's call.
 - **For the next merges, by design.** Every new `target_kind` -- lane L8's
   outward classes among them -- fails `test_no_write_is_aimed_by_a_name.py`
   until it is classified in `TARGET_KIND_CLASS`; a write aimed by a name is a
   ruling change, not a classification. A reader that starts building records
-  fails the bounded file until it joins `PEOPLE_TOOLS`, and the instructions
-  test until the paragraph names it.
+  THROUGH A RECORD CLASS fails the bounded file until it joins
+  `PEOPLE_TOOLS`, and the instructions test until the paragraph names it; one
+  that hands back envelope dicts built by hand is caught only if the envelope
+  guard drives it (P.4, P.6). And after this merges a new tool that returns
+  page text cannot be recorded by regenerating the baseline: the writer
+  refuses it, by design.
 - **Receipts are covered for a library's message, not for page text.** All
-  fourteen of the branch's write tools were `not_driven` by the envelope
-  guard; `send_invitation`'s preview (`who_this_would_reach`) quotes the label
+  fifteen write tools (lane L5's `send_reply` among them) were `not_driven`
+  by the envelope guard; `send_invitation`'s preview (`who_this_would_reach`) quotes the label
   its needle matched, and lane L5's `send_reply` preview prints the
   conversation's title, both in the confirm block. Mitigation 6 REQUIRES the
   tool to report whom it resolved before it acts, and mitigation 3 says no
   name in a receipt: the two meet in a preview, and whether a preview is a
   receipt, or should carry that name as a record, is a ruling this lane did
   not make.
-- **The insights reader** under `linkedin_who_viewed_me` returns LinkedIn's
-  labels and view names as page text: a baselined legacy path, pinned so the
-  plant may appear only under `$.insights`. Its `<p>` scan covers viewer rows;
-  narrowing it needs a live capture.
+- **The people tools' legacy text paths**, pinned, not converted:
+  `linkedin_who_viewed_me`'s `insights` (LinkedIn's labels and view names; its
+  `<p>` scan covers viewer rows, and narrowing it needs a live capture) and
+  `more_analytics`, and `linkedin_open_messaging`'s `filters`. The pins are
+  in the invariant file; the ratchet cannot see them (P.4).
 - **The overview's group label** comes back in a person record (P.11).
 - **Other readers still return names as text** -- the reader baseline's
   legacy inventory holds 40 `returns_text` readers. Not converted, by order.
 - **The DevTools declaration and split** (P.10) were made on the precedent of
   ruling (c); both are the orchestrator's to overturn.
 - **`PERMANENTLY_FORBIDDEN` holds nine keys; the rulings name six** as the ones
-  whose grounds are mitigations. Not touched here: the rulings register is
-  another owner's.
+  whose grounds are mitigations -- the other three are the outward classes
+  lane L8 is building behind grants, in flight. Not touched here.
 - **`INVENTED_NAMES` holds a real historical person's name**, unused in any
   fixture; the fixtures guard accepts that table, so such a name would pass
   there. For the table's owner.
@@ -1451,9 +1567,37 @@ NOT RUN, deliberately:
 
 ### P.16 The one cold verification pass
 
-One general-purpose child, cold, adversarial, launched on the final code
-(33e0c02) with this record in draft beside it: to break the three people
+One general-purpose child, cold and adversarial, launched at 33e0c02 with
+this record in draft beside it -- which was not the final code: 1175ba5
+landed while it ran, and it said so. It was told to break the three people
 tools, the redesigned guards, the ratchet, the derivation, the record-typed
 reading, the DevTools split and the conversation slot, and to spot-check this
-record's numbers. Its findings, and what was done about each, follow in the
-next commit.
+record's numbers. It edited nothing tracked; its scripts and outputs are in
+the scratchpad's `lane-g/cold2/`. It found 4 HIGH, 8 MEDIUM and 6 LOW, and
+the spot-checks it ran held (the commit times, the counts in P.8 and P.6's
+messages, the pins, the digests, the timings, the caps).
+
+| finding | severity | done |
+|---|---|---|
+| F1 `open_messaging` publishes filter controls' labels outside records; asking for a filter can press a non-pill | HIGH | labels pinned as a legacy path (b27ecbd); the press reported (P.15) |
+| F2 the redesigned verdicts pass respelled plants, sets, instances and hand-built envelopes | HIGH | hardened (6c16385), each shape now convicted; the hand-built envelope held by the `PEOPLE_TOOLS` check |
+| F3 the sanitiser is not idempotent; one label crashed both conversation tools | HIGH | fixed (934a9d0), P.2's claim corrected |
+| F4 `who_viewed_me(show_more_analytics=True)` leaves text outside records unseen | HIGH | pinned as the tool's second legacy path (b27ecbd) |
+| F5 267 default-ignorable code points survived the sanitiser | MEDIUM | stripped, held to Unicode's list (934a9d0) |
+| F6 the inventory and ratchet claims overstated | MEDIUM | the limits stated in P.4 |
+| F7 records built through three underived routes; no tie between records and `PEOPLE_TOOLS` | MEDIUM | the routes derived and the tie added (6c16385); the hand-built route stated |
+| F8 a DevTools send through an alias, a helper or `getattr` passes every check | MEDIUM | the claims corrected to literal calls (f474851); the scanner's limit stated |
+| F9 the conversation slot missed the element the list tool reads, and the thread title | MEDIUM | both read by class (22e6886) |
+| F10 `recipient_id` published with `str()` only, beside the record | MEDIUM | shape-checked (de826d4); where it lives is for the orchestrator (P.15) |
+| F11 overview labels undecoded, and message text could forge a row | MEDIUM | read as attributes, decoded (de826d4) |
+| F12 the record-typed reading: new functions in fixed-list tests, `**kwargs`, a metaclass trick | MEDIUM | the metaclass closed (6c16385); the rest stated in P.9 |
+| F13 the cache check caught 1 of 5 planted caches | LOW | 5 of 5 (6c16385) |
+| F14 P.0 missed 1175ba5; P.16 called 33e0c02 final | LOW | corrected, here and in P.0 |
+| F15 P.15 said fourteen write tools | LOW | fifteen, corrected |
+| F16 the bounded file's census stale after the merge | LOW | re-measured (6c16385) |
+| F17 lane D's docstrings said the scanner had no DevTools pattern | LOW | corrected (f474851) |
+| F18 "no other rule" for a plant convicted by two, by design | LOW | P.6 reworded |
+
+Its runs could not settle two things, and it said so: the gate totals
+(5740/6 and 6723/2), which it did not repeat, and the pre-adoption "four
+viewers, twice" red evidence of P.3, which predates its checkout.
