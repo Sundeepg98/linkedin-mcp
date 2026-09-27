@@ -1989,8 +1989,8 @@ one of the eleven tests passed with its navigation aborted.
     (F.17 names 130 files outside them). Measured: 22 at the base, 23 on the branch, 22 on master,
     23 merged, and the one waiver master lacks is `read_named_profile`'s. The copy now reads 23,
     and says whose the twenty-third is and that the shape pass still adds none.
-- The whole suite again on the commit that carries that fix: see the last paragraph of this
-  section.
+- The whole suite again on the commit that carries that fix, the same way and under the same
+  guard: 11161 passed, 1 failed -- the cited-SHA guard, by design, and nothing else -- 9 skipped, 1 xfailed; 11172 tests in 267 files, in 1725 s of wall clock (the box's load was not measured). The same eleven navigations to LinkedIn were aborted, and nothing else tried to leave.
 - Before the merge commit, three focused runs on the resolved tree: 40 files (7 failed and one
   file's collection errored -- each fixed above); 19 files with the I.5 guard (1395 passed, 2
   failed: the ABSENT-headline test before the Contact info cut); 3 files with the guard (674
@@ -2007,3 +2007,25 @@ one of the eleven tests passed with its navigation aborted.
 - Parse and repeated-key checks over the merged tree: every Python file parses; the AST scan over
   every dict and set literal and every module-level keyed assignment finds only
   `tests/test_api_call_sites.py`'s harmless set (I.4 (d)); no JSON file repeats a key.
+
+### I.7 NOT run
+
+- CI. Nothing was pushed, by the order; CI certifies on the orchestrator's push.
+- The whole suite WITHOUT the I.5 guard -- deliberately: eleven of its tests would send a browser
+  to LinkedIn. How those eleven behave with the navigation live, as CI runs them, was not
+  measured here; aborted, all eleven pass.
+- LIVE: nothing. Every named-person act waits on a person he names (F.12).
+- An independent cold verification of this integration: not ordered, and not run; every check in
+  this section is this lane's own.
+- The integration's new test file is unpriced in `scripts/ci_shard_timings.json`; the sharder
+  estimates it at the measured mean rate.
+- The standalone "Always on" label in `tests/test_selectors_resolve.py` proves the selector FINDS
+  a label; whether a label is bound to its radio is `tests/test_radio_label_binding.py`'s
+  question, unchanged.
+
+### I.8 Commits -- on this branch, none pushed, no AI attribution in any
+
+    02f95eb  the merge of master 52b55b6 (parents: the branch head and master): conflicts
+             resolved, lane G's foundation adopted, the five calls applied, every pin re-derived
+    99eef0f  the waiver ceiling's second copy, and this record's gates
+    (next)   this record's last gate paragraph and this list
