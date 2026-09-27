@@ -145,7 +145,7 @@ def test_a_target_that_is_not_a_thread_id_cannot_rebuild_an_address_the_write_do
 def test_the_tables_name_this_action():
     assert _ACTION in writes.PERFORMABLE
     assert _ACTION in writes.TYPING_ACTIONS and _ACTION in writes.REPLY_ACTIONS
-    assert _ACTION not in writes.ADDRESSED_TYPING_ACTIONS
+    # (ADDRESSED_TYPING_ACTIONS left with send_message on 2026-09-27.)
     assert _ACTION not in writes._TOGGLE_ACTIONS
     assert _ACTION not in writes.UPLOAD_ACTIONS
     assert writes.anchor_label_for(_SPEC) == threads.REPLY_EDITOR_LABEL

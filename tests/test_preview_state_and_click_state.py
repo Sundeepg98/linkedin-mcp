@@ -111,7 +111,6 @@ from tests.test_leave_group import GROUPS_LEAVE_ID, GROUPS_LEAVE_MARKUP
 from tests.test_named_profile_route import LINK as NAMED_PROFILE_LINK
 from tests.test_named_profile_route import PROFILE as NAMED_PROFILE
 from tests.test_result_verification_block import SHAREBOX_MARKUP
-from tests.test_send_message_gate import COMPOSER_MARKUP
 from tests.test_selectors_resolve import PAGE as SELECTOR_RESOLUTION_PAGE
 from tests.test_writes import (  # noqa: F401 -- two of these are fixtures
     FOLLOWED_COMPANY,
@@ -227,23 +226,11 @@ REACHED: dict[str, tuple[str, str, str]] = {
         TWO_DIALOG_HTML,
         EDITOR_FIELD_TARGET,
     ),
-    # THE TWELFTH, 2026-09-02, and the EMPTY composer is the state its arm
-    # acts from -- no recipient committed, one unlabelled div[role=textbox]
-    # for the body, and Send drawn DISABLED, which on that surface is what
-    # empty looks like.
-    #
-    # ITS CLICK-TIME STATE IS NOT ITS PREVIEW STATE, which is the whole reason
-    # this file exists and the reason ``click_from_state`` was added. The
-    # preview reads the NAV BADGE and reports ``composer_unmeasured``, because
-    # that gate must not open messaging; ``_live_control`` reads the composer
-    # itself and reports ``composer_empty``. Part 1 compares against the
-    # CLICK-time field, so this row exercises the split rather than working
-    # around it.
-    "send_message": (
-        "tests/test_send_message_gate.py",
-        COMPOSER_MARKUP,
-        _canonical("send_message"),
-    ),
+    # (THE TWELFTH, ``send_message``, stood here from 2026-09-02 -- the one
+    # action whose click-time state was not its preview state, and the reason
+    # ``click_from_state`` was added. It was RETIRED on 2026-09-27, lane L5,
+    # the orchestrator's order of 23:36: it was aimed by a name. No spec sets
+    # ``click_from_state`` now; the check below still reads it for the next.)
     # THE THIRTEENTH, 2026-09-23 (census row ``N 47``). A SYNTHETIC Page root
     # whose STRUCTURE is a measurement -- eight ``Follow <Page>`` controls, one
     # of them in the main column -- and whose content is invented; its source
@@ -560,8 +547,11 @@ def test_every_performable_action_is_either_reached_or_declared_unreachable():
     # its follow-up branch): ``connect_from_profile`` and
     # ``message_from_profile`` shipped, both reached over the synthetic named
     # profile their own tests read. MEASURED on the merged tree, not summed.
-    assert len(PERFORMABLE) == 18, sorted(PERFORMABLE)
-    assert len(REACHED) == 18, sorted(REACHED)
+    # 18 -> 17 later the same day (lane L5, the orchestrator's order of 23:36):
+    # ``send_message`` RETIRED -- it was aimed by a name -- and its row left
+    # ``REACHED`` with it. MEASURED.
+    assert len(PERFORMABLE) == 17, sorted(PERFORMABLE)
+    assert len(REACHED) == 17, sorted(REACHED)
     assert len(CANNOT_REACH) == 0, sorted(CANNOT_REACH)
 
 

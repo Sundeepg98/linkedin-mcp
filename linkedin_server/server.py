@@ -1,4 +1,4 @@
-"""The tool surface: fifty-nine tools, eighteen of which write to LinkedIn.
+"""The tool surface: fifty-eight tools, seventeen of which write to LinkedIn.
 
 THE FIFTY-EIGHTH AND FIFTY-NINTH ARRIVED TOGETHER, 2026-09-27, at lane L5's
 merge of master 52b55b6, and every site that states these numbers moved in the
@@ -193,9 +193,9 @@ assigned to anybody -- it waits for whoever next runs the suite, and in the
 meantime the pin goes on asserting the old number with full confidence.
 
 THE NUMBERS ABOVE ARE DERIVED NOW, and that is a statement about a test rather
-than about an intention. Fifty-nine is ``len(await mcp.list_tools())``,
+than about an intention. Fifty-eight is ``len(await mcp.list_tools())``,
 pinned in ``test_server_surface.py`` by
-``test_the_surface_is_exactly_the_fifty_nine_tools``; the split is pinned by
+``test_the_surface_is_exactly_the_fifty_eight_tools``; the split is pinned by
 ``tests/test_prose_that_makes_a_claim.py::test_the_server_docstring_numbers_are_derived``,
 which reads THESE WORDS and fails if any of the three disagrees with the
 registry.
@@ -208,13 +208,15 @@ POINTER to it was dangling, so a reader who followed it found nothing and
 would reasonably conclude these numbers are unchecked. A citation is a claim
 like any other.
 The surface splits three ways and the split is the part a reader actually
-needs: FORTY-ONE read, EIGHTEEN write, and ZERO are write-shaped,
-registered, gated and unable to act. Forty-one plus eighteen plus zero is
-fifty-nine. (Thirty-eight, thirteen and fifty-one until 2026-09-24; thirty-nine,
+needs: FORTY-ONE read, SEVENTEEN write, and ZERO are write-shaped,
+registered, gated and unable to act. Forty-one plus seventeen plus zero is
+fifty-eight. (Thirty-eight, thirteen and fifty-one until 2026-09-24; thirty-nine,
 thirteen and fifty-two at the live lane's merge the same day; thirty-nine,
 fourteen and fifty-three at lane L7's; forty-one, fifteen and fifty-six at
 lane L5's; forty-one, sixteen and fifty-seven at lane L8's merge on
-2026-09-27, until lane L5's merge of master 52b55b6 the same day.)
+2026-09-27, until lane L5's merge of master 52b55b6 the same day; forty-one,
+eighteen and fifty-nine from that merge until lane L5 RETIRED
+``linkedin_send_message`` later the same day -- aimed by a name.)
 
 THE FIFTY-THIRD IS ONE WRITE, 2026-09-24 (lane L7, census row ``P I14``).
 ``linkedin_mark_company_interest`` presses "I'm interested" in the
@@ -317,10 +319,12 @@ says so rather than being empty behind the constant.
 
 THAT THIRD COLUMN EMPTIED ON 2026-09-02 AND THE FACT IS WORTH A SENTENCE
 RATHER THAN A ZERO. It held one member, ``linkedin_send_message``, which was
-registered and gated and refused; it now performs, so **every write tool on
+registered and gated and refused; it then performed, so **every write tool on
 this surface can act.** The column is kept rather than deleted because it is
 the honest place for the next one, and because an absent column and an empty
-column say different things.
+column say different things. (``linkedin_send_message`` itself was RETIRED on
+2026-09-27 -- aimed by a name, which PEOPLE-DATA-MITIGATIONS forbids -- and
+``linkedin_message_from_profile`` reaches a person by their profile link.)
 
 ONE SANCTIONED ACTION STILL REFUSES AND IT IS NOT IN THAT COUNT.
 ``set_open_to_work`` has no tool registered for it at all, so it is not part
@@ -341,11 +345,13 @@ the moment ``update_profile_field`` was given an address while still refusing.
 always meant: an address is not a permission.
 
 NOTE THE ACTION THAT HAS NO TOOL. ``writes.SANCTIONED_WRITES`` holds
-NINETEEN actions where this surface registers EIGHTEEN write-shaped tools, and
+EIGHTEEN actions where this surface registers SEVENTEEN write-shaped tools, and
 the missing one is ``set_open_to_work``: it is sanctioned, it is refused by
-``_refuse_unperformable``, and no tool was ever registered for it. So eighteen
-counts TOOLS and nineteen counts ACTIONS, and a reader comparing the two
-numbers is not looking at a discrepancy. (SEVENTEEN and SIXTEEN until lane
+``_refuse_unperformable``, and no tool was ever registered for it. So seventeen
+counts TOOLS and eighteen counts ACTIONS, and a reader comparing the two
+numbers is not looking at a discrepancy. (NINETEEN and EIGHTEEN from lane L5's
+merge of master 52b55b6 until lane L5 retired ``send_message`` the same day,
+which took one from each; SEVENTEEN and SIXTEEN until lane
 L5's merge of master 52b55b6, 2026-09-27, ``connect_from_profile`` and
 ``message_from_profile`` adding two to each; SIXTEEN and FIFTEEN until lane
 L8's merge of master 2eb90ad the same day, ``withdraw_from_group`` adding one
@@ -919,13 +925,13 @@ mcp = FastMCP(
     instructions=(
         "A window onto the operator's OWN LinkedIn account, driven by his own "
         "signed-in browser on his own machine. Most tools read and change "
-        "nothing. EIGHTEEN WRITE: linkedin_save_job, "
+        "nothing. SEVENTEEN WRITE: linkedin_save_job, "
         "linkedin_unsave_job, linkedin_unfollow_company, "
         "linkedin_follow_company, linkedin_apply_job, "
         "linkedin_update_setting, linkedin_react_to_item, "
         "linkedin_send_invitation, linkedin_publish_post, "
         "linkedin_comment_on_item, linkedin_update_profile_field, "
-        "linkedin_send_message, linkedin_follow_company_page, "
+        "linkedin_follow_company_page, "
         "linkedin_mark_company_interest, linkedin_send_reply, "
         "linkedin_withdraw_from_group, linkedin_connect_from_profile and "
         "linkedin_message_from_profile. "
@@ -949,41 +955,15 @@ mcp = FastMCP(
         "names by its NUMERIC id, never by a group's name; no join is built "
         "here, so offer it only for a group he names -- and not his last "
         "membership, whose leave this server cannot verify. "
-        "THE TWELFTH ARRIVED 2026-09-02 AND SHIPS EXPECTING TO REFUSE, "
-        "which is the design and not a fault -- say so plainly rather than "
-        "presenting a refusal as a surprise. linkedin_send_message types the "
-        "name, then CHOOSES from the typeahead, then checks who is in the "
-        "box -- three steps, and the middle one was added on 2026-09-03 "
-        "because the first live run MEASURED that a bare fill commits "
-        "NOBODY: a clean composer, a correct first-degree name, all four "
-        "recipient selectors reading zero. Typing into a typeahead is not "
-        "choosing from it. The choosing refuses unless EXACTLY ONE "
-        "suggestion carries his needle, matched on its accessible name "
-        "inside the page rather than by position -- a dropdown offering "
-        "three people who all match refuses rather than pressing the first. "
-        "THE CLICK IS NOT ITS OWN EVIDENCE: after it, the original check "
-        "still runs and still decides, proceeding only if EXACTLY ONE "
-        "recipient is committed AND that recipient's name carries the needle "
-        "he supplied, compared inside the page so no third party's name ever "
-        "reaches this process. A COUNT IS NOT THE "
-        "PROPERTY -- one committed recipient with the wrong name refuses, "
-        "because 'LinkedIn thinks this is sendable' and 'this is addressed "
-        "to the person he named' are different claims. Whether clicking a "
-        "suggestion is what commits somebody is STILL UNMEASURED, and the "
-        "counts these refusals return are the measurement nobody can take "
-        "another way. His words are never "
-        "typed until that check passes, so a refusal costs him a name "
-        "sitting in a composer and never his message. IT CAN NOW REPORT "
-        "SENT, ON A WEAK FOOTING -- this paragraph said it 'can never report "
-        "SENT' until 2026-09-24, because the only surface that could confirm "
-        "a send, the conversation, was forbidden; ruling WRITE-CLASS-B lifted "
-        "that. After a send it reads the conversation left drawn on the same "
-        "page, in place, and says SENT only when his exact words are its last "
-        "message; with no earlier count to compare, an identical earlier "
-        "message of his would read the same, and anything else is unknown. "
-        "AND IT MAY SPEND AN INMAIL CREDIT whose "
-        "size is UNMEASURED rather than denied -- no countable balance "
-        "exists on either surface this server may read. "
+        "THE TWELFTH, linkedin_send_message, WAS RETIRED ON 2026-09-27 and "
+        "is not on this surface: it was aimed by a NAME typed into the "
+        "composer's recipient typeahead, which was measured to commit nobody "
+        "and which PEOPLE-DATA-MITIGATIONS forbids as the aim of an outward "
+        "act. To message a person, call linkedin_message_from_profile with "
+        "their PROFILE LINK: it presses that profile's own Message control, "
+        "so LinkedIn sets the recipient, checks whose conversation opened "
+        "before anything is typed, and types only for a first-degree "
+        "connection. "
         "Call any of them "
         "without a confirm_token and it performs NOTHING -- it reads the "
         "target live and returns a block for HIM to read; only a token from "
@@ -1028,7 +1008,9 @@ mcp = FastMCP(
         "tool: linkedin_publish_post, linkedin_comment_on_item, "
         "linkedin_react_to_item, linkedin_update_profile_field, "
         "linkedin_update_setting, linkedin_send_invitation and "
-        "linkedin_send_message. AND AS OF 2026-09-02 EVERY WRITE TOOL ON "
+        "linkedin_send_message -- the last RETIRED on 2026-09-27, and a "
+        "message now goes through linkedin_message_from_profile. AND AS OF "
+        "2026-09-02 EVERY WRITE TOOL ON "
         "THIS SURFACE CAN ACT -- that column is empty; the last of them "
         "shipped that day. This paragraph said 'NONE OF THEM CAN ACT' until "
         "then and it is corrected here rather than quietly deleted, because a "
@@ -1040,16 +1022,13 @@ mcp = FastMCP(
         "about them from what the tool itself returns rather than from a "
         "stored belief -- including this paragraph, which has now been wrong "
         "in both directions. "
-        "TWO COSTS ARE WORTH KNOWING IN ADVANCE AND SHIPPING MADE THEM MORE "
-        "RELEVANT, NOT LESS. linkedin_send_message DOES NOT OPEN MESSAGING at "
-        "preview -- loading it is measured to redirect into a stranger's "
-        "conversation, so the preview reads the nav badge and stops; if the "
-        "surface must be measured, HE calls linkedin_open_messaging, which "
-        "pays that cost knowingly. Performing it opens the composer, which is "
-        "a different address and does not redirect. And "
-        "linkedin_send_invitation DOES NOT OPEN /mynetwork/, because that "
-        "load spends his pending-invitation badge; it reads the invitation "
-        "controls on his own profile instead. "
+        "ONE COST IS WORTH KNOWING IN ADVANCE AND SHIPPING MADE IT MORE "
+        "RELEVANT, NOT LESS. linkedin_send_invitation DOES NOT OPEN "
+        "/mynetwork/, because that load spends his pending-invitation badge; "
+        "it reads the invitation controls on his own profile's suggestion "
+        "rail instead, and aims at the one whose card links to the profile "
+        "link he gives -- never at a name. (A second cost sat here until "
+        "2026-09-27, linkedin_send_message's, and left with that tool.) "
         "Following a company IS now performed, through "
         "linkedin_follow_company and behind the same gate -- with one "
         "asymmetry to carry into any answer: this server can start a follow "
@@ -4177,7 +4156,8 @@ async def linkedin_connections(limit: int = DEFAULT_LIMIT) -> dict[str, Any]:
 
             # 3. AFTER, off the nav of the page just loaded. NO THIRD
             #    NAVIGATION -- the badge renders on every signed-in page,
-            #    which is the property read_messaging_badge already relies on.
+            #    which is the property read_messaging_badge relied on (it left
+            #    dom.py on 2026-09-27 with send_message's retirement).
             after = shape.invitation_badge(await dom.read_invitation_badge(page))
             rows, census = await _read_connection_rows(page, limit)
 
@@ -8607,16 +8587,9 @@ _WHY_NOT_PERFORMED: dict[str, str] = {
     # gate now DECLARES that nothing can confirm a sent invitation rather than
     # refusing over it. (Since 2026-09-27 the aim is the person's profile LINK,
     # compared against each rail card's own link; the needle is gone.)
-    "send_message": (
-        "'/messaging/compose' is on the forbidden-url list, and one "
-        "exact-url exemption was ruled in on 2026-08-31, so the composer HAS "
-        "now been observed -- this line said it never had until 2026-09-01. "
-        "What stops it is TYPING AND the absence of anything that could "
-        "verify a send: no countable total on the composer, and none on "
-        "/premium/my-premium/ either. The preview still costs nothing -- it "
-        "reads the nav badge and stops; linkedin_open_messaging is the tool "
-        "that opens a thread knowingly."
-    ),
+    # ``"send_message"`` LEFT THIS TABLE ON 2026-09-27 with its action: the
+    # write was RETIRED rather than re-aimed (lane L5, the orchestrator's
+    # order of 23:36) -- see the note where ``linkedin_send_message`` stood.
 }
 
 
@@ -9903,112 +9876,38 @@ async def linkedin_send_invitation(
         return _error(exc)
 
 
-@mcp.tool()
-async def linkedin_send_message(
-    member: str, text: str, confirm_token: str = ""
-) -> dict[str, Any]:
-    """Send a message or InMail. PERFORMS, and it TYPES A NAME BEFORE IT STOPS.
-
-    THIS SAID "BUILT, GATED, AND REFUSING" UNTIL 2026-09-03, and on the one
-    tool here that reaches another person that was the most dangerous sentence
-    on this surface. It shipped able to act on 2026-09-02. It mints real
-    confirm tokens. Its Args block went on saying no token is ever issued for
-    it. A CALLER READS THIS INSTEAD OF THE SOURCE, so a docstring understating
-    a capability makes them careless in exact proportion to how much they
-    trust it -- which is the opposite of the failure everyone guards against.
-
-    IT REFUSES BY STOPPING PART-WAY, NOT BY DECLINING. That distinction is the
-    whole of what a caller needs and the old text hid it. The anchor is the
-    RECIPIENT COMBOBOX, not ``Send``: this fills the recipient FIRST, then
-    checks, and only a passing check lets your words be typed at all. So a
-    refusal is not free -- it leaves a NAME SITTING IN YOUR COMPOSER. It costs
-    you that and never your message.
-
-    AND THE RESIDUE MAKES THE NEXT CALL REFUSE DIFFERENTLY. Measured
-    2026-09-03: a first call left a name in the recipient box, and the second
-    refused at the STATE gate rather than the recipient one, because the state
-    gate requires an EMPTY composer and reads 0 dispatch radios once the box
-    is dirty. Two different refusals, one underlying cause, and the second
-    reason does not name the first. Clear the composer by hand between
-    attempts.
-
-    IT HAS NEVER SENT, AND THE REASON IS MEASURED RATHER THAN ASSUMED. On an
-    empty composer, with a CORRECT first-degree name, all four candidate
-    recipient selectors read ZERO committed recipients -- a bare fill does not
-    commit anybody. So the gate is not being cautious about an unknown; the
-    combobox demonstrably does not accept a typed name this way, and until
-    that is solved this cannot reach a send at all.
-
-    WHY A COUNT IS NOT THE PROPERTY. It proceeds only if EXACTLY ONE recipient
-    is committed AND that recipient's name carries the needle you supplied,
-    compared inside the page so no third party's name reaches this process.
-    One committed recipient with the wrong name refuses: "LinkedIn thinks this
-    is sendable" and "this is addressed to the person you named" are different
-    claims.
-
-    IT CAN REPORT SENT SINCE 2026-09-24, ON A WEAK FOOTING, AND IT STILL HAS
-    NEVER SENT. This paragraph said it could NEVER report SENT, because the
-    only surface that could confirm a send -- the conversation -- was
-    forbidden. Ruling WRITE-CLASS-B lifted that. After a send, the
-    conversation LinkedIn leaves drawn on the same page is read IN PLACE
-    (its id is page-derived and is never navigated to), and SENT is reported
-    only when your exact words are its last message. With no before-count,
-    an identical earlier last message of yours would read the same. None of
-    this reaches a recipient: the recipient check above still refuses. For a
-    person you already have a conversation with, ``linkedin_send_reply``
-    removes the recipient problem entirely and confirms by a delta.
-
-    ON OPENING MESSAGING, which is still true and still the reason the PREVIEW
-    stays blind. Loading /messaging/ is MEASURED TWICE to redirect into one
-    specific conversation of LinkedIn's own choosing -- so the load itself
-    OPENS SOMEBODY'S THREAD, and whether that fires them a read receipt is an
-    honest unknown believed unmeasurable from outside. The nav badge also
-    counts new-since-last-visit and resets when the tab is opened. So the
-    preview reads the BADGE off a page already open and stops. If you want the
-    surface measured, call ``linkedin_open_messaging`` yourself: it pays that
-    cost knowingly and its own name says so.
-
-    THE COMPOSER, THOUGH, IS MEASURED -- 77 controls, both dispatch radios,
-    the body editor, and ``Send`` drawn DISABLED while empty. And
-    ``/messaging/compose/`` is NOT forbidden to this action: the exact url has
-    been on the read allowlist since 2026-08-31 by an EXACT-url exemption, and
-    it is this action's own ``url_template``. The substring
-    ``/messaging/compose`` stays on the forbidden list, so every other
-    spelling in that family refuses exactly as it did. THIS DOCSTRING SAID THE
-    COMPOSER WAS UNMEASURED AND ITS URL FORBIDDEN; both had been false since
-    the day the action was addressed.
-
-    WHAT IT WOULD COST. A message is read by a person, usually within a day,
-    and arrives as an email as well as a notification; it is the most
-    irreversible-in-audience action in this whole design, and unlike an
-    application it is addressed to a named individual rather than a company's
-    process. It MAY ALSO SPEND AN INMAIL CREDIT, which is unmeasured rather
-    than denied: messaging outside your network uses InMail, that allowance is
-    finite on Premium Career, and this server has never read your balance
-    because the page carrying it is not on the read allowlist.
-
-    Args:
-        member: who to message. Unvalidated, for the same reason as
-            ``linkedin_send_invitation`` -- and it is ALSO the needle the
-            recipient check compares against inside the page.
-        text: the exact words. Part of the target, so a token binds to them.
-            Never typed unless the recipient check has already passed.
-        confirm_token: leave empty to read the gate. NEVER confirm on his
-            behalf: a token from that block, used once within two minutes, is
-            the only thing that acts -- and acting here TYPES A NAME into his
-            composer before it decides whether it may continue.
-
-            THIS SAID "accepted, and no token is ever issued for this action"
-            while the tool minted real ones. It is the sentence that started
-            the 2026-09-03 census of every PERFORMABLE action's docstring,
-            which found ``update_profile_field`` saying it too.
-    """
-    try:
-        return await _write_tool(
-            "send_message", {"member": member, "text": text}, confirm_token
-        )
-    except Exception as exc:
-        return _error(exc)
+# ``linkedin_send_message`` STOOD HERE, 2026-09-02 TO 2026-09-27, AND IT IS
+# RETIRED RATHER THAN RE-AIMED (lane L5, the orchestrator's order of 23:36;
+# PEOPLE-DATA-MITIGATIONS, mitigation 6: an outward act fires at the exact
+# member he names, by link or id -- never a name).
+#
+# IT WAS AIMED BY A NAME: ``member``, typed into the composer's recipient
+# typeahead and compared against the suggestions' labels. That aim was
+# MEASURED DEAD before the ruling made it forbidden -- a typed name commits
+# nobody (2026-09-03, all four chip selectors zero on a correct first-degree
+# name), and every refusal left the name sitting in his composer. It never
+# sent.
+#
+# WHY NOT AIM IT BY A LINK OR AN ID INSTEAD. The one composer route that does
+# not go through the typeahead is the composer addressed by identifier,
+# ``/messaging/compose/?profileUrn=urn%3Ali%3Afsd_profile%3A<id>&recipient=<id>``,
+# and the read boundary DOES admit it (``readonly._ALLOWED_URL_PATTERNS``,
+# since 2026-09-03; ``assert_read_url`` admits it, measured 2026-09-27). What
+# it cannot do is the part the order asks for: it is addressed by the member
+# id alone, which a profile link does not carry, and whom it addressed could
+# only be checked on the committed recipient -- which no instrument here has
+# ever observed (the four chip spellings in ``dom.RECIPIENT_CHIP_SELECTORS``
+# have never matched anything), and no capture shows that composer with a
+# recipient in it. So a re-aim would type his words into a composer whose
+# addressee nothing can confirm. And the capability already exists:
+# ``linkedin_message_from_profile`` reaches a person by their PROFILE LINK,
+# presses that profile's own Message control so LinkedIn sets the recipient,
+# checks whose conversation opened before a word is typed, types only for a
+# first-degree connection, and confirms SENT by a delta. For somebody he
+# already talks to, ``linkedin_send_reply`` fixes the recipient by thread id.
+#
+# The argument in full, and the census rows this moved:
+# ``_audit/2026-09-24-lane-l5-messaging.md``.
 
 
 @mcp.tool()
@@ -10023,9 +9922,10 @@ async def linkedin_send_reply(
     where LinkedIn lets a sender delete a message it does not un-send the
     email or un-read what was read.
 
-    WHY A CONVERSATION AND NOT A NAME. ``linkedin_send_message`` addresses a
-    person by the text of their name in a typeahead, and that route is
-    measured dead: a typed name commits nobody. A conversation already fixes
+    WHY A CONVERSATION AND NOT A NAME. ``linkedin_send_message`` addressed a
+    person by the text of their name in a typeahead, and that route was
+    measured dead -- a typed name commits nobody -- and was retired on
+    2026-09-27 (mitigation 6: no write is aimed by a name). A conversation fixes
     who receives the words, so the only aiming question left is "is this the
     conversation you named?" -- and a thread id inside an admitted address
     answers it. The landing is compared against your id before anything is
@@ -10803,25 +10703,23 @@ async def linkedin_server_info(verbose: bool = False) -> dict[str, Any]:
             # SIDE EFFECTS THIS SERVER PAYS, and the two it REFUSES to pay.
             # The refused pair is listed here rather than only in a document
             # because a caller meets this field and does not meet the audit:
-            # the whole design of linkedin_send_message and
-            # linkedin_send_invitation is that they DO NOT incur these, and a
-            # cost that is never named cannot be weighed.
+            # the whole design of linkedin_send_invitation is that it DOES NOT
+            # incur these (so was linkedin_send_message's, until it was
+            # retired on 2026-09-27), and a cost that is never named cannot
+            # be weighed.
             "known_side_effects": [
                 "opening the notifications page clears the unread badge",
                 "running a job search adds to your own recent-search history",
                 "opening messaging clears the messaging badge AND opens one "
                 "conversation LinkedIn chooses -- measured twice. Only "
                 "linkedin_open_messaging and linkedin_new_messages can incur "
-                "this, and only when called. linkedin_send_message's preview "
-                "deliberately does NOT open messaging: it reads the nav badge "
-                "off a page already loaded. THESE ALSO LOAD A MESSAGING "
+                "this, and only when called. THESE ALSO LOAD A MESSAGING "
                 "ADDRESS, and none of them opens a conversation LinkedIn "
                 "chooses: linkedin_list_conversations (the composer's list, "
                 "which opens none), linkedin_open_thread and "
-                "linkedin_send_reply (only the conversation you name by id), "
-                "and linkedin_send_message (the composer, when a confirmed "
-                "send is performed). Whether any of those loads clears the "
-                "messaging badge is unmeasured.",
+                "linkedin_send_reply (only the conversation you name by id). "
+                "Whether any of those loads clears the messaging badge is "
+                "unmeasured.",
                 "loading /mynetwork/ ITSELF would consume the pending-"
                 "invitation badge, and no tool here loads that root. TWO "
                 "tools DO load addresses UNDER it -- linkedin_connections "

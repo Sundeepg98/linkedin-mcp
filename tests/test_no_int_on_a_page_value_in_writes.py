@@ -34,7 +34,10 @@ and a latent one:
 TWO HALVES, BOTH SHOWN FAILING against the unrepaired module before the repair
 landed: a STRUCTURAL scan that finds every ``int()`` call in ``writes.py``, and
 a DRIVE of each of the fourteen functions over a reading whose counts are
-planted words, asserting nothing raises and no ``why`` quotes them.
+planted words, asserting nothing raises and no ``why`` quotes them. ELEVEN
+SINCE 2026-09-27: ``_read_messaging_badge``, ``_typeahead_gate`` and
+``_send_gate`` left with ``send_message`` (lane L5, the orchestrator's order of
+23:36), and the aim driven is ``aim_invitation_by_link``.
 
 WHAT THIS DOES NOT COVER, said so its green is not read as more: a raw reading
 value interpolated into a ``why`` without passing through ``int()`` at all.
@@ -55,7 +58,6 @@ ROOT = pathlib.Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
 from linkedin_server import dom, writes  # noqa: E402
-from tests.test_writes import _bare_grant  # noqa: E402
 
 # NO MODULE-LEVEL UPPER-CASE CONSTANT BEYOND ``ROOT``, on the impact gate's
 # rule: a test file that names an upper-case constant another staged file
@@ -137,9 +139,8 @@ def _whys(result) -> list[str]:
 
 
 def _cases():
-    grant = _bare_grant(action="send_message",
-                        target="Needle Q" + writes.TARGET_JOIN + "a body")
-    # A PROFILE LINK since 2026-09-27: a word is refused before any reading,
+    # (A ``send_message`` grant stood here for its typeahead gate until that
+    # action was retired on 2026-09-27.) A PROFILE LINK since 2026-09-27: a word is refused before any reading,
     # which would leave the invitation readers undriven. The segment carries
     # ``example``, a declared synthetic slug token.
     link = "https://www.linkedin.com/in/example-harness-person/"
@@ -173,9 +174,6 @@ def _cases():
          {"controls": _planted, "matches": _planted, "error": None},
          lambda: writes._read_profile_invitations(
              None, _spec("send_invitation"), target=link)),
-        ("_read_messaging_badge", "read_messaging_badge",
-         {"links": _planted, "label": None},
-         lambda: writes._read_messaging_badge(None, _spec("send_message"))),
         ("_name_the_invitation_recipient", "read_invitation_rail",
          {"controls": _planted, "matches": _planted, "error": None},
          lambda: writes._name_the_invitation_recipient(
@@ -187,12 +185,8 @@ def _cases():
         ("_publish_submit_gate", "read_post_composer",
          {"editors": _planted, "submits": _planted, "error": None},
          lambda: writes._publish_submit_gate(None)),
-        ("_typeahead_gate", "read_typeahead_options",
-         {"total": _planted, "matches": _planted, "error": None},
-         lambda: writes._typeahead_gate(None, grant)),
-        ("_send_gate", "read_compose_send_state",
-         {"textboxes": _planted, "controls": _planted, "error": None},
-         lambda: writes._send_gate(None)),
+        # (``_read_messaging_badge``, ``_typeahead_gate`` and ``_send_gate``
+        # were driven here until 2026-09-27, when they left with send_message.)
     ]
 
 

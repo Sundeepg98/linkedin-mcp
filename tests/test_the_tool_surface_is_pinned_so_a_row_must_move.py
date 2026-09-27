@@ -142,7 +142,9 @@ PINNED_TOOL_SURFACE: dict[str, tuple[str, ...]] = {
     # order of 23:36): aimed by the person's profile link, never a name.
     # Census N 1 keeps its state; its note records the new aim.
     "linkedin_send_invitation": ("confirm_token", "profile"),
-    "linkedin_send_message": ("confirm_token", "member", "text"),
+    # (``linkedin_send_message`` -- confirm_token, member, text -- was
+    # RETIRED on 2026-09-27, lane L5, the orchestrator's order of 23:36:
+    # aimed by a name. Census M M1, N 155 and M M2 moved; see the record.)
     "linkedin_send_reply": ("confirm_token", "text", "thread_id"),
     "linkedin_server_info": ("verbose",),
     "linkedin_session_info": ("verify_live",),
@@ -410,8 +412,15 @@ PINNED_TOOL_SURFACE: dict[str, tuple[str, ...]] = {
 #: never granted. See `_audit/2026-09-24-lane-l5-messaging.md`, "Follow-up:
 #: the named-person route" and "Integration: lane L5's merge of master
 #: 52b55b6".
-PINNED_TOOL_COUNT = 59
-PINNED_PARAMETER_COUNT = 95
+#: **RE-PINNED 2026-09-27 AT 58 TOOLS AND 92 PARAMETERS, on lane L5's order of
+#: 23:36 (PEOPLE-DATA-MITIGATIONS, mitigation 6): `linkedin_send_message`
+#: RETIRED -- it was aimed by a name -- taking one tool and three parameters
+#: (`member`, `text`, `confirm_token`); `linkedin_send_invitation`'s `member`
+#: became `profile`, which moves no count.** Census `M M1` and `N 155` note the
+#: retirement; `M M2` returns to GAP (its only tool was the retired one). See
+#: `_audit/2026-09-24-lane-l5-messaging.md`, "The name-aimed debts".
+PINNED_TOOL_COUNT = 58
+PINNED_PARAMETER_COUNT = 92
 
 
 def live_surface() -> dict[str, tuple[str, ...]]:

@@ -934,7 +934,8 @@ def message_verdict(
     This conversation's address is on the page -- page-derived -- and this
     route never navigates to it (PAGE-MAY-VETO-NEVER-SUPPLY). So it is read
     where it opened, and the before-count taken when it opened is what lets it
-    say more than ``send_message``'s in-place reading can: the number of
+    say more than ``send_message``'s in-place reading could (that action was
+    retired on 2026-09-27): the number of
     messages carrying exactly his words must rise by EXACTLY ONE, and his
     words must be the last message, with no ``--other`` modifier.
     """

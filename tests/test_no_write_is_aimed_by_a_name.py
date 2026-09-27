@@ -1,4 +1,4 @@
-"""No write is aimed by a name -- except one, and it is declared debt.
+"""No write is aimed by a name, and no debt is left.
 
 THE RULING. ``PEOPLE-DATA-MITIGATIONS``, mitigation 6, NOT A TARGET BY ITSELF
 (``_audit/2026-09-24-rulings-names-at-runtime.md``): "A name read off a page is
@@ -15,23 +15,29 @@ WHAT THIS FILE HOLDS, on the write registry and on the tool surface:
    fails until somebody classifies it; a classified kind that left the
    registry fails as stale.
 2. The actions whose kind is classified ``NAME`` are EXACTLY the keys of
-   ``NAME_AIMED_DEBT``: a new name-aimed write fails, and so does converting a
-   declared one, until its entry is deleted.
+   ``NAME_AIMED_DEBT`` -- EMPTY since 2026-09-27, and pinned empty by
+   ``test_no_debt_is_left``: a new name-aimed write fails, and declaring it
+   debt fails too. The machinery that held two debts stays, shown failing on
+   plants, for the day a ruling declares one.
 3. No field of a kind -- the kind itself, or each half of a composite -- is
    name-shaped unless the kind is classified ``NAME``, so a person-shaped field
    cannot be classified as an id to get past (2).
 4. No write TOOL in ``server.py`` takes a name-shaped parameter beyond
    ``DEBT_PARAMETERS``, asserted exactly.
 
-THE DEBT. ``send_message`` is aimed by the ``member`` half of its target, a
-name typed into the recipient typeahead. It predates the ruling; it is
-declared, and a declaration is a debt, not a waiver.
+THE DEBT IS PAID -- both entries, 2026-09-27, lane L5, on the orchestrator's
+order of 23:36. Two writes predated the ruling and were declared here, and a
+declaration was a debt, not a waiver:
 
-PAID, 2026-09-27: ``send_invitation`` was aimed by ``member``, his own word
-for the person, matched against the invitation controls' labels. Lane L5
-converted it on the orchestrator's order of 23:36 -- it takes the person's
-profile link, compared in the page against each rail card's own link -- and
-this file stayed red until its entry went, which is the design working.
+* ``send_invitation`` was aimed by ``member``, his own word for the person,
+  matched against the invitation controls' labels. CONVERTED: it takes the
+  person's profile link, compared in the page against each rail card's own
+  link, and this file stayed red until its entry went, which is the design
+  working.
+* ``send_message`` was aimed by the ``member`` half of its target, a name
+  typed into the recipient typeahead -- measured to commit nobody. RETIRED in
+  favour of ``message_from_profile``, which reaches a person by their profile
+  link: the tool, the spec and the name-aimed gates are gone.
 
 HOW A WRITE TOOL IS FOUND, off ``server.py``'s syntax tree: an ``@mcp.tool()``
 function whose body calls ``_write_tool``, the one function that reaches
@@ -52,8 +58,8 @@ THE LIMIT, plainly:
   outside it; ``tests/test_readonly.py``'s mutation scanner watches mutating
   calls package-wide.
 * It cannot stop a CLIENT copying a name a people read returned into a write's
-  argument. It makes true that no write, beyond the declared debt, has a
-  parameter through which a name is the aim.
+  argument. It makes true that no write has a parameter through which a name
+  is the aim.
 * Mitigation 6's second sentence, reporting whom it resolved before acting, is
   behaviour and is not asserted here. ``send_invitation``'s preview names the
   person on the one rail card its link matched
@@ -173,30 +179,23 @@ TARGET_KIND_CLASS: dict[str, tuple[str, str]] = {
         "profile_link_or_member_id",
         "send_invitation: /in/<segment>/ or an ACoAA id, compared in the page with each rail card's link",
     ),
-    "member_and_text": (
-        NAME_CLASS,
-        "send_message's subject half: a name typed into the recipient typeahead",
-    ),
+    # PAID 2026-09-27: ``member_and_text`` -- send_message's subject half, a
+    # name typed into the recipient typeahead -- left the registry with that
+    # action, which was retired rather than converted.
 }
 
 #: THE NAME-AIMED WRITES THAT EXIST TODAY. Declared, not waived.
-NAME_AIMED_DEBT: dict[str, str] = {
-    # ``send_invitation``'s entry went on 2026-09-27: aimed by the person's
-    # profile link since lane L5's order of 23:36 (kind ``rail_profile``).
-    "send_message": (
-        "PEOPLE-DATA-MITIGATIONS, mitigation 6: aimed by the member half of "
-        "its target, a name typed into the recipient typeahead. Debt, not a "
-        "waiver: converting this write to a link or member id supplied by the "
-        "caller fails this file until the entry goes."
-    ),
-}
+#:
+#: EMPTY SINCE 2026-09-27, both entries paid on lane L5's order of 23:36:
+#: ``send_invitation``'s by conversion (the person's profile link, kind
+#: ``rail_profile``) and ``send_message``'s by retirement. ``test_no_debt_is_left``
+#: pins it empty -- a new entry is a ruling change, not an edit here.
+NAME_AIMED_DEBT: dict[str, str] = {}
 
-#: The (tool, parameter) through which each debt write takes its name.
-DEBT_PARAMETERS = frozenset(
-    {
-        ("linkedin_send_message", "member"),
-    }
-)
+#: The (tool, parameter) through which each debt write takes its name. Empty
+#: with the table above: ``("linkedin_send_invitation", "member")`` and
+#: ``("linkedin_send_message", "member")`` went with their entries.
+DEBT_PARAMETERS: frozenset[tuple[str, str]] = frozenset()
 
 #: PARAMETER NAMES THAT SAY THEY HOLD A PERSON, and say nothing of a link or
 #: an id. Compared exactly, lower-cased. ``member`` is here because THIS
@@ -238,7 +237,9 @@ NAME_SHAPED_SUFFIXES = ("_name", "_names")
 #: merge of master 2eb90ad: fifteen, for sixteen, with lane L5's send_reply;
 #: and on its merge of master 7986ae3: sixteen, for seventeen, with lane L8's
 #: withdraw_from_group; and on lane L5's merge of master 52b55b6: eighteen,
-#: for nineteen, with connect_from_profile and message_from_profile.
+#: for nineteen, with connect_from_profile and message_from_profile; and on
+#: lane L5's order of 2026-09-27 23:36: seventeen, for eighteen, with
+#: send_message retired.
 KNOWN_WRITE_TOOLS = frozenset(
     {
         "linkedin_connect_from_profile",
@@ -258,7 +259,6 @@ KNOWN_WRITE_TOOLS = frozenset(
         "linkedin_update_profile_field",
         "linkedin_update_setting",
         "linkedin_send_invitation",
-        "linkedin_send_message",
     }
 )
 
@@ -553,6 +553,17 @@ def test_the_name_aimed_writes_are_exactly_the_declared_debt():
         "%s is no longer aimed by a name. The debt is paid: delete its "
         "NAME_AIMED_DEBT entry and its DEBT_PARAMETERS pair." % converted
     )
+
+
+def test_no_debt_is_left():
+    """THE ORDER OF 2026-09-27 23:36, held: no write is aimed by a name, so
+    nothing is declared. Both declarations are EMPTY. A name-aimed write fails
+    ``test_the_name_aimed_writes_are_exactly_the_declared_debt``; declaring it
+    here to get past that fails this -- a debt is a ruling change, argued in
+    the rulings register, not an edit to this table."""
+    assert NAME_AIMED_DEBT == {}, sorted(NAME_AIMED_DEBT)
+    assert DEBT_PARAMETERS == frozenset(), sorted(DEBT_PARAMETERS)
+    assert name_aimed_actions(writes.SANCTIONED_WRITES, TARGET_KIND_CLASS) == set()
 
 
 def test_each_debt_entry_names_the_ruling_and_is_not_a_waiver():

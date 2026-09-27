@@ -901,7 +901,8 @@ def test_the_file_list_is_newline_separated_with_no_carriage_returns(tmp_path):
 # tests/test_click_is_not_its_own_evidence.py's deliberate
 # ``xfail(strict=True)`` over a known defect, so every cell of the matrix would
 # have gone red on the first run this workflow ever had, for a marker doing
-# exactly its job.
+# exactly its job. (That test file was deleted on 2026-09-27 with the
+# send_message write it tested; the rule stands.)
 
 MIXED_JUNIT = """\
 <?xml version="1.0" encoding="utf-8"?>

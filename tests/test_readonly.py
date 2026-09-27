@@ -761,7 +761,8 @@ def test_only_dom_module_waives_evaluate():
     # A correct guard is one regex edit from being an incorrect guard. This
     # waiver buys the label never being in the process to guard.
     #
-    # THE THIRTEENTH, 2026-09-02: ``SELECTED_RECIPIENT_JS``, and the argument
+    # THE THIRTEENTH, 2026-09-02: ``SELECTED_RECIPIENT_JS`` (RETIRED 2026-09-27
+    # with send_message -- see the last paragraph), and the argument
     # for it is the twelfth's carried one surface further. The twelfth shapes
     # a label known to be HIS. This one runs where a committed recipient is by
     # definition A THIRD PARTY, so every label it touches names somebody who
@@ -939,7 +940,12 @@ def test_only_dom_module_waives_evaluate():
     # all, so the privacy argument that bought the seventh waiver is kept by a
     # cheaper instrument. THE CEILING COMES DOWN WITH IT: a ceiling left above
     # the count is a waiver nobody has to argue for.
-    assert waived_in.get("dom.py", 0) <= 22, waived_in
+    #
+    # 22 -> 21 the same day, later: SELECTED_RECIPIENT_JS -- the thirteenth --
+    # LEFT WITH send_message, which was RETIRED rather than re-aimed because it
+    # was aimed by a name (the same order). Its reader,
+    # dom.read_selected_recipients, had no caller once the recipient gate went.
+    assert waived_in.get("dom.py", 0) <= 21, waived_in
 
 
 # ---------------------------------------------------------------------------
@@ -956,20 +962,11 @@ INJECTED_SCRIPTS = {
     # leave. test_the_compose_script_returns_no_unshaped_label is the check
     # that the reduction has no bypass.
     "COMPOSE_MODES_JS": dom.COMPOSE_MODES_JS,
-    # 2026-09-02, and it is the SECOND script on the composer and the one with
-    # the sharper privacy argument. COMPOSE_MODES_JS resolves a name known to
-    # be HIS; this one runs where a committed recipient is by definition a
-    # THIRD PARTY, so any label it touches names somebody who is not him.
-    #
-    # It is declared for the ordinary reason -- an executed script that is not
-    # declared is one nobody reviewed -- and its own rule is that it returns
-    # INTEGERS ONLY: a per-selector count, a de-duplicated total, and how many
-    # carry the needle the caller handed in. The needle comparison happens
-    # inside the page for the reason INVITE_NEEDLE_JS does the same, and there
-    # is deliberately no `revealSingleMatch` escape hatch: that flag exists so
-    # a PREVIEW can show him who he would reach, and this script runs inside
-    # perform, after he has confirmed, where there is nothing left to show.
-    "SELECTED_RECIPIENT_JS": dom.SELECTED_RECIPIENT_JS,
+    # (2026-09-02 to 2026-09-27: SELECTED_RECIPIENT_JS, the SECOND script on
+    # the composer, which counted committed recipients carrying the needle
+    # the caller handed in -- a name compared in the page, inside perform. It
+    # left with send_message, retired on lane L5's order of 2026-09-27 23:36
+    # because that write was aimed by a name.)
     "RECIPIENT_IDS_JS": dom.RECIPIENT_IDS_JS,
     "HARVEST_LINKED_CARDS_JS": dom.HARVEST_LINKED_CARDS_JS,
     "HARVEST_BLOCK_CARDS_JS": dom.HARVEST_BLOCK_CARDS_JS,
@@ -1443,7 +1440,12 @@ def test_the_scripts_executed_are_exactly_the_ones_declared():
     # dom.read_invitation_surface, with it. The invitation's aim is a locator
     # count now. The waiver budget came down 23 -> 22 in the same change, so
     # the two counts stay one apart.
-    assert len(EXECUTED_SCRIPTS) == 23, sorted(EXECUTED_SCRIPTS)
+    #
+    # 23 -> 22 later again, the same order: SELECTED_RECIPIENT_JS left with
+    # send_message, which was RETIRED because it was aimed by a name, and its
+    # one call site, dom.read_selected_recipients, with it. The waiver budget
+    # came down 22 -> 21 in the same change; the two counts stay one apart.
+    assert len(EXECUTED_SCRIPTS) == 22, sorted(EXECUTED_SCRIPTS)
 
 
 def test_a_script_that_replaces_page_behaviour_runs_only_from_a_sanctioned_evaluate():

@@ -18,8 +18,11 @@ Four sections, each printing its own red and its own green:
    can act:** the page it hands ``perform`` is ``tests.plantedpage.PlantedPage``,
    whose ``goto``, ``click`` and ``fill`` raise, so every refusal downstream of
    the ones being measured is still a hard stop.
-3. **THE LEAK.** The family guard must convict ``writes._recipient_gate`` the
-   moment the coercion that shipped until this wave is put back. The plant is
+3. **THE LEAK.** The family guard must convict ``writes._live_control`` the
+   moment the coercion that shipped until this wave is put back (the subject
+   was ``writes._recipient_gate`` until that gate left with ``send_message``
+   on 2026-09-27; ``_live_control`` is the other grant-taking reader recorded
+   ``returns_text``, and it coerces through the same helper). The plant is
    not an invented mutation: it is ``int(value or 0)``, restored by rebinding
    ``coerce.as_count``, which ``writes.py`` reaches through the module and so
    sees at once.
@@ -60,10 +63,11 @@ from tests.test_readers_emit_no_page_string import (  # noqa: E402
     drive,
 )
 
-#: The action every section uses when it needs one. ``send_message`` because
-#: it is the spec whose target carries a subject component, which is what
-#: reaches ``_recipient_gate``'s coercions at all.
-SPEC = writes.SANCTIONED_WRITES["linkedin_send_message"]
+#: The action every section uses when it needs one. ``send_reply`` since
+#: 2026-09-27: a performable action with a two-part target, as
+#: ``send_message``'s was -- which this used until it was retired (lane L5,
+#: the orchestrator's order of 23:36).
+SPEC = writes.SANCTIONED_WRITES["linkedin_send_reply"]
 
 
 def _print_failures(label: str, failures: list[str]) -> None:
@@ -230,7 +234,7 @@ def section_three_the_leak() -> int:
     print()
 
     readers = dict(discover_readers())
-    subject = "writes:_recipient_gate"
+    subject = "writes:_live_control"
     before = drive(readers[subject])[0]
     print(f"  before the plant: {subject} -> {before}")
 

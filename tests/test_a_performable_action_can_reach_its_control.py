@@ -132,7 +132,7 @@ _TARGETS: dict[str, object] = {
     "item_and_text": {"item": _ACTIVITY_URN, "text": "some text"},
     "field_and_value": {"field": "City", "value": "somewhere"},
     "setting_and_value": {"setting": "dark mode", "value": "Always on"},
-    "member_and_text": {"member": "a needle nobody is", "text": "some text"},
+    # (``member_and_text`` left with ``send_message`` on 2026-09-27.)
     "thread_and_text": {"thread": "2-SYNTHETICTHREADAAAA==", "text": "some text"},
     # 2026-09-27: a named person's profile, as a LINK -- a bare word is refused
     # as a possible name. The segment carries a declared synthetic slug token.

@@ -212,7 +212,13 @@ LIFTED = {
     # seven entries on 2026-08-30 and every one of them left by shipping -- and
     # the checks below were reading that table directly. See the section 3
     # comment for what they read instead.
-    "send_message": "2026-09-02",
+    #
+    # AND IT LEFT THIS LEDGER ON 2026-09-27, THE ONLY DEPARTURE FROM IT: the
+    # action was RETIRED on lane L5's order of 23:36 -- it was aimed by a name
+    # -- so it is in no sanctioned set at all, and a ledger entry for it would
+    # make the reconciliation below count an action the registry no longer
+    # holds. ``tests/test_writes.py::test_send_message_is_retired_and_its_
+    # name_is_forbidden_again`` holds the retirement instead.
 }
 
 
@@ -534,7 +540,7 @@ TARGETS: dict[str, object] = {
     "update_profile_field": {"field": "headline", "value": "Node.js engineer"},
     "update_setting": {"setting": "dark-mode", "value": "Always on"},
     "send_invitation": MEMBER_LINK,
-    "send_message": {"member": MEMBER, "text": "Hello, are you hiring?"},
+    # (``send_message``'s -- a NAME and the words -- left with it, 2026-09-27.)
     # ADDED 2026-09-02, when the corpus stopped excluding this action. Its
     # target_kind is ``self`` -- the write lands on his own account and names
     # nothing else -- and ``_canonical_target`` accepts exactly "self", "me" or
@@ -920,17 +926,13 @@ async def test_each_refusal_is_a_fresh_reading_of_the_specs_own_surface(
     assert nav.gotos == [expected], (action, nav.gotos)
 
 
-async def test_the_message_gate_never_opens_messaging(writes_on, browser_page):
-    """THE ONE COST THIS DESIGN REFUSES TO PAY ON A STRANGER'S BEHALF, made
-    structural.
-
-    Loading /messaging/ is measured to redirect into one specific conversation
-    of LinkedIn's choosing and to reset the very badge that counts what is
-    new. So the gate reads the badge off a page already open. This asserts the
-    absence rather than trusting the comment that explains it.
-    """
-    _block, nav = await _preview_the_refusal(browser_page, "send_message")
-    assert not any("/messaging" in url for url in nav.gotos), nav.gotos
+# (``test_the_message_gate_never_opens_messaging`` stood here: send_message's
+# preview read the messaging badge off a page already open rather than load
+# /messaging/. The action was RETIRED on 2026-09-27 -- lane L5, the
+# orchestrator's order of 23:36: it was aimed by a name -- and the test left
+# with it. The cost it guarded is still refused by the tools that remain:
+# ``tests/test_a_named_cost_names_a_tool_that_can_incur_it.py`` holds which
+# tools may load a messaging address.)
 
 
 # ---------------------------------------------------------------------------
@@ -1468,7 +1470,10 @@ def test_every_surface_these_actions_read_is_already_on_the_read_boundary():
     # declared it were moved onto the page they act on, so the entry pointed
     # at a reader nothing could reach -- and the equality below is what said
     # so, before anybody noticed.
-    assert len(writes._SURFACE_READS) == 5
+    # FOUR SINCE 2026-09-27: ``messaging_badge`` left with its only
+    # claimant, ``send_message``, RETIRED on lane L5's order of 23:36 -- the
+    # equality below would have refused it as an orphan otherwise.
+    assert len(writes._SURFACE_READS) == 4
     covered = set(REFUSING) | set(LIFTED)
     state_froms = {spec_for_action(a).state_from for a in covered}
     # THIS WAS A FLAT EQUALITY UNTIL 2026-09-02 and it could not survive
@@ -1762,7 +1767,8 @@ def test_the_claims_that_depend_on_the_destruction_refusal_are_the_measured_ones
         "publish_post": ("delete_own_post", "NOT YET"),
         "comment_on_item": ("delete_own_comment", "NOT YET"),
         "send_invitation": ("withdraw_invitation", "NOT YET"),
-        "send_message": (None, "NOBODY"),
+        # (``send_message``'s (None, "NOBODY") left with it on 2026-09-27:
+        # RETIRED on lane L5's order of 23:36, aimed by a name. SEVEN now.)
         # The sixth, from lane L5, restated at this lane's merge of master.
         "send_reply": (None, "NOBODY"),
         # The seventh and eighth, from lane L5's follow-up, restated at its
@@ -1785,12 +1791,12 @@ def test_the_claims_that_depend_on_the_destruction_refusal_are_the_measured_ones
             status = outward_classes.OUTWARD_CLASS_SPECS[record].status
             assert record in text, (action, record)
             assert status in text, (action, record, status)
-    # The four NOBODY verdicts rest on grounds outside this server: LinkedIn's
-    # own Help Center for an application, delivery itself for a message, a
-    # reply and a message sent from a profile. (Three until lane L5's merge of
-    # master 52b55b6 brought message_from_profile.)
+    # The three NOBODY verdicts rest on grounds outside this server: LinkedIn's
+    # own Help Center for an application, delivery itself for a reply and a
+    # message sent from a profile. (Three until lane L5's merge of master
+    # 52b55b6 brought message_from_profile, four until send_message was
+    # retired the same day.)
     assert "a512388" in spec_for_action("apply_job").reversible_by
-    assert "cannot be recalled" in spec_for_action("send_message").reversible_by
     assert "cannot be recalled" in spec_for_action("send_reply").reversible_by
     assert "cannot be recalled" in spec_for_action("message_from_profile").reversible_by
 

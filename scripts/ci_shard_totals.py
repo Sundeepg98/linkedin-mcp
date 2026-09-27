@@ -110,6 +110,8 @@ def junit_totals(path: str) -> dict:
     distinction is kept here for the same reason and, more sharply, because
     this file SUMS across shards: one xfail counted as a skip would make every
     cell short by one and report a completeness gap that does not exist.
+    (That test file was deleted on 2026-09-27 with the send_message write it
+    tested; the rule stands.)
     """
     root = ET.parse(path).getroot()
     suite = root if root.tag == "testsuite" else root.find("testsuite")
