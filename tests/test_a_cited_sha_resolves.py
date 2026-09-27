@@ -378,6 +378,33 @@ def test_the_dead_doc_declaration_suppresses_and_can_be_defeated():
     assert [s.verdict for s in defeated] == ["CANDIDATE"], defeated
 
 
+#: A disclosure whose PHRASE is broken by a line wrap, each way the corpus
+#: wraps: between words, inside emphasis, and with the continuation indented
+#: as a list item's is. (2026-09-27, the orchestrator's order to lane G: the
+#: guard read its wording one line at a time, so a disclosure a writer wrapped
+#: at a narrow column disclosed nothing.)
+_WRAPPED_DISCLOSURES = {
+    "between-words": "It sits at `deadbee`, a hash which does not\nresolve on `master` yet.\n",
+    "inside-emphasis": "It sits at `deadbee`, which does **not**\nresolve on `master` yet.\n",
+    "indented-continuation": "- at `deadbee`, a hash which does\n  not resolve on `master` yet.\n",
+}
+
+
+@pytest.mark.parametrize(
+    "text", list(_WRAPPED_DISCLOSURES.values()), ids=list(_WRAPPED_DISCLOSURES)
+)
+def test_a_disclosure_wrapped_across_lines_still_discloses(text):
+    """THE WORDING IS READ ACROSS THE WRAP, whitespace folded between lines --
+    and the same text without the disclosure is still a candidate, so the
+    wrap is what is being read, not the neighbourhood."""
+    disclosed = guard.candidates({"_audit/_planted.md": text})
+    assert [(s.token, s.verdict) for s in disclosed] == [("deadbee", "MARKED-DISCLOSED")], disclosed
+    bare = text.replace("does not", "does").replace("not resolve", "resolve")
+    bare = bare.replace("does **not**", "does")
+    plain = guard.candidates({"_audit/_planted.md": bare})
+    assert [(s.token, s.verdict) for s in plain] == [("deadbee", "CANDIDATE")], plain
+
+
 def test_quoting_the_declaration_does_not_declare():
     """A document DISCUSSING the declaration must not be cleared by it.
 

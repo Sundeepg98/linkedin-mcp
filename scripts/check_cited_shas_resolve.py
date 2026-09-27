@@ -98,6 +98,7 @@ different and much more expensive instrument.
 """
 from __future__ import annotations
 
+import bisect
 import pathlib
 import re
 import subprocess
@@ -548,7 +549,23 @@ def disclosed_tokens(blob: str) -> set[str]:
     # missed every emphasised one. Found on the guard's own audit document,
     # which used the emphasised spelling and was convicted for it.
     plain = [_EMPHASIS.sub("", line) for line in lines]
-    disclosing = [i for i, line in enumerate(plain) if _DISCLOSURE.search(line)]
+    # THE WORDING IS READ ACROSS LINE WRAPS (2026-09-27). It was read one line
+    # at a time, so a writer who wrapped "does not / resolve" at a narrow
+    # column disclosed nothing and was convicted for a correct sentence. The
+    # lines are searched JOINED, so the vocabulary's own ``\s+`` folds the
+    # newline and any continuation indent like any other whitespace, and a
+    # match marks EVERY line it spans as disclosing.
+    starts: list[int] = []
+    offset = 0
+    for line in plain:
+        starts.append(offset)
+        offset += len(line) + 1
+    joined = "\n".join(plain)
+    disclosing: set[int] = set()
+    for match in _DISCLOSURE.finditer(joined):
+        first = bisect.bisect_right(starts, match.start()) - 1
+        last = bisect.bisect_right(starts, max(match.start(), match.end() - 1)) - 1
+        disclosing.update(range(first, last + 1))
     if not disclosing:
         return set()
     found: set[str] = set()
