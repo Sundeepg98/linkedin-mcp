@@ -241,6 +241,33 @@ NOT_A_CORRECTION: dict[tuple[str, str], str] = {
         "WOULD MAKE THIS ENTRY WRONG:** a network row asserting the doctrine "
         "withdrawn or mistaken while leaving the document unmarked."
     ),
+    # 2026-09-24, lane S follow-up, item 2. `J 108` AND `J 112` NOW CITE THE
+    # LANE'S RECORD for their capture spec -- read, not inferred.
+    ("jobs.md", "2026-09-24-lane-s-people-search.md"): (
+        "ADJACENCY, NOT A CORRECTION. Rows J 108 and J 112 cite the lane's "
+        "record for the capture spec of the People tab they read. The scan "
+        "reports J 112, and the matched word is `wrong`, twice, in the row's "
+        "own 2026-09-19 text about the anchor classifier -- *'the exact case "
+        "a containment matcher gets wrong'* -- which is about a matcher, not "
+        "about any document. Neither row withdraws anything the record says. "
+        "**WHAT WOULD MAKE THIS ENTRY "
+        "WRONG:** a jobs row asserting the record wrong about that row while "
+        "leaving the record unmarked, which would need its own CORRECTS: / "
+        "CORRECTED BY: pair."
+    ),
+    # 2026-09-24, lane S follow-up. `M C70` NOW CITES THE LANE'S RECORD for a
+    # capture spec -- read, not inferred from the filenames.
+    ("messaging-and-content.md", "2026-09-24-lane-s-people-search.md"): (
+        "ADJACENCY, NOT A CORRECTION. Row C70 cites the lane's record for the "
+        "capture spec that measures where LinkedIn searches inside a group. "
+        "The matched vocabulary is the row's OWN 2026-09-21 paragraph -- "
+        "*'TWO CORRECTIONS 2026-09-21'*, *'A PLAUSIBLE WRONG ANSWER'* -- about "
+        "a line-number citation into readonly.py that had rotted, earlier in "
+        "the same cell. The row withdraws nothing the record says. **WHAT "
+        "WOULD MAKE THIS ENTRY WRONG:** a messaging-and-content row asserting "
+        "the record wrong about that row while leaving the record unmarked, "
+        "which would need its own CORRECTS: / CORRECTED BY: pair."
+    ),
 
     # 2026-09-21, the FOUR-LOOSE-ROWS wave. THREE OF THESE FOUR ARE ROWS OF
     # ONE CHRONOLOGY TABLE, and the reason is one reason told three times
@@ -760,24 +787,36 @@ NOT_A_CORRECTION: dict[tuple[str, str], str] = {
         "session document is false while leaving it untouched."
     ),
     ("network.md", "2026-09-23-live-lane-session-1.md"): (
-        "TABLE-ROW PROXIMITY, AND ONE ROW'S OWN HISTORY. The citing line is "
-        "row `134`, whose 2026-09-23 23:08 paragraph banks it on the session's "
-        "fire and cites the session document as its evidence. Read window by "
-        "window: rows `132`, `133`, `135` and `136` each carry their own "
+        "TABLE-ROW PROXIMITY, AND THREE ROWS' OWN HISTORY. Five rows cite the "
+        "session document -- `20`, `45`, `76`, `134` and `136` -- and the "
+        "windows of `20` and `45` hold no correction vocabulary at all. Row "
+        "`136` (cited 2026-09-24, the lane's Part 2 (e)) is ONE table line "
+        "whose matches are its own older paragraphs -- a 2026-09-03 source "
+        "that 'corrected the census on exactly this row' and a 2026-09-05 "
+        "'self-correction' that measured an earlier claim 'FALSE' -- and its "
+        "2026-09-24 note reports what session 1's press read and withdraws "
+        "nothing from the session document. Row `134`'s "
+        "2026-09-23 23:08 paragraph banks it on the session's fire and cites "
+        "the session document as its evidence. Read window by window: rows "
+        "`132`, `133`, `135` and `136` each carry their own "
         "'corrected' / 'correction' / 'false' / 'wrong' from earlier waves; "
         "and row `134`'s older paragraphs carry 'correction' and 'false' "
         "about its own earlier blockers -- including this lane's earlier wave "
         "recording it NOT PROVEN, which was true under the rulings of that "
         "hour and moved because a ruling (VIEW-SWITCH-PRESS-RESTORED) and a "
-        "build arrived, not because it was wrong. No citing line withdraws "
-        "anything from the session document. **WHAT WOULD MAKE THIS ENTRY "
-        "WRONG:** row `134` asserting that something IN the session document "
-        "is false while leaving it untouched."
+        "build arrived, not because it was wrong. Row `76` (cited 2026-09-24, "
+        "the lane's Part 2 (c)) is ONE table line whose only match is its own "
+        "2026-09-21 'Not a wrong reading -- a reading with a timestamp', about "
+        "the row's 2026-09-19 permit; its 2026-09-24 paragraph reports what "
+        "the gate and a capture now say and withdraws nothing from the "
+        "session document. **WHAT WOULD MAKE THIS ENTRY WRONG:** row `76`, "
+        "`134` or `136` asserting that something IN the session document is "
+        "false while leaving it untouched."
     ),
     ("messaging-and-content.md", "2026-09-23-live-lane-session-1.md"): (
-        "TABLE-ROW PROXIMITY. SIX lines cite the session document -- `M33`, "
-        "`M43`, `M49`, `C38`, `C48`, `C85` -- and the windows of `M49` and "
-        "`C48` hold no correction vocabulary at all. The other four, read window "
+        "TABLE-ROW PROXIMITY. SEVEN lines cite the session document -- `M33`, "
+        "`M43`, `M49`, `C38`, `C48`, `C72`, `C85` -- and the windows of `M49` and "
+        "`C48` hold no correction vocabulary at all. The other five, read window "
         "by window: `M33` and `M43` (NOT OPENED on a measured badge reading) sit two rows "
         "above `M35` ('the same undercount 3.10 corrected') and `M45` (a "
         "'superseded' in its own history); `C38` (CAPTURED) sits below `C36` "
@@ -785,10 +824,16 @@ NOT_A_CORRECTION: dict[tuple[str, str], str] = {
         "ONE table line, where the matched `false` is its own 2026-09-21 "
         "paragraph -- 'nothing this census publishes had to be false', about "
         "the direction cell -- two days older than this session's NEEDS-TARGET "
-        "paragraph on the same line. No citing line withdraws anything from "
-        "the session document. **WHAT WOULD MAKE THIS ENTRY WRONG:** any of "
-        "those rows asserting that something IN the session document is false "
-        "while leaving it untouched."
+        "paragraph on the same line. `C72` (added 2026-09-24; its session-1 "
+        "citation predates that and was missed here) is a SELF-CORRECTION IN "
+        "PLACE: its 'CORRECTED 2026-09-24' paragraph withdraws the cell's OWN "
+        "earlier 'whatever happens' sentence, and the session document it cites "
+        "carries the same correction in place (its Part 2 (a), with pointers at "
+        "Entry 11 and at findings 1 and 2); `C70` two lines up carries an older "
+        "wave's 'correction', 'wrong' and 'false'. No citing line withdraws "
+        "anything from the session document. **WHAT WOULD MAKE THIS ENTRY "
+        "WRONG:** any of those rows asserting that something IN the session "
+        "document is false while leaving it untouched."
     ),
 
     ("network.md", "2026-09-21-the-fires-and-the-controls.md"): (

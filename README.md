@@ -3,8 +3,22 @@
 An MCP server that shows you your own LinkedIn account data as structured tool
 results instead of pages you have to click through.
 
-**Fifty-three tools ship. Thirty-nine read. Fourteen write. None is
+**Fifty-six tools ship. Forty-one read. Fifteen write. None is
 write-shaped and unable to act.**
+
+**THAT LINE READ "Fifty-three ... Thirty-nine read. Fourteen write" UNTIL THE
+LANE L5 MERGE, 2026-09-24,** and "Fifty-five ... Forty-one read. Fourteen
+write" on that lane's branch, which had counted from the live lane's
+fifty-two before lane L7's merge landed. Two reads and a write arrived on the
+messaging surface together. `linkedin_list_conversations` reads your
+conversation list off the composer, which opens no conversation, with unread
+paired to each row. `linkedin_open_thread` opens one conversation YOU name by
+thread id, and by default refuses while any listed row reads unread, so it
+shows nobody a new "seen". `linkedin_send_reply` replies inside a conversation
+you name -- the fifteenth write, behind the same flag and single-use grant as
+every other, and the first that confirms itself off the surface a person
+reads: a fresh load of that conversation. Census rows `M M10`, `M M17` and
+`M M49`, COVERED-UNFIRED: built offline and never fired.
 
 **THAT LINE READ "Fifty-two ... Thirteen write" ON MASTER UNTIL LANE L7'S
 MERGE, 2026-09-24,** and "Fifty-two ... Thirty-eight read ... Fourteen write"
@@ -571,9 +585,15 @@ renumbering. A read that changes something has to say so:
 3. **Opening messaging clears the messaging badge AND opens one conversation
    LinkedIn chooses** -- measured twice. `/messaging/` does not stay on a
    list. Only `linkedin_open_messaging` and `linkedin_new_messages` can incur
-   this, and only when called; `linkedin_send_message` deliberately does not
-   open messaging at all -- it reads the nav badge off a page already loaded,
-   and refuses.
+   this, and only when called; `linkedin_send_message`'s preview deliberately
+   does not open messaging at all -- it reads the nav badge off a page already
+   loaded. **These also load a messaging address, and none of them opens a
+   conversation LinkedIn chooses:** `linkedin_list_conversations` (the
+   composer's list, which opens none), `linkedin_open_thread` and
+   `linkedin_send_reply` (only the conversation you name by id), and
+   `linkedin_send_message` (the composer, when a confirmed send is
+   performed). Whether any of those loads clears the messaging badge is
+   unmeasured.
 4. **Three census surfaces may cost something merely by being opened**, and
    each returns a `cost` field saying what. The two publishing composers can
    autosave a draft this server has NO REACHABLE SURFACE to detect -- 17
@@ -898,7 +918,7 @@ linkedin_server/
   cdp_bridge.py              the recovery path: attach to a running Chrome
   dom.py                     the read-only harvesters and the control readers
   shape.py                   pure parsers and the result envelope
-  server.py                  the fifty-three tools
+  server.py                  the fifty-six tools
   errors.py
 tests/                       1393 tests, no network, no account
   fixtures/                  frozen LinkedIn markup, scrubbed

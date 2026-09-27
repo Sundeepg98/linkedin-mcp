@@ -893,21 +893,51 @@ async def test_verify_after_will_not_read_a_cleared_composer_as_sent(over):
     assert read_from == "", read_from
 
 
-async def test_verify_after_can_never_return_the_to_state(over):
-    """``message_sent`` IS UNREACHABLE BY CONSTRUCTION, proven two ways.
+#: THE CONVERSATION A SEND LEAVES DRAWN, derived for the 2026-09-24 argument
+#: below: a composer page that now also draws a conversation whose LAST
+#: message is his -- an item with no ``--other`` modifier -- carrying exactly
+#: MESSAGE_BODY. Structure from ``tests/fixtures/synthetic/messaging_thread.html``.
+_CONVERSATION_DRAWN = COMPOSER_MARKUP.replace(
+    "</main>",
+    '<ul class="msg-s-message-list-content">'
+    '<li class="msg-s-message-list__event clearfix">'
+    '<div class="msg-s-event-listitem msg-s-event-listitem--other">'
+    '<p class="msg-s-event-listitem__body">An earlier line from them.</p></div></li>'
+    '<li class="msg-s-message-list__event clearfix msg-s-message-list__last-msg-">'
+    '<div class="msg-s-event-listitem">'
+    '<p class="msg-s-event-listitem__body">' + MESSAGE_BODY + "</p></div></li>"
+    "</ul>"
+    # A real page draws hundreds of elements; the reader treats fewer than
+    # threads.RENDERED_FLOOR as a page that has not arrived.
+    + "<span></span>" * 60
+    + "</main>",
+    1,
+)
+assert _CONVERSATION_DRAWN != COMPOSER_MARKUP
 
-    ``expected_after`` is ``to_state`` and ``verified_state`` initialises to
-    UNKNOWN, so with no surface writing that state the True arm cannot be
-    entered. This action can be shown NOT to have happened and cannot be shown
-    to have happened, and that asymmetry is the design rather than a gap
-    somebody will close later.
 
-    TWO PROOFS, BECAUSE THE BEHAVIOURAL ONE ALONE IS WEAK. Driving both
-    readings shows the two reachable answers are not ``to_state``; it cannot
-    show a third reading does not exist. So the branch's own source is read:
-    every string constant inside ``_verify_after``'s ``send_message`` arm is
-    collected off the AST and ``to_state`` is asserted absent from it. A future
-    edit that adds a "sent" return has to argue with this test.
+async def test_verify_after_reaches_the_to_state_only_through_the_conversation_read_back(over):
+    """``message_sent`` WAS UNREACHABLE BY CONSTRUCTION UNTIL 2026-09-24.
+
+    This test was ``test_verify_after_can_never_return_the_to_state`` and its
+    docstring said a future edit adding a "sent" return would have to argue
+    with it. This is that argument. The only surface that tells a sent message
+    from a cleared composer is the conversation, and it was forbidden; ruling
+    ``WRITE-CLASS-B`` lifted that, and ``_verify_after`` now reads the
+    conversation a send leaves drawn on the same page, IN PLACE, never
+    navigating to its page-derived id.
+
+    THREE PROOFS, and each refuses something the others let through:
+
+    1. the two composer readings still never return ``to_state`` -- a cleared
+       composer alone is NOT a send;
+    2. a page drawing a conversation whose last message is his and carries
+       exactly the body DOES return it -- the arm is reachable, and only there;
+    3. the same page with the body changed returns UNKNOWN -- the words are
+       compared, not assumed;
+
+    and the arm's source routes the positive answer through
+    ``threads.sent_in_place`` and nowhere else, read off the AST.
     """
     spec = _spec()
     assert spec.to_state == "message_sent", spec.to_state
@@ -915,6 +945,15 @@ async def test_verify_after_can_never_return_the_to_state(over):
     for html in (COMPOSER_MARKUP, COMPOSER_SEND_ENABLED):
         state, why, _read_from = await _verify(over, html)
         assert state != spec.to_state, (state, why)
+
+    state, why, read_from = await _verify(over, _CONVERSATION_DRAWN)
+    assert state == spec.to_state, (state, why)
+    assert "IN PLACE" in why and read_from == ""
+
+    other_words = _CONVERSATION_DRAWN.replace(MESSAGE_BODY, "Something else entirely.")
+    assert other_words != _CONVERSATION_DRAWN
+    state, why, _read_from = await _verify(over, other_words)
+    assert state == UNKNOWN, (state, why)
 
     literals = _string_constants_in_the_send_message_arm("_verify_after")
     assert literals, (
@@ -924,11 +963,12 @@ async def test_verify_after_can_never_return_the_to_state(over):
     )
     assert spec.to_state not in literals, (
         f"{spec.to_state!r} is now a literal inside _verify_after's "
-        "send_message arm, so the True arm may have become reachable. That is "
-        "a claim this action cannot support: nothing this server can read "
-        "distinguishes a sent message from a composer that never received the "
-        "text."
+        "send_message arm. The positive answer is meant to come from "
+        "threads.sent_in_place, compared against spec.to_state, so a literal "
+        "here is a second route to SENT that nothing compared."
     )
+    source = WRITES_PY.read_text(encoding="utf-8")
+    assert "threads.sent_in_place(" in source
 
 
 def _string_constants_in_the_send_message_arm(function: str) -> set[str]:

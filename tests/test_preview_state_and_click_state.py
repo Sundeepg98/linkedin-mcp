@@ -105,6 +105,8 @@ from tests.test_follow_company_page import (
     COMPANY_PAGE_FOLLOW_ID,
     COMPANY_PAGE_FOLLOW_MARKUP,
 )
+from tests.test_messaging_threads import THREAD as MESSAGING_THREAD
+from tests.test_messaging_threads import THREAD_ID as MESSAGING_THREAD_ID
 from tests.test_result_verification_block import SHAREBOX_MARKUP
 from tests.test_send_message_gate import COMPOSER_MARKUP
 from tests.test_selectors_resolve import PAGE as SELECTOR_RESOLUTION_PAGE
@@ -257,6 +259,23 @@ REACHED: dict[str, tuple[str, str, str]] = {
         "tests/fixtures/job_detail_hydrated.html",
         markup("job_detail_hydrated"),
         JOB,
+    ),
+    # THE FIFTEENTH, 2026-09-24 (census row ``M M10``; the fourteenth on
+    # lane L5's branch, before lane L7's merge landed). A SYNTHETIC
+    # conversation whose STRUCTURE is measured -- the composer's own
+    # ``msg-form``, its editor empty and Send drawn DISABLED -- and whose
+    # content is invented; its source module says which parts are which.
+    # The preview and the click read the box through ONE function,
+    # ``threads.reply_state``, which is the property this file pins.
+    "send_reply": (
+        "tests/fixtures/synthetic/messaging_thread.html",
+        MESSAGING_THREAD,
+        str(
+            writes._target_for(
+                spec_for_action("send_reply"),
+                {"thread": MESSAGING_THREAD_ID, "text": "Thursday works."},
+            )
+        ),
     ),
 }
 
@@ -491,8 +510,11 @@ def test_every_performable_action_is_either_reached_or_declared_unreachable():
     # reached over its own committed fixture rather than declared unreachable.
     # 13 -> 14 on 2026-09-24 (lane L7's merge): ``mark_company_interest``
     # shipped, reached over the tracked ``job_detail_hydrated`` capture.
-    assert len(PERFORMABLE) == 14, sorted(PERFORMABLE)
-    assert len(REACHED) == 14, sorted(REACHED)
+    # 14 -> 15 the same day (lane L5's merge of master 66aaa95):
+    # ``send_reply`` shipped, and it is reached over the synthetic
+    # conversation its own tests read, not declared unreachable.
+    assert len(PERFORMABLE) == 15, sorted(PERFORMABLE)
+    assert len(REACHED) == 15, sorted(REACHED)
     assert len(CANNOT_REACH) == 0, sorted(CANNOT_REACH)
 
 

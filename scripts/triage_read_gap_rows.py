@@ -354,48 +354,88 @@ MEASURED_PAST_BY_BUCKET3: dict[str, str] = {
 #: only have been made for a row that was waiting on one.
 DECIDED_SINCE_TRIAGE: dict[str, str] = {
     # N 79, N 172 AND N 194: THE TRIAGE-DAY DECISION WAS MADE, THE READER WAS
-    # BUILT (lane S, 2026-09-24), AND A DIFFERENT DECISION NOW HOLDS THE ROW.
-    # The WHO rule (the orchestrator's census call, 2026-09-24 03:20) returned
-    # each to GAP: its payload is WHO and the reader publishes counts. So the
-    # row carries RULING again, on the name-free shaper doctrine, pending the
-    # operator's question on returning names at runtime -- and the bucket-3
-    # table gates it RULING. N 94 LEFT the same day: a FILTER, COVERED-UNFIRED.
+    # BUILT (lane S, 2026-09-24), AND A DIFFERENT DECISION HELD THE ROW UNTIL
+    # IT, TOO, WAS MADE. The WHO rule (the orchestrator's census call,
+    # 2026-09-24 03:20) returned each to GAP: its payload is WHO and the reader
+    # publishes counts. The operator then ruled that a people read returns
+    # names at runtime (NAMES-AT-RUNTIME, 08:11; registered on master
+    # 1902fcb), so what holds each row now is no decision at all but a
+    # name-returning reader held to PEOPLE-DATA-MITIGATIONS, on the shared
+    # people-record foundation lane G is building. Their page is captured (the
+    # live lane's session 1), so the bucket-3 table gates each READER (lane
+    # S's integration of its follow-up, 2026-09-24). The verdict letter stays
+    # that day's reading, as for every entry here. N 94 LEFT on the WHO rule's
+    # day: a FILTER, COVERED-UNFIRED.
     "N 79": "D1-SEARCH-AS-READS: a keyword may be passed, from tool "
-            "arguments only; built by lane S 2026-09-24, and now held by a "
-            "DIFFERENT question -- the name-free shaper doctrine under the "
-            "WHO rule, pending the operator; bucket-3 gate RULING",
+            "arguments only; built by lane S 2026-09-24; the WHO rule's "
+            "doctrine question since answered by NAMES-AT-RUNTIME, so it now "
+            "waits on a name-returning reader held to PEOPLE-DATA-MITIGATIONS "
+            "on lane G's people-record foundation; bucket-3 gate READER",
     "N 172": "OTHER-MEMBER-IDS-AS-READS with D1-SEARCH-AS-READS: another "
              "member's id in a search facet, from tool arguments only; built "
-             "by lane S 2026-09-24, and now held by a DIFFERENT question -- "
-             "the name-free shaper doctrine under the WHO rule, pending the "
-             "operator; bucket-3 gate RULING",
+             "by lane S 2026-09-24; the WHO rule's doctrine question since "
+             "answered by NAMES-AT-RUNTIME, so it now waits on a "
+             "name-returning reader held to PEOPLE-DATA-MITIGATIONS on lane "
+             "G's people-record foundation; bucket-3 gate READER",
     "N 194": "D1-SEARCH-AS-READS: the hashtag is a keyword; built by lane S "
-             "2026-09-24, and now held by a DIFFERENT question -- the "
-             "name-free shaper doctrine under the WHO rule, pending the "
-             "operator; bucket-3 gate RULING",
+             "2026-09-24; the WHO rule's doctrine question since answered by "
+             "NAMES-AT-RUNTIME, so it now waits on a name-returning reader "
+             "held to PEOPLE-DATA-MITIGATIONS on lane G's people-record "
+             "foundation; bucket-3 gate READER",
     # ---- decided by the calls registered at master 9c219c8 and 001f70b,
     # annotated by lane R at its merge (2026-09-24), ruling by ruling ----
     "N 99": "D3-UNREGISTERED-REFUSAL-IS-NOT-A-RULING and "
             "MEMBER-ROSTERS-AS-BOUNDED-READS: the alumni tab is a roster he "
-            "can open; GAP, blocked on an admission and a reader",
+            "can open; GAP, blocked on an admission and a reader -- the "
+            "admission made in lane S's follow-up (2026-09-24, bucket-3 gate "
+            "MEASURE), so a capture and a reader remain",
     "N 100": "MEMBER-ROSTERS-AS-BOUNDED-READS: the same school People tab; "
-             "an admission and a reader",
+             "an admission and a reader -- admitted in lane S's follow-up "
+             "(2026-09-24); finding alumni is WHO, a doctrine question since "
+             "answered by NAMES-AT-RUNTIME, so it now waits on a "
+             "name-returning reader held to PEOPLE-DATA-MITIGATIONS on lane "
+             "G's people-record foundation, and a capture; bucket-3 gate "
+             "MEASURE",
     "N 102": "MEMBER-ROSTERS-AS-BOUNDED-READS: a Page's People tab is a "
-             "roster he can open; an admission and a reader",
+             "roster he can open; an admission and a reader -- admitted in "
+             "lane S's follow-up (2026-09-24), so a capture and a reader "
+             "remain",
     "N 104": "D2-SEARCH-VERTICALS-WIDENED: the companies vertical is "
-             "admitted in principle; it needs a reader",
+             "admitted in principle, and on the boundary since lane S's "
+             "follow-up (2026-09-24, bucket-3 gate MEASURE); it needs a "
+             "capture and a reader",
     "N 132": "D6-CAPABILITY-OVER-AFFORDANCE: a row named for an affordance "
              "is discharged by the package's own sanctioned routes",
     "N 161": "D2-SEARCH-VERTICALS-WIDENED: the groups vertical is admitted "
-             "in principle; it needs a reader",
+             "in principle, and on the boundary since lane S's follow-up "
+             "(2026-09-24); which groups is WHICH, a doctrine question since "
+             "answered by NAMES-AT-RUNTIME, so it now waits on a "
+             "name-returning reader held to PEOPLE-DATA-MITIGATIONS on lane "
+             "G's people-record foundation, and a capture; bucket-3 gate "
+             "MEASURE",
     "N 177": "D3-UNREGISTERED-REFUSAL-IS-NOT-A-RULING and "
              "MEMBER-ROSTERS-AS-BOUNDED-READS: a group's member directory; "
-             "an admission and a reader",
+             "an admission and a reader -- admitted in lane S's follow-up "
+             "(2026-09-24); the people are WHO, a doctrine question since "
+             "answered by NAMES-AT-RUNTIME, so it now waits on a "
+             "name-returning reader held to PEOPLE-DATA-MITIGATIONS on lane "
+             "G's people-record foundation, and a capture; bucket-3 gate "
+             "MEASURE",
     "N 178": "D3-UNREGISTERED-REFUSAL-IS-NOT-A-RULING: GAP on an admission "
              "and a reader; its live proof loads another member's profile, "
-             "so the operator names that member",
+             "so the operator names that member "
+             "(THIRD-PARTY-PROFILE-FOR-A-NAMED-TARGET); which groups is "
+             "WHICH, a doctrine question since answered by NAMES-AT-RUNTIME, "
+             "so its reader must return names held to "
+             "PEOPLE-DATA-MITIGATIONS on lane G's people-record foundation; "
+             "NEEDS-TARGET",
     "N 179": "D2-SEARCH-VERTICALS-WIDENED: the events vertical is admitted "
-             "in principle; it needs a reader",
+             "in principle, and on the boundary since lane S's follow-up "
+             "(2026-09-24); which events is WHICH, a doctrine question since "
+             "answered by NAMES-AT-RUNTIME, so it now waits on a "
+             "name-returning reader held to PEOPLE-DATA-MITIGATIONS on lane "
+             "G's people-record foundation, and a capture; bucket-3 gate "
+             "MEASURE",
     "P C8": "D4-NO-OWN-BROWSER-CONTEXT: the download transport is the "
             "DevTools download behaviour on the attached browser",
 }

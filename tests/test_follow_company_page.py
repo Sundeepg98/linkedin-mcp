@@ -31,7 +31,7 @@ from pathlib import Path
 
 import pytest
 
-from linkedin_server import coerce, dom, server, writes
+from linkedin_server import dom, server, writes
 from linkedin_server.errors import WriteAttemptError
 from linkedin_server.writes import consume, preview, spec_for_action
 from tests.test_apply_modal_fixture import over  # noqa: F401 -- fixture
@@ -495,12 +495,21 @@ async def test_the_unfollow_arm_no_longer_quotes_the_label_into_a_refusal(monkey
 
 
 async def test_a_string_count_no_longer_carries_itself_out_of_live_control(monkeypatch):
-    """The coercion repair, SHOWN FAILING: with ``coerce.as_count`` put back to
-    the ``int(x or 0)`` it replaced, the same reading raises a ValueError that
-    quotes the page's string."""
+    """The repair, SHOWN FAILING: with the arm's count reading put back to a
+    bare ``int()``, the same reading raises a ValueError that quotes the
+    page's string.
+
+    WHERE THE PROTECTION LIVES MOVED ON 2026-09-24 (the live lane's Part 2
+    (b)): the react arm reads both label families through
+    ``dom.reaction_toggle_state``, whose counts are TYPE-CHECKED -- a string
+    is not an int, and the toggle state is then ``unknown`` -- rather than
+    coerced by ``coerce.as_count``. So the control now plants a naive
+    ``int()`` counter in ``dom.reaction_toggle_counts``' place; planting it in
+    ``coerce.as_count`` would test a call this arm no longer makes."""
 
     async def planted(_page):
-        return {"controls": "Exampleperson Markersurname", "off_state": 0}
+        return {"controls": "Exampleperson Markersurname", "off_state": 0,
+                "unreact_controls": 0, "react_controls": 0}
 
     monkeypatch.setattr(dom, "read_reaction_surface", planted)
     spec = spec_for_action("react_to_item")
@@ -508,7 +517,13 @@ async def test_a_string_count_no_longer_carries_itself_out_of_live_control(monke
     state, why, _sel = await writes._live_control(object(), spec, grant, dom.REACTION_OFF_LABEL)
     assert state == writes.UNKNOWN and "Markersurname" not in why
 
-    monkeypatch.setattr(coerce, "as_count", lambda value, default=0: int(value or default))
+    def naive_counts(reading):
+        return {
+            "toggles_off": int(reading["off_state"]),
+            "toggles_on": int(reading["controls"]) - int(reading["off_state"]),
+        }
+
+    monkeypatch.setattr(dom, "reaction_toggle_counts", naive_counts)
     with pytest.raises(ValueError) as excinfo:
         await writes._live_control(object(), spec, grant, dom.REACTION_OFF_LABEL)
     assert "Markersurname" in str(excinfo.value)

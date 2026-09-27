@@ -359,14 +359,21 @@ def test_the_published_href_is_a_literal_and_not_a_shape_of_the_input():
     assert IDENTIFIER not in group_page.PUBLISHED_HREF
 
 
-def test_the_member_roster_stays_refused_with_this_reader_shipped():
-    """N 165 is out of scope BY NAME and nothing here reopens it."""
-    assert (
-        readonly.is_read_url(
-            f"https://www.linkedin.com/groups/{IDENTIFIER}/members/"
-        )
-        is False
-    )
+def test_this_reader_never_builds_the_member_roster():
+    """RENAMED AND INVERTED 2026-09-24 from ``test_the_member_roster_stays_
+    refused_with_this_reader_shipped``: N 165's roster, "out of scope BY
+    NAME", was admitted by its own line on MEMBER-ROSTERS-AS-BOUNDED-READS.
+    What this file owed was that THIS reader never reaches it, and that is
+    still asserted: the one address it builds is the group page, and the
+    roster is admitted by a line that does not admit that page."""
+    roster = f"https://www.linkedin.com/groups/{IDENTIFIER}/members/"
+    built = group_page.group_page_url(IDENTIFIER)
+    assert built["built"] is True
+    assert not built["url"].rstrip("/").endswith("/members")
+    assert readonly.is_read_url(roster) is True
+    carriers = [p for p in readonly._ALLOWED_URL_PATTERNS if p.match(roster)]
+    assert len(carriers) == 1 and carriers[0].pattern.endswith("/members/?$")
+    assert not carriers[0].match(built["url"])
 
 
 def test_control_a_renamed_route_class_turns_the_lifted_count_into_a_zero(

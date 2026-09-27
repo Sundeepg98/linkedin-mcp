@@ -14,6 +14,12 @@ refused; removing the line refuses the target again (the rollback); and the
 line's blast radius over the shipped corpus plus this file's spellings is
 exactly the numeric-event addresses.
 
+AMENDED 2026-09-24: two of those neighbours are admitted since -- the events
+search vertical (D2-SEARCH-VERTICALS-WIDENED, on the search line) and the bare
+attendee roster (MEMBER-ROSTERS-AS-BOUNDED-READS, on its own line). Both moved
+to ``ADMITTED_BY_ANOTHER_LINE_SINCE``, which asserts THIS line reaches neither;
+the filtered attendee spelling stays refused.
+
 Ids are placeholders: five digits, or the root-only file's repdigit.
 """
 
@@ -34,16 +40,22 @@ import blast_radius  # noqa: E402
 B = "https://www.linkedin.com"
 ID = "12345"
 EVENT = f"{B}/events/{ID}/"
-CARRIER = "com/events/[0-9]"
+#: The fragment only THIS line carries. It read ``com/events/[0-9]`` until
+#: 2026-09-24, when the attendee-roster line -- ``/events/[0-9]{1,20}/
+#: attendees/?$`` -- began with the same characters; the fragment now runs to
+#: the id line's own anchor.
+CARRIER = "com/events/[0-9]{1,20}/?$"
 
 NEIGHBOURS = (
     (f"{B}/events/some-event-placeholder-{ID}/",
      "THE SLUG FORM -- a title run into the id; a title can carry a name"),
     (f"{B}/events/placeholder{ID}/", "a slug glued to the id"),
-    (f"{B}/events/{ID}/attendees/",
-     "THE ATTENDEE ROSTER -- N 188, out of scope with N 165"),
+    # THE BARE ATTENDEE ROSTER (N 188) STOOD HERE UNTIL 2026-09-24, "out of
+    # scope with N 165"; it moved to ADMITTED_BY_ANOTHER_LINE_SINCE below when
+    # MEMBER-ROSTERS-AS-BOUNDED-READS admitted it on its own line. Its
+    # filtered spelling stays: the roster line takes no query.
     (f"{B}/events/{ID}/attendees/?facetConnectionOf=1",
-     "the roster filtered -- N 189"),
+     "the roster filtered -- N 189; the roster line takes no query"),
     (f"{B}/events/{ID}/comments/", "third-party comments -- C 92"),
     (f"{B}/events/{ID}/about/", "the same page's about tab"),
     (f"{B}/events/{ID}/manage/", "the organiser-side manager, a write surface"),
@@ -56,12 +68,32 @@ NEIGHBOURS = (
     (f"{B}/events/{ID}/../../in/someone-else/",
      "a TRAVERSAL onto a member profile"),
     (f"{B}/events/past/", "a sub-path under the root, not an id"),
-    (f"{B}/search/results/events/?keywords=x", "the search vertical -- N 179"),
+)
+
+#: MOVED OUT OF ``NEIGHBOURS`` ON 2026-09-24, NOT DELETED. The events search
+#: vertical (``N 179``) was admitted by ``D2-SEARCH-VERTICALS-WIDENED`` -- on
+#: the SEARCH line, with its own blast radius, and not on this one. What this
+#: file still asserts about it is the part that was always its business: THIS
+#: line does not reach it.
+ADMITTED_BY_ANOTHER_LINE_SINCE = (
+    (f"{B}/search/results/events/?keywords=x",
+     "the search vertical -- N 179, admitted by the search line on D2"),
+    (f"{B}/events/{ID}/attendees/",
+     "the attendee roster -- N 188, admitted by its own roster line on "
+     "MEMBER-ROSTERS-AS-BOUNDED-READS"),
 )
 
 
 def _carriers():
     return [p for p in readonly._ALLOWED_URL_PATTERNS if CARRIER in p.pattern]
+
+
+def test_what_another_line_admitted_since_is_not_this_lines_doing():
+    carriers = _carriers()
+    assert len(carriers) == 1
+    for url, why in ADMITTED_BY_ANOTHER_LINE_SINCE:
+        assert readonly.is_read_url(url), why
+        assert not carriers[0].match(url), why
 
 
 def test_one_event_by_numeric_id_is_admitted_in_both_spellings():

@@ -674,3 +674,900 @@ would prove the reader and bank nothing: under the WHO rule a count does not
 deliver those rows. They move when the operator answers the question on
 returning names at runtime -- and the reader they would then need is not the
 one this lane built.
+
+## Follow-up 2026-09-24
+
+The orchestrator's follow-up order (04:28) gave this lane four items after
+its merge: D2's search verticals, the member rosters, the WHO rule extended to
+WHICH, and the pins. Offline throughout: no browser, no LinkedIn page, no
+Chrome profile. One commit per item, each carrying its own census moves, and
+this section grows with each commit so the record on disk is never behind the
+tree.
+
+### A. Step 0
+
+`HEAD` was `3cee266`, contained in `master` `ff98a7f`; `git merge --ff-only
+ff98a7f` fast-forwarded cleanly and the tree was clean. Every measurement
+below is taken on that base plus this lane's own commits.
+
+### B. Item 1 -- the search line widened to four closed words
+
+**THE LINE.** `readonly._ALLOWED_URL_PATTERNS`'s people-search entry changed
+from `^https://www\.linkedin\.com/search/results/people/?(\?[^#]*)?$` to
+`^https://www\.linkedin\.com/search/results/(people|companies|groups|events)/?(\?[^#]*)?$`
+-- one entry EDITED, none added, so the pattern count stays 49. It is the S2
+spelling `_audit/2026-09-19-search-admission-preconditions.md` measured, a
+closed alternation of four literal words and never a `/search/` prefix
+(`SEARCH-CONDITION-2-CLOSED`). The groups-root and events-root comments that
+listed their search verticals as "not this entry's to inherit" carry a dated
+comment-only amendment: admitted now, by the search line, not by them.
+
+**THE BLAST RADIUS, TAKEN BEFORE THE LINE CHANGED** with
+`scripts/_probe_search_admission_blast_radius.py` over its 90-address corpus
+against the 49 patterns on disk at `ff98a7f`:
+
+    S2   four verticals (this line)          newly admits  3
+         companies, groups, events -- each ?keywords=x, nothing else
+    S2b  three verticals (not taken)         newly admits  2
+    W1   /search/.*$ anchored (counterfactual)  newly admits 13
+    W2   /search/ prefix (counterfactual)       newly admits 13
+         both including the account-ending traversal
+
+**THE PROBE ITSELF EXITED 1 AT `ff98a7f`, before any edit of mine.** Its
+narrow-candidate control required S1 to newly admit something, and a
+candidate already on disk newly admits nothing by construction -- so from
+the day S1 landed (2026-09-20) the probe convicted the admission it had
+measured. The control now asks the question it exists for, of the candidate
+D2 took: every address its four words are for is admitted with it installed,
+newly or already. Before the line changed that reads 3 newly and 1 already;
+after, 0 and 4. All four controls pass after the change, exit 0.
+
+**THE DIGEST.** `_ALLOWED_URL_PATTERNS` `c37e98f84ee443f2 ->
+d7b3315318c877d0`, seven of eight digests byte-identical, `<functions>`
+unmoved. Attribution: the tree with exactly that one line put back to its
+people-only spelling hashes to the prior pin on all eight keys. Recorded in
+the ledger in `tests/test_readonly_boundary_invariant.py`.
+
+**`MUST_STAY_REFUSED`, ON `MUST-STAY-REFUSED-ENTRIES-COME-OUT`.** In
+`tests/test_search_admission_blast_radius.py` the three vertical entries left
+the durable set for `ADMITTED_BY_THE_D2_WIDENING`, under their old names and
+asserted the other way; `content`, `schools` and `jobs` moved to
+`REFUSED_UNDER_THE_D2_CHOICE`, marked with the choice they assume; the
+account-ending and third-party families stayed, and the durable set gained
+the account-ending traversal from each of the four words. The count test was
+rewritten to pin FOUR over a closed list of twelve vertical words, and a
+planted `/search/` prefix is shown turning it and the traversals red.
+
+**THE ORDER'S THREE TESTS**, in `tests/test_d2_search_verticals.py` (101):
+every admitted spelling of every word (with and without the slash and a
+query) and every address the composer builds over a nine-keyword corpus;
+the account-ending traversal and six siblings refused from all four words; 15
+planted prefix spellings refused (`companiesx`, `groupsearch`, `events2`, a
+changed case, a deep path under a word, a doubled slash), with the control
+that a `/search/results/` prefix admits all fifteen. Plus exactly one pattern
+admitting each word.
+
+**THE COMPOSER.** `linkedin_server/search_verticals.py::compose(vertical, *,
+keywords)` builds the companies, groups or events search from a tool's
+arguments only, the way `people_search.compose` builds a people search: the
+keyword is validated by `people_search.validated_keywords` -- split out of
+`people_search.compose` unchanged, so the rules cannot drift, and lane S's
+109 tests stayed green across the split -- sent under `keywords`,
+`urlencode`d, no `origin`. It takes no facet (none of these verticals'
+facets is on record in any capture) and REQUIRES a keyword (every row it
+serves is a search by keyword; the bare vertical page is uncaptured). Pure,
+no page, no loop, and a rejected value is described, never quoted.
+
+**CONDITION 1, AND A DEVIATION FROM ITS LETTER THAT THE ORCHESTRATOR SHOULD
+SEE.** The search admission's condition 1 reads *"ADMISSION AND A NAME-FREE
+SHAPER LAND IN THE SAME COMMIT, OR NEITHER LANDS"*. D2 says of its rows "each
+then needs a reader", and this order says readers are built against captures
+only -- and a capture needs the admission, because every capture goes through
+`BROWSER.goto`, which calls `assert_read_url`. So the address landed without
+a reader for the three new words, and what condition 1 protects is held
+instead by the absence of any route: nothing in the package imports
+`search_verticals` (`tests/test_every_orphan_module_is_ruled.py` holds it
+unwired with this as its reason), and the one search tool composes the
+people vertical only (pinned in `tests/test_d2_search_verticals.py`). The
+shaper itself exists and is the shipped one -- `search_results.read_results`
+and `read_filters` return integers whatever page they meet. **The first tool
+that opens one of the three words must land with its name-free reader in the
+same commit.** If the orchestrator reads condition 1 as binding the ADDRESS
+rather than the first read, the rollback is the one line, and every test above
+knows how to go back.
+
+**THE OTHER TESTS THE WIDENING MOVED**, each rewritten with the address it
+stopped refusing recorded, none deleted: `test_readonly.py` (two BLOCKED
+entries inverted into ALLOWED; three `MUST_STAY_UNREADABLE` entries recorded
+out), `test_the_search_results_address_is_refused_before_admission.py`
+(inverted a second time; the measured candidate is now READ OFF the probe by
+name and must equal the shipped line), `test_the_events_boundary_is_root_only.py`,
+`test_the_groups_id_segment_is_closed.py` and `test_l1_event_by_id_admission.py`
+(the search vertical moved to an ADMITTED-BY-ANOTHER-LINE group asserting no
+events or groups line carries it), and `test_analytics_creator_boundary.py`,
+`test_premium_four_boundary.py`, `test_search_appearances.py` (a companies
+canary replaced by the content vertical, still refused).
+
+**THE CENSUS.** In `_audit/_census/read-addresses.tsv`, `N 104`, `N 161` and
+`N 179` went REFUSED -> ADMITTED, gate MEASURE, source
+`linkedin_server/search_verticals.py::compose`, each prior note kept; `M C70`
+stays REFUSED on its content-vertical address, its groups spelling now an
+admitted also-driven line. Each of the four cells carries a dated paragraph;
+no STATE moved. `census_completion` pins `b3_admitted 40 -> 43`,
+`b3_refused 38 -> 35`, re-pinned in the same commit with the reason. The
+triage's three D2 annotations now say the address is on the boundary.
+
+**TWO GUARDS WENT RED ON THE ITEM-1 COMMIT, AND A SECOND COMMIT FIXED THEM**
+(3824 passed and 2 failed over the 18 always-run guards and the touched
+files). `tests/test_ci_shard.py`: the committed timings priced 157 of
+236 live test files, under its two-thirds line, because one test file was
+new; that file is priced from a serial run of it alone, under a new
+`_amended` provenance key, rather than by a full local run. And the
+correction guard: `M C70`'s cell now cites this record two lines from the
+cell's own 2026-09-21 correction vocabulary, triaged NOT_A_CORRECTION with
+the line read.
+
+### C. Item 2 -- member rosters as bounded reads
+
+**THE FOUR LINES**, at the end of `readonly._ALLOWED_URL_PATTERNS`, one per
+roster `MEMBER-ROSTERS-AS-BOUNDED-READS` names:
+
+    ^https://www\.linkedin\.com/groups/[0-9]{1,20}/members/?$                  N 165, N 177
+    ^https://www\.linkedin\.com/events/[0-9]{1,20}/attendees/?$                N 188 (N 189 filtered)
+    ^https://www\.linkedin\.com/company/[A-Za-z0-9%\-_]{1,100}/people/?$       N 102, J 108
+    ^https://www\.linkedin\.com/school/[A-Za-z0-9%\-_]{1,100}/people/?$        N 99, N 100, J 112
+
+Groups and events take the closed numeric segment their id entries already
+use. Company and school take the root entries' class, slug AND number: the
+captures in `_state/` draw the People tab by slug (by shape: twice on the
+company-root capture and twice on a school capture, which draws its own tabs
+under `/company/`, never `/school/`), and the `/company/` entry's argument --
+a numeric request lands on the slug -- applies unchanged. No line takes a
+query or a deeper path.
+
+**THE BLAST RADIUS, BEFORE THE LINES LANDED**, with the shipped
+`blast_radius.newly_admitted` over 197 addresses (its 67 plus 130
+roster-family spellings: page and filter queries, deeper paths, traversals
+onto a profile and an account ending, slugs where the family is numeric,
+non-ASCII and over-long ids, dotted segments, a case change, a glued tab
+word): groups +2, events +2, company +4, school +4 -- exactly the targets,
+nothing unexpected, nothing newly refused. The control: a `/groups/<id>/.*`
+family admits 23 over the same corpus.
+
+**THE DIGEST.** `_ALLOWED_URL_PATTERNS` `d7b3315318c877d0 ->
+a13f66bebba387cd`, 49 -> 53; the tree minus exactly the four lines hashes to
+the prior pin on all eight keys; a needle no line carries moves nothing, and
+dropping the pre-existing `/groups/discover/` line instead lands on
+`1018aafe63a9f35c`. The six entries that carried the 2026-09-05 refusal
+(groups root and id, events root and id, school, company) each gained a dated
+comment-only amendment pointing at the roster lines; their refusal text
+stands as written.
+
+**`linkedin_server/member_rosters.py::compose(roster, identifier)`** is the
+only place the package assembles a roster address: one address per call from
+a caller-supplied numeric id, validated by `group_page.group_page_url` for a
+group, `company_page.company_identifier` for an organisation, and the same
+ten-ASCII-digit, twenty-long rule for an event or a school. Slugs, urns,
+non-ASCII digits and over-long runs are refused and described, never quoted.
+Nothing in the package imports it (orphan ruling recorded): readers are built
+against captures only, and no roster page has been captured.
+
+**THE CONDITIONS, EACH WITH A TEST** (`tests/test_member_rosters.py`, 111):
+
+    1  one page, no automatic pagination   no second page admitted for any
+       roster, nine spellings each; A PLANTED PAGINATION LOOP walks ?page=
+       and ?start= through assert_read_url and is refused at every step
+       past the first; the control installs a query-admitting roster line
+       and the loop's second step goes through. compose takes (roster,
+       identifier) and nothing else. A pagination-findings guard holds the
+       module to no loop, comprehension, await or navigating attribute, and
+       six planted paginators (a for over pages, a navigating while, a
+       comprehension, a scroll, a show-more press, a page-side import) are
+       each convicted.
+    2  the id from the tool's arguments     eight refused id shapes on all
+       four rosters; the composer and the boundary agree on the numeric
+       rosters segment for segment; on company and school the composer is
+       STRICTER (no slug), asserted; lane G's navigation-derivation guard,
+       both walks and the reader walk, green over the module.
+    3  nothing in a tracked file            a storage guard (no open, write,
+       dump, and no json/pickle/sqlite/csv/os/io/logging import), with four
+       planted stores convicted.
+    4  inside the live budget               LOADS_PER_CALL is 1, and the
+       ruled forty is the register's LIVE-BUDGET-40-LOADS.
+    5  the rows GAP, blocked on a reader    the census, below.
+
+**THE OTHER TESTS THE ROSTERS MOVED**, each inverted with what it used to
+assert recorded, none deleted, names kept where an audit cites them:
+`test_readonly.py` (two BLOCKED entries inverted into ALLOWED; the roster's
+second page and a profile under the tab stand in; the membership-roots test
+now asserts each roster on its own line; the "refused by ONE gate" test's
+last assertion inverted, same name; the SHOWN-FAILING control now plants a
+family and admits the roster's second page), `test_the_groups_id_segment_is_closed.py`,
+`test_the_events_boundary_is_root_only.py` (its family control re-measured:
+8 of 11), `test_l1_event_by_id_admission.py` (its carrier fragment tightened,
+because the attendee line begins with the same characters),
+`test_company_page_boundary.py` (its mutation baseline now removes the root
+entry by exact text), `test_company_page.py`, `test_company_root.py`,
+`test_group_page.py`, `test_school_and_collections_boundary.py`.
+
+**THE CENSUS.** Bucket 3: `N 165`, `N 177`, `N 188`, `N 102`, `N 99` and
+`N 100` REFUSED -> ADMITTED, gate MEASURE; `N 189` stays REFUSED on its
+filtered spelling (the roster line takes no query) with the bare roster now
+an admitted also-driven line; `N 178` unchanged. The jobs side table: `J 108`
+and `J 112` REFUSED -> ADMITTED, MEASURE. Pins: `b3_admitted 43 -> 49`,
+`b3_refused 35 -> 29`, `jobs_admitted 11 -> 13`, `jobs_refused 26 -> 24`.
+**TWO ROWS THE ROSTER DECISION DID NOT LIST MOVED WITH THEIR ADDRESS**: `N 100` (the
+same alumni tab as `N 99`) and `J 112` (a school's alumni tab). `N 100` is a
+pinned pointer to `N 99`, and the pointer graph went red when `N 99`'s
+verdict kind moved (US-BOUNDARY -> US-BOUNDARY|US-RULING); that move is the
+point of the commit, so the graph was re-pinned (one line) and `N 100`'s
+cell says so rather than moving silently. No STATE moved. The triage's four
+roster annotations now say the admission is made.
+
+**THREE GUARDS WENT RED ON THE ITEM-2 COMMIT, AND A SECOND COMMIT FIXED THEM**
+(3895 passed, 3 failed). The identity guard read a urn spelled with a digit
+run in the new test file's refusal corpus -- now built from the invented id,
+as the groups boundary test builds its own. The census prose guard compares
+the allowlist count the messaging slice states with the shipped tuple, which
+had grown to 53; the slice's cell now says 53 and names the rosters and the
+D2 edit. And the citation guard wanted `J 112`'s citation of this record
+triaged: the word it matched sits in that row's own sentence about a
+containment matcher.
+
+### D. Item 3 -- the WHO/WHICH rule, row by row
+
+The rule as ordered: a row whose payload is WHO (people) or WHICH (items of
+other people's content, such as groups or events), served by a count-only
+reader, is GAP, its blocker the name-free shaper doctrine pending the
+operator's question, with a REOPENER; a row whose payload is an AGGREGATE or a
+FILTER, delivered by a count or aggregate reader, can reach COVERED-UNFIRED
+once built. Each row below is decided by its OWN words, and the reason is
+written into its cell (and its address-table note).
+
+**NO ROW'S STATE MOVED**: every row here is GAP before and after, because no
+reader exists -- none of these pages has been captured. What moved is each
+row's BLOCKER, and for six rows the address table's gate.
+
+| row | its words | payload | verdict | gate |
+|---|---|---|---|---|
+| `N 104` | Find an organization's Page by searching for it | an organisation's Page | REACHABLE, if the page draws numeric ids | MEASURE |
+| `N 161` | Search for groups by name or keyword | WHICH groups | doctrine | MEASURE -> RULING |
+| `N 179` | Search for events by keyword ... Events tab | WHICH events | doctrine | MEASURE -> RULING |
+| `M C70` | Search for content within Groups | WHICH posts | doctrine, and an unmeasured address | n/a (refused) |
+| `N 165` | View the full member list of a group | WHO | doctrine | MEASURE -> RULING |
+| `N 177` | Find people you know through shared group membership | WHO | doctrine | MEASURE -> RULING |
+| `N 188` | View the complete attendee list of an event | WHO | doctrine | MEASURE -> RULING |
+| `N 189` | See which of your 1st-degree connections ... attend | WHO | doctrine, and a refused filtered spelling | n/a (refused) |
+| `N 100` | Use a school's alumni tab to find and contact alumni | WHO, and a write | doctrine for the read half | MEASURE -> RULING |
+| `N 178` | See which groups a member belongs to | WHICH, on a third party's profile | doctrine, and NEEDS-TARGET | n/a (refused) |
+| `N 102` | Read employee insights on a Page's People tab | AGGREGATE | REACHABLE once built | MEASURE |
+| `J 108` | People tab (titles, study areas, skills, how connected) | AGGREGATE | REACHABLE once built; one facet may be WHO | MEASURE |
+| `N 99` | View the Alumni page for your school | AGGREGATE | REACHABLE once built | MEASURE |
+| `J 112` | School Page Alumni tab | AGGREGATE | REACHABLE once built | MEASURE |
+
+The doctrine rows carry, verbatim in their cells: "BLOCKER, NAMED: the
+name-free shaper doctrine (`_audit/2026-09-05-lead-rulings-round-two.md`: this
+server does not publish names), pending the operator's question on returning
+names at runtime" -- with "here, which groups / events / posts" on the WHICH
+rows -- and a REOPENER naming the ruling that would reopen each: the operator
+ruling that a search may return which groups, events or posts it found, or
+that roster reads may return who, at runtime.
+
+**THE NUMERIC-ID QUESTION FOR `N 104`, ANSWERED.** Yes, on the row's own
+words, IF the companies results page draws a numeric organisation id per
+result. The row's query names the organisation; what it lacks is where the
+Page is, and the package already publishes an organisation by its numeric
+Page address (`company_page.company_page_url`, "a digit run cannot be a
+name"). A reader returning `company_page_url(<id>)` per result therefore
+delivers "find an organization's Page by searching for it": the search is his
+keyword, the Page is its address. The limit, stated: the Pages come back in
+LinkedIn's order and by address, so where a name is ambiguous the choice is
+his. And the branch that says no: if the cards carry slugs only, the reader
+cannot publish them (a slug is a name) and cannot resolve them to numbers
+without a load per result aimed by page content, which the navigation-
+derivation guard forbids. Capture F.1 reads which branch the page is on.
+
+**WHY THE SAME ANSWER DOES NOT CARRY TO `N 161` OR `N 179`**, which a reader of
+the table above might expect, given that group and event ids are digit runs
+too. Two reasons, both the rows' own: (1) their keyword DISCOVERS items he does
+not already know -- "by name or keyword", "by keyword" -- so the payload is
+which items exist, where `N 104`'s query already names the organisation; and
+(2) the census has ruled on exactly this pairing already.
+`linkedin_group_memberships` publishes the numeric ids of the groups LinkedIn
+recommends (its `others` tally carries `identifiers`), and `N 162` -- browse
+recommended groups -- is COVERED-CANNOT-DELIVER all the same: how many, never
+which. `N 180` is the events twin. An id says where a group is; it does not
+say which group it is.
+
+**`N 100` AND `J 112` ARE NOT ON THE ORDER'S LIST** and were decided anyway,
+because the item-2 admission moved their address: `N 100` is `N 99`'s tab with
+a WHO payload and a write half; `J 112` is `N 99`'s tab in the jobs slice, an
+AGGREGATE.
+
+### E. Item 4 -- pins and gates
+
+**PINS RE-DERIVED ON THIS BRANCH, each in the commit that moved it.** No STATE
+moved anywhere in this follow-up, so every state-derived figure --
+`gap`, `adjudicated`, `delivered`, `unfired`, `PINNED_B1_ROWS`, and
+`RULING_BLOCKED_NAMED` (still empty) -- is what `ff98a7f` left. What moved:
+
+    readonly digest   _ALLOWED_URL_PATTERNS  c37e98f84ee443f2 -> d7b3315318c877d0   item 1
+                                             d7b3315318c877d0 -> a13f66bebba387cd   item 2
+                      seven of eight unmoved each time; attribution shown both times
+    census_completion b3_admitted   40 -> 43 -> 49      b3_refused  38 -> 35 -> 29
+                      jobs_admitted 11 -> 13            jobs_refused 26 -> 24
+    pointer graph     N 100 -> N 99, donor kind US-BOUNDARY -> US-BOUNDARY|US-RULING
+    ci shard timings  two new test files priced, each from a serial run of
+                      itself alone, under an _amended provenance key
+    triage            seven DECIDED_SINCE_TRIAGE annotations (N 99, N 100,
+                      N 102, N 104, N 161, N 177, N 179); key set unchanged
+    orphan rulings    + search_verticals, + member_rosters
+    census prose      the allowlist-count row, 49 -> 53
+
+The tool-surface pin is untouched (51 tools, 74 parameters): no tool was
+added, and `tests/test_the_tool_surface_is_pinned_so_a_row_must_move.py` is
+green. The address table's gates moved in item 3 (six rows MEASURE ->
+RULING); no figure pins the gate split, and the one that could matter --
+BLOCKED ON NOTHING -- is 2 before and after.
+
+**GATES RUN, on the final committed tree:** the census instruments --
+`census_completion --check` (every figure matches its pin),
+`check_read_addresses` (GREEN 94 of 94), `check_jobs_directions` (GREEN 92 of
+92), `triage_read_gap_rows` (every control it prints, 1 and 3-9, OK), `ruling_holds` (GREEN),
+`check_write_classes` (GREEN), `pin_census_rows` (no drift),
+`measure_pointer_graph --check` (pass), and the three generators `--check`
+(INDEX, RULINGS, blocker map at their fixed points) -- and one pytest run over
+58 test files, 4657 passed and 0 failed in 4m48s: the always-run corpus guards
+(18 at the base and 19 now, because `tests/test_member_rosters.py` joined
+them -- it sweeps the package for importers, so every future gate runs it,
+about two seconds), the navigation-derivation guard among them; the two
+page-string guards; this follow-up's four test files; the lane's
+people-search tests; and every test file the admissions touched or that pins
+a search, roster, company, school, group or event address. Then, while the
+cold verifier ran, the other 30 test files that touch the read boundary at
+all (every file naming `is_read_url`, `assert_read_url` or the allowlist):
+1161 passed, 4 skipped, 0 failed. [The first version of this paragraph said
+57 files and 18 guards; the cold verification counted 58 and 19.]
+
+**GATES NOT RUN, and why.** `impact_gate --against ff98a7f --plan-only`:
+34 changed paths select 192 of 237 test files (81%), past its 45% line, so it
+WIDENS TO THE FULL SUITE -- and the order says not to run that locally; CI
+certifies at merge. Nothing live: no browser, no LinkedIn page, no Chrome
+profile.
+
+#### E.1 The session-2 budget, and the order to spend it in
+
+`LIVE-BUDGET-40-LOADS` caps a session at forty page loads; `D1-SEARCH-AS-READS`
+at five test searches. The lane S live queue already holds four people
+searches. Priorities follow section D: a capture is worth a load now only if
+the row it serves can move when its reader is built.
+
+    P1  moves a row once its reader is built
+        N 84, N 87, N 94   people searches (the live queue)     3 loads, 3 searches
+        N 104  F.1         companies search                      1 load,  1 search
+        N 102 / J 108 F.5  company People tab                    1 load
+        N 99 / J 112  F.6  school alumni tab                     1 load
+    P2  measures an address a later admission needs
+        M C70  F.4         a group page's search control         1 load
+        N 188/189 F.8/1    an event page's attendee control      1 load (the L1 `event` key)
+    P3  moves no row until the operator answers the doctrine question
+        N 161  F.2 groups search; N 179 F.3 events search        2 loads, 2 searches
+        N 165 / N 177 F.7  group member list                     1 load
+        N 188  F.8/2       attendee list, if F.8/1 draws it      1 load
+    NEEDS-TARGET
+        N 85   people search on a member he names                1 load, 1 search
+        N 178  F.9         a member's profile, and his ruling    not in session 2
+
+P1 and P2 together are 8 loads and 4 searches, plus the two
+`linkedin_job_detail` loads that resolve organisation ids for `N 84` and
+`N 87` (F.5 reuses `N 84`'s) -- ten loads, well inside forty, and four
+searches of five. TEN IS A FLOOR: every harness run is bracketed by the
+control page before and after (two more loads a run, the L1 harness's
+convention), which the cold verification pointed out this sum left out; two
+runs still stay under twenty. P3's two searches would take the session to six
+with the people queue, so they wait for a later session or for the operator's
+answer, which would also make them worth their loads.
+
+### F. Capture specs for live session 2
+
+Every capture below is ONE page load through `BROWSER.goto` (which asserts
+the address admitted), with `page.content()` written to a gitignored
+`_state/` file and never committed. Nothing is typed, pressed, scrolled or
+submitted, and the live session's standing brackets apply (the control page
+before and after, the anomaly rule). Every address is composed by this
+package's composers from values supplied at fire time; no value below
+identifies the operator, and none is written into a tracked file. What is
+read out of each capture afterwards is offline, by SHAPE and COUNT: never a
+name, a slug, a title or a query value.
+
+**THE SEARCH CAP BINDS THE WHOLE SESSION.** `D1-SEARCH-AS-READS`, carried to
+every vertical by D2, allows five test searches per live session. The lane S
+live queue above already holds four people searches, and F.1-F.3 are three
+more, so the session budget is set in section E.
+
+#### F.1 `N 104` -- the companies search
+
+* **Page.** `search_verticals.compose("companies", keywords="robotics")` ->
+  `https://www.linkedin.com/search/results/companies/?keywords=robotics`. A
+  generic industry word, naming no employer of his; for the row's own proof a
+  later fire would search an organisation's NAME, which is what the row does.
+* **State.** Signed in; the control page served; nothing pressed.
+* **Why the load changes nothing.** A results page lists organisations and is
+  READ: reading it follows, messages and invites nobody -- condition 5 of the
+  search admission. No member profile is loaded, so nobody is left a
+  who-viewed record. The one trace is self-only: LinkedIn may add the keyword
+  to his own recent searches, which is the cost the five-search cap prices.
+* **What to read off it.** Landed on the companies vertical by closed-segment
+  equality; the number of result cards; **whether each card carries a
+  NUMERIC organisation id** (a `/company/<digits>/` href or a digit-bearing
+  entity urn) or slugs only, counted by shape; the results-count element;
+  whether a pagination control is drawn (never pressed); and the shipped
+  `search_results.read_results` / `read_filters` run over the capture offline.
+* **What it decides.** Whether a reader can return
+  `company_page.company_page_url(<digits>)` per result (section D gives the
+  row's verdict on that).
+* **Cost.** 1 load, 1 of the session's 5 searches.
+
+#### F.2 `N 161` -- the groups search
+
+* **Page.** `search_verticals.compose("groups", keywords="open source")` ->
+  `https://www.linkedin.com/search/results/groups/?keywords=open+source`.
+* **State.** As F.1.
+* **Why the load changes nothing.** As F.1. A results page may draw a join
+  control per group; joining is a write with its own row, and nothing is
+  pressed.
+* **What to read off it.** Landed vertical; result cards; group ids by shape
+  (`/groups/<digits>/`, the form `groups.py` counts); the results count;
+  whether join controls and pagination are drawn (counted, never pressed).
+* **Cost.** 1 load, 1 search.
+
+#### F.3 `N 179` -- the events search
+
+* **Page.** `search_verticals.compose("events", keywords="developer
+  conference")` -> `https://www.linkedin.com/search/results/events/?keywords=developer+conference`.
+* **State.** As F.1.
+* **Why the load changes nothing.** As F.1. An event card may draw an attend
+  or register control; attending is `N 185`'s write, and nothing is pressed.
+* **What to read off it.** Landed vertical; result cards; event ids by shape,
+  and whether the SLUG form (the event's title run into its id) is what the
+  cards link, which the boundary does not admit; the results count; attend
+  controls and pagination drawn (counted, never pressed).
+* **Cost.** 1 load, 1 search.
+
+#### F.4 `M C70` -- where LinkedIn searches inside a group
+
+* **Page.** `/groups/<id>/` (admitted since 2026-09-19), `<id>` a group he
+  belongs to, supplied at fire time -- the numeric ids
+  `linkedin_group_memberships` returns are the source, passed as an argument
+  and not read off a page by any code.
+* **State.** As F.1. NO search is fired: this load finds the address, it
+  does not use it.
+* **Why the load changes nothing.** A group he belongs to, opened by its
+  numeric id, is the load `linkedin_group_page` made three times on
+  2026-09-21 (`N 175`); an entity page leaves nobody a view record.
+* **What to read off it.** The search control the page draws: its form
+  action or href by SHAPE -- which vertical (`content`?), which parameter
+  names carry the group -- never a value. If it is the content vertical with
+  a group facet, the row needs a ruling to widen the search line to
+  `content`, which D2 did not make; if it is its own address, that address
+  needs its own admission.
+* **Cost.** 1 load, 0 searches.
+
+#### F.5 `N 102` and `J 108` -- a company's People tab
+
+* **Page.** `member_rosters.compose("company_people", "<id>")` ->
+  `https://www.linkedin.com/company/<id>/people/`. `<id>` is the numeric
+  organisation id of a LARGE organisation that is not his employer, current
+  or past -- the `company_id` `linkedin_job_detail` resolves on a posting. The
+  live queue's `N 84` call already resolves one such id in the same session,
+  so this costs no extra load for the id.
+* **State.** Signed in; nothing pressed, nothing scrolled.
+* **Why the load changes nothing.** An organisation's page emits no view
+  receipt to anybody -- the cause the `/company/` entry turns on. The tab
+  lists members and loads none of their profiles, so nobody is left a
+  who-viewed record. A follow or connect control drawn beside a member is a
+  write, and nothing is pressed.
+* **What to read off it.** Where it landed (did the number redirect to the
+  slug? by shape); the INSIGHT panels -- how many, and whether each is a
+  count-bearing chart drawn on the first load or behind a "next" press (a
+  press would be a PRESS gate, not a reader); the number of member cards
+  (`anchors.read_anchors`' member-profile count); whether a "show more"
+  control is drawn (never pressed).
+* **What it decides.** Whether an aggregate reader can deliver both rows from
+  the first page alone (section D).
+* **Cost.** 1 load.
+
+#### F.6 `N 99` (and `N 100`, `J 112`) -- a school's alumni tab
+
+* **Page.** `member_rosters.compose("school_people", "<id>")` ->
+  `https://www.linkedin.com/school/<id>/people/`. `<id>` is a numeric school
+  id the operator supplies at fire time, and for the CAPTURE it is a school
+  that is not his campus: the capture reads the page's structure, and the
+  row's own proof -- his school -- is a later, separate fire.
+* **State.** As F.5.
+* **Why the load changes nothing.** As F.5: a school is an organisation page,
+  and the tab loads no member's profile.
+* **What to read off it.** First, WHERE IT LANDS -- a captured school page
+  draws its own tabs under `/company/<slug>/`, so the numeric school address
+  may redirect there, which the landing shape shows (both spellings are
+  admitted); then the same readings as F.5.
+* **Cost.** 1 load.
+
+#### F.7 `N 165` and `N 177` -- a group's member list
+
+* **Page.** `member_rosters.compose("group_members", "<id>")` ->
+  `https://www.linkedin.com/groups/<id>/members/`, `<id>` a group he belongs
+  to, from the numeric ids `linkedin_group_memberships` returns, passed at
+  fire time.
+* **State.** As F.5.
+* **Why the load changes nothing.** A member of a group can open its member
+  list; the list loads no member's profile; joining, leaving and messaging
+  are writes and nothing is pressed.
+* **What to read off it.** Member cards (member-profile anchor count); any
+  drawn member COUNT; whether connection-degree badges are drawn per card
+  (`N 177` is about people he knows); "show more" drawn, never pressed.
+* **Cost.** 1 load.
+
+#### F.8 `N 188` and `N 189` -- an event's attendees
+
+* **Step 1.** `/events/<id>/` (admitted since 2026-09-23; the L1 harness's
+  `event` key already loads it), `<id>` an event he can open, supplied at
+  fire time. Read the attendee control's href BY SHAPE -- is it
+  `/events/<id>/attendees/`, or a people search carrying an event facet? --
+  and press nothing. Also read, by shape, the address the 1st-degree filter
+  is drawn with, if one is drawn (`N 189`).
+* **Step 2, ONLY if step 1 draws `/events/<id>/attendees/`.**
+  `member_rosters.compose("event_attendees", "<id>")`, once. If the list is
+  a people search with an event facet instead, stop: that is a people-search
+  facet, D1 governs it, and `people_search.compose` would need the facet --
+  a composer change, not this admission -- and the roster line should then be
+  withdrawn as a page LinkedIn does not serve.
+* **Why the loads change nothing.** An event page is an entity page; attending
+  is `N 185`'s write and nothing is pressed.
+* **Cost.** 1 load, or 2; step 1 is shared with the `event` key.
+
+#### F.9 `N 178` -- NEEDS-TARGET
+
+* **Page.** Another member's profile, at the section that lists their groups
+  (their interests, the groups tab). It is REFUSED by the boundary: the
+  third-party profile pattern was removed on his own call of 2026-09-04,
+  and `PERMANENTLY_FORBIDDEN` names the act.
+* **Why the load is NOT nothing.** Loading another member's profile leaves
+  that member a who-viewed record: an act toward that person, so
+  `OUTWARD-ACTS-NEED-THE-OPERATOR` governs it and HE NAMES THE MEMBER. Even
+  then the address needs a boundary decision that reverses his own
+  2026-09-04 ruling, which is his, not a lane's.
+* **State.** NEEDS-TARGET. Not in session 2 unless he names a member and
+  rules on the address.
+* **Cost.** 1 load, when he does.
+
+### G. The cold verification, and what it changed
+
+One cold pass by a `general-purpose` child after the four items, briefed to
+find what is wrong rather than to confirm, read-only, with its own
+adversarial corpora (1557 spellings of its own), its own AST diff of the
+boundary, the shipped digest function, extracted trees of three commits and
+the WHATWG URL parser in Node for landings. Its verdicts: the boundary diff,
+the digests, every blast-radius number, reachability, census consistency and
+the instruments PASS; 44 of the record's numbers MATCH. It ran 2065 tests on
+its own list and 4535 on a 55-file gate of its own choosing, 0 failed. It
+FAILED three checks, and each is answered below.
+
+**1. AN ENCODED DOT SEGMENT WALKED PAST THE BOUNDARY (MEDIUM) -- FIXED.** The
+two new People-tab lines carried the root entries' class, `%` included, and
+admitted `/company/%2e%2e/people/`: the URL standard reads `%2e%2e` as `..`,
+so a browser lands on `/people/`, which the boundary refuses and `goto` never
+re-checks. The root lines had the same hole, older (`/company/%2e%2e/` and
+`/school/%2e%2e/` landed on the site root), and their own comments promised
+a dotted slug fails closed. The 197-address corpus held literal dots only.
+Fixed on all four lines -- `%` dropped from the People lines, a lookahead
+refusing a segment of one or two encoded dots on the roots -- with
+`company_page.slug_is_addressable` refusing the same six spellings so the
+root/shaper coupling still agrees. Over 1705 addresses (the shipped corpus,
+the verifier's 1562, 96 more): 90 newly refused, nothing newly admitted,
+percent-encoded names still admitted on the roots. Digest `a13f66bebba387cd ->
+17409e16e7abbcc8`. Reach before the fix was nil (nothing composes such an
+address), so this was defence in depth, not an open route.
+
+**2. THREE PROBES HELD A CONTROL THE ADMISSIONS OPENED (MEDIUM) -- FIXED.**
+`_probe_newsletter_routes.py` and `_probe_route_vs_surface.py` refused to
+certify their tables, and `_probe_unmeasured_surface_addresses.py` failed
+its control and exited 0 anyway. Each control is re-aimed at the People
+tab's query spelling, the class it held; the last probe now exits 1 on a
+failed control; and `_probe_route_vs_surface.py`'s OTHER control, the people
+search, had failed since 2026-09-20 unnoticed and is re-aimed at the content
+vertical. `_probe_company_family_blast.py` was removing two `/company/`
+entries by prefix again -- the defect its own comment records from its first
+run -- and now removes the root by its full text. All four exit 0 with every
+control passing.
+
+**3. A SHIPPED PAYLOAD STATED A FALSE BOUNDARY FACT (MEDIUM) -- FIXED.**
+`company_root`'s `count_read` verdict told every caller the People tab "is
+refused by the read boundary", as did `linkedin_company_page_counts`'
+description and `company_page`'s docstrings. Each now says the tab is not
+opened by that tool, and is admitted on its own roster line that no tool
+reads yet.
+
+**THE LOWER FINDINGS, AND WHAT WAS DONE.** The roster test's import walk was
+blind to relative imports; it now uses the orphan test's reader, with five
+planted forms. Its condition-4 test now says it cannot catch a budget overrun
+-- the budget is carried by process, not code. `ROSTER-ENUMERATION` in
+`scripts/check_exclusion_basis.py` needed nothing: it is already in `EMPTIED`,
+so a row filed on it fails the run. The PINNED comment in
+`census_completion.py` now says six of the moved rows were re-gated RULING;
+the triage's `N 178` annotation carries its item-3 verdict;
+`search_verticals.ROWS_SERVED` is renamed `ROWS_NAMED_BY_THE_RULING`, because
+`M C70` is named for groups and its page is not the groups search; and the
+kept prior notes that still said "refused" carry a dated marker. Section E's
+counts are corrected (58 files, 19 always-run guards) and E.1 prices the
+bracket loads.
+
+**LEFT AS THEY ARE, and why.** The two red intermediate commits (the item-1
+and item-2 commits each failed a corpus guard, repaired by the commit after)
+stay: history is not rewritten here, and the merge can squash each pair.
+Fifteen non-ASCII bytes in `_audit/_census/network.md` are on four lines this
+lane never touched. The school People line admits a spelling no capture draws
+-- capture F.6 decides, and the line should go if the tab lives only under
+`/company/`. The argument separating `N 161` from `N 104` ("discovers" against
+"names") is weaker than the rule it supports; the verdict stands on the rule.
+And condition 1 of the search admission still needs the orchestrator's
+reading (section B).
+
+**THE FIX, RE-CHECKED WITH THE VERIFIER'S OWN INSTRUMENT** (its break script,
+re-run on the fixed tree rather than a second pass): dot segments 133 of 133
+refused (8 admitted before), encoded `;` parameters 28 of 28, the root lines'
+encoded dots 7 of 7. What it still admits is 17 addresses of two pre-existing
+kinds: the search line's open query shape (`?` alone, `??`, a second `?`
+inside the query -- a query cannot move the path, and S1 carried the same
+shape since 2026-09-20), and an encoded slash INSIDE one root-line segment
+(`/company/a-company%2Fpeople/`), which a browser keeps encoded; whether
+LinkedIn's server decodes it before routing is UNVERIFIED, and it is filed
+here, not changed.
+
+## Integration (follow-up) 2026-09-24
+
+The orchestrator's integration order of 08:32: merge `master` `1902fcb`;
+rewrite the blocker of the nine WHO/WHICH rows, and of `N 79`, `N 194` and
+`N 172` from the first pass, on the operator's answer of 08:11
+(`NAMES-AT-RUNTIME`, registered on that commit with the orchestrator's
+`PEOPLE-DATA-MITIGATIONS` and `OUTWARD-CLASSES-BUILT-BEHIND-GRANTS`);
+re-derive the pins; run the gates; commit. The same order accepted section
+B's reading of condition 1 of the search admission: the admission is inert
+until a reader lands, and the reader now returns names under the six
+mitigations.
+
+### J.1 The merge of `master` `1902fcb` (`3a7da6b`)
+
+Master since `ff98a7f` carried the live lane's session 1, rulings batch 4,
+lanes L7 and Y2, the fix after L7, and the names-at-runtime calls. Conflicts,
+and how each was resolved:
+
+    census slices     jobs.md, network.md: row by row against the base, each
+                      row from the side that changed it -- Y2's appended
+                      evidence on J 107, J 109, J 110, J 111, N 103, N 176;
+                      this lane's cells on J 108, J 112, N 102, N 104, N 177,
+                      N 178. No row was changed on both sides.
+    read-addresses    this lane's M C70 and N 161 lines; M C72 and N 134 gone,
+                      as master removed them (proven live, out of bucket 3)
+    pointer-graph     this lane's N 100 donor kind; master's removal of the
+                      N 134 and N 135 pointers
+    boundary ledger   both entries kept: the two sides moved DIFFERENT tables
+                      -- master SANCTIONED_MUTATIONS e79a701b37ae9c39, this
+                      lane _ALLOWED_URL_PATTERNS 17409e16e7abbcc8
+    census pins       both histories kept; the four moved figures MEASURED on
+                      the merged tree, never summed from the two sides' claims
+    shard timings     master's table and convention; this lane's two test
+                      files re-priced on the merged tree
+
+**THE ENCODED DOT-SEGMENT FIX SURVIVED THE MERGE INTACT**, shown with the
+cold verifier's own break script on the merged boundary, not a new one: 0 of
+133 dot-segment spellings admitted, and 0 of the 7 encoded dots on the
+pre-existing root lines. The script still admits 17 addresses, the same 17
+as when the fix was re-checked (section G), in two pre-existing kinds -- 15
+open query shapes on the search line and 2 encoded slashes inside one root
+segment -- and for all 17 the browser's landing is the string itself: its
+list of admitted addresses whose landing differs is empty.
+
+The generated files (`_audit/INDEX.md`, `_audit/RULINGS.md`, the blocker
+map) were already at their fixed point for the merged corpus. The merge
+was gated after it was made (made 08:43, the run finished 08:51), on the
+tree J.2's squash re-used byte for byte: 4691 passed, 0 failed, including
+`tests/test_gap_rows_on_refused_addresses.py` and
+`tests/test_the_package_compiles_on_its_oldest_python.py`.
+
+### J.2 The two gate-fix pairs, squashed
+
+The order allowed squashing each gate-fix pair into its item only if that
+was clean. Section G had left both in place (the item-1 and item-2 commits
+each failed a corpus guard, and the commit after each repaired it). A rebase
+would have had to re-make the merge and re-resolve every conflict in it, so
+the squash was done by plumbing instead: each rewritten commit reuses its
+ORIGINAL TREE, byte for byte, so nothing was resolved twice. The merge was
+re-made from its own tree with the same second parent, `1902fcb`. Authors,
+committers and dates are the originals'. The only new text is the two
+squashed messages, each the item's message followed by its fix's.
+
+    the D2 item and its gate fix        -> one commit (`bfeeb61`)
+    the rosters item and its gate fix   -> one commit (`b9b3df2`)
+    every later commit, tree for tree   -> the merge (`3a7da6b`) and this
+                                           integration's census commit
+                                           (`e251be7`)
+
+Before the branch moved, three things were checked. Every new commit's tree
+hashes equal to its original's, and the new tip's tree equals the old tip's.
+Nothing cited a rewritten hash: no tracked file and no commit message on the
+branch. No other branch or tag contained any of them, and none was ever on
+`master`. The branch was moved with an old-value check, so a concurrent
+writer would have made the move refuse. No commit on the branch now holds an
+item without its gate fix.
+
+### J.3 Names at runtime, row by row
+
+**NO ROW'S STATE MOVED.** Every row below is GAP before and after: no
+reader returns names yet. What moved is each row's BLOCKER, and for nine of
+them the address table's gate. Each cell keeps the doctrine paragraph it was
+blocked on as that day's record and gains a paragraph after it, opening
+"NAMES AT RUNTIME, 2026-09-24", which says the doctrine question is answered
+and names what holds the row now. Each earlier address-table note is kept
+after a marker naming what answered it.
+
+| row | payload | holds it now | gate before | gate now |
+|---|---|---|---|---|
+| `N 79` | WHO | a name-returning reader | RULING | READER |
+| `N 194` | WHO | a name-returning reader | RULING | READER |
+| `N 172` | WHO | a name-returning reader; the member from tool arguments only | RULING | READER |
+| `N 161` | WHICH groups | the reader, and capture F.2 | RULING | MEASURE |
+| `N 179` | WHICH events | the reader, and capture F.3 | RULING | MEASURE |
+| `N 165` | WHO | the reader, and capture F.7 | RULING | MEASURE |
+| `N 177` | WHO, by degree | the reader, and capture F.7 | RULING | MEASURE |
+| `N 188` | WHO | the reader, and capture F.8, which also finds the address | RULING | MEASURE |
+| `N 100` | WHO, and a write | the reader and capture F.6, for the read half | RULING | MEASURE |
+| `N 189` | WHO, filtered | the reader, capture F.8, and an address | refused | refused |
+| `N 178` | WHICH, on another member's profile | the reader, and a member he names | refused | refused |
+| `M C70` | WHICH posts | the reader, capture F.4, and an admission | refused | refused |
+
+"The reader" in every row is the same thing: a name-returning reader held to
+`PEOPLE-DATA-MITIGATIONS`, on the shared people-record foundation lane G is
+building. The first three are READER because their page is already captured
+(the live lane's session 1 loaded the people-search results page through
+`linkedin_people_search_shape`: `_audit/2026-09-23-live-lane-session-1.md`,
+entry 5, item 9); the next six are MEASURE because nobody has captured
+theirs.
+
+**WHAT THE READER GATE COUNTS HERE, STATED.** The census counts a row
+BLOCKED ON NOTHING when it is ADMITTED and gated READER or PRESS-PERMITTED,
+so the three READER rows move that figure from 5 to 8. For these three it
+means blocked on no decision and no measurement. It does NOT mean buildable
+today: their reader waits on lane G's foundation, a build this lane does not
+own.
+
+**TWO QUESTIONS THE ANSWER LEAVES OPEN, for the orchestrator.**
+
+1. `M C70` asks for posts. The mitigations declare a person's record and a
+   group's or event's record, and no post's. Before any reader returns what
+   a search inside a group finds, somebody has to declare a post's fields.
+   A post is another member's text: is it a title and a link, like a group,
+   or more?
+2. `N 178` reads which groups a member belongs to, off that member's
+   profile. `THIRD-PARTY-PROFILE-FOR-A-NAMED-TARGET` loads such a profile
+   only inside an outward act whose target the operator names, and never for
+   a measurement. This row is a read, not an outward act, so even with a
+   member he names it has no route. Delivering it needs his decision that a
+   named member's profile may be loaded for a read; otherwise it stays GAP
+   on that, NEEDS-TARGET either way.
+
+### J.4 Pins, re-derived on the final tree
+
+    readonly.py AST digests      8 of 8 equal their pins; no change since
+                                 the merge
+    census_completion            b3 admitted 51, refused 37; jobs admitted
+                                 13, refused 34 (all measured at the merge);
+                                 b3_blocked_on_nothing 5 -> 8 in this
+                                 integration, with its history line
+    pin_census_rows              no drift: the live population is the pin
+    pointer graph                PASS, 66 pinned pointers
+    address table                GREEN 104 of 104: READER 8, MEASURE 25,
+                                 BUILT-UNFIRED 4, PRESS 8, RULING 6 (none of
+                                 them this lane's rows), BLOCKED ON NOTHING 8
+    jobs side table              GREEN 107 of 107
+    triage                       every control OK (1, 3-9); the
+                                 DECIDED_SINCE_TRIAGE notes for the nine rows
+                                 name the new blocker and gate, and keep the
+                                 verdict letter RULING, which CONTROL 8 needs
+    tool surface                 untouched: no tool added or removed
+    shard timings                the follow-up's two files priced at the
+                                 merge, serially on the merged tree
+                                 (3.947 s and 4.245 s); the first pass's
+                                 file, never priced before, priced now,
+                                 alone and serially on the final tree
+                                 (109 tests, 9.139 s); 168 files priced
+
+### J.5 Gates
+
+**RUN, on the integration's census commit**, whose tree J.2's squash
+re-used byte for byte (the record's own commit adds
+this section and the one timing, and is gated by the corpus-wide guards and
+the three generators after it):
+
+- The census instruments: `census_completion --check` (every figure
+  matches its pin), `check_read_addresses` (GREEN 104 of 104),
+  `check_jobs_directions` (GREEN 107 of 107), `triage_read_gap_rows`
+  (controls 1 and 3-9 OK), `ruling_holds` (GREEN), `check_write_classes`
+  (GREEN, 339 lines), `check_exclusion_basis` (70 of 70, no structural
+  problem), `pin_census_rows --check` (no drift),
+  `measure_pointer_graph --check` (PASS, 66), and the three generators
+  `--check` (the audit index, the rulings index, the blocker map).
+- The verifier's break script, as J.1 gives it.
+- One pytest run over 121 test files: the impact gate's own selection for
+  this integration's staged diff (68 files, the 20 corpus-wide guards among
+  them), every test file that names the read boundary (69), and ten named by
+  the order or this lane, `tests/test_gap_rows_on_refused_addresses.py` and
+  `tests/test_the_package_compiles_on_its_oldest_python.py` among them:
+  7223 passed, 4 skipped, 1 xfailed, 0 failed, in 16m48s on six
+  workers. The JUnit report agrees: 7228 cases across 120 files, the
+  121st path being `tests/conftest.py`, which holds none.
+
+**THE FIRST ATTEMPT AT THAT RUN RAN NOTHING.** The file list was written in
+text mode on Windows, so every path ended in a carriage return, and pytest
+collected zero tests ("no tests ran", exit 5). An exit of 5 is not a pass,
+and nothing was read off it: the list was rewritten with bare newlines,
+counted (121 paths, no carriage return), and run again.
+
+**NOT RUN, and why.** `impact_gate --against 1902fcb --plan-only`: 226 of
+245 test files (92%), past its 45% line, so it WIDENS TO THE FULL SUITE,
+which the order says not to run locally; CI certifies at merge. Nothing
+live: no browser, no LinkedIn page, no Chrome profile.
+
+### J.6 The session-2 plan and the capture specs, after the answer
+
+**E.1'S THIRD TIER NO LONGER HOLDS ITS REASON.** P3 was "moves no row until
+the operator answers the doctrine question". He has answered, so each P3
+capture now moves a row once the name-returning reader lands, which is P1's
+reason. Joined to P1, the session wants six searches -- `N 84`, `N 87`,
+`N 94`, `N 104`, `N 161` and `N 179` -- and `D1-SEARCH-AS-READS` allows five.
+The order that fits: the three people searches first (they fire readers
+already built); then `N 104`'s companies search (its reader returns Page
+addresses, not names, so it does not wait on lane G); then ONE of `N 161`
+and `N 179`, the other to the next session. Loads stay well inside forty:
+the ten E.1 counted, plus three of P3's four (one search waits), thirteen
+before the bracket loads.
+
+**THE CAPTURES THEMSELVES, AND MITIGATION 3.** Section F writes each page's
+full content to a gitignored file, the way this repository has always
+captured: `scripts/_build_job_list_skeleton.py` builds a committed skeleton,
+keeping only the attributes its reader reads, from a raw capture that stays
+local and is never committed. F was written before `PEOPLE-DATA-MITIGATIONS`,
+whose third mitigation says no third party's name, headline or link is
+written to a tracked file, a log, an error field, a receipt, a cache or a
+fixture; that fixtures use synthetic people; and that live evidence records
+counts and hashes. Whether a gitignored raw capture is such a store is
+decided nowhere. This lane reads it as one, for a page OF people, and adopts
+the stricter form for its own specs from here. Nothing F asks to read off a
+capture is lost by it, since all of that is read by SHAPE and COUNT:
+
+- The skeleton reduction moves INTO the session: the page is reduced before
+  anything is written, every text node and every attribute value replaced
+  by its shape (digit run, letter run, length) and a hash; tags, attribute
+  names and classes are kept, since a reader's selectors are built on those.
+- What F asks for -- landed vertical, card counts, ids by shape, controls
+  drawn -- is computed from the skeleton, and only counts and hashes are
+  recorded.
+- The name-returning reader's fixtures are synthetic people poured into that
+  skeleton, never a captured page.
+
+The session-1 capture of the people-search page was made before the
+mitigations were registered and sits in the live lane's gitignored state;
+this lane has not touched it. Whether it is reduced the same way, and
+whether this reading holds at all, is the orchestrator's call.
+
+### J.7 What comes next
+
+After lane G lands the shared people-record foundation, not before: switch
+`linkedin_people_search_shape` to return names through it, and build the
+roster and vertical readers on it -- their composers, `member_rosters` and
+`search_verticals`, exist and nothing calls them yet -- each held to all six
+mitigations and each mitigation shown failing without its code, as the call
+requires. `N 79`, `N 194` and `N 172` then become COVERED-UNFIRED, and
+`tests/test_people_search_readers.py`'s `ROW_STATES` table moves with them in
+the same commit. The six MEASURE rows then need their captures, in the order
+J.6 gives.

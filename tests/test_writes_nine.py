@@ -540,6 +540,10 @@ CLEAN_COMPONENT = {
     "value": "a real value",
     "setting": "dark-mode",
     "member": MEMBER,
+    # ``send_reply``'s subject, 2026-09-24: a conversation id in the read
+    # allowlist's own shape (a digit first). SYNTHETIC, as every thread id in
+    # this suite is.
+    "thread": "2-SYNTHETICCLEANTHREAD==",
 }
 
 
@@ -1675,12 +1679,17 @@ def test_the_claims_that_depend_on_the_destruction_refusal_are_the_measured_ones
             if "NOBODY" in spec.reversible_by
         )
     )
+    # SIX SINCE 2026-09-24: send_reply's reversible_by leans on the same
+    # refusal -- a reply is a message, and deleting one is destruction --
+    # and writes.PERMANENTLY_FORBIDDEN's note was moved from FIVE to SIX in
+    # the same commit, by name.
     assert leaning == (
         "apply_job",
         "comment_on_item",
         "publish_post",
         "send_invitation",
         "send_message",
+        "send_reply",
     ), leaning
     for action in leaning:
         assert "forbidden" in spec_for_action(action).reversible_by.lower(), action

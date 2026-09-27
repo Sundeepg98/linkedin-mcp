@@ -150,25 +150,6 @@ from urllib.parse import urlsplit
 
 from linkedin_server import dom, press
 
-#: THE ITEM'S OWN REACTION TOGGLE, IN THE PERMALINK'S DIALECT -- what prices a
-#: press on this page. MEASURED on his own post's permalink, 2026-09-23 22:38
-#: and 2026-09-24 00:15: ONE toggle labelled "Unreact Like" (the item liked)
-#: and ZERO in the feed's dialect ("Reaction button state: ..."), which
-#: ``/feed/`` itself draws three of. So ``dom.read_reaction_surface``'s
-#: ``off_state`` -- the counter the ``/feed/`` basis names, and which reaches
-#: this page by path prefix -- reads 0 here at both ends of ANY press: a price
-#: that cannot move. That is how the first live fire of this module was
-#: priced, and why these two exist. The OFF form ("React <kind>") is inferred
-#: from the ON form and not yet seen live; a page drawing a toggle in neither
-#: dialect is refused by :func:`price_can_move` before anything is pressed.
-TOGGLE_ON_SELECTOR = 'button[aria-label^="Unreact "]'
-TOGGLE_OFF_SELECTOR = 'button[aria-label^="React "]'
-
-#: The counters :func:`read_item_price` reads, in the order it reads them.
-#: ``off_state`` stays first because the gate requires the counter its basis
-#: NAMES to be read at both ends; the two toggles are what can actually move.
-PRICE_COUNTERS = ("off_state", "toggle_on", "toggle_off")
-
 #: The permalink this module's caller is expected to have already navigated
 #: to. Built here so a caller can construct the SAME address this module
 #: reads ``page.url`` against, never so this module can navigate to it --
@@ -264,50 +245,19 @@ def post_url(digits: Any) -> str:
 
 
 async def read_item_price(page: Any) -> dict[str, Optional[int]]:
-    """The counters that price a press on an item's permalink: integers, or
-    None for one that did not read -- never a page string.
+    """The two counters the permalink basis names (``press.SENSITIVITY_BASES``,
+    ``/feed/update/``): reaction toggles OFF and ON, in either label family.
+    Integers, or None for a count that did not read -- never a page string.
 
-    ``off_state`` is the ``/feed/`` basis's own counter, from the shipped
-    reader; ``toggle_on`` / ``toggle_off`` count the item's reaction toggle in
-    the permalink's dialect (see :data:`TOGGLE_ON_SELECTOR`). A reaction by
-    this press, in either direction, moves one of the toggles.
+    A THIN READER OVER THE SHIPPED ONE, deliberately: the counting and the
+    label families live in ``dom`` (``read_reaction_surface`` and
+    ``reaction_toggle_counts``) and the rule a zero breaks lives in ``press``
+    (``check_price_can_move``), so this module writes neither a second time.
+    The first version of this reader counted its own selectors and its own
+    zero rule, and inferred an OFF label that contradicted one measured on
+    permalinks on 2026-08-31 -- see the live lane's session document.
     """
-    surface = await dom.read_reaction_surface(page)
-    off_state = surface.get("off_state") if isinstance(surface, dict) else None
-    reading: dict[str, Optional[int]] = {
-        "off_state": (
-            off_state
-            if isinstance(off_state, int) and not isinstance(off_state, bool)
-            else None
-        )
-    }
-    for name, selector in (
-        ("toggle_on", TOGGLE_ON_SELECTOR),
-        ("toggle_off", TOGGLE_OFF_SELECTOR),
-    ):
-        try:
-            reading[name] = int(await page.locator(selector).count())
-        except Exception:  # noqa: BLE001 - an unread counter is None, not 0
-            reading[name] = None
-    return reading
-
-
-def price_can_move(reading: Any) -> bool:
-    """PURE. May this reading price a press at all?
-
-    True only when EVERY counter in :data:`PRICE_COUNTERS` read as an integer
-    AND at least one reaction toggle is drawn, in either dialect. A reading of
-    all zeros is not a clean price: nothing drawn there can move, so an
-    outward act would leave it exactly as it found it. The gate compares what
-    it is handed and cannot tell "did not move" from "could not move"; this
-    is asked before the first press, so the answer costs no press.
-    """
-    if not isinstance(reading, dict):
-        return False
-    values = [reading.get(name) for name in PRICE_COUNTERS]
-    if any(isinstance(value, bool) or not isinstance(value, int) for value in values):
-        return False
-    return sum(values) >= 1
+    return dom.reaction_toggle_counts(await dom.read_reaction_surface(page))
 
 
 def link_shape(link: Any, digits: str) -> dict[str, Any]:
@@ -596,7 +546,8 @@ async def copy_own_post_link(
        ``press.check_basis`` -- a refusal from any of them is returned as
        this module's own refusal, with that check's own verdict attached.
     4. Counters read BEFORE any click -- unreadable refuses before the
-       trigger is ever pressed.
+       trigger is ever pressed, and so does a price that cannot move
+       (``press.check_price_can_move``: every counter the basis names read 0).
     5. The trigger is activated -- the first of this module's two clicks,
        both through :func:`_activate`.
     6. A bounded wait for the copy item to render -- a timeout refuses,
@@ -683,13 +634,37 @@ async def copy_own_post_link(
             }
 
         before = await read_counters()
-        if not before:
+        basis = press.sensitivity_basis(gate_url) or {}
+        named = tuple(basis.get("counters") or ())
+        unread = [
+            name for name in named
+            if not isinstance(before, dict)
+            or isinstance(before.get(name), bool)
+            or not isinstance(before.get(name), int)
+        ]
+        if not before or unread:
+            # BEFORE THE TRIGGER, not after it: the gate would refuse an
+            # unreadable counter only once the press had happened.
             return {
                 "refused": "counters_unreadable",
                 "why": (
-                    "read_counters returned nothing before any click; "
-                    "unmeasurable resolves against the press."
+                    "a counter this surface's basis names did not read as an "
+                    "integer before any click; unmeasurable resolves against "
+                    "the press, and nothing was pressed."
                 ),
+            }
+        # A PRICE THAT CANNOT MOVE, refused before the trigger is pressed:
+        # press's own rule, not a second copy of it.
+        price = press.check_price_can_move(before, basis)
+        if price.get("refused"):
+            return {
+                "refused": "price_cannot_move",
+                "why": (
+                    "every counter the surface's basis names read 0 before "
+                    "any click, so none could move whatever a press did; "
+                    "nothing was pressed. See price."
+                ),
+                "price": price,
             }
 
         expanded_before = await trigger.get_attribute("aria-expanded")
