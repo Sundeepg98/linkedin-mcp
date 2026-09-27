@@ -18,11 +18,13 @@ Four sections, each printing its own red and its own green:
    can act:** the page it hands ``perform`` is ``tests.plantedpage.PlantedPage``,
    whose ``goto``, ``click`` and ``fill`` raise, so every refusal downstream of
    the ones being measured is still a hard stop.
-3. **THE LEAK.** The family guard must convict ``writes._live_control`` the
-   moment the coercion that shipped until this wave is put back (the subject
-   was ``writes._recipient_gate`` until that gate left with ``send_message``
-   on 2026-09-27; ``_live_control`` is the other grant-taking reader recorded
-   ``returns_text``, and it coerces through the same helper). The plant is
+3. **THE LEAK.** The family guard must convict a reader of
+   ``writes._recipient_gate``'s SHAPE -- a raw ``page.evaluate`` reading handed
+   to ``coerce.as_count`` -- the moment the coercion that shipped until this
+   wave is put back. The subject was that gate itself until it left with
+   ``send_message`` on 2026-09-27; MEASURED then, no shipped reader has the
+   shape any more (the sweep below finds none red under the plant), so the
+   subject is built here, never shipped, in the gate's shape. The plant is
    not an invented mutation: it is ``int(value or 0)``, restored by rebinding
    ``coerce.as_count``, which ``writes.py`` reaches through the module and so
    sees at once.
@@ -227,6 +229,16 @@ def _shipped_int(value: Any, default: int = 0) -> int:
     return int(value or default)
 
 
+async def _raw_reading_coerced(page: Any) -> dict:
+    """THE SHAPE ``writes._recipient_gate`` HAD, built here and never shipped:
+    a ``page.evaluate`` reading handed RAW to ``coerce.as_count``, reached
+    through the module so the plant below reaches it. The gate left with
+    ``send_message`` on 2026-09-27 (lane L5, the orchestrator's order of
+    23:36); no shipped reader keeps the shape, so the control needs its own."""
+    reading = await page.evaluate("() => ({})")
+    return {"total": coerce.as_count(reading.get("total"))}
+
+
 def section_three_the_leak() -> int:
     """The family guard, red on the coercion that shipped and green on its repair."""
     print()
@@ -234,7 +246,8 @@ def section_three_the_leak() -> int:
     print()
 
     readers = dict(discover_readers())
-    subject = "writes:_live_control"
+    subject = "control:_raw_reading_coerced (the retired gate's shape)"
+    readers[subject] = _raw_reading_coerced
     before = drive(readers[subject])[0]
     print(f"  before the plant: {subject} -> {before}")
 
@@ -265,8 +278,8 @@ def section_three_the_leak() -> int:
         print("  FAIL: the guard did NOT convict the coercion that shipped.")
         print("        Its green on the repaired line therefore certifies nothing.")
         return 1
-    if restored != RETURNS_TEXT:
-        print(f"  FAIL: the subject did not return to {RETURNS_TEXT!r} once the")
+    if restored != before or restored == LEAKS:
+        print(f"  FAIL: the subject did not return to {before!r} once the")
         print(f"        plant was lifted (it reads {restored!r}), so the red above")
         print("        is not attributable to the plant.")
         return 1

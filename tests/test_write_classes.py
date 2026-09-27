@@ -157,10 +157,16 @@ def test_the_split_is_the_one_the_lane_report_quotes():
     ACCOUNT-DESTRUCTION-STAYS-MANUAL made `P N27` and `P P2` EXCLUDED-RULED
     (-2), and RELATION-REMOVALS-BUILT-BEHIND-GRANTS moved `N 29`, `N 141` and
     `N A14` to the act remove-relation, still R3. R1 and R2 are untouched.
-    358 + 29 - 2 = 385 = 16 R1 + 36 R2 + 333 R3."""
+    358 + 29 - 2 = 385 = 16 R1 + 36 R2 + 333 R3.
+
+    386 ON LANE L5'S ORDER OF 2026-09-27 23:36, MEASURED
+    (`_audit/2026-09-24-lane-l5-messaging.md`, "The name-aimed debts"): `M M2`
+    returned to GAP when `linkedin_send_message` -- its only tool, aimed by a
+    name -- was retired; classed R2 by its act (message-send), queued on
+    capture C-P5 as `M M6` is. 385 + 1 = 386 = 16 R1 + 37 R2 + 333 R3."""
     rows, _ = cwc.load()
     split = cwc.split(rows)
-    assert (split["R1"], split["R2"], split["R3"]) == (16, 36, 333)
+    assert (split["R1"], split["R2"], split["R3"]) == (16, 37, 333)
     assert split["R1:built"] + split["R1:queued"] == split["R1"]
 
 

@@ -2349,14 +2349,51 @@ P 187, M 132, N 160 -- with 67 rulings and 258 documents in the derived views.
 
 ### K.5 Gates
 
-(filled after the final tree is gated)
+- THE WHOLE SUITE, on the merge commit `7d3d023`: the impact gate's plan widened to it (86 changed
+  paths since `687b07c`, one of them `tests/conftest.py`, which the analyser has no model of), so it
+  ran whole -- locally, `-n auto --dist loadfile`, in the background, under the `np_offline`
+  plugin: 11364 passed, 8 failed, 9 skipped, 1 xfailed -- 11382 tests -- in 1094 s. Two requests
+  tried to leave, and both were the planted ones of lane G's own guard tests, to the synthetic host
+  `network-guard-plant.invalid`; nothing else did.
+- THE EIGHT: two are lane G's guard testing ITSELF -- `test_a_planted_request_is_refused_before_it_leaves`
+  and `test_a_context_the_test_opens_itself_is_guarded_too` assert that THEIR guard aborted the
+  request, and `np_offline`'s route aborted it first. Run without the plugin, under G's guard
+  alone, `tests/test_no_test_reaches_the_network.py` passes 17 of 17. The other six were this
+  order's own moves reaching instruments that pin them, each fixed at the instrument in the final
+  commit: the write-class split (R2 36 -> 37, `M M2`), the messaging slice's GAP split (131 -> 132),
+  `M M2`'s cell naming its blocker (the triage instrument reads `Blocker:`), the contingent
+  write-offs' pinned exemption for `M M2` (self-retired: the row left COVERED-CANNOT-DELIVER), and
+  one test borrowing an invented name the retired tests had held.
+- THE CONTROL SCRIPT this order re-pointed, `scripts/_check_the_refusing_grant_can_fail.py`, was
+  RED on its first re-point: section 3's subject `writes._live_control` did not go red under the
+  plant, because no shipped reader hands a raw page reading to `coerce.as_count` any more -- the
+  script's own sweep found none. Its subject is now the retired gate's SHAPE, built in the script:
+  red under the plant, back to its pre-plant verdict after. All five sections pass.
+- THE FINAL COMMIT'S DELTA, impact-gated: see K.9.
+- THE CENSUS BATTERY on the merged tree, all twelve instruments green (K.8), and again on the final
+  tree (K.9).
 
 ### K.6 NOT run
 
-(filled after the final tree is gated)
+- CI: nothing pushed, as ordered.
+- The whole suite WITHOUT `np_offline`: only lane G's guard-test file was run without it (17
+  passed); lane G's guard now keeps every test on the machine, and the order asked for the plugin.
+- `scripts/impact_gate.py` executing its own run: its plan was computed and read, and the run it
+  called for was made through `np_offline` instead.
+- LIVE: nothing. The two probes this order edited (`_probe_events_home_live.py`,
+  `_probe_notify_cost_precondition.py`) and the retired typeahead probe drive a signed-in browser
+  and were not run; the edits are held by the import-safety and static probe tests.
+- An independent, cold verification of the link aim or of the retirement: not ordered, not run.
+- The 12 `caplog` sites that cannot hear a DEBUG record (K.2): found, not fixed.
 
 ### K.7 Commits -- on this branch, none pushed, no AI attribution in any
 
     0f6bb24  item 2: the folder's choices are not filter values
     f099461  item 1a: send_invitation aimed by the person's profile link
-    (next)   item 1b: send_message retired; the debt list empty; pins, census and this section
+    930e96c  item 1b: send_message retired; the debt list empty; pins, census, this section
+    7d3d023  the merge of master 64afa6c (K.8)
+    (next)   the final run's six instrument consequences, the control's subject, K.5-K.7 and K.9
+
+### K.9 The final delta
+
+(filled after the final commit is gated)
