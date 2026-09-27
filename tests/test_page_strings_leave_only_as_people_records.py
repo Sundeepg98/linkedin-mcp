@@ -140,10 +140,14 @@ class _ViewerListPage(CountingPlantedPage):
     each one returns -- a LIST for the harvest -- and every other read the
     planted way."""
 
-    def __init__(self, rows: list[dict[str, Any]], insights: Any = None) -> None:
+    def __init__(
+        self, rows: list[dict[str, Any]], insights: Any = None,
+        recipient: str = _SYNTHETIC_RECIPIENT,
+    ) -> None:
         super().__init__()
         self.rows = rows
         self.insights = insights
+        self.recipient = recipient
 
     async def evaluate(self, script: Any, arg: Any = None, **kwargs: Any):
         self._count()
@@ -152,7 +156,7 @@ class _ViewerListPage(CountingPlantedPage):
         if script is dom.RECIPIENT_IDS_JS:
             return {
                 "buttons": 1,
-                "rows": [{"slug": _NAMED_SLUG, "recipient": _SYNTHETIC_RECIPIENT,
+                "rows": [{"slug": _NAMED_SLUG, "recipient": self.recipient,
                           "hops": 2, "left_the_row": False}],
             }
         if script is dom.PROFILE_VIEWS_INSIGHTS_JS and self.insights is not None:
@@ -226,6 +230,22 @@ def test_the_named_viewer_is_sanitised_linked_and_addressable_by_id(adopted):
     assert person["degree"] == "2nd"
     assert named["anonymous"] is False
     assert named["recipient_id"] == _SYNTHETIC_RECIPIENT
+
+
+def test_a_recipient_id_is_published_only_in_the_shape_of_an_id():
+    """FOUND BY THE COLD VERIFICATION, 2026-09-27: the recipient id was taken
+    with ``str()`` and published beside the record, so a page answering the id
+    script with the plant published it at ``$.results[0].recipient_id``. The
+    page script captures the id's shape, and ``dom.is_recipient_id`` now
+    checks it again on this side. Shown both ways, on the same drive."""
+    planted = _drive_who_viewed_me(
+        _ViewerListPage([_NAMED_ROW], insights=_CLEAN_INSIGHTS, recipient=PLANT)
+    )
+    assert planted["results"][0]["recipient_id"] is None
+    assert carries_the_plant_outside_records(planted)[0] == []
+    kept = _drive_who_viewed_me(_ViewerListPage([_NAMED_ROW], insights=_CLEAN_INSIGHTS))
+    assert kept["results"][0]["recipient_id"] == _SYNTHETIC_RECIPIENT
+    assert not dom.is_recipient_id(PLANT) and dom.is_recipient_id(_SYNTHETIC_RECIPIENT)
 
 
 def test_an_anonymised_viewer_comes_back_exactly_as_shown(adopted):

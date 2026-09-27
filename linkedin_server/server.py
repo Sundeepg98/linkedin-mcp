@@ -1757,6 +1757,12 @@ async def _attach_recipient_ids(page: Any, rows: list[dict[str, Any]]) -> None:
     failing because an optional enrichment did not; the ids are a bonus on a
     tool whose job is the list. A failure leaves every ``recipient_id`` None,
     which is the same answer the tool gave yesterday.
+
+    ONLY AN ID IS PUBLISHED. The page script captures the id with
+    ``dom.RECIPIENT_ID_SHAPE``, and ``dom.is_recipient_id`` checks that shape
+    again here, so a page answering the script with anything but an id --
+    words, markup, a name -- publishes nothing in this field (lane G's cold
+    verification, 2026-09-27, found it published verbatim).
     """
     try:
         reading = await dom.read_recipient_ids(page)
@@ -1765,7 +1771,7 @@ async def _attach_recipient_ids(page: Any, rows: list[dict[str, Any]]) -> None:
     by_slug = {
         entry["slug"]: entry["recipient"]
         for entry in reading.get("rows") or []
-        if entry.get("slug") and entry.get("recipient")
+        if entry.get("slug") and dom.is_recipient_id(entry.get("recipient"))
     }
     for row in rows:
         # The profile link is the row's own: inside its people record for a

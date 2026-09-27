@@ -285,6 +285,37 @@ def test_the_pairing_survives_redaction():
     assert unread_positions == [1, 3]
 
 
+def test_a_label_is_an_attribute_and_text_that_quotes_one_is_no_row():
+    """FOUND BY LANE G'S COLD VERIFICATION, 2026-09-27: the row pattern read the
+    serialised page, where a serialiser leaves quotes in TEXT alone, so a
+    message whose words spelled a label became a conversation of its own --
+    its "name" the words and markup that followed. Labels are now read as
+    attributes of elements; the text below is only text."""
+    quoted = (
+        '<div aria-label="Select conversation with Dana Whitfield"></div>'
+        '<p class="msg-s-event-listitem__body">thanks! aria-label="Select '
+        'conversation with Injected Rowperson and then more of the message"</p>'
+        '<div aria-label="Select conversation with Ivo Karlsson"></div>'
+    )
+    out = shape.messaging_overview(quoted, THREAD_URL, include_names=True)
+    assert out["conversations"] == 2
+    assert [r["with"]["name"] for r in out["rows"]] == ["Dana Whitfield", "Ivo Karlsson"]
+
+
+def test_a_label_is_read_with_its_entities_decoded():
+    """And the pattern never decoded entities, so these came back as ``&nbsp;``
+    and ``&amp;`` -- where the composer's list, reading the same row in the
+    browser, returned the name itself."""
+    encoded = (
+        '<div aria-label="Select conversation with Exampleperson&nbsp;Markersurname"></div>'
+        '<div aria-label="Select conversation with R&amp;D Example Group"></div>'
+    )
+    out = shape.messaging_overview(encoded, THREAD_URL, include_names=True)
+    assert [r["with"]["name"] for r in out["rows"]] == [
+        "Exampleperson Markersurname", "R&D Example Group"
+    ]
+
+
 def test_a_marker_does_not_bleed_into_the_next_conversation():
     """The row boundary has to hold or every row below an unread one reads
     unread too -- a wrong answer that would look plausible and inflate every

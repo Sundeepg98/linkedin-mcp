@@ -7166,7 +7166,19 @@ async def read_typeahead_options(page: Any, needle: str) -> dict[str, Any]:
 #: sanitised freeze of the Who's-Viewed-Me page, and every row that offers a
 #: Message button draws it as an anchor into the compose surface carrying the
 #: viewer's member id twice -- once bare, once inside a profile urn.
-RECIPIENT_ID_HREF = r"[?&]recipient=([A-Za-z0-9_-]{1,64})"
+#:
+#: THE SHAPE IS ONE CONSTANT, used twice: the page script captures it, and
+#: :func:`is_recipient_id` checks it again on this side before an id is
+#: published (2026-09-27, lane G's cold verification: a page answering the
+#: script with any string had it published as ``recipient_id`` verbatim).
+RECIPIENT_ID_SHAPE = r"[A-Za-z0-9_-]{1,64}"
+RECIPIENT_ID_HREF = r"[?&]recipient=(" + RECIPIENT_ID_SHAPE + r")"
+
+
+def is_recipient_id(value: Any) -> bool:
+    """Is ``value`` exactly the shape the page script captures as a recipient
+    id -- letters, digits, ``-`` and ``_``, at most 64 -- and nothing else?"""
+    return isinstance(value, str) and re.fullmatch(RECIPIENT_ID_SHAPE, value) is not None
 
 #: How far up from a Message button to look for the person link that names the
 #: same row. Small, because a row is small: past this the walk leaves the row

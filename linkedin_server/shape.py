@@ -16,6 +16,7 @@ Two properties the shapers hold to:
 from __future__ import annotations
 
 import re
+from html.parser import HTMLParser
 from typing import Any, Iterable, Optional, Sequence
 from urllib.parse import parse_qs, unquote, unquote_plus, urlsplit
 
@@ -4489,7 +4490,41 @@ def envelope(
 
 #: How LinkedIn labels each row of the conversation list. Measured on the live
 #: surface: ``aria-label="Select conversation with <NAME>"``.
-_CONVERSATION_ROW = re.compile(r'aria-label="Select conversation with ([^"]+)"')
+CONVERSATION_LABEL_PREFIX = "Select conversation with "
+
+
+class _ConversationLabels(HTMLParser):
+    """Every conversation label in a document, read as an ATTRIBUTE OF AN
+    ELEMENT -- never out of text -- with its entities decoded, and the offset
+    of the tag that carries it.
+
+    WHY A PARSER AND NOT THE PATTERN IT REPLACED (2026-09-27, found by lane G's
+    cold verification). The pattern read ``aria-label="Select conversation
+    with ..."`` anywhere in the serialised page, and a serialiser leaves the
+    quotes in TEXT alone: a message whose words contained that phrase became
+    a row of its own, its "name" the words and markup that followed (seven
+    rows counted for six labels). And the pattern never decoded entities, so a
+    name drawn with a no-break space or an ampersand came back as ``&nbsp;``
+    or ``&amp;`` -- where the composer's list, reading the same row through
+    the browser, returned the name itself.
+    """
+
+    def __init__(self, text: str) -> None:
+        super().__init__(convert_charrefs=True)
+        self._line_starts = [0]
+        self._line_starts.extend(i + 1 for i, ch in enumerate(text) if ch == "\n")
+        self.found: list[tuple[int, str]] = []
+
+    def handle_starttag(self, tag: str, attrs: list[tuple[str, Optional[str]]]) -> None:
+        for key, value in attrs:
+            if key == "aria-label" and value and value.startswith(CONVERSATION_LABEL_PREFIX):
+                line, column = self.getpos()
+                self.found.append(
+                    (self._line_starts[line - 1] + column, value[len(CONVERSATION_LABEL_PREFIX):])
+                )
+                return
+
+    handle_startendtag = handle_starttag
 
 #: Words LinkedIn uses to mark a row unread. Measured: ``UNREAD``, ``Unread``,
 #: ``unread`` and the class token ``messaging-remove-unread-blue-background``.
@@ -4527,21 +4562,31 @@ def _conversation_rows(html: str) -> list[dict[str, Any]]:
     ORDER IS PRESERVED, and that is load-bearing even when names are redacted:
     "rows 1 and 4 of 10 are unread" is actionable in a way that "4 unread" is
     not.
+
+    A LABEL IS AN ATTRIBUTE, read by :class:`_ConversationLabels`: text that
+    merely spells one -- a message quoting the phrase -- is no row.
     """
     text = html or ""
-    marks = list(_CONVERSATION_ROW.finditer(text))
+    reader = _ConversationLabels(text)
+    reader.feed(text)
+    reader.close()
+    marks = reader.found
     rows: list[dict[str, Any]] = []
     seen: set[str] = set()
-    for i, match in enumerate(marks):
-        name = match.group(1).strip()
+    for i, (start, label) in enumerate(marks):
+        name = label.strip()
         if name in seen:
             continue
         seen.add(name)
-        # The row runs from this label to the next one. The tail row runs to
-        # a bounded distance rather than to the end of the document, so the
-        # page footer cannot mark the last conversation unread.
-        start = match.start()
-        end = marks[i + 1].start() if i + 1 < len(marks) else min(len(text), match.end() + 4000)
+        # The row runs from this label's tag to the next one. The tail row
+        # runs to a bounded distance past its own tag rather than to the end
+        # of the document, so the page footer cannot mark the last
+        # conversation unread.
+        if i + 1 < len(marks):
+            end = marks[i + 1][0]
+        else:
+            tag_end = text.find(">", start)
+            end = min(len(text), (tag_end if tag_end >= 0 else start) + 4000)
         segment = text[start:end]
         rows.append(
             {
