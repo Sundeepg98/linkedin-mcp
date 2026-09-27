@@ -22,15 +22,22 @@ anchored:
    each field is already its own sanitised form. Every record's envelope form
    carries :data:`UNTRUSTED_KEY`, and the server's instructions tell the
    client model to treat those fields as data, never as instructions.
-3. NEVER STORED is enforced where the text could go -- the error fields, log
-   records, receipts, caches and fixtures -- by the page-string guards in
-   ``tests/``, which admit a page string ONLY inside a record's declared
-   fields and convict it everywhere else.
-4. BOUNDED, 5. VISIBLE ONLY and 6. NOT A TARGET BY ITSELF are structural
-   properties of the readers and writes, held by tests
-   (``tests/test_people_data.py``). A row LinkedIn renders as "LinkedIn
-   Member" comes back as exactly that: :func:`Person.from_page` never looks
-   anywhere else for who it was.
+3. NEVER STORED is enforced where the text could go by the page-string guards
+   in ``tests/``, which admit a page string ONLY inside a record's declared
+   fields and convict it in an exception, an error field and a log record
+   (``tests/test_readers_emit_no_page_string.py``,
+   ``tests/test_tool_envelopes_emit_no_page_string.py``, and the controls in
+   ``tests/test_page_strings_leave_only_as_people_records.py``, which also
+   hold the record path free of module-level caches); fixtures by
+   ``tests/test_fixtures_hold_only_synthetic_people.py``. Receipts are
+   covered for a library's message, not yet for page text -- the lane G
+   record says why.
+4. BOUNDED: ``tests/test_a_people_reader_reads_one_page.py``.
+5. VISIBLE ONLY: a row LinkedIn renders as "LinkedIn Member" comes back as
+   exactly that -- :func:`Person.from_page` never looks anywhere else for who
+   it was -- and de-anonymising a viewer stays permanently forbidden.
+6. NOT A TARGET BY ITSELF: ``tests/test_no_write_is_aimed_by_a_name.py``, and
+   two writes aimed by a name are declared there as debt.
 
 WHAT THIS MODULE DOES NOT DO. It stores nothing, fetches nothing and knows no
 page: readers hand it what they read. It does not decide that a string IS a
@@ -294,6 +301,13 @@ class Event:
     def envelope(self) -> dict[str, Any]:
         return {"title": self.title, "link": self.link, UNTRUSTED_KEY: UNTRUSTED_NOTE}
 
+
+#: THE TOOLS THAT RETURN PEOPLE RECORDS, by name. Declared, and held equal to
+#: the tools whose code builds one by ``tests/test_a_people_reader_reads_one_page.py``,
+#: so a tool that starts returning records joins this set in the same change,
+#: and every rule for a people reader -- one page, no cursor, no pagination
+#: helper -- applies to it from that change on.
+PEOPLE_TOOLS: frozenset[str] = frozenset({"linkedin_who_viewed_me"})
 
 #: Every record type, and the exact keys of each envelope SHAPE. A group and
 #: an event share a shape (title, link, marker). The page-string guards read

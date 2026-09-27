@@ -19,6 +19,7 @@ import re
 from typing import Any, Iterable, Optional, Sequence
 from urllib.parse import parse_qs, unquote, unquote_plus, urlsplit
 
+from linkedin_server import people_data
 from linkedin_server.config import MAX_TEXT_CHARS
 
 # ---------------------------------------------------------------------------
@@ -324,8 +325,14 @@ _MUTUALS = re.compile(r"^\d+\s+mutual\s+connections?$", re.I)
 _ABOUT_THE_PAGE = re.compile(r"viewed your profile", re.I)
 
 
+#: A generous per-line bound for the lines of one viewer row before they are
+#: classified. The record's own caps apply to what is kept; this only stops a
+#: pathological line from being normalised in full.
+_VIEWER_LINE_CAP = 1000
+
+
 def parse_person_card(record: dict[str, Any]) -> Optional[dict[str, Any]]:
-    """Shape one profile-view row.
+    """Shape one profile-view row: ``{"person": <record>, "viewed", "anonymous"}``.
 
     ``record`` is ``{"href": ..., "text": ...}`` as harvested from the page.
     Returns ``None`` when the row is not a viewer, so callers can count what
@@ -343,14 +350,30 @@ def parse_person_card(record: dict[str, Any]) -> Optional[dict[str, Any]]:
       drops the timestamp this reads as zero rows, which the tool reports as
       a failure. That is the intended trade: a loud nothing beats a confident
       wrong.
+
+    THE VIEWER IS A PEOPLE RECORD SINCE 2026-09-24 (NAMES-AT-RUNTIME, applied
+    by PEOPLE-DATA-MITIGATIONS; lane G's first worked adopter). ``person`` is
+    :class:`linkedin_server.people_data.Person`'s envelope -- name, headline,
+    link, degree, and the untrusted-third-party-text marker -- and it is the
+    ONLY place this row carries anything the viewer wrote. Every line is
+    sanitised BEFORE it is classified, so an invisible or direction-changing
+    character cannot slip a heading past the viewed-your-profile test or a
+    badge past the degree test. The degree badge, discarded until this date,
+    is kept as the record's ``degree``. ``viewed`` is a normalised time and
+    ``anonymous`` a boolean this package computed.
     """
-    lines = content_lines(record.get("text", ""))
+    lines = [
+        clean
+        for clean in (
+            people_data.sanitise(line, cap=_VIEWER_LINE_CAP)
+            for line in content_lines(record.get("text", ""))
+        )
+        if clean and not is_chrome(clean)
+    ]
     if not lines:
         return None
 
-    name = trim(lines[0], 120)
-    if not name:
-        return None
+    name = lines[0]
     if _ABOUT_THE_PAGE.search(name):
         return None
 
@@ -359,35 +382,38 @@ def parse_person_card(record: dict[str, Any]) -> Optional[dict[str, Any]]:
         return None
 
     headline = None
+    degree = None
     for line in lines[1:]:
-        if has_time_ago(line) or is_degree_badge(line) or _MUTUALS.match(line):
+        if is_degree_badge(line):
+            degree = degree or line
             continue
-        headline = trim(line)
-        if headline:
-            break
+        if has_time_ago(line) or _MUTUALS.match(line):
+            continue
+        if headline is None:
+            headline = line
 
     slug = profile_slug_from(record.get("href", ""))
     anonymous = slug is None or any(
         marker in name.casefold() for marker in _ANONYMOUS_MARKERS
     )
-    out: dict[str, Any] = {
-        "name": name,
-        "headline": headline,
-        "viewed": when,
-        "anonymous": anonymous,
-    }
-    if slug and not anonymous:
-        # A BROWSER LINK, NOT A NAVIGABLE ADDRESS. This server will not
-        # open it. A url in tool OUTPUT and a url on
-        # `readonly._ALLOWED_URL_PATTERNS` are different objects with
-        # different purposes: the first is for a HUMAN to open, the
-        # second is for this process to navigate. The third-party
-        # profile pattern was removed from that list on 2026-09-04
-        # because the server must never load a member's profile -- and
-        # that did not touch this field, because handing him a link is
-        # not visiting it. Coupling the two is the confusion.
-        out["profile"] = f"https://www.linkedin.com/in/{slug}"
-    return out
+    # A BROWSER LINK, NOT A NAVIGABLE ADDRESS, and only for a named viewer.
+    # This server will not open it. A url in tool OUTPUT and a url on
+    # `readonly._ALLOWED_URL_PATTERNS` are different objects with different
+    # purposes: the first is for a HUMAN to open, the second is for this
+    # process to navigate. The third-party profile pattern was removed from
+    # that list on 2026-09-04 because the server must never load a member's
+    # profile -- and that did not touch this field, because handing him a link
+    # is not visiting it. Coupling the two is the confusion. VISIBLE ONLY: an
+    # anonymous viewer gets no link, and nothing here looks for one.
+    person = people_data.Person.from_page(
+        name=name,
+        headline=headline,
+        href=f"/in/{slug}/" if slug and not anonymous else None,
+        degree=degree,
+    )
+    if person is None:
+        return None
+    return {"person": person.envelope(), "viewed": when, "anonymous": anonymous}
 
 
 def parse_connection_card(record: dict[str, Any]) -> Optional[dict[str, Any]]:

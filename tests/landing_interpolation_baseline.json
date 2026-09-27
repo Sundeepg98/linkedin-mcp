@@ -26,7 +26,6 @@
     "shape.py:apply_route:raw_href#2": "PUBLISHED_BY_CONTRACT",
     "shape.py:apply_route:raw_href#3": "PUBLISHED_BY_CONTRACT",
     "shape.py:parse_connection_card:slug": "PUBLISHED_BY_CONTRACT",
-    "shape.py:parse_person_card:slug": "PUBLISHED_BY_CONTRACT",
     "transport.py:_serve:http_url(chosen)": "SERVER_CONSTRUCTED",
     "writes.py:_assert_landed_on_target:landing.withheld(landed)": "WITHHELD",
     "writes.py:_assert_landed_on_target:landing.withheld(landed)#2": "WITHHELD",

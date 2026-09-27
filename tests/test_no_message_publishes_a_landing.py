@@ -158,13 +158,15 @@ ASKED_FOR_SITES: dict[str, str] = {
 }
 
 PUBLISHED_BY_CONTRACT_SITES: dict[str, str] = {
-    "shape.py:parse_person_card": (
-        "``out['profile']`` is a field this shaper publishes on its SUCCESS "
-        "path. Withholding it in a message while returning it in the payload "
-        "would withhold nothing. Whether that field may be published at all "
-        "is the SHAPERS' question, governed by shape.py and the redaction "
-        "tests -- a different subject with its own guards."
-    ),
+    # ``shape.py:parse_person_card`` WAS RULED HERE UNTIL 2026-09-24, for
+    # ``out['profile']``, and its entry left with the site: the viewer row
+    # became a people record (lane G's foundation), whose ``link`` is built by
+    # ``people_data.canonical_profile_link`` and RETURNED -- a helper's return
+    # value, outside this census's subject set of built messages and output
+    # fields. The publication is unchanged and is now ruled by NAMES-AT-RUNTIME
+    # itself; the record's link is canonical by construction (query, fragment
+    # and sub-pages dropped). Its twin, ``parse_connection_card`` below, has
+    # not moved onto the record and keeps its entry.
     "dom.py:read_job_identity": (
         "``out['company_url']`` is likewise a success-path field. Same "
         "reasoning, same owning guard."
