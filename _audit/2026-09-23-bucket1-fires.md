@@ -1,5 +1,3 @@
-claude-opus-5-5[1m]
-
 # BUCKET 1: the read-direction COVERED-UNFIRED rows, fired once each through attach
 
 **CORRECTS:** `_audit/_census/messaging-and-content.md` -- row `C41` read COVERED-UNFIRED with *"It has never returned an item"*; it returned eight on its first fire here, with authorship established on all three conditions, and moves to COVERED-PROVEN.

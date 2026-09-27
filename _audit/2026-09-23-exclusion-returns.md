@@ -1,5 +1,3 @@
-claude-opus-5-5[1m]
-
 # Exclusion returns -- the hidden work put back into the pending count
 
 **CORRECTS:** `_audit/_census/jobs.md` -- 38 of the slice's 48 exclusions returned to GAP with each blocker named, J 25, J 29 and J 30 re-filed MEASURED-ABSENT, 7 kept on written grounds; GAP 56 to 94.

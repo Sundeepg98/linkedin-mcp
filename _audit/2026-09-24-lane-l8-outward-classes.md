@@ -1,5 +1,3 @@
-claude-opus-5-5[1m]
-
 # Lane L8: the outward classes built behind the grant
 
 Base: `1902fcb` (master, "rulings: names at runtime (the operator's), their six

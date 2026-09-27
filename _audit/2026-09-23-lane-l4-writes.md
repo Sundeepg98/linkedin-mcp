@@ -1,5 +1,3 @@
-claude-opus-5-5[1m]
-
 # Lane L4 -- WRITES: classify the write-direction GAP rows, build the reversible first round to ready-to-fire
 
 Written as the lane runs. Worktree branch `worktree-agent-a6aa0720780262d33`, cut from `master` at `b0d3ab8`.

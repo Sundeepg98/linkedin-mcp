@@ -1,5 +1,3 @@
-claude-opus-5-5[1m]
-
 # Who ruled each exclusion -- the 315 rows outside the denominator, traced
 
 **Lane X, 2026-09-23, worktree off `master` at `b0d3ab8`. REPORT ONLY: no census

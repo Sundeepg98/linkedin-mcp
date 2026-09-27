@@ -1,5 +1,3 @@
-claude-opus-5-5[1m]
-
 # Lane G -- security guard hardening: four measured gaps in the checks that keep page text out and page choice out of navigation
 
 Branch `worktree-agent-a31f0ad625f238c58`, cut from `master` at `9c219c8`. Nothing

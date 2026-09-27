@@ -1,5 +1,3 @@
-claude-opus-5-5[1m]
-
 # The completeness probe -- does the census know every address LinkedIn rendered?
 
 Lane Y, 2026-09-23. Worktree branch off master `b0d3ab8`. Offline: no LinkedIn
