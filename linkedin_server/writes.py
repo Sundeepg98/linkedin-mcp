@@ -213,6 +213,7 @@ from linkedin_server import (
     coerce,
     company_interest,
     dom,
+    group_leave,
     landing,
     profile_editor,
     shape,
@@ -1034,6 +1035,90 @@ SANCTIONED_WRITES: dict[str, WriteSpec] = {
             "section's control wears once signalled, which is the anchor the "
             "removal (P I15) needs and the only evidence that a removal exists "
             "on this surface at all."
+        ),
+    ),
+    # LEAVING ONE GROUP, 2026-09-24 (census rows ``M C63`` and ``N 64``, one
+    # capability counted twice; lane L8). Specified field by field on
+    # 2026-09-05 (``_audit/2026-09-05-leave-group-writespec.md``) and built
+    # now under ``OUTWARD-CLASSES-BUILT-BEHIND-GRANTS``: withdrawing one of HIS
+    # OWN items is built behind the single-use grant, off by default, and fired
+    # only at a group he names by numeric id in that call. The selectors and
+    # verdicts live in ``group_leave``; this entry and the arms below delegate.
+    #
+    # THE ADDRESS IS A CONSTANT, the admitted ``/groups/`` root, so the id
+    # never enters a navigation -- ``PAGE-MAY-VETO-NEVER-SUPPLY`` by
+    # construction. The page can refuse the id (it is not one of his rows);
+    # it cannot supply one. And the group's NAME is read nowhere: it is in the
+    # disclosure's own label, which no selector here names.
+    "linkedin_leave_group": WriteSpec(
+        action="leave_group",
+        tool_name="linkedin_leave_group",
+        url_template=group_leave.GROUPS_URL,
+        url_pattern=re.compile(r"^https://www\.linkedin\.com/groups/$"),
+        exempt_substring=None,
+        summary=(
+            "Leave one LinkedIn group you belong to, named by its numeric id."
+        ),
+        from_state=group_leave.MEMBER,
+        to_state=group_leave.NOT_MEMBER,
+        target_kind="group_id",
+        state_from="groups_memberships",
+        direction_source=(
+            "the Groups page itself, /groups/ -- the page this action clicks "
+            "on, at one page load. MEASURED 2026-09-05 by "
+            "scripts/_probe_groups_menu.py, which opened all five per-row "
+            "menus and pressed nothing inside them: 'Leave this group' is on "
+            "the menu of every membership row and on no suggestion row. The "
+            "row is found FROM THE CONTROL: from each button declaring "
+            "aria-expanded, the first ancestor holding a numeric group anchor "
+            "is its row, and the gate requires exactly one such disclosure "
+            "whose row carries the numeric id you named and no other id. The "
+            "group's name is in that button's label and is never read."
+        ),
+        wrong_state_note=(
+            "A row that is not one of your memberships draws no leave control "
+            "at all. Aiming this action at one does not join it; it aims at a "
+            "control that is not there -- so a group that does not read as a "
+            "membership is refused, never pressed."
+        ),
+        reversibility="STILL-UNKNOWN whether a group left can be rejoined",
+        reversibility_measured=False,
+        reversibility_class="STILL-UNKNOWN",
+        reversibility_evidence=(
+            "NOT MEASURED. Nobody has left a group through this server or "
+            "watched LinkedIn complete a leave, and nothing here joins a group, "
+            "so no rejoin has ever been observed. What IS measured is "
+            "narrower: the wave that read the Groups root observed no "
+            "entry-rule or privacy marker on any row, so nothing on the page "
+            "this action acts on says which of his groups are open and which "
+            "need a manager's approval (groups-surface, 2026-09-05)."
+        ),
+        reversible_by=(
+            "NOT through this server: no join write is built (census M C61 is "
+            "GAP). Rejoining a group that requires approval needs a MANAGER to "
+            "act, and an unlisted group may not be findable again without a "
+            "link you still hold (census N 175) -- so treat leaving as "
+            "irreversible."
+        ),
+        residue=(
+            "WHAT PRESSING 'Leave this group' DOES IS UNMEASURED: LinkedIn may "
+            "leave at once or open a confirmation. This server presses nothing "
+            "past that item -- a dialog left open is counted, reported and "
+            "discarded by the fresh render that decides whether the leave "
+            "landed. SECOND: whether the group's managers are told is "
+            "unreadable here. THIRD: what becomes of your own posts and "
+            "comments inside the group is unmeasured."
+        ),
+        irreversible=True,
+        reversibility_procedure=(
+            "Read the TARGET group's entry rule BEFORE the act. /groups/<id>/ "
+            "IS on the read allowlist (readonly, admitted 2026-09-19, "
+            "[0-9]{1,20}) and linkedin_group_page opens it -- but that reader "
+            "reports anchor-class counts only and reads no join or privacy "
+            "control, so the entry rule is still unread by this server. Until "
+            "a name-free reader of that control exists, open the group's own "
+            "page yourself before confirming: an open group can be rejoined by "
+            "joining; one that requires approval cannot be without a manager."
         ),
     ),
     "linkedin_set_open_to_work": WriteSpec(
@@ -3239,6 +3324,21 @@ def _target_for(spec: WriteSpec, target: Any) -> str:
                 "click is anchored to the row carrying the id."
             )
         return raw
+    if spec.target_kind == "group_id":
+        # THE NUMERIC GROUP ID, AND THE REFUSAL NEVER REPEATS WHAT IT GOT. The
+        # commonest wrong value is the group's NAME or slug, and a group named
+        # after a person makes that a person's name -- so, unlike the two
+        # kinds above, this refusal reports a SHAPE, through the builder
+        # ``group_page`` already ships for this very id (``group_leave``).
+        digits, why = group_leave.checked_group_id(raw)
+        if digits is None:
+            raise WriteAttemptError(
+                f"{spec.action!r} is addressed by the numeric LinkedIn group id "
+                "-- as linkedin_group_memberships returns it -- and the value "
+                f"given is not one: {why} A name is not accepted here, and it "
+                "is not repeated here either."
+            )
+        return digits
     if spec.target_kind == "self":
         if raw.casefold() not in {"self", "me", ""}:
             raise WriteAttemptError(
@@ -4569,6 +4669,32 @@ async def observe(
             same_page_as_action=True,
         )
 
+    if spec.state_from == "groups_memberships":
+        # ONE load, of the page the click lands on, and the url is the spec's
+        # CONSTANT -- the group id never enters a navigation. The reading is
+        # COUNTS ONLY, off selectors built from constants and the caller's own
+        # digits (``group_leave.read_rows``); the group's name is not read. A
+        # landing anywhere but the Groups root reads ``unknown`` and is not
+        # recorded as a string: what was asked for is.
+        url = str(spec.url_template or "")
+        landed = await _load(navigator, page, url, surface="groups")
+        reading = await group_leave.read_rows(page, target)
+        facts, state, why = group_leave.membership_verdict(
+            reading,
+            target,
+            landed_elsewhere=str(landed).rstrip("/") != url.rstrip("/"),
+        )
+        return _record(
+            spec,
+            target=target,
+            facts=facts,
+            facts_url=url,
+            state=state,
+            state_why=why,
+            state_url=url,
+            same_page_as_action=True,
+        )
+
     if spec.state_from == "apply_control":
         # ONE load, and the facts and the route come off the same page. The
         # route is read from the CONTROL rather than from the payload, which
@@ -5078,6 +5204,21 @@ def _render(
         where["whose"] = "your own LinkedIn profile"
         where["name"] = observation.facts.get("name")
         where["headline"] = observation.facts.get("headline")
+    elif spec.target_kind == "group_id":
+        # THE ID YOU NAMED AND THE COUNTS THE PAGE GAVE -- AND NO NAME. Every
+        # other block names its target in words he can check; this one cannot,
+        # because a group's name can be a person's and the rulings forbid
+        # returning it from a write. What he checks instead is the id against
+        # the identifiers ``linkedin_group_memberships`` returns.
+        where["group_id"] = observation.target
+        where["what_the_page_showed"] = observation.facts
+        where["the_name_is_not_read"] = (
+            "this block does not print the group's name: this server never "
+            "reads it. You named the group by its numeric id, and the page "
+            "only confirmed that exactly one of your membership rows carries "
+            "that id. Check the id against linkedin_group_memberships before "
+            "confirming."
+        )
     else:
         # THE SEVEN. Their target is a subject, or a subject AND the content
         # that would be published, and the content is PRINTED IN FULL rather
@@ -5434,6 +5575,31 @@ PERFORMABLE: frozenset[str] = frozenset(
         # employer already signalled reads UNKNOWN and is refused. ENABLING IS
         # NOT FIRING: its live proof is aimed by the operator.
         "mark_company_interest",
+        # LEAVING ONE GROUP, 2026-09-24, census rows ``M C63`` / ``N 64`` (lane
+        # L8), under ``OUTWARD-CLASSES-BUILT-BEHIND-GRANTS``. Every clause the
+        # others needed is true of it:
+        #
+        #   a measured surface   /groups/, on the read allowlist since
+        #                        2026-09-05 and loaded live there; the one
+        #                        address this action ever loads, a CONSTANT
+        #   a measured anchor    'Leave this group', on the per-row menu of
+        #                        all five membership rows and no suggestion
+        #                        row (scripts/_probe_groups_menu.py)
+        #   an aimable target    exactly one row-scoped disclosure whose row
+        #                        carries the numeric id he named and no other
+        #                        -- walked up from the control, never from the
+        #                        anchor, and never by the group's name
+        #   a real verification  a fresh render of /groups/: a row still
+        #                        carrying the id means NOT left
+        #   no new permission    TWO presses through perform()'s ONE click
+        #                        site: the disclosure, then -- appended only by
+        #                        a gate that re-reads the menu -- the item.
+        #                        readonly.SANCTIONED_MUTATIONS is unchanged
+        #
+        # WHAT IT CANNOT SAY is what the leave press does: a confirmation, if
+        # one opens, is counted and never answered, and the fresh render
+        # decides. ENABLING IS NOT FIRING: its live proof is aimed by him.
+        "leave_group",
         # THE THIRTEENTH, 2026-09-23, census row ``N 47``, and the first write
         # added under the operator's reversible-first-round class since the
         # round's own three. Every clause the others needed is true of it:
@@ -5655,6 +5821,14 @@ PERFORMABLE: frozenset[str] = frozenset(
 #: exception is visible from the top of the file instead of buried in a
 #: branch. See :func:`_apply_submit_gate` for what the gate requires.
 TWO_CLICK_ACTIONS: frozenset[str] = frozenset({"apply_job"})
+
+#: Actions whose control is an ITEM IN A MENU the first press opens: the first
+#: click is the row's disclosure, and the item is appended to the one click
+#: queue only by a gate that re-reads the page after that press. Named for the
+#: same reason ``TWO_CLICK_ACTIONS`` is, and kept SEPARATE from it on purpose:
+#: that set is apply's, pinned, and its gate reads a modal rather than a menu.
+#: See ``group_leave.menu_item_gate`` for what the gate requires.
+MENU_ITEM_ACTIONS: frozenset[str] = frozenset({"leave_group"})
 
 #: How long to wait for the anchor to be actionable. Generous, because the
 #: alternative to waiting is clicking early, and a click that lands on a
@@ -5916,6 +6090,12 @@ def anchor_label_for(
         # control's name carries no company; identity comes from the card it
         # sits in, checked at preview and again at click time.
         return company_interest.OFF_LABEL
+    if spec.action == "leave_group":
+        # THE ITEM THAT PERFORMS THE LEAVE, exact, measured on all five
+        # membership rows' menus. The FIRST press is the row's disclosure, and
+        # it is aimed STRUCTURALLY -- by the row carrying the numeric id --
+        # never by its label, which carries the group's name.
+        return group_leave.LEAVE_LABEL
     if spec.action == "follow_company_page":
         # A PREFIX, like the unfollow's, and for the same reason: LinkedIn
         # writes the Page's own name into the label, which makes it a strong
@@ -6231,6 +6411,9 @@ _WRITE_SURFACE: dict[str, str] = {
 #: message he reads when a write meets an auth wall.
 _WRITE_SURFACE_FOR_ACTION: dict[str, str] = {
     "follow_company_page": "organisation Page",
+    # A group id is a kind no other action uses; named per action anyway, so
+    # the auth-wall message names the page the click was going to land on.
+    "leave_group": "groups",
 }
 
 
@@ -6291,6 +6474,9 @@ _WHERE_TO_LOOK: dict[str, str] = {
     # The card the press was made in, on the posting he named. No other
     # surface this server may read lists his interest signals.
     "mark_company_interest": "the About-the-company card on that posting",
+    # The page the leave is pressed on and verified off: his memberships are
+    # listed there and nowhere else this server may read.
+    "leave_group": "your LinkedIn Groups page",
     # THE TWELFTH, and the only row here naming a surface this server
     # deliberately will NOT open. Reading the thread is what would settle
     # a send, and it costs a read receipt on a real person -- his to
@@ -6430,6 +6616,15 @@ _VERIFIED_FROM["mark_company_interest"] = (
     "independent witness. Its NEGATIVE is strong -- the OFF label still drawn "
     "means the interest was not signalled -- and its positive says only that "
     "the control moved, because the label it moves to has never been captured."
+)
+_VERIFIED_FROM["leave_group"] = (
+    "THE SAME PAGE, RE-RENDERED by a fresh navigation to the Groups root: his "
+    "memberships are listed there and on no other surface this server may "
+    "read, so this is a new render from LinkedIn rather than an independent "
+    "witness. Its NEGATIVE is strong -- a row still carrying the id means the "
+    "leave did not land. Its positive needs the page to draw at least one "
+    "OTHER membership row; with none drawn it cannot tell a finished leave "
+    "from a page that has not arrived, and it answers unknown."
 )
 _VERIFIED_FROM["follow_company_page"] = (
     "a DIFFERENT surface from the one clicked: Manage Pages, where a followed "
@@ -6882,6 +7077,21 @@ async def _live_control(
         if state != company_interest.NOT_SIGNALLED:
             return (state, why, "")
         return (state, why, company_interest.OFF_CONTROL_IN_CARD)
+
+    if spec.action == "leave_group":
+        # THE SAME READING AND THE SAME VERDICT THE PREVIEW TOOK, on the Groups
+        # page the click is about to land on: freshness, not a second source.
+        # The selector returned is the FIRST press only -- the row's
+        # disclosure, built from constants and the grant's own digits, which
+        # the verdict has just required to match exactly one element; strict
+        # mode refuses the click if that stops being true. The leave item is
+        # appended later, by ``group_leave.menu_item_gate``, or not at all.
+        # The verdict's own state decides, not ``spec.from_state`` (see the
+        # ``mark_company_interest`` arm above for why).
+        _facts, state, why = await group_leave.read_state(page, grant.target)
+        if state != group_leave.MEMBER:
+            return (state, why, "")
+        return (state, why, group_leave.disclosure_selector(grant.target))
 
     if spec.action == "update_profile_field":
         # AIM FROM THE LIVE CONTROL LIST, never from a remembered selector.
@@ -7884,6 +8094,30 @@ async def _verify_after(
             + " Read off Manage Pages, a different surface from the Page root "
             "that was clicked, keyed by the same numeric id the grant names.",
             landed,
+        )
+
+    if spec.action == "leave_group":
+        # A FRESH RENDER OF THE GROUPS ROOT, and the navigation is also what
+        # discards a menu or a confirmation the press left open -- the one
+        # this server counted after the press and did not answer. Three
+        # answers, all real: ``member`` (a row still carries the id: NOT
+        # left), ``not_member`` (the page drew membership rows and none carries
+        # it), ``unknown`` (no membership row drawn at all, which a finished
+        # leave of his only group and a page that has not arrived share).
+        url = str(spec.url_template)
+        landed = await _load(navigator, page, url, surface="groups")
+        try:
+            _assert_landed_on_target(spec, grant, landed)
+        except WriteAttemptError as exc:
+            return (UNKNOWN, str(exc), url)
+        _facts, state, why = await group_leave.read_state(page, grant.target)
+        return (
+            state,
+            why
+            + " Read off a FRESH render of the Groups page, after the press "
+            "and by a new navigation, so a menu or dialog the press left open "
+            "is not what was read.",
+            url,
         )
 
     if spec.action == "follow_company":
@@ -9313,6 +9547,10 @@ async def perform(
     # that follows its press. See ``profile_editor``.
     editor_save_gate: Optional[dict[str, Any]] = None
     editor_close: Optional[dict[str, Any]] = None
+    # THE MENU GATE, for MENU_ITEM_ACTIONS only: what the page drew after the
+    # disclosure press, and what the item press left behind. See group_leave.
+    menu_gate: Optional[dict[str, Any]] = None
+    menu_after_press: Optional[dict[str, Any]] = None
 
     # THE TYPING PLAN, and it is a QUEUE FOR THE SAME REASON THE CLICK PLAN IS.
     #
@@ -9595,6 +9833,23 @@ async def perform(
                                 _text_component_of(spec, grant.target),
                             )
                         )
+                elif spec.action in MENU_ITEM_ACTIONS and clicks_made == 1:
+                    # THE DISCLOSURE JUST OPENED A MENU, AND THAT PROVES
+                    # NOTHING ABOUT WHOSE. The item is appended to this same
+                    # queue only if a fresh read finds exactly one pressable
+                    # item on the page and it is inside the row carrying the
+                    # grant's id -- through the SAME call site, no second one.
+                    menu_gate = await group_leave.menu_item_gate(page, grant.target)
+                    if menu_gate["proceed"]:
+                        click_plan.append(menu_gate["selector"])
+                elif spec.action in MENU_ITEM_ACTIONS and clicks_made == 2:
+                    # THE ITEM WAS PRESSED. Read what it left BEFORE anything
+                    # navigates -- counts only, and it presses nothing: a
+                    # dialog here is a further step that opened and is NOT
+                    # taken. The verification's fresh render decides.
+                    menu_after_press = group_leave.after_press_note(
+                        await group_leave.read_after_press(page, grant.target)
+                    )
                 continue
             fill_selector, fill_text = fill_plan.pop(0)
             await page.fill(fill_selector, fill_text, timeout=CLICK_TIMEOUT_MS)
@@ -9652,7 +9907,15 @@ async def perform(
                 if publish_gate["proceed"]:
                     click_plan.append(publish_gate["selector"])
     except Exception as exc:  # noqa: BLE001 - reported, never re-raised
-        click_error = f"{type(exc).__name__}: {exc}"
+        # THE TYPE ALONE FOR A MENU ITEM ACTION. A Playwright click error can
+        # print the element it resolved, and the one disclosure a leave
+        # presses is labelled with the group's NAME -- which may be a person's
+        # and may not leave in a receipt (PEOPLE-DATA-MITIGATIONS item 3).
+        click_error = (
+            type(exc).__name__
+            if spec.action in MENU_ITEM_ACTIONS
+            else f"{type(exc).__name__}: {exc}"
+        )
 
     # THE EDITOR CLOSING, polled after the Save press so the verification's
     # fresh navigation does not race LinkedIn's own save request -- navigating
@@ -9811,6 +10074,10 @@ async def perform(
     elif spec.target_kind == "company_id":
         target_block["company_id"] = grant.target
         target_block["company"] = observation.facts.get("company")
+    elif spec.target_kind == "group_id":
+        # THE ID ALONE. The group's name is never read, so there is none to
+        # print -- and a one-part target is not the composite split below.
+        target_block["group_id"] = grant.target
     else:
         # THE SUBJECT AND THE VALUE, SPLIT, for every composite kind -- and
         # ``subject`` is EMPTY for a one-component target rather than being
@@ -10086,6 +10353,24 @@ async def perform(
                     "condition failed before concluding anything about the "
                     "job."
                 ),
+            }
+        ),
+        # WHAT THE MENU GATE SAW, for MENU_ITEM_ACTIONS, and what the item
+        # press left on the page. Null for every other action. COUNTS AND
+        # SENTENCES BUILT FROM THEM: nothing here was read as text, and the
+        # group's name is not in it. ``after_the_item_press`` is null when the
+        # item was never pressed; when it was, it says in words whether a
+        # further step opened -- which, if it did, was not taken.
+        "menu_gate": (
+            None
+            if menu_gate is None
+            else {
+                "proceeded": bool(menu_gate.get("proceed")),
+                "refused_condition": menu_gate.get("refused_condition"),
+                "why": menu_gate.get("why"),
+                "observed": menu_gate.get("observed"),
+                "polls": menu_gate.get("polls"),
+                "after_the_item_press": menu_after_press,
             }
         ),
         "verified": verified,

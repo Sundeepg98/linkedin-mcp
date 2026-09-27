@@ -8731,6 +8731,51 @@ async def linkedin_mark_company_interest(
         return _error(exc)
 
 
+@mcp.tool()
+async def linkedin_leave_group(
+    group_id: str, confirm_token: str = ""
+) -> dict[str, Any]:
+    """Leave one LinkedIn group you belong to -- a WRITE, and treat it as irreversible.
+
+    Same two-step shape and the same five gates as ``linkedin_save_job``: no
+    ``confirm_token``, no action -- you get a block to read and a token that
+    works ONCE, only for this group, only for this verb, within two minutes.
+    Census rows ``M C63`` / ``N 64``.
+
+    YOU NAME THE GROUP, BY ITS NUMERIC ID -- as ``linkedin_group_memberships``
+    returns it. A name or a slug is refused and not repeated back: a group can
+    be named after a person, and this tool never reads, takes or returns a
+    group's name. The block you confirm prints the id and counts, not a name.
+
+    THE PAGE ONLY VETOES. Every call loads the Groups page -- one constant
+    address; the id never enters a navigation -- and the page can only refuse
+    your id: exactly one of your membership rows must carry it, found from the
+    row's own menu control. An id on a suggestion row, on no row, or on two
+    rows is refused, and nothing is pressed.
+
+    TWO PRESSES, AND THE SECOND IS GATED. The row's menu is opened, the page is
+    re-read, and ``Leave this group`` is pressed only if it is the one such
+    item on the page and it sits inside that row. LEAVING MAY OPEN A
+    CONFIRMATION THIS SERVER HAS NEVER SEEN; if a dialog is on the page after
+    the press, NOTHING further is pressed, the result says a further step
+    opened and was not taken, and a fresh render of the Groups page decides
+    ``performed`` -- a row still carrying your id means you did not leave.
+
+    THE UNDO IS NOT THROUGH THIS SERVER. Nothing here joins a group; rejoining
+    one that needs approval needs a manager; an unlisted one may not be
+    findable again. Check the group's own page first if that matters to you.
+
+    Args:
+        group_id: the numeric LinkedIn group id, 1 to 20 ASCII digits.
+        confirm_token: leave empty to preview. Pass the token from that
+            preview to actually leave.
+    """
+    try:
+        return await _write_tool("leave_group", group_id, confirm_token)
+    except Exception as exc:
+        return _error(exc)
+
+
 # ---------------------------------------------------------------------------
 # The seven that are built, gated, and refuse
 # ---------------------------------------------------------------------------

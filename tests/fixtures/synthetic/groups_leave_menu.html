@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<!--
+Synthetic Groups-root fixture for linkedin_server/group_leave.py and the
+leave_group write (census M C63 / N 64).
+
+Strictly ASCII. EVERY GROUP HERE IS INVENTED -- names, ids and all -- and no
+real person, group, id or slug appears anywhere in this file. Group ids are
+FEWER THAN SIX DIGITS on purpose: tests/test_no_committed_identity.py refuses a
+six-or-more digit run in a tracked file, and this file is tracked.
+
+WHAT IS MEASURED AND WHAT IS INVENTED. The STRUCTURE is modelled on his own
+/groups/ page as captured on 2026-09-20 (gitignored, never copied), measured
+offline as shapes and counts only:
+  * one <main>; membership rows and suggestion rows are list items;
+  * each membership row holds numeric group anchors of ONE id and exactly one
+    button[type=button][aria-expanded=false] whose aria-label is
+    "More options for <the group's name>" -- THE LABEL CARRIES THE NAME, which
+    is why nothing under test may read it;
+  * that button and the row's menu container are SIBLINGS under one parent;
+    the container is div[aria-hidden=true][tabindex=-1] > div > ul > li >
+    div[role=button][tabindex=0], and the items are 'Update your settings'
+    (twice), 'Copy link to group' and 'Leave this group' -- the menu content
+    is IN THE DOM while closed, inside the aria-hidden container;
+  * the leave item holds an aria-hidden svg icon beside its text;
+  * suggestion rows carry anchors and NO row-scoped control;
+  * list-level aria-expanded buttons sit outside the rows (two over the
+    suggestion block, two in a header outside <main>);
+  * no role=menu, no role=menuitem, no dialog.
+One row here carries TWO anchors of its one id in two spellings (relative with
+a trailing slash, absolute without) -- LinkedIn writes both -- so "anchors of
+exactly one id" is exercised, not "exactly one anchor". The capture drew one
+anchor per row.
+
+NOT MEASURED, and the behaviour below is a CHOICE a test selects, never a
+claim: what pressing 'Leave this group' does. By default the row is removed;
+a test may instead have it open a confirmation dialog, or do nothing.
+
+CLOSED MENUS ARE display:none BY DEFAULT (the capture has no CSS, so how
+LinkedIn hides them is unmeasured). The closedMenusDisplayed flag draws them
+visible while still aria-hidden, so a test can show that aria-hidden alone
+keeps a closed menu's item from being pressable.
+
+HOW A TEST PICKS A VARIANT: it edits the HTML TEXT before page.set_content,
+replacing the FIXTURE_CONFIG marker comment (on its own line, right before the
+behaviour script) with a script tag that sets window.__fixtureConfig. Document
+order is what makes the config arrive first; see
+tests/fixtures/synthetic/own_post_menu.html for why it must be markup rather
+than an init script. This comment never spells the marker's delimiters out in
+full, because HTML comments do not nest.
+
+Recognised flags, all optional:
+  onLeave             -- "remove" (default): pressing the leave item removes
+                         its row; "dialog": it opens a visible role=dialog
+                         with two buttons and changes nothing else;
+                         "nothing": it does nothing at all.
+  menuNeverOpens      -- the disclosure flips aria-expanded but the menu
+                         container stays aria-hidden and undrawn.
+  menuPortal          -- an opened menu is MOVED to the end of <body>, outside
+                         its row, as a portal would draw it.
+  duplicateLeaveItem  -- every menu carries a second 'Leave this group'.
+  opensAllMenus       -- one disclosure press opens every row's menu.
+  closedMenusDisplayed-- closed menus are drawn (still aria-hidden=true).
+  absentRows          -- a list of membership ids whose rows are removed at
+                         load (a fresh render after a leave).
+  duplicateRowOf      -- a membership id whose row is drawn twice.
+  stripDisclosures    -- the rows draw no aria-expanded control at all (a
+                         page that has not drawn its row controls).
+
+window.__leavePresses counts presses of any 'Leave this group' item, and
+window.__dialogButtonPresses counts presses inside the dialog -- a test reads
+them to prove what was and was not pressed.
+-->
+<html>
+<head>
+<meta charset="utf-8">
+<title>Groups</title>
+<style>
+  body:not(.show-closed) .grp-menu[aria-hidden="true"] { display: none; }
+  .grp-row { margin: 4px 0; }
+  .grp-dialog { position: fixed; top: 40px; left: 40px; background: #fff; border: 1px solid #000; padding: 8px; }
+</style>
+</head>
+<body>
+<header class="global-nav">
+  <a href="https://www.linkedin.com/feed/">Home</a>
+  <a href="https://www.linkedin.com/groups/">Groups</a>
+  <button type="button" aria-expanded="false" aria-label="Me">Me</button>
+  <button type="button" aria-expanded="false" aria-label="For Business">For Business</button>
+</header>
+<main>
+  <section class="grp-memberships">
+    <h2>Groups listing</h2>
+    <ul class="grp-list">
+      <li class="grp-row" data-row="10001">
+        <div class="grp-entity">
+          <a href="/groups/10001/"><img alt="" width="48" height="48"></a>
+          <div class="grp-title">
+            <a href="https://www.linkedin.com/groups/10001"><span>Quillfeather Circle</span></a>
+            <span>1,234 members</span>
+          </div>
+        </div>
+        <div class="grp-actions">
+          <button type="button" aria-expanded="false" aria-label="More options for Quillfeather Circle">...</button>
+          <div class="grp-menu" aria-hidden="true" tabindex="-1">
+            <div class="grp-menu-inner">
+              <ul>
+                <li><div role="button" tabindex="0">Update your settings</div></li>
+                <li><div role="button" tabindex="0">Update your settings</div></li>
+                <li><div role="button" tabindex="0">Copy link to group</div></li>
+                <li><div role="button" tabindex="0" class="grp-leave"><svg aria-hidden="true" role="none" width="16" height="16"><use href="#icon-leave" width="16" height="16"></use></svg>Leave this group</div></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </li>
+      <li class="grp-row" data-row="10002">
+        <div class="grp-entity">
+          <a href="https://www.linkedin.com/groups/10002/"><span>Marrowby Guild</span></a>
+          <span>87 members</span>
+        </div>
+        <div class="grp-actions">
+          <button type="button" aria-expanded="false" aria-label="More options for Marrowby Guild">...</button>
+          <div class="grp-menu" aria-hidden="true" tabindex="-1">
+            <div class="grp-menu-inner">
+              <ul>
+                <li><div role="button" tabindex="0">Update your settings</div></li>
+                <li><div role="button" tabindex="0">Update your settings</div></li>
+                <li><div role="button" tabindex="0">Copy link to group</div></li>
+                <li><div role="button" tabindex="0" class="grp-leave"><svg aria-hidden="true" role="none" width="16" height="16"><use href="#icon-leave" width="16" height="16"></use></svg>Leave this group</div></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </li>
+      <li class="grp-row" data-row="10003">
+        <div class="grp-entity">
+          <a href="https://www.linkedin.com/groups/10003/"><span>Tessaline Forum</span></a>
+          <span>5,678 members</span>
+        </div>
+        <div class="grp-actions">
+          <button type="button" aria-expanded="false" aria-label="More options for Tessaline Forum">...</button>
+          <div class="grp-menu" aria-hidden="true" tabindex="-1">
+            <div class="grp-menu-inner">
+              <ul>
+                <li><div role="button" tabindex="0">Update your settings</div></li>
+                <li><div role="button" tabindex="0">Update your settings</div></li>
+                <li><div role="button" tabindex="0">Copy link to group</div></li>
+                <li><div role="button" tabindex="0" class="grp-leave"><svg aria-hidden="true" role="none" width="16" height="16"><use href="#icon-leave" width="16" height="16"></use></svg>Leave this group</div></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </li>
+    </ul>
+  </section>
+  <section class="grp-suggestions">
+    <h2>Groups you might be interested in</h2>
+    <div class="grp-suggestion-controls">
+      <button type="button" aria-expanded="false" aria-label="Sort suggestions">Sort</button>
+      <button type="button" aria-expanded="false">Show all</button>
+    </div>
+    <ul class="grp-list">
+      <li class="grp-suggestion"><a href="https://www.linkedin.com/groups/20001/"><span>Brindlewick Society</span></a><span>44 members</span></li>
+      <li class="grp-suggestion"><a href="https://www.linkedin.com/groups/20002/"><span>Oakhollow Exchange</span></a><span>910 members</span></li>
+      <li class="grp-suggestion"><a href="https://www.linkedin.com/groups/20003/"><span>Pellucid Roundtable</span></a><span>3 members</span></li>
+    </ul>
+  </section>
+</main>
+<!--FIXTURE_CONFIG-->
+<script>
+(function () {
+  "use strict";
+
+  var cfg = window.__fixtureConfig || {};
+  window.__leavePresses = 0;
+  window.__dialogButtonPresses = 0;
+
+  if (cfg.closedMenusDisplayed) {
+    document.body.classList.add("show-closed");
+  }
+
+  function rowOf(id) {
+    return document.querySelector('li.grp-row[data-row="' + id + '"]');
+  }
+
+  (cfg.absentRows || []).forEach(function (id) {
+    var row = rowOf(id);
+    if (row) {
+      row.parentNode.removeChild(row);
+    }
+  });
+
+  if (cfg.duplicateRowOf) {
+    var original = rowOf(cfg.duplicateRowOf);
+    if (original) {
+      original.parentNode.appendChild(original.cloneNode(true));
+    }
+  }
+
+  if (cfg.stripDisclosures) {
+    Array.prototype.forEach.call(
+      document.querySelectorAll(".grp-actions > button[aria-expanded]"),
+      function (button) { button.removeAttribute("aria-expanded"); }
+    );
+  }
+
+  if (cfg.duplicateLeaveItem) {
+    Array.prototype.forEach.call(
+      document.querySelectorAll(".grp-menu ul"),
+      function (ul) {
+        var li = document.createElement("li");
+        li.innerHTML = '<div role="button" tabindex="0" class="grp-leave">Leave this group</div>';
+        ul.appendChild(li);
+      }
+    );
+  }
+
+  function openMenu(button) {
+    var menu = button.nextElementSibling;
+    button.setAttribute("aria-expanded", "true");
+    if (cfg.menuNeverOpens || !menu) {
+      return;
+    }
+    menu.setAttribute("aria-hidden", "false");
+    if (cfg.menuPortal) {
+      document.body.appendChild(menu);
+    }
+  }
+
+  function closeMenu(button) {
+    var menu = button.nextElementSibling;
+    button.setAttribute("aria-expanded", "false");
+    if (menu) {
+      menu.setAttribute("aria-hidden", "true");
+    }
+  }
+
+  function openDialog() {
+    var dialog = document.createElement("div");
+    dialog.className = "grp-dialog";
+    dialog.setAttribute("role", "dialog");
+    dialog.setAttribute("aria-modal", "true");
+    dialog.innerHTML = '<p>Are you sure you want to leave this group?</p>'
+      + '<button type="button">Cancel</button>'
+      + '<button type="button">Leave</button>';
+    Array.prototype.forEach.call(dialog.querySelectorAll("button"), function (b) {
+      b.addEventListener("click", function () { window.__dialogButtonPresses += 1; });
+    });
+    document.body.appendChild(dialog);
+  }
+
+  function onLeave(event) {
+    window.__leavePresses += 1;
+    var mode = cfg.onLeave || "remove";
+    if (mode === "dialog") {
+      openDialog();
+      return;
+    }
+    if (mode === "nothing") {
+      return;
+    }
+    var row = event.currentTarget.closest("li.grp-row");
+    if (row) {
+      row.parentNode.removeChild(row);
+    }
+  }
+
+  Array.prototype.forEach.call(document.querySelectorAll(".grp-leave"), function (item) {
+    item.addEventListener("click", onLeave);
+  });
+
+  var disclosures = document.querySelectorAll(".grp-actions > button");
+  Array.prototype.forEach.call(disclosures, function (button) {
+    button.addEventListener("click", function () {
+      if (button.getAttribute("aria-expanded") === "true") {
+        closeMenu(button);
+        return;
+      }
+      if (cfg.opensAllMenus) {
+        Array.prototype.forEach.call(disclosures, openMenu);
+        return;
+      }
+      openMenu(button);
+    });
+  });
+})();
+</script>
+</body>
+</html>

@@ -105,6 +105,7 @@ from tests.test_follow_company_page import (
     COMPANY_PAGE_FOLLOW_ID,
     COMPANY_PAGE_FOLLOW_MARKUP,
 )
+from tests.test_leave_group import GROUPS_LEAVE_ID, GROUPS_LEAVE_MARKUP
 from tests.test_result_verification_block import SHAREBOX_MARKUP
 from tests.test_send_message_gate import COMPOSER_MARKUP
 from tests.test_selectors_resolve import PAGE as SELECTOR_RESOLUTION_PAGE
@@ -257,6 +258,18 @@ REACHED: dict[str, tuple[str, str, str]] = {
         "tests/fixtures/job_detail_hydrated.html",
         markup("job_detail_hydrated"),
         JOB,
+    ),
+    # 2026-09-24 (census rows ``M C63`` / ``N 64``, lane L8). A SYNTHETIC
+    # Groups root whose STRUCTURE is a measurement -- membership rows carrying
+    # one row-scoped disclosure each, menus in the DOM and closed -- and whose
+    # groups are invented; its source module says which parts are which. The
+    # preview and the click read it through ONE verdict,
+    # ``group_leave.read_state``, and the click-time selector is the row's
+    # disclosure, the first of the action's two presses.
+    "leave_group": (
+        "tests/test_leave_group.py",
+        GROUPS_LEAVE_MARKUP,
+        GROUPS_LEAVE_ID,
     ),
 }
 
@@ -491,8 +504,10 @@ def test_every_performable_action_is_either_reached_or_declared_unreachable():
     # reached over its own committed fixture rather than declared unreachable.
     # 13 -> 14 on 2026-09-24 (lane L7's merge): ``mark_company_interest``
     # shipped, reached over the tracked ``job_detail_hydrated`` capture.
-    assert len(PERFORMABLE) == 14, sorted(PERFORMABLE)
-    assert len(REACHED) == 14, sorted(REACHED)
+    # 14 -> 15 on 2026-09-24 (lane L8): ``leave_group`` shipped, reached over
+    # its own committed synthetic Groups root rather than declared unreachable.
+    assert len(PERFORMABLE) == 15, sorted(PERFORMABLE)
+    assert len(REACHED) == 15, sorted(REACHED)
     assert len(CANNOT_REACH) == 0, sorted(CANNOT_REACH)
 
 
