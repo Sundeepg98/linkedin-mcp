@@ -241,6 +241,14 @@ DECLARED: dict[tuple[str, str], tuple[str, int]] = {
     # A reader who takes "SHAPED" here as a statement about the payload has
     # read a claim this table does not make.
     ("server.py", "linkedin_search_appearances"): (SHAPED, 1),
+    # 2026-09-28, lane S: two tools on the same argument as the entry above --
+    # each navigates to ONE address this package holds as a constant, with no
+    # member segment and no argument, and returns the landing through the
+    # census substitution because nobody has watched either page redirect.
+    # As above, this rules on the url and not on the payload: the payload is
+    # people records, and PEOPLE-DATA-MITIGATIONS rules on those.
+    ("server.py", "linkedin_recruiter_insights"): (SHAPED, 1),
+    ("server.py", "linkedin_messaging_presence"): (SHAPED, 1),
     # --- UNMEASURED: raw, and nobody has measured what the surface emits -----
     # Internal helpers, so the landed url is whatever their THREE callers
     # supplied. A helper cannot be ruled on without ruling on its callers, and

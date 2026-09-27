@@ -124,11 +124,13 @@ PINNED_TOOL_SURFACE: dict[str, tuple[str, ...]] = {
     ),
     "linkedin_premium_job_collection": ("collection",),
     "linkedin_premium_status": (),
+    "linkedin_messaging_presence": (),
     "linkedin_profile_editor_fields": (),
     "linkedin_profile_editor_values": (),
     "linkedin_publish_post": ("confirm_token", "text"),
     "linkedin_react_to_item": ("confirm_token", "item"),
     "linkedin_recent_job_searches": (),
+    "linkedin_recruiter_insights": (),
     "linkedin_save_job": ("confirm_token", "job_id"),
     "linkedin_saved_jobs": ("limit",),
     "linkedin_search_appearances": (),
@@ -423,7 +425,17 @@ PINNED_TOOL_SURFACE: dict[str, tuple[str, ...]] = {
 #: 59 and 95 carry lane L5's two tools and every pin above; this branch
 #: adds one parameter (`include_names`) and no tool. The census rows moved
 #: in each side's own commits; none moves in the merge itself.
-PINNED_TOOL_COUNT = 59
+#: **RE-PINNED 2026-09-28 AT 61 TOOLS AND 96 PARAMETERS (lane S, the offline
+#: frontier): two tools, no parameter, and four census rows move in the same
+#: commit.** `linkedin_recruiter_insights()` banks `N 195` and
+#: `linkedin_messaging_presence()` banks `M M53`, each GAP -> COVERED-UNFIRED
+#: over a capture's skeleton (people as records, under NAMES-AT-RUNTIME and
+#: the six PEOPLE-DATA-MITIGATIONS). `P S5` moves on
+#: `linkedin_search_appearances`' new `engagement` field and `J 107` on
+#: `linkedin_search_jobs` taking `company_id` without a keyword -- neither a
+#: surface change. Not PROVEN: nothing was fired live. See
+#: `_audit/2026-09-24-lane-s-people-search.md`, "The offline frontier".
+PINNED_TOOL_COUNT = 61
 PINNED_PARAMETER_COUNT = 96
 
 

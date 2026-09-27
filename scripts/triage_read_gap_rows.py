@@ -185,10 +185,8 @@ TRIAGE: dict[str, tuple[str, str, str]] = {
                             "drawn address is then refused on the forbidden "
                             "substring /mypreferences/d/categories/, which "
                             "fires before the allowlist"),
-    "P S5": ("BUILDABLE", "", "the search-appearances page is admitted and a "
-                              "shipped tool already loads it; a parser for two "
-                              "cards, which must not publish the employer the "
-                              "first one names"),
+    # P S5 LEFT 2026-09-28 (lane S's offline frontier) -- see LEFT THE
+    # READ-GAP SET below.
     # ---- network.md ----
     "N 61": ("ADDRESS", "REFUSED", "both followed-hashtag spellings contain "
                                    "/follow, matching inside the word "
@@ -264,16 +262,9 @@ TRIAGE: dict[str, tuple[str, str, str]] = {
                                    "exemption; and admin rights are unmeasured"),
     "N A5": ("ADDRESS", "REFUSED", "carries /invite, same double cost, same "
                                    "unmeasured precondition"),
-    # Admitted at GAP 2026-09-24 by lane Y2; see the profile block above.
-    # N 195 stays BUILDABLE under WHO-WHICH-COUNTS-ARE-NOT-DELIVERY as
-    # registered (2026-09-24): the page names no member, and its third part
-    # -- each recruiter viewer as a company, an industry and a time -- is an
-    # AGGREGATE, which the ruling says a count or aggregate reader delivers.
-    "N 195": ("BUILDABLE", "", "the bare recruiter-views address is admitted "
-                               "and the page has been captured; one reader, "
-                               "publishing the counts, the chart's series and "
-                               "the company and industry aggregates, naming "
-                               "nobody"),
+    # N 195 LEFT 2026-09-28 (lane S's offline frontier) -- see LEFT THE
+    # READ-GAP SET below. It had stayed BUILDABLE under
+    # WHO-WHICH-COUNTS-ARE-NOT-DELIVERY (2026-09-24): the page names no member.
     "N 197": ("PRESS", "", "the group page is admitted and the copy-link item "
                            "sits behind the group's own menu; whether a link "
                            "composed from the group id discharges the row is "
@@ -349,6 +340,14 @@ TRIAGE: dict[str, tuple[str, str, str]] = {
 #:     N 79   COVERED-UNFIRED  (was RULING) -- search for a person by keyword
 #:     N 172  COVERED-UNFIRED  (was RULING) -- a member's connections
 #:     N 194  COVERED-UNFIRED  (was RULING) -- the people a hashtag search finds
+#:
+#: LEFT THE READ-GAP SET 2026-09-28, on lane S's offline frontier: each built
+#: offline over a capture and never fired.
+#:
+#:     P S5   COVERED-UNFIRED  (was BUILDABLE) -- the two engagement cards, read
+#:            by dom.read_search_appearances, the employer kept in the page
+#:     N 195  COVERED-UNFIRED  (was BUILDABLE) -- recruiter insights, the
+#:            viewers as people records (recruiter_views.read_recruiter_views)
 
 #: These four 2026-09-21 verdicts were measured past by the bucket-3 address
 #: table (`_audit/_census/read-addresses.tsv`, audit

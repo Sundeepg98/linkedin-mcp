@@ -10404,9 +10404,110 @@ SEARCH_APPEARANCES_JS = """
       out.view_names.push(value);
     }
   }
+
+  // THE ENGAGEMENT CARDS (census P S5, 2026-09-28): two sentences drawn as
+  // buttons in a list, "You have <n> impressions on your experience at <an
+  // employer>" and "Someone recently clicked on your <section>". REDUCED HERE,
+  // like everything else this script returns: the NUMBER, a section word
+  // compared against cfg.sections, and whether the actor was drawn as
+  // "Someone" cross. The employer never does -- the pattern stops at "at " --
+  // and neither does any other word of either sentence.
+  const engagement = {cards_seen: 0, impressions: [], clicks: [], unrecognised: 0};
+  const IMPRESSIONS = /^You have ([0-9][0-9,]{0,12}) impressions? on your experience at /;
+  const CLICKED = /^(\\S+(?: \\S+){0,5}) recently clicked on your ([A-Za-z]+)\\.?$/;
+  for (const button of scope.querySelectorAll('li button')) {
+    if (engagement.cards_seen >= cfg.engagementMax) break;
+    if (!button.getClientRects().length) continue;
+    for (const raw of (button.innerText || '').split('\\n')) {
+      const line = raw.trim();
+      const impressions = IMPRESSIONS.exec(line);
+      if (impressions) {
+        engagement.cards_seen++;
+        engagement.impressions.push(parseInt(impressions[1].replace(/,/g, ''), 10));
+        break;
+      }
+      const clicked = CLICKED.exec(line);
+      if (clicked) {
+        engagement.cards_seen++;
+        const word = clicked[2].toLowerCase();
+        const known = cfg.sections.indexOf(word) !== -1;
+        if (!known) engagement.unrecognised++;
+        engagement.clicks.push({section: known ? word : null,
+                                someone: clicked[1] === 'Someone'});
+        break;
+      }
+    }
+  }
+  out.engagement = engagement;
   return out;
 }
 """
+
+#: The profile sections an engagement card ("Someone recently clicked on your
+#: <section>") may name back. CLOSED: "intro" is the one the capture of
+#: 2026-09-20 drew; "about" is the profile's summary heading, and the other
+#: three are :data:`PROFILE_DETAIL_SECTIONS`. A word outside this list is
+#: counted and never returned.
+ENGAGEMENT_SECTIONS: tuple[str, ...] = ("intro", "about", "experience", "education", "skills")
+
+#: At most this many engagement cards are read; the capture drew two.
+ENGAGEMENT_MAX_CARDS = 10
+
+#: An impressions count above this is not one this page draws.
+ENGAGEMENT_MAX_IMPRESSIONS = 10_000_000
+
+
+def _engagement_count(value: Any, ceiling: int) -> Optional[int]:
+    """An int the page's script computed, or None. Never coerced: a page that
+    hands back text is refused without the text reaching a ``ValueError``."""
+    if type(value) is int and 0 <= value <= ceiling:
+        return value
+    return None
+
+
+def _engagement_entries(value: Any) -> list[Any]:
+    """A list the page returned, capped. Anything else is ONE unreadable
+    entry, so a page answering with text counts as drawn-but-unread."""
+    if isinstance(value, list):
+        return list(value)[:ENGAGEMENT_MAX_CARDS]
+    return [value] if value is not None else []
+
+
+def _engagement(raw: Any) -> dict[str, Any]:
+    """The engagement cards as this package returns them: integers, words
+    from :data:`ENGAGEMENT_SECTIONS` (this module's own strings), booleans."""
+    if not hasattr(raw, "get"):
+        raw = {}
+    impressions: list[int] = []
+    clicks: list[dict[str, Any]] = []
+    unreadable = 0
+    counted = _engagement_entries(raw.get("impressions"))
+    for entry in counted:
+        value = _engagement_count(entry, ENGAGEMENT_MAX_IMPRESSIONS)
+        if value is None:
+            unreadable += 1
+        else:
+            impressions.append(value)
+    clicked = _engagement_entries(raw.get("clicks"))
+    for entry in clicked:
+        someone = entry.get("someone") if hasattr(entry, "get") else None
+        if not isinstance(someone, bool):
+            unreadable += 1
+            continue
+        section = entry.get("section")
+        clicks.append({
+            "section": (ENGAGEMENT_SECTIONS[ENGAGEMENT_SECTIONS.index(section)]
+                        if section in ENGAGEMENT_SECTIONS else None),
+            "anonymous": someone,
+        })
+    return {
+        "experience_impressions": impressions,
+        "section_clicks": clicks,
+        "cards_seen": len(counted) + len(clicked),
+        "cards_unreadable": unreadable,
+        "unrecognised_sections": _engagement_count(raw.get("unrecognised"),
+                                                   ENGAGEMENT_MAX_CARDS) or 0,
+    }
 
 
 def _search_appearance_labels(pairs: list[dict[str, Any]]) -> list[Optional[str]]:
@@ -10496,6 +10597,13 @@ async def read_search_appearances(page: Any) -> dict[str, Any]:
     navigate, does not click and does not scroll, so a page that defers most
     of itself reports less than the page holds -- ``observed.main_chars`` and
     ``observed.paragraphs_seen`` are what say whether anything rendered.
+
+    ``engagement`` (census P S5, 2026-09-28) is the page's profile-engagement
+    cards, read by the same script off the same render: one integer per "You
+    have <n> impressions on your experience at ..." card, and one {section,
+    anonymous} per "Someone recently clicked on your <section>" card. The
+    employer that ends the first sentence never leaves the page. Built over the
+    capture of 2026-09-20; ``cards_seen`` zero is a page that drew none.
     """
     try:
         data = await page.evaluate(  # readonly-ok
@@ -10510,6 +10618,8 @@ async def read_search_appearances(page: Any) -> dict[str, Any]:
                 "viewNameMax": SEARCH_APPEARANCES_VIEW_NAME_MAX,
                 "chartMaxChars": SEARCH_APPEARANCES_CHART_DESC_MAX_CHARS,
                 "ancestorHops": SEARCH_APPEARANCES_ANCESTOR_HOPS,
+                "sections": list(ENGAGEMENT_SECTIONS),
+                "engagementMax": ENGAGEMENT_MAX_CARDS,
             },
         )
     except Exception as exc:
@@ -10562,6 +10672,10 @@ async def read_search_appearances(page: Any) -> dict[str, Any]:
             "main_present": bool(data.get("main_present")),
             "main_chars": as_count(data.get("main_chars")),
         },
+        # THE ENGAGEMENT CARDS, census P S5 (2026-09-28): integers, closed
+        # section words and booleans, reduced inside the page. The entry an
+        # impressions card counts is WITHHELD -- an employer names it.
+        "engagement": _engagement(data.get("engagement")),
     }
 
 

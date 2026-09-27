@@ -2268,3 +2268,232 @@ fixture and its test file are the bytes they ran over. The observed read
 map the impact gate consults was recorded at `5c910e4`, not at this commit,
 as the gate itself prints; the run widened to the full suite, so no
 selection here rests on it.
+
+## The offline frontier 2026-09-28
+
+The orchestrator's order of 2026-09-28 01:30: the still-GAP rows bucket 3
+calls BLOCKED ON NOTHING -- the address admitted, no ruling on the page, no
+press refused -- were five, measured at 01:25: `M M53`, `N 195`, `P K1`,
+`P S5` (read direction) and one jobs row. For each, build a reader where a
+capture on disk shows the field the row wants and move the row to
+COVERED-UNFIRED; where none does, build nothing and write the capture spec
+here for session 2's plan. Say for each why it was still unbuilt, from its
+cell and from disk, before deciding.
+
+### L.1 Step 0, checked against disk before it was obeyed
+
+Master at `64afa6c`, holding this branch's last commit and lane G's network
+guard -- `tests/network_guard.py`, registered by `tests/conftest.py`'s
+`pytest_plugins`, so no test reaches the network and lane L5's plugin is no
+longer needed. This branch fast-forwarded to it. `census_completion` named
+the same four read rows as BLOCKED ON NOTHING, 4 of 101, and
+`check_jobs_directions` one jobs row, `J 107`. Disk agreed.
+
+### L.2 Why each was still unbuilt, and the verdict
+
+**`M M53` -- the composer's presence. VERDICT (a), BUILT.** Gated READER
+since lane Y2's completeness pass (2026-09-24), blocker
+PARSER-ON-A-LOADED-PAGE: `linkedin_compose_fields` already loads the page.
+Why it waited: the cell's own design -- key the status to a caller-supplied
+thread and publish no name -- was written before NAMES-AT-RUNTIME, when a
+people read could not return names; the ruling came on 2026-09-24 and the
+people-record foundation it needs landed on 2026-09-27 (lane G). The
+capture (`_state/cap-ct-compose.html`, 2026-09-20) draws seventeen
+suggestion cards, sixteen of them people, each with a status line.
+
+**`N 195` -- Premium's recruiter insights. VERDICT (a), BUILT.** Gated
+READER since the same pass, blocker PREMIUM-READER-NOT-BUILT, and lane Y2's
+integration decided WHO-WHICH-COUNTS-ARE-NOT-DELIVERY does not hold it: the
+page names no member. Why it waited: its only capture is the live lane's
+(session 1, 2026-09-23), gitignored in that lane's worktree, and no lane had
+read it for structure; its viewers are people, and a record channel for
+them landed on 2026-09-27.
+
+**`P S5` -- the two engagement cards. VERDICT (a), BUILT.** Gated READER
+since the same pass, blocker PARSER-ON-A-LOADED-PAGE, with the cell's
+condition that the employer the first card names is not published. Why it
+waited: that condition wants the sentence reduced INSIDE the page, which is
+a script, and a script outside `dom.py` is refused by `tests/test_readonly.py`
+-- this lane's first draft met exactly that refusal; nobody had put the read
+into the shipped reader's own script. The capture
+(`_state/cap-search-appearances.html`, 2026-09-20) draws both cards.
+
+**`J 107` -- see all jobs at one employer. VERDICT (a), BUILT.** Gated
+READER since lane D (2026-09-24), which measured that the shipped route
+returns only the postings matching a keyword and named the build: let
+`company_id` stand in for the keyword in `linkedin_search_jobs`' guard. Why
+it waited: the build was in `server.py`, which lane D did not own, and nobody
+took it. No capture is needed: the page is the search results page the
+shipped reader already reads, and the change is to the guard, not the
+reading.
+
+**`P K1` -- the Verifications section. VERDICT (b), NOT BUILT.** Gated
+READER since lane R's merge (2026-09-24), on the cell's words that the
+section sits on the admitted own profile. Nothing on disk shows it. The three
+captures of his own profile (the live lane, 2026-09-23) draw a verification
+BADGE on his name -- an icon whose label names his verifications -- and no
+section; the settings index (same session) draws Verifications only as a
+link to `/mypreferences/d/verifications/`, which the boundary refuses; the
+Premium hub (2026-09-20) links `/trust/verification/`, also refused. ALLOWED
+IS NOT SERVED: the row was never blocked on nothing. The address table
+re-gates it MEASURE, and the capture spec is L.4.
+
+### L.3 What was built
+
+- **`J 107`.** `linkedin_search_jobs` admits a keyword-less call exactly
+  when `company_id` is given, and that call's url carries no `keywords` key:
+  `/jobs/search/?f_C=<id>`, the address lane D measured the boundary
+  admitting. Every other call builds the url it always built.
+  `tests/test_a_company_search_needs_no_keyword.py`: the employer-only url,
+  the refusal of a call with neither (the control), the slug refusal, the
+  keyworded url.
+- **`P S5`.** The shipped reader's own script, `dom.SEARCH_APPEARANCES_JS`,
+  now also reduces the two engagement cards -- an integer, a section word
+  compared against a closed list passed in, a boolean -- and
+  `dom.read_search_appearances` returns them as `engagement`, which
+  `linkedin_search_appearances` carries off the same load. No new waiver
+  and no new script. The employer never leaves the page: the pattern stops
+  at the word before it. `tests/test_profile_engagement_cards.py`.
+- **`N 195`.** `linkedin_recruiter_insights()` and
+  `recruiter_views.read_recruiter_views`, reading with Playwright's own
+  find-and-read calls and no script: the two counts under keys the module
+  declares, the time range in days, each chart's points (a date and a
+  count -- the trend itself), and each recruiter viewer as a people record
+  named by LinkedIn's "Recruiter at <employer>" line, the industry its
+  headline, no link, anonymous -- the way `linkedin_who_viewed_me` returns a
+  viewer drawn that way. The employer's Page link is never returned.
+  `tests/test_recruiter_insights.py`.
+- **`M M53`.** `linkedin_messaging_presence()` and
+  `presence.read_suggested_presence`: each card pinned as an element handle
+  before anything is read from it, so a name, a headline and a presence come
+  from one card; each person a record (name, headline, no link) beside a
+  presence word from a closed three; a group conversation and a hidden card
+  counted and skipped. `tests/test_messaging_presence.py`.
+
+THE SIX MITIGATIONS, for the two people reads, each with a test that can
+fail: declared fields only (the row's keys and the record's shape, exactly);
+sanitised and marked untrusted (a name laced with a zero-width space and a
+direction override comes back clean, with a control showing the lace reached
+the page); never stored (no module-level state, no file opened, nothing
+logged); one page per call and nothing but finding and reading (one
+navigation, and an allowlist of read calls with a planted hover or scroll
+refused); visible only (a hidden row and a row inside an `aria-hidden`
+container counted and not read); never a target (no link in any record, and
+no write tool reaches either reader through any helper).
+
+THE FIXTURES are skeletons of their captures, built by
+`scripts/_build_capture_skeleton.py`, one plan per page: the structure kept,
+every word a member wrote replaced from the declared synthetic tables, the
+company ids the identity guard's declared ones, and a structure digest
+printed from the capture and pinned in each test file. It prints counts
+only. What no rule named was written as a placeholder and counted: none on
+the engagement cards or the suggestions, and on the recruiter page four text
+nodes (the charts' axis sentences) and six labels (the section's, the time
+filter's, and the two viewers' icon and image labels).
+
+THE GUARDS THIS MET, each answered in the same change: the evaluate waiver
+rule (the first draft ran its own scripts from new modules, and the rule
+refused it; the S5 read moved into the shipped script and the two people
+readers dropped scripts altogether); the tool surface, 61 tools and 96
+parameters, pinned with the census decision; the server surface, 61 tools
+and 43 that do not write, at every count site, in the server docstring and
+in the README's module map; `known_side_effects`' messaging clause and its
+README copy, which now name `linkedin_messaging_presence` among the tools
+that load a messaging address and open no conversation; `PEOPLE_TOOLS` and
+the instructions sentence; the source-url declarations (both SHAPED, as
+`linkedin_search_appearances` is); and the identity guard, which caught an
+undeclared company id in the first recruiter fixture.
+
+THE LEAK HARNESS CANNOT DRIVE THE TWO NEW READERS, and its baselines say
+so. Regenerated by their own writers, every existing verdict is unchanged;
+`presence:read_suggested_presence` and `recruiter_views:read_recruiter_views`
+record "not_driven:raises RuntimeError", and the recruiter reader's four
+helpers record their own not-driven reasons: the planted page's element
+stand-in has no `query_selector`, so a reader that pins handles cannot be
+driven past its first card -- the class `people_results.read_result_people`
+is already in. Their success paths are driven by their own files instead,
+with plants: laced names, a planted status word, a planted actor and section,
+a planted point label, a planted photo label and a failing page, each shown
+to reach the page and never the output.
+
+THE PLANTED MUTATIONS, one defect at a time, the named test file run over
+each, the source restored after each and its bytes compared:
+
+    J 107   5 of 5 red   the old guard; no guard; a blank employer counted as
+                         one; an empty keywords key kept; a keyworded url
+                         losing its keyword
+    P S5    7 of 7 red   the employer captured beside the number; the number
+                         crossing as text; the comma kept; every actor
+                         "Someone"; a hidden card read; a page value taken
+                         uncoerced; the page's section word returned (0 red
+                         on the first run -- the script already nulls an
+                         unknown word, so the Python check was untested; a
+                         test now drives that step directly, and it is 1 red)
+    N 195  10 of 10 red  a hidden viewer read; the View-insights twin read as
+                         a viewer; the page's label as the key; a viewer not
+                         anonymous; the raw line as the name; the comma kept;
+                         every chart given the page's first label; points not
+                         bounded to their chart; a module-level cache; two
+                         loads
+    M M53   8 of 8 red   a hidden card read; a group read as a person; the
+                         page's presence word returned; the status line
+                         captured whole; the raw line as the name; the photo's
+                         label as the name; a module-level cache; two loads
+
+### L.4 CAPTURE SPEC, `P K1`
+
+For session 2's plan, one load:
+
+    address   https://www.linkedin.com/in/me/  (admitted; lands on his own
+              profile)
+    loads     1 -- no press, no scroll beyond what the page draws on load
+    keep      the page content, gitignored, as session 1's captures are
+
+It must answer, from the capture's structure and never its text:
+
+1. Is a verifications SECTION drawn anywhere on the profile -- a heading and
+   items -- or only the badge on his name?
+2. If only the badge: is it a link, and to which address shape
+   (`/mypreferences/d/verifications/` and `/trust/verification/` are both
+   refused by the boundary today), or a control that opens an in-page
+   dialog?
+3. What each verification draws -- its kind, who verified it, when -- by
+   shape: the fields a reader would return.
+
+If 1 is no and 2 is a dialog, the row is gated by a PRESS, and the next
+question is whether the press gate permits opening that badge; if 2 is a
+link to a refused address, the row needs an admission. Neither is blocked on
+nothing.
+
+### L.5 The census
+
+Four rows GAP -> COVERED-UNFIRED, each cell opening on a dated paragraph
+naming the tool, the reader and the test file, with the earlier text kept
+after it: `M M53`, `N 195`, `P S5`, `J 107`. `P K1` stays GAP, its cell
+opening on why, and its address-table line re-gated READER -> MEASURE. The
+three read rows left `_audit/_census/read-addresses.tsv` and `J 107` left
+`_audit/_census/jobs-directions.tsv`; `P S5` and `N 195` left the read-gap
+triage, recorded beside the rows that left before them.
+`tests/test_the_offline_frontier_rows.py` holds all five to this.
+
+PINS, re-derived on this tree and never summed: thirteen census figures
+moved, and `PINNED_B1_ROWS` gains the four rows under no ruling.
+
+    adjudicated                183 -> 187     gap                  587 -> 583
+    delivered_broad            123 -> 127     gap_read             101 -> 98
+    unfired                     44 -> 48      gap_unknown          109 -> 108
+    b1_no_ruling                26 -> 30      jobs_gap             109 -> 108
+    b3_admitted                 46 -> 43      jobs_dir_r            41 -> 40
+    b3_blocked_on_nothing        4 -> 0       jobs_admitted         13 -> 12
+    jobs_blocked_on_nothing      1 -> 0
+
+BUCKET 3 NOW HOLDS NO ROW BLOCKED ON NOTHING, read or jobs. The address
+tables GREEN 98 of 98 and 108 of 108. The tool surface 61 tools and 96
+parameters, measured off the registry. The AST duplicate-key check: 4,311
+dict literals and 13 JSON files, 0 duplicates.
+
+### L.6 Gates
+
+The impact gate, the census instruments and the three generators run on
+the commit that carries this section, with nothing edited or committed while
+they run; their results follow in the commit after it.

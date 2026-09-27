@@ -619,7 +619,8 @@ renumbering. A read that changes something has to say so:
    does not open messaging at all -- it reads the nav badge off a page already
    loaded. **These also load a messaging address, and none of them opens a
    conversation LinkedIn chooses:** `linkedin_list_conversations` (the
-   composer's list, which opens none), `linkedin_open_thread` and
+   composer's list, which opens none), `linkedin_messaging_presence` (the
+   empty composer's suggestions, which opens none), `linkedin_open_thread` and
    `linkedin_send_reply` (only the conversation you name by id), and
    `linkedin_send_message` (the composer, when a confirmed send is
    performed). Whether any of those loads clears the messaging badge is
@@ -948,7 +949,7 @@ linkedin_server/
   cdp_bridge.py              the recovery path: attach to a running Chrome
   dom.py                     the read-only harvesters and the control readers
   shape.py                   pure parsers and the result envelope
-  server.py                  the fifty-nine tools
+  server.py                  the sixty-one tools
   errors.py
 tests/                       1393 tests, no network, no account
   fixtures/                  frozen LinkedIn markup, scrubbed
