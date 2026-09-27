@@ -2394,9 +2394,36 @@ P 187, M 132, N 160 -- with 67 rulings and 258 documents in the derived views.
     930e96c  item 1b: send_message retired; the debt list empty; pins, census, this section
     7d3d023  the merge of master 64afa6c (K.8)
     a5135be  the final run's six instrument consequences, the control's subject, K.5-K.7
-    (next)   the two findings of the whole suite on a5135be, both in this order's prose (K.9)
+    795adc5  the two findings of the whole suite on a5135be, both in this order's prose (K.9)
     (last)   K.9's gate results -- this file only, gated by its own plan (K.9)
 
 ### K.9 The final delta
 
-(filled after the final commit is gated)
+- THE WHOLE SUITE on `a5135be`, the tree K.5 left: 11368 passed, 4 failed, 9 skipped, 1 xfailed --
+  11382 tests -- in 1224 s, under `np_offline`; the two requests that tried to leave were lane G's
+  planted ones again. Two of the four are lane G's guard testing itself (K.5). The other two were
+  this order's own prose, each caught by a corpus guard:
+  - `M M2`'s cell named its blocker as a backticked capture id in a blocker slot, and
+    `tests/test_an_asserted_name_resolves.py` resolves such a name against the gap-blockers
+    ledger, which holds no capture ids. The cell now names the capture in words; the triage
+    instrument still reads its `Blocker:`.
+  - K.5 cited this branch's merge by its hash in a commit slot, and
+    `tests/test_a_cited_sha_resolves.py` asks for ancestry of master, which a branch commit has not
+    got until the branch merges. The sentence now names the merge by what it merged; K.7's list,
+    which no slot reads, keeps the hashes.
+  Before that fix was committed, the six instruments its lines reach: 120 passed.
+- THE IMPACT GATE on the commit that fixed them: two changed paths selected 138 of 270 test files
+  (51%), over the analyser's 45% line, so it WIDENED to the whole suite -- run locally, in the
+  background, `-n auto --dist loadfile`, under `np_offline`: 11370 passed, 2 failed, 9 skipped,
+  1 xfailed -- 11382 tests -- in 1670 s. The two failures are lane G's guard testing itself, as in
+  K.5, and the two requests that tried to leave were its planted ones, to
+  `network-guard-plant.invalid`; nothing else did. Run alone without the plugin, under G's guard,
+  `tests/test_no_test_reaches_the_network.py` passes 17 of 17 on the same tree.
+- THE CENSUS BATTERY on that commit, all twelve green: every headline figure at its pin; GAP 588,
+  by slice J 109, P 187, M 132, N 160; 386 write-class lines (R1 16, R2 37, R3 333), every class
+  derived and every citation resolving; 101 of 101 bucket-3 rows agreeing with the live boundary;
+  42 exclusions traced; 64 pinned pointers holding; and the derived views' `--check`s matching --
+  the blocker map, 67 rulings, 258 documents.
+- THE COMMIT CARRYING THIS PARAGRAPH changes this file and nothing else. Its own impact plan and
+  that plan's result are in the report that returns the head sha: a record cannot hold the gate of
+  the commit that writes it.
