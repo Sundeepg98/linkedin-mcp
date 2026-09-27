@@ -1053,3 +1053,717 @@ after the settle it already uses), saved gitignored and read offline for SHAPES 
 - **C10 -- the star's ON label** (`M M30`). PAGE a READ conversation he has ALREADY STARRED in
   LinkedIn himself, id HE NAMES. ELEMENT `button.msg-thread__star-icon`: `aria-label` and
   `aria-pressed`. WHY SAFE no press; read conversation. LOADS 2 (guarded open).
+
+## Follow-up: the named-person route
+
+**THE ORDER** (the orchestrator, 2026-09-24 after the lane's merge at `96c1165`, restated on the
+resume of 2026-09-27 13:25): ruling `THIRD-PARTY-PROFILE-FOR-A-NAMED-TARGET` -- admit
+`/in/<slug>/` for a CALLER-SUPPLIED slug, reachable only from inside an outward write, never by a
+read and never for a measurement; build Connect and Message on it, each grant-gated, off by
+default, aimed by a profile link or id and never a name, each reporting WHOM IT RESOLVED before
+it acts (PEOPLE-DATA-MITIGATIONS item 6); build only against captured DOM and write an exact
+NEEDS-CAPTURE spec for the rest; leave `include_names`' mitigation 2 to lane G's sanitiser
+through a seam and a failing-until-adopted test. Disk at the resume matched the order: HEAD
+`96c1165`, clean.
+
+**WHAT SHIPPED, in one paragraph.** A second door in `readonly.py`, reachable from one function;
+two writes, `linkedin_connect_from_profile` and `linkedin_message_from_profile`; a module,
+`linkedin_server/named_profile.py`, holding the target parser, the landing veto, the verdicts,
+the opened-conversation and send gates, and the one step that prints whom an act resolved to;
+`linkedin_server/people_seam.py`, where lane G's record adopts every name lane L5 returns; and
+two test files. A cold re-check refuted six claims of the first build and two warm ones found
+ten more; every one is fixed except two that need a capture or a boundary change first (F.16):
+the press names no position -- the topcard's only control of its kind, pressed strictly -- the
+conversation his words go into must be titled with exactly that person's name, a receipt never
+reads a control or a conversation swapped in place as his, a failed press is reported by what
+the package built rather than by the browser library's text, and the door no longer readmits,
+through an encoding or a letter that draws as blank, what its literal rules refuse. Census:
+`M M1` COVERED-CANNOT-DELIVER -> COVERED-UNFIRED, `N 4` GAP ->
+COVERED-UNFIRED by D6; `N 5` and `M M6` stay GAP, each now waiting on a capture this route's first
+supervised press makes. NOT BUILT: the note on an invitation (`N 5`) -- an exact spec only, F.6.
+NOTHING WAS FIRED: the lane stays offline, and every live proof waits on a person he names.
+
+### F.1 What the captures show -- measured offline, counts and shapes only
+
+Read over the 95 captures on disk (gitignored); no name, slug or member text was copied out.
+
+    a third party's profile (/in/<other>/, canonical)            0 of 95
+    'Invite <X> to connect'                                     52: 44 <button> with no href,
+                                                                8 <a> to /preload/search-custom-invite
+                                                                (people search only)
+    'Message <X>'                                               18, ALL <a>: 16 to /messaging/compose/,
+                                                                2 to /messaging/thread/; never a <button>
+    <X> in both labels                                          the full name, 2 or 3 words
+    document titles with a leading '(N) ' count                 21 of 95
+    profile titles ending ' | LinkedIn'                         all
+    his OWN profile's topcard                                   the one [id$="Topcard"] (6 captures);
+                                                                its name an h2; h1 count 0
+    the overlay conversation bubble                             captured minimised and sponsored only,
+                                                                with no msg-form in it: 4 captures,
+                                                                one bubble; its header a <header>, its
+                                                                title ONE h2.msg-overlay-bubble-header__title
+                                                                (text drawn directly, 6 words, not a name)
+    the invitation dialog; a 'Pending' label                    0 captures of either
+
+**SO NOTHING A NAMED ACT AIMS AT HAS EVER BEEN CAPTURED ON THE PAGE IT AIMS AT.** The labels are
+measured on people cards, the topcard template on his own profile, the reply form on the
+conversation pages. Every structural fact the acts need on a third party's profile is therefore a
+VETO: the act refuses unless the page shows the measured shape, and each refusal reports what it
+found as counts and closed tokens, so the first supervised act on a person he names IS the capture
+(F.7). The synthetic fixture, `tests/fixtures/synthetic/named_profile.html`, says element by
+element which parts are borrowed from a measured surface and which are derived.
+
+### F.2 The second door, and who may call it
+
+`readonly.assert_named_profile_url` admits EXACTLY `https://www.linkedin.com/in/<segment>/` --
+three to a hundred letters, digits, hyphens, underscores or percent-encoded NON-ASCII letters
+(the unit was any octet until the cold re-check, F.16 R5), and never one of the six letters that
+draw as nothing or as blank space (the warm re-checks, NEW-1 and R3-NEW-1), the address composed by
+`readonly.named_profile_url` from the caller's own segment -- and applies the
+forbidden-substring list with NO exemption table (a segment carrying `/invite` or `settings` is
+refused; it costs the caller one profile). `assert_read_url` and `is_read_url` are
+byte-identical: the READ door still refuses every such address, and `tests/test_named_profile_route.py`
+asserts it.
+
+**A DOOR ADMITS AN ADDRESS FOR EVERY CALLER, AND THIS RULING IS ABOUT WHO**, so the callers are
+what is pinned. `browser.LinkedInBrowser.goto(..., named_profile=True)` swaps the read door for
+the second one -- the rate slot, navigation and settle are the same code. One function in the
+package passes that keyword, `writes._load_named_profile` (an AST pin), and it refuses every spec
+outside `NAMED_PROFILE_ACTIONS`; only `browser.py` and `writes.py` name the door (a second AST
+pin). `tests/test_probe_navigation_budget.py`'s package-navigation guarantee counts the second
+door as a guard in that one (file, function) and nowhere else (`SECOND_DOOR_GUARD`), rather than
+adding it to `GUARD_CALLS`, which would have let any function call it and then navigate.
+
+`readonly.py`'s `<functions>` digest was re-frozen `d7e1d0922e3af446 -> 6bdd6beaef275129`, with
+the attribution this file's convention asks for: the tree MINUS exactly the door's three
+functions hashes to the value replaced; dropping `is_read_url` instead lands elsewhere
+(`f42c70c7413142d5`); a name no function carries moves nothing. Seven of eight digests
+byte-identical. No `SANCTIONED_MUTATIONS` entry was added: the click and the fill are
+`perform()`'s own. **RE-FROZEN AGAIN after the cold re-check narrowed the door:**
+`<functions>` `6bdd6beaef275129 -> 4221c17c31fdd935`, and the door's two shapes PINNED for the
+first time -- `NAMED_PROFILE_SEGMENT` `b3de160186fb187d`, `_NAMED_PROFILE_URL`
+`32c49c9c6bc0626f` -- because the re-check measured that widening either moved no digest.
+Attributed two ways: minus the door's three functions the tree still hashes to master's
+`d7e1d0922e3af446` (nothing outside the door moved), and with the two changed functions swapped
+back to their `cc8a509` source it hashes to `6bdd6beaef275129` (those two and nothing else).
+Controls: swapping back the unchanged `assert_named_profile_url` moves nothing; dropping
+`is_read_url` lands on `00aa3e33eda0838f`. **AND A THIRD TIME** for the letters that draw as
+nothing: `<functions>` `4221c17c31fdd935 -> c191182c4f66d789` and `_INVISIBLE_LETTER_CODES`
+pinned -- `80bce706e3a2b2c2` since the second warm re-check added the two Egyptian blanks, a
+move of that digest alone -- attributed the same two ways.
+
+**PAGE-MAY-VETO-NEVER-SUPPLY, where each half lives.** The landing is compared with the named
+segment (case and percent-encoding folded) in a condition, never bound to a navigation, and
+withheld through `landing.withheld` when it vetoes -- including a member id LinkedIn redirects to a
+vanity address, which the act refuses rather than adopts (C-P6). Each control was addressed by
+the POSITION `dom.NAMED_PROFILE_JS` computed inside the page; after two re-checks (F.16) it is
+addressed by NO position -- as the only control of its kind inside the owner's topcard, pressed
+strictly -- and what the page's script establishes, from a comparison that never leaves it, is
+that the one control is the owner's:
+the owner's name from the title (less a leading `(N) `), checked against the topcard's first
+heading, and every Connect and Message control's accessible name checked against it. What crosses
+is integers, booleans and closed tokens -- no position, since the re-checks;
+`dom.read_named_profile` re-closes every field in Python.
+
+**THE RULING'S SECOND CONDITION -- "the page's shaper stays name-free" -- AND ITEM 6, RECONCILED.**
+The reader that aims is name-free, as above. The one place a name crosses is the confirm block's
+`whom_this_resolves_to`, which item 6 of PEOPLE-DATA-MITIGATIONS requires ("the tool reports whom
+it resolved before it acts"): read by `READ_PROFILE_JS` and the topcard parser on the preview's
+own load, held to the title's name, added to a NEW dict after `grant.preview` was assigned (the
+discipline of `_name_the_invitation_recipient` and `threads.name_the_reply_recipient`), and
+asserted absent from the grant, the observation, every receipt and every error.
+
+### F.3 The target -- a link or a member id, never a name
+
+`named_profile.profile_segment` accepts a profile link (with or without scheme, `www` or a
+two-or-three-letter country host, a trailing slash, a query or fragment -- which are dropped), a
+member id (`ACoAA...`) or a member urn, and composes the canonical target as the LINK, so a second
+normalisation returns it unchanged. It refuses a bare word BY ITS OWN RULE -- a one-word name and a
+vanity segment are the same shape -- and says so, rather than letting the host check one line later
+refuse it for a reason that sends him looking for the wrong mistake; it refuses `/in/me/`, any
+sub-page, any other host, whitespace and control characters. Both tools run that normalisation
+BEFORE a browser session is opened, so a name costs nothing at all.
+
+### F.4 Connect -- `N 1`'s route through the profile, and `N 4` by D6
+
+PREVIEW: one load through the door; the landing held to the segment; the page must name its own
+owner (a profile title, exactly one topcard, its first heading equal to the title's name) and draw
+exactly ONE control named `Invite <owner> to connect`, INSIDE that topcard, with no dialog open.
+It prints whom it resolved to and a token.
+
+**THE TOPCARD RULE WAS FOUND BY THE FIRST TEST RUN, NOT DESIGNED.** A world meant to model "the
+page belongs to somebody else" named its owner Morgan -- and the fixture's side card already drew
+`Invite Morgan Example to connect`. The in-page comparison matched that card: exactly one control
+naming the page's owner, and it was a stranger's. A same-name person in 'People also viewed' is
+the realistic form of that world. So a control is the owner's only inside the owner's topcard,
+both acts refuse otherwise (C-P1 names where a third party's profile draws them), and the fresh
+render's "still drawn" is counted inside the topcard too.
+
+PERFORM: the address rebuilt by the write door, loaded through the second door, the landing held
+again, the control re-read live (`_live_control`) -- the topcard must hold exactly ONE Connect
+control, the owner's -- and pressed by `dom.topcard_invite_control_selector()`, the topcard scope
+and nothing else, with `strict=True`: a page redrawn while the press retries that draws a second
+match anywhere the scope reaches stops the press instead of handing it on (F.16 R2 and NEW-3).
+PRESSING CONNECT MAY SEND AT ONCE; the preview says so.
+
+VERIFY, in place and then on a FRESH render: in place first, because a reload discards the one
+thing it can see -- whether a dialog opened, and whether ANY control naming the person is still
+drawn: none at all reads UNKNOWN whatever the fresh render says, because a control swapped in
+place during the press would have been pressed (F.16, R3-NEW-2). Then the fresh render: the
+owner's Connect drawn again means NO INVITATION WAS SENT (`performed: false`). Gone reads UNKNOWN, with what the page's
+controls naming the owner now read as closed tokens (`pending`, `withdraw`, `follow`, `unfollow`,
+`more`, `remove`, `unrecognised`) -- never SENT, because what a pressed Connect becomes has never
+been captured (C-P2). If a dialog opened, nothing in it was pressed (C-P3). The receipt says DO NOT
+RETRY and points at My Network > Manage > Sent.
+
+### F.5 Message -- `M M1`, and `M M6`'s capture
+
+PREVIEW: as Connect's, and exactly one control named `Message <owner>` inside the topcard, of a
+shape this act may press -- a `<button>`, or an `<a>` whose href is the composer (16 of the 18
+measured); a link to anywhere else would navigate where the page chose, and is refused before
+anything is pressed -- with no conversation composer already on the page. The block says, from
+the topcard's degree line, whether the words will be typed: only for `1st`.
+
+PERFORM: the press is the first click -- the topcard's only Message control, by the topcard scope
+alone, STRICT, as Connect's is; the fill and the Send press are strict too -- and nothing is
+queued before it (`OPEN_THEN_TYPE_ACTIONS`). After it, a BOUNDED
+WAIT (up to 3 s) for a composer to be drawn, which decides nothing, and then
+`named_profile.opened_conversation_gate` must pass, IN ORDER: the press did not move the browser
+(the address after it equal to the one before, compared in a condition); the page still names
+the same owner; the degree reads `1st`; the page is readable; exactly one composer, inside
+exactly one overlay conversation, with one Send; **THAT CONVERSATION IS THE NAMED PERSON'S -- its
+one title (`h2.msg-overlay-bubble-header__title`, the class measured on the captured bubble)
+reads exactly the name the profile's own title gives, compared in the page, a boolean crossing**
+(F.16 R3); no recipient box; empty, with Send DISABLED -- the measured empty form; and the number
+of messages already carrying his exact words counted, the before-count. Only then are his words
+queued -- a FOURTH `fill_plan.append`, held by `tests/test_typed_bytes.py` to the bar the other
+three are: a bare `_text_component_of(spec, grant.target)`. After the fill,
+`named_profile.composer_send_gate` applies the reply's five refusals -- no recipient box, one
+editor, one Send, the fill landed, and the box holds EXACTLY his words -- and a SIXTH: with his
+words in the box, the conversation's title is checked again. The Message press is counted apart from the submits (`opener_clicks`), so a run that typed
+and refused reports the words left in his composer rather than a submit.
+
+VERIFY, IN PLACE: the composer still holding his words with Send enabled is NOT SENT; SENT needs
+his exact words as the conversation's last message, without `--other`, and the count of messages
+carrying them up by EXACTLY ONE against the before-count, in a conversation still titled with the
+person's name after Send (read by the page's own comparison -- F.16, R3-NEW-3); anything else is
+UNKNOWN with every count, and DO NOT RETRY. **WEAKER THAN `send_reply`'s VERDICT, AND SAYS SO:** a reply is confirmed
+on a fresh load of the conversation its caller named; this conversation's address is on the page
+and this route never navigates to a page-supplied address, so it is read where it opened -- the
+page's own redraw, with a before-count behind it.
+
+FOR ANYONE WHOSE PROFILE DOES NOT READ `1st` the act presses Message, records what opened as
+counts (`opened_conversation_gate.observed`), and STOPS BEFORE TYPING: a message there may be an
+InMail that spends a credit, or a message request, and that composer has never been captured. That
+reading is `M M6`'s capture (C-P5); nothing is sent, and the preview says so before the press.
+
+### F.6 `N 5` -- NOT BUILT, and the exact spec for when it can be
+
+WHY NOT: pressing Connect can send the invitation at once, so an act that carries a note could
+send WITHOUT it -- an invitation he did not approve -- and the dialog a note needs has never been
+captured. Nothing in this route presses anything inside a dialog.
+
+WHAT THE CAPTURE MUST HOLD (C-P3), taken on the first supervised `linkedin_connect_from_profile`
+press on a person he names, IF a dialog opens. THE RECEIPT ALREADY CARRIES ITS FIRST READING,
+taken in place before the verification's reload discards the dialog: how many dialogs opened,
+each control in them as a closed token, and how many note fields they hold. What only a page
+capture adds (the live lane's `page.content()`, gitignored, read offline for shapes -- and since
+the reload discards the dialog, taken by a capture probe that presses the SAME control on the
+SAME person, stops at the dialog, presses nothing in it, and closes it): the dialog's container
+(`[role="dialog"]`, its classes); every button in it (tag, `type`, disabled state); whether a note
+control exists before any press (a `textarea` or contenteditable, its `maxlength`) or appears only
+after an 'Add a note' press; and whether the default button sends without a note. THAT PROBE IS
+A SECOND PRESS AND NEEDS HIS GO LIKE THE FIRST: it is reasonable only after the receipt showed a
+dialog opening and the fresh render drew Connect again (nothing sent), and even then that the same
+press opens the same dialog rather than sending is DERIVED, not measured -- if it sends, it sends
+the invitation he already confirmed to that same person.
+
+THE BUILD, ONCE THAT IS KNOWN: `linkedin_connect_with_note(profile, note, confirm_token)`, a
+composite target (profile, note) typed exactly like a message; press Connect only where a dialog
+is REQUIRED to open (refuse, having pressed nothing further, if the invitation sends at once); press
+the note control only if measured as not dispatching; fill the note; press send only when the box
+holds EXACTLY the note; verify on a fresh render as Connect does, never SENT off the dialog.
+
+### F.7 NEEDS-CAPTURE -- C-P1 to C-P6, and what the receipt already records
+
+Every one is taken inside the first supervised act on a person HE names; none needs a load of its
+own except C-P6.
+
+| id | what | where it lands today | the capture adds |
+|---|---|---|---|
+| C-P1 | a third party's topcard: its container, headings, degree line, where Connect and Message sit | the preview's `what_the_page_showed` (counts and tokens: `topcards`, `topcard_headings`, `heading_matches_title`, `degree`, `invite_in_topcard`, `message_in_topcard`, `more_actions`, ...) | the page's shape, offline: is the owner's heading the topcard's first h1/h2, and are the two controls inside `[id$="Topcard"]` |
+| C-P2 | what a pressed Connect turns into | the receipt's `verification` (the fresh render's `named_controls` tokens) and the in-place reading | the new control's accessible name, so a later build can name the sent state |
+| C-P3 | the invitation dialog | the in-place reading, taken before the reload discards it: how many dialogs opened, their controls as closed tokens (`add_a_note`, `send_without_a_note`, `send`, `cancel`, `dismiss`, `connect`, `unrecognised`) and how many note fields, read in the page | F.6's list |
+| C-P4 | what a profile's Message press opens | `opened_conversation_gate.observed` -- composers, overlay bubbles, recipient boxes, empty, Send disabled, messages drawn; the conversation's titles, whether its one title reads exactly the person's name and whether it merely CONTAINS it (a hint no gate reads), and how long the composer took to be drawn (`composer_waited_ms`) | the bubble's markup, whether the form is the measured reply form, and what a person's conversation title holds besides the name -- if it holds more, the act refuses having typed nothing and that reading says what the comparison must be |
+| C-P5 | the composer a NON-connection gets | the same block, on a person whose profile does not read `1st` (the act stops there), with two booleans -- whether the opened conversation says "InMail", or "credit" -- a hint no gate reads | whether it is a message request or an InMail, and what names a credit spend |
+| C-P6 | whether a member id redirects to a vanity address | a preview called with a member id: the landing veto, withheld | nothing further: a redirect vetoes, and the remedy is to pass the link |
+
+### F.8 The seam lane G adopts -- mitigation 2
+
+`linkedin_server/people_seam.py` is the one place lane L5's name-bearing outputs pass through:
+`people_seam.name` for the `include_names` rows of `threads.read_conversation_list`
+(`linkedin_list_conversations`) and `shape.messaging_overview` (`linkedin_open_messaging`), and
+-- since the cold re-check found it bypassing the seam (F.16 R4) -- for the conversation title
+`linkedin_send_reply`'s preview prints as `who_this_would_reach`; `people_seam.person` for the
+named acts' `whom_this_resolves_to`. OUTSIDE THIS LANE, and named in the seam's docstring so
+adoption does not miss it: `writes._name_the_invitation_recipient` (2026-08-31) prints
+`linkedin_send_invitation`'s recipient label through neither function. TODAY THEY COLLAPSE WHITESPACE
+AND NOTHING ELSE -- what the list's reader always did, and one step more than the overview's
+`.strip()` did -- and `person` adds a `mitigation_2` field saying the text is not yet sanitised and
+is to be read as data. No second sanitiser was built.
+
+**THE FAILING-UNTIL-ADOPTED TESTS** are `tests/test_people_seam.py`'s TWELVE strict xfails (nine
+until the fourth output was routed), one property per reader per test -- no zero-width or bidirectional character survives, a name (for
+the identity block, a headline) is capped at lane G's caps, the untrusted marker rides beside it --
+asserted on what each READER returns for a planted name, so they flip whether lane G swaps the
+seam's bodies or wires its record into the readers directly. `raises=AssertionError` makes any
+other failure a real one; four controls (one per reader) pass today and after adoption, proving
+the plant reaches the reader. Routing tests pass today and fail if a reader stops using the seam.
+The reply's sentence quotes the title with `repr`, which ESCAPES an invisible character rather
+than removing it, so its three are held on the title read back out of its quotes -- a check on
+the sentence's characters would have passed today for the wrong reason.
+
+**THE ADOPTION WAS RUN ONCE, IN SCRATCH.** Lane G's WIP sanitiser (`90e087b`, a commit on lane G's
+own branch that does not resolve on `master` until that lane merges; `people_data.sanitise` and
+`Person.from_page(...).envelope()`) wired into the seam's two bodies by
+a scratch pytest plugin, with `--runxfail`: SEVEN OF THE NINE FLIP. The two that stay failing are
+the list's and the overview's MARKER: a string field cannot carry `untrusted_third_party_text`, so
+lane G's merge must mark those two envelopes (per row, or once per result). **RUN AGAIN after the fourth output joined, on `9d65c6f`: NINE OF THE TWELVE FLIP**, and the three that
+stay are the three MARKERS on string outputs -- the list's, the overview's and now the reply
+sentence's. And
+`test_the_identity_record_has_the_four_declared_fields_and_says_it_is_pending` goes red on
+adoption by design: it pins the pending field the adoption replaces.
+
+**FOR LANE G'S FOUNDATION MERGE, exactly:** replace `people_seam.name`'s body with
+`people_data.sanitise(raw, cap=people_data.CAPS["name"])` and `people_seam.person`'s with
+`Person.from_page(...).envelope()` (or wire the record into the four readers and leave the seam
+unused -- the routing tests then say so); add the untrusted marker to `threads.list_result`'s and
+`shape.messaging_overview`'s results and beside the reply preview's `who_this_would_reach`;
+remove the twelve xfail markers as they XPASS (strict turns each into a failure until it is
+removed); retire or rewrite the pending-field test.
+
+### F.9 The census -- MEASURED on the branch, not summed
+
+`scripts/census_completion.py --check`, re-pinned with the move stated in its comment:
+
+    adjudicated         202 -> 203     delivered_broad   113 -> 115     unfired     34 -> 36
+    cannot_deliver       19 ->  18     gap               545 -> 544     gap_write  335 -> 334
+    b1_standing          13 ->  15     PINNED_B1_ROWS    + M M1, N 4 on OPERATOR-NAMES-THE-TARGET
+
+`scripts/count_census_states.py --expect J=107,P=160,M=124,N=153` MATCHES at 544 (network 154 ->
+153). `_audit/_census/write-classes.tsv`: `N 4` `built:connect_from_profile`; `N 5`
+`queued:CAPTURE-C-P3-INVITATION-DIALOG`; `M M6` `queued:CAPTURE-C-P5-NON-CONNECTION-COMPOSER`;
+each citing `RULING:THIRD-PARTY-PROFILE-FOR-A-NAMED-TARGET` (and `N 4` D6).
+`scripts/check_write_classes.py`'s known answers moved with the row: `N 4` was a known-IN
+write-direction GAP row and is a known-OUT built write now; `N 5` takes its place.
+
+**`M M2` STAYS COVERED-CANNOT-DELIVER, AND ITS ARGUMENT WAS WRITTEN OUT.** Its cell opened "same
+tool, same gate" -- a positional pointer to `M M1`. `M M1` moved to a different tool, so `M M2`
+would have inherited an argument that is not its own; the cell now names `linkedin_send_message`
+and its gate itself, and says why `linkedin_message_from_profile` does not reach an InMail. The
+pointer graph was re-pinned (`--pin`: 66 -> 65 pointers; the re-pin also refreshed `M M8`'s
+reason-head column, pinned before lane L5's R3 note entered `M M8`'s own cell -- `--check` does not
+compare that column). Two literals moved with it: the selftest's calibration line (`all 65 pinned
+pointers`), and the G3 control's "56 remain elsewhere", stale since the pin fell from 69 and now
+COUNTED from the edges rather than typed.
+
+The notes: `M M1` (the state move), `M M2` (the write-out), `M M6` (still GAP; the addressing half
+is open and the composer is not), `N 1` (a second route exists), `N 4` (the move, by D6, and the
+search admission's condition 5 standing), `N 5` (a capture now, not a block). After the cold
+re-check: `M M1`'s two sentences corrected to what the code checks, dated in the cell; `N 2`
+annotated -- its ground no longer holds for a person he names -- and put to the orchestrator
+(F.16); `M M5`'s reason completed. No state moved, and the census battery says so (F.14).
+
+### F.10 The pins that moved, each MEASURED red before it was moved
+
+A discovery run of 81 files over the uncommitted build went red on 94 tests; every one was one of
+these, or the harness row F.11 names:
+
+- the tool surface: 56 -> 58 tools, 87 -> 92 parameters (`PINNED_TOOL_SURFACE`, `EXPECTED_TOOLS`,
+  the two exemption sets, the count, the read split 41 unchanged; the test renamed
+  `..._fifty_eight_tools`); `test_every_tool_is_on_the_surface`'s 56 -> 58;
+- the write surface: `PERFORMABLE` 15 -> 17 and `SANCTIONED_WRITES` 16 -> 18 in `tests/test_writes.py`
+  (the sanctioned and performable sets, the reversibility tables: both STILL-UNKNOWN, unmeasured);
+  server_info's two hand-typed lists and `performable_and_irreversible` (the seventh and eighth,
+  typed by hand, and the message now says a NINTH is a decision); the instructions' word map to
+  seventeen and `SEVENTEEN WRITE` naming both tools, with a paragraph on the route;
+  `tests/test_writes_nine.py`: the destruction refusal's leaning set SIX -> EIGHT, by name, and the
+  composite harness's clean `profile` component;
+- `tests/test_receipt_names_its_own_action.py`: the acknowledged count 15 -> 17, earned as its
+  docstring asks -- `message_from_profile` a second owner of "composer" and a third of "LinkedIn
+  messages" (it reads the composer its press opened, then the conversation), `connect_from_profile`
+  a second owner of "My Network", and the invitation pair a third sanctioned shared place (one act,
+  two routes, one Sent list); no row was reworded to dodge a phrase. Its test named for "the two
+  sanctioned pairs" is renamed for the groups;
+- `tests/test_typed_bytes.py`: fill sites 3 -> 4 and the extractor list, extended not weakened;
+- `tests/test_readonly.py`: `NAMED_PROFILE_JS` declared (its privacy argument beside it), executed
+  scripts 23 -> 24, the dom.py waiver budget 22 -> 23 with the answer to "why not a locator chain";
+- `tests/test_preview_state_and_click_state.py`: both actions REACHED over the synthetic profile,
+  17 of 17;
+- prose counts: `server.py`'s headline, split, sum and sanctioned-versus-tools paragraph;
+  `README.md`'s headline (with its stale text kept beside it) and module listing;
+  `tests/test_server_surface.py`'s derived first line; the `known_side_effects` sentence that said
+  no tool loads a third party's profile (it now names the two, and dates its correction);
+  `read_boundary_scope` (the one navigation it does not gate); two comments in `readonly.py` that
+  cited that sentence; `linkedin_send_invitation`'s docstring;
+- `writes._render`'s "THE SEVEN", stale since this lane's own `thread_and_text` made it eight on
+  2026-09-24, now "THE REST -- TEN", with that slip recorded in place;
+- baselines, each by its own writer: `reader_leak` (+7 readers, all clean or not driven),
+  `tool_envelope` (+2, not driven: writes refuse at the flag), `landing_interpolation` (+4 sites;
+  the second door's three refusals ruled ASKED_FOR -- it quotes the caller's own composed address
+  back before any navigation -- and one more WITHHELD in `_assert_landed_on_target`);
+- AFTER THE RE-CHECKS: `tests/test_selectors_resolve.py` (the two topcard builders resolved
+  against a page that now draws one topcard; it was RED on the removed `message_control_selector`,
+  F.16); `tests/test_readonly_boundary_invariant.py` (`PINNED` +3 -- the door's two shapes and the
+  blank letters -- and three re-freezes, each with its attribution); `tests/test_writes.py`'s
+  pinned click call site, which gained `strict=press_strictly` (still ONE site);
+  `tests/test_readonly.py`'s note on `NAMED_PROFILE_JS`, which no longer says a position crosses;
+  `tests/reader_leak_baseline.json` (+1 reader, `wait_for_opened_composer`, clean, by its own
+  writer); the opened gate's conditions 6 to 8 renumbered 7 to 9 in the route's tests;
+- `scripts/ci_shard_timings.json`: the two new files, measured by a junit run of the two alone,
+  serially, NOT a quiet box, RE-MEASURED at `c79216d` after the fix rounds added tests: 118 tests
+  in 74.1 s and 28 in 14.0 s. Earlier readings -- 51.1 s and 11.3 s for 77 and 23 on the merged
+  tree, and 102.9 s and 18.9 s for 70 and 23 on the branch with other lanes' agents busy -- are
+  kept in the table's own provenance so no drop is mistaken for a speed-up.
+
+### F.11 Findings along the way
+
+- **A NEW TARGET KIND AGAIN STOPPED THE PAGE-STRING HARNESS** (69.7's lesson, re-met):
+  `tests/refusinggrant.py` had no synthetic target for `profile`, and the KeyError stopped every
+  writes reader being driven for any spec -- 42 of the 94 reds from that one table. Three more
+  kind-keyed tables (`test_writes_nine`'s components, the reach-its-control shapes, the
+  preview-state reach) made it 54. Each row was added before anything else was read.
+- **THE EDIT TOOL DECODED FOUR ESCAPE SEQUENCES INTO THE CHARACTERS THEY SPELL** -- a middle dot, an
+  ellipsis, a zero-width space and a direction override, each written as a backslash-u escape
+  and landed as the character. Found by the ASCII check over the diff, fixed by a script that
+  builds every character with `chr()`; the first checkpoint commit (`a241623`) carries two of
+  them in its history, the tree carries none.
+- **AN INSERTION BROKE AN if/elif CHAIN IN `perform()` WITHOUT A SYNTAX ERROR**: the block taking
+  the address before the Message press was first placed between two `elif` arms, so every later
+  arm hung off the new `if`. Found by reading the diff before the first commit, and moved after
+  the chain.
+- `tests/test_write_classes.py`'s `N 1` plant copied the FIRST network line -- `N 4`, a queued line
+  until this build. A built line may name a COVERED-UNFIRED row, so the plant stopped being
+  convicted of what the test is about; it now takes the first QUEUED network line.
+- **EDITING A MODULE WHILE A GATE RAN MADE SEVEN REDS THAT WERE NOT THERE.** A prose edit to
+  `writes.py` landed during a run of `tests/test_click_is_not_its_own_evidence.py`, whose AST checks
+  read `inspect.getsource(writes.perform)`: the module was imported before the edit and the lines
+  were read after it, so `getsource` returned one line of something else and seven checks went
+  red. Re-run on the committed tree: green. Commit first, then gate -- and edit nothing a running
+  gate reads.
+- `tests/test_a_person_name_is_never_a_literal.py` flagged the route's member-id constant, then
+  named `MEMBER`, which that guard reads as a person-carrying name; renamed `MEMBER_ID` -- it holds
+  a declared synthetic member token, which is what the identity guard's `SYNTHETIC_MEMBER_TOKENS`
+  exists to declare.
+
+### F.12 Live queue -- the named-person route
+
+Every call runs in a process the live lane owns, inside its budget (`live-fire-budget-40-loads`:
+40 page loads a live session, 20 s or more apart, one live lane). "HE NAMES" is
+OPERATOR-NAMES-THE-TARGET: nothing here fires at anybody he has not named. **The live-proof
+targets he named are in the gitignored identity key, class `operator_named_live_targets`, and
+NEVER in a tracked file.** Each is resolved to the person's exact profile LINK first -- by him,
+from his own browser -- and the link is what the call takes; a name is refused by the tool
+itself. He reads `whom_this_resolves_to` in every preview and confirms only if it names the
+person he meant: a link to the wrong person is the one failure no gate here can catch.
+
+| row | call | target | loads | what banks it |
+|---|---|---|---|---|
+| `M M1` | `linkedin_message_from_profile(profile=<link>, text=<HE NAMES>)`, he checks whom it resolved to, then the same call with `confirm_token` within 120 s | a FIRST-DEGREE connection he names, and the exact words | 1 (preview), then 1 (act, verified in place) | COVERED-PROVEN on `performed: true, verified: true`. `opened_conversation_gate.observed` is capture C-P4 either way -- including whether the conversation's title reads exactly the name (`conversation_names_the_owner`) or merely contains it, and `composer_waited_ms`; any refusal there typed NOTHING and is itself the finding |
+| `N 4` | `linkedin_connect_from_profile(profile=<link>)`, he checks whom, then confirms | a person he names who is not yet a connection, and whose profile draws Connect | 1, then 2 (act, fresh render) | the receipt reads `unknown` BY DESIGN when the control changes (C-P2), with what it became as tokens; he opens My Network > Manage > Sent, and the invitation there banks COVERED-PROVEN on his reading. `performed: false` (Connect drawn again) banks nothing and is a finding. If a dialog opened, the receipt names its controls (C-P3) and nothing in it was pressed |
+| C-P5 (`M M6`) | `linkedin_message_from_profile` on a person he names whose profile does NOT read `1st` | a non-connection he names | 1, then 1 | nothing banks: Message is pressed and nothing is typed. `opened_conversation_gate.observed` (with its InMail and credit hints) IS the capture; the live lane's page capture of the opened composer adds its shape |
+| C-P6 | the `M M1` preview called with his member id in place of the link | the same person | 1 | the landing: served at the id, or vetoed as a redirect, withheld |
+
+One pass: 8 loads. `N 5`'s capture needs no load of its own: it rides the `N 4` press (F.6).
+
+
+### F.13 Mutations -- thirty-nine, each broken ALONE in a scratch copy of the tree
+
+A copy of the tracked files at `c79216d`; every named test passed on the unmutated copy first
+(39 of 39), then each mutation was applied alone, its tests run, and the file restored and
+checked byte for byte. **39 OF 39 KILLED**, each as a test failure, none as an error. The first
+twenty were killed at `daf157f` too (20 of 20); re-aimed where the code moved, they and the
+sixteen written for the first two fix rounds were killed at `9d65c6f` (36 of 36) before round
+three added three more.
+
+    N1   the second door's forbidden-substring check removed          takes_no_exemption
+    N2   the browser always takes the second door                      swaps_the_door
+    N3   the loader stops refusing specs that are not named acts       loader_refuses
+    N4   the loader navigates without calling the second door          package_navigation_guarantee,
+                                                                       referenced_only_by
+    N5   a bare word no longer refused by its own rule                 bare_word (3)
+    N6   every landing reads as the named profile                      vetoes_and_mints_nothing,
+                                                                       landing_moved
+    N7   Connect need not be inside the topcard                        same_name_stranger,
+                                                                       only_a_stranger_matches
+    N8   Message need not be inside the topcard                        same_name_stranger
+    N9   the topcard may hold a second control of the kind             second_control_of_the_kind
+    N10  the page's heading not compared with the title                somebody_other_than_the_title
+    N11  Message types for anyone, not only a first-degree connection  second_degree_message
+    N12  a press that moved the browser is typed into anyway           ...[navigates]
+    N13  Send pressed on words that are not his                        other_words_than_his
+    N14  the SENT delta weakened from exactly one to at least none     cannot_stand_in
+    N15  the name read not held to the title's name                    cannot_tie_to_the_title
+    N16  whom it resolved to written into the retained block           keeps_it_nowhere
+    N17  the words queued whatever the opened-conversation gate said   second_degree_message
+    N18  the Message press counted as a submit                         other_words_than_his
+    N19  the conversation list's names bypass the people seam          conversation_lists_names
+    N20  the messaging overview's names bypass the people seam         overviews_names
+      -- the cold re-check (F.16) --
+    N21  the segment's encoded unit admits any octet again             no_encoding_lets_back_in
+    N22  the decoded segment not held to letters                       no_encoding_lets_back_in
+    N23  the Connect spec's own address pattern widened                address_pattern_refuses
+    N24  the Connect press aimed page-wide again                       re_render_during_the_press
+    N25  the opened conversation's title not checked                   somebody else's, did_not_open
+    N26  the title not checked again before Send                       changes_hands
+    N27  the title compared by containment, not equality               ...[group]
+    N28  no bounded wait before the opened gate reads                  drawn_a_moment_after
+    N29  a failed press reported with the library's text again         press_that_fails,
+                                                                       reported_whole
+    N30  the reply recipient's name bypasses the people seam           reply_recipients_name
+      -- the warm re-checks --
+    N31  the Message press aimed page-wide again                       re_render_during_the_message_press
+    N32  the named acts' presses and fill not strict                   second_match_drawn_mid_press,
+                                                                       second_send_drawn
+    N33  the press in flight not recorded                              press_that_fails, and the
+                                                                       apply test's second click
+    N34  the first bubble's title read, not the holding one's          holding_the_composer
+    N35  the page does not count the topcard's controls of the kind    second_control_of_the_kind
+    N36  the blank-drawing letters admitted                            no_encoding_lets_back_in
+    N37  a Connect gone in place read as not sent                      swapped_in_place_mid_press
+    N38  a conversation not titled theirs after Send read as his       swapped_in_place_during_send
+    N39  the two Egyptian blanks admitted                              no_encoding_lets_back_in
+
+N9 changed meaning with the design: at `daf157f` it made the page report the first Connect's
+position; with no position left, it removes the rule that the topcard hold one control of the
+kind. At `149e787` two of the VERIFIER's mutations survived -- the Message press aimed page-wide,
+and the first bubble's title read -- which is what N31 and N34 now kill; the verifier's five
+mutations on round two were all killed.
+
+Five of the first twenty's tests were written for the mutation that would otherwise have survived:
+N5 (the host check refused a bare word one line later, so only the MESSAGE told the two apart),
+N10, N14, N15 and N18. A check that cannot fail certifies nothing, and those five could not until
+then.
+
+### F.14 Gates run on the branch, before the merge
+
+- A DISCOVERY run over the uncommitted build, 81 files: 94 failed, every one a pin or a harness
+  row listed in F.10 and F.11.
+- The gate over `f132155`, 84 files with `-n 4 --dist loadfile`: **5724 passed, 10 xfailed (this
+  follow-up's nine and one standing), 3 skipped, 4 failed.** Two were this run reading files
+  that were being edited while it ran -- an identity hit on a test value replaced minutes later
+  (clean on re-run) and the rulings register, stale by one phrase count until the record was
+  written (regenerated below). Two were REAL pins the build had missed: the package docstring's
+  write-tool count and `readonly.py`'s top-level function count, 14 -> 17. Both fixed in
+  `daf157f`.
+- The census instruments at `daf157f`: all green but the rulings register (the same phrase count).
+- The mutations (F.13) and the adoption dry-run (F.8).
+- The two new files alone, serially, with a junit record: F.10's timings.
+
+**AFTER THE MERGE -- the three fix rounds (F.16), each gated on its own commit:**
+
+- ROUND ONE (`149e787`). The route, seam, selector and reply files: 166 passed, 12 xfailed. The
+  boundary and page-string guards (11 files), on a tree being edited: 8 red -- SEVEN were this
+  lead editing `writes.py` while `tests/test_click_is_not_its_own_evidence.py` ran (its AST checks
+  read `inspect.getsource(writes.perform)`, and the module imported before the edit was read at
+  the lines after it; green on the committed tree), and ONE was real: the reader-leak baseline
+  lacked the new reader, regenerated by its own writer. The 123-file gate on `149e787`: 7001
+  passed, 13 xfailed, 3 skipped, 2 failed -- the rulings register (known) and
+  `tests/test_apply_modal_fixture.py::test_a_proceeding_gate_appends_the_second_click`, a REAL red
+  that round one's own fix caused (F.16, NEW-2). The 14 write-pipeline files over the fix: 1106
+  passed, 3 skipped, 1 xfailed.
+- ROUND TWO (`9d65c6f`). The route and boundary files: 10 collection errors, every one the selector
+  test still handing an index to the no-argument builders (fixed before the commit; 49 passed); the
+  123-file gate on `9d65c6f`: 7011 passed, 13 xfailed, 3 skipped, 1 failed -- the rulings register.
+- ROUND THREE (`c79216d`, gated on the working tree the commit then took unchanged): the corpus
+  floor, the route and seam, the read boundary and the write pipeline's guards, 37 files: 4421
+  passed, 13 xfailed.
+- The census battery after the census prose moved (F.9): green but the rulings register, which is
+  regenerated with this record.
+- The adoption dry-run again (F.8): nine of the twelve flip.
+- Two warm re-checks by the verifier (F.16).
+
+### F.15 The one integration: master `2eb90ad`, merged once, at the end
+
+Master had moved from `96c1165` to `2eb90ad` -- 52 commits, seven on its first parent: lane S's
+follow-up (four search verticals, member rosters, an encoded-dot hole closed), the live lane's
+Part 2, lane D (`N 132` under D6, the PDF download transport), two fixes, lane Y2's follow-up (the
+P-R settings block itemized into 22 rows) and lane L7's `P B9`. It was sampled at `9f6e272` and
+had moved again by the time of the merge; the merge took the SHA, not the moving name.
+
+**FOUR FILES CONFLICTED, and `git merge-tree` named the same four before the merge ran:**
+
+- `linkedin_server/writes.py` -- three hunks, each TWO INDEPENDENT ADDITIONS in the same place:
+  `_verify_after`'s parameters (this route's `opened`/`typed` beside `P B9`'s
+  `badge_before`/`witness`), the click loop's arms (this route's open-then-type arm beside the
+  premium badge's `switch` arm -- disjoint conditions: an action in `OPEN_THEN_TYPE_ACTIONS`
+  against a control kind of `switch`), and the call's keywords. Resolved as the union, both
+  kept whole.
+- `tests/test_readonly_boundary_invariant.py` -- the two branches' re-freeze NOTES met. Master's
+  kept first, this route's after, and a merge note: on the merged tree `<functions>` is this
+  route's `6bdd6beaef275129` and `_ALLOWED_URL_PATTERNS` master's `6240409ec52c4ab2`, each
+  MEASURED, and the tree minus the door's three functions still hashes to master's own
+  `<functions>`, `d7e1d0922e3af446`. All eight digests match.
+- `scripts/ci_shard_timings.json` -- master's table taken whole and this route's two files
+  re-added by the same script that added them on the branch (`_files` and `_total_seconds`
+  recomputed, the provenance appended).
+- `scripts/census_completion.py` -- master's pins taken whole and the census RE-MEASURED on the
+  merged tree: the same seven figures move by the same amounts over master's pins (F.9's block,
+  re-stated there against `2eb90ad`), and `PINNED_B1_ROWS` gains `M M1` and `N 4` beside master's
+  rows. `count_census_states --expect J=107,P=180,M=124,N=152` matches (network 152: master's
+  `N 132` and this route's `N 4`).
+
+**NOTHING ELSE CONFLICTED, AND NOTHING ELSE COULD BE ASSUMED.** Every pin this route moved was
+re-measured on the merged tree rather than carried: master added no tool and no write, so the
+surface stays 58 tools, 92 parameters, 17 performable, 18 sanctioned.
+
+**GATES ON THE MERGED TREE.** The 26 files whose pins this route moved, on the merged tree before the merge
+commit: 2161 passed, 9 xfailed. The wide list (91 files: the floor, the census instruments, the
+surface and its pins, lane G's guards, the read boundary, messaging and the write neighbours) on
+`cc8a509`: 6104 passed, 10 xfailed, 3 skipped, 1 failed -- the rulings register, stale by one
+phrase count (regenerated with this record). The census battery on the merged tree: green but that
+register. A file the lists did not hold was red all along: see F.16's closing paragraphs.
+
+### F.16 The cold re-check, and the warm re-checks that followed
+
+A `general-purpose` verifier with no part in the build (agent `aaaf98ea9c3abda66`), briefed to
+REFUTE, read-only on a snapshot of `daf157f` (868 blobs, checked before and after), offline. It
+returned **6 REFUTED, 3 COULD-NOT-CHECK, 11 CONFIRMED**, each refutation DEMONSTRATED on the
+synthetic fixture rather than argued. All six were real. The fixes are `149e787`, each held by a
+test that fails without it and by a mutation that is killed (F.13):
+
+| # | what it demonstrated | the fix | held by |
+|---|---|---|---|
+| R1 | a press that FAILED put the browser library's call log in `clicked.error` -- `Invite <owner> to connect`, `Message <owner>`, and the Message link's member id -- because `perform` reported every exception as `Type: text` (shared with `send_invitation`, so not new code; the claim "whom it resolved to, nowhere but the preview" was this lane's) | `writes.describe_click_error`: this package's own `WriteAttemptError` whole; anything else COMPOSED from what the package knows at the call -- the exception's type and, when a page call was in flight, its kind and the selector `perform` built for it (`in_flight`, set around each press, fill, choice and upload; the call sites themselves unchanged by it). The first version reported the type alone, and the fix round's gate caught what that cost: `tests/test_apply_modal_fixture.py` proves the apply flow's second click was attempted by finding its selector in this line | `test_a_press_that_fails_is_reported_by_its_type_and_names_nobody` (both acts, a press held under a transparent layer until it times out: the line is exactly the type and the topcard selector, no call log), `test_this_packages_own_refusal_is_still_reported_whole`, and the apply test; N29, N33 |
+| R2 | the press was `INVITE_CONTROL >> nth=K` over the WHOLE page, and Playwright re-resolves a selector whose element is re-rendered while the press retries: with the owner's Connect redrawn and a stranger's drawn at the top of the page mid-press, THE STRANGER WAS PRESSED -- and the fresh render then read "NO INVITATION WAS SENT" | FIRST (`149e787`): the position counted INSIDE the owner's topcard and the press scoped to `[id$="Topcard"]`; the page-wide `message_control_selector` removed. THEN, after the warm re-check found the position itself was the hole (NEW-3, below): no position at all -- `dom.topcard_invite_control_selector()` / `topcard_message_control_selector()` are the topcard scope alone, the topcard must hold exactly ONE control of the kind, and the press is strict | `test_a_re_render_during_the_press_cannot_hand_it_to_a_stranger` (the verifier's world), `test_a_re_render_during_the_message_press_cannot_hand_it_to_a_stranger`, `test_the_press_is_the_topcards_only_control_of_its_kind_pressed_strictly`; N24, N31 |
+| R3 | nothing compared the conversation the words went into with the person named: a press that opened somebody else's conversation, and a press that opened NOTHING while a conversation appeared during it, both took his words and read SENT -- counts ("none before, one after") cannot say whose | the page's script compares the one holding bubble's title with the owner's name from the document title and returns booleans; `opened_conversation_gate` refuses `6_not_their_conversation` (7 to 9 renumbered); `composer_send_gate` checks it AGAIN with his words in the box; a bounded wait (3 s, deciding nothing) lets a composer drawn a moment after the press be found | the parametrised refusals (somebody else's, and a GROUP that includes the named person), `test_a_conversation_headed_by_somebody_else_is_read_and_refused_in_the_page`, `test_a_conversation_the_press_did_not_open_never_takes_his_words` (the verifier's second world), `test_send_is_not_pressed_when_the_conversation_changes_hands_after_the_fill`, `test_a_conversation_drawn_a_moment_after_the_press_is_still_found`; N25 to N28 |
+| R4 | `send_reply`'s `who_this_would_reach` printed the other participant's name with ZERO seam calls, and `tests/test_people_seam.py` did not list it | `threads.name_the_reply_recipient` takes the title through `people_seam.name` (the same expression `_normalise` applied, so no value moves) | `test_the_reply_recipients_name_comes_out_of_the_seam`, a plant control and three more strict xfails (F.8); N30 |
+| R5 | the segment's percent-encoded unit `%[0-9A-Fa-f]{2}` admitted EVERY octet: `.../in/Casey%20Example/` (a two-word NAME) passed the link parser, and an encoded slash, NUL, newline or `%2Finvite` reached the door | the unit is `%[89A-Fa-f][0-9A-Fa-f]` (the octets UTF-8 uses for non-ASCII letters), in `readonly.NAMED_PROFILE_SEGMENT` and both WriteSpec patterns, and `valid_named_profile_segment` decodes the segment (strict UTF-8) and holds it to letters, digits, hyphens and underscores; the freeze now PINS the door's two shapes | `test_no_encoding_lets_back_in_what_the_segment_refuses` (ten segments), `test_the_write_specs_own_address_pattern_refuses_an_encoded_ascii_octet`, `test_a_vanity_name_with_a_non_ascii_letter_is_still_admitted`; N21 to N23 |
+| R6 | `M M1`'s cell said the Message control "opens a conversation that already has its recipient" as fact, and that the act typed only when "the press opened exactly one empty conversation composer" -- neither was what the code checked; and `N 2`, "Send an invitation from a named member's profile", still reads EXCLUDED-RULED under R4 while `linkedin_connect_from_profile` performs exactly that | `M M1`'s two sentences rewritten to what the code now checks, the correction dated in the cell; `N 2` annotated and PUT TO THE ORCHESTRATOR (below), not moved; `M M5`'s reason completed. No state moved | the census battery (F.14) |
+
+**THE LOW FINDINGS.** (a) The reader-leak baseline records `named_profile:name_the_profile_target`
+as `clean`, and the harness makes ZERO page reads inside it: it hands the reader a planted page
+whose facts confirm nobody, so it returns at its first guard -- an unearned clean by that file's
+own rule, the same shape `threads.name_the_reply_recipient` already had. NOT FIXED HERE: the
+harness is lane G's guard, and making it drive a reader that needs a page naming one person is a
+harness change; the route's own tests hold the property instead (the identity block in the preview
+and nowhere else, `_clean` over every grant, observation and receipt). **For lane G: a reader the
+harness drives without a single page read should read `not_driven`, not `clean`.** (b) The second
+door's two shapes were not in the freeze's pinned tables, so widening the door moved no digest --
+FIXED: both pinned (F.10).
+
+**COULD-NOT-CHECK (3):** the identity guard and one login test need `.git`, which a snapshot does not
+have (both run in this lane's gates); and anything about LinkedIn itself -- a third party's profile,
+what Connect becomes, the dialog, what a Message press opens and when -- which is NEEDS-CAPTURE
+C-P1 to C-P6 by this record's own account.
+
+**CONFIRMED (11)**, among them: no read tool, probe or other write reaches the second door (an AST
+scan); the read door is byte-identical and still refuses every `/in/<x>/` but `/in/me/`; nothing is
+typed for a profile that does not read `1st`; Send only on the exact words; SENT only on a delta of
+exactly one with authorship; the four census instruments green with the pin moves matching the two
+state moves exactly; no guard widened beyond the two actions; 4357 added lines, 0 non-ASCII bytes,
+every identity-shaped token a declared synthetic one.
+
+**PUT TO THE ORCHESTRATOR, NOT DECIDED HERE: `N 2` -> COVERED-UNFIRED by
+`linkedin_connect_from_profile`, under ruling `THIRD-PARTY-PROFILE-FOR-A-NAMED-TARGET`.** Its ground,
+R4, is exactly what that ruling lifts for a person he names, and the capability is the route itself,
+so no D6 argument is even needed. The ruling's unblock list omitted the row and the lane followed
+the list; moving a ruled row the ruling left out is the orchestrator's call. If moved: EXCLUDED-RULED
+-1, COVERED-UNFIRED +1, and `scripts/census_completion.py`'s pins move with it.
+
+**THE WARM RE-CHECK -- the same verifier, on `149e787`, its snapshot checked blob for blob:
+FIXED 7 (R1 to R6 and LOW (b), every earlier demonstration failing to reproduce), NOT FIXED 1
+(LOW (a), deliberately -- above), NEW 7.** Six are closed in `9d65c6f`; one waits on a capture:
+
+| new | what it demonstrated | what was done |
+|---|---|---|
+| NEW-2 | `149e787` RED on `tests/test_apply_modal_fixture.py::test_a_proceeding_gate_appends_the_second_click`: R1's type-only line removed the selector that test's evidence rode in (this lane's own fix-round gate showed the same red) | the line composed from the call in flight -- above, R1 |
+| NEW-3 | THE POSITION WAS THE HOLE. Scoped to the topcard, the press was still `<scope> >> nth=K`, re-resolved mid-press: a stranger's Connect drawn INSIDE the topcard, or in a second `[id$="Topcard"]` element, took the press, and the receipt read NOT SENT | no position at all. The page's script returns how many controls of each kind the topcard holds (`invite_controls_in_topcard`, `message_controls_in_topcard`) and no index; `connect_state` / `message_state` refuse unless exactly ONE, the owner's; the selector is the topcard scope alone; and `perform` presses and fills STRICTLY for the named acts (`strict=press_strictly`), so two matches at press time THROW. MEASURED before relying on it: on a local page with two matching buttons `page.click` pressed the first; with `strict=True` it raised a strict mode violation. Held by `test_a_second_match_drawn_mid_press_stops_the_press` (both worlds: nothing pressed, the line names the strict press) and `test_a_topcard_holding_a_second_control_of_the_kind_is_refused`; N9, N32, N35 |
+| NEW-5 | the Send press was page-wide and re-resolvable: with the owner's Send redrawn and a restored conversation holding a DRAFT drawn first, THAT DRAFT WAS SENT | the same strictness: a second Send at press time throws -- `test_a_second_send_drawn_during_the_send_press_stops_it` (neither his words nor the draft sent); N32 |
+| NEW-1 | the four default-ignorable code points that are LETTERS (the Hangul fillers U+115F, U+1160, U+3164, U+FFA0) pass `isalnum()`, so a two-word name with U+3164 in place of the space passed the door | refused by code point (`readonly._INVISIBLE_LETTER_CODES`, measured as exactly those four over the default-ignorable ranges with Unicode 15.1), and the tuple PINNED in the freeze -- re-frozen `4221c17c31fdd935 -> c191182c4f66d789`, attributed as before (minus the door: master's `d7e1d0922e3af446`; the one changed function swapped back: the value replaced); four more segments in the door tests; N36 |
+| NEW-6 | `_audit/RULINGS.md` stale by one phrase count since `daf157f` (consistent at `96c1165` and at master) | regenerated with this record |
+| two surviving mutations | the Message press aimed page-wide again stayed green (no Message re-render world), and reading the FIRST bubble's title instead of the holding one's stayed green (no world drew two bubbles) | `test_a_re_render_during_the_message_press_cannot_hand_it_to_a_stranger`, and `test_the_title_compared_is_the_one_on_the_conversation_holding_the_composer` (two bubbles, both orders); both mutations now killed (N31, N34) |
+| NEW-4 | NAME EQUALITY IS NOT IDENTITY: a different person with the named person's exact name, whose conversation was drawn during a press that opened nothing, received his words, and the verdict read SENT | **NOT CLOSED.** The only closing compares something identity-bearing in the bubble -- a participant's profile link, a member id -- with the profile named, in the page, as a boolean; and a person's conversation bubble has never been captured (the one on disk is minimised, sponsored, and carries no link in its title). It is now C-P4's FIRST question. What the risk needs, all at once: the press opening nothing, LinkedIn drawing a conversation by itself within the moment of the press, and that conversation's other member bearing exactly the named person's name |
+
+**THE SECOND WARM RE-CHECK -- on `9d65c6f`: FIXED 7 (NEW-1, NEW-2 -- the apply test green again --
+NEW-3 in both worlds, NEW-5, both surviving mutations, LOW (b)); NOT FIXED 3 (NEW-4 and LOW (a),
+deliberately; NEW-6, regenerated with this record); five mutations of its own on round two, all
+killed; and three NEW, all LOW, answered in `c79216d`:**
+
+| new | what it demonstrated | what was done |
+|---|---|---|
+| R3-NEW-1 | two letters that draw as BLANK SPACE without being default-ignorable -- EGYPTIAN HIEROGLYPH FULL BLANK and HALF BLANK, U+13441 and U+13442 -- passed the segment check | refused; and the list is now DERIVED rather than found one re-check at a time: a sweep of every code point `isalnum()` accepts whose Unicode name carries FILLER, BLANK, SPACE, INVISIBLE, NULL or EMPTY found exactly these six (the four fillers and the two blanks), besides the MATHEMATICAL MONOSPACE letters, which match on the substring and draw as letters. Only the tuple's digest moved in the freeze (`02528c398b97abab -> 80bce706e3a2b2c2`); two more door segments; N39 |
+| R3-NEW-2 | STRICTNESS BINDS THE COUNT, NOT THE PERSON: the owner's Connect replaced IN PLACE by a stranger's mid-press (still one Connect in the topcard) was pressed, and the receipt read NO INVITATION WAS SENT | **THE PRESS IS NOT PREVENTED -- a residual, below.** The receipt no longer lies: when, right after the press, the page draws no control naming the person at all, `connect_verdict` says UNKNOWN and DO NOT RETRY -- `test_a_control_swapped_in_place_mid_press_is_never_reported_not_sent`; N37 |
+| R3-NEW-3 | the same for Send: the owner's whole conversation swapped in place during the Send press for another holding a draft -- that draft was sent, the receipt read unknown | **NOT PREVENTED -- the same residual.** The verdict now says why: after Send, `_verify_after` reads whose conversation holds the composer (the page's own comparison, one boolean), and `message_verdict` never reads a conversation not titled with the person's name as his -- so SENT now requires it too. `test_a_conversation_swapped_in_place_during_send_is_never_read_as_his`; N38 |
+| observation | an open shadow root inside the topcard: the page's script counts one Connect, Playwright's scoped selector sees two (it pierces), so the gate says pressable and the strict press throws every time | fail-closed; recorded. If LinkedIn's topcard ever carries a shadow root the act refuses at the press rather than at the preview, and C-P1 shows it |
+
+**WHAT REMAINS OPEN, AND WHAT WOULD CLOSE IT.** (1) NEW-4, name equality is not identity: C-P4's
+first question, above. (2) R3-NEW-2 and R3-NEW-3, a control or a conversation swapped IN PLACE
+during the press: strictness binds the count and not the person. The closing the verifier
+proposed, and the one this lane would build: a Playwright selector engine that resolves, IN THE
+PAGE, "the one control of this kind in the topcard whose label names the title's owner" (and "the
+Send of the conversation titled with that name"), so that every retry re-checks identity and no
+name crosses. That is a new kind of script the page runs -- registered with the browser, not passed
+to `evaluate` -- which the read boundary's script declarations do not yet know how to see, so it is
+a boundary change of its own and NOT built under this order. What the risk needs: LinkedIn
+redrawing the named person's own topcard, or conversation, for somebody else, without a
+navigation, inside the moment of a press.
+
+**AND ONE FINDING OF THE LEAD'S OWN, FROM THE STRICTNESS MEASUREMENT, OUTSIDE THIS LANE.** Six
+comments in other lanes' code say Playwright's strict mode holds their press to one element --
+`company_interest.OFF_CONTROL_IN_CARD`, `dom`'s company-page follow block, `profile_editor.SAVE_SELECTOR`,
+and `writes._live_control`'s arms for `mark_company_interest`, the company-page follow and the posting
+follow's relabelled control. Every press goes through `perform`'s one `page.click`, which passed no
+`strict` until this follow-up and passes `False` for those actions now; measured, `page.click` is not
+strict unless asked. So those six claims are false today. NOT CHANGED HERE: making those presses
+strict changes other lanes' acts, some of them fired live. **Put to the orchestrator: add those
+actions to `press_strictly` (their gates already require exactly one match), or correct the six
+comments.**
+
+**FOUND BY THE FIX ROUND ITSELF, AND WORTH MORE THAN ONE LINE.** `tests/test_selectors_resolve.py`
+-- which enumerates every `*_selector` builder in `dom.py` by AST and resolves each in a browser --
+was RED at `daf157f` and at the merge: this follow-up added `message_control_selector` and none of
+its gate lists included that file. The lists were HAND-BUILT around the files the build touched,
+and a guard coupled to the diff by a naming convention rather than by an import was invisible to
+them. The shipped impact analyser does select it; it selects 225 of 253 files for this round (the
+edited modules are imported by nearly everything), which is the full suite the order rules out
+locally -- so the fix round's gate is the analyser's DATA couplings taken whole, every file naming
+a symbol this round touched, every file that drives `perform()`, and the previous wide list (F.14),
+with the 130 files it did not run LISTED in the scratch provenance. And the two new builders are
+named `*_selector` on purpose: the first draft named them `..._in_topcard`, which that same
+enumeration would never have seen.
+
+**THAT GATE THEN CAUGHT THE FIRST R1 FIX BREAKING ANOTHER LANE'S GUARD.** Reported by type alone,
+a failed press no longer said WHICH press failed, and
+`tests/test_apply_modal_fixture.py::test_a_proceeding_gate_appends_the_second_click` proves the
+apply flow's second click was attempted by finding that click's selector in `clicked.error` --
+evidence that rode in the very library text the fix removed. The line is now composed from what
+the package knows at the call (the type, the call's kind, the selector it built), which carries
+the evidence without the call log, and the apply test passes unchanged.
+
+### F.17 NOT run
+
+- The full suite, locally, by the order. The shipped impact analyser selects 242 of 253 test files for
+  this follow-up against master and 225 for the fix rounds alone -- the full suite by its own rule
+  -- so each fix round's gate was a derived union, and 130 of 253 files were not in it (their names
+  are in the scratch provenance). CI certifies on the orchestrator's push; nothing was pushed.
+- A third warm re-check of `c79216d` (round three's two receipt checks and two refused letters): its
+  worlds and mutations are this lane's own (F.13), not an independent verifier's.
+- LIVE: nothing. Every row in F.12 waits on a person he names.
+- RED IN THIS WORKTREE UNTIL THE MERGE: `tests/test_a_cited_sha_resolves.py` checks every commit this
+  corpus cites against `master`, and this record cites four of this branch's own commits in the slots
+  that guard reads. It reads them as not yet on `master` until the orchestrator's merge makes them
+  ancestors of it -- a merge that keeps this branch's history; a squash would strand them.
+
+### F.18 Commits -- on this branch, none pushed, no AI attribution in any
+
+    a241623  (1 of n) the second door, Connect and Message from a profile he names -- source and fixture
+    f132155  (2 of n) the route's tests, pins, census and baselines
+    f246e89  (3 of n) the first supervised act records its own captures; five tests that can fail
+    daf157f  (4 of n) the package docstring and the readonly function count
+    cc8a509  the ONE integration: master 2eb90ad merged (F.15)
+    149e787  (5 of n) the cold re-check's findings, fixed
+    9d65c6f  (6 of n) the warm re-check's findings: no position in the press, strict presses
+    c79216d  (7 of n) the second warm re-check: two blank letters, and receipts that re-check whose
+    (8 of n) this record, `_audit/INSTRUMENTS.md` 69.11, the re-measured timings and the
+             regenerated register
