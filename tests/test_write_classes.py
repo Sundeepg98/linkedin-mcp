@@ -166,6 +166,24 @@ def test_a_range_id_citation_is_parsed_and_must_still_name_a_row(tmp_path):
     assert not [p for p in problems if "O6-O99" in p and "is neither a path" in p]
 
 
+def test_a_suffixed_id_citation_is_parsed_and_must_still_name_a_row(tmp_path):
+    """``profile.md row A23b`` is a census row whose id carries a SPLIT SUFFIX --
+    lane L8 split it from ``A23`` on 2026-09-27, as ``L2b`` was split from ``L2``.
+    The self-row form admits the suffix, and the admission is not a hole: a
+    suffixed id that names no row is convicted by the same resolver as any other
+    id, not waved through and not misread as an unparseable citation. Shown
+    failing against the regex before the suffix was admitted: the plant read as
+    neither a path nor a census row, and never reached the resolver."""
+    lines = _lines()
+    i = _find(lines, lambda r: r["key"].startswith("P "))
+    row = _row(lines[i])
+    row["sources"] = row["sources"] + " ; _audit/_census/profile.md row A23z"
+    lines[i] = _line(row)
+    problems = _problems(_plant(tmp_path, lines))
+    _red_naming(problems, row["key"], "row A23z is no longer a row of")
+    assert not [p for p in problems if "A23z" in p and "is neither a path" in p]
+
+
 def test_red_on_a_missing_row(tmp_path):
     lines = _lines()
     i = _find(lines, lambda r: r["class"] == "R3")

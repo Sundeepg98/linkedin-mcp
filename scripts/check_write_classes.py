@@ -210,8 +210,12 @@ _WC_DISPOSITION_RX = re.compile(r"^(built:[a-z_]+|queued:[A-Z0-9][A-Z0-9-]*|clas
 #: into that one row, and it entered the write-direction population with lane R
 #: (2026-09-23). The range form still has to name a row that exists -- the
 #: resolver below searches the census for it verbatim.
+#: A row id may also carry a SPLIT SUFFIX, ``A23b``: lane L8 split `P A23` on
+#: 2026-09-27 under COMPOUND-ROW-SPLITS-ONLY-ON-STATE, as `L2b` was split from
+#: `L2`, and the delete half is the first suffixed row in the write-direction
+#: population. Before this the citation read as neither a path nor a row.
 _WC_SELF_ROW_RX = re.compile(
-    r"^(_audit/_census/[a-z\-]+\.md) row ([A-Za-z]*\d+(?:-[A-Za-z]*\d+)?)$")
+    r"^(_audit/_census/[a-z\-]+\.md) row ([A-Za-z]*\d+[a-z]?(?:-[A-Za-z]*\d+[a-z]?)?)$")
 _WC_PATH_RX = re.compile(r"^([A-Za-z0-9_.\-/]+\.(?:py|md|tsv|json))(?:::(.+))?$")
 _WC_RULING_RX = re.compile(r"^RULING:([A-Z0-9][A-Z0-9\-]*)$")
 

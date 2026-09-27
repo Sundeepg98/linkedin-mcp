@@ -267,9 +267,9 @@ reads 13 against 12 as an arithmetic error.
 | `update_profile_field` | STILL-UNKNOWN | no | the SAME tool, with the previous value the tool itself returns | **YES** -- see defect D4 below; the spec's own prose denies this |
 | `follow_company` | REVERSIBLE | yes | `linkedin_unfollow_company` | **NO -- CANNOT BE AIMED.** A posting names its employer by SLUG; the unfollow surface addresses rows by NUMERIC id; "a census of every capture in this repo on 2026-08-24 found zero postings carrying a numeric id and zero Manage-Pages rows carrying a slug" |
 | `unfollow_company` | REVERSIBLE | yes | `linkedin_follow_company` | **NO -- CANNOT BE AIMED**, same gap in the other direction. `follow_company` is addressed by `job_id`, so re-following needs a live posting from that company |
-| `apply_job` | STILL-UNKNOWN | no | withdrawing the application | **NO** -- withdrawing is in `PERMANENTLY_FORBIDDEN`, and `/withdraw` is on the forbidden URL list |
-| `publish_post` | STILL-UNKNOWN | no | deleting the post | **NO** -- deletion permanently forbidden; `/delete` on the forbidden URL list |
-| `comment_on_item` | STILL-UNKNOWN | no | deleting the comment | **NO** -- same two grounds |
+| `apply_job` | STILL-UNKNOWN | no | withdrawing the application | **NO** -- withdrawing is in `PERMANENTLY_FORBIDDEN`, and `/withdraw` is on the forbidden URL list **RESTATED 2026-09-27 (lane L8):** the first ground moved -- NOBODY can take an application back: LinkedIn's own Help Center (`a512388`) says one submitted through LinkedIn cannot be withdrawn. The refusal quoted first leaned on `delete_or_withdraw_anything`, retired 2026-09-24 (OUTWARD-CLASSES-BUILT-BEHIND-GRANTS); record `withdraw_application`: BLOCKED. |
+| `publish_post` | STILL-UNKNOWN | no | deleting the post | **NO** -- deletion permanently forbidden; `/delete` on the forbidden URL list **RESTATED 2026-09-27 (lane L8):** NOT YET through this server; by hand, he can. His own post's menu draws 'delete post' (the live lane's measurement); what pressing it draws is uncaptured. Deletion is no longer refused (retired 2026-09-24); record `delete_own_post`: NEEDS-CAPTURE. |
+| `comment_on_item` | STILL-UNKNOWN | no | deleting the comment | **NO** -- same two grounds **RESTATED 2026-09-27 (lane L8):** NOT YET through this server; by hand, he can. A comment's own menu draws 'Delete' (2026-09-04); what pressing it draws is uncaptured. Deletion is no longer refused (retired 2026-09-24); record `delete_own_comment`: NEEDS-CAPTURE. |
 | `send_invitation` | STILL-UNKNOWN | no | withdrawing the invitation | **NO** -- and the Sent-invitations manager is doubly unreachable: its address contains `invitation` (forbidden), and reaching it via `/mynetwork/` CONSUMES his pending-invitation badge |
 | `send_message` | STILL-UNKNOWN | no | recalling the message | **NO** -- "deletion is permanently forbidden here and `/messaging/compose` is on the read boundary's forbidden list" **RESTATED 2026-09-27 (lane L8):** the verdict stands on a different ground -- NOBODY: a delivered message cannot be recalled. The quoted deletion clause leaned on `delete_or_withdraw_anything`, retired 2026-09-24 (OUTWARD-CLASSES-BUILT-BEHIND-GRANTS); LinkedIn's 60-minute delete (census M M12) removes a message from a thread, never from an inbox, and is unbuilt. |
 | `react_to_item` | STILL-UNKNOWN | no | un-reacting -- **the control for it has never been observed** | **NO** -- "with the ON label unmeasured there is no selector for the inverse, so nothing here could aim an un-react even if LinkedIn offers one" |
@@ -499,13 +499,13 @@ is no batching, no queue and no standing authorisation anywhere in this design.
   overflow menu on one of his OWN existing comments and read whether a delete
   exists" (`_audit/2026-08-30-linkedin-writes.md:113-115`). Deletability of a
   comment is currently UNMEASURED and permanently forbidden to this server; if
-  no delete exists, this drops to Group C and should not be fired at all.
+  no delete exists, this drops to Group C and should not be fired at all. (RESTATED 2026-09-27, lane L8: no longer forbidden -- `delete_or_withdraw_anything` was retired 2026-09-24 by OUTWARD-CLASSES-BUILT-BEHIND-GRANTS; record `delete_own_comment`: NEEDS-CAPTURE.)
 - Smallest test, if the delete exists: comment on one of HIS OWN posts. The
   audience is his own followers rather than a stranger's, and the notified
   author is himself.
 - What it does: publishes attributable text under his own item.
 - Undoable by a tool: NO. Deletion is in `PERMANENTLY_FORBIDDEN`; the undo is
-  his, by hand, and only if the read above confirms one exists.
+  his, by hand, and only if the read above confirms one exists. (RESTATED 2026-09-27, lane L8: that key was retired 2026-09-24; record `delete_own_comment`: NEEDS-CAPTURE.)
 - Consent: per-fire, once.
 - Known side effect even on refusal: "a comment draft may be left in the box,
   and whether that draft is local to this browser or saved to your account is
@@ -559,7 +559,7 @@ is no batching, no queue and no standing authorisation anywhere in this design.
 **8. `publish_post`.** There is no small post. Any post is a broadcast to
 274-275 followers with measured past reach of 103-1,284 impressions, deletion
 is UNMEASURED and permanently forbidden to this server, and it is "the one
-artefact here a CURRENT EMPLOYER sees without looking." The only honest framing
+artefact here a CURRENT EMPLOYER sees without looking." (RESTATED 2026-09-27, lane L8: no longer forbidden -- `delete_or_withdraw_anything` was retired 2026-09-24 by OUTWARD-CLASSES-BUILT-BEHIND-GRANTS; record `delete_own_post`: NEEDS-CAPTURE.) The only honest framing
 is that the test cannot be made cheap, only made worthwhile -- he fires it on a
 post he wanted to publish anyway. Undoable by a tool: NO. Consent: per-fire.
 
@@ -585,7 +585,7 @@ Undoable by a tool: NO. Consent: per-fire.
 
 **10. `apply_job`.** Irreversible in audience and certain to be so -- "An
 application is READ BY A HUMAN at the employer, usually within a day."
-Withdrawing is in `PERMANENTLY_FORBIDDEN`. It has been fired once and the gate
+Withdrawing is in `PERMANENTLY_FORBIDDEN`. (RESTATED 2026-09-27, lane L8: that key was retired 2026-09-24 by OUTWARD-CLASSES-BUILT-BEHIND-GRANTS; record `withdraw_application`: BLOCKED, not a LinkedIn capability -- Help Center `a512388`.) It has been fired once and the gate
 held, on a defect that is now fixed, so **the next fire would be the first real
 submit this server has ever made.** That is worth stating plainly: the earlier
 firing is not a rehearsal that de-risks the next one; it exercised a path that
