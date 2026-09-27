@@ -10733,8 +10733,13 @@ early return -- the false clean lane G found in group_leave's readers.
 hunk and resolution scripts (`np_hunks.py`, `np_resolve.py`, `m_*.txt`),
 the duplicate-key scan (`np_dupkeys.py`, shown failing on its own plant), the
 surface and freeze measurements (`np_measure_surface.py`,
-`np_refreeze_merge.py`) and the census re-pin (`np_repin_census.py`) -- all
-under the lane's scratch directory; their numbers are in the lane record.
+`np_refreeze_merge.py`), the census re-pin (`np_repin_census.py`) and the
+offline guard its local gates ran under (`offline_plugin/np_offline.py`,
+shown working on its own control first, and its launcher
+`np_run_offline.py`) -- all under the lane's scratch directory; their numbers
+are in the lane record. The guard is DISPOSABLE HERE AND NOT IN GENERAL: its
+finding -- eleven tests in two files send a browser to LinkedIn -- is the lane
+record's I.5, left for the owners of the shared browser fixtures.
 
 ## 70. THE BEST-VERIFIED WRITE NEVER PRESSED SAVE, AND A WRITE AIMED BY ITS CARD (lane-l7-profile-writes, 2026-09-24)
 

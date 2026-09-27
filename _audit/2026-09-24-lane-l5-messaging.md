@@ -1952,18 +1952,58 @@ three. GAP by slice: jobs 109, profile 187, messaging 131, network 163; stated r
 
 ### I.5 A finding for other owners: the suite reaches LinkedIn
 
-The recording run in (b) logged every non-local request its browsers made. Four went to
-`https://www.linkedin.com`, all from `tests/test_verification_that_could_not_read.py`: its apply
-presses an anchor on `tests/fixtures/job_detail.html` whose href is LinkedIn's, and a fresh
-headless Chromium starts that navigation -- no cookies, no profile, never port 9224, but a request
-to LinkedIn, on every run of that file, locally and in CI. `tests/conftest.py` opens "No test in
-this suite reaches the network or an account"; the first half is false for those four tests.
-NOT FIXED HERE -- it is shared test infrastructure. What this lane's own gates did instead is in
-I.6: a scratch pytest plugin gives every Playwright context a route that lets loopback, `data:`,
-`about:`, `blob:` and `file:` through and ABORTS and records everything else before it leaves.
-Shown working first: a page's request to `https://www.example.com/` aborted and recorded, a
-loopback request passed through.
+The recording run in (b) logged every non-local request its browsers made: four went to
+`https://www.linkedin.com`, from `tests/test_verification_that_could_not_read.py`. The whole
+suite, run with the guard below, measured the full count: ELEVEN tests in TWO files -- those
+four, and seven in `tests/test_apply_modal_fixture.py`. Each presses the apply anchor of a job
+posting capture (`tests/fixtures/job_detail.html` and its siblings), whose href is LinkedIn's,
+and a fresh headless Chromium starts that navigation -- no cookies, no profile, never port 9224,
+but a request to LinkedIn, on every run of those files, locally and in CI.
+`tests/conftest.py` opens "No test in this suite reaches the network or an account"; the first
+half is false for those eleven tests. NOT FIXED HERE -- it is shared test infrastructure, and the
+fix belongs where the fixtures are served (a route that aborts non-local requests in the shared
+browser fixtures would make the sentence true).
+
+What this lane's own gates did instead: a scratch pytest plugin gives every Playwright context a
+route that lets loopback, `data:`, `about:`, `blob:` and `file:` through and ABORTS and records
+everything else before it leaves. Shown working first, outside any test: a page's request to
+`https://www.example.com/` aborted and recorded, a loopback request passed through. In the
+whole-suite run it aborted exactly the eleven requests named above and nothing else, and every
+one of the eleven tests passed with its navigation aborted.
 
 ### I.6 Gates
 
-Written after the whole suite ran on the merge commit, in the commit that follows it.
+- THE WHOLE SUITE, on the merge commit, locally, `-n auto --dist loadfile`, with the I.5 guard:
+  11160 passed, 2 failed, 9 skipped, 1 xfailed -- 11172 tests in 267 files -- in 1362 s of
+  wall clock. The eleven navigations to LinkedIn were aborted; no other request tried to leave.
+  - RED BY DESIGN: `tests/test_a_cited_sha_resolves.py::test_no_new_unresolvable_citation_appears`,
+    on this record's four branch commits in eight citation slots, and on nothing else. It stays
+    red until master carries them -- the order's merge, keeping this branch's history, makes them
+    ancestors of master; a squash would strand them. This section cites none of its own commits
+    in a slot that guard reads.
+  - RED AND THIS LANE'S OWN, since the follow-up's first build:
+    `tests/test_the_search_shape_reading.py::test_the_shape_pass_adds_no_evaluate_waiver` caps
+    `dom.py`'s `# readonly-ok` evaluate waivers at 22 -- a second copy of the ceiling in
+    `tests/test_readonly.py`, which the follow-up moved to 23 for `dom.read_named_profile` with
+    its argument. The follow-up's gates were hand-derived lists, and this file was not in any
+    (F.17 names 130 files outside them). Measured: 22 at the base, 23 on the branch, 22 on master,
+    23 merged, and the one waiver master lacks is `read_named_profile`'s. The copy now reads 23,
+    and says whose the twenty-third is and that the shape pass still adds none.
+- The whole suite again on the commit that carries that fix: see the last paragraph of this
+  section.
+- Before the merge commit, three focused runs on the resolved tree: 40 files (7 failed and one
+  file's collection errored -- each fixed above); 19 files with the I.5 guard (1395 passed, 2
+  failed: the ABSENT-headline test before the Contact info cut); 3 files with the guard (674
+  passed).
+- The census battery on the merge commit, twelve instruments, all green:
+  `census_completion --check` (every figure matches its pin), `count_census_states --expect
+  J=109,P=187,M=131,N=163` (GAP 590), `check_read_addresses` (104 of 104),
+  `check_write_classes` (385 lines), `check_exclusion_basis` (42 of 42), `ruling_holds`,
+  `pin_census_rows --check` (770 rows), `measure_pointer_graph --check` (64),
+  `check_gap_rows_on_refused_addresses`, and the three derived views --
+  `build_blocker_map --check`, `build_rulings_index --check` (67 rulings) and
+  `build_audit_index --check` (257 documents).
+- The document guards run inside the whole suite: every one green but the cited-SHA guard above.
+- Parse and repeated-key checks over the merged tree: every Python file parses; the AST scan over
+  every dict and set literal and every module-level keyed assignment finds only
+  `tests/test_api_call_sites.py`'s harmless set (I.4 (d)); no JSON file repeats a key.

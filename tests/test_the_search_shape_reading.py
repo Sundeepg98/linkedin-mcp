@@ -275,6 +275,15 @@ def test_the_shape_pass_adds_no_evaluate_waiver() -> None:
     ``tests/test_readonly.py`` caps ``dom.py`` at 22 waived ``evaluate``
     lines and the file sits at exactly 22. An instrument that cost a
     twenty-third would have needed a ruling, not a commit.
+
+    23 SINCE LANE L5'S MERGE OF MASTER 52b55b6 (2026-09-27), and the
+    twenty-third is not this pass's: it is ``dom.read_named_profile``'s run of
+    ``NAMED_PROFILE_JS`` for the two named-person acts, argued in
+    ``tests/test_readonly.py``'s budget under ruling
+    THIRD-PARTY-PROFILE-FOR-A-NAMED-TARGET, where the ceiling moved 22 -> 23 on
+    lane L5's branch. THIS COPY OF THE CEILING WAS MISSED THERE -- the lane's
+    gates were hand-derived lists that did not hold this file -- and the whole
+    suite on the merged tree found it red. The shape pass still adds none.
     """
     source = dom.__file__
     with open(source, encoding="utf-8") as stream:
@@ -283,7 +292,7 @@ def test_the_shape_pass_adds_no_evaluate_waiver() -> None:
             for line in stream.read().splitlines()
             if line.strip().endswith("# readonly-ok")
         )
-    assert waived <= 22, (
+    assert waived <= 23, (
         "the shape reading must extend the existing read_search_filters "
         "evaluate, never add one; waivers now %d" % waived
     )
