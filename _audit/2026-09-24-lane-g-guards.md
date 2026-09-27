@@ -2601,3 +2601,72 @@ order); the whole-tree identity sweeps the gate deselects in favour of the
 staged form (their base case runs on every push in CI); the browser tests on
 3.10. The impact gate over the FINAL tree, this record's commit included,
 runs after it; its counts are in the lane's report.
+
+### T.5 The gate over the final tree, the premise control, two corrections
+
+THE FULL SUITE: `scripts/impact_gate.py --against master` on `830e169` (a
+hash which does not resolve on `master` until this branch merges), with
+`master` read at 02:46:40 and still 64afa6c, so nothing was merged. 9
+changed paths selected 149 files and 26 corpus-wide, 153 of 273 (56 per
+cent), at or above the gate's 45 per cent line, so it WIDENED TO THE FULL
+SUITE: 02:46:54 to 03:17:14 -- 11570 passed, 9 skipped, 2 xfailed, 1
+FAILED, in 1777.0 s. Two commits follow that tree; both are below.
+
+THE ONE FAILURE, AND WHY IT IS NOT THIS BRANCH'S -- the facts measured,
+the mechanism DERIVED:
+`tests/test_typeahead_gate.py::test_an_empty_listbox_refuses_separately_from_an_absent_one`.
+The branch touches neither `linkedin_server/`, nor that test, nor
+`tests/conftest.py`: the diff against `master` over those paths is empty.
+The whole file ran three times in isolation straight after, on the same
+tree -- 11 passed each time. The test waits for the listbox with its own
+400 ms (`TYPEAHEAD_TIMEOUT_MS`, patched short on purpose), and the gate
+ran on a saturated box: at 03:05, CPU load 100 per cent, 64 Python and 51
+Chromium processes, other lanes' suites running beside it -- which is also
+why this full suite took 1777 s where the last one took 950 s. A listbox
+drawn after 400 ms reads as absent (`1_no_listbox`), the other half of the
+pair this test asserts. Recorded as a flake under load, for the
+orchestrator to watch in CI.
+
+THE HOLDING TEST, EVERY BRANCH SHOWN FAILING (T.2 showed one), each run
+in-process against the guard as committed: an empty table fails it naming
+the 14 readers the table holds (untriaged -- the branch that named the 22
+before any drive existed); the prior baseline fails it naming three
+(unrecorded); a driven reader added to the table fails it naming that
+reader (stale); an entry stripped of its kind fails it naming that entry
+(kindless).
+
+TWO DRIVES DID NOT KEEP THEIR OWN RULE, and the control that found them is
+new. Every drive is to RAISE when its fixture stops drawing the shape it
+rests on. Run for all 14, each as the guard runs it with ONE needle of its
+shape broken in a scratch copy of `tests/fixtures`: 12 raised and were
+recorded not driven; the `press:disclose` and `reveal:reveal` drives did
+not, with the capture's headline broken -- disclose went on to its click,
+reveal came back refused. Both read the headline inside the double's
+`evaluate`, that is inside the counter reader's own `except Exception`,
+which swallowed the check. A premise checked inside a double runs inside
+the reader's handlers; it has to be checked in the drive, before the
+reader runs. Moved there (`29b67ff`, a hash which does not resolve on
+`master` until this branch merges); re-run, 14 of 14 raise, and every
+drive's verdict on the real fixtures is unchanged. The control is a test
+now, so the rule holds for the next drive too:
+`test_a_drive_on_a_fixture_that_stopped_drawing_its_shape_raises`, one case
+per drive, each needle named in `FIXTURE_BREAKS` and checked present before
+it is broken; `test_every_drive_has_its_premise_broken_below` fails a drive
+added without one. RED FIRST: on the module as committed in `830e169` (a
+hash which does not resolve on `master` until this branch merges), those
+two cases fail and the other twelve pass.
+
+TWO CORRECTIONS TO T.4, both mine:
+
+* "the planted page's twelve dependents": eleven of those twelve files
+  import `tests/plantedpage.py`; the twelfth is
+  `tests/test_profile_views_more.py`, run because a held drive rests on its
+  synthetic page. The count, 432 passed and 1 xfailed, stands.
+* "NOT RUN: the full suite" held for the gate on `d0d2f0b` (a hash which
+  does not resolve on `master` until this branch merges) and no longer
+  holds: the gate over `830e169` ran it, above.
+
+THE TWO COMMITS AFTER THE FULL SUITE -- the premise fix and this section --
+are gated by `scripts/impact_gate.py --against 830e169`: the impact set of
+exactly what changed since the tree the full suite passed. Its count is in
+the lane's report.

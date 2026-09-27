@@ -10402,6 +10402,7 @@ shown failing on the tree before its fix.
 | `tests/test_readers_emit_no_page_string.py` (`WHAT_WOULD_DRIVE_IT` and its holding test) | with an empty table, the committed guard failed naming all 22; before the last four entries, naming exactly those four |
 | `tests/test_readers_emit_no_page_string.py` (`REFUSED_AFTER_READ`, `ERRORED_AFTER_READ`, the furthest-variant rank in `_worst`) | of the new control rows, four failed on the prior guard's `classify_drive` and four on its `_worst` (the other nine pass on both, the controls against over-reach); against the prior baseline the coverage comparison failed naming the readers the refusal rule takes |
 | `tests/plantedpage.py` (`NavigationAttempted` a `BaseException`; `and_`/`or_`/`filter` on the planted and failing locators) | a reader that reads, clicks inside `except Exception` and returns what it had was clean on HEAD; with the three methods removed, three readers returned `{"error": "AttributeError"}` and read as clean |
+| `tests/test_readers_emit_no_page_string.py` (`FIXTURE_BREAKS`, `test_a_drive_on_a_fixture_that_stopped_drawing_its_shape_raises`) | each drive run with one needle of its fixture's shape broken in a scratch copy: on the drives as first committed, the disclose and reveal drives did not raise (their headline check ran inside a reader's own handler) and the other twelve did; after the check moved into the drive, fourteen raise |
 
 ### 67.18 DECLARED DISPOSABLE (THE ORDER OF 01:30)
 
