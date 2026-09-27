@@ -81,8 +81,8 @@ Each is the orchestrator's unless it says his. A recommendation is mine.
   same words with one emoji he names (default U+1F44D). Typed exactly as
   granted; the send gate refuses a changed word before Send.
 * **D-6. The identity shown once.** For the reply target, the preview's
-  `who_this_would_reach` is what he confirms: since lane G, a people record
-  under `PREVIEW-NAMES-THE-RESOLVED-TARGET` -- the name and headline the page
+  `who_this_would_reach` is what he confirms: since lane G, a people record,
+  as the ruling `PREVIEW-NAMES-THE-RESOLVED-TARGET` has it -- the name and headline the page
   draws for the conversation he named, sanitised, marked untrusted, returned
   at runtime and never written; the receipt keeps only the thread id he
   supplied. The confirm must follow the preview within 120 s, so if his

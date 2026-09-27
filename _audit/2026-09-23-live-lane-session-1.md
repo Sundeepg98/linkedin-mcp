@@ -2359,8 +2359,8 @@ and its two readers are present beside lanes L8's and G's changes, and the
 merged gate below runs both sides' tests over them.
 
 **AND ONE THING THE MERGE BROUGHT INTO THE PLAN:** since lane G, the reply
-preview's `who_this_would_reach` is a people record under
-`PREVIEW-NAMES-THE-RESOLVED-TARGET` -- the name and headline the page draws
+preview's `who_this_would_reach` is a people record, as the ruling
+`PREVIEW-NAMES-THE-RESOLVED-TARGET` has it -- the name and headline the page draws
 for the conversation he named, sanitised, marked untrusted, returned at
 runtime and never written. That is the identity the plan's outward block
 shows him once; the plan's D-6 and its step 4.1 now cite it.
