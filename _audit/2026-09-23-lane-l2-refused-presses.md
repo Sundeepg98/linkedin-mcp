@@ -1,5 +1,3 @@
-claude-opus-5-5[1m]
-
 # Lane L2: nine refused presses, and none of them is a narrow extension away
 
 **CORRECTS:** `_audit/2026-09-20-the-profile-views-recapture.md` -- its section 9.2 reports two undocumented filters of 32 and 31 characters on the profile-views page; they are the two radio labels of a closed `<dialog>` form on that page, collected by the reader's every-`<label>` fallback, and are not filters.

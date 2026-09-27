@@ -26,10 +26,16 @@ server's stderr. Each is checked here, after the preview and, for the reply,
 after the write fires -- and each check is shown convicting a planted
 regression, so none can pass by looking at nothing.
 
-LIMITS: the headline half of "name and headline" is empty on both surfaces --
-neither the invitation rail's control nor the conversation header draws one
-in the measured markup. A group conversation's title comes back in a person
-record, as the messaging overview's does.
+THE RECORD OF THE RIGHT KIND (orchestrator, 2026-09-27 19:52): the headline
+is read where the page draws one, and where it does not the record says
+ABSENT (``people_data.ABSENT``, null) -- a different state from an empty
+string. A conversation with one other member names a person, with the line
+its header draws under the title (measured present on the one captured
+header; that it is the headline is derived); a GROUP conversation, or one
+whose row the page does not draw, comes back as the conversation's title
+record. The invitation's reading is one control's label, which draws no
+headline: ABSENT, and section 1 says so. Until that evening both previews
+carried a person record with an empty headline, whoever they named.
 """
 
 from __future__ import annotations
@@ -54,12 +60,29 @@ from tests.test_messaging_threads import _derive
 from tests.test_writes import browser_page, writes_on  # noqa: F401 -- fixtures
 from tests.test_writes_nine import MEMBER, _grantable_invitation, _preview_the_refusal
 
-#: What the reply fixture's conversation header draws.
+#: What the reply fixture's conversation header draws: the title, and the line
+#: under it.
 _TITLE = "Kai Example"
+_HEADLINE = "Invented headline"
+_HEADLINE_LINE = (
+    '<dd class="msg-entity-lockup__entity-info t-12 t-black--light t-normal">'
+    + _HEADLINE + "</dd>"
+)
+#: The open conversation's row link, as the fixture draws it: active.
+_ACTIVE_LINK = 'msg-conversations-container__convo-item-link--active">'
+#: The list reader's group marker, as the composer capture draws it.
+_GROUP_FACEPILE = (
+    '<div class="msg-facepile-grid msg-facepile-grid--4"><img class="msg-facepile-grid__img '
+    'msg-facepile-grid__img--multiple-participants" alt=""></div>'
+)
 
 
 def _is_a_person_record(value) -> bool:
     return isinstance(people_data.as_record(value), people_data.Person)
+
+
+def _is_a_title_record(value) -> bool:
+    return isinstance(people_data.as_record(value), (people_data.Group, people_data.Event))
 
 
 def retained_state() -> str:
@@ -101,13 +124,77 @@ async def test_the_invitation_preview_names_the_person_in_a_record(writes_on, br
     assert "CHECK IT" in check and MEMBER not in check, check
 
 
-async def test_the_reply_preview_names_the_conversation_in_a_record(writes_on, browser_page):
+async def test_the_invitation_record_says_its_headline_is_absent(writes_on, browser_page):
+    """WHAT IS READ HERE IS ONE CONTROL'S LABEL, and it draws a name and no
+    headline: the record says ABSENT -- null, not the empty string it carried
+    until 2026-09-27. The rail's card around the control has never been
+    captured, so no reader here knows where a headline would be, and none is
+    guessed at."""
+    block, _nav_used = await _preview_the_refusal(browser_page, "send_invitation")
+    named = block["who_this_would_reach"]
+    assert named["headline"] is people_data.ABSENT, named
+    assert named["headline"] != "", "ABSENT is not the empty string"
+
+
+async def test_the_reply_preview_names_the_person_with_the_headline_drawn(
+    writes_on, browser_page
+):
+    """ONE OTHER MEMBER: the row is drawn active with no group marker, so the
+    record is a person -- the title, and the line the header draws under it."""
     block, _nav_used = await _preview(browser_page)
     named = block.get("who_this_would_reach")
     assert _is_a_person_record(named), named
     assert named["name"] == _TITLE
+    assert named["headline"] == _HEADLINE, named
     check = block.get("who_this_would_reach_check", "")
-    assert "CHECK IT" in check and _TITLE not in check, check
+    assert "CHECK IT" in check and _TITLE not in check and _HEADLINE not in check, check
+
+
+async def test_a_header_with_no_line_under_the_title_says_absent(writes_on, browser_page):
+    world = _derive(THREAD, _HEADLINE_LINE, "")
+    block, _nav_used = await _preview(browser_page, world)
+    named = block["who_this_would_reach"]
+    assert _is_a_person_record(named), named
+    assert named["headline"] is people_data.ABSENT, named
+
+
+async def test_an_empty_line_under_the_title_is_empty_not_absent(writes_on, browser_page):
+    """THE OTHER SIDE OF THE DISTINCTION: a line drawn with nothing in it is
+    the empty string -- drawn, and empty -- never ABSENT."""
+    world = _derive(THREAD, _HEADLINE_LINE, _HEADLINE_LINE.replace(_HEADLINE, ""))
+    block, _nav_used = await _preview(browser_page, world)
+    assert block["who_this_would_reach"]["headline"] == "", block["who_this_would_reach"]
+
+
+async def test_a_group_conversation_comes_back_as_a_title_record(writes_on, browser_page):
+    """A GROUP CONVERSATION NAMES NO ONE PERSON: its row carries the group
+    marker, so the preview returns the conversation's title record -- the
+    record the list returns for a group row -- and not a person."""
+    world = _derive(THREAD, _ACTIVE_LINK, _ACTIVE_LINK + _GROUP_FACEPILE)
+    block, _nav_used = await _preview(browser_page, world)
+    named = block["who_this_would_reach"]
+    assert _is_a_title_record(named), named
+    assert not _is_a_person_record(named), named
+    assert named["title"] == _TITLE, named
+    assert named == threads.conversation_with(_TITLE, group=True), named
+    assert "GROUP" in block["who_this_would_reach_check"]
+
+
+async def test_a_conversation_whose_row_is_not_drawn_names_no_person(writes_on, browser_page):
+    """Nothing says whether it is one member or several, so it is not dressed
+    up as a person: the title record."""
+    world = _derive(THREAD, " " + _ACTIVE_LINK, '">')
+    block, _nav_used = await _preview(browser_page, world)
+    named = block["who_this_would_reach"]
+    assert _is_a_title_record(named), named
+    assert named["title"] == _TITLE, named
+
+
+async def test_a_header_drawing_two_lines_under_the_title_names_nobody(writes_on, browser_page):
+    world = _derive(THREAD, _HEADLINE_LINE, _HEADLINE_LINE + _HEADLINE_LINE)
+    block, _nav_used = await _preview(browser_page, world)
+    assert "who_this_would_reach" not in block, block
+    assert "cannot tell you who" in block["who_this_would_reach_check"]
 
 
 async def test_the_reply_preview_sanitises_the_title_it_names(writes_on, browser_page):
@@ -156,6 +243,7 @@ async def test_nothing_a_sent_reply_keeps_carries_the_title(writes_on, browser_p
     receipt = await writes.perform(_nav(DISPATCHING, AFTER), browser_page, grant)
     assert receipt["performed"] is True, receipt
     assert carried(_TITLE, receipts=[receipt], records=caplog.records) == []
+    assert carried(_HEADLINE, receipts=[receipt], records=caplog.records) == []
     assert _TITLE not in repr(grant), "the fired grant kept the title"
     assert TARGET["thread"] in grant.target and TARGET["text"] in grant.target
 

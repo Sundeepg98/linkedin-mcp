@@ -1,5 +1,3 @@
-claude-opus-5-5[1m]
-
 # Lane L5 -- MESSAGING: deliverable sends and a receipt-safe inbox
 
 Written as the lane runs. Worktree branch `worktree-agent-a6bb3cc0961290132`, cut from `master` at

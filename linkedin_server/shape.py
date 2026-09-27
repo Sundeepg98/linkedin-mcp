@@ -4771,13 +4771,68 @@ def redact_thread_id(url: Optional[str]) -> Optional[str]:
 #: of guessing the apply url.
 _FILTER_NAMES = ("focused", "other", "unread", "jobs", "connections", "inmail", "starred")
 
-#: Any element carrying one of those names, with whatever destination it has.
-#: Deliberately broad: a control that turns out to be a <button> with no href
-#: is a FINDING (the filter is client-side state, so InMails are unreachable
-#: without interacting), not a parse failure to be hidden.
-_LABELLED_CONTROL = re.compile(r"<(a|button)([^>]*)>([^<]{0,60})", re.I)
-_ARIA = re.compile(r'aria-label="([^"]*)"')
-_HREF = re.compile(r'href="([^"]*)"')
+class _FilterBar(HTMLParser):
+    """The pills of the ONE filter bar inside <main>, read as elements.
+
+    THE SAME STRUCTURE THE ACTIVATOR PRESSES BY (2026-09-27): a bar is an
+    element carrying ``dom.FILTER_BAR_HOOK`` inside <main>, and a pill is an
+    ``a`` or ``button`` inside a bar carrying ``dom.FILTER_PILL_HOOK``. Until
+    then this read every ``a`` and ``button`` in the page and reported the
+    folder dropdown's trigger, named exactly "Focused", as a pill.
+
+    An ``a`` is still read, where the activator presses only a ``button``: an
+    anchor pill would carry an href, and a filter reachable by navigation is
+    the finding this reader exists to report, not a control to press.
+    """
+
+    _VOID = frozenset({"area", "base", "br", "col", "embed", "hr", "img", "input",
+                       "link", "meta", "param", "source", "track", "wbr"})
+
+    def __init__(self, bar_hook: str, pill_hook: str) -> None:
+        super().__init__(convert_charrefs=True)
+        self._bar_hook, self._pill_hook = bar_hook, pill_hook
+        #: The open elements: (tag, is_main, is_bar, is_pill).
+        self._open: list[tuple[str, bool, bool, bool]] = []
+        self.bars = 0
+        self.pills: list[dict[str, Any]] = []
+        self._pill: Optional[dict[str, Any]] = None
+
+    def handle_starttag(self, tag: str, attrs: list[tuple[str, Optional[str]]]) -> None:
+        names = {key for key, _value in attrs}
+        in_main = any(entry[1] for entry in self._open)
+        in_bar = any(entry[2] for entry in self._open)
+        is_bar = in_main and self._bar_hook in names
+        is_pill = (
+            in_bar and self._pill is None and tag in ("a", "button")
+            and self._pill_hook in names
+        )
+        if is_bar:
+            self.bars += 1
+        if is_pill:
+            values = dict(attrs)
+            self._pill = {
+                "tag": tag,
+                "aria_label": (values.get("aria-label") or "").strip(),
+                "href": values.get("href"),
+                "text": [],
+            }
+        if tag not in self._VOID:
+            self._open.append((tag, tag == "main", is_bar, is_pill))
+
+    def handle_endtag(self, tag: str) -> None:
+        for index in range(len(self._open) - 1, -1, -1):
+            if self._open[index][0] == tag:
+                closed = self._open[index:]
+                del self._open[index:]
+                if self._pill is not None and any(entry[3] for entry in closed):
+                    self._pill["text"] = " ".join("".join(self._pill["text"]).split())
+                    self.pills.append(self._pill)
+                    self._pill = None
+                return
+
+    def handle_data(self, data: str) -> None:
+        if self._pill is not None:
+            self._pill["text"].append(data)
 
 
 def messaging_filters(html: str) -> dict[str, Any]:
@@ -4795,30 +4850,34 @@ def messaging_filters(html: str) -> dict[str, Any]:
     are NOT reachable by navigation at all -- which is equally a finding, and
     the honest answer is then that this server cannot see them without
     interacting with the page.
+
+    ONLY THE ONE FILTER BAR IS READ (2026-09-27): see :class:`_FilterBar`. A
+    page drawing no bar, or more than one, reports no pill at all and says so
+    in ``filter_bars``, because the activator presses nothing on such a page.
     """
-    text = html or ""
+    # THE SAME STRUCTURE AND THE SAME PREDICATE THE ACTIVATOR USES. Imported
+    # rather than re-implemented: the two paths disagreed on his live page
+    # inside one response because each had its own idea of what a pill is --
+    # first of matching, and then, on 2026-09-27, of WHERE a pill may be.
+    from linkedin_server.dom import FILTER_BAR_HOOK, FILTER_PILL_HOOK, filter_name_matches
+
+    reader = _FilterBar(FILTER_BAR_HOOK, FILTER_PILL_HOOK)
+    reader.feed(html or "")
+    reader.close()
     found: dict[str, dict[str, Any]] = {}
-    for match in _LABELLED_CONTROL.finditer(text):
-        tag, attrs, inner = match.groups()
-        aria = _ARIA.search(attrs or "")
+    for pill in reader.pills if reader.bars == 1 else []:
+        tag = pill["tag"]
         # The accessible name if there is one, else the visible text. Real
-        # LinkedIn pills nest spans, so inner text is often empty and the
-        # aria-label is the only thing carrying the word.
-        aria_label = (aria.group(1) if aria else "").strip()
+        # LinkedIn pills can nest spans, so the text is every descendant's.
+        aria_label = pill["aria_label"]
         # THE ACCESSIBLE NAME, not the two joined: since the shared rule became
         # EXACT (2026-09-27, ``dom.filter_name_matches``), a pill whose
         # aria-label repeats its text would no longer equal its word joined.
-        label = aria_label or (inner or "").strip()
+        inner = pill["text"]
+        label = aria_label or inner
         for name in _FILTER_NAMES:
-            # THE SAME PREDICATE THE ACTIVATOR USES. Importing it here rather
-            # than re-implementing "does the name appear in the label" is the
-            # whole fix: the two paths disagreed on his live page inside one
-            # response because each had its own idea of matching -- this one
-            # substring, the other exact equality on a guessed capitalisation.
-            from linkedin_server.dom import filter_name_matches
-
             if name and name not in found and filter_name_matches(label, name):
-                href = _HREF.search(attrs or "")
+                href = pill["href"]
                 found[name] = {
                     "tag": tag.lower(),
                     # THE ACCESSIBLE NAME, not one attribute of it. This field
@@ -4832,9 +4891,9 @@ def messaging_filters(html: str) -> dict[str, Any]:
                     # aria-label OR text. name_source says which, so the next
                     # reader does not have to guess whether null means absent
                     # or unread.
-                    "accessible_name": (aria_label or (inner or "").strip()) or None,
+                    "accessible_name": (aria_label or inner) or None,
                     "name_source": "aria-label" if aria_label else "text",
-                    "href": href.group(1) if href else None,
+                    "href": href or None,
                     "navigable": bool(href),
                 }
     navigable = [n for n, v in found.items() if v["navigable"]]
@@ -4842,8 +4901,13 @@ def messaging_filters(html: str) -> dict[str, Any]:
         "filters_seen": sorted(found),
         "detail": found,
         "navigable_filters": sorted(navigable),
+        "filter_bars": reader.bars,
         "verdict": (
-            "filter pills carry hrefs, so the filter surface is also reachable "
+            f"the filter bar did not render as measured: {reader.bars} bar(s) "
+            "drawn where exactly one is the measured shape, so no pill is read "
+            "and none would be pressed"
+            if reader.bars != 1
+            else "filter pills carry hrefs, so the filter surface is also reachable "
             "by navigation and the parameter is MEASURED rather than guessed"
             if navigable
             else (

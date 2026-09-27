@@ -891,7 +891,7 @@ def test_a_headline_drawn_otherwise_is_absent_and_counted():
         "h.replaceWith(mk('div', h.textContent));"
         "col(0).appendChild(mk('div')).appendChild(mk('p', 'Zzq summary line'));"
     ))
-    assert result["people"][0]["headline"] == ""
+    assert result["people"][0]["headline"] is people_data.ABSENT
     assert result["people_denominators"]["headline_unread"] == 1
     for text in (PLACE, "Zzq summary line"):
         assert not _anywhere(text, result), text
@@ -905,7 +905,7 @@ def test_an_extra_line_before_the_headline_leaves_it_absent():
         "const d = mk('div'); d.appendChild(mk('p', 'Zzq extra line'));"
         "col(0).insertBefore(d, col(0).children[1]);"
     ))
-    assert result["people"][0]["headline"] == ""
+    assert result["people"][0]["headline"] is people_data.ABSENT
     assert result["people_denominators"]["headline_unread"] == 1
     assert not _anywhere("Zzq extra line", result)
 
@@ -1146,7 +1146,7 @@ def test_a_result_with_one_line_has_no_headline():
     """B. One line beside the title: nothing here can know whether it is a
     headline or a location, so the headline is ABSENT and counted."""
     result = _read(mutate=_drawing("col(0).children[1].remove();"))
-    assert result["people"][0]["headline"] == ""
+    assert result["people"][0]["headline"] is people_data.ABSENT
     assert result["people_denominators"]["headline_unread"] == 1
     assert not _anywhere(PLACE, result)
 

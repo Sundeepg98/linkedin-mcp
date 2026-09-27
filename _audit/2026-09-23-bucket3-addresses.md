@@ -1,5 +1,3 @@
-claude-opus-5-5[1m]
-
 # Bucket 3, measured: 67 rows, 33 on an admitted page, and 5 a reader could close today
 
 **CORRECTS:** `_audit/2026-09-21-the-read-triage.md` -- four address verdicts: P F1 and P H11 are pages on the admitted profile, not ADDRESS/ABSENT, and P L4 and N 61 wait on a live read, not on a refused address anybody has seen served.

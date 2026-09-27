@@ -223,12 +223,18 @@ READS_NO_PAGE: Dict[str, str] = {}
 #: behind it -- a new one fails until somebody decides which side it is on.
 WRITE_DOOR: "Key" = ("server", "_write_tool")
 
-#: The record builders reached only through the write door: the two previews
-#: that name a third party.
+#: The record builders the write door reaches: the two previews that name a
+#: third party, and -- since the reply preview returns a GROUP conversation's
+#: title record (2026-09-27) -- ``threads.conversation_with``, the builder that
+#: preview shares with ``linkedin_list_conversations``. That one is ALSO a
+#: reader's builder, reached through ``threads.list_result``, and the stop does
+#: not hide it from that path: the list tool is still derived a people reader
+#: (``test_the_write_door_stops_only_itself`` holds the stop to itself).
 PREVIEW_BUILDERS: FrozenSet["Key"] = frozenset(
     {
         ("writes", "_name_the_invitation_recipient"),
         ("threads", "name_the_reply_recipient"),
+        ("threads", "conversation_with"),
     }
 )
 

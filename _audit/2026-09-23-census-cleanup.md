@@ -1,5 +1,3 @@
-claude-opus-5-5[1m]
-
 # Census cleanup: six statements the census makes about itself, measured against today
 
 **CORRECTS:** `_audit/_census/messaging-and-content.md` -- row `C42` read *"no tool in this server returns one"* (a post identifier); since `C41` was proven today, `linkedin_my_activity_items` returns one for every post of his own. The premise still holds for other people's posts, and the state is not re-decided.

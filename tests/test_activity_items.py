@@ -118,10 +118,10 @@ ENCODED_SEGMENT = "urn%3Ali%3Aactivity%3A" + ACTIVITY_ID
 #: three cases visible: LinkedIn writes a SHORTENED form into the overflow
 #: label while the ``h1`` carries the full one, which is the measured asymmetry
 #: the rule exists for.
-AUTHOR_SHORT = "Ada L"
-OWNER_FULL = "Ada Lovelace"
+AUTHOR_SHORT = "Tamsin S"
+OWNER_FULL = "Tamsin Stubworth"
 OTHER_AUTHOR = "Wren Fixturewright"
-NEAR_MISS_AUTHOR = "Adam Lovelace"
+NEAR_MISS_AUTHOR = "Tamsine Stubworth"
 
 #: Built from the constants under test rather than retyped, so a fixture cannot
 #: drift from the reader. That would be circular on its own -- if the constant
@@ -960,8 +960,8 @@ async def test_the_prefix_rule_in_both_directions(
     measured says which side is the short one, and asserting a direction nobody
     measured is how a guess gets written down as a fact -- row two.
 
-    THE THIRD ROW IS THE COST, PINNED. ``Adam Lovelace`` and ``Ada Lovelace``
-    share five characters and neither is a prefix of the other, so the rule
+    THE THIRD ROW IS THE COST, PINNED. ``Tamsine Stubworth`` and ``Tamsin Stubworth``
+    share their first six characters and neither is a prefix of the other, so the rule
     rejects. What it would NOT reject is a member whose display name really is a
     prefix of the owner's -- the residue recorded in ``dom.py`` above the
     script. C1 and C2 are what make that residue unreachable, which is why all

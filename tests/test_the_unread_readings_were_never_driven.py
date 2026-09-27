@@ -305,16 +305,26 @@ async def test_no_returned_field_carries_page_text(name: str) -> None:
     result = await dom.activate_messaging_filter(_ClickablePage(), name)
 
     assert result["activated"] is False, result
-    assert result["found"] == 0 and result["containing"] >= 1, result
+    # ONE BAR, ONE PILL (the double's one child per level), named the plant.
+    assert result["found"] == 0 and result["bars"] == 1 and result["pills"] >= 1, result
     assert sorted(carries_the_plant(result)) == sorted(PAGE_TEXT_FIELDS), result
 
 
 class _ExactPillLocator(_ClickableLocator):
-    """The same double, its controls named exactly the permitted word."""
+    """The same double, its controls named exactly the permitted word. Since
+    2026-09-27 the activator finds the bar, then the pills inside it, so the
+    double answers as both."""
 
     def __init__(self, depth: int = 0, word: str = "InMail") -> None:
         super().__init__(depth)
         self._word = word
+
+    def locator(self, *args: Any, **kwargs: Any) -> "_ExactPillLocator":
+        return _ExactPillLocator(self._depth + 1, self._word)
+
+    @property
+    def first(self) -> "_ExactPillLocator":
+        return _ExactPillLocator(self._depth + 1, self._word)
 
     def nth(self, index: int) -> "_ExactPillLocator":
         return _ExactPillLocator(self._depth + 1, self._word)
@@ -330,6 +340,9 @@ class _ExactPillLocator(_ClickableLocator):
 
 
 class _ExactPillPage(_ClickablePage):
+    def locator(self, *args: Any, **kwargs: Any) -> _ExactPillLocator:
+        return _ExactPillLocator()
+
     def get_by_role(self, *args: Any, **kwargs: Any) -> _ExactPillLocator:
         return _ExactPillLocator()
 

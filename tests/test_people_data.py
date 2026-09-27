@@ -296,7 +296,22 @@ def test_an_anonymised_row_comes_back_exactly_as_shown(href):
     takes what the row showed and looks nowhere else."""
     person = pd.Person.from_page(name=pd.ANONYMISED_NAME, href=href)
     assert person.envelope()["name"] == "LinkedIn Member"
-    assert person.link is None and person.headline == "" and person.degree is None
+    # ABSENT, not "": the row drew no headline (2026-09-27).
+    assert person.link is None and person.headline is pd.ABSENT and person.degree is None
+
+
+def test_absent_and_empty_are_two_states_of_a_headline():
+    """A headline the reader read none of is ABSENT; one it read that came to
+    nothing after sanitising is the empty string. Both build; neither is the
+    other, in the record or in its envelope, and both survive the rebuild the
+    page-string guards do (``as_record``)."""
+    absent = pd.Person.from_page(name="Synthetic Viewer")
+    empty = pd.Person.from_page(name="Synthetic Viewer", headline="\u200b \u202e")
+    assert absent.headline is pd.ABSENT and pd.ABSENT is None
+    assert empty.headline == ""
+    assert absent.envelope() != empty.envelope()
+    for person in (absent, empty):
+        assert pd.as_record(person.envelope()) == person
 
 
 # ---------------------------------------------------------------------------

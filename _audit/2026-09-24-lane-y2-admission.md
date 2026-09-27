@@ -1,5 +1,3 @@
-claude-opus-5-5[1m]
-
 # Lane Y2 -- completeness admission: one verdict for every app-scope candidate
 
 Lane Y2, 2026-09-24. Worktree branch off master `9c219c8`. OFFLINE: no LinkedIn,

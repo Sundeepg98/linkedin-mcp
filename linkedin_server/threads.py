@@ -240,6 +240,21 @@ TEXTBOX_SELECTOR = 'main [role="textbox"]'
 
 #: The correspondent's name in the conversation header -- exactly one.
 TITLE_SELECTOR = "main .msg-entity-lockup__entity-title"
+#: THE LINE THE HEADER DRAWS UNDER THE TITLE. MEASURED 2026-09-27 off the
+#: inbox capture (class tokens and a has-text boolean only, no text read): the
+#: header's one ``dl`` holds the title's ``dt`` and exactly one
+#: ``dd.msg-entity-lockup__entity-info``, holding text. The captured
+#: conversation was SPONSORED, so that the line is a member's HEADLINE in a
+#: conversation with a member is DERIVED -- the synthetic thread fixture draws
+#: it so -- and a record built from it says only what the line said.
+HEADLINE_SELECTOR = "main .msg-entity-lockup__entity-info"
+#: IS THE OPEN CONVERSATION A GROUP. The thread page draws the list beside it,
+#: with the open conversation's row link wearing the active marker (1 on the
+#: inbox capture), and the list reader's group marker -- the facepile's
+#: multiple-participants images -- sits INSIDE that link: measured 2026-09-27
+#: on both captures (3 such images, all in one row's link; the active row on
+#: the inbox capture held a single person's image).
+ACTIVE_GROUP_SELECTOR = ACTIVE_ROW_SELECTOR + " " + GROUP_FACEPILE_SELECTOR
 #: The conversation the inbox capture opened was SPONSORED: no reply form,
 #: response buttons instead.
 SPONSORED_SELECTOR = "main .msg-sponsored-conversation-thread"
@@ -1213,45 +1228,83 @@ async def name_the_reply_recipient(
     reply box was just measured. So the observation must have landed on the
     named thread, and a re-read here must find the same number of messages
     it recorded and exactly one title. No second page load.
+
+    WHO, AS A RECORD OF THE RIGHT KIND (2026-09-27, the orchestrator's order
+    on PREVIEW-NAMES-THE-RESOLVED-TARGET). A conversation with ONE other
+    member -- its row in the list drawn active and carrying no group marker
+    -- names a person: the title, and the headline the header draws under it,
+    or :data:`people_data.ABSENT` where it draws none. A GROUP conversation
+    names no one person, so it comes back as the conversation's title record,
+    the record ``linkedin_list_conversations`` returns for a group row; and so
+    does a conversation whose row the page does not draw, because nothing then
+    says which it is. A header drawing more than one line under the title is
+    not the measured shape, and names nobody.
     """
     if getattr(spec, "action", None) != "send_reply":
         return block
     facts = dict(getattr(observation, "facts", None) or {})
     if facts.get("landed_on_the_named_thread") is not True:
         return block
+    title: Optional[str] = None
+    headline: Optional[str] = None
+    active = group = 0
     try:
         same_conversation = await _count(page.locator(EVENT_SELECTOR)) == coerce.as_count(
             facts.get("events")
         )
         titles = page.locator(TITLE_SELECTOR)
-        if not same_conversation or await _count(titles) != 1:
-            title = None
-        else:
+        if same_conversation and await _count(titles) == 1:
             title = _normalise(await titles.first.inner_text()) or None
+        if title is not None:
+            lines = page.locator(HEADLINE_SELECTOR)
+            drawn = await _count(lines)
+            if drawn == 1:
+                headline = _normalise(await lines.first.inner_text())
+            elif drawn > 1:
+                title = None
+            active = await _count(page.locator(ACTIVE_ROW_SELECTOR))
+            group = await _count(page.locator(ACTIVE_GROUP_SELECTOR))
     except Exception as exc:  # noqa: BLE001
         logger.debug("title unreadable: %s", type(exc).__name__)
         title = None
-    # THE TITLE AS A PEOPLE RECORD (2026-09-27,
-    # PREVIEW-NAMES-THE-RESOLVED-TARGET): sanitised, capped and marked as
-    # another member's words, like every name this package returns. A group
-    # conversation's title comes back in a person record too, as the
-    # messaging overview's labels do: the header does not say how many it names.
-    person = people_data.Person.from_page(name=title) if title else None
-    out = dict(block)
-    if person is not None:
-        out["who_this_would_reach"] = person.envelope()
-        out["who_this_would_reach_check"] = (
-            "who_this_would_reach is the title of the conversation you named, "
-            "read off that conversation's own header, already open on your "
-            "screen; nobody is notified, and this server keeps no copy -- it is "
-            "in no grant, no log and no file. CHECK IT: a thread id that "
-            "uniquely names the WRONG conversation is the one failure this gate "
-            "cannot catch for you."
-        )
+    # THE TITLE AS A RECORD (PREVIEW-NAMES-THE-RESOLVED-TARGET): sanitised,
+    # capped and marked as another member's words, like every name this
+    # package returns -- a person only where the page says there is one.
+    one_person = active == 1 and not group
+    if title is None:
+        record = None
+    elif one_person:
+        person = people_data.Person.from_page(name=title, headline=headline)
+        record = None if person is None else person.envelope()
     else:
+        record = conversation_with(title, group=True)
+    out = dict(block)
+    if record is None:
         out["who_this_would_reach_check"] = (
-            "The conversation's header did not draw exactly one title, so "
-            "this server cannot tell you who it would reach. Open the "
-            "conversation yourself and check it before confirming."
+            "The conversation's header did not draw exactly one title, and at "
+            "most one line under it, so this server cannot tell you who it "
+            "would reach. Open the conversation yourself and check it before "
+            "confirming."
         )
+        return out
+    out["who_this_would_reach"] = record
+    kind = (
+        "the person in the conversation you named -- its title and the line "
+        "its header draws under it, as a person record whose headline is null "
+        "where the header draws none"
+        if one_person
+        else "the title of the GROUP conversation you named, as a title record: "
+        "every participant receives the reply"
+        if group
+        else "the title of the conversation you named, as a title record: the "
+        "page did not draw its row in the list, so nothing says whether it "
+        "has one other member or several"
+    )
+    out["who_this_would_reach_check"] = (
+        "who_this_would_reach is " + kind + ", read off that conversation's "
+        "own page, already open on your screen; nobody is notified, and this "
+        "server keeps no copy -- it is in no grant, no log and no file. CHECK "
+        "IT: a thread id that uniquely names the WRONG conversation is the one "
+        "failure this gate cannot catch for you."
+    )
     return out

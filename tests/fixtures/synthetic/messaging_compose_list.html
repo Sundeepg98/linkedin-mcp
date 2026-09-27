@@ -21,6 +21,11 @@
     * the filter pills are buttons carrying data-test hooks with UPPERCASE
       values (JOB, UNREAD, CONNECTIONS, INMAIL, STARRED) and aria-pressed; the
       folder (Focused) is a separate dropdown trigger;
+    * and, measured 2026-09-27 off the same two captures (hook names, tags and
+      roles only): the pills sit in ONE div[role=radiogroup] carrying
+      data-test-messaging-inbox-filters__filter-pill-group -- the filter bar
+      -- while the folder trigger sits beside it, in a div carrying
+      data-test-messaging-inbox-filters__folder-dropdown;
     * the messaging overlay is present and MINIMISED, with no rows;
     * LinkedIn's global search input is a role=combobox OUTSIDE <main>, on
       every page; the composer's own recipient box is
@@ -53,8 +58,10 @@
 <div class="scaffold-layout__list msg__list">
   <div class="msg-conversations-container__title-row">
     <div class="msg-cross-pillar-inbox-filters-v3__container">
-      <button type="button" class="artdeco-dropdown__trigger artdeco-button msg-cross-pillar-inbox-filters-v3__drop-down-trigger" aria-expanded="false" data-test-messaging-inbox-filters__folder-pill="">Focused</button>
-      <div class="artdeco-pill-choice-group">
+      <div class="artdeco-dropdown msg-cross-pillar-inbox-filters-v3__all-filters" data-test-messaging-inbox-filters__folder-dropdown="">
+        <button type="button" class="artdeco-dropdown__trigger artdeco-button msg-cross-pillar-inbox-filters-v3__drop-down-trigger" aria-expanded="false" data-test-messaging-inbox-filters__folder-pill="">Focused</button>
+      </div>
+      <div class="artdeco-pill-choice-group" role="radiogroup" data-test-messaging-inbox-filters__filter-pill-group="">
         <button type="button" role="button" aria-pressed="false" aria-checked="false" class="artdeco-pill artdeco-pill--slate artdeco-pill--3 artdeco-pill--choice" data-test-messaging-inbox-filters__filter-pill="JOB">Jobs</button>
         <button type="button" role="button" aria-pressed="false" aria-checked="false" class="artdeco-pill artdeco-pill--slate artdeco-pill--3 artdeco-pill--choice" data-test-messaging-inbox-filters__filter-pill="UNREAD">Unread</button>
         <button type="button" role="button" aria-pressed="false" aria-checked="false" class="artdeco-pill artdeco-pill--slate artdeco-pill--3 artdeco-pill--choice" data-test-messaging-inbox-filters__filter-pill="CONNECTIONS">Connections</button>

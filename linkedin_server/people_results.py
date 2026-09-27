@@ -76,7 +76,9 @@ timeout.
     headline  the first of the two lines, READ ONLY IN THE CAPTURED SHAPE: the
               title paragraph first among exactly three siblings, each of the
               other two holding exactly one line and no link, and the line
-              visible. Anything else leaves the headline ABSENT and counted
+              visible. Anything else leaves the headline ABSENT --
+              people_data.ABSENT, null, never an empty string -- and
+              counted
 
 NEVER READ: the location line's text; the mutual-connections sentence and
 every link in it; the hidden copy of the name that labels the photo; any

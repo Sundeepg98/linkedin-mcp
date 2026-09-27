@@ -1,5 +1,3 @@
-claude-opus-5-5[1m]
-
 # Lane G -- security guard hardening: four measured gaps in the checks that keep page text out and page choice out of navigation
 
 Branch `worktree-agent-a31f0ad625f238c58`, cut from `master` at `9c219c8`. Nothing
@@ -1890,3 +1888,231 @@ NOT RUN:
   the corpus; if it was never ruled, it is model attribution in tracked
   files. Not changed here: it spans every lane's records.
 - The ratchet's limits of P.4 stand: per reader, default drives only.
+
+## Order of 2026-09-27 19:52: the residuals
+
+The orchestrator's order to lane G, 2026-09-27 19:52 IST, after master was
+fast-forwarded to this branch: five calls on what the 17:05 section left
+open. Disk agreed with its sample at the start (head 52b55b6, master the same
+commit, a clean tree). The duplicate selector key and the two name-aimed
+writes went to lane L5, as the order said, and are not touched here.
+
+This record carried a bare model-id line above its title until this order,
+like eighteen others; R.1 removed it, and this section is written without
+one.
+
+### R.0 Commits, with their times from `git log`
+
+```
+e42f3e2  09-27 20:37  model attribution in files: nineteen records opened with a bare model-id line; removed, and a guard keeps it out
+1a8fdea  09-27 20:38  messaging filters: a pill is found inside the one filter bar, by its structure, and only then matched by exact name
+9e323b5  09-27 20:39  invented names: the second real historical figure is replaced, everywhere it was carried, and the digest sweep reads the whole tracked tree
+4829bac  09-27 20:39  preview records: a headline read where the page draws one, ABSENT where it does not, and a group conversation named by its title record
+23dc463  09-27 20:40  tests: the ABSENT-versus-empty test's planted characters are written as escapes
+d9425be  09-27 20:41  ci shard timings: this lane's three unpriced test files priced
+bde6892  09-27 21:18  model-id guard: its docstring carries the measured count of the records it cleaned
+```
+
+This record's commit follows them. None of these hashes is on `master` yet:
+each does not resolve on `master` until the orchestrator merges this branch.
+
+### R.1 The model-id lines: removed, and a guard
+
+MEASURED over all 892 tracked files, with the anchored pattern the order
+gave on line 1: nineteen, every one under `_audit/` -- twelve dated
+2026-09-23 and seven 2026-09-24, twelve of them named for a lane, this one
+among them -- each the id, then exactly one blank line, then the title. No
+such line anywhere below line 1. Each lost those two lines and nothing else:
+19 files, 38 deletions. How any document mentions a model in prose did not
+change. (The strip's commit message and the guard's first docstring said
+"nine lanes' records": a count nobody had taken. The docstring now carries
+the measured one.)
+
+One line pointer into those documents existed, found by a census of every
+tracked reference of the form path-and-line: a test docstring citing the
+lane L4 record's lines 48-49, now 46-47, the same two lines of text.
+
+`tests/test_no_tracked_file_opens_with_a_model_id.py` enumerates the tracked
+set -- so the impact gate derives it onto its corpus-wide floor, which moved
+from 23 guards to 24 -- and holds line 1 to the pattern, after removing a
+byte-order mark and a CR. RED FIRST: on the tree before the strip, 19
+offenders. Its controls convict the measured shape planted in a throwaway
+repository and five spellings of a bare header, and pass seven that are not
+one: prose on line 1, prose in the body, a sentence opening with an id, an
+id below line 1, an indented one, an uppercase one, and a binary file.
+
+THE CALL IS NOT IN THE REGISTER. It reached this lane in an order, not a
+tracked document, and a register entry needs a document and an anchor to
+resolve against. The guard encodes it; registering it is the orchestrator's.
+
+### R.2 The `focused` mis-aim: a pill is found inside the one filter bar
+
+MEASURED FIRST, off both 2026-09-20 messaging captures (gitignored; hook
+names, tags and roles only, no text read): inside `<main>`, exactly one
+`div[role=radiogroup]` carries `data-test-messaging-inbox-filters__filter-pill-group`
+and holds the five pills, `button[role=button][aria-pressed]` carrying the
+pill hook and no aria-label. The folder trigger carries
+`...__folder-pill` inside its own `...__folder-dropdown`, beside the bar.
+
+RED FIRST, on the exact-only activator in a real headless Chromium: 5 failed.
+The folder trigger named exactly "Focused" was pressed for `focused` (its
+recorder read `['folder']`); a namesake outside the bar was pressed; the
+pill beside its outside namesake was refused, two exact names found; a
+hooked button outside any bar was pressed; two bars were not told apart.
+HEAD's enumerator, on the same pages, reported `focused` and the outside
+`unread` as pills (scratchpad `lane-g/enum_red.py`).
+
+The fix: `dom.FILTER_BAR_HOOK` and `dom.FILTER_PILL_HOOK`, measured. The
+activator needs exactly one bar (`main [bar hook]`); inside it only hooked
+buttons are pills; each pill's accessible name is compared by the shared
+exact rule. Anything else is refused without a press, with `bars`, `pills`
+and `found` as counts. The enumerator reads the same bar, with an HTML
+parser rather than a pattern, and reports `filter_bars`. `focused` and
+`other` are the folder's choices, not pills: both are refused on the
+measured page, and the tool's docstring says so. The synthetic composer
+fixture gained the two hooks it lacked. After: the eleven affected test
+files, 1099 passed.
+
+AND A CONTROL THIS LANE HAD BROKEN. `scripts/_check_the_unread_readings_guard_can_fail.py`
+drives the unread-readings tests by name, and item 1 of the 17:05 order
+renamed three of them; the script died on an AttributeError at its pill
+section and convicted nothing there. Re-pointed at the tests that exist and
+at the path each plant reaches -- the refusal and the success: 11 of 11
+convictions.
+
+### R.3 The second real historical name
+
+Replaced by a plainly invented name, "Tamsin Stubworth", wherever it was
+carried: `dom.py`'s docstrings, five test files and two audit documents,
+with the forms the tests read kept in shape -- a given name and an initial,
+a near miss sharing a prefix and in no prefix relation, the split words, the
+name followed by a digit. A first choice reused the given name of an existing
+synthetic person and was renamed before its commit. The quoted assertion
+output in the activity-items slice record carries the new name.
+
+RED FIRST: its folded digest joined `RETIRED_REAL_NAMES_SHA256`, and the
+sweep widened from `tests/` and `scripts/` to every tracked text file --
+the old sweep could not see the package or the records, where it lived. On
+the previous tree: 23 sites in 8 files, every one this digest (prefix
+177f85df57ad). The first retired name was found nowhere in the whole tree.
+The control now asserts the sweep reaches all four folders.
+
+### R.4 The preview records: a headline where one is drawn, ABSENT where not
+
+`people_data.ABSENT` is `None`: a headline no reading drew, where `""` is
+one drawn empty. A `Person` defaults to ABSENT, and `as_record` rebuilds
+both. `None` rather than a sentinel string, because a string can be forged
+by the page it describes. The viewers list's anonymised row, which draws no
+headline, now says ABSENT as well.
+
+- THE REPLY. MEASURED on the one captured conversation header (class tokens
+  and a has-text boolean only): its `dl` holds the title's `dt` and exactly
+  one `dd.msg-entity-lockup__entity-info`, holding text. That line is now
+  read. That it is a member's headline is DERIVED: the captured
+  conversation was sponsored. Whether the conversation is a group is read
+  off its row in the list, drawn active on the thread page, carrying the
+  list reader's multiple-participants facepile -- placement measured on
+  both captures: 3 such images, all inside one row's link, the element
+  that wears the active marker. One other member names a person; a group,
+  or a row the page does not draw, comes back as the conversation's title
+  record, the record the list returns for a group row; two lines under the
+  title name nobody.
+- THE INVITATION. What is read is one control's label, which draws a name
+  and no headline: ABSENT. The rail card around the control has never been
+  captured, so no headline is guessed at.
+
+RED FIRST, with HEAD's `people_data` and `threads` put back for the run
+(only the name `ABSENT` added, so each failed on behaviour): 6 failed. The
+seventh new case, a line drawn empty reading `""`, passed on HEAD too: it is
+the other side of the distinction. After: 13 passed.
+
+THE BOUNDED-READER GUARD FOUND THE SHARED BUILDER, as it is built to:
+`threads.conversation_with` is now reached from behind the write door as
+well as from the list reader, and the declared set gains it with that
+reason. The derived people tools are unchanged: the viewers list, the
+conversation list and open_messaging.
+
+THE 17:05 SECTION'S Q.8 SAID the markup each preview reads draws no
+headline. That held for the invitation's label and did not hold for the
+reply: the header draws a line under the title, on the capture and in the
+fixture, and nothing had read it.
+
+AN ASCII SLIP, CAUGHT AND REPAIRED. The editor wrote this item's two planted
+invisible characters into a test as the characters themselves, from the
+escapes typed; the staged-line check reported the one line and the commit
+went ahead of it. The next commit writes them as escapes. Every line this
+order added, measured against 52b55b6: no non-ASCII character.
+
+### R.5 Timings
+
+CI already keeps each shard's junit in that shard's uploaded artifact (the
+09-24 step "Keep this shard's junit for the timings table"), so, as the
+order said, nothing in CI changed. Priced here: this lane's three unpriced
+test files -- the filter-pill and preview files from the 17:05 order, the
+model-id guard from this one -- by a junit run of those files alone,
+serially, on this laptop: 44 tests, 83.6 s. The table prices 184 files,
+1722.5 s.
+
+### R.6 Gates run, and what did not run
+
+RUN, with the venv's 3.13 unless said. Each item's red came first (R.1-R.4).
+
+    gate                                         result
+    item 2: the eleven affected test files       1099 passed
+    item 2: the unread-readings control script   11 of 11 convictions
+    items 1, 3, 4, 5: twenty affected files      1085 passed, 1 failed, 3 skipped:
+                                                 the shared builder of R.4, then
+                                                 declared -- that file 85 passed
+    item 4: the preview file                     13 passed; the people-data file,
+                                                 after the escape repair, 79
+    item 5: the shard tests over the table       131 passed; the pricing run, 44
+    THE IMPACT GATE ON THE FINAL TREE, at        46 changed paths select 242 of 265
+      d9425be (which does not resolve on         test files (91%), so it WIDENED TO
+      `master` until this branch merges)         THE FULL SUITE: PASS, 10968 tests,
+                                                 2029.8 s, a clean tree -- beside
+                                                 another session's full-suite gate
+    CPython 3.10.19 through uv, with the         630 passed, 3 skipped (symlinks this
+      requirements and Playwright pinned to      platform will not make), 4 workers,
+      the venv's 1.63.0: every one of the 17     157 s; clean tree
+      test files this order changed
+    this record and the register entries: the    128 of 265 test files (48%, the
+      impact gate over the two documents, on     register couples widely), so it
+      their text staged before this commit --    WIDENED TO THE FULL SUITE: PASS,
+      the new guard and every document guard     10968 tests, 1344.9 s; the cited-hash
+      among it                                   guard alone, OK
+
+WHEN EACH RAN, from the stamps: the item runs and the twenty-file selection
+ran on the working tree before their commits; the impact gate and the 3.10
+cell ran on committed trees, clean.
+
+THE 3.10 CELL REACHES THE BROWSER FILES NOW. Every earlier section of this
+record left the 3.10 cell for the browser-driven files unrun, because `uv`
+would resolve the newest Playwright, whose browser build the shared cache may
+not hold. Pinning the venv's own version (`playwright==1.63.0`, which the
+requirement `>=1.40` admits) resolves the build the cache already holds; a
+browser test run that way passed first, alone, before the whole set ran.
+
+NOT RUN:
+
+- **CI on any platform** (nothing pushed), **a cold verification pass**
+  (this order did not ask for one), **anything live**.
+- **The whole suite on 3.10**: the cell above is this order's changed test
+  files, as ordered, not the suite.
+
+### R.7 Open, for other owners
+
+- THE TIMINGS FLAG TAKES ONE JUNIT, AND CI KEEPS ONE PER SHARD.
+  `ci_shard.py --write-timings` reads a single report; a green CI run leaves
+  one per shard per cell. Rebuilding the table from CI needs one cell's
+  shard reports combined, or the flag taught to read several. Not built:
+  the order stopped item 5 at the upload.
+- WHERE THE INVITATION RAIL DRAWS A HEADLINE is uncaptured; a capture of
+  the profile rail's card settles it, and until then its record says ABSENT.
+- WHAT THE REPLY HEADER'S LINE SAYS in a conversation with a member is
+  derived; a capture of such a header settles it.
+- `threads`' list reader reads pills by its own selector, `main` and the
+  pill hook, not scoped to the bar. On the measured page the two agree;
+  unifying it with `dom.FILTER_PILL_IN_BAR` belongs to that module's owner.
+- `focused` and `other` stay in the tool's permitted set and can never be
+  activated on the measured page; whether to retire them from what the
+  tool accepts is the tool owner's call.

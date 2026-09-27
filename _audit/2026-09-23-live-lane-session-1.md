@@ -1,5 +1,3 @@
-claude-opus-5-5[1m]
-
 # THE LIVE LANE, SESSION 1
 
 **2026-09-23. Wave `live-lane-session-1`, base `c8fa6ea`. WRITTEN AS THE WAVE
