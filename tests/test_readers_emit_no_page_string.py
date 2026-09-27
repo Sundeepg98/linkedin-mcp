@@ -58,6 +58,7 @@ check entering the register at all.
 from __future__ import annotations
 
 import asyncio
+import functools
 import importlib
 import inspect
 import json
@@ -158,6 +159,33 @@ RETURNS_RECORDS = "returns_records"
 #: -- ``{"refused": ..., "why": ...}`` -- which is not empty and read nothing.
 NO_PAGE_READ = "not_driven:returned without reading the page"
 EMPTY_RESULT = "not_driven:read the page and returned only an empty shape"
+
+#: AND A PEOPLE READER'S SUCCESS PATH IS ITS RECORDS. Found at lane G's
+#: merge of master 5354d42, on the reader the order named: lane S's
+#: ``people_results.read_result_people`` read the planted page, skipped its one
+#: card for want of a member link, and returned its denominators -- a read,
+#: and a result that is not empty -- having built NO record. A reader whose
+#: code reaches a people-record builder (:func:`record_readers`, the
+#: bounded-reader guard's own derivation) has one success path, and on the
+#: planted page it puts the plant inside a record; a drive of such a reader
+#: that comes back clean did not take it.
+NO_RECORD = "not_driven:reaches a people-record builder and built no record"
+
+
+@functools.lru_cache(maxsize=1)
+def record_readers() -> frozenset[str]:
+    """Readers, as ``module:function``, whose code reaches a people-record
+    builder -- derived by ``tests/test_a_people_reader_reads_one_page.py``'s
+    own closure, stopped at the write door as it stops there."""
+    from tests import test_a_people_reader_reads_one_page as bounded
+
+    modules = bounded.package_modules()
+    functions = bounded.module_functions(modules)
+    edges = {key: bounded.references(fn) for key, fn in functions.items()}
+    reach = bounded.closure(
+        edges, bounded.record_builders(modules), stop=frozenset({bounded.WRITE_DOOR})
+    )
+    return frozenset(f"{module}:{name}" for module, name in reach)
 
 
 # ---------------------------------------------------------------------------
@@ -750,19 +778,26 @@ def drive(fn: Callable[..., Any]) -> tuple[str, str]:
     finding is that an exception carries values a return value would not.
     """
     variants, refusal = _build_call(fn)
+    builds = _reader_key(fn) in record_readers()
     verdicts = (
-        [] if variants is None else [_drive_once(fn, args, kwargs) for args, kwargs in variants]
+        []
+        if variants is None
+        else [_drive_once(fn, args, kwargs, builds_records=builds) for args, kwargs in variants]
     )
     shipped = AS_SHIPPED.get(_reader_key(fn))
     if shipped is not None:
-        verdicts.append(_drive_once(shipped, [PlantedPage()], {}))
+        verdicts.append(_drive_once(shipped, [PlantedPage()], {}, builds_records=builds))
     if not verdicts:
         return f"not_driven:{refusal}", refusal
     return _worst(verdicts)
 
 
 def _drive_once(
-    fn: Callable[..., Any], args: list[Any], kwargs: dict[str, Any]
+    fn: Callable[..., Any],
+    args: list[Any],
+    kwargs: dict[str, Any],
+    *,
+    builds_records: bool = False,
 ) -> tuple[str, str]:
     pages = [v for v in (*args, *kwargs.values()) if isinstance(v, PlantedPage)]
     counted = {"reads": 0}
@@ -790,7 +825,7 @@ def _drive_once(
         if hits:
             return LEAKS, f"{type(exc).__name__} carries it at {hits[0]}"
         return f"not_driven:raises {type(exc).__name__}", str(exc)[:120]
-    return classify_drive(result, counted["reads"])
+    return classify_drive(result, counted["reads"], builds_records=builds_records)
 
 
 def empty_shape(value: Any, depth: int = 0) -> bool:
@@ -815,14 +850,18 @@ def empty_shape(value: Any, depth: int = 0) -> bool:
     return False
 
 
-def classify_drive(result: Any, reads: int) -> tuple[str, str]:
+def classify_drive(result: Any, reads: int, *, builds_records: bool = False) -> tuple[str, str]:
     """The verdict on one DRIVE: what came back, and whether the success path
-    ran to produce it. Pure, so the controls drive the code the guard runs."""
+    ran to produce it -- for a people reader, its records; for any other, a
+    read and a result that is not empty. Pure, so the controls drive the code
+    the guard runs."""
     verdict, detail = classify_returned(result)
     if verdict != CLEAN:
         return verdict, detail
     if reads == 0:
         return NO_PAGE_READ, "the reader returned before any read of the page"
+    if builds_records:
+        return NO_RECORD, f"{reads} read(s), and no people record came back"
     if empty_shape(result):
         return EMPTY_RESULT, f"{reads} read(s), and every value that came back was empty"
     return CLEAN, f"{reads} read(s)"
@@ -1019,6 +1058,38 @@ def test_the_preview_namers_are_driven_to_the_records_they_build(fn_key, records
 )
 def test_a_clean_drive_needs_a_read_and_something_back(result, reads, verdict) -> None:
     assert classify_drive(result, reads)[0] == verdict
+
+
+@pytest.mark.parametrize(
+    "result, reads, verdict",
+    [
+        ({"people": [], "people_denominators": {"result_cards_seen": 1}}, 1, NO_RECORD),
+        ({"count": 1}, 3, NO_RECORD),
+        ({"count": 1}, 0, NO_PAGE_READ),
+    ],
+    ids=["lane S's reader, as it came back", "counts and no record", "no read at all"],
+)
+def test_a_people_readers_success_path_is_its_records(result, reads, verdict) -> None:
+    """A PEOPLE READER'S CLEAN IS EARNED ONLY BY RECORDS: counts and a non-empty
+    result are not its success path, and a records verdict is untouched."""
+    assert classify_drive(result, reads, builds_records=True)[0] == verdict
+    from linkedin_server import people_data
+
+    record = {"person": people_data.Person.from_page(name=PLANT).envelope()}
+    assert classify_drive(record, reads, builds_records=True)[0] == RETURNS_RECORDS
+
+
+def test_lane_s_people_reader_is_not_counted_clean() -> None:
+    """THE READER THE ORDER NAMED. ``people_results.read_result_people``
+    reaches a record builder, reads the planted page, skips its one card for
+    want of a member link and returns its denominators: not clean. Its drive
+    that reaches the records is its owner's to build, as named_profile's was."""
+    from linkedin_server import people_results
+
+    assert "people_results:read_result_people" in record_readers()
+    verdict, detail = drive(people_results.read_result_people)
+    assert verdict == NO_RECORD, (verdict, detail)
+    assert _baseline()["people_results:read_result_people"] == NO_RECORD
 
 
 def _early_return(fn: Callable[..., Any], *, read_first: bool) -> Callable[..., Any]:
