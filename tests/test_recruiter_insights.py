@@ -281,11 +281,11 @@ def test_mitigation_4_one_page_per_call_and_nothing_but_finding_and_reading():
 
 
 def test_THIS_CONTROL_CAN_FAIL_a_scroll_in_the_reader_is_refused():
-    anchor = "        lines = _lines(await anchor.inner_text())" + chr(10)
+    anchor = "    lines = _lines(await anchor.inner_text())" + chr(10)
     source = READER_SOURCE.read_text(encoding="utf-8")
     assert source.count(anchor) == 1
     planted = source.replace(
-        anchor, "        await anchor.scroll_into_view_if_needed()" + chr(10) + anchor)
+        anchor, "    await anchor.scroll_into_view_if_needed()" + chr(10) + anchor)
     assert page_calls_outside_the_allowlist(planted) != []
 
 
@@ -323,3 +323,34 @@ def test_a_failing_page_raises_by_type_alone():
         asyncio.run(recruiter_views.read_recruiter_views(Failing()))
     assert "Zzqfailureplant" not in str(caught.value)
     assert caught.value.__cause__ is None and caught.value.__suppress_context__
+
+
+def test_a_link_or_region_that_cannot_be_read_is_counted_by_type_and_the_rest_are_read():
+    """One failing element is counted by its exception's TYPE, never its
+    message, and every other element is still read."""
+    class FailingElement:
+        async def get_attribute(self, *args, **kwargs):
+            raise ValueError("Zzqfailureplant Markersurname")
+
+        async def query_selector_all(self, *args, **kwargs):
+            raise ValueError("Zzqfailureplant Markersurname")
+
+    class OneFailingEach:
+        def __init__(self, page):
+            self._page = page
+
+        async def query_selector_all(self, selector, *args, **kwargs):
+            found = await self._page.query_selector_all(selector, *args, **kwargs)
+            if selector in (recruiter_views.CHART_REGIONS, recruiter_views.COMPANY_LINKS):
+                return [FailingElement(), *found]
+            return found
+
+    async def action(page):
+        return await recruiter_views.read_recruiter_views(OneFailingEach(page))
+
+    result = xhtml_page.read(FIXTURE, action)
+    assert [v["person"]["name"] for v in result["viewers"]] == [v[0] for v in VIEWERS]
+    assert sorted(result["trends"]) == ["profile_views", "recruiter_views"]
+    assert result["denominators"]["charts_failed"] == {"ValueError": 1}
+    assert result["denominators"]["links_failed"] == {"ValueError": 1}
+    assert not xhtml_page.anywhere("Zzqfailureplant", result)

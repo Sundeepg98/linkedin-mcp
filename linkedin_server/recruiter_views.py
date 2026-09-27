@@ -37,7 +37,9 @@ WHAT THIS RETURNS.
 * ``denominators`` -- what was SEEN beside what was returned, so a row or a
   chart drawn in a shape this reader does not know reads as seen-and-unread
   rather than as absent: chart regions seen and read, insights links seen,
-  viewer rows seen, returned, unparsed and hidden.
+  viewer rows seen, returned, unparsed and hidden, and the regions and links
+  that could not be read at all, counted by exception TYPE -- one element that
+  fails is counted and the rest are still read.
 
 WHAT IT NEVER RETURNS: a label the page drew (every word in the output is this
 module's own or a record's field), an employer's Page link or id, anything of
@@ -102,6 +104,15 @@ _EPOCH_MS_CEILING = 4_102_444_800_000
 #: Where a viewer row sits inside a container hidden from assistive technology.
 _HIDDEN_ANCESTOR = "xpath=ancestor-or-self::*[@aria-hidden='true']"
 
+#: THE QUERIES, named, so the page is asked exactly these and a drive of this
+#: reader (``tests/shipped_drives.py``) can answer exactly these.
+PARAGRAPHS = "p"
+LABELS = "label"
+CHART_REGIONS = '[role="region"]'
+CHART_POINTS = "path[aria-label]"
+CHART_CARD = "xpath=.."
+COMPANY_LINKS = 'a[href*="/company/"]'
+
 
 def _key_for(label: Any) -> Optional[str]:
     """The declared key a page label names, as THIS module's string."""
@@ -147,11 +158,16 @@ def _when(line: str) -> Optional[str]:
     return found if found and NORMALISED_TIME.fullmatch(found) else None
 
 
-async def _counts(page: Any) -> dict[str, Optional[int]]:
+#: THE STEPS TAKE THE ELEMENTS, NEVER THE PAGE. The page is queried once, in
+#: :func:`read_recruiter_views`, and each step reads the handles it is given:
+#: one page entry point, which is the one the reader-leak guard drives.
+
+
+async def _counts(paragraphs: list[Any]) -> dict[str, Optional[int]]:
     """A paragraph that is only a number, followed by one that is a declared
     label: the count under that label's key. First reading of each key wins."""
     counts: dict[str, Optional[int]] = {key: None for key in _KEYS}
-    texts = [await p.inner_text() for p in (await page.query_selector_all("p"))[:MAX_PARAGRAPHS]]
+    texts = [await p.inner_text() for p in paragraphs[:MAX_PARAGRAPHS]]
     for value, label in zip(texts, texts[1:]):
         key, count = _key_for(label), _count(value)
         if key is not None and count is not None and counts[key] is None:
@@ -159,101 +175,129 @@ async def _counts(page: Any) -> dict[str, Optional[int]]:
     return counts
 
 
-async def _range_days(page: Any) -> Optional[int]:
-    for label in await page.query_selector_all("label"):
+async def _range_days(labels: list[Any]) -> Optional[int]:
+    for label in labels:
         found = RANGE.fullmatch(str(await label.inner_text() or "").strip())
         if found:
             return int(found.group(1))
     return None
 
 
-async def _trends(page: Any) -> tuple[dict[str, Any], int]:
+def _failed(tally: dict[str, int], exc: BaseException) -> None:
+    """One element that could not be read, counted by its exception's TYPE --
+    never its message -- so the others are still read."""
+    name = type(exc).__name__
+    tally[name] = tally.get(name, 0) + 1
+
+
+async def _chart(region: Any, trends: dict[str, Any]) -> bool:
+    """One region: False if it holds no labelled point (not a chart), else
+    True, and its trend added when its card names a declared metric."""
+    paths = await region.query_selector_all(CHART_POINTS)
+    if not paths:
+        return False
+    if len(trends) >= MAX_CHARTS:
+        return True
+    card = await region.query_selector(CHART_CARD)
+    key = None
+    for p in await card.query_selector_all(PARAGRAPHS) if card is not None else []:
+        key = _key_for(await p.inner_text())
+        if key is not None:
+            break
+    if key is None or key in trends:
+        return True
+    described = None
+    for line in _lines(await region.inner_text()):
+        found = DESCRIBED.fullmatch(line)
+        if found:
+            described = int(found.group(1))
+            break
+    points = []
+    for path in paths[:MAX_POINTS]:
+        point = _point(await path.get_attribute("aria-label"))
+        if point is not None:
+            points.append(point)
+    trends[key] = {"data_points": described, "points": points}
+    return True
+
+
+async def _trends(regions: list[Any]) -> tuple[dict[str, Any], int, dict[str, int]]:
     """Each chart: a region holding labelled points, the metric its own card
-    names, its description's point count, and its points. Returns the trends
-    and how many chart regions were SEEN, so a chart whose card names no
-    declared metric is counted rather than silently dropped."""
+    names, its description's point count, and its points. Returns the trends,
+    how many chart regions were SEEN -- so a chart whose card names no
+    declared metric is counted rather than silently dropped -- and the regions
+    that could not be read, by type."""
     trends: dict[str, Any] = {}
     seen = 0
-    for region in (await page.query_selector_all('[role="region"]'))[:MAX_REGIONS]:
-        paths = await region.query_selector_all("path[aria-label]")
-        if not paths:
-            continue
-        seen += 1
-        if len(trends) >= MAX_CHARTS:
-            continue
-        card = await region.query_selector("xpath=..")
-        key = None
-        for p in await card.query_selector_all("p") if card is not None else []:
-            key = _key_for(await p.inner_text())
-            if key is not None:
-                break
-        if key is None or key in trends:
-            continue
-        described = None
-        for line in _lines(await region.inner_text()):
-            found = DESCRIBED.fullmatch(line)
-            if found:
-                described = int(found.group(1))
-                break
-        points = []
-        for path in paths[:MAX_POINTS]:
-            point = _point(await path.get_attribute("aria-label"))
-            if point is not None:
-                points.append(point)
-        trends[key] = {"data_points": described, "points": points}
-    return trends, seen
+    failed: dict[str, int] = {}
+    for region in regions[:MAX_REGIONS]:
+        try:
+            if await _chart(region, trends):
+                seen += 1
+        except Exception as exc:  # noqa: BLE001 -- counted by type, never quoted
+            _failed(failed, exc)
+    return trends, seen, failed
 
 
-async def _viewers(page: Any) -> tuple[list[dict[str, Any]], dict[str, int]]:
+async def _viewers(anchors: list[Any]) -> tuple[list[dict[str, Any]], dict[str, Any]]:
     """Each recruiter viewer row: a link to an employer's insights page that
     draws a "Viewed ... ago" line. Its twin, "View insights", draws none and is
     not a viewer. A hidden row is counted and nothing of it is returned: its
     text is read only to decide whether it is a viewer row."""
     viewers: list[dict[str, Any]] = []
-    links = seen = hidden = unparsed = 0
-    for anchor in await page.query_selector_all('a[href*="/company/"]'):
-        if not _is_viewer_link(await anchor.get_attribute("href")):
-            continue
-        links += 1
-        if (not await anchor.is_visible()
-                or await anchor.query_selector(_HIDDEN_ANCESTOR) is not None):
-            if VIEWED.search(str(await anchor.text_content() or "")):
-                seen += 1
-                hidden += 1
-            continue
-        lines = _lines(await anchor.inner_text())
-        viewed = next((line for line in lines if VIEWED.fullmatch(line)), None)
-        if viewed is None:
-            continue
-        seen += 1
-        if len(viewers) >= MAX_VIEWERS:
-            continue
-        others = lines[:lines.index(viewed)] + lines[lines.index(viewed) + 1:]
-        # THE RECORD IS THE ONLY CHANNEL. No link and no degree: the row's
-        # link is an employer's page, and a record's link is a member's or
-        # nothing.
-        person = people_data.Person.from_page(
-            name=others[0] if others else None,
-            headline=others[1] if len(others) > 1 else None,
-        )
-        if person is None:
-            unparsed += 1
-            continue
-        viewers.append({
-            "person": person.envelope(),
-            "viewed": _when(viewed),
-            "anonymous": True,
-        })
-    return viewers, {"links": links, "seen": seen, "hidden": hidden, "unparsed": unparsed}
+    tally: dict[str, Any] = {"links": 0, "seen": 0, "hidden": 0, "unparsed": 0, "failed": {}}
+    for anchor in anchors:
+        try:
+            await _viewer(anchor, viewers, tally)
+        except Exception as exc:  # noqa: BLE001 -- counted by type, never quoted
+            _failed(tally["failed"], exc)
+    return viewers, tally
+
+
+async def _viewer(anchor: Any, viewers: list[dict[str, Any]], tally: dict[str, Any]) -> None:
+    """One company link: a viewer row, a hidden viewer row, or neither."""
+    if not _is_viewer_link(await anchor.get_attribute("href")):
+        return
+    tally["links"] += 1
+    if (not await anchor.is_visible()
+            or await anchor.query_selector(_HIDDEN_ANCESTOR) is not None):
+        if VIEWED.search(str(await anchor.text_content() or "")):
+            tally["seen"] += 1
+            tally["hidden"] += 1
+        return
+    lines = _lines(await anchor.inner_text())
+    viewed = next((line for line in lines if VIEWED.fullmatch(line)), None)
+    if viewed is None:
+        return
+    tally["seen"] += 1
+    if len(viewers) >= MAX_VIEWERS:
+        return
+    others = lines[:lines.index(viewed)] + lines[lines.index(viewed) + 1:]
+    # THE RECORD IS THE ONLY CHANNEL. No link and no degree: the row's link is
+    # an employer's page, and a record's link is a member's or nothing.
+    person = people_data.Person.from_page(
+        name=others[0] if others else None,
+        headline=others[1] if len(others) > 1 else None,
+    )
+    if person is None:
+        tally["unparsed"] += 1
+        return
+    viewers.append({
+        "person": person.envelope(),
+        "viewed": _when(viewed),
+        "anonymous": True,
+    })
 
 
 async def read_recruiter_views(page: Any) -> dict[str, Any]:
     """Everything the recruiter-insights section draws, as declared above."""
     try:
-        counts = await _counts(page)
-        days = await _range_days(page)
-        trends, charts_seen = await _trends(page)
-        viewers, tally = await _viewers(page)
+        counts = await _counts(list(await page.query_selector_all(PARAGRAPHS)))
+        days = await _range_days(list(await page.query_selector_all(LABELS)))
+        trends, charts_seen, charts_failed = await _trends(
+            list(await page.query_selector_all(CHART_REGIONS)))
+        viewers, tally = await _viewers(
+            list(await page.query_selector_all(COMPANY_LINKS)))
     except Exception as exc:  # noqa: BLE001 -- raised by type alone
         # THE LANDING IS DESCRIBED, NEVER PUBLISHED: the same ruling the
         # twelve dom readers raise under (WITHHELD), and the same describer.
@@ -269,10 +313,12 @@ async def read_recruiter_views(page: Any) -> dict[str, Any]:
         "denominators": {
             "charts_seen": charts_seen,
             "charts_read": len(trends),
+            "charts_failed": charts_failed,
             "insight_links_seen": tally["links"],
             "viewer_rows_seen": tally["seen"],
             "viewers_returned": len(viewers),
             "viewers_unparsed": tally["unparsed"],
             "viewers_hidden": tally["hidden"],
+            "links_failed": tally["failed"],
         },
     }

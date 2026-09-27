@@ -111,7 +111,7 @@ def test_each_suggested_person_comes_back_with_the_presence_drawn():
     assert _rows(result) == list(PEOPLE)
     assert result["denominators"] == {
         "cards_seen": 4, "cards_read": 4, "people_returned": 3, "people_unparsed": 0,
-        "groups_skipped": 1, "hidden_skipped": 0,
+        "groups_skipped": 1, "hidden_skipped": 0, "cards_failed": {},
     }
 
 
@@ -230,10 +230,10 @@ def test_mitigation_4_one_page_per_call_nothing_but_finding_and_reading():
 
 
 def test_THIS_CONTROL_CAN_FAIL_a_hover_in_the_reader_is_refused():
-    anchor = "            read += 1" + chr(10)
+    anchor = "        read += 1" + chr(10)
     source = READER_SOURCE.read_text(encoding="utf-8")
     assert source.count(anchor) == 1
-    planted = source.replace(anchor, anchor + "            await card.hover()" + chr(10))
+    planted = source.replace(anchor, anchor + "        await card.hover()" + chr(10))
     assert page_calls_outside_the_allowlist(planted) != []
 
 
@@ -275,3 +275,28 @@ def test_a_failing_page_raises_by_type_alone():
         asyncio.run(presence.read_suggested_presence(Failing()))
     assert "Zzqfailureplant" not in str(caught.value)
     assert caught.value.__cause__ is None and caught.value.__suppress_context__
+
+
+def test_a_card_that_cannot_be_read_is_counted_by_type_and_the_rest_are_read():
+    """One failing card is counted by its exception's TYPE, never its message,
+    and every other card is still read."""
+    class FailingCard:
+        async def is_visible(self):
+            raise ValueError("Zzqfailureplant Markersurname")
+
+    class OneFailingCard:
+        def __init__(self, page):
+            self._page = page
+
+        async def query_selector_all(self, selector, *args, **kwargs):
+            cards = await self._page.query_selector_all(selector, *args, **kwargs)
+            return [FailingCard(), *cards]
+
+    async def action(page):
+        return await presence.read_suggested_presence(OneFailingCard(page))
+
+    result = xhtml_page.read(FIXTURE, action)
+    assert _rows(result) == list(PEOPLE)
+    assert result["denominators"]["cards_failed"] == {"ValueError": 1}
+    assert result["denominators"]["cards_seen"] == 5
+    assert not xhtml_page.anywhere("Zzqfailureplant", result)
