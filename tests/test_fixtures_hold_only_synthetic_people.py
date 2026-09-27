@@ -62,6 +62,13 @@ allowed, nothing below the slug. Counts are from 2026-09-27.
   synthetic/messaging_compose_list.html 3 labels, 4 names. ADDED 2026-09-27
   with the second worked adopter, which returns these labels as people
   records when a caller passes ``include_names``.
+* ``class: a conversation card's participant names`` -- the element
+  ``linkedin_list_conversations`` reads, split the same way.
+  synthetic/messaging_compose_list.html 3 elements, 4 names.
+* ``class: an open conversation's title`` -- the element the reply preview
+  reads. synthetic/messaging_thread.html 1. Both ADDED 2026-09-27 on lane G's
+  cold verification, which found the label slot missing them: a row naming an
+  undeclared person in the element and not in a label read nothing.
 * ``member link: aria-label matching no template`` -- the label is taken
   WHOLE, so a new label shape on a member link fails closed instead of
   passing unread. Measured 0; it is the fallback, not a slot anything uses.
@@ -196,6 +203,19 @@ LABEL_CONNECTION_HIRING = "aria-label: X's connection is hiring"
 LABEL_SEND_MESSAGE = "aria-label: Send a message to X"
 LABEL_INVITE = "aria-label: Invite X to connect"
 LABEL_CONVERSATION = "aria-label: Select conversation with X"
+CLASS_PARTICIPANTS = "class: a conversation card's participant names"
+CLASS_THREAD_TITLE = "class: an open conversation's title"
+
+#: SLOTS READ BY CLASS, where the messaging readers read names: the first
+#: visible text inside an element wearing the class token, split into
+#: participants. Added 2026-09-27: lane G's cold verification found the
+#: conversation label slot missing the element ``linkedin_list_conversations``
+#: actually reads (``threads.PARTICIPANT_NAMES_SELECTOR``), and the thread
+#: title (``threads.TITLE_SELECTOR``) unread.
+CLASS_SLOTS = {
+    "msg-conversation-card__participant-names": CLASS_PARTICIPANTS,
+    "msg-entity-lockup__entity-title": CLASS_THREAD_TITLE,
+}
 
 #: Every slot kind that holds a person in the tracked fixtures today. The
 #: fallback is not on it: it exists to fail closed, and nothing uses it.
@@ -208,6 +228,8 @@ MEASURED_SLOTS = (
     LABEL_SEND_MESSAGE,
     LABEL_INVITE,
     LABEL_CONVERSATION,
+    CLASS_PARTICIPANTS,
+    CLASS_THREAD_TITLE,
 )
 
 #: A conversation's label joins its participants with ``, `` and a last
@@ -287,14 +309,18 @@ class _Link:
 
 class _Element:
     """An open element: its tag, whether it hides its text from sight, its
-    link record when it is an ``<a>``, and whether a heading was read yet."""
+    link record when it is an ``<a>``, the class slot it opens if any, and
+    whether a heading or that slot was read yet."""
 
-    __slots__ = ("tag", "hidden", "link", "text_taken")
+    __slots__ = ("tag", "hidden", "link", "slot", "text_taken")
 
-    def __init__(self, tag: str, hidden: bool, link: Optional[_Link]) -> None:
+    def __init__(
+        self, tag: str, hidden: bool, link: Optional[_Link], slot: Optional[str] = None
+    ) -> None:
         self.tag = tag
         self.hidden = hidden
         self.link = link
+        self.slot = slot
         self.text_taken = False
 
 
@@ -372,8 +398,10 @@ class _SlotReader(HTMLParser):
             self._add(MEMBER_PICTURE, values.get("alt", ""), line, col)
 
         if tag not in _VOID:
-            hidden = _HIDDEN_CLASS in values.get("class", "").split()
-            self._open.append(_Element(tag, hidden, link))
+            classes = values.get("class", "").split()
+            hidden = _HIDDEN_CLASS in classes
+            slot = next((s for c, s in CLASS_SLOTS.items() if c in classes), None)
+            self._open.append(_Element(tag, hidden, link, slot))
 
     def handle_endtag(self, tag):
         for index in range(len(self._open) - 1, -1, -1):
@@ -382,15 +410,23 @@ class _SlotReader(HTMLParser):
                 return
 
     def handle_data(self, data):
-        member = self._innermost_link()
-        if member is None:
-            return
         if any(element.tag in _UNREAD for element in self._open):
             return
         if any(element.hidden for element in self._open):
             return
         text, line, col = _first_line(data, *self.getpos())
         if not text:
+            return
+        # A CLASS SLOT is read wherever it sits, member link or not: its first
+        # visible text, split into participants.
+        owner = next((e for e in reversed(self._open) if e.slot), None)
+        if owner is not None and not owner.text_taken:
+            owner.text_taken = True
+            for part in _PARTICIPANT_SEPARATORS.split(text):
+                self._add(owner.slot, part, line, col)
+            return
+        member = self._innermost_link()
+        if member is None:
             return
         heading = next(
             (e for e in reversed(self._open) if e.tag in _HEADINGS), None
@@ -586,6 +622,14 @@ PLANTS = {
     LABEL_INVITE: '<button aria-label="Invite {name} to connect">Connect</button>',
     LABEL_CONVERSATION: (
         '<div tabindex="0" aria-label="Select conversation with {name}"></div>'
+    ),
+    CLASS_PARTICIPANTS: (
+        '<h3 class="msg-conversation-card__participant-names t-16">'
+        "<div><span>{name}</span></div></h3>"
+    ),
+    CLASS_THREAD_TITLE: (
+        '<dt class="msg-entity-lockup__entity-title-wrapper">'
+        '<span class="msg-entity-lockup__entity-title">{name}</span></dt>'
     ),
     MEMBER_LABEL_UNPARSED: '<a href="' + PLANT_MEMBER + '" aria-label="{name}"></a>',
 }
