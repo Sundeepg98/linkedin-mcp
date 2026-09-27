@@ -40,15 +40,24 @@ import textwrap
 import pytest
 
 from linkedin_server import search_results
+from tests.record_typed import identity_parameters_outside_a_record
 
 #: Parameter names that would mean an address, a needle or a person reached a
 #: function here. ``groups.py``'s list, plus the two this surface adds:
 #: a search takes a QUERY, and its rows are PEOPLE.
-_ADDRESS_SHAPED = {
+#:
+#: SPLIT ON 2026-09-27, around the record type (NAMES-AT-RUNTIME,
+#: PEOPLE-DATA-MITIGATIONS; ``tests/record_typed.py``): an IDENTITY -- a
+#: person, a name, an address of one -- may reach a function here only
+#: annotated as a ``people_data`` record; a NEEDLE or page text not at all,
+#: because no record type carries either. The union keeps its name for the
+#: exact-signature checks below.
+_IDENTITY_SHAPED = {
     "href", "url", "uri", "link", "slug", "path", "address", "urn", "id",
-    "profile", "member", "name", "person", "people", "keywords", "query",
-    "q", "needle", "search", "term", "text",
+    "profile", "member", "name", "person", "people",
 }
+_NEEDLE_SHAPED = {"keywords", "query", "q", "needle", "search", "term", "text"}
+_ADDRESS_SHAPED = _IDENTITY_SHAPED | _NEEDLE_SHAPED
 
 _PUBLIC = [
     name
@@ -64,18 +73,23 @@ def test_the_module_is_readable_at_all() -> None:
 
 
 def test_no_address_or_needle_is_a_parameter_of_any_function() -> None:
+    """REWRITTEN AROUND THE RECORD TYPE ON 2026-09-27, not deleted: an
+    identity-named parameter passes only annotated as a people record, and a
+    needle never does. See ``_IDENTITY_SHAPED``."""
     offenders: dict[str, set[str]] = {}
     for name in _PUBLIC:
         target = getattr(search_results, name)
         if not (inspect.isfunction(target) or inspect.iscoroutinefunction(target)):
             continue
-        found = _ADDRESS_SHAPED & set(inspect.signature(target).parameters)
+        found = set(identity_parameters_outside_a_record(target, _IDENTITY_SHAPED))
+        found |= _NEEDLE_SHAPED & set(inspect.signature(target).parameters)
         if found:
             offenders[name] = found
     assert not offenders, (
         "A function here can be handed an address or a needle: "
         f"{offenders}. Search results are made of other people; the whole "
-        "shaper is the promise that no name is a parameter."
+        "shaper is the promise that no name is a parameter -- except as a "
+        "people_data record, since NAMES-AT-RUNTIME."
     )
 
 

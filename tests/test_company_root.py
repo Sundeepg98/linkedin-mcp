@@ -42,6 +42,7 @@ import pytest
 
 from linkedin_server import coerce, company_page, company_root, dom, readonly
 from tests.plantedpage import PLANT, PlantedPage, carries_the_plant
+from tests.record_typed import identity_parameters_outside_a_record
 
 IDENTIFIER = "5417062"
 
@@ -277,12 +278,18 @@ def test_only_one_function_here_touches_a_page_and_none_takes_a_needle():
     ]
     assert async_functions == ["read_company_root"], async_functions
 
-    banned = {"name", "url", "href", "slug", "query", "keywords", "company"}
+    # REWRITTEN AROUND THE RECORD TYPE ON 2026-09-27, not deleted: a name or
+    # an address may arrive only annotated as a ``people_data`` record
+    # (NAMES-AT-RUNTIME, PEOPLE-DATA-MITIGATIONS; ``tests/record_typed.py``);
+    # a needle, or a company -- which no record type carries -- not at all.
+    identity = {"name", "url", "href", "slug"}
+    banned = {"query", "keywords", "company"}
     for name, function in vars(company_root).items():
         if not inspect.isfunction(function):
             continue
         parameters = set(inspect.signature(function).parameters)
-        assert not (parameters & banned), (name, parameters)
+        outside = identity_parameters_outside_a_record(function, identity)
+        assert not outside and not (parameters & banned), (name, parameters)
 
 
 def test_the_module_fires_nothing():

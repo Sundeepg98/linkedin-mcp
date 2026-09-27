@@ -16,6 +16,7 @@ import inspect
 import pytest
 
 from linkedin_server import anchors
+from tests.record_typed import identity_parameters_outside_a_record
 
 
 #: Parameter names whose VALUE would be an address or an identity.
@@ -38,10 +39,17 @@ def test_no_address_is_a_parameter_of_any_publishing_function() -> None:
 
     A reader never handed an address cannot leak one, whatever LinkedIn routes
     tomorrow. A filter has to keep up; an absent parameter does not.
+
+    REWRITTEN AROUND THE RECORD TYPE ON 2026-09-27, not deleted: an address
+    or a name may reach a publishing function here only annotated as a
+    ``people_data`` record, whose link is canonical and whose words are
+    sanitised and marked (NAMES-AT-RUNTIME, PEOPLE-DATA-MITIGATIONS;
+    ``tests/record_typed.py``). As a bare string it is refused, as before.
     """
     for name in ("tally", "term_for", "emitted_alphabet", "control_fixture"):
-        signature = inspect.signature(getattr(anchors, name))
-        offenders = _ADDRESS_SHAPED & set(signature.parameters)
+        offenders = identity_parameters_outside_a_record(
+            getattr(anchors, name), _ADDRESS_SHAPED
+        )
         assert not offenders, (
             f"anchors.{name} takes {sorted(offenders)}, which is an address by "
             "another name. Everything a caller publishes must take INTEGERS."

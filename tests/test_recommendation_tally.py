@@ -61,6 +61,7 @@ import json
 import pytest
 
 from linkedin_server import recommendations, shape
+from tests.record_typed import identity_parameters_outside_a_record
 
 # ---------------------------------------------------------------------------
 # Constants. See the module docstring for why each is safe to commit.
@@ -176,6 +177,15 @@ def test_the_sweep_found_exactly_the_three_functions_the_module_declares():
 #: identity or a slug become a parameter. Checked case-insensitively.
 _BANNED_PARAMETER_SUBSTRINGS = ("name", "label", "title", "text", "author", "slug")
 
+#: SPLIT ON 2026-09-27, around the record type (NAMES-AT-RUNTIME,
+#: PEOPLE-DATA-MITIGATIONS; ``tests/record_typed.py``): the IDENTITY half may
+#: become a parameter only annotated as a ``people_data`` record; the PAGE-TEXT
+#: half never, because no record type carries a label or free text.
+_IDENTITY_SUBSTRINGS = ("name", "title", "author", "slug")
+_TEXT_SUBSTRINGS = tuple(
+    token for token in _BANNED_PARAMETER_SUBSTRINGS if token not in _IDENTITY_SUBSTRINGS
+)
+
 
 @pytest.mark.parametrize("function_name", _PUBLIC_NAMES)
 def test_no_public_callable_takes_an_identifying_parameter(function_name):
@@ -192,11 +202,19 @@ def test_no_public_callable_takes_an_identifying_parameter(function_name):
     ``recommendation_tally`` as FUNCTION names while promising ``href``
     and ``relation`` as their only PARAMETER names -- so the assertion
     must be about parameters specifically, and it is.
+
+    REWRITTEN AROUND THE RECORD TYPE ON 2026-09-27, not deleted: see
+    ``_IDENTITY_SUBSTRINGS``. ``author_name`` as a bare string still turns
+    this red; as a ``people_data.Person`` it is the declared channel.
     """
     function = getattr(recommendations, function_name)
+    outside = identity_parameters_outside_a_record(
+        function, lambda p: any(token in p.lower() for token in _IDENTITY_SUBSTRINGS)
+    )
+    assert outside == [], (function_name, outside)
     for parameter in inspect.signature(function).parameters:
         lowered = parameter.lower()
-        assert not any(token in lowered for token in _BANNED_PARAMETER_SUBSTRINGS), (
+        assert not any(token in lowered for token in _TEXT_SUBSTRINGS), (
             function_name,
             parameter,
         )
