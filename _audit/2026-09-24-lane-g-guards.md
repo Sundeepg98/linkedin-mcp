@@ -1604,3 +1604,289 @@ messages, the pins, the digests, the timings, the caps).
 Its runs could not settle two things, and it said so: the gate totals
 (5740/6 and 6723/2), which it did not repeat, and the pre-adoption "four
 viewers, twice" red evidence of P.3, which predates its checkout.
+
+## Order of 2026-09-27 17:05: three fixes, a ruling, and the integration
+
+The orchestrator's order to lane G, 2026-09-27 17:05 IST. It ratified the
+three decisions the foundation left overturnable (the `cdp_download`
+declaration and the read-path split, integrating before the second adopter,
+the member id beside the viewer record); ordered three fixes the lane had
+found -- each shown failing first -- and one ruling registered and encoded;
+and made one integration conditional on lane L8 landing. It did land, so it
+was integrated. Disk agreed with the order's sample at the start (head
+ad5b50a, clean, 43 ahead of master 2eb90ad, master an ancestor of it).
+
+### Q.0 Commits, with their times from `git log`
+
+```
+6ae18a6  09-27 17:19  messaging filters: a pill is pressed by its EXACT name, and a decoy containing the word is refused
+69dab16  09-27 17:46  invented names: the entry that named a real historical figure is replaced, everywhere it was carried, and held out by digest
+bc5e735  09-27 17:48  cited-hash guard: a disclosure's wording is read across line wraps
+5c524e6  09-27 18:14  PREVIEW-NAMES-THE-RESOLVED-TARGET: registered, and the two previews that name a third party carry a people record
+9baf73b  09-27 18:38  merge master 7986ae3 into lane G: lane L8's outward classes meet lane G's foundation
+ca5a0f6  09-27 19:15  full gate: two of lane G's own reds, found when the whole suite first ran here
+```
+
+This record's commit follows them. None of these hashes is on `master` yet:
+each does not resolve on `master` until the orchestrator merges this branch.
+
+### Q.1 Item 1 (HIGH): a filter pill is pressed by its EXACT name
+
+`dom.activate_messaging_filter` found the pill with `get_by_role(name=word,
+exact=False)`, a substring match, so `message_filter="other"` -- the
+composer's list draws no "Other" pill -- pressed whichever button's name
+merely contained the word, and published its whole label.
+
+RED FIRST, in a real headless Chromium,
+`tests/test_a_filter_pill_is_pressed_by_its_exact_name.py` on the old
+activator: a decoy "Others from <plant>" was PRESSED for `other`; an exact
+"InMail" pill beside a decoy "InMail from <plant>" was not pressed (two
+substring matches, refused); the rule said True for "InMail messages". 6
+failed.
+
+The fix: `dom.filter_name_matches`, the one predicate the activator and the
+enumerator share, is exact equality with case and whitespace folded. The
+activator still finds candidates by substring, reads each one's accessible
+name, and presses only when exactly one EQUALS the word; otherwise it presses
+nothing and says what it saw as counts -- `found` (exact) and `containing`
+(substring) -- never a label, because a label it did not press is page text.
+`pill_label` is now the pressed pill's own spelling of the word. The
+enumerator compares the accessible name (aria-label, else text), not the two
+joined. The one click line stays in the function, so the sanctioned-mutation
+table does not move. After: the new file, 11 passed; on the tracked
+compose-list fixture the five measured pills are each pressed by exact name
+and `other` is refused. The verifier's r03 and r03b, re-run: nothing pressed
+that is not a pill, nothing outside a record. Tests that pinned the old leak
+moved to the new truth: the unread-readings file's page-text field set is
+now EMPTY, still pinned; the enumerator's agreement test covers both halves;
+the open_messaging `filters` pin now asserts nothing leaves at all.
+
+MEASURED, NOT ENDORSED: `focused` IS pressed on the fixture -- the folder
+dropdown's trigger is named exactly "Focused", and pressing it opens the
+folder menu rather than filtering. Whether the activator should also require
+a pill's own markers (`aria-pressed`, the filter-pill hook) is the
+activator's owner's call; the test pins what happens now.
+
+### Q.2 Item 2: the invented-names entry that named a real historical figure
+
+The first entry of `INVENTED_NAMES` named a real historical figure, under a
+comment reading "People, all invented". It is not named in this record
+either.
+
+RED FIRST: three tests in `tests/test_a_person_name_is_never_a_literal.py`
+hold retired real names as SHA-256 digests of the folded name, never the
+name. On the old tree the table check found the entry (digest prefix
+e71d025a0b49) and a sweep of tracked tests/ and scripts/ found it in six
+files, ten places: 2 failed. A control retires an invented pair at runtime
+and finds it beside another capitalised word.
+
+It is replaced by a plainly invented name, "Wren Fixturewright", in the
+table and in every file that carried it: two person constants
+(`OTHER_AUTHOR` in `tests/test_activity_items.py`, `MEMBER_NAME` in
+`scripts/_probe_interests_entity_shaping.py`) and literal fixtures in
+`tests/test_compose_fields.py` (with its split first and last words),
+`tests/test_shape.py` and `tests/test_surface_census.py`. The shape each test
+reads is unchanged. After: 1362 passed.
+
+### Q.3 Item 3: the cited-hash guard reads a disclosure across a line wrap
+
+`scripts/check_cited_shas_resolve.py` searched its "does not resolve"
+vocabulary one line at a time. RED FIRST: three wrapped disclosures --
+between words, inside emphasis, and with a list item's indented continuation
+-- all came back CANDIDATE: 3 failed. The emphasis-stripped lines are now
+searched JOINED, so the vocabulary's own `\s+` folds the newline and any
+continuation indent, and a match marks every line it spans. It can only add a
+disclosure; `PINNED` holds no bad citation for it to clear. Not read across:
+a wrap that inserts a non-space character, such as a blockquote's `> `.
+After: the guard, the audit-index and import-safety files, 318 passed.
+
+### Q.4 Item 4: PREVIEW-NAMES-THE-RESOLVED-TARGET
+
+- `_audit/2026-09-27-rulings-previews-and-receipts.md`: the orchestrator's
+  document, copied byte-identical (`cmp`). NO DOCUMENT GUARD OBJECTED; not a
+  word of it changed.
+- REGISTER: the entry with the ordered id, claim, binds, document, anchor
+  and note. RULINGS.md regenerated to a fixed point; its RULED declaration is
+  claimed.
+- ENCODED, RED FIRST: `tests/test_a_preview_names_the_resolved_target.py` on
+  the old previews, 3 failed -- prose where a record belongs. Now
+  `send_invitation`'s preview carries in `who_this_would_reach` a
+  `people_data.Person` envelope holding the name inside the control's label
+  ("Invite <name> to connect"; the whole label if drawn otherwise), and
+  `send_reply`'s the conversation's title, each sanitised, capped and marked;
+  the instruction to CHECK it moves to `who_this_would_reach_check`, prose
+  with no page text. The writes.py change is one function's tail and one
+  import line, kept minimal for lane L5.
+- NOTHING A WRITE KEEPS CARRIES THE NAME, measured where this package keeps
+  anything: a write writes nothing to disk, so what outlives a call is the
+  grant store, the observation store and the log records. After an
+  invitation preview (on a grantable spec, so a grant exists to keep it) and
+  after a reply is previewed, redeemed and FIRED, none carries the name, the
+  receipt carries none, and each grant's target is the caller's own. Each
+  check is shown convicting a planted regression.
+- THE BOUNDED-READER DERIVATION STOPS AT THE WRITE DOOR. The preview
+  builders are reached by name through `writes.preview` and then
+  `server._write_tool`, the one door every write tool calls; crossing it
+  declared all fifteen write tools people readers and refused the write
+  path's loops (3 failed, measured). The builders only the door reaches are
+  declared (`PREVIEW_BUILDERS`) and held equal to what is found behind it; a
+  control shows the stop hides nothing else, and that a function of the
+  door's name elsewhere re-opens the path loudly, by name.
+- After: 1737 passed over the previews, writes, the write door, the bounded
+  file, people data, the page-string, log and envelope guards and the
+  rulings, audit-index, census and cited-hash instruments.
+
+### Q.5 Item 5: the integration of master 7986ae3 (lane L8)
+
+When items 1-4 were committed, master's log showed lane L8's head, a
+fast-forward past 2eb90ad (18 commits). Integrated in one merge commit
+(the last row of Q.0).
+
+- (a)-(e) Conflicts, from both sides: perform's `click_error` keeps lane G's
+  type-only form for every action, which covers L8's type-only form for its
+  menu item actions; `__init__.py` reads sixteen write tools and fifteen
+  sanctioned mutating calls, both histories kept; REGISTER keeps L8's two
+  entries and this order's one; `PERMANENTLY_FORBIDDEN` is master's six,
+  identical by value; the timings table takes both sides' entries (181, none
+  priced differently by the two) and re-derives its totals (1638.9 s); the
+  generated files come from master's copies, regenerated to a fixed point,
+  67 rulings.
+- (f) This lane's guards against L8's code: `group_id` classified `id` in
+  `tests/test_no_write_is_aimed_by_a_name.py`; the receipt guard convicted
+  L8's withdraw verification returning `str(exc)`, now composed from the
+  type and the withheld landing; the fixtures guard gains two GROUP slots (a
+  group link's text, and the "More options for X" label L8's fixture says
+  carries the group's name) and declares L8's six invented group names in
+  `SYNTHETIC_GROUPS`; and group_leave's five readers -- `identifier: Any`, so
+  the reader guard handed them a page double that four refused on their
+  first line, recorded clean having read NOTHING -- are now driven with a
+  five-digit numeric id: 0 page reads before, 5 to 6 after, all five clean.
+- (g) Counts re-derived on the merged tree, measured off the registry: 57
+  tools, 16 write, 17 sanctioned actions. README ("Fifty-seven tools ship.
+  Forty-one read. Sixteen write."), the server's instructions and
+  `__init__.py` (sixteen write tools, fifteen sanctioned mutating calls)
+  say the same, and the tests that read those sentences are green in the
+  whole suite (Q.6).
+- (h) Pins: the tool surface measured at 57 tools and 90 parameters (master's
+  57 and 89, and this branch's `item`); the boundary digests unchanged from
+  this branch's -- L8 did not touch `readonly.py`.
+- (i) A repeated-key check over every dict and set literal in
+  `linkedin_server/`, `tests/` and `scripts/` (4638) and every JSON file:
+  two hits, both older than this merge and neither this lane's (Q.8).
+
+### Q.6 The whole suite, first run on this branch: two of this lane's own reds
+
+The merge's impact set widened to the whole suite (57 changed paths select
+253 of 264 test files), so the whole suite ran, on the merge commit with a
+clean tree: 264 files, 6 workers, 1426.5 s -- 10921 passed, 2 failed, 9
+skipped, 1 xfailed. THIS BRANCH HAD NEVER RUN IT: F.12, I.6 and P.14 each
+name it as not run, and every gate they list is a selection. Neither
+failure came from the merge. Both are this lane's, red since 2026-09-24:
+
+- `tests/test_apply_modal_fixture.py::test_a_proceeding_gate_appends_the_second_click`,
+  red since F.3's commit (`da3354d`), proved the two-click loop's second
+  click by reading its selector back out of `clicked.error` -- the leak F.3
+  closed when that field became the exception's type alone. The proof moves
+  to the page: a recorder of every selector `perform` hands `page.click`,
+  installed after the preview. The receipt is held to the type
+  (`TimeoutError`, measured). A control -- a refusing gate handing back the
+  same sentinel -- shows the record saying no, holding one press, the apply
+  control's; a plant emptying `TWO_CLICK_ACTIONS` shows the new assertion
+  failing.
+- `tests/test_an_outage_is_never_filed_as_an_absence.py`, red since I.4's
+  commit (`2e3aad2`): `scripts/py_baseline_lint.py`'s `_pieces` answered `[]`
+  when the tokenizer refused, a refusal reading as a file with no string
+  pieces. It answers None now -- no piece table, not an empty one -- and the
+  caller judges by the node's own quote as before, tracking "tokenized once"
+  with its own flag. A new test drives the refused branch, which no test
+  ran: None, and L7's line convicted by the fallback. The pre-fix module
+  fails it, answering `[]`.
+
+Both hashes above are this branch's and do not resolve on `master` until it
+merges. BOTH FILES WOULD HAVE BEEN SELECTED by today's `scripts/impact_gate.py`
+(measured with `--plan-only`): a `writes.py` change selects the apply file,
+which imports it, and a `scripts/` change selects the outage guard, which
+sweeps the directory. The impact set widened to the whole suite at every
+gate, the whole suite was not run, and the selections built in its place
+missed both: F.12's lesson about the items' hand-picked selections holds
+for the gates' symbol-built ones too.
+
+### Q.7 Gates run, and what did not run
+
+RUN, with the venv's 3.13 unless said. Each item's red came first (Q.1-Q.4).
+
+    gate                                         result
+    item 1: the new file                         11 passed
+    item 1: activator, enumerator, thread-id,    476 + 456 passed
+      leave-the-address, readonly, surface
+      and invariant files
+    item 2: the guard and every file that        1362 passed (23 min: another
+      carried the name                           session's full suite held the
+                                                 CPU at 100%)
+    item 3: the guard, audit-index and           318 passed
+      import-safety files
+    item 4: 24 files -- previews, writes, the    1737 passed, 391 s
+      write door, the bounded file, people
+      data, the page-string, log and envelope
+      guards, the rulings, audit-index, census
+      and cited-hash instruments
+    the merge, before its fixes: 38 files        2084 passed, 3 failed -- Q.5 (f):
+                                                 `group_id` unclassified (the rule and
+                                                 its control) and L8's `str(exc)`
+    the merge's fixes: the fixtures guard, the   98 passed; the reader guard, 502
+      no-name-aim rule and the receipt guard
+    THE WHOLE SUITE, on the merge commit         10921 passed, 2 failed (Q.6)
+    Q.6's repairs: the three files               67 passed
+    Q.6's repairs, CPython 3.10 through uv:      28 passed
+      the two non-browser files
+    the impact gate over Q.6's three files       58 files, 2898 passed, 696.9 s;
+                                                 NOT CHECKED, as it prints: 206 of 264
+                                                 files
+    CPython 3.10.19 through uv, with the         797 passed, 4 workers, 288 s;
+      requirements: the 25 changed test modules  clean tree, head `ca5a0f6`
+      that name no browser
+    the plants and controls                      each new check shown failing on the
+                                                 regression it exists for (Q.1-Q.6)
+
+WHEN EACH RAN, from the stamps: item 4's gate and the merge's first gate
+ran on the working tree before their commits (their stamps say tracked-dirty);
+so did the impact gate over Q.6's repairs, whose tree `ca5a0f6` committed
+unchanged. The whole suite ran on the committed merge, clean.
+
+NOT RUN:
+
+- **The whole suite after Q.6's repairs.** Their impact set ran instead
+  (58 files), beside the whole suite on the merge commit.
+- **The 3.10 cell for the 15 changed test files that name Playwright or a
+  browser page** -- the filter pill, the previews, the apply fixture, the
+  messaging overview and the writes files among them: under `uv` they would
+  resolve a Playwright whose browser build this box's shared cache may not
+  hold. CI's matrix runs 3.10.
+- **CI on any platform** (nothing pushed), **a cold verification pass**
+  (this order did not ask for one), **anything live**.
+- **The timings table** was not re-priced: this order's two new test files
+  are unpriced, and it prices 181 of 264 files, five above its two-thirds
+  line.
+
+### Q.8 Open, for other owners
+
+- The folder trigger named exactly "Focused" is pressed by `focused` (Q.1).
+- A second real historical figure's name, not on `INVENTED_NAMES`, appears
+  in `dom.py`'s docstrings (5 lines), five test files (17 lines) and two
+  audit documents; no guard fired on it in the whole suite. The
+  retired-name digest table (Q.2) can hold it once its owners choose a
+  replacement. It is not named here either.
+- Both previews' people records carry a name and an empty headline: the
+  markup each reads draws none. `send_reply`'s record is a person even for a
+  group conversation, whose title may be a group's name or several people's.
+- Mitigation 6's two debts stand: `send_invitation` and `send_message` are
+  still aimed by a name (P.15), measured again on the merged registry.
+- `tests/test_selectors_resolve.py`'s selector table repeats one key, so its
+  first entry is silently overwritten and one selector is never resolved;
+  `tests/test_api_call_sites.py` repeats a set element (harmless). Both
+  predate this merge.
+- 19 `_audit/` documents, this record among them, open with a bare model-id
+  line above their title. No ruling about it was found in the register or
+  the corpus; if it was never ruled, it is model attribution in tracked
+  files. Not changed here: it spans every lane's records.
+- The ratchet's limits of P.4 stand: per reader, default drives only.
