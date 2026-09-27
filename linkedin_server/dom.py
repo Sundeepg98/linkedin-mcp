@@ -8201,64 +8201,44 @@ def _in_topcard(selector_list: str) -> str:
     )
 
 
-def _topcard_position(index: object, builder: str) -> str:
-    """The position a click target is built from: a non-negative int, or raise.
+def topcard_invite_control_selector() -> str:
+    """THE Connect control of the profile's OWN topcard -- no position in it.
 
-    GUARDED the way :func:`invite_control_selector` is, and for the same
-    reason: the index is not chosen here, it is the output of
-    :data:`NAMED_PROFILE_JS`, which sets it ONLY when exactly one control's
-    accessible name names the profile's own owner and that control sits inside
-    the owner's topcard. The name never reaches this process; the position
-    does.
-    """
-    if isinstance(index, bool) or not isinstance(index, int) or index < 0:
-        raise ValueError(
-            f"{builder} needs a non-negative int index; a click target is "
-            "built from this string, so nothing else may reach it."
-        )
-    return str(index)
+    THE AIM, AS TWO RE-CHECKS OF 2026-09-27 LEFT IT. The first build pressed
+    ``INVITE_CONTROL >> nth=K`` over the whole page, and Playwright RE-RESOLVES
+    a selector whose element is re-rendered while the press waits: a
+    stranger's control drawn earlier in the page mid-press took position K
+    and the press. Scoping that position to the topcard closed the page and
+    left the topcard: a stranger's control drawn INSIDE the topcard, or a
+    second element whose id ends ``Topcard``, drawn mid-press, still took the
+    press -- a position is an address only while the list holds still.
 
-
-def topcard_invite_control_selector(index: int) -> str:
-    """ONE Connect control of the profile's OWN topcard, by its position there.
-
-    SCOPED, AND THE SCOPE IS THE FIX FOR WHAT THE COLD RE-CHECK OF 2026-09-27
-    FOUND. The press was ``INVITE_CONTROL >> nth=K`` over the whole page: no
-    label and no container in it, and Playwright RE-RESOLVES a selector whose
-    element was re-rendered while the press waited. A control inserted earlier
-    in the page -- somebody else's -- then took position K, and the press
-    landed on it; demonstrated on the synthetic profile, where a stranger's
-    'Invite ... to connect' drawn at the top of the page during a re-render
-    received the press. Scoped to the one topcard, a re-resolution can reach
-    only a control of the owner's own topcard. The position is
-    :data:`NAMED_PROFILE_JS`'s, counted inside that topcard; no name crosses
-    into this string.
+    So there is no position. The gate requires, when the page is read, that
+    the topcard holds exactly ONE control of this kind and that it is the
+    owner's (both compared in :data:`NAMED_PROFILE_JS`), and ``perform``
+    presses this selector STRICTLY -- ``strict=True``, so a press that finds
+    two matches at press time throws instead of choosing. Anything drawn
+    mid-press that would give the selector a second match stops the press; a
+    re-render of the owner's own control, and nothing else, is pressed. No
+    name crosses into this string.
 
     NAMED ``*_selector`` ON PURPOSE: ``tests/test_selectors_resolve.py``
     enumerates this module's builders by that suffix and resolves each one in
     a browser, and a builder named otherwise would never be handed to one.
     """
-    return (
-        _in_topcard(INVITE_CONTROL)
-        + " >> nth="
-        + _topcard_position(index, "topcard_invite_control_selector")
-    )
+    return _in_topcard(INVITE_CONTROL)
 
 
-def topcard_message_control_selector(index: int) -> str:
-    """ONE Message control of the profile's OWN topcard, by its position there
-    -- see :func:`topcard_invite_control_selector`.
+def topcard_message_control_selector() -> str:
+    """THE Message control of the profile's OWN topcard -- see
+    :func:`topcard_invite_control_selector`, whose reasons are this one's.
 
     It replaced ``message_control_selector``, the page-wide builder the
-    route's first build pressed Message with, for the same reason; nothing
-    else in the package pressed a Message control, so it was removed rather
-    than kept beside this one.
+    route's first build pressed Message with; nothing else in the package
+    pressed a Message control, so it was removed rather than kept beside this
+    one.
     """
-    return (
-        _in_topcard(MESSAGE_CONTROL)
-        + " >> nth="
-        + _topcard_position(index, "topcard_message_control_selector")
-    )
+    return _in_topcard(MESSAGE_CONTROL)
 
 
 #: THE OVERLAY CONVERSATION a profile's Message press is expected to open, and
@@ -8307,12 +8287,17 @@ OVERLAY_COMPOSER_EDITOR = 'form.msg-form div.msg-form__contenteditable[role="tex
 #: remove, or unrecognised -- which is how the first supervised act records
 #: what a pressed Connect turns into without a label crossing.
 #:
-#: TWO ADDITIONS FROM THE COLD RE-CHECK OF 2026-09-27, both comparisons that
-#: never leave the page:
+#: TWO ADDITIONS FROM THE RE-CHECKS OF 2026-09-27, both readings that never
+#: leave the page:
 #:
-#: * each matched control's POSITION INSIDE THE TOPCARD
-#:   (``invite_topcard_index``, ``message_topcard_index``), which is what the
-#:   press is now aimed by -- see :func:`topcard_invite_control_selector`;
+#: * how many controls OF EACH KIND the topcard holds, whatever their labels
+#:   (``invite_controls_in_topcard``, ``message_controls_in_topcard``). The
+#:   press carries NO POSITION -- it is the topcard-scoped selector, pressed
+#:   strictly -- so the gate needs the topcard to hold exactly one control of
+#:   the kind, and that one the owner's (see
+#:   :func:`topcard_invite_control_selector`). This script returned positions
+#:   until a second re-check showed a position is an address only while the
+#:   list holds still;
 #: * WHOSE CONVERSATION a composer belongs to: the overlay bubbles that hold
 #:   an editor are counted, and when exactly one does, its title
 #:   (:data:`OVERLAY_BUBBLE_TITLE`) is compared with the owner's name from the
@@ -8324,11 +8309,6 @@ OVERLAY_COMPOSER_EDITOR = 'form.msg-form div.msg-form__contenteditable[role="tex
 NAMED_PROFILE_JS = """
 (cfg) => {
   const norm = (s) => String(s === null || s === undefined ? '' : s).replace(/\\s+/g, ' ').trim();
-  const positionIn = (container, selector, el) => {
-    if (!container || !el || !container.contains(el)) return null;
-    const at = Array.prototype.indexOf.call(container.querySelectorAll(selector), el);
-    return at >= 0 ? at : null;
-  };
   const out = {
     title_shape: 'none',
     topcards: 0,
@@ -8338,16 +8318,14 @@ NAMED_PROFILE_JS = """
     degree_tokens: 0,
     invite_controls: 0,
     invite_matches: 0,
-    invite_index: null,
     invite_in_topcard: 0,
-    invite_topcard_index: null,
+    invite_controls_in_topcard: 0,
     message_controls: 0,
     message_matches: 0,
-    message_index: null,
     message_tag: null,
     message_href: null,
     message_in_topcard: 0,
-    message_topcard_index: null,
+    message_controls_in_topcard: 0,
     more_actions: 0,
     dialogs: 0,
     composer_editors: 0,
@@ -8410,6 +8388,8 @@ NAMED_PROFILE_JS = """
     const heads = card.querySelectorAll('h1, h2');
     out.topcard_headings = heads.length;
     out.heading_matches_title = heads.length >= 1 && norm(heads[0].innerText) === name;
+    out.invite_controls_in_topcard = card.querySelectorAll(cfg.inviteSelector).length;
+    out.message_controls_in_topcard = card.querySelectorAll(cfg.messageSelector).length;
     const found = [];
     for (const raw of String(card.innerText || '').split('\\n')) {
       const line = norm(raw).replace(/^\\u00b7\\s*/, '');
@@ -8430,18 +8410,12 @@ NAMED_PROFILE_JS = """
   const wantInvite = 'Invite ' + name + ' to connect';
   const invites = document.querySelectorAll(cfg.inviteSelector);
   let matches = 0;
-  let index = null;
-  let matched = null;
   for (let i = 0; i < invites.length; i += 1) {
     if (norm(invites[i].getAttribute('aria-label')) !== wantInvite) continue;
     matches += 1;
-    index = matches === 1 ? i : null;
-    matched = matches === 1 ? invites[i] : null;
     if (card && card.contains(invites[i])) out.invite_in_topcard += 1;
   }
   out.invite_matches = matches;
-  out.invite_index = matches === 1 ? index : null;
-  out.invite_topcard_index = matches === 1 ? positionIn(card, cfg.inviteSelector, matched) : null;
   const wantMessage = 'Message ' + name;
   const messages = document.querySelectorAll(cfg.messageSelector);
   const hrefToken = (href) => {
@@ -8452,23 +8426,17 @@ NAMED_PROFILE_JS = """
     return 'other';
   };
   matches = 0;
-  index = null;
-  matched = null;
   let tag = null;
   let href = null;
   for (let i = 0; i < messages.length; i += 1) {
     if (norm(messages[i].getAttribute('aria-label')) !== wantMessage) continue;
     matches += 1;
-    index = matches === 1 ? i : null;
-    matched = matches === 1 ? messages[i] : null;
     const t = messages[i].tagName.toLowerCase();
     tag = matches === 1 ? (t === 'a' || t === 'button' ? t : 'other') : null;
     href = matches === 1 ? hrefToken(messages[i].getAttribute('href')) : null;
     if (card && card.contains(messages[i])) out.message_in_topcard += 1;
   }
   out.message_matches = matches;
-  out.message_index = matches === 1 ? index : null;
-  out.message_topcard_index = matches === 1 ? positionIn(card, cfg.messageSelector, matched) : null;
   out.message_tag = matches === 1 ? tag : null;
   out.message_href = matches === 1 ? href : null;
   const vocabulary = [
@@ -8535,16 +8503,14 @@ async def read_named_profile(page: Any) -> dict[str, Any]:
         "degree_tokens": 0,
         "invite_controls": 0,
         "invite_matches": 0,
-        "invite_index": None,
         "invite_in_topcard": 0,
-        "invite_topcard_index": None,
+        "invite_controls_in_topcard": 0,
         "message_controls": 0,
         "message_matches": 0,
-        "message_index": None,
         "message_tag": None,
         "message_href": None,
         "message_in_topcard": 0,
-        "message_topcard_index": None,
+        "message_controls_in_topcard": 0,
         "more_actions": 0,
         "dialogs": 0,
         "composer_editors": 0,
@@ -8574,8 +8540,9 @@ async def read_named_profile(page: Any) -> dict[str, Any]:
     reading = raw if isinstance(raw, dict) else {}
     for key in (
         "topcards", "topcard_headings", "degree_tokens", "invite_controls",
-        "invite_matches", "invite_in_topcard", "message_controls",
-        "message_matches", "message_in_topcard", "more_actions", "dialogs",
+        "invite_matches", "invite_in_topcard", "invite_controls_in_topcard",
+        "message_controls", "message_matches", "message_in_topcard",
+        "message_controls_in_topcard", "more_actions", "dialogs",
         "composer_editors", "conversation_bubbles", "bubbles_with_editor",
         "bubble_titles", "dialog_note_fields",
     ):
@@ -8585,15 +8552,6 @@ async def read_named_profile(page: Any) -> dict[str, Any]:
         out[key] = reading.get(key) is True
     degree = reading.get("degree")
     out["degree"] = degree if degree in PROFILE_DEGREES else None
-    for key in ("invite_index", "message_index", "invite_topcard_index", "message_topcard_index"):
-        position = reading.get(key)
-        # ABSENT STAYS None: 0 is a real position, and "no match" must not
-        # collapse into "the first one".
-        out[key] = (
-            position
-            if isinstance(position, int) and not isinstance(position, bool) and position >= 0
-            else None
-        )
     tag = reading.get("message_tag")
     out["message_tag"] = tag if tag in ("a", "button", "other") else None
     href = reading.get("message_href")

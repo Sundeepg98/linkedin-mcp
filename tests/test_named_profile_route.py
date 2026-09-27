@@ -250,12 +250,18 @@ ENCODED_ASCII = (
 )
 #: ENCODED NON-ASCII THAT IS NOT A LETTER passes the shape and is refused on
 #: the DECODED form: a no-break space, a zero-width space, a direction
-#: override, and a UTF-8 sequence cut short.
+#: override, a UTF-8 sequence cut short -- and the four LETTERS that draw as
+#: nothing (the Hangul fillers U+115F, U+1160, U+3164, U+FFA0), which
+#: ``str.isalnum()`` accepts and a warm re-check got a two-word name through.
 ENCODED_NOT_A_LETTER = (
     "casey%C2%A0example",
     "casey%E2%80%8Bexample",
     "someone%E2%80%AEexample",
     "someone-example%C3",
+    "casey%E1%85%9Fexample",
+    "casey%E1%85%A0example",
+    "casey%E3%85%A4example",
+    "casey%EF%BE%A0example",
 )
 #: What the encoded unit exists for: a vanity name with a non-ASCII letter,
 #: as LinkedIn serves it -- percent-encoded UTF-8.
@@ -502,11 +508,11 @@ async def test_the_reader_identifies_the_owner_and_finds_their_two_controls(brow
     # Two Connect controls and two Message controls on the page, ONE of each
     # named for the owner -- the aside's belong to somebody else.
     assert reading["invite_controls"] == 2 and reading["invite_matches"] == 1
-    assert reading["invite_index"] == 0 and reading["invite_in_topcard"] == 1
-    assert reading["invite_topcard_index"] == 0
+    assert reading["invite_in_topcard"] == 1 and reading["invite_controls_in_topcard"] == 1
     assert reading["message_controls"] == 2 and reading["message_matches"] == 1
-    assert reading["message_index"] == 0 and reading["message_in_topcard"] == 1
-    assert reading["message_topcard_index"] == 0
+    assert reading["message_in_topcard"] == 1 and reading["message_controls_in_topcard"] == 1
+    # NO POSITION CROSSES: the press is the topcard's only control of its kind.
+    assert not any(key.endswith("_index") for key in reading), sorted(reading)
     assert reading["message_tag"] == "a" and reading["message_href"] == "compose"
     assert reading["more_actions"] == 1
     assert reading["dialogs"] == 0 and reading["composer_editors"] == 0
@@ -547,8 +553,8 @@ async def test_a_topcard_that_names_somebody_other_than_the_title_confirms_nobod
     assert reading["topcards"] == 1 and reading["topcard_headings"] == 1
     assert reading["heading_matches_title"] is False
     assert named_profile.identity_confirmed(reading) is False
-    state, why, index = named_profile.connect_state(reading)
-    assert state == named_profile.UNKNOWN and index is None
+    state, why = named_profile.connect_state(reading)
+    assert state == named_profile.UNKNOWN
     assert "NEEDS-CAPTURE C-P1" in why
 
 
@@ -561,16 +567,15 @@ async def test_a_same_name_stranger_elsewhere_on_the_page_is_never_the_target(br
     assert reading["invite_matches"] == 1 and reading["invite_in_topcard"] == 0
     assert reading["message_matches"] == 1 and reading["message_in_topcard"] == 0
     for state_of in (named_profile.connect_state, named_profile.message_state):
-        state, why, index = state_of(reading)
-        assert state == named_profile.UNKNOWN and index is None
+        state, why = state_of(reading)
+        assert state == named_profile.UNKNOWN
         assert "NOT inside their topcard" in why
 
 
 #: DERIVED -- somebody else's Connect and Message drawn INSIDE the owner's
-#: topcard, before the owner's own (a mutual connection's chip, say). Inside
-#: the topcard the owner's controls are then position 1 of lists that mix
-#: nothing else, which is what proves the position the page counts inside the
-#: topcard is the position the scoped press resolves.
+#: topcard, beside the owner's own (a mutual connection's chip, say). The
+#: owner's controls are still the only ones NAMED for the owner -- and the
+#: topcard no longer holds exactly one control of each kind.
 STRANGER_IN_THE_TOPCARD = _derive(
     STRANGER_FIRST,
     '<div class="topcard-actions">',
@@ -581,30 +586,36 @@ STRANGER_IN_THE_TOPCARD = _derive(
 )
 
 
-@pytest.mark.parametrize(
-    "world, inside", [(STRANGER_FIRST, 0), (STRANGER_IN_THE_TOPCARD, 1)],
-    ids=["strangers-before-the-topcard", "a-stranger-inside-the-topcard"],
-)
-async def test_positions_are_counted_inside_the_topcard_the_press_is_scoped_to(
-    browser_page, world, inside
-):
-    """The page-wide position of the owner's controls is 1 in both worlds; the
-    position INSIDE THE TOPCARD is what the press is aimed by, and pressing by
-    it reaches the owner's controls and no other."""
-    reading = await _read(browser_page, world)
-    assert reading["message_matches"] == 1 and reading["message_index"] == 1 + inside
-    assert reading["invite_matches"] == 1 and reading["invite_index"] == 1 + inside
-    assert reading["message_topcard_index"] == inside
-    assert reading["invite_topcard_index"] == inside
-    await browser_page.click(
-        dom.topcard_message_control_selector(reading["message_topcard_index"]), timeout=5_000
-    )
-    await browser_page.click(
-        dom.topcard_invite_control_selector(reading["invite_topcard_index"]), timeout=5_000
-    )
+async def test_the_press_is_the_topcards_only_control_of_its_kind_pressed_strictly(browser_page):
+    """THE AIM CARRIES NO POSITION. With strangers drawn before the topcard,
+    the topcard still holds one control of each kind, the owner's, and the
+    scoped selector pressed STRICTLY -- as ``perform`` presses it -- reaches
+    them and no other."""
+    reading = await _read(browser_page, STRANGER_FIRST)
+    assert reading["invite_controls"] == 3 and reading["message_controls"] == 3
+    assert reading["invite_controls_in_topcard"] == 1
+    assert reading["message_controls_in_topcard"] == 1
+    assert named_profile.connect_state(reading)[0] == named_profile.CONNECT_FROM
+    assert named_profile.message_state(reading)[0] == named_profile.MESSAGE_FROM
+    await browser_page.click(dom.topcard_message_control_selector(), timeout=5_000, strict=True)
+    await browser_page.click(dom.topcard_invite_control_selector(), timeout=5_000, strict=True)
     assert await _pressed(browser_page) == (
         "[Message Casey Example][Invite Casey Example to connect]"
     )
+
+
+async def test_a_topcard_holding_a_second_control_of_the_kind_is_refused(browser_page):
+    """A second Connect or Message inside the topcard -- even one plainly NOT
+    named for the owner -- would leave a press with no position choosing, so
+    both acts refuse before anything is pressed."""
+    reading = await _read(browser_page, STRANGER_IN_THE_TOPCARD)
+    assert reading["invite_matches"] == 1 and reading["invite_in_topcard"] == 1
+    assert reading["invite_controls_in_topcard"] == 2
+    assert reading["message_controls_in_topcard"] == 2
+    for state_of in (named_profile.connect_state, named_profile.message_state):
+        state, why = state_of(reading)
+        assert state == named_profile.UNKNOWN
+        assert "topcard draws 2" in why
 
 
 @pytest.mark.parametrize(
@@ -616,8 +627,8 @@ async def test_positions_are_counted_inside_the_topcard_the_press_is_scoped_to(
     ids=["none", "two"],
 )
 async def test_connect_is_aimable_only_at_exactly_one_control(browser_page, world, fragment):
-    state, why, index = named_profile.connect_state(await _read(browser_page, world))
-    assert state == named_profile.UNKNOWN and index is None
+    state, why = named_profile.connect_state(await _read(browser_page, world))
+    assert state == named_profile.UNKNOWN
     assert fragment in why
 
 
@@ -630,22 +641,24 @@ async def test_connect_is_aimable_only_at_exactly_one_control(browser_page, worl
     ids=["a-link-to-a-thread", "a-composer-already-open"],
 )
 async def test_message_is_refused_before_anything_is_pressed(browser_page, world, fragment):
-    state, why, index = named_profile.message_state(await _read(browser_page, world))
-    assert state == named_profile.UNKNOWN and index is None
+    state, why = named_profile.message_state(await _read(browser_page, world))
+    assert state == named_profile.UNKNOWN
     assert fragment in why
 
 
-def test_the_selector_builders_take_a_position_and_nothing_else():
-    for builder in (dom.topcard_invite_control_selector, dom.topcard_message_control_selector):
-        built = builder(2)
-        assert built.endswith(" >> nth=2")
-        alternatives = built[: -len(" >> nth=2")].split(",")
-        assert all(
-            part.strip().startswith(dom.NAMED_PROFILE_TOPCARD + " ") for part in alternatives
-        ), built
-        for bad in (-1, True, "0", None, 1.0):
-            with pytest.raises(ValueError):
-                builder(bad)
+def test_the_selector_builders_name_the_topcard_and_nothing_else():
+    """No argument, no position, no name: every alternative is the measured
+    control shape inside the one ``[id$="Topcard"]``."""
+    for builder, control in (
+        (dom.topcard_invite_control_selector, dom.INVITE_CONTROL),
+        (dom.topcard_message_control_selector, dom.MESSAGE_CONTROL),
+    ):
+        built = builder()
+        assert "nth=" not in built and ">>" not in built, built
+        alternatives = [part.strip() for part in built.split(",")]
+        assert alternatives == [
+            dom.NAMED_PROFILE_TOPCARD + " " + part.strip() for part in control.split(",")
+        ], built
     # THE PAGE-WIDE MESSAGE BUILDER IS GONE: nothing pressed Message but this
     # route, and a builder kept beside the scoped one is one edit from use.
     assert not hasattr(dom, "message_control_selector")
@@ -871,27 +884,56 @@ _PRESS_HOLD = (
     '<div id="press-hold" style="position:fixed;left:0;top:0;width:100%;'
     'height:100%;z-index:99999;background:transparent"></div>'
 )
-#: DERIVED -- A RE-RENDER DURING THE PRESS, the world the cold re-check of
-#: 2026-09-27 built. The layer holds the press back for 1.2 s; then it lifts,
-#: the owner's Connect is replaced by an identical fresh node -- the element
-#: the press resolved is detached, so the selector is resolved again -- and a
-#: STRANGER's 'Invite ... to connect' is drawn at the very top of the page,
-#: before the topcard. The page-wide press landed on the stranger.
-RERENDERED_DURING_THE_PRESS = _derive(
-    PROFILE,
-    "</body>",
-    _PRESS_HOLD
-    + "<script>setTimeout(function () {"
-    "  var hold = document.getElementById('press-hold');"
-    "  if (hold) { hold.parentNode.removeChild(hold); }"
+def _redrawn_mid_press(world: str, redraw: str) -> str:
+    """``world`` with a layer that holds every press for 1.2 s and then lifts
+    and runs ``redraw`` -- a page re-rendered while a press waits, which is
+    when Playwright resolves the press's selector again."""
+    return _derive(
+        world,
+        "</body>",
+        _PRESS_HOLD
+        + "<script>setTimeout(function () {"
+        "  var hold = document.getElementById('press-hold');"
+        "  if (hold) { hold.parentNode.removeChild(hold); }"
+        + redraw
+        + "}, 1200);</script></body>",
+    )
+
+
+#: The owner's controls replaced by identical fresh nodes: the element a press
+#: resolved is detached, so its selector is resolved again.
+_OWNERS_CONNECT_REDRAWN = (
     "  var owners = document.getElementById('topcard-connect');"
     "  if (owners) { owners.replaceWith(owners.cloneNode(true)); }"
-    "  var stranger = document.createElement('button');"
-    "  stranger.type = 'button';"
-    "  stranger.setAttribute('aria-label', 'Invite Morgan Example to connect');"
-    "  stranger.textContent = 'Connect';"
-    "  document.body.insertBefore(stranger, document.body.firstChild);"
-    "}, 1200);</script></body>",
+)
+_OWNERS_MESSAGE_REDRAWN = (
+    "  var link = document.getElementById('topcard-message');"
+    "  if (link) { link.replaceWith(link.cloneNode(true)); }"
+)
+#: A stranger's control, built in the page, and three places to draw it.
+_A_STRANGERS = (
+    "  var stranger = document.createElement('button'); stranger.type = 'button';"
+    "  stranger.setAttribute('aria-label', '{label}'); stranger.textContent = 'x';"
+)
+_AT_THE_TOP = "  document.body.insertBefore(stranger, document.body.firstChild);"
+_INSIDE_THE_TOPCARD = (
+    "  var row = document.querySelector('.topcard-actions');"
+    "  row.insertBefore(stranger, row.firstChild);"
+)
+_IN_A_SECOND_TOPCARD = (
+    "  var card = document.createElement('div'); card.id = 'strangerSyntheticTopcard';"
+    "  card.appendChild(stranger);"
+    "  document.body.insertBefore(card, document.body.firstChild);"
+)
+_STRANGERS_CONNECT = _A_STRANGERS.replace("{label}", "Invite Morgan Example to connect")
+_STRANGERS_MESSAGE = _A_STRANGERS.replace("{label}", "Message Morgan Example")
+
+#: DERIVED -- A RE-RENDER DURING THE PRESS, the world the cold re-check of
+#: 2026-09-27 built: the owner's Connect redrawn, and a STRANGER's 'Invite ...
+#: to connect' drawn at the very top of the page, before the topcard. The
+#: page-wide press landed on the stranger.
+RERENDERED_DURING_THE_PRESS = _redrawn_mid_press(
+    PROFILE, _OWNERS_CONNECT_REDRAWN + _STRANGERS_CONNECT + _AT_THE_TOP
 )
 
 
@@ -907,14 +949,50 @@ class _KeepsWhatWasPressed(_Navigator):
 
 async def test_a_re_render_during_the_press_cannot_hand_it_to_a_stranger(writes_on, browser_page):
     """THE PRESS IS SCOPED TO THE OWNER'S TOPCARD, so a selector resolved
-    again mid-press can reach only a control of the owner's own topcard --
-    here, the fresh copy of the owner's Connect -- and never the stranger's
-    control drawn earlier in the page."""
+    again mid-press reaches the fresh copy of the owner's Connect and never
+    the stranger's control drawn earlier in the page."""
     grant = await _connect_grant(browser_page)
     act = _KeepsWhatWasPressed(RERENDERED_DURING_THE_PRESS, PROFILE)
     receipt = await writes.perform(act, browser_page, grant)
     assert act.pressed == "[Invite Casey Example to connect]", act.pressed
     assert receipt["clicked"]["clicks_made"] == 1 and receipt["clicked"]["error"] is None
+    _clean(receipt)
+
+
+@pytest.mark.parametrize(
+    "where", [_INSIDE_THE_TOPCARD, _IN_A_SECOND_TOPCARD], ids=["inside-the-topcard", "a-second-topcard"]
+)
+async def test_a_second_match_drawn_mid_press_stops_the_press(writes_on, browser_page, where):
+    """THE WARM RE-CHECK'S TWO WORLDS (2026-09-27). Scoped to the topcard, the
+    press still carried a POSITION, and a stranger's Connect drawn INSIDE the
+    topcard -- or in a second element whose id ends ``Topcard`` -- took it
+    while the receipt read NO INVITATION WAS SENT. The press now names no
+    position and is STRICT: two matches at press time throw, and NOTHING is
+    pressed -- which is also what makes that receipt true."""
+    grant = await _connect_grant(browser_page)
+    world = _redrawn_mid_press(PROFILE, _OWNERS_CONNECT_REDRAWN + _STRANGERS_CONNECT + where)
+    act = _KeepsWhatWasPressed(world, PROFILE)
+    receipt = await writes.perform(act, browser_page, grant)
+    assert act.pressed == "", act.pressed
+    assert receipt["clicked"]["clicks_made"] == 0
+    assert receipt["clicked"]["error"] == (
+        "Error on the press aimed at " + repr(dom.topcard_invite_control_selector())
+    ), receipt["clicked"]["error"]
+    assert receipt["performed"] is False
+    _clean(receipt)
+
+
+async def test_a_re_render_during_the_message_press_cannot_hand_it_to_a_stranger(
+    writes_on, browser_page
+):
+    """The same world for MESSAGE: the owner's Message link redrawn, and a
+    stranger's Message button drawn at the top of the page mid-press."""
+    grant = await _message_grant(browser_page)
+    world = _redrawn_mid_press(DISPATCHING, _OWNERS_MESSAGE_REDRAWN + _STRANGERS_MESSAGE + _AT_THE_TOP)
+    receipt = await writes.perform(_Navigator(world), browser_page, grant)
+    assert (await _pressed(browser_page)).startswith("[Message Casey Example]")
+    assert "Morgan" not in await _pressed(browser_page)
+    assert receipt["performed"] is True, receipt["verification"]["why"]
     _clean(receipt)
 
 
@@ -926,27 +1004,46 @@ async def test_a_press_that_fails_is_reported_by_its_type_and_names_nobody(
     2026-09-27: the browser library's timeout text carries a CALL LOG quoting
     the element it resolved -- the owner's name in both controls' labels, and
     the member id in the Message link -- and ``clicked.error`` printed it
-    whole. It now carries the exception's TYPE (``describe_click_error``)."""
+    whole. It is now COMPOSED (``describe_click_error``): the exception's
+    type, and the press and the selector this package built for it, which
+    for this route names nobody."""
     spec, target = (CONNECT, LINK) if which == "connect" else (MESSAGE, TARGET)
     block = await preview(spec, target=target, navigator=_Navigator(PROFILE), page=browser_page)
     grant = consume(block["to_confirm"], action=spec.action, target=target)
     monkeypatch.setattr(writes, "CLICK_TIMEOUT_MS", 800)
     held = _derive(PROFILE, "</body>", _PRESS_HOLD + "</body>")
     receipt = await writes.perform(_Navigator(held, PROFILE), browser_page, grant)
-    assert receipt["clicked"]["error"] == "TimeoutError", receipt["clicked"]["error"]
+    built = (
+        dom.topcard_invite_control_selector()
+        if which == "connect"
+        else dom.topcard_message_control_selector()
+    )
+    assert receipt["clicked"]["error"] == (
+        "TimeoutError on the press aimed at " + repr(built)
+    ), receipt["clicked"]["error"]
     assert receipt["clicked"]["clicks_made"] == 0
     assert MEMBER_ID not in json.dumps(receipt)
+    assert "resolved to" not in json.dumps(receipt), "the library's call log crossed"
     _clean(receipt)
 
 
 def test_this_packages_own_refusal_is_still_reported_whole():
-    """The other half of ``describe_click_error``: a ``WriteAttemptError`` is
-    raised by this package with a reason it composed, so it crosses whole."""
+    """The other halves of ``describe_click_error``: a ``WriteAttemptError`` is
+    raised by this package with a reason it composed, so it crosses whole; a
+    foreign exception crosses as its type, with the call in flight when there
+    was one -- and never with its own text."""
     ours = WriteAttemptError("refusing to press: a reason this package wrote")
     assert writes.describe_click_error(ours) == (
         "WriteAttemptError: refusing to press: a reason this package wrote"
     )
-    assert writes.describe_click_error(TimeoutError("call log: <button ...>")) == "TimeoutError"
+    theirs = TimeoutError("call log: locator resolved to <button aria-label=...>")
+    assert writes.describe_click_error(theirs) == "TimeoutError"
+    assert writes.describe_click_error(theirs, in_flight=("fill", "#an-editor")) == (
+        "TimeoutError on the fill aimed at '#an-editor'"
+    )
+    assert writes.describe_click_error(ours, in_flight=("press", "#x")) == (
+        "WriteAttemptError: refusing to press: a reason this package wrote"
+    )
 
 
 async def test_the_act_refuses_before_any_press_when_the_landing_moved(writes_on, browser_page):
@@ -1156,6 +1253,97 @@ async def test_a_conversation_the_press_did_not_open_never_takes_his_words(
     assert receipt["performed"] is False
     editor = browser_page.locator(named_profile.COMPOSER_EDITOR_SELECTOR)
     assert await editor.inner_text() == ""
+    _clean(receipt)
+
+
+#: A minimised conversation already on the page before the press -- the
+#: captured shape: a bubble with a header and a title and NO form -- titled
+#: with the given name.
+def _minimised_first(world: str, title: str) -> str:
+    return _derive(
+        world,
+        '<div class="msg-overlay-container" id="msg-overlay"></div>',
+        '<div class="msg-overlay-container" id="msg-overlay">'
+        '<div class="msg-overlay-conversation-bubble msg-overlay-conversation-bubble--is-minimized">'
+        '<header class="msg-overlay-bubble-header">'
+        f'<h2 class="msg-overlay-bubble-header__title">{title}</h2>'
+        "</header></div></div>",
+    )
+
+
+async def test_the_title_compared_is_the_one_on_the_conversation_holding_the_composer(
+    writes_on, browser_page
+):
+    """TWO BUBBLES, BOTH WAYS -- the warm re-check's second surviving mutation
+    (the first bubble's title read instead of the holding one's) survived
+    because no world drew two. A minimised conversation titled with the
+    OWNER'S name drawn first, and the press opening somebody else's: refused.
+    A minimised stranger's drawn first, and the press opening the owner's:
+    sent."""
+    grant = await _message_grant(browser_page)
+    theirs_first = _minimised_first(
+        _body(conversation_with="Morgan Example", dispatches="yes"), "Casey Example"
+    )
+    receipt = await writes.perform(_Navigator(theirs_first), browser_page, grant)
+    opened = receipt["opened_conversation_gate"]
+    assert opened["observed"]["bubbles"] == 2 and opened["observed"]["bubbles_with_editor"] == 1
+    assert opened["refused_condition"] == "6_not_their_conversation"
+    assert receipt["typed_text"]["text_was_entered"] is False
+    grant = await _message_grant(browser_page)
+    strangers_first = _minimised_first(DISPATCHING, "Morgan Example")
+    receipt = await writes.perform(_Navigator(strangers_first), browser_page, grant)
+    assert receipt["opened_conversation_gate"]["proceeded"] is True
+    assert receipt["performed"] is True, receipt["verification"]["why"]
+    _clean(receipt)
+
+
+#: DERIVED -- THE WARM RE-CHECK'S SEND-PRESS WORLD (2026-09-27): his words are
+#: in the box and both gates passed; on the Send press's own mouse movement
+#: the owner's Send is redrawn and a RESTORED conversation with somebody else,
+#: holding a DRAFT (so its Send is enabled), is drawn first in the overlay. The
+#: page-wide Send press re-resolved to that conversation and sent THEIR draft.
+RESTORED_DRAFT_DURING_SEND = _derive(
+    DISPATCHING,
+    "</body>",
+    "<script>document.addEventListener('mousemove', function onMove() {"
+    "  var editor = document.querySelector('#msg-overlay .msg-form__contenteditable');"
+    "  if (!editor || !editor.textContent.trim()) { return; }"
+    "  document.removeEventListener('mousemove', onMove);"
+    "  var send = document.querySelector('#msg-overlay .msg-form__send-button');"
+    "  if (send) { send.replaceWith(send.cloneNode(true)); }"
+    "  var bubble = document.createElement('div');"
+    "  bubble.className = 'msg-overlay-conversation-bubble';"
+    "  bubble.innerHTML ="
+    "    '<header class=\"msg-overlay-bubble-header\">' +"
+    "    '<h2 class=\"msg-overlay-bubble-header__title\">Morgan Example</h2></header>' +"
+    "    '<form class=\"msg-form\"><div class=\"msg-form__contenteditable t-14\" '"
+    "    + 'contenteditable=\"true\" role=\"textbox\">an old draft</div>' +"
+    "    '<button type=\"submit\" class=\"msg-form__send-button artdeco-button\">Send</button>'"
+    "    + '</form>';"
+    "  bubble.querySelector('form').addEventListener('submit', function (event) {"
+    "    event.preventDefault(); document.body.setAttribute('data-draft-sent', 'yes'); });"
+    "  var overlay = document.getElementById('msg-overlay');"
+    "  overlay.insertBefore(bubble, overlay.firstChild);"
+    "});</script></body>",
+)
+
+
+async def test_a_second_send_drawn_during_the_send_press_stops_it(writes_on, browser_page):
+    """THE SEND PRESS IS STRICT: a second Send on the page at press time throws,
+    so neither his words nor somebody else's draft is sent."""
+    grant = await _message_grant(browser_page)
+    receipt = await writes.perform(_Navigator(RESTORED_DRAFT_DURING_SEND), browser_page, grant)
+    assert receipt["send_gate"]["proceeded"] is True
+    sent_draft = await browser_page.evaluate(
+        "() => document.body.getAttribute('data-draft-sent') || ''"
+    )
+    assert sent_draft == "", "somebody else's draft was sent"
+    assert receipt["clicked"]["error"] == (
+        "Error on the press aimed at " + repr(named_profile.COMPOSER_SEND_SELECTOR)
+    ), receipt["clicked"]["error"]
+    assert receipt["clicked"]["clicks_made"] == 1 and receipt["clicked"]["opener_clicks"] == 1
+    assert receipt["typed_text"]["submit_was_pressed"] is False
+    assert receipt["performed"] is not True
     _clean(receipt)
 
 

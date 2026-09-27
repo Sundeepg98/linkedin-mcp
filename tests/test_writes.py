@@ -3247,7 +3247,13 @@ def test_a_second_click_inside_perform_is_still_caught():
     # site. Draining a queue fires it twice for apply without adding a second
     # place to audit, which is the property SANCTIONED_MUTATIONS exists to
     # police.
-    call_site = "await page.click(click_plan.pop(0), timeout=CLICK_TIMEOUT_MS)"
+    # 2026-09-27: ``strict=press_strictly`` joined the call -- the named-person
+    # acts press strictly (lane L5's follow-up, after two re-checks); every
+    # other action passes False, the call it always made. Still ONE site.
+    call_site = (
+        "await page.click(click_plan.pop(0), timeout=CLICK_TIMEOUT_MS, "
+        "strict=press_strictly)"
+    )
     assert call_site in source, (
         "the mutating call site has been rewritten again. Update this literal "
         "to match it -- and do NOT relax the assertion below, which is the "

@@ -2288,11 +2288,11 @@ SANCTIONED_WRITES: dict[str, WriteSpec] = {
             "own owner -- its title, and its topcard's first heading, compared "
             "in the page -- and draw exactly ONE control named 'Invite <that "
             "person> to connect', the label measured 44 times on other "
-            "surfaces. No label, name or id crosses into this server: the "
-            "control is addressed by its position INSIDE THAT PERSON'S "
-            "TOPCARD, which the page's own script computes, and the press is "
-            "scoped to the topcard, so a page redrawn mid-press cannot hand it "
-            "to somebody else's control."
+            "surfaces, and it must be the ONLY Connect control in that "
+            "person's topcard. No label, name or id crosses into this server: "
+            "the press names the topcard and nothing else, and it is STRICT, "
+            "so a page redrawn mid-press that draws a second such control "
+            "stops the press rather than handing it to somebody else."
         ),
         wrong_state_note=(
             "Not a toggle. No Connect control naming this person means you may "
@@ -2354,13 +2354,15 @@ SANCTIONED_WRITES: dict[str, WriteSpec] = {
             "the named-profile door. The page must name its own owner, and "
             "draw exactly ONE control named 'Message <that person>' -- a "
             "button, or a link to the composer (the destination measured on "
-            "16 of the 18 Message controls captured) -- with no conversation "
-            "composer already open. The words are typed only when the profile "
-            "reads '1st' and exactly ONE empty composer is on the page after "
-            "the press, in the one conversation whose title reads exactly that "
-            "person's name (compared in the page), and Send is pressed only "
-            "when the box holds exactly your words and that title still reads "
-            "their name."
+            "16 of the 18 Message controls captured), the only Message control "
+            "in their topcard -- with no conversation composer already open. "
+            "The words are typed only when the profile reads '1st' and exactly "
+            "ONE empty composer is on the page after the press, in the one "
+            "conversation whose title reads exactly that person's name "
+            "(compared in the page), and Send is pressed only when the box "
+            "holds exactly your words and that title still reads their name. "
+            "Every press and the fill are STRICT: a second match drawn "
+            "mid-press stops it."
         ),
         wrong_state_note=(
             "Not a toggle. A Message control that is a link anywhere but the "
@@ -5127,9 +5129,9 @@ async def observe(
         facts = named_profile.profile_facts(reading)
         facts["landed_on_the_named_profile"] = True
         if spec.action == "connect_from_profile":
-            state, why, _index = named_profile.connect_state(reading)
+            state, why = named_profile.connect_state(reading)
         else:
-            state, why, _index = named_profile.message_state(reading)
+            state, why = named_profile.message_state(reading)
         return _record(
             spec,
             target=target,
@@ -7574,23 +7576,26 @@ async def _live_control(
         # selector is built from the POSITION the page's own script returned
         # -- no name, label or id reaches this process.
         #
-        # THE POSITION IS COUNTED INSIDE THE OWNER'S TOPCARD, AND THE PRESS IS
-        # SCOPED TO IT (the cold re-check, 2026-09-27). A page-wide
+        # NO POSITION, AND A STRICT PRESS (the re-checks of 2026-09-27). A
         # ``control >> nth=K`` is re-resolved by Playwright when the element
-        # it found is re-rendered while the press waits, and a stranger's
-        # control drawn earlier in the page during that window took position
-        # K and the press. Scoped, a re-resolution can reach only a control
-        # of the owner's own topcard.
+        # it found is re-rendered while the press waits: page-wide, a
+        # stranger's control drawn earlier in the page took position K; scoped
+        # to the topcard, one drawn inside the topcard, or a second element
+        # whose id ends ``Topcard``, still did. So the state functions require
+        # the topcard to hold exactly ONE control of the kind -- the owner's --
+        # and the selector is that scope alone, which ``perform`` presses with
+        # ``strict=True``: a second match at press time throws, and nothing
+        # else is ever pressed in its place.
         reading = await dom.read_named_profile(page)
         if spec.action == "connect_from_profile":
-            state, why, index = named_profile.connect_state(reading)
-            if state != named_profile.CONNECT_FROM or index is None:
+            state, why = named_profile.connect_state(reading)
+            if state != named_profile.CONNECT_FROM:
                 return (state, why, "")
-            return (state, why, dom.topcard_invite_control_selector(index))
-        state, why, index = named_profile.message_state(reading)
-        if state != named_profile.MESSAGE_FROM or index is None:
+            return (state, why, dom.topcard_invite_control_selector())
+        state, why = named_profile.message_state(reading)
+        if state != named_profile.MESSAGE_FROM:
             return (state, why, "")
-        return (state, why, dom.topcard_message_control_selector(index))
+        return (state, why, dom.topcard_message_control_selector())
 
     if spec.action == "mark_company_interest":
         # THE SAME READER THE PREVIEW USED, ON THE SAME PAGE: freshness, not a
@@ -9922,9 +9927,13 @@ async def _apply_submit_gate(page: Any) -> dict[str, Any]:
     return out
 
 
-def describe_click_error(exc: BaseException) -> str:
-    """What a press, a fill or a choice that raised inside ``perform`` is
-    reported as: THIS PACKAGE'S OWN refusal whole, anything else by its TYPE.
+def describe_click_error(
+    exc: BaseException, *, in_flight: Optional[tuple[str, str]] = None
+) -> str:
+    """What a press, a fill, a choice or an upload that raised inside
+    ``perform`` is reported as: THIS PACKAGE'S OWN refusal whole; anything
+    else by its TYPE, and -- when a page call was in flight -- by that call's
+    kind and the selector this package built for it.
 
     FOUND BY THE COLD RE-CHECK OF 2026-09-27 (lane L5's follow-up). This line
     was ``f"{type(exc).__name__}: {exc}"`` for every exception, and a browser
@@ -9936,10 +9945,22 @@ def describe_click_error(exc: BaseException) -> str:
     entered an exception's text is knowable at the raise and not here. A
     ``WriteAttemptError`` is raised by this package with a reason it composed
     -- every one of them is held to that by the page-string guards -- so it is
-    kept; for anything else only the type crosses.
+    kept; for anything else the line is COMPOSED from what this package knows
+    at the call: the exception's type, and ``in_flight`` -- the call's kind
+    and the selector ``perform`` handed it, a string this package built and
+    already prints as ``clicked.selector`` for the first press.
+
+    WHY THE SELECTOR AND NOT ONLY THE TYPE: which press failed is the
+    difference between a Message press and a Send press, and
+    ``tests/test_apply_modal_fixture.py`` proves the apply flow's second click
+    was attempted by finding its selector in this line -- evidence the
+    library's text used to carry, and the composition now carries without it.
     """
     if isinstance(exc, WriteAttemptError):
         return f"{type(exc).__name__}: {exc}"
+    if in_flight:
+        kind, selector = in_flight
+        return f"{type(exc).__name__} on the {kind} aimed at {selector!r}"
     return type(exc).__name__
 
 
@@ -10415,6 +10436,25 @@ async def perform(
     selects_made = 0
     uploads_made = 0
     uploaded: Optional[dict[str, Any]] = None
+    # THE PAGE CALL IN FLIGHT, for the receipt's error line (2026-09-27): its
+    # kind and the selector THIS PACKAGE built for it, set immediately before
+    # each press, fill, choice or upload and cleared once the call returned.
+    # If something raises while it is set, the error names that call from
+    # these two values -- never from the browser library's own text, whose
+    # call log quotes the element it resolved (see describe_click_error). The
+    # call sites themselves are untouched.
+    in_flight: Optional[tuple[str, str]] = None
+    # STRICT PRESSES AND FILLS FOR THE NAMED-PERSON ACTS (2026-09-27): a
+    # selector that matches two elements at the moment of the call THROWS
+    # instead of taking the first. Their controls carry no position -- the
+    # gate required exactly one of each kind where it presses -- so a second
+    # match can only be something drawn since the gate read the page: a
+    # stranger's control in the topcard, a second topcard, another
+    # conversation's composer or Send. MEASURED 2026-09-27 on a local page:
+    # ``page.click`` is NOT strict unless asked (two matching buttons, the
+    # first was pressed); with ``strict=True`` it raised a strict mode
+    # violation. Every other action keeps the call it has always made.
+    press_strictly = spec.action in NAMED_PROFILE_ACTIONS
     try:
         # THE UPLOAD DRAINS FIRST, AND THE ORDER IS AN ARGUMENT RATHER THAN A
         # PREFERENCE.
@@ -10527,10 +10567,12 @@ async def perform(
             # ``UploadFile.path`` -- absolute, real, checked to be a regular
             # file inside the declared root with no link anywhere on its chain
             # -- and not the string a caller supplied.
+            in_flight = ("upload", upload_selector)
             await page.set_input_files(
                 upload_selector, str(upload_file.path), timeout=CLICK_TIMEOUT_MS
             )
             uploads_made += 1
+            in_flight = None
             uploaded = upload_file.as_block(digest=current)
         while select_plan:
             select_selector, select_text = select_plan.pop(0)
@@ -10540,10 +10582,12 @@ async def perform(
             # preview printed. An index would be position-aiming; ``value=``
             # would be a submission token the page chose, and neither is the
             # thing he agreed to.
+            in_flight = ("choice", select_selector)
             await page.select_option(
                 select_selector, label=select_text, timeout=CLICK_TIMEOUT_MS
             )
             selects_made += 1
+            in_flight = None
         # THE COMMIT, FOR A CHANGE MADE BY CHOOSING. A select drains before
         # the click loop below, so an editor action asks its save gate HERE;
         # one that changed its field by typing asks inside the loop, after the
@@ -10590,8 +10634,10 @@ async def perform(
                 click_plan.clear()
         while fill_plan or click_plan:
             if click_plan:
-                await page.click(click_plan.pop(0), timeout=CLICK_TIMEOUT_MS)
+                in_flight = ("press", click_plan[0])
+                await page.click(click_plan.pop(0), timeout=CLICK_TIMEOUT_MS, strict=press_strictly)
                 clicks_made += 1
+                in_flight = None
                 if spec.action in TWO_CLICK_ACTIONS and clicks_made == 1:
                     apply_gate = await _apply_submit_gate(page)
                     if apply_gate["proceed"]:
@@ -10650,8 +10696,10 @@ async def perform(
                             click_plan.append(editor_save_gate["selector"])
                 continue
             fill_selector, fill_text = fill_plan.pop(0)
-            await page.fill(fill_selector, fill_text, timeout=CLICK_TIMEOUT_MS)
+            in_flight = ("fill", fill_selector)
+            await page.fill(fill_selector, fill_text, timeout=CLICK_TIMEOUT_MS, strict=press_strictly)
             fills_made += 1
+            in_flight = None
             # THE GATE BETWEEN THE FILL AND THE CLICK. The submit selector is
             # appended only if a fresh read says it should be, so the decision
             # to submit is taken AFTER the text is in the box rather than
@@ -10727,7 +10775,7 @@ async def perform(
                 if publish_gate["proceed"]:
                     click_plan.append(publish_gate["selector"])
     except Exception as exc:  # noqa: BLE001 - reported, never re-raised
-        click_error = describe_click_error(exc)
+        click_error = describe_click_error(exc, in_flight=in_flight)
 
     # THE EDITOR CLOSING, polled after the Save press so the verification's
     # fresh navigation does not race LinkedIn's own save request -- navigating

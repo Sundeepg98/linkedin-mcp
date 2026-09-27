@@ -33,8 +33,9 @@ route".
 A PAGE MAY VETO, NEVER SUPPLY (``PAGE-MAY-VETO-NEVER-SUPPLY``). Nothing here
 returns an address, an id or a name read off the page for anything to
 navigate by. The landing is compared in a condition and withheld; a control
-is addressed by its POSITION, which the page's own script computes from a
-comparison that never leaves the page.
+is pressed as THE ONLY CONTROL OF ITS KIND INSIDE THE OWNER'S TOPCARD -- which
+the page's own script checks, with a comparison that never leaves the page --
+by a selector that carries no name and no position, pressed strictly.
 """
 
 from __future__ import annotations
@@ -176,9 +177,10 @@ UNKNOWN = "unknown"
 _FACT_KEYS = (
     "title_shape", "topcards", "topcard_headings", "heading_matches_title",
     "degree", "degree_tokens", "invite_controls", "invite_matches",
-    "invite_in_topcard", "message_controls", "message_matches",
-    "message_tag", "message_href", "message_in_topcard", "more_actions",
-    "dialogs", "composer_editors", "conversation_bubbles", "named_controls",
+    "invite_in_topcard", "invite_controls_in_topcard", "message_controls",
+    "message_matches", "message_tag", "message_href", "message_in_topcard",
+    "message_controls_in_topcard", "more_actions", "dialogs",
+    "composer_editors", "conversation_bubbles", "named_controls",
     "dialog_controls", "dialog_note_fields", "error",
 )
 
@@ -220,20 +222,42 @@ def _identity_why(reading: dict[str, Any]) -> str:
     )
 
 
-def connect_state(reading: dict[str, Any]) -> tuple[str, str, Optional[int]]:
-    """``(state, why, index)`` -- is there exactly one Connect for THIS person?
+def _the_only_one_in_the_topcard(reading: dict[str, Any], key: str, kind: str) -> Optional[str]:
+    """Why the topcard does not hold exactly ONE control of this kind, or None.
+
+    THE PRESS CARRIES NO POSITION (see :func:`dom.topcard_invite_control_selector`):
+    it is the topcard-scoped selector, pressed strictly, so it can only ever
+    mean "the one control of this kind in the topcard". This is where that
+    one is required -- whatever its label -- beside the page's own check that
+    it is the owner's.
+    """
+    count = coerce.as_count(reading.get(key))
+    if count == 1:
+        return None
+    return (
+        f"the person's topcard draws {count} {kind} control(s) of any label, "
+        "where exactly one -- theirs -- is the only shape this act presses: "
+        "the press names no position, so a second control of the kind would "
+        "leave it choosing, and it is pressed strictly so that one appearing "
+        "mid-press stops it. Where a third party's profile draws its own "
+        "controls has never been captured (NEEDS-CAPTURE C-P1)."
+    )
+
+
+def connect_state(reading: dict[str, Any]) -> tuple[str, str]:
+    """``(state, why)`` -- is there exactly one Connect for THIS person?
 
     ``connect_control_drawn`` needs the identity confirmed, exactly one control
-    named ``Invite <owner> to connect`` (compared in the page), and no dialog
-    already open. The index is that control's position among the
-    :data:`dom.INVITE_CONTROL` controls INSIDE THE OWNER'S TOPCARD -- what
-    :func:`dom.topcard_invite_control_selector` presses by -- and nothing else
-    crosses. (It was the position in the whole page's list until the cold
-    re-check of 2026-09-27 showed a re-render could hand that position to a
-    stranger's control.)
+    named ``Invite <owner> to connect`` on the page (compared in the page),
+    that one INSIDE the owner's topcard and the ONLY Connect-shaped control
+    there, and no dialog already open. Nothing about the control crosses: the
+    press is :func:`dom.topcard_invite_control_selector`, pressed strictly.
+    (It carried a POSITION -- first in the whole page's list, then in the
+    topcard's -- until two re-checks of 2026-09-27 showed a re-render could
+    hand either position to a stranger's control.)
     """
     if not identity_confirmed(reading):
-        return UNKNOWN, _identity_why(reading), None
+        return UNKNOWN, _identity_why(reading)
     matches = coerce.as_count(reading.get("invite_matches"))
     if matches == 0:
         degree = reading.get("degree")
@@ -244,13 +268,13 @@ def connect_state(reading: dict[str, Any]) -> tuple[str, str, Optional[int]]:
             "invitation may be pending, or Connect sits inside the 'More' menu -- "
             "which has never been captured and which this act does not open. "
             "NEEDS-CAPTURE C-P1."
-        ), None
+        )
     if matches > 1:
         return UNKNOWN, (
             f"{matches} controls are named for inviting this person, and that "
             "is a refusal rather than a choice: pressing one would be choosing "
             "by position."
-        ), None
+        )
     if coerce.as_count(reading.get("invite_in_topcard")) != 1:
         return UNKNOWN, (
             "the one control named for inviting this person is NOT inside "
@@ -258,39 +282,39 @@ def connect_state(reading: dict[str, Any]) -> tuple[str, str, Optional[int]]:
             "-- a card in 'People also viewed', say -- and an invitation there "
             "would reach a stranger. Where a third party's profile draws its "
             "own Connect has never been captured (NEEDS-CAPTURE C-P1)."
-        ), None
+        )
+    why_not = _the_only_one_in_the_topcard(reading, "invite_controls_in_topcard", "Connect")
+    if why_not:
+        return UNKNOWN, why_not
     if coerce.as_count(reading.get("dialogs")):
         return UNKNOWN, (
             f"{coerce.as_count(reading.get('dialogs'))} dialog(s) are already "
             "open on the profile. Connect is not pressed underneath one."
-        ), None
-    index = reading.get("invite_topcard_index")
-    if not isinstance(index, int) or isinstance(index, bool) or index < 0:
-        return UNKNOWN, (
-            "exactly one Connect control matched and no usable position inside "
-            "the topcard came back for it, so nothing can be aimed."
-        ), None
+        )
     return CONNECT_FROM, (
         "exactly one control named for inviting this person to connect -- the "
-        "label shape measured 44 times on other surfaces -- on a page whose "
-        "topcard names the same person. PRESSING IT MAY SEND THE INVITATION AT "
-        "ONCE, with no further step: that is how Connect is known to behave, "
-        "and this is the last point at which nothing has happened."
-    ), index
+        "label shape measured 44 times on other surfaces -- and it is the only "
+        "Connect control in the topcard of a page that names the same person. "
+        "PRESSING IT MAY SEND THE INVITATION AT ONCE, with no further step: that "
+        "is how Connect is known to behave, and this is the last point at which "
+        "nothing has happened."
+    )
 
 
-def message_state(reading: dict[str, Any]) -> tuple[str, str, Optional[int]]:
-    """``(state, why, index)`` -- is there exactly one Message for THIS person,
-    of a shape this act may press?
+def message_state(reading: dict[str, Any]) -> tuple[str, str]:
+    """``(state, why)`` -- is there exactly one Message for THIS person, of a
+    shape this act may press?
 
     Pressable: a ``<button>``, or an ``<a>`` whose address is the composer --
     the destination measured on 16 of the 18 Message controls captured. A link
     anywhere else would navigate to an address the page supplied, which
-    PAGE-MAY-VETO-NEVER-SUPPLY forbids. And no conversation composer may
-    already be open: the one that opens must be the one this act types into.
+    PAGE-MAY-VETO-NEVER-SUPPLY forbids. It must be the only Message-shaped
+    control in the owner's topcard, for :func:`connect_state`'s reason. And no
+    conversation composer may already be open: the one that opens must be the
+    one this act types into.
     """
     if not identity_confirmed(reading):
-        return UNKNOWN, _identity_why(reading), None
+        return UNKNOWN, _identity_why(reading)
     matches = coerce.as_count(reading.get("message_matches"))
     if matches != 1:
         return UNKNOWN, (
@@ -298,7 +322,7 @@ def message_state(reading: dict[str, Any]) -> tuple[str, str, Optional[int]]:
             "exactly one is the only aimable number. None may mean the profile "
             "draws Message only for connections, or in a menu never captured "
             "(NEEDS-CAPTURE C-P4)."
-        ), None
+        )
     if coerce.as_count(reading.get("message_in_topcard")) != 1:
         return UNKNOWN, (
             "the one Message control named for this person is NOT inside "
@@ -306,7 +330,10 @@ def message_state(reading: dict[str, Any]) -> tuple[str, str, Optional[int]]:
             "and a message there would reach a stranger. Where a third party's "
             "profile draws its own Message has never been captured "
             "(NEEDS-CAPTURE C-P1)."
-        ), None
+        )
+    why_not = _the_only_one_in_the_topcard(reading, "message_controls_in_topcard", "Message")
+    if why_not:
+        return UNKNOWN, why_not
     tag = reading.get("message_tag")
     href = reading.get("message_href")
     if tag not in ("a", "button") or (tag == "a" and href != "compose"):
@@ -315,27 +342,22 @@ def message_state(reading: dict[str, Any]) -> tuple[str, str, Optional[int]]:
             "link that is not the composer would take the browser to an "
             "address the page chose, and that is refused before anything is "
             "pressed (PAGE-MAY-VETO-NEVER-SUPPLY). NEEDS-CAPTURE C-P4."
-        ), None
+        )
     if coerce.as_count(reading.get("composer_editors")):
         return UNKNOWN, (
             f"{coerce.as_count(reading.get('composer_editors'))} conversation "
             "composer(s) are already open on this page. Close them first: the "
             "composer this act types into must be the one its own press opens."
-        ), None
-    # THE POSITION INSIDE THE TOPCARD, as for Connect -- see connect_state.
-    index = reading.get("message_topcard_index")
-    if not isinstance(index, int) or isinstance(index, bool) or index < 0:
-        return UNKNOWN, (
-            "exactly one Message control matched and no usable position inside "
-            "the topcard came back for it, so nothing can be aimed."
-        ), None
+        )
     degree = reading.get("degree")
     return MESSAGE_FROM, (
-        "exactly one Message control named for this person, of a shape this "
-        "act may press, and no composer already open."
+        "exactly one Message control named for this person, the only one in "
+        "their topcard, of a shape this act may press, and no composer "
+        "already open."
         + (
-            " The profile reads '1st': the words are typed only if the press "
-            "opens exactly one empty conversation composer."
+            " The profile reads '1st': the words are typed only if, after the "
+            "press, exactly one empty composer sits in a conversation titled "
+            "with exactly that person's name."
             if degree == "1st"
             else f" THE PROFILE READS DEGREE {degree!r}, NOT '1st': confirming "
             "will press Message, record what opens, and STOP BEFORE TYPING -- "
@@ -343,7 +365,7 @@ def message_state(reading: dict[str, Any]) -> tuple[str, str, Optional[int]]:
             "an InMail that spends a credit, and that composer has never been "
             "captured (NEEDS-CAPTURE C-P5). Nothing will be sent."
         )
-    ), index
+    )
 
 
 # ---------------------------------------------------------------------------

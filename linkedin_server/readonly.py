@@ -2971,15 +2971,28 @@ NAMED_PROFILE_SEGMENT = re.compile(
 _NAMED_PROFILE_URL = re.compile(r"^https://www\.linkedin\.com/in/([^/?#]+)/$")
 
 
+#: THE FOUR INVISIBLE LETTERS. Of Unicode's default-ignorable code points --
+#: the ones a renderer draws as nothing -- four are LETTERS (category Lo), so
+#: ``str.isalnum()`` says yes to them: the Hangul fillers U+115F, U+1160,
+#: U+3164 and U+FFA0. MEASURED 2026-09-27 over the default-ignorable ranges of
+#: DerivedCoreProperties with Python 3.13's unicodedata (Unicode 15.1): these
+#: four and no others. The warm re-check of that day found a two-word name
+#: with U+3164 standing where the space was accepted as a segment. Kept as code
+#: points, not characters, so this file stays ASCII and the freeze can pin the
+#: tuple.
+_INVISIBLE_LETTER_CODES = (0x115F, 0x1160, 0x3164, 0xFFA0)
+
+
 def valid_named_profile_segment(segment: object) -> bool:
     """True only for a segment :data:`NAMED_PROFILE_SEGMENT` admits AND whose
     DECODED form is still a slug.
 
     The shape check alone admits any run of non-ASCII octets. Decoded -- as
     strict UTF-8, so a broken octet sequence refuses -- every character must be
-    a letter or a digit of any script, a hyphen or an underscore: an encoded
-    no-break space, a direction override or a zero-width character is not a
-    letter, and it does not make a name into a slug.
+    a letter or a digit of any script, a hyphen or an underscore, and not one
+    of :data:`_INVISIBLE_LETTER_CODES`: an encoded no-break space, a direction
+    override, a zero-width character or a letter that draws as nothing does
+    not make a name into a slug.
     """
     if not isinstance(segment, str) or not NAMED_PROFILE_SEGMENT.fullmatch(segment):
         return False
@@ -2987,7 +3000,11 @@ def valid_named_profile_segment(segment: object) -> bool:
         decoded = unquote(segment, errors="strict")
     except UnicodeDecodeError:
         return False
-    return all(character.isalnum() or character in "-_" for character in decoded)
+    return all(
+        (character.isalnum() and ord(character) not in _INVISIBLE_LETTER_CODES)
+        or character in "-_"
+        for character in decoded
+    )
 
 
 def named_profile_url(segment: str) -> str:

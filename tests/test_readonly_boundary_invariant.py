@@ -199,6 +199,9 @@ READONLY = REPO / "linkedin_server" / "readonly.py"
 #: The same re-check found the segment's percent-encoded unit admitting every
 #: octet, and the fix moved the first of these two. Purely additive: the seven
 #: names above and ``<functions>``' meaning are unchanged by the addition.
+#: ``_INVISIBLE_LETTER_CODES`` joined them the same day, when a warm re-check
+#: found four letters that draw as nothing passing the decoded check; it is
+#: the third thing the second door's admission rests on.
 PINNED = (
     "_ALLOWED_URL_PATTERNS",
     "_FORBIDDEN_URL_SUBSTRINGS",
@@ -209,6 +212,7 @@ PINNED = (
     "SANCTIONED_MUTATIONS",
     "NAMED_PROFILE_SEGMENT",
     "_NAMED_PROFILE_URL",
+    "_INVISIBLE_LETTER_CODES",
 )
 
 #: Digests of ``linkedin_server/readonly.py`` at "perform() for save_job, and
@@ -1427,15 +1431,35 @@ PINNED = (
 #: dropping ``is_read_url`` instead lands on 00aa3e33eda0838f. One
 #: interpreter, 3.13.
 #: ------------------------------------------------------------------------
+#: RE-FROZEN A THIRD TIME ON 2026-09-27, AFTER THE WARM RE-CHECK: FOUR
+#: INVISIBLE LETTERS REFUSED.
+#:
+#:     <functions>                4221c17c31fdd935 -> c191182c4f66d789
+#:     _INVISIBLE_LETTER_CODES    (new, pinned)    -> 02528c398b97abab
+#:     every other table          unchanged, the door's two shapes included
+#:
+#: ``str.isalnum()`` accepts the four default-ignorable code points that are
+#: letters -- the Hangul fillers U+115F, U+1160, U+3164, U+FFA0, which draw as
+#: nothing -- so a two-word name with U+3164 where the space was passed the
+#: decoded check. ``valid_named_profile_segment`` now refuses them, listed as
+#: code points in the pinned tuple. ATTRIBUTION, two ways again: minus the
+#: door's three functions the tree still hashes to master's d7e1d0922e3af446,
+#: and with ``valid_named_profile_segment`` alone swapped back to its 149e787
+#: source it hashes to 4221c17c31fdd935, the value replaced. Controls:
+#: swapping back the unchanged ``named_profile_url`` moves nothing; dropping
+#: ``is_read_url`` lands on ecac963caf105263. One interpreter, 3.13.
+#: ------------------------------------------------------------------------
 READONLY_AST_AT_LAST_REFREEZE = {
     # d7e1d0922e3af446 until 2026-09-27: the named-profile door's three
     # functions. 6bdd6beaef275129 until the same day's cold re-check narrowed
-    # the door. The last two re-freeze notes above.
-    "<functions>": "4221c17c31fdd935",
-    # PINNED 2026-09-27 -- the second door's segment and address shapes; the
-    # last re-freeze note above.
+    # the door, and 4221c17c31fdd935 until its warm re-check refused the four
+    # invisible letters. The last three re-freeze notes above.
+    "<functions>": "c191182c4f66d789",
+    # PINNED 2026-09-27 -- the second door's segment and address shapes, and
+    # the letters it refuses; the last two re-freeze notes above.
     "NAMED_PROFILE_SEGMENT": "b3de160186fb187d",
     "_NAMED_PROFILE_URL": "32c49c9c6bc0626f",
+    "_INVISIBLE_LETTER_CODES": "02528c398b97abab",
     "JS_MUTATION_TOKENS": "d47e30b67c583c1b",
     # ab8fdd31f93ef4fc until 2026-09-19. See the re-freeze note above: two
     # entries added for press.disclose's click and its closing Escape, on the

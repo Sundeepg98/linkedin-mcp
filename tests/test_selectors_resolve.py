@@ -243,11 +243,12 @@ def build_all() -> dict[str, str]:
         ),
         "reaction_control_selector": dom.reaction_control_selector(),
         "invite_control_selector": dom.invite_control_selector(0),
-        # THE NAMED-PERSON ACTS' TWO PRESSES, scoped to the topcard (the cold
-        # re-check of 2026-09-27). Position 0 is the only control of each kind
-        # inside the page's one topcard above.
-        "topcard_invite_control_selector": dom.topcard_invite_control_selector(0),
-        "topcard_message_control_selector": dom.topcard_message_control_selector(0),
+        # THE NAMED-PERSON ACTS' TWO PRESSES, scoped to the topcard and
+        # carrying no position (the re-checks of 2026-09-27): each must be the
+        # only control of its kind inside the page's one topcard above, which
+        # is what ``perform``'s strict press requires.
+        "topcard_invite_control_selector": dom.topcard_invite_control_selector(),
+        "topcard_message_control_selector": dom.topcard_message_control_selector(),
         "tracker_list_selector": dom.tracker_list_selector(),
         "compose_recipient_selector": dom.compose_recipient_selector(),
         "compose_body_selector": dom.compose_body_selector(),

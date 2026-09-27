@@ -1073,11 +1073,12 @@ INJECTED_SCRIPTS = {
     # ITS PRIVACY ARGUMENT IS INVITE_NEEDLE_JS'S, ON A PAGE THAT IS ONE PERSON.
     # It takes the owner's name from the title, compares it with the topcard's
     # first heading and with every Connect and Message control's accessible
-    # name -- all INSIDE the page -- and returns integers, booleans, the
-    # POSITION of the one control that matched, and closed tokens (a degree, a
-    # tag, an href class, and one word per other control naming the owner). No
-    # name, label, href or id is in its return value, and dom.read_named_profile
-    # re-closes every field in Python. The one place this route prints WHO it
+    # name -- all INSIDE the page -- and returns integers, booleans and closed
+    # tokens (a degree, a tag, an href class, and one word per other control
+    # naming the owner); since the re-checks of 2026-09-27 it also compares an
+    # opened conversation's title with the owner's name, and returns no
+    # position at all. No name, label, href or id is in its return value, and
+    # dom.read_named_profile re-closes every field in Python. The one place this route prints WHO it
     # resolved to is the confirm block, read by a different reader
     # (READ_PROFILE_JS) on the same load -- PEOPLE-DATA-MITIGATIONS item 6.
     "NAMED_PROFILE_JS": dom.NAMED_PROFILE_JS,
