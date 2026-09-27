@@ -135,7 +135,13 @@ def company_filter_param(company_id: str) -> dict[str, Any]:
             "why": "no company_id was supplied, so no company filter is applied",
         }
 
-    if not text.isdigit():
+    # ASCII DIGITS, AND NOT ALL ZEROS (2026-09-28, lane S). ``str.isdigit()``
+    # alone is true for a superscript two, a circled one and the fullwidth
+    # digits, and for "0" -- each of which this returned as a Page id. That was
+    # a keyworded search with a garbage facet until 2026-09-28; since an
+    # employer may stand in for the keyword (census J 107) it would have been
+    # a keyword-less load of a page of noise. Found by the cold review.
+    if not (text.isascii() and text.isdigit() and text.strip("0")):
         return {
             "state": "refused",
             "param": None,

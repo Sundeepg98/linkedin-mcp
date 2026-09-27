@@ -22,7 +22,9 @@ WHAT THIS RETURNS.
   declares (:data:`METRIC_KEYS`), never by the label the page drew;
 * ``time_range_days`` -- the filter's "Past <n> days", as the integer;
 * ``trends`` -- per metric, the chart's own point count and its POINTS, each
-  a date this module computed from the point's epoch and the integer count;
+  ``{"date", "views"}``: the UTC date of the point's epoch and the integer
+  count. MEASURED, not assumed: the capture's 26 points all sit at UTC
+  midnight (each a Thursday), so the UTC date is the date the chart means;
 * ``viewers`` -- each recruiter viewer as a row shaped like
   ``linkedin_who_viewed_me``'s: ``{"person", "viewed", "anonymous"}``, the
   person a PEOPLE RECORD (``people_data.Person``) whose name is the employer
@@ -31,26 +33,33 @@ WHAT THIS RETURNS.
   LinkedIn draws the viewer, and no more, the way that tool returns a viewer
   drawn as "Recruiter at Acme". That is the page naming nobody:
   WHO-WHICH-COUNTS-ARE-NOT-DELIVERY does not hold this row (lane Y2,
-  2026-09-24), and the viewer rows go out under PEOPLE-DATA-MITIGATIONS.
+  2026-09-24), and the viewer rows go out under PEOPLE-DATA-MITIGATIONS;
+* ``denominators`` -- what was SEEN beside what was returned, so a row or a
+  chart drawn in a shape this reader does not know reads as seen-and-unread
+  rather than as absent: chart regions seen and read, insights links seen,
+  viewer rows seen, returned, unparsed and hidden.
 
 WHAT IT NEVER RETURNS: a label the page drew (every word in the output is this
-module's own or a record's field), an employer's Page link or id, a hidden
-viewer, or anything past what had drawn -- no scroll, no "show more", no
-press of any kind.
+module's own or a record's field), an employer's Page link or id, anything of
+a hidden viewer row, or anything past what had drawn -- no scroll, no "show
+more", no press of any kind.
 
 HOW IT READS: Playwright's own read calls -- find elements, read their text
 and attributes, ask whether they are visible -- and no script. Every page
 string is matched against a pattern this module declares before anything is
 kept: a count leaves only as the digits a pattern captured, a label only as
-the key it matched, and a viewer's lines only inside a people record.
+the key it matched, a time only in this package's own spelling with ASCII
+digits, and a viewer's lines only inside a people record.
 """
 from __future__ import annotations
 
 import re
 from datetime import datetime, timezone
 from typing import Any, Optional
+from urllib.parse import urlsplit
 
-from linkedin_server import people_data, shape
+from linkedin_server import dom, people_data, shape
+from linkedin_server.errors import ExtractionFailedError
 
 RECRUITER_VIEWS_URL = "https://www.linkedin.com/analytics/recruiter-views/"
 
@@ -66,13 +75,22 @@ NUMBER = re.compile(r"[0-9][0-9,]{0,12}")
 RANGE = re.compile(r"Past ([0-9]{1,4}) days")
 POINT = re.compile(r"x, ([0-9]{10,13}), ([0-9]{1,7})\. Views over time\.")
 DESCRIBED = re.compile(r"Line chart with ([0-9]{1,4}) data points\.?")
-VIEWER_HREF = re.compile(r"(?:https://www\.linkedin\.com)?/company/[^/?#]+/insights/?")
-VIEWED = re.compile(r"Viewed \S+ ago")
+#: A viewer row's link: an employer's insights page, matched on the PATH, so a
+#: query or a fragment LinkedIn adds does not drop the row.
+VIEWER_PATH = re.compile(r"/company/[^/]+/insights/?")
+VIEWER_HOSTS = frozenset({"", "www.linkedin.com", "linkedin.com"})
+#: The viewer row's time line, in either notation LinkedIn uses -- "Viewed 2w
+#: ago" and "Viewed 2 weeks ago" (``shape.find_time_ago`` reads both).
+VIEWED = re.compile(r"Viewed .{1,24} ago")
+#: What a normalised time may look like when it leaves: this package's own
+#: spelling, ASCII digits only.
+NORMALISED_TIME = re.compile(r"[0-9]{1,4} [a-z]+ ago")
 
 #: Bounds: the capture drew two viewer rows and two charts of thirteen points.
 MAX_VIEWERS = 25
 MAX_POINTS = 60
 MAX_CHARTS = 4
+MAX_REGIONS = 40
 MAX_PARAGRAPHS = 400
 MAX_COUNT = 10_000_000
 
@@ -117,6 +135,18 @@ def _lines(text: Any) -> list[str]:
     return [line.strip() for line in str(text or "").split("\n") if line.strip()]
 
 
+def _is_viewer_link(href: Any) -> bool:
+    parts = urlsplit(str(href or ""))
+    return parts.netloc.lower() in VIEWER_HOSTS and bool(VIEWER_PATH.fullmatch(parts.path))
+
+
+def _when(line: str) -> Optional[str]:
+    """The row's time in this package's spelling, or None: a page-drawn digit
+    that is not ASCII, or a run too long to be a time, never leaves."""
+    found = shape.find_time_ago([line])
+    return found if found and NORMALISED_TIME.fullmatch(found) else None
+
+
 async def _counts(page: Any) -> dict[str, Optional[int]]:
     """A paragraph that is only a number, followed by one that is a declared
     label: the count under that label's key. First reading of each key wins."""
@@ -137,11 +167,20 @@ async def _range_days(page: Any) -> Optional[int]:
     return None
 
 
-async def _trends(page: Any) -> dict[str, Any]:
-    """Each chart region: the metric its own card names, its description's
-    point count, and its points."""
+async def _trends(page: Any) -> tuple[dict[str, Any], int]:
+    """Each chart: a region holding labelled points, the metric its own card
+    names, its description's point count, and its points. Returns the trends
+    and how many chart regions were SEEN, so a chart whose card names no
+    declared metric is counted rather than silently dropped."""
     trends: dict[str, Any] = {}
-    for region in (await page.query_selector_all('[role="region"]'))[:MAX_CHARTS]:
+    seen = 0
+    for region in (await page.query_selector_all('[role="region"]'))[:MAX_REGIONS]:
+        paths = await region.query_selector_all("path[aria-label]")
+        if not paths:
+            continue
+        seen += 1
+        if len(trends) >= MAX_CHARTS:
+            continue
         card = await region.query_selector("xpath=..")
         key = None
         for p in await card.query_selector_all("p") if card is not None else []:
@@ -157,23 +196,25 @@ async def _trends(page: Any) -> dict[str, Any]:
                 described = int(found.group(1))
                 break
         points = []
-        for path in (await region.query_selector_all("path[aria-label]"))[:MAX_POINTS]:
+        for path in paths[:MAX_POINTS]:
             point = _point(await path.get_attribute("aria-label"))
             if point is not None:
                 points.append(point)
         trends[key] = {"data_points": described, "points": points}
-    return trends
+    return trends, seen
 
 
 async def _viewers(page: Any) -> tuple[list[dict[str, Any]], dict[str, int]]:
     """Each recruiter viewer row: a link to an employer's insights page that
     draws a "Viewed ... ago" line. Its twin, "View insights", draws none and is
-    not a viewer. A hidden row is counted before anything is read from it."""
+    not a viewer. A hidden row is counted and nothing of it is returned: its
+    text is read only to decide whether it is a viewer row."""
     viewers: list[dict[str, Any]] = []
-    seen = hidden = unparsed = 0
+    links = seen = hidden = unparsed = 0
     for anchor in await page.query_selector_all('a[href*="/company/"]'):
-        if not VIEWER_HREF.fullmatch(str(await anchor.get_attribute("href") or "")):
+        if not _is_viewer_link(await anchor.get_attribute("href")):
             continue
+        links += 1
         if (not await anchor.is_visible()
                 or await anchor.query_selector(_HIDDEN_ANCESTOR) is not None):
             if VIEWED.search(str(await anchor.text_content() or "")):
@@ -200,10 +241,10 @@ async def _viewers(page: Any) -> tuple[list[dict[str, Any]], dict[str, int]]:
             continue
         viewers.append({
             "person": person.envelope(),
-            "viewed": shape.find_time_ago([viewed]),
+            "viewed": _when(viewed),
             "anonymous": True,
         })
-    return viewers, {"seen": seen, "hidden": hidden, "unparsed": unparsed}
+    return viewers, {"links": links, "seen": seen, "hidden": hidden, "unparsed": unparsed}
 
 
 async def read_recruiter_views(page: Any) -> dict[str, Any]:
@@ -211,11 +252,14 @@ async def read_recruiter_views(page: Any) -> dict[str, Any]:
     try:
         counts = await _counts(page)
         days = await _range_days(page)
-        trends = await _trends(page)
+        trends, charts_seen = await _trends(page)
         viewers, tally = await _viewers(page)
     except Exception as exc:  # noqa: BLE001 -- raised by type alone
-        raise RuntimeError(
-            f"could not read the recruiter-insights page ({type(exc).__name__})"
+        # THE LANDING IS DESCRIBED, NEVER PUBLISHED: the same ruling the
+        # twelve dom readers raise under (WITHHELD), and the same describer.
+        raise ExtractionFailedError(
+            f"could not read the recruiter-insights page ({type(exc).__name__})",
+            hint=dom._landing_note(page),
         ) from None
     return {
         "counts": counts,
@@ -223,7 +267,10 @@ async def read_recruiter_views(page: Any) -> dict[str, Any]:
         "trends": trends,
         "viewers": viewers,
         "denominators": {
-            "viewer_links_seen": tally["seen"],
+            "charts_seen": charts_seen,
+            "charts_read": len(trends),
+            "insight_links_seen": tally["links"],
+            "viewer_rows_seen": tally["seen"],
             "viewers_returned": len(viewers),
             "viewers_unparsed": tally["unparsed"],
             "viewers_hidden": tally["hidden"],

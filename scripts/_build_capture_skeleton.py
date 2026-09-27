@@ -120,10 +120,33 @@ def labelled_paths(svg: Node) -> list[Node]:
     return [n for n in walk(svg) if n.tag == "path" and attr(n, "aria-label")]
 
 
+def structural_attributes(node: Node) -> str:
+    """The attributes the readers select on, as :meth:`Builder.emit` keeps
+    them: a kept attribute with a value from its closed set, and an href as
+    its route words (every other segment ``*``, query and fragment dropped).
+    Never a label, an alt or any other value a member could have written."""
+    out = []
+    for name, value in node.attrs:
+        value = value or ""
+        if name in KEPT_ATTRIBUTES and value in KEPT_ATTRIBUTES[name]:
+            out.append(f"{name}={value}")
+        elif name == "href" and node.tag == "a":
+            segments = [s if s in ROUTE_WORDS else "*"
+                        for s in urlsplit(value.strip()).path.split("/") if s]
+            out.append("href=/" + "/".join(segments))
+    return ",".join(sorted(out))
+
+
 def structure(node: Node, keep_points: bool, depth: int = 0, out=None) -> list[str]:
     """The kept STRUCTURE, exactly as :meth:`Builder.emit` writes it: each
-    element's tag at its depth, a text node as a mark, and an svg as its
-    labelled-point count when the plan keeps points. No attribute, no text."""
+    element's tag at its depth with :func:`structural_attributes`, a text node
+    as a mark, and an svg as its labelled-point count when the plan keeps
+    points. No text, and no attribute value a member could have written.
+
+    THE ATTRIBUTES JOINED THE DIGEST 2026-09-28 (the cold review): tags and
+    nesting alone let a hand edit of ``role``, ``aria-hidden``,
+    ``data-view-name`` or an href -- every attribute the readers select on --
+    leave the pinned digest where it was."""
     if out is None:
         out = []
     if node.tag == "#text":
@@ -131,11 +154,12 @@ def structure(node: Node, keep_points: bool, depth: int = 0, out=None) -> list[s
         return out
     if node.tag in DROP_SUBTREE:
         return out
+    attrs = structural_attributes(node)
     if node.tag == "svg":
         points = len(labelled_paths(node)) if keep_points else 0
-        out.append(f"{depth}:svg[{points}]")
+        out.append(f"{depth}:svg[{points}]{{{attrs}}}")
         return out
-    out.append(f"{depth}:{node.tag}")
+    out.append(f"{depth}:{node.tag}{{{attrs}}}")
     if node.tag in VOID:
         return out
     for child in node.children:

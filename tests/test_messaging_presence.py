@@ -26,6 +26,7 @@ from pathlib import Path
 import pytest
 
 from linkedin_server import people_data, presence
+from linkedin_server.errors import ExtractionFailedError
 from linkedin_server import server as server_module
 from tests import xhtml_page
 from tests.test_people_search_names import (
@@ -41,7 +42,7 @@ READER_SOURCE = REPO / "linkedin_server" / "presence.py"
 SERVER_SOURCE = REPO / "linkedin_server" / "server.py"
 
 #: Printed by the builder from the CAPTURE's kept subtree on 2026-09-28.
-STRUCTURE_DIGEST = "cjlpgbpemgfecani"
+STRUCTURE_DIGEST = "kooeacfdhmiilape"
 
 PEOPLE = (
     ("Farhan Qureshi", "Engineering Manager at Umbrella Systems", "offline"),
@@ -81,6 +82,15 @@ def test_the_fixture_carries_the_structure_the_builder_printed_from_the_capture(
     assert builder.structure_digest(builder.SUGGESTED.select(tree.root), False) == STRUCTURE_DIGEST
 
 
+def test_THIS_CONTROL_CAN_FAIL_the_digest_moves_when_an_attribute_does():
+    """The attributes the reader selects on are in the digest: a list marked
+    hidden from assistive technology fails it."""
+    builder = _builder()
+    tree = builder.Tree()
+    tree.feed(FIXTURE.read_text(encoding="ascii").replace('aria-hidden="false"', 'aria-hidden="true"', 1))
+    assert builder.structure_digest(builder.SUGGESTED.select(tree.root), False) != STRUCTURE_DIGEST
+
+
 def test_THIS_CONTROL_CAN_FAIL_the_digest_moves_when_a_card_goes():
     builder = _builder()
     text = FIXTURE.read_text(encoding="ascii")
@@ -100,9 +110,27 @@ def test_each_suggested_person_comes_back_with_the_presence_drawn():
     result = _read()
     assert _rows(result) == list(PEOPLE)
     assert result["denominators"] == {
-        "cards_seen": 4, "people_returned": 3, "people_unparsed": 0,
+        "cards_seen": 4, "cards_read": 4, "people_returned": 3, "people_unparsed": 0,
         "groups_skipped": 1, "hidden_skipped": 0,
     }
+
+
+def test_a_list_longer_than_the_cap_says_so():
+    """Every card drawn is counted; at most MAX_CARDS are read."""
+    mutate = (f"() => {{ const card = {_CARDS}[2].parentElement.parentElement;"
+              " for (let i = 0; i < 30; i++) card.parentElement.appendChild(card.cloneNode(true)); }")
+    denominators = _read(mutate)["denominators"]
+    assert denominators["cards_seen"] == 34
+    assert denominators["cards_read"] == presence.MAX_CARDS
+
+
+def test_a_signed_out_load_is_an_error_not_an_empty_list():
+    """The wall draws no suggestion card; without the check an expired
+    session read as ok with nobody suggested (the cold review)."""
+    envelope = xhtml_page.drive_tool(FIXTURE, server_module.linkedin_messaging_presence,
+                                     land_on="https://www.linkedin.com/login")
+    assert envelope.get("error") == "not_authenticated", envelope
+    assert "suggested" not in envelope
 
 
 def test_each_presence_word_is_this_module_s_own_string_not_the_page_s():
@@ -202,7 +230,7 @@ def test_mitigation_4_one_page_per_call_nothing_but_finding_and_reading():
 
 
 def test_THIS_CONTROL_CAN_FAIL_a_hover_in_the_reader_is_refused():
-    anchor = "            seen += 1" + chr(10)
+    anchor = "            read += 1" + chr(10)
     source = READER_SOURCE.read_text(encoding="utf-8")
     assert source.count(anchor) == 1
     planted = source.replace(anchor, anchor + "            await card.hover()" + chr(10))
@@ -243,7 +271,7 @@ def test_a_failing_page_raises_by_type_alone():
         async def query_selector_all(self, *args, **kwargs):
             raise ValueError("Zzqfailureplant Markersurname")
 
-    with pytest.raises(RuntimeError) as caught:
+    with pytest.raises(ExtractionFailedError) as caught:
         asyncio.run(presence.read_suggested_presence(Failing()))
     assert "Zzqfailureplant" not in str(caught.value)
     assert caught.value.__cause__ is None and caught.value.__suppress_context__

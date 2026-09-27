@@ -105,6 +105,42 @@ async def test_an_employer_that_is_not_a_page_id_is_refused_before_any_load(driv
     assert navigations == [], navigations
 
 
+#: Values ``str.isdigit()`` accepts and no Page id is: a superscript two, a
+#: circled one, fullwidth digits, and zeros. Built from code points so this
+#: file stays ASCII.
+NOT_A_PAGE_ID = (chr(0xB2), chr(0x2460), chr(0xFF11) + chr(0xFF12), "0", "000")
+
+
+@pytest.mark.parametrize("company", NOT_A_PAGE_ID, ids=["sup2", "circled1", "fullwidth", "0", "000"])
+async def test_a_digit_that_is_no_page_id_is_refused_before_any_load(drive, company):
+    """The company verdict decides whether the id is a Page id, and a
+    keyword-less call rests on it: a digit that is not ASCII, or an id of
+    zeros, is refused rather than searched (the cold review)."""
+    page = FakePage(evaluate_result=[dict(SEARCH_CARD)])
+    navigations = drive(page)
+
+    result = await linkedin_search_jobs(keywords="", company_id=company)
+
+    assert result.get("error") == "bad_argument", (company, result)
+    assert company not in result["message"]
+    assert navigations == [], navigations
+
+
+async def test_a_none_keyword_from_a_python_caller_is_the_employer_search_too(drive):
+    """keywords stays REQUIRED -- the tool-envelope guard drives each tool with
+    its required arguments, and a default would stop it driving this one --
+    but a None from a Python caller reaches the employer search and is echoed
+    as empty rather than raising after the load (the cold review)."""
+    page = FakePage(evaluate_result=[dict(SEARCH_CARD)])
+    navigations = drive(page)
+
+    absent = await linkedin_search_jobs(keywords=None, company_id=EMPLOYER)
+
+    assert "error" not in absent, absent
+    assert [_pairs(url) for url in navigations] == [[("f_C", EMPLOYER)]]
+    assert absent["query"]["keywords"] == ""
+
+
 @pytest.mark.parametrize("company", ["", EMPLOYER])
 async def test_a_keyworded_search_builds_keywords_first_as_it_always_did(drive, company):
     page = FakePage(evaluate_result=[dict(SEARCH_CARD)])

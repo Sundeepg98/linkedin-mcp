@@ -41,7 +41,8 @@ from __future__ import annotations
 import re
 from typing import Any, Optional
 
-from linkedin_server import people_data
+from linkedin_server import dom, people_data
+from linkedin_server.errors import ExtractionFailedError
 
 #: The option cards of the composer's recipient list.
 SUGGESTED_CARD = '[data-view-name="messaging-type-ahead-card"]'
@@ -78,11 +79,14 @@ async def _text(card: Any, selector: str) -> Optional[str]:
 async def read_suggested_presence(page: Any) -> dict[str, Any]:
     """The composer's suggested people, each with the presence it drew."""
     people: list[dict[str, Any]] = []
-    seen = groups = hidden = unparsed = 0
+    seen = read = groups = hidden = unparsed = 0
     try:
         cards = list(await page.query_selector_all(SUGGESTED_CARD))
+        # EVERY CARD DRAWN IS COUNTED, and at most MAX_CARDS are read, so a
+        # list longer than the cap reads as longer rather than as exactly full.
+        seen = len(cards)
         for card in cards[:MAX_CARDS]:
-            seen += 1
+            read += 1
             # VISIBLE ONLY: counted, and nothing is read from it.
             if (not await card.is_visible()
                     or await card.query_selector(_HIDDEN_ANCESTOR) is not None):
@@ -108,13 +112,17 @@ async def read_suggested_presence(page: Any) -> dict[str, Any]:
                 continue
             people.append({"person": person.envelope(), "presence": presence})
     except Exception as exc:  # noqa: BLE001 -- raised by type alone
-        raise RuntimeError(
-            f"could not read the composer's suggestions ({type(exc).__name__})"
+        # THE LANDING IS DESCRIBED, NEVER PUBLISHED: the same ruling the
+        # twelve dom readers raise under (WITHHELD), and the same describer.
+        raise ExtractionFailedError(
+            f"could not read the composer's suggestions ({type(exc).__name__})",
+            hint=dom._landing_note(page),
         ) from None
     return {
         "suggested": people,
         "denominators": {
             "cards_seen": seen,
+            "cards_read": read,
             "people_returned": len(people),
             "people_unparsed": unparsed,
             "groups_skipped": groups,

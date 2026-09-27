@@ -217,6 +217,12 @@ SYNTHETIC_GROUPS = frozenset(
         "Pellucid Roundtable",
         "Quillfeather Circle",
         "Tessaline Forum",
+        # synthetic/compose_suggestions.html (declared 2026-09-28, lane S, with
+        # the typeahead-card slot): the title of the one group conversation
+        # the composer's suggestion list draws, invented by
+        # scripts/_build_capture_skeleton.py and said so in the fixture's
+        # header.
+        "Example Group",
     }
 )
 
@@ -241,6 +247,16 @@ CLASS_PARTICIPANTS = "class: a conversation card's participant names"
 CLASS_THREAD_TITLE = "class: an open conversation's title"
 GROUP_TEXT = "group link: first visible text"
 LABEL_GROUP_MENU = "aria-label: More options for X"
+TYPEAHEAD_NAME = "typeahead card: its name"
+ALT_SUGGESTED_PHOTO = "alt: Suggested: Photo of X"
+
+#: THE COMPOSER'S SUGGESTION CARD, added 2026-09-28 (lane S's cold review):
+#: ``presence.read_suggested_presence`` reads a person's name from the
+#: ``<dt>`` of an element wearing this view name, and the card's photo
+#: carries the same person in its alt. Neither sat in any slot here, so the
+#: fixture built for that reader passed this guard having never been read.
+TYPEAHEAD_CARD = "messaging-type-ahead-card"
+SUGGESTED_PHOTO = re.compile(r"^Suggested: Photo of (?P<name>.+?)\.?$")
 
 #: SLOTS READ BY CLASS, where the messaging readers read names: the first
 #: visible text inside an element wearing the class token, split into
@@ -268,6 +284,8 @@ MEASURED_SLOTS = (
     CLASS_THREAD_TITLE,
     GROUP_TEXT,
     LABEL_GROUP_MENU,
+    TYPEAHEAD_NAME,
+    ALT_SUGGESTED_PHOTO,
 )
 
 #: A conversation's label joins its participants with ``, `` and a last
@@ -363,16 +381,18 @@ class _Element:
     link record when it is an ``<a>``, the class slot it opens if any, and
     whether a heading or that slot was read yet."""
 
-    __slots__ = ("tag", "hidden", "link", "slot", "text_taken")
+    __slots__ = ("tag", "hidden", "link", "slot", "text_taken", "card")
 
     def __init__(
-        self, tag: str, hidden: bool, link: Optional[_Link], slot: Optional[str] = None
+        self, tag: str, hidden: bool, link: Optional[_Link], slot: Optional[str] = None,
+        card: bool = False,
     ) -> None:
         self.tag = tag
         self.hidden = hidden
         self.link = link
         self.slot = slot
         self.text_taken = False
+        self.card = card
 
 
 def _link_for(href: str) -> _Link:
@@ -450,11 +470,19 @@ class _SlotReader(HTMLParser):
         if tag == "img" and self._innermost_link() is not None:
             self._add(MEMBER_PICTURE, values.get("alt", ""), line, col)
 
+        if tag == "img":
+            suggested = SUGGESTED_PHOTO.match(" ".join(values.get("alt", "").split()))
+            if suggested is not None:
+                self._add(ALT_SUGGESTED_PHOTO, suggested.group("name"), line, col)
+
         if tag not in _VOID:
             classes = values.get("class", "").split()
             hidden = _HIDDEN_CLASS in classes
             slot = next((s for c, s in CLASS_SLOTS.items() if c in classes), None)
-            self._open.append(_Element(tag, hidden, link, slot))
+            if slot is None and tag == "dt" and any(e.card for e in self._open):
+                slot = TYPEAHEAD_NAME
+            card = values.get("data-view-name", "") == TYPEAHEAD_CARD
+            self._open.append(_Element(tag, hidden, link, slot, card))
 
     def handle_endtag(self, tag):
         for index in range(len(self._open) - 1, -1, -1):
@@ -697,6 +725,14 @@ PLANTS = {
         '<span class="msg-entity-lockup__entity-title">{name}</span></dt>'
     ),
     MEMBER_LABEL_UNPARSED: '<a href="' + PLANT_MEMBER + '" aria-label="{name}"></a>',
+    # The composer's suggestion card, as the capture drew it: the presence
+    # line and the headline beside the name, neither of which is the slot.
+    TYPEAHEAD_NAME: (
+        '<li role="option" data-view-name="messaging-type-ahead-card"><div>'
+        '<img alt="" src="p.png"><div><span>Status is offline</span></div></div>'
+        "<div><dl><dt>{name}</dt><dd>Plant Role at Plant Company</dd></dl></div></li>"
+    ),
+    ALT_SUGGESTED_PHOTO: '<img alt="Suggested: Photo of {name}" src="p.png">',
 }
 
 PLANTED_PATH = "tests/fixtures/planted.html"

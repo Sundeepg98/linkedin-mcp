@@ -57,10 +57,11 @@ def read(fixture: Path, reader: Callable[[Any], Any], *, mutate: str = "") -> An
 
 
 def drive_tool(fixture: Path, tool: Callable[..., Any], *, mutate: str = "",
-               **arguments: Any) -> dict[str, Any]:
+               land_on: str = "", **arguments: Any) -> dict[str, Any]:
     """A tool end to end over the fixture: the session yields the loaded page
-    and every navigation lands where it was sent without loading anything.
-    The navigations are returned under ``_gotos``, in order."""
+    and every navigation lands where it was sent without loading anything --
+    or on ``land_on`` when given, the way a signed-out session bounces to the
+    login wall. The navigations are returned under ``_gotos``, in order."""
     gotos: list[str] = []
 
     async def run(page: Any) -> dict[str, Any]:
@@ -70,7 +71,7 @@ def drive_tool(fixture: Path, tool: Callable[..., Any], *, mutate: str = "",
 
         async def fake_goto(target: Any, url: str, **more: Any) -> str:
             gotos.append(url)
-            return url
+            return land_on or url
 
         original = browser_module.BROWSER.session, browser_module.BROWSER.goto
         browser_module.BROWSER.session = fake_session

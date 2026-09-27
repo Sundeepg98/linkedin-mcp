@@ -32,7 +32,7 @@ REPO = Path(__file__).resolve().parent.parent
 FIXTURE = xhtml_page.SYNTHETIC / "search_appearances_engagement.html"
 
 #: Printed by the builder from the CAPTURE's kept subtree on 2026-09-28.
-STRUCTURE_DIGEST = "legacdkmdbbjempj"
+STRUCTURE_DIGEST = "bffkmckmmpfkjjff"
 
 #: The invented employer the fixture's first card names.
 EMPLOYER = "Umbrella Systems"
@@ -67,6 +67,15 @@ def test_the_fixture_carries_the_structure_the_builder_printed_from_the_capture(
     assert builder.structure_digest(builder.ENGAGEMENT.select(tree.root), False) == STRUCTURE_DIGEST
 
 
+def test_THIS_CONTROL_CAN_FAIL_the_digest_moves_when_an_attribute_does():
+    """The attributes the reader selects on are in the digest: a button that
+    is no longer a button fails it."""
+    builder = _builder()
+    tree = builder.Tree()
+    tree.feed(FIXTURE.read_text(encoding="ascii").replace('type="button"', 'type="submit"', 1))
+    assert builder.structure_digest(builder.ENGAGEMENT.select(tree.root), False) != STRUCTURE_DIGEST
+
+
 def test_THIS_CONTROL_CAN_FAIL_the_digest_moves_when_the_structure_does():
     builder = _builder()
     tree = builder.Tree()
@@ -82,7 +91,8 @@ def test_THIS_CONTROL_CAN_FAIL_the_digest_moves_when_the_structure_does():
 def test_both_cards_are_read_and_nothing_else_comes_back():
     assert _read() == {
         "experience_impressions": [7],
-        "section_clicks": [{"section": "intro", "anonymous": True}],
+        "section_clicks": [{"section": "intro", "actor": "someone"}],
+        "cards_drawn": 2,
         "cards_seen": 2,
         "cards_unreadable": 0,
         "unrecognised_sections": 0,
@@ -96,14 +106,14 @@ def test_a_thousands_comma_is_read_as_a_number():
 
 def test_a_section_outside_the_closed_list_is_counted_and_never_returned():
     result = _read(_card_text("your Intro", "Someone recently clicked on your Zzqsectionplant"))
-    assert result["section_clicks"] == [{"section": None, "anonymous": True}]
+    assert result["section_clicks"] == [{"section": None, "actor": "someone"}]
     assert result["unrecognised_sections"] == 1
     assert not xhtml_page.anywhere("zzqsectionplant", str(result).lower())
 
 
 def test_a_click_by_a_named_member_says_so_and_never_names_them():
     result = _read(_card_text("your Intro", "Zzqactorplant Markersurname recently clicked on your Intro"))
-    assert result["section_clicks"] == [{"section": "intro", "anonymous": False}]
+    assert result["section_clicks"] == [{"section": "intro", "actor": "other"}]
     assert not xhtml_page.anywhere("Zzqactorplant", result)
 
 
@@ -111,12 +121,27 @@ def test_a_hidden_card_is_not_read():
     mutate = "() => { document.querySelectorAll('li button')[1].style.display = 'none'; }"
     result = _read(mutate)
     assert result["section_clicks"] == [] and result["cards_seen"] == 1
+    assert result["cards_drawn"] == 1
 
 
 def test_a_page_without_the_cards_reads_as_none_seen():
     result = _read("() => { document.querySelector('ul').remove(); }")
-    assert result["cards_seen"] == 0
+    assert result["cards_seen"] == 0 and result["cards_drawn"] == 0
     assert result["experience_impressions"] == [] and result["section_clicks"] == []
+
+
+def test_a_card_in_a_shape_the_patterns_do_not_know_is_drawn_not_absent():
+    """A compact count is not guessed at: the card is DRAWN and not read, so
+    the reading says so instead of reporting no card."""
+    result = _read(_card_text("You have 7", "You have 1.2K impressions on your experience at Umbrella Systems"))
+    assert result["experience_impressions"] == []
+    assert result["cards_drawn"] == 2 and result["cards_seen"] == 1
+
+
+def test_a_multi_word_section_is_counted_unrecognised_not_dropped():
+    result = _read(_card_text("your Intro", "Someone recently clicked on your Licenses & certifications"))
+    assert result["section_clicks"] == [{"section": None, "actor": "someone"}]
+    assert result["unrecognised_sections"] == 1 and result["cards_seen"] == 2
 
 
 # ---------------------------------------------------------------------------
@@ -129,7 +154,7 @@ def test_the_tool_returns_the_cards_as_engagement_off_its_one_load():
     assert envelope["ok"] is True and envelope["pages_loaded"] == 1
     assert len(envelope["_gotos"]) == 1
     assert envelope["engagement"]["experience_impressions"] == [7]
-    assert envelope["engagement"]["section_clicks"] == [{"section": "intro", "anonymous": True}]
+    assert envelope["engagement"]["section_clicks"] == [{"section": "intro", "actor": "someone"}]
 
 
 # ---------------------------------------------------------------------------
@@ -178,7 +203,8 @@ def test_a_section_word_the_script_let_through_is_still_checked_here():
         {"section": "".join(["in", "tro"]), "someone": False},
     ]})
     assert not xhtml_page.anywhere(PLANT, result), result
-    assert result["section_clicks"][0] == {"section": None, "anonymous": True}
+    assert result["section_clicks"][0] == {"section": None, "actor": "someone"}
+    assert result["section_clicks"][0]["actor"] is dom.ENGAGEMENT_ACTORS[0]
     assert result["section_clicks"][1]["section"] is dom.ENGAGEMENT_SECTIONS[0]
 
 

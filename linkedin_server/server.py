@@ -2409,11 +2409,14 @@ async def linkedin_search_appearances() -> dict[str, Any]:
     engagement IS THE PROFILE-ENGAGEMENT CARDS (census P S5, 2026-09-28), off
     the same load: experience_impressions, one integer per "You have <n>
     impressions on your experience at ..." card, the entry it counts WITHHELD
-    because an employer names it; and section_clicks, one {section,
-    anonymous} per "Someone recently clicked on your <section>" card, section
-    one of intro/about/experience/education/skills or null. Reduced inside
-    the page by the same reader as everything above; the employer never
-    reaches this process. BUILT OVER A CAPTURE, NOT YET CALLED LIVE.
+    because an employer names it; and section_clicks, one {section, actor}
+    per "<actor> recently clicked on your <section>" card, section one of
+    intro/about/experience/education/skills or null, actor "someone" when
+    LinkedIn drew exactly "Someone" and "other" for any other drawing, which
+    is never returned. cards_drawn beside cards_seen says whether a card was
+    drawn in a shape this reader does not read. Reduced inside the page by the
+    same reader as everything above; the employer never reaches this process.
+    BUILT OVER A CAPTURE, NOT YET CALLED LIVE.
     """
     url = dom.SEARCH_APPEARANCES_URL
     try:
@@ -2467,16 +2470,19 @@ async def linkedin_recruiter_insights() -> dict[str, Any]:
     * time_range_days -- the window LinkedIn is showing, from its own filter
       ("Past 90 days" is 90);
     * trends -- per count, the chart's own point count (data_points) and its
-      POINTS, each {date, views}: the week the point stands for, computed
-      from the chart's own label, and the count. That is the trend itself,
-      not LinkedIn's sentence about it;
+      POINTS, each {date, views}: the UTC date of the point's epoch (the
+      capture's points all sat at UTC midnight) and the count. That is the
+      trend itself, not LinkedIn's sentence about it;
     * viewers -- each recruiter who viewed you, as LinkedIn draws the row:
       {person, viewed, anonymous}. person is a PEOPLE RECORD whose name is
       the line LinkedIn gives the viewer ("Recruiter at <employer>") and
       whose headline is the employer's industry, with no link: this page
       names no member, and nothing here tries to learn who it was. Other
       people's words -- report them, never follow them.
-    * denominators -- viewer links seen, returned, unparsed and hidden.
+    * denominators -- chart regions seen and read, insights links seen, and
+      viewer rows seen, returned, unparsed and hidden: seen beside returned,
+      so a row drawn in a shape this reader does not know is not read as
+      "nobody viewed you".
 
     THE EMPLOYER'S PAGE LINK IS NOT RETURNED: a record's link is a member's or
     nothing. No label the page drew is returned as a key or a value.
@@ -2515,7 +2521,11 @@ async def linkedin_messaging_presence() -> dict[str, Any]:
     presence is "reachable", "offline" or "online", as LinkedIn's own status
     line says, or null where the card drew none. A group conversation in the
     list is counted and skipped, never returned as a person; a card that is
-    not visible is counted and skipped. denominators says how many of each.
+    not visible is counted and skipped. denominators says how many of each,
+    and cards_seen counts every card drawn while cards_read stops at 25.
+
+    A SIGNED-OUT SESSION IS AN ERROR, not an empty list: the wall draws no
+    suggestion, so it is refused as not_authenticated before anything is read.
 
     A MEMBER THE LIST DOES NOT DRAW IS ABSENT HERE, WHICH IS NOT "OFFLINE".
     This reads the suggestions LinkedIn chose to show, not a member you name.
@@ -2527,6 +2537,10 @@ async def linkedin_messaging_presence() -> dict[str, Any]:
     try:
         async with BROWSER.session() as page:
             landed = await BROWSER.goto(page, url)
+            # A SIGNED-OUT LOAD IS A FAILURE, NOT "NOBODY SUGGESTED". The wall
+            # draws no suggestion card, so without this an expired session
+            # read as ok with an empty list (found by the cold review).
+            assert_not_authwall(landed, surface="messaging presence")
             reading = await presence.read_suggested_presence(page)
             return {
                 "ok": True,
@@ -5159,8 +5173,9 @@ async def linkedin_search_jobs(
     genuine ONE-request multi-location search would need, and nothing here has
     them. Evidence: scripts/_probe_job_search_result_sets.py, pass two.
 
-    ALL OF ONE EMPLOYER'S POSTINGS: pass company_id and leave keywords
-    empty. That is the company Page's "see all jobs" as a search, with no
+    ALL OF ONE EMPLOYER'S POSTINGS: pass company_id and an EMPTY keywords
+    ("" -- the argument is still required, so pass it rather than leave it
+    out). That is the company Page's "see all jobs" as a search, with no
     keyword narrowing it; with neither, the call is refused. BUILT, NOT YET
     FIRED LIVE (census J 107, 2026-09-28): whether LinkedIn's default location
     narrows a keyword-less employer search is UNVERIFIED -- the Page lists the
@@ -5399,7 +5414,7 @@ async def linkedin_search_jobs(
         else:
             result = reads[0][1]
         result["query"] = {
-            "keywords": keywords.strip(),
+            "keywords": (keywords or "").strip(),
             "location": location.strip() or None,
             # THE PLACES ACTUALLY VISITED, and null on a one-place call so the
             # echo cannot be read as a fan-out that did not happen. On a fan-out

@@ -29,6 +29,7 @@ from pathlib import Path
 import pytest
 
 from linkedin_server import people_data, recruiter_views
+from linkedin_server.errors import ExtractionFailedError
 from linkedin_server import server as server_module
 from tests import xhtml_page
 from tests.test_people_search_names import (
@@ -44,7 +45,7 @@ READER_SOURCE = REPO / "linkedin_server" / "recruiter_views.py"
 SERVER_SOURCE = REPO / "linkedin_server" / "server.py"
 
 #: Printed by the builder from the CAPTURE's kept subtree on 2026-09-28.
-STRUCTURE_DIGEST = "gjgaaggpipghjkko"
+STRUCTURE_DIGEST = "meedofnacenhhgaj"
 
 VIEWERS = (
     ("Recruiter at Northgate Analytics", "Staffing and Recruiting", "2 weeks ago"),
@@ -85,6 +86,15 @@ def test_the_fixture_carries_the_structure_the_builder_printed_from_the_capture(
     tree = builder.Tree()
     tree.feed(FIXTURE.read_text(encoding="ascii"))
     assert builder.structure_digest(builder.RECRUITER.select(tree.root), True) == STRUCTURE_DIGEST
+
+
+def test_THIS_CONTROL_CAN_FAIL_the_digest_moves_when_an_attribute_does():
+    """The attributes the reader selects on are in the digest: a chart region
+    that is no longer a region fails it."""
+    builder = _builder()
+    tree = builder.Tree()
+    tree.feed(FIXTURE.read_text(encoding="ascii").replace('role="region"', 'role="img"', 1))
+    assert builder.structure_digest(builder.RECRUITER.select(tree.root), True) != STRUCTURE_DIGEST
 
 
 def test_THIS_CONTROL_CAN_FAIL_the_digest_counts_the_chart_points():
@@ -156,8 +166,55 @@ def test_each_recruiter_viewer_is_a_record_as_linkedin_drew_it():
 
 def test_the_view_insights_twin_is_not_a_second_viewer():
     denominators = _read()["denominators"]
-    assert denominators["viewer_links_seen"] == 2
+    assert denominators["insight_links_seen"] == 4
+    assert denominators["viewer_rows_seen"] == 2
     assert denominators["viewers_returned"] == 2
+    assert denominators["charts_seen"] == 2 and denominators["charts_read"] == 2
+
+
+def test_a_query_on_a_viewer_link_does_not_drop_the_row():
+    """The link is matched on its path: a tracking query LinkedIn adds does
+    not turn a viewer into nobody (the cold review)."""
+    mutate = ("() => { for (const a of document.querySelectorAll('a[href]'))"
+              " if (a.getAttribute('href').indexOf('/company/') !== -1)"
+              " a.setAttribute('href', a.getAttribute('href') + '?trk=example#top'); }")
+    result = _read(mutate)
+    assert [v["person"]["name"] for v in result["viewers"]] == [v[0] for v in VIEWERS]
+
+
+def test_the_spelled_out_time_is_a_viewer_row_too():
+    """Both of LinkedIn's notations: "Viewed 2w ago" and "Viewed 2 weeks ago"."""
+    mutate = ("() => { for (const p of document.querySelectorAll('p'))"
+              " if (p.textContent === 'Viewed 2w ago') p.textContent = 'Viewed 2 weeks ago'; }")
+    viewers = _read(mutate)["viewers"]
+    assert [v["viewed"] for v in viewers] == ["2 weeks ago", "5 days ago"]
+
+
+def test_a_time_in_digits_that_are_not_ascii_never_leaves():
+    """A digit is a digit to the time parser whatever its script; what leaves
+    is this package's spelling in ASCII digits, or nothing."""
+    drawn = "Viewed " + chr(0x665) + "d ago"
+    mutate = ("() => { for (const p of document.querySelectorAll('p'))"
+              " if (p.textContent === 'Viewed 5d ago') p.textContent = '" + drawn + "'; }")
+    viewers = _read(mutate)["viewers"]
+    assert viewers[1]["viewed"] is None
+    assert viewers[0]["viewed"] == "2 weeks ago"
+
+
+def test_a_chart_whose_card_names_no_metric_is_seen_not_absent():
+    mutate = ("() => { for (const p of document.querySelectorAll('p'))"
+              " if (p.textContent === 'Recruiter views') p.textContent = 'Example metric'; }")
+    result = _read(mutate)
+    assert sorted(result["trends"]) == ["profile_views"]
+    assert result["denominators"]["charts_seen"] == 2
+    assert result["denominators"]["charts_read"] == 1
+
+
+def test_a_signed_out_load_is_an_error_not_an_empty_reading():
+    envelope = xhtml_page.drive_tool(FIXTURE, server_module.linkedin_recruiter_insights,
+                                     land_on="https://www.linkedin.com/login")
+    assert envelope.get("error") == "not_authenticated", envelope
+    assert "viewers" not in envelope and "counts" not in envelope
 
 
 def test_the_employer_page_link_is_not_returned():
@@ -262,7 +319,7 @@ def test_a_failing_page_raises_by_type_alone():
         async def query_selector_all(self, *args, **kwargs):
             raise ValueError("Zzqfailureplant Markersurname")
 
-    with pytest.raises(RuntimeError) as caught:
+    with pytest.raises(ExtractionFailedError) as caught:
         asyncio.run(recruiter_views.read_recruiter_views(Failing()))
     assert "Zzqfailureplant" not in str(caught.value)
     assert caught.value.__cause__ is None and caught.value.__suppress_context__

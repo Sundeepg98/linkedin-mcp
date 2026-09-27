@@ -10412,13 +10412,22 @@ SEARCH_APPEARANCES_JS = """
   // compared against cfg.sections, and whether the actor was drawn as
   // "Someone" cross. The employer never does -- the pattern stops at "at " --
   // and neither does any other word of either sentence.
-  const engagement = {cards_seen: 0, impressions: [], clicks: [], unrecognised: 0};
+  //
+  // DRAWN IS COUNTED APART FROM READ: a visible card that mentions either
+  // sentence is counted in `drawn` before either pattern is tried, so a card
+  // drawn in a shape these patterns do not know (a compact count, a new
+  // wording) reads as drawn-and-unread rather than as absent.
+  const engagement = {drawn: 0, cards_seen: 0, impressions: [], clicks: [], unrecognised: 0};
   const IMPRESSIONS = /^You have ([0-9][0-9,]{0,12}) impressions? on your experience at /;
-  const CLICKED = /^(\\S+(?: \\S+){0,5}) recently clicked on your ([A-Za-z]+)\\.?$/;
+  const CLICKED = /^(\\S+(?: \\S+){0,5}) recently clicked on your (.{1,40}?)\\.?$/;
+  const MENTIONS = /impressions? on your experience|recently clicked on your/i;
   for (const button of scope.querySelectorAll('li button')) {
-    if (engagement.cards_seen >= cfg.engagementMax) break;
+    if (engagement.drawn >= cfg.engagementMax) break;
     if (!button.getClientRects().length) continue;
-    for (const raw of (button.innerText || '').split('\\n')) {
+    const text = button.innerText || '';
+    if (!MENTIONS.test(text)) continue;
+    engagement.drawn++;
+    for (const raw of text.split('\\n')) {
       const line = raw.trim();
       const impressions = IMPRESSIONS.exec(line);
       if (impressions) {
@@ -10452,6 +10461,9 @@ ENGAGEMENT_SECTIONS: tuple[str, ...] = ("intro", "about", "experience", "educati
 
 #: At most this many engagement cards are read; the capture drew two.
 ENGAGEMENT_MAX_CARDS = 10
+
+#: The two things a click card's actor can be, in this package's words.
+ENGAGEMENT_ACTORS: tuple[str, ...] = ("someone", "other")
 
 #: An impressions count above this is not one this page draws.
 ENGAGEMENT_MAX_IMPRESSIONS = 10_000_000
@@ -10498,11 +10510,16 @@ def _engagement(raw: Any) -> dict[str, Any]:
         clicks.append({
             "section": (ENGAGEMENT_SECTIONS[ENGAGEMENT_SECTIONS.index(section)]
                         if section in ENGAGEMENT_SECTIONS else None),
-            "anonymous": someone,
+            # "someone" ONLY when LinkedIn drew the actor as exactly
+            # "Someone"; "other" is any other drawing -- a name, or a
+            # description -- which this reader never returns. Not a claim
+            # that "other" names a member (the cold review's wording point).
+            "actor": ENGAGEMENT_ACTORS[0] if someone else ENGAGEMENT_ACTORS[1],
         })
     return {
         "experience_impressions": impressions,
         "section_clicks": clicks,
+        "cards_drawn": _engagement_count(raw.get("drawn"), ENGAGEMENT_MAX_CARDS),
         "cards_seen": len(counted) + len(clicked),
         "cards_unreadable": unreadable,
         "unrecognised_sections": _engagement_count(raw.get("unrecognised"),
@@ -10601,9 +10618,13 @@ async def read_search_appearances(page: Any) -> dict[str, Any]:
     ``engagement`` (census P S5, 2026-09-28) is the page's profile-engagement
     cards, read by the same script off the same render: one integer per "You
     have <n> impressions on your experience at ..." card, and one {section,
-    anonymous} per "Someone recently clicked on your <section>" card. The
-    employer that ends the first sentence never leaves the page. Built over the
-    capture of 2026-09-20; ``cards_seen`` zero is a page that drew none.
+    actor} per "<actor> recently clicked on your <section>" card, the actor
+    "someone" only when drawn as exactly "Someone". The employer that ends the
+    first sentence never leaves the page. Built over the capture of
+    2026-09-20. ``cards_drawn`` counts every visible card mentioning either
+    sentence and ``cards_seen`` the ones read, so a card in a shape these
+    patterns do not know is drawn-and-unread, never absent; ``cards_drawn``
+    zero is a page that drew no such card.
     """
     try:
         data = await page.evaluate(  # readonly-ok
