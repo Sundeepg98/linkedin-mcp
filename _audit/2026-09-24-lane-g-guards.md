@@ -2670,3 +2670,29 @@ THE TWO COMMITS AFTER THE FULL SUITE -- the premise fix and this section --
 are gated by `scripts/impact_gate.py --against 830e169`: the impact set of
 exactly what changed since the tree the full suite passed. Its count is in
 the lane's report.
+
+### T.6 Integration of master 6bc63e2, at the end
+
+THE FULL SUITE ABOVE PASSED ON THE HEAD BEFORE THE MERGE: `8a8fd43` (a
+hash which does not resolve on `master` until this branch merges), gated
+by `scripts/impact_gate.py --against 830e169` (a hash which does not
+resolve on `master` until this branch merges) -- 4 changed paths, 145 of
+273 files, which widened it: PASS over the FULL SUITE, 11597 tests, in
+1852.1 s, 03:27:02 to 03:57:54. The typeahead test that failed under load
+in T.5 passed in it.
+
+`master` HAD MOVED meanwhile: read at 03:58:14, it was 6bc63e2, lane L5's
+seven commits since 64afa6c (retiring `linkedin_send_message`, aiming the
+invitation by the profile link; 71 files). Merged once, as the order says,
+in `aa191c4` (a hash which does not resolve on `master` until this branch
+merges). ONE CONFLICT, `tests/reader_leak_baseline.json`, resolved by its
+own writer on the merged tree rather than by hand: 160 readers -- master's
+set exactly, L5 having removed ten readers and renamed one -- carrying this
+branch's 18 verdict moves exactly and no other difference, each checked
+against both parents. The guard file and the register merged cleanly; the
+derived views are at a fixed point. The reader guard on the merged tree:
+575 passed.
+
+THE GATE OVER THE MERGED TREE, this section's commit included, is
+`scripts/impact_gate.py --against master`; it runs after this commit, and
+its counts are in the lane's report.
