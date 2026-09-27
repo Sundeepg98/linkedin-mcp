@@ -101,6 +101,7 @@ PINNED_TOOL_SURFACE: dict[str, tuple[str, ...]] = {
     "linkedin_group_page": ("group_id",),
     "linkedin_job_collections": (),
     "linkedin_job_detail": ("job_id",),
+    "linkedin_list_conversations": ("include_names",),
     "linkedin_login": ("wait_seconds",),
     "linkedin_login_browser": ("wait_seconds",),
     "linkedin_logout": ("confirm",),
@@ -112,7 +113,8 @@ PINNED_TOOL_SURFACE: dict[str, tuple[str, ...]] = {
     "linkedin_newsletter_subscriptions": (),
     "linkedin_notifications": ("limit",),
     "linkedin_notify_cost_precondition": (),
-    "linkedin_open_messaging": ("include_names", "message_filter"),
+    "linkedin_open_messaging": ("allow_unread", "include_names", "message_filter"),
+    "linkedin_open_thread": ("allow_unread", "thread_id"),
     "linkedin_page_plugin_snippet": ("page_id",),
     "linkedin_people_search_shape": (
         "connections_of", "current_company_ids", "keywords", "location_ids",
@@ -136,6 +138,7 @@ PINNED_TOOL_SURFACE: dict[str, tuple[str, ...]] = {
     ),
     "linkedin_send_invitation": ("confirm_token", "member"),
     "linkedin_send_message": ("confirm_token", "member", "text"),
+    "linkedin_send_reply": ("confirm_token", "text", "thread_id"),
     "linkedin_server_info": ("verbose",),
     "linkedin_session_info": ("verify_live",),
     "linkedin_surface_census": ("surface",),
@@ -145,6 +148,7 @@ PINNED_TOOL_SURFACE: dict[str, tuple[str, ...]] = {
     "linkedin_update_setting": ("confirm_token", "setting", "value"),
     "linkedin_who_viewed_me": ("limit", "open_filter_menus", "show_more_analytics", "view_switch"),
     "linkedin_own_item_link": ("activity_id", "include_link"),
+    "linkedin_withdraw_from_group": ("confirm_token", "group_id"),
 }
 
 #: 44 tools and 61 parameters at the pin. Asserted rather than assumed, so a
@@ -325,8 +329,43 @@ PINNED_TOOL_SURFACE: dict[str, tuple[str, ...]] = {
 #: COVERED-UNFIRED. Not PROVEN: a WRITE built to ready-to-fire behind the flag
 #: and the single-use grant, never granted. See
 #: `_audit/2026-09-24-lane-l7-profile-writes.md`.
-PINNED_TOOL_COUNT = 53
-PINNED_PARAMETER_COUNT = 80
+#: **RE-PINNED 2026-09-24 AT 54 TOOLS AND 81 PARAMETERS (lane L5, at its
+#: merge with master ff98a7f): three tools added, seven parameters, and the
+#: census rows move in the same merge.** `linkedin_send_reply("thread_id",
+#: "text", "confirm_token")` -- a reply inside a conversation he names,
+#: the fourteenth performable write -- banks `M M10` and, by
+#: D6-CAPABILITY-OVER-AFFORDANCE, `M M17`, both GAP -> COVERED-UNFIRED.
+#: `linkedin_open_thread("thread_id", "allow_unread")` and the new
+#: `allow_unread` on `linkedin_open_messaging` bank `M M49` (the read
+#: indicator on his own last message) GAP -> COVERED-UNFIRED, and put the
+#: receipt guard in front of `M M33`. `linkedin_list_conversations
+#: ("include_names")` is the receipt-free list that `M M43` rests on --
+#: ALREADY COVERED-UNFIRED, so it moves no row, and that is said here rather
+#: than left for this guard to infer. Every thread id is a caller's argument,
+#: shape-checked, never read off a page. Not PROVEN: the lane was offline.
+#: See `_audit/2026-09-24-lane-l5-messaging.md`.
+#: **AND 55 TOOLS AND 85 PARAMETERS AT LANE L5'S SECOND MERGE, of master
+#: 9b9a4d0 (the live lane's), 2026-09-24:** the live lane's 52 and 78 plus
+#: this lane's three tools and seven parameters, measured off the merged
+#: registry below. No row moves in the merge itself.
+#: **AND 56 TOOLS AND 87 PARAMETERS AT LANE L5'S THIRD MERGE, of master
+#: 66aaa95 (lane L7's, and its CI fix), 2026-09-24:** lane L7's 53 and 80
+#: plus this lane's
+#: three tools and seven parameters, measured off the merged registry
+#: below. No row moves in the merge itself.
+#: **RE-PINNED 2026-09-27 AT 57 TOOLS AND 89 PARAMETERS (lane L8, at its
+#: merge of master 2eb90ad), MEASURED off the merged registry: one tool, two
+#: parameters.** `linkedin_withdraw_from_group("group_id", "confirm_token")`
+#: -- leaving one group he names by numeric id -- banks `M C63` and `N 64`
+#: (one capability counted twice), GAP -> COVERED-UNFIRED, moved in the
+#: lane's census commit on its branch, which this merge carries. Not PROVEN:
+#: a WRITE built to ready-to-fire behind the flag and the single-use grant,
+#: never granted. The id is a NUMERIC IDENTIFIER, refused unless it is 1 to
+#: 20 ASCII digits -- the rule `linkedin_group_page("group_id")` already
+#: carries, reused rather than restated.
+#: See `_audit/2026-09-24-lane-l8-outward-classes.md`.
+PINNED_TOOL_COUNT = 57
+PINNED_PARAMETER_COUNT = 89
 
 
 def live_surface() -> dict[str, tuple[str, ...]]:

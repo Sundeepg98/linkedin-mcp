@@ -717,8 +717,13 @@ def test_what_ships_is_narrower_than_what_is_sanctioned():
         # address save and follow already act on and an anchor measured on
         # three tracked captures.
         "mark_company_interest",
-        # SIXTEEN FROM 2026-09-24: leaving one group (census rows M C63 /
-        # N 64, lane L8), sanctioned and performable in the same move, under
+        # SIXTEEN FROM LANE L5'S MERGE OF MASTER 66aaa95, the same day (fifteen
+        # on the lane's branch): the reply inside a conversation he names
+        # (census M M10), sanctioned and performable in the same move.
+        "send_reply",
+        # SEVENTEEN FROM LANE L8'S MERGE OF MASTER, 2026-09-27 (sixteen on the
+        # lane's branch): leaving one group (census rows M C63 / N 64),
+        # sanctioned and performable in the same move, under
         # OUTWARD-CLASSES-BUILT-BEHIND-GRANTS, on the admitted /groups/ root
         # and an item measured on all five membership rows' menus.
         "withdraw_from_group",
@@ -845,7 +850,19 @@ def test_what_ships_is_narrower_than_what_is_sanctioned():
         # live fire waits on that capture. NOTHING WAS PERMITTED TO LET IT
         # CROSS: the click is perform()'s existing one.
         "mark_company_interest",
-        # THE FIFTEENTH, 2026-09-24 (census rows M C63 / N 64, lane L8):
+        # THE FIFTEENTH, 2026-09-24 (the fourteenth on lane L5's branch), and
+        # the first write that CONFIRMS ITSELF
+        # FROM THE SURFACE A PERSON READS: a reply inside a conversation he
+        # names by thread id, typed only into an empty reply box, pressed only
+        # when the box holds exactly his words, and SENT only off a FRESH load
+        # -- his words the last message, not the other side's, one more copy
+        # of them than the preview counted. NOTHING WAS PERMITTED TO LET IT
+        # CROSS: readonly.SANCTIONED_MUTATIONS is unchanged -- the fill and
+        # the click are perform()'s own -- and the thread address was
+        # already on the read allowlist.
+        "send_reply",
+        # THE SIXTEENTH, 2026-09-27 (census rows M C63 / N 64, lane L8; the
+        # fifteenth on its branch until its merge of master brought send_reply):
         # leaving one group he names by numeric id, on the /groups/ root. TWO
         # presses and still NO new permission: the disclosure and the item
         # both drain perform()'s one click queue, the item appended only by
@@ -1340,7 +1357,14 @@ _UNMEASURED_REVERSIBILITY = {
     # ON-state control no capture holds, so nothing about undoing it has been
     # observed on this surface.
     "mark_company_interest",
-    # 2026-09-24 (census rows M C63 / N 64). No rejoin has ever been observed
+    # 2026-09-24. Whether LinkedIn lets a sent reply be recalled has never
+    # been observed. This comment used to add "and recalling one is
+    # destruction this server may not perform at any confirm level either
+    # way"; that refusal was retired the same day (OUTWARD-CLASSES-BUILT-
+    # BEHIND-GRANTS) and restated at lane L8's merge of master: no delete is
+    # built, and a delivered reply is not recalled from an inbox either way.
+    "send_reply",
+    # 2026-09-27 (census rows M C63 / N 64). No rejoin has ever been observed
     # and nothing here joins a group; its spec treats it as irreversible.
     "withdraw_from_group",
 }
@@ -1357,6 +1381,7 @@ REVERSIBILITY_CLASS = {
     "update_setting": "STILL-UNKNOWN",
     "send_invitation": "STILL-UNKNOWN",
     "send_message": "STILL-UNKNOWN",
+    "send_reply": "STILL-UNKNOWN",
     # THE ONE THAT IS NOT, and it is the whole reason this table is per-action
     # rather than a claim about the set. apply_job is STILL-UNKNOWN because the
     # surface that would settle it -- his applied list -- is empty, so there is
@@ -1375,7 +1400,7 @@ REVERSIBILITY_CLASS = {
     # 2026-09-24. STILL-UNKNOWN: LinkedIn's Help describes removing an
     # interest, but the control that would do it has never been captured.
     "mark_company_interest": "STILL-UNKNOWN",
-    # 2026-09-24. STILL-UNKNOWN whether a group left can be rejoined; it
+    # 2026-09-27. STILL-UNKNOWN whether a group left can be rejoined; it
     # carries irreversible=True regardless, because no join is built here and
     # an approval-gated group needs a manager to let him back in.
     "withdraw_from_group": "STILL-UNKNOWN",
@@ -1402,6 +1427,7 @@ REVERSIBILITY_MEASURED = {
     "send_message": False,
     "follow_company_page": True,
     "mark_company_interest": False,
+    "send_reply": False,
     "withdraw_from_group": False,
 }
 
@@ -4681,15 +4707,17 @@ def test_the_editor_exemption_is_an_exact_url_and_not_a_family():
     assert "/edit/" in readonly._FORBIDDEN_URL_SUBSTRINGS
 
 
-def test_send_message_can_report_not_sent_and_never_sent():
+def test_send_message_can_report_not_sent_from_the_composer():
     """The 2026-09-02 ruling: read what proves it did NOT happen.
 
     ``perform`` decides True by comparing the verified state against
     ``expected_after``, and False by comparing it against ``unchanged_state``,
-    falling to UNKNOWN between them. This action can never reach the True arm
-    -- ``verified_state`` initialises to UNKNOWN and no surface exists that
-    writes ``"message_sent"`` -- so naming the NOT-performed state is what
-    turns the worst answer into the second best.
+    falling to UNKNOWN between them. Until 2026-09-24 this action could never
+    reach the True arm -- no surface it could read wrote ``"message_sent"`` --
+    so naming the NOT-performed state is what turned the worst answer into
+    the second best. It still does, on the composer. (Renamed that day from
+    ``..._and_never_sent``: the True arm is now reachable through the
+    conversation a send leaves drawn, read in place.)
 
     The property that admits it is the one that disqualified the alternative,
     inverted: a "cleared composer means sent" rule could only be validated by
@@ -4725,11 +4753,13 @@ def test_send_message_can_report_not_sent_and_never_sent():
 
     # PERFORMABLE, AND THE THREE FIELDS THAT MAKE THE VERDICT HONEST.
     #
-    # ``to_state`` is a state no reader here can return, so the True arm is
-    # unreachable BY CONSTRUCTION -- that is the design, not an oversight.
-    # ``not_performed_state`` is what makes the False arm reachable. So this
-    # action can be shown NOT to have happened and cannot be shown to have
-    # happened, and the asymmetry is asserted rather than described.
+    # ``to_state`` WAS a state no reader here could return, until 2026-09-24:
+    # ruling WRITE-CLASS-B lifted the prohibition on the conversation, and
+    # ``_verify_after`` now reads the conversation a send leaves drawn, in
+    # place -- see
+    # ``tests/test_send_message_gate.py::test_verify_after_reaches_the_to_state_only_through_the_conversation_read_back``.
+    # ``not_performed_state`` is still what makes the False arm reachable on
+    # the composer itself, which is the half this test's name now claims.
     assert "send_message" in writes.PERFORMABLE
     assert spec.to_state == "message_sent"
     assert spec.unverifiable is None, (

@@ -195,9 +195,13 @@ CANDIDATES: tuple[tuple[str, str, Optional[str]], ...] = (
     # refused by that entry's anchor and by nothing else, so the row still
     # proves this probe can report REFUSED-NO-PATTERN, and it now also goes
     # red if the anchor is ever loosened into a family pattern.
+    #
+    # RE-AIMED AGAIN 2026-09-24: the bare roster is admitted on its own roster
+    # line (MEMBER-ROSTERS-AS-BOUNDED-READS), which takes no query, so the
+    # query spelling is what the anchor alone still refuses.
     (
         "control",
-        "https://www.linkedin.com/company/example/people/",
+        "https://www.linkedin.com/company/example/people/?keywords=x",
         MUST_REFUSE_NO_PATTERN,
     ),
 )
@@ -256,7 +260,7 @@ def _verdict(expectation: Optional[str], outcome: str) -> Optional[str]:
     raise AssertionError("unreachable: unknown expectation %r" % (expectation,))
 
 
-def main() -> None:
+def main() -> int:
     print("=== WHICH UNMEASURED LINKEDIN ADDRESSES DOES THE READ BOUNDARY ALLOW?")
     print("    %d literal addresses, one call each to readonly.assert_read_url" % (
         len(CANDIDATES),
@@ -339,16 +343,22 @@ def main() -> None:
     print("\n=== CONTROLS")
     if control_verdicts and all(v == "PASS" for v in control_verdicts):
         print("    ALL %d CONTROLS PASSED" % len(control_verdicts))
-    else:
-        failed = sum(1 for v in control_verdicts if v != "PASS")
-        print(
-            "    %d OF %d CONTROLS FAILED -- see the FAIL line(s) above. The"
-            % (failed, len(control_verdicts))
-        )
-        print("    findings above this line are not trustworthy until that is understood.")
+        return 0
+    failed = sum(1 for v in control_verdicts if v != "PASS")
+    print(
+        "    %d OF %d CONTROLS FAILED -- see the FAIL line(s) above. The"
+        % (failed, len(control_verdicts))
+    )
+    print("    findings above this line are not trustworthy until that is understood.")
+    # EXIT NON-ZERO, added 2026-09-24. The probe printed this and exited 0,
+    # so a run that failed its own control looked, to anything reading the
+    # exit status, like a clean one -- which is how lane S's follow-up
+    # verification found it: its re-aimed control had failed and nothing said
+    # so but a line of prose.
+    return 1
 
 
 # GUARDED: importing a script must not DO anything.
 # tests/test_scripts_are_import_safe.py asserts this for every file in scripts/.
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())

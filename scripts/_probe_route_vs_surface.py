@@ -53,8 +53,13 @@ MUST_ALLOW: tuple[tuple[str, str], ...] = (
     ("his own profile", f"{BASE}/in/me/"),
 )
 MUST_REFUSE: tuple[tuple[str, str], ...] = (
-    ("people search -- the general case, deliberately absent",
-     f"{BASE}/search/results/people/?keywords=x"),
+    # ``/search/results/people/?keywords=x`` STOOD HERE -- "the general case,
+    # deliberately absent" -- and has been ADMITTED since 2026-09-20, so this
+    # control has failed on every run since and nobody re-ran the probe to see
+    # it. Found by lane S's follow-up verification, 2026-09-24. A search
+    # vertical no ruling admits stands in: the content search.
+    ("a search vertical no ruling admits -- content",
+     f"{BASE}/search/results/content/?keywords=x"),
     # A COMPANY PAGE ROOT WAS THIS ROW UNTIL 2026-09-20 AND IT IS NOW
     # ALLOWED -- the root was admitted for COMPANY-PAGE-SURFACE, and this
     # control duly went red and refused to certify the table below it, which
@@ -66,8 +71,12 @@ MUST_REFUSE: tuple[tuple[str, str], ...] = (
     # boundary's anchor and by NOTHING else, and out of scope by the same
     # ruling that put a group's roster out of scope by name. If the anchor is
     # ever loosened into a family pattern, this row is what goes red.
-    ("an organisation's member roster",
-     f"{BASE}/company/example-co/people/"),
+    #
+    # THE BARE ROSTER IS ADMITTED SINCE 2026-09-24, on its own roster line
+    # (MEMBER-ROSTERS-AS-BOUNDED-READS), which takes no query; its query
+    # spelling stands in and holds the same class.
+    ("an organisation's member roster, asked for with a query",
+     f"{BASE}/company/example-co/people/?keywords=x"),
     ("the password page -- substring, not pattern",
      f"{BASE}/mypreferences/d/change-password"),
     ("a third party's details page", f"{BASE}/in/someone-else/details/skills/"),

@@ -111,18 +111,25 @@ def test_the_surviving_permanent_refusals_are_the_ruling_s_six_by_name():
 
 
 def test_the_retired_entries_are_kept_verbatim():
-    """Byte-for-byte the text each carried at 1902fcb.
+    """Byte-for-byte the text each last carried on master.
 
     A DIGEST, NOT A SECOND COPY, because a second copy in this file would be
     a pin of prose against prose. The digests were taken off the live dict
     before the entries left it, when the module's text compared equal to
     ``writes.PERMANENTLY_FORBIDDEN`` entry by entry. An edit to a retired
     entry is an edit to a record of what was ruled, and turns this red.
+
+    ONE DIGEST MOVED, ONCE, AT THE MERGE THAT RETIRED THE ENTRY ON MASTER
+    (2026-09-27). ``delete_or_withdraw_anything`` read ``79f0867297b22471`` at
+    ``1902fcb``, where this lane took it; lane L5 had meanwhile rewritten it on
+    master to count SIX specs, ``send_reply`` the sixth (``7d13af2``). The text
+    the retirement removed from master is that one, so that is the one kept,
+    compared equal to master's dict value before the swap.
     """
     want = {
         "repost_or_share": "7c1655c3ac2b725c",
         "endorse_or_recommend": "27dac326eead5ec9",
-        "delete_or_withdraw_anything": "79f0867297b22471",
+        "delete_or_withdraw_anything": "1cff9e239b05cb35",
     }
     got = {
         key: hashlib.sha256(text.encode("ascii")).hexdigest()[:16]

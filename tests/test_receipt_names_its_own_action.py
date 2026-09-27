@@ -185,7 +185,7 @@ _VERIFIED_FROM_OWNERS: dict[str, frozenset[str]] = {
     # ``"read receipt"`` is a cost, not a surface, which puts it in the same
     # class as the strength-class candidates rejected in the module docstring.
     "composer": frozenset({"send_message"}),
-    # ADDED 2026-09-24 FOR ``withdraw_from_group`` (lane L8). It verifies on a fresh
+    # ADDED 2026-09-27 FOR ``withdraw_from_group`` (lane L8). It verifies on a fresh
     # render of the Groups root, the one surface that lists his memberships,
     # and no other row names that page. Measured to occur in exactly one row.
     "Groups root": frozenset({"withdraw_from_group"}),
@@ -231,8 +231,15 @@ _WHERE_TO_LOOK_OWNERS: dict[str, frozenset[str]] = {
     # row. ``"message"`` alone is a word any future messaging-adjacent row
     # would legitimately contain -- an InMail, a reply, a request -- and it
     # would be reported as a trespass on a surface those rows never claimed.
-    "LinkedIn messages": frozenset({"send_message"}),
-    # ADDED 2026-09-24 FOR ``withdraw_from_group`` (lane L8): his Groups page is where
+    #
+    # A SECOND OWNER FROM 2026-09-24, entitled rather than borrowing:
+    # ``send_reply`` VERIFIES in the conversation itself -- its
+    # ``_verify_after`` branch reloads the conversation he named and reads
+    # the delta there -- so the place a human opens is the place this server
+    # read. Its ``_VERIFIED_FROM`` row was checked against every owned phrase
+    # above and contains none of them.
+    "LinkedIn messages": frozenset({"send_message", "send_reply"}),
+    # ADDED 2026-09-27 FOR ``withdraw_from_group`` (lane L8): his Groups page is where
     # his memberships are listed and where the leave is verified, and no other
     # row sends him there. Measured to occur in exactly one row.
     "Groups page": frozenset({"withdraw_from_group"}),
@@ -578,14 +585,26 @@ def test_the_action_set_is_the_one_this_file_was_measured_against():
     # so neither prints a phrase another action owns -- and no owner entry was
     # needed. ``update_profile_field``'s ``_VERIFIED_FROM`` row was rewritten
     # the same day (a fresh navigation after Save) and passed the same checks.
-    # FIFTEEN FROM 2026-09-24 (lane L8): ``withdraw_from_group``'s two rows were read.
-    # Its ``_WHERE_TO_LOOK`` value ("your LinkedIn Groups page") and its
+    # FIFTEEN FROM LANE L5'S MERGE OF MASTER 66aaa95, the same day, and the
+    # acknowledgement was earned the same way: ``send_reply``'s two rows
+    # were read (on the lane's branch, where it was the fourteenth). Its
+    # ``_WHERE_TO_LOOK`` value is the conversation in his LinkedIn
+    # messages -- the surface it VERIFIES on, reloaded -- so it was added as
+    # a second owner of "LinkedIn messages" rather than stripped of the
+    # phrase; its ``_VERIFIED_FROM`` row was checked against every owned
+    # phrase above and holds none. On the merged tree the rest of this file
+    # passed with both new actions' rows in place.
+    # SIXTEEN FROM LANE L8'S MERGE OF MASTER, 2026-09-27 (fifteen on the
+    # lane's branch): ``withdraw_from_group``'s two rows were read. Its
+    # ``_WHERE_TO_LOOK`` value ("your LinkedIn Groups page") and its
     # ``_VERIFIED_FROM`` row (a fresh render of the Groups root) were checked
-    # against every owned phrase above and contain none of another action's;
-    # each gained an owner entry of its own ("Groups page", "Groups root"),
-    # measured to occur in exactly its own row.
-    assert len(writes.PERFORMABLE) == 15, (
-        "writes.PERFORMABLE holds %d actions, not the 15 this file was "
+    # against every owned phrase above -- lane L5's second owner of "LinkedIn
+    # messages" included -- and contain none of another action's; each gained
+    # an owner entry of its own ("Groups page", "Groups root"), measured to
+    # occur in exactly its own row. On the merged tree the rest of this file
+    # passed with both lanes' rows in place.
+    assert len(writes.PERFORMABLE) == 16, (
+        "writes.PERFORMABLE holds %d actions, not the 16 this file was "
         "measured against: %s. Re-derive the phrase owners in this file for "
         "the new action, then update this count."
         % (len(writes.PERFORMABLE), sorted(writes.PERFORMABLE))

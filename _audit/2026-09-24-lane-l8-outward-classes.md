@@ -18,7 +18,10 @@ Rulings this lane builds under, all registered in `_audit/RULINGS.md`:
   item 6 (a target is a link or an id the caller supplies, never a name), and
   `MENTION-COMPOSITION-RULING` (stands).
 
-Status: IN PROGRESS. This record is written as the lane goes.
+Status: DONE OFFLINE, 2026-09-27. Master merged into the lane once, at the end.
+Nothing fired: no grant was minted outside the offline fixture tests, and no
+LinkedIn page was loaded. The live and capture queues at the foot of this
+record are what remains, each aimed at a target HE NAMES.
 
 **THE LANE RAN IN TWO SESSIONS.** The first (2026-09-24, 08:35 to about 10:30)
 stopped at a usage-limit restart with two children in flight; the second
@@ -96,8 +99,9 @@ fixtures -- counts and shapes only, no text or id left the reading:**
 
 ## 2. The forbidden set, narrowed
 
-Commit `efa3d8f`. `writes.PERMANENTLY_FORBIDDEN` now holds exactly the six
-the ruling names:
+Commit `efa3d8f` (on this lane's branch, which master holds only once the lane
+merges; before that it does not resolve on `master`). `writes.PERMANENTLY_FORBIDDEN`
+now holds exactly the six the ruling names:
 
     any_anti_detection_technique
     any_loop_sweep_or_scheduled_write
@@ -115,7 +119,12 @@ pinned by digest (`tests/test_outward_classes.py`):
 
     repost_or_share               7c1655c3ac2b725c
     endorse_or_recommend          27dac326eead5ec9
-    delete_or_withdraw_anything   79f0867297b22471
+    delete_or_withdraw_anything   79f0867297b22471 -> 1cff9e239b05cb35
+
+The third digest moved ONCE, at the merge of master (section 9). Lane L5 had
+rewritten that entry on master to count SIX specs, `send_reply` the sixth. The
+text the retirement removes from master is that one, so it is the one kept. It
+was compared equal to master's dict value before the swap.
 
 **Their facts were carried, not thrown away.** Each measured fact sits in the
 record that needs it (`OUTWARD_CLASS_SPECS[...].carried_facts`): the Repost
@@ -157,7 +166,12 @@ that governs its undo with that record's real status:
 | `comment_on_item` | NOT YET through this server; by hand, he can | a comment's own menu draws 'Delete' (2026-09-04); what it draws is uncaptured; one-page aim by id | `delete_own_comment`, NEEDS-CAPTURE |
 | `send_invitation` | NOT YET through this server; by hand, he can | LinkedIn offers the withdraw (Help Center, network.md s8.5); the Sent manager is refused on 'invitation' | `withdraw_invitation`, BLOCKED |
 | `send_message` | NOBODY: a delivered message cannot be recalled | delivery itself: it arrives as an email and a notification; LinkedIn's 60-minute delete (census `M M12`) removes it from a thread, never from an inbox, and is unbuilt | none |
-| `send_reply` (lane L5) | not on this base | -- | see below |
+| `send_reply` (lane L5) | NOBODY: a delivered reply cannot be recalled -- restated at this lane's merge of master (section 9) | as `send_message`: delivery itself; LinkedIn's 60-minute delete (census `M M12`) is unbuilt | none |
+
+**The sixth arrived with the merge.** What follows was written before it, and
+it is exactly what the merge did (section 9). The one addition:
+`reversibility_procedure`, which ended "Deleting stays forbidden here whatever
+the menu offers", is restated the same way.
 
 **`send_reply` is not on this lane's base** (`1902fcb` has no such spec; lane
 L5 is integrating it). Read off L5's own commit `5eadfe7` (*messaging: a
@@ -303,7 +317,89 @@ build pays all three -- the url is the admitted `/groups/` root, the sanction
 is the WriteSpec behind the grant, the ruling is
 OUTWARD-CLASSES-BUILT-BEHIND-GRANTS.
 
-(5.2 the edits and 5.3 the pin moves are filled in as the census lands.)
+### 5.2 The edits
+
+This lane's census child applied the edits from the decisions above, and the
+lead reviewed them. Two lane commits carry them: "census: the rows the three
+retired keys held ..." and its follow-up "census: P A23 split ...". Every
+marker is dated the day the move landed, 2026-09-27. The retirement it cites
+is dated 2026-09-24, the day the key left the dict.
+
+- **29 rows to GAP.** Each carries the marker `RETURNED TO GAP 2026-09-27 BY
+  LANE L8 (... s5)` and `BLOCKER, NAMED:` in its own cell, with the old text
+  kept. Every row was re-parsed by the shipped `count_census_states.classify`
+  after the edit.
+- **`P N28` re-grounded** in place, on `/close-accounts` alone.
+- **About 45 cells restated**, state unchanged:
+  - the delete halves of compound rows ("unbuilt, not refused");
+  - the repost pair;
+  - the recommendation rows (the named-profile route, or his own
+    recommendations section);
+  - `P E6` and `N 114` (the `/endorse` substring still blocks);
+  - `M C35`, `M C82` and `N 193`;
+  - `P D27`, `M C67` and `P L3`, the rows whose written TRIGGER named the
+    destruction key.
+- **`M C63`, `N 64`**: COVERED-UNFIRED, `built:withdraw_from_group`.
+- **Side tables:**
+  - `write-classes.tsv`: 26 lines added under three new acts (`endorse`,
+    `delete-or-withdraw-own`, `outside-the-classes`, all R3), 22 re-queued,
+    and the two built.
+  - `exclusion-basis.tsv`: 29 lines removed. The three families are
+    re-pointed to `outward_classes.RETIRED_PERMANENT_REFUSALS` and declared
+    EMPTIED.
+  - `jobs-directions.tsv`: `J 69` and `J 87` added.
+- **Instruments.** `classify_writeoff_reasons`'s fallback names the six
+  survivors. Its live-key test used to assert a floor of nine and went red on
+  the narrowing, for the right reason; it now asserts the six by name.
+- **The follow-up**, from what the child found beyond the decisions:
+  - **`N 125`.** Its R/W cell `W (also R5)` read as direction `unknown`,
+    which kept the row out of the write population. The note moved into the
+    state cell, as lane R's convention for section K has it. The row then
+    gained its class line, and the R5 control still counts 9.
+  - **`M M32` re-grounded.** The loop key alone refuses all three thirds.
+  - **`P A23` SPLIT under COMPOUND-ROW-SPLITS-ONLY-ON-STATE.** Its only other
+    ground, the destruction key, is retired. The desktop delete of his own
+    recording is in a class the ruling built, while recording and editing
+    stay mobile-app only (ground four). The halves now need different states,
+    so there is a new row `A23b`, GAP, with its blocker named, following the
+    `L2 -> L2b` precedent.
+    - This split exposed a real parser gap: the write-classes self-row
+      citation did not admit a split suffix. It now does, with a test shown
+      failing on the old regex (register section 80.4).
+    - Unlike L2, `A23` kept its capability text, and section A's heading
+      still says `(29)` over 30 rows.
+  - **`mcp-inventory.md`.** The reversibility-table rows for `apply_job`,
+    `publish_post` and `comment_on_item`, and four sentences of its
+    Deliverable Three, are restated to the grounds section 3 gives.
+
+**Left as they stand, on purpose:**
+- The network.md headings `B` ("all EXCLUDED-RULED") and `D` ("10
+  EXCLUDED-RULED, 1 GAP") were already stale after lane R, which left them.
+- Heading `K` is also a control in `classify_writeoff_reasons`.
+- The census COUNTS sections are recounts, not claims to patch.
+- `mcp-inventory.md`'s COUNTS line "the undo is permanently forbidden here,
+  or no selector for it exists | 6".
+
+### 5.3 The pin moves -- measured on the merged tree, NOT re-pinned
+
+The brief said not to re-pin. Each figure below is master's pin at `2eb90ad`
+against the tree after this lane's merge of master (section 9), measured by
+the instrument named. Every move is this lane's own work, except the one
+master row the merge returned (`P P2`).
+
+| instrument | pinned on master | measured on the merge | what moved it |
+|---|---|---|---|
+| census row population: `tests/census_row_pin.json` (`pin_census_rows.py --write`); `PINNED_ROW_TOTAL`, `PINNED_SLICE_ROWS` | 769, P 235 | 770, P 236 | `P A23b`, the split |
+| `test_a_census_locator_names_its_row` literal | 769 | 770 | the same row |
+| `census_completion.PINNED` | stated_rows 769, capabilities 783, achievable 698, capabilities_achievable 712, gap 564, gap_write 353, gap_unknown 107, out_of_scope 71, adjudicated 205, delivered_broad 115, unfired 36, b1_standing 13, jobs_gap 107, jobs_dir_w 58 | 770, 784, 729, 743, 593, 380, 109, 41, 177, 117, 38, 15, 109, 60 | 30 rows out of scope back to GAP (this lane's 29 and master's `P P2`); `M C63` / `N 64` COVERED-UNFIRED; `A23b` added; `N 125` read as W; `J 69` / `J 87` gaining a direction |
+| `census_completion.PINNED_B1_ROWS` | -- | + `M C63`, `N 64`, held by OPERATOR-NAMES-THE-TARGET | the build |
+| write-classes split (`test_write_classes`) | (16, 36, 306) | (16, 36, 335) | 29 new R3 lines: section 5.2's 26, `N 125`, `P A23b`, `P P2` |
+| messaging triage headline (`test_triage_instrument`) | 124 {R 17, W 103, R+W 4} | 131 {R 17, W 110, R+W 4} | seven M rows back to GAP (`C17`, `C19`, `C22`, `C31`, `C77`, `M12`, `M26`), less `C63` |
+| GAP rows on refused addresses (`EXPECTED_GAP_ROWS`) | 73 | 78 | `M C62` ('/withdraw'), `N A15` ('/invite', '/withdraw'), `P F5`, `P K7`, `P M3` ('/delete') |
+| pointer graph (`measure_pointer_graph.py --pin`) | 66 | 65, 3 moved | `P B3 -> P B2` and `P E5 -> P E4`: the donor verdicts read ACCOUNT-FACT beside US-RULING now; `M C63`'s `same` was struck when it was built, so its pointer is gone |
+
+The census as a whole (`count_census_states`, unpinned), on the merge: 770
+stated rows; GAP 593, EXCLUDED-RULED 29, COVERED-UNFIRED 35, XR 2.
 
 ## 6. The build: leaving a group, census `M C63` and `N 64`
 
@@ -464,8 +560,10 @@ The first session stopped on 2026-09-24 at about 10:30 with two children in
 flight. On 2026-09-27 13:20 the lead resumed on the orchestrator's order and
 SAMPLED FIRST, as the order asked:
 
-- this worktree at `7e370ac`, three commits past the base, the lane record
-  untracked and coherent -- pinned at once (`a002ff4`);
+- this worktree at `7e370ac` (a lane-branch commit that does not resolve on
+  `master` until the lane merges, like every commit this section names),
+  three commits past the base, the lane record untracked and coherent --
+  pinned at once (`a002ff4`);
 - the build child's branch had NO commits: its work -- five modified files and
   three new ones -- sat uncommitted in its own worktree, and its last run of its
   own test file had been green (23 passed). Salvaged by diffing each file
@@ -473,11 +571,88 @@ SAMPLED FIRST, as the order asked:
   unique, and proving the merge both ways (section 6). Nothing of it was
   rewritten except the name the naming law refused;
 - the census child had made NO edit; its baseline of every census checker,
-  taken at `efa3d8f`, survived in scratch and its successor reused it rather
-  than re-taking it;
+  taken at `efa3d8f` (the narrowing -- a lane-branch commit that does not
+  resolve on `master` until the lane merges), survived in scratch and its
+  successor reused it rather than re-taking it;
 - master had moved from `1902fcb` to `96c1165` (lane L5, with `send_reply`)
   and kept moving while the lead worked. The order was to integrate it ONCE,
   at the end; section 9 records that merge.
+
+## 9. The merge of master, once, at the end
+
+Master was merged into the lane ONCE, as ordered, at the end: master's head
+`2eb90ad` ("merge lane L7's last item: P B9 ..."), in the lane's merge commit
+"merge master 2eb90ad into lane L8 ...". Master had moved under the lane from
+the base: lane L5 (messaging, `send_reply`), lane L7's follow-ups and P B9,
+lane S, lane D, lane Y2's itemized P-R block, and the live lane.
+
+### 9.1 The conflicts: eleven files, each resolved by what each side changed
+
+- **`writes.py`, six hunks.**
+  - The forbidden dict keeps this lane's six. Master had rewritten
+    `delete_or_withdraw_anything` to count SIX specs, and that entry is
+    retired here.
+  - `PERFORMABLE`, `_WRITE_SURFACE_FOR_ACTION`, `_VERIFIED_FROM`, `perform`'s
+    locals and its click loop keep both sides: `send_reply` and the Premium
+    badge's switch from master, `withdraw_from_group` from here. They are
+    disjoint branches of one `elif` chain, and both drain the one click site.
+- **Four test files.** Both sides' rows are kept, and the counts moved on the
+  merged tree: 15 -> 16 performable, 16 -> 17 sanctioned. One duplicate dict
+  key that the union produced was removed: `"LinkedIn messages"` appeared
+  twice, the later one without `send_reply`. Left in, it would have silently
+  stripped lane L5's second owner of that phrase.
+- **`scripts/check_write_classes.py`.** Both acts vocabularies are kept:
+  master's `data-rights-request` and this lane's three.
+- **Five census tables** (exclusion-basis.tsv, messaging-and-content.md,
+  network.md, profile.md, write-classes.tsv). These were resolved ROW BY ROW,
+  by a keyed three-way merge over the base. There were 98 rows in nine hunks:
+  96 had changed on ONE side only, and 2 were identical on both, so none needed
+  a judgement.
+
+### 9.2 What the merge made untrue, restated in the merge commit
+
+- **`send_reply`** (lane L5) was the sixth spec leaning on the retired entry.
+  Its `reversible_by` now opens "NOBODY: a delivered reply cannot be
+  recalled" and quotes what it used to say. Its `reversibility_evidence` and
+  `reversibility_procedure` quote their retired clauses the same way.
+  `tests/test_writes_nine.py` names it the sixth. A NEW RULE there reads every
+  sanctioned spec's printed reversibility fields: a retired key, or
+  "permanently forbidden", may appear only as a quoted retraction. The rule is
+  shown failing on the exact text `send_reply` arrived with (register
+  section 80.6).
+- **The retired destruction text** is now master's SIX version, re-pinned by
+  digest (section 2).
+- **`P P2`** (lane Y2, "Delete his data") was itemized on master after this
+  lane's base and filed EXCLUDED-RULED on the retired key alone. It is now
+  RETURNED TO GAP with its blocker named:
+  - Y2's own distinction stands: his account data is not an item he made, so
+    this is none of the three classes, and Y2's reopener is now its blocker.
+  - Like P3-P5, it awaits admission by name.
+  - Its exclusion line left the table, it gained a class line
+    (`outside-the-classes`), and the emptied family's note says so.
+  Neither this row nor `send_reply` CONFLICTED. Both arrived by clean line
+  merges, and were found by reading master's added lines for the retired key
+  names before merging. The exclusion checker convicts a re-planted `P P2`
+  line four ways, measured on a copy of the table.
+- **`M M25`** (lane L5's cell) is restated. The key it was "adjacent to" is
+  retired, and its blocker is now named: the conversation's own menu has
+  never been opened.
+- **The tool surface:** 57 tools, 41 read, 16 write. The count moved at every
+  site that states it, all in the merge commit:
+  - the tool-surface pin (57 tools, 89 parameters);
+  - `test_server_surface.py`, whose test was renamed
+    `..._fifty_seven_tools`, with its irreversible list typed by hand to
+    SEVEN;
+  - `test_every_tool_is_on_the_surface.py`;
+  - `server.py`'s docstring and instructions;
+  - the package docstring;
+  - the README headline and layout.
+  The two page-string baselines were regenerated: `group_leave`'s six readers
+  are clean, and the tool is not driven, like every write. The two new test
+  files were priced into `scripts/ci_shard_timings.json`.
+- Master's `test_server_surface.py` also said "deletion is permanently
+  forbidden here" of a reply, and there is no endorsement tool "because ...
+  that is permanently refused". Both are restated to what now holds.
 
 ## Live queue
 
@@ -523,5 +698,8 @@ repost must exist first), `M C62` (a pending group request must exist),
 per-thread menus, lane L5's surface), `P I11` (the Open To Work editor, never
 loaded), `P K7` (the verification surface), `P F5` / `N 125` and the received-
 recommendation rows (his recommendations section, refused by allowlist silence
-until admitted), and the settings-family rows `J 87`, `N 96`, `P M3`, `P N27`
-(admission by name first).
+until admitted), the settings-family rows `J 87`, `N 96`, `P M3`, `P N27`
+(admission by name first), and `P A23b` (a name-pronunciation recording must
+first exist, and only the mobile app can make one). `P P2` (deleting his
+account data) is outside the three classes and waits on his ruling, not on
+a capture.

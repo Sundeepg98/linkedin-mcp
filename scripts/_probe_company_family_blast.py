@@ -162,6 +162,21 @@ CANDIDATES: tuple[tuple[str, str], ...] = (
 #: would have survived the run that found it.
 _ENTRY_PREFIX = "^https://www\\.linkedin\\.com/company/"
 
+#: THE SAME DEFECT, ONE ENTRY LATER -- 2026-09-24. The whole prefix stopped
+#: being unique when the company People-tab roster line landed (lane S's
+#: follow-up, MEMBER-ROSTERS-AS-BOUNDED-READS): it opens with the same
+#: characters, so the filter removed TWO entries again. The numbers happened
+#: not to move -- the People line admits only ``/people/`` spellings, which
+#: the root line refuses anyway -- which is exactly how the first instance of
+#: this defect survived its own run. So this entry is now removed by its FULL
+#: pattern text, as it stands on the boundary since that day's encoded-dot
+#: lookahead; if the text changes, the printed count goes to zero and the
+#: NOTE below says so.
+_ENTRY_PATTERN = (
+    "^https://www\\.linkedin\\.com/company/(?!(?:%2[eE]){1,2}/?$)"
+    "[A-Za-z0-9%\\-_]{1,100}/?$"
+)
+
 
 def without_the_company_entry() -> tuple:
     """The roster AS IT STOOD BEFORE this wave, so the reading reproduces.
@@ -173,7 +188,7 @@ def without_the_company_entry() -> tuple:
     """
     return tuple(
         pattern for pattern in readonly._ALLOWED_URL_PATTERNS
-        if not pattern.pattern.startswith(_ENTRY_PREFIX)
+        if pattern.pattern != _ENTRY_PATTERN
     )
 
 

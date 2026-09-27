@@ -133,13 +133,17 @@ DELIVERED_STRICT = ("COVERED-PROVEN",)
 #: returns.md` s4): the fifteen visibility toggles are settings pages awaiting
 #: admission by name, one blocker named in the row's cell, so its 14 extras are
 #: now inside the achievable surface. Re-read and re-pinned at lane R's merge,
-#: 2026-09-24. `P1` stays EXCLUDED-RULED on its own named key, and the P-R
-#: block's 44 settings-family capabilities are counted with it as that block's
-#: own paragraph states -- they carry no row ids, and the Integration section
-#: of the lane R audit names why they were not re-decided there.
+#: 2026-09-24. `P1` stays EXCLUDED-RULED on its own named key.
+#:
+#: `P1` STOOD FOR 45 UNTIL 2026-09-24, and stands for one since: lane Y2
+#: itemized the P-R block's settings-family 44 on the orchestrator's follow-up
+#: order (`_audit/2026-09-24-lane-y2-admission.md`, "Follow-up: the P-R
+#: settings block"). Of the stated 44, 22 are rows now (P2-P23), 9 were rows
+#: already elsewhere, 5 are choices inside a row, 1 is named twice, and 7
+#: are named nowhere or disputed. The collapse left with the count it
+#: rested on.
 COLLAPSED = {
     ("P", "O6-O20"): (15, "GAP"),
-    ("P", "P1"): (45, "EXCLUDED-RULED"),
 }
 
 #: ENUMERATED, not inferred. Rows the corpus names as waiting on a decision no
@@ -507,8 +511,8 @@ def report(rows, out) -> dict:
       f" + MEASURED-ABSENT {folded['MEASURED-ABSENT']}")
     p(f"    ACHIEVABLE SURFACE  {achievable:4d}   what is left to be built or ruled")
     p("")
-    p("  ROWS ARE NOT CAPABILITIES. `profile.md` collapses two blocks into")
-    p("  single rows, so the CAPABILITY total is larger than the row total:")
+    p("  ROWS ARE NOT CAPABILITIES. `profile.md` collapses one block into a")
+    p("  single row, so the CAPABILITY total is larger than the row total:")
     p("")
     extra, extra_out, collapse_problems = collapse(rows)
     for key, (n, _want) in sorted(COLLAPSED.items()):
@@ -532,15 +536,14 @@ def report(rows, out) -> dict:
     p("          counter never counted them. Subtracting them removes them a")
     p("          second time.")
     p("")
-    p("  ONE OF THE THREE FUTURES THAT 2026-09-19 COULD NOT SEPARATE IS NOW")
-    p("  CLOSED. That wave reported `THE P-R BLOCK DOES NOT EXIST` because no")
-    p("  row is named `P-R`, and could not tell whether the +45 double-counted")
-    p("  rows that had since been expanded or was simply stale. Measured at")
-    p("  HEAD: the block is a SECTION, not a row -- `### P-R ... (45)` -- its")
-    p("  44 settings-family items are PROSE BULLETS CARRYING NO ROW IDS, and")
-    p("  its own closing note reads `P1 is counted in the 45`. So the +44 is")
-    p("  not double-counted: those capabilities have no rows to double-count.")
-    p("  THE UNEXPLAINED TERM IS THE `- 2`, AND IT IS THE WHOLE DIFFERENCE.")
+    p("  THE P-R BLOCK IS ITEMIZED, 2026-09-24. Its settings-family 44 were")
+    p("  prose bullets carrying no row ids, counted as a +44 collapse on `P1`.")
+    p("  Itemized at the grain LinkedIn draws, 22 are rows now (P2-P23), 9")
+    p("  were rows already elsewhere -- so the +44 DID double-count, which")
+    p("  this paragraph said until then it could not -- 5 are choices inside")
+    p("  a row, 1 is named twice, and 7 are named nowhere or disputed. The")
+    p("  capability total falls by 22 with it; the rows are counted as rows.")
+    p("  The unexplained term in the 761 is still the `- 2`.")
     p("  Reported, not corrected: this denominator's owner is the counter's,")
     p("  and moving it silently is how the 761 became unreproducible.")
     if collapse_problems:
@@ -958,16 +961,124 @@ PINNED = {
     #:   jobs_gap 92 -> 107, jobs_dir_r 33 -> 41, jobs_dir_w 53 -> 58,
     #:   jobs_dir_rw 6 -> 8, jobs_refused 26 -> 36; jobs_admitted stays 11
     #:   (`J 158` entered admitted and left GAP); delivered_strict stays 79
-    "stated_rows": 747,
+    #:
+    #: RE-DERIVED AT LANE L5'S MERGE, 2026-09-24, from the tree merged with
+    #: master ff98a7f and not as deltas from the lane's base
+    #: (`_audit/2026-09-24-lane-l5-messaging.md`, Integration 2026-09-24).
+    #: Lane L5 built the reply (`linkedin_send_reply`) and the receipt-safe
+    #: inbox: `M M10` and, by D6-CAPABILITY-OVER-AFFORDANCE, `M M17` GAP ->
+    #: COVERED-UNFIRED, two W rows held by OPERATOR-NAMES-THE-TARGET; and
+    #: `M M49` GAP -> COVERED-UNFIRED, an R row no ruling holds (the read
+    #: indicator on his own last message, read with no target). So:
+    #:   adjudicated 194 -> 197, delivered_broad 105 -> 108, unfired 30 -> 33
+    #:   gap 510 -> 507, gap_read 94 -> 93, gap_write 324 -> 322
+    #:   b3_admitted 40 -> 39, b3_blocked_on_nothing 2 -> 1 (`M M49` left)
+    #:   b1_standing 10 -> 12, b1_no_ruling 20 -> 21
+    #: AND AT LANE L5'S SECOND MERGE, of master 9b9a4d0 (the live lane's four
+    #: proven rows and a rulings commit), the same three rows over the live
+    #: lane's figures, each MEASURED on the merged tree and equal to the sum:
+    #:   adjudicated 197 -> 200, delivered_broad 108 -> 111, unfired 29 -> 32
+    #:   gap 507 -> 504, gap_read 91 -> 90, b3_admitted 37 -> 36
+    #:   b1_no_ruling 19 -> 20; b1_standing 12, gap_write 322 and
+    #:   b3_blocked_on_nothing 1 as at the first merge (the live lane moved
+    #:   no write row and none of the rows those count)
+    #: AND AT LANE L5'S THIRD MERGE, of master 66aaa95 (lane L7's merge,
+    #: with `P I14` above, and a CI fix after it that moved no figure here),
+    #: the same three rows over lane L7's figures, each MEASURED on
+    #: the merged tree and equal to the sum:
+    #:   adjudicated 198 -> 201, delivered_broad 109 -> 112, unfired 30 -> 33
+    #:   gap 506 -> 503, gap_write 323 -> 321, b1_standing 11 -> 13
+    #:   gap_read 90, b3_admitted 36, b1_no_ruling 20 and
+    #:   b3_blocked_on_nothing 1 as at the second merge (lane L7 moved no
+    #:   read row and none of the rows those count)
+    #: AND AT LANE L5'S FOURTH MERGE, of master 530227e (lane Y2's 43
+    #: admitted rows and `J 158`, above), the same three rows over lane Y2's
+    #: figures, each MEASURED on the merged tree and equal to the sum:
+    #:   adjudicated 199 -> 202, delivered_broad 110 -> 113, unfired 31 -> 34
+    #:   gap 548 -> 545, gap_read 104 -> 103, gap_write 337 -> 335
+    #:   b3_admitted 42 -> 41, b3_blocked_on_nothing 5 -> 4 (`M M49` left)
+    #:   b1_standing 11 -> 13, b1_no_ruling 20 -> 21 -- the last GIT MERGED
+    #:   CLEAN AND WRONG: both sides moved it 19 -> 20, lane Y2 by `J 158`
+    #:   and this lane by `M M49`, and the tree holds both
+    #: RE-DERIVED AT LANE D'S MERGE, 2026-09-24, from the tree merged with
+    #: master 9b9a4d0 and not as deltas from the lane's base
+    #: (`_audit/2026-09-24-lane-d-d6-pdf.md`, Integration 2026-09-24). Lane D
+    #: applied D6-CAPABILITY-OVER-AFFORDANCE: `N 132` GAP -> COVERED-UNFIRED --
+    #: both views it switches between are served by their own tools, and one
+    #: of the two tools has never been called live -- and it leaves bucket 3,
+    #: where it was ADMITTED. `J 107` stays GAP and is re-gated RULING ->
+    #: READER in the jobs side table: its route refuses a call with no
+    #: keyword, and the fix is a tool change no ruling holds. So:
+    #:   adjudicated 197 -> 198, delivered_broad 108 -> 109, unfired 29 -> 30
+    #:   gap 507 -> 506, gap_read 91 -> 90, b3_admitted 37 -> 36
+    #:   b1_no_ruling 19 -> 20 (N 132 enters bucket 1, held by no ruling)
+    #:   jobs_blocked_on_nothing 0 -> 1 (J 107)
+    #: AND RE-DERIVED AGAIN AT THE LANE'S MERGE OF MASTER 603f4d3, which had
+    #: meanwhile taken lane L7's `P I14`. Both lanes had moved adjudicated,
+    #: delivered_broad, unfired and gap by one from the same 197 / 108 / 29 /
+    #: 507, so git merged the two IDENTICAL edits as one and left 198 / 109 /
+    #: 30 / 506 -- one row short on each, and `--check` said so. Measured on
+    #: the merged tree:
+    #:   adjudicated 199, delivered_broad 110, unfired 31, gap 505
+    #: (b1_standing 11 is lane L7's and b1_no_ruling 20 lane D's; each moved
+    #: once, so git's merge of them is right.)
+    #: AND AGAIN AT THE LANE'S MERGE OF MASTER 530227e (lane Y2: 43 rows
+    #: admitted, `J 158` moved to COVERED-UNFIRED). Measured on that merged
+    #: tree against lane Y2's pins, `N 132` is the only move:
+    #:   adjudicated 199 -> 200, delivered_broad 110 -> 111, unfired 31 -> 32,
+    #:   gap 548 -> 547, gap_read 104 -> 103, b3_admitted 42 -> 41,
+    #:   b1_no_ruling 20 -> 21; jobs_blocked_on_nothing stays 1 (`J 107`).
+    #: RE-DERIVED AT LANE Y2'S FOLLOW-UP, 2026-09-24, on master 1902fcb and
+    #: MEASURED, not summed (`_audit/2026-09-24-lane-y2-admission.md`,
+    #: "Follow-up: the P-R settings block"). The P-R block's settings-family
+    #: 44, a +44 collapse on `P1` until then, were itemized into 22 rows,
+    #: `P2`-`P23`, and the collapse left (see COLLAPSED). `P2` is
+    #: EXCLUDED-RULED on ground two; the other 21 are GAP -- 19 writes, and
+    #: two reads, `P3` (NEEDS-SESSION) and `P15` (REFUSED). Lane R's handback
+    #: bounded the rise of capabilities_achievable at 43; measured, it is 21.
+    #:   stated_rows 747 -> 769 (+22); capabilities 805 -> 783 (-22: the +44
+    #:   collapse left and 22 rows entered); capabilities_achievable
+    #:   691 -> 712 (+21); achievable 677 -> 698 (+21)
+    #:   out_of_scope 70 -> 71 and adjudicated 199 -> 200 (`P2`)
+    #:   gap 548 -> 569 (+21), gap_read 104 -> 106, gap_write 337 -> 356
+    #:   b3_refused 46 -> 47 (`P15`), b3_needs_session 13 -> 14 (`P3`)
+    #: 769 AT THE ORCHESTRATOR'S MERGE OF LANE Y2'S FOLLOW-UP (2026-09-27), MEASURED:
+    #: the P-R settings block itemized into 22 rows (P2-P23; Delete Data EXCLUDED-RULED).
+    "stated_rows": 769,
     #: 762 = 704 stated rows + 58 declared collapses, computed at HEAD. NOT the
     #: published 761 and NOT the counter docstring's 760: those two differ only
     #: by a `- 2 stateless` term whose two rows are already outside the 704.
     #: Pinned at what the tree computes, with the other two named in the output.
-    "capabilities": 805,
-    "capabilities_achievable": 691,
-    "out_of_scope": 70,
-    "achievable": 677,
-    "adjudicated": 199,
+    #: 203 AT THE ORCHESTRATOR'S MERGE OF LANE D (2026-09-27), MEASURED: lane D
+    #: moved `N 132` GAP -> COVERED-UNFIRED under D6-CAPABILITY-OVER-AFFORDANCE.
+    #: 783 SINCE THE P-R BLOCK WAS ITEMIZED, 2026-09-24: 769 stated rows + 14
+    #: for `O6-O20`, the only collapse left.
+    #: 783 AT THE ORCHESTRATOR'S MERGE OF LANE Y2'S FOLLOW-UP (2026-09-27), MEASURED:
+    #: the P-R settings block itemized into 22 rows (P2-P23; Delete Data EXCLUDED-RULED).
+    #: 712 AT THE ORCHESTRATOR'S MERGE OF LANE Y2'S FOLLOW-UP (2026-09-27), MEASURED:
+    #: the P-R settings block itemized into 22 rows (P2-P23; Delete Data EXCLUDED-RULED).
+    #: 71 AT THE ORCHESTRATOR'S MERGE OF LANE Y2'S FOLLOW-UP (2026-09-27), MEASURED:
+    #: the P-R settings block itemized into 22 rows (P2-P23; Delete Data EXCLUDED-RULED).
+    #: 698 AT THE ORCHESTRATOR'S MERGE OF LANE Y2'S FOLLOW-UP (2026-09-27), MEASURED:
+    #: the P-R settings block itemized into 22 rows (P2-P23; Delete Data EXCLUDED-RULED).
+    #: 204 AT THE ORCHESTRATOR'S MERGE OF LANE Y2'S FOLLOW-UP (2026-09-27), MEASURED:
+    #: the P-R settings block itemized into 22 rows (P2-P23; Delete Data EXCLUDED-RULED).
+    #: LANE L7'S P B9 BUILD (2026-09-24), integrated over master 0e4f4b3,
+    #: MEASURED on the merged tree: `P B9` GAP -> COVERED-UNFIRED, the Premium
+    #: badge switch pressed through `linkedin_update_profile_field` and aimed
+    #: by its block's title compared in the page, never fired
+    #: (`_audit/2026-09-24-lane-l7-profile-writes.md`, Follow-up F.5). A W row
+    #: whose cell cites RELEASED BY SELF-PROFILE-EDITS-NOT-OUTWARD, as the six
+    #: intro-field edits do, so it enters bucket 1 held by no ruling. One row
+    #: changing class moves seven figures: adjudicated, delivered_broad and
+    #: unfired +1; gap and gap_write -1; b1_no_ruling and b1_released +1.
+    "capabilities": 783,
+    "capabilities_achievable": 712,
+    "out_of_scope": 71,
+    "achievable": 698,
+    #: 205 AT THE ORCHESTRATOR'S MERGE OF LANE L7'S P B9 (2026-09-27), MEASURED: P B9
+    #: (Premium badge) moved GAP -> COVERED-UNFIRED, released like the intro edits.
+    "adjudicated": 205,
     #: THE LIVE LANE'S FOUR ROWS, RE-DERIVED AT EACH OF ITS MERGES OF MASTER
     #: (2026-09-24; last over lane S): four rows fired live and banked
     #: (`_audit/2026-09-23-live-lane-session-1.md`). `P G6` COVERED-UNFIRED ->
@@ -991,17 +1102,37 @@ PINNED = {
     #: (GAP -> COVERED-UNFIRED, `_audit/2026-09-23-lane-l1-refused-reads.md`).
     #: One row changing class moves all five; b3 admitted/refused 40/16 are
     #: L1's allowlist admissions, and b1_no_ruling 7 is P G6 entering bucket 1.
-    "delivered_broad": 110,
+    #: 114 AT THE ORCHESTRATOR'S MERGE OF LANE D (2026-09-27), MEASURED: lane D
+    #: moved `N 132` GAP -> COVERED-UNFIRED under D6-CAPABILITY-OVER-AFFORDANCE.
+    #: 115 AT THE ORCHESTRATOR'S MERGE OF LANE L7'S P B9 (2026-09-27), MEASURED: P B9
+    #: (Premium badge) moved GAP -> COVERED-UNFIRED, released like the intro edits.
+    "delivered_broad": 115,
     #: 79 since the live lane's merge (see `adjudicated`): P G6, N 134, P O3
     #: and M C72 COVERED-PROVEN.
     #: 75 and 21 since the bucket-1 merge: `M C41` fired live and moved from
     #: COVERED-UNFIRED to COVERED-PROVEN (`_audit/2026-09-23-bucket1-fires.md`).
     #: One row changing class moves both, and leaves delivered_broad at 96.
     "delivered_strict": 79,
-    "gap": 548,
-    "cannot_deliver": 19,
-    "unfired": 31,
     #: The live lane's merge: N 134, P O3 and M C72 left GAP.
+    #: Lane D's merge: N 132 left GAP, for COVERED-UNFIRED under D6.
+    #: 544 AT THE ORCHESTRATOR'S MERGE OF LANE D (2026-09-27), MEASURED: lane D
+    #: moved `N 132` GAP -> COVERED-UNFIRED under D6-CAPABILITY-OVER-AFFORDANCE.
+    #: 35 AT THE ORCHESTRATOR'S MERGE OF LANE D (2026-09-27), MEASURED: lane D
+    #: moved `N 132` GAP -> COVERED-UNFIRED under D6-CAPABILITY-OVER-AFFORDANCE.
+    #: 102 AT THE ORCHESTRATOR'S MERGE OF LANE D (2026-09-27), MEASURED: lane D
+    #: moved `N 132` GAP -> COVERED-UNFIRED under D6-CAPABILITY-OVER-AFFORDANCE.
+    #: 106 since the P-R block was itemized: `P3` and `P15` entered.
+    #: 565 AT THE ORCHESTRATOR'S MERGE OF LANE Y2'S FOLLOW-UP (2026-09-27), MEASURED:
+    #: the P-R settings block itemized into 22 rows (P2-P23; Delete Data EXCLUDED-RULED).
+    #: 564 AT THE ORCHESTRATOR'S MERGE OF LANE L7'S P B9 (2026-09-27), MEASURED: P B9
+    #: (Premium badge) moved GAP -> COVERED-UNFIRED, released like the intro edits.
+    "gap": 564,
+    "cannot_deliver": 19,
+    #: 36 AT THE ORCHESTRATOR'S MERGE OF LANE L7'S P B9 (2026-09-27), MEASURED: P B9
+    #: (Premium badge) moved GAP -> COVERED-UNFIRED, released like the intro edits.
+    "unfired": 36,
+    #: 104 AT THE ORCHESTRATOR'S MERGE OF LANE Y2'S FOLLOW-UP (2026-09-27), MEASURED:
+    #: the P-R settings block itemized into 22 rows (P2-P23; Delete Data EXCLUDED-RULED).
     "gap_read": 104,
     #: 151, not the 152 published by `_audit/2026-09-21-the-write-ceiling.md`.
     #: That document scoped itself to `profile.md`, `network.md` and
@@ -1017,7 +1148,22 @@ PINNED = {
     #: a read row until rulings batch 3 named it a setting -- every one classed
     #: in the same table by its act (16 R1, 35 R2, 274 R3 over 325 lines, the
     #: built `N 47` keeping its line).
-    "gap_write": 337,
+    #: 323 since lane L7's merge: `P I14` was built and left GAP; its line
+    #: stays, built.
+    #: 322 since lane L5's merge: `M M10` and `M M17` were built
+    #: (`linkedin_send_reply`) and left GAP; both keep their lines, built.
+    #: 321 since lane L5's merge of master 66aaa95, the two over
+    #: lane L7's one.
+    #: 335 since lane L5's merge of master 530227e: lane Y2's fourteen
+    #: admitted write rows (337 on master) less this lane's two.
+    #: 356 since the P-R block was itemized, 2026-09-24: nineteen settings
+    #: and data-rights rows entered, each classed R3 in the same table (16 R1,
+    #: 36 R2, 306 R3 over 358 lines).
+    #: 354 AT THE ORCHESTRATOR'S MERGE OF LANE Y2'S FOLLOW-UP (2026-09-27), MEASURED:
+    #: the P-R settings block itemized into 22 rows (P2-P23; Delete Data EXCLUDED-RULED).
+    #: 353 AT THE ORCHESTRATOR'S MERGE OF LANE L7'S P B9 (2026-09-27), MEASURED: P B9
+    #: (Premium badge) moved GAP -> COVERED-UNFIRED, released like the intro edits.
+    "gap_write": 353,
     #: All 54 are `jobs.md`, which has no per-row R/W column (56 until the
     #: lane-L3 merge built J 18 and J 39). Not a coincidence
     #: and not a defect in the finder: it is the whole of that slice's still-GAP
@@ -1044,10 +1190,55 @@ PINNED = {
     #: move.
     #: THE LIVE LANE'S MERGE, 2026-09-24: N 134, P O3 and M C72 were proven
     #: live and their address lines left the table; all three were ADMITTED.
-    "b3_admitted": 42,
-    "b3_refused": 46,
+    #: 36 / 38 / 1 / 13 / 2 SINCE LANE L5'S MERGE OVER THE LIVE LANE'S (sum 90,
+    #: `gap_read`): `M M49` left bucket 3 for COVERED-UNFIRED, ADMITTED; the
+    #: boundary did not move.
+    #: 41 / 46 / 1 / 13 / 2 SINCE LANE L5'S MERGE OF MASTER 530227e (sum
+    #: 103, `gap_read`): lane Y2's admitted reads, less `M M49`.
+    #: 43 / 35 / 1 / 13 / 2 SINCE LANE S'S FOLLOW-UP, ITEM 1 (2026-09-24): THE
+    #: BOUNDARY MOVED. `D2-SEARCH-VERTICALS-WIDENED` widened the search line
+    #: to four closed words, and the three rows whose recorded page is one of
+    #: the new words -- `N 104` (companies), `N 161` (groups), `N 179` (events)
+    #: -- went REFUSED -> ADMITTED, each gated MEASURE (no capture exists).
+    #: No row entered or left bucket 3 and no state moved; `M C70` stays
+    #: REFUSED on its content-vertical address, its groups spelling now an
+    #: admitted also-driven line.
+    #: 49 / 29 / 1 / 13 / 2 SINCE ITEM 2 OF THE SAME FOLLOW-UP: THE BOUNDARY
+    #: MOVED AGAIN. `MEMBER-ROSTERS-AS-BOUNDED-READS` put four rosters on lines
+    #: of their own, and the six rows whose recorded page is one of them went
+    #: REFUSED -> ADMITTED, each gated MEASURE: `N 165` and `N 177` (a group's
+    #: members), `N 188` (an event's attendees), `N 102` (a company's People
+    #: tab), `N 99` and `N 100` (a school's). `N 189` stays REFUSED on its
+    #: filtered spelling -- the roster line takes no query -- and `N 178` on
+    #: its third-party profile. No row entered or left bucket 3; no state
+    #: moved.
+    #: THE GATES THEN MOVED AGAIN, AND NO FIGURE HERE DID: item 3 of the same
+    #: follow-up (the WHO/WHICH rule, row by row) re-gated six of the rows
+    #: above MEASURE -> RULING -- `N 161`, `N 179`, `N 165`, `N 177`, `N 188`,
+    #: `N 100`, whose payload is WHO or WHICH -- so "each gated MEASURE" is
+    #: that commit's reading, not HEAD's. Class counts do not see a gate.
+    #: 51 / 37 AT LANE S'S FOLLOW-UP MERGE OF MASTER 1902fcb (2026-09-24),
+    #: MEASURED on the merged tree and not summed: master stood at 42 / 46
+    #: (the live lane's three ADMITTED rows gone, and lanes L7 and Y2's rows
+    #: in), and this lane's nine REFUSED -> ADMITTED lines -- the three D2
+    #: verticals and the six roster rows above -- move it by +9 / -9.
+    #: 50 AT THE ORCHESTRATOR'S MERGE OF LANE S INTO MASTER 96c1165 (2026-09-27),
+    #: MEASURED: lane L5's merge had moved `M M49` out of bucket 3 (COVERED-UNFIRED).
+    #: LANE D'S MERGE, 2026-09-24: N 132 left for COVERED-UNFIRED under D6
+    #: and its line left the table; it was ADMITTED, gated RULING, so
+    #: b3_blocked_on_nothing does not move.
+    #: 49 AT THE ORCHESTRATOR'S MERGE OF LANE D (2026-09-27), MEASURED: `N 132`
+    #: left bucket 3 (COVERED-UNFIRED under D6) and its address line went with it.
+    #: 42 / 47 / 1 / 14 / 2 SINCE THE P-R BLOCK WAS ITEMIZED, 2026-09-24 (sum
+    #: 106, `gap_read`): `P15` REFUSED on the forbidden substring
+    #: /mypreferences/d/categories/, and `P3` NEEDS-SESSION, no committed
+    #: source spelling its page. The boundary did not move.
+    "b3_admitted": 49,
+    #: 38 AT THE ORCHESTRATOR'S MERGE OF LANE Y2'S FOLLOW-UP (2026-09-27), MEASURED:
+    #: the P-R settings block itemized into 22 rows (P2-P23; Delete Data EXCLUDED-RULED).
+    "b3_refused": 38,
     "b3_no_address": 1,
-    "b3_needs_session": 13,
+    "b3_needs_session": 14,
     "b3_undetermined": 2,
     #: ITS HISTORY ON 2026-09-23 IS THE RULINGS AND THE LIVE READINGS MOVING
     #: UNDER IT, one line per move:
@@ -1075,11 +1266,25 @@ PINNED = {
     #:       already admitted and loaded, each waiting only on a reader --
     #:       `P S5`, `M M53`, and `N 195`, whose third part is an AGGREGATE
     #:       that WHO-WHICH-COUNTS-ARE-NOT-DELIVERY says counts deliver
+    #:   1   at lane L5's merge, 2026-09-24 (on its branch): `M M49` was built -- the read
+    #:       indicator on his own last message, returned by
+    #:       `linkedin_open_messaging` and `linkedin_open_thread`. Left: `P K1`
+    #:   4   at lane L5's merge of master 530227e: the two together --
+    #:       `P K1`, `P S5`, `M M53` and `N 195`
+    #:   8   at lane S's follow-up integration, 2026-09-24: NAMES-AT-RUNTIME
+    #:       (the operator's, 08:11) answered the question `N 79`, `N 172` and
+    #:       `N 194` were gated RULING on. Each now waits on a name-returning
+    #:       reader held to PEOPLE-DATA-MITIGATIONS, and their page is
+    #:       captured (the live lane's session 1), so each is re-gated READER.
+    #:       The six follow-up rows re-gated the same day went to MEASURE --
+    #:       no capture exists -- and are not in this count.
     #: The gates past the boundary are re-judged BY HAND when a ruling lands;
     #: what `ruling_problems` asks on every run is only that no row blocked on
     #: nothing sits on a page a hold binds.
     #: `_audit/2026-09-23-census-cleanup.md` items 6 and 7, sections 11-13.
-    "b3_blocked_on_nothing": 5,
+    #: 7 AT THE ORCHESTRATOR'S MERGE OF LANE S INTO MASTER 96c1165 (2026-09-27),
+    #: MEASURED: `M M49` left bucket 3 at lane L5's merge.
+    "b3_blocked_on_nothing": 7,
     #: BUCKET 1 BY WHAT HOLDS EACH ROW, DERIVED from the census and the
     #: holds in `scripts/ruling_holds.py`, BY THE STATUS OF THE HOLD: standing,
     #: relayed, pending, or none. They sum to `unfired`, and `PINNED_B1_ROWS`
@@ -1125,15 +1330,42 @@ PINNED = {
     #:   lane Y2's integration 11 standing / 0 / 0 / 20 none, 6 released, of 31:
     #:   (after lane L7's     `J 158`, a read no ruling holds, entered
     #:   merge)               COVERED-UNFIRED (+1 none).
+    #:   lane L5's merge      12 standing / 0 / 0 / 20 none, 6 released, of 32,
+    #:   (over the live lane) measured on the tree merged with 9b9a4d0:
+    #:                        the reply, `M M10` and by D6 `M M17`, two W rows
+    #:                        the write hold binds with no marker (+2
+    #:                        standing); `M M49`, a read no ruling holds (+1
+    #:                        none).
+    #:   lane L5's third      13 standing / 0 / 0 / 20 none, 6 released, of 33,
+    #:   merge (over L7)      measured on the tree merged with 66aaa95: the
+    #:                        same three rows over lane L7's figures.
+    #:   lane L5's fourth     13 standing / 0 / 0 / 21 none, 6 released, of 34,
+    #:   merge (over Y2)      measured on the tree merged with 530227e:
+    #:                        `J 158` and this lane's three rows together.
+    #:   lane D's merge       11 standing / 0 / 0 / 21 none, 6 released, of 32:
+    #:   (2026-09-24)         N 132 GAP -> COVERED-UNFIRED under D6, a read no
+    #:                        ruling holds (+1 none). Counted on the tree merged
+    #:                        with master 530227e, after lane Y2's line above.
+    #:   lane L7's P B9       13 standing / 0 / 0 / 22 none, 7 released,
+    #:   build (over 0e4f4b3)  measured on the merged tree: `P B9`, a W row
+    #:                        whose cell cites RELEASED BY
+    #:                        SELF-PROFILE-EDITS-NOT-OUTWARD (+1 none,
+    #:                        +1 released).
     #: `b1_relayed` is the count this file called `b1_named_target` until the
     #: target condition was registered: a name for what a status COUNTS, not
     #: for which ruling happens to have it today. `b1_released` is a SUBSET of
     #: `b1_no_ruling`: the writes held by nothing because a release says so.
-    "b1_standing": 11,
+    "b1_standing": 13,
     "b1_relayed": 0,
     "b1_pending": 0,
-    "b1_no_ruling": 20,
-    "b1_released": 6,
+    #: 22 AT THE ORCHESTRATOR'S MERGE OF LANE D (2026-09-27), MEASURED: lane D
+    #: moved `N 132` GAP -> COVERED-UNFIRED under D6-CAPABILITY-OVER-AFFORDANCE.
+    #: 23 AT THE ORCHESTRATOR'S MERGE OF LANE L7'S P B9 (2026-09-27), MEASURED: P B9
+    #: (Premium badge) moved GAP -> COVERED-UNFIRED, released like the intro edits.
+    "b1_no_ruling": 23,
+    #: 7 AT THE ORCHESTRATOR'S MERGE OF LANE L7'S P B9 (2026-09-27), MEASURED: P B9
+    #: (Premium badge) moved GAP -> COVERED-UNFIRED, released like the intro edits.
+    "b1_released": 7,
     #: D3's enumerated list: FOUR once `M C83` left it, and THREE since
     #: `N 172` left it the same evening on OTHER-MEMBER-IDS-AS-READS -- see
     #: `RULING_BLOCKED_NAMED`. It was printed as "five rows" and pinned
@@ -1153,16 +1385,31 @@ PINNED = {
     #: a line -- directions R 7, W 28, R+W 3 (so 33 / 53 / 6), and of the ten
     #: with a read half ADMITTED 2 (`J 17`, `J 115`), REFUSED 7, NEEDS-SESSION
     #: 1 (`J 134`). 11 + 26 + 0 + 2 + 0 = 39 = 33 + 6.
+    #: 13 / 24 SINCE LANE S'S FOLLOW-UP, ITEM 2 (2026-09-24): THE BOUNDARY
+    #: MOVED. `MEMBER-ROSTERS-AS-BOUNDED-READS` put the company and school
+    #: People tabs on lines of their own, and the two jobs rows whose recorded
+    #: page is one of them went REFUSED -> ADMITTED, gated MEASURE: `J 108`
+    #: (the company People tab) and `J 112` (a school's alumni tab). No row
+    #: left the table and no state moved. 13 + 24 + 0 + 2 + 0 = 39.
+    #: 107 / 41 / 58 / 8 AND 13 / 34 AT LANE S'S FOLLOW-UP MERGE OF MASTER
+    #: 1902fcb, MEASURED on the merged tree: master's lanes had grown the
+    #: table to 107 rows (11 admitted, 36 refused), and this lane's two
+    #: People-tab rows move it by +2 / -2. 13 + 34 + 0 + 2 + 0 = 49 = 41 + 8.
     "jobs_gap": 107,
     "jobs_dir_r": 41,
     "jobs_dir_w": 58,
     "jobs_dir_rw": 8,
-    "jobs_admitted": 11,
-    "jobs_refused": 36,
+    "jobs_admitted": 13,
+    "jobs_refused": 34,
     "jobs_no_address": 0,
     "jobs_needs_session": 2,
     "jobs_undetermined": 0,
-    "jobs_blocked_on_nothing": 0,
+    #: 1 since lane D's merge, 2026-09-24: `J 107` (the Company Page Jobs tab)
+    #: was re-gated RULING -> READER. D6 applied, and the replacing route,
+    #: `linkedin_search_jobs(company_id=...)`, refuses a call with no keyword,
+    #: so what stands in the way is that guard in the tool -- no ruling, no
+    #: boundary edit and no press.
+    "jobs_blocked_on_nothing": 1,
 }
 
 #: BUCKET 1, ROW BY ROW -- the control that goes RED WHEN A ROW MOVES, and
@@ -1177,9 +1424,14 @@ PINNED_B1_ROWS: dict[str, tuple[str, ...]] = {
     #: built offline and never fired; it tells one employer's recruiters, so
     #: it fires only at a company he names -- and, on the orchestrator's call,
     #: only once `P I15`'s undo control has been captured.
+    #: `M M10` and `M M17` entered with lane L5's merge, 2026-09-24: the
+    #: reply inside a conversation he names (`linkedin_send_reply`), built
+    #: offline and never fired; `M M17` rests on it by D6 (an emoji is a
+    #: character of the words it types). Held until he names the
+    #: conversation and the words.
     "OPERATOR-NAMES-THE-TARGET": (
         "J 103", "J 104", "J 128",
-        "M C1", "M C25", "M C32",
+        "M C1", "M C25", "M C32", "M M10", "M M17",
         "N 1", "N 46", "N 47", "N 48",
         "P I14",
     ),
@@ -1200,10 +1452,24 @@ PINNED_B1_ROWS: dict[str, tuple[str, ...]] = {
     #: then COVERED-UNFIRED on the orchestrator's delegated call --
     #: `linkedin_premium_job_collection(1)` reaches it, its reader read the
     #: page live on 2026-09-20, and the tool's call at index 1 never fired.
+    #: `M M49` entered with lane L5's merge, 2026-09-24: the read indicator on
+    #: his own last message, read off his own inbox with no target
+    #: (OWN-INBOX-READS-COVERED-BY-B permits; it holds nothing).
+    #: `N 132` entered with lane D's merge, 2026-09-24: the switch between
+    #: Search appearances and Who viewed your profile, discharged under D6 by
+    #: two shipped tools, one of which has never been called live. A read of
+    #: his own analytics, which no ruling holds.
+    #: `P B9` entered with lane L7's P B9 build, 2026-09-24, integrated over
+    #: master 0e4f4b3: the Premium badge switch, built offline and never
+    #: fired, a write its own cell releases by SELF-PROFILE-EDITS-NOT-OUTWARD --
+    #: the seventh, beside the six P A rows.
     NO_RULING: (
-        "J 18", "J 39", "J 121", "J 122", "J 158", "M M33", "M M43", "N 20", "N 23",
+        "J 18", "J 39", "J 121", "J 122", "J 158", "M M33", "M M43", "M M49",
+        #: `N 132` entered at the orchestrator's merge of lane D (2026-09-27): D6 moved it
+        #: GAP -> COVERED-UNFIRED on two shipped reads; no ruling holds it.
+        "N 20", "N 23", "N 132",
         "N 45", "N 84", "N 85", "N 87", "N 94",
-        "P A8", "P A11", "P A13", "P A17", "P A19", "P A21",
+        "P A8", "P A11", "P A13", "P A17", "P A19", "P A21", "P B9",
     ),
 }
 

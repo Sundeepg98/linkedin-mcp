@@ -459,7 +459,9 @@ EMPTIED: dict[str, str] = {
                           "outward_classes.RETIRED_PERMANENT_REFUSALS (lane L8 s5)",
     "PF-DELETE-OR-WITHDRAW": "retired from writes.PERMANENTLY_FORBIDDEN 2026-09-24 by "
                              "OUTWARD-CLASSES-BUILT-BEHIND-GRANTS: 26 rows returned to GAP with blockers "
-                             "named, P N28 re-grounded on ACCOUNT-END-SUBSTRINGS (lane L8 s5)",
+                             "named, P N28 re-grounded on ACCOUNT-END-SUBSTRINGS (lane L8 s5); and P P2, "
+                             "filed here on master by lane Y2 after lane L8's base, returned at lane "
+                             "L8's merge of master (s9)",
     "PF-ENDORSE-OR-RECOMMEND": "retired from writes.PERMANENTLY_FORBIDDEN 2026-09-24 by "
                                "OUTWARD-CLASSES-BUILT-BEHIND-GRANTS: 3 rows returned to GAP with blockers "
                                "named -- P E4, N 111 and N 112, filed second behind "

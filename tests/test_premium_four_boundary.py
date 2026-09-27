@@ -130,8 +130,14 @@ NOT_BOUGHT = (
     # that are still refused and that keep testing exactly that -- and the
     # replacement is STRICTLY STRONGER, because the sub-path is the spelling
     # that would address one PERSON rather than the page listing them.
+    #
+    # ``{BASE}/search/results/companies/?keywords=x`` STOOD HERE UNTIL
+    # 2026-09-24, and the same thing happened to it: `D2-SEARCH-VERTICALS-
+    # WIDENED` admitted it on the search line, its own ruling and its own
+    # blast radius, and not by anything the premium entries reach. Replaced
+    # by the content vertical, which that ruling left refused.
     f"{BASE}/search/results/people/example-person-a1b2c3/",
-    f"{BASE}/search/results/companies/?keywords=x",
+    f"{BASE}/search/results/content/?keywords=x",
 )
 
 

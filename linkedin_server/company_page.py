@@ -89,6 +89,16 @@ classes in that 35 are worth naming, because neither is a tab:
     ``search_results.RESULT_KINDS``: it is the class anything misclassified
     INTO or OUT OF is the defect the rules exist to prevent.
 
+    AMENDED 2026-09-24: THAT OBJECTION WAS AN ARGUMENT, NOT A RULING
+    (``D3-UNREGISTERED-REFUSAL-IS-NOT-A-RULING``), and
+    ``MEMBER-ROSTERS-AS-BOUNDED-READS`` weighed it the other way. The tab is
+    admitted since, on a roster line of its own -- one page, no query -- and
+    only ``member_rosters.compose`` assembles it, from a numeric id; nothing
+    in this module does, and no tool opens it yet. It stays first here, and
+    still the hazard class: a roster is made of people, so whatever reads it
+    owes the name-free shaper doctrine exactly the strictness this module
+    spends on the root.
+
 ``admin_surface`` and ``page_creation``
     ``/company/<x>/admin/``, ``/company/<x>/admin/dashboard/`` and
     ``/company/setup/new/`` are the WRITE half of this root -- Page
@@ -190,6 +200,14 @@ _SLUG_CHARS = frozenset(
     "%-_"
 )
 
+#: AND THE DOT KEPT OUT ABOVE CAN COME BACK IN ENCODED, which the sentence
+#: above did not reckon with until 2026-09-24: ``%`` is in the class, and the
+#: URL standard reads a segment of ``%2e`` or ``%2e%2e`` (either case) as
+#: ``.`` or ``..``. These are the lowered spellings of a segment made of
+#: nothing but one or two encoded dots; :func:`slug_is_addressable` refuses
+#: them, as the boundary's ``/company/`` root line now does.
+_ENCODED_DOT_SEGMENTS = frozenset({"%2e", "%2e%2e"})
+
 #: THE CLOSED OUTPUT ALPHABET. Order is the contract: a reading is a POSITION
 #: in this tuple, so reordering silently renames every reading ever taken.
 #: ``tests/test_company_page.py`` pins it.
@@ -197,7 +215,9 @@ _SLUG_CHARS = frozenset(
 #: ``people_tab`` IS THE HAZARD CLASS and is first on purpose. See the module
 #: docstring: it is a member roster, it is the one surface under this root the
 #: member-profile cause reaches, and it is out of scope by the same ruling
-#: that put a group's roster out of scope by name.
+#: that put a group's roster out of scope by name. [AMENDED 2026-09-24: that
+#: "ruling" was an argument; the tab is admitted on a roster line of its own
+#: under MEMBER-ROSTERS-AS-BOUNDED-READS, and stays the hazard class here.]
 TAB_KINDS: tuple[str, ...] = (
     "people_tab",
     "home_tab",
@@ -557,6 +577,13 @@ def slug_is_addressable(href: Optional[str]) -> bool:
         return False
     segment = segments[1]
     if not segment or len(segment) > MAX_SLUG_CHARS:
+        return False
+    # AN ENCODED DOT SEGMENT, added 2026-09-24 with the same refusal on the
+    # boundary's root line: the URL standard reads ``%2e`` and ``%2e%2e``
+    # (either case) as ``.`` and ``..``, so a segment made of nothing else
+    # is not a slug at all but a step up the path. The character check below
+    # would pass it, because ``%`` is in the class.
+    if segment.lower() in _ENCODED_DOT_SEGMENTS:
         return False
     return set(segment) <= _SLUG_CHARS
 

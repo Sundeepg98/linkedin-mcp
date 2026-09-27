@@ -540,6 +540,10 @@ CLEAN_COMPONENT = {
     "value": "a real value",
     "setting": "dark-mode",
     "member": MEMBER,
+    # ``send_reply``'s subject, 2026-09-24: a conversation id in the read
+    # allowlist's own shape (a digit first). SYNTHETIC, as every thread id in
+    # this suite is.
+    "thread": "2-SYNTHETICCLEANTHREAD==",
 }
 
 
@@ -1682,8 +1686,9 @@ def test_the_repost_refusal_says_what_survived_and_what_did_not():
 def test_the_claims_that_depend_on_the_destruction_refusal_are_the_measured_ones():
     """A refusal other claims lean on, pinned from BOTH ends and by NAME.
 
-    ``delete_or_withdraw_anything`` carries a note saying five specs cite it in
-    ``reversible_by``. THE NOTE WAS WRONG WHEN THIS TEST WAS FIRST WRITTEN, and
+    ``delete_or_withdraw_anything`` carried a note saying five specs cite it in
+    ``reversible_by`` (six, once lane L5's ``send_reply`` joined on master).
+    THE NOTE WAS WRONG WHEN THIS TEST WAS FIRST WRITTEN, and
     the way it was wrong is why this is asserted by name rather than by count:
     it read "a post, a comment, a reaction, an invitation and a message",
     which NAMED react (which does not cite the entry) and OMITTED apply (which
@@ -1704,12 +1709,18 @@ def test_the_claims_that_depend_on_the_destruction_refusal_are_the_measured_ones
     to the warning is to restate the five, each by name, not to keep the
     entry. This test used to assert the entry present and each of the five
     saying NOBODY with the word "forbidden" in it. What it asserts now is the
-    RESTATEMENT: each of the five names the retirement and the record in
-    ``outward_classes`` that governs its undo, the four whose undo is still
-    NOBODY say so on a ground that is not this server's refusal, and the
-    record's STATUS in each sentence is the record's real status -- so a
-    record that later moves to BUILT turns its spec's sentence red until the
-    sentence moves too.
+    RESTATEMENT: each names the retirement and, where one exists, the record
+    in ``outward_classes`` that governs its undo; the three whose undo is still
+    NOBODY (an application, a message, a reply) say so on a ground that is not
+    this server's refusal; and the record's STATUS in each sentence is the
+    record's real status -- so a record that later moves to BUILT turns its
+    spec's sentence red until the sentence moves too.
+
+    SIX SINCE THE MERGE OF MASTER, 2026-09-27. ``send_reply`` was built on lane
+    L5's branch while this lane retired the entry on its own, and it arrived
+    leaning on the refusal. It is restated like the other five, and the rule
+    below this test reads EVERY sanctioned spec, so a seventh cannot arrive
+    the same way unseen.
     """
     from linkedin_server import outward_classes
 
@@ -1719,13 +1730,15 @@ def test_the_claims_that_depend_on_the_destruction_refusal_are_the_measured_ones
     assert "CORRECTED" in note
     assert "react_to_item does not lean on this" in note
 
-    # THE FIVE, BY NAME, and the record each one's undo now rests on.
+    # THE SIX, BY NAME, and the record each one's undo now rests on.
     restated = {
         "apply_job": ("withdraw_application", "NOBODY"),
         "publish_post": ("delete_own_post", "NOT YET"),
         "comment_on_item": ("delete_own_comment", "NOT YET"),
         "send_invitation": ("withdraw_invitation", "NOT YET"),
         "send_message": (None, "NOBODY"),
+        # The sixth, from lane L5, restated at this lane's merge of master.
+        "send_reply": (None, "NOBODY"),
     }
     for action, (record, verdict) in restated.items():
         text = spec_for_action(action).reversible_by
@@ -1740,10 +1753,12 @@ def test_the_claims_that_depend_on_the_destruction_refusal_are_the_measured_ones
             status = outward_classes.OUTWARD_CLASS_SPECS[record].status
             assert record in text, (action, record)
             assert status in text, (action, record, status)
-    # The two NOBODY verdicts rest on grounds outside this server: LinkedIn's
-    # own Help Center for an application, delivery itself for a message.
+    # The three NOBODY verdicts rest on grounds outside this server: LinkedIn's
+    # own Help Center for an application, delivery itself for a message and a
+    # reply.
     assert "a512388" in spec_for_action("apply_job").reversible_by
     assert "cannot be recalled" in spec_for_action("send_message").reversible_by
+    assert "cannot be recalled" in spec_for_action("send_reply").reversible_by
 
     # THE ONE NAMED IN THE ORIGINAL NOTE THAT DOES NOT BELONG, and what it
     # actually rests on. If somebody later rewrites react's reversible_by to
@@ -1751,6 +1766,94 @@ def test_the_claims_that_depend_on_the_destruction_refusal_are_the_measured_ones
     reaction = spec_for_action("react_to_item").reversible_by
     assert "NOBODY" not in reaction
     assert "ON label unmeasured" in reaction
+
+
+#: The printed fields that state whether, and how, an action can be undone.
+_REVERSIBILITY_FIELDS = (
+    "reversibility",
+    "reversibility_evidence",
+    "reversible_by",
+    "reversibility_procedure",
+)
+
+
+def _leans_on_a_retired_refusal(spec: writes.WriteSpec) -> list[tuple[str, str]]:
+    """Every place a reversibility field states a permanent refusal LIVE.
+
+    The needles come from the system, not from the prose that went stale:
+    the retired keys' own names, read off
+    ``outward_classes.RETIRED_PERMANENT_REFUSALS``, and "permanently
+    forbidden" in either spelling. None of the six surviving refusals is an
+    undo, so a reversibility field has no live reason to cite one. A match is
+    allowed only as a QUOTED RETRACTION -- the two-part test
+    ``tests/test_a_spec_may_not_assert_what_the_code_denies.py`` applies,
+    imported rather than re-derived.
+    """
+    from linkedin_server import outward_classes
+    from tests.test_a_spec_may_not_assert_what_the_code_denies import (
+        _is_a_quoted_retraction,
+    )
+
+    needle = re.compile(
+        "|".join(
+            [re.escape(key) for key in outward_classes.RETIRED_PERMANENT_REFUSALS]
+            + [r"permanently[\s_]+forbidden"]
+        ),
+        re.IGNORECASE,
+    )
+    found = []
+    for field in _REVERSIBILITY_FIELDS:
+        text = getattr(spec, field, None) or ""
+        for match in needle.finditer(text):
+            if not _is_a_quoted_retraction(text, match):
+                found.append((field, match.group(0)))
+    return found
+
+
+def test_no_sanctioned_spec_states_a_retired_refusal_as_its_undo():
+    """ACROSS THE WHOLE SANCTIONED SET, not the six named above.
+
+    The test above names the specs it checks, so it cannot see a seventh --
+    which is exactly how the sixth arrived: ``send_reply`` reached this lane's
+    merge of master saying "Deletion is permanently forbidden here at any
+    confirm level (delete_or_withdraw_anything)", a reversibility claim
+    resting on a refusal that no longer existed.
+    """
+    leaning = {}
+    for spec in SANCTIONED_WRITES.values():
+        found = _leans_on_a_retired_refusal(spec)
+        if found:
+            leaning[spec.action] = found
+    assert not leaning, (
+        "A printed reversibility field states a permanent refusal as a live "
+        "reason: %r. Since 2026-09-24 writes.PERMANENTLY_FORBIDDEN holds only "
+        "the six mitigations, none of them an undo. Quote the old sentence as "
+        "a retraction and say what the undo rests on now." % (leaning,)
+    )
+
+
+def test_the_rule_convicts_the_text_send_reply_arrived_with():
+    """SHOWN FAILING on the words that reached the merge, and passing on
+    their quoted retraction -- a rule that cannot fail certifies nothing."""
+    arrived = (
+        "NOBODY, through this server. Deletion is permanently forbidden "
+        "here at any confirm level (delete_or_withdraw_anything), so an "
+        "un-send does not exist in this design."
+    )
+    spec = spec_for_action("send_reply")
+    planted = dataclasses.replace(spec, reversible_by=arrived)
+    assert _leans_on_a_retired_refusal(planted) == [
+        ("reversible_by", "permanently forbidden"),
+        ("reversible_by", "delete_or_withdraw_anything"),
+    ]
+    quoted = dataclasses.replace(
+        spec,
+        reversible_by='NOBODY. This field used to say "%s"; it no longer does.'
+        % arrived,
+    )
+    assert _leans_on_a_retired_refusal(quoted) == []
+    # And the spec as shipped says it only that way.
+    assert _leans_on_a_retired_refusal(spec) == []
 
 
 # ---------------------------------------------------------------------------

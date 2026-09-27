@@ -287,10 +287,16 @@ def test_the_address_this_reading_informs_is_still_refused():
     that are still refused rather than deleted. The sub-path is the sharper
     one: it is the spelling that would address a PERSON, and the admitted
     pattern takes no sub-path.
+
+    **AND THE SAME HAPPENED ONCE MORE ON 2026-09-24**: the companies vertical
+    that was second here was admitted by ``D2-SEARCH-VERTICALS-WIDENED``, its
+    own ruling with its own blast radius, and again by nothing the creator
+    entries reach. It is replaced the same way, by the content vertical, which
+    that ruling left refused.
     """
     for url in (
         "https://www.linkedin.com/search/results/people/example-person-a1b2c3/",
-        "https://www.linkedin.com/search/results/companies/?keywords=x",
+        "https://www.linkedin.com/search/results/content/?keywords=x",
         "https://www.linkedin.com/analytics/creator/newsletters/",
     ):
         assert not _allowed(url), url

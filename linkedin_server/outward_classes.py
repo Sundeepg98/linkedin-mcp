@@ -19,8 +19,11 @@ THIS MODULE HOLDS TWO THINGS AND DOES NOTHING. It imports nothing that opens
 a page, and no function in it touches a browser.
 
 1. :data:`RETIRED_PERMANENT_REFUSALS` -- the three entries that left
-   ``writes.PERMANENTLY_FORBIDDEN`` on 2026-09-24, VERBATIM as they read at
-   ``1902fcb``. They are kept, not deleted, for the reason the census keeps an
+   ``writes.PERMANENTLY_FORBIDDEN`` on 2026-09-24, VERBATIM as each last read
+   on master: two as at ``1902fcb``, and ``delete_or_withdraw_anything`` as
+   lane L5 left it (``7d13af2``, merged at ``96c1165``), its note counting SIX
+   specs once ``send_reply`` joined -- the text this lane's merge of master
+   removed. They are kept, not deleted, for the reason the census keeps an
    emptied exclusion family: their grounds were re-taken as MEASUREMENTS on
    2026-08-30, the measurements are still true, and an attribution deleted
    with its entry is a ruling nobody can find again. What changed is not the
@@ -56,14 +59,16 @@ WHAT EVERY RECORD OBEYS, and ``tests/test_outward_classes.py`` pins each:
 * EVERY LIVE PROOF FIRES ONLY AT A TARGET HE NAMES
   (``OPERATOR-NAMES-THE-TARGET``). ``live_proof`` says what he names.
 
-THE REVERSIBILITY CLAIMS OF FIVE SHIPPED SPECS LEANED ON ONE RETIRED ENTRY.
+THE REVERSIBILITY CLAIMS OF SIX SHIPPED SPECS LEANED ON ONE RETIRED ENTRY.
 ``delete_or_withdraw_anything`` was the stated reason an application, a
-post, a comment, an invitation and a message each said NOBODY could take
-them back through this server. Retiring it did not make any of the five
-reversible: each ``reversible_by`` in ``writes.SANCTIONED_WRITES`` now names
-the record here that governs its undo (and its status), or says why none
-can exist -- LinkedIn offers no withdraw of a submitted application, and a
-delivered message cannot be recalled.
+post, a comment, an invitation, a message and a reply each said NOBODY
+could take them back through this server -- five on this lane's base, and
+lane L5's ``send_reply`` the sixth, restated at the merge that brought it.
+Retiring the entry did not make any of the six reversible: each
+``reversible_by`` in ``writes.SANCTIONED_WRITES`` now names the record here
+that governs its undo (and its status), or says why none can exist --
+LinkedIn offers no withdraw of a submitted application, and a delivered
+message or reply cannot be recalled.
 """
 from __future__ import annotations
 
@@ -118,7 +123,8 @@ SURVIVING_PERMANENT_REFUSALS: tuple[str, ...] = (
 
 #: RETIRED 2026-09-24 FROM ``writes.PERMANENTLY_FORBIDDEN`` UNDER
 #: ``OUTWARD-CLASSES-BUILT-BEHIND-GRANTS``. Byte-for-byte the text each entry
-#: carried at ``1902fcb``, so the census families that were filed under them
+#: last carried on master (the module docstring says which commit), so the
+#: census families that were filed under them
 #: (``scripts/check_exclusion_basis.py``: PF-REPOST-OR-SHARE,
 #: PF-ENDORSE-OR-RECOMMEND, PF-DELETE-OR-WITHDRAW) still resolve their
 #: citation after the refusal itself is gone.
@@ -137,9 +143,10 @@ SURVIVING_PERMANENT_REFUSALS: tuple[str, ...] = (
 #:                            TARGET -- the measurement stands and now says
 #:                            where the control is, not that it is out of reach.
 #: ``delete_or_withdraw_anything``
-#:                            its note that five specs lean on it is answered
-#:                            spec by spec: each ``reversible_by`` in writes.py
-#:                            now names its own route or why there is none.
+#:                            its note that six specs lean on it (five until
+#:                            send_reply joined) is answered spec by spec: each
+#:                            ``reversible_by`` in writes.py now names its own
+#:                            route or why there is none.
 RETIRED_PERMANENT_REFUSALS: dict[str, str] = {
     "repost_or_share": (
         "NARROWED 2026-08-30 from an entry that read 'post_or_comment_or_like_"
@@ -174,11 +181,12 @@ RETIRED_PERMANENT_REFUSALS: dict[str, str] = {
     "delete_or_withdraw_anything": (
         "destruction is not a write this design covers, at any confirm level. "
         "NOTE WHAT NOW DEPENDS ON THIS ENTRY, added 2026-08-30 and CORRECTED "
-        "the same day after a review counted it: FIVE of the specs above cite "
-        "it in reversible_by -- an application, a post, a comment, an "
-        "invitation and a message all say NOBODY can take them back through "
+        "the same day after a review counted it: SIX of the specs above cite "
+        "it in reversible_by (FIVE until 2026-09-24, when send_reply joined) "
+        "-- an application, a post, a comment, an invitation, a message and "
+        "a reply all say NOBODY can take them back through "
         "this server, and this line is the reason. Shortening it would "
-        "silently make five reversibility claims wrong at once. The list first "
+        "silently make six reversibility claims wrong at once. The list first "
         "written here named a REACTION and omitted an APPLICATION, which was "
         "wrong in both directions at once; react_to_item does not lean on this "
         "entry at all, because its reversible_by rests on a different gap -- "

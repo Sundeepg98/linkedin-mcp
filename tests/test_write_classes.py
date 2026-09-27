@@ -139,10 +139,17 @@ def test_the_split_is_the_one_the_lane_report_quotes():
     sending a post to one person) and thirteen R3 (`P S2`, `S4`, `S6`-`S10`;
     `M M52`, `C97`, `C100`; `N 196`, `198`, `200`). R1 is untouched: no
     admitted row's act is one of the first round's own verbs.
-    325 + 14 = 339 = 16 R1 + 36 R2 + 287 R3."""
+    325 + 14 = 339 = 16 R1 + 36 R2 + 287 R3.
+
+    358 AFTER THE P-R SETTINGS BLOCK WAS ITEMIZED, 2026-09-24 (the same
+    record, "Follow-up: the P-R settings block"): nineteen new write rows,
+    all R3 -- P4 and P5 (two data-rights requests) and P6-P14, P16-P23
+    (settings awaiting admission by name). P3 and P15 are reads and P2 is
+    EXCLUDED-RULED, so none of the three has a line here.
+    339 + 19 = 358 = 16 R1 + 36 R2 + 306 R3."""
     rows, _ = cwc.load()
     split = cwc.split(rows)
-    assert (split["R1"], split["R2"], split["R3"]) == (16, 36, 287)
+    assert (split["R1"], split["R2"], split["R3"]) == (16, 36, 306)
     assert split["R1:built"] + split["R1:queued"] == split["R1"]
 
 
@@ -317,14 +324,33 @@ def test_red_on_a_build_naming_an_action_that_cannot_perform(tmp_path):
     _red_naming(problems, row["key"], "a build that did not move its row")
 
 
-def test_red_on_a_classify_only_class_carrying_a_build(tmp_path):
+def test_red_on_an_r1_line_left_classify_only(tmp_path):
+    """THE RULE THAT REMAINS. This plant was ``queued:`` on an R2 line, red
+    while R2 was classify-only in lane L4's scope. WRITE-CLASS-B let R2 be
+    built, and lane L5 (2026-09-24) records its R2 builds and blockers in the
+    same two dispositions R1 uses -- so that plant is now a legal line, and
+    ``test_an_r2_line_may_record_a_build_or_a_blocker`` says so. What is
+    still refused is the mirror: an R1 line that decides nothing."""
     lines = _lines()
-    i = _find(lines, lambda r: r["class"] == "R2")
+    i = _find(lines, lambda r: r["class"] == "R1")
     row = _row(lines[i])
-    row["disposition"] = "queued:SOMETHING"
+    row["disposition"] = "classify-only"
     lines[i] = _line(row)
     _red_naming(_problems(_plant(tmp_path, lines)), row["key"],
-                "is classify-only in this lane")
+                "R1 must say built: or queued:")
+
+
+def test_an_r2_line_may_record_a_build_or_a_blocker(tmp_path):
+    """GREEN FOR THE ROW: a queued R2 line draws no disposition problem."""
+    lines = _lines()
+    i = _find(lines, lambda r: r["class"] == "R2"
+              and not r["disposition"].startswith("built:"))
+    row = _row(lines[i])
+    row["disposition"] = "queued:ANY-BLOCKER"
+    lines[i] = _line(row)
+    problems = [p for p in _problems(_plant(tmp_path, lines))
+                if p.startswith(row["key"] + ":")]
+    assert problems == [], problems
 
 
 def test_red_on_an_r2_line_without_build_ready_detail(tmp_path):
@@ -383,7 +409,9 @@ def test_every_defining_passage_resolves_on_its_own(cls):
 
 # ---------------------------------------------------------------------------
 # R3 CARRIES A DISPOSITION SINCE 2026-09-24 (lane L7): a build must still be
-# true, and R2 is still classify-only
+# true. (This header went on "and R2 is still classify-only" until lane L5's
+# merge of master 66aaa95, the same day: WRITE-CLASS-B let R2 be built, and
+# test_an_r2_line_may_record_a_build_or_a_blocker, above, pins that.)
 # ---------------------------------------------------------------------------
 
 
