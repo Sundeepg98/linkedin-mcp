@@ -1117,7 +1117,12 @@ f4bff5f  09-27 14:32  the guard redesign: a page string leaves only through a pe
 aca479d  09-27 15:06  the second worked adopter: the conversation readers
 3742ce9  09-27 15:12  the "no name parameter" shaper tests, rewritten around the record type
 33e0c02  09-27 15:14  ci shard timings: the nine new test files priced
+1175ba5  09-27 15:34  after the merge, found by the final gate: two claims the DevTools declaration moved
 ```
+
+This record's own commit follows them. None of these hashes is on `master`
+yet: each does not resolve on `master` until the orchestrator merges this
+branch, which is why every one carries its subject.
 
 The 09-24 merge of master 1902fcb (38ba8df, 09:01) brought the rulings in
 before any of it.
@@ -1279,7 +1284,8 @@ On the real tree none of the seven modules takes such a parameter.
 
 ### P.10 The one integration: master 2eb90ad
 
-Merged at 10c6f02, after the foundation's own commits and before the second
+Merged at 10c6f02 (which does not resolve on `master` until this branch
+merges), after the foundation's own commits and before the second
 adopter -- the adopter's code existed only on master, which is why the one
 integration came here rather than last. Eight conflicts, each from both
 sides: the instructions (master's pages_loaded sentence, then the people
@@ -1376,7 +1382,8 @@ RUN, with the interpreter the repository's venv holds (3.13) unless said:
   second adopter and the invariant file, 716; the fixtures and identity
   guards, 992; the eight rewritten shaper tests and their controls, 264;
   `test_ci_shard.py`, 131.
-- **The final gate**, at 33e0c02: 113 files -- the post-merge selection plus
+- **The final gate**, at 33e0c02 (which does not resolve on `master` until
+  this branch merges): 113 files -- the post-merge selection plus
   every test file that names `threads`, `messaging_overview`, `list_result`,
   `people_data`, `cdp_download`, the server's instructions, either
   conversation tool or `SANCTIONED_MUTATIONS` -- 5 workers, 970.1 s: 6723
