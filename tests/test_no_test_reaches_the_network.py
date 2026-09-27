@@ -59,7 +59,7 @@ def test_the_guard_is_registered_in_this_run_with_no_flag(request):
         ("about:blank", True),
         ("data:text/html,<p>x</p>", True),
         ("blob:null/1234", True),
-        ("file:///C:/x.html", True),
+        ("file:///tmp/page.html", True),
         ("chrome-error://chromewebdata/", True),
     ],
 )
