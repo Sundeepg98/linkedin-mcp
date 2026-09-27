@@ -143,13 +143,14 @@ PINNED_TOOL_SURFACE: dict[str, tuple[str, ...]] = {
     "linkedin_send_reply": ("confirm_token", "text", "thread_id"),
     "linkedin_server_info": ("verbose",),
     "linkedin_session_info": ("verify_live",),
-    "linkedin_surface_census": ("surface",),
+    "linkedin_surface_census": ("item", "surface"),
     "linkedin_unfollow_company": ("company_id", "confirm_token"),
     "linkedin_unsave_job": ("confirm_token", "job_id"),
     "linkedin_update_profile_field": ("confirm_token", "field", "value"),
     "linkedin_update_setting": ("confirm_token", "setting", "value"),
     "linkedin_who_viewed_me": ("limit", "open_filter_menus", "show_more_analytics", "view_switch"),
     "linkedin_own_item_link": ("activity_id", "include_link"),
+    "linkedin_withdraw_from_group": ("confirm_token", "group_id"),
 }
 
 #: 44 tools and 61 parameters at the pin. Asserted rather than assumed, so a
@@ -330,6 +331,21 @@ PINNED_TOOL_SURFACE: dict[str, tuple[str, ...]] = {
 #: COVERED-UNFIRED. Not PROVEN: a WRITE built to ready-to-fire behind the flag
 #: and the single-use grant, never granted. See
 #: `_audit/2026-09-24-lane-l7-profile-writes.md`.
+#:
+#: **RE-PINNED 2026-09-24 AT 51 TOOLS AND 70 PARAMETERS (lane G follow-up), on
+#: its own branch over the base's 51 and 69.** `linkedin_surface_census`
+#: gained `item`, and NO CENSUS ROW MOVES, which is this guard's question
+#: answered out loud: it is not a new capability but the same measurement
+#: re-aimed. The census's `feed_item` surface used to open an item the PAGE
+#: chose -- the first on his rail, or, under the retired `feed_item_commented`
+#: key, the one with the most anchors -- and the ruling
+#: PAGE-MAY-VETO-NEVER-SUPPLY forbids that. So the caller names the item and
+#: his own rail may only refuse it. See `_audit/2026-09-24-lane-g-guards.md`,
+#: Follow-up.
+#: **RE-PINNED 2026-09-24 AT 53 TOOLS AND 81 PARAMETERS, at lane G's merge of
+#: master 66aaa95, MEASURED off the merged registry, not summed.** Master's 53
+#: and 80 carry every pin above; the branch adds one parameter (`item`) and no
+#: tool. No row moves in the merge.
 #: **RE-PINNED 2026-09-24 AT 54 TOOLS AND 81 PARAMETERS (lane L5, at its
 #: merge with master ff98a7f): three tools added, seven parameters, and the
 #: census rows move in the same merge.** `linkedin_send_reply("thread_id",
@@ -354,20 +370,45 @@ PINNED_TOOL_SURFACE: dict[str, tuple[str, ...]] = {
 #: plus this lane's
 #: three tools and seven parameters, measured off the merged registry
 #: below. No row moves in the merge itself.
-#: **RE-PINNED 2026-09-27 AT 58 TOOLS AND 92 PARAMETERS (lane L5's follow-up,
-#: on its branch over master 96c1165): two tools added, five parameters, and
-#: the census rows move in the same change.**
+#: **RE-PINNED 2026-09-27 AT 56 TOOLS AND 88 PARAMETERS, at lane G's merge of
+#: master 2eb90ad, MEASURED off the merged registry, not summed.** Master's 56
+#: and 87 carry every pin above; the branch adds one parameter (`item`) and no
+#: tool. No row moves in the merge.
+#: **RE-PINNED 2026-09-27 AT 57 TOOLS AND 89 PARAMETERS (lane L8, at its
+#: merge of master 2eb90ad), MEASURED off the merged registry: one tool, two
+#: parameters.** `linkedin_withdraw_from_group("group_id", "confirm_token")`
+#: -- leaving one group he names by numeric id -- banks `M C63` and `N 64`
+#: (one capability counted twice), GAP -> COVERED-UNFIRED, moved in the
+#: lane's census commit on its branch, which this merge carries. Not PROVEN:
+#: a WRITE built to ready-to-fire behind the flag and the single-use grant,
+#: never granted. The id is a NUMERIC IDENTIFIER, refused unless it is 1 to
+#: 20 ASCII digits -- the rule `linkedin_group_page("group_id")` already
+#: carries, reused rather than restated.
+#: See `_audit/2026-09-24-lane-l8-outward-classes.md`.
+#: **RE-PINNED 2026-09-27 AT 57 TOOLS AND 90 PARAMETERS, at lane G's merge of
+#: master 7986ae3 (lane L8's), MEASURED off the merged registry, not
+#: summed.** Master's 57 and 89 carry every pin above; the branch adds one
+#: parameter (`item`) and no tool. No row moves in the merge.
+#: **RE-PINNED 2026-09-27 AT 59 TOOLS AND 95 PARAMETERS, at lane L5's merge of
+#: master 52b55b6, MEASURED off the merged registry, not summed: two tools and
+#: five parameters from lane L5's follow-up branch (58 and 92 there, over
+#: master 96c1165), on top of master's 57 and 90.** The census rows moved in
+#: the lane's own commits on its branch, which this merge carries, and one
+#: more moves in the merge itself.
 #: `linkedin_connect_from_profile("profile", "confirm_token")` banks `N 4`, by
-#: D6-CAPABILITY-OVER-AFFORDANCE, GAP -> COVERED-UNFIRED;
+#: D6-CAPABILITY-OVER-AFFORDANCE, GAP -> COVERED-UNFIRED -- and `N 2`, whose
+#: only ground (R4) the ruling dissolved, NOT-REV -> COVERED-UNFIRED at this
+#: merge, on the orchestrator's application of the same ruling;
 #: `linkedin_message_from_profile("profile", "text", "confirm_token")` banks
 #: `M M1`, COVERED-CANNOT-DELIVER -> COVERED-UNFIRED. Ruling
 #: THIRD-PARTY-PROFILE-FOR-A-NAMED-TARGET. `profile` is a profile LINK or a
 #: member id, parsed by shape and refused when it could be a name. Not PROVEN:
 #: two WRITES built to ready-to-fire behind the flag and the single-use grant,
 #: never granted. See `_audit/2026-09-24-lane-l5-messaging.md`, "Follow-up:
-#: the named-person route".
-PINNED_TOOL_COUNT = 58
-PINNED_PARAMETER_COUNT = 92
+#: the named-person route" and "Integration: lane L5's merge of master
+#: 52b55b6".
+PINNED_TOOL_COUNT = 59
+PINNED_PARAMETER_COUNT = 95
 
 
 def live_surface() -> dict[str, tuple[str, ...]]:

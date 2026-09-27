@@ -91,6 +91,10 @@ class _Pills:
     def first(self):
         return self
 
+    def nth(self, _index: int):
+        """The activator reads each candidate by index since 2026-09-27."""
+        return self
+
     async def get_attribute(self, _name: str, timeout=None, **_kwargs) -> str:
         return "InMail"
 

@@ -413,7 +413,9 @@ async def read_job_collection(page: Any, expect: Optional[int] = None) -> dict[s
         out["ids_refused"] = 0
         out["empty_state_needles"] = 0
         out["refusal"] = None
-        out["error"] = "%s: %s" % (type(exc).__name__, exc)
+        # THE TYPE, NEVER THE TEXT: a library's message can quote a selector,
+        # a request or the page (ERROR-MESSAGE-RULED-AT-THE-RAISE).
+        out["error"] = type(exc).__name__
     return out
 
 

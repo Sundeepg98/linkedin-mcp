@@ -889,6 +889,46 @@ async def test_an_apply_now_reaches_the_gate(writes_on, browser_page, monkeypatc
     assert block["performed"] is not True, block
 
 
+#: The selector the gate hands back in the two tests below. It matches nothing,
+#: so a press aimed at it cannot press anything.
+_SENTINEL = "#no-such-control-this-test-invented"
+
+
+def _record_presses(page, monkeypatch) -> list[str]:
+    """Every selector ``perform`` hands to ``page.click``, in order: the PAGE'S
+    record of what it was asked to press.
+
+    The receipt cannot be that record. ``clicked.error`` is the exception's
+    TYPE since 2026-09-24 (ERROR-MESSAGE-RULED-AT-THE-RAISE): a Playwright
+    click error quotes the selector it waited on, and the typeahead's quotes
+    his needle, so a selector read back out of the receipt was the leak itself.
+    """
+    pressed: list[str] = []
+    click = page.click
+
+    async def _recording_click(selector, *args, **kwargs):
+        pressed.append(selector)
+        return await click(selector, *args, **kwargs)
+
+    monkeypatch.setattr(page, "click", _recording_click)
+    return pressed
+
+
+async def _apply_through_a_gate(page, monkeypatch, *, proceed: bool):
+    """A real apply through ``perform``, its gate answering ``proceed`` with
+    :data:`_SENTINEL`. Returns ``(block, presses)``; only perform's presses are
+    recorded, the preview's page reads having run before the recorder."""
+
+    async def _gate(_page):
+        return {"proceed": proceed, "selector": _SENTINEL, "modal": {}, "why": "test"}
+
+    monkeypatch.setattr(writes, "_apply_submit_gate", _gate)
+    grant = await _granted(page, "apply_job", target=JOB)
+    pressed = _record_presses(page, monkeypatch)
+    block, _nav = await _perform(page, grant)
+    return block, pressed
+
+
 async def test_a_proceeding_gate_appends_the_second_click(
     writes_on, browser_page, monkeypatch
 ):
@@ -897,32 +937,43 @@ async def test_a_proceeding_gate_appends_the_second_click(
     ``TWO_CLICK_ACTIONS`` only matters if a PROCEED actually appends a second
     click, and until now nothing had ever run that line. The second click is
     aimed at a selector that matches nothing, so the attempt FAILS -- and the
-    failure is the observation: ``clicked.error`` naming that selector can only
-    be produced by a second ``page.click`` having been issued.
+    page's own record of what it was asked to press is the observation: the
+    sentinel reaches ``page.click`` only if the loop appended it.
+
+    IT READ THE RECEIPT UNTIL 2026-09-27 -- ``clicked.error`` naming the
+    selector -- and was red from the day that field became the exception's
+    type alone. The red was the rule working: the selector in the receipt was
+    a Playwright message, the leak the rule closed. The receipt is now held to
+    the type, and the proof moved to the page.
 
     Nothing is submitted. A selector matching nothing cannot press anything,
     which is why this is the safe way to prove the branch runs.
     """
-    sentinel = "#no-such-control-this-test-invented"
+    block, pressed = await _apply_through_a_gate(browser_page, monkeypatch, proceed=True)
 
-    async def _proceeding_gate(page):
-        return {"proceed": True, "selector": sentinel, "modal": {}, "why": "test"}
-
-    monkeypatch.setattr(writes, "_apply_submit_gate", _proceeding_gate)
-
-    grant = await _granted(browser_page, "apply_job", target=JOB)
-    block, _nav = await _perform(browser_page, grant)
-
-    error = str((block.get("clicked") or {}).get("error") or "")
-    assert sentinel in error, (
+    assert pressed.count(_SENTINEL) == 1 and pressed[-1] == _SENTINEL, (
         "the gate said proceed and no second click was attempted, so the "
-        f"append in the click loop did not run. clicked.error was {error!r}"
+        f"append in the click loop did not run. page.click was asked for {pressed!r}"
     )
+    assert block["clicked"]["error"] == "TimeoutError", block["clicked"]
     # The click failed, so nothing was pressed. ``performed`` reports
     # "unknown" rather than False, and that is the design rather than a
     # shortfall: a click that raised on the way out MAY still have dispatched,
     # so the verification -- not the click -- decides, and it could not read an
     # applied state off a fixture. True is the only forbidden value.
+    assert block["performed"] is not True, block
+
+
+async def test_a_refusing_gate_hands_the_page_no_second_click(
+    writes_on, browser_page, monkeypatch
+):
+    """THE CONTROL for the record above: the same sentinel, from a gate that
+    REFUSES, never reaches ``page.click`` -- so the record can say no, and the
+    one press it holds is the apply control's."""
+    block, pressed = await _apply_through_a_gate(browser_page, monkeypatch, proceed=False)
+
+    assert _SENTINEL not in pressed, pressed
+    assert len(pressed) == 1, pressed
     assert block["performed"] is not True, block
 
 

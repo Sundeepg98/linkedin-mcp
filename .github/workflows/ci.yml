@@ -505,6 +505,20 @@ jobs:
             --cell '${{ toJSON(matrix.cell) }}' \
             --out "reports/${{ matrix.cell.os }}-${{ matrix.cell['python-version'] }}-${{ matrix.shard }}.json"
 
+      - name: Keep this shard's junit for the timings table
+        # ADDED 2026-09-24. scripts/ci_shard_timings.json prices each test file
+        # in seconds and goes stale as lanes add files; every lane that adds
+        # one tips its two-thirds line. Until now the only junit the table
+        # could be rebuilt from was a full LOCAL run, which the shared box
+        # cannot afford. Kept beside the report under a unique name -- the
+        # artifacts merge into one directory, and the totals job reads only
+        # *.json there, so an .xml beside them changes nothing it counts.
+        if: always()
+        run: |
+          if [ -f junit.xml ]; then
+            cp junit.xml "reports/junit-${{ matrix.cell.os }}-${{ matrix.cell['python-version'] }}-${{ matrix.shard }}.xml"
+          fi
+
       - uses: actions/upload-artifact@v4
         if: always()
         with:

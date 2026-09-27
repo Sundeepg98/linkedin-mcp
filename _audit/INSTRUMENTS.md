@@ -10224,6 +10224,125 @@ consumer map of `error` fields, the per-slot fold measurement, the timing
 script -- are declared disposable. Every number they produced is recorded in
 the lane record, and what they found is held by the entries above.
 
+### 67.5 RETIRED: `scripts/_check_jobs_gap_directions.py` (section 47.2), 2026-09-24
+
+Deleted on the lane G follow-up's evidence, after section 65.6 recorded it as
+superseded and red. Measured the day it left:
+
+    jobs.md GAP rows today                                     92
+    rows it classified                                         57
+      still GAP                                                54
+        covered by _audit/_census/jobs-directions.tsv          54   0 disagree
+      no longer GAP (J 18, J 39, J 40)                          3
+    today's GAP rows it did not classify                       40
+    its own run                                                crashed: KeyError on row 17
+    anything that ran it (tests, scripts, CI)                  nothing
+    its successor, scripts/check_jobs_directions.py            GREEN, 92 of 92
+
+Its data was a stale subset of a maintained table, and wiring it back in
+would have kept the second copy its own author warned against. Its one
+distinctive control -- a boundary stub that admits everything, which proved
+the reachability column read the shipped boundary -- lives on in the
+successor's tests (section 65.5). Section 47's text stays as the record of
+what it measured; this note is where it ended.
+
+### 67.6 THE FOLLOW-UP'S ENTRIES, 2026-09-24
+
+The orchestrator's follow-up order closed the gaps section 5 of the lane record
+named. Each entry below was shown failing before its repair; the per-item
+record is the lane record's `## Follow-up 2026-09-24`.
+
+| path | shown failing by |
+|---|---|
+| `tests/test_a_write_receipt_carries_no_library_message.py` | a failing click and a failing verification read, each quoting a marker, driven end to end through the follow-a-Page harness, plus a structural scan of `writes.py` for exception text outside a `raise` with its own control: 3 failed, 1 passed on the unrepaired module. Its second round pins what a `_PerformRefused` message may interpolate -- plants carrying a selector or a needle by f-string, `%` and `format` are convicted -- and with that exemption switched off the scan convicts exactly the one handler that keeps a composed refusal's text |
+| `tests/test_a_failed_navigation_withholds_its_address.py` | a page whose navigation fails quoting its address, over two admitted addresses carrying a keyword: the keyword appeared twice in the unrepaired message |
+| `tests/test_no_log_record_carries_a_library_message.py`, and the DEBUG log capture in `tests/test_readers_emit_no_page_string.py` | the scan named all 45 logging calls that rendered a caught exception (its control expects lines 5, 9 and 13 of a planted module); the failing-page drive, capturing the `linkedin` logger at DEBUG, convicted 35 readers (36 failed) |
+| `tests/test_click_is_not_its_own_evidence.py` (`_fast_wait`) | the premise check -- no reading under the 250 ms cut on a page that draws the wrapper, and at least one reading -- failed exactly the sixteen non-takers of the seventeen, twice, under two load profiles |
+| `linkedin_server/readonly.py` (`JS_API_REPLACEMENT_PATTERNS`) + `tests/test_readonly.py` | 13 plants replacing a browser API (the clipboard shape, `window.fetch`, a prototype member, `defineProperty`, `delete`, `Reflect.set`, a bracketed member) each scanned clean on the token list: 13 failed; 10 reads of the same globals stay clean before and after |
+| `scripts/check_asserted_names_resolve.py` (`tracked`), `tests/test_a_correction_is_findable_from_the_claim.py` (`_documents`) | a conflict manufactured in a throwaway repository: both listings returned the path three times; a planted tripled listing turned the basename-uniqueness assertion red (249 == 247) |
+| `tests/test_navigation_is_never_derived.py` (`derived_across_modules`; the tree test runs where `CI` is set) | with the import resolver stubbed to resolve nothing, the seven red plants failed and the tree test failed on its planted control; four green plants, the `_url_for` collision among them, hold either way |
+
+### 67.7 DECLARED DISPOSABLE (THE FOLLOW-UP)
+
+The follow-up's scratchpad helpers -- the exception-text and log-site
+censuses, the log rewriter, the boundary-digest comparer, the API-replacement
+prototype, the directions comparison, the retired census's red drive, the
+whole-tree prototype with its tracer, calibration and counterfactual
+measurements, the gate's symbol-based selection, the census of every
+`WriteAttemptError` raise, and the run of the complement over master's
+sources -- are declared disposable. Every number they produced is in the lane
+record, and what they found is held by the entries above.
+
+### 67.8 THE INTEGRATION'S ENTRIES, 2026-09-24 (lane G's merge of master 66aaa95)
+
+Record: the lane record's `## Integration (follow-up) 2026-09-24`.
+
+| path | shown failing by |
+|---|---|
+| `linkedin_server/readonly.py` (`SANCTIONED_API_REPLACEMENTS`) + `tests/test_readonly.py` (exact-declaration check and its plants) | the live lane's clipboard capture on the merged tree, 1 failed: seven replacements in a script declared invisible to the scan. After the declaration: an eighth replacement (`window.fetch`) refused, a missing one refused, the clipboard shape in an undeclared script refused by the plain scan |
+| `tests/test_readonly_boundary_invariant.py` (five more pinned names) | a planted eighth sanctioned replacement moves exactly `SANCTIONED_API_REPLACEMENTS`; dropping `navigator` from the browser roots moves `_JS_BROWSER_ROOTS` -- a fragment the pattern tuple reaches only by name, which `_literal` renders as a constant |
+| `tests/test_a_write_receipt_carries_no_library_message.py` (a fresh render that landed elsewhere, driven) | lane L7's two verification lines put back: the scan named both and the driven receipt read "refusing to click" after the click, 2 failed |
+| `scripts/py_baseline_lint.py` (the piece's quote) + two controls in `tests/test_the_package_compiles_on_its_oldest_python.py` | L7's line as it shipped (legal on 3.10.19, convicted) and its mirror (a SyntaxError on 3.10.19, passed): 2 failed on the unfixed lint; after, 18 passed on 3.13 and on 3.10 through `uv` |
+
+### 67.9 DECLARED DISPOSABLE (THE INTEGRATION)
+
+The merge's scratch helpers -- the keep-both resolver, the merged-registry
+surface measurement, the three-way boundary digest table, the L7 red
+reconstruction, the floor-lint control and timing scripts, and the second
+gate's selection and runner -- are declared disposable. Their numbers are in
+the lane record.
+
+### 67.10 THE FOUNDATION'S ENTRIES, 2026-09-24 TO 2026-09-27 (people data)
+
+Record: the lane record's `## Foundation: people data`. The rulings are
+NAMES-AT-RUNTIME and PEOPLE-DATA-MITIGATIONS
+(`_audit/2026-09-24-rulings-names-at-runtime.md`).
+
+| path | shown failing by |
+|---|---|
+| `linkedin_server/people_data.py` + `tests/test_people_data.py` | planted headlines -- instruction-shaped, zero-width and direction tricks, over-length -- and records built by hand with an unsanitised field, a widened envelope or a foreign link: each refused; the instructions paragraph held to name exactly `PEOPLE_TOOLS`, with a control naming one tool too few |
+| `tests/plantedpage.py` (`carries_the_plant_outside_records`, `text_ratchet`, `text_paths_a_baseline_may_not_record`) + the two driven guards' `returns_records` verdict | a plant beside a record, in a widened record, used as a key, and inside a record carried out by an exception or an `_error` envelope: each still text or a leak; the ratchet refuses a new text path, a stale entry and a converted reader that fell back, and the writers refuse to record a new text path |
+| `tests/test_page_strings_leave_only_as_people_records.py` | the first adopter's pre-adoption parser, driven on a planted list: four viewers for three and the plant twice outside a record; each guard convicting a planted leak after the redesign; the second adopter's two drives with the record builder swapped for the raw label: text, not records |
+| `tests/test_no_write_is_aimed_by_a_name.py` | twelve controls, fourteen cases, planted in strings: an unclassified kind, a class outside the vocabulary, a third name-aimed write, a converted debt write, a name parameter on a planted write tool, a person field classified as an id, a second write door, two routes disagreeing, a registered schema disagreeing |
+| `tests/test_fixtures_hold_only_synthetic_people.py` | an undeclared name planted in every slot kind, a declared one passing in each, a stale declaration, a failure message searched for the value it convicts, a conversation label splitting a declared name from an undeclared one; twelve places it does not read, each planted and shown unseen |
+| `tests/test_a_people_reader_reads_one_page.py` | thirteen planted shapes (a cursor, `while True`, `range(pages)`, a `load_more` helper, a large ceiling, a parameter bound, a module literal, a stepped slice, a navigating comprehension, a helper loop, a paging generator, recursion, a reader that loads no page), each convicted by its own rule and no other; the real reader with its slice removed, its bound raised, its `for` made a `while`: refused; a call-only derivation missing the real reader |
+| `tests/record_typed.py` + `tests/test_a_name_enters_a_shaper_only_as_a_record.py`, and the eight shaper tests that apply it | a bare name parameter planted into each of the seven modules turned its test red, 8 of 8; the same parameter annotated as a record turned it green, 8 of 8; the reading's own controls refuse a bare string, no annotation, `Any`, a list of strings and an unresolvable annotation |
+| `scripts/impact_gate.py` (`ALWAYS_RUN_DECLARED`) | with the declaration cleared, neither the oldest-Python lint nor the refused-address pin is in the floor -- the blind spot that let each turn CI red |
+| `linkedin_server/readonly.py` (`cdp_session`, `cdp_send`) + `tests/test_readonly.py` | a click by `Input.dispatchMouseEvent`, a browser-level session and a variable-method send each scanned clean before; after the merge, one more send or session in any other function of `cdp_download` is refused |
+| `tests/test_messaging_overview.py` (the DevTools split in `_read_path_gated`) | the transport's method table with an input method in it, an empty table, and a DevTools call in another module: each refused |
+
+### 67.11 DECLARED DISPOSABLE (THE FOUNDATION)
+
+The foundation's scratchpad helpers -- the adopter's red drive, the regenerator
+and the ASCII, re-escape and keep-both helpers, the three-way and working-tree
+boundary digest tables, the merged-registry and write-registry measurements,
+the hunk stager, the shaper-rewrite red script, the unpriced-file lister and
+the pricing merger, the gate selections and runners, and the child-transcript
+model search -- are declared disposable. Their numbers are in the lane record.
+
+### 67.12 THE COLD VERIFICATION'S REPAIRS, 2026-09-27
+
+The one cold verification of the foundation (lane record P.16) found 4 HIGH
+and 8 MEDIUM findings. Each repair below was shown failing first -- by the
+verifier's own repro on the unrepaired tree, and again green on the repaired
+one.
+
+| path | shown failing by |
+|---|---|
+| `linkedin_server/people_data.py` (`sanitise`'s second NFC pass, `STRIPPED_CODE_POINT_RANGES`) + `tests/test_people_data.py` | on the previous commit, 4 of 5 planted strips that join a base and a combining mark (or two jamo) made the record builders raise, and 267 default-ignorable code points survived; after, 0 and 0, held to Unicode's own list |
+| `linkedin_server/shape.py` (`_ConversationLabels`) + `tests/test_messaging_overview.py` | message text spelling a label forged a row (7 rows for 6 labels) and entities came back undecoded; after, 6 rows, decoded |
+| `linkedin_server/dom.py` (`RECIPIENT_ID_SHAPE`, `is_recipient_id`) + the recipient drive in `tests/test_page_strings_leave_only_as_people_records.py` | a planted recipient published at `$.results[0].recipient_id`; after, nothing outside a record |
+| `tests/plantedpage.py` (envelopes only, plant words) and `tests/test_tool_envelopes_emit_no_page_string.py` (sets, reprs, `records_outside_the_people_tools`) | six respellings called `returns_records`, a set in an `_error` envelope called clean, an instance admitted; each convicted after, with controls |
+| `tests/test_a_people_reader_reads_one_page.py` (three more builder routes) | records built through another module's `people_data`, `RECORD_TYPES` and `getattr` were not derived; after, all three |
+| `tests/record_typed.py` (identity) | a `str` subclass whose metaclass equals anything was admitted as a record |
+| `cache_writes` in the invariant file | 1 of 5 planted caches found; after, 5 of 5 |
+| `tests/test_fixtures_hold_only_synthetic_people.py` (two class slots) | a row naming an undeclared person in the participant-names element, with no label, read nothing; after, convicted |
+| the two legacy-path pins in the invariant file | text leaving `who_viewed_me` under `more_analytics` and `open_messaging` under `filters`, unseen by both baselines; pinned to those subtrees |
+
+The verifier's scripts (`scratchpad/lane-g/cold2/`, r01 to r12) and this
+repair's own red drive of both sanitiser versions and census re-measure are
+declared disposable; their numbers are in the lane record.
+
 ---
 
 ## 68. A DOWNLOAD TRANSPORT ON THE ATTACHED BROWSER, TESTED ON A FAKE CHROME THAT CAN SAY NO (lane-d, 2026-09-24)
@@ -10558,13 +10677,13 @@ knows at the call -- the type, the call's kind, the selector it built.
 |---|---|
 | `readonly.assert_named_profile_url`, `named_profile_url`, `valid_named_profile_segment`; `browser.LinkedInBrowser.goto(named_profile=True)` | `tests/test_named_profile_route.py` section 1: one shape admitted, no exemption from the forbidden list, the read door still refusing every such address, the browser swapping doors only when asked; mutations N1 (forbidden check removed) and N2 (always the second door) each kill a named test |
 | the door's encoded unit, a non-ASCII octet only, the DECODED segment held to letters, digits, hyphens and underscores and never one of the six letters that draw as nothing or as blank space (derived by a sweep of every code point by name), and both WriteSpec patterns; the door's shapes and that tuple pinned in `tests/test_readonly_boundary_invariant.py`'s freeze | `test_no_encoding_lets_back_in_what_the_segment_refuses` (sixteen segments), `test_the_write_specs_own_address_pattern_refuses_an_encoded_ascii_octet`, `test_a_vanity_name_with_a_non_ascii_letter_is_still_admitted`; mutations N21 (any octet again), N22 (the decoded form unchecked), N23 (the Connect spec's pattern widened), N36 (the blank letters admitted), N39 (the two Egyptian blanks admitted) |
-| the press with no position -- `dom.topcard_invite_control_selector()`, `topcard_message_control_selector()`, the topcard's per-kind counts `dom.NAMED_PROFILE_JS` returns, and `perform`'s `strict=press_strictly` on its press and its fill | `test_a_re_render_during_the_press_cannot_hand_it_to_a_stranger`, `test_a_re_render_during_the_message_press_cannot_hand_it_to_a_stranger`, `test_a_second_match_drawn_mid_press_stops_the_press` (inside the topcard; a second topcard), `test_a_second_send_drawn_during_the_send_press_stops_it`, `test_a_topcard_holding_a_second_control_of_the_kind_is_refused`, `tests/test_selectors_resolve.py`; mutations N9 and N35 (a second control of the kind allowed, in Python and in the page), N24 and N31 (Connect and Message pressed page-wide), N32 (not strict) |
+| the press with no position -- `dom.topcard_invite_control_selector()`, `topcard_message_control_selector()`, the topcard's per-kind counts `dom.NAMED_PROFILE_JS` returns, and `perform`'s strict press and fill (`strict=press_strictly` on the press, over `writes.STRICT_PRESS_ACTIONS` since lane L5's merge of master 52b55b6, and `strict=fill_strictly` on the fill, the named acts only) | `test_a_re_render_during_the_press_cannot_hand_it_to_a_stranger`, `test_a_re_render_during_the_message_press_cannot_hand_it_to_a_stranger`, `test_a_second_match_drawn_mid_press_stops_the_press` (inside the topcard; a second topcard), `test_a_second_send_drawn_during_the_send_press_stops_it`, `test_a_topcard_holding_a_second_control_of_the_kind_is_refused`, `tests/test_selectors_resolve.py`; mutations N9 and N35 (a second control of the kind allowed, in Python and in the page), N24 and N31 (Connect and Message pressed page-wide), N32 (not strict) |
 | what strictness cannot bind, re-checked by the receipt -- `connect_verdict`'s in-place reading (no control naming the person right after the press reads UNKNOWN, never NOT SENT) and `message_verdict`'s `conversation_is_theirs` (read after Send by the page's own comparison) | `test_a_control_swapped_in_place_mid_press_is_never_reported_not_sent`, `test_a_conversation_swapped_in_place_during_send_is_never_read_as_his`; mutations N37 and N38 |
 | WHOSE CONVERSATION -- the holding bubble's title compared in the page, `opened_conversation_gate`'s condition 6, `composer_send_gate`'s sixth refusal, the bounded wait | the parametrised refusals (somebody else's; a group that includes the person), `test_a_conversation_the_press_did_not_open_never_takes_his_words`, `test_the_title_compared_is_the_one_on_the_conversation_holding_the_composer` (two bubbles, both orders), `test_send_is_not_pressed_when_the_conversation_changes_hands_after_the_fill`, `test_a_conversation_drawn_a_moment_after_the_press_is_still_found`; mutations N25 (the opened gate's check removed), N26 (the send gate's), N27 (containment for equality), N28 (no wait), N34 (the first bubble's title read) |
-| `writes.describe_click_error` -- a failed press, fill, choice or upload reported by its TYPE and the call `perform` had in flight (its kind and the selector this package built), never by the browser library's own text, unless the refusal is this package's own | `test_a_press_that_fails_is_reported_by_its_type_and_names_nobody` (both acts, a press held under a transparent layer until it times out), `test_this_packages_own_refusal_is_still_reported_whole`, `tests/test_apply_modal_fixture.py`'s second-click proof; mutations N29 (the library's text again) and N33 (the call in flight not recorded) |
+| a failed press, fill, choice or upload reported by its exception's TYPE alone, unless the refusal is this package's own -- lane G's rule in `perform`, which REPLACED this lane's composed `writes.describe_click_error` (the type, the call's kind and the selector) at lane L5's merge of master 52b55b6; this row read "`writes.describe_click_error` -- ... never by the browser library's own text" until then | `test_a_press_that_fails_is_reported_by_its_type_and_names_nobody` (both acts, a press held under a transparent layer until it times out: `TimeoutError`, and the selector in `clicked.selector`); the composer's unit test and mutations N29 and N33 went with the function |
 | the callers pinned -- only `writes._load_named_profile` passes `named_profile=`, only `browser.py` and `writes.py` name the door, and the loader refuses every other spec; `tests/test_probe_navigation_budget.py`'s `SECOND_DOOR_GUARD`, admitted for that one (file, function) | `test_exactly_one_function_in_the_package_asks_for_the_named_door`, `test_the_second_door_is_referenced_only_by_the_browser_and_the_loader`, `test_the_loader_refuses_every_spec_that_is_not_a_named_person_act`; mutations N3 (loader stops refusing) and N4 (loader navigates without the door -- the package-navigation guarantee goes red) |
 | `named_profile` -- the target parser, the landing veto, the topcard-scoped control states, the opened-conversation and send gates, the SENT delta, whom it resolved to; with `dom.NAMED_PROFILE_JS` and `perform`'s open-then-type branch | the same file, sections 2 to 6, over `tests/fixtures/synthetic/named_profile.html` (SYNTHETIC: no third party's profile has been captured) and its asserted derivations; mutations N5 to N18 -- in `named_profile`, in the page's script and in `perform` -- each kill the test named for them (39 of 39 killed in all -- N1 to N39 -- each file restored byte for byte) |
-| `people_seam` -- the four name-bearing outputs of lane L5 (`threads.read_conversation_list`, `shape.messaging_overview`, the named acts' identity block, and `send_reply`'s `who_this_would_reach`, routed after the re-check found it bypassing the seam) | `tests/test_people_seam.py`: routing tests (mutations N19, N20, N30 bypass the seam and fail them) and twelve strict xfails, one property per test; the adoption dry-run (lane G's WIP sanitiser wired into the seam) flips NINE of the twelve, and the three that stay are the untrusted markers on string outputs -- the list's, the overview's, the reply sentence's |
+| `people_seam.person` -- since lane L5's merge of master 52b55b6 the ONE builder of every write preview's people record (the named acts' `whom_this_resolves_to`, `send_reply`'s and `send_invitation`'s `who_this_would_reach`), lane G's `people_data.Person` with a headline the page does not draw ABSENT; the two conversation readers build lane G's records directly. This row named the seam's four routes and twelve strict xfails until the merge | `tests/test_people_seam.py`: routing tests for the three previews, and the TWELVE mitigation-2 tests -- three properties by four outputs -- passing with no marker on the merged tree, each beside a control showing its plant arrived |
 
 **DECLARED DISPOSABLE:** the scratch probes of the captures (`np_inventory`,
 `np_controls`, `np_titles`, `np_topcard_probe`, `np_topcard_fixture_probe`),
@@ -10576,6 +10695,46 @@ the adoption dry-run plugin (`np_adopt/`), the mutation runners (`np_mutate.py`,
 -- all under the lane's scratch directory. What they
 measured is in the lane record with its numbers; what they check is carried
 by the two test files above.
+
+### 69.12 A COMMENT THAT CLAIMS A LIBRARY'S BEHAVIOUR IS A CLAIM ABOUT A CALL ARGUMENT (lane L5's merge of master 52b55b6, 2026-09-27)
+
+Eight sentences in the package said Playwright's strict mode held a press to
+one element, and `perform` passed no `strict=` for any of the five actions
+they described -- so the property did not exist, and nothing could notice: a
+comment is not executed, and every test of those actions was green. The
+orchestrator's call: make the code match where each action's fixtures show
+exactly one match. A recording run over their tests counted every press
+before it was made -- 76 presses, none counting 0 or 2 -- and five actions
+joined the named acts in `writes.STRICT_PRESS_ACTIONS`; `follow_company`
+joined on its three captures' static count, its prefixed control never drawn
+by any fixture, and its comment says so.
+
+    A SENTENCE THAT SAYS WHAT A LIBRARY DOES TO A CALL IS A CLAIM ABOUT THAT
+    CALL'S ARGUMENTS. PIN THE SENTENCE TO THE ARGUMENT, OR THE ARGUMENT CAN
+    LEAVE AND THE SENTENCE STAYS TRUE-SOUNDING.
+
+And the reader-leak harness recorded the named-person namer `clean` having
+read nothing: driven by signature, it got an observation built off the planted
+page, whose identity reading is never confirmed, and took its first-line
+early return -- the false clean lane G found in group_leave's readers.
+
+    A READER THAT GATES ON AN OBSERVATION IS MEASURED ONLY PAST THE GATE. GIVE
+    THE HARNESS THE OBSERVATION THE SERVER WOULD HAVE MADE, OR IT MEASURES THE
+    GATE AND CALLS THE READER CLEAN.
+
+| path | shown failing by |
+|---|---|
+| `writes.STRICT_PRESS_ACTIONS`, `perform`'s `press_strictly` / `fill_strictly`, and a pinned table of the eight claim sentences, each naming its action | `tests/test_a_strict_mode_claim_is_a_strict_press.py`: the set pinned by name; the click and fill arguments read off the syntax tree; every claim-shaped sentence counted off the package source against the table; `test_the_claim_rules_are_shown_failing` (a planted sentence is counted; an action dropped from the set turns its two sentences red); and through the real call, a second OFF control drawn mid-press stops the `mark_company_interest` press with `Error`, while the same world pressed without the set's membership is pressed |
+| the reader-leak harness's `AS_SHIPPED` variant for `named_profile.name_the_profile_target`: a planted page that CONFIRMS the named profile's identity and draws the plant as its owner, with the facts `observe` records there | `tests/test_readers_emit_no_page_string.py::test_the_named_profile_namer_is_driven_through_a_real_read`: the shipped variant returns the plant inside a people record while every signature variant alone reads `clean`; the baseline records `returns_records`, so a namer that stopped reading the page, or printed outside the record, fails the ratchet |
+| `tests/test_selectors_resolve.py`'s `build_all` names every selector once | `test_build_all_names_every_selector_once`: the file with its repeated key put back convicts that key by name, and both label aims are built and resolved |
+
+**DECLARED DISPOSABLE:** the strict-press recording run
+(`strict_measure/`: its plugin, launcher and analysis), the merge's
+hunk and resolution scripts (`np_hunks.py`, `np_resolve.py`, `m_*.txt`),
+the duplicate-key scan (`np_dupkeys.py`, shown failing on its own plant), the
+surface and freeze measurements (`np_measure_surface.py`,
+`np_refreeze_merge.py`) and the census re-pin (`np_repin_census.py`) -- all
+under the lane's scratch directory; their numbers are in the lane record.
 
 ## 70. THE BEST-VERIFIED WRITE NEVER PRESSED SAVE, AND A WRITE AIMED BY ITS CARD (lane-l7-profile-writes, 2026-09-24)
 
@@ -10822,3 +10981,124 @@ rule from git. Merged, each alone would let one thing through that the other sto
 | path | shown failing by |
 |---|---|
 | `scripts/triage_messaging_gap_rows.py` (`misfiled_returns`, `unnamed_entered`, `NAMED_BLOCKER`, the composed exemption in `main`) | `tests/test_triage_instrument.py`: a marked row lost from the map is refused, not classed, and an entered row whose cell names no blocker is refused -- each on a BUILT fixture, through `main` as well as the function; on the real tree every returned row entered after the freeze and every other entered row names its blocker. Eight mutations of the committed script, each restored from git: the freeze rule exempting every row (7 failed), no refusal on an empty freeze read (1), the join ignoring every exemption (4), no refusal on a dialect (1), CONTROL 2b disabled (1), CONTROL 2c disabled (1), the returned class ignoring the marker (6), the marker never matching (3); restored, 17 passed |
+
+---
+
+## 80. A RETIRED REFUSAL IS KEPT WHERE ITS CITATIONS CAN FIND IT, AND A RECORD OF WHAT WAITS IS HELD AGAINST THE CENSUS (lane-l8-outward-classes, 2026-09-24)
+
+**Registered 2026-09-24.** Full record: `_audit/2026-09-24-lane-l8-outward-classes.md`.
+Numbered 80 by this lane (L8) rather than from the current maximum, so appends
+from lanes forked off one master cannot collide; renumber at the merge if the
+orchestrator allocates another.
+
+### 80.1 RETIRING AN ENTRY MUST NOT DELETE THE TEXT THE CENSUS CITES
+
+Three `PERMANENTLY_FORBIDDEN` entries left the dict under
+OUTWARD-CLASSES-BUILT-BEHIND-GRANTS. Thirty census rows and three exclusion
+families cited them by the verbatim anchor `"<key>": (`, and two class-table
+lines cited phrases inside them. The moment the dict shrank,
+`check_exclusion_basis` went red on 33 problems and `check_write_classes` on 2.
+The entries moved BYTE-FOR-BYTE into `outward_classes.RETIRED_PERMANENT_REFUSALS`,
+in the same dict-entry form, so the anchors resolve in their new file, and the
+texts are pinned by digest, so "verbatim" cannot drift.
+
+    A RETIRED REFUSAL IS STILL A RECORD OF WHAT WAS RULED. MOVE IT WHERE ITS
+    CITATIONS CAN FOLLOW; DO NOT DELETE IT WITH ITS FORCE.
+
+### 80.2 A RECORD THAT SAYS AN ACT WAITS IS CHECKED AGAINST THE CENSUS AND THE CODE
+
+`outward_classes.OUTWARD_CLASS_SPECS` says, per act, BUILT / NEEDS-CAPTURE /
+BLOCKED. That status is a claim three other artefacts make too:
+`writes.PERFORMABLE` (is it built), the census state of each row it names
+(COVERED for a build, GAP otherwise), and the record's own capture or blocker.
+The test holds all three together in both directions -- a record may not claim
+a build `writes` cannot perform, and a build may not sit behind a record that
+still says it waits.
+
+### 80.3 A NAME A SPEC PROPOSED IS NOT THE NAME THE BUILD MAY TAKE
+
+The 2026-09-05 spec named the tool `linkedin_leave_group` -- a name that does
+not exist in the tree, then or now -- and the build first took that name. Two
+guards then spoke, in this order. The asserted-name guard's
+control (`test_every_marker_class_fires_on_the_real_corpus`) went red: the
+spec document was its document-scoped mark's ONLY example, and a built name
+resolves, so the mark matched nothing. And the naming law
+(`test_a_sanctioned_write_cannot_evade_the_law_by_being_renamed`,
+`readonly.name_implies_write`) refused the name outright: "leave" is not a
+write verb, and adding it was measured and refused -- the whole word sits in
+six READ tools' descriptions, which the docstring check would read as write
+claims. The build took the ruling's own verb instead,
+`linkedin_withdraw_from_group`; the spec's name stays unbuilt, the mark keeps
+its example, and the first repair (deleting the mark) was reverted.
+
+    A GUARD'S RED MAY BE A CONSEQUENCE OF A CHOICE ANOTHER GUARD REFUSES.
+    RUN THE LAW THAT GOVERNS THE CHOICE BEFORE REPAIRING WHAT THE CHOICE BROKE.
+
+### 80.4 THE ENTRIES
+
+| path | shown failing by |
+|---|---|
+| `tests/test_outward_classes.py` -- `_record_problems`, the census-state agreement, the retired-text digests, the surviving six by name | ten plants into copies of the real records (a status off the list, a class off the three, a name-shaped target kind, BUILT without a performable spec, NEEDS-CAPTURE with no capture, BLOCKED without a reason, a live proof that does not say what HE NAMES, empty facts, empty reversibility, and a performable action whose record still waits), each convicted by name; and on the REAL data before the build and the census landed, the census-agreement test was red on eleven rows and the records test on the then-unbuilt leave-a-group act -- shown failing on the tree before it was shown passing |
+| `linkedin_server/group_leave.py` -- `checked_group_id`, the XPath row walk, `read_rows`, `membership_verdict`, `menu_item_gate`, `read_after_press`, `after_press_note`; the `withdraw_from_group` spec, `MENU_ITEM_ACTIONS` and arms in `writes.py`; `server.linkedin_withdraw_from_group` | `tests/test_leave_group.py` over a synthetic Groups root whose structure is the 2026-09-20 capture's: the exact-id rule shown failing as a prefix match; the in-row menu condition shown failing on a planted portal menu; the second-use guard shown failing without its flag; the three grant controls with zero navigations; every aim refusal at the verdict and at the preview with nothing minted; a dialog after the leave press counted and never answered; no synthetic group name in any refusal, block or receipt |
+| `tests/test_writes_nine.py` -- `_live_retired_refusals`, `_leans_on_a_retired_refusal`, `test_no_sanctioned_spec_states_a_retired_refusal_as_its_undo` and `test_no_sanctioned_write_tool_description_states_a_retired_refusal` (added 2026-09-27, section 80.6): every sanctioned spec's printed reversibility fields AND every sanctioned write's tool description may state a retired key, or one of `_RETIRED_REFUSAL_PHRASINGS` (the phrasings measured on the tree -- a new phrasing escapes it, and that is its stated limit), only as a quoted retraction | `test_the_rule_convicts_the_text_send_reply_arrived_with`: the exact `reversible_by` lane L5's `send_reply` reached the merge with is convicted twice; `test_the_description_rule_convicts_the_two_sentences_it_was_built_for`: the two tool-description sentences the cold verification found; and the description test itself ran RED on the real registry, naming exactly those two tools, before they were restated |
+| `linkedin_server/group_leave.py` -- `verification_verdict` (added 2026-09-27, finding F-6): a `not_member` after the leave needs EXACTLY one membership row fewer than the preview counted | `tests/test_leave_group.py::test_a_partly_drawn_page_after_the_leave_is_unknown_not_a_leave`: the old rule alone calls a half-drawn page `not_member`, and the verification with the old rule substituted back (a mutant) goes red |
+| `tests/test_leave_group.py` -- the navigator's per-load landings and page-side press witness (added 2026-09-27, findings F-7, F-8) | `test_a_verification_that_lands_elsewhere_says_nothing_about_the_leave` kills the cold verifier's surviving mutant M3 (the verification's landing check deleted); the dialog, happy-path and refusing-gate tests read the fixture's own press counters off the clicked document |
+| `scripts/check_write_classes.py` -- `_WC_SELF_ROW_RX` admits a split suffix (`A23b`), added 2026-09-27 by this lane's census child when `P A23` was split | `tests/test_write_classes.py::test_a_suffixed_id_citation_is_parsed_and_must_still_name_a_row`: a planted `row A23z` must be convicted as a row that does not exist, never as an unparseable citation; shown failing on the old regex, where it read as neither a path nor a row |
+
+### 80.5 DECLARED DISPOSABLE
+
+The lane's scratch probes -- the counts-only census of labelled controls over
+the 25 local captures and the 29 tracked fixtures, the shape readers over the
+Groups-page capture (the lead's and the child's), the row inventory joined to
+the exclusion table, the overlap of master's census rows with this lane's, and
+the salvage scripts that diffed the child's uncommitted worktree against the
+base, applied its hunks, and proved the merge both ways -- are declared
+disposable. What each measured is in the lane record with its numbers. The
+salvage method is the part worth keeping as a METHOD: when a child dies with
+its work uncommitted, diff its files against the base, apply the hunks onto
+the lead's branch refusing any hunk whose context is not unique, and prove the
+merge by applying the two deltas in both orders.
+
+Also disposable, from the merge of master (2026-09-27): the scratch resolvers
+that chose each conflict hunk by an explicit recipe, re-dated the lane's own
+census markers, swapped in master's text of the retired entry after comparing
+it equal to master's dict value, and priced the two new test files. One of
+them is worth keeping as a METHOD. The census tables conflict ROW BY ROW, so
+resolve them by a keyed three-way merge over the base, taking whichever side
+changed each row. A row that changed on both sides is left for a human. At
+this merge none had.
+
+
+### 80.6 A LANE THAT FORKED BEFORE A RETIREMENT CAN STILL LEAN ON WHAT IT RETIRED
+
+Added 2026-09-27, at this lane's merge of master. Two other lanes, working
+from branches forked before the retirement, had written against
+`delete_or_withdraw_anything` while this lane retired it on its own branch.
+The two met only at the merge.
+
+- Lane L5 built `send_reply`, whose `reversible_by` read "Deletion is
+  permanently forbidden here at any confirm level
+  (delete_or_withdraw_anything)".
+- Lane Y2 filed a NEW census row, `P P2`, EXCLUDED-RULED on the same key.
+
+Neither needed a judgement at the conflict level. `send_reply` merged
+cleanly, and so did `P P2`'s census cell. Its exclusion line sat in a
+conflict hunk, but as a master-only row, which a keyed three-way merge takes
+as it stands and never shows. They were found by reading master's ADDED lines
+for the retired key names before merging. Afterwards, two instruments hold
+the class:
+- The restatement test in `tests/test_writes_nine.py` named its specs, so it
+  could not see a sixth. It now has a whole-set twin that reads every
+  sanctioned spec's printed reversibility fields. After the lane's cold
+  verification found two TOOL DESCRIPTIONS the twin could not see, it reads
+  those too.
+- `check_exclusion_basis` convicts a re-planted `P P2` line four ways:
+  - a basis left on a row that moved;
+  - an anchor `writes.py` no longer holds;
+  - a row filed under an EMPTIED family;
+  - a link the census does not carry.
+  This was measured on a copy of the table.
+
+    A RETIREMENT IS NOT DONE WHEN ITS BRANCH IS GREEN. A LANE THAT FORKED
+    BEFORE IT CAN STILL LEAN ON THE RETIRED THING, AND A CLEAN MERGE SAYS
+    NOTHING ABOUT THAT. READ THE OTHER SIDE'S ADDED LINES FOR IT.

@@ -65,7 +65,10 @@ that will be forgotten at the moment of writing.
 from __future__ import annotations
 
 import ast
+import hashlib
 import pathlib
+import re
+import subprocess
 
 import pytest
 
@@ -108,7 +111,7 @@ PERSON_CONSTANTS = frozenset(
 INVENTED_NAMES = frozenset(
     {
         # People, all invented, each already in use below.
-        "Grace Hopper",
+        "Wren Fixturewright",
         "Savita Krishnan",
         "Priya Raghunathan",
         "Thornwick M",
@@ -310,6 +313,98 @@ def test_every_declared_name_is_actually_used():
         "declared and unused: %s. Delete the entry -- a name nobody writes is "
         "a permission nobody is reviewing." % unused
     )
+
+
+# ---------------------------------------------------------------------------
+# Retired real names: held by digest, and hunted across tests/ and scripts/
+# ---------------------------------------------------------------------------
+
+#: REAL PEOPLE'S NAMES THIS REPOSITORY HAS RETIRED, as SHA-256 digests of the
+#: whitespace- and case-folded name -- NEVER THE NAME, because the rule this
+#: file enforces is that the name is not written here.
+#:
+#: ADDED 2026-09-27 on the orchestrator's order (lane G): the first entry of
+#: INVENTED_NAMES named a real historical figure. The table's own comment said
+#: "all invented", and nothing could check it -- a name has no shape. It was
+#: replaced by a plainly invented name in every file that carried it, and it
+#: is held out from then on here.
+#:
+#: THE LIMIT: a digest only recognises a name somebody already retired. It
+#: cannot tell whether a NEW entry names a real person; the table's claim
+#: stays a human's. Anyone holding a list of candidate names can test each one
+#: against a digest, so this keeps the name out of the file, not secret.
+RETIRED_REAL_NAMES_SHA256 = frozenset(
+    {"e71d025a0b49b7d6c7d2d0a8af9ff4cb0079d2797feb9be286fd0fe5d24e935a"}
+)
+
+#: Every overlapping pair of capitalised words -- the shape of a two-part name.
+_CAPITALISED_PAIR = re.compile(r"(?=\b([A-Z][a-z]+ [A-Z][a-z]+)\b)")
+
+#: What the sweep reads: every tracked file under these folders with a text
+#: suffix -- the constants, the fixtures and the probes where names have lived.
+_SWEPT_SUFFIXES = (".py", ".html", ".json", ".md", ".txt", ".tsv")
+
+
+def name_digest(name: str) -> str:
+    return hashlib.sha256(" ".join(name.split()).casefold().encode("utf-8")).hexdigest()
+
+
+def retired_names_in(text: str, retired=RETIRED_REAL_NAMES_SHA256) -> list[tuple[int, str]]:
+    """``(line, digest prefix)`` for every retired name in ``text``. Never the
+    name: a failure prints where, and a prefix of the digest to match on."""
+    found = []
+    for number, line in enumerate(text.splitlines(), start=1):
+        for match in _CAPITALISED_PAIR.finditer(line):
+            digest = name_digest(match.group(1))
+            if digest in retired:
+                found.append((number, digest[:12]))
+    return found
+
+
+def _tracked(folders=SCANNED) -> list[str]:
+    proc = subprocess.run(
+        ["git", "ls-files", "--", *folders], cwd=str(REPO), capture_output=True, text=True
+    )
+    assert proc.returncode == 0, proc.stderr
+    return [p for p in proc.stdout.splitlines() if p.endswith(_SWEPT_SUFFIXES)]
+
+
+def test_no_invented_name_is_a_retired_real_name():
+    """THE TABLE ITSELF: an entry that is a retired real name fails, by digest."""
+    retired = sorted(
+        name_digest(name)[:12]
+        for name in INVENTED_NAMES
+        if name_digest(name) in RETIRED_REAL_NAMES_SHA256
+    )
+    assert retired == [], (
+        "INVENTED_NAMES holds a name retired as a REAL PERSON'S (digest prefix "
+        "%s). Replace it with a plainly invented name in every file that "
+        "carries it." % retired
+    )
+
+
+def test_no_tracked_test_or_script_carries_a_retired_real_name():
+    """AND EVERY FIXTURE THAT CARRIED IT: tests/ and scripts/, tracked files."""
+    found = []
+    for rel in _tracked():
+        text = (REPO / rel).read_text(encoding="utf-8", errors="replace")
+        found.extend("%s:%d %s" % (rel, line, digest) for line, digest in retired_names_in(text))
+    assert found == [], (
+        "a retired real person's name is still carried at %s (digest prefixes "
+        "only). Replace it with a plainly invented name." % found
+    )
+
+
+def test_the_retired_name_hunt_can_fire():
+    """THE CONTROL, WITHOUT WRITING A REAL NAME: an invented pair is retired for
+    the length of this test, and found -- beside another capitalised word, which
+    a non-overlapping match would have swallowed."""
+    planted = "Zzqx Plantperson"
+    retired = frozenset({name_digest(planted)})
+    text = "first line\nSend to Mr " + planted + " now\n"
+    assert retired_names_in(text, retired) == [(2, name_digest(planted)[:12])]
+    assert retired_names_in(text.replace("Zzqx", "Qzzx"), retired) == []
+    assert _tracked(), "the sweep reads no tracked file: it is not reading the tree"
 
 
 @pytest.mark.parametrize("constant", sorted(PERSON_CONSTANTS))

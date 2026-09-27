@@ -149,12 +149,16 @@ ASKED_FOR_SITES: dict[str, str] = {
         "subject is the REQUESTED address, checked before any navigation, so "
         "there is no landing here to withhold."
     ),
-    "browser.py:goto": (
-        "the navigation target this package asked for, reported when the "
-        "navigation itself failed. No page was reached, so nothing LinkedIn "
-        "chose exists at this point."
-    ),
-    # 2026-09-27, lane L5's follow-up: the SECOND door.
+    # ``browser.py:goto`` WAS RULED HERE UNTIL 2026-09-24, and its entry left
+    # with the address: the lane G follow-up made a failed navigation's message
+    # name the exception's type and the address's first path segment, because
+    # an address can carry what was searched for or whom it names -- asked for
+    # is not the same as safe to repeat. With no entry, putting the address back
+    # arrives here as a site with no verdict, and has to be ruled again.
+    # 2026-09-27, lane L5's follow-up: the SECOND door. Its entry survived
+    # lane L5's merge of master 52b55b6 beside the retirement above, on
+    # ``assert_read_url``'s ground rather than ``goto``'s: a gate refusing the
+    # address it was handed, before any navigation.
     "readonly.py:assert_named_profile_url": (
         "same shape as readonly.assert_read_url: the named-profile door "
         "refuses the url it was HANDED, before any navigation. That url is "
@@ -166,13 +170,15 @@ ASKED_FOR_SITES: dict[str, str] = {
 }
 
 PUBLISHED_BY_CONTRACT_SITES: dict[str, str] = {
-    "shape.py:parse_person_card": (
-        "``out['profile']`` is a field this shaper publishes on its SUCCESS "
-        "path. Withholding it in a message while returning it in the payload "
-        "would withhold nothing. Whether that field may be published at all "
-        "is the SHAPERS' question, governed by shape.py and the redaction "
-        "tests -- a different subject with its own guards."
-    ),
+    # ``shape.py:parse_person_card`` WAS RULED HERE UNTIL 2026-09-24, for
+    # ``out['profile']``, and its entry left with the site: the viewer row
+    # became a people record (lane G's foundation), whose ``link`` is built by
+    # ``people_data.canonical_profile_link`` and RETURNED -- a helper's return
+    # value, outside this census's subject set of built messages and output
+    # fields. The publication is unchanged and is now ruled by NAMES-AT-RUNTIME
+    # itself; the record's link is canonical by construction (query, fragment
+    # and sub-pages dropped). Its twin, ``parse_connection_card`` below, has
+    # not moved onto the record and keeps its entry.
     "dom.py:read_job_identity": (
         "``out['company_url']`` is likewise a success-path field. Same "
         "reasoning, same owning guard."

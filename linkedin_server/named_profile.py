@@ -1009,6 +1009,28 @@ _COUNT_PREFIX = re.compile(r"^\(\d+\)\s*")
 #: (which draws no degree), would otherwise take it for the headline.
 _DEGREE_LINE = re.compile(r"(?:\u00b7\s*)?(?:1st|2nd|3rd\+?)")
 
+#: The topcard's "Contact info" line -- the separator the topcard parser was
+#: measured against (name, pronouns, headline, location, THEN Contact info).
+#: The headline and the location sit above it; below it come the connection
+#: count and, on a third party's profile, the action buttons -- Message,
+#: Connect, More -- whose labels the parser's chrome list, measured on HIS
+#: profile, does not know. So the lines are CUT here before parsing: with no
+#: headline drawn above Contact info, the parser falls back to the first
+#: eligible line anywhere, and printed the buttons' labels as the person's
+#: headline (measured at lane L5's merge of master 52b55b6 on the synthetic
+#: profile: "Message Connect More"). DERIVED, like everything read off a third
+#: party's topcard: no capture holds one (C-P1).
+_CONTACT_INFO_LINE = re.compile(r"\s*contact info[\s.:]*", re.IGNORECASE)
+
+
+def _above_contact_info(lines: list[Any]) -> list[Any]:
+    """The topcard's lines above its Contact info line, or all of them when it
+    draws none."""
+    for index, line in enumerate(lines):
+        if _CONTACT_INFO_LINE.fullmatch(str(line)):
+            return lines[:index]
+    return lines
+
 
 async def name_the_profile_target(
     page: Any, spec: Any, observation: Any, block: dict[str, Any], *, segment: str
@@ -1018,8 +1040,12 @@ async def name_the_profile_target(
     PEOPLE-DATA-MITIGATIONS item 6: "An outward act fires at the exact member
     the operator names, by link or id, and the tool reports whom it resolved
     before it acts." The four declared fields -- name, headline, link,
-    degree -- through :mod:`people_seam`, which is where lane G's sanitiser and
-    marker adopt them (mitigation 2, PENDING until that merge).
+    degree -- as a people record built by :func:`people_seam.person`: lane G's
+    ``people_data.Person``, sanitised, capped and marked as another member's
+    words (mitigation 2, adopted at lane L5's merge of master 52b55b6), its
+    headline ABSENT (``None``) when the topcard draws none
+    (PREVIEW-NAMES-THE-RESOLVED-TARGET, as the orchestrator applied it to
+    these previews).
 
     THE SAME DISCIPLINE AS ``_name_the_invitation_recipient`` and
     ``threads.name_the_reply_recipient``: added to a NEW dict after
@@ -1060,7 +1086,7 @@ async def name_the_profile_target(
                 for line in (top or {}).get("lines") or []
                 if not _DEGREE_LINE.fullmatch(str(line).strip())
             ]
-            parsed = shape.parse_profile_topcard(lines)
+            parsed = shape.parse_profile_topcard(_above_contact_info(lines))
             # THE NAME READ MUST BE THE NAME THE TITLE GIVES. The page's own
             # script already compared the topcard's heading with the title;
             # this holds the reader's first line to the same name, so a

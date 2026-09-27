@@ -107,6 +107,7 @@ from tests.test_follow_company_page import (
 )
 from tests.test_messaging_threads import THREAD as MESSAGING_THREAD
 from tests.test_messaging_threads import THREAD_ID as MESSAGING_THREAD_ID
+from tests.test_leave_group import GROUPS_LEAVE_ID, GROUPS_LEAVE_MARKUP
 from tests.test_named_profile_route import LINK as NAMED_PROFILE_LINK
 from tests.test_named_profile_route import PROFILE as NAMED_PROFILE
 from tests.test_result_verification_block import SHAREBOX_MARKUP
@@ -279,14 +280,28 @@ REACHED: dict[str, tuple[str, str, str]] = {
             )
         ),
     ),
-    # THE SIXTEENTH AND SEVENTEENTH, 2026-09-27 (census rows ``N 4`` by D6
-    # and ``M M1``, lane L5's follow-up). A SYNTHETIC third-party profile --
-    # no capture of one exists -- whose STRUCTURE borrows his own profile's
-    # measured topcard and the people cards' measured Connect and Message
-    # labels, and whose content is invented; its header says which parts are
-    # which. The preview and the click read the profile through ONE reader,
-    # ``dom.read_named_profile``, and ONE verdict per action, which is the
-    # property this file pins.
+    # THE SIXTEENTH, 2026-09-27 (census rows ``M C63`` / ``N 64``, lane L8;
+    # the fifteenth on its branch until its merge of master). A SYNTHETIC
+    # Groups root whose STRUCTURE is a measurement -- membership rows carrying
+    # one row-scoped disclosure each, menus in the DOM and closed -- and whose
+    # groups are invented; its source module says which parts are which. The
+    # preview and the click read it through ONE verdict,
+    # ``group_leave.read_state``, and the click-time selector is the row's
+    # disclosure, the first of the action's two presses.
+    "withdraw_from_group": (
+        "tests/test_leave_group.py",
+        GROUPS_LEAVE_MARKUP,
+        GROUPS_LEAVE_ID,
+    ),
+    # THE SEVENTEENTH AND EIGHTEENTH, 2026-09-27 (census rows ``N 4`` by D6,
+    # ``N 2`` and ``M M1``, lane L5's follow-up; the sixteenth and seventeenth
+    # on its branch until its merge of master 52b55b6). A SYNTHETIC
+    # third-party profile -- no capture of one exists -- whose STRUCTURE
+    # borrows his own profile's measured topcard and the people cards'
+    # measured Connect and Message labels, and whose content is invented; its
+    # header says which parts are which. The preview and the click read the
+    # profile through ONE reader, ``dom.read_named_profile``, and ONE verdict
+    # per action, which is the property this file pins.
     "connect_from_profile": (
         "tests/fixtures/synthetic/named_profile.html",
         NAMED_PROFILE,
@@ -538,11 +553,15 @@ def test_every_performable_action_is_either_reached_or_declared_unreachable():
     # 14 -> 15 the same day (lane L5's merge of master 66aaa95):
     # ``send_reply`` shipped, and it is reached over the synthetic
     # conversation its own tests read, not declared unreachable.
-    # 15 -> 17 on 2026-09-27 (lane L5's follow-up): ``connect_from_profile``
-    # and ``message_from_profile`` shipped, both reached over the synthetic
-    # named profile their own tests read.
-    assert len(PERFORMABLE) == 17, sorted(PERFORMABLE)
-    assert len(REACHED) == 17, sorted(REACHED)
+    # 15 -> 16 on 2026-09-27 (lane L8's merge of master; 14 -> 15 on its
+    # branch): ``withdraw_from_group`` shipped, reached over its own committed
+    # synthetic Groups root rather than declared unreachable.
+    # 16 -> 18 the same day (lane L5's merge of master 52b55b6; 15 -> 17 on
+    # its follow-up branch): ``connect_from_profile`` and
+    # ``message_from_profile`` shipped, both reached over the synthetic named
+    # profile their own tests read. MEASURED on the merged tree, not summed.
+    assert len(PERFORMABLE) == 18, sorted(PERFORMABLE)
+    assert len(REACHED) == 18, sorted(REACHED)
     assert len(CANNOT_REACH) == 0, sorted(CANNOT_REACH)
 
 

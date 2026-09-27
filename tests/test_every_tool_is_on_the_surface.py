@@ -332,8 +332,14 @@ def test_both_rules_reject_the_registry_that_was_actually_measured():
     # (linkedin_send_reply) on top of lane L7's fifty-three -- fifty-five on
     # the lane's branch, which had counted from the live lane's fifty-two --
     # measured off the merged registry and moved with every other count site.
-    # FIFTY-EIGHT ON LANE L5'S FOLLOW-UP BRANCH, 2026-09-27: two WRITES,
-    # linkedin_connect_from_profile and linkedin_message_from_profile (census
-    # N 4 by D6, and M M1), measured off the registry on the branch and moved
-    # with every other count site in the same change.
-    assert len(_tool_names()) == 58
+    # FIFTY-SEVEN AT LANE L8'S MERGE OF MASTER 2eb90ad, 2026-09-27: one WRITE,
+    # linkedin_withdraw_from_group (census rows M C63 / N 64), on top of
+    # master's fifty-six, measured off the merged registry and moved with
+    # every other count site in the merge commit.
+    # FIFTY-NINE AT LANE L5'S MERGE OF MASTER 52b55b6, the same day: two
+    # WRITES from its follow-up branch, linkedin_connect_from_profile and
+    # linkedin_message_from_profile (census N 4 by D6, N 2, and M M1; fifty-
+    # eight on that branch), on top of master's fifty-seven -- measured off the
+    # merged registry, not summed, and moved with every other count site in
+    # the merge commit.
+    assert len(_tool_names()) == 59

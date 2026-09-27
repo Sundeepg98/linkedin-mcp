@@ -375,7 +375,18 @@ AFTER_LANE_L5 = (113, {"R": 11, "W": 99, "R+W": 3})
 #: eleven admitted rows stay in the entered-since-freeze bucket.
 AFTER_LANE_L5_OVER_Y2 = (124, {"R": 17, "W": 103, "R+W": 4})
 
-EXPECTED_NOW = AFTER_LANE_L5_OVER_Y2
+#: AT LANE L8'S MERGE OF MASTER (2026-09-27), MEASURED with the merged tree's
+#: `scripts/triage_messaging_gap_rows.py` (`_audit/2026-09-24-lane-l8-outward-
+#: classes.md`, s5 and s10): OUTWARD-CLASSES-BUILT-BEHIND-GRANTS returned eight
+#: write rows of this slice to GAP, each naming its blocker in its own cell --
+#: `C17`, `C19`, `C22`, `C31`, `C62`, `C77`, `M12`, `M26` -- and `C63` left GAP,
+#: built (`linkedin_withdraw_from_group`). 124 + 8 - 1 = 131: writes 103 + 7,
+#: reads and read-and-writes untouched. RETURNED-OUTSIDE-LEDGER stays 14; `C62`
+#: joined its frozen map line and the other seven the entered-since-freeze
+#: bucket.
+AFTER_LANE_L8 = (131, {"R": 17, "W": 110, "R+W": 4})
+
+EXPECTED_NOW = AFTER_LANE_L8
 
 
 def test_the_headline_split_is_the_one_the_report_quotes():

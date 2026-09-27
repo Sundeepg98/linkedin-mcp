@@ -27,6 +27,7 @@ import pytest
 
 from linkedin_server import anchors, coerce, group_page, groups, readonly
 from tests.plantedpage import PLANT, PlantedPage, carries_the_plant
+from tests.record_typed import identity_parameters_outside_a_record
 
 #: A synthetic slug that is person-SHAPED, because the input this refusal
 #: exists for is a group named after somebody. A fixture whose hazard is
@@ -335,12 +336,18 @@ def test_no_function_here_takes_a_name_an_address_or_a_page_except_the_reader():
             async_functions.append(name)
     assert async_functions == ["read_group_page"], async_functions
 
-    banned = {"name", "url", "href", "slug", "query", "keywords", "text", "label"}
+    # REWRITTEN AROUND THE RECORD TYPE ON 2026-09-27, not deleted: a name or
+    # an address may arrive only annotated as a ``people_data`` record
+    # (NAMES-AT-RUNTIME, PEOPLE-DATA-MITIGATIONS; ``tests/record_typed.py``);
+    # a needle or page text not at all.
+    identity = {"name", "url", "href", "slug"}
+    banned = {"query", "keywords", "text", "label"}
     for name, function in vars(group_page).items():
         if not inspect.isfunction(function):
             continue
         parameters = set(inspect.signature(function).parameters)
-        assert not (parameters & banned), (name, parameters)
+        outside = identity_parameters_outside_a_record(function, identity)
+        assert not outside and not (parameters & banned), (name, parameters)
 
 
 def test_the_module_fires_nothing():

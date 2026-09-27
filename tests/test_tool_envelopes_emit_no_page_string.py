@@ -102,6 +102,9 @@ from tests.plantedpage import (
     SYNTHETIC_ARGUMENT,
     NavigationAttempted,
     PlantedPage,
+    carries_the_plant_outside_records,
+    text_paths_a_baseline_may_not_record,
+    text_ratchet,
 )
 
 REPO = Path(__file__).resolve().parents[1]
@@ -119,6 +122,13 @@ CLEAN = "clean"
 LEAKS = "leaks"
 RETURNS_TEXT = "returns_text"
 NOT_DRIVEN = "not_driven"
+#: THE DECLARED CHANNEL (2026-09-24, NAMES-AT-RUNTIME applied by
+#: PEOPLE-DATA-MITIGATIONS): the plant reached a SUCCESS payload and ONLY
+#: inside ``linkedin_server.people_data`` records. ``returns_text`` is since
+#: then a legacy inventory that may shrink and may not grow (the ratchet in
+#: ``test_the_driven_set_has_not_silently_shrunk``); ``leaks`` is unchanged and
+#: walks records too -- a record in an ``_error`` envelope is a leak.
+RETURNS_RECORDS = "returns_records"
 
 #: A landing this package already navigates to, carrying no identifier. The
 #: fake ``goto`` answers with the target it was handed, so a tool's own
@@ -324,6 +334,13 @@ def _walk(obj: Any, path: str = "$"):
     elif isinstance(obj, (list, tuple)):
         for index, value in enumerate(obj):
             yield from _walk(value, "%s[%d]" % (path, index))
+    elif isinstance(obj, (set, frozenset)):
+        # A SET IS PUBLISHED AS A LIST, so it is walked as one -- in a stable
+        # order, so a position names the same member on every run. It was not
+        # walked at all until lane G's cold verification (2026-09-27) put a
+        # plant in one and this guard called an _error envelope clean.
+        for index, value in enumerate(sorted(obj, key=repr)):
+            yield from _walk(value, "%s[%d]" % (path, index))
 
 
 def plant_positions(obj: Any) -> list[str]:
@@ -337,11 +354,20 @@ def plant_positions(obj: Any) -> list[str]:
     for path, value in _walk(obj):
         if isinstance(value, str) and PLANT in value:
             hits.add(path)
+        elif not isinstance(value, _WALKED_OR_INERT) and PLANT in repr(value):
+            # AN OBJECT IS PUBLISHED BY ITS FIELDS, so its repr is searched:
+            # a people record INSTANCE -- published without its marker --
+            # was invisible here until lane G's cold verification (2026-09-27).
+            hits.add(path + "(repr)")
         if isinstance(value, dict):
             for key in value:
                 if isinstance(key, str) and PLANT in key:
                     hits.add("%s.%s" % (path, PAGE_CHOSEN_KEY))
     return sorted(hits)
+
+
+#: What ``_walk`` descends into, and leaves that cannot hold page text.
+_WALKED_OR_INERT = (dict, list, tuple, set, frozenset, str, bytes, int, float, bool, type(None))
 
 
 def coercion_signatures(obj: Any) -> list[str]:
@@ -428,17 +454,7 @@ def drive_tool(name: str, fn: Callable[..., Any]) -> dict[str, Any]:
             "page_reads": 0,
         }
 
-    positions = plant_positions(out)
-    signatures = coercion_signatures(out)
-    if signatures:
-        verdict, reason = LEAKS, "a coercion-failure message reached the output"
-        positions = sorted(set(positions) | set(signatures))
-    elif positions and _is_error_envelope(out):
-        verdict, reason = LEAKS, "the plant reached the _error envelope"
-    elif positions:
-        verdict, reason = RETURNS_TEXT, "the plant reached a published payload"
-    else:
-        verdict, reason = CLEAN, ""
+    verdict, reason, positions = classify_envelope(out)
     return {
         "tool": name,
         "verdict": verdict,
@@ -447,6 +463,39 @@ def drive_tool(name: str, fn: Callable[..., Any]) -> dict[str, Any]:
         "page_reads": page.page_reads,
         "navigations": len(navigations),
     }
+
+
+def classify_envelope(out: Any) -> tuple[str, str, list[str]]:
+    """``(verdict, reason, positions)`` for one returned envelope.
+
+    A pure function of the envelope, so the controls drive the code the guard
+    runs. POSITIONS COME FROM THE PLAIN WALK, records included: a person record
+    in a failure envelope is a leak like any page string in one. Only a SUCCESS
+    payload asks where the plant sits relative to the records, and it asks for
+    a COUNT, never a path -- a record-aware path could spell a key the page
+    chose, and positions are the one thing this file prints.
+    """
+    positions = plant_positions(out)
+    signatures = coercion_signatures(out)
+    if signatures:
+        return (
+            LEAKS,
+            "a coercion-failure message reached the output",
+            sorted(set(positions) | set(signatures)),
+        )
+    if positions and _is_error_envelope(out):
+        return LEAKS, "the plant reached the _error envelope", positions
+    if positions:
+        outside, records = carries_the_plant_outside_records(out)
+        if not outside:
+            return (
+                RETURNS_RECORDS,
+                "the plant reached a published payload only inside %d people record(s)"
+                % records,
+                positions,
+            )
+        return RETURNS_TEXT, "the plant reached a published payload", positions
+    return CLEAN, "", positions
 
 
 def sandbox_session_store(directory: Any) -> None:
@@ -528,6 +577,50 @@ def test_the_driven_set_has_not_silently_shrunk(verdicts):
         if verdict == NOT_DRIVEN and recorded[name] != NOT_DRIVEN
     )
     assert not regressed, "these stopped being driven: %s" % ", ".join(regressed)
+    # THE LEGACY TEXT INVENTORY MAY SHRINK AND MAY NOT GROW (2026-09-24).
+    ratchet = text_ratchet(recorded, live)
+    assert not ratchet, (
+        "the page-text inventory moved: %s. A page string leaves only through a "
+        "people_data record: a NEW text path must return records instead; a "
+        "STALE entry means a tool stopped returning text and the baseline must "
+        "be regenerated so the inventory shrinks; LOST RECORDS means a "
+        "converted tool fell back." % "; ".join(ratchet)
+    )
+
+
+def records_outside_the_people_tools(rows: list[dict[str, Any]]) -> list[str]:
+    """Tools called ``returns_records`` that are not declared people tools."""
+    from linkedin_server import people_data
+
+    return sorted(
+        row["tool"]
+        for row in rows
+        if row["verdict"] == RETURNS_RECORDS and row["tool"] not in people_data.PEOPLE_TOOLS
+    )
+
+
+def test_only_a_declared_people_tool_returns_records(verdicts):
+    """A RECORD IS THE DECLARED CHANNEL FOR THE DECLARED PEOPLE TOOLS AND NO ONE
+    ELSE (lane G's cold verification, 2026-09-27). A dict shaped like an
+    envelope passes ``as_record`` whoever built it, so any tool could wrap
+    page text in one and be called ``returns_records``. Such a tool is refused
+    here, and by the baseline writer, until it joins
+    ``people_data.PEOPLE_TOOLS`` -- where the bounded-reader file, the
+    instructions paragraph and the invariant drives then hold it."""
+    strays = records_outside_the_people_tools(verdicts)
+    assert not strays, (
+        "returns people records without being a declared people tool: %s. "
+        "Declare it in people_data.PEOPLE_TOOLS, or return no page text." % strays
+    )
+
+
+def test_that_people_tool_check_can_fail():
+    rows = [
+        {"tool": "linkedin_planted_roster", "verdict": RETURNS_RECORDS},
+        {"tool": "linkedin_who_viewed_me", "verdict": RETURNS_RECORDS},
+        {"tool": "linkedin_planted_clean", "verdict": CLEAN},
+    ]
+    assert records_outside_the_people_tools(rows) == ["linkedin_planted_roster"]
 
 
 def write_baseline() -> dict[str, Any]:
@@ -545,6 +638,24 @@ def write_baseline() -> dict[str, Any]:
             "refusing to write a baseline recording a leak: %s"
             % ", ".join(leaking)
         )
+    committed: dict[str, str] = {}
+    if BASELINE_PATH.exists():
+        committed = json.loads(BASELINE_PATH.read_text(encoding="utf-8"))["tools"]
+    new_text = text_paths_a_baseline_may_not_record(
+        committed, {row["tool"]: row["verdict"] for row in rows}
+    )
+    if new_text:
+        raise SystemExit(
+            "refusing to write a baseline recording a NEW page-text path: %s. "
+            "A page string leaves only through a linkedin_server.people_data "
+            "record (2026-09-24)." % ", ".join(new_text)
+        )
+    strays = records_outside_the_people_tools(rows)
+    if strays:
+        raise SystemExit(
+            "refusing to write a baseline recording people records from a tool "
+            "that is not in people_data.PEOPLE_TOOLS: %s" % ", ".join(strays)
+        )
     tools: dict[str, str] = {}
     for row in rows:
         tools[row["tool"]] = (
@@ -556,9 +667,12 @@ def write_baseline() -> dict[str, Any]:
         "_comment": (
             "Verdict per mcp.tool in linkedin_server/server.py, driven against "
             "tests/plantedpage.py. 'clean' means the tool was DRIVEN and "
-            "published nothing the page chose; 'returns_text' means a page "
-            "string reached a published payload, which the shapers govern and "
-            "this guard does not; 'not_driven:<reason>' means this offline "
+            "published nothing the page chose; 'returns_records' means a page "
+            "string reached a published payload ONLY inside "
+            "linkedin_server.people_data records, the declared channel; "
+            "'returns_text' means a page string reached a published payload "
+            "outside a record -- a legacy inventory since 2026-09-24 that may "
+            "shrink and may not grow; 'not_driven:<reason>' means this offline "
             "harness could not reach it, which is never a pass. There is no "
             "verdict meaning 'this leaks' -- a baseline that could record one "
             "would become a list of permitted leaks. Regenerate with: "
@@ -578,7 +692,7 @@ def _report() -> None:
     for row in rows:
         counts[row["verdict"]] = counts.get(row["verdict"], 0) + 1
     print("tools discovered: %d" % len(rows))
-    for verdict in (CLEAN, RETURNS_TEXT, LEAKS, NOT_DRIVEN):
+    for verdict in (CLEAN, RETURNS_RECORDS, RETURNS_TEXT, LEAKS, NOT_DRIVEN):
         print("   %-14s %3d" % (verdict, counts.get(verdict, 0)))
     print()
     for row in sorted(rows, key=lambda r: (r["verdict"], r["tool"])):

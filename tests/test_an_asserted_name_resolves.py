@@ -39,6 +39,7 @@ that is computed, printed, and never branched on. Each control below ASSERTS.
 from __future__ import annotations
 
 import pathlib
+import subprocess
 import sys
 import time
 
@@ -531,4 +532,95 @@ def test_no_new_asserted_name_is_absent(measured):
         "a record of a defect may not outlive the defect. If instead the "
         "DETECTOR stopped seeing them, the pin just hid a regression, so check "
         "`test_the_detector_finds_a_planted_assertion` before editing PINNED."
+    )
+
+
+# --------------------------------------------------------------------------
+# THE MERGE-STAGE DUPLICATION DEFECT, and what it does NOT do here.
+#
+# `tracked()` returned every line of `git ls-files <paths>`, and `git ls-files`
+# prints an UNMERGED path once per merge stage (1 = common ancestor, 2 = ours,
+# 3 = theirs). On the blocker locator's copy of the listing that tripled one
+# conflicted document's scores, 33/30/24 against 11/10/8 once staged
+# (`_audit/2026-09-23-census-cleanup.md` section 13.5).
+#
+# MEASURED HERE, 2026-09-24, AND IT IS THE HONEST HALF: in THIS guard the
+# repeat changes no verdict. `load_corpus` keys its corpus by path, so the
+# second and third copies overwrite the first, and a planted tripled listing
+# left every ratchet count identical (64 sites = 64). A symptom test was
+# written and PASSED on the unrepaired code -- a test that cannot fail -- so it
+# was not kept. The listing is repaired anyway, because it is the function's
+# own contract and the next consumer need not key a dict.
+#
+# THE REAL MID-MERGE HAZARD FOR THIS RATCHET IS THE FILE, NOT THE LISTING. The
+# working copy of a conflicted document holds both sides of each conflicting
+# hunk, so a name inside one counts TWICE mid-merge (measured: 1, then 2, then
+# 1 once resolved). No listing dedupe reaches that; it is recorded in the lane
+# G record for the guards' owners.
+# --------------------------------------------------------------------------
+def test_a_conflicted_listing_is_read_once(tmp_path):
+    """A REAL multi-stage listing, manufactured, never found.
+
+    Builds an actual conflicted merge in `tmp_path` rather than trusting the
+    "once per stage" description, because a premise nobody re-measures can
+    quietly stop holding on a future git version. Never touches the real
+    repository and never reads the global/user git identity -- every commit
+    carries its own throwaway `-c user.name` / `-c user.email`.
+    """
+    audit = tmp_path / "_audit"
+    audit.mkdir()
+    doc = audit / "a.md"
+    identity = ["-c", "user.name=control", "-c", "user.email=control@example.invalid"]
+
+    def git(args, check=True):
+        result = subprocess.run(
+            ["git"] + args, cwd=str(tmp_path), capture_output=True, text=True,
+        )
+        if check:
+            assert result.returncode == 0, (
+                f"git {args!r} failed in {tmp_path}: rc={result.returncode} "
+                f"stdout={result.stdout!r} stderr={result.stderr!r}"
+            )
+        return result
+
+    git(["init", "-q"])
+    git(["checkout", "-q", "-b", "main"])
+
+    doc.write_text("original line\n", encoding="ascii")
+    git(["add", "_audit/a.md"])
+    git(identity + ["commit", "-q", "-m", "base"])
+
+    git(["checkout", "-q", "-b", "side"])
+    doc.write_text("side change\n", encoding="ascii")
+    git(["add", "_audit/a.md"])
+    git(identity + ["commit", "-q", "-m", "side"])
+
+    git(["checkout", "-q", "main"])
+    doc.write_text("main change\n", encoding="ascii")
+    git(["add", "_audit/a.md"])
+    git(identity + ["commit", "-q", "-m", "main"])
+
+    merge = git(identity + ["merge", "-m", "merge", "side"], check=False)
+    assert merge.returncode != 0, (
+        "the manufactured merge did not conflict (rc="
+        f"{merge.returncode}); this test's premise -- a real multi-stage "
+        f"listing -- was never created. stdout={merge.stdout!r} "
+        f"stderr={merge.stderr!r}"
+    )
+
+    raw = [line for line in git(["ls-files", "_audit"]).stdout.splitlines() if line]
+    raw_count = raw.count("_audit/a.md")
+    assert raw_count > 1, (
+        "STOP AND REPORT: plain `git ls-files _audit` lists _audit/a.md "
+        f"{raw_count} time(s) during this manufactured conflict, not more than "
+        "once. The premise this test measures -- that git lists an unmerged "
+        f"path once per stage -- does not hold here. Raw listing: {raw!r}"
+    )
+
+    listed = guard.tracked(tmp_path, guard.CORPUS_DIR)
+    assert listed.count("_audit/a.md") == 1, (
+        f"tracked(tmp_path, {guard.CORPUS_DIR!r}) lists _audit/a.md "
+        f"{listed.count('_audit/a.md')} time(s) during an unresolved merge "
+        f"conflict ({raw_count} stages in the raw listing); expected exactly "
+        f"1. Got: {listed!r}"
     )

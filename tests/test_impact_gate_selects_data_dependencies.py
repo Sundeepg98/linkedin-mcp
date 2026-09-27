@@ -329,6 +329,31 @@ def test_the_floor_is_derived_and_still_finds_the_two_proven_guards():
         )
 
 
+def test_the_declared_floor_members_run_and_are_not_derivable():
+    """THE TWO DECLARED MEMBERS, held so the declaration cannot rot.
+
+    Each is in the floor on every run, with its reason; each file exists; and
+    NONE is one the derivation already finds -- the day a detector learns to
+    see one, this fails and the declaration goes, so the table can only ever
+    hold what the rules are blind to.
+    """
+    floor = dict(G.always_run_files(G.Corpus()))
+    for rel in G.ALWAYS_RUN_DECLARED:
+        assert (G.REPO / rel).exists(), f"{rel} is declared and does not exist"
+        assert floor.get(rel, "").startswith("DECLARED: "), (rel, floor.get(rel))
+    saved = dict(G.ALWAYS_RUN_DECLARED)
+    try:
+        G.ALWAYS_RUN_DECLARED.clear()
+        derived = {rel for rel, _ in G.always_run_files(G.Corpus())}
+    finally:
+        G.ALWAYS_RUN_DECLARED.update(saved)
+    assert not (set(saved) & derived), sorted(set(saved) & derived)
+    # AND THE CONTROL: without the declaration neither is in the floor, which
+    # is the blind spot that made both of them CI's first finding.
+    for rel in saved:
+        assert rel not in derived, rel
+
+
 def test_the_floor_runs_even_when_the_diff_couples_to_nothing():
     """A diff with an empty selection still gets the corpus-wide guards.
 

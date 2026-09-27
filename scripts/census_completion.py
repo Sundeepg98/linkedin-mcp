@@ -1044,25 +1044,9 @@ PINNED = {
     #:   b3_refused 46 -> 47 (`P15`), b3_needs_session 13 -> 14 (`P3`)
     #: 769 AT THE ORCHESTRATOR'S MERGE OF LANE Y2'S FOLLOW-UP (2026-09-27), MEASURED:
     #: the P-R settings block itemized into 22 rows (P2-P23; Delete Data EXCLUDED-RULED).
-    #:
-    #: RE-DERIVED AT LANE L5'S FOLLOW-UP MERGE OF MASTER 2eb90ad (2026-09-27),
-    #: MEASURED on the merged tree and not summed
-    #: (`_audit/2026-09-24-lane-l5-messaging.md`, "Follow-up: the named-person
-    #: route"). Ruling THIRD-PARTY-PROFILE-FOR-A-NAMED-TARGET let two acts load
-    #: the profile of a person he names: `linkedin_message_from_profile` takes
-    #: `M M1` COVERED-CANNOT-DELIVER -> COVERED-UNFIRED, and
-    #: `linkedin_connect_from_profile` takes `N 4` GAP -> COVERED-UNFIRED by
-    #: D6-CAPABILITY-OVER-AFFORDANCE. Both are W rows the write hold binds with
-    #: no marker. Against master's pins:
-    #:   adjudicated 205 -> 206, delivered_broad 115 -> 117, unfired 36 -> 38
-    #:   cannot_deliver 19 -> 18, gap 564 -> 563, gap_write 353 -> 352
-    #:   b1_standing 13 -> 15
-    #: -- the same seven figures by the same amounts as on the lane's branch
-    #: over 96c1165 (202 -> 203 ... 13 -> 15), because master moved none of
-    #: these rows. `M M6` and `N 5` stay GAP, each now waiting on that route's
-    #: first capture; `M M2` stays COVERED-CANNOT-DELIVER, its positional
-    #: pointer to `M M1` written out.
-    "stated_rows": 769,
+    #: 770 AT LANE L8'S MERGE OF MASTER (2026-09-27), MEASURED: `P A23b`
+    #: entered, split from `P A23` (COMPOUND-ROW-SPLITS-ONLY-ON-STATE).
+    "stated_rows": 770,
     #: 762 = 704 stated rows + 58 declared collapses, computed at HEAD. NOT the
     #: published 761 and NOT the counter docstring's 760: those two differ only
     #: by a `- 2 stateless` term whose two rows are already outside the 704.
@@ -1090,13 +1074,32 @@ PINNED = {
     #: intro-field edits do, so it enters bucket 1 held by no ruling. One row
     #: changing class moves seven figures: adjudicated, delivered_broad and
     #: unfired +1; gap and gap_write -1; b1_no_ruling and b1_released +1.
-    "capabilities": 783,
-    "capabilities_achievable": 712,
-    "out_of_scope": 71,
-    "achievable": 698,
+    #: 784 AT LANE L8'S MERGE OF MASTER (2026-09-27), MEASURED: `P A23b`
+    #: entered; no collapse moved.
+    "capabilities": 784,
+    #: 741 AT LANE L8'S MERGE OF MASTER (2026-09-27), MEASURED: the achievable
+    #: move, with `O6-O20`'s 14 unchanged.
+    #: 742 AT LANE L5'S MERGE OF MASTER 52b55b6 (2026-09-27), MEASURED: `N 2` left the exclusions.
+    "capabilities_achievable": 742,
+    #: 43 AT LANE L8'S MERGE OF MASTER (2026-09-27), MEASURED: 29 rows returned
+    #: to GAP when OUTWARD-CLASSES-BUILT-BEHIND-GRANTS retired their key, and
+    #: `P P2` at the merge (-30); `P N27` and `P P2` then EXCLUDED-RULED on
+    #: ACCOUNT-DESTRUCTION-STAYS-MANUAL (+2).
+    #: 42 AT LANE L5'S MERGE OF MASTER 52b55b6 (2026-09-27), MEASURED: `N 2` EXCLUDED-RULED -> COVERED-UNFIRED, its R4 ground
+    #: dissolved by THIRD-PARTY-PROFILE-FOR-A-NAMED-TARGET.
+    "out_of_scope": 42,
+    #: 727 AT LANE L8'S MERGE OF MASTER (2026-09-27), MEASURED: stated rows 770
+    #: less out_of_scope 43: the returns, `P A23b`, and the two re-exclusions.
+    #: 728 AT LANE L5'S MERGE OF MASTER 52b55b6 (2026-09-27), MEASURED: stated rows 770 less out_of_scope 42 (`N 2`).
+    "achievable": 728,
     #: 205 AT THE ORCHESTRATOR'S MERGE OF LANE L7'S P B9 (2026-09-27), MEASURED: P B9
     #: (Premium badge) moved GAP -> COVERED-UNFIRED, released like the intro edits.
-    "adjudicated": 206,
+    #: 179 AT LANE L8'S MERGE OF MASTER (2026-09-27), MEASURED: the 30 returned
+    #: rows left an adjudicated state, `M C63` and `N 64` entered
+    #: COVERED-UNFIRED, and `P N27` / `P P2` re-entered EXCLUDED-RULED.
+    #: 180 AT LANE L5'S MERGE OF MASTER 52b55b6 (2026-09-27), MEASURED: `N 4` left GAP; `M M1` and `N 2` moved between
+    #: adjudicated states.
+    "adjudicated": 180,
     #: THE LIVE LANE'S FOUR ROWS, RE-DERIVED AT EACH OF ITS MERGES OF MASTER
     #: (2026-09-24; last over lane S): four rows fired live and banked
     #: (`_audit/2026-09-23-live-lane-session-1.md`). `P G6` COVERED-UNFIRED ->
@@ -1124,7 +1127,12 @@ PINNED = {
     #: moved `N 132` GAP -> COVERED-UNFIRED under D6-CAPABILITY-OVER-AFFORDANCE.
     #: 115 AT THE ORCHESTRATOR'S MERGE OF LANE L7'S P B9 (2026-09-27), MEASURED: P B9
     #: (Premium badge) moved GAP -> COVERED-UNFIRED, released like the intro edits.
-    "delivered_broad": 117,
+    #: 117 AT LANE L8'S MERGE OF MASTER (2026-09-27), MEASURED: `M C63` and
+    #: `N 64` built (`linkedin_withdraw_from_group`), never fired.
+    #: 120 AT LANE L5'S MERGE OF MASTER 52b55b6 (2026-09-27), MEASURED: `M M1` (COVERED-CANNOT-DELIVER), `N 4` (GAP, by D6) and `N 2`
+    #: (EXCLUDED-RULED, moved at the merge on the orchestrator's application of
+    #: THIRD-PARTY-PROFILE-FOR-A-NAMED-TARGET) all COVERED-UNFIRED.
+    "delivered_broad": 120,
     #: 79 since the live lane's merge (see `adjudicated`): P G6, N 134, P O3
     #: and M C72 COVERED-PROVEN.
     #: 75 and 21 since the bucket-1 merge: `M C41` fired live and moved from
@@ -1144,11 +1152,21 @@ PINNED = {
     #: the P-R settings block itemized into 22 rows (P2-P23; Delete Data EXCLUDED-RULED).
     #: 564 AT THE ORCHESTRATOR'S MERGE OF LANE L7'S P B9 (2026-09-27), MEASURED: P B9
     #: (Premium badge) moved GAP -> COVERED-UNFIRED, released like the intro edits.
-    "gap": 563,
+    #: 591 AT LANE L8'S MERGE OF MASTER (2026-09-27), MEASURED: +30 returned,
+    #: +1 `P A23b`, -2 built (`M C63`, `N 64`), -2 re-excluded (`P N27`,
+    #: `P P2`).
+    #: 590 AT LANE L5'S MERGE OF MASTER 52b55b6 (2026-09-27), MEASURED: `N 4` built (`linkedin_connect_from_profile`), by D6.
+    "gap": 590,
+    #: 18 AT LANE L5'S MERGE OF MASTER 52b55b6 (2026-09-27), MEASURED: `M M1` built (`linkedin_message_from_profile`).
     "cannot_deliver": 18,
     #: 36 AT THE ORCHESTRATOR'S MERGE OF LANE L7'S P B9 (2026-09-27), MEASURED: P B9
     #: (Premium badge) moved GAP -> COVERED-UNFIRED, released like the intro edits.
-    "unfired": 38,
+    #: 38 AT LANE L8'S MERGE OF MASTER (2026-09-27), MEASURED: `M C63` and
+    #: `N 64` built, never fired.
+    #: 41 AT LANE L5'S MERGE OF MASTER 52b55b6 (2026-09-27), MEASURED: `M M1` (COVERED-CANNOT-DELIVER), `N 4` (GAP, by D6) and `N 2`
+    #: (EXCLUDED-RULED, moved at the merge on the orchestrator's application of
+    #: THIRD-PARTY-PROFILE-FOR-A-NAMED-TARGET) all COVERED-UNFIRED.
+    "unfired": 41,
     #: 104 AT THE ORCHESTRATOR'S MERGE OF LANE Y2'S FOLLOW-UP (2026-09-27), MEASURED:
     #: the P-R settings block itemized into 22 rows (P2-P23; Delete Data EXCLUDED-RULED).
     "gap_read": 104,
@@ -1181,15 +1199,19 @@ PINNED = {
     #: the P-R settings block itemized into 22 rows (P2-P23; Delete Data EXCLUDED-RULED).
     #: 353 AT THE ORCHESTRATOR'S MERGE OF LANE L7'S P B9 (2026-09-27), MEASURED: P B9
     #: (Premium badge) moved GAP -> COVERED-UNFIRED, released like the intro edits.
-    #: 352 AT LANE L5'S FOLLOW-UP MERGE OF MASTER 2eb90ad (2026-09-27), MEASURED:
-    #: `N 4` built by D6 (`linkedin_connect_from_profile`) left GAP; its line
-    #: stays, built. `M M1` was not a GAP row, so it moves nothing here.
-    "gap_write": 352,
+    #: 378 AT LANE L8'S MERGE OF MASTER (2026-09-27), MEASURED: the returned
+    #: write rows and `P A23b`, less the two built and the two re-excluded;
+    #: `N 125` counted as a W row once its R/W cell read `W`.
+    #: 377 AT LANE L5'S MERGE OF MASTER 52b55b6 (2026-09-27), MEASURED: `N 4`, a W row, left GAP; its write-classes line stays,
+    #: built.
+    "gap_write": 377,
     #: All 54 are `jobs.md`, which has no per-row R/W column (56 until the
     #: lane-L3 merge built J 18 and J 39). Not a coincidence
     #: and not a defect in the finder: it is the whole of that slice's still-GAP
     #: population. 92 since lane R's merge, which returned 38 jobs rows.
-    "gap_unknown": 107,
+    #: 109 AT LANE L8'S MERGE OF MASTER (2026-09-27), MEASURED: `J 69` and
+    #: `J 87` returned; a jobs row carries no R/W column.
+    "gap_unknown": 109,
     "gap_ambiguous": 0,
     #: BUCKET 3, MEASURED 2026-09-23 (`_audit/2026-09-23-bucket3-addresses.md`),
     #: counted off `_audit/_census/read-addresses.tsv`, whose every verdict
@@ -1377,11 +1399,21 @@ PINNED = {
     #:   2026-09-27)          two W rows the write hold binds with no marker
     #:                        (+2 standing) -- Message and Connect on the
     #:                        profile of a person he names.
+    #:   lane L5's merge      18 standing / 0 / 0 / 23 none, 7 released, of 41,
+    #:   of master 52b55b6    measured on the merged tree: master's 15 (lane
+    #:   (2026-09-27)         L8's `M C63` and `N 64` in) with this lane's
+    #:                        `M M1` and `N 4`, and `N 2`, moved at the merge
+    #:                        (+3 standing).
     #: `b1_relayed` is the count this file called `b1_named_target` until the
     #: target condition was registered: a name for what a status COUNTS, not
     #: for which ruling happens to have it today. `b1_released` is a SUBSET of
     #: `b1_no_ruling`: the writes held by nothing because a release says so.
-    "b1_standing": 15,
+    #: 15 AT LANE L8'S MERGE OF MASTER (2026-09-27), MEASURED: `M C63` and
+    #: `N 64` entered bucket 1, W rows the write hold binds with no marker
+    #: (OPERATOR-NAMES-THE-TARGET).
+    #: 18 AT LANE L5'S MERGE OF MASTER 52b55b6 (2026-09-27), MEASURED: `M M1`, `N 4` and `N 2`, three W rows the write hold
+    #: binds with no marker (OPERATOR-NAMES-THE-TARGET).
+    "b1_standing": 18,
     "b1_relayed": 0,
     "b1_pending": 0,
     #: 22 AT THE ORCHESTRATOR'S MERGE OF LANE D (2026-09-27), MEASURED: lane D
@@ -1421,9 +1453,13 @@ PINNED = {
     #: 1902fcb, MEASURED on the merged tree: master's lanes had grown the
     #: table to 107 rows (11 admitted, 36 refused), and this lane's two
     #: People-tab rows move it by +2 / -2. 13 + 34 + 0 + 2 + 0 = 49 = 41 + 8.
-    "jobs_gap": 107,
+    #: 109 AT LANE L8'S MERGE OF MASTER (2026-09-27), MEASURED: `J 69` and
+    #: `J 87` returned to GAP, each given a line in jobs-directions.tsv.
+    "jobs_gap": 109,
     "jobs_dir_r": 41,
-    "jobs_dir_w": 58,
+    #: 60 AT LANE L8'S MERGE OF MASTER (2026-09-27), MEASURED: `J 69` and
+    #: `J 87`, both W.
+    "jobs_dir_w": 60,
     "jobs_dir_rw": 8,
     "jobs_admitted": 13,
     "jobs_refused": 34,
@@ -1455,15 +1491,21 @@ PINNED_B1_ROWS: dict[str, tuple[str, ...]] = {
     #: offline and never fired; `M M17` rests on it by D6 (an emoji is a
     #: character of the words it types). Held until he names the
     #: conversation and the words.
-    #: `M M1` and `N 4` entered with lane L5's follow-up, 2026-09-27: Message
-    #: and Connect on the profile of a person he names by link or member id
-    #: (`linkedin_message_from_profile`, `linkedin_connect_from_profile`; `N 4`
-    #: by D6), built offline and never fired. Held until he names the person
-    #: -- ruling THIRD-PARTY-PROFILE-FOR-A-NAMED-TARGET: never a stranger.
+    #: `M C63` and `N 64` entered AT LANE L8'S MERGE OF MASTER (2026-09-27),
+    #: MEASURED: leaving one group he names (`linkedin_withdraw_from_group`),
+    #: one capability counted twice, built offline under
+    #: OUTWARD-CLASSES-BUILT-BEHIND-GRANTS and never fired. Held until he names
+    #: the group -- by numeric id, and not his last membership.
+    #: `M M1`, `N 2` and `N 4` entered AT LANE L5'S MERGE OF MASTER 52b55b6
+    #: (2026-09-27), MEASURED: Message and Connect on the profile of a person he
+    #: names by link or member id (`linkedin_message_from_profile`,
+    #: `linkedin_connect_from_profile`; `N 4` by D6, `N 2` on the orchestrator's
+    #: application of THIRD-PARTY-PROFILE-FOR-A-NAMED-TARGET), built offline and
+    #: never fired. Held until he names the person -- never a stranger.
     "OPERATOR-NAMES-THE-TARGET": (
         "J 103", "J 104", "J 128",
-        "M C1", "M C25", "M C32", "M M1", "M M10", "M M17",
-        "N 1", "N 4", "N 46", "N 47", "N 48",
+        "M C1", "M C25", "M C32", "M C63", "M M1", "M M10", "M M17",
+        "N 1", "N 2", "N 4", "N 46", "N 47", "N 48", "N 64",
         "P I14",
     ),
     #: `J 18` and `J 39` entered with the lane-L3 merge, 2026-09-23: reads

@@ -16,10 +16,11 @@ Two properties the shapers hold to:
 from __future__ import annotations
 
 import re
+from html.parser import HTMLParser
 from typing import Any, Iterable, Optional, Sequence
 from urllib.parse import parse_qs, unquote, unquote_plus, urlsplit
 
-from linkedin_server import people_seam
+from linkedin_server import people_data
 from linkedin_server.config import MAX_TEXT_CHARS
 
 # ---------------------------------------------------------------------------
@@ -325,8 +326,14 @@ _MUTUALS = re.compile(r"^\d+\s+mutual\s+connections?$", re.I)
 _ABOUT_THE_PAGE = re.compile(r"viewed your profile", re.I)
 
 
+#: A generous per-line bound for the lines of one viewer row before they are
+#: classified. The record's own caps apply to what is kept; this only stops a
+#: pathological line from being normalised in full.
+_VIEWER_LINE_CAP = 1000
+
+
 def parse_person_card(record: dict[str, Any]) -> Optional[dict[str, Any]]:
-    """Shape one profile-view row.
+    """Shape one profile-view row: ``{"person": <record>, "viewed", "anonymous"}``.
 
     ``record`` is ``{"href": ..., "text": ...}`` as harvested from the page.
     Returns ``None`` when the row is not a viewer, so callers can count what
@@ -344,14 +351,30 @@ def parse_person_card(record: dict[str, Any]) -> Optional[dict[str, Any]]:
       drops the timestamp this reads as zero rows, which the tool reports as
       a failure. That is the intended trade: a loud nothing beats a confident
       wrong.
+
+    THE VIEWER IS A PEOPLE RECORD SINCE 2026-09-24 (NAMES-AT-RUNTIME, applied
+    by PEOPLE-DATA-MITIGATIONS; lane G's first worked adopter). ``person`` is
+    :class:`linkedin_server.people_data.Person`'s envelope -- name, headline,
+    link, degree, and the untrusted-third-party-text marker -- and it is the
+    ONLY place this row carries anything the viewer wrote. Every line is
+    sanitised BEFORE it is classified, so an invisible or direction-changing
+    character cannot slip a heading past the viewed-your-profile test or a
+    badge past the degree test. The degree badge, discarded until this date,
+    is kept as the record's ``degree``. ``viewed`` is a normalised time and
+    ``anonymous`` a boolean this package computed.
     """
-    lines = content_lines(record.get("text", ""))
+    lines = [
+        clean
+        for clean in (
+            people_data.sanitise(line, cap=_VIEWER_LINE_CAP)
+            for line in content_lines(record.get("text", ""))
+        )
+        if clean and not is_chrome(clean)
+    ]
     if not lines:
         return None
 
-    name = trim(lines[0], 120)
-    if not name:
-        return None
+    name = lines[0]
     if _ABOUT_THE_PAGE.search(name):
         return None
 
@@ -360,35 +383,38 @@ def parse_person_card(record: dict[str, Any]) -> Optional[dict[str, Any]]:
         return None
 
     headline = None
+    degree = None
     for line in lines[1:]:
-        if has_time_ago(line) or is_degree_badge(line) or _MUTUALS.match(line):
+        if is_degree_badge(line):
+            degree = degree or line
             continue
-        headline = trim(line)
-        if headline:
-            break
+        if has_time_ago(line) or _MUTUALS.match(line):
+            continue
+        if headline is None:
+            headline = line
 
     slug = profile_slug_from(record.get("href", ""))
     anonymous = slug is None or any(
         marker in name.casefold() for marker in _ANONYMOUS_MARKERS
     )
-    out: dict[str, Any] = {
-        "name": name,
-        "headline": headline,
-        "viewed": when,
-        "anonymous": anonymous,
-    }
-    if slug and not anonymous:
-        # A BROWSER LINK, NOT A NAVIGABLE ADDRESS. This server will not
-        # open it. A url in tool OUTPUT and a url on
-        # `readonly._ALLOWED_URL_PATTERNS` are different objects with
-        # different purposes: the first is for a HUMAN to open, the
-        # second is for this process to navigate. The third-party
-        # profile pattern was removed from that list on 2026-09-04
-        # because the server must never load a member's profile -- and
-        # that did not touch this field, because handing him a link is
-        # not visiting it. Coupling the two is the confusion.
-        out["profile"] = f"https://www.linkedin.com/in/{slug}"
-    return out
+    # A BROWSER LINK, NOT A NAVIGABLE ADDRESS, and only for a named viewer.
+    # This server will not open it. A url in tool OUTPUT and a url on
+    # `readonly._ALLOWED_URL_PATTERNS` are different objects with different
+    # purposes: the first is for a HUMAN to open, the second is for this
+    # process to navigate. The third-party profile pattern was removed from
+    # that list on 2026-09-04 because the server must never load a member's
+    # profile -- and that did not touch this field, because handing him a link
+    # is not visiting it. Coupling the two is the confusion. VISIBLE ONLY: an
+    # anonymous viewer gets no link, and nothing here looks for one.
+    person = people_data.Person.from_page(
+        name=name,
+        headline=headline,
+        href=f"/in/{slug}/" if slug and not anonymous else None,
+        degree=degree,
+    )
+    if person is None:
+        return None
+    return {"person": person.envelope(), "viewed": when, "anonymous": anonymous}
 
 
 def parse_connection_card(record: dict[str, Any]) -> Optional[dict[str, Any]]:
@@ -4464,7 +4490,41 @@ def envelope(
 
 #: How LinkedIn labels each row of the conversation list. Measured on the live
 #: surface: ``aria-label="Select conversation with <NAME>"``.
-_CONVERSATION_ROW = re.compile(r'aria-label="Select conversation with ([^"]+)"')
+CONVERSATION_LABEL_PREFIX = "Select conversation with "
+
+
+class _ConversationLabels(HTMLParser):
+    """Every conversation label in a document, read as an ATTRIBUTE OF AN
+    ELEMENT -- never out of text -- with its entities decoded, and the offset
+    of the tag that carries it.
+
+    WHY A PARSER AND NOT THE PATTERN IT REPLACED (2026-09-27, found by lane G's
+    cold verification). The pattern read ``aria-label="Select conversation
+    with ..."`` anywhere in the serialised page, and a serialiser leaves the
+    quotes in TEXT alone: a message whose words contained that phrase became
+    a row of its own, its "name" the words and markup that followed (seven
+    rows counted for six labels). And the pattern never decoded entities, so a
+    name drawn with a no-break space or an ampersand came back as ``&nbsp;``
+    or ``&amp;`` -- where the composer's list, reading the same row through
+    the browser, returned the name itself.
+    """
+
+    def __init__(self, text: str) -> None:
+        super().__init__(convert_charrefs=True)
+        self._line_starts = [0]
+        self._line_starts.extend(i + 1 for i, ch in enumerate(text) if ch == "\n")
+        self.found: list[tuple[int, str]] = []
+
+    def handle_starttag(self, tag: str, attrs: list[tuple[str, Optional[str]]]) -> None:
+        for key, value in attrs:
+            if key == "aria-label" and value and value.startswith(CONVERSATION_LABEL_PREFIX):
+                line, column = self.getpos()
+                self.found.append(
+                    (self._line_starts[line - 1] + column, value[len(CONVERSATION_LABEL_PREFIX):])
+                )
+                return
+
+    handle_startendtag = handle_starttag
 
 #: Words LinkedIn uses to mark a row unread. Measured: ``UNREAD``, ``Unread``,
 #: ``unread`` and the class token ``messaging-remove-unread-blue-background``.
@@ -4502,21 +4562,31 @@ def _conversation_rows(html: str) -> list[dict[str, Any]]:
     ORDER IS PRESERVED, and that is load-bearing even when names are redacted:
     "rows 1 and 4 of 10 are unread" is actionable in a way that "4 unread" is
     not.
+
+    A LABEL IS AN ATTRIBUTE, read by :class:`_ConversationLabels`: text that
+    merely spells one -- a message quoting the phrase -- is no row.
     """
     text = html or ""
-    marks = list(_CONVERSATION_ROW.finditer(text))
+    reader = _ConversationLabels(text)
+    reader.feed(text)
+    reader.close()
+    marks = reader.found
     rows: list[dict[str, Any]] = []
     seen: set[str] = set()
-    for i, match in enumerate(marks):
-        name = match.group(1).strip()
+    for i, (start, label) in enumerate(marks):
+        name = label.strip()
         if name in seen:
             continue
         seen.add(name)
-        # The row runs from this label to the next one. The tail row runs to
-        # a bounded distance rather than to the end of the document, so the
-        # page footer cannot mark the last conversation unread.
-        start = match.start()
-        end = marks[i + 1].start() if i + 1 < len(marks) else min(len(text), match.end() + 4000)
+        # The row runs from this label's tag to the next one. The tail row
+        # runs to a bounded distance past its own tag rather than to the end
+        # of the document, so the page footer cannot mark the last
+        # conversation unread.
+        if i + 1 < len(marks):
+            end = marks[i + 1][0]
+        else:
+            tag_end = text.find(">", start)
+            end = min(len(text), (tag_end if tag_end >= 0 else start) + 4000)
         segment = text[start:end]
         rows.append(
             {
@@ -4553,6 +4623,16 @@ def messaging_overview(
 
     NAMES ARE OFF BY DEFAULT and the pairing survives the redaction: position
     plus unread state is actionable even without identities.
+
+    ASKED FOR, A NAME COMES BACK AS A PEOPLE RECORD (since 2026-09-27, the
+    second worked adopter of PEOPLE-DATA-MITIGATIONS): each row's ``with`` is
+    a :class:`people_data.Person` holding the label LinkedIn draws for the
+    conversation -- sanitised, capped, marked as another member's words --
+    and never the raw label. THE LIMIT, STATED: this reads the label alone,
+    which does not say whether the conversation has one other person or
+    several, so a group conversation's label comes back in a person record.
+    ``linkedin_list_conversations`` reads the row's group marker and returns
+    a group's label as a title record instead.
     """
     text = html or ""
     rows = _conversation_rows(text)
@@ -4561,18 +4641,16 @@ def messaging_overview(
     in_rows = sum(1 for r in rows if r["unread"])
     on_a_thread = "/messaging/thread/" in (landed_url or "")
 
-    # A NAME LEAVES THROUGH THE PEOPLE SEAM (2026-09-27), where lane G's
-    # shared sanitiser and untrusted-text marker adopt it: PEOPLE-DATA-
-    # MITIGATIONS item 2. See ``linkedin_server/people_seam.py`` and the
-    # failing-until-adopted tests in ``tests/test_people_seam.py``.
-    conversations = [
-        {
-            "position": row["position"],
-            "name": people_seam.name(row["name"]) if include_names else NAME_PLACEHOLDER,
-            "unread": row["unread"],
-        }
-        for row in rows
-    ]
+    conversations = []
+    for row in rows:
+        entry: dict[str, Any] = {"position": row["position"]}
+        if include_names:
+            person = people_data.Person.from_page(name=row["name"])
+            entry["with"] = None if person is None else person.envelope()
+        else:
+            entry["name"] = NAME_PLACEHOLDER
+        entry["unread"] = row["unread"]
+        conversations.append(entry)
 
     return {
         "conversations": len(rows),
@@ -4727,7 +4805,10 @@ def messaging_filters(html: str) -> dict[str, Any]:
         # LinkedIn pills nest spans, so inner text is often empty and the
         # aria-label is the only thing carrying the word.
         aria_label = (aria.group(1) if aria else "").strip()
-        label = (aria_label + " " + (inner or "")).strip()
+        # THE ACCESSIBLE NAME, not the two joined: since the shared rule became
+        # EXACT (2026-09-27, ``dom.filter_name_matches``), a pill whose
+        # aria-label repeats its text would no longer equal its word joined.
+        label = aria_label or (inner or "").strip()
         for name in _FILTER_NAMES:
             # THE SAME PREDICATE THE ACTIVATOR USES. Importing it here rather
             # than re-implementing "does the name appear in the label" is the

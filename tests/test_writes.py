@@ -721,10 +721,17 @@ def test_what_ships_is_narrower_than_what_is_sanctioned():
         # on the lane's branch): the reply inside a conversation he names
         # (census M M10), sanctioned and performable in the same move.
         "send_reply",
-        # SEVENTEEN AND EIGHTEEN FROM 2026-09-27 (lane L5's follow-up): Connect
+        # SEVENTEEN FROM LANE L8'S MERGE OF MASTER, 2026-09-27 (sixteen on the
+        # lane's branch): leaving one group (census rows M C63 / N 64),
+        # sanctioned and performable in the same move, under
+        # OUTWARD-CLASSES-BUILT-BEHIND-GRANTS, on the admitted /groups/ root
+        # and an item measured on all five membership rows' menus.
+        "withdraw_from_group",
+        # EIGHTEEN AND NINETEEN FROM LANE L5'S MERGE OF MASTER 52b55b6, the
+        # same day (seventeen and eighteen on its follow-up branch): Connect
         # and Message on the profile of a person he names (census N 4 by D6,
-        # and M M1), sanctioned and performable in the same move, on ruling
-        # THIRD-PARTY-PROFILE-FOR-A-NAMED-TARGET.
+        # N 2, and M M1), sanctioned and performable in the same move, on
+        # ruling THIRD-PARTY-PROFILE-FOR-A-NAMED-TARGET.
         "connect_from_profile",
         "message_from_profile",
     }
@@ -861,15 +868,24 @@ def test_what_ships_is_narrower_than_what_is_sanctioned():
         # the click are perform()'s own -- and the thread address was
         # already on the read allowlist.
         "send_reply",
-        # THE SIXTEENTH AND SEVENTEENTH, 2026-09-27 (lane L5's follow-up):
-        # Connect and Message on the profile of a person he names by link or
-        # member id, each printing whom it resolved to before anything is
-        # pressed. ONE THING WAS PERMITTED TO LET THEM CROSS, and it is a
-        # NAVIGATION, not a mutation: a second door,
-        # readonly.assert_named_profile_url, which the read door does not
-        # share and which only writes._load_named_profile can ask for.
-        # readonly.SANCTIONED_MUTATIONS is unchanged -- the click and the fill
-        # are perform()'s own.
+        # THE SIXTEENTH, 2026-09-27 (census rows M C63 / N 64, lane L8; the
+        # fifteenth on its branch until its merge of master brought send_reply):
+        # leaving one group he names by numeric id, on the /groups/ root. TWO
+        # presses and still NO new permission: the disclosure and the item
+        # both drain perform()'s one click queue, the item appended only by
+        # a gate that re-reads the menu (writes.MENU_ITEM_ACTIONS). No undo
+        # is built here, and its spec says so.
+        "withdraw_from_group",
+        # THE SEVENTEENTH AND EIGHTEENTH, 2026-09-27 (lane L5's follow-up; the
+        # sixteenth and seventeenth on its branch until its merge of master
+        # 52b55b6 brought withdraw_from_group in first): Connect and Message on
+        # the profile of a person he names by link or member id, each printing
+        # whom it resolved to before anything is pressed. ONE THING WAS
+        # PERMITTED TO LET THEM CROSS, and it is a NAVIGATION, not a mutation:
+        # a second door, readonly.assert_named_profile_url, which the read door
+        # does not share and which only writes._load_named_profile can ask
+        # for. readonly.SANCTIONED_MUTATIONS is unchanged -- the click and the
+        # fill are perform()'s own.
         "connect_from_profile",
         "message_from_profile",
     }
@@ -1361,13 +1377,24 @@ _UNMEASURED_REVERSIBILITY = {
     # observed on this surface.
     "mark_company_interest",
     # 2026-09-24. Whether LinkedIn lets a sent reply be recalled has never
-    # been observed, and recalling one is destruction this server may not
-    # perform at any confirm level either way.
+    # been observed. This comment used to add "and recalling one is
+    # destruction this server may not perform at any confirm level either
+    # way"; that refusal was retired the same day (OUTWARD-CLASSES-BUILT-
+    # BEHIND-GRANTS) and restated at lane L8's merge of master: no delete is
+    # built, and a delivered reply is not recalled from an inbox either way.
     "send_reply",
-    # 2026-09-27. What a pressed Connect becomes on a profile has never been
-    # captured, so neither has a withdraw control; and whether a message sent
-    # from a profile can be recalled has never been observed. Both undo
-    # routes are destruction, forbidden here at any confirm level.
+    # 2026-09-27 (census rows M C63 / N 64). No rejoin has ever been observed
+    # and nothing here joins a group; its spec treats it as irreversible.
+    "withdraw_from_group",
+    # 2026-09-27 (lane L5's follow-up). What a pressed Connect becomes on a
+    # profile has never been captured, so neither has a withdraw control; and
+    # whether a message sent from a profile can be recalled has never been
+    # observed here. Neither undo is built: an invitation's withdraw is
+    # outward_classes' withdraw_invitation, BLOCKED, and no message delete
+    # exists. This comment used to end "Both undo routes are destruction,
+    # forbidden here at any confirm level"; that refusal was retired
+    # 2026-09-24 (OUTWARD-CLASSES-BUILT-BEHIND-GRANTS) and restated at lane
+    # L5's merge of master 52b55b6.
     "connect_from_profile",
     "message_from_profile",
 }
@@ -1390,7 +1417,10 @@ REVERSIBILITY_CLASS = {
     # surface that would settle it -- his applied list -- is empty, so there is
     # nothing there to look for a withdraw control on. It carries
     # irreversible=True regardless, on the separate and certain ground that
-    # withdrawing is permanently forbidden here in either direction.
+    # LinkedIn offers no withdraw of a submitted application (Help Center
+    # a512388). That ground read "withdrawing is permanently forbidden here in
+    # either direction" until 2026-09-24, when OUTWARD-CLASSES-BUILT-BEHIND-
+    # GRANTS retired the refusal; the verdict did not move, its reason did.
     "apply_job": "STILL-UNKNOWN",
     "set_open_to_work": "REVERSIBLE",
     # 2026-09-23. REVERSIBLE on the same measurement as unfollow_company --
@@ -1400,7 +1430,12 @@ REVERSIBILITY_CLASS = {
     # 2026-09-24. STILL-UNKNOWN: LinkedIn's Help describes removing an
     # interest, but the control that would do it has never been captured.
     "mark_company_interest": "STILL-UNKNOWN",
-    # 2026-09-27. STILL-UNKNOWN, both: see _UNMEASURED_REVERSIBILITY.
+    # 2026-09-27. STILL-UNKNOWN whether a group left can be rejoined; it
+    # carries irreversible=True regardless, because no join is built here and
+    # an approval-gated group needs a manager to let him back in.
+    "withdraw_from_group": "STILL-UNKNOWN",
+    # 2026-09-27 (lane L5's follow-up). STILL-UNKNOWN, both: see
+    # _UNMEASURED_REVERSIBILITY.
     "connect_from_profile": "STILL-UNKNOWN",
     "message_from_profile": "STILL-UNKNOWN",
 }
@@ -1427,6 +1462,7 @@ REVERSIBILITY_MEASURED = {
     "follow_company_page": True,
     "mark_company_interest": False,
     "send_reply": False,
+    "withdraw_from_group": False,
     "connect_from_profile": False,
     "message_from_profile": False,
 }
@@ -3398,8 +3434,23 @@ def test_the_write_module_passes_its_own_confinement_rule():
 
 def test_every_permanent_refusal_carries_its_reason():
     """An omission that does not explain itself reads as an oversight, and the
-    next agent 'fixes' it."""
-    assert len(PERMANENTLY_FORBIDDEN) >= 8
+    next agent 'fixes' it.
+
+    PINNED BY NAME SINCE 2026-09-24, NOT BY A FLOOR. This said ``>= 8`` and
+    the dict held nine; OUTWARD-CLASSES-BUILT-BEHIND-GRANTS then retired three
+    (repost or share, endorse or recommend, delete or withdraw), leaving the
+    six whose grounds are themselves mitigations. A floor would have gone red
+    for the right change and stayed green for a wrong one -- any six names
+    pass ``>= 6`` -- so the set is asserted against the ruling's own list in
+    ``outward_classes``, and the three retired names are asserted gone.
+    """
+    from linkedin_server import outward_classes
+
+    assert sorted(PERMANENTLY_FORBIDDEN) == sorted(
+        outward_classes.SURVIVING_PERMANENT_REFUSALS
+    )
+    for retired in outward_classes.RETIRED_PERMANENT_REFUSALS:
+        assert retired not in PERMANENTLY_FORBIDDEN, retired
     for name, reason in PERMANENTLY_FORBIDDEN.items():
         assert len(reason) > 40, name
 

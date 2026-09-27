@@ -1,4 +1,4 @@
-"""The tool surface: fifty-eight tools, forty-one of which do not write.
+"""The tool surface: fifty-nine tools, forty-one of which do not write.
 
 **AND THIS LINE IS NOW DERIVED, NOT MAINTAINED, 2026-09-20.** It had gone stale
 a THIRD time -- "forty-four tools, thirty-two of which do not write" against a
@@ -141,8 +141,15 @@ SANCTIONED_WRITE_TOOLS = frozenset(SANCTIONED_WRITES) & {
     # the write and its docstring must describe one, so it is on both
     # exemptions -- which are one set. A key in writes.SANCTIONED_WRITES.
     "linkedin_send_reply",
-    # THE SIXTEENTH AND SEVENTEENTH, 2026-09-27 (census rows N 4 by D6, and
-    # M M1; lane L5's follow-up, ruling THIRD-PARTY-PROFILE-FOR-A-NAMED-
+    # THE SIXTEENTH, 2026-09-27 (census rows M C63 / N 64, lane L8, at its
+    # merge of master): leaving one group he names by numeric id. Named
+    # "withdraw" because the naming law needs a write verb and "leave" is on
+    # no list -- so its name DOES announce the write, and this exemption is
+    # what lets it. A key in writes.SANCTIONED_WRITES like the rest.
+    "linkedin_withdraw_from_group",
+    # THE SEVENTEENTH AND EIGHTEENTH, 2026-09-27, at lane L5's merge of master
+    # 52b55b6 (the sixteenth and seventeenth on its follow-up branch; census
+    # rows N 4 by D6, N 2 and M M1, ruling THIRD-PARTY-PROFILE-FOR-A-NAMED-
     # TARGET): Connect and Message on the profile of a person he names by
     # link or member id. Their NAMES announce the write and their docstrings
     # must describe one, so they are on both exemptions -- which are one set.
@@ -488,8 +495,11 @@ EXPECTED_TOOLS = {
     "linkedin_open_thread",
     # THE FIFTY-FOURTH, the same merge, a WRITE: see SANCTIONED_WRITE_TOOLS.
     "linkedin_send_reply",
-    # THE FIFTY-SEVENTH AND FIFTY-EIGHTH, 2026-09-27 (lane L5's follow-up),
-    # two WRITES: see SANCTIONED_WRITE_TOOLS.
+    # THE FIFTY-SEVENTH, 2026-09-27 (lane L8, at its merge of master), a
+    # WRITE: see SANCTIONED_WRITE_TOOLS.
+    "linkedin_withdraw_from_group",
+    # THE FIFTY-EIGHTH AND FIFTY-NINTH, 2026-09-27 (lane L5's follow-up, at
+    # its merge of master 52b55b6), two WRITES: see SANCTIONED_WRITE_TOOLS.
     "linkedin_connect_from_profile",
     "linkedin_message_from_profile",
 }
@@ -530,6 +540,13 @@ EXPECTED_TOOLS = {
 #: ALWAYS DID: there is no endorsement capability under any spelling, because
 #: measuring one requires loading a third party's profile and that is
 #: permanently refused. It is the only one of the nine with no tool at all.
+#: (Restated 2026-09-27, lane L8: since 2026-09-24 endorsing is a class
+#: OUTWARD-CLASSES-BUILT-BEHIND-GRANTS builds behind the grant, recorded as
+#: ``outward_classes`` ``endorse_skill``, BLOCKED on the route that would load
+#: the named member's profile inside his act (the read boundary refuses
+#: ``/in/<slug>/`` today); its capture can be taken only inside an
+#: endorsement he names, and the load FOR A MEASUREMENT stays refused. Still no
+#: tool, so the spelling stays forbidden.)
 FORBIDDEN_TOOLS = {
     "linkedin_apply",
     "linkedin_easy_apply",
@@ -561,11 +578,20 @@ async def tools():
     return {t.name: t for t in await mcp.list_tools()}
 
 
-async def test_the_surface_is_exactly_the_fifty_eight_tools(tools):
-    """RENAMED AGAIN ON LANE L5'S FOLLOW-UP BRANCH, 2026-09-27, to
-    ``..._fifty_eight_tools``: two writes arrived together
-    (``linkedin_connect_from_profile``, ``linkedin_message_from_profile``) on
-    top of fifty-six. The name moved with the pin.
+async def test_the_surface_is_exactly_the_fifty_nine_tools(tools):
+    """RENAMED AGAIN AT LANE L5'S MERGE OF MASTER 52b55b6, 2026-09-27, to
+    ``..._fifty_nine_tools``: that lane's follow-up branch had brought two
+    writes together (``linkedin_connect_from_profile``,
+    ``linkedin_message_from_profile``) and renamed this test
+    ``..._fifty_eight_tools`` there, counting from fifty-six, while master
+    made it ``..._fifty_seven_tools`` at lane L8's merge. MEASURED off the
+    merged registry, not summed; the name moved with the pin in the merge
+    commit.
+
+    RENAMED AGAIN AT LANE L8'S MERGE OF MASTER 2eb90ad, 2026-09-27, to
+    ``..._fifty_seven_tools``: one write arrived, ``linkedin_withdraw_from_group``
+    (census M C63 / N 64), on top of master's fifty-six. The lane's branch had
+    not renamed it; the name moved with the pin in the merge commit.
 
     RENAMED AGAIN AT LANE L5'S MERGE OF MASTER 66aaa95, 2026-09-24, to
     ``..._fifty_six_tools``: two reads and a write arrived together
@@ -817,11 +843,17 @@ async def test_the_surface_is_exactly_the_fifty_eight_tools(tools):
     # READS and a WRITE on top of lane L7's fifty-three, so both sides of
     # the split below move -- the reads by two, the writes by one. The NAME
     # moved too. MEASURED off mcp.list_tools() on the merged tree.
-    # FIFTY-EIGHT ON LANE L5'S FOLLOW-UP BRANCH, 2026-09-27: two WRITES --
-    # linkedin_connect_from_profile and linkedin_message_from_profile -- so
-    # the split moves on its write side and the non-write count holds. The
-    # NAME moved again. MEASURED off mcp.list_tools() on the branch.
-    assert len(tools) == 58
+    # FIFTY-SEVEN AT LANE L8'S MERGE OF MASTER 2eb90ad, 2026-09-27:
+    # linkedin_withdraw_from_group, a WRITE, so the split moves on its write
+    # side and the non-write count holds at forty-one. MEASURED off
+    # mcp.list_tools() on the merged tree.
+    # FIFTY-NINE AT LANE L5'S MERGE OF MASTER 52b55b6, the same day: two
+    # WRITES from its follow-up branch (fifty-eight there) --
+    # linkedin_connect_from_profile and linkedin_message_from_profile -- on top
+    # of master's fifty-seven, so the split moves on its write side and the
+    # non-write count holds. The NAME moved again. MEASURED off
+    # mcp.list_tools() on the merged tree, not summed.
+    assert len(tools) == 59
     # And the split is asserted, not just the total. A future tool arriving as
     # a write would otherwise only have to bump a number.
     #
@@ -850,6 +882,7 @@ async def test_the_surface_is_exactly_the_fifty_eight_tools(tools):
         "linkedin_follow_company_page",
         "linkedin_mark_company_interest",
         "linkedin_send_reply",
+        "linkedin_withdraw_from_group",
         "linkedin_connect_from_profile",
         "linkedin_message_from_profile",
     }
@@ -976,9 +1009,12 @@ async def test_the_surface_is_exactly_the_fifty_eight_tools(tools):
     # addresses the boundary already admitted, and the write side grew by
     # exactly one, linkedin_send_reply, which is on the exemption -- so a
     # read arriving did not hide a write.
-    # STILL FORTY-ONE ON LANE L5'S FOLLOW-UP BRANCH, 2026-09-27: two WRITES
-    # arrived (linkedin_connect_from_profile, linkedin_message_from_profile),
-    # both on the exemption, and the read side is byte-identical across them.
+    # STILL FORTY-ONE AT LANE L8'S MERGE, 2026-09-27: the one tool it brought,
+    # linkedin_withdraw_from_group, is a write and on the exemption.
+    # STILL FORTY-ONE AT LANE L5'S MERGE OF MASTER 52b55b6, the same day: the
+    # two tools its follow-up brought (linkedin_connect_from_profile,
+    # linkedin_message_from_profile) are writes, both on the exemption, and
+    # the read side is byte-identical across them.
     assert len(set(tools) - SANCTIONED_WRITE_TOOLS) == 41
 
 
@@ -1084,6 +1120,7 @@ async def test_the_exemption_covers_only_the_names_on_it(tools):
         "linkedin_follow_company_page",
         "linkedin_mark_company_interest",
         "linkedin_send_reply",
+        "linkedin_withdraw_from_group",
         "linkedin_connect_from_profile",
         "linkedin_message_from_profile",
     }
@@ -1567,6 +1604,11 @@ async def test_server_info_stops_claiming_read_only_once_writes_are_on(monkeypat
         # establish that it did not happen.
         "update_profile_field",
         "update_setting",
+        # THE SIXTEENTH, 2026-09-27 (census M C63 / N 64, lane L8, at its merge
+        # of master), typed here by hand: leaving one group he names by
+        # numeric id, two presses through the one click site, verified off a
+        # fresh render of his Groups page.
+        "withdraw_from_group",
     ]
 
 
@@ -1636,6 +1678,9 @@ async def test_the_capability_is_reported_even_with_the_flag_off(monkeypatch):
         # establish that it did not happen.
         "update_profile_field",
         "update_setting",
+        # THE SIXTEENTH, 2026-09-27 (census M C63 / N 64). Typed by hand, as
+        # this list requires, at the merge of the lane that built it.
+        "withdraw_from_group",
     ]
     assert "OFF" in info["writes_note"]
     assert "unsave_job" in info["writes_note"]
@@ -1985,11 +2030,17 @@ async def test_the_server_instructions_name_every_write_that_ships():
         # send_reply. Extended the same way; the instructions still have to
         # SAY it, which this map does not do.
         15: "fifteen",
-        # SIXTEEN AND SEVENTEEN FROM 2026-09-27 (lane L5's follow-up):
-        # connect_from_profile and message_from_profile arrived together, so
-        # only seventeen is ever reached; sixteen is spelled so the map has no
-        # hole a later count could fall into.
-        16: "sixteen", 17: "seventeen",
+        # SIXTEEN FROM LANE L8'S MERGE OF MASTER 2eb90ad, 2026-09-27:
+        # withdraw_from_group. Extended the same way -- and the KeyError this
+        # map raises on a missing count is what caught the extension missing
+        # on the merged tree's first gate.
+        16: "sixteen",
+        # SEVENTEEN AND EIGHTEEN FROM LANE L5'S MERGE OF MASTER 52b55b6, the
+        # same day: connect_from_profile and message_from_profile arrived
+        # together from its follow-up branch, so only eighteen is ever
+        # reached; seventeen is spelled so the map has no hole a later count
+        # could fall into.
+        17: "seventeen", 18: "eighteen",
     }
     assert f"{words[len(writes.PERFORMABLE)]} write" in text
     for action in writes.PERFORMABLE:
@@ -2245,7 +2296,11 @@ async def test_server_info_reports_irreversibility_before_a_caller_commits(
     performable and it carries ``irreversible=True`` -- not because its
     reversibility was measured and came back no, but because it was never
     measurable at all and withdrawing is permanently forbidden here in either
-    direction. So this server can now do something it cannot undo.
+    direction. So this server can now do something it cannot undo. (That
+    ground was restated 2026-09-24: the refusal it names was retired by
+    OUTWARD-CLASSES-BUILT-BEHIND-GRANTS, and what keeps an application
+    irreversible now is LinkedIn's own Help Center, a512388 -- no withdraw of
+    a submitted LinkedIn application exists to build.)
 
     The old docstring's argument inverted with it and is worth stating in its
     new form rather than deleting. It ran: an empty
@@ -2288,14 +2343,20 @@ async def test_server_info_reports_irreversibility_before_a_caller_commits(
     assert expected_performable == [
         "apply_job",
         "comment_on_item",
-        # THE SEVENTH AND EIGHTH, 2026-09-27, TYPED BY HAND AS THIS LIST
-        # DEMANDS (lane L5's follow-up). connect_from_profile lands an
-        # invitation with his name on it on a person he names, and pressing
-        # Connect may send it at once; message_from_profile delivers words a
-        # person reads. Withdrawing and deleting are both destruction,
-        # forbidden here at any confirm level. And BOTH COST SOMETHING BEFORE
-        # ANYTHING IS PRESSED: the preview loads that person's profile, which
-        # may show him among their viewers, and both specs' residue says so.
+        # THE EIGHTH AND NINTH, 2026-09-27, TYPED BY HAND AS THIS LIST
+        # DEMANDS (lane L5's follow-up; the seventh and eighth on its branch
+        # until its merge of master 52b55b6 brought withdraw_from_group in
+        # first). connect_from_profile lands an invitation with his name on it
+        # on a person he names, and pressing Connect may send it at once;
+        # message_from_profile delivers words a person reads. Nothing this
+        # server does takes either back: its withdraw is outward_classes'
+        # withdraw_invitation, BLOCKED, and no message delete is built -- and a
+        # delete would not un-read what was read. (This comment used to say
+        # both were "destruction, forbidden here at any confirm level"; that
+        # refusal was retired 2026-09-24 by OUTWARD-CLASSES-BUILT-BEHIND-GRANTS,
+        # restated at the merge.) And BOTH COST SOMETHING BEFORE ANYTHING IS
+        # PRESSED: the preview loads that person's profile, which may show him
+        # among their viewers, and both specs' residue says so.
         "connect_from_profile",
         "message_from_profile",
         "publish_post",
@@ -2317,14 +2378,24 @@ async def test_server_info_reports_irreversibility_before_a_caller_commits(
         "send_message",
         # THE SIXTH, 2026-09-24, TYPED BY HAND AS THIS LIST DEMANDS: a reply
         # reaches the named people in a conversation he chose, and nothing
-        # this server may do takes it back -- deletion is permanently
-        # forbidden here, and even a recall would not un-read it. It spends
-        # no credit this server can see, and whether LinkedIn meters a reply
-        # inside an InMail conversation is UNMEASURED; its spec says so.
+        # this server does takes it back -- no delete is built, and even a
+        # recall would not un-read it. (This comment used to say "deletion is
+        # permanently forbidden here"; that refusal was retired 2026-09-24 by
+        # OUTWARD-CLASSES-BUILT-BEHIND-GRANTS, restated at lane L8's merge.)
+        # It spends no credit this server can see, and whether LinkedIn meters
+        # a reply inside an InMail conversation is UNMEASURED; its spec says so.
         "send_reply",
+        # THE SEVENTH, 2026-09-27 (lane L8, at its merge of master), TYPED BY
+        # HAND AS THIS LIST DEMANDS, AND THE DECISION IT RECORDS: leaving a
+        # group is permanent through this server. No join is built (census
+        # M C61), an approval-gated group needs a manager to let him back in,
+        # and an unlisted group may not be findable again -- so its spec treats
+        # it as irreversible though its reversibility was never measured. It
+        # lands on no person and sends no message; it spends nothing.
+        "withdraw_from_group",
     ], (
         "the permanent things this server performs are typed in here by "
-        "whoever added one. A NINTH arriving is a decision, not a diff."
+        "whoever added one. A TENTH arriving is a decision, not a diff."
     )
     # THE SECOND ARRIVED ON 2026-09-01 AND IT IS DIFFERENT IN KIND, which is
     # why this is written out rather than the list quietly growing by one.

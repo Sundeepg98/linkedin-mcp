@@ -43,11 +43,13 @@ into this process is a count. **No message body, no correspondent's name and
 no thread identifier is returned by any function in this module**, with two
 deliberate, named exceptions: the conversation list's names when the caller
 passes ``include_names`` (his own inbox, opt-in, as ``linkedin_open_messaging``
-already offers), and the reply preview's ``who_this_would_reach``, printed in
-the confirm block only -- see :func:`name_the_reply_recipient`. BOTH pass
-through ``people_seam.name`` and nothing else, so lane G's shared sanitiser
-reaches both when it adopts that seam (the second was routed there on
-2026-09-27, when a cold re-check found it bypassing the seam).
+already offers) -- read by :func:`read_conversation_list` into its reading and
+published by :func:`list_result` only as people records (since 2026-09-27,
+PEOPLE-DATA-MITIGATIONS) -- and the reply preview's ``who_this_would_reach``,
+returned in the confirm block only, as a people record since 2026-09-27
+(PREVIEW-NAMES-THE-RESOLVED-TARGET), built by ``people_seam.person``, the one
+builder every preview that names a person goes through -- see
+:func:`name_the_reply_recipient`.
 
 A THREAD ID IS ONLY EVER A TOOL ARGUMENT. It is validated against the same
 shape the read allowlist admits, formatted into one constant template, and
@@ -61,7 +63,7 @@ import re
 from typing import Any, Optional
 from urllib.parse import urlsplit
 
-from linkedin_server import coerce, landing, people_seam, shape
+from linkedin_server import coerce, landing, people_data, people_seam, shape
 from linkedin_server.errors import WriteAttemptError
 
 logger = logging.getLogger(__name__)
@@ -370,12 +372,8 @@ async def read_conversation_list(page: Any, *, include_names: bool = False) -> d
             record["group"] = bool(await _count(row.locator(GROUP_FACEPILE_SELECTOR)))
             if include_names:
                 names = row.locator(PARTICIPANT_NAMES_SELECTOR)
-                # THROUGH THE SEAM, 2026-09-27: every name this reader returns
-                # passes ``people_seam.name`` and nothing else, so lane G's
-                # shared sanitiser and marker adopt it in one place. Today the
-                # seam applies what ``_normalise`` did, character for character.
                 record["name"] = (
-                    people_seam.name(await names.first.inner_text())
+                    _normalise(await names.first.inner_text())
                     if await _count(names) == 1
                     else None
                 )
@@ -551,11 +549,37 @@ def receipt_guard(
     }
 
 
+def conversation_with(label: Any, *, group: bool) -> Optional[dict[str, Any]]:
+    """WHO A CONVERSATION IS WITH, as a people record, or ``None``.
+
+    The second worked adopter of PEOPLE-DATA-MITIGATIONS (lane G,
+    2026-09-27). A row draws ONE label: the other member's name on a
+    conversation with one person, and the participants' names -- or a title
+    somebody gave it -- on a group conversation. So a one-to-one row becomes a
+    :class:`people_data.Person` holding the name, its headline, link and
+    degree empty because the list draws none of them, and a group row becomes
+    a title record, which is how mitigation 1 returns a group. Either way the
+    label is sanitised, capped and marked as another member's words, and a
+    label with nothing left after sanitising comes back as ``None``, never
+    raw.
+    """
+    if group:
+        record: Any = people_data.Group.from_page(title=label)
+    else:
+        record = people_data.Person.from_page(name=label)
+    return None if record is None else record.envelope()
+
+
 def list_result(
     reading: dict[str, Any], landed: Any, *, include_names: bool
 ) -> dict[str, Any]:
     """What ``linkedin_list_conversations`` returns. Built here so the tool
-    body is navigation only and every field is testable without a server."""
+    body is navigation only and every field is testable without a server.
+
+    With ``include_names`` a rendered row carries ``with``, the people record
+    :func:`conversation_with` builds from the label the reader read; without
+    it, ``name`` is the placeholder. The raw label never leaves: it is in the
+    reading, and the reading is not returned."""
     rows = []
     for row in reading.get("rows") or []:
         entry = {
@@ -563,7 +587,12 @@ def list_result(
             for key in ("position", "rendered", "unread", "signals", "group")
         }
         if row.get("rendered"):
-            entry["name"] = row.get("name") if include_names else shape.NAME_PLACEHOLDER
+            if include_names:
+                entry["with"] = conversation_with(
+                    row.get("name"), group=row.get("group") is True
+                )
+            else:
+                entry["name"] = shape.NAME_PLACEHOLDER
         rows.append(entry)
     return {
         "conversations_listed": coerce.as_count(reading.get("rows_total")),
@@ -1200,27 +1229,35 @@ async def name_the_reply_recipient(
         if not same_conversation or await _count(titles) != 1:
             title = None
         else:
-            # THE OTHER PARTICIPANT'S NAME, SO IT GOES THROUGH THE SEAM
-            # (2026-09-27). It went through ``_normalise`` -- the same
-            # expression the seam applies today, so no value moves -- and so
-            # past the one place lane G's sanitiser and untrusted marker adopt
-            # (PEOPLE-DATA-MITIGATIONS item 2). A cold re-check found it with
-            # zero seam calls; tests/test_people_seam.py now routes it.
-            title = people_seam.name(await titles.first.inner_text()) or None
+            title = _normalise(await titles.first.inner_text()) or None
     except Exception as exc:  # noqa: BLE001
         logger.debug("title unreadable: %s", type(exc).__name__)
         title = None
+    # THE TITLE AS A PEOPLE RECORD (2026-09-27,
+    # PREVIEW-NAMES-THE-RESOLVED-TARGET): sanitised, capped and marked as
+    # another member's words, like every name this package returns. A group
+    # conversation's title comes back in a person record too, as the
+    # messaging overview's labels do: the header does not say how many it names.
+    # BUILT BY ``people_seam.person``, the one builder every preview that names
+    # a person goes through (lane L5's merge of master 52b55b6): the header
+    # draws no headline, so the record's is ABSENT (None), never an empty
+    # string standing for one.
+    person = people_seam.person(name=title) if title else None
     out = dict(block)
-    out["who_this_would_reach"] = (
-        "The conversation you named is titled "
-        f"{title!r}. Read off that conversation's own header, already open on "
-        "your screen; nobody is notified, and this server keeps no copy -- it "
-        "is in no grant, no log and no file. CHECK IT: a thread id that "
-        "uniquely names the WRONG conversation is the one failure this gate "
-        "cannot catch for you."
-        if title
-        else "The conversation's header did not draw exactly one title, so "
-        "this server cannot tell you who it would reach. Open the "
-        "conversation yourself and check it before confirming."
-    )
+    if person is not None:
+        out["who_this_would_reach"] = person
+        out["who_this_would_reach_check"] = (
+            "who_this_would_reach is the title of the conversation you named, "
+            "read off that conversation's own header, already open on your "
+            "screen; nobody is notified, and this server keeps no copy -- it is "
+            "in no grant, no log and no file. CHECK IT: a thread id that "
+            "uniquely names the WRONG conversation is the one failure this gate "
+            "cannot catch for you."
+        )
+    else:
+        out["who_this_would_reach_check"] = (
+            "The conversation's header did not draw exactly one title, so "
+            "this server cannot tell you who it would reach. Open the "
+            "conversation yourself and check it before confirming."
+        )
     return out

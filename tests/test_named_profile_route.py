@@ -39,7 +39,7 @@ import pathlib
 
 import pytest
 
-from linkedin_server import dom, named_profile, people_seam, readonly, server, writes
+from linkedin_server import dom, named_profile, people_data, readonly, server, writes
 from linkedin_server.errors import WriteAttemptError
 from linkedin_server.writes import consume, preview, spec_for_action
 from tests.test_messaging_threads import _derive
@@ -485,7 +485,14 @@ def test_the_tables_name_both_actions():
         assert spec.action in writes._WRITE_SURFACE_FOR_ACTION
         assert spec.action in writes._WHERE_TO_LOOK
         assert spec.action in writes._VERIFIED_FROM
-        assert "delete_or_withdraw_anything" in spec.reversible_by
+        # RESTATED AT LANE L5'S MERGE OF MASTER 52b55b6: the refusal both
+        # leaned on (delete_or_withdraw_anything) was retired on master by
+        # OUTWARD-CLASSES-BUILT-BEHIND-GRANTS, and neither may state it live.
+        assert "delete_or_withdraw_anything" not in spec.reversible_by.split('"')[0]
+        assert "OUTWARD-CLASSES-BUILT-BEHIND-GRANTS" in spec.reversible_by
+    assert CONNECT.reversible_by.startswith("NOT YET")
+    assert "withdraw_invitation" in CONNECT.reversible_by and "BLOCKED" in CONNECT.reversible_by
+    assert MESSAGE.reversible_by.startswith("NOBODY: a delivered message cannot be recalled")
     assert writes.anchor_label_for(CONNECT) == dom.INVITE_CONTROL_SUFFIX
     assert writes.anchor_label_for(MESSAGE) == dom.MESSAGE_CONTROL_PREFIX
     assert MESSAGE.action in writes.TYPING_ACTIONS
@@ -685,9 +692,14 @@ async def test_the_connect_preview_names_whom_it_resolved_to_and_keeps_it_nowher
     assert block["direction"]["currently"] == named_profile.CONNECT_FROM
     assert block["where"]["target"] == LINK and block["where"]["url"] == LINK
     whom = block["whom_this_resolves_to"]
+    # A PEOPLE RECORD SINCE LANE L5'S MERGE OF MASTER 52b55b6 (lane G's
+    # ``people_data.Person``, through ``people_seam.person``): exactly the
+    # record's shape, and marked as another member's words. Until the merge it
+    # carried a pending note saying the sanitiser had not landed yet.
+    assert isinstance(people_data.as_record(whom), people_data.Person), whom
     assert whom["name"] == OWNER and whom["headline"] == HEADLINE
     assert whom["link"] == LINK and whom["degree"] == "1st"
-    assert whom[people_seam.PENDING_KEY] == people_seam.PENDING_NOTE
+    assert whom[people_data.UNTRUSTED_KEY] == people_data.UNTRUSTED_NOTE
     assert "CHECK IT" in block["whom_this_resolves_to_why"]
     grant = writes._GRANTS[block["to_confirm"]]
     assert "whom_this_resolves_to" not in grant.preview, "the identity reached the grant"
@@ -715,6 +727,68 @@ async def test_a_second_degree_preview_says_it_will_stop_before_typing(writes_on
     )
     assert "STOP BEFORE TYPING" in block["direction"]["why"]
     assert block["whom_this_resolves_to"]["degree"] == "2nd"
+
+
+_LOCATION_LINE = "<p>Example City, Example Region</p>"
+#: DERIVED -- the owner's topcard drawing NEITHER a headline NOR a location:
+#: nothing above Contact info reads as a headline, so none is.
+NO_HEADLINE = _derive(_derive(PROFILE, "<p>" + HEADLINE + "</p>", ""), _LOCATION_LINE, "")
+#: DERIVED -- the owner's topcard drawing a location and NO headline.
+LOCATION_ONLY = _derive(PROFILE, "<p>" + HEADLINE + "</p>", "")
+
+
+@pytest.mark.parametrize("spec, target", [(CONNECT, LINK), (MESSAGE, TARGET)], ids=["connect", "message"])
+async def test_a_headline_the_page_does_not_draw_is_absent_never_empty(
+    writes_on, browser_page, spec, target
+):
+    """PREVIEW-NAMES-THE-RESOLVED-TARGET, as the orchestrator applied it to
+    these two previews at lane L5's merge of master 52b55b6: a headline the
+    page does not draw is ABSENT -- ``None`` in the record -- never ``""``,
+    which would read as a headline that is blank."""
+    block = await preview(spec, target=target, navigator=_Navigator(NO_HEADLINE), page=browser_page)
+    whom = block["whom_this_resolves_to"]
+    assert isinstance(people_data.as_record(whom), people_data.Person), whom
+    assert whom["name"] == OWNER
+    assert whom["headline"] is None, whom
+    assert whom[people_data.UNTRUSTED_KEY] == people_data.UNTRUSTED_NOTE
+
+
+async def test_a_location_with_no_headline_is_read_as_the_headline_a_stated_limit(
+    writes_on, browser_page
+):
+    """A STATED LIMIT OF THE DERIVED READING, pinned so it cannot be
+    forgotten or quietly fixed. The topcard parser was measured on HIS
+    profile, where one eligible line above Contact info is a headline and
+    no location; a third party's topcard drawing a location and NO headline
+    therefore reads its location AS the headline. Nothing on the lines
+    tells the two apart, and no third party's topcard has been captured
+    (NEEDS-CAPTURE C-P1) -- the preview's CHECK IT covers it: the record
+    names the right person with the wrong line beside the name."""
+    block = await preview(CONNECT, target=LINK, navigator=_Navigator(LOCATION_ONLY), page=browser_page)
+    whom = block["whom_this_resolves_to"]
+    assert whom["name"] == OWNER
+    assert whom["headline"] == "Example City, Example Region", whom
+    assert "CHECK IT" in block["whom_this_resolves_to_why"]
+
+
+async def test_nothing_a_named_act_keeps_or_returns_after_the_press_carries_the_name(
+    writes_on, browser_page
+):
+    """A PREVIEW IS NOT A RECEIPT. The name and headline the preview printed
+    live in that block only: not in the grant store, not in the observation
+    store, and not in the receipt of the send, which carries the target the
+    caller supplied -- his link and his words -- and nothing read off the
+    profile."""
+    block = await preview(MESSAGE, target=TARGET, navigator=_Navigator(DISPATCHING), page=browser_page)
+    assert block["whom_this_resolves_to"]["name"] == OWNER
+    grant = consume(block["to_confirm"], action=MESSAGE.action, target=TARGET)
+    receipt = await writes.perform(_Navigator(DISPATCHING), browser_page, grant)
+    assert receipt["performed"] is True, receipt["verification"]["why"]
+    kept = repr(list(writes._GRANTS.values())) + repr(list(writes._OBSERVED.values()))
+    for text in (OWNER, HEADLINE):
+        assert text not in kept, text
+        assert text not in json.dumps(receipt, default=repr), text
+    assert LINK in json.dumps(receipt, default=repr), "the receipt names the target he supplied"
 
 
 async def test_a_landing_that_is_not_the_named_profile_vetoes_and_mints_nothing(
@@ -981,9 +1055,9 @@ async def test_a_second_match_drawn_mid_press_stops_the_press(writes_on, browser
     receipt = await writes.perform(act, browser_page, grant)
     assert act.pressed == "", act.pressed
     assert receipt["clicked"]["clicks_made"] == 0
-    assert receipt["clicked"]["error"] == (
-        "Error on the press aimed at " + repr(dom.topcard_invite_control_selector())
-    ), receipt["clicked"]["error"]
+    # THE TYPE ONLY (lane G's rule, adopted at lane L5's merge of master
+    # 52b55b6): a strict violation's text quotes both matched elements.
+    assert receipt["clicked"]["error"] == "Error", receipt["clicked"]["error"]
     assert receipt["performed"] is False
     _clean(receipt)
 
@@ -1035,9 +1109,12 @@ async def test_a_press_that_fails_is_reported_by_its_type_and_names_nobody(
     2026-09-27: the browser library's timeout text carries a CALL LOG quoting
     the element it resolved -- the owner's name in both controls' labels, and
     the member id in the Message link -- and ``clicked.error`` printed it
-    whole. It is now COMPOSED (``describe_click_error``): the exception's
-    type, and the press and the selector this package built for it, which
-    for this route names nobody."""
+    whole. This lane then COMPOSED it (``describe_click_error``: the type,
+    and the press and selector this package built); master's lane G had
+    ruled the same defect package-wide the same day, TYPE ONLY, and that
+    rule replaced the composition at lane L5's merge of master 52b55b6.
+    The selector's absence costs nothing a caller can use: the receipt's
+    ``clicked.selector`` already names it."""
     spec, target = (CONNECT, LINK) if which == "connect" else (MESSAGE, TARGET)
     block = await preview(spec, target=target, navigator=_Navigator(PROFILE), page=browser_page)
     grant = consume(block["to_confirm"], action=spec.action, target=target)
@@ -1049,32 +1126,12 @@ async def test_a_press_that_fails_is_reported_by_its_type_and_names_nobody(
         if which == "connect"
         else dom.topcard_message_control_selector()
     )
-    assert receipt["clicked"]["error"] == (
-        "TimeoutError on the press aimed at " + repr(built)
-    ), receipt["clicked"]["error"]
+    assert receipt["clicked"]["error"] == "TimeoutError", receipt["clicked"]["error"]
+    assert receipt["clicked"]["selector"] == built
     assert receipt["clicked"]["clicks_made"] == 0
     assert MEMBER_ID not in json.dumps(receipt)
     assert "resolved to" not in json.dumps(receipt), "the library's call log crossed"
     _clean(receipt)
-
-
-def test_this_packages_own_refusal_is_still_reported_whole():
-    """The other halves of ``describe_click_error``: a ``WriteAttemptError`` is
-    raised by this package with a reason it composed, so it crosses whole; a
-    foreign exception crosses as its type, with the call in flight when there
-    was one -- and never with its own text."""
-    ours = WriteAttemptError("refusing to press: a reason this package wrote")
-    assert writes.describe_click_error(ours) == (
-        "WriteAttemptError: refusing to press: a reason this package wrote"
-    )
-    theirs = TimeoutError("call log: locator resolved to <button aria-label=...>")
-    assert writes.describe_click_error(theirs) == "TimeoutError"
-    assert writes.describe_click_error(theirs, in_flight=("fill", "#an-editor")) == (
-        "TimeoutError on the fill aimed at '#an-editor'"
-    )
-    assert writes.describe_click_error(ours, in_flight=("press", "#x")) == (
-        "WriteAttemptError: refusing to press: a reason this package wrote"
-    )
 
 
 async def test_the_act_refuses_before_any_press_when_the_landing_moved(writes_on, browser_page):
@@ -1369,9 +1426,7 @@ async def test_a_second_send_drawn_during_the_send_press_stops_it(writes_on, bro
         "() => document.body.getAttribute('data-draft-sent') || ''"
     )
     assert sent_draft == "", "somebody else's draft was sent"
-    assert receipt["clicked"]["error"] == (
-        "Error on the press aimed at " + repr(named_profile.COMPOSER_SEND_SELECTOR)
-    ), receipt["clicked"]["error"]
+    assert receipt["clicked"]["error"] == "Error", receipt["clicked"]["error"]
     assert receipt["clicked"]["clicks_made"] == 1 and receipt["clicked"]["opener_clicks"] == 1
     assert receipt["typed_text"]["submit_was_pressed"] is False
     assert receipt["performed"] is not True

@@ -21,7 +21,7 @@ import pathlib
 
 import pytest
 
-from linkedin_server import shape
+from linkedin_server import people_data, shape
 
 REPO = pathlib.Path(__file__).resolve().parents[1]
 
@@ -30,8 +30,40 @@ REPO = pathlib.Path(__file__).resolve().parents[1]
 #: subtracts it rather than reasoning about its contents.
 _TOKEN_GATED_DRAIN = ("linkedin_server/writes.py", "perform")
 
+#: DEVTOOLS CALLS ARE SPLIT BY THE METHODS THEY CAN SEND, read from the module
+#: rather than assumed -- as ``press`` is split by its key below. A DevTools
+#: session can do anything a page can, which is why both of its classes are
+#: GATED by default and stay gated everywhere else. The one module that holds
+#: them, ``cdp_download``, sends through one function that refuses any method
+#: outside ``cdp_download.CDP_METHODS`` (the scanner holds every LITERAL
+#: ``.send(`` call in the package to that function), and every method on the
+#: list below decides where HIS browser writes a download -- nothing a page
+#: LinkedIn serves receives. Declared 2026-09-27 on
+#: ``D4-NO-OWN-BROWSER-CONTEXT``, at lane G's merge of master 2eb90ad, where
+#: the widened scanner first met that module. An ``Input.*`` or ``Runtime.*``
+#: method joining ``CDP_METHODS`` turns this file red, and so does a literal
+#: DevTools call in any other module. THE LIMIT, measured by lane G's cold
+#: verification: a ``send`` reached through an alias, a bound-method variable
+#: or ``getattr`` is invisible to the scanner, and so to this split.
+_DEVTOOLS_KINDS = frozenset({"cdp_send", "cdp_session"})
+_DEVTOOLS_TRANSPORT = "linkedin_server/cdp_download.py"
+_DEVTOOLS_METHODS_THAT_HAND_LINKEDIN_NOTHING = frozenset({"Browser.setDownloadBehavior"})
 
-def _read_path_gated(entries, source_for):
+
+def _devtools_hands_linkedin_nothing(path, methods=None):
+    """True only for the download transport, and only while every method its
+    one send can carry is on the list above. ``methods`` stands in for the
+    module's table in the control."""
+    if path != _DEVTOOLS_TRANSPORT:
+        return False
+    if methods is None:
+        from linkedin_server import cdp_download
+
+        methods = cdp_download.CDP_METHODS
+    return bool(methods) and set(methods) <= _DEVTOOLS_METHODS_THAT_HAND_LINKEDIN_NOTHING
+
+
+def _read_path_gated(entries, source_for, devtools_methods=None):
     """Sanctioned mutations a READ PATH owns that hand LinkedIn real input.
 
     **THIS REPLACED TWO HARD-CODED COUNTS AND ONE BROKEN PROXY**, and the
@@ -64,6 +96,8 @@ def _read_path_gated(entries, source_for):
             in practice.
         source_for: ``path -> source text``. A parameter so the control below
             can run this over a tree that does not exist.
+        devtools_methods: the download transport's method table, for the
+            control; the module's own when omitted.
     """
     from linkedin_server import readonly
     from tests.test_probe_interaction_budget import DISMISS_KEYS, gated_classes
@@ -74,6 +108,10 @@ def _read_path_gated(entries, source_for):
         if (path, function) == _TOKEN_GATED_DRAIN:
             continue
         if kind not in gated:
+            continue
+        if kind in _DEVTOOLS_KINDS and _devtools_hands_linkedin_nothing(
+            path, devtools_methods
+        ):
             continue
         source = source_for(path)
         texts = [
@@ -127,10 +165,18 @@ def test_names_are_placeholders_unless_the_caller_asks():
 
 def test_opting_in_returns_the_real_names():
     """The control. A redactor that could never be turned off would make the
-    tool useless for the one thing he opens it for."""
+    tool useless for the one thing he opens it for.
+
+    SINCE 2026-09-27 EACH NAME COMES BACK AS A PEOPLE RECORD
+    (PEOPLE-DATA-MITIGATIONS; lane G's second worked adopter), so the names
+    are read out of the records -- and a bare name beside one fails."""
     out = shape.messaging_overview(HTML, THREAD_URL, include_names=True)
 
-    assert [r["name"] for r in out["rows"]] == ["Dana Whitfield", "Ivo Karlsson"]
+    assert [r["with"]["name"] for r in out["rows"]] == ["Dana Whitfield", "Ivo Karlsson"]
+    for row in out["rows"]:
+        assert "name" not in row, "a bare name was returned beside the record"
+        assert isinstance(people_data.as_record(row["with"]), people_data.Person)
+        assert row["with"][people_data.UNTRUSTED_KEY] == people_data.UNTRUSTED_NOTE
     assert out["names_included"] is True
 
 
@@ -240,6 +286,37 @@ def test_the_pairing_survives_redaction():
     assert all(r["name"] == shape.NAME_PLACEHOLDER for r in out["rows"])
     unread_positions = [r["position"] for r in out["rows"] if r["unread"]]
     assert unread_positions == [1, 3]
+
+
+def test_a_label_is_an_attribute_and_text_that_quotes_one_is_no_row():
+    """FOUND BY LANE G'S COLD VERIFICATION, 2026-09-27: the row pattern read the
+    serialised page, where a serialiser leaves quotes in TEXT alone, so a
+    message whose words spelled a label became a conversation of its own --
+    its "name" the words and markup that followed. Labels are now read as
+    attributes of elements; the text below is only text."""
+    quoted = (
+        '<div aria-label="Select conversation with Dana Whitfield"></div>'
+        '<p class="msg-s-event-listitem__body">thanks! aria-label="Select '
+        'conversation with Injected Rowperson and then more of the message"</p>'
+        '<div aria-label="Select conversation with Ivo Karlsson"></div>'
+    )
+    out = shape.messaging_overview(quoted, THREAD_URL, include_names=True)
+    assert out["conversations"] == 2
+    assert [r["with"]["name"] for r in out["rows"]] == ["Dana Whitfield", "Ivo Karlsson"]
+
+
+def test_a_label_is_read_with_its_entities_decoded():
+    """And the pattern never decoded entities, so these came back as ``&nbsp;``
+    and ``&amp;`` -- where the composer's list, reading the same row in the
+    browser, returned the name itself."""
+    encoded = (
+        '<div aria-label="Select conversation with Exampleperson&nbsp;Markersurname"></div>'
+        '<div aria-label="Select conversation with R&amp;D Example Group"></div>'
+    )
+    out = shape.messaging_overview(encoded, THREAD_URL, include_names=True)
+    assert [r["with"]["name"] for r in out["rows"]] == [
+        "Exampleperson Markersurname", "R&D Example Group"
+    ]
 
 
 def test_a_marker_does_not_bleed_into_the_next_conversation():
@@ -631,6 +708,26 @@ def test_the_read_path_rule_is_shown_refusing_and_shown_allowing():
     ) == [("linkedin_server/submit.py", "send", "press")]
 
 
+def test_the_devtools_split_is_shown_refusing_and_shown_allowing():
+    """THE CONTROL FOR THE DEVTOOLS SPLIT (2026-09-27), in the form of the one
+    above: the same entries, judged by the METHODS the transport can send.
+
+    Allowed while the table holds only the download behaviour; REFUSED the
+    moment it holds an input method; and refused on any other module whatever
+    its table says, because the split is the transport's and nobody else's.
+    """
+    entries = [
+        (_DEVTOOLS_TRANSPORT, "_send", "cdp_send"),
+        (_DEVTOOLS_TRANSPORT, "capture_download", "cdp_session"),
+    ]
+    assert _read_path_gated(entries, _package_source) == []
+    with_input = {"Browser.setDownloadBehavior", "Input.dispatchMouseEvent"}
+    assert _read_path_gated(entries, _package_source, devtools_methods=with_input) == entries
+    assert _read_path_gated(entries, _package_source, devtools_methods=set()) == entries
+    elsewhere = [("linkedin_server/dom.py", "poke", "cdp_send")]
+    assert _read_path_gated(elsewhere, lambda _path: "") == elsewhere
+
+
 def test_the_live_press_entry_really_is_the_escape_and_not_a_submit():
     """The control above proves the RULE splits; this proves the TREE is on
     the allowed side of the split, by reading the call rather than trusting
@@ -682,13 +779,30 @@ def test_the_compose_surface_is_still_refused_after_all_of_this():
 
 #: Labels LinkedIn could plausibly put on a pill. Only the first is what the
 #: old activator demanded; every other one made the two paths disagree.
+#: Labels the shared rule FINDS since it became exact (2026-09-27), and labels
+#: it no longer finds -- a name that merely contains the word. The property
+#: below is agreement, and it is asserted over both.
 REAL_LABELS = [
     "InMail",
+    "inmail",
+    "  InMail ",
+]
+CONTAINING_LABELS = [
     "InMail messages",
     "InMail 1 new",
     "Filter by InMail",
-    "inmail",
 ]
+
+
+@pytest.mark.parametrize("label", CONTAINING_LABELS)
+def test_a_label_that_only_contains_the_word_is_seen_by_neither_path(label):
+    """THE OTHER HALF OF AGREEMENT, since the rule became exact: what the
+    activator will not press, the enumerator does not report as a pill."""
+    from linkedin_server import dom
+
+    html = f'<button aria-label="{label}"><span>x</span></button>'
+    assert shape.messaging_filters(html)["filters_seen"] == []
+    assert dom.filter_name_matches(label, "inmail") is False
 
 
 @pytest.mark.parametrize("label", REAL_LABELS)
@@ -706,7 +820,8 @@ def test_whatever_the_enumerator_SEES_the_activator_can_FIND(label):
 
     There is one predicate now and both call it, so this asserts the property
     rather than the implementation: anything enumerated as present must be
-    findable.
+    findable. (Since 2026-09-27 the predicate is EXACT; the labels that only
+    contain the word are the test above, seen by neither path.)
     """
     from linkedin_server import dom
 
@@ -733,7 +848,7 @@ def test_the_shared_rule_still_says_no_to_a_different_pill():
 @pytest.mark.parametrize(
     "html,name,source",
     [
-        ('<button aria-label="InMail messages">x</button>', "InMail messages", "aria-label"),
+        ('<button aria-label="InMail">x</button>', "InMail", "aria-label"),
         ('<button class="pill">InMail</button>', "InMail", "text"),
     ],
     ids=["labelled", "text only"],

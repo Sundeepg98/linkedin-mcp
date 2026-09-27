@@ -337,10 +337,17 @@ _SIGNALS_RAW: list[tuple[str, str, str]] = [
 #: a complete reason to anybody who knows the codebase and invisible to a keyword sweep.
 #: The key list is READ FROM THE PACKAGE rather than hardcoded, so a tenth entry is picked
 #: up without editing this file.
+#:
+#: SIX SINCE 2026-09-24 (lane L8). OUTWARD-CLASSES-BUILT-BEHIND-GRANTS retired
+#: `repost_or_share`, `endorse_or_recommend` and `delete_or_withdraw_anything`
+#: from writes.PERMANENTLY_FORBIDDEN at `efa3d8f` (their texts are kept verbatim
+#: in outward_classes.RETIRED_PERMANENT_REFUSALS). A fallback that still named them
+#: would tag a cell citing a RETIRED key US-RULING on exactly the runs that cannot
+#: read the package -- the run least able to notice.
 _FORBIDDEN_FALLBACK = (
-    "repost_or_share", "endorse_or_recommend", "deanonymise_a_viewer",
+    "deanonymise_a_viewer",
     "load_a_third_partys_profile_to_measure_a_control",
-    "delete_or_withdraw_anything", "mark_notifications_read",
+    "mark_notifications_read",
     "auto_accept_or_auto_reply", "any_loop_sweep_or_scheduled_write",
     "any_anti_detection_technique",
 )
@@ -352,7 +359,8 @@ def forbidden_keys() -> tuple[list[str], str]:
     AN EMPTY LIST IS NEVER RETURNED, and that is a safety property rather than tidiness:
     `"|".join([])` inside an alternation yields a pattern that matches the empty string at
     every position, which would silently tag all 309 rows US-RULING. Every failure path
-    falls back to the nine names measured at `cd08e05` AND SAYS SO in the run header.
+    falls back to the six names that survive at `efa3d8f` (nine, measured at `cd08e05`,
+    until 2026-09-24) AND SAYS SO in the run header.
     """
     path = ROOT / "linkedin_server" / "writes.py"
     try:

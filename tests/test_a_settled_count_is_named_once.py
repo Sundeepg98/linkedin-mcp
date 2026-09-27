@@ -47,7 +47,9 @@ GUARDED = (
     "CENSUS_SETTLED_CONTROLS",
     "CENSUS_SURFACES",
     "CENSUS_SURFACE_COST",
-    "CENSUS_ITEM_RULES",
+    # ``CENSUS_ITEM_RULES`` LEFT 2026-09-24 WITH THE RULE IT HELD: the page no
+    # longer chooses the census's item, the caller names it and the page may
+    # only veto it. A table that no longer exists cannot shadow an entry.
     "CENSUS_SDUI_NEEDLES",
 )
 

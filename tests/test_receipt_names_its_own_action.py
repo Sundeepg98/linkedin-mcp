@@ -192,6 +192,10 @@ _VERIFIED_FROM_OWNERS: dict[str, frozenset[str]] = {
     # "the composer still holding your words with Send enabled" is a surface
     # it measured, exactly as ``send_message``'s is.
     "composer": frozenset({"send_message", "message_from_profile"}),
+    # ADDED 2026-09-27 FOR ``withdraw_from_group`` (lane L8). It verifies on a fresh
+    # render of the Groups root, the one surface that lists his memberships,
+    # and no other row names that page. Measured to occur in exactly one row.
+    "Groups root": frozenset({"withdraw_from_group"}),
 }
 
 #: THE SAME, FOR ``_WHERE_TO_LOOK``. These values are short phrases rather
@@ -256,6 +260,10 @@ _WHERE_TO_LOOK_OWNERS: dict[str, frozenset[str]] = {
     # read in place with a before-count, so the conversation in his LinkedIn
     # messages is the surface it read.
     "LinkedIn messages": frozenset({"send_message", "send_reply", "message_from_profile"}),
+    # ADDED 2026-09-27 FOR ``withdraw_from_group`` (lane L8): his Groups page is where
+    # his memberships are listed and where the leave is verified, and no other
+    # row sends him there. Measured to occur in exactly one row.
+    "Groups page": frozenset({"withdraw_from_group"}),
 }
 
 #: THE ONLY SETS OF ACTIONS ALLOWED TO SHARE A ``_WHERE_TO_LOOK`` VALUE
@@ -613,7 +621,17 @@ def test_the_action_set_is_the_one_this_file_was_measured_against():
     # phrase; its ``_VERIFIED_FROM`` row was checked against every owned
     # phrase above and holds none. On the merged tree the rest of this file
     # passed with both new actions' rows in place.
-    # SEVENTEEN FROM 2026-09-27 (lane L5's follow-up), earned the same way:
+    # SIXTEEN FROM LANE L8'S MERGE OF MASTER, 2026-09-27 (fifteen on the
+    # lane's branch): ``withdraw_from_group``'s two rows were read. Its
+    # ``_WHERE_TO_LOOK`` value ("your LinkedIn Groups page") and its
+    # ``_VERIFIED_FROM`` row (a fresh render of the Groups root) were checked
+    # against every owned phrase above -- lane L5's second owner of "LinkedIn
+    # messages" included -- and contain none of another action's; each gained
+    # an owner entry of its own ("Groups page", "Groups root"), measured to
+    # occur in exactly its own row. On the merged tree the rest of this file
+    # passed with both lanes' rows in place.
+    # EIGHTEEN FROM LANE L5'S MERGE OF MASTER 52b55b6, the same day
+    # (seventeen on its follow-up branch), earned the same way:
     # ``connect_from_profile``'s and ``message_from_profile``'s four rows were
     # read, and this file went red on exactly the three places they share with
     # an older action. Each was decided on the surface each action MEASURES:
@@ -621,9 +639,12 @@ def test_the_action_set_is_the_one_this_file_was_measured_against():
     # messages" (it reads the composer its press opened, then the conversation,
     # both in place); ``connect_from_profile`` an owner of "My Network", and
     # the invitation pair a third sanctioned shared place -- one act by two
-    # routes, one Sent list. No row was reworded to dodge a phrase.
-    assert len(writes.PERFORMABLE) == 17, (
-        "writes.PERFORMABLE holds %d actions, not the 17 this file was "
+    # routes, one Sent list. No row was reworded to dodge a phrase. At the
+    # merge their four rows and ``withdraw_from_group``'s two were read against
+    # each other's owned phrases ("Groups page", "Groups root"; "composer",
+    # "LinkedIn messages", "My Network") and hold none of the other lane's.
+    assert len(writes.PERFORMABLE) == 18, (
+        "writes.PERFORMABLE holds %d actions, not the 18 this file was "
         "measured against: %s. Re-derive the phrase owners in this file for "
         "the new action, then update this count."
         % (len(writes.PERFORMABLE), sorted(writes.PERFORMABLE))

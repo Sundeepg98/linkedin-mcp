@@ -267,11 +267,17 @@ def test_a_row_filed_under_a_declared_empty_family_is_red_and_named(world):
 
 #: RE-POINTED 2026-09-23 by lane R: `P D5` and `N 119` left the table when their
 #: rows returned to GAP, so the plants now sit on rows the table still holds.
+#: RE-POINTED AGAIN 2026-09-27 by lane L8: `N 10` and `N 111` left the table when
+#: OUTWARD-CLASSES-BUILT-BEHIND-GRANTS returned them to GAP. All three plants now
+#: sit on `N 131`, which the table still holds under a writes.py key that
+#: survives (`deanonymise_a_viewer`), and each keeps its meaning: a family whose
+#: link the row does not carry, an op the family does not record, and a source
+#: anchor that no longer resolves.
 @pytest.mark.parametrize("row, field, old, new, needle", [
-    ("N 10", "basis", "family=PF-DELETE-OR-WITHDRAW; op=NO",
+    ("N 131", "basis", "family=PF-DEANONYMISE-A-VIEWER; op=NO",
      "family=NO-THIRD-PARTY-PROFILE-LOAD; op=YES", "cites NO-THIRD-PARTY-PROFILE-LOAD"),
-    ("N 10", "basis", "op=NO", "op=YES", "records op=NO"),
-    ("N 111", "source", '"endorse_or_recommend": (', '"endorse_or_admire": (', "no longer contains"),
+    ("N 131", "basis", "op=NO", "op=YES", "records op=NO"),
+    ("N 131", "source", '"deanonymise_a_viewer": (', '"deanonymise_a_stranger": (', "no longer contains"),
 ])
 def test_a_plant_in_a_copy_of_the_real_table_is_red_and_named(real, tmp_path, row, field, old, new, needle):
     rows = [dict(r) for r in real[0]]
@@ -290,12 +296,14 @@ def test_main_on_a_copy_missing_a_line_is_red_and_names_it(tmp_path, capsys):
     lines = ceb.TABLE.read_text(encoding="ascii").splitlines(keepends=True)
     # N 23 until 2026-09-23; it left the table when lane R moved it to
     # COVERED-UNFIRED, so the removed line is now a row the table still holds.
-    kept = [ln for ln in lines if not ln.startswith("N\t10\t")]
+    # N 10 until 2026-09-27; it left the table when lane L8 returned it to GAP
+    # (OUTWARD-CLASSES-BUILT-BEHIND-GRANTS), so the line removed is now N 131's.
+    kept = [ln for ln in lines if not ln.startswith("N\t131\t")]
     assert len(kept) == len(lines) - 1
     copy.write_text("".join(kept), encoding="ascii")
     assert ceb.main(["--table", str(copy)]) == 1
     out = capsys.readouterr().out
-    assert "N 10: is EXCLUDED-RULED in the census and has NO LINE" in out
+    assert "N 131: is EXCLUDED-RULED in the census and has NO LINE" in out
 
 
 def test_main_is_red_exactly_while_the_table_holds_an_open_question(real, capsys):

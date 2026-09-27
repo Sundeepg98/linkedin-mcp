@@ -134,14 +134,17 @@ async def read_notifications_badge(page: Any) -> dict[str, Any]:
         badges = page.locator(notifications_badge_selector())
         out["badge_links"] = int(await badges.count())
     except Exception as exc:  # noqa: BLE001 - reported, never raised
-        out["error"] = f"{type(exc).__name__}: {exc}"
+        # THE TYPE, NEVER THE TEXT, here and below: a library's message can
+        # quote a selector, a request or the page
+        # (ERROR-MESSAGE-RULED-AT-THE-RAISE).
+        out["error"] = type(exc).__name__
         return out
     if out["badge_links"] != 1:
         return out
     try:
         label = await badges.first.get_attribute("aria-label")
     except Exception as exc:  # noqa: BLE001 - reported, never raised
-        out["error"] = f"{type(exc).__name__}: {exc}"
+        out["error"] = type(exc).__name__
         return out
     out["label"] = shape.census_shape(str(label or "").strip()) or None
     return out

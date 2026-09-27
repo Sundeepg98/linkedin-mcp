@@ -77,7 +77,11 @@ SAVE_CONTROL_NAME: str = dom.EDITOR_ANCHOR_NAME
 #: case-sensitive and whole), inside a dialog -- the container shape
 #: ``dom.EDITOR_CONTAINER_SELECTOR`` admits. Playwright's strict mode holds the
 #: click to exactly one element, and role selectors skip hidden controls, so a
-#: closed dialog's leftover button cannot be the one pressed.
+#: closed dialog's leftover button cannot be the one pressed. The strict half
+#: is TRUE SINCE LANE L5'S MERGE OF MASTER 52b55b6 (2026-09-27), when
+#: ``perform`` began pressing ``update_profile_field`` strictly
+#: (``writes.STRICT_PRESS_ACTIONS``); until then the press passed no
+#: ``strict=``.
 SAVE_SELECTOR: str = (
     'css=:is(dialog, [role="dialog"]) >> role=button[name="'
     + SAVE_CONTROL_NAME

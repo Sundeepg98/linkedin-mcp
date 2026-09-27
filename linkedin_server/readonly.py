@@ -3157,6 +3157,33 @@ _MUTATION_CALL_PATTERNS: tuple[tuple[str, re.Pattern[str]], ...] = (
     ("route_family", re.compile(
         r"\.(unroute(_all)?|route_from_har|route_web_socket)\s*\(")),
     ("http_headers", re.compile(r"\.set_extra_http_headers\s*\(")),
+    # -----------------------------------------------------------------------
+    # ADDED 2026-09-24 (lane D's 5.3, assigned to lane G): A DEVTOOLS SESSION
+    # CAN DO ANYTHING THE PAGE CAN, and nothing above could see one.
+    # ``session.send("Input.dispatchMouseEvent", ...)`` clicks without a
+    # ``.click(``; ``Runtime.evaluate`` runs script without an ``.evaluate(``;
+    # ``Page.navigate`` loads an address past the read door. Two patterns:
+    #
+    # * ``cdp_session`` -- OPENING one, by either of Playwright's two session
+    #   factories (a page's, or the whole browser's), the capability itself;
+    # * ``cdp_send`` -- ANY ``.send(`` call. Not only a literal method name:
+    #   lane D's closed table sends through ``_send(method, params)``, where
+    #   the method is a variable, so a pattern anchored on a quoted
+    #   ``"Domain.method"`` would have seen nothing.
+    #
+    # THE COLLISION IS STATED, as the rejection of ``clear`` above demands: a
+    # generator's or a socket's ``.send(`` matches too. Measured over the 55
+    # package modules with this scanner's real semantics: ZERO hits for either
+    # pattern, so nothing needs sanctioning here and the collision costs
+    # nothing today; the day it fires on a generator, it fires loudly. Lane D's
+    # ``cdp_download.py`` (unmerged at the time of writing) is matched four
+    # times: one send (``_send``), two sessions (``capture_download`` and
+    # ``reset_download_behaviour``) -- each to be sanctioned in
+    # SANCTIONED_MUTATIONS at its merge, in the function that makes it -- and
+    # one line of its module docstring, which this scanner reads as source
+    # like every other docstring, so its merge rewords it.
+    ("cdp_session", re.compile(r"\.new_(?:browser_)?cdp_session\s*\(")),
+    ("cdp_send", re.compile(r"\.send\s*\(")),
 )
 
 
@@ -3521,6 +3548,43 @@ SANCTIONED_MUTATIONS: tuple[tuple[str, str, str], ...] = (
     ("linkedin_server/share_link.py", "_activate", "click"),
     ("linkedin_server/share_link.py", "_clipboard", "evaluate"),
     ("linkedin_server/share_link.py", "copy_own_post_link", "press"),
+    # THE THIRTEENTH, FOURTEENTH AND FIFTEENTH, 2026-09-27, declared at lane
+    # G's merge of master 2eb90ad: LANE D'S DOWNLOAD TRANSPORT
+    # (``cdp_download``, census row P C8). NOT NEW CAPABILITY. Lane D's module
+    # reached master after lane G had taught this scanner to see a DevTools
+    # session (lane D's own item 5.3: the ``cdp_session`` and ``cdp_send``
+    # patterns), and the two met for the first time in that merge:
+    #
+    #   cdp_send     cdp_download._send -- THE ONE literal DevTools send in
+    #                the package (an alias or ``getattr`` would pass the
+    #                scanner unseen), refusing any method outside
+    #                ``cdp_download.CDP_METHODS``, which holds one: the
+    #                command that sets where downloads go (its name lives in
+    #                that module alone, as the P C8 transport test requires);
+    #   cdp_session  cdp_download.capture_download -- the browser-level
+    #                session a capture sets that behaviour over;
+    #   cdp_session  cdp_download.reset_download_behaviour -- the session
+    #                ``cdp_bridge.attach`` uses to hand his downloads back to
+    #                Chrome's own default.
+    #
+    # THE RULING IT RESTS ON is ``D4-NO-OWN-BROWSER-CONTEXT``: the package
+    # creates no browser context of its own, and P C8's download transport
+    # goes through the DevTools download behaviour on the attached browser.
+    # Declared here on the precedent of the orchestrator's integration ruling
+    # (c) of 2026-09-24, which had lane G declare the live lane's clipboard
+    # capture rather than weaken the scan: a capability another lane was
+    # ruled to have is declared where the widened scanner can see it.
+    #
+    # WHY IT IS ARGUABLE RATHER THAN A WIDENING. The send is bound to a
+    # one-method table; each session attaches to the browser already there,
+    # creates no context and opens no tab, and is detached in a ``finally``;
+    # the capture is off unless ``LINKEDIN_ENABLE_CDP_DOWNLOADS`` turns it on,
+    # and restores Chrome's own behaviour whatever happens; the reset sends
+    # only that default. None of it reaches a page LinkedIn serves: it
+    # decides where HIS browser writes a download.
+    ("linkedin_server/cdp_download.py", "_send", "cdp_send"),
+    ("linkedin_server/cdp_download.py", "capture_download", "cdp_session"),
+    ("linkedin_server/cdp_download.py", "reset_download_behaviour", "cdp_session"),
 )
 
 
@@ -3618,9 +3682,99 @@ JS_MUTATION_TOKENS: tuple[str, ...] = (
 )
 
 
+#: REPLACING A BROWSER API IS A MUTATION, AND NO TOKEN ABOVE COULD SEE IT.
+#: Found by the live lane 2026-09-24: a script that swaps
+#: ``navigator.clipboard.writeText`` for a capturing function calls nothing,
+#: sets no attribute and fetches nothing -- it replaces what the page's own code
+#: will call next -- and the cannot-mutate test passed it. So an ASSIGNMENT (or
+#: ``delete``) whose target is a member reached from a browser global, any
+#: ``.prototype`` member, and the property-definition calls are refused too.
+#: MEASURED BEFORE ADOPTION over the 58 JavaScript strings in this repository
+#: -- every executed script, every ``*_JS`` constant, every inline evaluate in
+#: ``scripts/`` -- with ZERO detections, and over 13 plants and 10 reads of the
+#: same globals (``tests/test_readonly.py``).
+_JS_BROWSER_ROOTS = (
+    "window|document|navigator|globalThis|self|top|parent|frames|location|"
+    "history|screen|console|localStorage|sessionStorage|indexedDB|caches|"
+    "crypto|Element|HTMLElement|HTML[A-Za-z]*Element|Node|EventTarget|Document|"
+    "Window|Navigator|Clipboard|ClipboardItem|Event|CustomEvent|MouseEvent|"
+    "KeyboardEvent|XMLHttpRequest|Request|Response|Headers|WebSocket|"
+    "MutationObserver|IntersectionObserver|Function|Object|Array|JSON|Promise|"
+    "Reflect|Proxy|Symbol|Date|Math|String|Number|Boolean|RegExp|Error|URL|"
+    "URLSearchParams|FormData|Blob|File|FileReader|Image|Audio|Notification|"
+    "Worker"
+)
+_JS_MEMBER_CHAIN = r"(?:\s*\.\s*[A-Za-z_$][\w$]*|\s*\[[^\]\n]*\])+"
+_JS_ASSIGNMENT = r"\s*(?:=(?![=>])|\+=|-=|\|\|=|&&=|\?\?=)"
+JS_API_REPLACEMENT_PATTERNS: tuple[re.Pattern[str], ...] = (
+    re.compile(
+        r"(?<![\w$.])(?:" + _JS_BROWSER_ROOTS + r")" + _JS_MEMBER_CHAIN
+        + _JS_ASSIGNMENT
+    ),
+    re.compile(r"\.\s*prototype" + _JS_MEMBER_CHAIN + _JS_ASSIGNMENT),
+    re.compile(r"\bdelete\s+(?:" + _JS_BROWSER_ROOTS + r")" + _JS_MEMBER_CHAIN),
+    re.compile(
+        r"\b(?:Object\s*\.\s*(?:defineProperty|defineProperties|setPrototypeOf)"
+        r"|Reflect\s*\.\s*(?:defineProperty|set|setPrototypeOf|deleteProperty)"
+        r"|__define[GS]etter__)\s*\("
+    ),
+    re.compile(
+        r"\bObject\s*\.\s*assign\s*\(\s*(?:" + _JS_BROWSER_ROOTS + r")\b"
+    ),
+)
+
+#: THE SCANNER'S SANCTIONED LIST: every API replacement a declared script may
+#: make, EXACTLY. Keyed by ``(module path, script constant)``; valued by the
+#: ``"API replacement: ..."`` entries :func:`scan_js_for_mutations` reports
+#: for that script, one per occurrence. THE SCAN IS NOT WEAKENED BY IT: the
+#: scan still reports every replacement, in every script. The certifying test
+#: (``tests/test_readonly.py``) holds each declared script's findings EQUAL to
+#: its entry -- one more replacement, or one fewer, is a red -- and every
+#: undeclared script to none at all.
+#:
+#: ONE ENTRY, 2026-09-24, entered at lane G's merge of master: the live lane's
+#: clipboard capture for ``M C72`` (copy the link of one of HIS OWN posts,
+#: ``share_link.copy_own_post_link``). THE RULING IT RESTS ON:
+#: SHARE-AND-POLL-PROOFS-OWN-POSTS (orchestrator, delegated) -- share-link
+#: proofs use the operator's own posts only. THE EVIDENCE: it runs from ONE
+#: call site, ``share_link._clipboard``, which ``SANCTIONED_MUTATIONS`` admits
+#: as an ``evaluate`` on the same call; everything it replaces lives in this
+#: server's own tab -- the page's two async clipboard writes, ``execCommand``
+#: for ``"copy"`` only (every other command passes through), a capture box
+#: and two idempotence flags defined on the page's own objects, and one
+#: listener flag -- so the page's copy lands in the capture instead of on the
+#: operator's system clipboard; and ``M C72`` was PROVEN on it live, 2026-09-24
+#: (``_audit/2026-09-23-live-lane-session-1.md``, entry 12: one load, two
+#: presses, the capture held the post's link, the price did not move). Until
+#: this merge the script was held by the test-side declaration
+#: ``SCRIPTS_THAT_REPLACE_PAGE_BEHAVIOUR`` on the ground that the token scan
+#: could not see it; the replacement scan now does, so the declaration of WHAT
+#: it may replace lives here, where the boundary freeze pins it.
+SANCTIONED_API_REPLACEMENTS: dict[tuple[str, str], tuple[str, ...]] = {
+    ("linkedin_server/share_link.py", "CLIPBOARD_JS"): (
+        "API replacement: navigator.clipboard.writeText =",
+        "API replacement: navigator.clipboard.write =",
+        "API replacement: document.execCommand =",
+        "API replacement: window.__lqCopyListenerInstalled =",
+        "API replacement: Object.defineProperty(",
+        "API replacement: Object.defineProperty(",
+        "API replacement: Object.defineProperty(",
+    ),
+}
+
+
 def scan_js_for_mutations(js: str) -> list[str]:
-    """Return every mutating token found in an injected script."""
-    return [token for token in JS_MUTATION_TOKENS if token in js]
+    """Return every mutating token found in an injected script.
+
+    Two kinds of entry: a token from :data:`JS_MUTATION_TOKENS`, verbatim, and
+    ``"API replacement: <what matched>"`` for a script that replaces a browser
+    API -- see :data:`JS_API_REPLACEMENT_PATTERNS`.
+    """
+    found = [token for token in JS_MUTATION_TOKENS if token in js]
+    for pattern in JS_API_REPLACEMENT_PATTERNS:
+        for match in pattern.finditer(js):
+            found.append("API replacement: " + " ".join(match.group(0).split()))
+    return found
 
 
 # ---------------------------------------------------------------------------

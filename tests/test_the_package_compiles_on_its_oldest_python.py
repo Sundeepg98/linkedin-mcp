@@ -281,3 +281,91 @@ def test_each_rule_fires_on_its_own_smallest_case(source, rule):
 )
 def test_the_legal_twins_stay_silent(source):
     assert lint.violations(source) == [], source
+
+
+# ---------------------------------------------------------------------------
+# ONE NODE, SEVERAL PIECES -- the quote that terminates is the PIECE's own
+# ---------------------------------------------------------------------------
+
+#: LANE L7'S LINE AS IT SHIPPED (603f4d3), in its implicit concatenation, and
+#: the reason this block exists. ``_EditorWorld`` rendered a page from nine
+#: literal pieces; ONE JoinedStr holds them all, and the piece carrying the
+#: expression is quoted with ``'`` while the FIRST piece is quoted with ``"``.
+#: The lint took the first piece's quote for every expression, so
+#: ``self.store["City"]`` read as the enclosing quote reused -- and CI failed
+#: on every platform (the fix-up 66aaa95 moved the value into a local). It was
+#: never a floor violation: measured 2026-09-24, it parses on CPython 3.10.19
+#: and on 3.13, and the lint flagged it on both.
+L7_LINE_AS_IT_SHIPPED = '''
+class _EditorWorld:
+    def render(self, months, notify, switch, handler, disabled):
+        return (
+            "<!doctype html><html><body><main><h1>Profile</h1></main>"
+            "<dialog open>"
+            '<label for="e-city">City</label>'
+            f'<input id="e-city" type="text" value="{self.store["City"]}">'
+            '<label for="e-month">Month</label>'
+            f'<select id="e-month">{months}</select>'
+            f"{notify}{switch}"
+            '<p id="e-error"></p>'
+            f'<button type="button" onclick="{handler}"{disabled}>Save</button>'
+            "</dialog></body></html>"
+        )
+'''
+
+#: THE MIRROR, AND THE WORSE HALF: a first piece quoted ``'`` and a LATER
+#: ``f"..."`` piece reusing ``"`` inside its expression. Measured 2026-09-24:
+#: a SyntaxError on 3.10.19 (``f-string: unmatched '['``) -- and the lint, on
+#: 3.13, reported NOTHING, because it looked for ``'``. That is the exact
+#: failure this file exists to prevent, shipped green by the instrument
+#: built to prevent it.
+REUSED_QUOTE_IN_A_LATER_PIECE = '''
+def cell(d):
+    return (
+        '<td>'
+        f"{d["k"]}"
+        '</td>'
+    )
+'''
+
+
+def test_a_quote_legal_in_its_own_piece_is_not_convicted():
+    """THE FALSE POSITIVE, cleared: L7's line parses on every version this
+    package supports, so a rule that convicts it is wrong."""
+    assert lint.violations(L7_LINE_AS_IT_SHIPPED, "test_profile_editor_commit.py") == []
+
+
+def test_a_quote_reused_in_a_later_piece_is_convicted():
+    """THE FALSE NEGATIVE, closed -- judged like every fixture above: the rule
+    must convict it where it parses, and below PEP 701 the parser refuses it."""
+    try:
+        found = lint.violations(REUSED_QUOTE_IN_A_LATER_PIECE)
+    except SyntaxError as error:
+        assert sys.version_info < (3, 12), (
+            "an interpreter at or above PEP 701 refused source it should "
+            "accept: %s" % error
+        )
+        return
+    assert [(rule, text) for _, rule, text in found] == [(lint.REUSED_QUOTE, 'd["k"]')], found
+
+
+def test_a_refused_tokenizer_is_no_piece_table_and_the_node_quote_decides(monkeypatch):
+    """NO PIECE TABLE IS NOT AN EMPTY ONE. Where the tokenizer refuses,
+    ``_pieces`` answers None -- it answered ``[]`` until 2026-09-27, a refusal
+    reading as a file with no string pieces, which
+    tests/test_an_outage_is_never_filed_as_an_absence.py refuses -- and each
+    expression is judged by its node's own quote.
+
+    L7's line shows the fallback is TAKEN rather than skipped: judged by the
+    first piece's quote it is convicted, a verdict only the piece table clears
+    (``test_a_quote_legal_in_its_own_piece_is_not_convicted`` above)."""
+
+    def _refuse(readline):
+        raise lint.tokenize.TokenError("refused, by this test", (1, 0))
+
+    monkeypatch.setattr(lint.tokenize, "generate_tokens", _refuse)
+    assert lint._pieces(L7_LINE_AS_IT_SHIPPED) is None
+    found = lint.violations(L7_LINE_AS_IT_SHIPPED, "test_profile_editor_commit.py")
+    assert [(rule, text) for _, rule, text in found] == [
+        (lint.REUSED_QUOTE, 'self.store["City"]')
+    ], found

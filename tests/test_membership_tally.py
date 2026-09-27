@@ -41,6 +41,7 @@ import inspect
 import pytest
 
 from linkedin_server import groups, shape
+from tests.record_typed import identity_parameters_outside_a_record
 
 #: A five-digit id. His own page carries one at this length, measured, so this
 #: is a real shape and not a value chosen to be short.
@@ -120,9 +121,17 @@ def test_no_public_function_takes_a_name(function):
     A future edit adding a ``name`` parameter here turns this red, which is the
     point: the fix would look reasonable in a diff and would silently
     reintroduce the class.
+
+    REWRITTEN AROUND THE RECORD TYPE ON 2026-09-27, not deleted. NAMES-AT-
+    RUNTIME amended the name-free doctrine for what a read returns, and
+    PEOPLE-DATA-MITIGATIONS says a group crosses as a ``people_data`` record.
+    So a name-carrying parameter is still refused here as a bare string, and
+    admitted only when its annotation is a record -- the reading
+    ``tests/record_typed.py`` holds, with its controls in
+    ``tests/test_a_name_enters_a_shaper_only_as_a_record.py``.
     """
-    parameters = list(inspect.signature(function).parameters)
-    assert not any("name" in parameter for parameter in parameters), parameters
+    outside = identity_parameters_outside_a_record(function, lambda p: "name" in p)
+    assert outside == [], list(inspect.signature(function).parameters)
 
 
 def test_the_module_publishes_no_free_text_key():
