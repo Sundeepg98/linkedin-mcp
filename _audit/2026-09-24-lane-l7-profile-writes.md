@@ -1135,10 +1135,12 @@ not-built note superseded, and gains the build note and **RELEASED BY `SELF-PROF
 field edits that ruling released, aimed at nobody and reversed by the same switch. Without the marker
 `scripts/ruling_holds.py` holds every W row by OPERATOR-NAMES-THE-TARGET, which for a write aimed at
 himself would be a hold nobody could meet by naming a target. Its class line moves to
-`built:update_profile_field`. `scripts/census_completion.py` re-pinned in this commit, seven figures and
-one bucket-1 row, each move beside its pin: adjudicated 199 -> 200, delivered_broad 110 -> 111, unfired
-31 -> 32, gap 548 -> 547, gap_write 337 -> 336, b1_no_ruling 20 -> 21, b1_released 6 -> 7
-(b1_standing stays 11), and `P B9` joins the NO_RULING rows beside the six P A rows.
+`built:update_profile_field`. `scripts/census_completion.py` re-pinned, seven figures and one bucket-1
+row, each move beside its pin -- ON THE BRANCH OVER `7d89b8d`: adjudicated 199 -> 200, delivered_broad
+110 -> 111, unfired 31 -> 32, gap 548 -> 547, gap_write 337 -> 336, b1_no_ruling 20 -> 21, b1_released
+6 -> 7 (b1_standing stays 11), and `P B9` joins the NO_RULING rows beside the six P A rows. The same
+seven moved by the same step when master was integrated; the values measured on the merged tree are in
+F.7.
 
 **WHAT IS STILL NOT MEASURED, AND WHICH WAY EACH FAILS.** (a) Which element LinkedIn's switch listens
 on: the press lands on the wrapper, the element the page marks as the switch (`role=switch`,
@@ -1181,6 +1183,92 @@ The operator has said NO MORE NEW WAVES, so after `P B9` this lane is done excep
 9. **Three facts only a live press can settle** (F.5): which element the switch listens on, whether it
    stores itself when pressed, and that 'checked' means the badge is shown. Each fails safe as F.5
    says, and the first live fire's receipt answers all three.
+
+### F.7 After the restart (2026-09-27): the WIP pinned, master integrated once, the gates
+
+**THE RESTART.** The session stopped on 2026-09-24 during `P B9`'s gate run. The orchestrator's resume
+order (2026-09-27 13:25) sampled HEAD `7d89b8d` with 11 files uncommitted, and disk agreed at 13:20. No
+process of this lane had survived the stop, and that gate run's output ended part-way with four errors
+and no summary, so it is recorded as NOT RUN rather than as a result. The 11 files were reviewed -- one
+build: code, tests, census, record, register, timing and baseline; strict ASCII wherever HEAD was; every
+Python file compiles -- and pinned as `ce73eb1` before anything else touched the tree. On `ce73eb1`,
+before the merge: the lane's three test files, the read-only boundary, `test_writes.py` and the reader
+inventory, 4 workers, **541 passed**.
+
+**THE INTEGRATION, ONCE, AT THE END: master `0e4f4b3`** -- lanes L5 and S's follow-up, then the live
+lane's Part 2, since `7d89b8d`. A first attempt merged `0d896de`, the tip at 13:25; master moved to
+`0e4f4b3` while its gate was running, so that merge was aborted UNCOMMITTED, its gate run stopped and its
+processes gone, and the merge redone against `0e4f4b3`: one integration, not two. Two conflicts, the two
+a dry run predicted, both files where each side priced or pinned its own move:
+* `scripts/ci_shard_timings.json` -- master's table, plus this lane's one file, re-priced from its own
+  junit run: `tests/test_premium_badge.py` 147.954 s; `_files` 169 -> 170, `_total_seconds` 1405.4 ->
+  1553.4.
+* `scripts/census_completion.py` -- master's pins, then `P B9`'s move MEASURED ON THE MERGED TREE, never
+  summed from either side. `census_completion --check` found exactly seven figures and one bucket-1 row
+  off master's pins, each by `P B9`'s own step, and nothing else: adjudicated 202 -> 203,
+  delivered_broad 113 -> 114, unfired 34 -> 35, gap 545 -> 544, gap_write 335 -> 334, b1_no_ruling
+  21 -> 22, b1_released 6 -> 7 (b1_standing 13), with `P B9` in NO_RULING. Re-pinned with the reason
+  beside each; `--check` then exits 0.
+
+`writes.py`, `server.py`, `INSTRUMENTS.md`, `write-classes.tsv` and the reader baseline merged without
+a conflict. Lane L5's reply and this lane's switch sit in different arms of `perform` (the fill arm and
+the click arm) and of `_verify_after`, the live lane's writes change is the reaction toggle's two label
+families, and the merged package imports with 15 performable actions. Both baselines were regenerated
+by their generators on the merged tree: the reader baseline differs from master's by this lane's one
+reader, `profile_editor:read_premium_badge` (`clean`, 152 readers), and the tool-envelope baseline not at
+all. `_audit/INDEX.md` and `_audit/RULINGS.md` are at a fixed point by their generators' `--check`, and
+the fourteen census instruments exit 0 on the merged tree. The merge is committed as `a2e6f66`, and the
+gates below ran on it.
+
+**THE BLOCKER MAP WAS NOT AT A FIXED POINT, AND ITS `--check` COULD NOT SAY SO.**
+`scripts/build_blocker_map.py --check` runs the map's assertions and never compares the file with what
+`--write` would produce, so it exited 0 here, and at every item of this follow-up, over two stale
+things, both this lane's: `P B9`'s `state_today` still reading GAP since the build, and the derived
+`reason_doc` column, whose ranked candidate moves when this record's text does. A read-only comparison
+through the generator's own `build()` found `P B9` the only stale state. `--write` then changed that
+state and the `reason_doc` of every row whose ranked candidate this record's own text now wins, and a
+second `--write` changed nothing. The counts are NOT printed here, measured rather than guessed: an
+earlier draft of this paragraph named the blockers and their counts, and naming them moved them, since
+the locator scores this text too. They are in the commit that carries the map. No test catches either
+column:
+`tests/test_blocker_map_is_derived.py` compares the blocker and class columns, and recomputes the GAP
+total from the live census rather than from the file. The map is committed with this record, after it.
+
+**WHAT THE LIVE LANE'S PART 2 CHANGES FOR THIS LANE -- NOTHING YET, AND THE REASON.** Its record's
+section (f) finds the account-level setting by name in the settings index -- LinkedIn's current label
+is 'Sharing profile edits', key `notifyNetworkForUpdates` -- and SPECIFIES its reader without building
+it: the setting's own page has no capture, and both candidate addresses are refused by the boundary
+today. So `account_share_updates` is still passed by no caller, and F.6's first item stands as written:
+when the reader is wired, both of this write's save-gate reads take it -- the one BEFORE the switch is
+pressed and the one before Save.
+
+**GATES -- the resume order's set, on the committed merge `a2e6f66`. No full suite locally, by order.**
+1. **The fourteen census instruments** -- `census_completion --check` among them -- exit 0 on the merged
+   tree.
+2. **One xdist run, 4 workers, 28 files**: this lane's tests (`test_premium_badge.py`,
+   `test_intro_editor_switches.py`, `test_profile_editor_commit.py`, `test_mark_company_interest.py`);
+   the three the order named (`test_the_package_compiles_on_its_oldest_python.py`,
+   `test_gap_rows_on_refused_addresses.py`, `test_ci_shard.py`); the guards over the modules this lane
+   changed (the read-only boundary, `test_writes.py`, both page-string guards, the reader inventory,
+   receipt-names-its-action, preview/click state, control reach, the server surface); the census and pin
+   tests the move touches (write classes, ruling holds, the row-total pin, the blocker map, the
+   covered-row artifact, row states); and the document and identity guards over this record:
+   **2303 passed**, in 7 min 24 s.
+3. **The new test file's timing** is measured, not estimated: `tests/test_premium_badge.py`, a junit run
+   of it alone, 147.954 s, in `scripts/ci_shard_timings.json` with its provenance.
+4. **After this record was completed**, the document, identity and blocker-map tests again over its final
+   text and the regenerated map, before either was committed; the count is in the commit that carries
+   them.
+
+**MASTER HAS MOVED PAST THE INTEGRATION, AND THIS LANE DID NOT FOLLOW IT -- ONCE, BY ORDER.** While the
+gate ran, master reached `effcb2e`: lane D's merge (`cf530fa`, `P C8` and the download transport) and a
+one-line census fix. A dry run of merging this branch over it predicts ONE conflict,
+`scripts/census_completion.py`, the pins both lanes moved from the same base; `profile.md`, `server.py`
+and `INSTRUMENTS.md` auto-merge. THE RESOLUTION IS THE ONE USED HERE: take master's pins and MEASURE on
+the merged tree. `census_completion --check` should then name exactly `P B9`'s seven figures and its
+bucket-1 row, each one step past master's value -- adjudicated, delivered_broad and unfired +1, gap and
+gap_write -1, b1_no_ruling and b1_released +1 -- and `P B9` joins NO_RULING beside the six P A rows. Any
+other figure it names is a finding, not a resolution.
 
 ## Live queue
 
