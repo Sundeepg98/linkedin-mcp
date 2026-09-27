@@ -3953,7 +3953,7 @@ def test_a_surface_earns_its_entry_by_being_measured_more_than_once():
 TEMPLATE_LEAKS = [
     ("Invite Savita Krishnan to connect", "Savita Krishnan"),
     ("Open control menu for post by Thornwick M", "Thornwick M"),
-    ("Grace Hopper & 70 other connections follow this page", "Grace Hopper"),
+    ("Wren Fixturewright & 70 other connections follow this page", "Wren Fixturewright"),
 ]
 
 

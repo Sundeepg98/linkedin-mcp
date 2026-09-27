@@ -120,7 +120,7 @@ ENCODED_SEGMENT = "urn%3Ali%3Aactivity%3A" + ACTIVITY_ID
 #: the rule exists for.
 AUTHOR_SHORT = "Ada L"
 OWNER_FULL = "Ada Lovelace"
-OTHER_AUTHOR = "Grace Hopper"
+OTHER_AUTHOR = "Wren Fixturewright"
 NEAR_MISS_AUTHOR = "Adam Lovelace"
 
 #: Built from the constants under test rather than retyped, so a fixture cannot

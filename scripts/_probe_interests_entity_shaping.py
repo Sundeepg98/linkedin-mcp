@@ -137,7 +137,7 @@ def _use_candidate(root: str) -> None:
 #: `tests/test_a_person_name_is_never_a_literal.py::INVENTED_NAMES`, held in
 #: the constants that test names. This file adds no name to the repository and
 #: makes no new claim that a name is invented.
-MEMBER_NAME = "Grace Hopper"
+MEMBER_NAME = "Wren Fixturewright"
 OTHER_AUTHOR = "Savita Krishnan"
 MEMBER_SLUG = "priya-sharma-12ab34"
 OTHER_SLUG = "alex-r-12ab34"

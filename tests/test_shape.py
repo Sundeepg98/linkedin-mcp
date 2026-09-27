@@ -751,8 +751,8 @@ def test_envelope_merges_extra_fields():
 #: values are the whole point: see the docstring below.
 DESCRIPTOR_CASES = [
     ("Ada Lovelace will send message", 1, False, "will send message"),
-    ("Ada Lovelace to Grace Hopper will send message", 2, True, "will send message"),
-    ("Grace Hopper", 1, False, ""),
+    ("Ada Lovelace to Wren Fixturewright will send message", 2, True, "will send message"),
+    ("Wren Fixturewright", 1, False, ""),
     ("Send", 1, False, ""),
     ("Open send options", 1, False, "send options"),
     # NONE, NOT "". No run was found, so no name-free tail can be derived.

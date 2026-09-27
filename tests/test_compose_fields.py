@@ -235,7 +235,7 @@ async def test_no_label_text_survives_into_any_answer(reading):
     page = _Page(reading=reading)
     out = await dom.read_compose_fields(page)
     blob = str(out)
-    for token in ("Ada", "Lovelace", "Grace", "Hopper", "will send message"):
+    for token in ("Ada", "Lovelace", "Wren", "Fixturewright", "will send message"):
         if token == "will send message" and "modes" in out:
             # The name-free TAIL is deliberately returned; it is what survives
             # the last capitalised run and is the storable half of the answer.
@@ -496,7 +496,7 @@ def _run_shape_of_in_node(cases):
 
 SHAPING_CORPUS = [
     "Ada Lovelace will send message",
-    "Ada Lovelace to Grace Hopper will send message",
+    "Ada Lovelace to Wren Fixturewright will send message",
     "Ada Lovelace",
     "Send",
     "InMail",
@@ -613,9 +613,9 @@ def test_the_extractor_actually_found_the_shipped_function():
         )
     src = dom.COMPOSE_MODES_JS
     assert src.count("const shapeOf =") == 1
-    rows = _run_shape_of_in_node(["Ada Lovelace to Grace Hopper will send message"])
+    rows = _run_shape_of_in_node(["Ada Lovelace to Wren Fixturewright will send message"])
     assert rows == [{
-        "raw": "Ada Lovelace to Grace Hopper will send message",
+        "raw": "Ada Lovelace to Wren Fixturewright will send message",
         "runs": 2,
         "joined_by_to": True,
         "tail": "will send message",
