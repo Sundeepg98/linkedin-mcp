@@ -3098,9 +3098,18 @@ async def read_apply_modal(page: Any) -> dict[str, Any]:
 #: costume of a limit -- the server's own verdict said InMails were
 #: unreachable "without interacting with the page, which it does not do", and
 #: that clause was a decision, not a wall.
+#:
+#: FIVE SINCE LANE L5'S ORDER OF 2026-09-27 23:36, SEVEN UNTIL THEN. The set
+#: also held ``focused`` and ``other``, and neither is a pill: on the measured
+#: page they are the FOLDER dropdown's choices, beside the filter bar (see
+#: :data:`FILTER_BAR_HOOK`), and lane G's bar scoping had already made the
+#: activator refuse both on every page -- so two accepted values could never
+#: be activated, and asking for one cost the tool's two page loads before it
+#: said so. They are gone from the set, from the tool's schema (an enum) and
+#: from its description, and the tool now checks the value BEFORE any page is
+#: loaded. Choosing a folder is a different act on a different control, and
+#: nothing here performs it.
 MESSAGING_FILTERS: tuple[str, ...] = (
-    "focused",
-    "other",
     "unread",
     "jobs",
     "connections",
@@ -3124,7 +3133,9 @@ MESSAGING_FILTERS: tuple[str, ...] = (
 #: WHICH pill it is, never WHETHER it is one. Until 2026-09-27 the activator
 #: asked the page for any button whose name equalled the word, and ``focused``
 #: pressed the folder trigger. ``focused`` and ``other`` are the folder's
-#: choices on the measured page, not pills, so both are now refused.
+#: choices on the measured page, not pills, so both were refused here -- and
+#: since lane L5's order of 2026-09-27 23:36 neither is an accepted value at
+#: all (:data:`MESSAGING_FILTERS`).
 FILTER_BAR_HOOK = "data-test-messaging-inbox-filters__filter-pill-group"
 FILTER_PILL_HOOK = "data-test-messaging-inbox-filters__filter-pill"
 FILTER_BAR_SELECTOR = "main [" + FILTER_BAR_HOOK + "]"
@@ -3176,8 +3187,9 @@ def assert_permitted_filter(name: str) -> str:
     """The closed-set check, unchanged, and still done BEFORE anything else.
 
     The narrowing was never the bug. The permission granted is to activate one
-    of seven named pills, not to press things on a page, and that is enforced
-    here before any locator exists.
+    of five named pills (seven until 2026-09-27: ``focused`` and ``other``, the
+    folder's choices, are gone -- see :data:`MESSAGING_FILTERS`), not to press
+    things on a page, and that is enforced here before any locator exists.
     """
     wanted = str(name or "").strip().lower()
     if wanted not in MESSAGING_FILTERS:

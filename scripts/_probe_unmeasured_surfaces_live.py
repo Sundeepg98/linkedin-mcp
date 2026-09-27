@@ -217,8 +217,11 @@ PROFILE_NEEDLES: tuple[tuple[str, str], ...] = (
 
 #: MESSAGING NEEDLES, AND THE FIRST SEVEN ARE THE CONTROL.
 #:
-#: `dom.MESSAGING_FILTERS` is a CLOSED SET OF SEVEN, and `dom.py` records the
-#: measurement behind it: "all six pills are `<button>` with no href", read
+#: `dom.MESSAGING_FILTERS` was a CLOSED SET OF SEVEN when this probe was written
+#: (FIVE since 2026-09-27: `focused` and `other` are the folder dropdown's
+#: choices beside the filter bar, not pills -- the needles below still look for
+#: all seven drawn controls, which is what a CONTROL needs), and `dom.py`
+#: records the measurement behind it: "all six pills are `<button>` with no href", read
 #: off the live inbox. So a settled render of this surface DRAWS THIS PILL
 #: ROW, and a reading that cannot find it is a reading of a page that had not
 #: arrived. THIS SURFACE HAS NO CONTROL COUNT IN `CENSUS_SETTLED_CONTROLS`,

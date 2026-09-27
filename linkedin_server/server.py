@@ -443,7 +443,7 @@ import logging
 import re
 import sys
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any, Literal, Optional
 from urllib.parse import parse_qs, urlencode, urlsplit
 
 from fastmcp import FastMCP
@@ -4430,9 +4430,19 @@ async def linkedin_new_messages() -> dict[str, Any]:
         return _error(exc)
 
 
+#: THE VALUES ``linkedin_open_messaging`` ACCEPTS FOR ``message_filter``, as
+#: the tool's SCHEMA states them: an enum a client reads before it calls, not a
+#: sentence it has to trust. The empty string is the default view; the rest is
+#: ``dom.MESSAGING_FILTERS`` exactly, and
+#: ``tests/test_the_folder_choices_are_not_filter_values.py`` holds the two
+#: equal. ``focused`` and ``other`` left both on 2026-09-27 (lane L5): they are
+#: the folder dropdown's choices, not pills, and could never be activated.
+MessageFilter = Literal["", "unread", "jobs", "connections", "inmail", "starred"]
+
+
 @mcp.tool()
 async def linkedin_open_messaging(
-    include_names: bool = False, message_filter: str = "", allow_unread: bool = False
+    include_names: bool = False, message_filter: MessageFilter = "", allow_unread: bool = False
 ) -> dict[str, Any]:
     """Open your LinkedIn messages and report what is there. OPENS A THREAD.
 
@@ -4504,15 +4514,17 @@ async def linkedin_open_messaging(
     would have been an invention. Pass ``message_filter="inmail"`` and the
     pill is activated.
 
-    THAT CLICK IS SANCTIONED AND NARROW. Only seven named pills can be
-    activated -- focused, other, unread, jobs, connections, inmail, starred --
-    checked against a fixed list before any selector is built, so an arbitrary
-    string can never become a click target -- and pressed only when exactly
-    one pill INSIDE THE ONE FILTER BAR is named EXACTLY that word; a control
+    THAT CLICK IS SANCTIONED AND NARROW. Only five named pills can be
+    activated -- unread, jobs, connections, inmail, starred -- checked against
+    a fixed list BEFORE ANY PAGE IS LOADED, so an arbitrary string can never
+    become a click target or cost a load -- and pressed only when exactly one
+    pill INSIDE THE ONE FILTER BAR is named EXACTLY that word; a control
     outside the bar is never pressed whatever it is named, and a name that
-    merely contains the word is refused, by count. ``focused`` and ``other``
-    are the folder dropdown's choices beside the bar, not pills, so on the
-    measured page both are refused. It is the SECOND entry in
+    merely contains the word is refused, by count. This said seven until
+    2026-09-27: ``focused`` and ``other`` were accepted too, and they are the
+    folder dropdown's choices beside the bar, not pills, so they could never
+    be activated -- they are refused now as values, before anything loads,
+    and the schema no longer offers them. It is the SECOND entry in
     ``readonly.SANCTIONED_MUTATIONS`` and the ONLY ONE OUTSIDE
     ``writes.perform`` -- which is the property worth stating, and is what
     "the only other entry" meant when there were two of them and four
@@ -4529,13 +4541,20 @@ async def linkedin_open_messaging(
         include_names: return each conversation's label as a people record
             in ``with``, instead of the placeholder ``name``. Default False.
         message_filter: activate one filter pill before reading -- one of
-            focused, other, unread, jobs, connections, inmail, starred. Empty
-            for the default view. Anything else is refused, not clicked.
+            unread, jobs, connections, inmail, starred. Empty for the default
+            view. Anything else is refused before any page is loaded.
         allow_unread: open /messaging/ even though a conversation reads
             unread on the composer's list. Default False.
     """
     try:
         wanted = str(message_filter or "").strip().lower()
+        if wanted:
+            # THE VALUE IS CHECKED BEFORE ANY PAGE IS LOADED (2026-09-27, lane
+            # L5). It was checked only by the activator, after the composer's
+            # list and /messaging/ had both loaded -- so a value that could
+            # never be activated still opened a conversation first. The schema
+            # refuses it at the client; this refuses a direct call.
+            wanted = dom.assert_permitted_filter(wanted)
         async with BROWSER.session() as page:
             # THE RECEIPT GUARD, 2026-09-24, and it runs BEFORE /messaging/
             # is asked for, because that load is the act it guards. The
