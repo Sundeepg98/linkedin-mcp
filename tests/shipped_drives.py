@@ -30,7 +30,7 @@ and carries nothing else out; the signature variants, which hand the same
 readers the plant, still run beside them and still convict a reader that
 starts returning what it read.
 
-THREE TABLES, AND ONLY THE FIRST EARNS ANYTHING:
+TWO TABLES, AND ONLY THE FIRST EARNS ANYTHING:
 
 * :data:`DRIVES` -- to the success path. The guard runs each beside its
   reader's signature variants (``AS_SHIPPED``).
@@ -38,11 +38,14 @@ THREE TABLES, AND ONLY THE FIRST EARNS ANYTHING:
   design. Run too, so every read BEFORE the press is hunted for the plant;
   each ends on the harness's refusal of the click, which the reader's own
   handler can no longer catch, and is recorded ``navigates (locator.click)``.
-* :data:`HELD_FOR_A_RULING` -- drives that DO reach the success path, and
-  what comes back is page text outside a people record. The legacy text
-  inventory may not grow (2026-09-24), so these are NOT run by the guard;
-  a test holds each to still returning text, so the day a reader converts,
-  it says to adopt the drive.
+
+FOUR DRIVES WERE HELD OUT FOR A RULING, and are in :data:`DRIVES` since the
+orchestrator gave it (2026-09-28 04:25): each reaches its reader's success
+path and what comes back is page text outside a people record -- his own
+profile's text, or an aggregate over his viewers that identifies no one.
+Both kinds are admitted to the text inventory, each reader named with its
+reason in the guard's ``ADMITTED_TEXT``; the one field that could name
+another member (an endorsement line) was converted instead.
 """
 
 from __future__ import annotations
@@ -917,7 +920,8 @@ async def copy_own_post_link_to_the_press(page: Any) -> Any:
 
 
 # ---------------------------------------------------------------------------
-# HELD FOR A RULING: success paths that return page text outside a record
+# ADMITTED BY THE RULING OF 2026-09-28: success paths that return page text
+# outside a record -- his own profile's, or an aggregate that names no one
 # ---------------------------------------------------------------------------
 
 #: The skill cards ``tests/fixtures/profile_skills.html`` draws, anchored on
@@ -956,11 +960,12 @@ async def read_profile_detail_entries_as_shipped(page: Any) -> Any:
     ``tests/test_sdui_surfaces_fixture.py`` runs the real harvest and the real
     reader over it and asserts six records and the six skill names.
 
-    WHAT COMES BACK IS THE FINDING: ``entries`` is card text, as plain strings,
-    outside any people record -- ``returns_text``. It is the reader's success
-    path, and it predates the 2026-09-24 inventory (added 2026-09-03); the
-    inventory missed it because nothing drove it. The inventory may not grow,
-    so this drive waits for a ruling: admit it, or convert the reader.
+    WHAT COMES BACK: ``entries`` is card text, as plain strings, outside any
+    people record -- ``returns_text``. It is the reader's success path, it
+    predates the 2026-09-24 inventory (added 2026-09-03), and the inventory
+    missed it because nothing drove it. HIS OWN PROFILE'S TEXT -- his skills,
+    and the lines under them -- so ADMITTED by the ruling of 2026-09-28; the
+    one line that could name another member, an endorsement's, was converted.
     """
     from linkedin_server import dom
 
@@ -1043,12 +1048,12 @@ async def read_self_owned_editor_fields_as_shipped(page: Any) -> Any:
     ``tests/test_intro_editor_switches.py`` reads it through this reader
     (via ``profile_editor.read_save_gate``) in a browser.
 
-    WHAT COMES BACK IS THE FINDING: the reader publishes a control's LABEL
-    ungated, under the self-owned-container ruling; with the label the plant,
-    that is page text outside a record at ``$.fields[0].name``. The inventory
-    recorded this reader clean on its ``no_anchor`` refusal and never saw it.
-    (Lane G's child measured the write path's ``include_dom_id=True`` call
-    publishing the id too.) Held for the ruling.
+    WHAT COMES BACK: the reader publishes a control's LABEL ungated, under the
+    self-owned-container ruling; with the label the plant, that is page text
+    outside a record at ``$.fields[0].name``. The inventory recorded this
+    reader clean on its ``no_anchor`` refusal and never saw it. (The write
+    path's ``include_dom_id=True`` call adds the element's id.) HIS OWN
+    EDITOR'S LABELS, so ADMITTED by the ruling of 2026-09-28.
     """
     from linkedin_server import dom
 
@@ -1067,10 +1072,10 @@ async def read_self_owned_editor_values_as_shipped(page: Any) -> Any:
     THE FIXTURE: the same four controls; the city input holds a value
     (``value="Placeholdertown"``), each switch is ``state_not_value``.
 
-    WHAT COMES BACK IS THE FINDING: the reader returns a field's VALUE
-    verbatim -- the restore path's whole purpose -- and its label ungated;
-    with both the plant, page text outside a record at ``$.fields[0]``.
-    Held for the ruling.
+    WHAT COMES BACK: the reader returns a field's VALUE verbatim -- the restore
+    path's whole purpose -- and its label ungated; with both the plant, page
+    text outside a record at ``$.fields[0]``. WHAT HE TYPED INTO HIS OWN
+    PROFILE, so ADMITTED by the ruling of 2026-09-28.
     """
     from linkedin_server import dom
 
@@ -1154,11 +1159,13 @@ async def read_profile_views_more_insights_as_shipped(page: Any) -> Any:
     nothing unparsed. The double draws that page's structure, with the values
     and names the plant.
 
-    WHAT COMES BACK IS THE FINDING: the highlight values and the company
-    names, as plain strings outside any record -- ``returns_text``. Built
-    2026-09-23, the day before the inventory, with its reason stated in the
-    module ("WHAT IS PUBLISHED, AND WHY NO NAME IS REDACTED HERE"); the
-    inventory missed it because nothing drove it. Held for the same ruling.
+    WHAT COMES BACK: the highlight values and the company names, as plain
+    strings outside any record -- ``returns_text``. Built 2026-09-23, the day
+    before the inventory, with its reason stated in the module ("WHAT IS
+    PUBLISHED, AND WHY NO NAME IS REDACTED HERE"); the inventory missed it
+    because nothing drove it. AGGREGATES OVER HIS VIEWERS THAT IDENTIFY NO ONE
+    -- a location, an industry, a company, each company's share -- so
+    ADMITTED by the ruling of 2026-09-28; no field is a viewer.
     """
     from linkedin_server import profile_views_more
 
@@ -1183,6 +1190,16 @@ DRIVES: dict[str, Callable[..., Any]] = {
     "server:_attach_recipient_ids": attach_recipient_ids_as_shipped,
     "server:_profile_views_press_counters": profile_views_press_counters_as_shipped,
     "threads:composer_holds": threads_composer_holds_as_shipped,
+    # ADMITTED BY THE RULING OF 2026-09-28: each returns page text outside a
+    # record on its success path -- his own profile's, or an aggregate that
+    # identifies no one -- and is named with its reason in the guard's
+    # ADMITTED_TEXT.
+    "dom:read_profile_detail_entries": read_profile_detail_entries_as_shipped,
+    "dom:read_self_owned_editor_fields": read_self_owned_editor_fields_as_shipped,
+    "dom:read_self_owned_editor_values": read_self_owned_editor_values_as_shipped,
+    "profile_views_more:read_profile_views_more_insights": (
+        read_profile_views_more_insights_as_shipped
+    ),
 }
 
 #: As far as a press. Run by the guard, so the reads before the press are
@@ -1191,15 +1208,4 @@ TO_THE_PRESS: dict[str, Callable[..., Any]] = {
     "press:disclose": disclose_to_the_press,
     "reveal:reveal": reveal_to_the_press,
     "share_link:copy_own_post_link": copy_own_post_link_to_the_press,
-}
-
-#: To a success path that returns page text outside a record. NOT run by the
-#: guard's verdicts: the text inventory may not grow. Held by a test.
-HELD_FOR_A_RULING: dict[str, Callable[..., Any]] = {
-    "dom:read_profile_detail_entries": read_profile_detail_entries_as_shipped,
-    "dom:read_self_owned_editor_fields": read_self_owned_editor_fields_as_shipped,
-    "dom:read_self_owned_editor_values": read_self_owned_editor_values_as_shipped,
-    "profile_views_more:read_profile_views_more_insights": (
-        read_profile_views_more_insights_as_shipped
-    ),
 }

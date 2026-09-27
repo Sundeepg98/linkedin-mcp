@@ -67,6 +67,7 @@ refuse it, which a shorter marker would have done silently.
 
 from __future__ import annotations
 
+from collections.abc import Mapping
 from pathlib import Path
 from typing import Any, Iterator
 
@@ -734,7 +735,11 @@ def _verdict_class(value: Any) -> str:
     return str(value).split(":", 1)[0].strip()
 
 
-def text_ratchet(baseline: dict[str, str], live: dict[str, str]) -> list[str]:
+def text_ratchet(
+    baseline: dict[str, str],
+    live: dict[str, str],
+    admitted: Mapping[str, Any] | None = None,
+) -> list[str]:
     """What a live verdict table may not do against its committed baseline.
 
     THE LEGACY INVENTORY MAY SHRINK AND MAY NOT GROW (2026-09-24,
@@ -749,6 +754,12 @@ def text_ratchet(baseline: dict[str, str], live: dict[str, str]) -> list[str]:
     * ``lost records``    -- the baseline says records and the live verdict is
       anything else: a converted reader fell back.
 
+    ``admitted`` names readers a RULING admitted to the inventory, each with
+    its reason (2026-09-28: PEOPLE-DATA-MITIGATIONS binds OTHER members' data;
+    his own profile's text, and aggregates that identify no one, are
+    admitted). Only such a name may join; it is the one door, and the caller
+    holds the table that says why.
+
     Names present on only one side are the callers' existing appeared/vanished
     checks, and are skipped here.
     """
@@ -756,6 +767,8 @@ def text_ratchet(baseline: dict[str, str], live: dict[str, str]) -> list[str]:
     for name in sorted(set(baseline) & set(live)):
         was, now = _verdict_class(baseline[name]), _verdict_class(live[name])
         if now == RETURNS_TEXT_VERDICT and was != RETURNS_TEXT_VERDICT:
+            if admitted and name in admitted:
+                continue
             problems.append(f"new text path: {name} ({was} -> {now})")
         elif was == RETURNS_TEXT_VERDICT and now != RETURNS_TEXT_VERDICT:
             problems.append(f"stale inventory: {name} ({was} -> {now})")
@@ -765,15 +778,19 @@ def text_ratchet(baseline: dict[str, str], live: dict[str, str]) -> list[str]:
 
 
 def text_paths_a_baseline_may_not_record(
-    baseline: dict[str, str], live: dict[str, str]
+    baseline: dict[str, str],
+    live: dict[str, str],
+    admitted: Mapping[str, Any] | None = None,
 ) -> list[str]:
     """Names a baseline WRITER must refuse: live text outside records where the
     committed baseline does not already record text -- including names it does
     not record at all. So a new page-text path cannot be written into the
-    inventory; it has to return records."""
+    inventory; it has to return records -- unless a ruling ``admitted`` it
+    (see :func:`text_ratchet`)."""
     return sorted(
         name
         for name, verdict in live.items()
         if _verdict_class(verdict) == RETURNS_TEXT_VERDICT
         and _verdict_class(baseline.get(name, "")) != RETURNS_TEXT_VERDICT
+        and not (admitted and name in admitted)
     )

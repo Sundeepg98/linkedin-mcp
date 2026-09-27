@@ -9310,6 +9310,22 @@ PROFILE_DETAIL_MAX_CHARS = 300
 #: it catches every inflection and cannot be defeated by a rewording.
 _ENDORSEMENT = re.compile(r"endors", re.I)
 
+#: The ONE endorsement line this reader publishes as text: a bare count --
+#: "3 endorsements". ANY OTHER endorsement line can name the endorser, and the
+#: endorser is ANOTHER MEMBER (2026-09-28, the orchestrator's ruling on what
+#: lane G held: this reader's text is his own profile's and is admitted to the
+#: text inventory for that reason; anything that identifies another member
+#: leaves only as a people record, and a sentence is not one). Such a line is
+#: COUNTED -- ``endorsements.lines_withheld`` -- and published nowhere, neither
+#: in ``endorsements.lines`` nor among a card's ``evidence`` lines.
+_ENDORSEMENT_COUNT = re.compile(r"^\d[\d,]*\s+endorsements?$", re.I)
+
+
+def _names_nobody(line: str) -> bool:
+    """Is ``line`` safe to publish as his own card's text? Every line is,
+    except an endorsement line that is not a bare count. PURE."""
+    return not _ENDORSEMENT.search(line) or bool(_ENDORSEMENT_COUNT.match(line.strip()))
+
 
 async def read_profile_detail_entries(
     page: Any, *, section: str
@@ -9392,7 +9408,10 @@ async def read_profile_detail_entries(
         # the shape that test permits; flattened into the list is the defect
         # it was written for.
         rest = [shape.trim(line, PROFILE_DETAIL_MAX_CHARS) for line in lines[1:]]
-        rest = [line for line in rest if line]
+        # AN ENDORSEMENT LINE THAT CAN NAME SOMEONE IS NOT HIS EVIDENCE: it is
+        # counted under ``endorsements`` and published nowhere (see
+        # ``_ENDORSEMENT_COUNT``).
+        rest = [line for line in rest if line and _names_nobody(line)]
         if name and rest:
             evidence.append({"name": name, "lines": rest})
 
@@ -9434,9 +9453,14 @@ async def read_profile_detail_entries(
             for line in shape.content_lines(record.get("text", ""))
             if _ENDORSEMENT.search(line)
         ]
+        # ONLY A BARE COUNT IS PUBLISHED; a line that can name the endorser
+        # is counted and withheld. ``drawn`` still answers whether LinkedIn
+        # drew ANY endorsement line -- the measurement this reading exists for.
+        published = [line for line in endorsement_lines if _names_nobody(line)]
         out["endorsements"] = {
             "drawn": bool(endorsement_lines),
-            "lines": endorsement_lines,
+            "lines": published,
+            "lines_withheld": len(endorsement_lines) - len(published),
             # WHAT IT DID SEE, not only what it failed to match. A "no" with
             # no denominator is indistinguishable from a page that never
             # loaded, and this repository has paid for that confusion twice.

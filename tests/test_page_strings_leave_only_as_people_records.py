@@ -811,6 +811,34 @@ def test_a_baseline_writer_may_not_record_a_new_text_path():
     assert text_paths_a_baseline_may_not_record(baseline, dict(baseline)) == []
 
 
+def test_only_a_ruled_admission_lets_a_text_path_join_the_inventory():
+    """THE ONE DOOR (2026-09-28). A reader a ruling admitted -- his own
+    profile's text, or an aggregate that identifies no one -- may join the
+    inventory; every other new text path is refused exactly as before, by the
+    ratchet and by the baseline writer alike, and an admission changes
+    nothing else the ratchet says."""
+    baseline = {
+        "legacy": "returns_text",
+        "his_own": "not_driven:returned without reading the page",
+        "someone_elses": "clean",
+        "converted": "returns_records",
+    }
+    live = dict(baseline, his_own="returns_text", someone_elses="returns_text",
+                converted="clean")
+    admitted = {"his_own": ("his own profile's data, not another member's",)}
+    assert text_ratchet(baseline, live, admitted) == [
+        "lost records: converted (returns_records -> clean)",
+        "new text path: someone_elses (clean -> returns_text)",
+    ]
+    assert text_ratchet(baseline, live) == [
+        "lost records: converted (returns_records -> clean)",
+        "new text path: his_own (not_driven -> returns_text)",
+        "new text path: someone_elses (clean -> returns_text)",
+    ]
+    assert text_paths_a_baseline_may_not_record(baseline, live, admitted) == ["someone_elses"]
+    assert text_paths_a_baseline_may_not_record(baseline, live) == ["his_own", "someone_elses"]
+
+
 def people_tools_in_the_text_inventory(tools: dict[str, str], people_tools) -> list[str]:
     """Declared people tools that a tool baseline records as ``returns_text``."""
     return sorted(

@@ -836,14 +836,60 @@ async def _name_the_invitation_recipient_as_shipped(page: Any) -> Any:
 #: that rule left not driven, each triaged -- driven to its success path over
 #: a tracked fixture (``DRIVES``), or as far as a press the planted page
 #: refuses (``TO_THE_PRESS``, recorded not driven, run so the reads before
-#: the press are hunted). Its drives that reach page text outside a record
-#: are held out (``HELD_FOR_A_RULING``); see that file.
+#: the press are hunted). The four whose success path returns page text
+#: outside a record were held until the orchestrator's ruling of 04:25 the
+#: same day, and are driven now under :data:`ADMITTED_TEXT`.
 AS_SHIPPED: dict[str, Callable[..., Any]] = {
     "named_profile:name_the_profile_target": _name_the_profile_target_as_shipped,
     "threads:name_the_reply_recipient": _name_the_reply_recipient_as_shipped,
     "writes:_name_the_invitation_recipient": _name_the_invitation_recipient_as_shipped,
     **shipped_drives.DRIVES,
     **shipped_drives.TO_THE_PRESS,
+}
+
+#: THE RULING, VERBATIM IN SUBSTANCE (the orchestrator, 2026-09-28 04:25):
+#: PEOPLE-DATA-MITIGATIONS binds OTHER members' data; his own data is not
+#: people data in that sense. So his own text is ADMITTED to the text
+#: inventory, anything identifying another member leaves only as a people
+#: record (the reader is converted), and an aggregate that identifies no one
+#: is admitted. "Read each one's success-path output on its drive; do not
+#: decide from the name."
+HIS_OWN = "his own profile's data, not another member's"
+AGGREGATE = "an aggregate that identifies no one"
+
+#: READERS ADMITTED TO THE TEXT INVENTORY BY THAT RULING, each with its
+#: reason, after its drive's output was read FIELD BY FIELD:
+#:
+#: * ``dom:read_profile_detail_entries`` -- ``entries`` (his skills, roles,
+#:   schools: the first line of each of HIS cards), ``evidence`` (the lines
+#:   under them: where he used a skill, his employers, his dates),
+#:   ``endorsements`` (a bare count), ``observed`` and ``why`` (counts and
+#:   this package's sentences). The one field that could name ANOTHER member
+#:   -- an endorsement line, "Endorsed by <a member>" -- was CONVERTED the same
+#:   day: such a line is counted and published nowhere
+#:   (``dom._ENDORSEMENT_COUNT``; ``tests/test_sdui_surfaces_fixture.py::
+#:   test_an_endorsement_line_that_names_a_member_leaves_as_a_count_only``).
+#: * ``dom:read_self_owned_editor_fields`` -- ``container`` (kind, the anchor
+#:   word, a count) and ``fields``: each control's accessible NAME in his own
+#:   editor (its label) and its type, role and states. His own editor's
+#:   labels. (Driven with the default projection; the write path's
+#:   ``include_dom_id=True`` adds the element's id, an attribute of his own
+#:   editor, used by ``writes._live_control`` and never printed.)
+#: * ``dom:read_self_owned_editor_values`` -- the same ``container``, and each
+#:   field's label and VALUE, verbatim: what he typed into his own profile.
+#: * ``profile_views_more:read_profile_views_more_insights`` --
+#:   ``sections_found`` (two closed words), ``highlights`` (the top location,
+#:   industry and company of his viewers: one value each, over all of them),
+#:   ``details`` (a sub-heading and company names, each with a share), and
+#:   ``unparsed_lines`` (a count). No field is a viewer: a value is taken
+#:   only from the line before a closed label, an entry only from a line
+#:   ending in a percentage, and a line that is neither is counted, never
+#:   returned.
+ADMITTED_TEXT: dict[str, tuple[str, ...]] = {
+    "dom:read_profile_detail_entries": (HIS_OWN,),
+    "dom:read_self_owned_editor_fields": (HIS_OWN,),
+    "dom:read_self_owned_editor_values": (HIS_OWN,),
+    "profile_views_more:read_profile_views_more_insights": (AGGREGATE,),
 }
 
 #: READERS NOTHING TRACKED CAN DRIVE TO THEIR SUCCESS PATH, each with WHAT
@@ -865,7 +911,8 @@ AS_SHIPPED: dict[str, Callable[..., Any]] = {
 #:   capture can make this guard's read count move.
 #: * ``RULING`` -- a tracked fixture drives it, and what its success path
 #:   returns is page text outside a record, which the text inventory may not
-#:   admit without one (the drive is held in ``shipped_drives``).
+#:   admit without one. (None is left: the four held on 2026-09-28 were ruled
+#:   on the same day -- :data:`ADMITTED_TEXT`.)
 #:
 #: FIVE OF THE 22 THE ORDER NAMED LEFT THIS SET THE SAME DAY, recorded
 #: ``navigates`` -- a reason that already says what would drive them: a
@@ -889,11 +936,6 @@ WHAT_WOULD_DRIVE_IT: dict[str, str] = {
         "(BROWSER.goto, refused offline) or works from the address it is "
         "handed, reading no page content either way."
     ),
-    "profile_views_more:read_profile_views_more_insights": (
-        "RULING: tests/test_profile_views_more.py's synthetic revealed page "
-        "drives it, and its success path returns the highlight values and "
-        "company names as page text outside a record (HELD_FOR_A_RULING)."
-    ),
     "dom:read_compose_fields": (
         "CAPTURE: /messaging/compose/ as loaded -- an empty composer, nothing "
         "clicked or typed -- drawing its two send-mode radios as "
@@ -902,26 +944,10 @@ WHAT_WOULD_DRIVE_IT: dict[str, str] = {
         "tracked compose fixture draws no radio. A committed script reading "
         "exists (tests/test_compose_fields.py MEASURED_MODES), but no page."
     ),
-    "dom:read_profile_detail_entries": (
-        "RULING: tests/fixtures/profile_skills.html drives it, and its "
-        "success path returns card text as plain strings outside a record "
-        "(HELD_FOR_A_RULING)."
-    ),
-    "dom:read_self_owned_editor_fields": (
-        "RULING: tests/fixtures/synthetic/intro_editor_switches.html drives "
-        "it, and its success path publishes a control's label ungated (the "
-        "self-owned-container ruling): page text outside a record "
-        "(HELD_FOR_A_RULING)."
-    ),
-    "dom:read_self_owned_editor_values": (
-        "RULING: the same intro editor drives it, and its success path "
-        "returns a field's value verbatim and its label ungated: page text "
-        "outside a record (HELD_FOR_A_RULING)."
-    ),
     "server:_profile_views_more_analytics": (
         "ACTION: the reveal's click (reveal:reveal is driven to it); after "
         "it, the page the Show more analytics press reveals, whose reader "
-        "is held for a ruling."
+        "is admitted (ADMITTED_TEXT)."
     ),
     "server:_profile_views_switch": (
         "ACTION: three clicks -- pill, option, Show results -- then a harvest; "
@@ -1225,7 +1251,7 @@ def test_the_driven_set_has_not_silently_shrunk() -> None:
         + ". The guard now certifies less than the baseline says it does."
     )
     # THE LEGACY TEXT INVENTORY MAY SHRINK AND MAY NOT GROW (2026-09-24).
-    ratchet = text_ratchet(baseline, live)
+    ratchet = text_ratchet(baseline, live, ADMITTED_TEXT)
     assert not ratchet, (
         "the page-text inventory moved: " + "; ".join(ratchet) + ". A page "
         "string leaves only through a people_data record: a NEW text path must "
@@ -1376,9 +1402,11 @@ def test_lane_s_people_reader_is_driven_to_its_records() -> None:
     assert _baseline()[key] == RETURNS_RECORDS
 
 
-#: What each drive to the success path comes back as.
+#: What each drive to the success path comes back as: clean, the people
+#: reader's records, or -- for a reader the ruling admitted -- text.
 DRIVEN_TO = {key: CLEAN for key in shipped_drives.DRIVES}
 DRIVEN_TO["people_results:read_result_people"] = RETURNS_RECORDS
+DRIVEN_TO.update({key: RETURNS_TEXT for key in ADMITTED_TEXT})
 
 
 @pytest.mark.parametrize("key", sorted(shipped_drives.DRIVES))
@@ -1415,19 +1443,24 @@ def test_a_drive_to_the_press_reaches_the_press_and_no_further(key: str) -> None
     assert key not in WHAT_WOULD_DRIVE_IT
 
 
-@pytest.mark.parametrize("key", sorted(shipped_drives.HELD_FOR_A_RULING))
-def test_a_drive_held_for_a_ruling_still_returns_page_text(key: str) -> None:
-    """HELD, NOT FORGOTTEN. Each of these drives reaches its reader's success
-    path over a tracked fixture, and what comes back is page text outside a
-    record -- a path the 2026-09-24 inventory never measured because nothing
-    drove it, and which it may not admit without a ruling. So they are NOT
-    in ``AS_SHIPPED``, and the reader stays not driven. The day a drive stops
-    returning text, this fails: adopt it then."""
-    verdict, detail = _drive_once(shipped_drives.HELD_FOR_A_RULING[key], [PlantedPage()], {})
-    assert verdict == RETURNS_TEXT, (verdict, detail)
-    assert key not in AS_SHIPPED
-    assert _baseline()[key] in VACUOUS
-    assert WHAT_WOULD_DRIVE_IT[key].startswith("RULING: ")
+@pytest.mark.parametrize("key", sorted(ADMITTED_TEXT))
+def test_a_reader_joins_the_text_inventory_only_by_the_ruling(key: str) -> None:
+    """ADMITTED, AND FOR A RULED REASON ONLY (2026-09-28). Each admitted
+    reader is driven to its success path by a tracked fixture, comes back
+    with page text outside a record, and is recorded so; its reason is one
+    the ruling gave; and without its admission the ratchet and the baseline
+    writer still refuse it as a new text path -- the door is this table."""
+    assert key in shipped_drives.DRIVES, "an admission must be earned by a drive"
+    assert set(ADMITTED_TEXT[key]) and set(ADMITTED_TEXT[key]) <= {HIS_OWN, AGGREGATE}
+    fn = dict(discover_readers())[key]
+    assert drive(fn)[0] == RETURNS_TEXT
+    assert _baseline()[key] == RETURNS_TEXT
+    was = {key: NO_PAGE_READ}
+    now = {key: RETURNS_TEXT}
+    assert text_ratchet(was, now) == [f"new text path: {key} (not_driven -> returns_text)"]
+    assert text_ratchet(was, now, ADMITTED_TEXT) == []
+    assert text_paths_a_baseline_may_not_record(was, now) == [key]
+    assert text_paths_a_baseline_may_not_record(was, now, ADMITTED_TEXT) == []
 
 
 #: EACH DRIVE'S PREMISE, BROKEN (2026-09-28). For every drive in
@@ -1497,9 +1530,7 @@ FIXTURE_BREAKS: dict[str, dict[str, str]] = {
 #: ``tests/test_profile_views_more.py``'s synthetic markup, broken in place.
 PREMISE_IN_A_TEST = "profile_views_more:read_profile_views_more_insights"
 
-ALL_DRIVES = {
-    **shipped_drives.DRIVES, **shipped_drives.TO_THE_PRESS, **shipped_drives.HELD_FOR_A_RULING,
-}
+ALL_DRIVES = {**shipped_drives.DRIVES, **shipped_drives.TO_THE_PRESS}
 
 
 def test_every_drive_has_its_premise_broken_below() -> None:
@@ -2204,7 +2235,7 @@ def write_baseline() -> int:
     # NOR IS IT WHERE A NEW PAGE-TEXT PATH IS RECORDED (2026-09-24). The text
     # inventory is the one committed before this rule, and it only shrinks.
     new_text = text_paths_a_baseline_may_not_record(
-        _baseline(), {name: verdict for name, (verdict, _) in rows.items()}
+        _baseline(), {name: verdict for name, (verdict, _) in rows.items()}, ADMITTED_TEXT
     )
     if new_text:
         print(f"REFUSED: {len(new_text)} reader(s) return page text outside a")

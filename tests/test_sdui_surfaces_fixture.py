@@ -1672,3 +1672,43 @@ async def test_the_endorsement_reader_can_say_yes():
         "the explanation belongs to the not-drawn case; printing it beside a "
         "count that WAS drawn would contradict the count"
     )
+
+
+#: A DECLARED synthetic person (tests/test_fixtures_hold_only_synthetic_people),
+#: standing for the member an endorsement line names.
+ENDORSER = "Rohan Desai"
+
+
+async def test_an_endorsement_line_that_names_a_member_leaves_as_a_count_only():
+    """ANOTHER MEMBER LEAVES ONLY AS A PEOPLE RECORD (2026-09-28, the
+    orchestrator's ruling on what lane G held). This reader returns HIS OWN
+    profile's data -- his skills and the lines under them -- and is admitted
+    to the text inventory for that reason. The one line on this page that can
+    name someone else is an endorsement line: "Endorsed by <a member> and N
+    others". A sentence is not a record, so such a line is COUNTED and never
+    published, in ``endorsements`` or in ``evidence``; a bare count
+    ("3 endorsements") names no one and is still published."""
+    markup = (
+        "<main><ul>"
+        '<li><a href="https://www.linkedin.com/in/someone/details/skills'
+        '/edit/forms/7/">Node.js</a>'
+        f"<p>Node.js</p><p>Endorsed by {ENDORSER} and 2 others</p>"
+        "<p>2 experiences at Example Labs</p></li>"
+        '<li><a href="https://www.linkedin.com/in/someone/details/skills'
+        '/edit/forms/8/">Python</a>'
+        "<p>Python</p><p>3 endorsements</p></li>"
+        "</ul></main>"
+    )
+
+    async def work(page):
+        return await dom.read_profile_detail_entries(page, section="skills")
+
+    reading = await _with_html(markup, work)
+    assert ENDORSER not in repr(reading), "a member's name left as page text"
+    endorsements = reading["endorsements"]
+    assert endorsements["drawn"] is True, reading
+    assert endorsements["lines"] == ["3 endorsements"], endorsements
+    assert endorsements["lines_withheld"] == 1, endorsements
+    evidence = {row["name"]: row["lines"] for row in reading["evidence"]}
+    assert evidence["Node.js"] == ["2 experiences at Example Labs"], evidence
+    assert evidence["Python"] == ["3 endorsements"], evidence
