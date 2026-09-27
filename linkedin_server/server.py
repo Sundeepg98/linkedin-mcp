@@ -2254,14 +2254,18 @@ async def linkedin_search_appearances() -> dict[str, Any]:
     takes an argument -- the address carries no member segment at all, so it
     can only ever resolve to whoever is signed in.
 
-    READ THIS BEFORE READING THE RESULT. **Nobody had opened this page when
-    this tool was written.** Its parser was built against a fixture that is
-    SYNTHETIC and says so in its own first line, so what is proven is that
-    this tool REFUSES to publish the third parties put in front of it -- not
-    that it reads the real surface correctly. The first live reading is the
-    one that establishes what these fields actually contain, and until then a
-    thin result means "the page did not look like the guess", not "there is
-    nothing there".
+    READ THIS BEFORE READING THE RESULT. **The page has been read live; this
+    tool has not been called live.** The reader it calls,
+    ``dom.read_search_appearances``, met the live page twice on 2026-09-05
+    through ``scripts/_probe_search_appearances_live.py`` -- a count of 108
+    both times, with both captions withheld, because the walk that clears a
+    caption ran out of hops. No record shows the tool itself called against
+    LinkedIn: its own path, the authwall check and this envelope, has run
+    only offline, against a fixture that is SYNTHETIC and says so in its
+    first line. So what is proven is that the reader counts on the live page
+    and that this tool REFUSES to publish the third parties put in front of
+    it; a thin result still means "the page did not look like the fixture",
+    not "there is nothing there".
 
     WHAT IT RETURNS AND WHAT IT WILL NOT. headline and delta are the first two
     number-and-caption pairs the page draws, with the caption SHAPED rather

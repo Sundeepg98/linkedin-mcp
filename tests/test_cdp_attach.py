@@ -18,12 +18,13 @@ The read-only boundary is unchanged in this mode, and the final test says so.
 
 from __future__ import annotations
 
+import logging
 import os
 
 import pytest
 
 from linkedin_server import browser as browser_module
-from linkedin_server import cdp_bridge, profile_lock
+from linkedin_server import cdp_bridge, cdp_download, profile_lock
 from linkedin_server.browser import LinkedInBrowser
 from linkedin_server.errors import BrowserUnavailableError, WriteAttemptError
 from tests.conftest import FakePage
@@ -340,3 +341,164 @@ def test_launch_is_the_default_mode(monkeypatch):
     browser = LinkedInBrowser()
     assert browser.mode == "launch"
     assert browser.attached is False
+
+
+# ---------------------------------------------------------------------------
+# His downloads, handed back at the attach (lane D, 2026-09-24)
+# ---------------------------------------------------------------------------
+#
+# The library's own handshake points his default context's downloads at a
+# temporary directory it deletes on disconnect -- read in the installed
+# driver's source and in 1.40.0's, the floor of ``playwright>=1.40``, not
+# observed live. So ``attach`` must send the reset right after it connects.
+# Everything above fakes ``attach`` away; these drive the REAL one, over a
+# fake Playwright that records the order of what happens.
+
+
+class _ResetSession:
+    """A browser-level DevTools session: records what is sent to it."""
+
+    def __init__(self, log, fail=None):
+        self.log = log
+        self.fail = fail
+
+    async def send(self, method, params=None):
+        self.log.append(("send", method, dict(params or {})))
+        if self.fail is not None:
+            raise self.fail
+        return {}
+
+    async def detach(self):
+        self.log.append(("detach",))
+
+
+class _ConnectedBrowser:
+    """What ``connect_over_cdp`` hands back: his context and a session maker."""
+
+    def __init__(self, log, context):
+        self.contexts = [context]
+        self.log = log
+        self.fail = None
+
+    async def new_browser_cdp_session(self):
+        self.log.append(("session",))
+        return _ResetSession(self.log, self.fail)
+
+    async def close(self):
+        self.log.append(("close",))
+
+
+class _Chromium:
+    def __init__(self, browser, log):
+        self.browser = browser
+        self.log = log
+
+    async def connect_over_cdp(self, endpoint, timeout=None):
+        # What the library does inside its own handshake, per its driver
+        # source: his default context's downloads, to a temporary directory.
+        self.log.append(("library", "allowAndName", "temporary directory"))
+        return self.browser
+
+
+class _Playwright:
+    def __init__(self, chromium):
+        self.chromium = chromium
+        self.stopped = False
+
+    async def stop(self):
+        self.stopped = True
+
+
+@pytest.fixture
+def real_attach(monkeypatch):
+    """The real ``cdp_bridge.attach`` over a fake ``async_playwright``."""
+    log: list = []
+    context = FakeAttachedContext()
+    browser = _ConnectedBrowser(log, context)
+    pw = _Playwright(_Chromium(browser, log))
+
+    class _Starter:
+        async def start(self):
+            return pw
+
+    monkeypatch.setattr("playwright.async_api.async_playwright", lambda: _Starter())
+    monkeypatch.setattr(cdp_bridge, "LAST_DOWNLOAD_RESET", {})
+    return {"log": log, "browser": browser, "context": context, "pw": pw}
+
+
+def assert_the_reset_followed_the_handshake(log) -> None:
+    """THE ASSERTION the tests share, factored out so the control can fail it.
+
+    One reset to Chrome's own behaviour, with no context id, sent AFTER the
+    library's handshake set its own, on a session that is then detached.
+    """
+    library = [i for i, entry in enumerate(log) if entry[0] == "library"]
+    sends = [i for i, entry in enumerate(log) if entry[0] == "send"]
+    assert library, log
+    assert len(sends) == 1, log
+    assert log[sends[0]] == (
+        "send", "Browser.setDownloadBehavior", {"behavior": "default"}
+    ), log
+    assert sends[0] > library[-1], log
+    assert ("detach",) in log[sends[0]:], log
+
+
+async def test_attach_hands_his_downloads_back_right_after_the_handshake(real_attach):
+    pw, client, context = await cdp_bridge.attach()
+
+    assert context is real_attach["context"]
+    assert client is real_attach["browser"]
+    assert_the_reset_followed_the_handshake(real_attach["log"])
+    sent = next(entry for entry in real_attach["log"] if entry[0] == "send")
+    assert "browserContextId" not in sent[2], (
+        "the library's own setting named no context -- his default one -- so "
+        "the reset must name none either"
+    )
+    assert cdp_bridge.LAST_DOWNLOAD_RESET == {"restored": True, "error": None}
+
+
+async def test_control_an_attach_without_the_reset_fails_the_assertion(
+    real_attach, monkeypatch
+):
+    """THE CONTROL. Take the reset out and the shared assertion must go red.
+
+    The stand-in claims success and sends nothing -- the regression most
+    likely to read as green.
+    """
+
+    async def _missing(browser, **_kwargs):
+        return {"restored": True, "error": None}
+
+    monkeypatch.setattr(cdp_download, "reset_download_behaviour", _missing)
+    await cdp_bridge.attach()
+
+    with pytest.raises(AssertionError):
+        assert_the_reset_followed_the_handshake(real_attach["log"])
+
+
+async def test_a_reset_that_fails_is_recorded_by_type_and_the_attach_stands(
+    real_attach, caplog
+):
+    """A NET, NOT A GATE: the reads go on, and the failure is said out loud."""
+    real_attach["browser"].fail = ConnectionError("NEEDLE-reset-text")
+
+    with caplog.at_level(logging.WARNING, logger="linkedin"):
+        pw, client, context = await cdp_bridge.attach()
+
+    assert context is real_attach["context"]
+    assert cdp_bridge.LAST_DOWNLOAD_RESET == {
+        "restored": False, "error": "ConnectionError",
+    }
+    assert "ConnectionError" in caplog.text
+    assert "NEEDLE" not in caplog.text
+    assert ("detach",) in real_attach["log"]
+
+
+async def test_the_reset_creates_no_context_and_opens_no_tab(real_attach):
+    """D4: the attach adopts his context. The reset adds a session, nothing more."""
+    await cdp_bridge.attach()
+
+    assert real_attach["context"].new_pages == []
+    assert [entry[0] for entry in real_attach["log"]] == [
+        "library", "session", "send", "detach",
+    ]

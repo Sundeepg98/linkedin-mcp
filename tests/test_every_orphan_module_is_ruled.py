@@ -138,6 +138,18 @@ DELIBERATELY_UNWIRED: dict[str, str] = {
     ),
 }
 
+# THE cdp_download ENTRY WAS DELETED 2026-09-24, AND NOT ON ITS OWN INSTRUCTION.
+#
+# It read "NOT PERMANENT: delete this entry when the press lands", and the
+# press has not landed. The module gained an importer for a different reason:
+# `cdp_bridge.attach` now calls `cdp_download.reset_download_behaviour` right
+# after it connects, to hand his downloads back to Chrome's own behaviour
+# (lane D's follow-up on the download hazard). So the module is no longer an
+# orphan and `test_every_ruling_is_still_about_a_real_orphan` would fail on a
+# kept entry. What the entry was really guarding -- that nothing calls the
+# CAPTURE -- is held where it always was, by the last test of
+# tests/test_profile_pdf_download_is_blocked_on_transport.py.
+
 # THE search_results ENTRY WAS DELETED 2026-09-20, ON ITS OWN INSTRUCTION.
 #
 # It read "NOT PERMANENT: delete this entry when the admission and a tool land

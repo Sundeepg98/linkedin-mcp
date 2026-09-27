@@ -45,9 +45,10 @@ file; the tally is a by-product.
                    so it cannot be typed onto an arbitrary row.
 
 **THE VERDICT IS THE BINDING GATE, NOT EVERY GATE.** Several rows carry two:
-`P C8` needs a press AND a transport this package does not have. The verdict
-names the EARLIEST one, because that is the one a wave would hit first, and the
-row's line says so.
+`P C8` needed a press AND a transport this package did not have on the triage
+day. The verdict names the EARLIEST one, because that is the one a wave would
+hit first, and the row's line says so. (The transport was built on 2026-09-24,
+lane D, and the row is now held on the press alone -- see DECIDED_SINCE_TRIAGE.)
 
 ## WHAT IT IMPORTS RATHER THAN REIMPLEMENTS
 
@@ -221,10 +222,6 @@ TRIAGE: dict[str, tuple[str, str, str]] = {
     "N 104": ("RULING", "", "the non-search half SHIPPED 2026-09-20; the "
                             "'by searching' half needs the companies vertical, "
                             "which the admission deliberately left out"),
-    "N 132": ("RULING", "", "both sides of the switch are reachable today by "
-                            "two shipped tools; whether that discharges a row "
-                            "named for the CONTROL is a census convention "
-                            "nobody has ruled"),
     "N 133": ("PRESS", "", "applying a filter SUBMITS, and the disclosing-press "
                            "ruling refuses submits by name"),
     # "N 134" LEFT 2026-09-24: proven live by the live lane's view switch, so
@@ -315,6 +312,10 @@ TRIAGE: dict[str, tuple[str, str, str]] = {
 #:     N 83   COVERED-PROVEN           (was BUILDABLE)
 #:     N 175  COVERED-CANNOT-DELIVER   (was BUILDABLE)
 #:
+#: and on 2026-09-24, lane D, under D6-CAPABILITY-OVER-AFFORDANCE:
+#:
+#:     N 132  COVERED-UNFIRED          (was RULING -- the D6 question itself)
+#:
 #: They were removed rather than kept because CONTROL 4 refuses a verdict for
 #: a row that is not a read-GAP row, and that refusal is the tripwire this
 #: file exists to carry.
@@ -404,8 +405,9 @@ DECIDED_SINCE_TRIAGE: dict[str, str] = {
              "admitted in principle, and on the boundary since lane S's "
              "follow-up (2026-09-24, bucket-3 gate MEASURE); it needs a "
              "capture and a reader",
-    "N 132": "D6-CAPABILITY-OVER-AFFORDANCE: a row named for an affordance "
-             "is discharged by the package's own sanctioned routes",
+    # N 132 WAS HERE ON MASTER AND IS NOT: lane D applied D6 on 2026-09-24
+    # and moved the row GAP -> COVERED-UNFIRED, so it left TRIAGE (see the
+    # LEFT GAP list above) and CONTROL 8 would refuse a decided entry for it.
     "N 161": "D2-SEARCH-VERTICALS-WIDENED: the groups vertical is admitted "
              "in principle, and on the boundary since lane S's follow-up "
              "(2026-09-24); which groups is WHICH, a doctrine question since "
@@ -436,8 +438,10 @@ DECIDED_SINCE_TRIAGE: dict[str, str] = {
              "name-returning reader held to PEOPLE-DATA-MITIGATIONS on lane "
              "G's people-record foundation, and a capture; bucket-3 gate "
              "MEASURE",
-    "P C8": "D4-NO-OWN-BROWSER-CONTEXT: the download transport is the "
-            "DevTools download behaviour on the attached browser",
+    "P C8": "D4-NO-OWN-BROWSER-CONTEXT (registered 2026-09-24): no context "
+            "of its own; the download transport is built on the attached "
+            "browser (cdp_download.py), and what holds the row now is the "
+            "Save to PDF press; bucket-3 gate PRESS",
 }
 
 

@@ -997,6 +997,34 @@ PINNED = {
     #:   b1_standing 11 -> 13, b1_no_ruling 20 -> 21 -- the last GIT MERGED
     #:   CLEAN AND WRONG: both sides moved it 19 -> 20, lane Y2 by `J 158`
     #:   and this lane by `M M49`, and the tree holds both
+    #: RE-DERIVED AT LANE D'S MERGE, 2026-09-24, from the tree merged with
+    #: master 9b9a4d0 and not as deltas from the lane's base
+    #: (`_audit/2026-09-24-lane-d-d6-pdf.md`, Integration 2026-09-24). Lane D
+    #: applied D6-CAPABILITY-OVER-AFFORDANCE: `N 132` GAP -> COVERED-UNFIRED --
+    #: both views it switches between are served by their own tools, and one
+    #: of the two tools has never been called live -- and it leaves bucket 3,
+    #: where it was ADMITTED. `J 107` stays GAP and is re-gated RULING ->
+    #: READER in the jobs side table: its route refuses a call with no
+    #: keyword, and the fix is a tool change no ruling holds. So:
+    #:   adjudicated 197 -> 198, delivered_broad 108 -> 109, unfired 29 -> 30
+    #:   gap 507 -> 506, gap_read 91 -> 90, b3_admitted 37 -> 36
+    #:   b1_no_ruling 19 -> 20 (N 132 enters bucket 1, held by no ruling)
+    #:   jobs_blocked_on_nothing 0 -> 1 (J 107)
+    #: AND RE-DERIVED AGAIN AT THE LANE'S MERGE OF MASTER 603f4d3, which had
+    #: meanwhile taken lane L7's `P I14`. Both lanes had moved adjudicated,
+    #: delivered_broad, unfired and gap by one from the same 197 / 108 / 29 /
+    #: 507, so git merged the two IDENTICAL edits as one and left 198 / 109 /
+    #: 30 / 506 -- one row short on each, and `--check` said so. Measured on
+    #: the merged tree:
+    #:   adjudicated 199, delivered_broad 110, unfired 31, gap 505
+    #: (b1_standing 11 is lane L7's and b1_no_ruling 20 lane D's; each moved
+    #: once, so git's merge of them is right.)
+    #: AND AGAIN AT THE LANE'S MERGE OF MASTER 530227e (lane Y2: 43 rows
+    #: admitted, `J 158` moved to COVERED-UNFIRED). Measured on that merged
+    #: tree against lane Y2's pins, `N 132` is the only move:
+    #:   adjudicated 199 -> 200, delivered_broad 110 -> 111, unfired 31 -> 32,
+    #:   gap 548 -> 547, gap_read 104 -> 103, b3_admitted 42 -> 41,
+    #:   b1_no_ruling 20 -> 21; jobs_blocked_on_nothing stays 1 (`J 107`).
     "stated_rows": 747,
     #: 762 = 704 stated rows + 58 declared collapses, computed at HEAD. NOT the
     #: published 761 and NOT the counter docstring's 760: those two differ only
@@ -1006,7 +1034,9 @@ PINNED = {
     "capabilities_achievable": 691,
     "out_of_scope": 70,
     "achievable": 677,
-    "adjudicated": 202,
+    #: 203 AT THE ORCHESTRATOR'S MERGE OF LANE D (2026-09-27), MEASURED: lane D
+    #: moved `N 132` GAP -> COVERED-UNFIRED under D6-CAPABILITY-OVER-AFFORDANCE.
+    "adjudicated": 203,
     #: THE LIVE LANE'S FOUR ROWS, RE-DERIVED AT EACH OF ITS MERGES OF MASTER
     #: (2026-09-24; last over lane S): four rows fired live and banked
     #: (`_audit/2026-09-23-live-lane-session-1.md`). `P G6` COVERED-UNFIRED ->
@@ -1030,18 +1060,27 @@ PINNED = {
     #: (GAP -> COVERED-UNFIRED, `_audit/2026-09-23-lane-l1-refused-reads.md`).
     #: One row changing class moves all five; b3 admitted/refused 40/16 are
     #: L1's allowlist admissions, and b1_no_ruling 7 is P G6 entering bucket 1.
-    "delivered_broad": 113,
+    #: 114 AT THE ORCHESTRATOR'S MERGE OF LANE D (2026-09-27), MEASURED: lane D
+    #: moved `N 132` GAP -> COVERED-UNFIRED under D6-CAPABILITY-OVER-AFFORDANCE.
+    "delivered_broad": 114,
     #: 79 since the live lane's merge (see `adjudicated`): P G6, N 134, P O3
     #: and M C72 COVERED-PROVEN.
     #: 75 and 21 since the bucket-1 merge: `M C41` fired live and moved from
     #: COVERED-UNFIRED to COVERED-PROVEN (`_audit/2026-09-23-bucket1-fires.md`).
     #: One row changing class moves both, and leaves delivered_broad at 96.
     "delivered_strict": 79,
-    "gap": 545,
-    "cannot_deliver": 19,
-    "unfired": 34,
     #: The live lane's merge: N 134, P O3 and M C72 left GAP.
-    "gap_read": 103,
+    #: Lane D's merge: N 132 left GAP, for COVERED-UNFIRED under D6.
+    #: 544 AT THE ORCHESTRATOR'S MERGE OF LANE D (2026-09-27), MEASURED: lane D
+    #: moved `N 132` GAP -> COVERED-UNFIRED under D6-CAPABILITY-OVER-AFFORDANCE.
+    "gap": 544,
+    "cannot_deliver": 19,
+    #: 35 AT THE ORCHESTRATOR'S MERGE OF LANE D (2026-09-27), MEASURED: lane D
+    #: moved `N 132` GAP -> COVERED-UNFIRED under D6-CAPABILITY-OVER-AFFORDANCE.
+    "unfired": 35,
+    #: 102 AT THE ORCHESTRATOR'S MERGE OF LANE D (2026-09-27), MEASURED: lane D
+    #: moved `N 132` GAP -> COVERED-UNFIRED under D6-CAPABILITY-OVER-AFFORDANCE.
+    "gap_read": 102,
     #: 151, not the 152 published by `_audit/2026-09-21-the-write-ceiling.md`.
     #: That document scoped itself to `profile.md`, `network.md` and
     #: `messaging-and-content.md`; measured at HEAD those three carry W 151 and
@@ -1125,7 +1164,12 @@ PINNED = {
     #: verticals and the six roster rows above -- move it by +9 / -9.
     #: 50 AT THE ORCHESTRATOR'S MERGE OF LANE S INTO MASTER 96c1165 (2026-09-27),
     #: MEASURED: lane L5's merge had moved `M M49` out of bucket 3 (COVERED-UNFIRED).
-    "b3_admitted": 50,
+    #: LANE D'S MERGE, 2026-09-24: N 132 left for COVERED-UNFIRED under D6
+    #: and its line left the table; it was ADMITTED, gated RULING, so
+    #: b3_blocked_on_nothing does not move.
+    #: 49 AT THE ORCHESTRATOR'S MERGE OF LANE D (2026-09-27), MEASURED: `N 132`
+    #: left bucket 3 (COVERED-UNFIRED under D6) and its address line went with it.
+    "b3_admitted": 49,
     "b3_refused": 37,
     "b3_no_address": 1,
     "b3_needs_session": 13,
@@ -1232,6 +1276,10 @@ PINNED = {
     #:   lane L5's fourth     13 standing / 0 / 0 / 21 none, 6 released, of 34,
     #:   merge (over Y2)      measured on the tree merged with 530227e:
     #:                        `J 158` and this lane's three rows together.
+    #:   lane D's merge       11 standing / 0 / 0 / 21 none, 6 released, of 32:
+    #:   (2026-09-24)         N 132 GAP -> COVERED-UNFIRED under D6, a read no
+    #:                        ruling holds (+1 none). Counted on the tree merged
+    #:                        with master 530227e, after lane Y2's line above.
     #: `b1_relayed` is the count this file called `b1_named_target` until the
     #: target condition was registered: a name for what a status COUNTS, not
     #: for which ruling happens to have it today. `b1_released` is a SUBSET of
@@ -1239,7 +1287,9 @@ PINNED = {
     "b1_standing": 13,
     "b1_relayed": 0,
     "b1_pending": 0,
-    "b1_no_ruling": 21,
+    #: 22 AT THE ORCHESTRATOR'S MERGE OF LANE D (2026-09-27), MEASURED: lane D
+    #: moved `N 132` GAP -> COVERED-UNFIRED under D6-CAPABILITY-OVER-AFFORDANCE.
+    "b1_no_ruling": 22,
     "b1_released": 6,
     #: D3's enumerated list: FOUR once `M C83` left it, and THREE since
     #: `N 172` left it the same evening on OTHER-MEMBER-IDS-AS-READS -- see
@@ -1279,7 +1329,12 @@ PINNED = {
     "jobs_no_address": 0,
     "jobs_needs_session": 2,
     "jobs_undetermined": 0,
-    "jobs_blocked_on_nothing": 0,
+    #: 1 since lane D's merge, 2026-09-24: `J 107` (the Company Page Jobs tab)
+    #: was re-gated RULING -> READER. D6 applied, and the replacing route,
+    #: `linkedin_search_jobs(company_id=...)`, refuses a call with no keyword,
+    #: so what stands in the way is that guard in the tool -- no ruling, no
+    #: boundary edit and no press.
+    "jobs_blocked_on_nothing": 1,
 }
 
 #: BUCKET 1, ROW BY ROW -- the control that goes RED WHEN A ROW MOVES, and
@@ -1325,9 +1380,15 @@ PINNED_B1_ROWS: dict[str, tuple[str, ...]] = {
     #: `M M49` entered with lane L5's merge, 2026-09-24: the read indicator on
     #: his own last message, read off his own inbox with no target
     #: (OWN-INBOX-READS-COVERED-BY-B permits; it holds nothing).
+    #: `N 132` entered with lane D's merge, 2026-09-24: the switch between
+    #: Search appearances and Who viewed your profile, discharged under D6 by
+    #: two shipped tools, one of which has never been called live. A read of
+    #: his own analytics, which no ruling holds.
     NO_RULING: (
         "J 18", "J 39", "J 121", "J 122", "J 158", "M M33", "M M43", "M M49",
-        "N 20", "N 23",
+        #: `N 132` entered at the orchestrator's merge of lane D (2026-09-27): D6 moved it
+        #: GAP -> COVERED-UNFIRED on two shipped reads; no ruling holds it.
+        "N 20", "N 23", "N 132",
         "N 45", "N 84", "N 85", "N 87", "N 94",
         "P A8", "P A11", "P A13", "P A17", "P A19", "P A21",
     ),
