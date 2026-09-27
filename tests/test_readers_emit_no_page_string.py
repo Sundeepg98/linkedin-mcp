@@ -80,7 +80,10 @@ from tests.plantedpage import (
     RaisingPage,
     carries_a_laundered_exception,
     carries_the_plant,
+    carries_the_plant_outside_records,
     carries_the_raised_plant,
+    text_paths_a_baseline_may_not_record,
+    text_ratchet,
 )
 
 REPO = Path(__file__).resolve().parents[1]
@@ -113,9 +116,28 @@ DRIVE_TIMEOUT_S = 5.0
 #: So an exception carrying the plant is a leak unconditionally, with no
 #: exemption list to be argued into -- and an exemption list is exactly how the
 #: previous three instances of this class stayed open.
+#:
+#: **THE INVARIANT WAS REDESIGNED ON 2026-09-24 (NAMES-AT-RUNTIME, applied by
+#: PEOPLE-DATA-MITIGATIONS; lane G's foundation), AND NOTHING ABOVE WAS
+#: WEAKENED.** It was "no page string leaves, except by a contract the shapers
+#: govern". It is now: A PAGE STRING LEAVES ONLY THROUGH A DECLARED PEOPLE
+#: RECORD (``linkedin_server.people_data``), and NEVER through an exception, an
+#: error field, a log record, a receipt, a cache or a fixture. So:
+#:
+#: * ``RETURNS_RECORDS`` -- the plant came back, and ONLY inside people
+#:   records: the declared channel. Nothing else in the value carries it.
+#: * ``RETURNS_TEXT`` -- the plant came back OUTSIDE a record. A LEGACY
+#:   INVENTORY FROM THIS DATE: every reader recorded so in the baseline may
+#:   stay so until it is converted, and none may join it --
+#:   :func:`text_ratchet` refuses a new one, a stale one, and a record reader
+#:   that fell back to text, and the baseline writer refuses to record one.
+#: * ``LEAKS`` is untouched, and it is checked on the PLAIN walk: a record in
+#:   an exception is a leak like any other page string in one. The failing-
+#:   page family and the log capture below also walk records.
 CLEAN = "clean"
 LEAKS = "leaks"
 RETURNS_TEXT = "returns_text"
+RETURNS_RECORDS = "returns_records"
 
 
 # ---------------------------------------------------------------------------
@@ -532,19 +554,31 @@ def _drive_once(
         if hits:
             return LEAKS, f"{type(exc).__name__} carries it at {hits[0]}"
         return f"not_driven:raises {type(exc).__name__}", str(exc)[:120]
+    return classify_returned(result)
 
+
+def classify_returned(result: Any) -> tuple[str, str]:
+    """The verdict on what a reader RETURNED. ``(verdict, detail)``.
+
+    A pure function of the value, so the controls below drive the same code the
+    guard does rather than a copy of it.
+    """
     # CHECKED BEFORE ``returns_text``, because it IS a leak wearing its costume.
     # A caught coercion failure put into an output field has carried the value
     # out just as surely as a raise would have -- see
-    # ``plantedpage.carries_a_laundered_exception``.
+    # ``plantedpage.carries_a_laundered_exception``. A record does not excuse
+    # it: this walk is plain.
     laundered = carries_a_laundered_exception(result)
     if laundered:
         return LEAKS, f"a caught coercion failure was returned at {laundered[0]}"
 
     hits = carries_the_plant(result)
-    if hits:
-        return RETURNS_TEXT, f"returns page text at {hits[0]}"
-    return CLEAN, ""
+    if not hits:
+        return CLEAN, ""
+    outside, records = carries_the_plant_outside_records(result)
+    if not outside:
+        return RETURNS_RECORDS, f"page text only inside {records} people record(s)"
+    return RETURNS_TEXT, f"returns page text at {outside[0]}"
 
 
 def _worst(verdicts: list[tuple[str, str]]) -> tuple[str, str]:
@@ -557,7 +591,7 @@ def _worst(verdicts: list[tuple[str, str]]) -> tuple[str, str]:
     -- if any variant actually ran and came back clean, the reader WAS measured,
     and reporting it as un-measurable would understate the coverage.
     """
-    order = {LEAKS: 3, RETURNS_TEXT: 2, CLEAN: 1}
+    order = {LEAKS: 4, RETURNS_TEXT: 3, RETURNS_RECORDS: 2, CLEAN: 1}
     best = max(verdicts, key=lambda v: order.get(v[0], 0))
     return best
 
@@ -636,6 +670,15 @@ def test_the_driven_set_has_not_silently_shrunk() -> None:
         "reader(s) that this guard used to DRIVE can no longer be driven: "
         + ", ".join(f"{n} -> {live[n]}" for n in regressed)
         + ". The guard now certifies less than the baseline says it does."
+    )
+    # THE LEGACY TEXT INVENTORY MAY SHRINK AND MAY NOT GROW (2026-09-24).
+    ratchet = text_ratchet(baseline, live)
+    assert not ratchet, (
+        "the page-text inventory moved: " + "; ".join(ratchet) + ". A page "
+        "string leaves only through a people_data record: a NEW text path must "
+        "return records instead; a STALE entry means a reader stopped returning "
+        f"text and {BASELINE_PATH.name} must be regenerated so the inventory "
+        "shrinks; LOST RECORDS means a converted reader fell back."
     )
 
 
@@ -1173,15 +1216,30 @@ def write_baseline() -> int:
         for name in leaking:
             print(f"  {name}  {rows[name][1]}")
         return 1
+    # NOR IS IT WHERE A NEW PAGE-TEXT PATH IS RECORDED (2026-09-24). The text
+    # inventory is the one committed before this rule, and it only shrinks.
+    new_text = text_paths_a_baseline_may_not_record(
+        _baseline(), {name: verdict for name, (verdict, _) in rows.items()}
+    )
+    if new_text:
+        print(f"REFUSED: {len(new_text)} reader(s) return page text outside a")
+        print("people record and the committed baseline does not already say so.")
+        print("A page string leaves only through linkedin_server.people_data:")
+        for name in new_text:
+            print(f"  {name}")
+        return 1
 
     payload = {
         "_comment": (
             "Verdict per page reader, from tests/plantedpage.py. Regenerate "
             "with: python -m tests.test_readers_emit_no_page_string "
             "--write-baseline. 'clean' means the reader was DRIVEN and carried "
-            "nothing out; 'returns_text' means it returns page text by "
-            "contract, which the shapers govern; 'not_driven:<reason>' means "
-            "this offline harness could not reach it, which is never a pass."
+            "nothing out; 'returns_records' means page text came back ONLY "
+            "inside linkedin_server.people_data records, the declared channel; "
+            "'returns_text' means page text came back outside a record -- a "
+            "legacy inventory since 2026-09-24 that may shrink and may not "
+            "grow; 'not_driven:<reason>' means this offline harness could not "
+            "reach it, which is never a pass."
         ),
         "readers": {name: verdict for name, (verdict, _) in sorted(rows.items())},
     }

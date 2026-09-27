@@ -637,3 +637,59 @@ def carries_the_plant_outside_records(obj: Any) -> tuple[list[str], int]:
 
     hits = [path for path, text in walk(obj, skip=is_record) if PLANT in text]
     return hits, len(records)
+
+
+#: The two verdict words the ratchet below turns on, shared by the reader guard
+#: and the tool-envelope guard (both baselines store ``"<verdict>:<reason>"``,
+#: so a verdict is compared by the part before the first colon).
+RETURNS_TEXT_VERDICT = "returns_text"
+RETURNS_RECORDS_VERDICT = "returns_records"
+
+
+def _verdict_class(value: Any) -> str:
+    return str(value).split(":", 1)[0].strip()
+
+
+def text_ratchet(baseline: dict[str, str], live: dict[str, str]) -> list[str]:
+    """What a live verdict table may not do against its committed baseline.
+
+    THE LEGACY INVENTORY MAY SHRINK AND MAY NOT GROW (2026-09-24,
+    PEOPLE-DATA-MITIGATIONS). Three problems, one line each, names only:
+
+    * ``new text path``   -- live returns text outside records where the
+      baseline does not say so: a page string leaving by a path that is not the
+      declared record. Return people data through ``people_data`` records.
+    * ``stale inventory`` -- the baseline says text and the live verdict is
+      anything else: the inventory is larger than the truth; regenerate it so
+      it shrinks.
+    * ``lost records``    -- the baseline says records and the live verdict is
+      anything else: a converted reader fell back.
+
+    Names present on only one side are the callers' existing appeared/vanished
+    checks, and are skipped here.
+    """
+    problems: list[str] = []
+    for name in sorted(set(baseline) & set(live)):
+        was, now = _verdict_class(baseline[name]), _verdict_class(live[name])
+        if now == RETURNS_TEXT_VERDICT and was != RETURNS_TEXT_VERDICT:
+            problems.append(f"new text path: {name} ({was} -> {now})")
+        elif was == RETURNS_TEXT_VERDICT and now != RETURNS_TEXT_VERDICT:
+            problems.append(f"stale inventory: {name} ({was} -> {now})")
+        elif was == RETURNS_RECORDS_VERDICT and now != RETURNS_RECORDS_VERDICT:
+            problems.append(f"lost records: {name} ({was} -> {now})")
+    return problems
+
+
+def text_paths_a_baseline_may_not_record(
+    baseline: dict[str, str], live: dict[str, str]
+) -> list[str]:
+    """Names a baseline WRITER must refuse: live text outside records where the
+    committed baseline does not already record text -- including names it does
+    not record at all. So a new page-text path cannot be written into the
+    inventory; it has to return records."""
+    return sorted(
+        name
+        for name, verdict in live.items()
+        if _verdict_class(verdict) == RETURNS_TEXT_VERDICT
+        and _verdict_class(baseline.get(name, "")) != RETURNS_TEXT_VERDICT
+    )
