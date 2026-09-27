@@ -202,7 +202,10 @@ DELIBERATELY_UNWIRED: dict[str, str] = {
 # gate's own PRESS_SCOPES table, and it stops at the first press that is not
 # permitted. The run that proved it live, and the three readers it added to
 # tests/reader_leak_baseline.json (all three "clean"), are in
-# _audit/2026-09-23-readers-four-rows.md, sections 3 and 10.
+# _audit/2026-09-23-readers-four-rows.md, sections 3 and 10. One of them,
+# `server:_profile_views_press_counters`, is recorded not_driven since
+# 2026-09-27: its drive returns before reading the page, and the reader guard
+# stopped counting such a drive clean.
 
 
 def _entry_points() -> list[pathlib.Path]:
