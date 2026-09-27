@@ -177,7 +177,7 @@ _FACT_KEYS = (
     "invite_in_topcard", "message_controls", "message_matches",
     "message_tag", "message_href", "message_in_topcard", "more_actions",
     "dialogs", "composer_editors", "conversation_bubbles", "named_controls",
-    "error",
+    "dialog_controls", "dialog_note_fields", "error",
 )
 
 
@@ -363,8 +363,12 @@ def connect_verdict(
     opened = dialogs_after > dialogs_before
     dialog_note = (
         f" A DIALOG OPENED after the press ({dialogs_before} before, "
-        f"{dialogs_after} after) and nothing in it was pressed -- it has never "
-        "been captured (NEEDS-CAPTURE C-P3); the reload discarded it."
+        f"{dialogs_after} after), drawing controls read as "
+        f"{list(in_place.get('dialog_controls') or [])} and "
+        f"{coerce.as_count(in_place.get('dialog_note_fields'))} note field(s) "
+        "(closed tokens and a count, read in the page), and nothing in it was "
+        "pressed -- it has never been captured (NEEDS-CAPTURE C-P3); the "
+        "reload discarded it."
         if opened
         else " No dialog opened after the press."
     )
@@ -425,6 +429,14 @@ _PAGE_RECIPIENT_BOX_SELECTOR = (
 )
 _EVENT = "li.msg-s-message-list__event"
 
+#: WORDS THAT WOULD SAY A COMPOSER SPENDS SOMETHING -- NEEDS-CAPTURE C-P5's
+#: first reading. Matched inside the opened overlay conversation and returned
+#: as BOOLEANS: whether an element there says "InMail", or "credit". A HINT
+#: for the capture and nothing more: no gate reads them, and they may match a
+#: message body as easily as a notice.
+_INMAIL_WORD = re.compile(r"\bInMail\b", re.I)
+_CREDIT_WORD = re.compile(r"\bcredits?\b", re.I)
+
 
 def _normalise(text: Any) -> str:
     return re.sub(r"\s+", " ", str(text or "")).strip()
@@ -450,6 +462,8 @@ async def read_opened_conversation(page: Any, *, text: Optional[str] = None) -> 
         "events_with_text": None,
         "last_from": "unknown",
         "last_has_text": None,
+        "inmail_words": None,
+        "credit_words": None,
         "error": None,
     }
     try:
@@ -462,6 +476,8 @@ async def read_opened_conversation(page: Any, *, text: Optional[str] = None) -> 
         )
         bubbles = page.locator(BUBBLE_SELECTOR)
         out["bubbles"] = coerce.as_count(await bubbles.count())
+        out["inmail_words"] = coerce.as_count(await bubbles.get_by_text(_INMAIL_WORD).count()) > 0
+        out["credit_words"] = coerce.as_count(await bubbles.get_by_text(_CREDIT_WORD).count()) > 0
         holding = bubbles.filter(has=page.locator(COMPOSER_EDITOR_SELECTOR))
         out["bubbles_with_editor"] = coerce.as_count(await holding.count())
         if out["editors"] == 1:
@@ -540,6 +556,9 @@ def opened_conversation_gate(
         "send_disabled": conversation.get("send_disabled"),
         "events": conversation.get("events"),
         "events_with_text": conversation.get("events_with_text"),
+        # C-P5's first reading: hints only, and no condition below reads them.
+        "inmail_words": conversation.get("inmail_words"),
+        "credit_words": conversation.get("credit_words"),
         "error": conversation.get("error") or profile_after.get("error"),
     }
     out: dict[str, Any] = {

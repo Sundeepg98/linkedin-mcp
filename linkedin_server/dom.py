@@ -8124,9 +8124,30 @@ NAMED_PROFILE_JS = """
     dialogs: 0,
     composer_editors: 0,
     conversation_bubbles: 0,
-    named_controls: []
+    named_controls: [],
+    dialog_controls: [],
+    dialog_note_fields: 0
   };
   out.dialogs = document.querySelectorAll('[role="dialog"]').length;
+  const dialogWords = {
+    'add a note': 'add_a_note',
+    'send without a note': 'send_without_a_note',
+    'send': 'send',
+    'send now': 'send',
+    'cancel': 'cancel',
+    'dismiss': 'dismiss',
+    'close': 'dismiss',
+    'connect': 'connect'
+  };
+  for (const dlg of document.querySelectorAll('[role="dialog"]')) {
+    out.dialog_note_fields += dlg.querySelectorAll('textarea, [contenteditable="true"]').length;
+    for (const b of dlg.querySelectorAll('button, [role="button"]')) {
+      const said = norm(b.getAttribute('aria-label') || b.innerText).toLowerCase();
+      out.dialog_controls.push(
+        Object.prototype.hasOwnProperty.call(dialogWords, said) ? dialogWords[said] : 'unrecognised'
+      );
+    }
+  }
   out.composer_editors = document.querySelectorAll('.msg-form__contenteditable').length;
   out.conversation_bubbles = document.querySelectorAll('.msg-overlay-conversation-bubble').length;
   out.invite_controls = document.querySelectorAll(cfg.inviteSelector).length;
@@ -8231,6 +8252,16 @@ NAMED_CONTROL_TOKENS = (
     "pending", "withdraw", "unfollow", "follow", "more", "remove", "unrecognised",
 )
 
+#: The tokens a control inside an open dialog may be classed as -- NEEDS-CAPTURE
+#: C-P3's first reading, taken in the page on the press that opened it. The
+#: vocabulary is the invitation dialog LinkedIn's help describes; it has never
+#: been captured, so a word outside it reads ``unrecognised`` and is the
+#: finding.
+DIALOG_CONTROL_TOKENS = (
+    "add_a_note", "send_without_a_note", "send", "cancel", "dismiss", "connect",
+    "unrecognised",
+)
+
 
 async def read_named_profile(page: Any) -> dict[str, Any]:
     """What a named person's profile draws, as integers and closed tokens.
@@ -8265,6 +8296,8 @@ async def read_named_profile(page: Any) -> dict[str, Any]:
         "composer_editors": 0,
         "conversation_bubbles": 0,
         "named_controls": [],
+        "dialog_controls": [],
+        "dialog_note_fields": 0,
         "error": None,
     }
     cfg = {"inviteSelector": INVITE_CONTROL, "messageSelector": MESSAGE_CONTROL}
@@ -8279,7 +8312,7 @@ async def read_named_profile(page: Any) -> dict[str, Any]:
         "topcards", "topcard_headings", "degree_tokens", "invite_controls",
         "invite_matches", "invite_in_topcard", "message_controls",
         "message_matches", "message_in_topcard", "more_actions", "dialogs",
-        "composer_editors", "conversation_bubbles",
+        "composer_editors", "conversation_bubbles", "dialog_note_fields",
     ):
         out[key] = as_count(reading.get(key))
     out["title_shape"] = "profile" if reading.get("title_shape") == "profile" else "none"
@@ -8303,6 +8336,11 @@ async def read_named_profile(page: Any) -> dict[str, Any]:
     out["named_controls"] = [
         token if token in NAMED_CONTROL_TOKENS else "unrecognised"
         for token in (named if isinstance(named, list) else [])
+    ][:40]
+    in_dialogs = reading.get("dialog_controls")
+    out["dialog_controls"] = [
+        token if token in DIALOG_CONTROL_TOKENS else "unrecognised"
+        for token in (in_dialogs if isinstance(in_dialogs, list) else [])
     ][:40]
     return out
 

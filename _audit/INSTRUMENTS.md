@@ -10385,6 +10385,49 @@ posting is its control.
 |---|---|
 | the reader's module-constant, helper and write-spec resolution; the second clause of the messaging sentence, checked in both copies | `test_the_reader_resolves_a_module_constant_a_helper_and_a_write_spec` (red first on the old reader); mutations M16 (write-spec branch dead) and M17 (module-constant branch dead) each fail it; `test_every_tool_the_second_clause_names_exists_and_loads_messaging` |
 
+### 69.11 A SECOND DOOR IS PINNED BY WHO MAY CALL IT, AND A PENDING MITIGATION BY ITS FLIP (the named-person route, 2026-09-27)
+
+Lane L5's follow-up, on ruling `THIRD-PARTY-PROFILE-FOR-A-NAMED-TARGET`; the
+record is the lane file's "Follow-up: the named-person route". Two acts load
+the ONE profile a caller names. The read door was not widened: a SECOND door,
+`readonly.assert_named_profile_url`, admits exactly
+`https://www.linkedin.com/in/<segment>/`, and what makes it a door rather than
+an allowlist line is WHO may ask for it.
+
+    A DOOR ADMITS AN ADDRESS FOR EVERY CALLER. WHEN THE RULING IS ABOUT WHO,
+    PIN THE CALLERS -- THE ONE FUNCTION THAT ASKS, AND THE FILES THAT NAME IT.
+
+A same-name stranger was the first thing the tests caught: a page naming its
+owner consistently still drew, in a side card, a control naming somebody else
+with the owner's name, and the in-page comparison matched it. A control is the
+owner's only INSIDE the owner's topcard.
+
+    A NAME COMPARED ACROSS THE WHOLE PAGE FINDS EVERY PERSON WHO SHARES IT.
+    SCOPE THE MATCH TO THE CONTAINER THAT IS THE PERSON, OR REFUSE.
+
+The mitigation the lane may not build (lane G owns the sanitiser) is held as
+strict xfails over what each READER returns for a planted name, and an
+adoption dry-run -- lane G's WIP sanitiser wired into the seam by a scratch
+plugin -- flipped seven of the nine, leaving exactly the two a string field
+cannot satisfy (a marker beside a list name).
+
+    A FAILING-UNTIL-ADOPTED TEST IS WORTH ITS MARKER ONLY IF THE ADOPTION HAS
+    BEEN SHOWN TO FLIP IT. RUN THE ADOPTION ONCE, IN SCRATCH, BEFORE IT LANDS.
+
+| path | shown failing by |
+|---|---|
+| `readonly.assert_named_profile_url`, `named_profile_url`, `valid_named_profile_segment`; `browser.LinkedInBrowser.goto(named_profile=True)` | `tests/test_named_profile_route.py` section 1: one shape admitted, no exemption from the forbidden list, the read door still refusing every such address, the browser swapping doors only when asked; mutations N1 (forbidden check removed) and N2 (always the second door) each kill a named test |
+| the callers pinned -- only `writes._load_named_profile` passes `named_profile=`, only `browser.py` and `writes.py` name the door, and the loader refuses every other spec; `tests/test_probe_navigation_budget.py`'s `SECOND_DOOR_GUARD`, admitted for that one (file, function) | `test_exactly_one_function_in_the_package_asks_for_the_named_door`, `test_the_second_door_is_referenced_only_by_the_browser_and_the_loader`, `test_the_loader_refuses_every_spec_that_is_not_a_named_person_act`; mutations N3 (loader stops refusing) and N4 (loader navigates without the door -- the package-navigation guarantee goes red) |
+| `named_profile` -- the target parser, the landing veto, the topcard-scoped control states, the opened-conversation and send gates, the SENT delta, whom it resolved to | the same file, sections 2 to 6, over `tests/fixtures/synthetic/named_profile.html` (SYNTHETIC: no third party's profile has been captured) and its asserted derivations; mutations N5 to N18 each kill the test named for them |
+| `people_seam` -- the three name-bearing outputs of lane L5 (`threads.read_conversation_list`, `shape.messaging_overview`, the named acts' identity block) | `tests/test_people_seam.py`: routing tests (mutations N19, N20 bypass the seam and fail them) and nine strict xfails, one property per test, flipped seven of nine by the adoption dry-run |
+
+**DECLARED DISPOSABLE:** the scratch probes of the captures (`np_inventory`,
+`np_controls`, `np_titles`, `np_topcard_probe`, `np_topcard_fixture_probe`),
+the adoption dry-run plugin (`np_adopt/`), the mutation runner (`np_mutate.py`)
+and the gate runners -- all under the lane's scratch directory. What they
+measured is in the lane record with its numbers; what they check is carried
+by the two test files above.
+
 ## 70. THE BEST-VERIFIED WRITE NEVER PRESSED SAVE, AND A WRITE AIMED BY ITS CARD (lane-l7-profile-writes, 2026-09-24)
 
 **Registered 2026-09-24.** Full record: `_audit/2026-09-24-lane-l7-profile-writes.md`.

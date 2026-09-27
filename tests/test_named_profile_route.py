@@ -373,6 +373,16 @@ def test_a_name_or_anything_that_is_not_a_profile_is_refused(given):
         writes._target_for(MESSAGE, {"profile": given, "text": TEXT})
 
 
+@pytest.mark.parametrize("given", ["casey", "casey-example-3f9a", "Casey"])
+def test_a_bare_word_is_refused_as_a_possible_name_and_says_so(given):
+    """A one-word name and a vanity segment are the same shape, so a bare word
+    is refused BY ITS OWN RULE, with the reason -- not by the host check a
+    bare word happens to fail one line later, whose message would send him
+    looking for the wrong mistake."""
+    with pytest.raises(WriteAttemptError, match="bare word"):
+        named_profile.profile_segment(given)
+
+
 def test_the_message_target_is_the_profile_and_the_words_and_only_the_profile_reaches_a_url():
     canonical = writes._target_for(MESSAGE, TARGET)
     assert canonical == LINK + writes.TARGET_JOIN + TEXT
@@ -437,6 +447,7 @@ async def test_the_reader_identifies_the_owner_and_finds_their_two_controls(brow
     assert reading["more_actions"] == 1
     assert reading["dialogs"] == 0 and reading["composer_editors"] == 0
     assert reading["named_controls"] == []
+    assert reading["dialog_controls"] == [] and reading["dialog_note_fields"] == 0
     assert named_profile.identity_confirmed(reading) is True
 
 
@@ -456,6 +467,22 @@ async def test_a_notification_count_in_the_title_does_not_hide_the_owner(browser
     counted = _derive(PROFILE, "<title>Casey Example", "<title>(3) Casey Example")
     reading = await _read(browser_page, counted)
     assert reading["heading_matches_title"] is True and reading["invite_matches"] == 1
+
+
+#: DERIVED -- the title names one person and the topcard's heading another.
+TITLE_AND_TOPCARD_DISAGREE = _derive(
+    PROFILE, "<title>Casey Example | LinkedIn</title>", "<title>Jordan Example | LinkedIn</title>"
+)
+
+
+async def test_a_topcard_that_names_somebody_other_than_the_title_confirms_nobody(browser_page):
+    reading = await _read(browser_page, TITLE_AND_TOPCARD_DISAGREE)
+    assert reading["topcards"] == 1 and reading["topcard_headings"] == 1
+    assert reading["heading_matches_title"] is False
+    assert named_profile.identity_confirmed(reading) is False
+    state, why, index = named_profile.connect_state(reading)
+    assert state == named_profile.UNKNOWN and index is None
+    assert "NEEDS-CAPTURE C-P1" in why
 
 
 async def test_a_same_name_stranger_elsewhere_on_the_page_is_never_the_target(browser_page):
@@ -708,8 +735,13 @@ async def test_a_connect_that_opened_a_dialog_presses_nothing_in_it(writes_on, b
     receipt = await writes.perform(act, browser_page, grant)
     assert receipt["clicked"]["clicks_made"] == 1
     assert receipt["performed"] is False
-    assert "A DIALOG OPENED" in receipt["verification"]["why"]
-    assert "C-P3" in receipt["verification"]["why"]
+    why = receipt["verification"]["why"]
+    assert "A DIALOG OPENED" in why and "C-P3" in why
+    # C-P3'S FIRST READING RIDES THE RECEIPT: what the dialog drew, as closed
+    # tokens and a count read in the page, before the reload discarded it.
+    assert "['add_a_note', 'send_without_a_note']" in why
+    assert "0 note field(s)" in why
+    assert "Add a note to your invitation" not in json.dumps(receipt)
 
 
 async def test_the_press_reaches_the_owners_control_and_no_other(writes_on, browser_page):
@@ -800,6 +832,34 @@ async def test_a_second_degree_message_presses_records_and_types_nothing(writes_
     assert "NOTHING WAS TYPED" in receipt["verification"]["why"]
     editor = browser_page.locator(named_profile.COMPOSER_EDITOR_SELECTOR)
     assert await editor.inner_text() == ""
+    # C-P5's first reading, as hints: this synthetic composer says nothing
+    # about InMail or credits.
+    assert opened["observed"]["inmail_words"] is False
+    assert opened["observed"]["credit_words"] is False
+
+
+#: DERIVED -- the conversation that opens for a non-connection names an
+#: InMail and a credit, as LinkedIn's help says an InMail composer does. The
+#: wording is invented; C-P5 is what captures the real one.
+SECOND_DEGREE_INMAIL = _derive(
+    SECOND_DEGREE,
+    "    header.textContent = owner;",
+    "    header.textContent = owner + ' -- InMail -- uses 1 of your InMail credits';",
+)
+
+
+async def test_a_composer_that_names_a_credit_is_recorded_and_still_typed_nothing(
+    writes_on, browser_page
+):
+    grant = await _message_grant(browser_page, SECOND_DEGREE_INMAIL)
+    receipt = await writes.perform(_Navigator(SECOND_DEGREE_INMAIL), browser_page, grant)
+    observed = receipt["opened_conversation_gate"]["observed"]
+    assert observed["inmail_words"] is True and observed["credit_words"] is True
+    assert receipt["opened_conversation_gate"]["refused_condition"] == (
+        "3_not_a_first_degree_connection"
+    )
+    assert receipt["typed_text"]["text_was_entered"] is False
+    assert "uses 1 of your" not in json.dumps(receipt)
 
 
 @pytest.mark.parametrize(
@@ -848,6 +908,12 @@ async def test_send_is_not_pressed_when_the_box_holds_other_words_than_his(
     assert gate["proceeded"] is False and gate["refused_condition"] == "5_words_not_exact"
     assert gate["observed"]["held_characters"] == gate["observed"]["grant_characters"] + 1
     assert receipt["clicked"]["clicks_made"] == 1
+    # THE ONE CLICK WAS THE MESSAGE PRESS, AND IT IS NOT A SUBMIT: the words
+    # were typed and Send was never pressed, so they are still on his screen.
+    assert receipt["clicked"]["opener_clicks"] == 1
+    assert receipt["typed_text"]["text_was_entered"] is True
+    assert receipt["typed_text"]["submit_was_pressed"] is False
+    assert receipt["typed_text"]["left_in_the_composer"] is True
     assert receipt["performed"] is not True
 
 
