@@ -701,8 +701,10 @@ OUTWARD_CLASS_SPECS: dict[str, OutwardClassSpec] = {
             "unlisted group may not be findable again."
         ),
         live_proof=(
-            "HE NAMES a group he belongs to, by numeric id. Two /groups/ "
-            "loads (preview, perform) and one verification read."
+            "HE NAMES a group he belongs to and is willing to leave, by "
+            "numeric id -- not his last membership, or the verification "
+            "answers unknown by construction. Three /groups/ loads: the "
+            "preview, the perform and the fresh-render verification."
         ),
     ),
 }
