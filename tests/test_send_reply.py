@@ -173,7 +173,9 @@ async def test_the_preview_reads_the_named_conversation_and_mints_one_token(writ
     facts = block["where"]["what_the_page_showed"]
     assert facts["landed_on_the_named_thread"] is True
     assert facts["events_with_text"] == 0 and facts["recipient_boxes"] == 0
-    assert "Kai Example" in block["who_this_would_reach"]
+    # A PEOPLE RECORD since 2026-09-27 (PREVIEW-NAMES-THE-RESOLVED-TARGET):
+    # tests/test_a_preview_names_the_resolved_target.py holds the rest.
+    assert block["who_this_would_reach"]["name"] == "Kai Example"
     grant = writes._GRANTS[block["to_confirm"]]
     assert "who_this_would_reach" not in grant.preview, "the title reached the grant"
     assert "Kai Example" not in json.dumps(grant.preview)

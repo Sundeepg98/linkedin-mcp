@@ -214,6 +214,7 @@ from linkedin_server import (
     company_interest,
     dom,
     landing,
+    people_data,
     profile_editor,
     shape,
     threads,
@@ -5542,14 +5543,26 @@ async def _name_the_invitation_recipient(
     label = reading.get("label")
     if not isinstance(label, str) or not label:
         return block
-    # A NEW DICT. The one on the grant is not touched, and this adds a
-    # top-level key only -- so nothing nested is shared into.
+    # THE PERSON THE LABEL NAMES, AS A PEOPLE RECORD (2026-09-27,
+    # PREVIEW-NAMES-THE-RESOLVED-TARGET): the control reads "Invite <name> to
+    # connect", and the record holds the name -- sanitised, capped and marked
+    # as another member's words -- or the whole label if it is drawn otherwise.
+    name = label.strip()
+    prefix, suffix = "Invite ", dom.INVITE_CONTROL_SUFFIX
+    if name.startswith(prefix) and name.endswith(suffix) and len(name) > len(prefix + suffix):
+        name = name[len(prefix):-len(suffix)]
+    person = people_data.Person.from_page(name=name)
+    if person is None:
+        return block
+    # A NEW DICT. The one on the grant is not touched, and this adds
+    # top-level keys only -- so nothing nested is shared into.
     out = dict(block)
-    out["who_this_would_reach"] = (
-        "LinkedIn labels the ONE control your word selected: "
-        f"{label!r}. That is read off your own profile, where it was already "
-        "rendered -- nobody is notified, no record is created, and this "
-        "server keeps no copy of it: it is printed here for you to check and "
+    out["who_this_would_reach"] = person.envelope()
+    out["who_this_would_reach_check"] = (
+        "who_this_would_reach is the person LinkedIn labels on the ONE control "
+        "your word selected. That is read off your own profile, where it was "
+        "already rendered -- nobody is notified, no record is created, and this "
+        "server keeps no copy of it: it is returned here for you to check and "
         "is in no grant, no log and no file. CHECK IT. Your word picked this "
         "control out uniquely, and a word that uniquely picks out the WRONG "
         "person is the one failure this gate cannot catch for you."

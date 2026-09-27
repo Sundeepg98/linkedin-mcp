@@ -1103,6 +1103,21 @@ REGISTER: tuple = (
         note="Orchestrator's call applying the operator's 08:11 principle and "
              "OUTWARD-ACTS-NEED-THE-OPERATOR; overridable.",
     ),
+    Ruling(
+        id="PREVIEW-NAMES-THE-RESOLVED-TARGET",
+        claim="A preview names whom the tool resolved -- the page-read name and "
+              "headline, sanitised, marked untrusted, inside a people record -- "
+              "and is returned at runtime, never written; a receipt (anything "
+              "persisted after a write fires) carries only the caller-supplied "
+              "target.",
+        binds="writes -- previews and receipts",
+        document="_audit/2026-09-27-rulings-previews-and-receipts.md",
+        anchor="RULED: (orchestrator, 2026-09-27, applying NAMES-AT-RUNTIME) A "
+               "PREVIEW NAMES WHOM",
+        note="Orchestrator's call applying NAMES-AT-RUNTIME and "
+             "PEOPLE-DATA-MITIGATIONS; overridable. Answers lane G's preview "
+             "question.",
+    ),
 )
 
 

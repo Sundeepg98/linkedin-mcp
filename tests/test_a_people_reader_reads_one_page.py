@@ -208,6 +208,30 @@ ONE_PAGE_AND_ITS_FALLBACK = 2
 #: it. An entry is a claim a human makes, and a stale one fails.
 READS_NO_PAGE: Dict[str, str] = {}
 
+#: WHERE THE DERIVATION STOPS: THE WRITE DOOR (2026-09-27,
+#: PREVIEW-NAMES-THE-RESOLVED-TARGET). A write's preview names whom the tool
+#: resolved inside a people record -- the ruling's identity check -- and the
+#: derivation reaches those builders by NAME, through ``writes.preview`` and
+#: then ``server._write_tool``, the one door every write tool calls
+#: (``tests/test_no_write_is_aimed_by_a_name.py`` holds that it is the only
+#: caller of the write path). Crossing it would declare every write tool a
+#: people READER and hold the write path to reader rules it was never under.
+#: A write returns one record, in one preview, of the one member it resolved,
+#: under the write gate's own rules: a single-use grant, and the target the
+#: caller named. So the reader derivation stops at the door, and the builders
+#: only the door reaches are declared below and held equal to what is found
+#: behind it -- a new one fails until somebody decides which side it is on.
+WRITE_DOOR: "Key" = ("server", "_write_tool")
+
+#: The record builders reached only through the write door: the two previews
+#: that name a third party.
+PREVIEW_BUILDERS: FrozenSet["Key"] = frozenset(
+    {
+        ("writes", "_name_the_invitation_recipient"),
+        ("threads", "name_the_reply_recipient"),
+    }
+)
+
 # ---------------------------------------------------------------------------
 # The instruments -- one set, read by the real-tree assertions AND the plants
 # ---------------------------------------------------------------------------
@@ -362,13 +386,22 @@ def calls(function: ast.AST) -> FrozenSet[str]:
     return frozenset(found)
 
 
-def closure(edges: Mapping[Key, FrozenSet[str]], seed: Iterable[Key]) -> FrozenSet[Key]:
+def closure(
+    edges: Mapping[Key, FrozenSet[str]],
+    seed: Iterable[Key],
+    stop: FrozenSet[Key] = frozenset(),
+) -> FrozenSet[Key]:
     """The seed, then every function whose edge names a collected function, to
-    a fixed point. By NAME: which module the name lives in is not asked."""
+    a fixed point. By NAME: which module the name lives in is not asked. A key
+    in ``stop`` never joins, so nothing reaches past it through it."""
     collected = set(seed)
     while True:
         names = {name for _module, name in collected}
-        grown = {key for key, named in edges.items() if key not in collected and named & names}
+        grown = {
+            key
+            for key, named in edges.items()
+            if key not in collected and key not in stop and named & names
+        }
         if not grown:
             return frozenset(collected)
         collected |= grown
@@ -707,9 +740,10 @@ def audit(modules: Mapping[str, ast.Module]) -> Audit:
                 pending.extend(named_by(key))
         return seen
 
-    # 1. Builders, the fixed point, and the tools in it.
+    # 1. Builders, the fixed point -- stopped at the write door -- and the
+    #    tools in it.
     builders = record_builders(modules)
-    derived = closure(edges, builders)
+    derived = closure(edges, builders, stop=frozenset({WRITE_DOOR}))
     readers = sorted(key for key in derived if is_tool(functions[key]))
 
     # 2. Paging parameters: every reader, the derived set, and what a reader
@@ -1325,6 +1359,82 @@ def test_the_derivation_follows_an_alias_a_wrapper_and_a_builder_passed_as_a_val
         "a call-only closure should miss the builder passed as a value, and only "
         "that; it found %s" % call_only
     )
+
+
+def builders_behind_the_write_door(modules: Mapping[str, ast.Module]) -> FrozenSet[Key]:
+    """Record builders from which the write door is reached, had the
+    derivation not stopped there."""
+    functions = module_functions(modules)
+    edges = {key: references(function) for key, function in functions.items()}
+    return frozenset(
+        builder
+        for builder in record_builders(modules)
+        if WRITE_DOOR in closure(edges, [builder])
+    )
+
+
+def test_the_builders_behind_the_write_door_are_the_declared_previews():
+    """WHAT THE STOP SETS ASIDE, HELD EXACTLY: the two previews that name a
+    third party (PREVIEW-NAMES-THE-RESOLVED-TARGET). A new builder behind the
+    door fails here until somebody decides it is a preview, not a reader."""
+    behind = builders_behind_the_write_door(package_modules())
+    assert behind == PREVIEW_BUILDERS, (
+        "record builders behind the write door: %s; declared previews: %s"
+        % (sorted(behind), sorted(PREVIEW_BUILDERS))
+    )
+
+
+def test_the_write_door_stops_only_itself():
+    """THE CONTROL. The door hides a builder reached THROUGH it and nothing else:
+    the same builder reached by a tool directly is still derived. And a function
+    of the door's NAME in another module is not the door: it is derived -- and,
+    because the derivation resolves by name, it re-opens the real door's path
+    too, so the set GROWS and the declared-set test fails loudly, the direction
+    this file's limits give a name collision."""
+    only_the_door = {
+        key: value
+        for key, value in _DOOR_PLANT.items()
+        if key != "elsewhere"
+    }
+    found = audit(parse_sources(only_the_door))
+    assert found.tools == {"linkedin_planted_reader"}, found.tools
+    assert builders_behind_the_write_door(parse_sources(only_the_door)) == {
+        ("writes", "_name_the_invitation_recipient")
+    }
+    disguised = audit(parse_sources(_DOOR_PLANT))
+    assert disguised.tools == {
+        "linkedin_planted_reader", "linkedin_planted_disguise", "linkedin_planted_write",
+    }, disguised.tools
+
+
+#: A write door, a preview builder behind it, a reader reaching the builder
+#: directly, and a function of the door's name in another module.
+_DOOR_PLANT = {
+    "writes": (
+        "from linkedin_server import people_data\n\n\n"
+        "def _name_the_invitation_recipient(label):\n"
+        "    return people_data.Person.from_page(name=label)\n\n\n"
+        "def preview(label):\n"
+        "    return _name_the_invitation_recipient(label)\n"
+    ),
+    "server": (
+        "async def _write_tool(label):\n"
+        "    return writes.preview(label)\n\n\n"
+        "@mcp.tool()\n"
+        "async def linkedin_planted_write(item: str = '') -> dict:\n"
+        "    return await _write_tool(item)\n\n\n"
+        "@mcp.tool()\n"
+        "async def linkedin_planted_reader() -> dict:\n"
+        "    return {'rows': [writes._name_the_invitation_recipient('x')]}\n"
+    ),
+    "elsewhere": (
+        "async def _write_tool(label):\n"
+        "    return writes.preview(label)\n\n\n"
+        "@mcp.tool()\n"
+        "async def linkedin_planted_disguise() -> dict:\n"
+        "    return await _write_tool('x')\n"
+    ),
+}
 
 
 def test_the_derivation_follows_another_modules_attribute_the_tuple_and_getattr():

@@ -8,9 +8,9 @@
 
 **THIS REGISTER IS NOT THE CORPUS AND DOES NOT CLAIM TO BE COMPLETE.** Read section 4 before concluding a question is unruled: the scan that keeps it honest reads ONE marker, and the ruling that caused this file to be written does not carry it.
 
-    rulings registered       64
-    documents scanned        253
-    RULED: declarations      51 claimed, 7 triaged, 0 unclaimed
+    rulings registered       65
+    documents scanned        254
+    RULED: declarations      52 claimed, 7 triaged, 0 unclaimed
 
 ---
 
@@ -151,6 +151,7 @@ Scan the CLAIM column against your question. Every claim is a paraphrase written
 | id | what was ruled | binds | when | where (document / section) |
 |---|---|---|---|---|
 | `OUTWARD-CLASSES-BUILT-BEHIND-GRANTS` | Repost or share, endorse or recommend, and delete or withdraw one of his own items are BUILT behind the single-use grant, off by default, fired only at a target he names. PERMANENTLY_FORBIDDEN keeps only entries whose grounds are mitigations. | the classes ruling (b) did not name | 2026-09-24 | [2026-09-24-rulings-names-at-runtime.md](2026-09-24-rulings-names-at-runtime.md)<br>*The outward classes ruling (b) did not name* |
+| `PREVIEW-NAMES-THE-RESOLVED-TARGET` | A preview names whom the tool resolved -- the page-read name and headline, sanitised, marked untrusted, inside a people record -- and is returned at runtime, never written; a receipt (anything persisted after a write fires) carries only the caller-supplied target. | previews and receipts | 2026-09-27 | [2026-09-27-rulings-previews-and-receipts.md](2026-09-27-rulings-previews-and-receipts.md)<br>*A preview is the identity check, not a receipt* |
 
 ---
 
@@ -315,6 +316,8 @@ Scan the CLAIM column against your question. Every claim is a paraphrase written
 
 **`PERMALINK-READ-IS-ALLOWED`** -- `M C42` records that this ruling DID NOT REACH naming the target -- which is why that row cannot rest on it. See the DISPUTED section of `_audit/2026-09-21-what-was-ruled.md`.
 
+**`PREVIEW-NAMES-THE-RESOLVED-TARGET`** -- Orchestrator's call applying NAMES-AT-RUNTIME and PEOPLE-DATA-MITIGATIONS; overridable. Answers lane G's preview question.
+
 **`REVEAL-BUTTON-IS-A-DISCLOSURE`** -- Orchestrator's call under OUTWARD-ACTS-NEED-THE-OPERATOR; overridable.
 
 **`SEARCH-ADMISSION-APPROVED-FIVE-CONDITIONS`** -- Condition 2 was AMENDED the same day -- see SEARCH-CONDITION-2-CLOSED. The ruling bars FIRING, not READING; conflating the two cost a later wave a decision it did not need.
@@ -341,7 +344,7 @@ Scan the CLAIM column against your question. Every claim is a paraphrase written
 
 | signal NOT scanned | files | lines |
 |---|---|---|
-| a heading naming a ruling | 120 | 262 |
+| a heading naming a ruling | 121 | 263 |
 | a bold line opening on RULING/RULED | 60 | 138 |
 | the phrase THE RULING | 37 | 58 |
 | a named -RULING id | 33 | 89 |
@@ -409,6 +412,7 @@ Every `RULED:` line in the corpus, and what became of it. An UNCLAIMED row fails
 | [2026-09-24-rulings-search-verticals-rosters-passive-costs.md](2026-09-24-rulings-search-verticals-rosters-passive-costs.md) | RULED: (orchestrator, 2026-09-24, delegated) D3 IS ANSWERED NO. A refusal | `D3-UNREGISTERED-REFUSAL-IS-NOT-A-RULING` |
 | [2026-09-24-rulings-search-verticals-rosters-passive-costs.md](2026-09-24-rulings-search-verticals-rosters-passive-costs.md) | RULED: (orchestrator, 2026-09-24, delegated) MEMBER ROSTERS ARE ADMITTED AS | `MEMBER-ROSTERS-AS-BOUNDED-READS` |
 | [2026-09-24-rulings-search-verticals-rosters-passive-costs.md](2026-09-24-rulings-search-verticals-rosters-passive-costs.md) | RULED: (orchestrator, 2026-09-24, delegated) D5 IS ANSWERED: A PASSIVE COST IS | `D5-PASSIVE-COST-IS-NOT-A-ROW` |
+| [2026-09-27-rulings-previews-and-receipts.md](2026-09-27-rulings-previews-and-receipts.md) | RULED: (orchestrator, 2026-09-27, applying NAMES-AT-RUNTIME) A PREVIEW NAMES WHOM | `PREVIEW-NAMES-THE-RESOLVED-TARGET` |
 
 ### 5.1 Triaged -- a declaration hit that is not a ruling made here
 

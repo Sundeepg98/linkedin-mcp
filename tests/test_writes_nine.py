@@ -2841,13 +2841,17 @@ async def test_the_confirm_block_names_who_the_invitation_would_reach(
 
     named = block.get("who_this_would_reach")
     assert named, block
-    assert MEMBER in named, named
+    # A PEOPLE RECORD since 2026-09-27 (PREVIEW-NAMES-THE-RESOLVED-TARGET):
+    # the name the label carries, sanitised and marked; the rest is held by
+    # tests/test_a_preview_names_the_resolved_target.py.
+    assert named["name"] == MEMBER, named
     # IT TELLS HIM TO CHECK IT, and says what it cannot catch. A word that
     # uniquely selects the WRONG person is the one failure this gate has no
     # way to see, and a block that printed a name without saying so would read
     # as corroboration it has not got.
-    assert "CHECK IT" in named
-    assert "no grant" in named
+    check = block.get("who_this_would_reach_check", "")
+    assert "CHECK IT" in check
+    assert "no grant" in check
 
 
 async def test_the_label_does_not_reach_the_grant(writes_on, browser_page, monkeypatch):
@@ -2888,8 +2892,10 @@ async def test_the_label_does_not_reach_the_grant(writes_on, browser_page, monke
     # is exactly why _read_profile_invitations does not read the label at all.
     assert grant.observation is not None
     assert label not in json.dumps(grant.observation.facts)
-    # The returned block DOES carry it, which is the whole point of the pair.
-    assert label in str(block.get("who_this_would_reach") or "")
+    # The returned block DOES carry the person it names, which is the whole
+    # point of the pair -- since 2026-09-27 as a people record holding the
+    # name inside the label, not the label itself.
+    assert block["who_this_would_reach"]["name"] == MEMBER
 
 
 async def test_two_matches_print_no_name(writes_on, browser_page):
