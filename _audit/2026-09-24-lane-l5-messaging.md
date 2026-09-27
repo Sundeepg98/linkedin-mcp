@@ -1278,8 +1278,8 @@ dialog opening and the fresh render drew Connect again (nothing sent), and even 
 press opens the same dialog rather than sending is DERIVED, not measured -- if it sends, it sends
 the invitation he already confirmed to that same person.
 
-THE BUILD, ONCE THAT IS KNOWN: `linkedin_connect_with_note(profile, note, confirm_token)`, a
-composite target (profile, note) typed exactly like a message; press Connect only where a dialog
+THE BUILD, ONCE THAT IS KNOWN -- a proposed tool, `linkedin_connect_with_note(profile, note, confirm_token)`,
+which does not exist yet: a composite target (profile, note) typed exactly like a message; press Connect only where a dialog
 is REQUIRED to open (refuse, having pressed nothing further, if the invitation sends at once); press
 the note control only if measured as not dispatching; fill the note; press send only when the box
 holds EXACTLY the note; verify on a fresh render as Connect does, never SENT off the dialog.

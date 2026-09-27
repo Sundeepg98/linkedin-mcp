@@ -128,9 +128,10 @@ COMPOSER_ALREADY_OPEN = _derive(
     "</form></div></div>",
 )
 #: DERIVED -- a stranger's Message BUTTON and Invite button drawn BEFORE the
-#: owner's controls in document order. The owner's Message control is then
-#: position 1 of a list mixing an <a> and a <button>, which is what proves
-#: the position the page computes is the position the click resolves.
+#: owner's controls in document order, outside the topcard. Page-wide the
+#: owner's controls are the second of their kind; the topcard still holds one
+#: control of each kind, the owner's, which is what the strict, topcard-scoped
+#: press reaches.
 STRANGER_FIRST = _derive(
     DISPATCHING,
     '<main class="scaffold-layout__main">',
