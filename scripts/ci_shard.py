@@ -68,7 +68,24 @@ jobs and only one of them can hurt:
     UNBALANCE a shard. It cannot lose a test, and there is no arrangement of
     its contents that would.
 
-Regenerate it after a change that moves the suite's shape:
+Regenerate it after a change that moves the suite's shape. A green CI run
+already holds the input: every shard keeps its junit in its artifact, as
+reports/junit-<os>-<python>-<shard>.xml (.github/workflows/ci.yml, "Keep this
+shard's junit for the timings table"), and --write-timings takes them all:
+
+    gh run download <run-id> --dir artifacts
+    python -m pytest --collect-only -q > collected.txt     # at the run's head
+    python scripts/ci_shard.py --collected collected.txt \\
+        --write-timings artifacts/*/junit-*.xml \\
+        --label "<run-id>, <head>, <date>, GitHub Actions, 3 cells x 6 shards" \\
+        > scripts/ci_shard_timings.json
+
+THE COMBINING RULE. Within one report, a file's seconds are its testcases
+summed. A file found in several reports -- it ran in several cells -- is priced
+at the LARGEST of those per-report totals, not their sum and not their mean:
+every cell runs the same shard split, and the slowest cell is the one that sets
+the run's wall clock. A report that prices none of the collected files is
+refused by name, as a single report always was. One report still works:
 
     python -m pytest -q --junitxml=junit.xml
     python scripts/ci_shard.py --write-timings junit.xml \\
@@ -250,10 +267,12 @@ def plan_shards(weights: dict[str, float], of: int) -> list[list[str]]:
 
 
 def seconds_per_file(junit_path: str, known: dict[str, int]) -> dict[str, float]:
-    """Per-file seconds from a junit report, for --plan's prediction column.
+    """Per-file seconds from a junit report: --plan's prediction column, and
+    each report's reading for --write-timings (:func:`slowest_seconds_per_file`).
 
-    Only used to PRINT a prediction. Nothing in the split depends on it, which
-    is why a junit report from an older commit is safe to pass here.
+    Nothing in a SPLIT reads it directly: --plan prints a prediction, and
+    --write-timings writes a table that a later commit ships -- which is why a
+    junit report from an older commit is safe to pass here.
 
     pytest's xunit2 report carries NO path -- measured, after this function was
     first written to read a ``file`` attribute and silently returned an empty
@@ -278,6 +297,35 @@ def seconds_per_file(junit_path: str, known: dict[str, int]) -> dict[str, float]
                 break
             parts.pop()
     return totals
+
+
+def slowest_seconds_per_file(
+    junit_paths: list[str], known: dict[str, int]
+) -> dict[str, float]:
+    """Per-file seconds from SEVERAL junit reports, each file at its slowest.
+
+    A green CI run leaves one report per shard per cell. Within one report a
+    file's seconds are its testcases summed, which is what seconds_per_file
+    returns. A file found in several reports ran in several cells, and it is
+    priced at the LARGEST of those per-report totals: not the sum, which would
+    charge it once per cell, and not the mean, because every cell runs the same
+    shard split and the slowest cell is the one that sets the wall clock.
+
+    EVERY REPORT MUST PRICE SOMETHING -- the single-report refusal, kept per
+    report. A report that prices none of the collected files, from another
+    repository or in a shape this parse does not read, would otherwise vanish
+    into the union, and its cell's files would be priced from the other cells
+    alone under a label that claims them all.
+    """
+    slowest: dict[str, float] = {}
+    for junit_path in junit_paths:
+        measured = seconds_per_file(junit_path, known)
+        if not measured:
+            raise SystemExit(_no_timings_message(junit_path, known))
+        for name, seconds in measured.items():
+            if name not in slowest or seconds > slowest[name]:
+                slowest[name] = seconds
+    return slowest
 
 
 def _no_timings_message(junit_path: str, counts: dict[str, int]) -> str:
@@ -329,8 +377,15 @@ def main(argv: list[str]) -> int:
     )
     parser.add_argument(
         "--write-timings",
+        nargs="+",
         metavar="JUNIT",
-        help="emit a new ci_shard_timings.json from this junit report",
+        help=(
+            "emit a new ci_shard_timings.json from one or more junit reports "
+            "(a CI run leaves one per shard per cell). A file's seconds in one "
+            "report are its testcases summed; a file in several reports is "
+            "priced at the LARGEST of those totals, because every cell runs "
+            "the same split and the slowest cell sets the wall clock"
+        ),
     )
     parser.add_argument(
         "--label", help="provenance line for --write-timings; required with it"
@@ -350,9 +405,7 @@ def main(argv: list[str]) -> int:
         # against it cannot be judged stale by anybody who finds it later.
         if not args.label:
             parser.error("--write-timings needs --label naming the run it came from")
-        measured = seconds_per_file(args.write_timings, counts)
-        if not measured:
-            raise SystemExit(_no_timings_message(args.write_timings, counts))
+        measured = slowest_seconds_per_file(args.write_timings, counts)
         print(
             json.dumps(
                 {

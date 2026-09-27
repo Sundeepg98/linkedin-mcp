@@ -338,15 +338,44 @@ class PlantedLocator:
 
 
 class PlantedPage:
-    """Playwright's page, wired to the same split as :class:`PlantedLocator`."""
+    """Playwright's page, wired to the same split as :class:`PlantedLocator`.
+
+    IT COUNTS ITS OWN READS (2026-09-27), in :attr:`reads`: every use of a
+    method in :data:`READ_ENTRY_POINTS`, the calls through which a reader
+    reaches what a page holds. Counted in ``__getattribute__`` so a subclass
+    that overrides a read is counted too. A reader driven here that returns
+    with ``reads == 0`` never read the page, and its verdict says nothing
+    about what a page can make it carry -- which is how readers were recorded
+    clean having read nothing (``tests/test_readers_emit_no_page_string.py``).
+    """
 
     #: A real LinkedIn read address, so a reader that checks where it is does
     #: not bail before reaching its coercions. It carries no identifier.
     url = "https://www.linkedin.com/feed/"
 
+    #: The page's read entry points. ``url`` is not one: it is the address the
+    #: harness set, not something the page drew.
+    READ_ENTRY_POINTS = frozenset(
+        {
+            "locator", "get_by_role", "get_by_text", "frame_locator", "evaluate",
+            "evaluate_handle", "eval_on_selector", "eval_on_selector_all",
+            "content", "title", "inner_text", "text_content", "query_selector",
+            "query_selector_all", "wait_for_selector",
+        }
+    )
+
+    #: Reads so far. A class default, so a subclass that skips ``__init__``
+    #: still counts from zero.
+    reads = 0
+
     def __init__(self) -> None:
         self.context = None
         self.keyboard = _PlantedKeyboard()
+
+    def __getattribute__(self, name: str) -> Any:
+        if name in PlantedPage.READ_ENTRY_POINTS:
+            object.__setattr__(self, "reads", object.__getattribute__(self, "reads") + 1)
+        return object.__getattribute__(self, name)
 
     # -- structure ---------------------------------------------------------
     def locator(self, *args: Any, **kwargs: Any) -> PlantedLocator:

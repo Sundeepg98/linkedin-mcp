@@ -323,6 +323,22 @@ async def test_the_tab_strip_would_have_been_the_wrong_anchor():
 # ---------------------------------------------------------------------------
 
 
+#: THE BOUND THE EMPTY-TAB TEST WAITS UNDER, AND WHY IT IS NOT 300 MS ANY MORE.
+#: The delay this test exists to catch is THE CEILING ITSELF: a wait that
+#: ignores the empty half pays all of it on every empty tab. Until 2026-09-27
+#: the test set the ceiling to 300 ms and asserted the wait took less -- so it
+#: compared a real browser's round trip with a wall-clock constant, and under
+#: full parallel load the round trip alone took 319 ms on a tab that HAD
+#: resolved. The ceiling is now far above any load latency, and the rule is
+#: that an empty tab pays LESS THAN HALF of it: load adds hundreds of
+#: milliseconds, a wait that ignores the empty half adds the whole ceiling.
+EMPTY_TAB_BOUND_MS = 4_000
+
+
+def _paid_less_than_half(verdict: dict, bound_ms: int) -> bool:
+    return verdict["attached"] is True and verdict["waited_ms"] < bound_ms / 2
+
+
 async def test_an_empty_tab_is_not_delayed(monkeypatch):
     """A legitimately empty tab satisfies the wait at once.
 
@@ -330,22 +346,84 @@ async def test_an_empty_tab_is_not_delayed(monkeypatch):
     row would spend the full bound on every empty tab -- and the operator has
     two of them.
 
-    SHOWN FAILING by dropping the empty half, which is the obvious anchor::
-
-        AssertionError: attached=False after 304ms of a 300ms bound
-        waiting only for rows makes an empty tab pay the full ceiling
+    SHOWN FAILING by dropping the empty half, which is the obvious anchor --
+    the wait then pays the whole bound and reports attached=False -- and held
+    steady under load by :data:`EMPTY_TAB_BOUND_MS`; both halves are driven by
+    the test below.
     """
-    monkeypatch.setattr(dom, "TRACKER_LIST_TIMEOUT_MS", 300)
+    monkeypatch.setattr(dom, "TRACKER_LIST_TIMEOUT_MS", EMPTY_TAB_BOUND_MS)
 
     async def work(page):
         return await dom.wait_for_tracker_list(page)
 
     verdict = await _with_html(markup("jobs_tracker_empty"), work)
     assert verdict["attached"] is True, verdict
-    assert verdict["waited_ms"] < 300, (
+    assert _paid_less_than_half(verdict, EMPTY_TAB_BOUND_MS), (
         f"attached={verdict['attached']} after {verdict['waited_ms']}ms of a "
-        "300ms bound; an empty tab is paying the ceiling"
+        f"{EMPTY_TAB_BOUND_MS}ms bound; an empty tab is paying the ceiling"
     )
+
+
+class _SlowRoundTrip:
+    """A real page whose readiness wait answers ``latency_s`` late -- the load
+    the 300 ms bound failed under, reproduced on purpose."""
+
+    def __init__(self, page, latency_s: float):
+        self._page = page
+        self._latency_s = latency_s
+
+    def locator(self, selector):
+        return _SlowLocator(self._page.locator(selector), self._latency_s)
+
+    def __getattr__(self, name):
+        return getattr(self._page, name)
+
+
+class _SlowLocator:
+    def __init__(self, inner, latency_s: float):
+        self._inner = inner
+        self._latency_s = latency_s
+
+    @property
+    def first(self):
+        return _SlowLocator(self._inner.first, self._latency_s)
+
+    async def wait_for(self, **kwargs):
+        import asyncio
+
+        await self._inner.wait_for(**kwargs)
+        await asyncio.sleep(self._latency_s)
+
+
+async def test_the_empty_tab_rule_absorbs_load_and_still_catches_the_ceiling(monkeypatch):
+    """THE RULE ABOVE, DRIVEN BOTH WAYS in a real browser.
+
+    * LOAD: 350 ms of added round-trip latency -- more than the 319 ms the
+      old 300 ms bound failed on -- on a tab that resolved: the rule holds.
+      The old assertion, applied to the same verdict, does not.
+    * THE DELAY IT EXISTS TO CATCH: the empty half removed from the selector,
+      under a 1 s bound so this costs a second, not four: the wait pays the
+      whole bound, and the rule fails.
+    """
+    async def loaded(page):
+        return await dom.wait_for_tracker_list(_SlowRoundTrip(page, 0.350))
+
+    monkeypatch.setattr(dom, "TRACKER_LIST_TIMEOUT_MS", EMPTY_TAB_BOUND_MS)
+    under_load = await _with_html(markup("jobs_tracker_empty"), loaded)
+    assert _paid_less_than_half(under_load, EMPTY_TAB_BOUND_MS), under_load
+    assert not under_load["waited_ms"] < 300, (
+        "the added latency did not reach the old bound, so this shows nothing "
+        "about it: %s" % under_load
+    )
+
+    async def plain(page):
+        return await dom.wait_for_tracker_list(page)
+
+    monkeypatch.setattr(dom, "TRACKER_LIST_TIMEOUT_MS", 1_000)
+    monkeypatch.setattr(shape, "TRACKER_EMPTY_MARKERS", ())
+    ceiling = await _with_html(markup("jobs_tracker_empty"), plain)
+    assert ceiling["attached"] is False and ceiling["waited_ms"] >= 1_000, ceiling
+    assert not _paid_less_than_half(ceiling, 1_000), ceiling
 
 
 async def test_the_empty_half_is_derived_from_shape_and_not_copied():

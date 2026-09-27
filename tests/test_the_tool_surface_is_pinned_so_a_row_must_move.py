@@ -119,8 +119,8 @@ PINNED_TOOL_SURFACE: dict[str, tuple[str, ...]] = {
     "linkedin_open_thread": ("allow_unread", "thread_id"),
     "linkedin_page_plugin_snippet": ("page_id",),
     "linkedin_people_search_shape": (
-        "connections_of", "current_company_ids", "keywords", "location_ids",
-        "past_company_ids",
+        "connections_of", "current_company_ids", "include_names", "keywords",
+        "location_ids", "past_company_ids",
     ),
     "linkedin_premium_job_collection": ("collection",),
     "linkedin_premium_status": (),
@@ -412,6 +412,22 @@ PINNED_TOOL_SURFACE: dict[str, tuple[str, ...]] = {
 #: never granted. See `_audit/2026-09-24-lane-l5-messaging.md`, "Follow-up:
 #: the named-person route" and "Integration: lane L5's merge of master
 #: 52b55b6".
+#: **RE-PINNED 2026-09-27 AT 57 TOOLS AND 91 PARAMETERS (lane S, names at
+#: runtime): no tool added, one parameter on one, and three census rows move
+#: in the same commit.** `linkedin_people_search_shape` gains
+#: `include_names`, off by default: with it, the people the results page draws
+#: come back as people records (`people_results.read_result_people`, under
+#: NAMES-AT-RUNTIME and the six PEOPLE-DATA-MITIGATIONS). THE THREE WHO ROWS
+#: THE 2026-09-24 ENTRY ABOVE LEFT GAP MOVE GAP -> COVERED-UNFIRED: `N 79`,
+#: `N 172` and `N 194`, which asked for WHO and waited on a reader that
+#: returns names. Not PROVEN: the lane was offline, and the reader was built
+#: over the one captured results page. See
+#: `_audit/2026-09-24-lane-s-people-search.md`, "Names returned".
+#: **RE-PINNED 2026-09-27 AT 59 TOOLS AND 96 PARAMETERS, at lane S's merge of
+#: master 687b07c, MEASURED off the merged registry, not summed.** Master's
+#: 59 and 95 carry lane L5's two tools and every pin above; this branch
+#: adds one parameter (`include_names`) and no tool. The census rows moved
+#: in each side's own commits; none moves in the merge itself.
 #: **RE-PINNED 2026-09-27 AT 58 TOOLS AND 92 PARAMETERS, on lane L5's order of
 #: 23:36 (PEOPLE-DATA-MITIGATIONS, mitigation 6): `linkedin_send_message`
 #: RETIRED -- it was aimed by a name -- taking one tool and three parameters
@@ -419,8 +435,12 @@ PINNED_TOOL_SURFACE: dict[str, tuple[str, ...]] = {
 #: became `profile`, which moves no count.** Census `M M1` and `N 155` note the
 #: retirement; `M M2` returns to GAP (its only tool was the retired one). See
 #: `_audit/2026-09-24-lane-l5-messaging.md`, "The name-aimed debts".
+#: **AND AT 58 TOOLS AND 93 PARAMETERS AT LANE L5'S MERGE OF MASTER
+#: 64afa6c, MEASURED off the merged registry, not summed**: master's 59 and
+#: 96 carry lane S's `include_names`; this branch takes one tool and three
+#: parameters (`linkedin_send_message`). No census row moves in the merge.
 PINNED_TOOL_COUNT = 58
-PINNED_PARAMETER_COUNT = 92
+PINNED_PARAMETER_COUNT = 93
 
 
 def live_surface() -> dict[str, tuple[str, ...]]:

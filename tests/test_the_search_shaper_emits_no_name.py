@@ -61,6 +61,16 @@ match LinkedIn's real dialect, whether the counts mean what they are named,
 whether a live filter label matches `FILTER_TERMS`. That is CORRECTNESS, not
 name-freedom, and it stays unmeasured until a browser slot. See
 `_audit/2026-09-20-the-search-admission.md`.
+
+AMENDED 2026-09-27 (lane S, names at runtime), and the paragraphs above are
+kept as written. A results page WAS captured, by the live lane's session 1,
+and `tests/fixtures/synthetic/people_search_results.html` now holds its
+STRUCTURE with synthetic people. It serves the tool's OTHER channel: with
+`include_names=True` the tool returns each result as a people record
+(`people_results.read_result_people`), and `tests/test_people_search_names.py`
+holds that channel to the six mitigations. This file still holds the DEFAULT
+path, which returns counts and nobody, and its property is still
+input-independent.
 """
 
 from __future__ import annotations

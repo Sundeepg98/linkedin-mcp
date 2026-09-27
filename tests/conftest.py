@@ -1,7 +1,11 @@
 """Fakes for a browser that is never launched.
 
-No test in this suite reaches the network or an account. Nearly all of them
-run with no Chromium either, on the fakes below: they stand in for the three
+No test in this suite reaches the network or an account, and the first half is
+ENFORCED, not asked: ``tests/network_guard.py``, registered below, refuses
+every request a test's browser makes to an address off this machine and fails
+that test by name. It was false until 2026-09-27 -- eleven tests sent a fresh
+headless Chromium to LinkedIn on every run -- and nothing said so. Nearly all
+of the tests run with no Chromium either, on the fakes below: they stand in for the three
 Playwright objects this server touches -- a page, its browser context, and
 its request context -- and they RECORD what was asked of them, so a test can
 assert not just the answer but that the question was actually put to
@@ -23,6 +27,9 @@ import json
 from typing import Any, Optional
 
 import pytest
+
+#: THE NETWORK GUARD, for every test in every run: CI and local, no flag.
+pytest_plugins = ("tests.network_guard",)
 
 
 @pytest.fixture(autouse=True)

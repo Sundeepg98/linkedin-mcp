@@ -58,6 +58,7 @@ check entering the register at all.
 from __future__ import annotations
 
 import asyncio
+import functools
 import importlib
 import inspect
 import json
@@ -138,6 +139,53 @@ CLEAN = "clean"
 LEAKS = "leaks"
 RETURNS_TEXT = "returns_text"
 RETURNS_RECORDS = "returns_records"
+
+#: CLEAN IS EARNED, NOT DEFAULTED (2026-09-27, the orchestrator's order). A
+#: drive that carried nothing out was recorded ``clean`` whether or not the
+#: reader ever reached the code that reads a page: group_leave's five readers
+#: refused their argument on the first line, ``named_profile``'s namer took
+#: an early return, and both were ``clean`` having read nothing. Measured
+#: that day over the 109 readers the baseline called clean: 13 returned
+#: without one read of the page, and 10 more read it and returned only an
+#: empty shape. So a clean drive must now show its success path ran -- the
+#: page was READ (``PlantedPage.reads``) and something that is not an empty
+#: shape came back (:func:`empty_shape`). A plant in the result already shows
+#: both, so ``returns_records`` and ``returns_text`` need no more. Either
+#: failure is a NOT-DRIVEN reason, never a pass, and the reader's other
+#: variants still decide its verdict (:func:`_worst`).
+#:
+#: WHY NOT A NON-EMPTY RESULT ALONE: an early return is often a refusal with
+#: a sentence in it. Ten of the thirteen no-read readers returned exactly that
+#: -- ``{"refused": ..., "why": ...}`` -- which is not empty and read nothing.
+NO_PAGE_READ = "not_driven:returned without reading the page"
+EMPTY_RESULT = "not_driven:read the page and returned only an empty shape"
+
+#: AND A PEOPLE READER'S SUCCESS PATH IS ITS RECORDS. Found at lane G's
+#: merge of master 5354d42, on the reader the order named: lane S's
+#: ``people_results.read_result_people`` read the planted page, skipped its one
+#: card for want of a member link, and returned its denominators -- a read,
+#: and a result that is not empty -- having built NO record. A reader whose
+#: code reaches a people-record builder (:func:`record_readers`, the
+#: bounded-reader guard's own derivation) has one success path, and on the
+#: planted page it puts the plant inside a record; a drive of such a reader
+#: that comes back clean did not take it.
+NO_RECORD = "not_driven:reaches a people-record builder and built no record"
+
+
+@functools.lru_cache(maxsize=1)
+def record_readers() -> frozenset[str]:
+    """Readers, as ``module:function``, whose code reaches a people-record
+    builder -- derived by ``tests/test_a_people_reader_reads_one_page.py``'s
+    own closure, stopped at the write door as it stops there."""
+    from tests import test_a_people_reader_reads_one_page as bounded
+
+    modules = bounded.package_modules()
+    functions = bounded.module_functions(modules)
+    edges = {key: bounded.references(fn) for key, fn in functions.items()}
+    reach = bounded.closure(
+        edges, bounded.record_builders(modules), stop=frozenset({bounded.WRITE_DOOR})
+    )
+    return frozenset(f"{module}:{name}" for module, name in reach)
 
 
 # ---------------------------------------------------------------------------
@@ -610,12 +658,143 @@ async def _name_the_profile_target_as_shipped(page: Any) -> Any:
     )
 
 
+def _inert_observation(
+    spec: Any, facts: dict[str, Any], target: Any = SYNTHETIC_ARGUMENT
+) -> Any:
+    """An Observation built by hand, which ``writes.Observation`` documents as
+    INERT: only ``writes._record`` writes the observation store. ``target``
+    is the argument by default; a namer that parses its observation's target
+    (the invitation's, since 2026-09-27) is handed the canonical target the
+    server would have observed instead."""
+    from linkedin_server import writes
+
+    return writes.Observation(
+        target=target,
+        target_kind=spec.target_kind,
+        facts=facts,
+        facts_url="",
+        state="",
+        state_why="",
+        state_url="",
+        same_page_as_action=True,
+        receipt="",
+        observed_at=float("-inf"),
+    )
+
+
+class _OneToOneConversation:
+    """The planted page, read as a conversation with ONE other member: its
+    active row carries no group marker. Every other read is the page's own."""
+
+    def __init__(self, page: Any) -> None:
+        self._page = page
+
+    def __getattr__(self, name: str) -> Any:
+        return getattr(self._page, name)
+
+    def locator(self, selector: Any, *args: Any, **kwargs: Any) -> Any:
+        from linkedin_server import threads
+
+        from tests.plantedpage import MAX_DEPTH, PlantedLocator
+
+        if selector == threads.ACTIVE_GROUP_SELECTOR:
+            return PlantedLocator(MAX_DEPTH)  # counts zero
+        return self._page.locator(selector, *args, **kwargs)
+
+
+async def _name_the_reply_recipient_as_shipped(page: Any) -> Any:
+    """The reply preview's namer as ``writes.preview`` calls it for a
+    ``send_reply``: after an observation that landed on the named thread and
+    counted its messages -- once on a page that reads as a GROUP (the planted
+    page counts every marker) and once as a conversation with ONE member."""
+    from linkedin_server import threads, writes
+
+    spec = writes.spec_for_action("send_reply")
+    facts = {"landed_on_the_named_thread": True, "events": 1}
+    group = await threads.name_the_reply_recipient(
+        page, spec, _inert_observation(spec, facts), {}
+    )
+    one = await threads.name_the_reply_recipient(
+        _OneToOneConversation(page), spec, _inert_observation(spec, facts), {}
+    )
+    return {"group": group, "one_to_one": one}
+
+
+class _AnswersTheInvitationRail:
+    """The planted page, whose invitation rail holds ONE card linking to the
+    observed profile -- its one control labelled, as LinkedIn labels it, with
+    the plant's name.
+
+    THE LINK AIM, SINCE LANE L5'S MERGE OF MASTER 64afa6c (2026-09-27). This
+    answered ``dom.INVITE_NEEDLE_JS`` until that script left with the needle:
+    the rail is read now by two LOCATOR COUNTS -- the controls, and the cards
+    linking to the profile -- and the label off the one control. So this
+    answers each count with one and the label with the plant, and every read
+    goes through the planted page first, so it is still counted."""
+
+    def __init__(self, page: Any) -> None:
+        self._page = page
+
+    def __getattr__(self, name: str) -> Any:
+        return getattr(self._page, name)
+
+    def locator(self, *args: Any, **kwargs: Any) -> Any:
+        return _OneCardOnTheRail(self._page.locator(*args, **kwargs))
+
+
+class _OneCardOnTheRail:
+    """A located set the rail reader counts as ONE, labelled with the plant."""
+
+    def __init__(self, located: Any) -> None:
+        self._located = located
+
+    def __getattr__(self, name: str) -> Any:
+        return getattr(self._located, name)
+
+    async def count(self) -> int:
+        await self._located.count()  # the read, counted
+        return 1
+
+    @property
+    def first(self) -> Any:
+        return _OneCardOnTheRail(self._located.first)
+
+    async def get_attribute(self, name: str, **kwargs: Any) -> Any:
+        from linkedin_server import dom
+
+        await self._located.get_attribute(name, **kwargs)  # the read, counted
+        return "Invite " + PLANT + dom.INVITE_CONTROL_SUFFIX
+
+
+async def _name_the_invitation_recipient_as_shipped(page: Any) -> Any:
+    """The invitation preview's namer as ``writes.preview`` calls it: after an
+    observation of the rail that counted one control, whose target is the
+    profile LINK the server canonicalised (since 2026-09-27)."""
+    from linkedin_server import writes
+    from tests import refusinggrant
+
+    spec = writes.spec_for_action("send_invitation")
+    observation = _inert_observation(
+        spec, {"controls": 1}, target=refusinggrant.synthetic_target(spec)
+    )
+    return await writes._name_the_invitation_recipient(
+        _AnswersTheInvitationRail(page), spec, observation, {}
+    )
+
+
 #: READERS THE SIGNATURE PLUMBING CAN ONLY DRIVE INTO AN EARLY RETURN, each
 #: with one more variant that reaches its page reads the way it ships. The
 #: generic variants still run and the worst verdict of all of them is the
 #: reader's, so this can only ADD a finding, never hide one.
+#:
+#: The two PREVIEW NAMERS joined 2026-09-27, when a clean verdict began to
+#: need a read: driven by signature they took their first-line returns --
+#: another action's spec, or no landing -- and were recorded clean having
+#: named nobody, the class this file now refuses.
 AS_SHIPPED: dict[str, Callable[..., Any]] = {
     "named_profile:name_the_profile_target": _name_the_profile_target_as_shipped,
+    "threads:name_the_reply_recipient": _name_the_reply_recipient_as_shipped,
+    "writes:_name_the_invitation_recipient": _name_the_invitation_recipient_as_shipped,
 }
 
 
@@ -631,25 +810,41 @@ def drive(fn: Callable[..., Any]) -> tuple[str, str]:
     finding is that an exception carries values a return value would not.
     """
     variants, refusal = _build_call(fn)
+    builds = _reader_key(fn) in record_readers()
     verdicts = (
-        [] if variants is None else [_drive_once(fn, args, kwargs) for args, kwargs in variants]
+        []
+        if variants is None
+        else [_drive_once(fn, args, kwargs, builds_records=builds) for args, kwargs in variants]
     )
     shipped = AS_SHIPPED.get(_reader_key(fn))
     if shipped is not None:
-        verdicts.append(_drive_once(shipped, [PlantedPage()], {}))
+        verdicts.append(_drive_once(shipped, [PlantedPage()], {}, builds_records=builds))
     if not verdicts:
         return f"not_driven:{refusal}", refusal
     return _worst(verdicts)
 
 
 def _drive_once(
-    fn: Callable[..., Any], args: list[Any], kwargs: dict[str, Any]
+    fn: Callable[..., Any],
+    args: list[Any],
+    kwargs: dict[str, Any],
+    *,
+    builds_records: bool = False,
 ) -> tuple[str, str]:
+    pages = [v for v in (*args, *kwargs.values()) if isinstance(v, PlantedPage)]
+    counted = {"reads": 0}
+
     async def _run() -> Any:
         call_args, call_kwargs = await resolve_paired_observations(args, kwargs)
-        return await asyncio.wait_for(
-            fn(*call_args, **call_kwargs), timeout=DRIVE_TIMEOUT_S
-        )
+        # THE READER'S OWN READS: a paired Observation is built by reading
+        # the page first, and those reads are the harness's, not the reader's.
+        before = sum(page.reads for page in pages)
+        try:
+            return await asyncio.wait_for(
+                fn(*call_args, **call_kwargs), timeout=DRIVE_TIMEOUT_S
+            )
+        finally:
+            counted["reads"] = sum(page.reads for page in pages) - before
 
     try:
         result = asyncio.run(_run())
@@ -662,7 +857,46 @@ def _drive_once(
         if hits:
             return LEAKS, f"{type(exc).__name__} carries it at {hits[0]}"
         return f"not_driven:raises {type(exc).__name__}", str(exc)[:120]
-    return classify_returned(result)
+    return classify_drive(result, counted["reads"], builds_records=builds_records)
+
+
+def empty_shape(value: Any, depth: int = 0) -> bool:
+    """Is ``value`` an EMPTY SHAPE -- ``None``, ``False``, zero, ``""``, or a
+    container holding only those, however nested? What an early return hands
+    back; a success path on the planted page, where every count is 1 and every
+    string the plant, hands back something else."""
+    if depth > 16:
+        return False
+    if value is None or value is False:
+        return True
+    if isinstance(value, bool):
+        return False
+    if isinstance(value, (int, float)):
+        return value == 0
+    if isinstance(value, str):
+        return value == ""
+    if isinstance(value, dict):
+        return all(empty_shape(item, depth + 1) for item in value.values())
+    if isinstance(value, (list, tuple, set, frozenset)):
+        return all(empty_shape(item, depth + 1) for item in value)
+    return False
+
+
+def classify_drive(result: Any, reads: int, *, builds_records: bool = False) -> tuple[str, str]:
+    """The verdict on one DRIVE: what came back, and whether the success path
+    ran to produce it -- for a people reader, its records; for any other, a
+    read and a result that is not empty. Pure, so the controls drive the code
+    the guard runs."""
+    verdict, detail = classify_returned(result)
+    if verdict != CLEAN:
+        return verdict, detail
+    if reads == 0:
+        return NO_PAGE_READ, "the reader returned before any read of the page"
+    if builds_records:
+        return NO_RECORD, f"{reads} read(s), and no people record came back"
+    if empty_shape(result):
+        return EMPTY_RESULT, f"{reads} read(s), and every value that came back was empty"
+    return CLEAN, f"{reads} read(s)"
 
 
 def classify_returned(result: Any) -> tuple[str, str]:
@@ -806,10 +1040,124 @@ def test_the_named_profile_namer_is_driven_through_a_real_read() -> None:
     assert shipped[0] == RETURNS_RECORDS, shipped
     variants, _refusal = _build_call(fn)
     generic = [_drive_once(fn, args, kwargs) for args, kwargs in variants or []]
-    assert generic and all(verdict == CLEAN for verdict, _ in generic), generic
+    # SAID OUT LOUD SINCE 2026-09-27: these read nothing, and are not clean.
+    assert generic and all(verdict == NO_PAGE_READ for verdict, _ in generic), generic
     assert drive(fn)[0] == RETURNS_RECORDS
     block = asyncio.run(_name_the_profile_target_as_shipped(PlantedPage()))
     assert block["whom_this_resolves_to"]["name"] == PLANT, block
+
+
+@pytest.mark.parametrize(
+    "fn_key, records",
+    [("threads:name_the_reply_recipient", 2), ("writes:_name_the_invitation_recipient", 1)],
+)
+def test_the_preview_namers_are_driven_to_the_records_they_build(fn_key, records) -> None:
+    """THE TWO PREVIEW NAMERS (PREVIEW-NAMES-THE-RESOLVED-TARGET) read a page
+    and return people records, here -- a group conversation's title record and
+    a one-member conversation's person, and the invitation's person. Driven by
+    signature alone they returned before reading and were recorded clean."""
+    fn = dict(discover_readers())[fn_key]
+    variants, _refusal = _build_call(fn)
+    generic = [_drive_once(fn, args, kwargs)[0] for args, kwargs in variants or []]
+    assert generic and CLEAN not in generic, generic
+    verdict, detail = _drive_once(AS_SHIPPED[fn_key], [PlantedPage()], {})
+    assert verdict == RETURNS_RECORDS, (verdict, detail)
+    assert detail == f"page text only inside {records} people record(s)", detail
+
+
+# ---------------------------------------------------------------------------
+# A clean verdict is earned: the success path ran
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.parametrize(
+    "result, reads, verdict",
+    [
+        ({"count": 1}, 2, CLEAN),
+        ({"refused": "unknown_section", "why": "a sentence"}, 0, NO_PAGE_READ),
+        ({"count": 1}, 0, NO_PAGE_READ),
+        ({"rows": [], "count": 0, "error": None}, 3, EMPTY_RESULT),
+        (None, 1, EMPTY_RESULT),
+        ([False, "", {}], 1, EMPTY_RESULT),
+        ({"present": True}, 1, CLEAN),
+        (PLANT, 0, RETURNS_TEXT),
+    ],
+    ids=[
+        "read and returned", "a refusal that read nothing", "a value that read nothing",
+        "read and returned empty", "read and returned None", "nested empties",
+        "a True is not empty", "a plant needs no proof",
+    ],
+)
+def test_a_clean_drive_needs_a_read_and_something_back(result, reads, verdict) -> None:
+    assert classify_drive(result, reads)[0] == verdict
+
+
+@pytest.mark.parametrize(
+    "result, reads, verdict",
+    [
+        ({"people": [], "people_denominators": {"result_cards_seen": 1}}, 1, NO_RECORD),
+        ({"count": 1}, 3, NO_RECORD),
+        ({"count": 1}, 0, NO_PAGE_READ),
+    ],
+    ids=["lane S's reader, as it came back", "counts and no record", "no read at all"],
+)
+def test_a_people_readers_success_path_is_its_records(result, reads, verdict) -> None:
+    """A PEOPLE READER'S CLEAN IS EARNED ONLY BY RECORDS: counts and a non-empty
+    result are not its success path, and a records verdict is untouched."""
+    assert classify_drive(result, reads, builds_records=True)[0] == verdict
+    from linkedin_server import people_data
+
+    record = {"person": people_data.Person.from_page(name=PLANT).envelope()}
+    assert classify_drive(record, reads, builds_records=True)[0] == RETURNS_RECORDS
+
+
+def test_lane_s_people_reader_is_not_counted_clean() -> None:
+    """THE READER THE ORDER NAMED. ``people_results.read_result_people``
+    reaches a record builder, reads the planted page, skips its one card for
+    want of a member link and returns its denominators: not clean. Its drive
+    that reaches the records is its owner's to build, as named_profile's was."""
+    from linkedin_server import people_results
+
+    assert "people_results:read_result_people" in record_readers()
+    verdict, detail = drive(people_results.read_result_people)
+    assert verdict == NO_RECORD, (verdict, detail)
+    assert _baseline()["people_results:read_result_people"] == NO_RECORD
+
+
+def _early_return(fn: Callable[..., Any], *, read_first: bool) -> Callable[..., Any]:
+    """``fn`` STUBBED TO RETURN EARLY: a refusal with a sentence in it, after
+    one read of the page or none -- dressed as ``fn`` so discovery takes it."""
+
+    async def stub(page: Any, *args: Any, **kwargs: Any) -> Any:
+        if read_first:
+            page.locator("main")
+            return {"rows": [], "count": 0, "error": None}
+        return {"refused": "stubbed", "why": "returned before reading the page"}
+
+    stub.__module__ = fn.__module__
+    stub.__name__ = stub.__qualname__ = fn.__name__
+    return stub
+
+
+def test_a_reader_stubbed_to_return_early_is_not_counted_clean(monkeypatch) -> None:
+    """THE CONTROL THE ORDER NAMED. ``anchors.read_anchors`` reads the page and
+    returns what it read: clean. Stubbed to return a refusal before reading,
+    or to read and hand back an empty shape, it is NOT clean -- and the
+    coverage comparison against the committed baseline FAILS on it by name,
+    the way a real reader that stopped reaching its success path would."""
+    from linkedin_server import anchors
+
+    real = anchors.read_anchors
+    assert drive(real)[0] == CLEAN, drive(real)
+    assert _baseline()["anchors:read_anchors"] == CLEAN
+
+    assert drive(_early_return(real, read_first=False))[0] == NO_PAGE_READ
+    assert drive(_early_return(real, read_first=True))[0] == EMPTY_RESULT
+
+    monkeypatch.setattr(anchors, "read_anchors", _early_return(real, read_first=False))
+    with pytest.raises(AssertionError) as shrunk:
+        test_the_driven_set_has_not_silently_shrunk()
+    assert "anchors:read_anchors -> " + NO_PAGE_READ in str(shrunk.value), shrunk.value
 
 
 def test_the_harness_plant_is_never_the_harness_argument() -> None:
@@ -1363,8 +1711,9 @@ def write_baseline() -> int:
         "_comment": (
             "Verdict per page reader, from tests/plantedpage.py. Regenerate "
             "with: python -m tests.test_readers_emit_no_page_string "
-            "--write-baseline. 'clean' means the reader was DRIVEN and carried "
-            "nothing out; 'returns_records' means page text came back ONLY "
+            "--write-baseline. 'clean' means the reader was DRIVEN -- it read "
+            "the page and returned something that is not an empty shape -- and "
+            "carried nothing out; 'returns_records' means page text came back ONLY "
             "inside linkedin_server.people_data records, the declared channel; "
             "'returns_text' means page text came back outside a record -- a "
             "legacy inventory since 2026-09-24 that may shrink and may not "

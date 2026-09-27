@@ -154,10 +154,25 @@ class FixtureNavigator:
     pretending to have moved.
     """
 
+    #: THE ONE NAVIGATION A PRESS STARTS ON THESE CAPTURES, answered HERE.
+    #: The job posting captures draw the apply control as an ANCHOR whose href
+    #: is LinkedIn's (``/jobs/view/<id>/apply/?openSDUIApplyFlow=true&``); on
+    #: LinkedIn its own script opens the apply flow in place, and on a frozen
+    #: capture, with no script, pressing it starts a navigation. Until
+    #: 2026-09-27 nothing answered it, and eleven tests sent a fresh Chromium
+    #: to LinkedIn on every run; ``tests/network_guard.py`` now fails any test
+    #: that lets a request leave. So the navigator that served the posting
+    #: answers its apply anchor too: ``204 No Content``, which a browser treats
+    #: as a navigation that lands nowhere -- the page stays on the capture, as
+    #: it does on LinkedIn -- and every answer is recorded in ``answered``.
+    APPLY_NAVIGATION = re.compile(r"^https://www\.linkedin\.com/jobs/view/\d+/apply/")
+
     def __init__(self, pages: dict[str, "str | list[str]"]):
         self.pages = dict(pages)
         self.gotos: list[str] = []
+        self.answered: list[str] = []
         self._visits: dict[str, int] = {}
+        self._routed: set[int] = set()
 
     async def goto(self, page, url: str) -> str:
         self.gotos.append(url)
@@ -173,8 +188,19 @@ class FixtureNavigator:
             html = entry[min(visit, len(entry) - 1)]
         else:
             html = entry
+        if id(page) not in self._routed and hasattr(page, "route"):
+            # A page's route outranks the network guard's context route, and
+            # the latest navigator's outranks an earlier one on the same page,
+            # so the navigator driving the press is the one that records it.
+            # A page double has no route and cannot reach a network.
+            await page.route(self.APPLY_NAVIGATION, self._answer_locally)
+            self._routed.add(id(page))
         await page.set_content(html, wait_until="domcontentloaded", timeout=60_000)
         return url
+
+    async def _answer_locally(self, route) -> None:
+        self.answered.append(route.request.url)
+        await route.fulfill(status=204)
 
 
 def _pages(

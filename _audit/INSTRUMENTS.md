@@ -10370,6 +10370,26 @@ censuses, the hunk stager, the enumerator red drive, the pricing runner, the
 re-escaper and the gate runners -- are declared disposable. Their numbers
 are in the lane record.
 
+### 67.15 THE ORDER OF 2026-09-27 23:36: THE NETWORK, THE EARNED CLEAN, THE TIMINGS, THE CEILING
+
+Record: the lane record's `## Order of 2026-09-27 23:36`. Every entry was shown
+failing on the tree before its fix.
+
+| path | shown failing by |
+|---|---|
+| `tests/network_guard.py` (registered by `tests/conftest.py`) + `tests/test_no_test_reaches_the_network.py` | with the guard on and nothing else changed, exactly the 11 tests lane L5 named failed, each naming itself and the apply anchor's address; three mutations in a scratch tree -- it never refuses, a refusal never fails the test, `new_page` unwrapped -- each red; a test that reaches out fails, by name, in its own pytest process |
+| `tests/test_writes.py` (`FixtureNavigator.APPLY_NAVIGATION`, answered 204 locally) | the eleven red under the guard before it; 45 passed after |
+| `tests/plantedpage.py` (`PlantedPage.reads`) + `tests/test_readers_emit_no_page_string.py` (`classify_drive`, `empty_shape`, `record_readers`) | the committed baseline named every reader clean on nothing (21 not-driven, 2 to records); `anchors.read_anchors` stubbed to return early fails the coverage comparison by name; with `classify_drive` put back to the old rule, the stub control and the table rows red; lane S's people reader, counted clean by "a read and a non-empty result", refused by the records rule |
+| `scripts/ci_shard.py` (`slowest_seconds_per_file`, `--write-timings` taking many reports) + `tests/test_ci_shard.py` | 4 failed on the unchanged script; eight wrong combining rules in scratch copies, each caught |
+| `tests/test_tracker_readiness.py` (`EMPTY_TAB_BOUND_MS`, `_paid_less_than_half`) | 320 ms of added latency failed the old assertion on a resolved tab (444 ms); the new rule holds under 350 ms and fails with the empty half removed |
+
+### 67.16 DECLARED DISPOSABLE (THE ORDER OF 23:36)
+
+The scratchpad helpers -- the guard mutation runner, the reader success-path
+census and the rule's mutation, the flake reproduction, the timings
+regenerator and the child's artifact, comparison and plan scripts -- are
+declared disposable. Their numbers are in the lane record.
+
 ---
 
 ## 68. A DOWNLOAD TRANSPORT ON THE ATTACHED BROWSER, TESTED ON A FAKE CHROME THAT CAN SAY NO (lane-d, 2026-09-24)
