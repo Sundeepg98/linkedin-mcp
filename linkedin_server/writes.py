@@ -1560,7 +1560,14 @@ SANCTIONED_WRITES: dict[str, WriteSpec] = {
             "WITH THE PARAGRAPH ABOVE IS LEFT STANDING RATHER THAN RESOLVED: "
             "that same reading bears on WHICH reaction this toggle applies, "
             "and retiring a disclosure the operator ruled is his call and not "
-            "this file's."
+            "this file's. "
+            "AND A SECOND ON NAME, 2026-09-23/24: 'Unreact Like', on the "
+            "permalink of his own post that carries a reaction, in a label "
+            "family the state prefix does not match. The direction reads and "
+            "the verification recognise both families since 2026-09-24; "
+            "before that a reacted item read as NO control at all -- UNKNOWN, "
+            "never 'reacted' -- and a reaction that landed would have been "
+            "verified UNKNOWN."
         ),
         reversibility_procedure=(
             "PRESS A CONTROL WEARING THE ON NAME AND READ WHAT IT BECOMES. "
@@ -3562,6 +3569,22 @@ def _target_for(spec: WriteSpec, target: Any) -> str:
         return _opaque_target(spec, raw)
     if spec.target_kind in _COMPOSITE_TARGET_KINDS:
         canonical = _composite_target(spec, target)
+        if spec.action == "update_profile_field":
+            # THE PREMIUM BADGE IS A SWITCH (P B9), so it takes one of two
+            # values and nothing else. Refused HERE, where ``observe`` and
+            # ``mint`` both pass, so no token is ever minted for a value the
+            # switch cannot take. See ``profile_editor.PREMIUM_BADGE_TITLE``.
+            badge_field, _, badge_value = canonical.partition(TARGET_JOIN)
+            if (
+                badge_field == profile_editor.PREMIUM_BADGE_TITLE
+                and badge_value not in profile_editor.PREMIUM_BADGE_STATES
+            ):
+                raise WriteAttemptError(
+                    repr(profile_editor.PREMIUM_BADGE_TITLE)
+                    + " is a switch and takes 'on' or 'off'; "
+                    + repr(badge_value)
+                    + " is neither. Refused before any token exists for it."
+                )
         if spec.action in UPLOAD_ACTIONS:
             # THE FILE IS CHECKED WHERE THE TARGET IS MADE, so that BOTH doors
             # get it. ``observe`` canonicalises and ``mint`` canonicalises
@@ -4270,14 +4293,18 @@ async def _read_item_permalink(
     """
     reading = await dom.read_reaction_surface(page)
     facts = dict(reading)
-    controls = coerce.as_count(reading.get("controls"))
-    off_state = coerce.as_count(reading.get("off_state"))
+    # BOTH LABEL FAMILIES, since 2026-09-24 (see dom.REACTION_UNREACT_PREFIX):
+    # his own liked post's permalink draws its toggle as "Unreact Like", which
+    # the state family's prefix does not match, so a reacted item used to
+    # read as ZERO controls -- UNKNOWN, never "reacted". The state and the
+    # count come from one pure reader, the same one _live_control uses.
+    state, drawn = dom.reaction_toggle_state(reading)
 
-    if controls != 1:
+    if state == "unknown":
         return (
             facts,
             UNKNOWN,
-            f"{controls} reaction control(s) rendered on this permalink and "
+            f"{drawn} reaction control(s) rendered on this permalink and "
             "exactly one is the only shape this gate can act on. Zero means "
             "the page had not drawn the item -- an absent control is UNKNOWN "
             "and never 'no reaction' -- and more than one means this is not "
@@ -4285,16 +4312,25 @@ async def _read_item_permalink(
             f"would be picking by position. The labels found were "
             f"{reading.get('labels')}.",
         )
-    if off_state != 1:
+    if state == "unmeasured_off":
+        return (
+            facts,
+            UNKNOWN,
+            "the one reaction control on this permalink wears an OFF label "
+            "this server has never MEASURED (the 'React' family that "
+            "'Unreact' implies), and a click is never aimed at an inferred "
+            f"label. The labels found were {reading.get('labels')}.",
+        )
+    if state == "reacted":
         return (
             facts,
             "reacted",
-            "the one reaction control on this permalink is NOT wearing "
-            f"{dom.REACTION_OFF_LABEL!r}, so this item ALREADY CARRIES A "
-            f"REACTION. The labels found were {reading.get('labels')}. "
-            "LinkedIn writes the toggle state into the accessible name, so "
-            "this is the control stating its own state rather than an "
-            "inference from anything around it.",
+            "the one reaction control on this permalink wears an ON label, "
+            f"so this item ALREADY CARRIES A REACTION. The labels found were "
+            f"{reading.get('labels')}. LinkedIn writes the toggle state into "
+            "the accessible name, in either of two measured families, so this "
+            "is the control stating its own state rather than an inference "
+            "from anything around it.",
         )
     return (
         facts,
@@ -6098,8 +6134,11 @@ PERFORMABLE: frozenset[str] = frozenset(
         #                        readonly.SANCTIONED_MUTATIONS is unchanged
         #
         # WHAT IT STILL CANNOT SAY is WHICH reaction, and that is disclosed in
-        # `residue` rather than fixed: the ON label has never been observed
-        # and the picker has never been opened. The operator ruled explicitly
+        # `residue` rather than fixed: the picker has never been opened. (This
+        # comment said the ON label had never been observed; it has been, in
+        # two families -- 2026-09-04 and 2026-09-23, see
+        # dom.REACTION_UNREACT_PREFIX -- and the kind it names is the default
+        # the toggle applied, not a choice anybody read.) The operator ruled explicitly
         # that this may ship with that stated. It is NOT the apply_job shape
         # -- the check answers WHETHER and answers it honestly; what is
         # unknown is a different question, and it is named.
@@ -6399,6 +6438,14 @@ def anchor_label_for(
         # action is valid FROM, so what it may press is still the OFF control
         # and only that. What the ON name buys is an aimable inverse, which no
         # spec in this package declares; see `reversible_by`.
+        #
+        # A SECOND ON NAME, 2026-09-23/24: "Unreact Like", on his own liked
+        # post's permalink, in a label family the state prefix does not match.
+        # It changes nothing here either -- the anchor stays the MEASURED OFF
+        # label, and the unmeasured "React" OFF form is never aimed at -- but
+        # the direction reads and the verification now recognise it
+        # (dom.reaction_toggle_state), where they used to read it as no
+        # control at all.
         return dom.REACTION_OFF_LABEL
 
     if spec.action == "update_setting":
@@ -7551,6 +7598,20 @@ async def _live_control(
         return (state, why, company_interest.OFF_CONTROL_IN_CARD)
 
     if spec.action == "update_profile_field":
+        # THE ONE SWITCH IN THIS FAMILY, P B9 (2026-09-24): the Premium
+        # badge. The fields reader below cannot aim it -- the switch has no
+        # accessible name -- so it is aimed by its BLOCK'S TITLE, compared in
+        # the page, on the ruling and five conditions recorded at
+        # ``profile_editor.PREMIUM_BADGE_TITLE``. Its kind is ``switch``: a
+        # click through the one click call site, never a fill.
+        badge_field, _, badge_value = grant.target.partition(TARGET_JOIN)
+        if badge_field.strip() == profile_editor.PREMIUM_BADGE_TITLE:
+            badge = await profile_editor.read_premium_badge(page)
+            aim = profile_editor.premium_badge_aim(badge, badge_value.strip())
+            if not aim["proceed"]:
+                return ("editor_addressed", aim["why"], "")
+            return ("editor_addressed", aim["why"], aim["selector"], "switch")
+
         # AIM FROM THE LIVE CONTROL LIST, never from a remembered selector.
         # ``perform`` has already navigated to the editor, so this reads the
         # controls that are on the page RIGHT NOW and matches the requested
@@ -8035,12 +8096,13 @@ async def _live_control(
         # position -- the objection that blocked this action until the
         # permalink was admitted.
         reading = await dom.read_reaction_surface(page)
-        controls = coerce.as_count(reading.get("controls"))
-        off = coerce.as_count(reading.get("off_state"))
-        if controls != 1:
+        # THE SAME PURE READER AS THE PREVIEW (_read_item_permalink), so the
+        # two ends of this write cannot read one page two ways.
+        state, drawn = dom.reaction_toggle_state(reading)
+        if state == "unknown":
             return (
                 UNKNOWN,
-                f"{controls} reaction control(s) rendered on this permalink "
+                f"{drawn} reaction control(s) rendered on this permalink "
                 "and exactly one is the only shape this gate can act on. Zero "
                 "means the page had not drawn the item -- an absent control "
                 "is UNKNOWN and never 'no reaction' -- and more than one means "
@@ -8048,15 +8110,23 @@ async def _live_control(
                 "pressing either would be picking by position.",
                 "",
             )
-        if off != 1:
+        if state == "unmeasured_off":
+            return (
+                UNKNOWN,
+                "the one reaction control wears an OFF label this server has "
+                "never measured (the 'React' family), and a click is never "
+                "aimed at an inferred label.",
+                "",
+            )
+        if state == "reacted":
             return (
                 "reacted",
-                "the one reaction control on this permalink is NOT wearing "
-                f"{dom.REACTION_OFF_LABEL!r}, so this item already carries a "
-                "reaction. This action is valid only from the un-reacted "
-                "state, and the label that would say WHICH reaction is "
-                "already there has never been measured -- so it cannot even "
-                "report what it is declining to overwrite.",
+                "the one reaction control on this permalink wears an ON "
+                "label, so this item already carries a reaction. This action "
+                "is valid only from the un-reacted state. The ON label names "
+                "the kind (measured: 'Reaction button state: Like', 'Unreact "
+                "Like'), but this action has no reading of which kind it "
+                "would be declining to overwrite beyond that name.",
                 "",
             )
         return (
@@ -8285,6 +8355,8 @@ async def _verify_after(
     prior_value: Optional[str] = None,
     opened: Optional[dict[str, Any]] = None,
     typed: bool = False,
+    badge_before: Optional[dict[str, Any]] = None,
+    witness: Optional[dict[str, Any]] = None,
 ) -> tuple[str, str, str]:
     """Read whether it landed, and read it somewhere the click did not reach.
 
@@ -8426,6 +8498,20 @@ async def _verify_after(
             _assert_landed_on_target(spec, grant, landed)
         except WriteAttemptError as exc:
             return (UNKNOWN, str(exc), editor_url)
+        if badge_before is not None:
+            # THE PREMIUM BADGE: both switches on the fresh render, against
+            # the reading taken before the write -- condition 4 of its ruling.
+            fresh = await profile_editor.read_premium_badge(page)
+            if witness is not None:
+                witness.update(fresh)
+            badge_state, badge_why = profile_editor.badge_verification(
+                badge_before, fresh, requested.strip()
+            )
+            return (
+                UNKNOWN if badge_state is None else badge_state,
+                badge_why + " Read by the block's title, compared in the page.",
+                editor_url,
+            )
         current, why = await _editor_value_of(
             page, wanted, when="after the write, on a fresh render of the editor"
         )
@@ -8471,14 +8557,16 @@ async def _verify_after(
         # THIS BRANCH CAN RETURN ``to_state``, which is the property
         # tests/test_unverifiable_outcomes.py exists to enforce and the one
         # apply_job lacked. ``to_state`` is "reacted" and the reading below
-        # produces exactly that when the control is present and has stopped
-        # wearing the OFF label.
+        # produces exactly that when the one toggle wears an ON label.
         #
-        # WHAT IT STILL CANNOT SAY IS **WHICH** REACTION, because the ON label
-        # has never been observed. That is not a defect in this check -- the
-        # check answers whether, and answers it honestly -- so it lives in
-        # ``residue``, which the gate prints as what stays unknown even given
-        # the verdict.
+        # SINCE 2026-09-24 IN EITHER LABEL FAMILY (dom.REACTION_UNREACT_
+        # PREFIX). Until then this branch counted only the state family, and
+        # his own post's permalink -- the very item this action last reacted
+        # to -- draws its reacted toggle as "Unreact Like": zero controls in
+        # that count, so a reaction that LANDED would have been verified
+        # UNKNOWN. The kind is in the ON label's name and reaches the receipt
+        # through newly_observed_reaction_labels; the verdict asserts only
+        # the state.
         landed = await _load(
             navigator,
             page,
@@ -8490,35 +8578,34 @@ async def _verify_after(
             surface="the item permalink",
         )
         reading = await dom.read_reaction_surface(page)
-        controls = coerce.as_count(reading.get("controls"))
-        off = coerce.as_count(reading.get("off_state"))
-        if controls != 1:
+        state, drawn = dom.reaction_toggle_state(reading)
+        if state == "unknown":
             return (
                 UNKNOWN,
-                f"{controls} reaction control(s) rendered on the re-read, "
+                f"{drawn} reaction control(s) rendered on the re-read, "
                 "where the permalink is measured to draw exactly one. An "
                 "absent control is a page that had not arrived, NOT a "
                 "reaction: reporting it as either outcome would be reading a "
                 "half-rendered page as a result.",
                 landed,
             )
-        if off == 0:
+        if state == "reacted":
             return (
                 "reacted",
-                "the one reaction control on this permalink has stopped "
-                f"wearing {dom.REACTION_OFF_LABEL!r}. LinkedIn writes the "
-                "toggle state into that name, so a control that is present "
-                "and no longer says 'no reaction' is the strongest statement "
-                "this surface makes. WHICH reaction it now carries is not "
-                "readable -- the ON label has never been observed -- so this "
-                "says that it moved and does not say what to.",
+                "the one reaction control on this permalink wears an ON "
+                "label after the click, in one of the two measured families. "
+                "LinkedIn writes the toggle state into that name, so a control "
+                "that is present and says it is on is the strongest statement "
+                f"this surface makes. Its name: {reading.get('labels')}.",
                 landed,
             )
+        # EITHER OFF FAMILY IS "NOT REACTED" AFTER A CLICK. Only the aim needs
+        # the measured label; a verification reading an OFF toggle in the
+        # unmeasured family still reads a toggle that is off.
         return (
             "no_reaction",
-            "the one reaction control still reads "
-            f"{dom.REACTION_OFF_LABEL!r} after the click, so the reaction did "
-            "not take effect.",
+            "the one reaction control still wears an OFF label after the "
+            "click, so the reaction did not take effect.",
             landed,
         )
 
@@ -10164,6 +10251,13 @@ async def perform(
     # that follows its press. See ``profile_editor``.
     editor_save_gate: Optional[dict[str, Any]] = None
     editor_close: Optional[dict[str, Any]] = None
+    # THE SWITCH'S OWN READINGS, for the one control_kind that is a switch
+    # (the Premium badge, P B9): condition 1 read BEFORE the press, the
+    # switches read after it, and whether only the badge moved.
+    switch_gate: Optional[dict[str, Any]] = None
+    switch_after_press: Optional[dict[str, Any]] = None
+    switch_check: Optional[dict[str, Any]] = None
+    switch_fresh: dict[str, Any] = {}
 
     # THE TYPING PLAN, and it is a QUEUE FOR THE SAME REASON THE CLICK PLAN IS.
     #
@@ -10261,7 +10355,15 @@ async def perform(
     # preview reads his profile and the value lives in the editor.
     prior_value: Optional[str] = None
     prior_why = ""
-    if spec.action == "update_profile_field":
+    badge_before: Optional[dict[str, Any]] = None
+    badge_value = grant.target.partition(TARGET_JOIN)[2].strip()
+    if spec.action == "update_profile_field" and control_kind == "switch":
+        # THE PREMIUM BADGE: the prior value is the switch's state, read by
+        # its title in the page -- and the same reading holds the OTHER
+        # switch's state, which is what later proves only this one moved.
+        badge_before = await profile_editor.read_premium_badge(page)
+        prior_value, prior_why = profile_editor.premium_badge_value(badge_before)
+    elif spec.action == "update_profile_field":
         prior_field, _, _ = grant.target.partition(TARGET_JOIN)
         prior_value, prior_why = await _editor_value_of(
             page, prior_field.strip(), when="before the write"
@@ -10436,6 +10538,13 @@ async def perform(
         # there is no fill and no select to do (see its construction above), so
         # for every other action the queues are never both loaded and
         # click-first is the same sequence it always was.
+        # A SWITCH MAY STORE ITSELF THE MOMENT IT IS PRESSED -- whether this
+        # one does is not measured -- so its condition 1 is read BEFORE the
+        # press, not only before Save. Refused, nothing is pressed at all.
+        if control_kind == "switch":
+            switch_gate = await profile_editor.read_save_gate(page, require_save=False)
+            if not switch_gate["proceed"]:
+                click_plan.clear()
         while fill_plan or click_plan:
             if click_plan:
                 await page.click(click_plan.pop(0), timeout=CLICK_TIMEOUT_MS)
@@ -10482,6 +10591,20 @@ async def perform(
                                 _text_component_of(spec, grant.target),
                             )
                         )
+                elif control_kind == "switch" and clicks_made == 1:
+                    # THE SWITCH WAS PRESSED; SAVE IS PRESSED ONLY IF THE
+                    # BADGE, AND NOTHING ELSE, MOVED. Read in the dialog,
+                    # before Save, against the reading taken before the
+                    # press. Otherwise the change sits unsaved and the
+                    # verification's fresh navigation discards it.
+                    switch_after_press = await profile_editor.read_premium_badge(page)
+                    switch_check = profile_editor.badge_moved_alone(
+                        badge_before, switch_after_press, badge_value
+                    )
+                    if switch_check["proceed"]:
+                        editor_save_gate = await profile_editor.read_save_gate(page)
+                        if editor_save_gate["proceed"]:
+                            click_plan.append(editor_save_gate["selector"])
                 continue
             fill_selector, fill_text = fill_plan.pop(0)
             await page.fill(fill_selector, fill_text, timeout=CLICK_TIMEOUT_MS)
@@ -10607,6 +10730,8 @@ async def perform(
             prior_value=prior_value,
             opened=opened_gate,
             typed=fills_made > 0,
+            badge_before=badge_before,
+            witness=switch_fresh,
         )
     except Exception as exc:  # noqa: BLE001 - the click already happened
         # WHERE TO GO AND LOOK, when the verification read itself failed.
@@ -10985,6 +11110,54 @@ async def perform(
                 ),
                 "editor_closed_after_save": (
                     None if editor_close is None else editor_close.get("closed")
+                ),
+            }
+        ),
+        # THE SWITCH PRESS, for the Premium badge (P B9) and nothing else:
+        # the two switches before, after the press, and on a fresh render --
+        # booleans and one position, never page text -- with condition 1 as
+        # read BEFORE the press and the in-dialog verdict Save waited on.
+        "switch_press": (
+            None
+            if badge_before is None
+            else {
+                "field": profile_editor.PREMIUM_BADGE_TITLE,
+                "aimed_by": (
+                    "the block's title, compared in the page; the other switch "
+                    "in the row -- Open Profile, by the capture -- is read by "
+                    "structure to prove it did not move"
+                ),
+                "before": {
+                    "badge_on": badge_before.get("badge_checked"),
+                    "other_on": badge_before.get("other_checked"),
+                    "badge_position": badge_before.get("badge_position"),
+                },
+                "condition_1_before_the_press": (
+                    None
+                    if switch_gate is None
+                    else {
+                        "proceeded": bool(switch_gate.get("proceed")),
+                        "refused_condition": switch_gate.get("refused_condition"),
+                        "condition_1": switch_gate.get("condition_1"),
+                        "why": switch_gate.get("why"),
+                    }
+                ),
+                "after_the_press": (
+                    None
+                    if switch_after_press is None
+                    else {
+                        "badge_on": switch_after_press.get("badge_checked"),
+                        "other_on": switch_after_press.get("other_checked"),
+                    }
+                ),
+                "only_the_badge_moved": switch_check,
+                "after_a_fresh_render": (
+                    None
+                    if not switch_fresh
+                    else {
+                        "badge_on": switch_fresh.get("badge_checked"),
+                        "other_on": switch_fresh.get("other_checked"),
+                    }
                 ),
             }
         ),

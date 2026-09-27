@@ -174,6 +174,11 @@ WRITE_CLASS_ACTS: dict[str, str] = {
     # which no act above does; R3 because the operator's cut named no purchase,
     # and the row's own cell says a live proof of it needs him.
     "purchase": "R3",
+    # A request under one of the data rights LinkedIn names (a1340649) --
+    # to change or correct his data, or to restrict or object to its use.
+    # Added 2026-09-24 for the P-R block's itemized rows P4 and P5; no act
+    # named a request to LinkedIn about his own data.
+    "data-rights-request": "R3",
 }
 
 #: The passage each non-residual class RESTS ON. A line of that class must cite

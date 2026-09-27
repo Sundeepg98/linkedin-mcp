@@ -549,7 +549,7 @@ def _verdict_for(
             "one line carrying a shipped phrase rendered with a %s number "
             "beside it. The number is a COUNT and never a list -- nothing "
             "here reads who is counted, and the roster tab that would is "
-            "refused by the read boundary." % term_for(chosen["shape"])
+            "never opened by this tool." % term_for(chosen["shape"])
         ),
     }
 

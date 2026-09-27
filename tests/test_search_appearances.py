@@ -328,8 +328,13 @@ def test_the_address_this_reader_names_is_the_one_the_boundary_admits():
         # refused, both are in the search family, and the sub-path is the
         # sharper canary because it is the spelling that would address one
         # PERSON rather than the page listing them.
+        #
+        # ``/search/results/companies/?keywords=x`` STOOD HERE UNTIL
+        # 2026-09-24: D2-SEARCH-VERTICALS-WIDENED admitted it on the search
+        # line, its own ruling, and not on the search-appearances entry. It is
+        # replaced by the content vertical, which that ruling left refused.
         "https://www.linkedin.com/search/results/people/example-person-a1b2c3/",
-        "https://www.linkedin.com/search/results/companies/?keywords=x",
+        "https://www.linkedin.com/search/results/content/?keywords=x",
     ],
 )
 def test_the_neighbours_of_that_address_are_still_refused(url):

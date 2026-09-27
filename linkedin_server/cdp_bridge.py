@@ -48,6 +48,12 @@ that one. And it never closes his browser: Playwright's ``close()`` on a CDP
 connection disconnects the client and leaves Chrome serving, which was
 measured here rather than assumed (the endpoint still answered afterwards).
 
+WHAT IT PUTS BACK. The library's own handshake points his default
+context's downloads at a temporary directory it deletes on disconnect, so
+:func:`attach` hands them back to Chrome's own behaviour straight after it
+connects -- read in the driver's source, not yet observed live; the comment
+in :func:`attach` has the detail.
+
 The read-only boundary is unchanged in this mode. Every navigation still goes
 through ``readonly.assert_read_url``; nothing in this module clicks, types,
 submits or issues a non-GET request.
@@ -60,6 +66,7 @@ import json
 import os
 from typing import Any, Optional
 
+from linkedin_server import cdp_download
 from linkedin_server.config import CDP_HOST, CDP_PORT, logger
 from linkedin_server.errors import BrowserUnavailableError
 
@@ -122,6 +129,13 @@ ATTACH_REQUIREMENTS = (
     "but that profile is signed into nothing, so LinkedIn has to be signed "
     f"into once inside it. Verify with http://{CDP_HOST}:{CDP_PORT}/json/version"
 )
+
+
+#: WHAT THE MOST RECENT ATTACH DID ABOUT HIS DOWNLOADS -- ``{"restored":
+#: bool, "error": <exception type or None>}`` from
+#: ``cdp_download.reset_download_behaviour``. Evidence for a diagnostic or a
+#: live observation to read; nothing in the package branches on it.
+LAST_DOWNLOAD_RESET: dict[str, Any] = {}
 
 
 def endpoint() -> str:
@@ -206,6 +220,32 @@ async def attach() -> tuple[Any, Any, Any]:
         # contexts[0] is the browser's OWN context, cookies and all. Making a
         # new one would produce an incognito-ish context signed into nothing,
         # which is the opposite of why anyone attaches.
+        #
+        # HIS DOWNLOADS, HANDED BACK TO HIS CHROME. Read in the installed
+        # driver's source, and in 1.40.0's -- the floor of the pinned range --
+        # not observed live: the handshake above has just pointed his default
+        # context's downloads at a temporary directory the library deletes
+        # when it disconnects. Left alone, a file he downloads in one of his
+        # own tabs while this server is attached is written there and removed
+        # with it. ``cdp_download.reset_download_behaviour`` gives Chrome's own
+        # behaviour back for that context; the protocol call lives in that
+        # module, beside the one closed table of methods this package sends.
+        #
+        # A NET, NOT A GATE. A reset that fails is recorded here and logged by
+        # exception TYPE, and the attach stands: refusing would stop every
+        # read, and would hand his downloads back only if Chrome resets the
+        # behaviour when the library's session ends -- which nothing here has
+        # measured.
+        outcome = await cdp_download.reset_download_behaviour(client)
+        LAST_DOWNLOAD_RESET.clear()
+        LAST_DOWNLOAD_RESET.update(outcome)
+        if not outcome.get("restored"):
+            logger.warning(
+                "cdp attach: his downloads could not be handed back to Chrome's "
+                "own behaviour (%s); while attached, a file he downloads may "
+                "land in a temporary directory removed on disconnect",
+                outcome.get("error"),
+            )
         logger.info("cdp attach: %d context(s) at %s", len(contexts), endpoint())
         return pw, client, contexts[0]
     except BrowserUnavailableError:

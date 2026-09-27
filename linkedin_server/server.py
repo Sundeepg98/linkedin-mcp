@@ -2283,14 +2283,18 @@ async def linkedin_search_appearances() -> dict[str, Any]:
     takes an argument -- the address carries no member segment at all, so it
     can only ever resolve to whoever is signed in.
 
-    READ THIS BEFORE READING THE RESULT. **Nobody had opened this page when
-    this tool was written.** Its parser was built against a fixture that is
-    SYNTHETIC and says so in its own first line, so what is proven is that
-    this tool REFUSES to publish the third parties put in front of it -- not
-    that it reads the real surface correctly. The first live reading is the
-    one that establishes what these fields actually contain, and until then a
-    thin result means "the page did not look like the guess", not "there is
-    nothing there".
+    READ THIS BEFORE READING THE RESULT. **The page has been read live; this
+    tool has not been called live.** The reader it calls,
+    ``dom.read_search_appearances``, met the live page twice on 2026-09-05
+    through ``scripts/_probe_search_appearances_live.py`` -- a count of 108
+    both times, with both captions withheld, because the walk that clears a
+    caption ran out of hops. No record shows the tool itself called against
+    LinkedIn: its own path, the authwall check and this envelope, has run
+    only offline, against a fixture that is SYNTHETIC and says so in its
+    first line. So what is proven is that the reader counts on the live page
+    and that this tool REFUSES to publish the third parties put in front of
+    it; a thin result still means "the page did not look like the fixture",
+    not "there is nothing there".
 
     WHAT IT RETURNS AND WHAT IT WILL NOT. headline and delta are the first two
     number-and-caption pairs the page draws, with the caption SHAPED rather
@@ -3551,8 +3555,10 @@ async def linkedin_company_page_counts(organisation_id: str) -> dict[str, Any]:
     MANY does not cover a row asking WHICH* -- and it is structural here: the
     page is reduced to integers inside the document and no string of any kind
     crosses back. The roster tab that WOULD name people,
-    ``/company/<x>/people/``, is refused by the read boundary and is not
-    reachable from anything in this tool.
+    ``/company/<x>/people/``, is not reachable from anything in this tool.
+    [Amended 2026-09-24: the read boundary refused that tab until then; it is
+    admitted since on a roster line of its own, under
+    MEMBER-ROSTERS-AS-BOUNDED-READS, and no tool opens it yet.]
 
     **THE SCREEN-READER COPY OF EVERY LINE IS STEPPED OVER AND COUNTED.**
     LinkedIn draws these lines twice -- an ``aria-hidden`` visible span that
@@ -8230,11 +8236,12 @@ async def linkedin_own_item_link(activity_id: str, include_link: bool = False) -
     then nothing is captured, the answer reads copied: false, and whether his
     clipboard was written cannot be read from here.
 
-    THE PRESSES ARE PRICED BY THE ITEM'S OWN REACTION TOGGLE, read in both
-    measured dialects (share_link.read_item_price) before the first press and
-    after the last. A page that draws no toggle at all is refused
-    (price_cannot_move) with nothing pressed: a counter that cannot move
-    prices nothing, whatever it reads.
+    THE PRESSES ARE PRICED BY THE ITEM'S OWN REACTION TOGGLE: the count of
+    toggles wearing an OFF label and of those wearing an ON label, across both
+    measured label families (the permalink's basis in press.SENSITIVITY_BASES),
+    read before the first press and after the last. A page on which both read
+    0 is refused (price_cannot_move) with nothing pressed: a counter that
+    cannot move prices nothing, whatever it reads.
 
     WHAT COMES BACK: copied (bool); captures (how many texts were kept);
     shape -- whether it is an https LinkedIn link, its path kind, whether it
@@ -8262,7 +8269,9 @@ async def linkedin_own_item_link(activity_id: str, include_link: bool = False) -
     # EVERY PRICE READING IS KEPT AND RETURNED, integers only: the price is
     # evidence, and a verdict that only names its counter ("priced by
     # off_state") cannot show whether that counter could have moved. The
-    # first live fire was priced by an off_state of 0 at both ends.
+    # first live fire was priced by an off_state of 0 at both ends. A price
+    # that cannot move is refused inside copy_own_post_link, before its first
+    # press, by press.check_price_can_move -- one rule, in the gate.
     own_item_readings: list[dict[str, Optional[int]]] = []
     try:
         async with BROWSER.session() as page:
@@ -8274,19 +8283,6 @@ async def linkedin_own_item_link(activity_id: str, include_link: bool = False) -
                 own_item_readings.append(dict(own_item_reading))
                 return own_item_reading
 
-            # A PRICE THAT CANNOT MOVE IS REFUSED BEFORE THE FIRST PRESS.
-            if not share_module.price_can_move(await own_item_counters()):
-                return {
-                    "refused": "price_cannot_move",
-                    "why": (
-                        "the item's page drew no reaction toggle in either "
-                        "measured dialect, so no counter read here could move "
-                        "for an outward act. A press nothing can price is not "
-                        "made: nothing was pressed."
-                    ),
-                    "price_readings": own_item_readings,
-                    "pages_loaded": 1,
-                }
             own_item_outcome = await share_module.copy_own_post_link(
                 page, activity_digits=own_item_digits, read_counters=own_item_counters
             )
@@ -9451,6 +9447,19 @@ async def linkedin_update_profile_field(
     reverted an hour later was still live for an hour, and LinkedIn notifies a
     network about some profile changes, which this server has not measured and
     would not control.
+
+    ONE FIELD IS A SWITCH, AND IT IS AIMED DIFFERENTLY (2026-09-24, census
+    row P B9). ``field="Profile Premium Badge"`` shows or hides the Premium
+    badge on your profile, and its ``value`` is ``"on"`` or ``"off"``;
+    anything else is refused before a token exists. The switch has no
+    accessible name, so it is found by its block's TITLE, compared inside the
+    page and never read out, in exactly one settings row of the intro
+    editor: a second row carrying the title, no such row, or a UI in another
+    language refuses. Condition 1 is read BEFORE the switch is pressed, Save
+    is pressed only if the badge and nothing else moved, and the
+    verification reads both switches on a fresh render -- the other one, Open
+    Profile, must not have moved. The restore is the same call with the
+    other value.
 
     Args:
         field: which field. Named freely; nothing here validates it against a

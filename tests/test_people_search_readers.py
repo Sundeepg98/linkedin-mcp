@@ -726,6 +726,17 @@ def test_an_unparseable_landing_reads_unreadable_not_a_guess() -> None:
 # set of people -- served by a reader that publishes only counts, is NOT
 # delivered; the precedent is N 162 and N 180. So the four FILTER rows stay
 # COVERED-UNFIRED and the three WHO rows stay GAP with their blocker named.
+#
+# NAMES AT RUNTIME (the operator's, 2026-09-24 08:11; registered on master
+# 1902fcb; applied at lane S's integration of its follow-up): a people read
+# returns people's names as its result, under PEOPLE-DATA-MITIGATIONS. That
+# answered the doctrine question the three WHO rows were blocked on, and moved
+# their BLOCKER, not their state: each stays GAP, now waiting on a
+# name-returning reader on the shared people-record foundation lane G is
+# building, and the address table re-gates each from RULING to READER, their
+# page having been captured. When that reader lands and
+# `linkedin_people_search_shape` returns names through it, the three move to
+# COVERED-UNFIRED, and this table moves with them in the same commit.
 
 #: row -> the state the WHO rule gave it.
 ROW_STATES: dict[str, str] = {
@@ -762,25 +773,38 @@ def test_the_table_covers_exactly_the_seven_rows() -> None:
 
 @pytest.mark.parametrize("row", ROWS)
 def test_the_row_claims_what_the_who_rule_gave_it(row: str) -> None:
-    """A fire, or the operator's answer on names, that moves a row must move
-    this in the same commit."""
+    """A fire that moves a row must move this in the same commit. The
+    operator's answer on names (NAMES-AT-RUNTIME, 2026-09-24) moved each GAP
+    row's BLOCKER, not its state, and this reads the blocker a reader of the
+    cell ends on."""
     state, note = _network_rows()[row]
     assert state == ROW_STATES[row], (row, state)
     # Every row names the reader it rests on or is blocked beside.
     assert "linkedin_people_search_shape" in note
     assert "people_search" in note
     if ROW_STATES[row] == "GAP":
-        # THE BLOCKER IS NAMED AND THE ROW CAN BE REOPENED, in its own cell.
-        assert "BLOCKER, NAMED: the name-free shaper doctrine" in note
-        assert "REOPENER: the operator rules that people reads may return " \
-               "who at runtime" in note
+        # THE DOCTRINE BLOCKER STAYS IN THE CELL AS THAT DAY'S RECORD, AND
+        # THE PARAGRAPH AFTER IT SAYS IT WAS ANSWERED AND NAMES WHAT HOLDS
+        # THE ROW NOW -- in that order, so the cell cannot end on a blocker
+        # that no longer holds.
+        doctrine = note.find("BLOCKER, NAMED: the name-free shaper doctrine")
+        answered = note.find("THE DOCTRINE BLOCKER ABOVE IS ANSWERED AND "
+                             "ITS REOPENER HAS FIRED")
+        now = note.find("BLOCKER, NAMED, SINCE THEN: a name-returning reader "
+                        "held to `PEOPLE-DATA-MITIGATIONS`")
+        assert 0 <= doctrine < answered < now, (row, doctrine, answered, now)
+        assert "`NAMES-AT-RUNTIME`" in note[answered:]
+        assert "people-record foundation lane G is building" in note[now:]
         assert "HELD BY `" not in note
     else:
         assert "WHO RULE, 2026-09-24" in note and "STAYS COVERED-UNFIRED" in note
 
 
-def test_the_who_rows_are_gated_ruling_in_the_address_table() -> None:
-    """The three WHO rows are back in bucket 3, re-gated RULING, never READER."""
+def test_the_who_rows_are_gated_reader_in_the_address_table() -> None:
+    """The three WHO rows stay in bucket 3. Gated RULING from the WHO rule
+    until NAMES-AT-RUNTIME answered the question (2026-09-24), READER since:
+    their page is captured and each waits on a name-returning reader. The
+    earlier note is kept, after a marker saying what answered it."""
     rows, problems = cra.load()
     assert not problems, problems
     by_row = {(r["slice"], r["row"]): r for r in rows}
@@ -788,8 +812,13 @@ def test_the_who_rows_are_gated_ruling_in_the_address_table() -> None:
         line = by_row.get(("N", row))
         if state == "GAP":
             assert line is not None, f"N {row} is GAP and has no address line"
-            assert line["class"] == "ADMITTED" and line["gate"] == "RULING", line
-            assert "name-free shaper doctrine" in line["note"]
+            assert line["class"] == "ADMITTED" and line["gate"] == "READER", line
+            note = line["note"]
+            assert "ON NAMES-AT-RUNTIME" in note
+            assert "PEOPLE-DATA-MITIGATIONS" in note
+            earlier = note.find("EARLIER NOTE, ITS DOCTRINE BLOCKER ANSWERED "
+                                "BY THAT RULING:")
+            assert 0 <= earlier < note.find("name-free shaper doctrine"), row
         else:
             assert line is None, f"N {row} left bucket 3 and still has a line"
 
