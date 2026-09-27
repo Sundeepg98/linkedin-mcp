@@ -4471,8 +4471,11 @@ async def linkedin_open_messaging(
     activated -- focused, other, unread, jobs, connections, inmail, starred --
     checked against a fixed list before any selector is built, so an arbitrary
     string can never become a click target -- and pressed only when exactly
-    one control is named EXACTLY that word; a control whose name merely
-    contains it is refused, by count, and never pressed. It is the SECOND entry in
+    one pill INSIDE THE ONE FILTER BAR is named EXACTLY that word; a control
+    outside the bar is never pressed whatever it is named, and a name that
+    merely contains the word is refused, by count. ``focused`` and ``other``
+    are the folder dropdown's choices beside the bar, not pills, so on the
+    measured page both are refused. It is the SECOND entry in
     ``readonly.SANCTIONED_MUTATIONS`` and the ONLY ONE OUTSIDE
     ``writes.perform`` -- which is the property worth stating, and is what
     "the only other entry" meant when there were two of them and four

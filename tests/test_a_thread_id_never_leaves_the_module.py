@@ -95,6 +95,11 @@ class _Pills:
         """The activator reads each candidate by index since 2026-09-27."""
         return self
 
+    def locator(self, _selector: str):
+        """Since 2026-09-27 the pills are found inside the ONE filter bar; this
+        double is that bar and its pills at once."""
+        return self
+
     async def get_attribute(self, _name: str, timeout=None, **_kwargs) -> str:
         return "InMail"
 
@@ -113,6 +118,9 @@ class _Page:
         self._pills = _Pills(pill_count)
 
     def get_by_role(self, *_a, **_kw):
+        return self._pills
+
+    def locator(self, _selector: str):
         return self._pills
 
     async def wait_for_timeout(self, _ms: int) -> None:

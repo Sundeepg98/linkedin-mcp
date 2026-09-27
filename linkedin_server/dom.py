@@ -3104,6 +3104,28 @@ MESSAGING_FILTERS: tuple[str, ...] = (
     "starred",
 )
 
+#: THE FILTER BAR, IDENTIFIED BY STRUCTURE -- never by any control's name.
+#:
+#: MEASURED 2026-09-27 off both 2026-09-20 messaging captures (the composer
+#: and the inbox, gitignored; hook NAMES, tags and roles only, no text read):
+#: inside <main>, exactly ONE ``div[role=radiogroup]`` carries
+#: ``data-test-messaging-inbox-filters__filter-pill-group``, and it holds the
+#: five pills -- ``button[role=button][aria-pressed]`` each carrying
+#: ``data-test-messaging-inbox-filters__filter-pill``, named by visible text.
+#: The FOLDER dropdown sits BESIDE the bar, in its own
+#: ``data-test-messaging-inbox-filters__folder-dropdown``, and its trigger --
+#: named exactly "Focused" -- carries ``...__folder-pill``, not the pill hook.
+#:
+#: So a pill is a hooked button INSIDE THE ONE BAR, and its name decides only
+#: WHICH pill it is, never WHETHER it is one. Until 2026-09-27 the activator
+#: asked the page for any button whose name equalled the word, and ``focused``
+#: pressed the folder trigger. ``focused`` and ``other`` are the folder's
+#: choices on the measured page, not pills, so both are now refused.
+FILTER_BAR_HOOK = "data-test-messaging-inbox-filters__filter-pill-group"
+FILTER_PILL_HOOK = "data-test-messaging-inbox-filters__filter-pill"
+FILTER_BAR_SELECTOR = "main [" + FILTER_BAR_HOOK + "]"
+FILTER_PILL_IN_BAR = "button[" + FILTER_PILL_HOOK + "]"
+
 
 def filter_name_matches(accessible_name: str, wanted: str) -> bool:
     """THE ONE RULE BOTH PATHS USE. EXACT, with case and whitespace folded.
@@ -3233,14 +3255,18 @@ def classify_filter_movement(before: str, after: str) -> str:
 async def activate_messaging_filter(page: Any, name: str) -> dict[str, Any]:
     """Activate one filter pill. THE ONLY CLICK ON ANY READ PATH.
 
-    Located by ACCESSIBLE NAME, and pressed only when EXACTLY ONE control's
-    name EQUALS the permitted word (case and whitespace folded) -- the same
-    rule the enumerator uses, :func:`filter_name_matches`. Playwright finds
-    the controls whose name CONTAINS the word; each one's name is read back and
-    compared exactly; anything but one exact match is refused WITHOUT A PRESS,
-    and the refusal says what it saw as counts (``found`` exact, ``containing``
-    by substring) -- never as a label, because a label it did not press is page
-    text. Substring alone pressed a decoy until 2026-09-27; see
+    FOUND INSIDE THE FILTER BAR, BY STRUCTURE, and pressed only when EXACTLY
+    ONE pill there is NAMED exactly the permitted word (case and whitespace
+    folded). The page must draw exactly ONE bar (:data:`FILTER_BAR_SELECTOR`);
+    inside it only hooked buttons are pills (:data:`FILTER_PILL_IN_BAR`); each
+    pill's accessible name is read back and compared by
+    :func:`filter_name_matches`, the rule the enumerator shares. Anything else
+    is refused WITHOUT A PRESS, and the refusal says what it saw as counts --
+    ``bars``, ``pills``, ``found`` -- never as a label, because a label it did
+    not press is page text. A control outside the bar is never a candidate,
+    whatever it is named: the folder trigger beside the bar is named exactly
+    "Focused". Substring matching pressed a decoy until 2026-09-27, and the
+    page-wide exact rule that replaced it pressed that trigger; see
     ``tests/test_a_filter_pill_is_pressed_by_its_exact_name.py``.
 
     Returns what happened, including the url before and after, because the
@@ -3281,15 +3307,29 @@ async def activate_messaging_filter(page: Any, name: str) -> dict[str, Any]:
     wanted = assert_permitted_filter(name)
     before = page.url
     try:
-        candidates = page.get_by_role("button", name=wanted, exact=False)
-        containing = int(await candidates.count())
-        # THE ACCESSIBLE NAME of each candidate, read back and compared
-        # EXACTLY. Reading aria-label alone reported empty for every
-        # successful activation on his live page -- his pills carry visible
-        # TEXT and no aria-label -- so the text is the fallback, as it is in
-        # the accessible-name computation itself.
+        bars = page.locator(FILTER_BAR_SELECTOR)
+        bar_count = int(await bars.count())
+        if bar_count != 1:
+            return {
+                "activated": False,
+                "found": 0,
+                "bars": bar_count,
+                "why": (
+                    f"expected exactly one filter bar and the page draws "
+                    f"{bar_count}. The bar is identified by its structure, and a "
+                    "page without exactly one is a page this reader has not "
+                    "seen: nothing was clicked."
+                ),
+            }
+        candidates = bars.first.locator(FILTER_PILL_IN_BAR)
+        pills = int(await candidates.count())
+        # THE ACCESSIBLE NAME of each pill, read back and compared EXACTLY.
+        # Reading aria-label alone reported empty for every successful
+        # activation on his live page -- his pills carry visible TEXT and no
+        # aria-label -- so the text is the fallback, as it is in the
+        # accessible-name computation itself.
         exact: list[tuple[int, str]] = []
-        for index in range(min(containing, FILTER_CANDIDATES_READ)):
+        for index in range(min(pills, FILTER_CANDIDATES_READ)):
             candidate = candidates.nth(index)
             seen = str(await candidate.get_attribute("aria-label") or "").strip()
             if not seen:
@@ -3302,14 +3342,16 @@ async def activate_messaging_filter(page: Any, name: str) -> dict[str, Any]:
         return {
             "activated": False,
             "found": len(exact),
-            "containing": containing,
+            "bars": 1,
+            "pills": pills,
             "why": (
-                f"expected exactly one control named exactly {wanted!r} and "
-                f"found {len(exact)}; {containing} control(s) have a name "
-                "that contains the word. One exact pill is the measured shape. "
-                "A control whose name merely contains the word is not the pill "
-                "and is not pressed, and anything else is a page this reader "
-                "has not seen: nothing was clicked."
+                f"expected exactly one pill named exactly {wanted!r} inside the "
+                f"filter bar and found {len(exact)} among its {pills} pill(s). "
+                "One exact pill is the measured shape. A control outside the "
+                "bar is never a pill, whatever it is named -- the folder "
+                "dropdown's trigger beside it is named exactly 'Focused' -- and "
+                "a name that merely contains the word is not the pill: nothing "
+                "was clicked."
             ),
         }
 
@@ -3389,10 +3431,10 @@ async def activate_messaging_filter(page: Any, name: str) -> dict[str, Any]:
 FILTER_CLICK_TIMEOUT_MS = 10_000
 FILTER_SETTLE_MS = 2_000
 
-#: How many candidate controls' names are read before the exact comparison.
-#: The composer draws one control per pill and a handful of others; a page
-#: offering more candidates than this is one this reader has not seen, and an
-#: exact pill past the bound is simply not found -- a refusal, not a press.
+#: How many of the bar's pills have their names read before the exact
+#: comparison. The measured bar holds five; a bar holding more than this is
+#: one this reader has not seen, and an exact pill past the bound is simply not
+#: found -- a refusal, not a press.
 FILTER_CANDIDATES_READ = 20
 
 
