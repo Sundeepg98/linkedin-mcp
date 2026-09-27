@@ -3554,6 +3554,76 @@ async def _load(navigator: Any, page: Any, url: str, *, surface: str) -> str:
     return landed
 
 
+async def _read_account_share_updates(navigator: Any, page: Any) -> dict[str, Any]:
+    """Load his "Sharing profile edits" page and read the switch. Never raises.
+
+    THE AMENDED CONDITION 1'S READING (``profile_editor.ACCOUNT_READINGS``),
+    taken by :func:`perform` before an editor write opens the editor. One
+    load, through :func:`_load` -- the read door, unrelaxed: the address is
+    admitted for READING ONLY -- then counts; nothing is pressed. Returns:
+
+        reading   'off' | 'on' | 'unknown', or None when no reading could be
+                  taken at all -- never 'off' for either
+        read      True once the page loaded
+        served    True when the page kept its own address; a redirect makes
+                  the reading 'unknown' (an admitted address is not a served
+                  one: the other candidate needs its own admission first)
+        named / input / aria   the reader's counts
+        why       constants and counts only
+        error     an exception's TYPE when the load or the read failed
+
+    A NAVIGATION THAT FAILS IS NOT A REFUSAL HERE, and that is deliberate: a
+    dialog that draws its own notify control can still establish condition 1,
+    so the editor is still opened and the save gate decides -- on None, which
+    it refuses wherever the dialog draws no control of its own.
+    """
+    from linkedin_server import profile_editor
+
+    # THE LOCALS ARE NAMED FOR THIS FUNCTION, and that is not cosmetic: the
+    # navigation guard tracks a tainted name ACROSS THE WHOLE MODULE, and
+    # ``landed`` is one here -- binding this function's booleans from it
+    # spread the taint through ``value`` and ``reading`` to every
+    # ``goto(page, url)`` in the file. Measured, not supposed.
+    try:
+        setting_landed = await _load(
+            navigator, page, profile_editor.ACCOUNT_SETTING_URL, surface="settings"
+        )
+    except Exception as exc:  # noqa: BLE001 - its TYPE is the whole report
+        return {
+            "reading": None,
+            "read": False,
+            "served": None,
+            "named": None,
+            "input": None,
+            "aria": None,
+            "why": (
+                "his 'Sharing profile edits' page could not be loaded, so the "
+                "account-level setting was not read."
+            ),
+            "error": type(exc).__name__,
+        }
+    setting_served = profile_editor.served_at_account_setting(setting_landed)
+    setting_reading = await profile_editor.read_account_share_updates(page)
+    setting_value = setting_reading.get("reading") if setting_served else "unknown"
+    setting_why = str(setting_reading.get("why") or "")
+    if not setting_served:
+        setting_why = (
+            "the settings page did not keep its own address -- LinkedIn "
+            "redirected it -- so what it drew is not the page admitted, and the "
+            "setting counts as unread. " + setting_why
+        )
+    return {
+        "reading": setting_value,
+        "read": True,
+        "served": setting_served,
+        "named": setting_reading.get("named"),
+        "input": setting_reading.get("input"),
+        "aria": setting_reading.get("aria"),
+        "why": setting_why,
+        "error": setting_reading.get("error"),
+    }
+
+
 async def _read_posting_facts(
     page: Any, target: str, *, navigator: Any = None
 ) -> dict[str, Any]:
@@ -9993,6 +10063,25 @@ async def perform(
         ),
         grant,
     )
+
+    # THE AMENDED CONDITION 1'S ACCOUNT-LEVEL READING, for an editor write
+    # only, and TAKEN BEFORE THE CHANGE IS ENTERED -- the amendment's own word
+    # (SELF-PROFILE-EDIT-NOTIFY-CONDITION-AMENDED) -- which here means before
+    # the editor is even opened: the setting lives on another page. Wired
+    # 2026-09-27 by the live lane at the seam ``profile_editor.ACCOUNT_READINGS``
+    # describes. A READ of his own settings page, admitted for reading only;
+    # nothing is pressed there.
+    #
+    # IT DECIDES NOTHING HERE. It is handed to every save-gate call below and
+    # the gate decides: a dialog that draws its own notify control is governed
+    # by that control whatever this reads. A reading that could not be taken
+    # is None -- never 'off' -- and the gate refuses on it like any other.
+    account_setting: Optional[dict[str, Any]] = None
+    account_share_updates: Optional[str] = None
+    if spec.action in EDITOR_SAVE_ACTIONS:
+        account_setting = await _read_account_share_updates(navigator, page)
+        account_share_updates = account_setting.get("reading")
+
     landed = await _load(
         navigator,
         page,
@@ -10310,13 +10399,14 @@ async def perform(
         # one that changed its field by typing asks inside the loop, after the
         # fill. Either way the press joins the ONE click queue -- no new click
         # call site is bought. Until 2026-09-24 neither path asked at all.
-        # NEITHER CALL PASSES ``account_share_updates``: the amended condition
-        # 1's account-level reader does not exist yet, so the gate refuses
-        # wherever the dialog draws no notify control. Wiring that reading --
-        # taken BEFORE the change is entered -- is the seam at
-        # ``profile_editor.ACCOUNT_READINGS``.
+        # EVERY SAVE-GATE CALL PASSES ``account_share_updates`` since
+        # 2026-09-27: the account-level reading taken above, BEFORE the change
+        # was entered. Until then none did, and the gate refused wherever the
+        # dialog drew no notify control. See ``profile_editor.ACCOUNT_READINGS``.
         if spec.action in EDITOR_SAVE_ACTIONS and selects_made:
-            editor_save_gate = await profile_editor.read_save_gate(page)
+            editor_save_gate = await profile_editor.read_save_gate(
+                page, account_share_updates=account_share_updates
+            )
             if editor_save_gate["proceed"]:
                 click_plan.append(editor_save_gate["selector"])
         # ONE LOOP OVER TWO QUEUES, AND CLICKS DRAIN FIRST.
@@ -10346,7 +10436,11 @@ async def perform(
         # one does is not measured -- so its condition 1 is read BEFORE the
         # press, not only before Save. Refused, nothing is pressed at all.
         if control_kind == "switch":
-            switch_gate = await profile_editor.read_save_gate(page, require_save=False)
+            switch_gate = await profile_editor.read_save_gate(
+                page,
+                require_save=False,
+                account_share_updates=account_share_updates,
+            )
             if not switch_gate["proceed"]:
                 click_plan.clear()
         while fill_plan or click_plan:
@@ -10388,7 +10482,9 @@ async def perform(
                         badge_before, switch_after_press, badge_value
                     )
                     if switch_check["proceed"]:
-                        editor_save_gate = await profile_editor.read_save_gate(page)
+                        editor_save_gate = await profile_editor.read_save_gate(
+                            page, account_share_updates=account_share_updates
+                        )
                         if editor_save_gate["proceed"]:
                             click_plan.append(editor_save_gate["selector"])
                 elif spec.action in MENU_ITEM_ACTIONS and clicks_made == 1:
@@ -10457,7 +10553,9 @@ async def perform(
                 # reached the ``else`` below until 2026-09-24, where the POST
                 # composer's gate looked for a post editor on the intro editor,
                 # found none, and pressed nothing -- so Save was never pressed.
-                editor_save_gate = await profile_editor.read_save_gate(page)
+                editor_save_gate = await profile_editor.read_save_gate(
+                    page, account_share_updates=account_share_updates
+                )
                 if editor_save_gate["proceed"]:
                     click_plan.append(editor_save_gate["selector"])
             elif spec.action in REPLY_ACTIONS:
@@ -10900,6 +10998,12 @@ async def perform(
                 ),
             }
         ),
+        # HIS ACCOUNT-LEVEL "SHARING PROFILE EDITS" SETTING, as read BEFORE the
+        # change was entered, for EDITOR_SAVE_ACTIONS only (null otherwise):
+        # the amended condition 1's input. 'off' | 'on' | 'unknown', or null
+        # when no reading could be taken -- counts and constants, never page
+        # text. See ``_read_account_share_updates``.
+        "account_setting": account_setting,
         # THE SWITCH PRESS, for the Premium badge (P B9) and nothing else:
         # the two switches before, after the press, and on a fresh render --
         # booleans and one position, never page text -- with condition 1 as

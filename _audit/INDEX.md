@@ -27,8 +27,8 @@ are listed as `(undated)`; no date is taken from git history, because
 
 | what | count |
 | --- | --- |
-| audit documents git tracks under `_audit` | 257 |
-| of those, carrying a `YYYY-MM-DD-` date prefix | 217 |
+| audit documents git tracks under `_audit` | 258 |
+| of those, carrying a `YYYY-MM-DD-` date prefix | 218 |
 | distinct dates | 17 |
 | documents with no level-1 heading | 2 |
 | `CORRECTS:` marker lines | 109 |
@@ -39,7 +39,7 @@ are listed as `(undated)`; no date is taken from git history, because
 | documents at either end of a cross-document edge | 100 |
 | intra-document correction markers | 4 |
 | documents that correct themselves later on | 2 |
-| documents no correction marker touches at all | 155 |
+| documents no correction marker touches at all | 156 |
 | blockquoted markers naming ANOTHER document | 0 |
 | edges missing one of their two markers | 0 |
 | edges declared a different number of times in each direction | 2 |
@@ -1731,6 +1731,7 @@ ways, which is a fact about markers and not a verdict on the document.
 | 2026-09-24 | [2026-09-24-rulings-names-at-runtime.md](2026-09-24-rulings-names-at-runtime.md) | Rulings, 2026-09-24 (third batch): names at runtime, their mitigations, and the classes built behind the grant |  |
 | 2026-09-24 | [2026-09-24-rulings-notify-veto-and-who-which.md](2026-09-24-rulings-notify-veto-and-who-which.md) | Rulings, 2026-09-24 (second batch): the notify condition, a page's veto, a named person's profile, and WHO/WHICH |  |
 | 2026-09-24 | [2026-09-24-rulings-search-verticals-rosters-passive-costs.md](2026-09-24-rulings-search-verticals-rosters-passive-costs.md) | Rulings, 2026-09-24: the search verticals, member rosters, refusals nobody registered, and passive costs |  |
+| 2026-09-27 | [2026-09-27-live-session-2-plan.md](2026-09-27-live-session-2-plan.md) | Live session 2 -- the plan, written offline |  |
 | 2026-09-27 | [2026-09-27-rulings-previews-and-receipts.md](2026-09-27-rulings-previews-and-receipts.md) | Ruling, 2026-09-27: a preview names whom the tool resolved |  |
 | 2026-09-27 | [2026-09-27-rulings-relation-removals-and-account-destruction.md](2026-09-27-rulings-relation-removals-and-account-destruction.md) | Rulings, 2026-09-27: removing a relation, and destroying the account |  |
 
