@@ -829,21 +829,20 @@ def _python_files() -> list[pathlib.Path]:
 #: not an edit for the lane that found it -- the same holding position the
 #: first entry here took before a live measurement settled it.
 #:
-#: **A FOURTH FILE, DECLARED AT THE LIVE LANE'S MERGE OF LANE G (2026-09-24),
-#: AND IT IS THE SAME CLASS.** ``_probe_live_lane_session_1.py`` -- the live
-#: lane's session-1 harness, hand-run and serial -- opens two addresses built
-#: from the newest activity id ``linkedin_my_activity_items`` returned for HIS
-#: OWN rail (authorship established three ways, the id never printed): the
-#: post-summary capture for lane L1, and his own post's permalink for the
-#: post-menu capture. It ran both before this rule could see them. It carries
-#: the argument the three entries above carry, plus a recorded call: the
-#: orchestrator's delegated decision that ``M C72``'s copy-link is proven on
-#: his own posts, from ``M C41``'s activity ids. Held here under the same
-#: pending ruling, not fixed and not waived.
+#: **A FOURTH FILE WAS DECLARED AT THE LIVE LANE'S MERGE OF LANE G
+#: (2026-09-24), AND IT LEFT BY BEING FIXED (2026-09-27).**
+#: ``_probe_live_lane_session_1.py`` -- the live lane's session-1 harness --
+#: opened two addresses built from the newest activity id
+#: ``linkedin_my_activity_items`` returned for HIS OWN rail: the post-summary
+#: capture for lane L1, and his own post's permalink for the post-menu
+#: capture. Converted under ``PAGE-MAY-VETO-NEVER-SUPPLY``, registered since:
+#: the caller names the post with ``--activity``, and the rail only VETOES an
+#: id that is not his (``activity_veto``). Its entry is deleted, and its
+#: session-2 successor, ``_probe_live_lane_session_2.py``, was written under
+#: that rule from its first line and never needed one.
 KNOWN_DERIVED_NAVIGATIONS: dict[str, list[str]] = {
     "_probe_comment_identifier.py": ["ITEM_PERMALINK_URL.format(urn=urn)"],
     "_probe_comment_overflow_menu.py": ["ITEM_PERMALINK_URL.format(urn=urn)"],
-    "_probe_live_lane_session_1.py": ["url", "url"],
     "server.py": ["item_url"],
 }
 

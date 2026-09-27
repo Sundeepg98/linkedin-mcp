@@ -2119,3 +2119,150 @@ as any of these shapes. The live page may name its switch through a title
 paragraph with no accessible name -- the intro editor's shape -- and then this
 reader answers 'unknown' and nothing fires. That is the case the in-session
 validation exists for.
+
+### (c) The session-2 harness, written under PAGE-MAY-VETO-NEVER-SUPPLY -- and session 1's harness converted to it
+
+**`scripts/_probe_live_lane_session_2.py`: 34 closed keys**, one for every
+step of the plan (d) that is not an outward act. **The rule is three
+mechanisms, each enforced:**
+
+* **every address is a module constant, or one of the package's own
+  composers** -- `search_verticals.compose`, `member_rosters.compose`, the
+  digit templates lane L1 and session 1 already use -- **filled from the
+  caller's `--item`**, each item validated as a closed shape before anything
+  loads (1-20 ASCII digits; a thread id by `threads.valid_thread_id`). A
+  refusal never echoes what was typed;
+* **a reading may only say no:** a group must be among the MEMBERSHIPS his
+  Groups page returned this session (not its suggestions), a post among the
+  ids his rail returned with authorship established, an attendees list only
+  after this session's `event` read that event and saw it link its own list.
+  A mismatch stops the key with nothing loaded;
+* **the caller may read a result and name an item from it; the file never
+  does.** `job_detail` writes the organisation it resolved; `n84` takes an
+  organisation only as `--item`.
+
+**THE NAVIGATION GUARD FINDS NOTHING IN IT, AND IS SHOWN ABLE TO:** its own
+engine over this file reports zero derived sites, and over a copy with one
+line changed -- an item taken from a reading on disk, a navigation to where
+the last one landed -- it reports the site (both in the new test file). No
+entry was added to `KNOWN_DERIVED_NAVIGATIONS`.
+
+**The ledger** (`_state/live2/ledger.json`, gitignored) is session 1's --
+every load counted through a wrapper around `BROWSER.goto`, the 41st refused
+before it navigates, the spacing waited out across processes -- plus two
+things session 1 did not have: **D1's five searches**, a sixth `/search/`
+load refused before it navigates, and **one driver at a time**, a lock that
+refuses a second harness process.
+
+**What it writes.** His settings page raw -- it draws no other person -- and
+every other page as a SKELETON reduced in the process before anything is
+written: tags, attribute names, classes, roles and closed ARIA states kept;
+every other text node and attribute value replaced by its shape (letters,
+digits, length) and an 8-hex HMAC under a key made once per session and kept
+in the gitignored state directory, so two captures compare and a list of
+names cannot reverse a hash; an id and every attribute naming it shaped with
+one key, so a label still finds its control; addresses keep LinkedIn's own
+path words and query parameter names; a closed set of LinkedIn's own UI words
+survives verbatim. Tool envelopes are raw where the tool is name-free by its
+own contract, and reduced where it can carry a person (notifications,
+connections, a job posting, an opened thread): integers, booleans, the
+package's literal fields and organisation, group and posting ids kept, every
+other string shaped. **The (b) reader still reads a skeleton**: shown on a
+synthetic page, it finds "Sharing profile edits" through a label and an id
+both shaped with one key, and reads the state.
+
+**Presses: ONE click site in the file**, `press_and_read` (asserted on the
+syntax tree), on a trigger found as exactly one match: a click -- an open
+verb by the probe rule -- a reading of the opened menu BY ATTRIBUTE and by
+our own words compared inside the page (only our words and integers come
+back), a skeleton of the open state, then Escape. Two anomalies stop the
+session: a menu whose own words do not go away again, and any message event
+on `/messaging/`, which is a conversation opened. Words are counted only
+where VISIBLE, because a menu LinkedIn keeps in the DOM while closed must not
+read as opened.
+
+**The setting's offline check** (`setting_offline`): the (b) reader over the
+setting's own capture in a local headless Chromium whose context is offline
+and runs no script (both flags asserted on the syntax tree), against the live
+reading, as one of seven verdicts. **The case a capture cannot answer is
+reproduced, not argued:** a switch whose ON is held only in the `checked`
+PROPERTY reads ON live, and its capture -- no `checked` attribute -- replays
+OFF. The live step therefore records the property and the attribute side by
+side, and that case reads `STATE-NOT-IN-MARKUP`, never `DISAGREES` or
+`AGREES`.
+
+**Lane D's LQ-4** (`attach_check`): the attach runs in a child process with
+the driver's protocol log on; the parent keeps only the
+`Browser.setDownloadBehavior` sends and the answers matched to them by id,
+each reduced to closed words, as the lines arrive -- a decoy line naming a
+tab never survives (tested). Its filter is proven on synthetic lines only;
+the plan says what a mismatch with the real log's form reads as.
+
+**Read offline before it was written, counts only, from session 1's own
+captures (no load):** his profile draws exactly ONE
+`button[aria-label="More"][aria-expanded="false"]`, page-wide and in main --
+so lane D's LQ-1 and the overflow `N 76` waits on are one control, which the
+inventory had as DERIVED; the header's Me trigger is one button named exactly
+"Me" on two captures; his newest post draws an empty comments list while his
+profile's rail draws four "N comments" phrases; all eight rail items are
+activity urns with authorship established. What each changed is in the plan.
+
+**SESSION 1 CONVERTED, AND ITS DECLARED ENTRY DELETED.** Judged cheap, and
+it was: `post_capture`, `l1_post_summary` and `own_link` take the post from
+the caller's `--activity` (1-20 ASCII digits, never echoed) and
+`activity_veto` refuses one that is not among his authorship-established rail
+ids; `newest_own_activity_digits` is gone. The navigation guard now finds
+nothing in `_probe_live_lane_session_1.py`, so its entry in
+`KNOWN_DERIVED_NAVIGATIONS` is deleted and the comment beside it records why.
+Its tests: the two that pinned the old choice are replaced by five that pin
+the veto, the digits rule and the selection.
+
+**Every corpus instrument over both files, run on them directly:**
+navigation 0, output 0, page text 0, import-time effects 0, gated
+interactions 0, context closers 0, tab leaks 0, never-branched controls 0,
+unguarded navigations 0. The tests: `tests/test_live_lane_session_2_harness.py`,
+106; `tests/test_live_lane_session_harness.py`, 33.
+
+**RED-PROOFS, each plant alone in a scratch copy (the two harness test files
+and the navigation guard):**
+
+    plant                                                            red
+    on the session-1 harness before the conversion      2, and 4 errors
+    C1  an address taken from a reading on disk                        3
+    C2  the search cap removed                                         1
+    C3  the ceiling not checked before the navigation                  1
+    C4  a suggested group accepted as a membership                     1
+    C5  authorship not required (session 1's rail ids)                 3
+    C6  a text node kept verbatim in a skeleton                        2
+    C7  classes shaped in a skeleton                                   2
+    C8  the shape's hash not keyed                                     4
+    C9  every envelope string kept                                     1
+    C10 hidden words counted as drawn                                  1
+    C11 a conversation opened by a press not an anomaly                1
+    C12 every menu taken as closed again                               2
+    C13 no STATE-NOT-IN-MARKUP verdict                                 2
+    C14 every protocol answer kept, not only the sends' own            5
+    C15 the artifacts folder not checked                               2
+    C16 a rider allowed without its page                               1
+    C17 an item's digits read by isdigit, not as ASCII                 1
+    C18 a second click site                                            1
+    C19 session 1 takes his post off the rail again                    1
+    C20 the replay runs the capture's scripts                          2
+    C21 the replay reaches the network                                 1
+    C22 a second driver let in                                         1
+
+Baseline and restored: 783 passed. None survived. C21 is caught only by the
+structural test, which is why that test exists: no synthetic document can
+witness a network the replay never needed.
+
+**ONE DEFECT CAUGHT BY THE STRICT-ASCII CHECK BEFORE THE COMMIT:** the
+ellipsis in one of LinkedIn's labels, written as a `\u` escape, reached the
+file as the character itself -- the tool channel decoded it. It is now built
+with `chr()`, and the check reads the file's bytes, not the intent.
+
+**WHAT IT DOES NOT DO.** The outward block is not in it; its loads are added
+to the ledger by hand. Its vocabulary of LinkedIn's words is a list written
+from the captures and lanes' records, not measured complete: a menu label
+outside it survives only as its shape and count (the plan's D-2). Its
+triggers were measured on captures of 2026-09-20 and 2026-09-23, and a
+trigger that is not exactly one match refuses without pressing.
