@@ -967,7 +967,18 @@ PINNED = {
     "capabilities_achievable": 691,
     "out_of_scope": 70,
     "achievable": 677,
-    "adjudicated": 199,
+    #: LANE L7'S FOLLOW-UP, 2026-09-24: `P B9` BUILT (GAP -> COVERED-UNFIRED).
+    #: The Premium badge switch, pressed through `linkedin_update_profile_field`
+    #: and aimed by its block's title compared in the page, on the
+    #: orchestrator's ruling of 09:15; never fired
+    #: (`_audit/2026-09-24-lane-l7-profile-writes.md`, Follow-up F.5). A W row
+    #: whose cell cites RELEASED BY SELF-PROFILE-EDITS-NOT-OUTWARD, as the six
+    #: intro-field edits do, so it enters bucket 1 held by no ruling. One row
+    #: changing class moves seven figures:
+    #:   adjudicated 199 -> 200, delivered_broad 110 -> 111, unfired 31 -> 32
+    #:   gap 548 -> 547, gap_write 337 -> 336
+    #:   b1_no_ruling 20 -> 21, b1_released 6 -> 7; b1_standing stays 11
+    "adjudicated": 200,
     #: THE LIVE LANE'S FOUR ROWS, RE-DERIVED AT EACH OF ITS MERGES OF MASTER
     #: (2026-09-24; last over lane S): four rows fired live and banked
     #: (`_audit/2026-09-23-live-lane-session-1.md`). `P G6` COVERED-UNFIRED ->
@@ -991,16 +1002,16 @@ PINNED = {
     #: (GAP -> COVERED-UNFIRED, `_audit/2026-09-23-lane-l1-refused-reads.md`).
     #: One row changing class moves all five; b3 admitted/refused 40/16 are
     #: L1's allowlist admissions, and b1_no_ruling 7 is P G6 entering bucket 1.
-    "delivered_broad": 110,
+    "delivered_broad": 111,
     #: 79 since the live lane's merge (see `adjudicated`): P G6, N 134, P O3
     #: and M C72 COVERED-PROVEN.
     #: 75 and 21 since the bucket-1 merge: `M C41` fired live and moved from
     #: COVERED-UNFIRED to COVERED-PROVEN (`_audit/2026-09-23-bucket1-fires.md`).
     #: One row changing class moves both, and leaves delivered_broad at 96.
     "delivered_strict": 79,
-    "gap": 548,
+    "gap": 547,
     "cannot_deliver": 19,
-    "unfired": 31,
+    "unfired": 32,
     #: The live lane's merge: N 134, P O3 and M C72 left GAP.
     "gap_read": 104,
     #: 151, not the 152 published by `_audit/2026-09-21-the-write-ceiling.md`.
@@ -1017,7 +1028,7 @@ PINNED = {
     #: a read row until rulings batch 3 named it a setting -- every one classed
     #: in the same table by its act (16 R1, 35 R2, 274 R3 over 325 lines, the
     #: built `N 47` keeping its line).
-    "gap_write": 337,
+    "gap_write": 336,
     #: All 54 are `jobs.md`, which has no per-row R/W column (56 until the
     #: lane-L3 merge built J 18 and J 39). Not a coincidence
     #: and not a defect in the finder: it is the whole of that slice's still-GAP
@@ -1125,6 +1136,10 @@ PINNED = {
     #:   lane Y2's integration 11 standing / 0 / 0 / 20 none, 6 released, of 31:
     #:   (after lane L7's     `J 158`, a read no ruling holds, entered
     #:   merge)               COVERED-UNFIRED (+1 none).
+    #:   lane L7's follow-up  11 standing / 0 / 0 / 21 none, 7 released, of 32:
+    #:   (2026-09-24)         `P B9` was built, a W row whose cell cites
+    #:                        RELEASED BY SELF-PROFILE-EDITS-NOT-OUTWARD
+    #:                        (+1 none, +1 released).
     #: `b1_relayed` is the count this file called `b1_named_target` until the
     #: target condition was registered: a name for what a status COUNTS, not
     #: for which ruling happens to have it today. `b1_released` is a SUBSET of
@@ -1132,8 +1147,8 @@ PINNED = {
     "b1_standing": 11,
     "b1_relayed": 0,
     "b1_pending": 0,
-    "b1_no_ruling": 20,
-    "b1_released": 6,
+    "b1_no_ruling": 21,
+    "b1_released": 7,
     #: D3's enumerated list: FOUR once `M C83` left it, and THREE since
     #: `N 172` left it the same evening on OTHER-MEMBER-IDS-AS-READS -- see
     #: `RULING_BLOCKED_NAMED`. It was printed as "five rows" and pinned
@@ -1200,10 +1215,13 @@ PINNED_B1_ROWS: dict[str, tuple[str, ...]] = {
     #: then COVERED-UNFIRED on the orchestrator's delegated call --
     #: `linkedin_premium_job_collection(1)` reaches it, its reader read the
     #: page live on 2026-09-20, and the tool's call at index 1 never fired.
+    #: `P B9` entered with lane L7's follow-up, 2026-09-24: the Premium badge
+    #: switch, built offline and never fired, a write its own cell releases
+    #: by SELF-PROFILE-EDITS-NOT-OUTWARD -- the seventh, beside the six P A rows.
     NO_RULING: (
         "J 18", "J 39", "J 121", "J 122", "J 158", "M M33", "M M43", "N 20", "N 23",
         "N 45", "N 84", "N 85", "N 87", "N 94",
-        "P A8", "P A11", "P A13", "P A17", "P A19", "P A21",
+        "P A8", "P A11", "P A13", "P A17", "P A19", "P A21", "P B9",
     ),
 }
 
