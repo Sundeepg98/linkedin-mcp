@@ -2058,9 +2058,79 @@ passed, 1 xfailed.
 ### K.11 The final gates
 
 The full suite through the impact gate, the mutation check over the reader
-as rewritten, and the census instruments run on the commit that carries
-this section, with nothing edited or committed while they run; their
-results follow in the commit after it.
+as rewritten, and the census instruments, run on the commit that carries
+this section (`f19e316`), in that order and never two at once -- the
+mutation check rewrites the reader on disk, and the suite's staleness tests
+compare the modules a process loaded with the disk -- with nothing edited or
+committed while they ran:
+
+- `impact_gate --against 52b55b6`: 59 changed paths select 246 of 266 test files (92%), past its
+  45% line, so it WIDENED TO THE FULL
+  SUITE, run locally and sharded: PASS, all 11,060 tests, in
+  1,478.9 s (24m39s).
+- The mutation check: fifteen defects planted in `people_results.py` one at
+  a time, the names file run over each, the file restored after each and its
+  bytes compared:
+
+    headline read off the location line                 7 red
+    a result nested in another is read                  1 red
+    a hidden card is read                               0 red, then 1 (below)
+    the title's paragraph not bounded to its result     1 red
+    nested text in the name link read with the name     3 red
+    the links not read again after the text             1 red
+    each card re-found at its turn, not pinned first    4 red
+    the line count not checked                          2 red
+    the title's own-member check removed                1 red
+    a failure quoted instead of counted by type         1 red
+    each name logged                                    1 red
+    each name written to a file                         1 red
+    a module cache built by a call                      1 red
+    a hover over every card                             5 red
+    a wheel scroll before the read                      3 red
+
+  FOURTEEN OF FIFTEEN ON THE FIRST RUN. The fifteenth -- the CARD's
+  visibility check removed -- stayed green because the NAME LINK's own check
+  refuses every display-based hiding: a display:none or hidden card hides
+  its link too. The two differ on one drawing only, a card hidden by
+  visibility:hidden whose name link sets visibility:visible, and that is
+  now a test (with a control showing the link really is shown there); run
+  over that mutant alone, it is 1 red. So fifteen of fifteen, and the
+  reader restored and byte-compared after every one.
+
+- The discriminating test's own commit, gated by the impact gate over its
+  staged change: 52 files, 2,755 tests (the 25 corpus-wide guards among
+  them), PASS -- and 214 of 266 files not run, said by the gate itself.
+- The census instruments and the generators, on the final tree, each at
+  the figures K.10 gives: every census figure at its pin, the address
+  tables GREEN 101 of 101 and 109 of 109, the row pin without drift, the
+  pointer graph PASS 65, triage, ruling holds, write classes (385) and the
+  exclusion basis (43 of 43) green, and the three generators at their
+  fixed point.
+
+**NOT RUN, and why.** CI: nothing is pushed, by the order; it certifies at
+merge. Nothing live: no browser session, no LinkedIn page, no Chrome profile.
+
+**MASTER MOVED AGAIN WHILE THESE RAN**, to `b6993e5`: the live lane's
+session-2 preparation. It was not merged -- the order integrates once, and
+that was `ae24426` (K.10) -- but it was MEASURED against this branch: a
+read-only three-way merge of this branch and that master (`merge-tree`)
+finds no conflict. Two files overlap (`_audit/_census/messaging-and-content.md`
+and `tests/reader_leak_baseline.json`), on different lines; master did not
+touch `scripts/census_completion.py` since `ae24426`, so the census pins this
+branch carries stay the merged tree's -- DERIVED, not measured on a merged
+tree.
+
+**THE SESSION-2 PLAN ALREADY FOLDS IN THIS RECORD'S CAPTURE SPECS**
+(`_audit/2026-09-27-live-session-2-plan.md`): its five searches are `N 104`
+and `N 161` (captures) and `N 94`, `N 84`, `N 87` (the shipped people
+search), `N 179` deferred; it captures a group's member list (`N 165`,
+`N 177`) and a Page's People tab (`N 102`, `J 108`), with the school tab and
+an event's attendees conditional or later. It was written before
+`include_names` existed. ONE RECOMMENDATION, AT NO COST: pass
+`include_names=True` on the people searches it already fires -- same load,
+same search -- so the names reader meets the live page; a keyword on one of
+them fires `N 79` as well. `N 172` needs a member token, and so a sixth
+search, and `N 194` a hashtag keyword: both wait on a later session.
 
 ### K.12 Questions for the orchestrator
 
