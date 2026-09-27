@@ -2349,7 +2349,8 @@ P 187, M 132, N 160 -- with 67 rulings and 258 documents in the derived views.
 
 ### K.5 Gates
 
-- THE WHOLE SUITE, on the merge commit `7d3d023`: the impact gate's plan widened to it (86 changed
+- THE WHOLE SUITE, on the merge of master 64afa6c (its hash is in K.7): the impact gate's plan
+  widened to it (86 changed
   paths since `687b07c`, one of them `tests/conftest.py`, which the analyser has no model of), so it
   ran whole -- locally, `-n auto --dist loadfile`, in the background, under the `np_offline`
   plugin: 11364 passed, 8 failed, 9 skipped, 1 xfailed -- 11382 tests -- in 1094 s. Two requests
@@ -2392,7 +2393,9 @@ P 187, M 132, N 160 -- with 67 rulings and 258 documents in the derived views.
     f099461  item 1a: send_invitation aimed by the person's profile link
     930e96c  item 1b: send_message retired; the debt list empty; pins, census, this section
     7d3d023  the merge of master 64afa6c (K.8)
-    (next)   the final run's six instrument consequences, the control's subject, K.5-K.7 and K.9
+    a5135be  the final run's six instrument consequences, the control's subject, K.5-K.7
+    (next)   the two findings of the whole suite on a5135be, both in this order's prose (K.9)
+    (last)   K.9's gate results -- this file only, gated by its own plan (K.9)
 
 ### K.9 The final delta
 
