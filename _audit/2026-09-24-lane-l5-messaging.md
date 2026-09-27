@@ -2089,5 +2089,28 @@ was `52b55b6`. One merge commit, history kept.
 
 ### J.3 Gates
 
-Written after the whole suite ran on this merge commit, in the commit that follows it. Before
-it: 25 affected test files under the I.5 guard, 1983 passed, no request left.
+- THE WHOLE SUITE on the second merge commit, locally, `-n auto --dist loadfile`, under the I.5
+  guard: 11384 passed, 2 failed, 9 skipped, 1 xfailed -- 11396 tests in 271 files -- in 1077 s of wall clock. The two reds: the cited-SHA guard, by design, on the same four branch commits and nothing else; and `tests/test_tracker_readiness.py::test_an_empty_tab_is_not_delayed`, a real-browser wait bounded at 300 ms that read 319 ms under the full parallel load. That file passed alone three times of three (60 tests); it is unchanged since `52b55b6`, and so is the function it waits on, `dom.wait_for_tracker_list` (compared by source); both whole-suite runs of the first integration passed it. A timing bound, not this merge -- stated, not fixed. The same eleven navigations to LinkedIn were aborted, and nothing else tried to leave.
+- Before it, on the resolved tree: 25 affected test files under the same guard, 1983 passed, no
+  request left.
+- The census battery on the merge commit, the same twelve instruments as I.6, all green, the
+  three derived views among them (67 rulings; 258 documents).
+- Parse and repeated-key checks: every Python file parses; the AST scan finds only the old
+  harmless set.
+
+### J.4 NOT run
+
+- CI: nothing pushed. The whole suite WITHOUT the I.5 guard, for I.5's reason.
+- LIVE: nothing.
+- An independent verification of either integration: not ordered, not run.
+- `focused` and `other` remain in `linkedin_open_messaging`'s permitted set though they can never
+  be activated on the measured page; lane G's record leaves that to the tool's owner, and this
+  order did not ask for it. Left as it is.
+
+### J.5 Commits -- on this branch, none pushed, no AI attribution in any
+
+    02f95eb  the merge of master 52b55b6 (Integration, I.1-I.5)
+    99eef0f  the waiver ceiling's second copy, and I.6
+    eafc6e9  I.6's last run, I.7 and I.8
+    d4b3b90  the merge of master b6993e5 (Integration 2, J.1-J.3's first form)
+    (next)   J.3's whole-suite result, J.4 and this list
