@@ -1038,7 +1038,7 @@ the order's four classes:
   named page at a time and names none of these. Three name their own refused address,
   each driven through the shipped boundary today: `P9` on "/settings/", `P15` on
   "/mypreferences/d/categories/", `P16` on "cookies". Each is a filter catching an
-  ADDRESS, so GAP under `INCIDENTAL-CAPTURE-IS-NOT-A-RULING` -- the "cookies" word
+  ADDRESS, so GAP, as `INCIDENTAL-CAPTURE-IS-NOT-A-RULING` rules -- the "cookies" word
   entry was written as a second gate on the ten settings-shaped addresses finding 7.1
   found, member-cookies among them, and names no act. `P3` adds the download transport
   `D4-NO-OWN-BROWSER-CONTEXT` names for `P C8`.
@@ -1048,7 +1048,7 @@ the order's four classes:
 * **A DELETION OF HIS DATA -- `P2`, EXCLUDED-RULED** on lane R's ground two:
   `delete_or_withdraw_anything` covers destruction at any confirm level, the ground
   `P N27` and `P N28`, the account-level destructions, are kept out on. An
-  exclusion-basis line files it under `PF-DELETE-OR-WITHDRAW`, and the cell carries
+  exclusion-basis line files it in the family `PF-DELETE-OR-WITHDRAW`, and the cell carries
   its REOPENER: he rules that a deletion of his account data may be made, naming the
   data, in the call that makes it. **The cell states why
   `OUTWARD-CLASSES-BUILT-BEHIND-GRANTS` does not reach it:** that ruling builds
@@ -1056,7 +1056,7 @@ the order's four classes:
   sent: a thing he made, fired only at the one item he names. `P2` erases what
   LinkedIn holds about him, which is not an item he made, and nothing in the package
   restores it. `P6` carries the same line conditionally: if the salary page offers
-  deleting the data, that half splits off under `COMPOUND-ROW-SPLITS-ONLY-ON-STATE`
+  deleting the data, that half splits off, as `COMPOUND-ROW-SPLITS-ONLY-ON-STATE` rules,
   and is kept out the same way. What the page offers is not captured.
 * **A PASSIVE COST -- none.** Every entry is a setting he sets or a right he
   exercises, and `D5-PASSIVE-COST-IS-NOT-A-ROW` names a preference he sets an act.
