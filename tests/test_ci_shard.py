@@ -536,6 +536,213 @@ def test_writing_timings_without_provenance_is_refused(tmp_path):
 
 
 # ---------------------------------------------------------------------------
+# The table, written from every report a CI run leaves
+# ---------------------------------------------------------------------------
+#
+# A green CI run keeps one junit per shard per cell -- eighteen, for three
+# cells of six shards -- and --write-timings used to read exactly one. One
+# shard's report prices a sixth of the suite; one cell's six price that cell's
+# machine rather than the slowest. The rule the flag now carries: a file's
+# seconds in ONE report are its testcases summed, and a file found in SEVERAL
+# reports is priced at the LARGEST of those per-report totals, because every
+# cell runs the same split and the slowest cell sets the run's wall clock.
+#
+# THE INPUTS ARE CHOSEN SO THAT EVERY NEIGHBOURING RULE WRITES A DIFFERENT
+# TABLE: the sum, the mean, the minimum, first-wins, last-wins, and the largest
+# single TESTCASE per name summed. A test whose inputs could not tell the rule
+# from those would pass all of them.
+
+
+def _junit_of(*cases: tuple[str, str, float]) -> str:
+    """One report in pytest's xunit2 shape, as JUNIT below builds it:
+    testsuites > testsuite > one testcase per (classname, name, time), and no
+    path anywhere -- the dotted classname is all a report carries."""
+    rows = "".join(
+        f'<testcase classname="{classname}" name="{name}" time="{seconds}"/>'
+        for classname, name, seconds in cases
+    )
+    return (
+        '<?xml version="1.0" encoding="utf-8"?>\n'
+        '<testsuites><testsuite name="pytest" errors="0" failures="0" '
+        f'skipped="0" tests="{len(cases)}" time="1.0">{rows}'
+        "</testsuite></testsuites>\n"
+    )
+
+
+def _write_timings(directory, *reports: str):
+    """--write-timings over SAMPLE's collection and these reports, passed in
+    the order given, through the real command line."""
+    directory.mkdir(parents=True, exist_ok=True)
+    collected = directory / "collected.txt"
+    collected.write_text(SAMPLE, encoding="utf-8")
+    paths = []
+    for index, report in enumerate(reports):
+        path = directory / f"junit-{index}.xml"
+        path.write_text(report, encoding="utf-8")
+        paths.append(path)
+    written = _run(
+        REPO / "scripts" / "ci_shard.py",
+        "--collected", collected, "--write-timings", *paths, "--label", "a test run",
+    )
+    return written, paths
+
+
+def test_reports_holding_different_files_are_all_priced(tmp_path):
+    """One shard's report holds that shard's files and no others, so the
+    reports of one cell are DISJOINT and only their union is the suite."""
+    written, _ = _write_timings(
+        tmp_path,
+        _junit_of(
+            ("tests.test_auth", "test_login", 1.25),
+            ("tests.test_auth", "test_logout", 0.5),
+        ),
+        _junit_of(
+            ("tests.test_prose", "test_claim", 3.0),
+            ("tests.test_shape", "test_deadline", 0.125),
+        ),
+    )
+    assert written.returncode == 0, written.stderr
+    table = json.loads(written.stdout)
+    assert table["seconds"] == {
+        "tests/test_auth.py": 1.75,
+        "tests/test_prose.py": 3.0,
+        "tests/test_shape.py": 0.125,
+    }, table
+    assert table["_files"] == 3, table
+    assert table["_total_seconds"] == 4.9, table
+    assert table["_tests"] == 6, table
+
+
+def test_a_file_in_several_reports_is_priced_at_its_largest_total(tmp_path):
+    """The slowest cell sets the wall clock, so the slowest cell is the price.
+
+    tests/test_auth.py is 2.0 in the first report (1.0 + 1.0) and 1.75 in the
+    second (1.5 + 0.25). The largest TOTAL is 2.0; the sum is 3.75, the mean
+    1.875, the minimum and the last report 1.75, and the largest testcase per
+    name, summed, 2.5. tests/test_prose.py is slower in the SECOND report, so
+    first-wins -- right on test_auth by accident -- is wrong on it. And both
+    orders must write one table: the order a shell globs eighteen artifact
+    directories in is nothing anybody chose.
+    """
+    one_cell = _junit_of(
+        ("tests.test_auth", "test_login", 1.0),
+        ("tests.test_auth", "test_logout", 1.0),
+        ("tests.test_prose", "test_claim", 0.5),
+    )
+    other_cell = _junit_of(
+        ("tests.test_auth", "test_login", 1.5),
+        ("tests.test_auth", "test_logout", 0.25),
+        ("tests.test_prose", "test_claim", 4.0),
+    )
+    for order, reports in (
+        ("forwards", (one_cell, other_cell)),
+        ("backwards", (other_cell, one_cell)),
+    ):
+        written, _ = _write_timings(tmp_path / order, *reports)
+        assert written.returncode == 0, (order, written.stderr)
+        table = json.loads(written.stdout)
+        assert table["seconds"] == {
+            "tests/test_auth.py": 2.0,
+            "tests/test_prose.py": 4.0,
+        }, (order, table)
+        assert table["_files"] == 2, (order, table)
+        # The total of the COMBINED table, not of every report added together:
+        # the reports sum to 8.25, and a table claiming that would price each
+        # file once per cell.
+        assert table["_total_seconds"] == 6.0, (order, table)
+
+
+def test_the_single_report_form_writes_what_it_always_wrote(tmp_path):
+    """Every table committed so far came from one report, through the recipe
+    in scripts/ci_shard.py's docstring. Pinned to the character -- key order,
+    indent, 3 places a file and 1 for the total -- so that teaching the flag
+    to read several cannot quietly change what it writes from one."""
+    collected = tmp_path / "collected.txt"
+    collected.write_text(SAMPLE, encoding="utf-8")
+    junit = tmp_path / "junit.xml"
+    junit.write_text(
+        _junit_of(
+            ("tests.test_auth", "test_login", 1.2344),
+            ("tests.test_auth", "test_logout", 0.3333),
+            ("tests.test_shape", "test_deadline", 2.0),
+        ),
+        encoding="utf-8",
+    )
+    written = _run(
+        REPO / "scripts" / "ci_shard.py",
+        "--write-timings", junit, "--collected", collected, "--label", "one laptop",
+    )
+    assert written.returncode == 0, written.stderr
+    assert written.stdout == json.dumps(
+        {
+            "_measured": "one laptop",
+            "_files": 2,
+            "_tests": 6,
+            "_total_seconds": 3.6,
+            "seconds": {"tests/test_auth.py": 1.568, "tests/test_shape.py": 2.0},
+        },
+        indent=2,
+    ) + "\n", written.stdout
+
+
+def test_the_command_line_takes_every_report_a_ci_run_leaves(tmp_path):
+    """The CI shape in small: three cells, two shards each, one shared split.
+    Each file is priced by whichever cell ran it slowest, and that is a
+    different cell for different files."""
+    cells = {
+        # cell: (test_auth's two tests, the credential file's two, prose, shape)
+        "ubuntu-3.10": ((0.5, 0.5), (0.25, 0.25), 1.0, 0.125),
+        "ubuntu-3.13": ((0.25, 0.25), (0.5, 0.5), 0.75, 0.375),
+        "windows-3.13": ((1.0, 1.5), (0.125, 0.125), 2.0, 0.0625),
+    }
+    reports = []
+    for auth, credential, prose, shape in cells.values():
+        reports.append(
+            _junit_of(
+                ("tests.test_auth", "test_login", auth[0]),
+                ("tests.test_auth", "test_logout", auth[1]),
+                ("tests.test_no_committed_credential", "test_file[a]", credential[0]),
+                ("tests.test_no_committed_credential", "test_file[b]", credential[1]),
+            )
+        )
+        reports.append(
+            _junit_of(
+                ("tests.test_prose", "test_claim", prose),
+                ("tests.test_shape", "test_deadline", shape),
+            )
+        )
+    written, paths = _write_timings(tmp_path, *reports)
+    assert len(paths) == 6
+    assert written.returncode == 0, written.stderr
+    table = json.loads(written.stdout)
+    assert table["seconds"] == {
+        "tests/test_auth.py": 2.5,  # windows
+        "tests/test_no_committed_credential.py": 1.0,  # ubuntu 3.13
+        "tests/test_prose.py": 2.0,  # windows
+        "tests/test_shape.py": 0.375,  # ubuntu 3.13
+    }, table
+    assert table["_files"] == 4, table
+    assert table["_total_seconds"] == 5.9, table
+    assert table["_tests"] == 6, table
+
+
+def test_a_report_that_prices_nothing_is_refused_by_name_among_several(tmp_path):
+    """The single-report refusal, kept PER REPORT. Among eighteen, a report
+    from another repository -- or of a shape this parse cannot read -- would
+    otherwise vanish into the union, and its cell's files would be priced
+    from the other cells alone under a label claiming all three."""
+    written, paths = _write_timings(
+        tmp_path,
+        _junit_of(("tests.test_auth", "test_login", 1.0)),
+        _junit_of(("elsewhere.test_other", "test_z", 9.0)),
+    )
+    assert written.returncode != 0, written.stdout
+    assert "produced timings for none" in written.stderr, written.stderr
+    assert str(paths[1]) in written.stderr, written.stderr
+    assert str(paths[0]) not in written.stderr, written.stderr
+
+
+# ---------------------------------------------------------------------------
 # Reading pytest's collection output
 # ---------------------------------------------------------------------------
 
