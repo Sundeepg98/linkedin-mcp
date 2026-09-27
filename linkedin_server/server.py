@@ -3194,8 +3194,9 @@ async def linkedin_people_search_shape(
             at most 5; several in ONE search. A place name is refused.
         connections_of: ONE member's opaque token -- the ``recipient_id``
             ``linkedin_connections`` returns, which opens ``ACoAA`` -- to list
-            that member's connections as counts. A profile slug is a name and
-            is refused. Never stored and never echoed.
+            that member's connections: as counts, and with ``include_names``
+            as people records. A profile slug is a name and is refused. Never
+            stored and never echoed.
         include_names: return the people the page draws as records (see the
             first paragraph). Off by default; the search is the same either
             way and still one page.

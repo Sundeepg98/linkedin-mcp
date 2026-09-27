@@ -571,6 +571,57 @@ class _ManyCards:
         return RESULTS[0][0]
 
 
+class _RecordingPage(_ManyCards):
+    """``_ManyCards``, recording which element every text read lands on."""
+
+    def __init__(self, cards: int) -> None:
+        super().__init__(cards)
+        self.index = 0
+        self.read_log: list[tuple[str, int]] = []
+
+    def nth(self, index: int) -> "_RecordingPage":
+        self.index = index
+        return self
+
+    @property
+    def first(self) -> "_RecordingPage":
+        self.index = 0
+        return self
+
+    def locator(self, selector: str, **kwargs: Any) -> "_RecordingPage":
+        self.selector = selector
+        self.index = 0
+        return self
+
+    async def inner_text(self, *args: Any, **kwargs: Any) -> str:
+        self.read_log.append((self.selector, self.index))
+        return await super().inner_text(*args, **kwargs)
+
+
+def test_mitigation_1_the_location_line_is_never_read_not_only_never_returned():
+    """THE SECOND LINK-FREE LINE IS THE LOCATION, AND ITS TEXT NEVER ENTERS
+    THIS PROCESS: of the column's lines only the first is ever read. A reader
+    that read the second and then dropped it would pass every output test
+    above; this reads the calls."""
+    page = _RecordingPage(3)
+    asyncio.run(people_results.read_result_people(page))
+    lines_read = [index for selector, index in page.read_log
+                  if selector == people_results.PLAIN_LINE]
+    assert lines_read == [0, 0, 0], page.read_log
+
+
+def test_THIS_CONTROL_CAN_FAIL_a_reader_touching_the_location_is_seen(monkeypatch):
+    original = people_results.read_result_people
+
+    async def nosy(page: Any) -> dict[str, Any]:
+        await page.locator(people_results.PLAIN_LINE).nth(1).inner_text()
+        return await original(page)
+
+    page = _RecordingPage(1)
+    asyncio.run(nosy(page))
+    assert (people_results.PLAIN_LINE, 1) in page.read_log
+
+
 def test_mitigation_4_one_call_reads_at_most_the_ceiling():
     page = _ManyCards(100)
     result = asyncio.run(people_results.read_result_people(page))
