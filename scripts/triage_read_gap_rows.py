@@ -394,7 +394,7 @@ DECIDED_SINCE_TRIAGE: dict[str, str] = {
              "answered by NAMES-AT-RUNTIME, so it now waits on a "
              "name-returning reader held to PEOPLE-DATA-MITIGATIONS on lane "
              "G's people-record foundation, and a capture; bucket-3 gate "
-             "MEASURE",
+             "MEASURE (the foundation landed 2026-09-27; the cell names the capture it waits on)",
     "N 102": "MEMBER-ROSTERS-AS-BOUNDED-READS: a Page's People tab is a "
              "roster he can open; an admission and a reader -- admitted in "
              "lane S's follow-up (2026-09-24), so a capture and a reader "
@@ -412,7 +412,7 @@ DECIDED_SINCE_TRIAGE: dict[str, str] = {
              "answered by NAMES-AT-RUNTIME, so it now waits on a "
              "name-returning reader held to PEOPLE-DATA-MITIGATIONS on lane "
              "G's people-record foundation, and a capture; bucket-3 gate "
-             "MEASURE",
+             "MEASURE (the foundation landed 2026-09-27; the cell names the capture it waits on)",
     "N 177": "D3-UNREGISTERED-REFUSAL-IS-NOT-A-RULING and "
              "MEMBER-ROSTERS-AS-BOUNDED-READS: a group's member directory; "
              "an admission and a reader -- admitted in lane S's follow-up "
@@ -420,7 +420,7 @@ DECIDED_SINCE_TRIAGE: dict[str, str] = {
              "answered by NAMES-AT-RUNTIME, so it now waits on a "
              "name-returning reader held to PEOPLE-DATA-MITIGATIONS on lane "
              "G's people-record foundation, and a capture; bucket-3 gate "
-             "MEASURE",
+             "MEASURE (the foundation landed 2026-09-27; the cell names the capture it waits on)",
     "N 178": "D3-UNREGISTERED-REFUSAL-IS-NOT-A-RULING: GAP on an admission "
              "and a reader; its live proof loads another member's profile, "
              "so the operator names that member "
@@ -428,14 +428,14 @@ DECIDED_SINCE_TRIAGE: dict[str, str] = {
              "WHICH, a doctrine question since answered by NAMES-AT-RUNTIME, "
              "so its reader must return names held to "
              "PEOPLE-DATA-MITIGATIONS on lane G's people-record foundation; "
-             "NEEDS-TARGET",
+             "NEEDS-TARGET (the foundation landed 2026-09-27; the cell names the capture it waits on)",
     "N 179": "D2-SEARCH-VERTICALS-WIDENED: the events vertical is admitted "
              "in principle, and on the boundary since lane S's follow-up "
              "(2026-09-24); which events is WHICH, a doctrine question since "
              "answered by NAMES-AT-RUNTIME, so it now waits on a "
              "name-returning reader held to PEOPLE-DATA-MITIGATIONS on lane "
              "G's people-record foundation, and a capture; bucket-3 gate "
-             "MEASURE",
+             "MEASURE (the foundation landed 2026-09-27; the cell names the capture it waits on)",
     "P C8": "D4-NO-OWN-BROWSER-CONTEXT (registered 2026-09-24): no context "
             "of its own; the download transport is built on the attached "
             "browser (cdp_download.py), and what holds the row now is the "

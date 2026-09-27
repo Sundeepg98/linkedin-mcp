@@ -57,10 +57,12 @@ an id, and it writes no file but the fixture.
 from __future__ import annotations
 
 import argparse
+import hashlib
 import re
 import sys
 from html.parser import HTMLParser
 from pathlib import Path
+from urllib.parse import urlsplit
 from xml.sax.saxutils import escape, quoteattr
 
 REPO = Path(__file__).resolve().parent.parent
@@ -87,8 +89,9 @@ SYNTHETIC_HEADLINES = (
     "Staff Software Engineer | Payments | Example Labs",
 )
 
-#: An invented place, shaped like the capture's location lines (three words,
-#: two commas).
+#: An invented place, shaped like the capture's location lines: three words
+#: with commas between them (the capture's were 27 characters, three words,
+#: and carried a comma -- the count of commas was not measured).
 SYNTHETIC_PLACE = "Fixtureton, Sampleshire, Exampleland"
 
 #: The number written into "<n> other mutual connections".
@@ -122,8 +125,20 @@ LABEL_TEMPLATES = (
 )
 LABEL_VERBATIM = {"Verified"}
 
-KEPT_ATTRIBUTES = {"role", "aria-hidden", "type"}
-ATTRIBUTE_VALUE = re.compile(r"^[A-Za-z0-9 _-]{0,24}$")
+#: The attributes kept, each with the CLOSED set of values it may keep. A
+#: value outside its set is dropped and counted -- a free-form value is where
+#: a page could put a name, so none is kept on shape alone.
+KEPT_ATTRIBUTES: dict[str, frozenset] = {
+    "role": frozenset({"list", "listitem", "img", "presentation", "none",
+                       "button", "link", "heading", "region", "main",
+                       "navigation"}),
+    "aria-hidden": frozenset({"true", "false"}),
+    "type": frozenset({"button", "submit"}),
+}
+
+#: The one host a kept href may name; any other becomes this placeholder.
+LINKEDIN_HOSTS = frozenset({"www.linkedin.com", "linkedin.com"})
+PLACEHOLDER_HOST = "https://example.invalid"
 
 
 class Node:
@@ -210,7 +225,9 @@ def list_of(cards):
             chain.append(walker)
             walker = walker.parent
         chains.append(chain)
-    common = next(c for c in chains[0] if all(c in chain for chain in chains))
+    # A STRICT ancestor: with one card, the card itself is common to every
+    # chain, and taking it made the item the document root.
+    common = next(c for c in chains[0][1:] if all(c in chain for chain in chains))
     items = []
     for chain in chains:
         items.append(chain[chain.index(common) - 1])
@@ -224,6 +241,8 @@ class Skeleton:
         self.pool = list(SYNTHETIC_PEOPLE)
         self.unclassified = 0
         self.dropped_labels = 0
+        self.dropped_values = 0
+        self.placeholder_hosts = 0
 
     def person(self, key):
         if key not in self.people:
@@ -233,22 +252,30 @@ class Skeleton:
         return self.people[key]
 
     def href(self, value):
-        value = (value or "").strip()
-        found = MEMBER.match(value)
-        if found:
-            prefix, key, tail = found.group(1) or "", found.group(2), found.group(3) or ""
-            below = [s for s in tail.split("/") if s]
+        """An href rebuilt from parts: a LinkedIn host kept, any other host
+        replaced, the query and the fragment ALWAYS dropped, a member's slug
+        replaced by a synthetic one, and every path segment not a route word
+        replaced by the placeholder."""
+        parts = urlsplit((value or "").strip())
+        host = parts.netloc.lower()
+        if host and host not in LINKEDIN_HOSTS:
+            self.placeholder_hosts += 1
+            base = PLACEHOLDER_HOST
+        elif host:
+            base = f"https://{host}"
+        else:
+            base = ""
+        segments = [s for s in parts.path.split("/") if s]
+        slash = "/" if parts.path.endswith("/") or not segments else ""
+        key = member_key(Node("a", [("href", value)], None))
+        if key is not None and len(segments) >= 2 and segments[0] == "in":
             rest = "".join(
-                "/" + (s if s in ROUTE_WORDS else PLACEHOLDER_SEGMENT) for s in below
+                "/" + (s if s in ROUTE_WORDS else PLACEHOLDER_SEGMENT)
+                for s in segments[2:]
             )
-            slash = "/" if tail.endswith("/") or not below else ""
-            return f"{prefix}/in/{self.person(key)[1]}{rest}{slash}"
-        prefix = re.match(r"^https?://[^/]+", value)
-        path = re.sub(r"[?#].*$", "", value[prefix.end():] if prefix else value)
-        segments = [s if s in ROUTE_WORDS else PLACEHOLDER_SEGMENT
-                    for s in path.split("/") if s]
-        return (prefix.group(0) if prefix else "") + "/" + "/".join(segments) + (
-            "/" if segments else "")
+            return f"{base}/in/{self.person(key)[1]}{rest}{slash}"
+        mapped = [s if s in ROUTE_WORDS else PLACEHOLDER_SEGMENT for s in segments]
+        return base + "/" + "/".join(mapped) + ("/" if mapped else "")
 
     def label(self, value, key):
         value = (value or "").strip()
@@ -269,8 +296,11 @@ class Skeleton:
                 kept = self.label(value, key)
                 if kept is not None:
                     out.append(("aria-label", kept))
-            elif name in KEPT_ATTRIBUTES and ATTRIBUTE_VALUE.match(value or ""):
-                out.append((name, value or ""))
+            elif name in KEPT_ATTRIBUTES:
+                if (value or "") in KEPT_ATTRIBUTES[name]:
+                    out.append((name, value or ""))
+                else:
+                    self.dropped_values += 1
             elif node.tag == "img" and name == "alt":
                 out.append(("alt", ""))
         return out
@@ -341,6 +371,41 @@ class Skeleton:
         out.append(f"</{node.tag}>")
 
 
+def structure(node, depth=0, out=None):
+    """The kept STRUCTURE of one result, exactly as :meth:`Skeleton.emit`
+    writes it: each element's tag at its depth, each text node as a mark --
+    no attribute, no text. Pure; the same on a capture and on the fixture
+    it produced."""
+    if out is None:
+        out = []
+    if node.tag == "#text":
+        out.append(f"{depth}:#text")
+        return out
+    if node.tag in DROP_SUBTREE:
+        return out
+    out.append(f"{depth}:{node.tag}")
+    if node.tag == "svg" or node.tag in VOID:
+        return out
+    for child in node.children:
+        structure(child, depth + 1, out)
+    return out
+
+
+#: The digest's alphabet: hex digits spelled as letters, so a digest can be
+#: quoted beside commit hashes and identifiers without resembling either.
+_DIGEST_LETTERS = str.maketrans("0123456789abcdef", "abcdefghijklmnop")
+
+
+def structure_digest(items):
+    """A digest of the kept results' structure, sixteen letters."""
+    lines = []
+    for index, item in enumerate(items):
+        lines.append(f"result {index}")
+        lines.extend(structure(item))
+    digest = hashlib.sha256("\n".join(lines).encode("ascii")).hexdigest()[:16]
+    return digest.translate(_DIGEST_LETTERS)
+
+
 def parents(node):
     walker = node.parent
     while walker is not None:
@@ -400,7 +465,14 @@ def main(argv=None):
           "| kept", len(kept), "| synthetic people used", len(skeleton.people),
           "| unclassified text nodes", skeleton.unclassified,
           "| aria-labels dropped", skeleton.dropped_labels,
+          "| attribute values dropped", skeleton.dropped_values,
+          "| placeholder hosts", skeleton.placeholder_hosts,
           "| bytes", len(text.encode("utf-8")))
+    # THE STRUCTURE THIS FIXTURE CARRIES, as a digest of tags and nesting
+    # only. Printed at build time from the capture and pinned in the tests,
+    # so a structural hand edit of the fixture fails there -- the fixed point
+    # alone pins the text and the order people appear, not the structure.
+    print("structure digest", structure_digest(kept))
     return 0
 
 

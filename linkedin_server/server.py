@@ -3087,8 +3087,12 @@ async def linkedin_people_search_shape(
     about anybody crosses: not the location line, not the mutual connections a
     result names, not a hidden copy of a name. A result LinkedIn draws as
     "LinkedIn Member" comes back as exactly that. One page, as drawn -- not
-    every person the search matched. Without the flag, everything below holds
-    as written: counts and filter names, never a person.
+    every person the search matched. A headline the reader could not place
+    in the captured shape comes back EMPTY, exactly as one the page drew
+    empty; ``people_denominators.headline_unread`` counts the first kind,
+    and a record cannot say which it is -- its four fields are closed.
+    Without the flag, everything below holds as written: counts and filter
+    names, never a person.
 
     **THIS IS THE FIRST TOOL ON A THIRD-PARTY-DENSE SURFACE**, and every
     decision in it is shaped by that. A people-search page's entire payload is
@@ -3287,8 +3291,14 @@ async def linkedin_people_search_shape(
                     "that the address serves a populated page with no query",
                     "that every result was seen; search pages lazy-load",
                     "that a kept argument filtered the results; query_kept "
-                    "describes the address LinkedIn settled on, and no "
-                    "result is ever named",
+                    "describes the address LinkedIn settled on"
+                    + (
+                        ", and the people it returns are the ones the page "
+                        "drew, not every person the search matched"
+                        if include_names
+                        else ", and no result is named unless include_names "
+                        "is passed"
+                    ),
                 ],
             }
     except Exception as exc:
