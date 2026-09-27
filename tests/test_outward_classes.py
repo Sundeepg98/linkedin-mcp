@@ -152,7 +152,7 @@ def test_the_brief_s_acts_each_have_a_record():
         "delete_own_comment",
         "withdraw_invitation",
         "withdraw_application",
-        "leave_group",
+        "withdraw_from_group",
     ):
         assert action in outward_classes.OUTWARD_CLASS_SPECS, action
 

@@ -674,8 +674,8 @@ OUTWARD_CLASS_SPECS: dict[str, OutwardClassSpec] = {
             "application (Help Center a512388)."
         ),
     ),
-    "leave_group": OutwardClassSpec(
-        action="leave_group",
+    "withdraw_from_group": OutwardClassSpec(
+        action="withdraw_from_group",
         outward_class="delete_or_withdraw_own",
         status="BUILT",
         target_kind="group_id",

@@ -266,7 +266,7 @@ REACHED: dict[str, tuple[str, str, str]] = {
     # preview and the click read it through ONE verdict,
     # ``group_leave.read_state``, and the click-time selector is the row's
     # disclosure, the first of the action's two presses.
-    "leave_group": (
+    "withdraw_from_group": (
         "tests/test_leave_group.py",
         GROUPS_LEAVE_MARKUP,
         GROUPS_LEAVE_ID,
@@ -504,7 +504,7 @@ def test_every_performable_action_is_either_reached_or_declared_unreachable():
     # reached over its own committed fixture rather than declared unreachable.
     # 13 -> 14 on 2026-09-24 (lane L7's merge): ``mark_company_interest``
     # shipped, reached over the tracked ``job_detail_hydrated`` capture.
-    # 14 -> 15 on 2026-09-24 (lane L8): ``leave_group`` shipped, reached over
+    # 14 -> 15 on 2026-09-24 (lane L8): ``withdraw_from_group`` shipped, reached over
     # its own committed synthetic Groups root rather than declared unreachable.
     assert len(PERFORMABLE) == 15, sorted(PERFORMABLE)
     assert len(REACHED) == 15, sorted(REACHED)

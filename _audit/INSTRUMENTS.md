@@ -10429,3 +10429,76 @@ rule from git. Merged, each alone would let one thing through that the other sto
 | path | shown failing by |
 |---|---|
 | `scripts/triage_messaging_gap_rows.py` (`misfiled_returns`, `unnamed_entered`, `NAMED_BLOCKER`, the composed exemption in `main`) | `tests/test_triage_instrument.py`: a marked row lost from the map is refused, not classed, and an entered row whose cell names no blocker is refused -- each on a BUILT fixture, through `main` as well as the function; on the real tree every returned row entered after the freeze and every other entered row names its blocker. Eight mutations of the committed script, each restored from git: the freeze rule exempting every row (7 failed), no refusal on an empty freeze read (1), the join ignoring every exemption (4), no refusal on a dialect (1), CONTROL 2b disabled (1), CONTROL 2c disabled (1), the returned class ignoring the marker (6), the marker never matching (3); restored, 17 passed |
+
+---
+
+## 80. A RETIRED REFUSAL IS KEPT WHERE ITS CITATIONS CAN FIND IT, AND A RECORD OF WHAT WAITS IS HELD AGAINST THE CENSUS (lane-l8-outward-classes, 2026-09-24)
+
+**Registered 2026-09-24.** Full record: `_audit/2026-09-24-lane-l8-outward-classes.md`.
+Numbered 80 by this lane (L8) rather than from the current maximum, so appends
+from lanes forked off one master cannot collide; renumber at the merge if the
+orchestrator allocates another.
+
+### 80.1 RETIRING AN ENTRY MUST NOT DELETE THE TEXT THE CENSUS CITES
+
+Three `PERMANENTLY_FORBIDDEN` entries left the dict under
+OUTWARD-CLASSES-BUILT-BEHIND-GRANTS. Thirty census rows and three exclusion
+families cited them by the verbatim anchor `"<key>": (`, and two class-table
+lines cited phrases inside them. The moment the dict shrank,
+`check_exclusion_basis` went red on 33 problems and `check_write_classes` on 2.
+The entries moved BYTE-FOR-BYTE into `outward_classes.RETIRED_PERMANENT_REFUSALS`,
+in the same dict-entry form, so the anchors resolve in their new file, and the
+texts are pinned by digest, so "verbatim" cannot drift.
+
+    A RETIRED REFUSAL IS STILL A RECORD OF WHAT WAS RULED. MOVE IT WHERE ITS
+    CITATIONS CAN FOLLOW; DO NOT DELETE IT WITH ITS FORCE.
+
+### 80.2 A RECORD THAT SAYS AN ACT WAITS IS CHECKED AGAINST THE CENSUS AND THE CODE
+
+`outward_classes.OUTWARD_CLASS_SPECS` says, per act, BUILT / NEEDS-CAPTURE /
+BLOCKED. That status is a claim three other artefacts make too:
+`writes.PERFORMABLE` (is it built), the census state of each row it names
+(COVERED for a build, GAP otherwise), and the record's own capture or blocker.
+The test holds all three together in both directions -- a record may not claim
+a build `writes` cannot perform, and a build may not sit behind a record that
+still says it waits.
+
+### 80.3 A NAME A SPEC PROPOSED IS NOT THE NAME THE BUILD MAY TAKE
+
+The 2026-09-05 spec named the tool `linkedin_leave_group` -- a name that does
+not exist in the tree, then or now -- and the build first took that name. Two
+guards then spoke, in this order. The asserted-name guard's
+control (`test_every_marker_class_fires_on_the_real_corpus`) went red: the
+spec document was its document-scoped mark's ONLY example, and a built name
+resolves, so the mark matched nothing. And the naming law
+(`test_a_sanctioned_write_cannot_evade_the_law_by_being_renamed`,
+`readonly.name_implies_write`) refused the name outright: "leave" is not a
+write verb, and adding it was measured and refused -- the whole word sits in
+six READ tools' descriptions, which the docstring check would read as write
+claims. The build took the ruling's own verb instead,
+`linkedin_withdraw_from_group`; the spec's name stays unbuilt, the mark keeps
+its example, and the first repair (deleting the mark) was reverted.
+
+    A GUARD'S RED MAY BE A CONSEQUENCE OF A CHOICE ANOTHER GUARD REFUSES.
+    RUN THE LAW THAT GOVERNS THE CHOICE BEFORE REPAIRING WHAT THE CHOICE BROKE.
+
+### 80.4 THE ENTRIES
+
+| path | shown failing by |
+|---|---|
+| `tests/test_outward_classes.py` -- `_record_problems`, the census-state agreement, the retired-text digests, the surviving six by name | ten plants into copies of the real records (a status off the list, a class off the three, a name-shaped target kind, BUILT without a performable spec, NEEDS-CAPTURE with no capture, BLOCKED without a reason, a live proof that does not say what HE NAMES, empty facts, empty reversibility, and a performable action whose record still waits), each convicted by name; and on the REAL data before the build and the census landed, the census-agreement test was red on eleven rows and the records test on the then-unbuilt leave-a-group act -- shown failing on the tree before it was shown passing |
+| `linkedin_server/group_leave.py` -- `checked_group_id`, the XPath row walk, `read_rows`, `membership_verdict`, `menu_item_gate`, `read_after_press`, `after_press_note`; the `withdraw_from_group` spec, `MENU_ITEM_ACTIONS` and arms in `writes.py`; `server.linkedin_withdraw_from_group` | `tests/test_leave_group.py` over a synthetic Groups root whose structure is the 2026-09-20 capture's: the exact-id rule shown failing as a prefix match; the in-row menu condition shown failing on a planted portal menu; the second-use guard shown failing without its flag; the three grant controls with zero navigations; every aim refusal at the verdict and at the preview with nothing minted; a dialog after the leave press counted and never answered; no synthetic group name in any refusal, block or receipt |
+
+### 80.5 DECLARED DISPOSABLE
+
+The lane's scratch probes -- the counts-only census of labelled controls over
+the 25 local captures and the 29 tracked fixtures, the shape readers over the
+Groups-page capture (the lead's and the child's), the row inventory joined to
+the exclusion table, the overlap of master's census rows with this lane's, and
+the salvage scripts that diffed the child's uncommitted worktree against the
+base, applied its hunks, and proved the merge both ways -- are declared
+disposable. What each measured is in the lane record with its numbers. The
+salvage method is the part worth keeping as a METHOD: when a child dies with
+its work uncommitted, diff its files against the base, apply the hunks onto
+the lead's branch refusing any hunk whose context is not unique, and prove the
+merge by applying the two deltas in both orders.

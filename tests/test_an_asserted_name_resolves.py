@@ -107,11 +107,7 @@ MARKERS = (
     "MARKED-PROPOSAL-DOC",
     "MARKED-PROPOSAL-TABLE",
     "MARKED-ABSENT",
-    # "MARKED-SPEC-DOC" was the sixth until 2026-09-24. Its one corpus example
-    # was `linkedin_leave_group` in the 2026-09-05 leave-group spec document;
-    # lane L8 built that tool, the name resolved, and control 2 below then
-    # found the mark matching nothing. It was deleted from the guard, not kept
-    # alive here -- which is what control 2 exists to demand.
+    "MARKED-SPEC-DOC",
 )
 
 
@@ -146,11 +142,7 @@ def test_the_registry_cannot_absorb_a_name_from_its_own_instruments():
             "linkedin_zzz_not_a_real_tool",   # planted in THIS file, below
             "linkedin_zzz_quoted_output",     # planted in THIS file, below
             "linkedin_applied_jobs",          # named in the guard's docstring
-            # "linkedin_leave_group" was the fourth until 2026-09-24, named in
-            # the guard's docstring as a name that did not exist. Lane L8 BUILT
-            # it that day (linkedin_server/server.py), so the registry now
-            # holds it from the server itself -- the one source it may read --
-            # and asserting it absent would be asserting a falsehood.
+            "linkedin_leave_group",           # named in the guard's docstring
         )
         if name in registry
     ]

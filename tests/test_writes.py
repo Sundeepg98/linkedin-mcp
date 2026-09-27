@@ -721,7 +721,7 @@ def test_what_ships_is_narrower_than_what_is_sanctioned():
         # N 64, lane L8), sanctioned and performable in the same move, under
         # OUTWARD-CLASSES-BUILT-BEHIND-GRANTS, on the admitted /groups/ root
         # and an item measured on all five membership rows' menus.
-        "leave_group",
+        "withdraw_from_group",
     }
     # THREE UNTIL 2026-08-25, four until 2026-08-30, five since. This line read
     # ``{"save_job", "unsave_job", "unfollow_company"}``.
@@ -851,7 +851,7 @@ def test_what_ships_is_narrower_than_what_is_sanctioned():
         # both drain perform()'s one click queue, the item appended only by
         # a gate that re-reads the menu (writes.MENU_ITEM_ACTIONS). No undo
         # is built here, and its spec says so.
-        "leave_group",
+        "withdraw_from_group",
     }
     assert writes.PERFORMABLE < sanctioned_actions
 
@@ -1342,7 +1342,7 @@ _UNMEASURED_REVERSIBILITY = {
     "mark_company_interest",
     # 2026-09-24 (census rows M C63 / N 64). No rejoin has ever been observed
     # and nothing here joins a group; its spec treats it as irreversible.
-    "leave_group",
+    "withdraw_from_group",
 }
 
 REVERSIBILITY_CLASS = {
@@ -1378,7 +1378,7 @@ REVERSIBILITY_CLASS = {
     # 2026-09-24. STILL-UNKNOWN whether a group left can be rejoined; it
     # carries irreversible=True regardless, because no join is built here and
     # an approval-gated group needs a manager to let him back in.
-    "leave_group": "STILL-UNKNOWN",
+    "withdraw_from_group": "STILL-UNKNOWN",
 }
 
 #: Which actions have had their reversibility MEASURED. Split out from the
@@ -1402,7 +1402,7 @@ REVERSIBILITY_MEASURED = {
     "send_message": False,
     "follow_company_page": True,
     "mark_company_interest": False,
-    "leave_group": False,
+    "withdraw_from_group": False,
 }
 
 def test_the_two_reversibility_tables_agree_with_each_other():

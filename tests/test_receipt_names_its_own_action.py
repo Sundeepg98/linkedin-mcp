@@ -185,10 +185,10 @@ _VERIFIED_FROM_OWNERS: dict[str, frozenset[str]] = {
     # ``"read receipt"`` is a cost, not a surface, which puts it in the same
     # class as the strength-class candidates rejected in the module docstring.
     "composer": frozenset({"send_message"}),
-    # ADDED 2026-09-24 FOR ``leave_group`` (lane L8). It verifies on a fresh
+    # ADDED 2026-09-24 FOR ``withdraw_from_group`` (lane L8). It verifies on a fresh
     # render of the Groups root, the one surface that lists his memberships,
     # and no other row names that page. Measured to occur in exactly one row.
-    "Groups root": frozenset({"leave_group"}),
+    "Groups root": frozenset({"withdraw_from_group"}),
 }
 
 #: THE SAME, FOR ``_WHERE_TO_LOOK``. These values are short phrases rather
@@ -232,10 +232,10 @@ _WHERE_TO_LOOK_OWNERS: dict[str, frozenset[str]] = {
     # would legitimately contain -- an InMail, a reply, a request -- and it
     # would be reported as a trespass on a surface those rows never claimed.
     "LinkedIn messages": frozenset({"send_message"}),
-    # ADDED 2026-09-24 FOR ``leave_group`` (lane L8): his Groups page is where
+    # ADDED 2026-09-24 FOR ``withdraw_from_group`` (lane L8): his Groups page is where
     # his memberships are listed and where the leave is verified, and no other
     # row sends him there. Measured to occur in exactly one row.
-    "Groups page": frozenset({"leave_group"}),
+    "Groups page": frozenset({"withdraw_from_group"}),
 }
 
 #: THE ONLY SETS OF ACTIONS ALLOWED TO SHARE A ``_WHERE_TO_LOOK`` VALUE
@@ -578,7 +578,7 @@ def test_the_action_set_is_the_one_this_file_was_measured_against():
     # so neither prints a phrase another action owns -- and no owner entry was
     # needed. ``update_profile_field``'s ``_VERIFIED_FROM`` row was rewritten
     # the same day (a fresh navigation after Save) and passed the same checks.
-    # FIFTEEN FROM 2026-09-24 (lane L8): ``leave_group``'s two rows were read.
+    # FIFTEEN FROM 2026-09-24 (lane L8): ``withdraw_from_group``'s two rows were read.
     # Its ``_WHERE_TO_LOOK`` value ("your LinkedIn Groups page") and its
     # ``_VERIFIED_FROM`` row (a fresh render of the Groups root) were checked
     # against every owned phrase above and contain none of another action's;

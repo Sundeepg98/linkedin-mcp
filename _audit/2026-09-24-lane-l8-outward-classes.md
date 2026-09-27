@@ -218,7 +218,7 @@ the state, the element, and why taking it cannot fire the act.
 
 | act | status | why | census rows |
 |---|---|---|---|
-| `leave_group` | BUILT (section 6) | the only act of the three classes whose pressed controls are in a capture file: his own `/groups/` page (2026-09-20) holds the row-scoped disclosure and the `Leave this group` item, and the 2026-09-05 probes measured the menus live; the address is admitted | `M C63`, `N 64` |
+| `withdraw_from_group` | BUILT (section 6) | the only act of the three classes whose pressed controls are in a capture file: his own `/groups/` page (2026-09-20) holds the row-scoped disclosure and the `Leave this group` item, and the 2026-09-05 probes measured the menus live; the address is admitted | `M C63`, `N 64` |
 | `repost_item` | NEEDS-CAPTURE | the Repost control is captured CLOSED four times and its menu never; the items the menu offers are what the act presses | `M C20` |
 | `repost_item_with_thoughts` | NEEDS-CAPTURE | the same menu, and the composer its second item opens | `M C21` |
 | `endorse_skill` | NEEDS-CAPTURE | no endorse control anywhere on disk (re-taken: 0 in 25 captures and 29 fixtures); it lives on a third party's profile, loadable only inside his named act, and no code path loads `/in/<slug>/` yet | `P E4`, `N 111`, `N 112` |
@@ -298,6 +298,113 @@ OUTWARD-CLASSES-BUILT-BEHIND-GRANTS.
 
 (5.2 the edits and 5.3 the pin moves are filled in as the census lands.)
 
+## 6. The build: leaving a group, census `M C63` and `N 64`
+
+**`linkedin_withdraw_from_group(group_id, confirm_token)`** -- spec
+`withdraw_from_group` in `writes.SANCTIONED_WRITES` (right after
+`mark_company_interest`), performable, grant-gated, off by default, one action,
+one caller-supplied numeric id, consumed once. Readers and verdicts in
+`linkedin_server/group_leave.py`; tests in `tests/test_leave_group.py` over the
+synthetic `tests/fixtures/synthetic/groups_leave_menu.html`. Built by this
+lane's child in its own worktree on 2026-09-24; the session stopped before the
+child committed, and on 2026-09-27 the lead salvaged its uncommitted work
+whole, reviewed every hunk, and merged it onto this branch. The merge was
+proven both ways -- applying the child's hunks onto the lane, and the lane's
+hunks onto the child's file, produce the same `writes.py` -- and the child's
+last run of its own file was green (23 passed), as was the lead's on the
+merged tree.
+
+**WHY IT IS NOT CALLED `leave_group`, as the 2026-09-05 spec proposed and the
+child first built it.** The naming law
+(`tests/test_writes.py::test_a_sanctioned_write_cannot_evade_the_law_by_being_renamed`)
+requires a sanctioned write's tool name to carry a word from
+`readonly.WRITE_VERBS`, and "leave" is not one. Adding it was MEASURED and
+refused: of the 54 registered tool descriptions, 8 contain the whole word, six
+of them READ tools, which the docstring check would then read as write claims.
+"withdraw" is on the list and is the ruling's own verb for this class. The
+tool's docstring says it withdraws his MEMBERSHIP and is not the separate,
+unbuilt act of withdrawing a pending request to join (`M C62`). The first name
+had also discharged the asserted-name guard's spec-document mark's only
+example; that mark, briefly deleted, is restored, because the spec's name
+stays unbuilt (register section 80.3).
+
+### 6.1 What it rests on, measured
+
+- **The address.** `/groups/`, the admitted Groups root, is the ONE address
+  this action loads -- a CONSTANT, so the id never enters a navigation
+  (PAGE-MAY-VETO-NEVER-SUPPLY by construction). The page can only refuse an
+  id; it cannot supply one.
+- **The controls, from the capture** (`cap-rc-groups.html`, 2026-09-20, read by
+  the child offline with JavaScript off and no network, counts only): 10
+  disclosures (`button[aria-expanded]`), 5 of them row-scoped by the walk below;
+  10 numeric group anchors, one per group; 5 `Leave this group` items in the
+  DOM, all under an `aria-hidden=true` container and none pressable while
+  closed; per id, exactly 1 disclosure, 1 row and 1 leave item for the 5
+  memberships and 0 for the 5 suggestions; an id with its last digit dropped
+  matches 0 (exact-id matching holds on the real hrefs). With one menu opened
+  in memory, exactly one item became pressable, and the in-row gate proceeded
+  for that row's id and refused the other nine.
+- **The rule, from the 2026-09-05 probes.** The row is found FROM THE CONTROL:
+  the nearest ancestor of an `aria-expanded` button that holds a numeric group
+  anchor, qualifying only if it holds anchors of exactly one id. The
+  disclosure's own label carries the group's NAME and is read nowhere.
+
+### 6.2 The act, two presses through the one click site
+
+1. The preview loads `/groups/` and requires exactly one row-scoped disclosure
+   whose row carries the id he named (`member`); anything else is `unknown` or
+   `not_member` and mints nothing. The block prints the id and the counts, and
+   says in words that the group's name is not read.
+2. At confirm, the same reading is taken fresh; click 1 is that row's
+   disclosure.
+3. A gate re-reads the page (briefly polled) and appends `Leave this group` to
+   the SAME click queue only if exactly one VISIBLE leave item is on the whole
+   page and it sits inside the target row (`MENU_ITEM_ACTIONS`, kept separate
+   from apply's pinned `TWO_CLICK_ACTIONS`). Otherwise nothing more is pressed
+   and the receipt says which condition refused.
+4. After click 2, the page is COUNTED before anything navigates: visible
+   dialogs and the buttons in them. **A dialog there is a further step that
+   opened and was NOT taken** -- the receipt says so in those words.
+5. The verification is a FRESH render of `/groups/`: a row still carrying the
+   id is `member` (performed false); the page drawing other membership rows and
+   none with the id is `not_member` (performed true); no membership row drawn
+   at all is `unknown`.
+
+`readonly.SANCTIONED_MUTATIONS` is unchanged: both presses drain `perform`'s
+one literal click. A click error for this action carries its exception TYPE
+only, because a Playwright message can print the element it resolved and this
+element's label is the group's name.
+
+### 6.3 What is not measured, and which way each gap fails
+
+- **What pressing `Leave this group` draws.** Fails closed: a confirmation is
+  counted and never answered; the fresh render then reads `member`, performed
+  false. The first supervised press is the measurement (live queue L1).
+- **Whether the menu opens in place.** A menu drawn outside the row is refused
+  by the in-row condition (a planted portal menu is shown failing).
+- **Whether a group left can be rejoined.** `reversible_by`: NOT through this
+  server -- no join write is built (census `M C61`), an approval-gated group
+  needs a manager, an unlisted group may not be findable again. Treated as
+  irreversible; `reversibility_class` STILL-UNKNOWN.
+- **His last group.** With no other membership row, the fresh render cannot
+  tell a finished leave from an undrawn page and answers `unknown` by
+  construction.
+
+### 6.4 The controls (`tests/test_leave_group.py`)
+
+The three grant controls with zero navigations on every refusal (no grant /
+forged / unredeemed / not a grant; a grant for another group or another verb;
+a second use of the token and of the grant object, the latter shown failing
+without its flag); the aim refusals at the verdict and at the preview with no
+grant minted (id absent, id on a suggestion row, id on two rows, no row-scoped
+disclosure, a name given as the id -- refused and not repeated); the exact-id
+rule shown failing as a prefix match; the menu gate refusing and pressing
+nothing further (item never visible, two items in the row, every row opening),
+with the in-row condition shown failing on a portal menu; a dialog after the
+leave press counted and never answered; the end-to-end leave verified off a
+fresh render; a click error carrying its type and never the element; and no
+synthetic group name in any refusal, block or receipt.
+
 ## 7. Gates
 
 **On `7e370ac` (the narrowing, before any census move or build):**
@@ -312,7 +419,7 @@ OUTWARD-CLASSES-BUILT-BEHIND-GRANTS.
   `test_the_other_two_count_claims_are_pinned_too.py`, `test_page_text_is_never_printed.py`,
   `test_readers_outside_dom_are_a_pinned_inventory.py`: 71 passed.
 - `tests/test_outward_classes.py`: 20 passed, **2 failed as designed** until
-  the build and the census land -- the BUILT record for `leave_group` has no
+  the build and the census land -- the BUILT record for the leave-a-group act had no
   performable spec yet, and nine governed rows still read EXCLUDED-RULED or GAP
   where their records say otherwise. That test is the instrument that proves
   the records and the census agree, shown failing on the real data first.
@@ -329,7 +436,7 @@ the offline fixture tests.
 
 | proof | HE NAMES | calls | page loads | presses | what it settles |
 |---|---|---|---|---|---|
-| L1 `linkedin_leave_group` | a group he belongs to and is willing to leave, by its NUMERIC id -- and NOT his last membership (with none left, the fresh render cannot tell "no memberships" from "not drawn yet", and the verification answers unknown by construction) | two, in a process started with `LINKEDIN_ENABLE_WRITES=1`: the preview (returns the counts, the state `member`, a token), then the same call with `confirm_token` within 120 s | 3 loads of `/groups/` -- preview, perform, verification | 2 -- the row's disclosure, then 'Leave this group' only if exactly one visible leave item sits in that row | EITHER the leave lands with no further step (verified `not_member` on the fresh render: performed True), OR a confirmation opens, nothing in it is pressed, the fresh render still reads `member` (performed False) and the receipt reports the dialog and its button count. In that case the next session is capture C9 on the same named group, and the confirm step is built from it |
+| L1 `linkedin_withdraw_from_group` | a group he belongs to and is willing to leave, by its NUMERIC id -- and NOT his last membership (with none left, the fresh render cannot tell "no memberships" from "not drawn yet", and the verification answers unknown by construction) | two, in a process started with `LINKEDIN_ENABLE_WRITES=1`: the preview (returns the counts, the state `member`, a token), then the same call with `confirm_token` within 120 s | 3 loads of `/groups/` -- preview, perform, verification | 2 -- the row's disclosure, then 'Leave this group' only if exactly one visible leave item sits in that row | EITHER the leave lands with no further step (verified `not_member` on the fresh render: performed True), OR a confirmation opens, nothing in it is pressed, the fresh render still reads `member` (performed False) and the receipt reports the dialog and its button count. In that case the next session is capture C9 on the same named group, and the confirm step is built from it |
 
 C9, queued only if L1 stops at a confirmation: `/groups/`, the same group HE
 NAMED, the row's menu opened and 'Leave this group' pressed, the confirmation

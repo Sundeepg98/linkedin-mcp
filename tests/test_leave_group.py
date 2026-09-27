@@ -1,4 +1,4 @@
-"""``leave_group`` -- census rows ``M C63`` and ``N 64`` -- built to ready-to-fire,
+"""``withdraw_from_group`` -- census rows ``M C63`` and ``N 64`` -- built to ready-to-fire,
 unfired, and the controls that keep a built write from being a fired one.
 
 WHAT THIS ACTION IS. Leaving one LinkedIn group he belongs to, named by its
@@ -50,7 +50,7 @@ _FIXTURE = Path(__file__).parent / "fixtures" / "synthetic" / "groups_leave_menu
 GROUPS_LEAVE_MARKUP = _FIXTURE.read_text(encoding="ascii")
 
 _MARKER = "<!--FIXTURE_CONFIG-->"
-_ACTION = "leave_group"
+_ACTION = "withdraw_from_group"
 _SPEC = spec_for_action(_ACTION)
 _URL = _SPEC.url_template
 
@@ -335,9 +335,9 @@ async def test_control_1_it_refuses_without_a_grant(monkeypatch, browser_page):
         await preview(_SPEC, target=GROUPS_LEAVE_ID, navigator=nav, page=browser_page)
     with pytest.raises(WriteAttemptError, match="disabled"):
         consume("anything", action=_ACTION, target=GROUPS_LEAVE_ID)
-    off = await server.linkedin_leave_group(group_id=GROUPS_LEAVE_ID)
+    off = await server.linkedin_withdraw_from_group(group_id=GROUPS_LEAVE_ID)
     assert off["error"] == "writes_disabled" and off["performed"] is False
-    off = await server.linkedin_leave_group(group_id=GROUPS_LEAVE_ID, confirm_token="forged")
+    off = await server.linkedin_withdraw_from_group(group_id=GROUPS_LEAVE_ID, confirm_token="forged")
     assert off["error"] == "writes_disabled" and off["performed"] is False
 
     # (b) writes on, and still no grant: no token, None, True, a forged token,
@@ -361,7 +361,7 @@ async def test_control_2_it_refuses_a_grant_for_another_group_or_another_verb(wr
     # ... and for a different VERB on the same digits: a company id of the
     # same shape is the pairing most worth refusing.
     block = await preview(_SPEC, target=GROUPS_LEAVE_ID, navigator=_Navigator(world()), page=browser_page)
-    with pytest.raises(WriteAttemptError, match="minted for 'leave_group'"):
+    with pytest.raises(WriteAttemptError, match="minted for 'withdraw_from_group'"):
         consume(block["to_confirm"], action="unfollow_company", target=GROUPS_LEAVE_ID)
 
 
@@ -546,7 +546,7 @@ async def test_a_click_error_carries_its_type_and_never_the_element(writes_on, b
 
 
 def test_the_spec_is_the_writespec_with_its_corrections():
-    assert _SPEC.tool_name == "linkedin_leave_group"
+    assert _SPEC.tool_name == "linkedin_withdraw_from_group"
     assert _SPEC.url_template == group_leave.GROUPS_URL == "https://www.linkedin.com/groups/"
     assert "{target}" not in _SPEC.url_template
     assert _SPEC.url_pattern.match(_SPEC.url_template)
@@ -575,13 +575,13 @@ def test_the_receipt_and_the_surface_tables_name_this_action():
     assert writes._WHERE_TO_LOOK[_ACTION] == "your LinkedIn Groups page"
     assert "RE-RENDERED" in writes._VERIFIED_FROM[_ACTION]
     assert writes._WRITE_SURFACE_FOR_ACTION[_ACTION] == "groups"
-    assert writes.SANCTIONED_WRITES["linkedin_leave_group"].action == _ACTION
+    assert writes.SANCTIONED_WRITES["linkedin_withdraw_from_group"].action == _ACTION
     keys = list(writes.SANCTIONED_WRITES)
-    assert keys[keys.index("linkedin_mark_company_interest") + 1] == "linkedin_leave_group"
+    assert keys[keys.index("linkedin_mark_company_interest") + 1] == "linkedin_withdraw_from_group"
 
 
 def test_the_tool_is_registered_and_says_what_it_does_not_do():
-    tool = getattr(server, "linkedin_leave_group", None)
+    tool = getattr(server, "linkedin_withdraw_from_group", None)
     assert callable(tool)
     doc = tool.__doc__ or ""
     for phrase in ("NUMERIC ID", "THE PAGE ONLY VETOES", "CONFIRMATION THIS SERVER HAS NEVER SEEN",

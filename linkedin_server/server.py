@@ -8732,10 +8732,17 @@ async def linkedin_mark_company_interest(
 
 
 @mcp.tool()
-async def linkedin_leave_group(
+async def linkedin_withdraw_from_group(
     group_id: str, confirm_token: str = ""
 ) -> dict[str, Any]:
     """Leave one LinkedIn group you belong to -- a WRITE, and treat it as irreversible.
+
+    NAMED "WITHDRAW FROM", NOT "LEAVE", on purpose: a write tool's name must
+    carry a write verb (``readonly.name_implies_write``), "leave" is not one,
+    and "withdraw" is the ruling's own verb for this class
+    (OUTWARD-CLASSES-BUILT-BEHIND-GRANTS: withdrawing one of your own items).
+    It withdraws your MEMBERSHIP; it is not the separate act of withdrawing a
+    pending request to join, which is not built.
 
     Same two-step shape and the same five gates as ``linkedin_save_job``: no
     ``confirm_token``, no action -- you get a block to read and a token that
@@ -8771,7 +8778,7 @@ async def linkedin_leave_group(
             preview to actually leave.
     """
     try:
-        return await _write_tool("leave_group", group_id, confirm_token)
+        return await _write_tool("withdraw_from_group", group_id, confirm_token)
     except Exception as exc:
         return _error(exc)
 

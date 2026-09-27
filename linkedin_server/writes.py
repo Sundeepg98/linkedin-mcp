@@ -1050,9 +1050,17 @@ SANCTIONED_WRITES: dict[str, WriteSpec] = {
     # construction. The page can refuse the id (it is not one of his rows);
     # it cannot supply one. And the group's NAME is read nowhere: it is in the
     # disclosure's own label, which no selector here names.
-    "linkedin_leave_group": WriteSpec(
-        action="leave_group",
-        tool_name="linkedin_leave_group",
+    #
+    # NAMED ``withdraw_from_group``, NOT ``leave_group`` AS THE 2026-09-05 SPEC
+    # PROPOSED: a sanctioned write's tool name must carry a write verb
+    # (``readonly.name_implies_write``; ``tests/test_writes.py``'s naming
+    # law), and "leave" is not one. Adding it to ``readonly.WRITE_VERBS`` was
+    # measured and refused: the whole word appears in six READ tools'
+    # descriptions, which the docstring check would then read as write claims.
+    # "withdraw" is on the list and is the ruling's own verb for this class.
+    "linkedin_withdraw_from_group": WriteSpec(
+        action="withdraw_from_group",
+        tool_name="linkedin_withdraw_from_group",
         url_template=group_leave.GROUPS_URL,
         url_pattern=re.compile(r"^https://www\.linkedin\.com/groups/$"),
         exempt_substring=None,
@@ -5599,7 +5607,7 @@ PERFORMABLE: frozenset[str] = frozenset(
         # WHAT IT CANNOT SAY is what the leave press does: a confirmation, if
         # one opens, is counted and never answered, and the fresh render
         # decides. ENABLING IS NOT FIRING: its live proof is aimed by him.
-        "leave_group",
+        "withdraw_from_group",
         # THE THIRTEENTH, 2026-09-23, census row ``N 47``, and the first write
         # added under the operator's reversible-first-round class since the
         # round's own three. Every clause the others needed is true of it:
@@ -5828,7 +5836,7 @@ TWO_CLICK_ACTIONS: frozenset[str] = frozenset({"apply_job"})
 #: same reason ``TWO_CLICK_ACTIONS`` is, and kept SEPARATE from it on purpose:
 #: that set is apply's, pinned, and its gate reads a modal rather than a menu.
 #: See ``group_leave.menu_item_gate`` for what the gate requires.
-MENU_ITEM_ACTIONS: frozenset[str] = frozenset({"leave_group"})
+MENU_ITEM_ACTIONS: frozenset[str] = frozenset({"withdraw_from_group"})
 
 #: How long to wait for the anchor to be actionable. Generous, because the
 #: alternative to waiting is clicking early, and a click that lands on a
@@ -6090,7 +6098,7 @@ def anchor_label_for(
         # control's name carries no company; identity comes from the card it
         # sits in, checked at preview and again at click time.
         return company_interest.OFF_LABEL
-    if spec.action == "leave_group":
+    if spec.action == "withdraw_from_group":
         # THE ITEM THAT PERFORMS THE LEAVE, exact, measured on all five
         # membership rows' menus. The FIRST press is the row's disclosure, and
         # it is aimed STRUCTURALLY -- by the row carrying the numeric id --
@@ -6413,7 +6421,7 @@ _WRITE_SURFACE_FOR_ACTION: dict[str, str] = {
     "follow_company_page": "organisation Page",
     # A group id is a kind no other action uses; named per action anyway, so
     # the auth-wall message names the page the click was going to land on.
-    "leave_group": "groups",
+    "withdraw_from_group": "groups",
 }
 
 
@@ -6476,7 +6484,7 @@ _WHERE_TO_LOOK: dict[str, str] = {
     "mark_company_interest": "the About-the-company card on that posting",
     # The page the leave is pressed on and verified off: his memberships are
     # listed there and nowhere else this server may read.
-    "leave_group": "your LinkedIn Groups page",
+    "withdraw_from_group": "your LinkedIn Groups page",
     # THE TWELFTH, and the only row here naming a surface this server
     # deliberately will NOT open. Reading the thread is what would settle
     # a send, and it costs a read receipt on a real person -- his to
@@ -6617,7 +6625,7 @@ _VERIFIED_FROM["mark_company_interest"] = (
     "means the interest was not signalled -- and its positive says only that "
     "the control moved, because the label it moves to has never been captured."
 )
-_VERIFIED_FROM["leave_group"] = (
+_VERIFIED_FROM["withdraw_from_group"] = (
     "THE SAME PAGE, RE-RENDERED by a fresh navigation to the Groups root: his "
     "memberships are listed there and on no other surface this server may "
     "read, so this is a new render from LinkedIn rather than an independent "
@@ -7078,7 +7086,7 @@ async def _live_control(
             return (state, why, "")
         return (state, why, company_interest.OFF_CONTROL_IN_CARD)
 
-    if spec.action == "leave_group":
+    if spec.action == "withdraw_from_group":
         # THE SAME READING AND THE SAME VERDICT THE PREVIEW TOOK, on the Groups
         # page the click is about to land on: freshness, not a second source.
         # The selector returned is the FIRST press only -- the row's
@@ -8096,7 +8104,7 @@ async def _verify_after(
             landed,
         )
 
-    if spec.action == "leave_group":
+    if spec.action == "withdraw_from_group":
         # A FRESH RENDER OF THE GROUPS ROOT, and the navigation is also what
         # discards a menu or a confirmation the press left open -- the one
         # this server counted after the press and did not answer. Three
