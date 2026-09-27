@@ -1765,5 +1765,8 @@ the evidence without the call log, and the apply test passes unchanged.
     149e787  (5 of n) the cold re-check's findings, fixed
     9d65c6f  (6 of n) the warm re-check's findings: no position in the press, strict presses
     c79216d  (7 of n) the second warm re-check: two blank letters, and receipts that re-check whose
-    (8 of n) this record, `_audit/INSTRUMENTS.md` 69.11, the re-measured timings and the
-             regenerated register
+    323857d  (8 of n) this record, `_audit/INSTRUMENTS.md` 69.11, the re-measured timings and
+             the regenerated register
+    749d90a  (9 of n) the two doc-guard reds the record's own gate raised: the proposed N 5 tool
+             marked as proposed, and the regenerated register triaged as no correction
+    (10 of n) this list brought up to date
