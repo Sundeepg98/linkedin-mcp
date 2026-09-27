@@ -78,6 +78,17 @@ file lands; what changes is that the SET of fields carrying page text is now
 pinned, so a fourth raw field fails here instead of shipping -- which is the
 class-not-instance discipline `test_a_thread_id_never_leaves_the_module.py`
 states and which that file could not extend to this class without a drive.
+
+## AND THEN THE PAYLOAD DID CHANGE (2026-09-27)
+
+The orchestrator ordered the activator to aim the pill by its EXACT name, on
+lane G's cold verification (a decoy whose label merely contained the word was
+pressed and its label published). Section 3 below was the proof that
+`pill_label` carried raw page text; it is now the proof that it cannot. A
+control whose name is page text -- the plant -- is not a pill, so nothing is
+pressed and the refusal carries counts only; `pill_label` can only ever hold
+a control's name that EQUALS a permitted word. The set of page-text fields is
+now empty, and still pinned, so a raw field added later fails here.
 """
 
 from __future__ import annotations
@@ -276,56 +287,77 @@ async def test_the_sibling_error_field_is_the_type_alone():
 #: SET is pinned, not the one member: pinning `pill_label` by name would
 #: protect the one field already known and none of the next one, which is the
 #: exact mistake `test_a_thread_id_never_leaves_the_module.py` was written
-#: about. An eighth field added raw fails here.
-PAGE_TEXT_FIELDS: tuple[str, ...] = ("$.pill_label",)
+#: about. An eighth field added raw fails here. EMPTY SINCE 2026-09-27: it
+#: held `$.pill_label` until the activator required an exact name.
+PAGE_TEXT_FIELDS: tuple[str, ...] = ()
 
 
 @pytest.mark.asyncio
 @pytest.mark.parametrize("name", dom.MESSAGING_FILTERS)
-async def test_exactly_one_returned_field_carries_page_text(name: str) -> None:
+async def test_no_returned_field_carries_page_text(name: str) -> None:
     """Every permitted filter name, not one. The closed tuple is the subject.
 
-    Driving all seven costs nothing and answers a question one would not:
-    whether the carrying field depends on WHICH filter was asked for. It does
-    not -- the label is read off whatever control matched, so the filter name
-    selects the pill and the PAGE chooses the string.
+    Every control on this page is named with the PLANT, so none is named
+    exactly a permitted word: the activator presses nothing, and the refusal
+    it returns carries counts, never a label. Until 2026-09-27 this drive
+    ACTIVATED and `pill_label` carried the plant for all seven names.
     """
     result = await dom.activate_messaging_filter(_ClickablePage(), name)
 
-    assert result["activated"] is True, result
+    assert result["activated"] is False, result
+    assert result["found"] == 0 and result["containing"] >= 1, result
     assert sorted(carries_the_plant(result)) == sorted(PAGE_TEXT_FIELDS), result
 
 
+class _ExactPillLocator(_ClickableLocator):
+    """The same double, its controls named exactly the permitted word."""
+
+    def __init__(self, depth: int = 0, word: str = "InMail") -> None:
+        super().__init__(depth)
+        self._word = word
+
+    def nth(self, index: int) -> "_ExactPillLocator":
+        return _ExactPillLocator(self._depth + 1, self._word)
+
+    async def get_attribute(self, name: str, **kwargs: Any) -> Any:
+        return self._word
+
+    async def inner_text(self, **kwargs: Any) -> str:
+        return self._word
+
+    async def count(self) -> int:
+        return 1
+
+
+class _ExactPillPage(_ClickablePage):
+    def get_by_role(self, *args: Any, **kwargs: Any) -> _ExactPillLocator:
+        return _ExactPillLocator()
+
+
 @pytest.mark.asyncio
-async def test_the_pill_label_is_not_drawn_from_the_closed_tuple():
-    """It is the PAGE's string, not the caller's argument.
+async def test_the_pill_label_is_the_permitted_word_and_never_other_text():
+    """What was the PAGE's string is now bounded by `dom.MESSAGING_FILTERS`:
+    the label published is the pressed pill's own spelling of the word, and a
+    control named otherwise is never pressed at all (the test above)."""
+    result = await dom.activate_messaging_filter(_ExactPillPage(), "inmail")
 
-    The locator matches `name=wanted, exact=False`, so the control's
-    accessible name need only CONTAIN the permitted word -- and the label is
-    then read back whole with `get_attribute`/`inner_text`. What comes back
-    is the control's entire text, which is not bounded by
-    `dom.MESSAGING_FILTERS` in either length or content.
-    """
-    result = await dom.activate_messaging_filter(_ClickablePage(), "inmail")
-
-    assert result["filter"] == "inmail", result
-    assert result["pill_label"] == PLANT, result
-    assert result["pill_label"] not in dom.MESSAGING_FILTERS, result
+    assert result["activated"] is True, result
+    assert result["pill_label"] == "InMail", result
+    assert dom.filter_name_matches(result["pill_label"], "inmail"), result
 
 
 @pytest.mark.asyncio
 async def test_the_two_redacted_url_fields_are_still_redacted_beside_it():
-    """THE FIELD BESIDE IT WAS FIXED AND THIS ONE WAS NOT.
+    """THE FIELD BESIDE IT WAS FIXED AND, SINCE 2026-09-27, SO IS THIS ONE.
 
-    Asserted together on purpose: the point is not that `pill_label` carries
-    text, it is that it carries text WHILE its neighbours are redacted at the
-    source. Reading either fact alone loses the finding.
+    Asserted together on purpose: until the exact-name rule, `pill_label`
+    carried text WHILE its neighbours were redacted at the source. Now no
+    field of the refusal carries the plant, the urls least of all.
     """
     result = await dom.activate_messaging_filter(_ClickablePage(), "inmail")
 
-    assert carries_the_plant(result["url_before"]) == [], result
-    assert carries_the_plant(result["url_after"]) == [], result
-    assert carries_the_plant(result["pill_label"]) != [], result
+    assert carries_the_plant(result) == [], result
+    assert "pill_label" not in result, result
 
 
 def test_the_reader_guard_cannot_supply_a_permitted_filter_name():

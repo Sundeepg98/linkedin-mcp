@@ -4805,7 +4805,10 @@ def messaging_filters(html: str) -> dict[str, Any]:
         # LinkedIn pills nest spans, so inner text is often empty and the
         # aria-label is the only thing carrying the word.
         aria_label = (aria.group(1) if aria else "").strip()
-        label = (aria_label + " " + (inner or "")).strip()
+        # THE ACCESSIBLE NAME, not the two joined: since the shared rule became
+        # EXACT (2026-09-27, ``dom.filter_name_matches``), a pill whose
+        # aria-label repeats its text would no longer equal its word joined.
+        label = aria_label or (inner or "").strip()
         for name in _FILTER_NAMES:
             # THE SAME PREDICATE THE ACTIVATOR USES. Importing it here rather
             # than re-implementing "does the name appear in the label" is the

@@ -779,13 +779,30 @@ def test_the_compose_surface_is_still_refused_after_all_of_this():
 
 #: Labels LinkedIn could plausibly put on a pill. Only the first is what the
 #: old activator demanded; every other one made the two paths disagree.
+#: Labels the shared rule FINDS since it became exact (2026-09-27), and labels
+#: it no longer finds -- a name that merely contains the word. The property
+#: below is agreement, and it is asserted over both.
 REAL_LABELS = [
     "InMail",
+    "inmail",
+    "  InMail ",
+]
+CONTAINING_LABELS = [
     "InMail messages",
     "InMail 1 new",
     "Filter by InMail",
-    "inmail",
 ]
+
+
+@pytest.mark.parametrize("label", CONTAINING_LABELS)
+def test_a_label_that_only_contains_the_word_is_seen_by_neither_path(label):
+    """THE OTHER HALF OF AGREEMENT, since the rule became exact: what the
+    activator will not press, the enumerator does not report as a pill."""
+    from linkedin_server import dom
+
+    html = f'<button aria-label="{label}"><span>x</span></button>'
+    assert shape.messaging_filters(html)["filters_seen"] == []
+    assert dom.filter_name_matches(label, "inmail") is False
 
 
 @pytest.mark.parametrize("label", REAL_LABELS)
@@ -803,7 +820,8 @@ def test_whatever_the_enumerator_SEES_the_activator_can_FIND(label):
 
     There is one predicate now and both call it, so this asserts the property
     rather than the implementation: anything enumerated as present must be
-    findable.
+    findable. (Since 2026-09-27 the predicate is EXACT; the labels that only
+    contain the word are the test above, seen by neither path.)
     """
     from linkedin_server import dom
 
@@ -830,7 +848,7 @@ def test_the_shared_rule_still_says_no_to_a_different_pill():
 @pytest.mark.parametrize(
     "html,name,source",
     [
-        ('<button aria-label="InMail messages">x</button>', "InMail messages", "aria-label"),
+        ('<button aria-label="InMail">x</button>', "InMail", "aria-label"),
         ('<button class="pill">InMail</button>', "InMail", "text"),
     ],
     ids=["labelled", "text only"],

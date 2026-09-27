@@ -590,22 +590,22 @@ class _ConversationPageWithAControl(_ConversationPage):
         )
 
 
-def test_open_messaging_s_filter_reading_is_its_declared_legacy_path():
+def test_open_messaging_s_filter_reading_publishes_no_decoy_label():
     """FOUND BY LANE G'S COLD VERIFICATION, 2026-09-27: open_messaging
     publishes the filter controls it finds -- each one's accessible name and
-    href -- so a control whose label carries a filter word carries its label
-    out, outside any record, with or without ``include_names``. The pills are
-    LinkedIn's interface, not people, and this is pinned like the viewer
-    tool's insights: the plant may leave a record under ``filters`` and
-    nowhere else. (The same finding's other half -- that asking for a filter
-    can click a control that is not a pill -- is not this lane's to change.)"""
+    href -- and a control whose label merely CONTAINED a filter word was
+    published with its whole label, outside any record. It was pinned here as
+    a legacy path (``filters``) the same day, and closed the same day by the
+    orchestrator's order that a pill is found by its EXACT name
+    (``dom.filter_name_matches``, which the enumerator shares): the decoy is no
+    pill, so nothing it says leaves at all."""
     envelope = _drive(
         server_module.linkedin_open_messaging, _ConversationPageWithAControl(),
         include_names=True,
     )
     outside, records = carries_the_plant_outside_records(envelope)
     assert records == 2, envelope
-    assert outside and all(path.startswith("$.filters.") for path in outside), outside
+    assert outside == [], outside
 
 
 def test_a_list_that_published_the_raw_label_is_convicted(monkeypatch):

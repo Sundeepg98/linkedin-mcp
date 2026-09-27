@@ -3106,7 +3106,22 @@ MESSAGING_FILTERS: tuple[str, ...] = (
 
 
 def filter_name_matches(accessible_name: str, wanted: str) -> bool:
-    """THE ONE RULE BOTH PATHS USE. Substring, case-insensitive.
+    """THE ONE RULE BOTH PATHS USE. EXACT, with case and whitespace folded.
+
+    IT WAS A SUBSTRING MATCH UNTIL 2026-09-27, for the reason below, and the
+    orchestrator ordered it exact that day on lane G's cold verification: the
+    composer's list draws no "Other" pill, so asking for ``other`` pressed
+    whichever button's name merely CONTAINED the word -- a sanctioned click on
+    a read path, landing on a control nobody named -- and published that
+    control's whole label. A name that contains the word is not the pill.
+    Both paths still call this one function, so the disagreement below stays
+    impossible; what changed is the question they both ask. The measured pills
+    are named by their visible text alone ("Jobs", "Unread", "Connections",
+    "InMail", "Starred" on the compose-list capture's structure), and each of
+    those is its word exactly. A live label that decorates the word -- "InMail
+    messages" -- is now refused, by count, rather than pressed.
+
+    THE HISTORY, kept because it is why there is one predicate at all:
 
     THIS EXISTS BECAUSE THE TWO PATHS DISAGREED ON HIS LIVE PAGE, inside a
     single response: the enumerator reported an ``inmail`` pill and the
@@ -3127,7 +3142,8 @@ def filter_name_matches(accessible_name: str, wanted: str) -> bool:
     So there is now ONE predicate and both call it. A disagreement of this
     shape is not possible while that holds, and a test asserts it.
     """
-    return str(wanted or "").strip().lower() in str(accessible_name or "").lower()
+    word = " ".join(str(wanted or "").split()).casefold()
+    return bool(word) and " ".join(str(accessible_name or "").split()).casefold() == word
 
 
 def assert_permitted_filter(name: str) -> str:
@@ -3217,9 +3233,15 @@ def classify_filter_movement(before: str, after: str) -> str:
 async def activate_messaging_filter(page: Any, name: str) -> dict[str, Any]:
     """Activate one filter pill. THE ONLY CLICK ON ANY READ PATH.
 
-    Located by ACCESSIBLE NAME with substring matching -- the same rule the
-    enumerator uses -- rather than by a selector rebuilt from a guess about
-    LinkedIn's exact capitalisation. See :func:`filter_name_matches`.
+    Located by ACCESSIBLE NAME, and pressed only when EXACTLY ONE control's
+    name EQUALS the permitted word (case and whitespace folded) -- the same
+    rule the enumerator uses, :func:`filter_name_matches`. Playwright finds
+    the controls whose name CONTAINS the word; each one's name is read back and
+    compared exactly; anything but one exact match is refused WITHOUT A PRESS,
+    and the refusal says what it saw as counts (``found`` exact, ``containing``
+    by substring) -- never as a label, because a label it did not press is page
+    text. Substring alone pressed a decoy until 2026-09-27; see
+    ``tests/test_a_filter_pill_is_pressed_by_its_exact_name.py``.
 
     Returns what happened, including the url before and after, because the
     caller has to be able to tell a FILTER from a NAVIGATION. If activating a
@@ -3259,35 +3281,43 @@ async def activate_messaging_filter(page: Any, name: str) -> dict[str, Any]:
     wanted = assert_permitted_filter(name)
     before = page.url
     try:
-        pills = page.get_by_role("button", name=wanted, exact=False)
-        count = int(await pills.count())
+        candidates = page.get_by_role("button", name=wanted, exact=False)
+        containing = int(await candidates.count())
+        # THE ACCESSIBLE NAME of each candidate, read back and compared
+        # EXACTLY. Reading aria-label alone reported empty for every
+        # successful activation on his live page -- his pills carry visible
+        # TEXT and no aria-label -- so the text is the fallback, as it is in
+        # the accessible-name computation itself.
+        exact: list[tuple[int, str]] = []
+        for index in range(min(containing, FILTER_CANDIDATES_READ)):
+            candidate = candidates.nth(index)
+            seen = str(await candidate.get_attribute("aria-label") or "").strip()
+            if not seen:
+                seen = str(await candidate.inner_text() or "").strip()
+            if filter_name_matches(seen, wanted):
+                exact.append((index, seen))
     except Exception as exc:  # noqa: BLE001 - reported, never fatal
         return {"activated": False, "why": f"pill unreadable ({type(exc).__name__})"}
-    if count != 1:
+    if len(exact) != 1:
         return {
             "activated": False,
-            "found": count,
+            "found": len(exact),
+            "containing": containing,
             "why": (
-                f"expected exactly one {name!r} pill and found {count}. One is "
-                "the measured shape; anything else is a page this reader has "
-                "not seen, and it is not clicked on speculation."
+                f"expected exactly one control named exactly {wanted!r} and "
+                f"found {len(exact)}; {containing} control(s) have a name "
+                "that contains the word. One exact pill is the measured shape. "
+                "A control whose name merely contains the word is not the pill "
+                "and is not pressed, and anything else is a page this reader "
+                "has not seen: nothing was clicked."
             ),
         }
 
-    # THE ACCESSIBLE NAME, which is what the locator matched on. Reading
-    # aria-label alone reported empty for every successful activation on his
-    # live page -- his pills carry visible TEXT and no aria-label -- and an
-    # empty label beside activated:true reads like a contradiction when it is
-    # only a field looking in the wrong place.
-    label = ""
-    try:
-        label = str(await pills.first.get_attribute("aria-label") or "").strip()
-        if not label:
-            label = str(await pills.first.inner_text() or "").strip()
-    except Exception:  # pragma: no cover - a report, not a gate
-        label = ""
-
-    await pills.first.click(timeout=FILTER_CLICK_TIMEOUT_MS)
+    # The published label is the pressed pill's own spelling of the word,
+    # which by construction equals it -- never another control's text.
+    index, label = exact[0]
+    pill = candidates.nth(index)
+    await pill.click(timeout=FILTER_CLICK_TIMEOUT_MS)
     try:
         await page.wait_for_timeout(FILTER_SETTLE_MS)
     except Exception:  # pragma: no cover - a settle, not a gate
@@ -3358,6 +3388,12 @@ async def activate_messaging_filter(page: Any, name: str) -> dict[str, Any]:
 #: after it. Short: this is a client-side filter, not a page load.
 FILTER_CLICK_TIMEOUT_MS = 10_000
 FILTER_SETTLE_MS = 2_000
+
+#: How many candidate controls' names are read before the exact comparison.
+#: The composer draws one control per pill and a handful of others; a page
+#: offering more candidates than this is one this reader has not seen, and an
+#: exact pill past the bound is simply not found -- a refusal, not a press.
+FILTER_CANDIDATES_READ = 20
 
 
 # ---------------------------------------------------------------------------

@@ -4452,7 +4452,9 @@ async def linkedin_open_messaging(
     THAT CLICK IS SANCTIONED AND NARROW. Only seven named pills can be
     activated -- focused, other, unread, jobs, connections, inmail, starred --
     checked against a fixed list before any selector is built, so an arbitrary
-    string can never become a click target. It is the SECOND entry in
+    string can never become a click target -- and pressed only when exactly
+    one control is named EXACTLY that word; a control whose name merely
+    contains it is refused, by count, and never pressed. It is the SECOND entry in
     ``readonly.SANCTIONED_MUTATIONS`` and the ONLY ONE OUTSIDE
     ``writes.perform`` -- which is the property worth stating, and is what
     "the only other entry" meant when there were two of them and four
