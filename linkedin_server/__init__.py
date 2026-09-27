@@ -57,11 +57,14 @@ chosen by hand and did not include it. The instrument worked; the selection
 of instruments did not. The count is twelve now: the same lane added three
 for the copy link of the operator's own post.
 
-WHAT IS TRUE, measured rather than remembered: fifteen write tools ship,
+WHAT IS TRUE, measured rather than remembered: seventeen write tools ship,
 twelve sanctioned mutating calls exist, writes are off unless a per-process
 flag is set, and every write needs a single-use token from its own preview --
 a token that works once, and a redeemed grant that ``perform`` will not act on
-twice. (This read "fourteen write tools" until lane L5's merge of master
+twice. (This read "fifteen write tools" until lane L5's follow-up, 2026-09-27,
+which brought ``linkedin_connect_from_profile`` and
+``linkedin_message_from_profile`` -- their press and their fill are
+``perform``'s own, so the mutating-call count did not move; "fourteen write tools" until lane L5's merge of master
 66aaa95, 2026-09-24, which brought ``linkedin_send_reply`` -- the fourteenth
 on that lane's branch; "thirteen write tools" until lane L7's merge the same
 day brought ``linkedin_mark_company_interest``; and "twelve write tools"

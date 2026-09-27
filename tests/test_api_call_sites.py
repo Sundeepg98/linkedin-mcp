@@ -339,4 +339,11 @@ def test_the_scope_statement_cost_no_boundary_movement():
     # moved no digest. A function arriving is exactly the thing that would
     # falsify "nothing but prose changed", so the number must move
     # deliberately, with the arrival named, rather than be derived.
-    assert len(functions) == 14, len(functions)
+    #
+    # SEVENTEEN SINCE 2026-09-27 (lane L5's follow-up): the second door --
+    # ``valid_named_profile_segment``, ``named_profile_url`` and
+    # ``assert_named_profile_url`` -- arrived together, and the boundary
+    # freeze was re-frozen for exactly those three in the same change
+    # (tests/test_readonly_boundary_invariant.py names them and attributes the
+    # digest). The module docstring's scope statement is untouched.
+    assert len(functions) == 17, len(functions)
