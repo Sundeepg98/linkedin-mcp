@@ -2269,7 +2269,7 @@ SANCTIONED_WRITES: dict[str, WriteSpec] = {
         url_template="https://www.linkedin.com/in/{target}/",
         url_pattern=re.compile(
             r"^https://www\.linkedin\.com/in/"
-            r"(?:[A-Za-z0-9]|%[0-9A-Fa-f]{2})(?:[A-Za-z0-9_\-]|%[0-9A-Fa-f]{2}){2,99}/$"
+            r"(?:[A-Za-z0-9]|%[89A-Fa-f][0-9A-Fa-f])(?:[A-Za-z0-9_\-]|%[89A-Fa-f][0-9A-Fa-f]){2,99}/$"
         ),
         exempt_substring=None,
         summary=(
@@ -2289,8 +2289,10 @@ SANCTIONED_WRITES: dict[str, WriteSpec] = {
             "in the page -- and draw exactly ONE control named 'Invite <that "
             "person> to connect', the label measured 44 times on other "
             "surfaces. No label, name or id crosses into this server: the "
-            "control is addressed by its position, which the page's own "
-            "script computes."
+            "control is addressed by its position INSIDE THAT PERSON'S "
+            "TOPCARD, which the page's own script computes, and the press is "
+            "scoped to the topcard, so a page redrawn mid-press cannot hand it "
+            "to somebody else's control."
         ),
         wrong_state_note=(
             "Not a toggle. No Connect control naming this person means you may "
@@ -2335,7 +2337,7 @@ SANCTIONED_WRITES: dict[str, WriteSpec] = {
         url_template="https://www.linkedin.com/in/{target}/",
         url_pattern=re.compile(
             r"^https://www\.linkedin\.com/in/"
-            r"(?:[A-Za-z0-9]|%[0-9A-Fa-f]{2})(?:[A-Za-z0-9_\-]|%[0-9A-Fa-f]{2}){2,99}/$"
+            r"(?:[A-Za-z0-9]|%[89A-Fa-f][0-9A-Fa-f])(?:[A-Za-z0-9_\-]|%[89A-Fa-f][0-9A-Fa-f]){2,99}/$"
         ),
         exempt_substring=None,
         summary=(
@@ -2353,9 +2355,12 @@ SANCTIONED_WRITES: dict[str, WriteSpec] = {
             "draw exactly ONE control named 'Message <that person>' -- a "
             "button, or a link to the composer (the destination measured on "
             "16 of the 18 Message controls captured) -- with no conversation "
-            "composer already open. The words are typed only into the ONE "
-            "composer the press opens, only when the profile reads '1st', and "
-            "Send is pressed only when the box holds exactly your words."
+            "composer already open. The words are typed only when the profile "
+            "reads '1st' and exactly ONE empty composer is on the page after "
+            "the press, in the one conversation whose title reads exactly that "
+            "person's name (compared in the page), and Send is pressed only "
+            "when the box holds exactly your words and that title still reads "
+            "their name."
         ),
         wrong_state_note=(
             "Not a toggle. A Message control that is a link anywhere but the "
@@ -7568,16 +7573,24 @@ async def _live_control(
         # re-reads who the page names and which control is theirs, and the
         # selector is built from the POSITION the page's own script returned
         # -- no name, label or id reaches this process.
+        #
+        # THE POSITION IS COUNTED INSIDE THE OWNER'S TOPCARD, AND THE PRESS IS
+        # SCOPED TO IT (the cold re-check, 2026-09-27). A page-wide
+        # ``control >> nth=K`` is re-resolved by Playwright when the element
+        # it found is re-rendered while the press waits, and a stranger's
+        # control drawn earlier in the page during that window took position
+        # K and the press. Scoped, a re-resolution can reach only a control
+        # of the owner's own topcard.
         reading = await dom.read_named_profile(page)
         if spec.action == "connect_from_profile":
             state, why, index = named_profile.connect_state(reading)
             if state != named_profile.CONNECT_FROM or index is None:
                 return (state, why, "")
-            return (state, why, dom.invite_control_selector(index))
+            return (state, why, dom.topcard_invite_control_selector(index))
         state, why, index = named_profile.message_state(reading)
         if state != named_profile.MESSAGE_FROM or index is None:
             return (state, why, "")
-        return (state, why, dom.message_control_selector(index))
+        return (state, why, dom.topcard_message_control_selector(index))
 
     if spec.action == "mark_company_interest":
         # THE SAME READER THE PREVIEW USED, ON THE SAME PAGE: freshness, not a
@@ -8992,15 +9005,21 @@ async def _opened_conversation_gate(
 ) -> dict[str, Any]:
     """After the Message press and BEFORE a word is typed: may they go in?
 
-    Three reads, none of them a navigation: WHETHER the press moved the
-    browser (the address after it, compared in a condition with the one
-    before it -- the landing was already held to the named profile before
-    the press, so an unchanged address is still that profile), what the
-    profile now names, and the conversation the press opened, with his words
-    compared in the page for the before-count. Neither address is bound to
-    anything a navigation could take. The decision is
-    :func:`named_profile.opened_conversation_gate`'s.
+    A BOUNDED WAIT for a composer to be drawn (it decides nothing -- see
+    :func:`named_profile.wait_for_opened_composer`), then three reads, none
+    of them a navigation: WHETHER the press moved the browser (the address
+    after it, compared in a condition with the one before it -- the landing
+    was already held to the named profile before the press, so an unchanged
+    address is still that profile), what the profile now names and whose
+    conversation the one composer sits in (the page's own comparisons), and
+    the conversation the press opened, with his words compared in the page
+    for the before-count. Neither address is bound to anything a navigation
+    could take. The decision is :func:`named_profile.opened_conversation_gate`'s.
+
+    THE WAIT COMES FIRST so the address is read after it: a press that
+    navigates may not have moved ``page.url`` the instant it returned.
     """
+    composer_wait = await named_profile.wait_for_opened_composer(page)
     try:
         still_on_the_profile = (
             address_before_press is not None and str(page.url) == address_before_press
@@ -9012,7 +9031,10 @@ async def _opened_conversation_gate(
         page, text=_text_component_of(spec, grant.target)
     )
     return named_profile.opened_conversation_gate(
-        profile_after, conversation, still_on_the_profile=still_on_the_profile
+        profile_after,
+        conversation,
+        still_on_the_profile=still_on_the_profile,
+        composer_wait=composer_wait,
     )
 
 
@@ -9900,6 +9922,27 @@ async def _apply_submit_gate(page: Any) -> dict[str, Any]:
     return out
 
 
+def describe_click_error(exc: BaseException) -> str:
+    """What a press, a fill or a choice that raised inside ``perform`` is
+    reported as: THIS PACKAGE'S OWN refusal whole, anything else by its TYPE.
+
+    FOUND BY THE COLD RE-CHECK OF 2026-09-27 (lane L5's follow-up). This line
+    was ``f"{type(exc).__name__}: {exc}"`` for every exception, and a browser
+    library's exception text carries a CALL LOG that quotes the element it
+    resolved -- on a named person's profile, a Connect control whose label is
+    that person's name, and a Message link whose href is their member id. A
+    press that timed out published both in the receipt's ``clicked.error``.
+    Ruling ERROR-MESSAGE-RULED-AT-THE-RAISE: whether a value the page chose
+    entered an exception's text is knowable at the raise and not here. A
+    ``WriteAttemptError`` is raised by this package with a reason it composed
+    -- every one of them is held to that by the page-string guards -- so it is
+    kept; for anything else only the type crosses.
+    """
+    if isinstance(exc, WriteAttemptError):
+        return f"{type(exc).__name__}: {exc}"
+    return type(exc).__name__
+
+
 def typed_text_residue(
     spec: WriteSpec,
     *,
@@ -10684,7 +10727,7 @@ async def perform(
                 if publish_gate["proceed"]:
                     click_plan.append(publish_gate["selector"])
     except Exception as exc:  # noqa: BLE001 - reported, never re-raised
-        click_error = f"{type(exc).__name__}: {exc}"
+        click_error = describe_click_error(exc)
 
     # THE EDITOR CLOSING, polled after the Save press so the verification's
     # fresh navigation does not race LinkedIn's own save request -- navigating

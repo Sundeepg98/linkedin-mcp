@@ -5,13 +5,17 @@ returns is SANITISED (Unicode-normalised; control, zero-width and
 bidirectional characters removed; whitespace collapsed; length-capped) and
 MARKED as untrusted third-party text. Lane G builds the one sanitiser and
 record; the order lane L5 works under (2026-09-27) says not to build a second.
-So lane L5's three name-bearing outputs route through
+So lane L5's four name-bearing outputs route through
 ``linkedin_server/people_seam.py`` and nothing else:
 
 * ``linkedin_list_conversations`` -- ``threads.read_conversation_list``;
 * ``linkedin_open_messaging`` -- ``shape.messaging_overview``;
 * the named-person acts' ``whom_this_resolves_to`` --
-  ``named_profile.name_the_profile_target``.
+  ``named_profile.name_the_profile_target``;
+* ``linkedin_send_reply``'s ``who_this_would_reach`` --
+  ``threads.name_the_reply_recipient``. This file listed three until the cold
+  re-check of 2026-09-27 found the fourth printing the other participant's
+  name with no seam call at all, and it is routed now.
 
 TWO KINDS OF TEST, AND WHICH IS WHICH MATTERS.
 
@@ -36,6 +40,7 @@ NOTHING HERE REACHES LINKEDIN.
 """
 from __future__ import annotations
 
+import ast
 import json
 import re
 import unicodedata
@@ -44,7 +49,8 @@ import pytest
 
 from linkedin_server import people_seam, shape, threads, writes
 from linkedin_server.writes import preview, spec_for_action
-from tests.test_messaging_threads import COMPOSE_LIST, _derive
+from tests import test_send_reply as reply
+from tests.test_messaging_threads import COMPOSE_LIST, THREAD, _derive
 from tests.test_named_profile_route import LINK, PROFILE, _Navigator
 from tests.test_writes import browser_page, writes_on  # noqa: F401 -- fixtures
 
@@ -165,6 +171,27 @@ async def test_the_named_acts_identity_comes_out_of_the_seam(writes_on, browser_
     assert block["whom_this_resolves_to"] == {"marked_by": "SEAM", "name": "Casey Example"}
 
 
+async def _reply_block(page, world: str = THREAD) -> dict:
+    return await preview(
+        spec_for_action("send_reply"), target=reply.TARGET, navigator=reply._nav(world), page=page
+    )
+
+
+async def test_the_reply_recipients_name_comes_out_of_the_seam(writes_on, browser_page, monkeypatch):
+    """THE FOURTH OUTPUT, routed 2026-09-27. Before, a send_reply preview made
+    ZERO seam calls and printed the conversation's title unmarked."""
+    calls = []
+
+    def _mark(raw=None):
+        calls.append(raw)
+        return "SEAM:" + str(raw)
+
+    monkeypatch.setattr(people_seam, "name", _mark)
+    block = await _reply_block(browser_page)
+    assert len(calls) == 1, calls
+    assert "'SEAM:Kai Example'" in block["who_this_would_reach"]
+
+
 # ---------------------------------------------------------------------------
 # 3. MITIGATION 2, per reader -- failing until lane G's record is adopted
 # ---------------------------------------------------------------------------
@@ -216,7 +243,7 @@ async def test_list_conversations_marks_names_untrusted(browser_page):
 def _overview() -> dict:
     html = (
         '<div aria-label="Select conversation with ' + PLANTED + LONG_TAIL + '"></div>'
-        '<div aria-label="Select conversation with Ivo Karlsson"></div>'
+        '<div aria-label="Select conversation with Ivo Placeholder"></div>'
     )
     return shape.messaging_overview(html, "https://www.linkedin.com/messaging/", include_names=True)
 
@@ -299,6 +326,59 @@ async def test_the_named_act_caps_a_headline(writes_on, browser_page):
 @MITIGATION_2
 async def test_the_named_act_marks_the_identity_untrusted(writes_on, browser_page):
     assert _marked(await _whom(browser_page))
+
+
+#: The reply's conversation with its title planted.
+PLANTED_THREAD = _derive(
+    THREAD,
+    '<span class="msg-entity-lockup__entity-title">Kai Example</span>',
+    '<span class="msg-entity-lockup__entity-title">Kai&#8203; Ex&#8238;ample'
+    + LONG_TAIL
+    + "</span>",
+)
+
+
+def _title_in(reach: str) -> str:
+    """The title the reply preview's sentence prints, AS THE VALUE IT IS.
+
+    The sentence quotes the title with ``repr``, and ``repr`` ESCAPES an
+    invisible character rather than removing it -- so a check on the
+    sentence's characters would pass today for the wrong reason. The value is
+    read back out of its quotes and the properties are held on it. A sentence
+    of another shape raises ValueError, which ``raises=AssertionError`` makes a
+    real failure rather than an expected one.
+    """
+    _head, found, rest = reach.partition("titled ")
+    quoted, ended, _tail = rest.partition(". Read off")
+    if not found or not ended:
+        raise ValueError("the reply preview's sentence changed shape")
+    return str(ast.literal_eval(quoted))
+
+
+async def _reached_title(page) -> str:
+    block = await _reply_block(page, PLANTED_THREAD)
+    return _title_in(str(block.get("who_this_would_reach") or ""))
+
+
+async def test_the_reply_plant_reaches_the_sentence(writes_on, browser_page):
+    """THE CONTROL for the three below (see the list's)."""
+    title = await _reached_title(browser_page)
+    assert "Kai" in title and "ample" in title and "Longname" in title
+
+
+@MITIGATION_2
+async def test_send_reply_strips_invisible_characters(writes_on, browser_page):
+    assert _invisible(await _reached_title(browser_page)) == []
+
+
+@MITIGATION_2
+async def test_send_reply_caps_a_name(writes_on, browser_page):
+    assert len(await _reached_title(browser_page)) <= NAME_CAP
+
+
+@MITIGATION_2
+async def test_send_reply_marks_the_name_untrusted(writes_on, browser_page):
+    assert _marked(await _reply_block(browser_page, PLANTED_THREAD))
 
 
 def test_the_marker_this_file_waits_for_is_not_the_pending_one():

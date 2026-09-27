@@ -40,6 +40,7 @@ comparison that never leaves the page.
 from __future__ import annotations
 
 import re
+import time
 from typing import Any, Optional
 from urllib.parse import unquote, urlsplit
 
@@ -122,8 +123,9 @@ def profile_segment(value: Any) -> str:
         raise WriteAttemptError(
             "the profile segment in the link you gave is not one this server "
             "can address (three to a hundred letters, digits, hyphens, "
-            "underscores or percent-encoded octets), or it is your own /in/me/, "
-            "which is not a person you name."
+            "underscores or percent-encoded non-ASCII letters -- an encoded "
+            "space, slash or other ASCII character is refused), or it is your "
+            "own /in/me/, which is not a person you name."
         )
     return segment
 
@@ -223,8 +225,12 @@ def connect_state(reading: dict[str, Any]) -> tuple[str, str, Optional[int]]:
 
     ``connect_control_drawn`` needs the identity confirmed, exactly one control
     named ``Invite <owner> to connect`` (compared in the page), and no dialog
-    already open. The index is that control's position in
-    :data:`dom.INVITE_CONTROL`'s list, and nothing else crosses.
+    already open. The index is that control's position among the
+    :data:`dom.INVITE_CONTROL` controls INSIDE THE OWNER'S TOPCARD -- what
+    :func:`dom.topcard_invite_control_selector` presses by -- and nothing else
+    crosses. (It was the position in the whole page's list until the cold
+    re-check of 2026-09-27 showed a re-render could hand that position to a
+    stranger's control.)
     """
     if not identity_confirmed(reading):
         return UNKNOWN, _identity_why(reading), None
@@ -258,11 +264,11 @@ def connect_state(reading: dict[str, Any]) -> tuple[str, str, Optional[int]]:
             f"{coerce.as_count(reading.get('dialogs'))} dialog(s) are already "
             "open on the profile. Connect is not pressed underneath one."
         ), None
-    index = reading.get("invite_index")
+    index = reading.get("invite_topcard_index")
     if not isinstance(index, int) or isinstance(index, bool) or index < 0:
         return UNKNOWN, (
-            "exactly one Connect control matched and no usable position came "
-            "back for it, so nothing can be aimed."
+            "exactly one Connect control matched and no usable position inside "
+            "the topcard came back for it, so nothing can be aimed."
         ), None
     return CONNECT_FROM, (
         "exactly one control named for inviting this person to connect -- the "
@@ -316,11 +322,12 @@ def message_state(reading: dict[str, Any]) -> tuple[str, str, Optional[int]]:
             "composer(s) are already open on this page. Close them first: the "
             "composer this act types into must be the one its own press opens."
         ), None
-    index = reading.get("message_index")
+    # THE POSITION INSIDE THE TOPCARD, as for Connect -- see connect_state.
+    index = reading.get("message_topcard_index")
     if not isinstance(index, int) or isinstance(index, bool) or index < 0:
         return UNKNOWN, (
-            "exactly one Message control matched and no usable position came "
-            "back for it, so nothing can be aimed."
+            "exactly one Message control matched and no usable position inside "
+            "the topcard came back for it, so nothing can be aimed."
         ), None
     degree = reading.get("degree")
     return MESSAGE_FROM, (
@@ -416,13 +423,29 @@ def connect_verdict(
 # A profile's Message press is expected to open the same form in LinkedIn's
 # conversation overlay, OUTSIDE ``main``, and that has never been captured.
 # So these readers are PAGE-WIDE and the gate is strict: no composer before
-# the press, exactly one after, inside exactly one overlay conversation, no
-# recipient box, empty, Send disabled. Anything else stops before a word is
-# typed, and the reading is the capture (NEEDS-CAPTURE C-P4).
+# the press, exactly one after, inside exactly one overlay conversation WHOSE
+# TITLE READS EXACTLY THE NAMED PERSON'S NAME, no recipient box, empty, Send
+# disabled. Anything else stops before a word is typed, and the reading is
+# the capture (NEEDS-CAPTURE C-P4).
+#
+# WHOSE CONVERSATION WAS ADDED BY THE COLD RE-CHECK OF 2026-09-27. Counts
+# alone -- none before the press, one after -- could not tell a conversation
+# the press opened with the named person from one headed by somebody else:
+# a press that opened another person's conversation, and a press that opened
+# nothing while a restored conversation appeared, both took his words and
+# read SENT. The title is compared in the page (``dom.NAMED_PROFILE_JS``) and
+# only a boolean crosses.
 
-BUBBLE_SELECTOR = ".msg-overlay-conversation-bubble"
-COMPOSER_EDITOR_SELECTOR = 'form.msg-form div.msg-form__contenteditable[role="textbox"]'
+BUBBLE_SELECTOR = dom.OVERLAY_BUBBLE
+COMPOSER_EDITOR_SELECTOR = dom.OVERLAY_COMPOSER_EDITOR
 COMPOSER_SEND_SELECTOR = 'form.msg-form button.msg-form__send-button[type="submit"]'
+
+#: HOW LONG THE GATE WAITS for a composer to be drawn after the Message press,
+#: before it reads. A LIVENESS BOUND, NOT A SAFETY ONE: the gate refuses on
+#: whatever it then finds, so a composer drawn later than this only means the
+#: act stops having typed nothing. How long LinkedIn's overlay takes to draw is
+#: part of NEEDS-CAPTURE C-P4, which the receipt records as ``composer_waited_ms``.
+OPENED_COMPOSER_WAIT_MS = 3_000
 _PAGE_RECIPIENT_BOX_SELECTOR = (
     '.msg-connections-typeahead [role="combobox"], '
     "input.msg-connections-typeahead__search-field"
@@ -440,6 +463,33 @@ _CREDIT_WORD = re.compile(r"\bcredits?\b", re.I)
 
 def _normalise(text: Any) -> str:
     return re.sub(r"\s+", " ", str(text or "")).strip()
+
+
+async def wait_for_opened_composer(
+    page: Any, *, timeout_ms: Optional[int] = None
+) -> dict[str, Any]:
+    """After the Message press: wait, BOUNDED, for a composer to be drawn.
+
+    The gate read the page the instant the press returned, and an overlay
+    drawn a moment later was refused as "not one conversation" -- safe, and
+    an act that could not proceed on the page it was built for (the cold
+    re-check's liveness note, 2026-09-27). This waits up to
+    :data:`OPENED_COMPOSER_WAIT_MS` for :data:`COMPOSER_EDITOR_SELECTOR` to be
+    attached and DECIDES NOTHING: the gate still reads everything and refuses
+    on what it finds. ``failure`` is an exception's TYPE only.
+    """
+    bound = OPENED_COMPOSER_WAIT_MS if timeout_ms is None else int(timeout_ms)
+    out: dict[str, Any] = {"appeared": False, "waited_ms": 0, "failure": None}
+    started = time.monotonic()
+    try:
+        await page.locator(COMPOSER_EDITOR_SELECTOR).first.wait_for(
+            state="attached", timeout=bound
+        )
+        out["appeared"] = True
+    except Exception as exc:  # noqa: BLE001 - a timeout is a reading, not a fault
+        out["failure"] = type(exc).__name__
+    out["waited_ms"] = int((time.monotonic() - started) * 1000)
+    return out
 
 
 async def read_opened_conversation(page: Any, *, text: Optional[str] = None) -> dict[str, Any]:
@@ -521,28 +571,36 @@ def opened_conversation_gate(
     conversation: dict[str, Any],
     *,
     still_on_the_profile: bool,
+    composer_wait: Optional[dict[str, Any]] = None,
 ) -> dict[str, Any]:
     """After the Message press, BEFORE a word is typed: may the words go in?
 
     ``profile_after`` is :func:`dom.read_named_profile` re-read after the
-    press, ``conversation`` :func:`read_opened_conversation` with his words.
-    ``proceed`` needs ALL of:
+    press, ``conversation`` :func:`read_opened_conversation` with his words,
+    ``composer_wait`` what :func:`wait_for_opened_composer` saw (recorded,
+    never decided on). ``proceed`` needs ALL of, and refuses IN THIS ORDER:
 
     1. the browser is still on the profile he named -- a press that navigated
        went to an address the page chose;
-    2. the profile still names the same person, and its degree reads ``1st``.
-       A message to anyone else may be an InMail that spends one of his
-       credits, or a message request, and neither composer has ever been
-       captured: the act stops here, having pressed Message and typed
-       nothing, and this reading is ``M M6``'s capture (NEEDS-CAPTURE C-P5);
-    3. exactly one composer on the page, inside exactly one overlay
-       conversation, with no recipient box, empty, and its Send DISABLED --
-       the measured empty state of the form (NEEDS-CAPTURE C-P4 otherwise).
-
-    ``observed`` carries the counts, including the number of messages already
-    carrying his exact words -- the before-count the SENT verdict diffs
-    against.
+    2. the profile still names the same person;
+    3. its degree reads ``1st``. A message to anyone else may be an InMail
+       that spends one of his credits, or a message request, and neither
+       composer has ever been captured: the act stops here, having pressed
+       Message and typed nothing, and this reading is ``M M6``'s capture
+       (NEEDS-CAPTURE C-P5);
+    4. the page could be read;
+    5. exactly one composer on the page, inside exactly one overlay
+       conversation, with one Send;
+    6. THAT CONVERSATION IS THE NAMED PERSON'S: its one title reads exactly
+       the name the profile's own title gives, compared in the page. Added
+       by the cold re-check of 2026-09-27 -- see this section's head;
+    7. no recipient box;
+    8. empty, and its Send DISABLED -- the measured empty state of the form
+       (NEEDS-CAPTURE C-P4 otherwise);
+    9. the number of messages already carrying his exact words was counted
+       -- the before-count the SENT verdict diffs against.
     """
+    waited = composer_wait or {}
     observed = {
         "still_on_the_profile": bool(still_on_the_profile),
         "identity_confirmed": identity_confirmed(profile_after),
@@ -550,13 +608,25 @@ def opened_conversation_gate(
         "editors": conversation.get("editors"),
         "bubbles": conversation.get("bubbles"),
         "bubbles_with_editor": conversation.get("bubbles_with_editor"),
+        # WHOSE CONVERSATION: the holding bubble's titles, counted, and
+        # whether its one title reads exactly the owner's name -- both from
+        # the page's own comparison, so no name crosses.
+        "conversation_titles": profile_after.get("bubble_titles"),
+        "conversation_names_the_owner": profile_after.get("bubble_title_names_owner"),
         "recipient_boxes": conversation.get("recipient_boxes"),
         "editor_empty": conversation.get("editor_empty"),
         "send_controls": conversation.get("send_controls"),
         "send_disabled": conversation.get("send_disabled"),
         "events": conversation.get("events"),
         "events_with_text": conversation.get("events_with_text"),
-        # C-P5's first reading: hints only, and no condition below reads them.
+        # C-P4 and C-P5's first readings: hints only, and no condition below
+        # reads them -- whether the one title CONTAINS the owner's name (a
+        # title that reads more than the name), how long the composer took
+        # to be drawn, and whether the opened conversation says "InMail" or
+        # "credit".
+        "title_contains_the_owner": profile_after.get("bubble_title_contains_owner"),
+        "composer_appeared": waited.get("appeared"),
+        "composer_waited_ms": waited.get("waited_ms"),
         "inmail_words": conversation.get("inmail_words"),
         "credit_words": conversation.get("credit_words"),
         "error": conversation.get("error") or profile_after.get("error"),
@@ -613,8 +683,23 @@ def opened_conversation_gate(
             "been captured (NEEDS-CAPTURE C-P4). Nothing was typed."
         )
         return out
+    if observed["conversation_names_the_owner"] is not True:
+        out["refused_condition"] = "6_not_their_conversation"
+        out["why"] = (
+            "the one conversation holding a composer is not headed by the "
+            "person you named: it draws "
+            f"{coerce.as_count(observed['conversation_titles'])} title(s), and "
+            "none reads exactly the name on the profile (compared in the page; "
+            "the title contains that name: "
+            f"{observed['title_contains_the_owner']!r}). A conversation this "
+            "press did not open, or somebody else's, would take your words to "
+            "a person you did not name. How a person's conversation title is "
+            "drawn has never been captured (NEEDS-CAPTURE C-P4). Nothing was "
+            "typed."
+        )
+        return out
     if coerce.as_count(observed["recipient_boxes"]):
-        out["refused_condition"] = "6_recipient_box"
+        out["refused_condition"] = "7_recipient_box"
         out["why"] = (
             f"{observed['recipient_boxes']} recipient box(es) are drawn: this is "
             "a new-message composer with nobody committed, not a conversation "
@@ -622,7 +707,7 @@ def opened_conversation_gate(
         )
         return out
     if observed["editor_empty"] is not True or observed["send_disabled"] is not True:
-        out["refused_condition"] = "7_not_empty"
+        out["refused_condition"] = "8_not_empty"
         out["why"] = (
             "the composer is not in the measured empty state -- it holds text, "
             "or Send is already enabled, most likely a draft LinkedIn restored. "
@@ -631,7 +716,7 @@ def opened_conversation_gate(
         )
         return out
     if not isinstance(observed["events_with_text"], int):
-        out["refused_condition"] = "8_no_before_count"
+        out["refused_condition"] = "9_no_before_count"
         out["why"] = (
             "the number of messages already carrying your words could not be "
             "counted, and the SENT verdict needs it. Nothing was typed."
@@ -640,20 +725,26 @@ def opened_conversation_gate(
     out["proceed"] = True
     out["why"] = (
         "still on the profile you named, a first-degree connection, and "
-        "exactly one conversation composer opened by the press: empty, Send "
-        "disabled, no recipient box."
+        "exactly one conversation composer after the press, in a conversation "
+        "whose title reads exactly that person's name: empty, Send disabled, "
+        "no recipient box."
     )
     return out
 
 
 async def composer_send_gate(page: Any, *, text: str) -> dict[str, Any]:
     """May Send be pressed? :func:`threads.reply_send_gate`'s conditions, on
-    the page-wide composer the Message press opened.
+    the page-wide composer the Message press opened -- and one more.
 
     The same five refusals in the same order -- no recipient box, one
     editor, one Send, the fill landed (Send enabled, box not empty), and the
     box holds EXACTLY his words -- so a message on this route is held to the
-    bar a reply is.
+    bar a reply is. THEN A SIXTH, added by the cold re-check of 2026-09-27:
+    with his words in the box and nothing pressed, the conversation holding
+    them must STILL be the one whose title reads exactly the named person's
+    name, compared in the page by :data:`dom.NAMED_PROFILE_JS`. The opened
+    gate checked it before the fill; this is the last moment it can be
+    checked before the message is irreversible.
     """
     out: dict[str, Any] = {
         "proceed": False,
@@ -684,6 +775,13 @@ async def composer_send_gate(page: Any, *, text: str) -> dict[str, Any]:
             observed["editor_empty"] = held == ""
             observed["words_exact"] = held == _normalise(text)
             observed["held_characters"] = len(held)
+        # WHOSE CONVERSATION, read by the page's own script: a count and two
+        # booleans cross, never the title.
+        again = await dom.read_named_profile(page)
+        observed["conversation_titles"] = again.get("bubble_titles")
+        observed["conversation_names_the_owner"] = (
+            not again.get("error") and again.get("bubble_title_names_owner") is True
+        )
     except Exception as exc:  # noqa: BLE001 - reported as a type
         out["refused_condition"] = "0_read_failed"
         out["why"] = (
@@ -726,10 +824,21 @@ async def composer_send_gate(page: Any, *, text: str) -> dict[str, Any]:
             "taken back. Send was not pressed."
         )
         return out
+    if observed["conversation_names_the_owner"] is not True:
+        out["refused_condition"] = "6_not_their_conversation"
+        out["why"] = (
+            "your words are in the box, but the conversation holding them is "
+            "no longer one whose title reads exactly the name of the person "
+            f"you named ({coerce.as_count(observed['conversation_titles'])} "
+            "title(s) drawn). A message cannot be taken back. Send was not "
+            "pressed, and the words are still in the composer on your screen."
+        )
+        return out
     out["proceed"] = True
     out["why"] = (
         "the composer holds exactly the words you confirmed and Send went from "
-        "disabled to enabled. No recipient box is drawn."
+        "disabled to enabled, in the conversation whose title reads exactly "
+        "the name of the person you named. No recipient box is drawn."
     )
     return out
 

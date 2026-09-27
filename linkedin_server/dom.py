@@ -8189,21 +8189,91 @@ MESSAGE_CONTROL_PREFIX = "Message "
 MESSAGE_CONTROL = 'a[aria-label^="Message "], button[aria-label^="Message "]'
 
 
-def message_control_selector(index: int) -> str:
-    """ONE Message control, by its position in :data:`MESSAGE_CONTROL`'s list.
+#: THE PROFILE'S OWN TOPCARD, the one element whose id ends ``Topcard``
+#: (measured on his own profile, 6 captures; derived on a third party's).
+NAMED_PROFILE_TOPCARD = '[id$="Topcard"]'
+
+
+def _in_topcard(selector_list: str) -> str:
+    """Each alternative of a comma-separated selector, scoped to the topcard."""
+    return ", ".join(
+        NAMED_PROFILE_TOPCARD + " " + part.strip() for part in selector_list.split(",")
+    )
+
+
+def _topcard_position(index: object, builder: str) -> str:
+    """The position a click target is built from: a non-negative int, or raise.
 
     GUARDED the way :func:`invite_control_selector` is, and for the same
     reason: the index is not chosen here, it is the output of
     :data:`NAMED_PROFILE_JS`, which sets it ONLY when exactly one control's
-    accessible name names the profile's own owner. The name never reaches this
-    process; the position does.
+    accessible name names the profile's own owner and that control sits inside
+    the owner's topcard. The name never reaches this process; the position
+    does.
     """
     if isinstance(index, bool) or not isinstance(index, int) or index < 0:
         raise ValueError(
-            "message_control_selector needs a non-negative int index; a click "
-            "target is built from this string, so nothing else may reach it."
+            f"{builder} needs a non-negative int index; a click target is "
+            "built from this string, so nothing else may reach it."
         )
-    return MESSAGE_CONTROL + " >> nth=" + str(index)
+    return str(index)
+
+
+def topcard_invite_control_selector(index: int) -> str:
+    """ONE Connect control of the profile's OWN topcard, by its position there.
+
+    SCOPED, AND THE SCOPE IS THE FIX FOR WHAT THE COLD RE-CHECK OF 2026-09-27
+    FOUND. The press was ``INVITE_CONTROL >> nth=K`` over the whole page: no
+    label and no container in it, and Playwright RE-RESOLVES a selector whose
+    element was re-rendered while the press waited. A control inserted earlier
+    in the page -- somebody else's -- then took position K, and the press
+    landed on it; demonstrated on the synthetic profile, where a stranger's
+    'Invite ... to connect' drawn at the top of the page during a re-render
+    received the press. Scoped to the one topcard, a re-resolution can reach
+    only a control of the owner's own topcard. The position is
+    :data:`NAMED_PROFILE_JS`'s, counted inside that topcard; no name crosses
+    into this string.
+
+    NAMED ``*_selector`` ON PURPOSE: ``tests/test_selectors_resolve.py``
+    enumerates this module's builders by that suffix and resolves each one in
+    a browser, and a builder named otherwise would never be handed to one.
+    """
+    return (
+        _in_topcard(INVITE_CONTROL)
+        + " >> nth="
+        + _topcard_position(index, "topcard_invite_control_selector")
+    )
+
+
+def topcard_message_control_selector(index: int) -> str:
+    """ONE Message control of the profile's OWN topcard, by its position there
+    -- see :func:`topcard_invite_control_selector`.
+
+    It replaced ``message_control_selector``, the page-wide builder the
+    route's first build pressed Message with, for the same reason; nothing
+    else in the package pressed a Message control, so it was removed rather
+    than kept beside this one.
+    """
+    return (
+        _in_topcard(MESSAGE_CONTROL)
+        + " >> nth="
+        + _topcard_position(index, "topcard_message_control_selector")
+    )
+
+
+#: THE OVERLAY CONVERSATION a profile's Message press is expected to open, and
+#: the two parts of it the named acts compare. MEASURED 2026-09-27 on the four
+#: captures on disk that draw a ``msg-overlay-conversation-bubble`` (one
+#: minimised bubble, the same in all four, with no form in it): the bubble's
+#: header is a ``<header>``, and its title is ONE ``h2`` carrying the class
+#: ``msg-overlay-bubble-header__title``, its text drawn directly in it. The
+#: editor is the measured reply form's (lane L5, 2026-09-24). That the title
+#: of a conversation with ONE person reads exactly that person's name is
+#: DERIVED -- the captured bubble's title is not a person's name -- and the
+#: first supervised Message press records what it read (NEEDS-CAPTURE C-P4).
+OVERLAY_BUBBLE = ".msg-overlay-conversation-bubble"
+OVERLAY_BUBBLE_TITLE = ".msg-overlay-bubble-header__title"
+OVERLAY_COMPOSER_EDITOR = 'form.msg-form div.msg-form__contenteditable[role="textbox"]'
 
 
 #: THE ONE SCRIPT A NAMED ACT RUNS ON THE PROFILE, and why it is a script.
@@ -8236,9 +8306,29 @@ def message_control_selector(index: int) -> str:
 #: reported as a CLOSED TOKEN -- pending, withdraw, follow, unfollow, more,
 #: remove, or unrecognised -- which is how the first supervised act records
 #: what a pressed Connect turns into without a label crossing.
+#:
+#: TWO ADDITIONS FROM THE COLD RE-CHECK OF 2026-09-27, both comparisons that
+#: never leave the page:
+#:
+#: * each matched control's POSITION INSIDE THE TOPCARD
+#:   (``invite_topcard_index``, ``message_topcard_index``), which is what the
+#:   press is now aimed by -- see :func:`topcard_invite_control_selector`;
+#: * WHOSE CONVERSATION a composer belongs to: the overlay bubbles that hold
+#:   an editor are counted, and when exactly one does, its title
+#:   (:data:`OVERLAY_BUBBLE_TITLE`) is compared with the owner's name from the
+#:   document title -- ``bubble_title_names_owner`` when it reads exactly that
+#:   name, ``bubble_title_contains_owner`` (a hint for the capture, read by no
+#:   gate) when the name is somewhere in it. The re-check found that nothing
+#:   compared the conversation a Message press's words went into with the
+#:   person named: a conversation headed by somebody else took them.
 NAMED_PROFILE_JS = """
 (cfg) => {
   const norm = (s) => String(s === null || s === undefined ? '' : s).replace(/\\s+/g, ' ').trim();
+  const positionIn = (container, selector, el) => {
+    if (!container || !el || !container.contains(el)) return null;
+    const at = Array.prototype.indexOf.call(container.querySelectorAll(selector), el);
+    return at >= 0 ? at : null;
+  };
   const out = {
     title_shape: 'none',
     topcards: 0,
@@ -8250,16 +8340,22 @@ NAMED_PROFILE_JS = """
     invite_matches: 0,
     invite_index: null,
     invite_in_topcard: 0,
+    invite_topcard_index: null,
     message_controls: 0,
     message_matches: 0,
     message_index: null,
     message_tag: null,
     message_href: null,
     message_in_topcard: 0,
+    message_topcard_index: null,
     more_actions: 0,
     dialogs: 0,
     composer_editors: 0,
     conversation_bubbles: 0,
+    bubbles_with_editor: 0,
+    bubble_titles: 0,
+    bubble_title_names_owner: false,
+    bubble_title_contains_owner: false,
     named_controls: [],
     dialog_controls: [],
     dialog_note_fields: 0
@@ -8286,6 +8382,15 @@ NAMED_PROFILE_JS = """
   }
   out.composer_editors = document.querySelectorAll('.msg-form__contenteditable').length;
   out.conversation_bubbles = document.querySelectorAll('.msg-overlay-conversation-bubble').length;
+  const holding = [];
+  for (const bubble of document.querySelectorAll(cfg.bubbleSelector)) {
+    if (bubble.querySelector(cfg.editorSelector)) holding.push(bubble);
+  }
+  out.bubbles_with_editor = holding.length;
+  const bubbleTitles = holding.length === 1
+    ? holding[0].querySelectorAll(cfg.bubbleTitleSelector)
+    : [];
+  out.bubble_titles = bubbleTitles.length;
   out.invite_controls = document.querySelectorAll(cfg.inviteSelector).length;
   out.message_controls = document.querySelectorAll(cfg.messageSelector).length;
   const labelled = document.querySelectorAll('button[aria-label], a[aria-label]');
@@ -8317,18 +8422,26 @@ NAMED_PROFILE_JS = """
     out.degree_tokens = found.length;
     out.degree = found.length === 1 ? found[0] : null;
   }
+  if (bubbleTitles.length === 1) {
+    const said = norm(bubbleTitles[0].innerText);
+    out.bubble_title_names_owner = said === name;
+    out.bubble_title_contains_owner = said.indexOf(name) !== -1;
+  }
   const wantInvite = 'Invite ' + name + ' to connect';
   const invites = document.querySelectorAll(cfg.inviteSelector);
   let matches = 0;
   let index = null;
+  let matched = null;
   for (let i = 0; i < invites.length; i += 1) {
     if (norm(invites[i].getAttribute('aria-label')) !== wantInvite) continue;
     matches += 1;
     index = matches === 1 ? i : null;
+    matched = matches === 1 ? invites[i] : null;
     if (card && card.contains(invites[i])) out.invite_in_topcard += 1;
   }
   out.invite_matches = matches;
   out.invite_index = matches === 1 ? index : null;
+  out.invite_topcard_index = matches === 1 ? positionIn(card, cfg.inviteSelector, matched) : null;
   const wantMessage = 'Message ' + name;
   const messages = document.querySelectorAll(cfg.messageSelector);
   const hrefToken = (href) => {
@@ -8340,12 +8453,14 @@ NAMED_PROFILE_JS = """
   };
   matches = 0;
   index = null;
+  matched = null;
   let tag = null;
   let href = null;
   for (let i = 0; i < messages.length; i += 1) {
     if (norm(messages[i].getAttribute('aria-label')) !== wantMessage) continue;
     matches += 1;
     index = matches === 1 ? i : null;
+    matched = matches === 1 ? messages[i] : null;
     const t = messages[i].tagName.toLowerCase();
     tag = matches === 1 ? (t === 'a' || t === 'button' ? t : 'other') : null;
     href = matches === 1 ? hrefToken(messages[i].getAttribute('href')) : null;
@@ -8353,6 +8468,7 @@ NAMED_PROFILE_JS = """
   }
   out.message_matches = matches;
   out.message_index = matches === 1 ? index : null;
+  out.message_topcard_index = matches === 1 ? positionIn(card, cfg.messageSelector, matched) : null;
   out.message_tag = matches === 1 ? tag : null;
   out.message_href = matches === 1 ? href : null;
   const vocabulary = [
@@ -8421,22 +8537,34 @@ async def read_named_profile(page: Any) -> dict[str, Any]:
         "invite_matches": 0,
         "invite_index": None,
         "invite_in_topcard": 0,
+        "invite_topcard_index": None,
         "message_controls": 0,
         "message_matches": 0,
         "message_index": None,
         "message_tag": None,
         "message_href": None,
         "message_in_topcard": 0,
+        "message_topcard_index": None,
         "more_actions": 0,
         "dialogs": 0,
         "composer_editors": 0,
         "conversation_bubbles": 0,
+        "bubbles_with_editor": 0,
+        "bubble_titles": 0,
+        "bubble_title_names_owner": False,
+        "bubble_title_contains_owner": False,
         "named_controls": [],
         "dialog_controls": [],
         "dialog_note_fields": 0,
         "error": None,
     }
-    cfg = {"inviteSelector": INVITE_CONTROL, "messageSelector": MESSAGE_CONTROL}
+    cfg = {
+        "inviteSelector": INVITE_CONTROL,
+        "messageSelector": MESSAGE_CONTROL,
+        "bubbleSelector": OVERLAY_BUBBLE,
+        "editorSelector": OVERLAY_COMPOSER_EDITOR,
+        "bubbleTitleSelector": OVERLAY_BUBBLE_TITLE,
+    }
     try:
         raw = await page.evaluate(NAMED_PROFILE_JS, cfg)  # readonly-ok
     except Exception as exc:  # noqa: BLE001 - reported as a type, never raised
@@ -8448,14 +8576,16 @@ async def read_named_profile(page: Any) -> dict[str, Any]:
         "topcards", "topcard_headings", "degree_tokens", "invite_controls",
         "invite_matches", "invite_in_topcard", "message_controls",
         "message_matches", "message_in_topcard", "more_actions", "dialogs",
-        "composer_editors", "conversation_bubbles", "dialog_note_fields",
+        "composer_editors", "conversation_bubbles", "bubbles_with_editor",
+        "bubble_titles", "dialog_note_fields",
     ):
         out[key] = as_count(reading.get(key))
     out["title_shape"] = "profile" if reading.get("title_shape") == "profile" else "none"
-    out["heading_matches_title"] = reading.get("heading_matches_title") is True
+    for key in ("heading_matches_title", "bubble_title_names_owner", "bubble_title_contains_owner"):
+        out[key] = reading.get(key) is True
     degree = reading.get("degree")
     out["degree"] = degree if degree in PROFILE_DEGREES else None
-    for key in ("invite_index", "message_index"):
+    for key in ("invite_index", "message_index", "invite_topcard_index", "message_topcard_index"):
         position = reading.get(key)
         # ABSENT STAYS None: 0 is a real position, and "no match" must not
         # collapse into "the first one".

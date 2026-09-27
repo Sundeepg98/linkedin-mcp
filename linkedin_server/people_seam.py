@@ -16,15 +16,24 @@ else:
 * :func:`name` -- the participant names of lane L5's TWO ``include_names``
   readers: ``threads.read_conversation_list`` (what
   ``linkedin_list_conversations`` prints) and ``shape.messaging_overview``
-  (what ``linkedin_open_messaging`` prints);
+  (what ``linkedin_open_messaging`` prints); and the conversation title
+  ``linkedin_send_reply``'s preview prints as ``who_this_would_reach``
+  (``threads.name_the_reply_recipient`` -- routed here 2026-09-27, when a
+  cold re-check found it printing the other participant's name with no seam
+  call at all);
 * :func:`person` -- WHOM a named-person act resolved to (name, headline,
   link, degree), printed in its confirm block and nowhere else.
 
-Lane G's foundation adopts all three call sites by replacing these two
+Lane G's foundation adopts all four call sites by replacing these two
 bodies. Until then they collapse whitespace -- what the conversation list's
-reader always did, and one step more than the overview's ``.strip()`` did (a
-run of spaces inside a name now reads as one) -- and :func:`person` says so
-in the one field it adds, :data:`PENDING_KEY`.
+reader and the reply preview always did, and one step more than the
+overview's ``.strip()`` did (a run of spaces inside a name now reads as one)
+-- and :func:`person` says so in the one field it adds, :data:`PENDING_KEY`.
+
+OUTSIDE LANE L5, AND SAID HERE SO ADOPTION DOES NOT MISS IT:
+``writes._name_the_invitation_recipient`` prints the invitation's recipient
+as ``linkedin_send_invitation``'s ``who_this_would_reach``, through neither
+function below. It predates this seam and is not this lane's to re-route.
 
 THE TEST THAT FAILS UNTIL ADOPTION is ``tests/test_people_seam.py``: the
 mitigation-2 properties -- no zero-width or bidirectional character survives,

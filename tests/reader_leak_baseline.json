@@ -87,6 +87,7 @@
     "named_profile:composer_send_gate": "clean",
     "named_profile:name_the_profile_target": "clean",
     "named_profile:read_opened_conversation": "clean",
+    "named_profile:wait_for_opened_composer": "clean",
     "newsletters:read_newsletter_subscriptions": "clean",
     "notify_cost:read_notifications_badge": "returns_text",
     "post_summary_counts:read_post_summary_counts": "clean",

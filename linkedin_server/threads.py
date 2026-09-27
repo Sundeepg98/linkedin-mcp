@@ -44,7 +44,10 @@ no thread identifier is returned by any function in this module**, with two
 deliberate, named exceptions: the conversation list's names when the caller
 passes ``include_names`` (his own inbox, opt-in, as ``linkedin_open_messaging``
 already offers), and the reply preview's ``who_this_would_reach``, printed in
-the confirm block only -- see :func:`name_the_reply_recipient`.
+the confirm block only -- see :func:`name_the_reply_recipient`. BOTH pass
+through ``people_seam.name`` and nothing else, so lane G's shared sanitiser
+reaches both when it adopts that seam (the second was routed there on
+2026-09-27, when a cold re-check found it bypassing the seam).
 
 A THREAD ID IS ONLY EVER A TOOL ARGUMENT. It is validated against the same
 shape the read allowlist admits, formatted into one constant template, and
@@ -1197,7 +1200,13 @@ async def name_the_reply_recipient(
         if not same_conversation or await _count(titles) != 1:
             title = None
         else:
-            title = _normalise(await titles.first.inner_text()) or None
+            # THE OTHER PARTICIPANT'S NAME, SO IT GOES THROUGH THE SEAM
+            # (2026-09-27). It went through ``_normalise`` -- the same
+            # expression the seam applies today, so no value moves -- and so
+            # past the one place lane G's sanitiser and untrusted marker adopt
+            # (PEOPLE-DATA-MITIGATIONS item 2). A cold re-check found it with
+            # zero seam calls; tests/test_people_seam.py now routes it.
+            title = people_seam.name(await titles.first.inner_text()) or None
     except Exception as exc:  # noqa: BLE001
         logger.debug("title unreadable: %s", type(exc).__name__)
         title = None

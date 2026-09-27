@@ -188,6 +188,17 @@ READONLY = REPO / "linkedin_server" / "readonly.py"
 #: ADDING THEM IS PURELY ADDITIVE. It can only make the freeze notice more; no
 #: existing digest changes meaning, and the four originals are byte-identical
 #: across the addition.
+#:
+#: THE SECOND DOOR'S TWO SHAPES, ADDED 2026-09-27 BY LANE L5'S FOLLOW-UP, AND
+#: FOR THE SAME REASON AS THE TWO ABOVE. The named-profile door
+#: (``assert_named_profile_url``) admits exactly what ``NAMED_PROFILE_SEGMENT``
+#: and ``_NAMED_PROFILE_URL`` say, and neither was pinned: a cold re-check of
+#: the route measured that widening either -- which is widening the one door
+#: that loads a third party's profile -- moved NO digest here, and only a list
+#: of examples in ``tests/test_named_profile_route.py`` would have noticed.
+#: The same re-check found the segment's percent-encoded unit admitting every
+#: octet, and the fix moved the first of these two. Purely additive: the seven
+#: names above and ``<functions>``' meaning are unchanged by the addition.
 PINNED = (
     "_ALLOWED_URL_PATTERNS",
     "_FORBIDDEN_URL_SUBSTRINGS",
@@ -196,6 +207,8 @@ PINNED = (
     "_MUTATION_CALL_PATTERNS",
     "JS_MUTATION_TOKENS",
     "SANCTIONED_MUTATIONS",
+    "NAMED_PROFILE_SEGMENT",
+    "_NAMED_PROFILE_URL",
 )
 
 #: Digests of ``linkedin_server/readonly.py`` at "perform() for save_job, and
@@ -1387,10 +1400,42 @@ PINNED = (
 #: functions still hashes to d7e1d0922e3af446 -- master's own `<functions>`,
 #: which none of master's re-freezes above moved.
 #: ------------------------------------------------------------------------
+#: RE-FROZEN 2026-09-27 BY LANE L5'S FOLLOW-UP A SECOND TIME, AFTER ITS COLD
+#: RE-CHECK: THE SECOND DOOR NARROWED, AND ITS TWO SHAPES PINNED.
+#:
+#:     <functions>              6bdd6beaef275129 -> 4221c17c31fdd935
+#:     NAMED_PROFILE_SEGMENT    (unpinned)       -> b3de160186fb187d
+#:     _NAMED_PROFILE_URL       (unpinned)       -> 32c49c9c6bc0626f
+#:     every other table        unchanged
+#:
+#: The re-check found the segment's percent-encoded unit, ``%[0-9A-Fa-f]{2}``,
+#: admitting every octet -- an encoded space let a two-word NAME through the
+#: link parser, and an encoded slash, NUL, newline or forbidden substring
+#: reached the door. The unit is now a non-ASCII octet only, and
+#: ``valid_named_profile_segment`` decodes the segment (strict UTF-8) and holds
+#: it to letters, digits, hyphens and underscores. ``named_profile_url``'s
+#: refusal text says so. Under the cc8a509 regex the segment constant
+#: rendered to 8ed98430ec62b61c; it was not pinned then, which is why this
+#: freeze adds it.
+#:
+#: ATTRIBUTION, TWO WAYS. The tree MINUS the door's three functions still
+#: hashes to d7e1d0922e3af446 -- master's -- so nothing outside the door
+#: moved; and with ``valid_named_profile_segment`` and ``named_profile_url``
+#: swapped back to their cc8a509 source the tree hashes to 6bdd6beaef275129,
+#: the value replaced, so those two and nothing else moved. Controls: swapping
+#: back ``assert_named_profile_url``, which did not change, moves nothing; and
+#: dropping ``is_read_url`` instead lands on 00aa3e33eda0838f. One
+#: interpreter, 3.13.
+#: ------------------------------------------------------------------------
 READONLY_AST_AT_LAST_REFREEZE = {
     # d7e1d0922e3af446 until 2026-09-27: the named-profile door's three
-    # functions; the last re-freeze note above.
-    "<functions>": "6bdd6beaef275129",
+    # functions. 6bdd6beaef275129 until the same day's cold re-check narrowed
+    # the door. The last two re-freeze notes above.
+    "<functions>": "4221c17c31fdd935",
+    # PINNED 2026-09-27 -- the second door's segment and address shapes; the
+    # last re-freeze note above.
+    "NAMED_PROFILE_SEGMENT": "b3de160186fb187d",
+    "_NAMED_PROFILE_URL": "32c49c9c6bc0626f",
     "JS_MUTATION_TOKENS": "d47e30b67c583c1b",
     # ab8fdd31f93ef4fc until 2026-09-19. See the re-freeze note above: two
     # entries added for press.disclose's click and its closing Escape, on the

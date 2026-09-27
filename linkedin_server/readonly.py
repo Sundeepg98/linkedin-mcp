@@ -139,6 +139,7 @@ from __future__ import annotations
 import ast
 import re
 from typing import Iterable, Optional
+from urllib.parse import unquote
 
 from linkedin_server.errors import WriteAttemptError
 
@@ -2947,12 +2948,22 @@ def is_read_url(url: str) -> bool:
 
 #: One profile's address segment, as a caller hands it over: a vanity name or
 #: a member id. Three to a hundred units, each a letter, a digit, a hyphen, an
-#: underscore or one percent-encoded octet (LinkedIn serves non-ASCII vanity
-#: names percent-encoded), and it may not open with a hyphen or an underscore.
-#: ``me`` cannot pass: it is two characters, and it is HIS OWN profile, which
-#: the read door already admits and which this door has no reason to.
+#: underscore or one percent-encoded NON-ASCII octet (LinkedIn serves non-ASCII
+#: vanity names percent-encoded), and it may not open with a hyphen or an
+#: underscore. ``me`` cannot pass: it is two characters, and it is HIS OWN
+#: profile, which the read door already admits and which this door has no
+#: reason to.
+#:
+#: THE OCTET WAS ANY OCTET UNTIL THE COLD RE-CHECK OF 2026-09-27, and an
+#: encoded ASCII octet is never needed -- ASCII letters and digits are written
+#: as themselves -- while it let everything the literal rules refuse back in
+#: through the encoding: a space (a two-word NAME, ``Casey%20Example``), a
+#: slash, a newline, a NUL, and a forbidden substring spelled ``%2Finvite``.
+#: So the unit is ``%[89A-Fa-f][0-9A-Fa-f]`` -- the octets UTF-8 uses for
+#: non-ASCII letters -- and :func:`valid_named_profile_segment` decodes the
+#: whole segment and holds it to letters, digits, hyphens and underscores.
 NAMED_PROFILE_SEGMENT = re.compile(
-    r"^(?:[A-Za-z0-9]|%[0-9A-Fa-f]{2})(?:[A-Za-z0-9_\-]|%[0-9A-Fa-f]{2}){2,99}$"
+    r"^(?:[A-Za-z0-9]|%[89A-Fa-f][0-9A-Fa-f])(?:[A-Za-z0-9_\-]|%[89A-Fa-f][0-9A-Fa-f]){2,99}$"
 )
 
 #: The one address this door admits. Rebuilt, never parsed loosely: no query,
@@ -2961,8 +2972,22 @@ _NAMED_PROFILE_URL = re.compile(r"^https://www\.linkedin\.com/in/([^/?#]+)/$")
 
 
 def valid_named_profile_segment(segment: object) -> bool:
-    """True only for a segment :data:`NAMED_PROFILE_SEGMENT` admits."""
-    return isinstance(segment, str) and bool(NAMED_PROFILE_SEGMENT.fullmatch(segment))
+    """True only for a segment :data:`NAMED_PROFILE_SEGMENT` admits AND whose
+    DECODED form is still a slug.
+
+    The shape check alone admits any run of non-ASCII octets. Decoded -- as
+    strict UTF-8, so a broken octet sequence refuses -- every character must be
+    a letter or a digit of any script, a hyphen or an underscore: an encoded
+    no-break space, a direction override or a zero-width character is not a
+    letter, and it does not make a name into a slug.
+    """
+    if not isinstance(segment, str) or not NAMED_PROFILE_SEGMENT.fullmatch(segment):
+        return False
+    try:
+        decoded = unquote(segment, errors="strict")
+    except UnicodeDecodeError:
+        return False
+    return all(character.isalnum() or character in "-_" for character in decoded)
 
 
 def named_profile_url(segment: str) -> str:
@@ -2976,8 +3001,8 @@ def named_profile_url(segment: str) -> str:
         raise WriteAttemptError(
             f"navigation blocked: {segment!r} is not a profile segment this "
             "server can address -- three to a hundred letters, digits, hyphens, "
-            "underscores or percent-encoded octets, taken from the link you "
-            "gave. A name is never accepted here."
+            "underscores or percent-encoded non-ASCII letters, taken from the "
+            "link you gave. A name is never accepted here."
         )
     return "https://www.linkedin.com/in/" + segment + "/"
 

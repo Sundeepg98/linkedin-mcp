@@ -1077,9 +1077,11 @@ mcp = FastMCP(
         "gate cannot catch. Connect can send at once when pressed; when the "
         "control changes it is reported unknown rather than sent, because what "
         "a pressed Connect becomes has never been captured. Message types only "
-        "for a first-degree connection and only into the one empty composer "
-        "its own press opened; for anyone else it presses Message and stops "
-        "before typing. The note on an invitation is NOT built. "
+        "for a first-degree connection and only into one empty composer whose "
+        "conversation is titled with exactly that person's name, compared in "
+        "the page and checked again before Send; for anyone else it presses "
+        "Message and stops before typing. The note on an invitation is NOT "
+        "built. "
         "Endorsing a skill is IMPOSSIBLE AS SPECIFIED and is the one "
         "capability with no tool: zero endorse controls across 13 fixtures "
         "and across 222 controls read live on his own profile, and the only "
@@ -9944,11 +9946,14 @@ async def linkedin_message_from_profile(
     if: the browser is still on their profile, it reads '1st' -- for anyone
     else a message may be an InMail that spends one of your credits, and that
     composer has never been captured, so the act stops there having typed
-    NOTHING -- and exactly one empty composer opened, inside one conversation,
-    with no recipient box. Your words are typed; Send is pressed only when the
-    box holds EXACTLY them. THEN IT IS READ BACK IN PLACE, in the conversation
-    the press opened: ``performed`` is true only if your words are its last
-    message and the number of messages carrying them rose by exactly one
+    NOTHING -- and exactly one empty composer is on the page, inside one
+    conversation whose title reads exactly that person's name (compared in the
+    page; no name crosses into this server), with no recipient box. Your words
+    are typed; Send is pressed only when the box holds EXACTLY them and that
+    conversation's title still reads their name. THEN IT IS READ BACK IN
+    PLACE, in the conversation the press opened: ``performed`` is true only if
+    your words are its last message and the number of messages carrying them
+    rose by exactly one
     against the count taken when it opened. It is not reloaded -- its address
     is page-supplied, and this route never navigates to one -- and the
     verdict says so. False means nothing was typed, or the composer still

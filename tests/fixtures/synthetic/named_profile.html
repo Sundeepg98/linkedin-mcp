@@ -25,6 +25,13 @@
   DISABLED while empty -- and the message list's event items, the other
   side's wearing msg-s-event-listitem--other.
 
+  MEASURED on the four captures that draw an overlay conversation bubble
+  (2026-09-27; one minimised bubble, the same in all four, with no form in
+  it): the bubble's header is a <header>, and its title is ONE
+  h2.msg-overlay-bubble-header__title with its text drawn directly in it.
+  That a conversation with one person is titled with exactly that person's
+  name is DERIVED: the captured bubble's title is not a person's name.
+
   DERIVED, and every test that leans on one says so:
     * that a third party's topcard is his topcard's template with a degree
       line (a middle dot and "1st") under the name, and the two controls
@@ -42,6 +49,9 @@
     data-dispatches     yes: a Send draws the words as a new last message
                         and empties the box, as LinkedIn redraws
     data-connect        nothing (default) | pending | dialog
+    data-conversation-with
+                        the title the opened conversation draws (default:
+                        the profile's owner) -- whose conversation it is
   Every labelled control pressed is appended to body[data-pressed], so a
   test can say WHICH control a click reached. It is the fixture's script,
   not this package's; nothing in linkedin_server injects script into a page.
@@ -112,7 +122,10 @@
     bubble.className = 'msg-overlay-conversation-bubble';
     var header = document.createElement('header');
     header.className = 'msg-overlay-bubble-header';
-    header.textContent = owner;
+    var title = document.createElement('h2');
+    title.className = 'msg-overlay-bubble-header__title';
+    title.textContent = body.getAttribute('data-conversation-with') || owner;
+    header.appendChild(title);
     bubble.appendChild(header);
     var list = document.createElement('ul');
     list.className = 'msg-s-message-list-content';

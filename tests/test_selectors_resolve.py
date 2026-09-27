@@ -192,6 +192,15 @@ PAGE = (
     # whose prefix is arbitrary and which still resolves is the proof of that.
     f'<a href="/mynetwork/" aria-label="Nav, 0 {dom.INVITATION_BADGE_TAIL}s">n</a>'
     '<a href="/mynetwork/grow/">grow your network</a>'
+    # A NAMED PERSON'S TOPCARD, added 2026-09-27 with the two builders the
+    # named-person acts press by. The element whose id ends "Topcard" is the
+    # measured container (his own profile, 6 captures); the two labels are
+    # the measured conventions, "Invite <name> to connect" on a <button> and
+    # "Message <name>" on an <a> to the composer. The name is invented.
+    '<div id="exampleSyntheticTopcard">'
+    '<a aria-label="Message Someone Example" href="/messaging/compose/">m</a>'
+    '<button aria-label="Invite Someone Example to connect">c</button>'
+    "</div>"
     "</main></body></html>"
 )
 
@@ -234,6 +243,11 @@ def build_all() -> dict[str, str]:
         ),
         "reaction_control_selector": dom.reaction_control_selector(),
         "invite_control_selector": dom.invite_control_selector(0),
+        # THE NAMED-PERSON ACTS' TWO PRESSES, scoped to the topcard (the cold
+        # re-check of 2026-09-27). Position 0 is the only control of each kind
+        # inside the page's one topcard above.
+        "topcard_invite_control_selector": dom.topcard_invite_control_selector(0),
+        "topcard_message_control_selector": dom.topcard_message_control_selector(0),
         "tracker_list_selector": dom.tracker_list_selector(),
         "compose_recipient_selector": dom.compose_recipient_selector(),
         "compose_body_selector": dom.compose_body_selector(),
