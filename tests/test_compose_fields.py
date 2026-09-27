@@ -235,7 +235,7 @@ async def test_no_label_text_survives_into_any_answer(reading):
     page = _Page(reading=reading)
     out = await dom.read_compose_fields(page)
     blob = str(out)
-    for token in ("Ada", "Lovelace", "Wren", "Fixturewright", "will send message"):
+    for token in ("Tamsin", "Stubworth", "Wren", "Fixturewright", "will send message"):
         if token == "will send message" and "modes" in out:
             # The name-free TAIL is deliberately returned; it is what survives
             # the last capitalised run and is the storable half of the answer.
@@ -279,7 +279,7 @@ async def test_a_tail_that_still_carries_a_name_is_refused_at_the_boundary():
     it is that a check nobody has seen fail certifies nothing.
     """
     page = _Page(reading=_reading([
-        {"runs": 1, "joined_by_to": False, "tail": "Ada Lovelace",
+        {"runs": 1, "joined_by_to": False, "tail": "Tamsin Stubworth",
          "checked": True, "disabled": False},
         {"runs": 2, "joined_by_to": True, "tail": "will send message",
          "checked": False, "disabled": False},
@@ -288,7 +288,7 @@ async def test_a_tail_that_still_carries_a_name_is_refused_at_the_boundary():
     assert out["refused"] == "page_shaping_returned_a_name"
     assert "modes" not in out
     assert "1 of 2 tails" in out["why"]
-    for token in ("Ada", "Lovelace"):
+    for token in ("Tamsin", "Stubworth"):
         assert token not in str(out), (token, out)
 
 
@@ -495,9 +495,9 @@ def _run_shape_of_in_node(cases):
 
 
 SHAPING_CORPUS = [
-    "Ada Lovelace will send message",
-    "Ada Lovelace to Wren Fixturewright will send message",
-    "Ada Lovelace",
+    "Tamsin Stubworth will send message",
+    "Tamsin Stubworth to Wren Fixturewright will send message",
+    "Tamsin Stubworth",
     "Send",
     "InMail",
     "Enter message recipients",
@@ -514,9 +514,9 @@ SHAPING_CORPUS = [
     "Jean-Luc Picard will send message",
     "Zoe  to  Acme will send message",
     "to Acme will send message",
-    "Ada to Grace to Mary will send message",
+    "Tamsin to Grace to Mary will send message",
     "Élodie will send message",
-    "Ada Lovelace2 will send message",
+    "Tamsin Stubworth2 will send message",
     "X9 will send message",
 ]
 
@@ -613,9 +613,9 @@ def test_the_extractor_actually_found_the_shipped_function():
         )
     src = dom.COMPOSE_MODES_JS
     assert src.count("const shapeOf =") == 1
-    rows = _run_shape_of_in_node(["Ada Lovelace to Wren Fixturewright will send message"])
+    rows = _run_shape_of_in_node(["Tamsin Stubworth to Wren Fixturewright will send message"])
     assert rows == [{
-        "raw": "Ada Lovelace to Wren Fixturewright will send message",
+        "raw": "Tamsin Stubworth to Wren Fixturewright will send message",
         "runs": 2,
         "joined_by_to": True,
         "tail": "will send message",

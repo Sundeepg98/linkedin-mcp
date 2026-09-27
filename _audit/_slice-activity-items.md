@@ -380,7 +380,7 @@ E           assert 'author_is_not_the_page_owner' is None
 FAILED ...::test_the_prefix_rule_in_both_directions[overflow shortened, h1 full -- the MEASURED asymmetry]
 ```
 
-The third row -- `Adam Lovelace` against `Ada Lovelace`, which must NOT establish -- is
+The third row -- `Tamsine Stubworth` against `Tamsin Stubworth`, which must NOT establish -- is
 covered by M5 above, which forces `ownerMatch = true` and makes that row red.
 
 ### A8 -- the anchored urn shape
@@ -430,10 +430,10 @@ the script returns `sole_author`, the reader carries it into `authorship_facts`,
 
 ```
 >           assert secret not in rendered, (label, secret, rendered)
-E           AssertionError: ('established', 'Ada L', '{"anchors_per_item": {...}')
-E           assert 'Ada L' not in '{"anchors_p..._loaded": 1}'
-E             'Ada L' is contained here:
-E               the page: Ada L", "matches_page_owner": true, "self_assertion_present": true,
+E           AssertionError: ('established', 'Tamsin S', '{"anchors_per_item": {...}')
+E           assert 'Tamsin S' not in '{"anchors_p..._loaded": 1}'
+E             'Tamsin S' is contained here:
+E               the page: Tamsin S", "matches_page_owner": true, "self_assertion_present": true,
     "unanimous": true}, "counts": {...}, "item_root_source": {...}, "items": [...]
 FAILED ...::test_no_name_or_member_segment_is_anywhere_in_the_answer[established]
 ```

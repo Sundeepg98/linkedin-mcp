@@ -664,9 +664,9 @@ async def test_a_person_named_heading_does_not_ship():
     carries a key this module owns. So a card headed with somebody's name is
     reported as a card with a row count and no name.
     """
-    reading = await events.read_events_home(_page(own_heading="Ada Lovelace"))
+    reading = await events.read_events_home(_page(own_heading="Tamsin Stubworth"))
     shapes = [card["heading_shape"] for card in reading["cards"]]
-    assert "Ada Lovelace" not in shapes
+    assert "Tamsin Stubworth" not in shapes
     assert shapes[0] == "<redacted>"
 
 

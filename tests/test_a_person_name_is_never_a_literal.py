@@ -316,7 +316,7 @@ def test_every_declared_name_is_actually_used():
 
 
 # ---------------------------------------------------------------------------
-# Retired real names: held by digest, and hunted across tests/ and scripts/
+# Retired real names: held by digest, and hunted across the whole tracked tree
 # ---------------------------------------------------------------------------
 
 #: REAL PEOPLE'S NAMES THIS REPOSITORY HAS RETIRED, as SHA-256 digests of the
@@ -329,20 +329,33 @@ def test_every_declared_name_is_actually_used():
 #: replaced by a plainly invented name in every file that carried it, and it
 #: is held out from then on here.
 #:
+#: THE SECOND ENTRY, the same evening on the next order: another real
+#: historical figure, carried by no constant this file reads -- in
+#: ``dom.py``'s docstrings, five test files and two audit documents -- so the
+#: sweep below was widened from ``tests/`` and ``scripts/`` to every tracked
+#: text file, which is where it had been living unread.
+#:
 #: THE LIMIT: a digest only recognises a name somebody already retired. It
 #: cannot tell whether a NEW entry names a real person; the table's claim
 #: stays a human's. Anyone holding a list of candidate names can test each one
 #: against a digest, so this keeps the name out of the file, not secret.
 RETIRED_REAL_NAMES_SHA256 = frozenset(
-    {"e71d025a0b49b7d6c7d2d0a8af9ff4cb0079d2797feb9be286fd0fe5d24e935a"}
+    {
+        "e71d025a0b49b7d6c7d2d0a8af9ff4cb0079d2797feb9be286fd0fe5d24e935a",
+        "177f85df57ad121d5aaac8076a4a0554a673182fe06cf65ee7d9f7d0961f947d",
+    }
 )
 
 #: Every overlapping pair of capitalised words -- the shape of a two-part name.
 _CAPITALISED_PAIR = re.compile(r"(?=\b([A-Z][a-z]+ [A-Z][a-z]+)\b)")
 
-#: What the sweep reads: every tracked file under these folders with a text
-#: suffix -- the constants, the fixtures and the probes where names have lived.
+#: What the sweep reads: every tracked file with a text suffix, in every
+#: folder -- the constants, fixtures and probes where names have lived, and
+#: the package's docstrings and the audit records where the second one did.
 _SWEPT_SUFFIXES = (".py", ".html", ".json", ".md", ".txt", ".tsv")
+
+#: The WHOLE tracked tree: ``git ls-files`` with no folder narrows nothing.
+SWEPT_FOR_RETIRED_NAMES: tuple[str, ...] = ()
 
 
 def name_digest(name: str) -> str:
@@ -383,11 +396,16 @@ def test_no_invented_name_is_a_retired_real_name():
     )
 
 
-def test_no_tracked_test_or_script_carries_a_retired_real_name():
-    """AND EVERY FIXTURE THAT CARRIED IT: tests/ and scripts/, tracked files."""
+def test_no_tracked_file_carries_a_retired_real_name():
+    """AND EVERY FILE THAT CARRIED IT -- the whole tracked tree, since the
+    second entry lived in the package's docstrings and two audit records,
+    where a tests/-and-scripts/ sweep could not look."""
     found = []
-    for rel in _tracked():
-        text = (REPO / rel).read_text(encoding="utf-8", errors="replace")
+    for rel in _tracked(SWEPT_FOR_RETIRED_NAMES):
+        path = REPO / rel
+        if not path.is_file():
+            continue  # tracked but absent from this checkout
+        text = path.read_text(encoding="utf-8", errors="replace")
         found.extend("%s:%d %s" % (rel, line, digest) for line, digest in retired_names_in(text))
     assert found == [], (
         "a retired real person's name is still carried at %s (digest prefixes "
@@ -404,7 +422,10 @@ def test_the_retired_name_hunt_can_fire():
     text = "first line\nSend to Mr " + planted + " now\n"
     assert retired_names_in(text, retired) == [(2, name_digest(planted)[:12])]
     assert retired_names_in(text.replace("Zzqx", "Qzzx"), retired) == []
-    assert _tracked(), "the sweep reads no tracked file: it is not reading the tree"
+    swept = _tracked(SWEPT_FOR_RETIRED_NAMES)
+    assert swept, "the sweep reads no tracked file: it is not reading the tree"
+    # AND IT READS WHERE THE SECOND NAME LIVED, not only tests/ and scripts/.
+    assert {rel.split("/")[0] for rel in swept} >= {"tests", "scripts", "linkedin_server", "_audit"}
 
 
 @pytest.mark.parametrize("constant", sorted(PERSON_CONSTANTS))

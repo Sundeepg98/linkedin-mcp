@@ -870,8 +870,8 @@ records.**
 `dom.read_surface_census`. Only the first went through
 `shape.census_aggregate`, and the singleton redaction lives inside it:
 
-    control_shapes   'Message Ada Lovelace'  ->  <redacted>
-    file_inputs      'Message Ada Lovelace'  ->  'Message Ada Lovelace'
+    control_shapes   'Message Tamsin Stubworth'  ->  <redacted>
+    file_inputs      'Message Tamsin Stubworth'  ->  'Message Tamsin Stubworth'
 
 **THE TRAP IS THE NAME OF THE FUNCTION THAT LOOKS LIKE IT COVERS THIS.**
 `census_shape` sounds like the redactor and is not -- it is a character and
@@ -885,7 +885,7 @@ block inherited the gate and missed both.
                  record -- CALL it, never re-derive the rule, or the copy
                  drifts (see 1.3)
     THE CONTROL  two halves, and the second is the one that matters:
-                 'Message Ada Lovelace' must become <redacted>, AND
+                 'Message Tamsin Stubworth' must become <redacted>, AND
                  'Attach a file for your draft conversation' must SURVIVE.
                  A fix that redacted every file-input name would pass the
                  first assertion and destroy the reader's only purpose.

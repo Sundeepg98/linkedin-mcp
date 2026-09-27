@@ -3844,8 +3844,8 @@ async def read_surface_census(
     **BE PRECISE ABOUT WHAT ``census_shape`` BUYS, BECAUSE IT IS NOT WHAT ITS
     NAME SUGGESTS AND A CONSUMER OF THESE RECORDS WILL RELY ON THE ANSWER.**
     This paragraph said "the raw strings are discarded" until 2026-09-04 and
-    that reads as redaction. Measured: ``census_shape('Ada Lovelace')``
-    returns ``'Ada Lovelace'``. It is a CHARACTER AND LENGTH GATE plus
+    that reads as redaction. Measured: ``census_shape('Tamsin Stubworth')``
+    returns ``'Tamsin Stubworth'``. It is a CHARACTER AND LENGTH GATE plus
     placeholder substitution -- ``<opaque>`` past ``CENSUS_NAME_LIMIT`` or on
     punctuation outside the safe set, and VERBATIM for anything short and
     plain. That is correct and deliberate: opaquing ``Notifications`` would
@@ -3865,7 +3865,7 @@ async def read_surface_census(
     **A CALLER THAT EMITS THESE RECORDS WITHOUT AGGREGATING THEM MUST APPLY
     ``census_redact_rare`` ITSELF.** That is not hypothetical: ``read_file_inputs``
     below shipped without it on 2026-09-04, so one payload of
-    ``linkedin_surface_census`` blanked ``Message Ada Lovelace`` in
+    ``linkedin_surface_census`` blanked ``Message Tamsin Stubworth`` in
     ``control_shapes`` and printed it in ``file_inputs``. Corrected the same
     day by calling the same function rather than re-deriving the rule.
     """
@@ -4041,8 +4041,8 @@ async def read_file_inputs(
         # HALF OF ITS OWN PAYLOAD. Shipped without it on 2026-09-04 and
         # corrected the same day, measured rather than reasoned about:
         #
-        #     control_shapes (aggregated)  'Message Ada Lovelace' -> <redacted>
-        #     file_inputs    (as shipped)  'Message Ada Lovelace' -> verbatim
+        #     control_shapes (aggregated)  'Message Tamsin Stubworth' -> <redacted>
+        #     file_inputs    (as shipped)  'Message Tamsin Stubworth' -> verbatim
         #
         # `census_shape` is only a character and length gate, so a short plain
         # string survives it whatever it names. What actually catches a member
@@ -5170,7 +5170,7 @@ ACTIVITY_PERMALINK_MARKER = "/feed/update/"
 #: substring of some other word in the title.
 #:
 #: Four characters is chosen against the shape LinkedIn actually writes into
-#: the overflow label, which is a given name plus an initial -- ``Ada L`` is
+#: the overflow label, which is a given name plus an initial -- ``Tamsin S`` is
 #: five. It is not chosen against a threat model, because there is not one to
 #: choose against: what this bound does is stop the DEGENERATE case, where a
 #: one- or two-character author matches almost any title, from reading as an
