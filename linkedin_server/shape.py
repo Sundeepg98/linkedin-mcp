@@ -4578,6 +4578,16 @@ def messaging_overview(
 
     NAMES ARE OFF BY DEFAULT and the pairing survives the redaction: position
     plus unread state is actionable even without identities.
+
+    ASKED FOR, A NAME COMES BACK AS A PEOPLE RECORD (since 2026-09-27, the
+    second worked adopter of PEOPLE-DATA-MITIGATIONS): each row's ``with`` is
+    a :class:`people_data.Person` holding the label LinkedIn draws for the
+    conversation -- sanitised, capped, marked as another member's words --
+    and never the raw label. THE LIMIT, STATED: this reads the label alone,
+    which does not say whether the conversation has one other person or
+    several, so a group conversation's label comes back in a person record.
+    ``linkedin_list_conversations`` reads the row's group marker and returns
+    a group's label as a title record instead.
     """
     text = html or ""
     rows = _conversation_rows(text)
@@ -4586,14 +4596,16 @@ def messaging_overview(
     in_rows = sum(1 for r in rows if r["unread"])
     on_a_thread = "/messaging/thread/" in (landed_url or "")
 
-    conversations = [
-        {
-            "position": row["position"],
-            "name": row["name"] if include_names else NAME_PLACEHOLDER,
-            "unread": row["unread"],
-        }
-        for row in rows
-    ]
+    conversations = []
+    for row in rows:
+        entry: dict[str, Any] = {"position": row["position"]}
+        if include_names:
+            person = people_data.Person.from_page(name=row["name"])
+            entry["with"] = None if person is None else person.envelope()
+        else:
+            entry["name"] = NAME_PLACEHOLDER
+        entry["unread"] = row["unread"]
+        conversations.append(entry)
 
     return {
         "conversations": len(rows),

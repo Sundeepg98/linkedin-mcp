@@ -43,8 +43,10 @@ into this process is a count. **No message body, no correspondent's name and
 no thread identifier is returned by any function in this module**, with two
 deliberate, named exceptions: the conversation list's names when the caller
 passes ``include_names`` (his own inbox, opt-in, as ``linkedin_open_messaging``
-already offers), and the reply preview's ``who_this_would_reach``, printed in
-the confirm block only -- see :func:`name_the_reply_recipient`.
+already offers) -- read by :func:`read_conversation_list` into its reading and
+published by :func:`list_result` only as people records (since 2026-09-27,
+PEOPLE-DATA-MITIGATIONS) -- and the reply preview's ``who_this_would_reach``,
+printed in the confirm block only -- see :func:`name_the_reply_recipient`.
 
 A THREAD ID IS ONLY EVER A TOOL ARGUMENT. It is validated against the same
 shape the read allowlist admits, formatted into one constant template, and
@@ -58,7 +60,7 @@ import re
 from typing import Any, Optional
 from urllib.parse import urlsplit
 
-from linkedin_server import coerce, landing, shape
+from linkedin_server import coerce, landing, people_data, shape
 from linkedin_server.errors import WriteAttemptError
 
 logger = logging.getLogger(__name__)
@@ -544,11 +546,37 @@ def receipt_guard(
     }
 
 
+def conversation_with(label: Any, *, group: bool) -> Optional[dict[str, Any]]:
+    """WHO A CONVERSATION IS WITH, as a people record, or ``None``.
+
+    The second worked adopter of PEOPLE-DATA-MITIGATIONS (lane G,
+    2026-09-27). A row draws ONE label: the other member's name on a
+    conversation with one person, and the participants' names -- or a title
+    somebody gave it -- on a group conversation. So a one-to-one row becomes a
+    :class:`people_data.Person` holding the name, its headline, link and
+    degree empty because the list draws none of them, and a group row becomes
+    a title record, which is how mitigation 1 returns a group. Either way the
+    label is sanitised, capped and marked as another member's words, and a
+    label with nothing left after sanitising comes back as ``None``, never
+    raw.
+    """
+    if group:
+        record: Any = people_data.Group.from_page(title=label)
+    else:
+        record = people_data.Person.from_page(name=label)
+    return None if record is None else record.envelope()
+
+
 def list_result(
     reading: dict[str, Any], landed: Any, *, include_names: bool
 ) -> dict[str, Any]:
     """What ``linkedin_list_conversations`` returns. Built here so the tool
-    body is navigation only and every field is testable without a server."""
+    body is navigation only and every field is testable without a server.
+
+    With ``include_names`` a rendered row carries ``with``, the people record
+    :func:`conversation_with` builds from the label the reader read; without
+    it, ``name`` is the placeholder. The raw label never leaves: it is in the
+    reading, and the reading is not returned."""
     rows = []
     for row in reading.get("rows") or []:
         entry = {
@@ -556,7 +584,12 @@ def list_result(
             for key in ("position", "rendered", "unread", "signals", "group")
         }
         if row.get("rendered"):
-            entry["name"] = row.get("name") if include_names else shape.NAME_PLACEHOLDER
+            if include_names:
+                entry["with"] = conversation_with(
+                    row.get("name"), group=row.get("group") is True
+                )
+            else:
+                entry["name"] = shape.NAME_PLACEHOLDER
         rows.append(entry)
     return {
         "conversations_listed": coerce.as_count(reading.get("rows_total")),

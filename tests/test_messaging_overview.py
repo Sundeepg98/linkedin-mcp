@@ -21,7 +21,7 @@ import pathlib
 
 import pytest
 
-from linkedin_server import shape
+from linkedin_server import people_data, shape
 
 REPO = pathlib.Path(__file__).resolve().parents[1]
 
@@ -162,10 +162,18 @@ def test_names_are_placeholders_unless_the_caller_asks():
 
 def test_opting_in_returns_the_real_names():
     """The control. A redactor that could never be turned off would make the
-    tool useless for the one thing he opens it for."""
+    tool useless for the one thing he opens it for.
+
+    SINCE 2026-09-27 EACH NAME COMES BACK AS A PEOPLE RECORD
+    (PEOPLE-DATA-MITIGATIONS; lane G's second worked adopter), so the names
+    are read out of the records -- and a bare name beside one fails."""
     out = shape.messaging_overview(HTML, THREAD_URL, include_names=True)
 
-    assert [r["name"] for r in out["rows"]] == ["Dana Whitfield", "Ivo Karlsson"]
+    assert [r["with"]["name"] for r in out["rows"]] == ["Dana Whitfield", "Ivo Karlsson"]
+    for row in out["rows"]:
+        assert "name" not in row, "a bare name was returned beside the record"
+        assert isinstance(people_data.as_record(row["with"]), people_data.Person)
+        assert row["with"][people_data.UNTRUSTED_KEY] == people_data.UNTRUSTED_NOTE
     assert out["names_included"] is True
 
 

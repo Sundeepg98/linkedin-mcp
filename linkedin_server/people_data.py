@@ -306,8 +306,13 @@ class Event:
 #: the tools whose code builds one by ``tests/test_a_people_reader_reads_one_page.py``,
 #: so a tool that starts returning records joins this set in the same change,
 #: and every rule for a people reader -- one page, no cursor, no pagination
-#: helper -- applies to it from that change on.
-PEOPLE_TOOLS: frozenset[str] = frozenset({"linkedin_who_viewed_me"})
+#: helper -- applies to it from that change on. The first adopter was
+#: ``linkedin_who_viewed_me`` (2026-09-24); the two conversation readers
+#: joined on 2026-09-27, returning records when their caller passes
+#: ``include_names``.
+PEOPLE_TOOLS: frozenset[str] = frozenset(
+    {"linkedin_who_viewed_me", "linkedin_list_conversations", "linkedin_open_messaging"}
+)
 
 #: Every record type, and the exact keys of each envelope SHAPE. A group and
 #: an event share a shape (title, link, marker). The page-string guards read

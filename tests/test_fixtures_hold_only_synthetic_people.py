@@ -56,6 +56,12 @@ allowed, nothing below the slug. Counts are from 2026-09-27.
 * ``aria-label: X's connection is hiring`` -- notifications.html 1.
 * ``aria-label: Send a message to X`` -- 2 in each profile-views fixture.
 * ``aria-label: Invite X to connect`` -- 1 in each profile-views fixture.
+* ``aria-label: Select conversation with X`` -- a conversation row's label,
+  which names every participant: one name, or several joined by ``, `` and a
+  last `` and ``, each read as a candidate of its own.
+  synthetic/messaging_compose_list.html 3 labels, 4 names. ADDED 2026-09-27
+  with the second worked adopter, which returns these labels as people
+  records when a caller passes ``include_names``.
 * ``member link: aria-label matching no template`` -- the label is taken
   WHOLE, so a new label shape on a member link fails closed instead of
   passing unread. Measured 0; it is the fallback, not a slot anything uses.
@@ -161,6 +167,15 @@ SYNTHETIC_PEOPLE = frozenset(
         "Dana Whitfield",
         "Robin Ellery",
         "Sam Okonkwo",
+        # synthetic/messaging_compose_list.html: the participants of its three
+        # conversation rows (declared 2026-09-27, with the conversation slot).
+        # No slug declares these; the basis is the fixture's own header -- "Its
+        # CONTENT is invented. The names are not anybody's" -- and every one
+        # carries a word this repository uses for a stand-in.
+        "Kai Example",
+        "Juno Fixture",
+        "Ivo Placeholder",
+        "Lea Sample",
     }
 )
 
@@ -180,6 +195,7 @@ LABEL_VIEW_PROFILE = "aria-label: View X's profile"
 LABEL_CONNECTION_HIRING = "aria-label: X's connection is hiring"
 LABEL_SEND_MESSAGE = "aria-label: Send a message to X"
 LABEL_INVITE = "aria-label: Invite X to connect"
+LABEL_CONVERSATION = "aria-label: Select conversation with X"
 
 #: Every slot kind that holds a person in the tracked fixtures today. The
 #: fallback is not on it: it exists to fail closed, and nothing uses it.
@@ -191,7 +207,12 @@ MEASURED_SLOTS = (
     LABEL_CONNECTION_HIRING,
     LABEL_SEND_MESSAGE,
     LABEL_INVITE,
+    LABEL_CONVERSATION,
 )
+
+#: A conversation's label joins its participants with ``, `` and a last
+#: `` and `` -- measured on the one group row the tracked fixtures draw.
+_PARTICIPANT_SEPARATORS = re.compile(r", | and ")
 
 #: The typographic apostrophe LinkedIn serves beside the plain one. BUILT FROM
 #: ITS CODE POINT, and the reason is measured: this file's first draft wrote
@@ -214,6 +235,7 @@ LABEL_TEMPLATES = (
     ),
     (LABEL_SEND_MESSAGE, re.compile(r"^Send a message to (?P<name>.+?)\.?$")),
     (LABEL_INVITE, re.compile(r"^Invite (?P<name>.+) to connect\.?$")),
+    (LABEL_CONVERSATION, re.compile(r"^Select conversation with (?P<name>.+?)\.?$")),
 )
 
 #: A member's own address and nothing below it. Addresses BELOW a member --
@@ -335,7 +357,14 @@ class _SlotReader(HTMLParser):
         if label:
             templated = _template_for(label)
             if templated is not None:
-                self._add(templated[0], templated[1], line, col)
+                slot, value = templated
+                parts = (
+                    _PARTICIPANT_SEPARATORS.split(value)
+                    if slot == LABEL_CONVERSATION
+                    else [value]
+                )
+                for part in parts:
+                    self._add(slot, part, line, col)
             elif link is not None and link.member:
                 self._add(MEMBER_LABEL_UNPARSED, label, line, col)
 
@@ -555,6 +584,9 @@ PLANTS = {
         '<a href="/messaging/" aria-label="Send a message to {name}">Message</a>'
     ),
     LABEL_INVITE: '<button aria-label="Invite {name} to connect">Connect</button>',
+    LABEL_CONVERSATION: (
+        '<div tabindex="0" aria-label="Select conversation with {name}"></div>'
+    ),
     MEMBER_LABEL_UNPARSED: '<a href="' + PLANT_MEMBER + '" aria-label="{name}"></a>',
 }
 
@@ -631,6 +663,23 @@ def test_a_failure_message_never_carries_the_value_it_convicts():
     assert PLANTED_PATH + ":" in message
     for slot in PLANTS:
         assert "[%s]" % slot in message, slot
+
+
+def test_a_conversation_label_is_read_one_participant_at_a_time():
+    """THE SPLIT, SHOWN BOTH WAYS. A group conversation's label names several
+    people; each is a candidate of its own, so a declared name cannot vouch
+    for an undeclared one beside it -- and the declared ones pass."""
+    declared = sorted(SYNTHETIC_PEOPLE)[0]
+    planted = PLANTS[LABEL_CONVERSATION].format(
+        name=declared + ", Kai Example and " + PLANTED
+    )
+    assert [found.value for found in candidates_in(planted)] == [
+        declared, "Kai Example", PLANTED
+    ]
+    found = violations(PLANTED_PATH, planted, ACCEPTED)
+    assert len(found) == 1 and fingerprint(PLANTED) in found[0], found
+    fine = PLANTS[LABEL_CONVERSATION].format(name=declared + " and Kai Example")
+    assert violations(PLANTED_PATH, fine, ACCEPTED) == []
 
 
 def test_an_unparsed_label_on_a_member_link_is_taken_whole():

@@ -19,7 +19,7 @@ from pathlib import Path
 
 import pytest
 
-from linkedin_server import server, threads
+from linkedin_server import people_data, server, threads
 from tests.test_apply_modal_fixture import over  # noqa: F401 -- fixture
 from tests.test_writes import browser_page  # noqa: F401 -- fixture
 
@@ -148,6 +148,19 @@ async def test_names_cross_only_when_asked_for(over):
     assert [r.get("name") for r in reading["rows"]] == [
         "Kai Example", "Juno Fixture", "Ivo Placeholder, Lea Sample", None, None
     ]
+    # WHAT THE TOOL PUBLISHES from that reading, since 2026-09-27: each label
+    # as a people record in ``with`` -- a person on a one-to-one row, a title
+    # record on the group row -- and no bare name anywhere in a row.
+    published = threads.list_result(reading, threads.COMPOSE_URL, include_names=True)
+    rendered = [r for r in published["rows"] if r["rendered"]]
+    records = [people_data.as_record(r["with"]) for r in rendered]
+    assert [type(record) for record in records] == [
+        people_data.Person, people_data.Person, people_data.Group
+    ]
+    assert [r["with"].get("name", r["with"].get("title")) for r in rendered] == [
+        "Kai Example", "Juno Fixture", "Ivo Placeholder, Lea Sample"
+    ]
+    assert all("name" not in r for r in published["rows"]), published["rows"]
     unnamed = threads.list_result(
         await over(COMPOSE_LIST, threads.read_conversation_list),
         threads.COMPOSE_URL,

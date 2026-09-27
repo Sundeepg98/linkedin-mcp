@@ -19,6 +19,14 @@ is shown STILL CONVICTING after the redesign:
    success path: their page double answers ``evaluate`` with a dict, and the
    viewer harvest expects a list, so the tool was certified "clean" on its
    extraction-failure path alone.
+1b. THE SECOND ADOPTER, DRIVEN (2026-09-27). ``linkedin_list_conversations``
+   and ``linkedin_open_messaging`` with ``include_names``, on a page whose two
+   conversations are labelled with the plant -- laced with a zero-width space
+   on the one-to-one row and a direction override on the group row. The same
+   blind spot, by a different route: the guards drive every tool with its
+   defaults, and ``include_names`` defaults to False, so no guard had ever seen
+   a name cross either tool. Each drive is shown failing: with the record
+   builder swapped for the raw label, the same envelope is text.
 2. EACH GUARD, CONVICTING A PLANTED LEAK AFTER THE REDESIGN, through the
    guard's own code rather than a copy of it: the reader guard's
    ``classify_returned``, the tool-envelope guard's ``classify_envelope``, the
@@ -46,7 +54,7 @@ from typing import Any
 import pytest
 
 from linkedin_server import browser as browser_module
-from linkedin_server import dom, people_data, writes
+from linkedin_server import dom, people_data, shape, threads, writes
 from linkedin_server import server as server_module
 from tests.plantedpage import (
     PLANT,
@@ -152,7 +160,10 @@ class _ViewerListPage(CountingPlantedPage):
         return await PlantedPage.evaluate(self, script, arg, **kwargs)
 
 
-def _drive_who_viewed_me(page: _ViewerListPage, **kwargs: Any) -> dict[str, Any]:
+def _drive(tool: Any, page: Any, **kwargs: Any) -> dict[str, Any]:
+    """Run one tool against ``page``: the session yields it, and every
+    navigation lands where it was asked to without loading anything."""
+
     @asynccontextmanager
     async def fake_session(*args: Any, **more: Any):
         yield page
@@ -165,10 +176,14 @@ def _drive_who_viewed_me(page: _ViewerListPage, **kwargs: Any) -> dict[str, Any]
     browser_module.BROWSER.session = fake_session
     browser_module.BROWSER.goto = fake_goto
     try:
-        return asyncio.run(server_module.linkedin_who_viewed_me(**kwargs))
+        return asyncio.run(tool(**kwargs))
     finally:
         browser_module.BROWSER.session = original_session
         browser_module.BROWSER.goto = original_goto
+
+
+def _drive_who_viewed_me(page: _ViewerListPage, **kwargs: Any) -> dict[str, Any]:
+    return _drive(server_module.linkedin_who_viewed_me, page, **kwargs)
 
 
 @pytest.fixture(scope="module")
@@ -273,6 +288,230 @@ def test_the_switched_view_is_bounded_by_the_callers_limit(monkeypatch):
     applied = envelope["view_switch"]["viewers_when_applied"]
     assert len(applied) == 2, len(applied)
     assert all(people_data.as_record(row["person"]) for row in applied)
+
+
+# ---------------------------------------------------------------------------
+# 1b. The second adopter: the conversation readers, with include_names
+# ---------------------------------------------------------------------------
+
+#: Built from code points, so this file stays ASCII.
+_ZERO_WIDTH_SPACE = chr(0x200B)
+_RIGHT_TO_LEFT_OVERRIDE = chr(0x202E)
+
+#: What the two rows draw: a conversation with one person, labelled with the
+#: plant and a zero-width space, and a group conversation, labelled with the
+#: plant and an invented second participant and a direction override.
+_SECOND_PARTICIPANT = "Example Secondperson"
+_ONE_TO_ONE_LABEL = PLANT + _ZERO_WIDTH_SPACE
+_GROUP_LABEL = PLANT + ", " + _SECOND_PARTICIPANT + _RIGHT_TO_LEFT_OVERRIDE
+
+
+class _Counted:
+    """A locator that answers what it was built with -- a count, attributes,
+    a text, children by selector, rows by index -- and counts ZERO for
+    anything else, so a reader's other questions find nothing on this page."""
+
+    def __init__(self, count: int = 0, *, text: str = "", attrs: Any = None,
+                 children: Any = None, rows: Any = ()) -> None:
+        self._n = count
+        self._text = text
+        self._attrs = dict(attrs or {})
+        self._children = dict(children or {})
+        self._rows = list(rows)
+
+    def locator(self, selector: Any, **kwargs: Any) -> "_Counted":
+        return self._children.get(selector, _Counted())
+
+    def get_by_text(self, *args: Any, **kwargs: Any) -> "_Counted":
+        return _Counted()
+
+    def get_by_role(self, *args: Any, **kwargs: Any) -> "_Counted":
+        return _Counted()
+
+    def filter(self, *args: Any, **kwargs: Any) -> "_Counted":
+        return _Counted()
+
+    def nth(self, index: int) -> "_Counted":
+        return self._rows[index] if index < len(self._rows) else _Counted()
+
+    @property
+    def first(self) -> "_Counted":
+        return self
+
+    @property
+    def last(self) -> "_Counted":
+        return self
+
+    async def count(self) -> int:
+        return self._n
+
+    async def get_attribute(self, name: str, **kwargs: Any) -> Any:
+        return self._attrs.get(name)
+
+    async def inner_text(self, **kwargs: Any) -> str:
+        return self._text
+
+    async def text_content(self, **kwargs: Any) -> str:
+        return self._text
+
+    async def is_visible(self, **kwargs: Any) -> bool:
+        return self._n > 0
+
+    async def all(self) -> list:
+        return list(self._rows)
+
+
+def _conversation_row(label: str, *, group: bool) -> _Counted:
+    """One READ row of the composer's list, drawn the way threads.py reads it."""
+    return _Counted(
+        1,
+        attrs={"class": "msg-conversation-listitem"},
+        children={
+            threads.ROW_LINK_SELECTOR: _Counted(1),
+            threads.GROUP_FACEPILE_SELECTOR: _Counted(1 if group else 0),
+            threads.PARTICIPANT_NAMES_SELECTOR: _Counted(1, text=label),
+        },
+    )
+
+
+class _ConversationPage(CountingPlantedPage):
+    """The composer's list with two read rows and, for the /messaging/ load,
+    a document labelling the same two conversations. Every other question the
+    tools ask counts zero, and every script answers an empty reading."""
+
+    def __init__(self) -> None:
+        super().__init__()
+        rows = [
+            _conversation_row(_ONE_TO_ONE_LABEL, group=False),
+            _conversation_row(_GROUP_LABEL, group=True),
+        ]
+        self._list = _Counted(len(rows), rows=rows)
+
+    def locator(self, selector: Any, **kwargs: Any) -> _Counted:
+        self._count()
+        return self._list if selector == threads.ROW_SELECTOR else _Counted()
+
+    def get_by_text(self, *args: Any, **kwargs: Any) -> _Counted:
+        return _Counted()
+
+    def get_by_role(self, *args: Any, **kwargs: Any) -> _Counted:
+        return _Counted()
+
+    async def evaluate(self, script: Any, arg: Any = None, **kwargs: Any) -> dict:
+        self._count()
+        return {}
+
+    async def content(self) -> str:
+        self._count()
+        return "".join(
+            '<div aria-label="Select conversation with %s"></div>' % label
+            for label in (_ONE_TO_ONE_LABEL, _GROUP_LABEL)
+        )
+
+
+@pytest.fixture(scope="module")
+def conversations_listed() -> dict[str, Any]:
+    return _drive(
+        server_module.linkedin_list_conversations, _ConversationPage(), include_names=True
+    )
+
+
+@pytest.fixture(scope="module")
+def messaging_opened() -> dict[str, Any]:
+    return _drive(
+        server_module.linkedin_open_messaging, _ConversationPage(), include_names=True
+    )
+
+
+def test_the_conversation_list_returns_the_plant_only_inside_records(conversations_listed):
+    result = conversations_listed
+    assert result.get("error") is None, result
+    assert carries_the_plant(result), "the labels did not come back at all"
+    outside, records = carries_the_plant_outside_records(result)
+    assert outside == [] and records == 2, (outside, records)
+    verdict, reason, _positions = classify_envelope(result)
+    assert verdict == ENVELOPE_RECORDS, (verdict, reason)
+
+
+def test_a_one_to_one_row_is_a_person_and_a_group_row_a_title_record(conversations_listed):
+    one, group = [row for row in conversations_listed["rows"] if row["rendered"]]
+    assert isinstance(people_data.as_record(one["with"]), people_data.Person)
+    assert one["with"]["name"] == PLANT, "the zero-width space survived"
+    assert isinstance(people_data.as_record(group["with"]), people_data.Group)
+    assert group["with"]["title"] == PLANT + ", " + _SECOND_PARTICIPANT
+    assert "name" not in one and "name" not in group
+
+
+def test_without_include_names_neither_tool_carries_the_plant():
+    listed = _drive(server_module.linkedin_list_conversations, _ConversationPage())
+    assert not carries_the_plant(listed), listed
+    assert {r["name"] for r in listed["rows"] if r["rendered"]} == {shape.NAME_PLACEHOLDER}
+    opened = _drive(server_module.linkedin_open_messaging, _ConversationPage())
+    assert not carries_the_plant(opened), opened
+    assert {r["name"] for r in opened["rows"]} == {shape.NAME_PLACEHOLDER}
+
+
+def test_open_messaging_returns_the_plant_only_inside_records(messaging_opened):
+    """Two pages -- the composer's list for the receipt guard, then
+    /messaging/ -- and the names come from the second only: the guard's
+    reading asks for none."""
+    result = messaging_opened
+    assert "error" not in result and not result.get("refused"), result
+    assert result["pages_loaded"] == 2
+    assert carries_the_plant(result), "the labels did not come back at all"
+    outside, records = carries_the_plant_outside_records(result)
+    assert outside == [] and records == 2, (outside, records)
+    verdict, reason, _positions = classify_envelope(result)
+    assert verdict == ENVELOPE_RECORDS, (verdict, reason)
+
+
+def test_the_overview_returns_each_label_as_a_person_record(messaging_opened):
+    """ITS STATED LIMIT, pinned: the /messaging/ label does not say how many
+    people it names, so the group conversation comes back in a person record
+    too -- sanitised like the other."""
+    rows = messaging_opened["rows"]
+    assert [row["with"]["name"] for row in rows] == [
+        PLANT, PLANT + ", " + _SECOND_PARTICIPANT
+    ]
+    for row in rows:
+        assert isinstance(people_data.as_record(row["with"]), people_data.Person)
+        assert "name" not in row
+
+
+def test_a_list_that_published_the_raw_label_is_convicted(monkeypatch):
+    """THE DRIVE'S CONTROL: with the record builder swapped for the raw label,
+    the same drive of the same tool is text, not records."""
+    monkeypatch.setattr(threads, "conversation_with", lambda label, *, group: label)
+    result = _drive(
+        server_module.linkedin_list_conversations, _ConversationPage(), include_names=True
+    )
+    assert carries_the_plant_outside_records(result)[0]
+    assert classify_envelope(result)[0] == ENVELOPE_TEXT
+
+
+def test_an_overview_that_published_the_raw_label_is_convicted(monkeypatch):
+    """And the overview's: a record type that carries no marker is no people
+    record, so its name is page text outside one."""
+
+    class _Unmarked:
+        def __init__(self, name: Any) -> None:
+            self.name = name
+
+        def envelope(self) -> dict[str, Any]:
+            return {"name": self.name}
+
+    class _UnmarkedPeople:
+        class Person:
+            @classmethod
+            def from_page(cls, *, name: Any, **kwargs: Any) -> _Unmarked:
+                return _Unmarked(name)
+
+    monkeypatch.setattr(shape, "people_data", _UnmarkedPeople)
+    result = _drive(
+        server_module.linkedin_open_messaging, _ConversationPage(), include_names=True
+    )
+    assert carries_the_plant_outside_records(result)[0]
+    assert classify_envelope(result)[0] == ENVELOPE_TEXT
 
 
 # ---------------------------------------------------------------------------
@@ -506,9 +745,15 @@ _RECORD_PATH = {
     "linkedin_server/people_data.py": {
         "sanitise", "canonical_degree", "canonical_profile_link", "as_record", "text_fields",
     },
-    "linkedin_server/shape.py": {"parse_person_card", "envelope"},
+    "linkedin_server/shape.py": {
+        "parse_person_card", "envelope", "messaging_overview", "_conversation_rows",
+    },
+    "linkedin_server/threads.py": {
+        "read_conversation_list", "conversation_with", "list_result",
+    },
     "linkedin_server/server.py": {
         "linkedin_who_viewed_me", "_attach_recipient_ids", "_profile_views_switch",
+        "linkedin_list_conversations", "linkedin_open_messaging",
     },
 }
 
