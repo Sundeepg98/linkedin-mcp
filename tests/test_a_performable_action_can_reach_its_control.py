@@ -127,6 +127,7 @@ _TARGETS: dict[str, object] = {
     "field_and_value": {"field": "City", "value": "somewhere"},
     "setting_and_value": {"setting": "dark mode", "value": "Always on"},
     "member_and_text": {"member": "a needle nobody is", "text": "some text"},
+    "thread_and_text": {"thread": "2-SYNTHETICTHREADAAAA==", "text": "some text"},
 }
 
 

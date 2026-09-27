@@ -107,7 +107,19 @@ SCRIPT = ROOT / "scripts" / "check_gap_rows_on_refused_addresses.py"
 #: and ``P N20``. Each stays GAP on the blocker its own cell names. Found by
 #: diffing this script's row list on master `66aaa95` (60) against the merged
 #: tree (70): ten added, none removed.
-EXPECTED_GAP_ROWS = 70
+#:
+#: **70 -> 73 on 2026-09-24, lane Y2's follow-up: ROWS ENTERED GAP.** Record:
+#: `_audit/2026-09-24-lane-y2-admission.md`, "Follow-up: the P-R settings
+#: block". No boundary entry changed. The block's settings-family 44 were
+#: itemized into rows, and three of the new GAP rows backtick the settings
+#: address each needs, refused on a substring: ``P P9`` (data for generative
+#: AI improvement, on ``/settings/``), ``P P15`` (the Advertising data page,
+#: on ``/mypreferences/d/categories/``) and ``P P16`` (his cookie
+#: preferences, on ``cookies``). Each stays GAP on the blocker its own cell
+#: names, under ``INCIDENTAL-CAPTURE-IS-NOT-A-RULING``. Found by running this
+#: script on master `1902fcb`'s census (70) and on the itemized tree (73):
+#: three added, none removed.
+EXPECTED_GAP_ROWS = 73
 
 
 def _run(*args: str) -> subprocess.CompletedProcess:

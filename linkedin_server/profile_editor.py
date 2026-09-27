@@ -115,18 +115,107 @@ NOTIFY_NETWORK_WORDS: tuple[tuple[str, ...], ...] = (
 #: reading BEFORE the change is entered (the amendment's word), pass it here;
 #: no rule in this module moves.
 #:
-#: AN UNNAMED SWITCH REFUSES, AND THE AMENDMENT SAYS SO: the measured intro
-#: editor draws switches with NO accessible name, and the ruling holds that a
-#: switch the dialog cannot name is not evidence either way -- the condition is
-#: not met while one is present, even with the account setting read OFF, until
-#: a capture identifies that switch (``6_unnamed_switch_unresolved``). The live
-#: lane's capture has since identified the intro editor's two ('Open Profile'
-#: and 'Profile Premium Badge', `_audit/2026-09-23-live-lane-session-1.md`),
-#: but this gate classifies by accessible name only, so it cannot yet tell a
-#: capture-identified switch from any other unnamed one. Recognising those two
-#: by what the capture measured is the build that lifts this refusal for the
-#: intro editor; until it lands, the refusal stands.
+#: AN UNNAMED SWITCH REFUSES UNTIL A CAPTURE IDENTIFIES IT, AND THE AMENDMENT
+#: SAYS SO: a switch the dialog cannot name is not evidence either way -- the
+#: condition is not met while one is present, even with the account setting
+#: read OFF, until a capture identifies that switch
+#: (``6_unnamed_switch_unresolved``). The live lane's capture of the intro
+#: editor identified its two ('Open Profile' and 'Profile Premium Badge',
+#: `_audit/2026-09-23-live-lane-session-1.md`, Entry 5), and this gate ties a
+#: switch it sees to that identification BY STRUCTURE -- see
+#: :data:`INTRO_SWITCH_BLOCKS` -- so for the intro editor, and only there,
+#: those two no longer block. Any other unnamed switch still does.
 ACCOUNT_READINGS: tuple[str, ...] = ("off", "on", "unknown")
+
+#: THE INTRO EDITOR'S TWO UNNAMED SWITCHES, RECOGNISED BY STRUCTURE, NEVER BY A
+#: LABEL (2026-09-24, lane L7 follow-up).
+#:
+#: WHAT THE CAPTURE DRAWS, measured offline on the one render on record: both
+#: switches are ``input[type=checkbox][role=switch]`` whose own ``label`` is
+#: drawn EMPTY, each the only input inside a wrapper ``div`` carrying
+#: ``role=switch`` and ``aria-checked``. Each wrapper sits in a SETTING BLOCK of
+#: exactly two parts -- a text part holding paragraphs and no control, then the
+#: part holding the wrapper -- and both blocks sit in one SETTINGS ROW: a
+#: leading paragraph, then exactly those two blocks. That row is a direct child
+#: of the dialog's scrolling column, which the page names with a test id. The
+#: two blocks are identical in EVERY attribute but two random ones: a
+#: ``componentkey`` of random-UUID (version 4) shape and an input id of the
+#: shape React generates -- random BY THOSE SHAPES, since one render is on
+#: record. **The capture draws no section element, no heading, no heading id and
+#: no aria-describedby** around either switch, so the anchor is the nearest
+#: element above them that the page itself names -- that column -- and the row
+#: under it is found by structure and attribute PRESENCE: the press rules'
+#: discipline, an enumerated shape and never a label. The only text the
+#: identification rests on, each block's title paragraph, is never read.
+#:
+#: IDENTITY IS THE BLOCK'S ORDER IN THAT ROW, as the capture recorded it:
+#: :data:`INTRO_SWITCH_IDENTITIES`. That is enough to LIFT CODE 6 -- the two are
+#: both identified as not notify controls, so which is which changes nothing
+#: there -- and it is NOT enough to AIM a press at one of them: order is
+#: position, and this module refuses to press one of several by position. A
+#: row that draws a third block, a third unnamed switch anywhere in the dialog,
+#: or a switch in any other shape is not recognised, and code 6 stands for it.
+#:
+#: NO NEW SCRIPT AND NO NEW WAIVER, the same promise as the rest of this
+#: module: every question below is a ``locator(...).count()``, so the page runs
+#: nothing it did not already run, and what comes back is an integer.
+INTRO_SWITCH_IDENTITIES: tuple[str, ...] = ("open_profile", "profile_premium_badge")
+
+#: The anchor above the row: the dialog's scrolling column, by the test id the
+#: capture shows the page drawing on it. An attribute VALUE, as ``role="switch"``
+#: is -- a name in LinkedIn's code, never text a viewer reads.
+INTRO_SWITCH_COLUMN: str = '[data-testid="lazy-column"]'
+
+#: The dialog the fields reader scopes to, found the same way: a ``dialog`` /
+#: ``[role=dialog]`` holding the one control named :data:`SAVE_CONTROL_NAME`.
+_EDITOR_DIALOG: str = 'css=:is(dialog, [role="dialog"])'
+_SAVE_CONTROL: str = 'role=button[name="' + SAVE_CONTROL_NAME + '"s]'
+
+#: From a setting block down to its wrapper: the block's second part, and the
+#: ``role=switch`` + ``aria-checked`` element directly inside it.
+_INTRO_WRAPPER_PATH: str = ' > div:last-child > div[role="switch"][aria-checked]'
+
+#: THE SETTINGS ROW: a direct child of the column whose element children are
+#: exactly a paragraph and then two blocks, the second and third children each
+#: holding a wrapper with a checkbox in it. Several ``:has()`` side by side and
+#: none inside another, because CSS does not nest them.
+INTRO_SWITCH_ROW: str = (
+    INTRO_SWITCH_COLUMN
+    + " > div:has(> p:first-child + div + div:last-child)"
+    + ":has(> div:nth-child(2)" + _INTRO_WRAPPER_PATH + ' input[type="checkbox"])'
+    + ":has(> div:nth-child(3)" + _INTRO_WRAPPER_PATH + ' input[type="checkbox"])'
+)
+
+#: A SETTING BLOCK'S SHAPE, wherever it sits: exactly two parts, the first
+#: holding a paragraph and no control. Shared by the recognition's blocks and
+#: the Premium badge's (:data:`PREMIUM_BADGE_ROW_BLOCKS`), so the two cannot
+#: come apart.
+_INTRO_BLOCK_SHAPE: str = (
+    ":has(> div:first-child + div:last-child)"
+    ":has(> div:first-child p)"
+    ":not(:has(> div:first-child :is(input, button, select, textarea, a[href], [role])))"
+)
+
+#: THE ENUMERATED SHAPES, one setting block per identity in the recorded order:
+#: the row's second element child is ``INTRO_SWITCH_IDENTITIES[0]``, its third
+#: is ``[1]``. Each is exactly two parts, the first holding a paragraph and no
+#: control. Exact membership, as in ``press.SANCTIONED_SHAPES``: each shape
+#: must match exactly one element, or nothing is recognised.
+INTRO_SWITCH_BLOCKS: tuple[str, ...] = tuple(
+    INTRO_SWITCH_ROW + " > div:nth-child(" + str(position) + ")" + _INTRO_BLOCK_SHAPE
+    for position in (2, 3)
+)
+
+#: THE SWITCH ITSELF, inside its wrapper: the capture's pairing of an EMPTY
+#: label immediately before an ``input[type=checkbox][role=switch]`` that
+#: carries no naming attribute and sits inside no label. The accessible-name
+#: half of "unnamed" -- a non-empty label pointing at it from anywhere -- is
+#: asked of Playwright's own name computation beside this, in
+#: :func:`recognise_intro_editor_switches`.
+_INTRO_SWITCH_INPUT: str = (
+    ' label:empty + input[type="checkbox"][role="switch"]'
+    ":not([aria-label]):not([aria-labelledby]):not([title]):not(label *)"
+)
 
 #: How long to wait, after the press, for the editor to close before the
 #: verification navigates away. Ten polls half a second apart: a save is one
@@ -173,7 +262,11 @@ def _is_unnamed_switch(control: dict[str, Any]) -> bool:
 
 
 def save_gate_verdict(
-    reading: dict[str, Any], *, account_share_updates: Optional[str] = None
+    reading: dict[str, Any],
+    *,
+    account_share_updates: Optional[str] = None,
+    recognised_switches: Optional[dict[str, Any]] = None,
+    require_save: bool = True,
 ) -> dict[str, Any]:
     """Decide the ``Save`` press from one reading of the editor container.
 
@@ -181,6 +274,11 @@ def save_gate_verdict(
     ``dom.read_self_owned_editor_fields`` returned (no dom ids -- this decides
     whether to press, it does not aim by id). ``account_share_updates`` is the
     seam described at :data:`ACCOUNT_READINGS`; nothing passes it today.
+    ``recognised_switches`` is :func:`recognise_intro_editor_switches`'s reading;
+    absent, no switch is recognised. ``require_save=False`` is the reading
+    taken BEFORE a switch is pressed: a switch may store itself the moment
+    it is pressed, so condition 1 cannot wait for Save -- conditions 1 and 2
+    (the Save control) are skipped and every notify condition is kept.
     Returns the gate block ``writes.perform`` reports:
 
         proceed            True only when every condition below holds
@@ -190,6 +288,9 @@ def save_gate_verdict(
         save_controls      how many controls in the container are named Save
         notify_network     'off' | 'not_drawn' | 'on' | 'unknown' | 'ambiguous'
         unnamed_switches   checkable controls with no accessible name
+        recognised_switches  the capture-identified ones among them, by
+                           identity from :data:`INTRO_SWITCH_IDENTITIES`
+        unresolved_switches  unnamed and NOT recognised -- what code 6 counts
         condition_1        on proceed, what established it:
                            'dialog_control_off' | 'account_setting_off'
 
@@ -201,7 +302,8 @@ def save_gate_verdict(
     3. at most one control is named for notifying the network;
     4. if one is, it reads unchecked;
     5. if none is, the account-level setting was read ``'off'``;
-    6. and, on that account-level route, no switch in the dialog is unnamed.
+    6. and, on that account-level route, every unnamed switch in the dialog
+       is one a capture identified (the ruling's own words).
     """
     out: dict[str, Any] = {
         "proceed": False,
@@ -211,6 +313,8 @@ def save_gate_verdict(
         "save_controls": 0,
         "notify_network": None,
         "unnamed_switches": 0,
+        "recognised_switches": [],
+        "unresolved_switches": 0,
         "condition_1": None,
     }
     refused = (reading or {}).get("refused")
@@ -232,8 +336,11 @@ def save_gate_verdict(
     saves = [f for f in fields if str(f.get("name") or "") == SAVE_CONTROL_NAME]
     out["save_controls"] = len(saves)
     out["unnamed_switches"] = sum(1 for f in fields if _is_unnamed_switch(f))
+    identities = _recognised_identities(recognised_switches, out["unnamed_switches"])
+    out["recognised_switches"] = identities
+    out["unresolved_switches"] = out["unnamed_switches"] - len(identities)
 
-    if len(saves) != 1:
+    if require_save and len(saves) != 1:
         out["refused_condition"] = "1_save_not_exactly_one"
         out["why"] = (
             f"{len(saves)} controls in the editor are named "
@@ -241,7 +348,7 @@ def save_gate_verdict(
             "one of several would be pressing by position. Nothing was saved."
         )
         return out
-    if saves[0].get("disabled") is True:
+    if require_save and saves[0].get("disabled") is True:
         out["refused_condition"] = "2_save_disabled"
         out["why"] = (
             f"the editor's {SAVE_CONTROL_NAME!r} control is drawn DISABLED after "
@@ -284,7 +391,7 @@ def save_gate_verdict(
         out["condition_1"] = "dialog_control_off"
     else:
         out["notify_network"] = "not_drawn"
-        unnamed = coerce.as_count(out["unnamed_switches"])
+        unresolved = coerce.as_count(out["unresolved_switches"])
         # THE ACCOUNT-LEVEL ROUTE, the only other basis condition 1 can have.
         # Anything but the exact reading 'off' -- not read, 'on', unreadable,
         # or a value this module does not recognise -- establishes nothing.
@@ -308,23 +415,25 @@ def save_gate_verdict(
                 "was not pressed, and the change sits unsaved until the "
                 "verification's fresh navigation discards it."
                 + (
-                    f" {unnamed} switch(es) in the dialog carry no accessible "
-                    "name, and either could be a per-edit notify control."
-                    if unnamed
+                    f" {unresolved} switch(es) in the dialog carry no accessible "
+                    "name and no capture identifies them, and either could be a "
+                    "per-edit notify control."
+                    if unresolved
                     else ""
                 )
             )
             return out
-        if unnamed:
+        if unresolved:
             out["refused_condition"] = "6_unnamed_switch_unresolved"
             out["why"] = (
                 "his account-level 'Share profile updates with your network' "
                 "setting was read OFF before the edit, but "
-                f"{unnamed} switch(es) in the dialog carry no accessible name and "
-                "either could be a per-edit notify control this gate cannot "
-                "read. The account-level route stands for a dialog that draws NO "
-                "notify control, which is not established while one is drawn "
-                "unnamed. NEEDS-OPERATOR: Save was not pressed."
+                f"{unresolved} switch(es) in the dialog carry no accessible name "
+                "and are not among the switches a capture identified, and either "
+                "could be a per-edit notify control this gate cannot read. The "
+                "ruling does not count the condition met while one is present, "
+                "until a capture identifies it. NEEDS-OPERATOR: Save was not "
+                "pressed."
             )
             return out
         out["condition_1"] = "account_setting_off"
@@ -336,19 +445,467 @@ def save_gate_verdict(
             "edit dialog"
         ),
         "account_setting_off": (
-            "the dialog draws no notify control and no unnamed switch, and his "
-            "account-level setting was read off before the edit"
+            "the dialog draws no notify control, every unnamed switch in it is "
+            "one a capture identified, and his account-level setting was read "
+            "off before the edit"
         ),
     }[out["condition_1"]]
     out["why"] = (
         f"exactly one {SAVE_CONTROL_NAME!r} control is drawn in the editor and it "
         f"is enabled; condition 1 is established because {basis}."
+        if require_save
+        else "condition 1 is established because "
+        + basis
+        + ". Read BEFORE the switch is pressed, because a switch may store "
+        "itself when pressed; the Save control is checked when it is about to "
+        "be pressed."
     )
     return out
 
 
+def _recognised_identities(
+    reading: Optional[dict[str, Any]], unnamed: int
+) -> list[str]:
+    """The identities the structural reading ties to the capture -- or none.
+
+    ALL OR NOTHING, and conservative in every other case: the reading must name
+    exactly :data:`INTRO_SWITCH_IDENTITIES`, each once, drawn from that closed
+    tuple rather than from anything the page returned, and there must be at
+    least as many unnamed switches in the fields reading as it recognised. A
+    reading that disagrees with the fields reader recognises nothing, so the
+    switches stay unresolved and code 6 stands.
+    """
+    identities = (reading or {}).get("identities")
+    if not isinstance(identities, list):
+        return []
+    if sorted(identities) != sorted(INTRO_SWITCH_IDENTITIES):
+        return []
+    if coerce.as_count(unnamed) < len(identities):
+        return []
+    return [i for i in INTRO_SWITCH_IDENTITIES if i in identities]
+
+
+async def _read_switch_block(
+    dialog: Any, block: str, unnamed_switch: Any
+) -> tuple[bool, Optional[bool]]:
+    """One setting block's switch: ``(in the recorded shape, checked state)``.
+
+    In the recorded shape means: the block holds exactly one checkbox, its
+    part holds exactly one ``role=switch`` + ``aria-checked`` wrapper, the
+    wrapper holds the recorded unnamed switch by its attributes, and that
+    switch has no accessible name by Playwright's own computation. The state
+    is None where the checkbox and its wrapper disagree. Counts only; the
+    caller catches.
+    """
+    wrapper = block + _INTRO_WRAPPER_PATH
+    switch = wrapper + _INTRO_SWITCH_INPUT
+    held = await dialog.locator("css=" + block + ' input[type="checkbox"]').count()
+    wrappers = await dialog.locator("css=" + wrapper).count()
+    shaped = await dialog.locator("css=" + switch).count()
+    unnamed = await dialog.locator("css=" + switch).and_(unnamed_switch).count()
+    if any(coerce.as_count(n) != 1 for n in (held, wrappers, shaped, unnamed)):
+        return (False, None)
+    on = coerce.as_count(await dialog.locator("css=" + switch + ":checked").count())
+    wrapper_on = coerce.as_count(
+        await dialog.locator("css=" + wrapper + '[aria-checked="true"]').count()
+    )
+    return (True, (on == 1) if (on == 1) == (wrapper_on == 1) else None)
+
+
+async def recognise_intro_editor_switches(page: Any) -> dict[str, Any]:
+    """Recognise the intro editor's two capture-identified switches. Never raises.
+
+    Every question is a ``locator(...).count()`` against the shapes above, so
+    what comes back from the page is integers. Returns:
+
+        recognised   0, or the number of :data:`INTRO_SWITCH_IDENTITIES`
+        identities   in row order, from that closed tuple -- never page text
+        checked      the same order's checked states; ``None`` where the input
+                     and its ``aria-checked`` wrapper disagree
+        containers   dialogs holding the one ``Save`` control (1 required)
+        rows         settings rows of the recorded shape under the column
+                     (1 required)
+        checkables   ``input[type=checkbox]`` in that dialog, for the receipt
+        error        an exception's TYPE if the reading failed
+
+    Recognition is all or nothing: one dialog, one row, and for EACH identity
+    exactly one block holding exactly one checkbox, which is the recorded
+    unnamed switch by its attributes AND has no accessible name by
+    Playwright's own computation (hidden or not, as the fields reader counts
+    hidden controls too). Anything else recognises none, and the gate's code 6
+    then counts every unnamed switch.
+    """
+    out: dict[str, Any] = {
+        "recognised": 0,
+        "identities": [],
+        "checked": [],
+        "containers": 0,
+        "rows": 0,
+        "checkables": 0,
+        "error": None,
+    }
+    try:
+        dialog = page.locator(_EDITOR_DIALOG, has=page.locator(_SAVE_CONTROL))
+        out["containers"] = coerce.as_count(await dialog.count())
+        if out["containers"] != 1:
+            return out
+        out["checkables"] = coerce.as_count(
+            await dialog.locator('css=input[type="checkbox"]').count()
+        )
+        out["rows"] = coerce.as_count(
+            await dialog.locator("css=" + INTRO_SWITCH_ROW).count()
+        )
+        if out["rows"] != 1:
+            return out
+        unnamed_switch = dialog.get_by_role(
+            "switch", name="", exact=True, include_hidden=True
+        )
+        states: list[Optional[bool]] = []
+        for block in INTRO_SWITCH_BLOCKS:
+            in_shape, state = await _read_switch_block(dialog, block, unnamed_switch)
+            if not in_shape:
+                return out
+            states.append(state)
+    except Exception as exc:  # noqa: BLE001 - the TYPE is the whole report
+        out["error"] = type(exc).__name__
+        return out
+    out["recognised"] = len(INTRO_SWITCH_IDENTITIES)
+    out["identities"] = list(INTRO_SWITCH_IDENTITIES)
+    out["checked"] = states
+    return out
+
+
+#: THE PREMIUM BADGE'S AIM -- P B9, built 2026-09-24 (lane L7) on the
+#: orchestrator's ruling of 09:15, relayed by the coordinator's order. The
+#: switch's block title is a LinkedIn UI string, not his data, and it may aim
+#: the press when ALL of these hold; each is held here or in ``writes``:
+#:
+#: 1. IT IS COMPARED INSIDE THE PAGE. It rides in a selector the page's own
+#:    engine evaluates (``:text-is``: exact, case-sensitive, whitespace
+#:    collapsed), and what comes back is a count. No text is read out or
+#:    returned.
+#: 2. IT MATCHES EXACTLY ONE SETTINGS ROW in the intro editor's column, or the
+#:    write refuses (:func:`read_premium_badge`).
+#: 3. A NON-ENGLISH UI REFUSES, because the string will not match: the count
+#:    is 0 and the refusal is the same one. Fail-closed BY CONSTRUCTION, not
+#:    by a language check that could itself be wrong.
+#: 4. A BEFORE/AFTER READING PROVES THAT ONLY THAT SWITCH CHANGED, and that
+#:    the other switch in its row -- Open Profile, row ``P B10``, by the
+#:    capture -- did not: in the dialog after the press and before Save
+#:    (:func:`badge_moved_alone`), and on a fresh render after the write
+#:    (:func:`badge_verification`).
+#: 5. THE RESTORE IS THE SAME WRITE WITH THE OTHER VALUE, checked the same
+#:    way.
+#:
+#: ONE STRING, written here and never composed from a caller's input. The
+#: write is ``update_profile_field`` with this title as its ``field``: the
+#: family's grant, off by default, its preview and token, and its restore
+#: block.
+PREMIUM_BADGE_TITLE: str = "Profile Premium Badge"
+
+#: The two values the write takes, and the checked state each means. ``on`` is
+#: the badge SHOWN: on the one render on record the switch reads checked and
+#: his profile draws the Premium icon. DERIVED from that render, not from a
+#: press, which is why the verification compares STATES and never meanings.
+PREMIUM_BADGE_STATES: dict[str, bool] = {"on": True, "off": False}
+
+#: The title paragraph, compared in the page. The constant carries no quote or
+#: backslash, so it cannot end the selector's own quoting.
+_BADGE_TITLE_P: str = 'p:text-is("' + PREMIUM_BADGE_TITLE + '")'
+
+#: Any row directly under the column carrying the title ANYWHERE in it, of any
+#: shape. Condition 2 is counted over this: a second row carrying it, in
+#: whatever shape, makes the aim ambiguous.
+PREMIUM_BADGE_ANY_ROW: str = INTRO_SWITCH_COLUMN + " > div:has(" + _BADGE_TITLE_P + ")"
+
+#: The recorded-shape row one of whose blocks carries the title in its text
+#: part. One ``:has()`` with a relative path, never nested.
+PREMIUM_BADGE_ROW: str = (
+    INTRO_SWITCH_ROW + ":has(> div > div:first-child " + _BADGE_TITLE_P + ")"
+)
+
+#: The two blocks of THAT row, by position, in the recorded shape.
+PREMIUM_BADGE_ROW_BLOCKS: tuple[str, ...] = tuple(
+    PREMIUM_BADGE_ROW + " > div:nth-child(" + str(position) + ")" + _INTRO_BLOCK_SHAPE
+    for position in (2, 3)
+)
+
+#: A block whose text part carries the title.
+_BADGE_TITLED: str = ":has(> div:first-child " + _BADGE_TITLE_P + ")"
+
+#: Why the badge cannot be aimed, by code. Built from constants only.
+PREMIUM_BADGE_REFUSALS: dict[str, str] = {
+    "0_editor_not_found": (
+        "the intro editor's dialog -- the one holding the one Save control -- "
+        "was not found exactly once."
+    ),
+    "1_title_not_drawn": (
+        "no settings row in the editor's column carries the title "
+        + repr(PREMIUM_BADGE_TITLE)
+        + ". A UI in another language lands here by construction: the English "
+        "string matches nothing, so nothing is aimed."
+    ),
+    "2_title_in_more_than_one_row": (
+        "more than one row in the editor's column carries the title "
+        + repr(PREMIUM_BADGE_TITLE)
+        + ", and pressing one of several would be choosing by position."
+    ),
+    "3_not_the_recorded_row": (
+        "the row carrying the title is not the recorded settings row -- a "
+        "leading paragraph and exactly two setting blocks."
+    ),
+    "4_title_not_on_exactly_one_block": (
+        "the title is not on exactly one of the row's two setting blocks."
+    ),
+    "5_switch_not_the_recorded_shape": (
+        "a switch in the row is not in the recorded shape: one unnamed "
+        "checkbox switch, in a wrapper carrying role=switch and aria-checked."
+    ),
+    "6_state_unreadable": (
+        "a switch's checkbox and its aria-checked wrapper disagree, so its "
+        "state cannot be read."
+    ),
+    "7_reading_failed": "the reading itself failed; only its exception type is kept.",
+}
+
+
+def _badge_refusal(out: dict[str, Any], code: str) -> dict[str, Any]:
+    out["aimable"] = False
+    out["refused"] = code
+    out["why"] = (
+        "the Premium badge switch was not aimed because "
+        + PREMIUM_BADGE_REFUSALS[code]
+        + " Nothing was pressed."
+    )
+    return out
+
+
+async def read_premium_badge(page: Any) -> dict[str, Any]:
+    """Find the Premium badge switch BY ITS TITLE, compared in the page. Never raises.
+
+    Every question is a ``locator(...).count()``, so the page runs nothing it
+    did not already run and what comes back is integers. Returns:
+
+        aimable            True only when every check below holds
+        refused / why      a code from :data:`PREMIUM_BADGE_REFUSALS`, and its
+                           sentence -- constants and counts, never page text
+        containers         dialogs holding the one Save control (1 required)
+        rows_titled        column rows carrying the title anywhere (1 required)
+        recorded_rows_titled  recorded-shape rows carrying it (1 required)
+        badge_position     1 or 2: the badge block's order in its row
+        badge_checked / other_checked   the two switches' states
+        selector           the press, when aimable: the wrapper of the titled
+                           block, at that position, in the titled row, in the
+                           dialog -- so the click itself re-checks the title
+        error              an exception's TYPE if the reading failed
+
+    THE OTHER SWITCH is the row's other setting block. The capture identifies
+    it as Open Profile; it is read here BY STRUCTURE only, so that condition 4
+    of the ruling can prove it did not move.
+    """
+    out: dict[str, Any] = {
+        "aimable": False,
+        "refused": None,
+        "why": "",
+        "containers": 0,
+        "rows_titled": 0,
+        "recorded_rows_titled": 0,
+        "badge_position": None,
+        "badge_checked": None,
+        "other_checked": None,
+        "selector": "",
+        "error": None,
+    }
+    try:
+        dialog = page.locator(_EDITOR_DIALOG, has=page.locator(_SAVE_CONTROL))
+        out["containers"] = coerce.as_count(await dialog.count())
+        if out["containers"] != 1:
+            return _badge_refusal(out, "0_editor_not_found")
+        out["rows_titled"] = coerce.as_count(
+            await dialog.locator("css=" + PREMIUM_BADGE_ANY_ROW).count()
+        )
+        if out["rows_titled"] == 0:
+            return _badge_refusal(out, "1_title_not_drawn")
+        if out["rows_titled"] > 1:
+            return _badge_refusal(out, "2_title_in_more_than_one_row")
+        out["recorded_rows_titled"] = coerce.as_count(
+            await dialog.locator("css=" + PREMIUM_BADGE_ROW).count()
+        )
+        if out["recorded_rows_titled"] != 1:
+            return _badge_refusal(out, "3_not_the_recorded_row")
+        titled = [
+            coerce.as_count(await dialog.locator("css=" + block + _BADGE_TITLED).count())
+            for block in PREMIUM_BADGE_ROW_BLOCKS
+        ]
+        if sorted(titled) != [0, 1]:
+            return _badge_refusal(out, "4_title_not_on_exactly_one_block")
+        badge = titled.index(1)
+        unnamed_switch = dialog.get_by_role(
+            "switch", name="", exact=True, include_hidden=True
+        )
+        badge_ok, badge_checked = await _read_switch_block(
+            dialog, PREMIUM_BADGE_ROW_BLOCKS[badge], unnamed_switch
+        )
+        other_ok, other_checked = await _read_switch_block(
+            dialog, PREMIUM_BADGE_ROW_BLOCKS[1 - badge], unnamed_switch
+        )
+        if not (badge_ok and other_ok):
+            return _badge_refusal(out, "5_switch_not_the_recorded_shape")
+        out["badge_position"] = badge + 1
+        out["badge_checked"] = badge_checked
+        out["other_checked"] = other_checked
+        if badge_checked is None or other_checked is None:
+            return _badge_refusal(out, "6_state_unreadable")
+    except Exception as exc:  # noqa: BLE001 - the TYPE is the whole report
+        out["error"] = type(exc).__name__
+        return _badge_refusal(out, "7_reading_failed")
+    out["aimable"] = True
+    out["selector"] = (
+        _EDITOR_DIALOG
+        + " >> css="
+        + PREMIUM_BADGE_ROW_BLOCKS[badge]
+        + _BADGE_TITLED
+        + _INTRO_WRAPPER_PATH
+    )
+    out["why"] = (
+        "exactly one settings row in the editor's column carries the title "
+        + repr(PREMIUM_BADGE_TITLE)
+        + ", compared in the page; it is the recorded row, the title is on its "
+        + ("first" if badge == 0 else "second")
+        + " setting block, and both of the row's switches are in the recorded "
+        "shape with readable states."
+    )
+    return out
+
+
+def premium_badge_value(reading: Optional[dict[str, Any]]) -> tuple[Optional[str], str]:
+    """The badge's state as the write names it, ``'on'`` or ``'off'`` -- or None.
+
+    None means it could not be read, never that it was off.
+    """
+    reading = reading or {}
+    if not reading.get("aimable"):
+        return (None, str(reading.get("why") or "the badge switch was not read."))
+    checked = reading.get("badge_checked")
+    for value, state in PREMIUM_BADGE_STATES.items():
+        if checked is state:
+            return (
+                value,
+                "read live from the editor before the write, off the switch "
+                "whose block carries the title, compared in the page.",
+            )
+    return (None, "the badge switch's state could not be read.")
+
+
+def premium_badge_aim(reading: Optional[dict[str, Any]], value: str) -> dict[str, Any]:
+    """Gate 5 for the badge: whether, and where, to press. PURE.
+
+    Refuses a value outside :data:`PREMIUM_BADGE_STATES`, a reading that is
+    not aimable, and a badge already in the requested state -- pressing that
+    one would switch it the OTHER way.
+    """
+    out: dict[str, Any] = {"proceed": False, "selector": "", "why": ""}
+    if value not in PREMIUM_BADGE_STATES:
+        out["why"] = (
+            "the Premium badge switch takes 'on' or 'off', and "
+            + repr(value)
+            + " is neither."
+        )
+        return out
+    reading = reading or {}
+    if not reading.get("aimable"):
+        out["why"] = str(reading.get("why") or "the badge switch was not read.")
+        return out
+    if reading.get("badge_checked") is PREMIUM_BADGE_STATES[value]:
+        out["why"] = (
+            "the Premium badge switch is already "
+            + repr(value)
+            + ". Pressing it would switch it the other way, so nothing is pressed."
+        )
+        return out
+    out["proceed"] = True
+    out["selector"] = str(reading.get("selector") or "")
+    out["why"] = str(reading.get("why") or "")
+    return out
+
+
+def badge_moved_alone(
+    before: Optional[dict[str, Any]], after: Optional[dict[str, Any]], value: str
+) -> dict[str, Any]:
+    """In the dialog, after the press and BEFORE Save: did the badge -- and only
+    the badge -- move? PURE. Save is pressed only on ``proceed``; otherwise the
+    change sits unsaved and the verification's fresh navigation discards it.
+    """
+    out: dict[str, Any] = {"proceed": False, "code": None, "why": ""}
+    before = before or {}
+    after = after or {}
+    if not (before.get("aimable") and after.get("aimable")):
+        out["code"] = "unreadable"
+        out["why"] = "the switches could not be read before and after the press."
+        return out
+    if after.get("badge_position") != before.get("badge_position"):
+        out["code"] = "the_row_changed"
+        out["why"] = "the badge's block moved within its row between the two readings."
+        return out
+    if after.get("other_checked") is not before.get("other_checked"):
+        out["code"] = "the_other_switch_moved"
+        out["why"] = (
+            "THE OTHER SWITCH IN THE ROW MOVED -- Open Profile, by the capture. "
+            "Save was not pressed, so nothing the dialog holds is stored by this "
+            "write; if the switch stores itself when pressed, check Open "
+            "Profile by hand."
+        )
+        return out
+    if after.get("badge_checked") is not PREMIUM_BADGE_STATES.get(value):
+        out["code"] = "the_badge_did_not_move"
+        out["why"] = "the badge switch did not reach the requested state; Save was not pressed."
+        return out
+    out["proceed"] = True
+    out["why"] = "the badge switch moved to the requested state and the other switch did not."
+    return out
+
+
+def badge_verification(
+    before: Optional[dict[str, Any]], after: Optional[dict[str, Any]], value: str
+) -> tuple[Optional[str], str]:
+    """On a FRESH RENDER after the write: ``field_changed`` when the badge holds
+    the requested state and the other switch holds its own before-state,
+    ``value_unchanged`` when neither moved, and None -- unknown -- otherwise.
+    PURE.
+    """
+    before = before or {}
+    after = after or {}
+    if not (before.get("aimable") and after.get("aimable")):
+        return (
+            None,
+            "the switches could not be read on the fresh render: "
+            + str(after.get("why") or ""),
+        )
+    if after.get("other_checked") is not before.get("other_checked"):
+        return (
+            None,
+            "THE OTHER SWITCH IN THE ROW -- Open Profile, by the capture -- no "
+            "longer holds the state it held before this write. Check it by hand.",
+        )
+    if after.get("badge_checked") is PREMIUM_BADGE_STATES.get(value):
+        return (
+            "field_changed",
+            "the badge switch reads the requested state on a fresh render, and "
+            "the other switch is unchanged.",
+        )
+    if after.get("badge_checked") is before.get("badge_checked"):
+        return (
+            "value_unchanged",
+            "neither switch moved: the badge reads what it read before this write.",
+        )
+    return (None, "the badge switch reads neither the requested state nor its previous one.")
+
+
 async def read_save_gate(
-    page: Any, *, account_share_updates: Optional[str] = None
+    page: Any,
+    *,
+    account_share_updates: Optional[str] = None,
+    require_save: bool = True,
 ) -> dict[str, Any]:
     """Read the open editor and decide the press. Never raises.
 
@@ -364,9 +921,22 @@ async def read_save_gate(
         verdict = save_gate_verdict(
             {"refused": type(exc).__name__},
             account_share_updates=account_share_updates,
+            require_save=require_save,
         )
         return verdict
-    return save_gate_verdict(reading, account_share_updates=account_share_updates)
+    # Only a reading that FOUND the container is worth recognising in: a
+    # refusal is code 0 whatever the switches are.
+    switches = (
+        await recognise_intro_editor_switches(page)
+        if isinstance(reading, dict) and "fields" in reading
+        else None
+    )
+    return save_gate_verdict(
+        reading,
+        account_share_updates=account_share_updates,
+        recognised_switches=switches,
+        require_save=require_save,
+    )
 
 
 async def wait_for_editor_to_close(
@@ -410,16 +980,23 @@ def notify_network_note(gate: Optional[dict[str, Any]]) -> str:
             "there is no notify-network reading for this write."
         )
     state = gate.get("notify_network")
-    unnamed = coerce.as_count(gate.get("unnamed_switches"))
+    unresolved = coerce.as_count(gate.get("unresolved_switches"))
+    known = len(gate.get("recognised_switches") or [])
     code = gate.get("refused_condition")
     if gate.get("condition_1") == "dialog_control_off":
         return "CONFIRMED OFF: a control named for notifying the network was read unchecked in the edit dialog."
     if gate.get("condition_1") == "account_setting_off":
         return (
             "CONFIRMED OFF AT THE ACCOUNT: no control in the edit dialog is named "
-            "for notifying the network and none is unnamed, and his account-level "
-            "'Share profile updates with your network' setting was read OFF before "
-            "the edit."
+            "for notifying the network, "
+            + (
+                f"its {known} unnamed switch(es) are the ones a capture identified, "
+                "recognised by structure, "
+                if known
+                else "none is unnamed, "
+            )
+            + "and his account-level 'Share profile updates with your network' "
+            "setting was read OFF before the edit."
         )
     if code == "5_condition_1_not_established":
         return (
@@ -427,9 +1004,9 @@ def notify_network_note(gate: Optional[dict[str, Any]]) -> str:
             "named for notifying the network, and his account-level setting was "
             "not read OFF before the edit"
             + (
-                f"; {unnamed} checkable control(s) in the dialog carry no name at "
-                "all and either could be it"
-                if unnamed
+                f"; {unresolved} checkable control(s) in the dialog carry no name "
+                "and no capture identifies them, and either could be it"
+                if unresolved
                 else ""
             )
             + ". Save was not pressed."
@@ -437,8 +1014,9 @@ def notify_network_note(gate: Optional[dict[str, Any]]) -> str:
     if code == "6_unnamed_switch_unresolved":
         return (
             "NOT ESTABLISHED -- NEEDS-OPERATOR: his account-level setting was read "
-            f"OFF, but {unnamed} checkable control(s) in the dialog carry no name "
-            "and either could be a per-edit notify control. Save was not pressed."
+            f"OFF, but {unresolved} checkable control(s) in the dialog carry no name "
+            "and no capture identifies them, and either could be a per-edit notify "
+            "control. Save was not pressed."
         )
     if state in ("on", "unknown", "ambiguous"):
         return f"REFUSED ON IT: the notify-network reading was {state!r}, so Save was not pressed."

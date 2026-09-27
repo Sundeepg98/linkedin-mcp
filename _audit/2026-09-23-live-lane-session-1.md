@@ -800,7 +800,9 @@ capture draws three. His post's permalink draws NONE: its one toggle reads
 "Unreact Like" (the post is liked) in all three captures of that page, 22:38
 closed, 22:38 open and 00:15. So `off_state` read 0 before and after the
 press whatever happened; the gate compared two zeros and reported them as a
-price. It cannot tell "did not move" from "could not move", and the `/feed/`
+price. **(Overclaimed, and corrected in Part 2 (a) below: had an unreaction
+drawn the toggle OFF in the state family, `off_state` would have moved; what
+the zero could not do is tell unmoved from unmovable.)** It cannot tell "did not move" from "could not move", and the `/feed/`
 basis reaches `/feed/update/` by path prefix while its counter exists only
 on `/feed/`. **The same zero priced Entry 4's press** on the same page, which
 Entry 4 records as "priced by `off_state`: permitted" without the value.
@@ -817,7 +819,9 @@ not the gate's price, and the gate is what failed.
 **THE FIX, offline, before the fire is repeated.**
 `share_link.read_item_price` counts the item's toggle in both measured
 dialects -- `off_state` (the basis's own), plus the permalink's "Unreact "
-(on) and "React " (off; inferred from the on form, not yet seen). The tool
+(on) and "React " (off; inferred from the on form, not yet seen; **Part 2
+(a) below: the permalink's OFF label had been MEASURED on 2026-08-31, in the
+state family, so "dialects" was the wrong model**). The tool
 asks `price_can_move` BEFORE the first press and refuses `price_cannot_move`,
 with nothing pressed, when every counter reads 0; every reading comes back
 as integers in `price_readings`. 84 tests. Seven plants, all red: the zero
@@ -1061,12 +1065,17 @@ and the commit that adds this section.
    this lane's: a basis of its own for `/feed/update/`, or a refusal when the
    basis-named counter reads 0 at both ends and nothing else priced the
    press. The gate's `priced_by` field also names the basis counter rather
-   than whatever counter could move (Entry 12).
+   than whatever counter could move (Entry 12). **Built in Part 2 (a), and
+   narrowed there: "prices nothing" overclaimed -- the zero cannot tell
+   unmoved from unmovable.**
 2. **The react write aims by the feed's label** (`dom.REACTION_OFF_LABEL`,
    `reaction_control_selector`, used on item permalinks). On his own post's
    permalink the measured toggle is "Unreact Like" (the post liked; the OFF
    form "React Like" is inferred). n=1, one liked post, but it suggests the
-   write would find no control there. For lane L4.
+   write would find no control there. For lane L4. **Corrected in Part 2
+   (a): the permalink's OFF label was measured on 2026-08-31 in the state
+   family, and an ON label on 2026-09-04 ("Reaction button state: Like");
+   the write's real defect is reading the "Unreact" ON label -- Part 2 (b).**
 3. **`JS_MUTATION_TOKENS` cannot see API replacement -- now VERIFIED BY
    INSTRUMENT.** With `CLIPBOARD_JS` undeclared (RC) or declared as an
    ordinary injected script (RD),
@@ -1373,3 +1382,566 @@ eight findings in other waves' documents, pinned by its test, which passes).
 the order says not to), CI, the 3.10 cell. **If master moves again before
 the orchestrator merges this branch, that merge is the orchestrator's;** the
 chase is stopped here so Part 2 can start.
+
+---
+
+## Part 2 -- offline follow-ups, 2026-09-24
+
+The order's six follow-ups, one commit each, after Part 1. Nothing is fired.
+
+### (a) PRICE: the gate refuses a price that cannot move, and the permalink gets its own basis
+
+**FIRST, A CORRECTION TO SESSION 1, FOUND WHILE BUILDING THIS.** Before
+writing the basis I read what this repository had already measured about the
+reaction toggle, and it contradicts part of Entry 11:
+
+    "Reaction button state: no reaction"  OFF  the feed, his rail, AND an item
+                                               permalink, 2026-08-30/31
+    "Reaction button state: Like"         ON   his profile rail, 2026-09-04
+    "Unreact Like"                        ON   his own liked post's permalink,
+                                               2026-09-23/24 (session 1)
+
+So there are two label FAMILIES, not a feed dialect and a permalink dialect:
+the permalink drew the state family's OFF label on 2026-08-31, and the
+"Unreact" family on 2026-09-23. Whether LinkedIn changed the permalink's
+labels in between, or draws a different component there, is not known.
+Three session-1 statements follow from that and are corrected in place, each
+with a pointer here: Entry 11's "`off_state` read 0 whatever happened"
+(overclaimed -- an unreaction drawn in the state family would have moved
+it; what a zero cannot do is tell unmoved from unmovable); Entry 11's
+inferred OFF form "React Like" (unmeasured, and the measured permalink OFF
+label is the state family's); and finding 2 of the closing section (the
+react write's real defect is reading the "Unreact" ON label, which (b)
+takes). **The first fire's price is still unverifiable, and the fix still
+stands**: 0 of a counter that counts one label cannot distinguish a toggle
+drawn ON, a toggle drawn in the other family, and no toggle at all.
+
+**BUILT (offline):**
+
+- `dom`: the "Unreact" family's two prefixes as constants, dated and
+  sourced; `read_reaction_surface` counts both (None, never 0, when a count
+  did not read); a pure `reaction_toggle_counts` turns one reading into
+  `toggles_off` and `toggles_on` across both families -- a reaction or an
+  unreaction moves both, one up and one down, whichever family is drawn.
+- `press`: a sensitivity basis of its own for `/feed/update/`, ordered before
+  `/feed/` (the table matches by containment, first entry wins), naming the
+  two toggle counts; a pure `check_price_can_move` -- a sensitive basis whose
+  named counters all read an integer and sum to 0 is refused
+  `price_cannot_move`; `disclose` asks it after its first reading and BEFORE
+  the click, and `check_counters` refuses the same zero after a press for a
+  caller that skipped it. Classified `after_a_read` in the refusal inventory
+  and reached by a real input, like every other refusal.
+- `share_link`: `read_item_price` is now a thin reader over `dom`, and the
+  zero rule is `press`'s -- the lane's own copy of both is deleted; the
+  module also refuses an unreadable price before its trigger. The tool drops
+  its pre-check (the module refuses first) and returns two readings, not
+  three.
+
+**SHOWN FAILING ON THE SHAPE OF THE VACUOUS FIRST FIRE.** The new test feeds
+`press.evaluate` exactly load 25's reading -- a permalink, `off_state` 0
+before and after, the menu closed -- and asserts no permit. Run against the
+committed `press.py` it FAILS with `permitted: True`; on the new code it is
+refused (`sensitive_counter_not_read`: the permalink's basis names the toggle
+counts). Plus eight plants, each alone in a scratch copy, all red:
+
+    plant                                                        red
+    A1 the permalink basis removed                                28
+    A2 the post-press zero rule removed                            2
+    A3 disclose's pre-click check removed                          1
+    A4 check_price_can_move never refuses a zero                   3
+    A5 toggles_on ignoring the "Unreact" family                    3
+    A6 an unread family count made a zero                          2
+    A7 share_link's pre-trigger zero check removed                 1
+    A8 share_link's pre-trigger unread check removed               1
+
+Baseline and restored: 167 passed (`test_press` and `test_share_link`).
+
+**CORRECTED 2026-09-24, found by (c)'s gate: THIS BUILD GREW THE PAGE-TEXT
+INVENTORY.** `read_reaction_surface`'s new family loop handed its loop name
+`key` to a debug line, and `key` is a name `dom.py` binds from page data
+elsewhere; `tests/test_page_text_is_never_printed.py` tracks a tainted name
+module-wide, so the pinned count for `linkedin_server/dom.py` read 10 against
+9 from this commit on. Nothing the page wrote reached a log -- the value was
+always one of two literals -- but the rule is on the binding, and it was
+right to go red. Nothing in this build's gate ran that guard; the next
+build's selection is where it showed. Repaired by renaming the loop's names
+(the commit after `cdf1c42`), and the inventory reads 9 again.
+
+### (b) REACT: the react write reads the other label family; nothing fired
+
+**THE DEFECT, stated from (a)'s correction rather than from the order's
+wording.** The order said the react write should "also aim at the permalink
+label ('Unreact Like')". It should not AIM there -- a reaction is made from
+the OFF state, and the OFF label the write aims at is the one measured on
+permalinks on 2026-08-31. What it could not do was READ the ON state in the
+other family: its three reading sites -- the preview's direction
+(`_read_item_permalink`), the click-time re-read (`_live_control`) and the
+verification after the click (`_verify_after`) -- counted only the state
+family's prefix, so his own reacted post, whose toggle reads "Unreact Like",
+counted ZERO controls: UNKNOWN at preview (a refusal for the wrong reason:
+"a page that had not arrived"), and a reaction that LANDED in that family
+would have been verified UNKNOWN. That item is very likely the one this
+write last reacted to (the spec records a reaction left on one of his items
+on 2026-09-03, and the post reads "1 reaction").
+
+**BUILT (offline, against frozen worlds; nothing fired, no grant issued):**
+one pure reader in `dom`, `reaction_toggle_state`, shared by all three sites
+so the preview and the click cannot read one page two ways: `reacted` when
+the one toggle wears an ON label in either family, `no_reaction` only on the
+state family's MEASURED OFF label (the only label a click is aimed at),
+`unmeasured_off` -- refused, never aimed -- on the "React" family's inferred
+OFF label, and `unknown` for anything but exactly one toggle. The
+verification treats either OFF family as not reacted. `read_reaction_surface`
+reports the other family's names in `labels` too, so the receipt's
+`newly_observed_reaction_labels` carries "Unreact Like" after such a
+reaction. The spec's residue and two comments that still said the ON label
+had never been observed are corrected.
+
+**A SIBLING LANE'S TEST, re-aimed rather than deleted.** Lane L4's
+`test_a_string_count_no_longer_carries_itself_out_of_live_control` proved
+its repair by planting a bare `int()` in `coerce.as_count` and expecting the
+page's string to escape in a ValueError. The react arm no longer calls
+`coerce.as_count`: its counts are type-checked inside
+`dom.reaction_toggle_counts` (a string count makes the state `unknown`). The
+property the test asserts first -- the string does not escape -- still
+holds; its control now plants the naive `int()` counter where the
+protection lives. Nothing was loosened: the control still goes red.
+
+**RED-PROOFS, each plant alone in a scratch copy of the package:**
+
+    plant                                                           red
+    B1 the preview reads the state family only                       3
+    B2 the click reads the state family only                         1
+    B3 the verification reads the state family only                  1
+    B4 an unmeasured OFF label treated as the measured one           3
+    B5 the other family's names left out of the labels               1
+
+Baseline and restored: 14 passed (`test_react_direction_is_read_where_it_
+acts`, six of them new). The write suites, the follow-page tests, the
+page-string guards and the corpus guards: 2185 passed with the one sibling
+test red before its re-aim, then 54 passed on the two files it touches.
+
+**CORRECTED 2026-09-24: "the corpus guards" OVERCLAIMED.** One of them,
+`tests/test_page_text_is_never_printed.py`, was red on this tree from (a)'s
+commit on (see (a)'s correction above), so the run that read 2185 passed with
+only the sibling test red cannot have included it. Run afterwards on an
+archive of this commit (`cdf1c42`), it fails: 1 failed, 19 passed. The other
+numbers stand as they were read.
+
+### (c) N 76: his own profile judged control by control, and the gate taught to see it
+
+**WHAT THE ORDER ASKED, AND TWO FACTS THE BUILD TURNED UP.** The order: the
+gate's blanket `no_sensitivity_basis` for `/in/me/` becomes per-control
+evidence, per `IN-ME-NO-BLANKET-BAR`. That is built. Building it turned up
+two measured facts that decide what `N 76` can do next, and neither was on
+the record:
+
+1. **THE GATE COULD NOT SEE HIS PROFILE AT ALL.** `press.disclose` reads
+   `page.url`, the LANDED url, and `/in/me/` lands on his vanity form with
+   `?isSelfProfile=true` behind it. Measured in-process on an invented
+   vanity before this build: `check_address` refused it
+   `address_not_admitted`, `reachable_by_this_route` False -- NEVER, for the
+   one profile the allowlist exists to admit -- and `evaluate` never reached
+   condition 3. Every live press on `/in/me/` would have been refused there
+   whatever any basis said. Reads accept the redirect (`browser.goto` asserts
+   the requested url) and writes accept it (`writes._assert_landed`); the
+   press gate was the one reader that did not.
+2. **THE SHAPE THIS ROW WAS PLANNED ON NOW MATCHES LINKS.** Read offline from
+   the 2026-09-23 capture of his profile (session 1, load 4, in `_state/`;
+   zero loads), structure only:
+
+        on his profile as captured                       2026-09-19   2026-09-23
+        [aria-haspopup], page-wide                                1            9
+          of which <a href> to a member profile root              -            9
+          all 9 to one member (the one 60 of the page's
+            70 member links point to: a proxy for the owner)      -          yes
+        [role=menu] / [role=menuitem] / [role=dialog]         0 / 0 / -    0 / 0 / 0
+        [aria-expanded], page-wide                                -           43
+          in main (38) + main's footer (1)                        -           39
+          of which the 9 links above                              -            9
+        the overflow control: button, type=button, aria-expanded,
+          no aria-haspopup, no href; main-scope [aria-expanded] index        5
+
+   Every `[aria-haspopup]` there is an anchor carrying
+   `aria-haspopup="dialog"`, and activating an anchor follows it: a
+   navigation. None of the nine is the overflow trigger the 2026-09-19 plan
+   meant, which carries `aria-expanded` and no `aria-haspopup`. The 2026-09-19
+   count is a reading with its own date, not a wrong one. Nor can
+   `[aria-expanded]` be judged as a shape: on this page it also matches the
+   same nine links, and top-card and rail toggles whose function nobody has
+   identified. The `componentkey` attribute every control carries is a
+   per-render UUID, so no component name pins the overflow either: only its
+   position does.
+
+**BUILT, in `linkedin_server/press.py` (nothing pressed, nothing loaded):**
+
+* **`/in/me/` IS JUDGED PER CONTROL.** A `SENSITIVITY_BASES` entry of kind
+  `per_control`, matched EXACTLY (a judgement on the profile root says
+  nothing about `/in/me/recent-activity/all/` or `/in/me/edit/...`), naming
+  its ruling. A control is admitted by a recorded DISCLOSURE judgement -- which
+  is a basis like any other, so route (b)'s whole-argument rule and the price
+  rules apply to it -- refused by an ACTION judgement (`control_judged_an_action`,
+  NEVER while its evidence stands), or refused NOT-YET because nobody has
+  judged it (`control_not_judged`, which names the remedy). Both refusals are
+  pure functions of the url and the shape key, so both are taken before any
+  contact. An entry with no evidence, no verdict, or a basis kind condition 3
+  does not know is not a judgement and is treated as none.
+* **THE TWO MOMENTS AGREE.** `sensitivity_basis(url, shape)` answers a mapping
+  for every control on a per-control surface, judged or not, so the pre-press
+  `check_basis` and the post-press `check_counters` reach the same refusal
+  through the one `_basis_refusal` -- were it None, the post-press moment
+  would say `no_sensitivity_basis` about a surface that has an entry. `shape`
+  is optional throughout, and every caller that omits it gets what it got.
+* **COMMITTED JUDGEMENTS:** `[aria-haspopup]` on `/in/me/` is JUDGED AN
+  ACTION, with the evidence above written into the entry. `[aria-expanded]`
+  is NOT judged, for the reason above.
+* **HIS PROFILE AS LANDED IS ADMITTED AS `/in/me/`, ON LINKEDIN'S OWN
+  ASSERTION** (`press.self_landing`, `press.admitted_address`): a profile ROOT
+  on `https://www.linkedin.com` whose `isSelfProfile` values all say `true` --
+  the anchor the operator-ruled names reader already stands on, and stricter
+  than it (every value, not any). The verdict says `self_landing: True`; the
+  composer and third-party checks, the basis lookup and a reading's surface
+  list all read the admitted form. Absent, `false`, contradictory, a page
+  beneath the root, another host or scheme: refused exactly as before. The
+  parameter name and the self-profile address are pinned equal to
+  `server`'s.
+
+**WHAT `N 76` WAITS ON NOW, specified for session 2.** The row stays PRESS.
+The overflow control can be aimed only by position, and a position-pinned
+judgement is a table shape the gate does not have: `controls` is keyed by
+shape. So the next step is a decision before it is a build:
+
+    step  what                                                   loads presses
+    1     load his profile through the self-profile loader        1-2      0
+          (isSelfProfile retried once on ABSENT); capture the
+          page to _state/
+    2     offline: the main-scope [aria-expanded] list by           0      0
+          structure (tag, type, href, aria-haspopup, an svg
+          inside), and the overflow's index read BY NAME from
+          the capture by the lead -- never by the gate
+    3     DECISION FOR THE ORCHESTRATOR: is an index-pinned         0      0
+          disclosure judgement admissible -- one control at one
+          scope and index, with a pre-click check that the
+          control there still carries the judged signature
+          (button, type=button, no href, no aria-haspopup)? If
+          yes, that is a table extension to build and red-prove
+          offline before any press
+    4     one press through press.disclose, scope main, that        0      1
+          index, with a reading key whose needles are the
+          2026-09-19 set: copy link, follow link, share
+          profile, personal link
+
+`P J4` and `P D28`, the two other `/in/me/` rows the cleanup moved to
+MEASURE under the same ruling, meet the same table: `[aria-haspopup]` is
+refused there, `[aria-expanded]` is not judged, and `P J4`'s "Open to"
+dropdown is another position in the same top card.
+
+**RED-PROOFS, each plant alone in a scratch copy of the package; the new
+tests are also run against the `press.py` before this build:**
+
+    plant                                                              red
+    on the press.py before (c) (the new and re-aimed tests)            41
+    C1  the blanket bar restored                                       19
+    C2  the /in/me/ entry matched by containment, not exactly           1
+    C3  a landing with NO assertion admitted                            6
+    C4  a page BENEATH the profile root admitted as the landing         3
+    C5  an action judgement reported as NOT-YET                         2
+    C6  a disclosure entry with no basis kind taken as a judgement      2
+    C7  an entry with no evidence taken as a judgement                  1
+    C8  the landing's member segment checked as landed                  4
+    C9  a reading's surface compared on the raw landed path             1
+    C10 the pre-click price read off the surface, not the control       1
+    C11 the post-press basis read off the surface, not the control      1
+    C12 the pre-press basis read off the surface, not the control       8
+    C13 an unjudged control resolving to None (the moments drift)      14
+
+Baseline and restored: 128 passed (`test_press`). C3 also turns a
+STRANGER's unasserted profile into a per-control verdict instead of
+`address_not_admitted` -- the ordering test's third-party row goes red --
+which is the failure the root-and-assertion rule exists to prevent.
+
+**GATES.** The impact plan for `press.py` widened to the full suite (161 of
+240 test files, since `server.py` imports it), so by order the full suite was
+NOT run locally. Run instead: the 15 test files that use the press gate, the
+editor-field, orphan-module and blast-radius tests, and the 18 corpus-wide
+guards -- 36 files, 3643 passed and 1 red, `test_page_text_is_never_printed`,
+which had been red since (a)'s commit and is repaired in its own commit
+(`45c46c8`; see (a)'s correction). Then, on the committed tree, that
+selection widened by everything the changed DOCUMENTS reach (the shipped
+`impact_gate.impact_set` over the session document, the network census
+table, the rulings register and the blocker map: 94 files, under the widening line on
+their own): 97 files, 5893 passed, 1 skipped, 3 red. Two were
+`test_stale_process_is_announced`, an artifact of committing `404da96` while
+the run was loading `2b75d01`, green on the stable tree. The third was real:
+`test_prose_that_makes_a_claim` found a sentence in `self_landing`'s
+docstring that put a member-path placeholder beside the words "the read
+allowlist admits" -- a sentence saying the allowlist admits ONLY `/in/me/`,
+but the guard reads the sentence, not the intent, and the repository has
+paid for exactly that shape before. Reworded in the next commit; the three
+files re-run: 164 passed. The census instruments: all exit 0 but
+`check_asserted_names_resolve`, whose eight findings sit in other waves'
+documents and are pinned by its test; the derived files are at a fixed
+point.
+
+### (d) M C85: his all-activity list admitted, so a poll post of his can be found
+
+**THE ORDER'S WORDS:** "Admit `/in/me/recent-activity/all/` (his own
+activity, a closed segment) so his own poll posts can be found. If he has
+none, NEEDS-TARGET stands." Session 1 found no poll among the 8 items his
+profile's activity rail draws (Entry 2); the rail's "Show all posts" anchor
+opens this list, which draws the rest.
+
+**BUILT (nothing loaded, nothing pressed):**
+
+* `readonly._ALLOWED_URL_PATTERNS` gains ONE anchored line,
+  `^https://www\.linkedin\.com/in/me/recent-activity/all/?$` -- the `/in/me/`
+  form only, no class, no wildcard, no query, no sub-path -- with its
+  argument on the line. It REVERSES A STATED SCOPE and says so: lane L1's
+  articles line listed `/recent-activity/all/` among what it did not admit;
+  that comment now carries a dated pointer, and L1's test moves the address
+  out of its refused neighbours with the same pointer.
+* `tests/test_own_activity_all_admission.py`, in L1's shape: both spellings
+  admitted through the shipped gate; fourteen neighbours refused (another
+  member's list, the activity root, the comments and reactions lists, five
+  other activity tabs, a query, a sub-path, a longer word, two traversals);
+  the articles list shown admitted by its OWN line, so neither line stands
+  in for the other; a control removing this line, which refuses the target
+  and moves no neighbour (the revert path, proven); the blast radius with
+  `blast_radius.newly_admitted` -- exactly its own two spellings, nothing
+  newly refused -- and the instrument's own control, a family pattern over
+  the activity tree, admitting the comments list and a traversal onto a
+  third party.
+* The boundary re-freeze: `_ALLOWED_URL_PATTERNS` `c37e98f84ee443f2 ->
+  b99f3c765fcb8043`, 49 -> 50 patterns; the tree minus exactly this line
+  hashes to the value replaced; dropping the pre-existing articles line
+  instead lands on `fcd2612ef29ac056`; seven of eight digests
+  byte-identical, `<functions>` unmoved.
+* The address table: `M C85` gains the list as an also-driven address
+  (admitted), and its gate moves RULING -> MEASURE -- the next thing past the
+  boundary is a look at an admitted page, not a decision. No pin moves
+  (`census_completion --check` green: MEASURE is not blocked-on-nothing).
+  The census cell carries a dated note.
+
+**EXPECTED, NOT MEASURED: WHETHER THE LIST KEEPS THE `/in/me/` FORM.** Its
+sibling `/in/me/recent-activity/articles/` SERVED EXACTLY on its first load
+(session 1, load 12: relation "SERVED, exact"), so this one probably does
+too. A redirect would widen nothing: `browser.goto` asserts the requested
+url.
+
+**RED-PROOFS, each plant alone in a scratch copy (the new file, L1's
+admission tests and the boundary invariant):**
+
+    plant                                                        red
+    on the readonly.py before (d)                                  6
+    D1 the line widened to every activity tab                     19
+    D2 the line accepting any member's activity                    4
+    D3 the line accepting a query                                  4
+    D4 the line admitting a sub-path                               8
+    D5 the line removed (the admission not made)                   6
+
+Baseline and restored: 104 passed.
+
+**THE CAPTURE SPEC FOR SESSION 2 (one load, zero presses, zero writes):**
+
+    step  what
+    1     load /in/me/recent-activity/all/ once; record the landing as a
+          RELATION (served exact, or redirected by depth), never the url;
+          read the health line (walled, challenge terms)
+    2     in main, by structure: item urns by type, the rail reader's
+          authorship check on each item, poll-shaped nodes
+          (`main [class*="poll"]`), and -- offline in the capture -- the
+          count of "N votes" phrases. State the scope: what the first render
+          draws; scrolling for more is not sanctioned
+    3     capture the page to the gitignored state directory; if a poll post
+          OF HIS is found, its urn stays there, never in a tracked file
+    4     offline, not in the session: if a poll of his exists, build the
+          results reader from the captured markup -- counts only, under the
+          feed-content ruling -- and fire it in a later key; if none exists,
+          NEEDS-TARGET stands and the address table's gate returns to RULING
+
+**AND THE LATER KEY TAKES ITS ADDRESS FROM ITS ARGUMENTS** -- registered
+since this spec was drafted, `PAGE-MAY-VETO-NEVER-SUPPLY` (on master, and
+merged into this branch after Part 2 -- the last section below): the poll
+post's id is the tool's argument, supplied by
+the caller, and the package may only VERIFY it against his own list and
+refuse it when it is not his; the list never supplies the address. That is
+the DECIDED source this row already carried ("from tool arguments only"),
+now a registered rule.
+
+**GATES:** the admission, L1-admission, boundary-invariant, blast-radius,
+search-blast-radius and prose tests, 142 passed; the address table's checker
+91 of 91 green with the new also-driven verdict; the census instruments as
+before. Then, on the committed tree (`7b38ffd`), every test file that drives
+the read boundary (68), the 18 corpus-wide guards and the census and
+document guards -- 93 files: 5918 passed, 4 skipped, 1 red, and the red was
+real: `test_the_census_prose_matches_the_boundary` reads the allowlist COUNT
+out of a census correction row, which still said 49. The row now says 50
+and names this line as the latest admission (the next commit). The full
+suite was not run locally: `readonly.py` is imported by nearly every test
+file, so the plan widens, and by order that run is CI's.
+
+### (e) N 136: the panel is probably the one behind "Show more analytics" -- a note, the state left as it stands
+
+**THE ORDER:** "A census note that it may be the 'Details' panel behind
+'Show more analytics'." Written into row `136` of the network census. What
+the note rests on is this document's own record, not a guess: the press row
+`136` names as its REOPENER was taken live in session 1 for `P O3`
+(Entries 7 and 8), permitted by the reveal gate with the url and the
+counters held, and `profile_views_more` read what it drew -- a
+"Highlights" section of three value/label pairs (top location, top
+industry, top company) and a "Details" section, a companies breakdown of 5
+entries, each a share in percent, whose largest entry equals the top
+company. So a breakdown IS drawn on that page, behind the press.
+
+**NOT MEASURED, and the note says so:** whether "Details" also breaks down
+locations and industries (the reader found one breakdown, of companies), and
+whether the row's "top locations, industries and companies" means the three
+top values or three breakdowns. **The state stays MEASURED-ABSENT, as the
+order asked for a note;** the row's own reopener condition -- "a breakdown
+panel drawn under any name on that page" -- is met, so its state is for the
+census owner to re-rule, with `P O3`'s proving fire as the evidence and
+`linkedin_who_viewed_me(show_more_analytics=True)` as the tool that returns
+it (`more_analytics.revealed_insights`). Zero loads.
+
+### (f) The six own-profile edits: the account-level setting, found by name, not yet by address
+
+**THE ORDER:** where the dialog draws no notify control, his account-level
+"Share profile updates with your network" setting, read OFF before the edit,
+satisfies condition 1 of SELF-PROFILE-EDITS-NOT-OUTWARD (the orchestrator's
+amendment, registered since as `SELF-PROFILE-EDIT-NOTIFY-CONDITION-AMENDED`
+on master, and merged into this branch after Part 2); if neither can be
+established the row is NEEDS-OPERATOR. "Find that setting's page and build
+its reader. If a capture exists, do it offline; otherwise write a capture
+spec for session 2. Read only; never toggle it."
+
+**FOUND BY NAME, offline, in the settings index captured in session 1**
+(`/mypreferences/d/`, load 15, zero presses), read from the page's own data
+and re-checked for this section:
+
+    setting key      notifyNetworkForUpdates
+    display name     "Sharing profile edits"    (the key's display-name map)
+    identifier       notify_network_for_updates (the key's identifier map)
+
+LinkedIn's current label for the setting the amendment names is "Sharing
+profile edits"; the words "Share profile updates" occur 0 times in the
+capture.
+
+**NOT FOUND BY ADDRESS. No capture of the setting's own page exists** (every
+`_state/` of every checkout searched for the label and the identifier's
+spellings: the only hits are the settings index itself and the cached script
+bundle read below), so no reader is built: a reader over imagined markup
+would be a claim. The index draws a link to the setting's CATEGORY,
+`/mypreferences/d/categories/profile-visibility`, and every category page is
+refused by the boundary's `/mypreferences/d/categories/` substring. The
+index's own slug-to-address pattern, measured on the settings it does link
+(`darkMode` -> `/mypreferences/d/dark-mode`; `showProfilePhotos` ->
+`/mypreferences/d/settings/show-profile-photos` -- the `/settings/` family
+holds 5 of the index's links, all display preferences), gives two
+candidates and no way to choose offline:
+
+    /mypreferences/d/notify-network-for-updates
+    /mypreferences/d/settings/notify-network-for-updates
+
+Both, the category page and the old `/psettings/` address below are refused
+by the shipped boundary today (driven through `readonly.is_read_url`,
+2026-09-24); `/mypreferences/d/dark-mode` is admitted, the control.
+
+**ONE MORE READING, AND IT ORDERS THE TWO.** LinkedIn's own settings bundle,
+cached in the package's browser-profile backup in the gitignored state
+directory (2026-08-30), carries a list pairing its OLD settings slugs with
+the new ones. In that list `activity-broadcast` pairs with
+`notify-network-for-updates` -- the old `/psettings/activity-broadcast`
+page, a family the boundary refuses outright, named here so a ruling does
+not rediscover it -- and, in the same list, `profile-photo-visibility`
+pairs with `show-profile-photos` and `videos` with `autoplay-videos`, the
+two whose new addresses the index draws, both under
+`/mypreferences/d/settings/`. So the `/settings/` candidate goes FIRST:
+DERIVED from two of two known pairs, not measured.
+
+**THE CAPTURE SPEC FOR SESSION 2, each step a separate decision:**
+
+    step  what                                                  loads presses
+    1     a ruling admitting ONE candidate, exact and anchored --   0      0
+          /mypreferences/d/settings/notify-network-for-updates
+          first -- on the ONE-NAMED-SETTINGS-PAGE-AT-A-TIME
+          precedent that admitted dark-mode
+    2     one load, captured closed; the capture answers: SERVED    1      0
+          or REDIRECTED (as a relation, never the url); the
+          switch's accessible name; its aria-checked / checked;
+          whether the page draws exactly one switch
+    3     if it redirects, the same for the second candidate --    0-1     0
+          or, if the redirect lands on the category page, a
+          separate ruling for that one load
+
+**THE READER, specified and not built:** one switch; its state read off the
+browser's own `checked` property (the verification `update_setting` already
+trusts), its name matched by exact equality to the display name above;
+returns one of lane L7's `profile_editor.ACCOUNT_READINGS` -- `off`, `on`,
+`unknown` -- and nothing else. It is taken BEFORE the change is entered and
+handed to the seam lane L7 built for exactly this (master, merged here):
+the `account_share_updates` keyword of `profile_editor.read_save_gate`,
+which `writes.perform` calls without it today, so the save gate refuses
+wherever the dialog draws no named notify control. **READ ONLY: this lane
+never presses the switch.** Condition 1 asks for OFF to be READ, never made
+so -- and turning it off would itself be a settings write this order does
+not grant.
+
+**IT IS NOW THE LAST OFFLINE PIECE THE SIX ROWS WAIT ON.** Lane L7's save
+gate also refuses while the dialog draws a switch it cannot NAME
+(`6_unnamed_switch_unresolved`), which the registered amendment requires,
+and the intro editor draws two. Session 1's capture identified them ('Open
+Profile' and 'Profile Premium Badge', Entry 5) by the text of their section,
+read offline -- the switches carry no accessible name, which was the one
+thing the gate classified on. **This paragraph first said the six rows
+needed that recognition built as well; lane L7 built it the same day** (its
+follow-up 1, "recognised by structure -- code 6 lifted there only", merged
+into this branch at the second master merge below), and its session-2 queue
+for `P A8`, `A11`, `A13`, `A17`, `A19` and `A21` now waits on exactly two
+things: this reader wired at the seam, and his setting reading OFF at fire
+time. So the critical path is the capture spec above -- a ruling admitting
+one address, one load, the reader built offline from that capture -- and
+until it is walked the six rows stay where session 1 left them.
+
+### Master merged once more, after Part 2 (`b230287`)
+
+Master moved to `1902fcb` while Part 2 was built -- lanes L7 (writes to his
+own profile) and Y2 (43 capabilities admitted as rows), and two rulings
+batches, among them the amended notify condition (f) was written for and
+`PAGE-MAY-VETO-NEVER-SUPPLY`. Integrated so the branch hands over
+merge-ready; the order's rules, applied as in Part 1:
+
+    file                                   resolution
+    _audit/_census/messaging-and-content   C72 changed on both sides: ours the
+                                           (a) correction mid-cell, theirs
+                                           only APPENDED lane Y2's DRAWN note
+                                           -> both kept; every other row one
+                                           side only -> that side
+    _audit/_census/read-addresses.tsv      no row on both sides: ours C85,
+                                           N 76, P D28, P J4; theirs sixteen,
+                                           including Y2's new rows
+    _audit/RULINGS.md, blocker-map.tsv     derived: theirs, every resolved
+                                           path staged, all three generators
+                                           --write twice, then --check
+
+Code merged without conflict (`server.py`, `writes.py`, the correction
+guard). The census instruments are green on the merged tree,
+`census_completion --check` included -- no pin moves -- and the
+asserted-name checker's findings are the pinned eight. **Gate, on the
+committed merge, scoped to where the two sides meet** (the write tests where
+(b) meets lane L7's `writes.py`; the tool-surface, envelope and reader
+guards where (a) meets `server.py`; the press and boundary files by their
+own tests; the census and document guards where the Part 2 notes meet lane
+Y2's rows; the 18 corpus-wide guards): 57 files, **4396 passed**. The full
+suite was not run locally, by order.
+
+Two Part 2 sections now cite what the merge brought: (d)'s later key takes
+its address from its arguments (`PAGE-MAY-VETO-NEVER-SUPPLY`), and (f)'s
+reader returns lane L7's `ACCOUNT_READINGS` into the seam L7 built for it.
+
+**MASTER MOVED ONCE MORE, TO `7d89b8d`, AND MERGED WITHOUT CONFLICT** --
+lane L7's three follow-ups: the intro editor's two unnamed switches
+recognised by structure, `P B9` and `P I14`/`I15` recorded, and its
+session-2 queue for the six intro rows. That follow-up is why (f)'s last
+paragraph now names this lane's reader as the last offline piece. The
+blocker map regenerated to a fixed point (derived candidate columns only);
+the census instruments green, no pin moves.

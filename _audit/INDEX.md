@@ -27,19 +27,19 @@ are listed as `(undated)`; no date is taken from git history, because
 
 | what | count |
 | --- | --- |
-| audit documents git tracks under `_audit` | 252 |
-| of those, carrying a `YYYY-MM-DD-` date prefix | 212 |
+| audit documents git tracks under `_audit` | 254 |
+| of those, carrying a `YYYY-MM-DD-` date prefix | 214 |
 | distinct dates | 16 |
 | documents with no level-1 heading | 2 |
-| `CORRECTS:` marker lines | 106 |
-| `CORRECTED BY:` marker lines | 106 |
-| distinct declared correction edges | 103 |
-| documents something later corrects | 51 |
-| documents that correct something | 71 |
-| documents at either end of a cross-document edge | 99 |
+| `CORRECTS:` marker lines | 109 |
+| `CORRECTED BY:` marker lines | 109 |
+| distinct declared correction edges | 106 |
+| documents something later corrects | 52 |
+| documents that correct something | 72 |
+| documents at either end of a cross-document edge | 100 |
 | intra-document correction markers | 4 |
 | documents that correct themselves later on | 2 |
-| documents no correction marker touches at all | 151 |
+| documents no correction marker touches at all | 152 |
 | blockquoted markers naming ANOTHER document | 0 |
 | edges missing one of their two markers | 0 |
 | edges declared a different number of times in each direction | 2 |
@@ -475,6 +475,10 @@ document is dead; it says one thing in it was overtaken and names what.
 
   > four of its address verdicts, re-taken through the shipped boundary for every bucket-3 row: `P F1` and `P H11` are sections on the admitted `/in/me/`, not ADDRESS/ABSENT (the detail spellings priced here do refuse, and are not where the payload is drawn), and `P L4` and `N 61` wait on a live read of which address serves rather than on a refused one. The per-row addresses now live in `_audit/_census/read-addresses.tsv`, re-driven by `scripts/check_read_addresses.py`.
 
+- CORRECTED BY [2026-09-24-lane-d-d6-pdf.md](2026-09-24-lane-d-d6-pdf.md)
+
+  > D4 files `P C8` as blocked on transport. D4 was answered NO on 2026-09-24 and the transport it names is built (`linkedin_server/cdp_download.py`, off by default); the installed Playwright already sets an allowAndName download behaviour on the attached context when it connects, so the transport was never the whole of it. What holds the row now is the Save to PDF press in the More menu on /in/me/, which no route in the package reaches.
+
 ### [2026-09-21-the-three-readers.md](2026-09-21-the-three-readers.md)
 
 2026-09-21 &middot; Two readers for three rows, on two addresses nothing could navigate to --
@@ -530,6 +534,14 @@ document is dead; it says one thing in it was overtaken and names what.
 - CORRECTED BY [2026-09-23-exclusion-returns.md](2026-09-23-exclusion-returns.md)
 
   > N 136 has a tracked measurement this audit did not cite (the 2026-09-20 profile-views recapture, section 6), so all 7 MEASURED-ABSENT rows are recorded; and P M3 cites the delete key in its own cell, so 20 lifted rows are held by nothing, not 21.
+
+### [2026-09-23-lane-l3-jobs.md](2026-09-23-lane-l3-jobs.md)
+
+2026-09-23 &middot; Lane L3, jobs rows: 56 directions, 31 read addresses, 2 readers built and 1 withdrawn
+
+- CORRECTED BY [2026-09-24-lane-d-d6-pdf.md](2026-09-24-lane-d-d6-pdf.md)
+
+  > sections 4.4, 10 and 12.3 call `J 107` served today and one ruling from COVERED-PROVEN at zero build cost. D6 was registered on 2026-09-24 and applied: `linkedin_search_jobs` refuses a keyword-less call before any page load, so the route serves only a keyword-narrowed subset of an employer's postings. `J 107` stays GAP on that guard, and its side-table line is re-gated READER.
 
 ### [INSTRUMENTS.md](INSTRUMENTS.md)
 
@@ -662,6 +674,10 @@ document is dead; it says one thing in it was overtaken and names what.
 - CORRECTED BY [2026-09-23-readers-four-rows.md](2026-09-23-readers-four-rows.md)
 
   > row `134` said the 2026-09-21 witness showed the panel opens and left one name-free shaper as the whole blocker. That press was measured to land on the header nav; the pill this row names opens into a filter form whose payload needs APPLYING, a submission. State unchanged.
+
+- CORRECTED BY [2026-09-24-lane-d-d6-pdf.md](2026-09-24-lane-d-d6-pdf.md)
+
+  > row `132` attributed the two search-appearance readings of 2026-09-05 to the surface census; the probe that took them reads the page with the tool's own reader, `dom.read_search_appearances`, and the tool itself has never been called live. The row moved GAP to COVERED-UNFIRED under D6 the same day.
 
 ### [_census/profile.md](_census/profile.md)
 
@@ -1433,6 +1449,22 @@ reach is visible. The quoted reason here is the CORRECTOR's own
 
   > row `O3` carried that witness as "the panel opens" and one name-free shaper as its whole blocker; it is blocked by "Show more analytics" carrying no sanctioned attribute and by filter application being a submission (section 3.0.1).
 
+### [2026-09-24-lane-d-d6-pdf.md](2026-09-24-lane-d-d6-pdf.md)
+
+2026-09-24 &middot; Lane D -- D6 moves and the profile PDF: one row moved, two held with the thing that holds each named, and the download transport built
+
+- CORRECTS [2026-09-21-the-read-triage.md](2026-09-21-the-read-triage.md)
+
+  > D4 files `P C8` as blocked on transport; the attached browser already accepts downloads through Playwright's attach default, the explicit transport is now built, and what holds the row is the Save to PDF press.
+
+- CORRECTS [2026-09-23-lane-l3-jobs.md](2026-09-23-lane-l3-jobs.md)
+
+  > sections 4.4, 10 and 12.3 call `J 107` served today and one ruling from COVERED-PROVEN at zero build cost; the route refuses a keyword-less call, so it serves a keyword-narrowed subset and the row needs a build.
+
+- CORRECTS [_census/network.md](_census/network.md)
+
+  > row `N 132` said the two search-appearance readings of 2026-09-05 went through `linkedin_surface_census`; the probe that took them reads with `dom.read_search_appearances`, and the tool that wraps it has never been called live.
+
 ## 5. Every document, by date
 
 `CORRECTED` means at least one later document declares a correction of
@@ -1482,7 +1514,7 @@ ways, which is a fact about markers and not a verdict on the document.
 | (undated) | [_census/jobs.md](_census/jobs.md) | Census slice: JOBS, END TO END | **CORRECTED x7** |
 | (undated) | [_census/mcp-inventory.md](_census/mcp-inventory.md) | MCP inventory -- what this server ACTUALLY DELIVERS |  |
 | (undated) | [_census/messaging-and-content.md](_census/messaging-and-content.md) | Capability census -- MESSAGING AND CONTENT | **CORRECTED x8** |
-| (undated) | [_census/network.md](_census/network.md) | CENSUS SLICE: NETWORK AND PEOPLE | **CORRECTED x13** |
+| (undated) | [_census/network.md](_census/network.md) | CENSUS SLICE: NETWORK AND PEOPLE | **CORRECTED x14** |
 | (undated) | [_census/profile.md](_census/profile.md) | CENSUS SLICE: PROFILE, IDENTITY, SETTINGS AND PRIVACY | **CORRECTED x5** |
 | 2026-08-22 | [2026-08-22-linkedin-preflight.md](2026-08-22-linkedin-preflight.md) | 2026-08-22 - browser preflight, and a session_info that outlives the browser |  |
 | 2026-08-22 | [2026-08-22-parity-linkedin.md](2026-08-22-parity-linkedin.md) | LinkedIn parity, 2026-08-22 -- what he can do that this server cannot | **CORRECTED x1** |
@@ -1665,7 +1697,7 @@ ways, which is a fact about markers and not a verdict on the document.
 | 2026-09-21 | [2026-09-21-the-locators-that-point-elsewhere.md](2026-09-21-the-locators-that-point-elsewhere.md) | The locators that point elsewhere |  |
 | 2026-09-21 | [2026-09-21-the-open-queue.md](2026-09-21-the-open-queue.md) | The open queue, 2026-09-21 at master `9dbaad2` | **CORRECTED x1** |
 | 2026-09-21 | [2026-09-21-the-proximity-field.md](2026-09-21-the-proximity-field.md) | The proximity field -- census row `J 40`, read per-job network proximity |  |
-| 2026-09-21 | [2026-09-21-the-read-triage.md](2026-09-21-the-read-triage.md) | The read rows are GATED, not backlogged -- but nineteen of the fifty-nine are not | **CORRECTED x3** corrects x2 |
+| 2026-09-21 | [2026-09-21-the-read-triage.md](2026-09-21-the-read-triage.md) | The read rows are GATED, not backlogged -- but nineteen of the fifty-nine are not | **CORRECTED x4** corrects x2 |
 | 2026-09-21 | [2026-09-21-the-search-results-surface.md](2026-09-21-the-search-results-surface.md) | THE SEARCH-RESULTS SURFACE -- the largest reader-closable concentration, and what a reader can actually do with it | corrects x2 |
 | 2026-09-21 | [2026-09-21-the-three-readers.md](2026-09-21-the-three-readers.md) | Two readers for three rows, on two addresses nothing could navigate to -- | **CORRECTED x2** |
 | 2026-09-21 | [2026-09-21-the-ungrantable-readers.md](2026-09-21-the-ungrantable-readers.md) | THE UNGRANTABLE READERS: what `GRANT_REFUSAL` was actually refusing |  |
@@ -1684,12 +1716,14 @@ ways, which is a fact about markers and not a verdict on the document.
 | 2026-09-23 | [2026-09-23-exclusion-returns.md](2026-09-23-exclusion-returns.md) | Exclusion returns -- the hidden work put back into the pending count | corrects x5 |
 | 2026-09-23 | [2026-09-23-lane-l1-refused-reads.md](2026-09-23-lane-l1-refused-reads.md) | Lane L1, refused reads: 24 rows at the read boundary, taken one at a time |  |
 | 2026-09-23 | [2026-09-23-lane-l2-refused-presses.md](2026-09-23-lane-l2-refused-presses.md) | Lane L2: nine refused presses, and none of them is a narrow extension away | corrects x1 |
-| 2026-09-23 | [2026-09-23-lane-l3-jobs.md](2026-09-23-lane-l3-jobs.md) | Lane L3, jobs rows: 56 directions, 31 read addresses, 2 readers built and 1 withdrawn | corrects x1 |
+| 2026-09-23 | [2026-09-23-lane-l3-jobs.md](2026-09-23-lane-l3-jobs.md) | Lane L3, jobs rows: 56 directions, 31 read addresses, 2 readers built and 1 withdrawn | **CORRECTED x1** corrects x1 |
 | 2026-09-23 | [2026-09-23-lane-l4-writes.md](2026-09-23-lane-l4-writes.md) | Lane L4 -- WRITES: classify the write-direction GAP rows, build the reversible first round to ready-to-fire |  |
 | 2026-09-23 | [2026-09-23-live-lane-session-1.md](2026-09-23-live-lane-session-1.md) | THE LIVE LANE, SESSION 1 |  |
 | 2026-09-23 | [2026-09-23-readers-four-rows.md](2026-09-23-readers-four-rows.md) | READERS FOR THE FOUR ROWS BLOCKED ON NOTHING: P O3, N 134, M C72, M C85 | corrects x4 |
 | 2026-09-23 | [2026-09-23-rulings-write-class-and-delegated-calls.md](2026-09-23-rulings-write-class-and-delegated-calls.md) | Rulings, 2026-09-23: the write class, the live budget, and the calls delegated to the orchestrator |  |
+| 2026-09-24 | [2026-09-24-lane-d-d6-pdf.md](2026-09-24-lane-d-d6-pdf.md) | Lane D -- D6 moves and the profile PDF: one row moved, two held with the thing that holds each named, and the download transport built | corrects x3 |
 | 2026-09-24 | [2026-09-24-lane-g-guards.md](2026-09-24-lane-g-guards.md) | Lane G -- security guard hardening: four measured gaps in the checks that keep page text out and page choice out of navigation |  |
+| 2026-09-24 | [2026-09-24-lane-l5-messaging.md](2026-09-24-lane-l5-messaging.md) | Lane L5 -- MESSAGING: deliverable sends and a receipt-safe inbox |  |
 | 2026-09-24 | [2026-09-24-lane-l7-profile-writes.md](2026-09-24-lane-l7-profile-writes.md) | Lane L7 -- WRITES TO HIS OWN PROFILE: the 36 R3 profile-family rows, classed and given one outcome each |  |
 | 2026-09-24 | [2026-09-24-lane-s-people-search.md](2026-09-24-lane-s-people-search.md) | Lane S -- people-search readers (2026-09-24) |  |
 | 2026-09-24 | [2026-09-24-lane-y2-admission.md](2026-09-24-lane-y2-admission.md) | Lane Y2 -- completeness admission: one verdict for every app-scope candidate |  |

@@ -227,7 +227,14 @@ _WHERE_TO_LOOK_OWNERS: dict[str, frozenset[str]] = {
     # row. ``"message"`` alone is a word any future messaging-adjacent row
     # would legitimately contain -- an InMail, a reply, a request -- and it
     # would be reported as a trespass on a surface those rows never claimed.
-    "LinkedIn messages": frozenset({"send_message"}),
+    #
+    # A SECOND OWNER FROM 2026-09-24, entitled rather than borrowing:
+    # ``send_reply`` VERIFIES in the conversation itself -- its
+    # ``_verify_after`` branch reloads the conversation he named and reads
+    # the delta there -- so the place a human opens is the place this server
+    # read. Its ``_VERIFIED_FROM`` row was checked against every owned phrase
+    # above and contains none of them.
+    "LinkedIn messages": frozenset({"send_message", "send_reply"}),
 }
 
 #: THE ONLY SETS OF ACTIONS ALLOWED TO SHARE A ``_WHERE_TO_LOOK`` VALUE
@@ -570,8 +577,17 @@ def test_the_action_set_is_the_one_this_file_was_measured_against():
     # so neither prints a phrase another action owns -- and no owner entry was
     # needed. ``update_profile_field``'s ``_VERIFIED_FROM`` row was rewritten
     # the same day (a fresh navigation after Save) and passed the same checks.
-    assert len(writes.PERFORMABLE) == 14, (
-        "writes.PERFORMABLE holds %d actions, not the 14 this file was "
+    # FIFTEEN FROM LANE L5'S MERGE OF MASTER 66aaa95, the same day, and the
+    # acknowledgement was earned the same way: ``send_reply``'s two rows
+    # were read (on the lane's branch, where it was the fourteenth). Its
+    # ``_WHERE_TO_LOOK`` value is the conversation in his LinkedIn
+    # messages -- the surface it VERIFIES on, reloaded -- so it was added as
+    # a second owner of "LinkedIn messages" rather than stripped of the
+    # phrase; its ``_VERIFIED_FROM`` row was checked against every owned
+    # phrase above and holds none. On the merged tree the rest of this file
+    # passed with both new actions' rows in place.
+    assert len(writes.PERFORMABLE) == 15, (
+        "writes.PERFORMABLE holds %d actions, not the 15 this file was "
         "measured against: %s. Re-derive the phrase owners in this file for "
         "the new action, then update this count."
         % (len(writes.PERFORMABLE), sorted(writes.PERFORMABLE))

@@ -66,18 +66,24 @@ EVENTS_ROOT_MUST_STAY_ADMITTED = (
 #: row it holds where it has one, because a refusal that cannot say which
 #: capability it refuses is not evidence about the census.
 EVENTS_DEEP_MUST_STAY_REFUSED = (
-    ("THE ATTENDEE LIST -- census N 188, a second member roster, out of scope "
-     "by the same ruling that put the group member list (N 165) out of scope",
-     f"{BASE}/events/{SYNTHETIC_EVENT_ID}/attendees/"),
+    # THE BARE ATTENDEE LIST STOOD HERE UNTIL 2026-09-24 -- "census N 188, a
+    # second member roster, out of scope by the same ruling that put the group
+    # member list (N 165) out of scope". That ruling was an argument, not a
+    # ruling (D3-UNREGISTERED-REFUSAL-IS-NOT-A-RULING), and
+    # MEMBER-ROSTERS-AS-BOUNDED-READS admitted the roster on its own line. It
+    # moved to ADMITTED_BY_ANOTHER_LINE_SINCE below. Its filtered spelling
+    # stays here: the roster line takes no query.
     ("the same roster filtered to 1st-degree connections -- census N 189. The "
-     "filter is applied by LinkedIn, so the page is still the roster",
+     "filter is applied by LinkedIn, so the page is still the roster, and the "
+     "roster line admits no query",
      f"{BASE}/events/{SYNTHETIC_EVENT_ID}/attendees/?facetConnectionOf=1"),
     # THE NUMERIC EVENT PAGE STOOD HERE UNTIL 2026-09-23 -- "an event page --
     # organiser and content. Census N 184". It is ADMITTED by its own line
     # (lane L1, a REVIEW: commit) and pinned in EVENT_BY_ID_ADMITTED below.
     # Its QUERY spelling takes its place: still refused, and still one of the
     # nine a family pattern would turn red, so the count in the test's
-    # docstring below is unchanged.
+    # docstring below is unchanged. [That count moved on 2026-09-24, for a
+    # different reason: see the re-measurement in the docstring.]
     ("the numeric event page carrying a query -- the admitted line takes "
      "none, and a query is where a filter naming a person would arrive",
      f"{BASE}/events/{SYNTHETIC_EVENT_ID}/?x=1"),
@@ -107,10 +113,33 @@ EVENTS_DEEP_MUST_STAY_REFUSED = (
      f"{BASE}/events/discovery/"),
     ("the saved-events shelf, a different surface with its own blocker",
      f"{BASE}/my-items/saved-events/"),
-    ("the events SEARCH vertical, which is SEARCH-RESULTS-SURFACE's row N 179 "
-     "and not this blocker's to admit",
-     f"{BASE}/search/results/events/?keywords=x"),
+    # THE EVENTS SEARCH VERTICAL STOOD HERE UNTIL 2026-09-24 -- "which is
+    # SEARCH-RESULTS-SURFACE's row N 179 and not this blocker's to admit" --
+    # and it was admitted by exactly that route: D2-SEARCH-VERTICALS-WIDENED,
+    # on the SEARCH line. It moved to ADMITTED_BY_ANOTHER_LINE_SINCE below,
+    # which still pins what this table was for: no EVENTS line reaches it.
 )
+
+#: MOVED OUT OF THE REFUSED TABLE ABOVE ON 2026-09-24, NOT DELETED. Each is
+#: admitted by a line of its own -- the search line, and the attendee-roster
+#: line -- and this file's business with each is that neither the events root
+#: line nor the event-by-id line carries it. ``url -> the start of the one
+#: line that must``.
+ADMITTED_BY_ANOTHER_LINE_SINCE = {
+    f"{BASE}/search/results/events/?keywords=x":
+        r"^https://www\.linkedin\.com/search/results/",
+    f"{BASE}/events/{SYNTHETIC_EVENT_ID}/attendees/":
+        r"^https://www\.linkedin\.com/events/[0-9]{1,20}/attendees/",
+}
+
+
+@pytest.mark.parametrize("url", sorted(ADMITTED_BY_ANOTHER_LINE_SINCE))
+def test_what_another_line_admitted_since_is_not_the_root_or_the_id_line(url):
+    assert readonly.is_read_url(url) is True
+    carriers = [p for p in readonly._ALLOWED_URL_PATTERNS if p.match(url)]
+    assert len(carriers) == 1, [p.pattern for p in carriers]
+    assert carriers[0].pattern.startswith(ADMITTED_BY_ANOTHER_LINE_SINCE[url]), (
+        carriers[0].pattern)
 
 
 #: ONE EVENT BY ITS NUMERIC ID, admitted 2026-09-23 (lane L1, REVIEW). Both
@@ -162,6 +191,12 @@ def test_the_anchoring_is_the_whole_of_the_events_permission(why, url):
     this file pins two mechanisms, not one, and an entry is annotated where it
     is not the anchoring that holds it. A guard that cannot say WHICH rule
     refuses an address will later be read as evidence for the wrong one.
+
+    RE-MEASURED 2026-09-24, AFTER TWO ENTRIES LEFT THE TABLE (the events
+    search vertical, admitted on D2, and the bare attendee list, admitted on
+    its own roster line): 8 of these 11 turn red. Of the three that survive,
+    two are not under `/events/` and the third is `/events/invited/`, held by
+    the `/invite` substring gate as before.
     """
     with pytest.raises(Exception):
         readonly.assert_read_url(url)
@@ -176,7 +211,10 @@ def test_this_guard_can_fail_and_is_therefore_worth_having():
     file, over this module -- rather than asserting that they are.
     """
     admitted = f"{BASE}/events/"
-    refused = f"{BASE}/events/{SYNTHETIC_EVENT_ID}/attendees/"
+    # The bare attendee list was the refused probe here until 2026-09-24, when
+    # its own roster line admitted it; the comments page, still refused by
+    # the anchoring alone, stands in.
+    refused = f"{BASE}/events/{SYNTHETIC_EVENT_ID}/comments/"
 
     assert readonly.is_read_url(admitted) is True, (
         "the control address stopped being admitted -- every refusal in this "

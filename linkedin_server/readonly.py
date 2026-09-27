@@ -748,6 +748,17 @@ _ALLOWED_URL_PATTERNS: tuple[re.Pattern[str], ...] = (
     #                              queued DECIDE and is not this entry's to
     #                              inherit
     #
+    # AMENDED 2026-09-24, COMMENT ONLY: ``/search/results/groups/`` IS NOW
+    # ADMITTED -- by the search entry, on `D2-SEARCH-VERTICALS-WIDENED`, and
+    # not by this one. The list above says what THIS root does not inherit,
+    # and that is unchanged.
+    #
+    # AND ``/groups/<id>/members/`` IS ADMITTED TOO, 2026-09-24, by the roster
+    # entries at the end of this tuple, on `MEMBER-ROSTERS-AS-BOUNDED-READS`:
+    # the refusal above was an argument, not a ruling
+    # (`D3-UNREGISTERED-REFUSAL-IS-NOT-A-RULING`), and that ruling weighed it
+    # the other way. The requests queue stays refused.
+    #
     # ``/groups/<id>/invite/`` IS REFUSED TWICE AND THAT IS WORTH KNOWING
     # RATHER THAN DISCOVERING. It contains ``/invite``, which is on
     # :data:`_FORBIDDEN_URL_SUBSTRINGS` and checked BEFORE this list, AND it
@@ -830,6 +841,11 @@ _ALLOWED_URL_PATTERNS: tuple[re.Pattern[str], ...] = (
     #                              have: measured today on a sibling surface,
     #                              an ``.*`` anchored at BOTH ends admitted 18
     #                              addresses, identical to the bare wildcard.
+    #
+    # AMENDED 2026-09-24, COMMENT ONLY: THE MEMBER ROSTER AT THE TOP OF THAT
+    # LIST IS ADMITTED NOW -- by its own line at the end of this tuple, on
+    # `MEMBER-ROSTERS-AS-BOUNDED-READS`, and not by this one. This line still
+    # refuses it, and the rest of the list stands.
     #
     # CONDITION 4 -- NOTHING IS FIRED, AND NOTHING HERE FIRES ANYTHING. This
     # entry opens two addresses. It builds no tool, and **no tool in this
@@ -933,6 +949,16 @@ _ALLOWED_URL_PATTERNS: tuple[re.Pattern[str], ...] = (
     #                              member roster, and out of scope by the same
     #                              ruling that put N 165 out of scope.
     #     /search/results/events/  SEARCH-RESULTS-SURFACE again
+    #
+    # AMENDED 2026-09-24, COMMENT ONLY: ``/search/results/events/`` IS NOW
+    # ADMITTED -- by the search entry, on `D2-SEARCH-VERTICALS-WIDENED`, and
+    # not by this one. What THIS root does not inherit is unchanged.
+    #
+    # AND THE ATTENDEE LIST, ``/events/<id>/attendees/``, IS ADMITTED BY ITS
+    # OWN LINE at the end of this tuple, on `MEMBER-ROSTERS-AS-BOUNDED-READS`;
+    # the "same ruling" named above was an argument and not a ruling
+    # (`D3-UNREGISTERED-REFUSAL-IS-NOT-A-RULING`). Its filtered spellings --
+    # any query -- stay refused.
     re.compile(r"^https://www\.linkedin\.com/events/?$"),
     # THE INTRO EDITOR ON HIS OWN PROFILE. Added 2026-08-31 on the operator's
     # ruling: the profile editors are his own profile, no third party, and
@@ -1443,6 +1469,12 @@ _ALLOWED_URL_PATTERNS: tuple[re.Pattern[str], ...] = (
     # cause could start to apply again. It is refused, and it is refused by
     # this anchor rather than by a promise.
     #
+    # AMENDED 2026-09-24, COMMENT ONLY: ``/people/`` IS ADMITTED NOW -- by its
+    # own line at the end of this tuple, on `MEMBER-ROSTERS-AS-BOUNDED-READS`,
+    # and this anchor still refuses it. The member-profile cause does not
+    # apply to the tab itself: a roster lists members, and no member's
+    # profile loads when it does.
+    #
     # A DOT IS DELIBERATELY OUTSIDE THE CHARACTER CLASS. A slug containing
     # ``.`` is a real, if uncommon, spelling, and admitting it would also
     # admit a segment of ``..`` -- which the browser normalises AWAY,
@@ -1451,11 +1483,24 @@ _ALLOWED_URL_PATTERNS: tuple[re.Pattern[str], ...] = (
     # class. So a dotted slug fails CLOSED here, which is a refusal to be
     # widened deliberately on evidence, never by relaxing the class.
     #
+    # AMENDED 2026-09-24 (lane S follow-up, its cold verification): THE
+    # SENTENCE ABOVE WAS TRUE OF A LITERAL DOT AND FALSE OF AN ENCODED ONE.
+    # ``%`` is in the class, and the URL standard reads a segment of ``%2e``
+    # or ``%2e%2e`` (either case) exactly as ``.`` or ``..`` -- so
+    # ``/school/%2e%2e/`` was admitted and landed on the site root, one level
+    # up. The lookahead refuses a segment made of nothing but one or two
+    # encoded dots; every other ``%`` slug stays admitted, including the
+    # percent-encoded non-ASCII names LinkedIn draws. Measured over 1705
+    # addresses (the shipped corpus, the cold verifier's 1562 adversarial
+    # spellings, and 96 written for this): 12 newly refused on this line, all
+    # of them those six spellings with and without the slash; nothing newly
+    # admitted.
+    #
     # WHAT STILL REFUSES A SLUG THAT HAPPENS TO CARRY A FORBIDDEN SUBSTRING.
     # Nothing about this entry excuses gate one: a school whose slug
     # contains ``connect`` or ``invite`` refuses, and that is correct
     # fail-closed behaviour rather than a defect to route around.
-    re.compile(r"^https://www\.linkedin\.com/school/[A-Za-z0-9%\-_]{1,100}/?$"),
+    re.compile(r"^https://www\.linkedin\.com/school/(?!(?:%2[eE]){1,2}/?$)[A-Za-z0-9%\-_]{1,100}/?$"),
     # AN ORGANISATION PAGE, THE ROOT ONLY, BOTH SPELLINGS. Added 2026-09-20 for
     # ``COMPANY-PAGE-SURFACE`` -- 18 published rows, 16 filed, the largest
     # BUILD in the census and every row of it filed behind this one line.
@@ -1614,7 +1659,24 @@ _ALLOWED_URL_PATTERNS: tuple[re.Pattern[str], ...] = (
     # line is STEPPED OVER inside the page, counted, and never assembled into
     # a string this process holds. ``/company/<x>/people/``, the roster that
     # would name them, is refused by this list exactly as it was.
-    re.compile(r"^https://www\.linkedin\.com/company/[A-Za-z0-9%\-_]{1,100}/?$"),
+    #
+    # AMENDED 2026-09-24, COMMENT ONLY: THAT ROSTER IS ADMITTED NOW -- by its
+    # own line at the end of this tuple, on `MEMBER-ROSTERS-AS-BOUNDED-READS`,
+    # and not by this one, which still refuses it. The sentence above was
+    # true when written. Whatever reader lands for the People tab owes it the
+    # strictness spent here: a count, never a list.
+    #
+    # AND AMENDED AGAIN THE SAME DAY: AN ENCODED DOT SEGMENT. The class was
+    # the school entry's byte for byte, dot outside, and ``%`` inside -- so
+    # ``/company/%2e%2e/`` (which the URL standard reads as ``..``) was
+    # admitted and landed on the site root. The cold verification of lane S's
+    # follow-up found it through the roster lines, which had copied this
+    # class. The same lookahead as the school entry now refuses a segment of
+    # one or two encoded dots and nothing else: 12 newly refused on this line
+    # over the same 1705 addresses, nothing newly admitted, percent-encoded
+    # names untouched. ``company_page.slug_is_addressable`` refuses the same
+    # six spellings, so the coupling test still asserts the two agree.
+    re.compile(r"^https://www\.linkedin\.com/company/(?!(?:%2[eE]){1,2}/?$)[A-Za-z0-9%\-_]{1,100}/?$"),
     # THE RECOMMENDED JOB COLLECTION, ONE NAMED ADDRESS. Admitted
     # 2026-09-05, census row 75 ``JOB-COLLECTIONS-SURFACE``, on the same
     # ruling.
@@ -1920,7 +1982,54 @@ _ALLOWED_URL_PATTERNS: tuple[re.Pattern[str], ...] = (
     # THE ROLLBACK IS THIS LINE. `tests/test_search_admission_blast_radius.py`
     # pins both directions and its `MUST_STAY_REFUSED` set -- which includes
     # every sibling vertical -- must stay green with this entry present.
-    re.compile(r"^https://www\.linkedin\.com/search/results/people/?(\?[^#]*)?$"),
+    #
+    # WIDENED 2026-09-24 TO FOUR CLOSED SEGMENTS, on `D2-SEARCH-VERTICALS-
+    # WIDENED` (the orchestrator's delegated call, `_audit/2026-09-24-rulings-
+    # search-verticals-rosters-passive-costs.md`). "WHY PEOPLE ONLY" above
+    # sends groups and events along a named route -- a request to widen, with
+    # its own blast radius -- and this is that route. `companies` rides in
+    # because `N 104` needs it, which answers the one reason the 2026-09-19
+    # preconditions preferred dropping it. The spelling is that measurement's
+    # S2: a closed alternation of four literal words, never a `/search/`
+    # prefix, which is what `SEARCH-CONDITION-2-CLOSED` demands.
+    #
+    # THE BLAST RADIUS, MEASURED BEFORE THIS LINE CHANGED, by
+    # `scripts/_probe_search_admission_blast_radius.py` over its 90-address
+    # corpus against the 49 patterns then on disk: S2 newly admits exactly
+    # THREE addresses -- the companies, groups and events keyword spellings --
+    # and no traversal, no `all` tab and no other vertical. The two wildcards
+    # it carries as counterfactuals newly admit 13 each, the account-ending
+    # traversal among them. The closed alternation still cannot be followed
+    # by `..`, so every traversal spelling above stays refused from all four
+    # words; `tests/test_d2_search_verticals.py` drives each.
+    #
+    # `MUST_STAY_REFUSED` NO LONGER LISTS THE THREE, on
+    # `MUST-STAY-REFUSED-ENTRIES-COME-OUT`: those entries assumed S1 and the
+    # ruling said they come out. The account-ending and third-party families
+    # stay in it, and the content, schools and jobs verticals move to a block
+    # marked with the choice they assume. The rollback is still this line:
+    # its people-only spelling, with that file's inverted assertions put back.
+    #
+    # CONDITION 1 FOR THE THREE NEW WORDS, stated rather than assumed. THE
+    # NAME-FREE SHAPER IS THE SHIPPED ONE: `search_results.read_results` and
+    # `read_filters` build what they return out of integer accumulators
+    # whatever page they meet, so a companies, groups or events results page
+    # can put no string into them -- the 2026-09-20 argument, "a shaper that
+    # is completely wrong about this page still cannot emit a name", proven on
+    # hostile payloads by `tests/test_the_search_shaper_emits_no_name.py`.
+    # WHAT DOES NOT EXIST IS A TOOL FOR THE THREE. The ruling says "each then
+    # needs a reader", and readers here are built against captures only, which
+    # this admission is the precondition for: every capture goes through
+    # `BROWSER.goto`, which calls `assert_read_url`. So no package code opens
+    # them today. `search_verticals.compose` builds their addresses from a
+    # tool's arguments and nothing in the package imports it
+    # (`tests/test_every_orphan_module_is_ruled.py` holds it unwired, with
+    # this condition as the reason), and `tests/test_d2_search_verticals.py`
+    # pins that the one search tool composes the people vertical only. THE
+    # FIRST TOOL THAT OPENS ONE OF THE THREE LANDS WITH ITS NAME-FREE READER
+    # IN THE SAME COMMIT -- condition 1's own words, applied to the first read
+    # rather than to the address.
+    re.compile(r"^https://www\.linkedin\.com/search/results/(people|companies|groups|events)/?(\?[^#]*)?$"),
     # ======================================================================
     # FIVE SELF-SCOPED READ PAGES, admitted 2026-09-23 by lane L1 (refused
     # reads). Full per-row record: `_audit/2026-09-23-lane-l1-refused-reads.md`.
@@ -2043,7 +2152,30 @@ _ALLOWED_URL_PATTERNS: tuple[re.Pattern[str], ...] = (
     # serves it, and if it redirects the line widens nothing. NOT admitted:
     # `/recent-activity/all/`, `/comments/` or `/reactions/` (other people's
     # posts he acted on), any other member's activity, a query, a sub-path.
+    # (`/recent-activity/all/` WAS ADMITTED 2026-09-24 by its own line below,
+    # on the orchestrator's order; `/comments/` and `/reactions/` still are
+    # not.)
     re.compile(r"^https://www\.linkedin\.com/in/me/recent-activity/articles/?$"),
+    # M C85 -- his ALL-ACTIVITY list, `/in/me/` form only. ADMITTED 2026-09-24
+    # by the live lane on the orchestrator's integration order of that day,
+    # Part 2 (d): "Admit /in/me/recent-activity/all/ (his own activity, a
+    # closed segment) so his own poll posts can be found." The row's own
+    # address source is DECIDED (orchestrator-delegated, 2026-09-23): only
+    # one of HIS OWN posts is used. His profile's activity rail draws 8 items
+    # and none was a poll (session 1); this is the list the rail's "Show all
+    # posts" anchor opens -- DRAWN on his own profile as
+    # `/in/<him>/recent-activity/all/`, which is why the parent was named when
+    # the articles line above was admitted. Its sibling `/recent-activity/
+    # articles/` SERVED EXACTLY on its first load (session 1, load 12: no
+    # redirect), so the `/in/me/` form is expected to be the address the page
+    # keeps; the first load here says so or not, and a redirect widens
+    # nothing. THE BOUNDARY DECIDES WHAT MAY BE OPENED; THE SHAPER DECIDES
+    # WHAT MAY BE SAID: the list can draw OTHER people's posts he reposted, so
+    # a reader owes the feed-content ruling's "counts and relations only,
+    # never text or names". NOT admitted: `/comments/` and `/reactions/`
+    # (other people's posts he acted on), the other activity tabs, the
+    # activity root, any other member's activity, a query, a sub-path.
+    re.compile(r"^https://www\.linkedin\.com/in/me/recent-activity/all/?$"),
     # ======================================================================
     # REVIEW (lane L1, 2026-09-23) -- P L2b, HIS OWN FOLLOWER LIST. This line
     # is HALF of a two-gate admission; the other half is the paired entry in
@@ -2114,7 +2246,9 @@ _ALLOWED_URL_PATTERNS: tuple[re.Pattern[str], ...] = (
     #      `/events/12345678/`), nothing else. An `/events/.*` family admits
     #      12, including the ATTENDEE ROSTER -- N 188, out of scope by the
     #      ruling that put N 165 out of scope -- and a traversal onto a member
-    #      profile.
+    #      profile. [AMENDED 2026-09-24, COMMENT ONLY: the attendee roster is
+    #      admitted since, by its own line at the end of this tuple, on
+    #      MEMBER-ROSTERS-AS-BOUNDED-READS; this line still does not reach it.]
     #   4. NOTHING IS FIRED: no attend, no share, no invite; `/events/<id>/
     #      invite/` stays refused twice (`/invite` first). NO READER SHIPS WITH
     #      IT: no event page has ever been captured, so the first load belongs
@@ -2128,6 +2262,89 @@ _ALLOWED_URL_PATTERNS: tuple[re.Pattern[str], ...] = (
     # nothing in this repository says it records who viewed it. The first load
     # brackets the invitation badge.
     re.compile(r"^https://www\.linkedin\.com/events/[0-9]{1,20}/?$"),
+    # ======================================================================
+    # MEMBER ROSTERS AS BOUNDED READS, admitted 2026-09-24 (lane S follow-up)
+    # on `MEMBER-ROSTERS-AS-BOUNDED-READS` (the orchestrator's delegated call,
+    # `_audit/2026-09-24-rulings-search-verticals-rosters-passive-costs.md`).
+    # FOUR LINES, ONE PER ROSTER: a group's members (N 165, N 177), an event's
+    # attendees (N 188, N 189), a company's People tab (J 108, N 102) and a
+    # school's (N 99, N 100, J 112).
+    #
+    # WHAT THIS REVERSES, AND WHOSE CALL IT IS. Every entry above that names
+    # one of these addresses -- the groups root and id entries, the events
+    # root and id entries, the school entry and the company entry -- carries a
+    # 2026-09-05 refusal: "a list of people who did not choose to be
+    # enumerated by him". `D3-UNREGISTERED-REFUSAL-IS-NOT-A-RULING` made that
+    # refusal a question with its argument recorded, and the roster ruling
+    # answers it the other way: the census asks what he can do on LinkedIn
+    # directly, he can open each of these lists himself, and what keeps a
+    # roster read at the scale of one person browsing is carried by the CODE
+    # -- one page, a caller-supplied id, the live budget -- not by refusing the
+    # address. Each of those entries now carries a dated comment-only
+    # amendment pointing here; their refusal text is left standing as written.
+    #
+    # THE FIVE CONDITIONS, AND WHERE EACH IS CARRIED.
+    #   1  ONE PAGE PER CALL, NO AUTOMATIC PAGINATION. No line below takes a
+    #      query or a deeper path, so `?page=2`, `?start=25`, every filter
+    #      spelling and `/page/2/` are refused HERE, before any browser sees
+    #      them. How LinkedIn serves a roster's further rows -- a scroll, a
+    #      "show more" press, a page parameter -- is UNMEASURED; the capture
+    #      counts which is drawn, and `SCROLL-NOT-SANCTIONED` stands whichever
+    #      it is. A planted paginator is refused at its second step
+    #      (`tests/test_member_rosters.py`).
+    #   2  THE ID FROM THE TOOL'S ARGUMENTS ONLY. `member_rosters.compose` is
+    #      the only place this package assembles a roster address, from an id
+    #      it is handed, the numeric form only; the navigation-derivation guard
+    #      covers it like every module.
+    #   3  NO MEMBER'S NAME OR ID IN A TRACKED FILE. The composer writes
+    #      nothing; a capture goes to the gitignored `_state/`.
+    #   4  INSIDE THE LIVE BUDGET. One call is one load, counted against the
+    #      forty of `LIVE-BUDGET-40-LOADS`.
+    #   5  THE ROWS BECOME GAP, BLOCKED ON A READER. No reader ships with these
+    #      lines: no roster page has ever been captured, and readers here are
+    #      built against captures only. Nothing in the package imports the
+    #      composer yet.
+    #
+    # THE SPELLINGS. Groups and events: the closed numeric segment their id
+    # entries use, `[0-9]{1,20}`, and nothing else -- a slug is a name, and an
+    # event's slug is its title. Company and school: slug AND number, because
+    # LinkedIn DRAWS the People tab by slug (measured by shape on two captures
+    # in `_state/`: the company root and a school page each draw it twice, the
+    # school page under `/company/`) and serves a numeric organisation address
+    # by redirecting to the slug -- the `/company/` entry's argument, which
+    # applies here unchanged. The composer assembles the numeric form only.
+    #
+    # BUT NOT THE ROOT ENTRIES' CLASS BYTE FOR BYTE: `%` IS OUT OF IT HERE.
+    # These two lines first shipped with it, and the cold verification of
+    # lane S's follow-up admitted `/company/%2e%2e/people/` through them: the
+    # URL standard reads `%2e%2e` as `..`, so that request lands on `/people/`,
+    # an address this list refuses, and `BROWSER.goto` never re-checks a
+    # landing. Without `%` every encoded spelling of a People tab is refused
+    # -- 66 over the 1705-address measurement on the root entries, nothing
+    # newly admitted, the real targets untouched -- at no cost to anything
+    # this package does: the composer builds digits, and a percent-encoded
+    # slug is a name it never assembles.
+    #
+    # THE BLAST RADIUS, MEASURED BEFORE THESE LANDED with the shipped
+    # `blast_radius.newly_admitted` over a 197-address corpus (its own 67 plus
+    # 130 roster-family spellings), each candidate against the 49 patterns
+    # then on disk: groups +2 and events +2 (the target with and without the
+    # slash), company +4 and school +4 (slug and number, each both ways) -- 12
+    # in all, and no page spelling, no query, no deeper path, no traversal, no
+    # dotted segment, no over-long run and no non-ASCII digit. The control: a
+    # `/groups/<id>/.*` family admits 23 over the same corpus. [That corpus
+    # held literal dots only; the ENCODED dot it missed is the paragraph above
+    # this one's subject.]
+    #
+    # NOTHING IS FIRED. A roster page may draw a connect, follow or message
+    # control beside each member; pressing one is a write with its own row
+    # and its own ruling, and nothing here reaches it. This list decides what
+    # may be OPENED; whatever reader lands owes the name-free shaper doctrine
+    # (`_audit/2026-09-05-lead-rulings-round-two.md`) what may be SAID.
+    re.compile(r"^https://www\.linkedin\.com/groups/[0-9]{1,20}/members/?$"),
+    re.compile(r"^https://www\.linkedin\.com/events/[0-9]{1,20}/attendees/?$"),
+    re.compile(r"^https://www\.linkedin\.com/company/[A-Za-z0-9\-_]{1,100}/people/?$"),
+    re.compile(r"^https://www\.linkedin\.com/school/[A-Za-z0-9\-_]{1,100}/people/?$"),
 )
 
 #: Substrings that must never appear in a navigation target, checked before
@@ -3168,11 +3385,13 @@ SANCTIONED_MUTATIONS: tuple[tuple[str, str, str], ...] = (
     # capture -- is named in share_link and reads as copied: false. The
     # address is admitted, the gate's component checks run before any press,
     # and the closure is verified. THE PRICE IS THE ITEM'S OWN REACTION
-    # TOGGLE, in both measured dialects (share_link.read_item_price), read
-    # before the first press and after the last; a page drawing no toggle is
-    # refused before any press, because the /feed/ basis's own off_state
-    # reads 0 on a permalink whatever happens -- measured on the first live
-    # fire, which that zero priced.
+    # TOGGLE: the permalink's own basis in press.SENSITIVITY_BASES counts
+    # toggles OFF and ON across both measured label families, before the
+    # first press and after the last, and a zero pair is refused before any
+    # press (press.check_price_can_move). The first live fire was priced by
+    # the feed basis's off_state at 0, which on a permalink whose toggle is
+    # ON -- or drawn in the other label family -- cannot tell unmoved from
+    # unmovable.
     ("linkedin_server/share_link.py", "_activate", "click"),
     ("linkedin_server/share_link.py", "_clipboard", "evaluate"),
     ("linkedin_server/share_link.py", "copy_own_post_link", "press"),

@@ -45,9 +45,10 @@ file; the tally is a by-product.
                    so it cannot be typed onto an arbitrary row.
 
 **THE VERDICT IS THE BINDING GATE, NOT EVERY GATE.** Several rows carry two:
-`P C8` needs a press AND a transport this package does not have. The verdict
-names the EARLIEST one, because that is the one a wave would hit first, and the
-row's line says so.
+`P C8` needed a press AND a transport this package did not have on the triage
+day. The verdict names the EARLIEST one, because that is the one a wave would
+hit first, and the row's line says so. (The transport was built on 2026-09-24,
+lane D, and the row is now held on the press alone -- see DECIDED_SINCE_TRIAGE.)
 
 ## WHAT IT IMPORTS RATHER THAN REIMPLEMENTS
 
@@ -169,6 +170,21 @@ TRIAGE: dict[str, tuple[str, str, str]] = {
                                   "details pages are read"),
     "P S3": ("ADDRESS", "ABSENT", "the skill-insights page is linked from "
                                   "every skill card and no pattern names it"),
+    # Itemized 2026-09-24 from the P-R settings block (lane Y2, the follow-up
+    # order); each row's address, or its absence, is in
+    # _audit/_census/read-addresses.tsv. RULING, not ADDRESS, for both: the
+    # EARLIEST gate is the operator naming the page, because the settings
+    # ruling admits a settings page only by name; the boundary is the second.
+    "P P3": ("RULING", "", "the operator names the page first: the settings "
+                           "ruling admits a settings page only by name, and "
+                           "no committed source spells this one; the archive "
+                           "then needs the download transport "
+                           "D4-NO-OWN-BROWSER-CONTEXT names for P C8"),
+    "P P15": ("RULING", "", "the operator names the page first: the settings "
+                            "ruling admits a settings page only by name; the "
+                            "drawn address is then refused on the forbidden "
+                            "substring /mypreferences/d/categories/, which "
+                            "fires before the allowlist"),
     "P S5": ("BUILDABLE", "", "the search-appearances page is admitted and a "
                               "shipped tool already loads it; a parser for two "
                               "cards, which must not publish the employer the "
@@ -221,10 +237,6 @@ TRIAGE: dict[str, tuple[str, str, str]] = {
     "N 104": ("RULING", "", "the non-search half SHIPPED 2026-09-20; the "
                             "'by searching' half needs the companies vertical, "
                             "which the admission deliberately left out"),
-    "N 132": ("RULING", "", "both sides of the switch are reachable today by "
-                            "two shipped tools; whether that discharges a row "
-                            "named for the CONTROL is a census convention "
-                            "nobody has ruled"),
     "N 133": ("PRESS", "", "applying a filter SUBMITS, and the disclosing-press "
                            "ruling refuses submits by name"),
     # "N 134" LEFT 2026-09-24: proven live by the live lane's view switch, so
@@ -315,6 +327,10 @@ TRIAGE: dict[str, tuple[str, str, str]] = {
 #:     N 83   COVERED-PROVEN           (was BUILDABLE)
 #:     N 175  COVERED-CANNOT-DELIVER   (was BUILDABLE)
 #:
+#: and on 2026-09-24, lane D, under D6-CAPABILITY-OVER-AFFORDANCE:
+#:
+#:     N 132  COVERED-UNFIRED          (was RULING -- the D6 question itself)
+#:
 #: They were removed rather than kept because CONTROL 4 refuses a verdict for
 #: a row that is not a read-GAP row, and that refusal is the tripwire this
 #: file exists to carry.
@@ -354,50 +370,93 @@ MEASURED_PAST_BY_BUCKET3: dict[str, str] = {
 #: only have been made for a row that was waiting on one.
 DECIDED_SINCE_TRIAGE: dict[str, str] = {
     # N 79, N 172 AND N 194: THE TRIAGE-DAY DECISION WAS MADE, THE READER WAS
-    # BUILT (lane S, 2026-09-24), AND A DIFFERENT DECISION NOW HOLDS THE ROW.
-    # The WHO rule (the orchestrator's census call, 2026-09-24 03:20) returned
-    # each to GAP: its payload is WHO and the reader publishes counts. So the
-    # row carries RULING again, on the name-free shaper doctrine, pending the
-    # operator's question on returning names at runtime -- and the bucket-3
-    # table gates it RULING. N 94 LEFT the same day: a FILTER, COVERED-UNFIRED.
+    # BUILT (lane S, 2026-09-24), AND A DIFFERENT DECISION HELD THE ROW UNTIL
+    # IT, TOO, WAS MADE. The WHO rule (the orchestrator's census call,
+    # 2026-09-24 03:20) returned each to GAP: its payload is WHO and the reader
+    # publishes counts. The operator then ruled that a people read returns
+    # names at runtime (NAMES-AT-RUNTIME, 08:11; registered on master
+    # 1902fcb), so what holds each row now is no decision at all but a
+    # name-returning reader held to PEOPLE-DATA-MITIGATIONS, on the shared
+    # people-record foundation lane G is building. Their page is captured (the
+    # live lane's session 1), so the bucket-3 table gates each READER (lane
+    # S's integration of its follow-up, 2026-09-24). The verdict letter stays
+    # that day's reading, as for every entry here. N 94 LEFT on the WHO rule's
+    # day: a FILTER, COVERED-UNFIRED.
     "N 79": "D1-SEARCH-AS-READS: a keyword may be passed, from tool "
-            "arguments only; built by lane S 2026-09-24, and now held by a "
-            "DIFFERENT question -- the name-free shaper doctrine under the "
-            "WHO rule, pending the operator; bucket-3 gate RULING",
+            "arguments only; built by lane S 2026-09-24; the WHO rule's "
+            "doctrine question since answered by NAMES-AT-RUNTIME, so it now "
+            "waits on a name-returning reader held to PEOPLE-DATA-MITIGATIONS "
+            "on lane G's people-record foundation; bucket-3 gate READER",
     "N 172": "OTHER-MEMBER-IDS-AS-READS with D1-SEARCH-AS-READS: another "
              "member's id in a search facet, from tool arguments only; built "
-             "by lane S 2026-09-24, and now held by a DIFFERENT question -- "
-             "the name-free shaper doctrine under the WHO rule, pending the "
-             "operator; bucket-3 gate RULING",
+             "by lane S 2026-09-24; the WHO rule's doctrine question since "
+             "answered by NAMES-AT-RUNTIME, so it now waits on a "
+             "name-returning reader held to PEOPLE-DATA-MITIGATIONS on lane "
+             "G's people-record foundation; bucket-3 gate READER",
     "N 194": "D1-SEARCH-AS-READS: the hashtag is a keyword; built by lane S "
-             "2026-09-24, and now held by a DIFFERENT question -- the "
-             "name-free shaper doctrine under the WHO rule, pending the "
-             "operator; bucket-3 gate RULING",
+             "2026-09-24; the WHO rule's doctrine question since answered by "
+             "NAMES-AT-RUNTIME, so it now waits on a name-returning reader "
+             "held to PEOPLE-DATA-MITIGATIONS on lane G's people-record "
+             "foundation; bucket-3 gate READER",
     # ---- decided by the calls registered at master 9c219c8 and 001f70b,
     # annotated by lane R at its merge (2026-09-24), ruling by ruling ----
     "N 99": "D3-UNREGISTERED-REFUSAL-IS-NOT-A-RULING and "
             "MEMBER-ROSTERS-AS-BOUNDED-READS: the alumni tab is a roster he "
-            "can open; GAP, blocked on an admission and a reader",
+            "can open; GAP, blocked on an admission and a reader -- the "
+            "admission made in lane S's follow-up (2026-09-24, bucket-3 gate "
+            "MEASURE), so a capture and a reader remain",
     "N 100": "MEMBER-ROSTERS-AS-BOUNDED-READS: the same school People tab; "
-             "an admission and a reader",
+             "an admission and a reader -- admitted in lane S's follow-up "
+             "(2026-09-24); finding alumni is WHO, a doctrine question since "
+             "answered by NAMES-AT-RUNTIME, so it now waits on a "
+             "name-returning reader held to PEOPLE-DATA-MITIGATIONS on lane "
+             "G's people-record foundation, and a capture; bucket-3 gate "
+             "MEASURE",
     "N 102": "MEMBER-ROSTERS-AS-BOUNDED-READS: a Page's People tab is a "
-             "roster he can open; an admission and a reader",
+             "roster he can open; an admission and a reader -- admitted in "
+             "lane S's follow-up (2026-09-24), so a capture and a reader "
+             "remain",
     "N 104": "D2-SEARCH-VERTICALS-WIDENED: the companies vertical is "
-             "admitted in principle; it needs a reader",
-    "N 132": "D6-CAPABILITY-OVER-AFFORDANCE: a row named for an affordance "
-             "is discharged by the package's own sanctioned routes",
+             "admitted in principle, and on the boundary since lane S's "
+             "follow-up (2026-09-24, bucket-3 gate MEASURE); it needs a "
+             "capture and a reader",
+    # N 132 WAS HERE ON MASTER AND IS NOT: lane D applied D6 on 2026-09-24
+    # and moved the row GAP -> COVERED-UNFIRED, so it left TRIAGE (see the
+    # LEFT GAP list above) and CONTROL 8 would refuse a decided entry for it.
     "N 161": "D2-SEARCH-VERTICALS-WIDENED: the groups vertical is admitted "
-             "in principle; it needs a reader",
+             "in principle, and on the boundary since lane S's follow-up "
+             "(2026-09-24); which groups is WHICH, a doctrine question since "
+             "answered by NAMES-AT-RUNTIME, so it now waits on a "
+             "name-returning reader held to PEOPLE-DATA-MITIGATIONS on lane "
+             "G's people-record foundation, and a capture; bucket-3 gate "
+             "MEASURE",
     "N 177": "D3-UNREGISTERED-REFUSAL-IS-NOT-A-RULING and "
              "MEMBER-ROSTERS-AS-BOUNDED-READS: a group's member directory; "
-             "an admission and a reader",
+             "an admission and a reader -- admitted in lane S's follow-up "
+             "(2026-09-24); the people are WHO, a doctrine question since "
+             "answered by NAMES-AT-RUNTIME, so it now waits on a "
+             "name-returning reader held to PEOPLE-DATA-MITIGATIONS on lane "
+             "G's people-record foundation, and a capture; bucket-3 gate "
+             "MEASURE",
     "N 178": "D3-UNREGISTERED-REFUSAL-IS-NOT-A-RULING: GAP on an admission "
              "and a reader; its live proof loads another member's profile, "
-             "so the operator names that member",
+             "so the operator names that member "
+             "(THIRD-PARTY-PROFILE-FOR-A-NAMED-TARGET); which groups is "
+             "WHICH, a doctrine question since answered by NAMES-AT-RUNTIME, "
+             "so its reader must return names held to "
+             "PEOPLE-DATA-MITIGATIONS on lane G's people-record foundation; "
+             "NEEDS-TARGET",
     "N 179": "D2-SEARCH-VERTICALS-WIDENED: the events vertical is admitted "
-             "in principle; it needs a reader",
-    "P C8": "D4-NO-OWN-BROWSER-CONTEXT: the download transport is the "
-            "DevTools download behaviour on the attached browser",
+             "in principle, and on the boundary since lane S's follow-up "
+             "(2026-09-24); which events is WHICH, a doctrine question since "
+             "answered by NAMES-AT-RUNTIME, so it now waits on a "
+             "name-returning reader held to PEOPLE-DATA-MITIGATIONS on lane "
+             "G's people-record foundation, and a capture; bucket-3 gate "
+             "MEASURE",
+    "P C8": "D4-NO-OWN-BROWSER-CONTEXT (registered 2026-09-24): no context "
+            "of its own; the download transport is built on the attached "
+            "browser (cdp_download.py), and what holds the row now is the "
+            "Save to PDF press; bucket-3 gate PRESS",
 }
 
 

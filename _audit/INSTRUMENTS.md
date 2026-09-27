@@ -10292,6 +10292,243 @@ reconstruction, the floor-lint control and timing scripts, and the second
 gate's selection and runner -- are declared disposable. Their numbers are in
 the lane record.
 
+---
+
+## 68. A DOWNLOAD TRANSPORT ON THE ATTACHED BROWSER, TESTED ON A FAKE CHROME THAT CAN SAY NO (lane-d, 2026-09-24)
+
+**Registered 2026-09-24.** Full record: `_audit/2026-09-24-lane-d-d6-pdf.md`.
+Numbered 68 as assigned to the lane; 66 and 67 belong to other lanes.
+
+`linkedin_server/cdp_download.py` is the transport the D4 ruling gave census
+row `P C8`: Chrome's own download behaviour, set over a DevTools session on the
+attached browser, with no browser context created, off unless
+`LINKEDIN_ENABLE_CDP_DOWNLOADS` is set. The module is a capability, not an
+instrument. What is registered here is what tests it.
+
+### 68.1 A FAKE IS ONLY AS GOOD AS WHAT IT REFUSES TO DO
+
+A fake browser that hands over a file whatever it is sent would make every
+capture test green and certify nothing. So `FakeChrome` models the four
+behaviours the protocol names -- `default` (his own folder, the page's name,
+no events to any session), `allow` (the page's name), `allowAndName` (the
+browser's GUID) and `deny` -- and sends events only to the session that
+switched them on. The CONTROL runs the same capture with the one step that
+sets the behaviour removed, and it must come back `no_download_began` with the
+bytes in HIS folder. A second control lets the PAGE name the file and must
+come back `file_missing`.
+
+    A CAPTURE TEST IS WORTH WHAT ITS FAKE WOULD DO WRONG. A FAKE THAT
+    CANNOT FAIL THE CAPTURE CANNOT PASS IT EITHER.
+
+### 68.2 THE SCANNER HAS NO DEVTOOLS PATTERN, SO THE SITES ARE PINNED BY AST
+
+`readonly.scan_source_for_mutations` does not see a DevTools `send`, and a
+DevTools session can do anything a page can. Until it has a pattern, the
+package's sites are pinned: exactly one `send` (in `cdp_download._send`,
+which refuses any method off its closed table) and one session (in
+`capture_download`), attributed through the shipped
+`readonly.enclosing_function` rather than a second copy of it. The detector is
+shown finding a planted second site before it is aimed at the package.
+
+### 68.3 THE ENTRIES
+
+| path | shown failing by |
+|---|---|
+| `tests/test_cdp_download.py` | its own two controls (the behaviour step removed; a page-named file), and five defects planted into the module from outside by a disposable plugin, each turning the file red: the behaviour step removed (15 of 33 red), `allow` for `allowAndName` (10), the restore dropped (5), the kind check off (2), an exception's text carried into the result (1). The AST pin's detector is shown finding a planted `send` and session in another module. |
+| `tests/test_profile_pdf_download_is_blocked_on_transport.py` (re-aimed) | the detector's second vocabulary is shown returning `cdp_download_behaviour` on a synthetic DevTools source, and the context route outranking it when both appear, before either is aimed at the package; the new tripwire's caller detector is shown finding a planted caller of `capture_download` |
+
+**A COST FOUND BY THE FIRST PLANT.** With the production timeouts a regression
+took the capture file from 3 s to 264 s, because every negative path waited
+out 20 s and 60 s. The test helper now passes 0.5 s bounds and the same plant
+fails in 11 s. A suite that turns slow instead of red is read as a hang.
+
+### 68.4 DECLARED DISPOSABLE
+
+The scratch mutation plugin, the offline `J 107` call-shape reading, the
+correction-vocabulary neighbour check and the census edit scripts this lane
+ran are declared disposable. What they measured is in the record with its
+numbers, and the capture file itself re-derives the controls on every run.
+
+### 68.5 THE RESET AT ATTACH, AND A CONTROL THAT TAKES IT OUT (added 2026-09-24)
+
+`cdp_bridge.attach` now hands his downloads back to Chrome's own behaviour
+right after it connects, through `cdp_download.reset_download_behaviour`,
+because the library's own handshake points them at a temporary directory it
+deletes on disconnect. Two tests carry it, and each is shown failing:
+
+| path | shown failing by |
+|---|---|
+| `tests/test_cdp_attach.py` (the REAL `attach` over a fake Playwright) | its control swaps the reset for a stand-in that claims success and sends nothing, and the shared assertion -- one reset to `default`, no context id, after the library's handshake, on a session then detached -- goes red |
+| `tests/test_cdp_download.py` section 5 | its control is the hazard itself on the fake Chrome: after the library's `allowAndName` alone his own download lands in the library's folder, and after the reset it lands in his |
+
+The AST pin moved with it: still one DevTools `send` site, and now two
+session sites, the capture's and the reset's, both in `cdp_download.py`.
+
+    WHAT A FAKE CAN SHOW IS THAT THE RESET IS SENT, IN ORDER, AND WHAT IT
+    WOULD DO IF CHROME DOES WHAT THE PROTOCOL SAYS. WHETHER IT DOES IS A
+    LIVE QUESTION, AND THE LANE RECORD QUEUES IT.
+
+---
+
+## 69. THE RECEIPT-SAFE INBOX AND THE REPLY THAT CONFIRMS ITSELF (lane-l5-messaging, 2026-09-24)
+
+**Registered 2026-09-24.** Full record: `_audit/2026-09-24-lane-l5-messaging.md`.
+Numbered 69 by the orchestrator's allocation for this lane, so parallel appends
+do not collide.
+
+Two blocks, each measured twice before this lane. Opening an unread
+conversation can show its sender a "seen", and `/messaging/` opens one of
+LinkedIn's choosing, so the live lane held three inbox rows; and
+`linkedin_send_message` could never report SENT, because the only surface that
+could confirm a send was forbidden until `WRITE-CLASS-B`.
+
+### 69.1 THE COMPOSER IS THE RECEIPT-FREE LIST, AND A ROW NAMES NO THREAD
+
+Measured offline on two gitignored captures of 2026-09-20, shapes and counts
+only: `/messaging/compose/` draws the whole conversation list with zero
+conversation messages and zero rows marked active, against one of each on
+`/messaging/` captured the same minute. No attribute on any row, or on any
+descendant, carries a thread identifier. So a list can be read without opening
+anything, and no list can say which row a given thread id is -- which is why
+the receipt guard refuses on ANY unread rendered row, not on "that" row.
+
+    A LIST THAT CANNOT NAME ITS ROWS CANNOT BE ASKED ABOUT ONE OF THEM.
+    REFUSE ON THE WHOLE, AND SAY WHAT THE WHOLE LEAVES OUT.
+
+### 69.2 A SEND CONFIRMS ITSELF BY A DELTA, NOT BY A REDRAW
+
+A page that just took a click redraws optimistically. `send_reply` therefore
+reads SENT off a FRESH load of the conversation he named, and requires three
+things at once: his exact words as the last message, that message without the
+`--other` modifier, and the count of messages carrying exactly those words up
+by EXACTLY ONE against the preview's before-count. The NOT-SENT reading is
+taken in place first, before the reload erases it.
+
+    AN IDENTICAL EARLIER MESSAGE IS NOT A SEND. ONLY THE DELTA IS.
+
+### 69.3 THE ENTRIES
+
+| path | shown failing by |
+|---|---|
+| `linkedin_server/threads.py` -- `read_conversation_list`, `receipt_guard`, `list_opened_a_conversation` | `tests/test_messaging_threads.py`: four DERIVED unread worlds (a class token, a hidden word, a badge, an accessible name), each flipping exactly its own row; the guard refusing an unread row (and naming the position), refusing a list page that opened a conversation even with the opt-in, refusing no rendered rows, an unreadable list and a landing off the composer; the tools refusing BEFORE the conversation is loaded (one load recorded) |
+| `threads.read_thread`, `reply_state`, `seen_state`, the in-page text match | the same file: a sponsored conversation, a restored draft, a recipient box and an unrendered page each read UNKNOWN with the reason; the read indicator `not_drawn` (measured) and `drawn` (derived) worlds; exact, partial, case-changed and whitespace-changed words; a conversation redirected elsewhere is not read |
+| `writes.py` -- spec `send_reply` and its arms; `threads.reply_send_gate`, `threads.reply_verdict`, `threads.name_the_reply_recipient` | `tests/test_send_reply.py`: no grant (writes off; no token, `None`, `True`, forged; unredeemed; a non-grant -- zero navigations), another thread, other words, another action, a second use at both doors, and the second-use guard SHOWN FAILING when its flag is cleared (the replay types and sends again); SENT, NOT SENT and UNKNOWN end to end; an identical earlier message refused as a send; Send not pressed when the fill did not turn it on, nor when the box holds other words than his (`5_words_not_exact`, two lengths kept and no text); the click refused before typing on a landing in another conversation, and over a draft; the title kept out of `grant.preview` and every receipt |
+| `writes._verify_after` -- `send_message` read back in place | `tests/test_send_message_gate.py::test_verify_after_reaches_the_to_state_only_through_the_conversation_read_back` -- it replaced the test that pinned SENT unreachable: the two composer readings never SENT, a conversation drawn with his words SENT, other words UNKNOWN |
+| `scripts/check_write_classes.py` -- R2 and R3 may carry `built:` and `queued:` | `tests/test_write_classes.py::test_red_on_an_r1_line_left_classify_only` (the rule that remains) and `test_an_r2_line_may_record_a_build_or_a_blocker` |
+| `threads` -- every conversation selector scoped to `<main>`; `RECIPIENT_BOX_SELECTOR` named by the composer's own typeahead; `EVIDENCE_EVENT_SELECTOR` and `EVIDENCE_ACTIVE_ROW_SELECTOR` page-wide (69.5) | `tests/test_messaging_threads.py`: `test_the_global_search_box_is_a_combobox_and_not_a_recipient_box` (counts `(1, 0)` on the thread, `(2, 1)` with the typeahead drawn), `test_the_composer_is_not_a_conversation_and_its_recipient_box_says_so`, `test_an_open_overlay_bubble_is_not_this_conversation`, `test_a_conversation_the_overlay_draws_counts_against_nothing_was_opened`; and the RED REPRODUCTION -- the fixture change alone, under the shipped selector, failed 17 of 63 lane tests |
+
+### 69.4 DECLARED DISPOSABLE
+
+The scratchpad probes this lane ran over the two captures -- overlay markers,
+payload markers, row structure, form controls, the thread view and the header,
+and the four added after the first build (landmarks, comboboxes, the recipient
+box's naming, and the old-against-scoped selector comparison) -- are declared
+disposable. What they measured is recorded with its numbers in
+the lane record's section 1, and the structure is carried by
+`tests/fixtures/synthetic/messaging_compose_list.html` and
+`tests/fixtures/synthetic/messaging_thread.html`, which the suite re-reads on
+every run.
+
+### 69.5 A ROLE IS NOT AN IDENTITY -- AND A FIXTURE CUT TO ONE REGION CANNOT CONVICT A LEAK
+
+Found after the first build by a probe of the captures, before any live
+use. The reply reader counted recipient boxes as `[role="combobox"]` -- "a
+thread has nobody to choose" -- and LinkedIn's global search input is a
+combobox on EVERY page: 2 on the composer capture (the search and the
+composer's own typeahead), 1 on the `/messaging/` capture (the search
+alone), 0 inside any reply form, and the search is outside `<main>` on
+both. Every real conversation would have read "not a conversation" and no
+reply could ever have been typed. The gate failed CLOSED, so nothing unsafe
+could follow -- and no test saw it, because every synthetic world had been
+cut to the messaging region and drew no global navigation.
+
+    A SELECTOR THAT NAMES ONLY A ROLE COUNTS EVERY WIDGET OF THAT ROLE ON THE PAGE.
+    SCOPE TO THE LANDMARK THE THING LIVES IN; NAME IT BY ITS OWN COMPONENT.
+    A FIXTURE MUST DRAW THE CHROME EVERY PAGE DRAWS, OR NO TEST CAN SEE A LEAK INTO IT.
+
+The fix was measured before it was written: each of the 17 selectors, old
+spelling against `<main>`-scoped, on both captures -- no count moved except
+the recipient box (composer 2 -> 1, `/messaging/` 1 -> 0). One exception is
+deliberate: RECEIPT EVIDENCE stays page-wide, because a conversation bubble
+the overlay draws outside `<main>` has still been displayed. Aim is
+`<main>`; a receipt is the whole page.
+
+### 69.6 FOURTEEN MUTATIONS, FOURTEEN KILLS
+
+Each load-bearing condition was broken ALONE in a scratch copy of the tree
+and its named test run. Ten at `899b24b` (a commit on the lane's branch;
+`899b24b` does not resolve on `master` until the branch merges): the
+unread word signal, the
+guard's refusal on an unread row, the list page's opened check, the reply's
+delta (`== was + 1` weakened to `>= was`), the send gate's transition check,
+the title's copy into a NEW dict, the landing check before typing, the
+landing check in the preview, `send_message`'s in-place read-back, and the
+reply verdict's authorship condition. Four more over the fix: the send
+gate's words check removed, the recipient box put back to any combobox,
+the receipt evidence scoped to `<main>`, and the conversation's messages
+unscoped. Each unmutated copy passed its tests; each mutation failed its
+test AT THE ASSERTION NAMED FOR IT, not at an import or a collection
+error, and every file was restored byte for byte.
+
+### 69.7 A NEW TARGET KIND MUST REACH EVERY HARNESS TABLE KEYED BY KIND
+
+`send_reply` shipped with a new `target_kind`, `thread_and_text`, and
+`tests/refusinggrant.py` had no synthetic target for it. The KeyError did not
+fail one case: the page-string guard drives each writes reader with EVERY
+shipped spec, so five readers (`perform`, `_live_control`, `_verify_after`,
+`_recipient_gate`, `_typeahead_gate`) could no longer be driven for any spec
+at all. Three more tables keyed by kind or component had the same hole. The
+179-file gate found all of them; nothing in the lane's own tests could.
+
+    A KIND-KEYED HARNESS THAT RAISES ON AN UNKNOWN KIND STOPS MEASURING EVERY
+    CASE IT SHARES A CALL WITH. ADD THE KIND TO EVERY TABLE BEFORE THE SPEC SHIPS.
+
+### 69.8 A TRANSFORMED PAGE STRING IS STILL A PAGE STRING
+
+`threads.read_thread` returned each file input's `accept` attribute
+lowercased and cut to an alphabet. The page-string guard's plant is matched
+as a case-sensitive substring (`tests/plantedpage.py`), so the lowercased
+copy, its space removed, read CLEAN. It is a closed token now.
+
+    A NEEDLE MATCHED BY SUBSTRING CERTIFIES ONLY THE SPELLINGS IT WAS GIVEN.
+    A CLOSED VOCABULARY IS THE ONE SHAPE IT CAN CERTIFY WHOLE.
+
+### 69.9 A CONTROL PLANTED IN A SHAPE NO CAPTURE HOLDS CERTIFIES ONLY THE PLANT
+
+`dom.read_thread_reply_surface` counted recipient boxes by an aria-label, and
+its control planted the composer's box WITH that aria-label -- so reader and
+control agreed with each other and not with LinkedIn. The measured box is named
+by a `<label for>`: on the composer capture the aria-label selector finds 0 and
+the role-and-name selector the send gate types into finds 1. The reader read the
+composer as a conversation, the one confusion that field exists to refute.
+Found at integration (2026-09-24); the new control, in the measured shape, was
+RED on the unfixed reader.
+
+    A CONTROL MUST BE BUILT IN THE SHAPE THE CAPTURE HOLDS, OR IT TESTS THE
+    READER AGAINST ITS AUTHOR'S ASSUMPTION INSTEAD OF AGAINST THE PAGE.
+
+| path | shown failing by |
+|---|---|
+| `dom.read_thread_reply_surface` -- recipient boxes by `dom.compose_recipient_selector()` | `tests/test_thread_reply_surface.py::test_the_composer_is_counted_in_the_shape_it_was_measured_in` (red first: 0 against 1) and `test_the_global_search_combobox_is_not_a_recipient_box`; mutation M15 puts the aria-label back and the first fails |
+
+### 69.10 A NAVIGATION READER THAT RESOLVES ONLY CONSTANTS CANNOT SEE A HELPER, A MODULE OR A WRITE
+
+The named-cost reader (`tests/test_a_named_cost_names_a_tool_that_can_incur_it.py`)
+resolved config constants and census keys and kept anything else as unparsed
+source. Three of this lane's tools navigate through `threads.COMPOSE_URL`, a
+local bound to `threads.thread_url(...)`, and `_write_tool("send_reply")`,
+none of which unparses to `/messaging` -- so the closed claim it guards stayed
+green by not seeing them. It now resolves all three by AST, and a planted
+source, RED on the old reader, holds each shape; a write whose spec is a job
+posting is its control.
+
+    A STATIC READER THAT KEEPS WHAT IT CANNOT RESOLVE AS SOURCE TEXT MUST BE
+    SHOWN A PLANT OF EVERY SHAPE THE CODE USES, OR ITS SILENCE IS BLINDNESS.
+
+| path | shown failing by |
+|---|---|
+| the reader's module-constant, helper and write-spec resolution; the second clause of the messaging sentence, checked in both copies | `test_the_reader_resolves_a_module_constant_a_helper_and_a_write_spec` (red first on the old reader); mutations M16 (write-spec branch dead) and M17 (module-constant branch dead) each fail it; `test_every_tool_the_second_clause_names_exists_and_loads_messaging` |
+
 ## 70. THE BEST-VERIFIED WRITE NEVER PRESSED SAVE, AND A WRITE AIMED BY ITS CARD (lane-l7-profile-writes, 2026-09-24)
 
 **Registered 2026-09-24.** Full record: `_audit/2026-09-24-lane-l7-profile-writes.md`.
@@ -10383,7 +10620,47 @@ exits 0 and the file passes 55 of 55.
 The script is disposable (70.4); the method is the part the merge can reuse,
 wherever a pin's owners read it from a module attribute.
 
+### 70.6 A SWITCH THE DIALOG CANNOT NAME, TIED TO ITS CAPTURE BY STRUCTURE (follow-up, 2026-09-24)
+
+The ruling `SELF-PROFILE-EDIT-NOTIFY-CONDITION-AMENDED` holds an unnamed switch
+against condition 1 "until a capture identifies that switch". A capture's
+identification is made by a person reading TEXT the gate may not read, so the
+gate needs a way to recognise the identified switch that never reads that text.
+
+    THE CAPTURE SAYS WHAT A THING IS; THE GATE MAY ONLY SAY WHERE IT IS.
+    RECOGNISE BY THE SHAPE AROUND IT, UNDER THE NEAREST ANCHOR THE PAGE
+    NAMES, AND LET ANY DEPARTURE FROM THAT SHAPE FALL BACK TO THE REFUSAL.
+
+And the half that is easy to drop: **"unnamed" is a property of the accessible
+name, not of the attributes.** Every attribute can match while a label
+elsewhere on the page names the control; a recogniser that asks attributes
+alone then recognises a switch the fields reader never counted as unnamed, and
+subtracting it lifts the refusal for a switch nobody identified.
+
+| path | shown failing by |
+|---|---|
+| `linkedin_server/profile_editor.py` -- `INTRO_SWITCH_COLUMN`, `INTRO_SWITCH_ROW`, `INTRO_SWITCH_BLOCKS`, `recognise_intro_editor_switches` (every question a `locator(...).count()`; no new script, no new waiver), `_recognised_identities`, and code 6 counting only the switches NOT recognised | `tests/test_intro_editor_switches.py` (18) over `tests/fixtures/synthetic/intro_editor_switches.html`. The gate as committed before it, driven over that fixture with the account setting read OFF, refuses `6_unnamed_switch_unresolved`; after, it proceeds with both recognised -- and the same holds on the RAW capture, offline (page scripts disabled, every one of its 25 requests aborted). Each load-bearing half knocked out in process turns exactly its own test red: without the accessible-name half the gate PROCEEDS over two planted unnamed switches while the capture's pair is named from elsewhere (as built: code 6); without `include_hidden`, a stylesheet-hidden pair is not recognised; without the column anchor, a row under any other parent is. |
+| `scripts/_build_intro_editor_switches_fixture.py --check` -- the same signature in Python, against any file | the test file's builder test: exit 0 and "one settings row, 2 switch blocks" on the fixture, and on the raw capture; a page whose row loses its leading paragraph, or whose column loses its test id, refuses, exit 1. |
+
 ---
+
+### 70.7 A PRESS AIMED BY A UI STRING THE PAGE COMPARES, AND A SWITCH THAT MAY COMMIT ON ITS OWN (P B9, 2026-09-24)
+
+The orchestrator ruled that one LinkedIn UI string, the Premium badge block's title, may aim a press,
+on five conditions. Two methods fell out of building it, and both generalise past this row.
+
+    A STRING THAT MAY AIM MAY STILL NOT BE READ. PUT IT IN THE SELECTOR, LET
+    THE PAGE'S ENGINE COMPARE IT, AND TAKE BACK ONLY A COUNT -- THEN A UI IN
+    ANOTHER LANGUAGE REFUSES BY CONSTRUCTION, WITH NO LANGUAGE CHECK TO BE
+    WRONG.
+
+    A SWITCH MAY STORE ITSELF THE MOMENT IT IS PRESSED. A CONDITION THAT MUST
+    HOLD BEFORE THE CHANGE IS STORED MUST BE READ BEFORE THE PRESS, NOT BEFORE
+    THE SAVE THAT FOLLOWS IT.
+
+| path | shown failing by |
+|---|---|
+| `linkedin_server/profile_editor.py` -- `PREMIUM_BADGE_TITLE`, `read_premium_badge`, `premium_badge_aim`, `badge_moved_alone`, `badge_verification`, the save gate's `require_save=False`, and `writes.perform`'s `switch` kind | `tests/test_premium_badge.py` (17). Written first: the four tests the order named -- two rows, none, a swapped order, a non-English title -- fail 4 of 4 on the module before the build. Three knock-outs in process each turn their own tests red: aiming by order (3 red -- the swapped render presses the other switch, and the no-row and non-English worlds stop refusing), pressing Save whatever moved (1 red -- the other switch is stored), and condition 1 read only before Save (1 red -- in the world where the press stores itself, the change lands with condition 1 never established). Over the RAW capture, offline, no press: exactly one titled row, the badge on its second block, agreeing with 70.6's order. |
 
 ## 71. THE COMPLETENESS VERDICT LAYER, THE ADJUDICATED CORPUS, AND THE TABLE AT A FIXED POINT (lane-y2-admission, 2026-09-24)
 

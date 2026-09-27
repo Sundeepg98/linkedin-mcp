@@ -1328,6 +1328,122 @@ PINNED = (
 #: across the 55 tracked package modules after, so nothing needed sanctioning. The
 #: floor below rises 29 -> 31 and the detector roster names both classes.
 #: ------------------------------------------------------------------------
+#: RE-FROZEN AGAIN 2026-09-24 (lane S follow-up), ONE DIGEST MOVED BY ONE
+#: EDITED TUPLE ENTRY -- THE SEARCH ADMISSION WIDENED TO FOUR CLOSED WORDS on
+#: `D2-SEARCH-VERTICALS-WIDENED`:
+#:
+#:     _ALLOWED_URL_PATTERNS   c37e98f84ee443f2 -> d7b3315318c877d0   49 -> 49
+#:     every other table       unchanged
+#:
+#:     ^https://www\.linkedin\.com/search/results/people/?(\?[^#]*)?$
+#:  -> ^https://www\.linkedin\.com/search/results/(people|companies|groups|events)/?(\?[^#]*)?$
+#:
+#: The count does not move because a line CHANGED rather than arrived. Its
+#: blast radius was measured before the change by
+#: `scripts/_probe_search_admission_blast_radius.py` (S2: exactly three newly
+#: admitted, the companies, groups and events keyword spellings) and is pinned
+#: in `tests/test_search_admission_blast_radius.py` and
+#: `tests/test_d2_search_verticals.py`. ATTRIBUTION: the tree with exactly
+#: this one line put back to its people-only spelling hashes to
+#: c37e98f84ee443f2 on the allowlist key and to the prior pin on all eight,
+#: so nothing else rode in. Seven of eight digests byte-identical;
+#: `<functions>` unmoved, so `assert_read_url` did not change.
+#: ------------------------------------------------------------------------
+#: RE-FROZEN AGAIN 2026-09-24 (lane S follow-up, item 2), ONE DIGEST MOVED BY
+#: FOUR NEW TUPLE ENTRIES -- MEMBER ROSTERS AS BOUNDED READS, on
+#: `MEMBER-ROSTERS-AS-BOUNDED-READS`:
+#:
+#:     _ALLOWED_URL_PATTERNS   d7b3315318c877d0 -> a13f66bebba387cd   49 -> 53
+#:     every other table       unchanged
+#:
+#:     ^https://www\.linkedin\.com/groups/[0-9]{1,20}/members/?$
+#:     ^https://www\.linkedin\.com/events/[0-9]{1,20}/attendees/?$
+#:     ^https://www\.linkedin\.com/company/[A-Za-z0-9%\-_]{1,100}/people/?$
+#:     ^https://www\.linkedin\.com/school/[A-Za-z0-9%\-_]{1,100}/people/?$
+#:
+#: Their blast radius was measured before they landed with
+#: `blast_radius.newly_admitted` over 197 addresses (+2, +2, +4, +4, nothing
+#: else) and is pinned per line in `tests/test_member_rosters.py`, which also
+#: holds a test for each of the ruling's conditions. ATTRIBUTION: the tree
+#: minus exactly these four lines hashes to d7b3315318c877d0 on the allowlist
+#: key and to the prior pin on all eight. Controls: a needle no line carries
+#: removes nothing and moves nothing, and dropping the pre-existing
+#: `/groups/discover/` line instead lands on 1018aafe63a9f35c. Seven of eight
+#: digests byte-identical; `<functions>` unmoved.
+#: ------------------------------------------------------------------------
+#: RE-FROZEN AGAIN 2026-09-24 (lane S follow-up, after its cold verification),
+#: ONE DIGEST MOVED BY FOUR EDITED ENTRIES -- A NARROWING, NOTHING ADMITTED:
+#:
+#:     _ALLOWED_URL_PATTERNS   a13f66bebba387cd -> 17409e16e7abbcc8   53 -> 53
+#:     every other table       unchanged
+#:
+#: The cold verifier admitted `/company/%2e%2e/people/` through the new
+#: People-tab lines: `%` was in their class, and the URL standard reads a
+#: segment of `%2e%2e` as `..`. The same hole was older on the company and
+#: school ROOT lines (`/company/%2e%2e/` landed on the site root). So:
+#:
+#:     company and school roots   + (?!(?:%2[eE]){1,2}/?$) after the path word
+#:     company and school People  `%` dropped from the class
+#:
+#: Measured over 1705 addresses (the shipped corpus, the verifier's 1562
+#: adversarial spellings and 96 more): 90 newly refused -- 12 per root line,
+#: all six one-or-two-encoded-dot spellings with and without the slash, and
+#: 33 per People line, every `%` spelling -- and NOTHING newly admitted.
+#: ATTRIBUTION: the tree with exactly those four lines put back hashes to the
+#: prior pin on all eight keys. Seven of eight digests byte-identical;
+#: `<functions>` unmoved.
+#: RE-FROZEN AGAIN 2026-09-24 BY THE LIVE LANE (Part 2 (d) of the
+#: orchestrator's integration order), ONE TUPLE ENTRY, ONE DIGEST MOVED --
+#: HIS ALL-ACTIVITY LIST, `/in/me/` FORM ONLY (census M C85):
+#:
+#:     _ALLOWED_URL_PATTERNS   c37e98f84ee443f2 -> b99f3c765fcb8043   49 -> 50
+#:     every other table       unchanged
+#:
+#:     ^https://www\.linkedin\.com/in/me/recent-activity/all/?$
+#:
+#: THE ORDER'S WORDS: "Admit /in/me/recent-activity/all/ (his own activity, a
+#: closed segment) so his own poll posts can be found." IT REVERSES A STATED
+#: SCOPE, and says so: lane L1's articles line listed `/recent-activity/all/`
+#: among what it did not admit, and `tests/test_l1_self_scoped_admissions.py`
+#: pinned it refused; that neighbour now points at this line's own file,
+#: `tests/test_own_activity_all_admission.py`, which pins the edges -- two
+#: spellings admitted, fourteen neighbours refused (other members, the
+#: activity root, the comments and reactions lists, five other tabs, a
+#: query, a sub-path, a longer word, two traversals), a control removing the
+#: line, and the blast radius with ``blast_radius.newly_admitted``: exactly
+#: its own two spellings, nothing newly refused.
+#:
+#: ATTRIBUTION, in this dict's form: the tree MINUS exactly this line hashes
+#: to ``c37e98f84ee443f2``, the value replaced, so nothing else rode in.
+#: Control: dropping the PRE-EXISTING articles line instead lands on
+#: ``fcd2612ef29ac056``. SEVEN of eight digests byte-identical;
+#: ``<functions>`` unmoved. Computed with this file's ``ast_digest``, one
+#: interpreter, 3.13.
+#: ------------------------------------------------------------------------
+#: RE-FROZEN AT THE ORCHESTRATOR'S MERGE OF THE LIVE LANE OVER LANE S
+#: (2026-09-27): THE TWO BRANCHES' ADMISSIONS MEET, NOTHING ELSE MOVES.
+#:
+#:     _ALLOWED_URL_PATTERNS   17409e16e7abbcc8 + b99f3c765fcb8043 -> 6240409ec52c4ab2   53 + 1 -> 54
+#:
+#: ATTRIBUTION on the merged tree: minus exactly the all-activity line hashes
+#: to 17409e16e7abbcc8, lane S's pin, so nothing else rode in. Control:
+#: minus the pre-existing articles line instead lands on 173ff7a49fd2bf66.
+#: ------------------------------------------------------------------------
+#: RE-FROZEN AT LANE G'S MERGE OF MASTER 2eb90ad (2026-09-27): THE TWO
+#: BRANCHES' RE-FREEZES MEET, AND NOTHING ELSE MOVES. THIRTEEN DIGESTS:
+#:
+#:     _ALLOWED_URL_PATTERNS     6240409ec52c4ab2   master's, the notes above
+#:     <functions>               ff43e832d6f2b685   lane G's replacement scan
+#:     _MUTATION_CALL_PATTERNS   579d20dc7c08eb52   lane G's, lane D's 5.3
+#:     the five names lane G pinned, and every other table: byte-identical
+#:
+#: ATTRIBUTION, computed with this file's ``ast_digest`` on each side's own
+#: copy of this file: the merged readonly.py equals lane G's branch on every
+#: key except ``_ALLOWED_URL_PATTERNS``, and equals master on every key
+#: master pins except ``<functions>`` and ``_MUTATION_CALL_PATTERNS``. Git
+#: merged the dict below line by line; every value in it was then checked
+#: against the merged file and none needed a hand edit. One interpreter, 3.13.
+#: ------------------------------------------------------------------------
 READONLY_AST_AT_LAST_REFREEZE = {
     "<functions>": "ff43e832d6f2b685",
     "JS_MUTATION_TOKENS": "d47e30b67c583c1b",
@@ -1485,7 +1601,25 @@ READONLY_AST_AT_LAST_REFREEZE = {
     # c8c476ea47f0dfdd until the second REVIEW: commit of 2026-09-23 (lane
     # L1): one event by its numeric id. See that ledger entry, which also
     # lists the value for every combination of the two REVIEW commits.
-    "_ALLOWED_URL_PATTERNS": "c37e98f84ee443f2",
+    #
+    # c37e98f84ee443f2 until 2026-09-24 (lane S follow-up): the people-only
+    # search line widened to four closed words on D2-SEARCH-VERTICALS-WIDENED.
+    # One entry edited, none added. See that ledger entry.
+    #
+    # d7b3315318c877d0 until item 2 of the same follow-up: four roster lines
+    # on MEMBER-ROSTERS-AS-BOUNDED-READS, 49 -> 53. See that ledger entry.
+    #
+    # a13f66bebba387cd until the same follow-up's cold verification: the
+    # encoded-dot narrowing on four lines, nothing admitted. See that entry.
+    #
+    # c37e98f84ee443f2 until 2026-09-24 (the live lane, Part 2 (d)): his
+    # all-activity list in the `/in/me/` form, one line, on the
+    # orchestrator's order. See that ledger entry.
+    #
+    # 17409e16e7abbcc8 (lane S) and b99f3c765fcb8043 (the live lane) met at the
+    # orchestrator's merge of the live lane over lane S, 2026-09-27: both
+    # admissions together, 53 + 1 = 54 lines; merged digest 6240409ec52c4ab2.
+    "_ALLOWED_URL_PATTERNS": "6240409ec52c4ab2",
     "_FORBIDDEN_SUBSTRING_EXEMPTIONS": "43e2bf7f3db0dbed",
     # 419e64a3cd92ec7e until the same REVIEW: commit: a third entry, excusing
     # exactly {"/follow"} for exactly the anchored follower-list address.

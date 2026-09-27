@@ -103,10 +103,17 @@ async def _open_fixture(config: Optional[dict] = None, *, url: str = FIXTURE_URL
 # ---------------------------------------------------------------------------
 
 
+#: A steady price on the fixture's permalink: the basis the address
+#: resolves to (``press.SENSITIVITY_BASES``, ``/feed/update/``) names two
+#: counters, reaction toggles OFF and ON, and one toggle drawn OFF is a
+#: price that CAN move -- a zero pair would be refused before any click.
+PERMALINK_PRICE = {"toggles_off": 1, "toggles_on": 0}
+
+
 def _steady_counters(mapping: Optional[dict]):
     """Returns the SAME mapping every call (or None, every call).
 
-    A steady ``{"off_state": N}`` is what the ``/feed/`` surface's declared
+    A steady :data:`PERMALINK_PRICE` is what the permalink's declared
     sensitivity basis needs to see UNMOVED for a press to be permitted --
     see ``press.SENSITIVITY_BASES``.
     """
@@ -123,7 +130,7 @@ def _moving_counters():
 
     async def _read():
         calls["n"] += 1
-        return {"off_state": calls["n"]}
+        return {"toggles_off": 1, "toggles_on": calls["n"]}
 
     return _read
 
@@ -187,7 +194,7 @@ async def test_happy_path_copies_the_link_without_touching_the_os_clipboard():
         verdict = await share_link.copy_own_post_link(
             page,
             activity_digits=ACTIVITY_DIGITS,
-            read_counters=_steady_counters({"off_state": 3}),
+            read_counters=_steady_counters(PERMALINK_PRICE),
         )
         assert verdict["permitted"] is True, verdict
         assert verdict["copied"] is True, verdict
@@ -215,7 +222,7 @@ async def test_a_menu_that_closes_itself_on_the_copy_press_is_sent_no_escape():
         verdict = await share_link.copy_own_post_link(
             page,
             activity_digits=ACTIVITY_DIGITS,
-            read_counters=_steady_counters({"off_state": 3}),
+            read_counters=_steady_counters(PERMALINK_PRICE),
         )
         assert verdict["permitted"] is True, verdict
         assert verdict["copied"] is True, verdict
@@ -232,7 +239,7 @@ async def test_a_copy_made_after_the_click_returns_is_still_captured():
         verdict = await share_link.copy_own_post_link(
             page,
             activity_digits=ACTIVITY_DIGITS,
-            read_counters=_steady_counters({"off_state": 3}),
+            read_counters=_steady_counters(PERMALINK_PRICE),
         )
         assert verdict["copied"] is True, verdict
         assert verdict["captures"] == 1, verdict
@@ -245,7 +252,7 @@ async def test_a_clipboard_item_copier_is_captured_by_its_text_part():
         verdict = await share_link.copy_own_post_link(
             page,
             activity_digits=ACTIVITY_DIGITS,
-            read_counters=_steady_counters({"off_state": 3}),
+            read_counters=_steady_counters(PERMALINK_PRICE),
         )
         assert verdict["copied"] is True, verdict
         assert verdict["shape"]["path_kind"] == "posts", verdict
@@ -262,7 +269,7 @@ async def test_a_write_with_no_text_part_is_a_capture_and_never_a_link():
         verdict = await share_link.copy_own_post_link(
             page,
             activity_digits=ACTIVITY_DIGITS,
-            read_counters=_steady_counters({"off_state": 3}),
+            read_counters=_steady_counters(PERMALINK_PRICE),
         )
         assert verdict["captures"] == 1, verdict
         assert verdict["copied"] is False, verdict
@@ -288,7 +295,7 @@ async def test_a_copier_holding_a_reference_taken_before_the_capture_reads_as_no
         verdict = await share_link.copy_own_post_link(
             page,
             activity_digits=ACTIVITY_DIGITS,
-            read_counters=_steady_counters({"off_state": 3}),
+            read_counters=_steady_counters(PERMALINK_PRICE),
         )
         assert verdict["copied"] is False, verdict
         assert verdict["captures"] == 0, verdict
@@ -316,7 +323,7 @@ async def test_a_startswith_lookalike_item_does_not_count_as_the_copy_item():
         verdict = await share_link.copy_own_post_link(
             page,
             activity_digits=ACTIVITY_DIGITS,
-            read_counters=_steady_counters({"off_state": 3}),
+            read_counters=_steady_counters(PERMALINK_PRICE),
         )
         assert verdict["permitted"] is True, verdict
         assert verdict["copied"] is True, verdict
@@ -332,7 +339,7 @@ async def test_non_owner_menu_refuses_not_his_post_without_clicking_copy():
         verdict = await share_link.copy_own_post_link(
             page,
             activity_digits=ACTIVITY_DIGITS,
-            read_counters=_steady_counters({"off_state": 3}),
+            read_counters=_steady_counters(PERMALINK_PRICE),
         )
         assert verdict.get("refused") == "not_his_post", verdict
         # THE COPY ITEM WAS NEVER CLICKED: the clipboard hook, installed
@@ -352,7 +359,7 @@ async def test_a_refusal_after_the_menu_opened_says_when_it_did_not_close():
         verdict = await share_link.copy_own_post_link(
             page,
             activity_digits=ACTIVITY_DIGITS,
-            read_counters=_steady_counters({"off_state": 3}),
+            read_counters=_steady_counters(PERMALINK_PRICE),
         )
         assert verdict.get("refused") == "not_his_post", verdict
         assert verdict["closure"].get("refused") == "not_restored", verdict
@@ -371,7 +378,7 @@ async def test_two_triggers_refuses_control_menu_not_unique_with_zero_clicks():
         verdict = await share_link.copy_own_post_link(
             page,
             activity_digits=ACTIVITY_DIGITS,
-            read_counters=_steady_counters({"off_state": 3}),
+            read_counters=_steady_counters(PERMALINK_PRICE),
         )
         assert verdict.get("refused") == "control_menu_not_unique", verdict
         assert verdict["trigger_matches"] == 2, verdict
@@ -398,7 +405,7 @@ async def test_copy_item_missing_refuses_copy_item_absent_and_closes_the_menu(
         verdict = await share_link.copy_own_post_link(
             page,
             activity_digits=ACTIVITY_DIGITS,
-            read_counters=_steady_counters({"off_state": 3}),
+            read_counters=_steady_counters(PERMALINK_PRICE),
         )
         assert verdict.get("refused") == "copy_item_absent", verdict
         assert await _trigger_expanded(page) == "false", (
@@ -417,7 +424,7 @@ async def test_duplicate_copy_items_refuse_copy_item_not_unique():
         verdict = await share_link.copy_own_post_link(
             page,
             activity_digits=ACTIVITY_DIGITS,
-            read_counters=_steady_counters({"off_state": 3}),
+            read_counters=_steady_counters(PERMALINK_PRICE),
         )
         assert verdict.get("refused") == "copy_item_not_unique", verdict
         assert await _trigger_expanded(page) == "false"
@@ -434,7 +441,7 @@ async def test_execcommand_copier_is_captured_and_permitted():
         verdict = await share_link.copy_own_post_link(
             page,
             activity_digits=ACTIVITY_DIGITS,
-            read_counters=_steady_counters({"off_state": 3}),
+            read_counters=_steady_counters(PERMALINK_PRICE),
         )
         assert verdict["copied"] is True, verdict
         assert verdict["permitted"] is True, verdict
@@ -455,7 +462,7 @@ async def test_menu_that_ignores_escape_gives_closure_refused_not_restored():
         verdict = await share_link.copy_own_post_link(
             page,
             activity_digits=ACTIVITY_DIGITS,
-            read_counters=_steady_counters({"off_state": 3}),
+            read_counters=_steady_counters(PERMALINK_PRICE),
         )
         # The copy itself still succeeded -- this is a CLOSURE failure, not
         # a copy failure, and the two must stay distinguishable.
@@ -514,7 +521,7 @@ async def test_page_not_on_the_read_allowlist_refuses_gate_refused():
         verdict = await share_link.copy_own_post_link(
             page,
             activity_digits=ACTIVITY_DIGITS,
-            read_counters=_steady_counters({"off_state": 3}),
+            read_counters=_steady_counters(PERMALINK_PRICE),
         )
         assert verdict.get("refused") == "gate_refused", verdict
         assert verdict["gate"].get("refused") == "address_not_admitted", verdict["gate"]
@@ -554,7 +561,7 @@ async def test_bad_activity_id_refuses_before_any_page_contact(bad):
     verdict = await share_link.copy_own_post_link(
         _NeverTouchedPage(),
         activity_digits=bad,
-        read_counters=_steady_counters({"off_state": 1}),
+        read_counters=_steady_counters(PERMALINK_PRICE),
     )
     assert verdict.get("refused") == "bad_activity_id", verdict
     assert set(verdict) == {"refused", "why"}, verdict
@@ -566,7 +573,7 @@ async def test_bad_activity_id_message_is_a_fixed_string_never_the_value():
         verdict = await share_link.copy_own_post_link(
             _NeverTouchedPage(),
             activity_digits=bad,
-            read_counters=_steady_counters({"off_state": 1}),
+            read_counters=_steady_counters(PERMALINK_PRICE),
         )
         assert str(bad) not in verdict["why"], verdict
         outcomes.add(verdict["why"])
@@ -890,9 +897,11 @@ async def _untouched(page) -> dict:
     }
 
 
+
+
 #: What a price reading looks like on the page the live fire saw: his own
-#: item, liked, its toggle in the permalink dialect, off_state 0.
-LIVE_SHAPED_PRICE = {"off_state": 0, "toggle_on": 1, "toggle_off": 0}
+#: item, liked, its one toggle wearing the ON label "Unreact Like".
+LIVE_SHAPED_PRICE = {"toggles_off": 0, "toggles_on": 1}
 
 
 async def test_the_tool_copies_on_one_load_and_withholds_the_link_by_default(
@@ -909,31 +918,34 @@ async def test_the_tool_copies_on_one_load_and_withholds_the_link_by_default(
     # THE LINK IS NOT IN THE ENVELOPE unless asked for; its presence is.
     assert "link" not in payload, payload
     assert payload["link_withheld"] is True, payload
-    # THE PRICE IS EVIDENCE, NOT A LABEL: three readings (the check before
-    # any press, and the gate's two), each with a toggle that COULD move.
+    # THE PRICE IS EVIDENCE, NOT A LABEL: the gate's two readings, each with
+    # a toggle that COULD move, priced by the permalink's own basis.
     assert payload["counters"].get("refused") is None, payload
-    assert payload["price_readings"] == [LIVE_SHAPED_PRICE] * 3, payload
+    assert payload["counters"]["priced_by"] == ["toggles_off", "toggles_on"], payload
+    assert payload["price_readings"] == [LIVE_SHAPED_PRICE] * 2, payload
 
 
 async def test_the_tool_refuses_a_page_whose_price_cannot_move_before_any_press(
     monkeypatch,
 ):
-    """The page draws no reaction toggle in either dialect: every counter
-    reads 0 and none could move. Refused on the first reading -- the menu
-    never opened, the capture never installed, no key pressed."""
+    """The page draws no reaction toggle in either label family: both
+    counters read 0 and neither could move. Refused on the first reading --
+    by press's own rule, inside share_link -- with the menu never opened,
+    the capture never installed and no key pressed."""
     payload, _, seen = await _run_tool(
         monkeypatch, {}, probe=_untouched, activity_id=ACTIVITY_DIGITS
     )
     assert payload.get("refused") == "price_cannot_move", payload
+    assert payload["price"].get("refused") == "price_cannot_move", payload
     assert payload["pages_loaded"] == 1, payload
     assert payload["price_readings"] == [
-        {"off_state": 0, "toggle_on": 0, "toggle_off": 0}
+        {"toggles_off": 0, "toggles_on": 0}
     ], payload
     assert seen == {"expanded": "false", "box": None, "escapes": 0}, seen
 
 
 async def test_the_tool_returns_the_link_only_when_asked(monkeypatch):
-    """Also the FEED dialect's price path: off_state 1, no permalink toggle."""
+    """Also the state family's price path: one toggle, OFF."""
     payload, _, _ = await _run_tool(
         monkeypatch, {"reactionControl": True},
         activity_id=ACTIVITY_DIGITS, include_link=True,
@@ -944,7 +956,7 @@ async def test_the_tool_returns_the_link_only_when_asked(monkeypatch):
     ] is True
     assert "link_withheld" not in payload, payload
     assert payload["price_readings"][0] == {
-        "off_state": 1, "toggle_on": 0, "toggle_off": 0
+        "toggles_off": 1, "toggles_on": 0
     }, payload
 
 
@@ -955,12 +967,12 @@ async def test_the_tool_returns_the_link_only_when_asked(monkeypatch):
         {"permalinkToggle": "liked", "copyReacts": True},
         {"permalinkToggle": "unliked", "copyReacts": True},
     ],
-    ids=["feed_dialect", "permalink_liked_to_unliked", "permalink_unliked_to_liked"],
+    ids=["off_to_on_state_family", "unreact_to_off", "unmeasured_off_to_unreact"],
 )
 async def test_the_tool_refuses_when_the_press_moves_the_reaction_toggle(
     monkeypatch, config
 ):
-    """THE PRICE, SHOWN FAILING END TO END, in every dialect and direction:
+    """THE PRICE, SHOWN FAILING END TO END, in every family and direction:
     the copy press also flips the item's reaction toggle, as an outward act
     would. The tool's own reader must see it move and the verdict must
     refuse -- whatever the clipboard captured."""
@@ -979,61 +991,77 @@ async def test_the_tool_refuses_a_bad_id_with_no_load(monkeypatch):
 @pytest.mark.parametrize(
     ("config", "expected"),
     [
-        ({"permalinkToggle": "liked"}, {"off_state": 0, "toggle_on": 1, "toggle_off": 0}),
-        ({"permalinkToggle": "unliked"}, {"off_state": 0, "toggle_on": 0, "toggle_off": 1}),
-        ({"reactionControl": True}, {"off_state": 1, "toggle_on": 0, "toggle_off": 0}),
-        ({}, {"off_state": 0, "toggle_on": 0, "toggle_off": 0}),
+        ({"permalinkToggle": "liked"}, {"toggles_off": 0, "toggles_on": 1}),
+        ({"permalinkToggle": "unliked"}, {"toggles_off": 1, "toggles_on": 0}),
+        ({"reactionControl": True}, {"toggles_off": 1, "toggles_on": 0}),
+        ({}, {"toggles_off": 0, "toggles_on": 0}),
     ],
-    ids=["permalink_liked", "permalink_unliked", "feed_dialect", "no_toggle"],
+    ids=["unreact_on", "unmeasured_react_off", "state_family_off", "no_toggle"],
 )
-async def test_read_item_price_reads_each_dialect(config, expected):
+async def test_read_item_price_reads_each_label_family(config, expected):
     async with _open_fixture(config) as page:
         assert await share_link.read_item_price(page) == expected
 
 
-@pytest.mark.parametrize(
-    "surface_off_state", [0, True, "3", None], ids=["int", "bool", "string", "none"]
-)
-async def test_an_unread_counter_is_none_never_a_zero(monkeypatch, surface_off_state):
-    """A toggle count that raises, and an off_state that is not an int, both
-    read as None -- and a None prices nothing. Found by a plant that turned an
-    unread toggle into 0 and moved no test (Q4): the exception path had never
-    been driven."""
+async def test_a_price_that_did_not_read_refuses_before_any_click(monkeypatch):
+    """An unread count is not a zero: the reader answers None, and the module
+    refuses counters_unreadable before the trigger is pressed rather than
+    pressing and learning it after."""
     async def surface(page):
-        return {"off_state": surface_off_state}
+        return {"controls": 1, "off_state": 1, "unreact_controls": None,
+                "react_controls": 0}
 
     monkeypatch.setattr(share_link.dom, "read_reaction_surface", surface)
+    async with _open_fixture({"reactionControl": True}) as page:
+        verdict = await share_link.copy_own_post_link(
+            page,
+            activity_digits=ACTIVITY_DIGITS,
+            read_counters=lambda: share_link.read_item_price(page),
+        )
+        assert verdict.get("refused") == "counters_unreadable", verdict
+        assert await _trigger_expanded(page) == "false"
+        assert await _clipboard_box(page) is None
 
-    class _Unreadable:
-        async def count(self):
-            raise RuntimeError("the page went away")
 
-    class _Page:
-        def locator(self, selector):
-            return _Unreadable()
+class _CountsRaiseFor:
+    """A page whose locator count raises for selectors carrying ``prefix``
+    and answers ``value`` for every other selector."""
 
-    reading = await share_link.read_item_price(_Page())
-    # ONLY a true int survives; a bool is an int to Python and not a count.
-    expected_off = surface_off_state if type(surface_off_state) is int else None
-    assert reading == {
-        "off_state": expected_off, "toggle_on": None, "toggle_off": None
-    }, reading
-    assert share_link.price_can_move(reading) is False
+    def __init__(self, prefix, value=0):
+        self.prefix = prefix
+        self.value = value
+
+    def locator(self, selector):
+        page = self
+
+        class _Locator:
+            async def count(self_inner):
+                if page.prefix in selector:
+                    raise RuntimeError("the page went away")
+                return page.value
+
+            def nth(self_inner, _index):
+                return self_inner
+
+            async def get_attribute(self_inner, _name):
+                return None
+
+        return _Locator()
+
+    def get_by_role(self, *args, **kwargs):
+        return self.locator("role")
 
 
 @pytest.mark.parametrize(
-    ("reading", "can_move"),
-    [
-        ({"off_state": 0, "toggle_on": 1, "toggle_off": 0}, True),
-        ({"off_state": 0, "toggle_on": 0, "toggle_off": 1}, True),
-        ({"off_state": 3, "toggle_on": 0, "toggle_off": 0}, True),
-        ({"off_state": 0, "toggle_on": 0, "toggle_off": 0}, False),
-        ({"off_state": None, "toggle_on": 1, "toggle_off": 0}, False),
-        ({"off_state": 0, "toggle_on": True, "toggle_off": 0}, False),
-        ({"toggle_on": 1, "toggle_off": 0}, False),
-        (None, False),
-    ],
-    ids=["liked", "unliked", "feed", "all_zero", "one_unread", "a_bool", "a_counter_missing", "none"],
+    "prefix", ["Unreact ", "React "], ids=["unreact_unread", "react_unread"]
 )
-def test_price_can_move(reading, can_move):
-    assert share_link.price_can_move(reading) is can_move
+async def test_the_dom_reader_leaves_an_unread_family_count_none_and_the_price_none(prefix):
+    """THE EXCEPTION PATH OF THE SHIPPED READER, driven: a family count that
+    raises stays None -- never a zero -- and a None anywhere makes both
+    toggle counts None, so no price is read off it."""
+    reading = await share_link.dom.read_reaction_surface(_CountsRaiseFor(prefix))
+    key = "unreact_controls" if prefix == "Unreact " else "react_controls"
+    assert reading[key] is None, reading
+    assert share_link.dom.reaction_toggle_counts(reading) == {
+        "toggles_off": None, "toggles_on": None
+    }
