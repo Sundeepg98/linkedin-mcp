@@ -65,6 +65,20 @@ DELIBERATELY_UNWIRED: dict[str, str] = {
         "obvious. Reached by scripts/_probe_messaging_menu_enumeration.py and "
         "tests/test_menus.py, which is the intended shape."
     ),
+    "outward_classes": (
+        "A RECORD, NOT A CAPABILITY -- ruled by its author 2026-09-24 (lane "
+        "L8). It holds the three PERMANENTLY_FORBIDDEN entries that "
+        "OUTWARD-CLASSES-BUILT-BEHIND-GRANTS retired, verbatim, so the census "
+        "families that cite them still resolve, and one record per act that "
+        "ruling built -- BUILT, NEEDS-CAPTURE with the exact capture, or "
+        "BLOCKED -- held by tests/test_outward_classes.py against "
+        "writes.PERFORMABLE and the census in both directions. No function "
+        "in it touches a page and it answers no question he calls a tool "
+        "for; wiring it into the package would buy an import and nothing "
+        "else. Its readers are the tests, the census cells and exclusion "
+        "families that cite it, and the next lane that builds a "
+        "NEEDS-CAPTURE act from its record."
+    ),
     "feed": (
         "A CAPABILITY WITH A MISSING COMPANION, and the gap is mechanical "
         "rather than a ruling. It answers an operator-facing question -- who "
