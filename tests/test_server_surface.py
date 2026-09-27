@@ -2150,7 +2150,11 @@ async def test_server_info_reports_irreversibility_before_a_caller_commits(
     performable and it carries ``irreversible=True`` -- not because its
     reversibility was measured and came back no, but because it was never
     measurable at all and withdrawing is permanently forbidden here in either
-    direction. So this server can now do something it cannot undo.
+    direction. So this server can now do something it cannot undo. (That
+    ground was restated 2026-09-24: the refusal it names was retired by
+    OUTWARD-CLASSES-BUILT-BEHIND-GRANTS, and what keeps an application
+    irreversible now is LinkedIn's own Help Center, a512388 -- no withdraw of
+    a submitted LinkedIn application exists to build.)
 
     The old docstring's argument inverted with it and is worth stating in its
     new form rather than deleting. It ran: an empty

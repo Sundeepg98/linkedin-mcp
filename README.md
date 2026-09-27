@@ -425,7 +425,10 @@ but for reasons that were measured:
    would be filled in or pressed. This is the same standard `unsave_job` is
    held to, applied to the action that deserves it most.
 2. **An application cannot be undone from here**, at any confirm level, in any
-   circumstances. Withdrawing is permanently forbidden.
+   circumstances -- and since 2026-09-24 the reason is LinkedIn's: its Help
+   Center (a512388) says an application submitted through LinkedIn cannot be
+   withdrawn. This line used to say "Withdrawing is permanently forbidden";
+   that refusal was retired by OUTWARD-CLASSES-BUILT-BEHIND-GRANTS.
 3. **The off-site half is not this server's to do at all**, however good a
    capture got. Driving somebody else's form, on somebody else's domain, under
    their terms, is a different piece of software.

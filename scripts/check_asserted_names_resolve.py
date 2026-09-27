@@ -46,6 +46,11 @@ author's own words, in one of a small number of ways:
     "**This is a SPECIFICATION, not a build.**"
         _audit/2026-09-05-leave-group-writespec.md:7 -- the document whose
         field table reads "| `tool_name` | `linkedin_leave_group` |"
+        (RETIRED AS A MARK 2026-09-24: lane L8 BUILT that tool, so the name
+        resolves in the tree and the spec document needs no mark. It was the
+        mark's only example in the corpus, and a suppressor with no example is
+        untested width, so the document-scoped spec mark was deleted from this
+        guard rather than kept alive on nothing.)
 
     "So a tool named `linkedin_read_inbox` WOULD not return an inbox"
         _audit/2026-08-25-cannot-vs-will-not.md:234 -- a modal
@@ -472,12 +477,16 @@ _DISCLOSES = re.compile(
     re.IGNORECASE,
 )
 
-#: DOCUMENT-scoped: the document declaring itself a spec for an unbuilt thing.
-_SPEC_DOC = re.compile(
-    r"this\s+is\s+a\s+specification,?\s+not\s+a\s+build"
-    r"|a\s+SPECIFICATION,?\s+not\s+a\s+build",
-    re.IGNORECASE,
-)
+#: DOCUMENT-scoped spec mark: DELETED 2026-09-24 (lane L8). It excused a TOOL
+#: name inside a document declaring itself "a SPECIFICATION, not a build", and
+#: its one corpus example was `linkedin_leave_group` in
+#: `_audit/2026-09-05-leave-group-writespec.md`. That tool was built the same
+#: day, so the name resolves and the example is gone; the control
+#: `test_every_marker_class_fires_on_the_real_corpus` then showed the mark
+#: matching nothing in the whole corpus. A suppressor that matches nothing is
+#: width nobody has seen excuse the right thing, so it went, and a future spec
+#: document naming an unbuilt tool is marked the way every other proposal in
+#: this corpus is -- or it is convicted.
 
 #: TABLE-scoped: a markdown table whose header says its names are proposals.
 #: `_audit/2026-09-20-the-decides.md:187` -- "successor blocker (proposed)".
@@ -678,14 +687,11 @@ def classify(
         inside_fence = fenced(lines)
         heads, cols = table_headers(lines)
         blob = "\n".join(lines)
-        # A document DECLARES itself a specification up front, the way
-        # `2026-09-05-leave-group-writespec.md` does at line 7. Searching the
-        # whole body instead let THIS wave's own report -- which QUOTES that
-        # sentence as evidence at line 55 -- register as a spec document and
-        # silently excuse every tool name in it. Scoping the self-declaration
-        # to the header is the difference between a document saying what it is
-        # and a document quoting one that did.
-        doc_is_spec = bool(_SPEC_DOC.search("\n".join(lines[:40])))
+        # THE DOCUMENT-SCOPED SPEC MARK WAS READ HERE UNTIL 2026-09-24, and
+        # deleted with its only example -- see the note where `_SPEC_DOC` was
+        # defined. Its scoping lesson stays true of any document-scoped mark:
+        # a self-declaration is read from a document's HEADER, because a body
+        # search let a report that QUOTED a spec document register as one.
         doc_cache: dict[str, str | None] = {}
 
         for n, line in enumerate(lines, 1):
@@ -723,9 +729,7 @@ def classify(
             proposal_table = bool(header and _PROPOSAL_HEADER.search(header))
 
             for kind, name in dict.fromkeys(found):
-                if kind == "TOOL" and doc_is_spec:
-                    verdict = "MARKED-SPEC-DOC"
-                elif modal:
+                if modal:
                     verdict = "MARKED-HYPOTHETICAL"
                 elif mints:
                     verdict = "MARKED-PROPOSAL"

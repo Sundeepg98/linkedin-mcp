@@ -39,9 +39,10 @@ read.
 
 **The census footprint of the three keys, measured with the shipped walk**
 (`scripts/check_write_classes.walk` joined to `exclusion-basis.tsv`):
-- 30 rows EXCLUDED-RULED under the two surviving families of those keys
-  (`PF-DELETE-OR-WITHDRAW` alone or with another family: 27;
-  `NO-THIRD-PARTY-PROFILE-LOAD+PF-ENDORSE-OR-RECOMMEND`: 3). `PF-REPOST-OR-SHARE`
+- 30 rows EXCLUDED-RULED whose exclusion family (in
+  `scripts/check_exclusion_basis.py`) is one of those keys' two live families:
+  27 in the destruction family, alone or first, and 3 in the family that pairs
+  the third-party-profile rule with the endorsement key. The repost family
   was already EMPTIED by lane R (`M C20`, `M C21` returned 2026-09-23).
 - About 35 GAP rows whose cells cite one of the keys: the recommendation rows
   (`P F2`-`F9`, `N 119`-`128`) whose blocker NAMED `endorse_or_recommend`, the
@@ -250,10 +251,10 @@ second written ground stays on that ground alone. Nothing here re-pins a count
 
 ### 5.1 The decisions, row by row
 
-Of the 30 EXCLUDED-RULED rows filed under the retired keys (27 under
-`PF-DELETE-OR-WITHDRAW`, alone or first; 3 under
-`NO-THIRD-PARTY-PROFILE-LOAD+PF-ENDORSE-OR-RECOMMEND`), **29 return to GAP and
-one stays**:
+Of the 30 EXCLUDED-RULED rows whose exclusion family rests on a retired key
+(27 in the destruction family, alone or first; 3 in the family pairing the
+third-party-profile rule with the endorsement key), **29 return to GAP and one
+stays**:
 
 * **`P N28` (close the account) STAYS EXCLUDED-RULED on ground one alone** --
   `/close-accounts` entered the forbidden tuple on 2026-08-31 aimed at exactly
