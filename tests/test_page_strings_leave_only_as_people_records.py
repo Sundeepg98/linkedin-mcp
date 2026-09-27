@@ -286,6 +286,88 @@ def test_the_adopters_other_readings_are_the_declared_legacy_paths():
     assert outside and all(path.startswith("$.insights.") for path in outside), outside
 
 
+class _SectionText:
+    """One analytics section: a heading and the lines under it."""
+
+    def __init__(self, heading: str, lines: list[str]) -> None:
+        self.heading = heading
+        self.text = "\n".join([heading, *lines])
+
+    async def inner_text(self, **kwargs: Any) -> str:
+        return self.heading
+
+    def locator(self, selector: Any, **kwargs: Any) -> "_SectionBody":
+        return _SectionBody(self.text)
+
+
+class _SectionBody:
+    def __init__(self, text: str) -> None:
+        self.text = text
+
+    async def inner_text(self, **kwargs: Any) -> str:
+        return self.text
+
+    def locator(self, selector: Any, **kwargs: Any) -> "_SectionBody":
+        return self
+
+
+class _Sections:
+    def __init__(self, sections: list[_SectionText]) -> None:
+        self.sections = sections
+
+    def locator(self, selector: Any, **kwargs: Any) -> "_Sections":
+        return self
+
+    async def count(self) -> int:
+        return len(self.sections)
+
+    def nth(self, index: int) -> _SectionText:
+        return self.sections[index]
+
+
+#: The revealed analytics, planted: LinkedIn's aggregates about his viewers --
+#: a top company, a location, an industry -- not people.
+_PLANTED_SECTIONS = [
+    _SectionText("Highlights", [
+        "Example City", "Top location", PLANT + " Consulting", "Top company",
+    ]),
+    _SectionText("Details", ["Companies", PLANT + " Consulting (40%)"]),
+]
+
+
+class _ViewerListWithSections(_ViewerListPage):
+    def locator(self, selector: Any, *args: Any, **kwargs: Any) -> Any:
+        if selector == "main":
+            self._count()
+            return _Sections(_PLANTED_SECTIONS)
+        return super().locator(selector, *args, **kwargs)
+
+
+def test_the_more_analytics_reading_is_the_second_declared_legacy_path(monkeypatch):
+    """FOUND BY LANE G'S COLD VERIFICATION, 2026-09-27: with
+    ``show_more_analytics=True`` the plant also left under ``more_analytics``,
+    a path neither guard drives (the tool baseline records the default call,
+    and the reader's own baseline entry never matched a heading). Like
+    ``insights``, it is LinkedIn's aggregates about his viewers, not people,
+    and it is pinned the same way: in that mode the plant may leave a record
+    under these two subtrees and nowhere else. The press is stood in for."""
+
+    async def pressed(page: Any, **kwargs: Any) -> dict[str, Any]:
+        return {"pressed": True, "verdict": "permitted", "why": "stood in for the decided press"}
+
+    from linkedin_server import reveal
+
+    monkeypatch.setattr(reveal, "reveal", pressed)
+    envelope = _drive_who_viewed_me(
+        _ViewerListWithSections([_NAMED_ROW], insights=_CLEAN_INSIGHTS),
+        show_more_analytics=True,
+    )
+    outside, records = carries_the_plant_outside_records(envelope)
+    assert records == 1, envelope
+    assert any(path.startswith("$.more_analytics.") for path in outside), outside
+    assert all(path.startswith(("$.insights.", "$.more_analytics.")) for path in outside), outside
+
+
 def test_the_switched_view_is_bounded_by_the_callers_limit(monkeypatch):
     """BOUNDED (mitigation 4): viewers_when_applied was every parsed row, up to
     three times the limit. The published rows are now cut to the limit."""
@@ -496,6 +578,34 @@ def test_the_overview_returns_each_label_as_a_person_record(messaging_opened):
     for row in rows:
         assert isinstance(people_data.as_record(row["with"]), people_data.Person)
         assert "name" not in row
+
+
+class _ConversationPageWithAControl(_ConversationPage):
+    """The same page, drawing a control whose label carries a filter word and
+    the plant -- the shape lane G's cold verification used (2026-09-27)."""
+
+    async def content(self) -> str:
+        return await super().content() + (
+            '<button aria-label="Other ' + PLANT + '">x</button>'
+        )
+
+
+def test_open_messaging_s_filter_reading_is_its_declared_legacy_path():
+    """FOUND BY LANE G'S COLD VERIFICATION, 2026-09-27: open_messaging
+    publishes the filter controls it finds -- each one's accessible name and
+    href -- so a control whose label carries a filter word carries its label
+    out, outside any record, with or without ``include_names``. The pills are
+    LinkedIn's interface, not people, and this is pinned like the viewer
+    tool's insights: the plant may leave a record under ``filters`` and
+    nowhere else. (The same finding's other half -- that asking for a filter
+    can click a control that is not a pill -- is not this lane's to change.)"""
+    envelope = _drive(
+        server_module.linkedin_open_messaging, _ConversationPageWithAControl(),
+        include_names=True,
+    )
+    outside, records = carries_the_plant_outside_records(envelope)
+    assert records == 2, envelope
+    assert outside and all(path.startswith("$.filters.") for path in outside), outside
 
 
 def test_a_list_that_published_the_raw_label_is_convicted(monkeypatch):
