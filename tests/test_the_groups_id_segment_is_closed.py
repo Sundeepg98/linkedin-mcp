@@ -85,6 +85,21 @@ ADMITTED = (
     f"{BASE}/groups/discover/",
 )
 
+#: MOVED OUT OF ``MUST_STAY_REFUSED`` ON 2026-09-24, NOT DELETED. Admitted by
+#: a line outside the groups family; this file's business with it is that
+#: neither groups line carries it.
+ADMITTED_BY_ANOTHER_LINE_SINCE = {
+    "search-groups": f"{BASE}/search/results/groups/?keywords=x",
+    # 2026-09-24, MEMBER-ROSTERS-AS-BOUNDED-READS: the roster's own line.
+    "roster": f"{BASE}/groups/{ID}/members/",
+}
+
+#: The prefix each line in ADMITTED_BY_ANOTHER_LINE_SINCE must be carried by.
+CARRIER_PREFIX = {
+    "search-groups": r"^https://www\.linkedin\.com/search/results/",
+    "roster": r"^https://www\.linkedin\.com/groups/[0-9]{1,20}/members/",
+}
+
 #: THE DURABLE HALF. Every one of these was refused before the admission and
 #: must be refused after it. Slugs use SANCTIONED SYNTHETIC TOKENS -- these are
 #: invented strings, and no group anybody belongs to is named here.
@@ -105,11 +120,14 @@ MUST_STAY_REFUSED = {
     # A urn is the other name-bearing shape an id-looking segment can wear.
     "urn": f"{BASE}/groups/urn:li:group:{ID}/",
     # ------------------------------------------------------- the deep paths
-    # THE MEMBER ROSTER, census row N 165, put out of scope BY NAME. It is a
-    # list of people who did not choose to be enumerated by him. It carries no
-    # forbidden substring, so the ONLY thing refusing it is the anchor on the
-    # pattern beside it -- which is exactly why it is pinned here.
-    "roster": f"{BASE}/groups/{ID}/members/",
+    # THE MEMBER ROSTER, census row N 165, STOOD HERE UNTIL 2026-09-24 -- "put
+    # out of scope BY NAME ... a list of people who did not choose to be
+    # enumerated by him". That refusal was an argument and not a ruling
+    # (D3-UNREGISTERED-REFUSAL-IS-NOT-A-RULING), and MEMBER-ROSTERS-AS-
+    # BOUNDED-READS weighed it the other way: the roster is admitted by its
+    # OWN line, numeric and query-free. It moved to
+    # ADMITTED_BY_ANOTHER_LINE_SINCE below, which pins that neither groups
+    # line reaches it -- the part of this entry that was this file's business.
     "requests-queue": f"{BASE}/groups/{ID}/requests/",
     "about": f"{BASE}/groups/{ID}/about/",
     "manage": f"{BASE}/groups/{ID}/manage/",
@@ -117,7 +135,12 @@ MUST_STAY_REFUSED = {
     "invite": f"{BASE}/groups/{ID}/invite/",
     # Group search belongs to SEARCH-RESULTS-SURFACE and is not this
     # admission's to inherit.
-    "search-groups": f"{BASE}/search/results/groups/?keywords=x",
+    #
+    # ``search-groups`` (``/search/results/groups/?keywords=x``) STOOD HERE
+    # UNTIL 2026-09-24 and was admitted by exactly that route -- on the SEARCH
+    # line, by D2-SEARCH-VERTICALS-WIDENED, not by either groups line. It
+    # moved to ADMITTED_BY_ANOTHER_LINE_SINCE below, which pins that neither
+    # groups line reaches it.
     "mynetwork-groups": f"{BASE}/mynetwork/groups/",
     # ----------------------------------------------------------- the query
     # Neither pattern takes one. Nothing builds a query on these addresses, so
@@ -226,6 +249,20 @@ def test_the_addresses_the_ruling_bought(url: str) -> None:
     assert readonly.is_read_url(url) is True
 
 
+@pytest.mark.parametrize("name", sorted(ADMITTED_BY_ANOTHER_LINE_SINCE))
+def test_what_another_line_admitted_since_is_not_one_of_the_two_groups_lines(
+    name: str,
+) -> None:
+    """Admitted, by exactly one line, and that line is neither the id line nor
+    the discover line this file pins -- the roster has its own, as the search
+    vertical has the search line."""
+    url = ADMITTED_BY_ANOTHER_LINE_SINCE[name]
+    assert readonly.is_read_url(url) is True
+    carriers = [p for p in readonly._ALLOWED_URL_PATTERNS if p.match(url)]
+    assert len(carriers) == 1, [p.pattern for p in carriers]
+    assert carriers[0].pattern.startswith(CARRIER_PREFIX[name]), carriers[0].pattern
+
+
 @pytest.mark.parametrize("segment", sorted(SEGMENTS))
 def test_the_two_gates_agree(segment: str) -> None:
     """THE COUPLING, AND THE MOST IMPORTANT ASSERTION IN THIS FILE.
@@ -298,8 +335,10 @@ def test_the_control_is_shown_failing_under_a_wider_segment(wider: str) -> None:
 
     # AND THE BOUNDARY IS BACK. A control that widens the shipped tuple has to
     # prove it put it back, or it is the most dangerous test in the file.
+    # (The roster was the probe here until it was admitted, 2026-09-24; the
+    # requests queue, still refused, stands in.)
     assert readonly._ALLOWED_URL_PATTERNS is original
-    assert readonly.is_read_url(MUST_STAY_REFUSED["roster"]) is False
+    assert readonly.is_read_url(MUST_STAY_REFUSED["requests-queue"]) is False
 
 
 def test_discover_is_opened_as_a_name_not_as_an_identifier() -> None:
@@ -384,28 +423,32 @@ def test_the_digit_spellings_are_really_non_ascii() -> None:
 
 
 def test_the_roster_is_still_refused_by_exactly_one_gate() -> None:
-    """THE COUNT IS THE POINT, and the admission did not change it.
+    """THE COUNT IS THE POINT -- AND SINCE 2026-09-24 IT COUNTS AN ADMISSION.
 
-    ``test_readonly.py`` records this for the root entry: the member roster
-    carries NO forbidden substring, so the only thing standing between this
-    server and a list of people who did not choose to be enumerated by him is
-    the anchoring on the pattern beside it.
-
-    **The admission moved that anchor** -- from the bare root to a closed
-    numeric segment -- so the sentence is re-measured here against the pattern
-    that actually holds the line now, rather than inherited.
+    **THE NAME IS KEPT AND THE CLAIM IS INVERTED.** ``test_readonly.py`` cites
+    this function by name, and a renamed test is a citation that rots into a
+    plausible wrong answer. Until 2026-09-24 it asserted that the roster
+    carried NO forbidden substring, so the anchoring of the groups lines was
+    the ONE gate refusing it. ``MEMBER-ROSTERS-AS-BOUNDED-READS`` then
+    admitted the roster by its own line, so the same measurement now reads
+    the other way: still no forbidden substring (so the denylist neither
+    refuses it nor would have to be narrowed), and exactly ONE allowlist line
+    admits it -- the roster line, never a groups-id line. Removing that one
+    line is the whole rollback.
     """
-    roster = MUST_STAY_REFUSED["roster"]
+    roster = ADMITTED_BY_ANOTHER_LINE_SINCE["roster"]
     substrings = [
         substring
         for substring in readonly._FORBIDDEN_URL_SUBSTRINGS
         if substring in roster.lower()
     ]
     assert substrings == [], (
-        "a forbidden substring now refuses the roster. That is not a "
-        "regression, but this test's claim -- refused by ONE gate -- has "
-        "become false and the comment on the admission must be corrected."
+        "a forbidden substring now names the roster, so the admission is "
+        "refused by gate one and the roster line admits nothing"
     )
-    assert not any(
-        pattern.match(roster) for pattern in readonly._ALLOWED_URL_PATTERNS
-    )
+    carriers = [p for p in readonly._ALLOWED_URL_PATTERNS if p.match(roster)]
+    assert len(carriers) == 1, [p.pattern for p in carriers]
+    assert carriers[0].pattern.endswith("/members/?$"), carriers[0].pattern
+    survivors = tuple(p for p in readonly._ALLOWED_URL_PATTERNS
+                      if p is not carriers[0])
+    assert not any(p.match(roster) for p in survivors)

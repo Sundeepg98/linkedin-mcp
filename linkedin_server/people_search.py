@@ -318,6 +318,46 @@ def _values(argument: str, kind: str, most: int, raw: Any) -> dict[str, Any]:
     return {"ok": True, "values": values}
 
 
+def validated_keywords(keywords: Any) -> dict[str, Any]:
+    """A search's keywords, stripped, or the refusal :func:`compose` returns.
+
+    ``{"ok": True, "text": <str>}`` -- an EMPTY ``text`` means no keyword was
+    given, which is not an error here -- or a refusal in :func:`_refused`'s
+    shape. Split out of :func:`compose` on 2026-09-24, unchanged, so that
+    ``search_verticals.compose`` validates a keyword by the SAME code rather
+    than by a copy of it that could drift.
+
+    PURE, and it never raises.
+    """
+    text = str(keywords or "").strip()
+    if not text:
+        return {"ok": True, "text": ""}
+    if len(text) > MAX_KEYWORD_CHARS:
+        return _refused(
+            "keywords",
+            "keywords_too_long",
+            text,
+            f"keywords run past {MAX_KEYWORD_CHARS} characters -- a budget "
+            "on this server, not a LinkedIn limit anybody here measured. "
+            "A search is refused rather than truncated, because a "
+            "truncated search is a different search.",
+        )
+    # CONTROL CHARACTERS ONLY (Unicode category Cc), and deliberately not
+    # ``str.isprintable()``: that is False for a no-break space and for
+    # the zero-width joiners several Indian scripts need inside a word, so
+    # it would refuse ordinary names typed in those scripts.
+    if any(unicodedata.category(ch) == "Cc" for ch in text):
+        return _refused(
+            "keywords",
+            "keywords_carry_a_control_character",
+            text,
+            "keywords carry a control character (a newline, a tab, ...). "
+            "A search box holds one line of text, and a control character "
+            "inside an address is how an anchored pattern is talked past.",
+        )
+    return {"ok": True, "text": text}
+
+
 def compose(
     *,
     keywords: Any = "",
@@ -351,31 +391,11 @@ def compose(
     pairs: list[tuple[str, str]] = []
     applied: dict[str, int] = {}
 
-    text = str(keywords or "").strip()
+    checked = validated_keywords(keywords)
+    if not checked.get("ok"):
+        return checked
+    text = checked["text"]
     if text:
-        if len(text) > MAX_KEYWORD_CHARS:
-            return _refused(
-                "keywords",
-                "keywords_too_long",
-                text,
-                f"keywords run past {MAX_KEYWORD_CHARS} characters -- a budget "
-                "on this server, not a LinkedIn limit anybody here measured. "
-                "A search is refused rather than truncated, because a "
-                "truncated search is a different search.",
-            )
-        # CONTROL CHARACTERS ONLY (Unicode category Cc), and deliberately not
-        # ``str.isprintable()``: that is False for a no-break space and for
-        # the zero-width joiners several Indian scripts need inside a word, so
-        # it would refuse ordinary names typed in those scripts.
-        if any(unicodedata.category(ch) == "Cc" for ch in text):
-            return _refused(
-                "keywords",
-                "keywords_carry_a_control_character",
-                text,
-                "keywords carry a control character (a newline, a tab, ...). "
-                "A search box holds one line of text, and a control character "
-                "inside an address is how an anchored pattern is talked past.",
-            )
         pairs.append((KEYWORDS_KEY, text))
     applied["keywords"] = 1 if text else 0
 

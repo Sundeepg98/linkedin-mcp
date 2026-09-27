@@ -1096,8 +1096,37 @@ PINNED = {
     #: boundary did not move.
     #: 41 / 46 / 1 / 13 / 2 SINCE LANE L5'S MERGE OF MASTER 530227e (sum
     #: 103, `gap_read`): lane Y2's admitted reads, less `M M49`.
-    "b3_admitted": 41,
-    "b3_refused": 46,
+    #: 43 / 35 / 1 / 13 / 2 SINCE LANE S'S FOLLOW-UP, ITEM 1 (2026-09-24): THE
+    #: BOUNDARY MOVED. `D2-SEARCH-VERTICALS-WIDENED` widened the search line
+    #: to four closed words, and the three rows whose recorded page is one of
+    #: the new words -- `N 104` (companies), `N 161` (groups), `N 179` (events)
+    #: -- went REFUSED -> ADMITTED, each gated MEASURE (no capture exists).
+    #: No row entered or left bucket 3 and no state moved; `M C70` stays
+    #: REFUSED on its content-vertical address, its groups spelling now an
+    #: admitted also-driven line.
+    #: 49 / 29 / 1 / 13 / 2 SINCE ITEM 2 OF THE SAME FOLLOW-UP: THE BOUNDARY
+    #: MOVED AGAIN. `MEMBER-ROSTERS-AS-BOUNDED-READS` put four rosters on lines
+    #: of their own, and the six rows whose recorded page is one of them went
+    #: REFUSED -> ADMITTED, each gated MEASURE: `N 165` and `N 177` (a group's
+    #: members), `N 188` (an event's attendees), `N 102` (a company's People
+    #: tab), `N 99` and `N 100` (a school's). `N 189` stays REFUSED on its
+    #: filtered spelling -- the roster line takes no query -- and `N 178` on
+    #: its third-party profile. No row entered or left bucket 3; no state
+    #: moved.
+    #: THE GATES THEN MOVED AGAIN, AND NO FIGURE HERE DID: item 3 of the same
+    #: follow-up (the WHO/WHICH rule, row by row) re-gated six of the rows
+    #: above MEASURE -> RULING -- `N 161`, `N 179`, `N 165`, `N 177`, `N 188`,
+    #: `N 100`, whose payload is WHO or WHICH -- so "each gated MEASURE" is
+    #: that commit's reading, not HEAD's. Class counts do not see a gate.
+    #: 51 / 37 AT LANE S'S FOLLOW-UP MERGE OF MASTER 1902fcb (2026-09-24),
+    #: MEASURED on the merged tree and not summed: master stood at 42 / 46
+    #: (the live lane's three ADMITTED rows gone, and lanes L7 and Y2's rows
+    #: in), and this lane's nine REFUSED -> ADMITTED lines -- the three D2
+    #: verticals and the six roster rows above -- move it by +9 / -9.
+    #: 50 AT THE ORCHESTRATOR'S MERGE OF LANE S INTO MASTER 96c1165 (2026-09-27),
+    #: MEASURED: lane L5's merge had moved `M M49` out of bucket 3 (COVERED-UNFIRED).
+    "b3_admitted": 50,
+    "b3_refused": 37,
     "b3_no_address": 1,
     "b3_needs_session": 13,
     "b3_undetermined": 2,
@@ -1132,11 +1161,20 @@ PINNED = {
     #:       `linkedin_open_messaging` and `linkedin_open_thread`. Left: `P K1`
     #:   4   at lane L5's merge of master 530227e: the two together --
     #:       `P K1`, `P S5`, `M M53` and `N 195`
+    #:   8   at lane S's follow-up integration, 2026-09-24: NAMES-AT-RUNTIME
+    #:       (the operator's, 08:11) answered the question `N 79`, `N 172` and
+    #:       `N 194` were gated RULING on. Each now waits on a name-returning
+    #:       reader held to PEOPLE-DATA-MITIGATIONS, and their page is
+    #:       captured (the live lane's session 1), so each is re-gated READER.
+    #:       The six follow-up rows re-gated the same day went to MEASURE --
+    #:       no capture exists -- and are not in this count.
     #: The gates past the boundary are re-judged BY HAND when a ruling lands;
     #: what `ruling_problems` asks on every run is only that no row blocked on
     #: nothing sits on a page a hold binds.
     #: `_audit/2026-09-23-census-cleanup.md` items 6 and 7, sections 11-13.
-    "b3_blocked_on_nothing": 4,
+    #: 7 AT THE ORCHESTRATOR'S MERGE OF LANE S INTO MASTER 96c1165 (2026-09-27),
+    #: MEASURED: `M M49` left bucket 3 at lane L5's merge.
+    "b3_blocked_on_nothing": 7,
     #: BUCKET 1 BY WHAT HOLDS EACH ROW, DERIVED from the census and the
     #: holds in `scripts/ruling_holds.py`, BY THE STATUS OF THE HOLD: standing,
     #: relayed, pending, or none. They sum to `unfired`, and `PINNED_B1_ROWS`
@@ -1222,12 +1260,22 @@ PINNED = {
     #: a line -- directions R 7, W 28, R+W 3 (so 33 / 53 / 6), and of the ten
     #: with a read half ADMITTED 2 (`J 17`, `J 115`), REFUSED 7, NEEDS-SESSION
     #: 1 (`J 134`). 11 + 26 + 0 + 2 + 0 = 39 = 33 + 6.
+    #: 13 / 24 SINCE LANE S'S FOLLOW-UP, ITEM 2 (2026-09-24): THE BOUNDARY
+    #: MOVED. `MEMBER-ROSTERS-AS-BOUNDED-READS` put the company and school
+    #: People tabs on lines of their own, and the two jobs rows whose recorded
+    #: page is one of them went REFUSED -> ADMITTED, gated MEASURE: `J 108`
+    #: (the company People tab) and `J 112` (a school's alumni tab). No row
+    #: left the table and no state moved. 13 + 24 + 0 + 2 + 0 = 39.
+    #: 107 / 41 / 58 / 8 AND 13 / 34 AT LANE S'S FOLLOW-UP MERGE OF MASTER
+    #: 1902fcb, MEASURED on the merged tree: master's lanes had grown the
+    #: table to 107 rows (11 admitted, 36 refused), and this lane's two
+    #: People-tab rows move it by +2 / -2. 13 + 34 + 0 + 2 + 0 = 49 = 41 + 8.
     "jobs_gap": 107,
     "jobs_dir_r": 41,
     "jobs_dir_w": 58,
     "jobs_dir_rw": 8,
-    "jobs_admitted": 11,
-    "jobs_refused": 36,
+    "jobs_admitted": 13,
+    "jobs_refused": 34,
     "jobs_no_address": 0,
     "jobs_needs_session": 2,
     "jobs_undetermined": 0,

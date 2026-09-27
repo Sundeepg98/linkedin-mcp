@@ -1,5 +1,16 @@
 """THE REVERT PATH FOR THE SEARCH-RESULTS ADMISSION. **THE PATTERN HAS LANDED.**
 
+**INVERTED A SECOND TIME 2026-09-24, THE SAME WAY.** `D2-SEARCH-VERTICALS-
+WIDENED` widened the one search line to four closed words,
+`(people|companies|groups|events)`, which is the route the paragraph "WHY ONLY
+PEOPLE" below names for groups and events -- a request to widen, with its own
+blast radius. Three spellings left `_STILL_REFUSED` for `_ADMITTED_BY_D2`,
+spelled exactly as they were; `all` and `content` stay refused (D2 chose four
+words, not six), and every section below still runs over the whole surface.
+The one line is still the whole revert: its people-only spelling puts the three
+back. The measured candidate the shipped line must equal is now S2, read off
+the probe that measured it rather than retyped.
+
 **INVERTED 2026-09-20, WHICH IS THIS FILE DOING ITS JOB.** It was committed
 green while nothing was admitted, went red the moment the pattern landed, and
 is rewritten here in that same commit -- entries the pattern now admits assert
@@ -68,6 +79,7 @@ one-character placeholder keyword.
 
 from __future__ import annotations
 
+import ast
 import pathlib
 import re
 
@@ -96,28 +108,45 @@ _ADMITTED_NOW: tuple[str, ...] = (
     ),
 )
 
-#: **THE DURABLE HALF.** Five verticals the admission did NOT buy. Each is its
-#: own third-party-dense surface and each needs its own blast radius, so a
-#: green run here is the statement that the admission stayed the size it was
-#: ruled at.
-_STILL_REFUSED: tuple[str, ...] = (
-    "https://www.linkedin.com/search/results/all/?keywords=x",
+#: **THE SECOND INVERSION, 2026-09-24.** These three stood in `_STILL_REFUSED`
+#: below, spelled exactly so, until `D2-SEARCH-VERTICALS-WIDENED` widened the
+#: same line to four closed words. They are admitted by THAT line and no other.
+_ADMITTED_BY_D2: tuple[str, ...] = (
     "https://www.linkedin.com/search/results/companies/?keywords=x",
     "https://www.linkedin.com/search/results/groups/?keywords=x",
     "https://www.linkedin.com/search/results/events/?keywords=x",
+)
+
+#: Everything the one search line admits today.
+_ADMITTED_BY_THE_LINE: tuple[str, ...] = _ADMITTED_NOW + _ADMITTED_BY_D2
+
+#: **THE DURABLE HALF.** Verticals the admission did NOT buy -- five until
+#: 2026-09-24, two since. Each is its own third-party-dense surface and each
+#: needs its own blast radius, so a green run here is the statement that the
+#: admission stayed the size it was ruled at.
+_STILL_REFUSED: tuple[str, ...] = (
+    "https://www.linkedin.com/search/results/all/?keywords=x",
     "https://www.linkedin.com/search/results/content/?keywords=%23hiring",
 )
 
 #: Every spelling the rows named, on both sides of the line. Used where a
 #: claim is about the SURFACE rather than about one side of it.
-_SEARCH_RESULTS_URLS: tuple[str, ...] = _ADMITTED_NOW + _STILL_REFUSED
+_SEARCH_RESULTS_URLS: tuple[str, ...] = _ADMITTED_BY_THE_LINE + _STILL_REFUSED
 
 #: The candidate the pre-admission wave measured. Carried here ONLY so the
 #: monkeypatched test below can show the refusal above is one pattern away
 #: from lifting. It is NOT installed on disk by this file or any other.
+#: It was the shipped line from 2026-09-20 to 2026-09-24.
 _CANDIDATE_NARROW = (
     r"^https://www\.linkedin\.com/search/results/people/?(\?[^#]*)?$"
 )
+
+#: THE PROBE THAT MEASURED THE SHIPPED LINE, and the name it measured it under.
+#: The candidate is READ from the probe rather than retyped here, so a line
+#: that drifted from the measured string by one character fails below.
+_PROBE = (pathlib.Path(__file__).resolve().parents[1] / "scripts"
+          / "_probe_search_admission_blast_radius.py")
+_D2_CANDIDATE_NAME = "S2-four-verticals"
 
 #: The shape condition 2 forbids, carried for the same reason: to show, rather
 #: than to argue, what a family wildcard reaches that the narrow one does not.
@@ -170,9 +199,26 @@ def test_the_people_vertical_is_now_admitted():
         )
 
 
+def test_the_three_d2_verticals_are_now_admitted():
+    """THE SECOND INVERTED HALF. These three asserted refusal until 2026-09-24,
+    in `test_the_other_five_verticals_are_still_refused` below."""
+    for url in _ADMITTED_BY_D2:
+        assert not _refused(url), (
+            f"a D2 vertical is refused again: {url!r}. Either the widening was "
+            "reverted -- in which case this tuple moves back into "
+            "_STILL_REFUSED in that same commit -- or the line was edited and "
+            "no longer matches the ruled spelling."
+        )
+
+
 def test_the_other_five_verticals_are_still_refused():
     """THE DURABLE HALF, and it is what makes the admission narrow rather than
     a family.
+
+    **THE NAME SAYS FIVE AND THE TUPLE HOLDS TWO SINCE 2026-09-24**, and the
+    name is kept: `_audit/2026-09-20-the-search-admission.md` cites this
+    function, and a renamed test is a citation that rots into a plausible
+    wrong answer. The number lives in the tuple, where it is checked.
 
     Every one of these is a search-results page too, and every one stays shut.
     If one of them opens without its own blast radius and its own ruling, the
@@ -181,9 +227,10 @@ def test_the_other_five_verticals_are_still_refused():
     for url in _STILL_REFUSED:
         assert _refused(url), (
             f"a vertical nobody admitted became readable: {url!r}. The "
-            "2026-09-20 admission was the PEOPLE vertical only. Widening is "
-            "allowed by the ruling's reopening clause and it costs a fresh "
-            "blast radius -- it is not something a pattern edit does quietly."
+            "search line admits people, companies, groups and events "
+            "(D2-SEARCH-VERTICALS-WIDENED). Widening is allowed by the "
+            "ruling's reopening clause and it costs a fresh blast radius -- it "
+            "is not something a pattern edit does quietly."
         )
 
 
@@ -219,7 +266,7 @@ def test_the_refusal_is_the_allowlist_and_not_the_denylist():
             "test_the_other_five_verticals_are_still_refused and means the "
             "two are reading different state"
         )
-    for url in _ADMITTED_NOW:
+    for url in _ADMITTED_BY_THE_LINE:
         matching = [p for p in readonly._ALLOWED_URL_PATTERNS if p.match(url)]
         assert len(matching) == 1, (
             f"{url!r} is admitted by {len(matching)} patterns, not one. The "
@@ -244,23 +291,27 @@ def test_removing_the_one_shipped_pattern_reverts_the_whole_surface(monkeypatch)
 
     `monkeypatch` restores the tuple when the test ends, so nothing after this
     inherits a narrowed boundary.
+
+    SINCE 2026-09-24 IT RUNS OVER ALL FOUR WORDS: the widened line is still
+    ONE line, so taking it out refuses the people search and the three D2
+    verticals together.
     """
     original = readonly._ALLOWED_URL_PATTERNS
-    for url in _ADMITTED_NOW:
+    for url in _ADMITTED_BY_THE_LINE:
         assert not _refused(url), "precondition: the surface is admitted"
 
     survivors = tuple(
         pattern for pattern in original
-        if not any(pattern.match(url) for url in _ADMITTED_NOW)
+        if not any(pattern.match(url) for url in _ADMITTED_BY_THE_LINE)
     )
     assert len(survivors) == len(original) - 1, (
-        f"removing what admits the people search took "
+        f"removing what admits the search surface took "
         f"{len(original) - len(survivors)} patterns out, not one. The revert "
         "is only 'delete one line' while exactly one line does the admitting."
     )
 
     monkeypatch.setattr(readonly, "_ALLOWED_URL_PATTERNS", survivors)
-    for url in _ADMITTED_NOW:
+    for url in _ADMITTED_BY_THE_LINE:
         assert _refused(url), (
             f"removing the one admitting pattern did NOT restore the refusal "
             f"of {url!r} -- something else now admits it and the rollback "
@@ -268,7 +319,7 @@ def test_removing_the_one_shipped_pattern_reverts_the_whole_surface(monkeypatch)
         )
 
     monkeypatch.setattr(readonly, "_ALLOWED_URL_PATTERNS", original)
-    for url in _ADMITTED_NOW:
+    for url in _ADMITTED_BY_THE_LINE:
         assert not _refused(url), "restoring the tuple did not restore the read"
 
 
@@ -344,14 +395,34 @@ def test_the_narrow_candidate_on_record_is_the_one_that_shipped(monkeypatch):
     something other than the boundary this repository ships -- a measurement
     correctly taken of the wrong artifact, which is this repo's most expensive
     recurring defect.
+
+    **THE CANDIDATE ON RECORD MOVED ON 2026-09-24** from S1 (retained above as
+    `_CANDIDATE_NARROW`) to S2, the four-word alternation D2 ruled. It is now
+    READ OFF THE PROBE THAT MEASURED IT, by name, so this assertion ties the
+    shipped line to the measured string without a third copy of it here.
     """
+    def _names(node: ast.stmt) -> list[str]:
+        if isinstance(node, ast.AnnAssign):
+            return [getattr(node.target, "id", "")]
+        if isinstance(node, ast.Assign):
+            return [getattr(target, "id", "") for target in node.targets]
+        return []
+
+    assignments = [
+        node for node in ast.parse(_PROBE.read_text(encoding="utf-8")).body
+        if "CANDIDATES" in _names(node)
+    ]
+    assert len(assignments) == 1, (
+        "the probe no longer defines CANDIDATES once at module level")
+    candidates = dict(ast.literal_eval(assignments[0].value))
+    measured = candidates[_D2_CANDIDATE_NAME]
     shipped = [
         pattern.pattern for pattern in readonly._ALLOWED_URL_PATTERNS
         if pattern.match(_ADMITTED_NOW[0])
     ]
-    assert shipped == [_CANDIDATE_NARROW], (
+    assert shipped == [measured], (
         "the pattern on disk is not the candidate that was measured:\n"
-        f"  measured: {_CANDIDATE_NARROW!r}\n"
+        f"  measured: {measured!r}\n"
         f"  shipped : {shipped!r}"
     )
 
@@ -405,6 +476,13 @@ def test_a_family_wildcard_admits_a_traversal_the_narrow_one_refuses(
         "to be a closed path segment; if it admits this, the candidate is "
         "wrong and must not be landed."
     )
+
+    # AND THE SHIPPED FOUR-WORD LINE, 2026-09-24: `original` carries it, and
+    # the traversal from each of its words stays refused.
+    monkeypatch.setattr(readonly, "_ALLOWED_URL_PATTERNS", original)
+    for word in ("people", "companies", "groups", "events"):
+        spelling = _TRAVERSAL_ONTO_ACCOUNT_ENDING.replace("/people/", f"/{word}/")
+        assert _refused(spelling), spelling
 
 
 # ---------------------------------------------------------------------------

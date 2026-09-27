@@ -88,8 +88,14 @@ MUST_REFUSE: tuple[tuple[str, str], ...] = (
     # instrument working rather than breaking. The Page's PEOPLE TAB replaces
     # it: the same surface's member roster, refused by the new entry's anchor
     # and by nothing else, so the row still holds the class it was here for.
-    ("an organisation's member roster",
-     f"{BASE}/company/example-co/people/"),
+    #
+    # AND THE BARE ROSTER WENT THE SAME WAY ON 2026-09-24: its own roster line
+    # (MEMBER-ROSTERS-AS-BOUNDED-READS) admits it, and this control went red
+    # exactly as before. Its QUERY spelling stands in -- the roster line takes
+    # none, so the class this row holds (a third party's organisation
+    # surface, refused by no pattern) is still what it tests.
+    ("an organisation's member roster, asked for with a query",
+     f"{BASE}/company/example-co/people/?keywords=x"),
     ("a third party's interests tab",
      f"{BASE}/in/someone-else/details/interests/"),
     # REFUSED BY SUBSTRING RATHER THAN BY PATTERN. Without this the table

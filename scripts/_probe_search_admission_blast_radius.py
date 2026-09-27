@@ -174,6 +174,14 @@ CANDIDATES: tuple[tuple[str, str], ...] = (
 #: distinguished from "this cannot report anything".
 NULL_CANDIDATE = r"^THIS-MATCHES-NOTHING$"
 
+#: THE CANDIDATE THE BOUNDARY TOOK, and the addresses its words are for.
+#: S1 landed 2026-09-20; D2-SEARCH-VERTICALS-WIDENED took S2 on 2026-09-24.
+LANDED_CANDIDATE = "S2-four-verticals"
+LANDED_TARGETS: tuple[str, ...] = tuple(
+    f"{BASE}/search/results/{word}/?keywords=x"
+    for word in ("people", "companies", "groups", "events")
+)
+
 
 def full_corpus() -> list[str]:
     urls = set(shipped_corpus())
@@ -247,14 +255,32 @@ def main() -> int:
         print("  [ok] and reports it as defended by nothing but the absence "
               "of a rule")
 
-    narrow = results["S1-people-only"]
-    if not narrow["newly_admitted"]:
+    # AMENDED 2026-09-24. This control read "the narrow candidate admitted
+    # NOTHING" as a failure, which made the probe exit 1 from the day S1
+    # landed (2026-09-20): a candidate already ON DISK newly admits nothing, by
+    # construction, so the control was convicting the admission it measured.
+    # What it exists to catch is a candidate that cannot serve its rows, and
+    # that is asked now of the candidate D2-SEARCH-VERTICALS-WIDENED took --
+    # each address its four words are for must be admitted with it
+    # installed, NEWLY or ALREADY. Before that line landed this passed on
+    # three newly admitted; after it, on four already admitted.
+    landed = results[LANDED_CANDIDATE]
+    unserved = [
+        url for url in LANDED_TARGETS
+        if url not in landed["newly_admitted"] and not readonly.is_read_url(url)
+    ]
+    if unserved:
         failures.append(
-            "the narrow candidate admitted NOTHING -- it cannot serve the "
-            "rows, or the corpus lost the address it is for")
+            "the landed candidate does not admit %d of the addresses its rows "
+            "need -- it cannot serve them, or the corpus lost them: %s"
+            % (len(unserved), ", ".join(unserved)))
     else:
-        print("  [ok] the narrow candidate admits the address the rows need "
-              "(%d urls)" % len(narrow["newly_admitted"]))
+        print("  [ok] the landed candidate (%s) admits all %d addresses its "
+              "rows need (%d newly, %d already on disk)"
+              % (LANDED_CANDIDATE, len(LANDED_TARGETS),
+                 len([u for u in LANDED_TARGETS if u in landed["newly_admitted"]]),
+                 len([u for u in LANDED_TARGETS
+                      if u not in landed["newly_admitted"]])))
 
     print()
     if failures:

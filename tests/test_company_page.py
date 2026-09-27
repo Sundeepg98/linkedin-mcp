@@ -465,9 +465,24 @@ AGREEMENT_CORPUS = [
     f"{BASE}/company/{EPONYMOUS_SLUG}/",
     f"{BASE}/company/{EPONYMOUS_SLUG}",
     f"{BASE}/company/{IDENTIFIER}/",
+    # ENCODED DOT SEGMENTS, added 2026-09-24 when the boundary's root line and
+    # ``slug_is_addressable`` both learned to refuse them: ``%2e%2e`` is ``..``
+    # to a browser. Before that, both said YES -- they agreed, and were both
+    # wrong, which is the case a coupling check alone cannot catch.
+    f"{BASE}/company/%2e%2e/",
+    f"{BASE}/company/%2E/",
+    f"{BASE}/company/%2e%2E",
+    # and a slug that merely CONTAINS an encoded dot, which both still admit
+    f"{BASE}/company/a%2e/",
     f"{BASE}/company/{'a' * 100}/",
     f"{BASE}/company/{'a' * 101}/",
-    f"{BASE}/company/{EPONYMOUS_SLUG}/people/",
+    # ``/company/<slug>/people/`` STOOD HERE UNTIL 2026-09-24, both gates
+    # answering False. MEMBER-ROSTERS-AS-BOUNDED-READS admitted the People tab
+    # on its OWN line, so the boundary now says True while
+    # ``slug_is_addressable`` -- which answers for the ROOT this shaper
+    # covers -- says False. That is not the two gates drifting apart; they
+    # stopped being about the same page. It moved to
+    # ``PEOPLE_TAB_ON_ITS_OWN_LINE`` below, asserted exactly that way.
     f"{BASE}/company/{EPONYMOUS_SLUG}/about/",
     f"{BASE}/company/{EPONYMOUS_SLUG}/admin/",
     f"{BASE}/company/setup/new/",
@@ -477,6 +492,21 @@ AGREEMENT_CORPUS = [
     f"{BASE}/company/",
     f"{BASE}/company/{EPONYMOUS_SLUG}/../../in/someone-else/",
 ]
+
+#: The People tab, admitted 2026-09-24 by the roster line and NOT by the root
+#: line this shaper couples to.
+PEOPLE_TAB_ON_ITS_OWN_LINE = f"{BASE}/company/{EPONYMOUS_SLUG}/people/"
+
+
+def test_the_people_tab_is_the_roster_lines_and_not_this_shapers():
+    """The root shaper still refuses the tab -- it describes a ROOT -- and the
+    boundary admits it by exactly one line, which does not admit the root."""
+    assert company_page.slug_is_addressable(PEOPLE_TAB_ON_ITS_OWN_LINE) is False
+    assert readonly.is_read_url(PEOPLE_TAB_ON_ITS_OWN_LINE) is True
+    carriers = [p for p in readonly._ALLOWED_URL_PATTERNS
+                if p.match(PEOPLE_TAB_ON_ITS_OWN_LINE)]
+    assert len(carriers) == 1 and carriers[0].pattern.endswith("/people/?$")
+    assert not carriers[0].match(f"{BASE}/company/{EPONYMOUS_SLUG}/")
 
 
 @pytest.mark.parametrize("url", AGREEMENT_CORPUS)

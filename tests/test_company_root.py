@@ -293,17 +293,26 @@ def test_the_module_fires_nothing():
         assert not (parameters & {"confirm_token", "token", "grant"}), name
 
 
-def test_the_address_is_admitted_and_the_roster_tab_still_is_not():
-    """This reader opens the ROOT. The member roster stays shut."""
+def test_the_address_is_admitted_and_this_reader_never_builds_the_roster_tab():
+    """This reader opens the ROOT, and only the root.
+
+    RENAMED AND INVERTED 2026-09-24 from ``test_the_address_is_admitted_and_
+    the_roster_tab_still_is_not``: the People tab this file used to assert
+    SHUT was admitted by its own line on MEMBER-ROSTERS-AS-BOUNDED-READS. What
+    was this file's business is unchanged and still asserted -- the builder
+    this reader navigates by assembles the root, never the tab, and the tab
+    is admitted by a line that is not the root's.
+    """
     built = company_page.company_page_url(IDENTIFIER)
     assert built["built"] is True
     assert readonly.is_read_url(built["url"]) is True
-    assert (
-        readonly.is_read_url(
-            f"https://www.linkedin.com/company/{IDENTIFIER}/people/"
-        )
-        is False
-    )
+    assert not built["url"].rstrip("/").endswith("/people")
+    tab = f"https://www.linkedin.com/company/{IDENTIFIER}/people/"
+    assert readonly.is_read_url(tab) is True
+    carriers = [p for p in readonly._ALLOWED_URL_PATTERNS if p.match(tab)]
+    assert len(carriers) == 1 and carriers[0].pattern.endswith("/people/?$"), (
+        [p.pattern for p in carriers])
+    assert not any(p.match(built["url"]) for p in carriers)
     assert company_page.company_page_url(EPONYMOUS_SLUG)["built"] is False
 
 
