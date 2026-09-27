@@ -122,19 +122,10 @@ DECLARED: dict[str, dict[str, str]] = {
             "memory."
         ),
     },
-    "_probe_typeahead_commit.py": {
-        "fill": (
-            "Types a NEEDLE into a message composer to measure whether "
-            "clicking a typeahead suggestion commits a recipient -- the "
-            "question writes._recipient_gate turns on and which no read can "
-            "answer, because a chip does not exist until a recipient is "
-            "committed. Its own docstring bounds it: it never types a message "
-            "BODY and never presses a send control, and it refuses to start "
-            "on a composer it did not find empty. Declared rather than "
-            "forbidden because the measurement is real and the blast radius "
-            "is argued in the file."
-        ),
-    },
+    # (``_probe_typeahead_commit.py`` was declared here -- it typed a
+    # NEEDLE into the composer to measure whether a typeahead suggestion
+    # commits a recipient -- until it retired with ``send_message`` on
+    # 2026-09-27, lane L5, the orchestrator's order of 23:36.)
     "classify_writeoff_reasons.py": {
         "fill": (
             "A FALSE POSITIVE, declared as one rather than suppressed, and it "

@@ -10390,6 +10390,29 @@ census and the rule's mutation, the flake reproduction, the timings
 regenerator and the child's artifact, comparison and plan scripts -- are
 declared disposable. Their numbers are in the lane record.
 
+### 67.17 THE ORDER OF 2026-09-28 01:30: EVERY COLUMN, AND THE 22 READERS TRIAGED
+
+Record: the lane record's `## Order of 2026-09-28 01:30`. Every entry was
+shown failing on the tree before its fix.
+
+| path | shown failing by |
+|---|---|
+| `scripts/build_blocker_map.py` (`render`, `drift`, `--check` over the whole file) + `tests/test_blocker_map_is_derived.py` | master 5354d42's map and documents put back: HEAD's `--check` exited 0 and its test passed; the new `--check` exited 1 naming 64 rows by column, the new test failed; the old comparison noticed 1227 of 4100 mutated cells, the new one 4100 |
+| `tests/shipped_drives.py` (`DRIVES`, `TO_THE_PRESS`, `HELD_FOR_A_RULING`, `_drawn`) | each reader was recorded not driven before its drive; each drive raises when its fixture stops drawing the shape it rests on; the held drives return page text and are pinned so |
+| `tests/test_readers_emit_no_page_string.py` (`WHAT_WOULD_DRIVE_IT` and its holding test) | with an empty table, the committed guard failed naming all 22; before the last four entries, naming exactly those four |
+| `tests/test_readers_emit_no_page_string.py` (`REFUSED_AFTER_READ`, `ERRORED_AFTER_READ`, the furthest-variant rank in `_worst`) | of the new control rows, four failed on the prior guard's `classify_drive` and four on its `_worst` (the other nine pass on both, the controls against over-reach); against the prior baseline the coverage comparison failed naming the readers the refusal rule takes |
+| `tests/plantedpage.py` (`NavigationAttempted` a `BaseException`; `and_`/`or_`/`filter` on the planted and failing locators) | a reader that reads, clicks inside `except Exception` and returns what it had was clean on HEAD; with the three methods removed, three readers returned `{"error": "AttributeError"}` and read as clean |
+| `tests/test_readers_emit_no_page_string.py` (`FIXTURE_BREAKS`, `test_a_drive_on_a_fixture_that_stopped_drawing_its_shape_raises`) | each drive run with one needle of its fixture's shape broken in a scratch copy: on the drives as first committed, the disclose and reveal drives did not raise (their headline check ran inside a reader's own handler) and the other twelve did; after the check moved into the drive, fourteen raise |
+
+### 67.18 DECLARED DISPOSABLE (THE ORDER OF 01:30)
+
+The scratchpad helpers -- the column and mutation probes, the red
+reproductions against HEAD's guard, the censuses (refusal-only cleans,
+error-envelope cleans, swallowed navigation over the reader, failing-page
+and tool-envelope families, the two rank measurements), the drive verifiers
+and the children's drive drafts -- are declared disposable. Their numbers are
+in the lane record.
+
 ---
 
 ## 68. A DOWNLOAD TRANSPORT ON THE ATTACHED BROWSER, TESTED ON A FAKE CHROME THAT CAN SAY NO (lane-d, 2026-09-24)
@@ -10787,6 +10810,60 @@ shown working on its own control first, and its launcher
 are in the lane record. The guard is DISPOSABLE HERE AND NOT IN GENERAL: its
 finding -- eleven tests in two files send a browser to LinkedIn -- is the lane
 record's I.5, left for the owners of the shared browser fixtures.
+
+### 69.13 A NAME IS NEVER THE AIM, AND A RETIRED WRITE TAKES ITS INSTRUMENTS WITH IT (the name-aimed debts, 2026-09-27)
+
+The orchestrator's order of 2026-09-27 23:36 (PEOPLE-DATA-MITIGATIONS, mitigation
+6): `linkedin_send_invitation` is aimed by the person's profile link, compared in
+the page against each rail card's own link; `linkedin_send_message`, aimed by a
+name typed into a typeahead, is RETIRED in favour of
+`linkedin_message_from_profile`; lane G's name-aimed debt table is empty and
+pinned empty. Full record: `_audit/2026-09-24-lane-l5-messaging.md`, "The
+name-aimed debts".
+
+Three findings worth carrying out of it:
+
+    A STRICT PRESS IS ONLY TESTED BY A REDRAW THAT DETACHES WHAT WAS PRESSED.
+    Playwright retries an intercepted press on the SAME element handle and
+    re-resolves the selector only when that element leaves the document. A
+    redraw that merely ADDS a second match leaves the handle connected, the
+    press lands, and strictness never gets its second look -- measured: the
+    first draft of the mid-press test was red for exactly that reason.
+
+    A LOG-ABSENCE CHECK MUST NAME THE LOGGER THE PACKAGE WRITES THROUGH, AND
+    PROVE THE CHANNEL HEARS THE LEVEL IT CHECKS. `caplog.at_level(DEBUG,
+    logger="linkedin_server")` set a logger nothing uses; the package logger
+    `linkedin` stayed at INFO, every DEBUG line was dropped before capture, and
+    "nothing logged the needle" could not fail for a debug record. Found by the
+    rewrite's first control reading an empty channel. Twelve more sites set
+    DEBUG on the ROOT logger and have the same blind spot (the lane record
+    lists them; not fixed under this order).
+
+    MEASURE THE REFERENCE GRAPH BEFORE CUTTING A WRITE OUT. What a retirement
+    may delete is what nothing else reaches once the write path is gone -- in
+    the package, in the scripts, and in the probes -- and that is a
+    measurement (an AST walk of every use), not a reading of the code's
+    comments. It kept the read-side selectors a thread reader still counts, and
+    it found the one probe whose deletion the retirement forced.
+
+| path | shown failing by |
+|---|---|
+| `dom.rail_invite_control_selector`, `dom.read_invitation_rail`, `writes.aim_invitation_by_link`, the `rail_profile` target kind, and `send_invitation` in `STRICT_PRESS_ACTIONS` | `tests/test_an_invitation_is_aimed_by_a_link.py` in a real headless Chromium over synthetic rail cards whose buttons record their own presses: two cards, a card with two people's links, a card with two controls and a control in no card each read as no aim; the builder refuses seven shapes; and a SECOND CARD drawn mid-press stops the strict press while the same world pressed without strictness lands on the card drawn first -- not his. The selector was run first over the 16 captures holding invitation buttons: 44 of 44 exactly one, the card's own control |
+| `tests/test_needle_never_escapes.py`, rewritten around the link, on the package logger with a control record | its first run, still on the old logger name, read an EMPTY channel and the control ("the unreadable rail was not logged at all") failed -- measured, and the reason the logger name changed; a reader driven over a page whose library error quotes the selector keeps only the error's type |
+| `tests/test_no_write_is_aimed_by_a_name.py::test_no_debt_is_left`, and the file's controls rebuilt on a planted NAME kind | the file went red on this branch's first commit exactly as designed ("send_invitation is no longer aimed by a name. The debt is paid: delete its entry") before its entry went; the rebuilt controls fail on plants whether the real table holds one entry or none |
+| `linkedin_open_messaging`'s five pills, as `dom.MESSAGING_FILTERS` and a schema enum, checked before a page loads | `tests/test_the_folder_choices_are_not_filter_values.py`: `focused` and `other` refused before a session opens, while the control, `inmail`, enters one -- so the fake that records entry is shown able to see it |
+
+**DECLARED DISPOSABLE:** the rail measurements (`np_rail_links.py`,
+`np_rail_xpath_check.py`), the reference-graph tools that decided what the
+retirement could cut (`np_reach.py`, `np_dom_graph.py`, `np_dangling.py`), the
+edit scripts (`d_*.py`) and the module launcher that ran the baseline writers
+under the offline guard (`np_module_offline.py`) -- all under the lane's
+scratch directory; their numbers are in the lane record. RETIRED WITH THE WRITE,
+their findings kept in `_audit/2026-09-03-typeahead-name-matching-is-dead.md`
+and in git: `scripts/_probe_typeahead_commit.py` and its test, and the gate
+tests `tests/test_send_message_gate.py`, `tests/test_typeahead_gate.py`,
+`tests/test_click_is_not_its_own_evidence.py` and
+`tests/test_the_needle_is_matched_as_a_bare_substring.py`.
 
 ## 70. THE BEST-VERIFIED WRITE NEVER PRESSED SAVE, AND A WRITE AIMED BY ITS CARD (lane-l7-profile-writes, 2026-09-24)
 

@@ -2352,3 +2352,347 @@ NOT RUN:
 - THE WINDOWS WALL CLOCK IS BOUNDED BY ONE FILE, not by this table:
   `tests/test_writes.py` took 185.7 s of its shard's 200.1 s, and `--dist
   loadfile` keeps a file on one worker.
+
+## Order of 2026-09-28 01:30: every column checked, the 22 readers triaged, three more false cleans
+
+The orchestrator's order to lane G, 2026-09-28 01:30 IST, after master was
+fast-forwarded to this branch's 64afa6c and pushed. Disk agreed with its
+sample: this branch and master both at 64afa6c, a clean tree.
+
+### T.0 Commits, with their times from `git log`
+
+- `ef6c6cb`, 2026-09-28 01:34:20 -- item 1, the blocker map's check over
+  every column; a hash which does not resolve on `master` until this branch
+  merges.
+- `d0d2f0b`, 2026-09-28 02:29:09 -- item 2, the 22 readers triaged and the
+  three false cleans found on the way; a hash which does not resolve on
+  `master` until this branch merges.
+- `d9dc4e9`, 2026-09-28 02:40:20 -- the one failure the impact gate found
+  on it, repaired (T.4); a hash which does not resolve on `master` until
+  this branch merges.
+
+This record's commit follows them.
+
+### T.1 Item 1: the blocker map's check compares every column
+
+MEASURED: `scripts/build_blocker_map.py --check` asserted the map's structure
+and never read the committed file; the one test that read it compared two
+columns of ten. Mutating the committed map one cell at a time, that comparison
+noticed 1227 of 4100 cells -- the row id, blocker and class columns -- and none
+of `source`, `locator`, `state_at_freeze`, `state_today`, `capability`, `note`
+or `reason_doc`, nor the header line.
+
+RED FIRST, ON THE EXACT CASE: master 5354d42's map and `_audit` documents put
+back in this tree and restored after. HEAD's `--check` exited 0 and HEAD's
+test passed; the new `--check` exited 1, naming 64 rows, each "column(s)
+reason_doc", and the new test failed.
+
+The fix: `render()` is the whole file exactly as `--write` writes it, and both
+modes use it; `--check` compares it with the committed file (line endings
+normalised, as the other two generators do) and prints each differing row with
+the columns that moved. The test holds the committed map to the derived one,
+whole; its controls plant the stale value master carried, a change in each of
+the ten columns, and a trailing byte -- each caught, by row and column.
+
+THE OTHER TWO DERIVED VIEWS, the same comparison: `build_audit_index` and
+`build_rulings_index` already compare the whole rendered text with the
+committed file, in `--check` and in their tests. Every cell mutated one at a
+time: `INDEX.md` 1873 of 1873 noticed, `RULINGS.md` 951 of 951, the new
+blocker-map comparison 4100 of 4100; each `--check`, run on one right-most
+cell, exited 1. Nothing to close in those two.
+
+The generators' dependents: 432 passed.
+
+### T.2 Item 2: the 22 readers, triaged -- (a) 6, (b) 16
+
+Four children triaged the readers in parallel (general-purpose; each wrote
+only under the lane's scratch area and committed nothing); every drive below
+was re-run by the lead and rebuilt into `tests/shipped_drives.py`, whose
+drives each re-read their fixture and raise if the shape they rest on is gone.
+
+RED FIRST: the holding test,
+`test_every_vacuous_reader_is_driven_or_names_what_would_drive_it`, run
+against the committed guard with an empty table, failed naming all 22.
+
+**(a) 6 -- driven over a tracked fixture, and the verdict earned:**
+
+    reader                                  was            now      over
+    dom:read_any_save_control_label         empty shape    clean    job_detail_hydrated.html
+    named_profile:composer_holds            empty shape    clean    synthetic/named_profile.html
+    people_results:read_result_people       no record      records  synthetic/people_search_results.html
+    server:_attach_recipient_ids            empty shape    clean    profile_views_analytics.html
+    server:_profile_views_press_counters    no read        clean    profile_views_analytics.html
+    threads:composer_holds                  empty shape    clean    synthetic/messaging_thread.html
+
+Lane S's people reader is one of them: over its own skeleton it returns one
+record with the plant inside it, and
+`test_lane_s_people_reader_is_driven_to_its_records` holds both halves --
+the signature variants alone still NO RECORD, the drive RETURNS_RECORDS.
+For each of the six (and
+`read_premium_badge`, T.2b), a test holds that the signature variants alone
+stay not driven and the drive is what earns it.
+
+SAID ONCE, WHERE A SUCCESS PATH NEVER MEETS THE PLANT: the two composer
+readers compare the box with the caller's words and return a boolean; the id
+join returns ids the capture draws; the counters return integers. Those
+drives prove the success path runs and carries nothing else out; the plant
+reaches those readers through their signature variants, which still run.
+
+**(b) 16 -- not driven, each with what would drive it**
+(`WHAT_WOULD_DRIVE_IT`, under a declared kind):
+
+* NAVIGATES, 5 -- recorded with their action, which is what would drive them:
+  `auth:_warm_session_cookies` and `writes:_read_account_share_updates`
+  (each had swallowed the harness's refusal of a page load and read
+  "returned without reading"); `press:disclose`, `reveal:reveal`,
+  `share_link:copy_own_post_link` (driven as far as their click over the
+  profile-views capture and `own_post_menu.html`, so every read before the
+  press is now hunted; beyond it, a stand-in for the click).
+* CAPTURE, 4 -- `view_switch:_pill_positions`, `_option_positions`,
+  `_apply_positions`, `_wait_for_option`: a committed skeleton of
+  /analytics/profile-views/ with the Interesting viewers pill open. The
+  tracked captures strip `aria-expanded` and draw no `main`. The capture
+  the audit cites (`_audit/2026-09-23-live-lane-session-1.md` Entry 3) IS
+  on this box, gitignored, in a sibling lane worktree's `_state/live1/`
+  (`pv-open-pill-1.html`, with `pv-closed.html` and `pv_switch.html`
+  beside it). What is missing is a committed skeleton built from it, in
+  the pattern of `scripts/_build_people_search_skeleton.py` -- keeping
+  `main`, the pills and the popover's closed vocabulary, and nothing of
+  the viewer list. That is the cheapest next step to four more drives.
+* ACTION, 3 -- `view_switch:apply_and_restore`,
+  `server:_profile_views_switch`, `server:_profile_views_more_analytics`:
+  clicks, and the page after them.
+* NOT A PAGE READER, 2 -- `auth:_arm_session_store` (touches only
+  `page.context` and writes the session store), `auth:_maybe_corroborate`
+  (loads the feed, or reads nothing but an address).
+* RULING, 2 -- `dom:read_profile_detail_entries`,
+  `profile_views_more:read_profile_views_more_insights`. A tracked fixture
+  drives each to its success path, and what comes back is page text outside
+  a people record (`returns_text`). Both predate the 2026-09-24 inventory,
+  which missed them because nothing drove them; the inventory may not grow,
+  so their drives are held (`HELD_FOR_A_RULING`, pinned by a test that they
+  still return text). DECISION FOR THE ORCHESTRATOR, with the two below:
+  admit them to the inventory, or convert the readers.
+
+### T.2b Found while triaging, each shown failing first
+
+1. A REFUSAL AFTER A READ WAS COUNTED CLEAN. Measured over the 86 readers
+   recorded clean: four were clean only by returning a whole-call refusal
+   after reading -- `dom:read_compose_fields`,
+   `dom:read_self_owned_editor_fields`, `dom:read_self_owned_editor_values`,
+   `profile_editor:read_premium_badge`. `REFUSED_AFTER_READ` makes that
+   not driven (a top-level `refused` that is truthy and is not a tally, so
+   `item_addresses`' per-href tally is untouched). RED: three of the new
+   control rows fail on the prior guard's `classify_drive` (the four
+   tally-and-falsy rows pass on both); the coverage comparison against the
+   prior baseline fails naming the three readers it takes from clean. The
+   four were triaged the same way -- (a) 1: `read_premium_badge`, over
+   `synthetic/intro_editor_switches.html`; (b) 3: `read_compose_fields`
+   (CAPTURE: the composer's two send-mode radios, which no tracked page
+   draws), and the two self-owned editor readers (RULING: driven over the
+   same intro editor, they publish a label ungated and a value verbatim --
+   page text outside a record -- held with the two above).
+2. A FAILURE ENVELOPE WAS COUNTED CLEAN. Three readers --
+   `named_profile:read_opened_conversation`,
+   `profile_editor:read_account_share_updates`,
+   `profile_editor:recognise_intro_editor_switches` -- were clean on
+   `{"error": "AttributeError", ...}`: the planted locator lacked
+   Playwright's `and_`, `or_` and `filter`, and each reader's own handler
+   caught the miss. The planted and failing locators now answer all three
+   (a failing locator narrows to a failing one); all three reach their
+   readings, error-free, and stay clean -- now earned. `ERRORED_AFTER_READ`
+   makes the next such gap a not-driven verdict. RED: with the three
+   methods removed, the new per-reader test fails on all three and the rule
+   records each "returned an error"; one control row fails on the prior
+   guard, two pass on both.
+3. THE HARNESS'S REFUSAL OF AN ACTION COULD BE SWALLOWED. `NavigationAttempted`
+   was a `RuntimeError`, so a reader's `except Exception` caught it.
+   Measured: no reader was clean that way; five not-driven reasons were
+   wrong (the two above among them). It is a `BaseException` now. RED: a
+   control reader that reads, clicks inside `except Exception` and returns
+   what it had was clean on HEAD. Effects measured before the change: the
+   failing-page family's returned count 113 -> 111 (floor 78), five of its
+   verdicts to navigates; the tool-envelope guard, 59 tools, none moved.
+4. AMONG NOT-DRIVEN VARIANTS, THE ONE THAT GOT FURTHEST NAMES THE READER --
+   read, then action, then the rest. On the tree before the drives the read
+   rank alone moved nothing; with them the action rank moved four, each to
+   the truer reason (the three press readers, and
+   `writes:_load_named_profile`, whose page load one variant reaches past
+   another's raise). RED: four of its six rows fail on the prior `_worst`.
+5. THE STANDALONE BASELINE WRITER now sandboxes the session store, as the
+   tool-envelope guard's standalone path does; `_arm_session_store` was
+   unreachable only because the planted page's `context` is `None`.
+6. NAMED, NOT CHANGED: `empty_shape` reads `[0]` -- a match at position 0 --
+   as empty, so a view_switch helper finding its target first would read
+   not driven (the safe direction). The CAPTURE entry says to keep the
+   controls before the pill.
+
+THE BASELINE, regenerated by its own writer: 18 verdicts move -- the 6
+driven, the 3 refusal-only readers not driven, the 5 navigating by the
+re-base, the 3 press readers and `writes:_load_named_profile` by the rank.
+clean 86 -> 88, records 3 -> 4, text 40 (unchanged), not driven 40 -> 37.
+
+THE DECISION THIS NEEDS FROM THE ORCHESTRATOR, one: four readers --
+`dom:read_profile_detail_entries`,
+`profile_views_more:read_profile_views_more_insights`,
+`dom:read_self_owned_editor_fields`, `dom:read_self_owned_editor_values`
+-- return page text outside a record on their success paths, each by design
+with a stated reason (his own skills; the viewer aggregates; the
+self-owned-container ruling). Admit them to the text inventory, which they
+predate, or convert them. Their drives are ready either way.
+
+### T.3 Integration
+
+`master` was 64afa6c at 01:34, at 02:26 and at 02:42, when this record was
+written: it had not moved since the order, so there was nothing to merge. It
+is read once more before the final gate, and the report says what it was.
+
+WHAT THIS BRANCH WILL MEET: lane S is building people-search readers and
+lane L5 is converting name-aimed sends. If either lands first and changes
+`people_results`, the planted page or a reader named in
+`WHAT_WOULD_DRIVE_IT`, the holding test and the drive tests fail by name at
+the merge -- which is what they are for.
+
+### T.4 Gates run, and what did not run
+
+Every run below is local, on Windows, with the network guard on (it is
+registered by `tests/conftest.py`, so every pytest run carries it).
+
+* ITEM 1: the generators' dependents, nine files -- 432 passed; the same
+  three generator test files on CPython 3.10 -- 73 passed.
+* ITEM 2, while it was built: the reader guard, whole file, sharded -- 587
+  passed; the planted page's twelve dependents after the re-base -- 432
+  passed, 1 xfailed (the people-search reader's declared limit); after the
+  locator algebra, the seven that read the baseline or the planted locator
+  hardest -- 167 passed.
+* THE THREE CAN-FAIL SCRIPTS the planted page stands under, on this tree:
+  the coercion family's -- 15 readers red under the coercion that shipped
+  and green on its removal, the other 73 clean not convicted; the refusing
+  grant's -- all 5 sections red on a defect and green without it; the tool
+  envelopes' -- fired (3 leaking) and green again (0), over 59 tools.
+* THE IMPACT GATE, `scripts/impact_gate.py --against master`, sharded, on
+  the code-complete tree (`d0d2f0b`, a hash which does not resolve on
+  `master` until this branch merges), 02:30:09 to 02:38:45: 7 changed
+  paths, 69 files selected and 26 corpus-wide, 74 in all -- 4616 passed,
+  1 skipped, 1 xfailed, 1 FAILED, in 489.7 s; by its own count 199 of 273
+  test files not checked (the corpus-wide sweeps did run).
+  THE FAILURE WAS RIGHT TO LOOK:
+  `test_no_tracked_file_pairs_fixture_content_with_anything_else` flagged
+  the new module's `_EDITOR_CONTROLS`, tuples of strings some of which a
+  committed fixture draws (input, text, checkbox, button) and some of which
+  it does not (label-for, native, state_not_value) -- the shape of a
+  de-anonymisation key. Every string there is structural vocabulary and the
+  only page text is the plant, so nothing is a pre-image; but the rule's own
+  first remedy is a rename, not an exemption, so the controls became
+  mappings with named fields (`d9dc4e9`, a hash which does not resolve on
+  `master` until this branch merges). That test passes, the two held drives
+  return what they returned, and the gate over the final tree re-runs the
+  whole impact set.
+* CPython 3.10 through uv, sharded, on `d9dc4e9` (a hash which does not
+  resolve on `master` until this branch merges) with a clean tree: the
+  reader guard, the orphan ruling, the tool envelopes, the unread readings
+  and the people-record channel -- five files, 666 passed in 148.1 s. It is
+  the check that a `BaseException` raised inside `asyncio.wait_for` still
+  reaches the harness on the oldest Python the package supports.
+
+NOT RUN: the full suite (the gate scoped, and says what it left out); CI's
+three platforms (nothing was pushed, by order); anything live (offline, by
+order); the whole-tree identity sweeps the gate deselects in favour of the
+staged form (their base case runs on every push in CI); the browser tests on
+3.10. The impact gate over the FINAL tree, this record's commit included,
+runs after it; its counts are in the lane's report.
+
+### T.5 The gate over the final tree, the premise control, two corrections
+
+THE FULL SUITE: `scripts/impact_gate.py --against master` on `830e169` (a
+hash which does not resolve on `master` until this branch merges), with
+`master` read at 02:46:40 and still 64afa6c, so nothing was merged. 9
+changed paths selected 149 files and 26 corpus-wide, 153 of 273 (56 per
+cent), at or above the gate's 45 per cent line, so it WIDENED TO THE FULL
+SUITE: 02:46:54 to 03:17:14 -- 11570 passed, 9 skipped, 2 xfailed, 1
+FAILED, in 1777.0 s. Two commits follow that tree; both are below.
+
+THE ONE FAILURE, AND WHY IT IS NOT THIS BRANCH'S -- the facts measured,
+the mechanism DERIVED:
+`tests/test_typeahead_gate.py::test_an_empty_listbox_refuses_separately_from_an_absent_one`.
+The branch touches neither `linkedin_server/`, nor that test, nor
+`tests/conftest.py`: the diff against `master` over those paths is empty.
+The whole file ran three times in isolation straight after, on the same
+tree -- 11 passed each time. The test waits for the listbox with its own
+400 ms (`TYPEAHEAD_TIMEOUT_MS`, patched short on purpose), and the gate
+ran on a saturated box: at 03:05, CPU load 100 per cent, 64 Python and 51
+Chromium processes, other lanes' suites running beside it -- which is also
+why this full suite took 1777 s where the last one took 950 s. A listbox
+drawn after 400 ms reads as absent (`1_no_listbox`), the other half of the
+pair this test asserts. Recorded as a flake under load, for the
+orchestrator to watch in CI.
+
+THE HOLDING TEST, EVERY BRANCH SHOWN FAILING (T.2 showed one), each run
+in-process against the guard as committed: an empty table fails it naming
+the 14 readers the table holds (untriaged -- the branch that named the 22
+before any drive existed); the prior baseline fails it naming three
+(unrecorded); a driven reader added to the table fails it naming that
+reader (stale); an entry stripped of its kind fails it naming that entry
+(kindless).
+
+TWO DRIVES DID NOT KEEP THEIR OWN RULE, and the control that found them is
+new. Every drive is to RAISE when its fixture stops drawing the shape it
+rests on. Run for all 14, each as the guard runs it with ONE needle of its
+shape broken in a scratch copy of `tests/fixtures`: 12 raised and were
+recorded not driven; the `press:disclose` and `reveal:reveal` drives did
+not, with the capture's headline broken -- disclose went on to its click,
+reveal came back refused. Both read the headline inside the double's
+`evaluate`, that is inside the counter reader's own `except Exception`,
+which swallowed the check. A premise checked inside a double runs inside
+the reader's handlers; it has to be checked in the drive, before the
+reader runs. Moved there (`29b67ff`, a hash which does not resolve on
+`master` until this branch merges); re-run, 14 of 14 raise, and every
+drive's verdict on the real fixtures is unchanged. The control is a test
+now, so the rule holds for the next drive too:
+`test_a_drive_on_a_fixture_that_stopped_drawing_its_shape_raises`, one case
+per drive, each needle named in `FIXTURE_BREAKS` and checked present before
+it is broken; `test_every_drive_has_its_premise_broken_below` fails a drive
+added without one. RED FIRST: on the module as committed in `830e169` (a
+hash which does not resolve on `master` until this branch merges), those
+two cases fail and the other twelve pass.
+
+TWO CORRECTIONS TO T.4, both mine:
+
+* "the planted page's twelve dependents": eleven of those twelve files
+  import `tests/plantedpage.py`; the twelfth is
+  `tests/test_profile_views_more.py`, run because a held drive rests on its
+  synthetic page. The count, 432 passed and 1 xfailed, stands.
+* "NOT RUN: the full suite" held for the gate on `d0d2f0b` (a hash which
+  does not resolve on `master` until this branch merges) and no longer
+  holds: the gate over `830e169` ran it, above.
+
+THE TWO COMMITS AFTER THE FULL SUITE -- the premise fix and this section --
+are gated by `scripts/impact_gate.py --against 830e169`: the impact set of
+exactly what changed since the tree the full suite passed. Its count is in
+the lane's report.
+
+### T.6 Integration of master 6bc63e2, at the end
+
+THE FULL SUITE ABOVE PASSED ON THE HEAD BEFORE THE MERGE: `8a8fd43` (a
+hash which does not resolve on `master` until this branch merges), gated
+by `scripts/impact_gate.py --against 830e169` (a hash which does not
+resolve on `master` until this branch merges) -- 4 changed paths, 145 of
+273 files, which widened it: PASS over the FULL SUITE, 11597 tests, in
+1852.1 s, 03:27:02 to 03:57:54. The typeahead test that failed under load
+in T.5 passed in it.
+
+`master` HAD MOVED meanwhile: read at 03:58:14, it was 6bc63e2, lane L5's
+seven commits since 64afa6c (retiring `linkedin_send_message`, aiming the
+invitation by the profile link; 71 files). Merged once, as the order says,
+in `aa191c4` (a hash which does not resolve on `master` until this branch
+merges). ONE CONFLICT, `tests/reader_leak_baseline.json`, resolved by its
+own writer on the merged tree rather than by hand: 160 readers -- master's
+set exactly, L5 having removed ten readers and renamed one -- carrying this
+branch's 18 verdict moves exactly and no other difference, each checked
+against both parents. The guard file and the register merged cleanly; the
+derived views are at a fixed point. The reader guard on the merged tree:
+575 passed.
+
+THE GATE OVER THE MERGED TREE, this section's commit included, is
+`scripts/impact_gate.py --against master`; it runs after this commit, and
+its counts are in the lane's report.

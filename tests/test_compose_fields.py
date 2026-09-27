@@ -654,22 +654,14 @@ def test_the_script_is_declared_where_scripts_are_reviewed():
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
     assert "COMPOSE_MODES_JS" in module.INJECTED_SCRIPTS
-    # THE SECOND SCRIPT ON THE COMPOSER, and it is declared for the sharper
-    # reason. COMPOSE_MODES_JS shapes a label already known to be HIS.
-    # SELECTED_RECIPIENT_JS runs where a committed recipient is by definition
-    # A THIRD PARTY, so every label it touches names somebody who is not him.
-    #
-    # WHAT IT DOES: it counts the committed recipients in the composer -- per
-    # candidate selector, then de-duplicated -- and counts how many of them
-    # carry the needle the caller handed in. WHY IT RETURNS INTEGERS ONLY:
-    # the needle comparison is done INSIDE THE PAGE, for the reason
-    # INVITE_NEEDLE_JS does the same, so no third party's name is ever pulled
-    # into this process. There is deliberately no ``revealSingleMatch``
-    # escape hatch either -- that flag exists so a PREVIEW can show him who he
-    # would reach, and this script runs inside ``perform``, after he has
-    # already confirmed, where there is nothing left to show and therefore no
-    # reason for a name to exist here at all.
-    assert "SELECTED_RECIPIENT_JS" in module.INJECTED_SCRIPTS
+    # THE SECOND SCRIPT ON THE COMPOSER WAS SELECTED_RECIPIENT_JS, from
+    # 2026-09-02 until 2026-09-27: it counted the committed recipients and how
+    # many carried the needle the caller handed in -- his WORD for a person,
+    # compared in the page. It left with ``send_message``, RETIRED on lane L5's
+    # order of 2026-09-27 23:36 because that write was aimed by a name, and it
+    # must not come back undeclared: absent from the table AND from dom.
+    assert "SELECTED_RECIPIENT_JS" not in module.INJECTED_SCRIPTS
+    assert not hasattr(dom, "SELECTED_RECIPIENT_JS")
     # TWELVE UNTIL 2026-09-02, THIRTEEN SINCE. Not derived from
     # ``len(module.INJECTED_SCRIPTS)``, which happens to be 13 as well today:
     # EXECUTED_SCRIPTS is keyed by CALL SITE and INJECTED_SCRIPTS by NAME, so

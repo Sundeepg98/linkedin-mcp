@@ -113,11 +113,13 @@ INVENTED_NAMES = frozenset(
         # People, all invented, each already in use below.
         "Wren Fixturewright",
         "Savita Krishnan",
-        "Priya Raghunathan",
-        "Thornwick M",
+        # ("Priya Raghunathan" and "Thornwick M" left on 2026-09-27 with the
+        # send_message tests that held them -- that write was RETIRED on lane
+        # L5's order of 23:36, because it was aimed by a name.)
         "Somebody",
-        # Not people, but held by the same constants.
-        "zzqneedlemarkerzz",
+        # Not people, but held by the same constants. (The needle marker
+        # "zzqneedlemarkerzz" left the same day: the file that held it is
+        # aimed by a link now, and its marker is not a person-shaped constant.)
         "alex-r-12ab34",
         "priya-sharma-12ab34",
         "Always off",
@@ -246,7 +248,7 @@ def test_every_person_constant_holds_a_declared_invented_name():
 # ---------------------------------------------------------------------------
 
 #: (file, line, constant, value) -- the shape _person_assignments returns.
-_INVENTED = ("tests/test_x.py", 10, "NEEDLE", "Thornwick M")
+_INVENTED = ("tests/test_x.py", 10, "NEEDLE", "Wren Fixturewright")
 _REAL = ("tests/test_x.py", 10, "NEEDLE", "A Real Person")
 
 
@@ -270,12 +272,13 @@ def test_it_stays_green_on_a_declared_name():
 def test_the_table_is_not_a_prefix_or_a_substring_match():
     """A NEAR-MISS IS A MISS.
 
-    "Thornwick" is not "Thornwick M", and a rule that accepted one for the
+    "Wren" is not "Wren Fixturewright", and a rule that accepted one for the
     other would accept a real first name whose surname happens to be on the
-    table. Membership, not resemblance.
+    table. Membership, not resemblance. (The pair was "Thornwick" and
+    "Thornwick M" until that name left the table on 2026-09-27.)
     """
-    near = ("tests/test_x.py", 10, "NEEDLE", "Thornwick")
-    longer = ("tests/test_x.py", 10, "NEEDLE", "Thornwick M Jr")
+    near = ("tests/test_x.py", 10, "NEEDLE", "Wren")
+    longer = ("tests/test_x.py", 10, "NEEDLE", "Wren Fixturewright Jr")
     assert undeclared([near], INVENTED_NAMES) == [near]
     assert undeclared([longer], INVENTED_NAMES) == [longer]
 

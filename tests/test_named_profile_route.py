@@ -498,7 +498,8 @@ def test_the_tables_name_both_actions():
     assert MESSAGE.action in writes.TYPING_ACTIONS
     assert MESSAGE.action in writes.OPEN_THEN_TYPE_ACTIONS
     assert CONNECT.action not in writes.TYPING_ACTIONS
-    assert MESSAGE.action not in writes.ADDRESSED_TYPING_ACTIONS
+    # (ADDRESSED_TYPING_ACTIONS, the set that typed a RECIPIENT, left with
+    # send_message on 2026-09-27; this action never typed one.)
     assert MESSAGE.action not in writes.REPLY_ACTIONS
 
 

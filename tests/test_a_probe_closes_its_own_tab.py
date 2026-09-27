@@ -59,7 +59,11 @@ CLOSES_CONTEXT = re.compile(
 
 #: How many session-opening scripts do NOT close their tab, as measured on
 #: 2026-09-05. **MAY ONLY DECREASE.** Lower it in the commit that fixes one.
-LEAKING_AT_LAST_COUNT = 39
+#: 39 -> 38 on 2026-09-27: scripts/_probe_typeahead_commit.py, one of the
+#: leaking scripts, was deleted with the send_message write it probed
+#: (retired on lane L5's order of 23:36; it was aimed by a name) -- a
+#: decrease by deletion rather than by a fix, said so.
+LEAKING_AT_LAST_COUNT = 38
 
 
 def _sources() -> list[tuple[str, str]]:

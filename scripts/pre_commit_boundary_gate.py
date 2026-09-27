@@ -389,7 +389,8 @@ def main() -> int:
     # PARALLELISE ONLY A BIG PLAN, AND THE THRESHOLD IS MEASURED RATHER THAN
     # GUESSED. ``-n`` pays a fixed per-worker startup, so on a small set it is
     # a LOSS: measured 2026-09-19 on tests/test_click_is_not_its_own_evidence.py
-    # -- 29 tests, one file -- serial 26.10s against 31.74s at ``-n 8``. On the
+    # -- 29 tests, one file, deleted on 2026-09-27 with the send_message write
+    # it tested -- serial 26.10s against 31.74s at ``-n 8``. On the
     # whole suite it is a win: 913s serial against 601s, and that comparison was
     # taken while a neighbour's suite competed for the same cores, so the real
     # margin is wider.

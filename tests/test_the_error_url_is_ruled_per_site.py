@@ -152,7 +152,7 @@ DECLARED: dict[tuple[str, str], tuple[str, int]] = {
     ("dom.py", "read_self_owned_editor_values"): (WITHHELD, 1),
     ("dom.py", "read_own_activity_items"): (WITHHELD, 1),
     ("dom.py", "read_compose_modes"): (WITHHELD, 1),
-    ("dom.py", "read_selected_recipients"): (WITHHELD, 1),
+    # (``read_selected_recipients`` left with send_message, 2026-09-27.)
     ("dom.py", "read_job_insight_panels"): (WITHHELD, 1),
     ("dom.py", "read_profile_views_insights"): (WITHHELD, 1),
     ("dom.py", "read_search_appearances"): (WITHHELD, 1),
@@ -201,8 +201,9 @@ DECLARED: dict[tuple[str, str], tuple[str, int]] = {
     ("dom.py", "compose_recipient_selector"): (NO_ADDRESS_IN_SCOPE, 1),
     ("dom.py", "compose_send_selector"): (NO_ADDRESS_IN_SCOPE, 1),
     ("dom.py", "comment_submit_selector"): (NO_ADDRESS_IN_SCOPE, 1),
-    ("dom.py", "escaped_needle"): (NO_ADDRESS_IN_SCOPE, 1),
-    ("dom.py", "_typeahead_selector_named"): (NO_ADDRESS_IN_SCOPE, 1),
+    # (``escaped_needle`` and ``_typeahead_selector_named`` -- the typeahead
+    # family -- left with send_message on 2026-09-27: RETIRED on lane L5's
+    # order of 23:36, because it was aimed by a name.)
 }
 
 
@@ -527,20 +528,28 @@ def test_the_twenty_are_still_twenty():
     never part of that count; they are asserted separately so a reader cannot
     confuse the two.
 
-    TWENTY-TWO FROM 2026-09-28 (lane S, the offline frontier): two readers
-    outside dom.py -- ``presence.read_suggested_presence`` and
+    TWENTY-ONE FROM 2026-09-28, at lane S's merge of master 0867bda (the
+    offline frontier): two readers outside dom.py --
+    ``presence.read_suggested_presence`` and
     ``recruiter_views.read_recruiter_views`` -- raise under the WITHHELD ruling
-    with the same describer, so WITHHELD is 14. The name stays: it is the
+    with the same describer, on top of master's nineteen, so WITHHELD is 13.
+    MEASURED off the merged table, not summed. The name stays: it is the
     number this file was written about.
     """
     tally: dict[str, int] = {}
     for verdict, count in DECLARED.values():
         tally[verdict] = tally.get(verdict, 0) + count
-    assert tally[WITHHELD] == 14, tally
+    # NINETEEN SINCE 2026-09-27, AND THE NAME STAYS FOR ITS HISTORY: the
+    # WITHHELD site ``dom.read_selected_recipients`` and two NO_ADDRESS_IN_SCOPE
+    # rows (``escaped_needle``, ``_typeahead_selector_named``) left dom.py with
+    # send_message, RETIRED on lane L5's order of 23:36 because it was aimed by
+    # a name. 12 -> 11 WITHHELD, 20 -> 19 in all, 12 -> 10 out of scope.
+    # TWENTY-ONE AT LANE S'S MERGE (above): 11 -> 13 WITHHELD.
+    assert tally[WITHHELD] == 13, tally
     assert tally[ASKED_FOR] == 7, tally
     assert tally[PASSTHROUGH] == 1, tally
-    assert tally[WITHHELD] + tally[ASKED_FOR] + tally[PASSTHROUGH] == 22, tally
-    assert tally[NO_ADDRESS_IN_SCOPE] == 12, tally
+    assert tally[WITHHELD] + tally[ASKED_FOR] + tally[PASSTHROUGH] == 21, tally
+    assert tally[NO_ADDRESS_IN_SCOPE] == 10, tally
 
 
 # ---------------------------------------------------------------------------
@@ -680,7 +689,10 @@ def test_every_feeder_and_describer_name_exists():
 def test_there_are_sites_to_rule_on():
     """A RULE ASSERTED OVER ZERO SITES IS A GREEN TEST THAT CHECKS NOTHING."""
     sites = _all_sites()
-    assert len(sites) >= 30, len(sites)
+    # 30 UNTIL 2026-09-27, over 32 sites; 27 since, over the 29 measured once
+    # three left with send_message's retirement -- the same slack. A floor
+    # against VACUITY, not a count: the declaration table above is exact.
+    assert len(sites) >= 27, len(sites)
     assert any(s["has_url"] for s in sites), "no site publishes a url"
     assert any(not s["has_url"] for s in sites), "no site withholds one"
     assert any(s["hint_describes"] for s in sites), "no site describes a landing"

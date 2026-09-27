@@ -42,6 +42,9 @@ ASSERTIONS, because a map that cannot fail certifies nothing:
   * no row may carry two blockers (the ledger's own rule is
     one blocker per row, the earliest binding constraint)     -> else FAIL
   * assigned + unassigned must equal the frozen GAP total     -> else FAIL
+  * with --check, the committed map must BE the derived map,
+    every column of every line (line endings normalised)      -> else FAIL,
+    naming each row and column that moved
 
     ./venv/Scripts/python.exe scripts/build_blocker_map.py --write
     ./venv/Scripts/python.exe scripts/build_blocker_map.py --check
@@ -525,22 +528,98 @@ def main(argv: list[str] | None = None) -> int:
     print("  the cell carries RANK and SCORE, never a bare path: the locator's "
           "measured at-rank-1 is 4 of 8 (see find_blocker_reason.py)")
 
+    text = render(gap, current, assign, marks, published, reason)
     if args.write and not fail:
-        lines = ["row_id\tblocker\tevidence_class\tsource\tlocator\t"
-                 "state_at_freeze\tstate_today\tcapability\tnote\treason_doc"]
-        for rid in sorted(gap, key=lambda s: (s[0], len(s), s)):
-            b, klass, source, locator, note = assign.get(
-                rid, unassigned_row(rid, marks, published))
-            txt = gap[rid][1].replace("\t", " ").replace("|", "/")[:110]
-            lines.append(f"{rid}\t{b}\t{klass}\t{source}\t{locator}\t"
-                         f"GAP\t{current.get(rid, 'ROW-GONE')}\t{txt}\t{note}\t"
-                         f"{reason.get(b, 'NO-BLOCKER-ASSIGNED')}")
-        MAP_OUT.write_text("\n".join(lines) + "\n", encoding="ascii", errors="replace")
+        MAP_OUT.write_text(text, encoding="ascii", errors="replace", newline="\n")
         print(f"\nwrote {MAP_OUT.relative_to(ROOT).as_posix()}  "
-              f"{len(lines) - 1} data lines")
+              f"{text.count(chr(10)) - 1} data lines")
     elif args.write:
         print("\nNOT WRITTEN -- assertions failed above")
+    if args.check:
+        stale = drift(committed(), text)
+        if stale:
+            print(f"\n  FAIL: {MAP_OUT.relative_to(ROOT).as_posix()} is not what "
+                  f"this generator derives -- {len(stale)} line(s) differ, "
+                  f"first {min(len(stale), 5)}:")
+            for line in stale[:5]:
+                print(f"    {line}")
+            print("    Re-run with --write. The map is DERIVED; never hand-edit it.")
+            fail = 1
+        else:
+            print(f"\nthe committed map is the derived map, every column of "
+                  f"every line")
     return 1 if fail else 0
+
+
+#: THE MAP'S COLUMNS, in the order written. Named so a drift report says WHICH
+#: column moved, not just which row.
+COLUMNS = ("row_id", "blocker", "evidence_class", "source", "locator",
+           "state_at_freeze", "state_today", "capability", "note", "reason_doc")
+
+
+def render(gap, current, assign, marks, published, reason) -> str:
+    """The whole map file, exactly as ``--write`` writes it.
+
+    ONE RENDERING FOR BOTH MODES (2026-09-28). ``--check`` used to assert the
+    map's structure and never read the committed file at all, while the test
+    compared two of its ten columns -- so on 2026-09-27 master carried a map
+    whose ``reason_doc`` column the generator no longer produced for that
+    tree, and every check was green. Both now compare THIS text with the
+    committed file, whole.
+    """
+    lines = ["\t".join(COLUMNS)]
+    for rid in sorted(gap, key=lambda s: (s[0], len(s), s)):
+        b, klass, source, locator, note = assign.get(
+            rid, unassigned_row(rid, marks, published))
+        txt = gap[rid][1].replace("\t", " ").replace("|", "/")[:110]
+        lines.append(f"{rid}\t{b}\t{klass}\t{source}\t{locator}\t"
+                     f"GAP\t{current.get(rid, 'ROW-GONE')}\t{txt}\t{note}\t"
+                     f"{reason.get(b, 'NO-BLOCKER-ASSIGNED')}")
+    # What ``write_text(..., encoding="ascii", errors="replace")`` stores, so
+    # the comparison is against the bytes a write would produce.
+    return ("\n".join(lines) + "\n").encode("ascii", errors="replace").decode("ascii")
+
+
+def derived_text(built=None) -> str:
+    """The map this generator derives from the tree now -- what ``--write``
+    would write -- from ``build()``'s result, computed here when not given."""
+    gap, current, assign, _problems = built if built is not None else build()
+    marks, _mark_problems = probe_marks()
+    return render(gap, current, assign, marks, ledger_counts(), reason_doc_column(assign))
+
+
+def committed(root: pathlib.Path | None = None) -> str:
+    """The committed map, line endings normalised: a checkout with
+    ``core.autocrlf`` holds the same committed bytes as CRLF."""
+    path = MAP_OUT if root is None else root / MAP_OUT.relative_to(ROOT)
+    if not path.is_file():
+        return ""
+    return path.read_bytes().decode("ascii", errors="replace").replace("\r\n", "\n")
+
+
+def drift(have: str, want: str) -> list[str]:
+    """Every difference between the committed map and the derived one, as a
+    line naming the row and each COLUMN that differs. Empty when they are the
+    same text, and only then."""
+    if have == want:
+        return []
+    theirs, mine = have.splitlines(), want.splitlines()
+    out: list[str] = []
+    for number, (one, two) in enumerate(zip(theirs, mine), 1):
+        if one == two:
+            continue
+        a, b = one.split("\t"), two.split("\t")
+        if len(a) != len(b):
+            out.append(f"line {number}: {len(a)} fields committed, {len(b)} derived")
+            continue
+        moved = [COLUMNS[i] if i < len(COLUMNS) else f"field {i}"
+                 for i, (x, y) in enumerate(zip(a, b)) if x != y]
+        out.append(f"line {number} ({b[0]}): column(s) {', '.join(moved)}")
+    if len(theirs) != len(mine):
+        out.append(f"{len(theirs)} lines committed, {len(mine)} derived")
+    if not out:
+        out.append("the texts differ outside any line (a trailing newline or byte)")
+    return out
 
 
 if __name__ == "__main__":

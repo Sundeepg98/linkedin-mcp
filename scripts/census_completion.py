@@ -1111,14 +1111,20 @@ PINNED = {
     #: `N 2`, `N 4`, `M M1` both carried. Each side had moved this figure by
     #: three from the same base, and git merged the two equal value lines as
     #: one -- three short -- which the measurement caught.
-    #: 187 AT LANE S'S OFFLINE FRONTIER (2026-09-28), MEASURED: the five rows
-    #: bucket 3 called blocked on nothing, taken one by one. `M M53`, `N 195`
-    #: and `P S5` (three R rows ADMITTED and gated READER) and `J 107` (the one
-    #: jobs row) GAP -> COVERED-UNFIRED, each built over a capture or on a
-    #: shipped page and never fired, so they leave buckets 3 and 1-by-side and
-    #: enter bucket 1 held by no ruling. `P K1` stays GAP and is re-gated
-    #: READER -> MEASURE: no capture draws its section.
-    "adjudicated": 187,
+    #: 179 ON LANE L5'S ORDER OF 2026-09-27 23:36, MEASURED:
+    #: `linkedin_send_message` RETIRED (aimed by a name): `M M2` returned to
+    #: GAP, its only tool retired.
+    #: 182 AT LANE L5'S MERGE OF MASTER 64afa6c (2026-09-27), MEASURED on the merged tree: master's figure with this branch's `M M2` back to GAP.
+    #: 187 AT LANE S'S OFFLINE FRONTIER (2026-09-28, on its branch), MEASURED:
+    #: the five rows bucket 3 called blocked on nothing, taken one by one.
+    #: `M M53`, `N 195` and `P S5` (three R rows ADMITTED and gated READER)
+    #: and `J 107` (the one jobs row) GAP -> COVERED-UNFIRED, each built over
+    #: a capture or on a shipped page and never fired, so they leave buckets 3
+    #: and 1-by-side and enter bucket 1 held by no ruling. `P K1` stays GAP
+    #: and is re-gated READER -> MEASURE: no capture draws its section.
+    #: 186 AT LANE S'S MERGE OF MASTER 0867bda (2026-09-28), MEASURED on the
+    #: merged tree: master's `M M2` back to GAP with this branch's four.
+    "adjudicated": 186,
     #: THE LIVE LANE'S FOUR ROWS, RE-DERIVED AT EACH OF ITS MERGES OF MASTER
     #: (2026-09-24; last over lane S): four rows fired live and banked
     #: (`_audit/2026-09-23-live-lane-session-1.md`). `P G6` COVERED-UNFIRED ->
@@ -1163,14 +1169,17 @@ PINNED = {
     #: `N 2`, `N 4`, `M M1` both carried. Each side had moved this figure by
     #: three from the same base, and git merged the two equal value lines as
     #: one -- three short -- which the measurement caught.
-    #: 127 AT LANE S'S OFFLINE FRONTIER (2026-09-28), MEASURED: the five rows
-    #: bucket 3 called blocked on nothing, taken one by one. `M M53`, `N 195`
-    #: and `P S5` (three R rows ADMITTED and gated READER) and `J 107` (the one
-    #: jobs row) GAP -> COVERED-UNFIRED, each built over a capture or on a
-    #: shipped page and never fired, so they leave buckets 3 and 1-by-side and
-    #: enter bucket 1 held by no ruling. `P K1` stays GAP and is re-gated
-    #: READER -> MEASURE: no capture draws its section.
-    "delivered_broad": 127,
+    #: 121 ON LANE L5'S ORDER OF 2026-09-27 23:36, MEASURED:
+    #: `linkedin_send_message` RETIRED (aimed by a name): `N 155`
+    #: COVERED-CANNOT-DELIVER -> COVERED-UNFIRED on
+    #: `linkedin_message_from_profile`.
+    #: 124 AT LANE L5'S MERGE OF MASTER 64afa6c (2026-09-27), MEASURED on the merged tree: master's figure with this branch's `N 155`.
+    #: 127 AT LANE S'S OFFLINE FRONTIER (2026-09-28, on its branch), MEASURED:
+    #: `M M53`, `N 195`, `P S5` and `J 107` GAP -> COVERED-UNFIRED (see
+    #: `adjudicated`).
+    #: 128 AT LANE S'S MERGE OF MASTER 0867bda (2026-09-28), MEASURED on the
+    #: merged tree: master's `N 155` with this branch's four.
+    "delivered_broad": 128,
     #: 79 since the live lane's merge (see `adjudicated`): P G6, N 134, P O3
     #: and M C72 COVERED-PROVEN.
     #: 75 and 21 since the bucket-1 merge: `M C41` fired live and moved from
@@ -1194,7 +1203,6 @@ PINNED = {
     #: +1 `P A23b`, -2 built (`M C63`, `N 64`), -2 re-excluded (`P N27`,
     #: `P P2`).
     #: 590 AT LANE L5'S MERGE OF MASTER 52b55b6 (2026-09-27), MEASURED: `N 4` built (`linkedin_connect_from_profile`), by D6.
-    #: 18 AT LANE L5'S MERGE OF MASTER 52b55b6 (2026-09-27), MEASURED: `M M1` built (`linkedin_message_from_profile`).
     #: 588 AT LANE S'S NAMES ADOPTION (2026-09-27), MEASURED: `N 79`, `N 172`
     #: and `N 194` GAP -> COVERED-UNFIRED, now that
     #: `linkedin_people_search_shape(include_names=True)` returns WHO as people
@@ -1207,15 +1215,23 @@ PINNED = {
     #: `N 2`, `N 4`, `M M1` both carried. Each side had moved this figure by
     #: three from the same base, and git merged the two equal value lines as
     #: one -- three short -- which the measurement caught.
-    #: 583 AT LANE S'S OFFLINE FRONTIER (2026-09-28), MEASURED: the five rows
-    #: bucket 3 called blocked on nothing, taken one by one. `M M53`, `N 195`
-    #: and `P S5` (three R rows ADMITTED and gated READER) and `J 107` (the one
-    #: jobs row) GAP -> COVERED-UNFIRED, each built over a capture or on a
-    #: shipped page and never fired, so they leave buckets 3 and 1-by-side and
-    #: enter bucket 1 held by no ruling. `P K1` stays GAP and is re-gated
-    #: READER -> MEASURE: no capture draws its section.
-    "gap": 583,
-    "cannot_deliver": 18,
+    #: 591 ON LANE L5'S ORDER OF 2026-09-27 23:36, MEASURED:
+    #: `linkedin_send_message` RETIRED (aimed by a name): `M M2`
+    #: COVERED-CANNOT-DELIVER -> GAP.
+    #: 588 AT LANE L5'S MERGE OF MASTER 64afa6c (2026-09-27), MEASURED on the merged tree: master's figure with this branch's `M M2`.
+    #: 583 AT LANE S'S OFFLINE FRONTIER (2026-09-28, on its branch), MEASURED:
+    #: `M M53`, `N 195`, `P S5` and `J 107` left GAP (see `adjudicated`).
+    #: 584 AT LANE S'S MERGE OF MASTER 0867bda (2026-09-28), MEASURED on the
+    #: merged tree: master's `M M2` back in GAP, this branch's four out.
+    "gap": 584,
+    #: 18 AT LANE L5'S MERGE OF MASTER 52b55b6 (2026-09-27), MEASURED: `M M1` built (`linkedin_message_from_profile`).
+    #: 16 ON LANE L5'S ORDER OF 2026-09-27 23:36, MEASURED:
+    #: `linkedin_send_message` RETIRED (aimed by a name): `M M2` to GAP and `N
+    #: 155` to COVERED-UNFIRED.
+    #: 16 AT LANE L5'S MERGE OF MASTER 64afa6c (2026-09-27), MEASURED on the merged tree: master moved none of these.
+    #: 16 AT LANE S'S MERGE OF MASTER 0867bda (2026-09-28), MEASURED on the
+    #: merged tree: lane S moved none of these.
+    "cannot_deliver": 16,
     #: 36 AT THE ORCHESTRATOR'S MERGE OF LANE L7'S P B9 (2026-09-27), MEASURED: P B9
     #: (Premium badge) moved GAP -> COVERED-UNFIRED, released like the intro edits.
     #: 38 AT LANE L8'S MERGE OF MASTER (2026-09-27), MEASURED: `M C63` and
@@ -1235,14 +1251,16 @@ PINNED = {
     #: `N 2`, `N 4`, `M M1` both carried. Each side had moved this figure by
     #: three from the same base, and git merged the two equal value lines as
     #: one -- three short -- which the measurement caught.
-    #: 48 AT LANE S'S OFFLINE FRONTIER (2026-09-28), MEASURED: the five rows
-    #: bucket 3 called blocked on nothing, taken one by one. `M M53`, `N 195`
-    #: and `P S5` (three R rows ADMITTED and gated READER) and `J 107` (the one
-    #: jobs row) GAP -> COVERED-UNFIRED, each built over a capture or on a
-    #: shipped page and never fired, so they leave buckets 3 and 1-by-side and
-    #: enter bucket 1 held by no ruling. `P K1` stays GAP and is re-gated
-    #: READER -> MEASURE: no capture draws its section.
-    "unfired": 48,
+    #: 42 ON LANE L5'S ORDER OF 2026-09-27 23:36, MEASURED:
+    #: `linkedin_send_message` RETIRED (aimed by a name): `N 155` on
+    #: `linkedin_message_from_profile`, never fired.
+    #: 45 AT LANE L5'S MERGE OF MASTER 64afa6c (2026-09-27), MEASURED on the merged tree: master's figure with this branch's `N 155`.
+    #: 48 AT LANE S'S OFFLINE FRONTIER (2026-09-28, on its branch), MEASURED:
+    #: `M M53`, `N 195`, `P S5` and `J 107` COVERED-UNFIRED, never fired
+    #: (see `adjudicated`).
+    #: 49 AT LANE S'S MERGE OF MASTER 0867bda (2026-09-28), MEASURED on the
+    #: merged tree: master's `N 155` with this branch's four.
+    "unfired": 49,
     #: 104 AT THE ORCHESTRATOR'S MERGE OF LANE Y2'S FOLLOW-UP (2026-09-27), MEASURED:
     #: the P-R settings block itemized into 22 rows (P2-P23; Delete Data EXCLUDED-RULED).
     #: 101 AT LANE S'S NAMES ADOPTION (2026-09-27), MEASURED: `N 79`, `N 172`
@@ -1294,7 +1312,10 @@ PINNED = {
     #: `N 125` counted as a W row once its R/W cell read `W`.
     #: 377 AT LANE L5'S MERGE OF MASTER 52b55b6 (2026-09-27), MEASURED: `N 4`, a W row, left GAP; its write-classes line stays,
     #: built.
-    "gap_write": 377,
+    #: 378 ON LANE L5'S ORDER OF 2026-09-27 23:36, MEASURED:
+    #: `linkedin_send_message` RETIRED (aimed by a name): `M M2`, a W row,
+    #: classed R2 in write-classes.tsv, queued on C-P5.
+    "gap_write": 378,
     #: All 54 are `jobs.md`, which has no per-row R/W column (56 until the
     #: lane-L3 merge built J 18 and J 39). Not a coincidence
     #: and not a defect in the finder: it is the whole of that slice's still-GAP
@@ -1538,7 +1559,10 @@ PINNED = {
     #: (OPERATOR-NAMES-THE-TARGET).
     #: 18 AT LANE L5'S MERGE OF MASTER 52b55b6 (2026-09-27), MEASURED: `M M1`, `N 4` and `N 2`, three W rows the write hold
     #: binds with no marker (OPERATOR-NAMES-THE-TARGET).
-    "b1_standing": 18,
+    #: 19 ON LANE L5'S ORDER OF 2026-09-27 23:36, MEASURED:
+    #: `linkedin_send_message` RETIRED (aimed by a name): `N 155` entered
+    #: bucket 1, held by OPERATOR-NAMES-THE-TARGET.
+    "b1_standing": 19,
     "b1_relayed": 0,
     "b1_pending": 0,
     #: 22 AT THE ORCHESTRATOR'S MERGE OF LANE D (2026-09-27), MEASURED: lane D
@@ -1669,10 +1693,15 @@ PINNED_B1_ROWS: dict[str, tuple[str, ...]] = {
     #: `linkedin_connect_from_profile`; `N 4` by D6, `N 2` on the orchestrator's
     #: application of THIRD-PARTY-PROFILE-FOR-A-NAMED-TARGET), built offline and
     #: never fired. Held until he names the person -- never a stranger.
+    #: `N 155` entered ON LANE L5'S ORDER OF 2026-09-27 23:36, MEASURED:
+    #: COVERED-CANNOT-DELIVER -> COVERED-UNFIRED once `linkedin_send_message`
+    #: was RETIRED (aimed by a name) -- the same capability as `M M1`, on
+    #: `linkedin_message_from_profile`, never fired. Held until he names the
+    #: person.
     "OPERATOR-NAMES-THE-TARGET": (
         "J 103", "J 104", "J 128",
         "M C1", "M C25", "M C32", "M C63", "M M1", "M M10", "M M17",
-        "N 1", "N 2", "N 4", "N 46", "N 47", "N 48", "N 64",
+        "N 1", "N 2", "N 4", "N 46", "N 47", "N 48", "N 64", "N 155",
         "P I14",
     ),
     #: `J 18` and `J 39` entered with the lane-L3 merge, 2026-09-23: reads

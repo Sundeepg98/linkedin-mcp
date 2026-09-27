@@ -53,7 +53,7 @@ from tests import test_send_reply as reply
 from tests.test_messaging_threads import COMPOSE_LIST, THREAD, _derive
 from tests.test_named_profile_route import LINK, PROFILE, _Navigator
 from tests.test_writes import browser_page, writes_on  # noqa: F401 -- fixtures
-from tests.test_writes_nine import MEMBER, _preview_the_refusal
+from tests.test_writes_nine import MEMBER, MEMBER_LINK, _preview_the_refusal
 
 NAME_CAP = people_data.CAPS["name"]
 HEADLINE_CAP = people_data.CAPS["headline"]
@@ -190,10 +190,14 @@ async def test_the_invitation_recipient_comes_out_of_the_seam(writes_on, browser
 
 async def test_the_invitation_recipient_is_the_seams_record_unpatched(writes_on, browser_page):
     """And unpatched, it is exactly the record the seam builds for that name
-    -- no field the seam would not set, the headline ABSENT."""
+    -- no field the seam would not set, the headline ABSENT. SINCE 2026-09-27
+    the record's link is HIS: the invitation is aimed by the profile link he
+    supplies (lane L5, the orchestrator's order of 23:36), so the link on the
+    record is the one his aim selected with, never one the page drew."""
     block, _nav = await _preview_the_refusal(browser_page, "send_invitation")
-    assert block["who_this_would_reach"] == people_seam.person(name=MEMBER)
+    assert block["who_this_would_reach"] == people_seam.person(name=MEMBER, href=MEMBER_LINK)
     assert block["who_this_would_reach"]["headline"] is None
+    assert block["who_this_would_reach"]["link"] == MEMBER_LINK
 
 
 # ---------------------------------------------------------------------------

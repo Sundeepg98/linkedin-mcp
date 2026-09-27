@@ -29,9 +29,12 @@ performable action with an opaque target kind must satisfy ONE of two things:
     REJECTS a target that is not the measured shape -- proven here by building
     a url from garbage and asserting the pattern refuses it; or
   * its ``url_template`` never interpolates the target at all, so the target
-    cannot reach a navigation. ``send_invitation`` is this case: its target is
-    a NEEDLE, which has no shape to enforce, and its aiming is done by
-    ``aim_invitation`` refusing anything but exactly one match.
+    cannot reach a navigation. ``send_invitation`` WAS this case until
+    2026-09-27: its target was a NEEDLE, which had no shape to enforce, and
+    its aiming was ``aim_invitation`` refusing anything but exactly one match.
+    It left the opaque kinds that day (lane L5): its target is the person's
+    profile LINK, parsed by ``named_profile.profile_segment``, and it still
+    never reaches a navigation -- the action lands on his own profile.
 
 A prose warning nobody re-reads is how this became stale in the first place.
 """
@@ -78,19 +81,10 @@ def test_an_opaque_target_is_constrained_before_it_can_reach_a_url(action):
     spec = writes.spec_for_action(action)
     assert spec.url_template is not None, action
 
-    if spec.target_kind == "member":
-        # A NEEDLE HAS NO SHAPE TO ENFORCE, so the rule for it is absolute
-        # rather than pattern-based: it must never reach a url at all. Stated
-        # as its own assertion rather than inferred from the template's
-        # current text, because "there is no {target} today" and "a needle may
-        # never be interpolated" are different claims and only the second is
-        # the rule. FOUND BY MUTATION: a template that started interpolating
-        # passed the shape-inferred version of this check.
-        assert "{target}" not in spec.url_template, (
-            "%s addresses a NEEDLE -- the operator's own word for a person -- "
-            "and its url_template interpolates it. A needle in a url is a "
-            "third party's identity in a navigation." % action
-        )
+    # (A ``member`` branch stood here until 2026-09-27: a NEEDLE had no shape
+    # to enforce, so it was asserted never to reach a url at all. The kind
+    # left with the needle; the invitation's link is held to the same rule in
+    # ``tests/test_an_invitation_is_aimed_by_a_link.py``.)
 
     if "{target}" not in spec.url_template:
         # ROUTE TWO: the target never reaches a navigation. Assert that

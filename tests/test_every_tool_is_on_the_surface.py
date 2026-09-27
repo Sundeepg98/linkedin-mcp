@@ -342,6 +342,11 @@ def test_both_rules_reject_the_registry_that_was_actually_measured():
     # eight on that branch), on top of master's fifty-seven -- measured off the
     # merged registry, not summed, and moved with every other count site in
     # the merge commit.
-    # SIXTY-ONE ON LANE S'S BRANCH, 2026-09-28: linkedin_recruiter_insights
-    # (census N 195) and linkedin_messaging_presence (census M M53), two READS.
-    assert len(_tool_names()) == 61
+    # FIFTY-EIGHT ON LANE L5'S ORDER OF 2026-09-27 23:36: linkedin_send_message
+    # RETIRED -- aimed by a name -- measured off the registry and moved with
+    # every other count site in the same commit.
+    # SIXTY AT LANE S'S MERGE OF MASTER 0867bda, 2026-09-28: two READS from its
+    # branch (sixty-one there), linkedin_recruiter_insights (census N 195) and
+    # linkedin_messaging_presence (census M M53), on top of master's
+    # fifty-eight -- measured off the merged registry, not summed.
+    assert len(_tool_names()) == 60

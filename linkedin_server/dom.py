@@ -1031,8 +1031,9 @@ async def read_company_about_card(page: Any) -> dict[str, Any]:
     except Exception as exc:
         # THE EXCEPTION'S TYPE, NEVER ITS TEXT -- here and at every returned
         # `error`/`why` in this module that a failing read can reach (the one
-        # kept exception, in read_typeahead_options, says why). A library's
-        # message can quote a selector carrying his needle, a request, or the
+        # kept exception was in read_typeahead_options, which left with
+        # send_message on 2026-09-27). A library's
+        # message can quote a selector carrying his target, a request, or the
         # page itself, and write gates print this field in their refusals.
         # Decided where the value enters (ERROR-MESSAGE-RULED-AT-THE-RAISE);
         # held by tests/test_readers_emit_no_page_string.py's failing-page tests.
@@ -3098,9 +3099,18 @@ async def read_apply_modal(page: Any) -> dict[str, Any]:
 #: costume of a limit -- the server's own verdict said InMails were
 #: unreachable "without interacting with the page, which it does not do", and
 #: that clause was a decision, not a wall.
+#:
+#: FIVE SINCE LANE L5'S ORDER OF 2026-09-27 23:36, SEVEN UNTIL THEN. The set
+#: also held ``focused`` and ``other``, and neither is a pill: on the measured
+#: page they are the FOLDER dropdown's choices, beside the filter bar (see
+#: :data:`FILTER_BAR_HOOK`), and lane G's bar scoping had already made the
+#: activator refuse both on every page -- so two accepted values could never
+#: be activated, and asking for one cost the tool's two page loads before it
+#: said so. They are gone from the set, from the tool's schema (an enum) and
+#: from its description, and the tool now checks the value BEFORE any page is
+#: loaded. Choosing a folder is a different act on a different control, and
+#: nothing here performs it.
 MESSAGING_FILTERS: tuple[str, ...] = (
-    "focused",
-    "other",
     "unread",
     "jobs",
     "connections",
@@ -3124,7 +3134,9 @@ MESSAGING_FILTERS: tuple[str, ...] = (
 #: WHICH pill it is, never WHETHER it is one. Until 2026-09-27 the activator
 #: asked the page for any button whose name equalled the word, and ``focused``
 #: pressed the folder trigger. ``focused`` and ``other`` are the folder's
-#: choices on the measured page, not pills, so both are now refused.
+#: choices on the measured page, not pills, so both were refused here -- and
+#: since lane L5's order of 2026-09-27 23:36 neither is an accepted value at
+#: all (:data:`MESSAGING_FILTERS`).
 FILTER_BAR_HOOK = "data-test-messaging-inbox-filters__filter-pill-group"
 FILTER_PILL_HOOK = "data-test-messaging-inbox-filters__filter-pill"
 FILTER_BAR_SELECTOR = "main [" + FILTER_BAR_HOOK + "]"
@@ -3176,8 +3188,9 @@ def assert_permitted_filter(name: str) -> str:
     """The closed-set check, unchanged, and still done BEFORE anything else.
 
     The narrowing was never the bug. The permission granted is to activate one
-    of seven named pills, not to press things on a page, and that is enforced
-    here before any locator exists.
+    of five named pills (seven until 2026-09-27: ``focused`` and ``other``, the
+    folder's choices, are gone -- see :data:`MESSAGING_FILTERS`), not to press
+    things on a page, and that is enforced here before any locator exists.
     """
     wanted = str(name or "").strip().lower()
     if wanted not in MESSAGING_FILTERS:
@@ -4017,8 +4030,9 @@ async def read_file_inputs(
     whether they are disabled, and which container each sits in. It cannot
     hand back a name to build a selector from, and it is not meant to: a
     future ``_live_control`` arm must compare a needle against an accessible
-    name INSIDE THE PAGE, the way ``_typeahead_gate`` already does, so that no
-    string crosses the boundary in either direction.
+    name INSIDE THE PAGE, the way ``_typeahead_gate`` did until it was retired
+    with ``send_message`` on 2026-09-27, so that no string crosses the boundary
+    in either direction.
 
     ``ambiguous`` IS THE FIELD THAT DECIDES A WIRING. Aiming needs exactly one
     candidate. Measured on the two surfaces this project has read: the message
@@ -4647,9 +4661,10 @@ async def read_self_owned_editor_fields(
 #   Publishing ``value`` here would answer a different question in the same
 #   slot, which is how a caller ends up restoring the wrong thing.
 #
-# Withheld IN THE PAGE, for the reason ``INVITE_NEEDLE_JS`` does its
-# comparison there: a string that reaches this process can reach a traceback
-# or a log line, and no care downstream un-rings that.
+# Withheld IN THE PAGE, for the reason ``INVITE_NEEDLE_JS`` did its
+# comparison there (retired 2026-09-27 with the needle): a string that reaches
+# this process can reach a traceback or a log line, and no care downstream
+# un-rings that.
 #
 # TEN FIELDS PER CONTROL, enumerated rather than summarised for the reason the
 # label reader's ten are -- this module has dropped a field by describing a
@@ -5090,7 +5105,8 @@ async def read_self_owned_editor_values(
 #
 # NO NAME AND NO HEADING TEXT LEAVES THE PAGE. The C3 comparison happens
 # INSIDE the document and only booleans come out -- the same discipline
-# :data:`INVITE_NEEDLE_JS` keeps, and for the same reason: a string that
+# ``INVITE_NEEDLE_JS`` kept until it retired on 2026-09-27, and for the same
+# reason: a string that
 # reaches Python can reach a traceback, a cache key or a log line. The author
 # string and the ``h1`` text are read, compared and discarded in the page;
 # neither is in this script's return value, and there is nothing for the
@@ -5851,21 +5867,22 @@ async def read_own_activity_items(
 # now and here is what was there" is a different artefact from "somebody
 # looked once in August", and the second is what goes stale silently.
 #
-# WHY ALMOST NO ``page.evaluate`` BELOW, AND WHY EXACTLY ONE. This comment
-# read "WHY NO ``page.evaluate`` ANYWHERE BELOW" until 2026-08-31 and it is
-# quoted rather than deleted, because the trade it describes is still the
-# right one for six of these seven readers: an injected script has to be
-# declared in ``test_readonly.py``'s ``INJECTED_SCRIPTS`` and put through the
-# JS mutation scanner, and a locator chain injects nothing.
+# WHY NO ``page.evaluate`` BELOW -- AGAIN, SINCE 2026-09-27. This comment
+# read "WHY NO ``page.evaluate`` ANYWHERE BELOW" until 2026-08-31, then "WHY
+# ALMOST NO ``page.evaluate`` BELOW, AND WHY EXACTLY ONE", and it is quoted
+# rather than deleted, because the trade it describes is the right one for all
+# seven of these readers again: an injected script has to be declared in
+# ``test_readonly.py``'s ``INJECTED_SCRIPTS`` and put through the JS mutation
+# scanner, and a locator chain injects nothing.
 #
-# ``INVITE_NEEDLE_JS`` is the exception and it BUYS something the other six do
-# not need. Their readers count controls; this one has to COMPARE a label
-# against a needle, and the label is a third party's name. A locator chain
-# doing that comparison in Python would have to fetch the label into this
-# process first, which is the exact thing the ruling on this capability
-# forbids -- so here the cheap side of the trade is the unacceptable one. The
-# script pays a boundary declaration in order to keep a name out of Python
-# entirely. See the constant for what it returns, which is three numbers.
+# ``INVITE_NEEDLE_JS`` WAS the exception, from 2026-08-31 to 2026-09-27, and it
+# bought something the other six did not need: its reader had to COMPARE a
+# label against a needle, and the label is a third party's name, so a locator
+# chain doing that comparison in Python would have fetched the label into this
+# process first. The needle left on lane L5's order of 2026-09-27 23:36 -- the
+# invitation is aimed by the person's profile LINK -- and a link comparison is
+# one an XPath locator makes in the page and answers with a COUNT
+# (:func:`rail_invite_control_selector`), so the exception left with it.
 
 #: The feed composer's entry control. MEASURED on ``/feed/`` 2026-08-30 as
 #: ``shape "Start a post", tag div, role button, name_source text,
@@ -6192,8 +6209,10 @@ COMMENT_EDITOR_LABEL = "Text editor for creating comment"
 
 #: THE COMPOSER'S TWO NAMED CONTROLS, measured 2026-09-01 on
 #: /messaging/compose/ with the badge at 0 either side, no redirect and zero
-#: dialogs. Recorded here because they were paid for and are the half of
-#: send_message's first clause that IS met.
+#: dialogs. Recorded here because they were paid for and were the half of
+#: send_message's first clause that WAS met. That action was RETIRED on
+#: 2026-09-27; both labels are still read, by ``read_thread_reply_surface``
+#: through the two selectors built from them.
 #:
 #: THE OTHER HALF IS NOT: the message BODY's aria-label and the two SEND-MODE
 #: radio labels all come back reduced by the census, and reading them needs a
@@ -6623,13 +6642,17 @@ async def read_compose_fields(page: Any) -> dict[str, Any]:
 
 
 # ---------------------------------------------------------------------------
-# The composer's WRITE path: three selectors and two readers
+# The composer's two selectors, and where a committed recipient might be drawn
 # ---------------------------------------------------------------------------
 #
-# NOTHING BELOW IS REACHED BY A READ TOOL. ``read_compose_fields`` above is the
-# read path and answers "which dispatch mode is checked" without returning a
-# label. These are for ``writes.perform``, which needs strings a fill and a
-# click can be aimed at.
+# THIS WAS THE COMPOSER'S WRITE PATH -- three selectors and two readers, for
+# ``writes.perform``'s ``send_message`` -- until that action was RETIRED on
+# 2026-09-27 (lane L5, the orchestrator's order of 23:36; it was aimed by a
+# NAME). What stays is what a READ still uses: the recipient and send
+# selectors, which ``read_thread_reply_surface`` counts, and the chip
+# spellings the messaging census probe reads. The body selector, the
+# selected-recipient script and its reader, the typeahead family and the send
+# state reader left with the action.
 
 
 def compose_recipient_selector() -> str:
@@ -6656,31 +6679,13 @@ def compose_recipient_selector() -> str:
     return 'role=combobox[name="' + MESSAGE_RECIPIENT_LABEL + '"s]'
 
 
-def compose_body_selector() -> str:
-    """The contenteditable a message's text is typed into. NO ARGUMENT.
-
-    **ADDRESSED BY ROLE ALONE, AND IT NEEDS NO LABEL.** That is the whole
-    reason this control was never a blocker: its ``aria-label`` comes back
-    ``<opaque>`` from the census, so a label-based selector was never
-    available -- and it was never needed, because ``div[role="textbox"]`` is
-    MEASURED at exactly ONE on this surface, corroborated by a
-    contenteditable count of one, on 2026-08-31 and again on 2026-09-02.
-
-    THE COUNT IS THE IDENTIFICATION and it is checked by the reader rather
-    than by this string: :func:`read_compose_modes` refuses
-    ``textbox_count_not_one`` before anything is typed. A selector that
-    matched two boxes would be aiming by document order, which is what that
-    refusal exists to prevent.
-    """
-    return 'div[role="textbox"]'
-
-
 def compose_send_selector() -> str:
     """The control that dispatches the message. NO ARGUMENT.
 
     ``Send`` is TEXT-NAMED -- measured -- so the accessible name is the
     element's own text and the role engine reads it. Drawn DISABLED on an
-    empty composer, which is the transition the send gate requires.
+    empty composer, which is the transition ``send_message``'s send gate
+    required until it was retired; ``read_thread_reply_surface`` counts it.
     """
     if any(bad in MESSAGE_SEND_NAME for bad in _SELECTOR_UNSAFE):
         raise ExtractionFailedError(
@@ -6702,12 +6707,10 @@ def compose_send_selector() -> str:
 #: ``locator`` DISCARDS the selector argument, so the strings below have never
 #: been executed against a page on either branch.
 #:
-#: THAT IS WHY THIS IS A LIST AND WHY THE READER REPORTS PER-SELECTOR COUNTS.
-#: A single guessed selector that matches nothing is indistinguishable from a
-#: composer with nobody in it, and on THIS surface those two answers are
-#: "refuse" and "send". The counts are the measurement the first supervised
-#: run exists to produce -- the same shape ``_comment_submit_gate`` takes,
-#: where the refusal is the instrument.
+#: THAT IS WHY THIS IS A LIST. A single guessed selector that matches nothing
+#: is indistinguishable from a composer with nobody in it. The reader that
+#: reported per-selector counts for ``send_message``'s recipient gate left with
+#: that action on 2026-09-27; the messaging census probe still reads the list.
 RECIPIENT_CHIP_SELECTORS: tuple[str, ...] = (
     'button[aria-label^="Remove"]',
     "[data-test-selected-recipient]",
@@ -6716,530 +6719,14 @@ RECIPIENT_CHIP_SELECTORS: tuple[str, ...] = (
 )
 
 
-#: COUNT the committed recipients, and count how many carry HIS NEEDLE. The
-#: comparison happens IN THE PAGE and no label comes back.
-#:
-#: **THE MATCH IS WORD-BOUNDED, AND IT WAS A BARE SUBSTRING UNTIL 2026-09-05.**
-#: The substring version was measured letting a STRANGER through in two ways,
-#: both in ``tests/test_the_needle_is_matched_as_a_bare_substring.py``:
-#:
-#:   1. every candidate in :data:`RECIPIENT_CHIP_SELECTORS` constrains
-#:      ``aria-label``, and this script then SEARCHES ``aria-label`` -- so the
-#:      haystack was selected BECAUSE it contains a fixed word, and a needle
-#:      that is a substring of that word matched a chip naming somebody else;
-#:   2. a short name is a substring of a longer one, so a stranger whose name
-#:      merely CONTAINS his needle counted as a match.
-#:
-#: A letter or digit on either side of the hit now refuses it. Digits count as
-#: word characters deliberately: a label running a name onto a connection
-#: degree (``<name>1st``) must REFUSE rather than match, because this gate is
-#: required to fail closed.
-#:
-#: **IT MAY REFUSE A LEGITIMATE RECIPIENT AND THAT IS THE RULING, NOT AN
-#: OVERSIGHT.** Nobody has ever observed a real chip, so the shape of a real
-#: label is unknown. The two error directions are not symmetric: too strict
-#: costs him a retry, too loose commits a stranger to an irreversible message
-#: under his name. When the directions differ that much the DOM does not have
-#: to be known -- only which way to fail. Relaxing this is a later question,
-#: and it needs a chip observed first.
-#:
-#: THE SAME ARGUMENT AS :data:`INVITE_NEEDLE_JS`, on a surface where it is
-#: sharper: a committed recipient IS a third party, by definition, so any label
-#: read here names somebody who is not him. A name that reaches Python can
-#: reach a traceback, a log line or a cache key, and no care downstream
-#: un-rings that. So the needle is handed in and only integers come out.
-#:
-#: THERE IS NO ``revealSingleMatch`` HERE, unlike the invitation script. That
-#: flag exists so a PREVIEW can show him who he is about to reach; this script
-#: runs inside ``perform``, after he has already confirmed, where there is
-#: nothing left to show him and therefore no reason for a name to exist in
-#: this process at all.
-SELECTED_RECIPIENT_JS = r"""
-(cfg) => {
-  const needle = String(cfg.needle).toLowerCase();
-  const perSelector = {};
-  const seen = [];
-  for (const selector of cfg.selectors) {
-    let nodes = [];
-    try { nodes = Array.from(document.querySelectorAll(selector)); }
-    catch (e) { perSelector[selector] = -1; continue; }
-    perSelector[selector] = nodes.length;
-    for (const node of nodes) { if (seen.indexOf(node) === -1) seen.push(node); }
-  }
-  // A WORD-BOUNDARY MATCH, NOT A SUBSTRING. See the note above the constant.
-  // A letter or a digit on either side of the hit means the needle is a
-  // FRAGMENT of a longer word, and a fragment is not a name.
-  const wordish = /[\p{L}\p{N}]/u;
-  const bounded = (haystack, term) => {
-    if (!term) { return false; }
-    let from = 0;
-    for (;;) {
-      const at = haystack.indexOf(term, from);
-      if (at === -1) { return false; }
-      const before = at === 0 ? '' : haystack.charAt(at - 1);
-      const after = haystack.charAt(at + term.length);
-      if (!wordish.test(before) && !wordish.test(after)) { return true; }
-      from = at + 1;
-    }
-  };
-  let matches = 0;
-  for (const node of seen) {
-    // THE LABEL IS READ AND IMMEDIATELY DISCARDED. It exists for the length of
-    // this comparison and is never assigned anywhere that leaves the loop.
-    const label =
-      (node.getAttribute('aria-label') || '') + ' ' + (node.textContent || '');
-    if (bounded(label.toLowerCase(), needle)) { matches += 1; }
-  }
-  return {
-    per_selector: perSelector,
-    total: seen.length,
-    matches: matches
-  };
-}
-"""
-
-
-async def read_selected_recipients(page: Any, needle: str) -> dict[str, Any]:
-    """How many recipients are committed, and how many carry ``needle``.
-
-    RETURNS INTEGERS AND NOTHING ELSE. ``per_selector`` is a count per
-    candidate string, ``total`` is the de-duplicated node count, ``matches`` is
-    how many of those carry his needle. No accessible name, no text, no
-    identifier.
-
-    A ``-1`` in ``per_selector`` means that selector RAISED in the browser --
-    an invalid string, not an empty page -- and it is reported rather than
-    folded into zero, because "this selector is wrong" and "there is nobody
-    here" are the two answers this whole gate turns on.
-    """
-    try:
-        data = await page.evaluate(  # readonly-ok
-            SELECTED_RECIPIENT_JS,
-            {"needle": str(needle or ""), "selectors": list(RECIPIENT_CHIP_SELECTORS)},
-        )
-    except Exception as exc:
-        raise ExtractionFailedError(
-            f"could not read the composer's selected recipients: "
-            f"{type(exc).__name__}: {exc}",
-            hint=_landing_note(page),
-        ) from exc
-    return dict(data or {})
-
-
-#: WHERE THE TYPEAHEAD DRAWS ITS SUGGESTIONS, as several spellings rather than
-#: one, for the same reason :data:`RECIPIENT_CHIP_SELECTORS` is a list: a single
-#: guessed selector that matches nothing is indistinguishable from a dropdown
-#: that never opened, and on THIS surface those two answers are "refuse" and
-#: "refuse for the wrong reason".
-#:
-#: **NONE OF THESE HAS EVER MATCHED ANYTHING**, because nobody has typed into
-#: that combobox through this server. The per-selector counts the first
-#: supervised run returns ARE the measurement, exactly as the recipient chips'
-#: were.
-TYPEAHEAD_OPTION_SELECTORS: tuple[str, ...] = (
-    '[role="option"]',
-    '[role="listbox"] [role="option"]',
-    '[aria-controls] ~ * [role="option"]',
-)
-
-#: THE DROPDOWN ITSELF, waited for SEPARATELY FROM ITS ROWS.
-#:
-#: THE FIRST VERSION WAITED FOR AN OPTION AND IT COLLAPSED TWO STATES. "The
-#: dropdown never opened" and "the dropdown opened and offered nobody" are
-#: different facts -- the first is about this reader and the page, the second
-#: is about the name he supplied -- and waiting on a ROW made them the same
-#: timeout. A test written to assert they differ is what found it, which is
-#: this repository's own rule arriving on its own code: collapsing two states
-#: does not merely give a wrong answer, it removes the test that would catch
-#: it.
-TYPEAHEAD_LISTBOX_SELECTOR = '[role="listbox"]'
-
-#: How long to wait for the dropdown after the needle is typed. BOUNDED, and
-#: short: a typeahead that has not drawn in this long has not drawn, and a
-#: longer wait would be a poll loop against his account.
-TYPEAHEAD_TIMEOUT_MS = 5_000
-
-#: Characters that would end the SELECTOR's own delimiting, refused rather than
-#: escaped. ``/`` closes the regex, a backslash starts an escape this function
-#: did not author, and a quote ends the attribute.
-_SELECTOR_BREAKING: tuple[str, ...] = ("/", chr(92), '"')
-
-#: Regex metacharacters, escaped so a name is matched LITERALLY. A ``.`` in
-#: ``Jr.`` must match a period and not any character -- an unescaped needle is
-#: a selector that matches MORE rows than the name it came from, and matching
-#: more rows on this surface means pressing somebody else.
-_REGEX_META = ".^$*+?()[]{}|"
-
-
-#: THE CANDIDATE MATCHERS, AS A CENSUS RATHER THAN A CHOICE.
-#:
-#: WHY THIS EXISTS, and it is a live measurement rather than a worry. On
-#: 2026-09-03 ``scripts/_probe_typeahead_commit.py`` was run against his own
-#: account with a real first-degree name and returned::
-#:
-#:     listbox appeared        True
-#:     options (total)         10
-#:     carrying the needle     10
-#:     refused                 4_several_options_match
-#:
-#: **THAT IS THE SUBSTRING MATCHER COUNTING LINKEDIN'S OWN RESULT SET.** A
-#: typeahead returns a row BECAUSE it matched what was typed, so "this row
-#: contains the needle" is close to tautological and ten-of-ten is the
-#: expected reading rather than the surprising one. A gate whose only
-#: discriminator is that predicate cannot discriminate: it refuses whenever
-#: LinkedIn returns more than one row, which is almost always, and the refusal
-#: reads as caution while being a defect.
-#:
-#: WHAT IS AND IS NOT ESTABLISHED, kept apart on purpose. Ten of ten is
-#: VERIFIED -- one live reading. That the ratio is STRUCTURAL is DERIVED, and
-#: one observation of one number does not show an instrument can return
-#: another. This tuple exists to take that measurement rather than to argue
-#: about it.
-#:
-#: EVERY ENTRY IS A READ. Counting how many rows a pattern WOULD match costs
-#: one locator count each and presses nothing, so the census can be attached
-#: to a refusal and the refusal becomes the instrument -- the same shape
-#: ``_comment_submit_gate`` and the chip selectors already take.
-#:
-#: ``{n}`` is replaced by the ESCAPED needle. The order is
-#: loosest-to-strictest and it is meaningful: a reader compares adjacent rows
-#: to learn what shape the page is drawing.
-#:
-#: THE ONE THAT IS NOT OBVIOUS, and it is the reason this is a census and not
-#: a one-line fix. The natural boundary assertion is ``\b``, and on this
-#: surface it may reject the very person it is meant to find: a suggestion
-#: row's accessible name concatenates the name with the connection degree, and
-#: if it does so WITHOUT A SEPARATOR the name becomes ``<name>1st``. ``\b``
-#: sits between a word character and a non-word character; ``G`` and ``1`` are
-#: both word characters, so there is no boundary there and ``^<n>\b`` matches
-#: NOTHING. ``^<n>(?![A-Za-z])`` accepts the digit and still rejects
-#: ``<n>upta``, which is the discrimination actually wanted. Whether the live
-#: rows carry a separator has never been read -- no accessible name from that
-#: listbox has ever entered this process -- so both are counted and the page
-#: answers.
-TYPEAHEAD_NAME_PATTERNS: tuple[tuple[str, str], ...] = (
-    # What ships today. Expected to equal the option count.
-    ("substring", "{n}"),
-    # The name is at the START of the accessible name. Distinguishes a row
-    # that merely mentions him from one that is his.
-    ("prefix", "^{n}"),
-    # Prefix, and the next character is not a Latin letter -- so a degree
-    # suffix, a comma, a space or end-of-string all pass and a longer name
-    # does not.
-    ("prefix_then_nonletter", "^{n}(?![A-Za-z])"),
-    # Prefix and a regex word boundary. Defeated by a digit-initial degree
-    # suffix run onto the name, which is exactly what this census is for.
-    ("prefix_boundary", "^{n}\\b"),
-    # Prefix, then whitespace or the end. The strictest of the prefix family
-    # and the one that needs a separator to exist at all.
-    ("prefix_then_space_or_end", "^{n}(\\s|$)"),
-    # The accessible name is the needle and nothing else.
-    ("whole", "^{n}$"),
-)
-
-#: THE CANDIDATE THE SERVER PRESSES BY. Named rather than spelled out at the
-#: call site, so "which matcher reaches a human being" is a row in the table
-#: above and a reviewer reads it there.
-#:
-#: IT IS THE LOOSEST ONE, AND THAT IS MEASURED RATHER THAN CHOSEN. Three live
-#: runs on 2026-09-03, three separate browser sessions, identical numbers:
-#: substring 10, and ZERO for every anchored candidate including the one named
-#: strictest below. The rows do not begin with the name -- something precedes
-#: it inside the accessible name -- so anchoring refuses everybody rather than
-#: refusing correctly. Until an offset reading says what precedes it, the
-#: substring is the only candidate that matches anything at all.
-TYPEAHEAD_SHIPPED_PATTERN = "substring"
-
-#: THE STRICTEST CANDIDATE that can still match a row whose connection degree
-#: is run onto the name. Named rather than indexed so the ambiguity refusal,
-#: the census and the probe's aim cannot drift apart.
-#:
-#: MEASURED DEAD ON THE LIVE SURFACE, and the name is kept because the reason
-#: is worth keeping: it is strictest among the ANCHORED family, and the
-#: anchored family is what three live runs measured at zero. It is what the
-#: probe would aim by if anchoring worked, and the refusal that reports it
-#: matching zero is how a reader learns that it does not.
-TYPEAHEAD_STRICTEST_PATTERN = "prefix_then_nonletter"
-
-
-def escaped_needle(needle: str) -> str:
-    """The needle as a LITERAL regex body, or a refusal.
-
-    Extracted from :func:`typeahead_option_selector` so the census and the
-    aim escape identically. Two escapers would be two chances to disagree,
-    and a disagreement here means one function counting rows that another
-    would not press.
-    """
-    for bad in _SELECTOR_BREAKING:
-        if bad in needle:
-            raise ExtractionFailedError(
-                "refusing to build the typeahead's option selector: the name "
-                "you supplied carries a quote, a slash or a backslash, any of "
-                "which would end this selector's own delimiting and could aim "
-                "it at a different row. Refused rather than escaped."
-            )
-    return "".join(
-        (chr(92) + char) if char in _REGEX_META else char for char in needle
-    )
-
-
-def typeahead_pattern_selector(needle: str, body: str) -> str:
-    """One candidate matcher, as a role selector. COUNTED, never pressed.
-
-    ``body`` is a template from :data:`TYPEAHEAD_NAME_PATTERNS` whose ``{n}``
-    is replaced by the escaped needle. The template itself is a MODULE
-    CONSTANT and never a caller's string, so the only thing a caller
-    contributes is the needle and the only thing that reaches a regex is the
-    escaped form of it.
-
-    WHAT THIS IS FOR. Every selector it builds is handed to ``locator.count``
-    and to nothing else. The census reports how many rows each candidate WOULD
-    match; which candidate the click is aimed by is
-    :func:`typeahead_option_selector`'s answer and is a separate decision,
-    deliberately, because a function that both proposed and chose would be
-    choosing its own evidence.
-    """
-    return "role=option[name=/" + body.replace("{n}", escaped_needle(needle)) + "/i]"
-
-
-def _typeahead_selector_named(needle: str, label: str) -> str:
-    """Resolve ONE named candidate from the table and build its selector.
-
-    THE SINGLE LOOKUP, and it exists because there are two named aims -- the
-    one the server presses by and the one the probe presses by -- and they
-    must be two different NAMES rather than two different pieces of string
-    surgery. Resolving both through here means neither can drift from the
-    table the census counts, or from the label the refusal texts print.
-
-    Raises:
-        ExtractionFailedError: no candidate carries that label. Refused rather
-            than defaulted: guessing which candidate was meant is exactly the
-            choice this function exists to remove.
-    """
-    for candidate, body in TYPEAHEAD_NAME_PATTERNS:
-        if candidate == label:
-            return typeahead_pattern_selector(needle, body)
-    raise ExtractionFailedError(
-        f"refusing to build a typeahead selector: {label!r} is not a candidate "
-        "in TYPEAHEAD_NAME_PATTERNS. A name and the table have diverged, and "
-        "guessing which candidate was meant is exactly the choice this lookup "
-        "exists to remove."
-    )
-
-
-def typeahead_strictest_selector(needle: str) -> str:
-    """The STRICTEST candidate matcher, as a selector. FOR AN INSTRUMENT ONLY.
-
-    :data:`TYPEAHEAD_STRICTEST_PATTERN` names it and this resolves it, so a
-    caller that wants the strictest aim cannot pick a different one by
-    indexing into the tuple and cannot drift from the label the refusal texts
-    print.
-
-    **THIS IS NOT WHAT THE SERVER PRESSES.** ``typeahead_option_selector`` is,
-    and it is still the substring form. The two are deliberately different
-    functions rather than a flag, because a flag would put "which matcher
-    presses his message" one boolean away from changing, and that decision is
-    supposed to cost a live measurement.
-
-    WHO MAY USE THIS. ``scripts/_probe_typeahead_commit.py``, which exists to
-    take a measurement the shipped gate can no longer reach: the substring
-    matcher counts LinkedIn's own result set, so it refuses on every real
-    dropdown, and a probe that always stops at that refusal can never answer
-    whether pressing a suggestion commits anybody. The strictest form is
-    STRICTLY NARROWER than the shipped one -- anchored at the start and
-    refusing a longer name where the substring accepts it -- so the instrument
-    presses less than the server would, never more.
-    """
-    return _typeahead_selector_named(needle, TYPEAHEAD_STRICTEST_PATTERN)
-
-
-async def read_typeahead_pattern_census(
-    page: Any, needle: str
-) -> dict[str, int]:
-    """How many suggestion rows each candidate matcher WOULD match.
-
-    RETURNS INTEGERS KEYED BY THE PATTERN'S OWN NAME. No accessible name, no
-    row text, no identifier -- every comparison happens inside the browser
-    through Playwright's role engine, exactly as the aim does.
-
-    A ``-1`` means that candidate RAISED -- an unparseable pattern, not an
-    empty page -- and it is reported rather than folded into zero, because
-    "this pattern is wrong" and "nothing matched it" are the two answers the
-    choice between candidates turns on.
-
-    THIS IS THE MEASUREMENT NOBODY CAN TAKE ANY OTHER WAY, and it is the
-    reason the refusal carries it: reading the live shape means reading
-    accessible names that belong to other people, and this counts them
-    instead. One live refusal now hands back enough to choose the matcher
-    without anybody's name entering this process.
-    """
-    out: dict[str, int] = {}
-    for label, body in TYPEAHEAD_NAME_PATTERNS:
-        try:
-            selector = typeahead_pattern_selector(needle, body)
-        except ExtractionFailedError:
-            out[label] = -1
-            continue
-        try:
-            out[label] = int(await page.locator(selector).count())
-        except Exception:  # noqa: BLE001 - an unusable pattern is reported as -1
-            out[label] = -1
-    return out
-
-
-def typeahead_option_selector(needle: str) -> str:
-    """Aim at ONE suggestion BY ITS ACCESSIBLE NAME, never by position.
-
-    **THIS IS THE WHOLE SAFETY ARGUMENT OF THE CLICK IT AIMS.** Every other
-    click in this package targets a control whose label is UI furniture --
-    ``Save the job``, ``Send``, a filter pill. A typeahead row exists because
-    LinkedIn matched A PERSON, so the thing being clicked is drawn from
-    somebody's name. Two consequences, and both are met here rather than
-    routed around:
-
-    * **The name never enters this process.** Playwright's ``name=`` matches
-      the ACCESSIBLE NAME inside the browser; what crosses back is a count.
-      The only string this function holds is the needle, which is HIS OWN
-      input and was already in this process before it was called.
-    * **The aim is the name, not the row.** ``nth``, ``first`` or an index
-      derived from a match would all press whatever LinkedIn drew in that
-      slot, which is verbatim the ``aim_invitation`` failure. If the name does
-      not resolve to exactly one row, the caller refuses; it never falls back
-      to a position.
-
-    **A REGEX, AND THE QUOTED FORM WAS MEASURED WRONG BEFORE THIS WAS
-    WRITTEN.** The obvious spelling is ``[name="Thornwick M"i]`` and it does not
-    do what it reads like. Measured on 2026-09-03 against a two-row listbox::
-
-        role=option[name="Thornwick M"i]      0
-        role=option[name="Thornwick M"]       0
-        role=option[name="Thornwick M"s]      0
-        role=option[name=/Thornwick M/i]      1
-        [role="option"]                      2
-
-    **The quoted form is a WHOLE-STRING match**, and a suggestion row's
-    accessible name is the whole row -- ``Thornwick M1st`` in that fixture, name
-    and degree concatenated. So the quoted form matches a real suggestion
-    NEVER, and the failure is silent: zero matches reads exactly like "he is
-    not in the list". Only the regex form is a substring, which is the
-    relation ``_recipient_gate`` already uses on the committed chip -- his
-    needle is PART of a fuller name, not equal to it.
-
-    That is why ``_compose_send_selector``'s quoted ``"s]`` spelling is right
-    THERE and wrong here: ``Send`` IS the entire accessible name of its
-    control. Same syntax, different relation, and copying it across would have
-    produced a gate that could never aim at anybody.
-
-    **THE NEEDLE IS ESCAPED, NOT TRUSTED.** An unescaped ``.`` matches any
-    character, so ``Jr.`` would match ``JrX`` -- a selector matching MORE rows
-    than the name it came from, which on this surface means pressing somebody
-    else. Metacharacters are escaped; the three characters that would break
-    the selector's own delimiting are REFUSED instead, because escaping those
-    correctly is a second parser to get subtly wrong.
-
-    Raises:
-        ExtractionFailedError: the needle carries a selector-breaking
-            character. REFUSED RATHER THAN ESCAPED: this server would rather
-            not send at all than send accurately-quoted to somebody else.
-    """
-    # ONE CONSTRUCTOR, AND THIS IS A TABLE LOOKUP RATHER THAN A THIRD PIECE OF
-    # STRING SURGERY.
-    #
-    # THREE FUNCTIONS BUILT THIS SHAPE FOR A WHILE and the team lead called it
-    # out: this one, the census's parameterised builder, and the probe's
-    # strictest aim. They are not competitors -- they answer three different
-    # questions -- but they were three places that knew how to spell
-    # "role=option[name=/.../i]" and how to escape a needle, which is three
-    # chances to disagree about which row is meant.
-    #
-    # SO THERE IS NOW ONE CONSTRUCTOR (typeahead_pattern_selector), ONE ESCAPER
-    # (escaped_needle) and ONE LOOKUP (_typeahead_selector_named), and the two
-    # named aims are each a single line naming a row of the table the census
-    # counts. What did NOT collapse is the pair of NAMES: the aim the server
-    # presses by and the aim the probe presses by stay two different constants
-    # rather than one flag, because a flag puts "which matcher reaches a human
-    # being" one boolean away from changing.
-    return _typeahead_selector_named(needle, TYPEAHEAD_SHIPPED_PATTERN)
-
-
-async def read_typeahead_options(page: Any, needle: str) -> dict[str, Any]:
-    """How many suggestions the typeahead drew, and how many carry ``needle``.
-
-    RETURNS INTEGERS AND NOTHING ELSE. ``per_selector`` is a count per
-    candidate spelling, ``total`` is the largest of them, ``matches`` is how
-    many rows Playwright's accessible-name match resolves to. No name, no
-    identifier, no ``urn``.
-
-    THE WAIT IS PART OF THE READING. A dropdown is asynchronous, so a count
-    taken too early is a zero that means "not yet" and reads identically to a
-    zero that means "nobody". This waits, once, bounded, and reports
-    ``appeared`` separately from ``total`` so those two zeroes stay
-    distinguishable -- the same tri-state discipline ``_self_assertion_state``
-    pays for.
-
-    A ``-1`` in ``per_selector`` means that selector RAISED in the browser --
-    an invalid string, not an empty dropdown -- reported rather than folded
-    into zero.
-    """
-    out: dict[str, Any] = {
-        "appeared": False,
-        "per_selector": {},
-        "total": 0,
-        "matches": 0,
-        "selector": None,
-        "error": None,
-        # ABSENT IS NOT EMPTY. An unbuildable needle returns before the census
-        # is taken, and {} there means "nobody counted" rather than "every
-        # candidate matched nothing".
-        "pattern_census": {},
-    }
-    try:
-        out["selector"] = typeahead_option_selector(needle)
-    except ExtractionFailedError as exc:
-        # KEPT AS TEXT: this try reads no page. Its only raises are the two
-        # refusals the selector builders compose, neither quoting the needle.
-        out["error"] = str(exc)
-        return out
-
-    try:
-        # NO ``# readonly-ok`` HERE, DELIBERATELY. ``wait_for_selector`` is on
-        # no entry of ``readonly._MUTATION_CALL_PATTERNS`` -- it observes and
-        # cannot act -- so a waiver would be claiming an exemption this call
-        # does not need, and the waiver COUNT is pinned precisely so that an
-        # unnecessary one shows up as a boundary change. It did: the first
-        # version of this line carried one and moved dom.py's count from 13 to
-        # 14.
-        await page.wait_for_selector(
-            TYPEAHEAD_LISTBOX_SELECTOR,
-            timeout=TYPEAHEAD_TIMEOUT_MS,
-            state="attached",
-        )
-        out["appeared"] = True
-    except Exception as exc:  # noqa: BLE001 - a timeout is a reading, not a fault
-        # NOT AN ERROR. The dropdown not drawing is one of the outcomes this
-        # reader exists to report, and calling it an error would put it in the
-        # same bucket as a broken selector.
-        logger.debug("typeahead did not appear: %s", type(exc).__name__)
-
-    for selector in TYPEAHEAD_OPTION_SELECTORS:
-        try:
-            out["per_selector"][selector] = await page.locator(selector).count()
-        except Exception:  # noqa: BLE001 - an invalid selector is reported as -1
-            out["per_selector"][selector] = -1
-    out["total"] = max([0] + [n for n in out["per_selector"].values() if n > 0])
-
-    try:
-        out["matches"] = await page.locator(out["selector"]).count()
-    except Exception as exc:  # noqa: BLE001 - reported, never raised
-        out["error"] = type(exc).__name__
-
-    # THE CENSUS, TAKEN ON EVERY READING AND NOT ONLY ON A REFUSAL. It costs
-    # one locator count per candidate and presses nothing, and taking it
-    # unconditionally means the PROCEEDING case is measured too -- otherwise
-    # the only shape ever recorded would be the shape that failed, which is
-    # how a family of instruments ends up knowing nothing about success.
-    out["pattern_census"] = await read_typeahead_pattern_census(page, needle)
-    return out
+#: ``SELECTED_RECIPIENT_JS`` / ``read_selected_recipients`` AND THE TYPEAHEAD
+#: FAMILY (``TYPEAHEAD_OPTION_SELECTORS`` through ``read_typeahead_options``)
+#: STOOD HERE until 2026-09-27. They compared HIS WORD for a person against the
+#: committed recipient's and the suggestions' labels, inside the page -- the
+#: name-aimed primitives ``send_message``'s gates stood on -- and they left with
+#: that action (lane L5, the orchestrator's order of 23:36; PEOPLE-DATA-
+#: MITIGATIONS, mitigation 6). What they measured is recorded in
+#: ``_audit/2026-09-03-typeahead-name-matching-is-dead.md``.
 
 
 #: THE RECIPIENT ID INSIDE A MESSAGE BUTTON'S HREF.
@@ -7405,33 +6892,6 @@ async def read_recipient_ids(page: Any) -> dict[str, Any]:
                 "left_the_row": bool(row.get("left_the_row")),
             }
         )
-    return out
-
-
-async def read_compose_send_state(page: Any) -> dict[str, Any]:
-    """The Send control: how many, and whether the one is enabled.
-
-    ``Send`` is measured DISABLED on an empty composer, which is the same
-    observable transition ``publish_post``'s gate rests on. Counted rather
-    than assumed at one, because more than one control named ``Send`` would
-    make pressing either a choice by position.
-    """
-    out: dict[str, Any] = {
-        "controls": 0,
-        "enabled": None,
-        "textboxes": 0,
-        "error": None,
-    }
-    try:
-        control = page.locator(compose_send_selector())
-        out["controls"] = int(await control.count())
-        out["textboxes"] = int(
-            await page.locator(compose_body_selector()).count()
-        )
-        if out["controls"] == 1:
-            out["enabled"] = bool(await control.first.is_enabled())
-    except Exception as exc:  # pragma: no cover - reported, never raised
-        out["error"] = type(exc).__name__
     return out
 
 
@@ -7638,105 +7098,84 @@ INVITE_CONTROL_SUFFIX = " to connect"
 INVITE_CONTROL = 'button[aria-label$=" to connect"]'
 
 
-def invite_control_selector(index: int) -> str:
-    """A selector for ONE of the invitation controls, by its position.
+#: THE RAIL'S CARD, AIMED BY THE CALLER'S OWN LINK -- 2026-09-27, lane L5, on
+#: the orchestrator's order of 23:36 (PEOPLE-DATA-MITIGATIONS, mitigation 6: an
+#: outward act fires at the exact member the operator names, by link or id).
+#:
+#: UNTIL THEN THIS WAS AIMED BY A NAME, and the design around it was careful
+#: about the wrong thing. ``INVITE_NEEDLE_JS`` took HIS WORD for the person,
+#: compared it inside the page against every invitation control's label --
+#: which IS that person's name -- and returned a position, so no name crossed
+#: into Python; ``invite_control_selector(index)`` then pressed that position.
+#: The name never leaked. But the name was the AIM, and once people search
+#: returns names a name read off a page can reach a write's argument. Both are
+#: gone, with ``read_invitation_surface``, and nothing in this package compares
+#: a name to choose what to press.
+#:
+#: WHAT IS COMPARED NOW IS THE CARD'S OWN LINK, and it is compared by the
+#: browser: the selector below is XPath, evaluated in the page, and what crosses
+#: back is a COUNT. MEASURED 2026-09-27 over every capture on disk (95, offline,
+#: counts and shapes only): the 32 invitation controls on his own profile's
+#: suggestion rail each sit in a card -- the nearest ancestor holding any
+#: ``/in/`` link -- that holds EXACTLY ONE member segment and EXACTLY ONE
+#: invitation control, and that link's own text names the person the control
+#: names. The rail's links are VANITY segments on all 32: none carries a member
+#: id, so a member id matches no card here, and the gate says so.
+#:
+#: THE PRESS USES THE SELECTOR THE GATE COUNTED, strictly
+#: (``writes.STRICT_PRESS_ACTIONS``), so a second match drawn between the
+#: reading and the press stops the press rather than choosing.
+_RAIL_SEGMENT = re.compile(r"^[A-Za-z0-9_%\-]{1,200}$")
+_ASCII_LOWER = str.maketrans("ABCDEFGHIJKLMNOPQRSTUVWXYZ", "abcdefghijklmnopqrstuvwxyz")
+#: An invitation control as MEASURED: a button labelled "Invite <X> to connect".
+_XPATH_INVITE_BUTTON = (
+    "button[starts-with(@aria-label, 'Invite ')]"
+    "[substring(@aria-label, string-length(@aria-label) - "
+    + str(len(INVITE_CONTROL_SUFFIX) - 1)
+    + ") = '"
+    + INVITE_CONTROL_SUFFIX
+    + "']"
+)
+_XPATH_MEMBER_LINK = "contains(@href, '/in/')"
+#: The ONE path segment after ``/in/`` -- stopped at the next ``/``, ``?`` or
+#: ``#`` -- with ASCII case folded, because vanity segments are case-insensitive
+#: on LinkedIn (``named_profile.landed_on_profile`` folds the same way).
+_XPATH_LINK_SEGMENT = (
+    "translate(substring-before(concat(substring-before(concat(substring-before("
+    "concat(substring-after(@href, '/in/'), '/'), '/'), '?'), '?'), '#'), '#'), "
+    "'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz')"
+)
 
-    GUARDED, like every other selector builder here that takes an argument.
-    ``index`` must be a real, non-negative ``int`` -- a bool is refused too,
-    because ``True`` is ``1`` in Python and a boolean arriving here means a
-    caller passed the wrong thing entirely.
 
-    POSITION, AND WHY THAT IS NOT "PICKING BY POSITION". This package refuses
-    to aim a write by position, and this selector is an index -- so the
-    distinction has to be exact. The index is not CHOSEN; it is the output of
-    :func:`writes.aim_invitation`, which returns one ONLY when the operator's
-    own needle matched exactly one control on the surface. Two matches erase
-    it rather than picking the first. So the position is a way of ADDRESSING
-    a control his word already selected, not a way of selecting one.
+def rail_invite_control_selector(segment: str) -> str:
+    """THE invitation control whose card is the profile the caller linked.
 
-    THE ANCHOR IS THE SUFFIX, NOT A NAME. These controls are labelled with
-    another person's name plus :data:`INVITE_CONTROL_SUFFIX`, and this server
-    does not read those names. Anchoring on the suffix keeps the selector free
-    of any third-party identity while still restricting it to controls that
-    are demonstrably invitations.
+    The button whose NEAREST ancestor holding any ``/in/`` link (its card)
+    holds a link to ``segment``, no link to any other segment, and exactly ONE
+    invitation control. Nothing in it is a name or a position: it is built from
+    constants and the caller's own segment, and the page supplies nothing.
+
+    GUARDED, like every builder here that takes an argument. ``segment`` is the
+    output of ``named_profile.profile_segment`` -- letters, digits, hyphens,
+    underscores and percent-encoded octets -- and anything else is refused
+    here, so no quote or bracket can reach the expression. It is ASCII-folded
+    exactly as the page side is.
     """
-    if isinstance(index, bool) or not isinstance(index, int) or index < 0:
+    text = str(segment or "")
+    if not _RAIL_SEGMENT.fullmatch(text):
         raise ValueError(
-            "invite_control_selector needs a non-negative int index; a click "
+            "rail_invite_control_selector needs a profile segment -- letters, "
+            "digits, hyphens, underscores or percent-encoded octets; a press "
             "target is built from this string, so nothing else may reach it."
         )
-    return INVITE_CONTROL + " >> nth=" + str(index)
-
-#: AIMING ONE OF THOSE NINE, AND THE REASON THIS IS A SCRIPT RATHER THAN A
-#: LOCATOR CHAIN. Every other reader in the block below deliberately injects
-#: nothing; this one injects, and the trade runs the other way here for one
-#: reason: A NAME THAT REACHES PYTHON CANNOT BE TAKEN BACK. It can reach an
-#: exception message, a log line, a cache key, a traceback, a rendered confirm
-#: block -- and no care downstream un-rings that. So the comparison happens
-#: INSIDE THE PAGE, where the label already lives, and what crosses back is
-#: arithmetic.
-#:
-#: WHAT GOES IN is a needle THE OPERATOR TYPED at call time, handed over as a
-#: script ARGUMENT rather than spliced into source -- so the script is a
-#: constant that ``test_readonly.py`` can read whole, and no caller string ever
-#: becomes executable text.
-#:
-#: WHAT COMES OUT IS THREE NUMBERS AND NOTHING ELSE: how many controls wear the
-#: suffix, how many of those contain the needle, and -- only when that is
-#: exactly one -- which position in the suffix-matched list it sits at. No
-#: label, no fragment of one, no href, not even truncated. The prefix of these
-#: labels has never been read by this server and is not read here either: the
-#: suffix is matched AS A SUFFIX with ``endsWith``, never by rebuilding a whole
-#: label from a prefix nobody has seen.
-#:
-#: ``index`` IS ``null`` AND NOT ``-1`` when there is no aim, deliberately. A
-#: sentinel integer is an index, and ``-1`` handed to Playwright's ``nth``
-#: means THE LAST CONTROL -- so the sentinel for "do not aim" would aim, at a
-#: stranger, which is the one failure this whole reader exists to prevent.
-INVITE_NEEDLE_JS = """
-(cfg) => {
-  const needle = String(cfg.needle).toLowerCase();
-  const nodes = document.querySelectorAll(cfg.selector);
-  let total = 0;
-  let matches = 0;
-  let index = null;
-  let only = null;
-  for (const node of nodes) {
-    const label = node.getAttribute('aria-label') || '';
-    // MATCHED AS A SUFFIX, and re-checked here even though cfg.selector is
-    // itself a suffix selector. The two predicates are written in different
-    // languages over the same fact, so a CSS engine that ever matched more
-    // loosely than endsWith would be narrowed by this line rather than
-    // followed by it.
-    if (!label.endsWith(cfg.suffix)) continue;
-    const position = total;
-    total += 1;
-    if (label.toLowerCase().indexOf(needle) !== -1) {
-      matches += 1;
-      // The FIRST match records where it sits; a SECOND erases the aim rather
-      // than keeping either. Choosing between two would be choosing by
-      // position, which is what the caller is refused for doing.
-      index = (matches === 1) ? position : null;
-      // THE LABEL RIDES THE SAME RULE AS THE INDEX, and it is erased by a
-      // second match for the same reason: it exists only to let him CHECK
-      // that the control his own word selected is the person he meant, and
-      // there is nothing to check if the word picked out two people.
-      only = (matches === 1) ? label : null;
-    }
-  }
-  // GATED ON THE CALLER ASKING, ON TOP OF matches === 1. Two independent
-  // conditions rather than one, because this is the only line in this script
-  // that can emit a third party's name and a single condition is a single
-  // edit away from always being true.
-  const reveal = (cfg.revealSingleMatch === true) && (matches === 1);
-  return {
-    total: total,
-    matches: matches,
-    index: index,
-    label: reveal ? only : null
-  };
-}
-"""
+    wanted = text.translate(_ASCII_LOWER)
+    card = (
+        "ancestor::*[.//a[" + _XPATH_MEMBER_LINK + "]][1]"
+        "[.//a[" + _XPATH_MEMBER_LINK + " and " + _XPATH_LINK_SEGMENT + " = '" + wanted + "']]"
+        "[not(.//a[" + _XPATH_MEMBER_LINK + " and " + _XPATH_LINK_SEGMENT + " != '" + wanted + "'])]"
+        "[count(.//" + _XPATH_INVITE_BUTTON + ") = 1]"
+    )
+    return "xpath=//" + _XPATH_INVITE_BUTTON + "[" + card + "]"
 
 #: The profile editors, MEASURED as ordinary anchors on ``/in/me/``
 #: 2026-08-30 -- each a single ``<a href>`` with an aria-label, count 1.
@@ -7841,7 +7280,8 @@ async def read_thread_reply_surface(page: Any) -> dict[str, Any]:
       ``div[role=textbox]``, and a reader that knew only one would report zero
       on a page that has the other.
     * ``send_controls`` / ``send_disabled`` -- the transition ``publish_post``
-      and ``send_message`` both gate on. An empty box draws ``Send`` DISABLED,
+      gates on (``send_message`` did too, until it was retired on 2026-09-27).
+      An empty box draws ``Send`` DISABLED,
       so a fill that lands is observable without reading what was typed.
     * ``recipient_boxes`` -- **EXPECTED TO BE ZERO, AND THE ZERO IS THE
       POINT.** A thread has nobody to choose, so a recipient combobox here
@@ -8156,111 +7596,36 @@ async def read_profile_editor_surface(page: Any) -> dict[str, Any]:
     return out
 
 
-async def read_invitation_surface(
-    page: Any,
-    needle: Optional[str] = None,
-    *,
-    reveal_single_match: bool = False,
-) -> dict[str, Any]:
-    """How many invitation controls this page draws, and -- if asked -- which.
+async def read_invitation_rail(page: Any, segment: Optional[str] = None) -> dict[str, Any]:
+    """How many invitation controls the page draws, and how many sit in the
+    card of the profile the caller linked. COUNTS, AND NOTHING ELSE.
 
-    STILL NUMBERS AND NOTHING ELSE, WHICHEVER QUESTION IS ASKED. This control's
-    accessible name IS another person's name. A reader that returned the label
-    would be collecting third-party identity in order to populate a confirm
-    block, which is the cost this whole family of rulings refuses to pay. So
-    the label is never returned -- not shaped, not truncated, not dropped after
-    a peek in Python.
+    NO SCRIPT RUNS: both answers are locator counts -- the suffix selector,
+    and :func:`rail_invite_control_selector` evaluated by the browser's XPath
+    engine -- so no label, no link and no fragment of either crosses into
+    this process. The one label the preview prints is read separately, by
+    ``writes._name_the_invitation_recipient``, off the one control matched.
 
-    ``needle`` IS THE OPERATOR'S OWN WORD, NOT A STORED ONE. Ruled 2026-08-31:
-    this server may RECEIVE a person's identity per call and must not persist
-    it. That is why the needle is a parameter and not a field: it arrives, it
-    is handed into the page, and it leaves with the frame. It is not written
-    into the result, not into a log line, and not into any exception message
-    raised below.
+    * ``controls`` -- controls wearing :data:`INVITE_CONTROL_SUFFIX`.
+    * ``matches`` -- ``None`` when no segment was given, which is a different
+      answer from ``0``: zero means the question was put and no card on this
+      page is that profile's.
+    * ``error`` -- an exception's TYPE when the page could not be read.
 
-    WHY THE COMPARISON HAPPENS IN THE PAGE. It is what makes "never stored"
-    ENFORCEABLE rather than promised. Doing it in Python would require the
-    label here first, and a name that reaches this process can reach a
-    traceback, a cache key or a rendered block, where no downstream care
-    retrieves it. See :data:`INVITE_NEEDLE_JS`.
-
-    THE THREE FIELDS, and the difference between two of them is the whole
-    aiming rule:
-
-    * ``controls`` -- how many controls wear :data:`INVITE_CONTROL_SUFFIX`.
-    * ``matches`` -- ``None`` when NO needle was asked for, which is a
-      different answer from ``0``. Zero means the question was put and nobody
-      on this surface carries that word; ``None`` means nobody asked.
-    * ``index`` -- the position within the suffix-matched list, set ONLY when
-      ``matches`` is exactly 1. Two matches erase it rather than picking one.
-
-    AN EMPTY NEEDLE IS NOT A NEEDLE. A blank string is a substring of every
-    label, so passing one through would report a match on all nine controls --
-    true, useless, and indistinguishable from a real ambiguity. It is treated
-    as "nothing was asked" instead, so the two honest answers stay separable
-    and no branch silently matches everybody.
+    REPLACED 2026-09-27 (lane L5): ``read_invitation_surface`` answered the
+    same two questions about a NAME the caller typed. See the note above
+    :func:`rail_invite_control_selector`.
     """
-    out: dict[str, Any] = {
-        "controls": 0,
-        "matches": None,
-        "index": None,
-        # THE ONE LABEL, and ``None`` unless the caller ASKED for it AND the
-        # needle picked out exactly one control.
-        #
-        # ADMITTED 2026-08-31, and the ruling turned on a distinction worth
-        # keeping in view: loading a stranger's PROFILE stays refused because
-        # it EMITS -- linkedin_who_viewed_me measures the receiving end, so
-        # the cost lands on somebody who did not agree to it. Reading one
-        # accessible name off a page already rendered on HIS OWN profile emits
-        # NOTHING. Nobody is notified, no record is created, and the person is
-        # not made aware. The cost to the third party is nil.
-        #
-        # AND HE ALREADY KNOWS THE NAME -- he supplied the needle. Reading the
-        # label back is not disclosing a stranger to him; it confirms that the
-        # control his own word uniquely selected belongs to the person he
-        # meant. That is verification of his input, which is the opposite of
-        # collection.
-        "label": None,
-    }
-    wanted = "" if needle is None else str(needle).strip()
-    if not wanted:
-        try:
-            out["controls"] = int(await page.locator(INVITE_CONTROL).count())
-        except Exception as exc:  # pragma: no cover - defensive
-            logger.debug("invite controls unreadable: %s", type(exc).__name__)
-        return out
-    cfg = {
-        "selector": INVITE_CONTROL,
-        "suffix": INVITE_CONTROL_SUFFIX,
-        "needle": wanted,
-        "revealSingleMatch": bool(reveal_single_match),
-    }
+    out: dict[str, Any] = {"controls": 0, "matches": None, "error": None}
+    selector = rail_invite_control_selector(segment) if segment else None
     try:
-        reading = await page.evaluate(INVITE_NEEDLE_JS, cfg)  # readonly-ok
-    except Exception as exc:  # pragma: no cover - defensive
-        # THE EXCEPTION IS NOT STRINGIFIED HERE, and every other reader in this
-        # module does stringify its own. The needle was handed to that call;
-        # a driver that echoes an argument back inside its error text would be
-        # publishing the operator's word into a log through this line. The
-        # type alone says which failure happened and carries nothing.
-        logger.debug("invite needle unreadable: %s", type(exc).__name__)
-        return out
-    out["controls"] = as_count(reading.get("total"))
-    out["matches"] = as_count(reading.get("matches"))
-    position = reading.get("index")
-    # ABSENT STAYS None. ``as_count`` answers 0 for a missing value, and 0 is a
-    # real index on this surface -- collapsing "no match" into "the first one"
-    # is the conflation the explicit None here exists to refuse.
-    out["index"] = None if position is None else as_count(position)
-    # THE THIRD GATE, IN PYTHON, over the two already applied in the page.
-    # Three conditions rather than one on the line that can carry a name, and
-    # they are written in two different languages so that a single edit
-    # cannot open all of them.
-    label = reading.get("label")
-    if reveal_single_match and out["matches"] == 1 and isinstance(label, str):
-        out["label"] = label
+        out["controls"] = as_count(await page.locator(INVITE_CONTROL).count())
+        if selector is not None:
+            out["matches"] = as_count(await page.locator(selector).count())
+    except Exception as exc:  # noqa: BLE001 - reported as a type, never raised
+        out["error"] = type(exc).__name__
+        logger.debug("invitation rail unreadable: %s", type(exc).__name__)
     return out
-
 
 # ---------------------------------------------------------------------------
 # A NAMED PERSON'S PROFILE -- read only inside an act he ordered
@@ -8662,38 +8027,13 @@ async def read_named_profile(page: Any) -> dict[str, Any]:
     return out
 
 
-async def read_messaging_badge(page: Any) -> dict[str, Any]:
-    """The messaging nav badge, read WITHOUT opening messaging.
-
-    This is the whole of what the send-a-message gate is allowed to look at,
-    and the restraint is the design rather than a limitation of it. Loading
-    /messaging/ is MEASURED to redirect into one specific conversation of
-    LinkedIn's choosing and to reset this very badge -- so a gate that opened
-    it in order to describe it would spend, on a stranger and on his own
-    unread count, exactly what it is supposed to be warning him about.
-
-    The nav link is present on every signed-in page. Its accessible name
-    carries the count LinkedIn would consume: measured 2026-08-30 as
-    ``Messaging, 0 new notifications`` on both the feed and the profile. The
-    label is shaped on the way out for the usual reason -- it is a nav label
-    today and nothing guarantees it stays one.
-    """
-    out: dict[str, Any] = {"links": 0, "label": None}
-    try:
-        links = page.locator('a[href*="/messaging/"]')
-        out["links"] = int(await links.count())
-    except Exception as exc:  # pragma: no cover - defensive
-        logger.debug("messaging link unreadable: %s", type(exc).__name__)
-        return out
-    if out["links"] < 1:
-        return out
-    try:
-        label = await links.first.get_attribute("aria-label")
-    except Exception as exc:  # pragma: no cover - defensive
-        logger.debug("messaging label unreadable: %s", type(exc).__name__)
-        return out
-    out["label"] = shape.census_shape(str(label or "").strip()) or None
-    return out
+# ``read_messaging_badge`` STOOD HERE until 2026-09-27: the messaging nav
+# badge, read without opening messaging, for send_message's preview. That
+# action was RETIRED (lane L5, the orchestrator's order of 23:36; it was
+# aimed by a name), which left the reader with no caller a tool reaches, and
+# ``tests/test_reader_reachability.py`` deletes such a reader rather than
+# keeping it. The two probes that still read the badge carry the same two
+# reads locally.
 
 
 #: THE PENDING-INVITATION BADGE, and every part of this aim is measured rather
@@ -8716,8 +8056,10 @@ async def read_messaging_badge(page: Any) -> dict[str, Any]:
 #: it as a badge at all -- so the aim is the conjunction of the two, and the
 #: label's own leading word is never matched, never stored and never needed.
 #:
-#: ``read_messaging_badge`` beside this one aims at ``a[href*="/messaging/"]``
-#: and takes ``.first``. This does NOT, and the difference is deliberate: a
+#: ``read_messaging_badge`` beside this one aimed at ``a[href*="/messaging/"]``
+#: and took ``.first`` (it left dom.py on 2026-09-27 with send_message's
+#: retirement; two probes carry it). This does NOT, and the difference is
+#: deliberate: a
 #: page can draw several ``/mynetwork/`` links -- the nav item and any
 #: in-page link to the same surface -- so ``.first`` would be a choice by
 #: POSITION between candidates that are not interchangeable. Requiring the
@@ -8776,7 +8118,8 @@ async def read_invitation_badge(page: Any) -> dict[str, Any]:
     cannot -- and this is the reader that makes that possible.
 
     IT COSTS NO PAGE LOAD. The nav renders on every signed-in page, which is
-    the same property ``read_messaging_badge`` relies on: the badge was
+    the same property ``read_messaging_badge`` relied on (it left dom.py on
+    2026-09-27): the badge was
     measured through it on ``/feed/`` and on ``/in/me/`` alike. So the AFTER
     reading can be taken on the connections page itself.
 
@@ -8791,7 +8134,7 @@ async def read_invitation_badge(page: Any) -> dict[str, Any]:
     shape" without opening a browser.
 
     THE LABEL IS SHAPED ON THE WAY OUT, the same route
-    ``read_messaging_badge`` takes, and the count is parsed from the SHAPED
+    ``read_messaging_badge`` took, and the count is parsed from the SHAPED
     string by :func:`shape.invitation_badge`. That ordering is deliberate and
     it is worth having; what it does NOT buy is redaction.
 

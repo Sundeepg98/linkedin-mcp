@@ -779,7 +779,9 @@ def test_a_name_on_the_invented_table_is_accepted_by_the_import():
     stand-in. Checked against both tables, so a regression that stopped
     importing would show here rather than as a mystery red on a fixture.
     """
-    invented = "Thornwick M"
+    # "Wren Fixturewright" since 2026-09-27: "Thornwick M" left the
+    # neighbour's table with the send_message tests that held it.
+    invented = "Wren Fixturewright"
     assert invented in INVENTED_NAMES, "the neighbour's table changed; pick another"
     assert invented not in SYNTHETIC_PEOPLE
     planted = PLANTS[MEMBER_TEXT].format(name=invented)

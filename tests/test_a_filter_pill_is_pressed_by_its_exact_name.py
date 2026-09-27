@@ -96,12 +96,21 @@ def _no_settle(monkeypatch):
 async def test_the_folder_trigger_named_exactly_focused_is_never_pressed(over):
     """THE DECOY THE ORDER NAMES: the folder dropdown's trigger, beside the bar
     as measured, named exactly "Focused". Nothing in the bar is. Asked for
-    ``focused``, nothing is pressed -- the exact-name rule alone pressed it."""
-    html = _page(_FOLDER, _bar(_pill("Unread", "unread"), _pill("Jobs", "jobs")))
-    result, pressed = await over(html, lambda page: _activate(page, "focused"))
+    ``focused``, nothing is pressed -- the exact-name rule alone pressed it.
 
+    SINCE LANE L5'S ORDER OF 2026-09-27 23:36 ``focused`` IS NOT A VALUE AT
+    ALL, so the refusal comes one step earlier -- before any locator -- and
+    the property this test exists for is unchanged: the trigger is never
+    pressed. (It read the bar's refusal, ``found == 0``, until then.)"""
+    html = _page(_FOLDER, _bar(_pill("Unread", "unread"), _pill("Jobs", "jobs")))
+
+    async def ask(page):
+        with pytest.raises(ValueError, match="is not a messaging filter"):
+            await dom.activate_messaging_filter(page, "focused")
+        return await page.evaluate("window.__pressed")
+
+    pressed = await over(html, ask)
     assert pressed == [], "a control outside the filter bar was pressed: %r" % pressed
-    assert result["activated"] is False and result["found"] == 0, result
 
 
 async def test_a_namesake_outside_the_bar_is_never_pressed(over):
@@ -144,11 +153,14 @@ async def test_two_bars_are_refused_rather_than_guessed_between(over):
 
 
 async def test_a_decoy_whose_label_contains_the_word_is_not_pressed(over):
-    """THE REPRODUCTION. No pill is named exactly ``other``; one pill's name
-    CONTAINS it. Nothing is pressed, the refusal says what it saw -- as counts,
-    because a label it did not press is page text -- and no label leaks."""
-    html = _page(_bar(_pill("Others from " + PLANT, "decoy"), _pill("Unread", "unread")))
-    result, pressed = await over(html, lambda page: _activate(page, "other"))
+    """THE REPRODUCTION. No pill is named exactly the word asked for; one
+    pill's name CONTAINS it. Nothing is pressed, the refusal says what it saw
+    -- as counts, because a label it did not press is page text -- and no
+    label leaks. The word was ``other`` until lane L5's order of 2026-09-27
+    23:36 took the folder's choices out of the accepted values; ``jobs`` is a
+    pill word, so the bar's own refusal is what is exercised, as before."""
+    html = _page(_bar(_pill("Jobs posted by " + PLANT, "decoy"), _pill("Unread", "unread")))
+    result, pressed = await over(html, lambda page: _activate(page, "jobs"))
 
     assert pressed == [], "the decoy was pressed: %r" % pressed
     assert result["activated"] is False, result
@@ -182,10 +194,13 @@ async def test_every_pill_the_composer_draws_is_found_by_its_exact_name(over):
     bar and pill structure are measured, draws five pills, and each is pressed
     by its exact name.
 
-    ``focused`` AND ``other`` ARE REFUSED: both are the folder dropdown's
+    ``focused`` AND ``other`` ARE NOT ASKABLE: both are the folder dropdown's
     choices, beside the bar, not pills. Until 2026-09-27 ``other`` pressed any
     control containing the word, and then ``focused`` pressed the folder
-    trigger, named exactly "Focused" -- the exact rule applied page-wide."""
+    trigger, named exactly "Focused" -- the exact rule applied page-wide. The
+    bar then refused both; since lane L5's order of 2026-09-27 23:36 they are
+    no longer in ``dom.MESSAGING_FILTERS`` at all, and asking raises before
+    any locator (``tests/test_the_folder_choices_are_not_filter_values.py``)."""
     from pathlib import Path
 
     fixture = (
@@ -201,8 +216,6 @@ async def test_every_pill_the_composer_draws_is_found_by_its_exact_name(over):
 
     verdicts = await over(fixture, every)
     assert verdicts == {
-        "focused": (False, 0),
-        "other": (False, 0),
         "unread": (True, None),
         "jobs": (True, None),
         "connections": (True, None),

@@ -386,12 +386,23 @@ AFTER_LANE_L5_OVER_Y2 = (124, {"R": 17, "W": 103, "R+W": 4})
 #: bucket.
 AFTER_LANE_L8 = (131, {"R": 17, "W": 110, "R+W": 4})
 
+#: ON LANE L5'S ORDER OF 2026-09-27 23:36, MEASURED with
+#: `scripts/triage_messaging_gap_rows.py` on the tree merged with master
+#: 64afa6c (`_audit/2026-09-24-lane-l5-messaging.md`, "The name-aimed
+#: debts"): `M2` returned to GAP when `linkedin_send_message` -- its only
+#: tool, aimed by a name -- was retired, and names its blocker in its own
+#: cell. 131 + 1 = 132: writes 110 + 1; lane S's merged rows are network rows
+#: and move nothing here.
+AFTER_LANE_L5_DEBTS = (132, {"R": 17, "W": 111, "R+W": 4})
+
 #: AT LANE S'S OFFLINE FRONTIER (2026-09-28), MEASURED with this tree's
 #: `scripts/triage_messaging_gap_rows.py`: `M53` left GAP, built
 #: (`linkedin_messaging_presence`, COVERED-UNFIRED;
 #: `_audit/2026-09-24-lane-s-people-search.md`, The offline frontier).
-#: 131 - 1 = 130: reads 17 - 1, writes and read-and-writes untouched.
-AFTER_LANE_S_FRONTIER = (130, {"R": 16, "W": 110, "R+W": 4})
+#: 131 - 1 = 130 on lane S's branch; at its merge of master 0867bda,
+#: MEASURED on the merged tree, not summed: 132 - 1 = 131, reads 17 - 1,
+#: writes and read-and-writes lane L5's.
+AFTER_LANE_S_FRONTIER = (131, {"R": 16, "W": 111, "R+W": 4})
 
 EXPECTED_NOW = AFTER_LANE_S_FRONTIER
 

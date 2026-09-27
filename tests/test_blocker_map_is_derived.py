@@ -846,31 +846,78 @@ def test_no_blocker_recounts_higher_than_the_ledger_published(built):
     )
 
 
-def test_the_committed_map_still_matches_what_the_evidence_derives(built):
-    gap, current, assign, _problems = built
-    committed = bbm.MAP_OUT.read_text(encoding="utf-8", errors="replace").splitlines()
+@pytest.fixture(scope="module")
+def derived(built):
+    return bbm.derived_text(built)
+
+
+def test_the_committed_map_still_matches_what_the_evidence_derives(built, derived):
+    """THE WHOLE FILE, every column of every line (line endings normalised).
+
+    UNTIL 2026-09-28 THIS COMPARED TWO COLUMNS OF TEN -- blocker and evidence
+    class -- and ``--check`` compared none, so on 2026-09-27 master carried a
+    map whose ``reason_doc`` column the generator no longer produced for that
+    very tree and everything was green. Now the committed file must BE what
+    ``--write`` would write."""
+    gap, _current, _assign, _problems = built
+    committed = bbm.committed()
     assert committed, "the map file is empty or missing"
-    assert len(committed) - 1 == len(gap), (
-        f"the committed map holds {len(committed) - 1} data lines against "
-        f"{len(gap)} frozen GAP rows. Re-run "
+    assert committed.count("\n") - 1 == len(gap), (
+        f"the committed map holds {committed.count(chr(10)) - 1} data lines "
+        f"against {len(gap)} frozen GAP rows. Re-run "
         "`scripts/build_blocker_map.py --write`."
     )
-    got = {}
-    for line in committed[1:]:
-        parts = line.split("\t")
-        got[parts[0]] = (parts[1], parts[2])
-    drift = []
-    for rid in gap:
-        want_b, want_k = (assign[rid][0], assign[rid][1]) if rid in assign \
-            else ("UNASSIGNED", "UNASSIGNED")
-        if got.get(rid) != (want_b, want_k):
-            drift.append((rid, got.get(rid), (want_b, want_k)))
-    assert drift == [], (
-        f"{len(drift)} rows in the committed map no longer match what the "
-        f"evidence derives, first three {drift[:3]}. The map is a DERIVED "
-        "artifact: fix the evidence file, then re-run "
-        "`scripts/build_blocker_map.py --write`. Never hand-edit the map."
+    stale = bbm.drift(committed, derived)
+    assert stale == [], (
+        f"{len(stale)} line(s) of the committed map are not what the evidence "
+        f"derives, first three {stale[:3]}. The map is a DERIVED artifact: fix "
+        "its sources, then re-run `scripts/build_blocker_map.py --write`. "
+        "Never hand-edit the map."
     )
+
+
+#: THE CASE THAT GOT PAST BOTH CHECKS, as it was: master 5354d42 committed this
+#: ``reason_doc`` cell for the GROUPS-SURFACE rows while the generator derived
+#: a different rank and score for the same tree.
+STALE_REASON_DOC = "CANDIDATE-1-OF-74 SCORE-22 _audit/2026-09-24-lane-s-people-search.md"
+
+
+def _with_cell(text: str, column: str, value: str, line_number: int = 2) -> str:
+    lines = text.split("\n")
+    cells = lines[line_number - 1].split("\t")
+    cells[bbm.COLUMNS.index(column)] = value
+    lines[line_number - 1] = "\t".join(cells)
+    return "\n".join(lines)
+
+
+def test_a_stale_reason_doc_column_is_caught_by_name(derived):
+    """THE EXACT STALE-COLUMN CASE, planted: one row's ``reason_doc`` cell
+    replaced by the value master carried. The comparison names the row and the
+    column -- where the two-column comparison it replaced saw nothing."""
+    stale = _with_cell(derived, "reason_doc", STALE_REASON_DOC)
+    assert stale != derived, "the plant did not change the text; the proof is vacuous"
+    found = bbm.drift(stale, derived)
+    assert len(found) == 1 and "column(s) reason_doc" in found[0], found
+
+
+@pytest.mark.parametrize("column", bbm.COLUMNS)
+def test_every_column_of_the_map_is_compared(derived, column):
+    """NO COLUMN IS SKIPPED: a change to any one cell is a drift, named."""
+    stale = _with_cell(derived, column, "PLANTED-DRIFT")
+    assert bbm.drift(stale, derived) != [], column
+    assert column in bbm.drift(stale, derived)[0], bbm.drift(stale, derived)
+
+
+def test_the_comparison_reads_line_endings_as_git_does(derived, tmp_path):
+    """A CRLF checkout of the same committed bytes is the same map --
+    ``core.autocrlf`` is true where this corpus is written and false on CI --
+    and only a real change is a drift, a trailing byte included."""
+    target = tmp_path / bbm.MAP_OUT.relative_to(bbm.ROOT)
+    target.parent.mkdir(parents=True)
+    target.write_bytes(derived.replace("\n", "\r\n").encode("ascii"))
+    assert bbm.drift(bbm.committed(tmp_path), derived) == []
+    assert bbm.drift(derived, derived) == []
+    assert bbm.drift(derived + "\n", derived) != []
 
 
 def test_the_state_today_column_reproduces_the_shipped_gap_total(built):
