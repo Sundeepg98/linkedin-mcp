@@ -64,6 +64,7 @@ import inspect
 import json
 import logging
 import pkgutil
+import shutil
 from pathlib import Path
 from typing import Any, Callable, Optional
 
@@ -1395,6 +1396,113 @@ def test_a_drive_held_for_a_ruling_still_returns_page_text(key: str) -> None:
     assert key not in AS_SHIPPED
     assert _baseline()[key] in VACUOUS
     assert WHAT_WOULD_DRIVE_IT[key].startswith("RULING: ")
+
+
+#: EACH DRIVE'S PREMISE, BROKEN (2026-09-28). For every drive in
+#: ``tests/shipped_drives.py``, ONE needle of the shape it rests on, and what
+#: it is broken into in a scratch copy of the fixtures. The drive must then
+#: RAISE -- recorded not driven -- and never come back with its verdict on a
+#: page the fixture no longer draws. Found by this control the day the drives
+#: were written: the disclose drive checked its headline inside a double,
+#: i.e. inside the counter reader's own ``except Exception``, which swallowed
+#: the check, and the drive went on to its click on the broken fixture.
+FIXTURE_BREAKS: dict[str, dict[str, str]] = {
+    "dom:read_any_save_control_label": {
+        "fixture": "job_detail_hydrated.html",
+        "needle": 'aria-label="Save the job"', "into": 'aria-label="Keep the job"',
+    },
+    "dom:read_profile_detail_entries": {
+        "fixture": "profile_skills.html",
+        "needle": "/details/skills/edit/forms/", "into": "/details/skills/",
+    },
+    "dom:read_self_owned_editor_fields": {
+        "fixture": "synthetic/intro_editor_switches.html",
+        "needle": "<p>Placeholder setting A</p>", "into": "<p>Placeholder setting Z</p>",
+    },
+    "dom:read_self_owned_editor_values": {
+        "fixture": "synthetic/intro_editor_switches.html",
+        "needle": "<p>Placeholder setting A</p>", "into": "<p>Placeholder setting Z</p>",
+    },
+    "named_profile:composer_holds": {
+        "fixture": "synthetic/named_profile.html",
+        "needle": "data-dispatches", "into": "data-other",
+    },
+    "people_results:read_result_people": {
+        "fixture": "synthetic/people_search_results.html",
+        "needle": "&#8226; 2nd", "into": "2nd",
+    },
+    "press:disclose": {
+        "fixture": "profile_views_analytics.html",
+        "needle": "<p>Profile viewers</p>", "into": "<p>Viewers</p>",
+    },
+    "profile_editor:read_premium_badge": {
+        "fixture": "synthetic/intro_editor_switches.html",
+        "needle": "<p>Placeholder setting A</p>", "into": "<p>Placeholder setting Z</p>",
+    },
+    "reveal:reveal": {
+        "fixture": "profile_views_analytics.html",
+        "needle": "<p>Profile viewers</p>", "into": "<p>Viewers</p>",
+    },
+    "server:_attach_recipient_ids": {
+        "fixture": "profile_views_analytics.html",
+        "needle": "recipient=", "into": "other=",
+    },
+    "server:_profile_views_press_counters": {
+        "fixture": "profile_views_analytics.html",
+        "needle": "<p>Profile viewers</p>", "into": "<p>Viewers</p>",
+    },
+    "share_link:copy_own_post_link": {
+        "fixture": "synthetic/own_post_menu.html",
+        "needle": 'id="decoy-toggle"', "into": 'id="decoy-other"',
+    },
+    "threads:composer_holds": {
+        "fixture": "synthetic/messaging_thread.html",
+        "needle": 'id="reply-editor"', "into": 'id="reply-other"',
+    },
+}
+
+#: The one drive whose shape is not a fixture file: its page is
+#: ``tests/test_profile_views_more.py``'s synthetic markup, broken in place.
+PREMISE_IN_A_TEST = "profile_views_more:read_profile_views_more_insights"
+
+ALL_DRIVES = {
+    **shipped_drives.DRIVES, **shipped_drives.TO_THE_PRESS, **shipped_drives.HELD_FOR_A_RULING,
+}
+
+
+def test_every_drive_has_its_premise_broken_below() -> None:
+    assert set(FIXTURE_BREAKS) | {PREMISE_IN_A_TEST} == set(ALL_DRIVES), (
+        sorted(set(ALL_DRIVES) ^ (set(FIXTURE_BREAKS) | {PREMISE_IN_A_TEST}))
+    )
+
+
+@pytest.mark.parametrize("key", sorted(ALL_DRIVES))
+def test_a_drive_on_a_fixture_that_stopped_drawing_its_shape_raises(
+    key: str, tmp_path: Any, monkeypatch: Any
+) -> None:
+    """A DRIVE IS ONLY AS GOOD AS ITS FIXTURE STILL BEING WHAT IT CITES:
+    each drive re-reads its fixture before the reader runs, and a broken
+    needle makes it raise -- not driven -- rather than measure a page nobody
+    draws. The needle is checked present first, so a control that breaks
+    nothing fails here instead of passing."""
+    if key == PREMISE_IN_A_TEST:
+        from tests import test_profile_views_more as source
+
+        monkeypatch.setattr(source, "HIGHLIGHTS", ["Overview", *source.HIGHLIGHTS[1:]])
+    else:
+        broken = FIXTURE_BREAKS[key]
+        copy = tmp_path / "fixtures"
+        shutil.copytree(shipped_drives.FIXTURES, copy)
+        target = copy / broken["fixture"]
+        text = target.read_text(encoding="utf-8")
+        assert broken["needle"] in text, (key, broken["needle"])
+        target.write_text(text.replace(broken["needle"], broken["into"]), encoding="utf-8")
+        monkeypatch.setattr(shipped_drives, "FIXTURES", copy)
+    verdict, detail = _drive_once(
+        ALL_DRIVES[key], [PlantedPage()], {}, builds_records=key in record_readers()
+    )
+    assert verdict == "not_driven:raises AssertionError", (verdict, detail)
+
 
 
 def test_every_vacuous_reader_is_driven_or_names_what_would_drive_it() -> None:

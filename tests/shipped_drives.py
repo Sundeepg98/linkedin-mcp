@@ -703,16 +703,26 @@ class _AtTheAddress(_Over):
 
 class _TheProfileViewsPage(_AtTheAddress):
     """``/analytics/profile-views/``, whose insights script draws the
-    capture's headline count (its label the plant)."""
+    capture's headline count (its label the plant).
+
+    THE COUNT IS READ OFF THE CAPTURE BY THE DRIVE, BEFORE THE READER RUNS,
+    and handed in. Read here, inside ``evaluate``, a capture that stopped
+    drawing it raised INSIDE the counter reader's own ``except Exception``,
+    which swallowed it: on a broken fixture the disclose drive went on to
+    its click and the reveal drive came back refused, neither raising
+    (2026-09-28, the premise control). A premise checked inside a double is
+    checked inside the reader's handlers."""
+
+    def __init__(self, wrapped: Any, url: str, headline: str) -> None:
+        super().__init__(wrapped, url)
+        self._headline = headline
 
     async def evaluate(self, script: Any, arg: Any = None, **kwargs: Any) -> Any:
         from linkedin_server import dom
 
         answer = await self._wrapped.evaluate(script, arg, **kwargs)  # the read, counted
         if script == dom.PROFILE_VIEWS_INSIGHTS_JS:
-            return _planted_answer_with(
-                metrics=[{"value": _captured_headline(), "label": PLANT}]
-            )
+            return _planted_answer_with(metrics=[{"value": self._headline, "label": PLANT}])
         return answer
 
 
@@ -744,7 +754,7 @@ async def disclose_to_the_press(page: Any) -> Any:
     """
     from linkedin_server import press, server
 
-    at = _TheProfileViewsPage(page, _profile_views_address())
+    at = _TheProfileViewsPage(page, _profile_views_address(), _captured_headline())
     counter_reader = await server._profile_views_press_counters(at)
     return await press.disclose(
         at,
@@ -825,7 +835,7 @@ async def reveal_to_the_press(page: Any) -> Any:
     from linkedin_server import reveal, server
 
     _drawn("profile_views_analytics.html", SHOW_MORE_LABEL)
-    at = _TheRevealPage(page, _profile_views_address())
+    at = _TheRevealPage(page, _profile_views_address(), _captured_headline())
     counters = await server._profile_views_press_counters(at)
     return await reveal.reveal(
         at,
