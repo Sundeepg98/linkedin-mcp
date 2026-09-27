@@ -404,7 +404,7 @@ master row the merge returned (`P P2`).
 | write-classes split (`test_write_classes`) | (16, 36, 306) | (16, 36, 335) | 29 new R3 lines: section 5.2's 26, `N 125`, `P A23b`, `P P2` |
 | messaging triage headline (`test_triage_instrument`) | 124 {R 17, W 103, R+W 4} | 131 {R 17, W 110, R+W 4} | seven M rows back to GAP (`C17`, `C19`, `C22`, `C31`, `C77`, `M12`, `M26`), less `C63` |
 | GAP rows on refused addresses (`EXPECTED_GAP_ROWS`) | 73 | 78 | `M C62` ('/withdraw'), `N A15` ('/invite', '/withdraw'), `P F5`, `P K7`, `P M3` ('/delete') |
-| pointer graph (`measure_pointer_graph.py --pin`) | 66 | 65, 3 moved | `P B3 -> P B2` and `P E5 -> P E4`: the donor verdicts read ACCOUNT-FACT beside US-RULING now; `M C63`'s `same` was struck when it was built, so its pointer is gone |
+| pointer graph (`measure_pointer_graph.py --pin`) | 66 | 65, 4 moved | `P B3 -> P B2` and `P E5 -> P E4`: the donor verdicts read ACCOUNT-FACT beside US-RULING now; `P F4 -> P F3`: US-BOUNDARY joined US-RULING when the F-4 fix named the refused profile (section 9.5), as it did for `P E4`; `M C63`'s `same` was struck when it was built, so its pointer is gone |
 
 The census as a whole (`count_census_states`, unpinned), on the merge: 770
 stated rows; GAP 593, EXCLUDED-RULED 29, COVERED-UNFIRED 35, XR 2.
@@ -687,6 +687,8 @@ then only the branch holds them, and the SUBJECT is the key that survives.
 
 | commit | date | subject |
 |---|---|---|
+| `511ed7f` | 09-27 | lane L8: what the cold verification found, fixed -- the retired refusal in two tool descriptions, six stale apply claims, a leave verdict a half-drawn page could fool |
+| `ac46138` | 09-27 | lane L8 closes: the instructions test counts to sixteen, and the record gets its commits and the gates on the merged tree |
 | `dda3f61` | 09-27 | merge master 2eb90ad into lane L8: the outward classes meet lanes L5, L7, S, D, Y2 and the live lane, once, at the end |
 | `30e7651` | 09-27 | census: P A23 split (its delete half is his own item now), N 125 admitted as a write, M M32 re-grounded, the inventory's undo grounds restated |
 | `c7fd61f` | 09-27 | census: the rows the three retired keys held -- 29 back to GAP with blockers named, M C63 / N 64 built, the side tables and instruments re-pointed |
@@ -702,9 +704,10 @@ then only the branch holds them, and the SUBJECT is the key that survives.
 | `e3a8eed` | 09-24 | outward_classes: name its constants for what they hold, so a test naming them couples to this module and nothing else |
 | `efa3d8f` | 09-24 | writes: narrow PERMANENTLY_FORBIDDEN to the six mitigations; the three retired entries kept verbatim in outward_classes |
 
-One more commit sits on top: this record's closing edit, together with the
-one repair the merged tree's gate asked for (section 9.4). No lane commit
-carries an AI co-author, session or generated-by line; that was checked over
+The count-map repair the merged tree's gate asked for is in `ac46138`
+(section 9.4), and the verification's fixes are in `511ed7f` (section 9.5).
+One more commit sits on top: this record's last edit. No lane commit carries
+an AI co-author, session or generated-by line; that was checked over
 `git log --first-parent --format=%B` for the range.
 
 ### 9.4 Gates on the merged tree, run and NOT run
@@ -866,8 +869,15 @@ file `verifier-report.md`. Its verdicts, and what each finding changed:
 The fixes were re-checked by instruments, not by a second pass:
 - the new rule, run red first;
 - the mutants for F-6 and F-8, each killed by its new test;
-- the census checkers;
-- the gates in the closing commits.
+- the census checkers, green but for the pins;
+- the same 34-file batch as section 9.4, on `511ed7f`: 2 failed and 2742
+  passed in 265.4 s. The two reds are the pins section 5.3 lists, the
+  write-classes split and the refused-address count.
+
+The census pins are unmoved by the fixes, with one exception: the pointer
+graph now shows 4 moved pointers where it showed 3 (section 5.3). The census
+and audit batch was re-run on this record's last edit: 8 failed and 522
+passed in 85.2 s -- the same eight pins as section 9.4.
 
 ## Live queue
 
