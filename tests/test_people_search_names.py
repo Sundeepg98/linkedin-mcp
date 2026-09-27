@@ -980,6 +980,36 @@ def test_a_result_the_page_does_not_show_is_not_read(hide):
     assert not _anywhere("Zzqhidden", result) and not _anywhere(hidden, result)
 
 
+def test_a_hidden_result_is_refused_even_when_its_name_link_is_shown():
+    """THE CARD'S OWN VISIBILITY CHECK, discriminated. Every hiding above
+    hides the name link too, so the name link's check alone refuses them --
+    the final mutation check (2026-09-27) removed the card's check and they
+    stayed green. A card hidden by ``visibility:hidden`` whose name link sets
+    ``visibility:visible`` is the one drawing where the two differ: the page
+    shows a stray name and not a result, and the card's check refuses it."""
+    result = _read(mutate=_drawing(
+        "cards()[0].setAttribute('style', 'visibility:hidden');"
+        "title(0).setAttribute('style', 'visibility:visible');"
+    ))
+    assert _skipped(result) == {"not_visible": 1}
+    assert [p["name"] for p in result["people"]] == [n for n, _s, _h in RESULTS[1:]]
+
+
+def test_THIS_CONTROL_CAN_FAIL_the_name_link_really_is_shown_in_that_drawing():
+    """Without this, the test above could pass on a drawing that hid the name
+    link after all."""
+
+    async def shown(page: Any) -> list[bool]:
+        cards = await page.locator(people_results.RESULT_CARD).element_handles()
+        title = await cards[0].query_selector(people_results.MEMBER_LINK)
+        return [await cards[0].is_visible(), await title.is_visible()]
+
+    assert asyncio.run(_with_page(shown, mutate=_drawing(
+        "cards()[0].setAttribute('style', 'visibility:hidden');"
+        "title(0).setAttribute('style', 'visibility:visible');"
+    ))) == [False, True]
+
+
 @pytest.mark.parametrize("style", [
     "position:absolute;width:1px;height:1px;overflow:hidden;"
     "clip:rect(0 0 0 0);white-space:nowrap",
