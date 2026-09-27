@@ -1356,6 +1356,42 @@ PINNED = (
 #: to 17409e16e7abbcc8, lane S's pin, so nothing else rode in. Control:
 #: minus the pre-existing articles line instead lands on 173ff7a49fd2bf66.
 #: ------------------------------------------------------------------------
+#: RE-FROZEN AGAIN 2026-09-27 BY THE LIVE LANE (the session-2 preparation),
+#: TWO DIGESTS MOVED, ONE ENTRY IN EACH OF TWO TABLES -- HIS "SHARING PROFILE
+#: EDITS" SETTING PAGE, FOR READING ONLY, on the orchestrator's APPLICATION of
+#: ONE-NAMED-SETTINGS-PAGE-AT-A-TIME (recorded as an application of that
+#: ruling, not a new one):
+#:
+#:     _ALLOWED_URL_PATTERNS                     6240409ec52c4ab2 -> 18e5958586c2c367   54 -> 55
+#:     _FORBIDDEN_SUBSTRING_PATTERN_EXEMPTIONS   76d7b10899530d69 -> 14f567fd160048a8    3 -> 4
+#:     _FORBIDDEN_URL_SUBSTRINGS                 unchanged                               33 -> 33
+#:
+#:     ^https://www\.linkedin\.com/mypreferences/d/settings/notify-network-for-updates/?$
+#:     excusing exactly {"/settings/", "settings"} for that anchored address
+#:
+#: The page holds the account-level setting condition 1 of
+#: SELF-PROFILE-EDITS-NOT-OUTWARD rests on where the edit dialog draws no
+#: notify control (SELF-PROFILE-EDIT-NOTIFY-CONDITION-AMENDED). The address is
+#: DERIVED, never drawn on a capture, and the other candidate is NOT
+#: admitted -- it gets its own admission only if this one redirects. The
+#: follower-list mechanism exactly: two gates, each naming the one address,
+#: the forbidden tuple untouched. `tests/test_notify_setting_admission.py`
+#: pins it: both spellings admitted; a sibling settings page, this address
+#: with a sub-path, a query, a traversal or another case, the other
+#: candidate, the category page, the old /psettings/ address and the family
+#: root all refused on the gate that names them; EITHER gate alone admits
+#: nothing; the pair's blast radius is exactly its own two spellings; and no
+#: write spec names or exempts it.
+#:
+#: ATTRIBUTION, in this dict's form: the tree MINUS exactly these two entries
+#: hashes to ``6240409ec52c4ab2`` and ``76d7b10899530d69``, the values
+#: replaced, so nothing else rode in. Partial states, for whoever merges only
+#: one half: the line alone 18e5958586c2c367 / 76d7b10899530d69; the exemption
+#: alone 6240409ec52c4ab2 / 14f567fd160048a8. Control: dropping the
+#: PRE-EXISTING dark-mode line instead lands on ec6311ecf485ba6a. SIX of eight
+#: digests byte-identical; ``<functions>`` unmoved, so ``assert_read_url`` did
+#: not change. Computed with this file's ``ast_digest``, one interpreter, 3.13.
+#: ------------------------------------------------------------------------
 READONLY_AST_AT_LAST_REFREEZE = {
     "<functions>": "d7e1d0922e3af446",
     "JS_MUTATION_TOKENS": "d47e30b67c583c1b",
@@ -1522,11 +1558,19 @@ READONLY_AST_AT_LAST_REFREEZE = {
     # 17409e16e7abbcc8 (lane S) and b99f3c765fcb8043 (the live lane) met at the
     # orchestrator's merge of the live lane over lane S, 2026-09-27: both
     # admissions together, 53 + 1 = 54 lines; merged digest 6240409ec52c4ab2.
-    "_ALLOWED_URL_PATTERNS": "6240409ec52c4ab2",
+    #
+    # 6240409ec52c4ab2 until 2026-09-27 (the live lane, session-2
+    # preparation): his "Sharing profile edits" setting page, one line here and
+    # one pattern exemption beside it, on the orchestrator's application of
+    # ONE-NAMED-SETTINGS-PAGE-AT-A-TIME. See that ledger entry.
+    "_ALLOWED_URL_PATTERNS": "18e5958586c2c367",
     "_FORBIDDEN_SUBSTRING_EXEMPTIONS": "43e2bf7f3db0dbed",
     # 419e64a3cd92ec7e until the same REVIEW: commit: a third entry, excusing
     # exactly {"/follow"} for exactly the anchored follower-list address.
-    "_FORBIDDEN_SUBSTRING_PATTERN_EXEMPTIONS": "76d7b10899530d69",
+    # 76d7b10899530d69 until 2026-09-27: a fourth, excusing exactly
+    # {"/settings/", "settings"} for exactly his "Sharing profile edits"
+    # setting page (the live lane; the same ledger entry).
+    "_FORBIDDEN_SUBSTRING_PATTERN_EXEMPTIONS": "14f567fd160048a8",
     "_FORBIDDEN_URL_SUBSTRINGS": "b0291a66ec9bd51e",
     # 23aece1483afdee9 until 2026-09-19. See the re-freeze note above: eleven
     # detector classes added, zero removed, and the direction is pinned by

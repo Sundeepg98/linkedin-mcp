@@ -1945,3 +1945,88 @@ session-2 queue for the six intro rows. That follow-up is why (f)'s last
 paragraph now names this lane's reader as the last offline piece. The
 blocker map regenerated to a fixed point (derived candidate columns only);
 the census instruments green, no pin moves.
+
+## Session-2 preparation, 2026-09-27 -- OFFLINE ONLY
+
+The orchestrator's order of 2026-09-27 16:45 IST: prepare live session 2 with
+no browser, no attach and no page loads; session 2 itself runs only on its
+separate go. Four items -- (a) the setting's address, (b) its reader wired at
+the save gate's seam, (c) a session-2 harness written under
+PAGE-MAY-VETO-NEVER-SUPPLY, (d) the plan,
+`_audit/2026-09-27-live-session-2-plan.md` -- each its own commit, on a branch
+fast-forwarded to master `2eb90ad` first (the order's sample said the tree was
+clean at `aa559de`, an ancestor of master; disk agreed at 16:34).
+
+**THE OPERATOR'S NAMED LIVE-PROOF TARGETS appear nowhere in this repository.**
+They live only in the gitignored identity key and the orchestrator's own
+memory; every step that needs one names it by role.
+
+### (a) The setting's address: admitted for reading, on an application of ONE-NAMED-SETTINGS-PAGE-AT-A-TIME
+
+**THE CALL IS THE ORCHESTRATOR'S, AND IT APPLIES AN EXISTING DECISION.**
+Step 1 of the capture spec in (f) above: admit
+`/mypreferences/d/settings/notify-network-for-updates`, exact and anchored,
+for reading, and that path alone -- the operator's settings ruling of
+2026-08-31 (ONE-NAMED-SETTINGS-PAGE-AT-A-TIME) applied to a second named
+page, as it was once to dark mode. No register entry is written.
+
+**BUILT, as lane L1's follower-list carve-out was built -- two gates, each
+naming the one address:**
+
+* one anchored line in `readonly._ALLOWED_URL_PATTERNS`, beside the dark-mode
+  entry, with its argument on the line: what the page is for (condition 1 as
+  amended), where its identity comes from (the settings index captured in
+  session 1), that the address is DERIVED and never drawn on a capture, that
+  the other candidate is not admitted, and that it is READ ONLY;
+* one entry in `readonly._FORBIDDEN_SUBSTRING_PATTERN_EXEMPTIONS` excusing
+  exactly `/settings/` and `settings` -- the two forbidden substrings the
+  address trips, measured -- for exactly that anchored address. The forbidden
+  tuple is unchanged at 33, so both words keep their full reach everywhere
+  else: nothing is NARROWED, which is the trade the dark-mode entry declined
+  for `language` and `autoplay-videos`.
+
+**THE CONTROLS THE ORDER NAMED, and more** (`tests/test_notify_setting_admission.py`):
+both spellings admitted through the shipped gate; refused, each on the gate
+that names it -- the sibling `/mypreferences/d/settings/show-profile-photos`,
+the two siblings the dark-mode entry declined by name, this address with a
+sub-path (`/anything`), a query, a traversal onto a sibling and onto the
+account-ending address, the same path in another case, the OTHER candidate
+(`/mypreferences/d/notify-network-for-updates`, allowlist), the category page
+(`/mypreferences/d/categories/`), the old `/psettings/activity-broadcast`
+(`/psettings/`) and the settings family root. EITHER gate alone admits
+nothing; the pair's blast radius over the shipped corpus plus these spellings
+is exactly its own two spellings, nothing newly refused; and no write spec
+names the address or exempts either word, so it is no write surface.
+
+**THE RE-FREEZE, in the comment chain's attribution form:**
+
+    _ALLOWED_URL_PATTERNS                     6240409ec52c4ab2 -> 18e5958586c2c367   54 -> 55
+    _FORBIDDEN_SUBSTRING_PATTERN_EXEMPTIONS   76d7b10899530d69 -> 14f567fd160048a8    3 -> 4
+
+The tree minus exactly the two entries hashes to the two values replaced;
+the line alone is 18e5958586c2c367 / 76d7b10899530d69 and the exemption alone
+6240409ec52c4ab2 / 14f567fd160048a8; dropping the pre-existing dark-mode line
+instead lands on ec6311ecf485ba6a; six of eight digests byte-identical,
+`<functions>` unmoved. Two other pins moved with it and say why:
+`tests/test_job_alerts_read_boundary.py`'s count of pattern exemptions
+(3 -> 4, a dated note) and the census allowlist-count claim in
+`_audit/_census/messaging-and-content.md` (54 -> 55, naming this admission as
+the latest). `P O6-O20` in `_audit/_census/profile.md` -- the fifteen
+visibility toggles, one of which this setting is -- carries a dated note: its
+page is named for reading; its toggles stay GAP.
+
+**RED-PROOFS, each plant alone in a scratch copy (the new file and the
+boundary invariant):**
+
+    plant                                                        red
+    on the readonly.py before (a)                                  8
+    R1 the admission not made                                      8
+    R2 the exemption widened to the settings family                5
+    R3 the allowlist line widened to the settings family           4
+    R4 the exemption excusing '/settings/' only                    6
+    R5 the exemption left open at the end (sub-paths excused)      6
+    R6 the allowlist line left open at the end                     2
+
+Baseline and restored: 35 passed. **If session 2's capture shows this
+address redirects, the second candidate gets its own admission then** -- not
+now.
