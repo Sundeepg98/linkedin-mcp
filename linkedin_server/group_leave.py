@@ -404,6 +404,52 @@ async def read_state(page: Any, identifier: Any) -> tuple[dict[str, Any], str, s
     return membership_verdict(await read_rows(page, identifier), identifier)
 
 
+def verification_verdict(
+    before: Any, reading: dict[str, Any], identifier: Any
+) -> tuple[dict[str, Any], str, str]:
+    """The FRESH render's answer, held against what the preview counted. PURE.
+
+    ``membership_verdict`` alone says ``not_member`` whenever the page drew
+    ANY membership row and none carries the id -- which a page that has drawn
+    SOME of its rows, and not yet the target's, satisfies too. After an
+    irreversible press that would print ``performed: True`` for a leave that
+    may not have landed (finding F-6 of lane L8's cold verification,
+    2026-09-27). So the verification asks one more thing of a ``not_member``:
+    the fresh render must draw EXACTLY ONE membership row fewer than the
+    preview counted -- the one that was left -- and every other.
+
+    Any other count is ``unknown``, and the why says it in counts: fewer is a
+    page still drawing (or more than one membership gone), the same count or
+    more is a list that changed in between. ``member`` and ``unknown`` pass
+    through unchanged. ``before`` is the preview's facts, as
+    ``membership_verdict`` returned them.
+    """
+    facts, state, why = membership_verdict(reading, identifier)
+    if state != NOT_MEMBER:
+        return facts, state, why
+    before = before if isinstance(before, dict) else {}
+    counted = coerce.as_count(before.get("row_scoped_disclosures"))
+    drawn = facts["row_scoped_disclosures"]
+    facts = {**facts, "membership_rows_the_preview_counted": counted}
+    if counted < 1 or drawn != counted - 1:
+        return (
+            facts,
+            UNKNOWN,
+            f"the fresh render drew {drawn} membership row(s) and none carries "
+            f"the group, but the preview counted {counted}; a finished leave "
+            f"draws exactly {max(counted - 1, 0)}. A page still drawing its "
+            "rows looks like this, and so does a list that changed in between, "
+            "so it is not reported as a leave.",
+        )
+    return (
+        facts,
+        NOT_MEMBER,
+        why
+        + f" And the page drew exactly one membership row fewer than the "
+        f"preview counted ({drawn} of {counted}): the one that was left.",
+    )
+
+
 #: THE MENU IS POLLED RATHER THAN WAITED FOR, briefly, because a menu still
 #: opening reads as absent and one read would refuse a press that was about to
 #: be fine. Two numbers for the reason ``writes.APPLY_MODAL_POLLS`` gives: the

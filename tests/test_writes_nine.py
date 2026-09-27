@@ -1777,15 +1777,31 @@ _REVERSIBILITY_FIELDS = (
 )
 
 
-def _leans_on_a_retired_refusal(spec: writes.WriteSpec) -> list[tuple[str, str]]:
-    """Every place a reversibility field states a permanent refusal LIVE.
+#: THE PHRASINGS THE TREE USED FOR THE RETIRED REFUSAL, beyond its key names.
+#: MEASURED, NOT IMAGINED: "permanently forbidden" was the only one at first,
+#: and the cold verification of lane L8 (2026-09-27) then found two TOOL
+#: DESCRIPTIONS stating the refusal live in words it did not match --
+#: "forbids deletion permanently" (``linkedin_comment_on_item``) and
+#: "Deletion is forbidden in this design" (``linkedin_send_reply``). A NEW
+#: PHRASING ESCAPES THIS RULE. That is its stated limit, and the reason the
+#: needles are listed here rather than implied.
+_RETIRED_REFUSAL_PHRASINGS = (
+    r"permanently[\s_]+forbidden",
+    r"forbids?\s+deletion",
+    r"(?:deletion|deleting|withdrawing|withdrawal)\s+(?:is|stays|remains)\s+"
+    r"(?:permanently\s+)?forbidden",
+    r"forbidden\s+in\s+this\s+design",
+)
 
-    The needles come from the system, not from the prose that went stale:
-    the retired keys' own names, read off
-    ``outward_classes.RETIRED_PERMANENT_REFUSALS``, and "permanently
-    forbidden" in either spelling. None of the six surviving refusals is an
-    undo, so a reversibility field has no live reason to cite one. A match is
-    allowed only as a QUOTED RETRACTION -- the two-part test
+
+def _live_retired_refusals(text: str) -> list[str]:
+    """Every statement of a retired refusal in ``text`` that is LIVE.
+
+    The needles are the retired keys' own names, read off
+    ``outward_classes.RETIRED_PERMANENT_REFUSALS``, and the phrasings above.
+    None of the six surviving refusals is an undo, so nothing that states how
+    an action is undone has a live reason to cite one. A match is allowed only
+    as a QUOTED RETRACTION -- the two-part test
     ``tests/test_a_spec_may_not_assert_what_the_code_denies.py`` applies,
     imported rather than re-derived.
     """
@@ -1797,16 +1813,24 @@ def _leans_on_a_retired_refusal(spec: writes.WriteSpec) -> list[tuple[str, str]]
     needle = re.compile(
         "|".join(
             [re.escape(key) for key in outward_classes.RETIRED_PERMANENT_REFUSALS]
-            + [r"permanently[\s_]+forbidden"]
+            + list(_RETIRED_REFUSAL_PHRASINGS)
         ),
         re.IGNORECASE,
     )
+    text = text or ""
+    return [
+        match.group(0)
+        for match in needle.finditer(text)
+        if not _is_a_quoted_retraction(text, match)
+    ]
+
+
+def _leans_on_a_retired_refusal(spec: writes.WriteSpec) -> list[tuple[str, str]]:
+    """Every place a reversibility field states a retired refusal LIVE."""
     found = []
     for field in _REVERSIBILITY_FIELDS:
-        text = getattr(spec, field, None) or ""
-        for match in needle.finditer(text):
-            if not _is_a_quoted_retraction(text, match):
-                found.append((field, match.group(0)))
+        for hit in _live_retired_refusals(getattr(spec, field, None) or ""):
+            found.append((field, hit))
     return found
 
 
@@ -1843,7 +1867,7 @@ def test_the_rule_convicts_the_text_send_reply_arrived_with():
     spec = spec_for_action("send_reply")
     planted = dataclasses.replace(spec, reversible_by=arrived)
     assert _leans_on_a_retired_refusal(planted) == [
-        ("reversible_by", "permanently forbidden"),
+        ("reversible_by", "Deletion is permanently forbidden"),
         ("reversible_by", "delete_or_withdraw_anything"),
     ]
     quoted = dataclasses.replace(
@@ -1854,6 +1878,44 @@ def test_the_rule_convicts_the_text_send_reply_arrived_with():
     assert _leans_on_a_retired_refusal(quoted) == []
     # And the spec as shipped says it only that way.
     assert _leans_on_a_retired_refusal(spec) == []
+
+
+async def test_no_sanctioned_write_tool_description_states_a_retired_refusal():
+    """THE TOOL DESCRIPTIONS OF THE SANCTIONED WRITES, which a client model
+    reads INSTEAD of the spec. The spec-field rule above could not see them,
+    and the cold verification of lane L8 found two stating the retired refusal
+    live (see ``_RETIRED_REFUSAL_PHRASINGS``). Read off the registry a client
+    reads, not off the source."""
+    from linkedin_server.server import mcp
+
+    tools = {tool.name: tool for tool in await mcp.list_tools()}
+    leaning = {}
+    for name in SANCTIONED_WRITES:
+        if name in tools:
+            found = _live_retired_refusals(tools[name].description or "")
+            if found:
+                leaning[name] = found
+    assert not leaning, (
+        "A write tool's description states a retired PERMANENTLY_FORBIDDEN "
+        "refusal as live: %r. Quote the old sentence as a retraction and say "
+        "what the undo rests on now." % (leaning,)
+    )
+
+
+def test_the_description_rule_convicts_the_two_sentences_it_was_built_for():
+    """SHOWN FAILING on the two sentences the verification found, verbatim,
+    and passing on their quoted retractions."""
+    found = [
+        "Not by this server, which forbids deletion permanently and should not "
+        "now try to aim one.",
+        "Deletion is forbidden in this design at any confirm level, and even "
+        "where LinkedIn lets a sender delete a message it does not un-send the "
+        "email or un-read what was read.",
+    ]
+    for sentence in found:
+        assert _live_retired_refusals(sentence), sentence
+        quoted = 'This used to say "%s"; that refusal was retired.' % sentence
+        assert _live_retired_refusals(quoted) == [], quoted
 
 
 # ---------------------------------------------------------------------------

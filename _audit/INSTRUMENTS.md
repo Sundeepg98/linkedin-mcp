@@ -10765,7 +10765,9 @@ its example, and the first repair (deleting the mark) was reverted.
 |---|---|
 | `tests/test_outward_classes.py` -- `_record_problems`, the census-state agreement, the retired-text digests, the surviving six by name | ten plants into copies of the real records (a status off the list, a class off the three, a name-shaped target kind, BUILT without a performable spec, NEEDS-CAPTURE with no capture, BLOCKED without a reason, a live proof that does not say what HE NAMES, empty facts, empty reversibility, and a performable action whose record still waits), each convicted by name; and on the REAL data before the build and the census landed, the census-agreement test was red on eleven rows and the records test on the then-unbuilt leave-a-group act -- shown failing on the tree before it was shown passing |
 | `linkedin_server/group_leave.py` -- `checked_group_id`, the XPath row walk, `read_rows`, `membership_verdict`, `menu_item_gate`, `read_after_press`, `after_press_note`; the `withdraw_from_group` spec, `MENU_ITEM_ACTIONS` and arms in `writes.py`; `server.linkedin_withdraw_from_group` | `tests/test_leave_group.py` over a synthetic Groups root whose structure is the 2026-09-20 capture's: the exact-id rule shown failing as a prefix match; the in-row menu condition shown failing on a planted portal menu; the second-use guard shown failing without its flag; the three grant controls with zero navigations; every aim refusal at the verdict and at the preview with nothing minted; a dialog after the leave press counted and never answered; no synthetic group name in any refusal, block or receipt |
-| `tests/test_writes_nine.py` -- `_leans_on_a_retired_refusal` and `test_no_sanctioned_spec_states_a_retired_refusal_as_its_undo` (added 2026-09-27, section 80.6): every sanctioned spec's printed reversibility fields, a retired key or "permanently forbidden" only as a quoted retraction | `test_the_rule_convicts_the_text_send_reply_arrived_with`: the exact `reversible_by` lane L5's `send_reply` reached the merge with is convicted twice (the phrase and the key), its quoted retraction passes, and the shipped spec passes |
+| `tests/test_writes_nine.py` -- `_live_retired_refusals`, `_leans_on_a_retired_refusal`, `test_no_sanctioned_spec_states_a_retired_refusal_as_its_undo` and `test_no_sanctioned_write_tool_description_states_a_retired_refusal` (added 2026-09-27, section 80.6): every sanctioned spec's printed reversibility fields AND every sanctioned write's tool description may state a retired key, or one of `_RETIRED_REFUSAL_PHRASINGS` (the phrasings measured on the tree -- a new phrasing escapes it, and that is its stated limit), only as a quoted retraction | `test_the_rule_convicts_the_text_send_reply_arrived_with`: the exact `reversible_by` lane L5's `send_reply` reached the merge with is convicted twice; `test_the_description_rule_convicts_the_two_sentences_it_was_built_for`: the two tool-description sentences the cold verification found; and the description test itself ran RED on the real registry, naming exactly those two tools, before they were restated |
+| `linkedin_server/group_leave.py` -- `verification_verdict` (added 2026-09-27, finding F-6): a `not_member` after the leave needs EXACTLY one membership row fewer than the preview counted | `tests/test_leave_group.py::test_a_partly_drawn_page_after_the_leave_is_unknown_not_a_leave`: the old rule alone calls a half-drawn page `not_member`, and the verification with the old rule substituted back (a mutant) goes red |
+| `tests/test_leave_group.py` -- the navigator's per-load landings and page-side press witness (added 2026-09-27, findings F-7, F-8) | `test_a_verification_that_lands_elsewhere_says_nothing_about_the_leave` kills the cold verifier's surviving mutant M3 (the verification's landing check deleted); the dialog, happy-path and refusing-gate tests read the fixture's own press counters off the clicked document |
 | `scripts/check_write_classes.py` -- `_WC_SELF_ROW_RX` admits a split suffix (`A23b`), added 2026-09-27 by this lane's census child when `P A23` was split | `tests/test_write_classes.py::test_a_suffixed_id_citation_is_parsed_and_must_still_name_a_row`: a planted `row A23z` must be convicted as a row that does not exist, never as an unparseable citation; shown failing on the old regex, where it read as neither a path nor a row |
 
 ### 80.5 DECLARED DISPOSABLE
@@ -10804,13 +10806,17 @@ The two met only at the merge.
   (delete_or_withdraw_anything)".
 - Lane Y2 filed a NEW census row, `P P2`, EXCLUDED-RULED on the same key.
 
-Neither one CONFLICTED. Both came in by clean line merges, and a keyed
-three-way merge of the conflicted census rows would never have shown them.
-They were found by reading master's ADDED lines for the retired key names
-before merging. Afterwards, two instruments hold the class:
+Neither needed a judgement at the conflict level. `send_reply` merged
+cleanly, and so did `P P2`'s census cell. Its exclusion line sat in a
+conflict hunk, but as a master-only row, which a keyed three-way merge takes
+as it stands and never shows. They were found by reading master's ADDED lines
+for the retired key names before merging. Afterwards, two instruments hold
+the class:
 - The restatement test in `tests/test_writes_nine.py` named its specs, so it
   could not see a sixth. It now has a whole-set twin that reads every
-  sanctioned spec's printed reversibility fields.
+  sanctioned spec's printed reversibility fields. After the lane's cold
+  verification found two TOOL DESCRIPTIONS the twin could not see, it reads
+  those too.
 - `check_exclusion_basis` convicts a re-planted `P P2` line four ways:
   - a basis left on a row that moved;
   - an anchor `writes.py` no longer holds;

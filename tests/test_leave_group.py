@@ -33,6 +33,7 @@ from __future__ import annotations
 import json
 import re
 from pathlib import Path
+from typing import Any
 
 import pytest
 
@@ -101,21 +102,44 @@ def _no_name(text: str, label: str = "") -> None:
 
 class _Navigator:
     """Serves frozen worlds for the ONE address this action loads, in order,
-    and RECORDS every ask. The last world repeats once the list runs out."""
+    and RECORDS every ask. The last world repeats once the list runs out.
 
-    def __init__(self, *worlds: str, landed: str = ""):
+    ``landed`` is one landing for every load, or a LIST, one per load, so a
+    test can make only the VERIFICATION land somewhere else (added
+    2026-09-27 for finding F-8 of lane L8's cold verification: no test drove
+    that branch, and deleting its landing check left every test green).
+
+    ``pressed`` holds, per load, THE PAGE'S OWN WITNESS of what was pressed on
+    the document about to be replaced -- the fixture's own counters, read
+    before the next world is set. Added 2026-09-27 for finding F-7: "nothing
+    in the dialog was pressed" rested on ``perform``'s own counter, the actor
+    grading itself. A blank page has neither counter and reads zero.
+    """
+
+    def __init__(self, *worlds: str, landed: Any = ""):
         assert worlds
         self.worlds = list(worlds)
         self.gotos: list[str] = []
         self.landed = landed
+        self.pressed: list[dict[str, int]] = []
 
     async def goto(self, page, url: str) -> str:
         self.gotos.append(url)
         if url != _URL:
             raise AssertionError(f"the gate asked for {url!r}, which this test did not freeze")
+        self.pressed.append(
+            await page.evaluate(
+                "() => ({leave: window.__leavePresses || 0,"
+                " dialog: window.__dialogButtonPresses || 0})"
+            )
+        )
         html = self.worlds.pop(0) if len(self.worlds) > 1 else self.worlds[0]
         await page.set_content(html, wait_until="domcontentloaded", timeout=60_000)
-        return self.landed or url
+        if isinstance(self.landed, list):
+            landed = self.landed[len(self.gotos) - 1] if len(self.gotos) <= len(self.landed) else ""
+        else:
+            landed = self.landed
+        return landed or url
 
 
 @pytest.fixture(autouse=True)
@@ -414,6 +438,9 @@ async def test_the_menu_gate_refuses_and_presses_nothing_further(writes_on, brow
         receipt = await writes.perform(act, browser_page, grant)
         assert act.gotos == [_URL, _URL], label
         assert receipt["clicked"]["clicks_made"] == 1, f"[{label}] the item was pressed past a refusing gate"
+        # THE PAGE'S OWN WITNESS agrees: no leave item was pressed on the
+        # clicked document, read before the verification replaced it.
+        assert act.pressed[-1]["leave"] == 0, (label, act.pressed)
         assert receipt["clicked"]["error"] is None, label
         gate = receipt["menu_gate"]
         assert gate["proceeded"] is False, label
@@ -461,8 +488,12 @@ def test_the_menu_gate_reads_counts_only():
 
 async def test_a_dialog_after_the_leave_press_is_counted_and_never_answered(writes_on, browser_page, fast_menu):
     grant, _block = await _granted(browser_page, html=world(onLeave="dialog"))
-    receipt = await writes.perform(_Navigator(world(onLeave="dialog"), world()), browser_page, grant)
+    act = _Navigator(world(onLeave="dialog"), world())
+    receipt = await writes.perform(act, browser_page, grant)
     assert receipt["clicked"]["clicks_made"] == 2, "exactly the disclosure and the item; nothing in the dialog"
+    # THE PAGE SAYS SO TOO, off its own listeners and not off perform's
+    # counter: one press of the leave item, none inside the dialog.
+    assert act.pressed[-1] == {"leave": 1, "dialog": 0}, act.pressed
     after = receipt["menu_gate"]["after_the_item_press"]
     assert after["further_step_opened"] is True
     assert after["dialogs"] + after["alertdialogs"] == 1
@@ -475,8 +506,10 @@ async def test_a_dialog_after_the_leave_press_is_counted_and_never_answered(writ
 
     # AND A PRESS THAT DOES NOTHING opens no step and still reports NOT left.
     grant, _block = await _granted(browser_page, html=world(onLeave="nothing"))
-    receipt = await writes.perform(_Navigator(world(onLeave="nothing"), world()), browser_page, grant)
+    act = _Navigator(world(onLeave="nothing"), world())
+    receipt = await writes.perform(act, browser_page, grant)
     assert receipt["clicked"]["clicks_made"] == 2
+    assert act.pressed[-1] == {"leave": 1, "dialog": 0}, act.pressed
     assert receipt["menu_gate"]["after_the_item_press"]["further_step_opened"] is False
     assert receipt["performed"] is False
     _no_name(json.dumps(receipt), "nothing")
@@ -497,6 +530,7 @@ async def test_a_leave_runs_end_to_end_and_is_verified_off_a_fresh_render(writes
     assert receipt["clicked"]["on"] == _URL
     assert receipt["clicked"]["error"] is None
     assert receipt["clicked"]["clicks_made"] == 2
+    assert act.pressed[-1] == {"leave": 1, "dialog": 0}, act.pressed
     gate = receipt["menu_gate"]
     assert gate["proceeded"] is True and gate["refused_condition"] is None
     assert gate["after_the_item_press"]["further_step_opened"] is False
@@ -514,6 +548,64 @@ async def test_a_leave_runs_end_to_end_and_is_verified_off_a_fresh_render(writes
     assert receipt["clicked"]["clicks_made"] == 2
     assert receipt["verification"]["observed_state"] == writes.UNKNOWN
     assert receipt["performed"] == writes.UNKNOWN
+
+
+async def test_a_partly_drawn_page_after_the_leave_is_unknown_not_a_leave(over, writes_on, browser_page, fast_menu):
+    """FINDING F-6 of lane L8's cold verification, 2026-09-27. A fresh render
+    that has drawn SOME membership rows and not yet the target's used to read
+    ``not_member``: one other row was enough. After an irreversible press
+    that printed ``performed: True`` for a leave that may not have landed.
+
+    SHOWN FAILING against the old rule first: ``membership_verdict`` alone,
+    on the very page the verification reads, answers ``not_member``. The
+    verification now also requires EXACTLY one row fewer than the preview
+    counted, and this page is two short.
+    """
+    partial = world(absentRows=[GROUPS_LEAVE_ID, MEMBER_IDS[1]])
+    reading = await _read(over, partial)
+    _facts, old_state, _why = group_leave.membership_verdict(reading, GROUPS_LEAVE_ID)
+    assert old_state == group_leave.NOT_MEMBER, "the old rule no longer mistakes this page"
+
+    grant, _block = await _granted(browser_page)
+    receipt = await writes.perform(_Navigator(world(), partial), browser_page, grant)
+    assert receipt["clicked"]["clicks_made"] == 2
+    assert receipt["verification"]["observed_state"] == writes.UNKNOWN
+    assert receipt["performed"] == writes.UNKNOWN
+    assert "a finished leave draws exactly" in receipt["verification"]["why"]
+    _no_name(json.dumps(receipt), "partial")
+
+    # THE PURE RULE, both ways, off the preview's own facts: one row fewer is
+    # a leave; the same count, or none counted, is not.
+    before = {"row_scoped_disclosures": len(MEMBER_IDS)}
+    full = await _read(over, world(absentRows=[GROUPS_LEAVE_ID]))
+    assert group_leave.verification_verdict(before, full, GROUPS_LEAVE_ID)[1] == group_leave.NOT_MEMBER
+    assert group_leave.verification_verdict({}, full, GROUPS_LEAVE_ID)[1] == group_leave.UNKNOWN
+    assert (
+        group_leave.verification_verdict(
+            {"row_scoped_disclosures": len(MEMBER_IDS) - 1}, full, GROUPS_LEAVE_ID
+        )[1]
+        == group_leave.UNKNOWN
+    )
+
+
+async def test_a_verification_that_lands_elsewhere_says_nothing_about_the_leave(writes_on, browser_page, fast_menu):
+    """FINDING F-8 of lane L8's cold verification, 2026-09-27: deleting the
+    verification's landing check left every test green, because no test
+    drove a verification that landed anywhere but the Groups root. Here the
+    preview and the click land where they asked; the re-read does not, on a
+    page whose rows WOULD read as a finished leave. The receipt must say
+    unknown, and must not name where it landed."""
+    grant, _block = await _granted(browser_page)
+    elsewhere = "https://www.linkedin.com/groups/" + MEMBER_IDS[1] + "/"
+    act = _Navigator(
+        world(), world(absentRows=[GROUPS_LEAVE_ID]), landed=["", elsewhere]
+    )
+    receipt = await writes.perform(act, browser_page, grant)
+    assert receipt["clicked"]["clicks_made"] == 2
+    assert receipt["verification"]["observed_state"] == writes.UNKNOWN
+    assert receipt["performed"] == writes.UNKNOWN
+    assert MEMBER_IDS[1] not in json.dumps(receipt["verification"])
+    _no_name(json.dumps(receipt), "elsewhere")
 
 
 async def test_a_click_error_carries_its_type_and_never_the_element(writes_on, browser_page, fast_menu, monkeypatch):

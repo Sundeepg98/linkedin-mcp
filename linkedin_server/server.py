@@ -994,11 +994,11 @@ mcp = FastMCP(
         "server CAN now submit an application, to a LinkedIn-hosted posting, "
         "through linkedin_apply_job and only behind the same two-step gate. "
         "Three things about it are worth carrying into any answer you give "
-        "him. FIRST, it cannot be taken back, and the honest form of that is "
-        "stronger than it sounds: nobody has established that LINKEDIN offers "
-        "a withdraw at all -- not that this server lacks one. It has never "
-        "been measurable, because measuring it needs an application to exist "
-        "and his Applied tab reads zero. SECOND, off-site postings are "
+        "him. FIRST, it cannot be taken back, by anybody: LinkedIn's own Help "
+        "Center (a512388) says an application submitted through LinkedIn "
+        "cannot be edited or withdrawn. This sentence used to say that nobody "
+        "had established whether LinkedIn offers a withdraw at all; its own "
+        "documentation settles that. SECOND, off-site postings are "
         "reported and NOT driven: about half of all postings apply on the "
         "employer's own applicant-tracking system, and for those "
         "linkedin_job_detail's apply_path names the destination host and the "
@@ -8353,10 +8353,11 @@ def _irreversible_block() -> dict[str, Any]:
             "two calls behind a single-use token, but the token is the only "
             "thing between a call and a permanent effect -- there is no "
             "inverse to name in the preview, because there is no inverse. "
-            "For apply specifically: nobody has established that LinkedIn "
-            "offers a withdraw at all, which is a stronger statement than "
-            "this server lacking one. See the reversibility field on the "
-            "preview block before confirming anything."
+            "For apply specifically: LinkedIn itself offers no withdraw of "
+            "an application submitted through it (Help Center a512388), so "
+            "nobody -- not this server and not LinkedIn -- takes one back. "
+            "See the reversibility field on the preview block before "
+            "confirming anything."
         )
     else:
         note = (
@@ -8637,14 +8638,14 @@ async def linkedin_apply_job(job_id: str, confirm_token: str = "") -> dict[str, 
     THIS ONE CANNOT BE TAKEN BACK, and the usual reassurance is not available
     here, so read the next sentence rather than the shape of it.
 
-    **NOBODY HAS ESTABLISHED THAT LINKEDIN OFFERS A WITHDRAW AT ALL.** That is
-    a stronger and worse statement than "this server cannot withdraw it",
-    which would invite you to assume LinkedIn can. It might. It has not been
-    measured, and it could not be: measuring a withdraw means enumerating the
-    controls on an APPLIED row, this account's Applied tab reads zero, and
-    getting a row there means applying. So the first application made through
-    this tool is the one that settles the question -- and if the answer turns
-    out to be no, it will be settled by an application that cannot be undone.
+    **LINKEDIN OFFERS NO WITHDRAW.** Its own Help Center (a512388) says so:
+    "You cannot edit or withdraw an application once submitted through
+    LinkedIn." This paragraph used to say "NOBODY HAS ESTABLISHED THAT
+    LINKEDIN OFFERS A WITHDRAW AT ALL ... It might. It has not been measured",
+    and that the first application made through this tool would settle it;
+    LinkedIn's own documentation settles it without one. So an application
+    sent through this tool is one NOBODY can take back -- not this server, and
+    not LinkedIn.
 
     CALL IT WITHOUT ``confirm_token`` FIRST. Nothing is submitted. The posting
     is read live and you get back a block naming the job by title and
@@ -9222,8 +9223,13 @@ async def linkedin_publish_post(text: str, confirm_token: str = "") -> dict[str,
     copies of them in this package DISAGREE -- this docstring said 274 / 113,
     319, 1287 and the spec's residue says 275 / 103, 308, 1284, and neither
     has been re-measured. That disagreement is recorded rather than resolved
-    by picking one. Whether a post can be deleted is UNMEASURED: the per-post
-    overflow menu has never been opened.
+    by picking one. Whether a post can be deleted is no longer unmeasured.
+    This used to say "Whether a post can be deleted is UNMEASURED: the
+    per-post overflow menu has never been opened"; it has since been opened on
+    his own post and draws 'delete post' (``linkedin_server/share_link.py``).
+    What pressing it draws is uncaptured, so no delete is built here
+    (``outward_classes`` ``delete_own_post``, NEEDS-CAPTURE). By hand, he can
+    delete a post.
 
     Args:
         text: EXACTLY what would be published, verbatim. It is the target, so
@@ -9322,8 +9328,12 @@ async def linkedin_comment_on_item(
     overflow menu on one of his own comments draws exactly three items --
     ``Copy link to comment``, ``Edit`` and ``Delete``. So the DATA is
     restorable: by him, by hand, on the surface that holds it. Not by this
-    server, which forbids deletion permanently and should not now try to aim
-    one.
+    server YET. This sentence used to end "which forbids deletion permanently
+    and should not now try to aim one"; that refusal was retired on 2026-09-24
+    (OUTWARD-CLASSES-BUILT-BEHIND-GRANTS), and deleting his own comment is now
+    a class built behind the grant -- unbuilt, recorded as ``outward_classes``
+    ``delete_own_comment``, NEEDS-CAPTURE: what pressing ``Delete`` draws has
+    never been captured.
 
     WHAT DOES NOT COME BACK IS THE NOTIFICATION. A delete takes back the row
     and not the fact that it was read, which is why the spec still calls this
@@ -9699,10 +9709,14 @@ async def linkedin_send_invitation(
     CORRECT -- the selector and its in-page predicate both found the nine
     when the nine were there.
 
-    IT CANNOT BE TAKEN BACK by this server, and whether LinkedIn offers a
-    withdraw at all is UNMEASURED -- which is a stronger statement than this
-    server lacking one. The surface that would show it is the same one that is
-    out of reach.
+    IT CANNOT BE TAKEN BACK by this server. LinkedIn does offer a withdraw:
+    its Help Center documents one (a568295), after which the same person
+    cannot be invited again for up to three weeks. But the Sent Invitations
+    manager that holds the control is refused by the read gate, so the
+    withdraw is unbuilt here (``outward_classes`` ``withdraw_invitation``,
+    BLOCKED). This used to say "whether LinkedIn offers a withdraw at all is
+    UNMEASURED"; the network census found LinkedIn's own page (network.md
+    section 8.5).
 
     Args:
         member: YOUR OWN WORD for the person -- a name fragment that picks
@@ -9835,9 +9849,10 @@ async def linkedin_send_reply(
     """Reply inside ONE existing conversation you name by thread id. SENDS.
 
     A REPLY TO A REAL PERSON, UNDER YOUR NAME, THAT NOTHING HERE CAN TAKE BACK.
-    Deletion is forbidden in this design at any confirm level, and even where
-    LinkedIn lets a sender delete a message it does not un-send the email or
-    un-read what was read.
+    No delete is built here -- this used to say "Deletion is forbidden in this
+    design at any confirm level", a refusal retired on 2026-09-24 -- and even
+    where LinkedIn lets a sender delete a message it does not un-send the
+    email or un-read what was read.
 
     WHY A CONVERSATION AND NOT A NAME. ``linkedin_send_message`` addresses a
     person by the text of their name in a typeahead, and that route is
@@ -9953,9 +9968,9 @@ def _trim_info(full: dict[str, Any], verbose: bool) -> dict[str, Any]:
             "irreversible, known_side_effects and recovery_path are in the "
             "default above. Reversibility text also stays inline on every "
             "tool that writes -- linkedin_apply_job's own docstring carries "
-            "the finding that nobody has established LinkedIn offers a "
-            "withdraw at all, and that reaches a caller at confirm time "
-            "rather than behind this flag."
+            "the finding that LinkedIn offers no withdraw of an application "
+            "submitted through it (Help Center a512388), and that reaches a "
+            "caller at confirm time rather than behind this flag."
         ),
     }
     return lean
@@ -10371,13 +10386,12 @@ async def linkedin_server_info(verbose: bool = False) -> dict[str, Any]:
                 "means of taking it: run that census and enumerate the "
                 "sections, recording for each whether it is url-addressed or "
                 "a modal.",
-                "WITHDRAWING an application. A real LinkedIn feature, and "
-                "the one that would most change how safe applying is -- "
-                "an apply that can be undone is a different risk from one "
-                "that cannot. Settle it on /jobs-tracker/?stage=applied, "
-                "by enumerating the controls on an applied row. Note that "
-                "tab currently reads zero, so a measurement needs an "
-                "application to exist first.",
+                "WITHDRAWING an application -- SETTLED, and not by a "
+                "measurement here: LinkedIn's own Help Center (a512388) "
+                "says an application submitted through LinkedIn cannot be "
+                "withdrawn, so there is no control on an applied row to "
+                "find. This entry used to call it a real LinkedIn feature, "
+                "to be settled on /jobs-tracker/?stage=applied.",
                 "POSTING or sharing an update. Settle it by enumerating "
                 "the composer controls on /feed/, which this server "
                 "already loads as a corroborating auth check and has "

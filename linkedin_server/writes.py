@@ -745,20 +745,17 @@ SANCTIONED_WRITES: dict[str, WriteSpec] = {
         ),
         irreversible=True,
         reversibility_procedure=(
-            "NOBODY HAS ESTABLISHED THAT LINKEDIN OFFERS A WITHDRAW AT ALL, "
-            "and that is a worse sentence than 'this server cannot withdraw "
-            "it' -- which would invite you to assume LinkedIn can. It might. "
-            "It has not been measured. "
-            "The measurement is: load /jobs-tracker/?stage=applied on an "
-            "account that HAS an application and look for a withdraw control "
-            "on a row. That requires an application to exist, which requires "
-            "performing the very action whose reversibility is in question. "
-            "Measured 2026-08-25, this account's Applied tab reads 0 with "
-            "LinkedIn's own 'No matches' empty state, so there is no row to "
-            "read. The loop resolves in one direction only: the first "
-            "application made here is the one that settles the question, and "
-            "if the answer is no, it will have been settled by an "
-            "application nobody can take back. "
+            "LINKEDIN OFFERS NO WITHDRAW OF AN APPLICATION SUBMITTED THROUGH "
+            "IT, and it says so itself: its Help Center (a512388, quoted in "
+            "_audit/_census/jobs.md) reads 'You cannot edit or withdraw an "
+            "application once submitted through LinkedIn.' This field used to "
+            "open \"NOBODY HAS ESTABLISHED THAT LINKEDIN OFFERS A WITHDRAW AT "
+            "ALL ... It might. It has not been measured\" and proposed "
+            "settling it on an applied row of /jobs-tracker/?stage=applied, "
+            "which needed an application to exist first. LinkedIn's own "
+            "documentation settles it without one, so there is no control to "
+            "look for and nothing to build (outward_classes "
+            "withdraw_application, BLOCKED). "
             "THE FLOW ITSELF IS NO LONGER A GAP, and this sentence used to "
             "say the opposite -- 'no capture in this repo shows the LinkedIn "
             "apply form at all'. It was captured on 2026-08-24 by "
@@ -1396,13 +1393,14 @@ SANCTIONED_WRITES: dict[str, WriteSpec] = {
         ),
         irreversible=True,
         reversibility_procedure=(
-            "Open the overflow menu on one of his own posts and read its "
-            "items -- the same measurement that settled what the "
-            "notifications overflow holds, on a surface already allowed. That "
-            "establishes whether a delete affordance exists AT ALL, which is "
-            "the question, and it costs one click on his own content with "
-            "nothing published. It has not been taken because this wave "
-            "performed nothing."
+            "The first half is DONE: the live lane opened the control menu on "
+            "his own post's permalink (linkedin_server/share_link.py) and read "
+            "'delete post' in it, so a delete affordance exists. This field "
+            "used to end \"It has not been taken because this wave performed "
+            "nothing\". What remains is what pressing 'delete post' draws -- "
+            "capture C6 in _audit/2026-09-24-lane-l8-outward-classes.md, "
+            "taken only on a post he names for deletion (outward_classes "
+            "delete_own_post, NEEDS-CAPTURE)."
         ),
     ),
     "linkedin_comment_on_item": WriteSpec(
@@ -1540,12 +1538,16 @@ SANCTIONED_WRITES: dict[str, WriteSpec] = {
         ),
         irreversible=True,
         reversibility_procedure=(
-            "Two things, and the first is the cheap one: open the overflow "
-            "menu on one of his OWN existing comments and read its items. "
-            "That settles whether a delete exists without publishing "
-            "anything. The second is the boundary question -- whether this "
-            "server may load /feed/update/<urn>/ at all -- which is a ruling "
-            "and not a measurement."
+            "Both halves this field used to prescribe are DONE. It said \"Two "
+            "things, and the first is the cheap one: open the overflow menu on "
+            "one of his OWN existing comments and read its items\" -- read on "
+            "2026-09-04, and it draws 'Delete' (_audit/INSTRUMENTS.md) -- and "
+            "named a boundary question, whether this server may load "
+            "/feed/update/<urn>/ at all, which the read allowlist answers yes. "
+            "What remains is what pressing 'Delete' draws -- capture C7 in "
+            "_audit/2026-09-24-lane-l8-outward-classes.md, taken only on a "
+            "comment he names for deletion (outward_classes "
+            "delete_own_comment, NEEDS-CAPTURE)."
         ),
     ),
     "linkedin_react_to_item": WriteSpec(
@@ -2048,15 +2050,23 @@ SANCTIONED_WRITES: dict[str, WriteSpec] = {
             "Not a toggle. No invitation control on the page means the rail "
             "did not render, not that there is nobody to invite."
         ),
-        reversibility="STILL-UNKNOWN whether an invitation can be withdrawn",
+        reversibility=(
+            "STILL-UNKNOWN through this server whether an invitation it sent "
+            "can be withdrawn; LinkedIn documents a withdraw (a568295) that "
+            "nothing here has observed"
+        ),
         reversibility_measured=False,
         reversibility_class="STILL-UNKNOWN",
         reversibility_evidence=(
-            "NOT MEASURED, and it cannot be measured from here. The surface "
-            "that would show a withdraw affordance is the sent-invitations "
+            "NOT MEASURED here, and it cannot be measured from here. The "
+            "surface that would show the withdraw is the sent-invitations "
             "manager, whose address contains 'invitation' and is on the read "
-            "boundary's forbidden list -- so this server has never seen it "
-            "and holds no evidence either way."
+            "boundary's forbidden list, so this server has never seen it. "
+            "This field used to end \"and holds no evidence either way\"; the "
+            "evidence is LinkedIn's own. Its Help Center documents the "
+            "withdraw (a568295, quoted in _audit/_census/network.md section "
+            "8.5), with a wait of up to three weeks before the same person "
+            "can be invited again. Never observed here, and never pressed."
         ),
         reversible_by=(
             "NOT YET through this server; by hand, he can. This field used to "
@@ -2238,9 +2248,10 @@ SANCTIONED_WRITES: dict[str, WriteSpec] = {
             "ground is now the message's own nature: it is delivered to a "
             "person and arrives as an email as well as a notification. "
             "LinkedIn documents deleting a sent message within 60 minutes "
-            "(census M M12); that removes it from a thread, never from an "
-            "inbox or from what was read, and no per-message menu has been "
-            "opened by this server, so even that is unbuilt. "
+            "(census M M12, a550661). What that delete removes, and from "
+            "whom, is unestablished here -- no per-message menu has been "
+            "opened by this server, so it is unbuilt too -- and no delete "
+            "reaches the email copy or un-reads what was read. "
             "WHAT THIS FIELD USED TO ADD WAS WRONG -- \"'/messaging/compose' "
             "is on the read boundary's forbidden list, so nothing here can "
             "reach a composer in either direction.\" The SUBSTRING is "
@@ -2359,9 +2370,10 @@ SANCTIONED_WRITES: dict[str, WriteSpec] = {
             "this design\"; that refusal was retired 2026-09-24 "
             "(OUTWARD-CLASSES-BUILT-BEHIND-GRANTS), so the ground is the "
             "reply's own nature: it is delivered to a person and arrives as "
-            "an email and a notification too. LinkedIn's 60-minute delete "
-            "(census M M12) removes it from a thread, never from an inbox or "
-            "from what was read, and it is unbuilt here."
+            "an email and a notification too. LinkedIn documents a delete "
+            "within 60 minutes (census M M12, a550661); what it removes, and "
+            "from whom, is unestablished here, it is unbuilt, and no delete "
+            "reaches the email copy or un-reads what was read."
         ),
         residue=(
             "A REPLY IS READ BY A PERSON, and it usually arrives as an email "
@@ -6933,9 +6945,10 @@ _VERIFIED_FROM["withdraw_from_group"] = (
     "memberships are listed there and on no other surface this server may "
     "read, so this is a new render from LinkedIn rather than an independent "
     "witness. Its NEGATIVE is strong -- a row still carrying the id means the "
-    "leave did not land. Its positive needs the page to draw at least one "
-    "OTHER membership row; with none drawn it cannot tell a finished leave "
-    "from a page that has not arrived, and it answers unknown."
+    "leave did not land. Its positive needs the page to draw EXACTLY ONE "
+    "membership row fewer than the preview counted, every other row still "
+    "there; any other count -- a page still drawing, a list that changed in "
+    "between, or no row at all -- answers unknown."
 )
 _VERIFIED_FROM["follow_company_page"] = (
     "a DIFFERENT surface from the one clicked: Manage Pages, where a followed "
@@ -8481,16 +8494,25 @@ async def _verify_after(
         # discards a menu or a confirmation the press left open -- the one
         # this server counted after the press and did not answer. Three
         # answers, all real: ``member`` (a row still carries the id: NOT
-        # left), ``not_member`` (the page drew membership rows and none carries
-        # it), ``unknown`` (no membership row drawn at all, which a finished
-        # leave of his only group and a page that has not arrived share).
+        # left), ``not_member`` (none carries it AND the page drew exactly one
+        # membership row fewer than the preview counted), ``unknown``
+        # (anything else -- no membership row drawn at all, which a finished
+        # leave of his only group and a page that has not arrived share, or a
+        # count that says the page is still drawing). The count half is
+        # ``group_leave.verification_verdict``, added 2026-09-27 for finding
+        # F-6 of lane L8's cold verification: one other row drawn used to be
+        # enough, and a half-drawn page satisfies that.
         url = str(spec.url_template)
         landed = await _load(navigator, page, url, surface="groups")
         try:
             _assert_landed_on_target(spec, grant, landed)
         except WriteAttemptError as exc:
             return (UNKNOWN, str(exc), url)
-        _facts, state, why = await group_leave.read_state(page, grant.target)
+        _facts, state, why = group_leave.verification_verdict(
+            observation.facts,
+            await group_leave.read_rows(page, grant.target),
+            grant.target,
+        )
         return (
             state,
             why

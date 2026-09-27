@@ -165,8 +165,8 @@ that governs its undo with that record's real status:
 | `publish_post` | NOT YET through this server; by hand, he can | his own post's menu draws 'delete post' (live lane, 2026-09-23/24); what it draws when pressed is uncaptured | `delete_own_post`, NEEDS-CAPTURE |
 | `comment_on_item` | NOT YET through this server; by hand, he can | a comment's own menu draws 'Delete' (2026-09-04); what it draws is uncaptured; one-page aim by id | `delete_own_comment`, NEEDS-CAPTURE |
 | `send_invitation` | NOT YET through this server; by hand, he can | LinkedIn offers the withdraw (Help Center, network.md s8.5); the Sent manager is refused on 'invitation' | `withdraw_invitation`, BLOCKED |
-| `send_message` | NOBODY: a delivered message cannot be recalled | delivery itself: it arrives as an email and a notification; LinkedIn's 60-minute delete (census `M M12`) removes it from a thread, never from an inbox, and is unbuilt | none |
-| `send_reply` (lane L5) | NOBODY: a delivered reply cannot be recalled -- restated at this lane's merge of master (section 9) | as `send_message`: delivery itself; LinkedIn's 60-minute delete (census `M M12`) is unbuilt | none |
+| `send_message` | NOBODY: a delivered message cannot be recalled | delivery itself: it arrives as an email and a notification. LinkedIn documents a 60-minute delete (census `M M12`, a550661); what it removes, and from whom, is unestablished here, and it is unbuilt (hedged at the verification, section 9.5) | none |
+| `send_reply` (lane L5) | NOBODY: a delivered reply cannot be recalled -- restated at this lane's merge of master (section 9) | as `send_message` | none |
 
 **The sixth arrived with the merge.** What follows was written before it, and
 it is exactly what the merge did (section 9). The one addition:
@@ -201,6 +201,10 @@ its ground is `send_message`'s:
                    in this design whatever LinkedIn offers\"; that refusal was
                    retired 2026-09-24, and the 60-minute delete is unbuilt (census
                    M M12, the per-message menu never opened)."
+
+(Applied at the merge as drafted. The clause on what the 60-minute delete
+removes was then hedged, at the cold verification. Nothing in the repository
+quotes a550661 beyond its title -- see section 9.5, D-C.)
 
 and add `"send_reply": (None, "NOBODY")` to the `restated` table in
 `tests/test_writes_nine.py::test_the_claims_that_depend_on_the_destruction_refusal_are_the_measured_ones`,
@@ -242,9 +246,9 @@ the state, the element, and why taking it cannot fire the act.
 | `withdraw_from_group` | BUILT (section 6) | the only act of the three classes whose pressed controls are in a capture file: his own `/groups/` page (2026-09-20) holds the row-scoped disclosure and the `Leave this group` item, and the 2026-09-05 probes measured the menus live; the address is admitted | `M C63`, `N 64` |
 | `repost_item` | NEEDS-CAPTURE | the Repost control is captured CLOSED four times and its menu never; the items the menu offers are what the act presses | `M C20` |
 | `repost_item_with_thoughts` | NEEDS-CAPTURE | the same menu, and the composer its second item opens | `M C21` |
-| `endorse_skill` | NEEDS-CAPTURE | no endorse control anywhere on disk (re-taken: 0 in 25 captures and 29 fixtures); it lives on a third party's profile, loadable only inside his named act, and no code path loads `/in/<slug>/` yet | `P E4`, `N 111`, `N 112` |
-| `request_recommendation` | NEEDS-CAPTURE | the named member's profile `More` menu and the form it opens; the own-profile route aims by a name typeahead, measured dead and forbidden as an aim | `P F2`, `N 119` |
-| `give_recommendation` | NEEDS-CAPTURE | as above, the `Recommend` item and its form | `P F3`, `N 120` |
+| `endorse_skill` | BLOCKED (NEEDS-CAPTURE until the verification, section 9.5, F-4) | no endorse control anywhere on disk (re-taken: 0 in 25 captures and 29 fixtures); it lives on a third party's profile, loadable only inside his named act -- and `/in/<slug>/` is refused by the read boundary, with no code path loading it yet, so that route comes before the capture | `P E4`, `N 111`, `N 112` |
+| `request_recommendation` | BLOCKED (as above) | the named member's profile `More` menu and the form it opens, behind the same refused route; the own-profile route aims by a name typeahead, measured dead and forbidden as an aim | `P F2`, `N 119` |
+| `give_recommendation` | BLOCKED (as above) | as above, the `Recommend` item and its form | `P F3`, `N 120` |
 | `delete_own_post` | NEEDS-CAPTURE | the menu is measured live ('delete post' drawn on his own post); what pressing it draws is not, and it may itself be the act -- so the capture is taken only on a post he names for deletion | `M C19` |
 | `delete_own_comment` | NEEDS-CAPTURE | the comment menu is measured ('Delete'); what it draws is not; aiming by comment id is measured on one page only | `M C31` |
 | `withdraw_invitation` | BLOCKED | the Sent Invitations manager is refused by the read gate ('invitation'), and its /mynetwork/ badge cost is unmeasured; an exact-url admission comes before any capture | `N 10`, `N 12` |
@@ -288,8 +292,10 @@ stays**:
   `M C22`, `M C31` (`delete_own_comment`), `M C62`, `M C77`, `N 10` and `N 12`
   (`withdraw_invitation`), `N 96`, `N 110`, `N 113`, `N 125`, `N A15`.
 * **Endorsing, through the named member's profile:** `P E4`, `N 111`, `N 112`
-  (`endorse_skill`), each NEEDS-CAPTURE inside his named act, behind the
-  missing route that loads `/in/<slug>/` there.
+  (`endorse_skill`), each BLOCKED on the missing route that loads
+  `/in/<slug>/` inside his named act (the read boundary refuses that address
+  today), then a capture there. They read "NEEDS-CAPTURE inside his named act"
+  until the verification (section 9.5, F-4).
 * **OUTSIDE THE THREE CLASSES -- a decision point for the orchestrator, not
   decided here:** `N 29` (remove a connection -- a relationship with another
   member, not his item), `N 141` (block a member -- the ruling that lets a
@@ -298,7 +304,8 @@ stays**:
   close a duplicate account -- an account is not an item). Each is GAP because
   the key that held it is gone and no other written ground reaches it; each
   names as its blocker that the three classes do not include it, plus what else
-  stands (a capture, an admission, an organiser precondition).
+  stands (a capture, an admission, an organiser precondition). Master's `P P2`
+  (delete his account data) joined this list at the merge (section 9.2).
 
 The GAP rows whose blockers NAMED a retired key keep their state and restate
 the blocker: the repost pair `M C20` / `M C21` (the Repost menu capture), the
@@ -307,8 +314,9 @@ for request, give and revise; his own recommendations section --
 `/in/me/details/recommendations/`, refused by allowlist silence on
 2026-09-24 -- for the rows about recommendations he received or gave), and the
 compound rows whose "delete half stays refused by delete_or_withdraw_anything"
-(the delete half now waits on the same capture as the rest of its row; it is
-unbuilt, not refused).
+(the delete half now waits on the same blocker as the rest of its row, which
+its cell names; it is unbuilt, not refused -- the cells said "the same capture"
+until the verification, section 9.5, F-9).
 
 **`M C63` and `N 64` (leave a group) move GAP -> COVERED-UNFIRED** on the
 build in section 6. Their class-table lines cite `GROUPS-ADDRESS-BUYS-NO-WRITE`
@@ -618,9 +626,11 @@ lane S, lane D, lane Y2's itemized P-R block, and the live lane.
   master's `data-rights-request` and this lane's three.
 - **Five census tables** (exclusion-basis.tsv, messaging-and-content.md,
   network.md, profile.md, write-classes.tsv). These were resolved ROW BY ROW,
-  by a keyed three-way merge over the base. There were 98 rows in nine hunks:
-  96 had changed on ONE side only, and 2 were identical on both, so none needed
-  a judgement.
+  by a keyed three-way merge over the base, taking whichever side changed each
+  row. The nine hunks held 98 rows, some of them unchanged context. Measured
+  afterwards from the three blobs, across the five whole tables: 288 rows had
+  changed on one side only (156 on the lane, 132 on master), and none on both.
+  So no row needed a judgement.
 
 ### 9.2 What the merge made untrue, restated in the merge commit
 
@@ -643,8 +653,10 @@ lane S, lane D, lane Y2's itemized P-R block, and the live lane.
   - Like P3-P5, it awaits admission by name.
   - Its exclusion line left the table, it gained a class line
     (`outside-the-classes`), and the emptied family's note says so.
-  Neither this row nor `send_reply` CONFLICTED. Both arrived by clean line
-  merges, and were found by reading master's added lines for the retired key
+  Neither needed a judgement at the conflict level. `send_reply` merged
+  cleanly, and so did the `P P2` census cell. `P P2`'s exclusion line did sit
+  in a conflict hunk, but as a master-only row, which a keyed merge takes as it
+  stands. Both were found by reading master's added lines for the retired key
   names before merging. The exclusion checker convicts a re-planted `P P2`
   line four ways, measured on a copy of the table.
 - **`M M25`** (lane L5's cell) is restated. The key it was "adjacent to" is
@@ -767,6 +779,96 @@ blocker-map guards. All eight reds are the pins in section 5.3:
   which launch Chromium.
 - Anything live.
 
+### 9.5 The cold verification, and what it changed
+
+The brief allowed one cold pass, and it went to a general-purpose child. The
+child started from `git diff 2eb90ad HEAD`, not from this record, and made
+mutations of its own, each restored. Its full report is the lane's scratch
+file `verifier-report.md`. Its verdicts, and what each finding changed:
+
+- **Q1, the forbidden set: HOLDS.** The six are exact. The three retired texts
+  are byte-identical to what each last carried on master, compared with
+  `ast`.
+- **Q2, the restated undo claims: DEFECT.** The six `reversible_by` fields held
+  against their sources; the text printed AROUND them did not. All three
+  classes of defect are fixed:
+  - **D-A.** Two tool descriptions still stated the retired refusal live:
+    - `linkedin_comment_on_item`, "forbids deletion permanently", present on
+      the base;
+    - `linkedin_send_reply`, "Deletion is forbidden in this design", which
+      arrived with lane L5.
+    The whole-set rule read only spec fields, and its needles matched neither
+    phrasing. Both descriptions now quote the old sentence as a retraction.
+    The rule now also reads every sanctioned write's tool DESCRIPTION, against
+    the phrasings measured on the tree, and it was run red on the two real
+    descriptions before they were fixed (register section 80.4).
+  - **D-B.** Printed text contradicted a restated ground, in the same spec or
+    the same tool:
+    - apply's "NOBODY HAS ESTABLISHED THAT LINKEDIN OFFERS A WITHDRAW AT ALL
+      ... It might" stood in six places: its procedure, its tool description,
+      the server instructions, two server_info notes, and a `not_yet_measured`
+      entry calling a withdraw "a real LinkedIn feature". All six now rest on
+      a512388.
+    - send_invitation's `reversibility`, its evidence and its description rest
+      on a568295.
+    - publish_post's description and procedure, and comment_on_item's
+      procedure, say the menus were read and what capture remains.
+    Each quotes what it used to say.
+  - **D-C.** "Removes it from a thread, never from an inbox" had no source,
+    since a550661 is cited by title only. It is hedged, in both specs, the
+    census `M M12` cell and class line, the inventory row, and section 3.
+- **Q3, `withdraw_from_group`: HOLDS on all four sub-questions.** It is gated,
+  aimed at one numeric id, and consumed once. It makes two presses at most,
+  leaks no name, and fails closed after the press. The verifier's mutations
+  M1 (dropping the in-row rule) and M2 (accepting two rows) were killed.
+  Three LOW findings, all fixed:
+  - **F-6.** The verification's `not_member` needed only one other row drawn,
+    which a half-drawn page satisfies. It now requires EXACTLY one row fewer
+    than the preview counted (`group_leave.verification_verdict`). The new
+    test kills the old rule, run as a mutant.
+  - **F-7.** The fixture's page-side press counters were never read. The test
+    navigator now reads them off the clicked document before the
+    verification replaces it.
+  - **F-8.** The verifier's mutant M3 SURVIVED: deleting the verification's
+    landing check left every test green. A new test drives a re-read that
+    lands elsewhere, and it kills M3.
+- **Q4, the records: DEFECT.** Every target is a link or an id. Two findings,
+  both fixed:
+  - **F-4.** `endorse_skill`, `request_recommendation` and
+    `give_recommendation` read NEEDS-CAPTURE though their capture page,
+    `/in/<slug>/`, is refused by the read boundary. That is BLOCKED by the
+    module's own definition, the status `withdraw_invitation` got for the same
+    kind of refusal. They are BLOCKED now, on one named route, keeping the
+    capture that follows. The census blockers of `P E4`, `P E5`, `P F2`-`F4`,
+    `N 111`, `N 119`, `N 120` and `N 124` say so.
+  - **F-5.** The captures of "repost with your thoughts" and of the two
+    recommendation forms pressed an item in a menu never read. Each now reads
+    the menu first and aims by an exact whole name, never a prefix or a
+    position: the Repost menu's expected sibling 'Repost' is a one-press
+    repost and a PREFIX of the target item.
+- **Q5, the census: HOLDS on states.** Eight moved rows were drawn at random.
+  `P N28`'s remaining ground exists, the `A23` / `A23b` split is what the
+  ruling requires, and `P P2`'s return is right. **F-9**: the compound rows'
+  "waits on the same capture as the rest of the row" is now "the same
+  blocker", because the rest often waits on an admission. `M C77` names its
+  refused `/pulse/` address.
+- **Q6, hygiene: HOLDS.** No real name, id, slug or path appears in the
+  lane's added lines, and no AI attribution appears in the 15 lane commits
+  that existed when it looked.
+- **INFO, left as they stand:**
+  - `A23` kept its whole-capability title, and section A's heading still says
+    `(29)` over 30 rows. Both were disclosed in section 5.2.
+  - The one clause edited in a surviving forbidden entry.
+  - This record's first line is the model id, by the brief's own order. It is
+    a convention every lane record here shares; whether it belongs in a
+    public repository is the operator's call.
+
+The fixes were re-checked by instruments, not by a second pass:
+- the new rule, run red first;
+- the mutants for F-6 and F-8, each killed by its new test;
+- the census checkers;
+- the gates in the closing commits.
+
 ## Live queue
 
 One act of the three classes is built, so one proof is queued. Nothing in this
@@ -796,10 +898,10 @@ chosen by him, in that session.
 | # | lifts | page (composed from what HE NAMES) | state when captured | element the capture must hold | why taking it cannot fire the act | loads |
 |---|---|---|---|---|---|---|
 | C1 | `repost_item` (`M C20`) | `/feed/update/<urn>/` of an item HE NAMES | the item's `Repost` control (declares `aria-expanded='false'`) pressed once through the shipped disclosing press | the menu it discloses: its items, their role and container | the control is a DISCLOSURE; nothing inside the menu is pressed; Escape closes it; the press is priced by the item's own reaction toggle at both ends, as share_link's is | 1 |
-| C2 | `repost_item_with_thoughts` (`M C21`) | the same page, same session | the menu open and its 'Repost with your thoughts' item pressed | the composer it opens: editor, post control, whether post is disabled while empty | a composer publishes nothing until its own post control is pressed; nothing is typed; it is closed with Escape (a discard prompt answered discard) | 0 (C1's load) |
+| C2 | `repost_item_with_thoughts` (`M C21`) | the same page, same session, AFTER C1 has read the menu | the menu open and the item whose whole name is exactly 'Repost with your thoughts' pressed -- only if exactly one visible item carries that name | the composer it opens: editor, post control, whether post is disabled while empty | a composer publishes nothing until its own post control is pressed; nothing is typed; it is closed with Escape (a discard prompt answered discard). The misaim is the risk: the sibling 'Repost' may republish in one press and is a prefix of the target, so the aim is the exact whole name C1 read, never a prefix or a position (F-5, section 9.5) | 0 (C1's load) |
 | C3 | `endorse_skill` (`P E4`, `N 111`, `N 112`), and `P E5` / `N 113` | `/in/<slug>/` of a 1st-degree connection HE NAMES, inside the endorsement he orders (THIRD-PARTY-PROFILE-FOR-A-NAMED-TARGET) | as first rendered, Skills section drawn | the per-skill endorse controls and the label an endorsed skill wears | loading and reading press nothing; the one cost, a profile view that member can read, is part of the act he ordered toward that same person -- never a measurement (the surviving forbidden entry). PREREQUISITE: a code path that loads `/in/<slug>/` inside a named act (the N 1 / M M1 builds) | 1 profile view |
-| C4 | `request_recommendation` (`P F2`, `N 119`) | the same named profile, inside the request he orders | its `More` disclosure opened, the request item pressed, the form open and EMPTY | the item, the form (relationship, position, message box) and its send control | a disclosure and a form; nothing typed; send never pressed; the form dismissed | 0 if taken with C3 on the same person, else 1 |
-| C5 | `give_recommendation` (`P F3`, `N 120`; revise `P F4` / `N 124`) | the same named profile, inside the recommendation he orders | `More` opened, the recommend item pressed, the form open and EMPTY | the item, the form and its send control | as C4 | as C4 |
+| C4 | `request_recommendation` (`P F2`, `N 119`) | the same named profile, inside the request he orders; the same PREREQUISITE as C3 | its `More` disclosure opened and its items READ, none pressed; then the request item, by its exact whole name from that read and only if exactly one visible item carries it, pressed, the form open and EMPTY | the menu's items, the request item, the form (relationship, position, message box) and its send control | a disclosure and a form; nothing typed; send never pressed; the form dismissed. The menu has never been read and may carry one-press acts beside the request (UNVERIFIED), so nothing in it is pressed before it is read (F-5) | 0 if taken with C3 on the same person, else 1 |
+| C5 | `give_recommendation` (`P F3`, `N 120`; revise `P F4` / `N 124`) | the same named profile, inside the recommendation he orders; the same PREREQUISITE | `More` opened and read first; then the recommend item, by exact whole name, pressed, the form open and EMPTY | the menu's items, the item, the form and its send control | as C4 | as C4 |
 | C6 | `delete_own_post` (`M C19`) | `/feed/update/<urn>/` of HIS OWN post, one HE NAMES FOR DELETION | the control menu opened through the shipped disclosing press (as share_link opens it) and 'delete post' pressed | whatever that press draws -- expected a confirmation with confirm and cancel | the menu open is a disclosure; 'delete post' MAY itself delete if no confirmation is drawn, which is why the post must be one he names for deletion -- then either outcome is the act he ordered; a drawn confirmation is cancelled | 1 |
 | C7 | `delete_own_comment` (`M C31`) | the permalink carrying HIS OWN comment, one HE NAMES FOR DELETION | the comment's own menu opened, aimed by the comment's id, and 'Delete' pressed | the comment id on its element; whatever 'Delete' draws | as C6 | 1 |
 | C8 | `withdraw_invitation` (`N 10`, `N 12`) | `/mynetwork/invitation-manager/sent/` -- REFUSED today; an exact-url admission with its badge cost measured comes FIRST | the sent list, with a pending invitation HE NAMES for withdrawal | the row's withdraw control and whatever pressing it draws | the admission and the list read press nothing; the withdraw press may be the act, so it is taken only on an invitation he names for withdrawal, and a drawn confirmation is cancelled | 1, priced by the badge gate |

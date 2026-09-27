@@ -529,9 +529,11 @@ EXPECTED_TOOLS = {
 #: permanently refused. It is the only one of the nine with no tool at all.
 #: (Restated 2026-09-27, lane L8: since 2026-09-24 endorsing is a class
 #: OUTWARD-CLASSES-BUILT-BEHIND-GRANTS builds behind the grant, recorded as
-#: ``outward_classes`` ``endorse_skill``, NEEDS-CAPTURE -- its capture can be
-#: taken only inside an endorsement he names, and the load FOR A MEASUREMENT
-#: stays refused. Still no tool, so the spelling stays forbidden.)
+#: ``outward_classes`` ``endorse_skill``, BLOCKED on the route that would load
+#: the named member's profile inside his act (the read boundary refuses
+#: ``/in/<slug>/`` today); its capture can be taken only inside an
+#: endorsement he names, and the load FOR A MEASUREMENT stays refused. Still no
+#: tool, so the spelling stays forbidden.)
 FORBIDDEN_TOOLS = {
     "linkedin_apply",
     "linkedin_easy_apply",

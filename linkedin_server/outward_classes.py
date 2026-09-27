@@ -237,7 +237,8 @@ class OutwardClassSpec:
     reversible_by: str
     #: What he names for a live proof, and the page loads it costs.
     live_proof: str
-    #: Required for NEEDS-CAPTURE; None otherwise.
+    #: Required for NEEDS-CAPTURE. A BLOCKED record may carry the capture that
+    #: comes AFTER its blocker; a BUILT one carries none.
     capture: Optional[CaptureSpec] = None
     #: Required for BLOCKED: what stands first, in words.
     blocked_by: str = ""
@@ -245,6 +246,20 @@ class OutwardClassSpec:
 
 _PERMALINK = "https://www.linkedin.com/feed/update/<urn>/"
 _PROFILE = "https://www.linkedin.com/in/<slug>/"
+
+#: WHAT STANDS BEFORE EVERY CAPTURE ON A NAMED MEMBER'S PROFILE. These three
+#: records read NEEDS-CAPTURE until the cold verification of lane L8
+#: (2026-09-27, finding F-4) showed that their capture page is REFUSED by the
+#: read boundary -- which is BLOCKED by this module's own definition, the
+#: status ``withdraw_invitation`` got for the same kind of refusal.
+_NAMED_PROFILE_ROUTE = (
+    "the named member's profile, /in/<slug>/, is refused by the read boundary "
+    "(the third-party profile pattern, removed 2026-09-04). "
+    "THIRD-PARTY-PROFILE-FOR-A-NAMED-TARGET admits that load only inside the "
+    "act he names, and no code path does it yet -- the route the connect and "
+    "message builds (N 1, M M1) would make. That route comes first; the "
+    "capture below comes after it."
+)
 
 #: THE RECORDS, one per act. Order: the three classes, in the ruling's order.
 OUTWARD_CLASS_SPECS: dict[str, OutwardClassSpec] = {
@@ -334,9 +349,11 @@ OUTWARD_CLASS_SPECS: dict[str, OutwardClassSpec] = {
         capture=CaptureSpec(
             page=_PERMALINK + " -- composed from the urn he names",
             state=(
-                "the Repost menu open (as for repost_item) and its "
-                "'Repost with your thoughts' item pressed, so its composer "
-                "is open and EMPTY of his text"
+                "AFTER repost_item's capture has READ the Repost menu's items "
+                "(nothing pressed), the menu open again and the item whose "
+                "whole accessible name is exactly 'Repost with your thoughts' "
+                "pressed -- only if exactly one visible item carries that "
+                "exact name -- so its composer is open and EMPTY of his text"
             ),
             element=(
                 "the composer that item opens: its editor, its post control "
@@ -346,7 +363,13 @@ OUTWARD_CLASS_SPECS: dict[str, OutwardClassSpec] = {
                 "opening a composer publishes nothing: publishing needs its "
                 "own post control, which the capture never presses, and "
                 "nothing is typed. The composer is closed with Escape; a "
-                "discard prompt, if drawn, is answered discard."
+                "discard prompt, if drawn, is answered discard. THE MISAIM IS "
+                "THE RISK, and it is closed by the exact-name rule: the menu's "
+                "expected sibling, 'Repost', may republish in ONE press and is "
+                "a PREFIX of the item this presses, so the aim is the whole "
+                "name, read first by repost_item's capture, never a prefix and "
+                "never a position; anything else stops before a press. (Added "
+                "2026-09-27, finding F-5 of lane L8's cold verification.)"
             ),
         ),
     ),
@@ -354,7 +377,7 @@ OUTWARD_CLASS_SPECS: dict[str, OutwardClassSpec] = {
     "endorse_skill": OutwardClassSpec(
         action="endorse_skill",
         outward_class="endorse_or_recommend",
-        status="NEEDS-CAPTURE",
+        status="BLOCKED",
         target_kind="profile_link_and_skill",
         target=(
             "the member's profile link (/in/<slug>/) and the skill, both as "
@@ -379,8 +402,8 @@ OUTWARD_CLASS_SPECS: dict[str, OutwardClassSpec] = {
         ),
         reversible_by=(
             "removing an endorsement he gave (census P E5 / N 113), on the "
-            "same profile, itself NEEDS-CAPTURE. The endorsed member is "
-            "notified either way."
+            "same profile, behind the same blocked route and then its own "
+            "capture. The endorsed member is notified either way."
         ),
         live_proof=(
             "HE NAMES a 1st-degree connection's profile link and one skill. "
@@ -411,11 +434,12 @@ OUTWARD_CLASS_SPECS: dict[str, OutwardClassSpec] = {
                 "(load_a_third_partys_profile_to_measure_a_control stands)."
             ),
         ),
+        blocked_by=_NAMED_PROFILE_ROUTE,
     ),
     "request_recommendation": OutwardClassSpec(
         action="request_recommendation",
         outward_class="endorse_or_recommend",
-        status="NEEDS-CAPTURE",
+        status="BLOCKED",
         target_kind="profile_link_and_text",
         target=(
             "the member's profile link and his message, verbatim; the "
@@ -445,27 +469,37 @@ OUTWARD_CLASS_SPECS: dict[str, OutwardClassSpec] = {
             page=_PROFILE + " -- composed from the link he names, loaded "
             "ONLY inside the request he orders",
             state=(
-                "the profile's own overflow ('More') disclosure opened, then "
-                "its request item pressed so the request form is open and "
-                "EMPTY"
+                "the profile's own overflow ('More') disclosure opened and its "
+                "items READ, none pressed; then, in the same session, the item "
+                "whose whole accessible name is the request item's -- as that "
+                "read found it, and only if exactly one visible item carries "
+                "it -- pressed, so the request form is open and EMPTY"
             ),
             element=(
-                "the menu's request item, the form it opens (relationship "
-                "and position choices, the message box) and its send control"
+                "the menu's items and roles, the request item, the form it "
+                "opens (relationship and position choices, the message box) "
+                "and its send control"
             ),
             why_it_cannot_fire=(
                 "the overflow is a disclosure and the item opens a FORM: "
                 "nothing is sent until the form's send control is pressed, "
                 "and the capture never presses it or types. The form is "
                 "dismissed. Taken only inside the request he names, for the "
-                "profile-view reason endorse_skill gives."
+                "profile-view reason endorse_skill gives. THE MISAIM IS THE "
+                "RISK: this menu has never been read, and a profile's overflow "
+                "may carry one-press acts beside the request (UNVERIFIED -- no "
+                "capture exists), so the menu is read before anything in it is "
+                "pressed, the aim is an exact whole name from that read, never "
+                "a prefix or a position, and anything else stops. (Added "
+                "2026-09-27, finding F-5 of lane L8's cold verification.)"
             ),
         ),
+        blocked_by=_NAMED_PROFILE_ROUTE,
     ),
     "give_recommendation": OutwardClassSpec(
         action="give_recommendation",
         outward_class="endorse_or_recommend",
-        status="NEEDS-CAPTURE",
+        status="BLOCKED",
         target_kind="profile_link_and_text",
         target="the member's profile link and his recommendation text, verbatim",
         census_rows=("P F3", "N 120"),
@@ -477,9 +511,11 @@ OUTWARD_CLASS_SPECS: dict[str, OutwardClassSpec] = {
             "once they accept it."
         ),
         reversible_by=(
-            "deleting a recommendation he sent (census P F5 / N 125) or "
-            "revising it (P F4 / N 124), both NEEDS-CAPTURE; the member has "
-            "been notified either way."
+            "deleting a recommendation he sent (census P F5 / N 125) -- his "
+            "own recommendations section is refused by the read boundary, so "
+            "an admission comes first -- or revising it (P F4 / N 124, "
+            "through the same blocked profile route); the member has been "
+            "notified either way."
         ),
         live_proof=(
             "HE NAMES a connection's profile link and writes the text. Two "
@@ -489,19 +525,24 @@ OUTWARD_CLASS_SPECS: dict[str, OutwardClassSpec] = {
             page=_PROFILE + " -- composed from the link he names, loaded "
             "ONLY inside the recommendation he orders",
             state=(
-                "the profile's 'More' disclosure opened and its recommend "
-                "item pressed, so the recommendation form is open and EMPTY"
+                "the profile's 'More' disclosure opened and its items READ, "
+                "none pressed; then the item whose whole accessible name is "
+                "the recommend item's -- only if exactly one visible item "
+                "carries it -- pressed, so the recommendation form is open "
+                "and EMPTY"
             ),
             element=(
-                "the recommend item, the form (relationship, position, text "
-                "box) and its send control"
+                "the menu's items and roles, the recommend item, the form "
+                "(relationship, position, text box) and its send control"
             ),
             why_it_cannot_fire=(
                 "as request_recommendation: a disclosure and a form, nothing "
                 "typed, the send control never pressed, the form dismissed, "
-                "taken only inside the act he names."
+                "taken only inside the act he names -- and the same exact-name "
+                "rule after a read of the never-read menu (finding F-5)."
             ),
         ),
+        blocked_by=_NAMED_PROFILE_ROUTE,
     ),
     # ---- delete or withdraw one of HIS OWN items ------------------------------
     "delete_own_post": OutwardClassSpec(
