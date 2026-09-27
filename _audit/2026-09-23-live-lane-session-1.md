@@ -2266,3 +2266,48 @@ from the captures and lanes' records, not measured complete: a menu label
 outside it survives only as its shape and count (the plan's D-2). Its
 triggers were measured on captures of 2026-09-20 and 2026-09-23, and a
 trigger that is not exactly one match refuses without pressing.
+
+### (d) The session-2 plan
+
+**`_audit/2026-09-27-live-session-2-plan.md`**, from an inventory of every
+open capture spec and every built-unfired row on master, taken by a
+read-only child of this lane over this branch at `2eb90ad` and kept in the
+lane's scratch (its counts were re-derived four ways and agreed: 36 rows by
+the header parse, the repository's own counter, `PINNED_B1_ROWS` and
+`census_completion --check`). The plan orders it: the attach first (no
+load), captures that need nothing from a fire, then the no-target fires,
+then the captures that need a fire's result, then the outward block, which
+fires only after he has seen each resolved identity once and names every
+target by role. **At most 38 of the 40 loads and 5 of the 5 searches, two in
+reserve.** Every step names its loads, the ruling it rests on, and whether it
+needs him; the credential and session controls are excluded by name, `P N10`
+among the seven.
+
+**What the plan found that the inventory had not, all offline:**
+
+* **the More control on his profile is ONE control** -- one match on
+  session 1's capture, page-wide -- so lane D's LQ-1 and the overflow `N 76`
+  waits on meet in one press; the plan asks the orchestrator to govern it
+  once (D-1);
+* **`linkedin_group_memberships` costs three loads, not one**: the tool
+  brackets the Groups page with the feed at both ends, which moved the
+  group steps' price;
+* **`M C29` and `M C42` need a DIFFERENT post of his** than session 1
+  captured: that post draws no comment, while his profile page, where the
+  rail is, draws four comment counts -- so the plan's `own_post` takes one of
+  those posts, named by the lead and vetoed against the rail;
+* **a skeleton cannot learn a label nobody has measured** -- the ON form of
+  "I'm interested" (`P I15`), a menu item outside the harness's words -- so
+  the raw-capture question (D-2) is priced in the plan, not left abstract.
+
+**The count, against the inventory:** of its 46 open capture specs, 27 are
+captured in session 2, 6 (and one part) wait on items only he can supply,
+3 go to session 3, 4 need an admission first, and 6 are optional,
+superseded, conditional or unspecified. Of the 36 built-unfired rows, 15 are
+fired -- every one of the 11 that need no target, `N 84` and `N 87`, and
+`M M10` and `M M17` in the outward block -- 8 go to session 3 (the six
+intro edits, `P B9`, `N 85`), 11 are outward rows whose target he has not
+named (three of them blocked), and 2 are blocked reads.
+
+**The decisions it puts to the orchestrator, D-1 to D-8,** and one to him,
+D-9 -- the ids only he can supply. None is taken here.
