@@ -20,6 +20,13 @@ Rulings this lane builds under, all registered in `_audit/RULINGS.md`:
 
 Status: IN PROGRESS. This record is written as the lane goes.
 
+**THE LANE RAN IN TWO SESSIONS.** The first (2026-09-24, 08:35 to about 10:30)
+stopped at a usage-limit restart with two children in flight; the second
+resumed on the orchestrator's order on 2026-09-27 at 13:20, sampled the disk
+first, and salvaged what the first left (section 8). Dates in this record are
+the dates things happened: the forbidden set was narrowed on 2026-09-24; the
+build was salvaged and the census moved on 2026-09-27.
+
 ## 1. What was on disk before anything moved
 
 **The forbidden set held nine entries.** Three of them are this lane's:
@@ -427,6 +434,50 @@ synthetic group name in any refusal, block or receipt.
   of 244 test files (74%), so the gate WIDENS TO THE FULL SUITE -- touching
   `writes.py` couples almost everything. **Not run locally, by order; CI
   certifies at merge.**
+
+**On the salvaged build, 2026-09-27, before the master merge:**
+- The write-path, tool-surface and page-string batch (22 files, `-n 6`): **49
+  failed, 1451 passed** on the first run. 46 of the 49 were ONE defect, and
+  not a pin: the reader-leak harness (`tests/refusinggrant.py`) and the reach
+  test had no synthetic value for the new `group_id` target kind, and the
+  KeyError stopped every `writes` reader taking a grant from being driven for
+  ANY spec. Both tables gained `"10001"`. The naming law refused the tool name
+  (section 6); the readers inventory gained `group_leave.read_menu` as wired
+  one hop away; the orphan-module ruling gained `outward_classes` as a record,
+  not a capability. Re-run: **16 failed, 1507 passed** -- all 16 are the
+  tool-surface pins and the two driven-set baselines, which move again at the
+  master merge and are re-derived there, once.
+- `tests/test_an_asserted_name_resolves.py` and
+  `tests/test_a_correction_is_findable_from_the_claim.py`: 24 passed (after the
+  rename; before it, the spec-document mark lost its only example -- register
+  section 80.3).
+- `tests/test_leave_group.py` + `tests/test_outward_classes.py`, serially,
+  junit, NOT a quiet box (a census child running beside it): 41 tests, 1
+  failed as designed (the census agreement, until the census lands). Priced by
+  `ci_shard.seconds_per_file`: `tests/test_leave_group.py` **48.465 s**,
+  `tests/test_outward_classes.py` **0.436 s** -- written into
+  `scripts/ci_shard_timings.json` after the master merge.
+
+## 8. The restart, and what was salvaged
+
+The first session stopped on 2026-09-24 at about 10:30 with two children in
+flight. On 2026-09-27 13:20 the lead resumed on the orchestrator's order and
+SAMPLED FIRST, as the order asked:
+
+- this worktree at `7e370ac`, three commits past the base, the lane record
+  untracked and coherent -- pinned at once (`a002ff4`);
+- the build child's branch had NO commits: its work -- five modified files and
+  three new ones -- sat uncommitted in its own worktree, and its last run of its
+  own test file had been green (23 passed). Salvaged by diffing each file
+  against the base blob, applying the hunks here only where their context was
+  unique, and proving the merge both ways (section 6). Nothing of it was
+  rewritten except the name the naming law refused;
+- the census child had made NO edit; its baseline of every census checker,
+  taken at `efa3d8f`, survived in scratch and its successor reused it rather
+  than re-taking it;
+- master had moved from `1902fcb` to `96c1165` (lane L5, with `send_reply`)
+  and kept moving while the lead worked. The order was to integrate it ONCE,
+  at the end; section 9 records that merge.
 
 ## Live queue
 
