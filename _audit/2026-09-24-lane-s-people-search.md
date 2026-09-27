@@ -2156,3 +2156,114 @@ search, and `N 194` a hashtag keyword: both wait on a later session.
    which is no member link, so the reader skips its one card before reading
    any text. This lane's own file drives the success path; whether the
    generic guard should learn to plant a member link is lane G's to decide.
+
+### K.13 The orchestrator's calls, and the integration of master `687b07c`
+
+The orchestrator's order of 2026-09-27 23:36: integrate master `687b07c`,
+then this branch merges next. Checked against disk first: this branch at
+`996424e` and clean, master at `687b07c` with `b6993e5` inside it and lane
+L5's named-person route on top. Disk agreed.
+
+**THE CALLS ON K.12's QUESTIONS**, recorded as made:
+
+1. The four roster admissions STAY: they are what lets session 2 capture
+   those pages; the rows stay GAP until a capture and a reader exist.
+2. `M C70`'s post record goes to lane G later, after a capture shows the
+   fields. Nothing here.
+3. `N 178` is the OPERATOR'S call: the read would reverse his own removal of
+   the third-party profile pattern on 2026-09-04. It is put to him; nothing
+   is built.
+4. The duplicate key in `tests/test_selectors_resolve.py` is fixed on master
+   (lane L5) -- and this merge's duplicate-key check finds none.
+5. The name-aimed `send_invitation` and `send_message` debts go to lane L5
+   next.
+6. The reader guard's success-path gap goes to lane G.
+7. `include_names=True` on session 2's people searches goes into the live
+   lane's go order.
+
+**THE MERGE.** Three conflicts, each resolved by measurement:
+
+    tool-surface pin     both histories kept; the registry MEASURED at 59
+                         tools and 96 parameters -- master's 59 and 95, and
+                         this branch's `include_names`
+    census pins          both histories kept, and four figures re-derived on
+                         the merged tree
+    shard timings        both sides' entries (this branch's names file,
+                         lane L5's named-profile route and people seam), no
+                         key changed on both sides; 187 files, 1,882.2 s,
+                         re-derived (`_tests` is the first measurement's
+                         5,736, which neither side moves)
+
+**THE CENSUS PINS SHOWED THE HAZARD THIS REPOSITORY HAS NAMED BEFORE.** Each
+side had moved `delivered_broad` and `unfired` by three from the same base --
+this branch by `N 79`, `N 172`, `N 194`, lane L5 by `N 2`, `N 4`, `M M1` -- so
+git saw the two sides' value lines as EQUAL and merged them as one, three
+short; the conflicts were only in the comments. Measured on the merged tree:
+
+    adjudicated        183   (this branch 182, master 180, base 179)
+    delivered_broad    123   (both sides 120, base 117)
+    gap                587   (this branch 588, master 590, base 591)
+    unfired             44   (both sides 41, base 38)
+
+Every other figure, and every bucket-1 hold, matched its pin on the merged
+tree without a change.
+
+`server.py`, both census slices and the reader-leak baseline -- each
+changed on both sides since `ae24426` -- merged without a conflict, and
+were read after the merge rather than trusted: the instructions still name
+the four people tools that `PEOPLE_TOOLS` holds (`people_data.py` is this
+branch's change alone; master did not touch it), and the network slice
+holds lane L5's `N 2` and `N 4` and this branch's three rows, each once.
+The reader, its fixture and its test file are byte-identical to `996424e`.
+The derived views were already at their fixed point (the audit index at 258
+documents, the register at 67 rulings, the blocker map), every register
+entry kept. The AST duplicate-key check over the merged tree: 4,242 dict
+literals and 13 JSON files, 0 duplicates. The census instruments: all green
+(the address tables 101 of 101 and 109 of 109, the pointer graph at master's
+64, the exclusion basis at master's 42).
+
+**A DISCLOSURE, BECAUSE THE ORDER'S WARNING APPLIES BACKWARDS.** Two test
+files in this suite (`tests/test_apply_modal_fixture.py`,
+`tests/test_verification_that_could_not_read.py`) send a headless Chromium to
+www.linkedin.com -- no cookies, no profile, no port 9224. This lane's two
+WHOLE-SUITE runs on 2026-09-27 (K.8's on the build commit, K.11's on the
+record commit) ran before the order named that, without lane L5's offline
+plugin, so those tests made their requests in both. No targeted gate of this
+lane ever included either file. Every run from here uses the plugin.
+
+**THE GATES, ON THE MERGE COMMIT `e15e507`**, in this order and never two
+at once, with nothing edited or committed while they ran. Every pytest run
+loaded lane L5's offline plugin (`-p np_offline`, its directory on
+`PYTHONPATH`, its log named by `NP_OFFLINE_LOG`):
+
+- The readers under lane G's guards and lane L5's people seam: 2,363
+  passed, 1 xfailed (the declared `KNOWN_LIMIT`, strict), in 121.1 s. The
+  plugin aborted nothing there; none of those files opens a page off the
+  box.
+- `impact_gate --against 687b07c`: 17 changed paths select 222 of 272 test
+  files (82%), past its 45% line, so it WIDENED TO THE FULL SUITE, run
+  locally and sharded: PASS, 11,490 tests by pytest's own count (the gate
+  prints one sum), in 1,145.2 s (19m05s).
+- THE PLUGIN'S LOG, read after that run: 11 requests aborted, every one to
+  https://www.linkedin.com, one from each of the 11 tests the order named --
+  7 in `tests/test_apply_modal_fixture.py`, 4 in
+  `tests/test_verification_that_could_not_read.py` -- and none from any
+  other test. Those 11 passed with their navigations aborted. What the
+  plugin cannot see, a request made outside Playwright, it does not claim,
+  and neither does this record.
+- The census instruments and the three generators: every census figure at
+  its pin (the four above among them); the address tables GREEN 101 of 101
+  and 109 of 109; the row pin without drift; the pointer graph PASS, 64 of
+  64; both triage scripts green; the holds green; write classes GREEN, 385
+  lines; the exclusion basis 42 of 42; and the generators at their fixed
+  point -- the audit index at 258 documents, the register at 67 rulings,
+  the blocker map deriving today's GAP as 587.
+
+**NOT RUN, and why.** CI: nothing is pushed, by the order; it certifies at
+merge, on three platforms where this gate ran on one. Nothing live: no
+browser session against LinkedIn, no Chrome profile, no port 9224. The
+mutation check and the cold verification were not re-run: the reader, its
+fixture and its test file are the bytes they ran over. The observed read
+map the impact gate consults was recorded at `5c910e4`, not at this commit,
+as the gate itself prints; the run widened to the full suite, so no
+selection here rests on it.
