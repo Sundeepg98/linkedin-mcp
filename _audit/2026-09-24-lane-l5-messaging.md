@@ -221,6 +221,12 @@ OBSERVING problem stays open -- no instrument has ever seen a committed recipien
 comes from him (his browser's address bar); this server never reads one off a page, and the list
 cannot hand one over because rows carry none.
 
+**MEASURED 2026-09-27 (section "The name-aimed debts", K.3):** the read boundary ADMITS the
+compose-by-identifier address -- `readonly._ALLOWED_URL_PATTERNS` has carried it since 2026-09-03,
+and `readonly.assert_read_url` admits it. The paragraph above read a morning state of that day.
+What stands is the rest of it: the address takes a member id and no link, and the OBSERVING problem
+is exactly as stated -- no instrument has ever seen a committed recipient.
+
 ### 3.2 `M M1` / `M M2` -- the send that could never say SENT
 
 `linkedin_send_message` said, in its own docstring, that it CAN REPORT NOT SENT AND CAN NEVER
@@ -2114,3 +2120,310 @@ was `52b55b6`. One merge commit, history kept.
     eafc6e9  I.6's last run, I.7 and I.8
     d4b3b90  the merge of master b6993e5 (Integration 2, J.1-J.3's first form)
     (next)   J.3's whole-suite result, J.4 and this list
+
+## The name-aimed debts: the orchestrator's order of 2026-09-27 23:36
+
+The order, in its own words: "Convert both debts so NO write is aimed by a name" --
+`linkedin_send_invitation` (N 1) is to "aim by the caller-supplied profile link or member id,
+compared inside the page against the card's own profile link, never against its name";
+`linkedin_send_message` is to be "either aim[ed] the same way ... or retire[d] in favour of
+`linkedin_message_from_profile`. The choice is yours; argue it in your record." Both leave lane
+G's debt list, whose test "must pass with no debt entries left"; the receipts stay
+caller-target-only; every pin, count and census cell the moves touch is re-derived. Item 2:
+`focused` and `other` leave `linkedin_open_messaging`'s accepted values and schema.
+
+Disk was sampled first and agreed with the order: HEAD = master = `687b07c`, CI run 36338770074
+`success`, a clean tree.
+
+### K.1 Item 2: the folder's choices are not filter values (`0f6bb24`)
+
+`dom.MESSAGING_FILTERS` holds the five pills -- `unread`, `jobs`, `connections`, `inmail`,
+`starred` -- and `message_filter` is a `Literal` of those five and `""`, so the registered schema
+carries the enum. The value is checked before any page loads. `focused` and `other` are the
+FOLDER dropdown's choices on the measured page (lane G's record, R.2), which lane G's bar scoping
+already refused on every page. `tests/test_the_folder_choices_are_not_filter_values.py` holds the
+set, the schema's enum, the description, a refusal before a session opens -- and its control,
+`inmail`, entering one, so the fake that records entry is shown able to see it -- and the
+activator's refusal before a locator. Census `M M33` notes it; no state moves.
+
+### K.2 `send_invitation`: aimed by the person's profile link (`f099461`)
+
+THE NEEDLE IS GONE. `linkedin_send_invitation(profile, confirm_token)` takes the person's
+profile link (or member id). `_target_for` parses it with the named-profile parser, so a bare
+word -- which could be a name -- is refused before a browser opens, and the refusal repeats
+nothing.
+
+MEASURED FIRST, offline, over the 95 captures on disk, counts and shapes only: 52 controls wear
+the invitation suffix. The 32 on his own profile's suggestion rail (four captures of `/in/me/`,
+eight each) each sit in a card -- the nearest ancestor holding any `/in/` link -- that holds
+EXACTLY ONE member segment and EXACTLY ONE control, the link's text naming the person the control
+names; all 32 are VANITY links, none a member id. The eight on people search are anchors carrying
+their own `href`, and are not this route.
+
+THE AIM is `dom.rail_invite_control_selector(segment)`: XPath the browser evaluates -- the
+invitation button whose card links to that segment and to no other segment, and holds one such
+button. The segment is ASCII-folded on both sides (vanity segments are case-insensitive), cut at
+`/`, `?` or `#`, and refused unless it is letters, digits, hyphens, underscores or
+percent-encoded octets, so nothing can close the expression. Run over the 16 captures holding
+invitation buttons: 44 of 44 matched exactly one element, the card's own control; upper-cased,
+44 of 44; a segment no card carries matched none on all 16.
+
+`dom.read_invitation_rail` runs NO SCRIPT: two locator counts. `INVITE_NEEDLE_JS`,
+`read_invitation_surface`, `invite_control_selector(index)` and `writes.aim_invitation` left.
+`writes.aim_invitation_by_link` answers AIMED only for exactly one card; two are AMBIGUOUS and
+refuse ("choosing either would be choosing by position"); none says so and, for a MEMBER ID,
+says why -- the rail's cards carry vanity links, 32 of 32 -- and names
+`linkedin_connect_from_profile`, which loads the profile an id names. No answer repeats the
+link. The press is the selector the gate counted, pressed STRICTLY (`STRICT_PRESS_ACTIONS` gains
+`send_invitation`). The preview names whom the link selected as a people record -- the label's
+name, sanitised and marked; the link HIS; the headline ABSENT, because the rail card's headline
+has never been captured. The grant and the receipt carry only his link, nothing the page drew.
+
+`tests/test_an_invitation_is_aimed_by_a_link.py`, 24 tests in a real headless Chromium over
+synthetic rail cards whose buttons record their own presses: one aim; a relative link with a
+query; the fold on each side; no card; a member id; two cards; a card holding two people's
+links; a card holding two controls; a control in no card; the reader runs no script and returns
+only numbers; the builder refuses seven shapes; a bare word is refused before a page opens; his
+link is compared and never navigated to; end to end, the press lands on his card and the receipt
+names his link and no name; and a SECOND CARD drawn while the press waits stops the strict press,
+where the same world pressed without strictness lands on the card drawn FIRST -- not his. That
+pair was written the other way first and went red, and the red is the finding: a redraw that
+only ADDS a card leaves the pressed element connected, Playwright keeps its handle, and
+strictness never gets a second look. The redraw has to detach it.
+
+`tests/test_needle_never_escapes.py` keeps its name and its ruling -- his target may live in a
+grant, never in an exception or a log -- on the link. ITS LOG HALF COULD NOT FAIL FOR A DEBUG
+LINE: it set DEBUG on a logger called `linkedin_server`, which nothing logs through; the package
+logger is `linkedin`, at INFO, so every debug line was dropped before capture. The rewrite's
+first control ("was the unreadable rail logged at all?") read an empty channel, which is how it
+surfaced. It now sets DEBUG on `config.logger.name`, proves the channel hears DEBUG with a control
+record, and drives the rail reader over a page whose library error QUOTES the selector -- the one
+route by which the segment could come back -- which keeps only the error's type.
+
+FOUND, NOT FIXED (outside this order): 12 more `caplog` sites set DEBUG on the ROOT logger, and
+the package logger stays at INFO under all of them, so their absence checks cannot fail for a
+DEBUG-level record -- `tests/test_a_preview_names_the_resolved_target.py` 2,
+`tests/test_auth.py` 3, `tests/test_auth_reason_withholds_the_request.py` 4,
+`tests/test_leakwalk.py` 3. The conftest fixture attaches the handler and leaves the level; one
+line there, or the logger's name at each site, closes it.
+
+Lane G's `tests/test_no_write_is_aimed_by_a_name.py` went red on this commit exactly as designed
+-- "send_invitation is no longer aimed by a name. The debt is paid: delete its NAME_AIMED_DEBT
+entry and its DEBT_PARAMETERS pair" -- and both went. `rail_profile` is classified
+`profile_link_or_member_id`, and the controls that leaned on the real debt entries now fail on
+plants, so they keep failing whether the table holds one entry or none. Census: `N 1` keeps
+COVERED-UNFIRED and its note records the aim; `N 5` and mcp-inventory `34` note the signature.
+
+### K.3 `send_message`: retired, and why not re-aimed
+
+A RE-AIM NEEDS A ROUTE TO THE COMPOSER THAT IS NOT THE TYPEAHEAD, and there is exactly one: the
+composer addressed by identifier,
+`/messaging/compose/?profileUrn=urn%3Ali%3Afsd_profile%3A<id>&recipient=<id>`. The read boundary
+ADMITS it -- `readonly._ALLOWED_URL_PATTERNS` has carried it since 2026-09-03, and
+`assert_read_url` admits it, measured today. It cannot do the part the order asks for. It is
+addressed by the member ID alone, which a profile link does not carry, so a caller holding a
+link -- the form every profile and every rail card draws -- cannot use it without first loading
+the profile. And whom it addressed could only be confirmed on the committed recipient, which no
+instrument here has ever observed: the four chip spellings in `dom.RECIPIENT_CHIP_SELECTORS`
+have never matched anything, and no capture shows that composer with a recipient in it. A re-aim
+would type his words into a composer whose addressee nothing can confirm -- the precondition the
+retired recipient gate refused on, every time.
+
+THE CAPABILITY ALREADY EXISTS WITHOUT ANY OF THAT. `linkedin_message_from_profile` reaches a
+person by their PROFILE LINK, presses that profile's own Message control so LinkedIn sets the
+recipient, types only when exactly one empty composer opened in a conversation titled with that
+person's name (compared in the page) and the profile reads '1st', and confirms SENT by a delta.
+For somebody he already talks to, `linkedin_send_reply` fixes the recipient by thread id. The
+retired tool never sent: a typed name commits nobody (2026-09-03), and every refusal left the
+name sitting in his composer. SO IT IS RETIRED. One limit carried forward rather than hidden:
+`linkedin_message_from_profile` accepts a member id and loads `/in/<id>/`, and whether LinkedIn
+serves that address without redirecting to the vanity one is unmeasured -- a redirect vetoes the
+act (`named_profile.landed_on_profile`). For a caller holding only an id, the identifier-addressed
+composer is the route a later build would take, after its capture.
+
+THIS ARGUMENT ONCE STOOD ON A BOUNDARY CLAIM THAT DID NOT HOLD. Section 3.1 of this record and
+census `M M6` said the identifier address was one "the read boundary refuses on purpose". It had
+been admitted the same day as the reading that said so; both places now carry the measurement
+(`M M6`'s cell, and a line under 3.1). The argument above does not rest on the boundary.
+
+WHAT WENT, measured before the cut -- an AST walk of every use in `linkedin_server/`, `scripts/`
+and `tests/` (`np_reach.py`, `np_dom_graph.py`, `np_dangling.py`) of what nothing reached once
+the write path was gone:
+
+- `server.py`: the tool; its `_WHY_NOT_PERFORMED` entry; every sentence describing it as live --
+  the instructions now name it RETIRED and point to `linkedin_message_from_profile`, and their
+  surviving cost is the invitation's (it does not open `/mynetwork/`).
+- `writes.py`: the spec; the `member_and_text` kind; its PERFORMABLE and TYPING entries; its
+  anchor, click-time and verification branches; `ADDRESSED_TYPING_ACTIONS` and `perform`'s
+  branches for it; `_typeahead_gate`, `_recipient_gate` and `_send_gate`;
+  `_read_messaging_badge` and its surface entry; `_subject_component_of`, whose one reason was
+  this action; the receipt's `typeahead_clicks`, `typeahead_gate` and `recipient_gate`.
+- `dom.py`: `SELECTED_RECIPIENT_JS` and `read_selected_recipients`, the typeahead family
+  (`TYPEAHEAD_OPTION_SELECTORS` through `read_typeahead_options`), `read_compose_send_state`,
+  `compose_body_selector`, and `read_messaging_badge` -- whose one shipped caller was this
+  action's preview; `tests/test_reader_reachability.py` deletes a dom reader no tool reaches
+  rather than parking it, and the two probes that still read the badge carry the same two reads
+  locally.
+- `threads.sent_in_place`, which nothing called.
+- `scripts/_probe_typeahead_commit.py`, the mutating probe that measured the typeahead dead -- it
+  drove this spec's `_live_control` and `_typeahead_gate` -- with its test, and the four test files
+  of the retired gates: `test_send_message_gate.py`, `test_typeahead_gate.py`,
+  `test_click_is_not_its_own_evidence.py` and `test_the_needle_is_matched_as_a_bare_substring.py`.
+  What they measured is kept in `_audit/2026-09-03-typeahead-name-matching-is-dead.md` and in git.
+
+WHAT STAYED, because a read still uses it: `compose_recipient_selector` and
+`compose_send_selector` (`read_thread_reply_surface` counts them) and their labels,
+`RECIPIENT_CHIP_SELECTORS` (the messaging census probe), `read_compose_fields` and
+`read_compose_modes` (`linkedin_compose_fields`), the identifier-addressed composer on the read
+boundary, and `WriteSpec.click_from_state` -- no spec sets it now; the mismatch it names belongs to
+any action whose preview and click read different surfaces.
+
+THE NAME WENT BACK ON THE FORBIDDEN LIST. `tests/test_writes.py`'s conservation law accepts only
+one way off `SANCTIONED_WRITES` -- back onto `FORBIDDEN_TOOLS`, visibly -- and
+`linkedin_send_message` is there again; `test_send_message_is_retired_and_its_name_is_forbidden_again`
+pins the whole retirement. Lane G's debt table is EMPTY and pinned empty (`test_no_debt_is_left`);
+`member_and_text` left its classification; the file passes with no debt entries.
+
+### K.4 Pins, counts and census cells -- each re-derived by its instrument
+
+| what | before | after | how |
+|---|---:|---:|---|
+| tools | 59 | 58 | `mcp.list_tools()`; three surface pins moved with it, the test renamed `..._fifty_eight_tools`; 58 on the merged tree too (K.8) |
+| parameters | 95 | 92 | the tool-surface pin (`member`, `text`, `confirm_token` left; `member` -> `profile` moves no count); 93 on the merged tree, with lane S's `include_names` (K.8) |
+| write tools / sanctioned / performable | 18 / 19 / 18 | 17 / 18 / 17 | the server docstring's derived split, README, `__init__`, the hand-typed lists |
+| strict-press set | 7 | 8 | `send_invitation` joined, pinned by name |
+| executed scripts | 24 | 22 | `INVITE_NEEDLE_JS` (K.2), `SELECTED_RECIPIENT_JS` (K.3) |
+| `dom.py` evaluate waivers (ceiling) | 23 (23) | 21 (21) | the ceiling brought down to the count |
+| name-aimed debt entries | 2 | 0 | pinned empty |
+| error-url feeder sites | 20 (+12 out of scope) | 19 (+10) | three dom sites left |
+| tab-leaking probes | 39 | 38 | the deleted probe was one |
+| decorative-control ratchet | 134 | 132 | its two entries |
+| CI shard timings | 186 files, 1810.6 s | 181, 1760.8 s | the five deleted files' entries |
+| reader-leak baseline | -- | -9 readers | regenerated by its writer, under the offline guard; the RETURNS_TEXT inventory shrank by four |
+
+Census, every figure measured by `scripts/census_completion.py` on this tree and re-pinned with
+the line saying what moved it: `M M2` COVERED-CANNOT-DELIVER -> GAP (its only tool retired; classed
+R2 in `write-classes.tsv`, queued on capture C-P5, as `M M6` is); `N 155` COVERED-CANNOT-DELIVER ->
+COVERED-UNFIRED (the same capability as `M M1`, on `linkedin_message_from_profile`, never fired;
+pinned in bucket 1 under OPERATOR-NAMES-THE-TARGET); `M M1`, `J 128` and mcp-inventory `35`
+re-pointed with no state move (`M M1` also says its Message control is pressed by the topcard
+selector, strictly -- not by position, as its older sentence still read). So: adjudicated
+180 -> 179, delivered_broad 120 -> 121, gap 590 -> 591, cannot_deliver 18 -> 16, unfired 41 -> 42,
+gap_write 377 -> 378, b1_standing 18 -> 19; GAP by slice J 109, P 187, M 132, N 163. On the
+merged tree (K.8) the same moves sit on lane S's: gap 588, unfired 45, adjudicated 182,
+delivered_broad 124, cannot_deliver 16; N 160.
+
+### K.8 The merge of master 64afa6c
+
+The order: "Integrate the then-current master once at your end." Master had moved from `687b07c`
+to `64afa6c` -- 18 commits: lane S's people search returning WHO (`include_names`, three census
+rows), and lane G's network guard (no test reaches the network), its earned-clean reader rule,
+the CI timings rebuilt from run 36338770074, and its record. One merge commit, history kept.
+
+THREE FILES CONFLICTED, each resolved by what the instrument measured on the merged tree:
+
+- `tests/test_the_tool_surface_is_pinned_so_a_row_must_move.py`: master's two re-pin blocks, then
+  this branch's, then 58 tools and 93 parameters -- measured off the merged registry (master's 59
+  and 96 carry lane S's `include_names`; this branch takes one tool and three parameters).
+- `scripts/census_completion.py`: master's comment lines, then this branch's, then the value the
+  instrument measured on the merged tree, never summed: adjudicated 182, delivered_broad 124, gap
+  588, cannot_deliver 16, unfired 45. The figures git merged without a conflict (gap_write 378,
+  b1_standing 19, the bucket-1 rows with `N 155`) were checked by the same run: every headline
+  figure at its pin.
+- `scripts/ci_shard_timings.json`: MASTER'S table -- regenerated from a green CI run by its writer
+  -- less the five files this branch deleted, `_files` and `_total_seconds` re-derived (271 -> 266,
+  3258.6 -> 3113.6 s) and the provenance line saying so.
+
+ONE MORE CHANGE THE MERGE NEEDED, found by the reference scan rather than by a conflict: lane G's
+reader-leak harness drove the invitation namer through an as-shipped variant that answered
+`dom.INVITE_NEEDLE_JS`, which this branch removed. The variant now answers the rail's two locator
+counts with one card and the label with the plant, every read through the planted page, and its
+observation carries the canonical profile link the server would have observed;
+`test_the_preview_namers_are_driven_to_the_records_they_build` passes for both namers. The three
+baselines, regenerated by their writers under the offline guard on the merged tree, came back
+byte-identical to what git merged: a fixed point.
+
+On the merged tree: every Python file parses; the AST duplicate-key scan finds only the old
+harmless `urlretrieve` pair; the census battery, all twelve, is green -- GAP 588, by slice J 109,
+P 187, M 132, N 160 -- with 67 rulings and 258 documents in the derived views.
+
+### K.5 Gates
+
+- THE WHOLE SUITE, on the merge of master 64afa6c (its hash is in K.7): the impact gate's plan
+  widened to it (86 changed
+  paths since `687b07c`, one of them `tests/conftest.py`, which the analyser has no model of), so it
+  ran whole -- locally, `-n auto --dist loadfile`, in the background, under the `np_offline`
+  plugin: 11364 passed, 8 failed, 9 skipped, 1 xfailed -- 11382 tests -- in 1094 s. Two requests
+  tried to leave, and both were the planted ones of lane G's own guard tests, to the synthetic host
+  `network-guard-plant.invalid`; nothing else did.
+- THE EIGHT: two are lane G's guard testing ITSELF -- `test_a_planted_request_is_refused_before_it_leaves`
+  and `test_a_context_the_test_opens_itself_is_guarded_too` assert that THEIR guard aborted the
+  request, and `np_offline`'s route aborted it first. Run without the plugin, under G's guard
+  alone, `tests/test_no_test_reaches_the_network.py` passes 17 of 17. The other six were this
+  order's own moves reaching instruments that pin them, each fixed at the instrument in the final
+  commit: the write-class split (R2 36 -> 37, `M M2`), the messaging slice's GAP split (131 -> 132),
+  `M M2`'s cell naming its blocker (the triage instrument reads `Blocker:`), the contingent
+  write-offs' pinned exemption for `M M2` (self-retired: the row left COVERED-CANNOT-DELIVER), and
+  one test borrowing an invented name the retired tests had held.
+- THE CONTROL SCRIPT this order re-pointed, `scripts/_check_the_refusing_grant_can_fail.py`, was
+  RED on its first re-point: section 3's subject `writes._live_control` did not go red under the
+  plant, because no shipped reader hands a raw page reading to `coerce.as_count` any more -- the
+  script's own sweep found none. Its subject is now the retired gate's SHAPE, built in the script:
+  red under the plant, back to its pre-plant verdict after. All five sections pass.
+- THE FINAL COMMIT'S DELTA, impact-gated: see K.9.
+- THE CENSUS BATTERY on the merged tree, all twelve instruments green (K.8), and again on the final
+  tree (K.9).
+
+### K.6 NOT run
+
+- CI: nothing pushed, as ordered.
+- The whole suite WITHOUT `np_offline`: only lane G's guard-test file was run without it (17
+  passed); lane G's guard now keeps every test on the machine, and the order asked for the plugin.
+- `scripts/impact_gate.py` executing its own run: its plan was computed and read, and the run it
+  called for was made through `np_offline` instead.
+- LIVE: nothing. The two probes this order edited (`_probe_events_home_live.py`,
+  `_probe_notify_cost_precondition.py`) and the retired typeahead probe drive a signed-in browser
+  and were not run; the edits are held by the import-safety and static probe tests.
+- An independent, cold verification of the link aim or of the retirement: not ordered, not run.
+- The 12 `caplog` sites that cannot hear a DEBUG record (K.2): found, not fixed.
+
+### K.7 Commits -- on this branch, none pushed, no AI attribution in any
+
+    0f6bb24  item 2: the folder's choices are not filter values
+    f099461  item 1a: send_invitation aimed by the person's profile link
+    930e96c  item 1b: send_message retired; the debt list empty; pins, census, this section
+    7d3d023  the merge of master 64afa6c (K.8)
+    a5135be  the final run's six instrument consequences, the control's subject, K.5-K.7
+    795adc5  the two findings of the whole suite on a5135be, both in this order's prose (K.9)
+    (last)   K.9's gate results -- this file only, gated by its own plan (K.9)
+
+### K.9 The final delta
+
+- THE WHOLE SUITE on `a5135be`, the tree K.5 left: 11368 passed, 4 failed, 9 skipped, 1 xfailed --
+  11382 tests -- in 1224 s, under `np_offline`; the two requests that tried to leave were lane G's
+  planted ones again. Two of the four are lane G's guard testing itself (K.5). The other two were
+  this order's own prose, each caught by a corpus guard:
+  - `M M2`'s cell named its blocker as a backticked capture id in a blocker slot, and
+    `tests/test_an_asserted_name_resolves.py` resolves such a name against the gap-blockers
+    ledger, which holds no capture ids. The cell now names the capture in words; the triage
+    instrument still reads its `Blocker:`.
+  - K.5 cited this branch's merge by its hash in a commit slot, and
+    `tests/test_a_cited_sha_resolves.py` asks for ancestry of master, which a branch commit has not
+    got until the branch merges. The sentence now names the merge by what it merged; K.7's list,
+    which no slot reads, keeps the hashes.
+  Before that fix was committed, the six instruments its lines reach: 120 passed.
+- THE IMPACT GATE on the commit that fixed them: two changed paths selected 138 of 270 test files
+  (51%), over the analyser's 45% line, so it WIDENED to the whole suite -- run locally, in the
+  background, `-n auto --dist loadfile`, under `np_offline`: 11370 passed, 2 failed, 9 skipped,
+  1 xfailed -- 11382 tests -- in 1670 s. The two failures are lane G's guard testing itself, as in
+  K.5, and the two requests that tried to leave were its planted ones, to
+  `network-guard-plant.invalid`; nothing else did. Run alone without the plugin, under G's guard,
+  `tests/test_no_test_reaches_the_network.py` passes 17 of 17 on the same tree.
+- THE CENSUS BATTERY on that commit, all twelve green: every headline figure at its pin; GAP 588,
+  by slice J 109, P 187, M 132, N 160; 386 write-class lines (R1 16, R2 37, R3 333), every class
+  derived and every citation resolving; 101 of 101 bucket-3 rows agreeing with the live boundary;
+  42 exclusions traced; 64 pinned pointers holding; and the derived views' `--check`s matching --
+  the blocker map, 67 rulings, 258 documents.
+- THE COMMIT CARRYING THIS PARAGRAPH changes this file and nothing else. Its own impact plan and
+  that plan's result are in the report that returns the head sha: a record cannot hold the gate of
+  the commit that writes it.

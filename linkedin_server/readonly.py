@@ -1387,7 +1387,11 @@ _ALLOWED_URL_PATTERNS: tuple[re.Pattern[str], ...] = (
     # runs, and an offset instrument that found the needle at ELEVEN distinct
     # positions across ten rows with accessible names 49 to 178 characters
     # long. No anchored or positional matcher can work there. This is how one
-    # person gets named deterministically instead.
+    # person gets named deterministically instead. (``send_message``, whose
+    # dead end this was admitted to replace, was RETIRED on 2026-09-27 without
+    # ever loading it: no write loads this address now, and whom the composer
+    # it opens has addressed has never been observed. See the note where
+    # ``linkedin_send_message`` stood, in ``server.py``.)
     re.compile(
         r"^https://www\.linkedin\.com/messaging/compose/"
         r"\?profileUrn=urn%3Ali%3Afsd_profile%3A[A-Za-z0-9_-]{1,64}"
@@ -1397,8 +1401,10 @@ _ALLOWED_URL_PATTERNS: tuple[re.Pattern[str], ...] = (
     # ruling, as ONE named address, and it exists to answer ONE question:
     # whether an InMail balance is a countable thing this server can read.
     #
-    # WHY IT IS NEEDED AT ALL. ``send_message`` may spend a finite credit
-    # whose size this server does not know, and a gate that cannot tell him
+    # WHY IT IS NEEDED AT ALL. ``send_message`` could spend a finite credit
+    # (it was RETIRED on 2026-09-27, aimed by a name; ``message_from_profile``
+    # stops before typing wherever a credit might be spent) whose size this
+    # server does not know, and a gate that cannot tell him
     # what an action COSTS is not fully a gate -- every other write here names
     # its cost. The composer itself was captured on 2026-08-31 and DOES NOT
     # carry a balance: the control there named ``InMail`` is a

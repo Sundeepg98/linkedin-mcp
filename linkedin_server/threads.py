@@ -11,6 +11,7 @@ Two blocks, each measured twice.
    an effect on another person. The live lane held three census rows on that
    cost at 22:14 and again at 23:26 on 2026-09-23.
 2. **A send could not confirm itself.** ``linkedin_send_message``'s docstring
+   (that tool was retired on 2026-09-27 -- it was aimed by a name)
    said it can report NOT SENT and can never report SENT, because the only
    surface that could confirm a send is the thread -- then forbidden. Ruling
    ``WRITE-CLASS-B`` (2026-09-23 18:15) lifted that: the thread may be read.
@@ -986,7 +987,8 @@ def thread_facts(reading: dict[str, Any]) -> dict[str, Any]:
 async def reply_send_gate(page: Any, *, text: str) -> dict[str, Any]:
     """May Send be pressed? Read AFTER his words are in the box.
 
-    The transition ``publish_post`` and ``send_message`` gate on: Send is
+    The transition ``publish_post`` gates on (and ``send_message`` did,
+    until it was retired on 2026-09-27): Send is
     measured DISABLED on an empty form, so a fill that landed is something
     this server can SEE -- Send enabled, the box no longer empty. Every
     condition is re-read here, on the page, after the fill.
@@ -1191,31 +1193,9 @@ def reply_verdict(
     )
 
 
-def sent_in_place(reading: dict[str, Any]) -> tuple[str, str]:
-    """For a send from the COMPOSER: read the conversation the send left open.
-
-    WEAKER THAN :func:`reply_verdict`, and it says so. After a compose send
-    LinkedIn shows the conversation on the same page; this reads it IN PLACE,
-    because that conversation's id is on the page and a page-derived id is
-    never navigated to. There is no before-count -- the composer drew no
-    conversation -- so an identical earlier last message of his cannot be
-    told from this one.
-    """
-    if reading.get("error") or not reading.get("rendered") or not reading.get("events"):
-        return UNKNOWN, "no conversation is drawn on the page the send left open."
-    if reading.get("last_from") == "him" and reading.get("last_has_text") is True:
-        return "message_sent", (
-            "the conversation now drawn on the page the send left open shows "
-            "your exact words as its last message, and that message carries no "
-            "'--other' modifier. Read IN PLACE and with no before-count, so an "
-            "identical earlier last message of yours in the same conversation "
-            "would read the same -- that is this reading's limit."
-        )
-    return UNKNOWN, (
-        f"a conversation is drawn but its last message is from "
-        f"{reading.get('last_from')!r} and carries your words: "
-        f"{reading.get('last_has_text')!r}. Open your messages and look."
-    )
+# ``sent_in_place`` STOOD HERE until 2026-09-27: ``send_message``'s reading of
+# the conversation a COMPOSER send left drawn, in place, with no before-count.
+# It left with that action (lane L5, the orchestrator's order of 23:36).
 
 
 # ---------------------------------------------------------------------------

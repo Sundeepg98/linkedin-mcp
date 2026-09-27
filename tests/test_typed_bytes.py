@@ -139,6 +139,12 @@ def test_the_fill_types_the_grants_own_text_and_nothing_else():
     # so its words are appended inside the click loop, after the opened-
     # conversation gate -- a fourth site, held to exactly the bar the other
     # three are: a bare ``_text_component_of(spec, grant.target)``.
+    #
+    # TWO SINCE LATER THE SAME DAY: ``send_message`` was RETIRED on lane L5's
+    # order of 2026-09-27 23:36 (it was aimed by a name), and its two sites --
+    # the recipient's ``_subject_component_of`` and its body's -- left with
+    # it, and ``_subject_component_of`` with them. What remains is the plain
+    # typing site and the named-person composer's, both the content half.
     appended = [
         node
         for node in ast.walk(_TREE)
@@ -148,7 +154,7 @@ def test_the_fill_types_the_grants_own_text_and_nothing_else():
         and isinstance(node.func.value, ast.Name)
         and node.func.value.id == "fill_plan"
     ]
-    assert len(appended) == 4, [ast.unparse(a) for a in appended]
+    assert len(appended) == 2, [ast.unparse(a) for a in appended]
 
     # THE ARGUMENT MUST BE THE CALL ITSELF, not merely contain it.
     #
@@ -181,15 +187,13 @@ def test_the_fill_types_the_grants_own_text_and_nothing_else():
         assert not text_expr.keywords, ast.unparse(text_expr)
         extractors.append(text_expr.func.id)
 
-    # AND BOTH HALVES ARE NAMED. Not "some extractor" -- the SUBJECT extractor
-    # exactly once and the CONTENT extractor three times (twice until
-    # 2026-09-27), because three sites type a body and only one types a
-    # recipient. A queue that pushed the subject where the content belongs
-    # would type his message into the recipient box, which no count-only
-    # assertion would notice.
+    # AND THE EXTRACTOR IS NAMED. Not "some extractor" -- the CONTENT
+    # extractor at both sites. Until 2026-09-27 the SUBJECT extractor was
+    # named here too, exactly once, for send_message's recipient; with that
+    # action retired no fill types a recipient, and a subject extractor
+    # arriving here again would be a write typing WHO -- a name -- which this
+    # line now refuses.
     assert sorted(extractors) == [
-        "_subject_component_of",
-        "_text_component_of",
         "_text_component_of",
         "_text_component_of",
     ], extractors

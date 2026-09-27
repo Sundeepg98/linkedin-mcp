@@ -10811,6 +10811,60 @@ are in the lane record. The guard is DISPOSABLE HERE AND NOT IN GENERAL: its
 finding -- eleven tests in two files send a browser to LinkedIn -- is the lane
 record's I.5, left for the owners of the shared browser fixtures.
 
+### 69.13 A NAME IS NEVER THE AIM, AND A RETIRED WRITE TAKES ITS INSTRUMENTS WITH IT (the name-aimed debts, 2026-09-27)
+
+The orchestrator's order of 2026-09-27 23:36 (PEOPLE-DATA-MITIGATIONS, mitigation
+6): `linkedin_send_invitation` is aimed by the person's profile link, compared in
+the page against each rail card's own link; `linkedin_send_message`, aimed by a
+name typed into a typeahead, is RETIRED in favour of
+`linkedin_message_from_profile`; lane G's name-aimed debt table is empty and
+pinned empty. Full record: `_audit/2026-09-24-lane-l5-messaging.md`, "The
+name-aimed debts".
+
+Three findings worth carrying out of it:
+
+    A STRICT PRESS IS ONLY TESTED BY A REDRAW THAT DETACHES WHAT WAS PRESSED.
+    Playwright retries an intercepted press on the SAME element handle and
+    re-resolves the selector only when that element leaves the document. A
+    redraw that merely ADDS a second match leaves the handle connected, the
+    press lands, and strictness never gets its second look -- measured: the
+    first draft of the mid-press test was red for exactly that reason.
+
+    A LOG-ABSENCE CHECK MUST NAME THE LOGGER THE PACKAGE WRITES THROUGH, AND
+    PROVE THE CHANNEL HEARS THE LEVEL IT CHECKS. `caplog.at_level(DEBUG,
+    logger="linkedin_server")` set a logger nothing uses; the package logger
+    `linkedin` stayed at INFO, every DEBUG line was dropped before capture, and
+    "nothing logged the needle" could not fail for a debug record. Found by the
+    rewrite's first control reading an empty channel. Twelve more sites set
+    DEBUG on the ROOT logger and have the same blind spot (the lane record
+    lists them; not fixed under this order).
+
+    MEASURE THE REFERENCE GRAPH BEFORE CUTTING A WRITE OUT. What a retirement
+    may delete is what nothing else reaches once the write path is gone -- in
+    the package, in the scripts, and in the probes -- and that is a
+    measurement (an AST walk of every use), not a reading of the code's
+    comments. It kept the read-side selectors a thread reader still counts, and
+    it found the one probe whose deletion the retirement forced.
+
+| path | shown failing by |
+|---|---|
+| `dom.rail_invite_control_selector`, `dom.read_invitation_rail`, `writes.aim_invitation_by_link`, the `rail_profile` target kind, and `send_invitation` in `STRICT_PRESS_ACTIONS` | `tests/test_an_invitation_is_aimed_by_a_link.py` in a real headless Chromium over synthetic rail cards whose buttons record their own presses: two cards, a card with two people's links, a card with two controls and a control in no card each read as no aim; the builder refuses seven shapes; and a SECOND CARD drawn mid-press stops the strict press while the same world pressed without strictness lands on the card drawn first -- not his. The selector was run first over the 16 captures holding invitation buttons: 44 of 44 exactly one, the card's own control |
+| `tests/test_needle_never_escapes.py`, rewritten around the link, on the package logger with a control record | its first run, still on the old logger name, read an EMPTY channel and the control ("the unreadable rail was not logged at all") failed -- measured, and the reason the logger name changed; a reader driven over a page whose library error quotes the selector keeps only the error's type |
+| `tests/test_no_write_is_aimed_by_a_name.py::test_no_debt_is_left`, and the file's controls rebuilt on a planted NAME kind | the file went red on this branch's first commit exactly as designed ("send_invitation is no longer aimed by a name. The debt is paid: delete its entry") before its entry went; the rebuilt controls fail on plants whether the real table holds one entry or none |
+| `linkedin_open_messaging`'s five pills, as `dom.MESSAGING_FILTERS` and a schema enum, checked before a page loads | `tests/test_the_folder_choices_are_not_filter_values.py`: `focused` and `other` refused before a session opens, while the control, `inmail`, enters one -- so the fake that records entry is shown able to see it |
+
+**DECLARED DISPOSABLE:** the rail measurements (`np_rail_links.py`,
+`np_rail_xpath_check.py`), the reference-graph tools that decided what the
+retirement could cut (`np_reach.py`, `np_dom_graph.py`, `np_dangling.py`), the
+edit scripts (`d_*.py`) and the module launcher that ran the baseline writers
+under the offline guard (`np_module_offline.py`) -- all under the lane's
+scratch directory; their numbers are in the lane record. RETIRED WITH THE WRITE,
+their findings kept in `_audit/2026-09-03-typeahead-name-matching-is-dead.md`
+and in git: `scripts/_probe_typeahead_commit.py` and its test, and the gate
+tests `tests/test_send_message_gate.py`, `tests/test_typeahead_gate.py`,
+`tests/test_click_is_not_its_own_evidence.py` and
+`tests/test_the_needle_is_matched_as_a_bare_substring.py`.
+
 ## 70. THE BEST-VERIFIED WRITE NEVER PRESSED SAVE, AND A WRITE AIMED BY ITS CARD (lane-l7-profile-writes, 2026-09-24)
 
 **Registered 2026-09-24.** Full record: `_audit/2026-09-24-lane-l7-profile-writes.md`.

@@ -7,7 +7,8 @@ module's READERS can be driven without a write being possible.
 ``WriteGrant`` and recorded the refusal as *"policy, not capability"*. Five
 readers -- ``_live_control``, ``_verify_after``, ``_typeahead_gate``,
 ``_recipient_gate`` and ``perform`` -- were therefore NOT-DRIVEN, which that
-file's own docstring says is never a pass.
+file's own docstring says is never a pass. (The two gates left with
+``send_message`` on 2026-09-27; three of the five remain.)
 
 Three measurements say the refusal was about the harness's plumbing rather
 than about permission:
@@ -78,7 +79,11 @@ from linkedin_server import writes
 SYNTHETIC_RAW_TARGETS: dict[str, Any] = {
     "job_id": "4600000042",
     "company_id": "9900000001",
-    "member": "example-harness-member",
+    # ``send_invitation``'s, since 2026-09-27: a person's profile LINK, compared
+    # against the rail cards' own links. It replaced the ``member`` row -- his
+    # word for a person, a name -- when that action stopped being aimed by
+    # one. A link, because a bare word is refused by ``_target_for``.
+    "rail_profile": "https://www.linkedin.com/in/example-harness-person/",
     "item_urn": "example-harness-item",
     "self": "self",
     # A NUMERIC GROUP ID (``withdraw_from_group``, 2026-09-24). Five digits, under the
@@ -98,10 +103,8 @@ SYNTHETIC_RAW_TARGETS: dict[str, Any] = {
     # reader is never driven. Taken from the server's own constant rather than
     # typed, so it cannot drift.
     "setting_and_value": {"setting": "dark_mode", "value": writes.DARK_MODE_STATES[0]},
-    "member_and_text": {
-        "member": "example-harness-member",
-        "text": "example-harness-message-text",
-    },
+    # (``member_and_text`` -- send_message's NAME and words -- left with that
+    # action on 2026-09-27.)
     # A CONVERSATION AND THE WORDS OF A REPLY (``send_reply``). The thread id
     # must pass ``threads.valid_thread_id`` -- a digit first, then the read
     # allowlist's own alphabet -- or ``_target_for`` refuses it and no reader

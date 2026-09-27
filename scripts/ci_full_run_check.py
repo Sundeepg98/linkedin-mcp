@@ -62,7 +62,8 @@ until somebody fixes the defect it records. Every cell of the matrix would
 have failed for it, on the first run this workflow ever had. So the two are
 counted separately below, the xfail is reported rather than hidden, and only a
 real skip fails the check. The argument above is untouched: it was always
-about a test that COULD NOT RUN, which an xfail is not.
+about a test that COULD NOT RUN, which an xfail is not. (That test file was
+deleted on 2026-09-27 with the send_message write it tested; the rule stands.)
 
 THIS FILE IS DUPLICATED, in linkedin and in ats-jobs, and there is no drift
 guard on it. That is a stated cost rather than an oversight: the vendoring

@@ -51,6 +51,21 @@ from linkedin_server import dom, shape  # noqa: E402
 from linkedin_server.auth import assert_not_authwall  # noqa: E402
 from linkedin_server.browser import BROWSER  # noqa: E402
 
+
+async def _read_messaging_badge(page):
+    """The messaging nav badge, ``{"links", "label"}``, read WITHOUT opening
+    messaging: a count of ``a[href*="/messaging/"]`` and the first one's
+    aria-label, shaped. MOVED HERE FROM ``dom.read_messaging_badge`` on
+    2026-09-27, when its one shipped caller -- send_message's preview -- was
+    RETIRED (lane L5, the orchestrator's order of 23:36) and a dom reader no
+    tool reaches is deleted rather than kept
+    (``tests/test_reader_reachability.py``). No except: an unreadable page
+    fails this probe rather than reading as a badge that is not there."""
+    links = page.locator('a[href*="/messaging/"]')
+    count = int(await links.count())
+    label = await links.first.get_attribute("aria-label") if count else None
+    return {"links": count, "label": shape.census_shape(str(label or "").strip()) or None}
+
 #: The feed. An address on the read allowlist that this server loads for other
 #: reasons anyway, chosen because the nav renders on every signed-in page and
 #: this probe needs a nav and nothing else.
@@ -130,7 +145,7 @@ async def main() -> int:
             # messaging control is reported from its reader's own output and
             # is not put through a shaper at all -- what is wanted here is
             # only "did this reader resolve", which the reading answers.
-            msg_reading = await dom.read_messaging_badge(page)
+            msg_reading = await _read_messaging_badge(page)
             msg_resolved = bool(msg_reading.get("label"))
             print("   messaging badge  : resolved=%-5r links=%r"
                   % (msg_resolved, msg_reading.get("links")))

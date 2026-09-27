@@ -732,7 +732,9 @@ def test_what_ships_is_narrower_than_what_is_sanctioned():
         "update_profile_field",
         "update_setting",
         "send_invitation",
-        "send_message",
+        # (send_message left this set on 2026-09-27: RETIRED on lane L5's
+        # order of 23:36, because it was aimed by a name. Nineteen became
+        # eighteen.)
         # FOURTEEN FROM 2026-09-23: the follow from the Page itself (census
         # row N 47). It entered the outer set and the middle one in the same
         # move, as apply did on 2026-08-25 -- sanctioned and performable at
@@ -844,28 +846,11 @@ def test_what_ships_is_narrower_than_what_is_sanctioned():
         # the fill and refuses with the observation when two controls share a
         # name. The refusal is what produces the missing measurement.
         "comment_on_item",
-        # THE TWELFTH, 2026-09-02, and it EMPTIES THE GAP THIS TEST IS ABOUT.
-        # Every other entry above widened the middle set while leaving
-        # something outside it; this one leaves exactly one sanctioned action
-        # unperformed, and that one -- set_open_to_work -- has no registered
-        # tool, so nothing a caller can reach is refused any more.
-        #
-        # IT SHIPS EXPECTING TO REFUSE, which is comment_on_item's shape, and
-        # for a sharper reason: its blocker is not a missing control but a
-        # missing AIM. The recipient box is a typeahead nobody has typed into,
-        # and "Send became enabled" says LinkedIn thinks this is sendable, not
-        # that the recipient is the person he named. So the gate requires
-        # exactly one committed recipient WHOSE ACCESSIBLE NAME CARRIES HIS
-        # OWN NEEDLE, compared inside the page with integers only coming back.
-        # A count of one with the wrong name refuses; a count of zero refuses.
-        #
-        # AND THE ORDER IS THE SAFETY PROPERTY: the recipient gate runs
-        # BETWEEN the two fills, so his words are never typed until a
-        # recipient has been confirmed, and a refusal costs him a typed name
-        # in a composer rather than his message. That ordering is what
-        # WriteSpec.click_from_state exists to express, and it arrived with
-        # this action.
-        "send_message",
+        # (THE TWELFTH, send_message, 2026-09-02 to 2026-09-27: it emptied the
+        # gap this test is about, and shipped expecting to refuse on a missing
+        # AIM -- a name in a typeahead. RETIRED on lane L5's order of 23:36:
+        # the aim was a name, which mitigation 6 forbids. The gap stays empty:
+        # set_open_to_work is still the one sanctioned action unperformed.)
         # THE THIRTEENTH, 2026-09-23, and the first write added under the
         # operator's reversible-first-round class since that round's own
         # three: a follow performed on the organisation Page root, addressed
@@ -1397,7 +1382,7 @@ _UNMEASURED_REVERSIBILITY = {
     "update_profile_field",
     "update_setting",
     "send_invitation",
-    "send_message",
+    # (send_message, retired 2026-09-27.)
     # 2026-09-24 (census row P I14). Its removal is P I15, which presses an
     # ON-state control no capture holds, so nothing about undoing it has been
     # observed on this surface.
@@ -1436,7 +1421,6 @@ REVERSIBILITY_CLASS = {
     "update_profile_field": "STILL-UNKNOWN",
     "update_setting": "STILL-UNKNOWN",
     "send_invitation": "STILL-UNKNOWN",
-    "send_message": "STILL-UNKNOWN",
     "send_reply": "STILL-UNKNOWN",
     # THE ONE THAT IS NOT, and it is the whole reason this table is per-action
     # rather than a claim about the set. apply_job is STILL-UNKNOWN because the
@@ -1484,7 +1468,6 @@ REVERSIBILITY_MEASURED = {
     "update_profile_field": False,
     "update_setting": False,
     "send_invitation": False,
-    "send_message": False,
     "follow_company_page": True,
     "mark_company_interest": False,
     "send_reply": False,
@@ -4775,72 +4758,31 @@ def test_the_editor_exemption_is_an_exact_url_and_not_a_family():
     assert "/edit/" in readonly._FORBIDDEN_URL_SUBSTRINGS
 
 
-def test_send_message_can_report_not_sent_from_the_composer():
-    """The 2026-09-02 ruling: read what proves it did NOT happen.
+def test_send_message_is_retired_and_its_name_is_forbidden_again():
+    """THE RETIREMENT, PINNED (2026-09-27, lane L5, the orchestrator's order of
+    23:36; PEOPLE-DATA-MITIGATIONS, mitigation 6).
 
-    ``perform`` decides True by comparing the verified state against
-    ``expected_after``, and False by comparing it against ``unchanged_state``,
-    falling to UNKNOWN between them. Until 2026-09-24 this action could never
-    reach the True arm -- no surface it could read wrote ``"message_sent"`` --
-    so naming the NOT-performed state is what turned the worst answer into
-    the second best. It still does, on the composer. (Renamed that day from
-    ``..._and_never_sent``: the True arm is now reachable through the
-    conversation a send leaves drawn, read in place.)
-
-    The property that admits it is the one that disqualified the alternative,
-    inverted: a "cleared composer means sent" rule could only be validated by
-    SENDING, while "the composer still holds its text" is measurable without a
-    first send.
+    ``send_message`` was aimed by a NAME typed into the composer's recipient
+    typeahead -- measured to commit nobody, and never sent. It was RETIRED
+    rather than re-aimed: the composer addressed by member id is on the read
+    boundary, but it takes no link and whom it addressed could only be read
+    off a committed recipient no instrument here has ever observed, while
+    ``message_from_profile`` already reaches a person by profile link. This
+    test held its not-sent verdict until then (``..._can_report_not_sent_
+    from_the_composer``); what it holds now is that the action is GONE from
+    every place that could act on it, and that its tool's NAME went back onto
+    the forbidden list -- the only route off ``SANCTIONED_WRITES`` that
+    ``test_no_boundary_can_be_deleted_only_moved`` accepts.
     """
-    spec = writes.spec_for_action("send_message")
-    assert spec.not_performed_state == "composer_holds_text"
+    from linkedin_server import server as server_module
 
-    # AND from_state IS DELIBERATELY DIFFERENT, which is the half this test
-    # got wrong first. It was changed to "composer_holds_text" on the
-    # grounds that the composer HAS been measured -- true of the census and
-    # irrelevant here. This field is what THE GATE has seen, and the gate
-    # refuses to open messaging to find out, because doing so redirects
-    # into a stranger's conversation. Overwriting it made the gate refuse
-    # with a wrong-state error instead of its designed refusal.
-    #
-    # The two fields are read at opposite ends and looking costs
-    # differently at each: BEFORE, by a gate that must not open messaging;
-    # AFTER, when the composer is already open and re-reading is free.
-    assert spec.from_state == "composer_unmeasured"
-    assert spec.not_performed_state != spec.from_state
-
-    # THE REFUSAL IS GONE, AND THAT IS WHY THIS BLOCK CHANGED.
-    #
-    # It used to read the action's entry out of ``_NINE_REFUSALS`` and assert
-    # the entry named its own fix. The action SHIPPED on 2026-09-02, so the
-    # entry was removed rather than reworded -- ``_refuse_unperformable``'s
-    # standing rule is that text left behind for a shipped action is
-    # unreachable AND false, which is the pair this package has now paid for
-    # three times.
-    assert "send_message" not in writes._NINE_REFUSALS
-
-    # PERFORMABLE, AND THE THREE FIELDS THAT MAKE THE VERDICT HONEST.
-    #
-    # ``to_state`` WAS a state no reader here could return, until 2026-09-24:
-    # ruling WRITE-CLASS-B lifted the prohibition on the conversation, and
-    # ``_verify_after`` now reads the conversation a send leaves drawn, in
-    # place -- see
-    # ``tests/test_send_message_gate.py::test_verify_after_reaches_the_to_state_only_through_the_conversation_read_back``.
-    # ``not_performed_state`` is still what makes the False arm reachable on
-    # the composer itself, which is the half this test's name now claims.
-    assert "send_message" in writes.PERFORMABLE
-    assert spec.to_state == "message_sent"
-    assert spec.unverifiable is None, (
-        "send_message must NOT declare `unverifiable`: that short-circuits "
-        "_verify_after to UNKNOWN before any comparison runs, which would "
-        "delete the not-sent answer while keeping the flag saying there is no "
-        "answer. Those are opposite things and they look identical in a spec "
-        "table."
-    )
-
-    # AND THE CLICK-TIME STATE IS A DIFFERENT FIELD, which is the whole reason
-    # ``click_from_state`` exists. ``from_state`` above is what the PREVIEW's
-    # gate has seen; by click time the composer is open in front of us and
-    # calling it unmeasured would be the lie. One field could not be both.
-    assert spec.click_from_state == "composer_empty"
-    assert spec.click_from_state != spec.from_state
+    actions = {spec.action for spec in SANCTIONED_WRITES.values()}
+    assert "send_message" not in actions
+    assert "linkedin_send_message" not in SANCTIONED_WRITES
+    assert "send_message" not in writes.PERFORMABLE
+    assert "send_message" not in writes.TYPING_ACTIONS
+    assert not hasattr(server_module, "linkedin_send_message")
+    assert "linkedin_send_message" in FORBIDDEN_TOOLS
+    # The way a person IS messaged now, by a link, never a name.
+    assert "message_from_profile" in writes.PERFORMABLE
+    assert spec_for_action("message_from_profile").target_kind == "profile_and_text"

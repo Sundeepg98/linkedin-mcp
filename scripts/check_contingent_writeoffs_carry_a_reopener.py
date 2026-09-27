@@ -100,10 +100,10 @@ ENFORCED_STATES = frozenset({"EXCLUDED-RULED", "XR"})
 #: Each entry is a row id mapped to why. THESE SELF-RETIRE: see check 2 above.
 #: Keep this list tiny. An exemption is a debt, not a decision.
 PINNED_EXEMPTIONS: dict[str, str] = {
-    "M M2": "COVERED-CANNOT-DELIVER, outside the EXCLUDED-RULED/XR row-set this "
-            "wave was scoped to. Its contingent fact is the InMail allowance, "
-            "the same one `network.md` R9 now carries a reopener for; the row "
-            "needs one clause and an owner for that state class.",
+    # (`M M2` was pinned here -- COVERED-CANNOT-DELIVER, its contingent fact
+    # the InMail allowance -- until 2026-09-27, when the retirement of
+    # `linkedin_send_message` returned it to GAP: lane L5, the orchestrator's
+    # order of 23:36. The pin self-retired, as this table's rule requires.)
     "N 57": "COVERED-CANNOT-DELIVER, outside this wave's row-set. Its "
             "contingent fact is what the account subscribes to, which changes "
             "the day he subscribes to anything.",

@@ -49,7 +49,9 @@ def test_every_supplied_grant_carries_all_four_refusals(spec):
 
 def test_the_refusal_check_convicts_an_ordinary_grant():
     """THE CONTROL. Without it the assertions above prove nothing."""
-    spec = writes.SANCTIONED_WRITES["linkedin_send_message"]
+    # ``send_reply`` since 2026-09-27; ``send_message``, which this named
+    # until then, was retired (lane L5, the orchestrator's order of 23:36).
+    spec = writes.SANCTIONED_WRITES["linkedin_send_reply"]
     ordinary = writes.WriteGrant(
         action=spec.action,
         target=refusinggrant.synthetic_target(spec),

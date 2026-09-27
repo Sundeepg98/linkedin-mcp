@@ -581,9 +581,11 @@ def test_the_filter_pills_are_read_not_guessed(html, seen, navigable):
 
 
 @pytest.mark.parametrize(
-    "name", ["focused", "other", "unread", "jobs", "connections", "inmail", "starred"]
+    "name", ["unread", "jobs", "connections", "inmail", "starred"]
 )
 def test_every_permitted_pill_builds_a_selector(name):
+    """FIVE SINCE LANE L5'S ORDER OF 2026-09-27 23:36 (seven until then):
+    ``focused`` and ``other``, the folder's choices, are refused below."""
     from linkedin_server import dom
 
     assert dom.assert_permitted_filter(name) == name
@@ -591,10 +593,10 @@ def test_every_permitted_pill_builds_a_selector(name):
 
 @pytest.mark.parametrize(
     "name",
-    ["delete", "archive", "send", "report", "block", "", "  ", "button", "*"],
+    ["delete", "archive", "send", "report", "block", "", "  ", "button", "*", "focused", "other"],
     ids=[
         "delete", "archive", "send", "report", "block",
-        "empty", "whitespace", "any button", "wildcard",
+        "empty", "whitespace", "any button", "wildcard", "folder-focused", "folder-other",
     ],
 )
 def test_anything_outside_the_named_set_is_refused_before_a_selector_exists(name):

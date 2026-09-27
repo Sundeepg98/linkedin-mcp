@@ -386,7 +386,16 @@ AFTER_LANE_L5_OVER_Y2 = (124, {"R": 17, "W": 103, "R+W": 4})
 #: bucket.
 AFTER_LANE_L8 = (131, {"R": 17, "W": 110, "R+W": 4})
 
-EXPECTED_NOW = AFTER_LANE_L8
+#: ON LANE L5'S ORDER OF 2026-09-27 23:36, MEASURED with
+#: `scripts/triage_messaging_gap_rows.py` on the tree merged with master
+#: 64afa6c (`_audit/2026-09-24-lane-l5-messaging.md`, "The name-aimed
+#: debts"): `M2` returned to GAP when `linkedin_send_message` -- its only
+#: tool, aimed by a name -- was retired, and names its blocker in its own
+#: cell. 131 + 1 = 132: writes 110 + 1; lane S's merged rows are network rows
+#: and move nothing here.
+AFTER_LANE_L5_DEBTS = (132, {"R": 17, "W": 111, "R+W": 4})
+
+EXPECTED_NOW = AFTER_LANE_L5_DEBTS
 
 
 def test_the_headline_split_is_the_one_the_report_quotes():

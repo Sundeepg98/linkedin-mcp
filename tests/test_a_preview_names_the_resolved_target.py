@@ -58,7 +58,12 @@ from tests.test_send_reply import (
 )
 from tests.test_messaging_threads import _derive
 from tests.test_writes import browser_page, writes_on  # noqa: F401 -- fixtures
-from tests.test_writes_nine import MEMBER, _grantable_invitation, _preview_the_refusal
+from tests.test_writes_nine import (
+    MEMBER,
+    MEMBER_LINK,
+    _grantable_invitation,
+    _preview_the_refusal,
+)
 
 #: What the reply fixture's conversation header draws: the title, and the line
 #: under it.
@@ -226,10 +231,12 @@ async def test_nothing_the_invitation_preview_keeps_carries_the_name(
     assert block.get("to_confirm"), "no grant was minted, so nothing could keep the name"
     label = "Invite " + MEMBER + dom.INVITE_CONTROL_SUFFIX
     assert carried(label, records=caplog.records) == []
-    # His own word is the target the caller supplied, and it is kept: that is
-    # the receipt half of the ruling, not a leak.
+    # His LINK is the target the caller supplied, and it is kept: that is the
+    # receipt half of the ruling, not a leak. (It was his own WORD for the
+    # person until 2026-09-27, when the invitation stopped being aimed by a
+    # name -- lane L5, the orchestrator's order of 23:36.)
     grant = writes._GRANTS[block["to_confirm"]]
-    assert grant.target == MEMBER
+    assert grant.target == MEMBER_LINK
 
 
 async def test_nothing_a_sent_reply_keeps_carries_the_title(writes_on, browser_page, caplog):

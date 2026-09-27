@@ -68,6 +68,21 @@ from linkedin_server import config, dom, events, readonly, shape  # noqa: E402
 from linkedin_server.browser import BROWSER  # noqa: E402
 from linkedin_server.config import BASE_URL, FEED_URL  # noqa: E402
 
+
+async def _read_messaging_badge(page):
+    """The messaging nav badge, ``{"links", "label"}``, read WITHOUT opening
+    messaging: a count of ``a[href*="/messaging/"]`` and the first one's
+    aria-label, shaped. MOVED HERE FROM ``dom.read_messaging_badge`` on
+    2026-09-27, when its one shipped caller -- send_message's preview -- was
+    RETIRED (lane L5, the orchestrator's order of 23:36) and a dom reader no
+    tool reaches is deleted rather than kept
+    (``tests/test_reader_reachability.py``). No except: an unreadable page
+    fails this probe rather than reading as a badge that is not there."""
+    links = page.locator('a[href*="/messaging/"]')
+    count = int(await links.count())
+    label = await links.first.get_attribute("aria-label") if count else None
+    return {"links": count, "label": shape.census_shape(str(label or "").strip()) or None}
+
 EVENTS_URL = f"{BASE_URL}/events/"
 CONTROL_URL = f"{BASE_URL}/mypreferences/d/dark-mode"
 CONTROL_EXPECTED = 20
@@ -93,7 +108,7 @@ async def _badges(page, when: str) -> dict:
     signed-in render. Reading a shipped tool beats inventing a sequence.
     """
     invitation = await dom.read_invitation_badge(page)
-    messaging = await dom.read_messaging_badge(page)
+    messaging = await _read_messaging_badge(page)
     shaped_invitation = shape.invitation_badge(invitation)
     # NO SHAPER IS APPLIED TO THE MESSAGING READING, and the reason is that
     # ``shape.messaging_badge`` parses an HTML STRING rather than this

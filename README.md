@@ -3,10 +3,22 @@
 An MCP server that shows you your own LinkedIn account data as structured tool
 results instead of pages you have to click through.
 
-**Fifty-nine tools ship. Forty-one read. Eighteen write. None is
+**Fifty-eight tools ship. Forty-one read. Seventeen write. None is
 write-shaped and unable to act.**
 
-**THAT LINE READ "Fifty-seven ... Forty-one read. Sixteen write" UNTIL LANE
+**THAT LINE READ "Fifty-nine ... Eighteen write" UNTIL LANE L5 RETIRED
+`linkedin_send_message`, LATER ON 2026-09-27** (the orchestrator's order of
+23:36; ruling `PEOPLE-DATA-MITIGATIONS`, mitigation 6: no write is aimed by a
+name). That tool took a NAME and typed it into the composer's recipient
+typeahead, which was measured to commit nobody; it never sent. To message a
+person, give `linkedin_message_from_profile` their profile link. The same order
+re-aimed `linkedin_send_invitation`: it takes the person's PROFILE LINK (or
+member id) instead of a word for them, and presses the one invitation control
+on your own profile's suggestion rail whose card links to that profile and to
+nobody else -- compared in the page, pressed strictly, and refused rather than
+chosen when two cards match.
+
+**AND "Fifty-seven ... Forty-one read. Sixteen write" UNTIL LANE
 L5'S MERGE OF MASTER, 2026-09-27.** Two writes arrived that act on a person YOU
 name, from that person's own profile: `linkedin_connect_from_profile` sends a
 connection invitation and `linkedin_message_from_profile` a message. Each takes
@@ -532,7 +544,8 @@ ENDED rather than a live example of one.
 same two-call token gate as every other write in this package** -- verified
 2026-09-04 against the live `writes.PERFORMABLE`, which carries
 `send_message`, `publish_post`, `comment_on_item`, `react_to_item` and
-`update_profile_field` alongside the rest. None of the five was handed a new
+`update_profile_field` alongside the rest (`send_message` was retired on
+2026-09-27 -- it was aimed by a name). None of the five was handed a new
 refusal to replace the old one: the sentence this paragraph used to close
 on -- "`perform` may CLICK -- that is one entry ... and it may do nothing
 else" -- is false in both halves now. `perform` may CLICK, FILL and SELECT,
@@ -615,14 +628,11 @@ renumbering. A read that changes something has to say so:
 3. **Opening messaging clears the messaging badge AND opens one conversation
    LinkedIn chooses** -- measured twice. `/messaging/` does not stay on a
    list. Only `linkedin_open_messaging` and `linkedin_new_messages` can incur
-   this, and only when called; `linkedin_send_message`'s preview deliberately
-   does not open messaging at all -- it reads the nav badge off a page already
-   loaded. **These also load a messaging address, and none of them opens a
-   conversation LinkedIn chooses:** `linkedin_list_conversations` (the
-   composer's list, which opens none), `linkedin_open_thread` and
-   `linkedin_send_reply` (only the conversation you name by id), and
-   `linkedin_send_message` (the composer, when a confirmed send is
-   performed). Whether any of those loads clears the messaging badge is
+   this, and only when called. **These also load a messaging address, and
+   none of them opens a conversation LinkedIn chooses:**
+   `linkedin_list_conversations` (the composer's list, which opens none),
+   `linkedin_open_thread` and `linkedin_send_reply` (only the conversation you
+   name by id). Whether any of those loads clears the messaging badge is
    unmeasured.
 4. **Three census surfaces may cost something merely by being opened**, and
    each returns a `cost` field saying what. The two publishing composers can
@@ -948,7 +958,7 @@ linkedin_server/
   cdp_bridge.py              the recovery path: attach to a running Chrome
   dom.py                     the read-only harvesters and the control readers
   shape.py                   pure parsers and the result envelope
-  server.py                  the fifty-nine tools
+  server.py                  the fifty-eight tools
   errors.py
 tests/                       1393 tests, no network, no account
   fixtures/                  frozen LinkedIn markup, scrubbed

@@ -191,7 +191,9 @@ _VERIFIED_FROM_OWNERS: dict[str, frozenset[str]] = {
     # ``named_profile.composer_holds`` before it reads the conversation -- so
     # "the composer still holding your words with Send enabled" is a surface
     # it measured, exactly as ``send_message``'s is.
-    "composer": frozenset({"send_message", "message_from_profile"}),
+    # (``send_message`` left both owner sets it held when it was RETIRED on
+    # 2026-09-27 -- lane L5, the orchestrator's order of 23:36.)
+    "composer": frozenset({"message_from_profile"}),
     # ADDED 2026-09-27 FOR ``withdraw_from_group`` (lane L8). It verifies on a fresh
     # render of the Groups root, the one surface that lists his memberships,
     # and no other row names that page. Measured to occur in exactly one row.
@@ -259,7 +261,7 @@ _WHERE_TO_LOOK_OWNERS: dict[str, frozenset[str]] = {
     # ``message_from_profile`` VERIFIES in the conversation its press opened,
     # read in place with a before-count, so the conversation in his LinkedIn
     # messages is the surface it read.
-    "LinkedIn messages": frozenset({"send_message", "send_reply", "message_from_profile"}),
+    "LinkedIn messages": frozenset({"send_reply", "message_from_profile"}),
     # ADDED 2026-09-27 FOR ``withdraw_from_group`` (lane L8): his Groups page is where
     # his memberships are listed and where the leave is verified, and no other
     # row sends him there. Measured to occur in exactly one row.
@@ -643,8 +645,11 @@ def test_the_action_set_is_the_one_this_file_was_measured_against():
     # merge their four rows and ``withdraw_from_group``'s two were read against
     # each other's owned phrases ("Groups page", "Groups root"; "composer",
     # "LinkedIn messages", "My Network") and hold none of the other lane's.
-    assert len(writes.PERFORMABLE) == 18, (
-        "writes.PERFORMABLE holds %d actions, not the 18 this file was "
+    # SEVENTEEN SINCE LANE L5'S ORDER OF 2026-09-27 23:36: ``send_message``
+    # RETIRED (aimed by a name). No row was re-derived for it -- an action
+    # leaving takes its rows with it -- and its two owner entries above went.
+    assert len(writes.PERFORMABLE) == 17, (
+        "writes.PERFORMABLE holds %d actions, not the 17 this file was "
         "measured against: %s. Re-derive the phrase owners in this file for "
         "the new action, then update this count."
         % (len(writes.PERFORMABLE), sorted(writes.PERFORMABLE))

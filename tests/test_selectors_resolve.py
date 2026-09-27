@@ -73,60 +73,11 @@ NOT_RESOLVED_HERE: dict[str, str] = {
         "in tests/test_writes.py, where the row structure it climbs is real "
         "rather than invented"
     ),
-    # THE ONLY BUILDER HERE WHOSE MATCH IS AN ACCESSIBLE NAME OF A PERSON.
-    # Every control on this file's PAGE is furniture with a fixed label, so a
-    # suggestion row is the one thing it cannot honestly draw: the selector's
-    # subject is a name supplied at call time, and a fixture inventing one
-    # would resolve a string this builder will never be handed.
-    #
-    # It IS resolved -- in tests/test_typeahead_gate.py, in a real browser,
-    # against a listbox of two suggestions, including the case that matters:
-    # his row drawn SECOND, so a builder aiming by position would press a
-    # stranger. That file also pins the measurement that forced the regex
-    # spelling, which this fixture could not have exposed.
-    "typeahead_option_selector": (
-        "resolved in tests/test_typeahead_gate.py against a real listbox, "
-        "because its match is the ACCESSIBLE NAME of a suggestion and this "
-        "file's page has no suggestions to name"
-    ),
-    # THE CENSUS BUILDER, added 2026-09-03, and it is here for its sibling's
-    # reason plus one of its own: it takes a PATTERN TEMPLATE as well as a
-    # name, so resolving it on this page would need both a suggestion row to
-    # name and a template to try, and neither exists here.
-    #
-    # It IS resolved -- in tests/test_click_is_not_its_own_evidence.py, in a
-    # real browser, where every one of the six candidate templates is counted
-    # against two listboxes that differ only in whether a separator sits
-    # between the name and the connection degree. Those counts are asserted
-    # individually, so a template that stopped resolving fails there rather
-    # than silently returning zero.
-    # THE INSTRUMENT'S AIM, added 2026-09-03, and it is here rather than in
-    # build_all() for its siblings' reason -- its match is a person's
-    # accessible name and this file's page has no suggestions to name.
-    #
-    # WHAT IT IS FOR, because a builder nobody in production calls would
-    # otherwise look like dead weight. The SHIPPED aim is
-    # typeahead_option_selector and it is a substring; a typeahead returns a
-    # row BECAUSE it matched what was typed, so on a live dropdown every row
-    # carries the needle and the gate refuses. That leaves the probe unable to
-    # reach the measurement it exists for, so the probe -- and only the probe
-    # -- aims by the STRICTEST candidate when the census says it resolves to
-    # exactly one row. Strictly narrower than the shipped aim, never wider.
-    #
-    # It IS resolved in tests/test_click_is_not_its_own_evidence.py against a
-    # real listbox, where it is asserted to pick exactly one of three rows
-    # that all carry the needle.
-    "typeahead_strictest_selector": (
-        "resolved in tests/test_click_is_not_its_own_evidence.py against a "
-        "real listbox, because its match is the ACCESSIBLE NAME of a "
-        "suggestion and this file's page has none to name"
-    ),
-    "typeahead_pattern_selector": (
-        "resolved in tests/test_click_is_not_its_own_evidence.py against two "
-        "real listboxes, once per candidate pattern, because it needs both a "
-        "suggestion to name and a pattern template and this file's page has "
-        "neither"
-    ),
+    # (``typeahead_option_selector``, ``typeahead_strictest_selector`` and
+    # ``typeahead_pattern_selector`` were declared here -- builders whose
+    # match was the ACCESSIBLE NAME of a person in a typeahead -- until they
+    # left with ``send_message`` on 2026-09-27, lane L5, the orchestrator's
+    # order of 23:36: that write was aimed by a name.)
 }
 
 #: One document carrying a control for every builder below. Every label is
@@ -166,8 +117,16 @@ PAGE = (
     f'<div role="textbox" aria-label="{dom.COMMENT_EDITOR_LABEL}"></div>'
     f"<button>{dom.COMMENT_CONTROL_NAME}</button>"
     f'<button aria-label="{dom.REACTION_OFF_LABEL}">react</button>'
-    '<button aria-label="Someone to connect">invite</button>'
-    # THE COMPOSER'S THREE, added 2026-09-02 with send_message. The recipient
+    # A RAIL CARD, since 2026-09-27 (lane L5, the orchestrator's order of
+    # 23:36): the nearest element holding a profile link holds ONE member's
+    # link and ONE invitation control, as measured on his own profile's
+    # suggestion rail (32 of 32 controls). It replaced a bare "... to connect"
+    # button that the index aim pressed by position. The segment carries
+    # ``example``, a declared synthetic slug token.
+    '<div class="rail-card"><a href="/in/someone-example-rail/">Someone</a>'
+    '<button aria-label="Invite Someone to connect">invite</button></div>'
+    # THE COMPOSER'S THREE, added 2026-09-02 with send_message (two since it
+    # was retired on 2026-09-27; read_thread_reply_surface counts them). The recipient
     # is drawn as a LABEL-FOR pair rather than with an aria-label, because
     # that is how the live surface names it -- measured, "an input with
     # role=combobox named through label-for" -- and an aria-label here would
@@ -175,13 +134,10 @@ PAGE = (
     # page does not use.
     f'<label for="msg-recipients">{dom.MESSAGE_RECIPIENT_LABEL}</label>'
     '<input id="msg-recipients" role="combobox">'
-    # The body carries NO LABEL, which is the point: it is addressed by role
-    # alone. Note this page now draws THREE div[role=textbox] -- the post
-    # editor, the comment editor and this -- so compose_body_selector matches
-    # three here. That is correct and is why this test asserts >= 1: the
-    # body's exactly-one property is a fact about the COMPOSER, enforced by
-    # dom.read_compose_modes refusing textbox_count_not_one, not a fact about
-    # the selector.
+    # The body carries NO LABEL: it was addressed by role alone, through
+    # compose_body_selector, which left with send_message on 2026-09-27 (lane
+    # L5; that write was aimed by a name). The element stays so the page
+    # still draws the composer's shape for the two selectors that remain.
     '<div role="textbox"></div>'
     f"<button>{dom.MESSAGE_SEND_NAME}</button>"
     '<a href="/jobs/view/1/">a job row</a>'
@@ -257,7 +213,12 @@ def build_all() -> dict[str, str]:
             dom.COMMENT_CONTROL_NAME
         ),
         "reaction_control_selector": dom.reaction_control_selector(),
-        "invite_control_selector": dom.invite_control_selector(0),
+        # AIMED BY A LINK SINCE 2026-09-27: the one control whose card links
+        # to the segment given, and to nobody else. It replaced
+        # ``invite_control_selector(index)``, which pressed a position.
+        "rail_invite_control_selector": dom.rail_invite_control_selector(
+            "someone-example-rail"
+        ),
         # THE NAMED-PERSON ACTS' TWO PRESSES, scoped to the topcard and
         # carrying no position (the re-checks of 2026-09-27): each must be the
         # only control of its kind inside the page's one topcard above, which
@@ -266,7 +227,7 @@ def build_all() -> dict[str, str]:
         "topcard_message_control_selector": dom.topcard_message_control_selector(),
         "tracker_list_selector": dom.tracker_list_selector(),
         "compose_recipient_selector": dom.compose_recipient_selector(),
-        "compose_body_selector": dom.compose_body_selector(),
+        # (compose_body_selector left with send_message on 2026-09-27.)
         "compose_send_selector": dom.compose_send_selector(),
         # NO ARGUMENT AT ALL -- both halves are module constants measured on
         # the live nav, so there is no name in it and nothing a caller can aim

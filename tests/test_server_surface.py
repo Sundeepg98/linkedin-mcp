@@ -1,4 +1,4 @@
-"""The tool surface: fifty-nine tools, forty-one of which do not write.
+"""The tool surface: fifty-eight tools, forty-one of which do not write.
 
 **AND THIS LINE IS NOW DERIVED, NOT MAINTAINED, 2026-09-20.** It had gone stale
 a THIRD time -- "forty-four tools, thirty-two of which do not write" against a
@@ -123,7 +123,7 @@ SANCTIONED_WRITE_TOOLS = frozenset(SANCTIONED_WRITES) & {
     "linkedin_update_profile_field",
     "linkedin_update_setting",
     "linkedin_send_invitation",
-    "linkedin_send_message",
+    # (linkedin_send_message RETIRED 2026-09-27, lane L5: aimed by a name.)
     # THE THIRTEENTH PERFORMABLE WRITE, 2026-09-23 (census row N 47): a follow
     # performed on the organisation Page root and addressed by the numeric id
     # linkedin_unfollow_company keys its rows by. It is a key in
@@ -407,7 +407,7 @@ EXPECTED_TOOLS = {
     "linkedin_update_profile_field",
     "linkedin_update_setting",
     "linkedin_send_invitation",
-    "linkedin_send_message",
+    # (linkedin_send_message RETIRED 2026-09-27, lane L5: aimed by a name.)
     # The fourth WRITE, 2026-08-25, AND THIS COMMENT USED TO SAY THE OPPOSITE. It
     # read: "NOT accompanied by linkedin_apply_job: apply is sanctioned and
     # specced and registers NO TOOL, because its flow has never been captured
@@ -560,6 +560,14 @@ FORBIDDEN_TOOLS = {
     # that a caller asking about messaging now meets a tool that reads the
     # nav badge, states the measured cost of opening messaging, and refuses --
     # instead of meeting nothing.
+    #
+    # AND IT IS BACK SINCE 2026-09-27, by the same law in reverse: the tool
+    # was RETIRED on lane L5's order of 23:36 -- it was aimed by a NAME typed
+    # into the composer's typeahead (PEOPLE-DATA-MITIGATIONS, mitigation 6)
+    # -- and a name that leaves SANCTIONED_WRITES comes back here, visibly,
+    # or tests/test_writes.py's conservation law reports it deleted. A
+    # message is sent through ``linkedin_message_from_profile``.
+    "linkedin_send_message",
     "linkedin_send_inmail",
     "linkedin_connect",
     "linkedin_invite",
@@ -578,8 +586,14 @@ async def tools():
     return {t.name: t for t in await mcp.list_tools()}
 
 
-async def test_the_surface_is_exactly_the_fifty_nine_tools(tools):
-    """RENAMED AGAIN AT LANE L5'S MERGE OF MASTER 52b55b6, 2026-09-27, to
+async def test_the_surface_is_exactly_the_fifty_eight_tools(tools):
+    """RENAMED AGAIN ON LANE L5'S ORDER OF 2026-09-27 23:36, to
+    ``..._fifty_eight_tools``: ``linkedin_send_message`` was RETIRED -- it was
+    aimed by a name (PEOPLE-DATA-MITIGATIONS, mitigation 6) -- and a person is
+    messaged by profile link through ``linkedin_message_from_profile``.
+    MEASURED off the registry; the name moved with the pin.
+
+    RENAMED AGAIN AT LANE L5'S MERGE OF MASTER 52b55b6, 2026-09-27, to
     ``..._fifty_nine_tools``: that lane's follow-up branch had brought two
     writes together (``linkedin_connect_from_profile``,
     ``linkedin_message_from_profile``) and renamed this test
@@ -853,7 +867,10 @@ async def test_the_surface_is_exactly_the_fifty_nine_tools(tools):
     # of master's fifty-seven, so the split moves on its write side and the
     # non-write count holds. The NAME moved again. MEASURED off
     # mcp.list_tools() on the merged tree, not summed.
-    assert len(tools) == 59
+    # FIFTY-EIGHT ON LANE L5'S ORDER OF 2026-09-27 23:36: linkedin_send_message
+    # RETIRED (aimed by a name), a WRITE, so the split moves on its write side
+    # and the non-write count holds at forty-one. MEASURED off mcp.list_tools().
+    assert len(tools) == 58
     # And the split is asserted, not just the total. A future tool arriving as
     # a write would otherwise only have to bump a number.
     #
@@ -878,7 +895,7 @@ async def test_the_surface_is_exactly_the_fifty_nine_tools(tools):
         "linkedin_update_profile_field",
         "linkedin_update_setting",
         "linkedin_send_invitation",
-        "linkedin_send_message",
+        # (linkedin_send_message RETIRED 2026-09-27, lane L5: aimed by a name.)
         "linkedin_follow_company_page",
         "linkedin_mark_company_interest",
         "linkedin_send_reply",
@@ -1116,7 +1133,7 @@ async def test_the_exemption_covers_only_the_names_on_it(tools):
         "linkedin_update_profile_field",
         "linkedin_update_setting",
         "linkedin_send_invitation",
-        "linkedin_send_message",
+        # (linkedin_send_message RETIRED 2026-09-27, lane L5: aimed by a name.)
         "linkedin_follow_company_page",
         "linkedin_mark_company_interest",
         "linkedin_send_reply",
@@ -1579,14 +1596,9 @@ async def test_server_info_stops_claiming_read_only_once_writes_are_on(monkeypat
         # read can confirm a sent invitation -- and it is the second
         # performable action that cannot be undone.
         "send_invitation",
-        # THE TWELFTH, 2026-09-02, and the one that SHIPS EXPECTING TO REFUSE.
-        # It reaches a named person like send_invitation does, and unlike it
-        # the gate stops between the two fills: a recipient is typed, then
-        # checked for EXACTLY ONE committed recipient whose name carries his
-        # own needle, and only then are his words typed. A count of one with
-        # the wrong name refuses. Nobody has typed into that combobox through
-        # this server, so the first refusal IS the measurement.
-        "send_message",
+        # (THE TWELFTH, send_message, 2026-09-02 to 2026-09-27: RETIRED on
+        # lane L5's order of 23:36 -- it was aimed by a name typed into the
+        # composer's typeahead, and it never sent.)
         # FIFTEENTH, 2026-09-24 (census M M10; the fourteenth on lane L5's
         # branch, before lane L7's merge landed), typed here by hand like its
         # fourteen siblings: a reply inside a conversation he names by thread
@@ -1657,14 +1669,9 @@ async def test_the_capability_is_reported_even_with_the_flag_off(monkeypatch):
         # THE EIGHTH, same day, and the first write on this surface that
         # reaches another person AND cannot confirm its own outcome.
         "send_invitation",
-        # THE TWELFTH, 2026-09-02, and the one that SHIPS EXPECTING TO REFUSE.
-        # It reaches a named person like send_invitation does, and unlike it
-        # the gate stops between the two fills: a recipient is typed, then
-        # checked for EXACTLY ONE committed recipient whose name carries his
-        # own needle, and only then are his words typed. A count of one with
-        # the wrong name refuses. Nobody has typed into that combobox through
-        # this server, so the first refusal IS the measurement.
-        "send_message",
+        # (THE TWELFTH, send_message, 2026-09-02 to 2026-09-27: RETIRED on
+        # lane L5's order of 23:36 -- it was aimed by a name typed into the
+        # composer's typeahead, and it never sent.)
         # THE FIFTEENTH, 2026-09-24 (census M M10; the fourteenth on lane L5's
         # branch). Typed by hand, as this list requires, by the lane that
         # built it.
@@ -2140,10 +2147,12 @@ async def test_the_server_instructions_name_every_write_that_ships():
     # not a correction.
     assert "every write tool on this surface can act" in text.lower()
     # THE COSTS SURVIVE THE SHIPPING, and that is the half worth keeping. The
-    # messaging paragraph still has to say the preview does not open messaging
-    # -- send_message performing does not make that cost go away, it makes it
-    # a thing a caller can now actually incur.
-    assert "does not open messaging" in text
+    # cost paragraph still has to say the invitation does not open
+    # /mynetwork/. It also said send_message's preview did not open
+    # messaging, until that tool was RETIRED on 2026-09-27 (aimed by a name)
+    # and the sentence left with it.
+    assert "does not open /mynetwork/" in text
+    assert "does not open messaging" not in text
 
     # The apply paragraph: it must offer the half that ships and refuse the
     # half that does not, WITHOUT calling the refusal a scoping decision.
@@ -2361,21 +2370,10 @@ async def test_server_info_reports_irreversibility_before_a_caller_commits(
         "message_from_profile",
         "publish_post",
         "send_invitation",
-        # THE FIFTH, 2026-09-02, ADDED BY HAND BECAUSE THAT IS THE POINT OF
-        # THIS LIST. send_message is irreversible and it reaches a NAMED
-        # INDIVIDUAL -- the spec calls it the most irreversible-in-audience
-        # action in the design, because a message is read by a person, usually
-        # within a day, and arrives as an email as well as a notification.
-        # Recalling it, if LinkedIn even permits that, removes it from a
-        # thread; it does not un-send the email and it does not un-read what
-        # somebody has read.
-        #
-        # AND IT MAY SPEND SOMETHING BESIDES. An InMail credit is a finite
-        # allowance whose size this server has MEASURED itself unable to read
-        # -- no countable balance exists on either surface it may open -- so
-        # this is the only entry here that can consume a resource nobody in
-        # this process can count.
-        "send_message",
+        # (THE FIFTH, send_message, 2026-09-02 to 2026-09-27 -- the most
+        # irreversible-in-audience action in the design, and the only entry
+        # that could spend an InMail credit nobody here can count. RETIRED on
+        # lane L5's order of 23:36: it was aimed by a name.)
         # THE SIXTH, 2026-09-24, TYPED BY HAND AS THIS LIST DEMANDS: a reply
         # reaches the named people in a conversation he chose, and nothing
         # this server does takes it back -- no delete is built, and even a

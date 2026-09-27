@@ -33,8 +33,10 @@ SO THE UNIT OF WORK HERE IS NOT A MEASUREMENT. IT IS A PRECONDITION.
 :func:`measurability` answers one question -- *is today a day on which this
 cost could be measured at all* -- and it answers it from a reading that costs
 ZERO page loads, because the nav renders on every signed-in page. That is the
-same property ``dom.read_messaging_badge`` and ``dom.read_invitation_badge``
-already rely on and it is measured, not assumed: the invitation badge was read
+same property ``dom.read_invitation_badge`` relies on -- and
+``dom.read_messaging_badge`` did, until it left dom.py on 2026-09-27 with
+send_message's retirement -- and it is measured, not assumed: the invitation
+badge was read
 on ``/feed/`` and on ``/in/me/`` alike.
 
 WHY A NEW MODULE RATHER THAN A THIRD FUNCTION IN ``dom.py``. Cohesion argues
@@ -62,7 +64,7 @@ from typing import Any, Optional
 from . import shape
 
 #: The notifications nav control, aimed the way ``dom.read_invitation_badge``
-#: aims and NOT the way ``dom.read_messaging_badge`` does.
+#: aims and NOT the way ``dom.read_messaging_badge`` did (retired 2026-09-27).
 #:
 #: The difference between those two shipped readers is a decision, recorded in
 #: ``dom.py``: the messaging reader takes ``.first`` of its href match, the

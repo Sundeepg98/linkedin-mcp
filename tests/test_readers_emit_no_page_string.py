@@ -698,13 +698,18 @@ async def _name_the_profile_target_as_shipped(page: Any) -> Any:
     )
 
 
-def _inert_observation(spec: Any, facts: dict[str, Any]) -> Any:
+def _inert_observation(
+    spec: Any, facts: dict[str, Any], target: Any = SYNTHETIC_ARGUMENT
+) -> Any:
     """An Observation built by hand, which ``writes.Observation`` documents as
-    INERT: only ``writes._record`` writes the observation store."""
+    INERT: only ``writes._record`` writes the observation store. ``target``
+    is the argument by default; a namer that parses its observation's target
+    (the invitation's, since 2026-09-27) is handed the canonical target the
+    server would have observed instead."""
     from linkedin_server import writes
 
     return writes.Observation(
-        target=SYNTHETIC_ARGUMENT,
+        target=target,
         target_kind=spec.target_kind,
         facts=facts,
         facts_url="",
@@ -756,8 +761,16 @@ async def _name_the_reply_recipient_as_shipped(page: Any) -> Any:
 
 
 class _AnswersTheInvitationRail:
-    """The planted page, whose invitation rail holds ONE control the needle
-    picks out -- labelled, as LinkedIn labels it, with the plant's name."""
+    """The planted page, whose invitation rail holds ONE card linking to the
+    observed profile -- its one control labelled, as LinkedIn labels it, with
+    the plant's name.
+
+    THE LINK AIM, SINCE LANE L5'S MERGE OF MASTER 64afa6c (2026-09-27). This
+    answered ``dom.INVITE_NEEDLE_JS`` until that script left with the needle:
+    the rail is read now by two LOCATOR COUNTS -- the controls, and the cards
+    linking to the profile -- and the label off the one control. So this
+    answers each count with one and the label with the plant, and every read
+    goes through the planted page first, so it is still counted."""
 
     def __init__(self, page: Any) -> None:
         self._page = page
@@ -765,28 +778,47 @@ class _AnswersTheInvitationRail:
     def __getattr__(self, name: str) -> Any:
         return getattr(self._page, name)
 
-    async def evaluate(self, script: Any, arg: Any = None, **kwargs: Any) -> Any:
+    def locator(self, *args: Any, **kwargs: Any) -> Any:
+        return _OneCardOnTheRail(self._page.locator(*args, **kwargs))
+
+
+class _OneCardOnTheRail:
+    """A located set the rail reader counts as ONE, labelled with the plant."""
+
+    def __init__(self, located: Any) -> None:
+        self._located = located
+
+    def __getattr__(self, name: str) -> Any:
+        return getattr(self._located, name)
+
+    async def count(self) -> int:
+        await self._located.count()  # the read, counted
+        return 1
+
+    @property
+    def first(self) -> Any:
+        return _OneCardOnTheRail(self._located.first)
+
+    async def get_attribute(self, name: str, **kwargs: Any) -> Any:
         from linkedin_server import dom
 
-        if script == dom.INVITE_NEEDLE_JS:
-            await self._page.evaluate(script, arg, **kwargs)  # the read, counted
-            return {
-                "total": 1,
-                "matches": 1,
-                "index": 0,
-                "label": "Invite " + PLANT + dom.INVITE_CONTROL_SUFFIX,
-            }
-        return await self._page.evaluate(script, arg, **kwargs)
+        await self._located.get_attribute(name, **kwargs)  # the read, counted
+        return "Invite " + PLANT + dom.INVITE_CONTROL_SUFFIX
 
 
 async def _name_the_invitation_recipient_as_shipped(page: Any) -> Any:
     """The invitation preview's namer as ``writes.preview`` calls it: after an
-    observation of the rail that counted one control."""
+    observation of the rail that counted one control, whose target is the
+    profile LINK the server canonicalised (since 2026-09-27)."""
     from linkedin_server import writes
+    from tests import refusinggrant
 
     spec = writes.spec_for_action("send_invitation")
+    observation = _inert_observation(
+        spec, {"controls": 1}, target=refusinggrant.synthetic_target(spec)
+    )
     return await writes._name_the_invitation_recipient(
-        _AnswersTheInvitationRail(page), spec, _inert_observation(spec, {"controls": 1}), {}
+        _AnswersTheInvitationRail(page), spec, observation, {}
     )
 
 

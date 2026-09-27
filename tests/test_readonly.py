@@ -666,7 +666,7 @@ def test_only_dom_module_waives_evaluate():
     # numbers -- total, matches, index -- and no label, no name, and no
     # fragment of either. The cheap side of the usual trade is the unacceptable
     # one here, which is the argument, and it is the only reason this number
-    # moved.
+    # moved. (RETIRED 2026-09-27 with the needle: see the last paragraph.)
     #
     # EIGHT FROM 2026-08-31, and it is the SECOND waiver spent on privacy
     # rather than on a reading -- EDITOR_FIELDS_JS, run by
@@ -761,7 +761,8 @@ def test_only_dom_module_waives_evaluate():
     # A correct guard is one regex edit from being an incorrect guard. This
     # waiver buys the label never being in the process to guard.
     #
-    # THE THIRTEENTH, 2026-09-02: ``SELECTED_RECIPIENT_JS``, and the argument
+    # THE THIRTEENTH, 2026-09-02: ``SELECTED_RECIPIENT_JS`` (RETIRED 2026-09-27
+    # with send_message -- see the last paragraph), and the argument
     # for it is the twelfth's carried one surface further. The twelfth shapes
     # a label known to be HIS. This one runs where a committed recipient is by
     # definition A THIRD PARTY, so every label it touches names somebody who
@@ -931,7 +932,20 @@ def test_only_dom_module_waives_evaluate():
     # name. Compared in the page, what crosses is integers, booleans, a
     # POSITION and closed tokens -- INVITE_NEEDLE_JS's argument, on the page
     # where it matters most.
-    assert waived_in.get("dom.py", 0) <= 23, waived_in
+    #
+    # 23 -> 22 on 2026-09-27 (lane L5, the orchestrator's order of 23:36):
+    # INVITE_NEEDLE_JS LEFT, with the needle. The invitation is aimed by the
+    # person's profile LINK now, compared against each rail card's own link by
+    # the browser's XPath engine -- a LOCATOR COUNT, which runs no script at
+    # all, so the privacy argument that bought the seventh waiver is kept by a
+    # cheaper instrument. THE CEILING COMES DOWN WITH IT: a ceiling left above
+    # the count is a waiver nobody has to argue for.
+    #
+    # 22 -> 21 the same day, later: SELECTED_RECIPIENT_JS -- the thirteenth --
+    # LEFT WITH send_message, which was RETIRED rather than re-aimed because it
+    # was aimed by a name (the same order). Its reader,
+    # dom.read_selected_recipients, had no caller once the recipient gate went.
+    assert waived_in.get("dom.py", 0) <= 21, waived_in
 
 
 # ---------------------------------------------------------------------------
@@ -948,20 +962,11 @@ INJECTED_SCRIPTS = {
     # leave. test_the_compose_script_returns_no_unshaped_label is the check
     # that the reduction has no bypass.
     "COMPOSE_MODES_JS": dom.COMPOSE_MODES_JS,
-    # 2026-09-02, and it is the SECOND script on the composer and the one with
-    # the sharper privacy argument. COMPOSE_MODES_JS resolves a name known to
-    # be HIS; this one runs where a committed recipient is by definition a
-    # THIRD PARTY, so any label it touches names somebody who is not him.
-    #
-    # It is declared for the ordinary reason -- an executed script that is not
-    # declared is one nobody reviewed -- and its own rule is that it returns
-    # INTEGERS ONLY: a per-selector count, a de-duplicated total, and how many
-    # carry the needle the caller handed in. The needle comparison happens
-    # inside the page for the reason INVITE_NEEDLE_JS does the same, and there
-    # is deliberately no `revealSingleMatch` escape hatch: that flag exists so
-    # a PREVIEW can show him who he would reach, and this script runs inside
-    # perform, after he has confirmed, where there is nothing left to show.
-    "SELECTED_RECIPIENT_JS": dom.SELECTED_RECIPIENT_JS,
+    # (2026-09-02 to 2026-09-27: SELECTED_RECIPIENT_JS, the SECOND script on
+    # the composer, which counted committed recipients carrying the needle
+    # the caller handed in -- a name compared in the page, inside perform. It
+    # left with send_message, retired on lane L5's order of 2026-09-27 23:36
+    # because that write was aimed by a name.)
     "RECIPIENT_IDS_JS": dom.RECIPIENT_IDS_JS,
     "HARVEST_LINKED_CARDS_JS": dom.HARVEST_LINKED_CARDS_JS,
     "HARVEST_BLOCK_CARDS_JS": dom.HARVEST_BLOCK_CARDS_JS,
@@ -1026,18 +1031,12 @@ INJECTED_SCRIPTS = {
     # hit count and nothing else; there is no path by which a payload string
     # reaches this process.
     "SDUI_ACTIONS_JS": dom.SDUI_ACTIONS_JS,
-    # 2026-08-31. The invitation needle. It is declared here for the ordinary
-    # reason -- every script this package executes is scanned, and one that is
-    # not declared is one nobody reviewed -- and declaring it ENROLS it in
-    # test_every_script_this_package_executes_cannot_mutate, which is the
-    # point of the list rather than a side effect of joining it.
-    #
-    # It is also the only script here whose OUTPUT shape is part of the
-    # boundary rather than only its input. It reads aria-labels carrying real
-    # people's names and returns three integers, so the privacy property is
-    # structural: there is no string in the return value to leak. The test that
-    # certifies THAT lives with the reader, not here.
-    "INVITE_NEEDLE_JS": dom.INVITE_NEEDLE_JS,
+    # (2026-08-31 to 2026-09-27: INVITE_NEEDLE_JS, the invitation needle. It
+    # read aria-labels carrying real people's names and returned three
+    # integers. It left with the needle on lane L5's order of 2026-09-27
+    # 23:36: the invitation is aimed by the person's profile link, compared
+    # by an XPath locator count -- no script -- in
+    # dom.rail_invite_control_selector and dom.read_invitation_rail.)
     # 2026-08-31. The self-owned editor reader. Declared for the ordinary
     # reason -- an undeclared script is one nobody reviewed -- and declaring it
     # ENROLS it in test_every_script_this_package_executes_cannot_mutate.
@@ -1435,7 +1434,18 @@ def test_the_scripts_executed_are_exactly_the_ones_declared():
     # INJECTED_SCRIPTS in the same change and run from exactly one call site,
     # dom.read_named_profile -- a dom.py waived read, so the waiver budget
     # moved 22 -> 23 with it and the two counts stay one apart.
-    assert len(EXECUTED_SCRIPTS) == 24, sorted(EXECUTED_SCRIPTS)
+    #
+    # 24 -> 23 the same day, later (lane L5, the orchestrator's order of
+    # 23:36): INVITE_NEEDLE_JS left with the needle, and its one call site,
+    # dom.read_invitation_surface, with it. The invitation's aim is a locator
+    # count now. The waiver budget came down 23 -> 22 in the same change, so
+    # the two counts stay one apart.
+    #
+    # 23 -> 22 later again, the same order: SELECTED_RECIPIENT_JS left with
+    # send_message, which was RETIRED because it was aimed by a name, and its
+    # one call site, dom.read_selected_recipients, with it. The waiver budget
+    # came down 22 -> 21 in the same change; the two counts stay one apart.
+    assert len(EXECUTED_SCRIPTS) == 22, sorted(EXECUTED_SCRIPTS)
 
 
 def test_a_script_that_replaces_page_behaviour_runs_only_from_a_sanctioned_evaluate():
