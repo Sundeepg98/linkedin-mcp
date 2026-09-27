@@ -616,13 +616,25 @@ def carries_the_plant_outside_records(obj: Any) -> tuple[list[str], int]:
 
     NAMES-AT-RUNTIME, applied by PEOPLE-DATA-MITIGATIONS: a people reader
     returns another member's words, and returns them ONLY inside a
-    ``linkedin_server.people_data`` record -- an instance, or its envelope dict
-    with exactly the declared keys, the marker's exact note and fields that
-    rebuild into a valid record. Such a record is the declared channel and is
-    not walked. EVERYTHING AROUND IT IS: a plant beside a record, in a key, in
-    a widened record-shaped dict, in an error field or an exception, is still
-    found. A dict that merely LOOKS like a record fails ``as_record`` and is
-    walked like any other dict.
+    ``linkedin_server.people_data`` record's ENVELOPE -- a dict with exactly
+    the declared keys, the marker's exact note and fields that rebuild into a
+    valid record. Such a record is the declared channel and is not walked.
+    EVERYTHING AROUND IT IS: a plant beside a record, in a key, in a widened
+    record-shaped dict, in an error field or an exception, is still found. A
+    dict that merely LOOKS like a record fails ``as_record`` and is walked
+    like any other dict.
+
+    HARDENED 2026-09-27 on lane G's cold verification, in two ways:
+
+    * A record INSTANCE is not the declared channel, only its envelope: the
+      server publishes an instance without the marker, so an instance is
+      walked like any other value.
+    * Outside a record the plant is found in ANY SPELLING that carries one of
+      its words -- a first name alone, a slug, another case, a no-break
+      space, an entity, a prefix -- not only verbatim. Each word of
+      :data:`PLANT` is long and invented, so one found anywhere is the plant.
+      (The plain hunt, :func:`carries_the_plant`, still matches verbatim; this
+      one is consulted once the verbatim plant is known to be present.)
     """
     from linkedin_server.people_data import as_record
     from tests.leakwalk import walk
@@ -630,13 +642,25 @@ def carries_the_plant_outside_records(obj: Any) -> tuple[list[str], int]:
     records: list[Any] = []
 
     def is_record(value: Any) -> bool:
-        if as_record(value) is None:
+        if not isinstance(value, dict) or as_record(value) is None:
             return False
         records.append(value)
         return True
 
-    hits = [path for path, text in walk(obj, skip=is_record) if PLANT in text]
+    hits = [
+        path for path, text in walk(obj, skip=is_record) if carries_a_plant_word(text)
+    ]
     return hits, len(records)
+
+
+#: The plant's words, case-folded. See :func:`carries_the_plant_outside_records`.
+PLANT_WORDS = tuple(word.casefold() for word in PLANT.split())
+
+
+def carries_a_plant_word(text: str) -> bool:
+    """Does ``text`` carry any word of the plant, in any case?"""
+    folded = str(text).casefold()
+    return any(word in folded for word in PLANT_WORDS)
 
 
 #: The two verdict words the ratchet below turns on, shared by the reader guard

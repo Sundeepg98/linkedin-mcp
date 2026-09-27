@@ -60,8 +60,12 @@ _UNIONS: tuple[Any, ...] = (Union, getattr(types, "UnionType", Union))
 
 
 def is_record_annotation(annotation: Any) -> bool:
-    """Is ``annotation`` a people record, a container of them, or an optional one?"""
-    if isinstance(annotation, type) and annotation in RECORD_TYPES:
+    """Is ``annotation`` a people record, a container of them, or an optional one?
+
+    By IDENTITY, not equality: ``in`` compares with ``==``, and a class whose
+    metaclass answers ``==`` with True -- a ``str`` subclass among them -- was
+    admitted as a record (lane G's cold verification, 2026-09-27)."""
+    if isinstance(annotation, type) and any(annotation is record for record in RECORD_TYPES):
         return True
     origin = typing.get_origin(annotation)
     members = [a for a in typing.get_args(annotation) if a is not Ellipsis]

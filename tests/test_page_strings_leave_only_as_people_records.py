@@ -627,6 +627,46 @@ def test_the_envelope_guard_convicts_a_record_in_an_error_envelope():
     assert classify_envelope({"results": [record], "hint": PLANT})[0] == ENVELOPE_TEXT
 
 
+#: The plant outside a record in the spellings lane G's cold verification
+#: found both guards calling ``returns_records`` (2026-09-27).
+_RESPELLED = {
+    "first-name": PLANT.split()[0],
+    "slug": "-".join(PLANT.lower().split()),
+    "upper-case": PLANT.upper(),
+    "no-break-space": PLANT.replace(" ", chr(0x00A0)),
+    "entity": PLANT.replace(" ", "&nbsp;"),
+    "prefix": PLANT[:20],
+}
+
+
+@pytest.mark.parametrize("spelling", list(_RESPELLED.values()), ids=list(_RESPELLED))
+def test_a_respelled_plant_beside_a_record_is_text_to_both_guards(spelling):
+    from tests.test_readers_emit_no_page_string import RETURNS_TEXT, classify_returned
+
+    value = {"results": [_record_of_the_plant()], "hint": spelling}
+    assert classify_envelope(value)[0] == ENVELOPE_TEXT
+    assert classify_returned(value)[0] == RETURNS_TEXT
+
+
+def test_a_plant_in_a_set_is_seen_by_the_envelope_guard():
+    """A set is published as a list; the envelope walk skipped sets, and called
+    this ``_error`` envelope clean."""
+    error = {"error": "unexpected", "message": "x", "detail": {PLANT}}
+    assert classify_envelope(error)[0] == ENVELOPE_LEAKS
+    assert classify_envelope({"names": frozenset({PLANT})})[0] == ENVELOPE_TEXT
+
+
+def test_a_record_instance_is_not_the_declared_channel():
+    """An instance is published without its marker, so only the ENVELOPE
+    counts as a record: both guards call an instance's words text."""
+    from tests.test_readers_emit_no_page_string import RETURNS_TEXT, classify_returned
+
+    instance = people_data.Person.from_page(name=PLANT, headline="Engineer")
+    assert classify_envelope({"rows": [instance]})[0] == ENVELOPE_TEXT
+    assert classify_returned({"rows": [instance]})[0] == RETURNS_TEXT
+    assert classify_envelope({"rows": [instance.envelope()]})[0] == ENVELOPE_RECORDS
+
+
 # ---------------------------------------------------------------------------
 # 3. The legacy inventory ratchet
 # ---------------------------------------------------------------------------
@@ -700,6 +740,28 @@ _CONTAINER_MUTATORS = frozenset(
     {"append", "extend", "insert", "add", "update", "setdefault", "__setitem__"}
 )
 
+#: Constructors of a mutable container, matched on the LAST segment of the
+#: called name, so ``collections.OrderedDict()`` counts as ``OrderedDict()``
+#: does (lane G's cold verification, 2026-09-27, planted the dotted spelling).
+_CONTAINER_CONSTRUCTORS = frozenset({
+    "dict", "list", "set", "OrderedDict", "defaultdict", "deque", "Counter",
+    "ChainMap", "WeakValueDictionary", "WeakKeyDictionary", "WeakSet", "fromkeys",
+})
+
+#: Decorators that ARE a cache: a builder wearing one keeps every record it
+#: ever built, keyed by what it was handed.
+_CACHING_DECORATORS = frozenset({"lru_cache", "cache", "cached_property", "cached"})
+
+
+def _called_name(node: Any) -> str:
+    """The last segment of what ``node`` calls or names, or ``""``."""
+    target = node.func if isinstance(node, ast.Call) else node
+    if isinstance(target, ast.Attribute):
+        return target.attr
+    if isinstance(target, ast.Name):
+        return target.id
+    return ""
+
 
 def _module_containers(tree: ast.Module) -> set[str]:
     """Module-level names bound to a mutable container literal or constructor."""
@@ -712,18 +774,42 @@ def _module_containers(tree: ast.Module) -> set[str]:
         elif isinstance(node, ast.AnnAssign) and node.value is not None:
             targets, value = [node.target], node.value
         mutable = isinstance(value, (ast.Dict, ast.List, ast.Set)) or (
-            isinstance(value, ast.Call)
-            and isinstance(value.func, ast.Name)
-            and value.func.id in {"dict", "list", "set", "OrderedDict", "defaultdict", "deque"}
+            isinstance(value, ast.Call) and _called_name(value) in _CONTAINER_CONSTRUCTORS
         )
         if mutable:
             names.update(t.id for t in targets if isinstance(t, ast.Name))
     return names
 
 
+def _is_the_namespace(node: Any) -> bool:
+    """Is ``node`` a call to ``globals()`` or ``vars()``?"""
+    return isinstance(node, ast.Call) and _called_name(node) in {"globals", "vars"}
+
+
+def _namespace_write(inner: Any) -> bool:
+    """``globals()[...] = ...`` or ``globals().update(...)`` (or ``vars()``)."""
+    if isinstance(inner, (ast.Assign, ast.AugAssign)):
+        targets = inner.targets if isinstance(inner, ast.Assign) else [inner.target]
+        return any(
+            isinstance(t, ast.Subscript) and _is_the_namespace(t.value) for t in targets
+        )
+    return (
+        isinstance(inner, ast.Call)
+        and isinstance(inner.func, ast.Attribute)
+        and inner.func.attr in _CONTAINER_MUTATORS
+        and _is_the_namespace(inner.func.value)
+    )
+
+
 def cache_writes(source: str, functions: set[str]) -> list[tuple[str, int]]:
     """``(function, line)`` for every write into a module-level container, or
-    ``global``/``nonlocal`` statement, inside the named functions."""
+    ``global``/``nonlocal`` statement, inside the named functions -- and, since
+    lane G's cold verification (2026-09-27), a caching decorator on one of
+    them, and a write to the module's own namespace through ``globals()`` or
+    ``vars()``.
+
+    ITS LIMIT: a container reached through another module's attribute, an
+    alias, ``setattr`` or an object's attribute is not modelled."""
     tree = ast.parse(source)
     containers = _module_containers(tree)
     found: list[tuple[str, int]] = []
@@ -732,8 +818,13 @@ def cache_writes(source: str, functions: set[str]) -> list[tuple[str, int]]:
             continue
         if node.name not in functions:
             continue
+        for decorator in node.decorator_list:
+            if _called_name(decorator) in _CACHING_DECORATORS:
+                found.append((node.name, decorator.lineno))
         for inner in ast.walk(node):
-            if isinstance(inner, (ast.Global, ast.Nonlocal)):
+            if _namespace_write(inner):
+                found.append((node.name, inner.lineno))
+            elif isinstance(inner, (ast.Global, ast.Nonlocal)):
                 found.append((node.name, inner.lineno))
             elif isinstance(inner, (ast.Assign, ast.AugAssign, ast.AnnAssign)):
                 targets = inner.targets if isinstance(inner, ast.Assign) else [inner.target]
@@ -751,10 +842,14 @@ def cache_writes(source: str, functions: set[str]) -> list[tuple[str, int]]:
                 isinstance(inner, ast.Call)
                 and isinstance(inner.func, ast.Attribute)
                 and inner.func.attr in _CONTAINER_MUTATORS
-                and isinstance(inner.func.value, ast.Name)
-                and inner.func.value.id in containers
             ):
-                found.append((node.name, inner.lineno))
+                # Rooted, as the assignment above is: ``_BY_KIND[k].append(x)``
+                # writes the module's container as surely as ``_SEEN.add(x)``.
+                root = inner.func.value
+                while isinstance(root, (ast.Subscript, ast.Attribute)):
+                    root = root.value
+                if isinstance(root, ast.Name) and root.id in containers:
+                    found.append((node.name, inner.lineno))
     return sorted(found)
 
 
@@ -810,6 +905,32 @@ def test_that_cache_check_can_fail():
     assert cache_writes(planted, {"other"}) == [("other", 9)]
     clean = "_TABLE = {}\ndef f(record):\n    local = {}\n    local['x'] = record\n    return local\n"
     assert cache_writes(clean, {"f"}) == []
+
+
+def test_that_cache_check_sees_the_shapes_the_cold_verification_planted():
+    """Lane G's cold verification (2026-09-27) planted five caches and this
+    found one: a dotted constructor, a caching decorator and a ``globals()``
+    write were all invisible. Each is found now, on its own line."""
+    planted = (
+        "import collections, functools\n"
+        "_SEEN = collections.OrderedDict()\n"
+        "_BY_KIND = collections.defaultdict(list)\n"
+        "@functools.lru_cache(maxsize=None)\n"
+        "def conversation_with(label, group):\n"
+        "    return label\n"
+        "def parse_person_card(record):\n"
+        "    person = build(record)\n"
+        "    _SEEN[person.name] = person\n"
+        "    globals()['LAST_VIEWER'] = person\n"
+        "    _BY_KIND[person.degree].append(person)\n"
+        "    return person\n"
+    )
+    assert cache_writes(planted, {"conversation_with", "parse_person_card"}) == [
+        ("conversation_with", 4),
+        ("parse_person_card", 9),
+        ("parse_person_card", 10),
+        ("parse_person_card", 11),
+    ]
 
 
 # ---------------------------------------------------------------------------

@@ -96,5 +96,23 @@ def test_is_record_annotation_on_each_shape(annotation, expected):
     assert is_record_annotation(annotation) is expected
 
 
+def test_a_class_that_only_compares_equal_to_a_record_is_not_one():
+    """Found by lane G's cold verification (2026-09-27): containment compared
+    with ``==``, so a ``str`` subclass whose metaclass says it equals anything
+    was admitted as a record. Contrived, and closed by comparing identity."""
+
+    class _EqualToEverything(type):
+        def __eq__(cls, other: object) -> bool:
+            return True
+
+        __hash__ = type.__hash__
+
+    class LooksLikeARecord(str, metaclass=_EqualToEverything):
+        pass
+
+    assert LooksLikeARecord in RECORD_TYPES  # the trap, still set
+    assert is_record_annotation(LooksLikeARecord) is False
+
+
 def test_the_record_types_are_the_people_data_ones():
     assert set(RECORD_TYPES) == {people_data.Person, people_data.Group, people_data.Event}

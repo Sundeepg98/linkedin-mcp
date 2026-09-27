@@ -334,6 +334,13 @@ def _walk(obj: Any, path: str = "$"):
     elif isinstance(obj, (list, tuple)):
         for index, value in enumerate(obj):
             yield from _walk(value, "%s[%d]" % (path, index))
+    elif isinstance(obj, (set, frozenset)):
+        # A SET IS PUBLISHED AS A LIST, so it is walked as one -- in a stable
+        # order, so a position names the same member on every run. It was not
+        # walked at all until lane G's cold verification (2026-09-27) put a
+        # plant in one and this guard called an _error envelope clean.
+        for index, value in enumerate(sorted(obj, key=repr)):
+            yield from _walk(value, "%s[%d]" % (path, index))
 
 
 def plant_positions(obj: Any) -> list[str]:
@@ -347,11 +354,20 @@ def plant_positions(obj: Any) -> list[str]:
     for path, value in _walk(obj):
         if isinstance(value, str) and PLANT in value:
             hits.add(path)
+        elif not isinstance(value, _WALKED_OR_INERT) and PLANT in repr(value):
+            # AN OBJECT IS PUBLISHED BY ITS FIELDS, so its repr is searched:
+            # a people record INSTANCE -- published without its marker --
+            # was invisible here until lane G's cold verification (2026-09-27).
+            hits.add(path + "(repr)")
         if isinstance(value, dict):
             for key in value:
                 if isinstance(key, str) and PLANT in key:
                     hits.add("%s.%s" % (path, PAGE_CHOSEN_KEY))
     return sorted(hits)
+
+
+#: What ``_walk`` descends into, and leaves that cannot hold page text.
+_WALKED_OR_INERT = (dict, list, tuple, set, frozenset, str, bytes, int, float, bool, type(None))
 
 
 def coercion_signatures(obj: Any) -> list[str]:
@@ -572,6 +588,41 @@ def test_the_driven_set_has_not_silently_shrunk(verdicts):
     )
 
 
+def records_outside_the_people_tools(rows: list[dict[str, Any]]) -> list[str]:
+    """Tools called ``returns_records`` that are not declared people tools."""
+    from linkedin_server import people_data
+
+    return sorted(
+        row["tool"]
+        for row in rows
+        if row["verdict"] == RETURNS_RECORDS and row["tool"] not in people_data.PEOPLE_TOOLS
+    )
+
+
+def test_only_a_declared_people_tool_returns_records(verdicts):
+    """A RECORD IS THE DECLARED CHANNEL FOR THE DECLARED PEOPLE TOOLS AND NO ONE
+    ELSE (lane G's cold verification, 2026-09-27). A dict shaped like an
+    envelope passes ``as_record`` whoever built it, so any tool could wrap
+    page text in one and be called ``returns_records``. Such a tool is refused
+    here, and by the baseline writer, until it joins
+    ``people_data.PEOPLE_TOOLS`` -- where the bounded-reader file, the
+    instructions paragraph and the invariant drives then hold it."""
+    strays = records_outside_the_people_tools(verdicts)
+    assert not strays, (
+        "returns people records without being a declared people tool: %s. "
+        "Declare it in people_data.PEOPLE_TOOLS, or return no page text." % strays
+    )
+
+
+def test_that_people_tool_check_can_fail():
+    rows = [
+        {"tool": "linkedin_planted_roster", "verdict": RETURNS_RECORDS},
+        {"tool": "linkedin_who_viewed_me", "verdict": RETURNS_RECORDS},
+        {"tool": "linkedin_planted_clean", "verdict": CLEAN},
+    ]
+    assert records_outside_the_people_tools(rows) == ["linkedin_planted_roster"]
+
+
 def write_baseline() -> dict[str, Any]:
     """Regenerate the committed verdicts.
 
@@ -598,6 +649,12 @@ def write_baseline() -> dict[str, Any]:
             "refusing to write a baseline recording a NEW page-text path: %s. "
             "A page string leaves only through a linkedin_server.people_data "
             "record (2026-09-24)." % ", ".join(new_text)
+        )
+    strays = records_outside_the_people_tools(rows)
+    if strays:
+        raise SystemExit(
+            "refusing to write a baseline recording people records from a tool "
+            "that is not in people_data.PEOPLE_TOOLS: %s" % ", ".join(strays)
         )
     tools: dict[str, str] = {}
     for row in rows:

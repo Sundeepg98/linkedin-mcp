@@ -49,15 +49,17 @@ WHAT EACH ASSERTION HOLDS
    FastMCP publishes, which is what a caller actually sees. Nor does any
    function in the derived set, or any package function a people tool names
    directly, with ONE measured exception: ``page`` is this package's name for
-   the browser tab. All 147 parameters called ``page`` across every definition
-   in the package are annotated ``Any`` or not at all; 142 come first (after
-   ``self``) and the other 5, all in ``writes.py``, come right after
-   ``navigator`` (2026-09-27). So on a HELPER ``page`` is the tab unless it is
+   the browser tab. All 157 parameters called ``page`` across every definition
+   in the package are annotated ``Any`` or not at all; 152 come first (after
+   ``self``) and the other 5 come right after ``navigator`` (re-measured
+   2026-09-27 on lane G's merge of master 2eb90ad; 147, 142 and 5 on the
+   branch before it). So on a HELPER ``page`` is the tab unless it is
    annotated as a number, and on a TOOL it is always paging: a caller cannot
    hand a tool a tab. The name check stops one hop out ON PURPOSE. Further
    down the vocabulary changes meaning: ``press.check_counters(before,
    after)`` and its siblings take READINGS, and every ``before`` and
-   ``after`` parameter in the package (9 and 6) is a reading taken around an
+   ``after`` parameter in the package (13 and 9 after the merge; 9 and 6
+   before it) is a reading taken around an
    action -- counters, an address -- never a position in a list. Iteration
    further down is assertion 4's job, which reads loops rather than names.
 
@@ -105,7 +107,12 @@ LIMITS, stated plainly.
   followed. A name collision errs the other way: a set grows and a test fails
   loudly.
 * A record built by another route -- ``people_data.as_record`` over a dict,
-  or a dict shaped like an envelope -- makes no builder.
+  or a dict shaped like an envelope -- makes no builder. (Three routes that
+  still name a record class were added on lane G's cold verification,
+  2026-09-27: another module's ``people_data`` attribute, ``RECORD_TYPES``
+  and ``getattr(people_data, "Person")``.) A tool that returns such records
+  and is driven by the tool-envelope guard is refused there unless it is in
+  ``PEOPLE_TOOLS``; one that is not driven is invisible to both.
 * A page fetched without a navigation verb is invisible to assertion 4: an
   API request, a ``fetch`` inside ``evaluate``, pressing a "next" control, a
   scroll. Those are held elsewhere: the mutation scanner in ``readonly.py``,
@@ -389,14 +396,31 @@ def record_aliases(tree: ast.Module) -> Tuple[FrozenSet[str], FrozenSet[str]]:
                     via_module.add(alias.asname or alias.name)
                 elif source in _RECORD_MODULE and alias.name == "*":
                     via_class |= RECORD_CLASSES
-                elif source in _RECORD_MODULE and alias.name in RECORD_CLASSES:
+                elif source in _RECORD_MODULE and alias.name in RECORD_REFERENCES:
                     via_class.add(alias.asname or alias.name)
     return frozenset(via_module), frozenset(via_class)
 
 
+#: What else names a record class through ``people_data``: the tuple of them.
+#: Added 2026-09-27 with the two routes below, on lane G's cold verification.
+RECORD_REFERENCES = RECORD_CLASSES | {"RECORD_TYPES"}
+
+
+def _names_people_data(node: Optional[ast.AST], via_module: FrozenSet[str]) -> bool:
+    """Is ``node`` the ``people_data`` module -- under an alias this module
+    imported, or reached as an attribute of another module
+    (``shape.people_data``)?"""
+    dotted = _dotted(node) if node is not None else None
+    if dotted is None:
+        return False
+    return dotted in via_module or dotted.rsplit(".", 1)[-1] == "people_data"
+
+
 def record_builders(modules: Mapping[str, ast.Module]) -> FrozenSet[Key]:
     """Step (a): module-level functions whose body references a record class
-    through ``people_data``."""
+    through ``people_data`` -- by attribute, under any import alias or through
+    another module's ``people_data`` attribute; by a name imported from it;
+    through ``RECORD_TYPES``; or by ``getattr(people_data, "Person")``."""
     found: Set[Key] = set()
     for module, tree in modules.items():
         via_module, via_class = record_aliases(tree)
@@ -406,15 +430,23 @@ def record_builders(modules: Mapping[str, ast.Module]) -> FrozenSet[Key]:
             for sub in _body(node):
                 through_module = (
                     isinstance(sub, ast.Attribute)
-                    and sub.attr in RECORD_CLASSES
-                    and _dotted(sub.value) in via_module
+                    and sub.attr in RECORD_REFERENCES
+                    and _names_people_data(sub.value, via_module)
                 )
                 by_name = (
                     isinstance(sub, ast.Name)
                     and isinstance(sub.ctx, ast.Load)
                     and sub.id in via_class
                 )
-                if through_module or by_name:
+                by_getattr = (
+                    isinstance(sub, ast.Call)
+                    and _dotted(sub.func) == "getattr"
+                    and len(sub.args) >= 2
+                    and _names_people_data(sub.args[0], via_module)
+                    and isinstance(sub.args[1], ast.Constant)
+                    and sub.args[1].value in RECORD_REFERENCES
+                )
+                if through_module or by_name or by_getattr:
                     found.add((module, node.name))
                     break
     return frozenset(found)
@@ -436,7 +468,8 @@ def paging_parameters(function: ast.AST) -> List[str]:
     """The function's parameters named in :data:`PAGING_PARAMETERS`.
 
     ``page`` on a HELPER is the browser tab -- this package's name for it at
-    every one of its 147 uses -- unless it is annotated as a number. On a TOOL
+    every one of its 157 uses (the module docstring) -- unless it is
+    annotated as a number. On a TOOL
     it is always paging: a caller cannot hand a tool a tab.
     """
     tool = is_tool(function)
@@ -1292,6 +1325,39 @@ def test_the_derivation_follows_an_alias_a_wrapper_and_a_builder_passed_as_a_val
         "a call-only closure should miss the builder passed as a value, and only "
         "that; it found %s" % call_only
     )
+
+
+def test_the_derivation_follows_another_modules_attribute_the_tuple_and_getattr():
+    """Three routes lane G's cold verification built records through without
+    being derived (2026-09-27), each a builder now. The fourth it found -- an
+    envelope dict built by hand -- names no record class and stays outside
+    this derivation, a limit the module docstring states; when such a tool is
+    driven, the tool-envelope guard refuses a ``returns_records`` verdict from
+    any tool not in ``PEOPLE_TOOLS``."""
+    modules = parse_sources({
+        "via_module": (
+            "from linkedin_server import shape\n\n\n"
+            "def viewer(row):\n"
+            "    return shape.people_data.Person.from_page(name=row)\n"
+        ),
+        "via_tuple": (
+            "from linkedin_server import people_data\n\n\n"
+            "def viewer(row):\n"
+            "    return people_data.RECORD_TYPES[0].from_page(name=row)\n"
+        ),
+        "via_getattr": (
+            "from linkedin_server import people_data\n\n\n"
+            "def viewer(row):\n"
+            "    return getattr(people_data, 'Person').from_page(name=row)\n"
+        ),
+        "by_hand": (
+            "def viewer(row):\n"
+            "    return {'name': row, 'headline': '', 'link': None, 'degree': None}\n"
+        ),
+    })
+    assert record_builders(modules) == {
+        ("via_module", "viewer"), ("via_tuple", "viewer"), ("via_getattr", "viewer"),
+    }
 
 
 def test_page_is_the_tab_on_a_helper_and_never_on_a_tool():
