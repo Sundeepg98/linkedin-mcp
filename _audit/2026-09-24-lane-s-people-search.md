@@ -1569,3 +1569,520 @@ requires. `N 79`, `N 194` and `N 172` then become COVERED-UNFIRED, and
 `tests/test_people_search_readers.py`'s `ROW_STATES` table moves with them in
 the same commit. The six MEASURE rows then need their captures, in the order
 J.6 gives.
+
+## Names returned 2026-09-27
+
+The orchestrator's order of 2026-09-27 20:05: with lane G's people-record
+foundation on master, "people search and rosters return names". Three parts:
+(a) the people search and the readers for `N 79`, `N 194` and `N 172`
+return WHO as people records under all six mitigations, each with a test that
+can fail, built over captured markup only; (b) the rosters, read where a
+capture exists and specified for capture where none does, admitting no
+address a capture has not shown served; (c) the census moved only where a
+reader returns names, every pin re-derived, and an AST duplicate-key check
+over the pinned dicts.
+
+### K.1 Step 0, checked against disk before it was obeyed
+
+Master was at `52b55b6`; this branch's `d296684` was already inside it, so
+the worktree moved by fast-forward and nothing was merged. `people_data.py`,
+`PEOPLE_TOOLS` and the four named guards were on master, and
+`NAMES-AT-RUNTIME`, `PEOPLE-DATA-MITIGATIONS` and
+`PREVIEW-NAMES-THE-RESOLVED-TARGET` were registered. Disk agreed with the
+order. One thing from the previous section's own gates: the local run over
+`d296684`'s four paths stopped at 99% when the session was interrupted on
+2026-09-24 -- no summary line and no failure mark in its progress -- and CI
+on master has run over that commit since.
+
+### K.2 What was built
+
+**`linkedin_server/people_results.py`, a module of its own, not
+`people_search.py`.** That module composes the address, and its proof that
+no page value can reach an address is that it touches no page -- asserted on
+its syntax tree. A reader takes a page, so it lives beside it, and the proof
+is intact. `read_result_people(page)` returns
+`{"people": [<Person envelope>, ...], "people_denominators": {...}}`. As first
+committed (`a734527`) it read through Playwright LOCATORS, which re-find
+their element on every call; after the cold verification (K.9) it pins every
+card to an ELEMENT HANDLE before any text is read, reads only through those
+handles, and reads both links again after the text. Either way it runs no
+script: the one-page and page-string guards reach it with no new evaluate
+waiver and no change to `dom.py`.
+
+**`linkedin_people_search_shape(include_names=False)`.** Off by default, the
+package's opt-in for a people payload (`linkedin_open_messaging` set it
+first), so the tool's default is unchanged -- the shape and nobody -- and the
+four FILTER rows it delivers are untouched. With it, the envelope carries
+`people`, `people_denominators` and `names_included`. `include_names` is not
+handed to `compose`: it decides what is read, never where the tool goes.
+
+**`server.py`, touched in two places and nothing else:** the tool (its
+parameter, its docstring and five lines of its body) and one sentence of the
+server instructions, which name every people tool -- a guard holds that
+sentence equal to `PEOPLE_TOOLS`, so adding the tool to one without the other
+fails. `people_data.PEOPLE_TOOLS` gains the tool in the same change, as its
+own comment requires.
+
+### K.3 The capture, read for structure only
+
+The one capture of a people-search results page is the live lane's, from
+session 1: a gitignored file in that lane's worktree, 174,412 bytes. It was
+read OFFLINE by scratch scripts that print tags, attribute names, text SHAPES
+(length, word count, character classes) and a closed list of interface words
+-- never a name, a headline, a place or a slug. Measured on every result, not
+a sample:
+
+    results                          10, the ten children of one list
+    rows drawn with no member link   0
+    each result                      ONE link to the member, holding a second
+                                     link to the same member -- the name
+    the title paragraph              exactly one member link, then one text:
+                                     the degree, "2nd" on all ten
+    the column beside it             exactly three elements on all ten: the
+                                     title and two link-free lines
+    line 1 (the headline)            28 to 181 characters; a '|' or the word
+                                     'at' on all ten
+    line 2 (the location)            27 characters, 3 words, a comma: all ten
+    mutual connections               19 links to OTHER members (one result
+                                     names one, nine name two), all inside
+                                     the results
+    member hrefs                     all 40 absolute, 39 of them bare
+                                     `/in/<slug>/`, one a level deeper
+    class names                      generated hashes; the reader reads none
+
+**THE "17 PERSON RESULTS" OF THE SESSION RECORD IS A COUNT OF LINKS,
+MEASURED.** The shipped counter's `person_result` is an anchor whose route is
+`/search/results/people`, so it counts links TO a people search, not people.
+Counted on the capture: 17 of its 77 anchors carry that route -- the ten
+results' "other mutual connections" links, and seven more on a second line
+some results draw -- while the page drew ten results. The census cells
+quoting the 17 are answered in their own new paragraphs.
+
+**THE SHIPPED READER, RUN OVER THE REAL CAPTURE.** In a headless browser
+whose every request was aborted, the capture converted to XHTML in memory
+(so no copy of it touched disk) and imported through an XML parser:
+`read_result_people` returned all ten, zero skipped, zero failed; every
+record exactly the four declared fields and the marker; the degree "2nd" on
+all ten; and each name and headline EQUAL, compared by digest in memory, to
+the capture's own static reading. Nothing of any person was printed.
+
+### K.4 The fixture, and the builder that made it
+
+`scripts/_build_people_search_skeleton.py` turns a capture into
+`tests/fixtures/synthetic/people_search_results.html`: the first three results,
+every tag and every nesting kept -- including the link inside a link -- and
+every text and attribute value replaced. Results and mutual connections
+become seven declared synthetic people with their declared slugs (the pairs
+invented for `connections_list.html`, so no declaration was added);
+headlines and the place are invented; the degree, "Connect", punctuation and
+"<n> other mutual connections" are kept as interface text; an href is
+rebuilt from its parts and a kept attribute keeps only a value from its
+closed set. It prints counts only -- over the capture: 10 results, 3 kept, 7
+people, 0 labels dropped, 0 attribute values dropped, 0 placeholder hosts,
+and 4 text nodes it could not classify, written as "Example text" (the same
+pair in two results: a one-character punctuation and a two-word phrase with
+digits linking to a people search; the reader reads neither) -- and the
+structure digest `hljfpfdmkfekafdh`.
+
+**WHY XHTML.** A page built with DOM calls can hold a link inside a link;
+HTML's parser cannot, and closes the outer link at the inner one. So the
+fixture is well-formed XHTML and the tests import it through an XML parser,
+and a test shows the HTML parser losing the shape -- the reader then finds
+no card at all.
+
+**WHAT PINS IT.** Run over the fixture, the builder reproduces it byte for
+byte, which pins the text and the order people first appear -- a normal
+form -- and the builder's own changes. The STRUCTURE is pinned by the digest
+the builder printed over the capture, recomputed from the fixture by a test
+whose control deletes every photo figure; whoever holds a capture can
+re-derive it (K.9, finding 3).
+
+The previous section's J.6 proposed reducing a capture inside the live
+session before anything is written. This build reduced the capture the live
+lane had already written, in the way `scripts/_build_job_list_skeleton.py`
+does: the capture stays in that lane's gitignored state, untouched, and
+nothing from it was copied into a tracked file. Whether session 2 reduces in
+the session is still the orchestrator's call.
+
+### K.5 The six mitigations, each with a test that can fail
+
+`tests/test_people_search_names.py`, 73 tests, every browser headless
+with every request aborted:
+
+    0  the fixture: XML, a link in a link per result, the captured column
+       shape, only declared synthetic people; its fixed point, its structure
+       digest, and the builder's refusals
+    1  the reader over the fixture returns the three results as people, and
+       nobody else -- no mutual connection, no place, no furniture; the HTML
+       parser's version of the page returns nobody
+    2  M1 declared fields only: every person exactly a record, nothing else
+       in the result; a record carrying the location is convicted; the
+       location's text never READ (every text a handle returned, spied)
+    3  M2 sanitised and marked: a name laced with a zero-width space and a
+       direction override, and an instruction-shaped headline, come back
+       inert and marked; a control shows the page really drew the lacing
+    4  M3 never stored: the TOOL driven end to end with the plant as a
+       result's name and headline -- the plant only inside the three records
+       -- and a second plant as a mutual connection's name, which crosses
+       nowhere, not even inside a record; a failure counted by type, never
+       quoted; nothing logged on the success path, at any logger; no file
+       written; no state kept between calls, in any shape
+    5  M4 one page: one navigation, pages_loaded 1, no paging parameter, the
+       tool a declared people tool, the ceiling enforced, and an allowlist
+       of the calls the reader may await -- no hover, wheel, scroll or key
+    6  M5 visible only: a result drawn as "LinkedIn Member" comes back as
+       exactly that while hidden copies still name the person; a row with no
+       member link is not read; only href is read; no script is run; a hidden
+       card, and text nested in the name link, are refused
+    7  M6 not a target: only the server imports the reader, and no write
+       tool reaches it through any chain of helpers
+    8  without include_names the tool returns nobody and never calls the
+       reader; with it, the same drive returns the three
+    9  the verifier's drawings: each refused or absent and counted, a
+       re-render mid-read and a node reused mid-read included; the one
+       declared limit as a strict xfail
+   10  the verifier's other surviving routes, each with its control
+
+**SHOWN FAILING ON THE READER ITSELF.** Over the first reader, four
+defects planted one at a time were each caught. Over the reader as
+rewritten, fifteen are planted -- the verifier's surviving routes among
+them -- and that check is recorded in K.11, with the final gates.
+
+Lane G's guards reach the reader without an entry being written for it: the
+one-page guard derives the tool as a people tool, the page-string guards
+drive the reader (its baseline verdict `clean` -- vacuous on the success
+path, K.9 finding 2), and the instructions guard holds the named tools equal
+to `PEOPLE_TOOLS`.
+
+### K.6 The census
+
+**THREE ROWS MOVE GAP -> COVERED-UNFIRED:** `N 79`, `N 172` and `N 194`,
+each cell opening on the paragraph that moved it; the WHO-rule and
+names-at-runtime paragraphs stay after it as those days' record. Not PROVEN:
+nothing fired. They leave the address table (104 -> 101 lines), enter
+bucket 1 held by no ruling, and leave the triage's read-GAP set (77
+verdicts; every control OK). The tool-surface pin moves 90 -> 91 parameters
+with the rows named.
+
+**PINS, RE-DERIVED AND MEASURED:**
+
+    adjudicated            179 -> 182
+    delivered_broad        117 -> 120
+    unfired                 38 ->  41
+    gap                    591 -> 588
+    gap_read               104 -> 101
+    b3_admitted             49 ->  46
+    b3_blocked_on_nothing    7 ->   4
+    b1_no_ruling            23 ->  26
+
+**THE ROWS THAT WAIT ON A CAPTURE STAY GAP**, each cell gaining a paragraph
+that says the foundation has landed and names what holds it now -- the
+capture, then a reader over it: `N 161` (F.2), `N 179` (F.3), `M C70` (F.4,
+and a post's declared fields), `N 100` (F.6), `N 165` and `N 177` (F.7),
+`N 188` and `N 189` (F.8), and `N 178` (a decision of the operator's, then
+F.9). The aggregate rows `N 99`, `N 102`, `J 108` and `J 112` and the
+companies search `N 104` return no names and were not touched.
+
+**AST DUPLICATE-KEY CHECK.** Every dict literal in the package, the scripts
+and the tests (4,026) and every JSON file under tests and scripts (13), keys
+compared as literals and as names. The pinned dicts -- `PINNED` 37 keys,
+`PINNED_B1_ROWS`, `TRIAGE` 77, `DECIDED_SINCE_TRIAGE` 9,
+`MEASURED_PAST_BY_BUCKET3` 4, `ROW_STATES` 7, `PINNED_TOOL_SURFACE` 57,
+`COVERED_ROWS` 9, `TARGET_KIND_CLASS` 12, `NOT_A_CORRECTION` 212 -- carry no
+duplicate. ONE DUPLICATE ON THE TREE, not in a pin and not this lane's:
+`tests/test_selectors_resolve.py` gives the key `settings_radio_label_selector`
+twice, once for "Always on" and once for "Device settings", so the second
+replaces the first and the "Always on" label selector is never resolved --
+though the comment on the second says both are resolved so that a break in
+either spelling fails there. Reported, not edited: the fix is to give the
+second its own key.
+
+### K.7 The rosters: no capture exists, so each waits on one
+
+No roster page has ever been captured -- not a group's members, an event's
+attendees, nor a company's or school's People tab -- so no roster reader was
+written: a reader over no markup would be a guess, and the order forbids
+one. No address was admitted in this build. CHECKED ON DISK, not assumed:
+every capture whose file name or links suggest a roster was read for route
+shapes and member-link counts only. The school, groups and events captures
+of 2026-09-20 draw 1, 0 and 0 member links -- none is a list of people --
+and the company roots and a group's feed LINK to roster addresses
+(`/company/<seg>/people`, `/groups/<num>/members`) without being them. That
+shows LinkedIn draws those addresses; it does not show them served. One
+detail for F.5: LinkedIn's own links to a Page's People tab carry the
+company's SLUG, while `member_rosters.compose` spells the tab with the
+numeric id, so the capture should load the numeric spelling and record
+whether it is served or redirected. **THE FOUR ROSTER LINES ADMITTED
+ON 2026-09-24 WERE ADMITTED BEFORE ANY CAPTURE SHOWED THEM SERVED**
+(MEMBER-ROSTERS-AS-BOUNDED-READS, with the orchestrator's acceptance). They
+stay; whether they should wait on a capture instead is a question below.
+
+**THE CAPTURE SPECS FOR SESSION 2, restated for a names reader.** Each is
+ONE page load through `BROWSER.goto`, composed from values supplied at fire
+time, nothing typed, pressed or scrolled:
+
+    spec  rows              address (composer)                         loads
+    F.5   N 102, J 108      a Page's People tab                        1
+                            member_rosters.compose("company_people", <id>)
+    F.6   N 99, N 100,      a school's People tab                      1
+          J 112             member_rosters.compose("school_people", <id>)
+    F.7   N 165, N 177      a group's member list                      1
+                            member_rosters.compose("group_members", <id>)
+    F.8   N 188, N 189      an event's attendee list                   1, +1 if
+                            member_rosters.compose("event_attendees",  the page
+                            <id>), or where the event page draws it    draws it
+                                                                       elsewhere
+    F.2   N 161             a groups search (1 of D1's five searches)  1
+    F.3   N 179             an events search (1 search)                1
+    F.4   M C70             the group page's own search control        1
+
+**WHAT EACH CAPTURE MUST ANSWER**, all of it read offline by SHAPE and COUNT
+and never by value:
+
+1. Served or redirected: the landed address against the one asked for.
+2. The list: how many rows; the list's container; whether each row is one
+   link holding the name link, as the search draws it, or not.
+3. Per row: which element holds the NAME (a member link's own text?);
+   whether a HEADLINE line is drawn and where; whether a DEGREE badge is
+   drawn; whether a member link is absolute or relative, a slug or an urn.
+4. Rows drawn with NO member link, and what they say ("LinkedIn Member" or
+   otherwise) -- counted; none is ever resolved.
+5. How further rows load -- a show-more control, a scroll, a page parameter
+   -- counted, never pressed: a reader reads one page.
+6. For the aggregate tabs (F.5, F.6): the insight blocks, their facet counts
+   and their headings' vocabulary.
+7. For a groups or events search (F.2, F.3): each result's title element and
+   link, and whether the result is one link holding the title link.
+
+Each capture is then reduced to a committed skeleton by a builder of the
+kind `scripts/_build_people_search_skeleton.py` is, and the reader written
+over it. Session 2 also has three new rows to FIRE -- `N 79`, `N 172` and
+`N 194` are COVERED-UNFIRED -- one people search each with
+`include_names=True`, which, with F.2 and F.3, is five searches: D1's whole
+budget. The people searches for `N 84`, `N 87` and `N 94` can be those same
+fires, since each returns the shape and the names at once.
+
+### K.8 Gates
+
+**ON THE BUILD COMMIT (`a734527`):**
+
+- The census instruments: `census_completion --check` (every figure matches
+  its pin), `check_read_addresses` (GREEN 101 of 101), `check_jobs_directions`
+  (GREEN 109 of 109), `triage_read_gap_rows` (controls 1 and 3-9 OK, 77
+  verdicts), `ruling_holds` (GREEN), `check_write_classes` (GREEN, 385
+  lines), `check_exclusion_basis` (43 of 43, no structural problem),
+  `pin_census_rows --check` (no drift), `measure_pointer_graph --check`
+  (PASS, 65), and the three generators `--check` (the audit index at 257
+  documents, the rulings index at 67 rulings, the blocker map).
+- Lane G's people guards, the document guards and this lane's tests, one
+  sharded run over 24 files: 3,332 passed, 1 skipped -- the whole-tree
+  navigation complement, which runs only where `CI` is set.
+- The AST duplicate-key check (K.6).
+- `impact_gate --against 52b55b6`: 213 of 265 test files (80%), past its 45%
+  line, so it WIDENED TO THE FULL SUITE, run locally and sharded: 10,967
+  passed, 9 failed, 9 skipped, 1 xfailed, in 34m38s. **THE NINE REDS WERE MY
+  OWN COMMIT, NOT THE CHANGE.** Seven are in
+  `tests/test_stale_process_is_announced.py`, which compares the commit a
+  process loaded with HEAD on disk; the suite had loaded the build commit,
+  and my follow-up commit (`5c0594d`) landed while it ran, so every
+  staleness-sensitive test saw a moved HEAD. The three files, re-run on a
+  quiet tree: 81 passed. The lesson is procedural and is applied below:
+  nothing is committed while a gate runs.
+
+**ON THE REWORK (`ddfb133`)**, before it was committed: the names file,
+72 passed and 1 xfailed (the declared limit); and the targeted set -- lane
+G's people guards, the page-string and reader guards, the identity and
+fixture guards, the census tests and the three stale-process files --
+3,452 passed and 1 failed on the first pass: the identity guard read a
+planted source string in the new test file -- a decorator written with its
+module name -- as an email address. The plant now imports the decorator by
+name; the names file and the identity guard re-run: 73 passed, 1 xfailed,
+and the guard clean for the file. The full suite, the mutation check and
+the census instruments on the final tree are K.11, run with nothing edited
+or committed while they ran.
+
+**NOT RUN, and why.** CI: nothing is pushed, by the order; it certifies at
+merge. Nothing live: no browser session, no LinkedIn page, no Chrome profile
+-- every browser here was a headless test browser with every request
+aborted.
+
+### K.9 The cold verification, and what it changed
+
+One cold pass by a general-purpose child over `a734527`, briefed to find
+what is wrong, read-only and offline; it exported the commit with
+`git archive` so it tested the commit and not the working tree, and touched
+the capture only through the lane's counts-only scripts, after reading them.
+Its verdicts:
+
+    1  the reader                FAIL, MEDIUM
+    2  the tests                 CONCERN, MEDIUM
+    3  the fixture and builder   content PASS; provenance CONCERN, LOW-MEDIUM
+    4  server.py                 PASS, one CONCERN
+    5  the census                PASS, one LOW
+    6  other claims              four overclaims, two LOWs, one pointer gap
+    7  the seven guard files     PASS, 914 of 914
+
+**1. THE READER RETURNED WRONG ANSWERS WITH CLEAN DENOMINATORS, ON DRAWINGS
+THE CAPTURE NEVER SHOWED -- AND THE DOCSTRING SAID IT COULD NOT.** On the
+captured page it was right: ten of ten names and headlines, nothing outside
+a record. But the verifier drew the fixture's page other ways, and:
+
+    C  headline without its paragraph, one more line after the location
+                                    -> the location as the headline
+    D  the location drawn before the headline
+                                    -> the location as the headline
+    F  each title out of its paragraph, the list inside one, a banner beside
+                                    -> the banner as every headline
+    H  a mutual connection's link holding a link to the same member
+                                    -> the mutual returned as a person
+    REORDER  the list re-rendering between the link reads and the text reads
+                                    -> one member's name on another's link
+    G1/G2  a card hidden with display:none or the hidden attribute
+                                    -> returned
+    G3  clip-hidden text inside the name link
+                                    -> welded to the name
+
+Each came from one mechanism: the reader re-found its elements with
+locators at every read, bounded nothing to the card, counted lines rather
+than checking the captured shape, and tested no visibility. THE READER WAS
+REWRITTEN in the commit that lands this section: every card pinned to an element handle before any
+text is read; the title paragraph required to sit inside its own card; the
+headline read only in the captured shape (first of three siblings, the other
+two one link-free line each); a nested card, an invisible card or name link,
+and a name link holding text in a nested element each refused and counted;
+both links read again after the text, and a card whose links moved refused
+(`changed_while_read`). Every drawing above is now a test in section 9 of the
+test file, run on the new reader: C, F, H, G1-G3 and REORDER refused or
+absent and counted, each name on its own link. D IS THE ONE LIMIT NO
+STRUCTURE CAN CLOSE -- the two lines differ only by position and by
+generated class hashes -- so it is DECLARED, in the reader's docstring and
+as a strict xfail that fails the day it starts passing.
+
+**2. THE TESTS HELD EACH MITIGATION BY SECTION, NOT EACH RULE.** Of the
+verifier's seventeen planted defects, eight passed the committed names file,
+and five passed all six guard files (852 tests): the title-is-its-own-member
+check removed, the exactly-two-lines check removed, a name logged, a name
+written to a file, and a module cache built with `dict()`. And lane G's
+package-wide reader guard drives this reader to "clean" VACUOUSLY: its
+planted page answers every href with the plant, which is no member link, so
+the reader skips its one card before reading any text. Answered in section
+10 of the test file: a root-logger capture over the planted success path, a
+file-write spy around the reader, a container check that finds call-built
+containers, subscript and augmented stores and caching decorators (with five
+planted controls), an ALLOWLIST of the calls the reader may await on a page
+or a handle (a hover, a wheel, a scroll and a key press refused), and the
+write-tool reach made transitive through helpers. The generic guard's vacuous
+"clean" is lane G's instrument and is reported, not changed here.
+
+**3. THE FIXTURE.** Content PASS: only declared synthetic people and slugs.
+But the builder kept a foreign host, a query after a bare host and short
+free-form attribute values verbatim; now an href is rebuilt from its parts
+(foreign host replaced, query and fragment always dropped) and a kept
+attribute keeps only a value from its closed set, each replacement counted
+and a test driving all three. And the fixed point proved a NORMAL FORM, not
+provenance: deleting every photo figure, every badge or the hidden copy of a
+name was still a fixed point. The builder now prints a STRUCTURE DIGEST --
+tags and nesting only -- which it printed over the capture as
+`hljfpfdmkfekafdh`, pinned in the test file with a structural hand edit as
+its control. Writing the builder's test found one more defect of its own:
+with a single result card, `list_of` took the card itself as the list and
+emitted the whole document; it now takes a strict ancestor, and the fixture
+rebuilt from the capture is byte-identical.
+
+**4. `not_claimed` said "no result is ever named"** in the envelope that
+names them. It now says so only without `include_names`.
+
+**5. FIVE TRIAGE REASONS** still said the foundation was being built; each
+now says it landed.
+
+**6. OTHER.** The two overclaims (the reader's "never as a guess", the
+fixture's "provenance") are restated as what is checked.
+`result_cards_read` counted cards TRIED and is renamed
+`result_cards_attempted`. An absent headline and an empty one are the same
+empty string in a closed record; the tool's docstring now says so, and
+`headline_unread` counts the first. Seven pointers -- six census cells and
+the tool-surface pin's comment -- cited a section of this record that the build
+commit (`a734527`) did not carry, and nor did the rework commit; this section
+lands in the commit after the integration (K.10), and they resolve from
+there on. And one INFORMATIONAL point for the orchestrator: by
+handing a client names, this reader raises the practical exposure of the two
+declared name-aimed write debts (`send_invitation`, `send_message`,
+`tests/test_no_write_is_aimed_by_a_name.py`); each record carries the link,
+so converting them to link-aimed targets is the natural next step, not
+taken here.
+
+**AND ONE FINDING ABOUT MY OWN SCRATCH INSTRUMENT.** The verifier declined to
+run the structure script in its skeleton mode: it printed, beside each text
+node's length and word count, a 24-bit unsalted hash of the text -- enough to
+confirm a guessed name. Two such skeletons (two results) were printed into
+this lane's session log on 2026-09-27, never into a tracked file or a
+commit. The hash is removed from that script and from its sibling; neither
+prints anything about a text but its shape now.
+
+### K.10 Integration of master `ae24426`
+
+Master had moved from `52b55b6` to `ae24426` by the end: lane G's residuals,
+its model-id guard, and its preview-record work. Merged once, measured on
+the merged tree, no delta added:
+
+    conflict            scripts/ci_shard_timings.json -- master's table taken,
+                        this lane's names file re-priced on the merged tree
+                        (73 tests, 71.6 s alone and serially)
+    merged cleanly      linkedin_server/server.py (master's instructions edit
+                        sits three lines below this lane's sentence),
+                        linkedin_server/people_data.py (this lane's
+                        PEOPLE_TOOLS entry beside master's ABSENT), and this
+                        record (both sides removed the same model-id line)
+
+**ONE CHANGE THE MERGE REQUIRED, AND IT IS A BETTER ANSWER THAN MINE.**
+Master's `people_data.ABSENT`: a headline the reader did not read is now
+`null`, not the empty string, so "none drawn here" and "an empty one" are
+different states in the record itself. The reader already handed `None` for
+a headline it could not place, so its records carry ABSENT unchanged; three
+tests now expect ABSENT where they expected `""`, and the tool's docstring,
+which said a record could not tell the two apart, now says it can. That
+closes the verifier's finding 6.8 in the record rather than only in prose.
+
+**PINS, RE-DERIVED ON THE MERGED TREE:** `census_completion --check` --
+every figure matches its pin (the merge moved no census figure);
+`check_read_addresses` GREEN 101 of 101; `check_jobs_directions` GREEN 109 of
+109; `pin_census_rows --check` no drift; `measure_pointer_graph --check` PASS,
+65; triage, `ruling_holds`, `check_write_classes` (385) and
+`check_exclusion_basis` (43 of 43) green; the tool surface 57 tools and 91
+parameters. The AST duplicate-key check over the merged tree (4,044 dict
+literals, 13 JSON files): every pinned dict clean, and the one duplicate is
+still `tests/test_selectors_resolve.py`'s. The surface pin, the names file,
+`test_people_data.py` and the one-page guard on the merged tree: 296
+passed, 1 xfailed.
+
+### K.11 The final gates
+
+The full suite through the impact gate, the mutation check over the reader
+as rewritten, and the census instruments run on the commit that carries
+this section, with nothing edited or committed while they run; their
+results follow in the commit after it.
+
+### K.12 Questions for the orchestrator
+
+1. **The four roster admissions.** They were made on 2026-09-24 under
+   MEMBER-ROSTERS-AS-BOUNDED-READS and before any capture. The order of
+   2026-09-27 admits no address a capture has not shown served. Keep them
+   (the composers are unwired, so nothing can open them), or withdraw them
+   until F.5-F.8 show them served? Either is one commit.
+2. **`M C70`'s post.** The foundation still declares a person, a group and an
+   event, and no post.
+3. **`N 178`** still needs his decision to load a member's profile he names
+   for a read, outside an outward act.
+4. **The duplicate key** in `tests/test_selectors_resolve.py` (K.6), for
+   whichever lane owns that file.
+5. **The two name-aimed write debts.** `send_invitation` and `send_message`
+   are aimed by a name (`tests/test_no_write_is_aimed_by_a_name.py` declares
+   them as debt). The people search now hands a client names, each with its
+   link, which raises their practical exposure: two results can share a
+   name. Converting both to take the link is the natural next step, and a
+   separate lane's.
+6. **Lane G's reader guard is vacuous on this reader's success path**
+   (K.9, finding 2): its planted page answers every href with the plant,
+   which is no member link, so the reader skips its one card before reading
+   any text. This lane's own file drives the success path; whether the
+   generic guard should learn to plant a member link is lane G's to decide.
