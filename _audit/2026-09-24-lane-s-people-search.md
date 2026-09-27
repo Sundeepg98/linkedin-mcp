@@ -2231,10 +2231,11 @@ record commit) ran before the order named that, without lane L5's offline
 plugin, so those tests made their requests in both. No targeted gate of this
 lane ever included either file. Every run from here uses the plugin.
 
-**THE GATES, ON THE MERGE COMMIT `e15e507`**, in this order and never two
-at once, with nothing edited or committed while they ran. Every pytest run
-loaded lane L5's offline plugin (`-p np_offline`, its directory on
-`PYTHONPATH`, its log named by `NP_OFFLINE_LOG`):
+**THE GATES, ON THE MERGE COMMIT `e15e507`** -- this branch's own, which
+until this branch merges resolves here and nowhere on `master` -- in this
+order and never two at once, with nothing edited or committed while they
+ran. Every pytest run loaded lane L5's offline plugin (`-p np_offline`, its
+directory on `PYTHONPATH`, its log named by `NP_OFFLINE_LOG`):
 
 - The readers under lane G's guards and lane L5's people seam: 2,363
   passed, 1 xfailed (the declared `KNOWN_LIMIT`, strict), in 121.1 s. The
