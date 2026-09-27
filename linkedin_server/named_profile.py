@@ -401,6 +401,32 @@ def connect_verdict(
         if opened
         else " No dialog opened after the press."
     )
+    # WHAT THE PRESS LEFT IN PLACE, and why a fresh render alone cannot say
+    # NOT SENT (the second warm re-check, 2026-09-27). The strict press binds
+    # the COUNT of Connect controls in the topcard, not the person: if the
+    # page replaced this person's control IN PLACE with somebody else's while
+    # the press waited, the one match was the other person's, and a fresh
+    # render then draws this person's Connect again -- which used to read NO
+    # INVITATION WAS SENT while an invitation went to someone else. So when,
+    # right after the press, the page draws NO control naming this person at
+    # all -- their Connect gone, and nothing it turned into -- the press
+    # cannot be shown to have been theirs, and the verdict is unknown.
+    if (
+        identity_confirmed(in_place)
+        and coerce.as_count(in_place.get("invite_matches")) == 0
+        and not list(in_place.get("named_controls") or [])
+    ):
+        return UNKNOWN, (
+            "right after the press, the page drew NO control naming this "
+            "person -- their Connect was gone and nothing naming them took "
+            "its place -- so this server cannot show that the control pressed "
+            "was theirs: a control redrawn in its place while the press waited "
+            "would have been pressed instead. What a pressed Connect becomes "
+            "has never been captured (NEEDS-CAPTURE C-P2)."
+            + dialog_note
+            + " Look at My Network > Manage > Sent before doing anything else. "
+            "DO NOT RETRY."
+        )
     if not identity_confirmed(fresh):
         return UNKNOWN, (
             "the fresh render did not show the named person's topcard in the "
@@ -899,6 +925,7 @@ def message_verdict(
     *,
     held_in_place: Optional[bool],
     typed: bool,
+    conversation_is_theirs: Optional[bool] = None,
 ) -> tuple[str, str]:
     """``(state, why)`` for a Message sent from a profile. IN PLACE, WITH A
     BEFORE-COUNT, and weaker than a reply's verdict for a stated reason.
@@ -924,6 +951,20 @@ def message_verdict(
             f"the conversation could not be re-read after Send ({after['error']}). "
             "Open it and look. Do NOT retry: a retry on a message that landed "
             "sends it twice."
+        )
+    # WHOSE CONVERSATION, ONE LAST TIME (the second warm re-check,
+    # 2026-09-27): the strict Send press binds the COUNT of Send controls,
+    # not the conversation, so a conversation swapped in place while the press
+    # waited would have been the one sent from. If the conversation holding
+    # the composer after Send is not titled with this person's name, nothing
+    # read in it speaks for this message.
+    if conversation_is_theirs is not True:
+        return UNKNOWN, (
+            "after Send, the conversation holding the composer is NOT titled "
+            "with the name of the person you named (compared in the page), so "
+            "what was sent, and to whom, cannot be read from it: a conversation "
+            "redrawn in place while the press waited would have been the one "
+            "sent from. Open your messages and look now. Do NOT retry."
         )
     was = (opened.get("observed") or {}).get("events_with_text")
     now = after.get("events_with_text")

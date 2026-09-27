@@ -262,6 +262,11 @@ ENCODED_NOT_A_LETTER = (
     "casey%E1%85%A0example",
     "casey%E3%85%A4example",
     "casey%EF%BE%A0example",
+    # and the two letters that draw as BLANK SPACE without being
+    # default-ignorable -- EGYPTIAN HIEROGLYPH FULL BLANK and HALF BLANK
+    # (a second warm re-check found the first).
+    "casey%F0%93%91%81example",
+    "casey%F0%93%91%82example",
 )
 #: What the encoded unit exists for: a vanity name with a non-ASCII letter,
 #: as LinkedIn serves it -- percent-encoded UTF-8.
@@ -982,6 +987,31 @@ async def test_a_second_match_drawn_mid_press_stops_the_press(writes_on, browser
     _clean(receipt)
 
 
+async def test_a_control_swapped_in_place_mid_press_is_never_reported_not_sent(
+    writes_on, browser_page
+):
+    """THE SECOND WARM RE-CHECK'S WORLD, AND WHAT IS AND IS NOT CLOSED. The
+    owner's Connect is REPLACED IN PLACE by a stranger's while the press waits.
+    The strict press binds the COUNT -- one Connect in the topcard -- not the
+    person, so that press is not prevented (a residual the lane record names).
+    What is closed is the receipt's lie: it read NO INVITATION WAS SENT off a
+    fresh render drawing the owner's Connect again. Right after the press the
+    page drew no control naming the owner, so the verdict is unknown."""
+    grant = await _connect_grant(browser_page)
+    world = _redrawn_mid_press(
+        PROFILE,
+        _STRANGERS_CONNECT
+        + "  var owners = document.getElementById('topcard-connect');"
+        "  if (owners) { owners.replaceWith(stranger); }",
+    )
+    receipt = await writes.perform(_Navigator(world, PROFILE), browser_page, grant)
+    assert receipt["performed"] == writes.UNKNOWN, receipt["verification"]["why"]
+    why = receipt["verification"]["why"]
+    assert "NO control naming this person" in why and "DO NOT RETRY" in why
+    assert "NO INVITATION WAS SENT" not in why
+    _clean(receipt)
+
+
 async def test_a_re_render_during_the_message_press_cannot_hand_it_to_a_stranger(
     writes_on, browser_page
 ):
@@ -1344,6 +1374,47 @@ async def test_a_second_send_drawn_during_the_send_press_stops_it(writes_on, bro
     assert receipt["clicked"]["clicks_made"] == 1 and receipt["clicked"]["opener_clicks"] == 1
     assert receipt["typed_text"]["submit_was_pressed"] is False
     assert receipt["performed"] is not True
+    _clean(receipt)
+
+
+#: DERIVED -- THE SECOND WARM RE-CHECK'S SEND WORLD: on the Send press's own
+#: mouse movement the owner's whole conversation is REPLACED IN PLACE by one
+#: with somebody else, holding a draft. One Send on the page, so the strict
+#: press is not stopped (a residual the lane record names); the receipt must
+#: not read that conversation as his.
+SWAPPED_IN_PLACE_DURING_SEND = _derive(
+    DISPATCHING,
+    "</body>",
+    "<script>document.addEventListener('mousemove', function onMove() {"
+    "  var editor = document.querySelector('#msg-overlay .msg-form__contenteditable');"
+    "  if (!editor || !editor.textContent.trim()) { return; }"
+    "  document.removeEventListener('mousemove', onMove);"
+    "  var bubble = document.createElement('div');"
+    "  bubble.className = 'msg-overlay-conversation-bubble';"
+    "  bubble.innerHTML ="
+    "    '<header class=\"msg-overlay-bubble-header\">' +"
+    "    '<h2 class=\"msg-overlay-bubble-header__title\">Morgan Example</h2></header>' +"
+    "    '<form class=\"msg-form\"><div class=\"msg-form__contenteditable t-14\" '"
+    "    + 'contenteditable=\"true\" role=\"textbox\">an old draft</div>' +"
+    "    '<button type=\"submit\" class=\"msg-form__send-button artdeco-button\">Send</button>'"
+    "    + '</form>';"
+    "  bubble.querySelector('form').addEventListener('submit', function (event) {"
+    "    event.preventDefault();"
+    "    bubble.querySelector('.msg-form__contenteditable').textContent = ''; });"
+    "  var owners = document.querySelector('#msg-overlay .msg-overlay-conversation-bubble');"
+    "  owners.replaceWith(bubble);"
+    "});</script></body>",
+)
+
+
+async def test_a_conversation_swapped_in_place_during_send_is_never_read_as_his(
+    writes_on, browser_page
+):
+    grant = await _message_grant(browser_page)
+    receipt = await writes.perform(_Navigator(SWAPPED_IN_PLACE_DURING_SEND), browser_page, grant)
+    assert receipt["send_gate"]["proceeded"] is True
+    assert receipt["performed"] == writes.UNKNOWN, receipt["verification"]["why"]
+    assert "is NOT titled" in receipt["verification"]["why"]
     _clean(receipt)
 
 

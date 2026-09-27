@@ -1448,6 +1448,17 @@ PINNED = (
 #: source it hashes to 4221c17c31fdd935, the value replaced. Controls:
 #: swapping back the unchanged ``named_profile_url`` moves nothing; dropping
 #: ``is_read_url`` lands on ecac963caf105263. One interpreter, 3.13.
+#:
+#: AND THE TUPLE GREW BY TWO THE SAME DAY, AT A SECOND WARM RE-CHECK, AND
+#: ONLY ITS OWN DIGEST MOVED:
+#:
+#:     _INVISIBLE_LETTER_CODES    02528c398b97abab -> 80bce706e3a2b2c2
+#:     <functions> and the rest   unchanged (the function names the tuple)
+#:
+#: U+13441 and U+13442, EGYPTIAN HIEROGLYPH FULL BLANK and HALF BLANK: letters
+#: that draw as blank space without being default-ignorable. A sweep of every
+#: code point ``isalnum()`` accepts, by name, found these two beside the four
+#: fillers and no other blank-drawing letter.
 #: ------------------------------------------------------------------------
 READONLY_AST_AT_LAST_REFREEZE = {
     # d7e1d0922e3af446 until 2026-09-27: the named-profile door's three
@@ -1459,7 +1470,9 @@ READONLY_AST_AT_LAST_REFREEZE = {
     # the letters it refuses; the last two re-freeze notes above.
     "NAMED_PROFILE_SEGMENT": "b3de160186fb187d",
     "_NAMED_PROFILE_URL": "32c49c9c6bc0626f",
-    "_INVISIBLE_LETTER_CODES": "02528c398b97abab",
+    # 02528c398b97abab until the second warm re-check added the two
+    # Egyptian blanks; the last re-freeze note above.
+    "_INVISIBLE_LETTER_CODES": "80bce706e3a2b2c2",
     "JS_MUTATION_TOKENS": "d47e30b67c583c1b",
     # ab8fdd31f93ef4fc until 2026-09-19. See the re-freeze note above: two
     # entries added for press.disclose's click and its closing Escape, on the

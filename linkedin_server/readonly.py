@@ -2971,16 +2971,20 @@ NAMED_PROFILE_SEGMENT = re.compile(
 _NAMED_PROFILE_URL = re.compile(r"^https://www\.linkedin\.com/in/([^/?#]+)/$")
 
 
-#: THE FOUR INVISIBLE LETTERS. Of Unicode's default-ignorable code points --
-#: the ones a renderer draws as nothing -- four are LETTERS (category Lo), so
-#: ``str.isalnum()`` says yes to them: the Hangul fillers U+115F, U+1160,
-#: U+3164 and U+FFA0. MEASURED 2026-09-27 over the default-ignorable ranges of
-#: DerivedCoreProperties with Python 3.13's unicodedata (Unicode 15.1): these
-#: four and no others. The warm re-check of that day found a two-word name
-#: with U+3164 standing where the space was accepted as a segment. Kept as code
-#: points, not characters, so this file stays ASCII and the freeze can pin the
-#: tuple.
-_INVISIBLE_LETTER_CODES = (0x115F, 0x1160, 0x3164, 0xFFA0)
+#: THE LETTERS THAT DRAW AS NOTHING OR AS BLANK SPACE. ``str.isalnum()`` says
+#: yes to them, so a two-word name with one standing where the space was
+#: passed the decoded check -- found by the warm re-checks of 2026-09-27, first
+#: with U+3164 and then with U+13441. MEASURED the same day with Python 3.13's
+#: unicodedata (Unicode 15.1), two ways: of the default-ignorable ranges of
+#: DerivedCoreProperties, exactly four are letters -- the Hangul fillers
+#: U+115F, U+1160, U+3164, U+FFA0; and a sweep of EVERY code point that
+#: ``isalnum()`` accepts whose name carries FILLER, BLANK, SPACE, INVISIBLE,
+#: NULL or EMPTY found those four and two more -- EGYPTIAN HIEROGLYPH FULL
+#: BLANK and HALF BLANK, U+13441 and U+13442 -- and otherwise only the
+#: MATHEMATICAL MONOSPACE letters and digits, which matched on the substring
+#: and draw as letters. Kept as code points, not characters, so this file
+#: stays ASCII and the freeze can pin the tuple.
+_INVISIBLE_LETTER_CODES = (0x115F, 0x1160, 0x3164, 0xFFA0, 0x13441, 0x13442)
 
 
 def valid_named_profile_segment(segment: object) -> bool:

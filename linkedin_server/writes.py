@@ -8766,8 +8766,18 @@ async def _verify_after(
         text = _text_component_of(spec, grant.target)
         held = await named_profile.composer_holds(page, text) if typed else None
         after = await named_profile.read_opened_conversation(page, text=text)
+        # AND WHOSE CONVERSATION IT IS NOW -- the page's own comparison, one
+        # boolean (the second warm re-check, 2026-09-27): a conversation swapped
+        # in place during the Send press would otherwise be read as his.
+        theirs = await dom.read_named_profile(page)
         state, why = named_profile.message_verdict(
-            opened, after, held_in_place=held, typed=typed
+            opened,
+            after,
+            held_in_place=held,
+            typed=typed,
+            conversation_is_theirs=(
+                not theirs.get("error") and theirs.get("bubble_title_names_owner") is True
+            ),
         )
         return state, why, ""
 
