@@ -90,6 +90,7 @@ PINNED_TOOL_SURFACE: dict[str, tuple[str, ...]] = {
     "linkedin_comment_on_item": ("confirm_token", "item", "text"),
     "linkedin_company_page_counts": ("organisation_id",),
     "linkedin_compose_fields": (),
+    "linkedin_connect_from_profile": ("confirm_token", "profile"),
     "linkedin_connections": ("limit",),
     "linkedin_creator_analytics": (),
     "linkedin_draft_applications": ("limit",),
@@ -106,6 +107,7 @@ PINNED_TOOL_SURFACE: dict[str, tuple[str, ...]] = {
     "linkedin_login_browser": ("wait_seconds",),
     "linkedin_logout": ("confirm",),
     "linkedin_mark_company_interest": ("confirm_token", "job_id"),
+    "linkedin_message_from_profile": ("confirm_token", "profile", "text"),
     "linkedin_my_activity_items": (),
     "linkedin_my_applications": ("limit",),
     "linkedin_my_profile": ("details", "include_skills"),
@@ -352,8 +354,20 @@ PINNED_TOOL_SURFACE: dict[str, tuple[str, ...]] = {
 #: plus this lane's
 #: three tools and seven parameters, measured off the merged registry
 #: below. No row moves in the merge itself.
-PINNED_TOOL_COUNT = 56
-PINNED_PARAMETER_COUNT = 87
+#: **RE-PINNED 2026-09-27 AT 58 TOOLS AND 92 PARAMETERS (lane L5's follow-up,
+#: on its branch over master 96c1165): two tools added, five parameters, and
+#: the census rows move in the same change.**
+#: `linkedin_connect_from_profile("profile", "confirm_token")` banks `N 4`, by
+#: D6-CAPABILITY-OVER-AFFORDANCE, GAP -> COVERED-UNFIRED;
+#: `linkedin_message_from_profile("profile", "text", "confirm_token")` banks
+#: `M M1`, COVERED-CANNOT-DELIVER -> COVERED-UNFIRED. Ruling
+#: THIRD-PARTY-PROFILE-FOR-A-NAMED-TARGET. `profile` is a profile LINK or a
+#: member id, parsed by shape and refused when it could be a name. Not PROVEN:
+#: two WRITES built to ready-to-fire behind the flag and the single-use grant,
+#: never granted. See `_audit/2026-09-24-lane-l5-messaging.md`, "Follow-up:
+#: the named-person route".
+PINNED_TOOL_COUNT = 58
+PINNED_PARAMETER_COUNT = 92
 
 
 def live_surface() -> dict[str, tuple[str, ...]]:

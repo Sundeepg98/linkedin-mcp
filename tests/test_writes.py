@@ -721,6 +721,12 @@ def test_what_ships_is_narrower_than_what_is_sanctioned():
         # on the lane's branch): the reply inside a conversation he names
         # (census M M10), sanctioned and performable in the same move.
         "send_reply",
+        # SEVENTEEN AND EIGHTEEN FROM 2026-09-27 (lane L5's follow-up): Connect
+        # and Message on the profile of a person he names (census N 4 by D6,
+        # and M M1), sanctioned and performable in the same move, on ruling
+        # THIRD-PARTY-PROFILE-FOR-A-NAMED-TARGET.
+        "connect_from_profile",
+        "message_from_profile",
     }
     # THREE UNTIL 2026-08-25, four until 2026-08-30, five since. This line read
     # ``{"save_job", "unsave_job", "unfollow_company"}``.
@@ -855,6 +861,17 @@ def test_what_ships_is_narrower_than_what_is_sanctioned():
         # the click are perform()'s own -- and the thread address was
         # already on the read allowlist.
         "send_reply",
+        # THE SIXTEENTH AND SEVENTEENTH, 2026-09-27 (lane L5's follow-up):
+        # Connect and Message on the profile of a person he names by link or
+        # member id, each printing whom it resolved to before anything is
+        # pressed. ONE THING WAS PERMITTED TO LET THEM CROSS, and it is a
+        # NAVIGATION, not a mutation: a second door,
+        # readonly.assert_named_profile_url, which the read door does not
+        # share and which only writes._load_named_profile can ask for.
+        # readonly.SANCTIONED_MUTATIONS is unchanged -- the click and the fill
+        # are perform()'s own.
+        "connect_from_profile",
+        "message_from_profile",
     }
     assert writes.PERFORMABLE < sanctioned_actions
 
@@ -1347,6 +1364,12 @@ _UNMEASURED_REVERSIBILITY = {
     # been observed, and recalling one is destruction this server may not
     # perform at any confirm level either way.
     "send_reply",
+    # 2026-09-27. What a pressed Connect becomes on a profile has never been
+    # captured, so neither has a withdraw control; and whether a message sent
+    # from a profile can be recalled has never been observed. Both undo
+    # routes are destruction, forbidden here at any confirm level.
+    "connect_from_profile",
+    "message_from_profile",
 }
 
 REVERSIBILITY_CLASS = {
@@ -1377,6 +1400,9 @@ REVERSIBILITY_CLASS = {
     # 2026-09-24. STILL-UNKNOWN: LinkedIn's Help describes removing an
     # interest, but the control that would do it has never been captured.
     "mark_company_interest": "STILL-UNKNOWN",
+    # 2026-09-27. STILL-UNKNOWN, both: see _UNMEASURED_REVERSIBILITY.
+    "connect_from_profile": "STILL-UNKNOWN",
+    "message_from_profile": "STILL-UNKNOWN",
 }
 
 #: Which actions have had their reversibility MEASURED. Split out from the
@@ -1401,6 +1427,8 @@ REVERSIBILITY_MEASURED = {
     "follow_company_page": True,
     "mark_company_interest": False,
     "send_reply": False,
+    "connect_from_profile": False,
+    "message_from_profile": False,
 }
 
 def test_the_two_reversibility_tables_agree_with_each_other():

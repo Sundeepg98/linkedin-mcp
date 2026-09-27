@@ -245,6 +245,14 @@ def connect_state(reading: dict[str, Any]) -> tuple[str, str, Optional[int]]:
             "is a refusal rather than a choice: pressing one would be choosing "
             "by position."
         ), None
+    if coerce.as_count(reading.get("invite_in_topcard")) != 1:
+        return UNKNOWN, (
+            "the one control named for inviting this person is NOT inside "
+            "their topcard. It may belong to somebody else with the same name "
+            "-- a card in 'People also viewed', say -- and an invitation there "
+            "would reach a stranger. Where a third party's profile draws its "
+            "own Connect has never been captured (NEEDS-CAPTURE C-P1)."
+        ), None
     if coerce.as_count(reading.get("dialogs")):
         return UNKNOWN, (
             f"{coerce.as_count(reading.get('dialogs'))} dialog(s) are already "
@@ -284,6 +292,14 @@ def message_state(reading: dict[str, Any]) -> tuple[str, str, Optional[int]]:
             "exactly one is the only aimable number. None may mean the profile "
             "draws Message only for connections, or in a menu never captured "
             "(NEEDS-CAPTURE C-P4)."
+        ), None
+    if coerce.as_count(reading.get("message_in_topcard")) != 1:
+        return UNKNOWN, (
+            "the one Message control named for this person is NOT inside "
+            "their topcard. It may belong to somebody else with the same name, "
+            "and a message there would reach a stranger. Where a third party's "
+            "profile draws its own Message has never been captured "
+            "(NEEDS-CAPTURE C-P1)."
         ), None
     tag = reading.get("message_tag")
     href = reading.get("message_href")
@@ -359,7 +375,10 @@ def connect_verdict(
             + dialog_note
             + " Open your Sent invitations and look before doing anything else."
         )
-    still = coerce.as_count(fresh.get("invite_matches"))
+    # THE OWNER'S OWN CONNECT, counted inside the topcard -- the only place
+    # the act would press one. A same-name control elsewhere on the page is
+    # somebody else's and says nothing about this invitation.
+    still = coerce.as_count(fresh.get("invite_in_topcard"))
     tokens = list(fresh.get("named_controls") or [])
     if still == 1:
         return CONNECT_STILL_DRAWN, (
@@ -797,7 +816,7 @@ _COUNT_PREFIX = re.compile(r"^\(\d+\)\s*")
 #: DERIVED: no capture holds a third party's topcard. Dropped before the
 #: topcard parser runs, because that parser, measured on his own profile
 #: (which draws no degree), would otherwise take it for the headline.
-_DEGREE_LINE = re.compile(r"(?:·\s*)?(?:1st|2nd|3rd\+?)")
+_DEGREE_LINE = re.compile(r"(?:\u00b7\s*)?(?:1st|2nd|3rd\+?)")
 
 
 async def name_the_profile_target(

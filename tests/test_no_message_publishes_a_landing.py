@@ -154,6 +154,15 @@ ASKED_FOR_SITES: dict[str, str] = {
         "navigation itself failed. No page was reached, so nothing LinkedIn "
         "chose exists at this point."
     ),
+    # 2026-09-27, lane L5's follow-up: the SECOND door.
+    "readonly.py:assert_named_profile_url": (
+        "same shape as readonly.assert_read_url: the named-profile door "
+        "refuses the url it was HANDED, before any navigation. That url is "
+        "composed by readonly.named_profile_url from the segment of the "
+        "caller's own link or member id, so quoting it quotes the caller's "
+        "argument back; no page has been reached and nothing LinkedIn chose "
+        "exists at this point."
+    ),
 }
 
 PUBLISHED_BY_CONTRACT_SITES: dict[str, str] = {

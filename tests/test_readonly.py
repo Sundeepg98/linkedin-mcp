@@ -821,7 +821,20 @@ def test_only_dom_module_waives_evaluate():
     # below it whenever the call wraps. The intersection reads 12 of 22 and
     # looks like proof that these are unrelated sets. It is proof of nothing
     # but line wrapping.
-    assert waived_in.get("dom.py", 0) <= 22, waived_in
+    #
+    # 22 -> 23 on 2026-09-27: NAMED_PROFILE_JS, run once from
+    # dom.read_named_profile, for the two named-person acts (ruling
+    # THIRD-PARTY-PROFILE-FOR-A-NAMED-TARGET). WHY IT COULD NOT BE A LOCATOR
+    # CHAIN, the question this budget forces: the act must know WHO the
+    # profile belongs to and WHICH control names that person, and both are
+    # comparisons between strings the page holds -- the owner's name in the
+    # title and the topcard, and every control's accessible name, which
+    # LinkedIn writes that name into. A locator read hands each of those to
+    # Python, and on a third party's profile every one of them is a person's
+    # name. Compared in the page, what crosses is integers, booleans, a
+    # POSITION and closed tokens -- INVITE_NEEDLE_JS's argument, on the page
+    # where it matters most.
+    assert waived_in.get("dom.py", 0) <= 23, waived_in
 
 
 # ---------------------------------------------------------------------------
@@ -1051,6 +1064,23 @@ INJECTED_SCRIPTS = {
     # exactly as designed: three reds naming both scripts by name.
     "SEARCH_RESULTS_JS": dom.SEARCH_RESULTS_JS,
     "FILTER_PANEL_JS": dom.FILTER_PANEL_JS,
+    # 2026-09-27. The named person's profile, read inside the act he ordered
+    # toward that person (ruling THIRD-PARTY-PROFILE-FOR-A-NAMED-TARGET) and
+    # never for a measurement. Declared for the ordinary reason -- an executed
+    # script that is not declared is one nobody reviewed -- and declaring it
+    # ENROLS it in test_every_script_this_package_executes_cannot_mutate.
+    #
+    # ITS PRIVACY ARGUMENT IS INVITE_NEEDLE_JS'S, ON A PAGE THAT IS ONE PERSON.
+    # It takes the owner's name from the title, compares it with the topcard's
+    # first heading and with every Connect and Message control's accessible
+    # name -- all INSIDE the page -- and returns integers, booleans, the
+    # POSITION of the one control that matched, and closed tokens (a degree, a
+    # tag, an href class, and one word per other control naming the owner). No
+    # name, label, href or id is in its return value, and dom.read_named_profile
+    # re-closes every field in Python. The one place this route prints WHO it
+    # resolved to is the confirm block, read by a different reader
+    # (READ_PROFILE_JS) on the same load -- PEOPLE-DATA-MITIGATIONS item 6.
+    "NAMED_PROFILE_JS": dom.NAMED_PROFILE_JS,
 }
 
 
@@ -1292,7 +1322,12 @@ def test_the_scripts_executed_are_exactly_the_ones_declared():
     # paragraph above says they would the first time a script ran from
     # somewhere other than a dom.py waiver: this one is not a waived read
     # but a SANCTIONED MUTATION, declared in SCRIPTS_THAT_REPLACE_PAGE_BEHAVIOUR.
-    assert len(EXECUTED_SCRIPTS) == 23, sorted(EXECUTED_SCRIPTS)
+    #
+    # 23 -> 24 on 2026-09-27 for NAMED_PROFILE_JS, declared in
+    # INJECTED_SCRIPTS in the same change and run from exactly one call site,
+    # dom.read_named_profile -- a dom.py waived read, so the waiver budget
+    # moved 22 -> 23 with it and the two counts stay one apart.
+    assert len(EXECUTED_SCRIPTS) == 24, sorted(EXECUTED_SCRIPTS)
 
 
 def test_a_script_that_replaces_page_behaviour_runs_only_from_a_sanctioned_evaluate():

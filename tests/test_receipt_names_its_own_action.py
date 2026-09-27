@@ -184,7 +184,14 @@ _VERIFIED_FROM_OWNERS: dict[str, frozenset[str]] = {
     # conversation action would trespass on it while being entirely correct.
     # ``"read receipt"`` is a cost, not a surface, which puts it in the same
     # class as the strength-class candidates rejected in the module docstring.
-    "composer": frozenset({"send_message"}),
+    #
+    # A SECOND OWNER FROM 2026-09-27, entitled rather than borrowing:
+    # ``message_from_profile`` reads the COMPOSER its own Message press opened,
+    # in place and first -- ``_verify_after``'s branch for it calls
+    # ``named_profile.composer_holds`` before it reads the conversation -- so
+    # "the composer still holding your words with Send enabled" is a surface
+    # it measured, exactly as ``send_message``'s is.
+    "composer": frozenset({"send_message", "message_from_profile"}),
 }
 
 #: THE SAME, FOR ``_WHERE_TO_LOOK``. These values are short phrases rather
@@ -196,6 +203,9 @@ _VERIFIED_FROM_OWNERS: dict[str, frozenset[str]] = {
 #: followed-companies page, and that is deliberate: ``_verify_after``'s follow
 #: branch already ends "Open your followed companies if you want a second
 #: opinion", and this field is that sentence in the place built for it.
+#: (THREE GROUPS SINCE 2026-09-27, and the follow pair is three actions since
+#: 2026-09-23: ``send_invitation``/``connect_from_profile`` both settle in the
+#: Sent list -- see the "My Network" entry.)
 #:
 #: ``"the post"`` has two owners for a third reason -- ``react_to_item`` and
 #: ``comment_on_item`` act on the same class of surface, an item permalink.
@@ -218,7 +228,13 @@ _WHERE_TO_LOOK_OWNERS: dict[str, frozenset[str]] = {
     "dark-mode": frozenset({"update_setting"}),
     "profile editor": frozenset({"update_profile_field"}),
     "recent activity": frozenset({"publish_post"}),
-    "My Network": frozenset({"send_invitation"}),
+    # A SECOND OWNER FROM 2026-09-27: ``connect_from_profile`` sends the same
+    # thing ``send_invitation`` does -- an invitation -- by a second route,
+    # from the named person's own profile. The Sent list is where LinkedIn
+    # lists every invitation he has sent, whichever control sent it, and
+    # neither action's verification can read it (its address carries a
+    # forbidden substring), so for both it is the place a HUMAN settles it.
+    "My Network": frozenset({"send_invitation", "connect_from_profile"}),
     "the post": frozenset({"react_to_item", "comment_on_item"}),
     # ADDED 2026-09-02 FOR THE TWELFTH ACTION. ``send_message`` sends him to
     # his own LinkedIn messages, which no other row names. THE PHRASE IS THE
@@ -234,7 +250,12 @@ _WHERE_TO_LOOK_OWNERS: dict[str, frozenset[str]] = {
     # the delta there -- so the place a human opens is the place this server
     # read. Its ``_VERIFIED_FROM`` row was checked against every owned phrase
     # above and contains none of them.
-    "LinkedIn messages": frozenset({"send_message", "send_reply"}),
+    #
+    # A THIRD OWNER FROM 2026-09-27, entitled for the same reason:
+    # ``message_from_profile`` VERIFIES in the conversation its press opened,
+    # read in place with a before-count, so the conversation in his LinkedIn
+    # messages is the surface it read.
+    "LinkedIn messages": frozenset({"send_message", "send_reply", "message_from_profile"}),
 }
 
 #: THE ONLY SETS OF ACTIONS ALLOWED TO SHARE A ``_WHERE_TO_LOOK`` VALUE
@@ -249,6 +270,11 @@ _LEGITIMATE_SHARED_PLACES: frozenset[frozenset[str]] = frozenset(
         # ``follow_company_page`` settles on the same page, for the reason
         # given on its owner entry above.
         frozenset({"follow_company", "unfollow_company", "follow_company_page"}),
+        # THE INVITATION PAIR, 2026-09-27, by the same equality edit: one act
+        # by two routes -- the rail on his own profile, and the named person's
+        # profile -- settling in the one list LinkedIn keeps of every
+        # invitation sent. The argument is on the "My Network" owner entry.
+        frozenset({"send_invitation", "connect_from_profile"}),
     }
 )
 
@@ -450,9 +476,10 @@ def check_no_two_actions_share_a_place_by_accident(
     )
     assert not unsanctioned, (
         "these actions print the IDENTICAL place to look and are not one of "
-        "the two groups sanctioned to: %s. The sanctioned groups are the save "
-        "pair and the follow pair, and they are compared by equality -- a "
-        "third action joining either one fails here too." % unsanctioned
+        "the groups sanctioned to: %s. The sanctioned groups are the save "
+        "pair, the follow group and (since 2026-09-27) the invitation pair, "
+        "and they are compared by equality -- an action joining any one of "
+        "them fails here too." % unsanctioned
     )
 
 
@@ -586,8 +613,17 @@ def test_the_action_set_is_the_one_this_file_was_measured_against():
     # phrase; its ``_VERIFIED_FROM`` row was checked against every owned
     # phrase above and holds none. On the merged tree the rest of this file
     # passed with both new actions' rows in place.
-    assert len(writes.PERFORMABLE) == 15, (
-        "writes.PERFORMABLE holds %d actions, not the 15 this file was "
+    # SEVENTEEN FROM 2026-09-27 (lane L5's follow-up), earned the same way:
+    # ``connect_from_profile``'s and ``message_from_profile``'s four rows were
+    # read, and this file went red on exactly the three places they share with
+    # an older action. Each was decided on the surface each action MEASURES:
+    # ``message_from_profile`` became an owner of "composer" and of "LinkedIn
+    # messages" (it reads the composer its press opened, then the conversation,
+    # both in place); ``connect_from_profile`` an owner of "My Network", and
+    # the invitation pair a third sanctioned shared place -- one act by two
+    # routes, one Sent list. No row was reworded to dodge a phrase.
+    assert len(writes.PERFORMABLE) == 17, (
+        "writes.PERFORMABLE holds %d actions, not the 17 this file was "
         "measured against: %s. Re-derive the phrase owners in this file for "
         "the new action, then update this count."
         % (len(writes.PERFORMABLE), sorted(writes.PERFORMABLE))
@@ -685,7 +721,7 @@ def test_no_action_sends_him_to_another_actions_page():
     )
 
 
-def test_the_only_actions_sharing_a_place_are_the_two_sanctioned_pairs():
+def test_the_only_actions_sharing_a_place_are_the_sanctioned_groups():
     """Part 2.3 -- exact-value sharing, with the legitimate pairs encoded.
 
     ENCODED RATHER THAN EXEMPTED. "Two actions may share" would pass the

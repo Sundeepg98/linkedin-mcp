@@ -192,8 +192,13 @@ WRITE_CLASS_BUILT_STATES = ("COVERED-UNFIRED", "COVERED-PROVEN")
 #: KNOWN ANSWERS for the walk, so an empty or inverted population cannot pass
 #: as agreement. ``M M6`` (send a message request) is a write-direction GAP
 #: row; ``N 1`` is a COVERED-UNFIRED write and ``P A1`` is a read.
-WRITE_CLASS_KNOWN_IN = ("M M6", "P A14", "N 4")
-WRITE_CLASS_KNOWN_OUT = ("N 1", "P A1")
+#: ``N 4`` WAS A KNOWN-IN ANSWER UNTIL 2026-09-27, when lane L5's follow-up
+#: built it by D6 (``connect_from_profile``) and it left GAP: it is a
+#: known-OUT answer now, a built write keeping its line, and ``N 5`` -- still
+#: a write-direction GAP row, waiting on that route's first capture --
+#: takes its place.
+WRITE_CLASS_KNOWN_IN = ("M M6", "P A14", "N 5")
+WRITE_CLASS_KNOWN_OUT = ("N 1", "N 4", "P A1")
 
 _WC_DISPOSITION_RX = re.compile(r"^(built:[a-z_]+|queued:[A-Z0-9][A-Z0-9-]*|classify-only)$")
 #: A row id may be a RANGE, ``O6-O20``: `profile.md` collapses fifteen toggles

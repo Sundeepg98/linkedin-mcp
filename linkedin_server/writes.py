@@ -5554,7 +5554,11 @@ def _render(
         where["name"] = observation.facts.get("name")
         where["headline"] = observation.facts.get("headline")
     else:
-        # THE SEVEN. Their target is a subject, or a subject AND the content
+        # THE REST -- TEN target kinds, counted 2026-09-27. This line said
+        # "THE SEVEN", which was true until lane L5's thread_and_text made it
+        # eight on 2026-09-24 without the word moving; the named-person route
+        # added profile and profile_and_text. Their target is a subject, or a
+        # subject AND the content
         # that would be published, and the content is PRINTED IN FULL rather
         # than summarised or truncated. That is the point of showing him a
         # block at all: a comment, a post and a message are published under

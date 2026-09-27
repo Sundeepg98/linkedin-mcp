@@ -544,6 +544,10 @@ CLEAN_COMPONENT = {
     # allowlist's own shape (a digit first). SYNTHETIC, as every thread id in
     # this suite is.
     "thread": "2-SYNTHETICCLEANTHREAD==",
+    # ``message_from_profile``'s subject, 2026-09-27: a profile LINK, because
+    # a bare word is refused as a possible name. The segment carries the
+    # declared synthetic slug token ``someone``.
+    "profile": "https://www.linkedin.com/in/someone-clean-example/",
 }
 
 
@@ -1683,9 +1687,14 @@ def test_the_claims_that_depend_on_the_destruction_refusal_are_the_measured_ones
     # refusal -- a reply is a message, and deleting one is destruction --
     # and writes.PERMANENTLY_FORBIDDEN's note was moved from FIVE to SIX in
     # the same commit, by name.
+    # EIGHT SINCE 2026-09-27: connect_from_profile (an invitation, which
+    # withdrawing would destroy) and message_from_profile (a message) lean on
+    # it too, and the note moved from SIX to EIGHT in the same commit, by name.
     assert leaning == (
         "apply_job",
         "comment_on_item",
+        "connect_from_profile",
+        "message_from_profile",
         "publish_post",
         "send_invitation",
         "send_message",

@@ -3,8 +3,20 @@
 An MCP server that shows you your own LinkedIn account data as structured tool
 results instead of pages you have to click through.
 
-**Fifty-six tools ship. Forty-one read. Fifteen write. None is
+**Fifty-eight tools ship. Forty-one read. Seventeen write. None is
 write-shaped and unable to act.**
+
+**THAT LINE READ "Fifty-six ... Forty-one read. Fifteen write" UNTIL LANE L5'S
+FOLLOW-UP, 2026-09-27.** Two writes arrived that act on a person YOU name, from
+that person's own profile: `linkedin_connect_from_profile` sends a connection
+invitation and `linkedin_message_from_profile` a message. Each takes the
+person's profile link or member id -- never a name -- and loads that one
+profile through a second door the read tools cannot reach (ruling
+`THIRD-PARTY-PROFILE-FOR-A-NAMED-TARGET`). The preview is not free: loading
+their profile may show you among their viewers. It prints whom it resolved to
+-- name, headline, link, degree -- before anything is pressed. Message types
+only for a first-degree connection. Census rows `N 4` and `M M1`,
+COVERED-UNFIRED: built offline and never fired.
 
 **THAT LINE READ "Fifty-three ... Thirty-nine read. Fourteen write" UNTIL THE
 LANE L5 MERGE, 2026-09-24,** and "Fifty-five ... Forty-one read. Fourteen
@@ -918,7 +930,7 @@ linkedin_server/
   cdp_bridge.py              the recovery path: attach to a running Chrome
   dom.py                     the read-only harvesters and the control readers
   shape.py                   pure parsers and the result envelope
-  server.py                  the fifty-six tools
+  server.py                  the fifty-eight tools
   errors.py
 tests/                       1393 tests, no network, no account
   fixtures/                  frozen LinkedIn markup, scrubbed

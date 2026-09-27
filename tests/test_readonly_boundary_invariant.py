@@ -1255,8 +1255,35 @@ PINNED = (
 #: nothing. SEVEN of eight digests byte-identical; ``<functions>`` unmoved.
 #: One interpreter, 3.13; the 3.10 cell is CI's.
 #: ------------------------------------------------------------------------
+#: RE-FROZEN 2026-09-27 BY LANE L5'S FOLLOW-UP, AND ONLY ``<functions>``
+#: MOVED -- A SECOND DOOR, NOT A WIDER FIRST ONE:
+#:
+#:     <functions>   d7e1d0922e3af446 -> 6bdd6beaef275129
+#:     every table   unchanged: the allowlist, all three denylists, both
+#:                   exemption tables, SANCTIONED_MUTATIONS, the JS tokens
+#:
+#: Ruling THIRD-PARTY-PROFILE-FOR-A-NAMED-TARGET. Three functions were added
+#: -- ``valid_named_profile_segment``, ``named_profile_url`` and
+#: ``assert_named_profile_url`` -- the door a named act's load of ONE
+#: third party's profile goes through, reached only by
+#: ``browser.LinkedInBrowser.goto(named_profile=True)``, which only
+#: ``writes._load_named_profile`` passes (both pinned in
+#: ``tests/test_named_profile_route.py``). ``assert_read_url`` and
+#: ``is_read_url`` are byte-identical, so the read door still refuses every
+#: such address; the forbidden-substring list applies to the new door with
+#: no exemption table.
+#:
+#: ATTRIBUTION, in this dict's form: the tree MINUS exactly those three
+#: functions (52 lines) hashes to d7e1d0922e3af446, the value replaced, so
+#: nothing else rode in. Controls: dropping ``is_read_url`` instead lands on
+#: f42c70c7413142d5, somewhere else entirely, and a name no function carries
+#: drops nothing and moves nothing. SEVEN of eight digests byte-identical.
+#: One interpreter, 3.13; the 3.10 cell is CI's.
+#: ------------------------------------------------------------------------
 READONLY_AST_AT_LAST_REFREEZE = {
-    "<functions>": "d7e1d0922e3af446",
+    # d7e1d0922e3af446 until 2026-09-27: the named-profile door's three
+    # functions; the last re-freeze note above.
+    "<functions>": "6bdd6beaef275129",
     "JS_MUTATION_TOKENS": "d47e30b67c583c1b",
     # ab8fdd31f93ef4fc until 2026-09-19. See the re-freeze note above: two
     # entries added for press.disclose's click and its closing Escape, on the

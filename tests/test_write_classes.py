@@ -183,9 +183,19 @@ def test_red_on_a_duplicate(tmp_path):
 
 
 def test_red_on_a_row_that_is_not_a_write_gap_row(tmp_path):
-    """``N 1`` is a COVERED-UNFIRED write -- not in the population."""
+    """``N 1`` is a COVERED-UNFIRED write -- not in the population.
+
+    THE DONOR LINE IS A QUEUED ONE, and it has to be (2026-09-27). This took
+    the FIRST ``N`` line, which was ``N 4`` -- queued until lane L5's
+    follow-up built it. A BUILT line may legitimately name a COVERED-UNFIRED
+    row, so a copy of it relabelled ``N 1`` stopped being convicted of the
+    thing this test is about and was convicted of its copied text instead.
+    """
     lines = _lines()
-    i = _find(lines, lambda r: r["key"].startswith("N "))
+    i = _find(
+        lines,
+        lambda r: r["key"].startswith("N ") and not r["disposition"].startswith("built:"),
+    )
     row = _row(lines[i])
     row["key"] = "N 1"
     lines.append(_line(row))

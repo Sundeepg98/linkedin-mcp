@@ -107,6 +107,8 @@ from tests.test_follow_company_page import (
 )
 from tests.test_messaging_threads import THREAD as MESSAGING_THREAD
 from tests.test_messaging_threads import THREAD_ID as MESSAGING_THREAD_ID
+from tests.test_named_profile_route import LINK as NAMED_PROFILE_LINK
+from tests.test_named_profile_route import PROFILE as NAMED_PROFILE
 from tests.test_result_verification_block import SHAREBOX_MARKUP
 from tests.test_send_message_gate import COMPOSER_MARKUP
 from tests.test_selectors_resolve import PAGE as SELECTOR_RESOLUTION_PAGE
@@ -274,6 +276,29 @@ REACHED: dict[str, tuple[str, str, str]] = {
             writes._target_for(
                 spec_for_action("send_reply"),
                 {"thread": MESSAGING_THREAD_ID, "text": "Thursday works."},
+            )
+        ),
+    ),
+    # THE SIXTEENTH AND SEVENTEENTH, 2026-09-27 (census rows ``N 4`` by D6
+    # and ``M M1``, lane L5's follow-up). A SYNTHETIC third-party profile --
+    # no capture of one exists -- whose STRUCTURE borrows his own profile's
+    # measured topcard and the people cards' measured Connect and Message
+    # labels, and whose content is invented; its header says which parts are
+    # which. The preview and the click read the profile through ONE reader,
+    # ``dom.read_named_profile``, and ONE verdict per action, which is the
+    # property this file pins.
+    "connect_from_profile": (
+        "tests/fixtures/synthetic/named_profile.html",
+        NAMED_PROFILE,
+        str(writes._target_for(spec_for_action("connect_from_profile"), NAMED_PROFILE_LINK)),
+    ),
+    "message_from_profile": (
+        "tests/fixtures/synthetic/named_profile.html",
+        NAMED_PROFILE,
+        str(
+            writes._target_for(
+                spec_for_action("message_from_profile"),
+                {"profile": NAMED_PROFILE_LINK, "text": "Thursday works."},
             )
         ),
     ),
@@ -513,8 +538,11 @@ def test_every_performable_action_is_either_reached_or_declared_unreachable():
     # 14 -> 15 the same day (lane L5's merge of master 66aaa95):
     # ``send_reply`` shipped, and it is reached over the synthetic
     # conversation its own tests read, not declared unreachable.
-    assert len(PERFORMABLE) == 15, sorted(PERFORMABLE)
-    assert len(REACHED) == 15, sorted(REACHED)
+    # 15 -> 17 on 2026-09-27 (lane L5's follow-up): ``connect_from_profile``
+    # and ``message_from_profile`` shipped, both reached over the synthetic
+    # named profile their own tests read.
+    assert len(PERFORMABLE) == 17, sorted(PERFORMABLE)
+    assert len(REACHED) == 17, sorted(REACHED)
     assert len(CANNOT_REACH) == 0, sorted(CANNOT_REACH)
 
 

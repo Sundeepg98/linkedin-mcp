@@ -997,6 +997,21 @@ PINNED = {
     #:   b1_standing 11 -> 13, b1_no_ruling 20 -> 21 -- the last GIT MERGED
     #:   CLEAN AND WRONG: both sides moved it 19 -> 20, lane Y2 by `J 158`
     #:   and this lane by `M M49`, and the tree holds both
+    #:
+    #: RE-DERIVED ON LANE L5'S FOLLOW-UP BRANCH, 2026-09-27, over master
+    #: 96c1165 (`_audit/2026-09-24-lane-l5-messaging.md`, "Follow-up: the
+    #: named-person route"). Ruling THIRD-PARTY-PROFILE-FOR-A-NAMED-TARGET
+    #: let two acts load the profile of a person he names:
+    #: `linkedin_message_from_profile` takes `M M1` COVERED-CANNOT-DELIVER ->
+    #: COVERED-UNFIRED, and `linkedin_connect_from_profile` takes `N 4` GAP ->
+    #: COVERED-UNFIRED by D6-CAPABILITY-OVER-AFFORDANCE. Both are W rows the
+    #: write hold binds with no marker. MEASURED on the branch, not summed:
+    #:   adjudicated 202 -> 203, delivered_broad 113 -> 115, unfired 34 -> 36
+    #:   cannot_deliver 19 -> 18, gap 545 -> 544, gap_write 335 -> 334
+    #:   b1_standing 13 -> 15
+    #: `M M6` and `N 5` stay GAP, each now waiting on that route's first
+    #: capture; `M M2` stays COVERED-CANNOT-DELIVER, its positional pointer to
+    #: `M M1` written out.
     "stated_rows": 747,
     #: 762 = 704 stated rows + 58 declared collapses, computed at HEAD. NOT the
     #: published 761 and NOT the counter docstring's 760: those two differ only
@@ -1006,7 +1021,7 @@ PINNED = {
     "capabilities_achievable": 691,
     "out_of_scope": 70,
     "achievable": 677,
-    "adjudicated": 202,
+    "adjudicated": 203,
     #: THE LIVE LANE'S FOUR ROWS, RE-DERIVED AT EACH OF ITS MERGES OF MASTER
     #: (2026-09-24; last over lane S): four rows fired live and banked
     #: (`_audit/2026-09-23-live-lane-session-1.md`). `P G6` COVERED-UNFIRED ->
@@ -1030,16 +1045,16 @@ PINNED = {
     #: (GAP -> COVERED-UNFIRED, `_audit/2026-09-23-lane-l1-refused-reads.md`).
     #: One row changing class moves all five; b3 admitted/refused 40/16 are
     #: L1's allowlist admissions, and b1_no_ruling 7 is P G6 entering bucket 1.
-    "delivered_broad": 113,
+    "delivered_broad": 115,
     #: 79 since the live lane's merge (see `adjudicated`): P G6, N 134, P O3
     #: and M C72 COVERED-PROVEN.
     #: 75 and 21 since the bucket-1 merge: `M C41` fired live and moved from
     #: COVERED-UNFIRED to COVERED-PROVEN (`_audit/2026-09-23-bucket1-fires.md`).
     #: One row changing class moves both, and leaves delivered_broad at 96.
     "delivered_strict": 79,
-    "gap": 545,
-    "cannot_deliver": 19,
-    "unfired": 34,
+    "gap": 544,
+    "cannot_deliver": 18,
+    "unfired": 36,
     #: The live lane's merge: N 134, P O3 and M C72 left GAP.
     "gap_read": 103,
     #: 151, not the 152 published by `_audit/2026-09-21-the-write-ceiling.md`.
@@ -1064,7 +1079,10 @@ PINNED = {
     #: lane L7's one.
     #: 335 since lane L5's merge of master 530227e: lane Y2's fourteen
     #: admitted write rows (337 on master) less this lane's two.
-    "gap_write": 335,
+    #: 334 on lane L5's follow-up branch, 2026-09-27: `N 4` was built by D6
+    #: (`linkedin_connect_from_profile`) and left GAP; its line stays, built.
+    #: `M M1` was not a GAP row, so it moves nothing here.
+    "gap_write": 334,
     #: All 54 are `jobs.md`, which has no per-row R/W column (56 until the
     #: lane-L3 merge built J 18 and J 39). Not a coincidence
     #: and not a defect in the finder: it is the whole of that slice's still-GAP
@@ -1194,11 +1212,16 @@ PINNED = {
     #:   lane L5's fourth     13 standing / 0 / 0 / 21 none, 6 released, of 34,
     #:   merge (over Y2)      measured on the tree merged with 530227e:
     #:                        `J 158` and this lane's three rows together.
+    #:   lane L5's follow-up  15 standing / 0 / 0 / 21 none, 6 released, of 36,
+    #:   (2026-09-27, on its  measured on the branch over 96c1165: `M M1` and
+    #:   branch)              `N 4`, two W rows the write hold binds with no
+    #:                        marker (+2 standing) -- Message and Connect on
+    #:                        the profile of a person he names.
     #: `b1_relayed` is the count this file called `b1_named_target` until the
     #: target condition was registered: a name for what a status COUNTS, not
     #: for which ruling happens to have it today. `b1_released` is a SUBSET of
     #: `b1_no_ruling`: the writes held by nothing because a release says so.
-    "b1_standing": 13,
+    "b1_standing": 15,
     "b1_relayed": 0,
     "b1_pending": 0,
     "b1_no_ruling": 21,
@@ -1251,10 +1274,15 @@ PINNED_B1_ROWS: dict[str, tuple[str, ...]] = {
     #: offline and never fired; `M M17` rests on it by D6 (an emoji is a
     #: character of the words it types). Held until he names the
     #: conversation and the words.
+    #: `M M1` and `N 4` entered with lane L5's follow-up, 2026-09-27: Message
+    #: and Connect on the profile of a person he names by link or member id
+    #: (`linkedin_message_from_profile`, `linkedin_connect_from_profile`; `N 4`
+    #: by D6), built offline and never fired. Held until he names the person
+    #: -- ruling THIRD-PARTY-PROFILE-FOR-A-NAMED-TARGET: never a stranger.
     "OPERATOR-NAMES-THE-TARGET": (
         "J 103", "J 104", "J 128",
-        "M C1", "M C25", "M C32", "M M10", "M M17",
-        "N 1", "N 46", "N 47", "N 48",
+        "M C1", "M C25", "M C32", "M M1", "M M10", "M M17",
+        "N 1", "N 4", "N 46", "N 47", "N 48",
         "P I14",
     ),
     #: `J 18` and `J 39` entered with the lane-L3 merge, 2026-09-23: reads

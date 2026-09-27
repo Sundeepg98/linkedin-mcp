@@ -861,8 +861,11 @@ def selftest(box: pathlib.Path) -> int:
         lines[ed.dep.lineno - 1] = "| " + " | ".join(cells) + " |"
     p.write_bytes(nl.join(lines).encode("utf-8"))
     out, rc = _check_in(tree)
-    record("G3 jobs.md loses every pointer (56 remain elsewhere -- a union "
-           "assertion would pass)", True, out, rc,
+    # COUNTED, NOT TYPED (2026-09-27): this label read "56 remain elsewhere"
+    # -- 69 less jobs.md's 13 -- and stayed 56 while the pin fell to 65.
+    elsewhere = sum(1 for x in edges if x.dep.letter != "J")
+    record(f"G3 jobs.md loses every pointer ({elsewhere} remain elsewhere -- a "
+           "union assertion would pass)", True, out, rc,
            "jobs.md contributed ZERO positional pointers")
 
     # -- G4 EMPTY PIN -----------------------------------------------------------------
@@ -893,8 +896,10 @@ def selftest(box: pathlib.Path) -> int:
     # the pin lost both pointers in the same commit as this literal.
     # 66 since lane L7's merge, 2026-09-24: `P G3` names its ruling in
     # place of its positional 'same ruling', so it is no longer a pointer.
+    # 65 since lane L5's follow-up, 2026-09-27: `M M1` moved to a different
+    # tool, so `M M2`'s positional 'same tool, same gate' was written out.
     record("G5 CALIBRATION -- whitespace in P D15's capability cell", False, out, rc,
-           "PASS -- all 66 pinned pointers")
+           "PASS -- all 65 pinned pointers")
 
     print("THE POINTER-GRAPH GUARD, SHOWN FAILING")
     print("=" * 92)

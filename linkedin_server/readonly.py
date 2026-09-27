@@ -529,6 +529,10 @@ _ALLOWED_URL_PATTERNS: tuple[re.Pattern[str], ...] = (
     # that signal, so a third-party profile load leaves a durable record in
     # that person's own viewer list. `PERMANENTLY_FORBIDDEN` names the act.
     # Removing this line makes the boundary say what the server already claims.
+    # (SINCE 2026-09-27 `known_side_effects` names two WRITE tools that load
+    # the ONE profile a caller names, inside that act, through the second door
+    # below -- `assert_named_profile_url`. This allowlist still admits no
+    # third party's profile, and no read reaches that door.)
     #
     # NOT "NOTHING USES IT, SO CLOSE IT" -- that is the weaker argument and it
     # was rejected. The measurement is the second reason, not the first.
@@ -563,7 +567,9 @@ _ALLOWED_URL_PATTERNS: tuple[re.Pattern[str], ...] = (
     # file says about itself: `known_side_effects` states that no tool here
     # loads a third party's profile, and the intro editor below is confined to
     # `/in/me/` on the MEASURED ground that loading a third party's profile
-    # leaves them a durable record in their own viewer list.
+    # leaves them a durable record in their own viewer list. (The first is
+    # narrower since 2026-09-27 -- see the note above on the second door --
+    # and neither admits a stranger's detail pages to this allowlist.)
     #
     # IT WAS NEARLY INHERITED. The Interests page was first admitted by adding
     # a fourth word to this alternation, which for one commit ALLOWED
