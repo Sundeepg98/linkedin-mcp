@@ -203,9 +203,11 @@ DELIBERATELY_UNWIRED: dict[str, str] = {
 # permitted. The run that proved it live, and the three readers it added to
 # tests/reader_leak_baseline.json (all three "clean"), are in
 # _audit/2026-09-23-readers-four-rows.md, sections 3 and 10. One of them,
-# `server:_profile_views_press_counters`, is recorded not_driven since
-# 2026-09-27: its drive returns before reading the page, and the reader guard
-# stopped counting such a drive clean.
+# `server:_profile_views_press_counters`, was recorded not_driven on
+# 2026-09-27 -- its drive returned before reading the page, and the reader
+# guard stopped counting such a drive clean -- and is clean again since
+# 2026-09-28, driven to the counters over the analytics capture's headline
+# (tests/shipped_drives.py).
 
 
 def _entry_points() -> list[pathlib.Path]:

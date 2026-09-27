@@ -70,6 +70,7 @@ from typing import Any, Callable, Optional
 import pytest
 
 import linkedin_server
+from tests import shipped_drives
 from tests.plantedpage import (
     PLANT,
     RAISED_PLANT,
@@ -170,6 +171,44 @@ EMPTY_RESULT = "not_driven:read the page and returned only an empty shape"
 #: planted page it puts the plant inside a record; a drive of such a reader
 #: that comes back clean did not take it.
 NO_RECORD = "not_driven:reaches a people-record builder and built no record"
+
+#: AND A REFUSAL IS NOT A SUCCESS PATH, EVEN AFTER A READ (2026-09-28, found
+#: while triaging the readers the rule above left not driven). "A read and a
+#: result that is not empty" let a reader through that read the planted page,
+#: judged it wrong, and returned its refusal: measured that day, four readers
+#: were recorded clean that way and no other way -- ``read_compose_fields``,
+#: ``read_self_owned_editor_fields`` and ``_values``, ``read_premium_badge``
+#: -- and every press reader driven as far as its click came back clean on
+#: the ``press_failed`` its own handler made of the harness's refusal (that
+#: refusal can no longer be caught: see ``plantedpage.NavigationAttempted``).
+#:
+#: WHAT IS READ IS THE FIELD, NOT THE WORD: a top-level ``refused`` that is
+#: truthy and is not a TALLY (a mapping or a sequence of per-item counts, as
+#: ``item_addresses`` and six other readers keep under that name). So
+#: ``press_failed`` -- whose own sentence says a failure is not a refusal --
+#: is caught with the refusals: it is under the same field, and it is not a
+#: success either.
+REFUSED_AFTER_READ = "not_driven:read the page and returned a refusal"
+
+#: NOR IS A FAILURE (2026-09-28, the same triage). Three readers were recorded
+#: clean on ``{"error": "AttributeError", ...}``: the planted locator lacked
+#: Playwright's ``and_``/``or_``/``filter``, each reader's own handler caught
+#: the ``AttributeError``, and what came back was a failure envelope with
+#: counts in it -- read, not empty, not a refusal. The locator now answers
+#: those three, and all three reach their readings; this rule is what makes
+#: the next missing method a not-driven verdict instead of a clean one. The
+#: same shape as the refusal rule: a top-level ``error`` that is truthy and
+#: is not a tally.
+ERRORED_AFTER_READ = "not_driven:read the page and returned an error"
+
+#: The not-driven verdicts of a drive that DID read the page. When a reader's
+#: variants are all not driven, one of these names the reader: it is the
+#: variant that got furthest (:func:`_worst`).
+READ_BUT_NOT_DRIVEN = (EMPTY_RESULT, NO_RECORD, REFUSED_AFTER_READ, ERRORED_AFTER_READ)
+
+#: The prefix of a drive that reached an action the planted page refuses
+#: (:class:`plantedpage.NavigationAttempted`): ``navigates (<which>)``.
+NAVIGATES = "not_driven:navigates"
 
 
 @functools.lru_cache(maxsize=1)
@@ -759,11 +798,139 @@ async def _name_the_invitation_recipient_as_shipped(page: Any) -> Any:
 #: need a read: driven by signature they took their first-line returns --
 #: another action's spec, or no landing -- and were recorded clean having
 #: named nobody, the class this file now refuses.
+#:
+#: THE REST JOINED 2026-09-28, from ``tests/shipped_drives.py``: the readers
+#: that rule left not driven, each triaged -- driven to its success path over
+#: a tracked fixture (``DRIVES``), or as far as a press the planted page
+#: refuses (``TO_THE_PRESS``, recorded not driven, run so the reads before
+#: the press are hunted). Its drives that reach page text outside a record
+#: are held out (``HELD_FOR_A_RULING``); see that file.
 AS_SHIPPED: dict[str, Callable[..., Any]] = {
     "named_profile:name_the_profile_target": _name_the_profile_target_as_shipped,
     "threads:name_the_reply_recipient": _name_the_reply_recipient_as_shipped,
     "writes:_name_the_invitation_recipient": _name_the_invitation_recipient_as_shipped,
+    **shipped_drives.DRIVES,
+    **shipped_drives.TO_THE_PRESS,
 }
+
+#: READERS NOTHING TRACKED CAN DRIVE TO THEIR SUCCESS PATH, each with WHAT
+#: WOULD (2026-09-28, the orchestrator's order: "name the capture that would
+#: make it drivable"). Every reader a drive leaves not driven after reading
+#: nothing, reading only empties, refusing, or building no record is here or
+#: has a drive; the test below holds that both ways.
+#:
+#: Each entry opens with its KIND, because a capture is not always the answer:
+#:
+#: * ``CAPTURE`` -- a page state nothing tracked draws. Capturing it (and
+#:   committing a skeleton of it) is what is missing.
+#: * ``ACTION`` -- its success path presses, types or loads a page, which the
+#:   planted page refuses by design. A capture of the page after the action
+#:   is needed AND a stand-in for the action, which is a ruling on this
+#:   harness, not a fixture.
+#: * ``NOT A PAGE READER`` -- it takes ``page`` but its success path reads no
+#:   page content at all (a cookie jar, a disk write, an address), so no
+#:   capture can make this guard's read count move.
+#: * ``RULING`` -- a tracked fixture drives it, and what its success path
+#:   returns is page text outside a record, which the text inventory may not
+#:   admit without one (the drive is held in ``shipped_drives``).
+#:
+#: FIVE OF THE 22 THE ORDER NAMED LEFT THIS SET THE SAME DAY, recorded
+#: ``navigates`` -- a reason that already says what would drive them: a
+#: stand-in for the action. Two had returned "without reading" because their
+#: own ``except Exception`` swallowed the harness's refusal of a page load,
+#: which ``plantedpage.NavigationAttempted`` no longer allows:
+#: ``auth:_warm_session_cookies`` (loads the feed to be issued a cookie, then
+#: reads the cookie jar) and ``writes:_read_account_share_updates`` (loads
+#: the settings page; its page half,
+#: ``profile_editor:read_account_share_updates``, is driven clean). Three are
+#: driven to their click by ``shipped_drives.TO_THE_PRESS``: ``press:disclose``,
+#: ``reveal:reveal``, ``share_link:copy_own_post_link``.
+WHAT_WOULD_DRIVE_IT: dict[str, str] = {
+    "auth:_arm_session_store": (
+        "NOT A PAGE READER: it touches only page.context, returns None on "
+        "every path, and its success path writes the session store "
+        "(SESSION_STORE.save_from_context); no capture moves a page read."
+    ),
+    "auth:_maybe_corroborate": (
+        "NOT A PAGE READER: with corroborate on it either loads the feed "
+        "(BROWSER.goto, refused offline) or works from the address it is "
+        "handed, reading no page content either way."
+    ),
+    "profile_views_more:read_profile_views_more_insights": (
+        "RULING: tests/test_profile_views_more.py's synthetic revealed page "
+        "drives it, and its success path returns the highlight values and "
+        "company names as page text outside a record (HELD_FOR_A_RULING)."
+    ),
+    "dom:read_compose_fields": (
+        "CAPTURE: /messaging/compose/ as loaded -- an empty composer, nothing "
+        "clicked or typed -- drawing its two send-mode radios as "
+        "_audit/2026-08-31-linkedin-perform.md records them (both named by "
+        "label-for, one checked), sanitised into a synthetic skeleton; the "
+        "tracked compose fixture draws no radio. A committed script reading "
+        "exists (tests/test_compose_fields.py MEASURED_MODES), but no page."
+    ),
+    "dom:read_profile_detail_entries": (
+        "RULING: tests/fixtures/profile_skills.html drives it, and its "
+        "success path returns card text as plain strings outside a record "
+        "(HELD_FOR_A_RULING)."
+    ),
+    "dom:read_self_owned_editor_fields": (
+        "RULING: tests/fixtures/synthetic/intro_editor_switches.html drives "
+        "it, and its success path publishes a control's label ungated (the "
+        "self-owned-container ruling): page text outside a record "
+        "(HELD_FOR_A_RULING)."
+    ),
+    "dom:read_self_owned_editor_values": (
+        "RULING: the same intro editor drives it, and its success path "
+        "returns a field's value verbatim and its label ungated: page text "
+        "outside a record (HELD_FOR_A_RULING)."
+    ),
+    "server:_profile_views_more_analytics": (
+        "ACTION: the reveal's click (reveal:reveal is driven to it); after "
+        "it, the page the Show more analytics press reveals, whose reader "
+        "is held for a ruling."
+    ),
+    "server:_profile_views_switch": (
+        "ACTION: three clicks -- pill, option, Show results -- then a harvest; "
+        "a stand-in for the clicks, and the skeleton view_switch's helpers "
+        "need, in its opened, selected and applied states."
+    ),
+    "view_switch:_apply_positions": (
+        "CAPTURE: the Interesting viewers popover open on /analytics/"
+        "profile-views/, as a committed skeleton keeping its button "
+        "controls -- Reset, then Show results. The capture exists "
+        "(_audit/2026-09-23-live-lane-session-1.md Entry 3, pill 1) in "
+        "gitignored lane state only."
+    ),
+    "view_switch:_option_positions": (
+        "CAPTURE: the same popover's two div[role=checkbox] options with "
+        "their aria-label and aria-checked (works at a company you follow, "
+        "verified), as a committed skeleton of the Entry 3 capture."
+    ),
+    "view_switch:_pill_positions": (
+        "CAPTURE: /analytics/profile-views/ with main kept and every main "
+        "[aria-expanded] control's role and caption (Past 90 days, "
+        "Interesting viewers, Company), as a committed skeleton of the "
+        "Entry 3 capture; the tracked captures strip aria-expanded and "
+        "have no main. Keep the controls before the pill: a match at "
+        "position 0 comes back [0], which empty_shape reads as empty."
+    ),
+    "view_switch:_wait_for_option": (
+        "CAPTURE: the Entry 3 popover skeleton, as _option_positions needs "
+        "it, the options visible once the pill is open."
+    ),
+    "view_switch:apply_and_restore": (
+        "ACTION: pill, option and Show results clicks, twice over; the "
+        "Entry 3 skeleton in its opened, selected and applied states, and a "
+        "stand-in for the clicks."
+    ),
+}
+
+#: The verdicts that mean a drive never reached its success path.
+VACUOUS = (NO_PAGE_READ, *READ_BUT_NOT_DRIVEN)
+
+#: The kinds an entry above may open with.
+WHAT_WOULD_DRIVE_IT_KINDS = ("CAPTURE: ", "ACTION: ", "NOT A PAGE READER: ", "RULING: ")
 
 
 def _reader_key(fn: Callable[..., Any]) -> str:
@@ -850,11 +1017,32 @@ def empty_shape(value: Any, depth: int = 0) -> bool:
     return False
 
 
+def _whole_call(result: Any, field: str) -> Any:
+    """``result``'s top-level ``field`` when it is truthy and not a tally (a
+    mapping or a sequence of per-item counts); otherwise ``None``."""
+    if not isinstance(result, dict):
+        return None
+    value = result.get(field)
+    if not value or isinstance(value, (dict, list, tuple, set, frozenset)):
+        return None
+    return value
+
+
+def whole_call_refusal(result: Any) -> Any:
+    """The refusal ``result`` IS, or ``None``. See :data:`REFUSED_AFTER_READ`."""
+    return _whole_call(result, "refused")
+
+
+def whole_call_error(result: Any) -> Any:
+    """The failure ``result`` IS, or ``None``. See :data:`ERRORED_AFTER_READ`."""
+    return _whole_call(result, "error")
+
+
 def classify_drive(result: Any, reads: int, *, builds_records: bool = False) -> tuple[str, str]:
     """The verdict on one DRIVE: what came back, and whether the success path
     ran to produce it -- for a people reader, its records; for any other, a
-    read and a result that is not empty. Pure, so the controls drive the code
-    the guard runs."""
+    read and a result that is neither empty nor a refusal. Pure, so the
+    controls drive the code the guard runs."""
     verdict, detail = classify_returned(result)
     if verdict != CLEAN:
         return verdict, detail
@@ -862,6 +1050,12 @@ def classify_drive(result: Any, reads: int, *, builds_records: bool = False) -> 
         return NO_PAGE_READ, "the reader returned before any read of the page"
     if builds_records:
         return NO_RECORD, f"{reads} read(s), and no people record came back"
+    refusal = whole_call_refusal(result)
+    if refusal is not None:
+        return REFUSED_AFTER_READ, f"{reads} read(s), and it refused: {str(refusal)[:60]}"
+    failure = whole_call_error(result)
+    if failure is not None:
+        return ERRORED_AFTER_READ, f"{reads} read(s), and it failed: {str(failure)[:60]}"
     if empty_shape(result):
         return EMPTY_RESULT, f"{reads} read(s), and every value that came back was empty"
     return CLEAN, f"{reads} read(s)"
@@ -900,10 +1094,26 @@ def _worst(verdicts: list[tuple[str, str]]) -> tuple[str, str]:
     Ranking clean ABOVE not-driven is deliberate for the same reason in reverse
     -- if any variant actually ran and came back clean, the reader WAS measured,
     and reporting it as un-measurable would understate the coverage.
+
+    AND AMONG THE NOT-DRIVEN, THE VARIANT THAT GOT FURTHEST NAMES THE READER
+    (2026-09-28): one that read the page and stopped short of success, then
+    one that reached an action the harness refuses, then the rest -- refused
+    or raised before either. Measured on the tree before that day's drives:
+    the read rank alone moved no recorded verdict. With the drives, the
+    action rank moved four, each to the truer reason: the three press
+    readers, driven to their click, and ``writes:_load_named_profile``, one
+    of whose variants reaches its page load past another's raise.
     """
     order = {LEAKS: 4, RETURNS_TEXT: 3, RETURNS_RECORDS: 2, CLEAN: 1}
-    best = max(verdicts, key=lambda v: order.get(v[0], 0))
-    return best
+
+    def rank(verdict: tuple[str, str]) -> float:
+        if verdict[0] in order:
+            return order[verdict[0]]
+        if verdict[0] in READ_BUT_NOT_DRIVEN:
+            return 0.5
+        return 0.25 if verdict[0].startswith(NAVIGATES) else 0
+
+    return max(verdicts, key=rank)
 
 
 def measure() -> dict[str, tuple[str, str]]:
@@ -1049,15 +1259,48 @@ def test_the_preview_namers_are_driven_to_the_records_they_build(fn_key, records
         ([False, "", {}], 1, EMPTY_RESULT),
         ({"present": True}, 1, CLEAN),
         (PLANT, 0, RETURNS_TEXT),
+        ({"refused": "no_anchor", "why": "a sentence"}, 1, REFUSED_AFTER_READ),
+        ({"pressed": False, "refused": "press_failed", "why": "a sentence"}, 13, REFUSED_AFTER_READ),
+        ({"refused": True, "reason": "a sentence"}, 2, REFUSED_AFTER_READ),
+        ({"recognised": 1, "refused": {"no_href": 1}}, 1, CLEAN),
+        ({"rows": [1], "refused": ["one item"]}, 1, CLEAN),
+        ({"count": 1, "refused": None}, 1, CLEAN),
+        ({"count": 1, "refused": False}, 1, CLEAN),
+        ({"recognised": 0, "containers": 1, "error": "AttributeError"}, 3, ERRORED_AFTER_READ),
+        ({"reading": "on", "named": 1, "error": None}, 2, CLEAN),
+        ({"rows": [1], "error": {"TimeoutError": 1}}, 1, CLEAN),
     ],
     ids=[
         "read and returned", "a refusal that read nothing", "a value that read nothing",
         "read and returned empty", "read and returned None", "nested empties",
         "a True is not empty", "a plant needs no proof",
+        "a refusal after a read", "a press the harness refused", "a refusal spelled True",
+        "a tally is not a refusal", "a list is not a refusal",
+        "no refusal, None", "no refusal, False",
+        "a failure after a read", "no failure, None", "a failure tally is not a failure",
     ],
 )
 def test_a_clean_drive_needs_a_read_and_something_back(result, reads, verdict) -> None:
     assert classify_drive(result, reads)[0] == verdict
+
+
+@pytest.mark.parametrize(
+    "variants, reason",
+    [
+        ([(NO_PAGE_READ, ""), (REFUSED_AFTER_READ, "13 read(s)")], REFUSED_AFTER_READ),
+        ([("not_driven:raises ValueError", ""), (EMPTY_RESULT, "1 read(s)")], EMPTY_RESULT),
+        ([(EMPTY_RESULT, ""), (CLEAN, "2 read(s)")], CLEAN),
+        ([(NO_PAGE_READ, ""), ("not_driven:raises ValueError", "")], NO_PAGE_READ),
+        ([(NO_PAGE_READ, ""), ("not_driven:navigates (locator.click)", "")],
+         "not_driven:navigates (locator.click)"),
+        ([("not_driven:navigates (page.goto)", ""), (EMPTY_RESULT, "1 read(s)")], EMPTY_RESULT),
+    ],
+    ids=["the drive that read names it", "a read outranks a raise", "clean outranks both",
+         "neither read: the first stands", "an action outranks a refusal before it",
+         "a read outranks an action"],
+)
+def test_the_variant_that_got_furthest_names_a_reader_not_driven(variants, reason) -> None:
+    assert _worst(variants)[0] == reason
 
 
 @pytest.mark.parametrize(
@@ -1079,17 +1322,173 @@ def test_a_people_readers_success_path_is_its_records(result, reads, verdict) ->
     assert classify_drive(record, reads, builds_records=True)[0] == RETURNS_RECORDS
 
 
-def test_lane_s_people_reader_is_not_counted_clean() -> None:
-    """THE READER THE ORDER NAMED. ``people_results.read_result_people``
-    reaches a record builder, reads the planted page, skips its one card for
-    want of a member link and returns its denominators: not clean. Its drive
-    that reaches the records is its owner's to build, as named_profile's was."""
+def test_lane_s_people_reader_is_driven_to_its_records() -> None:
+    """THE READER THE ORDER NAMED. Driven by its signature,
+    ``people_results.read_result_people`` reaches a record builder, reads the
+    planted page, skips its one card for want of a member link and returns its
+    denominators: NO RECORD, never clean. Driven over the people-search
+    skeleton (``tests/shipped_drives.py``), it returns ONE record, the plant
+    inside it -- and that is the verdict the baseline records."""
     from linkedin_server import people_results
 
-    assert "people_results:read_result_people" in record_readers()
-    verdict, detail = drive(people_results.read_result_people)
-    assert verdict == NO_RECORD, (verdict, detail)
-    assert _baseline()["people_results:read_result_people"] == NO_RECORD
+    key = "people_results:read_result_people"
+    assert key in record_readers()
+    variants, _refusal = _build_call(people_results.read_result_people)
+    generic = [_drive_once(people_results.read_result_people, a, k, builds_records=True)
+               for a, k in variants or []]
+    assert generic and all(verdict == NO_RECORD for verdict, _ in generic), generic
+    shipped = _drive_once(AS_SHIPPED[key], [PlantedPage()], {}, builds_records=True)
+    assert shipped == (RETURNS_RECORDS, "page text only inside 1 people record(s)"), shipped
+    assert drive(people_results.read_result_people)[0] == RETURNS_RECORDS
+    assert _baseline()[key] == RETURNS_RECORDS
+
+
+#: What each drive to the success path comes back as.
+DRIVEN_TO = {key: CLEAN for key in shipped_drives.DRIVES}
+DRIVEN_TO["people_results:read_result_people"] = RETURNS_RECORDS
+
+
+@pytest.mark.parametrize("key", sorted(shipped_drives.DRIVES))
+def test_a_drive_from_a_tracked_fixture_earns_the_verdict(key: str) -> None:
+    """EACH DRIVE IS WHAT EARNS ITS READER'S VERDICT: alone it comes back
+    clean (or with records), the reader's signature variants alone do not,
+    and the reader's recorded verdict is the drive's."""
+    fn = dict(discover_readers())[key]
+    builds = key in record_readers()
+    verdict, detail = _drive_once(shipped_drives.DRIVES[key], [PlantedPage()], {},
+                                  builds_records=builds)
+    assert verdict == DRIVEN_TO[key], (verdict, detail)
+    variants, _refusal = _build_call(fn)
+    generic = [_drive_once(fn, a, k, builds_records=builds)[0] for a, k in variants or []]
+    assert generic and all(v in VACUOUS for v in generic), generic
+    assert drive(fn)[0] == DRIVEN_TO[key]
+    assert _baseline()[key] == DRIVEN_TO[key]
+
+
+@pytest.mark.parametrize("key", sorted(shipped_drives.TO_THE_PRESS))
+def test_a_drive_to_the_press_reaches_the_press_and_no_further(key: str) -> None:
+    """THE HARNESS'S REFUSAL OF THE CLICK IS THE PROOF THE PRESS WAS REACHED:
+    it escapes the reader's own handler now, so the drive ends on it, after
+    the reads before the press. A drive that fell short of the click comes
+    back with the reader's refusal instead -- ``reveal_control_not_unique``,
+    ``counters_unreadable_before_any_press`` -- and fails here. The reader's
+    recorded verdict is that action: what would drive it further is a
+    stand-in for the click."""
+    verdict, detail = _drive_once(shipped_drives.TO_THE_PRESS[key], [PlantedPage()], {})
+    assert verdict == "not_driven:navigates (locator.click)", (verdict, detail)
+    fn = dict(discover_readers())[key]
+    assert drive(fn)[0] == verdict
+    assert _baseline()[key] == verdict
+    assert key not in WHAT_WOULD_DRIVE_IT
+
+
+@pytest.mark.parametrize("key", sorted(shipped_drives.HELD_FOR_A_RULING))
+def test_a_drive_held_for_a_ruling_still_returns_page_text(key: str) -> None:
+    """HELD, NOT FORGOTTEN. Each of these drives reaches its reader's success
+    path over a tracked fixture, and what comes back is page text outside a
+    record -- a path the 2026-09-24 inventory never measured because nothing
+    drove it, and which it may not admit without a ruling. So they are NOT
+    in ``AS_SHIPPED``, and the reader stays not driven. The day a drive stops
+    returning text, this fails: adopt it then."""
+    verdict, detail = _drive_once(shipped_drives.HELD_FOR_A_RULING[key], [PlantedPage()], {})
+    assert verdict == RETURNS_TEXT, (verdict, detail)
+    assert key not in AS_SHIPPED
+    assert _baseline()[key] in VACUOUS
+    assert WHAT_WOULD_DRIVE_IT[key].startswith("RULING: ")
+
+
+def test_every_vacuous_reader_is_driven_or_names_what_would_drive_it() -> None:
+    """NO READER IS LEFT NOT DRIVEN WITHOUT SAYING WHAT WOULD DRIVE IT
+    (2026-09-28). Every reader whose drives read nothing, read only empties,
+    refused, or built no record is in :data:`WHAT_WOULD_DRIVE_IT`, under a
+    declared kind, and the committed baseline records it so; an entry whose
+    reader is driven now, or gone, is stale."""
+    live = {name: verdict for name, (verdict, _) in measure().items()}
+    vacuous = sorted(name for name, verdict in live.items() if verdict in VACUOUS)
+    untriaged = [name for name in vacuous if name not in WHAT_WOULD_DRIVE_IT]
+    assert untriaged == [], (
+        "reader(s) never reaching their success path, and not triaged: %s. "
+        "Give each a drive in tests/shipped_drives.py from a tracked fixture, "
+        "or say in WHAT_WOULD_DRIVE_IT what would drive it." % untriaged
+    )
+    stale = sorted(name for name in WHAT_WOULD_DRIVE_IT if live.get(name) not in VACUOUS)
+    assert stale == [], (
+        "WHAT_WOULD_DRIVE_IT names reader(s) that are driven now, or gone: %s. "
+        "Remove them." % stale
+    )
+    baseline = _baseline()
+    unrecorded = sorted(name for name in WHAT_WOULD_DRIVE_IT if baseline.get(name) != live[name])
+    assert unrecorded == [], (
+        "the committed baseline does not record these as the harness finds "
+        "them: %s. Regenerate it." % unrecorded
+    )
+    kindless = sorted(
+        name for name, why in WHAT_WOULD_DRIVE_IT.items()
+        if not why.startswith(WHAT_WOULD_DRIVE_IT_KINDS)
+    )
+    assert kindless == [], kindless
+
+
+def test_the_harness_refusal_of_an_action_cannot_be_swallowed() -> None:
+    """A READER'S ``except Exception`` CANNOT TURN THE HARNESS'S REFUSAL INTO
+    A CLEAN (2026-09-28). ``NavigationAttempted`` was a ``RuntimeError``: a
+    reader that read the page, pressed inside a broad handler and returned
+    what it had came back clean, the click swallowed. Measured that day: no
+    reader was recorded clean that way, and five not-driven readers' reasons
+    were wrong -- two of them among the 22 the order named, which returned
+    "without reading" because they had swallowed a page load."""
+
+    async def reads_then_swallows_a_click(page: Any) -> dict[str, Any]:
+        count = await page.locator("main").count()
+        try:
+            await page.locator("button").click()
+        except Exception:  # noqa: BLE001 -- the shape under test
+            pass
+        return {"controls": count}
+
+    verdict, detail = _drive_once(reads_then_swallows_a_click, [PlantedPage()], {})
+    assert verdict == "not_driven:navigates (locator.click)", (verdict, detail)
+    assert not issubclass(NavigationAttempted, Exception)
+
+
+@pytest.mark.parametrize(
+    "key",
+    [
+        "named_profile:read_opened_conversation",
+        "profile_editor:read_account_share_updates",
+        "profile_editor:recognise_intro_editor_switches",
+    ],
+)
+def test_a_reader_that_narrows_a_locator_reaches_its_reading(key: str) -> None:
+    """THE THREE READERS RECORDED CLEAN ON A FAILURE (2026-09-28). Each
+    narrows a locator with Playwright's ``and_``/``or_``/``filter``; the
+    planted locator lacked them, so each returned ``{"error":
+    "AttributeError"}`` and read as clean. Every variant now reaches a
+    reading with no error in it, and the reader's clean is that reading's."""
+    fn = dict(discover_readers())[key]
+    variants, _refusal = _build_call(fn)
+    assert variants
+    for args, kwargs in variants:
+
+        async def run(args: list[Any] = args, kwargs: dict[str, Any] = kwargs) -> Any:
+            call_args, call_kwargs = await resolve_paired_observations(args, kwargs)
+            return await fn(*call_args, **call_kwargs)
+
+        value = asyncio.run(run())
+        assert isinstance(value, dict) and whole_call_error(value) is None, value
+    assert drive(fn)[0] == CLEAN
+
+
+def test_the_failing_locator_narrows_to_a_failing_locator() -> None:
+    """A FAILING PAGE STAYS FAILING THROUGH THE ALGEBRA: a locator narrowed
+    with ``and_``/``or_``/``filter`` off the failing page is itself failing,
+    so no reader escapes the failing family into a page that answers."""
+    base = RaisingPage().locator("main")
+    for narrowed in (base.and_(base), base.or_(base), base.filter(has_text="x")):
+        assert type(narrowed) is RaisingLocator, type(narrowed)
+    planted = PlantedPage().locator("main")
+    for narrowed in (planted.and_(planted), planted.or_(planted), planted.filter()):
+        assert type(narrowed).__name__ == "PlantedLocator", type(narrowed)
 
 
 def _early_return(fn: Callable[..., Any], *, read_first: bool) -> Callable[..., Any]:
@@ -1704,11 +2103,29 @@ def write_baseline() -> int:
     return 0
 
 
+def _sandbox_the_session_store(directory: Any) -> None:
+    """Point the session store at a throwaway path, as ``tests/conftest.py``
+    does for every test. The baseline writer runs OUTSIDE pytest, where that
+    fixture does not apply, and it drives ``auth._arm_session_store`` -- whose
+    success path writes the store. Unreachable today only because the planted
+    page's ``context`` is ``None``: redirected rather than relied on."""
+    from linkedin_server import browser as browser_module
+    from linkedin_server import session_store as store_module
+
+    sandbox = Path(directory) / "session.json"
+    store_module.SESSION_PATH = sandbox
+    browser_module.SESSION_STORE.path = sandbox
+
+
 if __name__ == "__main__":
     import sys as _sys
+    import tempfile as _tempfile
 
     if "--write-baseline" in _sys.argv:
-        raise SystemExit(write_baseline())
+        with _tempfile.TemporaryDirectory() as _scratch:
+            _sandbox_the_session_store(_scratch)
+            _status = write_baseline()
+        raise SystemExit(_status)
     raise SystemExit(
         "usage: python -m tests.test_readers_emit_no_page_string --write-baseline"
     )

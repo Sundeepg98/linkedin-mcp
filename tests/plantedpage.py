@@ -220,12 +220,20 @@ class PageAnswer(dict):
         return PageString(PLANT)
 
 
-class NavigationAttempted(RuntimeError):
+class NavigationAttempted(BaseException):
     """A reader tried to drive the browser. It is NOT-DRIVEN, not clean.
 
     Raised rather than silently accepted so that a reader which navigates,
     clicks or types is reported as a site this offline harness could not
     measure -- with its name -- instead of passing on a no-op.
+
+    A ``BaseException``, NOT A ``RuntimeError`` (2026-09-28), so the reader
+    under test cannot catch it. Readers wrap their presses and loads in
+    ``except Exception`` -- rightly, for a live page -- and as a
+    ``RuntimeError`` this signal was caught there and turned into the
+    reader's own answer: a load swallowed became "returned without reading
+    the page", and a click swallowed after a read would have come back
+    clean. The harness catches it by name; nothing else should.
     """
 
 
@@ -254,6 +262,20 @@ class PlantedLocator:
 
     @property
     def last(self) -> "PlantedLocator":
+        return PlantedLocator(self._depth + 1)
+
+    # PLAYWRIGHT'S LOCATOR ALGEBRA (added 2026-09-28). Missing, a reader that
+    # narrows a locator with one raised AttributeError inside its own handler
+    # and returned ``{"error": "AttributeError"}`` -- and three readers were
+    # recorded clean on exactly that: ``read_opened_conversation``,
+    # ``read_account_share_updates``, ``recognise_intro_editor_switches``.
+    def and_(self, *args: Any, **kwargs: Any) -> "PlantedLocator":
+        return PlantedLocator(self._depth + 1)
+
+    def or_(self, *args: Any, **kwargs: Any) -> "PlantedLocator":
+        return PlantedLocator(self._depth + 1)
+
+    def filter(self, *args: Any, **kwargs: Any) -> "PlantedLocator":
         return PlantedLocator(self._depth + 1)
 
     # -- PLAYWRIGHT-TYPED: the page cannot make these lie -------------------
@@ -545,6 +567,15 @@ class RaisingLocator(PlantedLocator):
 
     @property
     def last(self) -> "RaisingLocator":
+        return RaisingLocator(self._depth + 1)
+
+    def and_(self, *args: Any, **kwargs: Any) -> "RaisingLocator":
+        return RaisingLocator(self._depth + 1)
+
+    def or_(self, *args: Any, **kwargs: Any) -> "RaisingLocator":
+        return RaisingLocator(self._depth + 1)
+
+    def filter(self, *args: Any, **kwargs: Any) -> "RaisingLocator":
         return RaisingLocator(self._depth + 1)
 
 
