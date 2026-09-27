@@ -46,6 +46,7 @@ import logging
 import pytest
 
 from linkedin_server import dom, people_data, threads, writes
+from linkedin_server.config import logger as package_logger
 from linkedin_server.writes import consume
 from tests.test_send_reply import (
     AFTER,
@@ -110,6 +111,37 @@ def carried(name: str, *, receipts=(), records=()) -> list[str]:
         if name in record.getMessage():
             places.append("a log record")
     return places
+
+
+#: Emitted on the package logger when each capture below is set, and required
+#: back out of it: the per-test proof that "a log record" above is read off a
+#: channel this package can reach.
+_CHANNEL_CONTROL = "caplog control: the package logger is heard at DEBUG"
+
+
+def set_root_and_package_to_debug(caplog) -> None:
+    """``caplog`` at DEBUG on the ROOT logger AND on the package's own logger.
+
+    THE ROOT CALL ALONE NEVER HEARD A DEBUG RECORD FROM THIS PACKAGE.
+    ``config.py`` gives the ``linkedin`` logger a level of its own (INFO unless
+    ``LINKEDIN_LOG_LEVEL`` says otherwise) and ``propagate = False``. The
+    handler does reach it -- pytest attaches caplog's handler to every
+    non-propagating logger, and ``tests/conftest.py`` attaches it by name --
+    but ``caplog.set_level(logging.DEBUG)`` lowers only the root, and a logger
+    with a level of its own does not inherit the root's. Every
+    ``logger.debug(...)`` in the package was dropped before capture, so
+    ``carried(..., records=caplog.records)`` passed on a DEBUG line that
+    printed the name: measured 2026-09-28 with a planted record (lane G,
+    item 4). The root call stays for ``threads.py``, which logs through
+    ``getLogger(__name__)`` -- its records reach the root, never ``linkedin``.
+    """
+    caplog.set_level(logging.DEBUG)
+    caplog.set_level(logging.DEBUG, logger=package_logger.name)
+    package_logger.debug(_CHANNEL_CONTROL)
+    assert _CHANNEL_CONTROL in caplog.text, (
+        "caplog cannot hear the package logger at DEBUG: 'no log record "
+        "carries the name' would pass on a line that printed it"
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -225,7 +257,7 @@ async def test_nothing_the_invitation_preview_keeps_carries_the_name(
     """Driven through a spec made grantable, so a grant EXISTS to keep the
     name (``_grantable_invitation``: in production this action mints none,
     and the check would pass on an absence)."""
-    caplog.set_level(logging.DEBUG)
+    set_root_and_package_to_debug(caplog)
     _grantable_invitation(monkeypatch)
     block, _nav_used = await _preview_the_refusal(browser_page, "send_invitation")
     assert block.get("to_confirm"), "no grant was minted, so nothing could keep the name"
@@ -243,7 +275,7 @@ async def test_nothing_a_sent_reply_keeps_carries_the_title(writes_on, browser_p
     """Preview, redeem and FIRE: after the send, the retained state, the
     receipt and every log record carry no title -- and the grant's target is
     the thread id and the words he supplied."""
-    caplog.set_level(logging.DEBUG)
+    set_root_and_package_to_debug(caplog)
     block, _nav_used = await _preview(browser_page)
     assert _TITLE in json.dumps(block["who_this_would_reach"]), "the preview did not name it"
     grant = consume(block["to_confirm"], action=_ACTION, target=TARGET)

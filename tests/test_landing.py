@@ -391,7 +391,12 @@ def test_the_refusal_carries_no_part_of_the_landing_and_neither_does_the_log(
         "https://www.linkedin.com/authwall?sessionRedirect="
         "https%3A%2F%2Fwww.linkedin.com%2Fcompany%2F" + PLANT + "%2F"
     )
-    with caplog.at_level(logging.WARNING, logger="linkedin"):
+    # DEBUG, NOT WARNING: "neither does the log" is a claim about the whole
+    # log, and WARNING raised the package logger's own level from INFO,
+    # dropping every INFO and DEBUG record before capture -- a line quoting
+    # the landing at either level passed it (measured 2026-09-28 with a
+    # planted record, lane G item 4). INFO is the level the server runs at.
+    with caplog.at_level(logging.DEBUG, logger="linkedin"):
         with pytest.raises(NotAuthenticatedError) as caught:
             assert_not_authwall(url, surface="organisation Page")
 

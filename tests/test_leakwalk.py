@@ -22,10 +22,12 @@ import base64
 import json
 import logging
 import sys
+from contextlib import contextmanager
 from pathlib import Path
 
 import pytest
 
+from linkedin_server.config import logger as package_logger
 from tests import leakwalk
 from tests.leakwalk import (
     PLANTED_JSESSIONID,
@@ -43,8 +45,41 @@ from tests.leakwalk import (
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "scripts"))
 
 from credential_echo_control import TRANSFORMS, inject  # noqa: E402
+from credential_echo_control import _LOG as ECHO_LOG  # noqa: E402
 
 SECRET = PLANTED_LI_AT
+
+#: Emitted on the package logger inside every capture below and required back
+#: out of it: the per-test proof that the log these controls read is a channel
+#: the package can reach.
+_CHANNEL_CONTROL = "caplog control: the package logger is heard at DEBUG"
+
+
+@contextmanager
+def root_and_package_at_debug(caplog):
+    """``caplog`` at DEBUG on the ROOT logger AND on the package's own logger.
+
+    THE ROOT CALL ALONE NEVER HEARD A DEBUG RECORD FROM THE PACKAGE.
+    ``config.py`` gives the ``linkedin`` logger a level of its own (INFO unless
+    ``LINKEDIN_LOG_LEVEL`` says otherwise) and ``propagate = False``. The
+    handler does reach it -- pytest attaches caplog's handler to every
+    non-propagating logger, and ``tests/conftest.py`` attaches it by name --
+    but ``caplog.at_level(logging.DEBUG)`` lowers only the root, and a logger
+    with a level of its own does not inherit the root's. The controls below
+    stayed green only because the ``in_log`` transform wrote to
+    ``linkedin_server.auth``, a logger NOTHING in the package uses, which
+    reaches the root by propagation: they certified a channel the package
+    never writes. Measured 2026-09-28 with a planted record (lane G, item 4).
+    """
+    with caplog.at_level(logging.DEBUG), caplog.at_level(
+        logging.DEBUG, logger=package_logger.name
+    ):
+        package_logger.debug(_CHANNEL_CONTROL)
+        yield
+    assert _CHANNEL_CONTROL in caplog.text, (
+        "caplog cannot hear the package logger at DEBUG: an absence asserted "
+        "over this log would pass on a line that printed the value"
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -90,7 +125,7 @@ def test_every_leaking_transform_is_caught(transform, caplog):
     replaced, five of these transforms produced no complaint at all.
     """
     payload = {"credential": {"present": True, "expires_in_days": 300}}
-    with caplog.at_level(logging.DEBUG):
+    with root_and_package_at_debug(caplog):
         leaked = inject(payload, SECRET, transform)
 
     extra = [caplog.text] + [r.getMessage() for r in caplog.records]
@@ -101,7 +136,7 @@ def test_every_leaking_transform_is_caught(transform, caplog):
 def test_assert_no_leak_raises_on_every_leaking_transform(transform, caplog):
     """The same grid, through the assertion the tests actually call."""
     payload = {"credential": {"present": True}}
-    with caplog.at_level(logging.DEBUG):
+    with root_and_package_at_debug(caplog):
         leaked = inject(payload, SECRET, transform)
         with pytest.raises(AssertionError):
             assert_no_leak(leaked, SECRET, caplog=caplog)
@@ -234,9 +269,25 @@ def test_a_run_one_character_short_of_the_threshold_is_not_a_leak():
 
 
 def test_a_clean_result_stays_clean_with_an_empty_log(caplog):
-    with caplog.at_level(logging.DEBUG):
-        logging.getLogger("linkedin_server.auth").debug("no browser available")
+    """The quiet direction of the LOG half: a clean record, on the logger the
+    package really writes (``config.logger`` -- not ``linkedin_server.auth``,
+    which nothing in the package uses), read back and not convicted. The
+    record is required IN the haystack first: a quiet check over a log that
+    heard nothing passes perfectly and says nothing."""
+    with root_and_package_at_debug(caplog):
+        package_logger.debug("no browser available")
+    assert "no browser available" in caplog.text, "the clean record never reached the log"
     assert_no_leak(CLEAN_RESULT, SECRET, caplog=caplog)
+
+
+def test_the_echo_control_writes_to_the_log_the_package_writes():
+    """The ``in_log`` transform is a leak INTO THE PACKAGE'S LOG, so it has to
+    be emitted where the package logs: ``config.logger``. Until 2026-09-28 it
+    went to ``linkedin_server.auth``, which reaches the root by propagation and
+    so was heard by captures that could not hear the real logger at DEBUG --
+    every ``in_log`` control here and every ``in_log`` cell of
+    ``scripts/leak_matrix.py`` convicted a channel the package never writes."""
+    assert ECHO_LOG.name == package_logger.name, ECHO_LOG.name
 
 
 # ---------------------------------------------------------------------------

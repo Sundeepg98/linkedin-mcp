@@ -41,8 +41,10 @@ from __future__ import annotations
 
 import hashlib
 import json
+import logging
 import os
 import time
+from contextlib import contextmanager
 from pathlib import Path
 
 import pytest
@@ -50,6 +52,7 @@ import pytest
 from linkedin_server import auth as auth_module
 from linkedin_server import profile_lock as profile_lock_module
 from linkedin_server import server as server_module
+from linkedin_server.config import logger as package_logger
 from linkedin_server.errors import BrowserUnavailableError
 from tests.conftest import FakePage, FakeResponse, me_response
 from tests.leakwalk import PLANTED_JSESSIONID, assert_no_leak, find_leaks
@@ -681,9 +684,42 @@ def test_durability_keeps_its_fields_and_its_measured_note(tmp_path):
 # 3. No credential value, anywhere, on any path
 # ---------------------------------------------------------------------------
 
+#: Emitted on the package logger inside every capture below and required back
+#: out of it: the per-test proof that the log half of each leak check reads a
+#: channel this package can reach.
+_CHANNEL_CONTROL = "caplog control: the package logger is heard at DEBUG"
+
+
+@contextmanager
+def root_and_package_at_debug(caplog):
+    """``caplog`` at DEBUG on the ROOT logger AND on the package's own logger.
+
+    THE ROOT CALL ALONE NEVER HEARD A DEBUG RECORD FROM THIS PACKAGE.
+    ``config.py`` gives the ``linkedin`` logger a level of its own (INFO unless
+    ``LINKEDIN_LOG_LEVEL`` says otherwise) and ``propagate = False``. The
+    handler does reach it -- pytest attaches caplog's handler to every
+    non-propagating logger, and ``tests/conftest.py`` attaches it by name --
+    but ``caplog.at_level("DEBUG")`` lowers only the root, and a logger with
+    a level of its own does not inherit the root's. Every
+    ``logger.debug(...)`` in the package was dropped before capture, so a
+    "no record carries the credential" check passed on a DEBUG line that
+    printed it: measured 2026-09-28 with a planted record (lane G, item 4).
+    The root call stays for modules that log through ``getLogger(__name__)``
+    (``threads.py``), whose records reach the root and never ``linkedin``.
+    """
+    with caplog.at_level(logging.DEBUG), caplog.at_level(
+        logging.DEBUG, logger=package_logger.name
+    ):
+        package_logger.debug(_CHANNEL_CONTROL)
+        yield
+    assert _CHANNEL_CONTROL in caplog.text, (
+        "caplog cannot hear the package logger at DEBUG: an absence asserted "
+        "over this log would pass on a line that printed the value"
+    )
+
 
 def test_the_offline_result_carries_no_cookie_value(tmp_path, caplog):
-    with caplog.at_level("DEBUG"):
+    with root_and_package_at_debug(caplog):
         result = auth_module.session_info_offline(
             healthy_profile(tmp_path), mode="launch", why_no_live_check="no browser"
         )
@@ -696,7 +732,7 @@ async def test_the_live_result_carries_no_cookie_value(patched_navigation, caplo
         expiries={"li_at": time.time() + 300 * 86400},
         responses=[me_response()],
     )
-    with caplog.at_level("DEBUG"):
+    with root_and_package_at_debug(caplog):
         result = await auth_module.session_info(page)
 
     assert_no_leak(result, PLANTED_SECRET, caplog=caplog)
@@ -709,7 +745,7 @@ def test_a_logout_result_carries_no_cookie_value(tmp_path, monkeypatch, caplog):
     unlocked(tmp_path, monkeypatch)
     profile = healthy_profile(tmp_path)
 
-    with caplog.at_level("DEBUG"):
+    with root_and_package_at_debug(caplog):
         result = auth_module.logout(profile, confirm=True)
 
     assert result["cleared"] is True

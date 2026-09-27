@@ -57,7 +57,7 @@ import logging
 import subprocess
 import sys
 import xml.etree.ElementTree as ET
-from contextlib import asynccontextmanager
+from contextlib import asynccontextmanager, contextmanager
 from pathlib import Path
 from typing import Any, Callable, Optional
 
@@ -66,6 +66,7 @@ import pytest
 from linkedin_server import browser as browser_module
 from linkedin_server import people_data, people_results, people_search
 from linkedin_server import server as server_module
+from linkedin_server.config import logger as package_logger
 from tests.plantedpage import (
     PLANT,
     carries_a_plant_word,
@@ -535,13 +536,47 @@ class _RaisingPage:
         return [_RaisingHandle() for _ in range(4)]
 
 
+#: Emitted on the package logger inside every capture below and required back
+#: out of it: the per-test proof that "logged" is read off a channel the
+#: package can reach.
+_CHANNEL_CONTROL = "caplog control: the package logger is heard at DEBUG"
+
+
+@contextmanager
+def root_and_package_at_debug(caplog):
+    """``caplog`` at DEBUG on the ROOT logger AND on the package's own logger.
+
+    THE ROOT CALL ALONE NEVER HEARD A DEBUG RECORD FROM THIS PACKAGE -- the
+    belief that it captures "every logger" is the defect. ``config.py`` gives
+    the ``linkedin`` logger a level of its own (INFO unless
+    ``LINKEDIN_LOG_LEVEL`` says otherwise) and ``propagate = False``: the
+    handler reaches it (pytest attaches caplog's handler to every
+    non-propagating logger, and ``tests/conftest.py`` attaches it by name),
+    but ``caplog.at_level(logging.DEBUG)`` lowers only the root, and a logger
+    with a level of its own does not inherit the root's. A DEBUG line on the
+    package logger quoting the plant passed every absence below: measured
+    2026-09-28 with a planted record (lane G, item 4). The root call stays for
+    ``getLogger(__name__)`` loggers, which reach the root and never
+    ``linkedin``.
+    """
+    with caplog.at_level(logging.DEBUG), caplog.at_level(
+        logging.DEBUG, logger=package_logger.name
+    ):
+        package_logger.debug(_CHANNEL_CONTROL)
+        yield
+    assert _CHANNEL_CONTROL in caplog.text, (
+        "caplog cannot hear the package logger at DEBUG: an absence asserted "
+        "over this log would pass on a line that printed the value"
+    )
+
+
 @pytest.mark.parametrize("list_raises, failed", [(False, 4), (True, 1)])
 def test_mitigation_3_a_failure_is_counted_by_its_type_and_never_quoted(
     caplog, list_raises, failed
 ):
     """Per card, and for the list itself: counted by the exception's TYPE,
     the message -- which quotes the page -- never kept, logged or raised."""
-    with caplog.at_level(logging.DEBUG):
+    with root_and_package_at_debug(caplog):
         result = asyncio.run(
             people_results.read_result_people(_RaisingPage(list_raises=list_raises))
         )
@@ -1182,11 +1217,14 @@ def test_a_result_with_one_line_has_no_headline():
 
 
 def test_mitigation_3_no_name_reaches_any_logger_on_the_success_path(caplog):
-    """NEVER STORED, for logs: the planted drive of section 4, run with every
-    logger captured at DEBUG -- the root logger, so a module's own
-    ``getLogger(__name__)`` is captured too. No record carries any word of
+    """NEVER STORED, for logs: the planted drive of section 4, run with the
+    root logger AND the package logger captured at DEBUG. The root alone is
+    not "every logger": it hears a module's own ``getLogger(__name__)``, but
+    ``linkedin`` -- the logger ``config.logger`` names, and the one nearly
+    every module writes -- keeps its own INFO level and does not propagate,
+    so its DEBUG lines never reached the root's capture. No record carries any word of
     the plant, in its message or its arguments."""
-    with caplog.at_level(logging.DEBUG):
+    with root_and_package_at_debug(caplog):
         drive = _drive_tool(mutate=_planted_mutation(), keywords="engineer",
                             include_names=True)
     assert carries_the_plant(drive), "the drive never carried the plant"
@@ -1195,19 +1233,24 @@ def test_mitigation_3_no_name_reaches_any_logger_on_the_success_path(caplog):
         assert not carries_a_plant_word(rendered), record.name
 
 
-def test_THIS_CONTROL_CAN_FAIL_a_logged_name_is_caught(caplog, monkeypatch):
+@pytest.mark.parametrize(
+    "logger_name", ["linkedin_server.people_results", package_logger.name]
+)
+def test_THIS_CONTROL_CAN_FAIL_a_logged_name_is_caught(caplog, monkeypatch, logger_name):
+    """ON BOTH CHANNELS A MODULE CAN LOG ON. The module-named logger alone was
+    the whole control until 2026-09-28, and it reaches the root by
+    propagation -- so this stayed green while the capture above could not hear
+    a DEBUG line on ``linkedin``, the logger the package actually writes."""
     original = people_results._read_card
 
     async def chatty(card: Any) -> Any:
         verdict = await original(card)
         if not isinstance(verdict, str):
-            logging.getLogger("linkedin_server.people_results").debug(
-                "read %s", verdict[0].name
-            )
+            logging.getLogger(logger_name).debug("read %s", verdict[0].name)
         return verdict
 
     monkeypatch.setattr(people_results, "_read_card", chatty)
-    with caplog.at_level(logging.DEBUG):
+    with root_and_package_at_debug(caplog):
         _drive_tool(mutate=_planted_mutation(), keywords="engineer", include_names=True)
     assert any(carries_a_plant_word(r.getMessage()) for r in caplog.records)
 

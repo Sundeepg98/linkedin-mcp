@@ -12,6 +12,7 @@ from __future__ import annotations
 
 import json
 import logging
+from contextlib import contextmanager
 
 import pytest
 
@@ -23,6 +24,7 @@ from linkedin_server.auth import (
     require_auth,
 )
 from linkedin_server.config import ME_API
+from linkedin_server.config import logger as package_logger
 from linkedin_server.errors import AuthUnknownError, NotAuthenticatedError
 from tests.conftest import FakePage, FakeResponse, me_response
 from tests.leakwalk import PLANTED_JSESSIONID, PLANTED_LI_AT, assert_no_leak
@@ -289,11 +291,45 @@ def planted_cookie_page(**kwargs) -> FakePage:
     )
 
 
+#: Emitted on the package logger inside every capture below and required back
+#: out of it: the per-test proof that the log half of each leak check reads a
+#: channel this package can reach.
+_CHANNEL_CONTROL = "caplog control: the package logger is heard at DEBUG"
+
+
+@contextmanager
+def root_and_package_at_debug(caplog):
+    """``caplog`` at DEBUG on the ROOT logger AND on the package's own logger.
+
+    THE ROOT CALL ALONE NEVER HEARD A DEBUG RECORD FROM THIS PACKAGE.
+    ``config.py`` gives the ``linkedin`` logger a level of its own (INFO unless
+    ``LINKEDIN_LOG_LEVEL`` says otherwise) and ``propagate = False``. The
+    handler does reach it -- pytest attaches caplog's handler to every
+    non-propagating logger, and ``tests/conftest.py`` attaches it by name --
+    but ``caplog.at_level(logging.DEBUG)`` lowers only the root, and a logger
+    with a level of its own does not inherit the root's. Every
+    ``logger.debug(...)`` in the package was dropped before capture, so a
+    "no record carries the credential" check passed on a DEBUG line that
+    printed it: measured 2026-09-28 with a planted record (lane G, item 4).
+    The root call stays for modules that log through ``getLogger(__name__)``
+    (``threads.py``), whose records reach the root and never ``linkedin``.
+    """
+    with caplog.at_level(logging.DEBUG), caplog.at_level(
+        logging.DEBUG, logger=package_logger.name
+    ):
+        package_logger.debug(_CHANNEL_CONTROL)
+        yield
+    assert _CHANNEL_CONTROL in caplog.text, (
+        "caplog cannot hear the package logger at DEBUG: an absence asserted "
+        "over this log would pass on a line that printed the value"
+    )
+
+
 async def test_no_cookie_value_ever_reaches_a_tool_result(caplog):
     """Cookie VALUES are credentials. Only their presence may be reported."""
     page = planted_cookie_page(responses=[me_response()])
 
-    with caplog.at_level(logging.DEBUG):
+    with root_and_package_at_debug(caplog):
         result = await check_auth(page)
 
     assert result["session_cookie_present"] is True
@@ -306,7 +342,7 @@ async def test_no_cookie_value_leaks_from_the_login_result(
 ):
     page = planted_cookie_page(responses=[FakeResponse(401, ""), me_response()])
 
-    with caplog.at_level(logging.DEBUG):
+    with root_and_package_at_debug(caplog):
         result = await login_via_browser(page, wait_seconds=5)
 
     assert_no_leak(result, PLANTED_LI_AT, caplog=caplog)
@@ -557,7 +593,7 @@ async def test_session_info_never_returns_a_cookie_value(patched_navigation, cap
         responses=[me_response()],
     )
 
-    with caplog.at_level(logging.DEBUG):
+    with root_and_package_at_debug(caplog):
         result = await auth_module.session_info(page)
 
     # The expiry it DOES report is the point of the tool, so it is asserted

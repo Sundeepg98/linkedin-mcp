@@ -222,6 +222,11 @@ from linkedin_server import (
     threads,
     uploads,
 )
+# THE PACKAGE'S LOGGER, as ``dom`` imports it. Missing until 2026-09-28: the
+# one ``logger.debug`` here -- the invitation namer's handler for a label that
+# did not read, whose comment says "never raised" -- raised ``NameError``
+# instead (lane G, the order of 04:25, found by its log-capture census).
+from linkedin_server.config import logger
 from linkedin_server.errors import WriteAttemptError
 
 # ---------------------------------------------------------------------------

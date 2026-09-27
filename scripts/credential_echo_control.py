@@ -66,7 +66,16 @@ TRANSFORMS = (
     "in_log",
 )
 
-_LOG = logging.getLogger("linkedin_server.auth")
+#: THE LOGGER THE PACKAGE WRITES, not one named after a module. Every module in
+#: ``linkedin_server`` logs through ``config.logger``, which is ``linkedin``:
+#: its own level, ``propagate = False``. Until 2026-09-28 this was
+#: ``linkedin_server.auth`` -- a logger nothing in the package uses, which
+#: reaches the ROOT by propagation, so every ``in_log`` cell was caught by a
+#: root-level capture that could not hear a DEBUG line on the real logger.
+#: A literal, not an import of ``config``: ``leak_matrix.py`` imports this
+#: file with only ``scripts/`` on the path. ``tests/test_leakwalk.py`` pins
+#: the name to ``config.logger.name``.
+_LOG = logging.getLogger("linkedin")
 
 
 def render(secret: str, transform: str) -> Any:

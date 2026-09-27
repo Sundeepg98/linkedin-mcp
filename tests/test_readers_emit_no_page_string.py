@@ -1302,6 +1302,47 @@ def test_the_preview_namers_are_driven_to_the_records_they_build(fn_key, records
     assert detail == f"page text only inside {records} people record(s)", detail
 
 
+class _TheLabelDoesNotRead(_OneCardOnTheRail):
+    """The rail reads as the observation recorded it; the control's label
+    fails to read, as a live page's can."""
+
+    @property
+    def first(self) -> Any:
+        return _TheLabelDoesNotRead(self._located.first)
+
+    async def get_attribute(self, name: str, **kwargs: Any) -> Any:
+        raise RuntimeError("the label did not read")
+
+
+class _AFailingLabelOnTheRail(_AnswersTheInvitationRail):
+    def locator(self, *args: Any, **kwargs: Any) -> Any:
+        return _TheLabelDoesNotRead(self._page.locator(*args, **kwargs))
+
+
+def test_the_invitation_namer_survives_a_label_that_does_not_read() -> None:
+    """A FAILED READ IS LOGGED BY ITS TYPE AND THE BLOCK COMES BACK
+    (2026-09-28, found by lane G item 4's census). The namer's handler logged
+    through a ``logger`` that ``writes.py`` never defined, so the branch its
+    own comment calls "never raised" raised ``NameError`` -- and no drive had
+    reached it: the signature variants return first, the as-shipped drive's
+    label reads."""
+    from linkedin_server import writes
+
+    from tests import refusinggrant
+
+    spec = writes.spec_for_action("send_invitation")
+    observation = _inert_observation(
+        spec, {"controls": 1}, target=refusinggrant.synthetic_target(spec)
+    )
+    block = {"marker": "the preview block, untouched"}
+    out = asyncio.run(
+        writes._name_the_invitation_recipient(
+            _AFailingLabelOnTheRail(PlantedPage()), spec, observation, dict(block)
+        )
+    )
+    assert out == block, out
+
+
 # ---------------------------------------------------------------------------
 # A clean verdict is earned: the success path ran
 # ---------------------------------------------------------------------------
@@ -1774,7 +1815,12 @@ def test_as_count_logs_the_type_and_never_the_value(caplog: Any) -> None:
 
     from linkedin_server.coerce import as_count
 
-    with caplog.at_level(logging.WARNING, logger="linkedin"):
+    # DEBUG, NOT WARNING: ``PLANT not in caplog.text`` below is a claim about
+    # the whole log, and WARNING raised the package logger's own level from
+    # INFO, dropping every INFO and DEBUG record before capture -- a line
+    # quoting the value at either level passed it (measured 2026-09-28 with a
+    # planted record, lane G item 4). INFO is the level the server runs at.
+    with caplog.at_level(logging.DEBUG, logger="linkedin"):
         assert as_count(PLANT) == 0
         assert as_count(PLANT, 7) == 7
 
@@ -1947,19 +1993,30 @@ class _CollectRecords(logging.Handler):
             _DRIVE_LOG.append(repr(record.msg) + repr(record.args))
 
 
+#: THE PACKAGE'S LOGGERS: ``linkedin``, which ``config`` names and most modules
+#: import, and the MODULE-NAMED ones under ``linkedin_server`` (``threads``
+#: logs through ``getLogger(__name__)``). Each is heard at DEBUG while a reader
+#: is driven -- the second was deaf until 2026-09-28: it inherits the root's
+#: WARNING, so its DEBUG records never reached a handler.
+PACKAGE_LOGGERS = ("linkedin", "linkedin_server")
+
+
 def _drive_failing_once(
     fn: Callable[..., Any], args: list[Any], kwargs: dict[str, Any]
 ) -> tuple[str, str]:
-    log = logging.getLogger("linkedin")
     handler = _CollectRecords(level=logging.DEBUG)
-    level = log.level
-    log.addHandler(handler)
-    log.setLevel(logging.DEBUG)
+    saved = []
+    for name in PACKAGE_LOGGERS:
+        log = logging.getLogger(name)
+        saved.append((log, log.level))
+        log.addHandler(handler)
+        log.setLevel(logging.DEBUG)
     try:
         return _drive_failing_once_logged(fn, args, kwargs)
     finally:
-        log.removeHandler(handler)
-        log.setLevel(level)
+        for log, level in saved:
+            log.removeHandler(handler)
+            log.setLevel(level)
 
 
 def _drive_failing_once_logged(
@@ -2068,6 +2125,30 @@ def test_the_log_capture_sees_a_record_it_was_not_shown() -> None:
     _DRIVE_LOG.clear()
     drive_failing(logs_the_type)
     assert _DRIVE_LOG and sum(RAISED_PLANT in m for m in _DRIVE_LOG) == 0
+
+
+def test_the_log_capture_hears_a_module_named_logger_too() -> None:
+    """NOT ONLY ``linkedin`` (2026-09-28, lane G item 4's census). One module,
+    ``threads``, logs through ``getLogger(__name__)`` -- ``linkedin_server.
+    threads``, which is not under ``linkedin`` and sits at the root's level,
+    WARNING, so its DEBUG records were dropped before any handler: a reader
+    logging a failing library's message there was counted zero times.
+    Measured: planted on ``linkedin`` it was counted once; on the module's
+    logger, never."""
+    import logging as _logging
+
+    log = _logging.getLogger("linkedin_server.threads")
+
+    async def logs_the_message_by_module(page: Any) -> dict[str, Any]:
+        try:
+            await page.locator("x").count()
+        except Exception as exc:  # noqa: BLE001 - the defect, on purpose
+            log.debug("read failed: %s: %s", type(exc).__name__, exc)
+        return {}
+
+    _DRIVE_LOG.clear()
+    drive_failing(logs_the_message_by_module)
+    assert sum(RAISED_PLANT in m for m in _DRIVE_LOG) == 1, len(_DRIVE_LOG)
 
 
 @pytest.mark.parametrize("name", [n for n, _ in discover_readers()])

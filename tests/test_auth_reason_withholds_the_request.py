@@ -58,12 +58,14 @@ perfectly and certifies nothing.
 from __future__ import annotations
 
 import logging
+from contextlib import contextmanager
 
 import pytest
 
 from linkedin_server import auth as auth_module
 from linkedin_server.auth import check_auth, require_auth
 from linkedin_server.config import API_TIMEOUT_MS
+from linkedin_server.config import logger as package_logger
 from linkedin_server.errors import AuthUnknownError, NotAuthenticatedError
 from tests.conftest import FakePage, FakeResponse
 from tests.leakwalk import PLANTED_JSESSIONID, PLANTED_LI_AT, assert_no_leak
@@ -121,6 +123,40 @@ def planted_page(**kwargs) -> FakePage:
     return FakePage(
         cookies={"li_at": PLANTED_LI_AT, "JSESSIONID": PLANTED_JSESSIONID},
         **kwargs,
+    )
+
+
+#: Emitted on the package logger inside every capture below and required back
+#: out of it: the per-test proof that the log half of each leak check reads a
+#: channel this package can reach.
+_CHANNEL_CONTROL = "caplog control: the package logger is heard at DEBUG"
+
+
+@contextmanager
+def root_and_package_at_debug(caplog):
+    """``caplog`` at DEBUG on the ROOT logger AND on the package's own logger.
+
+    THE ROOT CALL ALONE NEVER HEARD A DEBUG RECORD FROM THIS PACKAGE.
+    ``config.py`` gives the ``linkedin`` logger a level of its own (INFO unless
+    ``LINKEDIN_LOG_LEVEL`` says otherwise) and ``propagate = False``. The
+    handler does reach it -- pytest attaches caplog's handler to every
+    non-propagating logger, and ``tests/conftest.py`` attaches it by name --
+    but ``caplog.at_level(logging.DEBUG)`` lowers only the root, and a logger
+    with a level of its own does not inherit the root's. Every
+    ``logger.debug(...)`` in the package was dropped before capture, so a
+    "no record carries the credential" check passed on a DEBUG line that
+    printed it: measured 2026-09-28 with a planted record (lane G, item 4).
+    The root call stays for modules that log through ``getLogger(__name__)``
+    (``threads.py``), whose records reach the root and never ``linkedin``.
+    """
+    with caplog.at_level(logging.DEBUG), caplog.at_level(
+        logging.DEBUG, logger=package_logger.name
+    ):
+        package_logger.debug(_CHANNEL_CONTROL)
+        yield
+    assert _CHANNEL_CONTROL in caplog.text, (
+        "caplog cannot hear the package logger at DEBUG: an absence asserted "
+        "over this log would pass on a line that printed the value"
     )
 
 
@@ -191,13 +227,15 @@ async def test_no_branch_of_check_auth_publishes_the_credential(branch, caplog):
 
     ``assert_no_leak`` reads the whole returned object AND the log -- every
     encoding, every 12-character run, keys as well as values. ``caplog`` hears
-    the ``linkedin`` logger because ``tests/conftest.py`` attaches its handler
-    to that logger by name; without that autouse fixture the log half of this
-    assertion would read an empty channel and pass on anything.
+    the ``linkedin`` logger at DEBUG because :func:`root_and_package_at_debug`
+    lowers that logger as well as the root. The handler alone was never
+    enough: ``tests/conftest.py`` attaches it by name, but the logger's own
+    INFO level dropped every DEBUG record before it, and this assertion's log
+    half passed on a DEBUG line that printed the credential.
     """
     page = planted_page(responses=[REASON_BRANCHES[branch]])
 
-    with caplog.at_level(logging.DEBUG):
+    with root_and_package_at_debug(caplog):
         result = await check_auth(page, warm=False)
 
     # The branch really was taken: every one of these is a non-True verdict
@@ -228,7 +266,7 @@ async def test_require_auth_does_not_raise_the_credential(branch, caplog):
     page = planted_page(responses=[REASON_BRANCHES[branch]])
 
     raised: Exception | None = None
-    with caplog.at_level(logging.DEBUG):
+    with root_and_package_at_debug(caplog):
         try:
             await require_auth(page)
         except (AuthUnknownError, NotAuthenticatedError) as exc:
@@ -256,7 +294,7 @@ async def test_session_info_why_not_does_not_publish_the_credential(
     """
     page = planted_page(responses=[_playwright_shaped_failure("timeout")])
 
-    with caplog.at_level(logging.DEBUG):
+    with root_and_package_at_debug(caplog):
         result = await auth_module.session_info(page)
 
     assert result["authenticated"] is None
@@ -307,7 +345,7 @@ async def test_login_result_does_not_republish_the_credential(
         ],
     )
 
-    with caplog.at_level(logging.DEBUG):
+    with root_and_package_at_debug(caplog):
         result = await auth_module.login_via_browser(page, wait_seconds=1)
 
     assert result.get("authenticated") is not True

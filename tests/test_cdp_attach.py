@@ -482,7 +482,12 @@ async def test_a_reset_that_fails_is_recorded_by_type_and_the_attach_stands(
     """A NET, NOT A GATE: the reads go on, and the failure is said out loud."""
     real_attach["browser"].fail = ConnectionError("NEEDLE-reset-text")
 
-    with caplog.at_level(logging.WARNING, logger="linkedin"):
+    # DEBUG, NOT WARNING: ``"NEEDLE" not in caplog.text`` below is a claim
+    # about the whole log, and WARNING raised the package logger's own level
+    # from INFO, dropping every INFO and DEBUG record before capture -- a line
+    # quoting the error at either level passed it (measured 2026-09-28 with a
+    # planted record, lane G item 4). INFO is the level the server runs at.
+    with caplog.at_level(logging.DEBUG, logger="linkedin"):
         pw, client, context = await cdp_bridge.attach()
 
     assert context is real_attach["context"]
