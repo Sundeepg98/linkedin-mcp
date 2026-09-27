@@ -2311,3 +2311,88 @@ named (three of them blocked), and 2 are blocked reads.
 
 **The decisions it puts to the orchestrator, D-1 to D-8,** and one to him,
 D-9 -- the ids only he can supply. None is taken here.
+
+### Integration, gates, and what did not run
+
+**Commits on this branch, none pushed, none attributed**, each through the
+pre-commit identity gate with 0 hits: `93d90c2` (a), `2761e35` (b), `4453124`
+(c), `56f129a` (d), `826ad09` (a's census note, below), `3233ebd` (the merge
+of master), and this section's commit.
+
+**ITEM (a)'S CENSUS NOTE, MENDED AT THE GATE OF (c) AND (d).** Its note on
+the profile census row O6-O20 wrote the two substrings its exemption excuses
+in backticks. The refused-address check reads every backticked path in a GAP
+row's cell as an address the row rests on, so it checked the substring
+itself, found it refused, and counted the row: 74 against its pin of 73. (a)'s
+gate never ran that check -- its selection named the read boundary's tests,
+and this one reads the census through a script -- and the gate of (c) and
+(d), built from every test that reads `scripts/`, did. The note now quotes
+them, as the cell's own text does, and the check reads 73.
+
+**THE ONE INTEGRATION**, at master's tip when the preparation was done:
+`52b55b6`, 68 commits and 137 files past `2eb90ad` -- lane L8's outward
+classes, the census applications of their rulings, and lane G's people-data
+foundation. Six conflicts, each resolved against the merge base:
+
+    file                                     resolution
+    the profile census                       O6-O20 changed here only, O21 on
+                                             master only, on neighbouring lines:
+                                             each side's row kept
+    tests/test_navigation_is_never_derived   master had emptied the table of
+                                             three entries and kept session 1's
+                                             harness as debt pending its
+                                             conversion; (c) converted it, so
+                                             the table is EMPTY and its note
+                                             records the debt as paid
+    tests/test_readonly_boundary_invariant   only the ledger notes: both kept,
+                                             master's first, one more for the
+                                             merge. The merged readonly.py equals
+                                             master on eleven digests and this
+                                             branch on its two, and the pin dict
+                                             matches all thirteen, no hand edit
+    the audit index, the rulings register,   master's, regenerated to a fixed
+    the blocker map                          point over the merged corpus
+
+`writes.py` and the reader baseline merged without conflict: (b)'s wiring --
+the reading before the editor, the four save-gate calls, the receipt's key --
+and its two readers are present beside lanes L8's and G's changes, and the
+merged gate below runs both sides' tests over them.
+
+**AND ONE THING THE MERGE BROUGHT INTO THE PLAN:** since lane G, the reply
+preview's `who_this_would_reach` is a people record under
+`PREVIEW-NAMES-THE-RESOLVED-TARGET` -- the name and headline the page draws
+for the conversation he named, sanitised, marked untrusted, returned at
+runtime and never written. That is the identity the plan's outward block
+shows him once; the plan's D-6 and its step 4.1 now cite it.
+
+**GATES, each on a committed tree:**
+
+    item     tree       files   result
+    (a)      93d90c2       94   6100 passed, 4 skipped
+    (b)      2761e35       75   4993 passed, 3 skipped, 1 xfailed
+    (c)(d)   56f129a       97   5813 passed, 4 skipped, 1 xfailed, 1 FAILED:
+                                the refused-address pin, mended in 826ad09;
+                                that file and two boundary-reading census
+                                files re-run, 28 passed
+    merge    3233ebd      185   8822 passed, 8 skipped, 1 xfailed: (b)'s and
+                                (c)(d)'s selections, every test file master
+                                changed since the base, and the census and
+                                boundary files (a) reaches
+
+plus: the census instruments on the merged tree, all exit 0 but the
+asserted-name checker, whose eight findings are the pinned eight in other
+waves' documents; the three generators at a fixed point; red-proofs, (a) 6
+plants, (b) 9, (c) 22, none surviving; strict ASCII over every file touched;
+the changed Python compiled under Python 3.10.19.
+
+**NOT RUN, named:**
+
+* **the full suite locally**, by order: 82 of the merged tree's 267 test
+  files were outside its gate, and CI's cells run them at the merge;
+* **anything live**, by order: no attach, no load, no press. So every
+  harness key, `attach_check` against the real driver's protocol log, and the
+  offline replay of a REAL capture are proven only on synthetic pages, fakes
+  and synthetic log lines;
+* **the impact gate**: the selections above were built by hand and are
+  named, each with its reason;
+* **session 2 itself**, which runs on the orchestrator's separate go.

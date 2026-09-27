@@ -81,9 +81,12 @@ Each is the orchestrator's unless it says his. A recommendation is mine.
   same words with one emoji he names (default U+1F44D). Typed exactly as
   granted; the send gate refuses a changed word before Send.
 * **D-6. The identity shown once.** For the reply target, the preview's
-  `who_this_would_reach` -- what the conversation's own header draws -- is
-  what he confirms. The confirm must follow the preview within 120 s, so if
-  his answer comes later the preview is taken again: one load, budgeted.
+  `who_this_would_reach` is what he confirms: since lane G, a people record
+  under `PREVIEW-NAMES-THE-RESOLVED-TARGET` -- the name and headline the page
+  draws for the conversation he named, sanitised, marked untrusted, returned
+  at runtime and never written; the receipt keeps only the thread id he
+  supplied. The confirm must follow the preview within 120 s, so if his
+  answer comes later the preview is taken again: one load, budgeted.
 * **D-7. The Me menu (`me_menu`, lane Y's item 9).** A press on his own view,
   the discovery curve's item; riding on his profile's page, no load.
   Recommendation: fire.
@@ -216,7 +219,7 @@ total by hand.
 
 | step | call | target, by role | rows | loads (total) | rests on | needs him |
 |---|---|---|---|---|---|---|
-| 4.1 | `linkedin_send_reply` preview | the brother's existing thread, its id supplied by him | `M M10`; lane L5's C3 (a) and C7 ride on the preview | 1 (32), +1 if the preview is re-taken (33) | `OPERATOR-NAMES-THE-TARGET`; `WRITE-CLASS-B` | YES: the thread, the words, and the identity once |
+| 4.1 | `linkedin_send_reply` preview | the brother's existing thread, its id supplied by him | `M M10`; lane L5's C3 (a) and C7 ride on the preview | 1 (32), +1 if the preview is re-taken (33) | `OPERATOR-NAMES-THE-TARGET`; `WRITE-CLASS-B`; `PREVIEW-NAMES-THE-RESOLVED-TARGET` (D-6) | YES: the thread, the words, and the identity once |
 | 4.2 | the same call with its `confirm_token`, within 120 s | the same | `M M10` | 2 (35) | the same | YES |
 | 4.3 | `linkedin_send_reply`, preview then confirm, with the emoji | the same thread | `M M17` | 3 (38) | `D6-CAPABILITY-OVER-AFFORDANCE`; `OPERATOR-NAMES-THE-TARGET` | YES; a changed emoji refuses before Send, and is not retried |
 
