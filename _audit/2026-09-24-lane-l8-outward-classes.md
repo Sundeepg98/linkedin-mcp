@@ -305,7 +305,9 @@ stays**:
   the key that held it is gone and no other written ground reaches it; each
   names as its blocker that the three classes do not include it, plus what else
   stands (a capture, an admission, an organiser precondition). Master's `P P2`
-  (delete his account data) joined this list at the merge (section 9.2).
+  (delete his account data) joined this list at the merge (section 9.2). The
+  orchestrator decided all five on 2026-09-27; section 10 applies both
+  rulings.
 
 The GAP rows whose blockers NAMED a retired key keep their state and restate
 the blocker: the repost pair `M C20` / `M C21` (the Repost menu capture), the
@@ -879,6 +881,170 @@ graph now shows 4 moved pointers where it showed 3 (section 5.3). The census
 and audit batch was re-run on this record's last edit: 8 failed and 522
 passed in 85.2 s -- the same eight pins as section 9.4.
 
+## 10. The rulings on the five rows, applied, and every pin re-derived (2026-09-27)
+
+The orchestrator ordered this at about 16:35, after it had sampled the branch at
+`965a13c` over master `2eb90ad`. Disk agreed with the order before anything
+moved: HEAD `965a13c`; master still `2eb90ad` and an ancestor of HEAD; the five
+rows read as section 5.1 describes. The orchestrator merges nothing else until
+this branch lands, so this tree IS the merged tree, and the pin moves section
+5.3 listed are this lane's to apply -- each re-derived here, by the instrument
+that owns it, on the final tree.
+
+### 10.1 The two rulings
+
+The document `_audit/2026-09-27-rulings-relation-removals-and-account-destruction.md`
+was copied byte-identical from the main tree (compared with `cmp`). Both
+rulings are registered in `scripts/build_rulings_index.py`, after
+OUTWARD-CLASSES-BUILT-BEHIND-GRANTS, with the ids, claims, binds, anchors
+and notes the order gave:
+- RELATION-REMOVALS-BUILT-BEHIND-GRANTS -- removing a 1st-degree
+  connection, blocking a member, removing an attendee from his event: BUILT
+  behind the grant, fired only at the one member he names.
+- ACCOUNT-DESTRUCTION-STAYS-MANUAL -- merging or closing his account, and
+  deleting the data LinkedIn holds about him: NOT built, EXCLUDED-RULED,
+  with the ruling's reopener.
+
+No document guard objected, so NO WORD of either entry or of the document
+changed. The register resolves both anchors and claims both declarations:
+66 rulings, 255 documents. The asserted-name check stays at its pinned 8
+sites, and every cited SHA resolves. The correction and reopener scans are
+in section 10.4.
+
+### 10.2 The six rows
+
+- **`N 29`, `N 141`, `N A14` stay GAP.** Each gains a RESTATED marker under
+  RELATION-REMOVALS-BUILT-BEHIND-GRANTS. The class is ruled, so each
+  "BLOCKER, NAMED:" is the build plus what the row itself still needs:
+  - `N 29`: the connections list's row menu has never been opened or
+    captured.
+  - `N 141`: its control sits on the named member's profile, so it needs the
+    named-profile route, then a capture inside his named act. Lane L5 is
+    building that route on its own branch; none of it is on master, so none
+    of it is cited.
+  - `N A14`: he organizes no event (the N A admin precondition), and the
+    attendee control has never been captured.
+  The NOT-REV notes are kept.
+- **`P N27` and `P P2`: GAP to EXCLUDED-RULED** on
+  ACCOUNT-DESTRUCTION-STAYS-MANUAL, with the ruling's REOPENER in each cell.
+  The old text is kept.
+- **`P N28`: state unchanged.** The ruling is added as its capability-level
+  ground, beside the forbidden-tuple entry that holds the address, with the
+  REOPENER.
+- **Side tables and instruments:**
+  - `write-classes.tsv`: the three relation rows move to a new act,
+    `remove-relation` (R3). Each gets a queue of its own
+    (CONNECTION-ROW-MENU-CAPTURE, NAMED-PROFILE-ROUTE,
+    EVENT-ORGANIZER-PRECONDITION) and cites both rulings. `P N27` and `P P2`
+    leave the table, since they are no longer write-direction GAP rows. The
+    act `outside-the-classes` no longer holds a line, so it leaves the
+    closed vocabulary in `scripts/check_write_classes.py`, which says why.
+  - `exclusion-basis.tsv`: `P N27` and `P P2` are filed under a new family,
+    ACCOUNT-DESTRUCTION-STAYS-MANUAL. It is registered in
+    `scripts/check_exclusion_basis.py` as made by the ORCHESTRATOR with
+    op=NO -- the D5-PASSIVE-COST-IS-NOT-A-ROW precedent -- and anchored on
+    the ruling's own two lines. `P N28` is filed under
+    ACCOUNT-END-SUBSTRINGS+ACCOUNT-DESTRUCTION-STAYS-MANUAL, and the ruling's
+    line is added as a source.
+  - The blocker map, the rulings index and the audit index are regenerated
+    by their generators.
+
+### 10.3 The pins, re-derived on the final tree (before, then after)
+
+| pin | owner | before | after | what moved it |
+|---|---|---|---|---|
+| census row population | `pin_census_rows.py --write` into `tests/census_row_pin.json`; `PINNED_ROW_TOTAL`, `PINNED_SLICE_ROWS` | 769; P 235 | 770; P 236 | `P A23b`, the split |
+| stated labels | `test_a_census_locator_names_its_row` literal | 769 | 770 | `P A23b` |
+| `census_completion.PINNED` | `census_completion.py --check` | (below) | (below) | each key carries its own dated cause |
+| bucket one, row by row | `PINNED_B1_ROWS` | -- | + `M C63`, `N 64`, OPERATOR-NAMES-THE-TARGET | the build |
+| write-classes split | `test_write_classes` | (16, 36, 306) | (16, 36, 333) | 358 + 29 - 2 = 385 lines |
+| messaging triage headline | `test_triage_instrument`, new `AFTER_LANE_L8` | 124 {R 17, W 103, R+W 4} | 131 {R 17, W 110, R+W 4} | eight M rows returned, `C63` built |
+| GAP rows on refused addresses | `EXPECTED_GAP_ROWS` | 73 | 78 | `M C62`, `N A15`, `P F5`, `P K7`, `P M3` entered GAP |
+| pointer graph | `measure_pointer_graph.py --pin`; the selftest's G5 literal; the guard's docstring | 66 | 65 | `M C63`'s pointer gone; `P B3`, `P E5`, `P F4` re-pinned on their donors' new verdicts |
+
+`census_completion.PINNED`, the 14 figures that moved:
+
+| figure | before | after |
+|---|---|---|
+| stated_rows | 769 | 770 |
+| capabilities | 783 | 784 |
+| capabilities_achievable | 712 | 741 |
+| out_of_scope | 71 | 43 |
+| achievable | 698 | 727 |
+| adjudicated | 205 | 179 |
+| delivered_broad | 115 | 117 |
+| unfired | 36 | 38 |
+| gap | 564 | 591 |
+| gap_write | 353 | 378 |
+| gap_unknown | 107 | 109 |
+| jobs_gap | 107 | 109 |
+| jobs_dir_w | 58 | 60 |
+| b1_standing | 13 | 15 |
+
+The rulings' own share of these moves: `P N27` and `P P2` leaving GAP for
+EXCLUDED-RULED move out_of_scope +2, gap -2, gap_write -2, achievable -2
+and adjudicated +2. The three relation rows stay GAP, and move no figure.
+
+After every edit to a pinned dict, an ast duplicate-key check ran over all
+33 Python files the lane has touched: 465 dict literals and 0 duplicate
+keys. It also checked the two registries built without a literal: the rulings
+register, 66 ids, and the exclusion families, 32 calls, both with no
+duplicates. The check was run red first, on a planted duplicate key. The
+write count did not move in this step. The earlier prose-ordinal sweep still
+holds: nothing in the package still counts fifteen writes except as history.
+
+### 10.4 Gates on the final tree
+
+- **The derived files.** The blocker map, the rulings index and the audit
+  index were regenerated in a loop until their hashes stopped changing. That
+  took two passes. `--check` then passed on each.
+- **The census instruments**, with no pin or write flag -- all green:
+  - `census_completion --check`: every headline figure matches its pin.
+  - `check_read_addresses`: 104 of 104.
+  - `check_write_classes`: 385 lines, 16 / 36 / 333.
+  - `check_exclusion_basis`: population 43, table 43, 0 structural.
+  - `check_jobs_directions`: 109 of 109.
+  - `ruling_holds`: 1 standing hold, 3 lifted, 1 release, all resolving.
+  - `pin_census_rows`: 770, matching.
+  - `check_gap_rows_on_refused_addresses`: 78, MATCH, PASS.
+  - Also green: `measure_pointer_graph --check` (65),
+    `classify_writeoff_reasons --check`, both triage scripts,
+    `check_census_locators_resolve`,
+    `check_contingent_writeoffs_carry_a_reopener` (PASS), and
+    `check_cited_shas_resolve`.
+  - `check_asserted_names_resolve` reports its pinned 8 sites, none new.
+- **The tests.** The impact set comes from `scripts/impact_gate.py`: 22 staged
+  paths selected 139 test files, the 20 corpus-wide guards among them. The
+  order's extras were added: `test_readonly.py`,
+  `test_readonly_boundary_invariant.py`, `test_writes.py`, the tool-surface
+  pin, and the correction, cited-SHA, reopener and asserted-name guards. Only
+  the reopener test was not already selected, so the run is 140 files, with
+  `-n 6 --dist loadfile`: 7554 passed, 8 skipped and 1 xfailed, none failed,
+  in 2910 s (exit 0; all 140 files are in its junit record).
+- **The final text.** This section was written after that run, and one list
+  in the capture queue lost `P N27`, which now queues nothing. The derived
+  files were then regenerated the same way, to a fixed point, and 29 files
+  ran on the final text: the analyser's 20 corpus-wide guards (the
+  correction and asserted-name guards among them), the cited-SHA and
+  reopener guards, the three derived-file guards, and the locator,
+  prose-claim, settled-count and path-hygiene tests: 3197 passed, none
+  failed (exit 0).
+- **NOT run:**
+  - The full suite. The analyser itself recommends widening to it, because
+    139 of 253 files is past its 45% line. It was not run, by the standing
+    order against a local full suite; CI certifies when the orchestrator
+    pushes.
+  - Anything live, and no browser but the local headless Chromium that the
+    fixture tests drive over committed markup.
+  - `scripts/build_read_map.py`: the observed read map the analyser leans on
+    was recorded at `5c910e4`. It can only add files to a plan, never trim
+    one.
+  - The rest of the analyser's set for this section's own edit. Asked about
+    this record and the audit index alone, it names 117 files. All of them
+    ran in the 140-file run, on the tree before this text; the text adds no
+    ruling declaration, no census row and no code, and the guards that read
+    prose ran on it again, as above.
+
 ## Live queue
 
 One act of the three classes is built, so one proof is queued. Nothing in this
@@ -923,8 +1089,18 @@ repost must exist first), `M C62` (a pending group request must exist),
 per-thread menus, lane L5's surface), `P I11` (the Open To Work editor, never
 loaded), `P K7` (the verification surface), `P F5` / `N 125` and the received-
 recommendation rows (his recommendations section, refused by allowlist silence
-until admitted), the settings-family rows `J 87`, `N 96`, `P M3`, `P N27`
+until admitted), the settings-family rows `J 87`, `N 96` and `P M3`
 (admission by name first), and `P A23b` (a name-pronunciation recording must
-first exist, and only the mobile app can make one). `P P2` (deleting his
-account data) is outside the three classes and waits on his ruling, not on
-a capture.
+first exist, and only the mobile app can make one).
+
+Since section 10, three more rows sit in a ruled class,
+RELATION-REMOVALS-BUILT-BEHIND-GRANTS, and each names a capture of its own.
+Each is taken only at a member HE NAMES:
+- `N 29`: the row menu of one connection he names, on the admitted
+  connections list.
+- `N 141`: the block control on the named member's profile, once the
+  named-profile route exists.
+- `N A14`: the attendee control of an event he organizes, once there is one.
+
+`P P2`, `P N27` and `P N28` queue nothing: ACCOUNT-DESTRUCTION-STAYS-MANUAL
+keeps them manual.

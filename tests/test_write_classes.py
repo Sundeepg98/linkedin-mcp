@@ -146,10 +146,21 @@ def test_the_split_is_the_one_the_lane_report_quotes():
     all R3 -- P4 and P5 (two data-rights requests) and P6-P14, P16-P23
     (settings awaiting admission by name). P3 and P15 are reads and P2 is
     EXCLUDED-RULED, so none of the three has a line here.
-    339 + 19 = 358 = 16 R1 + 36 R2 + 306 R3."""
+    339 + 19 = 358 = 16 R1 + 36 R2 + 306 R3.
+
+    385 AT LANE L8'S MERGE OF MASTER (2026-09-27), MEASURED
+    (`_audit/2026-09-24-lane-l8-outward-classes.md`, s5.2, s9 and s10).
+    OUTWARD-CLASSES-BUILT-BEHIND-GRANTS returned 26 write rows, each classed
+    R3 by its act (endorse, delete-or-withdraw-own, and the relation removals);
+    `N 125` became a W row once its R/W cell read `W` (+1); `P A23b` entered,
+    split from `P A23` (+1); master's `P P2` returned at the merge (+1). Then
+    ACCOUNT-DESTRUCTION-STAYS-MANUAL made `P N27` and `P P2` EXCLUDED-RULED
+    (-2), and RELATION-REMOVALS-BUILT-BEHIND-GRANTS moved `N 29`, `N 141` and
+    `N A14` to the act remove-relation, still R3. R1 and R2 are untouched.
+    358 + 29 - 2 = 385 = 16 R1 + 36 R2 + 333 R3."""
     rows, _ = cwc.load()
     split = cwc.split(rows)
-    assert (split["R1"], split["R2"], split["R3"]) == (16, 36, 306)
+    assert (split["R1"], split["R2"], split["R3"]) == (16, 36, 333)
     assert split["R1:built"] + split["R1:queued"] == split["R1"]
 
 

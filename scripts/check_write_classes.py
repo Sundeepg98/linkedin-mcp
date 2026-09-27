@@ -192,9 +192,20 @@ WRITE_CLASS_ACTS: dict[str, str] = {
     #                           built (a connection, a block, another member's
     #                           attendance): not `connect`, which is R2 and
     #                           classify-only here, and not his own item.
+    #                           RETIRED 2026-09-27 (lane L8, s10): no line holds
+    #                           it. RELATION-REMOVALS-BUILT-BEHIND-GRANTS ruled
+    #                           its three relation rows a class of their own
+    #                           (remove-relation, below), and
+    #                           ACCOUNT-DESTRUCTION-STAYS-MANUAL took P P2 out of
+    #                           scope. Kept out of the dict so no line can use it.
+    #   remove-relation         removing a relation with a member he names -- a
+    #                           1st-degree connection, a block, an attendee of an
+    #                           event he organizes (added 2026-09-27, lane L8,
+    #                           under RELATION-REMOVALS-BUILT-BEHIND-GRANTS). R3:
+    #                           not `connect`, and not in the first round.
     "endorse": "R3",
     "delete-or-withdraw-own": "R3",
-    "outside-the-classes": "R3",
+    "remove-relation": "R3",
 }
 
 #: The passage each non-residual class RESTS ON. A line of that class must cite

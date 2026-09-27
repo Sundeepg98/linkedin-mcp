@@ -8,9 +8,9 @@
 
 **THIS REGISTER IS NOT THE CORPUS AND DOES NOT CLAIM TO BE COMPLETE.** Read section 4 before concluding a question is unruled: the scan that keeps it honest reads ONE marker, and the ruling that caused this file to be written does not carry it.
 
-    rulings registered       64
-    documents scanned        254
-    RULED: declarations      51 claimed, 7 triaged, 0 unclaimed
+    rulings registered       66
+    documents scanned        255
+    RULED: declarations      53 claimed, 7 triaged, 0 unclaimed
 
 ---
 
@@ -151,6 +151,8 @@ Scan the CLAIM column against your question. Every claim is a paraphrase written
 | id | what was ruled | binds | when | where (document / section) |
 |---|---|---|---|---|
 | `OUTWARD-CLASSES-BUILT-BEHIND-GRANTS` | Repost or share, endorse or recommend, and delete or withdraw one of his own items are BUILT behind the single-use grant, off by default, fired only at a target he names. PERMANENTLY_FORBIDDEN keeps only entries whose grounds are mitigations. | the classes ruling (b) did not name | 2026-09-24 | [2026-09-24-rulings-names-at-runtime.md](2026-09-24-rulings-names-at-runtime.md)<br>*The outward classes ruling (b) did not name* |
+| `ACCOUNT-DESTRUCTION-STAYS-MANUAL` | Merging or closing his account, and deleting the data LinkedIn holds about him, are NOT built: EXCLUDED-RULED, reopened only when he asks for one by name in the call that would make it. | his account and its data | 2026-09-27 | [2026-09-27-rulings-relation-removals-and-account-destruction.md](2026-09-27-rulings-relation-removals-and-account-destruction.md)<br>*Destroying the account or its data* |
+| `RELATION-REMOVALS-BUILT-BEHIND-GRANTS` | Removing a relation with a member he names -- removing a 1st-degree connection, blocking a member, removing an attendee from an event he organises -- is BUILT behind the single-use grant, off by default, fired only at the one member he names in the call, with the resolved identity reported before the act. | his relations with another member | 2026-09-27 | [2026-09-27-rulings-relation-removals-and-account-destruction.md](2026-09-27-rulings-relation-removals-and-account-destruction.md)<br>*Removing a relation with a person he names* |
 
 ---
 
@@ -257,6 +259,8 @@ Scan the CLAIM column against your question. Every claim is a paraphrase written
 
 ## 3. NOTES ON INDIVIDUAL RULINGS
 
+**`ACCOUNT-DESTRUCTION-STAYS-MANUAL`** -- Orchestrator's call applying the operator's 08:11 principle; overridable. Decides P N27 and P P2, and adds a capability-level ground to P N28.
+
 **`BOUNDARY-IS-NOT-A-REASON`** -- The application of EXCLUDED-RULED-ADMISSION that section 5.4a found. It quotes the census rule rather than restating it.
 
 **`CANONICAL-RULING-ID`** -- THIS FILE IS THAT RULING'S ARTIFACT. It is why the register prints a section heading and never a line number, and why the aliases column exists at all.
@@ -315,6 +319,8 @@ Scan the CLAIM column against your question. Every claim is a paraphrase written
 
 **`PERMALINK-READ-IS-ALLOWED`** -- `M C42` records that this ruling DID NOT REACH naming the target -- which is why that row cannot rest on it. See the DISPUTED section of `_audit/2026-09-21-what-was-ruled.md`.
 
+**`RELATION-REMOVALS-BUILT-BEHIND-GRANTS`** -- Orchestrator's call applying the operator's 08:11 principle and OUTWARD-ACTS-NEED-THE-OPERATOR; overridable. Decides N 29, N 141 and N A14, which lane L8 left outside the three classes.
+
 **`REVEAL-BUTTON-IS-A-DISCLOSURE`** -- Orchestrator's call under OUTWARD-ACTS-NEED-THE-OPERATOR; overridable.
 
 **`SEARCH-ADMISSION-APPROVED-FIVE-CONDITIONS`** -- Condition 2 was AMENDED the same day -- see SEARCH-CONDITION-2-CLOSED. The ruling bars FIRING, not READING; conflating the two cost a later wave a decision it did not need.
@@ -341,7 +347,7 @@ Scan the CLAIM column against your question. Every claim is a paraphrase written
 
 | signal NOT scanned | files | lines |
 |---|---|---|
-| a heading naming a ruling | 119 | 260 |
+| a heading naming a ruling | 120 | 262 |
 | a bold line opening on RULING/RULED | 61 | 139 |
 | the phrase THE RULING | 36 | 57 |
 | a named -RULING id | 34 | 90 |
@@ -409,6 +415,8 @@ Every `RULED:` line in the corpus, and what became of it. An UNCLAIMED row fails
 | [2026-09-24-rulings-search-verticals-rosters-passive-costs.md](2026-09-24-rulings-search-verticals-rosters-passive-costs.md) | RULED: (orchestrator, 2026-09-24, delegated) D3 IS ANSWERED NO. A refusal | `D3-UNREGISTERED-REFUSAL-IS-NOT-A-RULING` |
 | [2026-09-24-rulings-search-verticals-rosters-passive-costs.md](2026-09-24-rulings-search-verticals-rosters-passive-costs.md) | RULED: (orchestrator, 2026-09-24, delegated) MEMBER ROSTERS ARE ADMITTED AS | `MEMBER-ROSTERS-AS-BOUNDED-READS` |
 | [2026-09-24-rulings-search-verticals-rosters-passive-costs.md](2026-09-24-rulings-search-verticals-rosters-passive-costs.md) | RULED: (orchestrator, 2026-09-24, delegated) D5 IS ANSWERED: A PASSIVE COST IS | `D5-PASSIVE-COST-IS-NOT-A-ROW` |
+| [2026-09-27-rulings-relation-removals-and-account-destruction.md](2026-09-27-rulings-relation-removals-and-account-destruction.md) | RULED: (orchestrator, 2026-09-27, applying the operator's 08:11 principle) REMOVING A RELA | `RELATION-REMOVALS-BUILT-BEHIND-GRANTS` |
+| [2026-09-27-rulings-relation-removals-and-account-destruction.md](2026-09-27-rulings-relation-removals-and-account-destruction.md) | RULED: (orchestrator, 2026-09-27, applying the operator's 08:11 principle) ACCOUNT-LEVEL | `ACCOUNT-DESTRUCTION-STAYS-MANUAL` |
 
 ### 5.1 Triaged -- a declaration hit that is not a ruling made here
 

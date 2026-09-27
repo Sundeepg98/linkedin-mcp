@@ -119,7 +119,22 @@ SCRIPT = ROOT / "scripts" / "check_gap_rows_on_refused_addresses.py"
 #: names, under ``INCIDENTAL-CAPTURE-IS-NOT-A-RULING``. Found by running this
 #: script on master `1902fcb`'s census (70) and on the itemized tree (73):
 #: three added, none removed.
-EXPECTED_GAP_ROWS = 73
+#:
+#: **73 -> 78 AT LANE L8'S MERGE OF MASTER (2026-09-27), MEASURED: ROWS
+#: ENTERED GAP.** Record: `_audit/2026-09-24-lane-l8-outward-classes.md`, s5
+#: and s10. No boundary entry changed. OUTWARD-CLASSES-BUILT-BEHIND-GRANTS
+#: retired the key five EXCLUDED-RULED rows rested on, and each returned to
+#: GAP with a cell that already backticked the address it would need, refused
+#: on a substring: ``M C62`` (withdraw a group membership request, on
+#: ``/withdraw``), ``N A15`` (withdraw an event invitation, on ``/invite`` and
+#: ``/withdraw``), and ``P F5``, ``P K7`` and ``P M3`` (delete a recommendation
+#: he sent, remove a verification, delete a saved resume, each on
+#: ``/delete``). Each stays GAP on the blocker its own cell names, under
+#: ``INCIDENTAL-CAPTURE-IS-NOT-A-RULING``. The two rows the 2026-09-27 rulings
+#: moved out of GAP, ``P N27`` and ``P P2``, were not in the count. Found by
+#: running the shipped walk on master `2eb90ad`'s census (73) and on the lane's
+#: final tree (78): five added, none removed.
+EXPECTED_GAP_ROWS = 78
 
 
 def _run(*args: str) -> subprocess.CompletedProcess:

@@ -409,6 +409,18 @@ FAMILIES: dict[str, Family] = {f.fid: f for f in (
         ("_audit/2026-09-24-rulings-search-verticals-rosters-passive-costs.md",
          "It governs `N 171`")],
        [r"D5-PASSIVE-COST-IS-NOT-A-ROW", r"NOT-AN-ACT"]),
+    # Registered 2026-09-27 (lane L8, s10). op is NO for the reason D5's is: the
+    # orchestrator made the call under the operator's 08:11 principle, and the
+    # operator can override it. The ruling names its rows (P N27, P P2, and P N28
+    # as a second ground), so each row cites the ruling id itself.
+    _f("ACCOUNT-DESTRUCTION-STAYS-MANUAL",
+       "merging or closing his account, and deleting the data LinkedIn holds about him, stay manual -- not built",
+       "ORCHESTRATOR", "NO",
+       [("_audit/2026-09-27-rulings-relation-removals-and-account-destruction.md",
+         "RULED: (orchestrator, 2026-09-27, applying the operator's 08:11 principle) ACCOUNT-LEVEL"),
+        ("_audit/2026-09-27-rulings-relation-removals-and-account-destruction.md",
+         "REOPENER: he asks for one of them by name, naming the account or the data,")],
+       [r"ACCOUNT-DESTRUCTION-STAYS-MANUAL"]),
     # ---- the 2026-09-05 retirement families (wave-ruled; the queue was his) ----
     *_RETIREMENTS,
 )}
