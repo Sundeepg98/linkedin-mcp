@@ -1978,6 +1978,11 @@ async def test_the_server_instructions_name_every_write_that_ships():
         # send_reply. Extended the same way; the instructions still have to
         # SAY it, which this map does not do.
         15: "fifteen",
+        # SIXTEEN FROM LANE L8'S MERGE OF MASTER 2eb90ad, 2026-09-27:
+        # withdraw_from_group. Extended the same way -- and the KeyError this
+        # map raises on a missing count is what caught the extension missing
+        # on the merged tree's first gate.
+        16: "sixteen",
     }
     assert f"{words[len(writes.PERFORMABLE)]} write" in text
     for action in writes.PERFORMABLE:

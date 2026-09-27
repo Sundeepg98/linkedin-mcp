@@ -151,7 +151,7 @@ the census family `NO-THIRD-PARTY-PROFILE-LOAD` cites -- is unchanged.
   now live and pin the carried facts; the "FIVE specs" test is rewritten --
   see section 3.
 
-## 3. The five `reversible_by` claims that leaned on the destruction entry
+## 3. The `reversible_by` claims that leaned on the destruction entry: five on the base, six at the merge
 
 The retired note said "Shortening it would silently make five reversibility
 claims wrong at once." The answer is to restate the five, each by name, not to
@@ -554,6 +554,19 @@ synthetic group name in any refusal, block or receipt.
   `tests/test_outward_classes.py` **0.436 s** -- written into
   `scripts/ci_shard_timings.json` after the master merge.
 
+**On the census commits, 2026-09-27, before the master merge.** These are
+the census child's runs, reviewed by the lead.
+- Every census table checker is green.
+- The census and audit test set gave 13 failed and 1483 passed. Every red is
+  one of three things:
+  - a pin move (section 5.3);
+  - the lane record's own index row, which the merge regenerated;
+  - the server docstring's tool count, which the merge moved.
+- One real defect was found and fixed on the way: the write-classes self-row
+  regex did not admit `A23b` (register section 80.4).
+
+**On the merged tree:** section 9.4.
+
 ## 8. The restart, and what was salvaged
 
 The first session stopped on 2026-09-24 at about 10:30 with two children in
@@ -653,6 +666,106 @@ lane S, lane D, lane Y2's itemized P-R block, and the live lane.
 - Master's `test_server_surface.py` also said "deletion is permanently
   forbidden here" of a reply, and there is no endorsement tool "because ...
   that is permanently refused". Both are restated to what now holds.
+
+### 9.3 The commits
+
+These are on the lane branch `worktree-agent-af690b71921f8cd52`, first parent
+first, oldest last. Each resolves on `master` once the lane merges. Until
+then only the branch holds them, and the SUBJECT is the key that survives.
+
+| commit | date | subject |
+|---|---|---|
+| `dda3f61` | 09-27 | merge master 2eb90ad into lane L8: the outward classes meet lanes L5, L7, S, D, Y2 and the live lane, once, at the end |
+| `30e7651` | 09-27 | census: P A23 split (its delete half is his own item now), N 125 admitted as a write, M M32 re-grounded, the inventory's undo grounds restated |
+| `c7fd61f` | 09-27 | census: the rows the three retired keys held -- 29 back to GAP with blockers named, M C63 / N 64 built, the side tables and instruments re-pointed |
+| `dedfaee` | 09-27 | lane L8 record: the two sessions, the salvage, and the gates before the master merge |
+| `3199b2f` | 09-27 | orphan modules: outward_classes is a record, not a capability -- ruled, not wired |
+| `9681c5d` | 09-27 | outward_classes: the leave record's live proof counts three /groups/ loads and warns off his last membership |
+| `73ea0b7` | 09-27 | readers inventory: group_leave.read_menu is wired one hop away, through the menu gate perform calls -- the read_filters shape |
+| `544363e` | 09-27 | writes: the leave-a-group write is withdraw_from_group -- the naming law refused "leave" (it also restored the asserted-name guard's mark, which the commit below had removed) |
+| `db480bb` | 09-27 | asserted-name guard: the spec-document mark lost its only example when leave_group was built, so it goes (reverted by the commit above) |
+| `4a93ac2` | 09-27 | writes: leave one group he names by numeric id (M C63 / N 64), built behind the grant, ready and unfired |
+| `a002ff4` | 09-27 | lane L8 record: pin the work in progress at the restart -- sections 1-4, the census decisions, the queues |
+| `7e370ac` | 09-24 | outward_classes, send_invitation: cite the Help Center page the network census fetched for the withdraw (a568295), and its three-week wait |
+| `e3a8eed` | 09-24 | outward_classes: name its constants for what they hold, so a test naming them couples to this module and nothing else |
+| `efa3d8f` | 09-24 | writes: narrow PERMANENTLY_FORBIDDEN to the six mitigations; the three retired entries kept verbatim in outward_classes |
+
+One more commit sits on top: this record's closing edit, together with the
+one repair the merged tree's gate asked for (section 9.4). No lane commit
+carries an AI co-author, session or generated-by line; that was checked over
+`git log --first-parent --format=%B` for the range.
+
+### 9.4 Gates on the merged tree, run and NOT run
+
+Everything below ran on the merge commit, `-n 6 --dist loadfile` or `-n 4`,
+and NOT on a quiet box: other lanes' test runs shared the machine.
+
+**The write path, the tool surface and the page-string guards: 34 files,
+3 failed, 2737 passed in 646.8 s.** The files:
+- the two new files: `test_outward_classes`, `test_leave_group`;
+- the write path: `test_writes`, `test_writes_nine`,
+  `test_preview_state_and_click_state`, `test_receipt_names_its_own_action`,
+  `test_unverifiable_outcomes`, `test_tools`, `test_send_reply`,
+  `test_send_message_gate`, `test_a_spec_may_not_assert_what_the_code_denies`,
+  `test_a_performable_action_can_reach_its_control`;
+- the tool surface: `test_server_surface`,
+  `test_the_tool_surface_is_pinned_so_a_row_must_move`,
+  `test_every_tool_is_on_the_surface`,
+  `test_the_other_two_count_claims_are_pinned_too`,
+  `test_prose_that_makes_a_claim`,
+  `test_the_stated_guarantee_matches_the_sanctioned_list`,
+  `test_a_named_cost_names_a_tool_that_can_incur_it`;
+- the page-string guards: `test_page_text_is_never_printed`,
+  `test_tool_envelopes_emit_no_page_string`,
+  `test_readers_emit_no_page_string`,
+  `test_readers_outside_dom_are_a_pinned_inventory`;
+- the orphan, identity and boundary guards: `test_every_orphan_module_is_ruled`,
+  `test_no_committed_identity`, `test_readonly`, `test_group_page`;
+- the three the order named: `test_the_package_compiles_on_its_oldest_python`,
+  `test_gap_rows_on_refused_addresses`, `test_ci_shard`;
+- and `test_write_classes`, `test_an_asserted_name_resolves`,
+  `test_a_cited_sha_resolves`, `test_a_correction_is_findable_from_the_claim`.
+
+Of the three reds, two are pins this lane was told not to move: the
+write-classes split and the refused-address count (section 5.3). The third
+was REAL: `test_the_server_instructions_name_every_write_that_ships`. Its
+map from a write count to the word the instructions must say stopped at
+fifteen, and it raised `KeyError: 16` -- the failure it was written to give.
+The map gained sixteen in the closing commit, and `test_server_surface.py`
+re-ran green: 52 passed. Before the merge commit, the five write-path files
+had also run on the resolved tree: 249 passed.
+
+**The census instruments, every script, with no pin or write flag:**
+- Green: `check_write_classes` (387 lines), `check_exclusion_basis` (41/41,
+  0 structural), `check_jobs_directions` (109/109), `check_read_addresses`,
+  `classify_writeoff_reasons --check`, both triage scripts,
+  `check_census_locators_resolve`, `check_contingent_writeoffs_carry_a_reopener`,
+  `check_gap_rows_on_refused_addresses`, `check_cited_shas_resolve`, and
+  `--check` on the blocker map, the rulings register and the audit index.
+  The generated files were regenerated to a fixed point.
+- Red only on pins:
+  - `census_completion --check` refuses to report while the row pin reads
+    769 against a live 770. Its figures were computed read-only with that
+    one control set aside, and every other control passed (section 5.3).
+  - `measure_pointer_graph --check`: the three moved pointers.
+- `check_asserted_names_resolve` reports the same eight ASSERTED-ABSENT
+  sites its test pins, none of them this lane's.
+
+**The census and audit test files: 26 files, 8 failed, 522 passed in
+224.7 s.** These are the census child's set plus the register, rulings and
+blocker-map guards. All eight reds are the pins in section 5.3:
+- bucket one;
+- the row-label literal;
+- the row total (two tests);
+- the pointer graph (three tests);
+- the messaging triage headline.
+
+**NOT run:**
+- The full suite, by order. `scripts/impact_gate.py` widens to it for any
+  change touching `writes.py`; CI certifies at the orchestrator's merge.
+- `tests/test_surface_census.py` and `tests/test_tracker_harvest_census.py`,
+  which launch Chromium.
+- Anything live.
 
 ## Live queue
 
