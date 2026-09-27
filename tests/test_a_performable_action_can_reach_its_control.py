@@ -120,6 +120,7 @@ _ACTIVITY_URN = "urn:li:" + "activity:" + ("1234567890" * 2)[:19]
 _TARGETS: dict[str, object] = {
     "job_id": "1234567890",
     "company_id": "1234567",
+    "group_id": "10001",
     "item_urn": _ACTIVITY_URN,
     "member": "a needle nobody is",
     "post_text": "some text",

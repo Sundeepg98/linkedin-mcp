@@ -231,6 +231,15 @@ def _argument_for(param: inspect.Parameter) -> tuple[bool, Any]:
         from linkedin_server import writes
 
         return True, writes.FEED_URL
+    # AND BEFORE ``Any`` FOR THE SAME REASON (2026-09-27, lane G's merge of
+    # master 7986ae3). ``identifier`` is lane L8's GROUP ID, the only reader
+    # parameter by that name (group_leave's five), annotated ``Any``: the
+    # harness handed it a page double, ``group_leave.disclosure_selector``
+    # refused it as not 1 to 20 digits on the FIRST line of every try block,
+    # and the five were recorded ``clean`` having read nothing. A five-digit id
+    # -- under the identity guard's six-digit line -- reaches the page reads.
+    if param.name == "identifier":
+        return True, _GROUP_ID
     if param.annotation is inspect.Parameter.empty:
         # Unannotated. Every such parameter in this package is a selector or a
         # needle, and a string is the only thing that could be passed anyway.
@@ -259,6 +268,11 @@ def _argument_for(param: inspect.Parameter) -> tuple[bool, Any]:
 #: A sentinel meaning "this parameter has several faithful values; run them
 #: all". See :func:`_domain_values`.
 _VARY = object()
+
+#: The group id group_leave's readers are driven with: numeric, as
+#: ``group_leave.checked_group_id`` requires, and five digits, under the
+#: six-digit run ``tests/test_no_committed_identity.py`` refuses.
+_GROUP_ID = "12345"
 
 
 class _Paired:

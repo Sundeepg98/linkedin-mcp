@@ -893,8 +893,11 @@ def selftest(box: pathlib.Path) -> int:
     # the pin lost both pointers in the same commit as this literal.
     # 66 since lane L7's merge, 2026-09-24: `P G3` names its ruling in
     # place of its positional 'same ruling', so it is no longer a pointer.
+    # 65 AT LANE L8'S MERGE OF MASTER (2026-09-27), MEASURED by `--pin`:
+    # `M C63` was built (`linkedin_withdraw_from_group`) and its 'same' was
+    # struck for evidence of its own, so it is no longer a pointer.
     record("G5 CALIBRATION -- whitespace in P D15's capability cell", False, out, rc,
-           "PASS -- all 66 pinned pointers")
+           "PASS -- all 65 pinned pointers")
 
     print("THE POINTER-GRAPH GUARD, SHOWN FAILING")
     print("=" * 92)

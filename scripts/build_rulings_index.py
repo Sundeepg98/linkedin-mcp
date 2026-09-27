@@ -1104,6 +1104,36 @@ REGISTER: tuple = (
              "OUTWARD-ACTS-NEED-THE-OPERATOR; overridable.",
     ),
     Ruling(
+        id="RELATION-REMOVALS-BUILT-BEHIND-GRANTS",
+        claim="Removing a relation with a member he names -- removing a "
+              "1st-degree connection, blocking a member, removing an attendee "
+              "from an event he organises -- is BUILT behind the single-use "
+              "grant, off by default, fired only at the one member he names in "
+              "the call, with the resolved identity reported before the act.",
+        binds="writes -- his relations with another member",
+        document="_audit/2026-09-27-rulings-relation-removals-and-account-"
+                 "destruction.md",
+        anchor="RULED: (orchestrator, 2026-09-27, applying the operator's 08:11 "
+               "principle) REMOVING A RELATION",
+        note="Orchestrator's call applying the operator's 08:11 principle and "
+             "OUTWARD-ACTS-NEED-THE-OPERATOR; overridable. Decides N 29, N 141 "
+             "and N A14, which lane L8 left outside the three classes.",
+    ),
+    Ruling(
+        id="ACCOUNT-DESTRUCTION-STAYS-MANUAL",
+        claim="Merging or closing his account, and deleting the data LinkedIn "
+              "holds about him, are NOT built: EXCLUDED-RULED, reopened only "
+              "when he asks for one by name in the call that would make it.",
+        binds="writes -- his account and its data",
+        document="_audit/2026-09-27-rulings-relation-removals-and-account-"
+                 "destruction.md",
+        anchor="RULED: (orchestrator, 2026-09-27, applying the operator's 08:11 "
+               "principle) ACCOUNT-LEVEL",
+        note="Orchestrator's call applying the operator's 08:11 principle; "
+             "overridable. Decides P N27 and P P2, and adds a capability-level "
+             "ground to P N28.",
+    ),
+    Ruling(
         id="PREVIEW-NAMES-THE-RESOLVED-TARGET",
         claim="A preview names whom the tool resolved -- the page-read name and "
               "headline, sanitised, marked untrusted, inside a people record -- "

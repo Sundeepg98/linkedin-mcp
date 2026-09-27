@@ -148,6 +148,7 @@ PINNED_TOOL_SURFACE: dict[str, tuple[str, ...]] = {
     "linkedin_update_setting": ("confirm_token", "setting", "value"),
     "linkedin_who_viewed_me": ("limit", "open_filter_menus", "show_more_analytics", "view_switch"),
     "linkedin_own_item_link": ("activity_id", "include_link"),
+    "linkedin_withdraw_from_group": ("confirm_token", "group_id"),
 }
 
 #: 44 tools and 61 parameters at the pin. Asserted rather than assumed, so a
@@ -371,8 +372,23 @@ PINNED_TOOL_SURFACE: dict[str, tuple[str, ...]] = {
 #: master 2eb90ad, MEASURED off the merged registry, not summed.** Master's 56
 #: and 87 carry every pin above; the branch adds one parameter (`item`) and no
 #: tool. No row moves in the merge.
-PINNED_TOOL_COUNT = 56
-PINNED_PARAMETER_COUNT = 88
+#: **RE-PINNED 2026-09-27 AT 57 TOOLS AND 89 PARAMETERS (lane L8, at its
+#: merge of master 2eb90ad), MEASURED off the merged registry: one tool, two
+#: parameters.** `linkedin_withdraw_from_group("group_id", "confirm_token")`
+#: -- leaving one group he names by numeric id -- banks `M C63` and `N 64`
+#: (one capability counted twice), GAP -> COVERED-UNFIRED, moved in the
+#: lane's census commit on its branch, which this merge carries. Not PROVEN:
+#: a WRITE built to ready-to-fire behind the flag and the single-use grant,
+#: never granted. The id is a NUMERIC IDENTIFIER, refused unless it is 1 to
+#: 20 ASCII digits -- the rule `linkedin_group_page("group_id")` already
+#: carries, reused rather than restated.
+#: See `_audit/2026-09-24-lane-l8-outward-classes.md`.
+#: **RE-PINNED 2026-09-27 AT 57 TOOLS AND 90 PARAMETERS, at lane G's merge of
+#: master 7986ae3 (lane L8's), MEASURED off the merged registry, not
+#: summed.** Master's 57 and 89 carry every pin above; the branch adds one
+#: parameter (`item`) and no tool. No row moves in the merge.
+PINNED_TOOL_COUNT = 57
+PINNED_PARAMETER_COUNT = 90
 
 
 def live_surface() -> dict[str, tuple[str, ...]]:

@@ -173,7 +173,18 @@ KNOWN_UNWIRED: dict[str, str] = {
         "same file reads as no caller at all. The entry is therefore a record "
         "of a detector boundary, not of a reader nobody reaches: delete it if "
         "and only if some other module calls `read_filters` directly again."
-    )
+    ),
+    # ADDED 2026-09-24 (lane L8), and the same kind of entry as the one above.
+    "group_leave.read_menu": (
+        "NOT UNWIRED -- WIRED ONE HOP AWAY, the read_filters shape exactly. "
+        "`writes.perform` calls `group_leave.menu_item_gate` after the "
+        "disclosure press of `linkedin_withdraw_from_group`, and that gate "
+        "polls `read_menu` until the target row shows a pressable leave item "
+        "or the page shows more than one -- so the reader and the decision "
+        "that consumes it stay in one module, and the only caller is in the "
+        "same file, which `_unwired` reads as no caller. Delete this line if "
+        "and only if some other module calls `read_menu` directly."
+    ),
 }
 
 

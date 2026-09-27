@@ -1570,21 +1570,30 @@ def test_the_dissolved_policy_entries_are_gone_from_the_permanent_refusals():
 
 
 def test_the_three_surviving_permanent_refusals_are_still_named():
-    """What survived the dissolution, and it is not the same set as before.
+    """What survived the 2026-08-30 dissolution, and where each is now.
 
-    ``repost_or_share`` is the quarter of the old speech entry that was about
+    ``repost_or_share`` was the quarter of the old speech entry that was about
     somebody ELSE'S item rather than about taste. ``endorse_or_recommend``
-    kept its name and lost its reason. The third is NEW that day, and it is
-    the rule the endorsement ruling now rests on rather than a restatement of
-    it.
+    kept its name and lost its reason. The third was NEW that day, and it is
+    the rule the endorsement ruling rested on rather than a restatement of it.
+
+    ON 2026-09-24 TWO OF THE THREE LEFT, and this test used to assert all
+    three present. OUTWARD-CLASSES-BUILT-BEHIND-GRANTS builds reposting and
+    endorsing behind the grant, so both entries moved VERBATIM to
+    ``outward_classes.RETIRED_PERMANENT_REFUSALS`` -- kept, not deleted, so the
+    measurements they carried can still be found. The third stays: loading a
+    third party's profile FOR A MEASUREMENT is a mitigation, and the ruling
+    keeps exactly the entries whose grounds are mitigations.
     """
-    for name in (
-        "repost_or_share",
-        "endorse_or_recommend",
-        "load_a_third_partys_profile_to_measure_a_control",
-    ):
-        assert name in PERMANENTLY_FORBIDDEN, name
-        assert len(PERMANENTLY_FORBIDDEN[name]) > 40, name
+    from linkedin_server import outward_classes
+
+    for name in ("repost_or_share", "endorse_or_recommend"):
+        assert name not in PERMANENTLY_FORBIDDEN, name
+        assert name in outward_classes.RETIRED_PERMANENT_REFUSALS, name
+        assert len(outward_classes.RETIRED_PERMANENT_REFUSALS[name]) > 40, name
+    survivor = "load_a_third_partys_profile_to_measure_a_control"
+    assert survivor in PERMANENTLY_FORBIDDEN
+    assert len(PERMANENTLY_FORBIDDEN[survivor]) > 40
 
 
 #: THE SENTENCE THE ENDORSEMENT REFUSAL USED TO REST ON, and the assertion
@@ -1614,7 +1623,14 @@ _OLD_ENDORSE_POLICY = (
 
 
 def test_the_endorsement_refusal_rests_on_a_measurement_not_on_the_old_policy():
-    reason = PERMANENTLY_FORBIDDEN["endorse_or_recommend"]
+    # RETIRED 2026-09-24 and read from where it now lives, VERBATIM. Every
+    # claim below is about the TEXT, which did not change; what changed is
+    # that the text is a record of a measurement rather than a refusal, so
+    # the last lines also pin that the measured counts reached the spec that
+    # needs them.
+    from linkedin_server import outward_classes
+
+    reason = outward_classes.RETIRED_PERMANENT_REFUSALS["endorse_or_recommend"]
 
     # IT IS NOT THAT SENTENCE, which is the claim that was actually wanted.
     assert reason != _OLD_ENDORSE_POLICY
@@ -1638,23 +1654,41 @@ def test_the_endorsement_refusal_rests_on_a_measurement_not_on_the_old_policy():
     assert "zero endorse controls" in reason
     assert "IMPOSSIBLE AS SPECIFIED" in reason
 
+    # CARRIED, NOT THROWN AWAY: the counts are the reason endorsing routes
+    # through a named member's profile, so they sit in that spec's facts.
+    carried = outward_classes.OUTWARD_CLASS_SPECS["endorse_skill"].carried_facts
+    for fact in ("13 tracked fixtures", "222 controls", "THIRD PARTY'S PROFILE"):
+        assert fact in carried, fact
+
 
 def test_the_repost_refusal_says_what_survived_and_what_did_not():
     """The narrowing is recorded IN the reason, so the three quarters that
-    went cannot be mistaken for something nobody got round to."""
-    reason = PERMANENTLY_FORBIDDEN["repost_or_share"]
+    went cannot be mistaken for something nobody got round to.
+
+    Read from ``outward_classes.RETIRED_PERMANENT_REFUSALS`` since 2026-09-24,
+    where the whole entry moved verbatim; its measurement -- the Repost
+    control is a disclosure whose menu has never been opened -- is the
+    capture ``repost_item`` still needs, and is pinned there too.
+    """
+    from linkedin_server import outward_classes
+
+    reason = outward_classes.RETIRED_PERMANENT_REFUSALS["repost_or_share"]
     assert "NARROWED" in reason
     assert "post_or_comment_or_like_or_share" in reason
     # What survives is about somebody ELSE'S item, which is the part that was
     # never taste.
     assert "SOMEBODY ELSE'S" in reason.upper()
+    carried = outward_classes.OUTWARD_CLASS_SPECS["repost_item"].carried_facts
+    assert "aria-expanded='false'" in carried
+    assert "3 on the feed and 8 on his profile" in carried
 
 
 def test_the_claims_that_depend_on_the_destruction_refusal_are_the_measured_ones():
     """A refusal other claims lean on, pinned from BOTH ends and by NAME.
 
-    ``delete_or_withdraw_anything`` carries a note saying five specs cite it in
-    ``reversible_by``. THE NOTE WAS WRONG WHEN THIS TEST WAS FIRST WRITTEN, and
+    ``delete_or_withdraw_anything`` carried a note saying five specs cite it in
+    ``reversible_by`` (six, once lane L5's ``send_reply`` joined on master).
+    THE NOTE WAS WRONG WHEN THIS TEST WAS FIRST WRITTEN, and
     the way it was wrong is why this is asserted by name rather than by count:
     it read "a post, a comment, a reaction, an invitation and a message",
     which NAMED react (which does not cite the entry) and OMITTED apply (which
@@ -1668,43 +1702,220 @@ def test_the_claims_that_depend_on_the_destruction_refusal_are_the_measured_ones
     inverse whatever any refusal list says. Shortening the destruction entry
     would break four claims and leave react's exactly as true, which is a fact
     about where each one actually rests.
+
+    THE ENTRY WAS RETIRED 2026-09-24 (OUTWARD-CLASSES-BUILT-BEHIND-GRANTS) AND
+    THIS TEST WAS REWRITTEN WITH IT, because "shortening it would silently make
+    five reversibility claims wrong at once" was the warning, and the answer
+    to the warning is to restate the five, each by name, not to keep the
+    entry. This test used to assert the entry present and each of the five
+    saying NOBODY with the word "forbidden" in it. What it asserts now is the
+    RESTATEMENT: each names the retirement and, where one exists, the record
+    in ``outward_classes`` that governs its undo; the three whose undo is still
+    NOBODY (an application, a message, a reply) say so on a ground that is not
+    this server's refusal; and the record's STATUS in each sentence is the
+    record's real status -- so a record that later moves to BUILT turns its
+    spec's sentence red until the sentence moves too.
+
+    SIX SINCE THE MERGE OF MASTER, 2026-09-27. ``send_reply`` was built on lane
+    L5's branch while this lane retired the entry on its own, and it arrived
+    leaning on the refusal. It is restated like the other five, and the rule
+    below this test reads EVERY sanctioned spec, so a seventh cannot arrive
+    the same way unseen.
     """
-    assert "delete_or_withdraw_anything" in PERMANENTLY_FORBIDDEN
-    # Across the WHOLE sanctioned set, not just the seven: apply_job is the
-    # fifth and it predates this wave.
-    leaning = tuple(
-        sorted(
-            spec.action
-            for spec in SANCTIONED_WRITES.values()
-            if "NOBODY" in spec.reversible_by
-        )
-    )
-    # SIX SINCE 2026-09-24: send_reply's reversible_by leans on the same
-    # refusal -- a reply is a message, and deleting one is destruction --
-    # and writes.PERMANENTLY_FORBIDDEN's note was moved from FIVE to SIX in
-    # the same commit, by name.
-    assert leaning == (
-        "apply_job",
-        "comment_on_item",
-        "publish_post",
-        "send_invitation",
-        "send_message",
-        "send_reply",
-    ), leaning
-    for action in leaning:
-        assert "forbidden" in spec_for_action(action).reversible_by.lower(), action
+    from linkedin_server import outward_classes
+
+    assert "delete_or_withdraw_anything" not in PERMANENTLY_FORBIDDEN
+    note = outward_classes.RETIRED_PERMANENT_REFUSALS["delete_or_withdraw_anything"]
+    # The retired note still names its own correction -- kept verbatim.
+    assert "CORRECTED" in note
+    assert "react_to_item does not lean on this" in note
+
+    # THE SIX, BY NAME, and the record each one's undo now rests on.
+    restated = {
+        "apply_job": ("withdraw_application", "NOBODY"),
+        "publish_post": ("delete_own_post", "NOT YET"),
+        "comment_on_item": ("delete_own_comment", "NOT YET"),
+        "send_invitation": ("withdraw_invitation", "NOT YET"),
+        "send_message": (None, "NOBODY"),
+        # The sixth, from lane L5, restated at this lane's merge of master.
+        "send_reply": (None, "NOBODY"),
+    }
+    for action, (record, verdict) in restated.items():
+        text = spec_for_action(action).reversible_by
+        assert text.startswith(verdict), (action, text[:60])
+        assert outward_classes.OUTWARD_CLASSES_RULING in text, action
+        # The retired refusal appears only as a QUOTED RETRACTION -- "used to
+        # say" ahead of the quote -- never as the live reason.
+        if "PERMANENTLY_FORBIDDEN" in text:
+            head = text[: text.index("PERMANENTLY_FORBIDDEN")]
+            assert "used to say" in head, action
+        if record is not None:
+            status = outward_classes.OUTWARD_CLASS_SPECS[record].status
+            assert record in text, (action, record)
+            assert status in text, (action, record, status)
+    # The three NOBODY verdicts rest on grounds outside this server: LinkedIn's
+    # own Help Center for an application, delivery itself for a message and a
+    # reply.
+    assert "a512388" in spec_for_action("apply_job").reversible_by
+    assert "cannot be recalled" in spec_for_action("send_message").reversible_by
+    assert "cannot be recalled" in spec_for_action("send_reply").reversible_by
+
     # THE ONE NAMED IN THE ORIGINAL NOTE THAT DOES NOT BELONG, and what it
     # actually rests on. If somebody later rewrites react's reversible_by to
     # lean on the destruction entry, this is what makes that visible.
     reaction = spec_for_action("react_to_item").reversible_by
     assert "NOBODY" not in reaction
     assert "ON label unmeasured" in reaction
-    # And the corrected note must name its own correction rather than having
-    # been silently swapped -- this repo's convention, and the reason the
-    # original error is legible at all.
-    note = PERMANENTLY_FORBIDDEN["delete_or_withdraw_anything"]
-    assert "CORRECTED" in note
-    assert "react_to_item does not lean on this" in note
+
+
+#: The printed fields that state whether, and how, an action can be undone.
+_REVERSIBILITY_FIELDS = (
+    "reversibility",
+    "reversibility_evidence",
+    "reversible_by",
+    "reversibility_procedure",
+)
+
+
+#: THE PHRASINGS THE TREE USED FOR THE RETIRED REFUSAL, beyond its key names.
+#: MEASURED, NOT IMAGINED: "permanently forbidden" was the only one at first,
+#: and the cold verification of lane L8 (2026-09-27) then found two TOOL
+#: DESCRIPTIONS stating the refusal live in words it did not match --
+#: "forbids deletion permanently" (``linkedin_comment_on_item``) and
+#: "Deletion is forbidden in this design" (``linkedin_send_reply``). A NEW
+#: PHRASING ESCAPES THIS RULE. That is its stated limit, and the reason the
+#: needles are listed here rather than implied.
+_RETIRED_REFUSAL_PHRASINGS = (
+    r"permanently[\s_]+forbidden",
+    r"forbids?\s+deletion",
+    r"(?:deletion|deleting|withdrawing|withdrawal)\s+(?:is|stays|remains)\s+"
+    r"(?:permanently\s+)?forbidden",
+    r"forbidden\s+in\s+this\s+design",
+)
+
+
+def _live_retired_refusals(text: str) -> list[str]:
+    """Every statement of a retired refusal in ``text`` that is LIVE.
+
+    The needles are the retired keys' own names, read off
+    ``outward_classes.RETIRED_PERMANENT_REFUSALS``, and the phrasings above.
+    None of the six surviving refusals is an undo, so nothing that states how
+    an action is undone has a live reason to cite one. A match is allowed only
+    as a QUOTED RETRACTION -- the two-part test
+    ``tests/test_a_spec_may_not_assert_what_the_code_denies.py`` applies,
+    imported rather than re-derived.
+    """
+    from linkedin_server import outward_classes
+    from tests.test_a_spec_may_not_assert_what_the_code_denies import (
+        _is_a_quoted_retraction,
+    )
+
+    needle = re.compile(
+        "|".join(
+            [re.escape(key) for key in outward_classes.RETIRED_PERMANENT_REFUSALS]
+            + list(_RETIRED_REFUSAL_PHRASINGS)
+        ),
+        re.IGNORECASE,
+    )
+    text = text or ""
+    return [
+        match.group(0)
+        for match in needle.finditer(text)
+        if not _is_a_quoted_retraction(text, match)
+    ]
+
+
+def _leans_on_a_retired_refusal(spec: writes.WriteSpec) -> list[tuple[str, str]]:
+    """Every place a reversibility field states a retired refusal LIVE."""
+    found = []
+    for field in _REVERSIBILITY_FIELDS:
+        for hit in _live_retired_refusals(getattr(spec, field, None) or ""):
+            found.append((field, hit))
+    return found
+
+
+def test_no_sanctioned_spec_states_a_retired_refusal_as_its_undo():
+    """ACROSS THE WHOLE SANCTIONED SET, not the six named above.
+
+    The test above names the specs it checks, so it cannot see a seventh --
+    which is exactly how the sixth arrived: ``send_reply`` reached this lane's
+    merge of master saying "Deletion is permanently forbidden here at any
+    confirm level (delete_or_withdraw_anything)", a reversibility claim
+    resting on a refusal that no longer existed.
+    """
+    leaning = {}
+    for spec in SANCTIONED_WRITES.values():
+        found = _leans_on_a_retired_refusal(spec)
+        if found:
+            leaning[spec.action] = found
+    assert not leaning, (
+        "A printed reversibility field states a permanent refusal as a live "
+        "reason: %r. Since 2026-09-24 writes.PERMANENTLY_FORBIDDEN holds only "
+        "the six mitigations, none of them an undo. Quote the old sentence as "
+        "a retraction and say what the undo rests on now." % (leaning,)
+    )
+
+
+def test_the_rule_convicts_the_text_send_reply_arrived_with():
+    """SHOWN FAILING on the words that reached the merge, and passing on
+    their quoted retraction -- a rule that cannot fail certifies nothing."""
+    arrived = (
+        "NOBODY, through this server. Deletion is permanently forbidden "
+        "here at any confirm level (delete_or_withdraw_anything), so an "
+        "un-send does not exist in this design."
+    )
+    spec = spec_for_action("send_reply")
+    planted = dataclasses.replace(spec, reversible_by=arrived)
+    assert _leans_on_a_retired_refusal(planted) == [
+        ("reversible_by", "Deletion is permanently forbidden"),
+        ("reversible_by", "delete_or_withdraw_anything"),
+    ]
+    quoted = dataclasses.replace(
+        spec,
+        reversible_by='NOBODY. This field used to say "%s"; it no longer does.'
+        % arrived,
+    )
+    assert _leans_on_a_retired_refusal(quoted) == []
+    # And the spec as shipped says it only that way.
+    assert _leans_on_a_retired_refusal(spec) == []
+
+
+async def test_no_sanctioned_write_tool_description_states_a_retired_refusal():
+    """THE TOOL DESCRIPTIONS OF THE SANCTIONED WRITES, which a client model
+    reads INSTEAD of the spec. The spec-field rule above could not see them,
+    and the cold verification of lane L8 found two stating the retired refusal
+    live (see ``_RETIRED_REFUSAL_PHRASINGS``). Read off the registry a client
+    reads, not off the source."""
+    from linkedin_server.server import mcp
+
+    tools = {tool.name: tool for tool in await mcp.list_tools()}
+    leaning = {}
+    for name in SANCTIONED_WRITES:
+        if name in tools:
+            found = _live_retired_refusals(tools[name].description or "")
+            if found:
+                leaning[name] = found
+    assert not leaning, (
+        "A write tool's description states a retired PERMANENTLY_FORBIDDEN "
+        "refusal as live: %r. Quote the old sentence as a retraction and say "
+        "what the undo rests on now." % (leaning,)
+    )
+
+
+def test_the_description_rule_convicts_the_two_sentences_it_was_built_for():
+    """SHOWN FAILING on the two sentences the verification found, verbatim,
+    and passing on their quoted retractions."""
+    found = [
+        "Not by this server, which forbids deletion permanently and should not "
+        "now try to aim one.",
+        "Deletion is forbidden in this design at any confirm level, and even "
+        "where LinkedIn lets a sender delete a message it does not un-send the "
+        "email or un-read what was read.",
+    ]
+    for sentence in found:
+        assert _live_retired_refusals(sentence), sentence
+        quoted = 'This used to say "%s"; that refusal was retired.' % sentence
+        assert _live_retired_refusals(quoted) == [], quoted
 
 
 # ---------------------------------------------------------------------------

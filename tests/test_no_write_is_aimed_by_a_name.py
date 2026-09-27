@@ -134,6 +134,10 @@ TARGET_KIND_CLASS: dict[str, tuple[str, str]] = {
         "id_and_own_text",
         "send_reply: a thread id the caller supplies, shape-checked, never read off a page",
     ),
+    "group_id": (
+        "id",
+        "withdraw_from_group: a numeric group id the caller supplies, 1 to 20 ASCII digits",
+    ),
     "member": (
         NAME_CLASS,
         "send_invitation's needle: his word for a person, matched against labels",
@@ -204,9 +208,12 @@ NAME_SHAPED_SUFFIXES = ("_name", "_names")
 #: The write tools on this tree, measured 2026-09-27 off server.py and
 #: mcp.list_tools(): fourteen, for fifteen sanctioned actions --
 #: set_open_to_work registers no tool. Re-measured the same day on lane G's
-#: merge of master 2eb90ad: fifteen, for sixteen, with lane L5's send_reply.
+#: merge of master 2eb90ad: fifteen, for sixteen, with lane L5's send_reply;
+#: and on its merge of master 7986ae3: sixteen, for seventeen, with lane L8's
+#: withdraw_from_group.
 KNOWN_WRITE_TOOLS = frozenset(
     {
+        "linkedin_withdraw_from_group",
         "linkedin_send_reply",
         "linkedin_save_job",
         "linkedin_unsave_job",

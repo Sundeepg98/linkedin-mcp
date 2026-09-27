@@ -179,6 +179,33 @@ WRITE_CLASS_ACTS: dict[str, str] = {
     # Added 2026-09-24 for the P-R block's itemized rows P4 and P5; no act
     # named a request to LinkedIn about his own data.
     "data-rights-request": "R3",
+    # Added 2026-09-27 (lane L8, `_audit/2026-09-24-lane-l8-outward-classes.md` s5)
+    # for the rows OUTWARD-CLASSES-BUILT-BEHIND-GRANTS returned to GAP when it
+    # retired three PERMANENTLY_FORBIDDEN keys. No act above names them. All R3,
+    # so the first round's R1 is untouched.
+    #   endorse                 endorsing a member's skill, or removing an
+    #                           endorsement he gave.
+    #   delete-or-withdraw-own  deleting or withdrawing one of HIS OWN items --
+    #                           the third class the ruling built.
+    #   outside-the-classes     an act the retired delete_or_withdraw_anything
+    #                           held that is none of the three classes the ruling
+    #                           built (a connection, a block, another member's
+    #                           attendance): not `connect`, which is R2 and
+    #                           classify-only here, and not his own item.
+    #                           RETIRED 2026-09-27 (lane L8, s10): no line holds
+    #                           it. RELATION-REMOVALS-BUILT-BEHIND-GRANTS ruled
+    #                           its three relation rows a class of their own
+    #                           (remove-relation, below), and
+    #                           ACCOUNT-DESTRUCTION-STAYS-MANUAL took P P2 out of
+    #                           scope. Kept out of the dict so no line can use it.
+    #   remove-relation         removing a relation with a member he names -- a
+    #                           1st-degree connection, a block, an attendee of an
+    #                           event he organizes (added 2026-09-27, lane L8,
+    #                           under RELATION-REMOVALS-BUILT-BEHIND-GRANTS). R3:
+    #                           not `connect`, and not in the first round.
+    "endorse": "R3",
+    "delete-or-withdraw-own": "R3",
+    "remove-relation": "R3",
 }
 
 #: The passage each non-residual class RESTS ON. A line of that class must cite
@@ -205,8 +232,12 @@ _WC_DISPOSITION_RX = re.compile(r"^(built:[a-z_]+|queued:[A-Z0-9][A-Z0-9-]*|clas
 #: into that one row, and it entered the write-direction population with lane R
 #: (2026-09-23). The range form still has to name a row that exists -- the
 #: resolver below searches the census for it verbatim.
+#: A row id may also carry a SPLIT SUFFIX, ``A23b``: lane L8 split `P A23` on
+#: 2026-09-27 under COMPOUND-ROW-SPLITS-ONLY-ON-STATE, as `L2b` was split from
+#: `L2`, and the delete half is the first suffixed row in the write-direction
+#: population. Before this the citation read as neither a path nor a row.
 _WC_SELF_ROW_RX = re.compile(
-    r"^(_audit/_census/[a-z\-]+\.md) row ([A-Za-z]*\d+(?:-[A-Za-z]*\d+)?)$")
+    r"^(_audit/_census/[a-z\-]+\.md) row ([A-Za-z]*\d+[a-z]?(?:-[A-Za-z]*\d+[a-z]?)?)$")
 _WC_PATH_RX = re.compile(r"^([A-Za-z0-9_.\-/]+\.(?:py|md|tsv|json))(?:::(.+))?$")
 _WC_RULING_RX = re.compile(r"^RULING:([A-Z0-9][A-Z0-9\-]*)$")
 

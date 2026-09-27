@@ -229,10 +229,15 @@ FAMILIES: dict[str, Family] = {f.fid: f for f in (
         ("_audit/2026-08-25-cannot-vs-will-not.md",
          "Open To Work -- I am OVERTURNING the pre-classification")],
        [r"(?i)set_open_to_work", r"NEVER.LOADED", r"(?i)never loaded", r"(?i)open.to.work"]),
+    # RE-POINTED 2026-09-27 (lane L8): the key left writes.PERMANENTLY_FORBIDDEN
+    # under OUTWARD-CLASSES-BUILT-BEHIND-GRANTS and its text lives, verbatim and
+    # in the same dict-entry form, in outward_classes.RETIRED_PERMANENT_REFUSALS --
+    # the same anchor, in the file that now holds it. Declared EMPTIED below.
     _f("PF-ENDORSE-OR-RECOMMEND",
-       "PERMANENTLY_FORBIDDEN endorse_or_recommend, surviving on a measurement of endorse controls",
+       "PERMANENTLY_FORBIDDEN endorse_or_recommend, surviving on a measurement of endorse controls"
+       " -- retired 2026-09-24",
        "CODE", "CONTRARY",
-       [("linkedin_server/writes.py", '"endorse_or_recommend": ('),
+       [("linkedin_server/outward_classes.py", '"endorse_or_recommend": ('),
         ("_audit/2026-08-25-cannot-vs-will-not.md",
          "the operator ruled on 2026-08-25 that it gets built")],
        [r"endorse_or_recommend", r"\bR3\b"]),
@@ -250,10 +255,12 @@ FAMILIES: dict[str, Family] = {f.fid: f for f in (
          "NOT RECOMMENDED - outreach or invitation automation")],
        [r"\bR9\b"]),
     # ---- code refusals written by agents ----------------------------------------
+    # RE-POINTED 2026-09-27 (lane L8), as PF-ENDORSE-OR-RECOMMEND above: the key
+    # is retired and its text is kept verbatim in outward_classes. Declared EMPTIED.
     _f("PF-DELETE-OR-WITHDRAW",
-       "PERMANENTLY_FORBIDDEN delete_or_withdraw_anything (network R5)",
+       "PERMANENTLY_FORBIDDEN delete_or_withdraw_anything (network R5) -- retired 2026-09-24",
        "CODE", "NO",
-       [("linkedin_server/writes.py", '"delete_or_withdraw_anything": ('),
+       [("linkedin_server/outward_classes.py", '"delete_or_withdraw_anything": ('),
         (_NET, "### R5 -- `delete_or_withdraw_anything`.")],
        # "five specs" is the key's own content -- FIVE specs cite it in
        # reversible_by -- and occurs nowhere else in the census or the package.
@@ -281,10 +288,11 @@ FAMILIES: dict[str, Family] = {f.fid: f for f in (
        "CODE", "NO",
        [("linkedin_server/writes.py", '"mark_notifications_read": (')],
        [r"mark_notifications_read"]),
+    # RE-POINTED 2026-09-27 (lane L8), as PF-ENDORSE-OR-RECOMMEND above.
     _f("PF-REPOST-OR-SHARE",
-       "PERMANENTLY_FORBIDDEN repost_or_share",
+       "PERMANENTLY_FORBIDDEN repost_or_share -- retired 2026-09-24",
        "CODE", "NO",
-       [("linkedin_server/writes.py", '"repost_or_share": (')],
+       [("linkedin_server/outward_classes.py", '"repost_or_share": (')],
        [r"repost_or_share"]),
     _f("R2-INVITATION-SUBSTRINGS",
        "forbidden substrings invitation, /invite, /connect, /withdraw (network R2)",
@@ -401,6 +409,18 @@ FAMILIES: dict[str, Family] = {f.fid: f for f in (
         ("_audit/2026-09-24-rulings-search-verticals-rosters-passive-costs.md",
          "It governs `N 171`")],
        [r"D5-PASSIVE-COST-IS-NOT-A-ROW", r"NOT-AN-ACT"]),
+    # Registered 2026-09-27 (lane L8, s10). op is NO for the reason D5's is: the
+    # orchestrator made the call under the operator's 08:11 principle, and the
+    # operator can override it. The ruling names its rows (P N27, P P2, and P N28
+    # as a second ground), so each row cites the ruling id itself.
+    _f("ACCOUNT-DESTRUCTION-STAYS-MANUAL",
+       "merging or closing his account, and deleting the data LinkedIn holds about him, stay manual -- not built",
+       "ORCHESTRATOR", "NO",
+       [("_audit/2026-09-27-rulings-relation-removals-and-account-destruction.md",
+         "RULED: (orchestrator, 2026-09-27, applying the operator's 08:11 principle) ACCOUNT-LEVEL"),
+        ("_audit/2026-09-27-rulings-relation-removals-and-account-destruction.md",
+         "REOPENER: he asks for one of them by name, naming the account or the data,")],
+       [r"ACCOUNT-DESTRUCTION-STAYS-MANUAL"]),
     # ---- the 2026-09-05 retirement families (wave-ruled; the queue was his) ----
     *_RETIREMENTS,
 )}
@@ -415,6 +435,12 @@ FAMILIES: dict[str, Family] = {f.fid: f for f in (
 #: longer fail, so each is DECLARED here with its reason, and a row filed under a
 #: declared-empty family is a problem: re-filing one means removing it from this
 #: table in the same edit, with the reason that changed.
+#:
+#: LANE L8 (2026-09-27, `_audit/2026-09-24-lane-l8-outward-classes.md` s5) ADDED
+#: THE THREE FAMILIES OF THE KEYS OUTWARD-CLASSES-BUILT-BEHIND-GRANTS RETIRED from
+#: writes.PERMANENTLY_FORBIDDEN. Their rows went back to GAP with each blocker
+#: named, except `P N28`, re-grounded on ACCOUNT-END-SUBSTRINGS alone; each
+#: family's anchor now resolves in outward_classes.RETIRED_PERMANENT_REFUSALS.
 EMPTIED: dict[str, str] = {
     "SETTINGS-BY-NAME": "his ruling admits settings by name and rules none out: 69 rows returned to GAP "
                         "awaiting admission, 4 re-filed on a ground of their own (returns s4)",
@@ -439,7 +465,19 @@ EMPTIED: dict[str, str] = {
     "ARTICLE-ROUTE-NOT-USED": "M C44 returned (returns s3.2)",
     "PF-AUTO-ACCEPT-OR-REPLY": "M M39 returned: the key's hinge does not reach text he writes (returns s3.2)",
     "PF-REPOST-OR-SHARE": "M C20 and M C21 returned: the key's grounds were 'not asked for', which ruling "
-                          "(b) answers, and taste, which he dissolved (returns s3.4)",
+                          "(b) answers, and taste, which he dissolved (returns s3.4); the key itself was "
+                          "retired from writes.PERMANENTLY_FORBIDDEN 2026-09-24 by "
+                          "OUTWARD-CLASSES-BUILT-BEHIND-GRANTS, its text kept verbatim in "
+                          "outward_classes.RETIRED_PERMANENT_REFUSALS (lane L8 s5)",
+    "PF-DELETE-OR-WITHDRAW": "retired from writes.PERMANENTLY_FORBIDDEN 2026-09-24 by "
+                             "OUTWARD-CLASSES-BUILT-BEHIND-GRANTS: 26 rows returned to GAP with blockers "
+                             "named, P N28 re-grounded on ACCOUNT-END-SUBSTRINGS (lane L8 s5); and P P2, "
+                             "filed here on master by lane Y2 after lane L8's base, returned at lane "
+                             "L8's merge of master (s9)",
+    "PF-ENDORSE-OR-RECOMMEND": "retired from writes.PERMANENTLY_FORBIDDEN 2026-09-24 by "
+                               "OUTWARD-CLASSES-BUILT-BEHIND-GRANTS: 3 rows returned to GAP with blockers "
+                               "named -- P E4, N 111 and N 112, filed second behind "
+                               "NO-THIRD-PARTY-PROFILE-LOAD, which keeps its other rows (lane L8 s5)",
     "FEED-CONTENT-READ": "M C43 returned: a lead's ruling he never made (returns s3.4)",
     "NAV-FROM-PAGE-CONTENT": "J 112 returned: its own reopener needs no new rule (returns s3.4)",
     "FOLLOW-PEOPLE-LIST": "N 38 returned: a class filter catching the address (returns s3.4)",

@@ -56,6 +56,7 @@
     "linkedin_unsave_job": "not_driven:never read the page",
     "linkedin_update_profile_field": "not_driven:never read the page",
     "linkedin_update_setting": "not_driven:never read the page",
-    "linkedin_who_viewed_me": "clean"
+    "linkedin_who_viewed_me": "clean",
+    "linkedin_withdraw_from_group": "not_driven:never read the page"
   }
 }

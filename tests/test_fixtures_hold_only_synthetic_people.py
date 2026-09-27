@@ -69,6 +69,13 @@ allowed, nothing below the slug. Counts are from 2026-09-27.
   reads. synthetic/messaging_thread.html 1. Both ADDED 2026-09-27 on lane G's
   cold verification, which found the label slot missing them: a row naming an
   undeclared person in the element and not in a label read nothing.
+* ``group link: first visible text`` and ``aria-label: More options for X`` --
+  a GROUP's title, which NAMES-AT-RUNTIME counts as people data and a group
+  can carry a person's name: the first text of an ``<a>`` whose href is
+  ``/groups/<digits>``, and the label of a membership row's menu button.
+  synthetic/groups_leave_menu.html 6 and 3. ADDED 2026-09-27 at lane G's
+  merge of master 7986ae3 (lane L8's fixture), accepted from their own table,
+  SYNTHETIC_GROUPS.
 * ``member link: aria-label matching no template`` -- the label is taken
   WHOLE, so a new label shape on a member link fails closed instead of
   passing unread. Measured 0; it is the fallback, not a slot anything uses.
@@ -186,9 +193,28 @@ SYNTHETIC_PEOPLE = frozenset(
     }
 )
 
+#: EVERY SYNTHETIC GROUP A TRACKED FIXTURE IS ALLOWED TO NAME. A group's title
+#: is people data too -- NAMES-AT-RUNTIME returns "people's names, and the
+#: titles of groups and events", and a group can be named after a person.
+#: DECLARED 2026-09-27 at lane G's merge of master 7986ae3, from the two group
+#: slots below, all six read out of lane L8's
+#: tests/fixtures/synthetic/groups_leave_menu.html, whose header says "EVERY
+#: GROUP HERE IS INVENTED -- names, ids and all". The entry is the claim, as
+#: for people.
+SYNTHETIC_GROUPS = frozenset(
+    {
+        "Brindlewick Society",
+        "Marrowby Guild",
+        "Oakhollow Exchange",
+        "Pellucid Roundtable",
+        "Quillfeather Circle",
+        "Tessaline Forum",
+    }
+)
+
 #: What a candidate may be: declared here, or declared on the neighbouring
 #: table for invented people.
-ACCEPTED = SYNTHETIC_PEOPLE | INVENTED_NAMES
+ACCEPTED = SYNTHETIC_PEOPLE | INVENTED_NAMES | SYNTHETIC_GROUPS
 
 # ===========================================================================
 # THE SLOTS
@@ -205,6 +231,8 @@ LABEL_INVITE = "aria-label: Invite X to connect"
 LABEL_CONVERSATION = "aria-label: Select conversation with X"
 CLASS_PARTICIPANTS = "class: a conversation card's participant names"
 CLASS_THREAD_TITLE = "class: an open conversation's title"
+GROUP_TEXT = "group link: first visible text"
+LABEL_GROUP_MENU = "aria-label: More options for X"
 
 #: SLOTS READ BY CLASS, where the messaging readers read names: the first
 #: visible text inside an element wearing the class token, split into
@@ -230,6 +258,8 @@ MEASURED_SLOTS = (
     LABEL_CONVERSATION,
     CLASS_PARTICIPANTS,
     CLASS_THREAD_TITLE,
+    GROUP_TEXT,
+    LABEL_GROUP_MENU,
 )
 
 #: A conversation's label joins its participants with ``, `` and a last
@@ -258,6 +288,17 @@ LABEL_TEMPLATES = (
     (LABEL_SEND_MESSAGE, re.compile(r"^Send a message to (?P<name>.+?)\.?$")),
     (LABEL_INVITE, re.compile(r"^Invite (?P<name>.+) to connect\.?$")),
     (LABEL_CONVERSATION, re.compile(r"^Select conversation with (?P<name>.+?)\.?$")),
+    # A membership row's menu button: "THE LABEL CARRIES THE NAME" of the
+    # group (lane L8's fixture header).
+    (LABEL_GROUP_MENU, re.compile(r"^More options for (?P<name>.+?)\.?$")),
+)
+
+#: A group's own address: ``/groups/<digits>``, relative or on a linkedin.com
+#: host, nothing below the id but an optional slash, query or fragment.
+GROUP_HREF = re.compile(
+    r"^(?:(?:https?:)?//(?:[a-z0-9-]+\.)*linkedin\.com)?"
+    r"/groups/[0-9]{1,20}/?(?:[?#].*)?$",
+    re.IGNORECASE | re.DOTALL,
 )
 
 #: A member's own address and nothing below it. Addresses BELOW a member --
@@ -297,12 +338,14 @@ class Candidate(NamedTuple):
 
 
 class _Link:
-    """An open ``<a>``: is it a member link, and does its text get read?"""
+    """An open ``<a>``: is it a member or a group link, and does its text get
+    read?"""
 
-    __slots__ = ("member", "reads_text", "text_taken")
+    __slots__ = ("member", "group", "reads_text", "text_taken")
 
-    def __init__(self, member: bool, reads_text: bool) -> None:
+    def __init__(self, member: bool, reads_text: bool, group: bool = False) -> None:
         self.member = member
+        self.group = group
         self.reads_text = reads_text
         self.text_taken = False
 
@@ -325,6 +368,8 @@ class _Element:
 
 
 def _link_for(href: str) -> _Link:
+    if GROUP_HREF.match(href.strip()):
+        return _Link(member=False, reads_text=True, group=True)
     match = MEMBER_HREF.match(href.strip())
     if match is None:
         return _Link(member=False, reads_text=False)
@@ -424,6 +469,13 @@ class _SlotReader(HTMLParser):
             owner.text_taken = True
             for part in _PARTICIPANT_SEPARATORS.split(text):
                 self._add(owner.slot, part, line, col)
+            return
+        # A GROUP LINK's first visible text is its title.
+        anchor = next((e.link for e in reversed(self._open) if e.link is not None), None)
+        if anchor is not None and anchor.group:
+            if not anchor.text_taken:
+                anchor.text_taken = True
+                self._add(GROUP_TEXT, text, line, col)
             return
         member = self._innermost_link()
         if member is None:
@@ -537,11 +589,11 @@ def test_every_declared_synthetic_person_is_still_rendered():
     Printing the stale entries is safe: they are this file's own claims, on
     the table above already.
     """
-    gone = stale(SYNTHETIC_PEOPLE, _rendered())
+    gone = stale(SYNTHETIC_PEOPLE | SYNTHETIC_GROUPS, _rendered())
     assert gone == [], (
-        "declared in SYNTHETIC_PEOPLE and rendered by no tracked fixture: %s. "
-        "Delete the entry -- a permission nobody uses is a permission nobody "
-        "reviews." % gone
+        "declared in SYNTHETIC_PEOPLE or SYNTHETIC_GROUPS and rendered by no "
+        "tracked fixture: %s. Delete the entry -- a permission nobody uses is a "
+        "permission nobody reviews." % gone
     )
 
 
@@ -622,6 +674,11 @@ PLANTS = {
     LABEL_INVITE: '<button aria-label="Invite {name} to connect">Connect</button>',
     LABEL_CONVERSATION: (
         '<div tabindex="0" aria-label="Select conversation with {name}"></div>'
+    ),
+    GROUP_TEXT: '<a href="/groups/12345/"><span>{name}</span></a>',
+    LABEL_GROUP_MENU: (
+        '<button type="button" aria-expanded="false" '
+        'aria-label="More options for {name}"></button>'
     ),
     CLASS_PARTICIPANTS: (
         '<h3 class="msg-conversation-card__participant-names t-16">'
@@ -803,6 +860,7 @@ def test_the_two_declared_tables_do_not_overlap():
     """One claim, one place. A name on both tables survives the deletion of
     either entry, which is how a stale permission outlives its review."""
     assert sorted(SYNTHETIC_PEOPLE & INVENTED_NAMES) == []
+    assert sorted(SYNTHETIC_GROUPS & (SYNTHETIC_PEOPLE | INVENTED_NAMES)) == []
 
 
 def test_this_file_stays_ascii():

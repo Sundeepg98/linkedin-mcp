@@ -3,8 +3,22 @@
 An MCP server that shows you your own LinkedIn account data as structured tool
 results instead of pages you have to click through.
 
-**Fifty-six tools ship. Forty-one read. Fifteen write. None is
+**Fifty-seven tools ship. Forty-one read. Sixteen write. None is
 write-shaped and unable to act.**
+
+**THAT LINE READ "Fifty-six ... Fifteen write" UNTIL LANE L8'S MERGE,
+2026-09-27.** The sixteenth write is `linkedin_withdraw_from_group`: leaving
+one group you name by its numeric id, behind the same flag and single-use
+grant as every other write. It presses the group row's own menu and then
+"Leave this group" -- two presses through the one click site -- and verifies
+off a fresh render of your Groups page. It is called "withdraw" because the
+naming law requires a write verb and "leave" is not one. Census rows `M C63`
+and `N 64`, COVERED-UNFIRED: built offline and never fired. The same merge
+narrowed the permanently forbidden acts to the six that are themselves
+mitigations: reposting or sharing, endorsing or recommending, and deleting or
+withdrawing one of your own items are no longer refused outright, but built
+behind the grant as their controls are captured (ruling
+OUTWARD-CLASSES-BUILT-BEHIND-GRANTS).
 
 **THAT LINE READ "Fifty-three ... Thirty-nine read. Fourteen write" UNTIL THE
 LANE L5 MERGE, 2026-09-24,** and "Fifty-five ... Forty-one read. Fourteen
@@ -439,7 +453,10 @@ but for reasons that were measured:
    would be filled in or pressed. This is the same standard `unsave_job` is
    held to, applied to the action that deserves it most.
 2. **An application cannot be undone from here**, at any confirm level, in any
-   circumstances. Withdrawing is permanently forbidden.
+   circumstances -- and since 2026-09-24 the reason is LinkedIn's: its Help
+   Center (a512388) says an application submitted through LinkedIn cannot be
+   withdrawn. This line used to say "Withdrawing is permanently forbidden";
+   that refusal was retired by OUTWARD-CLASSES-BUILT-BEHIND-GRANTS.
 3. **The off-site half is not this server's to do at all**, however good a
    capture got. Driving somebody else's form, on somebody else's domain, under
    their terms, is a different piece of software.
@@ -918,7 +935,7 @@ linkedin_server/
   cdp_bridge.py              the recovery path: attach to a running Chrome
   dom.py                     the read-only harvesters and the control readers
   shape.py                   pure parsers and the result envelope
-  server.py                  the fifty-six tools
+  server.py                  the fifty-seven tools
   errors.py
 tests/                       1393 tests, no network, no account
   fixtures/                  frozen LinkedIn markup, scrubbed
