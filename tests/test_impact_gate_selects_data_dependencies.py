@@ -47,6 +47,7 @@ it discriminating:
 from __future__ import annotations
 
 import pathlib
+import subprocess
 import sys
 
 import pytest
@@ -643,3 +644,349 @@ def test_the_flat_glob_check_can_actually_find_something(tmp_path):
     assert not any("__pycache__" in f for f in found), (
         "the cache is not source and must not be reported as a hidden file."
     )
+
+
+# --------------------------------------------------------------------------
+# A SENTENCE IN THE PACKAGE IS A CITATION, NOT A READ -- added 2026-09-28.
+#
+# ``code_text`` strips comments and docstrings, and a string literal that is a
+# VALUE survives it, because a value can be a path. In ``linkedin_server/``
+# those values are mostly sentences -- messages, specs, receipts -- and ONE of
+# them, in ``linkedin_server/writes.py``, made an edit to lane L5's record
+# select 118 test files and widen to the full suite. The rule and its
+# argument are in ``impact_gate.without_sentences``; what is pinned here:
+#
+#   (a) a package SENTENCE naming a data file does not couple it;
+#   (b) a package PATH literal naming it still does -- f-strings included,
+#       which is where the two tokenizers disagree and the oldest Python
+#       has to agree with the newest;
+#   (c) lane L5's record plan shrinks, under a bound derived from the gate;
+#   (d) four real data files, each read by a different route, keep exactly
+#       the plan they had;
+#   (e) a package module that cannot be separated is read WHOLE, and says so;
+#   and THE GUARD on the rule's premise, with its own control.
+# --------------------------------------------------------------------------
+
+#: The planted document. Synthetic, and only ever written under ``tmp_path``.
+PLANTED_DOC = "_audit/zz-planted-citation.md"
+
+#: One planted package module per case: ``(source, must it couple)``. The
+#: f-string cases are ONE token before 3.12 and a run of tokens from 3.12, so
+#: running this file on the oldest Python is what certifies them.
+PACKAGE_PLANTS = {
+    "sentence": (
+        'REASON = "the table lives in _audit/zz-planted-citation.md and is '
+        'read by hand"\n', False),
+    "sentence-fstring": (
+        "def reason(n):\n"
+        '    return f"row {n} is in _audit/zz-planted-citation.md, s2"\n',
+        False),
+    "path": ('PATH = "_audit/zz-planted-citation.md"\n', True),
+    "path-fstring": (
+        "from pathlib import Path\n"
+        "ROOT = Path('.')\n"
+        'DOC = f"{ROOT}/_audit/zz-planted-citation.md"\n', True),
+    "path-in-a-sentence-expression": (
+        "from pathlib import Path\n"
+        "ROOT = Path('.')\n"
+        "def reason():\n"
+        "    return f\"reading {ROOT / '_audit' / 'zz-planted-citation.md'}"
+        " now\"\n", True),
+}
+_SENTENCES = sorted(k for k, (_s, couples) in PACKAGE_PLANTS.items()
+                    if not couples)
+_PATHS = sorted(k for k, (_s, couples) in PACKAGE_PLANTS.items() if couples)
+
+
+def _plant(tmp_path, monkeypatch, module_source: str) -> str:
+    """A four-file repository: the document, one package module holding
+    ``module_source``, the package ``__init__``, and ONE test importing the
+    module. Returns that test. Built under ``tmp_path`` and pointed at by the
+    analyser's own roots, so nothing is written into a tree other agents are
+    committing to."""
+    (tmp_path / "_audit").mkdir()
+    (tmp_path / PLANTED_DOC).write_text("# planted\n", encoding="ascii")
+    package = tmp_path / "linkedin_server"
+    package.mkdir()
+    (package / "__init__.py").write_text("", encoding="ascii")
+    (package / "planted.py").write_text(module_source, encoding="ascii")
+    (tmp_path / "tests").mkdir()
+    (tmp_path / "tests" / "test_planted_reader.py").write_text(
+        "from linkedin_server import planted\n", encoding="ascii")
+    (tmp_path / "scripts").mkdir()
+    monkeypatch.setattr(G, "REPO", tmp_path)
+    monkeypatch.setattr(G, "TESTS_DIR", tmp_path / "tests")
+    monkeypatch.setattr(G, "SCRIPTS_DIR", tmp_path / "scripts")
+    monkeypatch.setattr(G, "PACKAGE_DIR", tmp_path / "linkedin_server")
+    return "tests/test_planted_reader.py"
+
+
+@pytest.mark.parametrize("case", _SENTENCES)
+def test_a_package_sentence_naming_a_data_file_does_not_couple_it(
+        tmp_path, monkeypatch, case):
+    """(a) A sentence that names a document CITES it; it does not read it."""
+    reader = _plant(tmp_path, monkeypatch, PACKAGE_PLANTS[case][0])
+    impact = G.impact_set([PLANTED_DOC], observed_coupling=False,
+                          always_run=False)
+    assert reader not in impact.selected, (
+        f"[{case}] a package SENTENCE naming {PLANTED_DOC} coupled it, so "
+        "every test importing that module joins the plan -- the defect that "
+        "made lane L5's record select 118 test files. Edges: "
+        f"{impact.edges}"
+    )
+
+
+@pytest.mark.parametrize("case", _PATHS)
+def test_a_package_path_literal_naming_a_data_file_still_couples_it(
+        tmp_path, monkeypatch, case):
+    """(b) A path the package HOLDS is a read, and still selects its tests.
+
+    ``path-in-a-sentence-expression`` is the sharp one: a sentence built
+    around a real path. The sentence goes and its expression stays, so the
+    path segments inside the braces are still seen.
+    """
+    reader = _plant(tmp_path, monkeypatch, PACKAGE_PLANTS[case][0])
+    impact = G.impact_set([PLANTED_DOC], observed_coupling=False,
+                          always_run=False)
+    assert reader in impact.selected, (
+        f"[{case}] a package module that holds {PLANTED_DOC} as a PATH did "
+        "not couple it: the sentence rule has started removing code. "
+        f"Edges: {impact.edges}"
+    )
+
+
+@pytest.mark.parametrize("case", sorted(PACKAGE_PLANTS))
+def test_with_the_rule_off_every_plant_couples(tmp_path, monkeypatch, case):
+    """THE CONTROL for (a) and (b): every plant NAMES the document, so with
+    the rule off each one couples. A sentence plant that did not couple here
+    would be passing (a) for a reason that has nothing to do with the rule."""
+    reader = _plant(tmp_path, monkeypatch, PACKAGE_PLANTS[case][0])
+    impact = G.impact_set([PLANTED_DOC], observed_coupling=False,
+                          always_run=False, sentences_are_prose=False)
+    assert reader in impact.selected, (case, impact.edges)
+
+
+def test_a_package_module_that_cannot_be_separated_is_read_whole(
+        tmp_path, monkeypatch, capsys):
+    """(e) NEVER SELECT LESS ON A FILE THAT COULD NOT BE READ, AND SAY SO.
+
+    A module the parser refuses cannot be told into code and sentences, so it
+    is read WHOLE -- its sentence couples, as before the rule -- and both its
+    edge and the report say that this was a fallback, not a reading.
+    """
+    reader = _plant(tmp_path, monkeypatch,
+                    'WHY = "see _audit/zz-planted-citation.md for why"\n'
+                    "def refused(:\n")
+    impact = G.impact_set([PLANTED_DOC], observed_coupling=False,
+                          always_run=False)
+    assert reader in impact.selected, (
+        "a package module that could not be separated NARROWED the plan; it "
+        f"must be read whole. Edges: {impact.edges}"
+    )
+    why = [w for a, b, w in impact.edges
+           if a == PLANTED_DOC and b == "linkedin_server/planted.py"]
+    assert why and all("read WHOLE" in w for w in why), why
+    assert impact.unseparated == ["linkedin_server/planted.py"], (
+        impact.unseparated)
+    G.main(["--paths", PLANTED_DOC, "--plan-only"])
+    assert "read WHOLE" in capsys.readouterr().err, (
+        "the report did not say that a module was read whole; a fallback "
+        "that passes silently as a reading is the defect this refuses."
+    )
+
+
+# --- THE REAL TREE. One reading of it, shared. ----------------------------
+
+@pytest.fixture(scope="module")
+def _one_reading():
+    """ONE reading of the real tree for every real-tree control below.
+
+    Sound to share: a ``Corpus`` holds only per-file readings and the floor,
+    and none of them takes input from the diff or from a switch. Cheap
+    because the first reading is most of the cost.
+    """
+    return G.Corpus()
+
+
+@pytest.fixture
+def shared_reading(_one_reading, monkeypatch):
+    """Hand that reading to every ``impact_set`` call in ONE test.
+
+    By patching the constructor rather than adding an argument, so the calls
+    below are the gate's own calls, unchanged -- which is what lets them run,
+    and go RED, against the analyser as it was before the rule.
+    """
+    monkeypatch.setattr(G, "Corpus", lambda: _one_reading)
+    return _one_reading
+
+
+#: THE RECORD WHOSE PLAN EXPOSED IT. Five package modules cite it; one does
+#: so in a VALUE, and that one sentence pulled in 95 test files.
+L5_RECORD = "_audit/2026-09-24-lane-l5-messaging.md"
+
+
+def test_the_lane_l5_record_no_longer_selects_through_a_package_sentence(
+        shared_reading):
+    """(c) The record's plan shrinks, and for the stated reason.
+
+    THE BOUND IS DERIVED, NOT PINNED. The gate widens to the full suite when
+    its plan reaches ``_FULL_SUITE_AT_FRACTION`` of the test files, and this
+    record's plan did: 118 selected, a plan of 132 of 271 at c9277bd -- the
+    22-28 minute gate the order named. So the selection must stay below what
+    that line leaves once the corpus-wide floor is counted: 0.45 x 271 - 26 =
+    95.95 there. An exact count would drift with every sweep reader added;
+    this is the property the rule exists to restore. With the rule: 23.
+    """
+    _skip_if_moved(L5_RECORD)
+    impact = G.impact_set([L5_RECORD])
+    package = sorted({b for a, b, _w in impact.edges
+                      if a == L5_RECORD and b.startswith("linkedin_server/")})
+    assert not package, (
+        f"{L5_RECORD} still reaches {package} at hop 0. No package module "
+        "reads that record; each one cites it, and a citation followed "
+        "through the package's importers is the 118-file plan."
+    )
+    bound = (G._FULL_SUITE_AT_FRACTION * len(G.test_files_on_disk())
+             - len(impact.always_run))
+    assert len(impact.selected) < bound, (
+        f"{len(impact.selected)} selected, at or over {bound:.1f}: with the "
+        f"{len(impact.always_run)}-file floor this plan crosses the gate's "
+        f"own widening line and runs the full suite."
+    )
+    # THE CONTROL: with the rule off the record still reaches a package
+    # module, so the arms above are not passing on a record nobody cites.
+    cited = G.impact_set([L5_RECORD], sentences_are_prose=False)
+    reached = {b for a, b, _w in cited.edges
+               if a == L5_RECORD and b.startswith("linkedin_server/")}
+    assert reached, (
+        f"with the rule off, {L5_RECORD} reaches no package module: the "
+        "sentence this control stands on is gone. Re-aim it at another "
+        "document a package sentence cites rather than deleting it."
+    )
+    assert len(cited.selected) > len(impact.selected)
+
+
+#: (d) Data files read in CODE, each by a different route. The rule must not
+#: move one of their plans by a single file.
+REAL_READS = {
+    "composed-path-segments": (LEDGER, THE_TEST),
+    "the-same-script-a-tsv": (EVIDENCE_TSV, THE_TEST),
+    "an-f-string-name": (COMPOSED_FIXTURE, COMPOSED_READER),
+    "a-script-loaded-by-path": (LOADED_BY_PATH, LOADED_BY_PATH_READER),
+}
+
+
+@pytest.mark.parametrize("route", sorted(REAL_READS))
+def test_a_real_data_file_plan_is_identical_with_the_rule_on_and_off(
+        shared_reading, route):
+    """(d) THE NAMES-ALONE TRAP, from the other side: a gate that stopped
+    seeing code strings would wave data changes through. The ledger is the
+    sharp case -- its test names no ledger at all and is reached only through
+    ``ROOT / "_audit" / "<name>"`` in the script it imports."""
+    data_file, reader = REAL_READS[route]
+    _skip_if_moved(data_file, reader)
+    armed = G.impact_set([data_file])
+    assert reader in armed.test_files, (
+        f"{data_file} no longer selects {reader} ({route})."
+    )
+    unarmed = G.impact_set([data_file], sentences_are_prose=False)
+    moved = sorted(set(armed.test_files) ^ set(unarmed.test_files))
+    assert not moved, (
+        f"the sentence rule moved {data_file}'s plan ({route}): {moved}. It "
+        "may only drop citations, and nothing reads this file in a sentence."
+    )
+
+
+# --- THE GUARD ON THE RULE'S PREMISE. ---------------------------------------
+
+def _tracked_data_files() -> list[str]:
+    """Tracked files that are not python: every data file a change can stage.
+
+    Asked of git at the analyser's own root, so the guard judges the tree the
+    analyser reads. A git that cannot answer FAILS this -- a guard with no
+    population is not a clean guard.
+    """
+    proc = subprocess.run(["git", "ls-files", "-z"], cwd=G.REPO,
+                          capture_output=True, text=True, encoding="utf-8")
+    if proc.returncode != 0:
+        pytest.fail("git could not list the tracked files, so this guard has "
+                    f"no population: {proc.stderr.strip()[:200]}")
+    return sorted(p for p in proc.stdout.split("\0")
+                  if p and not p.endswith(".py"))
+
+
+def _named_outside_sentences(
+    texts: dict[str, str], data_files: list[str],
+) -> list[tuple[str, str]]:
+    """``(module, data file)`` wherever a module's text names a data file, by
+    the analyser's own file patterns. Fed a module's text with its sentences
+    OUT, a hit is a data file the module names in code -- a read."""
+    hits: list[tuple[str, str]] = []
+    for data_file in data_files:
+        base = data_file.rsplit("/", 1)[-1]
+        patterns, _dirs = G.data_tokens(data_file)
+        for module, text in texts.items():
+            if base in text and any(p.search(text) for p in patterns):
+                hits.append((module, data_file))
+    return sorted(hits)
+
+
+def test_no_package_module_names_a_tracked_data_file_outside_a_sentence(
+        shared_reading):
+    """THE PREMISE OF THE SENTENCE RULE, held rather than believed.
+
+    The rule is safe because the package CITES documents and never opens one
+    by a name: measured 2026-09-28 at c9277bd, 65 modules and 337 tracked
+    data files, none named outside a sentence and 14 named inside one (19
+    times, in 6 modules) -- every one a citation. The day a package module
+    names a tracked data file in code, this fails and names both. That module
+    may be a READER now, and the rule's premise must be re-measured before a
+    plan that dropped its sentences is trusted.
+
+    And the premise under it: no tracked path holds whitespace. A path that
+    did could only be written as a literal with whitespace in it, which the
+    rule reads as a sentence, so it could miss a real read -- this says so
+    the day such a path is tracked, before anyone is misled by a plan.
+    """
+    data_files = _tracked_data_files()
+    assert len(data_files) > 100, (
+        f"only {len(data_files)} tracked data files: the listing broke, and "
+        "a guard over an almost-empty set certifies nothing."
+    )
+    spaced = [p for p in data_files if any(ch.isspace() for ch in p)]
+    assert not spaced, (
+        f"tracked paths holding whitespace: {spaced}. A literal naming one "
+        "holds whitespace, and the sentence rule would read it as prose."
+    )
+    modules = [rel for rel in shared_reading.files
+               if rel.startswith(G.SENTENCE_ROOT)]
+    assert len(modules) > 30, modules
+    texts = {rel: shared_reading.data(rel) for rel in modules}
+    unread = sorted(rel for rel, text in texts.items() if text is None)
+    assert not unread, f"package modules that could not be read: {unread}"
+    unseparated = sorted(set(modules) & shared_reading.unseparated)
+    assert not unseparated, (
+        f"package modules whose sentences could not be separated: "
+        f"{unseparated}. They are read whole, which is safe, and this guard "
+        "cannot vouch for what their code names until they separate."
+    )
+    hits = _named_outside_sentences(texts, data_files)
+    assert not hits, (
+        f"package modules naming a tracked data file OUTSIDE a sentence: "
+        f"{hits}. The sentence rule rests on the package never doing that."
+    )
+
+
+def test_the_guard_catches_a_planted_package_read_by_name():
+    """THE GUARD'S CONTROL. A planted package source that names a data file
+    in a whitespace-free literal is caught BY NAME, and one naming it only in
+    a sentence is not -- so neither a detector that sees nothing nor one that
+    sees everything passes this."""
+    reads = G.without_sentences('PATH = "' + PLANTED_DOC + '"\n')
+    cites = G.without_sentences('WHY = "see ' + PLANTED_DOC + ' for why"\n')
+    assert reads is not None and cites is not None
+    texts = {"linkedin_server/reads.py": reads,
+             "linkedin_server/cites.py": cites}
+    hits = _named_outside_sentences(
+        texts, [PLANTED_DOC, "_audit/zz-planted-other.md"])
+    assert hits == [("linkedin_server/reads.py", PLANTED_DOC)], hits

@@ -297,38 +297,249 @@ def code_text(path: Path) -> str | None:
     silently REMOVED a candidate from the plan. That is the exact failure
     this gate exists to prevent, reproduced inside the gate. None forces the
     caller to decide, and the caller widens.
+
+    **AND IN THE PACKAGE A SENTENCE IS PROSE TOO, which this function keeps.**
+    A string literal that is a VALUE survives this strip, deliberately: a
+    value can be a path. But in ``linkedin_server/`` those values are mostly
+    SENTENCES -- messages, specs, receipts -- and a sentence that names a
+    document cites it exactly as a comment does. Measured 2026-09-28 at
+    c9277bd: an edit to ``_audit/2026-09-24-lane-l5-messaging.md`` selected
+    118 test files, 95 of them through ONE sentence in
+    ``linkedin_server/writes.py`` -- the ``reversibility_procedure`` of
+    ``SANCTIONED_WRITES["linkedin_send_reply"]`` -- and widened to the full
+    suite (a plan of 132 of 271 files, over the 45% line). With package
+    sentences read as prose it selects 23 and scopes (41 of 271). That rule is
+    :func:`without_sentences`, applied to the package only by
+    :meth:`Corpus.data`; this function is unchanged for every caller.
     """
     try:
         src = path.read_text(encoding="utf-8", errors="replace")
     except OSError:
         return None
-    try:
-        tree = ast.parse(src)
-    except (SyntaxError, ValueError):
+    kept = _kept_tokens(src)
+    if kept is None:
         return src
-    # An expression statement whose whole value is a string literal is a
-    # string that is evaluated and thrown away -- which is precisely what a
-    # docstring is, including the ``#:``-style attribute docstrings used
-    # throughout this repo.
+    # One token per line, so nothing is glued into a match that the source
+    # does not actually contain.
+    return "\n".join(tok.string for tok in kept)
+
+
+def _kept_tokens(
+    src: str, *, docstrings: bool = True,
+) -> list[tokenize.TokenInfo] | None:
+    """The tokens :func:`code_text` keeps: all of them but comments and docstrings.
+
+    None when ``src`` cannot be parsed or tokenized, NEVER ``[]``: an empty
+    list reads as "holds nothing", and every caller widens on None instead.
+    ``docstrings=False`` is for a fragment that is an EXPRESSION rather than a
+    module -- there a lone string is a value, not a docstring. See
+    :func:`without_sentences`, which reads f-string expressions that way.
+    """
     prose: set[tuple[int, int]] = set()
-    for node in ast.walk(tree):
-        if (isinstance(node, ast.Expr)
-                and isinstance(node.value, ast.Constant)
-                and isinstance(node.value.value, str)):
-            prose.add((node.value.lineno, node.value.col_offset))
+    if docstrings:
+        try:
+            tree = ast.parse(src)
+        except (SyntaxError, ValueError):
+            return None
+        # An expression statement whose whole value is a string literal is a
+        # string that is evaluated and thrown away -- which is precisely what
+        # a docstring is, including the ``#:``-style attribute docstrings used
+        # throughout this repo.
+        for node in ast.walk(tree):
+            if (isinstance(node, ast.Expr)
+                    and isinstance(node.value, ast.Constant)
+                    and isinstance(node.value.value, str)):
+                prose.add((node.value.lineno, node.value.col_offset))
     try:
         tokens = list(tokenize.generate_tokens(io.StringIO(src).readline))
     except (tokenize.TokenError, IndentationError, SyntaxError, ValueError):
-        return src
-    kept: list[str] = []
-    for tok in tokens:
-        if tok.type == tokenize.COMMENT:
+        return None
+    return [tok for tok in tokens
+            if tok.type != tokenize.COMMENT
+            and not (tok.type == tokenize.STRING and tok.start in prose)]
+
+
+#: WHERE A SENTENCE IS A CITATION: the package, and nowhere else -- a scope
+#: that was MEASURED, not assumed (2026-09-28, 0867bda and c9277bd). No
+#: package module names any of the 337 tracked data files in a whitespace-free
+#: code token, and 14 are named inside package sentences, every one a
+#: citation: the package cites documents and never opens one by a name.
+#: ``tests/`` and ``scripts/`` are the opposite, and the same rule there cuts
+#: REAL reads: they plant data paths inside literals WITH spaces that their
+#: checkers resolve against the file at runtime -- ``"_audit/_census/jobs.md
+#: row 999"`` in ``tests/test_jobs_directions.py`` and a ``path::phrase``
+#: citation of ``_audit/_census/network.md`` in
+#: ``scripts/check_write_classes.py``. So everywhere else keeps ``code_text``.
+#: The package's premise is HELD, not believed: see
+#: ``tests/test_impact_gate_selects_data_dependencies.py``, which fails the
+#: day a package module names a tracked data file outside a sentence.
+SENTENCE_ROOT = "linkedin_server/"
+
+#: From 3.12 the tokenizer splits an f-string into START/MIDDLE/END tokens with
+#: the expression's own tokens between; before 3.12 an f-string is ONE STRING
+#: token. Absent on the floor, so read with a default -- as
+#: ``scripts/py_baseline_lint.py`` reads them, for the same reason.
+_FSTRING_START = getattr(tokenize, "FSTRING_START", None)
+_FSTRING_END = getattr(tokenize, "FSTRING_END", None)
+
+
+def _holds_whitespace(value: object) -> bool:
+    """Does a literal's VALUE hold whitespace? ``bytes`` are read as Latin-1."""
+    if isinstance(value, bytes):
+        value = value.decode("latin-1")
+    return isinstance(value, str) and any(ch.isspace() for ch in value)
+
+
+def _expressions_of(joined: ast.JoinedStr) -> list[str]:
+    """The source of every expression an f-string holds, format specs included."""
+    out: list[str] = []
+    for part in joined.values:
+        if isinstance(part, ast.FormattedValue):
+            out.append(ast.unparse(part.value))
+            if isinstance(part.format_spec, ast.JoinedStr):
+                out.extend(_expressions_of(part.format_spec))
+    return out
+
+
+def _source_between(
+    lines: list[str], start: tuple[int, int], end: tuple[int, int],
+) -> str:
+    """The source between two TOKENIZER positions: (row, character column)."""
+    (row0, col0), (row1, col1) = start, end
+    if row0 == row1:
+        return lines[row0 - 1][col0:col1]
+    return (lines[row0 - 1][col0:] + "".join(lines[row0:row1 - 1])
+            + lines[row1 - 1][:col1])
+
+
+def _piece_verdict(piece: str) -> tuple[bool, list[str]] | None:
+    """``(is it a sentence, the expressions it holds)`` for ONE string literal.
+
+    **READ BY THE PARSER, ON THE LITERAL'S OWN TEXT, which is what makes the
+    verdict the same on every Python.** The tokenizers disagree about what an
+    f-string is -- one STRING token before 3.12, a START..END run of tokens
+    from 3.12 -- but both hand over the same text, and ``ast`` reads that text
+    identically on both (measured on 3.13 and 3.10 over fifteen shapes,
+    escaped braces and nested f-strings included). Reading the 3.12 middle
+    tokens instead would not be: ``f"{a}{{b}}c"`` splits there into three
+    middles whose positions skip the doubled braces.
+
+    It judges the VALUE: ``ast`` decodes escapes, so ``"\\t"`` holds
+    whitespace. A value with whitespace in it is no tracked path -- see
+    :func:`without_sentences` -- whatever its source looks like.
+
+    None when the text does not parse as one literal; the caller then keeps
+    today's reading of the whole module rather than guess at this one.
+    """
+    try:
+        node = ast.parse(piece, mode="eval").body
+    except (SyntaxError, ValueError):
+        return None
+    if isinstance(node, ast.Constant):
+        return _holds_whitespace(node.value), []
+    if isinstance(node, ast.JoinedStr):
+        sentence = any(isinstance(part, ast.Constant)
+                       and _holds_whitespace(part.value)
+                       for part in node.values)
+        return sentence, _expressions_of(node)
+    return None
+
+
+def _without_sentence_tokens(
+    src: str, *, docstrings: bool = True,
+) -> list[str] | None:
+    """The token strings :func:`without_sentences` joins. None if unknown."""
+    kept = _kept_tokens(src, docstrings=docstrings)
+    if kept is None:
+        return None
+    lines = io.StringIO(src).readlines()
+    out: list[str] = []
+    i = 0
+    while i < len(kept):
+        tok = kept[i]
+        if _FSTRING_START is not None and tok.type == _FSTRING_START:
+            # 3.12+: the piece runs to its MATCHING end, nested ones inside.
+            depth, j = 1, i + 1
+            while j < len(kept) and depth:
+                if kept[j].type == _FSTRING_START:
+                    depth += 1
+                elif kept[j].type == _FSTRING_END:
+                    depth -= 1
+                j += 1
+            if depth:
+                return None
+            piece = kept[i:j]
+            text = _source_between(lines, tok.start, kept[j - 1].end)
+        elif tok.type == tokenize.STRING:
+            piece, j, text = [tok], i + 1, tok.string
+        else:
+            out.append(tok.string)
+            i += 1
             continue
-        if tok.type == tokenize.STRING and tok.start in prose:
-            continue
-        kept.append(tok.string)
-    # One token per line, so nothing is glued into a match that the source
-    # does not actually contain.
+        verdict = _piece_verdict(text)
+        if verdict is None:
+            return None
+        sentence, expressions = verdict
+        if sentence:
+            # THE SENTENCE GOES AND ITS EXPRESSIONS STAY. A sentence can be
+            # built around a real path -- f"reading {ROOT / 'x.md'} now" --
+            # so each expression is read again, by these same rules.
+            for expression in expressions:
+                inner = _without_sentence_tokens(expression, docstrings=False)
+                if inner is None:
+                    return None
+                out.extend(inner)
+        else:
+            out.extend(t.string for t in piece)
+        i = j
+    return out
+
+
+def without_sentences(src: str) -> str | None:
+    """:func:`code_text` of ``src`` with its SENTENCES gone as well. None if unknown.
+
+    **A PATH INSIDE A SENTENCE IS A CITATION, NOT A READ.** That is the rule
+    ``code_text`` applies to comments and docstrings, carried to the one
+    place prose survives it: a string literal that is a VALUE. In the package
+    those values are messages, specs and receipts, and they name the
+    documents they rest on. Following one is following a citation: measured
+    2026-09-28 at c9277bd, ONE sentence in ``linkedin_server/writes.py`` --
+    the ``reversibility_procedure`` of
+    ``SANCTIONED_WRITES["linkedin_send_reply"]``, "capture spec C6 in <lane
+    L5's record>" -- coupled that record to ``writes.py`` and through its
+    importers to 95 test files. The record's plan went from 118 selected
+    (132 of 271 files, widened to the full suite) to 23 selected (41 files,
+    scoped), and nothing a data file is really read
+    by moved: the ledger read through composed ``Path`` segments, the census
+    TSV, the fixture named by an f-string and the file a script loaded by path
+    select exactly the same test files with and without this rule. Over 51
+    data files probed -- the six the tests pin, and every file a literal
+    with whitespace in it names anywhere in the tree -- 14 plans shrank (746
+    test files in all), none grew, and the floor never moved.
+
+    WHAT IS A SENTENCE. A string literal whose value holds whitespace; for an
+    f-string, one whose LITERAL PARTS hold whitespace -- and then only those
+    parts go. Its expressions are kept and read again by these same rules, so
+    ``f"reading {ROOT / 'x.md'} now"`` still shows ``'x.md'``. The unit is one
+    literal PIECE, as ``scripts/py_baseline_lint.py`` counts them, so of
+    ``"see " "x.md"`` the second piece stays: a piece with no whitespace in it
+    is judged a path, which is the direction a gate may err in.
+
+    WHY WHITESPACE. No tracked path in this repository holds any -- 0 of 913
+    at c9277bd, and held by the test file -- so no literal a module opens as a
+    tracked path can hold any either. A value with whitespace in it is a
+    sentence ABOUT a path, never the path.
+
+    WHERE: :data:`SENTENCE_ROOT` only, and why only there is written beside it.
+
+    **None when ``src`` cannot be separated**: it does not parse or tokenize,
+    or one of its literals cannot be read alone. Never ``""``. The caller
+    keeps today's reading, ``code_text``, and SAYS SO (:meth:`Corpus.data`):
+    a reading that could not be taken may widen a plan and never narrow one.
+    """
+    kept = _without_sentence_tokens(src)
+    if kept is None:
+        return None
     return "\n".join(kept)
 
 
@@ -800,6 +1011,11 @@ class Corpus:
         self._code: dict[str, str | None] = {}
         self._imports: dict[str, set[str] | None] = {}
         self._composed: dict[str, "Composed | None"] = {}
+        #: :meth:`data`'s readings, and the package modules whose sentences it
+        #: could not separate -- kept so the report can SAY a module was read
+        #: whole, rather than let a fallback pass as a reading.
+        self._data: dict[str, str | None] = {}
+        self.unseparated: set[str] = set()
         #: The corpus-wide floor, memoised -- it takes no input from the diff,
         #: so deriving it twice in one run is pure cost.
         self.floor: list[tuple[str, str]] | None = None
@@ -818,6 +1034,26 @@ class Corpus:
         if rel not in self._code:
             self._code[rel] = code_text(REPO / rel)
         return self._code[rel]
+
+    def data(self, rel: str) -> str | None:
+        """The text a DATA READ is matched against. None = could not be read.
+
+        :func:`code_text` everywhere but :data:`SENTENCE_ROOT`, where
+        :func:`without_sentences` takes the sentences out as well. A package
+        module whose sentences cannot be separated keeps today's reading, its
+        whole ``code_text``, and joins :attr:`unseparated`: a fallback may
+        widen a plan, and it may never pass silently as a reading.
+        """
+        if rel not in self._data:
+            text: str | None = None
+            if rel.startswith(SENTENCE_ROOT):
+                raw = self.raw(rel)
+                if raw is not None:
+                    text = without_sentences(raw)
+                    if text is None:
+                        self.unseparated.add(rel)
+            self._data[rel] = text if text is not None else self.code(rel)
+        return self._data[rel]
 
     def imports(self, rel: str) -> set[str] | None:
         if rel not in self._imports:
@@ -1183,6 +1419,10 @@ class Impact:
     read_map_stamp: dict | None = None
     #: How many test files the observed map added that no static rule found.
     observed_only: int = 0
+    #: Package modules read WHOLE because their sentences could not be
+    #: separated from their code (:meth:`Corpus.data`). Empty is the normal
+    #: case; anything here is REPORTED, because a fallback is not a reading.
+    unseparated: list[str] = field(default_factory=list)
 
     @property
     def test_files(self) -> list[str]:
@@ -1202,6 +1442,7 @@ def impact_set(
     import_coupling: bool = True,
     constant_coupling: bool = True,
     always_run: bool = True,
+    sentences_are_prose: bool = True,
     max_hops: int = 4,
 ) -> Impact:
     """Test files a change to ``paths`` can break.
@@ -1212,6 +1453,12 @@ def impact_set(
     individually cannot be shown failing at all. See
     ``tests/test_impact_gate_selects_data_dependencies.py``, which asserts
     both arms for each of them.
+
+    ``sentences_are_prose`` is the one switch that NARROWS rather than finds.
+    On, a sentence in a package module is a citation
+    (:func:`without_sentences`); off, it couples again, as every sentence did
+    before 2026-09-28. Its control is lane L5's record: 118 selected with it
+    off, 23 with it on, and the four real reads that file pins unmoved.
     """
     impact = Impact()
     paths = [_rel(p) for p in paths]
@@ -1291,15 +1538,26 @@ def impact_set(
                     continue
                 if not any(pat.search(raw) for pat in file_pats + dir_pats):
                     continue
-                code = corpus.code(rel)
+                # A SENTENCE IN THE PACKAGE IS A CITATION (without_sentences):
+                # there the data read is matched on the code with its
+                # sentences out as well, and nowhere else does anything change.
+                code = (corpus.data(rel) if sentences_are_prose
+                        else corpus.code(rel))
+                # A package module whose sentences could not be separated was
+                # read whole -- wider, never narrower -- and its edge says so.
+                whole = (" -- read WHOLE: its sentences could not be "
+                         "separated from its code"
+                         if sentences_are_prose and rel in corpus.unseparated
+                         else "")
                 if code is None:
                     reached(source, rel, "UNREADABLE, coupled defensively",
                             frontier)
                 elif any(pat.search(code) for pat in file_pats):
-                    reached(source, rel, "names the path", frontier)
+                    reached(source, rel, "names the path" + whole, frontier)
                 elif (_SWEEP_VERBS.search(code)
                         and any(pat.search(code) for pat in dir_pats)):
-                    reached(source, rel, "sweeps the directory", frontier)
+                    reached(source, rel, "sweeps the directory" + whole,
+                            frontier)
                 elif composed_coupling and any(pat.search(code)
                                                for pat in dir_pats):
                     # THE FILE ADDRESSES THE DIRECTORY BUT NAMES NO FILE IN
@@ -1324,8 +1582,8 @@ def impact_set(
                                    if kind == _COMPOSED_EXACT
                                    else "composes names of this shape and "
                                         "enumerates none of them")
-                            reached(source, rel, f"{why} (/{pattern}/)",
-                                    frontier)
+                            reached(source, rel,
+                                    f"{why} (/{pattern}/){whole}", frontier)
         if import_coupling and source.endswith(".py"):
             importers_of(source, frontier)
 
@@ -1460,6 +1718,7 @@ def impact_set(
                 (hit[0], rel, "OBSERVED reading it in the recorded suite run"))
 
     impact.selected = sorted(f for f in found if (REPO / f).exists())
+    impact.unseparated = sorted(corpus.unseparated)
 
     # THE FLOOR, added LAST and kept in its own field. It is not a selection
     # and must never be counted as one.
@@ -1817,6 +2076,14 @@ def main(argv: list[str] | None = None) -> int:
                   f"{recorded}, HEAD is {head}. Rebuild with "
                   "scripts/build_read_map.py if a data reader has been added "
                   "since.", file=sys.stderr)
+    # A MODULE READ WHOLE IS A FALLBACK, NOT A READING. The plan above may be
+    # wider for it and is never narrower, and the reader is told which.
+    if impact.unseparated:
+        print(f"  {len(impact.unseparated)} package module(s) could not be "
+              "separated into code and sentences, so they were read WHOLE "
+              "(wider, never narrower):", file=sys.stderr)
+        for name in impact.unseparated[:10]:
+            print(f"      {name}", file=sys.stderr)
     if impact.always_run:
         print(f"  + {len(impact.always_run)} CORPUS-WIDE guard(s), run "
               "unconditionally -- they sweep the tracked set and take no "
