@@ -80,7 +80,18 @@ SANCTIONED_API_CALLS: frozenset[tuple[str, str, str]] = frozenset(
 #: object. Kept separate from :data:`_VERBS` because they are found a
 #: different way: ``urlopen`` is a bare Name, or an Attribute on ``urllib``,
 #: and no amount of looking for ``.request.<verb>`` will ever see one.
-_FETCH_NAMES = frozenset({"urlopen", "urlretrieve", "urlretrieve"})
+#:
+#: TWO NAMES, AND THE THIRD WAS A REPEAT (fixed 2026-09-28, lane L5, the
+#: orchestrator's call of 12:32). From ``fbedfca`` this read
+#: ``{"urlopen", "urlretrieve", "urlretrieve"}``: three written, two held. No
+#: third name was meant. ``fbedfca``'s own account of the finding names the
+#: bare ``urlopen`` it had missed, and the standard library's
+#: ``urllib.request`` has exactly two module-level callables that fetch by
+#: name -- these two (``build_opener`` builds, ``urlcleanup`` cleans up) --
+#: while the package's only by-name HTTP import is ``cdp_bridge``'s
+#: ``urlopen``. ``tests/test_a_literal_repeats_no_member.py`` now fails on
+#: any literal that repeats a member.
+_FETCH_NAMES = frozenset({"urlopen", "urlretrieve"})
 
 
 def _api_call_sites() -> list[tuple[str, str, str]]:

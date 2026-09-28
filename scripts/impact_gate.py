@@ -1138,6 +1138,12 @@ ALWAYS_RUN_DECLARED: dict[str, str] = {
         "it moved twice unselected, 55 -> 60 on 603f4d3 and 60 -> 70 at lane "
         "Y2's merge"
     ),
+    "tests/test_a_literal_repeats_no_member.py": (
+        "it parses EVERY committable .py (committable_files, imported from the "
+        "credential sweep, which runs git ls-files), so a set or dict literal "
+        "written anywhere can trip it while this file imports nothing the "
+        "change touches; declared the day it was written, 2026-09-28 (lane L5)"
+    ),
 }
 
 
