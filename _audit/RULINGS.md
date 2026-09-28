@@ -8,9 +8,9 @@
 
 **THIS REGISTER IS NOT THE CORPUS AND DOES NOT CLAIM TO BE COMPLETE.** Read section 4 before concluding a question is unruled: the scan that keeps it honest reads ONE marker, and the ruling that caused this file to be written does not carry it.
 
-    rulings registered       67
-    documents scanned        257
-    RULED: declarations      54 claimed, 7 triaged, 0 unclaimed
+    rulings registered       68
+    documents scanned        258
+    RULED: declarations      55 claimed, 7 triaged, 0 unclaimed
 
 ---
 
@@ -118,6 +118,7 @@ Scan the CLAIM column against your question. Every claim is a paraphrase written
 | `D2-SEARCH-VERTICALS-WIDENED` | The search admission widens from people to four CLOSED segments, /search/results/(people\|companies\|groups\|events)/, under D1-SEARCH-AS-READS's three conditions; serves N 104, N 161, M C70 and N 179. | search result verticals | 2026-09-24 | [2026-09-24-rulings-search-verticals-rosters-passive-costs.md](2026-09-24-rulings-search-verticals-rosters-passive-costs.md)<br>*D2: widen the search admission beyond people* |
 | `MEMBER-ROSTERS-AS-BOUNDED-READS` | A roster the operator can open himself (a group's members, an event's attendees, a company's or school's People tab) is admitted as a bounded read: one page per call, the id from tool arguments only, no automatic pagination, no member name or id in a tracked file, inside the live budget. | member rosters | 2026-09-24 | [2026-09-24-rulings-search-verticals-rosters-passive-costs.md](2026-09-24-rulings-search-verticals-rosters-passive-costs.md)<br>*Rosters he can open himself* |
 | `THIRD-PARTY-PROFILE-FOR-A-NAMED-TARGET` | A third party's profile (/in/<slug>/) may be loaded only inside an outward act whose target the operator names in that call: slug from tool arguments only, never for a measurement, the shaper name-free. Search-admission condition 5 stands. | third-party profiles inside outward acts | 2026-09-24 | [2026-09-24-rulings-notify-veto-and-who-which.md](2026-09-24-rulings-notify-veto-and-who-which.md)<br>*A third party's profile, inside his own outward act* |
+| `NAMED-PROFILE-READ-BEHIND-A-GRANT` | A read of a member's profile he names in the call -- by link or member id, never a name read off a page -- is built behind the single-use grant, its preview stating that LinkedIn may show the member the view; declared fields leave as people records; never for a measurement. | a third-party profile he names | 2026-09-28 | [2026-09-28-rulings-named-profile-read.md](2026-09-28-rulings-named-profile-read.md)<br>*His answer* |
 
 ### read results
 
@@ -304,6 +305,8 @@ Scan the CLAIM column against your question. Every claim is a paraphrase written
 
 **`MESSAGING-SETTINGS-CAPABILITY-LEVEL`** -- The ruling CANONICAL-RULING-ID was written about: one sentence wearing three names across three slices. Its census twin is `_audit/_census/profile.md`.
 
+**`NAMED-PROFILE-READ-BEHIND-A-GRANT`** -- The operator's ruling, verbatim in its document; mitigations as the question put them.
+
 **`NAMES-AT-RUNTIME`** -- The operator's ruling, verbatim in its document. Amends the 2026-09-05 name-free doctrine for runtime returns; answers WHO-WHICH-COUNTS-ARE-NOT-DELIVERY's question.
 
 **`NO-IRREVERSIBLE-WRITE-IS-FIRED`** -- The single widest write ruling in the corpus. It separates BUILD from FIRE, which is the distinction most re-escalations about writes collapse.
@@ -350,7 +353,7 @@ Scan the CLAIM column against your question. Every claim is a paraphrase written
 
 | signal NOT scanned | files | lines |
 |---|---|---|
-| a heading naming a ruling | 122 | 271 |
+| a heading naming a ruling | 123 | 272 |
 | a bold line opening on RULING/RULED | 62 | 141 |
 | the phrase THE RULING | 38 | 63 |
 | a named -RULING id | 35 | 92 |
@@ -421,6 +424,7 @@ Every `RULED:` line in the corpus, and what became of it. An UNCLAIMED row fails
 | [2026-09-27-rulings-previews-and-receipts.md](2026-09-27-rulings-previews-and-receipts.md) | RULED: (orchestrator, 2026-09-27, applying NAMES-AT-RUNTIME) A PREVIEW NAMES WHOM | `PREVIEW-NAMES-THE-RESOLVED-TARGET` |
 | [2026-09-27-rulings-relation-removals-and-account-destruction.md](2026-09-27-rulings-relation-removals-and-account-destruction.md) | RULED: (orchestrator, 2026-09-27, applying the operator's 08:11 principle) REMOVING A RELA | `RELATION-REMOVALS-BUILT-BEHIND-GRANTS` |
 | [2026-09-27-rulings-relation-removals-and-account-destruction.md](2026-09-27-rulings-relation-removals-and-account-destruction.md) | RULED: (orchestrator, 2026-09-27, applying the operator's 08:11 principle) ACCOUNT-LEVEL | `ACCOUNT-DESTRUCTION-STAYS-MANUAL` |
+| [2026-09-28-rulings-named-profile-read.md](2026-09-28-rulings-named-profile-read.md) | RULED: (operator, 2026-09-28 08:01, verbatim) "Yes, I'm giving you permission." | `NAMED-PROFILE-READ-BEHIND-A-GRANT` |
 
 ### 5.1 Triaged -- a declaration hit that is not a ruling made here
 

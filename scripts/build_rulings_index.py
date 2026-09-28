@@ -1148,6 +1148,28 @@ REGISTER: tuple = (
              "PEOPLE-DATA-MITIGATIONS; overridable. Answers lane G's preview "
              "question.",
     ),
+    # THE AMENDED RULING IS A FAMILY OF THE EXCLUSION REGISTER, NOT AN ENTRY
+    # OF THIS ONE (lane L5, 2026-09-28). His 2026-09-04 removal of the
+    # third-party profile pattern was never filed here: it is registered in
+    # ``scripts/check_exclusion_basis.py`` as the family
+    # NO-THIRD-PARTY-PROFILE-LOAD (op=YES, made by the OPERATOR), anchored on
+    # the removal's own comment in ``linkedin_server/readonly.py``. That id is
+    # the one this status names.
+    Ruling(
+        id="NAMED-PROFILE-READ-BEHIND-A-GRANT",
+        claim="A read of a member's profile he names in the call -- by link "
+              "or member id, never a name read off a page -- is built behind "
+              "the single-use grant, its preview stating that LinkedIn may "
+              "show the member the view; declared fields leave as people "
+              "records; never for a measurement.",
+        binds="read boundary -- a third-party profile he names",
+        document="_audit/2026-09-28-rulings-named-profile-read.md",
+        anchor="RULED: (operator, 2026-09-28 08:01, verbatim) \"Yes, I'm "
+               "giving you permission.\"",
+        status="AMENDS NO-THIRD-PARTY-PROFILE-LOAD",
+        note="The operator's ruling, verbatim in its document; mitigations as "
+             "the question put them.",
+    ),
 )
 
 
