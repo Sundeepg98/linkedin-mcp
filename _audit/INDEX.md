@@ -31,8 +31,8 @@ are listed as `(undated)`; no date is taken from git history, because
 | of those, carrying a `YYYY-MM-DD-` date prefix | 219 |
 | distinct dates | 18 |
 | documents with no level-1 heading | 2 |
-| `CORRECTS:` marker lines | 113 |
-| `CORRECTED BY:` marker lines | 113 |
+| `CORRECTS:` marker lines | 116 |
+| `CORRECTED BY:` marker lines | 116 |
 | distinct declared correction edges | 110 |
 | documents something later corrects | 52 |
 | documents that correct something | 73 |
@@ -587,6 +587,8 @@ document is dead; it says one thing in it was overtaken and names what.
 
   > rows `18`, `39` and `158` moved COVERED-UNFIRED to COVERED-PROVEN, each on one live call of its own tool in the live lane's session 2 and on the bar its own cell set; row `107` fired and did not bank.
 
+  > row `107` moved COVERED-UNFIRED to COVERED-PROVEN in the live lane's session 3, its question settled: the default location DOES narrow a keyword-less employer search, and location 'Worldwide' reaches past it.
+
 ### [_census/messaging-and-content.md](_census/messaging-and-content.md)
 
 (undated) &middot; Capability census -- MESSAGING AND CONTENT
@@ -626,6 +628,8 @@ document is dead; it says one thing in it was overtaken and names what.
 - CORRECTED BY [2026-09-23-live-lane-session-1.md](2026-09-23-live-lane-session-1.md)
 
   > row `M43` moved COVERED-UNFIRED to COVERED-PROVEN on a live fire of `linkedin_list_conversations`, which opened no conversation, in the live lane's session 2; rows `M53` and `M1` fired or were refused and did not bank.
+
+  > row `M53` moved COVERED-UNFIRED to COVERED-PROVEN in the live lane's session 3, the composer having drawn its suggestion cards; row `M1` was refused twice by its gate and does not bank.
 
 ### [_census/network.md](_census/network.md)
 
@@ -682,6 +686,8 @@ document is dead; it says one thing in it was overtaken and names what.
 - CORRECTED BY [2026-09-23-live-lane-session-1.md](2026-09-23-live-lane-session-1.md)
 
   > rows `23`, `79`, `84`, `87`, `94`, `132` and `195` moved COVERED-UNFIRED to COVERED-PROVEN, each on a live fire of its own tool in the live lane's session 2 and on the bar its own cell set; rows `20` and `45` fired again and were not shown.
+
+  > row `194` moved COVERED-UNFIRED to COVERED-PROVEN in the live lane's session 3, on lane S's whole bank rule; rows `20` and `45` fired a third time and were not shown.
 
 - CORRECTED BY [2026-09-23-readers-four-rows.md](2026-09-23-readers-four-rows.md)
 
@@ -1453,13 +1459,19 @@ reach is visible. The quoted reason here is the CORRECTOR's own
 
   > rows `18`, `39` and `158` read COVERED-UNFIRED, never fired; each fired live in session 2 on its own cell's bar and moves to COVERED-PROVEN. Row `107` fired and does not bank; row `37` is measured and stays.
 
+  > row `107` read COVERED-UNFIRED, its default-location question open after session 2; it fired live in session 3 on its own cell's bar, the question settled, and moves to COVERED-PROVEN.
+
 - CORRECTS [_census/messaging-and-content.md](_census/messaging-and-content.md)
 
   > row `M43` read COVERED-UNFIRED, never opened; it fired live in session 2, opening no conversation, and moves to COVERED-PROVEN.
 
+  > row `M53` read COVERED-UNFIRED, its session-2 fire drawing no card; it fired live in session 3, the composer drawing 17 cards, and moves to COVERED-PROVEN.
+
 - CORRECTS [_census/network.md](_census/network.md)
 
   > rows `23`, `79`, `84`, `87`, `94`, `132` and `195` read COVERED-UNFIRED, never fired; each fired live in session 2 on its own cell's bar -- lane S's whole bank rule for the three facets -- and moves to COVERED-PROVEN.
+
+  > row `194` read COVERED-UNFIRED, never fired; it fired live in session 3 on lane S's whole bank rule and moves to COVERED-PROVEN.
 
 - CORRECTS [_census/profile.md](_census/profile.md)
 
@@ -1803,7 +1815,7 @@ against the same line, so a missing continuation satisfies it.
 - REASON PAST ITS LINE [2026-09-20-the-first-firing.md](2026-09-20-the-first-firing.md) line 233 -- a line-scoped reader sees 35 of 465 characters.
 - REASON PAST ITS LINE [2026-09-20-the-five-under-banked.md](2026-09-20-the-five-under-banked.md) line 3 -- a line-scoped reader sees 35 of 349 characters.
 - REASON PAST ITS LINE [2026-09-20-the-five-under-banked.md](2026-09-20-the-five-under-banked.md) line 457 -- a line-scoped reader sees 94 of 717 characters.
-- REASON PAST ITS LINE [_census/jobs.md](_census/jobs.md) line 438 -- a line-scoped reader sees 825 of 1189 characters.
+- REASON PAST ITS LINE [_census/jobs.md](_census/jobs.md) line 447 -- a line-scoped reader sees 825 of 1189 characters.
 
 - TIGHTEST ADMISSION MARGIN [2026-09-03-linkedin-gap-blockers.md](2026-09-03-linkedin-gap-blockers.md) line 272 clears the 20-character floor by 0. The floor is applied to the marker's OWN LINE, so a reason of 723 characters is admitted on the strength of 20. Reflow that paragraph by one word and a guard rejects it saying it *carries no reason after the citation*, which would not be true. Reported every regeneration rather than counted, because a count of rejections reads zero until the day it does not.
 
