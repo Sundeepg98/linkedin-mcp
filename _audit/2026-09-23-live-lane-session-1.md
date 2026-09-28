@@ -2394,3 +2394,295 @@ the changed Python compiled under Python 3.10.19.
 * **the impact gate**: the selections above were built by hand and are
   named, each with its reason;
 * **session 2 itself**, which runs on the orchestrator's separate go.
+
+## Live session 2, 2026-09-28
+
+The orchestrator's order of 08:04 IST, RUN LIVE SESSION 2 NOW, superseding
+its own refresh order of 08:05 ("keep what you have already done, and skip
+the rest of the refresh"). He was present and gave his permission. The
+session ran from 08:20 to 08:49 on the Chrome he had started on port 9224,
+which this lane never started, restarted or closed. **35 of the 40 loads, 5
+of the 5 searches, 0 writes.** Chrome ended after the last run's teardown
+(below). Four offline fixes the orchestrator ordered at 08:52 follow this
+section, each shown failing first.
+
+**THE OPERATOR'S NAMED LIVE-PROOF TARGETS appear nowhere in this repository.**
+They live only in the gitignored identity key; every step below names them by
+role, and a key POSITION, where one is given, is 0-based, as the
+orchestrator counts.
+
+### The go, and the three harness commits it needed
+
+**The refresh's merge became a fast-forward.** Master had merged this branch
+(`5189ea7`) as `b6993e5` and stood at `c94c39e`; the branch was
+fast-forwarded to it, and the rest of the refresh was skipped by order.
+
+* **`2f24ec4`, the go's deltas.** The three people searches (`N 94`, `N 84`,
+  `N 87`) pass `include_names=True`, and `N 94`'s keyword search fires `N 79`
+  off the same load. `P K1` is read off the `/in/me/` load: every control in
+  main whose label mentions a verification, by structure, the label compared
+  inside the page. `M M53` (`linkedin_messaging_presence`), `N 195`
+  (`linkedin_recruiter_insights`) and `J 107` (`linkedin_search_jobs` with a
+  company id and no keyword) are one-load keys, and `P S5` rides `N 132`'s
+  load. 1083 passed, 1 skipped: the harness's tests with the seven corpus
+  guards that read `scripts/`.
+* **`d27090e`.** `job_detail` writes the organisation it resolved, by name
+  and id, to gitignored state, so D-4's name could reach the orchestrator
+  before any fire on it. 1056 passed, 1 skipped.
+* **`41fea96`, mid-session.** The ledger counts the named-person door (the
+  outward block, below). 813 passed, 1 skipped.
+
+The skip in each run is the navigation guard's whole-tree complement, which
+runs where CI is set. The navigation guard found no derived site after any
+of the three.
+
+### The session, load by load
+
+    n   time      key                        surface        what it read
+    1   08:20:30  setting                    mypreferences  SERVED, exact; 0 controls of the (b) name
+    2   08:21:37  in_me                      in             self-assertion true on the first load;
+                                                            7 [aria-expanded] in main; P K1;
+                                                            in_me_more TimeoutError, nothing pressed
+    3   08:23:31  n132                       analytics      N 132, P S5, P G7
+    4   08:24:03  notifications              notifications  N 20, N 45
+    5   08:24:40  j18                        jobs           J 18, J 37
+    6   08:25:10  j39                        jobs           J 39
+    7   08:25:40  j158                       jobs           J 158
+    8   08:26:48  job_detail                 jobs           the organisation for D-4; the posting
+    9   08:27:32  in_me                      in             the window in front: 44 [aria-expanded];
+                                                            in_me_more TimeoutError again
+    10  08:28:44  in_me_probe (scratch)      in             1 trigger; its scroll into view timed out
+    11  08:29:15  m43                        messaging      M M43; C1; C8 opened, did not close
+    12  08:29:56  outward_resolve (scratch)  messaging      read before the list drew: 0 rows
+    13  08:30:31  outward_resolve (scratch)  messaging      10 rows, 0 matches
+    14  08:31:14  n23                        feed           the badge, before
+    15  08:31:42  n23                        mynetwork      N 23
+    16  08:32:12  n94                        search         search 1 of 5: N 94, N 79
+    17  08:33:31  outward_resolve (scratch)  messaging      both spellings: 10 rows, 0 matches
+    18  08:34:08  n84                        search         search 2 of 5
+    19  08:34:36  n87                        search         search 3 of 5
+    20  08:35:00  company_people             company        N 102, J 108
+    21  08:35:30  j107                       jobs           J 107
+    22  08:40:51  M M1's preview (tool call) in             the named-person door; refused
+    23  08:42:06  recruiter                  analytics      N 195
+    24  08:42:35  presence                   messaging      M M53
+    25  08:43:30  the brother's profile      in             the named-person door; a skeleton
+    26  08:44:05  activity_all               in             M C85; the Me menu rode it
+    27  08:44:34  followers                  mynetwork      P L2b
+    28  08:45:03  own_post                   feed           M C29, M C42
+    29  08:45:31  n104                       search         search 4 of 5
+    30  08:46:00  n161                       search         search 5 of 5
+    31  08:46:34  memberships                feed           the tool's bracket, before
+    32  08:47:03  memberships                groups         5 memberships
+    33  08:47:26  memberships                feed           the tool's bracket, after
+    34  08:48:05  group_home                 groups         M C70
+    35  08:48:44  group_members              groups         N 165, N 177
+
+By surface: in 6, jobs 5, messaging 5, search 5, feed 4, groups 3,
+analytics 2, mynetwork 2, mypreferences 1, notifications 1, company 1. The
+closest two loads stood 22.7 s apart. Load 22 was recorded in the ledger by
+hand after the run (the outward block says why). Every "scratch" row is a
+disposable runner in the lane's scratch folder that took the harness's
+ledger, counter and driver lock by import, so its loads were counted like
+any key's.
+
+### What the rows read
+
+**FIRED AND PROVEN, each against its row's own bank condition** (the census
+moves are recorded below):
+
+* `M M43`: 5 conversations listed, 5 rendered, 0 placeholders; none opened
+  (0 message events, and the page stayed the composer).
+* `N 132` with `P S5`, and `P G7`'s tool-level fire: the headline and the
+  delta drawn and not withheld, 2 metrics; 2 of 2 engagement cards read, 0
+  unreadable.
+* `N 195`: 44 profile views and 1 recruiter view over 90 days; 2 charts of
+  13 points each, both read; 1 viewer returned as an anonymous record, and 1
+  more drawn hidden.
+* `J 18` with `J 37`: 6 recent searches read, 3 with the alert on.
+* `J 39`: 24 job ids in 24 slots, 0 refused. `J 158`: 25 ids in 25 slots, 0
+  refused.
+* `J 107`: 7 postings at the organisation cleared under D-4, with an empty
+  keyword, not capped.
+* `N 23`: 10 rows, all parsed, each with a recipient id; the badge read 0
+  before and 0 after, which says nothing about cost, and the row does not
+  claim it.
+* `N 94` with `N 79`: the keyword kept and both location ids applied; 10
+  people records from 10 of 10 cards, 0 skipped, 0 headlines unread.
+* `N 84` and `N 87`: the one organisation cleared under D-4, as the current-
+  and as the past-company facet, each applied and kept; 10 people records
+  each; 7 and 6 person results by the classifier.
+
+**FIRED, NOT BANKED:**
+
+* `N 20` and `N 45`: 10 notifications read, 0 of the invitation kind and 0 of
+  the follow kind. Neither row's item was drawn, so neither is proven or
+  refuted: a third reading, NOT SHOWN.
+* `M M53`: the composer drew 0 suggestion cards (0 seen, 0 read). A thin
+  reading, not a proof: the row stays where it is, with the empty composer
+  on record.
+* `P K1`: 6 controls in main labelled with a verification, all 6 linking to
+  neither refused address (link kind "other"), none in a heading.
+
+**CAPTURED, as skeletons (D-2):** his profile (loads 2 and 9; the file on
+disk is load 9's, the second write replacing the first), the all-activity
+list (`M C85`: 0 activity permalinks, 0 poll-shaped nodes and 0 vote phrases
+by the old selectors, which the new markup no longer carries), the Me menu
+open (lane Y's item 9: 8 of our words added, closed again), his followers
+(`P L2b`: 20 member links of 33 anchors), his commented post (`M C29`,
+`M C42`: 28 comment items), the composer with its unread row (lane L5's C1)
+and with the folder menu open (C8), the two vertical searches (`N 104`: 44
+anchors; `N 161`: 21, served at the same depth under a different address),
+his Groups page (5 memberships and 5 others), one group's page (`M C70`:
+reach AMBIGUOUS -- 122 anchors and not one post permalink, which a
+membership gate, an empty group and a restyle all produce) and its member
+list (`N 165`, `N 177`: 20 member links), the organisation's People tab
+(`N 102`, `J 108`: 227 member links of 349 anchors), the posting (`J 124`,
+`J 115`, `P M12`), the three people searches, the recruiter page, the
+composer again (`M M53`), the jobs pages, the notifications, the
+connections, the search-appearances page, and the brother's profile. His
+own settings page is the one RAW capture, as the plan says.
+
+### D-1: the More on his profile never became actionable
+
+Three tries, nothing pressed. At 08:21 the window was maximized but not in
+the foreground, and the press timed out on Playwright's actionability wait
+(5 s). The orchestrator fronted the window with his own script, and it was
+run before every press block after that. At 08:27, with the window in front,
+the same press timed out again; at 08:28 a scratch probe found exactly one
+trigger by the harness's handle and timed out scrolling it into view, before
+any click. So the handle -- `main button[aria-label="More"][aria-expanded="false"]`,
+exactly one match -- names a control that is not drawn (DERIVED from the two
+timeouts with the window in front). Fix 3 below finds why.
+
+### C8: the folder menu opened and did not close on Escape
+
+The folder pill, found as exactly one match, pressed once: 4 items and 6 of
+our words added, 0 message events. After Escape the harness read it as NOT
+closed, so the key stopped as an anomaly, and C9 and C5 never ran. Nothing
+inside the menu was pressed. The open state is a skeleton; the after-Escape
+state is not (the anomaly stops before the next write), so which of the two
+conditions failed -- a word still drawn, or the trigger still expanded -- is
+not on record. Fix 4 below reads the open state.
+
+### An occluded window draws less of the page
+
+His profile, loaded twice: 7 `[aria-expanded]` controls in main at 08:21
+with the window behind others, 44 at 08:27 with it in front. The page
+hydrates lazily, and a covered Chrome window stops drawing frames (DERIVED
+from the pair, one load each). A reading taken with the window covered
+UNDER-counts, and nothing in the reading says so; everything after 08:25 ran
+with the window fronted first.
+
+### The setting: served, and its label is not the one the reader asks for
+
+His settings page was served at its own address (`SERVED, exact`), and the
+(b) reader found 0 controls named "Sharing profile edits". The live page's
+switch is labelled "Share key profile updates" -- an `input` checkbox with
+role switch, named through `aria-labelledby` -- under the page heading
+"Share profile updates". So the setting was not read this session, and the
+offline check says `LIVE-UNKNOWN`. The six intro edits stay in session 3.
+Fix 2 below.
+
+### The outward block
+
+**THE RESOLUTION OF THE BROTHER'S THREAD, not resolved, twice.** The
+receipt-safe conversation list with names (`include_names=True`), matched
+whole-word and casefolded against the brother's spellings in the key:
+
+* 08:29-08:30, key position 2: the first load was read before the list drew
+  (0 rows -- the settle race), so the runner re-reads on the same page after
+  rows draw, and the second load drew 10 rows: 0 carry the spelling, so 0
+  one-to-one and 0 with the family name. Nothing was opened.
+* 08:33, key positions 2 and 3, on the orchestrator's order of 08:32: 10
+  rows, 0 carry either spelling.
+
+The connections (`N 23`, 08:31) drew 10 people and 0 carry any of the six
+words the key held then (positions 0 to 5: the father's two, the brother's
+two, and the two others'). The page draws 10 connections on its first render,
+so no route in this session reached him or the father without a scroll or a
+search, and neither was ruled. The orchestrator ruled a people search for
+the brother at 08:35 and cancelled it within the minute: the operator had
+supplied the brother's exact profile link, in gitignored state, and the key's
+class grew to 8 (position 6, a third spelling; position 7, the link's slug).
+
+**M M1, THROUGH THAT LINK: REFUSED BY THE TOOL.** Its supplied target checked
+on disk first -- gitignored, a profile link of the exact shape, its segment
+equal to key position 7. The preview (`linkedin_message_from_profile`,
+`LINKEDIN_ENABLE_WRITES=1` in the process) loaded that profile once through
+the named-person door and refused before minting a token:
+`write_attempt_blocked`, raised in `writes._direction` because the
+observation's state came back 'unknown'. Replayed against a fake browser with
+no network, it stops on the same line. On the live page the named-profile
+reader, built on the old markup, could not establish its conditions on
+today's profile, which draws hashed class names. Nothing was pressed, typed
+or sent, and no token was minted. So `M M17` had no thread to reply in and
+did not fire, and `M M10` has no older thread. All three go to session 3,
+after lane L5 rebuilds its reader over a capture of the new markup.
+
+**THE BROTHER'S PROFILE, AS A SKELETON (08:43, the orchestrator's order of
+08:43):** one load through the named-person door, counted, nothing pressed,
+no raw capture. Its controls in main, by LinkedIn's own words ("exact": the
+word alone; "with a name": the word and then a name):
+
+    Message    exact 2, with a name 4, visible 5
+    More       exact 2, visible 1
+    Follow     with a name 4, visible 4
+    Connect 0, Pending 0, Following 0
+
+So the page does not draw exactly one Message control in main, and it draws
+two More buttons, one hidden -- the shape that failed D-1 on his own profile.
+A page-wide count cannot aim either; lane L5's rebuilt reader must scope the
+top card and take the visible control. The skeleton is routed to L5.
+
+**The father and the two others:** counts only, as ordered: 0 in every list
+drawn.
+
+**THE LOAD THE LEDGER DID NOT COUNT, AND ITS FIX.** The wrapper around
+`BROWSER.goto` counted only addresses the read door admits, and passed every
+other navigation through uncounted -- but `goto(..., named_profile=True)` is
+a second admitted door, and M M1's preview went through it. That one load
+was entered in the ledger by hand after the run (load 22, marked so), and
+`41fea96` makes the wrapper count the second door, with a test. Only that
+navigation was affected: every other load went through the read door, and
+the brother's skeleton at 08:43 was counted by the fixed wrapper.
+
+### D-4, as the order asks it recorded
+
+The organisation `job_detail` resolved on the first posting of `J 39`'s
+collection was **cleared by the orchestrator against his resume's current
+and past employers**, and used for `N 84` (current company), `N 87` (past
+company), `company_people` and `J 107`. Its name and id live in gitignored
+state only.
+
+### Chrome's end
+
+The last run's teardown ran at 08:48:45: close our own tab, then disconnect
+CDP. At 08:49:16 the next attach failed with `BrowserUnavailableError`
+before any load: nothing listened on 9224, and no process held the profile.
+If our tab was the window's last, closing it ended the browser -- plausible,
+not proven. The optional last read (his setting's switch by its live label,
+one load) did not happen, and nothing else was lost. He will start Chrome
+again for session 3. Fix 1 below.
+
+### To session 3
+
+* D-1 on his profile, with fix 3's handle and fix 3's finding;
+* C8 with fix 4's close step, then C9 and C5;
+* `M M1`, then `M M17` in the thread it makes, after lane L5's reader is
+  rebuilt over the brother's skeleton; `M M10` needs an older thread;
+* `M M33` and `M M49`: a rendered row reads UNREAD, so their receipt guards
+  would refuse -- each would spend a load and bank nothing until he reads it;
+* the setting, read by its live label (fix 2), then the six intro edits and
+  `P B9` if it reads OFF;
+* `N 179`, `N 85`, `N 194`, `N 172`, `N 93`; `M M53` again; the event, school
+  and thread items he supplies (D-9); the father and the two others.
+
+### Scratch, declared disposable
+
+In the lane's scratch folder, none of it tracked: the outward runner
+(resolve, fire, the brother's skeleton), the item setter, the runner that
+passes items to the harness, the ledger's hand entry, the setting and More
+inspectors and probes, the key-position checks, and the orchestrator's
+window-fronting script. Each took the harness's ledger, counter and driver
+lock by import, so nothing in it loaded uncounted except the one load above.
