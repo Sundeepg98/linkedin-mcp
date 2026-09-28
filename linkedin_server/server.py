@@ -3234,6 +3234,7 @@ async def linkedin_people_search_shape(
     past_company_ids: str = "",
     location_ids: str = "",
     connections_of: str = "",
+    network: str = "",
     include_names: bool = False,
 ) -> dict[str, Any]:
     """What your people search OFFERS -- and, with include_names, WHO it found.
@@ -3253,6 +3254,21 @@ async def linkedin_people_search_shape(
     ``people_denominators.headline_unread`` counts them. Without the flag,
     everything below holds as written: counts and filter names, never a
     person.
+
+    **A MEMBER'S CONNECTIONS, THE ONES IN COMMON, AND A SEARCH BY DEGREE
+    (census N 30, N 31 and N 81, 2026-09-28).** ``connections_of`` with a
+    member's token is the search LinkedIn's own profile topcard links to for
+    that member's connections; with ``network="F"`` beside it, it is the one
+    LinkedIn links to as the connections you and that member have in common --
+    that member's connections who are your own first degree (``"S"`` is your
+    second degree; ``"F,S"`` both, as LinkedIn's own link lists them).
+    ``network`` on its own is a people search filtered by degree of YOUR
+    network -- ``network="F"`` searches your own connections, with a keyword
+    or any facet beside it -- the link LinkedIn's connections page draws. A
+    degree names nobody, so it needs no member. Pass ``include_names=True``
+    for the results as people records. Built over captured markup, NOT YET
+    FIRED LIVE: whether LinkedIn applies the facet to the results is what
+    ``query_kept`` reports on the first fire.
 
     **THIS IS THE FIRST TOOL ON A THIRD-PARTY-DENSE SURFACE**, and every
     decision in it is shaped by that. A people-search page's entire payload is
@@ -3361,6 +3377,12 @@ async def linkedin_people_search_shape(
             that member's connections: as counts, and with ``include_names``
             as people records. A profile slug is a name and is refused. Never
             stored and never echoed.
+        network: LinkedIn's letters for degrees of YOUR network, comma-
+            separated: ``F`` (1st) and ``S`` (2nd), the two its own links
+            write. Alone, a search filtered by degree; with
+            ``connections_of``, ``network="F"`` returns the connections that
+            member and you have in common. Any other value is refused,
+            described by its shape.
         include_names: return the people the page draws as records (see the
             first paragraph). Off by default; the search is the same either
             way and still one page.
@@ -3375,6 +3397,7 @@ async def linkedin_people_search_shape(
             past_company_ids=past_company_ids,
             location_ids=location_ids,
             connections_of=connections_of,
+            network=network,
         )
         if not composed["built"]:
             return people_search.refusal_envelope(composed)
@@ -5197,11 +5220,16 @@ async def linkedin_search_jobs(
     ALL OF ONE EMPLOYER'S POSTINGS: pass company_id and an EMPTY keywords
     ("" -- the argument is still required, so pass it rather than leave it
     out). That is the company Page's "see all jobs" as a search, with no
-    keyword narrowing it; with neither, the call is refused. BUILT, NOT YET
-    FIRED LIVE (census J 107, 2026-09-28): whether LinkedIn's default location
-    narrows a keyword-less employer search is UNVERIFIED -- the Page lists the
-    employer's postings wherever they are -- so pass `location` when the
-    answer must not depend on that default.
+    keyword narrowing it; with neither, the call is refused. For every posting
+    at an employer, pass location "Worldwide". MEASURED LIVE (census J 107,
+    COVERED-PROVEN, the live lane's session 3, 2026-09-28): LinkedIn applies a
+    DEFAULT LOCATION to a keyword-less employer search -- with no location, the
+    page's own location box held a value -- and the no-location and
+    "Worldwide" searches of one employer shared 0 of their 7 postings, while
+    two no-location searches five hours apart shared all 7. So a keyword-less
+    search with no location is narrowed to LinkedIn's default location, not
+    all of that employer's postings -- and either way one call is one page of
+    seven, not the employer's total (page with start, as above).
 
     Args:
         keywords: what to search for, e.g. "senior node.js engineer". May be
