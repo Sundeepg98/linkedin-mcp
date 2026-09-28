@@ -441,10 +441,17 @@ def test_the_real_table_passes_the_edge() -> None:
 
 
 def test_the_edge_reads_the_holds_table_it_is_given(monkeypatch) -> None:
-    """Not vacuous: install a hold on a real admitted row's page and the real table goes red."""
+    """Not vacuous: install a hold on a real admitted row's page and the real table goes red.
+
+    2026-09-28 (lane S, the offline frontier): the real table holds NO row
+    blocked on nothing any more -- the last four were built or re-gated -- so
+    the row is a real admitted, unheld one with its gate set to READER in
+    memory, as the plant below does on disk. The table itself is unchanged."""
     rows, _ = cra.load()
-    row = next(r for r in rows if _admitted_and_unheld(r)
-               and r["gate"] in cra.BLOCKED_ON_NOTHING)
+    real = next(r for r in rows if _admitted_and_unheld(r))
+    assert "READER" in cra.BLOCKED_ON_NOTHING
+    row = dict(real, gate="READER")
+    rows = [row if r is real else r for r in rows]
     _plant_hold(monkeypatch, _page(row))
     problems = cra.ruling_problems(rows)
     assert any(p.startswith(f"{row['slice']} {row['row']}: classed blocked on "

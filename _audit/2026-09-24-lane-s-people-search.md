@@ -2268,3 +2268,481 @@ fixture and its test file are the bytes they ran over. The observed read
 map the impact gate consults was recorded at `5c910e4`, not at this commit,
 as the gate itself prints; the run widened to the full suite, so no
 selection here rests on it.
+
+## The offline frontier 2026-09-28
+
+The orchestrator's order of 2026-09-28 01:30: the still-GAP rows bucket 3
+calls BLOCKED ON NOTHING -- the address admitted, no ruling on the page, no
+press refused -- were five, measured at 01:25: `M M53`, `N 195`, `P K1`,
+`P S5` (read direction) and one jobs row. For each, build a reader where a
+capture on disk shows the field the row wants and move the row to
+COVERED-UNFIRED; where none does, build nothing and write the capture spec
+here for session 2's plan. Say for each why it was still unbuilt, from its
+cell and from disk, before deciding.
+
+### L.1 Step 0, checked against disk before it was obeyed
+
+Master at `64afa6c`, holding this branch's last commit and lane G's network
+guard -- `tests/network_guard.py`, registered by `tests/conftest.py`'s
+`pytest_plugins`, so no test reaches the network and lane L5's plugin is no
+longer needed. This branch fast-forwarded to it. `census_completion` named
+the same four read rows as BLOCKED ON NOTHING, 4 of 101, and
+`check_jobs_directions` one jobs row, `J 107`. Disk agreed.
+
+### L.2 Why each was still unbuilt, and the verdict
+
+**`M M53` -- the composer's presence. VERDICT (a), BUILT.** Gated READER
+since lane Y2's completeness pass (2026-09-24), blocker
+PARSER-ON-A-LOADED-PAGE: `linkedin_compose_fields` already loads the page.
+Why it waited: the cell's own design -- key the status to a caller-supplied
+thread and publish no name -- was written before NAMES-AT-RUNTIME, when a
+people read could not return names; the ruling came on 2026-09-24 and the
+people-record foundation it needs landed on 2026-09-27 (lane G). The
+capture (`_state/cap-ct-compose.html`, 2026-09-20) draws seventeen
+suggestion cards, sixteen of them people, each with a status line.
+
+**`N 195` -- Premium's recruiter insights. VERDICT (a), BUILT.** Gated
+READER since the same pass, blocker PREMIUM-READER-NOT-BUILT, and lane Y2's
+integration decided WHO-WHICH-COUNTS-ARE-NOT-DELIVERY does not hold it: the
+page names no member. Why it waited: its only capture is the live lane's
+(session 1, 2026-09-23), gitignored in that lane's worktree, and no lane had
+read it for structure; its viewers are people, and a record channel for
+them landed on 2026-09-27.
+
+**`P S5` -- the two engagement cards. VERDICT (a), BUILT.** Gated READER
+since the same pass, blocker PARSER-ON-A-LOADED-PAGE, with the cell's
+condition that the employer the first card names is not published. Why it
+waited: that condition wants the sentence reduced INSIDE the page, which is
+a script, and a script outside `dom.py` is refused by `tests/test_readonly.py`
+-- this lane's first draft met exactly that refusal; nobody had put the read
+into the shipped reader's own script. The capture
+(`_state/cap-search-appearances.html`, 2026-09-20) draws both cards.
+
+**`J 107` -- see all jobs at one employer. VERDICT (a), BUILT.** Gated
+READER since lane D (2026-09-24), which measured that the shipped route
+returns only the postings matching a keyword and named the build: let
+`company_id` stand in for the keyword in `linkedin_search_jobs`' guard. Why
+it waited: the build was in `server.py`, which lane D did not own, and nobody
+took it. No capture is needed: the page is the search results page the
+shipped reader already reads, and the change is to the guard, not the
+reading.
+
+**`P K1` -- the Verifications section. VERDICT (b), NOT BUILT.** Gated
+READER since lane R's merge (2026-09-24), on the cell's words that the
+section sits on the admitted own profile. Nothing on disk shows it. The three
+captures of his own profile (the live lane, 2026-09-23) draw a verification
+BADGE on his name -- an icon whose label names his verifications -- and no
+section; the settings index (same session) draws Verifications only as a
+link to `/mypreferences/d/verifications/`, which the boundary refuses; the
+Premium hub (2026-09-20) links `/trust/verification/`, also refused. ALLOWED
+IS NOT SERVED: the row was never blocked on nothing. The address table
+re-gates it MEASURE, and the capture spec is L.4.
+
+### L.3 What was built
+
+- **`J 107`.** `linkedin_search_jobs` admits a keyword-less call exactly
+  when `company_id` is given, and that call's url carries no `keywords` key:
+  `/jobs/search/?f_C=<id>`, the address lane D measured the boundary
+  admitting. Every other call builds the url it always built.
+  `tests/test_a_company_search_needs_no_keyword.py`: the employer-only url,
+  the refusal of a call with neither (the control), the slug refusal, the
+  keyworded url.
+- **`P S5`.** The shipped reader's own script, `dom.SEARCH_APPEARANCES_JS`,
+  now also reduces the two engagement cards -- an integer, a section word
+  compared against a closed list passed in, a boolean -- and
+  `dom.read_search_appearances` returns them as `engagement`, which
+  `linkedin_search_appearances` carries off the same load. No new waiver
+  and no new script. The employer never leaves the page: the pattern stops
+  at the word before it. `tests/test_profile_engagement_cards.py`.
+- **`N 195`.** `linkedin_recruiter_insights()` and
+  `recruiter_views.read_recruiter_views`, reading with Playwright's own
+  find-and-read calls and no script: the two counts under keys the module
+  declares, the time range in days, each chart's points (a date and a
+  count -- the trend itself), and each recruiter viewer as a people record
+  named by LinkedIn's "Recruiter at <employer>" line, the industry its
+  headline, no link, anonymous -- the way `linkedin_who_viewed_me` returns a
+  viewer drawn that way. The employer's Page link is never returned.
+  `tests/test_recruiter_insights.py`.
+- **`M M53`.** `linkedin_messaging_presence()` and
+  `presence.read_suggested_presence`: each card pinned as an element handle
+  before anything is read from it, so a name, a headline and a presence come
+  from one card; each person a record (name, headline, no link) beside a
+  presence word from a closed three; a group conversation and a hidden card
+  counted and skipped. `tests/test_messaging_presence.py`.
+
+THE SIX MITIGATIONS, for the two people reads, each with a test that can
+fail: declared fields only (the row's keys and the record's shape, exactly);
+sanitised and marked untrusted (a name laced with a zero-width space and a
+direction override comes back clean, with a control showing the lace reached
+the page); never stored (no module-level state, no file opened, nothing
+logged); one page per call and nothing but finding and reading (one
+navigation, and an allowlist of read calls with a planted hover or scroll
+refused); visible only (a hidden row and a row inside an `aria-hidden`
+container counted, and nothing of it returned -- the presence reader reads
+nothing of a hidden card, and the recruiter reader reads a hidden link's
+address and text only to decide whether it is a viewer row, which the cold
+review found this line overstating, L.6 F16); never a target (no link in any
+record, and no write tool reaches either reader through any helper).
+
+THE FIXTURES are skeletons of their captures, built by
+`scripts/_build_capture_skeleton.py`, one plan per page: the structure kept,
+every word a member wrote replaced from the declared synthetic tables, the
+company ids the identity guard's declared ones, and a structure digest
+printed from the capture and pinned in each test file -- since the cold
+review (L.6 F13) over the attributes the readers select on as well as the
+tags, each digest with a control that moves it by one attribute. It prints
+counts only. What no rule named was written as a placeholder and counted: none on
+the engagement cards or the suggestions, and on the recruiter page four text
+nodes (the charts' axis sentences) and six labels (the section's, the time
+filter's, and the two viewers' icon and image labels).
+
+THE GUARDS THIS MET, each answered in the same change: the evaluate waiver
+rule (the first draft ran its own scripts from new modules, and the rule
+refused it; the S5 read moved into the shipped script and the two people
+readers dropped scripts altogether); the tool surface, 61 tools and 96
+parameters on this branch, pinned with the census decision -- 60 and 93
+once master's retirement of `linkedin_send_message` came in (L.7); the
+server surface, 61 tools and 43 that do not write (60 and 43 after the
+merge), at every count site, in the server docstring and in the README's
+module map; `known_side_effects`' messaging clause and its
+README copy, which now name `linkedin_messaging_presence` among the tools
+that load a messaging address and open no conversation; `PEOPLE_TOOLS` and
+the instructions sentence; the source-url declarations (both SHAPED, as
+`linkedin_search_appearances` is); and the identity guard, which caught an
+undeclared company id in the first recruiter fixture.
+
+THE LEAK HARNESS DRIVES BOTH PEOPLE READERS AS THEY SHIP -- which the
+first build could not say. That build's readers pinned element handles the
+planted page's element stand-in cannot answer, and the baseline recorded
+`presence:read_suggested_presence` and `recruiter_views:read_recruiter_views`
+"not_driven:raises RuntimeError", beside four recruiter helpers the guard
+discovered as readers of their own. After the cold review each reader asks
+the page once per named query and reads the handles it is handed, so the
+guard discovers one recruiter reader where it found five; on its signature
+drive each reads, reaches its record builder and builds none -- NO_RECORD.
+Master's guard, since lane G's triage of 2026-09-28, lets no reader rest
+there silently: it is driven from a tracked fixture, or it says what would
+drive it. Both have a tracked fixture, so both got a drive in
+`tests/shipped_drives.py` at the merge (L.7): the planted page answered with
+the skeleton's structure -- which element each named query finds -- and the
+one drawn string each success path keys on (a person card's presence line;
+the first chart's metric label and a viewer row's "Viewed 2w ago"), and the
+plant everywhere else. Each comes back `returns_records`, the plant inside
+one people record and nowhere else, having read the page (1 and 4 entry
+reads) with nothing failed; each raises, not driven, on a copy of its
+fixture with that drawn string reworded. The regenerated baseline differs
+from master's by those two lines only. Their files drive the rest with
+plants: laced names, a planted status word, a planted actor and section, a
+planted point label, a planted photo label and a failing page, each shown to
+reach the page and never the output.
+
+THE ENGAGEMENT CARDS SIT UNDER VERDICTS THAT WERE ALREADY `returns_text`
+(the cold review's F10): `dom:read_search_appearances` and
+`linkedin_search_appearances` were recorded so before this lane, so neither
+harness can go red on a new leak through `engagement`. What guards it is
+`tests/test_profile_engagement_cards.py`'s own: a PageString drive of the
+reduction, and a hunt for the employer over the reading and the envelope.
+
+THE PLANTED MUTATIONS, one defect at a time, the named test file run over
+each, the source restored after each and its bytes compared -- run on the
+merged tree, `87e5250`, since the readers' restructure and master's merge
+both moved the code under them (at the build they were 5, 7, 10 and 8
+mutants; the cold review's fixes added the rest):
+
+    J 107   7 of 7 red    the old guard; no guard; a blank employer counted
+                          as one; an empty keywords key kept; a keyworded url
+                          losing its keyword; a digit that is no Page id
+                          accepted; a None keyword echoed raw
+    P S5    9 of 9 red    the employer captured beside the number; the
+                          number crossing as text; the comma kept; every
+                          actor "someone"; a hidden card read; a page value
+                          taken uncoerced; the page's section word returned;
+                          a drawn card not counted; a multi-word section
+                          dropping the card
+    N 195  21 of 21 red   a hidden viewer read; the View-insights twin read
+                          as a viewer; the page's label as the key; a viewer
+                          not anonymous; the raw line as the name; the comma
+                          kept; the chart's card not its parent; a chart kept
+                          to its first point; a module-level cache; two
+                          loads; a query dropping the row; the spelled-out
+                          time not a viewer row; a time in other digits
+                          leaving; a chart naming no metric not counted; the
+                          signed-out wall not refused; one failing region
+                          stopping the other charts; one failing link
+                          stopping the other viewers; a failure counted by
+                          its message; the page-level failure carrying the
+                          exception's message; the range taking a bare
+                          number; the range taking any number the filter
+                          draws
+    M M53  14 of 14 red   a hidden card read; a group read as a person; the
+                          page's presence word returned; the status line
+                          captured whole; the raw line as the name; the
+                          photo's label as the name; a module-level cache;
+                          two loads; only the cards read counted; the
+                          signed-out wall not refused; one failing card
+                          stopping the others; a failure counted by its
+                          message; the page-level failure carrying the
+                          exception's message; a status word outside the
+                          three kept
+
+TWO SURVIVED A FIRST RUN, AND EACH WAS ANSWERED BY THE TEST THAT WAS
+MISSING, never by weakening the mutant. `P S5`'s section word, at the build:
+the script already nulls an unknown word, so the Python check was untested,
+and a test now drives that step directly. `N 195`'s range taking a bare
+number, on the merged tree: no test drew a filter of another shape, and one
+now draws "Past 2 weeks" and "90" and reads null -- after which that mutant,
+and a wider one taking any number the filter draws, are red.
+
+### L.4 CAPTURE SPEC, `P K1`
+
+For session 2's plan, one load:
+
+    address   https://www.linkedin.com/in/me/  (admitted; lands on his own
+              profile)
+    loads     1 -- no press, no scroll beyond what the page draws on load
+    keep      the page content, gitignored, as session 1's captures are
+
+It must answer, from the capture's structure and never its text:
+
+1. Is a verifications SECTION drawn anywhere on the profile -- a heading and
+   items -- or only the badge on his name?
+2. If only the badge: is it a link, and to which address shape
+   (`/mypreferences/d/verifications/` and `/trust/verification/` are both
+   refused by the boundary today), or a control that opens an in-page
+   dialog?
+3. What each verification draws -- its kind, who verified it, when -- by
+   shape: the fields a reader would return.
+
+If 1 is no and 2 is a dialog, the row is gated by a PRESS, and the next
+question is whether the press gate permits opening that badge; if 2 is a
+link to a refused address, the row needs an admission. Neither is blocked on
+nothing.
+
+### L.5 The census
+
+Four rows GAP -> COVERED-UNFIRED, each cell opening on a dated paragraph
+naming the tool, the reader and the test file, with the earlier text kept
+after it: `M M53`, `N 195`, `P S5`, `J 107`. `P K1` stays GAP, its cell
+opening on why, and its address-table line re-gated READER -> MEASURE. The
+three read rows left `_audit/_census/read-addresses.tsv` and `J 107` left
+`_audit/_census/jobs-directions.tsv`; `P S5` and `N 195` left the read-gap
+triage, recorded beside the rows that left before them.
+`tests/test_the_offline_frontier_rows.py` holds all five to this.
+
+PINS, re-derived on the branch's tree at the build and never summed --
+thirteen census figures moved, and `PINNED_B1_ROWS` gains the four rows
+under no ruling. The same thirteen were re-derived again on the merged tree
+over master `0867bda`, from master's values (L.7).
+
+    adjudicated                183 -> 187     gap                  587 -> 583
+    delivered_broad            123 -> 127     gap_read             101 -> 98
+    unfired                     44 -> 48      gap_unknown          109 -> 108
+    b1_no_ruling                26 -> 30      jobs_gap             109 -> 108
+    b3_admitted                 46 -> 43      jobs_dir_r            41 -> 40
+    b3_blocked_on_nothing        4 -> 0       jobs_admitted         13 -> 12
+    jobs_blocked_on_nothing      1 -> 0
+
+BUCKET 3 NOW HOLDS NO ROW BLOCKED ON NOTHING, read or jobs. The address
+tables GREEN 98 of 98 and 108 of 108. The tool surface 61 tools and 96
+parameters, measured off the registry (60 and 93 after the merge). The AST
+duplicate-key check -- every dict literal in `linkedin_server/`, `scripts/`
+and `tests/`, and every JSON file in `tests/` and `scripts/`: 4,311 dict
+literals and 13 JSON files, 0 duplicates.
+
+### L.6 The cold review, and what it changed
+
+A cold verifier read the build read-only -- the two commits from `64afa6c`
+-- and returned sixteen findings: no blocker, one major, six minor, nine
+notes. Twelve were answered in code and tests, one was settled by
+measurement, one is recorded, one is declined with its reason, and one is
+not done.
+
+- **F2, MAJOR (`M M53`).** A signed-out load came back ok with nobody
+  suggested: the login wall draws no suggestion card. Both people tools now
+  refuse the wall before reading (`assert_not_authwall`), each with a test
+  that lands on it.
+- **F1 (`J 107`).** The company verdict took `isdigit`, which admits a
+  superscript two, circled and fullwidth digits, and "0". It takes ASCII
+  digits that are not all zeros.
+- **F12 (`J 107`).** A `None` keyword spent a load and then raised at the
+  echo; it is echoed as an empty string.
+- **F8 (`J 107`), DECLINED.** `keywords` stays required. A default of `""`
+  was tried, and the tool-envelope guard stopped driving
+  `linkedin_search_jobs` -- it builds only required arguments -- so the
+  schema nicety would have cost a guard. The docstring says to pass an empty
+  keywords.
+- **F3, F15, F11 (`N 195`).** A viewer link is matched on its path, so a
+  query or a fragment LinkedIn adds no longer drops the row; both time
+  notations ("2w" and "2 weeks") are viewer rows; a time leaves only in this
+  package's spelling with ASCII digits.
+- **F4 (all three).** Seen beside read, everywhere a row could be drawn in a
+  shape the reader does not know: chart regions, insights links and viewer
+  rows; cards drawn beside cards read; a multi-word section counted
+  unrecognised, not dropped.
+- **F9 (`P S5`).** The click card's `anonymous` became `actor`, "someone"
+  or "other" -- never a claim about a named member.
+- **F7 (both).** The readers raise `ExtractionFailedError`, the type only,
+  with the dom readers' landing describer, under the WITHHELD ruling; the
+  error-url register moved 20 -> 22 sites on the branch.
+- **F16 (`N 195`).** "A hidden row is counted and not read" was stronger
+  than the code, which reads a hidden link's address and text to decide
+  whether it is a viewer row. The docstring and L.3 say "counted, and
+  nothing of it returned" now.
+- **F13 (fixtures).** The structure digest covers the attributes the readers
+  select on; three digests re-pinned, each with an attribute control.
+- **F5 (`M M53`).** The synthetic-people fixture guard gains the composer
+  card's two person slots, each with a planted control, and declares the
+  one invented group title the fixture draws.
+- **F6 (`N 195`), SETTLED BY MEASUREMENT.** The dates are the UTC date of
+  each point's epoch, and the capture says that is the date the chart
+  means: all 26 of its points sit at UTC midnight, each a Thursday.
+- **F10 (`P S5`), RECORDED** in L.3, under the leak harness.
+- **F14 (tests), NOT DONE.** The fixture tests launch a Chromium per read --
+  143.6 s, 119.2 s and 47.9 s for the three files, measured under load. A
+  module-scoped browser would cut that; it is a change to
+  `tests/xhtml_page.py` left for a pass on gate cost.
+
+AND ONE CHANGE NO FINDING ASKED FOR: each people reader asks the page once
+per named query and hands the elements to its steps, and one element that
+cannot be read is counted by its exception's type -- never its message --
+while the rest are read (`charts_failed`, `links_failed`, `cards_failed`).
+That made them drivable as they ship (L.3), and a bad card no longer costs
+the whole reading.
+
+THE COMMITS, each on this lane's branch and nowhere on `master` until the
+branch merges: `b862f40` J 107's guard; `d3bad01` the three readers and the
+census; `3d5267b` the five guards the full suite named; `77885a9` the cold
+review's fixes; `1a3fab9` one page entry per reader -- and, nowhere on
+`master` either, `87e5250`, the merge of master `0867bda`, and `c40fba9`,
+the CDP port guard (L.8), which is nowhere on `master` until then too.
+
+### L.7 The integration of master `0867bda`
+
+Master had moved from `64afa6c`: lane L5 retired `linkedin_send_message` --
+no write is aimed by a name -- and re-aimed `linkedin_send_invitation` by a
+profile link; lane G triaged the 22 readers its guard could not drive,
+drove six from tracked fixtures, and made every other one say what would
+drive it. Merged once, at the end. Nine files conflicted, each a count or a
+sentence both sides had moved, and each was measured rather than chosen:
+
+- THE SURFACE: 60 tools -- 43 read, 17 write -- and 93 parameters, off
+  `mcp.list_tools()` on the merged tree (61, 43, 18 and 96 on this branch;
+  58, 41, 17 and 93 on master). The server docstring's headline and split,
+  the README headline and module map, both surface pins and the non-write
+  split say so, each keeping both histories beside it.
+- `known_side_effects`' messaging clause and its README copy: L5's text,
+  without the retired tool, with `linkedin_messaging_presence` kept.
+- THE ERROR-URL REGISTER: WITHHELD 13, asked-for 7, passthrough 1 -- 21
+  sites -- and no address in scope 10 (master 11 and 19).
+- THE TRIAGE SPLIT: the messaging slice's GAP rows 131 -- R 16, W 111,
+  R+W 4 -- master's 132 less `M M53`.
+- THE READER BASELINE, regenerated by its writer after the two drives
+  landed (L.3): it differs from master's by this lane's two readers only,
+  both `returns_records`.
+- THE CENSUS PINS, re-derived on the merged tree, never summed -- the
+  thirteen this lane moves, from master's values:
+
+      adjudicated                182 -> 186     gap                  588 -> 584
+      delivered_broad            124 -> 128     gap_read             101 -> 98
+      unfired                     45 -> 49      gap_unknown          109 -> 108
+      b1_no_ruling                26 -> 30      jobs_gap             109 -> 108
+      b3_admitted                 46 -> 43      jobs_dir_r            41 -> 40
+      b3_blocked_on_nothing        4 -> 0       jobs_admitted         13 -> 12
+      jobs_blocked_on_nothing      1 -> 0
+
+  and `PINNED_B1_ROWS`' NO_RULING gains `J 107`, `M M53`, `N 195` and
+  `P S5`. Four of the thirteen read differently on the branch -- 187, 127,
+  583 and 48 -- because master had moved `M M2` back to GAP and `N 155` to
+  COVERED-UNFIRED; all four conflicted, and each was measured.
+  `census_completion --check`: every headline figure matches its pin.
+- THE BLOCKER MAP regenerated to its fixed point: `J 107`'s state today,
+  and three candidate counts the merged corpus moved.
+
+### L.8 Found while gating: the suite reached the CDP port
+
+The brief says never port 9224. A reading of the tool-envelope harness while
+gating found that the suite does not keep that: it drives every tool on a
+planted page, `linkedin_cdp_status` among them, and that tool's
+`cdp_bridge.probe()` opens `http://127.0.0.1:9224/json/version` with
+`urllib`. `tests/network_guard.py` covers what a test's browser requests and
+says it leaves out a request made outside a browser -- adding that no test
+makes one -- and it admits loopback by design, so nothing refused this one.
+
+MEASURED, NOT INFERRED, and without touching the port: a recording plugin
+that refuses any connection to the CDP port before it is attempted, shown
+first refusing the shipped probe, then run over
+`tests/test_tool_envelopes_emit_no_page_string.py` -- one connection per
+run, from that module's `verdicts` fixture. Nothing listened on 9224 when
+that was measured (the OS listen table). Whether anything listened while
+this lane's earlier gates ran that file is not known, and each did; while a
+live session is attached, the operator's Chrome answers such a probe.
+
+FIXED IN TWO PLACES, in its own commit, separable from the frontier:
+
+- AT ITS SOURCE: the envelope harness's `drive_tool` stubs the probe,
+  answering as a closed port does -- which also covers the harness's
+  standalone runs, where no pytest plugin applies.
+- FOR THE NEXT ONE: `tests/cdp_port_guard.py`, registered by
+  `tests/conftest.py` beside the network guard, refuses every connection a
+  test makes to the configured CDP port -- `ConnectionRefusedError`, what a
+  closed port answers -- and fails that test by name.
+  `tests/test_no_test_reaches_the_cdp_port.py` shows it refusing the shipped
+  probe, leaving another port alone, failing a planted test loudly in its
+  own process (pointed at a port nothing listens on), and the harness
+  reaching the port no more.
+
+FIVE PLANTED DEFECTS, each red and each restored byte-identical, run with
+the configured CDP port moved to an ephemeral loopback port nothing listened
+on, so no mutant could reach 9224: the harness's stub removed (the envelope
+module errors at its fixture, REACHED FOR THE CDP PORT, and the harness test
+fails); the guard never refusing a `connect`; nor a `connect_ex`; a refusal
+never failing its test; the guard refusing every port.
+
+`tests/network_guard.py`'s sentence that no test makes a request outside a
+browser is left as lane G wrote it, for lane G: this lane did not edit that
+file.
+
+### L.9 Gates
+
+On `d78b143` -- the final tree before this section, on this branch and
+nowhere on `master` until it merges -- with nothing edited or committed
+while they ran; master was still `0867bda` at the end, so the merge of L.7
+is the one integration:
+
+- THE IMPACT GATE against master: 48 changed paths, 259 test files selected
+  and 26 corpus-wide; it WIDENED TO THE WHOLE SUITE because
+  `tests/conftest.py` changed (L.8), which it has no model of. PASS over
+  11,622 tests in 1,301.5 s, sharded (`-n auto --dist loadfile`), 0 failed.
+  The gate prints the total only, on a pass. The CDP port guard was armed
+  in every worker, and no test reached the port -- a test that had would
+  have failed by name.
+- THE CENSUS INSTRUMENTS, thirteen, every exit 0: `census_completion
+  --check`, every headline figure matches its pin; `check_read_addresses`
+  GREEN 98 of 98; `check_jobs_directions` GREEN 108 of 108;
+  `pin_census_rows`, no drift; `measure_pointer_graph`, 0 pointers added;
+  both triage scripts; `ruling_holds` GREEN; `check_write_classes` GREEN,
+  386 lines; `check_exclusion_basis`, 42 of 42, 0 untraced.
+- THE THREE DERIVED --checks, among those thirteen: `_audit/INDEX.md`
+  matches the corpus (258 documents), `_audit/RULINGS.md` matches (67
+  rulings), and the blocker map is the derived map, every column of every
+  line.
+- THE AST DUPLICATE-KEY CHECK: 4,337 dict literals and 13 JSON files, 0
+  duplicates.
+- THE PLANTED MUTATIONS on the merged tree (L.3, L.8): 51 of 51 red over
+  the four rows and 5 of 5 over the CDP port guard, every source restored
+  byte-identical.
+
+This section's own commit changes only this document; it gets the impact
+gate for that path, and nothing else.
+
+### L.10 What was not run
+
+- NOTHING LIVE. `M M53`, `N 195`, `P S5` and `J 107` are COVERED-UNFIRED:
+  no page was loaded on LinkedIn. Whether LinkedIn's default location
+  narrows a keyword-less employer search stays unverified.
+- `P K1`'s CAPTURE: the spec is L.4, for session 2's plan.
+- CI: nothing is pushed, so the suite ran on this Windows box only; the
+  Linux and macOS cells did not run.
+- THE COLD REVIEW'S F14: the fixture tests still launch a Chromium per read.
+- A SECOND COLD REVIEW of what changed after the first -- the restructure,
+  the drives, the merge and the CDP port guard -- was not run.

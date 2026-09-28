@@ -1,4 +1,4 @@
-"""The tool surface: fifty-eight tools, forty-one of which do not write.
+"""The tool surface: sixty tools, forty-three of which do not write.
 
 **AND THIS LINE IS NOW DERIVED, NOT MAINTAINED, 2026-09-20.** It had gone stale
 a THIRD time -- "forty-four tools, thirty-two of which do not write" against a
@@ -215,6 +215,12 @@ EXPECTED_TOOLS = {
     # SEARCH. The only tool on this surface whose page nobody here had
     # opened when it shipped, and its docstring says so.
     "linkedin_search_appearances",
+    # THE SIXTIETH AND SIXTY-FIRST, 2026-09-28 (lane S, the offline frontier):
+    # two READS whose answer is people, as records -- the recruiter viewers
+    # on Premium's recruiter insights (census N 195) and the composer's
+    # suggested people with their presence (census M M53). Neither writes.
+    "linkedin_recruiter_insights",
+    "linkedin_messaging_presence",
     # THE THIRTY-EIGHTH, 2026-09-05: linkedin_events_home, a READ. No
     # write was added. It is the only tool here whose whole answer can be
     # ZERO, and its reader returns that integer only when four
@@ -586,8 +592,17 @@ async def tools():
     return {t.name: t for t in await mcp.list_tools()}
 
 
-async def test_the_surface_is_exactly_the_fifty_eight_tools(tools):
-    """RENAMED AGAIN ON LANE L5'S ORDER OF 2026-09-27 23:36, to
+async def test_the_surface_is_exactly_the_sixty_tools(tools):
+    """RENAMED AGAIN AT LANE S'S MERGE OF MASTER 0867bda, 2026-09-28, to
+    ``..._sixty_tools``: that lane's branch had brought two READS together
+    (``linkedin_recruiter_insights``, census N 195, and
+    ``linkedin_messaging_presence``, census M M53) and renamed this test
+    ``..._sixty_one_tools`` there, counting from fifty-nine, while master made
+    it ``..._fifty_eight_tools`` on lane L5's retirement. MEASURED off the
+    merged registry, not summed; the name moved with the pin in the merge
+    commit.
+
+    RENAMED AGAIN ON LANE L5'S ORDER OF 2026-09-27 23:36, to
     ``..._fifty_eight_tools``: ``linkedin_send_message`` was RETIRED -- it was
     aimed by a name (PEOPLE-DATA-MITIGATIONS, mitigation 6) -- and a person is
     messaged by profile link through ``linkedin_message_from_profile``.
@@ -870,7 +885,11 @@ async def test_the_surface_is_exactly_the_fifty_eight_tools(tools):
     # FIFTY-EIGHT ON LANE L5'S ORDER OF 2026-09-27 23:36: linkedin_send_message
     # RETIRED (aimed by a name), a WRITE, so the split moves on its write side
     # and the non-write count holds at forty-one. MEASURED off mcp.list_tools().
-    assert len(tools) == 58
+    # SIXTY AT LANE S'S MERGE OF MASTER 0867bda, 2026-09-28: two READS from its
+    # branch (sixty-one there), linkedin_recruiter_insights and
+    # linkedin_messaging_presence, so the split moves on its read side and the
+    # write set holds. MEASURED off mcp.list_tools() on the merged tree.
+    assert len(tools) == 60
     # And the split is asserted, not just the total. A future tool arriving as
     # a write would otherwise only have to bump a number.
     #
@@ -1032,7 +1051,10 @@ async def test_the_surface_is_exactly_the_fifty_eight_tools(tools):
     # two tools its follow-up brought (linkedin_connect_from_profile,
     # linkedin_message_from_profile) are writes, both on the exemption, and
     # the read side is byte-identical across them.
-    assert len(set(tools) - SANCTIONED_WRITE_TOOLS) == 41
+    # FORTY-THREE ON LANE S'S BRANCH, 2026-09-28: linkedin_recruiter_insights
+    # and linkedin_messaging_presence are READS -- each loads one admitted
+    # page and presses nothing -- and the write side is unmoved.
+    assert len(set(tools) - SANCTIONED_WRITE_TOOLS) == 43
 
 
 def test_the_read_that_was_nearly_named_a_write():

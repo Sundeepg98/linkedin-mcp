@@ -856,6 +856,13 @@ def test_only_dom_module_waives_evaluate():
     # only other things it returns are ``<label>`` captions, the chart's own
     # sentence, and COUNTS -- including the person-anchor count, which is the
     # measurement the whole page was opened for and is an integer.
+    # 2026-09-28 (lane S, census P S5): the SAME script also reduces the page's
+    # two engagement cards, and spends no new waiver and no new script. What
+    # crosses is an integer, a section word compared against a closed list
+    # passed in, and a boolean; the employer that ends "impressions on your
+    # experience at <an employer>" never does -- the pattern stops at "at ".
+    # Its first draft ran a script of its own from a new module, and this test
+    # refused it, correctly, for the reason given two paragraphs down.
     #
     # EIGHTEEN AND NINETEEN, 2026-09-19, and they were nearly spent in the
     # wrong place. ``anchors.read_anchor_classes`` and

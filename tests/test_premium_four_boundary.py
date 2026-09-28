@@ -361,24 +361,34 @@ def test_a_family_pattern_would_reach_premium_surfaces_nobody_argued_for():
 # ---------------------------------------------------------------------------
 
 
-def test_the_two_reader_less_entries_have_no_reader_in_the_package():
+def test_the_reader_less_entry_has_no_reader_and_recruiter_views_has_one():
     """ASSERTED, BECAUSE THE LEDGER CLAIM DEPENDS ON IT.
 
     ``_audit/2026-09-20-the-premium-four.md`` reports two of four admissions as
     buying no row. If somebody later lands a reader for either address without
     revisiting that ledger, this fails and points at the document.
+
+    AND ONE DID, 2026-09-28 (lane S, the offline frontier), and the ledger was
+    revisited in the same change: ``/analytics/recruiter-views`` has a reader,
+    ``recruiter_views.read_recruiter_views`` behind ``linkedin_recruiter_insights``,
+    built over the live lane's capture of that page as the ledger's own section
+    9 prescribed (census ``N 195``, COVERED-UNFIRED). So that address is now
+    held to exactly one module naming it, and ``/premium/profile-key-skills``
+    to none. Renamed from ``..._the_two_reader_less_entries_...`` that day.
     """
     package = _ROOT / "linkedin_server"
-    sources = "\n".join(
-        path.read_text(encoding="utf-8", errors="replace")
+    sources = {
+        path.name: path.read_text(encoding="utf-8", errors="replace")
         for path in package.glob("*.py")
-    )
-    for address in ("/analytics/recruiter-views", "/premium/profile-key-skills"):
-        navigating = re.findall(
-            r'["\']https://www\.linkedin\.com' + re.escape(address) + r'/?["\']',
-            sources,
-        )
-        assert navigating == [], (address, navigating)
+    }
+
+    def naming(address: str) -> dict[str, int]:
+        pattern = r'["\']https://www\.linkedin\.com' + re.escape(address) + r'/?["\']'
+        found = {name: len(re.findall(pattern, text)) for name, text in sources.items()}
+        return {name: count for name, count in found.items() if count}
+
+    assert naming("/premium/profile-key-skills") == {}
+    assert naming("/analytics/recruiter-views") == {"recruiter_views.py": 1}
 
 
 def test_the_collections_reader_is_the_only_thing_that_builds_an_admitted_address():

@@ -395,7 +395,16 @@ AFTER_LANE_L8 = (131, {"R": 17, "W": 110, "R+W": 4})
 #: and move nothing here.
 AFTER_LANE_L5_DEBTS = (132, {"R": 17, "W": 111, "R+W": 4})
 
-EXPECTED_NOW = AFTER_LANE_L5_DEBTS
+#: AT LANE S'S OFFLINE FRONTIER (2026-09-28), MEASURED with this tree's
+#: `scripts/triage_messaging_gap_rows.py`: `M53` left GAP, built
+#: (`linkedin_messaging_presence`, COVERED-UNFIRED;
+#: `_audit/2026-09-24-lane-s-people-search.md`, The offline frontier).
+#: 131 - 1 = 130 on lane S's branch; at its merge of master 0867bda,
+#: MEASURED on the merged tree, not summed: 132 - 1 = 131, reads 17 - 1,
+#: writes and read-and-writes lane L5's.
+AFTER_LANE_S_FRONTIER = (131, {"R": 16, "W": 111, "R+W": 4})
+
+EXPECTED_NOW = AFTER_LANE_S_FRONTIER
 
 
 def test_the_headline_split_is_the_one_the_report_quotes():

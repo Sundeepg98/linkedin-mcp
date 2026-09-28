@@ -368,13 +368,18 @@ class Event:
 #: ``linkedin_who_viewed_me`` (2026-09-24); the two conversation readers
 #: joined on 2026-09-27, returning records when their caller passes
 #: ``include_names``, and the people search the same day, on the same opt-in
-#: (lane S, ``people_results.read_result_people``).
+#: (lane S, ``people_results.read_result_people``). The recruiter-insights
+#: page's anonymous viewers and the composer's suggested people joined on
+#: 2026-09-28 (lane S, ``recruiter_views`` and ``presence``), with no opt-in:
+#: people are those two tools' whole answer.
 PEOPLE_TOOLS: frozenset[str] = frozenset(
     {
         "linkedin_who_viewed_me",
         "linkedin_list_conversations",
         "linkedin_open_messaging",
         "linkedin_people_search_shape",
+        "linkedin_recruiter_insights",
+        "linkedin_messaging_presence",
     }
 )
 

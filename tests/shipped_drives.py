@@ -1328,6 +1328,204 @@ async def read_profile_views_more_insights_as_shipped(page: Any) -> Any:
     return _modelled(at, await profile_views_more.read_profile_views_more_insights(at))
 
 
+class _DrawnText(_Node):
+    """An element whose text is what the cited fixture draws there, not the
+    plant: a label LinkedIn spells, which the reader keys on."""
+
+    def __init__(self, wrapped: Any, drawn: str) -> None:
+        super().__init__(wrapped)
+        self._drawn_text = drawn
+
+    async def inner_text(self, **kwargs: Any) -> Any:
+        return self._drawn_text
+
+
+# ---------------------------------------------------------------------------
+# presence:read_suggested_presence -- the composer's suggested people
+# ---------------------------------------------------------------------------
+
+#: The presence line a person's card draws in
+#: ``tests/fixtures/synthetic/compose_suggestions.html``: LinkedIn's own
+#: words, which the reader keeps only as its own declared word.
+PRESENCE_LINE_DRAWN = "Status is reachable"
+
+
+def _suggested_person_card(handle: Any) -> _Node:
+    """One PERSON card as the skeleton draws each of its three: visible, in
+    no hidden container, one photo, one span -- the presence line -- a name
+    in its ``dt`` and a headline in its ``dd``."""
+    from linkedin_server import presence
+
+    card = _Node(handle)
+    card.one = {
+        presence._HIDDEN_ANCESTOR: None,
+        "dt": _Node(handle.locator("dt")),
+        "dd": _Node(handle.locator("dd")),
+    }
+    card.many = {
+        "img": [_Node(handle.locator("img"))],
+        "span": [_Node(handle.locator("span"), text_content=PRESENCE_LINE_DRAWN)],
+    }
+    return card
+
+
+class _DrawsTheSuggestions(_Over):
+    async def query_selector_all(self, selector: str) -> list[Any]:
+        from linkedin_server import presence
+
+        found = await self._wrapped.query_selector_all(selector)  # the read, counted
+        if selector == presence.SUGGESTED_CARD:
+            return [_suggested_person_card(handle) for handle in found]
+        return found
+
+
+async def read_suggested_presence_as_shipped(page: Any) -> Any:
+    """``read_suggested_presence`` as ``linkedin_messaging_presence`` calls
+    it -- on the page it was handed, no argument but the page -- over the
+    planted page drawn as the composer's suggestion list.
+
+    THE SIGNATURE DRIVE reaches the card and stops: a planted element answers
+    no element query, so every card fails by type and no person comes back --
+    NO_RECORD.
+
+    THE SKELETON: ``tests/fixtures/synthetic/compose_suggestions.html``
+    (``scripts/_build_capture_skeleton.py``, plan "suggested"). Each person is
+    an option card carrying ``data-view-name="messaging-type-ahead-card"``,
+    one photo, one span holding its presence line, and a ``dl`` whose ``dt``
+    is the name and ``dd`` the headline; ``tests/test_messaging_presence.py``
+    runs this reader over it and asserts three people, one group skipped.
+
+    THE DOUBLE answers the STRUCTURE (which element each of the card's own
+    queries finds, or that it finds none) and the presence line the fixture
+    draws. The NAME and the HEADLINE are the plant, every visibility the
+    planted ``True``, and the number of cards the planted page's one: so the
+    record that comes back carries the plant, inside the record.
+    """
+    from linkedin_server import presence
+
+    _drawn(
+        "synthetic/compose_suggestions.html",
+        presence.SUGGESTED_CARD[1:-1],
+        "<span>" + PRESENCE_LINE_DRAWN + "</span>",
+        "<dl><dt>",
+    )
+    return await presence.read_suggested_presence(_DrawsTheSuggestions(page))
+
+
+# ---------------------------------------------------------------------------
+# recruiter_views:read_recruiter_views -- the recruiter viewers, as records
+# ---------------------------------------------------------------------------
+
+#: What ``tests/fixtures/synthetic/recruiter_views.html`` draws that the
+#: reader keys on: the first chart's metric label, and a viewer row's time
+#: line. Every other string the reader reads is the plant.
+RECRUITER_METRIC_DRAWN = "Profile views"
+RECRUITER_VIEWED_DRAWN = "Viewed 2w ago"
+
+#: A viewer row's link, as the fixture draws it: an employer's insights page.
+_INSIGHTS_LINK = re.compile(r'href="(https://www\.linkedin\.com/company/[0-9]+/insights/)"')
+
+
+class _TheViewerRow(_Node):
+    """A viewer row's link: the employer line and the industry line are the
+    page's (the plant, read twice), the time line the fixture's."""
+
+    async def inner_text(self, **kwargs: Any) -> Any:
+        employer = await self._wrapped.inner_text(**kwargs)
+        industry = await self._wrapped.inner_text(**kwargs)
+        return f"{employer}\n{industry}\n{RECRUITER_VIEWED_DRAWN}"
+
+
+def _recruiter_chart(handle: Any, points: int) -> _Node:
+    """The first chart as the skeleton draws it: a region holding ``points``
+    labelled paths, whose parent card's paragraphs are the count, the metric
+    label and the range."""
+    from linkedin_server import recruiter_views as rv
+
+    region = _Node(handle)
+    card = _Node(handle.locator(rv.CHART_CARD))
+    region.one = {rv.CHART_CARD: card}
+    region.many = {
+        rv.CHART_POINTS: [_Node(handle.locator(rv.CHART_POINTS)) for _ in range(points)],
+    }
+    card.many = {
+        rv.PARAGRAPHS: [
+            _Node(handle.locator(rv.PARAGRAPHS)),
+            _DrawnText(handle.locator(rv.PARAGRAPHS), RECRUITER_METRIC_DRAWN),
+            _Node(handle.locator(rv.PARAGRAPHS)),
+        ],
+    }
+    return region
+
+
+def _recruiter_viewer(handle: Any, link: str) -> _Node:
+    from linkedin_server import recruiter_views as rv
+
+    row = _TheViewerRow(handle, href=link)
+    row.one = {rv._HIDDEN_ANCESTOR: None}
+    return row
+
+
+class _DrawsTheRecruiterInsights(_Over):
+    def __init__(self, wrapped: Any, link: str, points: int) -> None:
+        super().__init__(wrapped)
+        self._link = link
+        self._points = points
+
+    async def query_selector_all(self, selector: str) -> list[Any]:
+        from linkedin_server import recruiter_views as rv
+
+        found = await self._wrapped.query_selector_all(selector)  # the read, counted
+        if selector == rv.CHART_REGIONS:
+            return [_recruiter_chart(handle, self._points) for handle in found]
+        if selector == rv.COMPANY_LINKS:
+            return [_recruiter_viewer(handle, self._link) for handle in found]
+        return found
+
+
+async def read_recruiter_views_as_shipped(page: Any) -> Any:
+    """``read_recruiter_views`` as ``linkedin_recruiter_insights`` calls it --
+    on the page it was handed, no argument but the page -- over the planted
+    page drawn as the recruiter-insights section.
+
+    THE SIGNATURE DRIVE reads every query and keeps nothing: a planted
+    element answers no element query, so the chart and the company link each
+    fail by type and no viewer comes back -- NO_RECORD.
+
+    THE SKELETON: ``tests/fixtures/synthetic/recruiter_views.html``
+    (``scripts/_build_capture_skeleton.py``, plan "recruiter"). Each chart is
+    a ``role="region"`` of labelled points whose parent card draws the count,
+    the metric label and the range as three paragraphs; each viewer row is a
+    link to an employer's insights page drawing an employer line, an industry
+    line and a "Viewed ... ago" line, and no member link.
+    ``tests/test_recruiter_insights.py`` runs this reader over it and asserts
+    both counts, both trends of thirteen points, and two viewers.
+
+    THE DOUBLE answers the STRUCTURE (which element each of the reader's
+    own query constants finds), the viewer row's link, the first chart's
+    metric label and a viewer row's time line. The counts, the range, the
+    chart's description, every point's label and the viewer's employer and
+    industry lines are the plant, and the number of charts and rows the
+    planted page's one: so the one record that comes back carries the plant,
+    inside the record, and nothing else does.
+    """
+    from linkedin_server import recruiter_views
+
+    markup = _drawn(
+        "synthetic/recruiter_views.html",
+        'role="region"', "<p>" + RECRUITER_METRIC_DRAWN + "</p>",
+        "<p>" + RECRUITER_VIEWED_DRAWN + "</p>", '<path role="img" aria-label="x, ',
+    )
+    link = _INSIGHTS_LINK.search(markup)
+    if link is None:
+        raise AssertionError("recruiter_views.html no longer draws an insights link")
+    first_chart = markup.split('role="region"', 1)[1].split("</svg>", 1)[0]
+    points = first_chart.count('<path role="img" aria-label="x, ')
+    return await recruiter_views.read_recruiter_views(
+        _DrawsTheRecruiterInsights(page, link.group(1), points)
+    )
+
+
 # ---------------------------------------------------------------------------
 # The tables the guard reads
 # ---------------------------------------------------------------------------
@@ -1338,7 +1536,9 @@ DRIVES: dict[str, Callable[..., Any]] = {
     "dom:read_any_save_control_label": read_any_save_control_label_as_shipped,
     "named_profile:composer_holds": named_profile_composer_holds_as_shipped,
     "people_results:read_result_people": read_result_people_as_shipped,
+    "presence:read_suggested_presence": read_suggested_presence_as_shipped,
     "profile_editor:read_premium_badge": read_premium_badge_as_shipped,
+    "recruiter_views:read_recruiter_views": read_recruiter_views_as_shipped,
     "server:_attach_recipient_ids": attach_recipient_ids_as_shipped,
     "server:_profile_views_press_counters": profile_views_press_counters_as_shipped,
     "threads:composer_holds": threads_composer_holds_as_shipped,

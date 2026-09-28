@@ -10168,6 +10168,26 @@ ASCII escaper, the derived-navigation mutation run and the blocker-map diff
 summariser -- are declared disposable. What they measured is recorded in the
 audit or re-derived by a shipped test.
 
+### 66.5 THE OFFLINE FRONTIER (lane S, the order of 2026-09-28 01:30)
+
+Record: the lane record's `## The offline frontier 2026-09-28`. Every entry
+was shown failing before it was relied on.
+
+| path | shown failing by |
+|---|---|
+| `scripts/_build_capture_skeleton.py` (three plans, and `structure_digest` over tags, nesting, text marks, chart point counts and the attributes the readers select on) | in each of the three fixture test files, a control moving one attribute the reader keys on -- a chart region made an image, a shown list marked hidden, a button typed submit -- and one moving the structure, and the pinned digest no longer matches; before the cold review (its F13) the digest read tags only, so an attribute could be hand-edited without moving it |
+| `tests/xhtml_page.py` (`read`, `drive_tool`, `anywhere`) -- a synthetic skeleton loaded as XHTML into a local page, every request aborted | the planted mutations over the readers it drives, on the merged tree: `N 195` 21 of 21 red, `M M53` 14 of 14, `P S5` 9 of 9, each restored byte-identical; one `N 195` mutant survived its first run and was answered by the test that was missing, then red |
+| `tests/shipped_drives.py` (`read_suggested_presence_as_shipped`, `read_recruiter_views_as_shipped`, `_DrawnText`) | each reader recorded NO_RECORD before its drive; each drive raises, not driven, on a copy of its fixture with its drawn string reworded (`FIXTURE_BREAKS`) |
+| `tests/cdp_port_guard.py` (registered by `tests/conftest.py`) + `tests/test_no_test_reaches_the_cdp_port.py` | before it, the tool-envelope harness made one connection to the CDP port per run, counted by a recording plugin that refused it; with it, the shipped probe is refused and recorded, a planted test that probes fails by name in its own process, and another port is untouched; five planted defects, run with the port moved to a closed ephemeral one, each red -- the harness's stub removed, `connect` or `connect_ex` never refused, a refusal never failing its test, every port refused |
+
+### 66.6 DECLARED DISPOSABLE (THE ORDER OF 01:30)
+
+The scratchpad helpers -- the capture structure and phrase probes, the
+mutation runner and its four specs, the drive probes, the pin differ, the
+recording plugin that measured the CDP connection, the duplicate-key check
+and the instrument runner -- are declared disposable. Their numbers are in
+the lane record.
+
 ---
 
 ## 67. FOUR GUARDS THAT COULD NOT SEE THEIR OWN SUBJECT: A READER'S OUTPUT, A LIBRARY'S MESSAGE, A CAPITAL LETTER, A MERGE STAGE (lane-g-guards, 2026-09-24)

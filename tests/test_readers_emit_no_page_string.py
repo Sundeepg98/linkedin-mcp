@@ -1427,6 +1427,11 @@ def test_lane_s_people_reader_is_driven_to_its_records() -> None:
 DRIVEN_TO = {key: CLEAN for key in shipped_drives.DRIVES}
 DRIVEN_TO["people_results:read_result_people"] = RETURNS_RECORDS
 DRIVEN_TO.update({key: RETURNS_TEXT for key in ADMITTED_TEXT})
+# LANE S'S TWO PEOPLE READERS (2026-09-28): each success path returns people
+# records -- the composer's suggested people and the recruiter viewers -- so
+# the plant comes back inside a record, where the rule says it may.
+DRIVEN_TO["presence:read_suggested_presence"] = RETURNS_RECORDS
+DRIVEN_TO["recruiter_views:read_recruiter_views"] = RETURNS_RECORDS
 
 
 @pytest.mark.parametrize("key", sorted(shipped_drives.DRIVES))
@@ -1515,6 +1520,14 @@ FIXTURE_BREAKS: dict[str, dict[str, str]] = {
     "people_results:read_result_people": {
         "fixture": "synthetic/people_search_results.html",
         "needle": "&#8226; 2nd", "into": "2nd",
+    },
+    "presence:read_suggested_presence": {
+        "fixture": "synthetic/compose_suggestions.html",
+        "needle": "<span>Status is reachable</span>", "into": "<span>Status is away</span>",
+    },
+    "recruiter_views:read_recruiter_views": {
+        "fixture": "synthetic/recruiter_views.html",
+        "needle": "<p>Viewed 2w ago</p>", "into": "<p>Seen 2w ago</p>",
     },
     "press:disclose": {
         "fixture": "profile_views_analytics.html",

@@ -1115,7 +1115,16 @@ PINNED = {
     #: `linkedin_send_message` RETIRED (aimed by a name): `M M2` returned to
     #: GAP, its only tool retired.
     #: 182 AT LANE L5'S MERGE OF MASTER 64afa6c (2026-09-27), MEASURED on the merged tree: master's figure with this branch's `M M2` back to GAP.
-    "adjudicated": 182,
+    #: 187 AT LANE S'S OFFLINE FRONTIER (2026-09-28, on its branch), MEASURED:
+    #: the five rows bucket 3 called blocked on nothing, taken one by one.
+    #: `M M53`, `N 195` and `P S5` (three R rows ADMITTED and gated READER)
+    #: and `J 107` (the one jobs row) GAP -> COVERED-UNFIRED, each built over
+    #: a capture or on a shipped page and never fired, so they leave buckets 3
+    #: and 1-by-side and enter bucket 1 held by no ruling. `P K1` stays GAP
+    #: and is re-gated READER -> MEASURE: no capture draws its section.
+    #: 186 AT LANE S'S MERGE OF MASTER 0867bda (2026-09-28), MEASURED on the
+    #: merged tree: master's `M M2` back to GAP with this branch's four.
+    "adjudicated": 186,
     #: THE LIVE LANE'S FOUR ROWS, RE-DERIVED AT EACH OF ITS MERGES OF MASTER
     #: (2026-09-24; last over lane S): four rows fired live and banked
     #: (`_audit/2026-09-23-live-lane-session-1.md`). `P G6` COVERED-UNFIRED ->
@@ -1165,7 +1174,12 @@ PINNED = {
     #: COVERED-CANNOT-DELIVER -> COVERED-UNFIRED on
     #: `linkedin_message_from_profile`.
     #: 124 AT LANE L5'S MERGE OF MASTER 64afa6c (2026-09-27), MEASURED on the merged tree: master's figure with this branch's `N 155`.
-    "delivered_broad": 124,
+    #: 127 AT LANE S'S OFFLINE FRONTIER (2026-09-28, on its branch), MEASURED:
+    #: `M M53`, `N 195`, `P S5` and `J 107` GAP -> COVERED-UNFIRED (see
+    #: `adjudicated`).
+    #: 128 AT LANE S'S MERGE OF MASTER 0867bda (2026-09-28), MEASURED on the
+    #: merged tree: master's `N 155` with this branch's four.
+    "delivered_broad": 128,
     #: 79 since the live lane's merge (see `adjudicated`): P G6, N 134, P O3
     #: and M C72 COVERED-PROVEN.
     #: 75 and 21 since the bucket-1 merge: `M C41` fired live and moved from
@@ -1205,12 +1219,18 @@ PINNED = {
     #: `linkedin_send_message` RETIRED (aimed by a name): `M M2`
     #: COVERED-CANNOT-DELIVER -> GAP.
     #: 588 AT LANE L5'S MERGE OF MASTER 64afa6c (2026-09-27), MEASURED on the merged tree: master's figure with this branch's `M M2`.
-    "gap": 588,
+    #: 583 AT LANE S'S OFFLINE FRONTIER (2026-09-28, on its branch), MEASURED:
+    #: `M M53`, `N 195`, `P S5` and `J 107` left GAP (see `adjudicated`).
+    #: 584 AT LANE S'S MERGE OF MASTER 0867bda (2026-09-28), MEASURED on the
+    #: merged tree: master's `M M2` back in GAP, this branch's four out.
+    "gap": 584,
     #: 18 AT LANE L5'S MERGE OF MASTER 52b55b6 (2026-09-27), MEASURED: `M M1` built (`linkedin_message_from_profile`).
     #: 16 ON LANE L5'S ORDER OF 2026-09-27 23:36, MEASURED:
     #: `linkedin_send_message` RETIRED (aimed by a name): `M M2` to GAP and `N
     #: 155` to COVERED-UNFIRED.
     #: 16 AT LANE L5'S MERGE OF MASTER 64afa6c (2026-09-27), MEASURED on the merged tree: master moved none of these.
+    #: 16 AT LANE S'S MERGE OF MASTER 0867bda (2026-09-28), MEASURED on the
+    #: merged tree: lane S moved none of these.
     "cannot_deliver": 16,
     #: 36 AT THE ORCHESTRATOR'S MERGE OF LANE L7'S P B9 (2026-09-27), MEASURED: P B9
     #: (Premium badge) moved GAP -> COVERED-UNFIRED, released like the intro edits.
@@ -1235,7 +1255,12 @@ PINNED = {
     #: `linkedin_send_message` RETIRED (aimed by a name): `N 155` on
     #: `linkedin_message_from_profile`, never fired.
     #: 45 AT LANE L5'S MERGE OF MASTER 64afa6c (2026-09-27), MEASURED on the merged tree: master's figure with this branch's `N 155`.
-    "unfired": 45,
+    #: 48 AT LANE S'S OFFLINE FRONTIER (2026-09-28, on its branch), MEASURED:
+    #: `M M53`, `N 195`, `P S5` and `J 107` COVERED-UNFIRED, never fired
+    #: (see `adjudicated`).
+    #: 49 AT LANE S'S MERGE OF MASTER 0867bda (2026-09-28), MEASURED on the
+    #: merged tree: master's `N 155` with this branch's four.
+    "unfired": 49,
     #: 104 AT THE ORCHESTRATOR'S MERGE OF LANE Y2'S FOLLOW-UP (2026-09-27), MEASURED:
     #: the P-R settings block itemized into 22 rows (P2-P23; Delete Data EXCLUDED-RULED).
     #: 101 AT LANE S'S NAMES ADOPTION (2026-09-27), MEASURED: `N 79`, `N 172`
@@ -1245,7 +1270,14 @@ PINNED = {
     #: six PEOPLE-DATA-MITIGATIONS), never fired. Three R rows that were
     #: ADMITTED and gated READER in bucket 3, so they leave it and enter bucket
     #: 1 held by no ruling.
-    "gap_read": 101,
+    #: 98 AT LANE S'S OFFLINE FRONTIER (2026-09-28), MEASURED: the five rows
+    #: bucket 3 called blocked on nothing, taken one by one. `M M53`, `N 195`
+    #: and `P S5` (three R rows ADMITTED and gated READER) and `J 107` (the one
+    #: jobs row) GAP -> COVERED-UNFIRED, each built over a capture or on a
+    #: shipped page and never fired, so they leave buckets 3 and 1-by-side and
+    #: enter bucket 1 held by no ruling. `P K1` stays GAP and is re-gated
+    #: READER -> MEASURE: no capture draws its section.
+    "gap_read": 98,
     #: 151, not the 152 published by `_audit/2026-09-21-the-write-ceiling.md`.
     #: That document scoped itself to `profile.md`, `network.md` and
     #: `messaging-and-content.md`; measured at HEAD those three carry W 151 and
@@ -1290,7 +1322,14 @@ PINNED = {
     #: population. 92 since lane R's merge, which returned 38 jobs rows.
     #: 109 AT LANE L8'S MERGE OF MASTER (2026-09-27), MEASURED: `J 69` and
     #: `J 87` returned; a jobs row carries no R/W column.
-    "gap_unknown": 109,
+    #: 108 AT LANE S'S OFFLINE FRONTIER (2026-09-28), MEASURED: the five rows
+    #: bucket 3 called blocked on nothing, taken one by one. `M M53`, `N 195`
+    #: and `P S5` (three R rows ADMITTED and gated READER) and `J 107` (the one
+    #: jobs row) GAP -> COVERED-UNFIRED, each built over a capture or on a
+    #: shipped page and never fired, so they leave buckets 3 and 1-by-side and
+    #: enter bucket 1 held by no ruling. `P K1` stays GAP and is re-gated
+    #: READER -> MEASURE: no capture draws its section.
+    "gap_unknown": 108,
     "gap_ambiguous": 0,
     #: BUCKET 3, MEASURED 2026-09-23 (`_audit/2026-09-23-bucket3-addresses.md`),
     #: counted off `_audit/_census/read-addresses.tsv`, whose every verdict
@@ -1362,7 +1401,14 @@ PINNED = {
     #: six PEOPLE-DATA-MITIGATIONS), never fired. Three R rows that were
     #: ADMITTED and gated READER in bucket 3, so they leave it and enter bucket
     #: 1 held by no ruling.
-    "b3_admitted": 46,
+    #: 43 AT LANE S'S OFFLINE FRONTIER (2026-09-28), MEASURED: the five rows
+    #: bucket 3 called blocked on nothing, taken one by one. `M M53`, `N 195`
+    #: and `P S5` (three R rows ADMITTED and gated READER) and `J 107` (the one
+    #: jobs row) GAP -> COVERED-UNFIRED, each built over a capture or on a
+    #: shipped page and never fired, so they leave buckets 3 and 1-by-side and
+    #: enter bucket 1 held by no ruling. `P K1` stays GAP and is re-gated
+    #: READER -> MEASURE: no capture draws its section.
+    "b3_admitted": 43,
     #: 38 AT THE ORCHESTRATOR'S MERGE OF LANE Y2'S FOLLOW-UP (2026-09-27), MEASURED:
     #: the P-R settings block itemized into 22 rows (P2-P23; Delete Data EXCLUDED-RULED).
     "b3_refused": 38,
@@ -1420,7 +1466,14 @@ PINNED = {
     #: six PEOPLE-DATA-MITIGATIONS), never fired. Three R rows that were
     #: ADMITTED and gated READER in bucket 3, so they leave it and enter bucket
     #: 1 held by no ruling.
-    "b3_blocked_on_nothing": 4,
+    #: 0 AT LANE S'S OFFLINE FRONTIER (2026-09-28), MEASURED: the five rows
+    #: bucket 3 called blocked on nothing, taken one by one. `M M53`, `N 195`
+    #: and `P S5` (three R rows ADMITTED and gated READER) and `J 107` (the one
+    #: jobs row) GAP -> COVERED-UNFIRED, each built over a capture or on a
+    #: shipped page and never fired, so they leave buckets 3 and 1-by-side and
+    #: enter bucket 1 held by no ruling. `P K1` stays GAP and is re-gated
+    #: READER -> MEASURE: no capture draws its section.
+    "b3_blocked_on_nothing": 0,
     #: BUCKET 1 BY WHAT HOLDS EACH ROW, DERIVED from the census and the
     #: holds in `scripts/ruling_holds.py`, BY THE STATUS OF THE HOLD: standing,
     #: relayed, pending, or none. They sum to `unfired`, and `PINNED_B1_ROWS`
@@ -1523,7 +1576,14 @@ PINNED = {
     #: six PEOPLE-DATA-MITIGATIONS), never fired. Three R rows that were
     #: ADMITTED and gated READER in bucket 3, so they leave it and enter bucket
     #: 1 held by no ruling.
-    "b1_no_ruling": 26,
+    #: 30 AT LANE S'S OFFLINE FRONTIER (2026-09-28), MEASURED: the five rows
+    #: bucket 3 called blocked on nothing, taken one by one. `M M53`, `N 195`
+    #: and `P S5` (three R rows ADMITTED and gated READER) and `J 107` (the one
+    #: jobs row) GAP -> COVERED-UNFIRED, each built over a capture or on a
+    #: shipped page and never fired, so they leave buckets 3 and 1-by-side and
+    #: enter bucket 1 held by no ruling. `P K1` stays GAP and is re-gated
+    #: READER -> MEASURE: no capture draws its section.
+    "b1_no_ruling": 30,
     #: 7 AT THE ORCHESTRATOR'S MERGE OF LANE L7'S P B9 (2026-09-27), MEASURED: P B9
     #: (Premium badge) moved GAP -> COVERED-UNFIRED, released like the intro edits.
     "b1_released": 7,
@@ -1558,13 +1618,34 @@ PINNED = {
     #: People-tab rows move it by +2 / -2. 13 + 34 + 0 + 2 + 0 = 49 = 41 + 8.
     #: 109 AT LANE L8'S MERGE OF MASTER (2026-09-27), MEASURED: `J 69` and
     #: `J 87` returned to GAP, each given a line in jobs-directions.tsv.
-    "jobs_gap": 109,
-    "jobs_dir_r": 41,
+    #: 108 AT LANE S'S OFFLINE FRONTIER (2026-09-28), MEASURED: the five rows
+    #: bucket 3 called blocked on nothing, taken one by one. `M M53`, `N 195`
+    #: and `P S5` (three R rows ADMITTED and gated READER) and `J 107` (the one
+    #: jobs row) GAP -> COVERED-UNFIRED, each built over a capture or on a
+    #: shipped page and never fired, so they leave buckets 3 and 1-by-side and
+    #: enter bucket 1 held by no ruling. `P K1` stays GAP and is re-gated
+    #: READER -> MEASURE: no capture draws its section.
+    "jobs_gap": 108,
+    #: 40 AT LANE S'S OFFLINE FRONTIER (2026-09-28), MEASURED: the five rows
+    #: bucket 3 called blocked on nothing, taken one by one. `M M53`, `N 195`
+    #: and `P S5` (three R rows ADMITTED and gated READER) and `J 107` (the one
+    #: jobs row) GAP -> COVERED-UNFIRED, each built over a capture or on a
+    #: shipped page and never fired, so they leave buckets 3 and 1-by-side and
+    #: enter bucket 1 held by no ruling. `P K1` stays GAP and is re-gated
+    #: READER -> MEASURE: no capture draws its section.
+    "jobs_dir_r": 40,
     #: 60 AT LANE L8'S MERGE OF MASTER (2026-09-27), MEASURED: `J 69` and
     #: `J 87`, both W.
     "jobs_dir_w": 60,
     "jobs_dir_rw": 8,
-    "jobs_admitted": 13,
+    #: 12 AT LANE S'S OFFLINE FRONTIER (2026-09-28), MEASURED: the five rows
+    #: bucket 3 called blocked on nothing, taken one by one. `M M53`, `N 195`
+    #: and `P S5` (three R rows ADMITTED and gated READER) and `J 107` (the one
+    #: jobs row) GAP -> COVERED-UNFIRED, each built over a capture or on a
+    #: shipped page and never fired, so they leave buckets 3 and 1-by-side and
+    #: enter bucket 1 held by no ruling. `P K1` stays GAP and is re-gated
+    #: READER -> MEASURE: no capture draws its section.
+    "jobs_admitted": 12,
     "jobs_refused": 34,
     "jobs_no_address": 0,
     "jobs_needs_session": 2,
@@ -1574,7 +1655,14 @@ PINNED = {
     #: `linkedin_search_jobs(company_id=...)`, refuses a call with no keyword,
     #: so what stands in the way is that guard in the tool -- no ruling, no
     #: boundary edit and no press.
-    "jobs_blocked_on_nothing": 1,
+    #: 0 AT LANE S'S OFFLINE FRONTIER (2026-09-28), MEASURED: the five rows
+    #: bucket 3 called blocked on nothing, taken one by one. `M M53`, `N 195`
+    #: and `P S5` (three R rows ADMITTED and gated READER) and `J 107` (the one
+    #: jobs row) GAP -> COVERED-UNFIRED, each built over a capture or on a
+    #: shipped page and never fired, so they leave buckets 3 and 1-by-side and
+    #: enter bucket 1 held by no ruling. `P K1` stays GAP and is re-gated
+    #: READER -> MEASURE: no capture draws its section.
+    "jobs_blocked_on_nothing": 0,
 }
 
 #: BUCKET 1, ROW BY ROW -- the control that goes RED WHEN A ROW MOVES, and
@@ -1657,6 +1745,14 @@ PINNED_B1_ROWS: dict[str, tuple[str, ...]] = {
         "N 20", "N 23", "N 132",
         "N 45", "N 79", "N 84", "N 85", "N 87", "N 94", "N 172", "N 194",
         "P A8", "P A11", "P A13", "P A17", "P A19", "P A21", "P B9",
+        #: `J 107`, `M M53`, `N 195` and `P S5` entered with lane S's offline
+        #: frontier, 2026-09-28: a keyword-less employer search, the composer's
+        #: suggested people with their presence, Premium's recruiter insights,
+        #: and the two engagement cards -- each built offline over a capture or
+        #: on a shipped page, never fired. NAMES-AT-RUNTIME and PEOPLE-DATA-
+        #: MITIGATIONS permit and shape the two people reads; no ruling holds any
+        #: of the four.
+        "J 107", "M M53", "N 195", "P S5",
     ),
 }
 

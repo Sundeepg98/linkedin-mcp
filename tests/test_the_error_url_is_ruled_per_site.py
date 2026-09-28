@@ -156,6 +156,12 @@ DECLARED: dict[tuple[str, str], tuple[str, int]] = {
     ("dom.py", "read_job_insight_panels"): (WITHHELD, 1),
     ("dom.py", "read_profile_views_insights"): (WITHHELD, 1),
     ("dom.py", "read_search_appearances"): (WITHHELD, 1),
+    # 2026-09-28 (lane S, the offline frontier): two readers outside dom.py,
+    # on the same ruling -- each is handed a page and never a url, and raises
+    # with the failing exception's TYPE name and no url at all (the cold
+    # review asked for the kind every other reader failure has).
+    ("presence.py", "read_suggested_presence"): (WITHHELD, 1),
+    ("recruiter_views.py", "read_recruiter_views"): (WITHHELD, 1),
     # --- ASKED_FOR: the seven tool-side raises ----------------------------
     # `url` is this helper's own parameter, composed by its caller
     # (`linkedin_search_jobs._search_url`) out of BASE_URL and urlencode.
@@ -521,6 +527,14 @@ def test_the_twenty_are_still_twenty():
     The NO_ADDRESS_IN_SCOPE rows are the guard's completeness surface and were
     never part of that count; they are asserted separately so a reader cannot
     confuse the two.
+
+    TWENTY-ONE FROM 2026-09-28, at lane S's merge of master 0867bda (the
+    offline frontier): two readers outside dom.py --
+    ``presence.read_suggested_presence`` and
+    ``recruiter_views.read_recruiter_views`` -- raise under the WITHHELD ruling
+    with the same describer, on top of master's nineteen, so WITHHELD is 13.
+    MEASURED off the merged table, not summed. The name stays: it is the
+    number this file was written about.
     """
     tally: dict[str, int] = {}
     for verdict, count in DECLARED.values():
@@ -530,10 +544,11 @@ def test_the_twenty_are_still_twenty():
     # rows (``escaped_needle``, ``_typeahead_selector_named``) left dom.py with
     # send_message, RETIRED on lane L5's order of 23:36 because it was aimed by
     # a name. 12 -> 11 WITHHELD, 20 -> 19 in all, 12 -> 10 out of scope.
-    assert tally[WITHHELD] == 11, tally
+    # TWENTY-ONE AT LANE S'S MERGE (above): 11 -> 13 WITHHELD.
+    assert tally[WITHHELD] == 13, tally
     assert tally[ASKED_FOR] == 7, tally
     assert tally[PASSTHROUGH] == 1, tally
-    assert tally[WITHHELD] + tally[ASKED_FOR] + tally[PASSTHROUGH] == 19, tally
+    assert tally[WITHHELD] + tally[ASKED_FOR] + tally[PASSTHROUGH] == 21, tally
     assert tally[NO_ADDRESS_IN_SCOPE] == 10, tally
 
 

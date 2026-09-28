@@ -3,10 +3,25 @@
 An MCP server that shows you your own LinkedIn account data as structured tool
 results instead of pages you have to click through.
 
-**Fifty-eight tools ship. Forty-one read. Seventeen write. None is
+**Sixty tools ship. Forty-three read. Seventeen write. None is
 write-shaped and unable to act.**
 
-**THAT LINE READ "Fifty-nine ... Eighteen write" UNTIL LANE L5 RETIRED
+**THAT LINE READ "Fifty-eight ... Forty-one read. Seventeen write" UNTIL
+LANE S'S OFFLINE FRONTIER, 2026-09-28** (its branch read Sixty-one and
+Eighteen write until its merge of master took in L5's retirement, below).
+Two reads arrived whose answer is people, as records marked as other
+members' words. `linkedin_recruiter_insights` reads Premium's recruiter
+insights: how many recruiters viewed your profile, the trend week by week,
+and each recruiter viewer as LinkedIn draws them -- an employer, an industry
+and a time, no link, no name. `linkedin_messaging_presence` reads the people
+the empty composer suggests, each with LinkedIn's own presence word --
+reachable, offline or online. `linkedin_search_appearances` also returns
+your two engagement cards now, and `linkedin_search_jobs` takes a
+`company_id` with an empty keyword for every posting at one employer. Census
+rows `N 195`, `M M53`, `P S5` and `J 107`, COVERED-UNFIRED: built offline
+over captures and never fired.
+
+**AND "Fifty-nine ... Eighteen write" UNTIL LANE L5 RETIRED
 `linkedin_send_message`, LATER ON 2026-09-27** (the orchestrator's order of
 23:36; ruling `PEOPLE-DATA-MITIGATIONS`, mitigation 6: no write is aimed by a
 name). That tool took a NAME and typed it into the composer's recipient
@@ -631,8 +646,10 @@ renumbering. A read that changes something has to say so:
    this, and only when called. **These also load a messaging address, and
    none of them opens a conversation LinkedIn chooses:**
    `linkedin_list_conversations` (the composer's list, which opens none),
-   `linkedin_open_thread` and `linkedin_send_reply` (only the conversation you
-   name by id). Whether any of those loads clears the messaging badge is
+   `linkedin_messaging_presence` (the empty composer's suggestions, which
+   opens none), `linkedin_open_thread` and `linkedin_send_reply` (only the
+   conversation you name by id). Whether any of those loads clears the
+   messaging badge is
    unmeasured.
 4. **Three census surfaces may cost something merely by being opened**, and
    each returns a `cost` field saying what. The two publishing composers can
@@ -958,7 +975,7 @@ linkedin_server/
   cdp_bridge.py              the recovery path: attach to a running Chrome
   dom.py                     the read-only harvesters and the control readers
   shape.py                   pure parsers and the result envelope
-  server.py                  the fifty-eight tools
+  server.py                  the sixty tools
   errors.py
 tests/                       1393 tests, no network, no account
   fixtures/                  frozen LinkedIn markup, scrubbed

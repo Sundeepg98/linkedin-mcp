@@ -508,6 +508,19 @@ def test_the_consumers_of_this_predicate_are_the_ones_that_were_considered():
         # redirect, and whoever takes it should re-open this entry and the
         # matching one in `test_the_source_url_split_was_never_ruled.py`.
         ("server.py", "linkedin_search_appearances"),
+        # A TENTH AND ELEVENTH, 2026-09-28 (lane S, the offline frontier):
+        # `linkedin_recruiter_insights` and `linkedin_messaging_presence`, on
+        # their `source_url`, and considered on the ninth's argument word for
+        # word. Each lands on ONE address this package holds as a constant --
+        # /analytics/recruiter-views/ and the empty composer -- with no
+        # member segment and no argument; nobody has watched either redirect,
+        # so the landing is shaped rather than trusted. The same recorded gap
+        # applies: a bare member token in a query would survive, and each
+        # tool returns `redirected` beside it for that reason. Both
+        # PUBLISH people records in their payload on purpose; this entry is
+        # about the url and says nothing about those.
+        ("server.py", "linkedin_recruiter_insights"),
+        ("server.py", "linkedin_messaging_presence"),
     }, sorted(callers)
 
 

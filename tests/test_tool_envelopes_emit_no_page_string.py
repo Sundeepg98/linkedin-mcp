@@ -95,6 +95,7 @@ from typing import Any, Callable, Optional
 import pytest
 
 from linkedin_server import browser as browser_module
+from linkedin_server import cdp_bridge as cdp_bridge_module
 from linkedin_server import server as server_module
 from tests.plantedpage import (
     COERCION_FAILURE_SIGNATURES,
@@ -418,10 +419,20 @@ def drive_tool(name: str, fn: Callable[..., Any]) -> dict[str, Any]:
         navigations.append(url)
         return url
 
+    def closed_cdp_port() -> str:
+        # NEVER THE CDP PORT. ``linkedin_cdp_status`` probes
+        # http://127.0.0.1:<CDP_PORT>/json/version with urllib, where the live
+        # lane's Chrome listens, and this harness drove it live: one connection
+        # per run, measured 2026-09-28 (lane S). The probe answers here as a
+        # closed port does. ``tests/cdp_port_guard.py`` refuses the next one.
+        raise ConnectionRefusedError("the envelope harness does not probe the CDP port")
+
     original_session = browser_module.BROWSER.session
     original_goto = browser_module.BROWSER.goto
+    original_read_version = cdp_bridge_module._read_version
     browser_module.BROWSER.session = fake_session
     browser_module.BROWSER.goto = fake_goto
+    cdp_bridge_module._read_version = closed_cdp_port
     try:
         out = asyncio.run(asyncio.wait_for(fn(**kwargs), DRIVE_TIMEOUT_S))
         raised = None
@@ -436,6 +447,7 @@ def drive_tool(name: str, fn: Callable[..., Any]) -> dict[str, Any]:
     finally:
         browser_module.BROWSER.session = original_session
         browser_module.BROWSER.goto = original_goto
+        cdp_bridge_module._read_version = original_read_version
 
     if raised is not None:
         return {
