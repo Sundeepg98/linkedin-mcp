@@ -3397,3 +3397,241 @@ again on this section's commit.
 * **The observed read map** the impact gate consults was recorded at
   `5c910e4`, not at this tree; the gate widened to the full suite, so nothing
   here rested on it.
+
+## Live session 4, 2026-09-28
+
+The orchestrator's GO of 17:05 IST, LIVE SESSION 4, under the operator's
+standing instruction ("establish everything yourself, and ask him nothing").
+The session ran from 17:33 to 17:44 on the Chrome the orchestrator had started
+on port 9224 at 12:40 -- the same instance as session 3 -- which this lane
+never started, restarted or closed. **10 of the 40 loads, 0 of the 5 searches.
+NOTHING WAS SENT AND NOTHING CHANGED ON HIS PROFILE: two write attempts, and
+neither landed. Three rows moved to GAP on the orchestrator's ruling, and
+Chrome was still up at the end.**
+
+**THE OPERATOR'S NAMED LIVE-PROOF TARGETS appear nowhere in this repository.**
+They live only in the gitignored identity key; every step below names them by
+role, and a key POSITION, where one is given, is 0-based, as the orchestrator
+counts.
+
+### The go
+
+**CI FIRST.** The order held the session until CI on master `0e1040b` (lane
+L5's first-contact path) was green, checked by the full sha: run 36416346909,
+all 20 jobs passed, at 17:13. The branch then fast-forwarded to it. The
+gitignored skeleton of the first-degree profile in `_state/live2/` was renamed
+to the neutral name master's tracked copy now carries, so that a re-export
+cannot write the old name back; its re-export is byte-equal to master's
+`tests/fixtures/live2/first_degree_profile.html` (174925 bytes). The harness
+tests, the navigation guard, `tests/test_first_contact_message.py` and
+`tests/test_named_profile_live_skeleton.py`: 883 passed, 1 skipped (the
+navigation guard's whole-tree complement, which runs where CI is set).
+
+**THE ATTACH CHECK: CONFOUNDED ONCE, THEN PASS.** At 17:19 it read FAIL-FOLDER,
+0 loads: the library's artifact folders in the OS temp directory counted
+2456, 2461 and 2459 before, during and after, where a pass needs the last to
+equal the first. Lane S's impact gate was running a full suite on the same box
+from 17:15, 8 workers, and at 17:20 six Playwright drivers that were not this
+lane's were alive and two new artifact folders appeared: the count takes every
+process's folders, so the reading proves nothing either way (DERIVED). On a
+quiet box at 17:33 it read PASS: 2455, 2456 and 2455, the download behaviour set
+and reset in order, both answered, the reset reading restored. Making the count
+HERMETIC -- the attach run's own temp directory -- is the orchestrator's
+offline item after this section.
+
+### The session, load by load
+
+    n   time      key (the ledger's)    surface        what it read
+    1   17:33:36  m1_preview            in             M M1: the brother resolved, 1st degree
+    2   17:34:04  m1_confirm            in             M M1: typed, NOT SENT (below)
+    3   17:35:43  edit_read             in             his intro editor, read; the plan
+    4   17:36:44  B9_test_preview       in             P B9's test write: the preview
+    5   17:37:08  B9_test_confirm       mypreferences  his sharing setting, read by the tool
+    6   17:37:30  B9_test_confirm       in             the editor: REFUSED before any press
+    7   17:41:52  notifications         notifications  N 20, N 45: neither kind drawn
+    8   17:42:46  c8                    messaging      C8 pressed once; closed on Escape
+    9   17:43:10  editor_capture        in             the editor's dialog timed; a skeleton
+    10  17:43:39  j121                  jobs           J 121, J 122: re-measured
+
+By surface: in 6, and mypreferences, notifications, messaging and jobs 1 each.
+The closest two loads stood 22.3 s apart. Loads 1 to 6 and 8 to 10 were made by
+the lane's outward runner, which took the harness's ledger, counter and driver
+lock by import, and load 7 by the harness. The ledger heads itself "live4" --
+the label fix of `23a9124`, the first ledger to carry it.
+
+### 2a: M M1 on the first-contact path -- typed, NOT SENT
+
+The preview resolved the brother from the link he supplied: key position 6,
+the family initial, 1st degree. The confirm pressed the owner's one visible
+Message control once, and the composer was drawn in 1.3 s. **LANE L5'S
+FIRST-CONTACT GATE PASSED EVERY LINK OF ITS CHAIN:** one bubble, titled as a
+new message; one recipient box, holding one committed recipient whose name is
+the profile's, compared in the page; the search field empty; the recipient card
+linking his profile; the pressed link naming his member; Send inside the
+bubble. **His words were then TYPED -- 65 of 65 characters, exact -- and the
+send gate REFUSED at `4_fill_not_landed`:** Send read DISABLED the moment after
+the fill. **Send was never pressed**: the receipt counts one click, the Message
+press, and `submit_was_pressed` false. Nothing reached him. The tool's own
+verdict is `unknown`, because its words were left in the composer; its runner
+then closed its own tab, which takes the bubble off the page.
+
+**THE CAUSE, FOR LANE L5 (DERIVED from two captures):** a skeleton of the bubble
+taken through the piercing locator about a second after the refusal, with no
+load and no press, draws Send with NO disabled attribute, where session 3's
+capture of the same empty composer draws it disabled. LinkedIn enabled Send a
+moment after the fill, and the gate read it first: a race. Lane L5's post-fill
+wait for Send is the fix, in flight. The bubble's header also draws exactly one
+control whose text starts "Close", which is what L5's close step aims at.
+**NOT MEASURED:** whether LinkedIn keeps the unsent words as a draft; if it
+does, the next Message press reopens the composer holding them and the gate
+refuses at `8_not_empty`.
+
+**NO THIRD ATTEMPT**, by the order and by the tool's own word on `unknown`.
+**2b, `M M17`: NOT FIRED** -- no thread exists. The census keeps `M M1`
+COVERED-UNFIRED with the fire in its cell (the orchestrator's ruling of 17:48);
+it re-fires in session 5. The bubble's tracked copy:
+`tests/fixtures/live4/m1_refused_bubble_0.html`.
+
+### 3: the edits -- read, planned, refused once before any press, then stopped
+
+**THE EDITOR, READ ONCE (load 3)**, into gitignored state only, with a benign
+test value chosen per row -- benign even if a restore failed -- or the row
+skipped with its reason, as the orchestrator ratified at 17:22:
+
+    row    field             live reading                     plan
+    P B9   the Premium badge on                               test off, restore on
+    P A21  Education         ONE entry of his, and the        test: the unset option
+                             unset option                     (no school in the intro)
+    P A19  Pronouns          SET                              test: unset them
+    P A8   Additional name   empty                            skipped: any value would be
+                                                              a statement he has not made
+    P A11  Country / Region  an input with aria-autocomplete  skipped: see below
+    P A13  City              an input with aria-autocomplete  skipped
+    P A17  Industry          an input with aria-autocomplete  skipped
+
+Each option the two selects would use is one whose text is exactly what the
+tool's `select_option(label=...)` matches, so each original could be put back
+exactly. The three autocomplete fields store the ENTRY picked from LinkedIn's
+list; the one tool, `linkedin_update_profile_field`, types text only, so neither
+a benign test value nor an exact restore can be made through it (measured live
+on the attribute; what LinkedIn would store from typed text is not measured).
+
+**P B9's TEST WRITE WAS REFUSED BEFORE ANY PRESS.** The preview (load 4), then
+the confirm read his sharing setting (load 5) and loaded the editor (load 6),
+and returned `write_attempt_blocked`. Its message is shaped in the receipt, so
+each refusal `writes.perform` can build on that path was built the same way and
+its keyed shape compared: exactly one matches -- "the Premium badge switch was
+not aimed because the intro editor's dialog -- the one holding the one Save
+control -- was not found exactly once. Nothing was pressed." (`0_editor_not_found`).
+No verification load followed, as a refusal before the press predicts. The
+lane's runner stopped the edits on that error by its own rule, and the
+orchestrator ruled at 17:43: stop for the session.
+
+**THE RACE:** the tool reads the dialog the moment the editor's address loads.
+The read of load 3 waited 3 s and found the badge aimable; load 9, read only,
+found the dialog ALREADY drawn when the navigation returned. So the race is
+intermittent, and the refusal cannot say whether it saw 0 dialogs or 2. **WHY
+NO RUNNER-SIDE WAIT:** the orchestrator chose (b) over a wait added in this
+lane's runner, because the edits are writes to his public profile: proven
+through a patch the package lacks, they would be fired again once the package
+carried its own wait -- two rounds of writes for one proof. The package gets the
+bounded wait (the next section's item), and session 5 fires `P B9`, `P A21`
+and `P A19` once, through the package as shipped.
+
+**AND A RULING CORRECTED ITSELF:** at 17:22 the orchestrator ruled the skipped
+rows filed GAP; at 17:48, on the census's own definition (GAP is "no tool and no
+such passage"), it corrected that for `P A8`, which has a working tool and lacks
+only a benign value: `A8` stays COVERED-UNFIRED with the reason in its cell. The
+three autocomplete rows go to GAP -- the one tool cannot make their change.
+
+### Step 5: the notifications and C8
+
+* **`N 20` and `N 45`, A FOURTH READING, NOT SHOWN:** 9 notifications, 5 unread
+  when read, 0 of the invitation kind and 0 of the follow kind.
+* **C8, ALONE, FOR FIX 4'S TRIGGER STEP:** the folder pill found as exactly one
+  match and pressed once by the harness's own `press_and_read`: 4 items, 0
+  message events, and it CLOSED ON ESCAPE again, so the trigger step was not
+  needed and stays proven offline only. C9 and C5 were not pressed. The open
+  menu: `tests/fixtures/live4/compose_c8-open.html`.
+
+### J 121 and J 122: re-measured, and a correction to this record
+
+**A CORRECTION TO THIS RECORD'S OWN "To session 4" LIST** (the session-3
+section): it put `J 121` and `J 122` there as "one posting load, read against
+each bar", and said `J 121`'s percentile "would be one of the two metrics".
+Both cells already recorded a fire on 2026-09-20 over 11 postings, DELIBERATELY
+NOT BANKED: the metrics are applicant counts, `J 121`'s percentile lives behind
+the gated Show Premium Insights control, which the reader does not open, and
+`J 122`'s top-skills half has no key in the reader. The list should have said
+so. With the budget comfortable, the orchestrator allowed the one
+load anyway, as a re-measurement: the same posting session 2 read, at the
+organisation cleared under D-4. `applicant_insights` holds heading, metrics (2),
+seniority (4) and education (4); 0 percentile, rank, skill or "top" words; the
+gated control is drawn. Unchanged, and neither row banks.
+
+### Chrome's end
+
+At 17:44, after the last run, port 9224 was listening, owned by the process the
+orchestrator started at 12:40, and Chrome's DevTools target list -- read over
+HTTP, nothing attached -- held exactly 1 page, a blank tab, and 0 LinkedIn tabs.
+The outward runner's six runs each reported its tab `closed` -- another page
+being open -- and the harness's one loading run closes through the same rule
+without printing its word. Fix 1's keeper path still did not arise.
+
+### The census moves, and the pins
+
+**CORRECTS:** `_audit/_census/profile.md` -- rows `A11`, `A13` and `A17` read COVERED-UNFIRED, a tool that would not refuse; session 4 measured each field an input carrying `aria-autocomplete`, which the one tool can only type into, and each moves to GAP on the orchestrator's ruling.
+
+**THREE ROWS MOVED, COVERED-UNFIRED TO GAP**, each with its paragraph first in its
+cell and a line in `_audit/_census/write-classes.tsv` (R3, queued on a way to
+pick an entry from the list). **A DATED NOTE, NO STATE:** `M M1`, `M M17`,
+`P B9`, `P A21`, `P A19`, `P A8`, `N 20`, `N 45`, `J 121`, `J 122`, and the C8
+rows `M M7`, `M M8`, `M M9`, `M M28`.
+
+**THE COUNTS**, file-wide by `scripts/count_census_states.py`:
+
+    slice      COVERED-UNFIRED   GAP
+    profile       8 -> 5         186 -> 189
+    all four     31 -> 28        588 -> 591
+
+**THE PINS, MEASURED ON THE FINAL TREE AND RE-PINNED, NEVER SUMMED:**
+`scripts/census_completion.py --check` named seven figures and three bucket-1
+rows off their pins, and nothing else:
+
+    adjudicated        182 -> 179
+    delivered_broad    128 -> 125
+    gap                588 -> 591
+    gap_write          378 -> 381
+    unfired             34 -> 31
+    b1_no_ruling        15 -> 12
+    b1_released          7 -> 4
+    PINNED_B1_ROWS     NO_RULING loses P A11, P A13 and P A17
+
+`check_write_classes.py` named the three new write-direction GAP rows as
+unclassed until their lines were added, then read GREEN. The derived views were
+regenerated with `--write` twice and `--check`.
+
+### The tracked copies
+
+4 files under `tests/fixtures/live4/`, written by `--export-fixtures`: the refused
+bubble, the open C8 menu, the notifications, and his intro editor -- the source
+the offline wait's builder is ordered to build from. No settings page was read
+raw this session. The fixture tests count the new directory.
+
+### To session 5
+
+* `P B9`, `P A21` and `P A19`, once, by the ratified pattern, after the editor
+  path's own wait lands; `P A8` while it is empty, never.
+* `M M1`, then `M M17`, after lane L5's post-fill Send wait; the gate refuses at
+  `8_not_empty` if LinkedIn kept a draft. `M M10` still needs an older thread.
+* `M M33` and `M M49` while the unread row stands; `N 20` and `N 45` when the
+  notifications draw either kind; fix 4's trigger step and fix 1's keeper path
+  the first time either arises.
+
+### Scratch, declared disposable
+
+In the lane's scratch folder, none of it tracked: the session-4 outward runner
+and its offline self-check, the refusal matcher (keyed-shape comparison), the
+page-target counter, the census, delta, pin and write-class editors, and the
+CI waiter. The runner took the harness's ledger, counter and driver lock by
+import, so nothing loaded uncounted.

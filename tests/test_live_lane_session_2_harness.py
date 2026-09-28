@@ -614,8 +614,9 @@ def test_a_non_ascii_word_survives_the_copy_as_a_reference() -> None:
 
 
 #: Each session's tracked copies, by directory: session 2's 27 skeletons and
-#: his settings page; session 3's 13 and the same page again.
-LIVE_FIXTURE_COUNTS = {"live2": 28, "live3": 14}
+#: his settings page; session 3's 13 and the same page again; session 4's 4
+#: (no settings page was read raw that session).
+LIVE_FIXTURE_COUNTS = {"live2": 28, "live3": 14, "live4": 4}
 
 
 @pytest.mark.parametrize("session_dir", sorted(LIVE_FIXTURE_COUNTS))

@@ -1137,7 +1137,10 @@ PINNED = {
     #: 182 ON LANE L5'S ORDER OF 2026-09-28 12:32, MEASURED: `N 30`, `N 31`, `N 65`
     #: and `N 103` EXCLUDED-RULED -> GAP, their R4 ground narrowed by
     #: NAMED-PROFILE-READ-BEHIND-A-GRANT (the orchestrator's call).
-    "adjudicated": 182,
+    #: 179 AT THE LIVE LANE'S SESSION 4 (2026-09-28), MEASURED: `P A11`, `P A13`
+    #: and `P A17` COVERED-UNFIRED -> GAP on the orchestrator's ruling -- each
+    #: field an input carrying aria-autocomplete, which the one tool can only type into.
+    "adjudicated": 179,
     #: THE LIVE LANE'S FOUR ROWS, RE-DERIVED AT EACH OF ITS MERGES OF MASTER
     #: (2026-09-24; last over lane S): four rows fired live and banked
     #: (`_audit/2026-09-23-live-lane-session-1.md`). `P G6` COVERED-UNFIRED ->
@@ -1192,7 +1195,10 @@ PINNED = {
     #: `adjudicated`).
     #: 128 AT LANE S'S MERGE OF MASTER 0867bda (2026-09-28), MEASURED on the
     #: merged tree: master's `N 155` with this branch's four.
-    "delivered_broad": 128,
+    #: 125 AT THE LIVE LANE'S SESSION 4 (2026-09-28), MEASURED: `P A11`, `P A13`
+    #: and `P A17` COVERED-UNFIRED -> GAP on the orchestrator's ruling -- each
+    #: field an input carrying aria-autocomplete, which the one tool can only type into.
+    "delivered_broad": 125,
     #: 79 since the live lane's merge (see `adjudicated`): P G6, N 134, P O3
     #: and M C72 COVERED-PROVEN.
     #: 75 and 21 since the bucket-1 merge: `M C41` fired live and moved from
@@ -1246,7 +1252,10 @@ PINNED = {
     #: 588 ON LANE L5'S ORDER OF 2026-09-28 12:32, MEASURED: `N 30`, `N 31`, `N 65`
     #: and `N 103` EXCLUDED-RULED -> GAP, their R4 ground narrowed by
     #: NAMED-PROFILE-READ-BEHIND-A-GRANT (the orchestrator's call).
-    "gap": 588,
+    #: 591 AT THE LIVE LANE'S SESSION 4 (2026-09-28), MEASURED: `P A11`, `P A13`
+    #: and `P A17` COVERED-UNFIRED -> GAP on the orchestrator's ruling -- each
+    #: field an input carrying aria-autocomplete, which the one tool can only type into.
+    "gap": 591,
     #: 18 AT LANE L5'S MERGE OF MASTER 52b55b6 (2026-09-27), MEASURED: `M M1` built (`linkedin_message_from_profile`).
     #: 16 ON LANE L5'S ORDER OF 2026-09-27 23:36, MEASURED:
     #: `linkedin_send_message` RETIRED (aimed by a name): `M M2` to GAP and `N
@@ -1288,7 +1297,10 @@ PINNED = {
     #: COVERED-UNFIRED.
     #: 34 AT THE LIVE LANE'S SESSION 3 (2026-09-28), MEASURED: `J 107`, `M M53`
     #: and `N 194` fired live and banked, each on its own cell's bar.
-    "unfired": 34,
+    #: 31 AT THE LIVE LANE'S SESSION 4 (2026-09-28), MEASURED: `P A11`, `P A13`
+    #: and `P A17` COVERED-UNFIRED -> GAP on the orchestrator's ruling -- each
+    #: field an input carrying aria-autocomplete, which the one tool can only type into.
+    "unfired": 31,
     #: 104 AT THE ORCHESTRATOR'S MERGE OF LANE Y2'S FOLLOW-UP (2026-09-27), MEASURED:
     #: the P-R settings block itemized into 22 rows (P2-P23; Delete Data EXCLUDED-RULED).
     #: 101 AT LANE S'S NAMES ADOPTION (2026-09-27), MEASURED: `N 79`, `N 172`
@@ -1347,7 +1359,10 @@ PINNED = {
     #: 378 ON LANE L5'S ORDER OF 2026-09-27 23:36, MEASURED:
     #: `linkedin_send_message` RETIRED (aimed by a name): `M M2`, a W row,
     #: classed R2 in write-classes.tsv, queued on C-P5.
-    "gap_write": 378,
+    #: 381 AT THE LIVE LANE'S SESSION 4 (2026-09-28), MEASURED: `P A11`, `P A13`
+    #: and `P A17` COVERED-UNFIRED -> GAP on the orchestrator's ruling -- each
+    #: field an input carrying aria-autocomplete, which the one tool can only type into.
+    "gap_write": 381,
     #: All 54 are `jobs.md`, which has no per-row R/W column (56 until the
     #: lane-L3 merge built J 18 and J 39). Not a coincidence
     #: and not a defect in the finder: it is the whole of that slice's still-GAP
@@ -1636,10 +1651,16 @@ PINNED = {
     #: `N 45` fired and stay: not banked, each cell says why.
     #: 15 AT THE LIVE LANE'S SESSION 3 (2026-09-28), MEASURED: `J 107`, `M M53`
     #: and `N 194` fired live and banked, each on its own cell's bar.
-    "b1_no_ruling": 15,
+    #: 12 AT THE LIVE LANE'S SESSION 4 (2026-09-28), MEASURED: `P A11`, `P A13`
+    #: and `P A17` COVERED-UNFIRED -> GAP on the orchestrator's ruling -- each
+    #: field an input carrying aria-autocomplete, which the one tool can only type into.
+    "b1_no_ruling": 12,
     #: 7 AT THE ORCHESTRATOR'S MERGE OF LANE L7'S P B9 (2026-09-27), MEASURED: P B9
     #: (Premium badge) moved GAP -> COVERED-UNFIRED, released like the intro edits.
-    "b1_released": 7,
+    #: 4 AT THE LIVE LANE'S SESSION 4 (2026-09-28), MEASURED: `P A11`, `P A13`
+    #: and `P A17` COVERED-UNFIRED -> GAP on the orchestrator's ruling -- each
+    #: field an input carrying aria-autocomplete, which the one tool can only type into.
+    "b1_released": 4,
     #: D3's enumerated list: FOUR once `M C83` left it, and THREE since
     #: `N 172` left it the same evening on OTHER-MEMBER-IDS-AS-READS -- see
     #: `RULING_BLOCKED_NAMED`. It was printed as "five rows" and pinned
@@ -1802,10 +1823,12 @@ PINNED_B1_ROWS: dict[str, tuple[str, ...]] = {
         "J 121", "J 122", "M M33", "M M49",
         "N 20",
         "N 45", "N 85", "N 172",
-        "P A8", "P A11", "P A13", "P A17", "P A19", "P A21", "P B9",
+        "P A8", "P A19", "P A21", "P B9",
         #: `J 107` and `M M53` entered with lane S's offline frontier,
         #: 2026-09-28, fired at session 2 without banking, and LEFT at
         #: session 3 (2026-09-28), fired again and banked -- with `N 194`.
+        #: `P A11`, `P A13` and `P A17` LEFT at session 4 (2026-09-28) for GAP:
+        #: autocomplete inputs, which the one tool can only type into.
     ),
 }
 

@@ -31,8 +31,8 @@ are listed as `(undated)`; no date is taken from git history, because
 | of those, carrying a `YYYY-MM-DD-` date prefix | 219 |
 | distinct dates | 18 |
 | documents with no level-1 heading | 2 |
-| `CORRECTS:` marker lines | 116 |
-| `CORRECTED BY:` marker lines | 116 |
+| `CORRECTS:` marker lines | 117 |
+| `CORRECTED BY:` marker lines | 117 |
 | distinct declared correction edges | 110 |
 | documents something later corrects | 52 |
 | documents that correct something | 73 |
@@ -720,6 +720,8 @@ document is dead; it says one thing in it was overtaken and names what.
 - CORRECTED BY [2026-09-23-live-lane-session-1.md](2026-09-23-live-lane-session-1.md)
 
   > row `S5` moved COVERED-UNFIRED to COVERED-PROVEN on the first live call of `linkedin_search_appearances`, in the live lane's session 2; row `G7`, already proven, gained the tool-level fire it stood without.
+
+  > rows `A11`, `A13` and `A17` read COVERED-UNFIRED, a tool that would not refuse; the live lane's session 4 measured each field drawn as an input carrying `aria-autocomplete`, which the one tool can only type into, and each moves to GAP on the orchestrator's ruling. Row `A8` stays, its test value having no benign form while it is empty.
 
 - CORRECTED BY [2026-09-23-readers-four-rows.md](2026-09-23-readers-four-rows.md)
 
@@ -1476,6 +1478,8 @@ reach is visible. The quoted reason here is the CORRECTOR's own
 - CORRECTS [_census/profile.md](_census/profile.md)
 
   > row `S5` read COVERED-UNFIRED, never fired; it fired live on `N 132`'s load in session 2 and moves to COVERED-PROVEN.
+
+  > rows `A11`, `A13` and `A17` read COVERED-UNFIRED, a tool that would not refuse; session 4 measured each field an input carrying `aria-autocomplete`, which the one tool can only type into, and each moves to GAP on the orchestrator's ruling.
 
 ### [2026-09-23-readers-four-rows.md](2026-09-23-readers-four-rows.md)
 
