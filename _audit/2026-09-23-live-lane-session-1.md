@@ -3094,7 +3094,8 @@ Message control, the owner's, and none foreign.
   titles. **REFUSED at condition 6** (`6_not_their_conversation`); condition
   7, a recipient box, refuses the same shape next. Nothing typed.
 
-So for a first contact -- no conversation with him exists -- LinkedIn's
+So for a first contact -- no conversation with him was found: session 2's two
+reads of the list drew none, and the press opened none (DERIVED) -- LinkedIn's
 Message press opens a NEW-MESSAGE composer, and the gate, built for a
 conversation headed by his name, refuses it by design. A skeleton of the page
 after that press did not contain the composer: the overlay the gate counted
@@ -3168,10 +3169,10 @@ rendered, 10 placeholders), 0 opened, 0 message events and 1 unread row:
   buttons; 0 message events; **closed on Escape**. Session 2's failure to
   close did not recur, so fix 4's trigger step was not needed, and it stays
   proven offline only.
-* **C9, one READ row's options menu:** 9 items, buttons and links -- Move to
-  Other, one item not among our words, Mark as unread, Star, Mute, Archive,
-  Report / Block, Delete conversation, Manage settings. 0 message events;
-  closed on Escape; nothing inside was pressed.
+* **C9, one READ row's options menu:** 9 items, 8 of role button and 1 of role
+  link with no address -- Move to Other, one item not among our words, Mark as
+  unread, Star, Mute, Archive, Report / Block, Delete conversation, Manage
+  settings. 0 message events; closed on Escape; nothing inside was pressed.
 * **C5, the GIF picker:** opened; no menu container and none of our words
   drawn; closed on Escape.
 
@@ -3357,3 +3358,42 @@ and its self-check, the census, delta and pin editors, the JSON printers that
 print only numbers and closed words, the condition matcher, and the
 window-fronting scripts. The outward runner took the harness's ledger, counter
 and driver lock by import, so nothing loaded uncounted.
+
+### Gates on the final tree, run and NOT run
+
+**THE IMPACT GATE**, `scripts/impact_gate.py --against 5564c15`, in the
+background, offline, sharded by the gate itself (`-n auto --dist loadfile`),
+started once lane L5's full suite on the same box had ended. The diff reaches
+144 of 283 test files, so it widened to the full suite at the gate's 45% line:
+
+    tree       result
+    2a47949    PASS over the full suite, 12246 tests, in 18 min 33 s
+
+**THE CENSUS INSTRUMENTS AND THE THREE `--check`s**, on the same tree, by exit
+code: `census_completion.py --check`, `check_read_addresses.py`,
+`check_write_classes.py`, `ruling_holds.py`, `pin_census_rows.py --check`,
+`measure_pointer_graph.py --check`, `check_jobs_directions.py`,
+`check_gap_rows_on_refused_addresses.py`, `check_cited_shas_resolve.py`,
+`check_contingent_writeoffs_carry_a_reopener.py`,
+`check_census_locators_resolve.py` and the three generators' `--check` all
+exit 0. `check_asserted_names_resolve.py` exits 1 on the same eight findings
+as session 2's, all pinned in other waves' documents and none in this one.
+
+**THE NAVIGATION GUARD WITH CI SET**, whose whole-tree complement is the one
+skip in every local run: `tests/test_navigation_is_never_derived.py`, 683
+passed, none skipped.
+
+**THE IDENTITY GATE:** the pre-commit exact-value gate on both commits of this
+wrap-up, 0 hits each against 226 spellings (16 files, then 10); the shape
+guard, `tests/test_no_committed_identity.py`, inside the full-suite run, and
+again on this section's commit.
+
+**NOT RUN, named:**
+
+* **CI**: nothing pushed, by order. Every number here is this box's Python
+  3.13; the 3.10 cell is CI's.
+* **Anything live after 13:09.** Fix 1's keeper path, fix 4's trigger step,
+  `M M1` and `M M17` wait for session 4, as listed above.
+* **The observed read map** the impact gate consults was recorded at
+  `5c910e4`, not at this tree; the gate widened to the full suite, so nothing
+  here rested on it.
