@@ -10922,7 +10922,7 @@ tests `tests/test_send_message_gate.py`, `tests/test_typeahead_gate.py`,
 
 ### 69.14 A READ THAT SPENDS A VIEW IS CONFIRMED BEFORE IT, AND A READER IS REBUILT OVER THE PAGE THAT REFUSED IT (the read he names, 2026-09-28)
 
-Two findings, and the instruments that hold them.
+Three findings, and the instruments that hold them.
 
 **THE CONFIRMATION MUST PRECEDE WHAT IT CONFIRMS.** The operator permitted a read of a profile he
 names on the mitigation "a single-use confirmation for each view, stating the possible trace". The
@@ -10933,19 +10933,34 @@ confirmed call.
 
 | instrument | what it holds | shown failing |
 |---|---|---|
-| `tests/test_named_profile_read.py` | the preview opens no browser and mints one token; the token reads once, one profile, 120 s; a name never reaches a browser or a grant; one load, through the second door; the record; groups absent; nothing kept; no script names the read; one tool reaches its loader | five controls: a preview that opens a browser, a reusable token, a read of the groups, a probe naming the read, the landing veto removed -- each caught by the real test it plants against |
+| `tests/test_named_profile_read.py` | the preview opens no browser, asks the door first and mints one token; the token reads once, one profile, 120 s, and a token that would be refused opens no browser; a name never reaches a browser or a grant; one load, through the second door; the landing compared by ASCII case only, member ids exactly, an empty landing vetoing; the record; groups absent; nothing kept; no script names the read; one tool reaches its loader | five controls: a preview that opens a browser, a reusable token, a read of the groups, a probe naming the read, the landing veto removed -- each caught by the real test it plants against; and the cold check's cases, 15 of 18 red on the first rebuild's code |
 
 **A READER BUILT OVER AN INVENTED PAGE IS A GUESS UNTIL THE LIVE PAGE REFUSES IT.** The named acts'
 reader matched the Message control by its label, `Message <name>`, measured on people cards; the live
 topcard draws it with no label, twice, one hidden, and every labelled Message control on that page
 is somebody else's. The first live Message refused -- safely -- and the capture it left is the
-fixture now.
+fixture's structure now. ONE SOURCE: the live lane's tracked copy of that capture
+(`tests/fixtures/live2/`) is the live-true source; this lane's page is built from the same capture,
+because the tracked copy reduces the person and the member ids the reader needs.
 
 | instrument | what it holds | shown failing |
 |---|---|---|
-| `scripts/_build_named_profile_skeleton.py` + `tests/test_named_profile_live_skeleton.py` | the live-true fixture is the capture's structure (digest `iefnpejnhfajibng`, printed from the skeleton) and a fixed point of its builder; the builder keeps only LinkedIn's words on the live lane's list | an svg deletion changes the digest; a text edit breaks the fixed point -- AND THAT CONTROL FAILED FIRST: the builder kept any non-shape text, so a hand edit survived its own fixed point |
-| the same file | the old gate's conditions read zero on the live page; the rebuilt reader finds one visible owner's control whichever row is hidden, and refuses both shown | the old reader, run before the rebuild, refused it exactly as live; a hidden control counted reads two |
-| `MEMBER_LINK_INTERFACE_TEXT` in `tests/test_fixtures_hold_only_synthetic_people.py` | a profile link whose only text is "Send" or "Show all" names no one | a planted name, alone or after either word, is still convicted |
+| `scripts/_build_named_profile_skeleton.py` + `tests/test_named_profile_live_skeleton.py` | the built page is the capture's structure (digest `iefnpejnhfajibng`, printed from the skeleton, and the digest of the live lane's TRACKED copy of the same capture) and a fixed point of its builder; the builder keeps only LinkedIn's words on the live lane's list, and a kept attribute only inside its closed vocabulary | an svg deletion changes the digest, of the page and of the source; a text edit breaks the fixed point -- AND THAT CONTROL FAILED FIRST: the builder kept any non-shape text, so a hand edit survived its own fixed point; a canary in `role`, `dir` and `aria-current` breaks it (the cold check found it surviving); a capture that draws an Interests section keeps it (found written as "Example text", which made the `N 178` check unfailable) |
+| the same file | the old gate's conditions read zero on the live page; the rebuilt reader finds one visible owner's control whichever row is hidden, refuses both shown, and refuses the tracked source, which names no one | the old reader, run before the rebuild, refused it exactly as live; a hidden control counted reads two |
+
+**A GATE THAT RE-DERIVES WHAT THE PRESS WILL FIND IS A SECOND OPINION -- AND IT DISAGREED.** The first
+rebuild judged, in the page, what its own `querySelectorAll` found and its own visibility test
+said; the press resolves through Playwright's engine. A cold verifier built pages where the two
+disagree -- `visibility:collapse`, a shadow root, `display:contents`, `content-visibility`, a closed
+`<details>`, a stranger's card nested inside the owner's -- and asked, with a trial click, what the
+strict press would reach. On six the gate passed and the press would have reached a control that is
+not the owner's. The gate now counts and judges exactly the elements the press selector resolves,
+in the press's own engine.
+
+| instrument | what it holds | shown failing |
+|---|---|---|
+| `tests/test_named_profile_adversarial.py` | 12 pages built by script from the two committed ones: the gate's visible count equals the press selector's count in Playwright's engine; the seven that put a stranger's control within reach are refused; where the gate passes, the one element the press resolves is the owner's | 22 of its 34 cases red on the first rebuild's reader |
+| `dom.CONTROL_FACTS_JS` via `evaluate_all` in `dom.read_named_profile`, declared in `tests/test_readonly.py` | ownership judged on the engine's own resolution, one call site, every returned field re-closed by `dom._closed_facts` | the readonly scanner refused the first draft's three call sites until they became one, declared with its argument |
 
     A PREVIEW THAT DOES WHAT IT PREVIEWS IS NOT A PREVIEW. WHEN THE COST IS THE LOAD, THE
     CONFIRMATION COMES BEFORE THE LOAD, AND THE PREVIEW SAYS WHAT IT DID NOT READ.
@@ -10953,8 +10968,18 @@ fixture now.
     A FIXED POINT PROVES NOTHING ABOUT THE VALUES A BUILDER KEEPS VERBATIM. A BUILDER THAT
     PASSES UNKNOWN TEXT THROUGH IS A FIXED POINT OF ANY EDIT; KEEP ONLY WHAT A CLOSED LIST NAMES.
 
+    A GATE MUST ASK THE PRESS'S OWN ENGINE. A SECOND ENGINE'S ANSWER TO "WHICH ONE WILL IT
+    PRESS" IS A PREDICTION, AND A PAGE CAN BE BUILT WHERE THE PREDICTION IS WRONG.
+
+The member-link interface words this lane first narrowed (`MEMBER_LINK_INTERFACE_TEXT`) were
+superseded in the merge of master 02560b0 by the live lane's `MEMBER_LINK_INTERFACE_WORDS`, which
+skips the word and still reads the name after it; see that lane's record.
+
 DECLARED DISPOSABLE: the lane's scratch inspectors of the skeleton (structure, hooks, controls, card
-ids), which printed shapes and counts once to decide the rebuild.
+ids), which printed shapes and counts once to decide the rebuild; the cold verifier's world builder
+and trial-press script, whose worlds live on in `tests/test_named_profile_adversarial.py`; and the
+two measurements that decided the reconciliation -- the composer-link member comparison and the
+tracked-copy digest -- whose second is now a test.
 
 
 ## 70. THE BEST-VERIFIED WRITE NEVER PRESSED SAVE, AND A WRITE AIMED BY ITS CARD (lane-l7-profile-writes, 2026-09-24)
