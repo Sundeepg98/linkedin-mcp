@@ -24,6 +24,10 @@ Chrome of his, no network and no LinkedIn:
   checked property alone), reproduced rather than argued;
 * lane D's LQ-4 filter -- only the download-behaviour lines are kept, and a
   decoy line naming a tab never survives.
+* lane D's LQ-4 count, hermetic -- the attach child counts in a temp directory
+  of its own, so a folder another process leaves in the system temp is never
+  counted, a folder the child leaves still fails, and the directory is emptied
+  only under the session's own state.
 
 Every literal here is invented: the names are the redaction tests' own
 invented ones, the slug is ``tests/test_no_committed_identity.py``'s
@@ -35,7 +39,10 @@ import ast
 import asyncio
 import contextlib
 import json
+import os
+import subprocess
 import sys
+import tempfile
 import time
 from pathlib import Path
 
@@ -1117,6 +1124,238 @@ def test_the_filter_keeps_the_two_sends_and_their_answers_and_nothing_else() -> 
 ])
 def test_lane_d_s_pass_rule(events, before, during, after, restored, error, verdict) -> None:
     assert harness.attach_verdict(events, before, during, after, restored, error) == verdict
+
+
+# --------------------------------------------------------------------------
+# Lane D's LQ-4, HERMETIC: the attach child counts in a temp directory of its
+# own, so a folder another process makes or leaves in the system temp is never
+# counted -- and a folder the child itself leaves still fails.
+# --------------------------------------------------------------------------
+
+#: THE STAND-IN FOR ``--attach-child``, spawned by the harness's own
+#: ``_attach_check`` in place of the real child: no browser, no network, no
+#: page. It waits for the test's go -- by then a FOREIGN artifacts folder sits
+#: where the old count looked -- then does to a temp directory what the real
+#: child's driver does: makes ONE artifacts folder in ITS
+#: ``tempfile.gettempdir()``. It writes the two download-behaviour sends and
+#: their answers to stderr (this file's ``_log()``, decoys and all), prints the
+#: child's report line with its own count, and removes its folder unless told
+#: to leave it.
+_STAND_IN = """\
+import json
+import os
+import sys
+import tempfile
+
+LINES = None
+prefix, mode = sys.argv[1], sys.argv[2]
+sys.stdin.readline()
+own = tempfile.mkdtemp(prefix=prefix)
+for line in LINES:
+    sys.stderr.write(line + "\\n")
+sys.stderr.flush()
+during = sum(1 for name in os.listdir(tempfile.gettempdir()) if name.startswith(prefix))
+print(json.dumps({"during": during, "restored": True, "error": None}), flush=True)
+if mode == "clean":
+    os.rmdir(own)
+"""
+
+
+class _StandInSpawner:
+    """``harness.subprocess`` for one run: the real module in every attribute
+    but ``Popen``, which spawns the stand-in in place of ``--attach-child`` --
+    with the harness's own env, pipes and encoding, recorded -- and REFUSES any
+    other command, so nothing real is ever spawned from these tests. While the
+    stand-in runs, and before it counts, it plants a FOREIGN artifacts folder in
+    ``foreign`` and leaves it there, as a concurrent suite leaves one."""
+
+    def __init__(self, script: Path, mode: str, foreign: Path) -> None:
+        self.script, self.mode, self.foreign = script, mode, foreign
+        self.env: dict[str, str] = {}
+        self.planted: Path | None = None
+
+    def __getattr__(self, name: str):
+        return getattr(subprocess, name)
+
+    def Popen(self, argv, **kwargs):  # noqa: N802 -- the module's own name
+        assert list(argv[-1:]) == ["--attach-child"], argv
+        self.env = dict(kwargs["env"])
+        child = subprocess.Popen(
+            [sys.executable, str(self.script), harness.ARTIFACTS_PREFIX, self.mode],
+            stdin=subprocess.PIPE, **kwargs)
+        try:
+            self.planted = Path(tempfile.mkdtemp(prefix=harness.ARTIFACTS_PREFIX + "foreign-",
+                                                 dir=self.foreign))
+        finally:
+            child.stdin.write("go\n")
+            child.stdin.close()
+        return child
+
+
+@pytest.fixture
+def attach_world(tmp_path, monkeypatch):
+    """THE SYSTEM TEMP, MOVED INTO ``tmp_path``: this process's ``tempfile``
+    and the environment every child inherits both point there, so the count
+    the harness took before its fix reads that directory, and nothing is
+    planted in, or counted from, the real one. ``STATE`` moves too. Yields the
+    moved system temp and a runner: ``run(mode)`` is one ``_attach_check``."""
+    system_temp = tmp_path / "system_temp"
+    system_temp.mkdir()
+    monkeypatch.setattr(tempfile, "tempdir", str(system_temp))
+    for name in ("TMP", "TEMP", "TMPDIR"):
+        monkeypatch.setenv(name, str(system_temp))
+    monkeypatch.setattr(harness, "STATE", tmp_path / "state")
+    script = tmp_path / "attach_child_stand_in.py"
+    script.write_text(_STAND_IN.replace("LINES = None", "LINES = " + repr(_log())), encoding="ascii")
+
+    def run(mode: str) -> tuple[dict, _StandInSpawner]:
+        spawner = _StandInSpawner(script, mode, system_temp)
+        monkeypatch.setattr(harness, "subprocess", spawner)
+        return harness._attach_check(), spawner
+
+    return system_temp, run
+
+
+def test_a_folder_another_process_leaves_in_the_system_temp_is_never_counted(attach_world) -> None:
+    """THE DEFECT, MEASURED LIVE 2026-09-28. A concurrent test suite made and
+    removed artifacts folders in the system temp during the attach, and the
+    count read [2456, 2461, 2459] -> FAIL-FOLDER on a sound attach; on a quiet
+    box it read [2455, 2456, 2455] -> PASS. It could not tell its own folder
+    from another process's. Here a foreign folder is planted in the (moved)
+    system temp while a stand-in that cleans up after itself runs, and is left
+    there: the child counts in a directory of its own, so the verdict is PASS
+    and the foreign folder is still where it was put, uncounted."""
+    system_temp, run = attach_world
+    out, spawner = run("clean")
+    assert (out["verdict"], out["artifacts"]) == ("PASS", [0, 1, 0]), out
+    assert spawner.planted is not None and spawner.planted.is_dir()
+    assert [p.name for p in system_temp.iterdir()] == [spawner.planted.name]
+    own = harness.attach_tmp_dir().resolve()
+    for name in ("TMP", "TEMP", "TMPDIR"):
+        assert Path(spawner.env[name]).resolve() == own, name
+    assert spawner.env["DEBUG"] == "pw:protocol"
+    assert list(own.iterdir()) == []
+
+
+def test_the_control_a_folder_the_child_leaves_behind_still_fails(attach_world) -> None:
+    """THE CONTROL: a count that cannot fail certifies nothing. The same run,
+    foreign folder and all, with a stand-in that LEAVES its own folder reads
+    FAIL-FOLDER -- and the leftover sits in the child's own directory,
+    attributable, while the foreign folder is still uncounted where it was
+    planted."""
+    system_temp, run = attach_world
+    out, spawner = run("leave")
+    assert (out["verdict"], out["artifacts"]) == ("FAIL-FOLDER", [0, 1, 1]), out
+    left = [p.name for p in harness.attach_tmp_dir().iterdir()]
+    assert len(left) == 1 and left[0].startswith(harness.ARTIFACTS_PREFIX), left
+    assert [p.name for p in system_temp.iterdir()] == [spawner.planted.name]
+
+
+def test_each_run_starts_from_an_empty_directory_of_its_own(attach_world) -> None:
+    """A run's leftovers never reach the next run's count: a failed run leaves
+    its folder, a stray file is added beside it, and the next run empties the
+    directory before it counts -- so it reads from zero again, and passes when
+    its own child cleans up."""
+    _system_temp, run = attach_world
+    assert run("leave")[0]["verdict"] == "FAIL-FOLDER"
+    (harness.attach_tmp_dir() / "stray.txt").write_text("x", encoding="ascii")
+    out, _spawner = run("clean")
+    assert (out["verdict"], out["artifacts"]) == ("PASS", [0, 1, 0]), out
+    assert list(harness.attach_tmp_dir().iterdir()) == []
+
+
+def test_emptying_refuses_anything_not_under_the_sessions_own_state(tmp_path, monkeypatch) -> None:
+    """Emptying deletes, so it acts only UNDER the session's own gitignored
+    directory. A directory beside it, that directory itself, a ``..`` that
+    climbs out of it and the directory above it are each REFUSED before
+    anything is deleted -- the canary outside survives. THE CONTROL: under it,
+    the directory is emptied and made."""
+    state = tmp_path / "state"
+    monkeypatch.setattr(harness, "STATE", state)
+    outside = tmp_path / "outside"
+    outside.mkdir()
+    canary = outside / "canary.txt"
+    canary.write_text("kept", encoding="ascii")
+    for refused in (outside, state, state / ".." / "outside", tmp_path):
+        with pytest.raises(ValueError):
+            harness.fresh_attach_tmp(refused)
+    assert canary.read_text(encoding="ascii") == "kept"
+    inside = state / "attach_tmp"
+    (inside / (harness.ARTIFACTS_PREFIX + "old")).mkdir(parents=True)
+    (inside / "stray.txt").write_text("x", encoding="ascii")
+    assert harness.fresh_attach_tmp(inside) == inside.resolve()
+    assert inside.is_dir() and list(inside.iterdir()) == []
+
+
+def _link_directory(link: Path, target: Path) -> None:
+    """A DIRECTORY LINK at ``link`` leading to ``target``: a junction on
+    Windows -- no privilege needed, and ``is_symlink()`` reads False for one --
+    and a symlink elsewhere. Skips when neither can be made."""
+    try:
+        if sys.platform == "win32":
+            import _winapi
+
+            _winapi.CreateJunction(str(target), str(link))
+        else:
+            os.symlink(target, link, target_is_directory=True)
+    except (OSError, AttributeError, ImportError) as exc:
+        pytest.skip("no directory link can be made here: " + type(exc).__name__)
+
+
+def test_a_link_that_leads_out_of_the_sessions_state_is_refused(tmp_path, monkeypatch) -> None:
+    """A PATH IS NOT A PLACE. A link named ``attach_tmp`` under the session's
+    directory is under it by its spelling; resolved, it leads out -- and is
+    refused before anything is deleted, with the canary it leads to intact."""
+    state = tmp_path / "state"
+    state.mkdir()
+    monkeypatch.setattr(harness, "STATE", state)
+    outside = tmp_path / "outside"
+    outside.mkdir()
+    canary = outside / "canary.txt"
+    canary.write_text("kept", encoding="ascii")
+    link = state / "attach_tmp"
+    _link_directory(link, outside)
+    try:
+        with pytest.raises(ValueError):
+            harness.fresh_attach_tmp(link)
+        assert canary.read_text(encoding="ascii") == "kept"
+    finally:
+        if sys.platform == "win32":
+            os.rmdir(link)
+        else:
+            os.unlink(link)
+
+
+class _StartAndStopOnly:
+    """``BROWSER`` for the child's own count: it starts and stops, and attaches
+    to nothing."""
+
+    async def start(self) -> None:
+        return None
+
+    async def stop(self) -> None:
+        return None
+
+
+def test_the_child_counts_only_in_the_attach_directory(tmp_path, monkeypatch, capsys) -> None:
+    """The parent counts in the session's attach directory; the child counts
+    in ITS ``tempfile.gettempdir()``. Were those ever two directories, a child
+    count from a crowded system temp beside two zeros from an empty directory
+    would read as appeared-and-gone for a driver that made nothing. So the
+    child reports a count only when its temp directory IS the attach
+    directory, and no count otherwise -- which the rule reads as FAIL-FOLDER."""
+    monkeypatch.setattr(harness, "BROWSER", _StartAndStopOnly())
+    monkeypatch.setattr(harness.cdp_bridge, "LAST_DOWNLOAD_RESET", {"restored": True})
+    monkeypatch.setattr(harness, "STATE", tmp_path / "state")
+    own = harness.fresh_attach_tmp(harness.attach_tmp_dir())
+    crowded = tmp_path / "crowded"
+    (crowded / (harness.ARTIFACTS_PREFIX + "foreign")).mkdir(parents=True)
+    during = {}
+    for label, temp in (("own", own), ("crowded", crowded)):
+        monkeypatch.setattr(tempfile, "tempdir", str(temp))
+        assert asyncio.run(harness._attach_child()) == 0
+        during[label] = json.loads(capsys.readouterr().out.strip().splitlines()[-1])["during"]
+    assert during == {"own": 0, "crowded": None}
 
 
 # --------------------------------------------------------------------------

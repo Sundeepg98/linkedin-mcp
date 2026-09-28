@@ -94,6 +94,7 @@ import html as html_escape
 import json
 import os
 import re
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -1174,11 +1175,47 @@ DOWNLOAD_METHOD = "Browser.setDownloadBehavior"
 _BEHAVIOURS = ("allowAndName", "allow", "deny", "default")
 _MESSAGE_ID = re.compile(r'"id":\s*([0-9]+)')
 
+#: THE CHILD'S OWN TEMP DIRECTORY, under the session's gitignored state, and
+#: the three names that hand it over. On an attach the driver makes its
+#: artifacts folder in Node's ``os.tmpdir()`` -- TEMP, then TMP, on Windows;
+#: TMPDIR first elsewhere -- and ``tempfile`` reads TMPDIR, TEMP, TMP: with all
+#: three set, the folder is made there and the child counts there. HERMETIC
+#: SINCE 2026-09-28. The count used to be taken in the SYSTEM temp, where a
+#: concurrent test suite made and removed the same kind of folder during an
+#: attach, and read [2456, 2461, 2459] against a quiet box's [2455, 2456, 2455]:
+#: it could not tell its own child's folder from another process's. The only
+#: artifacts folder this directory can hold is its own child's.
+ATTACH_TMP_NAME = "attach_tmp"
+ATTACH_TMP_ENV = ("TMP", "TEMP", "TMPDIR")
 
-def artifacts_count() -> int:
-    """How many of the library's artifact folders sit in the OS temp dir."""
-    folder = Path(tempfile.gettempdir())
-    return sum(1 for entry in folder.iterdir() if entry.name.startswith(ARTIFACTS_PREFIX))
+
+def attach_tmp_dir() -> Path:
+    """The attach child's own temp directory, read off :data:`STATE` at call
+    time -- so whatever moves the session's state moves it too."""
+    return STATE / ATTACH_TMP_NAME
+
+
+def fresh_attach_tmp(folder: Path) -> Path:
+    """``folder``, made EMPTY, and returned resolved.
+
+    Emptying deletes, so it acts only strictly UNDER :data:`STATE`, both
+    resolved: a directory elsewhere, the state directory itself, a ``..`` that
+    climbs out and a link that leads out are each REFUSED -- ``ValueError``,
+    naming no path -- before anything is deleted.
+    """
+    state = STATE.resolve()
+    target = Path(folder).resolve()
+    if state not in target.parents:
+        raise ValueError("REFUSING to empty a directory that is not under this session's own state")
+    if target.exists():
+        shutil.rmtree(target)
+    target.mkdir(parents=True)
+    return target
+
+
+def artifacts_count(folder: Path) -> int:
+    """How many of the library's artifact folders sit in ``folder``."""
+    return sum(1 for entry in Path(folder).iterdir() if entry.name.startswith(ARTIFACTS_PREFIX))
 
 
 def _json_tail(text: str) -> Optional[dict[str, Any]]:
@@ -1266,10 +1303,18 @@ def attach_verdict(events: list[dict[str, Any]], before: int, during: Optional[i
 
 
 async def _attach_child() -> int:
-    """THE CHILD: attach, read, detach. Opens no tab and loads no page."""
+    """THE CHILD: attach, read, detach. Opens no tab and loads no page.
+
+    It counts in ITS OWN temp directory -- the one its parent handed it
+    through :data:`ATTACH_TMP_ENV` -- and only when that directory IS the
+    session's attach directory; otherwise it reports no count. The parent's
+    two counts are taken in the attach directory, and a count from anywhere
+    else beside them would be read against the wrong place.
+    """
+    own = Path(tempfile.gettempdir())
     await BROWSER.start()
     try:
-        during = artifacts_count()
+        during = artifacts_count(own) if own.resolve() == attach_tmp_dir().resolve() else None
         reset = dict(cdp_bridge.LAST_DOWNLOAD_RESET)
     finally:
         await BROWSER.stop()
@@ -1281,10 +1326,20 @@ async def _attach_child() -> int:
 
 def _attach_check() -> dict[str, Any]:
     """Run the attach in a CHILD with the driver's protocol log on, and keep
-    only the download-behaviour lines of its stderr, as they arrive."""
-    before = artifacts_count()
+    only the download-behaviour lines of its stderr, as they arrive.
+
+    HERMETIC: the child runs with :data:`ATTACH_TMP_ENV` naming a fresh, EMPTY
+    directory of its own, and both counts here are taken in that directory --
+    so the only artifacts folder that can appear in it is the child's driver's,
+    and a folder another process makes or leaves in the system temp is never
+    counted.
+    """
+    tmp = fresh_attach_tmp(attach_tmp_dir())
+    before = artifacts_count(tmp)
     env = dict(os.environ)
     env["DEBUG"] = "pw:protocol"
+    for name in ATTACH_TMP_ENV:
+        env[name] = str(tmp)
     child = subprocess.Popen(
         [sys.executable, str(Path(__file__).resolve()), "--attach-child"],
         env=env, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
@@ -1295,7 +1350,7 @@ def _attach_check() -> dict[str, Any]:
         kept.feed(text)
     child_out = child.stdout.read()
     child.wait(timeout=120)
-    after = artifacts_count()
+    after = artifacts_count(tmp)
     lines_out = child_out.strip().splitlines()
     report = _json_tail(lines_out[-1]) if lines_out else None
     during = report.get("during") if isinstance(report, dict) else None
