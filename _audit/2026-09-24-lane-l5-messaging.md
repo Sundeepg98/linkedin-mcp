@@ -3074,11 +3074,11 @@ it finished green, 20 of 20 jobs. Then the merge, keeping the history.
   lane's session-3 note, appended whole. Each note is the count a blocker in the cell asks about:
   `31`'s, one mutual-connections phrase on the named read's first render; `103`'s, no 'People also
   viewed' and one 'People you may know'. Row `30` is this lane's; master had not touched it.
-- `network.md`'s counts section: the live lane's correction line and session-3 delta first -- they
+- `network.md`'s counts section: the live lane's back-pointer line and session-3 delta first -- they
   follow the session-2 delta above them -- then this lane's delta of 12:32.
 - `_audit/_census/messaging-and-content.md` row `M1`: master's cell with its session-3 note,
   carrying this lane's rename of the tracked copy's path.
-- MERGED CLEAN, THEN CORRECTED: master's harness test added a parametrize naming the old file --
+- MERGED CLEAN, THEN RENAMED: master's harness test added a parametrize naming the old file --
   it would have put the relation into a test id -- and a docstring's role word; both now say
   first-degree. No tracked file names the old file. `_probe_live_lane_session_2.py` and
   `census_completion.py` merged clean.
