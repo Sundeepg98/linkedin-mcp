@@ -360,7 +360,7 @@ async def main() -> int:
         # THE PAGE, NEVER THE CONTEXT: the context is his signed-in session.
         if _own_page is not None:
             try:
-                await _own_page.close()
+                await BROWSER.close_tab(_own_page)
                 print("    tab closed")
             except Exception as error:  # noqa: BLE001
                 print("    tab NOT closed: %s" % type(error).__name__)

@@ -578,7 +578,7 @@ async def main() -> None:
             # signed-in session. Leaking the page is what degraded attach for
             # a whole fleet on 2026-09-05.
             try:
-                await page.close()
+                await BROWSER.close_tab(page)
                 print("\n    page closed: %r" % page.is_closed())
             except Exception as exc:  # noqa: BLE001
                 print("\n    page close failed: %s" % type(exc).__name__)

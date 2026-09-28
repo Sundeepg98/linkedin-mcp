@@ -99,6 +99,86 @@ def _headless() -> bool:
     return os.environ.get(_HEADLESS_ENV, "").strip().lower() in {"1", "true", "yes"}
 
 
+#: What :func:`close_tab_keeping_the_window` did, one closed word each.
+TAB_CLOSED = "closed"
+TAB_CLOSED_AFTER_A_KEEPER = "closed_after_a_keeper"
+TAB_KEPT_THE_LAST = "kept_the_last_tab"
+TAB_KEPT_UNCOUNTABLE = "kept_uncountable"
+TAB_ALREADY_CLOSED = "already_closed"
+TAB_NONE = "no_tab"
+
+
+def _other_open_pages(page: Any, context: Any) -> Optional[int]:
+    """How many OTHER pages in ``context`` are open, or None if it cannot say."""
+    try:
+        return sum(1 for other in list(context.pages) if other is not page and not other.is_closed())
+    except Exception as exc:  # noqa: BLE001 - uncountable is an answer, and a safe one
+        logger.debug("counting open pages raised %s", type(exc).__name__)
+        return None
+
+
+async def close_tab_keeping_the_window(page: Any, context: Any = None) -> str:
+    """Close a tab this process opened -- NEVER the browser's last one. Never raises.
+
+    FIX 1 OF THE LIVE LANE'S SESSION 2, 2026-09-28. In ATTACH mode the
+    browser is HIS: a Chrome this server did not start and may not end, and
+    closing the last tab of its last window ends it. That morning the last
+    run's teardown closed its own tab and disconnected at 08:48:45; at
+    08:49:16 nothing listened on the port and no process held the profile.
+    That our tab was the last is plausible, not proven -- and it is now
+    impossible, whichever it was:
+
+    * our tab is closed only while ANOTHER open page remains in its context;
+    * when ours is the last, a KEEPER tab (a blank page) is opened first, and
+      ours is closed only once the keeper counts as open;
+    * when no keeper can be opened, or the context's pages cannot be counted,
+      ours is LEFT OPEN and the caller only disconnects: a tab of ours left in
+      his browser is a nuisance he can close; a browser ended under him is
+      not ours to restart.
+
+    WHAT IT COUNTS: the open pages of the tab's own browser CONTEXT --
+    ``context``, else ``page.context`` -- which in attach mode is his
+    browser's default context, every window of it. So it never closes the
+    tab whose closing would end the browser. A window holding nothing but our
+    tab, beside other windows of his, closes with it; a keeper cannot be
+    placed in a chosen window through Playwright, so the rule is the
+    context's, stated here rather than implied.
+
+    Every caller in this package and in ``scripts/`` closes a page through
+    here (:meth:`LinkedInBrowser.close_tab`), and
+    ``tests/test_a_probe_closes_its_own_tab.py`` refuses any other page
+    close. Returns one of the ``TAB_*`` words.
+    """
+    if page is None:
+        return TAB_NONE
+    try:
+        if page.is_closed():
+            return TAB_ALREADY_CLOSED
+        if context is None:
+            context = page.context
+    except Exception as exc:  # noqa: BLE001 - a page we cannot read is not closed
+        logger.debug("reading our tab raised %s", type(exc).__name__)
+        return TAB_KEPT_UNCOUNTABLE
+    others = _other_open_pages(page, context)
+    if others is None:
+        return TAB_KEPT_UNCOUNTABLE
+    word = TAB_CLOSED
+    if others == 0:
+        try:
+            await context.new_page()
+        except Exception as exc:  # noqa: BLE001 - no keeper: ours stays
+            logger.debug("opening a keeper tab raised %s", type(exc).__name__)
+            return TAB_KEPT_THE_LAST
+        if not _other_open_pages(page, context):
+            return TAB_KEPT_THE_LAST
+        word = TAB_CLOSED_AFTER_A_KEEPER
+    try:
+        await page.close()
+    except Exception as exc:  # noqa: BLE001 - shutdown noise
+        logger.debug("closing our tab raised %s", type(exc).__name__)
+    return word
+
+
 class LinkedInBrowser:
     """A single persistent-profile Chromium, started lazily, closed when idle."""
 
@@ -308,6 +388,13 @@ class LinkedInBrowser:
         """Close the browser and release the profile lock. Never raises."""
         await self._teardown()
 
+    async def close_tab(self, page: Any) -> str:
+        """Close ``page``, a tab of ours, never as the browser's last one
+        (:func:`close_tab_keeping_the_window`, in the page's own context).
+        What a probe calls on the page :meth:`session` gave it. Never
+        raises; returns one of the ``TAB_*`` words."""
+        return await close_tab_keeping_the_window(page)
+
     async def _teardown(self) -> None:
         context, pw = self._context, self._pw
         client, own_page = self._cdp_client, self._own_page
@@ -324,14 +411,13 @@ class LinkedInBrowser:
 
         if client is not None:
             # ATTACH mode. The context belongs to the operator's browser, so
-            # closing it would close HIS window. Close only the tab we opened,
-            # then drop the CDP connection: measured on this machine, the
+            # closing it would close HIS window. Close only the tab we opened
+            # -- and never as the browser's last (close_tab_keeping_the_window)
+            # -- then drop the CDP connection: measured on this machine, the
             # client's close() disconnects and leaves Chrome serving.
             if own_page is not None:
-                try:
-                    await own_page.close()
-                except Exception as exc:  # pragma: no cover - shutdown noise
-                    logger.debug("closing our tab raised %s", type(exc).__name__)
+                word = await close_tab_keeping_the_window(own_page, context)
+                logger.debug("our tab at teardown: %s", word)
             try:
                 await client.close()
             except Exception as exc:  # pragma: no cover - shutdown noise

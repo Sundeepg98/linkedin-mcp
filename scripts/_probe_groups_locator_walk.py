@@ -272,7 +272,7 @@ async def main() -> int:
         return 1
     finally:
         if tab is not None and not tab.is_closed():
-            await tab.close()
+            await BROWSER.close_tab(tab)
         print("    tab closed:",
               tab.is_closed() if tab is not None else "no tab")
 

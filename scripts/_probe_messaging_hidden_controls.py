@@ -242,7 +242,7 @@ async def main() -> None:
             await _run(page)
         finally:
             try:
-                await page.close()
+                await BROWSER.close_tab(page)
                 print("\n    page closed: %r" % page.is_closed())
             except Exception as exc:  # noqa: BLE001
                 print("\n    page close failed: %s" % type(exc).__name__)

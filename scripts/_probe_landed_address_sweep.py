@@ -309,7 +309,7 @@ async def main() -> int:
     finally:
         # THE PAGE, NEVER THE CONTEXT. The context is his signed-in browser.
         if _own_page is not None and not _own_page.is_closed():
-            await _own_page.close()
+            await BROWSER.close_tab(_own_page)
 
     print("\n=== RESULT")
     print(f"    addresses measured beside the control : {measured}")

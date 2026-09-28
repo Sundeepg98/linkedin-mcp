@@ -383,7 +383,7 @@ async def main() -> int:
         # THE PAGE, NEVER THE CONTEXT. The context is his own signed-in browser
         # session and a dozen waves share it.
         if _own_page is not None and not _own_page.is_closed():
-            await _own_page.close()
+            await BROWSER.close_tab(_own_page)
         print("\n    tab closed:",
               _own_page.is_closed() if _own_page is not None else "no tab opened")
 

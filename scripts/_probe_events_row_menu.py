@@ -222,7 +222,7 @@ async def main() -> int:
         if page is not None:
             try:
                 if not page.is_closed():
-                    await page.close()
+                    await BROWSER.close_tab(page)
                 # PRESENCE, NOT A DELTA. A page count off /json/list is a
                 # delta over a pool a dozen waves share -- measured 26 -> 27
                 # -> 27 -> 30 across three runs with this close firing -- so

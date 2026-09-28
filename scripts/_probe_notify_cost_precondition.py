@@ -197,7 +197,7 @@ async def main() -> int:
         # signed-in browser. Guarded because a failed attach never bound one.
         if page is not None:
             try:
-                await page.close()
+                await BROWSER.close_tab(page)
                 print("\n   [page closed]")
             except Exception as exc:  # noqa: BLE001
                 print("\n   [page close failed: %s]" % type(exc).__name__)

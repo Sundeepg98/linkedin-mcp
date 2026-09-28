@@ -389,7 +389,7 @@ async def _run() -> int:
                 # reports rather than raises if it cannot -- a cleanup step that
                 # masks the real error is worse than one that fails.
                 try:
-                    await page.close()
+                    await BROWSER.close_tab(page)
                     print("    tab: closed the page this probe opened")
                 except Exception as exc:  # noqa: BLE001 - reported, never raised
                     print(f"    tab: could NOT close: {type(exc).__name__}: {exc}")

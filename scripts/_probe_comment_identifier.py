@@ -523,7 +523,7 @@ async def main() -> None:
         # cannot prove a tab closed -- a dozen waves share this Chrome -- so
         # ``is_closed()`` is read, which is the presence reading.
         try:
-            await page.close()
+            await BROWSER.close_tab(page)
             print(f"\n  page closed: {page.is_closed()}")
         except Exception as exc:  # pragma: no cover - cleanup only
             print(f"\n  page close failed: {type(exc).__name__}")

@@ -113,7 +113,7 @@ async def main() -> int:
                 # close by NAME, so a clean probe using any other variable
                 # reads as a leak and pushes a pin that may only go down.
                 page = own
-                await page.close()
+                await BROWSER.close_tab(page)
         except Exception as exc:  # noqa: BLE001 - shutdown noise only
             print("    closing our tab raised " + type(exc).__name__)
         try:

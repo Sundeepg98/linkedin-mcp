@@ -342,7 +342,7 @@ async def main():
                           % job["needle"][MUST_BE_ABSENT_AT])
 
         finally:
-            await page.close()
+            await BROWSER.close_tab(page)
             print()
             print("page closed: %s" % page.is_closed())
 
