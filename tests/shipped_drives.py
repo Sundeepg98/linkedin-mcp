@@ -691,7 +691,7 @@ async def read_premium_badge_as_shipped(page: Any) -> Any:
 
 
 # ---------------------------------------------------------------------------
-# TO THE PRESS: press:disclose, reveal:reveal, share_link:copy_own_post_link
+# TO THE PRESS: press:disclose, share_link:copy_own_post_link
 # ---------------------------------------------------------------------------
 
 
@@ -769,32 +769,6 @@ async def disclose_to_the_press(page: Any) -> Any:
     )
 
 
-#: The show-more button's text, as both profile-views captures draw it.
-SHOW_MORE_LABEL = "Show more analytics"
-
-#: The attributes whose presence makes ``reveal`` skip a button.
-_REVEAL_STATE_ATTRIBUTES = ("aria-expanded", "aria-haspopup", "aria-controls")
-
-
-class _TheShowMoreButton(_Over):
-    async def get_attribute(self, name: str, **kwargs: Any) -> Any:
-        if name in _REVEAL_STATE_ATTRIBUTES:
-            return None
-        return await self._wrapped.get_attribute(name, **kwargs)
-
-    async def inner_text(self, **kwargs: Any) -> Any:
-        return SHOW_MORE_LABEL
-
-
-class _ItsButtons(_Over):
-    """``main``'s buttons: the planted count, the show-more button the one
-    the planted page draws."""
-
-    def nth(self, index: int) -> Any:
-        button = self._wrapped.nth(index)
-        return _TheShowMoreButton(button) if index == 0 else button
-
-
 class _ItsMain(_Over):
     def __init__(self, wrapped: Any, selector: str, answer: Callable[[Any], Any]) -> None:
         super().__init__(wrapped)
@@ -804,48 +778,6 @@ class _ItsMain(_Over):
     def locator(self, selector: Any, *args: Any, **kwargs: Any) -> Any:
         inner = self._wrapped.locator(selector, *args, **kwargs)
         return self._answer(inner) if selector == self._selector else inner
-
-
-class _TheRevealPage(_TheProfileViewsPage):
-    def locator(self, selector: Any, *args: Any, **kwargs: Any) -> Any:
-        from linkedin_server import reveal
-
-        located = self._wrapped.locator(selector, *args, **kwargs)  # the read, counted
-        if selector == reveal.CANDIDATE_SCOPE:
-            return _ItsMain(located, "button", _ItsButtons)
-        return located
-
-
-async def reveal_to_the_press(page: Any) -> Any:
-    """``reveal.reveal`` as ``linkedin_who_viewed_me(show_more_analytics=True)``
-    presses "Show more analytics" -- the one decided reveal, priced by the
-    server's own counter reader -- on the page the tool loads.
-
-    THE SIGNATURE DRIVE: ``check_reveal`` refuses the synthetic key before any
-    read.
-
-    AS FAR AS THE PRESS: the address, the counters, and exactly one visible
-    ``main button`` with none of the three state attributes whose text is
-    "show more analytics"; then the click, refused.
-
-    THE FIXTURE: both profile-views captures draw that button as a bare
-    ``<button>`` ("Show more analytics", no state attribute) and the headline.
-    They are the content section only, with no ``<main>``: that the button
-    sits in ``main`` rests on ``reveal.DECIDED_REVEALS``'s recorded live
-    measurement, which is why the ``main button`` COUNT is left the planted
-    page's own rather than claimed.
-    """
-    from linkedin_server import reveal, server
-
-    _drawn("profile_views_analytics.html", SHOW_MORE_LABEL)
-    at = _TheRevealPage(page, _profile_views_address(), _captured_headline())
-    counters = await server._profile_views_press_counters(at)
-    return await reveal.reveal(
-        at,
-        key=server.PROFILE_VIEWS_REVEAL,
-        read_counters=counters,
-        reading=server.PROFILE_VIEWS_MENU_READING,
-    )
 
 
 #: ``tests/fixtures/synthetic/own_post_menu.html``: ``main [aria-expanded]``
@@ -1085,95 +1017,315 @@ async def read_self_owned_editor_values_as_shipped(page: Any) -> Any:
     )
 
 
-#: ``tests/test_profile_views_more.py``'s synthetic revealed page: in
-#: ``main``, a first heading, then "Highlights" (three value/label pairs) and
-#: "Details" (a sub-heading and three "<name> (<n>%)" entries). The LABELS and
-#: the sub-heading are the page's closed vocabulary, answered as drawn; every
-#: VALUE and NAME is page text, so here it is the plant.
-_REVEALED_HEADINGS = (None, "Highlights", "Details")
-_REVEALED_LINES = {
-    "Highlights": ["Highlights", PLANT, "Top location", PLANT, "Top industry", PLANT, "Top company"],
-    "Details": ["Details", "Companies", PLANT + " (13.3%)", PLANT + " (6.7%)", PLANT + " (6.7%)"],
+# ---------------------------------------------------------------------------
+# THE PROFILE-VIEWS PAGE, AS ITS SKELETONS DRAW IT (the order of 2026-09-28 04:25)
+# ---------------------------------------------------------------------------
+#
+# Four committed skeletons of /analytics/profile-views/, each built by
+# ``scripts/_build_profile_views_skeleton.py`` from one capture of the live
+# lane (``_audit/2026-09-23-live-lane-session-1.md``): LinkedIn's interface
+# words kept, every other member's text reduced to SHAPE (every letter x or
+# X). The drives read them through ``tests.skeleton_page``: a double that
+# answers locators from the parsed skeleton, counts each page read on the
+# planted page beneath it, answers another member's shaped text as the plant,
+# and leaves every script it has no stand-in for to the planted page.
+
+#: The skeletons, by the state of the page each capture shows, and the
+#: capture each was built from.
+VIEWS_CLOSED = "synthetic/profile_views_closed.html"
+VIEWS_PILL_OPEN = "synthetic/profile_views_pill_open.html"
+VIEWS_VERIFY = "synthetic/profile_views_verify.html"
+VIEWS_REVEALED = "synthetic/profile_views_revealed.html"
+VIEWS_SOURCES: dict[str, str] = {
+    VIEWS_CLOSED: "pv-closed.html -- Entry 3's load, every filter pill closed",
+    VIEWS_PILL_OPEN: "pv-open-pill-1.html -- the same load, the Interesting viewers pill open",
+    VIEWS_VERIFY: "pv_verify.html -- Entry 7's fresh load, the switch run's rows and headline",
+    VIEWS_REVEALED: "pv_switch.html -- Entry 7's switch run at its end, Show more analytics pressed",
 }
 
+#: What each drive rests on, checked in the skeleton before the reader runs:
+#: its builder's header, and the state it is named for.
+VIEWS_NEEDLES: dict[str, tuple[str, ...]] = {
+    VIEWS_CLOSED: ("Interesting viewers", 'aria-expanded="false"', ">Show more analytics<"),
+    VIEWS_PILL_OPEN: (
+        'aria-expanded="true"', 'aria-label="Works at a company you follow"', ">Show results<",
+    ),
+    VIEWS_VERIFY: (">Show more analytics<", ">Profile viewers<"),
+    VIEWS_REVEALED: (">Highlights<", ">Details<", ">Companies<"),
+}
 
-class _TheRevealedSection(_Over):
-    """A heading's ancestor, whose text is its section's lines."""
+#: The ruled switch and the decided reveal, as the tool presses them.
+SWITCH_KEY = "interesting_viewers_verified"
+REVEAL_KEY = "profile_views_show_more_analytics"
 
-    def __init__(self, wrapped: Any, lines: list[str]) -> None:
-        super().__init__(wrapped)
-        self._lines = lines
+#: EACH PRESS A DRIVE STANDS IN FOR, with its source (ruling (2) of
+#: 2026-09-28: "The leak harness's page double may stand in for a click by
+#: moving the fixture to the state the real page draws after that click ...
+#: Record each transition's source (which capture shows the after-state). A
+#: transition no capture shows stays not driven."). ``None``: no capture shows
+#: the page after that press, so the double refuses it, as the planted page
+#: refuses every press, and the drive ends there.
+TRANSITIONS: tuple[tuple[str, str, Optional[str]], ...] = (
+    ("the Interesting viewers pill", VIEWS_CLOSED, VIEWS_PILL_OPEN),
+    ("its 'verified' option", VIEWS_PILL_OPEN, None),
+    ("Show more analytics", VIEWS_VERIFY, VIEWS_REVEALED),
+)
 
-    def locator(self, selector: Any, *args: Any, **kwargs: Any) -> Any:
-        return _TheRevealedSection(self._wrapped.locator(selector, *args, **kwargs), self._lines)
-
-    async def inner_text(self, **kwargs: Any) -> str:
-        return "\n".join(self._lines)
-
-
-class _TheRevealedHeading(_Over):
-    def __init__(self, wrapped: Any, title: str) -> None:
-        super().__init__(wrapped)
-        self._title = title
-
-    async def inner_text(self, **kwargs: Any) -> str:
-        return self._title
-
-    def locator(self, selector: Any, *args: Any, **kwargs: Any) -> Any:
-        inner = self._wrapped.locator(selector, *args, **kwargs)
-        return _TheRevealedSection(inner, _REVEALED_LINES[self._title])
-
-
-class _TheRevealedHeadings(_Over):
-    async def count(self) -> int:
-        return len(_REVEALED_HEADINGS)
-
-    def nth(self, index: int) -> Any:
-        heading = self._wrapped.nth(index)
-        title = _REVEALED_HEADINGS[index] if index < len(_REVEALED_HEADINGS) else None
-        return heading if title is None else _TheRevealedHeading(heading, title)
+#: A run of shaped words: the builder turned every letter of another member's
+#: text into x or X.
+_SHAPED_RUN = re.compile(r"[Xx]+(?:[ ][Xx]+)*")
 
 
-#: The headings ``read_profile_views_more_insights`` looks for inside ``main``.
-_ANY_HEADING = "h1, h2, h3, h4, h5, h6, [role=heading]"
+def _shaped_as_plant(text: str) -> str:
+    """ANOTHER MEMBER'S TEXT IS THE PLANT. A text whose every letter is x or X
+    is one the skeleton builder reduced to shape -- a viewer's name, a
+    headline, an employer; the double answers each run of shaped words with
+    the plant, keeping the digits and punctuation around it ("Xxxxx (13.3%)"
+    -> "<plant> (13.3%)"). Interface words, kept verbatim, pass through."""
+    letters = [ch for ch in text if ch.isalpha()]
+    if letters and all(ch in "xX" for ch in letters):
+        return _SHAPED_RUN.sub(PLANT, text)
+    return text
 
 
-class _TheRevealedPage(_Over):
-    def locator(self, selector: Any, *args: Any, **kwargs: Any) -> Any:
-        located = self._wrapped.locator(selector, *args, **kwargs)  # the read, counted
-        if selector == "main":
-            return _ItsMain(located, _ANY_HEADING, _TheRevealedHeadings)
-        return located
+def _views_document(name: str) -> Any:
+    """One skeleton, parsed -- once the file is shown to still be its
+    builder's output in the state it is named for; otherwise this RAISES."""
+    from tests import skeleton_page
+
+    return skeleton_page.parse(
+        _drawn(name, "_build_profile_views_skeleton.py", *VIEWS_NEEDLES[name])
+    )
+
+
+def _collapsed(element: Any) -> str:
+    from tests import skeleton_page
+
+    return " ".join(skeleton_page.text_of(element).split())
+
+
+_BARE_NUMBER = re.compile(r"^[0-9][0-9,.]*%?$")
+
+
+def _headline_metrics(page: Any, arg: Any = None) -> PageAnswer:
+    """``dom.PROFILE_VIEWS_INSIGHTS_JS``'s ``metrics``, from the skeleton: each
+    ``<p>`` whose text is a bare number followed by a sibling ``<p>`` holding
+    text -- "paragraph pairs where the first is a bare number", as the
+    reader's docstring names them -- in document order, inside ``main``; a
+    ``<p>`` holding only a space between them is stepped over, as the capture
+    draws one there. The label goes through the double's text answer, so a
+    shaped label is the plant. Every other key is the planted page's own."""
+    from tests import skeleton_page
+
+    mains = skeleton_page.select(page.document, "main")
+    scope = mains[0] if mains else page.document
+    metrics = []
+    for paragraph in skeleton_page.select(scope, "p"):
+        if not _BARE_NUMBER.match(_collapsed(paragraph)):
+            continue
+        siblings = [child for child in paragraph.parent.children if hasattr(child, "tag")]
+        after = [el for el in siblings[siblings.index(paragraph) + 1:] if _collapsed(el)]
+        if after and after[0].tag == "p":
+            metrics.append({
+                "value": _collapsed(paragraph),
+                "label": _shaped_as_plant(_collapsed(after[0])),
+            })
+    return _planted_answer_with(metrics=metrics)
+
+
+class _ViewsTransitions:
+    """THE CLICK STAND-IN (ruling (2) of 2026-09-28), over :data:`TRANSITIONS`.
+
+    A press the capture record shows the page after moves the double to that
+    capture's skeleton; any other press is refused, as the planted page
+    refuses every press. The controls are recognised by the readers' OWN
+    constants: the pill by ``view_switch``'s entry caption, the reveal's
+    button by ``reveal``'s decided phrase. ``presses`` records each press and
+    what the double did, so a test can say which press a drive stopped at."""
+
+    def __init__(self, documents: dict[str, Any]) -> None:
+        self._documents = documents
+        self.presses: list[str] = []
+
+    def __call__(self, locator: Any, page: Any) -> None:
+        from linkedin_server import reveal, view_switch
+
+        from tests.plantedpage import NavigationAttempted
+
+        element = locator.element()
+        said = view_switch.normalised(_collapsed(element))
+        switch = view_switch.view_switch(SWITCH_KEY) or {}
+        decided = reveal.decided_reveal(REVEAL_KEY) or {}
+        if (
+            page.document is self._documents[VIEWS_CLOSED]
+            and "aria-expanded" in element.attrs
+            and said == switch.get("pill_caption")
+        ):
+            self.presses.append(TRANSITIONS[0][0])
+            page.document = self._documents[VIEWS_PILL_OPEN]
+            return
+        if (
+            page.document is self._documents[VIEWS_VERIFY]
+            and element.tag == "button"
+            and said == decided.get("phrase")
+        ):
+            self.presses.append(TRANSITIONS[2][0])
+            page.document = self._documents[VIEWS_REVEALED]
+            return
+        self.presses.append("refused")
+        raise NavigationAttempted("locator.click")
+
+
+def _views_page(page: Any, start: str) -> Any:
+    """The planted page at the tool's address, drawn as the ``start``
+    skeleton, standing in for the presses :data:`TRANSITIONS` sources."""
+    from linkedin_server import dom
+
+    from tests import skeleton_page
+
+    documents = {name: _views_document(name) for name in VIEWS_SOURCES}
+    return skeleton_page.SkeletonPage(
+        page,
+        documents[start],
+        url=_profile_views_address(),
+        answer_text=_shaped_as_plant,
+        on_click=_ViewsTransitions(documents),
+        scripts={dom.PROFILE_VIEWS_INSIGHTS_JS: _headline_metrics},
+    )
+
+
+def _modelled(at: Any, value: Any) -> Any:
+    """``value``, once the double is shown to have answered every read the
+    reader made: a locator method or selector it does not model is a refusal
+    the reader could have swallowed, and a drive over it measures nothing."""
+    if at.unmodelled:
+        raise AssertionError("the skeleton double could not answer: %s" % sorted(set(at.unmodelled)))
+    return value
+
+
+async def pill_positions_over_the_skeleton(page: Any) -> Any:
+    """``view_switch._pill_positions`` as ``apply_and_restore`` calls it before
+    any press, for the ruled switch's caption, on the closed page.
+
+    THE SIGNATURE DRIVE: every planted role is the plant, not "button", so no
+    pill is found -- a read and an empty list. THE SKELETON: ``main
+    [aria-expanded]`` draws a dialog button, then the three filter pills --
+    Past 90 days, Interesting viewers, Company -- each a ``div[role=button]``
+    holding a ``<label>``, then two more controls whose captions are shaped;
+    the ruled caption is found at position 2."""
+    from linkedin_server import view_switch
+
+    at = _views_page(page, VIEWS_CLOSED)
+    entry = view_switch.view_switch(SWITCH_KEY)
+    return _modelled(at, await view_switch._pill_positions(at, entry["pill_caption"]))
+
+
+async def option_positions_over_the_skeleton(page: Any) -> Any:
+    """``view_switch._option_positions`` for the ruled option, with the pill
+    open: the popover's two ``div[role=checkbox]`` options, "Works at a company
+    you follow" and "Verified", both unchecked; the ruled one is at 1."""
+    from linkedin_server import view_switch
+
+    at = _views_page(page, VIEWS_PILL_OPEN)
+    entry = view_switch.view_switch(SWITCH_KEY)
+    return _modelled(at, await view_switch._option_positions(at, entry["option"]))
+
+
+async def wait_for_option_over_the_skeleton(page: Any) -> Any:
+    """``view_switch._wait_for_option`` for the ruled option, with the pill
+    open: the first option is visible, and the read finds the ruled one."""
+    from linkedin_server import view_switch
+
+    at = _views_page(page, VIEWS_PILL_OPEN)
+    entry = view_switch.view_switch(SWITCH_KEY)
+    return _modelled(at, await view_switch._wait_for_option(at, entry["option"]))
+
+
+async def apply_positions_over_the_skeleton(page: Any) -> Any:
+    """``view_switch._apply_positions`` with the pill open: of the page's 25
+    buttons, the popover's "Show results" is the one ``APPLY_PATTERN`` takes
+    (its "Reset" beside it is not)."""
+    from linkedin_server import view_switch
+
+    at = _views_page(page, VIEWS_PILL_OPEN)
+    return _modelled(at, await view_switch._apply_positions(at))
+
+
+async def profile_views_switch_to_the_option(page: Any) -> Any:
+    """The ruled switch as ``linkedin_who_viewed_me(view_switch=...)`` presses
+    it -- ``server._profile_views_switch``, which calls
+    ``view_switch.apply_and_restore`` with the server's own view and counter
+    readers -- on the closed page, and the drive of BOTH readers.
+
+    AS FAR AS A CAPTURE GOES: the counters read (the headline, 39), the pill
+    is found, the view is read, and the pill's press is stood in for by the
+    capture of that pill open; the option is found and read unchecked. Its
+    press is NOT stood in for: no capture shows the popover with it checked,
+    so the double refuses it and the drive ends there, recorded
+    ``navigates (locator.click)``."""
+    from linkedin_server import server
+
+    at = _views_page(page, VIEWS_CLOSED)
+    return _modelled(
+        at, await server._profile_views_switch(at, SWITCH_KEY, server.DEFAULT_LIMIT)
+    )
+
+
+async def reveal_over_the_skeletons(page: Any) -> Any:
+    """``reveal.reveal`` as ``_profile_views_more_analytics`` presses "Show
+    more analytics" -- priced by the server's own counter reader -- on the
+    fresh load, the press stood in for by the capture of the page after it.
+
+    THE SIGNATURE DRIVE: ``check_reveal`` refuses the synthetic key before any
+    read. HERE: exactly one visible ``main`` button carries the decided phrase
+    and none of the three state attributes; the counters read the headline
+    (39) before and after; ``main`` grows from the fresh load's elements to the
+    revealed page's; the reveal is PERMITTED. Its reading (``COUNT_LINES_JS``)
+    has no stand-in: the planted page answers it, so the reading comes back
+    unreadable at both moments, which the gate records and does not gate on."""
+    from linkedin_server import reveal, server
+
+    at = _views_page(page, VIEWS_VERIFY)
+    counters = await server._profile_views_press_counters(at)
+    outcome = await reveal.reveal(
+        at, key=REVEAL_KEY, read_counters=counters, reading=server.PROFILE_VIEWS_MENU_READING
+    )
+    return _modelled(at, outcome)
+
+
+async def profile_views_more_analytics_over_the_skeletons(page: Any) -> Any:
+    """``_profile_views_more_analytics`` as ``linkedin_who_viewed_me
+    (show_more_analytics=True)`` calls it: the reveal pressed (stood in for),
+    then the page's insights and the revealed sections read -- his own
+    page's analytics, and the aggregates over his viewers (the ruling admits
+    both: ``ADMITTED_TEXT``)."""
+    from linkedin_server import server
+
+    at = _views_page(page, VIEWS_VERIFY)
+    return _modelled(at, await server._profile_views_more_analytics(at))
 
 
 async def read_profile_views_more_insights_as_shipped(page: Any) -> Any:
     """``read_profile_views_more_insights`` as ``_profile_views_more_analytics``
-    calls it after the reveal: on the page, nothing else.
+    calls it after the reveal: on the page, nothing else -- here the revealed
+    page's skeleton, the capture taken after that press.
 
     THE SIGNATURE DRIVE: the planted heading is neither "highlights" nor
     "details", so every heading is skipped -- a read and an empty shape.
 
-    THE FIXTURE: ``tests/test_profile_views_more.py`` builds the revealed page
-    as synthetic markup and ``test_the_revealed_page_is_read_whole`` reads it
-    in a browser: both sections found, three highlight values, three shares,
-    nothing unparsed. The double draws that page's structure, with the values
-    and names the plant.
+    THE SKELETON draws, in ``main``, a "Highlights" section (three value/label
+    pairs) and a "Details" section (a "Companies" pill, then five
+    "<company> (<n>%)" entries); every value and company is shaped, so here
+    it is the plant.
 
     WHAT COMES BACK: the highlight values and the company names, as plain
-    strings outside any record -- ``returns_text``. Built 2026-09-23, the day
-    before the inventory, with its reason stated in the module ("WHAT IS
-    PUBLISHED, AND WHY NO NAME IS REDACTED HERE"); the inventory missed it
-    because nothing drove it. AGGREGATES OVER HIS VIEWERS THAT IDENTIFY NO ONE
-    -- a location, an industry, a company, each company's share -- so
-    ADMITTED by the ruling of 2026-09-28; no field is a viewer.
-    """
+    strings outside any record -- ``returns_text``. AGGREGATES OVER HIS
+    VIEWERS THAT IDENTIFY NO ONE, so ADMITTED by the ruling of 2026-09-28; no
+    field is a viewer."""
     from linkedin_server import profile_views_more
 
-    from tests import test_profile_views_more as the_test
-
-    if the_test.HIGHLIGHTS[0] != "Highlights" or the_test.DETAILS[:2] != ["Details", "Companies"]:
-        raise AssertionError("the test's synthetic revealed page changed shape")
-    return await profile_views_more.read_profile_views_more_insights(_TheRevealedPage(page))
+    at = _views_page(page, VIEWS_REVEALED)
+    return _modelled(at, await profile_views_more.read_profile_views_more_insights(at))
 
 
 # ---------------------------------------------------------------------------
@@ -1200,12 +1352,25 @@ DRIVES: dict[str, Callable[..., Any]] = {
     "profile_views_more:read_profile_views_more_insights": (
         read_profile_views_more_insights_as_shipped
     ),
+    # OVER THE PROFILE-VIEWS SKELETONS (the order of 2026-09-28 04:25):
+    # ruling (3)'s four view_switch readers, and ruling (2)'s click stand-in
+    # carrying the reveal -- and the server's reveal, whose revealed page is
+    # admitted text -- past the press a capture shows the page after.
+    "view_switch:_pill_positions": pill_positions_over_the_skeleton,
+    "view_switch:_option_positions": option_positions_over_the_skeleton,
+    "view_switch:_wait_for_option": wait_for_option_over_the_skeleton,
+    "view_switch:_apply_positions": apply_positions_over_the_skeleton,
+    "reveal:reveal": reveal_over_the_skeletons,
+    "server:_profile_views_more_analytics": profile_views_more_analytics_over_the_skeletons,
 }
 
 #: As far as a press. Run by the guard, so the reads before the press are
 #: hunted; each ends on the refused click, recorded ``navigates (locator.click)``.
 TO_THE_PRESS: dict[str, Callable[..., Any]] = {
     "press:disclose": disclose_to_the_press,
-    "reveal:reveal": reveal_to_the_press,
     "share_link:copy_own_post_link": copy_own_post_link_to_the_press,
+    # PAST ONE PRESS AND STOPPED AT THE NEXT: the pill's press is stood in for
+    # by the capture of that pill open; no capture shows the option checked.
+    "server:_profile_views_switch": profile_views_switch_to_the_option,
+    "view_switch:apply_and_restore": profile_views_switch_to_the_option,
 }

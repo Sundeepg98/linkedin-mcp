@@ -885,11 +885,19 @@ AGGREGATE = "an aggregate that identifies no one"
 #:   only from the line before a closed label, an entry only from a line
 #:   ending in a percentage, and a line that is neither is counted, never
 #:   returned.
+#: * ``server:_profile_views_more_analytics`` (driven the same day, over the
+#:   profile-views skeletons, past the reveal's press by ruling (2)) --
+#:   ``reveal`` (the gate's measurements: counts, verdicts, this package's
+#:   words), ``insights_after`` (``dom.read_profile_views_insights`` on HIS
+#:   OWN analytics page: the headline count and its label, the chart's
+#:   description, the filter labels -- it reads no viewer row), and
+#:   ``revealed_insights`` (the aggregates above). No field is a viewer.
 ADMITTED_TEXT: dict[str, tuple[str, ...]] = {
     "dom:read_profile_detail_entries": (HIS_OWN,),
     "dom:read_self_owned_editor_fields": (HIS_OWN,),
     "dom:read_self_owned_editor_values": (HIS_OWN,),
     "profile_views_more:read_profile_views_more_insights": (AGGREGATE,),
+    "server:_profile_views_more_analytics": (HIS_OWN, AGGREGATE),
 }
 
 #: READERS NOTHING TRACKED CAN DRIVE TO THEIR SUCCESS PATH, each with WHAT
@@ -925,6 +933,16 @@ ADMITTED_TEXT: dict[str, tuple[str, ...]] = {
 #: ``profile_editor:read_account_share_updates``, is driven clean). Three are
 #: driven to their click by ``shipped_drives.TO_THE_PRESS``: ``press:disclose``,
 #: ``reveal:reveal``, ``share_link:copy_own_post_link``.
+#:
+#: AND SEVEN MORE LEFT IT LATER THE SAME DAY, by the orchestrator's rulings of
+#: 04:25: the four ``view_switch`` readers are driven over the committed
+#: profile-views skeletons (ruling 3); ``reveal:reveal`` and
+#: ``server:_profile_views_more_analytics`` are driven past the reveal's press,
+#: stood in for by the capture of the page after it (ruling 2); and
+#: ``view_switch:apply_and_restore`` and ``server:_profile_views_switch`` are
+#: driven past the pill's press to the option's, which no capture shows --
+#: recorded ``navigates``, the transition named in
+#: ``shipped_drives.TRANSITIONS``.
 WHAT_WOULD_DRIVE_IT: dict[str, str] = {
     "auth:_arm_session_store": (
         "NOT A PAGE READER: it touches only page.context, returns None on "
@@ -943,45 +961,6 @@ WHAT_WOULD_DRIVE_IT: dict[str, str] = {
         "label-for, one checked), sanitised into a synthetic skeleton; the "
         "tracked compose fixture draws no radio. A committed script reading "
         "exists (tests/test_compose_fields.py MEASURED_MODES), but no page."
-    ),
-    "server:_profile_views_more_analytics": (
-        "ACTION: the reveal's click (reveal:reveal is driven to it); after "
-        "it, the page the Show more analytics press reveals, whose reader "
-        "is admitted (ADMITTED_TEXT)."
-    ),
-    "server:_profile_views_switch": (
-        "ACTION: three clicks -- pill, option, Show results -- then a harvest; "
-        "a stand-in for the clicks, and the skeleton view_switch's helpers "
-        "need, in its opened, selected and applied states."
-    ),
-    "view_switch:_apply_positions": (
-        "CAPTURE: the Interesting viewers popover open on /analytics/"
-        "profile-views/, as a committed skeleton keeping its button "
-        "controls -- Reset, then Show results. The capture exists "
-        "(_audit/2026-09-23-live-lane-session-1.md Entry 3, pill 1) in "
-        "gitignored lane state only."
-    ),
-    "view_switch:_option_positions": (
-        "CAPTURE: the same popover's two div[role=checkbox] options with "
-        "their aria-label and aria-checked (works at a company you follow, "
-        "verified), as a committed skeleton of the Entry 3 capture."
-    ),
-    "view_switch:_pill_positions": (
-        "CAPTURE: /analytics/profile-views/ with main kept and every main "
-        "[aria-expanded] control's role and caption (Past 90 days, "
-        "Interesting viewers, Company), as a committed skeleton of the "
-        "Entry 3 capture; the tracked captures strip aria-expanded and "
-        "have no main. Keep the controls before the pill: a match at "
-        "position 0 comes back [0], which empty_shape reads as empty."
-    ),
-    "view_switch:_wait_for_option": (
-        "CAPTURE: the Entry 3 popover skeleton, as _option_positions needs "
-        "it, the options visible once the pill is open."
-    ),
-    "view_switch:apply_and_restore": (
-        "ACTION: pill, option and Show results clicks, twice over; the "
-        "Entry 3 skeleton in its opened, selected and applied states, and a "
-        "stand-in for the clicks."
     ),
 }
 
@@ -1546,8 +1525,41 @@ FIXTURE_BREAKS: dict[str, dict[str, str]] = {
         "needle": "<p>Placeholder setting A</p>", "into": "<p>Placeholder setting Z</p>",
     },
     "reveal:reveal": {
-        "fixture": "profile_views_analytics.html",
-        "needle": "<p>Profile viewers</p>", "into": "<p>Viewers</p>",
+        "fixture": "synthetic/profile_views_verify.html",
+        "needle": ">Show more analytics<", "into": ">Xxxx xxxx xxxxxxxxx<",
+    },
+    "profile_views_more:read_profile_views_more_insights": {
+        "fixture": "synthetic/profile_views_revealed.html",
+        "needle": ">Highlights<", "into": ">Xxxxxxxxxx<",
+    },
+    "server:_profile_views_more_analytics": {
+        "fixture": "synthetic/profile_views_revealed.html",
+        "needle": ">Details<", "into": ">Xxxxxxx<",
+    },
+    "server:_profile_views_switch": {
+        "fixture": "synthetic/profile_views_closed.html",
+        "needle": "Interesting viewers", "into": "Xxxxxxxxxxx xxxxxxx",
+    },
+    "view_switch:_apply_positions": {
+        "fixture": "synthetic/profile_views_pill_open.html",
+        "needle": ">Show results<", "into": ">Xxxx xxxxxxx<",
+    },
+    "view_switch:_option_positions": {
+        "fixture": "synthetic/profile_views_pill_open.html",
+        "needle": 'aria-label="Works at a company you follow"',
+        "into": 'aria-label="Xxxxx xx x xxxxxxx xxx xxxxxx"',
+    },
+    "view_switch:_pill_positions": {
+        "fixture": "synthetic/profile_views_closed.html",
+        "needle": "Interesting viewers", "into": "Xxxxxxxxxxx xxxxxxx",
+    },
+    "view_switch:_wait_for_option": {
+        "fixture": "synthetic/profile_views_pill_open.html",
+        "needle": 'aria-expanded="true"', "into": 'aria-expanded="false"',
+    },
+    "view_switch:apply_and_restore": {
+        "fixture": "synthetic/profile_views_closed.html",
+        "needle": 'aria-expanded="false"', "into": 'aria-expanded="mixed"',
     },
     "server:_attach_recipient_ids": {
         "fixture": "profile_views_analytics.html",
@@ -1567,17 +1579,11 @@ FIXTURE_BREAKS: dict[str, dict[str, str]] = {
     },
 }
 
-#: The one drive whose shape is not a fixture file: its page is
-#: ``tests/test_profile_views_more.py``'s synthetic markup, broken in place.
-PREMISE_IN_A_TEST = "profile_views_more:read_profile_views_more_insights"
-
 ALL_DRIVES = {**shipped_drives.DRIVES, **shipped_drives.TO_THE_PRESS}
 
 
 def test_every_drive_has_its_premise_broken_below() -> None:
-    assert set(FIXTURE_BREAKS) | {PREMISE_IN_A_TEST} == set(ALL_DRIVES), (
-        sorted(set(ALL_DRIVES) ^ (set(FIXTURE_BREAKS) | {PREMISE_IN_A_TEST}))
-    )
+    assert set(FIXTURE_BREAKS) == set(ALL_DRIVES), sorted(set(ALL_DRIVES) ^ set(FIXTURE_BREAKS))
 
 
 @pytest.mark.parametrize("key", sorted(ALL_DRIVES))
@@ -1589,25 +1595,90 @@ def test_a_drive_on_a_fixture_that_stopped_drawing_its_shape_raises(
     needle makes it raise -- not driven -- rather than measure a page nobody
     draws. The needle is checked present first, so a control that breaks
     nothing fails here instead of passing."""
-    if key == PREMISE_IN_A_TEST:
-        from tests import test_profile_views_more as source
-
-        monkeypatch.setattr(source, "HIGHLIGHTS", ["Overview", *source.HIGHLIGHTS[1:]])
-    else:
-        broken = FIXTURE_BREAKS[key]
-        copy = tmp_path / "fixtures"
-        shutil.copytree(shipped_drives.FIXTURES, copy)
-        target = copy / broken["fixture"]
-        text = target.read_text(encoding="utf-8")
-        assert broken["needle"] in text, (key, broken["needle"])
-        target.write_text(text.replace(broken["needle"], broken["into"]), encoding="utf-8")
-        monkeypatch.setattr(shipped_drives, "FIXTURES", copy)
+    broken = FIXTURE_BREAKS[key]
+    copy = tmp_path / "fixtures"
+    shutil.copytree(shipped_drives.FIXTURES, copy)
+    target = copy / broken["fixture"]
+    text = target.read_text(encoding="utf-8")
+    assert broken["needle"] in text, (key, broken["needle"])
+    target.write_text(text.replace(broken["needle"], broken["into"]), encoding="utf-8")
+    monkeypatch.setattr(shipped_drives, "FIXTURES", copy)
     verdict, detail = _drive_once(
         ALL_DRIVES[key], [PlantedPage()], {}, builds_records=key in record_readers()
     )
     assert verdict == "not_driven:raises AssertionError", (verdict, detail)
 
 
+
+@pytest.mark.parametrize("press, before, after", shipped_drives.TRANSITIONS)
+def test_each_stood_in_press_names_the_capture_that_shows_the_page_after_it(
+    press: str, before: str, after: Any
+) -> None:
+    """RULING (2), APPLIED (2026-09-28): a press the guard's double stands in
+    for moves it to the skeleton of the capture taken after that press, and
+    each such transition names its source; a press no capture shows (``after``
+    None) is refused, as the planted page refuses every press, and the drive
+    ends there -- never a state the double invented."""
+    assert before in shipped_drives.VIEWS_SOURCES, before
+    if after is not None:
+        assert after in shipped_drives.VIEWS_SOURCES and after != before, after
+
+
+def _run_until_refused(drive: Callable[..., Any], at: Any) -> Any:
+    """``drive(at)`` to its end; the harness's refusal of a press, if any,
+    returned rather than raised, so a test can read what the double did."""
+    try:
+        return asyncio.run(drive(at))
+    except NavigationAttempted as refused:
+        return refused
+
+
+def test_the_stand_in_carries_the_reveal_past_its_press_and_nothing_else() -> None:
+    """THE STAND-IN, SHOWN DOING THE WORK. With the double's stand-in taken
+    away, the reveal ends at its click, as a ``TO_THE_PRESS`` drive does; with
+    it, the one press is the decided one, the reveal is PERMITTED, and
+    ``main`` grew from the fresh load's elements to the revealed page's."""
+    from linkedin_server import reveal, server
+
+    async def the_reveal(at: Any) -> Any:
+        counters = await server._profile_views_press_counters(at)
+        return await reveal.reveal(
+            at, key=shipped_drives.REVEAL_KEY, read_counters=counters,
+            reading=server.PROFILE_VIEWS_MENU_READING,
+        )
+
+    bare = shipped_drives._views_page(PlantedPage(), shipped_drives.VIEWS_VERIFY)
+    bare._on_click = None
+    assert isinstance(_run_until_refused(the_reveal, bare), NavigationAttempted)
+
+    at = shipped_drives._views_page(PlantedPage(), shipped_drives.VIEWS_VERIFY)
+    value = _run_until_refused(the_reveal, at)
+    assert at._on_click.presses == ["Show more analytics"], at._on_click.presses
+    assert value["pressed"] is True and value["permitted"] is True, value
+    assert value["main_elements"]["after"] > value["main_elements"]["before"], value
+    assert at.unmodelled == [], at.unmodelled
+
+
+def test_the_switch_is_driven_to_the_one_press_no_capture_shows() -> None:
+    """THE OPTION'S PRESS HAS NO CAPTURE, so the switch stays NOT DRIVEN
+    there -- and it is THAT press it stops at: the pill's press is stood in
+    for (the popover the capture drew), the option is found and read
+    unchecked, and only then is a press refused."""
+    from linkedin_server import server
+
+    async def the_switch(at: Any) -> Any:
+        return await server._profile_views_switch(
+            at, shipped_drives.SWITCH_KEY, server.DEFAULT_LIMIT
+        )
+
+    at = shipped_drives._views_page(PlantedPage(), shipped_drives.VIEWS_CLOSED)
+    assert isinstance(_run_until_refused(the_switch, at), NavigationAttempted)
+    assert at._on_click.presses == ["the Interesting viewers pill", "refused"], (
+        at._on_click.presses
+    )
+    assert at.document is not None and at.unmodelled == [], at.unmodelled
+    refused = [row for row in shipped_drives.TRANSITIONS if row[2] is None]
+    assert [row[1] for row in refused] == [shipped_drives.VIEWS_PILL_OPEN], refused
 
 def test_every_vacuous_reader_is_driven_or_names_what_would_drive_it() -> None:
     """NO READER IS LEFT NOT DRIVEN WITHOUT SAYING WHAT WOULD DRIVE IT
