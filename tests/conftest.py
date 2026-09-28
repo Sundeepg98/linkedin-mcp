@@ -301,6 +301,18 @@ def _caplog_can_hear_the_linkedin_logger(caplog):
 
     Attaching the handler to the named logger, rather than flipping
     ``propagate``, keeps the stdio guarantee exactly as it is in production.
+
+    **MEASURED AGAIN 2026-09-28: THE HANDLER IS HALF, THE LEVEL IS THE OTHER.**
+    On pytest 9.1.1 caplog's handler reaches a non-propagating logger by
+    itself (a probe with no conftest heard an INFO record), so this fixture is
+    now a second route to the same handler, kept. What neither route gives is
+    the LEVEL: the ``linkedin`` logger keeps its own INFO, and
+    ``caplog.at_level(logging.DEBUG)`` with no ``logger=`` lowers only the
+    root, so a DEBUG record is dropped before any handler sees it and an
+    absence asserted over the capture passes on a build that logs the value.
+    18 sites had that shape; lower the package logger too, and prove a DEBUG
+    control record comes back. The rule is held by
+    ``tests/test_a_debug_capture_lowers_the_package_logger.py``.
     """
     import logging
 
