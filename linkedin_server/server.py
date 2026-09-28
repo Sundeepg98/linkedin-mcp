@@ -10312,10 +10312,16 @@ async def linkedin_message_from_profile(
     names their profile's own member, the press opened the one bubble on the
     page, exactly one recipient is committed and its name is exactly the
     profile's, nobody else is being added, the recipient card links their
-    profile, and the one Send is that bubble's -- each compared in the page. Send is pressed only while all of that still holds
-    with your words in the box. Afterwards a conversation must exist, headed
-    by their name and holding your words as its last message, read in place;
-    only then is the bubble closed, by its own close control.
+    profile, and the one Send is that bubble's -- each compared in the page.
+    Send is pressed only while all of that still holds with your words in
+    the box, and only once Send is drawn enabled: LinkedIn turns it on a
+    moment after the words land, and that is waited for, up to 5 s
+    (measured live, session 4). If the box ALREADY holds exactly your
+    words, whole and nothing else -- a draft LinkedIn kept from an earlier
+    attempt -- they are not typed again; any other text in it refuses.
+    Afterwards a conversation must exist, headed by their name and holding
+    your words as its last message, read in place; only then is the bubble
+    closed, by its own close control.
 
     ONE LINE ONLY: a newline in the text is refused.
 

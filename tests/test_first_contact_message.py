@@ -30,6 +30,16 @@ THE CHAIN THIS FILE HOLDS, each link a condition that refuses on doubt:
 5. the bubble is then closed by its header's close control, found by its
    text. Escape is never pressed: it does not close this bubble.
 
+SESSION 4 FIRED IT (2026-09-28, 17:33): every link held, his words went in,
+65 of 65 -- and the last-moment check refused at 4, because Send read DISABLED
+straight after the fill. About a second later a skeleton of the same bubble
+drew Send without ``disabled``. So (the orchestrator's order of 17:37): the
+check now WAITS, bounded, for the bubble's own Send to turn on, then re-reads
+everything; and a box that ALREADY holds exactly his words, whole and nothing
+else -- a draft LinkedIn kept -- is not typed into again, but goes to that
+same wait and check. Any other text in the box refuses, as before. The filled
+bubble is BUILT from that session's skeleton, through the same builder.
+
 THE CONVERSATION PATH IS LEFT AS IT WAS, as the addendum ordered: where the
 page's own script cannot see the conversation -- in a shadow root -- it
 refuses at 6, and where it can see it, it acts as before. Both are held here.
@@ -92,6 +102,18 @@ TARGET = {"profile": LINK, "text": TEXT}
 #: A structural hand edit of the fixture, or of the source, changes it.
 STRUCTURE_DIGEST = "ligiiccbckljhmoo"
 
+#: THE SECOND CAPTURE: the same bubble about a second after session 4's fill,
+#: Send drawn without ``disabled``, built by ``--kind filled`` from the live
+#: lane's gitignored skeleton; the builder printed this digest over that
+#: skeleton and prints it over the built file.
+BUBBLE_FILLED_FIXTURE = REPO / "tests" / "fixtures" / "synthetic" / "first_contact_bubble_filled.html"
+BUBBLE_FILLED = BUBBLE_FILLED_FIXTURE.read_text(encoding="ascii")
+FILLED_DIGEST = "ppnjobnklaocacjm"
+#: The builder's declared words in the filled editor -- granted as HIS words to
+#: model the draft LinkedIn keeps (the builder's TYPED_WORDS; a test says so).
+DRAFT_WORDS = "Example words typed into the box and nothing else as they landed."
+DRAFT_TARGET = {"profile": LINK, "text": DRAFT_WORDS}
+
 #: THE STAND-IN FOR LINKEDIN'S SCRIPT, installed on every load. ``cfg`` says
 #: how this world behaves; each key is one test's deviation from the capture.
 BEHAVIOUR = r"""
@@ -100,7 +122,7 @@ BEHAVIOUR = r"""
   host.id = 'interop-outlet';
   document.body.appendChild(host);
   const root = cfg.lightDom ? host : host.attachShadow({ mode: 'open' });
-  window.__lane = { pressed: 0, closed: 0, escapes: 0, submitted: 0, preSubmitted: 0 };
+  window.__lane = { pressed: 0, closed: 0, escapes: 0, submitted: 0, preSubmitted: 0, inputs: 0 };
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') window.__lane.escapes += 1;
   }, true);
@@ -186,6 +208,10 @@ BEHAVIOUR = r"""
       form.innerHTML = '<button class="msg-form__send-button" type="submit" disabled>Send</button>';
       root.appendChild(form);
     }
+    if (typeof cfg.draftText === 'string') {
+      bubble.querySelector('.msg-form__contenteditable p').textContent = cfg.draftText;
+    }
+    if (cfg.sendDisabledAtOpen) bubble.querySelector('.msg-form__send-button').disabled = true;
   }
   function onTyping(bubble) {
     const pill = bubble.querySelector('button.artdeco-pill--dismiss');
@@ -220,8 +246,21 @@ BEHAVIOUR = r"""
     const send = bubble.querySelector('.msg-form__send-button');
     const form = bubble.querySelector('form.msg-form');
     let changed = false;
+    let timer = null;
     editor.addEventListener('input', () => {
-      if (send) send.disabled = editor.textContent.trim().length === 0;
+      window.__lane.inputs += 1;
+      const filled = editor.textContent.trim().length > 0;
+      if (send && filled && cfg.enableDelayMs) {
+        // SESSION 4's TIMING: Send stays disabled as the words land, and turns
+        // on a moment later.
+        send.disabled = true;
+        clearTimeout(timer);
+        timer = setTimeout(() => {
+          if (editor.textContent.trim().length) send.disabled = false;
+        }, cfg.enableDelayMs);
+      } else if (send) {
+        send.disabled = !filled;
+      }
       if (cfg.onTyping && !pre && !changed && editor.textContent.trim().length) {
         changed = true;
         onTyping(bubble);
@@ -295,9 +334,10 @@ async def _lane(page) -> dict:
     return await page.evaluate("() => window.__lane")
 
 
-async def _grant(page, **behaviour):
-    block = await preview(MESSAGE, target=TARGET, navigator=_Navigator(**behaviour), page=page)
-    return consume(block["to_confirm"], action=MESSAGE.action, target=TARGET)
+async def _grant(page, target=None, **behaviour):
+    target = TARGET if target is None else target
+    block = await preview(MESSAGE, target=target, navigator=_Navigator(**behaviour), page=page)
+    return consume(block["to_confirm"], action=MESSAGE.action, target=target)
 
 
 # ---------------------------------------------------------------------------
@@ -305,9 +345,9 @@ async def _grant(page, **behaviour):
 # ---------------------------------------------------------------------------
 
 
-def _rebuild(source: Path, out: Path) -> subprocess.CompletedProcess:
+def _rebuild(source: Path, out: Path, kind: str = "empty") -> subprocess.CompletedProcess:
     return subprocess.run(
-        [sys.executable, str(BUILDER), "--source", str(source), "--out", str(out)],
+        [sys.executable, str(BUILDER), "--source", str(source), "--out", str(out), "--kind", kind],
         capture_output=True, text=True, cwd=REPO,
     )
 
@@ -405,6 +445,55 @@ def test_the_bubble_draws_what_the_capture_drew():
     assert BUBBLE.count(">Close your draft conversation<") == 1
 
 
+def test_the_filled_bubble_is_a_fixed_point_of_its_builder_and_keeps_its_digest(tmp_path):
+    """The second capture's fixture: rebuilt from itself with ``--kind filled``
+    it is byte for byte the committed file, and prints the digest the builder
+    printed over the live lane's skeleton."""
+    out = tmp_path / "rebuilt.html"
+    run = _rebuild(BUBBLE_FILLED_FIXTURE, out, kind="filled")
+    assert run.returncode == 0, run.stderr
+    assert _lf(out.read_bytes()) == _lf(BUBBLE_FILLED_FIXTURE.read_bytes())
+    assert _printed(run.stdout, "structure digest") == FILLED_DIGEST
+    for label in ("unclassified texts", "unclassified labels", "unclassified attributes",
+                  "placeholder texts", "texts to the owner", "texts to the words"):
+        assert _printed(run.stdout, label) == "0", (label, run.stdout)
+
+
+def test_THIS_CONTROL_CAN_FAIL_a_structural_edit_of_the_filled_bubble_changes_its_digest(tmp_path):
+    edited = tmp_path / "edited.html"
+    stripped = re.sub(r"<svg[^>]*></svg>", "", BUBBLE_FILLED, count=1)
+    assert stripped != BUBBLE_FILLED
+    edited.write_text(stripped, encoding="ascii")
+    run = _rebuild(edited, tmp_path / "rebuilt.html", kind="filled")
+    assert run.returncode == 0, run.stderr
+    assert _printed(run.stdout, "structure digest") != FILLED_DIGEST
+
+
+def test_the_draft_words_are_the_builders_declared_words():
+    sys.path.insert(0, str(REPO / "scripts"))
+    import _build_first_contact_bubble as builder
+
+    assert builder.TYPED_WORDS == DRAFT_WORDS
+    assert (len(DRAFT_WORDS), sum(c.isalpha() for c in DRAFT_WORDS)) == (65, 53), (
+        "fitted to the shape of the words the capture reduced"
+    )
+
+
+def test_the_filled_bubble_differs_from_the_empty_one_where_the_fill_did():
+    """MEASURED, one capture beside the other: after the fill the editor's
+    paragraph holds the words where it held a line break, and Send is drawn
+    WITHOUT ``disabled``. Everything the chain reads is the same."""
+    empty_sends = re.findall(r'<button class="msg-form__send-button[^>]*>', BUBBLE)
+    filled_sends = re.findall(r'<button class="msg-form__send-button[^>]*>', BUBBLE_FILLED)
+    assert len(empty_sends) == 1 and " disabled" in empty_sends[0]
+    assert len(filled_sends) == 1 and " disabled" not in filled_sends[0]
+    assert BUBBLE.count("<p><br></p>") == 1 and BUBBLE_FILLED.count("<p><br></p>") == 0
+    assert BUBBLE_FILLED.count("<p>" + DRAFT_WORDS + "</p>") == 1
+    for drawn in (">New message<", "artdeco-pill--dismiss", 'aria-label="Remove Casey Example"',
+                  'href="/in/' + SEGMENT + '/"', ">Close your draft conversation<"):
+        assert BUBBLE.count(drawn) == BUBBLE_FILLED.count(drawn), drawn
+
+
 # ---------------------------------------------------------------------------
 # 2. The overlay's shadow root: the page's script cannot see it; the reader can
 # ---------------------------------------------------------------------------
@@ -454,6 +543,29 @@ async def test_THIS_CONTROL_CAN_FAIL_the_escape_counter_counts_an_escape(browser
     assert len((await dom.read_bubbles(browser_page))["bubbles"]) == 1
 
 
+@pytest.mark.parametrize(
+    "bubble, enabled", [(BUBBLE_FILLED, True), (BUBBLE, False)], ids=["filled", "empty"]
+)
+async def test_the_send_wait_finds_the_filled_captures_send_and_not_the_empty_ones(
+    browser_page, bubble, enabled
+):
+    """THE WAIT'S ONE CLAIM, on the two captures, each in an open shadow root:
+    the Send the filled bubble draws is found without ``disabled`` through the
+    piercing engine; the empty bubble's is not, and the wait runs out."""
+    await browser_page.set_content("<html><body><div id='host'></div></body></html>")
+    await browser_page.evaluate(
+        "(markup) => { document.getElementById('host').attachShadow({ mode: 'open' }).innerHTML = markup; }",
+        bubble,
+    )
+    waited = await named_profile.wait_for_send_enabled(browser_page, timeout_ms=600)
+    assert waited["enabled"] is enabled, waited
+    assert waited["failure"] == (None if enabled else "TimeoutError"), waited
+
+
+def test_the_send_wait_is_bounded_at_five_seconds():
+    assert named_profile.SEND_ENABLED_WAIT_MS == 5_000
+
+
 # ---------------------------------------------------------------------------
 # 3. The act, end to end
 # ---------------------------------------------------------------------------
@@ -487,8 +599,13 @@ async def test_a_first_contact_is_sent_read_in_place_and_closed(writes_on, brows
     assert receipt["close_gate"]["proceeded"] is True
     wait = receipt["sent_words_wait"]
     assert wait["appeared"] is True and isinstance(wait["waited_ms"], int) and wait["waited_ms"] >= 0
+    assert receipt["send_enabled_wait"]["enabled"] is True
+    assert receipt["typed_text"]["text_was_entered"] is True
     lane = await _lane(browser_page)
-    assert lane == {"pressed": 1, "closed": 1, "escapes": 0, "submitted": 1, "preSubmitted": 0}
+    assert {key: lane[key] for key in ("pressed", "closed", "escapes", "submitted", "preSubmitted")} == {
+        "pressed": 1, "closed": 1, "escapes": 0, "submitted": 1, "preSubmitted": 0,
+    }
+    assert lane["inputs"] >= 1, "his words were typed"
     assert await browser_page.locator(named_profile.BUBBLE_SELECTOR).count() == 0
     _clean(receipt)
 
@@ -521,6 +638,149 @@ async def test_a_first_contact_whose_bubble_is_not_headed_by_the_name_after_send
     assert receipt["close_gate"] is None
     assert receipt["clicked"]["clicks_made"] == 2 and receipt["clicked"]["closer_clicks"] == 0
     assert (await _lane(browser_page))["closed"] == 0
+    _clean(receipt)
+
+
+# ---------------------------------------------------------------------------
+# 3b. Session 4: Send turns on after the words land (the order of 17:37)
+# ---------------------------------------------------------------------------
+
+
+async def test_a_send_that_turns_on_after_the_words_land_is_waited_for_then_pressed(
+    writes_on, browser_page
+):
+    """SESSION 4, REPRODUCED OFFLINE: every link held and the words went in, and
+    Send turned on about a second later. The check now waits for it, bounded,
+    through the piercing engine, then re-reads everything -- and the message
+    goes, is read SENT in place, and the bubble is closed."""
+    grant = await _grant(browser_page)
+    receipt = await writes.perform(_Navigator(enableDelayMs=1_000), browser_page, grant)
+    send = receipt["send_gate"]
+    assert send["proceeded"] is True, send
+    assert send["observed"]["send_enabled"] is True and send["observed"]["words_exact"] is True
+    wait = receipt["send_enabled_wait"]
+    assert wait["enabled"] is True and wait["waited_ms"] >= 500, wait
+    assert receipt["verification"]["observed_state"] == named_profile.MESSAGE_SENT
+    assert receipt["clicked"]["clicks_made"] == 3 and receipt["close_gate"]["proceeded"] is True
+    lane = await _lane(browser_page)
+    assert lane["submitted"] == 1 and lane["closed"] == 1 and lane["escapes"] == 0
+    _clean(receipt)
+
+
+async def test_a_send_that_never_turns_on_is_refused_after_the_bounded_wait(
+    writes_on, browser_page, monkeypatch
+):
+    """The wait decides nothing: a Send still disabled at its end refuses at 4,
+    as before, nothing pressed, and the receipt says his words are in the box."""
+    monkeypatch.setattr(named_profile, "SEND_ENABLED_WAIT_MS", 1_500)
+    grant = await _grant(browser_page)
+    receipt = await writes.perform(_Navigator(enableDelayMs=600_000), browser_page, grant)
+    send = receipt["send_gate"]
+    assert send["proceeded"] is False and send["refused_condition"] == "4_fill_not_landed", send
+    wait = receipt["send_enabled_wait"]
+    assert wait["enabled"] is False and wait["waited_ms"] >= 1_400, wait
+    assert receipt["clicked"]["clicks_made"] == 1
+    assert receipt["typed_text"]["text_was_entered"] is True
+    assert receipt["typed_text"]["submit_was_pressed"] is False
+    assert receipt["typed_text"]["left_in_the_composer"] is True
+    # AS TODAY, and as session 4's receipt read: the verdict is not SENT. It
+    # reads "unknown" -- the shared verdict cannot see the title in the shadow
+    # root -- although Send was never pressed; the record puts that to the
+    # orchestrator rather than changing it here.
+    assert receipt["verification"]["observed_state"] != named_profile.MESSAGE_SENT
+    assert (await _lane(browser_page))["submitted"] == 0
+    _clean(receipt)
+
+
+# ---------------------------------------------------------------------------
+# 3c. The draft rule (the order of 17:37): his words already in the box
+# ---------------------------------------------------------------------------
+
+
+async def test_a_draft_holding_exactly_his_words_is_not_typed_again_and_is_sent(
+    writes_on, browser_page
+):
+    """DERIVED WORLD, from the second capture: the press opens the new message
+    with his words already in the box -- the shape session 4's fill left, as a
+    draft LinkedIn kept. Nothing is typed; the same wait and the same
+    last-moment check run; Send is pressed; SENT is read in place."""
+    grant = await _grant(browser_page, target=DRAFT_TARGET)
+    receipt = await writes.perform(_Navigator(bubble=BUBBLE_FILLED), browser_page, grant)
+    opened = receipt["opened_conversation_gate"]
+    assert opened["proceeded"] is True, opened
+    assert opened["observed"]["editor_empty"] is False
+    assert opened["observed"]["editor_holds_the_words"] is True
+    typed = receipt["typed_text"]
+    assert typed["text_was_entered"] is False and typed["words_were_already_in_the_box"] is True
+    assert typed["submit_was_pressed"] is True
+    assert receipt["send_gate"]["proceeded"] is True
+    assert receipt["send_enabled_wait"]["enabled"] is True
+    assert receipt["verification"]["observed_state"] == named_profile.MESSAGE_SENT
+    assert receipt["clicked"]["clicks_made"] == 3 and receipt["close_gate"]["proceeded"] is True
+    lane = await _lane(browser_page)
+    assert lane["inputs"] == 0, "nothing was typed"
+    assert lane["submitted"] == 1 and lane["closed"] == 1
+    _clean(receipt)
+
+
+@pytest.mark.parametrize(
+    "target, behaviour",
+    [
+        (TARGET, {"bubble": BUBBLE_FILLED}),
+        (DRAFT_TARGET, {"bubble": BUBBLE_FILLED, "draftText": DRAFT_WORDS + " PS"}),
+        (DRAFT_TARGET, {"bubble": BUBBLE_FILLED, "draftText": DRAFT_WORDS[:30]}),
+    ],
+    ids=["other-words", "his-words-and-more", "part-of-his-words"],
+)
+async def test_any_other_text_already_in_the_box_refuses_as_before(
+    writes_on, browser_page, target, behaviour
+):
+    grant = await _grant(browser_page, target=target)
+    receipt = await writes.perform(_Navigator(**behaviour), browser_page, grant)
+    opened = receipt["opened_conversation_gate"]
+    assert opened["proceeded"] is False and opened["refused_condition"] == "8_not_empty", opened
+    assert opened["observed"]["editor_holds_the_words"] is False
+    assert receipt["clicked"]["clicks_made"] == 1
+    assert receipt["typed_text"]["text_was_entered"] is False
+    assert receipt["send_enabled_wait"] is None and receipt["send_gate"] is None
+    lane = await _lane(browser_page)
+    assert lane["inputs"] == 0 and lane["submitted"] == 0
+    _clean(receipt)
+
+
+async def test_a_draft_whose_send_never_turns_on_is_refused_after_the_wait(
+    writes_on, browser_page, monkeypatch
+):
+    monkeypatch.setattr(named_profile, "SEND_ENABLED_WAIT_MS", 1_500)
+    grant = await _grant(browser_page, target=DRAFT_TARGET)
+    receipt = await writes.perform(
+        _Navigator(bubble=BUBBLE_FILLED, sendDisabledAtOpen=True), browser_page, grant
+    )
+    assert receipt["opened_conversation_gate"]["proceeded"] is True
+    send = receipt["send_gate"]
+    assert send["proceeded"] is False and send["refused_condition"] == "4_fill_not_landed", send
+    assert receipt["send_enabled_wait"]["enabled"] is False
+    typed = receipt["typed_text"]
+    assert typed["text_was_entered"] is False and typed["words_were_already_in_the_box"] is True
+    assert typed["submit_was_pressed"] is False and typed["left_in_the_composer"] is True
+    assert receipt["clicked"]["clicks_made"] == 1
+    lane = await _lane(browser_page)
+    assert lane["inputs"] == 0 and lane["submitted"] == 0
+    _clean(receipt)
+
+
+async def test_the_draft_rule_is_the_first_contacts_only(writes_on, browser_page):
+    """A conversation that already exists is left as it was: its box holding
+    his words -- even exactly -- refuses at 8, where the page's own script can
+    see the conversation."""
+    grant = await _grant(browser_page, target=DRAFT_TARGET)
+    receipt = await writes.perform(
+        _Navigator(bubble=BUBBLE_FILLED, asConversation=True, lightDom=True), browser_page, grant
+    )
+    opened = receipt["opened_conversation_gate"]
+    assert receipt["message_path"] == "conversation"
+    assert opened["proceeded"] is False and opened["refused_condition"] == "8_not_empty", opened
+    assert (await _lane(browser_page))["submitted"] == 0
     _clean(receipt)
 
 
