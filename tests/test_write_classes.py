@@ -163,10 +163,17 @@ def test_the_split_is_the_one_the_lane_report_quotes():
     (`_audit/2026-09-24-lane-l5-messaging.md`, "The name-aimed debts"): `M M2`
     returned to GAP when `linkedin_send_message` -- its only tool, aimed by a
     name -- was retired; classed R2 by its act (message-send), queued on
-    capture C-P5 as `M M6` is. 385 + 1 = 386 = 16 R1 + 37 R2 + 333 R3."""
+    capture C-P5 as `M M6` is. 385 + 1 = 386 = 16 R1 + 37 R2 + 333 R3.
+
+    389 AT THE LIVE LANE'S SESSION 4 (2026-09-28), MEASURED
+    (`_audit/2026-09-23-live-lane-session-1.md`, "Live session 4, 2026-09-28"):
+    `P A11`, `P A13` and `P A17` returned to GAP on the orchestrator's ruling --
+    each an input carrying aria-autocomplete, which the one tool can only type
+    into; classed R3 by their act (profile-edit), queued on picking an entry.
+    386 + 3 = 389 = 16 R1 + 37 R2 + 336 R3."""
     rows, _ = cwc.load()
     split = cwc.split(rows)
-    assert (split["R1"], split["R2"], split["R3"]) == (16, 37, 333)
+    assert (split["R1"], split["R2"], split["R3"]) == (16, 37, 336)
     assert split["R1:built"] + split["R1:queued"] == split["R1"]
 
 
