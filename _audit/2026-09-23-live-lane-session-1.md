@@ -3635,3 +3635,116 @@ and its offline self-check, the refusal matcher (keyed-shape comparison), the
 page-target counter, the census, delta, pin and write-class editors, and the
 CI waiter. The runner took the harness's ledger, counter and driver lock by
 import, so nothing loaded uncounted.
+
+## After session 4, offline: the editor's wait, the autocomplete refusal, the hermetic attach check
+
+The orchestrator's two offline items, ordered at 17:22 (the attach check) and
+17:43 (the editor), the second widened at 17:48 by the autocomplete refusal.
+The edit rows themselves fire in session 5, once, through the package as it now
+ships.
+
+### The editor waits for its dialog (`be665f8`)
+
+**THE DEFECT, AS MEASURED LIVE** (section "Live session 4", above): P B9's test
+write read the intro editor's dialog the moment the address loaded and refused
+`0_editor_not_found`, and a later load found the dialog drawn at the landing.
+The fresh-render verification reads the same way, so a clean save could come
+back `unknown`.
+
+**THE WAIT:** `profile_editor.wait_for_editor_dialog`. It polls 50 times, 200 ms
+apart -- 10 s -- until exactly one dialog holding the one Save control is drawn,
+and returns what it saw: drawn, the polls taken, the last count; a reading that
+fails is `None`, never "not drawn". **IT DECIDES NOTHING.** `writes.perform`
+takes it for an editor write after the landing and before the gate reads the
+control, and the fresh-render verification takes it after its load and before
+it reads the value; a dialog never drawn, or drawn twice, still refuses exactly
+as it did. The receipt carries it as `editor_dialog_wait`.
+
+**THE AUTOCOMPLETE REFUSAL:** the gate refuses, before anything is typed, a field
+whose control carries `aria-autocomplete` (other than `none`), a combobox role
+or a `list` attribute -- counted in the page on the one control its id names.
+His Country/Region, City and Industry carry the first (measured live); what
+LinkedIn stores for them is the entry picked from its list, and this write types
+text. The tool's docstring says both.
+
+**RED FIRST:** `tests/test_the_editor_waits_for_its_dialog.py`, 15 tests. On the
+unrepaired module 12 failed, each for the live reason: the badge write refused
+"the intro editor's dialog ... was not found exactly once", the field write found
+no Save anchor, the late verification read `unknown` over a value that WAS
+stored, and all four autocomplete marks were TYPED AND SAVED. The three that
+passed were the builder's own checks and the `aria-autocomplete="none"` control.
+All 15 pass now; the controls -- a dialog never drawn, two editors -- still
+refuse, with nothing pressed and nothing saved.
+
+**THE WORLD:** `tests/fixtures/synthetic/intro_editor_late.html`, built by
+`scripts/_build_intro_editor_late_fixture.py`, its digest pinned. The builder
+holds the editor's one dialog in a template and has the page's own script draw
+it `data-late-ms` after the load. Its structure is the synthetic switch fixture
+(session 1's capture), because today's tracked copy reduced the labels and test
+ids the readers aim by; today's capture is its PRECONDITION -- the builder
+refuses unless `tests/fixtures/live4/editor.html` draws exactly one dialog
+holding Save. It does: 5 dialogs, 1 holding Save. His profile without the editor
+open (`tests/fixtures/live3/in_me.html`) draws 4 and 0, which the precondition
+refuses. The reader-leak baseline gained exactly one line, the new reader clean.
+
+**AND A DEFECT IN THE TEST, CAUGHT BEFORE CI (`5427f24`):** the digest was taken
+over the file's bytes, and a Windows checkout with `core.autocrlf` writes CRLF,
+so CI's Windows cells would have failed it. It is taken over the text now; a
+CRLF copy of the fixture reads the same digest, where its bytes would not.
+
+### The attach check is hermetic (`3656648`)
+
+Built by a child of this lane in a worktree of its own, reviewed here, and
+cherry-picked: the child's commit `40b1453` is nowhere on `master` and never
+will be, its change landing as `3656648`. The attach child now runs with
+TMP, TEMP and TMPDIR naming a fresh, empty directory under the session's
+gitignored state (`attach_tmp`), and both of the parent's counts are taken
+there: the only artifacts folder it can hold is its own child's driver's. The
+child counts only when its own temp directory IS that directory, and reports no
+count otherwise, which the unchanged rule reads as FAIL-FOLDER. Emptying the
+directory refuses anything not strictly under the session's state, once both
+are resolved -- a `..` or a junction leading out included -- before anything is
+deleted. `attach_verdict` is unchanged.
+
+**RED FIRST**, with a stand-in child and no browser: on the old code a foreign
+folder planted in the (moved) system temp while the stand-in ran read
+FAIL-FOLDER `[0, 2, 1]` -- the shape of the live `[2456, 2461, 2459]` -- and on
+the new code PASS `[0, 1, 0]`; the control, a child that leaves its own folder
+behind, reads FAIL-FOLDER `[0, 1, 1]`. Each guard was removed in turn and shown
+to be what its tests catch; removing the handover turned the control into a
+FALSE PASS, which is why the child-side rule exists. Gates in its worktree: the
+harness file 143 passed; the seven script guards 987 passed, 1 skipped, and that
+one passed with `CI=1`. **NOT RUN LIVE:** that the driver makes its folder there
+is read off the driver's source; session 5's first attach check is the first
+live use, and it should read `[0, 1, 0]`.
+
+**A HAZARD, FOUND BY THAT CHILD:** the first child, cut from a master that did
+not contain this branch's base, stopped as its brief said and returned clean;
+its worktree was then removed, and when it was resumed with a reset order it
+came back INSIDE this lane's worktree -- and refused the order, which would have
+reset this lane's tree. A worktree child that returned clean is spawned fresh,
+never resumed with a git order.
+
+### The census
+
+`P B9`, `P A21` and `P A19` carry a dated note that the wait landed, and `P A11`,
+`P A13` and `P A17` that the refusal did; their write-class lines say so too. No
+state moved.
+
+### Gates, run and NOT run
+
+    commits              gate                                   result
+    be665f8 + 5427f24    the impact gate against ef58580,       PASS over the full suite,
+                         widened to the full suite              12373 tests, 31 min 39 s
+                         (219 of 286 files)                     (a shared box)
+    40b1453 (as 3656648) the harness file; the seven script     143 passed; 987 passed,
+                         guards; the CI-only one with CI=1      1 skipped; 1 passed
+
+The pre-commit identity gate read 0 hits on each commit. **NOT RUN:** CI
+(nothing pushed); anything live. The integration of master and its gate
+follow.
+
+### Scratch, declared disposable
+
+The child's red-run and mutant scripts and their outputs, the builder's staged
+drafts, and the census and record editors, in the lane's scratch folder.
