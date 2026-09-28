@@ -743,6 +743,7 @@ READ_TOOLS = {
     "linkedin_premium_job_collection", "linkedin_search_appearances", "linkedin_notifications",
     "linkedin_connections", "linkedin_job_detail", "linkedin_people_search_shape",
     "linkedin_group_memberships", "linkedin_group_page", "linkedin_open_thread",
+    "linkedin_messaging_presence", "linkedin_recruiter_insights", "linkedin_search_jobs",
 }
 
 
@@ -768,6 +769,67 @@ def test_the_replay_context_is_offline_and_runs_no_script() -> None:
     assert len(calls) == 1
     flags = {kw.arg: kw.value.value for kw in calls[0].keywords if isinstance(kw.value, ast.Constant)}
     assert flags == {"offline": True, "java_script_enabled": False}
+
+
+def test_every_people_search_asks_for_the_people_and_writes_them_reduced() -> None:
+    """THE GO ORDER OF 2026-09-28: the people searches pass include_names=True,
+    so each envelope carries people records -- and so each is written REDUCED."""
+    calls = [node for node in ast.walk(_tree())
+             if isinstance(node, ast.Call) and isinstance(node.func, ast.Attribute)
+             and node.func.attr == "linkedin_people_search_shape"]
+    assert len(calls) == 3
+    for call in calls:
+        flags = {kw.arg: getattr(kw.value, "value", None) for kw in call.keywords}
+        assert flags.get("include_names") is True, ast.unparse(call)
+    for key in ("n94", "n84", "n87", "presence", "recruiter", "j107", "n132"):
+        assert harness.KEYS[key].get("envelope") == "reduced", key
+    assert "N 79" in harness.KEYS["n94"]["rows"]
+
+
+def test_the_new_readers_cost_one_load_each_and_the_job_search_is_not_one_of_the_five() -> None:
+    for key in ("presence", "recruiter", "j107"):
+        assert harness.KEYS[key]["loads"] == 1 and not harness.KEYS[key].get("searches"), key
+    assert harness.KEYS["j107"]["items"] == ("org",)
+
+
+def test_a_named_target_is_matched_by_whole_words_and_only_counted() -> None:
+    assert harness.name_tokens("  Dara  WHITFIELD, MBA ") == ["dara", "whitfield", "mba"]
+    assert harness.person_matches("Dara Whitfield", "dara")
+    assert harness.person_matches("Dara Whitfield", "Dara", ["whitfield"])
+    assert not harness.person_matches("Dara Whitfield", "dara", ["karlsson"])
+    assert not harness.person_matches("Daramir Whitfield", "dara"), "a name inside a longer word"
+    assert not harness.person_matches("", "dara") and not harness.person_matches("Dara", "")
+    names = harness.names_in({"results": [{"name": "Dara Whitfield"}, {"person": {"name": "Ivo Karlsson"}}],
+                              "title": "not a name field"})
+    assert sorted(names) == ["Dara Whitfield", "Ivo Karlsson"]
+    counts = harness.named_target_counts(names, ["dara", "karlsson", "nobody"])
+    assert counts == {"T1": 1, "T2": 1, "T3": 0}
+    assert "Dara" not in json.dumps(counts) and "Ivo" not in json.dumps(counts)
+
+
+def test_the_family_name_is_the_last_word_of_a_multi_word_spelling() -> None:
+    key = {"operator": ["Tamsin Stubworth", "tamsin-stubworth-x1", "T Stubworth", "Tamsin", "Tamsin Q"]}
+    assert harness.family_names(key) == ["stubworth"]
+    assert harness.family_names({}) == []
+
+
+async def test_p_k1_reads_a_verification_control_by_structure(browser_page) -> None:
+    """P K1 (lane S's L.4): a verification badge in the top card, linked to
+    the refused settings page, read by structure; its label never returned."""
+    await browser_page.set_content(
+        "<main><section><h1>" + INVENTED_NAME
+        + "<a href='/mypreferences/d/verifications/' aria-label='Verified by " + INVENTED_NAME
+        + "'><svg></svg></a></h1><button aria-label='Show verification details' aria-haspopup='dialog'>"
+        "</button><span aria-label='Unrelated'></span></section></main>")
+    raw = await browser_page.evaluate(harness._VERIFY_JS)
+    records = [harness.verify_record(r) for r in raw]
+    assert [(r["tag"], r["link"], r["in_heading"], r["haspopup"]) for r in records] == [
+        ("a", "mypreferences_verifications", True, "none"),
+        ("button", "none", False, "dialog"),
+    ]
+    assert INVENTED_NAME not in json.dumps(records)
+    assert "Verifications" in harness.PROFILE_SECTION_WORDS and "Verifications" in harness.FURNITURE
+    assert "verifications" in harness.PATH_WORDS
 
 
 def test_every_tool_key_reaches_a_tool() -> None:

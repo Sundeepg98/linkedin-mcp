@@ -183,7 +183,7 @@ KEYS: dict[str, dict[str, Any]] = {
                 "rows": "P A8 A11 A13 A17 A19 A21, P B9: condition 1"},
     "setting_offline": {"kind": "offline", "loads": 0, "rows": "the (b) reader, on the capture"},
     "in_me": {"kind": "in_me", "loads": 2,
-              "rows": "N 76, P J4, P D28; P F1 H11 K8 D26 read off the capture"},
+              "rows": "N 76, P J4, P D28, P K1; P F1 H11 K8 D26 read off the capture"},
     "in_me_more": {"kind": "in_me_more", "loads": 0, "after": ("in_me",),
                    "rows": "P C8: lane D LQ-1 (two openings)"},
     "me_menu": {"kind": "me_menu", "loads": 0, "after": ("in_me", "activity_all"),
@@ -200,14 +200,20 @@ KEYS: dict[str, dict[str, Any]] = {
     "j18": {"kind": "tool", "loads": 1, "rows": "J 18; J 37 rides"},
     "j39": {"kind": "tool", "loads": 1, "rows": "J 39"},
     "j158": {"kind": "tool", "loads": 1, "rows": "J 158"},
-    "n132": {"kind": "tool", "loads": 1, "rows": "N 132; P G7"},
+    "n132": {"kind": "tool", "loads": 1, "envelope": "reduced", "rows": "N 132, P S5; P G7"},
     "notifications": {"kind": "tool", "loads": 1, "envelope": "reduced", "rows": "N 20, N 45"},
-    "n23": {"kind": "tool", "loads": 2, "envelope": "reduced", "rows": "N 23"},
+    "n23": {"kind": "tool", "loads": 2, "envelope": "reduced",
+            "rows": "N 23; the named targets among his connections, counted"},
     "job_detail": {"kind": "tool", "loads": 1, "items": ("posting",), "envelope": "reduced",
                    "rows": "an org id for N 84, N 87, N 102; J 124, J 115, P M12 by the capture"},
-    "n94": {"kind": "tool", "loads": 1, "searches": 1, "rows": "N 94"},
-    "n84": {"kind": "tool", "loads": 1, "searches": 1, "items": ("org",), "rows": "N 84"},
-    "n87": {"kind": "tool", "loads": 1, "searches": 1, "items": ("past_org",), "rows": "N 87"},
+    "n94": {"kind": "tool", "loads": 1, "searches": 1, "envelope": "reduced", "rows": "N 94, N 79"},
+    "n84": {"kind": "tool", "loads": 1, "searches": 1, "items": ("org",), "envelope": "reduced",
+            "rows": "N 84"},
+    "n87": {"kind": "tool", "loads": 1, "searches": 1, "items": ("past_org",), "envelope": "reduced",
+            "rows": "N 87"},
+    "presence": {"kind": "tool", "loads": 1, "envelope": "reduced", "rows": "M M53"},
+    "recruiter": {"kind": "tool", "loads": 1, "envelope": "reduced", "rows": "N 195"},
+    "j107": {"kind": "tool", "loads": 1, "items": ("org",), "envelope": "reduced", "rows": "J 107"},
     "n104": {"kind": "capture", "loads": 1, "searches": 1, "rows": "N 104"},
     "n161": {"kind": "capture", "loads": 1, "searches": 1, "rows": "N 161"},
     "n179": {"kind": "capture", "loads": 1, "searches": 1, "rows": "N 179"},
@@ -597,6 +603,7 @@ FURNITURE: frozenset[str] = frozenset({
     "Organizations", "Test scores", "Patents", "Analytics", "Resources",
     "Suggested for you", "People also viewed", "People you may know", "You might like",
     "Top Voice", "Profile strength", "Open to", "Add profile section", "Enhance profile",
+    "Verifications", "Verification", "Verified",
     # the profile's More menu
     "More", "Save to PDF", "Send profile in a message", "Share profile via message",
     "Copy link to profile", "Request a recommendation", "Recommend", "Report / Block",
@@ -669,6 +676,7 @@ PATH_WORDS: frozenset[str] = frozenset({
     "d", "settings", "recent-activity", "posts", "members", "attendees", "analytics",
     "overlay", "edit", "details", "network-manager", "people-follow", "followers",
     "following", "invite-connect", "connections", "notifications", "about", "life",
+    "verifications", "verification", "trust",
 })
 
 
@@ -1310,8 +1318,53 @@ N76_NEEDLES = ("copy link", "follow link", "share profile", "personal link")
 #: The top card's More, as lane D's LQ-1 names it; one on session 1's capture.
 MORE_TRIGGER = 'main button[aria-label="More"][aria-expanded="false"]'
 
-#: The section words P F1, P H11, P K8 and P D26 ask about, counted in main.
-PROFILE_SECTION_WORDS = ("Recommendations", "Services", "Top Voice", "Profile strength")
+#: The section words P F1, P H11, P K8, P D26 and P K1 ask about, counted in main.
+PROFILE_SECTION_WORDS = ("Recommendations", "Services", "Top Voice", "Profile strength",
+                         "Verifications")
+
+#: P K1 (lane S's capture spec L.4): every control in main whose accessible
+#: label mentions a verification -- the badge on his name, or a section's --
+#: read by STRUCTURE, the label compared inside the page and never returned:
+#: its tag, its role, whether it sits in the top card's heading, and where its
+#: link (its own or its nearest anchor's) points, as a closed word.
+_VERIFY_JS = """
+() => Array.from(document.querySelectorAll("main [aria-label]"))
+  .filter((e) => /verif/i.test(e.getAttribute("aria-label") || ""))
+  .map((e) => {
+    const a = e.closest("a") || e.querySelector("a");
+    const h = (e.getAttribute("href") || (a && a.getAttribute("href")) || "");
+    const kind = h === "" ? "none"
+      : h.includes("/mypreferences/d/verifications") ? "mypreferences_verifications"
+      : h.includes("/trust/verification") ? "trust_verification"
+      : h.includes("/overlay/") ? "profile_overlay"
+      : "other";
+    return {
+      tag: e.tagName.toLowerCase(),
+      role: e.getAttribute("role"),
+      in_heading: !!e.closest("h1, h2"),
+      link: kind,
+      haspopup: e.getAttribute("aria-haspopup"),
+      expanded: e.hasAttribute("aria-expanded"),
+    };
+  })
+"""
+
+_LINK_KINDS = ("none", "mypreferences_verifications", "trust_verification", "profile_overlay", "other")
+
+
+def verify_record(raw: Any) -> dict[str, Any]:
+    """One verification control, reduced to closed words and booleans. PURE."""
+    if not isinstance(raw, dict):
+        return {"readable": False}
+    tag, role, popup, link = raw.get("tag"), raw.get("role"), raw.get("haspopup"), raw.get("link")
+    return {
+        "tag": tag if tag in _TAGS + ("svg", "img", "li-icon") else "other",
+        "role": role if role in _ROLES + ("img", "dialog") else ("none" if role is None else "other"),
+        "in_heading": raw.get("in_heading") is True,
+        "link": link if link in _LINK_KINDS else "other",
+        "haspopup": popup if popup in _HASPOPUP_WORDS else ("none" if popup is None else "other"),
+        "expanded": raw.get("expanded") is True,
+    }
 
 _EXPANDED_JS = """
 () => Array.from(document.querySelectorAll("main [aria-expanded]")).map((e) => ({
@@ -1353,11 +1406,18 @@ async def _in_me(capture: bool) -> dict[str, Any]:
         census = [expanded_record(raw) for raw in (await page.evaluate(_EXPANDED_JS) or [])]
         sections = {word: int(await page.locator("main").get_by_text(word, exact=True).count())
                     for word in PROFILE_SECTION_WORDS}
+        verifications = [verify_record(raw) for raw in (await page.evaluate(_VERIFY_JS) or [])]
         await _save_page(page, "in_me", capture)
     out = {"self_assertion": assertion, "loads": loads, "expanded": census,
-           "more_triggers": sum(1 for row in census if row["more"]), "sections": sections}
+           "more_triggers": sum(1 for row in census if row["more"]), "sections": sections,
+           "verification_controls": verifications}
     say("    main [aria-expanded] " + str(len(census)) + "; labelled More " + str(out["more_triggers"])
         + "; section words " + shape_of(sections))
+    by_link: dict[str, int] = {}
+    for control in verifications:
+        by_link[str(control.get("link"))] = by_link.get(str(control.get("link")), 0) + 1
+    say("    P K1: controls labelled with a verification " + str(len(verifications))
+        + "; by link " + shape_of(by_link))
     return out
 
 
@@ -1482,11 +1542,24 @@ async def _tool(key: str, items: dict[str, str]) -> dict[str, Any]:
     if key == "job_detail":
         return await server.linkedin_job_detail(job_id=items["posting"])
     if key == "n94":
-        return await server.linkedin_people_search_shape(keywords=N94_KEYWORDS, location_ids=N94_GEOS)
+        # A KEYWORD SEARCH WITH NAMES: N 94's two locations, and N 79 -- a person
+        # found by keyword -- off the same load (the orchestrator's go order).
+        return await server.linkedin_people_search_shape(
+            keywords=N94_KEYWORDS, location_ids=N94_GEOS, include_names=True)
     if key == "n84":
-        return await server.linkedin_people_search_shape(current_company_ids=items["org"])
+        return await server.linkedin_people_search_shape(
+            current_company_ids=items["org"], include_names=True)
     if key == "n87":
-        return await server.linkedin_people_search_shape(past_company_ids=items["past_org"])
+        return await server.linkedin_people_search_shape(
+            past_company_ids=items["past_org"], include_names=True)
+    if key == "presence":
+        return await server.linkedin_messaging_presence()
+    if key == "recruiter":
+        return await server.linkedin_recruiter_insights()
+    if key == "j107":
+        # J 107: every posting at ONE employer -- the employer the caller named,
+        # standing in for the keyword. A jobs search, not one of D1's five.
+        return await server.linkedin_search_jobs(keywords="", company_id=items["org"])
     if key == "memberships":
         return await server.linkedin_group_memberships()
     if key == "group_home":
@@ -1498,6 +1571,82 @@ async def _tool(key: str, items: dict[str, str]) -> dict[str, Any]:
 
 #: The star's labels, compared inside the page (lane L5's C10).
 STAR_LABELS = ("Star conversation", "Unstar conversation")
+
+
+# ---------------------------------------------------------------------------
+# The operator's named live targets: matched IN THIS PROCESS, never printed.
+# ---------------------------------------------------------------------------
+
+#: The identity key's class holding the people he named for live proofs. The
+#: words live ONLY in the gitignored key; here they are read, compared and
+#: counted, and nothing of them leaves this process but an index and a count.
+TARGET_CLASS = "operator_named_live_targets"
+
+
+def _key_data() -> dict[str, Any]:
+    """The gitignored identity key, found from a worktree the way the identity
+    sweep finds it. Empty when absent: then every count below is None."""
+    from tests.repo_paths import sanitisation_key_path
+
+    loaded = _json_or_none(sanitisation_key_path(_ROOT))
+    return loaded if isinstance(loaded, dict) else {}
+
+
+def name_tokens(text: Any) -> list[str]:
+    """A name as its words: NFKC, casefolded, split on anything not a letter.
+    PURE."""
+    import unicodedata
+
+    folded = unicodedata.normalize("NFKC", str(text or "")).casefold()
+    return [w for w in re.split(r"[^\w]+|[\d_]+", folded) if w]
+
+
+def person_matches(name: Any, first: str, surnames: Any = ()) -> bool:
+    """Does a drawn name carry ``first`` as a whole word -- and, when surnames
+    are given, one of them too? PURE. Whole words only: a first name inside a
+    longer word is not that name."""
+    tokens = name_tokens(name)
+    if not first or first.casefold() not in tokens:
+        return False
+    wanted = [s.casefold() for s in surnames if s]
+    return not wanted or any(s in tokens for s in wanted)
+
+
+def family_names(key: dict[str, Any]) -> list[str]:
+    """The last word of each multi-word spelling of the operator's own name, of
+    three letters or more: the family name a relative's drawn name carries.
+    PURE. Read from the key, never written anywhere."""
+    out: list[str] = []
+    for value in key.get("operator") or []:
+        words = str(value).split()
+        if len(words) >= 2 and len(words[-1]) >= 3 and words[-1].casefold() not in out:
+            out.append(words[-1].casefold())
+    return out
+
+
+def names_in(envelope: Any) -> list[str]:
+    """Every string under a ``name`` key anywhere in an envelope. PURE. What a
+    people record calls the person; read here only to be counted."""
+    found: list[str] = []
+    stack = [envelope]
+    while stack:
+        node = stack.pop()
+        if isinstance(node, dict):
+            for field, inner in node.items():
+                if field == "name" and isinstance(inner, str):
+                    found.append(inner)
+                else:
+                    stack.append(inner)
+        elif isinstance(node, (list, tuple)):
+            stack.extend(node)
+    return found
+
+
+def named_target_counts(names: list[str], words: list[str]) -> dict[str, int]:
+    """For each word of the key's class, by its 1-based INDEX, how many drawn
+    names carry it as a whole word. PURE. Indices and counts only."""
+    return {"T" + str(i): sum(1 for n in names if person_matches(n, w))
+            for i, w in enumerate(words, 1)}
 
 
 async def _left_open(key: str, capture: bool, envelope: dict[str, Any]) -> dict[str, Any]:
@@ -1527,6 +1676,14 @@ async def _run_tool(key: str, items: dict[str, str], capture: bool) -> dict[str,
         raise _Anomaly("error_envelope", key)
     _print_envelope(out)
     extra = await _left_open(key, capture, out)
+    if key == "n23":
+        # THE NAMED TARGETS AMONG HIS CONNECTIONS, COUNTED (the order of
+        # 2026-09-28 08:04, for session 3): by the key word's index, never by
+        # the word; read-only, no outward act.
+        words = [str(w) for w in (_key_data().get(TARGET_CLASS) or [])]
+        extra["named_target_counts"] = named_target_counts(names_in(out), words) if words else None
+        say("    named targets among the connections drawn, by key index: "
+            + shape_of(extra["named_target_counts"]))
     if key == "notifications":
         extra["kinds"] = s1.notification_kinds(out.get("results") or [])
         say("    kinds: " + shape_of(extra["kinds"]))
