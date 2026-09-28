@@ -1089,6 +1089,56 @@ FROM_STATE_READERS: dict[str, int] = {
 #: four meanings is how this went wrong.
 CLICK_FROM_STATE_READERS: dict[str, int] = {"valid_from": 1}
 
+#: AND THE SECOND-ORIGIN FIELD, added 2026-09-28 (lane L5, the orchestrator's
+#: order of 21:08): ``also_from_states`` names the OTHER states an action may
+#: act from -- one today, a reply box already holding exactly the grant's
+#: words -- and it is read by the two ends and nothing else. A third reader is
+#: a third meaning arriving, which is what this file exists to make loud.
+ALSO_FROM_STATES_READERS: dict[str, int] = {"_direction": 1, "valid_from": 1}
+
+
+def _attribute_reads(attr: str, source: str) -> dict[str, int]:
+    """Every ``<something>.<attr>`` READ in ``source``, by innermost enclosing
+    function -- :func:`_from_state_reads`'s method, for any one field."""
+    tree = ast.parse(source)
+    parents: dict[ast.AST, ast.AST] = {}
+    for node in ast.walk(tree):
+        for child in ast.iter_child_nodes(node):
+            parents[child] = node
+
+    def enclosing(node: ast.AST) -> str:
+        cur = parents.get(node)
+        while cur is not None:
+            if isinstance(cur, (ast.FunctionDef, ast.AsyncFunctionDef)):
+                return cur.name
+            cur = parents.get(cur)
+        return "<module>"
+
+    found: dict[str, int] = {}
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Attribute) and node.attr == attr and isinstance(node.ctx, ast.Load):
+            name = enclosing(node)
+            found[name] = found.get(name, 0) + 1
+    return found
+
+
+def test_the_click_time_and_second_origin_fields_have_only_their_readers():
+    """``CLICK_FROM_STATE_READERS`` was pinned and never checked until
+    2026-09-28 -- a pin that could not fail. It is checked here, beside the
+    field that joined it that day."""
+    source = WRITES_PY.read_text(encoding="utf-8")
+    assert _attribute_reads("click_from_state", source) == CLICK_FROM_STATE_READERS
+    assert _attribute_reads("also_from_states", source) == ALSO_FROM_STATES_READERS
+
+
+def test_THIS_CONTROL_CAN_FAIL_a_third_reader_is_counted():
+    planted = (
+        "def valid_from(spec):\n    return spec.also_from_states\n"
+        "def _direction(spec):\n    return spec.also_from_states\n"
+        "def perform(spec):\n    return spec.also_from_states\n"
+    )
+    assert _attribute_reads("also_from_states", planted) != ALSO_FROM_STATES_READERS
+
 #: The two ends the design is written around, named so the test can assert they
 #: are still here even if the counts move.
 THE_TWO_ENDS = ("_direction", "valid_from")

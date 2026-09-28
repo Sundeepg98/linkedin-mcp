@@ -1005,6 +1005,16 @@ WHAT_WOULD_DRIVE_IT: dict[str, str] = {
         "lane's copy, in a shadow root, and reads it True and False. The harness "
         "types nothing, so no composer holds anybody's words."
     ),
+    #: ADDED 2026-09-28 (lane L5, the orchestrator's order of 21:08): the same
+    #: question of a reply's box, read after the verdict's fresh load -- did
+    #: LinkedIn keep his words. Its success path is a reply box holding them.
+    "threads:words_in_the_box": (
+        "ACTION: a reply whose words went into the box, typed or already there "
+        "as a draft. tests/test_reply_send_wait_and_draft.py drives this reader "
+        "after the act, over the reply fixture's fresh load, and reads it True "
+        "and False. The harness types nothing, so no reply box holds anybody's "
+        "words."
+    ),
     "dom:read_compose_fields": (
         "CAPTURE: /messaging/compose/ as loaded -- an empty composer, nothing "
         "clicked or typed -- drawing its two send-mode radios as "

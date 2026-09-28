@@ -10186,16 +10186,22 @@ async def linkedin_send_reply(
     words, and the state of its reply box. Read it, then call again with the
     token it hands you, within two minutes, once.
 
-    ON CONFIRM: the reply box must be EMPTY, with Send drawn disabled; your
-    words are typed; Send must turn enabled, the box must hold EXACTLY your
-    words -- a box that changed them as they were typed refuses, keeping two
-    lengths and no text -- and no recipient box may be drawn; then Send is
-    pressed. THEN IT CONFIRMS ITSELF: the conversation is loaded fresh
-    and ``performed`` is true only if your exact words are its last message
-    AND the number of messages carrying them rose by exactly one. False means
-    the box still held your words with Send enabled and nothing new appeared.
-    ``"unknown"`` means neither -- open the conversation and look, and do NOT
-    retry, because a retry on a reply that landed sends it twice.
+    ON CONFIRM: the reply box must be EMPTY, with Send drawn disabled -- or
+    ALREADY hold exactly your words, whole and nothing else, a draft LinkedIn
+    kept from an earlier attempt, and then nothing is typed; any other text in
+    it refuses. Your words are typed; Send must turn enabled -- LinkedIn turns
+    it on a moment after the words land, and that is waited for, up to 5 s --
+    the box must hold EXACTLY your words -- a box that changed them as they
+    were typed refuses, keeping two lengths and no text -- and no recipient
+    box may be drawn; then Send is pressed. THEN IT CONFIRMS ITSELF: the
+    conversation is loaded fresh and ``performed`` is true only if your exact
+    words are its last message AND the number of messages carrying them rose
+    by exactly one. False means NOTHING WAS SENT: Send was never pressed, or
+    the box still held your words with Send enabled and nothing new appeared;
+    ``typed_text.words_left_in_the_box`` says whether your words are still in
+    the box on the fresh load, and a retry is safe. ``"unknown"`` means Send
+    WAS pressed and neither could be shown -- open the conversation and look,
+    and do NOT retry, because a retry on a reply that landed sends it twice.
 
     ONE LINE ONLY: a newline in the text is refused, the same rule every
     typed target here follows, because a target is printed in a block a human

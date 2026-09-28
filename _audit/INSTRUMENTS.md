@@ -11117,6 +11117,41 @@ have landed -- and could not be confirmed.
 
 DECLARED DISPOSABLE: the probes of master's verdicts in the three worlds.
 
+### 69.19 A FIX FOR ONE SEND IS OWED TO EVERY SEND THAT SHARES ITS RACE (the orchestrator's order of 2026-09-28 21:08)
+
+**THE SAME RACE, ONE PATH OVER.** Session 5 sent the campaign's first outward message: the first
+contact waited 228 ms for its Send and went. Two minutes later the reply path refused at 4 on the
+same page behaviour -- 67 of 67 characters in the box and Send read disabled straight after the
+fill -- because the wait had been built for one send path, not for the race. And its verdict read
+"unknown, do not retry" about a reply that never left. The reply now has the same three things:
+a bounded wait for its Send, then the whole check; the draft rule; and "not sent" for a Send never
+pressed.
+
+**A NEW ORIGIN IS DECLARED, NOT SMUGGLED.** The reply's draft rule needed the preview and the
+click-time gate to accept a box already holding his words. Relabelling that box "empty" would have
+made the state lie. So the spec gained a field with ONE meaning, `also_from_states`, read by the two
+ends and pinned there -- beside `click_from_state`, whose own reader pin had been written and never
+checked.
+
+| instrument | what it holds | shown failing |
+|---|---|---|
+| `threads.wait_for_reply_send_enabled` (bound `REPLY_SEND_ENABLED_WAIT_MS`, 5 s), `writes._reply_send_check` | the reply form's Send, looked for without `disabled` before the whole last-moment check; decides nothing; in the receipt as `send_enabled_wait` | on master's code the late-Send reply refused at 4 -- M M17's live refusal reproduced |
+| `threads.REPLY_WORDS_IN_PLACE`, `editor_holds_the_words` in `threads.read_thread`, `reply_state`, `WriteSpec.also_from_states`, and `perform`'s untyped route | a reply box already holding exactly his words is acted from without typing; any other text refuses as before | on master's code the draft-holding reply was refused at the preview as NOT EMPTY |
+| `threads.reply_verdict(send_attempted=...)`, `threads.words_in_the_box` | a reply Send never let through reads not sent, with whether a fresh load kept his words, and a safe retry | on master's code it read unknown with do-not-retry, both when the fresh load dropped the words and when it kept them |
+| `ALSO_FROM_STATES_READERS`, `CLICK_FROM_STATE_READERS`, `tests/test_preview_state_and_click_state.py` | each field's readers, counted by AST | a planted third reader is counted; the click-time pin, dead since it was written, now checked |
+
+The reply form's structure is pinned by digest (`plmmidecdkbbmdma`). Eight mutations of the
+reply's new checks were each caught, and the targets pass unmutated.
+
+    WHEN A LIVE RACE IS FIXED ON ONE PATH, ASK AT ONCE WHICH OTHER PATHS SHARE IT, AND FIX THEM
+    BEFORE THEY FIRE.
+
+    A STATE AN ACTION MAY START FROM IS DECLARED, NAMED FOR WHAT IT IS, AND COUNTED WHERE IT IS
+    READ. A PIN THAT IS NEVER CHECKED IS NOT A PIN.
+
+DECLARED DISPOSABLE: the probes of master's reply verdicts, and the red demonstration's copy of the
+tree.
+
 
 ## 70. THE BEST-VERIFIED WRITE NEVER PRESSED SAVE, AND A WRITE AIMED BY ITS CARD (lane-l7-profile-writes, 2026-09-24)
 
