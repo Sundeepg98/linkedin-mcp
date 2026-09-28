@@ -698,6 +698,21 @@ async def _name_the_profile_target_as_shipped(page: Any) -> Any:
     )
 
 
+async def _read_the_confirmed_profile_as_shipped(page: Any) -> Any:
+    """The read he names (ruling NAMED-PROFILE-READ-BEHIND-A-GRANT,
+    2026-09-28) as ``linkedin_read_named_profile`` calls it after its one
+    load: on the page the load landed on, the landing being the address the
+    server composed from the caller's segment -- so the landing veto passes
+    and the reader reaches its identity reading, its record and its hint."""
+    from linkedin_server import named_profile, readonly
+
+    return await named_profile.read_the_confirmed_profile(
+        _ConfirmsTheNamedProfile(page),
+        segment=SYNTHETIC_ARGUMENT,
+        landed=readonly.named_profile_url(SYNTHETIC_ARGUMENT),
+    )
+
+
 def _inert_observation(
     spec: Any, facts: dict[str, Any], target: Any = SYNTHETIC_ARGUMENT
 ) -> Any:
@@ -841,6 +856,10 @@ async def _name_the_invitation_recipient_as_shipped(page: Any) -> Any:
 #: same day, and are driven now under :data:`ADMITTED_TEXT`.
 AS_SHIPPED: dict[str, Callable[..., Any]] = {
     "named_profile:name_the_profile_target": _name_the_profile_target_as_shipped,
+    # THE READ HE NAMES, 2026-09-28 (lane L5): driven by signature it is
+    # handed a landing that is not the named profile, vetoes on its first
+    # line and reads nothing -- so it is driven as the tool calls it.
+    "named_profile:read_the_confirmed_profile": _read_the_confirmed_profile_as_shipped,
     "threads:name_the_reply_recipient": _name_the_reply_recipient_as_shipped,
     "writes:_name_the_invitation_recipient": _name_the_invitation_recipient_as_shipped,
     **shipped_drives.DRIVES,

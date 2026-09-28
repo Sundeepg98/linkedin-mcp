@@ -350,10 +350,18 @@ def _package_sources():
             yield path, ast.parse(path.read_text(encoding="utf-8"))
 
 
-def test_exactly_one_function_in_the_package_asks_for_the_named_door():
-    """THE PIN. ``named_profile=`` is passed to a ``goto`` in ONE place,
+def test_exactly_two_functions_in_the_package_ask_for_the_named_door():
+    """THE PIN. ``named_profile=`` is passed to a ``goto`` in TWO places:
     ``writes._load_named_profile`` -- so the second door is reachable from the
-    two named-person specs and from nothing else, and no read can reach it."""
+    two named-person specs -- and, since 2026-09-28,
+    ``named_profile.load_the_confirmed_profile``, the ONE read ruling
+    NAMED-PROFILE-READ-BEHIND-A-GRANT admits, which redeems its own preview's
+    token before it composes an address. Nothing else reaches the door.
+
+    (Until 2026-09-28 this was ``test_exactly_one_function_...`` and said "no
+    read can reach it"; the operator's ruling of that morning made one read
+    that can, and ``tests/test_named_profile_read.py`` pins that read's own
+    callers.)"""
     callers = []
     for path, tree in _package_sources():
         for function in ast.walk(tree):
@@ -367,10 +375,15 @@ def test_exactly_one_function_in_the_package_asks_for_the_named_door():
                     and any(kw.arg == "named_profile" for kw in node.keywords)
                 ):
                     callers.append((path.name, function.name))
-    assert sorted(set(callers)) == [("writes.py", "_load_named_profile")]
+    assert sorted(set(callers)) == [
+        ("named_profile.py", "load_the_confirmed_profile"),
+        ("writes.py", "_load_named_profile"),
+    ]
 
 
-def test_the_second_door_is_referenced_only_by_the_browser_and_the_loader():
+def test_the_second_door_is_referenced_only_by_the_browser_and_the_two_loaders():
+    """``browser.py`` swaps the door; ``writes.py`` and, since 2026-09-28,
+    ``named_profile.py`` (the read he names) each ask for it in one function."""
     users = set()
     for path, tree in _package_sources():
         for node in ast.walk(tree):
@@ -382,7 +395,7 @@ def test_the_second_door_is_referenced_only_by_the_browser_and_the_loader():
                 for alias in node.names:
                     if alias.name == "assert_named_profile_url":
                         users.add(path.name)
-    assert users == {"browser.py", "writes.py"}
+    assert users == {"browser.py", "named_profile.py", "writes.py"}
 
 
 async def test_the_loader_refuses_every_spec_that_is_not_a_named_person_act():
@@ -580,10 +593,15 @@ async def test_a_same_name_stranger_elsewhere_on_the_page_is_never_the_target(br
     reading = await _read(browser_page, SAME_NAME_ELSEWHERE)
     assert reading["invite_matches"] == 1 and reading["invite_in_topcard"] == 0
     assert reading["message_matches"] == 1 and reading["message_in_topcard"] == 0
+    # SINCE 2026-09-28 THE REASON IS THE TOPCARD'S, NOT THE PAGE'S: the press
+    # reaches only the owner's topcard, which draws no visible control of
+    # either kind, and the stranger's controls outside it are not counted.
+    assert reading["invite_visible_in_topcard"] == 0
+    assert reading["message_visible_in_topcard"] == 0
     for state_of in (named_profile.connect_state, named_profile.message_state):
         state, why = state_of(reading)
         assert state == named_profile.UNKNOWN
-        assert "NOT inside their topcard" in why
+        assert "topcard draws no visible" in why
 
 
 #: DERIVED -- somebody else's Connect and Message drawn INSIDE the owner's
@@ -626,17 +644,21 @@ async def test_a_topcard_holding_a_second_control_of_the_kind_is_refused(browser
     assert reading["invite_matches"] == 1 and reading["invite_in_topcard"] == 1
     assert reading["invite_controls_in_topcard"] == 2
     assert reading["message_controls_in_topcard"] == 2
+    # SINCE 2026-09-28 the stranger's control inside the topcard is FOREIGN --
+    # labelled for somebody else -- and that alone refuses, visible or not.
+    assert reading["invite_foreign_in_topcard"] == 1
+    assert reading["message_foreign_in_topcard"] == 1
     for state_of in (named_profile.connect_state, named_profile.message_state):
         state, why = state_of(reading)
         assert state == named_profile.UNKNOWN
-        assert "topcard draws 2" in why
+        assert "that are not theirs" in why
 
 
 @pytest.mark.parametrize(
     "world, fragment",
     [
-        (NO_CONNECT, "draws no Connect control"),
-        (TWO_CONNECTS, "is a refusal rather than a choice"),
+        (NO_CONNECT, "draws no visible Connect control"),
+        (TWO_CONNECTS, "draws 2 VISIBLE Connect control(s)"),
     ],
     ids=["none", "two"],
 )
@@ -662,17 +684,22 @@ async def test_message_is_refused_before_anything_is_pressed(browser_page, world
 
 def test_the_selector_builders_name_the_topcard_and_nothing_else():
     """No argument, no position, no name: every alternative is the measured
-    control shape inside the one ``[id$="Topcard"]``."""
+    control shape inside the one ``[id$="Topcard"]`` -- and, since 2026-09-28,
+    only what is VISIBLE there (the live topcard hides a duplicate of each
+    action), with the Message shape the live page draws, a composer link
+    named by its own text, beside the labelled one."""
     for builder, control in (
         (dom.topcard_invite_control_selector, dom.INVITE_CONTROL),
-        (dom.topcard_message_control_selector, dom.MESSAGE_CONTROL),
+        (dom.topcard_message_control_selector, dom.TOPCARD_MESSAGE_CONTROL),
     ):
         built = builder()
         assert "nth=" not in built and ">>" not in built, built
         alternatives = [part.strip() for part in built.split(",")]
         assert alternatives == [
-            dom.NAMED_PROFILE_TOPCARD + " " + part.strip() for part in control.split(",")
+            dom.NAMED_PROFILE_TOPCARD + " " + part.strip() + ":visible"
+            for part in control.split(",")
         ], built
+    assert dom.TOPCARD_MESSAGE_CONTROL.startswith(dom.MESSAGE_CONTROL)
     # THE PAGE-WIDE MESSAGE BUILDER IS GONE: nothing pressed Message but this
     # route, and a builder kept beside the scoped one is one edit from use.
     assert not hasattr(dom, "message_control_selector")
@@ -835,7 +862,7 @@ async def test_a_link_to_somebody_else_is_caught_by_the_name_the_block_prints(
 
 
 async def test_a_preview_where_only_a_stranger_matches_mints_nothing(writes_on, browser_page):
-    with pytest.raises(WriteAttemptError, match="NOT inside their topcard"):
+    with pytest.raises(WriteAttemptError, match="topcard draws no visible Connect"):
         await preview(
             CONNECT, target=LINK, navigator=_Navigator(SAME_NAME_ELSEWHERE), page=browser_page
         )

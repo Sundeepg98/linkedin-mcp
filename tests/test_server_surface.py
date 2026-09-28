@@ -1,4 +1,4 @@
-"""The tool surface: sixty tools, forty-three of which do not write.
+"""The tool surface: sixty-one tools, forty-four of which do not write.
 
 **AND THIS LINE IS NOW DERIVED, NOT MAINTAINED, 2026-09-20.** It had gone stale
 a THIRD time -- "forty-four tools, thirty-two of which do not write" against a
@@ -221,6 +221,12 @@ EXPECTED_TOOLS = {
     # suggested people with their presence (census M M53). Neither writes.
     "linkedin_recruiter_insights",
     "linkedin_messaging_presence",
+    # THE SIXTY-FIRST, 2026-09-28 (lane L5, ruling
+    # NAMED-PROFILE-READ-BEHIND-A-GRANT): a READ of the profile of a member
+    # he names by link or member id, loaded once behind the single-use
+    # grant through the second door; its preview loads nothing. It writes
+    # nothing, and it is on no write table (census N 178 stays GAP).
+    "linkedin_read_named_profile",
     # THE THIRTY-EIGHTH, 2026-09-05: linkedin_events_home, a READ. No
     # write was added. It is the only tool here whose whole answer can be
     # ZERO, and its reader returns that integer only when four
@@ -592,8 +598,14 @@ async def tools():
     return {t.name: t for t in await mcp.list_tools()}
 
 
-async def test_the_surface_is_exactly_the_sixty_tools(tools):
-    """RENAMED AGAIN AT LANE S'S MERGE OF MASTER 0867bda, 2026-09-28, to
+async def test_the_surface_is_exactly_the_sixty_one_tools(tools):
+    """RENAMED AGAIN ON LANE L5'S ORDER OF 2026-09-28 08:06, to
+    ``..._sixty_one_tools``: one READ, ``linkedin_read_named_profile`` (ruling
+    NAMED-PROFILE-READ-BEHIND-A-GRANT), the profile of a member he names,
+    loaded once behind the single-use grant. MEASURED off the registry;
+    the name moved with the pin.
+
+    RENAMED AGAIN AT LANE S'S MERGE OF MASTER 0867bda, 2026-09-28, to
     ``..._sixty_tools``: that lane's branch had brought two READS together
     (``linkedin_recruiter_insights``, census N 195, and
     ``linkedin_messaging_presence``, census M M53) and renamed this test
@@ -889,7 +901,10 @@ async def test_the_surface_is_exactly_the_sixty_tools(tools):
     # branch (sixty-one there), linkedin_recruiter_insights and
     # linkedin_messaging_presence, so the split moves on its read side and the
     # write set holds. MEASURED off mcp.list_tools() on the merged tree.
-    assert len(tools) == 60
+    # SIXTY-ONE ON LANE L5'S ORDER OF 2026-09-28 08:06: linkedin_read_named_profile,
+    # a READ, so the split moves on its read side and the write set holds.
+    # MEASURED off mcp.list_tools().
+    assert len(tools) == 61
     # And the split is asserted, not just the total. A future tool arriving as
     # a write would otherwise only have to bump a number.
     #
@@ -1054,7 +1069,11 @@ async def test_the_surface_is_exactly_the_sixty_tools(tools):
     # FORTY-THREE ON LANE S'S BRANCH, 2026-09-28: linkedin_recruiter_insights
     # and linkedin_messaging_presence are READS -- each loads one admitted
     # page and presses nothing -- and the write side is unmoved.
-    assert len(set(tools) - SANCTIONED_WRITE_TOOLS) == 43
+    # FORTY-FOUR ON LANE L5'S ORDER OF 2026-09-28 08:06:
+    # linkedin_read_named_profile is a READ -- its preview loads nothing, its
+    # confirmed call loads one profile he named through the second door and
+    # presses nothing -- and the write side is unmoved.
+    assert len(set(tools) - SANCTIONED_WRITE_TOOLS) == 44
 
 
 def test_the_read_that_was_nearly_named_a_write():

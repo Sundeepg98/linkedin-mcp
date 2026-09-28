@@ -532,8 +532,13 @@ _ALLOWED_URL_PATTERNS: tuple[re.Pattern[str], ...] = (
     # Removing this line makes the boundary say what the server already claims.
     # (SINCE 2026-09-27 `known_side_effects` names two WRITE tools that load
     # the ONE profile a caller names, inside that act, through the second door
-    # below -- `assert_named_profile_url`. This allowlist still admits no
-    # third party's profile, and no read reaches that door.)
+    # below -- `assert_named_profile_url` -- and SINCE 2026-09-28 one READ,
+    # `linkedin_read_named_profile`, on HIS OWN RULING of that morning
+    # (NAMED-PROFILE-READ-BEHIND-A-GRANT, which amends this 2026-09-04 removal
+    # for exactly that read): a profile he names, loaded once behind the
+    # single-use grant. This allowlist still admits no third party's profile;
+    # the read reaches that door by one function, with its own preview's
+    # token, and no probe, census or instrument reaches it at all.)
     #
     # NOT "NOTHING USES IT, SO CLOSE IT" -- that is the weaker argument and it
     # was rejected. The measurement is the second reason, not the first.
@@ -3001,15 +3006,21 @@ def is_read_url(url: str) -> bool:
 # ``https://www.linkedin.com/in/<segment>/``, the segment a caller's -- and the
 # forbidden-substring list applies to it WITHOUT ANY EXEMPTION. It has one
 # caller in the package: ``browser.LinkedInBrowser.goto`` with
-# ``named_profile=True``, which ``writes._load_named_profile`` alone passes,
-# and that function refuses any spec that is not a named-profile write. Both
-# facts are pinned in ``tests/test_named_profile_route.py``.
+# ``named_profile=True``, which two functions pass --
+# ``writes._load_named_profile``, which refuses any spec that is not a
+# named-profile write, and, since 2026-09-28,
+# ``named_profile.load_the_confirmed_profile``, which redeems its own
+# preview's single-use token before it composes an address (ruling
+# NAMED-PROFILE-READ-BEHIND-A-GRANT). Both facts are pinned in
+# ``tests/test_named_profile_route.py``, and the read's own callers in
+# ``tests/test_named_profile_read.py``.
 #
 # WHY A SECOND DOOR RATHER THAN AN ALLOWLIST LINE. An allowlist line admits a
 # shape for EVERY caller, and the whole of the ruling is WHO may load it: the
-# act he ordered, aimed at the person he named. A read tool that could reach
-# ``/in/<slug>/`` is the thing ``PERMANENTLY_FORBIDDEN`` names -- a stranger's
-# privacy spent on a measurement.
+# act he ordered, aimed at the person he named -- or, since 2026-09-28, the
+# one read he confirms of a person he names. A read tool that could reach
+# ``/in/<slug>/`` for anything else is the thing ``PERMANENTLY_FORBIDDEN``
+# names -- a stranger's privacy spent on a measurement.
 
 #: One profile's address segment, as a caller hands it over: a vanity name or
 #: a member id. Three to a hundred units, each a letter, a digit, a hyphen, an

@@ -349,4 +349,8 @@ def test_both_rules_reject_the_registry_that_was_actually_measured():
     # branch (sixty-one there), linkedin_recruiter_insights (census N 195) and
     # linkedin_messaging_presence (census M M53), on top of master's
     # fifty-eight -- measured off the merged registry, not summed.
-    assert len(_tool_names()) == 60
+    # SIXTY-ONE ON LANE L5'S ORDER OF 2026-09-28 08:06: one READ,
+    # linkedin_read_named_profile (ruling NAMED-PROFILE-READ-BEHIND-A-GRANT;
+    # census N 178 stays GAP on its capture), measured off the registry and
+    # moved with every other count site in the same commit.
+    assert len(_tool_names()) == 61

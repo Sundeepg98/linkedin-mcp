@@ -2259,8 +2259,10 @@ SANCTIONED_WRITES: dict[str, WriteSpec] = {
     # route", for the NEEDS-CAPTURE specs C-P1 to C-P6.
     #
     # THE PROFILE IS LOADED THROUGH A SECOND DOOR, never the read door, which
-    # still refuses it: ``readonly.assert_named_profile_url``, reached only by
-    # :func:`_load_named_profile`. And the page may only VETO: the landing is
+    # still refuses it: ``readonly.assert_named_profile_url``, reached by
+    # :func:`_load_named_profile` for these acts (and, since 2026-09-28, by
+    # ``named_profile.load_the_confirmed_profile`` for the one read he
+    # confirms). And the page may only VETO: the landing is
     # compared and withheld, and each control is addressed by the topcard's
     # own scope and NO position -- ``dom.topcard_invite_control_selector`` and
     # ``dom.topcard_message_control_selector`` -- pressed STRICTLY, after the
@@ -2503,8 +2505,18 @@ PERMANENTLY_FORBIDDEN: dict[str, str] = {
         "person, through a separate door the read boundary does not share. "
         "That is his choice made per call, and the view it emits lands on the "
         "person he chose to act toward. A load for a measurement -- a probe, "
-        "a read tool, a census -- stays forbidden, and no read can reach that "
-        "door"
+        "a census, a check of what a profile draws -- stays forbidden. "
+        "NARROWED AGAIN 2026-09-28, BY THE OPERATOR HIMSELF: ruling "
+        "NAMED-PROFILE-READ-BEHIND-A-GRANT takes exactly ONE read out of this "
+        "entry -- linkedin_read_named_profile, which loads the profile of a "
+        "member he names in that call, by link or member id and never a name "
+        "read off a page, once, behind the single-use grant, its preview "
+        "loading nothing and saying that the member may be shown the view. "
+        "It reaches the same door by one function, with a token its own "
+        "preview minted. Everything else stays forbidden on the ground above, "
+        "which is unchanged -- the view spends the member's privacy, and only "
+        "his confirmation of that one read may spend it -- so no probe, "
+        "census, instrument or unconfirmed read loads a third party's profile"
     ),
     "mark_notifications_read": (
         "clearing his unread badge destroys signal he has not seen, and the "
@@ -3639,7 +3651,9 @@ async def _load(navigator: Any, page: Any, url: str, *, surface: str) -> str:
 
 #: THE ACTIONS THAT LOAD A NAMED PERSON'S PROFILE, 2026-09-27. A closed set,
 #: and :func:`_load_named_profile` refuses every spec outside it -- so the
-#: second door is reachable from these two write specs and from nothing else.
+#: second door is reachable from these two write specs and, since
+#: 2026-09-28, from the one read he confirms
+#: (``named_profile.load_the_confirmed_profile``), and from nothing else.
 NAMED_PROFILE_ACTIONS: frozenset[str] = frozenset(
     {"connect_from_profile", "message_from_profile"}
 )
@@ -3702,9 +3716,11 @@ async def _load_named_profile(
     NOT THE READ DOOR, and deliberately not :func:`_load`. Ruling
     THIRD-PARTY-PROFILE-FOR-A-NAMED-TARGET admits a third party's profile ONLY
     inside an outward act whose target the operator names in that call; the
-    read door still refuses every such address. So this is the one function in
-    the package that asks the navigator for ``named_profile=True``, and it
-    asks only for a spec in :data:`NAMED_PROFILE_ACTIONS`, with the address
+    read door still refuses every such address. So this is one of the TWO
+    functions in the package that ask the navigator for ``named_profile=True``
+    -- the other is ``named_profile.load_the_confirmed_profile``, the read he
+    confirms (2026-09-28) -- and it asks only for a spec in
+    :data:`NAMED_PROFILE_ACTIONS`, with the address
     COMPOSED by the boundary from the segment of the caller's own target --
     never a landing, never a link read off a page.
     """

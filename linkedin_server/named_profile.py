@@ -15,6 +15,16 @@ the landing veto, the verdicts over :func:`dom.read_named_profile`'s integers,
 the conversation a Message press opens, and the one step that prints WHOM the
 act resolved to. ``writes.py`` holds the specs and calls in.
 
+AND, SINCE 2026-09-28, ONE READ (section 6). Ruling
+``NAMED-PROFILE-READ-BEHIND-A-GRANT`` (the operator, verbatim: "Yes, I'm giving
+you permission."; ``_audit/2026-09-28-rulings-named-profile-read.md``) permits
+a read of the profile of a member he names, by link or member id, behind the
+single-use grant -- its preview loading NOTHING and saying that LinkedIn may
+show the member the view -- with the declared fields returned as people
+records, one page per call, nothing stored, never for a measurement. It is
+``linkedin_read_named_profile``, and it reaches the second door through
+:func:`load_the_confirmed_profile` alone, with a token its own preview minted.
+
 WHAT IS MEASURED AND WHAT IS NOT, because an act on a person is exactly where
 a derived claim must not pass for a measured one. MEASURED over every capture
 on disk (2026-09-27): the ``Invite <name> to connect`` control, a ``<button>``
@@ -41,7 +51,9 @@ by a selector that carries no name and no position, pressed strictly.
 from __future__ import annotations
 
 import re
+import secrets
 import time
+from dataclasses import dataclass
 from typing import Any, Optional
 from urllib.parse import unquote, urlsplit
 
@@ -177,11 +189,14 @@ UNKNOWN = "unknown"
 _FACT_KEYS = (
     "title_shape", "topcards", "topcard_headings", "heading_matches_title",
     "degree", "degree_tokens", "invite_controls", "invite_matches",
-    "invite_in_topcard", "invite_controls_in_topcard", "message_controls",
-    "message_matches", "message_tag", "message_href", "message_in_topcard",
-    "message_controls_in_topcard", "more_actions", "dialogs",
-    "composer_editors", "conversation_bubbles", "named_controls",
-    "dialog_controls", "dialog_note_fields", "error",
+    "invite_in_topcard", "invite_controls_in_topcard", "invite_visible_in_topcard",
+    "invite_owner_visible_in_topcard", "invite_foreign_in_topcard",
+    "message_controls", "message_matches", "message_tag", "message_href",
+    "message_in_topcard", "message_controls_in_topcard", "message_kind_in_topcard",
+    "message_visible_in_topcard", "message_owner_visible_in_topcard",
+    "message_foreign_in_topcard", "more_in_topcard", "more_visible_in_topcard",
+    "more_actions", "dialogs", "composer_editors", "conversation_bubbles",
+    "named_controls", "dialog_controls", "dialog_note_fields", "error",
 )
 
 
@@ -222,68 +237,86 @@ def _identity_why(reading: dict[str, Any]) -> str:
     )
 
 
-def _the_only_one_in_the_topcard(reading: dict[str, Any], key: str, kind: str) -> Optional[str]:
-    """Why the topcard does not hold exactly ONE control of this kind, or None.
+def _the_one_visible_and_theirs(
+    reading: dict[str, Any], kind: str, prefix: str, named_as: str
+) -> Optional[str]:
+    """Why the owner's topcard does not draw exactly ONE VISIBLE control of this
+    kind, and that one the owner's, or ``None`` when it does.
 
     THE PRESS CARRIES NO POSITION (see :func:`dom.topcard_invite_control_selector`):
-    it is the topcard-scoped selector, pressed strictly, so it can only ever
-    mean "the one control of this kind in the topcard". This is where that
-    one is required -- whatever its label -- beside the page's own check that
-    it is the owner's.
+    it is the topcard-scoped, VISIBLE-only selector, pressed strictly, so it can
+    only ever mean "the one visible control of this kind in the topcard". This
+    is where that one is required, and required to be the owner's: a control
+    of the kind that names somebody else -- visible or not -- refuses the act,
+    because the owner's own topcard has no reason to draw one.
+
+    REBUILT 2026-09-28 over the live skeleton (the orchestrator's addendum of
+    08:43). The live topcard draws each action TWICE, one of the two hidden,
+    and draws its Message control named by its own text, with no label: the
+    old reader counted labelled controls only, page-wide, found none naming
+    the owner, and refused every live Message. It counts now what the press
+    can reach -- the visible controls inside the topcard -- and what makes one
+    the owner's is settled in the page.
     """
-    count = coerce.as_count(reading.get(key))
-    if count == 1:
+    visible = coerce.as_count(reading.get(prefix + "_visible_in_topcard"))
+    owners = coerce.as_count(reading.get(prefix + "_owner_visible_in_topcard"))
+    foreign = coerce.as_count(reading.get(prefix + "_foreign_in_topcard"))
+    if foreign:
+        return (
+            f"the person's topcard draws {foreign} {kind} control(s) that are not "
+            f"theirs -- {named_as} -- and the owner's own topcard has no reason "
+            "to draw one: pressing any control there could reach somebody else. "
+            "Refused before anything is pressed."
+        )
+    if visible == 1 and owners == 1:
         return None
     return (
-        f"the person's topcard draws {count} {kind} control(s) of any label, "
-        "where exactly one -- theirs -- is the only shape this act presses: "
-        "the press names no position, so a second control of the kind would "
-        "leave it choosing, and it is pressed strictly so that one appearing "
-        "mid-press stops it. Where a third party's profile draws its own "
-        "controls has never been captured (NEEDS-CAPTURE C-P1)."
+        f"the person's topcard draws {visible} VISIBLE {kind} control(s), "
+        f"{owners} of them theirs, where exactly one, visible and theirs, is the "
+        "only shape this act presses: the press names no position and reaches "
+        "only what is visible, so two would leave it choosing, and it is "
+        "pressed strictly so that a second appearing mid-press stops it. (The "
+        "live topcard draws each action twice and hides one -- measured on the "
+        "live skeleton of 2026-09-28 -- so the visible one is the only one "
+        "counted.)"
     )
 
 
 def connect_state(reading: dict[str, Any]) -> tuple[str, str]:
     """``(state, why)`` -- is there exactly one Connect for THIS person?
 
-    ``connect_control_drawn`` needs the identity confirmed, exactly one control
-    named ``Invite <owner> to connect`` on the page (compared in the page),
-    that one INSIDE the owner's topcard and the ONLY Connect-shaped control
-    there, and no dialog already open. Nothing about the control crosses: the
-    press is :func:`dom.topcard_invite_control_selector`, pressed strictly.
+    ``connect_control_drawn`` needs the identity confirmed, exactly ONE VISIBLE
+    Connect-shaped control inside the owner's topcard, that one named
+    ``Invite <owner> to connect`` (compared in the page), no Connect-shaped
+    control there naming anybody else, and no dialog already open. Nothing
+    about the control crosses: the press is
+    :func:`dom.topcard_invite_control_selector`, visible-only, pressed strictly.
     (It carried a POSITION -- first in the whole page's list, then in the
     topcard's -- until two re-checks of 2026-09-27 showed a re-render could
-    hand either position to a stranger's control.)
+    hand either position to a stranger's control; and it counted hidden
+    controls until the live skeleton of 2026-09-28 showed the topcard hides
+    a duplicate of each action.) A same-name stranger's control OUTSIDE the
+    topcard is not the press's to reach and is not counted.
     """
     if not identity_confirmed(reading):
         return UNKNOWN, _identity_why(reading)
-    matches = coerce.as_count(reading.get("invite_matches"))
-    if matches == 0:
+    if (
+        coerce.as_count(reading.get("invite_visible_in_topcard")) == 0
+        and coerce.as_count(reading.get("invite_foreign_in_topcard")) == 0
+    ):
         degree = reading.get("degree")
         return UNKNOWN, (
-            "this person's profile draws no Connect control naming them "
-            f"(degree read: {degree!r}; {coerce.as_count(reading.get('more_actions'))} "
-            "'More actions' control(s)). You may already be connected, an "
+            "this person's topcard draws no visible Connect control naming them "
+            f"(degree read: {degree!r}; "
+            f"{coerce.as_count(reading.get('more_visible_in_topcard'))} visible "
+            "'More' control(s) in the topcard). You may already be connected, an "
             "invitation may be pending, or Connect sits inside the 'More' menu -- "
             "which has never been captured and which this act does not open. "
             "NEEDS-CAPTURE C-P1."
         )
-    if matches > 1:
-        return UNKNOWN, (
-            f"{matches} controls are named for inviting this person, and that "
-            "is a refusal rather than a choice: pressing one would be choosing "
-            "by position."
-        )
-    if coerce.as_count(reading.get("invite_in_topcard")) != 1:
-        return UNKNOWN, (
-            "the one control named for inviting this person is NOT inside "
-            "their topcard. It may belong to somebody else with the same name "
-            "-- a card in 'People also viewed', say -- and an invitation there "
-            "would reach a stranger. Where a third party's profile draws its "
-            "own Connect has never been captured (NEEDS-CAPTURE C-P1)."
-        )
-    why_not = _the_only_one_in_the_topcard(reading, "invite_controls_in_topcard", "Connect")
+    why_not = _the_one_visible_and_theirs(
+        reading, "Connect", "invite", "named for inviting somebody else"
+    )
     if why_not:
         return UNKNOWN, why_not
     if coerce.as_count(reading.get("dialogs")):
@@ -292,12 +325,12 @@ def connect_state(reading: dict[str, Any]) -> tuple[str, str]:
             "open on the profile. Connect is not pressed underneath one."
         )
     return CONNECT_FROM, (
-        "exactly one control named for inviting this person to connect -- the "
-        "label shape measured 44 times on other surfaces -- and it is the only "
-        "Connect control in the topcard of a page that names the same person. "
-        "PRESSING IT MAY SEND THE INVITATION AT ONCE, with no further step: that "
-        "is how Connect is known to behave, and this is the last point at which "
-        "nothing has happened."
+        "exactly one visible control named for inviting this person to connect "
+        "-- the label shape measured 44 times on other surfaces -- and it is the "
+        "only visible Connect control in the topcard of a page that names the "
+        "same person. PRESSING IT MAY SEND THE INVITATION AT ONCE, with no further "
+        "step: that is how Connect is known to behave, and this is the last point "
+        "at which nothing has happened."
     )
 
 
@@ -305,33 +338,33 @@ def message_state(reading: dict[str, Any]) -> tuple[str, str]:
     """``(state, why)`` -- is there exactly one Message for THIS person, of a
     shape this act may press?
 
-    Pressable: a ``<button>``, or an ``<a>`` whose address is the composer --
-    the destination measured on 16 of the 18 Message controls captured. A link
-    anywhere else would navigate to an address the page supplied, which
-    PAGE-MAY-VETO-NEVER-SUPPLY forbids. It must be the only Message-shaped
-    control in the owner's topcard, for :func:`connect_state`'s reason. And no
-    conversation composer may already be open: the one that opens must be the
-    one this act types into.
+    The one VISIBLE Message-shaped control inside the owner's topcard, and it
+    the owner's: a control LABELLED ``Message <owner>``, or -- the live page's
+    shape, measured 2026-09-28 -- one with no label whose own text is exactly
+    "Message" (see :data:`dom.TOPCARD_MESSAGE_CONTROL`). Pressable: a
+    ``<button>``, or an ``<a>`` whose address is the composer -- the
+    destination measured on 16 of the 18 labelled Message controls captured
+    and on both of the live topcard's. A link anywhere else would navigate to
+    an address the page supplied, which PAGE-MAY-VETO-NEVER-SUPPLY forbids.
+    And no conversation composer may already be open: the one that opens must
+    be the one this act types into.
     """
     if not identity_confirmed(reading):
         return UNKNOWN, _identity_why(reading)
-    matches = coerce.as_count(reading.get("message_matches"))
-    if matches != 1:
+    if (
+        coerce.as_count(reading.get("message_visible_in_topcard")) == 0
+        and coerce.as_count(reading.get("message_foreign_in_topcard")) == 0
+    ):
         return UNKNOWN, (
-            f"{matches} Message control(s) are named for this person, where "
-            "exactly one is the only aimable number. None may mean the profile "
-            "draws Message only for connections, or in a menu never captured "
-            "(NEEDS-CAPTURE C-P4)."
+            "this person's topcard draws no visible Message control -- "
+            f"{coerce.as_count(reading.get('message_kind_in_topcard'))} of the "
+            "kind drawn, none visible. The profile may draw Message only for "
+            "connections, or in a menu never captured (NEEDS-CAPTURE C-P4)."
         )
-    if coerce.as_count(reading.get("message_in_topcard")) != 1:
-        return UNKNOWN, (
-            "the one Message control named for this person is NOT inside "
-            "their topcard. It may belong to somebody else with the same name, "
-            "and a message there would reach a stranger. Where a third party's "
-            "profile draws its own Message has never been captured "
-            "(NEEDS-CAPTURE C-P1)."
-        )
-    why_not = _the_only_one_in_the_topcard(reading, "message_controls_in_topcard", "Message")
+    why_not = _the_one_visible_and_theirs(
+        reading, "Message", "message",
+        "labelled for somebody else, or saying something other than 'Message'",
+    )
     if why_not:
         return UNKNOWN, why_not
     tag = reading.get("message_tag")
@@ -351,9 +384,9 @@ def message_state(reading: dict[str, Any]) -> tuple[str, str]:
         )
     degree = reading.get("degree")
     return MESSAGE_FROM, (
-        "exactly one Message control named for this person, the only one in "
-        "their topcard, of a shape this act may press, and no composer "
-        "already open."
+        "exactly one visible Message control in this person's topcard, and it "
+        "is theirs, of a shape this act may press, and no composer already "
+        "open."
         + (
             " The profile reads '1st': the words are typed only if, after the "
             "press, exactly one empty composer sits in a conversation titled "
@@ -436,8 +469,10 @@ def connect_verdict(
         )
     # THE OWNER'S OWN CONNECT, counted inside the topcard -- the only place
     # the act would press one. A same-name control elsewhere on the page is
-    # somebody else's and says nothing about this invitation.
-    still = coerce.as_count(fresh.get("invite_in_topcard"))
+    # somebody else's and says nothing about this invitation. VISIBLE ONLY
+    # since 2026-09-28: the live topcard draws each action twice and hides
+    # one, and a hidden duplicate counted here would read two.
+    still = coerce.as_count(fresh.get("invite_owner_visible_in_topcard"))
     tokens = list(fresh.get("named_controls") or [])
     if still == 1:
         return CONNECT_STILL_DRAWN, (
@@ -1033,6 +1068,52 @@ def _above_contact_info(lines: list[Any]) -> list[Any]:
     return lines
 
 
+def person_from_the_topcard(
+    fields: dict[str, Any], *, segment: str, degree: Any = None
+) -> Optional[dict[str, Any]]:
+    """The people record a profile's topcard names, or ``None``. PURE: it reads
+    no page, only :func:`dom.read_profile_fields`' reading of one.
+
+    THE ONE PARSE BOTH ROUTES MAKE (2026-09-28): the named acts' preview
+    (:func:`name_the_profile_target`) and the read he names
+    (:func:`read_the_confirmed_profile`) name the member with the same rules --
+    the title without its notification count, the topcard picked BY THAT NAME,
+    degree lines dropped, the lines cut at Contact info, and the name the parser
+    reads HELD TO THE NAME THE TITLE GIVES, so a section picked by position
+    rather than by name names nobody. Split out of the preview's namer rather
+    than copied, because two copies of a rule that decides whom a record names
+    are two rules.
+
+    ``segment`` is the caller's own; the record's link is the address this
+    server COMPOSED from it, never a link read off the page. ``degree`` is what
+    the caller read, or ``None`` -- ABSENT, the read's choice: no capture shows
+    a third party's degree line.
+    """
+    title = _COUNT_PREFIX.sub("", str(fields.get("title") or ""))
+    top = shape.pick_topcard(fields.get("sections") or [], title)
+    # A LINE WITH NO LETTER AND NO DIGIT IS NEVER A HEADLINE OR A PLACE
+    # (2026-09-28): the live skeleton's topcard draws two such lines between
+    # the name and the headline -- a two-character one whose words the
+    # skeleton does not keep, and a separator -- and the parser takes the
+    # first eligible line for the headline.
+    lines = [
+        line
+        for line in (top or {}).get("lines") or []
+        if not _DEGREE_LINE.fullmatch(str(line).strip())
+        and any(character.isalnum() for character in str(line))
+    ]
+    parsed = shape.parse_profile_topcard(_above_contact_info(lines))
+    wanted = shape.name_from_title(title)
+    if not wanted or str(parsed.get("name") or "").casefold() != wanted.casefold():
+        return None
+    return people_seam.person(
+        name=parsed.get("name"),
+        headline=parsed.get("headline"),
+        href=profile_url(segment),
+        degree=degree,
+    )
+
+
 async def name_the_profile_target(
     page: Any, spec: Any, observation: Any, block: dict[str, Any], *, segment: str
 ) -> dict[str, Any]:
@@ -1076,30 +1157,15 @@ async def name_the_profile_target(
     try:
         again = await dom.read_named_profile(page)
         if identity_confirmed(again):
-            fields = await dom.read_profile_fields(page)
             # THE TITLE WITHOUT ITS NOTIFICATION COUNT, which 21 of 95
-            # captures carry as a leading "(N) " -- otherwise the topcard is
-            # not found BY NAME and the first section stands in for it.
-            title = _COUNT_PREFIX.sub("", str(fields.get("title") or ""))
-            top = shape.pick_topcard(fields.get("sections") or [], title)
-            lines = [
-                line
-                for line in (top or {}).get("lines") or []
-                if not _DEGREE_LINE.fullmatch(str(line).strip())
-            ]
-            parsed = shape.parse_profile_topcard(_above_contact_info(lines))
-            # THE NAME READ MUST BE THE NAME THE TITLE GIVES. The page's own
-            # script already compared the topcard's heading with the title;
-            # this holds the reader's first line to the same name, so a
-            # section picked by position rather than by name names nobody.
-            wanted = shape.name_from_title(title)
-            if wanted and str(parsed.get("name") or "").casefold() == wanted.casefold():
-                person = people_seam.person(
-                    name=parsed.get("name"),
-                    headline=parsed.get("headline"),
-                    href=profile_url(segment),
-                    degree=facts.get("degree"),
-                )
+            # captures carry as a leading "(N) ", and THE NAME READ HELD TO
+            # THE NAME THE TITLE GIVES -- both in the one parse the read he
+            # names shares (:func:`person_from_the_topcard`, 2026-09-28).
+            person = person_from_the_topcard(
+                await dom.read_profile_fields(page),
+                segment=segment,
+                degree=facts.get("degree"),
+            )
     except Exception as exc:  # noqa: BLE001 - a read for a human, never raised
         logger.debug("named profile identity unreadable: %s", type(exc).__name__)
         person = None
@@ -1115,4 +1181,352 @@ async def name_the_profile_target(
         "server cannot tell you whom the act would reach. Open the profile "
         "yourself and check it before confirming."
     )
+    return out
+
+
+# ---------------------------------------------------------------------------
+# 6. THE READ HE NAMES -- ruling NAMED-PROFILE-READ-BEHIND-A-GRANT
+# ---------------------------------------------------------------------------
+#
+# THE RULING (the operator, 2026-09-28 08:01, verbatim: "Yes, I'm giving you
+# permission."; ``_audit/2026-09-28-rulings-named-profile-read.md``, registered
+# as NAMED-PROFILE-READ-BEHIND-A-GRANT): a read of a member's profile HE NAMES
+# in the call -- by link or member id, never a name read off a page -- behind
+# the single-use grant; the preview states that LinkedIn may show the member
+# the view; the declared fields leave as people records under
+# PEOPLE-DATA-MITIGATIONS; never for a measurement. It amends his own
+# 2026-09-04 removal of the third-party profile pattern (the exclusion family
+# NO-THIRD-PARTY-PROFILE-LOAD) for exactly this read, and unblocks ``N 178``.
+#
+# THE PREVIEW LOADS NOTHING, AND THAT IS THE RULING'S OWN CONDITION. The
+# mitigation he approved reads "a single-use confirmation for each view,
+# stating the possible trace". The view IS the load, so the confirmation has
+# to come before it. The two named-person WRITES load the profile at their
+# preview because that load is part of the act he ordered toward that person;
+# for this read the load is the whole act. So the preview names the member by
+# the ONE address it resolved from his argument -- a link says WHO -- and says
+# plainly that it has not read the name: a people record cannot be built
+# without one (``people_data.Person`` requires a name), and the name is on the
+# page whose load is being confirmed. The record comes back from the confirmed
+# call, read once.
+#
+# ONE PAGE PER CALL: the preview loads none; the confirmed call exactly one --
+# this profile, through the second door, with no scroll and no press.
+#
+# THE GRANT HAS THE WRITES' SHAPE AND ITS OWN REGISTRY. ``writes.mint`` issues
+# a grant only for a sanctioned WRITE, only against a reading a preview LOADED,
+# and only with writes switched on: three facts about writes that this read
+# does not share. So this read keeps its own grants with the same properties
+# -- a token of 24 random bytes, bound to the canonical link, valid for
+# :data:`READ_GRANT_TTL_SECONDS` (the writes' 120, pinned equal by a test),
+# single-use at BOTH doors (consumed once, loaded once), swept on every mint
+# and consume, held in this process's memory and nowhere else. What a grant
+# holds is HIS OWN ARGUMENT, canonicalised -- never a page string.
+#
+# WHAT IS MEASURED AND WHAT IS NOT. The name and the headline are read with
+# the parse the named acts' preview uses (:func:`person_from_the_topcard`),
+# over :func:`dom.read_profile_fields`, the reader ``linkedin_my_profile`` uses
+# -- measured on his OWN profile's topcard (six captures); on a third party's
+# page the same template is DERIVED (NEEDS-CAPTURE C-P1), and the result says
+# so. The degree line and the member's GROUPS are ABSENT: no capture shows
+# either on a third party's profile, and a field no capture shows is not
+# read. ``N 178`` -- the groups a member belongs to -- waits on the capture
+# spec C-P7 in ``_audit/2026-09-24-lane-l5-messaging.md``, taken inside the
+# first confirmed read on a member he names; the one count this read takes
+# for it, :data:`GROUP_LINK_SELECTOR`, is a hint for that capture and reads
+# nobody's groups.
+
+#: The action a read grant is bound to. Not a write: it is in no
+#: ``writes.SANCTIONED_WRITES`` table and no write door accepts it.
+READ_ACTION = "read_named_profile"
+
+#: How long a read grant lives. The writes' ``GRANT_TTL_SECONDS``, restated
+#: here because ``writes`` imports this module; ``tests/test_named_profile_read.py``
+#: pins the two equal.
+READ_GRANT_TTL_SECONDS = 120.0
+
+#: THE ONE COUNT THE READ TAKES FOR THE CAPTURE C-P7 NEEDS: how many links on
+#: the loaded page point under ``/groups/``. An integer and a hint, read once
+#: -- it says whether a group link was drawn at load, without a scroll, which
+#: tells the capture whether that load's DOM can show a member's groups at
+#: all. It names no group, and no field is built on it.
+GROUP_LINK_SELECTOR = 'a[href*="/groups/"]'
+
+
+@dataclass
+class ReadGrant:
+    """Permission for ONE load of ONE profile he named, once, soon."""
+
+    #: The canonical link composed from HIS argument -- the whole target.
+    target: str
+    token: str
+    minted_at: float
+    consumed: bool = False
+    #: SET BEFORE THE ONE NAVIGATION and refused on a second: single-use at
+    #: the load as well as at the token, as ``writes.WriteGrant.performed``
+    #: is at ``perform``.
+    loaded: bool = False
+
+    def expired(self) -> bool:
+        return time.monotonic() - self.minted_at > READ_GRANT_TTL_SECONDS
+
+
+#: Live read grants, by token. Process-local by construction.
+_READ_GRANTS: dict[str, ReadGrant] = {}
+
+
+def _sweep_read_grants() -> int:
+    """Drop every read grant past its lifetime. Returns how many went."""
+    stale = [token for token, grant in _READ_GRANTS.items() if grant.expired()]
+    for token in stale:
+        _READ_GRANTS.pop(token, None)
+    return len(stale)
+
+
+def mint_read_grant(segment: str) -> ReadGrant:
+    """Issue a single-use grant for ONE confirmed load of the profile he named.
+
+    Only :func:`read_preview` calls this, and it loads nothing: a grant here is
+    permission for a view that has not happened, which is the ruling's point.
+    """
+    grant = ReadGrant(
+        target=profile_url(segment),
+        token=secrets.token_urlsafe(24),
+        minted_at=time.monotonic(),
+    )
+    _READ_GRANTS[grant.token] = grant
+    # AFTER the insert, as ``writes.mint`` sweeps: the new grant is never the
+    # one swept, and every stale one goes now.
+    _sweep_read_grants()
+    return grant
+
+
+def consume_read_grant(token: Any, segment: str) -> ReadGrant:
+    """Redeem a token for the ONE profile it was minted against, or raise.
+
+    Every refusal is a view he did not confirm: no token, an unknown or used
+    one, an expired one, or one minted for another profile. None of the
+    messages quotes a link -- a profile link can carry a person's name, and
+    an error is printed.
+    """
+    if not isinstance(token, str) or not token.strip():
+        raise WriteAttemptError(
+            "no confirm token. This read loads a profile only with the token "
+            "from its own preview: call it once without confirm_token, read "
+            "what the preview says, then pass the token it hands you."
+        )
+    grant = _READ_GRANTS.get(token.strip())
+    if grant is None or grant.consumed:
+        raise WriteAttemptError(
+            "unknown or already-used confirm token. A read token works once; "
+            "run the preview again for a new one."
+        )
+    if grant.expired():
+        _READ_GRANTS.pop(grant.token, None)
+        raise WriteAttemptError(
+            f"this confirm token expired after {READ_GRANT_TTL_SECONDS:.0f}s. "
+            "Run the preview again and read it before confirming."
+        )
+    if grant.target != profile_url(segment):
+        raise WriteAttemptError(
+            "this confirm token was minted for a different profile than the "
+            "one passed now. Nothing was loaded; run the preview for the "
+            "profile you mean."
+        )
+    grant.consumed = True
+    _READ_GRANTS.pop(grant.token, None)
+    _sweep_read_grants()
+    return grant
+
+
+def discard_read_grants() -> None:
+    """Drop every live read grant."""
+    _READ_GRANTS.clear()
+
+
+def read_preview(segment: str) -> dict[str, Any]:
+    """The first call: NOTHING IS LOADED. Whom it resolved, what the view
+    costs, and a single-use token.
+
+    ``segment`` is :func:`profile_segment`'s, so a name never reaches here.
+    """
+    grant = mint_read_grant(segment)
+    as_member_id = bool(MEMBER_ID.fullmatch(segment))
+    block: dict[str, Any] = {
+        "action": READ_ACTION,
+        "loaded": False,
+        "pages_loaded": 0,
+        "profile_this_loads": grant.target,
+        "given_as": "a member id" if as_member_id else "a profile link",
+        "whom_this_resolves_to": None,
+        "whom_this_resolves_to_why": (
+            "NOT READ, AND ON PURPOSE: the name and headline are on the "
+            "profile page, and loading it IS the view this confirmation asks "
+            "you for. So the preview names the member by the one address it "
+            "resolved from your argument -- the link above -- and the "
+            "confirmed call reads the name and headline once and returns them "
+            "as a people record. CHECK THE LINK: a link that names the wrong "
+            "person is the one failure this preview cannot catch for you."
+        ),
+        "they_may_see_this_view": (
+            "LinkedIn may show this member that you viewed their profile -- "
+            "among the people who viewed it, in the way your own "
+            "profile-viewing setting presents you -- and a view cannot be "
+            "taken back. Confirming loads their profile ONCE; this preview "
+            "loaded nothing."
+        ),
+        "on_confirm": {
+            "pages_loaded": 1,
+            "person": (
+                "name, headline and link, as a people record: the member's own "
+                "words, sanitised, capped and marked as another member's text"
+            ),
+            "groups": (
+                "ABSENT: no capture shows a member's groups on their profile "
+                "(NEEDS-CAPTURE C-P7), and a field no capture shows is not read"
+            ),
+            "degree": "ABSENT: no capture shows a third party's degree line",
+        },
+        "confirm_token": grant.token,
+        "expires_in_seconds": int(READ_GRANT_TTL_SECONDS),
+        "kept": (
+            "nothing: what the confirmed read returns is in no grant, no log "
+            "and no file of this server's"
+        ),
+    }
+    if as_member_id:
+        block["member_id_landing"] = (
+            "LinkedIn may answer a member id by redirecting to the member's own "
+            "address. If it does, this read returns NOTHING -- a landing this "
+            "server did not compose names nobody it can vouch for "
+            "(PAGE-MAY-VETO-NEVER-SUPPLY) -- and the view may already have "
+            "been recorded. Whether it redirects has never been captured "
+            "(NEEDS-CAPTURE C-P6); pass the profile link to avoid the question."
+        )
+    return block
+
+
+async def load_the_confirmed_profile(
+    navigator: Any, page: Any, *, token: str, segment: str
+) -> str:
+    """The ONE load a confirmed read makes. Returns the landing for the reader
+    to COMPARE, and never for anything to navigate by or print.
+
+    THE SECOND DOOR'S ONLY READ CALLER. The token is redeemed FIRST -- an
+    unconfirmed, replayed, expired or foreign token raises before any address
+    is composed -- and the grant is marked loaded BEFORE the navigation, so a
+    grant can reach the door once. The address is composed by the boundary
+    from the caller's own segment (``readonly.named_profile_url``), checked by
+    ``readonly.assert_named_profile_url`` here and again by the navigator,
+    and loaded with ``named_profile=True``: the read door refuses every such
+    address, as it did before this ruling.
+    """
+    from linkedin_server.auth import assert_not_authwall
+
+    grant = consume_read_grant(token, segment)
+    if grant.loaded:
+        raise WriteAttemptError(
+            "this grant has already loaded its profile once. A read token "
+            "buys one load."
+        )
+    grant.loaded = True
+    # THE LOCALS ARE NAMED FOR THIS FUNCTION, as in ``writes._read_account_share_updates``:
+    # the navigation guard tracks a tainted NAME across the whole module, and a
+    # landing bound to ``landed`` here tainted every ``landed`` parameter above,
+    # spread through ``parts`` and ``path`` into ``profile_segment``'s
+    # ``segment``, and read this very navigation as one the page chose
+    # (measured 2026-09-28, ``tests/test_navigation_is_never_derived.py``).
+    profile_address = readonly.assert_named_profile_url(readonly.named_profile_url(segment))
+    read_landing = str(
+        await navigator.goto(page, profile_address, named_profile=True) or profile_address
+    )
+    assert_not_authwall(read_landing, surface="profile")
+    return read_landing
+
+
+async def read_the_confirmed_profile(
+    page: Any, *, segment: str, landed: str
+) -> dict[str, Any]:
+    """The confirmed read's answer, off the page :func:`load_the_confirmed_profile`
+    loaded. Reads; never navigates, presses or scrolls.
+
+    A LANDING ELSEWHERE VETOES THE WHOLE READ -- a member id LinkedIn
+    redirected, a profile that moved -- and nothing is read off a page this
+    server did not compose the address of (PAGE-MAY-VETO-NEVER-SUPPLY). THE
+    PAGE MUST NAME ONE PERSON: the title a profile title, exactly one
+    topcard, its first heading the title's name (compared in the page). Then
+    the person, as a people record whose name is held to the title's; the
+    groups and the degree ABSENT; and one hint count for the capture C-P7.
+    """
+    link = profile_url(segment)
+    out: dict[str, Any] = {
+        "action": READ_ACTION,
+        "loaded": True,
+        "pages_loaded": 1,
+        "profile_loaded": link,
+        "landed_on_the_named_profile": False,
+        "identity_confirmed": False,
+        "person": None,
+        "person_why": "",
+        "groups": None,
+        "groups_why": (
+            "ABSENT: no capture shows a member's groups on their profile, and "
+            "a field no capture shows is not read (NEEDS-CAPTURE C-P7)."
+        ),
+        "what_the_page_showed": {},
+        "capture_hints": {},
+        "the_view": (
+            "the profile was loaded once: LinkedIn may show this member that "
+            "you viewed it, and that cannot be undone."
+        ),
+        "kept": "nothing: this answer is in no grant, no log and no file.",
+    }
+    if not landed_on_profile(landed, segment):
+        out["person_why"] = (
+            "the browser did not land on the profile you named -- a member id "
+            "LinkedIn redirected (NEEDS-CAPTURE C-P6), or an address the page "
+            "chose -- so nothing is read off that page: a landing this server "
+            "did not compose names nobody it can vouch for. The landing is "
+            "withheld. Pass the profile link itself."
+        )
+        return out
+    out["landed_on_the_named_profile"] = True
+    reading = await dom.read_named_profile(page)
+    out["what_the_page_showed"] = {
+        key: reading.get(key)
+        for key in ("title_shape", "topcards", "topcard_headings", "heading_matches_title")
+    }
+    if not identity_confirmed(reading):
+        out["person_why"] = _identity_why(reading)
+        return out
+    out["identity_confirmed"] = True
+    person = None
+    try:
+        person = person_from_the_topcard(await dom.read_profile_fields(page), segment=segment)
+    except Exception as exc:  # noqa: BLE001 - the type is logged, never the words
+        logger.debug("named profile read unreadable: %s", type(exc).__name__)
+        person = None
+    out["person"] = person
+    out["person_why"] = (
+        "READ ONCE OFF THE PROFILE YOU NAMED, with the reader measured on your "
+        "own profile's topcard; on a third party's page that template is "
+        "derived (NEEDS-CAPTURE C-P1), so check it against the link. The name "
+        "is held to the one the page's own title gives."
+        if person
+        else "the page named one person, but its topcard did not yield that "
+        "name on a re-read, so no record is returned rather than a guess."
+    )
+    try:
+        links = coerce.as_count(await page.locator(GROUP_LINK_SELECTOR).count())
+    except Exception as exc:  # noqa: BLE001 - a hint; a failure is its type
+        logger.debug("group link count unreadable: %s", type(exc).__name__)
+        links = None
+    out["capture_hints"] = {
+        "group_links_drawn": links,
+        "note": (
+            "for NEEDS-CAPTURE C-P7 only: how many links on this load point "
+            "under /groups/, read once without a scroll. It names no group and "
+            "is not a reading of anybody's groups."
+        ),
+    }
     return out

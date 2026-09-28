@@ -129,6 +129,7 @@ PINNED_TOOL_SURFACE: dict[str, tuple[str, ...]] = {
     "linkedin_profile_editor_values": (),
     "linkedin_publish_post": ("confirm_token", "text"),
     "linkedin_react_to_item": ("confirm_token", "item"),
+    "linkedin_read_named_profile": ("confirm_token", "profile"),
     "linkedin_recent_job_searches": (),
     "linkedin_recruiter_insights": (),
     "linkedin_save_job": ("confirm_token", "job_id"),
@@ -455,8 +456,17 @@ PINNED_TOOL_SURFACE: dict[str, tuple[str, ...]] = {
 #: MEASURED off the merged registry, not summed**: master's 58 and 93 carry
 #: lane L5's retirement; this branch adds two tools and no parameter. No
 #: census row moves in the merge.
-PINNED_TOOL_COUNT = 60
-PINNED_PARAMETER_COUNT = 93
+#: **RE-PINNED 2026-09-28 AT 61 TOOLS AND 95 PARAMETERS on lane L5's order of
+#: 08:06 (ruling NAMED-PROFILE-READ-BEHIND-A-GRANT): one READ,
+#: `linkedin_read_named_profile(profile, confirm_token)` -- the profile of a
+#: member he names, loaded once behind the single-use grant, its name and
+#: headline returned as a people record.** THE CENSUS DECISION: `N 178` (which
+#: groups a member belongs to) STAYS GAP -- no capture shows a member's groups
+#: on their profile, so the read returns them ABSENT and the row waits on the
+#: capture spec C-P7; no other row moves. See
+#: `_audit/2026-09-24-lane-l5-messaging.md`, "The read he names".
+PINNED_TOOL_COUNT = 61
+PINNED_PARAMETER_COUNT = 95
 
 
 def live_surface() -> dict[str, tuple[str, ...]]:

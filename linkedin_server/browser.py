@@ -462,11 +462,14 @@ class LinkedInBrowser:
         ``named_profile`` SWAPS THE DOOR, IT DOES NOT OPEN ONE. With it set the
         url is checked by ``readonly.assert_named_profile_url`` -- exactly
         ``https://www.linkedin.com/in/<segment>/``, the segment a caller's --
-        INSTEAD of the read door, which still refuses every such address. One
-        call site in the package passes it, ``writes._load_named_profile``,
-        and that function refuses any spec that is not a named-profile write
-        (ruling THIRD-PARTY-PROFILE-FOR-A-NAMED-TARGET). Everything after the
-        door -- the rate slot, the navigation, the settle -- is the same code.
+        INSTEAD of the read door, which still refuses every such address. Two
+        call sites in the package pass it: ``writes._load_named_profile``,
+        which refuses any spec that is not a named-profile write (ruling
+        THIRD-PARTY-PROFILE-FOR-A-NAMED-TARGET), and, since 2026-09-28,
+        ``named_profile.load_the_confirmed_profile``, which redeems the read's
+        own single-use token first (ruling NAMED-PROFILE-READ-BEHIND-A-GRANT).
+        Everything after the door -- the rate slot, the navigation, the
+        settle -- is the same code.
 
         Raises:
             WriteAttemptError: url is not a permitted read surface, or, with

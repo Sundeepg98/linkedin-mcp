@@ -7646,16 +7646,47 @@ async def read_invitation_rail(page: Any, segment: Optional[str] = None) -> dict
 MESSAGE_CONTROL_PREFIX = "Message "
 MESSAGE_CONTROL = 'a[aria-label^="Message "], button[aria-label^="Message "]'
 
+#: THE PROFILE'S OWN MESSAGE CONTROL, AS THE LIVE PAGE DRAWS IT -- MEASURED
+#: 2026-09-28 on the live lane's skeleton of a first-degree profile the
+#: operator named (``tests/fixtures/synthetic/named_profile_live.html``): a
+#: link to the composer, ``/messaging/compose/``, whose accessible name is its
+#: own text, "Message", with NO aria-label -- drawn twice in the topcard, in
+#: two action rows, one of them hidden. The label convention above
+#: (``Message <full name>``) is the RAILS': every labelled Message control on
+#: that page is another person's. So the topcard's Message control is matched
+#: by BOTH shapes, and which one is the owner's is settled in the page
+#: (:data:`NAMED_PROFILE_JS`): a label must name the owner; a control without
+#: one must say exactly "Message" -- inside the owner's own topcard, that is
+#: the owner's action. The old reader matched the label alone, found none, and
+#: refused every live Message (the live lane, session 2).
+TOPCARD_MESSAGE_CONTROL = MESSAGE_CONTROL + ', a[href*="/messaging/compose/"]'
+
 
 #: THE PROFILE'S OWN TOPCARD, the one element whose id ends ``Topcard``
-#: (measured on his own profile, 6 captures; derived on a third party's).
+#: (measured on his own profile, 6 captures). On a third party's profile the
+#: live skeleton SHAPES ids, so the suffix is DERIVED there: the container that
+#: holds the owner's name heading has an 80-character id, 71 letters and 4
+#: digits -- ``com.linkedin.sdui.profile.card.ref`` (34), a 39-character
+#: member id, and a 7-letter suffix -- and its six sibling cards fit the same
+#: pattern with their own suffixes. Were it wrong, the reader finds no topcard
+#: and every act refuses.
 NAMED_PROFILE_TOPCARD = '[id$="Topcard"]'
 
 
 def _in_topcard(selector_list: str) -> str:
-    """Each alternative of a comma-separated selector, scoped to the topcard."""
+    """Each alternative of a comma-separated selector, scoped to the topcard
+    and to what is VISIBLE: Playwright's ``:visible``, a non-empty box and no
+    ``visibility:hidden`` -- the test :data:`NAMED_PROFILE_JS`'s ``visible``
+    applies in the page. The live topcard draws each action twice, one of the
+    two hidden (the live lane, 2026-09-28: Message 5 visible of 6 page-wide,
+    More 1 of 2), so a press scoped to the topcard alone would find two
+    matches and a strict press would refuse; scoped to the visible one, it
+    finds the owner's -- and still refuses if a second VISIBLE one is drawn
+    mid-press. A hidden duplicate is the shape that broke the live lane's own
+    More handle, which matched a hidden button."""
     return ", ".join(
-        NAMED_PROFILE_TOPCARD + " " + part.strip() for part in selector_list.split(",")
+        NAMED_PROFILE_TOPCARD + " " + part.strip() + ":visible"
+        for part in selector_list.split(",")
     )
 
 
@@ -7694,9 +7725,11 @@ def topcard_message_control_selector() -> str:
     It replaced ``message_control_selector``, the page-wide builder the
     route's first build pressed Message with; nothing else in the package
     pressed a Message control, so it was removed rather than kept beside this
-    one.
+    one. Since 2026-09-28 it matches :data:`TOPCARD_MESSAGE_CONTROL` -- the
+    live page's composer link named by its own text as well as the labelled
+    shape -- and only what is visible.
     """
-    return _in_topcard(MESSAGE_CONTROL)
+    return _in_topcard(TOPCARD_MESSAGE_CONTROL)
 
 
 #: THE OVERLAY CONVERSATION a profile's Message press is expected to open, and
@@ -7731,14 +7764,30 @@ OVERLAY_COMPOSER_EDITOR = 'form.msg-form div.msg-form__contenteditable[role="tex
 #: * the TOPCARD is the one element whose id ends ``Topcard`` (measured on his
 #:   own profile, 6 captures) and its FIRST HEADING must equal that name --
 #:   the same cross-check ``shape.pick_topcard`` makes. On a third party's
-#:   profile both are DERIVED: that page has never been captured;
+#:   profile the heading is MEASURED (the live skeleton of 2026-09-28: the
+#:   owner's name is an ``h2``, the first heading inside the container) and
+#:   the id's suffix DERIVED from its shape (see :data:`NAMED_PROFILE_TOPCARD`);
 #: * the CONNECT control is ``INVITE_CONTROL`` (a ``<button>`` whose name ends
 #:   `` to connect``, measured 44 times) whose whole name is ``Invite <name>
-#:   to connect``; the MESSAGE control is ``MESSAGE_CONTROL`` whose whole name
-#:   is ``Message <name>``. Both conventions are measured on people cards;
+#:   to connect``. MEASURED on people cards, and on the live skeleton's rails;
+#:   a third party's topcard Connect has never been captured (the one live
+#:   profile is first-degree);
+#: * the MESSAGE control, INSIDE THE TOPCARD, is :data:`TOPCARD_MESSAGE_CONTROL`:
+#:   the live skeleton draws it as a composer link named by its own text,
+#:   "Message", with no label -- twice, one of the two hidden -- while every
+#:   LABELLED Message control on that page (``Message <name>``) is another
+#:   person's, on a rail. MEASURED, 2026-09-28. The old reader matched the
+#:   label alone and refused the live page;
+#: * a control counts only when VISIBLE -- a non-empty box and no
+#:   ``visibility:hidden``, what Playwright's ``:visible`` means -- because the
+#:   live topcard draws each action twice and hides one (the live lane:
+#:   Message 5 visible of 6 page-wide, More 1 of 2). Which of the two rows is
+#:   hidden is not in the skeleton, which keeps no stylesheet;
 #: * the DEGREE is a topcard line that is exactly ``1st``, ``2nd`` or ``3rd``
-#:   (optionally ``3rd+``, optionally after a middle dot). DERIVED: no
-#:   capture holds a third party's topcard.
+#:   (optionally ``3rd+``, optionally after a middle dot). Its SHAPE is
+#:   measured on the live skeleton (a middle dot, a space and ``1st``: five characters); its words
+#:   are derived from the live lane's statement that the profile is
+#:   first-degree.
 #:
 #: A control whose name carries the owner's name but is neither of the two is
 #: reported as a CLOSED TOKEN -- pending, withdraw, follow, unfollow, more,
@@ -7767,7 +7816,21 @@ OVERLAY_COMPOSER_EDITOR = 'form.msg-form div.msg-form__contenteditable[role="tex
 NAMED_PROFILE_JS = """
 (cfg) => {
   const norm = (s) => String(s === null || s === undefined ? '' : s).replace(/\\s+/g, ' ').trim();
+  const visible = (el) => {
+    const box = el.getBoundingClientRect();
+    if (!(box.width > 0 && box.height > 0)) return false;
+    return window.getComputedStyle(el).visibility !== 'hidden';
+  };
   const out = {
+    message_kind_in_topcard: 0,
+    message_visible_in_topcard: 0,
+    message_owner_visible_in_topcard: 0,
+    message_foreign_in_topcard: 0,
+    invite_visible_in_topcard: 0,
+    invite_owner_visible_in_topcard: 0,
+    invite_foreign_in_topcard: 0,
+    more_in_topcard: 0,
+    more_visible_in_topcard: 0,
     title_shape: 'none',
     topcards: 0,
     topcard_headings: 0,
@@ -7842,12 +7905,46 @@ NAMED_PROFILE_JS = """
   const cards = document.querySelectorAll('[id$="Topcard"]');
   out.topcards = cards.length;
   const card = cards.length === 1 ? cards[0] : null;
+  const wantInvite = 'Invite ' + name + ' to connect';
+  const wantMessage = 'Message ' + name;
+  let ownerMessage = null;
   if (card) {
     const heads = card.querySelectorAll('h1, h2');
     out.topcard_headings = heads.length;
     out.heading_matches_title = heads.length >= 1 && norm(heads[0].innerText) === name;
     out.invite_controls_in_topcard = card.querySelectorAll(cfg.inviteSelector).length;
     out.message_controls_in_topcard = card.querySelectorAll(cfg.messageSelector).length;
+    // THE TOPCARD'S OWN CONTROLS BY KIND, AND WHICH ARE VISIBLE (2026-09-28,
+    // the live skeleton). A Message control with a label is the owner's only
+    // if the label names the owner; one without a label is the owner's only
+    // if it says exactly "Message" -- inside the owner's topcard, that is his
+    // action. Anything else of the kind is FOREIGN, and the gate refuses on
+    // it, visible or not.
+    for (const el of card.querySelectorAll(cfg.topcardMessageSelector)) {
+      out.message_kind_in_topcard += 1;
+      const label = el.getAttribute('aria-label');
+      const owner = label !== null ? norm(label) === wantMessage : norm(el.textContent) === 'Message';
+      if (!owner) out.message_foreign_in_topcard += 1;
+      if (!visible(el)) continue;
+      out.message_visible_in_topcard += 1;
+      if (owner) {
+        out.message_owner_visible_in_topcard += 1;
+        ownerMessage = el;
+      }
+    }
+    for (const el of card.querySelectorAll(cfg.inviteSelector)) {
+      const owner = norm(el.getAttribute('aria-label')) === wantInvite;
+      if (!owner) out.invite_foreign_in_topcard += 1;
+      if (!visible(el)) continue;
+      out.invite_visible_in_topcard += 1;
+      if (owner) out.invite_owner_visible_in_topcard += 1;
+    }
+    for (const el of card.querySelectorAll('button, a, [role="button"]')) {
+      const said = norm(el.getAttribute('aria-label') || el.textContent);
+      if (said !== 'More' && said !== 'More actions') continue;
+      out.more_in_topcard += 1;
+      if (visible(el)) out.more_visible_in_topcard += 1;
+    }
     const found = [];
     for (const raw of String(card.innerText || '').split('\\n')) {
       const line = norm(raw).replace(/^\\u00b7\\s*/, '');
@@ -7865,7 +7962,6 @@ NAMED_PROFILE_JS = """
     out.bubble_title_names_owner = said === name;
     out.bubble_title_contains_owner = said.indexOf(name) !== -1;
   }
-  const wantInvite = 'Invite ' + name + ' to connect';
   const invites = document.querySelectorAll(cfg.inviteSelector);
   let matches = 0;
   for (let i = 0; i < invites.length; i += 1) {
@@ -7874,7 +7970,6 @@ NAMED_PROFILE_JS = """
     if (card && card.contains(invites[i])) out.invite_in_topcard += 1;
   }
   out.invite_matches = matches;
-  const wantMessage = 'Message ' + name;
   const messages = document.querySelectorAll(cfg.messageSelector);
   const hrefToken = (href) => {
     if (href === null || href === undefined) return 'none';
@@ -7884,19 +7979,21 @@ NAMED_PROFILE_JS = """
     return 'other';
   };
   matches = 0;
-  let tag = null;
-  let href = null;
   for (let i = 0; i < messages.length; i += 1) {
     if (norm(messages[i].getAttribute('aria-label')) !== wantMessage) continue;
     matches += 1;
-    const t = messages[i].tagName.toLowerCase();
-    tag = matches === 1 ? (t === 'a' || t === 'button' ? t : 'other') : null;
-    href = matches === 1 ? hrefToken(messages[i].getAttribute('href')) : null;
     if (card && card.contains(messages[i])) out.message_in_topcard += 1;
   }
   out.message_matches = matches;
-  out.message_tag = matches === 1 ? tag : null;
-  out.message_href = matches === 1 ? href : null;
+  // THE TAG AND DESTINATION OF THE ONE VISIBLE OWNER'S CONTROL IN THE
+  // TOPCARD, and of nothing else: until 2026-09-28 they described the one
+  // control page-wide whose LABEL named the owner, which the live page's
+  // topcard does not draw.
+  if (out.message_visible_in_topcard === 1 && out.message_owner_visible_in_topcard === 1 && ownerMessage) {
+    const t = ownerMessage.tagName.toLowerCase();
+    out.message_tag = t === 'a' || t === 'button' ? t : 'other';
+    out.message_href = hrefToken(ownerMessage.getAttribute('href'));
+  }
   const vocabulary = [
     ['pending', /^Pending\\b/i],
     ['withdraw', /withdraw/i],
@@ -7969,6 +8066,15 @@ async def read_named_profile(page: Any) -> dict[str, Any]:
         "message_href": None,
         "message_in_topcard": 0,
         "message_controls_in_topcard": 0,
+        "message_kind_in_topcard": 0,
+        "message_visible_in_topcard": 0,
+        "message_owner_visible_in_topcard": 0,
+        "message_foreign_in_topcard": 0,
+        "invite_visible_in_topcard": 0,
+        "invite_owner_visible_in_topcard": 0,
+        "invite_foreign_in_topcard": 0,
+        "more_in_topcard": 0,
+        "more_visible_in_topcard": 0,
         "more_actions": 0,
         "dialogs": 0,
         "composer_editors": 0,
@@ -7985,6 +8091,7 @@ async def read_named_profile(page: Any) -> dict[str, Any]:
     cfg = {
         "inviteSelector": INVITE_CONTROL,
         "messageSelector": MESSAGE_CONTROL,
+        "topcardMessageSelector": TOPCARD_MESSAGE_CONTROL,
         "bubbleSelector": OVERLAY_BUBBLE,
         "editorSelector": OVERLAY_COMPOSER_EDITOR,
         "bubbleTitleSelector": OVERLAY_BUBBLE_TITLE,
@@ -8000,7 +8107,11 @@ async def read_named_profile(page: Any) -> dict[str, Any]:
         "topcards", "topcard_headings", "degree_tokens", "invite_controls",
         "invite_matches", "invite_in_topcard", "invite_controls_in_topcard",
         "message_controls", "message_matches", "message_in_topcard",
-        "message_controls_in_topcard", "more_actions", "dialogs",
+        "message_controls_in_topcard", "message_kind_in_topcard",
+        "message_visible_in_topcard", "message_owner_visible_in_topcard",
+        "message_foreign_in_topcard", "invite_visible_in_topcard",
+        "invite_owner_visible_in_topcard", "invite_foreign_in_topcard",
+        "more_in_topcard", "more_visible_in_topcard", "more_actions", "dialogs",
         "composer_editors", "conversation_bubbles", "bubbles_with_editor",
         "bubble_titles", "dialog_note_fields",
     ):

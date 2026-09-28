@@ -371,7 +371,9 @@ class Event:
 #: (lane S, ``people_results.read_result_people``). The recruiter-insights
 #: page's anonymous viewers and the composer's suggested people joined on
 #: 2026-09-28 (lane S, ``recruiter_views`` and ``presence``), with no opt-in:
-#: people are those two tools' whole answer.
+#: people are those two tools' whole answer. ``linkedin_read_named_profile``
+#: joined the same day (lane L5, ruling NAMED-PROFILE-READ-BEHIND-A-GRANT): the
+#: ONE member he names, read once behind the single-use grant, is its answer.
 PEOPLE_TOOLS: frozenset[str] = frozenset(
     {
         "linkedin_who_viewed_me",
@@ -380,6 +382,7 @@ PEOPLE_TOOLS: frozenset[str] = frozenset(
         "linkedin_people_search_shape",
         "linkedin_recruiter_insights",
         "linkedin_messaging_presence",
+        "linkedin_read_named_profile",
     }
 )
 

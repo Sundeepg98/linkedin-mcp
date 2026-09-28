@@ -1007,6 +1007,15 @@ _RECORD_PATH = {
     "linkedin_server/server.py": {
         "linkedin_who_viewed_me", "_attach_recipient_ids", "_profile_views_switch",
         "linkedin_list_conversations", "linkedin_open_messaging",
+        # The read he names (2026-09-28, lane L5): the tool and, below, the
+        # reader and the one parse it builds its record with. Its grants live
+        # in a module-level registry, written by functions OFF this path --
+        # mint and consume -- which hold his own argument and never a page
+        # string.
+        "linkedin_read_named_profile",
+    },
+    "linkedin_server/named_profile.py": {
+        "read_the_confirmed_profile", "person_from_the_topcard", "name_the_profile_target",
     },
 }
 
