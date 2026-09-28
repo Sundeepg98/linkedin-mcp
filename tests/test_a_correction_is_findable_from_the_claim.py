@@ -185,6 +185,22 @@ CORRECTION_VOCABULARY = (
 #: outcome this file exists to require and so cannot also be a violation of it.
 NOT_A_CORRECTION: dict[tuple[str, str], str] = {
 
+    # 2026-09-28, the live lane's session 2. A CENSUS ROW CITES THE LANE'S
+    # RECORD AS THE EVIDENCE FOR ITS OWN FIRE -- read, not inferred from the
+    # filenames. The lane's real corrections run the other way and are
+    # DECLARED: its record carries CORRECTS: for all four slices, and each
+    # slice carries the CORRECTED BY: back-pointer.
+    ("jobs.md", "2026-09-23-live-lane-session-1.md"): (
+        "THE RECORD OF THE ROW'S OWN FIRE, NOT A CORRECTION OF IT. Row `18` "
+        "cites the lane's record for the session-2 fire that banked it. The "
+        "matched word is the KEPT prior cell on the same line -- lane L3's "
+        "*'THE ROW WAS PRICED ON THE WRONG ADDRESS'*, about the row's own "
+        "pricing on 2026-09-23. Nothing in row `18` says the record is wrong. "
+        "**WHAT WOULD MAKE THIS ENTRY WRONG:** a jobs row asserting something "
+        "in the live lane's record does not hold while leaving the record "
+        "unmarked, which would need its own CORRECTS: / CORRECTED BY: pair."
+    ),
+
     # 2026-09-27, lane L5's follow-up (the named-person route). ITS RECORD
     # REPORTS A GENERATED FILE STALE AND REGENERATED, and that is read here,
     # not inferred from the filename.

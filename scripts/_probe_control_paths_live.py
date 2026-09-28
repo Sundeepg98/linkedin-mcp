@@ -416,7 +416,7 @@ async def _drive(BROWSER: Any, planted: bool) -> list[dict[str, Any]]:
             # session-using probes -- the same leak that put an attach
             # handshake over its ceiling earlier in the day.
             if not page.is_closed():
-                await page.close()
+                await BROWSER.close_tab(page)
 
 
 async def _classify(page: Any, planted: bool) -> list[dict[str, Any]]:

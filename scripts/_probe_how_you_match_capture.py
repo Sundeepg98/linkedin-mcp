@@ -218,7 +218,7 @@ async def main() -> int:
         return 1
     finally:
         if tab is not None and not tab.is_closed():
-            await tab.close()
+            await BROWSER.close_tab(tab)
         await BROWSER.stop()
 
     # THE MAPPING LIVES BESIDE THE CAPTURES AND IS NEVER PRINTED. A job id

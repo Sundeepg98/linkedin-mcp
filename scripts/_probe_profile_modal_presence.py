@@ -467,7 +467,7 @@ async def own_tab():
         finally:
             try:
                 if not page.is_closed():
-                    await page.close()
+                    await BROWSER.close_tab(page)
             except Exception as exc:  # noqa: BLE001
                 print(f"  NOTE: could not close this probe's tab "
                       f"({type(exc).__name__}); it is left open and counts "

@@ -463,7 +463,7 @@ async def main() -> int:
                 # UP while actually being clean, which is worse than leaking:
                 # it spends the budget AND teaches the instrument nothing.
                 page = own
-                await page.close()
+                await BROWSER.close_tab(page)
         except Exception as exc:  # noqa: BLE001 - shutdown noise only
             print("    closing our tab raised " + type(exc).__name__)
         try:

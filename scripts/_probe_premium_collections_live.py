@@ -470,7 +470,7 @@ async def main() -> int:
         # timer, so the tab OUTLIVES THE PROCESS. THE PAGE, NEVER THE CONTEXT.
         if _own_page is not None:
             try:
-                await _own_page.close()
+                await BROWSER.close_tab(_own_page)
                 print("\n    tab closed")
             except Exception as error:  # noqa: BLE001
                 print(f"\n    tab NOT closed: {type(error).__name__}")

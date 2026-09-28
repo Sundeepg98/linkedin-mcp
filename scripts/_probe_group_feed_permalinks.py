@@ -334,7 +334,7 @@ async def _census_groups(BROWSER: Any, wanted: int) -> dict[str, Any]:
                 # ``_probe_company_root_wording`` for the measurement behind
                 # this. The tab is ours; the context is his.
                 if not page.is_closed():
-                    await page.close()
+                    await BROWSER.close_tab(page)
         (raw_dir / ("group-%02d.html" % position)).write_text(
             html, encoding="utf-8"
         )

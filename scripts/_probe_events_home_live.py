@@ -295,7 +295,7 @@ async def main() -> int:
         if page is not None:
             try:
                 if not page.is_closed():
-                    await page.close()
+                    await BROWSER.close_tab(page)
                 # PRESENCE, NOT A DELTA, AND THE DIFFERENCE IS MEASURED.
                 #
                 # The obvious proof of this fix is a page COUNT off

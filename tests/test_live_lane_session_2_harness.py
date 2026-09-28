@@ -33,6 +33,7 @@ from __future__ import annotations
 
 import ast
 import asyncio
+import contextlib
 import json
 import sys
 import time
@@ -338,6 +339,30 @@ def test_the_sixth_search_is_refused_before_the_navigation(fake) -> None:
     assert fake.calls == [FEED], "a load that is not a search is not held by the search cap"
 
 
+def test_a_named_profile_load_through_the_second_door_is_counted(tmp_path, monkeypatch) -> None:
+    """FOUND LIVE, 2026-09-28: the named-person door (``named_profile=True``)
+    loads an address the read door refuses, and the first wrapper waved it
+    through uncounted. It is a load, and the ledger counts it."""
+    calls: list[tuple[str, bool]] = []
+
+    class _SecondDoor:
+        async def goto(self, page, url, **kwargs):  # noqa: ANN001 - fake
+            calls.append((url, kwargs.get("named_profile") is True))
+            return url
+
+    monkeypatch.setattr(harness, "BROWSER", _SecondDoor())
+    monkeypatch.setattr(harness, "STATE", tmp_path)
+    monkeypatch.setattr(harness, "LEDGER", tmp_path / "ledger.json")
+    monkeypatch.setattr(harness, "MIN_GAP_S", 0.0)
+    harness._install_counter()
+    profile = "https://www.linkedin.com/in/" + SYNTHETIC_SLUG + "/"
+    assert not readonly.is_read_url(profile)
+    asyncio.run(harness.BROWSER.goto(None, profile, named_profile=True))
+    ledger = json.loads(harness.LEDGER.read_text(encoding="utf-8"))
+    assert [row["surface"] for row in ledger["loads"]] == ["in"]
+    assert calls == [(profile, True)]
+
+
 def test_a_refused_address_is_not_a_load(fake) -> None:
     with pytest.raises(readonly.WriteAttemptError):
         asyncio.run(harness.BROWSER.goto(None, "https://www.linkedin.com/my-items/"))
@@ -404,7 +429,7 @@ PEOPLE_PAGE = (
     "<a href='/feed/update/urn:li:activity:" + _digits(19) + "/'>More</a>"
     "<button aria-label='Star conversation' aria-pressed='false'></button>"
     "</li></ul>"
-    "<label for='s'>Sharing profile edits</label>"
+    "<label for='s'>Share key profile updates</label>"
     "<input id='s' type='checkbox' role='switch' checked data-view-name='settings-toggle'>"
     "<div data-member-name='" + INVENTED_NAME + "' componentkey='" + _digits(9) + "'>Show all</div>"
     "</main></body></html>"
@@ -422,7 +447,7 @@ def test_a_skeleton_keeps_what_a_readers_selectors_need() -> None:
     skeleton = harness.skeleton_of(PEOPLE_PAGE, KEY)
     for kept in ('class="msg-conversation-listitem"', 'role="switch"', 'aria-expanded="false"',
                  'aria-pressed="false"', 'aria-label="Star conversation"', "\nShow all\n", "\nMe\n",
-                 "\nSharing profile edits\n", 'data-test-hook="UNREAD"', 'data-view-name="settings-toggle"',
+                 "\nShare key profile updates\n", 'data-test-hook="UNREAD"', 'data-view-name="settings-toggle"',
                  "https://www.linkedin.com/in/", "?miniProfileUrn=", "/feed/update/urn:li:activity:"):
         assert kept in skeleton, kept
     label_for = harness.value_shape("s", KEY)
@@ -498,6 +523,71 @@ def test_the_first_read_row_skips_placeholders_and_unread_rows() -> None:
     assert harness.first_read_row(None) is None
 
 
+# --------------------------------------------------------------------------
+# The tracked copy: what a committed fixture of this session may hold.
+# --------------------------------------------------------------------------
+
+
+def _member_page(name: str) -> str:
+    return ("<!doctype html><html><body><main><p>" + name + "</p>"
+            "<a href='https://www.linkedin.com/in/" + SYNTHETIC_SLUG + "/'>" + name + "</a>"
+            "<span>Show all</span></main></body></html>")
+
+
+def test_a_tracked_copy_carries_no_keyed_hash_and_no_length() -> None:
+    skeleton = harness.skeleton_of(_member_page(INVENTED_NAME), KEY)
+    assert harness._KEYED_SHAPE.search(skeleton), "the control: the skeleton is keyed"
+    copy = harness.tracked_copy(skeleton)
+    assert not harness._KEYED_SHAPE.search(copy)
+    assert INVENTED_NAME not in copy and SYNTHETIC_SLUG not in copy
+    assert "\nx\n" in copy, "a text node is one x, whatever its length"
+    assert "https://www.linkedin.com/in/x/" in copy
+    assert "\nShow all\n" in copy, "LinkedIn's own words stay"
+    assert copy.isascii()
+
+
+def test_a_tracked_copy_passes_the_people_guard_its_keyed_skeleton_fails() -> None:
+    """The reason the copy exists: a keyed shape in a member link is a
+    candidate the fixture guard convicts; one x is a value reduced to shape."""
+    from tests.test_fixtures_hold_only_synthetic_people import (
+        ACCEPTED, PLANTED, PLANTED_PATH, violations)
+
+    skeleton = harness.skeleton_of(_member_page(PLANTED), KEY)
+    assert len(violations(PLANTED_PATH, skeleton, ACCEPTED)) == 1
+    assert violations(PLANTED_PATH, harness.tracked_copy(skeleton), ACCEPTED) == []
+
+
+async def test_a_tracked_copy_keeps_a_label_on_its_control(browser_page) -> None:
+    page = ("<!doctype html><html><body><main><div id='autoPrefs' aria-hidden='true'>"
+            "<p>Share key profile updates</p></div><span aria-hidden='true'>Off</span>"
+            "<input type='checkbox' role='switch' aria-labelledby='autoPrefs'>"
+            "<label for='other'>" + INVENTED_NAME + "</label><input id='other' type='checkbox'>"
+            "</main></body></html>")
+    copy = harness.tracked_copy(harness.skeleton_of(page, KEY))
+    assert "autoPrefs" not in copy
+    await browser_page.set_content(copy)
+    named = browser_page.get_by_role("switch", name="Share key profile updates", exact=True)
+    assert await named.count() == 1
+    assert await browser_page.get_by_role("checkbox", name="x", exact=True).count() == 1
+
+
+def test_a_non_ascii_word_survives_the_copy_as_a_reference() -> None:
+    ellipsis = "Write a message" + chr(0x2026)
+    copy = harness.tracked_copy(harness.skeleton_of("<main><p>" + ellipsis + "</p></main>", KEY))
+    assert copy.isascii() and "Write a message&#8230;" in copy
+
+
+def test_every_committed_live2_fixture_is_a_tracked_copy() -> None:
+    """What ``--export-fixtures`` wrote, and nothing written another way: no
+    keyed shape, strict ASCII, one file per skeleton plus his settings page."""
+    copies = sorted(harness.FIXTURES.glob("*.html"))
+    assert len(copies) == 28, [p.name for p in copies]
+    for path in copies:
+        text = path.read_bytes().decode("ascii")
+        assert not harness._KEYED_SHAPE.search(text), path.name
+        assert text.startswith("<!doctype html>"), path.name
+
+
 def test_closed_again_means_the_menus_own_words_are_gone_and_the_trigger_reads_as_before() -> None:
     before = {"More": 1}
     added = {"Save to PDF": 1}
@@ -545,9 +635,15 @@ def quick(tmp_path, monkeypatch):
     return tmp_path
 
 
+#: THE HANDLE SESSION 2 USED FOR THE MORE, page-wide and blind to drawing.
+#: Kept here for two jobs: finding the synthetic menu's trigger in the press
+#: tests below, and showing on today's skeletons what it took.
+OLD_MORE_HANDLE = 'main button[aria-label="More"][aria-expanded="false"]'
+
+
 async def test_one_press_is_read_by_attribute_and_closed_again(browser_page, quick) -> None:
     await browser_page.set_content(_menu_page())
-    handle, count = await harness._one_handle(browser_page.locator(harness.MORE_TRIGGER))
+    handle, count = await harness._one_handle(browser_page.locator(OLD_MORE_HANDLE))
     assert count == 1
     result = await harness.press_and_read(browser_page, "in_me_more", handle, True,
                                           needles=harness.N76_NEEDLES)
@@ -565,7 +661,7 @@ async def test_one_press_is_read_by_attribute_and_closed_again(browser_page, qui
 
 async def test_a_menu_that_stays_open_stops_the_session(browser_page, quick) -> None:
     await browser_page.set_content(_menu_page(closes=False))
-    handle, _count = await harness._one_handle(browser_page.locator(harness.MORE_TRIGGER))
+    handle, _count = await harness._one_handle(browser_page.locator(OLD_MORE_HANDLE))
     with pytest.raises(harness._Anomaly) as stop:
         await harness.press_and_read(browser_page, "in_me_more", handle, False)
     assert stop.value.kind == "the_menu_did_not_close"
@@ -573,7 +669,7 @@ async def test_a_menu_that_stays_open_stops_the_session(browser_page, quick) -> 
 
 async def test_a_conversation_opened_by_a_press_stops_the_session(browser_page, quick) -> None:
     await browser_page.set_content(_menu_page(opens_a_conversation=True))
-    handle, _count = await harness._one_handle(browser_page.locator(harness.MORE_TRIGGER))
+    handle, _count = await harness._one_handle(browser_page.locator(OLD_MORE_HANDLE))
     with pytest.raises(harness._Anomaly) as stop:
         await harness.press_and_read(browser_page, "compose_c9", handle, False, messaging=True)
     assert stop.value.kind == "a_conversation_opened"
@@ -585,6 +681,228 @@ async def test_our_words_are_the_only_keys_that_come_back(browser_page) -> None:
         "<button aria-label='Star conversation'></button><span hidden>Save to PDF</span></main>")
     counted = await harness.furniture_counts(browser_page)
     assert counted == {"Show all": 1, "aria:Star conversation": 1}
+
+
+# --------------------------------------------------------------------------
+# D-1, fix 3: the top card's More, on today's skeletons of both profiles.
+# --------------------------------------------------------------------------
+
+LIVE2 = ROOT / "tests" / "fixtures" / "live2"
+
+#: A landing the press gate reads as his own profile (``press.self_landing``),
+#: on an invented slug; served by the test page's own route, never fetched.
+PROFILE_URL = "https://www.linkedin.com/in/xxxx/?isSelfProfile=true"
+
+#: LINKEDIN'S STYLESHEET, WHICH NO SKELETON CARRIES, STOOD IN FOR BY ONE RULE:
+#: the action bar the page does not show at the width in question. Each class
+#: sits on exactly one element of both skeletons -- that bar's own container.
+#: WIDE is his window on 2026-09-28: the bar holding the LABELLED More was not
+#: drawn -- its More never became actionable, twice, with the window in front
+#: (DERIVED from those two timeouts). NARROW hides the other bar instead.
+WIDE = "._2f3017c2 { display: none !important; }"
+NARROW = "._53a77971 { display: none !important; }"
+
+
+async def _serve_profile(page, name: str, hide: str) -> None:
+    body = (LIVE2 / (name + ".html")).read_text(encoding="ascii")
+
+    async def handler(route) -> None:  # noqa: ANN001 - playwright route
+        if route.request.url == PROFILE_URL:
+            await route.fulfill(status=200, content_type="text/html", body=body)
+        else:
+            await route.abort()
+
+    await page.route("**/*", handler)
+    await page.goto(PROFILE_URL, wait_until="domcontentloaded")
+    if hide:
+        await page.add_style_tag(content=hide)
+
+
+class _ServedBrowser:
+    """``BROWSER.session()`` over one test page, and nothing else."""
+
+    def __init__(self, page) -> None:  # noqa: ANN001 - playwright page
+        self.page = page
+
+    @contextlib.asynccontextmanager
+    async def session(self):
+        yield self.page
+
+
+async def test_d1_the_top_card_is_the_section_around_the_first_h2(browser_page) -> None:
+    """Both profiles: the top card holds both action bars -- on his, two of
+    "Open to" and of "Enhance profile", one More and one Resources; on the
+    brother's, two More -- and its first h2 is the page's first."""
+    await _serve_profile(browser_page, "in_me", "")
+    card = harness.topcard_of(browser_page)
+    assert await card.count() == 1
+    drawn = {word: await card.get_by_role("button", name=word, exact=True, include_hidden=True).count()
+             for word in harness.TOPCARD_WORDS}
+    assert drawn == {"More": 1, "Resources": 1, "Open to": 2, "Enhance profile": 2,
+                     "Add profile section": 0}
+    await _serve_profile(browser_page, "brother_profile", "")
+    card = harness.topcard_of(browser_page)
+    assert await card.get_by_role("button", name="More", exact=True, include_hidden=True).count() == 2
+
+
+async def test_d1_the_old_handle_takes_the_hidden_more_on_both_profiles(browser_page) -> None:
+    """THE DEFECT, measured on today's skeletons at his width: the old handle
+    finds exactly one More on each profile -- the labelled one, in the bar the
+    page does not show -- so "exactly one" was true and the one was not drawn.
+    On the brother's profile a visible More sat beside it, labelled by text."""
+    for name in ("in_me", "brother_profile"):
+        await _serve_profile(browser_page, name, WIDE)
+        old = browser_page.locator(OLD_MORE_HANDLE)
+        assert await old.count() == 1, name
+        assert not await old.is_visible(), name
+
+
+async def test_d1_the_key_presses_nothing_his_width_does_not_draw(browser_page, quick, monkeypatch) -> None:
+    """FIX 3, END TO END ON HIS PROFILE AT HIS WIDTH. Red before the fix: the
+    key took the old handle's one match and its click waited out Playwright's
+    actionability check on a control that is not drawn (TimeoutError), as it
+    did live. Now it counts the top card's More -- 1 drawn, 0 visible -- and
+    refuses with nothing pressed."""
+    await _serve_profile(browser_page, "in_me", WIDE)
+    monkeypatch.setattr(harness, "BROWSER", _ServedBrowser(browser_page))
+    started = time.monotonic()
+    result = await harness._in_me_more(False)
+    assert result == {"stopped": "more_visible_0_drawn_1", "openings": []}
+    assert time.monotonic() - started < 4.0, "an actionability wait ran: something was pressed"
+
+
+async def test_d1_the_new_handle_takes_the_one_visible_more(browser_page) -> None:
+    """The brother's profile at the same width: 2 drawn, 1 visible, and the
+    one taken is the text-labelled More the old handle never matched. His
+    own at the narrow width: his labelled More, visible, taken."""
+    await _serve_profile(browser_page, "brother_profile", WIDE)
+    handle, drawn, visible = await harness.topcard_control(browser_page, harness.MORE_NAME)
+    assert (drawn, visible) == (2, 1)
+    assert await handle.get_attribute("aria-label") is None
+    assert await handle.is_visible()
+    await _serve_profile(browser_page, "in_me", NARROW)
+    handle, drawn, visible = await harness.topcard_control(browser_page, harness.MORE_NAME)
+    assert (drawn, visible) == (1, 1)
+    assert await handle.get_attribute("aria-label") == "More"
+
+
+async def test_d1_his_wide_top_card_shows_resources_where_the_other_bar_has_more(browser_page) -> None:
+    """What session 3 must rule on before D-1 can fire at his width: the bar
+    his window shows holds "Resources" and no More. Counted, never pressed."""
+    await _serve_profile(browser_page, "in_me", WIDE)
+    counts = {}
+    for word in ("More", "Resources"):
+        _handle, drawn, visible = await harness.topcard_control(browser_page, word)
+        counts[word] = (drawn, visible)
+    assert counts == {"More": (1, 0), "Resources": (1, 1)}
+
+
+async def test_d1_two_visible_refuse(browser_page) -> None:
+    """With no stylesheet both bars show, and the brother's two More are both
+    visible: exactly one is required, so none is taken."""
+    await _serve_profile(browser_page, "brother_profile", "")
+    handle, drawn, visible = await harness.topcard_control(browser_page, harness.MORE_NAME)
+    assert (handle, drawn, visible) == (None, 2, 2)
+
+
+# --------------------------------------------------------------------------
+# C8, fix 4: the folder menu's close step, on today's skeleton of it open.
+# --------------------------------------------------------------------------
+
+#: THE FOLDER MENU'S BEHAVIOUR, which a skeleton cannot carry, installed on
+#: today's skeleton of the composer with that menu open. The skeleton shows
+#: the structure: an artdeco dropdown -- its trigger the folder pill,
+#: aria-expanded "true" while open; its content a sibling holding four items
+#: (Focused, Other, Archived, Spam), each a folder CHOICE; NO close control of
+#: its own. The model starts it CLOSED, and then: Escape does what it did live
+#: on 2026-09-28, per ``escape`` ("none": nothing; "closes": closes;
+#: "collapses": the trigger reads closed while the items stay drawn); a click
+#: on the trigger toggles it, as an artdeco dropdown's trigger does (ASSUMED
+#: from the component, never yet pressed live), unless ``toggles`` is False.
+#: Every trigger click is counted.
+_C8_MODEL = """
+([escape, toggles]) => {
+  const t = document.querySelector('[data-test-messaging-inbox-filters__folder-pill]');
+  const box = t.closest('.artdeco-dropdown').querySelector('.artdeco-dropdown__content');
+  window.__clicks = 0;
+  const set = (open) => {
+    t.setAttribute('aria-expanded', open ? 'true' : 'false');
+    box.classList.toggle('artdeco-dropdown__content--is-open', open);
+    box.style.display = open ? '' : 'none';
+  };
+  set(false);
+  t.addEventListener('click', () => {
+    window.__clicks += 1;
+    if (window.__clicks === 1 || toggles) set(t.getAttribute('aria-expanded') !== 'true');
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key !== 'Escape') return;
+    if (escape === 'closes') set(false);
+    if (escape === 'collapses') t.setAttribute('aria-expanded', 'false');
+  });
+}
+"""
+
+
+async def _c8_world(page, escape: str, toggles: bool = True) -> object:
+    body = (LIVE2 / "compose_c8-open.html").read_text(encoding="ascii")
+
+    async def handler(route) -> None:  # noqa: ANN001 - playwright route
+        if route.request.url == harness.COMPOSE_URL:
+            await route.fulfill(status=200, content_type="text/html", body=body)
+        else:
+            await route.abort()
+
+    await page.route("**/*", handler)
+    await page.goto(harness.COMPOSE_URL, wait_until="domcontentloaded")
+    await page.evaluate(_C8_MODEL, [escape, toggles])
+    handle, count = await harness._one_handle(
+        page.locator(harness.FOLDER_TRIGGER).filter(has_text="Focused"))
+    assert count == 1, "the harness's own C8 trigger, exactly one on today's skeleton"
+    return handle
+
+
+async def test_c8_the_menu_escape_left_open_is_closed_by_its_own_trigger(browser_page, quick) -> None:
+    """FIX 4, AS IT HAPPENED LIVE. Red before the fix: the press opened the
+    menu, Escape left it open, and the key stopped as an anomaly -- the
+    session's own outcome. Now the close step presses the SAME trigger once
+    more, only because it still reads expanded, and the menu closes."""
+    handle = await _c8_world(browser_page, "none")
+    result = await harness.press_and_read(browser_page, "compose_c8", handle, False, messaging=True)
+    assert result["closed_again"] is True
+    assert result["closed_by"] == "trigger"
+    assert result["container_found"] is True and len(result["items"]) == 4
+    assert [item["word"] for item in result["items"]] == ["Focused", "Other", "Archived", "Spam"]
+    assert result["message_events"] == [0, 0, 0]
+    assert await browser_page.evaluate("window.__clicks") == 2
+
+
+async def test_c8_a_menu_escape_closes_is_pressed_once(browser_page, quick) -> None:
+    handle = await _c8_world(browser_page, "closes")
+    result = await harness.press_and_read(browser_page, "compose_c8", handle, False, messaging=True)
+    assert (result["closed_again"], result["closed_by"]) == (True, "escape")
+    assert await browser_page.evaluate("window.__clicks") == 1
+
+
+async def test_c8_a_menu_nothing_closes_still_stops_the_session(browser_page, quick) -> None:
+    """The close step is ONE more press, never a loop, and it masks nothing: a
+    menu that stays open after it is the same anomaly as before."""
+    handle = await _c8_world(browser_page, "none", toggles=False)
+    with pytest.raises(harness._Anomaly) as stop:
+        await harness.press_and_read(browser_page, "compose_c8", handle, False, messaging=True)
+    assert stop.value.kind == "the_menu_did_not_close"
+    assert await browser_page.evaluate("window.__clicks") == 2
+
+
+async def test_c8_a_trigger_reading_closed_is_never_pressed_again(browser_page, quick) -> None:
+    """When Escape leaves the trigger reading closed while the words stay
+    drawn, a second click would OPEN the menu: it is not made, and the
+    anomaly stands."""
+    handle = await _c8_world(browser_page, "collapses")
+    with pytest.raises(harness._Anomaly) as stop:
+        await harness.press_and_read(browser_page, "compose_c8", handle, False, messaging=True)
+    assert stop.value.kind == "the_menu_did_not_close"
+    assert await browser_page.evaluate("window.__clicks") == 1
 
 
 # --------------------------------------------------------------------------
@@ -603,12 +921,12 @@ async def test_the_restated_locator_agrees_with_the_reader_on_every_b_world(brow
 
 
 PROPERTY_ONLY = (
-    "<!doctype html><html><body><main><label for='s'>Sharing profile edits</label>"
+    "<!doctype html><html><body><main><label for='s'>" + profile_editor.ACCOUNT_SETTING_NAME + "</label>"
     "<input id='s' type='checkbox' role='switch'></main>"
     "<script>document.getElementById('s').checked = true;</script></body></html>"
 )
 ATTRIBUTE_ON = (
-    "<!doctype html><html><body><main><label for='s'>Sharing profile edits</label>"
+    "<!doctype html><html><body><main><label for='s'>" + profile_editor.ACCOUNT_SETTING_NAME + "</label>"
     "<input id='s' type='checkbox' role='switch' checked></main></body></html>"
 )
 
@@ -724,17 +1042,26 @@ def _enclosing_function(tree: ast.Module, target: ast.AST) -> str:
     return "<module>"
 
 
-def test_every_click_is_the_one_in_press_and_read_and_every_key_press_is_escape() -> None:
+def test_every_click_is_the_triggers_own_in_press_and_read_and_every_key_press_is_escape() -> None:
+    """TWO clicks, both on the one trigger, both in press_and_read: the open,
+    and fix 4's close step -- which runs only inside an ``if`` that reads the
+    trigger still expanded after Escape and closed before the press."""
     tree = _tree()
     clicks, keys = [], []
     for node in ast.walk(tree):
         if isinstance(node, ast.Call) and isinstance(node.func, ast.Attribute):
             if node.func.attr == "click":
-                clicks.append(_enclosing_function(tree, node))
+                clicks.append((_enclosing_function(tree, node), ast.unparse(node.func.value)))
             if node.func.attr == "press":
                 keys.append(ast.unparse(node.args[0]) if node.args else "")
-    assert clicks == ["press_and_read"], clicks
+    assert clicks == [("press_and_read", "handle"), ("press_and_read", "handle")], clicks
     assert keys == ["'Escape'"], keys
+    guards = [ast.unparse(node.test) for node in ast.walk(tree) if isinstance(node, ast.If)
+              and any(isinstance(inner, ast.Call) and isinstance(inner.func, ast.Attribute)
+                      and inner.func.attr == "click" for inner in ast.walk(node))]
+    assert len(guards) == 1, guards
+    for condition in ("closed_by is None", "expanded_after == 'true'", "expanded_before == 'false'"):
+        assert condition in guards[0], (condition, guards)
 
 
 #: The tools a harness key may call: every one a read.
@@ -743,6 +1070,7 @@ READ_TOOLS = {
     "linkedin_premium_job_collection", "linkedin_search_appearances", "linkedin_notifications",
     "linkedin_connections", "linkedin_job_detail", "linkedin_people_search_shape",
     "linkedin_group_memberships", "linkedin_group_page", "linkedin_open_thread",
+    "linkedin_messaging_presence", "linkedin_recruiter_insights", "linkedin_search_jobs",
 }
 
 
@@ -768,6 +1096,67 @@ def test_the_replay_context_is_offline_and_runs_no_script() -> None:
     assert len(calls) == 1
     flags = {kw.arg: kw.value.value for kw in calls[0].keywords if isinstance(kw.value, ast.Constant)}
     assert flags == {"offline": True, "java_script_enabled": False}
+
+
+def test_every_people_search_asks_for_the_people_and_writes_them_reduced() -> None:
+    """THE GO ORDER OF 2026-09-28: the people searches pass include_names=True,
+    so each envelope carries people records -- and so each is written REDUCED."""
+    calls = [node for node in ast.walk(_tree())
+             if isinstance(node, ast.Call) and isinstance(node.func, ast.Attribute)
+             and node.func.attr == "linkedin_people_search_shape"]
+    assert len(calls) == 3
+    for call in calls:
+        flags = {kw.arg: getattr(kw.value, "value", None) for kw in call.keywords}
+        assert flags.get("include_names") is True, ast.unparse(call)
+    for key in ("n94", "n84", "n87", "presence", "recruiter", "j107", "n132"):
+        assert harness.KEYS[key].get("envelope") == "reduced", key
+    assert "N 79" in harness.KEYS["n94"]["rows"]
+
+
+def test_the_new_readers_cost_one_load_each_and_the_job_search_is_not_one_of_the_five() -> None:
+    for key in ("presence", "recruiter", "j107"):
+        assert harness.KEYS[key]["loads"] == 1 and not harness.KEYS[key].get("searches"), key
+    assert harness.KEYS["j107"]["items"] == ("org",)
+
+
+def test_a_named_target_is_matched_by_whole_words_and_only_counted() -> None:
+    assert harness.name_tokens("  Dara  WHITFIELD, MBA ") == ["dara", "whitfield", "mba"]
+    assert harness.person_matches("Dara Whitfield", "dara")
+    assert harness.person_matches("Dara Whitfield", "Dara", ["whitfield"])
+    assert not harness.person_matches("Dara Whitfield", "dara", ["karlsson"])
+    assert not harness.person_matches("Daramir Whitfield", "dara"), "a name inside a longer word"
+    assert not harness.person_matches("", "dara") and not harness.person_matches("Dara", "")
+    names = harness.names_in({"results": [{"name": "Dara Whitfield"}, {"person": {"name": "Ivo Karlsson"}}],
+                              "title": "not a name field"})
+    assert sorted(names) == ["Dara Whitfield", "Ivo Karlsson"]
+    counts = harness.named_target_counts(names, ["dara", "karlsson", "nobody"])
+    assert counts == {"T1": 1, "T2": 1, "T3": 0}
+    assert "Dara" not in json.dumps(counts) and "Ivo" not in json.dumps(counts)
+
+
+def test_the_family_name_is_the_last_word_of_a_multi_word_spelling() -> None:
+    key = {"operator": ["Tamsin Stubworth", "tamsin-stubworth-x1", "T Stubworth", "Tamsin", "Tamsin Q"]}
+    assert harness.family_names(key) == ["stubworth"]
+    assert harness.family_names({}) == []
+
+
+async def test_p_k1_reads_a_verification_control_by_structure(browser_page) -> None:
+    """P K1 (lane S's L.4): a verification badge in the top card, linked to
+    the refused settings page, read by structure; its label never returned."""
+    await browser_page.set_content(
+        "<main><section><h1>" + INVENTED_NAME
+        + "<a href='/mypreferences/d/verifications/' aria-label='Verified by " + INVENTED_NAME
+        + "'><svg></svg></a></h1><button aria-label='Show verification details' aria-haspopup='dialog'>"
+        "</button><span aria-label='Unrelated'></span></section></main>")
+    raw = await browser_page.evaluate(harness._VERIFY_JS)
+    records = [harness.verify_record(r) for r in raw]
+    assert [(r["tag"], r["link"], r["in_heading"], r["haspopup"]) for r in records] == [
+        ("a", "mypreferences_verifications", True, "none"),
+        ("button", "none", False, "dialog"),
+    ]
+    assert INVENTED_NAME not in json.dumps(records)
+    assert "Verifications" in harness.PROFILE_SECTION_WORDS and "Verifications" in harness.FURNITURE
+    assert "verifications" in harness.PATH_WORDS
 
 
 def test_every_tool_key_reaches_a_tool() -> None:

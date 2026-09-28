@@ -318,7 +318,7 @@ async def _measure(BROWSER: Any, wanted: int, keep_raw: bool) -> dict[str, Any]:
                 # attach, and abandoned tabs put a handshake over its ceiling
                 # earlier in this very wave.
                 if not page.is_closed():
-                    await page.close()
+                    await BROWSER.close_tab(page)
 
         # THE RAW CAPTURE IS A LIST OF OTHER PEOPLE. Gitignored, always.
         if keep_raw:

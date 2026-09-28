@@ -926,7 +926,7 @@ async def main() -> int:
     finally:
         try:
             if page is not None and not page.is_closed():
-                await page.close()
+                await BROWSER.close_tab(page)
         except Exception as exc:  # noqa: BLE001 - shutdown noise only
             say("    closing our tab raised " + type(exc).__name__)
         try:

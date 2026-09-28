@@ -1,21 +1,23 @@
-"""His account-level "Sharing profile edits" setting: read before the change, wired at the seam.
+"""His account-level "Share key profile updates" setting: read before the change, wired at the seam.
 
 The live lane, 2026-09-27, session-2 preparation item (b). Condition 1 of
 SELF-PROFILE-EDITS-NOT-OUTWARD, as amended
 (SELF-PROFILE-EDIT-NOTIFY-CONDITION-AMENDED): where the edit dialog draws no
 notify control, his account-level "share profile updates with your network"
-setting -- LinkedIn's label today, "Sharing profile edits" -- read OFF BEFORE
-the edit satisfies it. Lane L7 built the seam
+setting -- its switch labelled "Share key profile updates" on its own page,
+measured live 2026-09-28 (the settings index calls it "Sharing profile
+edits", and the first reader asked for that name and found nothing) -- read
+OFF BEFORE the edit satisfies it. Lane L7 built the seam
 (``profile_editor.ACCOUNT_READINGS``, the ``account_share_updates`` keyword of
 ``read_save_gate``) and left it unwired; this file is the reader and the
 wiring.
 
-THE PAGE IS SYNTHETIC, AND SAYS SO. No capture of the setting's own page
-exists: every world below is INVENTED markup in the shapes a settings switch
-plausibly takes -- a labelled checkbox switch, an ARIA switch -- and the
-refusals it must make are planted beside it. Session 2's plan validates the
-reader on the REAL capture, offline and inside the session, before any of the
-six edits fires (``_audit/2026-09-27-live-session-2-plan.md``).
+MOST WORLDS ARE SYNTHETIC, AND ONE PAGE IS REAL. Every world in ``WORLDS`` is
+INVENTED markup in the shapes a settings switch plausibly takes -- a labelled
+checkbox switch, an ARIA switch -- with the refusals it must make planted
+beside it. Beside them, ``TODAYS_CAPTURE``: the setting's own page as the
+live lane's session 2 captured it, reduced to a tracked skeleton, on which
+the reader must find the one switch by its live label.
 
 THE FOUR THE ORDER NAMED, through the real preview, ``consume`` and
 ``perform``: OFF passes; ON refuses; unknown refuses; a missing reading
@@ -28,6 +30,7 @@ from __future__ import annotations
 
 import ast
 import inspect
+from pathlib import Path
 
 import pytest
 
@@ -122,6 +125,59 @@ async def test_the_reader_on_every_world(browser_page, world):
     assert reading["reading"] == want, (world, reading)
     assert reading["reading"] in profile_editor.ACCOUNT_READINGS
     assert reading["error"] is None, reading
+
+
+#: HIS SETTINGS PAGE AS THE LIVE LANE'S SESSION 2 CAPTURED IT, 2026-09-28:
+#: the raw capture reduced to a skeleton and written as a tracked copy
+#: (``scripts/_probe_live_lane_session_2.py --export-fixtures``). LinkedIn's
+#: words stay; every other text is one ``x``.
+TODAYS_CAPTURE = (
+    Path(__file__).resolve().parent / "fixtures" / "live2" / "setting.html"
+)
+
+
+async def _refused(route) -> None:
+    await route.abort()
+
+
+async def _serve_todays_capture(page) -> None:
+    """The copy keeps its stylesheet and image addresses' path words, so a
+    browser would fetch them: the page's own route refuses every request
+    first, as ``tests/network_guard.py`` asks of a test that serves a page."""
+    await page.route("**/*", _refused)
+    await page.set_content(TODAYS_CAPTURE.read_text(encoding="ascii"),
+                           wait_until="domcontentloaded")
+
+
+async def test_todays_capture_is_read_by_the_switchs_own_label(browser_page):
+    """FIX 2 OF THE LIVE LANE'S SESSION 2, shown on the page itself.
+
+    Live, the reader found 0 controls named "Sharing profile edits" -- the
+    name the settings INDEX gave the setting. The page labels its switch
+    "Share key profile updates": an ``input`` checkbox with role switch,
+    named through ``aria-labelledby``, under the heading "Share profile
+    updates". On that capture the reader must find exactly one control, an
+    input, and read its state from ``checked`` -- which the markup holds
+    OFF (no ``checked`` attribute; the page's own toggle text reads Off).
+    Whether the live PROPERTY agrees is the next live read's question, and
+    the offline check's STATE-NOT-IN-MARKUP verdict exists for it.
+    """
+    await _serve_todays_capture(browser_page)
+    reading = await profile_editor.read_account_share_updates(browser_page)
+    assert (reading["named"], reading["input"], reading["aria"]) == (1, 1, None), reading
+    assert reading["reading"] == "off", reading
+    assert reading["error"] is None, reading
+
+
+async def test_todays_capture_names_no_switch_by_the_indexs_name_or_the_heading(browser_page):
+    """Why the live read found nothing, and why only the exact label will do:
+    neither the index's name nor the page's heading names a control there."""
+    await _serve_todays_capture(browser_page)
+    for name in ("Sharing profile edits", "Share profile updates"):
+        for role in ("switch", "checkbox"):
+            found = browser_page.get_by_role(role, name=name, exact=True, include_hidden=True)
+            assert await found.count() == 0, (name, role)
+    assert await browser_page.get_by_text("Share profile updates", exact=True).count() >= 1
 
 
 async def test_two_controls_of_that_name_refuse_on_the_count_itself(browser_page):

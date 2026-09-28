@@ -973,6 +973,16 @@ WHAT_WOULD_DRIVE_IT: dict[str, str] = {
         "(BROWSER.goto, refused offline) or works from the address it is "
         "handed, reading no page content either way."
     ),
+    #: ADDED 2026-09-28, fix 1 of the live lane's session 2: the one function
+    #: that closes a tab of ours, never the browser's last. Discovered here
+    #: because it takes a ``page``; it reads nothing ON the page.
+    "browser:close_tab_keeping_the_window": (
+        "NOT A PAGE READER: it reads no page content -- it asks whether the "
+        "tab is closed, counts the open pages of the tab's context, may open "
+        "a blank keeper tab, closes the tab, and returns one of the TAB_* "
+        "constants on every path. Its behaviour is held over fake contexts by "
+        "tests/test_the_last_tab_is_never_closed.py."
+    ),
     "dom:read_compose_fields": (
         "CAPTURE: /messaging/compose/ as loaded -- an empty composer, nothing "
         "clicked or typed -- drawing its two send-mode radios as "

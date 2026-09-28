@@ -391,7 +391,7 @@ async def _run() -> int:
             # named page/tab/_own_page in THIS file. THE PAGE, NEVER THE
             # CONTEXT.
             if not page.is_closed():
-                await page.close()
+                await BROWSER.close_tab(page)
 
 
 if __name__ == "__main__":

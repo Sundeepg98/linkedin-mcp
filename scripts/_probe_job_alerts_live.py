@@ -389,7 +389,7 @@ async def main() -> int:
         # session; closing it closes his window. In a finally, because the runs
         # that ABORT are exactly the ones that leak a tab.
         if _own_page is not None and not _own_page.is_closed():
-            await _own_page.close()
+            await BROWSER.close_tab(_own_page)
     return 0
 
 

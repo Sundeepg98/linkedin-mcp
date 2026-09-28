@@ -37,6 +37,7 @@ you meant and counting what matched.
 
 from __future__ import annotations
 
+import ast
 import pathlib
 import re
 
@@ -49,8 +50,13 @@ SCRIPTS = REPO / "scripts"
 OPENS = re.compile(r"BROWSER\.session\s*\(\s*\)|own_tab\s*\(\s*\)")
 
 #: Closing OUR tab. The receiver is named: `.close()` alone matches a file
-#: handle, and did.
-CLOSES_PAGE = re.compile(r"\b(page|tab|_own_page)\s*\.\s*close\s*\(")
+#: handle, and did. Since 2026-09-28 a script closes its tab through the
+#: last-tab rule -- ``BROWSER.close_tab(page)``, or the module function it
+#: wraps -- and the direct form survives only inside that function (the third
+#: check below), so both spellings count as closing.
+CLOSES_PAGE = re.compile(
+    r"\b(page|tab|_own_page)\s*\.\s*close\s*\(|\bclose_tab(?:_keeping_the_window)?\s*\("
+)
 
 #: Closing HIS browser. This is the one that must never appear.
 CLOSES_CONTEXT = re.compile(
@@ -221,3 +227,93 @@ def test_the_corpus_checks_are_shown_failing_on_a_corpus_that_deserves_it():
         "in both -- if it appeared only in one, the two checks are reading "
         "different things than they claim"
     )
+
+
+# ---------------------------------------------------------------------------
+# THE THIRD CHECK, AND THE HARDEST: NO PAGE IS CLOSED BUT BY THE LAST-TAB RULE
+# ---------------------------------------------------------------------------
+#
+# FIX 1 OF THE LIVE LANE'S SESSION 2, 2026-09-28. The last run's teardown
+# closed its own tab at 08:48:45, and at 08:49:16 his Chrome was gone: closing
+# the last tab of the last window ends the browser. So a page is closed ONLY
+# through ``linkedin_server.browser.close_tab_keeping_the_window`` -- in a
+# probe, ``BROWSER.close_tab(page)`` -- which never closes the browser
+# context's last open page (``tests/test_the_last_tab_is_never_closed.py``
+# holds its behaviour). This check makes every other close impossible to
+# write: over ``scripts/`` AND ``linkedin_server/``, a call ``<x>.close()``
+# whose receiver's own name ends in ``page`` or ``tab`` fails the suite,
+# except inside that one function. 47 scripts closed a page directly when it
+# was written; every one was converted in the same commit.
+
+REPO_PACKAGE = REPO / "linkedin_server"
+
+#: A receiver named for a page or a tab: ``page``, ``tab``, ``_own_page``,
+#: ``own_page``, ``self.page`` -- the last name, whatever holds it.
+PAGE_RECEIVER = re.compile(r"(?:^|_)(?:page|tab)$")
+
+#: The one function allowed to close a page itself.
+THE_CLOSER = ("linkedin_server/browser.py", "close_tab_keeping_the_window")
+
+
+def _closer_sources() -> list[tuple[str, str]]:
+    return [
+        (path.relative_to(REPO).as_posix(), path.read_text(encoding="utf-8", errors="replace"))
+        for folder in (SCRIPTS, REPO_PACKAGE)
+        for path in sorted(folder.glob("*.py"))
+    ]
+
+
+def direct_page_closes(sources=None) -> list[str]:
+    """``path:line`` of every page closed outside the last-tab rule."""
+    if sources is None:
+        sources = _closer_sources()
+    found: list[str] = []
+    for rel, text in sources:
+        tree = ast.parse(text)
+        owner: dict[int, str] = {}
+        for node in ast.walk(tree):
+            if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+                for inner in ast.walk(node):
+                    owner[id(inner)] = node.name
+        for node in ast.walk(tree):
+            if not (isinstance(node, ast.Call) and isinstance(node.func, ast.Attribute)
+                    and node.func.attr == "close" and not node.args and not node.keywords):
+                continue
+            receiver = node.func.value
+            last = receiver.attr if isinstance(receiver, ast.Attribute) else getattr(receiver, "id", "")
+            if PAGE_RECEIVER.search(last) and (rel, owner.get(id(node))) != THE_CLOSER:
+                found.append(rel + ":" + str(node.lineno))
+    return found
+
+
+def test_no_page_is_closed_but_through_the_last_tab_rule():
+    """THE RULE. Every script and module closes a page through the one
+    function that never closes the browser's last tab."""
+    sources = _closer_sources()
+    assert len(sources) > 100, f"only {len(sources)} files scanned"
+    offenders = direct_page_closes(sources)
+    assert offenders == [], (
+        f"these close a page directly: {offenders}. Closing the browser's "
+        "last tab ends his Chrome; close it through the last-tab rule -- "
+        "`await BROWSER.close_tab(page)`, or "
+        "`linkedin_server.browser.close_tab_keeping_the_window(page)`."
+    )
+
+
+def test_the_last_tab_rule_is_shown_failing():
+    """Both directions, on synthetic source: a direct close anywhere else --
+    in a script, or in browser.py outside the one function -- is found; the
+    rule's own spelling, and the close inside the rule, are not."""
+    assert direct_page_closes([("scripts/p.py", "async def main(page):\n    await page.close()\n")]) == [
+        "scripts/p.py:2"]
+    assert direct_page_closes([("scripts/p.py", "async def main(x):\n    await x.own_tab.close()\n")]) == [
+        "scripts/p.py:2"]
+    assert direct_page_closes([("scripts/p.py", "async def main(page):\n    await BROWSER.close_tab(page)\n")]) == []
+    assert direct_page_closes([("scripts/p.py", "def main(fh):\n    fh.close()\n")]) == []
+    inside = "async def close_tab_keeping_the_window(page, context=None):\n    await page.close()\n"
+    assert direct_page_closes([("linkedin_server/browser.py", inside)]) == []
+    outside = "async def _teardown(own_page):\n    await own_page.close()\n"
+    assert direct_page_closes([("linkedin_server/browser.py", outside)]) == [
+        "linkedin_server/browser.py:2"]
+    assert CLOSES_PAGE.search("await BROWSER.close_tab(page)")
+    assert CLOSES_PAGE.search("await close_tab_keeping_the_window(page, context)")

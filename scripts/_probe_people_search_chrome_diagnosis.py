@@ -234,7 +234,7 @@ async def main() -> int:
         return 1
     finally:
         if tab is not None and not tab.is_closed():
-            await tab.close()
+            await BROWSER.close_tab(tab)
         await BROWSER.stop()
 
     path = pathlib.Path(args.out)

@@ -31,15 +31,15 @@ are listed as `(undated)`; no date is taken from git history, because
 | of those, carrying a `YYYY-MM-DD-` date prefix | 219 |
 | distinct dates | 18 |
 | documents with no level-1 heading | 2 |
-| `CORRECTS:` marker lines | 109 |
-| `CORRECTED BY:` marker lines | 109 |
-| distinct declared correction edges | 106 |
+| `CORRECTS:` marker lines | 113 |
+| `CORRECTED BY:` marker lines | 113 |
+| distinct declared correction edges | 110 |
 | documents something later corrects | 52 |
-| documents that correct something | 72 |
-| documents at either end of a cross-document edge | 100 |
+| documents that correct something | 73 |
+| documents at either end of a cross-document edge | 101 |
 | intra-document correction markers | 4 |
 | documents that correct themselves later on | 2 |
-| documents no correction marker touches at all | 157 |
+| documents no correction marker touches at all | 156 |
 | blockquoted markers naming ANOTHER document | 0 |
 | edges missing one of their two markers | 0 |
 | edges declared a different number of times in each direction | 2 |
@@ -583,6 +583,10 @@ document is dead; it says one thing in it was overtaken and names what.
 
   > lane R returned 38 of this slice's 48 exclusions to GAP with each blocker named, re-filed J 25, J 29 and J 30 to MEASURED-ABSENT, and kept 7 on the census's written grounds; GAP 56 -> 94.
 
+- CORRECTED BY [2026-09-23-live-lane-session-1.md](2026-09-23-live-lane-session-1.md)
+
+  > rows `18`, `39` and `158` moved COVERED-UNFIRED to COVERED-PROVEN, each on one live call of its own tool in the live lane's session 2 and on the bar its own cell set; row `107` fired and did not bank.
+
 ### [_census/messaging-and-content.md](_census/messaging-and-content.md)
 
 (undated) &middot; Capability census -- MESSAGING AND CONTENT
@@ -618,6 +622,10 @@ document is dead; it says one thing in it was overtaken and names what.
 - CORRECTED BY [2026-09-23-exclusion-returns.md](2026-09-23-exclusion-returns.md)
 
   > lane R returned 40 of this slice's 50 exclusions to GAP with each blocker named and kept 10 on the census's written grounds; GAP 77 -> 117.
+
+- CORRECTED BY [2026-09-23-live-lane-session-1.md](2026-09-23-live-lane-session-1.md)
+
+  > row `M43` moved COVERED-UNFIRED to COVERED-PROVEN on a live fire of `linkedin_list_conversations`, which opened no conversation, in the live lane's session 2; rows `M53` and `M1` fired or were refused and did not bank.
 
 ### [_census/network.md](_census/network.md)
 
@@ -671,6 +679,10 @@ document is dead; it says one thing in it was overtaken and names what.
 
   > lane R returned 69 of this slice's 97 exclusions to GAP with each blocker named, moved N 23 to COVERED-UNFIRED because linkedin_connections reads that list, and kept 27 on the census's written grounds; GAP 86 -> 155.
 
+- CORRECTED BY [2026-09-23-live-lane-session-1.md](2026-09-23-live-lane-session-1.md)
+
+  > rows `23`, `79`, `84`, `87`, `94`, `132` and `195` moved COVERED-UNFIRED to COVERED-PROVEN, each on a live fire of its own tool in the live lane's session 2 and on the bar its own cell set; rows `20` and `45` fired again and were not shown.
+
 - CORRECTED BY [2026-09-23-readers-four-rows.md](2026-09-23-readers-four-rows.md)
 
   > row `134` said the 2026-09-21 witness showed the panel opens and left one name-free shaper as the whole blocker. That press was measured to land on the header nav; the pill this row names opens into a filter form whose payload needs APPLYING, a submission. State unchanged.
@@ -698,6 +710,10 @@ document is dead; it says one thing in it was overtaken and names what.
 - CORRECTED BY [2026-09-23-exclusion-returns.md](2026-09-23-exclusion-returns.md)
 
   > lane R returned 98 of this slice's 113 exclusions to GAP with each blocker named -- the 22 profile editors, 19 Open To Work rows, the unnamed settings pages and the rest -- and kept 15 on the census's written grounds; GAP 55 -> 153.
+
+- CORRECTED BY [2026-09-23-live-lane-session-1.md](2026-09-23-live-lane-session-1.md)
+
+  > row `S5` moved COVERED-UNFIRED to COVERED-PROVEN on the first live call of `linkedin_search_appearances`, in the live lane's session 2; row `G7`, already proven, gained the tool-level fire it stood without.
 
 - CORRECTED BY [2026-09-23-readers-four-rows.md](2026-09-23-readers-four-rows.md)
 
@@ -1429,6 +1445,26 @@ reach is visible. The quoted reason here is the CORRECTOR's own
 
   > five address readings re-taken through the shipped boundary (`J 16`, `J 18`, `J 56`, `J 110`, `J 116`-`J 120`), and `J 148` resolved from AMBIGUOUS to R+W; section 4 below gives each with its evidence.
 
+### [2026-09-23-live-lane-session-1.md](2026-09-23-live-lane-session-1.md)
+
+2026-09-23 &middot; THE LIVE LANE, SESSION 1
+
+- CORRECTS [_census/jobs.md](_census/jobs.md)
+
+  > rows `18`, `39` and `158` read COVERED-UNFIRED, never fired; each fired live in session 2 on its own cell's bar and moves to COVERED-PROVEN. Row `107` fired and does not bank; row `37` is measured and stays.
+
+- CORRECTS [_census/messaging-and-content.md](_census/messaging-and-content.md)
+
+  > row `M43` read COVERED-UNFIRED, never opened; it fired live in session 2, opening no conversation, and moves to COVERED-PROVEN.
+
+- CORRECTS [_census/network.md](_census/network.md)
+
+  > rows `23`, `79`, `84`, `87`, `94`, `132` and `195` read COVERED-UNFIRED, never fired; each fired live in session 2 on its own cell's bar -- lane S's whole bank rule for the three facets -- and moves to COVERED-PROVEN.
+
+- CORRECTS [_census/profile.md](_census/profile.md)
+
+  > row `S5` read COVERED-UNFIRED, never fired; it fired live on `N 132`'s load in session 2 and moves to COVERED-PROVEN.
+
 ### [2026-09-23-readers-four-rows.md](2026-09-23-readers-four-rows.md)
 
 2026-09-23 &middot; READERS FOR THE FOUR ROWS BLOCKED ON NOTHING: P O3, N 134, M C72, M C85
@@ -1511,11 +1547,11 @@ ways, which is a fact about markers and not a verdict on the document.
 | (undated) | [_slice-surface-census-tool.md](_slice-surface-census-tool.md) | Slice: linkedin_surface_census -- BUILT AND GREEN |  |
 | (undated) | [_slice-trace-corpus.md](_slice-trace-corpus.md) | Slice -- the parse-trace corpus, measured and widened |  |
 | (undated) | [_slice-unfollow-census.md](_slice-unfollow-census.md) | Unfollow-anchor census -- linkedin MCP server |  |
-| (undated) | [_census/jobs.md](_census/jobs.md) | Census slice: JOBS, END TO END | **CORRECTED x7** |
+| (undated) | [_census/jobs.md](_census/jobs.md) | Census slice: JOBS, END TO END | **CORRECTED x8** |
 | (undated) | [_census/mcp-inventory.md](_census/mcp-inventory.md) | MCP inventory -- what this server ACTUALLY DELIVERS |  |
-| (undated) | [_census/messaging-and-content.md](_census/messaging-and-content.md) | Capability census -- MESSAGING AND CONTENT | **CORRECTED x8** |
-| (undated) | [_census/network.md](_census/network.md) | CENSUS SLICE: NETWORK AND PEOPLE | **CORRECTED x14** |
-| (undated) | [_census/profile.md](_census/profile.md) | CENSUS SLICE: PROFILE, IDENTITY, SETTINGS AND PRIVACY | **CORRECTED x5** |
+| (undated) | [_census/messaging-and-content.md](_census/messaging-and-content.md) | Capability census -- MESSAGING AND CONTENT | **CORRECTED x9** |
+| (undated) | [_census/network.md](_census/network.md) | CENSUS SLICE: NETWORK AND PEOPLE | **CORRECTED x15** |
+| (undated) | [_census/profile.md](_census/profile.md) | CENSUS SLICE: PROFILE, IDENTITY, SETTINGS AND PRIVACY | **CORRECTED x6** |
 | 2026-08-22 | [2026-08-22-linkedin-preflight.md](2026-08-22-linkedin-preflight.md) | 2026-08-22 - browser preflight, and a session_info that outlives the browser |  |
 | 2026-08-22 | [2026-08-22-parity-linkedin.md](2026-08-22-parity-linkedin.md) | LinkedIn parity, 2026-08-22 -- what he can do that this server cannot | **CORRECTED x1** |
 | 2026-08-23 | [2026-08-23-build-linkedin.md](2026-08-23-build-linkedin.md) | linkedin, 2026-08-23 -- leak walker, and a write design that is scoped rather than unlocked | corrects x1 |
@@ -1718,7 +1754,7 @@ ways, which is a fact about markers and not a verdict on the document.
 | 2026-09-23 | [2026-09-23-lane-l2-refused-presses.md](2026-09-23-lane-l2-refused-presses.md) | Lane L2: nine refused presses, and none of them is a narrow extension away | corrects x1 |
 | 2026-09-23 | [2026-09-23-lane-l3-jobs.md](2026-09-23-lane-l3-jobs.md) | Lane L3, jobs rows: 56 directions, 31 read addresses, 2 readers built and 1 withdrawn | **CORRECTED x1** corrects x1 |
 | 2026-09-23 | [2026-09-23-lane-l4-writes.md](2026-09-23-lane-l4-writes.md) | Lane L4 -- WRITES: classify the write-direction GAP rows, build the reversible first round to ready-to-fire |  |
-| 2026-09-23 | [2026-09-23-live-lane-session-1.md](2026-09-23-live-lane-session-1.md) | THE LIVE LANE, SESSION 1 |  |
+| 2026-09-23 | [2026-09-23-live-lane-session-1.md](2026-09-23-live-lane-session-1.md) | THE LIVE LANE, SESSION 1 | corrects x4 |
 | 2026-09-23 | [2026-09-23-readers-four-rows.md](2026-09-23-readers-four-rows.md) | READERS FOR THE FOUR ROWS BLOCKED ON NOTHING: P O3, N 134, M C72, M C85 | corrects x4 |
 | 2026-09-23 | [2026-09-23-rulings-write-class-and-delegated-calls.md](2026-09-23-rulings-write-class-and-delegated-calls.md) | Rulings, 2026-09-23: the write class, the live budget, and the calls delegated to the orchestrator |  |
 | 2026-09-24 | [2026-09-24-lane-d-d6-pdf.md](2026-09-24-lane-d-d6-pdf.md) | Lane D -- D6 moves and the profile PDF: one row moved, two held with the thing that holds each named, and the download transport built | corrects x3 |
@@ -1767,7 +1803,7 @@ against the same line, so a missing continuation satisfies it.
 - REASON PAST ITS LINE [2026-09-20-the-first-firing.md](2026-09-20-the-first-firing.md) line 233 -- a line-scoped reader sees 35 of 465 characters.
 - REASON PAST ITS LINE [2026-09-20-the-five-under-banked.md](2026-09-20-the-five-under-banked.md) line 3 -- a line-scoped reader sees 35 of 349 characters.
 - REASON PAST ITS LINE [2026-09-20-the-five-under-banked.md](2026-09-20-the-five-under-banked.md) line 457 -- a line-scoped reader sees 94 of 717 characters.
-- REASON PAST ITS LINE [_census/jobs.md](_census/jobs.md) line 421 -- a line-scoped reader sees 825 of 1189 characters.
+- REASON PAST ITS LINE [_census/jobs.md](_census/jobs.md) line 438 -- a line-scoped reader sees 825 of 1189 characters.
 
 - TIGHTEST ADMISSION MARGIN [2026-09-03-linkedin-gap-blockers.md](2026-09-03-linkedin-gap-blockers.md) line 272 clears the 20-character floor by 0. The floor is applied to the marker's OWN LINE, so a reason of 723 characters is admitted on the strength of 20. Reflow that paragraph by one word and a guard rejects it saying it *carries no reason after the citation*, which would not be true. Reported every regeneration rather than counted, because a count of rejections reads zero until the day it does not.
 

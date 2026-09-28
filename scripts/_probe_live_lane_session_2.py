@@ -49,7 +49,7 @@ same directory refuses a second harness process: one driver at a time.
 Printed: integers, booleans, field names, and the package's own closed words.
 Written under ``_state/live2/`` (gitignored), never committed:
 
-* a RAW capture of ONE page only -- his "Sharing profile edits" setting,
+* a RAW capture of ONE page only -- his "Share profile updates" setting,
   which draws no other person;
 * for every other page a SKELETON reduced in this process before anything is
   written (:func:`skeleton_of`): tags, attribute names, classes, roles and
@@ -60,6 +60,14 @@ Written under ``_state/live2/`` (gitignored), never committed:
   orchestrator rules on raw captures;
 * tool envelopes RAW where the tool is name-free by its own contract, and
   REDUCED (:func:`reduce_envelope`) where it can carry a person.
+
+**THE ONE STEP THAT WRITES INTO THE TREE, AND IT LOADS NOTHING:**
+``--export-fixtures`` (:func:`export_fixtures`) writes each skeleton, and his
+settings page reduced to one, as a TRACKED copy under
+``tests/fixtures/live2/`` (:func:`tracked_copy`): every keyed shape of a text
+becomes one ``x``, so neither a hash nor a length of anybody's words leaves
+the box. What reaches a commit is then decided by the identity gate and the two
+people guards, as for any fixture.
 
 ## THE ANOMALY RULE
 
@@ -183,7 +191,7 @@ KEYS: dict[str, dict[str, Any]] = {
                 "rows": "P A8 A11 A13 A17 A19 A21, P B9: condition 1"},
     "setting_offline": {"kind": "offline", "loads": 0, "rows": "the (b) reader, on the capture"},
     "in_me": {"kind": "in_me", "loads": 2,
-              "rows": "N 76, P J4, P D28; P F1 H11 K8 D26 read off the capture"},
+              "rows": "N 76, P J4, P D28, P K1; P F1 H11 K8 D26 read off the capture"},
     "in_me_more": {"kind": "in_me_more", "loads": 0, "after": ("in_me",),
                    "rows": "P C8: lane D LQ-1 (two openings)"},
     "me_menu": {"kind": "me_menu", "loads": 0, "after": ("in_me", "activity_all"),
@@ -200,14 +208,20 @@ KEYS: dict[str, dict[str, Any]] = {
     "j18": {"kind": "tool", "loads": 1, "rows": "J 18; J 37 rides"},
     "j39": {"kind": "tool", "loads": 1, "rows": "J 39"},
     "j158": {"kind": "tool", "loads": 1, "rows": "J 158"},
-    "n132": {"kind": "tool", "loads": 1, "rows": "N 132; P G7"},
+    "n132": {"kind": "tool", "loads": 1, "envelope": "reduced", "rows": "N 132, P S5; P G7"},
     "notifications": {"kind": "tool", "loads": 1, "envelope": "reduced", "rows": "N 20, N 45"},
-    "n23": {"kind": "tool", "loads": 2, "envelope": "reduced", "rows": "N 23"},
+    "n23": {"kind": "tool", "loads": 2, "envelope": "reduced",
+            "rows": "N 23; the named targets among his connections, counted"},
     "job_detail": {"kind": "tool", "loads": 1, "items": ("posting",), "envelope": "reduced",
                    "rows": "an org id for N 84, N 87, N 102; J 124, J 115, P M12 by the capture"},
-    "n94": {"kind": "tool", "loads": 1, "searches": 1, "rows": "N 94"},
-    "n84": {"kind": "tool", "loads": 1, "searches": 1, "items": ("org",), "rows": "N 84"},
-    "n87": {"kind": "tool", "loads": 1, "searches": 1, "items": ("past_org",), "rows": "N 87"},
+    "n94": {"kind": "tool", "loads": 1, "searches": 1, "envelope": "reduced", "rows": "N 94, N 79"},
+    "n84": {"kind": "tool", "loads": 1, "searches": 1, "items": ("org",), "envelope": "reduced",
+            "rows": "N 84"},
+    "n87": {"kind": "tool", "loads": 1, "searches": 1, "items": ("past_org",), "envelope": "reduced",
+            "rows": "N 87"},
+    "presence": {"kind": "tool", "loads": 1, "envelope": "reduced", "rows": "M M53"},
+    "recruiter": {"kind": "tool", "loads": 1, "envelope": "reduced", "rows": "N 195"},
+    "j107": {"kind": "tool", "loads": 1, "items": ("org",), "envelope": "reduced", "rows": "J 107"},
     "n104": {"kind": "capture", "loads": 1, "searches": 1, "rows": "N 104"},
     "n161": {"kind": "capture", "loads": 1, "searches": 1, "rows": "N 161"},
     "n179": {"kind": "capture", "loads": 1, "searches": 1, "rows": "N 179"},
@@ -483,10 +497,14 @@ def _install_counter() -> None:
     original = BROWSER.goto
 
     async def counted_goto(page: Any, url: str, **kwargs: Any) -> str:
-        if not readonly.is_read_url(url):
-            # REFUSED BY THE BOUNDARY: ``original`` raises inside
-            # ``assert_read_url`` before ``page.goto``; nothing loads, nothing
-            # is counted.
+        # THE SECOND DOOR COUNTS TOO (found live, 2026-09-28): a named-person
+        # act loads the one profile its caller named through
+        # ``named_profile=True``, an address the READ door refuses -- so the
+        # first version of this wrapper waved it through uncounted and
+        # unspaced. Only an address NEITHER door admits passes uncounted, and
+        # ``original`` refuses it before ``page.goto``.
+        second_door = kwargs.get("named_profile") is True
+        if not second_door and not readonly.is_read_url(url):
             return await original(page, url, **kwargs)
         loads = _ledger_read()["loads"]
         if len(loads) >= CEILING:
@@ -597,6 +615,7 @@ FURNITURE: frozenset[str] = frozenset({
     "Organizations", "Test scores", "Patents", "Analytics", "Resources",
     "Suggested for you", "People also viewed", "People you may know", "You might like",
     "Top Voice", "Profile strength", "Open to", "Add profile section", "Enhance profile",
+    "Verifications", "Verification", "Verified",
     # the profile's More menu
     "More", "Save to PDF", "Send profile in a message", "Share profile via message",
     "Copy link to profile", "Request a recommendation", "Recommend", "Report / Block",
@@ -619,8 +638,11 @@ FURNITURE: frozenset[str] = frozenset({
     "Members", "People", "Posts", "Events", "Groups", "Companies", "All filters", "Reset",
     "Join", "Request to join", "Attend", "Register", "Attendees", "Show results",
     "Next", "Previous",
-    # the settings page
-    "Sharing profile edits", "On", "Off", "Back", "Visibility", "Account preferences",
+    # the settings page: the (b) reader's first name for the switch, and the
+    # words the live page drew on 2026-09-28 -- its heading, and the switch's
+    # own label, which a skeleton must keep for a label to name its control
+    "Sharing profile edits", "Share profile updates", "Share key profile updates",
+    "On", "Off", "Back", "Visibility", "Account preferences",
     "Sign in & security", "Data privacy", "Advertising data",
     # everywhere
     "Close", "Dismiss", "Cancel", "Save", "Done", "Edit", "Menu",
@@ -669,6 +691,7 @@ PATH_WORDS: frozenset[str] = frozenset({
     "d", "settings", "recent-activity", "posts", "members", "attendees", "analytics",
     "overlay", "edit", "details", "network-manager", "people-follow", "followers",
     "following", "invite-connect", "connections", "notifications", "about", "life",
+    "verifications", "verification", "trust",
 })
 
 
@@ -773,6 +796,74 @@ def skeleton_of(page_html: str, key: bytes) -> str:
     parser.feed(page_html)
     parser.close()
     return "<!doctype html>\n" + "\n".join(parser.out)
+
+
+#: A keyed shape as :func:`value_shape` writes it: letters, digits, length, hash.
+_KEYED_SHAPE = re.compile(r"\{L(\d{1,7})D(\d{1,7})n(\d{1,7}):([0-9a-f]{8})\}")
+
+#: An id-reference attribute as :class:`_Skeleton` writes one: after a space,
+#: its value in double quotes. The longest names first, so ``for`` never
+#: claims the tail of a longer name.
+_ID_REF_WRITTEN = re.compile(
+    r'(?<= )(' + "|".join(sorted(ID_REF_ATTRIBUTES, key=len, reverse=True)) + r')="([^"]*)"'
+)
+
+#: Where the TRACKED copies of this session's skeletons live.
+FIXTURES = _ROOT / "tests" / "fixtures" / "live2"
+
+
+def tracked_copy(skeleton: str) -> str:
+    """A session skeleton as a TRACKED file may hold it. PURE.
+
+    THE KEYED HASHES STAY ON THIS BOX. Every shape of a non-empty value
+    becomes ONE ``x`` (an empty one stays empty) -- the alphabet both of the
+    repository's people guards admit as a value reduced to shape
+    (``is_reduced_to_shape`` in
+    ``tests/test_fixtures_hold_only_synthetic_people.py``, ``SHAPED_SLUG`` in
+    ``tests/test_no_committed_identity.py``). So a tracked copy says of
+    anybody's text only that it was there: not its length, which a name's
+    shape would leak, and no hash, which whoever holds the key could test
+    against a list of names. Rendering the LENGTH was tried first and
+    rejected on its size: a shape stands for values of any length, and
+    written out in full the 28 copies came to 14 MB. The one exception is an
+    id reference: ``k`` and the 8-hex hash, the same for an id and every
+    attribute naming it, because an id names a control, never a person, and
+    a label must still find its control in the copy.
+
+    Anything outside ASCII becomes a character reference, which a parser
+    reads back as the same character: the copy is strict ASCII and draws the
+    same document. Tags, attributes, classes, roles, ARIA states, LinkedIn's
+    path words and :data:`FURNITURE` are the skeleton's, untouched.
+    """
+    def ids(match: "re.Match[str]") -> str:
+        tokens = []
+        for token in match.group(2).split():
+            keyed = _KEYED_SHAPE.fullmatch(token)
+            tokens.append("k" + keyed.group(4) if keyed else token)
+        return match.group(1) + '="' + " ".join(tokens) + '"'
+
+    reduced = _KEYED_SHAPE.sub(lambda m: "x" if int(m.group(3)) else "", _ID_REF_WRITTEN.sub(ids, skeleton))
+    return reduced.encode("ascii", "xmlcharrefreplace").decode("ascii")
+
+
+def export_fixtures() -> dict[str, int]:
+    """Every skeleton of this session, and his settings page reduced to one,
+    written as TRACKED copies (:func:`tracked_copy`) under
+    ``tests/fixtures/live2/``. Zero loads; attaches to nothing. Returns each
+    copy's name and size -- the only things printed."""
+    FIXTURES.mkdir(parents=True, exist_ok=True)
+    written: dict[str, int] = {}
+    for path in sorted(STATE.glob("*.skeleton.html")):
+        name = path.name[: -len(".skeleton.html")]
+        text = tracked_copy(path.read_text(encoding="utf-8"))
+        (FIXTURES / (name + ".html")).write_text(text, encoding="ascii", newline="\n")
+        written[name] = len(text)
+    raw = STATE / "setting.html"
+    if raw.exists():
+        text = tracked_copy(skeleton_of(raw.read_text(encoding="utf-8"), _shape_key()))
+        (FIXTURES / "setting.html").write_text(text, encoding="ascii", newline="\n")
+        written["setting"] = len(text)
+    return written
 
 
 def reduce_envelope(value: Any, key: bytes, field: str = "") -> Any:
@@ -988,6 +1079,22 @@ async def press_and_read(page: Any, key: str, handle: Any, capture: bool, *,
     menu's items by attribute (:data:`_MENU_JS`). Refused as an anomaly: a
     menu that did not close, and -- on ``/messaging/`` -- any message event on
     the page, which is a conversation opened.
+
+    THE CLOSE STEP, FIX 4 OF SESSION 2. Live on 2026-09-28 the composer's
+    folder menu (C8) opened and was still open after Escape, and the key
+    stopped. Its skeleton, taken open, draws no close control of its own:
+    four items, each a folder CHOICE -- pressing one would change his view --
+    and a trigger that reads ``aria-expanded="true"`` while the menu is open,
+    an artdeco dropdown's trigger, which toggles its own menu. A click outside
+    was the other way, and on ``/messaging/`` there is no outside the
+    skeleton can certify: the list beside the pill is conversations, and a
+    click on one opens it. So when Escape leaves the trigger reading
+    ``"true"`` -- and only then, and only if it read ``"false"`` before the
+    press, so the click can only CLOSE what the first one opened -- the SAME
+    trigger is pressed ONCE more. Never a third time: a menu still open after
+    it is the same anomaly as before. ``closed_by`` says which step closed
+    it: ``"escape"``, ``"trigger"``, or None. The trigger step's first live
+    use is a session-3 fire.
     """
     expanded_before = await handle.get_attribute("aria-expanded")
     events_before = int(await page.locator(threads.EVIDENCE_EVENT_SELECTOR).count()) if messaging else 0
@@ -1000,23 +1107,33 @@ async def press_and_read(page: Any, key: str, handle: Any, capture: bool, *,
     menu = await handle.evaluate(_MENU_JS, {"needles": list(needles), "words": sorted(FURNITURE)})
     events_open = int(await page.locator(threads.EVIDENCE_EVENT_SELECTOR).count()) if messaging else 0
     await _save_page(page, key + "-open", capture)
+    added = counts_delta(opened, before)
     await page.keyboard.press("Escape")
     await asyncio.sleep(s1.OPEN_SETTLE_S)
     after = await furniture_counts(page)
     expanded_after = await handle.get_attribute("aria-expanded")
+    closed_by = "escape" if closed_again(added, after, before, expanded_after, expanded_before) else None
+    if closed_by is None and expanded_after == "true" and expanded_before == "false":
+        await handle.click(timeout=5_000)
+        await asyncio.sleep(s1.OPEN_SETTLE_S)
+        after = await furniture_counts(page)
+        expanded_after = await handle.get_attribute("aria-expanded")
+        if closed_again(added, after, before, expanded_after, expanded_before):
+            closed_by = "trigger"
     events_after = int(await page.locator(threads.EVIDENCE_EVENT_SELECTOR).count()) if messaging else 0
     menu_items = [item_record(raw) for raw in ((menu or {}).get("items") or [])]
-    added = counts_delta(opened, before)
     result = {
         "pressed": True,
         "container_found": (menu or {}).get("container") is True,
         "items": menu_items,
         "words_added": added,
-        "closed_again": closed_again(added, after, before, expanded_after, expanded_before),
+        "closed_again": closed_by is not None,
+        "closed_by": closed_by,
         "message_events": [events_before, events_open, events_after],
     }
     say("    pressed; menu items " + str(len(menu_items)) + ", our words added "
-        + str(len(result["words_added"])) + ", closed again " + str(result["closed_again"]))
+        + str(len(result["words_added"])) + ", closed again " + str(result["closed_again"])
+        + (" (by its trigger)" if closed_by == "trigger" else ""))
     if events_open or events_after:
         raise _Anomaly("a_conversation_opened", key)
     if not result["closed_again"]:
@@ -1185,8 +1302,8 @@ def _attach_check() -> dict[str, Any]:
 
 def named_setting_control(page: Any) -> Any:
     """The reader's own locator, restated: controls of role switch or
-    checkbox named exactly "Sharing profile edits". A test holds the two equal
-    on the (b) worlds."""
+    checkbox named exactly :data:`profile_editor.ACCOUNT_SETTING_NAME`. A
+    test holds the two equal on the (b) worlds."""
     name = profile_editor.ACCOUNT_SETTING_NAME
     return page.get_by_role("switch", name=name, exact=True, include_hidden=True).or_(
         page.get_by_role("checkbox", name=name, exact=True, include_hidden=True))
@@ -1307,11 +1424,96 @@ async def _setting_offline() -> dict[str, Any]:
 #: The needles for N 76's step 4, as the 2026-09-19 plan wrote them.
 N76_NEEDLES = ("copy link", "follow link", "share profile", "personal link")
 
-#: The top card's More, as lane D's LQ-1 names it; one on session 1's capture.
-MORE_TRIGGER = 'main button[aria-label="More"][aria-expanded="false"]'
+#: THE TOP CARD'S MORE, BY ITS NAME -- lane D's LQ-1 -- taken inside the top
+#: card and only when exactly ONE is VISIBLE (:func:`topcard_control`).
+#:
+#: FIX 3 OF SESSION 2. The first handle was page-wide and blind to drawing:
+#: ``main button[aria-label="More"][aria-expanded="false"]``, one match on
+#: session 1's capture. On 2026-09-28 his profile drew that one match and it
+#: never became actionable -- twice with the window in front, and a scroll
+#: into view timed out before any click. Today's skeleton says why: the new
+#: markup draws the top card's actions TWICE, in two bars, of which the page
+#: shows one at a time. On his profile the bar holding the labelled More is
+#: the one his window width does not show; the bar it shows holds
+#: "Resources" where the other holds More. On the brother's profile both bars
+#: hold a More -- one by its label, one by its text -- and one was visible.
+MORE_NAME = "More"
 
-#: The section words P F1, P H11, P K8 and P D26 ask about, counted in main.
-PROFILE_SECTION_WORDS = ("Recommendations", "Services", "Top Voice", "Profile strength")
+#: The top card's own words, counted drawn and visible on every ``in_me``
+#: load: which bar his window shows, read, never pressed.
+TOPCARD_WORDS = ("More", "Resources", "Open to", "Enhance profile", "Add profile section")
+
+
+def topcard_of(page: Any) -> Any:
+    """THE TOP CARD, BY STRUCTURE: the nearest section around the first
+    ``h2`` in main. Measured on today's skeletons of both profiles: the new
+    markup draws no ``h1``; the name is the top card's one ``h2``, and its
+    section holds both action bars and nothing else a name can match. No
+    class is used -- the classes are hashed and move with LinkedIn's
+    builds."""
+    return page.locator("main h2").first.locator("xpath=ancestor::section[1]")
+
+
+async def topcard_control(page: Any, name: str) -> tuple[Optional[Any], int, int]:
+    """``(handle, drawn, visible)``: the top card's button named exactly
+    ``name``, as a handle ONLY when exactly one is VISIBLE; ``drawn`` counts
+    hidden ones too. A duplicate the page keeps for another width is drawn
+    and not visible, so it is never the one taken, and two visible refuse."""
+    named = topcard_of(page).get_by_role("button", name=name, exact=True, include_hidden=True)
+    drawn = int(await named.count())
+    shown = named.filter(visible=True)
+    visible = int(await shown.count())
+    if visible != 1:
+        return None, drawn, visible
+    return await shown.element_handle(), drawn, visible
+
+#: The section words P F1, P H11, P K8, P D26 and P K1 ask about, counted in main.
+PROFILE_SECTION_WORDS = ("Recommendations", "Services", "Top Voice", "Profile strength",
+                         "Verifications")
+
+#: P K1 (lane S's capture spec L.4): every control in main whose accessible
+#: label mentions a verification -- the badge on his name, or a section's --
+#: read by STRUCTURE, the label compared inside the page and never returned:
+#: its tag, its role, whether it sits in the top card's heading, and where its
+#: link (its own or its nearest anchor's) points, as a closed word.
+_VERIFY_JS = """
+() => Array.from(document.querySelectorAll("main [aria-label]"))
+  .filter((e) => /verif/i.test(e.getAttribute("aria-label") || ""))
+  .map((e) => {
+    const a = e.closest("a") || e.querySelector("a");
+    const h = (e.getAttribute("href") || (a && a.getAttribute("href")) || "");
+    const kind = h === "" ? "none"
+      : h.includes("/mypreferences/d/verifications") ? "mypreferences_verifications"
+      : h.includes("/trust/verification") ? "trust_verification"
+      : h.includes("/overlay/") ? "profile_overlay"
+      : "other";
+    return {
+      tag: e.tagName.toLowerCase(),
+      role: e.getAttribute("role"),
+      in_heading: !!e.closest("h1, h2"),
+      link: kind,
+      haspopup: e.getAttribute("aria-haspopup"),
+      expanded: e.hasAttribute("aria-expanded"),
+    };
+  })
+"""
+
+_LINK_KINDS = ("none", "mypreferences_verifications", "trust_verification", "profile_overlay", "other")
+
+
+def verify_record(raw: Any) -> dict[str, Any]:
+    """One verification control, reduced to closed words and booleans. PURE."""
+    if not isinstance(raw, dict):
+        return {"readable": False}
+    tag, role, popup, link = raw.get("tag"), raw.get("role"), raw.get("haspopup"), raw.get("link")
+    return {
+        "tag": tag if tag in _TAGS + ("svg", "img", "li-icon") else "other",
+        "role": role if role in _ROLES + ("img", "dialog") else ("none" if role is None else "other"),
+        "in_heading": raw.get("in_heading") is True,
+        "link": link if link in _LINK_KINDS else "other",
+        "haspopup": popup if popup in _HASPOPUP_WORDS else ("none" if popup is None else "other"),
+        "expanded": raw.get("expanded") is True,
+    }
 
 _EXPANDED_JS = """
 () => Array.from(document.querySelectorAll("main [aria-expanded]")).map((e) => ({
@@ -1353,11 +1555,26 @@ async def _in_me(capture: bool) -> dict[str, Any]:
         census = [expanded_record(raw) for raw in (await page.evaluate(_EXPANDED_JS) or [])]
         sections = {word: int(await page.locator("main").get_by_text(word, exact=True).count())
                     for word in PROFILE_SECTION_WORDS}
+        verifications = [verify_record(raw) for raw in (await page.evaluate(_VERIFY_JS) or [])]
+        topcard: dict[str, list[int]] = {}
+        for word in TOPCARD_WORDS:
+            _handle, drawn, visible = await topcard_control(page, word)
+            if _handle is not None:
+                await _handle.dispose()
+            topcard[word] = [drawn, visible]
         await _save_page(page, "in_me", capture)
     out = {"self_assertion": assertion, "loads": loads, "expanded": census,
-           "more_triggers": sum(1 for row in census if row["more"]), "sections": sections}
+           "more_triggers": sum(1 for row in census if row["more"]), "sections": sections,
+           "verification_controls": verifications, "topcard_drawn_visible": topcard}
     say("    main [aria-expanded] " + str(len(census)) + "; labelled More " + str(out["more_triggers"])
         + "; section words " + shape_of(sections))
+    say("    top card, drawn/visible: " + "; ".join(
+        word + " " + str(topcard[word][0]) + "/" + str(topcard[word][1]) for word in TOPCARD_WORDS))
+    by_link: dict[str, int] = {}
+    for control in verifications:
+        by_link[str(control.get("link"))] = by_link.get(str(control.get("link")), 0) + 1
+    say("    P K1: controls labelled with a verification " + str(len(verifications))
+        + "; by link " + shape_of(by_link))
     return out
 
 
@@ -1370,10 +1587,12 @@ async def _in_me_more(capture: bool) -> dict[str, Any]:
         if not on_his_profile:
             return {"stopped": "not_on_his_profile"}
         for _opening in range(2):
-            handle, count = await _one_handle(page.locator(MORE_TRIGGER))
+            handle, drawn, visible = await topcard_control(page, MORE_NAME)
             if handle is None:
-                say("    More triggers matching: " + str(count) + ". NOT EXACTLY ONE. Nothing pressed.")
-                return {"stopped": "more_trigger_count_" + str(count), "openings": openings}
+                say("    More in the top card: " + str(drawn) + " drawn, " + str(visible)
+                    + " visible. NOT EXACTLY ONE VISIBLE. Nothing pressed.")
+                return {"stopped": "more_visible_" + str(visible) + "_drawn_" + str(drawn),
+                        "openings": openings}
             openings.append(await press_and_read(page, "in_me_more", handle, capture,
                                                  needles=N76_NEEDLES))
             await handle.dispose()
@@ -1482,11 +1701,24 @@ async def _tool(key: str, items: dict[str, str]) -> dict[str, Any]:
     if key == "job_detail":
         return await server.linkedin_job_detail(job_id=items["posting"])
     if key == "n94":
-        return await server.linkedin_people_search_shape(keywords=N94_KEYWORDS, location_ids=N94_GEOS)
+        # A KEYWORD SEARCH WITH NAMES: N 94's two locations, and N 79 -- a person
+        # found by keyword -- off the same load (the orchestrator's go order).
+        return await server.linkedin_people_search_shape(
+            keywords=N94_KEYWORDS, location_ids=N94_GEOS, include_names=True)
     if key == "n84":
-        return await server.linkedin_people_search_shape(current_company_ids=items["org"])
+        return await server.linkedin_people_search_shape(
+            current_company_ids=items["org"], include_names=True)
     if key == "n87":
-        return await server.linkedin_people_search_shape(past_company_ids=items["past_org"])
+        return await server.linkedin_people_search_shape(
+            past_company_ids=items["past_org"], include_names=True)
+    if key == "presence":
+        return await server.linkedin_messaging_presence()
+    if key == "recruiter":
+        return await server.linkedin_recruiter_insights()
+    if key == "j107":
+        # J 107: every posting at ONE employer -- the employer the caller named,
+        # standing in for the keyword. A jobs search, not one of D1's five.
+        return await server.linkedin_search_jobs(keywords="", company_id=items["org"])
     if key == "memberships":
         return await server.linkedin_group_memberships()
     if key == "group_home":
@@ -1498,6 +1730,82 @@ async def _tool(key: str, items: dict[str, str]) -> dict[str, Any]:
 
 #: The star's labels, compared inside the page (lane L5's C10).
 STAR_LABELS = ("Star conversation", "Unstar conversation")
+
+
+# ---------------------------------------------------------------------------
+# The operator's named live targets: matched IN THIS PROCESS, never printed.
+# ---------------------------------------------------------------------------
+
+#: The identity key's class holding the people he named for live proofs. The
+#: words live ONLY in the gitignored key; here they are read, compared and
+#: counted, and nothing of them leaves this process but an index and a count.
+TARGET_CLASS = "operator_named_live_targets"
+
+
+def _key_data() -> dict[str, Any]:
+    """The gitignored identity key, found from a worktree the way the identity
+    sweep finds it. Empty when absent: then every count below is None."""
+    from tests.repo_paths import sanitisation_key_path
+
+    loaded = _json_or_none(sanitisation_key_path(_ROOT))
+    return loaded if isinstance(loaded, dict) else {}
+
+
+def name_tokens(text: Any) -> list[str]:
+    """A name as its words: NFKC, casefolded, split on anything not a letter.
+    PURE."""
+    import unicodedata
+
+    folded = unicodedata.normalize("NFKC", str(text or "")).casefold()
+    return [w for w in re.split(r"[^\w]+|[\d_]+", folded) if w]
+
+
+def person_matches(name: Any, first: str, surnames: Any = ()) -> bool:
+    """Does a drawn name carry ``first`` as a whole word -- and, when surnames
+    are given, one of them too? PURE. Whole words only: a first name inside a
+    longer word is not that name."""
+    tokens = name_tokens(name)
+    if not first or first.casefold() not in tokens:
+        return False
+    wanted = [s.casefold() for s in surnames if s]
+    return not wanted or any(s in tokens for s in wanted)
+
+
+def family_names(key: dict[str, Any]) -> list[str]:
+    """The last word of each multi-word spelling of the operator's own name, of
+    three letters or more: the family name a relative's drawn name carries.
+    PURE. Read from the key, never written anywhere."""
+    out: list[str] = []
+    for value in key.get("operator") or []:
+        words = str(value).split()
+        if len(words) >= 2 and len(words[-1]) >= 3 and words[-1].casefold() not in out:
+            out.append(words[-1].casefold())
+    return out
+
+
+def names_in(envelope: Any) -> list[str]:
+    """Every string under a ``name`` key anywhere in an envelope. PURE. What a
+    people record calls the person; read here only to be counted."""
+    found: list[str] = []
+    stack = [envelope]
+    while stack:
+        node = stack.pop()
+        if isinstance(node, dict):
+            for field, inner in node.items():
+                if field == "name" and isinstance(inner, str):
+                    found.append(inner)
+                else:
+                    stack.append(inner)
+        elif isinstance(node, (list, tuple)):
+            stack.extend(node)
+    return found
+
+
+def named_target_counts(names: list[str], words: list[str]) -> dict[str, int]:
+    """For each word of the key's class, by its 1-based INDEX, how many drawn
+    names carry it as a whole word. PURE. Indices and counts only."""
+    return {"T" + str(i): sum(1 for n in names if person_matches(n, w))
+            for i, w in enumerate(words, 1)}
 
 
 async def _left_open(key: str, capture: bool, envelope: dict[str, Any]) -> dict[str, Any]:
@@ -1527,9 +1835,28 @@ async def _run_tool(key: str, items: dict[str, str], capture: bool) -> dict[str,
         raise _Anomaly("error_envelope", key)
     _print_envelope(out)
     extra = await _left_open(key, capture, out)
+    if key == "n23":
+        # THE NAMED TARGETS AMONG HIS CONNECTIONS, COUNTED (the order of
+        # 2026-09-28 08:04, for session 3): by the key word's index, never by
+        # the word; read-only, no outward act.
+        words = [str(w) for w in (_key_data().get(TARGET_CLASS) or [])]
+        extra["named_target_counts"] = named_target_counts(names_in(out), words) if words else None
+        say("    named targets among the connections drawn, by key index: "
+            + shape_of(extra["named_target_counts"]))
     if key == "notifications":
         extra["kinds"] = s1.notification_kinds(out.get("results") or [])
         say("    kinds: " + shape_of(extra["kinds"]))
+    if key == "job_detail":
+        # D-4, THE ORCHESTRATOR'S CALL: an organisation id is shown to him BY
+        # NAME before any search or roster fires on it. So the ORGANISATION --
+        # its name and resolved id, never a person -- is written beside the
+        # reduced envelope, gitignored, for the lead to read and send; nothing
+        # of it is printed here.
+        resolved = out.get("company_id") if isinstance(out.get("company_id"), dict) else {}
+        _write("job_detail", ".org.json", json.dumps({
+            "company": out.get("company"), "company_id": resolved.get("company_id"),
+        }, indent=2))
+        say("    the organisation, by name and id, written for D-4 under _state/ (gitignored)")
     reduced = KEYS[key].get("envelope") == "reduced"
     written = reduce_envelope(out, _shape_key()) if reduced else out
     _write(key, ".json", json.dumps({"envelope": written, **extra}, indent=2, default=str))
@@ -1674,7 +2001,7 @@ async def _run_keys(keys: list[str], items: dict[str, str], capture: bool) -> in
             own = getattr(BROWSER, "_own_page", None)
             if own is not None and not own.is_closed():
                 page = own
-                await page.close()
+                await BROWSER.close_tab(page)
         except Exception as exc:  # noqa: BLE001 - shutdown noise only
             say("    closing our tab raised " + type(exc).__name__)
         try:
@@ -1692,6 +2019,10 @@ async def _run_keys(keys: list[str], items: dict[str, str], capture: bool) -> in
 async def main_async(argv: list[str]) -> int:
     if "--attach-child" in argv:
         return await _attach_child()
+    if "--export-fixtures" in argv:
+        for name, size in export_fixtures().items():
+            say("    tracked copy " + name + ": " + str(size) + " characters")
+        return 0
     items = parse_items(argv)
     keys = selected(argv, items)
     capture = "--no-capture" not in argv

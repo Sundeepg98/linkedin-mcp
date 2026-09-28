@@ -70,6 +70,7 @@ def _browser_id() -> str:
 
 async def _run(args) -> dict:
     from linkedin_server import cdp_bridge
+    from linkedin_server.browser import close_tab_keeping_the_window
 
     version = await cdp_bridge.probe()
     if not version.get("reachable"):
@@ -115,7 +116,7 @@ async def _run(args) -> dict:
                 )
                 out["user_agent"] = await page.evaluate("() => navigator.userAgent")
             finally:
-                await page.close()
+                await close_tab_keeping_the_window(page, context)
     finally:
         # Close the CLIENT, never the context: the context is the browser's own
         # and closing it closes the operator's window. This is the same

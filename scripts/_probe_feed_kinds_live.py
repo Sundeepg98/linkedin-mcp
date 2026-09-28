@@ -198,7 +198,7 @@ async def main() -> int:
                 print("      'there was nothing to consume'.")
     finally:
         if page is not None and not page.is_closed():
-            await page.close()
+            await BROWSER.close_tab(page)
             print("\npage closed (the PAGE, never the CONTEXT). is_closed=%s"
                   % page.is_closed())
 
