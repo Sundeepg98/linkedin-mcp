@@ -10919,6 +10919,44 @@ tests `tests/test_send_message_gate.py`, `tests/test_typeahead_gate.py`,
 `tests/test_click_is_not_its_own_evidence.py` and
 `tests/test_the_needle_is_matched_as_a_bare_substring.py`.
 
+
+### 69.14 A READ THAT SPENDS A VIEW IS CONFIRMED BEFORE IT, AND A READER IS REBUILT OVER THE PAGE THAT REFUSED IT (the read he names, 2026-09-28)
+
+Two findings, and the instruments that hold them.
+
+**THE CONFIRMATION MUST PRECEDE WHAT IT CONFIRMS.** The operator permitted a read of a profile he
+names on the mitigation "a single-use confirmation for each view, stating the possible trace". The
+named acts' previews LOAD the profile -- for them the load is part of the act he ordered -- and the
+obvious build copies them, which would spend the view before he confirmed it. So the read's preview
+loads nothing, and names the member by the one address it resolved; the record comes back from the
+confirmed call.
+
+| instrument | what it holds | shown failing |
+|---|---|---|
+| `tests/test_named_profile_read.py` | the preview opens no browser and mints one token; the token reads once, one profile, 120 s; a name never reaches a browser or a grant; one load, through the second door; the record; groups absent; nothing kept; no script names the read; one tool reaches its loader | five controls: a preview that opens a browser, a reusable token, a read of the groups, a probe naming the read, the landing veto removed -- each caught by the real test it plants against |
+
+**A READER BUILT OVER AN INVENTED PAGE IS A GUESS UNTIL THE LIVE PAGE REFUSES IT.** The named acts'
+reader matched the Message control by its label, `Message <name>`, measured on people cards; the live
+topcard draws it with no label, twice, one hidden, and every labelled Message control on that page
+is somebody else's. The first live Message refused -- safely -- and the capture it left is the
+fixture now.
+
+| instrument | what it holds | shown failing |
+|---|---|---|
+| `scripts/_build_named_profile_skeleton.py` + `tests/test_named_profile_live_skeleton.py` | the live-true fixture is the capture's structure (digest `iefnpejnhfajibng`, printed from the skeleton) and a fixed point of its builder; the builder keeps only LinkedIn's words on the live lane's list | an svg deletion changes the digest; a text edit breaks the fixed point -- AND THAT CONTROL FAILED FIRST: the builder kept any non-shape text, so a hand edit survived its own fixed point |
+| the same file | the old gate's conditions read zero on the live page; the rebuilt reader finds one visible owner's control whichever row is hidden, and refuses both shown | the old reader, run before the rebuild, refused it exactly as live; a hidden control counted reads two |
+| `MEMBER_LINK_INTERFACE_TEXT` in `tests/test_fixtures_hold_only_synthetic_people.py` | a profile link whose only text is "Send" or "Show all" names no one | a planted name, alone or after either word, is still convicted |
+
+    A PREVIEW THAT DOES WHAT IT PREVIEWS IS NOT A PREVIEW. WHEN THE COST IS THE LOAD, THE
+    CONFIRMATION COMES BEFORE THE LOAD, AND THE PREVIEW SAYS WHAT IT DID NOT READ.
+
+    A FIXED POINT PROVES NOTHING ABOUT THE VALUES A BUILDER KEEPS VERBATIM. A BUILDER THAT
+    PASSES UNKNOWN TEXT THROUGH IS A FIXED POINT OF ANY EDIT; KEEP ONLY WHAT A CLOSED LIST NAMES.
+
+DECLARED DISPOSABLE: the lane's scratch inspectors of the skeleton (structure, hooks, controls, card
+ids), which printed shapes and counts once to decide the rebuild.
+
+
 ## 70. THE BEST-VERIFIED WRITE NEVER PRESSED SAVE, AND A WRITE AIMED BY ITS CARD (lane-l7-profile-writes, 2026-09-24)
 
 **Registered 2026-09-24.** Full record: `_audit/2026-09-24-lane-l7-profile-writes.md`.

@@ -2427,3 +2427,234 @@ P 187, M 132, N 160 -- with 67 rulings and 258 documents in the derived views.
 - THE COMMIT CARRYING THIS PARAGRAPH changes this file and nothing else. Its own impact plan and
   that plan's result are in the report that returns the head sha: a record cannot hold the gate of
   the commit that writes it.
+
+## The read he names: the orchestrator's order of 2026-09-28 08:06, and its addendum of 08:43
+
+**THE ORDER.** The operator ruled YES on reading a profile he names (08:01, verbatim: "Yes, I'm
+giving you permission."). Copy his ruling's document into `_audit/`, register it, build a read tool
+over this lane's named-person door -- `profile` (a link or member id) and a `confirm_token`, behind
+the single-use grant; a preview naming the resolved member and stating that LinkedIn may show that
+member the view; on confirm, one load and the declared fields as people records, name, headline and
+the groups `N 178` needs -- ABSENT where no capture shows them; one page per call, nothing stored,
+never aimed by a name, `PERMANENTLY_FORBIDDEN`'s third-party entry narrowed to exactly this; `N 178`
+moved only if its section is captured, else a capture spec for the live lane's session 3.
+
+**THE ADDENDUM (08:43).** Measured live that morning: `linkedin_message_from_profile` was REFUSED
+on a first-degree profile the operator named -- the preview's reading came back `unknown`, and
+nothing was pressed or sent. `dom.read_named_profile`, built over an invented page, was not
+live-true. The live lane took one skeleton of that profile; rebuild the reader and its topcard
+selectors over it, keep every refusal, keep the invented page as the secondary case and say which is
+live-true, and build the read over the same reader.
+
+Disk at 08:04 agreed with the order: master `c94c39e`, this branch inside it; fast-forwarded.
+
+### R.1 The ruling, registered
+
+- `_audit/2026-09-28-rulings-named-profile-read.md`, copied from the orchestrator's scratch copy.
+  ONE CHANGE, forced by a document guard, and the order's own rule for that case: the backticks
+  around `PEOPLE-DATA-MITIGATIONS` on its line 37 are removed -- no word changed, two bytes.
+  `tests/test_an_asserted_name_resolves.py` reads "under" at the end of line 36 and a backticked
+  upper-kebab name opening line 37 as a BLOCKER citation, resolved against the gap-blockers ledger,
+  which holds no ruling ids. sha256 before `de3d032f079b2ca0`, after `18f0c8809ea97ea8`.
+- The register entry, `scripts/build_rulings_index.py`, with the order's fields verbatim --
+  id `NAMED-PROFILE-READ-BEHIND-A-GRANT`, claim, binds, document, anchor, note -- and the status
+  `AMENDS NO-THIRD-PARTY-PROFILE-LOAD`. FOUND ON DISK, AND NOT IN THIS REGISTER: his 2026-09-04
+  removal of the third-party profile pattern has no entry in the rulings register. It is registered
+  in the EXCLUSION register, `scripts/check_exclusion_basis.py`, as the family
+  `NO-THIRD-PARTY-PROFILE-LOAD` -- made by the OPERATOR, op=YES, anchored on the removal's own
+  comment in `readonly.py` ("THE THIRD-PARTY PROFILE PATTERN WAS REMOVED 2026-09-04, ON THE
+  OPERATOR'S"). That id is the one the status names. `THIRD-PARTY-PROFILE-FOR-A-NAMED-TARGET` was
+  the other candidate and is not it: it is the orchestrator's application of ruling (b) of
+  2026-09-24, not his removal. `RULINGS.md` regenerated: 68 rulings; `INDEX.md`: 259 documents.
+
+### R.2 The read: `linkedin_read_named_profile(profile, confirm_token)`
+
+- **THE PREVIEW LOADS NOTHING.** The mitigation he approved reads "a single-use confirmation for
+  each view, stating the possible trace": the view IS the load, so the confirmation must come first.
+  The preview is a sentence and a token, and never opens a browser (a test drives it with a browser
+  that fails on any session). THE ONE PLACE THIS DEPARTS FROM THE ORDER'S WORDS: the order said the
+  preview names the resolved member "as a people record". It cannot, and stay inside the ruling: a
+  record needs a name (`people_data.Person` refuses one without), and the name is on the page whose
+  load is being confirmed. So the preview names the member by the ONE address it resolved from his
+  argument -- a link says WHO -- says it has not read the name and why, and tells him to check the
+  link; the people record comes back from the confirmed call, read once. The order's two other
+  sentences -- "states that LinkedIn may show that member the view" and "on confirm it loads the
+  profile once" -- are exactly this design.
+- **THE GRANT.** The writes' shape, its own registry: `writes.mint` grants only a sanctioned WRITE,
+  only against a reading a preview LOADED, and only with writes on -- three facts this read does not
+  share. So `named_profile` keeps read grants with the same properties: a 24-byte token, bound to
+  the
+  canonical link, 120 s (pinned equal to `writes.GRANT_TTL_SECONDS`), single-use at the token AND at
+  the load, swept on every mint and consume, in process memory only. A grant holds his argument,
+  never a page string. NOT BEHIND THE WRITES FLAG: the ruling calls it a read and its conditions
+  are the grant, the preview's statement and the records, each enforced; a flag named WRITES would
+  misname it. The orchestrator can flip that.
+- **ONE LOAD.** `named_profile.load_the_confirmed_profile` redeems the token FIRST, marks the grant
+  loaded, composes the address with the boundary (`readonly.named_profile_url`), checks it with
+  `assert_named_profile_url` and loads it through the second door. A landing that is not the named
+  address vetoes the whole read (a member id LinkedIn redirects: C-P6), and the preview says so when
+  it was given a member id. No scroll, no press.
+- **WHAT COMES BACK.** `person` -- name, headline, link, as a people record through
+  `named_profile.person_from_the_topcard`, the ONE parse the named acts' preview now shares (split
+  out of `name_the_profile_target`, not copied; a line with no letter or digit is dropped before
+  it, because the live topcard draws two). Degree ABSENT: no capture shows a third party's degree
+  line's words. `groups` ABSENT, with its reason. `capture_hints.group_links_drawn`: one count, for
+  C-P7, naming no group. Counts of what the page showed. Nothing else.
+- **NEVER FOR A MEASUREMENT, AS FACTS ABOUT THE TREE:** no file under `scripts/` names the read by
+  any of its six names (a test, shown catching a planted probe), and one tool reaches its loader.
+- **NEVER A NAME:** `named_profile.profile_segment` refuses a name, a bare word, a sub-page, his own
+  `/in/me/` and an invisible character before a browser session or a grant exists.
+- `tests/test_named_profile_read.py`, 35 tests, five of them controls that plant each property false
+  -- a preview that opens a browser, a reusable token, a read of the groups, a probe naming the
+  read,
+  the landing veto removed -- and are caught.
+
+### R.3 The door, and the permanent refusal
+
+- The second door now has TWO callers, each pinned: `writes._load_named_profile` (the named acts)
+  and `named_profile.load_the_confirmed_profile` (the read). `tests/test_named_profile_route.py`'s
+  two pins became "exactly two functions ask for the door" and "only `browser.py`, `writes.py` and
+  `named_profile.py` name it"; `tests/test_probe_navigation_budget.py` counts the door as a guard in
+  exactly those two (file, function)s (`SECOND_DOOR_GUARDS`). The read door is unchanged.
+- The loader's locals are named for it (`profile_address`, `read_landing`): bound to `landed`, the
+  navigation guard's module-wide taint spread through `landed_on_profile`'s `parts` and
+  `profile_segment`'s `segment` into this navigation, and read it as one the page chose -- measured
+  red, then renamed, as `writes._read_account_share_updates` records the same trap.
+- `writes.PERMANENTLY_FORBIDDEN["load_a_third_partys_profile_to_measure_a_control"]`: the key and
+  its measured ground unchanged; the text now takes exactly this read out of it, by name and ruling,
+  and says everything else stays forbidden -- a probe, a census, an instrument, an unconfirmed read.
+
+### R.4 The addendum: the reader rebuilt over the live skeleton
+
+- **THE LIVE REFUSAL, REPRODUCED OFFLINE.** The old reader, run on the fixture built from the
+  skeleton, before any edit: title, one topcard, its first heading the title's name, degree `1st`
+  -- identity confirmed -- and `message_state` `unknown`: "0 Message control(s) are named for this
+  person". `message_matches` 0, `message_controls_in_topcard` 0. The topcard's Message control is a
+  composer link named by its own text, "Message", with NO label -- drawn TWICE, in two action rows,
+  one hidden -- and every LABELLED Message control on the page (`Message <name>`) is another
+  person's, on a rail. The old reader matched the label alone. Pinned by
+  `test_the_old_reader_refuses_the_live_page_as_it_did_live`, over the old gate's frozen conditions.
+- **THE FIXTURE.** `scripts/_build_named_profile_skeleton.py` (committed) turns the live lane's
+  skeleton -- every non-furniture value already a keyed shape -- into
+  `tests/fixtures/synthetic/named_profile_live.html`: the capture's structure, 1415 elements; the
+  owner the declared `Casey Example` (the invented page's person, so the two fixtures are one person
+  on two drawings); other people REDUCED TO SHAPE and given `someone-example-<n>` slugs; LinkedIn's
+  class names DROPPED, so no reader here can lean on them. Its capture run printed: 185 texts
+  reduced
+  to shape, 7 dotted, 16 labels refilled from their control's own word, 36 placeholder labels, 11
+  labels dropped on member links, 8 unclassified labels ("Verified", absent from master's copy of
+  the live lane's word list), 0 unclassified texts, 75 addresses rebuilt, 8 dropped (off LinkedIn's
+  host), and the STRUCTURE DIGEST `iefnpejnhfajibng`. Run over its own output it is a FIXED POINT,
+  and prints the same digest; `tests/test_named_profile_live_skeleton.py` pins both, and its two
+  controls fail on an svg deletion and on a text edit. THE TEXT-EDIT CONTROL FAILED FIRST: the
+  builder kept any text that was not a shape, so a hand edit survived its own fixed point. It keeps
+  now only LinkedIn's words on a closed list -- held to the live lane's list by a test -- and the
+  values it writes; anything else becomes "Example text", counted.
+- **DERIVED, AND SAID SO IN THE FIXTURE AND THE BUILDER:** the topcard container's id suffix
+  (shaped in the skeleton; its shape, 80 characters, 71 letters, 4 digits, is the measured
+  `com.linkedin.sdui.profile.card.ref<member id>Topcard`, and six sibling cards fit the same pattern
+  with their own suffix lengths -- were it wrong, the reader finds no topcard and refuses); WHICH of
+  the two action rows is hidden (the second, here; the tests also hide the first); the degree
+  line's words; "Contact info".
+- **THE REBUILT READER** (`dom.NAMED_PROFILE_JS`, `dom.TOPCARD_MESSAGE_CONTROL`, the two topcard
+  selector builders, `named_profile.connect_state` / `message_state`): inside the owner's topcard,
+  the controls of each kind are counted with their VISIBILITY -- a non-empty box and no
+  `visibility:hidden`, what Playwright's `:visible` means -- and each is the owner's or FOREIGN: a
+  Message control with a label is the owner's only if it names the owner, one without a label only
+  if it says exactly "Message". The act needs exactly ONE VISIBLE control of the kind and that one
+  the
+  owner's, and refuses on any foreign one, visible or not. The press selectors carry `:visible`, so
+  the strict press reaches the one visible control and still throws if a second visible one is drawn
+  mid-press. Every refusal kept: exactly one, a re-check before any press, `unknown` refuses.
+- **ON THE LIVE-TRUE FIXTURE:** 2 Message controls in the topcard, 1 visible, the owner's, a
+  composer link -- `message_control_drawn`, and the press selector matches exactly 1. With the FIRST
+  row hidden instead: the same. With both rows shown: 2 visible, refused. The read he names returns
+  `Casey Example` and the headline as a people record, groups absent, `group_links_drawn` 0.
+- **WHICH FIXTURE IS LIVE-TRUE:** `named_profile_live.html`. `named_profile.html` says in its header
+  that it is the SECONDARY case, kept for what the live page cannot show: a Connect control, another
+  degree, a same-name stranger, the conversation a Message press opens. Its six route tests that
+  pinned the old reasons pin the new ones, each intent unchanged.
+- **ONE GUARD NARROWED, AS ITS OWN FAILURE MESSAGE SAYS TO:**
+  `test_fixtures_hold_only_synthetic_people`
+  read "Send" (twice) and "Show all" (twice) as the first text of links to the owner's profile --
+  the
+  live page draws a post's share action and a section footer as such links. The member-text slot now
+  passes exactly those two interface words (`MEMBER_LINK_INTERFACE_TEXT`), with a control showing a
+  planted name, alone or after either word, still convicted.
+- The tool that wrote this lane's files decoded three escapes into the characters they spell (a
+  middle dot, a zero-width space); all three are ASCII spellings again, checked byte by byte.
+
+### R.5 The census
+
+- **`N 178` STAYS GAP; NEEDS-TARGET STANDS.** Its section is not in the capture: the live skeleton,
+  one load without a scroll, draws no Interests section and no link under `/groups/` (a test pins
+  both). Its cell now records the ruling, the tool and the blocker, named in words: the capture
+  C-P7.
+  The address table's note moves with it; its line stays REFUSED, because that table is the READ
+  door's, and the read goes through the second door.
+- **THE FOUR READ ROWS PUT TO THE ORCHESTRATOR, NOT MOVED.** R4's section records the narrowing. The
+  rows filed EXCLUDED-RULED on it that are READS of a member's profile content -- `N 30` (a
+  connection's connections), `N 31` (shared connections), `N 65` (the Interests section) and
+  `N 103` (similar profiles) -- rest on a ground now narrowed for a member he names, and by
+  EXCLUDED-RULED-ADMISSION a row whose written ground no longer reaches it is GAP with a named
+  blocker. The ruling's own unblock list names `N 178` alone, so, as with `N 2` on 2026-09-27, their
+  state is kept and the move is the orchestrator's: to GAP, each blocked on a capture of its section
+  and a declared field, would move GAP 584 -> 588 and EXCLUDED-RULED 30 -> 26. The acts on R4 keep
+  their ground.
+- No state moved: J 108, P 186, M 131, N 159, GAP 584 -- the figures master carries.
+
+#### C-P7 -- a member's groups, for the live lane's session 3
+
+Taken INSIDE the first confirmed `linkedin_read_named_profile` of a member HE names for his own
+reason -- never a load of its own; a load to capture is a load for a measurement, which stays
+forbidden.
+
+1. The member: one he names, ideally one who belongs to at least one group he can see. He confirms
+   the read himself, after its preview.
+2. After the confirmed call returns, with the page still on screen in the server's own tab: save its
+   DOM with the session-2 skeleton writer, nothing pressed, no scroll.
+3. The read's own `capture_hints.group_links_drawn` says at once whether that load drew a group
+   link.
+   Session 2's first-degree profile drew none.
+4. Offline, counts and shapes only, the capture must answer: is an Interests section drawn at load;
+   its tabs (a closed vocabulary) and which is selected; whether the Groups panel is in the DOM
+  before
+   any press; each group entry's shape (a link under `/groups/<digits>/`, a title element); and
+   whether a "Show all" link to the member's `details/interests` sub-page is drawn, with its tab
+  index.
+5. If the groups are NOT on that load, the next step is a ruling, not a load: a scroll (the scroll
+   ruling covers infinite scroll, not one scroll to a section), a tab press
+  (DISCLOSING-PRESS-PERMITTED
+   has four conditions), or the sub-page -- which the named-profile door does not admit. The
+   capture's answer is what that ruling decides on.
+
+The same save refreshes C-P1 for a profile of another degree; session 2's skeleton took it for a
+first-degree one.
+
+### R.6 Pins and counts, each measured
+
+- The surface: 61 tools, 95 parameters (+1 tool, +2 parameters); 44 read, 17 write, 0 write-shaped.
+  `test_server_surface.py`'s headline, its count test (`..._sixty_one_tools`) and its split;
+  `test_every_tool_is_on_the_surface.py`; the pinned surface, with its census decision written
+  beside the pin; `server.py`'s headline, its three-way split and its instructions;
+  `known_side_effects` and `read_boundary_scope`, which said no read tool loads a profile.
+- `people_data.PEOPLE_TOOLS`: 7, with the read (the bounded-reader guard derives it).
+- The reader-leak baseline, regenerated by its writer, offline:
+  `named_profile:read_the_confirmed_profile`
+  `returns_records` (driven as the tool calls it), `named_profile:load_the_confirmed_profile`
+  `not_driven:raises WriteAttemptError` (the harness's token is no grant). The tool-envelope
+  baseline:
+  the read `not_driven:never read the page`. The landing baseline: unchanged.
+- The page-string guard's record path now includes the read, its reader and the shared parse.
+
+### R.7 Gates
+
+(filled after the commits are gated)
+
+### R.8 NOT run
+
+(filled after the commits are gated)
+
+### R.9 Commits -- on this branch, none pushed, no AI attribution in any
+
+(filled after the commits are gated)
