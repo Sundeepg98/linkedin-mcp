@@ -428,7 +428,7 @@ PEOPLE_PAGE = (
     "<a href='/feed/update/urn:li:activity:" + _digits(19) + "/'>More</a>"
     "<button aria-label='Star conversation' aria-pressed='false'></button>"
     "</li></ul>"
-    "<label for='s'>Sharing profile edits</label>"
+    "<label for='s'>Share key profile updates</label>"
     "<input id='s' type='checkbox' role='switch' checked data-view-name='settings-toggle'>"
     "<div data-member-name='" + INVENTED_NAME + "' componentkey='" + _digits(9) + "'>Show all</div>"
     "</main></body></html>"
@@ -446,7 +446,7 @@ def test_a_skeleton_keeps_what_a_readers_selectors_need() -> None:
     skeleton = harness.skeleton_of(PEOPLE_PAGE, KEY)
     for kept in ('class="msg-conversation-listitem"', 'role="switch"', 'aria-expanded="false"',
                  'aria-pressed="false"', 'aria-label="Star conversation"', "\nShow all\n", "\nMe\n",
-                 "\nSharing profile edits\n", 'data-test-hook="UNREAD"', 'data-view-name="settings-toggle"',
+                 "\nShare key profile updates\n", 'data-test-hook="UNREAD"', 'data-view-name="settings-toggle"',
                  "https://www.linkedin.com/in/", "?miniProfileUrn=", "/feed/update/urn:li:activity:"):
         assert kept in skeleton, kept
     label_for = harness.value_shape("s", KEY)
@@ -692,12 +692,12 @@ async def test_the_restated_locator_agrees_with_the_reader_on_every_b_world(brow
 
 
 PROPERTY_ONLY = (
-    "<!doctype html><html><body><main><label for='s'>Sharing profile edits</label>"
+    "<!doctype html><html><body><main><label for='s'>" + profile_editor.ACCOUNT_SETTING_NAME + "</label>"
     "<input id='s' type='checkbox' role='switch'></main>"
     "<script>document.getElementById('s').checked = true;</script></body></html>"
 )
 ATTRIBUTE_ON = (
-    "<!doctype html><html><body><main><label for='s'>Sharing profile edits</label>"
+    "<!doctype html><html><body><main><label for='s'>" + profile_editor.ACCOUNT_SETTING_NAME + "</label>"
     "<input id='s' type='checkbox' role='switch' checked></main></body></html>"
 )
 

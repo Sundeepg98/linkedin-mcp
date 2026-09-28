@@ -49,7 +49,7 @@ same directory refuses a second harness process: one driver at a time.
 Printed: integers, booleans, field names, and the package's own closed words.
 Written under ``_state/live2/`` (gitignored), never committed:
 
-* a RAW capture of ONE page only -- his "Sharing profile edits" setting,
+* a RAW capture of ONE page only -- his "Share profile updates" setting,
   which draws no other person;
 * for every other page a SKELETON reduced in this process before anything is
   written (:func:`skeleton_of`): tags, attribute names, classes, roles and
@@ -1276,8 +1276,8 @@ def _attach_check() -> dict[str, Any]:
 
 def named_setting_control(page: Any) -> Any:
     """The reader's own locator, restated: controls of role switch or
-    checkbox named exactly "Sharing profile edits". A test holds the two equal
-    on the (b) worlds."""
+    checkbox named exactly :data:`profile_editor.ACCOUNT_SETTING_NAME`. A
+    test holds the two equal on the (b) worlds."""
     name = profile_editor.ACCOUNT_SETTING_NAME
     return page.get_by_role("switch", name=name, exact=True, include_hidden=True).or_(
         page.get_by_role("checkbox", name=name, exact=True, include_hidden=True))

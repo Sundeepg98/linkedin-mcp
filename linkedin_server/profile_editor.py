@@ -1051,14 +1051,20 @@ ACCOUNT_SETTING_URL: str = (
     "https://www.linkedin.com/mypreferences/d/settings/notify-network-for-updates"
 )
 
-#: LINKEDIN'S OWN NAME FOR THE SETTING, as the settings index captured in the
-#: live lane's session 1 draws it: the display-name map's value for the key
-#: ``notifyNetworkForUpdates``. A LinkedIn UI string, never his data, and it
-#: is COMPARED INSIDE THE PAGE -- Playwright's role-and-name engine, exact --
-#: so what comes back is a count, never text: the discipline
-#: :data:`PREMIUM_BADGE_TITLE` set. A UI in another language matches nothing,
-#: and nothing is read: 'unknown', by construction.
-ACCOUNT_SETTING_NAME: str = "Sharing profile edits"
+#: THE SWITCH'S OWN ACCESSIBLE NAME ON THE SETTING'S PAGE, measured live by the
+#: live lane on 2026-09-28: an ``input`` checkbox with role switch, named
+#: through ``aria-labelledby`` by a label reading "Share key profile updates",
+#: under the page heading "Share profile updates". The first value here was
+#: "Sharing profile edits" -- the settings INDEX's display name for the key
+#: ``notifyNetworkForUpdates``, captured in session 1 -- and the page itself
+#: draws no control of that name: session 2's live read found 0 and read
+#: nothing. A LinkedIn UI string, never his data, and it is COMPARED INSIDE THE
+#: PAGE -- Playwright's role-and-name engine, exact -- so what comes back is a
+#: count, never text: the discipline :data:`PREMIUM_BADGE_TITLE` set. A UI in
+#: another language matches nothing, and nothing is read: 'unknown', by
+#: construction. Held on today's capture of the page by
+#: ``tests/test_account_share_updates.py``.
+ACCOUNT_SETTING_NAME: str = "Share key profile updates"
 
 #: The roles a control holding this setting's on/off state can carry. Both
 #: are asked, and exactly ONE control of either, of this exact name, may be
@@ -1088,7 +1094,7 @@ def served_at_account_setting(landed: Optional[str]) -> bool:
 
 
 async def read_account_share_updates(page: Any) -> dict[str, Any]:
-    """Read his "Sharing profile edits" switch. READ ONLY, and never raises.
+    """Read his "Share key profile updates" switch. READ ONLY, and never raises.
 
     ONE CONTROL, ITS NAME BY EXACT EQUALITY, ITS STATE FROM ``checked``. Every
     question is a ``count()``: the page runs nothing it did not already run,
