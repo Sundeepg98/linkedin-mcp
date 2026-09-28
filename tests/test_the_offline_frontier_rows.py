@@ -48,13 +48,15 @@ MOVED: dict[tuple[str, str], tuple[str, ...]] = {
         "`linkedin_search_jobs`", "`tests/test_a_company_search_needs_no_keyword.py`"),
 }
 
-#: MOVED AGAIN, 2026-09-28: fired live in the live lane's session 2 and banked,
-#: each on its own cell's bar. The cell now OPENS on the paragraph that banked
-#: it, and the move above follows it, kept as that morning's record.
-#: `J 107` and `M M53` fired too and did not bank; their cells still open on
-#: the move above, with the session's note at the end.
-BANKED_AGAIN = {("network.md", "195"), ("profile.md", "S5")}
-BANKED_OPENING = "**FIRED AND BANKED 2026-09-28 (the live lane's session 2).**"
+#: MOVED AGAIN, 2026-09-28: fired live and banked, each on its own cell's bar --
+#: `N 195` and `P S5` in the live lane's session 2, `J 107` and `M M53` in its
+#: session 3 (fired in session 2 too, without banking). The cell now OPENS on
+#: the paragraph that banked it, and the move above follows it, kept as that
+#: morning's record.
+BANKED_AGAIN = {("network.md", "195"), ("profile.md", "S5"),
+                ("jobs.md", "107"), ("messaging-and-content.md", "M53")}
+BANKED_OPENING = ("**FIRED AND BANKED 2026-09-28 (the live lane's session 2).**",
+                  "**FIRED AND BANKED 2026-09-28 (the live lane's session 3).**")
 
 #: The row not built, and why.
 NOT_BUILT = ("profile.md", "K1")

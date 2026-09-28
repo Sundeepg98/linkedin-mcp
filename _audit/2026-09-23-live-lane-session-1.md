@@ -2983,3 +2983,417 @@ on this section's commit.
   live `checked` property, fix 3's handle at his width, and fix 4's trigger
   toggle are all proven offline only; each one's first live use is session
   3's.
+
+## Live session 3, 2026-09-28
+
+The orchestrator's GO of 12:42 IST, RUN LIVE SESSION 3, under the operator's
+standing instruction ("do the needful": establish everything yourself, and ask
+him nothing). The session ran from 12:52 to 13:09 on the Chrome the
+orchestrator had started on port 9224 at 12:40, which this lane never started,
+restarted or closed. **16 of the 40 loads, 2 of the 5 searches, 0 writes.
+Three rows banked -- `J 107`, `N 194` and `M M53` -- and Chrome was still up at
+the end.**
+
+**THE OPERATOR'S NAMED LIVE-PROOF TARGETS appear nowhere in this repository.**
+They live only in the gitignored identity key; every step below names them by
+role, and a key POSITION, where one is given, is 0-based, as the orchestrator
+counts.
+
+### The go, and the harness change it needed
+
+The branch fast-forwarded to master `5564c15`: this lane's session-2 wrap-up
+with lane L5's named-profile read on top. The harness tests, the navigation
+guard and L5's two named-profile test files: 863 passed, 1 skipped.
+
+* **`ed858fe`.** Each session gets its own state directory
+  (`LIVE_LANE_SESSION_DIR`, a closed shape: `live` and one or two digits), so
+  session 3's ledger, key and captures sit in `_state/live3/` and its forty
+  loads are its own. D-1 presses the ONE opener the top card draws, More or
+  Resources, on the orchestrator's ruling, once. A menu drawn as a
+  `role=menu` apart from its trigger is read. With the seven script guards:
+  1109 passed, 1 skipped.
+
+The skip in each run is the navigation guard's whole-tree complement, which
+runs where CI is set.
+
+**THE ATTACH CHECK, 12:52, 0 loads: PASS**, by lane D's LQ-4 rule. The
+download behaviour was set with a path and then reset to the default with
+none, both answered without error, in that order; the library's artifact
+folders in the temp directory counted 2455, 2456 and 2455 before, during and
+after; the reset reads restored, and the child exited 0.
+
+### The session, load by load
+
+    n   time      key (the ledger's)    surface        what it read
+    1   12:52:54  read_named_confirm    in             2a: the named read, its first live proof
+    2   12:53:30  m1_preview            in             M M1: resolved; the runner stopped (below)
+    3   12:54:26  m1_preview            in             M M1: resolved, 1st degree, one Message
+    4   12:54:48  m1_confirm            in             REFUSED at condition 5: no composer in 3 s
+    5   12:57:17  m1_preview            in             the approved retry: resolved again
+    6   12:57:45  m1_confirm            in             REFUSED at condition 6
+    7   12:59:23  in_me                 in             D-1 (Resources, once); the Me menu; P K1
+    8   13:01:37  m1_capture_profile    in             the composer captured; nothing typed
+    9   13:02:59  m43                   messaging      M M43; C8, C9 and C5; C1's unread row
+    10  13:04:05  setting               mypreferences  the switch by its live label: OFF
+    11  13:05:21  presence              messaging      M M53: 17 cards, 16 people
+    12  13:05:43  n179                  search         search 1 of 5: N 179
+    13  13:06:14  notifications         notifications  N 20, N 45: neither kind drawn
+    14  13:07:28  j107_worldwide        jobs           J 107 with 'Worldwide': 7 postings
+    15  13:08:35  j107_default          jobs           J 107 with no location: 7 postings
+    16  13:09:26  n194                  search         search 2 of 5: N 194
+
+By surface: in 8, messaging 2, search 2, jobs 2, mypreferences 1,
+notifications 1. The closest two loads stood 21.7 s apart (3 and 4). Loads 1
+to 6, 8 and 14 to 16 were made by the lane's outward runner, a disposable
+script in its scratch folder that took the harness's ledger, counter and
+driver lock by import; the others by the harness. Every load is in the ledger.
+
+### 2a: the named read, PROVEN live
+
+`linkedin_read_named_profile` on the operator's supplied link and nothing
+else. The preview loaded nothing and minted a token; the confirm made one load
+through the named-person door. It landed on the named profile, the identity
+was confirmed (1 top card, 1 heading, matching the page's title), and it
+returned one people record, marked untrusted, with a headline drawn. The
+returned name carries the spelling at key position 6 as a whole word, and its
+last word is the family initial -- checked in the process, and only positions
+and booleans left it. **This is the first live proof of the read he ruled YES
+on**: lane L5's tool, over the reader it rebuilt on this lane's tracked
+skeleton of the same page.
+
+From the SAME load, with no scroll and no press, a skeleton and these counts:
+0 group links, and 0 "Groups" and 0 "Interests" drawn (`N 178`, C-P7: this
+first render shows no groups; whether a scroll draws them is not measured); 0
+"People also viewed" and 1 "People you may know" (`N 103`); 1
+mutual-connections phrase (`N 31`); 41 member links. The controls in main,
+page-wide, as session 2 counted them, are unchanged: Message 2 exactly the
+word, 4 with a name, 5 visible; More 2, 1 visible; Follow 4 with a name; 0
+Connect, Pending or Following. The tool's own top-card reading: one visible
+Message control, the owner's, and none foreign.
+
+### 2b: M M1, refused twice by its gate; nothing typed
+
+* **12:53, load 2.** The preview resolved the named person, but the lane's
+  runner read the person from `who_this_would_reach`, where this route
+  returns it as `whom_this_resolves_to`. The runner found none and stopped
+  before confirming: fail-closed, one load spent for nothing. The runner now
+  reads either field.
+* **12:54, loads 3 and 4.** The preview resolved him -- key position 6, the
+  family initial, 1st degree, exactly one visible Message control in the top
+  card and it is his, none foreign; the control is a link whose address is of
+  the compose kind. The confirm reloaded the profile, pressed that control
+  once, and waited the tool's 3 s for a composer. None was drawn (0 bubbles,
+  0 editors), still on the profile: **REFUSED at condition 5**
+  (`5_not_one_conversation`). Nothing typed: `text_was_entered` and
+  `left_in_the_composer` both read no, and `performed` no.
+* **12:57, loads 5 and 6: the one retry the orchestrator approved at 12:57.**
+  The composer wait -- which the code calls a liveness bound, not a safety
+  one -- was raised to 12 s in the runner's process, never in the package. The
+  composer was drawn in 1.5 s, still on the profile: ONE bubble holding ONE
+  empty editor, ONE disabled Send and ONE RECIPIENT BOX, with 0 conversation
+  titles. **REFUSED at condition 6** (`6_not_their_conversation`); condition
+  7, a recipient box, refuses the same shape next. Nothing typed.
+
+So for a first contact -- no conversation with him was found: session 2's two
+reads of the list drew none, and the press opened none (DERIVED) -- LinkedIn's
+Message press opens a NEW-MESSAGE composer, and the gate, built for a
+conversation headed by his name, refuses it by design. A skeleton of the page
+after that press did not contain the composer: the overlay the gate counted
+through Playwright's locators is invisible to `document.querySelectorAll` and
+to `page.content()`, as a shadow root is (the link carries an interop
+parameter; DERIVED, not inspected).
+
+**THE COMPOSER, CAPTURED: 13:01, load 8, on the orchestrator's approval of
+12:59.** One reload through the named-person door, and the tool's own gates
+first -- identity confirmed, exactly one visible Message control that is the
+owner's, none foreign, no composer already open -- then one press. The
+composer was drawn in 2.0 s. Its bubble was read through a SHADOW-PIERCING
+locator and written as a skeleton to gitignored state, with no raw copy
+anywhere. The four answers, taken in the process as booleans and positions:
+
+    (a) a recipient box is drawn, and a committed pill sits in it    yes
+    (b) the pill's text carries the spelling at key position 6,
+        with the family initial last                                 yes
+    (c) the pill carries an id or urn                                no: nothing to compare.
+        The profile's own member id was found, in the pressed link's address.
+    (d) pills                                                        1, in the box
+
+The pill is a dismissable pill button whose label has the shape of a
+remove-this-recipient label carrying the name. The bubble also draws attach
+image and attach file ("for your draft conversation", in LinkedIn's words),
+GIF and emoji, a disabled Send and a send-mode toggle. **NOTHING WAS TYPED.**
+The close did not confirm. The bubble has no control labelled Close by
+attribute (its header's two controls carry their labels as text, which a
+skeleton shapes), so Escape was pressed, and after it 1 bubble, 1 editor and
+1 dialog were still drawn. Closing our tab at the end of the run removed the
+page and the bubble with it. **Whether an empty new-message composer leaves a
+draft is NOT MEASURED:** the next messaging load (13:02:59) lists
+conversations with no draft field, and a skeleton shapes a draft row's label.
+Nothing had been typed into it.
+
+The capture went to lane L5 through the orchestrator (its addendum of 13:03),
+as the ground for a FIRST-CONTACT path in which every link of the chain
+refuses on doubt: the caller-supplied link and a confirmed top card; the
+pressed control's member id equal to the profile's; exactly one bubble and one
+committed pill, whose text equals the top-card name, whole-word; only then
+type and send; afterwards a conversation headed by that name, as the receipt;
+and the header's close control, found by its visible text. The tracked copy:
+`tests/fixtures/live3/m1_composer_bubble.html`.
+
+**2c, `M M17`: NOT FIRED.** It replies in the thread `M M1` would make. `M M1`
+and `M M17` go to session 4 on L5's first-contact path.
+
+### D-1: Resources, pressed once
+
+His profile at 12:59, the window fronted first: 44 `[aria-expanded]` controls
+in main (session 2's fronted load: 44). The top card drew More 1, visible 0,
+and Resources 1, visible 1 -- fix 3's finding, live. On the orchestrator's
+ruling, Resources was pressed ONCE. Its menu held 5 items, read by attribute:
+exactly 1 is Save to PDF, found by comparison inside the page, and its
+attribute handle was found; 0 items match any of `N 76`'s four needles (copy
+link, follow link, share profile, personal link). Of our words the menu added
+Activity, Save to PDF and Send profile in a message. Nothing inside was
+pressed, and it closed on Escape. `P C8` does not move: the item's own press
+starts a download, which is neither sanctioned nor built.
+
+The Me menu rode the same load: 8 of our words added, closed on Escape. `P K1`:
+7 controls in main labelled with a verification (6 in session 2), none
+linking to either refused address.
+
+### C8, C9 and C5: each opened and closed on Escape
+
+On `M M43`'s load at 13:02:59, which read 20 conversations listed (10
+rendered, 10 placeholders), 0 opened, 0 message events and 1 unread row:
+
+* **C8, the folder menu:** 4 items (Focused, Other, Archived, Spam), all
+  buttons; 0 message events; **closed on Escape**. Session 2's failure to
+  close did not recur, so fix 4's trigger step was not needed, and it stays
+  proven offline only.
+* **C9, one READ row's options menu:** 9 items, 8 of role button and 1 of role
+  link with no address -- Move to Other, one item not among our words, Mark as
+  unread, Star, Mute, Archive, Report / Block, Delete conversation, Manage
+  settings. 0 message events; closed on Escape; nothing inside was pressed.
+* **C5, the GIF picker:** opened; no menu container and none of our words
+  drawn; closed on Escape.
+
+Each open state is a tracked copy (`compose_c8-open.html`,
+`compose_c9-open.html`, `compose_c5-open.html`). The rows they feed -- `M M7`,
+`M M8`, `M M9` and `M M28`; `M M22`, `M M27`, `M M29` and `M M31`; `M M16` --
+carry a dated capture note. No state moves on a capture.
+
+### The setting: read by its live label, OFF (fix 2, live)
+
+13:04, one load. Served at its own address (`SERVED, exact`); exactly one
+control named "Share key profile updates", an input, reading OFF -- the live
+`checked` PROPERTY 0 and the attribute 0 -- and the offline replay of the raw
+capture AGREES. Read only, never pressed. So condition 1 of the six intro
+edits and `P B9` reads OFF. The orchestrator ruled at 13:06 that those edits
+are its call, not his, and go in the session-4 plan: read the current value,
+set a harmless test value, verify that it saved, RESTORE the original, and
+verify the restore -- one field at a time, the setting re-read OFF just
+before each. Not this session. The raw capture stays in gitignored state; its
+tracked copy is `tests/fixtures/live3/setting.html`.
+
+### The rows the budget allowed
+
+* **`M M53`, BANKED.** `linkedin_messaging_presence`, one load: 17 suggestion
+  cards seen and 17 read; 16 people returned as records with their presence
+  (reachable 10, offline 4, online 2); 1 group conversation skipped; 0
+  unparsed. Session 2's load drew no card.
+* **`N 179`, CAPTURED.** The events vertical, search 1 of 5: served exactly,
+  38 anchors, all classified, 0 member links.
+* **`N 20` and `N 45`, FIRED A THIRD TIME, NOT SHOWN.** 10 notifications, 6
+  unread when read, 0 of the invitation kind and 0 of the follow kind.
+* **`M M33` and `M M49`, HELD AGAIN.** The composer's list drew the one unread
+  row again.
+
+### J 107: the default location narrows (D-4)
+
+On the orchestrator's D-4 yes of 13:06, two keyword-less searches at the
+organisation cleared under D-4, a minute apart:
+
+    13:07  location 'Worldwide'  7 postings; the query carried 'Worldwide'
+    13:08  no location           7 postings; the page's one location box held
+                                 another value, neither empty nor 'Worldwide'
+                                 (read in the process, never printed)
+
+The two sets share **0** ids, and the no-location set shares **all 7** with
+session 2's no-location search of 08:35. So LinkedIn applies a default
+location to a keyword-less employer search, and the location moved the set,
+not the hour (DERIVED from the three sets; the two no-location searches, five
+hours apart, are the control). Every posting at one employer is
+`linkedin_search_jobs(keywords="", company_id=<id>, location="Worldwide")`,
+which the tool accepts today; its docstring should say so (for its owner,
+lane S). Each page drew 7 postings, one page's hydration and not the
+employer's total. The row banks on its own bar.
+
+**D1'S CAP, AND THE JOBS SEARCHES.** The ruling
+(`_audit/2026-09-23-rulings-write-class-and-delegated-calls.md`, section "D1:
+search keywords and facets") reads: *"A live session makes at most 5 test
+searches, because people searches count against the account's monthly
+limit."* The harness counts a load against the five by its address, a
+`/search/` load (surface "search"). The two J 107 searches loaded
+`/jobs/search/` (surface "jobs") and were not counted, as session 2's four
+jobs loads were not: the rule's stated reason, read as its scope, since a jobs
+search is not a people search. Read strictly instead -- every search a test
+search -- the session made 4 (`N 179`, `N 194` and the two J 107 searches),
+inside the five either way.
+
+### N 194: the #hiring people search, banked
+
+`linkedin_people_search_shape(keywords="#hiring", include_names=True)`, search
+2 of 5. `ok`; it landed on the people search, where it was sent; the keyword
+kept `verbatim`; 11 person results; the filter panel settled (3 polls, 93
+controls first and last); 0 values refused; 10 people records from 10 of 10
+cards, 0 skipped and 0 headlines unread. Every term of lane S's bank rule
+held. Which of them manage hiring stays the caller's judgement from the
+headlines.
+
+### D-4, as the order asks it recorded
+
+The organisation used for `J 107` is the one `job_detail` resolved in session
+2, **cleared by the orchestrator against his resume's current and past
+employers**. Its name and id live in gitignored state only.
+
+### Chrome's end: still up; fix 1 proven live on its normal path
+
+At 13:09, after the last run, port 9224 was listening, owned by the process
+the orchestrator had started at 12:40, and Chrome held exactly 1 page -- a
+blank tab -- and no LinkedIn tab. Twelve runs made loads, 8 through the
+outward runner, each reporting `closed` (another page was open, so ours
+closed normally), and 4 through the harness, whose teardown does not print its
+word; the attach check made none. Chrome survived every one. **Fix 1's normal
+path is proven live. Its keeper path -- ours the last tab -- did not arise,
+and stays proven offline only.**
+
+### The census moves, and the pins
+
+**CORRECTS:** `_audit/_census/jobs.md` -- row `107` read COVERED-UNFIRED, its default-location question open after session 2; it fired live in session 3 on its own cell's bar, the question settled, and moves to COVERED-PROVEN.
+
+**CORRECTS:** `_audit/_census/network.md` -- row `194` read COVERED-UNFIRED, never fired; it fired live in session 3 on lane S's whole bank rule and moves to COVERED-PROVEN.
+
+**CORRECTS:** `_audit/_census/messaging-and-content.md` -- row `M53` read COVERED-UNFIRED, its session-2 fire drawing no card; it fired live in session 3, the composer drawing 17 cards, and moves to COVERED-PROVEN.
+
+**THREE ROWS MOVED, EACH ON ITS OWN CELL'S BAR:**
+
+    row     the bar its cell set                        what session 3 read
+    J 107   whether the default location narrows a      a default in the box; 0 ids shared
+              keyword-less employer search              with 'Worldwide', 7 of 7 with session 2
+    N 194   ok, landed, kept verbatim, person results   verbatim; 11; settled; 0 refused;
+              >= 1, panel settled, 0 values refused     10 records
+    M M53   the composer draws its suggestion cards     17 cards read, 16 people with presence
+
+**NOT BANKED, EACH CELL SAYING WHY:** `M M1` (refused twice by its gate),
+`M M17` (no thread), `N 20` and `N 45` (not shown, a third time), `M M33` and
+`M M49` (held). **A DATED NOTE, NO STATE:** `N 76` and `P C8` (D-1), `P K1`,
+`N 31`, `N 103`, and the six intro edits and `P B9` (the setting).
+**CAPTURED, A NOTE POINTING AT ITS TRACKED COPY:** `N 178`, `N 179`, and the
+C8, C9 and C5 rows above.
+
+**THE COUNTS**, file-wide by `scripts/count_census_states.py`, each slice's
+delta written into its own count section:
+
+    slice         COVERED-PROVEN   COVERED-UNFIRED
+    jobs             22 -> 23          3 -> 2
+    network          15 -> 16         13 -> 12
+    messaging         8 -> 9          10 -> 9
+    profile          25 -> 25          8 -> 8
+    all four         70 -> 73         34 -> 31      GAP unmoved
+
+**THE PINS, MEASURED ON THE FINAL TREE AND RE-PINNED, NEVER SUMMED:**
+`scripts/census_completion.py --check` named three figures and three bucket-1
+rows off their pins, and nothing else:
+
+    delivered_strict    91 -> 94
+    unfired             37 -> 34
+    b1_no_ruling        18 -> 15
+    PINNED_B1_ROWS      NO_RULING loses J 107, M M53 and N 194
+
+Two test pins moved with their rows: `tests/test_the_offline_frontier_rows.py`
+(`J 107` and `M M53` now open on their session-3 banking, the frontier's move
+after it) and `tests/test_people_search_readers.py` (`N 194` COVERED-PROVEN,
+opening on its banking). The derived views were regenerated with `--write`
+twice and `--check`.
+
+### The tracked copies, and a ledger label (`23a9124`)
+
+14 files under `tests/fixtures/live3/`, 2.0 MB: the session's 13 skeletons and
+his settings page, each written by `--export-fixtures` (every keyed shape one
+`x`, ids as `k` and 8 hex, strict ASCII). The fixture tests now count each
+session's directory, and a directory nobody counted fails. The same change
+fixes a label: a new ledger was headed "live-lane-session-2" whatever its
+directory, a constant the per-session directory of `ed858fe` never reached,
+so session 3's ledger carries the old name (nothing reads it). A new ledger
+now names its directory, with a test shown red first. The identity gate
+examined its 16 files, 0 hits; the shape guard and the fixture people guard on
+the result: 1097 passed.
+
+### To session 4
+
+* `M M1`, then `M M17` in the thread it makes, on lane L5's first-contact
+  path; `M M10` still needs an older thread.
+* The six intro edits and `P B9`, by the orchestrator's pattern above.
+* `M M33` and `M M49` while the unread row stands: each would spend a load
+  and bank nothing.
+* `N 20` and `N 45`, when the notifications draw either kind.
+* `J 121` and `J 122`: not on this session's list, and no ruling holds them.
+  Session 2's posting load already returned `applicant_insights` -- a
+  heading, 2 metrics, 4 seniority entries and 4 education entries -- to
+  gitignored state. Whether that meets either row's bar is not judged here:
+  `J 122`'s levels are drawn and its top skills are not, and `J 121`'s
+  percentile would be one of the two metrics, whose labels a reduced envelope
+  shapes. One posting load, read against each bar.
+* `N 85` and `N 172`: each takes a member he names as its argument, and none
+  was ruled for this session.
+* Fix 1's keeper path and fix 4's trigger step, the first time either arises
+  live; and the harness's teardown should print `close_tab`'s word, as the
+  outward runner does, so the keeper path can be seen when it does.
+* The event, school and thread items he supplies (D-9); the father and the
+  two others.
+
+### Scratch, declared disposable
+
+In the lane's scratch folder, none of it tracked: the session-3 outward runner
+and its self-check, the census, delta and pin editors, the JSON printers that
+print only numbers and closed words, the condition matcher, and the
+window-fronting scripts. The outward runner took the harness's ledger, counter
+and driver lock by import, so nothing loaded uncounted.
+
+### Gates on the final tree, run and NOT run
+
+**THE IMPACT GATE**, `scripts/impact_gate.py --against 5564c15`, in the
+background, offline, sharded by the gate itself (`-n auto --dist loadfile`),
+started once lane L5's full suite on the same box had ended. The diff reaches
+144 of 283 test files, so it widened to the full suite at the gate's 45% line:
+
+    tree       result
+    2a47949    PASS over the full suite, 12246 tests, in 18 min 33 s
+
+**THE CENSUS INSTRUMENTS AND THE THREE `--check`s**, on the same tree, by exit
+code: `census_completion.py --check`, `check_read_addresses.py`,
+`check_write_classes.py`, `ruling_holds.py`, `pin_census_rows.py --check`,
+`measure_pointer_graph.py --check`, `check_jobs_directions.py`,
+`check_gap_rows_on_refused_addresses.py`, `check_cited_shas_resolve.py`,
+`check_contingent_writeoffs_carry_a_reopener.py`,
+`check_census_locators_resolve.py` and the three generators' `--check` all
+exit 0. `check_asserted_names_resolve.py` exits 1 on the same eight findings
+as session 2's, all pinned in other waves' documents and none in this one.
+
+**THE NAVIGATION GUARD WITH CI SET**, whose whole-tree complement is the one
+skip in every local run: `tests/test_navigation_is_never_derived.py`, 683
+passed, none skipped.
+
+**THE IDENTITY GATE:** the pre-commit exact-value gate on both commits of this
+wrap-up, 0 hits each against 226 spellings (16 files, then 10); the shape
+guard, `tests/test_no_committed_identity.py`, inside the full-suite run, and
+again on this section's commit.
+
+**NOT RUN, named:**
+
+* **CI**: nothing pushed, by order. Every number here is this box's Python
+  3.13; the 3.10 cell is CI's.
+* **Anything live after 13:09.** Fix 1's keeper path, fix 4's trigger step,
+  `M M1` and `M M17` wait for session 4, as listed above.
+* **The observed read map** the impact gate consults was recorded at
+  `5c910e4`, not at this tree; the gate widened to the full suite, so nothing
+  here rested on it.

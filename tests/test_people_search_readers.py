@@ -755,6 +755,9 @@ def test_an_unparseable_landing_reads_unreadable_not_a_guess() -> None:
 # rule (`query_kept` verbatim, person results, the panel settled, nothing
 # refused). Each cell now OPENS on the paragraph that banked it, and the
 # earlier record follows it, in the order it was written.
+#
+# AND A FIFTH THE SAME DAY (the live lane's session 3): `N 194`, the #Hiring
+# search, by the names on the same bank rule.
 
 #: row -> its state, and what delivers it.
 ROW_STATES: dict[str, str] = {
@@ -764,15 +767,17 @@ ROW_STATES: dict[str, str] = {
     "87": "COVERED-PROVEN",    # filter by past company -- a FILTER
     "94": "COVERED-PROVEN",    # several locations in one search -- a FILTER
     "172": "COVERED-UNFIRED",  # view a member's connections -- WHO, by the names
-    "194": "COVERED-UNFIRED",  # find hiring managers -- WHO, by the names
+    "194": "COVERED-PROVEN",   # find hiring managers -- WHO, by the names
 }
 
 #: The three rows whose payload is WHO, delivered by the names since 2026-09-27.
 WHO_ROWS = ("79", "172", "194")
 
-#: The rows the live lane's session 2 banked, and the words each cell opens on.
-BANKED_2026_09_28 = ("79", "84", "87", "94")
-BANKED_OPENING = "**FIRED AND BANKED 2026-09-28 (the live lane's session 2).**"
+#: The rows the live lane banked on 2026-09-28 (sessions 2 and 3), and the
+#: words each cell opens on.
+BANKED_2026_09_28 = ("79", "84", "87", "94", "194")
+BANKED_OPENING = ("**FIRED AND BANKED 2026-09-28 (the live lane's session 2).**",
+                  "**FIRED AND BANKED 2026-09-28 (the live lane's session 3).**")
 
 _ROW = re.compile(r"^\|\s*(\d+)\s*\|[^|]*\|\s*R\s*\|\s*\*{0,2}([A-Z-]+)\*{0,2}\s*\|(.*)$")
 

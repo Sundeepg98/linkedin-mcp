@@ -534,6 +534,42 @@ def _member_page(name: str) -> str:
             "<span>Show all</span></main></body></html>")
 
 
+def test_each_session_has_its_own_directory_and_a_bad_name_is_refused() -> None:
+    """Forty loads a SESSION: session 3's ledger, lock, key and captures live in
+    their own directory, named by LIVE_LANE_SESSION_DIR, and only a closed
+    shape is taken -- a path with a separator would put state outside _state."""
+    import os
+    import subprocess
+
+    assert harness.SESSION_DIR == "live2" and harness.STATE.name == "live2"
+    code = "import sys; sys.path.insert(0, 'scripts'); import _probe_live_lane_session_2 as h; print(h.STATE.name)"
+    for value, ok in (("live3", True), ("../x", False), ("live", False), ("live123", False)):
+        env = dict(os.environ, LIVE_LANE_SESSION_DIR=value)
+        proc = subprocess.run([sys.executable, "-c", code], cwd=str(ROOT), env=env,
+                              capture_output=True, text=True, timeout=120)
+        assert (proc.returncode == 0) is ok, (value, proc.returncode)
+        if ok:
+            assert proc.stdout.strip().endswith(value)
+
+
+def test_a_new_ledger_names_the_session_whose_directory_it_is_in() -> None:
+    """Session 3's ledger was headed "live-lane-session-2": the label was a
+    constant the per-session directory never reached. A directory no session
+    has used, so the ledger read is the one a first load would write; reading
+    it creates nothing."""
+    import os
+    import subprocess
+
+    code = ("import sys; sys.path.insert(0, 'scripts'); import _probe_live_lane_session_2 as h; "
+            "print(h.LEDGER.exists(), h._ledger_read()['session'])")
+    env = dict(os.environ, LIVE_LANE_SESSION_DIR="live97")
+    proc = subprocess.run([sys.executable, "-c", code], cwd=str(ROOT), env=env,
+                          capture_output=True, text=True, timeout=120)
+    assert proc.returncode == 0, proc.stderr[-400:]
+    assert proc.stdout.split() == ["False", "live97"], proc.stdout
+    assert not (ROOT / "_state" / "live97").exists()
+
+
 def test_a_tracked_copy_carries_no_keyed_hash_and_no_length() -> None:
     skeleton = harness.skeleton_of(_member_page(INVENTED_NAME), KEY)
     assert harness._KEYED_SHAPE.search(skeleton), "the control: the skeleton is keyed"
@@ -577,15 +613,27 @@ def test_a_non_ascii_word_survives_the_copy_as_a_reference() -> None:
     assert copy.isascii() and "Write a message&#8230;" in copy
 
 
-def test_every_committed_live2_fixture_is_a_tracked_copy() -> None:
+#: Each session's tracked copies, by directory: session 2's 27 skeletons and
+#: his settings page; session 3's 13 and the same page again.
+LIVE_FIXTURE_COUNTS = {"live2": 28, "live3": 14}
+
+
+@pytest.mark.parametrize("session_dir", sorted(LIVE_FIXTURE_COUNTS))
+def test_every_committed_session_fixture_is_a_tracked_copy(session_dir: str) -> None:
     """What ``--export-fixtures`` wrote, and nothing written another way: no
     keyed shape, strict ASCII, one file per skeleton plus his settings page."""
-    copies = sorted(harness.FIXTURES.glob("*.html"))
-    assert len(copies) == 28, [p.name for p in copies]
+    copies = sorted((ROOT / "tests" / "fixtures" / session_dir).glob("*.html"))
+    assert len(copies) == LIVE_FIXTURE_COUNTS[session_dir], [p.name for p in copies]
     for path in copies:
         text = path.read_bytes().decode("ascii")
         assert not harness._KEYED_SHAPE.search(text), path.name
         assert text.startswith("<!doctype html>"), path.name
+
+
+def test_every_session_fixture_directory_is_counted() -> None:
+    """A session directory nobody added to the table would pass unread."""
+    found = sorted(p.name for p in (ROOT / "tests" / "fixtures").glob("live*") if p.is_dir())
+    assert found == sorted(LIVE_FIXTURE_COUNTS), found
 
 
 def test_closed_again_means_the_menus_own_words_are_gone_and_the_trigger_reads_as_before() -> None:
@@ -757,18 +805,63 @@ async def test_d1_the_old_handle_takes_the_hidden_more_on_both_profiles(browser_
         assert not await old.is_visible(), name
 
 
-async def test_d1_the_key_presses_nothing_his_width_does_not_draw(browser_page, quick, monkeypatch) -> None:
-    """FIX 3, END TO END ON HIS PROFILE AT HIS WIDTH. Red before the fix: the
-    key took the old handle's one match and its click waited out Playwright's
-    actionability check on a control that is not drawn (TimeoutError), as it
-    did live. Now it counts the top card's More -- 1 drawn, 0 visible -- and
-    refuses with nothing pressed."""
-    await _serve_profile(browser_page, "in_me", WIDE)
+_COUNT_CLICKS = """
+() => { window.__clicks = 0;
+        document.addEventListener('click', () => { window.__clicks += 1; }, true); }
+"""
+
+
+@pytest.mark.parametrize("width,opener", [(WIDE, "Resources"), (NARROW, "More")])
+async def test_d1_the_key_presses_the_one_opener_his_width_draws(
+        browser_page, quick, monkeypatch, width, opener) -> None:
+    """FIX 3, END TO END, AND THE ORCHESTRATOR'S RULING OF 2026-09-28 12:42:
+    press the opener the top card DRAWS -- at his width Resources, at the
+    narrow one More -- ONCE. Red before fix 3: the key took the old handle's
+    one match and its click waited out Playwright's actionability check on a
+    control that is not drawn (TimeoutError), as it did live."""
+    await _serve_profile(browser_page, "in_me", width)
+    await browser_page.evaluate(_COUNT_CLICKS)
     monkeypatch.setattr(harness, "BROWSER", _ServedBrowser(browser_page))
-    started = time.monotonic()
     result = await harness._in_me_more(False)
-    assert result == {"stopped": "more_visible_0_drawn_1", "openings": []}
-    assert time.monotonic() - started < 4.0, "an actionability wait ran: something was pressed"
+    assert result["opener"] == opener
+    assert result["counts"][opener][1] == 1
+    assert result["opening"]["pressed"] is True and result["opening"]["closed_again"] is True
+    assert await browser_page.evaluate("window.__clicks") == 1, "one press, and only one"
+
+
+@pytest.mark.parametrize("profile,hide", [("in_me", ""), ("first_degree_profile", "")])
+async def test_d1_neither_or_both_openers_visible_refuses(
+        browser_page, quick, monkeypatch, profile, hide) -> None:
+    """With no stylesheet both bars show: his profile then draws More AND
+    Resources visible, the first-degree profile's two Mores -- not exactly one opener, so
+    nothing is pressed."""
+    await _serve_profile(browser_page, profile, hide)
+    await browser_page.evaluate(_COUNT_CLICKS)
+    monkeypatch.setattr(harness, "BROWSER", _ServedBrowser(browser_page))
+    result = await harness._in_me_more(False)
+    assert result["stopped"] == "opener_not_exactly_one"
+    assert await browser_page.evaluate("window.__clicks") == 0
+
+
+async def test_a_menu_drawn_as_a_role_menu_elsewhere_is_read(browser_page, quick) -> None:
+    """THE NEW MARKUP'S MENU: no artdeco dropdown and no aria-controls, a
+    role=menu drawn apart from its trigger. The one visible role=menu is the
+    container, and Save to PDF is found by comparison inside the page."""
+    await browser_page.set_content(
+        "<!doctype html><html><body><main><button id='t' type='button' aria-label='More' "
+        "aria-expanded='false'>More</button></main><div id='portal'></div><script>"
+        "const t=document.getElementById('t'), p=document.getElementById('portal');"
+        "t.addEventListener('click',()=>{t.setAttribute('aria-expanded','true');"
+        "p.innerHTML='<div role=\"menu\"><div role=\"menuitem\">Save to PDF</div>"
+        "<div role=\"menuitem\">" + INVENTED_NAME + "</div></div>';});"
+        "document.addEventListener('keydown',(e)=>{if(e.key==='Escape'){"
+        "t.setAttribute('aria-expanded','false'); p.innerHTML='';}});"
+        "</script></body></html>")
+    handle, _count = await harness._one_handle(browser_page.locator(OLD_MORE_HANDLE))
+    result = await harness.press_and_read(browser_page, "in_me_more", handle, False)
+    assert result["container_found"] is True
+    assert [item["save_to_pdf"] for item in result["items"]] == [True, False]
+    assert result["closed_again"] is True and result["closed_by"] == "escape"
 
 
 async def test_d1_the_new_handle_takes_the_one_visible_more(browser_page) -> None:
