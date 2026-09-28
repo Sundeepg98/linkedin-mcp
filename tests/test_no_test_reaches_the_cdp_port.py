@@ -134,3 +134,54 @@ def test_a_test_that_probes_the_port_fails_loudly_by_name(tmp_path):
     assert "1 failed" in output, output[-2000:]
     assert "test_probes_the_port.py::test_it_probes REACHED FOR THE CDP PORT" in output, output[-2000:]
     assert f"127.0.0.1:{port}" in output, output[-2000:]
+
+
+#: A test that logs through the package logger, passing or failing on request.
+_A_TEST_THAT_LOGS = '''
+import os
+
+from linkedin_server.config import logger
+
+
+def test_it_logs():
+    logger.warning("SENTINEL-PACKAGE-LOG-7F3A")
+    assert os.environ.get("PLANTED_LOG_TEST_FAILS") != "1"
+'''
+
+
+def _run_the_logging_test(tmp_path: Path, *, fails: bool) -> str:
+    """The planted test under ``-n 2``, with only this guard loaded."""
+    planted = tmp_path / "test_logs.py"
+    planted.write_text(_A_TEST_THAT_LOGS, encoding="ascii")
+    env = dict(os.environ, PYTHONPATH=str(REPO), PLANTED_LOG_TEST_FAILS="1" if fails else "0")
+    done = subprocess.run(
+        [sys.executable, "-m", "pytest", "-p", "tests.cdp_port_guard", "-p", "no:cacheprovider",
+         "-q", "-o", "addopts=", "-n", "2", "--rootdir", str(tmp_path), str(planted)],
+        cwd=str(tmp_path), env=env, capture_output=True, text=True, timeout=180,
+    )
+    output = done.stdout + done.stderr
+    assert done.returncode == (1 if fails else 0), output[-2000:]
+    return output
+
+
+def test_the_guard_leaves_a_passing_tests_package_log_in_pytests_capture(tmp_path):
+    """THE GUARD MAY NOT MOVE THE PACKAGE'S LOG OUT OF PYTEST'S CAPTURE.
+
+    Its configure hook once read the port by importing
+    ``linkedin_server.config``, which built the package logger's
+    ``StreamHandler`` in an xdist worker BEFORE that worker's capture began:
+    the handler held the worker's real stderr, and every package log line of
+    a ``-n auto`` run reached the console, a passing test's included -- 5,000+
+    lines in one full run, measured 2026-09-28 (lane G, the addendum of
+    06:20). The port is read at the first connection now. RED on the eager
+    read: the passing test's sentinel on the console.
+
+    THE CONTROL: the same test, failing, shows the sentinel -- pytest prints
+    what it captured -- so the absence above is the capture working, not a
+    test that never logged."""
+    passing = _run_the_logging_test(tmp_path, fails=False)
+    assert "1 passed" in passing, passing[-2000:]
+    assert "SENTINEL-PACKAGE-LOG-7F3A" not in passing, passing[-2000:]
+    failing = _run_the_logging_test(tmp_path, fails=True)
+    assert "1 failed" in failing, failing[-2000:]
+    assert "SENTINEL-PACKAGE-LOG-7F3A" in failing, failing[-2000:]

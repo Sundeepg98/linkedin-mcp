@@ -68,6 +68,24 @@ def the_port() -> int:
     return int(config.CDP_PORT)
 
 
+#: The port, read at the FIRST connection this guard sees -- NEVER at
+#: configure time. Importing ``linkedin_server.config`` from
+#: :func:`pytest_configure` built the package logger's ``StreamHandler`` in
+#: an xdist worker before that worker's output capture began, so the handler
+#: held the worker's REAL stderr and every package log line of the run
+#: reached the console, a passing test's included -- measured 2026-09-28
+#: (lane G, the addendum of 06:20): 5,000+ lines in one full ``-n auto`` run,
+#: none before this guard was registered. Read here, the import happens in
+#: collection or in a test, under capture, as it always had.
+_PORT: list[int] = []
+
+
+def _port() -> int:
+    if not _PORT:
+        _PORT.append(the_port())
+    return _PORT[0]
+
+
 def take_refused() -> list[tuple[str, str]]:
     """The attempts refused since the last report, and forget them. A test
     that plants one on purpose -- this guard's own controls -- takes it here,
@@ -85,12 +103,11 @@ def _aimed_at_the_port(address: Any, port: int) -> bool:
 
 
 def pytest_configure(config: Any) -> None:
-    port = the_port()
     connect = socket.socket.connect
     connect_ex = socket.socket.connect_ex
 
     def guarded_connect(self: Any, address: Any) -> Any:
-        if _aimed_at_the_port(address, port):
+        if _aimed_at_the_port(address, _port()):
             _REFUSED.append((_RUNNING["nodeid"], f"{address[0]}:{address[1]}"))
             raise ConnectionRefusedError(
                 REFUSED_ERRNO, "the CDP port is refused to every test (tests/cdp_port_guard.py)"
@@ -98,7 +115,7 @@ def pytest_configure(config: Any) -> None:
         return connect(self, address)
 
     def guarded_connect_ex(self: Any, address: Any) -> Any:
-        if _aimed_at_the_port(address, port):
+        if _aimed_at_the_port(address, _port()):
             _REFUSED.append((_RUNNING["nodeid"], f"{address[0]}:{address[1]}"))
             return REFUSED_ERRNO
         return connect_ex(self, address)

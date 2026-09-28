@@ -30,12 +30,32 @@ A test that serves a page itself -- ``page.route`` fulfilling or aborting --
 is untouched, because a page's routes outrank a context's; a request it lets
 through with ``route.fallback()`` reaches this guard, as it should.
 
-WHAT IT DOES NOT COVER, named rather than implied: a request made outside a
-browser (``urllib``, ``requests``, Playwright's ``APIRequestContext``) -- the
-package's read boundary and the suite's fakes hold those -- and a browser a
-test starts in a SUBPROCESS, which this process cannot wrap; no test does
-either today. A browser's own background traffic, which is not a page
-request, is Playwright's launch flags' business, not a route's.
+WHAT IT COVERS, EXACTLY: a request Playwright routes -- one a PAGE makes --
+in a browser context THIS process created through one of the three wrapped
+calls. Loopback is admitted at every port, by design.
+
+WHAT IT DOES NOT COVER, named rather than implied:
+
+* A CONNECTION MADE OUTSIDE A BROWSER: ``urllib``, ``http.client``,
+  ``requests``, a raw socket, Playwright's ``APIRequestContext``. This
+  docstring used to add "no test does either today". THAT WAS FALSE, measured
+  2026-09-28 by lane S: ``tests/test_tool_envelopes_emit_no_page_string.py``
+  drove ``linkedin_cdp_status``, whose probe opened
+  ``http://127.0.0.1:<CDP_PORT>/json/version`` with ``urllib`` once per run
+  -- loopback, and outside any browser, so this guard saw nothing. The
+  harness stubs that probe now, and ``tests/cdp_port_guard.py`` refuses the
+  CDP port to every ``socket.connect`` the test process makes.
+  A socket census of the full suite, 2026-09-28 (lane G's record, the order of
+  04:25, U.7), found no other: 6,022 connection attempts from the test
+  processes, every one to loopback outside the CDP ports, none off the
+  machine, no name resolved that is not loopback -- and no connection off the
+  machine from Node or Chromium, at the sampler's resolution.
+* A context this process did not create through the three calls: the
+  contexts a browser already holds when a test reaches it with ``connect``
+  or ``connect_over_cdp``.
+* A browser a test starts in a SUBPROCESS, which this process cannot wrap.
+* A browser's own background traffic, which is not a page request: that is
+  Playwright's launch flags' business, not a route's.
 """
 from __future__ import annotations
 
