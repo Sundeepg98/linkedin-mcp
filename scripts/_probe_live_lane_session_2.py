@@ -452,7 +452,7 @@ def _envelope_of(path: Path) -> Any:
 
 def _ledger_read() -> dict[str, Any]:
     if not LEDGER.exists():
-        return {"session": "live-lane-session-2", "ceiling": CEILING,
+        return {"session": SESSION_DIR, "ceiling": CEILING,
                 "min_gap_s": MIN_GAP_S, "search_cap": SEARCH_CAP, "loads": []}
     return json.loads(LEDGER.read_text(encoding="utf-8"))
 
