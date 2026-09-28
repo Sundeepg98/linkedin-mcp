@@ -4,7 +4,12 @@ No test in this suite reaches the network or an account, and the first half is
 ENFORCED, not asked: ``tests/network_guard.py``, registered below, refuses
 every request a test's browser makes to an address off this machine and fails
 that test by name. It was false until 2026-09-27 -- eleven tests sent a fresh
-headless Chromium to LinkedIn on every run -- and nothing said so. Nearly all
+headless Chromium to LinkedIn on every run -- and nothing said so. Nor does
+any test connect to the CDP port, where the live lane's Chrome listens:
+``tests/cdp_port_guard.py``, registered beside it, refuses that connection
+and fails the test by name. One test made it on every run until 2026-09-28
+-- the tool-envelope harness, driving ``linkedin_cdp_status`` -- and nothing
+said so either. Nearly all
 of the tests run with no Chromium either, on the fakes below: they stand in for the three
 Playwright objects this server touches -- a page, its browser context, and
 its request context -- and they RECORD what was asked of them, so a test can
@@ -28,8 +33,9 @@ from typing import Any, Optional
 
 import pytest
 
-#: THE NETWORK GUARD, for every test in every run: CI and local, no flag.
-pytest_plugins = ("tests.network_guard",)
+#: THE NETWORK GUARD AND THE CDP PORT GUARD, for every test in every run: CI
+#: and local, no flag.
+pytest_plugins = ("tests.network_guard", "tests.cdp_port_guard")
 
 
 @pytest.fixture(autouse=True)
