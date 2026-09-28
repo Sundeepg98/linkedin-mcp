@@ -2686,3 +2686,236 @@ passes items to the harness, the ledger's hand entry, the setting and More
 inspectors and probes, the key-position checks, and the orchestrator's
 window-fronting script. Each took the harness's ledger, counter and driver
 lock by import, so nothing in it loaded uncounted except the one load above.
+
+## After session 2, offline: the skeletons, the four fixes, the census
+
+The orchestrator's order of 08:52: after the record, four offline fixes, each
+shown failing first against today's skeletons; then the census moves for the
+proven rows, the pins re-derived, the gates, and a commit with no
+attribution. **The laptop restarted at about 09:57** with this lane's turn cut
+off inside the census step; the orchestrator's resume order of 10:02 found
+the branch at `d81511d` with the four census files modified and nothing else
+dirty, and disk agreed at 10:03. **The four files were whole**: every changed
+line a complete table row, its cell count unchanged, every cell but the state
+unchanged, and the old reason cell intact after the new paragraph -- checked
+line by line against `HEAD`. The step continued from there.
+
+### The skeletons, committed as tracked copies (`5f70af8`)
+
+**28 files under `tests/fixtures/live2/`, 3.3 MB**: the session's 27
+skeletons and his settings page reduced to one. The harness writes a
+skeleton with a keyed hash of every text it shapes, which compares two
+captures and cannot be reversed without the key -- and the key sits beside
+it in gitignored state. A tracked copy (`--export-fixtures`, `tracked_copy`)
+carries no hash of anybody's words: **every keyed shape becomes one `x`**
+(an empty value stays empty), an id reference keeps its hash as `k` and 8 hex
+so a label still finds its control, and anything outside ASCII becomes a
+character reference. Rendering each shape's LENGTH in `x` was tried first and
+rejected on size: 14 MB, because one shape stands for a value of any length.
+
+**WHY THE COPY, SHOWN:** `tests/test_fixtures_hold_only_synthetic_people.py`
+reads the value in every person slot of a tracked fixture, and a keyed shape
+in a member link is an undeclared candidate -- a planted page's keyed
+skeleton fails it once, its tracked copy passes (a harness test). **THE GUARD
+NARROWED, AS ITS OWN REMEDY SAYS:** 19 sites in the copies held a LinkedIn
+word as a member link's first visible text -- "Send" 11, "Show all" 4,
+"Premium" 4 -- so those three words are SKIPPED, not taken, and the link's
+next text is read as its person; a name after a skipped word is still
+convicted (shown), and a value that only contains one is a candidate like any
+other. The identity gate and the shape guard passed all 28.
+
+**A COPY LOADED IN A TEST NEEDS THE PAGE'S OWN ROUTE TO REFUSE EVERY
+REQUEST.** The copies keep their stylesheet and image addresses' path words,
+so a browser fetches them; `tests/network_guard.py` caught the first test
+that loaded one without the route.
+
+### Fix 1: never the browser's last tab (`d81511d`)
+
+**THE RULE, ONE FUNCTION:** `linkedin_server/browser.close_tab_keeping_the_window`.
+Our tab closes only while another open page remains in its context; when it
+is the last, a KEEPER tab (a blank page) opens first and ours closes only once
+the keeper counts as open; when no keeper can be opened, or the pages cannot
+be counted, ours is LEFT OPEN and the caller only disconnects. The attach
+teardown closes through it; a probe calls `BROWSER.close_tab(page)`. **What it
+counts is the context's pages** -- his browser's default context, every
+window of it -- so it never closes the tab whose closing would end the
+browser; a window holding nothing but our tab, beside other windows of his,
+closes with it, and the function's docstring says so rather than implying a
+per-window rule Playwright cannot place a keeper for.
+
+**MADE IMPOSSIBLE, WITH A TEST:** all 47 scripts that closed a page directly
+were converted -- 46 by one mechanical line each, the attach-continuity probe
+by hand because it attaches without `BROWSER` -- and a third check in
+`tests/test_a_probe_closes_its_own_tab.py` fails on any `.close()` of a
+receiver named for a page or a tab, in `scripts/` or the package, outside that
+one function. The page matcher counts the rule's spelling as a close, so the
+leak ratchet did not move (38).
+
+**RED FIRST:** the old teardown, run end to end over a fake context with ours
+as its only tab, left it **0 open pages** -- the state that ends a real
+Chrome; the third check over the tree at `HEAD` before the fix found **48**
+direct closes (47 scripts and the teardown); after it, 0.
+`tests/test_the_last_tab_is_never_closed.py` holds the behaviour (8 tests).
+**NOT PROVEN:** which window Chrome puts a keeper in, which no fake can say;
+session 3's first teardown is the first live use.
+
+### Fix 2: the setting reader asks for the switch's own label (`619870e`)
+
+`profile_editor.ACCOUNT_SETTING_NAME` was "Sharing profile edits", the
+settings INDEX's display name; the page draws no control of that name. It is
+now "Share key profile updates", the label the page's switch is named by
+through `aria-labelledby`. **RED FIRST ON TODAY'S CAPTURE:** the raw capture
+replayed offline (headless, the context offline, no script) read 0 named and
+'unknown'; after the fix, 1 named, an input, reading OFF -- the markup holds
+no `checked` attribute, and the page's own toggle text reads Off. The tracked
+copy reads the same, and the tests run on it: one named input read OFF, and
+neither the index's name nor the page heading names a control there.
+**WHAT IT DOES NOT SETTLE:** whether the live `checked` PROPERTY agrees. The
+first live read of session 3 answers it, and the offline check's
+`STATE-NOT-IN-MARKUP` verdict exists for the case where it cannot.
+
+### Fix 3: D-1's More, inside the top card and only when one is visible (`f1f34a4`)
+
+**WHAT TODAY'S SKELETONS SAY.** His profile draws no `h1`: the name is the top
+card's one `h2`, and its section holds the card's actions TWICE, in two bars
+of which the page shows one at a time -- [Open to, Enhance profile,
+Resources] and [Open to, More, Enhance profile]. The old handle's one match is
+the labelled More in the second bar, which his window width did not show
+(DERIVED from the two timeouts with the window in front). The brother's
+profile has the same two bars, each holding a More -- one by its text, one by
+its label -- and the live count was 2 drawn, 1 visible.
+
+**THE HANDLE:** `topcard_of`, the nearest section around the first `h2` in
+main, with no class named (the classes are hashed); `topcard_control(page,
+name)`, the button of exactly that name inside it, taken only when exactly
+one is VISIBLE. **RED FIRST, END TO END:** the key on his profile at his
+width -- the other bar hidden by one stylesheet rule standing in for
+LinkedIn's, which no skeleton carries -- timed out on the old handle's click
+(`ElementHandle.click: Timeout 5000ms exceeded`), as it did live, and now
+refuses with nothing pressed (1 drawn, 0 visible). Five of the six new tests
+were red on the old harness; the sixth records the old handle's defect and
+passes on both. `in_me` now counts the top card's words, drawn and visible,
+on every load.
+
+**THE FINDING SESSION 3 NEEDS A RULING ON:** at his width the top card draws
+no visible More at all. The bar it shows holds Resources where the other
+holds More, and nobody has seen Resources' menu. D-1 can fire only on a
+ruling to press Resources, or at a width that shows the More.
+
+### Fix 4: C8's close step (`209d65a`)
+
+**WHAT THE OPEN-MENU SKELETON SAYS:** an artdeco dropdown; its trigger, the
+folder pill, reads `aria-expanded="true"` while open; its content is a sibling
+holding four items -- Focused, Other, Archived, Spam -- each a folder CHOICE,
+and no close control of its own. A click outside was the other way the order
+named, and on `/messaging/` the skeleton certifies no neutral outside: the
+list beside the pill is conversations. **THE STEP:** when Escape leaves the
+trigger reading expanded -- and only if it read closed before the press, so
+the click can only close what the first opened -- the same trigger is pressed
+once more; never a third time; `closed_by` records which step closed it.
+
+**RED FIRST ON TODAY'S SKELETON**, with the menu's behaviour installed: Escape
+inert, as it was live, and the trigger toggling, as an artdeco trigger does
+(ASSUMED from the component, never pressed live). The old code stopped with
+`the_menu_did_not_close`, the session's own outcome; now it closes by its
+trigger, reads 4 items and 0 message events, in 2 clicks. The controls: a menu
+Escape closes takes 1 click; one nothing closes is still the anomaly after 2;
+a trigger that reads closed with the words still drawn is not pressed again.
+The click-site test holds two clicks, both on the trigger in
+`press_and_read`, the second inside the one `if` that reads it expanded.
+
+### The gates of the export and the four fixes, each on its committed tree
+
+    commit    files   result
+    5f70af8      10   2958 passed, 1 skipped (identity, credential, path,
+                      and the seven script guards); 190 passed (the harness
+                      and the fixture people guard)
+    619870e       3   195 passed (the reader, the harness, the editor commits)
+    f1f34a4       8   1095 passed, 1 skipped (the harness, the seven script
+                      guards)
+    209d65a       8   1099 passed, 1 skipped (the same)
+    d81511d       3   48 passed (the last tab, attach, browser); 15 (the tab
+                      guard and the last tab)
+
+The skip in each is the navigation guard's whole-tree complement, which runs
+where CI is set. The impact gate on the final tree is below.
+
+### The census moves, and the pins
+
+**CORRECTS:** `_audit/_census/jobs.md` -- rows `18`, `39` and `158` read COVERED-UNFIRED, never fired; each fired live in session 2 on its own cell's bar and moves to COVERED-PROVEN. Row `107` fired and does not bank; row `37` is measured and stays.
+
+**CORRECTS:** `_audit/_census/network.md` -- rows `23`, `79`, `84`, `87`, `94`, `132` and `195` read COVERED-UNFIRED, never fired; each fired live in session 2 on its own cell's bar -- lane S's whole bank rule for the three facets -- and moves to COVERED-PROVEN.
+
+**CORRECTS:** `_audit/_census/profile.md` -- row `S5` read COVERED-UNFIRED, never fired; it fired live on `N 132`'s load in session 2 and moves to COVERED-PROVEN.
+
+**CORRECTS:** `_audit/_census/messaging-and-content.md` -- row `M43` read COVERED-UNFIRED, never opened; it fired live in session 2, opening no conversation, and moves to COVERED-PROVEN.
+
+**TWELVE ROWS MOVED, EACH ON ITS OWN CELL'S BAR:**
+
+    row     the bar its cell set                          what session 2 read
+    J 18    list label seen, an entry with keywords       6 of 6 with keywords; not redirected
+    J 39    list container seen, ids non-empty            24 ids
+    J 158   list container seen, slots above 0            25 slots, 25 ids
+    M M43   rows rendered, no conversation opened         5 rendered, 0 message events
+    N 23    one call that returns rows                    10 rows, each with a recipient id
+    N 79    the name-returning reader, fired              10 people records, 10 of 10 cards
+    N 84    ok, landed, kept verbatim or same values,     verbatim; 7 person results
+    N 87      person results >= 1, panel settled,         verbatim; 6
+    N 94      0 values refused (lane S's bank rule)       verbatim, both ids; 8
+    N 132   one end-to-end call of the tool               headline and delta; 2 metrics
+    N 195   fired live                                    44 and 1 over 90 days; 2 charts
+    P S5    fired live                                    2 of 2 cards read
+
+**NOT BANKED, EACH CELL SAYING WHY:** `N 20` and `N 45` (a third reading, NOT
+SHOWN, again); `M M53` (the composer drew no card); `M M1` (refused by the tool
+before a token). **AND A CORRECTION TO THIS LANE'S OWN END-OF-SESSION REPORT:**
+it listed `J 107` as fired and passing. Its cell's bar also names the
+default-location question -- whether LinkedIn narrows a keyword-less employer
+search to his location -- and the fire does not settle it: the envelope
+records no location applied, and no address the capture draws carries one. So
+`J 107` does not move. **MEASURED, NO STATE:** `J 37`, by lane L3's own test at
+no extra load -- `J 18`'s 3 alerts against the 5 in the mail inventory its cell
+cites: unequal, so the jobs home does not carry every alert.
+
+**HELD, A DATED NOTE IN EACH CELL:** `P C8` and `N 76` (D-1, fix 3's finding);
+`M M7`, `M M8`, `M M9`, `M M28` (C8) and `M M22`, `M M27`, `M M29`, `M M31`,
+`M M16` (C9 and C5, never reached); `M M10` and `M M17`; `M M33` and `M M49`
+(the unread row); the six intro edits and `P B9` (fix 2). **CAPTURED, A NOTE
+POINTING AT ITS TRACKED COPY:** `P L2b`, `M C85`, `M C29`, `M C42`, `N 104`,
+`N 161`, `N 102`, `J 108`, `N 165`, `N 177`, `M C70`, `P K1`, `J 124`, `J 115`,
+`P M12`, `P J4`, `P D28`, `P F1`, `P H11`, `P K8`, `P D26` -- no state moves on
+a capture. `J 124`'s own question is not readable from its capture: the
+posting's company-insights block drew 21 lines, and a skeleton shapes their
+words (the cost D-2 stated).
+
+**THE COUNTS**, file-wide by `scripts/count_census_states.py`, each slice's
+delta written into its own count section:
+
+    slice         COVERED-PROVEN   COVERED-UNFIRED
+    jobs             19 -> 22          6 -> 3
+    network           8 -> 15         20 -> 13
+    profile          24 -> 25          9 -> 8
+    messaging         7 -> 8          11 -> 10
+    all four         58 -> 70         46 -> 34      GAP 584, unmoved
+
+**THE PINS, MEASURED ON THE FINAL TREE AND RE-PINNED, NEVER SUMMED:**
+`scripts/census_completion.py --check` named three figures and twelve
+bucket-1 rows off their pins, and nothing else:
+
+    delivered_strict    79 -> 91
+    unfired             49 -> 37
+    b1_no_ruling        30 -> 18
+    PINNED_B1_ROWS      NO_RULING loses the twelve rows above
+
+`delivered_broad`, `adjudicated`, `gap` and every other headline figure did
+not move: a row changing class inside the covered states. The derived views
+were regenerated with `--write` twice and `--check`: the audit index gains the
+four correction edges, each with both markers; the blocker map moves the
+twelve state cells; the rulings register does not change.
+
+**THE AST DUPLICATE-KEY CHECK** (a scratch walker, shown firing on a planted
+duplicate first): 591 tracked Python files, 4417 dict displays, **0 duplicate
+keys**. It also reports one SET literal with a repeated member --
+`_FETCH_NAMES` in `tests/test_api_call_sites.py`, `"urlretrieve"` twice since
+`fbedfca` -- harmless in a set, its intended third member unknown; left for
+its owner and not changed here.

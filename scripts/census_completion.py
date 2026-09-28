@@ -1185,7 +1185,12 @@ PINNED = {
     #: 75 and 21 since the bucket-1 merge: `M C41` fired live and moved from
     #: COVERED-UNFIRED to COVERED-PROVEN (`_audit/2026-09-23-bucket1-fires.md`).
     #: One row changing class moves both, and leaves delivered_broad at 96.
-    "delivered_strict": 79,
+    #: 91 AT THE LIVE LANE'S SESSION 2 (2026-09-28), MEASURED: twelve rows
+    #: fired live and banked, each on its own cell's bar -- `J 18`, `J 39`,
+    #: `J 158`, `M M43`, `N 23`, `N 79`, `N 84`, `N 87`, `N 94`, `N 132`,
+    #: `N 195`, `P S5` -- COVERED-UNFIRED -> COVERED-PROVEN. delivered_broad
+    #: does not move: a row changing class within it.
+    "delivered_strict": 91,
     #: The live lane's merge: N 134, P O3 and M C72 left GAP.
     #: Lane D's merge: N 132 left GAP, for COVERED-UNFIRED under D6.
     #: 544 AT THE ORCHESTRATOR'S MERGE OF LANE D (2026-09-27), MEASURED: lane D
@@ -1260,7 +1265,10 @@ PINNED = {
     #: (see `adjudicated`).
     #: 49 AT LANE S'S MERGE OF MASTER 0867bda (2026-09-28), MEASURED on the
     #: merged tree: master's `N 155` with this branch's four.
-    "unfired": 49,
+    #: 37 AT THE LIVE LANE'S SESSION 2 (2026-09-28), MEASURED: the twelve rows
+    #: named at `delivered_strict` fired live and banked, leaving
+    #: COVERED-UNFIRED.
+    "unfired": 37,
     #: 104 AT THE ORCHESTRATOR'S MERGE OF LANE Y2'S FOLLOW-UP (2026-09-27), MEASURED:
     #: the P-R settings block itemized into 22 rows (P2-P23; Delete Data EXCLUDED-RULED).
     #: 101 AT LANE S'S NAMES ADOPTION (2026-09-27), MEASURED: `N 79`, `N 172`
@@ -1583,7 +1591,12 @@ PINNED = {
     #: shipped page and never fired, so they leave buckets 3 and 1-by-side and
     #: enter bucket 1 held by no ruling. `P K1` stays GAP and is re-gated
     #: READER -> MEASURE: no capture draws its section.
-    "b1_no_ruling": 30,
+    #: 18 AT THE LIVE LANE'S SESSION 2 (2026-09-28), MEASURED: twelve of the
+    #: thirty fired live and banked, each on its own cell's bar, so they left
+    #: bucket 1 -- `J 18`, `J 39`, `J 158`, `M M43`, `N 23`, `N 79`, `N 84`,
+    #: `N 87`, `N 94`, `N 132`, `N 195`, `P S5`. `J 107`, `M M53`, `N 20` and
+    #: `N 45` fired and stay: not banked, each cell says why.
+    "b1_no_ruling": 18,
     #: 7 AT THE ORCHESTRATOR'S MERGE OF LANE L7'S P B9 (2026-09-27), MEASURED: P B9
     #: (Premium badge) moved GAP -> COVERED-UNFIRED, released like the intro edits.
     "b1_released": 7,
@@ -1738,21 +1751,26 @@ PINNED_B1_ROWS: dict[str, tuple[str, ...]] = {
     #: built offline over the one captured results page and never fired.
     #: NAMES-AT-RUNTIME and PEOPLE-DATA-MITIGATIONS permit and shape it;
     #: neither holds it.
+    #: TWELVE LEFT AT THE LIVE LANE'S SESSION 2, 2026-09-28, MEASURED: `J 18`,
+    #: `J 39`, `J 158`, `M M43`, `N 23`, `N 79`, `N 84`, `N 87`, `N 94`,
+    #: `N 132`, `N 195` and `P S5` fired live and banked COVERED-PROVEN, each
+    #: on its own cell's bar (`_audit/2026-09-23-live-lane-session-1.md`,
+    #: "Live session 2, 2026-09-28"). `J 107`, `M M53`, `N 20` and `N 45`
+    #: fired and stay here, not banked; `M M33`, `M M49`, the six P A rows and
+    #: `P B9` did not fire.
     NO_RULING: (
-        "J 18", "J 39", "J 121", "J 122", "J 158", "M M33", "M M43", "M M49",
-        #: `N 132` entered at the orchestrator's merge of lane D (2026-09-27): D6 moved it
-        #: GAP -> COVERED-UNFIRED on two shipped reads; no ruling holds it.
-        "N 20", "N 23", "N 132",
-        "N 45", "N 79", "N 84", "N 85", "N 87", "N 94", "N 172", "N 194",
+        "J 121", "J 122", "M M33", "M M49",
+        "N 20",
+        "N 45", "N 85", "N 172", "N 194",
         "P A8", "P A11", "P A13", "P A17", "P A19", "P A21", "P B9",
-        #: `J 107`, `M M53`, `N 195` and `P S5` entered with lane S's offline
-        #: frontier, 2026-09-28: a keyword-less employer search, the composer's
-        #: suggested people with their presence, Premium's recruiter insights,
-        #: and the two engagement cards -- each built offline over a capture or
-        #: on a shipped page, never fired. NAMES-AT-RUNTIME and PEOPLE-DATA-
-        #: MITIGATIONS permit and shape the two people reads; no ruling holds any
-        #: of the four.
-        "J 107", "M M53", "N 195", "P S5",
+        #: `J 107` and `M M53` entered with lane S's offline frontier,
+        #: 2026-09-28 (with `N 195` and `P S5`, which left at session 2): a
+        #: keyword-less employer search and the composer's suggested people
+        #: with their presence -- each built offline over a capture or on a
+        #: shipped page. Fired at session 2 and not banked. NAMES-AT-RUNTIME
+        #: and PEOPLE-DATA-MITIGATIONS permit and shape the people read; no
+        #: ruling holds either.
+        "J 107", "M M53",
     ),
 }
 
