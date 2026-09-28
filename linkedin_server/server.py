@@ -3255,17 +3255,20 @@ async def linkedin_people_search_shape(
     everything below holds as written: counts and filter names, never a
     person.
 
-    **A MEMBER'S CONNECTIONS, AND THE ONES YOU SHARE (census N 30 and N 31,
-    2026-09-28).** ``connections_of`` with a member's token is the search
-    LinkedIn's own profile topcard links to for that member's connections;
-    with ``network="F"`` beside it, it is the one LinkedIn links to as your
-    SHARED connections -- that member's connections who are your own first degree
-    (``"S"`` is your second degree; ``"F,S"`` both, as LinkedIn's own link
-    lists them). Pass ``include_names=True`` for them as people records.
-    ``network`` is refused without ``connections_of``: the member is always
-    one you name. Built over captured markup, NOT YET FIRED LIVE: whether
-    LinkedIn applies the facet to the results is what ``query_kept`` reports
-    on the first fire.
+    **A MEMBER'S CONNECTIONS, THE ONES IN COMMON, AND A SEARCH BY DEGREE
+    (census N 30, N 31 and N 81, 2026-09-28).** ``connections_of`` with a
+    member's token is the search LinkedIn's own profile topcard links to for
+    that member's connections; with ``network="F"`` beside it, it is the one
+    LinkedIn links to as the connections you and that member have in common --
+    that member's connections who are your own first degree (``"S"`` is your
+    second degree; ``"F,S"`` both, as LinkedIn's own link lists them).
+    ``network`` on its own is a people search filtered by degree of YOUR
+    network -- ``network="F"`` searches your own connections, with a keyword
+    or any facet beside it -- the link LinkedIn's connections page draws. A
+    degree names nobody, so it needs no member. Pass ``include_names=True``
+    for the results as people records. Built over captured markup, NOT YET
+    FIRED LIVE: whether LinkedIn applies the facet to the results is what
+    ``query_kept`` reports on the first fire.
 
     **THIS IS THE FIRST TOOL ON A THIRD-PARTY-DENSE SURFACE**, and every
     decision in it is shaped by that. A people-search page's entire payload is
@@ -3376,9 +3379,10 @@ async def linkedin_people_search_shape(
             stored and never echoed.
         network: LinkedIn's letters for degrees of YOUR network, comma-
             separated: ``F`` (1st) and ``S`` (2nd), the two its own links
-            write. Only with ``connections_of``: ``network="F"`` returns the
-            connections that member and you have in common. Any other value
-            is refused, described by its shape.
+            write. Alone, a search filtered by degree; with
+            ``connections_of``, ``network="F"`` returns the connections that
+            member and you have in common. Any other value is refused,
+            described by its shape.
         include_names: return the people the page draws as records (see the
             first paragraph). Off by default; the search is the same either
             way and still one page.

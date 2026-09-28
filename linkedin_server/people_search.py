@@ -19,8 +19,9 @@ This module is those two calls turned into code, and nothing wider. Census
 rows (``_audit/_census/network.md``): ``N 79`` and ``N 194`` (a keyword),
 ``N 84`` and ``N 87`` (current and past company), ``N 94`` (more than one
 location in one search), ``N 85``, ``N 172`` and ``N 30`` (the connections of
-a member), and ``N 31`` (the connections he shares with a member: the member's
-connections narrowed by LinkedIn's ``network`` facet to his own first degree).
+a member), ``N 31`` (the connections he shares with a member: the member's
+connections narrowed by LinkedIn's ``network`` facet to his own first degree)
+and ``N 81`` (the same facet alone: a people search filtered by degree).
 
 ## IT TOUCHES NO PAGE, AND THAT IS THE DERIVATION PROOF
 
@@ -52,8 +53,9 @@ two, off a first-degree profile's topcard (2026-09-28):
                     (a first-degree profile's topcard, links 2, 3)
     network         LinkedIn-authored as a JSON LIST: ["F"]         MEASURED
                     encoded (links 2, 3), ["F","S"] raw (link 1);
-                    also alone on the connections page, its value
-                    shape unread there
+                    also ALONE on the connections page, whose value
+                    shape is on record nowhere (its skeleton keeps a
+                    placeholder), so sent there in the same grammar
 
 ``connectionOf`` read ``never LinkedIn-authored; named by a test`` -- DERIVED --
 from 2026-09-24 until the live lane's first-degree capture was read for its
@@ -141,8 +143,8 @@ GEO_ID = "geo_id"
 MEMBER_TOKEN = "member_token"
 NETWORK_DEGREE = "network_degree"
 
-#: LINKEDIN'S ``network`` FACET, AS THE CAPTURE WRITES IT (census ``N 31``,
-#: 2026-09-28). Its values are degrees of HIS OWN network, in LinkedIn's
+#: LINKEDIN'S ``network`` FACET, AS THE CAPTURES WRITE IT (census ``N 31``
+#: and ``N 81``, 2026-09-28). Its values are degrees of HIS OWN network, in LinkedIn's
 #: letters: ``F`` his first degree, ``S`` his second. CLOSED TO THE TWO THE
 #: CAPTURE HOLDS, in the order link 1 lists them -- LinkedIn's letter for a
 #: third degree is on record nowhere here, so it is refused, not guessed.
@@ -158,8 +160,8 @@ NETWORK_DEGREES: tuple[str, ...] = ("F", "S")
 #:
 #: ``network`` SITS BEFORE ``connectionOf`` because LinkedIn's own
 #: shared-connections links write them in that order (links 2 and 3 of a
-#: first-degree profile's topcard), and it is only ever sent beside a member
-#: this server was handed: see :func:`compose`.
+#: first-degree profile's topcard). It is sent alone too -- the connections
+#: page's link -- since 2026-09-28 17:02: see :func:`compose`.
 FACETS: tuple[tuple[str, str, str, int], ...] = (
     ("current_company_ids", "currentCompany", ORGANISATION_ID, 5),
     ("past_company_ids", "pastCompany", ORGANISATION_ID, 5),
@@ -425,15 +427,16 @@ def compose(
     ``url`` is the ONLY field that carries one, and it exists to be handed to
     ``BROWSER.goto``; the tool never publishes it.
 
-    ``network`` IS NEVER SENT WITHOUT A MEMBER. The rows it serves are about
-    ONE member's connections -- with ``connections_of``, ``F`` is the
-    connections he shares with that member, the search LinkedIn's own
-    shared-connections links write -- and the order that added it
-    (2026-09-28 15:10) made a named member its condition. Given alone it is
-    refused. LinkedIn DOES write it alone, once, on the connections-page
-    capture (``tests/fixtures/live2/n23.html``: ``network`` and ``origin``,
-    no member) -- a search of his own network by degree, which is census
-    ``N 81``'s question and is not built here.
+    ``network`` IN TWO SHAPES, EACH AS LINKEDIN WRITES IT. ALONE it is a search
+    of his own network by degree -- census ``N 81`` -- the link the
+    connections-page capture draws (``tests/fixtures/live2/n23.html``:
+    ``network`` and ``origin``, no member). BESIDE ``connections_of`` it
+    narrows that member's connections to degrees of his own network --
+    ``F`` is the connections they have in common, census ``N 31`` -- the
+    shared-connections links of a first-degree profile's topcard, which write
+    ``network`` BEFORE ``connectionOf``. A degree filter targets nobody, so it
+    needs no member; it was refused alone until the orchestrator's call of
+    2026-09-28 17:02. ``origin`` is never sent, in either shape.
 
     PURE: arguments in, a dict out. It reads no page, no file, no clock and
     no network, and it never raises.
@@ -469,18 +472,6 @@ def compose(
             # LinkedIn's faceted grammar: a JSON list of strings, no spaces.
             pairs.append((key, json.dumps(values, separators=(",", ":"))))
         applied[argument] = len(values)
-
-    if applied["network"] and not applied["connections_of"]:
-        return _refused(
-            "network",
-            "network_needs_a_named_member",
-            str(network or "").strip(),
-            "network narrows ONE MEMBER'S connections to degrees of your own "
-            "network -- with connections_of, F is the connections you share "
-            "with that member, the search LinkedIn's own shared-connections "
-            "link writes. It is not sent without a member: name one with "
-            "connections_of. Nothing was loaded.",
-        )
 
     url = BASE_URL + ("?" + urlencode(pairs) if pairs else "")
     return {"built": True, "url": url, "applied": applied}

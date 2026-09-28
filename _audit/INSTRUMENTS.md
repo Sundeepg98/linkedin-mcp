@@ -10194,7 +10194,7 @@ Record: the lane record's `## Four people-search items 2026-09-28`.
 
 | path | shown failing by |
 |---|---|
-| `tests/test_shared_connections_search.py` -- the `network` facet held to the capture's keys, order and value shape, its two letters, and a named member; the premise that the capture still draws the three topcard links | its census tests red on the tree before the census moved; each control convicting what it must (the other key order, the raw spelling, the same letter without a member); eight planted defects in the composer and the tool, each red and restored byte-identical |
+| `tests/test_shared_connections_search.py` -- the `network` facet held to the captures' keys, order and value shape, and its two letters, in both shapes: alone (the connections page, census `N 81`, since the call of 17:02) and beside a member (the shared links, `N 31`); the premises that the captures still draw those links | its census tests red on the tree before the census moved, twice; each control convicting what it must (the other key order, the raw spelling, the shared address against the alone check, the captured letters built in both shapes); eight planted defects at 15:10 and ten at 17:02 in the composer and the tool, each red and restored byte-identical |
 | `tests/test_a_company_search_needs_no_keyword.py` (the docstring pin) | the words before the fire, verbatim, rejected by the pin; three planted defects in the docstring, each red |
 
 ### 66.8 DECLARED DISPOSABLE (THE ORDER OF 15:10)

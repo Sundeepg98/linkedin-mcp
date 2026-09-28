@@ -2830,7 +2830,10 @@ this build refuses `network` alone; lifting that condition, on a D1 facet
 LinkedIn writes, is what would deliver `N 81`. The composer's docstring says
 so. Its first draft said LinkedIn writes the facet only beside a member; the
 captures said otherwise before anything was committed, and that sentence
-never shipped.
+never shipped. **THAT LAST CLAUSE WAS NOT SO, FOUND AT N.1 BELOW:** the same
+sentence did ship, in `tests/test_shared_connections_search.py`'s module
+docstring (`a7f954f`), and was replaced there with the `N 81` build. **AND THE
+FINDING WAS RULED THE SAME DAY (17:02): YES** -- N.2.
 
 `tests/test_shared_connections_search.py`: the capture still draws the three
 links (a premise check); the composed keys in the capture's order, with a
@@ -2945,5 +2948,107 @@ integrate: this branch is master and its own commits.
   (`query_kept` reports it then).
 - CI: nothing is pushed, so the suite ran on this Windows box only.
 - `N 81`: LinkedIn's `network` alone, drawn on the connections page, is not
-  built; the order's named-member condition refuses it (M.3).
+  built; the order's named-member condition refuses it (M.3). **BUILT AT
+  17:02 ON HIS CALL** -- N.2.
 - A COLD REVIEW of this order's change was not run.
+
+## N 81, the degree filter 2026-09-28
+
+The orchestrator's call of 17:02, on the finding in M.3: YES. Allow `network`
+WITHOUT a named member, as the connections-page capture shows LinkedIn
+writing it -- a degree filter targets no one, so mitigation 6 is untouched,
+and it is a LinkedIn-written facet from tool arguments (D1). Keep exactly F
+and S. Beside `connections_of` it stays `N 31`'s shape. Tests for both shapes
+and a refused letter, planted mutations, `N 81` to COVERED-UNFIRED, every pin
+re-derived. And a merge-order hold: lane L5's first-contact path lands first;
+this lane integrates master once it is on L5's head with CI green, gates
+again, and reports.
+
+### N.1 Step 0
+
+At 17:01 this branch stood at `6dc74c3` -- nowhere on `master` until this
+branch merges -- clean. The local `master` had
+moved past `854f9ea` to L5's head, `0e1040b`, which contains `dc6e349`; the
+remote was still at `854f9ea`, and no CI run existed for `0e1040b`. So the
+build went on `6dc74c3`, as ordered, and the integration waits.
+
+What disk said about the facet alone: `tests/fixtures/live2/n23.html` draws
+exactly one people-search link -- `network` then `origin`, no member. Its
+VALUE shape is on record nowhere: the live lane's gitignored skeleton of that
+page holds a placeholder token in the value's place (its class mask, printed
+without its letters, is a braced pair of alphanumeric runs), and so do the
+first-degree links' values in the other skeletons read this way. So the
+facet alone is sent in the grammar measured on the shared links -- a
+percent-encoded JSON list -- and `query_kept` reports what LinkedIn keeps of
+it on the first fire.
+
+AND ONE CLAIM OF THIS RECORD DID NOT HOLD. M.3 said the sentence "LinkedIn is
+on record writing it only beside `connectionOf`" never shipped. It shipped,
+in the new test file's module docstring, in `a7f954f`. It is replaced there
+now, and M.3 carries a pointer to this paragraph in place.
+
+### N.2 What was built
+
+- `people_search.compose` no longer refuses `network` alone: the facet is a
+  search of his own network by degree -- `network="F"` searches his own
+  connections, with a keyword or any other facet beside it. The refusal
+  literal `network_needs_a_named_member` is gone.
+- Both shapes, each as LinkedIn writes it: ALONE, the connections page's --
+  `network`, and `origin` never sent; BESIDE `connections_of`, the shared
+  links' -- `network` before `connectionOf`. The value is the same in both.
+- The vocabulary is unchanged: `F` and `S` only, in link 1's order; anything
+  else refused before a session opens, alone or with a member.
+- The tool's docstring and the composer's say both shapes, and the composer's
+  evidence table says the alone value's shape is on record nowhere.
+
+`tests/test_shared_connections_search.py`, 52 tests: the connections page
+still draws the facet alone (a premise check); the alone address writes the
+page's keys, less `origin`, with the same value as the shared shape; the two
+shapes side by side, with a control that the alone check convicts the shared
+address; the facet beside a keyword, a company and a place; the refusals of
+eight values outside F and S in BOTH shapes, with a control that F, S and
+F,S build in both; the tool refusing a third degree before any session, in
+both shapes; both shapes admitted by the shipped boundary, with and without
+a keyword; and the tool driven with the facet alone over the captured
+results skeleton -- three people records of exactly the declared shape, one
+page, the facet applied and kept, nothing about anybody outside the records.
+The admission corpus of `tests/test_people_search_readers.py` takes the
+facet too, alone and in every pair.
+
+TEN PLANTED DEFECTS, each red, each source restored byte-identical: the
+member rule restored (10 red); the facet silently dropped when alone (6);
+`origin` sent with it, as the capture writes it (6); `network` after
+`connectionOf` (3); any letter taken as a degree (14); a third degree guessed
+(4); the caller's order kept (1); one degree only (6); the tool not handing
+`network` to the composer (4); `network` sent raw (2).
+
+### N.3 The census
+
+`N 81` GAP -> COVERED-UNFIRED, its cell opening on the paragraph that moved
+it and keeping the 2026-09-21 record after it: the filter-panel route is
+still refused, and the row no longer waits on it. It left the address table
+and the read triage. `N 31`'s cell says the facet stood alone from 17:02.
+
+    census_completion   adjudicated 184 -> 185    gap 586 -> 585
+                        delivered_broad 130 -> 131    gap_read 100 -> 99
+                        unfired 36 -> 37          b1_no_ruling 17 -> 18
+                        b3_admitted 43 -> 42
+    PINNED_B1_ROWS      NO_RULING gains `N 81`
+    count_census_states network.md COVERED-UNFIRED 14 -> 15, GAP 161 -> 160
+    tool surface        61 tools, 96 parameters: no parameter moved
+
+**A FINDING FOR THE ORCHESTRATOR, NOT ACTED ON.** With the facet alone, two
+more GAP rows have a route the package's own search now composes: `N 25`
+("Search your connections by name": `network="F"` with a keyword) and `N 26`
+("Filter your connections by location, company, school, industry":
+`network="F"` with `location_ids` or `current_company_ids`; school and
+industry have no facet here). Each is blocked today on the connections
+page's query variants, which the boundary refuses. Whether the people search
+restricted to his first degree discharges them is a D6 question -- the
+payload differs (a people search ranks and pages; the connections page lists
+every connection) -- and D6 moves have been his.
+
+### N.4 Gates
+
+The integration of L5's head and the gates on the final tree follow in the
+next section, once master is on that head with its CI green.

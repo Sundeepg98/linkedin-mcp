@@ -1,38 +1,49 @@
-"""Shared connections with a member (census ``N 31``) and a member's own
-connections (``N 30``) -- the people searches LinkedIn's own topcard links write.
+"""LinkedIn's ``network`` facet in both the shapes it writes: shared connections
+with a member (census ``N 31``), a member's own connections (``N 30``), and a
+people search filtered by degree alone (``N 81``).
 
-THE CAPTURE. The live lane's session-2 capture of a first-degree profile, kept
-as ``tests/fixtures/live2/first_degree_profile.html`` with every query value
-replaced by ``x``, draws three links from the topcard into people search:
+THE CAPTURES. The live lane's session-2 capture of a first-degree profile,
+kept as ``tests/fixtures/live2/first_degree_profile.html`` with every query
+value replaced by ``x``, draws three links from the topcard into people search:
 
     link 1       origin, connectionOf, network      the member's connections
-    links 2, 3   origin, network, connectionOf      the connections he shares
+    links 2, 3   origin, network, connectionOf      the connections in common
 
-Lane L5 measured the VALUE shapes off the gitignored skeleton on 2026-09-28,
-values never read (``_audit/2026-09-24-lane-l5-messaging.md``, 'The
-orchestrator's calls of 2026-09-28 12:32', S.1): on links 2 and 3 both lists
-percent-encoded, ``network`` 13 characters of which 3 are letters --
-``["F"]``, his first degree; on link 1 ``network`` 9 characters and 2 letters,
-written raw -- ``["F","S"]``.
+and the same session's capture of the connections page,
+``tests/fixtures/live2/n23.html``, draws one -- ``network`` and ``origin``, no
+member: a search of his own network by degree.
+
+Lane L5 measured the VALUE shapes on the first-degree links off the gitignored
+skeleton on 2026-09-28, values never read
+(``_audit/2026-09-24-lane-l5-messaging.md``, 'The orchestrator's calls of
+2026-09-28 12:32', S.1): on links 2 and 3 both lists percent-encoded,
+``network`` 13 characters of which 3 are letters -- ``["F"]``, his first
+degree; on link 1 ``network`` 9 characters and 2 letters, written raw --
+``["F","S"]``. The connections page's value shape is on record nowhere: its
+gitignored skeleton keeps a placeholder token there. So the facet alone is
+sent in the grammar measured on links 2 and 3.
 
 WHAT THIS FILE HOLDS, each with a check shown able to fail:
 
-1. The capture still draws what this build rests on -- a premise check.
-2. ``people_search.compose(connections_of=..., network="F")`` writes the
-   capture's keys in the capture's order -- ``network`` then
-   ``connectionOf``; ``origin`` is never sent -- and ``network``'s value in
-   exactly the shape lane L5 measured.
+1. The captures still draw what this build rests on -- premise checks.
+2. With a member, ``network`` then ``connectionOf`` -- the shared links'
+   order -- and ``network``'s value in exactly the shape lane L5 measured.
+   Alone, ``network`` and nothing else -- the connections page's keys.
+   ``origin`` is never sent, in either shape.
 3. The degrees are LinkedIn's two captured letters and nothing else: a third
-   degree is refused, not guessed. And ``network`` is never sent without a
-   member named in ``connections_of`` -- LinkedIn is on record writing it only
-   beside ``connectionOf``.
-4. The address is admitted by the shipped read boundary.
-5. The tool returns the shared connections as PEOPLE RECORDS, one page, over
-   the same captured skeleton and the same reader
-   ``tests/test_people_search_names.py`` holds to the six mitigations.
+   degree is refused, not guessed.
+4. Both shapes are admitted by the shipped read boundary.
+5. The tool returns the results as PEOPLE RECORDS, one page, over the same
+   captured skeleton and the same reader ``tests/test_people_search_names.py``
+   holds to the six mitigations -- with a member, and alone.
 6. A facet LinkedIn drops reads ``absent``, never filtered.
-7. The census: ``N 30`` and ``N 31`` COVERED-UNFIRED on this route, and
-   ``N 85``'s spelling MEASURED.
+7. The census: ``N 30``, ``N 31`` and ``N 81`` COVERED-UNFIRED on this route,
+   and ``N 85``'s spelling MEASURED.
+
+(``network`` WAS REFUSED WITHOUT A MEMBER from the order of 2026-09-28 15:10
+until the orchestrator's call of 17:02: a degree filter names nobody. This
+docstring said then that LinkedIn is on record writing the facet only beside
+``connectionOf``; the connections-page capture above shows it alone.)
 
 EVERY VALUE IS SYNTHETIC: the member tokens are declared
 ``SYNTHETIC_MEMBER_TOKENS``, and every person the skeleton draws is from the
@@ -58,6 +69,8 @@ from tests.test_people_search_names import MUTUALS, PLACE, RESULTS, _drive_tool
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 CAPTURE = ROOT / "tests" / "fixtures" / "live2" / "first_degree_profile.html"
+#: The connections page, where LinkedIn writes ``network`` alone.
+CONNECTIONS_PAGE = ROOT / "tests" / "fixtures" / "live2" / "n23.html"
 NETWORK = ROOT / "_audit" / "_census" / "network.md"
 SERVER = ROOT / "linkedin_server" / "server.py"
 
@@ -85,9 +98,9 @@ def _short_panel_wait(monkeypatch):
     monkeypatch.setattr(search_results, "PANEL_POLL_MS", 1)
 
 
-def _capture_links() -> list[list[str]]:
-    """The KEY sequence of every people-search link the capture draws."""
-    text = CAPTURE.read_text(encoding="utf-8")
+def _capture_links(capture: pathlib.Path = CAPTURE) -> list[list[str]]:
+    """The KEY sequence of every people-search link a capture draws."""
+    text = capture.read_text(encoding="utf-8")
     return [
         [key for key, _value in parse_qsl(urlsplit(html.unescape(href)).query,
                                           keep_blank_values=True)]
@@ -120,6 +133,8 @@ def _order_of(link_keys: list[str], url: str) -> bool:
 
 SHARED_LINK = ["origin", "network", "connectionOf"]
 CONNECTIONS_LINK = ["origin", "connectionOf", "network"]
+#: The connections page's one people-search link: the facet alone.
+DEGREE_LINK = ["network", "origin"]
 
 
 def test_the_capture_draws_the_three_topcard_links_this_build_rests_on() -> None:
@@ -127,6 +142,11 @@ def test_the_capture_draws_the_three_topcard_links_this_build_rests_on() -> None
     assert links.count(SHARED_LINK) == 2, links
     assert links.count(CONNECTIONS_LINK) == 1, links
     assert len(links) == 3, links
+
+
+def test_the_connections_page_draws_the_facet_alone() -> None:
+    """``N 81``'s premise: LinkedIn writes ``network`` with no member."""
+    assert _capture_links(CONNECTIONS_PAGE) == [DEGREE_LINK]
 
 
 # ---------------------------------------------------------------------------
@@ -179,13 +199,59 @@ def test_applied_counts_the_degrees_and_carries_no_value() -> None:
 
 
 # ---------------------------------------------------------------------------
-# 3. Two captured letters, and never without a named member
+# 2b. Alone -- the connections page's shape (census N 81)
 # ---------------------------------------------------------------------------
 
 
+def test_the_degree_filter_alone_writes_the_connections_pages_keys() -> None:
+    url = _composed(network="F")
+    assert _order_of(DEGREE_LINK, url), _raw_query(url)
+    assert [key for key, _value in _raw_query(url)] == ["network"]
+    value = dict(_raw_query(url))["network"]
+    # The same grammar as the shared links: the alone value's own shape is on
+    # record nowhere, so it is not guessed differently.
+    assert len(value) == SHARED_NETWORK_CHARACTERS and unquote(value) == '["F"]', value
+
+
+def test_the_two_shapes_differ_by_the_member_and_nothing_else() -> None:
+    """BOTH SHAPES, side by side: the facet alone, and the N 31 shape with a
+    member -- ``network`` before ``connectionOf`` -- the same value either way."""
+    alone = _raw_query(_composed(network="F"))
+    shared = _raw_query(_composed(network="F", connections_of=TOKEN_A))
+    assert [key for key, _v in alone] == ["network"]
+    assert [key for key, _v in shared] == ["network", "connectionOf"]
+    assert dict(alone)["network"] == dict(shared)["network"]
+
+
+def test_THIS_CONTROL_CAN_FAIL_the_degree_shape_is_not_the_shared_shape() -> None:
+    """The alone check tells the shapes apart: the shared address is not it."""
+    assert not _order_of(DEGREE_LINK, _composed(network="F", connections_of=TOKEN_A))
+
+
+@pytest.mark.parametrize(
+    "others, keys",
+    [
+        ({"keywords": "engineer"}, ["keywords", "network"]),
+        ({"current_company_ids": "5417062"}, ["currentCompany", "network"]),
+        ({"location_ids": "100"}, ["geoUrn", "network"]),
+    ],
+)
+def test_the_degree_filter_rides_beside_any_other_argument(others: dict, keys: list) -> None:
+    verdict = people_search.compose(network="S", **others)
+    assert verdict["built"] is True, verdict
+    assert [key for key, _value in _raw_query(verdict["url"])] == keys
+    assert verdict["applied"]["network"] == 1 and verdict["applied"]["connections_of"] == 0
+
+
+# ---------------------------------------------------------------------------
+# 3. Two captured letters, and nothing else
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.parametrize("member", [TOKEN_A, ""], ids=["with-member", "alone"])
 @pytest.mark.parametrize("value", ["O", "f", "s", "1st", "F S", "FS", "first", "Zzqdegreeplant"])
-def test_a_degree_the_capture_does_not_hold_is_refused_and_described(value: str) -> None:
-    verdict = people_search.compose(connections_of=TOKEN_A, network=value)
+def test_a_degree_the_capture_does_not_hold_is_refused_and_described(value: str, member: str) -> None:
+    verdict = people_search.compose(connections_of=member, network=value)
     assert verdict["built"] is False, verdict
     assert verdict["argument"] == "network"
     assert verdict["refused"] == "not_a_network_degree"
@@ -200,20 +266,12 @@ def test_a_repeated_degree_is_refused_not_dropped() -> None:
     assert verdict["refused"] == "duplicate_value"
 
 
-@pytest.mark.parametrize("others", [{}, {"keywords": "engineer"},
-                                    {"current_company_ids": "5417062"}])
-def test_network_without_a_named_member_is_refused(others: dict) -> None:
-    verdict = people_search.compose(network="F", **others)
-    assert verdict["built"] is False, verdict
-    assert verdict["argument"] == "network"
-    assert verdict["refused"] == "network_needs_a_named_member"
-    envelope = people_search.refusal_envelope(verdict)
-    assert envelope["error"] == "bad_argument" and envelope["pages_loaded"] == 0
-
-
-def test_THIS_CONTROL_CAN_FAIL_the_same_degree_with_a_member_is_built() -> None:
-    """The refusal above is about the missing member, not the letter."""
-    assert people_search.compose(network="F", connections_of=TOKEN_A)["built"] is True
+def test_THIS_CONTROL_CAN_FAIL_the_captured_letters_are_built_in_both_shapes() -> None:
+    """The refusals above are about the letter, not the shape: F and S are
+    built alone and with a member."""
+    for member in (TOKEN_A, ""):
+        for degree in ("F", "S", "F,S"):
+            assert people_search.compose(network=degree, connections_of=member)["built"] is True
 
 
 class _NoSessionBrowser:
@@ -237,17 +295,18 @@ class _NoSessionBrowser:
         raise AssertionError("a page was loaded")
 
 
-def test_the_tool_refuses_network_alone_before_any_session(monkeypatch) -> None:
+@pytest.mark.parametrize("member", [TOKEN_A, ""], ids=["with-member", "alone"])
+def test_the_tool_refuses_a_third_degree_before_any_session(monkeypatch, member: str) -> None:
     from linkedin_server import server
 
     browser = _NoSessionBrowser()
     monkeypatch.setattr(server, "BROWSER", browser)
-    payload = asyncio.run(server.linkedin_people_search_shape(network="F"))
+    payload = asyncio.run(server.linkedin_people_search_shape(network="O", connections_of=member))
     assert browser.sessions == 0 and browser.gotos == []
     assert payload["ok"] is False
     assert payload["error"] == "bad_argument"
     assert payload["argument"] == "network"
-    assert payload["refused"] == "network_needs_a_named_member"
+    assert payload["refused"] == "not_a_network_degree"
     assert payload["pages_loaded"] == 0
 
 
@@ -256,12 +315,14 @@ def test_the_tool_refuses_network_alone_before_any_session(monkeypatch) -> None:
 # ---------------------------------------------------------------------------
 
 
+@pytest.mark.parametrize("member", [TOKEN_B, ""], ids=["with-member", "alone"])
 @pytest.mark.parametrize("degrees", ["F", "S", "F,S"])
-def test_the_shared_address_is_admitted_by_the_shipped_boundary(degrees: str) -> None:
-    url = _composed(connections_of=TOKEN_B, network=degrees, keywords="engineer")
-    assert readonly.is_read_url(url) is True, url
-    assert people_search.boundary_verdict(url) == {"admitted": True}
-    assert cra.refusal_of(url) == "-"
+def test_both_shapes_are_admitted_by_the_shipped_boundary(degrees: str, member: str) -> None:
+    for extra in ({}, {"keywords": "engineer"}):
+        url = _composed(connections_of=member, network=degrees, **extra)
+        assert readonly.is_read_url(url) is True, url
+        assert people_search.boundary_verdict(url) == {"admitted": True}
+        assert cra.refusal_of(url) == "-"
 
 
 # ---------------------------------------------------------------------------
@@ -301,6 +362,28 @@ def test_nothing_about_anybody_crosses_outside_the_records(shared_drive) -> None
         assert not any(needle in text for text in texts), needle
     for needle in (*MUTUALS, PLACE):
         assert not any(needle in text for _where, text in walk(shared_drive["people"])), needle
+
+
+@pytest.fixture(scope="module")
+def degree_drive() -> dict[str, Any]:
+    return _drive_tool(network="F", keywords="engineer", include_names=True)
+
+
+def test_the_degree_filter_alone_returns_people_records_off_one_page(degree_drive) -> None:
+    """``N 81``: the facet alone, beside a keyword, through the same tool and
+    the same reader -- people records of exactly the declared shape, one
+    page, the facet applied and kept, and no member anywhere."""
+    assert degree_drive["ok"] is True, degree_drive
+    people = degree_drive["people"]
+    assert [person["name"] for person in people] == [name for name, _slug, _head in RESULTS]
+    for person in people:
+        assert set(person) == people_data.PERSON_SHAPE, person
+    assert degree_drive["query_applied"]["network"] == 1
+    assert degree_drive["query_applied"]["connections_of"] == 0
+    assert degree_drive["query_kept"] == {"keywords": "verbatim", "network": "verbatim"}
+    assert degree_drive["_gotos"] == 1 and degree_drive["pages_loaded"] == 1
+    for needle in (*MUTUALS, PLACE):
+        assert not any(needle in text for _where, text in walk(degree_drive)), needle
 
 
 # ---------------------------------------------------------------------------
@@ -364,6 +447,18 @@ def test_n31_is_covered_unfired_on_the_network_facet() -> None:
         assert words in opening, words
 
 
+def test_n81_is_covered_unfired_on_the_facet_alone() -> None:
+    state, cell = _network_rows()["81"]
+    assert state == "COVERED-UNFIRED"
+    opening = cell.lstrip()
+    assert opening.startswith("**COVERED-UNFIRED 2026-09-28 (lane S"), opening[:120]
+    head = opening[: opening.find("**FIRED LIVE 2026-09-21")]
+    for words in ('network="F"', "`tests/fixtures/live2/n23.html`", "`F` and `S`",
+                  "include_names=True", "`PEOPLE-DATA-MITIGATIONS`", "Not PROVEN",
+                  "`tests/test_shared_connections_search.py`"):
+        assert words in head, words
+
+
 def test_n85_reads_the_spelling_measured_and_cites_the_capture() -> None:
     _state, cell = _network_rows()["85"]
     assert "**THE SPELLING IS MEASURED, 2026-09-28" in cell
@@ -379,10 +474,10 @@ def test_the_composers_own_table_reads_connectionof_measured() -> None:
     assert network.rstrip().endswith("MEASURED"), network
 
 
-def test_neither_row_is_in_the_address_table_or_the_read_triage() -> None:
+def test_no_moved_row_is_in_the_address_table_or_the_read_triage() -> None:
     rows, problems = cra.load()
     assert not problems, problems
     by_row = {(r["slice"], r["row"]) for r in rows}
-    for row in ("30", "31"):
+    for row in ("30", "31", "81"):
         assert ("N", row) not in by_row, f"N {row} left bucket 3 and still has a line"
         assert f"N {row}" not in triage.TRIAGE, f"N {row} left the read-gap set"

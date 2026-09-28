@@ -210,8 +210,8 @@ TRIAGE: dict[str, tuple[str, str, str]] = {
     # returns WHO as people records (COVERED-UNFIRED); see the note below.
     "N 80": ("BUILDABLE", "", "served by the shipped people-search tool's "
                               "filter vocabulary"),
-    "N 81": ("BUILDABLE", "", "served by the shipped people-search tool's "
-                              "filter vocabulary"),
+    # N 81 LEFT 2026-09-28 (lane S, the orchestrator's call of 17:02) -- see
+    # LEFT THE READ-GAP SET below.
     "N 82": ("BUILDABLE", "", "served by the shipped people-search tool's "
                               "filter vocabulary"),
     # N 84, N 85 and N 87 LEFT 2026-09-24: lane S built their facet readers
@@ -368,6 +368,12 @@ TRIAGE: dict[str, tuple[str, str, str]] = {
 #:            by D6 on the orchestrator's ruling, as N 4's was
 #:     N 31   COVERED-UNFIRED  (was BUILDABLE) -- the shared connections: the
 #:            people search gained LinkedIn's network facet beside connectionOf
+#:
+#: LEFT THE READ-GAP SET 2026-09-28, on the orchestrator's call of 17:02
+#: (lane S): the same facet alone, as the connections page writes it.
+#:
+#:     N 81   COVERED-UNFIRED  (was BUILDABLE) -- a people search filtered by
+#:            degree: network alone, F or S, no member
 
 #: These four 2026-09-21 verdicts were measured past by the bucket-3 address
 #: table (`_audit/_census/read-addresses.tsv`, audit

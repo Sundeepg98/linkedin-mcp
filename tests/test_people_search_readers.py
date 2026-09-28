@@ -186,11 +186,13 @@ _ONE = {
     "past_company_ids": [ORG_B, ORG_A + " , " + ORG_B],
     "location_ids": [GEO_A, GEO_A + "," + GEO_B, "1,2,3,4,5"],
     "connections_of": [TOKEN_A, TOKEN_B],
+    # N 31 and N 81 (2026-09-28): the degree facet, alone and in every pair.
+    "network": ["F", "S", "S,F"],
 }
 
 
 def _corpus() -> list[dict[str, str]]:
-    """Every argument alone, every pair, and all five together."""
+    """Every argument alone, every pair, and all six together."""
     out: list[dict[str, str]] = [{}]
     names = sorted(_ONE)
     for name in names:
