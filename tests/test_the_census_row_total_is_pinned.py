@@ -99,7 +99,12 @@ import pin_census_rows as P  # noqa: E402
 #: COMPOUND-ROW-SPLITS-ONLY-ON-STATE when its delete half's only ground was
 #: retired -- see `_audit/2026-09-24-lane-l8-outward-classes.md`, s5.2. No row
 #: left.
-PINNED_ROW_TOTAL = 770
+#: 770 -> 771 ON THE ORCHESTRATOR'S CALL OF 2026-09-28 17:46 (lane S), MEASURED
+#: by `scripts/pin_census_rows.py`: `N 26b` entered, split from `N 26` under
+#: COMPOUND-ROW-SPLITS-ONLY-ON-STATE -- school and industry stay GAP where
+#: location and company went COVERED-UNFIRED by D6 -- see
+#: `_audit/2026-09-24-lane-s-people-search.md`, "N 25 and N 26". No row left.
+PINNED_ROW_TOTAL = 771
 
 #: Per slice, because a delta of zero across four slices is reachable by two
 #: errors cancelling -- one row added to `jobs.md` and one dropped from
@@ -108,7 +113,7 @@ PINNED_SLICE_ROWS = {
     "J": 166,   # jobs.md                    (150 + 16)
     "P": 236,   # profile.md                 (203 + 10 + 22 + 1, P A23b)
     "M": 153,   # messaging-and-content.md   (142 + 11)
-    "N": 215,   # network.md                 (209 + 6)
+    "N": 216,   # network.md                 (209 + 6 + 1, N 26b)
 }
 
 #: Every spelling `count_census_states` will honour. Two of these were taught

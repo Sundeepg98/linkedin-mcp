@@ -193,17 +193,8 @@ TRIAGE: dict[str, tuple[str, str, str]] = {
     # NAMED-PROFILE-READ-BEHIND-A-GRANT narrowed it, each blocker named in
     # its own cell. Not RETURNED: that class is lane R's, and its marker says
     # so. Each carries the cost its cell measured.
-    "N 30": ("SERVED", "", "the first-degree capture draws the list as a "
-                           "people search with connectionOf, and the shipped "
-                           "people search composes it and returns people "
-                           "records (the route N 172 is COVERED-UNFIRED on), "
-                           "never fired; the move to COVERED-UNFIRED is the "
-                           "orchestrator's"),
-    "N 31": ("BUILDABLE", "", "the capture draws the shared connections as a "
-                              "people search with network and connectionOf; "
-                              "the shipped search composes connectionOf but "
-                              "not the network facet, and the shipped people "
-                              "reader reads the page it would open"),
+    # N 30 AND N 31 LEFT THE SAME DAY (lane S, the orchestrator's order of
+    # 15:10) -- see LEFT THE READ-GAP SET below.
     "N 65": ("RULING", "", "the Interests section is on another member's "
                            "profile, R4's refusal until 2026-09-28"),
     "N 103": ("RULING", "", "the similar-profiles rail is on another "
@@ -219,8 +210,8 @@ TRIAGE: dict[str, tuple[str, str, str]] = {
     # returns WHO as people records (COVERED-UNFIRED); see the note below.
     "N 80": ("BUILDABLE", "", "served by the shipped people-search tool's "
                               "filter vocabulary"),
-    "N 81": ("BUILDABLE", "", "served by the shipped people-search tool's "
-                              "filter vocabulary"),
+    # N 81 LEFT 2026-09-28 (lane S, the orchestrator's call of 17:02) -- see
+    # LEFT THE READ-GAP SET below.
     "N 82": ("BUILDABLE", "", "served by the shipped people-search tool's "
                               "filter vocabulary"),
     # N 84, N 85 and N 87 LEFT 2026-09-24: lane S built their facet readers
@@ -304,8 +295,13 @@ TRIAGE: dict[str, tuple[str, str, str]] = {
     "N 19": ("RETURNED", "", "returned by lane R 2026-09-23 from EXCLUDED-RULED; its blocker is named in its own cell and its address is measured in read-addresses.tsv"),
     "N 22": ("RETURNED", "", "returned by lane R 2026-09-23 from EXCLUDED-RULED; its blocker is named in its own cell and its address is measured in read-addresses.tsv"),
     "N 24": ("RETURNED", "", "returned by lane R 2026-09-23 from EXCLUDED-RULED; its blocker is named in its own cell and its address is measured in read-addresses.tsv"),
-    "N 25": ("RETURNED", "", "returned by lane R 2026-09-23 from EXCLUDED-RULED; its blocker is named in its own cell and its address is measured in read-addresses.tsv"),
-    "N 26": ("RETURNED", "", "returned by lane R 2026-09-23 from EXCLUDED-RULED; its blocker is named in its own cell and its address is measured in read-addresses.tsv"),
+    # N 25 AND N 26 LEFT 2026-09-28 (lane S, the orchestrator's call of
+    # 17:46) -- see LEFT THE READ-GAP SET below. N 26b, split from N 26 the
+    # same day, ENTERED:
+    "N 26b": ("BUILDABLE", "", "split from N 26 2026-09-28: the people "
+                               "search the shipped tool reads is admitted, and "
+                               "no school or industry facet is composed; a "
+                               "capture of LinkedIn's own spelling comes first"),
     "N 27": ("RETURNED", "", "returned by lane R 2026-09-23 from EXCLUDED-RULED; its blocker is named in its own cell and its address is measured in read-addresses.tsv"),
     "N 28": ("RETURNED", "", "returned by lane R 2026-09-23 from EXCLUDED-RULED; its blocker is named in its own cell and its address is measured in read-addresses.tsv"),
     "N 32": ("RETURNED", "", "returned by lane R 2026-09-23 from EXCLUDED-RULED; its blocker is named in its own cell and its address is measured in read-addresses.tsv"),
@@ -368,6 +364,30 @@ TRIAGE: dict[str, tuple[str, str, str]] = {
 #:            by dom.read_search_appearances, the employer kept in the page
 #:     N 195  COVERED-UNFIRED  (was BUILDABLE) -- recruiter insights, the
 #:            viewers as people records (recruiter_views.read_recruiter_views)
+#:
+#: LEFT THE READ-GAP SET 2026-09-28, on the orchestrator's order of 15:10
+#: (lane S): each the people search a first-degree profile's topcard links
+#: to, composed from the tool's arguments and never fired.
+#:
+#:     N 30   COVERED-UNFIRED  (was SERVED) -- a connection's own connections,
+#:            by D6 on the orchestrator's ruling, as N 4's was
+#:     N 31   COVERED-UNFIRED  (was BUILDABLE) -- the shared connections: the
+#:            people search gained LinkedIn's network facet beside connectionOf
+#:
+#: LEFT THE READ-GAP SET 2026-09-28, on the orchestrator's call of 17:02
+#: (lane S): the same facet alone, as the connections page writes it.
+#:
+#:     N 81   COVERED-UNFIRED  (was BUILDABLE) -- a people search filtered by
+#:            degree: network alone, F or S, no member
+#:
+#: LEFT THE READ-GAP SET 2026-09-28, on the orchestrator's call of 17:46
+#: (lane S): by D6, the degree filter delivering what the connections page's
+#: refused query variants would have.
+#:
+#:     N 25   COVERED-UNFIRED  (was RETURNED) -- a name search of his first
+#:            degree: network F beside a keyword
+#:     N 26   COVERED-UNFIRED  (was RETURNED) -- its location and company
+#:            halves; school and industry split to N 26b, which ENTERED GAP
 
 #: These four 2026-09-21 verdicts were measured past by the bucket-3 address
 #: table (`_audit/_census/read-addresses.tsv`, audit

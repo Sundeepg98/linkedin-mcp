@@ -10188,6 +10188,20 @@ recording plugin that measured the CDP connection, the duplicate-key check
 and the instrument runner -- are declared disposable. Their numbers are in
 the lane record.
 
+### 66.7 THE FOUR PEOPLE-SEARCH ITEMS (lane S, the order of 2026-09-28 15:10)
+
+Record: the lane record's `## Four people-search items 2026-09-28`.
+
+| path | shown failing by |
+|---|---|
+| `tests/test_shared_connections_search.py` -- the `network` facet held to the captures' keys, order and value shape, and its two letters, in both shapes: alone (the connections page, census `N 81`, since the call of 17:02) and beside a member (the shared links, `N 31`); the premises that the captures still draw those links | its census tests red on the tree before the census moved, twice; each control convicting what it must (the other key order, the raw spelling, the shared address against the alone check, the captured letters built in both shapes); eight planted defects at 15:10 and ten at 17:02 in the composer and the tool, each red and restored byte-identical |
+| `tests/test_a_company_search_needs_no_keyword.py` (the docstring pin) | the words before the fire, verbatim, rejected by the pin; three planted defects in the docstring, each red |
+
+### 66.8 DECLARED DISPOSABLE (THE ORDER OF 15:10)
+
+The CI poller, the registry measurer and the two mutation specs are
+declared disposable. Their numbers are in the lane record.
+
 ---
 
 ## 67. FOUR GUARDS THAT COULD NOT SEE THEIR OWN SUBJECT: A READER'S OUTPUT, A LIBRARY'S MESSAGE, A CAPITAL LETTER, A MERGE STAGE (lane-g-guards, 2026-09-24)
@@ -11052,6 +11066,36 @@ recipient card links the topcard's own profile -- and it re-checks them with the
 DECLARED DISPOSABLE: the scratch readers of the bubble's skeleton (outline, inventory, the
 keyed-hash comparisons of the pill and card with the topcard) and the red demonstration's copy of
 the tree.
+
+### 69.17 A STATE THE PAGE SETS AFTER THE ACT IS READ AFTER A BOUNDED WAIT, AND A DRAFT IS HIS WORDS ONLY WHEN IT IS ALL OF THEM (session 4's refusal, 2026-09-28)
+
+**A CHECK READ THE INSTANT AFTER AN ACT READS THE PAGE BEFORE THE PAGE HAS ANSWERED.** Session 4
+cleared every link of the first-contact chain and put his words in the box, 65 of 65 -- and the
+last-moment check refused, because Send read DISABLED straight after the fill. About a second
+later a skeleton of the same bubble drew Send without `disabled`: LinkedIn turns it on after the
+words land, not as they do. The check now waits for that state, bounded, and decides nothing by
+waiting: it re-reads everything afterwards and refuses on what it finds.
+
+**A DRAFT IS HIS WORDS ONLY WHEN IT IS ALL OF THEM.** A refused message leaves his words in the
+box, and LinkedIn may reopen them as a draft; a gate that refuses every box holding text would
+refuse that retry forever. A box holding exactly the confirmed words, whole and nothing else, is
+not typed into again -- it goes to the same wait and the same check. Other words, more words, or
+part of them still refuse.
+
+| instrument | what it holds | shown failing |
+|---|---|---|
+| `named_profile.wait_for_send_enabled` (bound `SEND_ENABLED_WAIT_MS`, 5 s) and `writes._first_contact_send_check` | a first contact's own Send, looked for without `disabled` through the piercing engine before the whole last-moment check; the wait decides nothing and its result is in the receipt (`send_enabled_wait`) | on the two captures, each in a shadow root: found in the filled one, and the wait runs out on the empty one; on master's code the session-4 world -- Send turning on a second after the fill -- refuses at 4 with the words exact and the verdict unknown, the live receipt reproduced |
+| `scripts/_build_first_contact_bubble.py --kind filled` + `tests/fixtures/synthetic/first_contact_bubble_filled.html` | the bubble after the fill, built from the live lane's session-4 skeleton: digest `ppnjobnklaocacjm`, a fixed point, differing from the empty capture only where the fill did -- the words in the editor's paragraph, Send without `disabled` | a structural edit changes the digest; the empty fixture stayed byte-identical under the builder's change |
+| the draft rule: `editor_holds_the_words` in `named_profile.read_opened_conversation`, condition 8 of `opened_conversation_gate` for a first contact, and `writes.perform`'s untyped route; `typed_text_residue` says the words were already there | exactly his words proceed untyped to the wait and the check; anything else refuses at 8; a conversation that already exists is left as it was | on master's code the draft world refuses at 8, and the receipt said there was no draft to clear |
+
+    READ A STATE THE PAGE SETS IN ANSWER TO AN ACT ONLY AFTER GIVING IT A BOUNDED CHANCE TO SET
+    IT -- AND LET THE WAIT DECIDE NOTHING.
+
+    A PRE-FILLED BOX IS HIS WORDS ONLY IF IT IS ALL OF THEM, WHOLE; ANYTHING ELSE REFUSES.
+
+DECLARED DISPOSABLE: the redacted reader of the live lane's receipts, the outline diff of the two
+skeletons, the probes of master's code in the two worlds, and the red demonstration's copy of the
+tree.
 
 
 ## 70. THE BEST-VERIFIED WRITE NEVER PRESSED SAVE, AND A WRITE AIMED BY ITS CARD (lane-l7-profile-writes, 2026-09-24)

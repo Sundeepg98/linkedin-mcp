@@ -9134,6 +9134,22 @@ async def _first_contact_after_send(
     return {"wait": sent_wait, "held": sent_held, "after": sent_reading, "state": sent_state}
 
 
+async def _first_contact_send_check(
+    page: Any, spec: WriteSpec, grant: WriteGrant
+) -> tuple[dict[str, Any], dict[str, Any]]:
+    """A FIRST CONTACT, HIS WORDS IN THE BOX -- typed now, or already there as a
+    draft: the bounded wait for its Send to turn on, then the whole
+    last-moment check, as for every message (the order of 2026-09-28 17:37;
+    session 4 measured Send turning on after the words land, and a check
+    read straight after the fill refused a message every link of the chain
+    had cleared). The wait decides nothing; the check decides."""
+    waited = await named_profile.wait_for_send_enabled(page)
+    checked = await named_profile.composer_send_gate(
+        page, text=_text_component_of(spec, grant.target), first_contact=True
+    )
+    return waited, checked
+
+
 async def _opened_conversation_gate(
     page: Any, spec: WriteSpec, grant: WriteGrant, *, address_before_press: Optional[str]
 ) -> dict[str, Any]:
@@ -9608,6 +9624,7 @@ def typed_text_residue(
     fills_made: int,
     submit_clicks: int,
     click_error: Optional[str],
+    words_already_in_place: bool = False,
 ) -> Optional[dict[str, Any]]:
     """What is left IN HIS COMPOSER after a typing action, said out loud.
 
@@ -9655,6 +9672,30 @@ def typed_text_residue(
     """
     if spec.action not in TYPING_ACTIONS:
         return None
+    if fills_made < 1 and words_already_in_place:
+        # THE DRAFT RULE (the order of 2026-09-28 17:37): nothing was typed
+        # because his words were ALREADY in the box -- a draft LinkedIn kept.
+        # "Nothing was typed, no draft to clear" would be half true, and the
+        # half it drops is the one on his screen.
+        pressed = submit_clicks > 0
+        return {
+            "text_was_entered": False,
+            "words_were_already_in_the_box": True,
+            "submit_was_pressed": pressed,
+            "left_in_the_composer": not pressed,
+            "click_error": click_error,
+            "what_to_do": (
+                "NOTHING WAS TYPED: the box already held exactly the words you "
+                "confirmed -- a draft LinkedIn kept from an earlier attempt -- and "
+                "Send was never pressed, so they are still in the composer on "
+                "LinkedIn. Clear them yourself if you do not want them there."
+                if not pressed
+                else
+                "Nothing was typed: the box already held exactly the words you "
+                "confirmed -- a draft LinkedIn kept -- and Send WAS pressed. "
+                "Whether it went is 'verification''s answer, not this one."
+            ),
+        }
     if fills_made < 1:
         return {
             "text_was_entered": False,
@@ -9998,6 +10039,11 @@ async def perform(
     first_contact_after: Optional[dict[str, Any]] = None
     close_gate: Optional[dict[str, Any]] = None
     closer_clicks = 0
+    # AND THE ORDER OF 17:37's TWO: how long a first contact's Send took to
+    # turn on after his words were in the box, and whether those words were
+    # already there -- a draft LinkedIn kept -- so that nothing was typed.
+    send_enabled_wait: Optional[dict[str, Any]] = None
+    drafts_used = 0
     # THE EDITOR'S COMMIT GATE, for EDITOR_SAVE_ACTIONS only, and the poll
     # that follows its press. See ``profile_editor``.
     editor_save_gate: Optional[dict[str, Any]] = None
@@ -10340,7 +10386,18 @@ async def perform(
                     opened_gate = await _opened_conversation_gate(
                         page, spec, grant, address_before_press=address_before_press
                     )
-                    if opened_gate["proceed"]:
+                    if opened_gate["proceed"] and opened_gate.get("words_in_place"):
+                        # THE DRAFT RULE (2026-09-28 17:37): his words are
+                        # already in the box, whole and nothing else, so nothing
+                        # is typed -- straight to the wait and the check a fill
+                        # gets, and Send only if every condition holds again.
+                        drafts_used += 1
+                        send_enabled_wait, send_gate = await _first_contact_send_check(
+                            page, spec, grant
+                        )
+                        if send_gate["proceed"]:
+                            click_plan.append(send_gate["selector"])
+                    elif opened_gate["proceed"]:
                         fill_plan.append(
                             (
                                 named_profile.COMPOSER_EDITOR_SELECTOR,
@@ -10440,14 +10497,18 @@ async def perform(
                 # THE COMPOSER THE PRESS OPENED, held to the reply's bar
                 # (2026-09-27): no recipient box, one editor, one Send, the
                 # fill landed, and the box holds EXACTLY the grant's words.
-                send_gate = await named_profile.composer_send_gate(
-                    page,
-                    text=_text_component_of(spec, grant.target),
-                    first_contact=(
-                        opened_gate is not None
-                        and opened_gate.get("path") == "first_contact"
-                    ),
-                )
+                # A FIRST CONTACT waits, bounded, for its Send to turn on
+                # first (2026-09-28 17:37); the conversation path is as it was.
+                if opened_gate is not None and opened_gate.get("path") == "first_contact":
+                    send_enabled_wait, send_gate = await _first_contact_send_check(
+                        page, spec, grant
+                    )
+                else:
+                    send_gate = await named_profile.composer_send_gate(
+                        page,
+                        text=_text_component_of(spec, grant.target),
+                        first_contact=False,
+                    )
                 if send_gate["proceed"]:
                     click_plan.append(send_gate["selector"])
             elif spec.action in REPLY_ACTIONS:
@@ -10526,7 +10587,8 @@ async def perform(
             observation,
             prior_value=prior_value,
             opened=opened_gate,
-            typed=fills_made > 0,
+            # HIS WORDS WERE IN THE BOX by a fill, or already, by the draft rule.
+            typed=fills_made > 0 or drafts_used > 0,
             badge_before=badge_before,
             witness=switch_fresh,
             first_contact_after=first_contact_after,
@@ -10737,6 +10799,7 @@ async def perform(
             # subtracted for the same reason until ``send_message`` retired.
             submit_clicks=clicks_made - opener_clicks - closer_clicks,
             click_error=click_error,
+            words_already_in_place=drafts_used > 0,
         ),
         # WHAT WAS PUT INTO THE COMPOSER FROM THIS MACHINE, and it sits beside
         # "clicked" rather than inside it for the same reason "typed_text"
@@ -10842,6 +10905,17 @@ async def perform(
         # bubble, read before the verdict (2026-09-28): whether it appeared
         # inside the bound, and the milliseconds waited. Null for every other
         # action and path.
+        # HOW LONG A FIRST CONTACT'S SEND TOOK TO TURN ON after his words were
+        # in the box (2026-09-28 17:37): whether it did inside the bound, and
+        # the milliseconds waited. Null for every other action and path.
+        "send_enabled_wait": (
+            None
+            if send_enabled_wait is None
+            else {
+                "enabled": send_enabled_wait.get("enabled") is True,
+                "waited_ms": coerce.as_count(send_enabled_wait.get("waited_ms")),
+            }
+        ),
         "sent_words_wait": (
             None
             if first_contact_after is None

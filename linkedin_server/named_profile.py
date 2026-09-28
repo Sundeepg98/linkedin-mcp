@@ -587,7 +587,11 @@ def connect_verdict(
 #   4. only then are his words typed, and Send is pressed only while all of 3
 #      still holds; afterwards a conversation must exist, headed by that name,
 #      holding his words -- the receipt, read in place, the name never
-#      recorded;
+#      recorded. SINCE THE ORDER OF 17:37 (session 4, measured live): the
+#      check waits, bounded, for Send to turn on first -- LinkedIn turns it
+#      on after the words land -- and a box that ALREADY holds exactly his
+#      words, whole and nothing else (a draft LinkedIn kept), is not typed
+#      into again: it goes straight to that wait and that check;
 #   5. and the bubble is closed by its header's close control, found by its
 #      text: Escape does not close it (measured).
 #
@@ -631,16 +635,30 @@ OPENED_COMPOSER_WAIT_MS = 12_000
 #: above: it decides nothing, and a message drawn later reads UNKNOWN.
 SENT_WORDS_WAIT_MS = 5_000
 
+#: HOW LONG, AFTER HIS WORDS ARE IN THE BOX, A FIRST CONTACT'S SEND IS GIVEN
+#: TO TURN ON before the last-moment check reads it. A LIVENESS BOUND, NOT A
+#: SAFETY ONE: the wait decides nothing, and the check refuses on what it then
+#: finds. MEASURED LIVE 2026-09-28 (the live lane's session 4): every link of
+#: the chain held and his words went in, 65 of 65, and the check refused at 4
+#: because Send read DISABLED straight after the fill; a skeleton of the same
+#: bubble about a second later drew Send WITHOUT ``disabled``. LinkedIn turns
+#: it on after the words land, not as they do.
+SEND_ENABLED_WAIT_MS = 5_000
+#: The new message's Send as the wait looks for it: drawn without ``disabled``.
+_SEND_ENABLED_SELECTOR = COMPOSER_SEND_SELECTOR + ":not([disabled])"
+
 #: THE BUBBLE'S CLOSE CONTROL -- a header control whose accessible name opens
 #: on the word "Close", pressed strictly. MEASURED 2026-09-28: the header's
 #: two controls carry their labels as text, and Escape does NOT close the
-#: bubble (after it: one bubble, one editor, one dialog). ITS WORDS WERE NOT
-#: MEASURED: the capture reduced them, and "Close your draft conversation"
-#: is DERIVED from their shape (26 letters in four words) and the form's own
-#: "... for your draft conversation" labels -- its first word too. Only
-#: that word is read; if the live control reads otherwise, the close gate
-#: refuses and the bubble stays on his screen. The gate also requires the
-#: one element this selects to be one of the bubble's header controls.
+#: bubble (after it: one bubble, one editor, one dialog). THE FIRST WORD IS
+#: MEASURED: in session 4 the bubble reader counted exactly one header
+#: control of the live bubble whose text opens on "Close". The rest of
+#: "Close your draft conversation" is DERIVED from the reduced words' shape
+#: (26 letters in four words) and the form's own "... for your draft
+#: conversation" labels, and is never read. If the live control reads
+#: otherwise, the close gate refuses and the bubble stays on his screen.
+#: The gate also requires the one element this selects to be one of the
+#: bubble's header controls.
 BUBBLE_CLOSE_SELECTOR = (
     dom.OVERLAY_BUBBLE + " .msg-overlay-bubble-header__controls"
     + " >> role=button[name=/^Close\\b/]"
@@ -706,6 +724,10 @@ async def read_opened_conversation(page: Any, *, text: Optional[str] = None) -> 
         "bubbles": 0,
         "bubbles_with_editor": 0,
         "editor_empty": None,
+        # THE BOX HOLDS EXACTLY HIS WORDS, whole and nothing else -- the draft
+        # rule's reading (the order of 2026-09-28 17:37). Compared in this
+        # process, as the send gate compares them; only the boolean crosses.
+        "editor_holds_the_words": None,
         "send_disabled": None,
         "events": 0,
         "events_with_text": None,
@@ -741,7 +763,10 @@ async def read_opened_conversation(page: Any, *, text: Optional[str] = None) -> 
         holding = bubbles.filter(has=page.locator(COMPOSER_EDITOR_SELECTOR))
         out["bubbles_with_editor"] = coerce.as_count(await holding.count())
         if out["editors"] == 1:
-            out["editor_empty"] = _normalise(await editors.first.inner_text()) == ""
+            held = _normalise(await editors.first.inner_text())
+            out["editor_empty"] = held == ""
+            if text is not None:
+                out["editor_holds_the_words"] = held == _normalise(text)
         if out["send_controls"] == 1:
             out["send_disabled"] = bool(await sends.first.is_disabled())
         if out["bubbles_with_editor"] == 1:
@@ -817,6 +842,30 @@ async def wait_for_sent_words(
             .first.wait_for(state="attached", timeout=bound)
         )
         out["appeared"] = True
+    except Exception as exc:  # noqa: BLE001 - a timeout is a reading, not a fault
+        out["failure"] = type(exc).__name__
+    out["waited_ms"] = int((time.monotonic() - started) * 1000)
+    return out
+
+
+async def wait_for_send_enabled(
+    page: Any, *, timeout_ms: Optional[int] = None
+) -> dict[str, Any]:
+    """A first contact, his words in the box: wait, BOUNDED, for the Send
+    inside the one bubble holding the composer to be drawn without
+    ``disabled`` -- through Playwright's piercing engine, the bubble being in
+    a shadow root. DECIDES NOTHING: :func:`composer_send_gate` reads
+    everything afterwards and refuses on what it finds. ``failure`` is an
+    exception's TYPE only."""
+    bound = SEND_ENABLED_WAIT_MS if timeout_ms is None else int(timeout_ms)
+    out: dict[str, Any] = {"enabled": False, "waited_ms": 0, "failure": None}
+    started = time.monotonic()
+    try:
+        holding = page.locator(BUBBLE_SELECTOR).filter(has=page.locator(COMPOSER_EDITOR_SELECTOR))
+        await holding.locator(_SEND_ENABLED_SELECTOR).first.wait_for(
+            state="attached", timeout=bound
+        )
+        out["enabled"] = True
     except Exception as exc:  # noqa: BLE001 - a timeout is a reading, not a fault
         out["failure"] = type(exc).__name__
     out["waited_ms"] = int((time.monotonic() - started) * 1000)
@@ -936,7 +985,11 @@ def opened_conversation_gate(
        by the cold re-check of 2026-09-27 -- see this section's head;
     7. no recipient box;
     8. empty, and its Send DISABLED -- the measured empty state of the form
-       (NEEDS-CAPTURE C-P4 otherwise);
+       (NEEDS-CAPTURE C-P4 otherwise). A FIRST CONTACT may instead find the
+       box ALREADY holding exactly his words, whole and nothing else -- a
+       draft LinkedIn kept from an earlier attempt (the order of 17:37):
+       then nothing is typed, and Send's state is left to the bounded wait
+       and the last-moment check. Any other text in the box refuses;
     9. the number of messages already carrying his exact words was counted
        -- the before-count the SENT verdict diffs against.
     """
@@ -967,6 +1020,7 @@ def opened_conversation_gate(
         "bubble_facts_error": conversation.get("bubble_facts_error"),
         "recipient_boxes": conversation.get("recipient_boxes"),
         "editor_empty": conversation.get("editor_empty"),
+        "editor_holds_the_words": conversation.get("editor_holds_the_words"),
         "send_controls": conversation.get("send_controls"),
         "send_disabled": conversation.get("send_disabled"),
         "events": conversation.get("events"),
@@ -992,6 +1046,9 @@ def opened_conversation_gate(
         # person) or "first_contact" (a new message addressed to them), once
         # condition 5 has been passed; None before.
         "path": None,
+        # HIS WORDS ARE ALREADY IN THE BOX (the draft rule, a first contact
+        # only): nothing is to be typed.
+        "words_in_place": False,
     }
     if not still_on_the_profile:
         out["refused_condition"] = "1_navigated_away"
@@ -1066,7 +1123,18 @@ def opened_conversation_gate(
                 f"title as {observed['title_kind']!r}.)"
             )
             return out
-    if observed["editor_empty"] is not True or observed["send_disabled"] is not True:
+    if (
+        out["path"] == "first_contact"
+        and observed["editor_empty"] is False
+        and observed["editor_holds_the_words"] is True
+    ):
+        # THE DRAFT RULE (the orchestrator's order of 2026-09-28 17:37): a
+        # first contact refused after its words went in leaves them in the
+        # box, and LinkedIn may keep them as a draft that the next press
+        # opens with. Exactly his words, whole and nothing else, are not
+        # typed again; any other text still refuses below.
+        out["words_in_place"] = True
+    elif observed["editor_empty"] is not True or observed["send_disabled"] is not True:
         out["refused_condition"] = "8_not_empty"
         out["why"] = (
             "the composer is not in the measured empty state -- it holds text, "
@@ -1089,7 +1157,13 @@ def opened_conversation_gate(
             "FIRST CONTACT: the pressed Message link names that profile's own "
             "member, and it opened one new-message composer addressed to exactly "
             "one recipient, whose name is the profile's name and whose card links "
-            "that profile, nobody else being added: empty, Send disabled."
+            "that profile, nobody else being added: "
+            + (
+                "the box already holds exactly your words, whole and nothing "
+                "else -- a draft LinkedIn kept -- so nothing will be typed."
+                if out["words_in_place"]
+                else "empty, Send disabled."
+            )
         )
     else:
         out["why"] = (

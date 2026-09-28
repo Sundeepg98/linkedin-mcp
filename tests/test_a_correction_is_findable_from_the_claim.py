@@ -287,10 +287,18 @@ NOT_A_CORRECTION: dict[tuple[str, str], str] = {
         "79 is `mistake`, inside that row's KEPT prior cell -- the tool "
         "docstring it quotes, *'by a caller or by a mistake'* -- and `false` "
         "sits in rows 80 and 81, about their own filter terms. No network row "
-        "withdraws anything the record says. **WHAT WOULD MAKE THIS ENTRY "
-        "WRONG:** a network row asserting the record wrong about that row "
-        "while leaving the record unmarked, which would need its own "
-        "CORRECTS: / CORRECTED BY: pair."
+        "withdraws anything the record leaves unmarked. RE-READ 2026-09-28 "
+        "(lane S, the orchestrator's order of 15:10), because row 85 moved: "
+        "its cell now reads the `connectionOf` spelling MEASURED -- LinkedIn "
+        "writes it on a first-degree profile's topcard -- where the record's "
+        "section 2 had it on record nowhere. The record carries that in "
+        "place, beside its own claim, pointing at its section M.4, in the "
+        "commit that moved the cell: one author's claim updated in its own "
+        "document, which the census then states, not one document "
+        "overruling another. **WHAT WOULD MAKE THIS ENTRY WRONG:** a network "
+        "row asserting the record wrong about that row while leaving the "
+        "record unmarked, which would need its own CORRECTS: / CORRECTED BY: "
+        "pair."
     ),
     # 2026-09-24, lane S at its integration. THE WHO RULE'S BLOCKER CITES THE
     # DOCTRINE; it does not correct it -- read, not inferred from the names.
