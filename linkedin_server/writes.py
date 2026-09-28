@@ -10198,11 +10198,12 @@ async def perform(
         prior_value, prior_why = await _editor_value_of(
             page, prior_field.strip(), when="before the write"
         )
-        if control_kind == "select_option":
+        if control_kind in ("select_option", "fill"):
             # EVERY FIELD'S VALUE BEFORE THE CHANGE (2026-09-28, the live
-            # lane's session 5): what ``profile_editor.only_the_field_moved``
+            # lane's session 5; the fill path since the orchestrator's
+            # follow-up of 21:57): what ``profile_editor.only_the_field_moved``
             # compares against after it, so Save is pressed only when the
-            # chosen field, and no other, moved.
+            # chosen or typed field, and no other, moved.
             editor_values_before = await _editor_values_or_refusal(page)
 
     selects_made = 0
@@ -10557,11 +10558,26 @@ async def perform(
                 # reached the ``else`` below until 2026-09-24, where the POST
                 # composer's gate looked for a post editor on the intro editor,
                 # found none, and pressed nothing -- so Save was never pressed.
-                editor_save_gate = await profile_editor.read_save_gate(
-                    page, account_share_updates=account_share_updates
+                # THE TYPED FIELD, WAITED FOR, AND ONLY IT MOVED (the
+                # orchestrator's follow-up of 2026-09-28 21:57): the select
+                # path's rule on the fill path. A bounded wait, deciding
+                # nothing, for the field to read EXACTLY the typed value; Save
+                # is asked for only if it does and no other field moved.
+                fill_field = grant.target.partition(TARGET_JOIN)[0].strip()
+                field_after, field_wait = await profile_editor.wait_for_state(
+                    page,
+                    lambda: _editor_values_or_refusal(page),
+                    lambda reading: profile_editor.field_reads(reading, fill_field, fill_text),
                 )
-                if editor_save_gate["proceed"]:
-                    click_plan.append(editor_save_gate["selector"])
+                field_check = profile_editor.only_the_field_moved(
+                    editor_values_before, field_after, fill_field, fill_text
+                )
+                if field_check["proceed"]:
+                    editor_save_gate = await profile_editor.read_save_gate(
+                        page, account_share_updates=account_share_updates
+                    )
+                    if editor_save_gate["proceed"]:
+                        click_plan.append(editor_save_gate["selector"])
             elif spec.action in OPEN_THEN_TYPE_ACTIONS:
                 # THE COMPOSER THE PRESS OPENED, held to the reply's bar
                 # (2026-09-27): no recipient box, one editor, one Send, the
@@ -11049,10 +11065,11 @@ async def perform(
                 ),
             }
         ),
-        # THE SELECT PATH'S PRESS READINGS, for a field changed by choosing
-        # (2026-09-28, the live lane's session 5): whether the field read the
-        # requested option inside the bound, and whether only it moved --
-        # which Save waited on. Null for every other path.
+        # THE FIELD'S PRESS READINGS, for a field changed by choosing
+        # (2026-09-28, the live lane's session 5) or by typing (the
+        # orchestrator's follow-up of 21:57): whether the field read the
+        # requested value inside the bound, and whether only it moved -- which
+        # Save waited on. Null for the switch and every other action.
         "field_press": (
             None
             if field_check is None

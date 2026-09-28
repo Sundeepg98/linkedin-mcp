@@ -42,7 +42,7 @@ import pytest
 from linkedin_server import profile_editor, writes
 from tests.test_premium_badge import BADGE_ID, OTHER_ID, _BadgeWorld
 from tests.test_premium_badge import _write as _badge_write
-from tests.test_profile_editor_commit import _CONFIRMABLE, _EditorWorld
+from tests.test_profile_editor_commit import _CONFIRMABLE, _NEW_CITY, _OLD_CITY, _EditorWorld
 from tests.test_profile_editor_commit import _write as _field_write
 from tests.test_writes import browser_page, writes_on  # noqa: F401 -- fixtures
 
@@ -243,3 +243,70 @@ def test_only_the_field_moved_holds_its_own_rules():
                                                "March")["code"] == "unreadable"
     assert profile_editor.only_the_field_moved(before, {"fields": []}, "Month",
                                                "March")["code"] == "not_one_field"
+
+
+# ---------------------------------------------------------------------------
+# 4. THE FILL PATH (the orchestrator's follow-up of 21:57): the same rule
+# ---------------------------------------------------------------------------
+
+
+class _LateFillWorld(_EditorWorld):
+    """The editor world, its City input's typed value landing ``fill_ms`` late
+    -- and, with ``moves_month``, typing into City also changing Month."""
+
+    def __init__(self, *, fill_ms: int = LATE_MS, moves_month: bool = False, **kwargs):
+        super().__init__(**kwargs)
+        self.fill_ms = fill_ms
+        self.moves_month = moves_month
+
+    def editor_html(self) -> str:
+        html = BUILD.make_late_press(super().editor_html(), None, None, self.fill_ms)
+        if self.moves_month:
+            html = html.replace(
+                "</body>",
+                "<script>document.addEventListener('input', function (e) {"
+                " if (e.target && e.target.id === 'e-city') {"
+                " document.getElementById('e-month').selectedIndex = 2; } });</script></body>",
+                1,
+            )
+        return html
+
+
+async def test_a_late_fill_is_waited_for_and_saved(writes_on, browser_page):
+    """RED before the follow-up: Save pressed while the input still held the
+    old value -- the store unchanged, performed false."""
+    world = _LateFillWorld(**_CONFIRMABLE)
+    receipt = await _field_write(browser_page, world, "City", _NEW_CITY)
+    assert world.store["City"] == _NEW_CITY
+    assert receipt["performed"] is True, receipt["verification"]
+    press = receipt["field_press"]
+    assert press["waited_for_the_requested_state"]["reached"] is True
+    assert press["only_the_field_moved"]["proceed"] is True
+
+
+async def test_a_fill_that_moves_another_field_is_not_saved(writes_on, browser_page):
+    """RED before the follow-up: Save was pressed and Month was stored changed
+    beside the City asked for. Now: nothing pressed, nothing stored."""
+    world = _LateFillWorld(fill_ms=0, moves_month=True, **_CONFIRMABLE)
+    receipt = await _field_write(browser_page, world, "City", _NEW_CITY)
+    assert world.saves == 0, "Save was pressed over a second field's change"
+    assert world.store == {"City": _OLD_CITY, "Month": "January"}
+    assert receipt["performed"] is False
+    assert receipt["field_press"]["only_the_field_moved"]["code"] == "another_field_moved"
+
+
+async def test_a_fill_that_never_lands_is_not_saved(writes_on, browser_page, monkeypatch):
+    monkeypatch.setattr(profile_editor, "PRESS_STATE_POLLS", 3)
+    world = _LateFillWorld(fill_ms=-1, **_CONFIRMABLE)
+    receipt = await _field_write(browser_page, world, "City", _NEW_CITY)
+    assert world.saves == 0 and world.store["City"] == _OLD_CITY
+    assert receipt["performed"] is False
+    assert receipt["field_press"]["only_the_field_moved"]["code"] == "the_field_did_not_move"
+
+
+async def test_a_prompt_fill_is_saved_at_the_first_poll(writes_on, browser_page):
+    """The control: a fill that lands at once is saved as it always was."""
+    world = _LateFillWorld(fill_ms=0, **_CONFIRMABLE)
+    receipt = await _field_write(browser_page, world, "City", _NEW_CITY)
+    assert receipt["performed"] is True and world.store["City"] == _NEW_CITY
+    assert receipt["field_press"]["waited_for_the_requested_state"]["polls"] <= 2

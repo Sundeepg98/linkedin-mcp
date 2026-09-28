@@ -9881,8 +9881,9 @@ async def linkedin_update_profile_field(
     waited for (up to 10 s) before the write reads it and before the
     verification does; a dialog never drawn refuses as it always did. After
     the press itself the control is given up to 5 s to read the requested
-    state -- a switch its state, a choice its option -- and Save is pressed
-    only if it does and, for a choice, no other field's value moved.
+    state -- a switch its state, a choice its option, a typed field exactly
+    the typed value -- and Save is pressed only if it does and, for a choice
+    or a typed field, no other field's value moved.
 
     Args:
         field: which field. Named freely; nothing here validates it against a

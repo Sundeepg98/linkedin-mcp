@@ -78,11 +78,25 @@ BASE_SCRIPT = (
 )
 
 
-def late_press_script(switch_ms: int, select_ms: int) -> str:
+def late_press_script(switch_ms: int, select_ms: int, fill_ms: int = None) -> str:
     """The lateness, as one script. PURE. ``None`` leaves that behaviour as it
-    was; a negative delay means the change never lands."""
+    was; a negative delay means the change never lands. A late FILL (added for
+    the fill path, 2026-09-28): an input's typed value is put back to the value
+    it was rendered with at once, and applied ``fill_ms`` later."""
     sw = "null" if switch_ms is None else str(int(switch_ms))
     se = "null" if select_ms is None else str(int(select_ms))
+    fill = "" if fill_ms is None else (
+        " var fi = " + str(int(fill_ms)) + ";"
+        " document.addEventListener('input', function (e) {"
+        "  var el = e.target;"
+        "  if (!el || el.tagName !== 'INPUT' || el.__applying) { return; }"
+        "  var want = el.value; var was = el.defaultValue;"
+        "  if (want === was) { return; }"
+        "  el.value = was;"
+        "  if (fi >= 0) { setTimeout(function () {"
+        "   el.__applying = true; el.value = want; el.__applying = false; }, fi); }"
+        " }, true);"
+    )
     return (
         "<script>(function () {"
         " var sw = " + sw + ", se = " + se + ";"
@@ -105,16 +119,17 @@ def late_press_script(switch_ms: int, select_ms: int) -> str:
         "    s.__applying = true; s.selectedIndex = want; s.__was = want; s.__applying = false; }, se); }"
         "  }, true);"
         " }"
+        + fill +
         "})();</script>"
     )
 
 
 def make_late_press(html: str, switch_ms: int = DEFAULT_SWITCH_MS,
-                    select_ms: int = DEFAULT_SELECT_MS) -> str:
+                    select_ms: int = DEFAULT_SELECT_MS, fill_ms: int = None) -> str:
     """The page with the lateness appended before its body closes. PURE."""
     if html.count("</body>") != 1:
         raise ValueError("the page must close its body exactly once")
-    return html.replace("</body>", late_press_script(switch_ms, select_ms) + "</body>", 1)
+    return html.replace("</body>", late_press_script(switch_ms, select_ms, fill_ms) + "</body>", 1)
 
 
 def _selects_html() -> str:
