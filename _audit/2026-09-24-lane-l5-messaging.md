@@ -3052,3 +3052,66 @@ holds its 64 pins.
     5e84802  a neutral fixture name: the first-degree profile's tracked copy
     06c05ec  census: N 30, N 31, N 65 and N 103 back to GAP, R4 narrowed by the read he names
     (last)   this section, and the instrument register's 69.15
+
+## Integration 3: lane L5's merge of master a9cb2e3 (the orchestrator's addendum of 2026-09-28 14:20)
+
+**THE ORDER.** Master was being fast-forwarded to `a9cb2e3`, the live lane's session-3 wrap-up
+(14 tracked copies under `tests/fixtures/live3/`, `J 107`, `N 194` and `M M53` to COVERED-PROVEN,
+delivered_strict 94, unfired 34, b1_no_ruling 15, GAP 584). Finish and gate the 12:32 calls,
+integrate `a9cb2e3` once -- never a red master -- keeping this lane's state and cell on rows `31`
+and `103` with the live lane's note appended, re-deriving every pin on the merged tree, and running
+the duplicate-key check; report after the integration, so it can merge before the first-contact
+build lands.
+
+Disk at 14:20: this branch at the 12:32 calls' last commit, gated; master at `a9cb2e3` locally, the
+remote not yet moved and no CI run. The first-contact work in progress was set aside as a patch
+first, so the integration carries none of it. At 14:22 the remote moved and CI started; at 14:31
+it finished green, 20 of 20 jobs. Then the merge, keeping the history.
+
+### T.1 The conflicts, each resolved at its site
+
+- `_audit/_census/network.md` rows `31` and `103`: this lane's GAP state and cell, then the live
+  lane's session-3 note, appended whole. Each note is the count a blocker in the cell asks about:
+  `31`'s, one mutual-connections phrase on the named read's first render; `103`'s, no 'People also
+  viewed' and one 'People you may know'. Row `30` is this lane's; master had not touched it.
+- `network.md`'s counts section: the live lane's correction line and session-3 delta first -- they
+  follow the session-2 delta above them -- then this lane's delta of 12:32.
+- `_audit/_census/messaging-and-content.md` row `M1`: master's cell with its session-3 note,
+  carrying this lane's rename of the tracked copy's path.
+- MERGED CLEAN, THEN CORRECTED: master's harness test added a parametrize naming the old file --
+  it would have put the relation into a test id -- and a docstring's role word; both now say
+  first-degree. No tracked file names the old file. `_probe_live_lane_session_2.py` and
+  `census_completion.py` merged clean.
+
+### T.2 Pins, re-derived on the merged tree
+
+`census_completion.py --check`: every headline figure at its pin -- gap 588, gap_read 102,
+out_of_scope 38, achievable 732, capabilities_achievable 746, adjudicated 182, b3 admitted 45,
+refused 40, blocked on nothing 1 (the 12:32 calls') beside delivered_strict 94, unfired 34,
+b1_no_ruling 15 (the live lane's). The counter: GAP 588 (J 108, P 186, M 131, N 163),
+EXCLUDED-RULED 26, COVERED-PROVEN 73, COVERED-UNFIRED 31, 770 stated rows. The two sides moved
+different rows, so no figure needed more than the merge -- each was measured, not assumed. `INDEX.md`
+and the blocker map re-written by their writers twice, at a fixed point; `RULINGS.md` unchanged.
+
+### T.3 Gates
+
+- The census battery on the merged tree, twelve of twelve green.
+- The duplicate check: `tests/test_a_literal_repeats_no_member.py` 19 of 19 -- 596 files, 732 set
+  and 4450 dict displays, no repeat -- and the scratch walker's re-assigned-key half, none.
+- The identity gate on the merge commit: 26 staged files, 0 hits.
+- THE WHOLE SUITE on the merge commit: the impact plan against `a9cb2e3` selected 251 of 284 test
+  files (88%) and widened -- run in the background, `-n auto --dist loadfile`, under
+  the suite's own offline guards: 12257 passed, 9 skipped, 1 xfailed -- 12267 tests -- in 933 s.
+  `tests/test_no_committed_identity.py` 1026 of 1026 on the committed tree, the live lane's
+  harness 136 of 136. The navigation guard's whole-tree complement with CI=1: 683 of 683.
+- This section's own commit is gated after it; its result is in the report.
+
+### T.4 NOT run
+
+- CI on this branch: nothing pushed. The merge is Windows, Python 3.13, locally.
+- LIVE: nothing.
+
+### T.5 Commits -- on this branch, none pushed, no AI attribution in any
+
+    91932b0  merge master a9cb2e3, the live lane's session-3 wrap-up
+    (last)   this section
