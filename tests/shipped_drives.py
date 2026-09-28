@@ -1017,6 +1017,24 @@ async def read_self_owned_editor_values_as_shipped(page: Any) -> Any:
     )
 
 
+async def editor_values_or_refusal_as_shipped(page: Any) -> Any:
+    """``writes._editor_values_or_refusal`` -- the select path's before-and-
+    after reading (2026-09-28, the live lane's session 5) -- over the same
+    editor: the values reader above, its exception turned into a refusal that
+    names only the exception's type.
+
+    THE FIXTURE and WHAT COMES BACK: exactly the values reader's, which it
+    returns whole on its success path -- his own profile's values, ADMITTED by
+    the ruling of 2026-09-28 as that reader is.
+    """
+    from linkedin_server import dom, writes
+
+    _the_intro_editor()
+    return await writes._editor_values_or_refusal(
+        _TheEditorScript(page, dom.EDITOR_VALUES_JS, _editor_reading(values=True))
+    )
+
+
 # ---------------------------------------------------------------------------
 # THE PROFILE-VIEWS PAGE, AS ITS SKELETONS DRAW IT (the order of 2026-09-28 04:25)
 # ---------------------------------------------------------------------------
@@ -1549,6 +1567,7 @@ DRIVES: dict[str, Callable[..., Any]] = {
     "dom:read_profile_detail_entries": read_profile_detail_entries_as_shipped,
     "dom:read_self_owned_editor_fields": read_self_owned_editor_fields_as_shipped,
     "dom:read_self_owned_editor_values": read_self_owned_editor_values_as_shipped,
+    "writes:_editor_values_or_refusal": editor_values_or_refusal_as_shipped,
     "profile_views_more:read_profile_views_more_insights": (
         read_profile_views_more_insights_as_shipped
     ),

@@ -1,0 +1,18 @@
+<!doctype html>
+<!-- LATE PRESS: built by scripts/_build_intro_editor_late_press_fixture.py
+     from intro_editor_switches.html, its two selects shaped as today's
+     capture draws them. A switch press lands DEFAULT_SWITCH_MS late and a
+     select change DEFAULT_SELECT_MS late. -->
+<!-- SYNTHETIC: built by scripts/_build_intro_editor_switches_fixture.py from one
+     capture of the intro editor. The settings row is the capture's STRUCTURE;
+     every text, id and key is invented, and the rest of the dialog is not
+     carried (see the builder's docstring). -->
+<html><body><script>window.__flip = function (w) { var on = w.getAttribute('aria-checked') !== 'true'; w.setAttribute('aria-checked', on ? 'true' : 'false'); w.querySelector('input[type="checkbox"]').checked = on; };window.__press = function (event, w) { event.preventDefault(); window.__flip(w); };</script><main><h1>Profile</h1></main>
+<dialog open aria-labelledby="intro-dialog-header">
+<h2 id="intro-dialog-header">Edit intro</h2>
+<label for="intro-city">City</label><input id="intro-city" type="text" value="Placeholdertown">
+<div data-testid="lazy-column"><div><p>Placeholder section</p><div><div><p>Placeholder setting A</p><p>Placeholder description A</p></div><div><div role="switch" onclick="__press(event, this)" aria-checked="true" tabindex="0" aria-label="Tap to toggle setting"><div><div><p></p></div><div><span>Placeholder state</span><div><label for="intro-switch-1"></label><input role="switch" type="checkbox" checked="" id="intro-switch-1"><span></span></div></div></div></div></div></div><div><div><p>Profile Premium Badge</p><p>Placeholder description B</p></div><div><div role="switch" onclick="__press(event, this)" aria-checked="true" tabindex="0" aria-label="Tap to toggle setting"><div><div><p></p></div><div><span>Placeholder state</span><div><label for="intro-switch-2"></label><input role="switch" type="checkbox" checked="" id="intro-switch-2"><span></span></div></div></div></div></div></div></div></div>
+<label for="intro-pronouns">Pronouns</label><select id="intro-pronouns"><option value="">Please select</option><option value="v1">Option A</option><option value="v2">Option B</option><option value="v3">Option C</option><option value="v4">Custom</option></select>
+<label for="intro-education">Education</label><select id="intro-education"><option value="">Please select</option><option value="v1">Placeholder school</option></select>
+<button type="button">Save</button>
+</dialog><script>(function () { var sw = 2500, se = 2500; if (sw !== null && window.__flip) {  var flip = window.__flip;  window.__flip = function (w) { if (sw >= 0) { setTimeout(function () { flip(w); }, sw); } }; } if (se !== null) {  var remember = function () { document.querySelectorAll('select').forEach(function (s) {   if (typeof s.__was !== 'number') { s.__was = s.selectedIndex; } }); };  remember();  new MutationObserver(remember).observe(document.documentElement, {childList: true, subtree: true});  document.addEventListener('change', function (e) {   var s = e.target;   if (!s || s.tagName !== 'SELECT' || s.__applying) { return; }   var want = s.selectedIndex; var was = s.__was;   if (typeof was !== 'number' || want === was) { return; }   s.selectedIndex = was;   if (se >= 0) { setTimeout(function () {    s.__applying = true; s.selectedIndex = want; s.__was = want; s.__applying = false; }, se); }  }, true); }})();</script></body></html>
