@@ -2704,6 +2704,45 @@ file.
 
 ### L.9 Gates
 
-The impact gate, the census instruments and the three generators run on
-the commit that carries this line, with nothing edited or committed while
-they run; their results follow in the commit after it.
+On `d78b143` -- the final tree before this section, on this branch and
+nowhere on `master` until it merges -- with nothing edited or committed
+while they ran; master was still `0867bda` at the end, so the merge of L.7
+is the one integration:
+
+- THE IMPACT GATE against master: 48 changed paths, 259 test files selected
+  and 26 corpus-wide; it WIDENED TO THE WHOLE SUITE because
+  `tests/conftest.py` changed (L.8), which it has no model of. PASS over
+  11,622 tests in 1,301.5 s, sharded (`-n auto --dist loadfile`), 0 failed.
+  The gate prints the total only, on a pass. The CDP port guard was armed
+  in every worker, and no test reached the port -- a test that had would
+  have failed by name.
+- THE CENSUS INSTRUMENTS, thirteen, every exit 0: `census_completion
+  --check`, every headline figure matches its pin; `check_read_addresses`
+  GREEN 98 of 98; `check_jobs_directions` GREEN 108 of 108;
+  `pin_census_rows`, no drift; `measure_pointer_graph`, 0 pointers added;
+  both triage scripts; `ruling_holds` GREEN; `check_write_classes` GREEN,
+  386 lines; `check_exclusion_basis`, 42 of 42, 0 untraced.
+- THE THREE DERIVED --checks, among those thirteen: `_audit/INDEX.md`
+  matches the corpus (258 documents), `_audit/RULINGS.md` matches (67
+  rulings), and the blocker map is the derived map, every column of every
+  line.
+- THE AST DUPLICATE-KEY CHECK: 4,337 dict literals and 13 JSON files, 0
+  duplicates.
+- THE PLANTED MUTATIONS on the merged tree (L.3, L.8): 51 of 51 red over
+  the four rows and 5 of 5 over the CDP port guard, every source restored
+  byte-identical.
+
+This section's own commit changes only this document; it gets the impact
+gate for that path, and nothing else.
+
+### L.10 What was not run
+
+- NOTHING LIVE. `M M53`, `N 195`, `P S5` and `J 107` are COVERED-UNFIRED:
+  no page was loaded on LinkedIn. Whether LinkedIn's default location
+  narrows a keyword-less employer search stays unverified.
+- `P K1`'s CAPTURE: the spec is L.4, for session 2's plan.
+- CI: nothing is pushed, so the suite ran on this Windows box only; the
+  Linux and macOS cells did not run.
+- THE COLD REVIEW'S F14: the fixture tests still launch a Chromium per read.
+- A SECOND COLD REVIEW of what changed after the first -- the restructure,
+  the drives, the merge and the CDP port guard -- was not run.
