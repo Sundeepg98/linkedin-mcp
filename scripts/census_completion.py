@@ -1249,7 +1249,11 @@ PINNED = {
     #: 96 AT THE LIVE LANE'S SESSION 5 (2026-09-28), MEASURED: `M M1` (sent on the
     #: first-contact path, verified) and `P B9` (both directions, one restore
     #: failed before the recovery held) fired live and banked.
-    "delivered_strict": 96,
+    #: 101 AT THE LIVE LANE'S SESSION 6 (2026-09-28), MEASURED: `M M17` (the reply
+    #: with its emoji, sent and verified), `M M33` (the starred pill applied), `M M49`
+    #: (the read indicator read) and `P A21`, `P A19` (tested and restored exactly)
+    #: fired live and banked.
+    "delivered_strict": 101,
     #: The live lane's merge: N 134, P O3 and M C72 left GAP.
     #: Lane D's merge: N 132 left GAP, for COVERED-UNFIRED under D6.
     #: 544 AT THE ORCHESTRATOR'S MERGE OF LANE D (2026-09-27), MEASURED: lane D
@@ -1355,7 +1359,11 @@ PINNED = {
     #: 34 AT THE LIVE LANE'S SESSION 5 (2026-09-28), MEASURED: `M M1` (sent on the
     #: first-contact path, verified) and `P B9` (both directions, one restore
     #: failed before the recovery held) fired live and banked.
-    "unfired": 34,
+    #: 29 AT THE LIVE LANE'S SESSION 6 (2026-09-28), MEASURED: `M M17` (the reply
+    #: with its emoji, sent and verified), `M M33` (the starred pill applied), `M M49`
+    #: (the read indicator read) and `P A21`, `P A19` (tested and restored exactly)
+    #: fired live and banked.
+    "unfired": 29,
     #: 104 AT THE ORCHESTRATOR'S MERGE OF LANE Y2'S FOLLOW-UP (2026-09-27), MEASURED:
     #: the P-R settings block itemized into 22 rows (P2-P23; Delete Data EXCLUDED-RULED).
     #: 101 AT LANE S'S NAMES ADOPTION (2026-09-27), MEASURED: `N 79`, `N 172`
@@ -1704,7 +1712,11 @@ PINNED = {
     #: 18 AT THE LIVE LANE'S SESSION 5 (2026-09-28), MEASURED: `M M1` (sent on the
     #: first-contact path, verified) and `P B9` (both directions, one restore
     #: failed before the recovery held) fired live and banked.
-    "b1_standing": 18,
+    #: 17 AT THE LIVE LANE'S SESSION 6 (2026-09-28), MEASURED: `M M17` (the reply
+    #: with its emoji, sent and verified), `M M33` (the starred pill applied), `M M49`
+    #: (the read indicator read) and `P A21`, `P A19` (tested and restored exactly)
+    #: fired live and banked.
+    "b1_standing": 17,
     "b1_relayed": 0,
     "b1_pending": 0,
     #: 22 AT THE ORCHESTRATOR'S MERGE OF LANE D (2026-09-27), MEASURED: lane D
@@ -1746,7 +1758,11 @@ PINNED = {
     #: 16 AT THE LIVE LANE'S SESSION 5 (2026-09-28), MEASURED: `M M1` (sent on the
     #: first-contact path, verified) and `P B9` (both directions, one restore
     #: failed before the recovery held) fired live and banked.
-    "b1_no_ruling": 16,
+    #: 12 AT THE LIVE LANE'S SESSION 6 (2026-09-28), MEASURED: `M M17` (the reply
+    #: with its emoji, sent and verified), `M M33` (the starred pill applied), `M M49`
+    #: (the read indicator read) and `P A21`, `P A19` (tested and restored exactly)
+    #: fired live and banked.
+    "b1_no_ruling": 12,
     #: 7 AT THE ORCHESTRATOR'S MERGE OF LANE L7'S P B9 (2026-09-27), MEASURED: P B9
     #: (Premium badge) moved GAP -> COVERED-UNFIRED, released like the intro edits.
     #: 4 AT THE LIVE LANE'S MERGE OF MASTER c2825a4 (2026-09-28), MEASURED on the
@@ -1756,7 +1772,11 @@ PINNED = {
     #: 3 AT THE LIVE LANE'S SESSION 5 (2026-09-28), MEASURED: `M M1` (sent on the
     #: first-contact path, verified) and `P B9` (both directions, one restore
     #: failed before the recovery held) fired live and banked.
-    "b1_released": 3,
+    #: 1 AT THE LIVE LANE'S SESSION 6 (2026-09-28), MEASURED: `M M17` (the reply
+    #: with its emoji, sent and verified), `M M33` (the starred pill applied), `M M49`
+    #: (the read indicator read) and `P A21`, `P A19` (tested and restored exactly)
+    #: fired live and banked.
+    "b1_released": 1,
     #: D3's enumerated list: FOUR once `M C83` left it, and THREE since
     #: `N 172` left it the same evening on OTHER-MEMBER-IDS-AS-READS -- see
     #: `RULING_BLOCKED_NAMED`. It was printed as "five rows" and pinned
@@ -1870,9 +1890,11 @@ PINNED_B1_ROWS: dict[str, tuple[str, ...]] = {
     #: person.
     #: `M M1` LEFT AT THE LIVE LANE'S SESSION 5 (2026-09-28): sent to the target
     #: he named, on the first-contact path, and verified -- COVERED-PROVEN.
+    #: `M M17` LEFT AT SESSION 6 (2026-09-28): the reply in that conversation,
+    #: its emoji among his words, sent and verified -- COVERED-PROVEN.
     "OPERATOR-NAMES-THE-TARGET": (
         "J 103", "J 104", "J 128",
-        "M C1", "M C25", "M C32", "M C63", "M M10", "M M17",
+        "M C1", "M C25", "M C32", "M C63", "M M10",
         "N 1", "N 2", "N 4", "N 46", "N 47", "N 48", "N 64", "N 155",
         "P I14",
     ),
@@ -1930,16 +1952,18 @@ PINNED_B1_ROWS: dict[str, tuple[str, ...]] = {
     #: degree filter: a name search of his first degree, and his first degree
     #: filtered by place or employer; never fired. Reads no ruling holds.
     NO_RULING: (
-        "J 121", "J 122", "M M33", "M M49",
+        "J 121", "J 122",
         "N 20", "N 25", "N 26", "N 30", "N 31",
         "N 45", "N 81", "N 85", "N 172",
-        "P A8", "P A19", "P A21",
+        "P A8",
         #: `J 107` and `M M53` entered with lane S's offline frontier,
         #: 2026-09-28, fired at session 2 without banking, and LEFT at
         #: session 3 (2026-09-28), fired again and banked -- with `N 194`.
         #: `P A11`, `P A13` and `P A17` LEFT at session 4 (2026-09-28) for GAP:
         #: autocomplete inputs, which the one tool can only type into.
         #: `P B9` LEFT at session 5 (2026-09-28): both directions measured live.
+        #: `M M33`, `M M49`, `P A21` and `P A19` LEFT at session 6 (2026-09-28), fired
+        #: live and banked, the two edits tested and restored exactly.
     ),
 }
 

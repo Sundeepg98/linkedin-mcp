@@ -4050,3 +4050,171 @@ integration of master and the full gate follow.
 
 The late-press debugging script, the census and record editors, in the lane's
 scratch folder.
+
+## Live session 6, 2026-09-28
+
+The orchestrator's GO of 22:36 IST, LIVE SESSION 6, under the operator's
+standing instruction; its addendum of about 22:50; and its SPEND BRAKE of
+22:57, on the operator's words at 22:55 ("I don't want any new lanes at the
+moment"). The session ran from 22:43 to 22:58 on the Chrome of sessions 3 to 5,
+which this lane never started, restarted or closed. **29 of the 40 loads, 0 of
+the 5 searches. `M M17` SENT AND VERIFIED; `P A21` and `P A19` each TESTED AND
+RESTORED EXACTLY; `M M33` and `M M49` fired behind the badge reading 0. Five
+rows banked. Chrome was still up at the end.**
+
+**THE OPERATOR'S NAMED LIVE-PROOF TARGETS appear nowhere in this repository.**
+They live only in the gitignored identity key; every step below names them by
+role, and a key POSITION, where one is given, is 0-based.
+
+### The go
+
+The fill-path follow-up (`76817ca`) was committed and gated before the GO landed
+(the full suite, 12517 tests). Master `675c7a0` -- the orchestrator's merge of
+this lane's session-5 wrap-up onto lane L5's reply-path Send wait and reply draft
+rule -- was CI-green by its sha, and was merged into the branch without a
+conflict (`d621582`): the tree was master plus the one gated commit. The harness
+tests, `tests/test_reply_send_wait_and_draft.py`,
+`tests/test_an_editor_press_is_waited_for.py` and the first-contact tests: 237
+passed. **THE ATTACH CHECK: PASS `[0, 1, 0]`.**
+
+### The session, load by load
+
+    n   time      key (the ledger's)    surface        what it read
+    1   22:43:40  m17_resolve           messaging      the list: 1 row carries a spelling
+    2   22:44:00  m17_open_by_click     messaging      the thread, opened by its row
+    3   22:44:28  m17_preview           messaging      M M17: the brother resolved
+    4   22:44:56  m17_confirm           messaging      typed; Send on in 221 ms; pressed
+    5   22:45:25  m17_confirm           messaging      the fresh load: reply_sent
+    6   22:46:02  edit_read             in             his intro editor, read; the plan
+    7-10          A21_test_*            in, mypref.    Education -> unset: SAVED
+    11-14         A21_restore_*         in, mypref.    Education -> the original: SAVED
+    15-18         A19_test_*            in, mypref.    Pronouns -> unset: SAVED
+    19-22         A19_restore_*         in, mypref.    Pronouns -> the original: SAVED
+    23  22:53:46  reread_A19            in             the pronouns and their visibility
+    24  22:54:09  m33_badge             feed           the badge: 0
+    25  22:54:39  m33                   messaging      the composer's list: 0 unread
+    26  22:55:08  m33                   messaging      /messaging/, the starred pill
+    27  22:55:52  m49_badge             feed           the badge: 0
+    28  22:56:21  m49                   messaging      the composer's list: 0 unread
+    29  22:56:50  m49                   messaging      /messaging/, the read indicator
+
+(Each edit's four loads: the tool's preview of his profile, his sharing page,
+the editor, and the verification's fresh render of it.) By surface: in 14,
+messaging 9, mypreferences 4, feed 2. The closest two loads stood 20.2 s apart.
+Every load was made by the lane's outward runner, which took the harness's
+ledger, counter and driver lock by import.
+
+### M M17 -- SENT, verified; and what LinkedIn keeps
+
+The thread was resolved as ordered: the receipt-safe list drew 10 rows, 0
+unread, and exactly one carries a spelling -- at the top, one-to-one, read. It
+was opened by its row and its header carries the spelling; the reply preview
+resolved the brother. **The reply box opened EMPTY** (`reply_box_empty`): LinkedIn
+did NOT keep session 5's unsent reply as a draft, which settles that section's
+open question, as session 5's empty composer settled session 4's -- two
+measurements, both "not kept". So the draft rule did not apply and his words
+and U+1F44D were typed, 67 of 67 characters, exact. **Send turned on in 221 ms** -- lane L5's
+reply-path wait, the race session 5 lost -- the send gate held, Send was pressed,
+nothing was left in the box, and **a fresh load of the thread read
+`reply_sent`**: the words, the emoji among them, read back exactly as text.
+
+### P A21 and P A19 -- each tested and restored exactly
+
+Through the package as shipped, with the dialog's wait (`be665f8`) and the wait
+after the press (`c3b2393`); his sharing setting read OFF before each of the
+four writes, and the dialog was drawn at the first poll every time.
+
+* **P A21 (Education):** the unset option SAVED -- the choice read back at the
+  first poll of the press wait, no other field moved, Save pressed, the editor
+  closed, the fresh render `field_changed` -- then his one entry, the exact
+  original, SAVED the same way. Each write's prior value equalled the planned
+  one exactly.
+* **P A19 (Pronouns):** unset SAVED, then the exact original SAVED, the same
+  readings. **A separate read-only load (23)** read the pronouns back as the
+  original and their visibility control as it read before the edits: All
+  LinkedIn members. The unset-and-restore did not reset it.
+
+With `P B9` in session 5, the three edits ordered for session 5 are proven both
+ways, each field reading its original again on a fresh render.
+
+### M M33 and M M49 -- behind the badge reading 0
+
+Each fire read the badge off his feed first (0 both times) and went through the
+tool's own receipt guard (the composer's list, 0 unread rows both times); no
+unread row was opened.
+
+* **M M33:** `linkedin_open_messaging(message_filter="starred")` opened
+  /messaging/ and ACTIVATED the starred pill -- the view moved to its filter
+  state. The filtered list drew 0 conversations: none starred, or none rendered.
+* **M M49:** `linkedin_open_messaging()` drew 10 conversations, 0 unread; the
+  conversation LinkedIn opened drew 2 messages, and the read indicator on the
+  last words he wrote read `not_drawn`, on the measured without-seen-receipt
+  marker (1 such marker, 0 with one).
+
+### Left unstarted, the operator's spend brake 22:55
+
+On the orchestrator's brake of 22:57, these were **left unstarted -- not failed**:
+the addendum's people-search proofs (`N 25`, `N 26`, `N 81`, `N 30`, `N 85`,
+`N 172`, `N 31`) and its `N 178` / `N 65` capture on the brother's profile;
+`N 20` / `N 45` on the notifications; C8 for fix 4's trigger step. **One fact
+read for the addendum before the brake, for whoever takes it up:**
+`connections_of` takes ONE member's opaque token -- the `recipient_id` that
+`linkedin_connections` returns -- and refuses a profile slug; the link the
+operator supplied for the brother is a profile-slug link. So the brother's
+token would come from his row in `linkedin_connections`, if his row is among
+the ones it draws.
+
+**TWO CANDIDATES, NOT MOVED** (the addendum's census checks, held by the
+brake): `M M10` -- `M M17` fired its tool live and it sent, but in a conversation
+session 5 had made, not the older thread the row asks for; `N 155` -- `M M1` sent
+to a first-degree connection through the tool that now reaches the row, and by
+`D6-CAPABILITY-OVER-AFFORDANCE` it may bank on that. Each cell carries a dated
+note saying so.
+
+### Chrome's end
+
+At 22:58 port 9224 was listening, owned by the process the orchestrator started
+at 12:40, and Chrome's DevTools target list -- read over HTTP, nothing attached
+-- held exactly 1 page, a blank tab, and 0 LinkedIn tabs. Every run closed its
+own tab normally; fix 1's keeper path did not arise.
+
+### The census moves, and the pins
+
+**CORRECTS:** `_audit/_census/messaging-and-content.md` -- rows `M17`, `M33` and `M49` read COVERED-UNFIRED, never fired or not sent; in session 6 the reply with its emoji was sent and verified, the starred pill applied and the read indicator read, and each moves to COVERED-PROVEN.
+
+**CORRECTS:** `_audit/_census/profile.md` -- rows `A21` and `A19` read COVERED-UNFIRED, held in session 5; in session 6 each was tested and restored exactly, verified on a fresh render, and moves to COVERED-PROVEN.
+
+**FIVE ROWS MOVED, EACH ON ITS OWN CELL'S BAR:**
+
+    row     the bar                                    what session 6 read
+    M M17   an emoji in a message, by send_reply,      reply_sent; the emoji read back
+              read back exactly                          exactly as text
+    M M33   a filter pill applied, the badge at 0      the starred pill activated
+    M M49   the read indicator, on the conversation    not_drawn, on the measured
+              /messaging/ opens                          marker
+    P A21   the choice saved and restored, verified    both saved, fresh render each
+    P A19   the choice saved and restored, verified    both saved; visibility unchanged
+
+**THE COUNTS**, file-wide by `scripts/count_census_states.py`:
+
+    slice         COVERED-PROVEN   COVERED-UNFIRED
+    messaging       10 -> 13          8 -> 5
+    profile         26 -> 28          4 -> 2
+
+**THE PINS, MEASURED AND RE-PINNED, NEVER SUMMED:** `--check` named five figures
+and five bucket-1 rows, and nothing else:
+
+    delivered_strict     96 -> 101
+    unfired              34 -> 29
+    b1_standing          18 -> 17
+    b1_no_ruling         16 -> 12
+    b1_released           3 -> 1
+    PINNED_B1_ROWS       OPERATOR-NAMES-THE-TARGET loses M M17; NO_RULING loses
+                         M M33, M M49, P A21 and P A19
+
+No skeleton was taken, so there is no tracked copy.
+
+### Scratch, declared disposable
+
+The session-6 runner, the census, delta and pin editors, in the lane's scratch
+folder. Nothing loaded uncounted.

@@ -31,8 +31,8 @@ are listed as `(undated)`; no date is taken from git history, because
 | of those, carrying a `YYYY-MM-DD-` date prefix | 219 |
 | distinct dates | 18 |
 | documents with no level-1 heading | 2 |
-| `CORRECTS:` marker lines | 119 |
-| `CORRECTED BY:` marker lines | 119 |
+| `CORRECTS:` marker lines | 121 |
+| `CORRECTED BY:` marker lines | 121 |
 | distinct declared correction edges | 110 |
 | documents something later corrects | 52 |
 | documents that correct something | 73 |
@@ -633,6 +633,8 @@ document is dead; it says one thing in it was overtaken and names what.
 
   > row `M1` moved COVERED-UNFIRED to COVERED-PROVEN in the live lane's session 5, sent on the first-contact path and verified; row `M17` fired and was not sent.
 
+  > rows `M17`, `M33` and `M49` moved COVERED-UNFIRED to COVERED-PROVEN in the live lane's session 6 -- the reply with its emoji sent and verified, the starred pill applied, the read indicator read -- each on its own cell's bar.
+
 ### [_census/network.md](_census/network.md)
 
 (undated) &middot; CENSUS SLICE: NETWORK AND PEOPLE
@@ -726,6 +728,8 @@ document is dead; it says one thing in it was overtaken and names what.
   > rows `A11`, `A13` and `A17` read COVERED-UNFIRED, a tool that would not refuse; the live lane's session 4 measured each field drawn as an input carrying `aria-autocomplete`, which the one tool can only type into, and each moves to GAP on the orchestrator's ruling. Row `A8` stays, its test value having no benign form while it is empty.
 
   > row `B9` moved COVERED-UNFIRED to COVERED-PROVEN in the live lane's session 5, both directions measured, one restore having failed before the recovery held.
+
+  > rows `A21` and `A19` moved COVERED-UNFIRED to COVERED-PROVEN in the live lane's session 6, each tested and restored exactly and verified on a fresh render.
 
 - CORRECTED BY [2026-09-23-readers-four-rows.md](2026-09-23-readers-four-rows.md)
 
@@ -1475,6 +1479,8 @@ reach is visible. The quoted reason here is the CORRECTOR's own
 
   > row `M1` read COVERED-UNFIRED, refused or not sent at every earlier fire; it was sent on the first-contact path in session 5 and verified, and moves to COVERED-PROVEN.
 
+  > rows `M17`, `M33` and `M49` read COVERED-UNFIRED, never fired or not sent; in session 6 the reply with its emoji was sent and verified, the starred pill applied and the read indicator read, and each moves to COVERED-PROVEN.
+
 - CORRECTS [_census/network.md](_census/network.md)
 
   > rows `23`, `79`, `84`, `87`, `94`, `132` and `195` read COVERED-UNFIRED, never fired; each fired live in session 2 on its own cell's bar -- lane S's whole bank rule for the three facets -- and moves to COVERED-PROVEN.
@@ -1488,6 +1494,8 @@ reach is visible. The quoted reason here is the CORRECTOR's own
   > rows `A11`, `A13` and `A17` read COVERED-UNFIRED, a tool that would not refuse; session 4 measured each field an input carrying `aria-autocomplete`, which the one tool can only type into, and each moves to GAP on the orchestrator's ruling.
 
   > row `B9` read COVERED-UNFIRED, its session-4 test refused before any press; in session 5 both directions were measured -- one restore failing before the recovery held -- and it moves to COVERED-PROVEN.
+
+  > rows `A21` and `A19` read COVERED-UNFIRED, held in session 5; in session 6 each was tested and restored exactly, verified on a fresh render, and moves to COVERED-PROVEN.
 
 ### [2026-09-23-readers-four-rows.md](2026-09-23-readers-four-rows.md)
 
