@@ -3115,3 +3115,248 @@ and the blocker map re-written by their writers twice, at a fixed point; `RULING
 
     91932b0  merge master a9cb2e3, the live lane's session-3 wrap-up
     (last)   this section
+
+## The first-contact path: the orchestrator's addendums of 2026-09-28 13:03 and 14:20
+
+**THE ORDER.** Session 3 measured `linkedin_read_named_profile` PROVEN live, and
+`linkedin_message_from_profile` REFUSED twice by `6_not_their_conversation`: there was no
+conversation, so the press opened a NEW-MESSAGE composer, inside a SHADOW ROOT. The addendum of
+13:03 gave the first contact a chain: (1) the target is the caller's link and identity is
+confirmed; (2) the pressed control is the owner's one visible Message link and its address names
+the profile's own member; (3) after the press exactly one bubble, exactly one committed recipient,
+its text the topcard's name, whole, and no other recipient; (4) type only then, Send, then verify a
+conversation exists headed by that name -- the receipt, never recording the name; (5) close by the
+header's close control, found by its text -- Escape is not enough. Every condition refuses on doubt;
+tests over a committed fixture BUILT from the skeleton, with synthetic names, a builder and a pinned
+digest; the existing path stays as it is; no browser. The addendum of 14:20 set the order of work --
+the 12:32 calls, then the merge of `a9cb2e3`, then this, over the live lane's tracked copy
+`tests/fixtures/live3/m1_composer_bubble.html` -- and asked for a report after each.
+
+Disk when this began: the integration committed, gated and reported (section "Integration 3");
+master and the remote at `a9cb2e3`. The work in progress had been set aside as a patch at 14:20 and
+went back on unchanged -- none of the four code files it touches moved in the merge. The path was
+built, gated on the whole suite, then read by a cold reviewer, whose one defect and gaps were taken
+up before this was reported (U.5).
+
+### U.1 The chain, link by link, and the condition that holds each
+
+    link  what must hold                              condition that refuses, and where it is read
+    1     still on the link he gave                   1_navigated_away (the address before the press)
+          the topcard is the person the title names   2_identity_lost: title shape, one topcard, its
+                                                      first heading IS the title's name -- in the page
+          a first-degree connection                   3_not_a_first_degree_connection
+          no composer open anywhere before the press  the preview and the act refuse before pressing:
+                                                      counted by the page's own script AND by the
+                                                      engine the press uses (``composer_editors_pierced``)
+    2     the owner's one visible Message control     the preview's existing conditions (unchanged)
+          its address names the profile's member      6f_press_not_bound_to_them: every member slot in
+                                                      the pressed address IS the profile's own member,
+                                                      compared in the page (``CONTROL_FACTS_JS``)
+    3     one composer in one bubble, one Send        5_not_one_conversation
+          the new message readable                    4_unreadable (a failed piercing read)
+          exactly one bubble on the page              6f_not_one_bubble
+          somebody committed in the recipient box     7_recipient_box (a box with no one in it)
+          the bubble is a new message                 6f_not_a_new_message (its one title, a token)
+          one box, in that bubble, one recipient      6f_not_one_recipient -- every pill counted,
+                                                      dismissible or not
+          that recipient's drawn text IS the name     6f_recipient_not_theirs -- the name the title
+                                                      gives, which link 1 tied to the topcard
+          nobody else on the way in                   6f_another_recipient_on_the_way (search field)
+          the recipient card links that profile only  6f_card_not_theirs (its /in/ segment, one, and
+                                                      the topcard's own; a member id exactly)
+          the one Send is that bubble's               6f_send_not_in_the_bubble
+          empty, Send disabled; a before-count taken  8_not_empty, 9_no_before_count (unchanged)
+    4     his words in the box, exactly               the send gate's 2 to 5, as for every message
+          all of link 3 again, with the words in      0_read_failed, 6f_recipient_changed -- the
+          the box                                     last moment
+          SENT: a conversation headed by the name,    ``message_verdict``, on a reading taken in place
+          holding his words, their count 0 -> 1       right after the press (``title_kind`` "owner",
+                                                      a closed token -- no name crosses); the wait for
+                                                      it kept in the receipt (``sent_words_wait``)
+    5     one bubble, holding the composer            1_not_one_bubble
+          one header control whose text opens         2_not_one_close_control
+          on "Close"
+          the close selector resolves one element,    3_selector_count -- the press is strict
+          and it is one of the bubble's header
+          controls
+          the composer is empty                       4_words_in_the_box
+
+Every reading starts at None or False and every condition asks for `is True` or a count of one, so
+a field that could not be read refuses; a reading that raised is reported by its type and refuses.
+The conditions marked `6f`, and 7 as it now reads, run only when a recipient box is drawn -- the
+first contact's shape; a conversation that already exists takes condition 6 as before, and 1 to 5,
+8 and 9 hold for both.
+
+**WHERE THE READINGS COME FROM.** The overlay is in an open shadow root, so the bubble is judged by
+``dom.BUBBLE_FACTS_JS`` over the elements Playwright's piercing engine resolves
+(``dom.read_bubbles``, one call site, declared in `tests/test_readonly.py`: its evaluate budget 22 ->
+23, its executed scripts 23 -> 24). It returns per bubble counts, booleans and one title token;
+``dom._closed_bubble_facts`` re-closes each, and a value off its vocabulary reads in the direction
+that refuses. The title and the recipient's name are compared on their DRAWN text (``innerText``),
+as the page's own script compares a title; a member id in a card's address is compared exactly, a
+vanity name with its ASCII case folded, as ``same_segment`` compares them.
+
+**THE CLOSE CONTROL.** On the capture the header draws two controls, each carrying its words as its
+own text: the expand button's and the close button's. The close button is a circle button, and its
+words sit in its `artdeco-button__text` span -- which a circle button may draw visually hidden -- so
+the control is found by its own text, the accessible name that text gives:
+``role=button[name=/^Close\b/]`` inside the bubble's header controls, pressed through the one strict
+click site, and the gate requires that one element to be one of the bubble's header controls. The
+capture's words were reduced; "Close your draft conversation" is DERIVED from their shape (26
+letters in four words, and the form's own "... for your draft conversation" labels) -- its first
+word too, and only that word is read. Escape is never pressed.
+
+### U.2 The fixture: built, synthetic, pinned
+
+- `scripts/_build_first_contact_bubble.py` reads the live lane's tracked copy -- its default source
+  -- and writes `tests/fixtures/synthetic/first_contact_bubble.html`: 125 elements, structure digest
+  `ligiiccbckljhmoo` (tags and nesting), pinned in `tests/test_first_contact_message.py`. Built from
+  the tracked copy and from the gitignored skeleton that copy was made from, the output is the same,
+  byte for byte, digest and all. The fixture is a fixed point of its builder, and the words the
+  builder keeps are a subset of the live lane's own kept list (a test says so).
+- NOBODY IN IT IS ANYBODY: the recipient is the profile builder's declared synthetic person. The
+  values put in place of reduced ones are named in the builder's docstring, each by the element it
+  stands in, and four are argued as DERIVED -- the pill's label, the degree's words, the presence
+  words, the close control's words. On the skeleton, by keyed hash and never read: the pill's text
+  and the card's name WERE the topcard's name, and the card's two links named the topcard's own
+  `/in/` segment. Those two comparisons cannot be re-derived from tracked files.
+- THE SHADOW ROOT IS NOT IN THE FILE: the test's stand-in for LinkedIn's script opens the bubble
+  inside an open shadow root when the owner's Message link is pressed, as the live page does -- and
+  one test opens it outside one, to show the reading does not depend on where it is drawn. Each
+  world is one named deviation from the capture.
+
+### U.3 Red first, then green
+
+- THE PATH, ON THE CODE BEFORE IT (this branch's head before the path): 16 of the first 23 cases
+  red, 7 green. The 7 are the fixture's own tests. Of the 16: 11 the act refusing by
+  `6_not_their_conversation` -- the live refusal reproduced offline; 2 more the act refusing at the
+  opened gate; 3 on readings the path adds. After the build: 23 of 23.
+- THE CORRECTIONS, ON THE PATH'S FIRST COMMIT (U.10): the test file, now 44 cases, 11 red, 33
+  green. 8 red on substance: the defect (below), the preview issuing a confirmation beside it, a
+  second recipient drawn as another pill, a minimised bubble beside the new one at the opened gate
+  and again while typing, a Send outside the bubble at the opened gate and moved out of it while
+  typing, and the conversation path acting in the shadow root. 3 red on readings added with them
+  (the pierced count, the box in the bubble, the post-send wait). THE DEFECT, REPRODUCED on that commit's code by a scratch probe: a conversation titled with
+  the name, open in the shadow root before the press, the press's own bubble 3 s late -- the act
+  proceeded on the conversation path, the send gate passed, the old conversation took his words
+  (`preSubmitted: 1`) and the receipt read `message_sent`. After the corrections: 44 of 44, and that
+  world is refused before anything is pressed.
+
+### U.4 What the repository's own guards found, fixed where they pointed
+
+- THE NAVIGATION GUARD, red on the first draft: its taint is by NAME and module-wide, and the first
+  contact's reading was bound to ``after``, ``state`` and ``why`` from a structure carrying the opened
+  gate, which read ``page.url`` -- so two navigations' ``url`` read as derived. The locals took
+  names of their own (``sent_*``), the remedy the named-profile loader took on the same trap.
+- THE READER-LEAK GUARD: five new page-taking functions. Its baseline, regenerated by its own
+  writer: four clean; ``named_profile.holding_bubble`` not driven, because the harness presses
+  nothing and so no bubble holds a composer -- declared in ``WHAT_WOULD_DRIVE_IT`` as an ACTION,
+  naming the test that drives it. The envelope and landing baselines rewrote unchanged, then and
+  after the corrections.
+
+### U.5 A cold review, and what it changed
+
+A reviewer that wrote none of this read the path's first commit statically -- no tests run, no
+browser, nothing edited -- against the addendum's chain: 1 DEFECT, 5 GAP headings, 23 NOTEs. It found
+no way to type into, or Send, a new message addressed to anyone but the named person. Its findings,
+each verified here before anything changed:
+
+- **THE DEFECT: THE CONVERSATION PATH, MADE LIVE, COULD TYPE INTO A CONVERSATION THE PRESS DID NOT
+  OPEN.** The first build had given the conversation path the piercing reading beside the page's own
+  -- a change the order had not asked for, made so it could see a conversation in the shadow root.
+  Its precondition "no composer open before the press" was still counted by the page's own script,
+  blind there; the wait after the press returns on any composer; so a conversation already open,
+  titled with the name -- a namesake's included -- took his words and read SENT (reproduced, U.3).
+  TWO CHANGES: the precondition is counted by the engine the press uses too, at the preview and
+  again before the press, for both paths; and the conversation path is LEFT AS IT WAS, as ordered --
+  its "whose conversation" is the page's own reading again, at the opened gate, the send gate and
+  the verdict, byte for byte, with one sentence added to its refusal saying what the piercing
+  reading saw.
+- GAPS AND NOTES TAKEN UP: exactly one bubble on the page (the chain's words; a minimised one beside the new
+  message refuses, at both gates); every committed recipient counted, whatever pill it wears; the
+  one box and the one Send are the new message's own; a failed piercing read refuses as unreadable,
+  not as a missing recipient; the title and the recipient compared on their drawn text only; a
+  member id compared exactly; the close gate's pressed element tied to the header controls; and a
+  test for every reading of the last-moment check, the close gate's refusals 1 to 4 (its 0, a read
+  that raises, has no world), a SENT
+  denied when the title is not the name after the press, a labelled link naming no member (so the
+  member binding, not the label, is what refuses), and the Escape counter shown counting one.
+- NOTES RECORDED, NOT ACTED ON: a first contact's before-count is zero by construction, so SENT
+  rests on the redraw alone (C2); the "last message is his" reading rests on a DERIVED selector (C4,
+  as before); the close gate does not re-read whose bubble it closes -- it closes an empty composer,
+  which sends nothing (D3); the bubble reader is capped at eight bubbles, safe only because every
+  gate also counts page-wide (G2); the card could also be compared with the caller's own link, not
+  only the topcard's (G4, a tightening, offered); the stand-in's post-send redraw is DERIVED (G5);
+  the close gate's refusal 0 has no world that drives it; a recipient box now leads to the
+  first-contact chain where condition 6 used to run first, and every bubble refused before is
+  still refused (E2); the bubble's close-control count is read and reported, and the close gate
+  decides on its own reading (G11's other half).
+
+### U.6 The conversation path, left as it was -- and the question it leaves
+
+Where LinkedIn draws an existing conversation inside the shadow root, the conversation path
+refuses at 6, as it always has there; where the page's own script can see it, it acts as before (a
+test holds each). Whether LinkedIn draws it there is DERIVED -- session 3 opened only a new message.
+If it does, a second Message to the same person through this tool, after session 4's first
+contact, refuses at 6; `linkedin_send_reply` in that conversation is the route, and it reads the
+conversation's own page, not the overlay. Making the
+conversation path live is the orchestrator's call: the change is the piercing reading beside the
+page's own -- now that the precondition counts with the same engine -- and its residual is one
+this path has always had in the page itself: a conversation restored DURING the press, headed by a
+namesake, while the press draws nothing, would be taken for his. The first contact cannot be fooled
+that way: its card must link the topcard's own profile.
+
+### U.7 The record and the docs
+
+- `_audit/_census/messaging-and-content.md` `M M1`: the path noted; state unchanged,
+  COVERED-UNFIRED. `linkedin_message_from_profile`'s docstring describes the first contact.
+- `_audit/INSTRUMENTS.md` 69.16, with the law the review taught.
+
+### U.8 Gates
+
+- RED FIRST, THEN GREEN: U.3, for the path and for its corrections.
+- THE PATH'S FIRST COMMIT: before it, the guards the change reaches most directly -- 17 files, 1342
+  of 1342; the navigation guard with CI=1 and the readonly scanner, 1028 of 1028; the census
+  battery, 12 of 12. On it: the identity gate, 12 staged files, 0 hits; the navigation guard alone
+  with CI=1, 685 of 685; the literal-repeat guard, 19 of 19 (598 files, 746 set and 4479 dict
+  displays, no repeat); the builder re-run from the tracked copy and from the gitignored skeleton,
+  both byte-identical to the committed fixture. THE WHOLE SUITE: the impact plan selected 258 of 285
+  test files (91%) and widened -- PASS, 12316 tests, 1309 s.
+- THE CORRECTIONS' COMMIT: before it, 19 guard files -- the navigation guard with CI=1, readonly,
+  people and identity, reader leak, envelopes, landing, reachability, correction-findability,
+  performable action, strict press, the named-profile read, route, adversarial and live-skeleton
+  tests, page strings, writes, the literal-repeat guard and this path's own -- 2401 of 2401; this
+  path's file, 44 of 44; the three derived baselines regenerated by their writers and unchanged; the
+  census battery, 12 of 12, the index, blocker map and rulings register each at its fixed point.
+  The identity gate on the commit: 7 staged files, 0 hits. THE WHOLE SUITE on it: the impact plan
+  against the path's first commit selected 251 of 285 test files (88%) and widened -- PASS, 12337
+  tests, 1981 s (the mutation check below shared the box for its first minutes).
+- A MUTATION CHECK of the corrections, on an archived copy of their commit: each new check removed
+  in turn, with the one test that should catch it -- 16 mutations, all as expected. 14 caught: the
+  last-moment check's bubble, title, page-wide box, name, search, card and Send; the opened gate's
+  one bubble and Send; every pill counted; the pre-press count, at the act and at the preview; the
+  member binding against the label; and the conversation path given the piercing reading again. 2
+  stay green because another check implies them, which is what they were run to show: one box in
+  the bubble (the search field is that box) and one recipient (the name check counts recipients).
+  NOT PINNED BY ANY WORLD: the failed-read refusals, names compared on drawn text only, the member id
+  compared exactly, and the close press's tie to the header controls.
+- This section's own commit is gated after it; its result is in the report.
+
+### U.9 NOT known, and NOT run
+
+- LIVE: nothing. The path has never fired; its first fire is session 4's, and that fire is its
+  proof.
+- UNMEASURED ON A LIVE PAGE: the bubble AFTER a first contact's Send -- that it becomes a
+  conversation headed by the name, holding his words, with a close control whose text opens on
+  "Close". The stand-in draws it so. If the page does otherwise the verdict does not read SENT, or
+  the close gate refuses and the bubble stays on his screen; neither presses anything else.
+- The close control's words are DERIVED from their shape; only "Close" is read.
+- CI on this branch: nothing pushed.
+
+### U.10 Commits -- on this branch, none pushed, no AI attribution in any
+
+    fe09de5  message_from_profile: a first contact, proven by a chain and read through the
+             shadow root
+    dc6e349  message_from_profile: a cold review's defect and gaps, and the conversation path
+             left as it was
+    (last)   this section

@@ -983,6 +983,18 @@ WHAT_WOULD_DRIVE_IT: dict[str, str] = {
         "constants on every path. Its behaviour is held over fake contexts by "
         "tests/test_the_last_tab_is_never_closed.py."
     ),
+    #: ADDED 2026-09-28 (lane L5, the first-contact path of
+    #: message_from_profile): the one overlay bubble holding a composer, read
+    #: through the piercing engine. Its success path is a bubble a Message
+    #: press opened, which a planted page never draws.
+    "named_profile:holding_bubble": (
+        "ACTION: a Message press on a named profile, which opens the overlay "
+        "bubble inside a shadow root -- the live lane's tracked copy of the one "
+        "session 3 drew is tests/fixtures/live3/m1_composer_bubble.html, and "
+        "tests/test_first_contact_message.py drives this reader over the page "
+        "built from it, in a shadow root, after that press. The harness presses "
+        "nothing, so no bubble holds a composer and every field reads None."
+    ),
     "dom:read_compose_fields": (
         "CAPTURE: /messaging/compose/ as loaded -- an empty composer, nothing "
         "clicked or typed -- drawing its two send-mode radios as "

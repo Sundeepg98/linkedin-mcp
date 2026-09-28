@@ -7768,6 +7768,40 @@ OVERLAY_BUBBLE = ".msg-overlay-conversation-bubble"
 OVERLAY_BUBBLE_TITLE = ".msg-overlay-bubble-header__title"
 OVERLAY_COMPOSER_EDITOR = 'form.msg-form div.msg-form__contenteditable[role="textbox"]'
 
+#: THE NEW-MESSAGE BUBBLE A FIRST CONTACT OPENS -- MEASURED 2026-09-28 by the
+#: live lane's session 3, on a first-degree profile the operator named with no
+#: conversation between them. The live lane's tracked copy of the capture is
+#: ``tests/fixtures/live3/m1_composer_bubble.html``; the fixture built from it
+#: by ``scripts/_build_first_contact_bubble.py``, peopled with synthetic values,
+#: is ``tests/fixtures/synthetic/first_contact_bubble.html``. Its header's controls carry
+#: their labels as TEXT (:data:`OVERLAY_BUBBLE_CONTROL`); its one title reads
+#: :data:`NEW_MESSAGE_TITLE`; a recipient box holds the committed recipients as
+#: dismissible pills (:data:`OVERLAY_RECIPIENT_PILL`), beside an empty search
+#: field; a card for the recipient links to their profile. AND THE WHOLE
+#: OVERLAY IS INSIDE AN OPEN SHADOW ROOT: ``document.querySelectorAll`` -- and
+#: so :data:`NAMED_PROFILE_JS` -- does not see it, and Playwright's CSS engine
+#: does. :func:`read_bubbles` reads it that way.
+OVERLAY_BUBBLE_CONTROL = ".msg-overlay-bubble-header__control"
+OVERLAY_RECIPIENT_BOX = (
+    '.msg-connections-typeahead [role="combobox"], '
+    "input.msg-connections-typeahead__search-field"
+)
+OVERLAY_RECIPIENT_PILL = ".msg-connections-typeahead button.artdeco-pill--dismiss"
+OVERLAY_RECIPIENT_SEARCH = "input.msg-connections-typeahead__search-field"
+OVERLAY_RECIPIENT_CARD_LINK = ".msg-s-profile-card a[href]"
+NEW_MESSAGE_TITLE = "New message"
+#: EVERY COMMITTED RECIPIENT, whatever pill it is drawn as: the dismissible
+#: one the capture drew, and any other a second recipient might wear (the
+#: cold review of 2026-09-28). A first contact goes to exactly one.
+OVERLAY_RECIPIENT_ANY_PILL = ".msg-connections-typeahead__added-recipients .artdeco-pill"
+#: THE FORM'S SEND, as the gates count it page-wide -- and counted inside the
+#: one bubble as well, so the Send that is pressed is that bubble's.
+OVERLAY_SEND_CONTROL = 'form.msg-form button.msg-form__send-button[type="submit"]'
+#: ANY COMPOSER'S EDITOR: what "a composer is already open" counts before a
+#: press -- the selector :data:`NAMED_PROFILE_JS` counts with, asked of
+#: Playwright's engine, which sees into the overlay's shadow root.
+OVERLAY_ANY_COMPOSER_EDITOR = ".msg-form__contenteditable"
+
 
 #: THE ONE SCRIPT A NAMED ACT RUNS ON THE PROFILE, and why it is a script.
 #:
@@ -8100,12 +8134,13 @@ CONTROL_FACTS_JS = """
     const href = hrefToken(el.getAttribute('href'));
     const label = labelOf(el);
     let owner = false;
+    let bound = false;
     if (inCard && name) {
       if (cfg.kind === 'invite') {
         owner = label.labelled && label.said === 'Invite ' + name + ' to connect';
       } else {
         const members = tag === 'a' ? membersIn(el.getAttribute('href')) : [];
-        const bound = members !== null && members.length > 0 && member !== null
+        bound = members !== null && members.length > 0 && member !== null
           && members.every((m) => m === member);
         if (label.labelled) {
           // THE LABEL NAMES THE OWNER; a member the address names must be his
@@ -8122,7 +8157,7 @@ CONTROL_FACTS_JS = """
         }
       }
     }
-    return { in_card: inCard, owner: owner, tag: tag, href: href };
+    return { in_card: inCard, owner: owner, tag: tag, href: href, bound: bound };
   });
 }
 """
@@ -8192,6 +8227,7 @@ async def read_named_profile(page: Any) -> dict[str, Any]:
         "message_visible_in_topcard": 0,
         "message_owner_visible_in_topcard": 0,
         "message_foreign_in_topcard": 0,
+        "message_member_bound": False,
         "invite_kind_in_topcard": 0,
         "invite_visible_in_topcard": 0,
         "invite_owner_visible_in_topcard": 0,
@@ -8204,6 +8240,7 @@ async def read_named_profile(page: Any) -> dict[str, Any]:
         "more_actions": 0,
         "dialogs": 0,
         "composer_editors": 0,
+        "composer_editors_pierced": 0,
         "conversation_bubbles": 0,
         "bubbles_with_editor": 0,
         "bubble_titles": 0,
@@ -8285,6 +8322,19 @@ async def read_named_profile(page: Any) -> dict[str, Any]:
             if kind == "message" and len(seen) == 1 and len(owners) == 1:
                 out["message_tag"] = owners[0]["tag"]
                 out["message_href"] = owners[0]["href"]
+                # THE PRESSED CONTROL'S ADDRESS NAMES THE PROFILE'S OWN
+                # MEMBER -- the second link of the first-contact chain
+                # (2026-09-28): the recipient a new-message composer commits
+                # is the one the pressed link carries.
+                out["message_member_bound"] = owners[0]["bound"] is True
+        # A COMPOSER ALREADY OPEN, COUNTED BY THE ENGINE THE PRESS USES (the
+        # cold review of 2026-09-28). The page's own script, above, counts
+        # none inside the overlay's shadow root, where the live overlay is,
+        # so a composer open there before the press read as none. A locator
+        # count, which runs no script.
+        out["composer_editors_pierced"] = as_count(
+            await page.locator(OVERLAY_ANY_COMPOSER_EDITOR).count()
+        )
         out["more_visible_in_topcard"] = as_count(
             await page.locator(NAMED_PROFILE_TOPCARD)
             .get_by_role("button", name=TOPCARD_MORE_NAME, exact=True)
@@ -8307,9 +8357,164 @@ def _closed_facts(raw: Any) -> list[dict[str, Any]]:
         out.append({
             "in_card": in_card,
             "owner": in_card and fact.get("owner") is True,
+            # THE ADDRESS NAMES THE TOPCARD'S OWN MEMBER, in every member slot
+            # it has (the first-contact path's condition, 2026-09-28).
+            "bound": in_card and fact.get("bound") is True,
             "tag": fact.get("tag") if fact.get("tag") in ("a", "button", "other") else "other",
             "href": fact.get("href") if fact.get("href") in MESSAGE_HREF_TOKENS else "other",
         })
+    return out
+
+
+#: WHAT A BUBBLE'S TITLE READS, as a closed token: ``new_message`` for the
+#: new-message composer, ``owner`` when it reads exactly the profile's name,
+#: ``other`` for anything else or more than one title, ``none`` for no title.
+BUBBLE_TITLE_KINDS = ("none", "new_message", "owner", "other")
+
+#: At most this many bubbles are judged; more is refused on the count first.
+BUBBLE_FACTS_CAP = 8
+
+#: EACH OVERLAY BUBBLE, JUDGED WHERE IT IS DRAWN (2026-09-28). Run by
+#: ``evaluate_all`` over the bubbles PLAYWRIGHT'S ENGINE resolves -- it pierces
+#: the open shadow root the overlay lives in -- and compared, in the same
+#: evaluation, with the profile's own name (from the document title, as
+#: :data:`NAMED_PROFILE_JS` reads it) and the profile's own member link (the
+#: distinct ``/in/`` segments the one topcard links to). Per bubble it returns
+#: counts, booleans and one closed token -- no name, label, address or id:
+#:
+#: * ``editor``: the bubble holds a composer;
+#: * ``title_kind``: see :data:`BUBBLE_TITLE_KINDS`;
+#: * ``boxes`` and ``pills``: recipient boxes, and the recipients committed in
+#:   one -- every pill, the dismissible kind and any other;
+#: * ``pill_names_owner``: exactly one recipient, a dismissible pill, and its
+#:   drawn text IS the profile's name, the whole of it;
+#: * ``sends``: the form's Send controls inside the bubble;
+#: * ``search_empty``: the box's one search field holds nothing -- no second
+#:   recipient on the way in;
+#: * ``card_matches``: the recipient card links exactly one profile, and it is
+#:   the topcard's own -- a vanity name with its ASCII case folded, a member
+#:   id exactly, as :func:`named_profile.same_segment` compares them;
+#: * ``close_controls``: header controls whose text opens on the word "Close".
+#:
+#: THE TITLE AND THE PILL ARE COMPARED ON THEIR DRAWN TEXT (``innerText``), as
+#: :data:`NAMED_PROFILE_JS` compares the title: hidden text never names
+#: anybody here (the cold review of 2026-09-28).
+BUBBLE_FACTS_JS = """
+(els, cfg) => {
+  const norm = (s) => String(s === null || s === undefined ? '' : s).replace(/\\s+/g, ' ').trim();
+  const title = norm(document.title).replace(/^\\(\\d+\\)\\s*/, '');
+  const suffix = ' | LinkedIn';
+  const name = title.endsWith(suffix) ? title.slice(0, title.length - suffix.length).trim() : '';
+  const segOf = (raw) => {
+    const m = /^(?:https:\\/\\/www\\.linkedin\\.com)?\\/in\\/([^\\/?#]+)/.exec(String(raw || ''));
+    if (!m) return null;
+    let seg = m[1];
+    try { seg = decodeURIComponent(seg); } catch (e) { return null; }
+    if (/^ACoAA[A-Za-z0-9_-]{10,80}$/.test(seg)) return seg;
+    return seg.replace(/[A-Z]/g, (c) => c.toLowerCase());
+  };
+  const cards = document.querySelectorAll('[id$="Topcard"]');
+  const own = new Set();
+  if (cards.length === 1) {
+    for (const a of cards[0].querySelectorAll('a[href]')) {
+      const seg = segOf(a.getAttribute('href'));
+      if (seg) own.add(seg);
+    }
+  }
+  const textOf = (el) => norm(el.innerText || el.textContent);
+  const shown = (el) => norm(el.innerText);
+  return els.slice(0, cfg.cap).map((el) => {
+    const titles = el.querySelectorAll(cfg.titleSelector);
+    let titleKind = 'none';
+    if (titles.length === 1) {
+      const said = shown(titles[0]);
+      if (said === cfg.newMessage) titleKind = 'new_message';
+      else if (name && said === name) titleKind = 'owner';
+      else titleKind = 'other';
+    } else if (titles.length > 1) {
+      titleKind = 'other';
+    }
+    const pills = el.querySelectorAll(cfg.pillSelector);
+    const recipients = new Set([...pills, ...el.querySelectorAll(cfg.anyPillSelector)]);
+    const search = el.querySelectorAll(cfg.searchSelector);
+    const segs = new Set();
+    for (const a of el.querySelectorAll(cfg.cardLinkSelector)) {
+      const seg = segOf(a.getAttribute('href'));
+      if (seg) segs.add(seg);
+    }
+    let closers = 0;
+    for (const b of el.querySelectorAll(cfg.controlSelector)) {
+      if (/^Close\\b/.test(textOf(b))) closers += 1;
+    }
+    return {
+      editor: el.querySelector(cfg.editorSelector) !== null,
+      title_kind: titleKind,
+      boxes: el.querySelectorAll(cfg.boxSelector).length,
+      pills: recipients.size,
+      pill_names_owner: recipients.size === 1 && pills.length === 1 && !!name
+        && shown(pills[0]) === name,
+      sends: el.querySelectorAll(cfg.sendSelector).length,
+      search_empty: search.length === 1 && String(search[0].value || '') === '',
+      card_matches: own.size === 1 && segs.size === 1 && own.has(Array.from(segs)[0]),
+      close_controls: closers
+    };
+  });
+}
+"""
+
+
+def _closed_bubble_facts(raw: Any) -> list[dict[str, Any]]:
+    """:data:`BUBBLE_FACTS_JS`'s answer, RE-CLOSED: a count coerced, a token
+    off its vocabulary read as ``other``, a boolean true only when the page said
+    ``true`` -- every doubt in the direction that refuses."""
+    out: list[dict[str, Any]] = []
+    for fact in (raw if isinstance(raw, list) else [])[:BUBBLE_FACTS_CAP]:
+        fact = fact if isinstance(fact, dict) else {}
+        kind = fact.get("title_kind")
+        out.append({
+            "editor": fact.get("editor") is True,
+            "title_kind": kind if kind in BUBBLE_TITLE_KINDS else "other",
+            "boxes": as_count(fact.get("boxes")),
+            "pills": as_count(fact.get("pills")),
+            "pill_names_owner": fact.get("pill_names_owner") is True,
+            "search_empty": fact.get("search_empty") is True,
+            "card_matches": fact.get("card_matches") is True,
+            "close_controls": as_count(fact.get("close_controls")),
+            "sends": as_count(fact.get("sends")),
+        })
+    return out
+
+
+async def read_bubbles(page: Any) -> dict[str, Any]:
+    """Every overlay bubble on the page, through the PIERCING engine, as closed
+    facts (:data:`BUBBLE_FACTS_JS`). ``error`` carries an exception's TYPE only.
+
+    WHY A LOCATOR AND NOT :data:`NAMED_PROFILE_JS`: the live lane's session 3
+    measured the messaging overlay inside an OPEN SHADOW ROOT -- the page's
+    own ``querySelectorAll`` counted no composer while Playwright's locators
+    found one. A reading that cannot see the bubble cannot say whose it is.
+    """
+    out: dict[str, Any] = {"bubbles": [], "error": None}
+    cfg = {
+        "cap": BUBBLE_FACTS_CAP,
+        "titleSelector": OVERLAY_BUBBLE_TITLE,
+        "editorSelector": OVERLAY_COMPOSER_EDITOR,
+        "boxSelector": OVERLAY_RECIPIENT_BOX,
+        "pillSelector": OVERLAY_RECIPIENT_PILL,
+        "anyPillSelector": OVERLAY_RECIPIENT_ANY_PILL,
+        "sendSelector": OVERLAY_SEND_CONTROL,
+        "searchSelector": OVERLAY_RECIPIENT_SEARCH,
+        "cardLinkSelector": OVERLAY_RECIPIENT_CARD_LINK,
+        "controlSelector": OVERLAY_BUBBLE_CONTROL,
+        "newMessage": NEW_MESSAGE_TITLE,
+    }
+    try:
+        out["bubbles"] = _closed_bubble_facts(
+            await page.locator(OVERLAY_BUBBLE).evaluate_all(BUBBLE_FACTS_JS, cfg)  # readonly-ok
+        )
+    except Exception as exc:  # noqa: BLE001 - reported as a type, never raised
+        out["error"] = type(exc).__name__
+        logger.debug("overlay bubbles unreadable: %s", type(exc).__name__)
     return out
 
 

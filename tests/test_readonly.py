@@ -970,7 +970,18 @@ def test_only_dom_module_waives_evaluate():
     # evaluate_all on the engine's own resolution, the gate and the press see
     # one set. The visible More count the same reader needs is a LOCATOR COUNT
     # and spends nothing.
-    assert waived_in.get("dom.py", 0) <= 22, waived_in
+    #
+    # 22 -> 23 on 2026-09-28 (lane L5, the first-contact path of
+    # message_from_profile): BUBBLE_FACTS_JS, run from ONE call site in
+    # dom.read_bubbles over the overlay bubbles Playwright's engine resolves.
+    # WHY IT COULD NOT BE A LOCATOR CHAIN: whose bubble it is, and to whom it is
+    # addressed, are comparisons between strings the page holds -- a
+    # recipient's name with the profile's name, a card's profile link with the
+    # topcard's -- and each names a person; a locator read hands each to
+    # Python. AND WHY IT COULD NOT BE NAMED_PROFILE_JS: the live lane measured
+    # the messaging overlay inside an OPEN SHADOW ROOT, which that script's
+    # querySelectorAll cannot see into and Playwright's engine can.
+    assert waived_in.get("dom.py", 0) <= 23, waived_in
 
 
 # ---------------------------------------------------------------------------
@@ -1212,6 +1223,14 @@ INJECTED_SCRIPTS = {
     # destination) -- no name, label, href or id. dom._closed_facts re-closes
     # every field; anything outside its vocabulary reads as not the owner's.
     "CONTROL_FACTS_JS": dom.CONTROL_FACTS_JS,
+    # 2026-09-28 (lane L5, the first-contact path). EACH OVERLAY BUBBLE, judged
+    # on the elements Playwright's piercing engine resolves -- the overlay is
+    # in a shadow root. It compares, inside the page, a committed recipient's
+    # text with the profile's name from the title, and the recipient card's
+    # /in/ segment with the topcard's own, and returns per bubble booleans,
+    # counts and one closed title token -- no name, label, address or id.
+    # dom._closed_bubble_facts re-closes every field.
+    "BUBBLE_FACTS_JS": dom.BUBBLE_FACTS_JS,
 }
 
 
@@ -1484,7 +1503,11 @@ def test_the_scripts_executed_are_exactly_the_ones_declared():
     # in the same change and run from exactly ONE call site,
     # dom.read_named_profile (four resolutions, one loop, one call). The waiver
     # budget moved 21 -> 22 with it; the two counts stay one apart.
-    assert len(EXECUTED_SCRIPTS) == 23, sorted(EXECUTED_SCRIPTS)
+    #
+    # 23 -> 24 on 2026-09-28 for BUBBLE_FACTS_JS, declared in INJECTED_SCRIPTS
+    # in the same change and run from exactly ONE call site, dom.read_bubbles.
+    # The waiver budget moved 22 -> 23 with it; the two counts stay one apart.
+    assert len(EXECUTED_SCRIPTS) == 24, sorted(EXECUTED_SCRIPTS)
 
 
 def test_a_script_that_replaces_page_behaviour_runs_only_from_a_sanctioned_evaluate():

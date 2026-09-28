@@ -8430,6 +8430,7 @@ async def _verify_after(
     typed: bool = False,
     badge_before: Optional[dict[str, Any]] = None,
     witness: Optional[dict[str, Any]] = None,
+    first_contact_after: Optional[dict[str, Any]] = None,
 ) -> tuple[str, str, str]:
     """Read whether it landed, and read it somewhere the click did not reach.
 
@@ -8881,6 +8882,25 @@ async def _verify_after(
         # navigates to a page-supplied address, so there is no fresh load to
         # take -- see ``named_profile.message_verdict`` for what that costs.
         text = _text_component_of(spec, grant.target)
+        if first_contact_after is not None:
+            # A FIRST CONTACT, READ IN PLACE RIGHT AFTER ITS SEND (2026-09-28)
+            # and before the close step took the bubble away: a conversation
+            # must now exist, headed by exactly that person's name (the
+            # piercing reading, a token), holding his words as its last
+            # message -- the before-count the opened gate took was 0.
+            # NAMES OF THEIR OWN: the navigation guard's taint is by name and
+            # module-wide, and ``first_contact_after`` carries the opened gate,
+            # which read ``page.url``; bound to ``after``/``state``/``why`` it
+            # reached two navigations' ``url`` (measured red, 2026-09-28).
+            sent_reading = first_contact_after["after"]
+            sent_state, sent_why = named_profile.message_verdict(
+                opened,
+                sent_reading,
+                held_in_place=first_contact_after["held"],
+                typed=typed,
+                conversation_is_theirs=sent_reading.get("holding_title_kind") == "owner",
+            )
+            return sent_state, sent_why, ""
         held = await named_profile.composer_holds(page, text) if typed else None
         after = await named_profile.read_opened_conversation(page, text=text)
         # AND WHOSE CONVERSATION IT IS NOW -- the page's own comparison, one
@@ -9055,6 +9075,29 @@ TYPING_ACTIONS: frozenset[str] = frozenset(
 #: until it was retired (2026-09-27), so forgetting a branch fails closed:
 #: the default is "do not type".
 OPEN_THEN_TYPE_ACTIONS: frozenset[str] = frozenset({"message_from_profile"})
+
+
+async def _first_contact_after_send(
+    page: Any, spec: WriteSpec, grant: WriteGrant, opened: Optional[dict[str, Any]]
+) -> dict[str, Any]:
+    """What a FIRST CONTACT'S Send left, read IN PLACE, right after the press
+    (2026-09-28): a bounded wait for his words to be drawn (it decides
+    nothing), whether the composer still holds them, the conversation as the
+    opened gate read it, and the verdict those give. Taken HERE because the
+    close step that follows a sent message takes the bubble off the screen,
+    and the verification reads this rather than an empty page."""
+    sent_text = _text_component_of(spec, grant.target)
+    sent_wait = await named_profile.wait_for_sent_words(page, text=sent_text)
+    sent_held = await named_profile.composer_holds(page, sent_text)
+    sent_reading = await named_profile.read_opened_conversation(page, text=sent_text)
+    sent_state, _sent_why = named_profile.message_verdict(
+        opened,
+        sent_reading,
+        held_in_place=sent_held,
+        typed=True,
+        conversation_is_theirs=sent_reading.get("holding_title_kind") == "owner",
+    )
+    return {"wait": sent_wait, "held": sent_held, "after": sent_reading, "state": sent_state}
 
 
 async def _opened_conversation_gate(
@@ -9902,6 +9945,13 @@ async def perform(
     apply_gate: Optional[dict[str, Any]] = None
     publish_gate: Optional[dict[str, Any]] = None
     send_gate: Optional[dict[str, Any]] = None
+    # A FIRST CONTACT'S LAST TWO READINGS (2026-09-28, the addendum of 13:03):
+    # what its Send left, read in place right after the press, and the gate
+    # of the close step that follows a sent one. ``closer_clicks`` counts the
+    # press that only closed the bubble -- it dispatched nothing either.
+    first_contact_after: Optional[dict[str, Any]] = None
+    close_gate: Optional[dict[str, Any]] = None
+    closer_clicks = 0
     # THE EDITOR'S COMMIT GATE, for EDITOR_SAVE_ACTIONS only, and the poll
     # that follows its press. See ``profile_editor``.
     editor_save_gate: Optional[dict[str, Any]] = None
@@ -10251,6 +10301,33 @@ async def perform(
                                 _text_component_of(spec, grant.target),
                             )
                         )
+                elif (
+                    spec.action in OPEN_THEN_TYPE_ACTIONS
+                    and clicks_made == 2
+                    and opened_gate is not None
+                    and opened_gate.get("path") == "first_contact"
+                ):
+                    # A FIRST CONTACT'S SEND JUST LANDED (2026-09-28). What it
+                    # left is read IN PLACE now, and the bubble's close control
+                    # is queued -- through this same queue -- ONLY if that
+                    # reading is a sent message: a conversation headed by the
+                    # name, holding his words, the box empty. Escape does not
+                    # close it (measured), and nothing else is pressed.
+                    first_contact_after = await _first_contact_after_send(
+                        page, spec, grant, opened_gate
+                    )
+                    if first_contact_after["state"] == named_profile.MESSAGE_SENT:
+                        close_gate = await named_profile.bubble_close_gate(page)
+                        if close_gate["proceed"]:
+                            click_plan.append(close_gate["selector"])
+                elif (
+                    spec.action in OPEN_THEN_TYPE_ACTIONS
+                    and clicks_made == 3
+                    and close_gate is not None
+                    and close_gate.get("proceed")
+                ):
+                    # THE CLOSE PRESS. It dispatched nothing.
+                    closer_clicks += 1
                 elif control_kind == "switch" and clicks_made == 1:
                     # THE SWITCH WAS PRESSED; SAVE IS PRESSED ONLY IF THE
                     # BADGE, AND NOTHING ELSE, MOVED. Read in the dialog,
@@ -10318,7 +10395,12 @@ async def perform(
                 # (2026-09-27): no recipient box, one editor, one Send, the
                 # fill landed, and the box holds EXACTLY the grant's words.
                 send_gate = await named_profile.composer_send_gate(
-                    page, text=_text_component_of(spec, grant.target)
+                    page,
+                    text=_text_component_of(spec, grant.target),
+                    first_contact=(
+                        opened_gate is not None
+                        and opened_gate.get("path") == "first_contact"
+                    ),
                 )
                 if send_gate["proceed"]:
                     click_plan.append(send_gate["selector"])
@@ -10401,6 +10483,7 @@ async def perform(
             typed=fills_made > 0,
             badge_before=badge_before,
             witness=switch_fresh,
+            first_contact_after=first_contact_after,
         )
     except Exception as exc:  # noqa: BLE001 - the click already happened
         # WHERE TO GO AND LOOK, when the verification read itself failed.
@@ -10606,7 +10689,7 @@ async def perform(
             # would tell him his words had gone out when what happened was a
             # composer opening (2026-09-27). A typeahead suggestion was
             # subtracted for the same reason until ``send_message`` retired.
-            submit_clicks=clicks_made - opener_clicks,
+            submit_clicks=clicks_made - opener_clicks - closer_clicks,
             click_error=click_error,
         ),
         # WHAT WAS PUT INTO THE COMPOSER FROM THIS MACHINE, and it sits beside
@@ -10640,6 +10723,9 @@ async def perform(
             # ``typeahead_clicks`` field sat beside it until ``send_message``,
             # the one action that could fill it, was retired the same day.)
             "opener_clicks": opener_clicks,
+            # AND THE PRESS THAT ONLY CLOSED A FIRST CONTACT'S BUBBLE after
+            # its message was read sent (2026-09-28). It dispatched nothing.
+            "closer_clicks": closer_clicks,
         },
         # WHAT THE COMPOSER A NAMED-PERSON MESSAGE PRESS OPENED LOOKED LIKE,
         # BEFORE A WORD WAS TYPED (2026-09-27). Null for every other action.
@@ -10689,6 +10775,33 @@ async def perform(
                 "refused_condition": send_gate.get("refused_condition"),
                 "why": send_gate.get("why"),
                 "observed": send_gate.get("observed"),
+            }
+        ),
+        # WHAT THE CLOSE STEP SAW, for a first contact whose message read
+        # sent in place (2026-09-28). Null for every other action and path.
+        "close_gate": (
+            None
+            if close_gate is None
+            else {
+                "proceeded": bool(close_gate.get("proceed")),
+                "refused_condition": close_gate.get("refused_condition"),
+                "why": close_gate.get("why"),
+                "observed": close_gate.get("observed"),
+            }
+        ),
+        # WHICH COMPOSER THE MESSAGE PRESS OPENED, for message_from_profile:
+        # "conversation" or "first_contact" (2026-09-28). Null otherwise.
+        "message_path": None if opened_gate is None else opened_gate.get("path"),
+        # HOW LONG A FIRST CONTACT'S SEND TOOK TO BE DRAWN as a message in its
+        # bubble, read before the verdict (2026-09-28): whether it appeared
+        # inside the bound, and the milliseconds waited. Null for every other
+        # action and path.
+        "sent_words_wait": (
+            None
+            if first_contact_after is None
+            else {
+                "appeared": first_contact_after["wait"].get("appeared") is True,
+                "waited_ms": coerce.as_count(first_contact_after["wait"].get("waited_ms")),
             }
         ),
         # WHAT THE PUBLISH GATE SAW, for the composer.
