@@ -8431,6 +8431,7 @@ async def _verify_after(
     badge_before: Optional[dict[str, Any]] = None,
     witness: Optional[dict[str, Any]] = None,
     first_contact_after: Optional[dict[str, Any]] = None,
+    send_attempted: Optional[bool] = None,
 ) -> tuple[str, str, str]:
     """Read whether it landed, and read it somewhere the click did not reach.
 
@@ -8899,6 +8900,8 @@ async def _verify_after(
                 held_in_place=first_contact_after["held"],
                 typed=typed,
                 conversation_is_theirs=sent_reading.get("holding_title_kind") == "owner",
+                # Read only after the press: Send WAS pressed.
+                send_attempted=True,
             )
             return sent_state, sent_why, ""
         held = await named_profile.composer_holds(page, text) if typed else None
@@ -8915,6 +8918,9 @@ async def _verify_after(
             conversation_is_theirs=(
                 not theirs.get("error") and theirs.get("bubble_title_names_owner") is True
             ),
+            # A SEND NEVER PRESSED READS "NOT SENT" (the call of 2026-09-28
+            # 19:48): nothing can have left, and a retry is safe.
+            send_attempted=send_attempted,
         )
         return state, why, ""
 
@@ -9096,6 +9102,7 @@ async def _first_contact_after_send(
         held_in_place=sent_held,
         typed=True,
         conversation_is_theirs=sent_reading.get("holding_title_kind") == "owner",
+        send_attempted=True,
     )
     return {"wait": sent_wait, "held": sent_held, "after": sent_reading, "state": sent_state}
 
@@ -9694,6 +9701,19 @@ def typed_text_residue(
             "'verification', not here."
         ),
     }
+
+
+def _typed_text_with_the_box(
+    block: Optional[dict[str, Any]], spec: WriteSpec, words_left: Optional[bool]
+) -> Optional[dict[str, Any]]:
+    """A Message from a profile's typed-text block, with WHERE HIS WORDS ARE
+    read in place as the verdict is written (``words_left_in_the_box``: True,
+    False, or None when it could not be told) -- beside the counts' inference,
+    so a caller told "not sent" knows a draft may be there (the call of
+    2026-09-28 19:48). Every other action's block is as it was."""
+    if block is None or spec.action not in OPEN_THEN_TYPE_ACTIONS:
+        return block
+    return {**block, "words_left_in_the_box": words_left}
 
 
 class _PerformRefused(WriteAttemptError):
@@ -10546,6 +10566,11 @@ async def perform(
             badge_before=badge_before,
             witness=switch_fresh,
             first_contact_after=first_contact_after,
+            # WHETHER SEND WAS EVER LET THROUGH (the call of 2026-09-28 19:48):
+            # a Send the last-moment check never passed was never pressed,
+            # and nothing can have left. A Send it passed was pressed, or its
+            # press raised -- either may have landed, and keeps "unknown".
+            send_attempted=send_gate is not None and send_gate.get("proceed") is True,
         )
     except Exception as exc:  # noqa: BLE001 - the click already happened
         # WHERE TO GO AND LOOK, when the verification read itself failed.
@@ -10585,6 +10610,15 @@ async def perform(
                     "in this package, not a statement that no surface exists."
                 )
             )
+        )
+
+    # WHERE HIS WORDS ARE NOW, read in place as the verdict is written (the
+    # call of 2026-09-28 19:48): whether the one composer holds exactly them.
+    # A Message from a profile only; a measurement, never a gate.
+    words_left_in_the_box: Optional[bool] = None
+    if spec.action in OPEN_THEN_TYPE_ACTIONS:
+        words_left_in_the_box = await named_profile.words_in_the_box(
+            page, _text_component_of(spec, grant.target)
         )
 
     # THE LABELS THE RE-READ CONTROL WEARS, taken AFTER ``_verify_after`` has
@@ -10743,7 +10777,7 @@ async def perform(
         # it, because it is a fact about HIS SCREEN rather than about this
         # server's click, and a reader looking for consequences should not
         # have to find it under a diagnostic.
-        "typed_text": typed_text_residue(
+        "typed_text": _typed_text_with_the_box(typed_text_residue(
             spec,
             fills_made=fills_made,
             # THE SUBMITS, NOT THE CLICKS. A named-person Message press only
@@ -10754,7 +10788,7 @@ async def perform(
             submit_clicks=clicks_made - opener_clicks - closer_clicks,
             click_error=click_error,
             words_already_in_place=drafts_used > 0,
-        ),
+        ), spec, words_left_in_the_box),
         # WHAT WAS PUT INTO THE COMPOSER FROM THIS MACHINE, and it sits beside
         # "clicked" rather than inside it for the same reason "typed_text"
         # does: it is a fact about WHAT LEFT THIS MACHINE, not a diagnostic
