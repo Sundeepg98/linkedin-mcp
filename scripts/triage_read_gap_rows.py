@@ -188,6 +188,26 @@ TRIAGE: dict[str, tuple[str, str, str]] = {
     # P S5 LEFT 2026-09-28 (lane S's offline frontier) -- see LEFT THE
     # READ-GAP SET below.
     # ---- network.md ----
+    # N 30, N 31, N 65 AND N 103 ENTERED 2026-09-28 (lane L5, the
+    # orchestrator's call of 12:32): EXCLUDED-RULED on R4 until
+    # NAMED-PROFILE-READ-BEHIND-A-GRANT narrowed it, each blocker named in
+    # its own cell. Not RETURNED: that class is lane R's, and its marker says
+    # so. Each carries the cost its cell measured.
+    "N 30": ("SERVED", "", "the first-degree capture draws the list as a "
+                           "people search with connectionOf, and the shipped "
+                           "people search composes it and returns people "
+                           "records (the route N 172 is COVERED-UNFIRED on), "
+                           "never fired; the move to COVERED-UNFIRED is the "
+                           "orchestrator's"),
+    "N 31": ("BUILDABLE", "", "the capture draws the shared connections as a "
+                              "people search with network and connectionOf; "
+                              "the shipped search composes connectionOf but "
+                              "not the network facet, and the shipped people "
+                              "reader reads the page it would open"),
+    "N 65": ("RULING", "", "the Interests section is on another member's "
+                           "profile, R4's refusal until 2026-09-28"),
+    "N 103": ("RULING", "", "the similar-profiles rail is on another "
+                            "member's profile, R4's refusal until 2026-09-28"),
     "N 61": ("ADDRESS", "REFUSED", "both followed-hashtag spellings contain "
                                    "/follow, matching inside the word "
                                    "'followed' -- a substring hit, not a "
@@ -435,6 +455,16 @@ DECIDED_SINCE_TRIAGE: dict[str, str] = {
              "name-returning reader held to PEOPLE-DATA-MITIGATIONS on lane "
              "G's people-record foundation, and a capture; bucket-3 gate "
              "MEASURE (the foundation landed 2026-09-27; the cell names the capture it waits on)",
+    # ---- decided 2026-09-28: the orchestrator's call of 12:32 applied
+    # NAMED-PROFILE-READ-BEHIND-A-GRANT to these two (lane L5) ----
+    "N 65": "NAMED-PROFILE-READ-BEHIND-A-GRANT: the read of a profile he names "
+            "is ruled and built (linkedin_read_named_profile); the row waits on "
+            "a capture of the section -- the save C-P7 specifies for N 178 -- "
+            "and a reader extension over it; NEEDS-TARGET",
+    "N 103": "NAMED-PROFILE-READ-BEHIND-A-GRANT: the read of a profile he names "
+             "is ruled and built (linkedin_read_named_profile); the row waits "
+             "on a capture showing the rail, which the first-degree capture "
+             "does not, and a reader extension over it; NEEDS-TARGET",
     "P C8": "D4-NO-OWN-BROWSER-CONTEXT (registered 2026-09-24): no context "
             "of its own; the download transport is built on the attached "
             "browser (cdp_download.py), and what holds the row now is the "

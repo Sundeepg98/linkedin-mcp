@@ -1080,18 +1080,28 @@ PINNED = {
     #: 741 AT LANE L8'S MERGE OF MASTER (2026-09-27), MEASURED: the achievable
     #: move, with `O6-O20`'s 14 unchanged.
     #: 742 AT LANE L5'S MERGE OF MASTER 52b55b6 (2026-09-27), MEASURED: `N 2` left the exclusions.
-    "capabilities_achievable": 742,
+    #: 746 ON LANE L5'S ORDER OF 2026-09-28 12:32, MEASURED: `N 30`, `N 31`, `N 65`
+    #: and `N 103` EXCLUDED-RULED -> GAP, their R4 ground narrowed by
+    #: NAMED-PROFILE-READ-BEHIND-A-GRANT (the orchestrator's call).
+    "capabilities_achievable": 746,
     #: 43 AT LANE L8'S MERGE OF MASTER (2026-09-27), MEASURED: 29 rows returned
     #: to GAP when OUTWARD-CLASSES-BUILT-BEHIND-GRANTS retired their key, and
     #: `P P2` at the merge (-30); `P N27` and `P P2` then EXCLUDED-RULED on
     #: ACCOUNT-DESTRUCTION-STAYS-MANUAL (+2).
     #: 42 AT LANE L5'S MERGE OF MASTER 52b55b6 (2026-09-27), MEASURED: `N 2` EXCLUDED-RULED -> COVERED-UNFIRED, its R4 ground
     #: dissolved by THIRD-PARTY-PROFILE-FOR-A-NAMED-TARGET.
-    "out_of_scope": 42,
+    #: 38 ON LANE L5'S ORDER OF 2026-09-28 12:32, MEASURED: `N 30`, `N 31`, `N 65`
+    #: and `N 103` EXCLUDED-RULED -> GAP, their R4 ground narrowed by
+    #: NAMED-PROFILE-READ-BEHIND-A-GRANT (the orchestrator's call).
+    "out_of_scope": 38,
     #: 727 AT LANE L8'S MERGE OF MASTER (2026-09-27), MEASURED: stated rows 770
     #: less out_of_scope 43: the returns, `P A23b`, and the two re-exclusions.
     #: 728 AT LANE L5'S MERGE OF MASTER 52b55b6 (2026-09-27), MEASURED: stated rows 770 less out_of_scope 42 (`N 2`).
-    "achievable": 728,
+    #: 732 ON LANE L5'S ORDER OF 2026-09-28 12:32, MEASURED: `N 30`, `N 31`, `N 65`
+    #: and `N 103` EXCLUDED-RULED -> GAP, their R4 ground narrowed by
+    #: NAMED-PROFILE-READ-BEHIND-A-GRANT (the orchestrator's call). Stated rows 770
+    #: less out_of_scope 38.
+    "achievable": 732,
     #: 205 AT THE ORCHESTRATOR'S MERGE OF LANE L7'S P B9 (2026-09-27), MEASURED: P B9
     #: (Premium badge) moved GAP -> COVERED-UNFIRED, released like the intro edits.
     #: 179 AT LANE L8'S MERGE OF MASTER (2026-09-27), MEASURED: the 30 returned
@@ -1124,7 +1134,10 @@ PINNED = {
     #: and is re-gated READER -> MEASURE: no capture draws its section.
     #: 186 AT LANE S'S MERGE OF MASTER 0867bda (2026-09-28), MEASURED on the
     #: merged tree: master's `M M2` back to GAP with this branch's four.
-    "adjudicated": 186,
+    #: 182 ON LANE L5'S ORDER OF 2026-09-28 12:32, MEASURED: `N 30`, `N 31`, `N 65`
+    #: and `N 103` EXCLUDED-RULED -> GAP, their R4 ground narrowed by
+    #: NAMED-PROFILE-READ-BEHIND-A-GRANT (the orchestrator's call).
+    "adjudicated": 182,
     #: THE LIVE LANE'S FOUR ROWS, RE-DERIVED AT EACH OF ITS MERGES OF MASTER
     #: (2026-09-24; last over lane S): four rows fired live and banked
     #: (`_audit/2026-09-23-live-lane-session-1.md`). `P G6` COVERED-UNFIRED ->
@@ -1228,7 +1241,10 @@ PINNED = {
     #: `M M53`, `N 195`, `P S5` and `J 107` left GAP (see `adjudicated`).
     #: 584 AT LANE S'S MERGE OF MASTER 0867bda (2026-09-28), MEASURED on the
     #: merged tree: master's `M M2` back in GAP, this branch's four out.
-    "gap": 584,
+    #: 588 ON LANE L5'S ORDER OF 2026-09-28 12:32, MEASURED: `N 30`, `N 31`, `N 65`
+    #: and `N 103` EXCLUDED-RULED -> GAP, their R4 ground narrowed by
+    #: NAMED-PROFILE-READ-BEHIND-A-GRANT (the orchestrator's call).
+    "gap": 588,
     #: 18 AT LANE L5'S MERGE OF MASTER 52b55b6 (2026-09-27), MEASURED: `M M1` built (`linkedin_message_from_profile`).
     #: 16 ON LANE L5'S ORDER OF 2026-09-27 23:36, MEASURED:
     #: `linkedin_send_message` RETIRED (aimed by a name): `M M2` to GAP and `N
@@ -1285,7 +1301,11 @@ PINNED = {
     #: shipped page and never fired, so they leave buckets 3 and 1-by-side and
     #: enter bucket 1 held by no ruling. `P K1` stays GAP and is re-gated
     #: READER -> MEASURE: no capture draws its section.
-    "gap_read": 98,
+    #: 102 ON LANE L5'S ORDER OF 2026-09-28 12:32, MEASURED: `N 30`, `N 31`, `N 65`
+    #: and `N 103` EXCLUDED-RULED -> GAP, their R4 ground narrowed by
+    #: NAMED-PROFILE-READ-BEHIND-A-GRANT (the orchestrator's call). All four are R
+    #: rows, and all four enter bucket 3.
+    "gap_read": 102,
     #: 151, not the 152 published by `_audit/2026-09-21-the-write-ceiling.md`.
     #: That document scoped itself to `profile.md`, `network.md` and
     #: `messaging-and-content.md`; measured at HEAD those three carry W 151 and
@@ -1416,10 +1436,19 @@ PINNED = {
     #: shipped page and never fired, so they leave buckets 3 and 1-by-side and
     #: enter bucket 1 held by no ruling. `P K1` stays GAP and is re-gated
     #: READER -> MEASURE: no capture draws its section.
-    "b3_admitted": 43,
+    #: 45 ON LANE L5'S ORDER OF 2026-09-28 12:32, MEASURED: `N 30`, `N 31`, `N 65`
+    #: and `N 103` EXCLUDED-RULED -> GAP, their R4 ground narrowed by
+    #: NAMED-PROFILE-READ-BEHIND-A-GRANT (the orchestrator's call). `N 30` and `N
+    #: 31`: their lists are people searches the read door admits, gated
+    #: BUILT-UNFIRED and READER.
+    "b3_admitted": 45,
     #: 38 AT THE ORCHESTRATOR'S MERGE OF LANE Y2'S FOLLOW-UP (2026-09-27), MEASURED:
     #: the P-R settings block itemized into 22 rows (P2-P23; Delete Data EXCLUDED-RULED).
-    "b3_refused": 38,
+    #: 40 ON LANE L5'S ORDER OF 2026-09-28 12:32, MEASURED: `N 30`, `N 31`, `N 65`
+    #: and `N 103` EXCLUDED-RULED -> GAP, their R4 ground narrowed by
+    #: NAMED-PROFILE-READ-BEHIND-A-GRANT (the orchestrator's call). `N 65` and `N
+    #: 103`: sections of a member's profile, a page this table's read door refuses.
+    "b3_refused": 40,
     "b3_no_address": 1,
     "b3_needs_session": 14,
     "b3_undetermined": 2,
@@ -1481,7 +1510,12 @@ PINNED = {
     #: shipped page and never fired, so they leave buckets 3 and 1-by-side and
     #: enter bucket 1 held by no ruling. `P K1` stays GAP and is re-gated
     #: READER -> MEASURE: no capture draws its section.
-    "b3_blocked_on_nothing": 0,
+    #: 1 ON LANE L5'S ORDER OF 2026-09-28 12:32, MEASURED: `N 30`, `N 31`, `N 65`
+    #: and `N 103` EXCLUDED-RULED -> GAP, their R4 ground narrowed by
+    #: NAMED-PROFILE-READ-BEHIND-A-GRANT (the orchestrator's call). `N 31`,
+    #: ADMITTED and gated READER: people search composes `connectionOf` but not
+    #: LinkedIn's `network` facet, and nothing blocks building it.
+    "b3_blocked_on_nothing": 1,
     #: BUCKET 1 BY WHAT HOLDS EACH ROW, DERIVED from the census and the
     #: holds in `scripts/ruling_holds.py`, BY THE STATUS OF THE HOLD: standing,
     #: relayed, pending, or none. They sum to `unfired`, and `PINNED_B1_ROWS`
