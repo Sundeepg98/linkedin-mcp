@@ -149,6 +149,19 @@ def test_a_point_label_of_another_shape_is_not_a_point():
     assert not xhtml_page.anywhere("Zzqpointplant", result)
 
 
+@pytest.mark.parametrize("drawn", ["Past 2 weeks", "90"])
+def test_a_filter_label_of_another_shape_is_not_the_range(drawn):
+    """ONLY "Past <n> days" IS A RANGE. A filter drawn in weeks, or as a bare
+    number, is not guessed into days: the range reads null, and the reading
+    still returns. Found by a planted mutation that survived every other test
+    (a range pattern that also took a bare number)."""
+    mutate = ("() => { document.querySelector('label').firstChild.textContent = '"
+              + drawn + "'; }")
+    result = _read(mutate)
+    assert result["time_range_days"] is None, result["time_range_days"]
+    assert result["counts"] == {"profile_views": 41, "recruiter_views": 3}
+
+
 # ---------------------------------------------------------------------------
 # 2. The viewers
 # ---------------------------------------------------------------------------
