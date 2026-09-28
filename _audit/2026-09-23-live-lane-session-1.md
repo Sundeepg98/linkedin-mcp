@@ -3778,3 +3778,200 @@ impact gate against `c2825a4` widened to the full suite (226 of 287 files) and
 PASSED, 12475 tests in 31 min 44 s, on a box a second full suite shared. The
 census instruments exit 0 but the asserted-names check, on the same eight
 findings in other waves' documents.
+
+## Live session 5, 2026-09-28
+
+The orchestrator's GO of 21:00 IST, LIVE SESSION 5, under the operator's
+standing instruction. The session ran from 21:03 to 21:15 on the Chrome the
+orchestrator had started on port 9224 at 12:40 -- the instance of sessions 3
+and 4 -- which this lane never started, restarted or closed. **23 of the 40
+loads, 0 of the 5 searches. `M M1` SENT AND VERIFIED -- the first outward act
+of this server proven live -- and `P B9` PROVEN BOTH WAYS, after ONE RESTORE
+FAILED and the ordered recovery restored it. `M M17` was typed and not sent.
+Chrome was still up at the end.**
+
+**THE OPERATOR'S NAMED LIVE-PROOF TARGETS appear nowhere in this repository.**
+They live only in the gitignored identity key; every step below names them by
+role, and a key POSITION, where one is given, is 0-based.
+
+### The go
+
+The branch was master: `1db8992`, pushed by the orchestrator, CI green (run
+36442529675, checked by its sha before the first load). Chrome's port was owned
+by the session's process, and no other test suite ran on the box. The harness
+tests, `tests/test_first_contact_message.py` and
+`tests/test_the_editor_waits_for_its_dialog.py`: 217 passed. **THE ATTACH
+CHECK: PASS `[0, 1, 0]`** -- the hermetic count's first live use, the triple
+the fix predicted: one artifacts folder, the child's own, appeared in its own
+directory during the attach and was gone after.
+
+### The session, load by load
+
+    n   time      key (the ledger's)    surface        what it read
+    1   21:03:47  m1_preview            in             M M1: the brother resolved, 1st degree
+    2   21:04:15  m1_confirm            in             M M1: SENT, verified
+    3   21:04:52  m17_resolve           messaging      the list: 1 row carries a spelling
+    4   21:05:13  m17_open_by_click     messaging      the thread, opened by its row
+    5   21:05:41  m17_preview           messaging      M M17: the brother resolved
+    6   21:06:10  m17_confirm           messaging      M M17: typed, NOT SENT
+    7   21:06:39  m17_confirm           messaging      the reply's fresh-load verification
+    8   21:07:22  edit_read             in             his intro editor, read; the plan
+    9   21:07:50  B9_test_preview       in             P B9 on -> off: the preview
+    10  21:08:12  B9_test_confirm       mypreferences  his sharing setting: OFF
+    11  21:08:34  B9_test_confirm       in             the editor: one press, Save
+    12  21:09:03  B9_test_confirm       in             the fresh render: off. SAVED
+    13  21:09:33  B9_restore_preview    in             P B9 off -> on: the preview
+    14  21:09:55  B9_restore_confirm    mypreferences  his sharing setting: OFF
+    15  21:10:24  B9_restore_confirm    in             one press; the switch did not move
+    16  21:10:58  B9_restore_confirm    in             the fresh render: off. NOT RESTORED
+    17  21:11:28  reread_B9             in             the re-read ordered: off
+    18  21:12:02  notifications         notifications  N 20, N 45: neither kind drawn
+    19  21:12:55  B9_recovery_preview   in             the ordered recovery: the preview
+    20  21:13:22  B9_recovery_confirm   mypreferences  his sharing setting: OFF
+    21  21:13:54  B9_recovery_confirm   in             one press; the switch moved; Save
+    22  21:14:23  B9_recovery_confirm   in             the fresh render: on. RESTORED
+    23  21:14:52  reread_B9             in             confirmed: on, Open Profile on
+
+By surface: in 14, messaging 5, mypreferences 3, notifications 1. The closest
+two loads stood 20.2 s apart. Loads 1 to 17 and 19 to 23 were made by the lane's
+outward runner, which took the harness's ledger, counter and driver lock by
+import, and load 18 by the harness.
+
+### 2a: M M1 -- SENT, verified
+
+The preview resolved the brother from the link he supplied: key position 6, the
+family initial, 1st degree. The confirm pressed the owner's one visible Message
+control; the new-message composer was drawn in 1.4 s, and **every link of lane
+L5's first-contact chain held**: one bubble titled as a new message, one
+recipient box holding one committed recipient whose name is the profile's
+(compared in the page), the search field empty, the recipient card linking his
+profile, the pressed link naming his member, Send inside the bubble. **The
+composer opened EMPTY** -- session 4's unsent words were not kept as a draft,
+which settles that section's open question -- so the draft rule did not apply
+and his words were typed: 65 of 65 characters, exact. **Send turned on in
+228 ms** (L5's wait, `send_enabled_wait`), the last-moment check held, and Send
+was pressed. His words were drawn as the new conversation's message in 1.4 s,
+the close gate found the bubble's one "Close" header control and pressed it
+(three clicks in all: Message, Send, Close), and **the verification read
+`message_sent`.**
+
+### 2b: M M17 -- typed, NOT SENT
+
+The thread was resolved as ordered: the receipt-safe list drew 10 rows, 0
+unread, and exactly one carries a spelling -- at the top, one-to-one, read: the
+conversation `M M1` had just made. It was opened by its row (a navigation
+counted by hand) and its header carries the spelling. The reply preview
+resolved the brother. The confirm typed his words and U+1F44D -- 67 of 67
+characters, exact -- and **the reply's send gate refused at
+`4_fill_not_landed`**: Send read disabled straight after the fill. **Send was
+never pressed** (0 clicks). It is session 4's `M M1` race on the REPLY path:
+`threads.reply_send_gate` reads Send the moment the fill lands, and lane L5's
+wait was built for the first-contact path only. The tool's verdict is `unknown`,
+its words having been left in the reply box; its fresh reload of the thread
+found no reply sent. **NOT MEASURED:** whether LinkedIn keeps those words as a
+draft of that conversation's reply. No retry, by the order; lane L5 is building
+the reply path's wait, and `M M17` re-fires in session 6.
+
+### 3: the edits -- P B9 proven both ways, one restore failing first
+
+**THE READ (load 8)** gave the plan of session 4: `P B9` on, `P A21` the unset
+option then its one entry, `P A19` unset then its pronouns; the pronouns'
+visibility control read All LinkedIn members, recorded to be compared after
+`A19`. Each write read his sharing setting OFF first, and the editor's dialog
+was drawn at the first poll of the package's new wait every time.
+
+**P B9, on -> off (loads 9-12): SAVED.** One press; straight after it the badge
+read off and Open Profile on -- the badge alone moved -- so Save was pressed, the
+editor closed, and the fresh render read the badge off, Open Profile on.
+
+**P B9, off -> on (loads 13-16): THE RESTORE FAILED.** One press, no click
+error, and straight after it the badge STILL read off (`the_badge_did_not_move`),
+so the tool -- as designed -- did not press Save, and the fresh render read
+`value_unchanged`: off. **His Premium badge was left HIDDEN**, the value ruled
+benign should a restore fail. The runner's STOP-ALL marker refused every later
+edit; the re-read the order requires (load 17) read the badge off, shape
+`{L3D0n3:7bc10cea}`, the original on, `{L2D0n2:cb21795d}`, and Open Profile on;
+the orchestrator was told at once.
+
+**THE RECOVERY, on the orchestrator's order of 21:13 (loads 19-22): RESTORED.**
+One restore through the tool as shipped: the same press, about two minutes after
+the one that failed, flipped the switch -- badge on, Open Profile on, straight
+after it -- Save was pressed, the editor closed, and the fresh render read on.
+**One read-only load (23) confirmed it: the badge on, Open Profile on.** The
+order's step (b), a wait built in-session, was not needed live.
+
+**WHAT THE FAILURE MEASURED:** the same off -> on press, minutes apart, first did
+not flip the switch in the in-dialog read taken straight after it, and then did.
+The press-then-read is intermittent -- the class of today's Send race -- and a
+bounded wait after the press, for the control to reach the requested state, is
+the orchestrator's offline item (below).
+
+**P A21 AND P A19: HELD** by the orchestrator at 21:16 for session 6 -- the select
+path's press-then-read is the same class of race, and a failed restore there
+would leave a visible change (his school hidden, his pronouns unset). The
+STOP-ALL marker holds them until the wait lands.
+
+### 4: the rows the budget allowed, and what did not arise
+
+* **`N 20` and `N 45`, A FIFTH READING, NOT SHOWN:** 9 notifications, 1 unread when
+  read, 0 of either kind.
+* **`M M33` and `M M49`:** the list read 0 unread rows for the first time, but
+  neither was fired -- the orchestrator's order put them after the edits, and the
+  session ended on the recovery. Session 6 may fire them.
+* **Fix 1's keeper path and fix 4's trigger step** did not arise (C8 was not
+  pressed).
+
+### Chrome's end
+
+At 21:15 port 9224 was listening, owned by the process the orchestrator started
+at 12:40, and Chrome's DevTools target list -- read over HTTP, nothing attached
+-- held exactly 1 page, a blank tab, and 0 LinkedIn tabs.
+
+### The census moves, and the pins
+
+**CORRECTS:** `_audit/_census/messaging-and-content.md` -- row `M1` read COVERED-UNFIRED, refused or not sent at every earlier fire; it was sent on the first-contact path in session 5 and verified, and moves to COVERED-PROVEN.
+
+**CORRECTS:** `_audit/_census/profile.md` -- row `B9` read COVERED-UNFIRED, its session-4 test refused before any press; in session 5 both directions were measured -- one restore failing before the recovery held -- and it moves to COVERED-PROVEN.
+
+**TWO ROWS MOVED, EACH ON ITS OWN CELL'S BAR:**
+
+    row     the bar                                   what session 5 read
+    M M1    the message sent to the person he named   message_sent, on the first-contact
+                                                      chain, every link held
+    P B9    the badge shown and hidden, verified      on -> off saved; off -> on saved
+              on a fresh render, only it moving         at the second attempt; confirmed
+
+**A DATED NOTE, NO STATE:** `M M17`, `N 20`, `N 45`, `P A21`, `P A19`.
+
+**THE COUNTS**, file-wide by `scripts/count_census_states.py`:
+
+    slice         COVERED-PROVEN   COVERED-UNFIRED
+    messaging        9 -> 10          9 -> 8
+    profile         25 -> 26          5 -> 4
+
+**THE PINS, MEASURED AND RE-PINNED, NEVER SUMMED:** `--check` named five figures
+and two bucket-1 rows, and nothing else:
+
+    delivered_strict    94 -> 96
+    unfired             36 -> 34
+    b1_standing         19 -> 18
+    b1_no_ruling        17 -> 16
+    b1_released          4 -> 3
+    PINNED_B1_ROWS      OPERATOR-NAMES-THE-TARGET loses M M1; NO_RULING loses P B9
+
+One tracked copy, `tests/fixtures/live5/notifications.html`; the fixture tests
+count the new directory.
+
+### To session 6
+
+* `M M17`, after lane L5's reply-path Send wait; `M M10` still needs an older
+  thread.
+* `P A21` and `P A19`, once each, after the bounded wait after the press lands;
+  `A19`'s pronoun visibility compared before and after.
+* `M M33` and `M M49`, the unread row having gone; `N 20` and `N 45`.
+* Fix 1's keeper path and fix 4's trigger step, the first time either arises.
+
+### Scratch, declared disposable
+
+The session-5 runner and its self-check, the census, delta and pin editors, in
+the lane's scratch folder. Nothing loaded uncounted.
