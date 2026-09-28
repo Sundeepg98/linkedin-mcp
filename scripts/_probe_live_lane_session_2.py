@@ -61,6 +61,14 @@ Written under ``_state/live2/`` (gitignored), never committed:
 * tool envelopes RAW where the tool is name-free by its own contract, and
   REDUCED (:func:`reduce_envelope`) where it can carry a person.
 
+**THE ONE STEP THAT WRITES INTO THE TREE, AND IT LOADS NOTHING:**
+``--export-fixtures`` (:func:`export_fixtures`) writes each skeleton, and his
+settings page reduced to one, as a TRACKED copy under
+``tests/fixtures/live2/`` (:func:`tracked_copy`): every keyed shape of a text
+becomes one ``x``, so neither a hash nor a length of anybody's words leaves
+the box. What reaches a commit is then decided by the identity gate and the two
+people guards, as for any fixture.
+
 ## THE ANOMALY RULE
 
 An exception, an error envelope, an auth wall or a challenge phrase stops
@@ -630,8 +638,11 @@ FURNITURE: frozenset[str] = frozenset({
     "Members", "People", "Posts", "Events", "Groups", "Companies", "All filters", "Reset",
     "Join", "Request to join", "Attend", "Register", "Attendees", "Show results",
     "Next", "Previous",
-    # the settings page
-    "Sharing profile edits", "On", "Off", "Back", "Visibility", "Account preferences",
+    # the settings page: the (b) reader's first name for the switch, and the
+    # words the live page drew on 2026-09-28 -- its heading, and the switch's
+    # own label, which a skeleton must keep for a label to name its control
+    "Sharing profile edits", "Share profile updates", "Share key profile updates",
+    "On", "Off", "Back", "Visibility", "Account preferences",
     "Sign in & security", "Data privacy", "Advertising data",
     # everywhere
     "Close", "Dismiss", "Cancel", "Save", "Done", "Edit", "Menu",
@@ -785,6 +796,74 @@ def skeleton_of(page_html: str, key: bytes) -> str:
     parser.feed(page_html)
     parser.close()
     return "<!doctype html>\n" + "\n".join(parser.out)
+
+
+#: A keyed shape as :func:`value_shape` writes it: letters, digits, length, hash.
+_KEYED_SHAPE = re.compile(r"\{L(\d{1,7})D(\d{1,7})n(\d{1,7}):([0-9a-f]{8})\}")
+
+#: An id-reference attribute as :class:`_Skeleton` writes one: after a space,
+#: its value in double quotes. The longest names first, so ``for`` never
+#: claims the tail of a longer name.
+_ID_REF_WRITTEN = re.compile(
+    r'(?<= )(' + "|".join(sorted(ID_REF_ATTRIBUTES, key=len, reverse=True)) + r')="([^"]*)"'
+)
+
+#: Where the TRACKED copies of this session's skeletons live.
+FIXTURES = _ROOT / "tests" / "fixtures" / "live2"
+
+
+def tracked_copy(skeleton: str) -> str:
+    """A session skeleton as a TRACKED file may hold it. PURE.
+
+    THE KEYED HASHES STAY ON THIS BOX. Every shape of a non-empty value
+    becomes ONE ``x`` (an empty one stays empty) -- the alphabet both of the
+    repository's people guards admit as a value reduced to shape
+    (``is_reduced_to_shape`` in
+    ``tests/test_fixtures_hold_only_synthetic_people.py``, ``SHAPED_SLUG`` in
+    ``tests/test_no_committed_identity.py``). So a tracked copy says of
+    anybody's text only that it was there: not its length, which a name's
+    shape would leak, and no hash, which whoever holds the key could test
+    against a list of names. Rendering the LENGTH was tried first and
+    rejected on its size: a shape stands for values of any length, and
+    written out in full the 28 copies came to 14 MB. The one exception is an
+    id reference: ``k`` and the 8-hex hash, the same for an id and every
+    attribute naming it, because an id names a control, never a person, and
+    a label must still find its control in the copy.
+
+    Anything outside ASCII becomes a character reference, which a parser
+    reads back as the same character: the copy is strict ASCII and draws the
+    same document. Tags, attributes, classes, roles, ARIA states, LinkedIn's
+    path words and :data:`FURNITURE` are the skeleton's, untouched.
+    """
+    def ids(match: "re.Match[str]") -> str:
+        tokens = []
+        for token in match.group(2).split():
+            keyed = _KEYED_SHAPE.fullmatch(token)
+            tokens.append("k" + keyed.group(4) if keyed else token)
+        return match.group(1) + '="' + " ".join(tokens) + '"'
+
+    reduced = _KEYED_SHAPE.sub(lambda m: "x" if int(m.group(3)) else "", _ID_REF_WRITTEN.sub(ids, skeleton))
+    return reduced.encode("ascii", "xmlcharrefreplace").decode("ascii")
+
+
+def export_fixtures() -> dict[str, int]:
+    """Every skeleton of this session, and his settings page reduced to one,
+    written as TRACKED copies (:func:`tracked_copy`) under
+    ``tests/fixtures/live2/``. Zero loads; attaches to nothing. Returns each
+    copy's name and size -- the only things printed."""
+    FIXTURES.mkdir(parents=True, exist_ok=True)
+    written: dict[str, int] = {}
+    for path in sorted(STATE.glob("*.skeleton.html")):
+        name = path.name[: -len(".skeleton.html")]
+        text = tracked_copy(path.read_text(encoding="utf-8"))
+        (FIXTURES / (name + ".html")).write_text(text, encoding="ascii", newline="\n")
+        written[name] = len(text)
+    raw = STATE / "setting.html"
+    if raw.exists():
+        text = tracked_copy(skeleton_of(raw.read_text(encoding="utf-8"), _shape_key()))
+        (FIXTURES / "setting.html").write_text(text, encoding="ascii", newline="\n")
+        written["setting"] = len(text)
+    return written
 
 
 def reduce_envelope(value: Any, key: bytes, field: str = "") -> Any:
@@ -1864,6 +1943,10 @@ async def _run_keys(keys: list[str], items: dict[str, str], capture: bool) -> in
 async def main_async(argv: list[str]) -> int:
     if "--attach-child" in argv:
         return await _attach_child()
+    if "--export-fixtures" in argv:
+        for name, size in export_fixtures().items():
+            say("    tracked copy " + name + ": " + str(size) + " characters")
+        return 0
     items = parse_items(argv)
     keys = selected(argv, items)
     capture = "--no-capture" not in argv

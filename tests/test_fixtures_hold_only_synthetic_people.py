@@ -230,6 +230,21 @@ SYNTHETIC_GROUPS = frozenset(
 #: table for invented people.
 ACCEPTED = SYNTHETIC_PEOPLE | INVENTED_NAMES | SYNTHETIC_GROUPS
 
+#: LINKEDIN'S OWN WORDS, MEASURED AS THE FIRST VISIBLE TEXT OF A MEMBER LINK,
+#: AHEAD OF WHATEVER PERSON THE LINK NAMES. The slot rule, NARROWED as this
+#: file's own remedy says, never a declaration: such a word is SKIPPED and not
+#: taken, so the member link's NEXT visible text is read as its person, and a
+#: name that follows one of these words is convicted exactly as before
+#: (:func:`test_THIS_CONTROL_CAN_FAIL_an_interface_word_does_not_hide_the_name_after_it`).
+#: Only the whole value is skipped, compared exactly.
+#:
+#: MEASURED 2026-09-28 in the live lane's session-2 skeletons
+#: (``tests/fixtures/live2/``), 19 sites, each word a LinkedIn label kept
+#: verbatim by that capture's closed word list: "Send" 11 (his profile 9, the
+#: brother's profile 2), "Show all" 4 (2 and 2), "Premium" 4 (the profile
+#: card in the left rail of the jobs, groups, notifications and post pages).
+MEMBER_LINK_INTERFACE_WORDS = frozenset({"Premium", "Send", "Show all"})
+
 # ===========================================================================
 # THE SLOTS
 # ===========================================================================
@@ -526,6 +541,8 @@ class _SlotReader(HTMLParser):
                 self._add(MEMBER_HEADING, text, line, col)
             return
         if member.reads_text and not member.text_taken:
+            if text in MEMBER_LINK_INTERFACE_WORDS:
+                return
             member.text_taken = True
             self._add(MEMBER_TEXT, text, line, col)
 
@@ -812,6 +829,31 @@ def test_THIS_CONTROL_CAN_FAIL_one_real_letter_makes_a_shape_a_candidate():
     planted = PLANTS[MEMBER_TEXT].format(name=SHAPED_BUT_ONE)
     found = violations(PLANTED_PATH, planted, ACCEPTED)
     assert len(found) == 1 and "[%s]" % MEMBER_TEXT in found[0], found
+
+
+def test_an_interface_word_first_in_a_member_link_is_skipped_not_taken():
+    """The narrowing, as the session-2 skeletons draw it: the word first, the
+    person after it. The word is not a candidate; the person still is."""
+    for word in sorted(MEMBER_LINK_INTERFACE_WORDS):
+        planted = ('<a href="/in/xxxx/"><span>%s</span><span>%s</span></a>'
+                   % (word, SHAPED_NAME))
+        assert [(f.slot, f.value) for f in candidates_in(planted)] == [
+            (MEMBER_TEXT, SHAPED_NAME)
+        ], word
+        alone = '<a href="/in/xxxx/"><span>%s</span></a>' % word
+        assert candidates_in(alone) == [], word
+
+
+def test_THIS_CONTROL_CAN_FAIL_an_interface_word_does_not_hide_the_name_after_it():
+    """A real-looking name after a skipped word is convicted -- the skip moves
+    the slot to the next text, it never closes it -- and a word that only
+    CONTAINS an interface word is a candidate like any other."""
+    planted = ('<a href="/in/xxxx/"><span>Premium</span><span>%s</span></a>'
+               % PLANTED)
+    found = violations(PLANTED_PATH, planted, ACCEPTED)
+    assert len(found) == 1 and "[%s]" % MEMBER_TEXT in found[0], found
+    contains = '<a href="/in/xxxx/"><span>Premium %s</span></a>' % PLANTED
+    assert len(violations(PLANTED_PATH, contains, ACCEPTED)) == 1
 
 
 def test_a_name_on_the_invented_table_is_accepted_by_the_import():

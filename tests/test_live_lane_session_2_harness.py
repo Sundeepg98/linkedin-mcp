@@ -522,6 +522,71 @@ def test_the_first_read_row_skips_placeholders_and_unread_rows() -> None:
     assert harness.first_read_row(None) is None
 
 
+# --------------------------------------------------------------------------
+# The tracked copy: what a committed fixture of this session may hold.
+# --------------------------------------------------------------------------
+
+
+def _member_page(name: str) -> str:
+    return ("<!doctype html><html><body><main><p>" + name + "</p>"
+            "<a href='https://www.linkedin.com/in/" + SYNTHETIC_SLUG + "/'>" + name + "</a>"
+            "<span>Show all</span></main></body></html>")
+
+
+def test_a_tracked_copy_carries_no_keyed_hash_and_no_length() -> None:
+    skeleton = harness.skeleton_of(_member_page(INVENTED_NAME), KEY)
+    assert harness._KEYED_SHAPE.search(skeleton), "the control: the skeleton is keyed"
+    copy = harness.tracked_copy(skeleton)
+    assert not harness._KEYED_SHAPE.search(copy)
+    assert INVENTED_NAME not in copy and SYNTHETIC_SLUG not in copy
+    assert "\nx\n" in copy, "a text node is one x, whatever its length"
+    assert "https://www.linkedin.com/in/x/" in copy
+    assert "\nShow all\n" in copy, "LinkedIn's own words stay"
+    assert copy.isascii()
+
+
+def test_a_tracked_copy_passes_the_people_guard_its_keyed_skeleton_fails() -> None:
+    """The reason the copy exists: a keyed shape in a member link is a
+    candidate the fixture guard convicts; one x is a value reduced to shape."""
+    from tests.test_fixtures_hold_only_synthetic_people import (
+        ACCEPTED, PLANTED, PLANTED_PATH, violations)
+
+    skeleton = harness.skeleton_of(_member_page(PLANTED), KEY)
+    assert len(violations(PLANTED_PATH, skeleton, ACCEPTED)) == 1
+    assert violations(PLANTED_PATH, harness.tracked_copy(skeleton), ACCEPTED) == []
+
+
+async def test_a_tracked_copy_keeps_a_label_on_its_control(browser_page) -> None:
+    page = ("<!doctype html><html><body><main><div id='autoPrefs' aria-hidden='true'>"
+            "<p>Share key profile updates</p></div><span aria-hidden='true'>Off</span>"
+            "<input type='checkbox' role='switch' aria-labelledby='autoPrefs'>"
+            "<label for='other'>" + INVENTED_NAME + "</label><input id='other' type='checkbox'>"
+            "</main></body></html>")
+    copy = harness.tracked_copy(harness.skeleton_of(page, KEY))
+    assert "autoPrefs" not in copy
+    await browser_page.set_content(copy)
+    named = browser_page.get_by_role("switch", name="Share key profile updates", exact=True)
+    assert await named.count() == 1
+    assert await browser_page.get_by_role("checkbox", name="x", exact=True).count() == 1
+
+
+def test_a_non_ascii_word_survives_the_copy_as_a_reference() -> None:
+    ellipsis = "Write a message" + chr(0x2026)
+    copy = harness.tracked_copy(harness.skeleton_of("<main><p>" + ellipsis + "</p></main>", KEY))
+    assert copy.isascii() and "Write a message&#8230;" in copy
+
+
+def test_every_committed_live2_fixture_is_a_tracked_copy() -> None:
+    """What ``--export-fixtures`` wrote, and nothing written another way: no
+    keyed shape, strict ASCII, one file per skeleton plus his settings page."""
+    copies = sorted(harness.FIXTURES.glob("*.html"))
+    assert len(copies) == 28, [p.name for p in copies]
+    for path in copies:
+        text = path.read_bytes().decode("ascii")
+        assert not harness._KEYED_SHAPE.search(text), path.name
+        assert text.startswith("<!doctype html>"), path.name
+
+
 def test_closed_again_means_the_menus_own_words_are_gone_and_the_trigger_reads_as_before() -> None:
     before = {"More": 1}
     added = {"Save to PDF": 1}
