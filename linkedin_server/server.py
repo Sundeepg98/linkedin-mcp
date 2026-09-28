@@ -9845,6 +9845,14 @@ async def linkedin_update_profile_field(
     Profile, must not have moved. The restore is the same call with the
     other value.
 
+    AN AUTOCOMPLETE FIELD IS REFUSED (2026-09-28). His editor draws
+    Country/Region, City and Industry as inputs carrying ``aria-autocomplete``:
+    LinkedIn stores the entry picked from its list, and this write types text,
+    so a field drawn that way is refused before anything is typed. And the
+    editor's dialog, which LinkedIn draws a moment after the address loads, is
+    waited for (up to 10 s) before the write reads it and before the
+    verification does; a dialog never drawn refuses as it always did.
+
     Args:
         field: which field. Named freely; nothing here validates it against a
             list of fields, because no editor has been opened to enumerate one.

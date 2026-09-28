@@ -109,6 +109,7 @@
     "profile_editor:read_premium_badge": "clean",
     "profile_editor:read_save_gate": "clean",
     "profile_editor:recognise_intro_editor_switches": "clean",
+    "profile_editor:wait_for_editor_dialog": "clean",
     "profile_editor:wait_for_editor_to_close": "clean",
     "profile_views_more:read_profile_views_more_insights": "returns_text",
     "recruiter_views:read_recruiter_views": "returns_records",

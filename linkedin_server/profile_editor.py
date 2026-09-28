@@ -979,6 +979,57 @@ async def wait_for_editor_to_close(
     return {"closed": False, "polls": taken}
 
 
+#: HOW LONG AN EDITOR WRITE WAITS FOR ITS DIALOG TO BE DRAWN: this many polls,
+#: this far apart -- 10 s. A LIVENESS BOUND, NOT A SAFETY ONE. MEASURED LIVE
+#: 2026-09-28 (the live lane's session 4): P B9's write loaded his intro editor
+#: and its gate read the dialog the moment the address loaded -- refused,
+#: ``0_editor_not_found``, nothing pressed -- while another load of the same
+#: address found the dialog already drawn when the navigation returned. So
+#: LinkedIn draws the dialog on its own schedule, and a reader that looks at
+#: once can lose the race (``_audit/2026-09-23-live-lane-session-1.md``,
+#: "Live session 4").
+EDITOR_DIALOG_POLLS: int = 50
+EDITOR_DIALOG_POLL_MS: int = 200
+
+
+async def wait_for_editor_dialog(
+    page: Any,
+    *,
+    polls: Optional[int] = None,
+    poll_ms: Optional[int] = None,
+) -> dict[str, Any]:
+    """After a navigation to the intro editor's own address: poll, BOUNDED,
+    until exactly one dialog holding the one Save control is drawn.
+
+    Returns ``drawn`` (True / False / None), the ``polls`` taken and the last
+    count of such ``dialogs``. ``None`` means the reading itself failed, which
+    is not the same answer as "not drawn". IT DECIDES NOTHING: every gate after
+    it reads the page for itself and refuses on what it finds, so a dialog
+    never drawn -- or drawn twice -- refuses exactly as it did before this wait
+    existed; the wait only bounds how long a reader looks before it reads.
+    Taken by ``writes.perform`` after the editor's landing and before its gate
+    reads the control, and by the fresh-render verification before it reads
+    the stored value. Counts only; nothing is pressed.
+    """
+    total = coerce.as_count(EDITOR_DIALOG_POLLS if polls is None else polls)
+    gap = coerce.as_count(EDITOR_DIALOG_POLL_MS if poll_ms is None else poll_ms)
+    taken = 0
+    drawn = 0
+    for index in range(max(1, total)):
+        taken += 1
+        try:
+            drawn = coerce.as_count(
+                await page.locator(_EDITOR_DIALOG, has=page.locator(_SAVE_CONTROL)).count()
+            )
+        except Exception:  # noqa: BLE001 - a measurement, not a gate
+            return {"drawn": None, "polls": taken, "dialogs": None}
+        if drawn == 1:
+            return {"drawn": True, "polls": taken, "dialogs": 1}
+        if index + 1 < max(1, total):
+            await page.wait_for_timeout(gap)
+    return {"drawn": False, "polls": taken, "dialogs": drawn}
+
+
 def notify_network_note(gate: Optional[dict[str, Any]]) -> str:
     """The sentence the receipt prints about condition 1 of the ruling.
 

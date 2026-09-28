@@ -7654,6 +7654,17 @@ def _save_candidates_note(
     )
 
 
+#: THE MARKS OF AN AUTOCOMPLETE FIELD, appended to the one control's own id
+#: selector (2026-09-28, the live lane's session 4): ``aria-autocomplete``
+#: other than ``none``, a combobox role, or a ``list`` attribute naming a
+#: datalist. An editor field carrying any of them stores the entry picked from
+#: a list, which a typed value is not, so the write refuses it. See
+#: :func:`_live_control`.
+_AUTOCOMPLETE_MARKS = (
+    ':is([aria-autocomplete]:not([aria-autocomplete="none"]), [role="combobox"], [list])'
+)
+
+
 async def _live_control(
     page: Any, spec: WriteSpec, grant: WriteGrant, anchor: str
 ) -> Union[tuple[str, str, str], tuple[str, str, str, str]]:
@@ -7891,6 +7902,24 @@ async def _live_control(
                 "editor_addressed",
                 f"{wanted!r} is drawn disabled. A disabled control is not "
                 "typed into to find out what happens.",
+                "",
+            )
+        # AN AUTOCOMPLETE FIELD IS REFUSED, NEVER TYPED INTO (2026-09-28, the
+        # live lane's session 4). His editor draws Country/Region, City and
+        # Industry as inputs carrying ``aria-autocomplete`` (measured live):
+        # what LinkedIn STORES is the entry picked from its list, and this
+        # write types text -- what LinkedIn would store from typed text is not
+        # measured. So a control carrying ``aria-autocomplete`` (other than
+        # ``none``), a combobox role or a ``list`` attribute is refused before
+        # anything is typed. Counted in the page, on the one control the id
+        # names; nothing is read out.
+        if coerce.as_count(await page.locator("#" + dom_id + _AUTOCOMPLETE_MARKS).count()):
+            return (
+                "editor_addressed",
+                f"{wanted!r} is drawn as an AUTOCOMPLETE field: LinkedIn stores "
+                "the entry picked from its list, and this write only types "
+                "text, so what it would store is not measured. Refused rather "
+                "than typed into. Nothing was typed.",
                 "",
             )
 
@@ -8591,6 +8620,11 @@ async def _verify_after(
                 "So it says nothing about whether the value was stored.",
                 editor_url,
             )
+        # THE FRESH RENDER'S DIALOG, WAITED FOR TOO (2026-09-28, the live
+        # lane's session 4): read at once, a dialog LinkedIn draws a moment
+        # later reads as no value at all, and a clean save came back
+        # ``unknown``. The same bounded wait the write took; it decides nothing.
+        await profile_editor.wait_for_editor_dialog(page)
         if badge_before is not None:
             # THE PREMIUM BADGE: both switches on the fresh render, against
             # the reading taken before the write -- condition 4 of its ruling.
@@ -9883,6 +9917,18 @@ async def perform(
     # posting, and whole for a list. See :func:`_assert_landed_on_target`.
     _assert_landed_on_target(spec, grant, landed)
 
+    # THE EDITOR'S DIALOG, WAITED FOR BEFORE ANYTHING READS IT (2026-09-28, the
+    # live lane's session 4). LinkedIn draws the intro editor's dialog on its
+    # own schedule after the address loads: live, P B9's write read it at once
+    # and refused ``0_editor_not_found`` with nothing pressed, and another load
+    # found it drawn at the landing. A LIVENESS BOUND THAT DECIDES NOTHING --
+    # ``profile_editor.wait_for_editor_dialog`` -- so the gate below still reads
+    # the page for itself and refuses a dialog never drawn, or drawn twice,
+    # exactly as it did. Its reading is on the receipt.
+    editor_dialog_wait: Optional[dict[str, Any]] = None
+    if spec.action in EDITOR_SAVE_ACTIONS:
+        editor_dialog_wait = await profile_editor.wait_for_editor_dialog(page)
+
     # Gate 5: the control itself, read live, on the page about to be clicked.
     # A STAR SO THE OTHER EIGHT ARMS NEED NO EDIT. Only the arm with a choice
     # to report returns a fourth element; everything else is a click, which is
@@ -10846,6 +10892,11 @@ async def perform(
                 ),
             }
         ),
+        # HOW LONG THE EDITOR'S DIALOG TOOK TO BE DRAWN, for EDITOR_SAVE_ACTIONS
+        # (null otherwise): whether one dialog holding the one Save control was
+        # drawn inside the bound, the polls taken, and the last count -- counts
+        # only (2026-09-28, the live lane's session 4).
+        "editor_dialog_wait": editor_dialog_wait,
         # HIS ACCOUNT-LEVEL "SHARING PROFILE EDITS" SETTING, as read BEFORE the
         # change was entered, for EDITOR_SAVE_ACTIONS only (null otherwise):
         # the amended condition 1's input. 'off' | 'on' | 'unknown', or null
