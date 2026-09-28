@@ -3975,3 +3975,78 @@ count the new directory.
 
 The session-5 runner and its self-check, the census, delta and pin editors, in
 the lane's scratch folder. Nothing loaded uncounted.
+
+## After session 5, offline: the wait after the press
+
+The orchestrator's item of 21:16: a bounded liveness wait after the press, for
+the SWITCH path and the SELECT path, for the control to reach the requested
+state, deciding nothing, with Save still conditional on exactly that field
+having moved; red first on a late switch and a late select; fixtures from
+today's captures, digests pinned. `P A21` and `P A19` fire in session 6 on it.
+
+### The wait, and the rule on the select path (`c3b2393`)
+
+**THE WAIT:** `profile_editor.wait_for_state` calls the reader it is handed, 25
+times at most, 200 ms apart -- 5 s -- until the reading reaches the requested
+state, and returns the last reading with whether it did and the polls taken. It
+decides nothing: each path asks its own question of the last reading.
+
+* **The switch path** waits for the badge to read the requested state, then asks
+  `badge_moved_alone` exactly as before -- the badge, and only the badge, moved --
+  and presses Save only on its yes. The receipt carries the wait as
+  `switch_press.waited_for_the_requested_state`.
+* **The select path** reads EVERY field's value before the choice, waits for the
+  chosen field to read the requested option, and asks for Save only if
+  `profile_editor.only_the_field_moved` holds: exactly one control named for the
+  field reads the requested value, and every other value-bearing control reads,
+  as a multiset, what it read before. Until now the select path pressed Save
+  straight after the choice and asked nothing of the field. The receipt carries
+  both as `field_press`.
+
+**RED FIRST:** `tests/test_an_editor_press_is_waited_for.py`, 12 tests. On the
+unrepaired module 9 failed: a switch flipping 1.2 s late read
+`the_badge_did_not_move` in both directions -- off -> on is today's live failure
+exactly -- and stored nothing; a select applying its choice late was saved over
+the OLD option; a choice that also rewrote the City field was SAVED, the second
+field stored beside the one asked for; and the new functions did not exist. All 12
+pass now. **THE CONTROLS:** a switch that never flips and a select that never
+updates still store nothing, and a select that applies at once is saved at the
+first poll. The fixture's own self-test failed once under a concurrent suite
+with its first 800 ms delay -- the read "straight after the press" landed after
+it -- and the committed delays are 2500 ms.
+
+**THE WORLD:** `tests/fixtures/synthetic/intro_editor_late_press.html`, built by
+`scripts/_build_intro_editor_late_press_fixture.py`, its digest pinned over its
+text. The switch row is the synthetic switch fixture's (session 1's capture),
+with the badge's title on its block as the badge tests place it; the two selects
+are shaped as TODAY's capture draws them -- the builder refuses unless
+`tests/fixtures/live4/editor.html` draws a 5-option and a 2-option select, each
+opening on one unset option, and two switch inputs (it does). The lateness is one
+appended script: a switch press flips `switch_ms` later, and a select's change is
+undone at once and applied `select_ms` later. The write tests make the badge and
+editor worlds of the existing suites late with the builder's own function.
+
+**THE LEAK GUARD:** the select path's reading, `writes._editor_values_or_refusal`,
+is the values reader returned whole, so it is driven over the same editor and
+ADMITTED as that reader is; the wait itself is recorded not driven (called with
+the page alone it has no reader), as fifteen other functions that raise are.
+
+**THE FILL PATH IS NOT CHANGED:** a typed field (`P A8` alone, and it is not
+tested) presses Save after its fill as before; the order named the switch and
+select paths.
+
+### The census
+
+`P A21` and `P A19` carry a dated note that the wait landed, `P B9` that its path
+waits too. No state moved.
+
+### Gates, run and NOT run
+
+The editor and write-path suites on `c3b2393`: 581 passed; the reader-leak guard:
+653 passed. The pre-commit identity gate read 0 hits on each commit. The
+integration of master and the full gate follow.
+
+### Scratch, declared disposable
+
+The late-press debugging script, the census and record editors, in the lane's
+scratch folder.
