@@ -1687,6 +1687,17 @@ async def _run_tool(key: str, items: dict[str, str], capture: bool) -> dict[str,
     if key == "notifications":
         extra["kinds"] = s1.notification_kinds(out.get("results") or [])
         say("    kinds: " + shape_of(extra["kinds"]))
+    if key == "job_detail":
+        # D-4, THE ORCHESTRATOR'S CALL: an organisation id is shown to him BY
+        # NAME before any search or roster fires on it. So the ORGANISATION --
+        # its name and resolved id, never a person -- is written beside the
+        # reduced envelope, gitignored, for the lead to read and send; nothing
+        # of it is printed here.
+        resolved = out.get("company_id") if isinstance(out.get("company_id"), dict) else {}
+        _write("job_detail", ".org.json", json.dumps({
+            "company": out.get("company"), "company_id": resolved.get("company_id"),
+        }, indent=2))
+        say("    the organisation, by name and id, written for D-4 under _state/ (gitignored)")
     reduced = KEYS[key].get("envelope") == "reduced"
     written = reduce_envelope(out, _shape_key()) if reduced else out
     _write(key, ".json", json.dumps({"envelope": written, **extra}, indent=2, default=str))
