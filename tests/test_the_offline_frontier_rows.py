@@ -48,6 +48,14 @@ MOVED: dict[tuple[str, str], tuple[str, ...]] = {
         "`linkedin_search_jobs`", "`tests/test_a_company_search_needs_no_keyword.py`"),
 }
 
+#: MOVED AGAIN, 2026-09-28: fired live in the live lane's session 2 and banked,
+#: each on its own cell's bar. The cell now OPENS on the paragraph that banked
+#: it, and the move above follows it, kept as that morning's record.
+#: `J 107` and `M M53` fired too and did not bank; their cells still open on
+#: the move above, with the session's note at the end.
+BANKED_AGAIN = {("network.md", "195"), ("profile.md", "S5")}
+BANKED_OPENING = "**FIRED AND BANKED 2026-09-28 (the live lane's session 2).**"
+
 #: The row not built, and why.
 NOT_BUILT = ("profile.md", "K1")
 NOT_BUILT_OPENED = "**NOT BLOCKED ON NOTHING, 2026-09-28 (lane S, the offline frontier):"
@@ -77,8 +85,13 @@ def _table(name: str) -> list[dict[str, str]]:
 @pytest.mark.parametrize("key", sorted(MOVED))
 def test_a_moved_row_opens_on_its_move_and_names_what_it_rests_on(key):
     state, notes = _row(*key)
-    assert state == "COVERED-UNFIRED", (key, state)
-    assert notes.startswith(OPENED), key
+    if key in BANKED_AGAIN:
+        assert state == "COVERED-PROVEN", (key, state)
+        assert notes.startswith(BANKED_OPENING), key
+        assert notes.find(OPENED) > 0, (key, "the frontier's move no longer follows the banking")
+    else:
+        assert state == "COVERED-UNFIRED", (key, state)
+        assert notes.startswith(OPENED), key
     for name in MOVED[key]:
         assert name in notes, (key, name)
     assert "Not PROVEN" in notes, key

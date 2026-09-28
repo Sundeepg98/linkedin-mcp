@@ -143,17 +143,20 @@ COVERED_ROWS: dict[tuple[str, str], tuple[str, str]] = {
     # that built them was offline -- the same reasoning, and the same trap in
     # the other direction, as the network rows above: an unannounced promotion
     # is what inflates a count.
+    # BOTH MOVED UNFIRED -> PROVEN ON 2026-09-28 (the live lane's session 2),
+    # each on lane L3's bank condition for it, and the pins move with them in
+    # the same commit, as this table asks.
     ("jobs.md", "18"): (
-        "COVERED-UNFIRED",
+        "COVERED-PROVEN",
         "recent job searches, read off the jobs home by "
-        "linkedin_recent_job_searches; built over a sanitised copy of the live "
-        "capture and never fired",
+        "linkedin_recent_job_searches; FIRED 2026-09-28: 6 searches, every one "
+        "with its keywords, the list's label seen, the page not redirected",
     ),
     ("jobs.md", "39"): (
-        "COVERED-UNFIRED",
+        "COVERED-PROVEN",
         "job recommendations as posting ids: index 2 of "
-        "linkedin_premium_job_collection, the recommended collection the "
-        "reader's shape was measured on; never fired at that index",
+        "linkedin_premium_job_collection; FIRED 2026-09-28 at that index: the "
+        "list container seen and 24 ids",
     ),
     # PINNED AT UNFIRED, 2026-09-23, by lane L1 -- the state it belongs in,
     # for the reason the network rows above were first pinned there: the

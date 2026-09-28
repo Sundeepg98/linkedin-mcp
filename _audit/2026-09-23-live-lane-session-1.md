@@ -2694,8 +2694,9 @@ shown failing first against today's skeletons; then the census moves for the
 proven rows, the pins re-derived, the gates, and a commit with no
 attribution. **The laptop restarted at about 09:57** with this lane's turn cut
 off inside the census step; the orchestrator's resume order of 10:02 found
-the branch at `d81511d` with the four census files modified and nothing else
-dirty, and disk agreed at 10:03. **The four files were whole**: every changed
+the branch at `d81511d` (fix 1's commit, "no page is closed as the browser's
+last tab", which does not resolve on `master` until the lane merges) with the
+four census files modified and nothing else dirty, and disk agreed at 10:03. **The four files were whole**: every changed
 line a complete table row, its cell count unchanged, every cell but the state
 unchanged, and the old reason cell intact after the new paragraph -- checked
 line by line against `HEAD`. The step continued from there.

@@ -11,6 +11,7 @@
     "auth:login_via_browser": "not_driven:raises BrowserUnavailableError",
     "auth:require_auth": "not_driven:raises BrowserUnavailableError",
     "auth:session_info": "not_driven:raises BrowserUnavailableError",
+    "browser:close_tab_keeping_the_window": "not_driven:returned without reading the page",
     "collections_page:read_collections": "clean",
     "company_interest:read_after_press": "clean",
     "company_interest:read_interest_control": "clean",

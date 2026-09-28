@@ -749,19 +749,30 @@ def test_an_unparseable_landing_reads_unreadable_not_a_guess() -> None:
 # COVERED-UNFIRED now -- four FILTER rows by the counts, three WHO rows by the
 # names -- and none of them is in the address table.
 
+#
+# AND FOUR WERE FIRED LIVE AND BANKED, 2026-09-28 (the live lane's session 2):
+# `N 79` by the names, and `N 84`, `N 87` and `N 94` on lane S's whole bank
+# rule (`query_kept` verbatim, person results, the panel settled, nothing
+# refused). Each cell now OPENS on the paragraph that banked it, and the
+# earlier record follows it, in the order it was written.
+
 #: row -> its state, and what delivers it.
 ROW_STATES: dict[str, str] = {
-    "79": "COVERED-UNFIRED",   # search for a person -- WHO, by the names
-    "84": "COVERED-UNFIRED",   # filter by current company -- a FILTER
+    "79": "COVERED-PROVEN",    # search for a person -- WHO, by the names
+    "84": "COVERED-PROVEN",    # filter by current company -- a FILTER
     "85": "COVERED-UNFIRED",   # filter by connections of -- a FILTER
-    "87": "COVERED-UNFIRED",   # filter by past company -- a FILTER
-    "94": "COVERED-UNFIRED",   # several locations in one search -- a FILTER
+    "87": "COVERED-PROVEN",    # filter by past company -- a FILTER
+    "94": "COVERED-PROVEN",    # several locations in one search -- a FILTER
     "172": "COVERED-UNFIRED",  # view a member's connections -- WHO, by the names
     "194": "COVERED-UNFIRED",  # find hiring managers -- WHO, by the names
 }
 
 #: The three rows whose payload is WHO, delivered by the names since 2026-09-27.
 WHO_ROWS = ("79", "172", "194")
+
+#: The rows the live lane's session 2 banked, and the words each cell opens on.
+BANKED_2026_09_28 = ("79", "84", "87", "94")
+BANKED_OPENING = "**FIRED AND BANKED 2026-09-28 (the live lane's session 2).**"
 
 _ROW = re.compile(r"^\|\s*(\d+)\s*\|[^|]*\|\s*R\s*\|\s*\*{0,2}([A-Z-]+)\*{0,2}\s*\|(.*)$")
 
@@ -793,17 +804,24 @@ def test_the_row_claims_what_delivers_it(row: str) -> None:
     naming the reader and the file that holds it to the mitigations; the WHO
     rule's paragraph and the names-at-runtime paragraph stay after it as those
     days' record, in the order they were written. The four FILTER rows keep
-    the WHO rule's verdict on them."""
+    the WHO rule's verdict on them. A row BANKED by the live lane's session 2
+    opens on the paragraph that banked it, and all of the above follows it."""
     state, note = _network_rows()[row]
     assert state == ROW_STATES[row], (row, state)
     # Every row names the reader it rests on.
     assert "linkedin_people_search_shape" in note
     assert "people_search" in note
     assert "HELD BY `" not in note
+    if row in BANKED_2026_09_28:
+        assert note.lstrip().startswith(BANKED_OPENING), row
     if row in WHO_ROWS:
         opened = "**COVERED-UNFIRED 2026-09-27 (lane S, names at runtime):"
-        assert note.lstrip().startswith(opened), row
-        head = note[: note.find("**GAP 2026-09-24 UNDER THE WHO RULE")]
+        start = note.find(opened)
+        if row in BANKED_2026_09_28:
+            assert start > 0, (row, "the move of 2026-09-27 no longer follows the banking")
+        else:
+            assert note.lstrip().startswith(opened), row
+        head = note[start: note.find("**GAP 2026-09-24 UNDER THE WHO RULE")]
         assert "`people_results.read_result_people`" in head
         assert "include_names=True" in head
         assert "`tests/test_people_search_names.py`" in head
