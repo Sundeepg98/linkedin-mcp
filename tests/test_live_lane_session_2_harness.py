@@ -806,6 +806,106 @@ async def test_d1_two_visible_refuse(browser_page) -> None:
 
 
 # --------------------------------------------------------------------------
+# C8, fix 4: the folder menu's close step, on today's skeleton of it open.
+# --------------------------------------------------------------------------
+
+#: THE FOLDER MENU'S BEHAVIOUR, which a skeleton cannot carry, installed on
+#: today's skeleton of the composer with that menu open. The skeleton shows
+#: the structure: an artdeco dropdown -- its trigger the folder pill,
+#: aria-expanded "true" while open; its content a sibling holding four items
+#: (Focused, Other, Archived, Spam), each a folder CHOICE; NO close control of
+#: its own. The model starts it CLOSED, and then: Escape does what it did live
+#: on 2026-09-28, per ``escape`` ("none": nothing; "closes": closes;
+#: "collapses": the trigger reads closed while the items stay drawn); a click
+#: on the trigger toggles it, as an artdeco dropdown's trigger does (ASSUMED
+#: from the component, never yet pressed live), unless ``toggles`` is False.
+#: Every trigger click is counted.
+_C8_MODEL = """
+([escape, toggles]) => {
+  const t = document.querySelector('[data-test-messaging-inbox-filters__folder-pill]');
+  const box = t.closest('.artdeco-dropdown').querySelector('.artdeco-dropdown__content');
+  window.__clicks = 0;
+  const set = (open) => {
+    t.setAttribute('aria-expanded', open ? 'true' : 'false');
+    box.classList.toggle('artdeco-dropdown__content--is-open', open);
+    box.style.display = open ? '' : 'none';
+  };
+  set(false);
+  t.addEventListener('click', () => {
+    window.__clicks += 1;
+    if (window.__clicks === 1 || toggles) set(t.getAttribute('aria-expanded') !== 'true');
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key !== 'Escape') return;
+    if (escape === 'closes') set(false);
+    if (escape === 'collapses') t.setAttribute('aria-expanded', 'false');
+  });
+}
+"""
+
+
+async def _c8_world(page, escape: str, toggles: bool = True) -> object:
+    body = (LIVE2 / "compose_c8-open.html").read_text(encoding="ascii")
+
+    async def handler(route) -> None:  # noqa: ANN001 - playwright route
+        if route.request.url == harness.COMPOSE_URL:
+            await route.fulfill(status=200, content_type="text/html", body=body)
+        else:
+            await route.abort()
+
+    await page.route("**/*", handler)
+    await page.goto(harness.COMPOSE_URL, wait_until="domcontentloaded")
+    await page.evaluate(_C8_MODEL, [escape, toggles])
+    handle, count = await harness._one_handle(
+        page.locator(harness.FOLDER_TRIGGER).filter(has_text="Focused"))
+    assert count == 1, "the harness's own C8 trigger, exactly one on today's skeleton"
+    return handle
+
+
+async def test_c8_the_menu_escape_left_open_is_closed_by_its_own_trigger(browser_page, quick) -> None:
+    """FIX 4, AS IT HAPPENED LIVE. Red before the fix: the press opened the
+    menu, Escape left it open, and the key stopped as an anomaly -- the
+    session's own outcome. Now the close step presses the SAME trigger once
+    more, only because it still reads expanded, and the menu closes."""
+    handle = await _c8_world(browser_page, "none")
+    result = await harness.press_and_read(browser_page, "compose_c8", handle, False, messaging=True)
+    assert result["closed_again"] is True
+    assert result["closed_by"] == "trigger"
+    assert result["container_found"] is True and len(result["items"]) == 4
+    assert [item["word"] for item in result["items"]] == ["Focused", "Other", "Archived", "Spam"]
+    assert result["message_events"] == [0, 0, 0]
+    assert await browser_page.evaluate("window.__clicks") == 2
+
+
+async def test_c8_a_menu_escape_closes_is_pressed_once(browser_page, quick) -> None:
+    handle = await _c8_world(browser_page, "closes")
+    result = await harness.press_and_read(browser_page, "compose_c8", handle, False, messaging=True)
+    assert (result["closed_again"], result["closed_by"]) == (True, "escape")
+    assert await browser_page.evaluate("window.__clicks") == 1
+
+
+async def test_c8_a_menu_nothing_closes_still_stops_the_session(browser_page, quick) -> None:
+    """The close step is ONE more press, never a loop, and it masks nothing: a
+    menu that stays open after it is the same anomaly as before."""
+    handle = await _c8_world(browser_page, "none", toggles=False)
+    with pytest.raises(harness._Anomaly) as stop:
+        await harness.press_and_read(browser_page, "compose_c8", handle, False, messaging=True)
+    assert stop.value.kind == "the_menu_did_not_close"
+    assert await browser_page.evaluate("window.__clicks") == 2
+
+
+async def test_c8_a_trigger_reading_closed_is_never_pressed_again(browser_page, quick) -> None:
+    """When Escape leaves the trigger reading closed while the words stay
+    drawn, a second click would OPEN the menu: it is not made, and the
+    anomaly stands."""
+    handle = await _c8_world(browser_page, "collapses")
+    with pytest.raises(harness._Anomaly) as stop:
+        await harness.press_and_read(browser_page, "compose_c8", handle, False, messaging=True)
+    assert stop.value.kind == "the_menu_did_not_close"
+    assert await browser_page.evaluate("window.__clicks") == 1
+
+
+# --------------------------------------------------------------------------
 # The setting, and its offline check.
 # --------------------------------------------------------------------------
 
@@ -942,17 +1042,26 @@ def _enclosing_function(tree: ast.Module, target: ast.AST) -> str:
     return "<module>"
 
 
-def test_every_click_is_the_one_in_press_and_read_and_every_key_press_is_escape() -> None:
+def test_every_click_is_the_triggers_own_in_press_and_read_and_every_key_press_is_escape() -> None:
+    """TWO clicks, both on the one trigger, both in press_and_read: the open,
+    and fix 4's close step -- which runs only inside an ``if`` that reads the
+    trigger still expanded after Escape and closed before the press."""
     tree = _tree()
     clicks, keys = [], []
     for node in ast.walk(tree):
         if isinstance(node, ast.Call) and isinstance(node.func, ast.Attribute):
             if node.func.attr == "click":
-                clicks.append(_enclosing_function(tree, node))
+                clicks.append((_enclosing_function(tree, node), ast.unparse(node.func.value)))
             if node.func.attr == "press":
                 keys.append(ast.unparse(node.args[0]) if node.args else "")
-    assert clicks == ["press_and_read"], clicks
+    assert clicks == [("press_and_read", "handle"), ("press_and_read", "handle")], clicks
     assert keys == ["'Escape'"], keys
+    guards = [ast.unparse(node.test) for node in ast.walk(tree) if isinstance(node, ast.If)
+              and any(isinstance(inner, ast.Call) and isinstance(inner.func, ast.Attribute)
+                      and inner.func.attr == "click" for inner in ast.walk(node))]
+    assert len(guards) == 1, guards
+    for condition in ("closed_by is None", "expanded_after == 'true'", "expanded_before == 'false'"):
+        assert condition in guards[0], (condition, guards)
 
 
 #: The tools a harness key may call: every one a read.

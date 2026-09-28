@@ -1079,6 +1079,22 @@ async def press_and_read(page: Any, key: str, handle: Any, capture: bool, *,
     menu's items by attribute (:data:`_MENU_JS`). Refused as an anomaly: a
     menu that did not close, and -- on ``/messaging/`` -- any message event on
     the page, which is a conversation opened.
+
+    THE CLOSE STEP, FIX 4 OF SESSION 2. Live on 2026-09-28 the composer's
+    folder menu (C8) opened and was still open after Escape, and the key
+    stopped. Its skeleton, taken open, draws no close control of its own:
+    four items, each a folder CHOICE -- pressing one would change his view --
+    and a trigger that reads ``aria-expanded="true"`` while the menu is open,
+    an artdeco dropdown's trigger, which toggles its own menu. A click outside
+    was the other way, and on ``/messaging/`` there is no outside the
+    skeleton can certify: the list beside the pill is conversations, and a
+    click on one opens it. So when Escape leaves the trigger reading
+    ``"true"`` -- and only then, and only if it read ``"false"`` before the
+    press, so the click can only CLOSE what the first one opened -- the SAME
+    trigger is pressed ONCE more. Never a third time: a menu still open after
+    it is the same anomaly as before. ``closed_by`` says which step closed
+    it: ``"escape"``, ``"trigger"``, or None. The trigger step's first live
+    use is a session-3 fire.
     """
     expanded_before = await handle.get_attribute("aria-expanded")
     events_before = int(await page.locator(threads.EVIDENCE_EVENT_SELECTOR).count()) if messaging else 0
@@ -1091,23 +1107,33 @@ async def press_and_read(page: Any, key: str, handle: Any, capture: bool, *,
     menu = await handle.evaluate(_MENU_JS, {"needles": list(needles), "words": sorted(FURNITURE)})
     events_open = int(await page.locator(threads.EVIDENCE_EVENT_SELECTOR).count()) if messaging else 0
     await _save_page(page, key + "-open", capture)
+    added = counts_delta(opened, before)
     await page.keyboard.press("Escape")
     await asyncio.sleep(s1.OPEN_SETTLE_S)
     after = await furniture_counts(page)
     expanded_after = await handle.get_attribute("aria-expanded")
+    closed_by = "escape" if closed_again(added, after, before, expanded_after, expanded_before) else None
+    if closed_by is None and expanded_after == "true" and expanded_before == "false":
+        await handle.click(timeout=5_000)
+        await asyncio.sleep(s1.OPEN_SETTLE_S)
+        after = await furniture_counts(page)
+        expanded_after = await handle.get_attribute("aria-expanded")
+        if closed_again(added, after, before, expanded_after, expanded_before):
+            closed_by = "trigger"
     events_after = int(await page.locator(threads.EVIDENCE_EVENT_SELECTOR).count()) if messaging else 0
     menu_items = [item_record(raw) for raw in ((menu or {}).get("items") or [])]
-    added = counts_delta(opened, before)
     result = {
         "pressed": True,
         "container_found": (menu or {}).get("container") is True,
         "items": menu_items,
         "words_added": added,
-        "closed_again": closed_again(added, after, before, expanded_after, expanded_before),
+        "closed_again": closed_by is not None,
+        "closed_by": closed_by,
         "message_events": [events_before, events_open, events_after],
     }
     say("    pressed; menu items " + str(len(menu_items)) + ", our words added "
-        + str(len(result["words_added"])) + ", closed again " + str(result["closed_again"]))
+        + str(len(result["words_added"])) + ", closed again " + str(result["closed_again"])
+        + (" (by its trigger)" if closed_by == "trigger" else ""))
     if events_open or events_after:
         raise _Anomaly("a_conversation_opened", key)
     if not result["closed_again"]:
