@@ -915,6 +915,9 @@ ADMITTED_TEXT: dict[str, tuple[str, ...]] = {
     "dom:read_profile_detail_entries": (HIS_OWN,),
     "dom:read_self_owned_editor_fields": (HIS_OWN,),
     "dom:read_self_owned_editor_values": (HIS_OWN,),
+    # The select path's before-and-after reading (2026-09-28): the values
+    # reader above, returned whole, its exception turned into a typed refusal.
+    "writes:_editor_values_or_refusal": (HIS_OWN,),
     "profile_views_more:read_profile_views_more_insights": (AGGREGATE,),
     "server:_profile_views_more_analytics": (HIS_OWN, AGGREGATE),
 }
@@ -1551,6 +1554,10 @@ FIXTURE_BREAKS: dict[str, dict[str, str]] = {
         "needle": "<p>Placeholder setting A</p>", "into": "<p>Placeholder setting Z</p>",
     },
     "dom:read_self_owned_editor_values": {
+        "fixture": "synthetic/intro_editor_switches.html",
+        "needle": "<p>Placeholder setting A</p>", "into": "<p>Placeholder setting Z</p>",
+    },
+    "writes:_editor_values_or_refusal": {
         "fixture": "synthetic/intro_editor_switches.html",
         "needle": "<p>Placeholder setting A</p>", "into": "<p>Placeholder setting Z</p>",
     },

@@ -8401,6 +8401,15 @@ async def _live_control(
     return (state, why, dom.save_control_selector(anchor))
 
 
+async def _editor_values_or_refusal(page: Any) -> dict[str, Any]:
+    """The open editor's values reading, or a refusal that names only the
+    exception's TYPE -- so a wait that polls it never raises (2026-09-28)."""
+    try:
+        return await dom.read_self_owned_editor_values(page)
+    except Exception as exc:  # noqa: BLE001 - the TYPE is the whole report
+        return {"refused": "read_failed", "reason": type(exc).__name__}
+
+
 async def _editor_value_of(
     page: Any, field: str, *, when: str = "after the write"
 ) -> tuple[Optional[str], str]:
@@ -10150,6 +10159,13 @@ async def perform(
     prior_value: Optional[str] = None
     prior_why = ""
     badge_before: Optional[dict[str, Any]] = None
+    # THE SELECT PATH'S PRESS READINGS (2026-09-28, the live lane's session 5):
+    # every field's value before the change, the bounded wait after it, and
+    # whether only the chosen field moved -- which Save now waits on.
+    editor_values_before: Optional[dict[str, Any]] = None
+    field_wait: Optional[dict[str, Any]] = None
+    field_check: Optional[dict[str, Any]] = None
+    switch_wait: Optional[dict[str, Any]] = None
     badge_value = grant.target.partition(TARGET_JOIN)[2].strip()
     if spec.action == "update_profile_field" and control_kind == "switch":
         # THE PREMIUM BADGE: the prior value is the switch's state, read by
@@ -10162,6 +10178,12 @@ async def perform(
         prior_value, prior_why = await _editor_value_of(
             page, prior_field.strip(), when="before the write"
         )
+        if control_kind == "select_option":
+            # EVERY FIELD'S VALUE BEFORE THE CHANGE (2026-09-28, the live
+            # lane's session 5): what ``profile_editor.only_the_field_moved``
+            # compares against after it, so Save is pressed only when the
+            # chosen field, and no other, moved.
+            editor_values_before = await _editor_values_or_refusal(page)
 
     selects_made = 0
     uploads_made = 0
@@ -10326,11 +10348,29 @@ async def perform(
         # was entered. Until then none did, and the gate refused wherever the
         # dialog drew no notify control. See ``profile_editor.ACCOUNT_READINGS``.
         if spec.action in EDITOR_SAVE_ACTIONS and selects_made:
-            editor_save_gate = await profile_editor.read_save_gate(
-                page, account_share_updates=account_share_updates
+            # THE CHOSEN FIELD, WAITED FOR, AND ONLY IT MOVED (2026-09-28, the
+            # live lane's session 5). A choice can land in the form a moment
+            # after the DOM event, as the switch's press did live; Save used to
+            # follow the choice at once and ask nothing of the field. Now a
+            # bounded wait -- deciding nothing -- lets the field read the
+            # requested option, and Save is asked for only if it does and no
+            # other field's value moved.
+            select_field = grant.target.partition(TARGET_JOIN)[0].strip()
+            select_wanted = _text_component_of(spec, grant.target)
+            field_after, field_wait = await profile_editor.wait_for_state(
+                page,
+                lambda: _editor_values_or_refusal(page),
+                lambda reading: profile_editor.field_reads(reading, select_field, select_wanted),
             )
-            if editor_save_gate["proceed"]:
-                click_plan.append(editor_save_gate["selector"])
+            field_check = profile_editor.only_the_field_moved(
+                editor_values_before, field_after, select_field, select_wanted
+            )
+            if field_check["proceed"]:
+                editor_save_gate = await profile_editor.read_save_gate(
+                    page, account_share_updates=account_share_updates
+                )
+                if editor_save_gate["proceed"]:
+                    click_plan.append(editor_save_gate["selector"])
         # ONE LOOP OVER TWO QUEUES, AND CLICKS DRAIN FIRST.
         #
         # THIS WAS TWO SEQUENTIAL LOOPS -- every fill, then every click -- and
@@ -10437,7 +10477,16 @@ async def perform(
                     # before Save, against the reading taken before the
                     # press. Otherwise the change sits unsaved and the
                     # verification's fresh navigation discards it.
-                    switch_after_press = await profile_editor.read_premium_badge(page)
+                    # THE SWITCH, WAITED FOR (2026-09-28, the live lane's
+                    # session 5): live, a restore's press did not show in the
+                    # read taken straight after it, and the same press flipped
+                    # minutes later. A bounded wait for the requested state,
+                    # deciding nothing; the rule below decides as it did.
+                    switch_after_press, switch_wait = await profile_editor.wait_for_state(
+                        page,
+                        lambda: profile_editor.read_premium_badge(page),
+                        lambda reading: profile_editor.badge_reads(reading, badge_value),
+                    )
                     switch_check = profile_editor.badge_moved_alone(
                         badge_before, switch_after_press, badge_value
                     )
@@ -10966,6 +11015,22 @@ async def perform(
                 ),
             }
         ),
+        # THE SELECT PATH'S PRESS READINGS, for a field changed by choosing
+        # (2026-09-28, the live lane's session 5): whether the field read the
+        # requested option inside the bound, and whether only it moved --
+        # which Save waited on. Null for every other path.
+        "field_press": (
+            None
+            if field_check is None
+            else {
+                "waited_for_the_requested_state": field_wait,
+                "only_the_field_moved": {
+                    "proceed": bool(field_check.get("proceed")),
+                    "code": field_check.get("code"),
+                    "why": field_check.get("why"),
+                },
+            }
+        ),
         # HOW LONG THE EDITOR'S DIALOG TOOK TO BE DRAWN, for EDITOR_SAVE_ACTIONS
         # (null otherwise): whether one dialog holding the one Save control was
         # drawn inside the bound, the polls taken, and the last count -- counts
@@ -11015,6 +11080,10 @@ async def perform(
                     }
                 ),
                 "only_the_badge_moved": switch_check,
+                # HOW LONG THE SWITCH TOOK TO READ THE REQUESTED STATE after
+                # the press, polled and bounded (2026-09-28): whether it did,
+                # and the polls taken. Null if the switch was not pressed.
+                "waited_for_the_requested_state": switch_wait,
                 "after_a_fresh_render": (
                     None
                     if not switch_fresh

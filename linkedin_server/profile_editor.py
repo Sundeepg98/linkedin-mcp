@@ -1030,6 +1030,124 @@ async def wait_for_editor_dialog(
     return {"drawn": False, "polls": taken, "dialogs": drawn}
 
 
+#: HOW LONG AN EDITOR WRITE WAITS, AFTER ITS PRESS, FOR THE CONTROL TO READ THE
+#: REQUESTED STATE: this many polls, this far apart -- 5 s. A LIVENESS BOUND,
+#: NOT A SAFETY ONE. MEASURED LIVE 2026-09-28 (the live lane's session 5): P
+#: B9's restore pressed the badge switch once and the read taken straight after
+#: the press still showed the old state -- so Save was not pressed and the
+#: badge was left hidden -- while the same press about two minutes later
+#: flipped it in the read (``_audit/2026-09-23-live-lane-session-1.md``, "Live
+#: session 5").
+PRESS_STATE_POLLS: int = 25
+PRESS_STATE_POLL_MS: int = 200
+
+
+async def wait_for_state(
+    page: Any,
+    read: Any,
+    reached: Any,
+    *,
+    polls: Optional[int] = None,
+    poll_ms: Optional[int] = None,
+) -> tuple[Any, dict[str, Any]]:
+    """After an editor press: call ``read()`` again, BOUNDED, until
+    ``reached(reading)`` holds. Returns ``(the last reading, {"reached",
+    "polls"})``.
+
+    IT DECIDES NOTHING. The caller asks its own question of the last reading
+    -- ``badge_moved_alone`` on the switch path, ``only_the_field_moved`` on
+    the select path -- exactly as it did of the one reading it took before
+    this wait existed; the wait only bounds how long the control is given to
+    answer the press. A ``reached`` that raises counts as not reached.
+    """
+    total = max(1, coerce.as_count(PRESS_STATE_POLLS if polls is None else polls))
+    gap = coerce.as_count(PRESS_STATE_POLL_MS if poll_ms is None else poll_ms)
+    reading: Any = None
+    for index in range(total):
+        reading = await read()
+        try:
+            done = bool(reached(reading))
+        except Exception:  # noqa: BLE001 - a reading that cannot be judged has not reached it
+            done = False
+        if done:
+            return reading, {"reached": True, "polls": index + 1}
+        if index + 1 < total:
+            await page.wait_for_timeout(gap)
+    return reading, {"reached": False, "polls": total}
+
+
+def badge_reads(reading: Optional[dict[str, Any]], value: str) -> bool:
+    """Whether a badge reading is aimable and reads ``value``. PURE."""
+    reading = reading or {}
+    want = PREMIUM_BADGE_STATES.get(value)
+    return bool(reading.get("aimable")) and want is not None and reading.get("badge_checked") is want
+
+
+def _field_values(reading: Optional[dict[str, Any]], field: str) -> list[str]:
+    records = (reading or {}).get("fields") or []
+    return [str(r.get("value")) for r in records
+            if str(r.get("name") or "") == field and r.get("value") is not None]
+
+
+def field_reads(reading: Optional[dict[str, Any]], field: str, requested: str) -> bool:
+    """Whether exactly one value-bearing control named ``field`` reads
+    ``requested``, in an editor values reading. PURE."""
+    values = _field_values(reading, field)
+    return len(values) == 1 and values[0] == requested
+
+
+def only_the_field_moved(
+    before: Optional[dict[str, Any]],
+    after: Optional[dict[str, Any]],
+    field: str,
+    requested: str,
+) -> dict[str, Any]:
+    """In the dialog, after the change and BEFORE Save: did ``field`` -- and
+    only ``field`` -- move? PURE. Save is pressed only on ``proceed``;
+    otherwise the change sits unsaved and the verification's fresh navigation
+    discards it (2026-09-28, the live lane's session 5).
+
+    ``before`` and ``after`` are editor VALUES readings. Every value-bearing
+    control other than ``field`` must read, as a multiset of (name, value),
+    exactly what it read before, and exactly one control named ``field`` must
+    read ``requested``. A control carrying no value (a button, a switch) is
+    not compared: its state is not a value, and the switch path has its own
+    rule.
+    """
+    out: dict[str, Any] = {"proceed": False, "code": None, "why": ""}
+    if not isinstance(before, dict) or not isinstance(after, dict) or "fields" not in before \
+            or "fields" not in after:
+        out["code"] = "unreadable"
+        out["why"] = "the editor's values could not be read before and after the change; Save was not pressed."
+        return out
+
+    def others(reading: dict[str, Any]) -> list[tuple[str, str]]:
+        return sorted(
+            (str(r.get("name") or ""), str(r.get("value")))
+            for r in reading["fields"]
+            if r.get("value") is not None and str(r.get("name") or "") != field
+        )
+
+    values = _field_values(after, field)
+    if len(values) != 1:
+        out["code"] = "not_one_field"
+        out["why"] = (str(len(values)) + " value-bearing control(s) carry the field's name after the "
+                      "change, where exactly one is required; Save was not pressed.")
+        return out
+    if values[0] != requested:
+        out["code"] = "the_field_did_not_move"
+        out["why"] = "the field does not read the requested value after the change; Save was not pressed."
+        return out
+    if others(before) != others(after):
+        out["code"] = "another_field_moved"
+        out["why"] = ("ANOTHER FIELD'S VALUE CHANGED beside the one asked for; Save was not pressed, "
+                      "so nothing the dialog holds is stored by this write.")
+        return out
+    out["proceed"] = True
+    out["why"] = "the field reads the requested value and no other field moved."
+    return out
+
+
 def notify_network_note(gate: Optional[dict[str, Any]]) -> str:
     """The sentence the receipt prints about condition 1 of the ruling.
 
