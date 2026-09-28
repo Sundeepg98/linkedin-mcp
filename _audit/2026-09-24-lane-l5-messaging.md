@@ -3360,3 +3360,144 @@ that way: its card must link the topcard's own profile.
     dc6e349  message_from_profile: a cold review's defect and gaps, and the conversation path
              left as it was
     (last)   this section
+
+## Session 4's refusal: the Send wait and the draft rule (the orchestrator's order of 2026-09-28 17:37)
+
+**THE ORDER.** Session 4 fired the first-contact path live. Every link of the chain held -- one
+bubble, a new message, one box with one committed recipient equal to the name, the search field
+empty, the card linking his profile, the pressed link naming his member, Send in the bubble, the
+composer in 1.3 s -- and the words went in, 65 of 65, exact. Then the last-moment check refused at
+`4_fill_not_landed`: Send read DISABLED straight after the fill. Nothing was pressed and nothing
+reached him; the verdict read unknown, his words left in the composer. About a second later a
+piercing skeleton of the same bubble drew Send WITHOUT `disabled`. The order: (1) after the fill, a
+BOUNDED liveness wait -- up to 5 s, through the piercing engine -- for the bubble's own Send to lose
+`disabled`, then the whole check as now, pressing only if every condition still holds, and refusing
+as today if Send never turns on; (2) THE DRAFT RULE -- LinkedIn may keep the unsent words, and the
+next press opens the composer non-empty, which refuses at 8 forever: a box holding text EXACTLY
+the grant's words, whole and nothing else, skips typing and goes to the wait and the check, and any
+other pre-filled text refuses as today; (3) fixtures built from the live lane's captures through
+the builder, synthetic names, pinned digests, red first on today's code; (4) the gates; (5) commit
+with no attribution, no push, and the then-current master integrated once at the end.
+
+Disk at 17:37 agreed: master and the remote at this branch's head (the first-contact path's last
+commit), the live lane's session-4 files present in its own gitignored state -- read only, and read
+REDACTED: numbers, booleans and short closed tokens, every other string its length only. `shape.key`
+was not opened.
+
+### V.1 What the live lane's files show
+
+- THE RECEIPT, VERIFIED from its numbers and booleans: the opened gate proceeded -- bubbles 1, one
+  holding the composer, the box in it 1, recipients 1, theirs, the search empty, the card theirs,
+  Send in the bubble 1, the pressed link naming the member, the editor empty, Send disabled, the
+  composer drawn in 1347 ms. The send gate refused with the words exact (65 of 65) and
+  `send_enabled` false. The typed-text block: entered, submit never pressed, left in the composer.
+  Clicks 1, the opener only.
+- THE LATER READING, by this lane's own bubble reader on the live page: one bubble, a new message,
+  one pill naming the owner, the search empty, the card matching, one Send in the bubble -- and ONE
+  HEADER CONTROL WHOSE TEXT OPENS ON "Close". The close control's first word is now MEASURED; the
+  rest of its words stay DERIVED and are never read.
+- THE TWO SKELETONS SIDE BY SIDE (their outlines, shapes only): the bubble after the fill differs
+  from session 3's empty one in exactly three places -- the editor's paragraph holds a text of 65
+  characters where it held a line break, two classes moved (the content container's active state,
+  the placeholder's own class), and Send lost `disabled`.
+
+### V.2 The Send wait
+
+`named_profile.wait_for_send_enabled`: after his words are in the box, a first contact waits, up to
+`SEND_ENABLED_WAIT_MS` (5 s), for the Send INSIDE the one bubble holding the composer to be drawn
+without `disabled` -- a CSS locator through Playwright's piercing engine, the bubble being in a
+shadow root; no script runs in the page. It decides nothing: `writes._first_contact_send_check`
+runs it and then the whole last-moment check as before -- the editor, the Send, the fill landed,
+the words exact, and every link of the chain again -- and Send is queued only if all of that holds.
+A Send still disabled at the bound refuses at 4 as before. The receipt carries the wait
+(`send_enabled_wait`: whether Send turned on, and the milliseconds waited). A first contact only:
+the conversation path is left as it was.
+
+### V.3 The draft rule
+
+- THE READING: `read_opened_conversation` now also says whether the one editor holds EXACTLY the
+  grant's words, whole and nothing else (`editor_holds_the_words`), compared in this process as the
+  send gate compares them; only the boolean crosses.
+- THE CONDITION: at 8, a FIRST CONTACT whose box is not empty but holds exactly those words
+  proceeds, marked `words_in_place`, with Send's state left to the wait and the check. Any other
+  text -- other words, his words and more, part of his words -- refuses at 8 as before; so does
+  every box on the conversation path.
+- THE ROUTE: `writes.perform` types nothing for it and goes straight to the wait and the check; the
+  verdict counts his words as in the box; the receipt's typed-text block says NOTHING WAS TYPED and
+  the words were already there, and whether Send was pressed -- where it would have said there was
+  no draft to clear.
+
+### V.4 The fixture: the second capture
+
+`scripts/_build_first_contact_bubble.py --kind filled`, over the live lane's session-4 skeleton,
+wrote `tests/fixtures/synthetic/first_contact_bubble_filled.html`: 124 elements, structure digest
+`ppnjobnklaocacjm` -- printed over the skeleton and over the built file -- a fixed point of its
+builder. The same declared synthetic person; the editor's words are the builder's `TYPED_WORDS`,
+declared, fitted to the reduced words' shape (65 characters, 53 letters, no digit), and a test
+grants exactly them to model a draft. The empty fixture came out byte-identical under the builder's
+change. The session-4 skeleton has no tracked copy yet, so this fixture cannot be re-derived from
+tracked files; if the live lane exports one, a test can pin it as the session-3 copy is pinned.
+
+THE DRAFT WORLD IS DERIVED: nobody has captured a reopened draft. The tests model it as the filled
+bubble opened by the press; what LinkedIn draws on the next press is session 5's measurement. If it
+keeps the words but not an enabled Send, the wait runs out and the check refuses at 4 -- nothing
+pressed.
+
+### V.5 Red first, then green
+
+- `tests/test_first_contact_message.py`, 59 cases, on MASTER'S CODE (the builder and the new
+  fixture copied in, so every red is the product's): 11 red, 48 green. 2 red ON SUBSTANCE -- the
+  session-4 world, Send turning on a second after the fill, and a draft holding exactly his words.
+  9 red on the readings the order adds (the wait, its bound, its receipt field, the draft's
+  reading). PROBES of master's code in those two worlds: the first -- the opened gate passes, the
+  check refuses at 4 with Send disabled and the words exact, the verdict unknown, the words typed
+  and left in the box: SESSION 4'S RECEIPT, REPRODUCED OFFLINE; the second -- refused at 8, and the
+  receipt said there was no draft to clear.
+- Here: 59 of 59.
+- A MUTATION CHECK on an archived copy of the commit, each new check removed in turn with the one
+  test that should catch it: 8 of 8 caught -- no wait; the wait taking a disabled Send (twice: the
+  timing world, and the empty capture); the draft rule taking any text, or part of his words; the
+  draft rule on the conversation path too; a draft's words not counted as in the box; the residue
+  not told of the draft. Control: the same 8 targets pass unmutated.
+
+### V.6 The record and the docs
+
+- `_audit/_census/messaging-and-content.md` `M M1`: the wait, the draft rule and the measured
+  first word noted; state unchanged, COVERED-UNFIRED, its first fire session 5's.
+- `linkedin_message_from_profile`'s docstring: the wait and the draft rule, in his words.
+- `_audit/INSTRUMENTS.md` 69.17.
+
+### V.7 Gates
+
+- RED FIRST, THEN GREEN, AND MUTATED: V.5.
+- BEFORE THE COMMIT: the guard files -- the navigation guard with CI=1, readonly, people and
+  identity, reader leak, envelopes, landing, reachability, correction-findability, performable
+  action, strict press, the named-profile read, route, adversarial and live-skeleton tests, page
+  strings, writes, the literal-repeat guard and this path's own -- 19 files, 2424 of 2424; the
+  three derived baselines regenerated by their writers (two new readers, both clean; the envelope
+  and landing baselines unchanged); the census battery, 12 of 12, the index, blocker map and
+  rulings register each at its fixed point; the record and people guards, 183 of 183.
+- THE IDENTITY GATE ON THE COMMIT: 9 staged files, 0 hits.
+- THE WHOLE SUITE on the commit: the impact plan against master's head selected 222 of
+  285 test files (78%) and widened -- PASS, 12360 tests, 3336 s (two other lanes' gates shared the
+  box for most of it).
+- This section's own commit is gated after it; its result is in the report.
+
+### V.8 NOT known, NOT run, and put to the orchestrator
+
+- THE VERDICT WHEN SEND IS NEVER PRESSED reads "unknown", as it did in session 4, with its "do not
+  retry" -- the shared verdict cannot see the title in the shadow root -- although no Send press
+  happened and the receipt says so. Kept, as ordered ("refuse as today"); making it read "not sent"
+  when no Send was pressed is one change, the orchestrator's call.
+- THE BOUND: 5 s against a measured "about a second" -- measured no finer.
+- A DRAFT'S ATTACHMENT: if LinkedIn kept a file or image with the words, nothing here reads it; no
+  capture holds one.
+- THE CONVERSATION PATH has the same race in principle, and is untouched: left as it was, and blind
+  in the shadow root at 6 before any fill.
+- LIVE: nothing. CI on this branch: nothing pushed.
+
+### V.9 Commits -- on this branch, none pushed, no AI attribution in any
+
+    5fcab6b  message_from_profile: wait for a first contact's Send to turn on, and do not
+             retype a draft of his words
+    (last)   this section
