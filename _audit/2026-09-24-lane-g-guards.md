@@ -3242,8 +3242,8 @@ every hash here does not resolve on `master` until this branch merges):
 A HAND-PICKED GATE MISSED ONE, AND THE 3.10 CELL CAUGHT IT. The gate on
 4e0114d was chosen by hand and left out the exact-identity sweep, which reads
 every file rather than importing anything. The CPython 3.10 cell over the
-order's files ran it: 2028 passed, 1 failed -- two synthetic `/in/Xxxx/`
-hrefs in the double's own test, upper case, which the sweep's shape exemption
+order's files ran it: 2028 passed, 1 failed -- two synthetic `/in/<slug>/`
+hrefs in the double's own test, their slug capitalised, which the sweep's shape exemption
 (lower case, as the builder writes) does not cover. ee9ad11 lowered them and
 kept the assertion discriminating (a mutant that answers the href is red at
 it). The analyser would not have missed it: its plan for that one file holds
