@@ -804,10 +804,13 @@ def test_answer_text_reaches_every_text_node_and_the_aria_label_and_nothing_else
 
     def answer(text: str) -> str:
         seen.append(text)
-        return text.replace("Xxxx", PLANT)
+        return text.replace("Xxxx", PLANT).replace("xxxx", PLANT)
 
+    # The href is a member slug in the shape the skeleton builder writes it
+    # (lower case, which the identity sweep reads as a shape): a double that
+    # answered the href too would turn it into the plant.
     page, _planted = _page(
-        '<a id="a" href="/in/Xxxx/" role="Xxxx" aria-label="View Xxxx profile" title="Xxxx">'
+        '<a id="a" href="/in/xxxx/" role="Xxxx" aria-label="View Xxxx profile" title="Xxxx">'
         "<span>Xxxx</span> <span>Xxxx</span></a>",
         answer_text=answer,
     )
@@ -816,7 +819,7 @@ def test_answer_text_reaches_every_text_node_and_the_aria_label_and_nothing_else
     assert run(link.text_content()) == f"{PLANT} {PLANT}"
     assert run(link.get_attribute("aria-label")) == f"View {PLANT} profile"
     assert run(link.get_attribute("ARIA-LABEL")) == f"View {PLANT} profile"
-    assert run(link.get_attribute("href")) == "/in/Xxxx/"
+    assert run(link.get_attribute("href")) == "/in/xxxx/"
     assert run(link.get_attribute("role")) == "Xxxx"
     assert run(link.get_attribute("title")) == "Xxxx"
     assert text_of(link.element()) == "Xxxx Xxxx"
