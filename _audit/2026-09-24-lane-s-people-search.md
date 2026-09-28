@@ -2906,7 +2906,44 @@ figure is the instrument's reading of the tree it pins.
 
 ### M.7 Gates
 
-The impact gate, the census instruments and the derived views run on the
-commit that carries this section, with nothing edited or committed while
-they run; the identity check runs on the COMMITS, over their blobs. Their
-results follow in the commit after it.
+Offline throughout, with nothing edited or committed while a gate ran.
+
+- THE IMPACT GATE against master, on `a7f954f` (the four items): 15 changed
+  paths, 211 of 285 test files selected, so it WIDENED TO THE WHOLE SUITE --
+  12,294 passed and 2 FAILED, both in `tests/test_server_surface.py`: the
+  docstring guard read the new paragraph's line-opening "add" as a read tool
+  claiming a write. Reworded in `53ef478`, not exempted -- and one more verb
+  the full docstring carried below the description the guard reads, reworded
+  with it, so `readonly.docstring_write_claims` finds nothing in the whole
+  docstring now. Re-run on `53ef478`: widened again, PASS over the whole
+  suite, 12,306 tests in 1,961.9 s, sharded. Both heads are on this branch
+  and nowhere on `master` until it merges.
+- THE CENSUS INSTRUMENTS, thirteen, on `a7f954f`, every exit 0:
+  `census_completion --check` every headline figure matches its pin;
+  `check_read_addresses` GREEN 100 of 100; `check_jobs_directions` GREEN 108
+  of 108; `pin_census_rows` no drift; `measure_pointer_graph` 0 pointers
+  added; both triage scripts; `ruling_holds` GREEN; `check_write_classes`
+  GREEN, 386 lines; `check_exclusion_basis` 38 of 38. Among them the three
+  DERIVED --checks: `_audit/INDEX.md` (259 documents), `_audit/RULINGS.md`
+  (68 rulings) and the blocker map, each at its fixed point.
+- THE IDENTITY CHECK ON THE COMMITS, `scripts/sweep_blobs_for_identity.py`
+  over `854f9ea..53ef478`: 2 commits, 982 blobs, 226 needles, 0 hits -- and
+  the pre-commit gate on each commit's index.
+- THE STANDING LITERAL-REPEAT GUARD, green in both whole-suite runs; the AST
+  duplicate-key check, 4,457 dict literals and 13 JSON files, 0 duplicates.
+- THE PLANTED MUTATIONS: 8 of 8 red for `N 31`, 3 of 3 for `J 107`'s
+  docstring (M.3, M.5).
+
+Master was still `854f9ea` when the gates ended, so there was nothing to
+integrate: this branch is master and its own commits.
+
+### M.8 What was not run
+
+- NOTHING LIVE: `N 30` and `N 31` are COVERED-UNFIRED. Whether LinkedIn
+  applies the `network` facet to the results, and what a `connectionOf`
+  results page draws, only a fire at a member he names will say
+  (`query_kept` reports it then).
+- CI: nothing is pushed, so the suite ran on this Windows box only.
+- `N 81`: LinkedIn's `network` alone, drawn on the connections page, is not
+  built; the order's named-member condition refuses it (M.3).
+- A COLD REVIEW of this order's change was not run.
