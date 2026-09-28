@@ -1,5 +1,6 @@
-"""The named-person reader over the LIVE-TRUE fixture (the orchestrator's
-addendum of 2026-09-28 08:43).
+"""The named-person reader over the page BUILT FROM THE LIVE CAPTURE (the
+orchestrator's addendum of 2026-09-28 08:43), held to the capture's ONE
+live-true source (his addendum of 11:25).
 
 WHAT HAPPENED LIVE. The live lane's session 2 ran ``linkedin_message_from_profile``
 on a first-degree profile the operator named. The preview loaded the profile
@@ -15,7 +16,8 @@ WHAT THIS FILE HOLDS.
 
 1. The fixture is the capture's STRUCTURE: a fixed point of its committed
    builder, ``scripts/_build_named_profile_skeleton.py``, carrying the
-   structure digest the builder printed from the live lane's skeleton.
+   structure digest the builder printed from the live lane's skeleton -- and
+   the live lane's TRACKED copy of the same capture has that digest too.
 2. The OLD reader fails on it, as the live page failed it: the label it
    matched is not drawn, so the old gate's conditions read zero.
 3. The REBUILT reader passes on it -- the one visible Message control inside
@@ -25,9 +27,17 @@ WHAT THIS FILE HOLDS.
    record, and the member's GROUPS stay absent -- the capture draws no
    Interests section and no group link, which is why ``N 178`` stays GAP.
 
-WHICH FIXTURE IS LIVE-TRUE: this one. The synthetic page stays the secondary
-case, for what the live one cannot show (a Connect control, a degree other than
-first, a stranger with the same name, the conversation a Message press opens).
+ONE LIVE-TRUE SOURCE: the live lane's tracked copy of the capture,
+``tests/fixtures/live2/`` (:data:`SOURCE`) -- every keyed text one x, every
+query value one x, ids kept as their hash, LinkedIn's class names kept. The
+reader runs on it and REFUSES, as it must on a page that names no one (no name,
+no member id, no topcard id). Every case that needs a person runs on the page
+built from the same capture, which carries a declared synthetic one; the two
+test different things -- the live lane's harness reads the tracked copy's
+action bars by their class names, this file reads a named person -- and the
+digest below ties them. The invented page stays the secondary case, for what
+the live one cannot show (a Connect control, a degree other than first, a
+stranger with the same name, the conversation a Message press opens).
 """
 from __future__ import annotations
 
@@ -45,6 +55,9 @@ from tests.test_writes import browser_page  # noqa: F401 -- a fixture
 
 REPO = Path(__file__).resolve().parent.parent
 FIXTURE = REPO / "tests" / "fixtures" / "synthetic" / "named_profile_live.html"
+#: THE ONE LIVE-TRUE SOURCE of this profile's markup: the live lane's tracked
+#: copy of the capture the builder read (its session-2 wrap-up).
+SOURCE = REPO / "tests" / "fixtures" / "live2" / "brother_profile.html"
 BUILDER = REPO / "scripts" / "_build_named_profile_skeleton.py"
 LIVE = FIXTURE.read_text(encoding="ascii")
 HIDDEN = ' style="display:none"'
@@ -115,6 +128,35 @@ def test_the_fixture_carries_the_structure_the_builder_printed_from_the_capture(
     assert _printed(run.stdout, "structure digest") == STRUCTURE_DIGEST
 
 
+def _digest_of_body(text: str) -> str:
+    """The builder's own structure digest over a page's ``<body>`` -- the
+    function it prints from, not a second reading of it."""
+    sys.path.insert(0, str(REPO / "scripts"))
+    import _build_named_profile_skeleton as builder
+
+    tree = builder.Tree()
+    tree.feed(text)
+    tree.close()
+    body = next(node for node in builder.walk(tree.root) if node.tag == "body")
+    return builder.structure_digest(body)
+
+
+def test_the_page_is_built_from_the_capture_whose_tracked_copy_is_the_source():
+    """ONE LIVE-TRUE SOURCE (the addendum of 2026-09-28 11:25). The live lane's
+    tracked copy and this page are the same capture: over the tracked copy's
+    body the builder's digest is the one it printed from the skeleton, and
+    this page's. Anyone can re-derive it from tracked files."""
+    assert _digest_of_body(SOURCE.read_text(encoding="ascii")) == STRUCTURE_DIGEST
+    assert _digest_of_body(LIVE) == STRUCTURE_DIGEST
+
+
+def test_THIS_CONTROL_CAN_FAIL_a_structural_edit_of_the_source_breaks_the_tie():
+    source = SOURCE.read_text(encoding="ascii")
+    edited = re.sub(r"<svg[^>]*>.*?</svg>", "", source, count=1, flags=re.S)
+    assert edited != source
+    assert _digest_of_body(edited) != STRUCTURE_DIGEST
+
+
 def test_THIS_CONTROL_CAN_FAIL_a_structural_hand_edit_changes_the_digest(tmp_path):
     """Every svg deleted: the text survives, the structure does not."""
     edited = tmp_path / "edited.html"
@@ -176,10 +218,12 @@ def test_THIS_CONTROL_CAN_FAIL_a_capture_that_draws_interests_keeps_them(tmp_pat
     assert "Interests" in rebuilt and ">Groups<" in rebuilt and "/groups/" in rebuilt
 
 
-def test_the_fixture_says_it_is_the_live_true_one_and_the_synthetic_says_secondary():
-    assert "THIS IS THE LIVE-TRUE FIXTURE" in LIVE
+def test_each_page_names_the_live_true_source_and_the_synthetic_says_secondary():
+    assert "THE LIVE-TRUE SOURCE IS THE LIVE LANE'S TRACKED COPY" in LIVE
+    assert "tests/fixtures/live2/" in LIVE
     synthetic = (FIXTURE.parent / "named_profile.html").read_text(encoding="utf-8")
     assert "THE SECONDARY CASE SINCE 2026-09-28" in synthetic
+    assert "THE LIVE-TRUE SOURCE is the live lane's tracked copy" in synthetic
     assert "named_profile_live.html" in synthetic
 
 
@@ -275,6 +319,30 @@ async def test_THIS_CONTROL_CAN_FAIL_a_hidden_control_counted_would_read_two(bro
     assert reading["message_kind_in_topcard"] != reading["message_visible_in_topcard"]
 
 
+async def test_the_reader_refuses_the_live_true_source_which_names_no_one(browser_page):
+    """THE READER, ON THE SOURCE ITSELF: every name there is one x and no id is
+    a member's, so no topcard is found and nothing can be the owner's -- the
+    reader refuses, as it must on any page that names no one.
+
+    THE COPY KEEPS ITS STYLESHEET AND IMAGE ADDRESSES' PATH WORDS, so a browser
+    loading it fetches them: every request is refused in the page's own route
+    first -- the network guard caught this test without it (four requests,
+    each refused before it left)."""
+
+    async def _refuse(route) -> None:  # noqa: ANN001 - playwright route
+        await route.abort()
+
+    await browser_page.route("**/*", _refuse)
+    await browser_page.set_content(
+        SOURCE.read_text(encoding="ascii"), wait_until="domcontentloaded", timeout=60_000
+    )
+    reading = await dom.read_named_profile(browser_page)
+    assert reading["topcards"] == 0
+    assert named_profile.identity_confirmed(reading) is False
+    assert named_profile.message_state(reading)[0] == named_profile.UNKNOWN
+    assert named_profile.connect_state(reading)[0] == named_profile.UNKNOWN
+
+
 async def test_a_first_degree_live_profile_draws_no_topcard_connect(browser_page):
     reading = await _reading(browser_page)
     assert reading["invite_visible_in_topcard"] == 0
@@ -334,9 +402,16 @@ async def test_the_read_returns_the_person_and_no_groups_from_the_live_page(
 
 
 def test_the_capture_holds_no_groups_section_so_n178_stays_gap():
-    """THE CENSUS'S REASON, AS A FACT ABOUT THE FIXTURE: the live page, loaded
+    """THE CENSUS'S REASON, AS A FACT ABOUT THE CAPTURE: the live page, loaded
     once without a scroll, draws no Interests section and no link under
     /groups/ -- so no reader of a member's groups can be built over it, and
-    ``N 178`` waits on the capture spec C-P7."""
-    assert "Interests" not in LIVE
-    assert "/groups/" not in LIVE
+    ``N 178`` waits on the capture spec C-P7. Read off the SOURCE, whose
+    writer keeps "Interests" and the path word "groups" verbatim (so their
+    absence is a measurement, not a reduction), and off the built page."""
+    sys.path.insert(0, str(REPO / "scripts"))
+    import _probe_live_lane_session_2 as live
+
+    assert "Interests" in live.FURNITURE and "groups" in live.PATH_WORDS
+    for page in (SOURCE.read_text(encoding="ascii"), LIVE):
+        assert "Interests" not in page
+        assert "/groups/" not in page

@@ -16,6 +16,22 @@ reaches this script -- only shapes, and equal shapes for equal strings. What
 it does is put SYNTHETIC values where the shapes stood, each by the ROLE the
 structure gives it.
 
+THE LIVE-TRUE SOURCE, AND WHY THIS SCRIPT DOES NOT READ IT. The live lane
+committed the same capture as a TRACKED copy under ``tests/fixtures/live2/``
+with its session-2 wrap-up: every keyed shape of a text one ``x``, every query
+value one ``x``, ids kept as their hash, LinkedIn's class names kept. That copy
+is the ONE live-true source of this page's markup (the orchestrator's addendum
+of 2026-09-28 11:25), and ``tests/test_named_profile_live_skeleton.py`` holds
+this script's output to it: the STRUCTURE DIGEST below, computed over the
+tracked copy's body, is the digest this script printed from the skeleton. It
+cannot be this script's INPUT, because it reduces exactly what a page for the
+named-person reader needs -- the keyed hash that finds the owner's name
+wherever it stands (the title, the heading, a label); the hash in each composer
+link's ``recipient``, which says which member the link names and is the
+measurement the reader's ownership rule rests on; and the letters, digits and
+length that find the degree line, the headline and the contact overlay. So it
+reads the gitignored skeleton that copy was made from.
+
 WHAT IS KEPT. Every element inside ``<body>``, with its tag and its nesting
 (an ``<svg>`` stays, EMPTY: its drawing is dropped); the closed attribute
 vocabularies the live lane kept verbatim (role, type, tabindex, dir, target,
@@ -239,10 +255,11 @@ KEPT_WORDS = frozenset({
     # 178 stays GAP because the fixture holds no "Interests" could never fail.
     "Interests", "Groups",
 })
-#: And the labels it keeps verbatim, on the same terms.
-KEPT_LABELS = frozenset({"Dismiss", "For Business", "More", "Premium"})
-#: ("Verified", which the live lane kept as a label eight times, is not on
-#: master's copy of that list, so it is written as the placeholder here.)
+#: And the labels it keeps verbatim, on the same terms. "Verified", which the
+#: live lane's skeleton kept as a label eight times, joined that list on master
+#: with the live lane's session-2 wrap-up and is kept from then on; before, it
+#: was written as the placeholder.
+KEPT_LABELS = frozenset({"Dismiss", "For Business", "More", "Premium", "Verified"})
 PLACEHOLDER_TEXT = "Example text"
 #: A label this script wrote from a template: a control's word and a person
 #: reduced to shape.
@@ -259,8 +276,12 @@ HEADER = """<!doctype html>
   skeleton; scripts/_build_named_profile_skeleton.py turned that skeleton into
   this file, and says line by line what it kept and what it put in place.
 
-  THIS IS THE LIVE-TRUE FIXTURE for dom.read_named_profile (lane L5, the
-  orchestrator's addendum of 2026-09-28 08:43). tests/fixtures/synthetic/
+  THE LIVE-TRUE SOURCE IS THE LIVE LANE'S TRACKED COPY of the same capture,
+  under tests/fixtures/live2/: every keyed text one x, ids kept as their hash.
+  This page is BUILT FROM THAT CAPTURE for dom.read_named_profile (lane L5,
+  2026-09-28), which needs what the tracked copy reduces -- a person to name,
+  and member ids in the topcard's id and in the composer links -- and a test
+  holds the two to one structure digest. tests/fixtures/synthetic/
   named_profile.html, the invented page the reader was first built over, is the
   SECONDARY case.
 

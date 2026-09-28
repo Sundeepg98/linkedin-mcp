@@ -251,12 +251,12 @@ def _identity_why(reading: dict[str, Any]) -> str:
         return f"the profile could not be read ({reading['error']})."
     return (
         "the page did not show one person's topcard in the shape this server "
-        f"measured on your own profile: title shape {reading.get('title_shape')!r}, "
+        "measured on your own profile and on the one third party's profile "
+        f"captured (first-degree, 2026-09-28): title shape {reading.get('title_shape')!r}, "
         f"{coerce.as_count(reading.get('topcards'))} topcard(s), first heading "
-        f"matching the title: {reading.get('heading_matches_title')!r}. A third "
-        "party's profile has never been captured, so this is the first reading "
-        "of one -- NEEDS-CAPTURE C-P1 in the record -- and nothing is aimed at a "
-        "page this server cannot identify."
+        f"matching the title: {reading.get('heading_matches_title')!r}. A shape "
+        "no capture shows is NEEDS-CAPTURE C-P1 in the record, and nothing is "
+        "aimed at a page this server cannot identify."
     )
 
 

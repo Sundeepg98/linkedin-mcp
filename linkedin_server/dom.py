@@ -7641,24 +7641,29 @@ async def read_invitation_rail(page: Any, segment: Optional[str] = None) -> dict
 #: ``<a>``, 16 with an href on ``/messaging/compose/`` and 2 on
 #: ``/messaging/thread/``, and NONE a ``<button>``. Measured on people cards
 #: (search appearances, company people, his own profile's rail). A third
-#: party's profile has never been captured, so how ITS Message control is drawn
-#: is the first supervised act's to see; the reader below reports it.
+#: party's profile had never been captured when this was written; the next
+#: paragraph is what the first capture of one showed.
 MESSAGE_CONTROL_PREFIX = "Message "
 MESSAGE_CONTROL = 'a[aria-label^="Message "], button[aria-label^="Message "]'
 
 #: THE PROFILE'S OWN MESSAGE CONTROL, AS THE LIVE PAGE DRAWS IT -- MEASURED
 #: 2026-09-28 on the live lane's skeleton of a first-degree profile the
-#: operator named (``tests/fixtures/synthetic/named_profile_live.html``): a
+#: operator named (the live lane's tracked copy under ``tests/fixtures/live2/``,
+#: and the page built from it, ``tests/fixtures/synthetic/named_profile_live.html``): a
 #: link to the composer, ``/messaging/compose/``, whose accessible name is its
 #: own text, "Message", with NO aria-label -- drawn twice in the topcard, in
 #: two action rows, one of them hidden. The label convention above
 #: (``Message <full name>``) is the RAILS': every labelled Message control on
 #: that page is another person's. So the topcard's Message control is matched
-#: by BOTH shapes, and which one is the owner's is settled in the page
-#: (:data:`NAMED_PROFILE_JS`): a label must name the owner; a control without
-#: one must say exactly "Message" -- inside the owner's own topcard, that is
-#: the owner's action. The old reader matched the label alone, found none, and
-#: refused every live Message (the live lane, session 2).
+#: by BOTH shapes, and which one is the owner's is settled in the page by
+#: :data:`CONTROL_FACTS_JS`, on exactly the elements the press selector
+#: resolves: a label must name the owner; a control without one must say
+#: exactly "Message", be a link, and name in its composer address the member
+#: in the topcard's own id. The old reader matched the label alone, found
+#: none, and refused every live Message (the live lane, session 2); the first
+#: rebuild took any unlabelled "Message" inside the topcard for the owner's,
+#: and the cold check built a stranger's card inside the topcard that it
+#: accepted.
 TOPCARD_MESSAGE_CONTROL = MESSAGE_CONTROL + ', a[href*="/messaging/compose/"]'
 
 
