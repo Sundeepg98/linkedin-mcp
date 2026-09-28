@@ -3048,7 +3048,51 @@ restricted to his first degree discharges them is a D6 question -- the
 payload differs (a people search ranks and pages; the connections page lists
 every connection) -- and D6 moves have been his.
 
-### N.4 Gates
+### N.4 The integration of master `0e1040b`, lane L5's head
 
-The integration of L5's head and the gates on the final tree follow in the
-next section, once master is on that head with its CI green.
+The build was committed on `6dc74c3` as `aa1b507`. Master's CI for
+`0e1040b` finished green at 17:12 -- 20 of 20 jobs, queried by the full SHA
+-- and the remote `master` stood on it. It was merged once, as `94bb86f`: no
+file conflicted. Lane L5 touched messaging -- `dom.py`, `named_profile.py`,
+`writes.py`, the message path in `server.py`, the reader baseline and three
+tests -- and this branch the people search, the jobs docstring, and the
+network and jobs census cells with their side tables. `aa1b507` and
+`94bb86f` are on this branch and nowhere on `master` until it merges.
+
+EVERY PIN RE-DERIVED ON THE MERGED TREE, NEVER SUMMED: `census_completion
+--check` -- every headline figure matches its pin (adjudicated 185, gap 585,
+unfired 37, b1_no_ruling 18, b3_admitted 42) -- and no bucket-1 row off its
+hold; `count_census_states` GAP 585 of 770 stated rows; the tool surface 61
+tools and 96 parameters off the registry; the address table 99 of 99 GREEN.
+The merge moved none of them.
+
+### N.5 Gates
+
+On `94bb86f`, the integrated tree, offline, with nothing edited or committed
+while they ran:
+
+- THE IMPACT GATE against master: 15 changed paths, 212 of 286 test files
+  selected, so it WIDENED TO THE WHOLE SUITE -- PASS over 12,402 tests in
+  1,033.8 s, sharded, 0 failed.
+- THE CENSUS INSTRUMENTS, thirteen, every exit 0, the three DERIVED
+  --checks among them: `_audit/INDEX.md` (259 documents), `_audit/RULINGS.md`
+  (68 rulings) and the blocker map, each at its fixed point.
+- THE IDENTITY CHECK ON THE COMMITS: `scripts/sweep_blobs_for_identity.py`
+  over `0e1040b..94bb86f` -- 5 commits, 1,008 blobs, 226 needles, 0 hits --
+  and the pre-commit gate on every commit's index.
+- THE STANDING LITERAL-REPEAT GUARD green in the whole suite; the AST
+  duplicate-key check 4,498 dict literals and 13 JSON files, 0 duplicates;
+  the cited-SHA guard green.
+- THE PLANTED MUTATIONS: 10 of 10 red for `N 81` (N.2).
+
+This section's own commit changes only this document and the regenerated
+blocker map; it gets the impact gate for those paths.
+
+### N.6 What was not run
+
+- NOTHING LIVE: `N 81`, like `N 30` and `N 31`, is COVERED-UNFIRED. Whether
+  LinkedIn keeps the facet alone, and in what spelling, only its first fire
+  says (`query_kept`).
+- CI on this branch: nothing is pushed; the suite ran on this Windows box.
+- A COLD REVIEW of the `network` facet's two shapes was not run.
+- `N 25` and `N 26`: not moved -- a D6 question (N.3).
