@@ -8905,9 +8905,7 @@ async def _verify_after(
         after = await named_profile.read_opened_conversation(page, text=text)
         # AND WHOSE CONVERSATION IT IS NOW -- the page's own comparison, one
         # boolean (the second warm re-check, 2026-09-27): a conversation swapped
-        # in place during the Send press would otherwise be read as his. SINCE
-        # 2026-09-28 THE PIERCING READING COUNTS TOO: the live overlay is in a
-        # shadow root the page's own script does not see into.
+        # in place during the Send press would otherwise be read as his.
         theirs = await dom.read_named_profile(page)
         state, why = named_profile.message_verdict(
             opened,
@@ -8915,8 +8913,7 @@ async def _verify_after(
             held_in_place=held,
             typed=typed,
             conversation_is_theirs=(
-                (not theirs.get("error") and theirs.get("bubble_title_names_owner") is True)
-                or after.get("holding_title_kind") == "owner"
+                not theirs.get("error") and theirs.get("bubble_title_names_owner") is True
             ),
         )
         return state, why, ""
@@ -10795,6 +10792,18 @@ async def perform(
         # WHICH COMPOSER THE MESSAGE PRESS OPENED, for message_from_profile:
         # "conversation" or "first_contact" (2026-09-28). Null otherwise.
         "message_path": None if opened_gate is None else opened_gate.get("path"),
+        # HOW LONG A FIRST CONTACT'S SEND TOOK TO BE DRAWN as a message in its
+        # bubble, read before the verdict (2026-09-28): whether it appeared
+        # inside the bound, and the milliseconds waited. Null for every other
+        # action and path.
+        "sent_words_wait": (
+            None
+            if first_contact_after is None
+            else {
+                "appeared": first_contact_after["wait"].get("appeared") is True,
+                "waited_ms": coerce.as_count(first_contact_after["wait"].get("waited_ms")),
+            }
+        ),
         # WHAT THE PUBLISH GATE SAW, for the composer.
         "publish_gate": (
             None

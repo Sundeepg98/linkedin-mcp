@@ -218,7 +218,8 @@ _FACT_KEYS = (
     "message_visible_in_topcard", "message_owner_visible_in_topcard",
     "message_foreign_in_topcard", "invite_kind_in_topcard", "topcard_all_headings",
     "topcard_members", "topcard_member_id", "more_in_topcard", "more_visible_in_topcard",
-    "more_actions", "dialogs", "composer_editors", "conversation_bubbles",
+    "more_actions", "dialogs", "composer_editors", "composer_editors_pierced",
+    "conversation_bubbles",
     "named_controls", "dialog_controls", "dialog_note_fields", "error",
 )
 
@@ -414,9 +415,16 @@ def message_state(reading: dict[str, Any]) -> tuple[str, str]:
             "address the page chose, and that is refused before anything is "
             "pressed (PAGE-MAY-VETO-NEVER-SUPPLY). NEEDS-CAPTURE C-P4."
         )
-    if coerce.as_count(reading.get("composer_editors")):
+    # A COMPOSER ALREADY OPEN, BY EITHER ENGINE (the cold review of
+    # 2026-09-28): the page's own script cannot see into the overlay's
+    # shadow root, where the live overlay is; Playwright's engine can.
+    already = max(
+        coerce.as_count(reading.get("composer_editors")),
+        coerce.as_count(reading.get("composer_editors_pierced")),
+    )
+    if already:
         return UNKNOWN, (
-            f"{coerce.as_count(reading.get('composer_editors'))} conversation "
+            f"{already} conversation "
             "composer(s) are already open on this page. Close them first: the "
             "composer this act types into must be the one its own press opens."
         )
@@ -428,7 +436,9 @@ def message_state(reading: dict[str, Any]) -> tuple[str, str]:
         + (
             " The profile reads '1st': the words are typed only if, after the "
             "press, exactly one empty composer sits in a conversation titled "
-            "with exactly that person's name."
+            "with exactly that person's name -- or, where no conversation "
+            "exists yet, in the one new message the press opened, addressed "
+            "to exactly them and nobody else."
             if degree == "1st"
             else f" THE PROFILE READS DEGREE {degree!r}, NOT '1st': confirming "
             "will press Message, record what opens, and STOP BEFORE TYPING -- "
@@ -583,14 +593,24 @@ def connect_verdict(
 #
 # THE OVERLAY IS IN A SHADOW ROOT (the same session): the page's own
 # ``querySelectorAll`` does not see it, so ``dom.NAMED_PROFILE_JS``'s bubble
-# fields read nothing there. Every question about the bubble is therefore
-# ALSO asked through Playwright's piercing engine (``dom.read_bubbles``), and
-# the conversation path's "whose conversation" takes either reading -- the
-# one fix the existing path needed, and the only one it was given.
+# fields read nothing there. The first contact therefore asks every question
+# about its bubble through Playwright's piercing engine (``dom.read_bubbles``),
+# and the one precondition both paths share -- no composer open BEFORE the
+# press -- is counted by that engine too (``composer_editors_pierced``).
+#
+# THE CONVERSATION PATH IS LEFT AS IT WAS, as the addendum of 13:03 ordered:
+# its "whose conversation" is the page's own reading, which cannot see into
+# the shadow root, so where LinkedIn draws the conversation there it refuses
+# at 6 -- which conversation bubbles are drawn there is DERIVED; session 3
+# opened only a new message. Giving it the piercing reading as well was
+# built on 2026-09-28 and taken out the same day: the cold review showed it
+# let the path type into a conversation already open before the press,
+# which the page's own count could not see (lane L5's record, "The
+# first-contact path").
 
 BUBBLE_SELECTOR = dom.OVERLAY_BUBBLE
 COMPOSER_EDITOR_SELECTOR = dom.OVERLAY_COMPOSER_EDITOR
-COMPOSER_SEND_SELECTOR = 'form.msg-form button.msg-form__send-button[type="submit"]'
+COMPOSER_SEND_SELECTOR = dom.OVERLAY_SEND_CONTROL
 
 #: HOW LONG THE GATE WAITS for a composer to be drawn after the Message press,
 #: before it reads. A LIVENESS BOUND, NOT A SAFETY ONE: the gate refuses on
@@ -614,8 +634,13 @@ SENT_WORDS_WAIT_MS = 5_000
 #: THE BUBBLE'S CLOSE CONTROL -- a header control whose accessible name opens
 #: on the word "Close", pressed strictly. MEASURED 2026-09-28: the header's
 #: two controls carry their labels as text, and Escape does NOT close the
-#: bubble (after it: one bubble, one editor, one dialog). Only the first word
-#: is read; the rest of the label is DERIVED from its shape.
+#: bubble (after it: one bubble, one editor, one dialog). ITS WORDS WERE NOT
+#: MEASURED: the capture reduced them, and "Close your draft conversation"
+#: is DERIVED from their shape (26 letters in four words) and the form's own
+#: "... for your draft conversation" labels -- its first word too. Only
+#: that word is read; if the live control reads otherwise, the close gate
+#: refuses and the bubble stays on his screen. The gate also requires the
+#: one element this selects to be one of the bubble's header controls.
 BUBBLE_CLOSE_SELECTOR = (
     dom.OVERLAY_BUBBLE + " .msg-overlay-bubble-header__controls"
     + " >> role=button[name=/^Close\\b/]"
@@ -698,6 +723,7 @@ async def read_opened_conversation(page: Any, *, text: Optional[str] = None) -> 
         "holding_search_empty": None,
         "holding_card_matches": None,
         "holding_close_controls": None,
+        "holding_sends": None,
         "bubble_facts_error": None,
     }
     try:
@@ -769,6 +795,7 @@ async def holding_bubble(page: Any) -> dict[str, Any]:
         "holding_search_empty": one.get("search_empty"),
         "holding_card_matches": one.get("card_matches"),
         "holding_close_controls": one.get("close_controls"),
+        "holding_sends": one.get("sends"),
         "bubble_facts_error": facts["error"],
     }
 
@@ -802,8 +829,8 @@ async def bubble_close_gate(page: Any) -> dict[str, Any]:
 
     1. exactly one overlay bubble is drawn, and it holds the composer;
     2. its header draws exactly one control whose text opens on "Close";
-    3. the close selector resolves exactly that one element -- the press is
-       strict;
+    3. the close selector resolves exactly one element, and it is one of the
+       bubble's header controls -- the press is strict;
     4. the composer is empty: a box still holding words is not closed over.
     """
     out: dict[str, Any] = {
@@ -822,6 +849,14 @@ async def bubble_close_gate(page: Any) -> dict[str, Any]:
             "bubbles_with_editor": len(holding),
             "close_controls": holding[0]["close_controls"] if len(holding) == 1 else None,
             "matches": coerce.as_count(await page.locator(BUBBLE_CLOSE_SELECTOR).count()),
+            # THE ELEMENT THE PRESS WILL TAKE IS ONE OF THE BUBBLE'S HEADER
+            # CONTROLS (the cold review of 2026-09-28): the count above is by
+            # accessible name, the page's count by class and text.
+            "matches_as_control": coerce.as_count(
+                await page.locator(BUBBLE_CLOSE_SELECTOR)
+                .and_(page.locator(dom.OVERLAY_BUBBLE + " " + dom.OVERLAY_BUBBLE_CONTROL))
+                .count()
+            ),
             "editor_empty": None,
             "error": facts["error"],
         }
@@ -848,11 +883,12 @@ async def bubble_close_gate(page: Any) -> dict[str, Any]:
             "pressed in its place. Nothing was closed."
         )
         return out
-    if observed["matches"] != 1:
+    if observed["matches"] != 1 or observed["matches_as_control"] != 1:
         out["refused_condition"] = "3_selector_count"
         out["why"] = (
-            f"the close selector resolves {observed['matches']} element(s), not one. Nothing "
-            "was closed."
+            f"the close selector resolves {observed['matches']} element(s), "
+            f"{observed['matches_as_control']} of them a header control of the "
+            "bubble: it must be one, and that one. Nothing was closed."
         )
         return out
     if observed["editor_empty"] is not True:
@@ -863,7 +899,10 @@ async def bubble_close_gate(page: Any) -> dict[str, Any]:
         )
         return out
     out["proceed"] = True
-    out["why"] = "one bubble, its one close control, the composer empty: closed by that control."
+    out["why"] = (
+        "one bubble, its one close control, the composer empty: that control "
+        "is the one pressed."
+    )
     return out
 
 
@@ -913,22 +952,19 @@ def opened_conversation_gate(
         # whether its one title reads exactly the owner's name -- both from
         # the page's own comparison, so no name crosses.
         "conversation_titles": profile_after.get("bubble_titles"),
-        # EITHER READING NAMES THE OWNER (2026-09-28): the page's own script,
-        # which cannot see into the overlay's shadow root, or the piercing
-        # one, which can -- both compare the one title with the name in the
-        # page. Before that day only the first was asked.
-        "conversation_names_the_owner": (
-            profile_after.get("bubble_title_names_owner") is True
-            or conversation.get("holding_title_kind") == "owner"
-        ),
+        "conversation_names_the_owner": profile_after.get("bubble_title_names_owner"),
         # THE FIRST CONTACT'S READINGS (2026-09-28), each from the piercing
-        # engine or the pressed control -- see this section's head.
+        # engine or the pressed control -- see this section's head. The
+        # conversation path decides on none of them.
         "title_kind": conversation.get("holding_title_kind"),
+        "recipient_boxes_in_bubble": conversation.get("holding_boxes"),
         "recipient_pills": conversation.get("holding_pills"),
         "recipient_is_theirs": conversation.get("holding_pill_names_owner"),
         "recipient_search_empty": conversation.get("holding_search_empty"),
         "recipient_card_is_theirs": conversation.get("holding_card_matches"),
+        "send_in_bubble": conversation.get("holding_sends"),
         "press_names_their_member": profile_after.get("message_member_bound"),
+        "bubble_facts_error": conversation.get("bubble_facts_error"),
         "recipient_boxes": conversation.get("recipient_boxes"),
         "editor_empty": conversation.get("editor_empty"),
         "send_controls": conversation.get("send_controls"),
@@ -1018,16 +1054,16 @@ def opened_conversation_gate(
             out["why"] = (
                 "the one conversation holding a composer is not headed by the "
                 "person you named: it draws "
-                f"{coerce.as_count(observed['conversation_titles'])} title(s) the "
-                "page's own script can see, and neither reading -- that one, or "
-                "the piercing one, which reads "
-                f"{observed['title_kind']!r} -- finds exactly the name on the "
-                "profile (compared in the page; the title contains that name: "
+                f"{coerce.as_count(observed['conversation_titles'])} title(s), and "
+                "none reads exactly the name on the profile (compared in the page; "
+                "the title contains that name: "
                 f"{observed['title_contains_the_owner']!r}). A conversation this "
                 "press did not open, or somebody else's, would take your words to "
                 "a person you did not name. How a person's conversation title is "
                 "drawn has never been captured (NEEDS-CAPTURE C-P4). Nothing was "
-                "typed."
+                "typed. (The page's own script cannot see into a shadow root; the "
+                "piercing reading, which this path does not act on, reads the "
+                f"title as {observed['title_kind']!r}.)"
             )
             return out
     if observed["editor_empty"] is not True or observed["send_disabled"] is not True:
@@ -1068,6 +1104,19 @@ def opened_conversation_gate(
 def _first_contact_refusal(observed: dict[str, Any]) -> Optional[tuple[str, str]]:
     """The first-contact chain's links 2 and 3, in order: ``(condition, why)``
     for the first that fails, or None. Every doubt refuses; nothing is typed."""
+    if observed.get("bubble_facts_error"):
+        return "4_unreadable", (
+            "the new message could not be read through the engine that sees "
+            f"into the overlay ({observed.get('bubble_facts_error')}). Nothing "
+            "was typed."
+        )
+    if coerce.as_count(observed.get("bubbles")) != 1:
+        return "6f_not_one_bubble", (
+            f"{observed.get('bubbles')} overlay bubble(s) are drawn: a first "
+            "contact is typed only into the one bubble on the page, the one the "
+            "press opened -- the measured shape, none before the press and one "
+            "after. Nothing was typed."
+        )
     if not coerce.as_count(observed.get("recipient_pills")):
         return "7_recipient_box", (
             f"{observed.get('recipient_boxes')} recipient box(es) are drawn with "
@@ -1083,12 +1132,15 @@ def _first_contact_refusal(observed: dict[str, Any]) -> Optional[tuple[str, str]
         )
     if (
         coerce.as_count(observed.get("recipient_boxes")) != 1
+        or coerce.as_count(observed.get("recipient_boxes_in_bubble")) != 1
         or coerce.as_count(observed.get("recipient_pills")) != 1
     ):
         return "6f_not_one_recipient", (
-            f"{observed.get('recipient_boxes')} recipient box(es) holding "
-            f"{observed.get('recipient_pills')} committed recipient(s): a first "
-            "contact goes to exactly one. Nothing was typed."
+            f"{observed.get('recipient_boxes')} recipient box(es) on the page, "
+            f"{observed.get('recipient_boxes_in_bubble')} in the new message, "
+            f"holding {observed.get('recipient_pills')} committed recipient(s): "
+            "a first contact goes to exactly one, in its own box. Nothing was "
+            "typed."
         )
     if observed.get("recipient_is_theirs") is not True:
         return "6f_recipient_not_theirs", (
@@ -1111,6 +1163,12 @@ def _first_contact_refusal(observed: dict[str, Any]) -> Optional[tuple[str, str]
         return "6f_card_not_theirs", (
             "the new message's recipient card does not link the profile you "
             "named, and only that profile (compared in the page). Nothing was "
+            "typed."
+        )
+    if coerce.as_count(observed.get("send_in_bubble")) != 1:
+        return "6f_send_not_in_the_bubble", (
+            f"the new message's bubble holds {observed.get('send_in_bubble')} Send "
+            "control(s): the one Send on the page must be its own. Nothing was "
             "typed."
         )
     return None
@@ -1171,16 +1229,26 @@ async def composer_send_gate(
         # WHOSE CONVERSATION, read by the page's own script: a count and two
         # booleans cross, never the title.
         again = await dom.read_named_profile(page)
-        holding = await holding_bubble(page)
         observed["conversation_titles"] = again.get("bubble_titles")
-        observed["title_kind"] = holding["holding_title_kind"]
         observed["conversation_names_the_owner"] = (
             not again.get("error") and again.get("bubble_title_names_owner") is True
-        ) or holding["holding_title_kind"] == "owner"
-        observed["recipient_pills"] = holding["holding_pills"]
-        observed["recipient_is_theirs"] = holding["holding_pill_names_owner"]
-        observed["recipient_search_empty"] = holding["holding_search_empty"]
-        observed["recipient_card_is_theirs"] = holding["holding_card_matches"]
+        )
+        # A FIRST CONTACT'S CHAIN, read again with his words in the box,
+        # through the piercing engine (2026-09-28). The conversation path
+        # reads none of it.
+        holding: dict[str, Any] = {}
+        observed["bubbles"] = None
+        if first_contact:
+            holding = await holding_bubble(page)
+            observed["bubbles"] = coerce.as_count(await page.locator(BUBBLE_SELECTOR).count())
+        observed["title_kind"] = holding.get("holding_title_kind")
+        observed["recipient_boxes_in_bubble"] = holding.get("holding_boxes")
+        observed["recipient_pills"] = holding.get("holding_pills")
+        observed["recipient_is_theirs"] = holding.get("holding_pill_names_owner")
+        observed["recipient_search_empty"] = holding.get("holding_search_empty")
+        observed["recipient_card_is_theirs"] = holding.get("holding_card_matches")
+        observed["send_in_bubble"] = holding.get("holding_sends")
+        observed["bubble_facts_error"] = holding.get("bubble_facts_error")
         observed["first_contact"] = bool(first_contact)
     except Exception as exc:  # noqa: BLE001 - reported as a type
         out["refused_condition"] = "0_read_failed"
@@ -1190,6 +1258,14 @@ async def composer_send_gate(
         )
         return out
     out["observed"] = observed
+    if first_contact and observed["bubble_facts_error"]:
+        out["refused_condition"] = "0_read_failed"
+        out["why"] = (
+            "the new message could not be read through the engine that sees "
+            f"into the overlay ({observed['bubble_facts_error']}). Send was not "
+            "pressed, and the words are still in the composer on your screen."
+        )
+        return out
     if observed["recipient_boxes"] and not first_contact:
         out["refused_condition"] = "1_not_a_conversation"
         out["why"] = (
@@ -1226,18 +1302,24 @@ async def composer_send_gate(
         return out
     if first_contact:
         if not (
-            observed["title_kind"] == "new_message"
+            coerce.as_count(observed["bubbles"]) == 1
+            and observed["title_kind"] == "new_message"
             and coerce.as_count(observed["recipient_boxes"]) == 1
+            and coerce.as_count(observed["recipient_boxes_in_bubble"]) == 1
             and coerce.as_count(observed["recipient_pills"]) == 1
             and observed["recipient_is_theirs"] is True
             and observed["recipient_search_empty"] is True
             and observed["recipient_card_is_theirs"] is True
+            and coerce.as_count(observed["send_in_bubble"]) == 1
         ):
             out["refused_condition"] = "6f_recipient_changed"
             out["why"] = (
                 "your words are in the box, but the new message is no longer "
-                "addressed to exactly the person you named: title "
-                f"{observed['title_kind']!r}, {observed['recipient_boxes']} box(es), "
+                f"addressed to exactly the person you named: {observed['bubbles']} "
+                f"bubble(s), title {observed['title_kind']!r}, "
+                f"{observed['recipient_boxes']} box(es), "
+                f"{observed['recipient_boxes_in_bubble']} in the bubble, "
+                f"its Send there: {observed['send_in_bubble']!r}, "
                 f"{observed['recipient_pills']} committed recipient(s), the one "
                 f"named for them: {observed['recipient_is_theirs']!r}, nobody else "
                 f"on the way in: {observed['recipient_search_empty']!r}, the card "

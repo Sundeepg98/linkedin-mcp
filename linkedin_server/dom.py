@@ -7790,6 +7790,17 @@ OVERLAY_RECIPIENT_PILL = ".msg-connections-typeahead button.artdeco-pill--dismis
 OVERLAY_RECIPIENT_SEARCH = "input.msg-connections-typeahead__search-field"
 OVERLAY_RECIPIENT_CARD_LINK = ".msg-s-profile-card a[href]"
 NEW_MESSAGE_TITLE = "New message"
+#: EVERY COMMITTED RECIPIENT, whatever pill it is drawn as: the dismissible
+#: one the capture drew, and any other a second recipient might wear (the
+#: cold review of 2026-09-28). A first contact goes to exactly one.
+OVERLAY_RECIPIENT_ANY_PILL = ".msg-connections-typeahead__added-recipients .artdeco-pill"
+#: THE FORM'S SEND, as the gates count it page-wide -- and counted inside the
+#: one bubble as well, so the Send that is pressed is that bubble's.
+OVERLAY_SEND_CONTROL = 'form.msg-form button.msg-form__send-button[type="submit"]'
+#: ANY COMPOSER'S EDITOR: what "a composer is already open" counts before a
+#: press -- the selector :data:`NAMED_PROFILE_JS` counts with, asked of
+#: Playwright's engine, which sees into the overlay's shadow root.
+OVERLAY_ANY_COMPOSER_EDITOR = ".msg-form__contenteditable"
 
 
 #: THE ONE SCRIPT A NAMED ACT RUNS ON THE PROFILE, and why it is a script.
@@ -8229,6 +8240,7 @@ async def read_named_profile(page: Any) -> dict[str, Any]:
         "more_actions": 0,
         "dialogs": 0,
         "composer_editors": 0,
+        "composer_editors_pierced": 0,
         "conversation_bubbles": 0,
         "bubbles_with_editor": 0,
         "bubble_titles": 0,
@@ -8315,6 +8327,14 @@ async def read_named_profile(page: Any) -> dict[str, Any]:
                 # (2026-09-28): the recipient a new-message composer commits
                 # is the one the pressed link carries.
                 out["message_member_bound"] = owners[0]["bound"] is True
+        # A COMPOSER ALREADY OPEN, COUNTED BY THE ENGINE THE PRESS USES (the
+        # cold review of 2026-09-28). The page's own script, above, counts
+        # none inside the overlay's shadow root, where the live overlay is,
+        # so a composer open there before the press read as none. A locator
+        # count, which runs no script.
+        out["composer_editors_pierced"] = as_count(
+            await page.locator(OVERLAY_ANY_COMPOSER_EDITOR).count()
+        )
         out["more_visible_in_topcard"] = as_count(
             await page.locator(NAMED_PROFILE_TOPCARD)
             .get_by_role("button", name=TOPCARD_MORE_NAME, exact=True)
@@ -8364,14 +8384,21 @@ BUBBLE_FACTS_CAP = 8
 #:
 #: * ``editor``: the bubble holds a composer;
 #: * ``title_kind``: see :data:`BUBBLE_TITLE_KINDS`;
-#: * ``boxes`` and ``pills``: recipient boxes, and recipients committed in one;
-#: * ``pill_names_owner``: exactly one pill, and its text IS the profile's name,
-#:   the whole of it;
+#: * ``boxes`` and ``pills``: recipient boxes, and the recipients committed in
+#:   one -- every pill, the dismissible kind and any other;
+#: * ``pill_names_owner``: exactly one recipient, a dismissible pill, and its
+#:   drawn text IS the profile's name, the whole of it;
+#: * ``sends``: the form's Send controls inside the bubble;
 #: * ``search_empty``: the box's one search field holds nothing -- no second
 #:   recipient on the way in;
 #: * ``card_matches``: the recipient card links exactly one profile, and it is
-#:   the topcard's own;
+#:   the topcard's own -- a vanity name with its ASCII case folded, a member
+#:   id exactly, as :func:`named_profile.same_segment` compares them;
 #: * ``close_controls``: header controls whose text opens on the word "Close".
+#:
+#: THE TITLE AND THE PILL ARE COMPARED ON THEIR DRAWN TEXT (``innerText``), as
+#: :data:`NAMED_PROFILE_JS` compares the title: hidden text never names
+#: anybody here (the cold review of 2026-09-28).
 BUBBLE_FACTS_JS = """
 (els, cfg) => {
   const norm = (s) => String(s === null || s === undefined ? '' : s).replace(/\\s+/g, ' ').trim();
@@ -8383,6 +8410,7 @@ BUBBLE_FACTS_JS = """
     if (!m) return null;
     let seg = m[1];
     try { seg = decodeURIComponent(seg); } catch (e) { return null; }
+    if (/^ACoAA[A-Za-z0-9_-]{10,80}$/.test(seg)) return seg;
     return seg.replace(/[A-Z]/g, (c) => c.toLowerCase());
   };
   const cards = document.querySelectorAll('[id$="Topcard"]');
@@ -8394,11 +8422,12 @@ BUBBLE_FACTS_JS = """
     }
   }
   const textOf = (el) => norm(el.innerText || el.textContent);
+  const shown = (el) => norm(el.innerText);
   return els.slice(0, cfg.cap).map((el) => {
     const titles = el.querySelectorAll(cfg.titleSelector);
     let titleKind = 'none';
     if (titles.length === 1) {
-      const said = textOf(titles[0]);
+      const said = shown(titles[0]);
       if (said === cfg.newMessage) titleKind = 'new_message';
       else if (name && said === name) titleKind = 'owner';
       else titleKind = 'other';
@@ -8406,6 +8435,7 @@ BUBBLE_FACTS_JS = """
       titleKind = 'other';
     }
     const pills = el.querySelectorAll(cfg.pillSelector);
+    const recipients = new Set([...pills, ...el.querySelectorAll(cfg.anyPillSelector)]);
     const search = el.querySelectorAll(cfg.searchSelector);
     const segs = new Set();
     for (const a of el.querySelectorAll(cfg.cardLinkSelector)) {
@@ -8420,8 +8450,10 @@ BUBBLE_FACTS_JS = """
       editor: el.querySelector(cfg.editorSelector) !== null,
       title_kind: titleKind,
       boxes: el.querySelectorAll(cfg.boxSelector).length,
-      pills: pills.length,
-      pill_names_owner: pills.length === 1 && !!name && textOf(pills[0]) === name,
+      pills: recipients.size,
+      pill_names_owner: recipients.size === 1 && pills.length === 1 && !!name
+        && shown(pills[0]) === name,
+      sends: el.querySelectorAll(cfg.sendSelector).length,
       search_empty: search.length === 1 && String(search[0].value || '') === '',
       card_matches: own.size === 1 && segs.size === 1 && own.has(Array.from(segs)[0]),
       close_controls: closers
@@ -8448,6 +8480,7 @@ def _closed_bubble_facts(raw: Any) -> list[dict[str, Any]]:
             "search_empty": fact.get("search_empty") is True,
             "card_matches": fact.get("card_matches") is True,
             "close_controls": as_count(fact.get("close_controls")),
+            "sends": as_count(fact.get("sends")),
         })
     return out
 
@@ -8468,6 +8501,8 @@ async def read_bubbles(page: Any) -> dict[str, Any]:
         "editorSelector": OVERLAY_COMPOSER_EDITOR,
         "boxSelector": OVERLAY_RECIPIENT_BOX,
         "pillSelector": OVERLAY_RECIPIENT_PILL,
+        "anyPillSelector": OVERLAY_RECIPIENT_ANY_PILL,
+        "sendSelector": OVERLAY_SEND_CONTROL,
         "searchSelector": OVERLAY_RECIPIENT_SEARCH,
         "cardLinkSelector": OVERLAY_RECIPIENT_CARD_LINK,
         "controlSelector": OVERLAY_BUBBLE_CONTROL,

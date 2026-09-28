@@ -11015,9 +11015,19 @@ scratch duplicate-key walker, which the committed guard replaces.
 **WHAT THE PAGE'S SCRIPT CANNOT SEE, IT CANNOT SAY WHOSE IT IS.** The live lane measured LinkedIn's
 messaging overlay inside an OPEN SHADOW ROOT: ``document.querySelectorAll`` -- the engine every
 in-page reading script here uses -- counted no composer while Playwright's piercing locators found
-one. So the conversation gate's "whose conversation" read nothing there, for a first contact AND
-for a conversation that already exists. The bubble is now read by a script run over the elements
-the piercing engine resolves, and compared in the page as before.
+one. So the conversation gate's "whose conversation" read nothing there, and the check that no
+composer is open before the press counted nothing there either. The first contact's bubble is now
+read by a script run over the elements the piercing engine resolves, and compared in the page as
+before; the pre-press count is taken by that engine too. The conversation path was left as it was,
+as ordered.
+
+**A ZERO READ BY AN ENGINE THAT CANNOT SEE IS NOT AN ABSENCE.** The first build gave the
+conversation path the piercing reading as well, so it could see a conversation in the shadow root.
+A cold review then found the path's own precondition -- no composer open before the press -- still
+counted by the blind engine: a conversation open before the press read as none, and the act typed
+into it and read SENT (reproduced offline on that commit). An "exactly one" condition refuses when
+its reader is blind; a "none present" condition PASSES. Every zero a gate relies on is now taken
+by the engine the press uses.
 
 **A NEW MESSAGE HAS NO TITLE TO READ; ITS RECIPIENT IS PROVEN BY A CHAIN.** With no conversation,
 the press opens a new-message composer: one committed recipient and no title with the name. The
@@ -11027,14 +11037,17 @@ recipient card links the topcard's own profile -- and it re-checks them with the
 
 | instrument | what it holds | shown failing |
 |---|---|---|
-| `dom.BUBBLE_FACTS_JS` via `dom.read_bubbles`, declared in `tests/test_readonly.py` | each overlay bubble judged on the elements the piercing engine resolves: title as a closed token, recipients counted, the recipient's name and card compared with the profile's in the page; closed facts only | the page's own script, on the same page, counts 0 composers, 0 bubbles and 0 titles (the live finding reproduced) |
-| `scripts/_build_first_contact_bubble.py` + `tests/test_first_contact_message.py` | the bubble fixture is the live lane's tracked copy's structure (digest `ligiiccbckljhmoo`, the same from the gitignored skeleton) and a fixed point of its builder; the act end to end in a shadow root -- SENT read in place, closed by its close control, Escape never pressed; every doubt about the recipient refused before a word is typed, and again before Send | on the code before the path, 16 of its 23 cases red: 13 the act refusing -- 11 by the live refusal, `6_not_their_conversation`, reproduced offline, the existing path's own blindness among them -- and 3 on readings the path adds; a structural edit of the fixture or of the source changes the digest; a text edit breaks the fixed point |
+| `dom.BUBBLE_FACTS_JS` via `dom.read_bubbles`, declared in `tests/test_readonly.py` | each overlay bubble judged on the elements the piercing engine resolves: title as a closed token, every committed recipient counted whatever pill it wears, the recipient's drawn name and card compared with the profile's in the page, the Send counted inside the bubble; closed facts only | the page's own script, on the same page, counts 0 composers, 0 bubbles and 0 titles (the live finding reproduced); and each closed fact turns to the refusing side when the test's stand-in plants its deviation -- no one committed, a second recipient, a stranger's name, more than the name, a search field being typed in, a card linking someone else, a title that is not a new message |
+| `scripts/_build_first_contact_bubble.py` + `tests/test_first_contact_message.py` | the bubble fixture is the live lane's tracked copy's structure (digest `ligiiccbckljhmoo`, the same from the gitignored skeleton) and a fixed point of its builder; the act end to end in a shadow root -- SENT read in place, closed by its close control, Escape never pressed; every doubt about the recipient refused before a word is typed, and again before Send | on the code before the path, 16 of its first 23 cases red: 13 the act refusing -- 11 by the live refusal, `6_not_their_conversation`, reproduced offline -- and 3 on readings the path adds. On the path's first commit, 11 of the 44 cases red: 8 on substance -- a conversation open before the press took his words and read SENT (the cold review's defect, reproduced), the preview issuing a confirmation beside it, a second recipient of another pill, a minimised bubble beside the new one (at the opened gate and while typing), a Send outside the bubble (at the opened gate and while typing), and the conversation path acting in the shadow root -- and 3 on readings added with them; a structural edit of the fixture or of the source changes the digest; a text edit breaks the fixed point; the Escape counter is shown counting one |
 
     WHAT A READING CANNOT SEE, IT CANNOT CLEAR. ASK THE ENGINE THE PRESS USES WHERE THE PRESS
     WILL LAND -- INCLUDING INSIDE A SHADOW ROOT.
 
     WHEN THE PAGE DRAWS NO NAME TO COMPARE, PROVE THE RECIPIENT BY A CHAIN OF LINKS EACH OF WHICH
     CAN REFUSE, AND CHECK IT AGAIN AT THE LAST MOMENT BEFORE THE ACT IS IRREVERSIBLE.
+
+    A CONDITION THAT PASSES ON ZERO MUST BE COUNTED BY AN ENGINE THAT CAN SEE THE THING. A BLIND
+    "NONE" IS THE ONE READING THAT WAVES AN ACT THROUGH.
 
 DECLARED DISPOSABLE: the scratch readers of the bubble's skeleton (outline, inventory, the
 keyed-hash comparisons of the pill and card with the topcard) and the red demonstration's copy of
