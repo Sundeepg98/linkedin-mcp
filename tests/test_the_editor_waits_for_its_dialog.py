@@ -132,7 +132,9 @@ class _MarkedFieldWorld(_EditorWorld):
 
 
 def test_the_late_world_is_the_builders_output_and_its_digest_is_pinned():
-    text = LATE.read_bytes().decode("ascii")
+    """Read as TEXT, so the digest is of the LF text whatever line endings a
+    checkout wrote (a Windows checkout with core.autocrlf writes CRLF)."""
+    text = LATE.read_text(encoding="ascii")
     assert text == BUILD.build(), "the committed fixture is not the builder's output: re-run the builder"
     assert hashlib.sha256(text.encode("ascii")).hexdigest() == LATE_SHA256
 
