@@ -350,9 +350,9 @@ Scan the CLAIM column against your question. Every claim is a paraphrase written
 
 | signal NOT scanned | files | lines |
 |---|---|---|
-| a heading naming a ruling | 122 | 266 |
+| a heading naming a ruling | 122 | 271 |
 | a bold line opening on RULING/RULED | 62 | 141 |
-| the phrase THE RULING | 38 | 60 |
+| the phrase THE RULING | 38 | 63 |
 | a named -RULING id | 35 | 92 |
 | the phrase standing ruling | 17 | 40 |
 | a lead or operator ruling in prose | 37 | 103 |

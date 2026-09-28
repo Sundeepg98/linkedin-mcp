@@ -2696,3 +2696,595 @@ derived views are at a fixed point. The reader guard on the merged tree:
 THE GATE OVER THE MERGED TREE, this section's commit included, is
 `scripts/impact_gate.py --against master`; it runs after this commit, and
 its counts are in the lane's report.
+
+## Order of 2026-09-28 04:25: the rulings on what lane G held, two gaps lane L5 found, and the network guard's reach
+
+The orchestrator's order to lane G, 2026-09-28 04:25 IST. Its sample: master
+being fast-forwarded to this branch's 0867bda and pushed, CI running. Disk at
+04:21:55: this branch and local master both 0867bda, a clean tree; the remote
+still at 6bc63e2 and no CI run for 0867bda yet. At 04:41:03 the remote was
+0867bda and its CI run had completed with success -- disk agreed, and the
+work went on. An addendum at 06:20 added item 6, the network guard's reach
+(U.7).
+
+### U.0 Commits, with their times from `git log`
+
+Every hash in this section is a commit on this branch, which does not
+resolve on `master` until this branch merges; the times are the commits' own.
+
+    1e51c3e  04:40:52  reader guard: the ruling on the four held readers --
+                       three of his own admitted, one aggregate admitted,
+                       one field that could name a member converted
+    c9277bd  05:19:12  profile-views skeletons: a committed builder, four
+                       states of the page, every other member's text reduced
+                       to shape
+    4daa38d  05:29:31  log capture: 21 sites that could not hear a DEBUG
+                       record now do, and the one handler that raised
+                       NameError logs
+    4e0114d  05:37:07  reader guard: the profile-views readers driven over
+                       their skeletons, and the click stand-in taken to
+                       every press a capture shows
+    ee9ad11  05:45:50  page double's test: its member link takes the slug
+                       shape the builder writes, which the identity sweep
+                       reads as a shape
+    de8e95e  06:02:17  log capture: a guard on the shape the 18 root-only
+                       DEBUG captures had, and conftest's docstring told the
+                       level half
+    739c117  06:10:25  impact gate: in the package a sentence that names a
+                       document cites it, and no longer couples it; every
+                       real read keeps its plan
+    955adbc  06:13:16  merge master ff42daa into lane G: lane S's offline
+                       frontier meets the rulings of 04:25
+    6a419b6  07:01:18  network guards: the docstring says what the network
+                       guard covers, a socket census finds nothing outside a
+                       browser but loopback, and the CDP guard stops putting
+                       the package log on the console
+
+and this record, on the commit that carries it.
+
+### U.1 Ruling (1): the four readers held for a ruling
+
+THE RULING: PEOPLE-DATA-MITIGATIONS binds OTHER members' data. His own text
+is admitted to the text inventory; anything identifying another member
+leaves only as a people record (the reader is converted); an aggregate that
+identifies no one is admitted. Each reader's success-path output was read
+FIELD BY FIELD on its drive, not decided from its name:
+
+    reader                                  fields on its drive, and whose                  applied
+    dom:read_profile_detail_entries         entries, evidence: his skills and the lines     ADMITTED, his own
+                                            under them; endorsements: see below;            + one field
+                                            observed, why: counts, this package's words     CONVERTED
+    dom:read_self_owned_editor_fields       container; each control's label, type,          ADMITTED, his own
+                                            role, states -- his own editor's
+    dom:read_self_owned_editor_values       container; each field's label and the value     ADMITTED, his own
+                                            he typed
+    profile_views_more:                     sections_found (closed words); highlights:      ADMITTED, an
+      read_profile_views_more_insights      top location, industry, company over all his    aggregate
+                                            viewers; details: company names and shares;
+                                            unparsed_lines (a count). No field is a viewer.
+
+THE ONE FIELD CONVERTED. `read_profile_detail_entries` published every card
+line containing "endors" verbatim, in `endorsements.lines` and among the
+card's `evidence`. LinkedIn draws none today (measured 2026-09-04), but a line
+it could draw -- "Endorsed by <a member> and 2 others" -- names ANOTHER
+member, and a sentence is not a record. Now a bare count ("3 endorsements")
+is still published, and any other endorsement line is counted
+(`endorsements.lines_withheld`) and published nowhere. RED FIRST:
+`test_an_endorsement_line_that_names_a_member_leaves_as_a_count_only` put a
+declared synthetic endorser on a card; on the unconverted reader the name came
+back in `evidence` and in `endorsements.lines`; after, it is nowhere, the
+count line is kept, and the existing control that a count is reported still
+passes.
+
+THE DOOR. `tests/plantedpage.py`'s `text_ratchet` and
+`text_paths_a_baseline_may_not_record` take the admissions: a reader named in
+the guard's `ADMITTED_TEXT`, with its ruled reason, may join the inventory;
+every other new text path is refused as before. RED FIRST: HEAD's ratchet took
+no admission at all (TypeError) and called the admitted case a new text path;
+the new test shows the same case refused without the table and let through
+with it, while another member's path in the same table is still refused. The
+four drives moved from `HELD_FOR_A_RULING` (removed) into `DRIVES`;
+`test_a_reader_joins_the_text_inventory_only_by_the_ruling` holds each one
+driven, recorded as text, for a ruled reason, and refused without its
+admission. The baseline moved by exactly those four, each to `returns_text`.
+
+THE FIFTH READER RULED THE SAME WAY, later the same day: once ruling (2)
+drove it, `server:_profile_views_more_analytics` came back with page text
+too, and its fields were read the same way -- `reveal` (the gate's counts
+and verdicts), `insights_after` (`dom.read_profile_views_insights` on his
+own analytics page: the headline and its label, the chart's description,
+the filter labels; it reads no viewer row) and `revealed_insights` (the
+aggregates above). ADMITTED, for both reasons.
+
+### U.2 Ruling (2): the click stand-in
+
+THE RULING: the leak harness's page double may stand in for a click by
+moving the fixture to the state the real page draws after it -- a test
+double only; no real press exists anywhere -- each transition recorded with
+its source, and a transition no capture shows stays not driven.
+
+THE DOUBLE. `tests/skeleton_page.py` (built by a child of this lane,
+reviewed and applied by the lead): a pure-Python page that answers locators
+from a parsed skeleton -- locators LAZY, as Playwright's are, so a locator
+built before a press reads the page after it; Playwright's strictness; a
+grammar of exactly the 18 selectors its readers use, harvested from their
+source by a test, anything else refused AND recorded in `page.unmodelled`
+(every drive requires it empty); each page read counted on the planted page
+beneath it; every script it has no stand-in for answered by the planted
+page. `tests/test_skeleton_page.py`: 252 cases, each seen failing under at
+least one of 67 deliberate mutations of the double.
+
+THE TRANSITIONS (`shipped_drives.TRANSITIONS`, each source a live-lane
+capture, `_audit/2026-09-23-live-lane-session-1.md`):
+
+    press                          before (skeleton of)            after (skeleton of)
+    the Interesting viewers pill   pv-closed.html, Entry 3's load   pv-open-pill-1.html, the same load
+    its 'verified' option          pv-open-pill-1.html              NONE -- no capture draws it checked
+    Show more analytics            pv_verify.html, Entry 7's fresh  pv_switch.html, the switch run's end
+                                   load (the run's rows, headline)
+
+APPLIED TO THE THREE READERS THE RULING NAMED, and one more it reaches:
+
+* `view_switch:apply_and_restore` and `server:_profile_views_switch` (one
+  drive, the server's call): the counters read (headline 39), the pill found,
+  the view read, the pill's press stood in for; the option found and read
+  unchecked; its press REFUSED -- no capture shows the after-state -- so both
+  stay not driven, recorded `navigates (locator.click)`, the transition named.
+  A test holds that it is the option's press the drive stops at, not the
+  pill's.
+* `server:_profile_views_more_analytics`: the reveal pressed (stood in for),
+  then the insights and the revealed sections read -- `returns_text`,
+  admitted (U.1).
+* `reveal:reveal`, the same press: PERMITTED -- the counters equal at both
+  ends, `main` grown from the fresh load's elements to the revealed page's --
+  `clean`. Its reading (`COUNT_LINES_JS`) has no stand-in, so the planted
+  page answers it and the reading is unreadable at both moments, which the
+  gate records and does not gate on.
+
+SHOWN DOING THE WORK: with the double's stand-in removed, the reveal's drive
+ends at its click; with it, the one press is the decided one and the reveal
+is permitted. NOT DONE, and said: `press:disclose` closes its popover with
+the Escape key, and the page after that key is shown by no capture of that
+moment; it stays driven to its click.
+
+### U.3 Ruling (3): the profile-views skeleton, and the four view_switch readers
+
+THE BUILDER, `scripts/_build_profile_views_skeleton.py` (built by a child of
+this lane from the live lane's gitignored captures, read in place and never
+printed; reviewed by the lead), the way
+`scripts/_build_people_search_skeleton.py` builds its own:
+
+* KEPT: the body's tags and nesting; `class`, `role`, `type`, `tabindex`,
+  `disabled`, `hidden`, `data-view-name` and every `aria-*`, each checked
+  against its own vocabulary; LinkedIn's interface words from a declared
+  allowlist (51 phrases and 7 templates whose only variable is a number,
+  each phrase from a source that cannot hold a person: the readers' own
+  phrases, the audit's recorded vocabulary, the tracked sanitised fixture);
+  plain numbers.
+* REDUCED TO SHAPE: every other text and label (every letter X or x, digits
+  and punctuation kept); a member link keeps only its slug's shape; any other
+  link keeps its route words.
+* It prints counts and a structure digest, is a fixed point over its own
+  output, and refuses a page with no `main`. No raw capture is committed.
+
+THE FOUR SKELETONS, each the state it is named for (measured by counts on
+the captures first): `profile_views_closed` (984 body elements kept 663),
+`_pill_open` (the Interesting viewers popover: two options, both unchecked,
+and its Reset and Show results), `_verify` and `_revealed` (Highlights and
+Details drawn), 69,526 to 78,505 bytes each.
+`tests/test_profile_views_skeletons.py` pins the fixed points and the four
+digests the captures printed, each state, and that every text, label and
+link is an interface word, a number, a shape or a route -- each shown
+failing on a plant.
+
+TWO PRIVACY GUARDS HAD TO LEARN WHAT A SHAPE IS, narrowly. HEAD's exact-
+identity sweep found 6 "linkedin slug" hits per skeleton and the
+synthetic-people guard 6 undeclared people per skeleton: the shaped member
+links and names. A slug made ONLY of x, 0, - _ % and a value whose EVERY
+letter is X or x identify no one (the alphabet is the argument), and each
+guard now says so -- with a control that keeps it narrow: one real letter
+left unshaped and each fires again. Patched: 0 and 0.
+
+THE FOUR READERS, driven over the skeletons (`tests/shipped_drives.py`),
+each from EMPTY SHAPE to CLEAN:
+
+    view_switch:_pill_positions      closed page     [2]  (a dialog button, then the three pills)
+    view_switch:_option_positions    pill open       [1]  ("Verified", after "Works at a company you follow")
+    view_switch:_wait_for_option     pill open       [1]
+    view_switch:_apply_positions     pill open       [24] (Show results, of 25 buttons)
+
+Each drive checks its skeleton's builder header and the state it rests on
+before the reader runs, and raises if they are gone (a case each in the
+premise test); another member's shaped text is answered as the plant.
+`read_profile_views_more_insights` moved from the test's inline markup to
+the revealed skeleton, the capture's own structure.
+
+### U.4 Lane L5's first: log-capture sites that could not fail
+
+THE FINDING: 12 log-capture sites whose "no record contains X" passes
+whatever the code logs. MEASURED FIRST, AND THE MECHANISM WAS NOT THE ONE
+NAMED. The order said the sites do not hear the `linkedin` logger. They do:
+pytest 9.1.1 attaches caplog's handler to the non-propagating `linkedin`
+logger itself, and conftest's fixture does too. What they lacked was the
+LEVEL: `linkedin` runs at its own INFO, and each site lowered only the root
+(`caplog.at_level(DEBUG)` or `set_level(DEBUG)` with no `logger=`), so a
+DEBUG record on `linkedin` was dropped before any handler saw it. Each of the
+12 passed with a DEBUG record carrying its forbidden value planted inside the
+call it guards, and went red on the same record at INFO.
+
+THE FIX, per site: lower the root AND `linkedin` to DEBUG, and first prove a
+DEBUG control record comes back, so a site that cannot hear says so instead
+of passing. Every site shown: red on a planted DEBUG record after, green on
+the real code, red again with the fix reverted at run time.
+
+    the 12 named        test_a_preview_names_the_resolved_target 2, test_auth 3,
+                        test_auth_reason_withholds_the_request 4, test_leakwalk 3
+    THE SAME SHAPE, 9   test_auth_lifecycle 3, test_people_search_names 3, and three
+    more, by census     WARNING-level captures that could not hear a DEBUG record
+                        (test_cdp_attach, test_landing, the reader guard's as_count)
+    ruled out           test_needle_never_escapes 2 (already red on a planted DEBUG
+                        record) and the two log-capture controls (each plants a
+                        record and asserts it IS heard, so each can fail)
+
+The census: every function in `tests/` that takes a capture fixture, reads
+or hands one on, or sets a level on it -- parsed, its level calls and their
+`logger=` read, 107 functions over 25 files; each candidate then run with a
+planted record at DEBUG and at INFO.
+
+THREE MORE THE SAME HUNT FOUND:
+
+* `scripts/credential_echo_control.py`, the echo control behind six auth
+  leak tests: its `in_log` plant wrote to `linkedin_server.auth`, a logger no
+  module of the package writes to, so the controls it drives certified a
+  channel the package never uses. It writes to `linkedin` now, pinned by a
+  test (red against HEAD's control, green against the patched one); the leak
+  matrix is 0 green cells of 54 either way.
+* The reader guard's failing-page family collected records on `linkedin`
+  only; `threads` logs through `getLogger(__name__)`, at the root's WARNING.
+  The family now listens on both package loggers: red on a planted record,
+  green after.
+* `linkedin_server/writes.py`: the invitation namer's handler for a label
+  that did not read called `logger`, which writes.py never defined, so its
+  "never raised" branch raised NameError. It imports the package logger now.
+  RED FIRST: a label that raises on read took the call down with NameError;
+  after, the namer returns and logs the failure by type. A census of the
+  package for any other name read and bound nowhere found none.
+
+The sites and their proofs were built by a child of this lane in a shadow
+tree, and reviewed and applied by the lead.
+
+AND KEPT FOUND. The census was a one-off; the shape is now a guard,
+`tests/test_a_debug_capture_lowers_the_package_logger.py`: every function
+under `tests/`, parsed; a caplog level call at DEBUG (or at a level the parser
+cannot read) that names no logger must sit, in the same function, beside one
+that names a logger at DEBUG. RED FIRST: over the test modules at master
+0867bda it finds 18 hits in 23 level calls -- exactly the 12 named sites and
+the 6 root-only ones the census added; over this branch, 0 in 17. Nine planted
+sources hold it to its verdict both ways. It does not read the WARNING-level
+shape (whether such a capture is vacuous depends on the level the code logs
+at, which no parse of the test sees). And `tests/conftest.py`'s docstring
+said caplog's handler sits on the root only; a probe on pytest 9.1.1 with no
+conftest heard an INFO record on a non-propagating logger (DEBUG with the
+root lowered: not heard; with the logger named: heard). The docstring now
+says the handler is half and the level is the other, and names the guard.
+
+### U.5 Lane L5's second: the impact analyser read prose as a data read
+
+THE FINDING: a prose-only edit to lane L5's record selected 118 test files
+and a 22-28 minute gate, because a comment mentioning a document counted as
+a dependency. MEASURED FIRST, AND THE PREMISE WAS HALF RIGHT. `code_text`
+already strips comments and docstrings, and four of the five places in the
+package that mention the record are there (docstrings of `named_profile.py`
+and `threads.py`, comments in `server.py` and `writes.py`): they coupled
+nothing. The fifth is a SENTENCE THAT IS A VALUE, which the strip keeps on
+purpose (a value can be a path): the `reversibility_procedure` of
+`SANCTIONED_WRITES["linkedin_send_reply"]` in `linkedin_server/writes.py`,
+"... (capture spec C6 in <the record>) ...". That one string coupled the
+record to `writes.py`, and through its importers to 95 test files: at
+c9277bd (a hash which does not resolve on `master` until this branch
+merges), 118 selected, a plan of 132 of 271 test files, over the 45% line,
+so the gate widened to the full suite.
+
+THE RULE (`scripts/impact_gate.py`, `without_sentences`, applied by
+`Corpus.data` to `linkedin_server/` only): in the package, a string literal
+whose VALUE holds whitespace is a sentence, and a path inside a sentence is a
+citation, not a read. It goes before the data-read match; an f-string's
+literal parts go and its expressions stay, read again by the same rule, so
+`f"reading {ROOT / 'x.md'} now"` still shows `'x.md'`; a literal with no
+whitespace is a path and stays. Read by the parser on each literal's own
+text, so 3.10's one-token f-string and 3.12's token run give one verdict.
+WHY WHITESPACE: no tracked path holds any (0 of 913, held by a test). WHY THE
+PACKAGE ONLY, measured: no package module names any of the 337 tracked data
+files outside a sentence, and 14 are named inside sentences, every one a
+citation -- while `tests/` and `scripts/` plant data paths inside spaced
+literals that their checkers resolve at run time (a `path row N` in
+`tests/test_jobs_directions.py`, a `path::phrase` in
+`scripts/check_write_classes.py`), so there the same rule would cut real
+reads. A package module the parser cannot separate is read WHOLE, and its
+edge and the report say so: a fallback may widen a plan and never narrow it.
+
+SHOWN, with the plans:
+
+    data file                                    selected  plan (of 271)
+    lane L5's record (the order's case)          118 -> 23  132 -> 41, full suite -> scoped
+    the blocker ledger, read through composed
+      Path segments (the names-alone trap)       28 -> 28   identical set
+    its assignments TSV, the same script         28 -> 28   identical set
+    a fixture named by an f-string               43 -> 43   identical set
+    a data file a script loads by path           29 -> 29   identical set
+
+The record's 23 are there for a reason other than prose: 22 reach it through
+readers that sweep `_audit/`, and one through a real reference in code, a
+dictionary key.
+
+Over 51 data files probed (the ones the tests pin, and every file a literal
+with whitespace names anywhere in the tree), 14 plans shrank and none grew;
+the corpus-wide floor never moved. A data file read in code keeps its plan
+file for file -- the names-alone trap, caught from the other side.
+
+THE LEAD'S OWN CHECK, on the 14 that shrank: every node the rule drops, and
+every edge leaving one. 0 of them is a text edge onto a citing module (names
+the path, sweeps the directory, composes, pins): each is "imports it", or
+"loads it by path" (33, a module executed, which is behaviour too). So no
+test the rule drops reads a citing module's text and resolves the citation
+against the file: an edit to a cited file cannot reach any of them.
+`pyproject.toml` is among the 14 and runs the full suite regardless (a
+runner-wide trigger).
+
+THE TESTS (`tests/test_impact_gate_selects_data_dependencies.py`, 18 new):
+(a) a package sentence naming a data file does not couple it, plain and as
+an f-string; (b) a package path still does, plain, as an f-string and inside
+a sentence's expression; the control, every plant coupling with the rule
+off; (c) lane L5's record under a bound DERIVED from the gate's own widening
+line, with its rule-off control; (d) the four real reads identical with the
+rule on and off; (e) an unseparable module read whole and reported; and the
+PREMISE held, not believed: the test fails the day a package module names a
+tracked data file outside a sentence, or a tracked path holds whitespace,
+with a control that catches a planted read by name and passes a planted
+citation. RED FIRST, on the unpatched analyser: 15 of the 18 fail; the
+three that pass are (b), which guard the fix itself and go red under the
+mutants that strip too much. Five mutants of the patch, each turned red by
+the new tests: every package literal read as a sentence; that, in every
+source; the on/off switch ignored; the token filter dropping every string;
+nothing ever a sentence. The fourth is the certifying case for 3.10: there
+an f-string is one token, and 3.10 caught losses 3.13 could not see.
+
+NOT COVERED, and said: `tests/` and `scripts/` still read their sentences as
+reads (a real over-selection there, and the only safe reading); the dynamic
+loader rule still reads package sentences whole, so `writes.py` "loads" the
+probe scripts its sentences name -- a false edge, wider and never narrower;
+and a path assembled only from pieces that each hold whitespace would be
+missed, which the whitespace premise makes impossible for a tracked path.
+THE COST, measured: the test file went from 97.5 s to 129.5 s run alone, and
+it runs on every gate; about 10.7 s of that is one cold reading of the tree
+that each of its older tests already pays separately, so sharing one reading
+across the file would make it faster than before. Not done; named.
+
+Built by a child of this lane; reviewed by the lead, who replaced two
+line-number citations in its docstrings with the symbol, since the line had
+already moved on this branch.
+
+### U.6 Integration
+
+Master at 06:10:54 was ff42daa, local and remote agreeing: lane S's offline
+frontier, nine commits over 0867bda. Merged once, as 955adbc (06:13:16).
+
+Six files changed on both sides. Four merged cleanly --
+`linkedin_server/dom.py` (lane S's engagement cards live in
+`SEARCH_APPEARANCES_JS`, far from the endorsement conversion),
+`tests/conftest.py` (lane S's CDP-port guard beside this branch's docstring
+paragraph), `tests/shipped_drives.py` and
+`tests/test_fixtures_hold_only_synthetic_people.py` (each side's additions
+in different places). Two conflicted, both by adjacency:
+
+* `tests/test_readers_emit_no_page_string.py`, `DRIVEN_TO`: this branch's
+  admitted readers (`returns_text`) and lane S's two people readers
+  (`returns_records`, `presence:read_suggested_presence` and
+  `recruiter_views:read_recruiter_views`) -- both kept.
+* `tests/reader_leak_baseline.json`: resolved by hand, then regenerated
+  with `--write-baseline` on the merged tree -- byte-identical to the hand
+  resolution. 162 readers: clean 88, returns_text 41, not_driven 27,
+  returns_records 6.
+
+Lane S's two drives brought their own premise entries, so the premise
+table still covers every drive, as this branch's stricter form of that test
+(no exempt drive) requires. This branch touched no `_audit` file before the
+merge, so master's derived views held; the commit that adds this record
+regenerates them to a fixed point.
+
+### U.7 The addendum of 06:20: what the network guard covers, and every connection the suite makes outside a browser
+
+THE ADDENDUM, verified before it was obeyed: master ff42daa with CI green,
+run 36362999033 -- checked, conclusion success, head ff42daa, the master
+this branch had merged at 06:13.
+
+THE DOCSTRING. `tests/network_guard.py` said a request made outside a browser
+was not covered, and that "no test does either today". That was false:
+lane S measured the envelope test's CDP probe. It now says exactly what it
+covers -- a request Playwright routes, a page's, in a context THIS process
+created through one of the three wrapped calls, loopback admitted at every
+port -- and names what it does not: a connection outside a browser (the
+probe, and this census), the contexts a browser already holds when a test
+reaches it with `connect` or `connect_over_cdp`, a browser in a subprocess,
+and a browser's own background traffic.
+
+THIS LANE REACHED FOR THE PORT ONCE IN THIS ORDER, found by reading this
+lane's own command history for the envelope test: the gate on ruling (1),
+04:46:28, ran `tests/test_tool_envelopes_emit_no_page_string.py` as a
+dependent of `dom.py`, before lane S's stub reached this branch, so its
+probe opened `http://127.0.0.1:9224/json/version` once. Whether anything
+listened at that moment was not measured. No child of this lane ran that
+file. Every full suite this lane ran under earlier orders made the same
+attempt once, as lane S found for every lane. From the merge on, the probe is
+stubbed and `tests/cdp_port_guard.py` refuses the port.
+
+THE CENSUS, a scratch instrument (disposable), in two halves:
+
+* A `sitecustomize` on PYTHONPATH for the whole run, so pytest, every xdist
+  worker and every Python subprocess a test starts loads it. An AUDIT HOOK
+  sees every `socket.connect` and `connect_ex` at the C level, whatever
+  library called them, every name resolved and every datagram sent; and
+  asyncio's proactor connect on Windows -- an overlapped `ConnectEx`, which
+  raises no audit event -- is wrapped when asyncio loads it. It RECORDS each
+  attempt against the running test and REFUSES every address off the
+  machine, every loopback port in 9222-9229 and every name that is not
+  loopback: the measurement could observe an escape, never make one.
+* A TCP SAMPLER for what no Python hook sees -- Playwright's Node driver,
+  Chromium: every pass, each TCP connection held by any process in the run's
+  tree whose remote end is off the machine or on a loopback CDP port.
+
+CONTROLS, each shown seeing. Ten planted attempts -- an off-machine connect,
+`connect_ex`, a public name, `urllib`, 9224, 9222, a loopback listener, UDP,
+an asyncio connect, a Python subprocess -- each recorded, and each off-machine
+or CDP-range one refused. THE CONTROL CAUGHT THE CENSUS'S OWN BLIND SPOT: on
+its first run the asyncio connect went unrecorded (the proactor's
+`ConnectEx`, and asyncio skips name resolution for a numeric address), and
+went out toward 203.0.113.9, a documentation address that routes nowhere;
+the proactor wrap closed it, and the second run recorded and refused all
+ten. The sampler, rooted at a process holding a connection to its own LAN
+address (which never leaves the machine but is not loopback) and one to
+loopback 9227, reported both.
+
+THE COUNT, the full suite at 955adbc (which does not resolve on `master`
+until this branch merges) under the census, 1,246 s: 11,954 passed,
+9 skipped, 1 xfailed, 18 FAILED -- and the 18 are the census's own fault,
+found and re-run. A scratch script of this lane's, named `numbers.py`,
+written into the census's directory eight minutes into the run, shadowed the
+standard library's `numbers` module in every Python process started after
+it; the 18 tests whose gate subprocess started later (the staged identity
+and staged navigation gates) died at import. Renamed, those two files ran
+again under the census: 29 passed, and not one socket event.
+
+6,022 connection attempts, all from the 8 xdist workers -- no Python
+subprocess a test started made one -- by 2,479 tests in 128 files. EVERY ONE
+a `socket.connect` to 127.0.0.1 on a port in the dynamic range (49159 and
+up): the self-pipe of an asyncio loop on Windows, which is a loopback socket
+pair -- one `asyncio.run` makes exactly one, shown on the census alone --
+and the tests' own local listeners.
+
+    off the machine                        0
+    a loopback CDP port (9222-9229)        0
+    a name that is not loopback, resolved  0
+    a datagram                             0
+
+The sampler, 532 passes (one every 2.3 s) over a process tree of up to 34
+Chromium processes and 9 Node drivers, saw 0 connections off the machine or
+to a CDP port. 3 census lines were torn by processes appending at once; the
+raw text holds no refusal anywhere.
+
+THE DECISION, by the addendum's own rule: no destination besides the known
+probe appears, so no socket-level guard is added -- the count above is what
+says so. What stands between a test and the network outside a browser is
+`tests/cdp_port_guard.py` for the one port and nothing for the rest, and
+nothing needs it today. NAMED, NOT BUILT: that guard's wrap of
+`socket.connect` is one condition away from refusing every address off the
+machine. And the census cannot see a socket opened below CPython's socket
+module, nor Node or Chromium between two of the sampler's passes, nor the two
+subprocess pytest runs that the network and CDP guards' own controls start
+with PYTHONPATH replaced -- those plant their own refused attempts.
+
+AND THE CENSUS FOUND SOMETHING ELSE: the package's log on the console. The
+census run's output held 5,343 package log lines at INFO or WARNING and 770
+at DEBUG. Like for like: the 3.10 cell over this order's test files printed
+none at ee9ad11 (a hash which does not resolve on `master` until this branch
+merges), before the merge, and 5,208 and 768 at the merge. Measured, not
+guessed: a planted PASSING test that logs a sentinel through the package
+logger, run under `-n 2` with only `tests/cdp_port_guard.py` loaded,
+puts the sentinel on the console; without that plugin, or without xdist, it
+does not. The mechanism: the guard's configure hook read the port by
+importing `linkedin_server.config`, which built the package logger's
+`StreamHandler` in an xdist worker before that worker's capture began, so
+the handler held the worker's REAL stderr. Every `-n auto` run since
+the merge printed the suite's package log, a passing test's included -- on
+this branch, with the echo control's planted fake session cookie and the
+log-capture controls' synthetic names, which the DEBUG sites of U.4 now
+emit. CI's shards run `-n auto` too (`ci.yml`): master's CI run
+36362999033, on ff42daa, carries 5,932 package log lines in its log, read
+back with `gh run view --log` -- type-only diagnostics and
+the runner's temp paths, no planted value, because the DEBUG sites are this
+branch's and never ran in CI before the fix. CORRECTION: the fix's own
+commit message, 6a419b6, says CI's shards run without xdist. They do not;
+this paragraph is the measurement.
+
+FIXED, in the guard: it reads the port at the first connection it sees
+(`_port()`), which happens in collection or in a test, under capture. The
+new `test_the_guard_leaves_a_passing_tests_package_log_in_pytests_capture`
+runs the planted test passing (no sentinel on the console) and failing (the
+control: the sentinel shows, because pytest prints what it captured) -- RED
+on the guard as merged, green on the fix. Both guards' test files: 24 passed;
+the xdist run of the people-search log controls printed 5 package lines
+before and 0 after.
+
+### U.8 Gates run, and what did not run
+
+PER COMMIT, each on its own tree before the next (the main venv, sharded;
+every hash here does not resolve on `master` until this branch merges):
+
+    1e51c3e   the endorsement test's file, the tool envelopes,
+              test_tools, the orphan-module ruling              287 passed
+              (the run that reached for the CDP port, U.7)
+    c9277bd   the skeletons' test, the two privacy guards,
+              the import-safety sweep                           1291 passed
+    4daa38d   the patched log-capture files                     1079 passed, 1 xfailed
+    4e0114d   the reader guard, the double's and the
+              skeletons' tests -- HAND-PICKED                   878 passed
+    ee9ad11   the identity sweep, the double's test, the
+              synthetic-people guard                            1277 passed
+    de8e95e   the new capture guard                             10 passed
+    739c117   RED: the 18 new tests on the unpatched analyser   15 failed, 3 passed
+              GREEN: every test file that exercises the gate    97 passed
+    955adbc   the merge: the reader baseline regenerated,
+              byte-identical to the hand resolution; then the
+              gate on the merge, below
+    6a419b6   RED: the log-capture test on the guard as merged  1 failed
+              GREEN: both guards' test files                    24 passed
+
+A HAND-PICKED GATE MISSED ONE, AND THE 3.10 CELL CAUGHT IT. The gate on
+4e0114d was chosen by hand and left out the exact-identity sweep, which reads
+every file rather than importing anything. The CPython 3.10 cell over the
+order's files ran it: 2028 passed, 1 failed -- two synthetic `/in/Xxxx/`
+hrefs in the double's own test, upper case, which the sweep's shape exemption
+(lower case, as the builder writes) does not cover. ee9ad11 lowered them and
+kept the assertion discriminating (a mutant that answers the href is red at
+it). The analyser would not have missed it: its plan for that one file holds
+the sweep twice over, as a sweeper of `tests/` and as a corpus-wide guard. A
+gate is chosen by the analyser, not by hand.
+
+THE GATE ON THE MERGE, `scripts/impact_gate.py --against master` at
+955adbc (which does not resolve on `master` until this branch merges): 31
+changed paths, 262 selected + 26 corpus-wide = 264 test files, WIDENED TO
+THE FULL SUITE (`tests/conftest.py` is runner-wide, so scoping would be a
+guess) -- PASS, 11982 tests, 1008 s (`-n auto --dist loadfile`).
+
+THE FINAL GATE, on the code-final tree:
+`scripts/impact_gate.py --against master` at 6a419b6 (which does
+not resolve on `master` until this branch merges): 34 changed paths, 263
+selected + 26 corpus-wide = 265 test files, WIDENED TO THE FULL SUITE
+(`tests/conftest.py` again) -- PASS, 11983 tests, 954 s. This record's own
+commit changes `_audit/` only; its scoped gate is in the report to the
+orchestrator, which cannot be written into the commit it gates.
+
+CPYTHON 3.10, through uv (the requirements, pytest-xdist, playwright
+1.63.0): at ee9ad11 (which does not resolve on `master` until this branch
+merges), every test file the order had touched by then (15), 2422 passed,
+1 xfailed (the declared people-search limit), 337 s.
+At the merge (tracked-dirty only by the network guard's docstring,
+then uncommitted): 17 files -- the 15 and the two new ones -- 2505
+passed, 1 xfailed, 516 s. At 6a419b6 (which does not resolve on `master`
+until this branch merges), the two guard test files, the new log test's
+own `-n 2` run included: 24 passed, 63 s.
+
+THE CENSUS RUN, the full suite at 955adbc (which does not resolve on
+`master` until this branch merges) under the socket census (U.7), its
+refusals armed: 11,954 passed, 9 skipped, 1 xfailed, 18 failed -- the
+census's own stray script (U.7); those two files re-ran under it, 29
+passed -- 1,246 s.
+
+NOT RUN, and named: CI's three platforms (this branch is not pushed; the
+orchestrator pushes); anything live -- no LinkedIn, no Chrome, and port 9224
+only in the one probe U.7 names, before the stub; the full suite on 3.10
+(only the files this order touched); the stand-ins for `press:disclose` (its
+Escape key) and `share_link:copy_own_post_link`, which no capture of the
+after-state supports -- both stay driven to their click; the option's press
+in the Interesting viewers switch, which no capture draws checked; the
+shared cold reading that would make the analyser's test file cheaper (U.5).

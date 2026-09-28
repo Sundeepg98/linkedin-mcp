@@ -10433,6 +10433,40 @@ and tool-envelope families, the two rank measurements), the drive verifiers
 and the children's drive drafts -- are declared disposable. Their numbers are
 in the lane record.
 
+### 67.19 THE ORDER OF 2026-09-28 04:25: THE RULINGS APPLIED, TWO GAPS LANE L5 FOUND, AND THE ADDENDUM OF 06:20
+
+Record: the lane record's `## Order of 2026-09-28 04:25`. Every entry was
+shown failing on the tree before its fix. `HELD_FOR_A_RULING` (67.17) is gone:
+the ruling released its four drives into `DRIVES`.
+
+| path | shown failing by |
+|---|---|
+| `tests/plantedpage.py` (`text_ratchet`, `text_paths_a_baseline_may_not_record` take the admissions) + `tests/test_readers_emit_no_page_string.py` (`ADMITTED_TEXT`, `HIS_OWN`, `AGGREGATE`) | HEAD's ratchet took no admission and called an admitted reader a new text path; without the table the same case is still refused, and another member's path beside it is refused with it |
+| `linkedin_server/dom.py` (`_ENDORSEMENT_COUNT`, `endorsements.lines_withheld`) + `tests/test_sdui_surfaces_fixture.py::test_an_endorsement_line_that_names_a_member_leaves_as_a_count_only` | a declared synthetic endorser's name came back in `evidence` and in `endorsements.lines` |
+| `tests/skeleton_page.py` + `tests/test_skeleton_page.py` (a page double answering locators from a parsed skeleton; the click stand-in) | its 252 cases, each red under at least one of 67 deliberate mutations of the double (lazy locators made eager, strictness dropped, the grammar opened or shut, a refused selector read, a stand-in not awaited, ...) |
+| `scripts/_build_profile_views_skeleton.py` + `tests/fixtures/synthetic/profile_views_{closed,pill_open,verify,revealed}.html` + `tests/test_profile_views_skeletons.py` | two tampered skeletons (an `<hr>` deleted from `main`; an invented name planted in another): 4 of 25 red -- the structure pin, the fixed point and the text rule |
+| `tests/test_no_committed_identity.py` (`SHAPED_SLUG`) + `tests/test_fixtures_hold_only_synthetic_people.py` (`is_reduced_to_shape`) | HEAD's sweeps: 6 slug hits and 6 undeclared people per skeleton; the control: one real letter left unshaped and each fires again |
+| `tests/shipped_drives.py` (`TRANSITIONS`, `_views_page`, the four `view_switch` drives, the stand-in drives) + the guard's `test_each_stood_in_press_names_the_capture_that_shows_the_page_after_it`, `test_the_stand_in_carries_the_reveal_past_its_press_and_nothing_else`, `test_the_switch_is_driven_to_the_one_press_no_capture_shows` | without the double's stand-in the reveal's drive ends at its click; each new drive raises on its broken premise (`FIXTURE_BREAKS`) |
+| the 21 log-capture sites (each lowers the root AND `linkedin` to DEBUG and first proves a DEBUG control record comes back) | a planted DEBUG record carrying the site's forbidden value: green on HEAD, red after; red again with the fix reverted at run time |
+| `scripts/credential_echo_control.py` (`in_log` writes to `linkedin`) + `tests/test_leakwalk.py::test_the_echo_control_writes_to_the_log_the_package_writes` | the pin, red against HEAD's control (it wrote to a logger no module uses) |
+| `tests/test_readers_emit_no_page_string.py` (`PACKAGE_LOGGERS` in the failing-page family) + `::test_the_log_capture_hears_a_module_named_logger_too` | a record planted on a module-named logger at WARNING: unheard on HEAD |
+| `linkedin_server/writes.py` (the package logger imported) + `::test_the_invitation_namer_survives_a_label_that_does_not_read` | a label that raises on read: NameError on HEAD |
+| `tests/test_a_debug_capture_lowers_the_package_logger.py` (a caplog level call at DEBUG naming no logger must sit beside one that names a logger at DEBUG) | over the test modules at master 0867bda: 18 hits in 23 level calls, exactly the 18 root-only sites fixed; nine planted sources, each red or clean as declared |
+| `tests/cdp_port_guard.py` (`_port()`: the CDP port read at the first connection, never in `pytest_configure`) + `tests/test_no_test_reaches_the_cdp_port.py::test_the_guard_leaves_a_passing_tests_package_log_in_pytests_capture` | on the guard as merged, a PASSING test's package-log sentinel reached the console of a `-n 2` run; the control -- the same test failing -- shows the sentinel on both |
+| `scripts/impact_gate.py` (`without_sentences`, `SENTENCE_ROOT`, `Corpus.data`, `Impact.unseparated`, the `sentences_are_prose` switch) + 18 tests in `tests/test_impact_gate_selects_data_dependencies.py` | on the unpatched analyser 15 of the 18 red (the other three guard the fix, and go red under the mutants that strip too much); five mutants of the patch, each turned red; the premise guard's control catches a planted package read by name and passes a planted citation |
+
+### 67.20 DECLARED DISPOSABLE (THE ORDER OF 04:25)
+
+The scratchpad helpers are declared disposable: the children's drafts and
+shadow trees, the red reproductions against HEAD, the privacy sweeps over
+the skeletons, the double's 67 mutants and the analyser's five, the plan
+measurements over 51 data files, the lead's check of every edge the sentence
+rule drops, the log-capture census -- whose rule is harvested as
+`tests/test_a_debug_capture_lowers_the_package_logger.py` above -- and the
+addendum's socket census (an audit-hook `sitecustomize` and a TCP sampler
+over the run's process tree, each shown seeing on planted attempts first).
+Their numbers are in the lane record.
+
 ---
 
 ## 68. A DOWNLOAD TRANSPORT ON THE ATTACHED BROWSER, TESTED ON A FAKE CHROME THAT CAN SAY NO (lane-d, 2026-09-24)
