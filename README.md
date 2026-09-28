@@ -3,8 +3,17 @@
 An MCP server that shows you your own LinkedIn account data as structured tool
 results instead of pages you have to click through.
 
-**Sixty tools ship. Forty-three read. Seventeen write. None is
+**Sixty-one tools ship. Forty-four read. Seventeen write. None is
 write-shaped and unable to act.**
+
+**THAT LINE READ "Sixty ... Forty-three read. Seventeen write" UNTIL THE
+OPERATOR'S RULING OF 2026-09-28 08:01** (NAMED-PROFILE-READ-BEHIND-A-GRANT).
+One read arrived: `linkedin_read_named_profile` reads the profile of ONE member
+you name, by profile link or member id -- never a name. Its first call loads
+nothing and hands you a token; only your confirmation loads the profile, once,
+and LinkedIn may show that member the view. The name and headline come back as
+a record marked as another member's words; the member's groups are absent until
+a capture shows them (census `N 178`, GAP).
 
 **THAT LINE READ "Fifty-eight ... Forty-one read. Seventeen write" UNTIL
 LANE S'S OFFLINE FRONTIER, 2026-09-28** (its branch read Sixty-one and
@@ -975,7 +984,7 @@ linkedin_server/
   cdp_bridge.py              the recovery path: attach to a running Chrome
   dom.py                     the read-only harvesters and the control readers
   shape.py                   pure parsers and the result envelope
-  server.py                  the sixty tools
+  server.py                  the sixty-one tools
   errors.py
 tests/                       1393 tests, no network, no account
   fixtures/                  frozen LinkedIn markup, scrubbed
