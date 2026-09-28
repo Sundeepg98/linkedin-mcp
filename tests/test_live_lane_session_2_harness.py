@@ -33,6 +33,7 @@ from __future__ import annotations
 
 import ast
 import asyncio
+import contextlib
 import json
 import sys
 import time
@@ -634,9 +635,15 @@ def quick(tmp_path, monkeypatch):
     return tmp_path
 
 
+#: THE HANDLE SESSION 2 USED FOR THE MORE, page-wide and blind to drawing.
+#: Kept here for two jobs: finding the synthetic menu's trigger in the press
+#: tests below, and showing on today's skeletons what it took.
+OLD_MORE_HANDLE = 'main button[aria-label="More"][aria-expanded="false"]'
+
+
 async def test_one_press_is_read_by_attribute_and_closed_again(browser_page, quick) -> None:
     await browser_page.set_content(_menu_page())
-    handle, count = await harness._one_handle(browser_page.locator(harness.MORE_TRIGGER))
+    handle, count = await harness._one_handle(browser_page.locator(OLD_MORE_HANDLE))
     assert count == 1
     result = await harness.press_and_read(browser_page, "in_me_more", handle, True,
                                           needles=harness.N76_NEEDLES)
@@ -654,7 +661,7 @@ async def test_one_press_is_read_by_attribute_and_closed_again(browser_page, qui
 
 async def test_a_menu_that_stays_open_stops_the_session(browser_page, quick) -> None:
     await browser_page.set_content(_menu_page(closes=False))
-    handle, _count = await harness._one_handle(browser_page.locator(harness.MORE_TRIGGER))
+    handle, _count = await harness._one_handle(browser_page.locator(OLD_MORE_HANDLE))
     with pytest.raises(harness._Anomaly) as stop:
         await harness.press_and_read(browser_page, "in_me_more", handle, False)
     assert stop.value.kind == "the_menu_did_not_close"
@@ -662,7 +669,7 @@ async def test_a_menu_that_stays_open_stops_the_session(browser_page, quick) -> 
 
 async def test_a_conversation_opened_by_a_press_stops_the_session(browser_page, quick) -> None:
     await browser_page.set_content(_menu_page(opens_a_conversation=True))
-    handle, _count = await harness._one_handle(browser_page.locator(harness.MORE_TRIGGER))
+    handle, _count = await harness._one_handle(browser_page.locator(OLD_MORE_HANDLE))
     with pytest.raises(harness._Anomaly) as stop:
         await harness.press_and_read(browser_page, "compose_c9", handle, False, messaging=True)
     assert stop.value.kind == "a_conversation_opened"
@@ -674,6 +681,128 @@ async def test_our_words_are_the_only_keys_that_come_back(browser_page) -> None:
         "<button aria-label='Star conversation'></button><span hidden>Save to PDF</span></main>")
     counted = await harness.furniture_counts(browser_page)
     assert counted == {"Show all": 1, "aria:Star conversation": 1}
+
+
+# --------------------------------------------------------------------------
+# D-1, fix 3: the top card's More, on today's skeletons of both profiles.
+# --------------------------------------------------------------------------
+
+LIVE2 = ROOT / "tests" / "fixtures" / "live2"
+
+#: A landing the press gate reads as his own profile (``press.self_landing``),
+#: on an invented slug; served by the test page's own route, never fetched.
+PROFILE_URL = "https://www.linkedin.com/in/xxxx/?isSelfProfile=true"
+
+#: LINKEDIN'S STYLESHEET, WHICH NO SKELETON CARRIES, STOOD IN FOR BY ONE RULE:
+#: the action bar the page does not show at the width in question. Each class
+#: sits on exactly one element of both skeletons -- that bar's own container.
+#: WIDE is his window on 2026-09-28: the bar holding the LABELLED More was not
+#: drawn -- its More never became actionable, twice, with the window in front
+#: (DERIVED from those two timeouts). NARROW hides the other bar instead.
+WIDE = "._2f3017c2 { display: none !important; }"
+NARROW = "._53a77971 { display: none !important; }"
+
+
+async def _serve_profile(page, name: str, hide: str) -> None:
+    body = (LIVE2 / (name + ".html")).read_text(encoding="ascii")
+
+    async def handler(route) -> None:  # noqa: ANN001 - playwright route
+        if route.request.url == PROFILE_URL:
+            await route.fulfill(status=200, content_type="text/html", body=body)
+        else:
+            await route.abort()
+
+    await page.route("**/*", handler)
+    await page.goto(PROFILE_URL, wait_until="domcontentloaded")
+    if hide:
+        await page.add_style_tag(content=hide)
+
+
+class _ServedBrowser:
+    """``BROWSER.session()`` over one test page, and nothing else."""
+
+    def __init__(self, page) -> None:  # noqa: ANN001 - playwright page
+        self.page = page
+
+    @contextlib.asynccontextmanager
+    async def session(self):
+        yield self.page
+
+
+async def test_d1_the_top_card_is_the_section_around_the_first_h2(browser_page) -> None:
+    """Both profiles: the top card holds both action bars -- on his, two of
+    "Open to" and of "Enhance profile", one More and one Resources; on the
+    brother's, two More -- and its first h2 is the page's first."""
+    await _serve_profile(browser_page, "in_me", "")
+    card = harness.topcard_of(browser_page)
+    assert await card.count() == 1
+    drawn = {word: await card.get_by_role("button", name=word, exact=True, include_hidden=True).count()
+             for word in harness.TOPCARD_WORDS}
+    assert drawn == {"More": 1, "Resources": 1, "Open to": 2, "Enhance profile": 2,
+                     "Add profile section": 0}
+    await _serve_profile(browser_page, "brother_profile", "")
+    card = harness.topcard_of(browser_page)
+    assert await card.get_by_role("button", name="More", exact=True, include_hidden=True).count() == 2
+
+
+async def test_d1_the_old_handle_takes_the_hidden_more_on_both_profiles(browser_page) -> None:
+    """THE DEFECT, measured on today's skeletons at his width: the old handle
+    finds exactly one More on each profile -- the labelled one, in the bar the
+    page does not show -- so "exactly one" was true and the one was not drawn.
+    On the brother's profile a visible More sat beside it, labelled by text."""
+    for name in ("in_me", "brother_profile"):
+        await _serve_profile(browser_page, name, WIDE)
+        old = browser_page.locator(OLD_MORE_HANDLE)
+        assert await old.count() == 1, name
+        assert not await old.is_visible(), name
+
+
+async def test_d1_the_key_presses_nothing_his_width_does_not_draw(browser_page, quick, monkeypatch) -> None:
+    """FIX 3, END TO END ON HIS PROFILE AT HIS WIDTH. Red before the fix: the
+    key took the old handle's one match and its click waited out Playwright's
+    actionability check on a control that is not drawn (TimeoutError), as it
+    did live. Now it counts the top card's More -- 1 drawn, 0 visible -- and
+    refuses with nothing pressed."""
+    await _serve_profile(browser_page, "in_me", WIDE)
+    monkeypatch.setattr(harness, "BROWSER", _ServedBrowser(browser_page))
+    started = time.monotonic()
+    result = await harness._in_me_more(False)
+    assert result == {"stopped": "more_visible_0_drawn_1", "openings": []}
+    assert time.monotonic() - started < 4.0, "an actionability wait ran: something was pressed"
+
+
+async def test_d1_the_new_handle_takes_the_one_visible_more(browser_page) -> None:
+    """The brother's profile at the same width: 2 drawn, 1 visible, and the
+    one taken is the text-labelled More the old handle never matched. His
+    own at the narrow width: his labelled More, visible, taken."""
+    await _serve_profile(browser_page, "brother_profile", WIDE)
+    handle, drawn, visible = await harness.topcard_control(browser_page, harness.MORE_NAME)
+    assert (drawn, visible) == (2, 1)
+    assert await handle.get_attribute("aria-label") is None
+    assert await handle.is_visible()
+    await _serve_profile(browser_page, "in_me", NARROW)
+    handle, drawn, visible = await harness.topcard_control(browser_page, harness.MORE_NAME)
+    assert (drawn, visible) == (1, 1)
+    assert await handle.get_attribute("aria-label") == "More"
+
+
+async def test_d1_his_wide_top_card_shows_resources_where_the_other_bar_has_more(browser_page) -> None:
+    """What session 3 must rule on before D-1 can fire at his width: the bar
+    his window shows holds "Resources" and no More. Counted, never pressed."""
+    await _serve_profile(browser_page, "in_me", WIDE)
+    counts = {}
+    for word in ("More", "Resources"):
+        _handle, drawn, visible = await harness.topcard_control(browser_page, word)
+        counts[word] = (drawn, visible)
+    assert counts == {"More": (1, 0), "Resources": (1, 1)}
+
+
+async def test_d1_two_visible_refuse(browser_page) -> None:
+    """With no stylesheet both bars show, and the brother's two More are both
+    visible: exactly one is required, so none is taken."""
+    await _serve_profile(browser_page, "brother_profile", "")
+    handle, drawn, visible = await harness.topcard_control(browser_page, harness.MORE_NAME)
+    assert (handle, drawn, visible) == (None, 2, 2)
 
 
 # --------------------------------------------------------------------------

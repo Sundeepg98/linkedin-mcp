@@ -1398,8 +1398,48 @@ async def _setting_offline() -> dict[str, Any]:
 #: The needles for N 76's step 4, as the 2026-09-19 plan wrote them.
 N76_NEEDLES = ("copy link", "follow link", "share profile", "personal link")
 
-#: The top card's More, as lane D's LQ-1 names it; one on session 1's capture.
-MORE_TRIGGER = 'main button[aria-label="More"][aria-expanded="false"]'
+#: THE TOP CARD'S MORE, BY ITS NAME -- lane D's LQ-1 -- taken inside the top
+#: card and only when exactly ONE is VISIBLE (:func:`topcard_control`).
+#:
+#: FIX 3 OF SESSION 2. The first handle was page-wide and blind to drawing:
+#: ``main button[aria-label="More"][aria-expanded="false"]``, one match on
+#: session 1's capture. On 2026-09-28 his profile drew that one match and it
+#: never became actionable -- twice with the window in front, and a scroll
+#: into view timed out before any click. Today's skeleton says why: the new
+#: markup draws the top card's actions TWICE, in two bars, of which the page
+#: shows one at a time. On his profile the bar holding the labelled More is
+#: the one his window width does not show; the bar it shows holds
+#: "Resources" where the other holds More. On the brother's profile both bars
+#: hold a More -- one by its label, one by its text -- and one was visible.
+MORE_NAME = "More"
+
+#: The top card's own words, counted drawn and visible on every ``in_me``
+#: load: which bar his window shows, read, never pressed.
+TOPCARD_WORDS = ("More", "Resources", "Open to", "Enhance profile", "Add profile section")
+
+
+def topcard_of(page: Any) -> Any:
+    """THE TOP CARD, BY STRUCTURE: the nearest section around the first
+    ``h2`` in main. Measured on today's skeletons of both profiles: the new
+    markup draws no ``h1``; the name is the top card's one ``h2``, and its
+    section holds both action bars and nothing else a name can match. No
+    class is used -- the classes are hashed and move with LinkedIn's
+    builds."""
+    return page.locator("main h2").first.locator("xpath=ancestor::section[1]")
+
+
+async def topcard_control(page: Any, name: str) -> tuple[Optional[Any], int, int]:
+    """``(handle, drawn, visible)``: the top card's button named exactly
+    ``name``, as a handle ONLY when exactly one is VISIBLE; ``drawn`` counts
+    hidden ones too. A duplicate the page keeps for another width is drawn
+    and not visible, so it is never the one taken, and two visible refuse."""
+    named = topcard_of(page).get_by_role("button", name=name, exact=True, include_hidden=True)
+    drawn = int(await named.count())
+    shown = named.filter(visible=True)
+    visible = int(await shown.count())
+    if visible != 1:
+        return None, drawn, visible
+    return await shown.element_handle(), drawn, visible
 
 #: The section words P F1, P H11, P K8, P D26 and P K1 ask about, counted in main.
 PROFILE_SECTION_WORDS = ("Recommendations", "Services", "Top Voice", "Profile strength",
@@ -1490,12 +1530,20 @@ async def _in_me(capture: bool) -> dict[str, Any]:
         sections = {word: int(await page.locator("main").get_by_text(word, exact=True).count())
                     for word in PROFILE_SECTION_WORDS}
         verifications = [verify_record(raw) for raw in (await page.evaluate(_VERIFY_JS) or [])]
+        topcard: dict[str, list[int]] = {}
+        for word in TOPCARD_WORDS:
+            _handle, drawn, visible = await topcard_control(page, word)
+            if _handle is not None:
+                await _handle.dispose()
+            topcard[word] = [drawn, visible]
         await _save_page(page, "in_me", capture)
     out = {"self_assertion": assertion, "loads": loads, "expanded": census,
            "more_triggers": sum(1 for row in census if row["more"]), "sections": sections,
-           "verification_controls": verifications}
+           "verification_controls": verifications, "topcard_drawn_visible": topcard}
     say("    main [aria-expanded] " + str(len(census)) + "; labelled More " + str(out["more_triggers"])
         + "; section words " + shape_of(sections))
+    say("    top card, drawn/visible: " + "; ".join(
+        word + " " + str(topcard[word][0]) + "/" + str(topcard[word][1]) for word in TOPCARD_WORDS))
     by_link: dict[str, int] = {}
     for control in verifications:
         by_link[str(control.get("link"))] = by_link.get(str(control.get("link")), 0) + 1
@@ -1513,10 +1561,12 @@ async def _in_me_more(capture: bool) -> dict[str, Any]:
         if not on_his_profile:
             return {"stopped": "not_on_his_profile"}
         for _opening in range(2):
-            handle, count = await _one_handle(page.locator(MORE_TRIGGER))
+            handle, drawn, visible = await topcard_control(page, MORE_NAME)
             if handle is None:
-                say("    More triggers matching: " + str(count) + ". NOT EXACTLY ONE. Nothing pressed.")
-                return {"stopped": "more_trigger_count_" + str(count), "openings": openings}
+                say("    More in the top card: " + str(drawn) + " drawn, " + str(visible)
+                    + " visible. NOT EXACTLY ONE VISIBLE. Nothing pressed.")
+                return {"stopped": "more_visible_" + str(visible) + "_drawn_" + str(drawn),
+                        "openings": openings}
             openings.append(await press_and_read(page, "in_me_more", handle, capture,
                                                  needles=N76_NEEDLES))
             await handle.dispose()
