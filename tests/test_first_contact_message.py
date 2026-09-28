@@ -601,6 +601,7 @@ async def test_a_first_contact_is_sent_read_in_place_and_closed(writes_on, brows
     assert wait["appeared"] is True and isinstance(wait["waited_ms"], int) and wait["waited_ms"] >= 0
     assert receipt["send_enabled_wait"]["enabled"] is True
     assert receipt["typed_text"]["text_was_entered"] is True
+    assert receipt["typed_text"]["words_left_in_the_box"] is False, "sent, and the bubble closed"
     lane = await _lane(browser_page)
     assert {key: lane[key] for key in ("pressed", "closed", "escapes", "submitted", "preSubmitted")} == {
         "pressed": 1, "closed": 1, "escapes": 0, "submitted": 1, "preSubmitted": 0,
@@ -683,12 +684,35 @@ async def test_a_send_that_never_turns_on_is_refused_after_the_bounded_wait(
     assert receipt["typed_text"]["text_was_entered"] is True
     assert receipt["typed_text"]["submit_was_pressed"] is False
     assert receipt["typed_text"]["left_in_the_composer"] is True
-    # AS TODAY, and as session 4's receipt read: the verdict is not SENT. It
-    # reads "unknown" -- the shared verdict cannot see the title in the shadow
-    # root -- although Send was never pressed; the record puts that to the
-    # orchestrator rather than changing it here.
-    assert receipt["verification"]["observed_state"] != named_profile.MESSAGE_SENT
+    # SESSION 4'S RECEIPT READ "unknown", do not retry, about a message that
+    # never left. SEND WAS NEVER PRESSED, SO IT IS "not sent" (the
+    # orchestrator's call of 2026-09-28 19:48): the words are still in the
+    # box, and a retry is safe.
+    verification = receipt["verification"]
+    assert verification["observed_state"] == named_profile.MESSAGE_NOT_SENT, verification
+    assert "SEND WAS NEVER PRESSED" in verification["why"]
+    assert "A RETRY IS SAFE" in verification["why"] and "Do NOT retry" not in verification["why"]
+    assert "Your words are still in the box" in verification["why"]
+    assert receipt["typed_text"]["words_left_in_the_box"] is True
     assert (await _lane(browser_page))["submitted"] == 0
+    _clean(receipt)
+
+
+async def test_a_send_pressed_but_unconfirmed_stays_unknown_and_says_do_not_retry(
+    writes_on, browser_page
+):
+    """THE OTHER SIDE OF THE CALL OF 19:48: Send WAS pressed, the box emptied,
+    and the bubble is not a conversation headed by the name -- the message
+    may have gone. That alone stays "unknown", with its do-not-retry: a retry
+    could send it twice."""
+    grant = await _grant(browser_page)
+    receipt = await writes.perform(_Navigator(titleAfterSend="New message"), browser_page, grant)
+    assert receipt["typed_text"]["submit_was_pressed"] is True
+    verification = receipt["verification"]
+    assert verification["observed_state"] == named_profile.UNKNOWN, verification
+    assert "Do NOT retry" in verification["why"] and "A RETRY IS SAFE" not in verification["why"]
+    assert receipt["typed_text"]["words_left_in_the_box"] is False
+    assert (await _lane(browser_page))["submitted"] == 1
     _clean(receipt)
 
 
@@ -763,9 +787,36 @@ async def test_a_draft_whose_send_never_turns_on_is_refused_after_the_wait(
     typed = receipt["typed_text"]
     assert typed["text_was_entered"] is False and typed["words_were_already_in_the_box"] is True
     assert typed["submit_was_pressed"] is False and typed["left_in_the_composer"] is True
+    assert typed["words_left_in_the_box"] is True
+    verification = receipt["verification"]
+    assert verification["observed_state"] == named_profile.MESSAGE_NOT_SENT, verification
+    assert "sends them without typing them again" in verification["why"]
     assert receipt["clicked"]["clicks_made"] == 1
     lane = await _lane(browser_page)
     assert lane["inputs"] == 0 and lane["submitted"] == 0
+    _clean(receipt)
+
+
+async def test_a_conversation_whose_send_was_never_pressed_reads_not_sent_too(
+    writes_on, browser_page
+):
+    """The call of 19:48 is about the press, not the path: where the page's own
+    script sees the conversation and its title changes as his words land, the
+    last-moment check refuses, Send is never pressed -- "not sent", a retry
+    safe, and this path's box must be cleared first (it has no draft rule)."""
+    grant = await _grant(browser_page)
+    receipt = await writes.perform(
+        _Navigator(asConversation=True, lightDom=True, onTyping="retitle"), browser_page, grant
+    )
+    assert receipt["message_path"] == "conversation"
+    send = receipt["send_gate"]
+    assert send["proceeded"] is False and send["refused_condition"] == "6_not_their_conversation"
+    verification = receipt["verification"]
+    assert verification["observed_state"] == named_profile.MESSAGE_NOT_SENT, verification
+    assert "SEND WAS NEVER PRESSED" in verification["why"]
+    assert "refused until it is cleared" in verification["why"]
+    assert receipt["typed_text"]["words_left_in_the_box"] is True
+    assert (await _lane(browser_page))["submitted"] == 0
     _clean(receipt)
 
 

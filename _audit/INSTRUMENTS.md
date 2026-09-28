@@ -11097,6 +11097,26 @@ DECLARED DISPOSABLE: the redacted reader of the live lane's receipts, the outlin
 skeletons, the probes of master's code in the two worlds, and the red demonstration's copy of the
 tree.
 
+### 69.18 A VERDICT MUST TELL "NEVER PRESSED" FROM "NOT CONFIRMED" (the orchestrator's call of 2026-09-28 19:48)
+
+**"UNKNOWN, DO NOT RETRY" ABOUT A MESSAGE THAT NEVER LEFT ABANDONS A SEND HE WANTED.** Session 4's
+receipt read "unknown", and told the caller not to retry, about a message whose Send was never
+pressed. The verdict read the page after the refusal, found the page's own script blind in the
+shadow root, and said it could not tell. The act already knew: its own last-moment check never let
+the press through. The verdict now takes that evidence. A Send the check never passed reads "not
+sent"; the verdict says where his words are, read in place, and that a retry is safe. "unknown",
+and its do-not-retry, stays only for a Send that WAS pressed -- or whose press raised, which may
+have landed -- and could not be confirmed.
+
+| instrument | what it holds | shown failing |
+|---|---|---|
+| `send_attempted`, from `writes.perform` into `named_profile.message_verdict`; `named_profile.words_in_the_box` into the receipt's `typed_text.words_left_in_the_box` | a Send never let through reads not sent, with his words' place and a safe retry, on either path; a Send pressed and unconfirmed stays unknown, do not retry | on master's code a Send never pressed read unknown with do-not-retry, typed and as a draft (probed); five mutations -- the branch removed (twice), the branch taken after a press, the evidence never handed over, the evidence false after a press -- each caught, the last by the conversation path's own pressed-and-unconfirmed test (a first contact's after-press verdict takes its evidence from the press itself, which that mutation cannot reach); the targets pass unmutated |
+
+    WHERE THE ACT ITSELF KNOWS AN OUTCOME, ITS VERDICT MUST NOT SAY IT CANNOT TELL: A SEND NEVER
+    PRESSED SENT NOTHING. KEEP "CANNOT TELL" FOR WHAT THE ACT CANNOT KNOW.
+
+DECLARED DISPOSABLE: the probes of master's verdicts in the three worlds.
+
 
 ## 70. THE BEST-VERIFIED WRITE NEVER PRESSED SAVE, AND A WRITE AIMED BY ITS CARD (lane-l7-profile-writes, 2026-09-24)
 

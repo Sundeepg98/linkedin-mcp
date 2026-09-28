@@ -995,6 +995,16 @@ WHAT_WOULD_DRIVE_IT: dict[str, str] = {
         "built from it, in a shadow root, after that press. The harness presses "
         "nothing, so no bubble holds a composer and every field reads None."
     ),
+    #: ADDED 2026-09-28 (lane L5, the orchestrator's call of 19:48): where his
+    #: words are after a Message from a profile, read in place as the verdict
+    #: is written. Its success path is a composer holding his words.
+    "named_profile:words_in_the_box": (
+        "ACTION: a Message from a profile whose words went into the composer -- "
+        "typed, or already there as a draft. tests/test_first_contact_message.py "
+        "drives this reader after the act, over the bubble built from the live "
+        "lane's copy, in a shadow root, and reads it True and False. The harness "
+        "types nothing, so no composer holds anybody's words."
+    ),
     "dom:read_compose_fields": (
         "CAPTURE: /messaging/compose/ as loaded -- an empty composer, nothing "
         "clicked or typed -- drawing its two send-mode radios as "

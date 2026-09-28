@@ -97,6 +97,7 @@
     "named_profile:wait_for_opened_composer": "clean",
     "named_profile:wait_for_send_enabled": "clean",
     "named_profile:wait_for_sent_words": "clean",
+    "named_profile:words_in_the_box": "not_driven:read the page and returned only an empty shape",
     "newsletters:read_newsletter_subscriptions": "clean",
     "notify_cost:read_notifications_badge": "returns_text",
     "people_results:read_result_people": "returns_records",

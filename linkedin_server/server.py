@@ -10338,9 +10338,12 @@ async def linkedin_message_from_profile(
     rose by exactly one
     against the count taken when it opened. It is not reloaded -- its address
     is page-supplied, and this route never navigates to one -- and the
-    verdict says so. False means nothing was typed, or the composer still
-    holds your words with Send enabled. ``"unknown"``: open the conversation
-    and look, and do NOT retry.
+    verdict says so. False means NOTHING WAS SENT: nothing was typed, Send was
+    never pressed, or the composer still holds your words with Send enabled;
+    ``typed_text.words_left_in_the_box`` says whether your words are still in
+    the box, and a retry is safe. ``"unknown"`` means Send WAS pressed and the
+    message could not be confirmed: open the conversation and look, and do
+    NOT retry.
 
     A FIRST CONTACT -- no conversation with them yet -- opens a NEW-MESSAGE
     composer instead (measured live, 2026-09-28), and it is typed into only

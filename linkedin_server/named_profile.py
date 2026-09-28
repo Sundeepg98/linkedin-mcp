@@ -1464,6 +1464,7 @@ def message_verdict(
     held_in_place: Optional[bool],
     typed: bool,
     conversation_is_theirs: Optional[bool] = None,
+    send_attempted: Optional[bool] = None,
 ) -> tuple[str, str]:
     """``(state, why)`` for a Message sent from a profile. IN PLACE, WITH A
     BEFORE-COUNT, and weaker than a reply's verdict for a stated reason.
@@ -1476,10 +1477,20 @@ def message_verdict(
     retired on 2026-09-27): the number of
     messages carrying exactly his words must rise by EXACTLY ONE, and his
     words must be the last message, with no ``--other`` modifier.
+
+    ``send_attempted`` is False when the act NEVER PRESSED SEND -- its
+    last-moment check never let the press through -- and then nothing can
+    have left: the verdict is "not sent", never "unknown" (the
+    orchestrator's call of 2026-09-28 19:48), and it says where his words
+    are and that a retry is safe. "unknown", and its do-not-retry, is kept
+    for a Send that WAS pressed, or whose press raised, and could not be
+    confirmed. None is a caller that does not say, and changes nothing.
     """
     if not typed or opened is None or not opened.get("proceed"):
         why = (opened or {}).get("why") or "the act stopped before typing."
         return MESSAGE_NOT_SENT, "NOTHING WAS TYPED, SO NOTHING WAS SENT: " + str(why)
+    if send_attempted is False:
+        return MESSAGE_NOT_SENT, _never_pressed_why(opened, after)
     if held_in_place is True:
         return MESSAGE_NOT_SENT, (
             "the composer still holds your words with Send enabled: NOTHING "
@@ -1530,6 +1541,54 @@ def message_verdict(
         "conversation and look. Do NOT retry: a retry on a message that landed "
         "sends it twice."
     )
+
+
+def _never_pressed_why(opened: dict[str, Any], after: dict[str, Any]) -> str:
+    """The verdict's words for a Send the act never pressed: nothing left,
+    where his words are -- the box as read in place -- and that a retry is
+    safe, with what a retry will do on this path."""
+    held = after.get("editor_holds_the_words")
+    if held is True:
+        box = "Your words are still in the box on LinkedIn."
+    elif held is False:
+        box = "The box does not hold your words now."
+    else:
+        box = "Whether your words are still in the box could not be read."
+    if opened.get("path") == "first_contact":
+        retry = (
+            "A RETRY IS SAFE: nothing left, so nothing can go twice -- the next "
+            "attempt finds your words already in the box and sends them without "
+            "typing them again, or refuses if the box holds anything else."
+        )
+    else:
+        retry = (
+            "A RETRY IS SAFE: nothing left, so nothing can go twice -- though a "
+            "conversation's box still holding words is refused until it is "
+            "cleared."
+        )
+    return (
+        "SEND WAS NEVER PRESSED, SO NOTHING WAS SENT: the act stopped at its "
+        "last-moment check, before the press (see send_gate). " + box + " " + retry
+    )
+
+
+async def words_in_the_box(page: Any, text: str) -> Optional[bool]:
+    """In place, as the verdict is written: are his words, exactly and whole,
+    what the one composer on the page holds? ``True`` -- exactly one composer,
+    holding exactly them; ``False`` -- no composer is drawn, or the one holds
+    other words or none; ``None`` -- more than one composer, or it could not
+    be read. Only the boolean leaves (the call of 2026-09-28 19:48)."""
+    try:
+        editors = page.locator(COMPOSER_EDITOR_SELECTOR)
+        count = coerce.as_count(await editors.count())
+        if count == 0:
+            return False
+        if count != 1:
+            return None
+        return _normalise(await editors.first.inner_text()) == _normalise(text)
+    except Exception as exc:  # noqa: BLE001 - reported as None, never raised
+        logger.debug("the box could not be read: %s", type(exc).__name__)
+        return None
 
 
 # ---------------------------------------------------------------------------
