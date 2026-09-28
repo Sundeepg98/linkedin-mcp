@@ -3748,3 +3748,33 @@ follow.
 
 The child's red-run and mutant scripts and their outputs, the builder's staged
 drafts, and the census and record editors, in the lane's scratch folder.
+
+### The integration of master `c2825a4` (`bf7a903`)
+
+Master had moved to `c2825a4`: lane S's people-search items (the network facet,
+`N 81`, `N 25` and `N 26`) and lane L5's answer to session 4's refusal (the wait
+for Send after the fill, and the draft rule). CI on it was green, checked by the
+full sha, before the merge. **Two conflicts, each resolved at its cause:**
+
+* **`M M1`'s cell** in `_audit/_census/messaging-and-content.md`: this branch had
+  appended session 4's fire and lane L5 its answer to it. Both notes are kept, in
+  time order -- the fire, then L5's note.
+* **The pins** in `scripts/census_completion.py`: master's side was taken and
+  measured again on the merged tree. `--check` named seven figures and three
+  bucket-1 rows, all of them this branch's three GAP rows and nothing else:
+
+      adjudicated        187 -> 184
+      delivered_broad    133 -> 130
+      gap                584 -> 587
+      gap_write          378 -> 381
+      unfired             39 -> 36
+      b1_no_ruling        20 -> 17
+      b1_released          7 -> 4
+      PINNED_B1_ROWS     NO_RULING loses P A11, P A13 and P A17
+
+`writes.py` -- this branch's editor path and L5's send path -- merged without a
+conflict. The derived views were regenerated to a fixed point. **THE GATE:** the
+impact gate against `c2825a4` widened to the full suite (226 of 287 files) and
+PASSED, 12475 tests in 31 min 44 s, on a box a second full suite shared. The
+census instruments exit 0 but the asserted-names check, on the same eight
+findings in other waves' documents.
