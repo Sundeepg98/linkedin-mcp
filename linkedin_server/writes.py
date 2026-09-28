@@ -463,6 +463,16 @@ class WriteSpec:
     #: ONE question it answers is what stops it becoming a fifth meaning
     #: stacked on the four that field already carries.
     click_from_state: Optional[str] = None
+    #: OTHER STATES THIS ACTION MAY BE PERFORMED FROM, beside ``from_state``,
+    #: each with its own route through ``perform`` -- added 2026-09-28 (lane
+    #: L5, the orchestrator's order of 21:08) for ONE meaning: a reply box that
+    #: already holds exactly the grant's words, which is sent without typing
+    #: them again. It is not ``from_state`` widened: that field keeps its four
+    #: readers and their meanings, and a state here is one the spec DECLARES
+    #: it can act from, read by ``_direction`` and ``valid_from`` and by
+    #: nothing else (``tests/test_preview_state_and_click_state.py`` counts
+    #: them). Empty for every other action.
+    also_from_states: tuple[str, ...] = ()
     #: DECLARED WHEN NOTHING CAN CONFIRM THIS ACTION'S OUTCOME. See
     #: :class:`Unverifiable`. ``None`` means this action HAS a verification,
     #: and ``_verify_after`` must carry a branch that can actually return the
@@ -2176,6 +2186,9 @@ SANCTIONED_WRITES: dict[str, WriteSpec] = {
             "thread id."
         ),
         from_state="reply_box_empty",
+        # AND FROM A BOX ALREADY HOLDING EXACTLY HIS WORDS (2026-09-28 21:08):
+        # nothing is typed; the Send wait and the last-moment check run.
+        also_from_states=(threads.REPLY_WORDS_IN_PLACE,),
         to_state=threads.REPLY_SENT,
         not_performed_state=threads.REPLY_HELD,
         target_kind="thread_and_text",
@@ -5553,7 +5566,7 @@ def _direction(
         )
         return out
 
-    if state != spec.from_state:
+    if state != spec.from_state and state not in spec.also_from_states:
         raise WriteAttemptError(
             f"{spec.action!r} is valid only from {spec.from_state!r} and this "
             f"target reads {state!r}. "
@@ -6442,7 +6455,7 @@ def valid_from(spec: WriteSpec, state: str, target: str) -> tuple[bool, str]:
     # now RULED rather than relied on.
     wanted_here = spec.click_from_state or spec.from_state
     if wanted_here is not None:
-        if state == wanted_here:
+        if state == wanted_here or state in spec.also_from_states:
             return True, ""
         return False, (
             f"{spec.action!r} is valid only from {wanted_here!r} at click time "
@@ -8099,11 +8112,12 @@ async def _live_control(
         # landing was already held to the named thread id by
         # ``_assert_landed_on_target``; this is the box itself, by the same
         # verdict the preview used, so the two readings cannot disagree about
-        # what "empty" means. The text is not passed: at click time nothing is
-        # compared, only the box's state is read.
-        reading = await threads.read_thread(page)
+        # what "empty" means. HIS WORDS ARE PASSED SINCE 2026-09-28 21:08: the
+        # draft rule asks whether the box already holds exactly them, compared
+        # in this process as the send gate compares them; a boolean crosses.
+        reading = await threads.read_thread(page, text=_text_component_of(spec, grant.target))
         state, why = threads.reply_state(reading)
-        if state != "reply_box_empty":
+        if state not in ("reply_box_empty", threads.REPLY_WORDS_IN_PLACE):
             return (UNKNOWN, why, "")
         return (state, why, threads.REPLY_EDITOR_SELECTOR)
 
@@ -9004,7 +9018,11 @@ async def _verify_after(
             )
         after = await threads.read_thread(page, text=text)
         state, why = threads.reply_verdict(
-            observation.facts, after, held_in_place=held
+            observation.facts,
+            after,
+            held_in_place=held,
+            # A SEND NEVER PRESSED READS "NOT SENT" (2026-09-28 21:08).
+            send_attempted=send_attempted,
         )
         return state, why, str(spec.url_template).format(
             target=url_target_of(spec, grant.target)
@@ -9162,6 +9180,21 @@ async def _first_contact_send_check(
     waited = await named_profile.wait_for_send_enabled(page)
     checked = await named_profile.composer_send_gate(
         page, text=_text_component_of(spec, grant.target), first_contact=True
+    )
+    return waited, checked
+
+
+async def _reply_send_check(
+    page: Any, spec: WriteSpec, grant: WriteGrant
+) -> tuple[dict[str, Any], dict[str, Any]]:
+    """A REPLY, HIS WORDS IN THE BOX -- typed now, or already there as a draft:
+    the bounded wait for the reply form's Send to turn on, then the whole
+    last-moment check as before (the order of 2026-09-28 21:08; session 5
+    measured the reply's Send still disabled straight after the fill, the
+    race session 4 met on a first contact). The wait decides nothing."""
+    waited = await threads.wait_for_reply_send_enabled(page)
+    checked = await threads.reply_send_gate(
+        page, text=_text_component_of(spec, grant.target)
     )
     return waited, checked
 
@@ -9754,7 +9787,7 @@ def _typed_text_with_the_box(
     False, or None when it could not be told) -- beside the counts' inference,
     so a caller told "not sent" knows a draft may be there (the call of
     2026-09-28 19:48). Every other action's block is as it was."""
-    if block is None or spec.action not in OPEN_THEN_TYPE_ACTIONS:
+    if block is None or spec.action not in (OPEN_THEN_TYPE_ACTIONS | REPLY_ACTIONS):
         return block
     return {**block, "words_left_in_the_box": words_left}
 
@@ -10126,6 +10159,12 @@ async def perform(
         # words are appended inside the loop only when
         # ``_opened_conversation_gate`` says exactly one empty composer opened.
         pass
+    elif spec.action in REPLY_ACTIONS and live_state == threads.REPLY_WORDS_IN_PLACE:
+        # THE DRAFT RULE ON THE REPLY PATH (2026-09-28 21:08): his words are
+        # already in the box, whole and nothing else. Nothing is queued to
+        # type, and nothing to press: the wait and the check run below,
+        # before the loop, and queue Send only if every condition holds.
+        pass
     elif spec.action in TYPING_ACTIONS or control_kind == "fill":
         fill_plan.append((selector, _text_component_of(spec, grant.target)))
     # THE ADDRESS BEFORE THE PRESS, for OPEN_THEN_TYPE_ACTIONS only (2026-09-27):
@@ -10154,8 +10193,11 @@ async def perform(
     upload_plan: list[tuple[str, uploads.UploadFile]] = []
     if spec.action in UPLOAD_ACTIONS:
         upload_plan.append((selector, _file_component_of(spec, grant.target)))
+    reply_words_in_place = (
+        spec.action in REPLY_ACTIONS and live_state == threads.REPLY_WORDS_IN_PLACE
+    )
     click_plan: list[str] = (
-        [] if (fill_plan or select_plan or upload_plan) else [selector]
+        [] if (fill_plan or select_plan or upload_plan or reply_words_in_place) else [selector]
     )
 
     # THE BEFORE-READING FOR A DELTA ACTION, taken here because it must happen
@@ -10428,6 +10470,14 @@ async def perform(
             )
             if not switch_gate["proceed"]:
                 click_plan.clear()
+        if reply_words_in_place:
+            # HIS WORDS ARE ALREADY IN THE REPLY BOX (the draft rule): the
+            # same wait and the same last-moment check a fill gets, and Send
+            # is the one press queued, only if they pass.
+            drafts_used += 1
+            send_enabled_wait, send_gate = await _reply_send_check(page, spec, grant)
+            if send_gate["proceed"]:
+                click_plan.append(send_gate["selector"])
         while fill_plan or click_plan:
             if click_plan:
                 await page.click(click_plan.pop(0), timeout=CLICK_TIMEOUT_MS, strict=press_strictly)
@@ -10603,10 +10653,10 @@ async def perform(
                 # EXACTLY the grant's words -- a message is irreversible, so
                 # words changed as they were typed are not sent. Reported in
                 # the receipt's ``send_gate`` block, which is the field a
-                # reader of any send already looks at.
-                send_gate = await threads.reply_send_gate(
-                    page, text=_text_component_of(spec, grant.target)
-                )
+                # reader of any send already looks at. SINCE 2026-09-28 21:08
+                # it first waits, bounded, for Send to turn on: session 5 read
+                # it disabled straight after the fill.
+                send_enabled_wait, send_gate = await _reply_send_check(page, spec, grant)
                 if send_gate["proceed"]:
                     click_plan.append(send_gate["selector"])
             else:
@@ -10729,6 +10779,12 @@ async def perform(
     words_left_in_the_box: Optional[bool] = None
     if spec.action in OPEN_THEN_TYPE_ACTIONS:
         words_left_in_the_box = await named_profile.words_in_the_box(
+            page, _text_component_of(spec, grant.target)
+        )
+    elif spec.action in REPLY_ACTIONS:
+        # A REPLY's box, after the verdict's FRESH LOAD: whether LinkedIn
+        # kept his words (2026-09-28 21:08).
+        words_left_in_the_box = await threads.words_in_the_box(
             page, _text_component_of(spec, grant.target)
         )
 
@@ -11004,9 +11060,10 @@ async def perform(
         # bubble, read before the verdict (2026-09-28): whether it appeared
         # inside the bound, and the milliseconds waited. Null for every other
         # action and path.
-        # HOW LONG A FIRST CONTACT'S SEND TOOK TO TURN ON after his words were
-        # in the box (2026-09-28 17:37): whether it did inside the bound, and
-        # the milliseconds waited. Null for every other action and path.
+        # HOW LONG A FIRST CONTACT'S, OR A REPLY'S, SEND TOOK TO TURN ON after
+        # his words were in the box (2026-09-28 17:37 and 21:08): whether it
+        # did inside the bound, and the milliseconds waited. Null for every
+        # other action and path.
         "send_enabled_wait": (
             None
             if send_enabled_wait is None

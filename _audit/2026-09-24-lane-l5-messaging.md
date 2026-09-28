@@ -3579,3 +3579,124 @@ Disk at 19:48 agreed: master and the remote at this branch's head.
 
     0e4f48e  message_from_profile: a Send never pressed reads not sent, and says a retry is safe
     (last)   this section
+
+## The reply path's Send wait and draft rule: the orchestrator's order of 2026-09-28 21:08
+
+**THE ORDER.** Session 5 sent the campaign's first outward act through the first-contact path: M M1
+SENT and VERIFIED on a fresh reading, every link of the chain held, no draft kept from session 4, 65
+of 65 typed, Send drawn enabled after 228 ms of the wait, the words drawn as the new conversation's
+message in 1.4 s, the bubble closed by its "Close" control. Then M M17 met the same race on the
+REPLY path: the thread resolved exactly, 67 of 67 characters typed (his words and an emoji), and
+`threads.reply_send_gate` read Send DISABLED straight after the fill and refused at
+`4_fill_not_landed` -- no press, the words left in the box, a fresh reload showing no reply. The
+wait had been built for the first contact only. The order: the reply path gets (1) the same bounded
+Send wait, then its whole last-moment check; (2) the draft rule -- a reply box already holding
+exactly the grant's words, whole and nothing else, is not typed into, and any other text refuses;
+(3) the 19:48 verdict -- a Send never pressed reads "not sent", with `words_left_in_the_box`; (4)
+fixtures -- the live lane's reply-box skeleton if one exists, or the existing reply fixture with
+Send enabling late; red first on today's code; (5) the gates; (6) no attribution, no push, master
+integrated once at the end.
+
+Disk at 21:08: master had moved past this branch's head -- the orchestrator's merge of it onto the
+live lane's session-4 work -- and held all of this branch; the branch was fast-forwarded onto it, no
+merge commit. The live lane's session-5 state held receipts and NO reply-box skeleton, so the
+existing reply fixture was used. Its receipt for M M17, read redacted: the send gate refused with
+one editor, one Send, `send_enabled` false, the words exact, 67 of 67; no click; typed, not
+submitted, left in the box.
+
+### X.1 The Send wait
+
+`threads.wait_for_reply_send_enabled`, run by `writes._reply_send_check` after the fill: up to
+`REPLY_SEND_ENABLED_WAIT_MS` (5 s) for the reply form's Send to be drawn without `disabled` -- a CSS
+locator on the same `main form.msg-form` the reply path reads everything with, no page script. It
+decides nothing: the whole `reply_send_gate` then runs as before, and Send is queued only if every
+condition holds. A Send still disabled at the bound refuses at 4 as before. The receipt carries it
+as `send_enabled_wait`.
+
+### X.2 The draft rule, and the origin it needed
+
+- THE READING: `threads.read_thread`, given his words, also says whether the one reply editor holds
+  exactly them (`editor_holds_the_words`); the preview prints it.
+- THE STATE: `threads.reply_state` returns `reply_box_holds_the_words` for a box that is not empty
+  and holds exactly his words; any other text is still "NOT EMPTY", refused as before.
+- THE ORIGIN: the reply acts from `reply_box_empty`, and the preview's direction check and the
+  click-time gate compare against that one state. A box holding his words is not empty, and
+  relabelling it would make the state lie, so the spec gained `also_from_states` -- the other
+  states an action may act from, one meaning, read by `_direction` and `valid_from` and by nothing
+  else, pinned by AST beside `click_from_state` (whose own reader pin had been written and never
+  checked; it is checked now).
+- THE ROUTE: at click time `_live_control` reads the box with his words; for the draft state
+  `perform` queues no fill and no press, runs the same wait and check before the loop, and queues
+  Send only if they pass. The receipt says nothing was typed and the words were already there.
+
+### X.3 The verdict
+
+`threads.reply_verdict` takes `send_attempted` from `perform`: a Send the last-moment check never let
+through reads `reply_box_holds_text` -- the reply's not-sent state, `performed` false -- never
+"unknown", with "SEND WAS NEVER PRESSED", whether the FRESH LOAD shows his words still in the box
+("LinkedIn kept them") or not, and "A RETRY IS SAFE". "unknown" and its do-not-retry stay for a Send
+that was pressed, or whose press raised, and could not be confirmed. The receipt's
+`typed_text.words_left_in_the_box` is read after that fresh load (`threads.words_in_the_box`): it
+answers the residue question session 5 left open -- whether LinkedIn keeps an unsent reply -- on
+the next fire.
+
+### X.4 The fixture
+
+The live lane's session-5 state holds no reply-box skeleton, so every world is an asserted edit of
+the reply fixture every reply test uses (`tests/fixtures/synthetic/messaging_thread.html`): Send
+turning on 1 s after the words land, or never; a box already holding his words, with Send drawn
+enabled or disabled; his words with M M17's emoji; his words and more, part of them, other words.
+The reply form's structure is pinned by digest, `plmmidecdkbbmdma` (the first-contact builder's
+digest over the one `form.msg-form`): the timing worlds keep it; a draft world differs by exactly
+the editor's words, and without them is the pinned form again.
+
+### X.5 Red first, then green
+
+- `tests/test_reply_send_wait_and_draft.py`, 16 cases, on MASTER'S CODE (only that file copied in):
+  9 red, 7 green. RED ON SUBSTANCE: the late-Send reply refused at 4 -- M M17 reproduced offline;
+  the draft-holding reply, with and without the emoji, refused at the preview as NOT EMPTY. The
+  never-pressed worlds are red on the new bound they patch; PROBED on master's code they read
+  "unknown" with "Do NOT retry", 0 clicks, typed and never pressed -- M M17's live verdict --
+  whether the fresh load dropped his words or kept them. The pressed-and-unconfirmed reply is red
+  only on the new field; its "unknown" was already right.
+- Here: 16 of 16; with the reply, thread and click-state files beside it, 114 of 114.
+- A MUTATION CHECK: eight ways to break it -- no wait; the wait taking a disabled Send; the draft
+  state taken for any text; the spec not declaring the second origin; the click-time gate refusing
+  the draft state; a draft typed into again; the never-pressed branch removed; the evidence never
+  handed to the reply verdict -- each caught. The targets pass unmutated.
+
+### X.6 Gates
+
+- RED FIRST, THEN GREEN, AND MUTATED: X.5.
+- BEFORE THE COMMIT: the guard files -- the navigation guard with CI=1, readonly, people and
+  identity, reader leak, envelopes, landing, reachability, correction-findability, performable
+  action, strict press, page strings, writes, the first contact's and the named-profile route's,
+  send_reply, the thread readers, the click-state pins, typed bytes, the literal-repeat guard and
+  this file -- 21 files, 2480 of 2480; the three derived baselines regenerated by their writers --
+  two new readers clean, the reply box's reader declared in ``WHAT_WOULD_DRIVE_IT`` as an ACTION,
+  the envelope and landing baselines unchanged. THE CENSUS BATTERY, 12 of 12 -- once the blocker
+  map was re-written by its writer: 69.19 joined the ranked candidates of two messaging rows, and
+  neither row's rank-1 pointer moved (measured: with master's register the map was already at its
+  fixed point) -- and the census tests beside it, 67 of 67. The census counter's expectation is
+  master's own since the live lane's session 4: P 189.
+- THE IDENTITY GATE ON THE COMMIT: 9 staged files, 0 hits.
+- THE WHOLE SUITE on the commit: the impact plan against master's head selected 242 of
+  288 test files (84%) and widened -- PASS, 12509 tests, 1174 s, the box otherwise quiet.
+- This section's own commit is gated after it; its result is in the report.
+
+### X.7 NOT known, and NOT run
+
+- No reply-box capture was taken this session; the draft world is DERIVED. Whether LinkedIn keeps
+  an unsent reply, and whether it keeps Send enabled with it, is session 6's measurement --
+  `words_left_in_the_box` and `send_enabled_wait` will say. If the box comes back holding the words
+  with Send disabled and it never turns on, the wait runs out and the reply refuses at 4, nothing
+  pressed.
+- An emoji drawn as an image in a restored box would not read as his words, and the box would
+  refuse as NOT EMPTY -- safe; no capture shows it.
+- LIVE: nothing. CI on this branch: nothing pushed.
+
+### X.8 Commits -- on this branch, none pushed, no AI attribution in any
+
+    063900f  send_reply: wait for Send to turn on, do not retype a draft of his words, and read
+             a Send never pressed as not sent
+    (last)   this section

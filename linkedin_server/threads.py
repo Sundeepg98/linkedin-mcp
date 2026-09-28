@@ -59,6 +59,7 @@ from __future__ import annotations
 
 import logging
 import re
+import time
 from typing import Any, Optional
 from urllib.parse import urlsplit
 
@@ -229,6 +230,9 @@ SEEN_ANY_SELECTOR = "main [class*='seen-receipt']"
 REPLY_FORM_SELECTOR = "main form.msg-form"
 REPLY_EDITOR_SELECTOR = 'main form.msg-form div.msg-form__contenteditable[role="textbox"]'
 REPLY_SEND_SELECTOR = 'main form.msg-form button.msg-form__send-button[type="submit"]'
+#: THE REPLY'S SEND AS THE WAIT LOOKS FOR IT after his words land: drawn
+#: without ``disabled`` (the order of 2026-09-28 21:08).
+_REPLY_SEND_ENABLED_SELECTOR = REPLY_SEND_SELECTOR + ":not([disabled])"
 #: The editor's accessible name, measured: 'Write a message' + U+2026.
 REPLY_EDITOR_LABEL = "Write a message\u2026"
 FILE_INPUT_SELECTOR = 'main form.msg-form input[type="file"]'
@@ -718,6 +722,10 @@ async def read_thread(page: Any, *, text: Optional[str] = None) -> dict[str, Any
         "editors": 0,
         "editor_label_matches": None,
         "editor_empty": None,
+        # THE BOX HOLDS EXACTLY HIS WORDS, whole and nothing else -- the draft
+        # rule's reading (the order of 2026-09-28 21:08). Only the boolean
+        # crosses; set only when ``text`` is given.
+        "editor_holds_the_words": None,
         "send_controls": 0,
         "send_disabled": None,
         "textboxes": 0,
@@ -775,9 +783,13 @@ async def read_thread(page: Any, *, text: Optional[str] = None) -> dict[str, Any
             out["editor_label_matches"] = (
                 await editors.first.get_attribute("aria-label")
             ) == REPLY_EDITOR_LABEL
-            # HIS OWN BOX. Only the emptiness crosses, as a boolean; whatever
-            # is in it is his draft and it is not kept.
-            out["editor_empty"] = _normalise(await editors.first.inner_text()) == ""
+            # HIS OWN BOX. Only the emptiness crosses, as a boolean -- and,
+            # when his words are given, whether it holds exactly them;
+            # whatever is in it is his draft and it is not kept.
+            held = _normalise(await editors.first.inner_text())
+            out["editor_empty"] = held == ""
+            if text is not None:
+                out["editor_holds_the_words"] = held == _normalise(text)
         sends = page.locator(REPLY_SEND_SELECTOR)
         out["send_controls"] = await _count(sends)
         if out["send_controls"] == 1:
@@ -881,6 +893,19 @@ def reply_state(reading: dict[str, Any]) -> tuple[str, str]:
             f"{sends} Send control(s) in the reply form, where exactly one is "
             "the measured shape."
         )
+    if reading.get("editor_empty") is False and reading.get("editor_holds_the_words") is True:
+        # THE DRAFT RULE ON THE REPLY PATH (the orchestrator's order of
+        # 2026-09-28 21:08): a reply refused after its words went in leaves
+        # them in the box, and LinkedIn may keep them. Exactly his words,
+        # whole and nothing else, are the one text a reply may act from
+        # without typing; any other text still refuses below.
+        return REPLY_WORDS_IN_PLACE, (
+            "exactly one reply editor, and it ALREADY holds exactly the words "
+            "you confirmed, whole and nothing else -- a draft LinkedIn kept "
+            "from an earlier attempt. Nothing will be typed: Send is pressed "
+            "only once it is drawn enabled, within a bounded wait, and the "
+            "last-moment check holds again. No recipient box is drawn."
+        )
     if reading.get("send_disabled") is not True or reading.get("editor_empty") is not True:
         return "unknown", (
             "the reply box is NOT EMPTY -- Send is already enabled, or the box "
@@ -971,7 +996,7 @@ def thread_facts(reading: dict[str, Any]) -> dict[str, Any]:
     keep = (
         "elements", "events", "items", "items_from_the_other_side",
         "last_from", "events_with_text", "forms", "editors",
-        "editor_label_matches", "editor_empty", "send_controls",
+        "editor_label_matches", "editor_empty", "editor_holds_the_words", "send_controls",
         "send_disabled", "textboxes", "recipient_boxes", "file_inputs",
         "file_input_accepts", "footer_actions", "titles", "sponsored",
         "response_controls", "error",
@@ -982,6 +1007,39 @@ def thread_facts(reading: dict[str, Any]) -> dict[str, Any]:
 # ---------------------------------------------------------------------------
 # 5. The gate between the fill and the Send click
 # ---------------------------------------------------------------------------
+
+
+#: HOW LONG, AFTER HIS WORDS ARE IN THE REPLY BOX, SEND IS GIVEN TO TURN ON
+#: before the last-moment check reads it. A LIVENESS BOUND, NOT A SAFETY ONE:
+#: the wait decides nothing, and the check refuses on what it then finds.
+#: MEASURED LIVE 2026-09-28 (the live lane's session 5, M M17): 67 of 67
+#: characters in the box and the check refused at 4, because Send read
+#: DISABLED straight after the fill -- the race the first contact met in
+#: session 4, whose Send was drawn enabled about a second later (and
+#: 228 ms later in session 5, once waited for).
+REPLY_SEND_ENABLED_WAIT_MS = 5_000
+
+
+async def wait_for_reply_send_enabled(
+    page: Any, *, timeout_ms: Optional[int] = None
+) -> dict[str, Any]:
+    """His words in the reply box: wait, BOUNDED, for the reply form's Send
+    to be drawn without ``disabled`` -- through the locator engine every
+    reading of this form already uses. DECIDES NOTHING: :func:`reply_send_gate`
+    reads everything afterwards and refuses on what it finds. ``failure``
+    is an exception's TYPE only (the order of 2026-09-28 21:08)."""
+    bound = REPLY_SEND_ENABLED_WAIT_MS if timeout_ms is None else int(timeout_ms)
+    out: dict[str, Any] = {"enabled": False, "waited_ms": 0, "failure": None}
+    started = time.monotonic()
+    try:
+        await page.locator(_REPLY_SEND_ENABLED_SELECTOR).first.wait_for(
+            state="attached", timeout=bound
+        )
+        out["enabled"] = True
+    except Exception as exc:  # noqa: BLE001 - a timeout is a reading, not a fault
+        out["failure"] = type(exc).__name__
+    out["waited_ms"] = int((time.monotonic() - started) * 1000)
+    return out
 
 
 async def reply_send_gate(page: Any, *, text: str) -> dict[str, Any]:
@@ -1098,6 +1156,10 @@ async def reply_send_gate(page: Any, *, text: str) -> dict[str, Any]:
 REPLY_SENT = "reply_sent"
 REPLY_HELD = "reply_box_holds_text"
 UNKNOWN = "unknown"
+#: THE ONE OTHER STATE A REPLY MAY ACT FROM (the order of 2026-09-28 21:08):
+#: the box already holds exactly his words, whole and nothing else. Read by
+#: :func:`reply_state`; declared on the spec as ``also_from_states``.
+REPLY_WORDS_IN_PLACE = "reply_box_holds_the_words"
 
 
 async def composer_holds(page: Any, text: str) -> Optional[bool]:
@@ -1127,8 +1189,28 @@ async def composer_holds(page: Any, text: str) -> Optional[bool]:
     return None
 
 
+async def words_in_the_box(page: Any, text: str) -> Optional[bool]:
+    """Are his words, exactly and whole, what the one reply editor holds?
+    ``True``, ``False`` (it holds other words or none), or ``None`` (not
+    exactly one editor, or unreadable). Read after the verdict's fresh
+    load, it says whether LinkedIn kept them. Only the boolean leaves (the
+    order of 2026-09-28 21:08)."""
+    try:
+        editors = page.locator(REPLY_EDITOR_SELECTOR)
+        if await _count(editors) != 1:
+            return None
+        return _normalise(await editors.first.inner_text()) == _normalise(text)
+    except Exception as exc:  # noqa: BLE001 - reported as None, never raised
+        logger.debug("reply box unreadable: %s", type(exc).__name__)
+        return None
+
+
 def reply_verdict(
-    before: dict[str, Any], after: dict[str, Any], *, held_in_place: Optional[bool]
+    before: dict[str, Any],
+    after: dict[str, Any],
+    *,
+    held_in_place: Optional[bool],
+    send_attempted: Optional[bool] = None,
 ) -> tuple[str, str]:
     """Did the reply land? Read off a FRESH LOAD of the conversation he named.
 
@@ -1147,7 +1229,30 @@ def reply_verdict(
     ``reply_box_holds_text`` is the NOT-SENT answer: the box still held his
     words with Send enabled before the reload, and the reload shows no new
     message carrying them. Anything else is ``unknown``, with the counts.
+
+    ``send_attempted`` False -- the last-moment check never let the Send
+    press through -- is also NOT SENT, whatever the reload shows: nothing
+    this act did can have left (the orchestrator's calls of 2026-09-28
+    19:48 and 21:08). It says where his words are on the fresh load and
+    that a retry is safe. ``unknown``, and its do-not-retry, stays for a
+    Send that WAS pressed, or whose press raised, and could not be
+    confirmed. None is a caller that does not say, and changes nothing.
     """
+    if send_attempted is False:
+        kept = after.get("editor_holds_the_words")
+        if kept is True:
+            box = "A fresh load shows your words still in the box: LinkedIn kept them."
+        elif kept is False:
+            box = "A fresh load shows the box without your words."
+        else:
+            box = "Whether a fresh load keeps your words in the box could not be read."
+        return REPLY_HELD, (
+            "SEND WAS NEVER PRESSED, SO NOTHING WAS SENT: the act stopped at its "
+            "last-moment check, before the press (see send_gate). " + box + " A "
+            "RETRY IS SAFE: nothing left, so nothing can go twice -- the next "
+            "attempt finds your words already in the box and sends them without "
+            "typing them again, or refuses if the box holds anything else."
+        )
     if after.get("error") or not after.get("rendered"):
         return UNKNOWN, (
             "the conversation did not render on the re-read "
