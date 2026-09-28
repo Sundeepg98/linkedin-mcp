@@ -474,10 +474,103 @@ def test_the_composers_own_table_reads_connectionof_measured() -> None:
     assert network.rstrip().endswith("MEASURED"), network
 
 
+#: THE ORCHESTRATOR'S CALLS OF 17:46 (2026-09-28): `N 25` and the location and
+#: company half of `N 26` COVERED-UNFIRED by D6 on the degree filter; the
+#: school and industry half split to `N 26b`, GAP.
+NAME_SEARCH = "Exampleperson Markersurname"
+
+
+def test_a_name_search_of_his_first_degree_is_one_composition() -> None:
+    """``N 25``'s route: the degree filter beside a keyword that is a name --
+    his own first degree searched for it. The name goes into the address and
+    nowhere else; a refusal would describe it, never quote it."""
+    verdict = people_search.compose(network="F", keywords=NAME_SEARCH)
+    assert verdict["built"] is True, verdict
+    assert [key for key, _value in _raw_query(verdict["url"])] == ["keywords", "network"]
+    assert verdict["applied"] == {"keywords": 1, "current_company_ids": 0,
+                                  "past_company_ids": 0, "location_ids": 0,
+                                  "network": 1, "connections_of": 0}
+    assert not any(NAME_SEARCH in text for _where, text in walk(verdict["applied"]))
+
+
+@pytest.mark.parametrize(
+    "argument, value, key",
+    [("location_ids", "100", "geoUrn"), ("current_company_ids", "5417062", "currentCompany")],
+)
+def test_his_connections_filtered_by_place_or_employer_compose(argument, value, key) -> None:
+    """``N 26``'s two kept halves: his first degree filtered by a place or an
+    employer -- facets LinkedIn writes, beside the degree filter."""
+    url = _composed(network="F", **{argument: value})
+    assert [k for k, _v in _raw_query(url)] == [key, "network"]
+    assert readonly.is_read_url(url) is True
+
+
+def test_no_school_or_industry_facet_is_composed_yet() -> None:
+    """``N 26b``'s blocker, as code says it: the composer's facet table holds
+    no school and no industry key, and the tool takes no such argument."""
+    keys = {key.lower() for _arg, key, _kind, _most in people_search.FACETS}
+    assert not any("school" in key or "industr" in key for key in keys), keys
+    args = {arg for arg, _key in people_search.ARGUMENT_KEYS}
+    assert not any("school" in arg or "industr" in arg for arg in args), args
+
+
+def _cell(row: str) -> tuple[str, str, str]:
+    """(capability, state, notes) of one network.md row, the id matched whole."""
+    for line in NETWORK.read_text(encoding="utf-8").splitlines():
+        cells = line.split("|")
+        if len(cells) > 5 and cells[1].strip() == row:
+            return cells[2].strip(), cells[4].strip().strip("*"), cells[5].strip()
+    raise AssertionError(f"no row {row!r} in network.md")
+
+
+def test_n25_is_covered_unfired_by_d6_as_a_name_search_of_his_first_degree() -> None:
+    _capability, state, cell = _cell("25")
+    assert state == "COVERED-UNFIRED"
+    assert cell.startswith("**COVERED-UNFIRED 2026-09-28 (lane S), BY D6-CAPABILITY-OVER-AFFORDANCE"), cell[:140]
+    head = cell[: cell.find("R2 **RETURNED TO GAP")]
+    for words in ('network="F"', "keywords=", "include_names=True",
+                  "FIND A 1ST-DEGREE CONNECTION BY NAME",
+                  "THE ONE-PAGE BOUND IS A MITIGATION, NOT A GAP",
+                  "A NAME HE GIVES", "`PEOPLE-DATA-MITIGATIONS`",
+                  "`tests/test_shared_connections_search.py`"):
+        assert words in head, words
+
+
+def test_n26_keeps_location_and_company_and_splits_the_rest_to_26b() -> None:
+    capability, state, cell = _cell("26")
+    assert capability == "Filter your connections by location or company"
+    assert state == "COVERED-UNFIRED"
+    assert cell.startswith("**COVERED-UNFIRED 2026-09-28 (lane S), BY D6-CAPABILITY-OVER-AFFORDANCE"), cell[:140]
+    head = cell[: cell.find("R2 **RETURNED TO GAP")]
+    for words in ('network="F"', "location_ids=", "current_company_ids=",
+                  "COMPOUND-ROW-SPLITS-ONLY-ON-STATE", "`26b`",
+                  "`tests/test_shared_connections_search.py`"):
+        assert words in head, words
+
+
+def test_n26b_is_gap_with_its_blocker_and_the_capture_named() -> None:
+    capability, state, cell = _cell("26b")
+    assert capability == "Filter your connections by school or industry"
+    assert state == "GAP"
+    assert cell.startswith("**Split from 26 on 2026-09-28"), cell[:120]
+    for words in ("COMPOUND-ROW-SPLITS-ONLY-ON-STATE", "BLOCKER, NAMED:",
+                  "NO FACET IN THIS SEARCH YET", "THE CAPTURE THAT WOULD SETTLE IT"):
+        assert words in cell, words
+
+
+def test_n26b_sits_in_bucket_3_and_the_triage_as_a_read_gap_row() -> None:
+    rows, problems = cra.load()
+    assert not problems, problems
+    line = next((r for r in rows if (r["slice"], r["row"]) == ("N", "26b")), None)
+    assert line is not None, "N 26b is a read GAP row and has no address line"
+    assert line["class"] == "ADMITTED" and line["gate"] == "MEASURE", line
+    assert triage.TRIAGE["N 26b"][0] == "BUILDABLE"
+
+
 def test_no_moved_row_is_in_the_address_table_or_the_read_triage() -> None:
     rows, problems = cra.load()
     assert not problems, problems
     by_row = {(r["slice"], r["row"]) for r in rows}
-    for row in ("30", "31", "81"):
+    for row in ("30", "31", "81", "25", "26"):
         assert ("N", row) not in by_row, f"N {row} left bucket 3 and still has a line"
         assert f"N {row}" not in triage.TRIAGE, f"N {row} left the read-gap set"

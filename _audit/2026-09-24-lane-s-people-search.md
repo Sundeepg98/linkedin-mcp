@@ -3095,4 +3095,105 @@ blocker map; it gets the impact gate for those paths.
   says (`query_kept`).
 - CI on this branch: nothing is pushed; the suite ran on this Windows box.
 - A COLD REVIEW of the `network` facet's two shapes was not run.
-- `N 25` and `N 26`: not moved -- a D6 question (N.3).
+- `N 25` and `N 26`: not moved -- a D6 question (N.3). **RULED AT 17:46 --
+  the next section.**
+
+## N 25 and N 26 2026-09-28
+
+The orchestrator's calls of 17:46, on the finding in N.3, with this branch
+merged into master as `6e2935f`:
+
+1. `N 25`, "Search your connections by name": COVERED-UNFIRED by D6. The
+   payload is to find a 1st-degree connection by name;
+   `linkedin_people_search_shape(network="F", keywords=<name>)` delivers it,
+   with names, as people records. The one-page bound is a mitigation, not a
+   gap: a name search returns few rows. Both said in the cell; its live fire
+   needs a name he gives.
+2. `N 26`, "Filter your connections by location, company, school, industry":
+   SPLIT under COMPOUND-ROW-SPLITS-ONLY-ON-STATE. `N 26` keeps location and
+   company, COVERED-UNFIRED by D6; a new `N 26b` takes school and industry,
+   GAP, its blocker named as no facet in this search yet, plus the capture
+   that would show whether the people search draws either facet. Following
+   `P L2` -> `L2b` and `P A23` -> `A23b`, the census row pin and the locator
+   literal with it.
+3. Every pin re-derived, never summed; the standing literal-repeat guard run.
+
+### O.1 Step 0
+
+At 17:42 the local `master` was `6e2935f`, this branch's own head; the
+remote moved to it at 17:44, and its CI run finished green at 17:55 -- 20 of
+20 jobs, queried by the full SHA. Nothing was built before that. The branch
+was already the base, so no fast-forward was needed.
+
+### O.2 The rows
+
+- **`N 25`** opens on the D6 paragraph his call worded: the payload, the
+  composition (`network="F"` beside the name as the keyword, the facet as the
+  connections page writes it), the people records under the six mitigations,
+  the one-page bound as mitigation 4 rather than a gap, and a fire that needs
+  a name he gives. The route replaces the connections page's own search box,
+  whose query variants the boundary refuses -- the lane R blocker kept below
+  it.
+- **`N 26`** is renamed to its half, "Filter your connections by location or
+  company", and opens on the same kind of paragraph: `network="F"` beside
+  `location_ids` or `current_company_ids`, the `geoUrn` and `currentCompany`
+  facets LinkedIn writes. The row's old name is quoted in the cell, as `P L2`
+  kept its history when it became "Own follower COUNT".
+- **`N 26b`**, "Filter your connections by school or industry", enters GAP
+  as the next row after `N 26`, opening "Split from 26 on 2026-09-28 ..." as
+  `A23b` opens. BLOCKER, NAMED: no facet in this search yet -- the composer's
+  five facets hold no school and no industry key, and how LinkedIn spells
+  either is on record nowhere here. The capture that would settle it: a
+  people-search address LinkedIn itself writes carrying either filter, read
+  for keys and value shapes only. `N 88` and `N 89` wait on the same
+  spelling, and the cell says so.
+
+### O.3 The side tables
+
+- `_audit/_census/read-addresses.tsv`: `N 25` and `N 26` left (both REFUSED,
+  on the connections page's query variants); `N 26b` entered ADMITTED on the
+  people search filtered to his first degree, basis NAMED from its own cell,
+  gated MEASURE -- the capture comes first.
+- `scripts/triage_read_gap_rows.py`: `N 25` and `N 26` left, noted beside the
+  rows that left before them; `N 26b` entered BUILDABLE -- the page is
+  admitted and read by the shipped tool, and its line names the capture.
+- `tests/census_row_pin.json`, by `scripts/pin_census_rows.py --write`:
+  total 770 -> 771, network 215 -> 216, `26b` pinned. The two literals with
+  it: `tests/test_the_census_row_total_is_pinned.py` (`PINNED_ROW_TOTAL`,
+  `PINNED_SLICE_ROWS["N"]`) and the locator index's
+  `tests/test_a_census_locator_names_its_row.py`, each with its dated line.
+
+### O.4 The tests
+
+`tests/test_shared_connections_search.py` gained eight: the name search's
+composition (keywords then `network`, the name counted and never echoed);
+the place and employer filters beside the degree filter, each admitted; that
+no school or industry facet is composed, read off the composer's own tables;
+and the census -- `N 25` and `N 26` opening on their D6 paragraphs, `N 26`
+under its new name and naming `26b`, `N 26b` GAP with its blocker and the
+capture, `N 26b` in bucket 3 and the triage, and `N 25` and `N 26` out of
+both. FIVE OF THEM WERE RED ON THE TREE BEFORE THE CENSUS MOVED -- every
+census test -- and green after it; the three code tests were green on both,
+as they should be: the route shipped at 17:02.
+
+### O.5 Pins, each re-derived on the edited tree
+
+    census_completion   stated_rows 770 -> 771      capabilities 784 -> 785
+                        capabilities_achievable 746 -> 747
+                        achievable 732 -> 733       adjudicated 185 -> 187
+                        delivered_broad 131 -> 133  unfired 37 -> 39
+                        gap 585 -> 584              gap_read 99 -> 98
+                        b3_admitted 42 -> 43        b3_refused 40 -> 38
+                        b1_no_ruling 18 -> 20
+    PINNED_B1_ROWS      NO_RULING gains `N 25` and `N 26`
+    count_census_states network.md stated 215 -> 216, COVERED-UNFIRED
+                        15 -> 17, GAP 160 -> 159; all slices GAP 584 of 771
+    census row pin      770 -> 771; network 215 -> 216
+    address table       99 -> 98 rows, GREEN (two left, one entered)
+    tool surface        61 tools, 96 parameters: no parameter moved
+
+### O.6 Gates
+
+On the commit that carries this section, offline, with nothing edited or
+committed while they run; their results follow in the commit after it, and
+the integration of the then-current master before that.

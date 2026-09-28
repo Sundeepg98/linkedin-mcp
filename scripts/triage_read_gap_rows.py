@@ -295,8 +295,13 @@ TRIAGE: dict[str, tuple[str, str, str]] = {
     "N 19": ("RETURNED", "", "returned by lane R 2026-09-23 from EXCLUDED-RULED; its blocker is named in its own cell and its address is measured in read-addresses.tsv"),
     "N 22": ("RETURNED", "", "returned by lane R 2026-09-23 from EXCLUDED-RULED; its blocker is named in its own cell and its address is measured in read-addresses.tsv"),
     "N 24": ("RETURNED", "", "returned by lane R 2026-09-23 from EXCLUDED-RULED; its blocker is named in its own cell and its address is measured in read-addresses.tsv"),
-    "N 25": ("RETURNED", "", "returned by lane R 2026-09-23 from EXCLUDED-RULED; its blocker is named in its own cell and its address is measured in read-addresses.tsv"),
-    "N 26": ("RETURNED", "", "returned by lane R 2026-09-23 from EXCLUDED-RULED; its blocker is named in its own cell and its address is measured in read-addresses.tsv"),
+    # N 25 AND N 26 LEFT 2026-09-28 (lane S, the orchestrator's call of
+    # 17:46) -- see LEFT THE READ-GAP SET below. N 26b, split from N 26 the
+    # same day, ENTERED:
+    "N 26b": ("BUILDABLE", "", "split from N 26 2026-09-28: the people "
+                               "search the shipped tool reads is admitted, and "
+                               "no school or industry facet is composed; a "
+                               "capture of LinkedIn's own spelling comes first"),
     "N 27": ("RETURNED", "", "returned by lane R 2026-09-23 from EXCLUDED-RULED; its blocker is named in its own cell and its address is measured in read-addresses.tsv"),
     "N 28": ("RETURNED", "", "returned by lane R 2026-09-23 from EXCLUDED-RULED; its blocker is named in its own cell and its address is measured in read-addresses.tsv"),
     "N 32": ("RETURNED", "", "returned by lane R 2026-09-23 from EXCLUDED-RULED; its blocker is named in its own cell and its address is measured in read-addresses.tsv"),
@@ -374,6 +379,15 @@ TRIAGE: dict[str, tuple[str, str, str]] = {
 #:
 #:     N 81   COVERED-UNFIRED  (was BUILDABLE) -- a people search filtered by
 #:            degree: network alone, F or S, no member
+#:
+#: LEFT THE READ-GAP SET 2026-09-28, on the orchestrator's call of 17:46
+#: (lane S): by D6, the degree filter delivering what the connections page's
+#: refused query variants would have.
+#:
+#:     N 25   COVERED-UNFIRED  (was RETURNED) -- a name search of his first
+#:            degree: network F beside a keyword
+#:     N 26   COVERED-UNFIRED  (was RETURNED) -- its location and company
+#:            halves; school and industry split to N 26b, which ENTERED GAP
 
 #: These four 2026-09-21 verdicts were measured past by the bucket-3 address
 #: table (`_audit/_census/read-addresses.tsv`, audit

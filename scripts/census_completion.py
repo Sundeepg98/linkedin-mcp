@@ -1046,7 +1046,11 @@ PINNED = {
     #: the P-R settings block itemized into 22 rows (P2-P23; Delete Data EXCLUDED-RULED).
     #: 770 AT LANE L8'S MERGE OF MASTER (2026-09-27), MEASURED: `P A23b`
     #: entered, split from `P A23` (COMPOUND-ROW-SPLITS-ONLY-ON-STATE).
-    "stated_rows": 770,
+    #: 771 ON THE ORCHESTRATOR'S CALL OF 2026-09-28 17:46 (lane S), MEASURED:
+    #: `N 26b` entered, split from `N 26` (COMPOUND-ROW-SPLITS-ONLY-ON-STATE):
+    #: school and industry, GAP, where location and company went
+    #: COVERED-UNFIRED by D6.
+    "stated_rows": 771,
     #: 762 = 704 stated rows + 58 declared collapses, computed at HEAD. NOT the
     #: published 761 and NOT the counter docstring's 760: those two differ only
     #: by a `- 2 stateless` term whose two rows are already outside the 704.
@@ -1076,14 +1080,18 @@ PINNED = {
     #: unfired +1; gap and gap_write -1; b1_no_ruling and b1_released +1.
     #: 784 AT LANE L8'S MERGE OF MASTER (2026-09-27), MEASURED: `P A23b`
     #: entered; no collapse moved.
-    "capabilities": 784,
+    #: 785 ON THE ORCHESTRATOR'S CALL OF 2026-09-28 17:46 (lane S), MEASURED:
+    #: `N 26b` entered (see `stated_rows`); no collapse moved.
+    "capabilities": 785,
     #: 741 AT LANE L8'S MERGE OF MASTER (2026-09-27), MEASURED: the achievable
     #: move, with `O6-O20`'s 14 unchanged.
     #: 742 AT LANE L5'S MERGE OF MASTER 52b55b6 (2026-09-27), MEASURED: `N 2` left the exclusions.
     #: 746 ON LANE L5'S ORDER OF 2026-09-28 12:32, MEASURED: `N 30`, `N 31`, `N 65`
     #: and `N 103` EXCLUDED-RULED -> GAP, their R4 ground narrowed by
     #: NAMED-PROFILE-READ-BEHIND-A-GRANT (the orchestrator's call).
-    "capabilities_achievable": 746,
+    #: 747 ON THE ORCHESTRATOR'S CALL OF 2026-09-28 17:46 (lane S), MEASURED:
+    #: `N 26b` entered, in scope (see `stated_rows`).
+    "capabilities_achievable": 747,
     #: 43 AT LANE L8'S MERGE OF MASTER (2026-09-27), MEASURED: 29 rows returned
     #: to GAP when OUTWARD-CLASSES-BUILT-BEHIND-GRANTS retired their key, and
     #: `P P2` at the merge (-30); `P N27` and `P P2` then EXCLUDED-RULED on
@@ -1101,7 +1109,9 @@ PINNED = {
     #: and `N 103` EXCLUDED-RULED -> GAP, their R4 ground narrowed by
     #: NAMED-PROFILE-READ-BEHIND-A-GRANT (the orchestrator's call). Stated rows 770
     #: less out_of_scope 38.
-    "achievable": 732,
+    #: 733 ON THE ORCHESTRATOR'S CALL OF 2026-09-28 17:46 (lane S), MEASURED:
+    #: stated rows 771 less out_of_scope 38 -- `N 26b` entered, in scope.
+    "achievable": 733,
     #: 205 AT THE ORCHESTRATOR'S MERGE OF LANE L7'S P B9 (2026-09-27), MEASURED: P B9
     #: (Premium badge) moved GAP -> COVERED-UNFIRED, released like the intro edits.
     #: 179 AT LANE L8'S MERGE OF MASTER (2026-09-27), MEASURED: the 30 returned
@@ -1148,7 +1158,13 @@ PINNED = {
     #: people search filtered by degree, as the connections page writes it;
     #: never fired. An R row ADMITTED in bucket 3, so it leaves it and enters
     #: bucket 1 held by no ruling.
-    "adjudicated": 185,
+    #: 187 ON THE ORCHESTRATOR'S CALL OF 2026-09-28 17:46 (lane S), MEASURED:
+    #: `N 25` (a name search of his first degree) and `N 26` (its location
+    #: and company halves) GAP -> COVERED-UNFIRED by D6 on the degree filter,
+    #: never fired. Two R rows REFUSED in bucket 3 (the connections page's
+    #: query variants), so they leave it and enter bucket 1 held by no ruling;
+    #: `N 26b`, split from `N 26`, enters GAP.
+    "adjudicated": 187,
     #: THE LIVE LANE'S FOUR ROWS, RE-DERIVED AT EACH OF ITS MERGES OF MASTER
     #: (2026-09-24; last over lane S): four rows fired live and banked
     #: (`_audit/2026-09-23-live-lane-session-1.md`). `P G6` COVERED-UNFIRED ->
@@ -1207,7 +1223,9 @@ PINNED = {
     #: `N 30` and `N 31` GAP -> COVERED-UNFIRED (see `adjudicated`).
     #: 131 ON THE ORCHESTRATOR'S CALL OF 2026-09-28 17:02 (lane S), MEASURED:
     #: `N 81` GAP -> COVERED-UNFIRED (see `adjudicated`).
-    "delivered_broad": 131,
+    #: 133 ON THE ORCHESTRATOR'S CALL OF 2026-09-28 17:46 (lane S), MEASURED:
+    #: `N 25` and `N 26` GAP -> COVERED-UNFIRED (see `adjudicated`).
+    "delivered_broad": 133,
     #: 79 since the live lane's merge (see `adjudicated`): P G6, N 134, P O3
     #: and M C72 COVERED-PROVEN.
     #: 75 and 21 since the bucket-1 merge: `M C41` fired live and moved from
@@ -1265,7 +1283,9 @@ PINNED = {
     #: `N 30` and `N 31` left GAP (see `adjudicated`).
     #: 585 ON THE ORCHESTRATOR'S CALL OF 2026-09-28 17:02 (lane S), MEASURED:
     #: `N 81` left GAP (see `adjudicated`).
-    "gap": 585,
+    #: 584 ON THE ORCHESTRATOR'S CALL OF 2026-09-28 17:46 (lane S), MEASURED:
+    #: `N 25` and `N 26` left GAP and `N 26b` entered it (see `adjudicated`).
+    "gap": 584,
     #: 18 AT LANE L5'S MERGE OF MASTER 52b55b6 (2026-09-27), MEASURED: `M M1` built (`linkedin_message_from_profile`).
     #: 16 ON LANE L5'S ORDER OF 2026-09-27 23:36, MEASURED:
     #: `linkedin_send_message` RETIRED (aimed by a name): `M M2` to GAP and `N
@@ -1311,7 +1331,9 @@ PINNED = {
     #: `N 30` and `N 31` COVERED-UNFIRED, never fired (see `adjudicated`).
     #: 37 ON THE ORCHESTRATOR'S CALL OF 2026-09-28 17:02 (lane S), MEASURED:
     #: `N 81` COVERED-UNFIRED, never fired (see `adjudicated`).
-    "unfired": 37,
+    #: 39 ON THE ORCHESTRATOR'S CALL OF 2026-09-28 17:46 (lane S), MEASURED:
+    #: `N 25` and `N 26` COVERED-UNFIRED, never fired (see `adjudicated`).
+    "unfired": 39,
     #: 104 AT THE ORCHESTRATOR'S MERGE OF LANE Y2'S FOLLOW-UP (2026-09-27), MEASURED:
     #: the P-R settings block itemized into 22 rows (P2-P23; Delete Data EXCLUDED-RULED).
     #: 101 AT LANE S'S NAMES ADOPTION (2026-09-27), MEASURED: `N 79`, `N 172`
@@ -1336,7 +1358,10 @@ PINNED = {
     #: `N 30` and `N 31`, two R rows, left GAP and bucket 3 (see `adjudicated`).
     #: 99 ON THE ORCHESTRATOR'S CALL OF 2026-09-28 17:02 (lane S), MEASURED:
     #: `N 81`, an R row, left GAP and bucket 3 (see `adjudicated`).
-    "gap_read": 99,
+    #: 98 ON THE ORCHESTRATOR'S CALL OF 2026-09-28 17:46 (lane S), MEASURED:
+    #: `N 25` and `N 26` left GAP and bucket 3, and `N 26b`, an R row, entered
+    #: both (see `adjudicated`).
+    "gap_read": 98,
     #: 151, not the 152 published by `_audit/2026-09-21-the-write-ceiling.md`.
     #: That document scoped itself to `profile.md`, `network.md` and
     #: `messaging-and-content.md`; measured at HEAD those three carry W 151 and
@@ -1477,14 +1502,21 @@ PINNED = {
     #: left the address table (see `adjudicated`).
     #: 42 ON THE ORCHESTRATOR'S CALL OF 2026-09-28 17:02 (lane S), MEASURED:
     #: `N 81` GAP -> COVERED-UNFIRED, so its ADMITTED line left the table.
-    "b3_admitted": 42,
+    #: 43 ON THE ORCHESTRATOR'S CALL OF 2026-09-28 17:46 (lane S), MEASURED:
+    #: `N 26b` entered ADMITTED -- the people search filtered to his first
+    #: degree -- gated MEASURE: the school and industry facets' spelling needs
+    #: a capture first.
+    "b3_admitted": 43,
     #: 38 AT THE ORCHESTRATOR'S MERGE OF LANE Y2'S FOLLOW-UP (2026-09-27), MEASURED:
     #: the P-R settings block itemized into 22 rows (P2-P23; Delete Data EXCLUDED-RULED).
     #: 40 ON LANE L5'S ORDER OF 2026-09-28 12:32, MEASURED: `N 30`, `N 31`, `N 65`
     #: and `N 103` EXCLUDED-RULED -> GAP, their R4 ground narrowed by
     #: NAMED-PROFILE-READ-BEHIND-A-GRANT (the orchestrator's call). `N 65` and `N
     #: 103`: sections of a member's profile, a page this table's read door refuses.
-    "b3_refused": 40,
+    #: 38 ON THE ORCHESTRATOR'S CALL OF 2026-09-28 17:46 (lane S), MEASURED:
+    #: `N 25` and `N 26`, REFUSED on the connections page's query variants,
+    #: left the table for COVERED-UNFIRED by D6 (see `adjudicated`).
+    "b3_refused": 38,
     "b3_no_address": 1,
     "b3_needs_session": 14,
     "b3_undetermined": 2,
@@ -1676,7 +1708,9 @@ PINNED = {
     #: at a member he names (see `adjudicated`).
     #: 18 ON THE ORCHESTRATOR'S CALL OF 2026-09-28 17:02 (lane S), MEASURED:
     #: `N 81` entered, a read no ruling holds, which names nobody.
-    "b1_no_ruling": 18,
+    #: 20 ON THE ORCHESTRATOR'S CALL OF 2026-09-28 17:46 (lane S), MEASURED:
+    #: `N 25` and `N 26` entered, reads no ruling holds (see `adjudicated`).
+    "b1_no_ruling": 20,
     #: 7 AT THE ORCHESTRATOR'S MERGE OF LANE L7'S P B9 (2026-09-27), MEASURED: P B9
     #: (Premium badge) moved GAP -> COVERED-UNFIRED, released like the intro edits.
     "b1_released": 7,
@@ -1847,9 +1881,12 @@ PINNED_B1_ROWS: dict[str, tuple[str, ...]] = {
     #: `N 81` entered on the orchestrator's call of 2026-09-28 17:02 (lane S):
     #: the same `network` facet alone, a people search filtered by degree, as
     #: the connections page writes it; never fired. A read no ruling holds.
+    #: `N 25` and `N 26` entered on his call of 17:46 (lane S), by D6 on that
+    #: degree filter: a name search of his first degree, and his first degree
+    #: filtered by place or employer; never fired. Reads no ruling holds.
     NO_RULING: (
         "J 121", "J 122", "M M33", "M M49",
-        "N 20", "N 30", "N 31",
+        "N 20", "N 25", "N 26", "N 30", "N 31",
         "N 45", "N 81", "N 85", "N 172",
         "P A8", "P A11", "P A13", "P A17", "P A19", "P A21", "P B9",
         #: `J 107` and `M M53` entered with lane S's offline frontier,
