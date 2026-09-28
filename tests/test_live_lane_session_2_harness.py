@@ -534,6 +534,24 @@ def _member_page(name: str) -> str:
             "<span>Show all</span></main></body></html>")
 
 
+def test_each_session_has_its_own_directory_and_a_bad_name_is_refused() -> None:
+    """Forty loads a SESSION: session 3's ledger, lock, key and captures live in
+    their own directory, named by LIVE_LANE_SESSION_DIR, and only a closed
+    shape is taken -- a path with a separator would put state outside _state."""
+    import os
+    import subprocess
+
+    assert harness.SESSION_DIR == "live2" and harness.STATE.name == "live2"
+    code = "import sys; sys.path.insert(0, 'scripts'); import _probe_live_lane_session_2 as h; print(h.STATE.name)"
+    for value, ok in (("live3", True), ("../x", False), ("live", False), ("live123", False)):
+        env = dict(os.environ, LIVE_LANE_SESSION_DIR=value)
+        proc = subprocess.run([sys.executable, "-c", code], cwd=str(ROOT), env=env,
+                              capture_output=True, text=True, timeout=120)
+        assert (proc.returncode == 0) is ok, (value, proc.returncode)
+        if ok:
+            assert proc.stdout.strip().endswith(value)
+
+
 def test_a_tracked_copy_carries_no_keyed_hash_and_no_length() -> None:
     skeleton = harness.skeleton_of(_member_page(INVENTED_NAME), KEY)
     assert harness._KEYED_SHAPE.search(skeleton), "the control: the skeleton is keyed"
@@ -757,18 +775,63 @@ async def test_d1_the_old_handle_takes_the_hidden_more_on_both_profiles(browser_
         assert not await old.is_visible(), name
 
 
-async def test_d1_the_key_presses_nothing_his_width_does_not_draw(browser_page, quick, monkeypatch) -> None:
-    """FIX 3, END TO END ON HIS PROFILE AT HIS WIDTH. Red before the fix: the
-    key took the old handle's one match and its click waited out Playwright's
-    actionability check on a control that is not drawn (TimeoutError), as it
-    did live. Now it counts the top card's More -- 1 drawn, 0 visible -- and
-    refuses with nothing pressed."""
-    await _serve_profile(browser_page, "in_me", WIDE)
+_COUNT_CLICKS = """
+() => { window.__clicks = 0;
+        document.addEventListener('click', () => { window.__clicks += 1; }, true); }
+"""
+
+
+@pytest.mark.parametrize("width,opener", [(WIDE, "Resources"), (NARROW, "More")])
+async def test_d1_the_key_presses_the_one_opener_his_width_draws(
+        browser_page, quick, monkeypatch, width, opener) -> None:
+    """FIX 3, END TO END, AND THE ORCHESTRATOR'S RULING OF 2026-09-28 12:42:
+    press the opener the top card DRAWS -- at his width Resources, at the
+    narrow one More -- ONCE. Red before fix 3: the key took the old handle's
+    one match and its click waited out Playwright's actionability check on a
+    control that is not drawn (TimeoutError), as it did live."""
+    await _serve_profile(browser_page, "in_me", width)
+    await browser_page.evaluate(_COUNT_CLICKS)
     monkeypatch.setattr(harness, "BROWSER", _ServedBrowser(browser_page))
-    started = time.monotonic()
     result = await harness._in_me_more(False)
-    assert result == {"stopped": "more_visible_0_drawn_1", "openings": []}
-    assert time.monotonic() - started < 4.0, "an actionability wait ran: something was pressed"
+    assert result["opener"] == opener
+    assert result["counts"][opener][1] == 1
+    assert result["opening"]["pressed"] is True and result["opening"]["closed_again"] is True
+    assert await browser_page.evaluate("window.__clicks") == 1, "one press, and only one"
+
+
+@pytest.mark.parametrize("profile,hide", [("in_me", ""), ("brother_profile", "")])
+async def test_d1_neither_or_both_openers_visible_refuses(
+        browser_page, quick, monkeypatch, profile, hide) -> None:
+    """With no stylesheet both bars show: his profile then draws More AND
+    Resources visible, the brother's two Mores -- not exactly one opener, so
+    nothing is pressed."""
+    await _serve_profile(browser_page, profile, hide)
+    await browser_page.evaluate(_COUNT_CLICKS)
+    monkeypatch.setattr(harness, "BROWSER", _ServedBrowser(browser_page))
+    result = await harness._in_me_more(False)
+    assert result["stopped"] == "opener_not_exactly_one"
+    assert await browser_page.evaluate("window.__clicks") == 0
+
+
+async def test_a_menu_drawn_as_a_role_menu_elsewhere_is_read(browser_page, quick) -> None:
+    """THE NEW MARKUP'S MENU: no artdeco dropdown and no aria-controls, a
+    role=menu drawn apart from its trigger. The one visible role=menu is the
+    container, and Save to PDF is found by comparison inside the page."""
+    await browser_page.set_content(
+        "<!doctype html><html><body><main><button id='t' type='button' aria-label='More' "
+        "aria-expanded='false'>More</button></main><div id='portal'></div><script>"
+        "const t=document.getElementById('t'), p=document.getElementById('portal');"
+        "t.addEventListener('click',()=>{t.setAttribute('aria-expanded','true');"
+        "p.innerHTML='<div role=\"menu\"><div role=\"menuitem\">Save to PDF</div>"
+        "<div role=\"menuitem\">" + INVENTED_NAME + "</div></div>';});"
+        "document.addEventListener('keydown',(e)=>{if(e.key==='Escape'){"
+        "t.setAttribute('aria-expanded','false'); p.innerHTML='';}});"
+        "</script></body></html>")
+    handle, _count = await harness._one_handle(browser_page.locator(OLD_MORE_HANDLE))
+    result = await harness.press_and_read(browser_page, "in_me_more", handle, False)
+    assert result["container_found"] is True
+    assert [item["save_to_pdf"] for item in result["items"]] == [True, False]
+    assert result["closed_again"] is True and result["closed_by"] == "escape"
 
 
 async def test_d1_the_new_handle_takes_the_one_visible_more(browser_page) -> None:

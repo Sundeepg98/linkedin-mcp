@@ -123,7 +123,15 @@ import _probe_disclosure_targets as structure  # noqa: E402
 import _probe_l1_admitted_reads_live as l1  # noqa: E402
 import _probe_live_lane_session_1 as s1  # noqa: E402
 
-STATE = _ROOT / "_state" / "live2"
+#: THE SESSION'S OWN DIRECTORY, one per live session: its ledger (forty loads
+#: a SESSION, LIVE-BUDGET-40-LOADS), its driver lock, its shape key and its
+#: captures. ``live2`` unless ``LIVE_LANE_SESSION_DIR`` names another -- session
+#: 3 runs with ``live3``, so session 2's ledger and captures stay as they were.
+#: A closed shape: ``live`` and one or two digits.
+SESSION_DIR = os.environ.get("LIVE_LANE_SESSION_DIR", "live2").strip() or "live2"
+if not re.fullmatch(r"live[0-9]{1,2}", SESSION_DIR):
+    raise SystemExit("LIVE_LANE_SESSION_DIR must be 'live' and one or two digits")
+STATE = _ROOT / "_state" / SESSION_DIR
 LEDGER = STATE / "ledger.json"
 DRIVER_LOCK = STATE / "driver.lock"
 SHAPE_KEY_FILE = STATE / "shape.key"
@@ -193,7 +201,7 @@ KEYS: dict[str, dict[str, Any]] = {
     "in_me": {"kind": "in_me", "loads": 2,
               "rows": "N 76, P J4, P D28, P K1; P F1 H11 K8 D26 read off the capture"},
     "in_me_more": {"kind": "in_me_more", "loads": 0, "after": ("in_me",),
-                   "rows": "P C8: lane D LQ-1 (two openings)"},
+                   "rows": "P C8: lane D LQ-1 (one press of the opener the top card draws)"},
     "me_menu": {"kind": "me_menu", "loads": 0, "after": ("in_me", "activity_all"),
                 "rows": "lane Y item 9 (discovery curve)"},
     "activity_all": {"kind": "capture", "loads": 1, "rows": "M C85"},
@@ -809,7 +817,7 @@ _ID_REF_WRITTEN = re.compile(
 )
 
 #: Where the TRACKED copies of this session's skeletons live.
-FIXTURES = _ROOT / "tests" / "fixtures" / "live2"
+FIXTURES = _ROOT / "tests" / "fixtures" / SESSION_DIR
 
 
 def tracked_copy(skeleton: str) -> str:
@@ -1005,6 +1013,14 @@ _MENU_JS = """
     if (dd) box = dd.querySelector(".artdeco-dropdown__content");
   }
   if (!box) box = document.querySelector(".artdeco-dropdown__content--is-open");
+  if (!box) {
+    // THE NEW MARKUP (2026-09-28): hashed classes and no artdeco dropdown, so
+    // the one role=menu the press made visible is the container -- one, or
+    // none is taken.
+    const shownMenus = Array.from(document.querySelectorAll('[role="menu"]'))
+      .filter((e) => !e.checkVisibility || e.checkVisibility({visibilityProperty: true}));
+    if (shownMenus.length === 1) box = shownMenus[0];
+  }
   if (!box) return {container: false, items: []};
   let items = Array.from(box.querySelectorAll('[role="menuitem"]'));
   if (!items.length) items = Array.from(box.querySelectorAll(".artdeco-dropdown__item"));
@@ -1578,32 +1594,57 @@ async def _in_me(capture: bool) -> dict[str, Any]:
     return out
 
 
+#: THE TOP CARD'S OPENERS, BY NAME. Fix 3 found that at his window's width the
+#: top card draws Resources where the other bar draws More; the orchestrator's
+#: ruling of 2026-09-28 12:42: press the one the top card DRAWS, once.
+TOPCARD_OPENERS = ("More", "Resources")
+
+
+async def topcard_opener(page: Any) -> tuple[Optional[Any], Optional[str], dict[str, list[int]]]:
+    """``(handle, name, counts)``: the ONE top-card opener drawn visible, of
+    :data:`TOPCARD_OPENERS`, with the drawn and visible count of each. None
+    when not exactly one of them is visible -- neither, or both."""
+    counts: dict[str, list[int]] = {}
+    found: list[tuple[str, Any]] = []
+    for name in TOPCARD_OPENERS:
+        handle, drawn, visible = await topcard_control(page, name)
+        counts[name] = [drawn, visible]
+        if handle is not None:
+            found.append((name, handle))
+    if len(found) != 1:
+        for _name, handle in found:
+            await handle.dispose()
+        return None, None, counts
+    return found[0][1], found[0][0], counts
+
+
 async def _in_me_more(capture: bool) -> dict[str, Any]:
-    """Lane D's LQ-1: the top card's More, opened TWICE on the page ``in_me``
-    left open, read by attribute; the Save-to-PDF item's handle compared."""
-    openings: list[dict[str, Any]] = []
+    """Lane D's LQ-1, by the orchestrator's ruling of 2026-09-28: the opener the
+    top card DRAWS -- More or Resources -- pressed ONCE on the page ``in_me``
+    left open, its menu read by attribute, Save to PDF found by comparison
+    inside the page, nothing inside it pressed."""
     async with BROWSER.session() as page:
         on_his_profile = press.self_landing(page.url)
         if not on_his_profile:
             return {"stopped": "not_on_his_profile"}
-        for _opening in range(2):
-            handle, drawn, visible = await topcard_control(page, MORE_NAME)
-            if handle is None:
-                say("    More in the top card: " + str(drawn) + " drawn, " + str(visible)
-                    + " visible. NOT EXACTLY ONE VISIBLE. Nothing pressed.")
-                return {"stopped": "more_visible_" + str(visible) + "_drawn_" + str(drawn),
-                        "openings": openings}
-            openings.append(await press_and_read(page, "in_me_more", handle, capture,
-                                                 needles=N76_NEEDLES))
-            await handle.dispose()
-    first = handle_signature(openings[0]["items"])
-    second = handle_signature(openings[1]["items"])
-    out = {"openings": openings, "save_to_pdf_handle_found": first is not None,
-           "stable_across_openings": first is not None and first == second,
-           "needle_items": [sum(1 for one in openings[0]["items"] if one["needles"][i])
+        handle, opener, counts = await topcard_opener(page)
+        say("    top-card openers, drawn/visible: " + "; ".join(
+            name + " " + str(counts[name][0]) + "/" + str(counts[name][1]) for name in TOPCARD_OPENERS))
+        if handle is None:
+            say("    NOT EXACTLY ONE OPENER VISIBLE. Nothing pressed.")
+            return {"stopped": "opener_not_exactly_one", "counts": counts}
+        say("    the opener drawn: " + str(opener))
+        opening = await press_and_read(page, "in_me_more", handle, capture, needles=N76_NEEDLES)
+        await handle.dispose()
+    items = opening["items"]
+    out = {"opener": opener, "counts": counts, "opening": opening,
+           "save_to_pdf_item": sum(1 for one in items if one.get("save_to_pdf")),
+           "save_to_pdf_word_drawn": int(opening["words_added"].get("Save to PDF", 0)),
+           "save_to_pdf_handle_found": handle_signature(items) is not None,
+           "needle_items": [sum(1 for one in items if one["needles"][i])
                             for i in range(len(N76_NEEDLES))]}
-    say("    Save to PDF handle found " + str(out["save_to_pdf_handle_found"])
-        + "; stable across two openings " + str(out["stable_across_openings"])
+    say("    Save to PDF: items " + str(out["save_to_pdf_item"]) + ", drawn as our word "
+        + str(out["save_to_pdf_word_drawn"]) + "; handle found " + str(out["save_to_pdf_handle_found"])
         + "; items per N 76 needle " + str(out["needle_items"]))
     return out
 
