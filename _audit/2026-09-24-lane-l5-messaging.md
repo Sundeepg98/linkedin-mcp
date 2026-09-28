@@ -2830,22 +2830,35 @@ first-degree one. Its tracked copy keeps the words "Interests" and "Groups" and 
   more on the rerun: the visible More count in the topcard, which a `:text-is` selector read as 0
   and a role query reads as the 1 visible. Last: 3879 passed, 1 skipped.
 - **THE IDENTITY GATE ON EACH COMMIT** -- the pre-commit hook, 226 spellings, its key read from the
-  main checkout: 11 staged files for `5afa484`, 97 for the merge, 6 for `0017f42`; 0 hits each.
+  main checkout: 11 staged files for `5afa484`, 97 for the merge, 6 for `0017f42`, 2 for
+  `c04b20f`; 0 hits each.
 - **THE WHOLE SUITE on `5afa484`.** The impact gate's plan against `c94c39e` selected 259 of 282
   test files (92%) and widened. Run in the background, `-n auto --dist loadfile`, under the suite's
   own offline guards: 12101 passed, 9 skipped, 1 xfailed -- 12111 tests -- in 1098 s.
   `tests/test_no_committed_identity.py` 982 of 982, its exact-value sweep among them. The nine
-  skips: three symlink tests this box cannot run, four empty parameter sets, one declared limit, one
-  test that arms itself when its reader arrives, and the navigation guard's whole-tree complement,
-  which runs only under CI (run below with CI=1).
+  skips: three symlink tests this box cannot run, four empty parameter sets, one test that arms
+  itself when its reader arrives, and the navigation guard's whole-tree complement, which runs only
+  under CI (run below with CI=1). The one xfail is the people-search reader's declared limit.
 - **THE CENSUS BATTERY on `5afa484`:** twelve instruments, all green.
 - **MASTER'S CI, THEN THE MERGED TREE:** R.7 -- master's run green; derived views at a fixed point;
   baselines unchanged; the census battery green; one duplicate key, master's.
 - **THE RECONCILIATION:** its new tests red first where R.8 says, then 19 of 19 in the file; the
   thirteen files the change reaches, 3178 passed, 1 skipped (the complement); the navigation guard
   with CI=1, 683 of 683.
-- **THE FINAL GATE,** on the commit carrying this record: its impact plan and result are in the
-  report that returns the head sha -- a record cannot hold the gate of the commit that writes it.
+- **THE RECORD'S OWN PATHS, before their commit:** the impact gate's own run over them, 45 test
+  files (2898 tests), PASS -- and it says so, over nothing else.
+- **THE FINAL GATE, on `c04b20f`** -- the tree the reconciliation and this record left. The impact
+  gate's plan against master `02560b0` selected 258 of 283 test files (91%) and widened; the whole
+  suite, in the background, `-n auto --dist loadfile`, under its own offline guards: 12200 passed,
+  9 skipped, 1 xfailed -- 12210 tests -- in 956 s, the same nine skips and the same xfail.
+  `tests/test_no_committed_identity.py` 1011 of 1011 on the committed tree, its exact-value sweep
+  among them; the live lane's harness 128 of 128; this lane's named-profile files 34, 19, 51 and
+  121, every case. The census battery on it: twelve of twelve green. The navigation guard with
+  CI=1: 683 of 683. The builder, re-run from the skeleton: the committed page byte for byte. The
+  duplicate-key check: master's one, nothing new.
+- **THE COMMIT CARRYING THIS PARAGRAPH** changes this file and nothing else. Its own impact plan and
+  that plan's result are in the report that returns the head sha -- a record cannot hold the gate
+  of the commit that writes it.
 
 ### R.10 NOT run
 
@@ -2858,8 +2871,9 @@ first-degree one. Its tracked copy keeps the words "Interests" and "Groups" and 
 - The builder over the tracked copy: it cannot run there (R.8); the tie is the digest.
 - The four read rows `N 30`, `N 31`, `N 65` and `N 103`: put to the orchestrator, not moved (R.5).
 - The duplicate `"urlretrieve"` in `tests/test_api_call_sites.py`: found, not fixed (R.7).
-- `scripts/impact_gate.py` executing its own run: its plans were computed and read, and the whole
-  suite they called for ran through this lane's runner under the suite's own guards.
+- `scripts/impact_gate.py` executing its own WHOLE-SUITE run: its plans were computed and read, and
+  the two whole-suite runs they called for ran through this lane's runner under the suite's own
+  guards. (Over the record's two paths it did run itself, R.9.)
 
 ### R.11 Commits -- on this branch, none pushed, no AI attribution in any
 
@@ -2870,4 +2884,5 @@ first-degree one. Its tracked copy keeps the words "Interests" and "Groups" and 
     5afa484  the cold check's findings on cee979c, fixed at their sites (R.4)
     981848e  the merge of master 02560b0 (R.7)
     0017f42  one live-true source; three stale capture claims corrected (R.8)
-    (last)   this record, R.2 to R.11, and the instrument register's 69.14
+    c04b20f  this record, R.2 to R.11, and the instrument register's 69.14
+    (last)   R.9's final gate, and its skip sentence corrected -- this file only
