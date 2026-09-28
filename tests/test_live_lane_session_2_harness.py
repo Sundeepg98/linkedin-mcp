@@ -338,6 +338,30 @@ def test_the_sixth_search_is_refused_before_the_navigation(fake) -> None:
     assert fake.calls == [FEED], "a load that is not a search is not held by the search cap"
 
 
+def test_a_named_profile_load_through_the_second_door_is_counted(tmp_path, monkeypatch) -> None:
+    """FOUND LIVE, 2026-09-28: the named-person door (``named_profile=True``)
+    loads an address the read door refuses, and the first wrapper waved it
+    through uncounted. It is a load, and the ledger counts it."""
+    calls: list[tuple[str, bool]] = []
+
+    class _SecondDoor:
+        async def goto(self, page, url, **kwargs):  # noqa: ANN001 - fake
+            calls.append((url, kwargs.get("named_profile") is True))
+            return url
+
+    monkeypatch.setattr(harness, "BROWSER", _SecondDoor())
+    monkeypatch.setattr(harness, "STATE", tmp_path)
+    monkeypatch.setattr(harness, "LEDGER", tmp_path / "ledger.json")
+    monkeypatch.setattr(harness, "MIN_GAP_S", 0.0)
+    harness._install_counter()
+    profile = "https://www.linkedin.com/in/" + SYNTHETIC_SLUG + "/"
+    assert not readonly.is_read_url(profile)
+    asyncio.run(harness.BROWSER.goto(None, profile, named_profile=True))
+    ledger = json.loads(harness.LEDGER.read_text(encoding="utf-8"))
+    assert [row["surface"] for row in ledger["loads"]] == ["in"]
+    assert calls == [(profile, True)]
+
+
 def test_a_refused_address_is_not_a_load(fake) -> None:
     with pytest.raises(readonly.WriteAttemptError):
         asyncio.run(harness.BROWSER.goto(None, "https://www.linkedin.com/my-items/"))

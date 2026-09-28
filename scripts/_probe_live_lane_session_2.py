@@ -489,10 +489,14 @@ def _install_counter() -> None:
     original = BROWSER.goto
 
     async def counted_goto(page: Any, url: str, **kwargs: Any) -> str:
-        if not readonly.is_read_url(url):
-            # REFUSED BY THE BOUNDARY: ``original`` raises inside
-            # ``assert_read_url`` before ``page.goto``; nothing loads, nothing
-            # is counted.
+        # THE SECOND DOOR COUNTS TOO (found live, 2026-09-28): a named-person
+        # act loads the one profile its caller named through
+        # ``named_profile=True``, an address the READ door refuses -- so the
+        # first version of this wrapper waved it through uncounted and
+        # unspaced. Only an address NEITHER door admits passes uncounted, and
+        # ``original`` refuses it before ``page.goto``.
+        second_door = kwargs.get("named_profile") is True
+        if not second_door and not readonly.is_read_url(url):
             return await original(page, url, **kwargs)
         loads = _ledger_read()["loads"]
         if len(loads) >= CEILING:
