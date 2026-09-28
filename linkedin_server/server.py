@@ -10306,6 +10306,16 @@ async def linkedin_message_from_profile(
     holds your words with Send enabled. ``"unknown"``: open the conversation
     and look, and do NOT retry.
 
+    A FIRST CONTACT -- no conversation with them yet -- opens a NEW-MESSAGE
+    composer instead (measured live, 2026-09-28), and it is typed into only
+    when: the Message link pressed names their profile's own member, exactly
+    one recipient is committed and its name is exactly the profile's, nobody
+    else is being added, and the recipient card links their profile -- each
+    compared in the page. Send is pressed only while all of that still holds
+    with your words in the box. Afterwards a conversation must exist, headed
+    by their name and holding your words as its last message, read in place;
+    only then is the bubble closed, by its own close control.
+
     ONE LINE ONLY: a newline in the text is refused.
 
     Args:

@@ -11010,6 +11010,36 @@ DECLARED DISPOSABLE: the scratch probes that read the capture for this call -- t
 and connection-link shape readers, the rail-heading counter, the tracked-copy comparison -- and the
 scratch duplicate-key walker, which the committed guard replaces.
 
+### 69.16 A COMPOSER IN A SHADOW ROOT IS INVISIBLE TO THE PAGE'S OWN SCRIPT, AND A FIRST CONTACT IS PROVEN BY A CHAIN, NOT A TITLE (the first-contact path, 2026-09-28)
+
+**WHAT THE PAGE'S SCRIPT CANNOT SEE, IT CANNOT SAY WHOSE IT IS.** The live lane measured LinkedIn's
+messaging overlay inside an OPEN SHADOW ROOT: ``document.querySelectorAll`` -- the engine every
+in-page reading script here uses -- counted no composer while Playwright's piercing locators found
+one. So the conversation gate's "whose conversation" read nothing there, for a first contact AND
+for a conversation that already exists. The bubble is now read by a script run over the elements
+the piercing engine resolves, and compared in the page as before.
+
+**A NEW MESSAGE HAS NO TITLE TO READ; ITS RECIPIENT IS PROVEN BY A CHAIN.** With no conversation,
+the press opens a new-message composer: one committed recipient and no title with the name. The
+act types only when every link holds -- the pressed link names the profile's own member, one
+recipient is committed and its name IS the topcard's name, nobody else is being added, and the
+recipient card links the topcard's own profile -- and it re-checks them with the words in the box.
+
+| instrument | what it holds | shown failing |
+|---|---|---|
+| `dom.BUBBLE_FACTS_JS` via `dom.read_bubbles`, declared in `tests/test_readonly.py` | each overlay bubble judged on the elements the piercing engine resolves: title as a closed token, recipients counted, the recipient's name and card compared with the profile's in the page; closed facts only | the page's own script, on the same page, counts 0 composers, 0 bubbles and 0 titles (the live finding reproduced) |
+| `scripts/_build_first_contact_bubble.py` + `tests/test_first_contact_message.py` | the bubble fixture is the live lane's tracked copy's structure (digest `ligiiccbckljhmoo`, the same from the gitignored skeleton) and a fixed point of its builder; the act end to end in a shadow root -- SENT read in place, closed by its close control, Escape never pressed; every doubt about the recipient refused before a word is typed, and again before Send | on the code before the path, 16 of its 23 cases red: 13 the act refusing -- 11 by the live refusal, `6_not_their_conversation`, reproduced offline, the existing path's own blindness among them -- and 3 on readings the path adds; a structural edit of the fixture or of the source changes the digest; a text edit breaks the fixed point |
+
+    WHAT A READING CANNOT SEE, IT CANNOT CLEAR. ASK THE ENGINE THE PRESS USES WHERE THE PRESS
+    WILL LAND -- INCLUDING INSIDE A SHADOW ROOT.
+
+    WHEN THE PAGE DRAWS NO NAME TO COMPARE, PROVE THE RECIPIENT BY A CHAIN OF LINKS EACH OF WHICH
+    CAN REFUSE, AND CHECK IT AGAIN AT THE LAST MOMENT BEFORE THE ACT IS IRREVERSIBLE.
+
+DECLARED DISPOSABLE: the scratch readers of the bubble's skeleton (outline, inventory, the
+keyed-hash comparisons of the pill and card with the topcard) and the red demonstration's copy of
+the tree.
+
 
 ## 70. THE BEST-VERIFIED WRITE NEVER PRESSED SAVE, AND A WRITE AIMED BY ITS CARD (lane-l7-profile-writes, 2026-09-24)
 
