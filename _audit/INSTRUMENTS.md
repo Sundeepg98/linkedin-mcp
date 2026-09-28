@@ -10188,6 +10188,20 @@ recording plugin that measured the CDP connection, the duplicate-key check
 and the instrument runner -- are declared disposable. Their numbers are in
 the lane record.
 
+### 66.7 THE FOUR PEOPLE-SEARCH ITEMS (lane S, the order of 2026-09-28 15:10)
+
+Record: the lane record's `## Four people-search items 2026-09-28`.
+
+| path | shown failing by |
+|---|---|
+| `tests/test_shared_connections_search.py` -- the `network` facet held to the capture's keys, order and value shape, its two letters, and a named member; the premise that the capture still draws the three topcard links | its census tests red on the tree before the census moved; each control convicting what it must (the other key order, the raw spelling, the same letter without a member); eight planted defects in the composer and the tool, each red and restored byte-identical |
+| `tests/test_a_company_search_needs_no_keyword.py` (the docstring pin) | the words before the fire, verbatim, rejected by the pin; three planted defects in the docstring, each red |
+
+### 66.8 DECLARED DISPOSABLE (THE ORDER OF 15:10)
+
+The CI poller, the registry measurer and the two mutation specs are
+declared disposable. Their numbers are in the lane record.
+
 ---
 
 ## 67. FOUR GUARDS THAT COULD NOT SEE THEIR OWN SUBJECT: A READER'S OUTPUT, A LIBRARY'S MESSAGE, A CAPITAL LETTER, A MERGE STAGE (lane-g-guards, 2026-09-24)

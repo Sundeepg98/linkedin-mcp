@@ -120,7 +120,7 @@ PINNED_TOOL_SURFACE: dict[str, tuple[str, ...]] = {
     "linkedin_page_plugin_snippet": ("page_id",),
     "linkedin_people_search_shape": (
         "connections_of", "current_company_ids", "include_names", "keywords",
-        "location_ids", "past_company_ids",
+        "location_ids", "network", "past_company_ids",
     ),
     "linkedin_premium_job_collection": ("collection",),
     "linkedin_premium_status": (),
@@ -465,8 +465,17 @@ PINNED_TOOL_SURFACE: dict[str, tuple[str, ...]] = {
 #: on their profile, so the read returns them ABSENT and the row waits on the
 #: capture spec C-P7; no other row moves. See
 #: `_audit/2026-09-24-lane-l5-messaging.md`, "The read he names".
+#: **RE-PINNED 2026-09-28 AT 61 TOOLS AND 96 PARAMETERS on the orchestrator's
+#: order of 15:10 (lane S): no tool, one parameter -- `network` on
+#: `linkedin_people_search_shape`, LinkedIn's degree facet as its own
+#: shared-connections link writes it, sent only beside `connections_of`.**
+#: THE CENSUS DECISION, in the same commit: `N 31` (the connections he shares
+#: with a member) GAP -> COVERED-UNFIRED on it, and `N 30` (a connection's own
+#: connections) GAP -> COVERED-UNFIRED by D6 on the orchestrator's ruling, on
+#: `connections_of`, which shipped earlier. Never fired. See
+#: `_audit/2026-09-24-lane-s-people-search.md`, "Four people-search items".
 PINNED_TOOL_COUNT = 61
-PINNED_PARAMETER_COUNT = 95
+PINNED_PARAMETER_COUNT = 96
 
 
 def live_surface() -> dict[str, tuple[str, ...]]:

@@ -24,9 +24,12 @@ WHAT THESE TESTS HOLD, and each has the control that makes it readable:
   before any load, so a keyword-less call cannot become a slug search;
 * a keyworded call still builds keywords first.
 
-NOT PROVEN HERE, and the census says so: nothing has fired a keyword-less
-``f_C`` search live, and whether LinkedIn's DEFAULT location narrows one is
-UNVERIFIED. The row is COVERED-UNFIRED until a live fire answers that.
+THE LIVE ANSWER, 2026-09-28 (the live lane's session 3; ``J 107``
+COVERED-PROVEN): LinkedIn DOES apply a default location to a keyword-less
+employer search -- the no-location and "Worldwide" searches of one employer
+shared 0 of their 7 postings. So the tool's docstring tells a caller who wants
+every posting at an employer to pass location "Worldwide", and the last
+section here pins that sentence, with a control on the words it replaced.
 
 The company id is a synthetic number, the one lane D measured the boundary
 with; the card is ``tests/test_tools.py``'s shared synthetic card.
@@ -152,3 +155,75 @@ async def test_a_keyworded_search_builds_keywords_first_as_it_always_did(drive, 
     pairs = _pairs(navigations[0])
     assert pairs[0] == ("keywords", "node.js engineer"), pairs
     assert (("f_C", EMPLOYER) in pairs) is bool(company), pairs
+
+
+# ---------------------------------------------------------------------------
+# THE DOCSTRING SAYS WHAT THE LIVE FIRE MEASURED
+# ---------------------------------------------------------------------------
+
+#: The instruction, as the docstring words it.
+WORLDWIDE = 'For every posting at an employer, pass location "Worldwide".'
+
+#: The measurement it rests on, in the docstring's words.
+MEASURED = (
+    'LinkedIn applies a DEFAULT LOCATION to a keyword-less employer search',
+    '"Worldwide" searches of one employer shared 0 of their 7 postings',
+)
+
+#: What the docstring said before the fire, word for word: the default was
+#: UNVERIFIED. A docstring still carrying it would tell a caller the question
+#: is open when it has been answered the other way.
+BEFORE_THE_FIRE = (
+    "whether LinkedIn's default location narrows a keyword-less employer "
+    "search is UNVERIFIED"
+)
+
+
+def _flat(text: str) -> str:
+    """Whitespace-normalised, so the pin survives a reflow."""
+    return " ".join(text.split())
+
+
+def _docstring() -> str:
+    return _flat(linkedin_search_jobs.__doc__ or "")
+
+
+def test_the_docstring_tells_a_caller_to_pass_worldwide_for_every_posting():
+    doc = _docstring()
+    assert WORLDWIDE in doc
+    for words in MEASURED:
+        assert words in doc, words
+    assert BEFORE_THE_FIRE not in doc
+
+
+def test_THIS_CONTROL_CAN_FAIL_the_words_before_the_fire_are_convicted():
+    """The paragraph as it stood before the fire: it lacks the instruction and
+    carries the open question, and the pin above would reject it."""
+    before = _flat(
+        "ALL OF ONE EMPLOYER'S POSTINGS: pass company_id and an EMPTY keywords "
+        "(\"\" -- the argument is still required, so pass it rather than leave "
+        "it out). That is the company Page's \"see all jobs\" as a search, with "
+        "no keyword narrowing it; with neither, the call is refused. BUILT, NOT "
+        "YET FIRED LIVE (census J 107, 2026-09-28): whether LinkedIn's default "
+        "location narrows a keyword-less employer search is UNVERIFIED -- the "
+        "Page lists the employer's postings wherever they are -- so pass "
+        "`location` when the answer must not depend on that default."
+    )
+    assert WORLDWIDE not in before
+    assert BEFORE_THE_FIRE in before
+
+
+async def test_the_worldwide_call_the_docstring_prescribes_is_one_the_tool_builds(drive):
+    """The instruction is a call the tool accepts: an employer, no keyword and
+    location "Worldwide" -- one navigation, the facet and the place, no
+    keyword key."""
+    page = FakePage(evaluate_result=[dict(SEARCH_CARD)])
+    navigations = drive(page)
+
+    result = await linkedin_search_jobs(keywords="", company_id=EMPLOYER, location="Worldwide")
+
+    assert "error" not in result, result
+    assert len(navigations) == 1, navigations
+    pairs = _pairs(navigations[0])
+    assert ("f_C", EMPLOYER) in pairs and ("location", "Worldwide") in pairs, pairs
+    assert "keywords" not in dict(pairs), pairs

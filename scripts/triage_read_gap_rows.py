@@ -193,17 +193,8 @@ TRIAGE: dict[str, tuple[str, str, str]] = {
     # NAMED-PROFILE-READ-BEHIND-A-GRANT narrowed it, each blocker named in
     # its own cell. Not RETURNED: that class is lane R's, and its marker says
     # so. Each carries the cost its cell measured.
-    "N 30": ("SERVED", "", "the first-degree capture draws the list as a "
-                           "people search with connectionOf, and the shipped "
-                           "people search composes it and returns people "
-                           "records (the route N 172 is COVERED-UNFIRED on), "
-                           "never fired; the move to COVERED-UNFIRED is the "
-                           "orchestrator's"),
-    "N 31": ("BUILDABLE", "", "the capture draws the shared connections as a "
-                              "people search with network and connectionOf; "
-                              "the shipped search composes connectionOf but "
-                              "not the network facet, and the shipped people "
-                              "reader reads the page it would open"),
+    # N 30 AND N 31 LEFT THE SAME DAY (lane S, the orchestrator's order of
+    # 15:10) -- see LEFT THE READ-GAP SET below.
     "N 65": ("RULING", "", "the Interests section is on another member's "
                            "profile, R4's refusal until 2026-09-28"),
     "N 103": ("RULING", "", "the similar-profiles rail is on another "
@@ -368,6 +359,15 @@ TRIAGE: dict[str, tuple[str, str, str]] = {
 #:            by dom.read_search_appearances, the employer kept in the page
 #:     N 195  COVERED-UNFIRED  (was BUILDABLE) -- recruiter insights, the
 #:            viewers as people records (recruiter_views.read_recruiter_views)
+#:
+#: LEFT THE READ-GAP SET 2026-09-28, on the orchestrator's order of 15:10
+#: (lane S): each the people search a first-degree profile's topcard links
+#: to, composed from the tool's arguments and never fired.
+#:
+#:     N 30   COVERED-UNFIRED  (was SERVED) -- a connection's own connections,
+#:            by D6 on the orchestrator's ruling, as N 4's was
+#:     N 31   COVERED-UNFIRED  (was BUILDABLE) -- the shared connections: the
+#:            people search gained LinkedIn's network facet beside connectionOf
 
 #: These four 2026-09-21 verdicts were measured past by the bucket-3 address
 #: table (`_audit/_census/read-addresses.tsv`, audit

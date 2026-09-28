@@ -18,7 +18,9 @@ held open:
 This module is those two calls turned into code, and nothing wider. Census
 rows (``_audit/_census/network.md``): ``N 79`` and ``N 194`` (a keyword),
 ``N 84`` and ``N 87`` (current and past company), ``N 94`` (more than one
-location in one search), ``N 85`` and ``N 172`` (the connections of a member).
+location in one search), ``N 85``, ``N 172`` and ``N 30`` (the connections of
+a member), and ``N 31`` (the connections he shares with a member: the member's
+connections narrowed by LinkedIn's ``network`` facet to his own first degree).
 
 ## IT TOUCHES NO PAGE, AND THAT IS THE DERIVATION PROOF
 
@@ -38,21 +40,36 @@ from a closed alphabet. The landing never leaves it.
 
 Read off every LinkedIn-authored people-search href in the 25 raw captures and
 the tracked fixtures, by parameter NAME and value SHAPE only
-(``_audit/2026-09-24-lane-s-people-search.md`` section 2):
+(``_audit/2026-09-24-lane-s-people-search.md`` section 2), and, for the last
+two, off a first-degree profile's topcard (2026-09-28):
 
     keywords        LinkedIn-authored, space written '+'           MEASURED
     currentCompany  LinkedIn-authored as a JSON LIST (company root) MEASURED
                     and bare (profile views, a job page)
     pastCompany     LinkedIn-authored BARE only (a job page)        list DERIVED
     geoUrn          LinkedIn-authored BARE only (profile views)     list DERIVED
-    connectionOf    never LinkedIn-authored; named by a test        list DERIVED
+    connectionOf    LinkedIn-authored as a JSON LIST, encoded       MEASURED
+                    (a first-degree profile's topcard, links 2, 3)
+    network         LinkedIn-authored as a JSON LIST: ["F"]         MEASURED
+                    encoded (links 2, 3), ["F","S"] raw (link 1);
+                    also alone on the connections page, its value
+                    shape unread there
+
+``connectionOf`` read ``never LinkedIn-authored; named by a test`` -- DERIVED --
+from 2026-09-24 until the live lane's first-degree capture was read for its
+shapes on 2026-09-28 (``tests/fixtures/live2/first_degree_profile.html``: every
+value an ``x``; the value shapes lane L5 measured off the capture's skeleton).
+Links 2 and 3 are LinkedIn's shared-connections links, and they write
+``network`` then ``connectionOf``, each a percent-encoded list -- exactly what
+:func:`compose` sends for ``connections_of`` with ``network``.
 
 LinkedIn's FACETED grammar on this surface is JSON -- a list per facet
 (``currentCompany``, ``activelyHiringForJobTitles``) or a JSON string
 (``activelyHiring``). Every facet here is sent in that grammar, one code path,
 and the list form is the only one that can carry more than one value, which is
-what ``N 94`` asks for. **A two-member list is on record for no facet at all**;
-it is the same grammar with a second member, and it is DERIVED. The tool reports
+what ``N 94`` asks for. **A two-member list is on record for one facet only**,
+``network``'s ``["F","S"]`` on link 1, written raw; for every other facet it is
+the same grammar with a second member, and it is DERIVED. The tool reports
 per argument what LinkedIn did with each value in the address it settled on
 (:func:`landing_verdict`), so a spelling LinkedIn drops or rewrites is a
 visible literal on the first fire rather than a silently unfiltered search --
@@ -122,6 +139,14 @@ KEYWORDS_KEY = "keywords"
 ORGANISATION_ID = "organisation_id"
 GEO_ID = "geo_id"
 MEMBER_TOKEN = "member_token"
+NETWORK_DEGREE = "network_degree"
+
+#: LINKEDIN'S ``network`` FACET, AS THE CAPTURE WRITES IT (census ``N 31``,
+#: 2026-09-28). Its values are degrees of HIS OWN network, in LinkedIn's
+#: letters: ``F`` his first degree, ``S`` his second. CLOSED TO THE TWO THE
+#: CAPTURE HOLDS, in the order link 1 lists them -- LinkedIn's letter for a
+#: third degree is on record nowhere here, so it is refused, not guessed.
+NETWORK_DEGREES: tuple[str, ...] = ("F", "S")
 
 #: ``(tool argument, LinkedIn query key, value kind, most values per call)``.
 #: ORDER IS THE ADDRESS ORDER: keywords first, then these, as listed.
@@ -130,10 +155,16 @@ MEMBER_TOKEN = "member_token"
 #: the rows it serves ask about ONE member's connections, and a call that
 #: named several other people at once would carry more third-party ids than
 #: any row needs.
+#:
+#: ``network`` SITS BEFORE ``connectionOf`` because LinkedIn's own
+#: shared-connections links write them in that order (links 2 and 3 of a
+#: first-degree profile's topcard), and it is only ever sent beside a member
+#: this server was handed: see :func:`compose`.
 FACETS: tuple[tuple[str, str, str, int], ...] = (
     ("current_company_ids", "currentCompany", ORGANISATION_ID, 5),
     ("past_company_ids", "pastCompany", ORGANISATION_ID, 5),
     ("location_ids", "geoUrn", GEO_ID, 5),
+    ("network", "network", NETWORK_DEGREE, len(NETWORK_DEGREES)),
     ("connections_of", "connectionOf", MEMBER_TOKEN, 1),
 )
 
@@ -271,6 +302,20 @@ def _one_id(argument: str, kind: str, text: str) -> dict[str, Any]:
             "name, and OTHER-MEMBER-IDS-AS-READS permits an id, not a name. "
             "The value is described rather than quoted.",
         )
+    if kind == NETWORK_DEGREE:
+        if text in NETWORK_DEGREES:
+            return {"ok": True, "value": text}
+        return _refused(
+            argument,
+            "not_a_network_degree",
+            text,
+            "network takes LinkedIn's own letters for a degree of YOUR "
+            "network, as its shared-connections link writes them: F for your "
+            "1st degree, S for your 2nd, comma-separated. Nothing else is on "
+            "record, so a third degree is not guessed, and a lower-case letter "
+            "or a word is not LinkedIn's spelling. The value is described "
+            "rather than quoted.",
+        )
     return _refused(argument, "unknown_value_kind", text, "no such value kind")
 
 
@@ -365,6 +410,7 @@ def compose(
     past_company_ids: Any = "",
     location_ids: Any = "",
     connections_of: Any = "",
+    network: Any = "",
 ) -> dict[str, Any]:
     """The people-search address for these arguments, or a refusal.
 
@@ -379,6 +425,16 @@ def compose(
     ``url`` is the ONLY field that carries one, and it exists to be handed to
     ``BROWSER.goto``; the tool never publishes it.
 
+    ``network`` IS NEVER SENT WITHOUT A MEMBER. The rows it serves are about
+    ONE member's connections -- with ``connections_of``, ``F`` is the
+    connections he shares with that member, the search LinkedIn's own
+    shared-connections links write -- and the order that added it
+    (2026-09-28 15:10) made a named member its condition. Given alone it is
+    refused. LinkedIn DOES write it alone, once, on the connections-page
+    capture (``tests/fixtures/live2/n23.html``: ``network`` and ``origin``,
+    no member) -- a search of his own network by degree, which is census
+    ``N 81``'s question and is not built here.
+
     PURE: arguments in, a dict out. It reads no page, no file, no clock and
     no network, and it never raises.
     """
@@ -386,6 +442,7 @@ def compose(
         "current_company_ids": current_company_ids,
         "past_company_ids": past_company_ids,
         "location_ids": location_ids,
+        "network": network,
         "connections_of": connections_of,
     }
     pairs: list[tuple[str, str]] = []
@@ -404,10 +461,26 @@ def compose(
         if not verdict.get("ok"):
             return verdict
         values = verdict["values"]
+        if kind == NETWORK_DEGREE:
+            # THE CAPTURE'S ORDER, whatever order the caller wrote them in:
+            # link 1 lists ``["F","S"]``.
+            values = [degree for degree in NETWORK_DEGREES if degree in values]
         if values:
             # LinkedIn's faceted grammar: a JSON list of strings, no spaces.
             pairs.append((key, json.dumps(values, separators=(",", ":"))))
         applied[argument] = len(values)
+
+    if applied["network"] and not applied["connections_of"]:
+        return _refused(
+            "network",
+            "network_needs_a_named_member",
+            str(network or "").strip(),
+            "network narrows ONE MEMBER'S connections to degrees of your own "
+            "network -- with connections_of, F is the connections you share "
+            "with that member, the search LinkedIn's own shared-connections "
+            "link writes. It is not sent without a member: name one with "
+            "connections_of. Nothing was loaded.",
+        )
 
     url = BASE_URL + ("?" + urlencode(pairs) if pairs else "")
     return {"built": True, "url": url, "applied": applied}
