@@ -28,7 +28,7 @@ WHAT THIS FILE HOLDS.
    Interests section and no group link, which is why ``N 178`` stays GAP.
 
 ONE LIVE-TRUE SOURCE: the live lane's tracked copy of the capture,
-``tests/fixtures/live2/`` (:data:`SOURCE`) -- every keyed text one x, every
+``tests/fixtures/live2/first_degree_profile.html`` (:data:`SOURCE`) -- every keyed text one x, every
 query value one x, ids kept as their hash, LinkedIn's class names kept. The
 reader runs on it and REFUSES, as it must on a page that names no one (no name,
 no member id, no topcard id). Every case that needs a person runs on the page
@@ -57,7 +57,7 @@ REPO = Path(__file__).resolve().parent.parent
 FIXTURE = REPO / "tests" / "fixtures" / "synthetic" / "named_profile_live.html"
 #: THE ONE LIVE-TRUE SOURCE of this profile's markup: the live lane's tracked
 #: copy of the capture the builder read (its session-2 wrap-up).
-SOURCE = REPO / "tests" / "fixtures" / "live2" / "brother_profile.html"
+SOURCE = REPO / "tests" / "fixtures" / "live2" / "first_degree_profile.html"
 BUILDER = REPO / "scripts" / "_build_named_profile_skeleton.py"
 LIVE = FIXTURE.read_text(encoding="ascii")
 HIDDEN = ' style="display:none"'
@@ -220,10 +220,11 @@ def test_THIS_CONTROL_CAN_FAIL_a_capture_that_draws_interests_keeps_them(tmp_pat
 
 def test_each_page_names_the_live_true_source_and_the_synthetic_says_secondary():
     assert "THE LIVE-TRUE SOURCE IS THE LIVE LANE'S TRACKED COPY" in LIVE
-    assert "tests/fixtures/live2/" in LIVE
+    assert "tests/fixtures/live2/first_degree_profile.html" in LIVE
     synthetic = (FIXTURE.parent / "named_profile.html").read_text(encoding="utf-8")
     assert "THE SECONDARY CASE SINCE 2026-09-28" in synthetic
     assert "THE LIVE-TRUE SOURCE is the live lane's tracked copy" in synthetic
+    assert "tests/fixtures/live2/first_degree_profile.html" in synthetic
     assert "named_profile_live.html" in synthetic
 
 

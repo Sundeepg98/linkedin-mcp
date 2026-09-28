@@ -1435,7 +1435,7 @@ N76_NEEDLES = ("copy link", "follow link", "share profile", "personal link")
 #: markup draws the top card's actions TWICE, in two bars, of which the page
 #: shows one at a time. On his profile the bar holding the labelled More is
 #: the one his window width does not show; the bar it shows holds
-#: "Resources" where the other holds More. On the brother's profile both bars
+#: "Resources" where the other holds More. On the first-degree profile both bars
 #: hold a More -- one by its label, one by its text -- and one was visible.
 MORE_NAME = "More"
 

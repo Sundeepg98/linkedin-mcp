@@ -1,7 +1,7 @@
 """A real person's name may not arrive as a test constant.
 
 WHAT THIS COSTS BEFORE IT EXISTS. On 2026-09-03 a real third party's given
-name -- the operator's brother, supplied by the wave lead as the needle for a
+name -- a person the operator named, supplied by the wave lead as the needle for a
 live typeahead measurement -- reached three tracked files and five commit
 messages. It was caught before the push, and closing it cost a rewrite of every
 unpushed commit. **The alternative was deleting and recreating the repository**,

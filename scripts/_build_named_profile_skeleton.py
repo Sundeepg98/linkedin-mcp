@@ -17,7 +17,8 @@ it does is put SYNTHETIC values where the shapes stood, each by the ROLE the
 structure gives it.
 
 THE LIVE-TRUE SOURCE, AND WHY THIS SCRIPT DOES NOT READ IT. The live lane
-committed the same capture as a TRACKED copy under ``tests/fixtures/live2/``
+committed the same capture as a TRACKED copy,
+``tests/fixtures/live2/first_degree_profile.html``,
 with its session-2 wrap-up: every keyed shape of a text one ``x``, every query
 value one ``x``, ids kept as their hash, LinkedIn's class names kept. That copy
 is the ONE live-true source of this page's markup (the orchestrator's addendum
@@ -277,7 +278,7 @@ HEADER = """<!doctype html>
   this file, and says line by line what it kept and what it put in place.
 
   THE LIVE-TRUE SOURCE IS THE LIVE LANE'S TRACKED COPY of the same capture,
-  under tests/fixtures/live2/: every keyed text one x, ids kept as their hash.
+  tests/fixtures/live2/first_degree_profile.html: every keyed text one x, ids kept as their hash.
   This page is BUILT FROM THAT CAPTURE for dom.read_named_profile (lane L5,
   2026-09-28), which needs what the tracked copy reduces -- a person to name,
   and member ids in the topcard's id and in the composer links -- and a test

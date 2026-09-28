@@ -10940,7 +10940,8 @@ reader matched the Message control by its label, `Message <name>`, measured on p
 topcard draws it with no label, twice, one hidden, and every labelled Message control on that page
 is somebody else's. The first live Message refused -- safely -- and the capture it left is the
 fixture's structure now. ONE SOURCE: the live lane's tracked copy of that capture
-(`tests/fixtures/live2/`) is the live-true source; this lane's page is built from the same capture,
+(`tests/fixtures/live2/first_degree_profile.html`) is the live-true source; this lane's page is built from the same
+capture,
 because the tracked copy reduces the person and the member ids the reader needs.
 
 | instrument | what it holds | shown failing |

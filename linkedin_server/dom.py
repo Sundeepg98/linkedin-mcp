@@ -7648,7 +7648,8 @@ MESSAGE_CONTROL = 'a[aria-label^="Message "], button[aria-label^="Message "]'
 
 #: THE PROFILE'S OWN MESSAGE CONTROL, AS THE LIVE PAGE DRAWS IT -- MEASURED
 #: 2026-09-28 on the live lane's skeleton of a first-degree profile the
-#: operator named (the live lane's tracked copy under ``tests/fixtures/live2/``,
+#: operator named (the live lane's tracked copy,
+#: ``tests/fixtures/live2/first_degree_profile.html``,
 #: and the page built from it, ``tests/fixtures/synthetic/named_profile_live.html``): a
 #: link to the composer, ``/messaging/compose/``, whose accessible name is its
 #: own text, "Message", with NO aria-label -- drawn twice in the topcard, in

@@ -2767,7 +2767,7 @@ first-degree one. Its tracked copy keeps the words "Interests" and "Groups" and 
 ### R.8 One live-true source for the profile's markup (the addendum of 11:25)
 
 - **THE TWO FILES ARE ONE CAPTURE, MEASURED.** The live lane's tracked copy,
-  `tests/fixtures/live2/brother_profile.html`, and the gitignored skeleton this lane's builder reads
+  `tests/fixtures/live2/first_degree_profile.html`, and the gitignored skeleton this lane's builder reads
   have IDENTICAL tag and attribute-name sequences, 1830 elements each. What differs is only what the
   tracked copy reduces: every keyed shape of a text one `x` (203 texts), every query value one `x`
   -- the seven composer links all read `profileUrn=x&recipient=x` -- ids kept as `k` and their

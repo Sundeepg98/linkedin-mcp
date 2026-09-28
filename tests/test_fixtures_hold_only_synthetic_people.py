@@ -241,7 +241,7 @@ ACCEPTED = SYNTHETIC_PEOPLE | INVENTED_NAMES | SYNTHETIC_GROUPS
 #: MEASURED 2026-09-28 in the live lane's session-2 skeletons
 #: (``tests/fixtures/live2/``), 19 sites, each word a LinkedIn label kept
 #: verbatim by that capture's closed word list: "Send" 11 (his profile 9, the
-#: brother's profile 2), "Show all" 4 (2 and 2), "Premium" 4 (the profile
+#: first-degree profile 2), "Show all" 4 (2 and 2), "Premium" 4 (the profile
 #: card in the left rail of the jobs, groups, notifications and post pages).
 MEMBER_LINK_INTERFACE_WORDS = frozenset({"Premium", "Send", "Show all"})
 

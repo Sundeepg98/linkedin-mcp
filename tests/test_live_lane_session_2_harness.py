@@ -732,7 +732,7 @@ class _ServedBrowser:
 async def test_d1_the_top_card_is_the_section_around_the_first_h2(browser_page) -> None:
     """Both profiles: the top card holds both action bars -- on his, two of
     "Open to" and of "Enhance profile", one More and one Resources; on the
-    brother's, two More -- and its first h2 is the page's first."""
+    first-degree profile's, two More -- and its first h2 is the page's first."""
     await _serve_profile(browser_page, "in_me", "")
     card = harness.topcard_of(browser_page)
     assert await card.count() == 1
@@ -740,7 +740,7 @@ async def test_d1_the_top_card_is_the_section_around_the_first_h2(browser_page) 
              for word in harness.TOPCARD_WORDS}
     assert drawn == {"More": 1, "Resources": 1, "Open to": 2, "Enhance profile": 2,
                      "Add profile section": 0}
-    await _serve_profile(browser_page, "brother_profile", "")
+    await _serve_profile(browser_page, "first_degree_profile", "")
     card = harness.topcard_of(browser_page)
     assert await card.get_by_role("button", name="More", exact=True, include_hidden=True).count() == 2
 
@@ -749,8 +749,8 @@ async def test_d1_the_old_handle_takes_the_hidden_more_on_both_profiles(browser_
     """THE DEFECT, measured on today's skeletons at his width: the old handle
     finds exactly one More on each profile -- the labelled one, in the bar the
     page does not show -- so "exactly one" was true and the one was not drawn.
-    On the brother's profile a visible More sat beside it, labelled by text."""
-    for name in ("in_me", "brother_profile"):
+    On the first-degree profile a visible More sat beside it, labelled by text."""
+    for name in ("in_me", "first_degree_profile"):
         await _serve_profile(browser_page, name, WIDE)
         old = browser_page.locator(OLD_MORE_HANDLE)
         assert await old.count() == 1, name
@@ -772,10 +772,10 @@ async def test_d1_the_key_presses_nothing_his_width_does_not_draw(browser_page, 
 
 
 async def test_d1_the_new_handle_takes_the_one_visible_more(browser_page) -> None:
-    """The brother's profile at the same width: 2 drawn, 1 visible, and the
+    """The first-degree profile at the same width: 2 drawn, 1 visible, and the
     one taken is the text-labelled More the old handle never matched. His
     own at the narrow width: his labelled More, visible, taken."""
-    await _serve_profile(browser_page, "brother_profile", WIDE)
+    await _serve_profile(browser_page, "first_degree_profile", WIDE)
     handle, drawn, visible = await harness.topcard_control(browser_page, harness.MORE_NAME)
     assert (drawn, visible) == (2, 1)
     assert await handle.get_attribute("aria-label") is None
@@ -798,9 +798,9 @@ async def test_d1_his_wide_top_card_shows_resources_where_the_other_bar_has_more
 
 
 async def test_d1_two_visible_refuse(browser_page) -> None:
-    """With no stylesheet both bars show, and the brother's two More are both
+    """With no stylesheet both bars show, and the first-degree profile's two More are both
     visible: exactly one is required, so none is taken."""
-    await _serve_profile(browser_page, "brother_profile", "")
+    await _serve_profile(browser_page, "first_degree_profile", "")
     handle, drawn, visible = await harness.topcard_control(browser_page, harness.MORE_NAME)
     assert (handle, drawn, visible) == (None, 2, 2)
 
