@@ -3194,6 +3194,37 @@ as they should be: the route shipped at 17:02.
 
 ### O.6 Gates
 
-On the commit that carries this section, offline, with nothing edited or
-committed while they run; their results follow in the commit after it, and
-the integration of the then-current master before that.
+On `1313ae2` -- this branch's commit of the calls, nowhere on `master` until
+it merges -- offline, with nothing edited or committed while they ran:
+
+- THE IMPACT GATE against master `6e2935f`: 10 changed paths, 77 test files
+  selected and 30 corpus-wide -- 81 of 286, below the line where it widens
+  -- PASS over 4,701 tests, 0 failed. NOT CHECKED, as it says itself: 205 of
+  the 286 test files. Four corpus-wide sweeps inside the plan were answered
+  on the change rather than the tree (the navigation and identity sweeps),
+  their files still run.
+- THE CENSUS INSTRUMENTS, thirteen, every exit 0, the three DERIVED
+  --checks among them: `census_completion --check` every headline figure
+  matches its pin; `check_read_addresses` GREEN 98 of 98; `pin_census_rows`
+  no drift at 771; `_audit/INDEX.md` (259 documents), `_audit/RULINGS.md`
+  (68 rulings) and the blocker map at their fixed points.
+- THE IDENTITY CHECK ON THE COMMIT: `scripts/sweep_blobs_for_identity.py`
+  over `6e2935f..1313ae2` -- 1 commit, 984 blobs, 226 needles, 0 hits -- and
+  the pre-commit gate on its index.
+- THE STANDING LITERAL-REPEAT GUARD, 19 passed among the census families
+  (144 passed); the AST duplicate-key check 4,500 dict literals and 13 JSON
+  files, 0 duplicates; the cited-SHA guard green.
+
+Master stood at `6e2935f` -- this branch's own base -- when the gates ended
+at 18:37, so there was nothing to integrate: the live lane's session-4
+record and lane L5's messaging fix had not landed.
+
+### O.7 What was not run
+
+- NOTHING LIVE: `N 25` and `N 26` are COVERED-UNFIRED. `N 25`'s fire needs a
+  name he gives; `N 26`'s a place or an employer.
+- THE WHOLE SUITE: the impact gate did not widen, and 205 of 286 test files
+  were not run on this change.
+- CI on this branch: nothing is pushed.
+- `N 26b`'s CAPTURE: named in its cell, not taken -- offline.
+- A COLD REVIEW of the split was not run.
