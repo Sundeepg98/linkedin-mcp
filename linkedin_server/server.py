@@ -3258,8 +3258,8 @@ async def linkedin_people_search_shape(
     **A MEMBER'S CONNECTIONS, AND THE ONES YOU SHARE (census N 30 and N 31,
     2026-09-28).** ``connections_of`` with a member's token is the search
     LinkedIn's own profile topcard links to for that member's connections;
-    add ``network="F"`` and it is the one LinkedIn links to as your SHARED
-    connections -- that member's connections who are your own first degree
+    with ``network="F"`` beside it, it is the one LinkedIn links to as your
+    SHARED connections -- that member's connections who are your own first degree
     (``"S"`` is your second degree; ``"F,S"`` both, as LinkedIn's own link
     lists them). Pass ``include_names=True`` for them as people records.
     ``network`` is refused without ``connections_of``: the member is always
@@ -3377,8 +3377,8 @@ async def linkedin_people_search_shape(
         network: LinkedIn's letters for degrees of YOUR network, comma-
             separated: ``F`` (1st) and ``S`` (2nd), the two its own links
             write. Only with ``connections_of``: ``network="F"`` returns the
-            connections you share with that member. Any other value is
-            refused, described by its shape.
+            connections that member and you have in common. Any other value
+            is refused, described by its shape.
         include_names: return the people the page draws as records (see the
             first paragraph). Off by default; the search is the same either
             way and still one page.
