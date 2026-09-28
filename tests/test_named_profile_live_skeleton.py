@@ -135,6 +135,47 @@ def test_THIS_CONTROL_CAN_FAIL_a_hand_edit_breaks_the_fixed_point(tmp_path):
     assert _lf(out.read_bytes()) != _lf(edited.read_bytes())
 
 
+def test_THIS_CONTROL_CAN_FAIL_a_hand_edit_in_a_kept_attribute_breaks_the_fixed_point(tmp_path):
+    """FOUND BY THE COLD CHECK OF 2026-09-28: a canary written into ``role``,
+    ``dir`` and ``aria-current`` survived the builder and WAS a fixed point of
+    it -- a kept attribute was kept whatever it held. Each kept attribute now
+    holds a closed vocabulary, and a value outside it is dropped and counted."""
+    from tests.test_fixtures_hold_only_synthetic_people import PLANTED
+
+    edited = tmp_path / "edited.html"
+    planted = LIVE.replace('role="button"', 'role="' + PLANTED + '"', 1)
+    planted = planted.replace('<main ', '<main dir="' + PLANTED + '" aria-current="' + PLANTED + '" ', 1)
+    assert planted.count(PLANTED) == 3
+    edited.write_text(planted, encoding="ascii")
+    out = tmp_path / "rebuilt.html"
+    run = _rebuild(edited, out)
+    assert run.returncode == 0, run.stderr
+    assert PLANTED not in out.read_text(encoding="ascii")
+    assert _printed(run.stdout, "unclassified attributes") == "3"
+    assert _lf(out.read_bytes()) != _lf(edited.read_bytes())
+
+
+def test_THIS_CONTROL_CAN_FAIL_a_capture_that_draws_interests_keeps_them(tmp_path):
+    """THE N 178 CHECK BELOW CAN FAIL: a capture drawing an Interests section
+    with a Groups tab and a group link keeps all three through the builder
+    (the cold check found "Interests" written as "Example text", which made
+    that check unfailable)."""
+    edited = tmp_path / "edited.html"
+    planted = LIVE.replace(
+        "</body>",
+        '<section><h3>Interests</h3><div role="tablist"><button type="button" role="tab">'
+        'Groups</button></div><a href="https://www.linkedin.com/groups/1234501/">x</a>'
+        "</section></body>",
+        1,
+    )
+    edited.write_text(planted, encoding="ascii")
+    out = tmp_path / "rebuilt.html"
+    run = _rebuild(edited, out)
+    assert run.returncode == 0, run.stderr
+    rebuilt = out.read_text(encoding="ascii")
+    assert "Interests" in rebuilt and ">Groups<" in rebuilt and "/groups/" in rebuilt
+
+
 def test_the_fixture_says_it_is_the_live_true_one_and_the_synthetic_says_secondary():
     assert "THIS IS THE LIVE-TRUE FIXTURE" in LIVE
     synthetic = (FIXTURE.parent / "named_profile.html").read_text(encoding="utf-8")

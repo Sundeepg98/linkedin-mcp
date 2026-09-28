@@ -10401,6 +10401,9 @@ async def linkedin_read_named_profile(
         segment = named_profile.profile_segment(profile)
         if not str(confirm_token or "").strip():
             return named_profile.read_preview(segment)
+        # A TOKEN THAT WOULD BE REFUSED IS REFUSED BEFORE A SESSION IS OPENED
+        # (the cold check of 2026-09-28); the loader still redeems it.
+        named_profile.check_read_token(str(confirm_token).strip(), segment)
         async with BROWSER.session() as page:
             landed = await named_profile.load_the_confirmed_profile(
                 BROWSER, page, token=str(confirm_token).strip(), segment=segment

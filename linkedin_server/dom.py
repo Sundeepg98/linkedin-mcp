@@ -7675,18 +7675,34 @@ NAMED_PROFILE_TOPCARD = '[id$="Topcard"]'
 
 def _in_topcard(selector_list: str) -> str:
     """Each alternative of a comma-separated selector, scoped to the topcard
-    and to what is VISIBLE: Playwright's ``:visible``, a non-empty box and no
-    ``visibility:hidden`` -- the test :data:`NAMED_PROFILE_JS`'s ``visible``
-    applies in the page. The live topcard draws each action twice, one of the
-    two hidden (the live lane, 2026-09-28: Message 5 visible of 6 page-wide,
-    More 1 of 2), so a press scoped to the topcard alone would find two
-    matches and a strict press would refuse; scoped to the visible one, it
-    finds the owner's -- and still refuses if a second VISIBLE one is drawn
-    mid-press. A hidden duplicate is the shape that broke the live lane's own
-    More handle, which matched a hidden button."""
+    and to what is VISIBLE: Playwright's ``:visible``. The live topcard draws
+    each action twice, one of the two hidden (the live lane, 2026-09-28:
+    Message 5 visible of 6 page-wide, More 1 of 2), so a press scoped to the
+    topcard alone would find two matches and a strict press would refuse;
+    scoped to the visible one, it finds the owner's -- and still refuses if a
+    second VISIBLE one is drawn mid-press. A hidden duplicate is the shape
+    that broke the live lane's own More handle, which matched a hidden button.
+
+    THE GATE COUNTS WHAT THIS SELECTOR RESOLVES, IN PLAYWRIGHT'S ENGINE -- not
+    a visibility test of the page's own (:func:`read_named_profile`). Until the
+    cold check of 2026-09-28 the gate ran its own ``visible()`` in the page, and
+    it disagreed with ``:visible`` on ``visibility:collapse``, on
+    ``content-visibility``, inside a closed ``<details>`` and on
+    ``display:contents``; and the page's ``querySelectorAll`` never entered a
+    shadow root, which Playwright's CSS engine does. Two of those together let
+    the gate pass on the owner's collapsed control while the press reached a
+    stranger's in a shadow root. One engine now answers both questions."""
     return ", ".join(
         NAMED_PROFILE_TOPCARD + " " + part.strip() + ":visible"
         for part in selector_list.split(",")
+    )
+
+
+def _in_topcard_all(selector_list: str) -> str:
+    """Each alternative scoped to the topcard, VISIBLE OR NOT: the controls of
+    a kind the gate refuses on when any is not the owner's, hidden included."""
+    return ", ".join(
+        NAMED_PROFILE_TOPCARD + " " + part.strip() for part in selector_list.split(",")
     )
 
 
@@ -7778,11 +7794,17 @@ OVERLAY_COMPOSER_EDITOR = 'form.msg-form div.msg-form__contenteditable[role="tex
 #:   LABELLED Message control on that page (``Message <name>``) is another
 #:   person's, on a rail. MEASURED, 2026-09-28. The old reader matched the
 #:   label alone and refused the live page;
-#: * a control counts only when VISIBLE -- a non-empty box and no
-#:   ``visibility:hidden``, what Playwright's ``:visible`` means -- because the
-#:   live topcard draws each action twice and hides one (the live lane:
-#:   Message 5 visible of 6 page-wide, More 1 of 2). Which of the two rows is
-#:   hidden is not in the skeleton, which keeps no stylesheet;
+#: * a control counts only when VISIBLE, because the live topcard draws each
+#:   action twice and hides one (the live lane: Message 5 visible of 6
+#:   page-wide, More 1 of 2). Which of the two rows is hidden is not in the
+#:   skeleton, which keeps no stylesheet. THIS SCRIPT DOES NOT DECIDE WHICH
+#:   CONTROLS ARE VISIBLE OR WHOSE THEY ARE: :func:`read_named_profile` asks
+#:   Playwright's engine what the press selector resolves and runs
+#:   :data:`CONTROL_FACTS_JS` on exactly those elements (the cold check of
+#:   2026-09-28 found this script's own ``visible()`` and ``querySelectorAll``
+#:   disagreeing with the engine the press uses). What stays here about the
+#:   topcard is whether it is ONE PERSON'S CARD: every heading of any level,
+#:   and every distinct member it links;
 #: * the DEGREE is a topcard line that is exactly ``1st``, ``2nd`` or ``3rd``
 #:   (optionally ``3rd+``, optionally after a middle dot). Its SHAPE is
 #:   measured on the live skeleton (a middle dot, a space and ``1st``: five characters); its words
@@ -7816,21 +7838,11 @@ OVERLAY_COMPOSER_EDITOR = 'form.msg-form div.msg-form__contenteditable[role="tex
 NAMED_PROFILE_JS = """
 (cfg) => {
   const norm = (s) => String(s === null || s === undefined ? '' : s).replace(/\\s+/g, ' ').trim();
-  const visible = (el) => {
-    const box = el.getBoundingClientRect();
-    if (!(box.width > 0 && box.height > 0)) return false;
-    return window.getComputedStyle(el).visibility !== 'hidden';
-  };
   const out = {
-    message_kind_in_topcard: 0,
-    message_visible_in_topcard: 0,
-    message_owner_visible_in_topcard: 0,
-    message_foreign_in_topcard: 0,
-    invite_visible_in_topcard: 0,
-    invite_owner_visible_in_topcard: 0,
-    invite_foreign_in_topcard: 0,
+    topcard_all_headings: 0,
+    topcard_members: 0,
+    topcard_member_id: false,
     more_in_topcard: 0,
-    more_visible_in_topcard: 0,
     title_shape: 'none',
     topcards: 0,
     topcard_headings: 0,
@@ -7907,43 +7919,32 @@ NAMED_PROFILE_JS = """
   const card = cards.length === 1 ? cards[0] : null;
   const wantInvite = 'Invite ' + name + ' to connect';
   const wantMessage = 'Message ' + name;
-  let ownerMessage = null;
   if (card) {
     const heads = card.querySelectorAll('h1, h2');
     out.topcard_headings = heads.length;
     out.heading_matches_title = heads.length >= 1 && norm(heads[0].innerText) === name;
     out.invite_controls_in_topcard = card.querySelectorAll(cfg.inviteSelector).length;
     out.message_controls_in_topcard = card.querySelectorAll(cfg.messageSelector).length;
-    // THE TOPCARD'S OWN CONTROLS BY KIND, AND WHICH ARE VISIBLE (2026-09-28,
-    // the live skeleton). A Message control with a label is the owner's only
-    // if the label names the owner; one without a label is the owner's only
-    // if it says exactly "Message" -- inside the owner's topcard, that is his
-    // action. Anything else of the kind is FOREIGN, and the gate refuses on
-    // it, visible or not.
-    for (const el of card.querySelectorAll(cfg.topcardMessageSelector)) {
-      out.message_kind_in_topcard += 1;
-      const label = el.getAttribute('aria-label');
-      const owner = label !== null ? norm(label) === wantMessage : norm(el.textContent) === 'Message';
-      if (!owner) out.message_foreign_in_topcard += 1;
-      if (!visible(el)) continue;
-      out.message_visible_in_topcard += 1;
-      if (owner) {
-        out.message_owner_visible_in_topcard += 1;
-        ownerMessage = el;
-      }
+    // ONE PERSON'S CARD (the cold check, 2026-09-28): every heading of any
+    // level, and every distinct member the card links to. The live topcard
+    // holds one heading, the owner's name, and links one member, the owner;
+    // a stranger's card drawn inside it would bring its own. Counts only.
+    out.topcard_all_headings = card.querySelectorAll(
+      'h1, h2, h3, h4, h5, h6, [role="heading"]').length;
+    const members = new Set();
+    for (const a of card.querySelectorAll('a[href]')) {
+      const raw = String(a.getAttribute('href') || '');
+      const m = /^(?:https:\\/\\/www\\.linkedin\\.com)?\\/in\\/([^\\/?#]+)/.exec(raw);
+      if (!m) continue;
+      let seg = m[1];
+      try { seg = decodeURIComponent(seg); } catch (e) { /* kept as drawn */ }
+      members.add(seg.replace(/[A-Z]/g, (c) => c.toLowerCase()));
     }
-    for (const el of card.querySelectorAll(cfg.inviteSelector)) {
-      const owner = norm(el.getAttribute('aria-label')) === wantInvite;
-      if (!owner) out.invite_foreign_in_topcard += 1;
-      if (!visible(el)) continue;
-      out.invite_visible_in_topcard += 1;
-      if (owner) out.invite_owner_visible_in_topcard += 1;
-    }
+    out.topcard_members = members.size;
+    out.topcard_member_id = /^com\\.linkedin\\.sdui\\.profile\\.card\\.ref(ACoAA[A-Za-z0-9_-]{10,80})Topcard$/.test(card.id || '');
     for (const el of card.querySelectorAll('button, a, [role="button"]')) {
       const said = norm(el.getAttribute('aria-label') || el.textContent);
-      if (said !== 'More' && said !== 'More actions') continue;
-      out.more_in_topcard += 1;
-      if (visible(el)) out.more_visible_in_topcard += 1;
+      if (said === 'More' || said === 'More actions') out.more_in_topcard += 1;
     }
     const found = [];
     for (const raw of String(card.innerText || '').split('\\n')) {
@@ -7971,13 +7972,6 @@ NAMED_PROFILE_JS = """
   }
   out.invite_matches = matches;
   const messages = document.querySelectorAll(cfg.messageSelector);
-  const hrefToken = (href) => {
-    if (href === null || href === undefined) return 'none';
-    const path = String(href).replace(/^https?:\\/\\/[^\\/]+/, '').split('?')[0].split('#')[0];
-    if (path === '/messaging/compose/' || path === '/messaging/compose') return 'compose';
-    if (path.indexOf('/messaging/thread/') === 0) return 'thread';
-    return 'other';
-  };
   matches = 0;
   for (let i = 0; i < messages.length; i += 1) {
     if (norm(messages[i].getAttribute('aria-label')) !== wantMessage) continue;
@@ -7985,15 +7979,6 @@ NAMED_PROFILE_JS = """
     if (card && card.contains(messages[i])) out.message_in_topcard += 1;
   }
   out.message_matches = matches;
-  // THE TAG AND DESTINATION OF THE ONE VISIBLE OWNER'S CONTROL IN THE
-  // TOPCARD, and of nothing else: until 2026-09-28 they described the one
-  // control page-wide whose LABEL named the owner, which the live page's
-  // topcard does not draw.
-  if (out.message_visible_in_topcard === 1 && out.message_owner_visible_in_topcard === 1 && ownerMessage) {
-    const t = ownerMessage.tagName.toLowerCase();
-    out.message_tag = t === 'a' || t === 'button' ? t : 'other';
-    out.message_href = hrefToken(ownerMessage.getAttribute('href'));
-  }
   const vocabulary = [
     ['pending', /^Pending\\b/i],
     ['withdraw', /withdraw/i],
@@ -8015,6 +8000,137 @@ NAMED_PROFILE_JS = """
   return out;
 }
 """
+
+#: WHOSE CONTROL IS THIS -- run by Playwright's ``evaluate_all`` on EXACTLY the
+#: elements a topcard selector resolves in its own engine (shadow roots
+#: entered, ``:visible`` as the press means it), so the gate and the press
+#: see one set. Per element, closed values only:
+#:
+#: * ``in_card`` -- ``closest('[id$="Topcard"]')`` is the page's ONE topcard.
+#:   An element inside a shadow root is not: ``closest`` stops at the root.
+#: * ``owner`` -- the owner's control, compared in the page: for Connect, a
+#:   label that reads exactly ``Invite <owner> to connect``; for Message,
+#:   either a label (``aria-label``, or ``aria-labelledby`` resolved) that
+#:   reads exactly ``Message <owner>`` and an address naming no OTHER member,
+#:   or no label, the rendered text exactly "Message", and a composer address
+#:   whose every member (``recipient``, ``profileUrn``) is the member the
+#:   topcard's own id names (``...card.ref<member id>Topcard``). MEASURED 2026-09-28 on the live
+#:   skeleton: the topcard's two composer links name one member and every
+#:   rail's names another, and ``recipient``'s shape (39 characters, 35 letters,
+#:   4 digits) is exactly the member-id part of the topcard id's shape; the id
+#:   format itself measured on his own profile (3 raw captures, all
+#:   ``com.linkedin.sdui.profile.card.ref<member id>Topcard``). An unlabelled
+#:   control with no member it can be held to is NOT the owner's.
+#: * ``tag`` -- ``a``, ``button`` or ``other``.
+#: * ``href`` -- ``compose`` only for a path on LinkedIn's own host (a
+#:   relative path, or ``https://www.linkedin.com``): the cold check found the
+#:   old token read the path of ANY host, so a composer path on another site
+#:   passed as the composer.
+CONTROL_FACTS_JS = """
+(els, cfg) => {
+  const norm = (s) => String(s === null || s === undefined ? '' : s).replace(/\\s+/g, ' ').trim();
+  const title = norm(document.title).replace(/^\\(\\d+\\)\\s*/, '');
+  const suffix = ' | LinkedIn';
+  const name = title.endsWith(suffix) ? title.slice(0, title.length - suffix.length).trim() : '';
+  const cards = document.querySelectorAll('[id$="Topcard"]');
+  const card = cards.length === 1 ? cards[0] : null;
+  const idMatch = card
+    ? /^com\\.linkedin\\.sdui\\.profile\\.card\\.ref(ACoAA[A-Za-z0-9_-]{10,80})Topcard$/.exec(card.id || '')
+    : null;
+  const member = idMatch ? idMatch[1] : null;
+  const pathOf = (raw) => {
+    if (raw === null || raw === undefined) return null;
+    const s = String(raw);
+    if (s.charAt(0) === '/' && s.charAt(1) !== '/') return s;
+    const m = /^https:\\/\\/www\\.linkedin\\.com(\\/.*)?$/.exec(s);
+    return m ? (m[1] || '/') : false;
+  };
+  const hrefToken = (raw) => {
+    const path = pathOf(raw);
+    if (path === null) return 'none';
+    if (path === false) return 'other';
+    const bare = path.split('?')[0].split('#')[0];
+    if (bare === '/messaging/compose/' || bare === '/messaging/compose') return 'compose';
+    if (bare.indexOf('/messaging/thread/') === 0) return 'thread';
+    return 'other';
+  };
+  const membersIn = (raw) => {
+    const path = pathOf(raw);
+    if (!path) return null;
+    const at = path.indexOf('?');
+    if (at === -1) return [];
+    const found = [];
+    for (const pair of path.slice(at + 1).split('#')[0].split('&')) {
+      const eq = pair.indexOf('=');
+      if (eq === -1) continue;
+      const key = pair.slice(0, eq);
+      let value;
+      try { value = decodeURIComponent(pair.slice(eq + 1)); } catch (e) { return null; }
+      if (key === 'recipient') found.push(value);
+      if (key === 'profileUrn') found.push(value.replace(/^urn:li:fsd_profile:/, ''));
+    }
+    return found;
+  };
+  const labelOf = (el) => {
+    const by = el.getAttribute('aria-labelledby');
+    if (by !== null) {
+      const root = el.getRootNode();
+      const parts = [];
+      for (const id of by.split(/\\s+/)) {
+        if (!id) continue;
+        const ref = root && root.getElementById ? root.getElementById(id) : null;
+        parts.push(ref ? ref.textContent : '');
+      }
+      return { labelled: true, said: norm(parts.join(' ')) };
+    }
+    const attr = el.getAttribute('aria-label');
+    if (attr !== null) return { labelled: true, said: norm(attr) };
+    return { labelled: false, said: norm(el.innerText) };
+  };
+  return els.slice(0, cfg.cap).map((el) => {
+    const inCard = !!card && el.closest('[id$="Topcard"]') === card;
+    const t = el.tagName.toLowerCase();
+    const tag = t === 'a' || t === 'button' ? t : 'other';
+    const href = hrefToken(el.getAttribute('href'));
+    const label = labelOf(el);
+    let owner = false;
+    if (inCard && name) {
+      if (cfg.kind === 'invite') {
+        owner = label.labelled && label.said === 'Invite ' + name + ' to connect';
+      } else {
+        const members = tag === 'a' ? membersIn(el.getAttribute('href')) : [];
+        const bound = members !== null && members.length > 0 && member !== null
+          && members.every((m) => m === member);
+        if (label.labelled) {
+          // THE LABEL NAMES THE OWNER; a member the address names must be his
+          // too, where both are there to compare. An address that names no
+          // member, or is not LinkedIn's, leaves the label to decide, and the
+          // destination check refuses anything but the composer.
+          const clash = members !== null && members.length > 0 && member !== null
+            && !members.every((m) => m === member);
+          owner = label.said === 'Message ' + name && !clash;
+        } else {
+          // NO LABEL: the text says only "Message", so the address is the
+          // whole of the evidence -- it must name the topcard's own member.
+          owner = label.said === 'Message' && tag === 'a' && bound;
+        }
+      }
+    }
+    return { in_card: inCard, owner: owner, tag: tag, href: href };
+  });
+}
+"""
+
+#: THE MORE CONTROL IN THE TOPCARD, as the accessibility tree has it: a button
+#: whose accessible name is exactly "More" -- by its label or by its text, the
+#: live topcard drawing one of each, one of them hidden, which the role engine
+#: leaves out. A locator count, which runs no script. Informational: a
+#: refusal prints the count.
+TOPCARD_MORE_NAME = "More"
+
+#: At most this many controls of a kind are judged; a topcard drawing more is
+#: refused on the count long before this matters.
+CONTROL_FACTS_CAP = 40
 
 #: The degrees the script may return, and nothing else crosses in that field.
 PROFILE_DEGREES = ("1st", "2nd", "3rd+")
@@ -8070,9 +8186,13 @@ async def read_named_profile(page: Any) -> dict[str, Any]:
         "message_visible_in_topcard": 0,
         "message_owner_visible_in_topcard": 0,
         "message_foreign_in_topcard": 0,
+        "invite_kind_in_topcard": 0,
         "invite_visible_in_topcard": 0,
         "invite_owner_visible_in_topcard": 0,
         "invite_foreign_in_topcard": 0,
+        "topcard_all_headings": 0,
+        "topcard_members": 0,
+        "topcard_member_id": False,
         "more_in_topcard": 0,
         "more_visible_in_topcard": 0,
         "more_actions": 0,
@@ -8091,7 +8211,6 @@ async def read_named_profile(page: Any) -> dict[str, Any]:
     cfg = {
         "inviteSelector": INVITE_CONTROL,
         "messageSelector": MESSAGE_CONTROL,
-        "topcardMessageSelector": TOPCARD_MESSAGE_CONTROL,
         "bubbleSelector": OVERLAY_BUBBLE,
         "editorSelector": OVERLAY_COMPOSER_EDITOR,
         "bubbleTitleSelector": OVERLAY_BUBBLE_TITLE,
@@ -8107,24 +8226,20 @@ async def read_named_profile(page: Any) -> dict[str, Any]:
         "topcards", "topcard_headings", "degree_tokens", "invite_controls",
         "invite_matches", "invite_in_topcard", "invite_controls_in_topcard",
         "message_controls", "message_matches", "message_in_topcard",
-        "message_controls_in_topcard", "message_kind_in_topcard",
-        "message_visible_in_topcard", "message_owner_visible_in_topcard",
-        "message_foreign_in_topcard", "invite_visible_in_topcard",
-        "invite_owner_visible_in_topcard", "invite_foreign_in_topcard",
-        "more_in_topcard", "more_visible_in_topcard", "more_actions", "dialogs",
+        "message_controls_in_topcard", "topcard_all_headings", "topcard_members",
+        "more_in_topcard", "more_actions", "dialogs",
         "composer_editors", "conversation_bubbles", "bubbles_with_editor",
         "bubble_titles", "dialog_note_fields",
     ):
         out[key] = as_count(reading.get(key))
     out["title_shape"] = "profile" if reading.get("title_shape") == "profile" else "none"
-    for key in ("heading_matches_title", "bubble_title_names_owner", "bubble_title_contains_owner"):
+    for key in (
+        "heading_matches_title", "bubble_title_names_owner", "bubble_title_contains_owner",
+        "topcard_member_id",
+    ):
         out[key] = reading.get(key) is True
     degree = reading.get("degree")
     out["degree"] = degree if degree in PROFILE_DEGREES else None
-    tag = reading.get("message_tag")
-    out["message_tag"] = tag if tag in ("a", "button", "other") else None
-    href = reading.get("message_href")
-    out["message_href"] = href if href in MESSAGE_HREF_TOKENS else None
     named = reading.get("named_controls")
     out["named_controls"] = [
         token if token in NAMED_CONTROL_TOKENS else "unrecognised"
@@ -8135,6 +8250,60 @@ async def read_named_profile(page: Any) -> dict[str, Any]:
         token if token in DIALOG_CONTROL_TOKENS else "unrecognised"
         for token in (in_dialogs if isinstance(in_dialogs, list) else [])
     ][:40]
+    # THE CONTROLS, AS THE PRESS WILL FIND THEM (the cold check of 2026-09-28):
+    # each kind resolved by Playwright's engine through the selector the press
+    # uses (visible) and its all-of-kind twin (hidden included), and judged on
+    # those very elements by :data:`CONTROL_FACTS_JS`. Closed values only. ONE
+    # call site for the four resolutions, so one script at one site is what
+    # the evaluate budget counts; the visible More count is a locator count,
+    # which runs no script at all.
+    try:
+        facts: dict[tuple[str, str], list[dict[str, Any]]] = {}
+        for kind, which, selector in (
+            ("message", "seen", topcard_message_control_selector()),
+            ("message", "every", _in_topcard_all(TOPCARD_MESSAGE_CONTROL)),
+            ("invite", "seen", topcard_invite_control_selector()),
+            ("invite", "every", _in_topcard_all(INVITE_CONTROL)),
+        ):
+            arg = {"kind": kind, "cap": CONTROL_FACTS_CAP}
+            facts[(kind, which)] = _closed_facts(
+                await page.locator(selector).evaluate_all(CONTROL_FACTS_JS, arg)  # readonly-ok
+            )
+        for kind in ("message", "invite"):
+            seen, every = facts[(kind, "seen")], facts[(kind, "every")]
+            owners = [fact for fact in seen if fact["owner"]]
+            out[kind + "_visible_in_topcard"] = len(seen)
+            out[kind + "_owner_visible_in_topcard"] = len(owners)
+            out[kind + "_kind_in_topcard"] = len(every)
+            out[kind + "_foreign_in_topcard"] = sum(1 for fact in every if not fact["owner"])
+            if kind == "message" and len(seen) == 1 and len(owners) == 1:
+                out["message_tag"] = owners[0]["tag"]
+                out["message_href"] = owners[0]["href"]
+        out["more_visible_in_topcard"] = as_count(
+            await page.locator(NAMED_PROFILE_TOPCARD)
+            .get_by_role("button", name=TOPCARD_MORE_NAME, exact=True)
+            .count()
+        )
+    except Exception as exc:  # noqa: BLE001 - reported as a type, never raised
+        out["error"] = type(exc).__name__
+        logger.debug("named profile controls unreadable: %s", type(exc).__name__)
+    return out
+
+
+def _closed_facts(raw: Any) -> list[dict[str, Any]]:
+    """:data:`CONTROL_FACTS_JS`'s answer, RE-CLOSED in a second language: a
+    fact that is not a mapping, or a field outside its vocabulary, reads as
+    NOT the owner's -- the direction that refuses."""
+    out: list[dict[str, Any]] = []
+    for fact in (raw if isinstance(raw, list) else [])[:CONTROL_FACTS_CAP]:
+        fact = fact if isinstance(fact, dict) else {}
+        in_card = fact.get("in_card") is True
+        out.append({
+            "in_card": in_card,
+            "owner": in_card and fact.get("owner") is True,
+            "tag": fact.get("tag") if fact.get("tag") in ("a", "button", "other") else "other",
+            "href": fact.get("href") if fact.get("href") in MESSAGE_HREF_TOKENS else "other",
+        })
     return out
 
 

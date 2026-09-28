@@ -952,7 +952,25 @@ def test_only_dom_module_waives_evaluate():
     # LEFT WITH send_message, which was RETIRED rather than re-aimed because it
     # was aimed by a name (the same order). Its reader,
     # dom.read_selected_recipients, had no caller once the recipient gate went.
-    assert waived_in.get("dom.py", 0) <= 21, waived_in
+    #
+    # 21 -> 22 on 2026-09-28 (lane L5, the named-person reader rebuilt after the
+    # cold check): CONTROL_FACTS_JS, run from ONE call site in
+    # dom.read_named_profile, over the elements Playwright's engine resolves for
+    # the press selector. WHY IT COULD NOT BE A LOCATOR CHAIN, the question this
+    # budget forces: whose control each one is, is a comparison between strings
+    # the page holds -- the owner's name in the title against a control's
+    # accessible name, and the member a composer address names against the
+    # member in the topcard's id -- and every one of them names a person. A
+    # locator read hands each to Python. AND WHY IT COULD NOT STAY INSIDE
+    # NAMED_PROFILE_JS, which is what the first rebuild did: that script could
+    # only judge what ITS OWN querySelectorAll found and ITS OWN visible() said,
+    # and the cold check measured both disagreeing with the engine the press
+    # uses -- a collapsed control, a shadow root -- so that the gate passed on
+    # the owner's control while the press reached a stranger's. Run by
+    # evaluate_all on the engine's own resolution, the gate and the press see
+    # one set. The visible More count the same reader needs is a LOCATOR COUNT
+    # and spends nothing.
+    assert waived_in.get("dom.py", 0) <= 22, waived_in
 
 
 # ---------------------------------------------------------------------------
@@ -1185,6 +1203,15 @@ INJECTED_SCRIPTS = {
     # resolved to is the confirm block, read by a different reader
     # (READ_PROFILE_JS) on the same load -- PEOPLE-DATA-MITIGATIONS item 6.
     "NAMED_PROFILE_JS": dom.NAMED_PROFILE_JS,
+    # 2026-09-28 (lane L5, the cold check). WHOSE CONTROL IS THIS, answered on
+    # EXACTLY the elements Playwright's engine resolves for the press selector,
+    # so the gate and the press see one set. It compares, inside the page, a
+    # control's accessible name with the owner's name from the title, and the
+    # member a composer address names with the member in the topcard's id, and
+    # returns per element two booleans and two closed tokens (a tag and a
+    # destination) -- no name, label, href or id. dom._closed_facts re-closes
+    # every field; anything outside its vocabulary reads as not the owner's.
+    "CONTROL_FACTS_JS": dom.CONTROL_FACTS_JS,
 }
 
 
@@ -1452,7 +1479,12 @@ def test_the_scripts_executed_are_exactly_the_ones_declared():
     # send_message, which was RETIRED because it was aimed by a name, and its
     # one call site, dom.read_selected_recipients, with it. The waiver budget
     # came down 22 -> 21 in the same change; the two counts stay one apart.
-    assert len(EXECUTED_SCRIPTS) == 22, sorted(EXECUTED_SCRIPTS)
+    #
+    # 22 -> 23 on 2026-09-28 for CONTROL_FACTS_JS, declared in INJECTED_SCRIPTS
+    # in the same change and run from exactly ONE call site,
+    # dom.read_named_profile (four resolutions, one loop, one call). The waiver
+    # budget moved 21 -> 22 with it; the two counts stay one apart.
+    assert len(EXECUTED_SCRIPTS) == 23, sorted(EXECUTED_SCRIPTS)
 
 
 def test_a_script_that_replaces_page_behaviour_runs_only_from_a_sanctioned_evaluate():

@@ -339,6 +339,30 @@ async def test_a_grant_loads_once_even_if_handed_back(browser_page):
     assert nav.gotos == [LINK]
 
 
+@pytest.mark.parametrize("case", ["unminted", "replayed", "expired", "another profile"])
+async def test_a_token_that_would_be_refused_opens_no_browser(monkeypatch, browser_page, case):
+    """FOUND BY THE COLD CHECK OF 2026-09-28: each refusal was reached inside a
+    browser session the tool had already opened. It is refused before one."""
+    nav = _Navigator()
+    browser = _Browser(browser_page, nav)
+    token = "made-up-token"
+    if case != "unminted":
+        block = await _preview(monkeypatch)
+        token = block["confirm_token"]
+    monkeypatch.setattr(server, "BROWSER", browser)
+    given = LINK
+    if case == "replayed":
+        await server.linkedin_read_named_profile(LINK, token)
+    elif case == "expired":
+        named_profile._READ_GRANTS[token].minted_at -= named_profile.READ_GRANT_TTL_SECONDS + 1
+    elif case == "another profile":
+        given = MEMBER_ID
+    before = browser.sessions
+    result = await server.linkedin_read_named_profile(given, token)
+    assert result.get("error"), result
+    assert browser.sessions == before, "a refused token opened a browser session"
+
+
 def test_expired_grants_are_swept_on_the_next_mint():
     stale = named_profile.mint_read_grant(SEGMENT)
     stale.minted_at -= named_profile.READ_GRANT_TTL_SECONDS + 1
@@ -520,15 +544,19 @@ async def test_control_a_preview_that_loads_is_caught(monkeypatch):
 
 
 async def test_control_a_reusable_token_is_caught(monkeypatch, browser_page):
-    """With the grant left in the registry after use, the replay test's
-    second call loads again, and that test's assertions refuse it."""
+    """With a registry that FORGETS each use -- a fresh, unused grant put back
+    under the same token -- the replay test's second call loads again, and
+    that test's assertions refuse it. (The first version of this control reset
+    the used grant in place; the token check the cold check of 2026-09-28
+    added reads its ``loaded`` flag and refused the replay anyway, so that
+    control stopped failing. It plants the wider defect now.)"""
     original = named_profile.consume_read_grant
 
     def lax(token, segment):
         grant = original(token, segment)
-        grant.consumed = False
-        grant.loaded = False
-        named_profile._READ_GRANTS[grant.token] = grant
+        named_profile._READ_GRANTS[grant.token] = named_profile.ReadGrant(
+            target=grant.target, token=grant.token, minted_at=grant.minted_at
+        )
         return grant
 
     monkeypatch.setattr(named_profile, "consume_read_grant", lax)
@@ -578,3 +606,61 @@ async def test_control_a_landing_the_read_did_not_compose_is_caught(monkeypatch,
     monkeypatch.setattr(named_profile, "landed_on_profile", lambda landed, segment: True)
     with pytest.raises(AssertionError):
         await test_a_member_id_redirected_elsewhere_reads_nothing(monkeypatch, browser_page)
+
+
+# ---------------------------------------------------------------------------
+# 8. What the cold check of 2026-09-28 found, each shown red on cee979c first
+# ---------------------------------------------------------------------------
+
+#: A profile segment of the right shape carrying a word the navigation
+#: boundary refuses in ANY address. Built from declared synthetic tokens.
+DOOR_REFUSED = ("someone-settings-example", "someone-invitation-example",
+                "someone-verification-example")
+
+
+@pytest.mark.parametrize("segment", DOOR_REFUSED)
+async def test_a_profile_the_door_refuses_gets_no_token_and_is_not_quoted(monkeypatch, segment):
+    """The preview asked nothing of the door: it minted a token for an address
+    the confirmed call could never load, and that call's error QUOTED the
+    address. The preview now asks the door first, and says why without it."""
+    result = await _preview(monkeypatch, "https://www.linkedin.com/in/" + segment + "/")
+    assert result.get("error"), result
+    assert "confirm_token" not in result and named_profile._READ_GRANTS == {}
+    assert segment not in json.dumps(result), "the refusal quoted the address"
+
+
+@pytest.mark.parametrize(
+    "landed, named, same",
+    [
+        ("https://www.linkedin.com/in/Casey-Example-3f9a/", "casey-example-3f9a", True),
+        ("https://www.linkedin.com/in/stra%C3%9Fe-example/", "stra%c3%9fe-example", True),
+        # casefold() said each of these was the profile named, and none is:
+        ("https://www.linkedin.com/in/strasse-example/", "stra%C3%9Fe-example", False),
+        ("https://www.linkedin.com/in/%E2%84%AAase-example/", "kase-example", False),
+        ("https://www.linkedin.com/in/%EF%AC%81ne-example/", "fine-example", False),
+        ("https://www.linkedin.com/in/%C5%BFome-example/", "some-example", False),
+        # a member id is case-sensitive
+        (MEMBER_LINK, MEMBER_ID, True),
+        ("https://www.linkedin.com/in/" + MEMBER_ID.lower() + "/", MEMBER_ID, False),
+    ],
+)
+def test_the_landing_is_the_named_profile_by_ascii_case_only(landed, named, same):
+    assert named_profile.landed_on_profile(landed, named) is same
+
+
+async def test_an_empty_landing_vetoes_the_read(browser_page):
+    """An empty landing used to default to the composed address and pass the
+    veto: nothing the browser said was taken as having landed on the profile."""
+
+    class _Blank(_Navigator):
+        async def goto(self, page, url, *, named_profile: bool = False) -> str:
+            await super().goto(page, url, named_profile=named_profile)
+            return ""
+
+    grant = named_profile.mint_read_grant(SEGMENT)
+    landed = await named_profile.load_the_confirmed_profile(
+        _Blank(), browser_page, token=grant.token, segment=SEGMENT
+    )
+    assert landed == ""
+    result = await named_profile.read_the_confirmed_profile(browser_page, segment=SEGMENT, landed=landed)
+    assert result["landed_on_the_named_profile"] is False and result["person"] is None

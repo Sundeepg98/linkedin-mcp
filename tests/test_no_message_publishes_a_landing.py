@@ -268,6 +268,16 @@ NAMES_NO_ADDRESS_SITES: dict[str, str] = {
         "a REGEX PATTERN, ``/jobs/view/(?:[^/?#]*-)?(\\d{6,})``, not an "
         "address. There is no landing at this site to withhold."
     ),
+    # 2026-09-28 (lane L5, the named-person reader rebuilt after the cold
+    # check): the per-control facts the page script returns, re-closed.
+    "dom.py:_closed_facts": (
+        "the value under the key ``href`` is a DESTINATION TOKEN, one of "
+        "``dom.MESSAGE_HREF_TOKENS`` (none, compose, thread, other), re-closed "
+        "in the same expression -- a value outside the tuple becomes 'other'. "
+        "``dom.CONTROL_FACTS_JS`` computes the token in the page and returns "
+        "it instead of the attribute, so no address reaches this dict; the "
+        "site matches the address rule through the key's name alone."
+    ),
 }
 
 

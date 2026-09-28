@@ -117,7 +117,7 @@ import re
 import sys
 from html.parser import HTMLParser
 from pathlib import Path
-from urllib.parse import urlsplit
+from urllib.parse import unquote, urlsplit
 
 REPO = Path(__file__).resolve().parent.parent
 DEFAULT_OUT = REPO / "tests" / "fixtures" / "synthetic" / "named_profile_live.html"
@@ -160,6 +160,52 @@ VOID = {"area", "base", "br", "col", "embed", "hr", "img", "input", "link",
 KEPT = ("role", "type", "tabindex", "dir", "target", "hidden", "disabled", "checked",
         "aria-hidden", "aria-expanded", "aria-haspopup", "aria-pressed", "aria-checked",
         "aria-selected", "aria-current", "aria-disabled", "aria-level", "aria-modal")
+
+#: AND THE VALUES EACH MAY HOLD. Added after the cold check of 2026-09-28: a
+#: canary written into ``role``, ``dir`` and ``aria-current`` of a copy of the
+#: fixture survived the builder and was a fixed point of it, because a kept
+#: attribute was kept whatever it held. A value outside its vocabulary is now
+#: DROPPED and counted, so a hand edit there breaks the fixed point too.
+ARIA_ROLES = frozenset({
+    "alert", "alertdialog", "application", "article", "banner", "button", "cell",
+    "checkbox", "columnheader", "combobox", "complementary", "contentinfo",
+    "definition", "dialog", "directory", "document", "feed", "figure", "form", "grid",
+    "gridcell", "group", "heading", "img", "link", "list", "listbox", "listitem", "log",
+    "main", "marquee", "math", "menu", "menubar", "menuitem", "menuitemcheckbox",
+    "menuitemradio", "navigation", "none", "note", "option", "presentation",
+    "progressbar", "radio", "radiogroup", "region", "row", "rowgroup", "rowheader",
+    "scrollbar", "search", "searchbox", "separator", "slider", "spinbutton", "status",
+    "switch", "tab", "table", "tablist", "tabpanel", "term", "textbox", "timer",
+    "toolbar", "tooltip", "tree", "treegrid", "treeitem",
+})
+ARIA_STATES = frozenset({"true", "false", "mixed", "undefined"})
+KEPT_VALUES = {
+    "role": ARIA_ROLES,
+    "type": frozenset({
+        "button", "submit", "reset", "checkbox", "radio", "text", "search", "email",
+        "password", "hidden", "file", "number", "tel", "url", "image/svg+xml", "text/css",
+    }),
+    "dir": frozenset({"ltr", "rtl", "auto"}),
+    "target": frozenset({"_blank", "_self", "_parent", "_top"}),
+    "aria-hidden": ARIA_STATES, "aria-expanded": ARIA_STATES, "aria-pressed": ARIA_STATES,
+    "aria-checked": ARIA_STATES, "aria-selected": ARIA_STATES,
+    "aria-disabled": ARIA_STATES, "aria-modal": ARIA_STATES,
+    "aria-haspopup": frozenset({"true", "false", "menu", "listbox", "tree", "grid", "dialog"}),
+    "aria-current": frozenset({"true", "false", "page", "step", "location", "date", "time"}),
+}
+NUMERIC_KEPT = ("tabindex", "aria-level")
+BOOLEAN_KEPT = ("hidden", "disabled", "checked")
+
+
+def kept_value(key, value):
+    """Whether a kept attribute's value is one its vocabulary allows."""
+    if key in KEPT_VALUES:
+        return value in KEPT_VALUES[key]
+    if key in NUMERIC_KEPT:
+        return re.fullmatch(r"-?\d{1,3}", value) is not None
+    if key in BOOLEAN_KEPT:
+        return value in ("", key)
+    return False
 #: Attributes that NAME an id.
 ID_REFS = ("for", "aria-labelledby", "aria-describedby", "aria-controls")
 #: LinkedIn's own path words, which an address keeps (the live lane's list).
@@ -187,6 +233,11 @@ KEPT_WORDS = frozenset({
     "Jobs", "Learning", "Like", "Me", "Message", "Messaging", "More", "My Network",
     "Notifications", "People you may know", "Posts", "Repost", "Send", "Show all",
     "You might like",
+    # NOT DRAWN BY THIS CAPTURE, KEPT SO THAT A CAPTURE WHICH DRAWS THEM KEEPS
+    # THEM (the cold check, 2026-09-28): without them a capture's Interests
+    # section would reach the fixture as "Example text", and the test that N
+    # 178 stays GAP because the fixture holds no "Interests" could never fail.
+    "Interests", "Groups",
 })
 #: And the labels it keeps verbatim, on the same terms.
 KEPT_LABELS = frozenset({"Dismiss", "For Business", "More", "Premium"})
@@ -325,10 +376,12 @@ class Builder:
         self.counts = {"reduced text": 0, "dotted text": 0, "labels dropped": 0,
                        "placeholder labels": 0, "templated labels": 0,
                        "ids mapped": 0, "addresses rebuilt": 0, "addresses dropped": 0,
-                       "unclassified text": 0, "unclassified labels": 0}
+                       "unclassified text": 0, "unclassified labels": 0,
+                       "unclassified attributes": 0}
         self.ids = {}
         self.slugs = {}
         self.members = {}
+        self.owner_keys = set()
         self.written = 0
 
     # -- finding the landmarks -------------------------------------------------
@@ -350,6 +403,16 @@ class Builder:
                 members.add(segment)
         assert len(members) == 1, "the topcard links %d members" % len(members)
         self.owner_segment = members.pop()
+        # THE OWNER'S MEMBER, AS THE CAPTURE'S COMPOSER LINKS NAME IT: the
+        # member key of every composer link inside the topcard. Measured on
+        # the live skeleton: the topcard's links name one member, the same one
+        # a composer link OUTSIDE the topcard names (the page draws the
+        # owner's Message there too), and every rail's link names another.
+        for node in walk(container):
+            if isinstance(node, Node) and node.tag == "a":
+                key = self._member_key(node.get("href"))
+                if key is not None:
+                    self.owner_keys.add(key)
         titles = [n for n in walk(self.tree.root) if n.tag == "title"]
         values = {v for t in titles for v in own_text(t)}
         assert len(values) == 1, "%d distinct titles" % len(values)
@@ -358,6 +421,24 @@ class Builder:
         self.container_shape = (
             "L%sD%sn%s" % found.groups() if found else "literal, %d characters" % len(container.get("id"))
         )
+
+    @staticmethod
+    def _member_key(href):
+        """The member a composer link names -- its ``recipient`` value (a shape
+        on the capture, the synthetic id on this script's output), else its
+        ``profileUrn`` value less the urn prefix -- or ``None``."""
+        if not href or "/messaging/compose" not in href:
+            return None
+        values = {}
+        for pair in urlsplit(href).query.split("&"):
+            name, _eq, value = pair.partition("=")
+            values.setdefault(name, value)
+        if values.get("recipient"):
+            return values["recipient"]
+        urn = values.get("profileUrn")
+        if urn:
+            return unquote(urn).replace("urn:li:fsd_profile:", "")
+        return None
 
     @staticmethod
     def _member_segment(href):
@@ -454,10 +535,15 @@ class Builder:
             self.slugs[segment] = OTHER_SEGMENT_TEMPLATE.format(n=len(self.slugs) + 1)
         return self.slugs[segment]
 
-    def member_id_for(self, node):
-        if self.container in ancestors(node):
+    def member_id_for(self, key):
+        """The synthetic member for a link's member key: the owner's for the
+        key the topcard's links carry, a declared synthetic id as itself, and
+        the next declared synthetic id for each other key, in order of first
+        appearance -- so links that named one member still name one."""
+        if key in self.owner_keys or key == OWNER_MEMBER_ID:
             return OWNER_MEMBER_ID
-        key = id(node)
+        if key in OTHER_MEMBER_IDS:
+            return key
         if key not in self.members:
             self.members[key] = OTHER_MEMBER_IDS[len(self.members) % len(OTHER_MEMBER_IDS)]
         return self.members[key]
@@ -488,7 +574,17 @@ class Builder:
         path = "/".join(out)
         prefix = "https://www.linkedin.com" if absolute else ""
         if path.startswith("/messaging/compose"):
-            return prefix + path + "?profileUrn=urn%3Ali%3Afsd_profile%3A" + self.member_id_for(node)
+            member = self.member_id_for(self._member_key(href))
+            query = []
+            for pair in parts.query.split("&"):
+                name = pair.partition("=")[0]
+                if name == "profileUrn":
+                    query.append("profileUrn=urn%3Ali%3Afsd_profile%3A" + member)
+                elif name == "recipient":
+                    query.append("recipient=" + member)
+                elif name in ("screenContext", "interop"):
+                    query.append(name + "=example")
+            return prefix + path + ("?" + "&".join(query) if query else "")
         return prefix + path
 
     def label_for(self, node, value):
@@ -569,7 +665,10 @@ class Builder:
                     attrs.append((key, None))
                 continue
             if key in KEPT:
-                attrs.append((key, value))
+                if kept_value(key, value):
+                    attrs.append((key, value))
+                else:
+                    self.counts["unclassified attributes"] += 1
             elif key == "id":
                 attrs.append((key, self.id_for(value)))
             elif key in ID_REFS:

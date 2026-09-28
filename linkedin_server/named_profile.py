@@ -52,6 +52,7 @@ from __future__ import annotations
 
 import re
 import secrets
+import string
 import time
 from dataclasses import dataclass
 from typing import Any, Optional
@@ -152,11 +153,18 @@ def landed_on_profile(landed: Any, segment: str) -> bool:
     """Did the browser land on THIS profile? A comparison, never an address.
 
     LinkedIn's own host, ``/in/<segment>/`` with or without the slash, the
-    segment compared with percent-encoding and ASCII case folded -- vanity
-    names are case-insensitive there. Anything else is a landing the page
-    chose, and it VETOES the act: a member id LinkedIn redirects to a vanity
-    address reads False here, and the act refuses rather than adopting an
-    address the page supplied.
+    segment compared with percent-encoding decoded and ASCII case folded --
+    vanity names are case-insensitive there -- and a MEMBER ID compared
+    exactly: ``ACoAA...`` ids are case-sensitive. Anything else is a landing
+    the page chose, and it VETOES the act: a member id LinkedIn redirects to a
+    vanity address reads False here, and the act refuses rather than adopting
+    an address the page supplied.
+
+    ASCII FOLDING, NOT ``casefold()`` (the cold check of 2026-09-28): full
+    Unicode case folding said a landing on ``strasse`` was the profile named
+    ``stra<sharp s>e``, that the Kelvin sign is a ``k``, a ligature two letters
+    and a long s an s, and that two member ids differing in case were one.
+    Each is a different address, and the docstring had always said ASCII.
     """
     try:
         parts = urlsplit(str(landed or ""))
@@ -167,7 +175,21 @@ def landed_on_profile(landed: Any, segment: str) -> bool:
     path = _LINK_PATH.fullmatch(parts.path or "")
     if not path:
         return False
-    return unquote(path.group(1)).casefold() == unquote(str(segment)).casefold()
+    return same_segment(path.group(1), str(segment))
+
+
+#: Upper-case ASCII letters to lower-case, and nothing else.
+_ASCII_LOWER = str.maketrans(string.ascii_uppercase, string.ascii_lowercase)
+
+
+def same_segment(landed: str, named: str) -> bool:
+    """Is a landed profile segment the one named? Percent-decoded both sides;
+    a member id exactly; a vanity name with ASCII case folded and nothing
+    else folded."""
+    here, there = unquote(landed), unquote(named)
+    if MEMBER_ID.fullmatch(here) or MEMBER_ID.fullmatch(there):
+        return here == there
+    return here.translate(_ASCII_LOWER) == there.translate(_ASCII_LOWER)
 
 
 # ---------------------------------------------------------------------------
@@ -194,7 +216,8 @@ _FACT_KEYS = (
     "message_controls", "message_matches", "message_tag", "message_href",
     "message_in_topcard", "message_controls_in_topcard", "message_kind_in_topcard",
     "message_visible_in_topcard", "message_owner_visible_in_topcard",
-    "message_foreign_in_topcard", "more_in_topcard", "more_visible_in_topcard",
+    "message_foreign_in_topcard", "invite_kind_in_topcard", "topcard_all_headings",
+    "topcard_members", "topcard_member_id", "more_in_topcard", "more_visible_in_topcard",
     "more_actions", "dialogs", "composer_editors", "conversation_bubbles",
     "named_controls", "dialog_controls", "dialog_note_fields", "error",
 )
@@ -261,6 +284,21 @@ def _the_one_visible_and_theirs(
     visible = coerce.as_count(reading.get(prefix + "_visible_in_topcard"))
     owners = coerce.as_count(reading.get(prefix + "_owner_visible_in_topcard"))
     foreign = coerce.as_count(reading.get(prefix + "_foreign_in_topcard"))
+    # ONE PERSON'S CARD FIRST (the cold check of 2026-09-28): a stranger's card
+    # drawn inside the owner's topcard brings a heading of its own, or a link
+    # to its own person, and a control inside it can pass for the owner's --
+    # by an unlabelled "Message", or by a same-name label. The live topcard
+    # holds one heading and links one member; anything else refuses.
+    headings = coerce.as_count(reading.get("topcard_all_headings"))
+    members = coerce.as_count(reading.get("topcard_members"))
+    if headings != 1 or members > 1:
+        return (
+            f"the person's topcard is not one person's card: it draws {headings} "
+            f"heading(s) and links {members} distinct member(s), where the "
+            "measured topcard draws one heading, the owner's name, and links at "
+            "most the owner. A card of somebody else's inside it could hold the "
+            "control this act would press. Refused before anything is pressed."
+        )
     if foreign:
         return (
             f"the person's topcard draws {foreign} {kind} control(s) that are not "
@@ -1344,12 +1382,64 @@ def discard_read_grants() -> None:
     _READ_GRANTS.clear()
 
 
+def check_read_token(token: Any, segment: str) -> None:
+    """Raise :func:`consume_read_grant`'s refusal for a token it would refuse,
+    WITHOUT consuming anything -- so the tool refuses a bad token before it
+    opens a browser session (the cold check of 2026-09-28 found each refusal
+    opening one). The redeeming is still :func:`load_the_confirmed_profile`'s."""
+    if not isinstance(token, str) or not token.strip():
+        raise WriteAttemptError(
+            "no confirm token. This read loads a profile only with the token "
+            "from its own preview: call it once without confirm_token, read "
+            "what the preview says, then pass the token it hands you."
+        )
+    grant = _READ_GRANTS.get(token.strip())
+    if grant is None or grant.consumed or grant.loaded:
+        raise WriteAttemptError(
+            "unknown or already-used confirm token. A read token works once; "
+            "run the preview again for a new one."
+        )
+    if grant.expired():
+        _READ_GRANTS.pop(grant.token, None)
+        raise WriteAttemptError(
+            f"this confirm token expired after {READ_GRANT_TTL_SECONDS:.0f}s. "
+            "Run the preview again and read it before confirming."
+        )
+    if grant.target != profile_url(segment):
+        raise WriteAttemptError(
+            "this confirm token was minted for a different profile than the "
+            "one passed now. Nothing was loaded; run the preview for the "
+            "profile you mean."
+        )
+
+
+def _door_address(segment: str) -> str:
+    """The one address the read may load, through the named-profile door --
+    or a refusal that QUOTES NOTHING. The door's own message names the
+    address, and an address can carry a person's name; the cold check of
+    2026-09-28 found the read's confirmed call returning it in its error."""
+    try:
+        return readonly.assert_named_profile_url(readonly.named_profile_url(segment))
+    except WriteAttemptError:
+        raise WriteAttemptError(
+            "the profile address you gave carries a word this server's "
+            "navigation boundary refuses in any address (a settings, "
+            "verification or invitation word, say), so the named-profile door "
+            "will not load it. Nothing was loaded and no token was issued."
+        ) from None
+
+
 def read_preview(segment: str) -> dict[str, Any]:
     """The first call: NOTHING IS LOADED. Whom it resolved, what the view
     costs, and a single-use token.
 
     ``segment`` is :func:`profile_segment`'s, so a name never reaches here.
+    THE DOOR IS ASKED FIRST (the cold check of 2026-09-28): a segment that
+    passes the shape and carries a word the boundary refuses used to get a
+    token its confirmed call could never use; it is refused here, with no
+    token.
     """
+    _door_address(segment)
     grant = mint_read_grant(segment)
     as_member_id = bool(MEMBER_ID.fullmatch(segment))
     block: dict[str, Any] = {
@@ -1436,10 +1526,11 @@ async def load_the_confirmed_profile(
     # spread through ``parts`` and ``path`` into ``profile_segment``'s
     # ``segment``, and read this very navigation as one the page chose
     # (measured 2026-09-28, ``tests/test_navigation_is_never_derived.py``).
-    profile_address = readonly.assert_named_profile_url(readonly.named_profile_url(segment))
-    read_landing = str(
-        await navigator.goto(page, profile_address, named_profile=True) or profile_address
-    )
+    profile_address = readonly.assert_named_profile_url(_door_address(segment))
+    # AN EMPTY LANDING IS NOT THE NAMED ADDRESS (the cold check of 2026-09-28):
+    # it used to default to the composed address, which then passed the veto.
+    # Returned as it came, it reads as no landing and vetoes the read.
+    read_landing = str(await navigator.goto(page, profile_address, named_profile=True) or "")
     assert_not_authwall(read_landing, surface="profile")
     return read_landing
 
