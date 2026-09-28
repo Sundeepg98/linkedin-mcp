@@ -2920,3 +2920,66 @@ keys**. It also reports one SET literal with a repeated member --
 `_FETCH_NAMES` in `tests/test_api_call_sites.py`, `"urlretrieve"` twice since
 `fbedfca` -- harmless in a set, its intended third member unknown; left for
 its owner and not changed here.
+
+### Gates on the final tree, run and NOT run
+
+**THE IMPACT GATE**, `scripts/impact_gate.py --against c94c39e`, background,
+offline, sharded by the gate itself (`-n auto --dist loadfile`). The diff
+reaches 198, then 228, of 280 test files, so both runs widened to the full
+suite at the gate's 45% line:
+
+    tree       result
+    1847a82    15 failed, 12055 passed, 9 skipped, 1 xfailed, in 17 min 33 s
+    f4c82cf    PASS over the full suite, 12080 tests, in 18 min 31 s
+
+**THE FIFTEEN, EACH REPAIRED AT ITS CAUSE, in `f4c82cf`:**
+
+* **3, the reader-leak guard.** The last-tab rule takes a `page`, so the guard
+  discovered it as a page reader with no recorded verdict. Its own
+  `measure()` gives `not_driven:returned without reading the page`, and no
+  other reader's verdict moved: one baseline line, and a `WHAT_WOULD_DRIVE_IT`
+  entry declaring it NOT A PAGE READER, with why.
+* **4 in `tests/test_people_search_readers.py` and 2 in
+  `tests/test_a_covered_row_names_the_artifact_that_covers_it.py`:** pins
+  naming `N 79`, `N 84`, `N 87`, `N 94`, `J 18` and `J 39` COVERED-UNFIRED.
+  Both files say a fire that moves a row moves the pin in the same commit;
+  they now pin COVERED-PROVEN, and the people-search pin checks that each
+  banked cell opens on its banking with the earlier record after it.
+* **4, `tests/test_the_offline_frontier_rows.py`.** Two of its rows moved
+  again (`N 195`, `P S5`) and now open on their banking, the frontier's move
+  kept after it. Two did not (`J 107`, `M M53`) -- and this lane had put its
+  session-2 note FIRST in their cells, so neither opened on its move any
+  more. Those two notes now close their cells instead.
+* **1, the correction guard.** Row `18` cites this record on a line that keeps
+  lane L3's "THE ROW WAS PRICED ON THE WRONG ADDRESS", about the row's own
+  pricing: triaged NOT_A_CORRECTION, with what would make the entry wrong.
+* **1, the cited-SHA guard.** `d81511d`, a commit of this branch, cited in an
+  "at" slot: disclosed in place with its subject.
+
+**THE CENSUS INSTRUMENTS AND THE THREE `--check`s**, on `f4c82cf`, by exit
+code: `census_completion.py --check`, `check_read_addresses.py`,
+`check_write_classes.py`, `ruling_holds.py`, `pin_census_rows.py --check`,
+`measure_pointer_graph.py --check`, `check_jobs_directions.py`,
+`check_gap_rows_on_refused_addresses.py`, `check_cited_shas_resolve.py`,
+`check_contingent_writeoffs_carry_a_reopener.py`,
+`check_census_locators_resolve.py` and the three generators' `--check` all
+exit 0. `check_asserted_names_resolve.py` exits 1 on the eight findings
+pinned in other waves' documents, none in this one.
+
+**THE NAVIGATION GUARD'S WHOLE-TREE COMPLEMENT**, the one skip in every local
+run above, run with `CI=1`: 11 passed.
+
+**THE IDENTITY GATE:** the pre-commit exact-value gate on every commit of
+this branch, 0 hits each (226 spellings); the shape guard,
+`tests/test_no_committed_identity.py`, inside both full-suite runs, and again
+on this section's commit.
+
+**NOT RUN, named:**
+
+* **CI**: nothing pushed, by order. Every number here is this box's Python
+  3.13; the 3.10 cell is CI's.
+* **Anything live**: Chrome on 9224 was not running and was not needed. So
+  fix 1's keeper -- which window Chrome puts it in -- fix 2's reading of the
+  live `checked` property, fix 3's handle at his width, and fix 4's trigger
+  toggle are all proven offline only; each one's first live use is session
+  3's.
