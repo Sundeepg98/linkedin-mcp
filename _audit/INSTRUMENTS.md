@@ -10983,6 +10983,34 @@ two measurements that decided the reconciliation -- the composer-link member com
 tracked-copy digest -- whose second is now a test.
 
 
+### 69.15 A LITERAL THAT REPEATS A MEMBER IS A SILENT COLLAPSE, AND A BLOCKER IS WRITTEN FROM THE CAPTURE, NOT THE CALL (the orchestrator's calls of 2026-09-28 12:32)
+
+**A SET THAT HOLDS TWO OF ITS THREE NAMES RAISES NOTHING.** `_FETCH_NAMES` read
+`{"urlopen", "urlretrieve", "urlretrieve"}` for five weeks. A set keeps one of a repeat and a dict
+keeps the later value; Python raises on neither, so a reader counts what was written and the program
+holds less. Two scratch walkers found it the same day; nothing in the suite had ever asked.
+
+| instrument | what it holds | shown failing |
+|---|---|---|
+| `tests/test_a_literal_repeats_no_member.py` | no set display (nor `set()`/`frozenset()` over a list or tuple display) and no dict display in any committable Python file holds two members Python would collapse -- equal constant values, or the same bare name or dotted attribute; a member that may evaluate differently is never compared; a file that does not parse fails, never skips; declared always-run in `scripts/impact_gate.py` | red on `tests/test_api_call_sites.py` as it stood, one offender at line 83; its controls plant the line verbatim and each kind of repeat |
+
+**A CALL NAMES THE ROUTE IT EXPECTS; THE CAPTURE NAMES THE ROUTE THERE IS.** The call read four rows
+as sections of a named member's profile. The first-degree capture drew two of them as links into
+people search, an admitted address this server already composes -- so one row's second blocker was
+not needed and another's was a different build. Each cell was written from the capture, the call's
+blockers taken in turn and marked, and the difference put back to the caller.
+
+    A LITERAL THAT REPEATS A MEMBER SAYS LESS THAN IT LOOKS. PARSE FOR THE REPEAT; PYTHON NEVER
+    WILL.
+
+    BEFORE WRITING A BLOCKER A CALL NAMED, READ THE CAPTURE FOR THE ROUTE. WHERE THEY DIFFER,
+    WRITE WHAT THE CAPTURE SHOWS AND PUT THE DIFFERENCE TO THE CALLER.
+
+DECLARED DISPOSABLE: the scratch probes that read the capture for this call -- the composer-link
+and connection-link shape readers, the rail-heading counter, the tracked-copy comparison -- and the
+scratch duplicate-key walker, which the committed guard replaces.
+
+
 ## 70. THE BEST-VERIFIED WRITE NEVER PRESSED SAVE, AND A WRITE AIMED BY ITS CARD (lane-l7-profile-writes, 2026-09-24)
 
 **Registered 2026-09-24.** Full record: `_audit/2026-09-24-lane-l7-profile-writes.md`.

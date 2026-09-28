@@ -2886,3 +2886,169 @@ first-degree one. Its tracked copy keeps the words "Interests" and "Groups" and 
     0017f42  one live-true source; three stale capture claims corrected (R.8)
     c04b20f  this record, R.2 to R.11, and the instrument register's 69.14
     (last)   R.9's final gate, and its skip sentence corrected -- this file only
+
+## The orchestrator's calls of 2026-09-28 12:32: four reads back to GAP, a neutral name, a repeated member
+
+**THE ORDER.** Master was fast-forwarded to this branch's head and pushed, its CI running. Three calls
+on the three items this lane had put to him: (1) `N 30`, `N 31`, `N 65` and `N 103` to GAP -- their
+only exclusion ground was R4, loading a third party's profile, which NAMED-PROFILE-READ-BEHIND-A-GRANT
+narrowed to a read of a profile he names -- each cell naming its blockers (a capture showing that
+section on a profile he names; then an extension of `linkedin_read_named_profile` returning it as
+declared fields or people records; a target he names), `N 30`'s R2 recorded as incidental capture,
+GAP 584 -> 588 and EXCLUDED-RULED 30 -> 26 measured, every pin re-derived; (2) the tracked copy of
+the first-degree profile renamed to a neutral structural name, every reference updated; (3)
+`_FETCH_NAMES`'s repeated member resolved from the intent of the commit that wrote it, and a guard
+that no set literal repeats a member, shown failing on today's file.
+
+Disk at 12:30 agreed: master, the remote and this branch on the head the order named. Its CI run
+finished green, 20 of 20 jobs, at 12:36.
+
+### S.1 The four rows
+
+- **`N 65` AND `N 103`, AS CALLED.** GAP, the call's three blockers named in each cell. Neither
+  section is in any capture: the live lane's first-degree capture, one load without a scroll, draws
+  no Interests section (`N 178`'s test pins it), and its rails are headed 'People you may know' (6
+  member links) and 'You might like' (4 Page links, 5 member links) -- no rail headed 'People also
+  viewed' or 'More profiles for you' (measured on the tracked copy: headings and link paths, nothing
+  of anybody's). Whether 'You might like' is the rail `N 103` names, a skeleton cannot settle.
+  C-P7's save, specified for `N 178`, answers `N 65` too: the same section, its other tabs.
+- **`N 30` AND `N 31`: THE CALL'S PREMISE, MEASURED, IS NARROWER THAN THESE TWO ROWS.** The call
+  reads each row as a section of the named member's profile. The capture says these two lists are
+  not profile sections but LINKS INTO PEOPLE SEARCH, drawn inside the topcard -- three of them, each
+  to `/search/results/people/` with `origin` and `connectionOf`:
+
+      link 1   origin, connectionOf, network   connectionOf 43 characters: one member id in a
+                                               JSON list; network 9 characters, 2 letters
+      link 2   origin, network, connectionOf   both percent-encoded lists: connectionOf 51
+      link 3   the same as link 2              characters, network 13 characters, 3 letters
+
+  (shapes read off the gitignored skeleton; values never read). DERIVED from those shapes: link 1
+  carries `network` `["F","S"]` -- the member's connections -- and links 2 and 3 `["F"]` -- the
+  shared ones, his first degree. The read door ADMITS both addresses, and R2 catches neither
+  (measured). So, holding the state the call set and writing the blockers as measured:
+  - `N 30`. `linkedin_people_search_shape(connections_of=<member token>, include_names=True)`
+    already composes that `connectionOf` -- `people_search.compose` writes exactly the
+    percent-encoded list LinkedIn drew on links 2 and 3 -- and returns the member's connections as
+    people records, the route `N 172` is COVERED-UNFIRED on; a 1st-degree connection's token is the
+    `recipient_id` `linkedin_connections` returns; and the two-value `network` narrows nothing,
+    since every connection of a 1st-degree connection is within two degrees of him. The cell takes
+    the call's blockers in turn: (1) CAPTURED; (2) NOT NEEDED on the drawn route; (3) STANDS, for the
+    first fire. Its move on to COVERED-UNFIRED, by D6-CAPABILITY-OVER-AFFORDANCE as `N 4`'s was, is
+    PUT TO THE ORCHESTRATOR; until he rules, GAP. The address table gates it BUILT-UNFIRED, the read
+    triage SERVED.
+  - `N 31`. The same search composes `connectionOf` but not LinkedIn's `network` facet, so it
+    returns the member's connections at every degree, one page per call, each with a degree; the
+    shared ones are the 1st-degree among them, on that page only. (1) CAPTURED; (2) the extension is
+    people search's composition gaining `network` -- a closed vocabulary LinkedIn wrote on this page
+    in two spellings -- not `linkedin_read_named_profile`; nothing blocks building it; (3) STANDS,
+    for the first fire. The address table gates it READER -- the one row in bucket 3 BLOCKED ON
+    NOTHING -- and the triage BUILDABLE.
+  - `N 30`'s R2, RECORDED AS INCIDENTAL CAPTURE, a blocker and not a ruling
+    (INCIDENTAL-CAPTURE-IS-NOT-A-RULING): the forbidden substring "/connect" also matches the word
+    "connections" -- `/in/<slug>/details/connections/` is refused on it before the allowlist is
+    asked, and `/in/<slug>/overlay/connections/` too (measured). On the route the capture draws, R2
+    catches nothing.
+- **A FINDING FOR ANOTHER CELL'S OWNER, NOT ACTED ON HERE.** `N 85`'s cell calls the `connectionOf`
+  spelling DERIVED -- "on record nowhere LinkedIn wrote it". Links 2 and 3 are LinkedIn writing it,
+  percent-encoded, the spelling `people_search.compose` sends. The cell is lane S's, and a pointer
+  instrument pins its argument, so it is reported rather than edited.
+- **THE SIDE TABLES.** The four `_audit/_census/exclusion-basis.tsv` lines left with their rows.
+  `_audit/_census/read-addresses.tsv` gained one line each: `N 30` and `N 31` ADMITTED (the two
+  people searches, values placeholders), `N 65` and `N 103` REFUSED on a member's profile, the
+  named-profile door not governed by that table -- as `N 178`'s line says. The read triage
+  (`scripts/triage_read_gap_rows.py`), whose CONTROL 4 refuses a read-GAP row with no verdict, gained
+  one each: `N 30` SERVED, `N 31` BUILDABLE, `N 65` and `N 103` RULING with a decided annotation --
+  RETURNED is lane R's own class, and its marker names lane R. `network.md`'s section 1 records the
+  delta; R4's section records the move.
+
+### S.2 Pins, before -> after, each measured on the edited tree
+
+    count_census_states     GAP 584 -> 588 (N 159 -> 163; J 108, P 186, M 131 unchanged)
+                            EXCLUDED-RULED 30 -> 26; stated rows 770
+    census_completion       gap 584 -> 588          gap_read 98 -> 102
+                            out_of_scope 42 -> 38   achievable 728 -> 732
+                            capabilities_achievable 742 -> 746
+                            adjudicated 186 -> 182
+                            b3_admitted 43 -> 45    b3_refused 38 -> 40
+                            b3_blocked_on_nothing 0 -> 1
+    check_exclusion_basis   population 42 -> 38, table 38, 0 problems
+    check_read_addresses    98 -> 102 bucket-3 rows, every verdict agreeing with the boundary
+    triage_read_gap_rows    75 -> 79 verdicts; decided since the triage 9 -> 11
+    network.md, file-wide   EXCLUDED-RULED 15 -> 11, GAP 159 -> 163
+
+The exclusion-basis table and the census instruments agree: population and table are both 38, and
+NO-THIRD-PARTY-PROFILE-LOAD holds six rows, the acts 35, 66 and 144 to 147. `RULINGS.md` was
+regenerated -- two of its corpus counts move by one, for the ruling id `N 30`'s cell cites -- and
+`INDEX.md` and the blocker map were re-written unchanged, each at a fixed point. The pointer graph
+holds its 64 pins.
+
+### S.3 The rename
+
+- `tests/fixtures/live2/first_degree_profile.html`, by `git mv`; content byte-identical.
+- **REFERENCES TO THE OLD NAME: 7, ALL UPDATED** -- the live lane's harness test 4 (the name handed
+  to `_serve_profile`), this lane's skeleton test 1 (`SOURCE`), `M M1`'s census cell 1, this record 1
+  (R.8's path). No tracked file names the old file.
+- **WHAT NAMED ONLY THE DIRECTORY NOW NAMES THE FILE:** the builder (its docstring, and the header it
+  writes -- the built page regenerated, still a fixed point, digest `iefnpejnhfajibng` unchanged),
+  the invented page's header, `dom.py`'s comment, INSTRUMENTS 69.14, and the skeleton test's header
+  assertions, which now assert the exact path.
+- **THE ROLE WORD LEFT CODE PROSE** -- 7 sites: four test docstrings pytest can print in a traceback,
+  two comments, one module docstring -- each saying what the profile is, first-degree. It stays in
+  record prose under `_audit/` (14 lines, 3 documents), as the call allows.
+- **NOT RENAMED, AND NOT THIS LANE'S TO RENAME:** the gitignored skeleton in the live lane's own
+  `_state/live2/`, read-only for this lane. `export_fixtures` names each tracked copy after its
+  skeleton, so a re-export there would write the old name back; the harness's 28-copy count would
+  then go red on the extra file. The live lane should rename its state file.
+
+### S.4 The set that repeated a member
+
+- **THE INTENT, READ.** `fbedfca` wrote `frozenset({"urlopen", "urlretrieve", "urlretrieve"})`.
+  Its message and its audit (the 2026-08-24 publish audit, section 6) name the one shape it had
+  missed, a bare `urlopen`; the standard library's `urllib.request` has exactly two module-level
+  callables that fetch by name, these two (measured: `build_opener` builds, `urlcleanup` cleans
+  up); and the package's only by-name HTTP import is `cdp_bridge`'s `urlopen`. No third name was
+  meant. The repeat is dropped, and the comment above the set says why.
+- **THE GUARD,** `tests/test_a_literal_repeats_no_member.py`: no set display -- nor `set(...)` or
+  `frozenset(...)` over a list or tuple display -- and no dict display, in any committable Python
+  file, holds two members Python would collapse: equal constant values, or the same bare name or
+  dotted attribute. A member that may evaluate differently each time is never compared, and a file
+  that does not parse FAILS rather than skips. Dict keys are in it beyond the call's words: they are
+  the "ast duplicate-key check" each order asked for at a merge, which this lane ran by hand; it
+  stands now.
+- **SHOWN FAILING ON TODAY'S FILE:** before the fix, 1 failed, 18 passed -- the one offender
+  `tests/test_api_call_sites.py:83`, `'urlretrieve'` twice. After: 19 passed, and 30 with the
+  call-sites file. It read 596 files, 732 set displays and 4449 dict displays, the same under
+  Python 3.13 and, through `uv`, 3.10. Its controls plant the line as it stood and each kind of
+  repeat, and show the members it must not compare staying unconvicted.
+- **DECLARED ALWAYS-RUN** in `scripts/impact_gate.py`: it reads every committable `.py` through an
+  imported `git ls-files`, which the gate's own detector cannot see; corpus-wide guards 29 -> 30.
+
+### S.5 Gates
+
+- The literal guard: red on today's file, green on the fix (S.4). The impact gate's detection
+  guard, `tests/test_impact_gate_selects_data_dependencies.py`, with it: 61 passed.
+- The rename: the nine files it reaches, 1354 passed; the census battery, 12 of 12 green.
+- The census move: the census battery, 12 of 12 green on the edited tree. THE IMPACT GATE over its
+  six paths FOUND TWO RED FIRST -- `tests/test_triage_read_gap_rows.py`, CONTROL 4: four read-GAP
+  rows with no triage verdict -- fixed at their site (S.1's triage lines); then 61 files, 3412
+  tests, PASS.
+- The identity gate on each commit: 3, 13 and 6 staged files; 0 hits each.
+- THE FINAL GATE, on the commit carrying this section: its impact plan and result are in the report
+  that returns the head sha -- a record cannot hold the gate of the commit that writes it.
+
+### S.6 NOT run
+
+- CI on this branch: nothing pushed, as ordered.
+- LIVE: nothing -- no LinkedIn, no browser, no port. The capture was read from files only, for
+  shapes, counts, headings and link paths.
+- `N 30`'s and `N 31`'s route never fired: nothing here shows what a `connectionOf` results page
+  draws (`N 172`'s cell says the same of its own route).
+- The live lane's state file keeps its old name (S.3).
+- `N 85`'s cell: reported, not edited (S.1).
+
+### S.7 Commits -- on this branch, none pushed, no AI attribution in any
+
+    c397ee6  a literal repeats no member: _FETCH_NAMES held two of its three names
+    5e84802  a neutral fixture name: the first-degree profile's tracked copy
+    06c05ec  census: N 30, N 31, N 65 and N 103 back to GAP, R4 narrowed by the read he names
+    (last)   this section, and the instrument register's 69.15
