@@ -37,8 +37,10 @@ WHAT THIS FILE HOLDS, each with a check shown able to fail:
    captured skeleton and the same reader ``tests/test_people_search_names.py``
    holds to the six mitigations -- with a member, and alone.
 6. A facet LinkedIn drops reads ``absent``, never filtered.
-7. The census: ``N 30``, ``N 31`` and ``N 81`` COVERED-UNFIRED on this route,
-   and ``N 85``'s spelling MEASURED.
+7. The census: ``N 30``, ``N 31`` and ``N 81`` on this route -- COVERED-UNFIRED
+   from 2026-09-28, each banked live since (``N 81`` at the live lane's
+   session 7, ``N 30`` and ``N 31`` at its session 9) -- and ``N 85``'s
+   spelling MEASURED.
 
 (``network`` WAS REFUSED WITHOUT A MEMBER from the order of 2026-09-28 15:10
 until the orchestrator's call of 17:02: a degree filter names nobody. This
@@ -423,11 +425,32 @@ def _network_rows() -> dict[str, tuple[str, str]]:
     return out
 
 
-def test_n30_is_covered_unfired_by_d6_and_its_fire_needs_a_member_he_names() -> None:
-    state, cell = _network_rows()["30"]
-    assert state == "COVERED-UNFIRED"
+#: THE LIVE LANE'S SESSION 9 (2026-10-10) BANKED `N 30` AND `N 31`, read-only,
+#: at the member he named, through the member token his named read of that
+#: member returned. The banking paragraph opens each cell, and lane S's
+#: paragraph -- the route, and why its fire waited on a member he names -- is
+#: kept after it, checked as before.
+SESSION_9_BANK = "**FIRED AND BANKED 2026-10-10 (the live lane's session 9)"
+LANE_S_OPENING = "**COVERED-UNFIRED 2026-09-28 (lane S)"
+
+
+def _after_the_bank(cell: str, words: tuple[str, ...]) -> str:
+    """The cell opens on session 9's banking paragraph, which carries
+    ``words``; lane S's paragraph follows it, and is returned onward."""
     opening = cell.lstrip()
-    assert opening.startswith("**COVERED-UNFIRED 2026-09-28 (lane S)"), opening[:120]
+    assert opening.startswith(SESSION_9_BANK), opening[:120]
+    lane_s = opening.find(LANE_S_OPENING)
+    assert lane_s > 0, "lane S's paragraph no longer follows the banking"
+    for word in words:
+        assert word in opening[:lane_s], word
+    return opening[lane_s:]
+
+
+def test_n30_banked_at_session_9_on_lane_s_route_at_a_member_he_named() -> None:
+    state, cell = _network_rows()["30"]
+    assert state == "COVERED-PROVEN"
+    opening = _after_the_bank(cell, ("`query_kept` `verbatim` for `connections_of`",
+                                     "10 person results", "0 values refused"))
     head = opening[: opening.find("**RETURNED TO GAP") if "**RETURNED TO GAP" in opening else None]
     for words in ("D6-CAPABILITY-OVER-AFFORDANCE", "`linkedin_people_search_shape(",
                   "connections_of=", "include_names=True", "A MEMBER HE NAMES",
@@ -436,11 +459,12 @@ def test_n30_is_covered_unfired_by_d6_and_its_fire_needs_a_member_he_names() -> 
         assert words in head, words
 
 
-def test_n31_is_covered_unfired_on_the_network_facet() -> None:
+def test_n31_banked_at_session_9_on_the_network_facet() -> None:
     state, cell = _network_rows()["31"]
-    assert state == "COVERED-UNFIRED"
-    opening = cell.lstrip()
-    assert opening.startswith("**COVERED-UNFIRED 2026-09-28 (lane S)"), opening[:120]
+    assert state == "COVERED-PROVEN"
+    opening = _after_the_bank(cell, ("`query_kept` `verbatim` for `connections_of` and for "
+                                     "`network`", "13 person results",
+                                     "all 10 at 1st degree"))
     for words in ('network="F"', "connections_of=", "include_names=True",
                   "`PEOPLE-DATA-MITIGATIONS`", "A MEMBER HE NAMES",
                   "`tests/test_shared_connections_search.py`"):

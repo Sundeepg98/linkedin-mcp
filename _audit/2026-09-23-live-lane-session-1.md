@@ -4741,3 +4741,143 @@ a blank tab, and 0 LinkedIn tabs. Every run closed its own tab.
 
 The session-8 runner (session 7's, plus the badge check, the gate capture, the recovery and
 lane K's captures), the census and pin editors, in the lane's scratch folder.
+
+## Live session 9, 2026-10-10
+
+The orchestrator's GO of 14:42 IST: a short session, READ-ONLY -- no write and no edit, at
+most 10 loads and 3 searches, at least 20 s apart. The session ran from 14:41:54 to
+14:45:31. **6 of the 10 loads, 2 of the 3 searches, no write and no press. `N 30`, `N 85`,
+`N 172` and `N 31` FIRED AND BANKED, read-only, at the member he named, on the member token
+his named read of that member returned.** The interests details page was captured for
+`N 178` and `N 65`, and `N 47`'s refusal was read; each carries a dated note and keeps its
+state.
+
+**THE OPERATOR'S NAMED LIVE-PROOF TARGETS, his Pages and his employers appear nowhere in
+this repository.** Every step below names them by role.
+
+### The go, measured before obeying it
+
+At 14:40 port 9224 was held by the same one Chrome process (started 11:15:16); master was
+`f8c7392`, already merged into this branch (`66eb699`), which holds lane NP's two handles
+and its detail-page route; the main checkout's live-session flag stood. **THE ATTACH CHECK:
+PASS `[0, 1, 0]`** (14:42), and he was signed in (load 1: no wall, 0 challenge terms, the
+messaging badge 0).
+
+### The session, load by load
+
+    n   time      key (the ledger's)          surface   what it read
+    1   14:42:17  signin                      feed      signed in; the badge 0
+    2   14:42:40  named9                      in        the member he named; the token
+    3   14:43:03  s3_of                       search    that member's connections
+    4   14:43:25  s4_shared                   search    the connections the two share
+    5   (below)   details9_counted_by_hand    in        the interests details page
+    6   14:45:15  n47diag                     company   the Page root, read only
+
+By surface: in 2, search 2, feed 1, company 1. The closest two stamped loads stood 22.1 s
+apart. **Load 5's time is bounded, not stamped:** its run started at 14:43:46, 20.8 s after
+load 4, and its receipt was written at 14:43:55; the ledger's entry for it carries the time
+it was appended by hand (14:44:38). See "The harness's ledger missed a door" below. No
+block could press, so none was fronted.
+
+### 1: the named read -- the member token came back
+
+Load 2, `linkedin_read_named_profile` on the profile link the operator supplied, through
+lane NP's route: landed, identity confirmed. **The member token came back** -- 39
+characters, of the closed shape the read checks -- and is kept only in the gitignored
+state, never printed. `activity_items` held 2, both authored by the profile's owner: the
+item keys `M C32`'s react would take, which this session did not fire.
+
+### 2: the two searches with that token -- four rows banked
+
+* **Load 3, `linkedin_people_search_shape(connections_of=<token>, include_names=True)`:**
+  ok, landed on the people search, `query_kept` `verbatim` for `connections_of`; 10 person
+  results, the panel settled (6 polls), 0 values refused; 10 people records from 10 of 10
+  result cards, all 10 at 2nd degree. **`N 30`, `N 85` and `N 172` BANKED**: a member's
+  connections, the Connections-of filter, and those connections as people.
+* **Load 4, the same with `network="F"`:** `query_kept` `verbatim` for `connections_of`
+  and for `network`; 13 person results, the panel settled (5 polls), 0 values refused; 10
+  people records from 10 of 10 result cards, all 10 at 1st degree. **`N 31` BANKED**: the
+  connections he and that member share.
+
+Neither search drew a record at the named member's own link.
+
+### 3: the interests details page -- served, and no group on its first render
+
+Load 5, `linkedin_read_named_profile(section="interests")` (ruling
+NAMED-PROFILE-DETAIL-PAGES), the same member: landed on the details page, its path
+`/details/interests/` when read; `entries` absent, no reader being built yet. Its first
+render drew 4 headings, 8 list items and 16 member links, and 0 group, 0 company, 0
+newsletter and 0 school links, and no `role="tab"` element. **The default view is not
+every tab, and no group is on it:** `N 178` and `N 65` keep GAP, with a dated note each.
+The skeleton is in the gitignored state, for the reader built offline.
+
+### 4: `N 47` -- why the gate refuses, read
+
+Load 6, the first-by-rule Page's root, the Page followed, read through the shipped reader
+and verdict of `linkedin_follow_company_page` in the runner's process; nothing pressed:
+
+* the identity link holds: 1 link, naming exactly the id;
+* the Page's own control is named, shaped, `W10 click to unfollow W9`, so it does not open
+  `Follow `;
+* the one control in the main column that does (10 on the page in all) is shaped
+  `Follow W5 W5 W5` -- another name than the Page's -- and binds to none of the column's
+  headings;
+* so the verdict refuses at its binding condition, `unknown`, before any press.
+
+**THE SIMPLE CAUSE, DERIVED:** unfollowed, as at session 8's load 8, the Page's own control
+opens `Follow ` too, so the column holds two and the verdict refuses them as several --
+pressing one would be picking by position. The fix is offline: among several, aim at the
+one control bound to the Page's own heading.
+
+### Chrome's end
+
+At 14:45 port 9224 was held by the same process, and its DevTools target list held 1 page,
+a blank tab, and 0 LinkedIn tabs. Every run closed its own tab.
+
+### The harness's ledger missed a door
+
+The harness counts a load by wrapping `BROWSER.goto`, and it counts two doors: the read
+door and the named-profile door (`named_profile=True`). Lane NP's detail page enters
+through a third, `named_profile_details_of=`, so load 5 passed the wrapper uncounted and
+unspaced. It was counted by hand the moment its run ended, before load 6; its spacing held
+only because its run started 20.8 s after load 4. The wrapper is to be fixed offline, red
+first, before the next session that loads a detail page.
+
+### The census moves, and the pins
+
+**CORRECTS:** `_audit/_census/network.md` -- rows `30`, `85`, `172` and `31` read COVERED-UNFIRED, never fired; in session 9 each fired read-only at the member he named, on the member token his named read returned, and each moves to COVERED-PROVEN.
+
+**FOUR ROWS MOVED, EACH ON ITS OWN CELL'S BAR:**
+
+    row     the bar                                  what session 9 read
+    N 30    a member's connections, at a member      load 3: verbatim; 10 person results;
+            he names                                 settled; 0 refused; 10 records
+    N 85    the Connections-of filter, on lane S's   the same fire
+            whole bank rule
+    N 172   those connections AS PEOPLE, under the   the same fire: 10 people records
+            six mitigations
+    N 31    the connections the two share            load 4: both verbatim; 13 person
+                                                     results; 10 records, all 1st degree
+
+`N 178`, `N 65` and `N 47` carry dated notes and keep their states.
+
+**THE COUNTS**, file-wide by `scripts/count_census_states.py`:
+
+    slice         proven                    unfired
+    network       COVERED-PROVEN 22 -> 26   COVERED-UNFIRED 11 -> 7
+
+**THE PINS, MEASURED AND RE-PINNED:** `--check` named three figures and four bucket-1 rows:
+
+    delivered_strict    109 -> 113
+    unfired              21 -> 17
+    b1_no_ruling          9 -> 5
+    PINNED_B1_ROWS       NO RULING loses N 30, N 31, N 85 and N 172
+
+The tests that pin those rows moved with them, in the same commit:
+`tests/test_people_search_readers.py` (`N 85`, `N 172`) and
+`tests/test_shared_connections_search.py` (`N 30`, `N 31`).
+
+### Scratch, declared disposable
+
+The session-9 runner (session 8's, with session 9's four read phases and a read-only
+gate), the census, pin and test editors, in the lane's scratch folder.

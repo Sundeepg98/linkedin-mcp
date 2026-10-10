@@ -1272,7 +1272,11 @@ PINNED = {
     #: (the unfollow through LinkedIn's confirmation, the row gone and a posting
     #: reading not-following) and `N 46` and `J 103` (the follow from a posting
     #: that restored it, verified on Manage Pages) fired live and banked.
-    "delivered_strict": 109,
+    #: 113 AT THE LIVE LANE'S SESSION 9 (2026-10-10), MEASURED: `N 30`, `N 85`
+    #: and `N 172` (a named member's connections, as people, by the
+    #: Connections-of filter) and `N 31` (the connections he and that member
+    #: share) fired live, read-only, and banked.
+    "delivered_strict": 113,
     #: The live lane's merge: N 134, P O3 and M C72 left GAP.
     #: Lane D's merge: N 132 left GAP, for COVERED-UNFIRED under D6.
     #: 544 AT THE ORCHESTRATOR'S MERGE OF LANE D (2026-09-27), MEASURED: lane D
@@ -1393,7 +1397,11 @@ PINNED = {
     #: (the unfollow through LinkedIn's confirmation, the row gone and a posting
     #: reading not-following) and `N 46` and `J 103` (the follow from a posting
     #: that restored it, verified on Manage Pages) fired live and banked.
-    "unfired": 21,
+    #: 17 AT THE LIVE LANE'S SESSION 9 (2026-10-10), MEASURED: `N 30`, `N 85`
+    #: and `N 172` (a named member's connections, as people, by the
+    #: Connections-of filter) and `N 31` (the connections he and that member
+    #: share) fired live, read-only, and banked.
+    "unfired": 17,
     #: 104 AT THE ORCHESTRATOR'S MERGE OF LANE Y2'S FOLLOW-UP (2026-09-27), MEASURED:
     #: the P-R settings block itemized into 22 rows (P2-P23; Delete Data EXCLUDED-RULED).
     #: 101 AT LANE S'S NAMES ADOPTION (2026-09-27), MEASURED: `N 79`, `N 172`
@@ -1808,7 +1816,11 @@ PINNED = {
     #: the results) and `N 26` (his connections filtered by place) fired live and
     #: banked; `N 155` moved on the orchestrator's call of that day, by D6 on
     #: `M M1`'s session-5 send.
-    "b1_no_ruling": 9,
+    #: 5 AT THE LIVE LANE'S SESSION 9 (2026-10-10), MEASURED: `N 30`, `N 85`
+    #: and `N 172` (a named member's connections, as people, by the
+    #: Connections-of filter) and `N 31` (the connections he and that member
+    #: share) fired live, read-only, and banked.
+    "b1_no_ruling": 5,
     #: 7 AT THE ORCHESTRATOR'S MERGE OF LANE L7'S P B9 (2026-09-27), MEASURED: P B9
     #: (Premium badge) moved GAP -> COVERED-UNFIRED, released like the intro edits.
     #: 4 AT THE LIVE LANE'S MERGE OF MASTER c2825a4 (2026-09-28), MEASURED on the
@@ -2004,8 +2016,7 @@ PINNED_B1_ROWS: dict[str, tuple[str, ...]] = {
     #: filtered by place or employer; never fired. Reads no ruling holds.
     NO_RULING: (
         "J 121", "J 122",
-        "N 20", "N 30", "N 31",
-        "N 45", "N 85", "N 172",
+        "N 20", "N 45",
         "P A8",
         #: `J 107` and `M M53` entered with lane S's offline frontier,
         #: 2026-09-28, fired at session 2 without banking, and LEFT at
@@ -2017,6 +2028,9 @@ PINNED_B1_ROWS: dict[str, tuple[str, ...]] = {
         #: live and banked, the two edits tested and restored exactly.
         #: `N 25`, `N 81` and `N 26` LEFT at session 7 (2026-10-10), fired live and
         #: banked: the name search, the degree facet, the place filter.
+        #: `N 30`, `N 85`, `N 172` and `N 31` LEFT at session 9 (2026-10-10),
+        #: fired live at the member he named, read-only, and banked: his
+        #: connections as people, and the ones the two of them share.
     ),
 }
 
