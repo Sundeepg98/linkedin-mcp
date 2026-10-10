@@ -4595,7 +4595,7 @@ TRACKER_STAGES_LANE_A: dict[str, str] = {
 
 @mcp.tool()
 async def linkedin_tracker_stage(
-    stage: str, limit: int = DEFAULT_LIMIT
+    stage: str = "interview", limit: int = DEFAULT_LIMIT
 ) -> dict[str, Any]:
     """List one further stage of your own job tracker: interview, archived or clicked_apply.
 
@@ -4619,7 +4619,7 @@ async def linkedin_tracker_stage(
     stage and moves no job between lists.
 
     Args:
-        stage: interview, archived or clicked_apply.
+        stage: interview (the default), archived or clicked_apply.
         limit: maximum rows to return (default 25, max 100).
     """
     if not isinstance(stage, str) or stage not in TRACKER_STAGES_LANE_A:

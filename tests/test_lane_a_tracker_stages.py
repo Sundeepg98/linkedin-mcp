@@ -160,3 +160,15 @@ def test_each_stage_address_is_admitted_by_exactly_its_own_line(stage):
 def test_the_stage_table_is_exactly_the_three_tokens():
     assert set(server_module.TRACKER_STAGES_LANE_A) == {
         "interview", "archived", "clicked_apply"}
+async def test_the_default_stage_is_interview(drive):
+    """The default is the stage that matters most to a job search, and it is
+    what lets tests/test_tool_envelopes_emit_no_page_string.py drive this tool
+    (that harness supplies only REQUIRED parameters)."""
+    page = FakePage(evaluate_result=[STAGE_CARD])
+    page.inner_text_result = _strip()
+    navigations = drive(page)
+
+    result = await linkedin_tracker_stage(limit=25)
+
+    assert "error" not in result, result
+    assert navigations == [f"{BASE}/jobs-tracker/?stage=interview"]

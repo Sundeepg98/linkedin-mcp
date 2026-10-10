@@ -714,6 +714,13 @@ tool in a contiguous `LANE A` block of `server.py`:
   clicked_apply list as a failure, and each address admitted by exactly its
   own line. The covered-row guard binds `J 50` and `J 51` to the chain, with a
   control that renames the reader call on a copy and watches it convict.
+* `stage` DEFAULTS TO `interview`, and the reason is a guard, not taste:
+  `tests/test_tool_envelopes_emit_no_page_string.py` supplies only REQUIRED
+  parameters, so a required `stage` got its synthetic value, was refused, and
+  the tool read as "not_driven: never read the page" -- a coverage hole the
+  guard's own baseline would have recorded. With the default it is driven and
+  CLEAN (11 page reads, one navigation, no page string in any envelope), and
+  the baseline records it so.
 * THE SURFACE PINS, each moved with its cause: 61 -> 62 tools and 96 -> 98
   parameters (`tests/test_the_tool_surface_is_pinned_so_a_row_must_move.py`),
   the registry counts in `tests/test_server_surface.py` (renamed
