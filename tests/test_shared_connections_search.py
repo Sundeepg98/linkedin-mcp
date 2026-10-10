@@ -447,10 +447,21 @@ def test_n31_is_covered_unfired_on_the_network_facet() -> None:
         assert words in opening, words
 
 
-def test_n81_is_covered_unfired_on_the_facet_alone() -> None:
+#: THE LIVE LANE'S SESSION 7 (2026-10-10) BANKED `N 25`, `N 81` AND `N 26`, each
+#: on its own cell's bar; the banking paragraph opens each cell and lane S's
+#: paragraph -- what the route is, and why -- is kept after it, checked as before.
+SESSION_7_BANK = "**FIRED AND BANKED 2026-10-10 (the live lane's session 7)"
+
+
+def test_n81_banked_at_session_7_on_the_facet_alone() -> None:
     state, cell = _network_rows()["81"]
-    assert state == "COVERED-UNFIRED"
+    assert state == "COVERED-PROVEN"
     opening = cell.lstrip()
+    assert opening.startswith(SESSION_7_BANK), opening[:120]
+    for words in ("`query_kept` `verbatim` for `network`", "4 of 4, then 10 of 10",
+                  "applied the facet to the results"):
+        assert words in opening[: opening.find("**COVERED-UNFIRED 2026-09-28 (lane S")], words
+    opening = opening[opening.find("**COVERED-UNFIRED 2026-09-28 (lane S"):]
     assert opening.startswith("**COVERED-UNFIRED 2026-09-28 (lane S"), opening[:120]
     head = opening[: opening.find("**FIRED LIVE 2026-09-21")]
     for words in ('network="F"', "`tests/fixtures/live2/n23.html`", "`F` and `S`",
@@ -523,10 +534,19 @@ def _cell(row: str) -> tuple[str, str, str]:
     raise AssertionError(f"no row {row!r} in network.md")
 
 
-def test_n25_is_covered_unfired_by_d6_as_a_name_search_of_his_first_degree() -> None:
+_LANE_S_D6 = "**COVERED-UNFIRED 2026-09-28 (lane S), BY D6-CAPABILITY-OVER-AFFORDANCE"
+
+
+def test_n25_banked_at_session_7_as_a_name_search_of_his_first_degree() -> None:
     _capability, state, cell = _cell("25")
-    assert state == "COVERED-UNFIRED"
-    assert cell.startswith("**COVERED-UNFIRED 2026-09-28 (lane S), BY D6-CAPABILITY-OVER-AFFORDANCE"), cell[:140]
+    assert state == "COVERED-PROVEN"
+    assert cell.startswith(SESSION_7_BANK), cell[:140]
+    bank = cell[: cell.find(_LANE_S_D6)]
+    for words in ('network="F"', "exactly one of them at the profile link the operator supplied",
+                  "a 1st-degree connection found by name", "lane S's bank rule"):
+        assert words in bank, words
+    cell = cell[cell.find(_LANE_S_D6):]
+    assert cell.startswith(_LANE_S_D6), cell[:140]
     head = cell[: cell.find("R2 **RETURNED TO GAP")]
     for words in ('network="F"', "keywords=", "include_names=True",
                   "FIND A 1ST-DEGREE CONNECTION BY NAME",
@@ -536,11 +556,17 @@ def test_n25_is_covered_unfired_by_d6_as_a_name_search_of_his_first_degree() -> 
         assert words in head, words
 
 
-def test_n26_keeps_location_and_company_and_splits_the_rest_to_26b() -> None:
+def test_n26_banked_its_location_half_and_keeps_the_split_to_26b() -> None:
     capability, state, cell = _cell("26")
     assert capability == "Filter your connections by location or company"
-    assert state == "COVERED-UNFIRED"
-    assert cell.startswith("**COVERED-UNFIRED 2026-09-28 (lane S), BY D6-CAPABILITY-OVER-AFFORDANCE"), cell[:140]
+    assert state == "COVERED-PROVEN"
+    assert cell.startswith(SESSION_7_BANK + ", THE LOCATION HALF.**"), cell[:140]
+    bank = cell[: cell.find(_LANE_S_D6)]
+    for words in ("`verbatim` for `location_ids` and for `network`", "all 10 at 1st degree",
+                  "The row asks location OR company"):
+        assert words in bank, words
+    cell = cell[cell.find(_LANE_S_D6):]
+    assert cell.startswith(_LANE_S_D6), cell[:140]
     head = cell[: cell.find("R2 **RETURNED TO GAP")]
     for words in ('network="F"', "location_ids=", "current_company_ids=",
                   "COMPOUND-ROW-SPLITS-ONLY-ON-STATE", "`26b`",
