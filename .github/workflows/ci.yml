@@ -282,8 +282,10 @@ jobs:
           # gets ONE cell (ubuntu, 3.13) in FOUR shards. Everything else --
           # master, pull_request, workflow_dispatch, and any other push --
           # takes the literals above untouched, so the full matrix's outputs
-          # are byte-for-byte what they were (tests/test_ci_fast_lane.py runs
-          # this script both ways and compares).
+          # are byte-for-byte what they were: compared once against 3c8edc2's
+          # script (195 bytes, four event shapes, recorded in
+          # _audit/2026-10-10-lane-ci-fastlane.md), and pinned per event shape
+          # by tests/test_ci_fast_lane.py, which runs this script.
           #
           # WHY IT EXISTS. Lanes ran their suites on the one shared 8-core box
           # because the push gate let nothing but master out; a lane took
