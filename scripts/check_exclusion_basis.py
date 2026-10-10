@@ -421,6 +421,20 @@ FAMILIES: dict[str, Family] = {f.fid: f for f in (
         ("_audit/2026-09-27-rulings-relation-removals-and-account-destruction.md",
          "REOPENER: he asks for one of them by name, naming the account or the data,")],
        [r"ACCOUNT-DESTRUCTION-STAYS-MANUAL"]),
+    # Registered 2026-10-10 (lane K, `_audit/2026-09-28-lane-k-ledger.md` s2).
+    # op is NO for the reason D5's is: the orchestrator made the call, applying
+    # the operator's COST-AWARE STAKES-GATING rule, and the operator can
+    # override it. The ruling names a CLASS (Premium, InMail credits, ads,
+    # boosts, any paid upgrade), so each row cites the ruling id in its own
+    # cell: `P S9` (the Premium plan) and `M C71` (a paid boost).
+    _f("PURCHASES-STAY-MANUAL",
+       "a purchase -- Premium, InMail credits, ads, boosts, any paid upgrade -- is not built",
+       "ORCHESTRATOR", "NO",
+       [("_audit/2026-09-28-rulings-build-classes.md",
+         "RULED: (orchestrator, 2026-09-28, applying COST-AWARE STAKES-GATING) PURCHASES-STAY-MANUAL"),
+        ("_audit/2026-09-28-rulings-build-classes.md",
+         "its row is EXCLUDED-RULED with the reopener \"he names a purchase to automate\"")],
+       [r"PURCHASES-STAY-MANUAL"]),
     # ---- the 2026-09-05 retirement families (wave-ruled; the queue was his) ----
     *_RETIREMENTS,
 )}
