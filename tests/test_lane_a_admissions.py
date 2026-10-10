@@ -70,13 +70,29 @@ class Admission(NamedTuple):
     #: empty for an allowlist-silence admission.
     excused: frozenset
     siblings: tuple
-    #: Spellings the pair must newly admit besides ``address`` (normally the
-    #: other slash form).
+    #: Spellings the pair must newly admit besides ``address`` and, when
+    #: ``twin``, its other slash form.
     spellings: tuple = ()
+    #: False for an address that ends in a query value: it has no slash twin.
+    twin: bool = True
+    #: True for the search-shaped lines that take a query, as the classic job
+    #: search line does; the shape check then permits exactly that one group,
+    #: ``(\?[^#]*)?``, and nothing else.
+    query: bool = False
 
 
 def _slash_twin(url: str) -> str:
     return url[:-1] if url.endswith("/") else url + "/"
+
+
+def _own(adm) -> set:
+    own = {adm.address, *adm.spellings}
+    if adm.twin:
+        own.add(_slash_twin(adm.address))
+    return own
+
+
+QUERY_GROUP = r"(\?[^#]*)?"
 
 
 ADMISSIONS = (
@@ -209,6 +225,330 @@ ADMISSIONS = (
                     "/mypreferences/d/categories/", "a longer leaf"),
         ),
     ),
+    # ------------------------------------------------------------------
+    # ALLOWLIST SILENCE (the ruling's second clause): no substring crossed,
+    # so `excused` is empty and the exemption table must hold nothing for
+    # any of these.
+    Admission(
+        key="featured",
+        rows=("P S1",),
+        address=f"{B}/in/me/details/featured/",
+        excused=frozenset(),
+        siblings=(
+            Sibling(f"{B}/in/me/details/featured/edit/", "/edit/",
+                    "the Featured editor, a write"),
+            Sibling(f"{B}/in/me/details/featured/?x=1", None, "a QUERY"),
+            Sibling(f"{B}/in/someone-else/details/featured/", None,
+                    "another member's Featured page"),
+            Sibling(f"{B}/in/me/details/", None, "the details root"),
+        ),
+    ),
+    Admission(
+        key="skill-insights",
+        rows=("P S3",),
+        address=f"{B}/in/me/skill-insights/2/",
+        excused=frozenset(),
+        siblings=(
+            Sibling(f"{B}/in/me/skill-insights/", None, "no segment"),
+            Sibling(f"{B}/in/me/skill-insights/12345/", None,
+                    "five digits -- the class is closed at four"),
+            Sibling(f"{B}/in/me/skill-insights/abc/", None, "a word segment"),
+            Sibling(f"{B}/in/me/skill-insights/\u0662/", None,
+                    "an Arabic-Indic digit, which a \\d class would admit"),
+            Sibling(f"{B}/in/me/skill-insights/2/?x=1", None, "a QUERY"),
+            Sibling(f"{B}/in/someone-else/skill-insights/2/", None,
+                    "another member's skill page"),
+        ),
+        spellings=(f"{B}/in/me/skill-insights/9999/",),
+    ),
+    Admission(
+        key="premium-matches",
+        rows=("N 199",),
+        address=f"{B}/premium/matches/",
+        excused=frozenset(),
+        siblings=(
+            Sibling(f"{B}/premium/", None, "the purchase family root"),
+            Sibling(f"{B}/premium/matches/?x=1", None, "a QUERY"),
+            Sibling(f"{B}/premium/matches/connect/", "/connect",
+                    "a SUB-PATH naming an act"),
+            Sibling(f"{B}/premium/products/", None, "a purchase page"),
+        ),
+    ),
+    Admission(
+        key="tracker-interview",
+        rows=("J 50",),
+        address=f"{B}/jobs-tracker/?stage=interview",
+        excused=frozenset(),
+        twin=False,
+        siblings=(
+            Sibling(f"{B}/jobs-tracker/?stage=withdraw", None,
+                    "a stage nothing names"),
+            Sibling(f"{B}/jobs-tracker/?stage=interview&x=1", None,
+                    "a second key"),
+            Sibling(f"{B}/jobs-tracker/?stage=INTERVIEW", None,
+                    "another case"),
+            Sibling(f"{B}/jobs-tracker/?stage=in_progress", None,
+                    "the tab's LABEL, which is not its address"),
+            Sibling(f"{B}/jobs-tracker/?stage=interview/", None,
+                    "a trailing slash after the token"),
+        ),
+    ),
+    Admission(
+        key="tracker-archived",
+        rows=("J 51",),
+        address=f"{B}/jobs-tracker/?stage=archived",
+        excused=frozenset(),
+        twin=False,
+        siblings=(
+            Sibling(f"{B}/jobs-tracker/?stage=archive", None,
+                    "a near spelling"),
+            Sibling(f"{B}/jobs-tracker/?stage=archived&x=1", None,
+                    "a second key"),
+        ),
+    ),
+    Admission(
+        key="tracker-clicked-apply",
+        rows=("J 52",),
+        address=f"{B}/jobs-tracker/?stage=clicked_apply",
+        excused=frozenset(),
+        twin=False,
+        siblings=(
+            Sibling(f"{B}/jobs-tracker/?stage=clicked_apply&apply=1", None,
+                    "a second key naming the act"),
+            Sibling(f"{B}/jobs-tracker/?stage=clicked", None,
+                    "a near spelling"),
+        ),
+    ),
+    Admission(
+        key="ai-job-search",
+        rows=("J 16",),
+        address=f"{B}/jobs/search-results/",
+        excused=frozenset(),
+        query=True,
+        siblings=(
+            Sibling(f"{B}/jobs/search-results/?keywords=a&alertAction=viewjobs",
+                    "action=", "the alert links LinkedIn draws, which carry "
+                    "alertAction= (J 38: its D6 route is elsewhere)"),
+            Sibling(f"{B}/jobs/search-results/x/", None, "a SUB-PATH"),
+            Sibling(f"{B}/jobs/search-resultsx/", None, "a longer word"),
+            Sibling(f"{B}/jobs/search-results/?keywords=a#frag", None,
+                    "a fragment"),
+        ),
+        spellings=(f"{B}/jobs/search-results/?keywords=placeholder",
+                   f"{B}/jobs/search-results?keywords=placeholder"),
+    ),
+    Admission(
+        key="career-insights",
+        rows=("J 160",),
+        address=f"{B}/explore-career-insights/",
+        excused=frozenset(),
+        query=True,
+        siblings=(
+            Sibling(f"{B}/explore-career-insights/x/", None, "a SUB-PATH"),
+            Sibling(f"{B}/explore-career-insights/?action=x", "action=",
+                    "a query naming an act"),
+        ),
+        spellings=(
+            f"{B}/explore-career-insights/?job_title=placeholder&location=placeholder",
+            f"{B}/explore-career-insights?job_title=placeholder",
+        ),
+    ),
+    Admission(
+        key="learning-home",
+        rows=("J 152",),
+        address=f"{B}/learning/",
+        excused=frozenset(),
+        siblings=(
+            Sibling(f"{B}/learning/chatbot/", None,
+                    "the AI coach (J 155), not admitted"),
+            Sibling(f"{B}/learning/1234567890/1234567890/", None,
+                    "a course video (J 153), not admitted"),
+            Sibling(f"{B}/learning/role-play/scenarios/new/", None,
+                    "starting a role-play session"),
+            Sibling(f"{B}/learning/me/", None, "the library's parent"),
+            Sibling(f"{B}/learning/?x=1", None, "a QUERY"),
+        ),
+    ),
+    Admission(
+        key="learning-browse",
+        rows=("J 152",),
+        address=f"{B}/learning/browse/",
+        excused=frozenset(),
+        siblings=(
+            Sibling(f"{B}/learning/browse/x/", None, "a SUB-PATH"),
+        ),
+    ),
+    Admission(
+        key="learning-certifications",
+        rows=("J 152",),
+        address=f"{B}/learning/browse/certifications/",
+        excused=frozenset(),
+        siblings=(
+            Sibling(f"{B}/learning/browse/certifications/x/", None,
+                    "a SUB-PATH"),
+        ),
+    ),
+    Admission(
+        key="learning-library",
+        rows=("J 154",),
+        address=f"{B}/learning/me/my-library/",
+        excused=frozenset(),
+        siblings=(
+            Sibling(f"{B}/learning/me/my-library/x/", None, "a SUB-PATH"),
+        ),
+    ),
+    Admission(
+        key="learning-in-progress",
+        rows=("J 154",),
+        address=f"{B}/learning/me/my-library/in-progress/",
+        excused=frozenset(),
+        siblings=(
+            Sibling(f"{B}/learning/me/my-library/in-progress/?x=1", None,
+                    "a QUERY"),
+        ),
+    ),
+    Admission(
+        key="learning-career-journey",
+        rows=("J 156",),
+        address=f"{B}/learning/career-journey/",
+        excused=frozenset(),
+        siblings=(
+            Sibling(f"{B}/learning/career-journey/goals/", None,
+                    "a SUB-PATH where a goal would be set"),
+        ),
+    ),
+    Admission(
+        key="company-about",
+        rows=("J 106",),
+        address=f"{B}/company/placeholder-org/about/",
+        excused=frozenset(),
+        siblings=(
+            Sibling(f"{B}/company/placeholder-org/jobs/", None,
+                    "the jobs tab (J 107 needs none)"),
+            Sibling(f"{B}/company/placeholder-org/posts/", None,
+                    "the posts tab (J 110, a RULING row)"),
+            Sibling(f"{B}/company/placeholder-org/admin/", None,
+                    "Page administration"),
+            Sibling(f"{B}/company/%2e%2e/about/", None,
+                    "an encoded dot segment: the class holds no percent"),
+            Sibling(f"{B}/company/a.b/about/", None, "a dotted segment"),
+            Sibling(f"{B}/company/placeholder-org/about/?x=1", None, "a QUERY"),
+            Sibling(f"{B}/company/placeholder-org/about/../../in/someone-else/",
+                    None, "a TRAVERSAL onto a member profile"),
+        ),
+        spellings=(f"{B}/company/5417062/about/",),
+    ),
+    Admission(
+        key="company-life",
+        rows=("J 109",),
+        address=f"{B}/company/placeholder-org/life/",
+        excused=frozenset(),
+        siblings=(
+            Sibling(f"{B}/company/placeholder-org/life/12345/", None,
+                    "one Life video by id"),
+        ),
+        spellings=(f"{B}/company/5417062/life/",),
+    ),
+    Admission(
+        key="company-products",
+        rows=("J 111",),
+        address=f"{B}/company/placeholder-org/products/",
+        excused=frozenset(),
+        siblings=(
+            Sibling(f"{B}/company/placeholder-org/products/placeholder/", None,
+                    "one product under the tab (J 166 reads it at /products/)"),
+        ),
+        spellings=(f"{B}/company/5417062/products/",),
+    ),
+    Admission(
+        key="company-product",
+        rows=("J 111",),
+        address=f"{B}/company/placeholder-org/product/",
+        excused=frozenset(),
+        siblings=(
+            Sibling(f"{B}/company/placeholder-org/product/x/", None,
+                    "a SUB-PATH"),
+        ),
+        spellings=(f"{B}/company/5417062/product/",),
+    ),
+    Admission(
+        key="company-services",
+        rows=("J 111",),
+        address=f"{B}/company/placeholder-org/services/",
+        excused=frozenset(),
+        siblings=(
+            Sibling(f"{B}/company/placeholder-org/services/request/", None,
+                    "a SUB-PATH where a request would be made"),
+        ),
+        spellings=(f"{B}/company/5417062/services/",),
+    ),
+    Admission(
+        key="company-insights",
+        rows=("J 113", "J 114"),
+        address=f"{B}/company/placeholder-org/insights/?insightType=HEADCOUNT",
+        excused=frozenset(),
+        twin=False,
+        siblings=(
+            Sibling(f"{B}/company/placeholder-org/insights/", None,
+                    "the tab without its drawn key"),
+            Sibling(f"{B}/company/placeholder-org/insights/?insightType=ALUMNI",
+                    None, "another value -- only the drawn one is admitted"),
+            Sibling(f"{B}/company/placeholder-org/insights/?insightType=HEADCOUNT&x=1",
+                    None, "a second key"),
+        ),
+        spellings=(f"{B}/company/5417062/insights/?insightType=HEADCOUNT",),
+    ),
+    Admission(
+        key="company-events",
+        rows=("J 165",),
+        address=f"{B}/company/placeholder-org/events/",
+        excused=frozenset(),
+        siblings=(
+            Sibling(f"{B}/company/placeholder-org/events/12345/", None,
+                    "one event under the tab"),
+        ),
+        spellings=(f"{B}/company/5417062/events/",),
+    ),
+    Admission(
+        key="showcase",
+        rows=("J 167",),
+        address=f"{B}/showcase/placeholder-page/",
+        excused=frozenset(),
+        siblings=(
+            Sibling(f"{B}/showcase/", None, "the family root"),
+            Sibling(f"{B}/showcase/a.b/", None, "a dotted segment"),
+            Sibling(f"{B}/showcase/placeholder-page/admin/", None,
+                    "Page administration"),
+        ),
+    ),
+    Admission(
+        key="product-page",
+        rows=("J 166",),
+        address=f"{B}/products/placeholder-product/",
+        excused=frozenset(),
+        siblings=(
+            Sibling(f"{B}/products/", None, "the family root"),
+            Sibling(f"{B}/products/placeholder-product/reviews/", None,
+                    "a SUB-PATH"),
+        ),
+        spellings=(f"{B}/products/12345/",),
+    ),
+    Admission(
+        key="resume-tailoring",
+        rows=("J 147", "J 148", "J 149"),
+        address=f"{B}/job-apply-resources/?jobPostingId=1234567890",
+        excused=frozenset(),
+        twin=False,
+        siblings=(
+            Sibling(f"{B}/job-apply-resources/", None, "no posting"),
+            Sibling(f"{B}/job-apply-resources/?jobPostingId=abc", None,
+                    "a non-numeric id"),
+            Sibling(f"{B}/job-apply-resources/?jobPostingId=1&x=1", None,
+                    "a second key"),
+            Sibling(f"{B}/jobs/view/1234567890/apply/", None,
+                    "the apply route (J 82), not admitted"),
+        ),
+    ),
 )
 
 KEYS = [a.key for a in ADMISSIONS]
@@ -238,7 +578,7 @@ def _trips(url: str) -> frozenset:
 
 @pytest.mark.parametrize("adm", ADMISSIONS, ids=KEYS)
 def test_the_address_is_admitted_through_the_shipped_gate(adm):
-    for url in (adm.address, _slash_twin(adm.address), *adm.spellings):
+    for url in sorted(_own(adm)):
         assert readonly.is_read_url(url), (adm.key, url)
 
 
@@ -249,7 +589,10 @@ def test_exactly_one_anchored_line_carries_it_and_it_has_no_wildcard(adm):
     source = lines[0].pattern
     assert source.startswith("^https://www\\.linkedin\\.com/"), source
     assert source.endswith("$"), source
-    for token in (".*", ".+", r"\w", r"\S", "[^"):
+    if adm.query:
+        assert source.endswith("/?" + QUERY_GROUP + "$"), source
+        source = source.replace(QUERY_GROUP, "")
+    for token in (".*", ".+", r"\w", r"\S", r"\d", "[^"):
         assert token not in source, (adm.key, token, source)
     if "/in/" in source:
         assert "/in/me/" in source, (adm.key, source)
@@ -318,7 +661,7 @@ def test_without_the_line_the_address_is_refused(adm, monkeypatch):
 def test_each_admission_newly_admits_exactly_its_own_spellings(adm):
     """THE BLAST RADIUS of each pair, over the shipped corpus plus every
     address in this file -- before and after, on concrete urls."""
-    own = {adm.address, _slash_twin(adm.address), *adm.spellings}
+    own = _own(adm)
     corpus = sorted(
         set(blast_radius.corpus())
         | own

@@ -224,8 +224,11 @@ asks it.
     M C47                          /pulse/drafts/ (also /drafts/, /content/drafts/)               allowlist silence                           (b)     NO SERVED SPELLING: three NAMED guesses, none drawn
     M C70                          /search/results/content/                                       allowlist silence                           (b)     NO SERVED SPELLING for the row's page (search INSIDE a group)
     N 189                          /events/<digits>/attendees/?facetConnectionOf=<x>              allowlist silence                           (b)     NO SERVED SPELLING: a test fixture's, never captured
-    P S1, P S3, N 199, M C93,      (allowlist-silence pages drawn by LinkedIn)                    allowlist silence                           (b)     see 3.3
-      J 16, J 38, J 50-J 52, J 106,
+    M C93                          /search/results/all/                                           allowlist silence                           (b)     NOT ADMITTED: a fifth search vertical is D2's to grant (3.4, 7)
+    J 38                           /jobs/search-results/?...&alertAction=viewjobs&...             action= (re-addressed to the drawn alert    (a)     NOT ADMITTED: no exact address for action=; a D6 route on /notifications/ (4)
+                                                                                                  spelling)
+    P S1, P S3, N 199,             (allowlist-silence pages drawn by LinkedIn)                    allowlist silence                           (b)     ADMITTED (3.4)
+      J 16, J 50-J 52, J 106,
       J 109, J 111, J 113, J 114,
       J 147-J 149, J 152, J 154,
       J 156, J 160, J 165-J 167
@@ -463,4 +466,383 @@ all thirteen keys); census count cell 59 -> 61;
 to "allowlist match" and its named-refusal count 16 -> 14;
 `tests/test_gap_rows_on_refused_addresses.py` 78 -> 76 with both rows named;
 `census_completion.py` `b3_admitted` 54 -> 56, `b3_refused` 27 -> 25. Two
-capture lines.
+capture lines. **GATE after `cf8109a`:** 1766 passed, the boundary invariant
+and the gap-row pin among them.
+
+### 3.4 Twenty-four pages refused by allowlist silence alone
+
+The ruling's second clause: "A page refused by allowlist SILENCE alone, with no
+substring, is admitted the same way when a row needs it and no ruling holds
+it." Twenty-four anchored lines, one per address, in a `LANE A, CONTINUED`
+block; NO exemption is involved, so `_FORBIDDEN_SUBSTRING_PATTERN_EXEMPTIONS`
+is byte-identical and only the allowlist digest moves.
+
+    his own profile      /in/me/details/featured/                          P S1
+                         /in/me/skill-insights/[0-9]{1,4}/                 P S3
+    Premium              /premium/matches/                                 N 199
+    his job tracker      ?stage=interview / archived / clicked_apply       J 50, J 51, J 52   (one line each; the three-word line is untouched)
+    search               /jobs/search-results/ + query                     J 16
+                         /explore-career-insights/ + query                 J 160
+    LinkedIn Learning    /learning/, /browse/, /browse/certifications/     J 152
+                         /learning/me/my-library/, .../in-progress/        J 154
+                         /learning/career-journey/                         J 156   (the read half)
+    a company Page       /company/<seg>/about/ life/ products/ product/    J 106, J 109, J 111, J 113, J 114, J 165
+                         services/ events/ and insights/?insightType=HEADCOUNT
+                         /showcase/<seg>/, /products/<seg>/                J 167, J 166
+    resume tailoring     /job-apply-resources/?jobPostingId=[0-9]{1,20}    J 147, J 148, J 149
+
+THE SHAPES ARE THE DRAWN ONES, NARROWED: the company, showcase and product
+segment is the roster lines' class, `[A-Za-z0-9\-_]{1,100}` -- no percent and
+no dot, so neither an encoded nor a literal dot segment can reach a traversal;
+the skill segment is the small integer the tracked skills fixture draws (the
+side table's word placeholder for `P S3` was re-addressed to it); the
+Insights tab admits exactly `?insightType=HEADCOUNT`, the only value drawn
+anywhere; the resume-tailoring page exactly `?jobPostingId=` and digits. The
+two search-shaped lines take a query as the classic job search line does,
+values from a tool's arguments (D1-SEARCH-AS-READS) -- and the forbidden tuple
+still runs first, so the alert links LinkedIn draws into the AI search, which
+carry `alertAction=`, stay refused on `action=`.
+
+**`M C93` WAS WRITTEN AND WITHDRAWN BEFORE IT LANDED.** The all-results search
+page is refused by allowlist silence alone, and a line for it went in with the
+others. The discovery run then went red in three search-admission tests on one
+premise: `tests/test_search_admission_blast_radius.py`'s
+`test_exactly_the_four_d2_verticals_are_admitted` and its planted-prefix
+control, and `tests/test_the_search_results_address_is_refused_before_admission.py`'s
+"other five verticals" test. Those pin the measured scope of
+D2-SEARCH-VERTICALS-WIDENED -- exactly four closed words -- and a fifth vertical
+is that ruling's to grant, not this clause's. The line came out; `M C93` stays
+REFUSED with the reason on its row, and section 7 asks it.
+
+**`J 38` IS NOT AMONG THEM EITHER, AND WHY.** The table's address for it was a
+constructed keyword search; the page that holds the jobs an alert DELIVERED is
+the alert link, which carries `alertAction=` and stays refused. The line was
+re-addressed to that drawn spelling (values as placeholders), REFUSED on
+`FORBIDDEN[action=]+PATTERN-WOULD-ADMIT`. An exemption for `action=` on a query
+of unfixed key order is no exact address. The D6 route is section 4's.
+
+**WHAT DISK SAYS ABOUT THE DRAWN BASIS, read off the raw captures and tracked
+fixtures by a read-only child over 169 files (shapes only):** the company
+about, life and insights tabs are drawn; products, product, services, events,
+top-level showcase and products pages, and `/premium/matches/` are NOT in the
+current corpus -- their census cells record each drawn on a 2026-09-21 or
+2026-09-23 capture no longer on disk, and the tracked live fixtures are
+skeletons whose path words outside the harness list are blanked, so a zero
+there is not an absence. The cells' records stand; each capture line says a
+redirect is a finding. No stage token but `draft` is drawn anywhere, so
+interview, archived and clicked_apply rest on `readonly.py`'s own record that
+LinkedIn's payload names them (NAMED basis).
+
+**NOT ADMITTED from the same clause, each with its reason in 2.6/2.7:** a
+course video, the AI coach, the Ad Library, news, games, a live video event,
+creator hub, the drafts spellings, the comments metric, content search, the
+all-results search, the filtered attendee roster, his Page's admin surfaces, a
+newsletter's own page.
+
+**RED FIRST:** the twenty-four entries against the previous `readonly.py`, 96
+failed, 92 passed -- the four presence tests of each new entry failing, every
+sibling and table check passing before and after; with the block, 188 passed.
+**THE BLAST-RADIUS TEST CAUGHT A REAL THING ON ITS FIRST RUN:**
+`blast_radius.corpus()` already carried `/search/results/all/?keywords=x`, which
+the then-present all-results line admitted -- a spelling the author had not
+listed. That entry left with its line.
+
+**PINS:** the allowlist digest `fc6839c2e877c011` -> `d3c96a8103316665`, every
+other key byte-identical and the tree minus the block hashing to the prior pin;
+census count cell 61 -> 85; `tests/test_readonly.py` (three tracker stages and
+five company tabs leave its refused tables, recorded, replaced by a second key,
+a near spelling, the bare Insights tab and another insightType; the tracker
+test's permitted set grows to six with the three-word line asserted
+unchanged); `tests/test_company_page_boundary.py` (six tabs move to a
+`TABS_ADMITTED_BY_THEIR_OWN_LINE` tuple asserted the roster's way -- exactly one
+line, never the root entry; the refusal example becomes the Posts tab);
+`tests/test_company_page.py` (the About tab leaves the shaper-boundary
+agreement corpus for a `TABS_ON_THEIR_OWN_LINES` check, the People tab's
+shape); `tests/test_refusal_names_both_gates.py` (its allowlist-sentence needle
+moves from the About tab to the Jobs tab); `tests/test_job_home.py` (the AI
+search route it called refused is admitted; the property it guards -- the
+home's reader is no route -- now rests on that module carrying no navigation
+call, asserted, and on the navigation guard); `census_completion.py`
+`b3_admitted` 56 -> 59, `b3_refused` 25 -> 22, `jobs_admitted` 15 -> 34,
+`jobs_refused` 31 -> 12. Six also-driven verdicts in the two side tables turned
+True with these lines and were re-recorded; both checkers GREEN (98 of 98, 108
+of 108).
+
+**A GATE THIS LANE MISSED, FOUND HERE.** The discovery run -- every test file
+that drives the read boundary, 80 files, 7010 passed / 29 failed in 24 minutes
+on a shared box -- also convicted two things older than this commit:
+`tests/test_job_alerts_read_boundary.py` pins the pattern-exemption table's
+size, and it had been red since `8a0636a`, because each earlier gate here was a
+hand-picked list that left that direct importer out (now 10, each new entry
+named); and `tests/test_no_committed_identity.py` read `/company/12345/` in this
+lane's own test file as seven undeclared company ids (now the declared
+synthetic id the company boundary test already uses). Both are fixed in this
+commit. The lesson is the brief's own: the gate is the files that IMPORT what
+changed, enumerated, not the files one remembers.
+
+---
+
+## 4. Past the boundary: no reader is owed yet, and the captures that come first
+
+**NO ADMITTED PAGE HAS A TRACKED SKELETON FROM A LIVE CAPTURE, so no reader was
+built and no row moved state.** Measured two ways: a search of `tests/fixtures/**`
+for each admitted page's own content (the fixtures draw LINKS to several of
+these pages -- the skills page's skill-insight anchors, the posting's
+resume-tailoring and Insights anchors, the notifications' AI-search anchors --
+and never the pages themselves), and a read-only child's census of the 169
+files in the raw capture store and the tracked fixtures. A reader built on
+anything else would be built on synthetic markup, which moves no row and has
+failed live once already. Every admitted row is therefore GAP with gate
+MEASURE, and every one has a line in `_audit/_census/capture-queue-reads.tsv`.
+
+**THE QUEUE, 24 lines in Lane K's columns** (surface-id, address, presses,
+save, loads, searches, rows):
+
+    admitted pages (15 lines)    invitations-received, invitations-sent, people-followed,
+                                 job-application-settings, unfollowed, ads-settings,
+                                 featured, skill-insights, premium-matches, tracker-stages,
+                                 ai-job-search, career-insights, learning,
+                                 company-tabs, resume-tailoring
+    spellings first (5 lines)    connections-sort-and-filters (N 24, N 27, N 28),
+                                 page-admin-precondition (N A3, N A5),
+                                 creator-hub-on-the-dashboard (P L7),
+                                 comments-metric-spelling (M C39),
+                                 article-drafts-spelling (M C47)
+    section 5's specs (4 lines)  people-search-facets, profile-views-pills,
+                                 tracker-date-posted, posting-credentials-badge
+
+Nothing on any line is pressed unless the line names the ruling that permits
+the press; every address takes its variable segment from the operator or a
+tool's arguments, never from a page; the `/mynetwork/` lines share one
+badge bracket (the control page before and after, as `linkedin_connections`
+takes it). Loads, if every line were taken once: about 45, more than one
+session's LIVE-BUDGET-40-LOADS -- the orchestrator orders them.
+
+`M C70` and `N 189` already have capture specs (lane S, `F.4` and `F.8` in
+`_audit/2026-09-24-lane-s-people-search.md`); no second line was written.
+
+**D6 ROUTES, found on the way, none built here:**
+
+* `J 38`, the jobs an alert delivered: the alert notifications on the admitted
+  `/notifications/` page carry `originToLandingJobPostings`, the delivered job
+  ids (tracked `tests/fixtures/notifications.html`, four links).
+  `shape.notification_handles` already lifts `search_keywords` and
+  `company_id` out of those links and not this key; returning the ids lets
+  `linkedin_job_detail` read each. Whether the in-app list carries every
+  delivered job is unmeasured.
+* `N 86`, followers of a member: the people-search facet `followerOf` is on
+  record in three tracked live fixtures; its value is a member id, which
+  OTHER-MEMBER-IDS-AS-READS permits from a tool's arguments.
+* `N 24`, `N 27`, `N 28`: lane S moved `N 25` and `N 26` (the same list's
+  search and filter) to COVERED-UNFIRED through the people search filtered to
+  his first degree. Whether sort, Talks-about and Open-to have a people-search
+  spelling is what the `connections-sort-and-filters` line records.
+* `N 82`, `J 17`, `J 57`, `N 197`: section 5.
+
+---
+
+## 5. The 17 admitted rows a press or a ruling holds
+
+One paragraph each: the decision the row waits on, its evidence, and this
+lane's recommendation. The evidence was gathered read-only by a child into a
+scratch file and every quote re-checked against the tree before it entered
+here. No press default is implemented: for none of the PRESS rows below is the
+shipped gate's evidence pattern -- a per-control basis AND a before/after
+reading proving no state change -- already on record for that row's control,
+so each gets a measurement spec instead (section 4 lists the lines).
+
+**P C8 (PRESS) -- save his profile as a PDF.** Waits on two presses on
+`/in/me/`: the More-menu opener, a disclosure, which the shipped gate now
+answers `control_not_judged` (the side table's `no_sensitivity_basis` is the
+pre-404da96 name; same outcome) because the `[aria-expanded]` shape also
+matches nine member links on the capture of his profile, so only a
+position-pinned judgement could admit it; and the Save-to-PDF item, an ACT
+press whose shape was never measured. The download transport is built
+(`linkedin_server/cdp_download.py`, off by default). No evidence pattern on
+record. RECOMMENDATION: the orchestrator decides once whether a position-pinned
+judgement (a control identified by its index on a recorded capture, re-verified
+by shape at press time) is admissible -- the same question holds `N 76` -- and
+the item press is specified as his own act (not outward: it downloads his own
+profile) with its own capture.
+
+**M C96 (PRESS) -- the content-credentials panel on a posting's image.** Waits
+on measuring the badge control's shape; `press.py` declares no basis for
+`/jobs/view/`. No evidence on record. RECOMMENDATION: a capture of a posting
+that draws the badge, recording the control's attributes and the panel it
+opens; then the press default is the orchestrator's, on that evidence.
+
+**N 76 (PRESS) -- the follow link behind a menu on his own profile.** Waits on
+the orchestrator's undecided call on index-pinned disclosure judgements (as
+`P C8`): the trigger's `[aria-haspopup]` shape is judged an action on `/in/me/`
+because all nine matches on the capture are member links. No evidence pattern.
+RECOMMENDATION: decide the position-pinned question once for both rows.
+
+**N 82 (RULING) -- a people-search filter whose label this surface may not
+read.** The row is held because "nothing available tells a people filter from
+a jobs badge without reading the label". D6 OFFERS ANOTHER ROUTE: lane L2 and
+lane S recorded the LinkedIn-written facet `activelyHiring` among the query
+keys of LinkedIn-authored people-search hrefs; `linkedin_server/people_search.py`
+does not compose it, and no tracked fixture carries it (audits only).
+RECOMMENDATION: the gate is not a ruling; compose `activelyHiring` from a tool
+argument under D1-SEARCH-AS-READS once a tracked capture carries the facet (a
+capture line, `people-search-facets`, records it), and the row moves by D6 on
+the shipped people-search reader.
+
+**N 86 (PRESS) -- "TERMINAL BY THIS ROUTE" stands, and D6 now has a route on
+record that nobody reported.** The All-filters press is not relitigated. But
+the LinkedIn-written facet `followerOf` IS on record: three tracked live
+fixtures (`tests/fixtures/live2/n84.html`, `n87.html`, `n94.html`, committed
+`5f70af8` on 2026-09-28) carry it in eleven hrefs, after the side-table note,
+the census cell and lane L2 said "No people-search facet for this filter is on
+record". Its value is a member id, which `OTHER-MEMBER-IDS-AS-READS` permits
+from a tool's arguments, never from a page. `people_search.py` does not
+compose it. RECOMMENDATION: compose `followerOf` from a caller-supplied member
+id; the people-search reader already reads the captured results markup, so the
+row can move to COVERED-UNFIRED by D6 on that build. Not built in this lane
+(section 7).
+
+**N 90, N 91, N 92 (PRESS) -- TERMINAL BY THIS ROUTE, and no facet on record.**
+The facet census over the tracked fixtures finds none for these three filters.
+RECOMMENDATION: nothing to rule; a capture line records any LinkedIn-written
+people-search href carrying these filters on the surfaces that already draw
+search links (profiles, company Pages, the jobs pages), and D1 applies the
+moment one is found.
+
+**N 133 (PRESS) -- applying a viewer filter on his profile-views page.** The
+side table calls the restore-and-prove press "a build"; it WAS built
+(`linkedin_server/view_switch.py`) and fired with a proving before/after
+reading -- for `N 134`'s option ("Interesting viewers / verified", live lane
+session 1, Entry 7). `N 133` was never re-assessed against it. The evidence on
+record covers that one option, not the time-range or Company pills this row
+needs. RECOMMENDATION: re-gate `N 133` PRESS -> MEASURE: one live run of the
+shipped view switch over each remaining pill, with the same before/after
+reading, is the whole of what remains (a measurement spec, not a decision).
+
+**N 174 (RULING) -- his pending group requests.** Observable only once a
+pending request exists; creating one is an act toward a group, now built behind
+the grant under EVERY-OUTWARD-CLASS-BUILT-BEHIND-GRANTS ("RSVPs and group
+membership requests") and fired only at a group he names
+(OPERATOR-NAMES-THE-TARGET). The join write itself (census `M C61`) is not
+built. RECOMMENDATION: build the join request behind the grant; the row then
+waits only on the operator naming a group.
+
+**N 197 (PRESS) -- copy a link to a group.** The side table places the control
+in "the group page's own menu" at `/groups/<id>/`; the 2026-09-05 measurement
+opened the per-row menus on the `/groups/` ROOT and never the item. D6 is the
+row's own open question: a group's address is composed from its numeric id.
+RECOMMENDATION: apply D6 -- the package composes `/groups/<id>/` from a
+caller-supplied id, which is the link the control copies -- and the row moves
+on that route's proof; the press is then unnecessary.
+
+**M C43 (RULING) -- a post's text, shaped.** Held by FEED-CONTENT-READ-RULING
+(counts and relations only). NAMES-AT-RUNTIME (the operator's, 2026-09-24) is
+registered as amending that ruling for what a read RETURNS, but its declared
+returns are names and group and event titles, not post text, and nothing has
+applied it to this row. RECOMMENDATION: the orchestrator applies the
+operator's 08:11 principle ("do not ask whether to deliver a capability ...
+mitigate the risk") to post text as it was applied to names: returned at
+runtime, sanitised, marked untrusted, never stored, one post per call. That is
+a call on what may be RETURNED, not an outward act.
+
+**J 17 (RULING) -- search from his device's current location.** Waits on the
+operator: a geolocation grant over CDP would persist in his real browser
+profile. Its own record already says the capability is served another way:
+"the location parameter already reaches every documented result set (a523131,
+decide-retire s3.7)". RECOMMENDATION: keep the grant with the operator, and
+ask the orchestrator to apply D6 -- the search he wants is delivered by naming
+the location -- which needs no grant at all.
+
+**J 56 (PRESS) -- filter his tracker by date posted.** The side table says "a
+checkbox is off press.SANCTIONED_SHAPES"; the fixtures it cites draw the
+opener as `div[role=button][aria-expanded]`, a sanctioned shape. What refuses
+it is the missing basis for `/jobs-tracker/`. RECOMMENDATION: the basis is a
+press-gate default (the orchestrator's); no before/after reading is on record,
+so a capture line opens the pill under the shipped view switch and reads the
+tracker's counts before and after.
+
+**J 57 (RULING) -- his connections reachable for a tracked job.** Waits on
+the composition question (`_audit/2026-09-21-the-jobs-direction.md` 6.1); lane
+D's D6 sweep left it out (a boolean against a count). Since NAMES-AT-RUNTIME,
+the people-search reader may return WHO. RECOMMENDATION: re-run D6 on it --
+the people search filtered to his first degree and the posting's company, both
+composed from tool arguments, returns exactly the connections the row asks
+for.
+
+**J 110 (RULING) -- a company Page's Home and Posts prose.** Held by
+`shape.company_about_card`'s docstring, which calls "THE DESCRIPTION IS
+MEASURED AND NOT PUBLISHED ... a ruling rather than an oversight". It is
+unregistered and names no decider; D3's logic reaches it (a refusal written
+beside code is a question, not a ruling). RECOMMENDATION: the orchestrator
+decides it under NAMES-AT-RUNTIME and the 08:11 principle as for `M C43`
+(organisation prose returned at runtime, untrusted, never stored); note also
+that the drawn `/company/<slug>/home/` and `/posts/` spellings stay refused.
+
+**J 131 (RULING) -- whom to message about a job, and whether it costs a
+credit.** The names half is answered (NAMES-AT-RUNTIME); what remains is
+whether the server should duplicate a ranking the `linkedin-jobs` skill
+already serves from mail -- unregistered. RECOMMENDATION: an orchestrator's
+call on duplication, applying the same rule to every row filed
+SERVED-BY-GMAIL-SKILL at once rather than row by row.
+
+---
+
+## 7. Questions for the orchestrator, each with its ground
+
+1. **R1's second question, on the invitation manager's received tab (`N 13`,
+   `N 14`, `N 19`).** Ground: `_audit/2026-08-30-linkedin-nine.md` 2.2, "Q2
+   emission | unmeasured, and the cost lands on someone else | Whether an
+   invitation marked seen is visible to its SENDER has never been measured."
+   The tab is admitted (the badge is a passive cost by the ruling's own
+   words); nothing loads it until its capture line is merged. If the
+   orchestrator reads Q2 as an outward cost, the received-tab line and its
+   exemption come out together (both carry `invitation-manager/?$`), and the
+   sent tab is unaffected.
+2. **How many named settings pages "one at a time" allows (`N 39`, `P P15`,
+   and `/jobs/application-settings/`).** Ground: ONE-NAMED-SETTINGS-PAGE-AT-A-TIME,
+   "ONE NAMED settings page below `/mypreferences/d/` -- one at a time, never
+   the family, never a wildcard ... A second page needs a second ruling", and
+   the 2026-09-27 admission recorded as "the orchestrator's APPLICATION of the
+   ruling above". Lane A applied it the same way, each page by exact address.
+   The two `/mypreferences/d/` pages are commit `cf8109a` alone; the
+   application-settings page is `435a133` alone.
+3. **Is "stored job applicant accounts" a credential surface (`P M9`,
+   `J 77`)?** Ground: the census cell, "Stored job applicant accounts" /
+   "View / delete stored third-party applicant accounts", and the ruling's
+   exclusion of "a credential, recovery, session or security surface". This
+   lane read it as accounts held for signing into employers' systems and left
+   it refused on `job-application`; that is an inference, not a measurement.
+4. **The two (c)? rows that rest on this lane's inference, not a record:
+   `M C95` (a live broadcast may register its viewer to the broadcaster) and
+   `J 153` (playing a course records progress).** Ground: none on record
+   either way; each census cell names only the payload ("a reader could
+   publish ... facts, never its words").
+5. **The three (e) rows: `M C99` games, `M C98` LinkedIn News, `J 159` the Ad
+   Library.** Ground: the brief's own class (e), with games as its example;
+   news and the ad library are this lane's reading of "purpose doubtful" for a
+   server whose rows are his account and his search. Overridable by one word.
+6. **`M C101`, a newsletter's own page.** Ground: `readonly.py`'s newsletters
+   entry -- "Its slug is ROUTINELY ITS AUTHOR'S NAME", "THIS PACKAGE COULD NEVER
+   ASSEMBLE THIS ADDRESS", and "it would put one in every log line that records
+   a page load". Under D3 these are not a ruling; NAMES-AT-RUNTIME and
+   PAGE-MAY-VETO-NEVER-SUPPLY answer two of the three. The third is whether a
+   navigated address is PERSISTED anywhere, which PEOPLE-DATA-MITIGATIONS
+   ("never stored") would forbid for a slug that is a name.
+7. **`M C93`, the all-results search, as a fifth search vertical.** Ground:
+   D2-SEARCH-VERTICALS-WIDENED, "four CLOSED segments,
+   /search/results/(people|companies|groups|events)/", and its measured scope
+   in `tests/test_search_admission_blast_radius.py`
+   (`test_exactly_the_four_d2_verticals_are_admitted`). The page is drawn (as
+   hashtag links on posts) and refused by allowlist silence alone; widening D2
+   to `all` is a re-application of D2, and the line lane A wrote for it was
+   withdrawn when those tests named that scope.
+8. **Decisions section 5 recommends rather than takes:** whether a
+   position-pinned control judgement is admissible (`P C8`, `N 76`); applying
+   D6 to `J 17` (the location parameter), `N 197` (a group link composed from
+   its id) and `J 57` (people search, first degree and the company); applying
+   the 08:11 principle to post text (`M C43`) and organisation prose
+   (`J 110`); duplication of skill-served rows (`J 131`); press-gate defaults
+   for `/jobs-tracker/` (`J 56`) and `/jobs/view/` (`M C96`).
+9. **Two D6 builds this lane names but did not take** (section 4): composing
+   the people-search facet `followerOf` (on record in three tracked live
+   fixtures) for `N 86`, and returning an alert notification's
+   `originToLandingJobPostings` job ids for `J 38`.

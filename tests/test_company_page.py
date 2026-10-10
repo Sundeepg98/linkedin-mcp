@@ -483,7 +483,11 @@ AGREEMENT_CORPUS = [
     # covers -- says False. That is not the two gates drifting apart; they
     # stopped being about the same page. It moved to
     # ``PEOPLE_TAB_ON_ITS_OWN_LINE`` below, asserted exactly that way.
-    f"{BASE}/company/{EPONYMOUS_SLUG}/about/",
+    # ``/company/<slug>/about/`` STOOD HERE UNTIL 2026-10-10 for the same
+    # reason and left the same way: lane A admitted the About tab on its OWN
+    # line, so it moved to ``TABS_ON_THEIR_OWN_LINES`` below. The Jobs tab,
+    # still refused by both, stands in.
+    f"{BASE}/company/{EPONYMOUS_SLUG}/jobs/",
     f"{BASE}/company/{EPONYMOUS_SLUG}/admin/",
     f"{BASE}/company/setup/new/",
     f"{BASE}/company/{EPONYMOUS_SLUG}/?foo=1",
@@ -506,6 +510,26 @@ def test_the_people_tab_is_the_roster_lines_and_not_this_shapers():
     carriers = [p for p in readonly._ALLOWED_URL_PATTERNS
                 if p.match(PEOPLE_TAB_ON_ITS_OWN_LINE)]
     assert len(carriers) == 1 and carriers[0].pattern.endswith("/people/?$")
+    assert not carriers[0].match(f"{BASE}/company/{EPONYMOUS_SLUG}/")
+
+
+#: The tabs lane A admitted 2026-10-10, each on its OWN line and none by the
+#: root line this shaper couples to -- the People tab's shape, again.
+TABS_ON_THEIR_OWN_LINES = tuple(
+    f"{BASE}/company/{EPONYMOUS_SLUG}/{tab}"
+    for tab in ("about/", "life/", "products/", "services/",
+                "insights/?insightType=HEADCOUNT", "events/")
+)
+
+
+@pytest.mark.parametrize("url", TABS_ON_THEIR_OWN_LINES)
+def test_the_lane_a_tabs_are_their_own_lines_and_not_this_shapers(url):
+    """As the People tab: the root shaper still refuses each tab, and the
+    boundary admits it by exactly one line, which does not admit the root."""
+    assert company_page.slug_is_addressable(url) is False
+    assert readonly.is_read_url(url) is True
+    carriers = [p for p in readonly._ALLOWED_URL_PATTERNS if p.match(url)]
+    assert len(carriers) == 1, [p.pattern for p in carriers]
     assert not carriers[0].match(f"{BASE}/company/{EPONYMOUS_SLUG}/")
 
 

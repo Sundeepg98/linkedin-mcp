@@ -1919,12 +1919,15 @@ BLOCKED = [
     # A wildcard query would have let every one of these through.
     "https://www.linkedin.com/jobs-tracker/",
     "https://www.linkedin.com/jobs-tracker/?stage=withdraw",
-    "https://www.linkedin.com/jobs-tracker/?stage=archived",
-    # The stages LinkedIn's own payload names and this server still refuses,
-    # listed since 2026-08-26 because that is the day the enumeration grew and
-    # a widening is only narrow if the things it did NOT admit are asserted.
-    "https://www.linkedin.com/jobs-tracker/?stage=interview",
-    "https://www.linkedin.com/jobs-tracker/?stage=clicked_apply",
+    # ``?stage=archived``, ``?stage=interview`` and ``?stage=clicked_apply``
+    # STOOD HERE UNTIL 2026-10-10 -- the stages LinkedIn's own payload names,
+    # listed since 2026-08-26 so the enumeration's edge was asserted. Lane A
+    # admitted each by its OWN line (READ-PAST-AN-ACT-SUBSTRING, allowlist
+    # silence alone); the closed three-stage line is unchanged. What stands
+    # in is each token with a second key, and a near spelling.
+    "https://www.linkedin.com/jobs-tracker/?stage=archived&x=1",
+    "https://www.linkedin.com/jobs-tracker/?stage=interview&x=1",
+    "https://www.linkedin.com/jobs-tracker/?stage=clicked",
     "https://www.linkedin.com/jobs-tracker/?apply=1",
     "https://www.linkedin.com/jobs-tracker/?stage=saved&save=1",
     "https://www.linkedin.com/jobs-tracker/?a%63tion=delete",
@@ -2272,9 +2275,16 @@ def test_the_tracker_allowlist_admits_three_stages_and_no_more():
     """
     from linkedin_server.config import BASE_URL
 
-    permitted = {"saved", "applied", "draft"}
-    refused = {"interview", "archived", "clicked_apply", "withdraw", "in_progress"}
+    # AMENDED 2026-10-10 (lane A): interview, archived and clicked_apply are
+    # admitted now, each by its OWN anchored line rather than by widening the
+    # three-stage alternation, which this test's docstring warned against and
+    # which stays exactly three words. The enumeration's edge is still named.
+    permitted = {"saved", "applied", "draft", "interview", "archived", "clicked_apply"}
+    refused = {"withdraw", "in_progress", "archive", "clicked"}
     assert permitted & refused == set()
+    three = [p for p in readonly._ALLOWED_URL_PATTERNS
+             if "(saved|applied|draft)" in p.pattern]
+    assert len(three) == 1, three
 
     for stage in sorted(permitted):
         url = f"{BASE_URL}/jobs-tracker/?stage={stage}"
@@ -2837,15 +2847,14 @@ MUST_STAY_UNREADABLE = (
     "https://www.linkedin.com/company/example-co/admin/dashboard/",
     # THE REST OF THE TABS, each a census row this admission deliberately did
     # not buy: About (J 106), Jobs (J 107), Life (J 109), Posts (J 110),
-    # Products and Services (J 111), Insights (J 113 / J 114).
-    "https://www.linkedin.com/company/example-co/about/",
+    # Products and Services (J 111), Insights (J 113 / J 114). About, Life,
+    # Products, Services and Insights-with-HEADCOUNT STOOD HERE UNTIL
+    # 2026-10-10, when lane A admitted each by its OWN line; what stays is the
+    # rest, and the Insights tab without its drawn key.
     "https://www.linkedin.com/company/example-co/jobs/",
-    "https://www.linkedin.com/company/example-co/life/",
     "https://www.linkedin.com/company/example-co/posts/",
-    "https://www.linkedin.com/company/example-co/products/",
-    "https://www.linkedin.com/company/example-co/services/",
     "https://www.linkedin.com/company/example-co/insights/",
-    "https://www.linkedin.com/company/example-co/insights/?insightType=HEADCOUNT",
+    "https://www.linkedin.com/company/example-co/insights/?insightType=ALUMNI",
     # A QUERY ON THE ADMITTED ROOT, which is where a filter naming a person
     # would arrive, and the product root, which is not a Page.
     "https://www.linkedin.com/company/example-co/?foo=1",

@@ -1879,7 +1879,13 @@ READONLY_AST_AT_LAST_REFREEZE = {
     # people and Pages he unfollowed, his advertising-data page), one line
     # each, each paired with one exemption below; the tree minus those two
     # lines and two entries hashes to the prior pins on all thirteen keys.
-    "_ALLOWED_URL_PATTERNS": "fc6839c2e877c011",
+    #
+    # fc6839c2e877c011 until lane A's fourth: twenty-four anchored lines for
+    # pages refused by allowlist silence alone (READ-PAST-AN-ACT-SUBSTRING's
+    # second clause), no exemption among them -- the exemption table and every
+    # other key are byte-identical, and the tree minus the block hashes to
+    # fc6839c2e877c011.
+    "_ALLOWED_URL_PATTERNS": "d3c96a8103316665",
     "_FORBIDDEN_SUBSTRING_EXEMPTIONS": "43e2bf7f3db0dbed",
     # 419e64a3cd92ec7e until the same REVIEW: commit: a third entry, excusing
     # exactly {"/follow"} for exactly the anchored follower-list address.

@@ -1549,7 +1549,11 @@ PINNED = {
     #: application settings page.
     #: 56 ON LANE A'S THIRD, MEASURED: `N 39` and `P P15` REFUSED -> ADMITTED
     #: (gate MEASURE), two settings pages of his admitted by name.
-    "b3_admitted": 56,
+    #: 59 ON LANE A'S FOURTH, MEASURED: `P S1`, `P S3` and `N 199` REFUSED ->
+    #: ADMITTED (gate MEASURE), pages refused by allowlist silence alone
+    #: (READ-PAST-AN-ACT-SUBSTRING's second clause). `M C93` stays REFUSED: a
+    #: fifth search vertical is D2's to grant.
+    "b3_admitted": 59,
     #: 38 AT THE ORCHESTRATOR'S MERGE OF LANE Y2'S FOLLOW-UP (2026-09-27), MEASURED:
     #: the P-R settings block itemized into 22 rows (P2-P23; Delete Data EXCLUDED-RULED).
     #: 40 ON LANE L5'S ORDER OF 2026-09-28 12:32, MEASURED: `N 30`, `N 31`, `N 65`
@@ -1563,7 +1567,8 @@ PINNED = {
     #: left REFUSED (see `b3_admitted`).
     #: 27 ON LANE A'S SECOND ADMISSION, MEASURED: the same five rows left.
     #: 25 ON LANE A'S THIRD, MEASURED: `N 39` and `P P15` left.
-    "b3_refused": 25,
+    #: 22 ON LANE A'S FOURTH, MEASURED: the same three rows left.
+    "b3_refused": 22,
     "b3_no_address": 1,
     "b3_needs_session": 14,
     "b3_undetermined": 2,
@@ -1851,8 +1856,14 @@ PINNED = {
     #: 15 and 31 ON LANE A'S SECOND ADMISSION OF 2026-10-10, MEASURED: `J 71`,
     #: `J 72` and `J 73` REFUSED -> ADMITTED (gate MEASURE), his job
     #: application settings page read past "/jobs/application" and "settings".
-    "jobs_admitted": 15,
-    "jobs_refused": 31,
+    #: 34 and 12 ON LANE A'S FOURTH, MEASURED: nineteen jobs rows REFUSED ->
+    #: ADMITTED (gate MEASURE) on allowlist silence alone -- `J 16`, `J 50`,
+    #: `J 51`, `J 52`, `J 106`, `J 109`, `J 111`, `J 113`, `J 114`, `J 147`,
+    #: `J 148`, `J 149`, `J 152`, `J 154`, `J 156`, `J 160`, `J 165`, `J 166`,
+    #: `J 167`. `J 38` stays REFUSED, re-addressed to the drawn alert spelling
+    #: (refused on action=).
+    "jobs_admitted": 34,
+    "jobs_refused": 12,
     "jobs_no_address": 0,
     "jobs_needs_session": 2,
     "jobs_undetermined": 0,

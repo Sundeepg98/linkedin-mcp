@@ -280,7 +280,14 @@ def test_this_widening_bought_no_forbidden_substring_exemption():
     # orchestrator's application of ONE-NAMED-SETTINGS-PAGE-AT-A-TIME: his
     # "Sharing profile edits" setting page, excusing "/settings/" and
     # "settings" for that one anchored address. Not an alert address either.
-    assert len(readonly._FORBIDDEN_SUBSTRING_PATTERN_EXEMPTIONS) == 4
+    # 4 UNTIL 2026-10-10, when lane A added SIX, each for one anchored page of
+    # his own account (READ-PAST-AN-ACT-SUBSTRING): the invitation manager's
+    # received and sent tabs ("invitation"), the people he follows
+    # ("/follow"), his job application settings ("/jobs/application",
+    # "settings"), the people he unfollowed ("/unfollow") and his
+    # advertising-data page ("/mypreferences/d/categories/"). None is an alert
+    # address; the loop below still holds.
+    assert len(readonly._FORBIDDEN_SUBSTRING_PATTERN_EXEMPTIONS) == 10
     for url in (CREATE_URL, DELETE_URL, FREQUENCY_URL):
         assert url not in readonly._FORBIDDEN_SUBSTRING_EXEMPTIONS
 

@@ -2356,6 +2356,81 @@ _ALLOWED_URL_PATTERNS: tuple[re.Pattern[str], ...] = (
     # the toggles" -- a write. Reading the page presses none of them, and
     # every other category page stays refused on that substring.
     re.compile(r"^https://www\.linkedin\.com/mypreferences/d/categories/ads/?$"),
+    # ----------------------------------------------------------------------
+    # LANE A, CONTINUED -- PAGES REFUSED BY ALLOWLIST SILENCE ALONE, admitted
+    # on the same ruling's second clause: "A page refused by allowlist SILENCE
+    # alone, with no substring, is admitted the same way when a row needs it
+    # and no ruling holds it." Each address below is one LinkedIn DRAWS
+    # (record, section 3.4, names the capture or fixture for each), each line
+    # is exact and anchored, and none crosses a forbidden substring. No query
+    # unless the line says so, and where it does, the values come from a
+    # tool's arguments (D1-SEARCH-AS-READS), never from a page. Nothing in the
+    # package composes most of these yet; each waits on a capture
+    # (`_audit/_census/capture-queue-reads.tsv`).
+    #
+    # His own profile's Featured detail page (census P S1), drawn on his
+    # profile as the Featured card's detail link; its siblings under
+    # /in/me/details/ are read already.
+    re.compile(r"^https://www\.linkedin\.com/in/me/details/featured/?$"),
+    # One skill's insight page on his own profile (census P S3), drawn on
+    # each skill card of the tracked skills fixture with a small integer
+    # segment. The segment comes from a tool's arguments, never a page.
+    re.compile(r"^https://www\.linkedin\.com/in/me/skill-insights/[0-9]{1,4}/?$"),
+    # Premium networking suggestions for his job search (census N 199),
+    # drawn in a notification. A list of people: NAMES-AT-RUNTIME.
+    re.compile(r"^https://www\.linkedin\.com/premium/matches/?$"),
+    # His job tracker's other three stages (census J 50, J 51, J 52), the
+    # tokens LinkedIn's own payload names (the stage entry above records
+    # them); the closed list there is untouched, each stage its own line.
+    re.compile(r"^https://www\.linkedin\.com/jobs-tracker/\?stage=interview$"),
+    re.compile(r"^https://www\.linkedin\.com/jobs-tracker/\?stage=archived$"),
+    re.compile(r"^https://www\.linkedin\.com/jobs-tracker/\?stage=clicked_apply$"),
+    # LinkedIn's AI job search (census J 16), drawn by his recent-search
+    # anchors and the alert notifications. Any query, as the classic search
+    # line above takes one; the forbidden tuple still runs first, so the
+    # alert links themselves -- which carry alertAction= -- stay refused on
+    # "action=".
+    re.compile(r"^https://www\.linkedin\.com/jobs/search-results/?(\?[^#]*)?$"),
+    # Premium career insights for a role (census J 160), drawn on the
+    # search-appearances page with job_title and location keys.
+    re.compile(r"^https://www\.linkedin\.com/explore-career-insights/?(\?[^#]*)?$"),
+    # NOT HERE: the all-results search page (census M C93). A fifth search
+    # vertical is D2-SEARCH-VERTICALS-WIDENED's to grant -- its measured scope
+    # is "exactly the four" (tests/test_search_admission_blast_radius.py) --
+    # not this clause's. Named to the orchestrator in the record.
+    #
+    # LinkedIn Learning: its home and catalogue (census J 152), his own
+    # library and its in-progress list (J 154), his career-journey page
+    # (J 156, the read half), each drawn in the global or the Learning nav.
+    # Not a course video (playing one records progress) and not the AI coach
+    # (its answers exist only after a typed question).
+    re.compile(r"^https://www\.linkedin\.com/learning/?$"),
+    re.compile(r"^https://www\.linkedin\.com/learning/browse/?$"),
+    re.compile(r"^https://www\.linkedin\.com/learning/browse/certifications/?$"),
+    re.compile(r"^https://www\.linkedin\.com/learning/me/my-library/?$"),
+    re.compile(r"^https://www\.linkedin\.com/learning/me/my-library/in-progress/?$"),
+    re.compile(r"^https://www\.linkedin\.com/learning/career-journey/?$"),
+    # A company Page's tabs (census J 106, J 109, J 111, J 113, J 114,
+    # J 165), each drawn by Pages and postings. The organisation segment is
+    # the roster lines' class -- no percent, no dot, so no encoded or literal
+    # dot segment reaches a traversal -- and comes from a tool's arguments.
+    # The company entry above listed these as not bought, with no ground
+    # beyond the row ids: allowlist silence (D3).
+    re.compile(r"^https://www\.linkedin\.com/company/[A-Za-z0-9\-_]{1,100}/about/?$"),
+    re.compile(r"^https://www\.linkedin\.com/company/[A-Za-z0-9\-_]{1,100}/life/?$"),
+    re.compile(r"^https://www\.linkedin\.com/company/[A-Za-z0-9\-_]{1,100}/products/?$"),
+    re.compile(r"^https://www\.linkedin\.com/company/[A-Za-z0-9\-_]{1,100}/product/?$"),
+    re.compile(r"^https://www\.linkedin\.com/company/[A-Za-z0-9\-_]{1,100}/services/?$"),
+    re.compile(r"^https://www\.linkedin\.com/company/[A-Za-z0-9\-_]{1,100}/insights/\?insightType=HEADCOUNT$"),
+    re.compile(r"^https://www\.linkedin\.com/company/[A-Za-z0-9\-_]{1,100}/events/?$"),
+    # A company's showcase Page and one product's own page (census J 167,
+    # J 166), each drawn on company Pages.
+    re.compile(r"^https://www\.linkedin\.com/showcase/[A-Za-z0-9\-_]{1,100}/?$"),
+    re.compile(r"^https://www\.linkedin\.com/products/[A-Za-z0-9\-_]{1,100}/?$"),
+    # The resume-tailoring page for one posting (census J 147, J 148, J 149),
+    # drawn on the tracked job-detail fixtures with exactly this key. Its
+    # insights exist only for an uploaded resume, which is a write.
+    re.compile(r"^https://www\.linkedin\.com/job-apply-resources/\?jobPostingId=[0-9]{1,20}$"),
     # ======================================================================
     # REVIEW (lane L1, 2026-09-23) -- N 184, ONE EVENT BY ITS NUMERIC ID.
     # Census row N 184: "reach an event through its URL after it has been

@@ -368,10 +368,10 @@ Scan the CLAIM column against your question. Every claim is a paraphrase written
 
 | signal NOT scanned | files | lines |
 |---|---|---|
-| a heading naming a ruling | 126 | 276 |
-| a bold line opening on RULING/RULED | 63 | 144 |
+| a heading naming a ruling | 126 | 277 |
+| a bold line opening on RULING/RULED | 64 | 151 |
 | the phrase THE RULING | 38 | 63 |
-| a named -RULING id | 38 | 97 |
+| a named -RULING id | 38 | 98 |
 | the phrase standing ruling | 17 | 40 |
 | a lead or operator ruling in prose | 40 | 106 |
 
