@@ -152,6 +152,9 @@ async def load_the_confirmed_details(
             "this grant has already loaded its page once. A read token buys one load."
         )
     grant.loaded = True
+    # THE THIRD CHECK, ASKED HERE as well as by the navigator, against the
+    # segment he named -- the navigation guard counts it only at this site.
+    details_page = readonly.assert_named_profile_details_url(details_page, segment)
     details_landing = str(
         await navigator.goto(page, details_page, named_profile_details_of=segment) or ""
     )
