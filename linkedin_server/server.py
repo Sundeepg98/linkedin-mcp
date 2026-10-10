@@ -489,6 +489,7 @@ from linkedin_server import (
     events,
     group_page,
     groups_page,
+    item_text,
     job_collections,
     job_home,
     jobfilter,
@@ -11420,6 +11421,65 @@ async def linkedin_page_plugin_snippet(page_id: str) -> dict[str, Any]:
     """
     try:
         return {"ok": True, **page_plugin.follow_plugin_snippet(page_id)}
+    except Exception as exc:
+        return _error(exc)
+
+
+# ---- lane B3 (2026-10-10): M C43 -------------------------------------------
+# One block for this lane's tools, as the lane rules require. The reader is
+# ``item_text``; this function only composes the address from the caller's
+# key, loads it once, and refuses a landing anywhere else.
+@mcp.tool()
+async def linkedin_read_item_text(item: str) -> dict[str, Any]:
+    """ONE item's own words, read off its permalink, as an untrusted record.
+
+    Census row ``M C43``, ruling ``THIRD-PARTY-TEXT-AT-RUNTIME`` (the
+    orchestrator, 2026-10-10, applying the operator's NAMES-AT-RUNTIME): the
+    words are returned at runtime under PEOPLE-DATA-MITIGATIONS -- inside ONE
+    people record, sanitised, cut at 3,000 characters, labelled as another
+    member's words, and kept nowhere by this server: no file, no log, no
+    cache.
+
+    WHAT YOU PASS. ``item`` is one item key, ``urn:li:<letters>:<digits>``,
+    exactly as ``linkedin_my_activity_items`` returns your own and
+    ``linkedin_read_named_profile``'s ``activity_items`` returns those of a
+    member you name. The address is composed from that key alone; nothing on
+    any page chooses it, and a key of any other shape is refused without
+    being repeated.
+
+    WHAT IT COSTS. ONE page load: the item's permalink, which the read
+    allowlist admits. Nothing is pressed and nothing on the item changes.
+    Opening it may count as a view of it.
+
+    WHAT COMES BACK. ``item`` is the record -- ``author`` (the member the
+    item's own header names, as a people record), ``link`` (the permalink
+    this server loaded) and ``text`` (the words) -- or null, with ``why``
+    saying which check declined: no single description drawn, a second words
+    container drawn (a repost, say), or a header naming no member (an
+    organisation Page's item has no record type yet). ``expanded`` is false
+    when a control is drawn inside the description and the words may be
+    partial; ``truncated`` is true when they ran past the cap. A landing on
+    any address other than the one asked for reads nothing.
+
+    It cannot react, comment, share or follow; those acts are other tools,
+    each behind its own grant.
+    """
+    try:
+        url = item_text.permalink(item)
+        async with BROWSER.session() as page:
+            landed = await BROWSER.goto(page, url)
+            assert_not_authwall(landed, surface="item permalink")
+            if not item_text.landed_on_the_item(landed, url):
+                return {
+                    "ok": True,
+                    "readable": False,
+                    "item": None,
+                    "why": (
+                        "The navigation did not stay on the item's permalink, "
+                        "so nothing was read."
+                    ),
+                }
+            return {"ok": True, **await item_text.read_item_text(page, link=url)}
     except Exception as exc:
         return _error(exc)
 

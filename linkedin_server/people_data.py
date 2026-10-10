@@ -410,9 +410,11 @@ class Post:
     unless a reader read the words, and then sanitised and capped at
     ``CAPS["text"]``, LinkedIn's own limit for a post.
 
-    NOT YET ADOPTED: no reader builds one, and no tool returns one. A post
-    with no member author -- a Page's post, a header with no name -- has no
-    record here: :meth:`from_page` returns ``None`` for it.
+    ADOPTED 2026-10-10 (lane B3): ``item_text.read_item_text`` builds one
+    for ``linkedin_read_item_text``, census row ``M C43``, under
+    THIRD-PARTY-TEXT-AT-RUNTIME. A post with no member author -- a Page's
+    post, a header with no name -- has no record here: :meth:`from_page`
+    returns ``None`` for it.
     """
 
     author: Person
@@ -480,6 +482,10 @@ class Post:
 #: people are those two tools' whole answer. ``linkedin_read_named_profile``
 #: joined the same day (lane L5, ruling NAMED-PROFILE-READ-BEHIND-A-GRANT): the
 #: ONE member he names, read once behind the single-use grant, is its answer.
+#: ``linkedin_read_item_text`` joined on 2026-10-10 (lane B3, ruling
+#: THIRD-PARTY-TEXT-AT-RUNTIME): ONE :class:`Post` record, the item whose key
+#: the caller passed, read off that one permalink -- the first adopter of the
+#: post record.
 PEOPLE_TOOLS: frozenset[str] = frozenset(
     {
         "linkedin_who_viewed_me",
@@ -489,6 +495,7 @@ PEOPLE_TOOLS: frozenset[str] = frozenset(
         "linkedin_recruiter_insights",
         "linkedin_messaging_presence",
         "linkedin_read_named_profile",
+        "linkedin_read_item_text",
     }
 )
 

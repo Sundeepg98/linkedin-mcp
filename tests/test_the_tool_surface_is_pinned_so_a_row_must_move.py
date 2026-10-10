@@ -129,6 +129,7 @@ PINNED_TOOL_SURFACE: dict[str, tuple[str, ...]] = {
     "linkedin_profile_editor_values": (),
     "linkedin_publish_post": ("confirm_token", "text"),
     "linkedin_react_to_item": ("confirm_token", "item"),
+    "linkedin_read_item_text": ("item",),
     "linkedin_read_named_profile": ("confirm_token", "profile", "section"),
     "linkedin_recent_job_searches": (),
     "linkedin_recruiter_insights": (),
