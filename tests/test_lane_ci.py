@@ -74,7 +74,7 @@ def test_a_branch_the_gate_would_refuse_is_refused_here_first(branch):
 @pytest.mark.parametrize("url", [
     "https://github.com/owner-x/repo-y.git",
     "https://github.com/owner-x/repo-y",
-    "git@github.com:owner-x/repo-y.git",
+    "ssh://github.com/owner-x/repo-y.git",
 ])
 def test_the_repo_slug_comes_from_the_remote(url):
     assert lane.slug_from_url(url) == "owner-x/repo-y"
