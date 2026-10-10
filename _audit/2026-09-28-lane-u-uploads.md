@@ -26,9 +26,10 @@ master `3c8edc2`. Every number below was measured in this lane's worktree on
 * The live-proof spec is section 7. This lane took no live loads.
 
 **LANE U'S OWN COMMITS, cited below by short SHA:** `d295e6e`, `3e6b7b7`,
-`e4c6cca`, `18dd736`, `4710609`, `f4d3eeb`, `7f9caa6`. They are on lane U's
-branch and do not resolve on `master` until the orchestrator merges it. Each
-one's subject, which survives a rebase, is in the table below.
+`e4c6cca`, `18dd736`, `4710609`, `f4d3eeb`, `7f9caa6`, `1096eef`, `45466b8`.
+They are on lane U's branch and do not resolve on `master` until the
+orchestrator merges it. Each one's subject, which survives a rebase, is in
+the table below.
 
 | short SHA | subject |
 |---|---|
@@ -39,6 +40,8 @@ one's subject, which survives a rebase, is in the table below.
 | `4710609` | writes: send_attachment -- one file into one conversation he names, built behind the grant and unfired |
 | `f4d3eeb` | merge master 53908ea into lane U: the CI fast lane and live session 7 under the upload work |
 | `7f9caa6` | record + INSTRUMENTS 84: the mutations, the merge, and the hand-off's two lessons registered |
+| `1096eef` | lane U, lane CI's first run answered: the surface pin, the envelope baseline, and three citations of unmerged commits |
+| `45466b8` | merge master fe119de into lane U: lane K's ledger, the CI lane's local-master fix and one-process sweep |
 
 ---
 
@@ -80,6 +83,16 @@ Three guards spoke about the copy, and none was answered by editing it:
    agreement, so the pair is triaged onto `NOT_A_CORRECTION` with its reason.
    That guard was red at `d295e6e` -- it was not in the first targeted set --
    and is green from `3e6b7b7`.
+
+**RECONCILED AT THE MERGE OF MASTER `fe119de`.** Lane K registered the same
+five ids on master first, from the same copy (commit `4b78e5f`, "rulings:
+register the five class rulings of 2026-09-28"), and met the same three
+guards. The copy merged clean, both sides holding the same sha256. Lane U's
+five entries, its asserted-names pin and its correction triage were dropped
+for master's, verbatim; the claims the register prints are lane K's wording.
+Lane U's one register entry of its own is `FILE-UPLOAD-OPENED` (1.2), now the
+register's last entry: 74 rulings, master's 73 and that one. Lanes A and S
+still owe the same reconciliation.
 
 ### 1.2 The operator's upload decision
 
@@ -416,8 +429,10 @@ hand-off even if Send is never pressed.
 ## 8. Gates
 
 Local gates were targeted, never the suite: serial while the live lane's
-flag stood (it was removed during session 7's close, about 13:00), a few
-workers after. The suite is certified on lane CI (below).
+flag stood, a few workers in the hour it was down (from session 7's close,
+about 13:00, until it was back by 14:00), serial again after, and each group
+held under two minutes from the 11:35 order on. The suite is certified on
+lane CI (below).
 
 | commit | what ran | result |
 |---|---|---|
@@ -432,6 +447,10 @@ workers after. The suite is certified on lane CI (below).
 | `7f9caa6`, the merged tree | the direct importers of `threads.py` not yet run (messaging threads, the people reader, the reply's Send wait, the reply surface, the first contact) | 224 passed |
 | LANE CI, run 38036873514 on `7f9caa6` | the suite on four shards, pushed to `ci/<branch>` with `lane_ci.py push` | FAILURE, 16 failed. Shard 0: 2444 passed; shard 3: 3368 passed; shard 1: 15 failed, 3410 passed; shard 2: 1 failed, 3471 passed. TWO were this lane's and are fixed in the next commit: the tool-surface pin (`linkedin_send_attachment` appeared with no census decision recorded in the pin) and the tool-envelope baseline (a new tool, unclassified). FOURTEEN were the cited-SHA family on the missing local `master`, the known infrastructure failure the CI lane fixed on master. One of those fourteen, the ratchet, ALSO hid a finding of this lane's own: three commit-slot citations of the unmerged commits above. Disclosed at the top of this record |
 | the two CI fixes | the surface pin re-pinned at 62 tools and 99 parameters; the envelope baseline regenerated (one line added, `not_driven`, the verdict every other write tool carries) | 68 passed |
+| `1096eef` the fixes and the disclosure | the cited-SHA file, on the record before the disclosure and after; committed identity; six doc guards (correction, asserted names, person-name literal, ignored path, pointer graph, audit index) in one group | cited-SHA: 1 failed (the three sites, `d295e6e` x2 and `3e6b7b7`), then 44 passed; identity 1055 passed. The doc-guard group ran past its 115 s cap at 61 passed and no failure: NOT counted as run; re-run on the merge |
+| `45466b8` merge of master `fe119de` | the reconciliation of section 1.1; the three derived views regenerated with their own writers, then `--check`; seven census instruments | RULINGS 74 rulings, every anchor resolving, every declaration accounted for; INDEX 263 documents; blocker map 409 lines, every column. Exit 0 and GREEN: `census_completion` ("every headline figure matches its pin"), `check_next_step` (585 GAP rows, each once), `check_write_classes` (387 lines), `check_read_addresses` (98 of 98), `check_jobs_directions` (108 of 108), `ruling_holds`, `check_exclusion_basis` (40 of 40) |
+| `45466b8`, targeted, seven serial groups under a 115 s cap each | the surface and count pins with the envelope guard; the reader-leak guard (both sides' baseline lines); the register, asserted names, corrections, register numbering and lane K's next-step test; the writes fan-out (writes_nine, preview and click state, reaching each control); and three groups that ran past the cap: the upload files with master's unfollow and badge tests, the writes and receipt group, the committed-identity sweep | 139 passed; 683 passed; 64 passed; 212 passed. The three capped groups stopped with no failure (80 passed 3 skipped; about 100 passed; about 1000 passed) and are NOT counted as run. The pushed commits' blobs were swept for identity by the pre-push hook: 0 hits across 1104 blobs, 226 needles |
+| LANE CI, run 38038976360 on `45466b8` | the suite on four shards, every test file | SUCCESS, wall 6m16s. Shard 0: 4314 passed, 1 skipped; shard 1: 3166 passed, 2 skipped, 1 xfailed; shard 2: 2076 passed, 1 skipped; shard 3: 3214 passed, 4 skipped. 12770 passed, nothing failed: the cited-SHA family green with master's local-master step and this record's disclosure |
 
 **THE TWO REDS I LEFT AND THEN CLOSED, said plainly.** `d295e6e` was red on
 the correction guard and `e4c6cca` on the receipt-message pin, each because
@@ -485,9 +504,38 @@ lane built neither, because each is a boundary change and the brief asked
 for the specs.
 
 **Q6. THE COPIED RULINGS TRIP TWO GUARDS IN EVERY LANE THAT COPIES THEM.**
-Pinned and triaged here (section 1.1). A one-word rewording of section 5's
-"is read under" would let the asserted-names pin narrow.
+Lane U and lane K are reconciled at the merge (section 1.1): one register
+entry per id, one pin, one triage. Lanes A and S still owe it. A one-word
+rewording of section 5's "is read under" would let the shared asserted-names
+pin narrow.
 
 **Q7. THE FULL SUITE.** `writes.py`, `server.py`, `threads.py` and
 `uploads`' hand-off changed; the local gate ran only targeted files. The lane
-CI run is reported in section 8.
+CI runs are reported in section 8.
+
+**Q8. ON A `ci/` RUN THE CITED-SHA RATCHET CONVICTS A LANE'S OWN COMMITS.**
+`check_cited_shas_resolve.resolves` asks `merge-base --is-ancestor <sha>
+master`, and since the CI lane's local-master step a `ci/` run's `master` is
+`origin/master`, which no lane commit reaches before its merge. Measured
+here: three sites, red locally, answered by the disclosure at the top. Every
+lane record that writes "commit" or "at" before its own short SHA meets this
+on its `ci/` run. And the ratchet's own message advises *"say in the document
+that the SHA resolves only on a branch"*, which `_DISCLOSURE` does not read:
+measured, `disclosed_tokens` returns nothing for that wording and returns the
+token for "does not resolve on `master`". The message or the vocabulary
+should move, the owner's call.
+
+**Q9. LANE NP IS ON LOCAL MASTER AND NOT ON ORIGIN.** Local master reads
+`0b41978` (lane NP's merge); `origin/master` reads `fe119de`, which this
+branch merged as ordered. NP was not taken: a `ci/` push of it would publish
+master commits nobody has pushed. When the two meet, the tool-surface pin
+collides by text -- NP moved `PINNED_PARAMETER_COUNT` 96 to 97, this lane 96
+to 99 -- and the merged value is 100, at 62 tools. Both lanes changed
+`writes.py`.
+
+**Q10. LANE K'S LEDGER NAMES THIS LANE FOR ITS 15 ROWS.** `next-step.tsv`
+carries `SIBLING:lane-U` on all fifteen, which stays true:
+`check_next_step` is GREEN on the merged tree. Folding this lane's seven
+capture lines into the ledger's ranked queue and replacing the fifteen
+SIBLING steps is an edit to lane K's judged tables; left for the
+orchestrator to assign.
