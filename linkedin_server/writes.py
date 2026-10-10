@@ -8037,12 +8037,30 @@ async def _live_control(
         # has something new to say says it.
         tag = str(control.get("tag") or "").lower()
         kind = "select_option" if tag == "select" else "fill"
+        # THE CLEAR'S OWN PRECONDITION (2026-10-10, census row P A8), read
+        # HERE because this is where the control was read, on the page about
+        # to be typed into -- never at the preview. A clear types the empty
+        # string, so its control must be a typed one; its record must still
+        # be live; and the field must hold EXACTLY what this server's own
+        # write typed into it. THIS SERVER ONLY CLEARS WHAT IT WROTE: a field
+        # changed since is refused with nothing typed, and the refusal names
+        # no value. See ``field_restore.clear_verdict``.
+        cleared = ""
+        if _is_clear_target(spec, grant.target):
+            try:
+                current, _how = await _editor_value_of(page, wanted, when="before the clear")
+            except Exception:  # noqa: BLE001 - an unread field is refused, below
+                current = None
+            proceed, cleared = field_restore.clear_verdict(wanted, current, kind)
+            if not proceed:
+                return ("editor_addressed", cleared, "")
+            cleared = " " + cleared
         return (
             "editor_addressed",
             f"the editor drew exactly one control named {wanted!r}, it is "
             f"enabled, it carries an id to aim at, and it is a {tag!r} so this "
             f"write would {kind}. Read live from the page this write would act "
-            f"on, not from the preview.",
+            f"on, not from the preview.{cleared}",
             "#" + dom_id,
             kind,
         )
@@ -10932,6 +10950,36 @@ async def perform(
     else:
         performed = UNKNOWN
 
+    # THE RESTORE RECORD, WRITTEN OR SPENT, AFTER THE VERDICT AND NEVER BEFORE
+    # IT (2026-10-10, census row P A8). ``field_restore``'s two mutations, and
+    # this is the one place in the package that makes either -- a test walks
+    # every module for a second caller.
+    #
+    # WRITTEN only on the FILL path, only for a write VERIFIED stored, and only
+    # when the value it overwrote was read as EXACTLY the empty string: a
+    # string, never None -- an unread prior admits nothing. What it records is
+    # the field and what the fill typed, the slice of the grant's own target.
+    #
+    # SPENT only by a clear that was VERIFIED: its fresh render read the field
+    # empty. A clear that did not land leaves its record live, and the
+    # click-time check still holds any retry to the field holding exactly what
+    # this server typed.
+    restore_record: Optional[field_restore.RestoreRecord] = None
+    clear_spent: Optional[bool] = None
+    if spec.action == "update_profile_field" and control_kind == "fill":
+        written_field = grant.target.partition(TARGET_JOIN)[0].strip()
+        if _is_clear_target(spec, grant.target):
+            clear_spent = performed is True and field_restore.spend(written_field)
+        elif (
+            performed is True
+            and fills_made > 0
+            and isinstance(prior_value, str)
+            and prior_value == ""
+        ):
+            restore_record = field_restore.record_empty_prior(
+                written_field, _text_component_of(spec, grant.target)
+            )
+
     # WHAT THIS WRITE ACTED ON, KEYED BY ITS OWN TARGET KIND.
     #
     # THIS WAS ``job_id`` OR ELSE ``company_id`` UNTIL 2026-09-02, and the
@@ -10968,11 +11016,21 @@ async def perform(
         # owns the split; a second spelling of it here would be a second way
         # to disagree with the separator that binds a token to what the
         # preview showed.
+        #
+        # TWO-PART IS ASKED OF THE KIND AND THE SEPARATOR, NOT OF THE VALUE
+        # (2026-10-10, census row P A8). This read ``if value else ""`` and
+        # ``value or grant.target``, which took an EMPTY value for a one-part
+        # target: a clear's receipt printed subject "" and value
+        # "<field> :: ". ``destination_of`` still owns the value; whether
+        # there is a subject is a property of the kind.
         value = destination_of(spec, grant.target)
-        target_block["subject"] = (
-            grant.target[: -(len(value) + len(TARGET_JOIN))] if value else ""
+        two_part = bool(_COMPOSITE_TARGET_KINDS.get(spec.target_kind, ("", ""))[1]) and (
+            grant.target.count(TARGET_JOIN) == 1
         )
-        target_block["value"] = value or grant.target
+        target_block["subject"] = (
+            grant.target[: -(len(value) + len(TARGET_JOIN))] if two_part else ""
+        )
+        target_block["value"] = value if two_part else grant.target
         target_block["what_these_are"] = (
             "the two halves of this action's canonical target, split on the "
             "separator the confirm token was bound across. For a one-part "
@@ -10997,30 +11055,51 @@ async def perform(
     # `previous_value` IS VERBATIM AND MAY BE None. None means it could not be
     # read, never that it was empty; the two are not collapsed, because on a
     # restore that difference is the whole message.
+    #
+    # AN EMPTY ORIGINAL IS PUT BACK BY A CLEAR (2026-10-10, census row P A8).
+    # This printed ``value=''`` for one until then: a call ``_target_for``
+    # refused, offered as the way back. Now the call is offered only when a
+    # clear was RECORDED above, it says it is a CLEAR and on what terms, and
+    # where none was recorded the field is None and ``clear`` says why.
     restore_block: Optional[dict[str, Any]] = None
     if spec.action == "update_profile_field":
         restore_field, _, _ = grant.target.partition(TARGET_JOIN)
         restore_field = restore_field.strip()
-        restore_block = {
-            "previous_value": prior_value,
-            "how_it_was_read": prior_why,
-            "to_put_it_back": (
-                None
-                if prior_value is None
-                else "linkedin_update_profile_field(field="
+        if prior_value is None:
+            put_back: Optional[str] = None
+        elif prior_value == "":
+            put_back = (
+                None if restore_record is None else field_restore.clear_call(restore_field)
+            )
+        else:
+            put_back = (
+                "linkedin_update_profile_field(field="
                 + repr(restore_field)
                 + ", value="
                 + repr(prior_value)
                 + ")  # then confirm the token it returns"
-            ),
+            )
+        restore_block = {
+            "previous_value": prior_value,
+            "how_it_was_read": prior_why,
+            "to_put_it_back": put_back,
             "this_server_will_not_do_it_for_you": (
                 "Restoring is a WRITE and gets its own preview, its own token "
-                "and its own confirmation. Nothing here is queued, scheduled "
-                "or held. If the previous value reads as null it could not be "
-                "read before the change -- which is not the same as it having "
-                "been empty, and on a restore that difference is the message."
+                "and its own confirmation. Nothing here is queued or "
+                "scheduled; the one thing held, when the previous value was "
+                "empty, is the admission of ONE clear -- see 'clear' -- and it "
+                "acts only through that same preview, token and confirmation. "
+                "If the previous value reads as null it could not be read "
+                "before the change -- which is not the same as it having been "
+                "empty, and on a restore that difference is the message."
             ),
         }
+        if clear_spent is not None:
+            restore_block["clear"] = field_restore.spent_note(clear_spent, performed)
+        elif prior_value == "":
+            restore_block["clear"] = field_restore.recorded_note(
+                restore_record, performed, control_kind
+            )
 
     return {
         "action": spec.action,

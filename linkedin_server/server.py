@@ -9824,6 +9824,15 @@ async def linkedin_update_profile_field(
     write, and it gets its own preview, its own token and your confirmation,
     exactly like this one did.
 
+    AN EMPTY ORIGINAL IS PUT BACK BY A CLEAR (2026-10-10, census row P A8).
+    An empty ``value`` is refused, with ONE exception: when this server's own
+    write to a typed field read its previous value as exactly empty and was
+    verified stored, that write's ``to_put_it_back`` is the same call with
+    ``value=''`` -- a CLEAR, admissible once, for a bounded time the result
+    states, in this server process only. Its preview says ``clear: true`` and
+    why; at the click the field must still hold exactly what this server
+    typed, or nothing is typed -- this server only clears what it wrote.
+
     WHAT IS MEASURED, and it CONTRADICTS what this server used to say. Profile
     editors ARE addressed by url. Three are ordinary anchors on your own
     profile -- ``/in/<member>/edit/intro/``,
