@@ -251,9 +251,10 @@ TRIAGE: dict[str, tuple[str, str, str]] = {
     # restored it; _audit/2026-10-10-lane-b2-network-build.md section 4.
     # "N 134" LEFT 2026-09-24: proven live by the live lane's view switch, so
     # it is no longer a read GAP row.
-    "N 161":("RULING", "", "the groups vertical was deliberately left out of "
-                            "the search admission, which names the "
-                            "request-to-widen route instead"),
+    # N 161 LEFT 2026-10-10 (lane B2, its TRIAGE entry): the groups search's
+    # reader and tool were built over session 2's capture
+    # (search_vertical_results, linkedin_search_groups) and the row is
+    # COVERED-UNFIRED; _audit/2026-10-10-lane-b2-network-build.md.
     # N 172 LEFT 2026-09-27 with N 79: the connections of a member named by
     # token, returned as people records (COVERED-UNFIRED).
     "N 174": ("RULING", "", "the surface is unobservable until a pending "
@@ -263,8 +264,10 @@ TRIAGE: dict[str, tuple[str, str, str]] = {
                             "and, in the boundary's own words, anywhere"),
     "N 178": ("RULING", "", "needs another member's profile, the boundary's "
                             "sharpest refusal"),
-    "N 179": ("RULING", "", "the events vertical was deliberately left out of "
-                            "the search admission"),
+    # N 179 LEFT 2026-10-10 (lane B2, its TRIAGE entry): the events search's
+    # reader and tool were built over session 3's capture
+    # (search_vertical_results, linkedin_search_events) and the row is
+    # COVERED-UNFIRED; _audit/2026-10-10-lane-b2-network-build.md.
     "N 184": ("ADDRESS", "ABSENT", "the events family admits the root only -- "
                                    "one segment narrower than the groups "
                                    "family, which admits the id"),
@@ -448,13 +451,10 @@ DECIDED_SINCE_TRIAGE: dict[str, str] = {
     # N 132 WAS HERE ON MASTER AND IS NOT: lane D applied D6 on 2026-09-24
     # and moved the row GAP -> COVERED-UNFIRED, so it left TRIAGE (see the
     # LEFT GAP list above) and CONTROL 8 would refuse a decided entry for it.
-    "N 161": "D2-SEARCH-VERTICALS-WIDENED: the groups vertical is admitted "
-             "in principle, and on the boundary since lane S's follow-up "
-             "(2026-09-24); which groups is WHICH, a doctrine question since "
-             "answered by NAMES-AT-RUNTIME, so it now waits on a "
-             "name-returning reader held to PEOPLE-DATA-MITIGATIONS on lane "
-             "G's people-record foundation, and a capture; bucket-3 gate "
-             "MEASURE (the foundation landed 2026-09-27; the cell names the capture it waits on)",
+    # N 161 LEFT 2026-10-10 (lane B2, its DECIDED_SINCE_TRIAGE entry): the
+    # groups search's reader and tool were built over session 2's capture
+    # (search_vertical_results, linkedin_search_groups) and the row is
+    # COVERED-UNFIRED; _audit/2026-10-10-lane-b2-network-build.md.
     "N 177": "D3-UNREGISTERED-REFUSAL-IS-NOT-A-RULING and "
              "MEMBER-ROSTERS-AS-BOUNDED-READS: a group's member directory; "
              "an admission and a reader -- admitted in lane S's follow-up "
@@ -471,13 +471,10 @@ DECIDED_SINCE_TRIAGE: dict[str, str] = {
              "so its reader must return names held to "
              "PEOPLE-DATA-MITIGATIONS on lane G's people-record foundation; "
              "NEEDS-TARGET (the foundation landed 2026-09-27; the cell names the capture it waits on)",
-    "N 179": "D2-SEARCH-VERTICALS-WIDENED: the events vertical is admitted "
-             "in principle, and on the boundary since lane S's follow-up "
-             "(2026-09-24); which events is WHICH, a doctrine question since "
-             "answered by NAMES-AT-RUNTIME, so it now waits on a "
-             "name-returning reader held to PEOPLE-DATA-MITIGATIONS on lane "
-             "G's people-record foundation, and a capture; bucket-3 gate "
-             "MEASURE (the foundation landed 2026-09-27; the cell names the capture it waits on)",
+    # N 179 LEFT 2026-10-10 (lane B2, its DECIDED_SINCE_TRIAGE entry): the
+    # events search's reader and tool were built over session 3's capture
+    # (search_vertical_results, linkedin_search_events) and the row is
+    # COVERED-UNFIRED; _audit/2026-10-10-lane-b2-network-build.md.
     # ---- decided 2026-09-28: the orchestrator's call of 12:32 applied
     # NAMED-PROFILE-READ-BEHIND-A-GRANT to these two (lane L5) ----
     "N 65": "NAMED-PROFILE-READ-BEHIND-A-GRANT: the read of a profile he names "

@@ -335,7 +335,6 @@ N 156	N	W	R2	TARGET:a non-connection he names (the act stops at the composer)	NA
 N 158	N	W	R2	TARGET:a non-connection he names (the act stops at the composer)	NAMED	_audit/2026-09-24-lane-l5-messaging.md::| C-P5 | the composer a NON-connection gets ; RULING:OPERATOR-NAMES-THE-TARGET
 N 159	N	W	R3	SIBLING:lane-S	INFERRED	RULING:HIS-OWN-SETTINGS-NOT-OUTWARD
 N 160	N	W	R2	SIBLING:M M6	NAMED	N 160 ; M M6
-N 161	N	R	-	BUILD:tests/fixtures/live2/n161.html	MEASURED	tests/fixtures/live2/n161.html ; _audit/_census/read-addresses.tsv::https://www.linkedin.com/search/results/groups/
 N 163	N	W	R3	BUILD:tests/fixtures/live2/group_home.html	INFERRED	tests/fixtures/live2/group_home.html ; RULING:EVERY-OUTWARD-CLASS-BUILT-BEHIND-GRANTS
 N 164	N	W	R3	PRECONDITION:a pending invitation to a group	INFERRED	N 164
 N 165	N	R	-	BUILD:tests/fixtures/live2/group_members.html	MEASURED	tests/fixtures/live2/group_members.html ; RULING:MEMBER-ROSTERS-AS-BOUNDED-READS
@@ -348,7 +347,6 @@ N 174	N	R	-	TARGET:a group he names to request to join (the pending list is obse
 N 176	N	W	R3	SIBLING:lane-S	INFERRED	RULING:HIS-OWN-SETTINGS-NOT-OUTWARD
 N 177	N	R	-	BUILD:tests/fixtures/live2/group_members.html	MEASURED	tests/fixtures/live2/group_members.html ; RULING:MEMBER-ROSTERS-AS-BOUNDED-READS
 N 178	N	R	-	SIBLING:lane-NP	NAMED	_audit/2026-10-10-rulings-ledger-questions.md::Already answered by NAMED-PROFILE-DETAIL-PAGES (lane NP)
-N 179	N	R	-	BUILD:tests/fixtures/live3/n179.html	MEASURED	tests/fixtures/live3/n179.html ; _audit/_census/read-addresses.tsv::https://www.linkedin.com/search/results/events/
 N 182	N	W	R3	PRECONDITION:a pending invitation to an event	INFERRED	N 182
 N 183	N	W	R3	SIBLING:lane-S	INFERRED	RULING:HIS-OWN-SETTINGS-NOT-OUTWARD
 N 184	N	R	-	TARGET:an event he names	NAMED	_audit/_census/read-addresses.tsv::ADMITTED 2026-09-23 BY A REVIEW: COMMIT (lane L1): one event by its NUMERIC id ; RULING:EVERY-OUTWARD-CLASS-BUILT-BEHIND-GRANTS

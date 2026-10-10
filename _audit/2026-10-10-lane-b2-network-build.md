@@ -15,7 +15,7 @@ live lane's gitignored keyed skeleton where none does -- BEFORE anything was
 built, because a BUILD step names a capture and says nothing about whether the
 capture draws what the row needs. Twelve captures did not draw it; two rows
 needed no build at all, their payload already delivered and proven by a
-shipped route; three were built.
+shipped route; three were built, and two of those builds are merged here.
 
 **CORRECTS:** `_audit/2026-09-28-lane-k-ledger.md` -- section 12.7 moved `N 37`, `N 43`, `N 51`, `N 153`, `N 154`, `N 200`, `N 80`, `N 88`, `N 89` and `N 93` to BUILD on session 8's skeletons, and section 5 counted "unsubscribe" on the newsletter list for `N 56`; read against the captures, ten of those eleven steps had nothing to build on (sections 2, 3 and 5), and the eleventh, `N 80`'s, is discharged under D6.
 
@@ -36,9 +36,9 @@ shipped route; three were built.
     N 56   unsubscribe from a newsletter         GAP -> GAP                 5
     N 103  other similar profiles                GAP -> GAP                 5
     N 104  find a Page by searching              GAP -> GAP                 5
-    N 161  search for groups                     PENDING                    6
-    N 179  search for events                     PENDING                    6
-    N 102  a Page's People-tab insights          PENDING                    7
+    N 161  search for groups                     GAP -> COVERED-UNFIRED     6
+    N 179  search for events                     GAP -> COVERED-UNFIRED     6
+    N 102  a Page's People-tab insights          GAP -> GAP (built, unmerged) 7
 
 ## 1. How a hashed label was read, and what that method may not do
 
@@ -285,21 +285,29 @@ sixth heading of 18 letters that is not read. The only further control is the
 carousel's `Next`, a press, never pressed. The roster sits in another list:
 75 cards, 225 member links, in no heading's container.
 
-THE BUILD (child B, section 12): a declared record, `people_data.Aggregate`
--- a category from a closed vocabulary of the five headings, a label
-sanitised and capped as a title, a non-negative integer count -- and
-`linkedin_server/company_people_insights.py`, whose reader finds the module by
-its exact headings, reads buckets only inside a heading's own container,
-parses a count only from a digit run, and never reads a member link; and the
-tool `linkedin_company_people_insights(organization_id)` in this lane's
-server block, composing the People tab with `member_rosters.compose` (its
-first importer; the orphan entry deleted with it) and loading one page. The
-fixture `tests/fixtures/synthetic/company_people_insights.html` is written
-from the keyed skeleton by `scripts/_build_company_people_insights_fixture.py`,
-which extends the named-profile builder: the five headings verbatim, every
-count a synthetic number of the same digit count, every label reduced to
-shape, the roster cut to three synthetic cards; a fixed point, and a source
-digest equal to the tracked copy's.
+THE ROW STAYS GAP, AND WHY. The build below is on child B's branch,
+`worktree-agent-a72ddaf792b6d7610` at `3e70900`, and is NOT merged into this
+lane: the orchestrator's wrap-up order of 19:02 arrived before the merge,
+which is ten union conflicts against master and child A (the child's report
+lists them), and the child's own gates are incomplete -- four of its
+red-first runs were not shown and its final tree's guards were not re-run.
+A build that is not on the lane's branch moves no row. Next: that merge, its
+gates, then this row by its own bar.
+
+THE BUILD, as the child reports it, and none of it on this branch: a
+declared aggregate record -- a category from a closed vocabulary of the five
+headings, a label sanitised and capped as a title, a non-negative integer
+count -- beside the organisation record master gained; a reader module that
+finds the module by its exact headings, reads buckets only inside a heading's
+own container, parses a count only from a digit run and never reads a member
+link; a tool that composes the People tab from a numeric organisation id
+through the shipped roster composer, its first importer, and loads one page;
+and a fixture written from the keyed skeleton by a builder that extends the
+named-profile builder -- the five headings verbatim, every count a synthetic
+number of the same digit count, every label reduced to shape, the roster cut
+to three synthetic cards -- a fixed point, whose source digest equals the
+tracked copy's. The child asks one question for the merge: its parameter is
+spelled `organization_id`, its siblings' `organisation_id`.
 
 ## 8. The census moves, and the pins
 
@@ -329,13 +337,68 @@ gained a dated line. `check_next_step` GREEN at 559 and `check_read_addresses`
 GREEN at 90 of 90; the blocker map, the audit index and the rulings register
 regenerated.
 
+THE MERGE OF MASTER, `a5e7343`: three pins both sides moved, re-derived on the
+merged tree -- adjudicated 215, delivered_broad 137, gap 556.
+
+ROUND 2, after child A's merge (`c06d2be`): `N 161` and `N 179` GAP ->
+COVERED-UNFIRED, each with a dated note naming its tool, its reader, its
+fixture and the capture's tracked copy. Their next-step and read-address
+lines left, and their read-triage entries with them. Measured and re-pinned:
+
+    adjudicated         215 -> 217
+    delivered_broad     137 -> 139
+    unfired              24 -> 26
+    gap                 556 -> 554
+    gap_read             90 -> 88
+    b3_admitted          39 -> 37
+    b1_no_ruling          9 -> 11   (both join PINNED_B1_ROWS' NO_RULING hold:
+                                     reads no ruling holds)
+
+`N 102` does not move (section 7).
+
 ## 9. Gates, run and not run
 
-PENDING.
+LOCAL, serially, each run under or near the two-minute cap, the live-session
+flag checked absent before each: the census and prose instruments for the
+files this lane changed -- `test_a_correction_is_findable_from_the_claim`
+15 passed; `test_an_asserted_name_resolves`, `test_the_audit_index_is_derived`
+and `test_the_rulings_register_is_derived` 66 passed; `test_blocker_map_is_derived`,
+`test_census_rows_carry_a_state`, `test_the_census_row_total_is_pinned`,
+`test_a_census_locator_names_its_row`, `test_write_classes` and `test_ruling_holds`
+122 passed and 1 failed, the blocker map read before the lane's record was
+tracked (regenerated; green since); `test_next_step`, `test_read_addresses`,
+`test_a_literal_repeats_no_member` and `test_verify_fixed_labels` 74 passed;
+`test_no_committed_identity` 1078 passed after the commit it reads. Every
+commit's identity gate armed: 226 spellings, 0 hits.
+
+CI, the full suite on the lane's `ci/` ref. Run 38047725191 on `a5e7343`
+(round 1 and the merge of master): FAILURE, two shards, four tests in two
+files this lane's own changes broke and its local gate had not selected --
+the banked-evidence guard (`N 133`'s cell keeps two gitignored prior
+readings; pinned as `N 134`'s were) and the read-row triage (`N 80` and
+`N 133` still listed after leaving GAP). Repaired in `d653ac9`, 42 passed
+locally. THE MERGE NOTE: `a5e7343`'s message names master as `0103810`;
+another lane's fetch had moved the shared ref, and the merge took
+`2b165fd`, which descends from it -- the pins were measured on the tree the
+merge produced, so no figure depends on the name.
 
 ## 10. The live-proof specs
 
-PENDING.
+    row    loads                                  inverse          STOP-ALL
+    N 80   none owed: rests on N 79's and N 194's   a read; none     --
+           banked fires
+    N 133  none owed: rests on N 134's banked fire  the switch's     --
+                                                    own restore
+    N 161  1: linkedin_search_groups with a         a read; none     landed off /search/results/groups/;
+           keyword that names nobody of his --                       the auth wall; any record whose link
+           one of D1's five searches                                 is not /groups/<digits>/; a
+                                                                     denominator naming a failure type
+    N 179  1: linkedin_search_events, the same      a read; none     the same, on /search/results/events/
+           terms -- one of D1's five                                 and /events/<digits>/
+
+Two loads in all, both searches; neither presses anything, and each is banked
+by its own cell's bar: the tool returns its records live, every mitigation
+holding.
 
 ## 11. Instruments and scratch
 
@@ -356,7 +419,27 @@ registered instrument.
 
 ## 12. Children
 
-PENDING.
+Two, `general-purpose` per the standing rules, each in its own worktree, each
+told the lead's edits are the lead's and the census its own to leave alone.
+
+CHILD A, the search verticals: branch `worktree-agent-ae8392079b8893fa8`,
+head `c882d1f` (`648c385` fixtures, `0fa55a7` readers and tools, `c882d1f`
+the surface re-pin). Red first by 17 mutation runs, each restored byte for
+byte: records returned, the untrusted marker, title sanitising, non-result
+links excluded, the moved-link skip, visible only, the 25-card cap,
+exceptions by type, the tool's records -- every one failed without its code.
+Its gates: `test_search_vertical_results` 58 passed in three slices,
+`test_search_vertical_fixtures` 24, `test_d2_search_verticals` 102,
+`test_a_people_reader_reads_one_page` 92, the identity sweep 1080 after each
+commit. Reviewed by the lead and MERGED (`c06d2be`), five count conflicts
+resolved to the union; on the merged tree the surface files 137 passed, the
+prose, people-data, D2 and orphan files 255, the fixture and one-page files
+116, the page-string guards 49.
+
+CHILD B, the People-tab insights: branch `worktree-agent-a72ddaf792b6d7610`,
+head `3e70900`. Measured, built and committed; NOT merged (section 7). Its
+report names four red-first runs not shown and the final tree's guards not
+re-run, and lists the ten union conflicts a merge must resolve.
 
 ## 13. Questions for the orchestrator
 
@@ -380,3 +463,7 @@ PENDING.
    COVERED-UNFIRED the brief named: `N 80` rests on the people search's live
    proofs and `N 133` on `N 134`'s view-switch fire. D6 says PROVEN where the
    route is live-proven; both are the orchestrator's to override.
+4. `N 102`'s build waits on a merge: child B's branch at `3e70900`, ten
+   union conflicts and its unfinished gates (section 12). The same tool would
+   also serve the jobs slice's People-tab row, `J 108`, which names titles,
+   study areas and skills -- three of its five categories.
