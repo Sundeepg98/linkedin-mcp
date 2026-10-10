@@ -2529,7 +2529,12 @@ PERMANENTLY_FORBIDDEN: dict[str, str] = {
         "preview minted. Everything else stays forbidden on the ground above, "
         "which is unchanged -- the view spends the member's privacy, and only "
         "his confirmation of that one read may spend it -- so no probe, "
-        "census, instrument or unconfirmed read loads a third party's profile"
+        "census, instrument or unconfirmed read loads a third party's profile. "
+        "THAT READ INCLUDES ITS PROFILE'S OWN DETAIL PAGES SINCE 2026-10-10 "
+        "(lane NP, ruling NAMED-PROFILE-DETAIL-PAGES, an application of the "
+        "operator's): one detail page of the SAME profile per call, behind the "
+        "same single-use grant and the same preview warning, through a third "
+        "check that takes the segment he named; still never for a measurement"
     ),
     "mark_notifications_read": (
         "clearing his unread badge destroys signal he has not seen, and the "
