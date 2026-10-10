@@ -16,7 +16,7 @@ code, because several were queued before a lane that landed them.
 
 | item | verdict | section |
 |---|---|---|
-| 1. the asserted-names check, red on 8 sites | fixed in `912cc25`; red test shown | 1 |
+| 1. the asserted-names check, red on 8 sites | fixed in `912cc25`; red test shown; one new site from lane K's merge is the orchestrator's to repair | 1 |
 | 2. earned-clean, the people-search readers | fixed in `f3b46fb`; 17 readers move, one driven back since; red tests shown (this branch's hashes do not resolve on `master` until it merges) | 2 |
 | 3a. a post record in `people_data.py` | built in `d1529ff`; red tests shown | 3 |
 | 3b. the root-logger captures that could not fail | done before: `4daa38d`, `de8e95e` | 4.1 |
@@ -86,6 +86,17 @@ records left is still convicted wherever it is written.
 The two names, said once more so this record cannot be read as asserting
 them: `ALERTS-PAGE-UNREAD` and `PROXIMITY-NOT-PARSED` do not exist in the
 blocker ledger; each was a proposal of the contingent-writeoffs record.
+
+ONE SITE CAME BACK THE SAME DAY, AND IT IS NOT A LANE'S TO REPAIR. Lane K's
+registration of the orchestrator's class rulings brought the shape once more:
+that document's line on a page that lists other people says it "is read
+under" the ruling id `NAMES-AT-RUNTIME`, the bare slot phrase directly before
+the id on one line. Lane K pinned it, because the document is the
+orchestrator's and copied byte-identical by four lanes, so no lane may reword
+it. At this branch's merge of master fe119de the pin holds that one site, the
+script exits 1 on it alone, and the eight stay repaired. The repair is two
+words in that document ("read under the ruling"), the orchestrator's; the
+ratchet then demands the pin narrow (section 6).
 
 ## 2. Earned-clean: a success path leaves something the page made
 
@@ -327,11 +338,18 @@ census instrument and derived-view check ran green over this slice here
    `linkedin_server/people_data.py` is imported by the server module and so
    by most of the suite, and the local gates here were scoped by policy: lane
    CI runs 38035353731 and 38036894654 are green but for the known `ci/`
-   infrastructure failure (section 8); the run on the final head, with the
-   fix in, is in the lane's report.
+   infrastructure failure, and run 38037637262, with the fix in, is green
+   (section 8); the run on the final head is in the lane's report.
 5. ROW `M C70`'s cell can name `people_data.Post` when its owner next edits
    it (section 3).
-6. A CAVEAT FOR WHOEVER DRIVES `server._open_profile_views_filter_menus` TO
+6. THE ONE ASSERTED-NAME SITE LEFT IS THE ORCHESTRATOR'S (section 1): in
+   `_audit/2026-09-28-rulings-build-classes.md`, the line on a page that
+   lists other people names `NAMES-AT-RUNTIME` straight after "read under".
+   Two words -- "read under the ruling" -- clear it; the pin in
+   `tests/test_an_asserted_name_resolves.py` then goes red asking to be
+   narrowed, by design. Lanes holding a byte-identical copy of that document
+   would meet the edit at their next merge.
+7. A CAVEAT FOR WHOEVER DRIVES `server._open_profile_views_filter_menus` TO
    ITS PRESS. `_worst` ranks a drive that read the page (this lane's verdict
    among them) above `navigates`, so a drive added to `TO_THE_PRESS` for it
    would be outranked by its own signature variant, and
@@ -443,6 +461,19 @@ equal the merged baseline, 180 readers, none moved (clean 81, not driven 50,
 text 42, records 7); its coverage, holding, premise and drive tests pass
 (31); every census instrument and the three derived views check clean.
 
-The lane CI run on this branch's final head, with the fix in, cannot be
-written into the commit it certifies; its run id and verdict are in the
-lane's report to the orchestrator.
+Run 38037637262, on 09e93b7 (a hash which does not resolve on `master`
+until this branch merges), with the fix in: SUCCESS, all four shards and the
+shard plan green.
+
+MASTER MOVED ONCE MORE, to fe119de (lane K's next-step ledger), and was
+merged in b8a731c (a hash which does not resolve on `master` until this
+branch merges). Five conflicts: the asserted-name pin (section 1: lane K's one
+site kept, the eight repaired kept out), the register (82, 86, 87, in number
+order), and the three derived views, regenerated (263 documents, 73 rulings;
+the map differs from master's only by this record being one more candidate
+document). On the merged tree every census instrument and derived view is
+green, lane K's `scripts/check_next_step.py` green (585 GAP rows, each
+once), and master touched neither the reader guard nor its subjects.
+
+The lane CI run on this branch's final head cannot be written into the commit
+it certifies; its run id and verdict are in the lane's report.
