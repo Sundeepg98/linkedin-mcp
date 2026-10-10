@@ -8,9 +8,9 @@
 
 **THIS REGISTER IS NOT THE CORPUS AND DOES NOT CLAIM TO BE COMPLETE.** Read section 4 before concluding a question is unruled: the scan that keeps it honest reads ONE marker, and the ruling that caused this file to be written does not carry it.
 
-    rulings registered       73
-    documents scanned        262
-    RULED: declarations      60 claimed, 7 triaged, 0 unclaimed
+    rulings registered       74
+    documents scanned        265
+    RULED: declarations      61 claimed, 7 triaged, 0 unclaimed
 
 ---
 
@@ -120,6 +120,7 @@ Scan the CLAIM column against your question. Every claim is a paraphrase written
 | `THIRD-PARTY-PROFILE-FOR-A-NAMED-TARGET` | A third party's profile (/in/<slug>/) may be loaded only inside an outward act whose target the operator names in that call: slug from tool arguments only, never for a measurement, the shaper name-free. Search-admission condition 5 stands. | third-party profiles inside outward acts | 2026-09-24 | [2026-09-24-rulings-notify-veto-and-who-which.md](2026-09-24-rulings-notify-veto-and-who-which.md)<br>*A third party's profile, inside his own outward act* |
 | `NAMED-PROFILE-READ-BEHIND-A-GRANT` | A read of a member's profile he names in the call -- by link or member id, never a name read off a page -- is built behind the single-use grant, its preview stating that LinkedIn may show the member the view; declared fields leave as people records; never for a measurement. | a third-party profile he names | 2026-09-28 | [2026-09-28-rulings-named-profile-read.md](2026-09-28-rulings-named-profile-read.md)<br>*His answer* |
 | `READ-PAST-AN-ACT-SUBSTRING` | A refused substring whose recorded ground is an ACT -- sending, following, applying -- does not bar the READ of his own page that carries it: one exact anchored pattern, a control shown failing, the press gate still refusing every control. Not for a GET that changes state, a credential, recovery, session or security surface, a sign-in challenge, or a refusal grounded in an operator's ruling. | substrings written to stop an act | 2026-09-28 | [2026-09-28-rulings-build-classes.md](2026-09-28-rulings-build-classes.md)<br>*5. Reading past a substring written to stop an act* |
+| `NAMED-PROFILE-DETAIL-PAGES` | The read of a profile he names includes that same profile's own detail pages (/in/<the same slug>/details/<section>/), one load per call, behind the same single-use grant and the same preview warning; any other slug and any non-details path stay refused. | a third-party profile he names | 2026-10-10 | [2026-10-10-rulings-named-profile-detail-pages.md](2026-10-10-rulings-named-profile-detail-pages.md)<br>*The ruling* |
 
 ### read results
 
@@ -316,6 +317,8 @@ Scan the CLAIM column against your question. Every claim is a paraphrase written
 
 **`MESSAGING-SETTINGS-CAPABILITY-LEVEL`** -- The ruling CANONICAL-RULING-ID was written about: one sentence wearing three names across three slices. Its census twin is `_audit/_census/profile.md`.
 
+**`NAMED-PROFILE-DETAIL-PAGES`** -- Orchestrator's application of NAMED-PROFILE-READ-BEHIND-A-GRANT; overridable. Admitted for the four detail sections measured on his own profile; N 178 and N 65 wait on the Interests page's capture.
+
 **`NAMED-PROFILE-READ-BEHIND-A-GRANT`** -- The operator's ruling, verbatim in its document; mitigations as the question put them.
 
 **`NAMES-AT-RUNTIME`** -- The operator's ruling, verbatim in its document. Amends the 2026-09-05 name-free doctrine for runtime returns; answers WHO-WHICH-COUNTS-ARE-NOT-DELIVERY's question.
@@ -368,11 +371,11 @@ Scan the CLAIM column against your question. Every claim is a paraphrase written
 
 | signal NOT scanned | files | lines |
 |---|---|---|
-| a heading naming a ruling | 126 | 275 |
+| a heading naming a ruling | 129 | 281 |
 | a bold line opening on RULING/RULED | 63 | 144 |
 | the phrase THE RULING | 38 | 63 |
 | a named -RULING id | 38 | 96 |
-| the phrase standing ruling | 17 | 40 |
+| the phrase standing ruling | 18 | 41 |
 | a lead or operator ruling in prose | 40 | 106 |
 
 **The ruling that caused this register to be written is in the first row and not in the scan.** `BOUNDARY-IS-NOT-A-REASON` is phrased as a quoted ledger rule under a heading that carries no marker at all. It is registered because a person read it, and nothing here would have found it.
@@ -445,6 +448,7 @@ Every `RULED:` line in the corpus, and what became of it. An UNCLAIMED row fails
 | [2026-09-28-rulings-build-classes.md](2026-09-28-rulings-build-classes.md) | RULED: (orchestrator, 2026-09-28, applying COST-AWARE STAKES-GATING) PURCHASES-STAY-MANUAL | `PURCHASES-STAY-MANUAL` |
 | [2026-09-28-rulings-build-classes.md](2026-09-28-rulings-build-classes.md) | RULED: (orchestrator, 2026-09-28, applying OUTWARD-ACTS-NEED-THE-OPERATOR and D3-UNREGISTE | `READ-PAST-AN-ACT-SUBSTRING` |
 | [2026-09-28-rulings-named-profile-read.md](2026-09-28-rulings-named-profile-read.md) | RULED: (operator, 2026-09-28 08:01, verbatim) "Yes, I'm giving you permission." | `NAMED-PROFILE-READ-BEHIND-A-GRANT` |
+| [2026-10-10-rulings-named-profile-detail-pages.md](2026-10-10-rulings-named-profile-detail-pages.md) | RULED: (orchestrator, 2026-10-10, applying the operator's 08:01 YES to reading profiles he | `NAMED-PROFILE-DETAIL-PAGES` |
 
 ### 5.1 Triaged -- a declaration hit that is not a ruling made here
 

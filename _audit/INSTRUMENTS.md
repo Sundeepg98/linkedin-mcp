@@ -11648,6 +11648,98 @@ runner is worth keeping as a METHOD: write the mutated module, run only the
 test meant to catch it, restore the original bytes in a finally block, and
 check the restore by digest after every mutation.
 
+## 86. A RED INSTRUMENT MADE GREEN IN ITS RECORDS, A CLEAN THAT MUST SHOW WHAT THE PAGE MADE, AND A RECORD TYPE THE BOUND COULD NOT NAME (lane-g2-debts, 2026-10-10)
+
+Record: `_audit/2026-10-10-lane-g2-debts.md`.
+
+### 86.1 THE ASSERTED-NAMES CHECK: A PIN THAT KEPT CI GREEN OVER A RED SCRIPT
+
+`scripts/check_asserted_names_resolve.py` exited 1 on eight sites from
+2026-09-23, while its test pinned exactly those eight, so the suite stayed
+green. A pinned red is a quiet red: the ninth finding would have been one
+more line under eight that nobody acted on. All eight were repaired in the
+records that made them -- five ruling ids and one state word reworded to name
+their kind, two never-minted blocker names disclosed beside the proposals
+that minted them -- and the pin was emptied. No line of the checker changed.
+
+SHOWN FAILING AFTER THE REPAIR, which is what keeps it in this register: a
+fabricated name in the `blocker` slot, and a real ruling id wrapped after a
+bare "under", appended to a tracked record and removed before any commit --
+exit 1, both named; without them, exit 0. The emptied pin was red (1 failed,
+naming all eight) against the records as they were.
+
+    A PIN THAT HOLDS A KNOWN RED IS A DEBT WITH NO DUE DATE. REPAIR THE
+    RECORDS AND EMPTY THE PIN; NEVER WIDEN THE CHECKER TO MEET THEM.
+
+### 86.2 CLEAN NEEDS SOMETHING THE PAGE MADE, MEASURED AGAINST A PAGE THAT DRAWS NOTHING
+
+The reader-leak guard's earned-clean rule ("a read, and a result that is
+neither empty, a refusal nor an error") was met by readers that hand back the
+same thing whatever the page draws. Measured over the 97 readers it recorded
+clean: 17 were clean on a refusal tally, a poll budget, their own sentence or
+a failure's name -- the guard's own control reader among them, and the three
+readers behind the people search. The instrument: the same call over
+`tests/plantedpage.py`'s `BlankPage`, and a value counts only if it differs
+from that drive and sits under no refusal or failure key
+(`tests/test_readers_emit_no_page_string.py`, `page_evidence`).
+
+SHOWN FAILING: two stubs that read the page and then return before their
+success path were clean under the old rule and are not under the new one; the
+pure rule's table has 13 rows; and the coverage comparison named the 17 when
+the rule met the old baseline.
+
+WHAT IT FOUND BEYOND THE COUNT: two of the 17 had success paths that return
+page text outside a record -- a control's id attribute, a followed Page's
+name -- which no drive had reached; they are held for a ruling. Two of the
+17 got curated drives over the tracked intro editor the same day: the Save
+gate, back to an earned clean, and the editor value reader, whose success
+path returns his own field's value, admitted as `HIS_OWN`. The triage
+added two kinds to `WHAT_WOULD_DRIVE_IT`: `SCRIPT` (a script the planted page
+can only answer with strings) and `WORDS` (LinkedIn's own words in the page's
+text, which it can only answer with the plant).
+
+THE NULL HAD TO BE FAITHFUL BEFORE IT WAS USEFUL. Its first version let every
+wait return at once, so seven wait readers read "attached" on both pages and
+would have been convicted for the double's fault; a fidelity test now holds
+that every wait on the blank page times out and no read answers the plant.
+
+    A VALUE BOTH PAGES GIVE IS THE READER'S OWN. ASK WHAT A PAGE THAT DRAWS
+    NOTHING RETURNS BEFORE CALLING A DRIVE A READING -- AND MAKE THE NULL TIME
+    OUT WHERE THE REAL PAGE WOULD.
+
+### 86.3 A RECORD TYPE THE BOUNDED-READER GUARD CANNOT NAME
+
+`tests/test_a_people_reader_reads_one_page.py` finds record readers by a
+hand-kept set of class names. When `people_data.Post` was declared, the set did
+not hold it, so a reader building posts would have had no bound on its pages.
+`test_every_record_type_is_a_record_class_here` holds the set equal to
+`people_data.RECORD_TYPES`; SHOWN FAILING on `Post` before the name was added.
+
+### 86.4 THE CONTROL FIXTURES RUN IN AN ENGINE, NOT ONLY ATTACHED TO HIS CHROME
+
+`tests/test_control_paths_run_in_an_engine.py` runs the five control paths
+of `scripts/_probe_control_paths_live.py` -- each module's own fixture and
+written expectation, through the shipped reader -- in a local headless
+Chromium, through the probe's own `_classify`, so nothing is copied. Until
+now nothing in the suite had executed the one line that makes a fixture a
+control (`DOMParser` inside the shipped script). SHOWN FAILING: each path's
+planted defect turns it red, and an expectation bent by one turns exactly
+its own path red. The same file runs the group reader over the live lane's
+tracked group-page skeleton against the live load's own verdict, with a
+planted post permalink as its control.
+
+    A SERIALISED PAGE IS NOT THE PAGE: NESTED ANCHORS DO NOT SURVIVE A
+    RE-PARSE, SO A SKELETON'S COUNT CAN DIFFER FROM THE LIVE COUNT FOR THE
+    PARSER'S REASONS. COMPARE A READER WITH THE ENGINE IT RAN IN.
+
+### 86.9 DECLARED DISPOSABLE
+
+Scratch probes of this lane, kept in its scratch area and not committed:
+the census ASCII count, the comment-coupling measurement of item 3c, the
+search readers' planted drive, the success-evidence measurement whose rule
+became 86.2 (the committed form is the guard's own), the baseline diff, the
+bent-expectation control behind 86.4, and the instrument runner.
+
 ## 87. A REF NAME IS NOT A PERMISSION; ANCESTRY PLUS THE SHIPPED SWEEP IS (lci-fastlane-lead, 2026-10-10)
 
 **Registered 2026-10-10.** Full record: `_audit/2026-10-10-lane-ci-fastlane.md`.
@@ -11729,3 +11821,76 @@ shard job now creates a local master on every run that is not master's.
 | path | shown failing by |
 |---|---|
 | `.github/workflows/ci.yml` -- the guarded `git branch --force master origin/master` step; `tests/test_ci_fast_lane.py` local-master tests | against the workflow before the step: 2 failed (no step creates a local master; no guard off master); 36 passed after, including a reproduction that shows `master` failing to resolve in a ci/-shaped clone and resolving after the step's own script runs |
+
+### 87.7 AN IDENTITY READER DECODES BY RULE, NEVER BY LOCALE (the 13:43 ruling)
+
+Four readers matched text against the wordlist and no two decoded it the
+same way: two used the LOCALE (cp1252 on the operator's box, where the hooks
+run), two used UTF-8 with replacement. So 9 non-ASCII needles could never
+match a UTF-8 file at commit or push time there, and none could match a
+cp1252 file in the other two. One function now decides --
+`sweep_tracked_for_identity.decode_text`, UTF-8 when valid else cp1252 --
+and all four call it; `redact` now hides letters of every script and prints
+ASCII only. A DELIBERATE behaviour change: the real tree still reads PASS.
+
+    AN ENCODING NOBODY CHOSE IS STILL A CHOICE: THE MACHINE'S. A DETECTOR
+    THAT DECODES BY LOCALE DETECTS DIFFERENT THINGS ON DIFFERENT BOXES.
+
+| path | shown failing by |
+|---|---|
+| `scripts/sweep_tracked_for_identity.py` -- `decode_text`, `redact`; its use in the tracked sweep, the blob sweep (`_as_text`), `scripts/pre_commit_identity_gate.py` (`_staged_content`, `_mask`) and `scripts/identity_gate.py` (`_git`, `redact`); `tests/test_identity_text_is_decoded_one_way.py` | against the old readers on the operator's box, with a synthetic non-ASCII needle in UTF-8 and cp1252 copies: 6 failed -- no rule; the shape kept accented letters; the blob sweep and the pre-commit gate missed the UTF-8 copy; the tracked sweep and identity_gate missed the cp1252 copy. 6 passed after |
+
+DECLARED DISPOSABLE, sections 87.5-87.7: the old-versus-new sweep
+benchmark, the UTF-8 decoding probe, the non-ASCII needle COUNT (it printed
+counts only), the run-collection read-back from junit, the timings writer
+wrapper, the fast-lane xdist replay, the shard anatomy reader, and the
+escape rewriter for a test file whose escapes a tool layer decoded.
+
+## 88. A HANDLE LEAVES ONLY WHEN EVERY LINK THAT NAMES IT AGREES, AND A DOOR TAKES THE SEGMENT IT WAS ASKED FOR (lnp-named-profile-lead, 2026-10-10)
+
+**Registered 2026-10-10.** Full record: `_audit/2026-10-10-lane-np-named-profile.md`.
+Numbered 88 by the orchestrator's allocation, appended at the end; renumber
+at the merge if another lane took it.
+
+### 88.1 A VALUE THE PAGE HOLDS LEAVES FOR THE CALLER ONLY WHEN EVERY PLACE THE PAGE WRITES IT SAYS THE SAME
+
+`linkedin_read_named_profile` now returns the named member's token, which a
+caller passes back to the people search. The token is not read from ONE link:
+it is the topcard's own id, returned only when M M1's Message chain closes AND
+every topcard composer link and every connections link names that same member.
+A stranger's id in any one of them returns NO token -- not the majority's, not
+the first's. And the token leaves for the CALLER, never for a tool: one module
+composes it, that module navigates nowhere and keeps nothing, and no tool reads
+it to build an address.
+
+    A PAGE MAY VETO, NEVER SUPPLY. A HANDLE THAT LEAVES FOR THE CALLER IS
+    SUPPLIED BY NOBODY UNTIL HE PASSES IT BACK; MAKE EVERY COPY OF IT AGREE
+    BEFORE IT LEAVES.
+
+### 88.2 A DOOR FOR ONE SUB-PAGE TAKES THE SEGMENT IT WAS ASKED FOR AS AN ARGUMENT
+
+The detail pages of a profile he names (ruling NAMED-PROFILE-DETAIL-PAGES) are
+admitted by a THIRD check, `readonly.assert_named_profile_details_url(url,
+segment)`. An address-only check cannot tell the named member's page from a
+stranger's -- the anchored shape alone matches both, which a control shows --
+so the check is handed the segment the caller named and compares it.
+
+    A URL-ONLY CHECK ANSWERS "IS THIS A SHAPE WE ADMIT"; ONLY THE CALLER'S
+    ARGUMENT ANSWERS "IS THIS THE ONE HE NAMED".
+
+### 88.3 THE ENTRIES
+
+| path | shown failing by |
+|---|---|
+| `dom.NAMED_HANDLES_JS` / `dom.read_named_profile_handles`, `linkedin_server/named_handles.py`; `tests/test_named_profile_handles.py` | RED before the read was wired (`KeyError: 'member_token'`); then each check weakened in the script lets its plant through -- the composer check (a stranger's composer link returns the owner's token), the connections check, the actor check and the author check (a stranger's item reads `owner`), and the stop at the first permalink (the owner's own post reads `another_member`): `test_control_each_check_weakened_lets_its_plant_through` |
+| `readonly.assert_named_profile_details_url`; `tests/test_named_profile_detail_pages.py` | the anchored shape ALONE admits another member's detail page and a section off the vocabulary; only the segment comparison and the vocabulary refuse them (`test_control_the_shape_alone_admits_*`); 16 other addresses each refused and never quoted |
+| `scripts/_build_named_profile_activity_skeleton.py` (the fixture's provenance) | a planted stranger's name in a label and in a text node of a copy of its own output: `unclassified labels 1`, `unclassified text 1`, the structure digest moved, the name gone from the rebuild, the fixed point broken -- a hand edit does not survive |
+| `linkedin_server/field_restore.py`, `writes._clear_target` and the clear's click-time check (child C); `tests/test_an_empty_value_is_admitted_only_as_a_clear.py`, `tests/test_an_empty_original_is_restored_by_a_clear.py` | RED with nothing wired: 18 failed, among them `needs 'value' and got ''` with a recorded empty prior; then three one-line mutations, each reverted, each turning its test red: the click-time check skipped (a field changed since is cleared -- `DID NOT RAISE`), a `None` prior recorded, the old receipt split restored |
+| `linkedin_server/item_author.py` (child B); `tests/test_a_reaction_takes_any_item_and_names_its_author.py` | RED on the shipped gate: the author tests `assert None == 'another_member'` / `'you'` / `'unknown'`, no record, and `ImportError` against an export of the previous commit; and a docstring check that could NOT fail (the old sentence wraps across two lines) caught on the first draft and fixed |
+
+### 88.4 DECLARED DISPOSABLE
+
+The lane's scratch tools: the skeleton peekers (structure tree, topcard shapes,
+fixture grep), the targeted page-string driver for the new readers, the freeze
+attribution script, the ASCII checker, the census cell appender and the planted
+builder run. Each answered one question once; the answers are in the record.

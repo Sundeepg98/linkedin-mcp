@@ -14,15 +14,15 @@ wordlist (the planted value is invented here and names no one):
 * ONE PROCESS. A sweep of several blobs launches ``git cat-file --batch``
   exactly once and ``git cat-file -p`` never. The old loop launched one per
   blob, and that is this file's red run.
-* THE SAME TEXT. Blobs built to differ under every decoding choice -- CRLF, a
-  lone CR, bytes that are not UTF-8, cp1252 punctuation, valid UTF-8, an empty
-  blob, one larger than a pipe buffer -- read back from the batch reader equal
-  to ``subprocess.run(["git", "cat-file", "-p", sha], text=True,
-  errors="replace").stdout``, the exact call the old loop made. Matching runs
-  on that text, so equal text is what makes every verdict, line number and
-  redacted shape the same.
+* THE SAME BYTES. Blobs built to break a framing or decoding mistake -- CRLF,
+  a lone CR, bytes that are not UTF-8, cp1252 punctuation, valid UTF-8, an
+  empty blob, one larger than a pipe buffer -- read back from the batch reader
+  equal to one ``git cat-file -p`` per blob, both decoded by the sweep's rule.
+  (Until the 2026-10-10 decoding ruling the comparison was against the LOCALE
+  text the old loop used, and it held byte for byte; the rule itself is
+  pinned in ``tests/test_identity_text_is_decoded_one_way.py``.)
 * THE SAME REPORT. ``main()``'s whole output over a repository with a planted
-  value is identical with the batch reader and with the old per-blob read
+  value is identical with the batch reader and with one process per blob
   swapped back in -- and it is a FAIL naming the planted line, so the
   planted-value control still fails.
 * A BLOB GIT CANNOT PRODUCE REFUSES (exit 2); it never reads as clean.
@@ -110,10 +110,15 @@ def _aim(module, monkeypatch, root: Path) -> None:
                         lambda: {"planted_class": {PLANTED}})
 
 
-def _old_text(root: Path, sha: str) -> str:
-    """The exact call the old loop made, through ``_git``'s own options."""
-    return subprocess.run(["git", "cat-file", "-p", sha], cwd=root,
-                          capture_output=True, text=True, errors="replace").stdout
+def _old_text(module, root: Path, sha: str) -> str:
+    """One ``git cat-file -p`` per blob -- the old loop's framing -- decoded
+    by the sweep's own rule. (Until 2026-10-10 the comparison was against the
+    LOCALE decoding the old loop used; the rule then changed deliberately,
+    ``tests/test_identity_text_is_decoded_one_way.py``, and this file pins the
+    FRAMING: one process hands over the bytes N processes did.)"""
+    raw = subprocess.run(["git", "cat-file", "-p", sha], cwd=root,
+                         capture_output=True).stdout
+    return module.decode_text(raw)
 
 
 def test_a_sweep_launches_one_cat_file_process_not_one_per_blob(
@@ -145,7 +150,7 @@ def test_the_batch_reader_hands_over_the_text_cat_file_p_did(repo, monkeypatch):
     reader = module._BlobReader()
     try:
         for name, sha in shas.items():
-            assert reader.read(sha) == _old_text(root, sha), name
+            assert reader.read(sha) == _old_text(module, root, sha), name
     finally:
         reader.close()
 
@@ -160,10 +165,10 @@ def test_the_report_is_identical_and_the_planted_value_still_fails(
     batch = capsys.readouterr().out
 
     class PerBlob:
-        """The old loop's read, swapped back in."""
+        """The old loop's framing -- one process per blob -- swapped back in."""
 
         def read(self, sha):
-            return module._git("cat-file", "-p", sha)
+            return _old_text(module, root, sha)
 
         def close(self):
             pass

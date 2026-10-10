@@ -284,6 +284,12 @@ def test_the_shape_pass_adds_no_evaluate_waiver() -> None:
     lane L5's branch. THIS COPY OF THE CEILING WAS MISSED THERE -- the lane's
     gates were hand-derived lists that did not hold this file -- and the whole
     suite on the merged tree found it red. The shape pass still adds none.
+
+    24 SINCE LANE NP (2026-10-10), and the twenty-fourth is not this pass's
+    either: it is ``dom.read_named_profile_handles``' run of
+    ``NAMED_HANDLES_JS``, argued in ``tests/test_readonly.py``'s budget. This
+    copy of the ceiling was missed again by the lane's hand-picked gates and
+    found red by its CI run; it moves with the budget it copies.
     """
     source = dom.__file__
     with open(source, encoding="utf-8") as stream:
@@ -292,7 +298,7 @@ def test_the_shape_pass_adds_no_evaluate_waiver() -> None:
             for line in stream.read().splitlines()
             if line.strip().endswith("# readonly-ok")
         )
-    assert waived <= 23, (
+    assert waived <= 24, (
         "the shape reading must extend the existing read_search_filters "
         "evaluate, never add one; waivers now %d" % waived
     )

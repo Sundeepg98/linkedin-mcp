@@ -129,7 +129,7 @@ PINNED_TOOL_SURFACE: dict[str, tuple[str, ...]] = {
     "linkedin_profile_editor_values": (),
     "linkedin_publish_post": ("confirm_token", "text"),
     "linkedin_react_to_item": ("confirm_token", "item"),
-    "linkedin_read_named_profile": ("confirm_token", "profile"),
+    "linkedin_read_named_profile": ("confirm_token", "profile", "section"),
     "linkedin_recent_job_searches": (),
     "linkedin_recruiter_insights": (),
     "linkedin_save_job": ("confirm_token", "job_id"),
@@ -477,6 +477,16 @@ PINNED_TOOL_SURFACE: dict[str, tuple[str, ...]] = {
 #: connections) GAP -> COVERED-UNFIRED by D6 on the orchestrator's ruling, on
 #: `connections_of`, which shipped earlier. Never fired. See
 #: `_audit/2026-09-24-lane-s-people-search.md`, "Four people-search items".
+#: **RE-PINNED 2026-10-10 AT 61 TOOLS AND 97 PARAMETERS on lane NP (ruling
+#: NAMED-PROFILE-DETAIL-PAGES): no tool, one parameter -- `section` on
+#: `linkedin_read_named_profile`, ONE detail page of the same profile he names,
+#: behind the same grant and warning.** THE CENSUS DECISION, in the same commit:
+#: NO ROW MOVES. `N 178` and `N 65` stay GAP -- no capture of the Interests
+#: detail page exists, so the load returns counts and no entry; the capture spec
+#: and the reader design are in `_audit/2026-10-10-lane-np-named-profile.md`.
+#: The read's two new fields (`member_token`, `activity_items`) are not
+#: parameters; `N 30`, `N 85`, `N 172`, `N 31` and `M C32` move only when proven
+#: live.
 #: **RE-PINNED 2026-10-10 AT 62 TOOLS AND 100 PARAMETERS (lane S, settings,
 #: HIS-OWN-SETTINGS-NOT-OUTWARD): one WRITE,
 #: `linkedin_set_admitted_setting(settings_page, control, value, confirm_token)` -- ONE
@@ -486,8 +496,11 @@ PINNED_TOOL_SURFACE: dict[str, tuple[str, ...]] = {
 #: and goes GAP -> COVERED-UNFIRED, its switch built on the real capture of
 #: its page; the other fourteen toggles stay GAP on their pages' captures.
 #: Never fired. See `_audit/2026-09-28-lane-s-settings.md`.
+#: **AT LANE S'S MERGE OF MASTER 1027bf8 (2026-10-10): 62 TOOLS AND 101
+#: PARAMETERS** -- master's 61 and 97 (lane NP's `section`) with lane S's one
+#: tool and its four parameters, counted on the merged tree.
 PINNED_TOOL_COUNT = 62
-PINNED_PARAMETER_COUNT = 100
+PINNED_PARAMETER_COUNT = 101
 
 
 def live_surface() -> dict[str, tuple[str, ...]]:

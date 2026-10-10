@@ -231,6 +231,10 @@ PINNED = (
     "NAMED_PROFILE_SEGMENT",
     "_NAMED_PROFILE_URL",
     "_INVISIBLE_LETTER_CODES",
+    # 2026-10-10, lane NP: the third check's section vocabulary and shape
+    # (ruling NAMED-PROFILE-DETAIL-PAGES); the re-freeze note below.
+    "NAMED_PROFILE_DETAIL_SECTIONS",
+    "_NAMED_PROFILE_DETAILS_URL",
 )
 
 #: Digests of ``linkedin_server/readonly.py`` at "perform() for save_job, and
@@ -1661,12 +1665,42 @@ PINNED = (
 #: line by line and every value in it equals the merged file; only these
 #: notes conflicted, both kept, master's first. One interpreter, 3.13.
 #: ------------------------------------------------------------------------
+#: RE-FROZEN 2026-10-10 BY LANE NP: A THIRD CHECK BESIDE THE SECOND DOOR, NOT
+#: A WIDER SECOND DOOR. Ruling NAMED-PROFILE-DETAIL-PAGES (the orchestrator,
+#: 2026-10-10, applying the operator's 08:01 YES; registered in
+#: ``_audit/2026-10-10-rulings-named-profile-detail-pages.md``).
+#:
+#:     <functions>                     bd677a42da1d190f -> bbbc335322319cc3
+#:     NAMED_PROFILE_DETAIL_SECTIONS   (new, pinned)    -> 871ec6e1ca249f4e
+#:     _NAMED_PROFILE_DETAILS_URL      (new, pinned)    -> 83927127b7af1d00
+#:     every other digest              unchanged
+#:
+#: Two functions were added -- ``named_profile_details_url`` and
+#: ``assert_named_profile_details_url`` -- reached only by
+#: ``browser.LinkedInBrowser.goto(named_profile_details_of=<segment>)``, which
+#: only ``named_details.load_the_confirmed_details`` passes (both pinned in
+#: ``tests/test_named_profile_detail_pages.py``). The check takes the segment
+#: the caller NAMED: ``/in/<that segment>/details/<section>/`` for four section
+#: words measured on his own profile, no query, no exemption.
+#: ``assert_read_url``, ``is_read_url`` and ``assert_named_profile_url`` are
+#: byte-identical, so the read door and the second door still refuse every
+#: detail page of a third party.
+#:
+#: ATTRIBUTION, in this dict's form: the tree MINUS exactly those two functions
+#: hashes to bd677a42da1d190f, the value replaced, so nothing else rode in.
+#: Controls: dropping ``is_read_url`` instead lands on c5e30b2a76946c5c, and a
+#: name no function carries drops nothing and moves nothing. Computed with this
+#: file's ``ast_digest``, one interpreter, 3.13.
+#: ------------------------------------------------------------------------
 READONLY_AST_AT_LAST_REFREEZE = {
     # ff43e832d6f2b685 on master (lane G's replacement scan) and
     # c191182c4f66d789 on lane L5's follow-up branch (the named-profile door)
-    # until lane L5's merge of master 52b55b6 brought both; the last re-freeze
-    # note above attributes it.
-    "<functions>": "bd677a42da1d190f",
+    # until lane L5's merge of master 52b55b6 brought both; bd677a42da1d190f
+    # until lane NP's third check (2026-10-10). The re-freeze notes above.
+    "<functions>": "bbbc335322319cc3",
+    # PINNED 2026-10-10 -- the third check's vocabulary and shape (lane NP).
+    "NAMED_PROFILE_DETAIL_SECTIONS": "871ec6e1ca249f4e",
+    "_NAMED_PROFILE_DETAILS_URL": "83927127b7af1d00",
     # PINNED 2026-09-27 -- the second door's segment and address shapes, and
     # the letters it refuses; the re-freeze notes above.
     "NAMED_PROFILE_SEGMENT": "b3de160186fb187d",
