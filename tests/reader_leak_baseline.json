@@ -84,6 +84,7 @@
     "group_page:read_group_page": "clean",
     "groups_page:read_group_memberships": "clean",
     "item_addresses:read_item_addresses": "clean",
+    "item_author:read_item_author": "returns_records",
     "job_collections:read_job_collection": "clean",
     "job_home:read_recent_searches": "clean",
     "named_profile:bubble_close_gate": "clean",

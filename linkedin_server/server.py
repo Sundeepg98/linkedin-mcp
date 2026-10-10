@@ -9755,6 +9755,18 @@ async def linkedin_react_to_item(
     ``activity_items``, each carrying its author kind), and REACTING TO ANOTHER
     MEMBER'S POST NOTIFIES THAT MEMBER.
 
+    SO THE PREVIEW NAMES WHOSE POST IT IS (2026-10-10, ruling
+    PREVIEW-NAMES-THE-RESOLVED-TARGET). ``who_this_would_reach`` is the post's
+    AUTHOR as a people record -- the name and headline its one actor block
+    draws, read off the permalink the preview loaded, sanitised and marked as
+    another member's words; its link is null, because the page's link is
+    never handed back. ``author_kind`` is ``you``, ``another_member`` or
+    ``unknown``, and it is DERIVED: it compares the actor's profile link with
+    your own identity card's on the same page, and no capture has yet shown
+    that comparison telling another member's post apart
+    (``linkedin_server/item_author.py``). The name is in the block you read
+    and nowhere this server keeps -- not the grant, not a log, not a receipt.
+
     WHAT DID NOT CLOSE, AND SHIPS ANYWAY BECAUSE HE RULED IT SO: **pressing
     this control applies whatever LinkedIn's default reaction is, and nobody
     has measured which one that is.** ``Open reactions menu`` is a separate
