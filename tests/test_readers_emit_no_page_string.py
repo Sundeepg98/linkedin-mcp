@@ -773,6 +773,19 @@ async def _read_the_confirmed_details_as_shipped(page: Any) -> Any:
     )
 
 
+async def _read_radio_label_binding_as_shipped(page: Any) -> Any:
+    """``dom.read_radio_label_binding`` as ``writes._live_control`` calls it:
+    the one role its aim takes, ``"radio"``, and the caller's own label word
+    (2026-10-10, lane G2). Driven by signature it is handed a role the
+    selector builder refuses and returns its own sentence; as shipped it
+    reads the control's id and its label's ``for`` -- the planted page
+    answers both with the plant -- and returns the verdict, never either id
+    (converted the same day, on the orchestrator's order)."""
+    from linkedin_server import dom
+
+    return await dom.read_radio_label_binding(page, "radio", "Always on")
+
+
 def _inert_observation(
     spec: Any, facts: dict[str, Any], target: Any = SYNTHETIC_ARGUMENT
 ) -> Any:
@@ -923,6 +936,10 @@ AS_SHIPPED: dict[str, Callable[..., Any]] = {
     # ONE DETAIL PAGE OF IT, 2026-10-10 (lane NP): driven by signature it is
     # handed a section off the vocabulary and raises before any read.
     "named_details:read_the_confirmed_details": _read_the_confirmed_details_as_shipped,
+    # THE RADIO BINDING, 2026-10-10 (lane G2): driven by signature it is
+    # handed a role the selector builder refuses; as the write path calls it,
+    # it reaches its verdict.
+    "dom:read_radio_label_binding": _read_radio_label_binding_as_shipped,
     "threads:name_the_reply_recipient": _name_the_reply_recipient_as_shipped,
     "writes:_name_the_invitation_recipient": _name_the_invitation_recipient_as_shipped,
     **shipped_drives.DRIVES,
@@ -1011,11 +1028,12 @@ ADMITTED_TEXT: dict[str, tuple[str, ...]] = {
 #: * ``RULING`` -- a tracked fixture drives it, and what its success path
 #:   returns is page text outside a record, which the text inventory may not
 #:   admit without one. (The four held on 2026-09-28 were ruled on the same
-#:   day -- :data:`ADMITTED_TEXT`. Two are held since 2026-10-10, found when
-#:   their old clean stopped counting: ``dom:read_radio_label_binding``, whose
-#:   success path returns a control's id attribute, and
-#:   ``writes:_read_followed_state``, whose success path returns a followed
-#:   Page's name.)
+#:   day -- :data:`ADMITTED_TEXT`. Two more were found on 2026-10-10, when
+#:   their old clean stopped counting, and the orchestrator ruled both
+#:   CONVERTED the same day: ``dom:read_radio_label_binding`` now returns the
+#:   binding as a verdict and never the id, and is driven as shipped;
+#:   ``writes:_read_followed_state``'s Page name leaves only through a
+#:   declared record.)
 #: * ``SCRIPT`` (2026-10-10, lane G2) -- its reading is a script this package
 #:   runs in the page. The planted page answers every script with page
 #:   strings, the reader's coercion refuses them, and what comes back is a
@@ -1239,20 +1257,6 @@ WHAT_WOULD_DRIVE_IT: dict[str, str] = {
         "(test_with_include_names_the_same_drive_returns_the_three), which "
         "assert on the people and not on its counts."
     ),
-    "dom:read_radio_label_binding": (
-        "RULING: the harness hands role its generic string, which "
-        "named_role_selector refuses before any count, so the drive comes "
-        "back with the reader's own sentence. Handed a role this package "
-        "maps -- 'radio', as writes._live_control passes it -- the planted "
-        "page alone reaches its success path, and what comes back is page "
-        "text outside a record: the control's id and its label's for, in "
-        "observed and quoted in why. tests/test_radio_label_binding.py "
-        "drives it in a headless browser over hand-written settings rows "
-        "(test_a_properly_bound_label_verifies); no tracked fixture draws a "
-        "named settings radio. Recording that drive needs a ruling on those "
-        "two attribute values -- or the reader converted to publish only "
-        "whether they match."
-    ),
     "dom:read_sdui_actions": (
         "SCRIPT: its reading is dom.SDUI_ACTIONS_JS, which counts action "
         "tokens in the page's script text and answers integers. The planted "
@@ -1298,20 +1302,27 @@ WHAT_WOULD_DRIVE_IT: dict[str, str] = {
         "so a drive would come back clean."
     ),
     "writes:_read_followed_state": (
-        "RULING: it reads the followed-Pages list by locators -- each control "
-        "named 'Click to stop following' and its row's company link -- and "
-        "LinkedIn's stated total from main's text; the planted page answers "
-        "every label and the text with page strings, so no row parses, no "
-        "total reads, and it returns unknown with its own sentence. "
-        "tests/fixtures/manage_pages_following_hydrated.html draws the list, "
-        "and tests/test_writes.py drives it there in a headless browser "
-        "(test_an_unfollow_that_took_reports_true_and_names_both_totals, "
-        "following before the click); tests/test_follow_state_fixture.py "
-        "drives its pieces (test_a_page_that_did_render_is_answered_"
-        "following). Its success path returns the matched Page's name, in "
-        "facts' company and quoted in why: page text outside a record, and "
-        "which reason, if any, admits a followed organisation's name is a "
-        "ruling's to give."
+        "WORDS: it keys on the words LinkedIn writes into each Manage Pages "
+        "row's own button -- 'Click to stop following <Page>' -- and on "
+        "LinkedIn's stated total in main's text; the planted page answers "
+        "every label and the text with the plant, so no row parses and no "
+        "record is built. Its success path -- the matched Page's name, as an "
+        "organisation record since the orchestrator's ruling of 2026-10-10 "
+        "-- runs over tests/fixtures/manage_pages_following_hydrated.html in "
+        "a headless browser (tests/test_writes.py::test_an_unfollow_that_"
+        "took_reports_true_and_names_both_totals), and over stand-ins for its "
+        "two reads in tests/test_the_followed_page_name_leaves_only_as_a_"
+        "record.py. A double answering those reads off the capture is not "
+        "built."
+    ),
+    "writes:_read_followed_counts": (
+        "WORDS: the same read without the Page's name, for the verification "
+        "after the click (2026-10-10, lane G2): the state, its sentence, the "
+        "matched id and LinkedIn's counts. It keys on the same button words "
+        "and stated total, which the planted page answers with the plant. "
+        "Its success path runs inside writes._verify_after over the tracked "
+        "Manage Pages captures in tests/test_writes.py (the unfollow's "
+        "verification reads the totals before and after)."
     ),
     "writes:_read_saved_state": (
         "WORDS: it reads _read_tracker_membership for the Saved tab, which "

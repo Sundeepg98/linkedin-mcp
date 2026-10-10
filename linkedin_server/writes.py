@@ -219,6 +219,7 @@ from linkedin_server import (
     item_author,
     landing,
     named_profile,
+    people_data,
     people_seam,
     profile_editor,
     shape,
@@ -4127,16 +4128,61 @@ async def _read_followed_state(
     refuses rather than telling him he does not follow somebody he does.
     """
     rows = await dom.harvest_followed_pages(page)
-    parsed = shape.parse_followed_pages(rows, await dom.read_main_text(page))
-    verdict = shape.followed_page_state(target, parsed)
+    parsed, verdict = _followed_verdict(rows, await dom.read_main_text(page), target)
     matched = verdict.get("matched") or {}
+    # THE PAGE'S NAME LEAVES ONLY AS A RECORD (the orchestrator's ruling of
+    # 2026-10-10 14:56 IST): LinkedIn writes it into the row's own button, so
+    # it is a string the page chose. It travels as a ``people_data``
+    # organisation record -- sanitised, bounded, marked -- with the Page's
+    # numeric address (never its slug, which can be a name), and the preview
+    # and the receipt print that record where they printed the bare name.
+    organisation = (
+        people_data.Organisation.from_page(
+            name=matched.get("name"),
+            href="/company/" + str(matched["id"]) + "/" if matched.get("id") else None,
+        )
+        if matched
+        else None
+    )
     facts = {
-        "company": matched.get("name"),
+        "company": organisation.envelope() if organisation is not None else None,
         "company_id": matched.get("id"),
         "rendered": parsed.get("rendered"),
         "total_followed": parsed.get("total_followed"),
     }
     return facts, str(verdict.get("state") or UNKNOWN), str(verdict.get("why") or "")
+
+
+def _followed_verdict(
+    rows: Any, main_text: Any, target: str
+) -> tuple[dict[str, Any], dict[str, Any]]:
+    """The Manage Pages parse and the three-valued verdict, from the two
+    readings. Pure, and the one place both reads below make it."""
+    parsed = shape.parse_followed_pages(rows, main_text)
+    return parsed, shape.followed_page_state(target, parsed)
+
+
+async def _read_followed_counts(
+    page: Any, target: str
+) -> tuple[dict[str, Any], str, str]:
+    """The same read as :func:`_read_followed_state` WITHOUT the Page's name:
+    the state, its sentence, the matched id and LinkedIn's counts.
+
+    FOR THE VERIFICATION AFTER A CLICK (2026-10-10, lane G2), which decides
+    from the state and the totals and prints neither name. Kept apart so the
+    verification builds no organisation record: a function that reaches a
+    record builder is a people reader to the guards, and ``_verify_after``
+    answers for every write, not only this one.
+    """
+    rows = await dom.harvest_followed_pages(page)
+    parsed, verdict = _followed_verdict(rows, await dom.read_main_text(page), target)
+    matched = verdict.get("matched") or {}
+    counts = {
+        "company_id": matched.get("id"),
+        "rendered": parsed.get("rendered"),
+        "total_followed": parsed.get("total_followed"),
+    }
+    return counts, str(verdict.get("state") or UNKNOWN), str(verdict.get("why") or "")
 
 
 #: A reader-reported exception TYPE is echoed only if it is spelled like one.
@@ -9316,7 +9362,7 @@ async def _verify_after(
         landed = await _load(
             navigator, page, FOLLOWED_PAGES_URL, surface="followed companies"
         )
-        _facts, state, why = await _read_followed_state(page, grant.target)
+        _facts, state, why = await _read_followed_counts(page, grant.target)
         return (
             state,
             why
@@ -9619,7 +9665,7 @@ async def _verify_after(
         landed = await _load(
             navigator, page, FOLLOWED_PAGES_URL, surface="followed companies"
         )
-        facts, state, why = await _read_followed_state(page, grant.target)
+        facts, state, why = await _read_followed_counts(page, grant.target)
         if state == "following":
             return (
                 "following",
