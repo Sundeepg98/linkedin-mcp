@@ -11520,6 +11520,58 @@ the class:
     BEFORE IT CAN STILL LEAN ON THE RETIRED THING, AND A CLEAN MERGE SAYS
     NOTHING ABOUT THAT. READ THE OTHER SIDE'S ADDED LINES FOR IT.
 
+
+## 82. A LEDGER OF NEXT STEPS HELD TO THE CENSUS, AND A CAPTURE QUEUE WHOSE VERDICTS ARE RE-DRIVEN (lane-k-ledger, 2026-10-10)
+
+**Registered 2026-10-10.** Full record: `_audit/2026-09-28-lane-k-ledger.md`,
+sections 3, 5 and 9. Numbered 82 by the orchestrator's brief, so appends from
+lanes forked off one master cannot collide.
+
+### 82.1 WHAT IT HOLDS
+
+`_audit/_census/next-step.tsv` gives every GAP row one next step, a basis and
+a source; `_audit/_census/capture-queue.tsv` gives every capture its address,
+its presses and the rows it unblocks. Both are judged tables. The checker
+holds them to the census in both directions: every GAP row once and nothing
+else, the count equal to `census_completion`'s pinned `gap`, every source and
+every payload resolving, every queue row a census row whose step matches its
+line's gate, and every queue address re-driven through `readonly.is_read_url`.
+The source forms the shipped resolver already reads go through
+`check_write_classes.source_problems`, imported, not rewritten; only the two
+forms it does not read -- a bare census id and a tracked fixture path -- are
+resolved here.
+
+### 82.2 THE ENTRIES
+
+| path | shown failing by |
+|---|---|
+| `scripts/check_next_step.py` -- `check()`, `population()`, the payload rules for CAPTURE, BUILD, RULING, SIBLING and ADMIT, and the queue's gate agreement | `scripts/_check_next_step_can_fail.py`: seven plants into copies of the committed tables, each caught BY NAME after a control run over the unplanted copies came back GREEN -- a GAP row's line deleted, a line doubled, a source phrase in no file, a census id that is no row, a CAPTURE id with no queue line, a queue line listing a row the census does not hold, and a BUILD path neither tracked nor planned. Measured 2026-10-10: 7 of 7 caught, 11 s. |
+| `tests/test_next_step.py` | runs the checker on the committed tables, the control, and each of the seven plants as its own test (10 tests, 19 s) |
+
+### 82.3 THE CHEAPEST LOAD IS THE ONE ALREADY TAKEN
+
+The census still queued five messaging rows on captures C5 and C9 after
+session 3 had committed both open states as tracked fixtures, and 40 more GAP
+rows build on captures already on this box -- tracked skeletons, or raw
+captures a builder can skeletonise -- while nothing joined the inventory to the
+rows. A capture queue written without the inventory spends live loads on
+surfaces the box already holds.
+
+    BEFORE A ROW IS QUEUED FOR A LIVE LOAD, LOOK FOR ITS SURFACE IN THE
+    TRACKED FIXTURES AND THE GITIGNORED CAPTURES. THE CHEAPEST LOAD IS THE
+    ONE ALREADY TAKEN.
+
+### 82.4 DECLARED DISPOSABLE
+
+The lane's scratch generator (the decision table that wrote both TSVs, and the
+queue builder that grouped, re-drove and ranked them), the join of the GAP rows
+to the four side tables, the verdict helper that drove candidate addresses
+through `readonly.is_read_url` and `press.py`'s pre-press checks, and the two
+children's inventory and session-extraction scripts. Each one's output is a
+committed table or a section of the lane record; the tables are the record,
+and `check_next_step` is what keeps them true.
+
+
 ## 87. A REF NAME IS NOT A PERMISSION; ANCESTRY PLUS THE SHIPPED SWEEP IS (lci-fastlane-lead, 2026-10-10)
 
 **Registered 2026-10-10.** Full record: `_audit/2026-10-10-lane-ci-fastlane.md`.

@@ -1,0 +1,404 @@
+store	path	date	kind	surface	url_evidence	shape
+tracked	tests/fixtures/synthetic/drawn_routes.txt	2026-09-20	derived	-	comment	route corpus: 44 drawn anchor shapes from six 2026-09-20 captures
+tracked	tests/fixtures/synthetic/creator_content_addresses.html	2026-09-20	skeleton	/analytics/creator/content/	comment	content analytics: post anchors and post-summary links
+tracked	tests/fixtures/synthetic/post_summary_counts.html	2026-09-23	skeleton	/analytics/creator/content/	comment	content analytics top posts plus profile activity rail anchors
+tracked	tests/fixtures/profile_views_analytics.html	2026-08-21	skeleton	/analytics/profile-views/	builder-script	profile viewers list: viewer rows, Connect/Follow/More
+tracked	tests/fixtures/profile_views_analytics_hydrated.html	2026-08-21	skeleton	/analytics/profile-views/	content-guess	profile viewers list, settled: viewer rows, CTAs
+tracked	tests/fixtures/synthetic/profile_views_closed.html	2026-09-28	skeleton	/analytics/profile-views/	builder-script	profile viewers, filter pill closed
+tracked	tests/fixtures/synthetic/profile_views_pill_open.html	2026-09-28	skeleton	/analytics/profile-views/	builder-script	profile viewers, filter pill open
+tracked	tests/fixtures/synthetic/profile_views_revealed.html	2026-09-28	skeleton	/analytics/profile-views/	builder-script	profile viewers, rows revealed after switch
+tracked	tests/fixtures/synthetic/profile_views_verify.html	2026-09-28	skeleton	/analytics/profile-views/	builder-script	profile viewers, verification re-read
+tracked	tests/fixtures/live2/recruiter.html	2026-09-28	skeleton	/analytics/recruiter-views/	comment	Premium recruiter insights: counts, trend charts, viewer employers
+tracked	tests/fixtures/synthetic/recruiter_views.html	2026-09-28	skeleton	/analytics/recruiter-views/	builder-script	recruiter insights: counts, 13-point trend charts, viewer employers
+tracked	tests/fixtures/live2/n132.html	2026-09-28	skeleton	/analytics/search-appearances/	comment	search appearances analytics: counts, searcher cards
+tracked	tests/fixtures/synthetic/search_appearances_engagement.html	2026-09-28	skeleton	/analytics/search-appearances/	builder-script	two profile-engagement cards: impressions, recent click
+tracked	tests/fixtures/synthetic/search_appearances_synthetic.html	2026-09-05	derived	/analytics/search-appearances/	comment	hand-built search appearances page: chart, searcher companies
+tracked	tests/fixtures/synthetic/company_page_follow.html	2026-09-23	skeleton	/company/<company>/	comment	organisation page header: Follow controls, analytics tabs
+tracked	tests/fixtures/live2/company_people.html	2026-09-28	skeleton	/company/<company>/people/	comment	organisation People tab: member cards, alumni filters
+tracked	tests/fixtures/live2/memberships.html	2026-09-28	skeleton	/feed/	comment	page the group-memberships tool leaves open: home feed
+tracked	tests/fixtures/live2/own_post.html	2026-09-28	skeleton	/feed/update/<urn>/	comment	own post permalink: post, reactions, comments
+tracked	tests/fixtures/synthetic/own_post_menu.html	2026-09-24	derived	/feed/update/<urn>/	comment	own post control menu: copy link and other items
+tracked	tests/fixtures/synthetic/groups_leave_menu.html	2026-09-27	derived	/groups/	comment	groups root rows with More menu: Copy link, Leave
+tracked	tests/fixtures/live2/group_home.html	2026-09-28	skeleton	/groups/<group>/	comment	group home: group feed posts, join suggestions
+tracked	tests/fixtures/live2/group_members.html	2026-09-28	skeleton	/groups/<group>/members/	comment	group members list: member rows
+tracked	tests/fixtures/live2/first_degree_profile.html	2026-09-28	skeleton	/in/<member>/	comment	third-party first-degree profile: topcard, about, activity
+tracked	tests/fixtures/live2/in_me.html	2026-09-28	skeleton	/in/<member>/	comment	own profile via /in/me/: topcard, sections, activity rail
+tracked	tests/fixtures/live3/in_me.html	2026-09-28	skeleton	/in/<member>/	comment	own profile via /in/me/: topcard, sections, activity rail
+tracked	tests/fixtures/live3/in_me_more-open.html	2026-09-28	skeleton	/in/<member>/	comment	own profile with topcard More menu open
+tracked	tests/fixtures/live3/m1_after_press.html	2026-09-28	skeleton	/in/<member>/	comment	named first-degree profile after Message press
+tracked	tests/fixtures/live3/m1_composer_bubble.html	2026-09-28	skeleton	/in/<member>/	comment	messaging-overlay new-message bubble (shadow-root fragment)
+tracked	tests/fixtures/live3/me_menu-open.html	2026-09-28	skeleton	/in/<member>/	comment	Me menu open over own profile
+tracked	tests/fixtures/live3/named_profile.html	2026-09-28	skeleton	/in/<member>/	comment	named first-degree profile read through the named-person door
+tracked	tests/fixtures/live4/m1_refused_bubble_0.html	2026-09-28	skeleton	/in/<member>/	comment	new-message bubble after fill, send refused (fragment)
+tracked	tests/fixtures/profile_topcard.html	2026-08-22	skeleton	/in/<member>/	content-guess	own profile topcard: Open to, Add section, More
+tracked	tests/fixtures/profile_topcard_hydrated.html	2026-08-22	skeleton	/in/<member>/	content-guess	own profile topcard, settled, analytics links
+tracked	tests/fixtures/synthetic/first_contact_bubble.html	2026-09-28	skeleton	/in/<member>/	builder-script	new-message bubble, empty: header, editor, Send
+tracked	tests/fixtures/synthetic/first_contact_bubble_filled.html	2026-09-28	skeleton	/in/<member>/	builder-script	new-message bubble after fill: editor words, Send enabled
+tracked	tests/fixtures/synthetic/named_profile.html	2026-09-27	derived	/in/<member>/	comment	invented named profile: topcard, Connect, More
+tracked	tests/fixtures/synthetic/named_profile_live.html	2026-09-28	skeleton	/in/<member>/	builder-script	first-degree profile skeleton peopled with synthetic values
+tracked	tests/fixtures/profile_skills.html	2026-08-22	skeleton	/in/<member>/details/skills/	content-guess	own skills detail list with edit links
+tracked	tests/fixtures/live4/editor.html	2026-09-28	skeleton	/in/<member>/edit/intro/	builder-script	own profile with intro editor dialog open
+tracked	tests/fixtures/synthetic/intro_editor_late.html	2026-09-28	skeleton	/in/<member>/edit/intro/	builder-script	intro editor dialog drawn late by script
+tracked	tests/fixtures/synthetic/intro_editor_late_press.html	2026-09-28	skeleton	/in/<member>/edit/intro/	builder-script	intro editor whose switch and select presses land late
+tracked	tests/fixtures/synthetic/intro_editor_switches.html	2026-09-24	skeleton	/in/<member>/edit/intro/	builder-script	intro editor settings row: two switches, Save
+tracked	tests/fixtures/live2/activity_all.html	2026-09-28	skeleton	/in/<member>/recent-activity/all/	comment	own activity list: posts with reactions, comment counts
+tracked	tests/fixtures/live2/me_menu-open.html	2026-09-28	skeleton	/in/<member>/recent-activity/all/	comment	Me menu open over own activity list
+tracked	tests/fixtures/jobs_tracker_empty.html	2026-08-22	skeleton	/jobs-tracker/	content-guess	job tracker, empty stage
+tracked	tests/fixtures/jobs_tracker_row.html	2026-08-22	skeleton	/jobs-tracker/	content-guess	job tracker with one saved-job row
+tracked	tests/fixtures/synthetic/jobs_home_recent_searches.html	2026-09-23	skeleton	/jobs/alerts/	builder-script	jobs home recent-searches list: 6 entries plus decoys
+tracked	tests/fixtures/live2/j39.html	2026-09-28	skeleton	/jobs/collections/recommended/	comment	recommended collection: list, detail pane, insights
+tracked	tests/fixtures/synthetic/jobs_recommended_skeleton.html	2026-09-23	skeleton	/jobs/collections/recommended/	builder-script	recommended collection list shape: slot and card tiers
+tracked	tests/fixtures/synthetic/job_collection.html	2026-09-20	derived	/jobs/collections/top-applicant/	comment	job collection list: four job cards with dismiss
+tracked	tests/fixtures/live2/j158.html	2026-09-28	skeleton	/jobs/collections/top-choice/	comment	Premium top-choice collection: list, detail pane, insights
+tracked	tests/fixtures/live2/j18.html	2026-09-28	skeleton	/jobs/jam/	comment	jobs home: recent searches, job cards
+tracked	tests/fixtures/jobs_search.html	2026-08-22	skeleton	/jobs/search/	content-guess	jobs search result list fragment: 7 job cards
+tracked	tests/fixtures/jobs_search_hydrated.html	2026-08-22	skeleton	/jobs/search/	content-guess	jobs search result list, hydrated: cards with dismiss
+tracked	tests/fixtures/jobs_search_salary.html	2026-08-22	skeleton	/jobs/search/	content-guess	jobs search result list with salary lines
+tracked	tests/fixtures/live2/j107.html	2026-09-28	skeleton	/jobs/search/	comment	jobs search at one employer: result list, detail pane, insights
+tracked	tests/fixtures/apply_modal_derived.html	2026-08-26	derived	/jobs/view/<job>/	comment	Easy Apply modal rebuilt from recorded counts, not served markup
+tracked	tests/fixtures/job_detail.html	2026-08-22	skeleton	/jobs/view/<job>/	builder-script	job posting detail, data-view-name stripped
+tracked	tests/fixtures/job_detail_following.html	2026-08-23	skeleton	/jobs/view/<job>/	builder-script	posting from a followed company, before list settles
+tracked	tests/fixtures/job_detail_following_hydrated.html	2026-08-23	skeleton	/jobs/view/<job>/	builder-script	posting from a followed company, settled; Following state
+tracked	tests/fixtures/job_detail_hydrated.html	2026-08-22	skeleton	/jobs/view/<job>/	builder-script	job posting detail, settled render
+tracked	tests/fixtures/job_detail_shell.html	2026-08-22	skeleton	/jobs/view/<job>/	builder-script	job posting document before content renders
+tracked	tests/fixtures/live2/job_detail.html	2026-09-28	skeleton	/jobs/view/<job>/	comment	job posting detail: description, company card
+tracked	tests/fixtures/live2/compose_c8-open.html	2026-09-28	skeleton	/messaging/compose/	comment	composer with conversation list; one row menu open
+tracked	tests/fixtures/live2/m43.html	2026-09-28	skeleton	/messaging/compose/	comment	composer with conversation list (list_conversations tool page)
+tracked	tests/fixtures/live2/presence.html	2026-09-28	skeleton	/messaging/compose/	comment	composer suggested-recipient cards with presence dots
+tracked	tests/fixtures/live3/compose_c5-open.html	2026-09-28	skeleton	/messaging/compose/	comment	composer with conversation list; one row menu open
+tracked	tests/fixtures/live3/compose_c8-open.html	2026-09-28	skeleton	/messaging/compose/	comment	composer with conversation list; one row menu open
+tracked	tests/fixtures/live3/compose_c9-open.html	2026-09-28	skeleton	/messaging/compose/	comment	composer; conversation options menu open (mute, archive, report)
+tracked	tests/fixtures/live3/m43.html	2026-09-28	skeleton	/messaging/compose/	comment	composer with conversation list (list_conversations tool page)
+tracked	tests/fixtures/live3/presence.html	2026-09-28	skeleton	/messaging/compose/	comment	composer suggested-recipient cards with presence dots
+tracked	tests/fixtures/live4/compose_c8-open.html	2026-09-28	skeleton	/messaging/compose/	comment	composer with conversation list; one row menu open
+tracked	tests/fixtures/synthetic/compose_suggestions.html	2026-09-28	skeleton	/messaging/compose/	builder-script	composer suggested-recipient cards with presence lines
+tracked	tests/fixtures/synthetic/messaging_compose_list.html	2026-09-24	skeleton	/messaging/compose/	comment	composer conversation list rows
+tracked	tests/fixtures/synthetic/messaging_thread.html	2026-09-24	skeleton	/messaging/thread/<thread>/	comment	one open conversation: messages, star, Send
+tracked	tests/fixtures/connections_list.html	2026-09-04	derived	/mynetwork/invite-connect/connections/	comment	invented connections list: member rows, Message links
+tracked	tests/fixtures/live2/n23.html	2026-09-28	skeleton	/mynetwork/invite-connect/connections/	comment	connections list: member rows with Message links
+tracked	tests/fixtures/manage_pages_following.html	2026-08-23	skeleton	/mynetwork/network-manager/company/	builder-script	Manage Pages: followed organisations, 10 rows
+tracked	tests/fixtures/manage_pages_following_hydrated.html	2026-08-23	skeleton	/mynetwork/network-manager/company/	builder-script	Manage Pages: followed organisations, 20 rows
+tracked	tests/fixtures/synthetic/newsletter_subscriptions.html	2026-09-05	skeleton	/mynetwork/network-manager/newsletters/	comment	newsletter subscriptions: rows, two anchors per row
+tracked	tests/fixtures/live2/followers.html	2026-09-28	skeleton	/mynetwork/network-manager/people-follow/followers/	comment	followers list: member rows with follow-back state
+tracked	tests/fixtures/live2/setting.html	2026-09-28	skeleton	/mypreferences/d/settings/notify-network-for-updates/	comment	account setting page: one switch (share profile updates)
+tracked	tests/fixtures/live3/setting.html	2026-09-28	skeleton	/mypreferences/d/settings/notify-network-for-updates/	comment	account setting page: one switch (share profile updates)
+tracked	tests/fixtures/live2/notifications.html	2026-09-28	skeleton	/notifications/	comment	notifications list: cards with job-alert and network items
+tracked	tests/fixtures/live3/notifications.html	2026-09-28	skeleton	/notifications/	comment	notifications list: cards with job-alert and network items
+tracked	tests/fixtures/live4/notifications.html	2026-09-28	skeleton	/notifications/	comment	notifications list: cards with job-alert and network items
+tracked	tests/fixtures/live5/notifications.html	2026-09-28	skeleton	/notifications/	comment	notifications list: cards with job-alert and network items
+tracked	tests/fixtures/notifications.html	2026-08-22	skeleton	/notifications/	content-guess	notifications list: 6 cards with delete menus
+tracked	tests/fixtures/live2/n104.html	2026-09-28	skeleton	/search/results/companies/	comment	companies search results for a generic keyword
+tracked	tests/fixtures/live3/n179.html	2026-09-28	skeleton	/search/results/events/	comment	events search results for a generic keyword
+tracked	tests/fixtures/live2/n161.html	2026-09-28	skeleton	/search/results/groups/	comment	groups search results for a generic keyword
+tracked	tests/fixtures/live2/n84.html	2026-09-28	skeleton	/search/results/people/	comment	people search filtered by current company: result cards
+tracked	tests/fixtures/live2/n87.html	2026-09-28	skeleton	/search/results/people/	comment	people search filtered by past company: result cards
+tracked	tests/fixtures/live2/n94.html	2026-09-28	skeleton	/search/results/people/	comment	people search by keyword and location: result cards
+tracked	tests/fixtures/synthetic/people_search_results.html	2026-09-27	skeleton	/search/results/people/	builder-script	people search result cards, nested member links
+state	_state/_probe_out.txt	2026-09-20	derived	-	comment	probe report: what each captured surface draws, source vs rendered
+state	_state/cap-ct-creator.html	2026-09-20	raw	/analytics/creator/content/	comment	content analytics: top posts, post-summary links
+state	_state/cap-profile-views-captions.html	2026-09-20	raw	/analytics/profile-views/	comment	profile viewers list re-captured for row captions
+state	_state/cap-profile-views.html	2026-09-20	raw	/analytics/profile-views/	comment	profile viewers list: viewer rows, Connect/Follow/More
+state	_state/live-who-viewed-me.json	2026-09-20	raw	/analytics/profile-views/	json-field	who_viewed_me tool output: viewer rows with names
+state	_state/profile-views-captions-raw.json	2026-09-20	raw	/analytics/profile-views/	filename	five viewer-row caption strings
+state	_state/cap-search-appearances.html	2026-09-20	raw	/analytics/search-appearances/	comment	search appearances: counts, searcher cards, engagement
+state	_state/cap-company-root.html	2026-09-20	raw	/company/<company>/	content-guess	organisation page Home: posts, jobs, follow
+state	_state/cap-rc-school.html	2026-09-20	raw	/company/<company>/about/	content-guess	organisation About page: overview, follow
+state	_state/cap-rc-events.html	2026-09-20	raw	/events/	content-guess	events home: event cards with Share
+state	_state/cap-rc-groups.html	2026-09-20	raw	/groups/	comment	own groups list: rows with More, Copy link, Leave
+state	_state/cap-rc-badges.html	2026-09-20	raw	/in/<member>/	content-guess	own profile: topcard badges, activity rail, sections
+state	_state/cap-ct-jobsalerts.html	2026-09-20	raw	/jobs/alerts/	builder-script	jobs alerts landing drawn as jobs home: recent searches, cards
+state	_state/cap-jobs-recommended.html	2026-09-20	raw	/jobs/collections/recommended/	builder-script	recommended collection: job list, detail pane, insights
+state	_state/live-job-collections.json	2026-09-20	derived	/jobs/collections/recommended/	comment	job collections tool error receipt
+state	_state/live-job-collections2.json	2026-09-20	derived	/jobs/collections/recommended/	comment	job collections tool reading: groupings, anchor counts
+state	_state/cap-collection-top-applicant.html	2026-09-20	raw	/jobs/collections/top-applicant/	comment	Premium top-applicant collection: job list, detail pane, insights
+state	_state/cap-collection-top-choice.html	2026-09-20	raw	/jobs/collections/top-choice/	comment	Premium top-choice collection: job list, detail pane, insights
+state	_state/cap-control-jobs-search.html	2026-09-20	raw	/jobs/search/	comment	jobs search (control arm): result list, detail pane
+state	_state/cap-jobs-search.html	2026-09-20	raw	/jobs/search/	comment	keyword jobs search: result list, detail pane
+state	_state/live-search-jobs.json	2026-09-20	raw	/jobs/search/	json-field	search_jobs tool output: seven postings
+state	_state/_jobids.txt	2026-09-20	derived	/jobs/view/<job>/	comment	seven live posting ids
+state	_state/live-job-detail-1.json	2026-09-20	raw	/jobs/view/<job>/	json-field	job_detail tool output: title, company, description, insights
+state	_state/live-job-detail-2.json	2026-09-20	raw	/jobs/view/<job>/	json-field	job_detail tool output: title, company, description, insights
+state	_state/live-job-detail-3.json	2026-09-20	raw	/jobs/view/<job>/	json-field	job_detail tool output: title, company, description, insights
+state	_state/live-job-detail-4.json	2026-09-20	raw	/jobs/view/<job>/	json-field	job_detail tool output: title, company, description, insights
+state	_state/live-job-detail-5.json	2026-09-20	raw	/jobs/view/<job>/	json-field	job_detail tool output: title, company, description, insights
+state	_state/live-job-detail-6.json	2026-09-20	raw	/jobs/view/<job>/	json-field	job_detail tool output: title, company, description, insights
+state	_state/live-job-detail-7.json	2026-09-20	raw	/jobs/view/<job>/	json-field	job_detail tool output: title, company, description, insights
+state	_state/cap-roleplay-t0.html	2026-09-20	raw	/learning/role-play/scenarios/	comment	LinkedIn Learning role-play listing, served and empty
+state	_state/cap-roleplay-t10000.html	2026-09-20	raw	/learning/role-play/scenarios/	comment	LinkedIn Learning role-play listing, served and empty
+state	_state/cap-roleplay-t15000.html	2026-09-20	raw	/learning/role-play/scenarios/	comment	LinkedIn Learning role-play listing, served and empty
+state	_state/cap-roleplay-target.html	2026-09-20	raw	/learning/role-play/scenarios/	comment	LinkedIn Learning role-play listing, served and empty
+state	_state/cap-ct-messaging.html	2026-09-20	raw	/messaging/	content-guess	messaging inbox: conversation list, sponsored conversation
+state	_state/cap-ct-compose.html	2026-09-20	raw	/messaging/compose/	comment	composer: suggested-recipient cards with presence
+state	_state/cap-newsletters.html	2026-09-20	raw	/mynetwork/network-manager/newsletters/	comment	newsletter subscriptions list
+state	_state/cap-ct-sharebox.html	2026-09-20	raw	/preload/sharebox/	comment	share box composer open: Post, Schedule, Add
+state	_state/cap-premium-hub.html	2026-09-20	raw	/premium/my-premium/	comment	Premium hub: features, collections links, role-play entry
+state	_state/cap-roleplay-control.html	2026-09-20	raw	/premium/my-premium/	comment	Premium hub, control arm of the role-play experiment
+state	_state/live-premium-status.json	2026-09-20	derived	/premium/my-premium/	comment	premium entitlement verdict: state, strength, hits
+archive	_state/worktree-archive/agent-a5a55e2f165574ec2/_state/control-paths-clean.json	2026-09-21	derived	-	none	control-path census over captures (clean run)
+archive	_state/worktree-archive/agent-a5a55e2f165574ec2/_state/control-paths-planted.json	2026-09-21	derived	-	none	control-path census over captures (planted control)
+archive	_state/worktree-archive/agent-a95d2a970e4a6b54b/_state/unfired-self-reads-raw.json	2026-09-23	raw	-	none	self-read tool outputs for census rows C41, M45
+archive	_state/worktree-archive/agent-aa3a6827a641b0467/_state/unfired-self-reads-raw.json	2026-09-20	raw	-	none	self-read tool outputs for census rows C41, M45
+archive	_state/worktree-archive/agent-abe7534208a32563f/_state/ev-company-school.md	2026-09-21	derived	-	none	evidence slice: organisation page and follow surfaces
+archive	_state/worktree-archive/agent-abe7534208a32563f/_state/ev-groups-events.md	2026-09-21	derived	-	none	evidence slice: groups, events, page-admin rows
+archive	_state/worktree-archive/agent-abe7534208a32563f/_state/ev-profile-analytics.md	2026-09-21	derived	-	none	evidence slice: profile and analytics surfaces
+archive	_state/worktree-archive/agent-a5a55e2f165574ec2/_state/company-root-wording.json	2026-09-21	derived	/company/<company>/	comment	wording summary over six org-root reads
+archive	_state/worktree-archive/agent-a5a55e2f165574ec2/_state/company-root-wording/page-00.html	2026-09-21	raw	/company/<company>/posts/	content-guess	organisation page Posts tab: posts, follow controls
+archive	_state/worktree-archive/agent-a5a55e2f165574ec2/_state/company-root-wording/page-01.html	2026-09-21	raw	/company/<company>/posts/	content-guess	organisation page Posts tab: posts, follow controls
+archive	_state/worktree-archive/agent-a5a55e2f165574ec2/_state/company-root-wording/page-02.html	2026-09-21	raw	/company/<company>/posts/	content-guess	organisation page Posts tab: posts, follow controls
+archive	_state/worktree-archive/agent-a5a55e2f165574ec2/_state/company-root-wording/page-03.html	2026-09-21	raw	/company/<company>/posts/	content-guess	organisation page Posts tab: posts, follow controls
+archive	_state/worktree-archive/agent-a5a55e2f165574ec2/_state/company-root-wording/page-04.html	2026-09-21	raw	/company/<company>/posts/	content-guess	organisation page Posts tab: posts, follow controls
+archive	_state/worktree-archive/agent-a5a55e2f165574ec2/_state/company-root-wording/page-05.html	2026-09-21	raw	/company/<company>/posts/	content-guess	organisation page Posts tab: posts, follow controls
+archive	_state/worktree-archive/agent-afc2ac8da92a0e019/_audit/_probe-events-hyd.html	2026-09-20	raw	/events/	content-guess	events home: event cards with Share
+archive	_state/worktree-archive/agent-afc2ac8da92a0e019/_audit/_probe-groups-hyd.html	2026-09-20	raw	/groups/	content-guess	own groups list: rows with More, Copy link, Leave
+archive	_state/worktree-archive/agent-a5a55e2f165574ec2/_state/group-feed-permalinks.json	2026-09-21	derived	/groups/<group>/	comment	permalink counts over three group feeds
+archive	_state/worktree-archive/agent-a5a55e2f165574ec2/_state/group-feed-permalinks/group-00.html	2026-09-21	raw	/groups/<group>/	content-guess	group feed: posts with permalinks, join controls
+archive	_state/worktree-archive/agent-a5a55e2f165574ec2/_state/group-feed-permalinks/group-01.html	2026-09-21	raw	/groups/<group>/	content-guess	group feed: posts with permalinks, join controls
+archive	_state/worktree-archive/agent-a5a55e2f165574ec2/_state/group-feed-permalinks/group-02.html	2026-09-21	raw	/groups/<group>/	content-guess	group feed: posts with permalinks, join controls
+archive	_state/worktree-archive/agent-aa3a6827a641b0467/_state/unfired-job-search-filters-raw.json	2026-09-20	raw	/jobs/search/	content-guess	jobs search filter fires: per-filter results, drift
+archive	_state/worktree-archive/agent-a95d2a970e4a6b54b/_state/unfired-job-detail-insights-raw.json	2026-09-23	raw	/jobs/view/<job>/	json-field	job detail insights tool output for unfired rows
+archive	_state/worktree-archive/agent-a9a16ccfab3e7298e/_state/how-you-match/manifest.json	2026-09-21	derived	/jobs/view/<job>/	json-field	manifest: three postings, two captures each
+archive	_state/worktree-archive/agent-a9a16ccfab3e7298e/_state/how-you-match/posting-01-capture-1.html	2026-09-21	raw	/jobs/view/<job>/	content-guess	job posting detail incl. how-you-match panel
+archive	_state/worktree-archive/agent-a9a16ccfab3e7298e/_state/how-you-match/posting-01-capture-2.html	2026-09-21	raw	/jobs/view/<job>/	content-guess	job posting detail incl. how-you-match panel
+archive	_state/worktree-archive/agent-a9a16ccfab3e7298e/_state/how-you-match/posting-02-capture-1.html	2026-09-21	raw	/jobs/view/<job>/	content-guess	job posting detail incl. how-you-match panel
+archive	_state/worktree-archive/agent-a9a16ccfab3e7298e/_state/how-you-match/posting-02-capture-2.html	2026-09-21	raw	/jobs/view/<job>/	content-guess	job posting detail incl. how-you-match panel
+archive	_state/worktree-archive/agent-a9a16ccfab3e7298e/_state/how-you-match/posting-03-capture-1.html	2026-09-21	raw	/jobs/view/<job>/	content-guess	job posting detail incl. how-you-match panel
+archive	_state/worktree-archive/agent-a9a16ccfab3e7298e/_state/how-you-match/posting-03-capture-2.html	2026-09-21	raw	/jobs/view/<job>/	content-guess	job posting detail incl. how-you-match panel
+archive	_state/worktree-archive/agent-aa3a6827a641b0467/_state/unfired-job-detail-insights-raw.json	2026-09-20	raw	/jobs/view/<job>/	json-field	job detail insights tool output for unfired rows
+archive	_state/worktree-archive/agent-a5a55e2f165574ec2/_state/people-search-race-postfix-asyncio-sleep.json	2026-09-21	derived	/search/results/people/	content-guess	people search race measurement: fires and timings
+archive	_state/worktree-archive/agent-a5a55e2f165574ec2/_state/people-search-race-postfix-underload.json	2026-09-21	derived	/search/results/people/	content-guess	people search race measurement: fires and timings
+archive	_state/worktree-archive/agent-a5a55e2f165574ec2/_state/people-search-race-prefix-underload.json	2026-09-21	derived	/search/results/people/	content-guess	people search race measurement: fires and timings
+archive	_state/worktree-archive/agent-a5a55e2f165574ec2/_state/the-three-fires.json	2026-09-21	derived	/search/results/people/	content-guess	three filtered fires: org and group harvests
+archive	_state/worktree-archive/agent-a9a16ccfab3e7298e/_state/people-search-chrome-diagnosis.json	2026-09-21	derived	/search/results/people/	content-guess	people search chrome phrases diagnosis
+archive	_state/worktree-archive/agent-a9a16ccfab3e7298e/_state/people-search-shape-live.json	2026-09-21	derived	/search/results/people/	comment	people_search_shape tool trials and payload shape
+archive	_state/worktree-archive/agent-ac4e94e032e0aff9c/_state/all-filters-disclosure-shape-2.json	2026-09-21	derived	/search/results/people/	content-guess	All-filters panel disclosure shape per surface
+archive	_state/worktree-archive/agent-ac4e94e032e0aff9c/_state/all-filters-disclosure-shape-3.json	2026-09-21	derived	/search/results/people/	content-guess	All-filters panel disclosure shape per surface
+archive	_state/worktree-archive/agent-ac4e94e032e0aff9c/_state/all-filters-disclosure-shape.json	2026-09-21	derived	/search/results/people/	content-guess	All-filters panel disclosure shape per surface
+live-lane	live-lane:_state/live1/ledger.json	2026-09-24	derived	-	json-field	session load ledger: key, surface, time per load
+live-lane	live-lane:_state/live2/items.json	2026-09-28	derived	-	none	item ids for session 2 (posting, org, group)
+live-lane	live-lane:_state/live2/ledger.json	2026-09-28	derived	-	json-field	session load ledger: key, surface, time per load
+live-lane	live-lane:_state/live2/operator_supplied_targets.json	2026-09-28	derived	-	none	operator-named live-proof target pointer
+live-lane	live-lane:_state/live2/shape.key	2026-09-28	derived	-	none	keyed-hash key for skeleton shapes
+live-lane	live-lane:_state/live3/ledger.json	2026-09-28	derived	-	json-field	session load ledger: key, surface, time per load
+live-lane	live-lane:_state/live3/shape.key	2026-09-28	derived	-	none	keyed-hash key for skeleton shapes
+live-lane	live-lane:_state/live4/ledger.json	2026-09-28	derived	-	json-field	session load ledger: key, surface, time per load
+live-lane	live-lane:_state/live4/shape.key	2026-09-28	derived	-	none	keyed-hash key for skeleton shapes
+live-lane	live-lane:_state/live5/ledger.json	2026-09-28	derived	-	json-field	session load ledger: key, surface, time per load
+live-lane	live-lane:_state/live5/shape.key	2026-09-28	derived	-	none	keyed-hash key for skeleton shapes
+live-lane	live-lane:_state/live5/targets.json	2026-09-28	derived	-	none	operator-named live-proof target pointer
+live-lane	live-lane:_state/live6/ledger.json	2026-09-28	derived	-	json-field	session load ledger: key, surface, time per load
+live-lane	live-lane:_state/live6/shape.key	2026-09-28	derived	-	none	keyed-hash key for skeleton shapes
+live-lane	live-lane:_state/live6/targets.json	2026-09-28	derived	-	none	operator-named live-proof target pointer
+live-lane	live-lane:_state/live7/ledger.json	2026-10-10	derived	-	json-field	session load ledger: key, surface, time per load
+live-lane	live-lane:_state/live7/shape.key	2026-10-10	derived	-	none	keyed-hash key for skeleton shapes
+live-lane	live-lane:_state/readers4/disclosure-targets.json	2026-09-23	derived	-	json-field	disclosure targets: two pages, phrase matches
+live-lane	live-lane:_state/readers4/probe-slice-report.md	2026-09-23	derived	-	none	no-press disclosure-order probe report
+live-lane	live-lane:_state/l1-audience.html	2026-09-23	raw	/analytics/creator/audience/	comment	audience analytics: follower demographics
+live-lane	live-lane:_state/live1/l1_audience.json	2026-09-23	derived	/analytics/creator/audience/	comment	sidecar: audience analytics: follower demographics
+live-lane	live-lane:_state/l1-post_summary.html	2026-09-23	raw	/analytics/post-summary/<urn>/	comment	post analytics: impressions, reactions
+live-lane	live-lane:_state/live1/l1_post_summary.json	2026-09-23	derived	/analytics/post-summary/<urn>/	comment	sidecar: post analytics: impressions, reactions
+live-lane	live-lane:_state/live1/per_post.json	2026-09-23	derived	/analytics/post-summary/<urn>/	comment	sidecar: per-post analytics reading (envelope)
+live-lane	live-lane:_state/live1/pv-closed.html	2026-09-23	raw	/analytics/profile-views/	comment	profile viewers list, filter pill closed
+live-lane	live-lane:_state/live1/pv-open-pill-0.html	2026-09-23	raw	/analytics/profile-views/	comment	profile viewers list, filter pill 0 open
+live-lane	live-lane:_state/live1/pv-open-pill-1.html	2026-09-23	raw	/analytics/profile-views/	comment	profile viewers list, filter pill 1 open
+live-lane	live-lane:_state/live1/pv-open-pill-2.html	2026-09-23	raw	/analytics/profile-views/	comment	profile viewers list, filter pill 2 open
+live-lane	live-lane:_state/live1/pv_capture.json	2026-09-23	derived	/analytics/profile-views/	comment	sidecar: filter-pill menus captured on profile viewers
+live-lane	live-lane:_state/live1/pv_switch.html	2026-09-23	raw	/analytics/profile-views/	comment	profile viewers after a filter switch
+live-lane	live-lane:_state/live1/pv_switch.json	2026-09-23	raw	/analytics/profile-views/	json-field	profile viewers tool output: viewer rows with names
+live-lane	live-lane:_state/live1/pv_verify.html	2026-09-23	raw	/analytics/profile-views/	comment	profile viewers re-read to verify the switch
+live-lane	live-lane:_state/live1/pv_verify.json	2026-09-23	raw	/analytics/profile-views/	json-field	profile viewers tool output: viewer rows with names
+live-lane	live-lane:_state/readers4/fire-analytics-raw.json	2026-09-23	raw	/analytics/profile-views/	json-field	analytics reader output: viewer rows with names
+live-lane	live-lane:_state/live1/cap_recruiter_views.html	2026-09-23	raw	/analytics/recruiter-views/	comment	recruiter insights page: counts, chart, viewer employers
+live-lane	live-lane:_state/live1/cap_recruiter_views.json	2026-09-23	derived	/analytics/recruiter-views/	comment	sidecar: recruiter insights page: counts, chart, viewer employers
+live-lane	live-lane:_state/live2/recruiter.json	2026-09-28	derived	/analytics/recruiter-views/	comment	envelope (reduced): Premium recruiter insights: counts, trend charts, viewer employers
+live-lane	live-lane:_state/live2/recruiter.skeleton.html	2026-09-28	skeleton	/analytics/recruiter-views/	comment	Premium recruiter insights: counts, trend charts, viewer employers
+live-lane	live-lane:_state/live2/n132.json	2026-09-28	derived	/analytics/search-appearances/	comment	envelope (reduced): search appearances analytics: counts, searcher cards
+live-lane	live-lane:_state/live2/n132.skeleton.html	2026-09-28	skeleton	/analytics/search-appearances/	comment	search appearances analytics: counts, searcher cards
+live-lane	live-lane:_state/live1/cap_company_large.html	2026-09-23	raw	/company/<company>/	comment	large organisation page Home: posts, showcase, events, jobs
+live-lane	live-lane:_state/live1/cap_company_large.json	2026-09-23	derived	/company/<company>/	comment	sidecar: large organisation page Home: posts, showcase, events, jobs
+live-lane	live-lane:_state/live1/cap_company_services.html	2026-09-23	raw	/company/<company>/	comment	services organisation page Home: posts, showcase, events
+live-lane	live-lane:_state/live1/cap_company_services.json	2026-09-23	derived	/company/<company>/	comment	sidecar: services organisation page Home: posts, showcase, events
+live-lane	live-lane:_state/live7/refollow_outcome.json	2026-10-10	derived	/company/<company>/	json-field	re-follow outcome: refused at a stage
+live-lane	live-lane:_state/live7/refollow_preview.json	2026-10-10	derived	/company/<company>/	json-field	re-follow preview: error receipt
+live-lane	live-lane:_state/live2/company_people.json	2026-09-28	derived	/company/<company>/people/	comment	sidecar: organisation People tab: member cards, alumni filters
+live-lane	live-lane:_state/live2/company_people.skeleton.html	2026-09-28	skeleton	/company/<company>/people/	comment	organisation People tab: member cards, alumni filters
+live-lane	live-lane:_state/l1-overview.html	2026-09-23	raw	/dashboard/	comment	creator dashboard overview: analytics tiles
+live-lane	live-lane:_state/live1/l1_overview.json	2026-09-23	derived	/dashboard/	comment	sidecar: creator dashboard overview: analytics tiles
+live-lane	live-lane:_state/live1/badge.html	2026-09-24	raw	/feed/	content-guess	home feed: posts, share box, nav badges
+live-lane	live-lane:_state/live1/badge.json	2026-09-24	derived	/feed/	content-guess	sidecar: home feed: posts, share box, nav badges
+live-lane	live-lane:_state/live2/memberships.json	2026-09-28	derived	/feed/	comment	sidecar: page the group-memberships tool leaves open: home feed
+live-lane	live-lane:_state/live2/memberships.skeleton.html	2026-09-28	skeleton	/feed/	comment	page the group-memberships tool leaves open: home feed
+live-lane	live-lane:_state/live7/signin.json	2026-10-10	derived	/feed/	json-field	sign-in check on the feed: badge, on_feed
+live-lane	live-lane:_state/readers4/fire-feed-verdict.json	2026-09-23	derived	/feed/	content-guess	feed reader fire verdict
+live-lane	live-lane:_state/live1/own_link.html	2026-09-24	raw	/feed/update/<urn>/	comment	own post permalink with control menu (copy link)
+live-lane	live-lane:_state/live1/own_link.json	2026-09-24	derived	/feed/update/<urn>/	comment	sidecar: own post permalink with control menu (copy link)
+live-lane	live-lane:_state/live1/post-closed.html	2026-09-23	raw	/feed/update/<urn>/	comment	own post permalink, control menu closed
+live-lane	live-lane:_state/live1/post-open-menu.html	2026-09-23	raw	/feed/update/<urn>/	comment	own post permalink, control menu open
+live-lane	live-lane:_state/live1/post_capture.json	2026-09-23	derived	/feed/update/<urn>/	comment	sidecar: verdict: post control-menu items captured
+live-lane	live-lane:_state/live2/own_post.json	2026-09-28	derived	/feed/update/<urn>/	comment	sidecar: own post permalink: post, reactions, comments
+live-lane	live-lane:_state/live2/own_post.skeleton.html	2026-09-28	skeleton	/feed/update/<urn>/	comment	own post permalink: post, reactions, comments
+live-lane	live-lane:_state/live2/group_home.json	2026-09-28	derived	/groups/<group>/	comment	sidecar: group home: group feed posts, join suggestions
+live-lane	live-lane:_state/live2/group_home.skeleton.html	2026-09-28	skeleton	/groups/<group>/	comment	group home: group feed posts, join suggestions
+live-lane	live-lane:_state/live2/group_members.json	2026-09-28	derived	/groups/<group>/members/	comment	sidecar: group members list: member rows
+live-lane	live-lane:_state/live2/group_members.skeleton.html	2026-09-28	skeleton	/groups/<group>/members/	comment	group members list: member rows
+live-lane	live-lane:_state/live1/activity.html	2026-09-23	raw	/in/<member>/	content-guess	own profile page left open by the activity read
+live-lane	live-lane:_state/live1/activity.json	2026-09-23	derived	/in/<member>/	content-guess	sidecar: own profile page left open by the activity read
+live-lane	live-lane:_state/live1/offline-badges.json	2026-09-23	derived	/in/<member>/	comment	sidecar: nav badge counts after reading own profile
+live-lane	live-lane:_state/live2/first_degree_profile.json	2026-09-28	derived	/in/<member>/	comment	topcard controls on the first-degree profile
+live-lane	live-lane:_state/live2/first_degree_profile.skeleton.html	2026-09-28	skeleton	/in/<member>/	comment	third-party first-degree profile: topcard, about, activity
+live-lane	live-lane:_state/live2/in_me.json	2026-09-28	derived	/in/<member>/	comment	sidecar: own profile via /in/me/: topcard, sections, activity rail
+live-lane	live-lane:_state/live2/in_me.skeleton.html	2026-09-28	skeleton	/in/<member>/	comment	own profile via /in/me/: topcard, sections, activity rail
+live-lane	live-lane:_state/live3/in_me.json	2026-09-28	derived	/in/<member>/	comment	sidecar: own profile via /in/me/: topcard, sections, activity rail
+live-lane	live-lane:_state/live3/in_me.skeleton.html	2026-09-28	skeleton	/in/<member>/	comment	own profile via /in/me/: topcard, sections, activity rail
+live-lane	live-lane:_state/live3/in_me_more-open.skeleton.html	2026-09-28	skeleton	/in/<member>/	comment	own profile with topcard More menu open
+live-lane	live-lane:_state/live3/in_me_more.json	2026-09-28	derived	/in/<member>/	comment	own profile More menu reading
+live-lane	live-lane:_state/live3/m1_after_press.json	2026-09-28	derived	/in/<member>/	comment	sidecar: named first-degree profile after Message press
+live-lane	live-lane:_state/live3/m1_after_press.skeleton.html	2026-09-28	skeleton	/in/<member>/	comment	named first-degree profile after Message press
+live-lane	live-lane:_state/live3/m1_capture.json	2026-09-28	derived	/in/<member>/	comment	message-from-profile capture
+live-lane	live-lane:_state/live3/m1_composer_bubble.skeleton.html	2026-09-28	skeleton	/in/<member>/	comment	messaging-overlay new-message bubble (shadow-root fragment)
+live-lane	live-lane:_state/live3/m1_preview.json	2026-09-28	derived	/in/<member>/	comment	message-from-profile preview
+live-lane	live-lane:_state/live3/m1_receipt.json	2026-09-28	derived	/in/<member>/	comment	message-from-profile receipt
+live-lane	live-lane:_state/live3/me_menu-open.skeleton.html	2026-09-28	skeleton	/in/<member>/	comment	Me menu open over own profile
+live-lane	live-lane:_state/live3/me_menu.json	2026-09-28	derived	/in/<member>/	comment	Me menu press reading: items
+live-lane	live-lane:_state/live3/named_profile.json	2026-09-28	derived	/in/<member>/	comment	named-profile counts, topcard controls, name check
+live-lane	live-lane:_state/live3/named_profile.skeleton.html	2026-09-28	skeleton	/in/<member>/	comment	named first-degree profile read through the named-person door
+live-lane	live-lane:_state/live3/read_named_receipt.json	2026-09-28	derived	/in/<member>/	comment	read-named-profile receipt
+live-lane	live-lane:_state/live4/m1_preview.json	2026-09-28	derived	/in/<member>/	comment	message-from-profile preview
+live-lane	live-lane:_state/live4/m1_receipt.json	2026-09-28	derived	/in/<member>/	comment	message-from-profile receipt
+live-lane	live-lane:_state/live4/m1_refused.json	2026-09-28	derived	/in/<member>/	comment	message-from-profile refused
+live-lane	live-lane:_state/live4/m1_refused_bubble_0.skeleton.html	2026-09-28	skeleton	/in/<member>/	comment	new-message bubble after fill, send refused (fragment)
+live-lane	live-lane:_state/live5/m1_preview.json	2026-09-28	derived	/in/<member>/	comment	message-from-profile preview
+live-lane	live-lane:_state/live5/m1_receipt.json	2026-09-28	derived	/in/<member>/	comment	message-from-profile receipt
+live-lane	live-lane:_state/live7/named.json	2026-10-10	derived	/in/<member>/	comment	read-named-profile receipt
+live-lane	live-lane:_state/live7/named.skeleton.html	2026-10-10	skeleton	/in/<member>/	comment	named profile read: topcard, tabs, activity
+live-lane	live-lane:_state/live7/named_cp7.json	2026-10-10	derived	/in/<member>/	content-guess	named profile tab and link counts
+live-lane	live-lane:_state/live1/editor_fields.html	2026-09-23	raw	/in/<member>/edit/intro/	content-guess	own profile with intro editor dialog open: form fields
+live-lane	live-lane:_state/live1/editor_fields.json	2026-09-23	derived	/in/<member>/edit/intro/	content-guess	sidecar: own profile with intro editor dialog open: form fields
+live-lane	live-lane:_state/live4/B9_test_preview.json	2026-09-28	derived	/in/<member>/edit/intro/	comment	profile-editor write preview (rows B9/A19/A21)
+live-lane	live-lane:_state/live4/B9_test_receipt.json	2026-09-28	derived	/in/<member>/edit/intro/	comment	profile-editor write receipt (rows B9/A19/A21)
+live-lane	live-lane:_state/live4/EDITS_STOPPED.json	2026-09-28	derived	/in/<member>/edit/intro/	comment	profile-editor write stop record (rows B9/A19/A21)
+live-lane	live-lane:_state/live4/edit_plan.json	2026-09-28	derived	/in/<member>/edit/intro/	comment	profile-editor write plan (rows B9/A19/A21)
+live-lane	live-lane:_state/live4/edit_results.json	2026-09-28	derived	/in/<member>/edit/intro/	comment	profile-editor write receipt (rows B9/A19/A21)
+live-lane	live-lane:_state/live4/editor.skeleton.html	2026-09-28	skeleton	/in/<member>/edit/intro/	builder-script	own profile with intro editor dialog open
+live-lane	live-lane:_state/live4/editor_capture.json	2026-09-28	derived	/in/<member>/edit/intro/	builder-script	intro editor capture timing
+live-lane	live-lane:_state/live5/B9_recovery_preview.json	2026-09-28	derived	/in/<member>/edit/intro/	comment	profile-editor write preview (rows B9/A19/A21)
+live-lane	live-lane:_state/live5/B9_recovery_receipt.json	2026-09-28	derived	/in/<member>/edit/intro/	comment	profile-editor write receipt (rows B9/A19/A21)
+live-lane	live-lane:_state/live5/B9_restore_preview.json	2026-09-28	derived	/in/<member>/edit/intro/	comment	profile-editor write preview (rows B9/A19/A21)
+live-lane	live-lane:_state/live5/B9_restore_receipt.json	2026-09-28	derived	/in/<member>/edit/intro/	comment	profile-editor write receipt (rows B9/A19/A21)
+live-lane	live-lane:_state/live5/B9_test_preview.json	2026-09-28	derived	/in/<member>/edit/intro/	comment	profile-editor write preview (rows B9/A19/A21)
+live-lane	live-lane:_state/live5/B9_test_receipt.json	2026-09-28	derived	/in/<member>/edit/intro/	comment	profile-editor write receipt (rows B9/A19/A21)
+live-lane	live-lane:_state/live5/EDITS_STOPPED.json	2026-09-28	derived	/in/<member>/edit/intro/	comment	profile-editor write stop record (rows B9/A19/A21)
+live-lane	live-lane:_state/live5/edit_plan.json	2026-09-28	derived	/in/<member>/edit/intro/	comment	profile-editor write plan (rows B9/A19/A21)
+live-lane	live-lane:_state/live5/edit_results.json	2026-09-28	derived	/in/<member>/edit/intro/	comment	profile-editor write receipt (rows B9/A19/A21)
+live-lane	live-lane:_state/live6/A19_restore_preview.json	2026-09-28	derived	/in/<member>/edit/intro/	comment	profile-editor write preview (rows B9/A19/A21)
+live-lane	live-lane:_state/live6/A19_restore_receipt.json	2026-09-28	derived	/in/<member>/edit/intro/	comment	profile-editor write receipt (rows B9/A19/A21)
+live-lane	live-lane:_state/live6/A19_test_preview.json	2026-09-28	derived	/in/<member>/edit/intro/	comment	profile-editor write preview (rows B9/A19/A21)
+live-lane	live-lane:_state/live6/A19_test_receipt.json	2026-09-28	derived	/in/<member>/edit/intro/	comment	profile-editor write receipt (rows B9/A19/A21)
+live-lane	live-lane:_state/live6/A21_restore_preview.json	2026-09-28	derived	/in/<member>/edit/intro/	comment	profile-editor write preview (rows B9/A19/A21)
+live-lane	live-lane:_state/live6/A21_restore_receipt.json	2026-09-28	derived	/in/<member>/edit/intro/	comment	profile-editor write receipt (rows B9/A19/A21)
+live-lane	live-lane:_state/live6/A21_test_preview.json	2026-09-28	derived	/in/<member>/edit/intro/	comment	profile-editor write preview (rows B9/A19/A21)
+live-lane	live-lane:_state/live6/A21_test_receipt.json	2026-09-28	derived	/in/<member>/edit/intro/	comment	profile-editor write receipt (rows B9/A19/A21)
+live-lane	live-lane:_state/live6/edit_plan.json	2026-09-28	derived	/in/<member>/edit/intro/	comment	profile-editor write plan (rows B9/A19/A21)
+live-lane	live-lane:_state/live6/edit_results.json	2026-09-28	derived	/in/<member>/edit/intro/	comment	profile-editor write receipt (rows B9/A19/A21)
+live-lane	live-lane:_state/live7/edit_plan.json	2026-10-10	derived	/in/<member>/edit/intro/	comment	profile-editor write plan
+live-lane	live-lane:_state/live7/editor.skeleton.html	2026-10-10	skeleton	/in/<member>/edit/intro/	builder-script	own profile with intro editor dialog open
+live-lane	live-lane:_state/live7/editor_capture.json	2026-10-10	derived	/in/<member>/edit/intro/	builder-script	intro editor capture timing
+live-lane	live-lane:_state/l1-contact.html	2026-09-23	raw	/in/<member>/overlay/contact-info/	comment	contact-info overlay over own profile
+live-lane	live-lane:_state/live1/l1_contact.json	2026-09-23	derived	/in/<member>/overlay/contact-info/	comment	sidecar: contact-info overlay (redirected onto the profile, dialog open)
+live-lane	live-lane:_state/live2/activity_all.json	2026-09-28	derived	/in/<member>/recent-activity/all/	comment	sidecar: own activity list: posts with reactions, comment counts
+live-lane	live-lane:_state/live2/activity_all.skeleton.html	2026-09-28	skeleton	/in/<member>/recent-activity/all/	comment	own activity list: posts with reactions, comment counts
+live-lane	live-lane:_state/live2/me_menu-open.skeleton.html	2026-09-28	skeleton	/in/<member>/recent-activity/all/	comment	Me menu open over own activity list
+live-lane	live-lane:_state/live2/me_menu.json	2026-09-28	derived	/in/<member>/recent-activity/all/	comment	Me menu press reading: items
+live-lane	live-lane:_state/l1-articles.html	2026-09-23	raw	/in/<member>/recent-activity/articles/	comment	own activity, articles tab
+live-lane	live-lane:_state/live1/l1_articles.json	2026-09-23	derived	/in/<member>/recent-activity/articles/	comment	sidecar: own activity, articles tab
+live-lane	live-lane:_state/live2/j39.json	2026-09-28	derived	/jobs/collections/recommended/	comment	envelope (reduced): recommended collection: list, detail pane, insights
+live-lane	live-lane:_state/live2/j39.skeleton.html	2026-09-28	skeleton	/jobs/collections/recommended/	comment	recommended collection: list, detail pane, insights
+live-lane	live-lane:_state/live2/j158.json	2026-09-28	derived	/jobs/collections/top-choice/	comment	envelope (reduced): Premium top-choice collection: list, detail pane, insights
+live-lane	live-lane:_state/live2/j158.skeleton.html	2026-09-28	skeleton	/jobs/collections/top-choice/	comment	Premium top-choice collection: list, detail pane, insights
+live-lane	live-lane:_state/live2/j18.json	2026-09-28	derived	/jobs/jam/	comment	envelope (reduced): jobs home: recent searches, job cards
+live-lane	live-lane:_state/live2/j18.skeleton.html	2026-09-28	skeleton	/jobs/jam/	comment	jobs home: recent searches, job cards
+live-lane	live-lane:_state/live2/j107.json	2026-09-28	derived	/jobs/search/	comment	envelope (reduced): jobs search at one employer: result list, detail pane, insights
+live-lane	live-lane:_state/live2/j107.skeleton.html	2026-09-28	skeleton	/jobs/search/	comment	jobs search at one employer: result list, detail pane, insights
+live-lane	live-lane:_state/live3/j107_default.json	2026-09-28	derived	/jobs/search/	comment	envelope (reduced): jobs search at one employer, default geography
+live-lane	live-lane:_state/live3/j107_worldwide.json	2026-09-28	derived	/jobs/search/	comment	envelope (reduced): jobs search at one employer, worldwide geography
+live-lane	live-lane:_state/live2/job_detail.json	2026-09-28	derived	/jobs/view/<job>/	comment	envelope (reduced): job posting detail: description, company card
+live-lane	live-lane:_state/live2/job_detail.org.json	2026-09-28	derived	/jobs/view/<job>/	comment	sidecar: posting's organisation id pair (identity-bearing ids)
+live-lane	live-lane:_state/live2/job_detail.skeleton.html	2026-09-28	skeleton	/jobs/view/<job>/	comment	job posting detail: description, company card
+live-lane	live-lane:_state/live4/j121.json	2026-09-28	derived	/jobs/view/<job>/	comment	envelope (reduced): job posting with Premium applicant insights
+live-lane	live-lane:_state/live4/j121_reading.json	2026-09-28	derived	/jobs/view/<job>/	comment	sidecar: applicant-insights presence and gated controls on one posting
+live-lane	live-lane:_state/live7/j121.json	2026-10-10	derived	/jobs/view/<job>/	comment	envelope (reduced): job posting with Premium applicant insights
+live-lane	live-lane:_state/live7/j121_reading.json	2026-10-10	derived	/jobs/view/<job>/	comment	sidecar: applicant-insights presence and gated controls on one posting
+live-lane	live-lane:_state/live2/outward_resolve.json	2026-09-28	derived	/messaging/	content-guess	recipient resolution counts
+live-lane	live-lane:_state/live5/m17_resolve.json	2026-09-28	derived	/messaging/	content-guess	recipient resolution counts (row M17)
+live-lane	live-lane:_state/live6/m17_resolve.json	2026-09-28	derived	/messaging/	content-guess	recipient resolution counts (row M17)
+live-lane	live-lane:_state/live6/m33.json	2026-09-28	derived	/messaging/	comment	envelope (reduced): messaging inbox, InMail filter
+live-lane	live-lane:_state/live6/m49.json	2026-09-28	derived	/messaging/	comment	envelope (reduced): messaging inbox, unread rows
+live-lane	live-lane:_state/live7/m10_resolve.json	2026-10-10	derived	/messaging/	content-guess	recipient resolution counts (row M10)
+live-lane	live-lane:_state/live2/compose_c8-open.skeleton.html	2026-09-28	skeleton	/messaging/compose/	comment	composer with conversation list; one row menu open
+live-lane	live-lane:_state/live2/m43.json	2026-09-28	derived	/messaging/compose/	comment	sidecar: composer with conversation list (list_conversations tool page)
+live-lane	live-lane:_state/live2/m43.skeleton.html	2026-09-28	skeleton	/messaging/compose/	comment	composer with conversation list (list_conversations tool page)
+live-lane	live-lane:_state/live2/presence.json	2026-09-28	derived	/messaging/compose/	comment	envelope (reduced): composer suggested-recipient cards with presence dots
+live-lane	live-lane:_state/live2/presence.skeleton.html	2026-09-28	skeleton	/messaging/compose/	comment	composer suggested-recipient cards with presence dots
+live-lane	live-lane:_state/live3/compose_c5-open.skeleton.html	2026-09-28	skeleton	/messaging/compose/	comment	composer with conversation list; one row menu open
+live-lane	live-lane:_state/live3/compose_c8-open.skeleton.html	2026-09-28	skeleton	/messaging/compose/	comment	composer with conversation list; one row menu open
+live-lane	live-lane:_state/live3/compose_c9-open.skeleton.html	2026-09-28	skeleton	/messaging/compose/	comment	composer; conversation options menu open (mute, archive, report)
+live-lane	live-lane:_state/live3/compose_presses.json	2026-09-28	derived	/messaging/compose/	comment	composer menu presses c5/c8/c9 readings
+live-lane	live-lane:_state/live3/m43.json	2026-09-28	derived	/messaging/compose/	comment	sidecar: composer with conversation list (list_conversations tool page)
+live-lane	live-lane:_state/live3/m43.skeleton.html	2026-09-28	skeleton	/messaging/compose/	comment	composer with conversation list (list_conversations tool page)
+live-lane	live-lane:_state/live3/presence.json	2026-09-28	derived	/messaging/compose/	comment	envelope (reduced): composer suggested-recipient cards with presence dots
+live-lane	live-lane:_state/live3/presence.skeleton.html	2026-09-28	skeleton	/messaging/compose/	comment	composer suggested-recipient cards with presence dots
+live-lane	live-lane:_state/live4/c8.json	2026-09-28	derived	/messaging/compose/	comment	composer row-menu press reading
+live-lane	live-lane:_state/live4/compose_c8-open.skeleton.html	2026-09-28	skeleton	/messaging/compose/	comment	composer with conversation list; one row menu open
+live-lane	live-lane:_state/live5/m17_preview.json	2026-09-28	derived	/messaging/thread/<thread>/	comment	reply-in-thread preview
+live-lane	live-lane:_state/live5/m17_receipt.json	2026-09-28	derived	/messaging/thread/<thread>/	comment	reply-in-thread receipt
+live-lane	live-lane:_state/live6/m17_preview.json	2026-09-28	derived	/messaging/thread/<thread>/	comment	reply-in-thread preview
+live-lane	live-lane:_state/live6/m17_receipt.json	2026-09-28	derived	/messaging/thread/<thread>/	comment	reply-in-thread receipt
+live-lane	live-lane:_state/live1/cap_connections.html	2026-09-23	raw	/mynetwork/invite-connect/connections/	comment	connections list: member rows with Message, More
+live-lane	live-lane:_state/live1/cap_connections.json	2026-09-23	derived	/mynetwork/invite-connect/connections/	comment	sidecar: connections list: member rows with Message, More
+live-lane	live-lane:_state/live2/n23.json	2026-09-28	derived	/mynetwork/invite-connect/connections/	comment	envelope (reduced): connections list: member rows with Message links
+live-lane	live-lane:_state/live2/n23.skeleton.html	2026-09-28	skeleton	/mynetwork/invite-connect/connections/	comment	connections list: member rows with Message links
+live-lane	live-lane:_state/live7/connections.json	2026-10-10	derived	/mynetwork/invite-connect/connections/	comment	connections tool envelope
+live-lane	live-lane:_state/live7/follow_check.json	2026-10-10	derived	/mynetwork/network-manager/company/	comment	followed-pages list re-check: tool envelope
+live-lane	live-lane:_state/live7/follow_read.json	2026-10-10	derived	/mynetwork/network-manager/company/	comment	followed-pages list reading: tool envelope
+live-lane	live-lane:_state/live7/follow_target.json	2026-10-10	derived	/mynetwork/network-manager/company/	comment	follow target id and counts before the act
+live-lane	live-lane:_state/live7/unfollow_outcome.json	2026-10-10	derived	/mynetwork/network-manager/company/	comment	unfollow outcome: performed, verified
+live-lane	live-lane:_state/live7/unfollow_preview.json	2026-10-10	derived	/mynetwork/network-manager/company/	comment	unfollow-organisation preview
+live-lane	live-lane:_state/live7/unfollow_receipt.json	2026-10-10	derived	/mynetwork/network-manager/company/	comment	unfollow-organisation receipt
+live-lane	live-lane:_state/live2/followers.json	2026-09-28	derived	/mynetwork/network-manager/people-follow/followers/	comment	sidecar: followers list: member rows with follow-back state
+live-lane	live-lane:_state/live2/followers.skeleton.html	2026-09-28	skeleton	/mynetwork/network-manager/people-follow/followers/	comment	followers list: member rows with follow-back state
+live-lane	live-lane:_state/live1/cap_prefs.html	2026-09-23	raw	/mypreferences/d/	comment	settings home (redirected to a category page): setting links
+live-lane	live-lane:_state/live1/cap_prefs.json	2026-09-23	derived	/mypreferences/d/	comment	sidecar: settings home (redirected to a category page): setting links
+live-lane	live-lane:_state/live2/setting.html	2026-09-28	raw	/mypreferences/d/settings/notify-network-for-updates/	comment	account setting page: one switch (share profile updates)
+live-lane	live-lane:_state/live2/setting.json	2026-09-28	derived	/mypreferences/d/settings/notify-network-for-updates/	comment	sidecar: account setting page: one switch (share profile updates)
+live-lane	live-lane:_state/live2/setting_offline.json	2026-09-28	derived	/mypreferences/d/settings/notify-network-for-updates/	comment	sidecar: verdict: offline vs live reading of the setting switch
+live-lane	live-lane:_state/live3/setting.html	2026-09-28	raw	/mypreferences/d/settings/notify-network-for-updates/	comment	account setting page: one switch (share profile updates)
+live-lane	live-lane:_state/live3/setting.json	2026-09-28	derived	/mypreferences/d/settings/notify-network-for-updates/	comment	sidecar: account setting page: one switch (share profile updates)
+live-lane	live-lane:_state/live3/setting_offline.json	2026-09-28	derived	/mypreferences/d/settings/notify-network-for-updates/	comment	sidecar: verdict: offline vs live reading of the setting switch
+live-lane	live-lane:_state/live1/notifications.html	2026-09-24	raw	/notifications/	content-guess	notifications list: cards, delete menus
+live-lane	live-lane:_state/live1/notifications.json	2026-09-24	raw	/notifications/	json-field	notifications tool output: kinds, items with names
+live-lane	live-lane:_state/live2/notifications.json	2026-09-28	derived	/notifications/	comment	envelope (reduced): notifications list: cards with job-alert and network items
+live-lane	live-lane:_state/live2/notifications.skeleton.html	2026-09-28	skeleton	/notifications/	comment	notifications list: cards with job-alert and network items
+live-lane	live-lane:_state/live3/notifications.json	2026-09-28	derived	/notifications/	comment	envelope (reduced): notifications list: cards with job-alert and network items
+live-lane	live-lane:_state/live3/notifications.skeleton.html	2026-09-28	skeleton	/notifications/	comment	notifications list: cards with job-alert and network items
+live-lane	live-lane:_state/live4/notifications.json	2026-09-28	derived	/notifications/	comment	envelope (reduced): notifications list: cards with job-alert and network items
+live-lane	live-lane:_state/live4/notifications.skeleton.html	2026-09-28	skeleton	/notifications/	comment	notifications list: cards with job-alert and network items
+live-lane	live-lane:_state/live5/notifications.json	2026-09-28	derived	/notifications/	comment	envelope (reduced): notifications list: cards with job-alert and network items
+live-lane	live-lane:_state/live5/notifications.skeleton.html	2026-09-28	skeleton	/notifications/	comment	notifications list: cards with job-alert and network items
+live-lane	live-lane:_state/live7/notifications.json	2026-10-10	derived	/notifications/	comment	envelope (reduced): notifications list: cards with job-alert and network items
+live-lane	live-lane:_state/live7/notifications.skeleton.html	2026-10-10	skeleton	/notifications/	comment	notifications list: cards with job-alert and network items
+live-lane	live-lane:_state/live2/n104.json	2026-09-28	derived	/search/results/companies/	comment	sidecar: companies search results for a generic keyword
+live-lane	live-lane:_state/live2/n104.skeleton.html	2026-09-28	skeleton	/search/results/companies/	comment	companies search results for a generic keyword
+live-lane	live-lane:_state/live3/n179.json	2026-09-28	derived	/search/results/events/	comment	sidecar: events search results for a generic keyword
+live-lane	live-lane:_state/live3/n179.skeleton.html	2026-09-28	skeleton	/search/results/events/	comment	events search results for a generic keyword
+live-lane	live-lane:_state/live2/n161.json	2026-09-28	derived	/search/results/groups/	comment	sidecar: groups search results for a generic keyword
+live-lane	live-lane:_state/live2/n161.skeleton.html	2026-09-28	skeleton	/search/results/groups/	comment	groups search results for a generic keyword
+live-lane	live-lane:_state/live1/people_search.html	2026-09-23	raw	/search/results/people/	content-guess	people search results: cards with Connect/Follow
+live-lane	live-lane:_state/live1/people_search.json	2026-09-23	derived	/search/results/people/	content-guess	sidecar: people search results: cards with Connect/Follow
+live-lane	live-lane:_state/live2/n84.json	2026-09-28	derived	/search/results/people/	comment	envelope (reduced): people search filtered by current company: result cards
+live-lane	live-lane:_state/live2/n84.skeleton.html	2026-09-28	skeleton	/search/results/people/	comment	people search filtered by current company: result cards
+live-lane	live-lane:_state/live2/n87.json	2026-09-28	derived	/search/results/people/	comment	envelope (reduced): people search filtered by past company: result cards
+live-lane	live-lane:_state/live2/n87.skeleton.html	2026-09-28	skeleton	/search/results/people/	comment	people search filtered by past company: result cards
+live-lane	live-lane:_state/live2/n94.json	2026-09-28	derived	/search/results/people/	comment	envelope (reduced): people search by keyword and location: result cards
+live-lane	live-lane:_state/live2/n94.skeleton.html	2026-09-28	skeleton	/search/results/people/	comment	people search by keyword and location: result cards
+live-lane	live-lane:_state/live3/n194.json	2026-09-28	derived	/search/results/people/	content-guess	envelope (reduced): census row N 194 tool reading; ledger surface search
+live-lane	live-lane:_state/live7/s1_name.json	2026-10-10	derived	/search/results/people/	json-field	people search by name: tool envelope
+live-lane	live-lane:_state/live7/s2_geo.json	2026-10-10	derived	/search/results/people/	json-field	people search by geography: tool envelope
