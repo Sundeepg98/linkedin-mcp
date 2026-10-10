@@ -152,6 +152,89 @@ def test_the_plan_reads_the_event_and_ref_through_env_not_the_script_text():
     assert "${{" not in step["run"], "an expression is spliced into the script"
 
 
+_LOCAL_MASTER_IF = "github.ref != 'refs/heads/master'"
+
+
+def _local_master_step() -> tuple[int, dict, list[dict]]:
+    steps = _workflow()["jobs"]["test"]["steps"]
+    found = [(i, s) for i, s in enumerate(steps)
+             if "git branch --force master origin/master" in (s.get("run") or "")]
+    assert len(found) == 1, (
+        "no shard step creates a local master -- on a ci/ or pull_request "
+        "checkout `master` names nothing, and the cited-SHA family fails "
+        "with \"cannot resolve `master` to a short sha (got '')\"")
+    return found[0][0], found[0][1], steps
+
+
+def test_every_shard_creates_a_local_master_before_any_test_runs():
+    """MEASURED 2026-10-10 on lane runs 38035128406 and 38035353731: a ci/
+    checkout has no LOCAL master ref (actions/checkout makes a local branch
+    only for the ref it checks out), so 20 tests that resolve `master` failed
+    on every fast-lane run. Master's own runs check out master and never saw
+    it. The step must sit after the checkout and before the first pytest."""
+    index, step, steps = _local_master_step()
+    checkout = next(i for i, s in enumerate(steps)
+                    if (s.get("uses") or "").startswith("actions/checkout@"))
+    first_pytest = next(i for i, s in enumerate(steps)
+                        if "pytest" in (s.get("run") or ""))
+    assert checkout < index < first_pytest, (checkout, index, first_pytest)
+    assert steps[checkout]["with"]["fetch-depth"] == 0
+
+
+def test_master_runs_skip_the_local_master_step():
+    """A checked-out branch cannot be force-updated, and master's own runs
+    must stay byte-for-byte what they were: the step is guarded off them."""
+    _index, step, _steps = _local_master_step()
+    assert step.get("if") == _LOCAL_MASTER_IF, step.get("if")
+
+
+def test_the_step_gives_a_ci_checkout_the_master_it_lacked(tmp_path):
+    """Reproduce the ci/ checkout's shape -- the lane branch checked out,
+    origin/master fetched, NO local master -- show `master` failing to
+    resolve, run the step's own script, and show it resolving to
+    origin/master."""
+    _index, step, _steps = _local_master_step()
+    env = dict(os.environ)
+    env.update({"GIT_AUTHOR_NAME": "fixture", "GIT_AUTHOR_EMAIL": "fixture@example.com",
+                "GIT_COMMITTER_NAME": "fixture", "GIT_COMMITTER_EMAIL": "fixture@example.com"})
+    for name in ("GIT_DIR", "GIT_WORK_TREE"):
+        env.pop(name, None)
+
+    def git(cwd: Path, *args: str, check: bool = True):
+        done = subprocess.run(["git", "-c", "core.hooksPath=.nohooks", *args],
+                              cwd=cwd, env=env, capture_output=True, text=True,
+                              timeout=60)
+        if check:
+            assert done.returncode == 0, (args, done.stderr)
+        return done
+
+    origin = tmp_path / "origin"
+    origin.mkdir()
+    git(origin, "init", "-q", "-b", "master")
+    (origin / "a.txt").write_text("published\n", encoding="utf-8")
+    git(origin, "add", "a.txt")
+    git(origin, "commit", "-q", "--no-verify", "-m", "master")
+    git(origin, "checkout", "-q", "-b", "ci/lane")
+    (origin / "b.txt").write_text("the lane's work\n", encoding="utf-8")
+    git(origin, "add", "b.txt")
+    git(origin, "commit", "-q", "--no-verify", "-m", "lane")
+
+    clone = tmp_path / "clone"
+    git(tmp_path, "clone", "-q", "--no-checkout", str(origin), str(clone))
+    git(clone, "checkout", "-q", "-B", "ci/lane", "refs/remotes/origin/ci/lane")
+    git(clone, "branch", "-D", "master", check=False)  # absent already, or now
+    assert git(clone, "rev-parse", "--short", "master", check=False).returncode != 0, (
+        "the reproduction is wrong: master already resolves")
+
+    script = tmp_path / "step.sh"
+    script.write_text(step["run"], encoding="utf-8", newline="\n")
+    done = subprocess.run([_bash(), str(script).replace("\\", "/")], cwd=clone,
+                          env=env, capture_output=True, text=True, timeout=60)
+    assert done.returncode == 0, done.stderr
+    want = git(clone, "rev-parse", "refs/remotes/origin/master").stdout.strip()
+    assert git(clone, "rev-parse", "master").stdout.strip() == want
+
+
 def test_the_triggers_and_the_jobs_are_still_there():
     flow = _workflow()
     # PyYAML reads the bare key `on` as the boolean True (YAML 1.1).
