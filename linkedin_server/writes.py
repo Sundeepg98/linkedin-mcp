@@ -213,6 +213,7 @@ from linkedin_server import (
     coerce,
     company_interest,
     dom,
+    field_restore,
     group_leave,
     landing,
     named_profile,
@@ -2840,13 +2841,18 @@ def consume(token: str, *, action: str, target: str) -> WriteGrant:
 
 
 def discard_all() -> None:
-    """Drop every live grant AND every live reading.
+    """Drop every live grant, every live reading, AND every restore record.
 
-    Both, because they are two halves of the same permission: a receipt that
-    outlived a kill switch is a grant waiting to be minted.
+    The first two because they are two halves of the same permission: a
+    receipt that outlived a kill switch is a grant waiting to be minted. The
+    third since 2026-10-10 (census row P A8) for the same reason one step
+    earlier: a restore record is what ADMITS an empty value to be minted at
+    all (``field_restore``), and a reset that left it would leave an admission
+    standing.
     """
     _GRANTS.clear()
     _OBSERVED.clear()
+    field_restore.discard_all()
 
 
 # ---------------------------------------------------------------------------
@@ -3537,6 +3543,74 @@ def _composite_target(spec: WriteSpec, target: Any) -> str:
     )
 
 
+def _is_clear_target(spec: WriteSpec, target: Any) -> bool:
+    """Whether a CANONICAL target is a CLEAR: ``update_profile_field``'s
+    ``<field> :: `` -- one separator, and nothing after it. Only
+    :func:`_clear_target` can produce one; see :mod:`field_restore`."""
+    return (
+        spec.action == "update_profile_field"
+        and isinstance(target, str)
+        and target.count(TARGET_JOIN) == 1
+        and target.endswith(TARGET_JOIN)
+    )
+
+
+def _clear_target(spec: WriteSpec, target: Any) -> Optional[str]:
+    """THE ONE ADMISSION OF AN EMPTY VALUE (2026-10-10, census row P A8).
+
+    ``update_profile_field`` asking for EXACTLY ``""`` -- a string, empty
+    after the strip every value gets -- for a field whose live restore record
+    (:mod:`field_restore`) says this server's own verified write read the
+    field's prior value as ``""`` before typing. Then, and only then, the
+    canonical target is ``<field> :: ``: the field, the separator, and an
+    EMPTY second half.
+
+    WHY THAT SPELLING IS NOT THE AMBIGUITY ``_clean_target_part`` REFUSES.
+    Neither half may contain the separator and the field half is never empty,
+    so ``<field> :: `` partitions one way only -- into that field and the
+    empty string -- and no other field or value canonicalises to it. The
+    token binds it exactly as it binds any other target.
+
+    THREE ANSWERS. None when this is not that request at all -- another
+    action, a value that is not empty, a value that is not a string (None is
+    "absent", never "empty") -- so the ordinary path canonicalises it and
+    refuses an empty component exactly as it always has. The clear target when
+    a record admits it. And a REFUSAL when it IS that request and nothing
+    admits it: the ordinary refusal verbatim, then why the one exception does
+    not apply -- no record for this field, used, expired, or the field is the
+    Premium badge switch, which takes 'on' or 'off' and is never cleared.
+    """
+    if spec.action != "update_profile_field" or spec.target_kind != "field_and_value":
+        return None
+    first, second = _COMPOSITE_TARGET_KINDS[spec.target_kind]
+    if isinstance(target, str) and target.count(TARGET_JOIN) == 1:
+        subject, _, value = target.partition(TARGET_JOIN)
+    elif isinstance(target, dict):
+        subject, value = target.get(first), target.get(second)
+    else:
+        return None
+    if not isinstance(value, str) or value.strip():
+        return None
+    field_name = _clean_target_part(spec, first, subject)
+    if field_name == profile_editor.PREMIUM_BADGE_TITLE:
+        why: Optional[str] = (
+            repr(profile_editor.PREMIUM_BADGE_TITLE) + " is a switch and takes "
+            "'on' or 'off'; a clear empties a typed field and never a switch."
+        )
+    else:
+        why = field_restore.why_no_clear(field_name)
+    if why is not None:
+        # FAIL-CLOSED: the ordinary refusal's own words lead, in the raise --
+        # the one place this module renders an exception's text -- and the
+        # refusal is raised whether or not the ordinary check gave any.
+        try:
+            _clean_target_part(spec, second, value)
+        except WriteAttemptError as exc:
+            raise WriteAttemptError(str(exc) + " " + why) from None
+        raise WriteAttemptError(why)
+    return field_name + TARGET_JOIN
+
+
 def _target_for(spec: WriteSpec, target: Any) -> str:
     """Normalise ``target`` to the shape THIS action is addressed by, or raise.
 
@@ -3605,6 +3679,13 @@ def _target_for(spec: WriteSpec, target: Any) -> str:
     if spec.target_kind in _OPAQUE_TARGET_KINDS:
         return _opaque_target(spec, raw)
     if spec.target_kind in _COMPOSITE_TARGET_KINDS:
+        # THE CLEAR, ASKED FIRST (2026-10-10, census row P A8): the one place
+        # an empty value is admitted, and it answers None for everything that
+        # is not that request -- so every other target, and every empty value
+        # it does not admit, takes the ordinary path below unchanged.
+        cleared = _clear_target(spec, target)
+        if cleared is not None:
+            return cleared
         canonical = _composite_target(spec, target)
         if spec.action == "update_profile_field":
             # THE PREMIUM BADGE IS A SWITCH (P B9), so it takes one of two
@@ -5776,6 +5857,13 @@ def _render(
         "spends": spec.spends,
         "performed": False,
     }
+
+    # A CLEAR SAYS IT IS ONE (2026-10-10, census row P A8). The value printed
+    # above is the empty string, and an empty value next to a field reads as
+    # nothing at all -- so the block says it twice, as ``clear: True`` and in
+    # a sentence, with the terms it is admitted on. See ``field_restore``.
+    if _is_clear_target(spec, observation.target):
+        out.update(field_restore.clear_preview(observation.target.partition(TARGET_JOIN)[0]))
 
     # THE FILE BLOCK, for an action that would upload one.
     #
