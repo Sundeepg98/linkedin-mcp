@@ -5121,6 +5121,19 @@ no card on a three-result page is an offline item; the tool keeps no skeleton of
 At 19:20 port 9224 was held by the same process, and its DevTools target list held 1 page,
 a blank tab, and 0 LinkedIn tabs. Every run closed its own tab.
 
+### After the close: why the Page root refused, recovered from the kept message
+
+The preview's envelope kept its message as a keyed shape. Driving the shipped verdict
+(`writes.company_page_follow_verdict`) over a grid of readings, composing each refusal
+exactly as the preview raises it, and shaping it with the session's key, **exactly one
+sentence matches: 2 controls whose name opens `Follow ` in the Page's main column, and 2
+of them read it followed by a heading the Page prints there** -- refused as several bound.
+So unfollowed, the Page draws its OWN control twice in the main column, both named for it
+(DERIVED from the sentence: two controls bound to the Page's own heading). Session 9's
+followed load drew one own control there and another entity's beside it. The next fix is
+offline: several controls that all bind to the Page's own heading are one Page's control,
+and the press needs exactly one of them by something other than position.
+
 ### The census, and the pins
 
 **NO ROW MOVED.** Dated notes: profile `B9`, network `47`, `20` and `45`.
