@@ -8394,7 +8394,10 @@ async def linkedin_my_activity_items() -> dict[str, Any]:
     other tool here returns an item key. linkedin_surface_census substitutes
     every urn out before it counts, by design, so a measurement cannot publish
     an identifier; and the feed carries zero item permalinks. This tool returns
-    the keys, for his own items only.
+    the keys, for his own items only. (SINCE 2026-10-10 IT IS NOT THE ONLY
+    READER OF ITEM KEYS: linkedin_read_named_profile returns activity_items,
+    the keys on the first render of the profile of a member he names, each
+    marked whose item it is.)
     =================================================================
 
     DO NOT PASTE ITS OUTPUT INTO A TRACKED FILE IN THIS REPOSITORY. The urns
@@ -9688,6 +9691,14 @@ async def linkedin_comment_on_item(
     offers -- but a caller holding one from somewhere else is not stopped by
     this parameter, and claiming otherwise would be the same kind of unearned
     certainty being removed above.
+
+    SINCE 2026-10-10 THE CASE ARISES, AND THE TWO PARAGRAPHS ABOVE ARE HISTORY
+    FROM THAT DATE: ``linkedin_read_named_profile`` returns ``activity_items``,
+    the item keys on the first render of the profile of a member he names,
+    each marked ``owner``, ``another_member`` or ``unknown``. A comment aimed
+    with one of those lands on THAT member's item, in front of THEIR audience,
+    and notifies THEM -- the geography the 2026-09-04 correction said nobody
+    could reach. Nothing here checks whose item it is; the key is his to pass.
 
     A DELETE EXISTS, MEASURED 2026-09-04 AND WITHOUT PUBLISHING ANYTHING. The
     overflow menu on one of his own comments draws exactly three items --

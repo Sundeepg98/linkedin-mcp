@@ -126,7 +126,64 @@ in the script, its plant goes through (`test_control_each_check_weakened_lets_it
 
 ## B. `M C32`'s react tool (child B)
 
-PENDING CHILD B'S REPORT -- filled at its merge.
+Built by child B in its own worktree (two commits, `d352ffc` and `0b2367f`),
+reviewed and merged here; its report is the source of the reds below.
+
+- B1, THE ITEM IS THE CALLER'S ARGUMENT, FOR ANY POST: walked end to end
+  (`server.linkedin_react_to_item` -> `writes._write_tool` -> `preview` ->
+  `observe` -> `_target_for` -> `_opaque_target` -> `_clean_target_part`; the
+  permalink read; `_direction`; `mint`; `perform` -> `assert_write_url`,
+  `_assert_landed_on_target`, `_live_control`, `valid_from`): NOTHING checks
+  whose post it is, only the urn's anchored shape. No refusal existed, so none
+  was removed. The tool's text said "Get it from linkedin_my_activity_items,
+  which returns keys only for items established to be yours" -- where keys
+  came from, read as a gate it never was. It now says the item is the caller's
+  argument, names both key sources (his own items; `activity_items` of a profile
+  he names) and that reacting to another member's post notifies them.
+- B2, PREVIEW-NAMES-THE-RESOLVED-TARGET: the react preview adds, ONLY to the
+  block it returns -- never the grant, the observation, a log or a receipt,
+  each held by a test -- `who_this_would_reach` (the post's author as a people
+  record, name and headline read off the permalink's one actor block, its link
+  null by `people_seam`'s contract), `author_kind` (`you`, `another_member`,
+  `unknown`) and the sentence saying where it was read.
+  `linkedin_server/item_author.py`: locator reads only, no new evaluate.
+  EVIDENCE CLASS: on his own post's permalink capture
+  (`tests/fixtures/live2/own_post.html`, the only permalink capture) no
+  author-only affordance is drawn without a press -- the post-analytics link
+  the order suggested is MEASURED ABSENT in `main` -- so `author_kind` compares
+  the actor's profile link with his own identity card's (the sidebar card beside
+  his private analytics widget). That returns `you` on his own post; that it
+  returns `another_member` on another member's is DERIVED (every name in the
+  captures is sanitised, and none shows another member's post page), and the
+  block says so.
+- B3, THE INVERSE, IS NOT BUILT. Under the lane's time box child B committed
+  only what was green; the un-react moves a dozen pinned tables across about
+  fifteen test files. ITS DESIGN IS BUILD-READY in child B's report and is
+  summarised here: action `unreact_to_item`, the react spec's address and
+  pattern, from `reacted` to `no_reaction`, aimed ONLY at the two MEASURED ON
+  labels ("Reaction button state: Like", his profile rail, 2026-09-04;
+  "Unreact Like", his own liked post's permalink, 2026-09-23/24), verified by
+  a fresh render reading the measured OFF label; registered in PERFORMABLE,
+  `_TOGGLE_ACTIONS`, `_WHERE_TO_LOOK`, `_VERIFIED_FROM`,
+  `item_author.REACTION_ACTIONS` and an outward-class record; the react spec's
+  `reversible_by`, `wrong_state_note` and `reversibility_procedure` made
+  truthful in the same change. ITS NAME NEEDS A RULING: `tests/test_writes.py`'s
+  verb conservation law refuses `unreact` by name
+  (`test_the_ruling_carve_out_admits_exactly_two_verbs_and_no_derivative`); the
+  choice is to admit it in `_VERBS_ADMITTED_BY_RULING` (LinkedIn's own word,
+  "Unreact Like") or to name the tool by an original verb
+  (`linkedin_withdraw_reaction`).
+
+RED FIRST (child B's runs): B1's two docstring tests failed on the shipped text
+(and a check that could not fail -- the old sentence wraps across two lines --
+was caught on the first draft and fixed by flattening whitespace); B2's preview
+tests failed on the shipped gate (`assert None == 'another_member'`,
+`assert None == 'you'`, `assert None == 'unknown'`, no record), and its module
+tests with `ImportError` against an export of the previous commit. GREEN: the
+file (renamed at this merge to
+`tests/test_a_reaction_takes_any_item_and_names_its_author.py`, so its name no
+longer claims the inverse) 16 passed, and the react-touching and static guards
+child B ran, each under two minutes.
 
 ---
 
@@ -266,10 +323,13 @@ the merge of master `53908ea`.
   returns it as `member_token`. They move only when proven live (F). At the
   merge of master these four cells had ALSO gained live session 7's paragraph;
   resolved keyed by row, master's cell whole and this lane's paragraph after it.
-- `M C32` (messaging-and-content): the cell names the new route -- see the
-  merge of child B below.
-- `P A8` (profile): the cell names the clear-restore -- see the merge of child C
-  below.
+- `M C32` (messaging-and-content): the cell names the new route -- the item
+  key from `activity_items`, passed back as `item`; nothing checks whose post
+  it is; the preview names the author and its kind -- and says the inverse is
+  NOT built and that the live proof waits on it.
+- `P A8` (profile): the cell names the clear-restore -- the record a write over
+  an empty original leaves, the one admission of the empty value as a CLEAR,
+  the click's "only what this server wrote", the read-back that must read "".
 - NOT EDITED, and why: `N 178` and `N 65` keep their cells -- their blocker is
   still a capture (C-NP1 now, on the detail page the new door admits), which D.2
   specifies; `M C35` ("Remove or change a reaction") is a candidate for the next
@@ -346,6 +406,12 @@ THE BARS, each row on its own cell's:
 STOP RULES, as every session: any wall, challenge or unexpected landing stops
 the session; a refused step is recorded and the next INDEPENDENT step runs
 (2-4 hang on 2's token; 6-11 on 2's items; 16-19 on 12-15).
+
+STEPS 6-11 WAIT ON THE INVERSE. His YES was to react AND take the reaction
+back; `linkedin_unreact_to_item` (or the name the ruling picks) is not built
+(B3). Until it is on master and green, steps 6-11 are NOT RUN -- a reaction
+this server cannot take back is not fired -- and the session spends 14 loads,
+2 searches.
 
 ---
 

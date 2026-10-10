@@ -1,6 +1,10 @@
-"""A reaction says WHOSE post it lands on, and it has an inverse.
+"""A reaction takes any item from its arguments and says WHOSE post it lands on.
 
-Lane NP, child B, 2026-10-10. Three things, each red before it was built:
+Lane NP, child B, 2026-10-10. Two things, each red before it was built. (The
+file was first named for a third, the inverse, which was NOT built under the
+lead's time box -- its design and the verb-law question its name raises are in
+``_audit/2026-10-10-lane-np-named-profile.md``, section B -- and was renamed at
+the lead's merge so its name claims only what it holds.)
 
 B1  THE TARGET IS A TOOL ARGUMENT, NOT ONLY HIS OWN ITEM. Nothing in the react
     gate refuses an item that is not his -- ``writes._target_for`` checks the
