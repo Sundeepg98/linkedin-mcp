@@ -9084,6 +9084,14 @@ async def linkedin_unfollow_company(
     LinkedIn's own stated total dropping by one, not on the row having
     vanished. On a partial list an absent row is not evidence.
 
+    THE PRESS IS READ BEFORE THE RELOAD, SINCE 2026-10-10. Live, one press
+    left the row following on the reload. So what the press drew is read in
+    place first (``unfollow_confirm_gate`` on the receipt): a confirmation
+    with exactly one control named ``Unfollow`` has that control pressed,
+    through the same single click call site; any other dialog, or a control
+    under another name, is reported by its shape and nothing more is pressed;
+    and a press that drew nothing at all is said so, for the reload to decide.
+
     THIS DOCSTRING SAID THE PAIR WAS ASYMMETRIC ON PURPOSE, AND THAT IS
     FALSE AT HEAD. It read: "THE PAIR IS ASYMMETRIC ON PURPOSE: this server
     can stop a follow and cannot start one," and went on to describe
@@ -9864,10 +9872,13 @@ async def linkedin_update_profile_field(
     row P B9). ``field="Profile Premium Badge"`` shows or hides the Premium
     badge on your profile, and its ``value`` is ``"on"`` or ``"off"``;
     anything else is refused before a token exists. The switch has no
-    accessible name, so it is found by its block's TITLE, compared inside the
-    page and never read out, in exactly one settings row of the intro
-    editor: a second row carrying the title, no such row, or a UI in another
-    language refuses. Condition 1 is read BEFORE the switch is pressed, Save
+    accessible name of its own, so it is found by its block's TITLE, compared
+    inside the page and never read out, in exactly one settings row of the
+    intro editor: a second row carrying the title, no such row, or a UI in
+    another language refuses. (Since 2026-10-10 LinkedIn draws the switch
+    named on its own input -- one label shared by both switches, which names
+    neither -- so the title still aims it, and the press lands on the switch's
+    own control in either recorded shape.) Condition 1 is read BEFORE the switch is pressed, Save
     is pressed only if the badge and nothing else moved, and the
     verification reads both switches on a fresh render -- the other one, Open
     Profile, must not have moved. The restore is the same call with the

@@ -130,7 +130,9 @@ KEY_PATH = sanitisation_key_path(REPO)
 
 #: Generous but bounded. The positive control below does a real sweep of one
 #: commit's worth of blobs (low hundreds -- 610 the last time this was
-#: measured), one ``git cat-file`` subprocess per blob. In a quiet worktree
+#: measured), one ``git cat-file`` subprocess per blob. (Since 2026-10-10 the
+#: blobs go through ONE ``git cat-file --batch``, ~10s for 1002 blobs; the
+#: bound below was sized for the old cost and is kept as headroom.) In a quiet worktree
 #: that finishes in a couple of seconds; in THIS repository's actual working
 #: conditions -- a shared worktree with a measured concurrent writer, see the
 #: module docstring's history -- the identical command was clocked at 136s
@@ -421,6 +423,15 @@ def test_the_zero_blobs_guard_fires_even_with_real_commits(monkeypatch, capsys):
         )
 
     monkeypatch.setattr(module, "_git", fake_git)
+
+    # Since 2026-10-10 blobs are read through ONE `git cat-file --batch`
+    # (`_BlobReader`), not through `_git` -- so the fake above can no longer
+    # see a blob read. This keeps the proof this test states: no blob is read.
+    def no_blob_read(self, sha: str) -> str:
+        raise AssertionError(f"the zero-blobs guard should have returned "
+                             f"before reading blob {sha}")
+
+    monkeypatch.setattr(module._BlobReader, "read", no_blob_read)
 
     code = module.main(["prog", "fake-range"])
     out = capsys.readouterr().out
