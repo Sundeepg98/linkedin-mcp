@@ -9224,18 +9224,21 @@ async def linkedin_follow_company_page(
 
     WHAT THE PREVIEW READS, on the Page root itself, at one page load. The
     Page's own follow control -- measured wearing ``Follow `` followed by the
-    Page's name -- must be the ONE such control in the page's main column
-    (LinkedIn draws the same control for every Page it recommends, in a side
-    column), its name must match a heading the Page prints, and the Page's
+    Page's name -- must be the ONE control in the page's main column whose
+    name matches a heading the Page prints, as this server compares them and
+    as the page's own engine does (LinkedIn draws the same control for other
+    Pages and people, in a side column and, measured 2026-10-10, in the main
+    column too), and the Page's
     own people-search link must name the id you asked about. That last check
     is what ties the page to the id: LinkedIn redirects ``/company/<id>/`` to
     the Page's canonical address, which this block does not print -- it is a
     slug, and a slug can be a name.
 
     A PAGE YOU ALREADY FOLLOW IS REFUSED, NOT REPORTED. The label its control
-    wears once followed has never been captured, so this reads ``unknown``
-    rather than guessing -- pressing a follow control in its other state is
-    how a follow becomes an unfollow.
+    wears once followed was read live once (2026-10-10), as a shape, and this
+    gate does not read it: it reads ``unknown`` rather than guessing --
+    pressing a follow control in its other state is how a follow becomes an
+    unfollow.
 
     After the click the result is read off a DIFFERENT surface: your followed
     companies, where the row for this id must render. That list shows about
