@@ -574,10 +574,13 @@ on a shared box -- also convicted two things older than this commit:
 `tests/test_job_alerts_read_boundary.py` pins the pattern-exemption table's
 size, and it had been red since `8a0636a`, because each earlier gate here was a
 hand-picked list that left that direct importer out (now 10, each new entry
-named); and `tests/test_no_committed_identity.py` read `/company/12345/` in this
-lane's own test file as seven undeclared company ids (now the declared
-synthetic id the company boundary test already uses). Both are fixed in this
-commit. The lesson is the brief's own: the gate is the files that IMPORT what
+named); and `tests/test_no_committed_identity.py` read a five-digit invented
+organisation segment in this lane's own test file as seven undeclared company
+ids (now the declared synthetic id the company boundary test already uses).
+Both are fixed in this commit. (The same sweep then found the record's own
+quotation of that segment, and the new allowlist digest, whose tail is ten
+decimal digits and reads as a telephone number; the next commit rewords the
+one and writes the other as two adjacent literals.) The lesson is the brief's own: the gate is the files that IMPORT what
 changed, enumerated, not the files one remembers.
 
 ---
