@@ -378,6 +378,21 @@ jobs:
           # jobs red, on a commit whose history was complete ON THE SERVER.
           fetch-depth: 0
 
+      # A LOCAL `master`, ADDED 2026-10-10. actions/checkout creates a local
+      # branch only for the ref it checks out; everything else, master
+      # included, arrives as refs/remotes/origin/*. The cited-SHA family
+      # (tests/test_a_cited_sha_resolves.py and its kin) resolves the bare name
+      # `master`, so on a ci/ push -- and on a pull_request, which checks out a
+      # detached merge commit -- 20 tests failed with "cannot resolve `master`
+      # to a short sha (got '')": measured on lane runs 38035128406 and
+      # 38035353731, the same 20 on each. Master's own runs check master out
+      # and never saw it; they SKIP this step, because a checked-out branch
+      # cannot be force-updated and their behaviour must not move.
+      # tests/test_ci_fast_lane.py runs this step's script on a reproduction.
+      - name: A local master ref, for the tests that resolve `master`
+        if: github.ref != 'refs/heads/master'
+        run: git branch --force master origin/master
+
       # tests/test_vendored_buildinfo.py compares linkedin_server/buildinfo.py
       # and paths.py against jobcore's originals, and SKIPS when it cannot find
       # a jobcore checkout by walking up from the test file. Without this step

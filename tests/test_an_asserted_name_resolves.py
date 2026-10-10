@@ -78,13 +78,13 @@ PINNED: set[tuple[str, str, str, int]] = {
      "_audit/2026-09-23-census-cleanup.md", 1),
     ("BLOCKER", "ONE-NAMED-SETTINGS-PAGE-AT-A-TIME",
      "_audit/2026-09-23-lane-l1-refused-reads.md", 1),
-    # SURFACED 2026-10-10 by lane U copying the orchestrator's rulings of
-    # 2026-09-28 into _audit/ BYTE-IDENTICAL, as its order requires. Section 5
-    # reads "is read under" a backticked RULING id (a registered ruling, not a
-    # blocker): the slot phrase of the five 2026-09-23 entries above, here on
-    # ONE line. The document is a ruling whose text no lane may edit, so the
-    # one-word rewording is the orchestrator's to make; this pin then narrows
-    # by the ratchet below.
+    # SURFACED 2026-10-10 BY LANE K's registration of the class rulings of
+    # 2026-09-28, the same shape as the five above: "is read under
+    # `NAMES-AT-RUNTIME`", a slot phrase before a registered RULING id, not a
+    # blocker. Pinned rather than repaired because the document is the
+    # orchestrator's, copied byte-identical by four lanes; a lane may not
+    # reword it. The repair is the owner's ("read by the ruling"), and the
+    # ratchet then demands this pin narrow.
     ("BLOCKER", "NAMES-AT-RUNTIME",
      "_audit/2026-09-28-rulings-build-classes.md", 1),
 }

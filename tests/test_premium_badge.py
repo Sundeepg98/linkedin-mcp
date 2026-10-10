@@ -35,6 +35,7 @@ from __future__ import annotations
 import ast
 import json
 import pathlib
+import re
 
 import pytest
 
@@ -77,27 +78,57 @@ _ROW_END = "</div></div>\n" + _SAVE_BUTTON
 #: press writes both switches' states into ``window.__saved`` and closes the
 #: dialog. ``data-press-moves`` plants the two failures the write must catch:
 #: a press that moves nothing, and a press that moves the other switch too.
+#: SINCE 2026-10-10 THE PRESS MAY LAND ON THE INPUT ITSELF (the second recorded
+#: shape, below): the checkbox's own toggle moves it, a cancelled click undoes
+#: that, and the planted 'both' failure flips the other input by hand.
 _SCRIPT = (
     "<script>"
     "window.__flip = function (w) {"
-    " const on = w.getAttribute('aria-checked') !== 'true';"
-    " w.setAttribute('aria-checked', on ? 'true' : 'false');"
-    " w.querySelector('input[type=\"checkbox\"]').checked = on; };"
+    " const input = (w.tagName === 'INPUT') ? w : w.querySelector('input[type=\"checkbox\"]');"
+    " const on = !input.checked;"
+    " if (w.hasAttribute('aria-checked')) { w.setAttribute('aria-checked', on ? 'true' : 'false'); }"
+    " input.checked = on; };"
     "window.__commit = function () {"
     " const s = {};"
     " document.querySelectorAll('input[role=\"switch\"][id^=\"intro-switch-\"]')"
     ".forEach(function (i) { s[i.id] = i.checked; });"
     " window.__saved = JSON.stringify(s); };"
     "window.__press = function (event, w) {"
-    " event.preventDefault();"
     " const mode = document.body.dataset.pressMoves;"
-    " if (mode === 'nothing') { return; }"
-    " window.__flip(w);"
-    " if (mode === 'both') { document.querySelectorAll('div[role=\"switch\"]')"
+    " if (w.tagName === 'INPUT') {"
+    "  if (mode === 'nothing') { event.preventDefault(); return; }"
+    "  if (mode === 'both') { document.querySelectorAll('input[role=\"switch\"][id^=\"intro-switch-\"]')"
+    ".forEach(function (x) { if (x !== w) { x.checked = !x.checked; } }); }"
+    " } else {"
+    "  event.preventDefault();"
+    "  if (mode === 'nothing') { return; }"
+    "  window.__flip(w);"
+    "  if (mode === 'both') { document.querySelectorAll('div[role=\"switch\"]')"
     ".forEach(function (x) { if (x !== w) { window.__flip(x); } }); }"
+    " }"
     " if (document.body.dataset.commitsOnPress === 'yes') { window.__commit(); } };"
     "</script>"
 )
+
+#: THE SECOND RECORDED SWITCH SHAPE, MEASURED 2026-10-10 (the live lane's
+#: session 7, two loads of his intro editor): the wrapper carries none of
+#: role, aria-checked, tabindex or aria-label, and the checkbox input carries
+#: the label beside the role=switch it always had. The label below is the
+#: fixture's invented one; the live label was measured only as a shape.
+_WRAPPER = re.compile(
+    r'<div role="switch" aria-checked="(?:true|false)" tabindex="0" aria-label="Tap to toggle setting">'
+)
+_INPUT_OPEN = '<input role="switch" type="checkbox"'
+
+
+def _as_named_input(block: str, *, label: str = "Tap to toggle setting") -> str:
+    """One setting block redrawn in the second shape, the press on the input."""
+    assert len(_WRAPPER.findall(block)) == 1, "the block no longer draws the recorded wrapper"
+    assert block.count(_INPUT_OPEN) == 1, "the block no longer draws one switch input"
+    block = _WRAPPER.sub("<div>", block)
+    return block.replace(
+        _INPUT_OPEN, _INPUT_OPEN + ' aria-label="' + label + '" onclick="__press(event, this)"', 1
+    )
 
 
 def _split(html: str) -> tuple[str, str, str, str]:
@@ -138,8 +169,17 @@ class _BadgeWorld:
         commits_on_press: bool = False,
         other_title: str = "Placeholder setting A",
         description: str = "Placeholder description B",
+        named_input: bool = False,
+        named_other: "bool | None" = None,
+        empty_label: bool = False,
     ):
         self.store = {OTHER_ID: other, BADGE_ID: badge}
+        #: The second recorded shape (2026-10-10), on the badge's block, and on
+        #: the other block unless ``named_other`` says otherwise -- a row that
+        #: draws the two shapes at once is a world of its own.
+        self.named_input = named_input
+        self.named_other = named_input if named_other is None else named_other
+        self.empty_label = empty_label
         self.swapped = swapped
         self.badge_title = badge_title
         self.second_titled_row = second_titled_row
@@ -153,8 +193,11 @@ class _BadgeWorld:
 
     def editor_html(self) -> str:
         head, block_a, block_b, tail = _split(BASE)
-        block_a = _pressable(_with_state(block_a, self.store[OTHER_ID]))
-        block_b = _pressable(_with_state(block_b, self.store[BADGE_ID]))
+        block_a = _with_state(block_a, self.store[OTHER_ID])
+        block_b = _with_state(block_b, self.store[BADGE_ID])
+        label = "" if self.empty_label else "Tap to toggle setting"
+        block_a = _as_named_input(block_a, label=label) if self.named_other else _pressable(block_a)
+        block_b = _as_named_input(block_b, label=label) if self.named_input else _pressable(block_b)
         block_a = block_a.replace("Placeholder setting A", self.other_title)
         block_b = block_b.replace("Placeholder setting B", self.badge_title)
         block_b = block_b.replace("Placeholder description B", self.description)
@@ -457,3 +500,84 @@ def test_the_verdicts_hold_their_own_rules():
     assert profile_editor.badge_verification(before, before, "off")[0] == "value_unchanged"
     assert profile_editor.badge_verification(before, both, "off")[0] is None
     assert profile_editor.premium_badge_value(before) == ("on", profile_editor.premium_badge_value(before)[1])
+
+
+# ---------------------------------------------------------------------------
+# 5. THE SECOND RECORDED SHAPE (2026-10-10): the switch named on its own input
+# ---------------------------------------------------------------------------
+#
+# MEASURED on two loads of his intro editor in the live lane's session 7: the
+# reader answered ``3_not_the_recorded_row`` on both, because the setting
+# block's wrapper no longer carries role=switch, aria-checked, tabindex or
+# aria-label, and the checkbox input carries the label itself. These were
+# written first and run red against the reader as it stood.
+
+
+async def test_the_reader_reads_the_switch_named_on_its_input(browser_page):
+    """The badge is still found by its block's title, compared in the page; the
+    switch inside that block by its own role, on the input that carries it."""
+    world = _BadgeWorld(named_input=True, other_title="Plantedsecretone")
+    await browser_page.set_content(world.editor_html(), wait_until="domcontentloaded")
+    reading = await profile_editor.read_premium_badge(browser_page)
+    assert reading["aimable"] is True, reading["why"]
+    assert reading["switch_shape"] == "named_input"
+    assert reading["badge_position"] == 2
+    assert reading["badge_checked"] is True and reading["other_checked"] is True
+    assert reading["selector"].endswith(profile_editor._NAMED_SWITCH_PATH)
+    assert "Plantedsecret" not in repr(reading)
+
+
+async def test_the_reader_still_reads_the_first_shape_and_says_which(browser_page):
+    world = _BadgeWorld()
+    await browser_page.set_content(world.editor_html(), wait_until="domcontentloaded")
+    reading = await profile_editor.read_premium_badge(browser_page)
+    assert reading["aimable"] is True, reading["why"]
+    assert reading["switch_shape"] == "wrapper"
+
+
+async def test_switching_the_badge_off_on_the_named_input_moves_only_the_badge(writes_on, browser_page):
+    world = _BadgeWorld(named_input=True)
+    receipt = await _write(browser_page, world, "off")
+    assert receipt["performed"] is True, receipt["verification"]
+    assert world.store == {OTHER_ID: True, BADGE_ID: False}
+    press = receipt["switch_press"]
+    assert press["only_the_badge_moved"]["proceed"] is True
+    assert press["after_a_fresh_render"] == {"badge_on": False, "other_on": True}
+    assert receipt["clicked"]["clicks_made"] == 2
+
+
+async def test_the_restore_on_the_named_input_switches_it_back(writes_on, browser_page):
+    world = _BadgeWorld(named_input=True)
+    before = dict(world.store)
+    first = await _write(browser_page, world, "off")
+    assert first["performed"] is True and world.store[BADGE_ID] is False
+    second = await _write(browser_page, world, _restore_value(first))
+    assert second["performed"] is True, second["verification"]
+    assert world.store == before, "before and after the round trip differ"
+
+
+async def test_a_named_input_press_that_also_moves_open_profile_is_not_saved(writes_on, browser_page):
+    world = _BadgeWorld(named_input=True, press_moves="both")
+    receipt = await _write(browser_page, world, "off")
+    assert receipt["switch_press"]["only_the_badge_moved"]["code"] == "the_other_switch_moved"
+    assert receipt["clicked"]["clicks_made"] == 1
+    assert world.store == {OTHER_ID: True, BADGE_ID: True} and world.saves == 0
+    assert receipt["performed"] is False
+
+
+async def test_a_row_drawing_the_two_shapes_at_once_is_refused(writes_on, browser_page):
+    """One block named on its input, the other still in its wrapper: a row in
+    NEITHER recorded shape, so nothing is aimed and nothing is pressed."""
+    world = _BadgeWorld(named_input=True, named_other=False)
+    message = await _refused(browser_page, world, "off")
+    assert "neither recorded" in message, message
+    assert world.store == {OTHER_ID: True, BADGE_ID: True} and world.saves == 0
+
+
+async def test_a_named_input_whose_label_computes_no_name_is_refused(writes_on, browser_page):
+    """The second shape is a NAMED switch: an aria-label that computes no name
+    is not it, and is refused rather than read as either shape."""
+    world = _BadgeWorld(named_input=True, empty_label=True)
+    message = await _refused(browser_page, world, "off")
+    assert "not in a recorded shape" in message, message
+    assert world.store == {OTHER_ID: True, BADGE_ID: True} and world.saves == 0

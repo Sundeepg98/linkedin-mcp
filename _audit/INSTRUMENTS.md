@@ -11520,6 +11520,58 @@ the class:
     BEFORE IT CAN STILL LEAN ON THE RETIRED THING, AND A CLEAN MERGE SAYS
     NOTHING ABOUT THAT. READ THE OTHER SIDE'S ADDED LINES FOR IT.
 
+
+## 82. A LEDGER OF NEXT STEPS HELD TO THE CENSUS, AND A CAPTURE QUEUE WHOSE VERDICTS ARE RE-DRIVEN (lane-k-ledger, 2026-10-10)
+
+**Registered 2026-10-10.** Full record: `_audit/2026-09-28-lane-k-ledger.md`,
+sections 3, 5 and 9. Numbered 82 by the orchestrator's brief, so appends from
+lanes forked off one master cannot collide.
+
+### 82.1 WHAT IT HOLDS
+
+`_audit/_census/next-step.tsv` gives every GAP row one next step, a basis and
+a source; `_audit/_census/capture-queue.tsv` gives every capture its address,
+its presses and the rows it unblocks. Both are judged tables. The checker
+holds them to the census in both directions: every GAP row once and nothing
+else, the count equal to `census_completion`'s pinned `gap`, every source and
+every payload resolving, every queue row a census row whose step matches its
+line's gate, and every queue address re-driven through `readonly.is_read_url`.
+The source forms the shipped resolver already reads go through
+`check_write_classes.source_problems`, imported, not rewritten; only the two
+forms it does not read -- a bare census id and a tracked fixture path -- are
+resolved here.
+
+### 82.2 THE ENTRIES
+
+| path | shown failing by |
+|---|---|
+| `scripts/check_next_step.py` -- `check()`, `population()`, the payload rules for CAPTURE, BUILD, RULING, SIBLING and ADMIT, and the queue's gate agreement | `scripts/_check_next_step_can_fail.py`: seven plants into copies of the committed tables, each caught BY NAME after a control run over the unplanted copies came back GREEN -- a GAP row's line deleted, a line doubled, a source phrase in no file, a census id that is no row, a CAPTURE id with no queue line, a queue line listing a row the census does not hold, and a BUILD path neither tracked nor planned. Measured 2026-10-10: 7 of 7 caught, 11 s. |
+| `tests/test_next_step.py` | runs the checker on the committed tables, the control, and each of the seven plants as its own test (10 tests, 19 s) |
+
+### 82.3 THE CHEAPEST LOAD IS THE ONE ALREADY TAKEN
+
+The census still queued five messaging rows on captures C5 and C9 after
+session 3 had committed both open states as tracked fixtures, and 40 more GAP
+rows build on captures already on this box -- tracked skeletons, or raw
+captures a builder can skeletonise -- while nothing joined the inventory to the
+rows. A capture queue written without the inventory spends live loads on
+surfaces the box already holds.
+
+    BEFORE A ROW IS QUEUED FOR A LIVE LOAD, LOOK FOR ITS SURFACE IN THE
+    TRACKED FIXTURES AND THE GITIGNORED CAPTURES. THE CHEAPEST LOAD IS THE
+    ONE ALREADY TAKEN.
+
+### 82.4 DECLARED DISPOSABLE
+
+The lane's scratch generator (the decision table that wrote both TSVs, and the
+queue builder that grouped, re-drove and ranked them), the join of the GAP rows
+to the four side tables, the verdict helper that drove candidate addresses
+through `readonly.is_read_url` and `press.py`'s pre-press checks, and the two
+children's inventory and session-extraction scripts. Each one's output is a
+committed table or a section of the lane record; the tables are the record,
+and `check_next_step` is what keeps them true.
+
+
 ## 87. A REF NAME IS NOT A PERMISSION; ANCESTRY PLUS THE SHIPPED SWEEP IS (lci-fastlane-lead, 2026-10-10)
 
 **Registered 2026-10-10.** Full record: `_audit/2026-10-10-lane-ci-fastlane.md`.
@@ -11568,6 +11620,39 @@ jobs json, the ASCII checker, the old-versus-new plan-step byte comparison,
 the red-run copies of the two test files aimed at the 3c8edc2 gate and
 workflow, and the mutation plugin for `tests/test_lane_ci.py`. Each answered
 one question once; the answers are in the full record.
+
+### 87.5 A FASTER INSTRUMENT IS PROVEN EQUAL BEFORE IT IS PROVEN FAST (the 12:46 follow-up)
+
+`scripts/sweep_blobs_for_identity.py` read each blob with its own
+`git cat-file -p`; it now reads them through one `git cat-file --batch`
+(281.6s -> 9.8s on a 3-commit range of 1002 blobs). The text a blob is
+matched as had to stay EXACTLY what `subprocess.run(text=True,
+errors="replace")` produced -- the locale's encoding and universal newlines --
+because a faster sweep that decodes differently is a different instrument
+with the old one's name. Equality was shown three ways: byte-identical
+stdout from the old and new scripts on two real ranges; the reader's text
+against `cat-file -p` for blobs built to break each decoding choice; and the
+whole report with the old per-blob read swapped back in.
+
+    WHEN AN INSTRUMENT IS MADE FASTER, ITS OUTPUT IS THE SPECIFICATION.
+    SHOW THE OLD AND NEW READINGS EQUAL BEFORE QUOTING THE SPEED.
+
+| path | shown failing by |
+|---|---|
+| `scripts/sweep_blobs_for_identity.py` -- `_BlobReader`, `_as_text`; `tests/test_sweep_blobs_reads_through_one_process.py` | against the old sweep, 5 failed: "9 cat-file launch(es) for 9 blobs", and no batch reader for the text, report, missing-blob and no-launch tests; 5 passed with the change |
+| `tests/test_sweep_blobs_refuses_a_vacuous_pass.py::test_the_zero_blobs_guard_fires_even_with_real_commits` -- now also forbids a batch read | its fake `_git` can no longer observe blob reads, so its stated proof ("no blob is read") would have gone vacuous; the added `_BlobReader.read` patch restores it |
+| `scripts/lane_ci.py` -- `push` asks for ancestry only (`git_ci_check(sha, sweep=False)`); `tests/test_lane_ci.py::test_push_leaves_the_sweep_to_the_hook` and `test_the_hook_path_still_sweeps` | against the old helper: "the helper ran the sweep itself over <base>..<sha>"; 39 passed with the change |
+
+### 87.6 A CHECKOUT IS NOT A CLONE (the 13:22 fix)
+
+A `ci/` run checks out its own branch; `master` exists there only as
+`refs/remotes/origin/master`, and the cited-SHA family resolves the bare name.
+Master's runs could never see this, because they check master out. The
+shard job now creates a local master on every run that is not master's.
+
+| path | shown failing by |
+|---|---|
+| `.github/workflows/ci.yml` -- the guarded `git branch --force master origin/master` step; `tests/test_ci_fast_lane.py` local-master tests | against the workflow before the step: 2 failed (no step creates a local master; no guard off master); 36 passed after, including a reproduction that shows `master` failing to resolve in a ci/-shaped clone and resolving after the step's own script runs |
 
 ## 84. A CHECK IS ABOUT THE BYTES IT READ, AND AN AIM IS SHOWN REFUSING ON THE SKELETON IT WAS BUILT FROM (lane-u-uploads, 2026-10-10)
 

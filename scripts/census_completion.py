@@ -1091,7 +1091,9 @@ PINNED = {
     #: NAMED-PROFILE-READ-BEHIND-A-GRANT (the orchestrator's call).
     #: 747 ON THE ORCHESTRATOR'S CALL OF 2026-09-28 17:46 (lane S), MEASURED:
     #: `N 26b` entered, in scope (see `stated_rows`).
-    "capabilities_achievable": 747,
+    #: 745 ON LANE K's PURCHASES-STAY-MANUAL EXCLUSIONS (2026-10-10), MEASURED:
+    #: `P S9` and `M C71` GAP -> EXCLUDED-RULED; `O6-O20`'s 14 unchanged.
+    "capabilities_achievable": 745,
     #: 43 AT LANE L8'S MERGE OF MASTER (2026-09-27), MEASURED: 29 rows returned
     #: to GAP when OUTWARD-CLASSES-BUILT-BEHIND-GRANTS retired their key, and
     #: `P P2` at the merge (-30); `P N27` and `P P2` then EXCLUDED-RULED on
@@ -1101,7 +1103,10 @@ PINNED = {
     #: 38 ON LANE L5'S ORDER OF 2026-09-28 12:32, MEASURED: `N 30`, `N 31`, `N 65`
     #: and `N 103` EXCLUDED-RULED -> GAP, their R4 ground narrowed by
     #: NAMED-PROFILE-READ-BEHIND-A-GRANT (the orchestrator's call).
-    "out_of_scope": 38,
+    #: 40 ON LANE K's PURCHASES-STAY-MANUAL EXCLUSIONS (2026-10-10), MEASURED:
+    #: `P S9` (the Premium plan) and `M C71` (a paid boost) GAP ->
+    #: EXCLUDED-RULED on the orchestrator's ruling of 2026-09-28.
+    "out_of_scope": 40,
     #: 727 AT LANE L8'S MERGE OF MASTER (2026-09-27), MEASURED: stated rows 770
     #: less out_of_scope 43: the returns, `P A23b`, and the two re-exclusions.
     #: 728 AT LANE L5'S MERGE OF MASTER 52b55b6 (2026-09-27), MEASURED: stated rows 770 less out_of_scope 42 (`N 2`).
@@ -1111,7 +1116,9 @@ PINNED = {
     #: less out_of_scope 38.
     #: 733 ON THE ORCHESTRATOR'S CALL OF 2026-09-28 17:46 (lane S), MEASURED:
     #: stated rows 771 less out_of_scope 38 -- `N 26b` entered, in scope.
-    "achievable": 733,
+    #: 731 ON LANE K's PURCHASES-STAY-MANUAL EXCLUSIONS (2026-10-10), MEASURED:
+    #: stated rows 771 less out_of_scope 40 (`P S9`, `M C71`).
+    "achievable": 731,
     #: 205 AT THE ORCHESTRATOR'S MERGE OF LANE L7'S P B9 (2026-09-27), MEASURED: P B9
     #: (Premium badge) moved GAP -> COVERED-UNFIRED, released like the intro edits.
     #: 179 AT LANE L8'S MERGE OF MASTER (2026-09-27), MEASURED: the 30 returned
@@ -1168,7 +1175,10 @@ PINNED = {
     #: merged tree: master's figure with this branch's `P A11`, `P A13` and `P A17`
     #: COVERED-UNFIRED -> GAP (session 4: autocomplete inputs the one tool can only
     #: type into, now refused by it).
-    "adjudicated": 184,
+    #: 186 ON LANE K's PURCHASES-STAY-MANUAL EXCLUSIONS (2026-10-10), MEASURED:
+    #: `P S9` and `M C71` GAP -> EXCLUDED-RULED -- adjudicated, delivered by
+    #: neither line.
+    "adjudicated": 186,
     #: THE LIVE LANE'S FOUR ROWS, RE-DERIVED AT EACH OF ITS MERGES OF MASTER
     #: (2026-09-24; last over lane S): four rows fired live and banked
     #: (`_audit/2026-09-23-live-lane-session-1.md`). `P G6` COVERED-UNFIRED ->
@@ -1309,7 +1319,9 @@ PINNED = {
     #: merged tree: master's figure with this branch's `P A11`, `P A13` and `P A17`
     #: COVERED-UNFIRED -> GAP (session 4: autocomplete inputs the one tool can only
     #: type into, now refused by it).
-    "gap": 587,
+    #: 585 ON LANE K's PURCHASES-STAY-MANUAL EXCLUSIONS (2026-10-10), MEASURED:
+    #: `P S9` and `M C71` left GAP (see `adjudicated`).
+    "gap": 585,
     #: 18 AT LANE L5'S MERGE OF MASTER 52b55b6 (2026-09-27), MEASURED: `M M1` built (`linkedin_message_from_profile`).
     #: 16 ON LANE L5'S ORDER OF 2026-09-27 23:36, MEASURED:
     #: `linkedin_send_message` RETIRED (aimed by a name): `M M2` to GAP and `N
@@ -1443,7 +1455,9 @@ PINNED = {
     #: merged tree: master's figure with this branch's `P A11`, `P A13` and `P A17`
     #: COVERED-UNFIRED -> GAP (session 4: autocomplete inputs the one tool can only
     #: type into, now refused by it).
-    "gap_write": 381,
+    #: 379 ON LANE K's PURCHASES-STAY-MANUAL EXCLUSIONS (2026-10-10), MEASURED:
+    #: `P S9` and `M C71`, two W rows, left GAP; their write-classes lines go.
+    "gap_write": 379,
     #: All 54 are `jobs.md`, which has no per-row R/W column (56 until the
     #: lane-L3 merge built J 18 and J 39). Not a coincidence
     #: and not a defect in the finder: it is the whole of that slice's still-GAP
