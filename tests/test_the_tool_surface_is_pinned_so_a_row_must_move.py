@@ -141,6 +141,8 @@ PINNED_TOOL_SURFACE: dict[str, tuple[str, ...]] = {
         "limit", "location", "locations", "remote", "sort_by", "start",
         "under_ten_applicants",
     ),
+    # 2026-10-10, lane U: one file into one conversation he names.
+    "linkedin_send_attachment": ("confirm_token", "file", "thread_id"),
     # ``member`` -> ``profile`` on 2026-09-27 (lane L5, the orchestrator's
     # order of 23:36): aimed by the person's profile link, never a name.
     # Census N 1 keeps its state; its note records the new aim.
@@ -474,8 +476,19 @@ PINNED_TOOL_SURFACE: dict[str, tuple[str, ...]] = {
 #: connections) GAP -> COVERED-UNFIRED by D6 on the orchestrator's ruling, on
 #: `connections_of`, which shipped earlier. Never fired. See
 #: `_audit/2026-09-24-lane-s-people-search.md`, "Four people-search items".
-PINNED_TOOL_COUNT = 61
-PINNED_PARAMETER_COUNT = 96
+#: **RE-PINNED 2026-10-10 AT 62 TOOLS AND 99 PARAMETERS on lane U's branch
+#: (ruling FILE-UPLOAD-OPENED): one WRITE,
+#: `linkedin_send_attachment(thread_id, file, confirm_token)` -- one file from
+#: the declared upload root into one conversation he names, behind the
+#: single-use grant.** THE CENSUS DECISION, in the same commit: `M M14`,
+#: `M M15` and `M M18` STAY GAP -- the file input is aimed on a real capture,
+#: but no capture shows a composer holding an attachment or a sent
+#: attachment message, so the read-back and the verification are aimed at
+#: the file's name rather than at markup; each row waits on its capture
+#: (U-REPLY-ATTACHMENT-SENT and -PENDING). No other row moves. See
+#: `_audit/2026-09-28-lane-u-uploads.md`, section 5.
+PINNED_TOOL_COUNT = 62
+PINNED_PARAMETER_COUNT = 99
 
 
 def live_surface() -> dict[str, tuple[str, ...]]:

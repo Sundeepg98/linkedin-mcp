@@ -25,6 +25,21 @@ master `3c8edc2`. Every number below was measured in this lane's worktree on
   `_audit/_census/capture-queue-uploads.tsv` (sections 5 and 6).
 * The live-proof spec is section 7. This lane took no live loads.
 
+**LANE U'S OWN COMMITS, cited below by short SHA:** `d295e6e`, `3e6b7b7`,
+`e4c6cca`, `18dd736`, `4710609`, `f4d3eeb`, `7f9caa6`. They are on lane U's
+branch and do not resolve on `master` until the orchestrator merges it. Each
+one's subject, which survives a rebase, is in the table below.
+
+| short SHA | subject |
+|---|---|
+| `d295e6e` | rulings: the orchestrator's build classes of 2026-09-28, copied and registered |
+| `3e6b7b7` | rulings + census: the operator's upload decision registered, and the 15 upload rows relabelled within the ledger's capacity |
+| `e4c6cca` | uploads: hand the browser the verified bytes, not a path to read again |
+| `18dd736` | uploads: the drain point's path-guard refusal speaks in perform's own words |
+| `4710609` | writes: send_attachment -- one file into one conversation he names, built behind the grant and unfired |
+| `f4d3eeb` | merge master 53908ea into lane U: the CI fast lane and live session 7 under the upload work |
+| `7f9caa6` | record + INSTRUMENTS 84: the mutations, the merge, and the hand-off's two lessons registered |
+
 ---
 
 ## 1. The rulings
@@ -58,8 +73,8 @@ Three guards spoke about the copy, and none was answered by editing it:
    not be edited by a lane, so the site is pinned in
    `tests/test_an_asserted_name_resolves.py` beside the five 2026-09-23 sites
    of the same slot phrase; the ratchet narrows the pin when the orchestrator
-   rewords it. **The other three lanes copying this file will meet the same
-   two guards.**
+   rewords it. **The other three lanes copying this file will meet this
+   guard and the next one.**
 3. **The correction guard** read the copy's line 101 as an undeclared
    correction of the upload wave's record. It cites that record in
    agreement, so the pair is triaged onto `NOT_A_CORRECTION` with its reason.
@@ -143,9 +158,14 @@ bytes nobody compared.
 root, no link on the chain, a regular readable file, the size cap), and
 returns the bytes with the digest of exactly those bytes. `perform` compares
 that digest and hands over those bytes as Playwright's
-`files=[{name, mimeType, buffer}]`. The path guard's own refusals now reach
-the receipt in words (they were reported as an exception type only). No
-extension or type allowlist was added; nothing is refused for its type.
+`files=[{name, mimeType, buffer}]`. A refusal by the path guard at the drain
+point now reaches the receipt as a sentence of `perform`'s own -- what may
+have happened, and that a second preview prints the guard's exact reason --
+where it used to leave as an exception type only. It does not quote the
+guard: an exception's text is not carried into a receipt
+(`tests/test_a_write_receipt_carries_no_library_message.py`, which `e4c6cca`
+met and `18dd736` answered). No extension or type allowlist was added;
+nothing is refused for its type.
 
 **THE TYPE, READ FROM THE BYTES.** `attachments.sniff` reads the signature:
 PNG, JPEG, GIF, WebP; ISO base-media video (MP4, QuickTime); PDF; ZIP
@@ -354,9 +374,10 @@ words go with the file).
    `file.the_name_and_the_bytes` "they agree"; `file.sha256_prefix`
    `5d03126f1fd64701`; `where.file` `linkedin-tool-test.png`;
    `who_this_would_reach` a person record whose name is the member he named
-   (CHECK IT before confirming); `the_input_this_file_goes_to`: label "Attach
-   an image for your draft conversation", `labelled_wrappers` 1, `inputs` 1,
-   `declaration` `images`; state `reply_box_empty`; one token.
+   (CHECK IT before confirming);
+   `where.what_the_page_showed.the_input_this_file_goes_to`: `input_label`
+   "Attach an image for your draft conversation", `labelled_wrappers` 1,
+   `inputs` 1, `declaration` `images`; state `reply_box_empty`; one token.
    **STOP HERE if** the declaration reads anything but `images`, or either
    count is not 1: no token is minted, nothing was attached, and that closed
    reading is the measurement -- LinkedIn's inputs moved.
@@ -408,7 +429,9 @@ workers after. The suite is certified on lane CI (below).
 | mutations on `4710609` | five, section 4 | five kills, every restore verified by sha256 |
 | `f4d3eeb` merge of master `53908ea` | the three derived views regenerated (the only conflicts) and `--check`; `census_completion` | all clean; "every headline figure matches its pin" |
 | INSTRUMENTS 84 | register numbering, probe controls, corrections, asserted names | 38 passed |
-| LANE CI | the suite, on GitHub's runners | pending at this commit: the run on its sha is recorded here once it returns |
+| `7f9caa6`, the merged tree | the direct importers of `threads.py` not yet run (messaging threads, the people reader, the reply's Send wait, the reply surface, the first contact) | 224 passed |
+| LANE CI, run 38036873514 on `7f9caa6` | the suite on four shards, pushed to `ci/<branch>` with `lane_ci.py push` | FAILURE, 16 failed. Shard 0: 2444 passed; shard 3: 3368 passed; shard 1: 15 failed, 3410 passed; shard 2: 1 failed, 3471 passed. TWO were this lane's and are fixed in the next commit: the tool-surface pin (`linkedin_send_attachment` appeared with no census decision recorded in the pin) and the tool-envelope baseline (a new tool, unclassified). FOURTEEN were the cited-SHA family on the missing local `master`, the known infrastructure failure the CI lane fixed on master. One of those fourteen, the ratchet, ALSO hid a finding of this lane's own: three commit-slot citations of the unmerged commits above. Disclosed at the top of this record |
+| the two CI fixes | the surface pin re-pinned at 62 tools and 99 parameters; the envelope baseline regenerated (one line added, `not_driven`, the verdict every other write tool carries) | 68 passed |
 
 **THE TWO REDS I LEFT AND THEN CLOSED, said plainly.** `d295e6e` was red on
 the correction guard and `e4c6cca` on the receipt-message pin, each because
