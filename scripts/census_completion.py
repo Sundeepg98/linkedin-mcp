@@ -1278,7 +1278,11 @@ PINNED = {
     #: the results) and `N 26` (his connections filtered by place) fired live and
     #: banked; `N 155` moved on the orchestrator's call of that day, by D6 on
     #: `M M1`'s session-5 send.
-    "delivered_strict": 105,
+    #: 109 AT THE LIVE LANE'S SESSION 8 (2026-10-10), MEASURED: `N 48` and `J 104`
+    #: (the unfollow through LinkedIn's confirmation, the row gone and a posting
+    #: reading not-following) and `N 46` and `J 103` (the follow from a posting
+    #: that restored it, verified on Manage Pages) fired live and banked.
+    "delivered_strict": 109,
     #: The live lane's merge: N 134, P O3 and M C72 left GAP.
     #: Lane D's merge: N 132 left GAP, for COVERED-UNFIRED under D6.
     #: 544 AT THE ORCHESTRATOR'S MERGE OF LANE D (2026-09-27), MEASURED: lane D
@@ -1405,7 +1409,14 @@ PINNED = {
     #: an alert's delivered job ids, read off the notifications page (never fired).
     #: 28 ON LANE A'S TRACKER STAGES (2026-10-10), MEASURED: `J 50` and `J 51`
     #: GAP -> COVERED-UNFIRED on linkedin_tracker_stage, never fired.
-    "unfired": 28,
+    #: 21 AT THE LIVE LANE'S SESSION 8 (2026-10-10), MEASURED: `N 48` and `J 104`
+    #: (the unfollow through LinkedIn's confirmation, the row gone and a posting
+    #: reading not-following) and `N 46` and `J 103` (the follow from a posting
+    #: that restored it, verified on Manage Pages) fired live and banked.
+    #: 24 AT LANE A'S MERGE OF MASTER 66eb699 (2026-10-10), MEASURED on the
+    #: merged tree: master's four session-8 rows gone with this branch's `J 38`,
+    #: `J 50` and `J 51` come.
+    "unfired": 24,
     #: 104 AT THE ORCHESTRATOR'S MERGE OF LANE Y2'S FOLLOW-UP (2026-09-27), MEASURED:
     #: the P-R settings block itemized into 22 rows (P2-P23; Delete Data EXCLUDED-RULED).
     #: 101 AT LANE S'S NAMES ADOPTION (2026-09-27), MEASURED: `N 79`, `N 172`
@@ -1787,7 +1798,11 @@ PINNED = {
     #: the results) and `N 26` (his connections filtered by place) fired live and
     #: banked; `N 155` moved on the orchestrator's call of that day, by D6 on
     #: `M M1`'s session-5 send.
-    "b1_standing": 16,
+    #: 12 AT THE LIVE LANE'S SESSION 8 (2026-10-10), MEASURED: `N 48` and `J 104`
+    #: (the unfollow through LinkedIn's confirmation, the row gone and a posting
+    #: reading not-following) and `N 46` and `J 103` (the follow from a posting
+    #: that restored it, verified on Manage Pages) fired live and banked.
+    "b1_standing": 12,
     "b1_relayed": 0,
     "b1_pending": 0,
     #: 22 AT THE ORCHESTRATOR'S MERGE OF LANE D (2026-09-27), MEASURED: lane D
@@ -1995,10 +2010,13 @@ PINNED_B1_ROWS: dict[str, tuple[str, ...]] = {
     #: its emoji among his words, sent and verified -- COVERED-PROVEN.
     #: `N 155` LEFT ON THE ORCHESTRATOR'S CALL OF 2026-10-10, by D6 on `M M1`'s
     #: session-5 send to a first-degree connection -- COVERED-PROVEN.
+    #: `N 48`, `J 104`, `N 46` and `J 103` LEFT AT SESSION 8 (2026-10-10): the
+    #: first-by-rule Page unfollowed through LinkedIn's confirmation and followed
+    #: again from one of its postings, each verified -- COVERED-PROVEN.
     "OPERATOR-NAMES-THE-TARGET": (
-        "J 103", "J 104", "J 128",
+        "J 128",
         "M C1", "M C25", "M C32", "M C63", "M M10",
-        "N 1", "N 2", "N 4", "N 46", "N 47", "N 48", "N 64",
+        "N 1", "N 2", "N 4", "N 47", "N 64",
         "P I14",
     ),
     #: `J 18` and `J 39` entered with the lane-L3 merge, 2026-09-23: reads
