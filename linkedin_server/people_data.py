@@ -419,7 +419,8 @@ class Organisation:
     Page's name leaves the unfollow read only through a declared record: the
     name LinkedIn writes into the row's own button ("Click to stop following
     <Page>") is a string the page chose. Sanitised and capped at the title's
-    room, marked as untrusted text, its link the Page's canonical address.
+    room, marked as untrusted text, its link the Page's NUMERIC address --
+    never the slug a Page root redirects to, because a slug can be a name.
     """
 
     name: str

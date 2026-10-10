@@ -3997,8 +3997,8 @@ async def _read_followed_state(
     # 2026-10-10 14:56 IST): LinkedIn writes it into the row's own button, so
     # it is a string the page chose. It travels as a ``people_data``
     # organisation record -- sanitised, bounded, marked -- with the Page's
-    # canonical address, and the preview and the receipt print that record
-    # where they printed the bare name.
+    # numeric address (never its slug, which can be a name), and the preview
+    # and the receipt print that record where they printed the bare name.
     organisation = (
         people_data.Organisation.from_page(
             name=matched.get("name"),

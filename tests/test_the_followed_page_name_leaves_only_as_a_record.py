@@ -9,8 +9,9 @@ in its sentence. The reader guard found that success path on 2026-10-10, when
 the old clean stopped counting.
 
 NOW the name travels as a ``people_data.Organisation`` record -- sanitised,
-bounded, marked as untrusted third-party text, its link the Page's canonical
-address -- and the sentence says the Page is in the list without naming it.
+bounded, marked as untrusted third-party text, its link the Page's numeric
+address (a slug can be a name, so none is kept) -- and the sentence says the
+Page is in the list without naming it.
 
 Every page here is a stand-in for the two reads the function makes; nothing
 reaches LinkedIn or a browser. The Page's name is the harness plant, which no
@@ -26,8 +27,10 @@ from tests.plantedpage import PLANT, carries_the_plant_outside_records
 
 #: The row the Manage Pages list draws for the Page he names, as
 #: ``dom.harvest_followed_pages`` returns it: its button's accessible name and
-#: its company link. A five-digit id, under the identity sweep's floor.
-COMPANY_ID = "12345"
+#: its company link. Its id and the other Page's are members of the identity
+#: sweep's invented ids (``SYNTHETIC_IDS``, the 530000xx series of invented
+#: organisations), which its company-id shape passes on sight.
+COMPANY_ID = "53000011"
 ROW = {"label": "Click to stop following " + PLANT, "href": "/company/" + COMPANY_ID + "/"}
 
 
@@ -56,7 +59,7 @@ def test_the_pages_name_comes_back_only_inside_an_organisation_record(monkeypatc
 
 
 def test_no_match_is_no_record_and_the_sentence_names_only_his_own_target(monkeypatch):
-    other = {"label": "Click to stop following Another Example Page", "href": "/company/67890/"}
+    other = {"label": "Click to stop following Another Example Page", "href": "/company/53000012/"}
     facts, state, why = _read(monkeypatch, [other])
     assert state != "following"
     assert facts["company"] is None
