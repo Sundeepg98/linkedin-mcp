@@ -185,6 +185,24 @@ CORRECTION_VOCABULARY = (
 #: outcome this file exists to require and so cannot also be a violation of it.
 NOT_A_CORRECTION: dict[tuple[str, str], str] = {
 
+    # 2026-10-10, lane K. THE CLASS RULINGS OF 2026-09-28 CITE THE UPLOAD
+    # SANCTION FOR WHAT THE UPLOAD ROWS STILL LACK -- read, not inferred from
+    # the filenames. The document is a byte-identical copy of the
+    # orchestrator's and its words may not change.
+    ("2026-09-28-rulings-build-classes.md", "2026-09-05-upload-sanction.md"): (
+        "A CITATION OF THE AIM, NOT A CORRECTION OF IT. The section 'Not ruled "
+        "here: uploads' calls the census BLOCKER LABEL "
+        "`FILE-UPLOAD-UNSANCTIONED` stale -- the operator decided uploads on "
+        "2026-09-04 -- and cites `_audit/2026-09-05-upload-sanction.md` for "
+        "what those rows lack: an AIM, a performable upload verb and a capture "
+        "of each surface's file input. The matched word is about the label, "
+        "and the line relies on the cited document rather than overturning "
+        "it. **WHAT WOULD MAKE THIS ENTRY WRONG:** the rulings document "
+        "asserting something the upload-sanction document says does not hold "
+        "while leaving it unmarked, which would need its own CORRECTS: / "
+        "CORRECTED BY: pair."
+    ),
+
     # 2026-10-10, lane NP. TABLE-ROW PROXIMITY, read and not inferred from the
     # filenames: found by the lane's CI run 38037374698.
     ("network.md", "2026-10-10-lane-np-named-profile.md"): (
